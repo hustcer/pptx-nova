@@ -473,6 +473,11 @@ const box = (slide, name, kind, x, y, w, h, color) => {
   return name
 }
 
+const cardTopAccent = (slide, name, x, y, w, h, color) => {
+  const kind = S.surface.cardShape === 'rounded-rectangle' ? 'rounded-rectangle' : 'rectangle'
+  return box(slide, name, kind, x, y, w, h, color)
+}
+
 const styledBox = (slide, name, kind, x, y, w, h, color, options = {}) => {
   shape(slide, name, kind, x, y, w, h)
   fill(slide, name, color)
@@ -1079,7 +1084,7 @@ function slideKPI(total) {
 
     // 顶部色条
     const topName = nm(s, `Kpi${i + 1}Top`)
-    box(s, topName, 'rectangle', x, y, cardW, S.surface.accentBarH, C.primary)
+    cardTopAccent(s, topName, x, y, cardW, S.surface.accentBarH, C.primary)
 
     // label / value / delta / note
     tx(
@@ -1353,7 +1358,7 @@ function slidePillars(total) {
     const card = nm(s, `P${i + 1}Bg`)
     cardBox(s, card, x, 2.4, cardW, S.layout.pillarCardH, SURFACE_BG)
 
-    box(s, nm(s, `P${i + 1}Bar`), 'rectangle', x, 2.4, cardW, S.surface.accentBarH, c.color)
+    cardTopAccent(s, nm(s, `P${i + 1}Bar`), x, 2.4, cardW, S.surface.accentBarH, c.color)
 
     tx(
       s,

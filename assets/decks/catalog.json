@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "pptx-deck-catalog/v1",
+  "entries": [
+    {
+      "id": "deck-generator-template",
+      "name": "Deck Generator Template",
+      "type": "generator",
+      "path": "../examples/deck-generator-template.mjs",
+      "bestFor": ["new customer-ready deck", "express mode", "themePack-driven generation"],
+      "inputs": ["outline JSON", "themePack id", "stylePack id"],
+      "status": "available"
+    },
+    {
+      "id": "qbr-outline",
+      "name": "QBR Outline Example",
+      "type": "outline",
+      "path": "../examples/qbr-outline.json",
+      "bestFor": ["quarterly business review", "enterprise reporting"],
+      "status": "available"
+    },
+    {
+      "id": "quarterly-report-patch",
+      "name": "Quarterly Report Patch Example",
+      "type": "patch",
+      "path": "../examples/quarterly-report.patch.json",
+      "bestFor": ["schema-v1 patch reference", "manual apply example"],
+      "status": "available"
+    },
+    {
+      "id": "pptx-nova-example-artifacts",
+      "name": "Preset and Theme Example Artifacts",
+      "type": "generatedArtifactSet",
+      "path": "examples/index.json",
+      "bestFor": [
+        "preset quality regression",
+        "themePack visual audit",
+        "vision-check summary archive"
+      ],
+      "commands": {
+        "generate": "node tools/generate-pptx-nova-examples.mjs --clean --render-previews",
+        "check": "node tools/generate-pptx-nova-examples.mjs --out .tmp-pptx-nova-examples --clean --preset-theme tech-dark --themes corporate-blue --fail-on-vision medium",
+        "preview": "node tools/generate-pptx-nova-examples.mjs --out .tmp-pptx-nova-examples --clean --preset-theme tech-dark --themes corporate-blue --fail-on-vision medium --render-previews"
+      },
+      "status": "available"
+    }
+  ]
+}

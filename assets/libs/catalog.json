@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "pptx-nova-lib-catalog/v1",
+  "entries": [
+    {
+      "id": "consulting-dark",
+      "version": "0.1.0",
+      "path": "consulting-dark.lib.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "supportedSlideTypes": [
+        "heroSlide",
+        "profileTableSlide",
+        "kpiRowSlide",
+        "previewProductSlide",
+        "multiCardSlide",
+        "landscapeSlide",
+        "convertFlowSlide",
+        "benchmarkSlide",
+        "timelineSlide",
+        "askSlide"
+      ],
+      "density": {
+        "soft": {
+          "titleMaxChars": 48,
+          "cardsMax": 5,
+          "kpisMax": 4,
+          "bulletsPerCardMax": 3,
+          "timelineStepsMax": 5,
+          "tableRowsMax": 6,
+          "profileRowsMax": 5
+        },
+        "hard": {
+          "titleMaxChars": 120,
+          "cardsMax": 8,
+          "kpisMax": 6,
+          "bulletsPerCardMax": 6,
+          "timelineStepsMax": 8,
+          "tableRowsMax": 10,
+          "profileRowsMax": 8
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "high=0 medium=0",
+        "pngReview": "full"
+      },
+      "knownLimits": [
+        "large tables should use benchmarkSlide or split across pages",
+        "custCard number badge fits 2 digits max (width 0.5in)",
+        "heroSlide decorative dots avoid y 6.4-7.0 text band"
+      ],
+      "examples": ["examples/roadshow-content.json"]
+    }
+  ]
+}

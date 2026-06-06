@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/timelineSlide",
+  "title": "timelineSlide data schema",
+  "type": "object",
+  "required": ["eyebrow", "title", "steps"],
+  "properties": {
+    "eyebrow": { "type": "string" },
+    "title": { "type": "string" },
+    "steps": {
+      "type": "array",
+      "description": "Tuple: [accent, idx, title, desc, status?]",
+      "minItems": 1,
+      "items": {
+        "type": "array",
+        "minItems": 4,
+        "maxItems": 5,
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

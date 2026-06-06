@@ -1,0 +1,32 @@
+{
+  "id": "theme-consulting-grey",
+  "title": "Consulting Grey Theme Showcase · executive-grid",
+  "kind": "theme-showcase",
+  "themePack": "consulting-grey",
+  "stylePack": "consulting",
+  "layoutVariant": "executive-grid",
+  "opCount": 580,
+  "deckPath": "skills/pptx-nova/assets/decks/examples/theme-consulting-grey/deck.pptx",
+  "patchPath": "skills/pptx-nova/assets/decks/examples/theme-consulting-grey/patch.json",
+  "dryRunSummaryPath": "skills/pptx-nova/assets/decks/examples/theme-consulting-grey/dry-run-summary.json",
+  "initialVisionPath": "skills/pptx-nova/assets/decks/examples/theme-consulting-grey/vision.initial.json",
+  "visionPath": "skills/pptx-nova/assets/decks/examples/theme-consulting-grey/vision.json",
+  "previewDir": "skills/pptx-nova/assets/decks/examples/theme-consulting-grey/previews",
+  "previewCount": 8,
+  "contactSheetPath": "skills/pptx-nova/assets/decks/examples/theme-consulting-grey/contact-sheet.png",
+  "autoRetryRounds": 1,
+  "initialVision": {
+    "high": 0,
+    "medium": 14,
+    "low": 5,
+    "autoFixable": 14,
+    "totalIssues": 19
+  },
+  "vision": {
+    "high": 0,
+    "medium": 0,
+    "low": 5,
+    "autoFixable": 0,
+    "totalIssues": 5
+  }
+}

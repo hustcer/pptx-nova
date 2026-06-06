@@ -1,0 +1,32 @@
+{
+  "id": "theme-gov-blue",
+  "title": "Government Blue Theme Showcase · executive-grid",
+  "kind": "theme-showcase",
+  "themePack": "gov-blue",
+  "stylePack": "consulting",
+  "layoutVariant": "executive-grid",
+  "opCount": 502,
+  "deckPath": "skills/pptx-nova/assets/decks/examples/theme-gov-blue/deck.pptx",
+  "patchPath": "skills/pptx-nova/assets/decks/examples/theme-gov-blue/patch.json",
+  "dryRunSummaryPath": "skills/pptx-nova/assets/decks/examples/theme-gov-blue/dry-run-summary.json",
+  "initialVisionPath": "skills/pptx-nova/assets/decks/examples/theme-gov-blue/vision.initial.json",
+  "visionPath": "skills/pptx-nova/assets/decks/examples/theme-gov-blue/vision.json",
+  "previewDir": "skills/pptx-nova/assets/decks/examples/theme-gov-blue/previews",
+  "previewCount": 8,
+  "contactSheetPath": "skills/pptx-nova/assets/decks/examples/theme-gov-blue/contact-sheet.png",
+  "autoRetryRounds": 1,
+  "initialVision": {
+    "high": 0,
+    "medium": 14,
+    "low": 3,
+    "autoFixable": 14,
+    "totalIssues": 17
+  },
+  "vision": {
+    "high": 0,
+    "medium": 0,
+    "low": 3,
+    "autoFixable": 0,
+    "totalIssues": 3
+  }
+}

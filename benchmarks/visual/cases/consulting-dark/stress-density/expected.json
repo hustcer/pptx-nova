@@ -28,6 +28,8 @@
       "visualRisksMedium": 0
     },
     "vision": { "status": "success", "high": 0, "medium": 0 },
+    "previews": { "enabled": true, "countEqualsSlides": true, "nonEmpty": true },
+    "contactSheet": { "enabled": true, "exists": true, "nonEmpty": true },
     "pngHardDefects": 0,
     "performance": { "record": true, "compareToBaseline": true }
   }

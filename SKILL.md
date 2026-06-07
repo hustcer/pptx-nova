@@ -393,7 +393,7 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
 它适合在最终交付前检查字体是否嵌入、是否存在外链、是否包含兼容性风险；创建型 deck 的
 硬门槛仍是 `s8fy pptx vision-check` 的 high/medium 清零。单文件要写结构化报告时使用
 `-o check.json --pretty --overwrite`；不要加 `--json`（该子命令不支持），也不要对单文件用
-`--report`（只用于 batched inputs）。若只看到 `font_not_embedded` warning，说明目标环境可能
+`s8fy check --report`（check 的 `--report` 只用于 batched inputs）。若只看到 `font_not_embedded` warning，说明目标环境可能
 缺字体；这不是布局失败，但面向外部分发时应嵌入字体、换成目标环境可用字体，或在交付说明中标注风险。
 
 > 加上 `--contact-sheet` 会在同一次转换里多产出一张 `previews/contact-sheet.png` 全 deck 总览图

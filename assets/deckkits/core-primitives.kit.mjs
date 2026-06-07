@@ -217,47 +217,450 @@ export async function loadContent(path) {
   return JSON.parse(readFileSync(path, 'utf8'))
 }
 
-// --- Content validation (delegates to validate-content logic) ---
-export function validateContent(content, { deckkit, throwOnError = false } = {}) {
-  const catalog = JSON.parse(readFileSync(join(__dirname, 'catalog.json'), 'utf8'))
-  const entry = catalog.entries.find((e) => e.id === deckkit)
-  const errors = []
-  const warnings = []
+// --- Content validation ---
+const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
 
-  if (!content?.meta?.deckkit) errors.push({ type: 'meta', message: 'meta.deckkit is required' })
-  if (deckkit && content?.meta?.deckkit && content.meta.deckkit !== deckkit) {
-    errors.push({
-      type: 'meta',
-      message: `meta.deckkit "${content.meta.deckkit}" does not match DeckKit "${deckkit}"`,
-    })
+export function loadCatalog() {
+  return readJson(join(__dirname, 'catalog.json'))
+}
+
+const loadSchema = (name) => readJson(join(__dirname, 'schemas', name))
+
+const makeIssue = (type, message, extra = {}) => ({ type, message, ...extra })
+
+const makeFitDiagnostic = ({
+  slideIndex,
+  slideType,
+  severity,
+  code,
+  path,
+  value,
+  limit,
+  message,
+  suggestedActions,
+}) => ({
+  slideIndex,
+  slideType,
+  severity,
+  code,
+  path,
+  value,
+  limit,
+  message,
+  suggestedActions,
+})
+
+const countText = (value) => (typeof value === 'string' ? value.length : 0)
+
+const arrayValue = (value) => (Array.isArray(value) ? value : null)
+
+const checkType = (value, type) => {
+  if (!type) return true
+  if (Array.isArray(type)) return type.some((t) => checkType(value, t))
+  if (type === 'array') return Array.isArray(value)
+  if (type === 'object') return value !== null && typeof value === 'object' && !Array.isArray(value)
+  return typeof value === type
+}
+
+function validateObjectAgainstSchema(value, schema, path, errors) {
+  if (!schema || !schema.properties || !value || typeof value !== 'object') return
+
+  for (const req of schema.required ?? []) {
+    if (!(req in value)) {
+      errors.push(makeIssue('field', `${path}: missing required field "${req}"`, { path }))
+    }
   }
-  if (!entry) errors.push({ type: 'meta', message: `DeckKit "${deckkit}" not found in catalog` })
 
-  if (!Array.isArray(content?.slides) || content.slides.length === 0) {
-    errors.push({ type: 'structure', message: 'slides must be a non-empty array' })
-  }
-
-  if (entry && Array.isArray(content?.slides)) {
-    const supported = entry.supportedSlideTypes
-    const soft = entry.density?.soft ?? {}
-    const hard = entry.density?.hard ?? {}
-    for (let i = 0; i < content.slides.length; i++) {
-      const { type, data } = content.slides[i]
-      if (!supported.includes(type)) {
-        errors.push({ type: 'slide', message: `slides[${i}]: unsupported type "${type}"` })
+  if (schema.additionalProperties === false) {
+    for (const key of Object.keys(value)) {
+      if (!(key in schema.properties)) {
+        errors.push(
+          makeIssue('field', `${path}: unknown field "${key}"`, { path: `${path}.${key}` }),
+        )
       }
-      if (data?.title && hard.titleMaxChars && data.title.length > hard.titleMaxChars) {
-        errors.push({
-          type: 'density',
-          message: `slides[${i}].title: ${data.title.length} chars > hard ${hard.titleMaxChars}`,
-        })
-      } else if (data?.title && soft.titleMaxChars && data.title.length > soft.titleMaxChars) {
-        warnings.push({
-          type: 'density',
-          message: `slides[${i}].title: ${data.title.length} chars > soft ${soft.titleMaxChars}`,
+    }
+  }
+
+  for (const [key, propSchema] of Object.entries(schema.properties)) {
+    if (!(key in value)) continue
+    const fieldPath = `${path}.${key}`
+    const fieldValue = value[key]
+
+    if (propSchema.type && !checkType(fieldValue, propSchema.type)) {
+      errors.push(
+        makeIssue('field', `${fieldPath}: expected ${propSchema.type}`, {
+          path: fieldPath,
+          expected: propSchema.type,
+        }),
+      )
+      continue
+    }
+
+    if (Array.isArray(fieldValue)) {
+      if (propSchema.minItems && fieldValue.length < propSchema.minItems) {
+        errors.push(
+          makeIssue(
+            'field',
+            `${fieldPath}: ${fieldValue.length} items below min ${propSchema.minItems}`,
+            {
+              path: fieldPath,
+              value: fieldValue.length,
+              limit: propSchema.minItems,
+            },
+          ),
+        )
+      }
+      if (propSchema.maxItems && fieldValue.length > propSchema.maxItems) {
+        errors.push(
+          makeIssue(
+            'field',
+            `${fieldPath}: ${fieldValue.length} items exceeds max ${propSchema.maxItems}`,
+            {
+              path: fieldPath,
+              value: fieldValue.length,
+              limit: propSchema.maxItems,
+            },
+          ),
+        )
+      }
+
+      const itemSchema = propSchema.items
+      if (itemSchema) {
+        fieldValue.forEach((item, i) => {
+          const itemPath = `${fieldPath}[${i}]`
+          if (itemSchema.type && !checkType(item, itemSchema.type)) {
+            errors.push(
+              makeIssue('field', `${itemPath}: expected ${itemSchema.type}`, {
+                path: itemPath,
+                expected: itemSchema.type,
+              }),
+            )
+            return
+          }
+          if (Array.isArray(item)) {
+            if (itemSchema.minItems && item.length < itemSchema.minItems) {
+              errors.push(
+                makeIssue(
+                  'field',
+                  `${itemPath}: ${item.length} items below min ${itemSchema.minItems}`,
+                  {
+                    path: itemPath,
+                    value: item.length,
+                    limit: itemSchema.minItems,
+                  },
+                ),
+              )
+            }
+            if (itemSchema.maxItems && item.length > itemSchema.maxItems) {
+              errors.push(
+                makeIssue(
+                  'field',
+                  `${itemPath}: ${item.length} items exceeds max ${itemSchema.maxItems}`,
+                  {
+                    path: itemPath,
+                    value: item.length,
+                    limit: itemSchema.maxItems,
+                  },
+                ),
+              )
+            }
+          }
         })
       }
     }
+  }
+}
+
+function pushDensityDiagnostic({
+  errors,
+  warnings,
+  fitDiagnostics,
+  ignoreSoftLimits,
+  slideIndex,
+  slideType,
+  field,
+  path,
+  value,
+  softLimit,
+  hardLimit,
+  unit,
+  codeBase,
+  suggestedActions,
+}) {
+  if (value === null || value === undefined) return
+  if (hardLimit && value > hardLimit) {
+    const message = `${path}: ${value} ${unit} exceeds hard limit ${hardLimit}`
+    const diagnostic = makeFitDiagnostic({
+      slideIndex,
+      slideType,
+      severity: 'error',
+      code: `${codeBase}.hardLimit`,
+      path,
+      value,
+      limit: hardLimit,
+      message,
+      suggestedActions,
+    })
+    fitDiagnostics.push(diagnostic)
+    errors.push(makeIssue('density', message, { path, field, diagnostic }))
+  } else if (softLimit && value > softLimit && !ignoreSoftLimits) {
+    const message = `${path}: ${value} ${unit} exceeds soft limit ${softLimit}`
+    const diagnostic = makeFitDiagnostic({
+      slideIndex,
+      slideType,
+      severity: 'warning',
+      code: `${codeBase}.softLimit`,
+      path,
+      value,
+      limit: softLimit,
+      message,
+      suggestedActions,
+    })
+    fitDiagnostics.push(diagnostic)
+    warnings.push(makeIssue('density', message, { path, field, diagnostic }))
+  }
+}
+
+function checkSlideDensity({
+  slide,
+  slideIndex,
+  soft,
+  hard,
+  errors,
+  warnings,
+  fitDiagnostics,
+  ignoreSoftLimits,
+}) {
+  const data = slide.data ?? {}
+  const slideType = slide.type
+  const prefix = `slides[${slideIndex}].data`
+
+  pushDensityDiagnostic({
+    errors,
+    warnings,
+    fitDiagnostics,
+    ignoreSoftLimits,
+    slideIndex,
+    slideType,
+    field: 'title',
+    path: `${prefix}.title`,
+    value: countText(data.title),
+    softLimit: soft.titleMaxChars,
+    hardLimit: hard.titleMaxChars,
+    unit: 'chars',
+    codeBase: 'text.title',
+    suggestedActions: ['shorten-copy', 'split-title', 'switch-layout'],
+  })
+
+  const kpis = arrayValue(data.kpis ?? data.items)
+  pushDensityDiagnostic({
+    errors,
+    warnings,
+    fitDiagnostics,
+    ignoreSoftLimits,
+    slideIndex,
+    slideType,
+    field: 'kpis/items',
+    path: data.kpis ? `${prefix}.kpis` : `${prefix}.items`,
+    value: kpis?.length,
+    softLimit: soft.kpisMax,
+    hardLimit: hard.kpisMax,
+    unit: 'items',
+    codeBase: 'array.kpis',
+    suggestedActions: ['split-slide', 'switch-layout', 'remove-item'],
+  })
+
+  const cards = arrayValue(data.cards)
+  pushDensityDiagnostic({
+    errors,
+    warnings,
+    fitDiagnostics,
+    ignoreSoftLimits,
+    slideIndex,
+    slideType,
+    field: 'cards',
+    path: `${prefix}.cards`,
+    value: cards?.length,
+    softLimit: soft.cardsMax,
+    hardLimit: hard.cardsMax,
+    unit: 'items',
+    codeBase: 'array.cards',
+    suggestedActions: ['split-slide', 'switch-layout', 'remove-card'],
+  })
+
+  const steps = arrayValue(data.steps)
+  pushDensityDiagnostic({
+    errors,
+    warnings,
+    fitDiagnostics,
+    ignoreSoftLimits,
+    slideIndex,
+    slideType,
+    field: 'steps',
+    path: `${prefix}.steps`,
+    value: steps?.length,
+    softLimit: soft.timelineStepsMax,
+    hardLimit: hard.timelineStepsMax,
+    unit: 'items',
+    codeBase: 'array.timelineSteps',
+    suggestedActions: ['split-slide', 'shorten-copy', 'remove-step'],
+  })
+
+  const rows = arrayValue(data.rows ?? data.tableRows)
+  pushDensityDiagnostic({
+    errors,
+    warnings,
+    fitDiagnostics,
+    ignoreSoftLimits,
+    slideIndex,
+    slideType,
+    field: 'rows',
+    path: data.rows ? `${prefix}.rows` : `${prefix}.tableRows`,
+    value: rows?.length,
+    softLimit: slideType === 'benchmarkSlide' ? soft.tableRowsMax : soft.profileRowsMax,
+    hardLimit: slideType === 'benchmarkSlide' ? hard.tableRowsMax : hard.profileRowsMax,
+    unit: 'items',
+    codeBase: 'array.rows',
+    suggestedActions: ['split-slide', 'switch-layout', 'shorten-table'],
+  })
+
+  if (cards) {
+    cards.forEach((card, j) => {
+      const items = Array.isArray(card) ? card[3] : card?.items
+      pushDensityDiagnostic({
+        errors,
+        warnings,
+        fitDiagnostics,
+        ignoreSoftLimits,
+        slideIndex,
+        slideType,
+        field: 'cardItems',
+        path: `${prefix}.cards[${j}].items`,
+        value: Array.isArray(items) ? items.length : undefined,
+        softLimit: soft.bulletsPerCardMax,
+        hardLimit: hard.bulletsPerCardMax,
+        unit: 'items',
+        codeBase: 'array.cardBullets',
+        suggestedActions: ['shorten-copy', 'split-card', 'remove-bullet'],
+      })
+    })
+  }
+}
+
+export function validateContent(
+  content,
+  { deckkit, throwOnError = false, ignoreSoftLimits = false, mode = 'draft' } = {},
+) {
+  const catalog = loadCatalog()
+  const contentSchema = loadSchema('content.schema.json')
+  const requestedDeckkit = deckkit || content?.meta?.deckkit
+  const entry = catalog.entries.find((e) => e.id === requestedDeckkit)
+  const errors = []
+  const warnings = []
+  const fitDiagnostics = []
+
+  if (!content || typeof content !== 'object') {
+    errors.push(makeIssue('structure', 'Content must be an object'))
+  }
+  if (!content?.meta || typeof content.meta !== 'object') {
+    errors.push(makeIssue('structure', 'Missing or invalid "meta" field', { path: 'meta' }))
+  }
+  if (!Array.isArray(content?.slides) || content.slides.length === 0) {
+    errors.push(makeIssue('structure', '"slides" must be a non-empty array', { path: 'slides' }))
+  }
+
+  if (errors.length === 0) {
+    validateObjectAgainstSchema(content.meta, contentSchema.properties.meta, 'meta', errors)
+  }
+
+  if (!content?.meta?.deckkit) {
+    errors.push(makeIssue('meta', 'meta.deckkit is required', { path: 'meta.deckkit' }))
+  }
+  if (!entry) {
+    errors.push(
+      makeIssue('meta', `DeckKit "${requestedDeckkit}" not found in catalog`, {
+        path: 'meta.deckkit',
+        available: catalog.entries.map((e) => e.id),
+      }),
+    )
+  }
+  if (deckkit && content?.meta?.deckkit && content.meta.deckkit !== deckkit) {
+    errors.push(
+      makeIssue(
+        'meta',
+        `content.meta.deckkit "${content.meta.deckkit}" does not match --deckkit "${deckkit}"`,
+        { path: 'meta.deckkit' },
+      ),
+    )
+  }
+  if (mode === 'delivery' && entry && !['production', 'default'].includes(entry.readiness)) {
+    warnings.push(
+      makeIssue(
+        'catalog',
+        `DeckKit "${entry.id}" readiness is "${entry.readiness ?? 'unspecified'}"; delivery mode requires production/default readiness`,
+        { path: 'catalog.readiness', readiness: entry.readiness },
+      ),
+    )
+  }
+
+  const supportedTypes =
+    entry?.supportedSlideTypes ?? contentSchema.properties.slides.items.properties.type.enum ?? []
+  const soft = entry?.density?.soft ?? {}
+  const hard = entry?.density?.hard ?? {}
+
+  if (Array.isArray(content?.slides)) {
+    content.slides.forEach((slide, i) => {
+      const prefix = `slides[${i}]`
+
+      if (!slide || typeof slide !== 'object') {
+        errors.push(makeIssue('slide', `${prefix}: slide must be an object`, { path: prefix }))
+        return
+      }
+
+      validateObjectAgainstSchema(slide, contentSchema.properties.slides.items, prefix, errors)
+
+      if (!slide.type) {
+        errors.push(makeIssue('slide', `${prefix}: missing "type"`, { path: `${prefix}.type` }))
+        return
+      }
+      if (!supportedTypes.includes(slide.type)) {
+        errors.push(
+          makeIssue(
+            'slide',
+            `${prefix}: unknown type "${slide.type}". Supported: ${supportedTypes.join(', ')}`,
+            {
+              path: `${prefix}.type`,
+              supported: supportedTypes,
+            },
+          ),
+        )
+        return
+      }
+      if (!slide.data || typeof slide.data !== 'object' || Array.isArray(slide.data)) {
+        errors.push(
+          makeIssue('slide', `${prefix}: missing or invalid "data"`, { path: `${prefix}.data` }),
+        )
+        return
+      }
+
+      try {
+        const schema = loadSchema(`${slide.type}.schema.json`)
+        validateObjectAgainstSchema(slide.data, schema, `${prefix}.data`, errors)
+      } catch {
+        // Schema coverage is intentionally progressive.
+      }
+
+      checkSlideDensity({
+        slide,
+        slideIndex: i,
+        soft,
+        hard,
+        errors,
+        warnings,
+        fitDiagnostics,
+        ignoreSoftLimits,
+      })
+    })
   }
 
   if (throwOnError && errors.length > 0) {
@@ -265,5 +668,13 @@ export function validateContent(content, { deckkit, throwOnError = false } = {})
       `Content validation failed:\n${errors.map((e) => `  [${e.type}] ${e.message}`).join('\n')}`,
     )
   }
-  return { errors, warnings, valid: errors.length === 0 }
+
+  return {
+    errors,
+    warnings,
+    fitDiagnostics,
+    valid: errors.length === 0,
+    entry,
+    normalizedContent: content,
+  }
 }

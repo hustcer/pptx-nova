@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "pptx-nova-visual-benchmarks/v1",
+  "cases": [
+    {
+      "id": "consulting-dark.golden-roadshow",
+      "deckkit": "consulting-dark",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/roadshow-content.json",
+      "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
+      "expectedPath": "cases/consulting-dark/golden-roadshow/expected.json",
+      "reviewPath": "cases/consulting-dark/golden-roadshow/review.md"
+    }
+  ]
+}

@@ -6,7 +6,25 @@
       "version": "0.1.0",
       "path": "consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "defaultFor": ["roadshow", "executive consulting", "technical roadshow", "技术路演"],
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "heroSlide",
+          "profileTableSlide",
+          "kpiRowSlide",
+          "previewProductSlide",
+          "multiCardSlide",
+          "landscapeSlide",
+          "convertFlowSlide",
+          "benchmarkSlide",
+          "timelineSlide",
+          "askSlide"
+        ]
+      },
       "supportedSlideTypes": [
         "heroSlide",
         "profileTableSlide",
@@ -43,6 +61,12 @@
         "s8fy": ">=10",
         "visionCheck": "high=0 medium=0",
         "pngReview": "full"
+      },
+      "quality": {
+        "lastBenchmark": null,
+        "vision": { "high": 0, "medium": 0 },
+        "manualHardDefects": null,
+        "knownBlockingLimits": []
       },
       "knownLimits": [
         "large tables should use benchmarkSlide or split across pages",

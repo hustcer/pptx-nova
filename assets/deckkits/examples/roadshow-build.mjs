@@ -11,7 +11,7 @@ if (errors.length > 0) {
   for (const e of errors) console.error(`[error] ${e.message}`)
   process.exit(1)
 }
-for (const w of valWarnings) console.error(`[warn] ${w.message}`)
+for (const w of valWarnings) console.error(`[warn:${w.diagnostic?.code ?? w.type}] ${w.message}`)
 
 const { patch, warnings } = createDeck(content)
 for (const w of warnings) console.error(`[content-warning] ${w}`)

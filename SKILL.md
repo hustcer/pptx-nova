@@ -105,8 +105,10 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 创建型交付 deck 的默认顺序：
 
 1. 先查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
-   选择 DeckKit。
-2. 跑 `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
+   选择 DeckKit；优先使用 `node tools/pptx-nova-deckkit-select.mjs --target delivery`
+   自动过滤 readiness、页型覆盖、语言、密度和 quality metadata。
+2. 对选中的 DeckKit 跑
+   `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
    确认 catalog readiness、benchmark、vision/PNG gate 和人工 review 元数据都满足交付要求。
 3. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
    只能用于草稿、迁移验证，或人工确认后的交付。

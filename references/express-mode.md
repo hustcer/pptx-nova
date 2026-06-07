@@ -61,7 +61,16 @@ prompt → outline → content.json（~200 行纯数据）
 
 ```bash
 # 0. 从 prompt 提炼 deckBrief（主题/受众/页数/语气/数据/风格）→ 见 §3、§7
-# 1. 选择 production/default DeckKit，并先跑 delivery readiness audit
+# 1. 选择 production/default DeckKit
+node tools/pptx-nova-deckkit-select.mjs \
+  --scenario roadshow \
+  --language mixed \
+  --density dense \
+  --slide-types heroSlide,multiCardSlide,benchmarkSlide,timelineSlide,askSlide \
+  --target delivery \
+  --json
+
+# 1b. 对 selected.id 再跑 delivery readiness audit
 node tools/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target delivery
 
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）

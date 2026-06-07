@@ -22,15 +22,17 @@
 
 ## 1. 何时用 Express（vs Studio / Edit）
 
-| 信号                                                   | 走哪个模式  | 去向                                               |
-| ------------------------------------------------------ | ----------- | -------------------------------------------------- |
-| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express** | 本文档                                             |
-| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**  | SKILL §1 + §9 + `deck-generator-workflow.md`       |
-| 指定品牌 profile / 要做品牌合规检查                    | **Studio**  | SKILL §4 + `recipes.md`（apply-corporate-rebrand） |
-| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**    | SKILL §2 + `inspect-and-edit.md`                   |
+| 信号                                                   | 走哪个模式  | 去向                                                  |
+| ------------------------------------------------------ | ----------- | ----------------------------------------------------- |
+| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express** | 本文档                                                |
+| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**  | 先选 DeckKit；无匹配时见 `deck-generator-workflow.md` |
+| 指定品牌 profile / 要做品牌合规检查                    | **Studio**  | SKILL §4 + `recipes.md`（apply-corporate-rebrand）    |
+| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**    | SKILL §2 + `inspect-and-edit.md`                      |
 
 Express 和 Studio 共用同一套 DeckKit / generator / op 基础设施，区别只在
 **ceremony**：express 自动选默认、最小确认、自动闭环；studio 让你逐项控制。
+两者的新建交付路径都先走 production/default DeckKit；generator 只用于没有匹配
+DeckKit、需要新页型或需要改组件结构时的创建/扩展阶段。
 中途发现需要精控，随时按 §8 升级，不用重来。
 
 ### DeckKit 快路径（同套件二次创作）
@@ -42,11 +44,11 @@ Express 和 Studio 共用同一套 DeckKit / generator / op 基础设施，区�
 prompt → outline → content.json（~200 行纯数据）
   → validate-content.mjs 校验
   → createDeck(content) 生成 patch
-  → dry-run → vision-check → PNG
+  → dry-run → apply → vision-check → PNG/contact sheet review
 ```
 
 判断条件：`catalog.json` 中存在匹配的 `id`，`supportedSlideTypes` 覆盖 outline
-所需的全部页型，且 readiness audit 通过。交付型自动选择只允许
+所需的全部页型，且 `--target delivery` readiness audit 通过。交付型自动选择只允许
 `readiness in ["production", "default"]`；`candidate` 只能用于草稿、迁移验证，
 或人工确认后的交付。不满足时进入创建/扩展 DeckKit 流程，而不是把通用 generator
 作为最终交付路径。
@@ -59,8 +61,8 @@ prompt → outline → content.json（~200 行纯数据）
 
 ```bash
 # 0. 从 prompt 提炼 deckBrief（主题/受众/页数/语气/数据/风格）→ 见 §3、§7
-# 1. 选择 DeckKit，并先跑 readiness audit
-node tools/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target candidate
+# 1. 选择 production/default DeckKit，并先跑 delivery readiness audit
+node tools/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target delivery
 
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
 cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
@@ -129,11 +131,12 @@ outline 顶层还带 `out`（输出路径）和 `themePack` / `stylePack`（如 
 `slideChart` / `slideTable` / `slidePillars`（多列支柱）/ `slideWorkflow` / `slideHero`（全色收尾），
 挑最接近的页型改内容。
 
-### 3.2 无可用 DeckKit 时：套生成器模板扩展 DeckKit
+### 3.2 无可用 DeckKit 时：创建/扩展 DeckKit
 
 只有 readiness audit 没有合适 DeckKit、outline 缺页型或需要改组件结构时，才复制
 `assets/examples/deck-generator-template.mjs`。目标是抽取/扩展 DeckKit，再回到
-content manifest 生产路径；不要把临时 generator 当作最终交付路径。按 outline 改这三处即可，
+content manifest 生产路径；不要把临时 generator、theme showcase 或
+`tools/generate-pptx-nova-examples.mjs` 当作最终交付路径。按 outline 改这三处即可，
 **不要重写 helper**：
 
 1. **theme/style 选择** —— 默认 `--theme corporate-blue --style consulting`；可换成

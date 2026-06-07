@@ -2,12 +2,13 @@
 
 > 本文档解决的问题：**当没有可用 DeckKit、需要新页型或需要改组件结构时**，如何用
 > JS 生成器把视觉语言和页型抽取出来，再冻结成 DeckKit。普通交付 deck 应优先走
-> `content manifest → DeckKit → patch`；不要把临时 generator 当作最终交付默认路径。
+> `content manifest → DeckKit → patch`；不要把临时 generator、theme showcase 或
+> `tools/generate-pptx-nova-examples.mjs` 当作最终交付默认路径。
 > 下面给一套 "用 JS 生成 patch.json" 的标准模板和工作流，把 deck 的"数据 + 模板"
 > 显式拆开，让换主题色、换内容、换字号节奏各自 1 行修改解决。
 >
 > 出处：实战做 8 页 / 775 ops 橙色 deck 后沉淀。模板代码在
-> `assets/examples/deck-generator-template.mjs`，可直接 `cp` 改用。
+> `assets/examples/deck-generator-template.mjs`，仅在创建/扩展 DeckKit 的探索阶段复制使用。
 
 ---
 
@@ -27,7 +28,12 @@
 
 ---
 
-## 起手三步
+## 探索生成器起手三步
+
+先确认 `assets/deckkits/catalog.json` 里没有满足场景、语言、密度和页型覆盖的
+production/default DeckKit。若有可用 DeckKit，直接回到 SKILL §1.0 的
+`content.json → validate-content → createDeck → s8fy → vision-check → PNG review` 生产路径。
+只有确实需要新 DeckKit 或新页型时，才进入下面的探索生成器流程。
 
 ```bash
 # 1. 复制模板
@@ -36,7 +42,7 @@ cp skills/pptx-nova/assets/examples/deck-generator-template.mjs ./generate.mjs
 # 2. 选择 themePack/stylePack；要新增风格时先改 assets/themes/catalog.json 再 just theme -g
 #    然后只改各 slide 函数里的文字/数据
 
-# 3. 生成 + 丰富度自检 + dry-run gate + 落盘
+# 3. 生成探索 patch + 丰富度自检 + dry-run gate + 落盘
 node generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
 jq '.ops | length' patch.json   # ← 客户演示级 ≥ 200,低于这条线视觉一定空,回去加装饰
 # 多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：v10 起 daemon
@@ -51,6 +57,10 @@ s8fy convert out.pptx --to png -o previews/ --overwrite --contact-sheet
 # 再逐页 Read previews/slide-00*.png 抠单页细节：字符重叠/换行压字/截断、
 # 小字号、连接线/箭头、中轴居中和对称平衡
 ```
+
+探索样例通过后，应把视觉 token、组件和页型函数抽取到
+`assets/deckkits/<name>.kit.mjs`，补 schema、catalog、benchmark 和 review。最终交付 deck
+仍从 content manifest 调用 DeckKit 生成，不直接交付这份临时 generator 的输出。
 
 ---
 
@@ -146,7 +156,7 @@ consulting/minimal/product 的完整字号 token 属于 `assets/themes/catalog.j
 | `narrative-split` | thesis-led recommendation、客户决策 memo              | 左侧叙事 rail、右侧证据堆叠、cohort bar、结论 panel      |
 | `data-room`       | appendix、due diligence、action register              | 紧凑命令头、dashboard metrics、原生 table、行动 register |
 
-单 deck 生成：
+探索用单 deck 生成：
 
 ```bash
 node skills/pptx-nova/assets/examples/deck-generator-template.mjs \
@@ -155,7 +165,7 @@ node skills/pptx-nova/assets/examples/deck-generator-template.mjs \
   --layout narrative-split > .tmp-narrative.patch.json
 ```
 
-示例产物矩阵生成：
+legacy/theme showcase 产物矩阵生成：
 
 ```bash
 node tools/generate-pptx-nova-examples.mjs \
@@ -167,7 +177,8 @@ node tools/generate-pptx-nova-examples.mjs \
   --fail-on-vision medium
 ```
 
-`executive-grid` 是默认值，用来保持旧命令兼容；需要验证 theme/style 是否真的跨版式稳定时，
+`tools/generate-pptx-nova-examples.mjs` 只用于 legacy/showcase 回归和迁移参考，不是交付
+PPTX 生成入口。`executive-grid` 是默认值，用来保持旧命令兼容；需要验证 theme/style 是否真的跨版式稳定时，
 显式传 `--layouts all`。
 
 ### 3. `nm()` 命名规范（双向必经）
@@ -461,7 +472,8 @@ slideKPI2(TOTAL)
   / delta pill / callout 卡片" 全是 patch op
 - recipe 的 KPI grid 是 3+1 布局，不是 4-across；自己手堆 4 张才能对齐
 
-**recipe 适合：草稿 / 极简内部速记（≤30 ops）**。客户演示级直接走模板。
+**recipe 适合：草稿 / 极简内部速记（≤30 ops）**。客户演示级交付直接走
+production/default DeckKit；模板只用于抽取或扩展 DeckKit。
 
 ---
 
@@ -497,8 +509,9 @@ s8fy convert out.pptx --to png -o previews/ --overwrite --contact-sheet
 | token 开销 | 全量                                 | 首次引用 DeckKit 后缓存，二次创作仅 content |
 | 适用场景   | 新 theme / 深度定制布局              | 同 theme 的内容变体                         |
 
-**何时不适合 DeckKit 模式**：目标场景尚无 DeckKit、需要修改布局/组件结构、需要新页型。
-这些场景仍应走完整 generator workflow + 冻结为新 DeckKit。
+**何时不适合直接复用现有 DeckKit**：目标场景尚无 production/default DeckKit、需要修改布局/
+组件结构、需要新页型。这些场景仍应走创建/扩展 DeckKit workflow，并在冻结和 benchmark
+通过后回到 content manifest → DeckKit → patch 生产路径。
 
 ---
 

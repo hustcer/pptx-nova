@@ -106,15 +106,18 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 
 1. 先查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
    选择 DeckKit。
-2. 跑 `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate`
-   确认 golden / stress / mixed-language benchmark 已通过。
+2. 跑 `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
+   确认 catalog readiness、benchmark、vision/PNG gate 和人工 review 元数据都满足交付要求。
 3. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
    只能用于草稿、迁移验证，或人工确认后的交付。
-4. 有可用 DeckKit 时，写 `content.json` → `validate-content.mjs` → `createDeck(content)`，
-   禁止回退到 `assets/examples/deck-generator-template.mjs` 作为最终交付生成器。
+4. 有可用 DeckKit 时，严格走 `content.json` → `validate-content.mjs` →
+   `createDeck(content)` → `s8fy pptx apply --dry-run` → apply → `vision-check` →
+   PNG/contact sheet review。
 5. 没有可用 DeckKit、缺页型或需要改组件结构时，先创建/扩展 DeckKit，再用 DeckKit 生产 deck。
 
-`deck-generator-template.mjs` 是新建或扩展 DeckKit 的开发起点，不是普通交付 deck 的默认路径。
+`deck-generator-template.mjs` 是新建或扩展 DeckKit 的探索/迁移开发起点，不是普通交付 deck
+的默认路径；`assets/decks/examples/theme-*` 和 `tools/generate-pptx-nova-examples.mjs`
+只保留为 legacy/showcase 参考，不得作为交付 deck 生成入口。
 
 ### 1.1 极简最短路径（recipe-first）
 

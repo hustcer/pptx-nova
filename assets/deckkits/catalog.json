@@ -63,10 +63,135 @@
         "pngReview": "full"
       },
       "quality": {
-        "lastBenchmark": null,
-        "vision": { "high": 0, "medium": 0 },
+        "lastBenchmark": "2026-06-07",
+        "vision": {
+          "high": 0,
+          "medium": 0
+        },
         "manualHardDefects": null,
-        "knownBlockingLimits": []
+        "knownBlockingLimits": [],
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-07",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "requiredKinds": ["golden", "stress", "mixed-language"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0
+          },
+          "cases": [
+            {
+              "caseId": "consulting-dark.golden-roadshow",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/golden-roadshow/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 1,
+                "fitDiagnostics": 1,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 5
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 318683
+              },
+              "patchOps": 1090,
+              "p50TotalMs": 39.48
+            },
+            {
+              "caseId": "consulting-dark.stress-density",
+              "kind": "stress",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/stress-density/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/stress-density/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 9,
+                "fitDiagnostics": 9,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0
+              },
+              "previews": {
+                "count": 6,
+                "expectedCount": 6,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 194994
+              },
+              "patchOps": 693,
+              "p50TotalMs": 35.41
+            },
+            {
+              "caseId": "consulting-dark.mixed-language",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/mixed-language/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/mixed-language/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0
+              },
+              "previews": {
+                "count": 5,
+                "expectedCount": 5,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 138986
+              },
+              "patchOps": 486,
+              "p50TotalMs": 34.73
+            }
+          ],
+          "blockers": []
+        }
       },
       "knownLimits": [
         "large tables should use benchmarkSlide or split across pages",

@@ -85,6 +85,33 @@ benchmark CLI 已接入逐页 PNG 与 contact-sheet 机器 gate；人工视觉�
 catalog 质量字段和已知限制仍需补齐后，才能把 DeckKit 提升为 `production`
 或 `default`。
 
+## Catalog 质量元数据回写
+
+benchmark 通过后，用 catalog update 工具把机器可证明的结果写回
+`assets/deckkits/catalog.json`：
+
+```bash
+node tools/pptx-nova-deckkit-catalog-update.mjs \
+  --deckkit consulting-dark \
+  --write
+```
+
+该命令只更新 `quality.lastBenchmark`、`quality.vision` 和
+`quality.benchmark`，默认不改变 `readiness`，也不会把人工 PNG review
+结果假定为通过。人工复核完成后，再显式写入 hard defect 数：
+
+```bash
+node tools/pptx-nova-deckkit-catalog-update.mjs \
+  --deckkit consulting-dark \
+  --manual-hard-defects 0 \
+  --write
+```
+
+只有逐页 PNG 和 contact sheet 人工检查完成、`manualHardDefects=0`、benchmark
+和 vision gate 均通过后，才可以带 `--readiness production` 或
+`--readiness default`，且必须同时带 `--confirm-manual-png-review`。否则工具会拒绝
+promotion。
+
 ## 新增 DeckKit 流程
 
 1. 从已验证的 gen.mjs 抽取视觉语言和页型 → `<name>.kit.mjs`

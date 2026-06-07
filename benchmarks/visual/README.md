@@ -69,6 +69,47 @@ delivery, and default use. Delivery/default should remain blocked when PNG
 preview or contact-sheet artifacts are skipped, missing, empty, or out of sync
 with the slide count.
 
+To write machine-verifiable benchmark metadata back to `catalog.json`, run:
+
+```bash
+node tools/pptx-nova-deckkit-catalog-update.mjs \
+  --deckkit consulting-dark \
+  --write
+```
+
+This updates `quality.lastBenchmark`, aggregate `quality.vision`, and
+`quality.benchmark` from `.tmp/pptx-nova-visual/<deckkit>/<case>/summary.json`.
+It does not change readiness by default and does not invent manual review data.
+
+Manual PNG review remains a separate human step:
+
+1. Open each case `contact-sheet.png` and inspect the per-slide PNG files under
+   `.tmp/pptx-nova-visual/consulting-dark/<case>/previews/`.
+2. Fill the corresponding `review.md` with last reviewed date, reviewer, result,
+   checked manual items, and notes.
+3. Count hard visual defects. Only after this review is complete, write the
+   manual count:
+
+```bash
+node tools/pptx-nova-deckkit-catalog-update.mjs \
+  --deckkit consulting-dark \
+  --manual-hard-defects 0 \
+  --write
+```
+
+Promotion requires an explicit manual review confirmation:
+
+```bash
+node tools/pptx-nova-deckkit-catalog-update.mjs \
+  --deckkit consulting-dark \
+  --manual-hard-defects 0 \
+  --readiness production \
+  --confirm-manual-png-review \
+  --write
+```
+
+Do not run the promotion command until all required PNG reviews are complete.
+
 Current consulting-dark cases:
 
 - `golden-roadshow` validates the normal delivery path.

@@ -65,7 +65,7 @@ process.stdout.write(JSON.stringify(patch))
 8. catalog 记录版本、验证命令、示例路径和已知限制
 
 当前 readiness audit 会明确报告 candidate / delivery / default 三个结论。
-在 benchmark CLI 尚未接入 vision/PNG 真实 gate 前，不要把 DeckKit 自动提升为
+在 benchmark CLI 尚未接入 PNG/contact-sheet 真实 gate 前，不要把 DeckKit 自动提升为
 `production` 或 `default`。
 
 ## 新增 DeckKit 流程

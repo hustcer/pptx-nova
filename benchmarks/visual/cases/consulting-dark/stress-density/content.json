@@ -34,7 +34,7 @@
       "data": {
         "eyebrow": "02 · CARD DENSITY",
         "title": "六张卡片与每卡四条 bullet 的压力场景",
-        "intro": "Cards and bullets intentionally exceed soft density limits while staying below hard limits.",
+        "intro": "Cards exceed soft density limits but stay below hard limits.",
         "cards": [
           [
             "C8583A",
@@ -100,7 +100,7 @@
         "eyebrow": "04 · TIMELINE DENSITY",
         "title": "六个里程碑验证 timeline 容量软上限",
         "steps": [
-          ["C8583A", "01", "Catalog", "readiness metadata available", "done"],
+          ["C8583A", "01", "Catalog", "metadata ready", "done"],
           ["3C6FA6", "02", "Validate", "shared validation path", "done"],
           ["3E9D6E", "03", "Fit", "structured diagnostics", "done"],
           ["CF9B43", "04", "Golden", "baseline case passes", "done"],

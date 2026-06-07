@@ -49,10 +49,11 @@ node tools/pptx-nova-deckkit-benchmark.mjs \
   --clean
 ```
 
-The first CLI version runs validate/build gates and writes `patch.json`,
-`timing.json`, and `summary.json` to `.tmp/pptx-nova-visual/<deckkit>/<case>/`.
-Vision and PNG gates are recorded as skipped until the s8fy dry-run/vision and
-preview stages are wired in.
+The current CLI runs validate/build, s8fy dry-run, real apply, and
+`vision-check` gates. It writes `patch.json`, `deck.pptx`, `dry-run.json`,
+`apply.json`, `vision.json`, `timing.json`, and `summary.json` to
+`.tmp/pptx-nova-visual/<deckkit>/<case>/`. PNG preview and contact-sheet gates
+are still recorded as skipped until the preview stage is wired in.
 
 After benchmark output exists, run the readiness audit:
 
@@ -64,8 +65,8 @@ node tools/pptx-nova-deckkit-readiness.mjs \
 
 The audit reads `catalog.json`, `index.json`, and the generated
 `summary.json` files. It reports whether the DeckKit is ready for candidate,
-delivery, and default use. Delivery/default should remain blocked while vision
-and PNG gates are still recorded as skipped.
+delivery, and default use. Delivery/default should remain blocked while PNG
+preview and contact-sheet gates are still recorded as skipped.
 
 Current consulting-dark cases:
 

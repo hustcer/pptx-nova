@@ -205,7 +205,7 @@
       "version": "0.1.0",
       "path": "mckinsey-blue.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "experimental",
+      "readiness": "production",
       "defaultFor": [
         "McKinsey-style consulting",
         "customer loyalty strategy",
@@ -318,10 +318,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 281430
+                "bytes": 294328
               },
-              "patchOps": 1854,
-              "p50TotalMs": 42.32
+              "patchOps": 1882,
+              "p50TotalMs": 44.8
             },
             {
               "caseId": "mckinsey-blue.stress-density",
@@ -356,7 +356,7 @@
                 "bytes": 69114
               },
               "patchOps": 485,
-              "p50TotalMs": 39.27
+              "p50TotalMs": 41.49
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
@@ -388,10 +388,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 112265
+                "bytes": 123525
               },
-              "patchOps": 667,
-              "p50TotalMs": 36.66
+              "patchOps": 695,
+              "p50TotalMs": 37.4
             }
           ],
           "blockers": []

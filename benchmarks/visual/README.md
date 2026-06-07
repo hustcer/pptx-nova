@@ -10,7 +10,15 @@ benchmarks/visual/
 ├── index.json
 ├── cases/
 │   └── consulting-dark/
-│       └── golden-roadshow/
+│       ├── golden-roadshow/
+│       │   ├── expected.json
+│       │   └── review.md
+│       ├── stress-density/
+│       │   ├── content.json
+│       │   ├── expected.json
+│       │   └── review.md
+│       └── mixed-language/
+│           ├── content.json
 │           ├── expected.json
 │           └── review.md
 └── baselines/
@@ -45,3 +53,10 @@ The first CLI version runs validate/build gates and writes `patch.json`,
 `timing.json`, and `summary.json` to `.tmp/pptx-nova-visual/<deckkit>/<case>/`.
 Vision and PNG gates are recorded as skipped until the s8fy dry-run/vision and
 preview stages are wired in.
+
+Current consulting-dark cases:
+
+- `golden-roadshow` validates the normal delivery path.
+- `stress-density` intentionally triggers soft fit warnings without hard errors.
+- `mixed-language` verifies CJK, English, numbers, and compact business terms
+  stay inside normal density limits.

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "pptx-nova-visual-case/v1",
+  "deckkit": "consulting-dark",
+  "case": "mixed-language",
+  "contentPath": "content.json",
+  "expected": {
+    "minSlides": 5,
+    "requiredSlideTypes": [
+      "heroSlide",
+      "multiCardSlide",
+      "benchmarkSlide",
+      "timelineSlide",
+      "askSlide"
+    ],
+    "validate": { "errors": 0, "blockingWarnings": 0, "maxWarnings": 0 },
+    "fitDiagnostics": { "errors": 0, "blockingWarnings": 0, "maxWarnings": 0 },
+    "vision": { "high": 0, "medium": 0 },
+    "pngHardDefects": 0,
+    "performance": { "record": true, "compareToBaseline": true }
+  }
+}

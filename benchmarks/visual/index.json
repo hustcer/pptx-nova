@@ -9,6 +9,24 @@
       "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
       "expectedPath": "cases/consulting-dark/golden-roadshow/expected.json",
       "reviewPath": "cases/consulting-dark/golden-roadshow/review.md"
+    },
+    {
+      "id": "consulting-dark.stress-density",
+      "deckkit": "consulting-dark",
+      "kind": "stress",
+      "contentPath": "cases/consulting-dark/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
+      "expectedPath": "cases/consulting-dark/stress-density/expected.json",
+      "reviewPath": "cases/consulting-dark/stress-density/review.md"
+    },
+    {
+      "id": "consulting-dark.mixed-language",
+      "deckkit": "consulting-dark",
+      "kind": "mixed-language",
+      "contentPath": "cases/consulting-dark/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
+      "expectedPath": "cases/consulting-dark/mixed-language/expected.json",
+      "reviewPath": "cases/consulting-dark/mixed-language/review.md"
     }
   ]
 }

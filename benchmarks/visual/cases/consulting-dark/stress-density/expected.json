@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "pptx-nova-visual-case/v1",
+  "deckkit": "consulting-dark",
+  "case": "stress-density",
+  "contentPath": "content.json",
+  "expected": {
+    "minSlides": 6,
+    "requiredSlideTypes": [
+      "heroSlide",
+      "kpiRowSlide",
+      "multiCardSlide",
+      "benchmarkSlide",
+      "timelineSlide",
+      "askSlide"
+    ],
+    "validate": { "errors": 0, "blockingWarnings": 0, "minWarnings": 4 },
+    "fitDiagnostics": { "errors": 0, "blockingWarnings": 0, "minWarnings": 4 },
+    "vision": { "high": 0, "medium": 0 },
+    "pngHardDefects": 0,
+    "performance": { "record": true, "compareToBaseline": true }
+  }
+}

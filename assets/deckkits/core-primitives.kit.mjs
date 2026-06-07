@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { addTablerIconPicture } from './icon-assets.kit.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -190,6 +191,9 @@ export function createOps() {
     if (bg) ops.push({ op: 'set-slide-background', slide: s, fill: { type: 'solid', color: bg } })
   }
 
+  const icon = (s, name, iconName, x, y, w, h, options) =>
+    addTablerIconPicture(ops, s, name, iconName, x, y, w, h, options)
+
   return {
     ops,
     shape,
@@ -205,6 +209,7 @@ export function createOps() {
     tx,
     fillText,
     addSlide,
+    icon,
   }
 }
 

@@ -7,6 +7,7 @@
 ```
 assets/deckkits/
 ├── core-primitives.kit.mjs     # 几何安全 + op 生成（所有 DeckKit 共用）
+├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-picture helper
 ├── consulting-dark.kit.mjs     # 深墨蓝咨询风格 + 页型函数
 ├── catalog.json                # DeckKit 注册表、版本、density 限制、验证记录
 ├── schemas/                    # content 和各页型 JSON Schema（渐进覆盖）
@@ -24,6 +25,7 @@ assets/deckkits/
 | `textbox()`, `setText()`, `runFont()`, `tx()`, `box()` | chrome 结构（topBar, footer 的高度/位置）  |
 | `withFontFloor()`, `parseFontPt()`, `fontSizeValue()`  | 页型函数（heroSlide, kpiRowSlide 等）      |
 | `contrastRatio()`, `readableTextOn()`, `isDarkColor()` | 组件外观（卡片圆角、accent bar 高度）      |
+| `icon()`, `addTablerIconPicture()`                     | 具体图标语义选择（哪个 icon 表示某概念）   |
 | `cardBox()`, `panelBox()`（结构骨架）                  | 组件内容布局（KPI 圆的位置、编号框的偏移） |
 | content schema 校验引擎、fit diagnostics 框架          | 具体页型的 soft/hard limit 数值            |
 | `assertWithinSlide` bounds check                       | stylePack/themePack 的选择和解析           |
@@ -60,6 +62,26 @@ const { patch, warnings } = createDeck(content)
 for (const w of warnings) console.error(`[warning] ${w.message}`)
 process.stdout.write(JSON.stringify(patch))
 ```
+
+## 图标使用
+
+DeckKit 需要 Tabler 图标时，使用 `createOps()` 返回的 `icon()` 或直接使用
+`icon-assets.kit.mjs`。它只读取 `../icons/tabler-icons.generated.json`，并把 SVG
+内联为 `add-picture` 的 `bytesBase64 + mime`，不依赖网络、临时 SVG 文件或 Tabler
+源码目录：
+
+```js
+const p = createOps()
+p.addSlide(0, '0B1020')
+p.icon(0, 'S0_StatusIcon', 'chart-line', 0.72, 0.72, 0.28, 0.28, {
+  color: 'C8583A',
+  strokeWidth: 1.8,
+})
+```
+
+图标名必须来自 `assets/icons/tabler-icons.manifest.json`。要增减高频图标，先改
+manifest，再运行 `nu tools/generate-pptx-nova-tabler-icons.nu` 和
+`nu tools/generate-pptx-nova-tabler-icons.nu --check`。
 
 ## 版本规则（semver）
 

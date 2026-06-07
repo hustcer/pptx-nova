@@ -318,10 +318,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 280100
+                "bytes": 280764
               },
-              "patchOps": 1842,
-              "p50TotalMs": 43.18
+              "patchOps": 1854,
+              "p50TotalMs": 43.32
             },
             {
               "caseId": "mckinsey-blue.stress-density",
@@ -353,10 +353,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 69088
+                "bytes": 69114
               },
               "patchOps": 485,
-              "p50TotalMs": 37.48
+              "p50TotalMs": 37.82
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
@@ -388,10 +388,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 112885
+                "bytes": 112265
               },
-              "patchOps": 666,
-              "p50TotalMs": 35.1
+              "patchOps": 667,
+              "p50TotalMs": 36.27
             }
           ],
           "blockers": []

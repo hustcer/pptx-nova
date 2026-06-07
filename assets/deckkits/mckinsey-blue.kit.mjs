@@ -147,7 +147,7 @@ function makeChrome({ tx, box, fillText }) {
       bold: true,
       color,
     })
-    tx(s, nm(s, `${base}B`), x + 0.18, y + 0.35, w - 0.3, h - 0.44, asLines(body), {
+    tx(s, nm(s, `${base}B`), x + 0.18, y + 0.35, w - 0.3, h - 0.4, asLines(body), {
       name: FONT_EN,
       size: '8.2pt',
       color: C.text2,
@@ -214,12 +214,14 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
     box(s, nm(s, `${base}Track`), 'rectangle', x + 2.05, y, w, h, C.surface2)
     const fillW = Math.max(0.05, (w * value) / max)
     box(s, nm(s, `${base}Bar`), 'rectangle', x + 2.05, y, fillW, h, color)
+    const valueW = 0.68
+    const valueX = x + 2.05 + Math.max(0, Math.min(fillW - valueW - 0.08, w - valueW - 0.08))
     tx(
       s,
       nm(s, `${base}Val`),
-      x + 2.05 + Math.min(fillW - 0.48, w - 0.52),
+      valueX,
       y + 0.08,
-      0.42,
+      valueW,
       0.18,
       valueLabel ?? `${value}%`,
       { name: FONT_EN, size: '8pt', bold: true, color: C.white },
@@ -245,12 +247,22 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
       0.18,
       color,
     )
-    tx(s, nm(s, `${base}V`), x + w - 0.44, y, 0.42, 0.17, value, {
-      name: FONT_EN,
-      size: '8pt',
-      bold: true,
-      color,
-    })
+    tx(
+      s,
+      nm(s, `${base}V`),
+      x + w - 0.72,
+      y,
+      0.68,
+      0.2,
+      value,
+      {
+        name: FONT_EN,
+        size: '8pt',
+        bold: true,
+        color,
+      },
+      'right',
+    )
     if (note) {
       tx(s, nm(s, `${base}N`), x + 1.5, y + 0.26, w - 1.5, 0.14, note, {
         name: FONT_EN,
@@ -380,8 +392,8 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
 }
 
 function makePageTypes(builders, chrome, components, total) {
-  const { tx, box, card, icon, fillText, addSlide, setLine } = builders
-  const { topRule, header, footer, sectionLabel, noteBox, cardCaption } = chrome
+  const { tx, box, icon, addSlide, setLine } = builders
+  const { header, footer, sectionLabel, noteBox } = chrome
   const { metricCard, hBar, miniBar, pillarCard, smallInfo } = components
 
   function mckCoverSlide(s, data) {
@@ -390,10 +402,10 @@ function makePageTypes(builders, chrome, components, total) {
     box(s, nm(s, 'HeroDeep'), 'rectangle', 0, 0, 7.8, 3.04, C.navy)
     box(s, nm(s, 'HeroBlue'), 'rectangle', 7.8, 0, 5.53, 3.04, C.blue)
     ;[
-      [8.65, 0.05, 3.85, '0E4F7E'],
-      [9.45, 0.42, 2.55, '116A9E'],
-      [10.12, 0.82, 1.36, '2A7FAF'],
-      [10.53, 1.18, 0.64, '3B8CBC'],
+      [8.72, 0.08, 2.88, '0E4F7E'],
+      [9.34, 0.44, 1.98, '116A9E'],
+      [9.84, 0.82, 1.12, '2A7FAF'],
+      [10.18, 1.18, 0.58, '3B8CBC'],
     ].forEach(([x, y, d, color], i) => box(s, nm(s, `Ring${i}`), 'oval', x, y, d, d, color))
     tx(s, nm(s, 'Eyebrow'), 0.82, 0.42, 3.4, 0.16, data.eyebrow, {
       name: FONT_EN,
@@ -575,7 +587,7 @@ function makePageTypes(builders, chrome, components, total) {
       MX,
       4.98,
       CW,
-      0.72,
+      0.88,
       data.implication.title,
       data.implication.body,
       C.blue,
@@ -1227,11 +1239,21 @@ function makePageTypes(builders, chrome, components, total) {
         [C.navy, C.primary, C.blue, C.amber][i],
       )
     })
-    tx(s, nm(s, 'End'), 12.45, axisY - 0.03, 0.36, 0.12, 'END', {
-      name: FONT_EN,
-      size: '6pt',
-      color: C.blue,
-    })
+    tx(
+      s,
+      nm(s, 'End'),
+      12.28,
+      axisY - 0.04,
+      0.64,
+      0.16,
+      'END',
+      {
+        name: FONT_EN,
+        size: '6pt',
+        color: C.blue,
+      },
+      'right',
+    )
 
     const metrics = data.metrics ?? []
     const metricCells = grid(3, 0.18, MX, CW)
@@ -1270,12 +1292,12 @@ function makePageTypes(builders, chrome, components, total) {
       })
     })
 
-    box(s, nm(s, 'GovernanceBg'), 'rectangle', MX, 5.62, CW, 0.92, C.deep)
+    box(s, nm(s, 'GovernanceBg'), 'rectangle', MX, 5.56, CW, 1.12, C.deep)
     tx(
       s,
       nm(s, 'GovTitle'),
       MX,
-      5.82,
+      5.78,
       CW,
       0.14,
       data.governance.title,
@@ -1294,9 +1316,9 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `GovLab${i}`),
         x,
-        6.1,
+        6.08,
         w,
-        0.12,
+        0.15,
         label,
         {
           name: FONT_EN,
@@ -1309,9 +1331,9 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `GovPri${i}`),
         x,
-        6.27,
+        6.28,
         w,
-        0.12,
+        0.16,
         primary,
         {
           name: FONT_EN,
@@ -1325,9 +1347,9 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `GovSec${i}`),
         x,
-        6.43,
+        6.48,
         w,
-        0.12,
+        0.16,
         secondary,
         {
           name: FONT_EN,

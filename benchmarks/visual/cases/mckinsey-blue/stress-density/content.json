@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "deckkit": "mckinsey-blue",
+    "style": "consulting",
+    "layout": "stress-density"
+  },
+  "slides": [
+    {
+      "type": "mckCrisisSnapshotSlide",
+      "data": {
+        "title": "A.CO. retention economics require immediate executive action because controllable loss remains concentrated in service and price levers",
+        "subtitle": "Long executive copy should still build a readable consulting page",
+        "metrics": [
+          {
+            "label": "Repeat purchase rate",
+            "value": "14%",
+            "sub": "vs. target 32%",
+            "note": "Widest gap in the benchmark cohort",
+            "accent": "DC2626",
+            "bg": "FEF2F2"
+          },
+          {
+            "label": "Lost to competitors",
+            "value": "55%",
+            "sub": "of lapsed buyers",
+            "note": "Primary defection driver",
+            "accent": "F59E0B",
+            "bg": "FFFBEB"
+          },
+          {
+            "label": "Service rated Fair or Poor",
+            "value": "69%",
+            "sub": "of all customers",
+            "note": "Must-fix priority",
+            "accent": "F59E0B",
+            "bg": "FEF2F2"
+          }
+        ],
+        "cohortTitle": "FATE OF 100 A.CO. BUYERS — STRESS COHORT",
+        "cohort": [
+          { "value": 14, "label": "Return to A.CO.", "color": "005587" },
+          {
+            "value": 55,
+            "label": "Bought competitor model",
+            "note": "Initiative: discount",
+            "color": "DC2626"
+          },
+          {
+            "value": 25,
+            "label": "Service issue",
+            "note": "Initiative: service",
+            "color": "F59E0B"
+          },
+          { "value": 6, "label": "Other", "color": "CBD5E1" }
+        ],
+        "cohortSum": "55 + 25 = 80 customers · 80% controllable",
+        "implication": {
+          "title": "Strategic implication:",
+          "body": "Two levers drive recoverable loss: repurchase economics and service reliability."
+        },
+        "gap": {
+          "title": "Data quality gap:",
+          "body": "Unknown reasons still sit at 6%; survey incentives remain useful."
+        },
+        "lever": {
+          "title": "Key management lever:",
+          "body": "Prioritise the first two initiatives before broad brand campaigns."
+        },
+        "source": "Source: A.CO. stress-density benchmark"
+      }
+    },
+    {
+      "type": "mckInitiativeRankingSlide",
+      "data": {
+        "title": "Five dense initiatives test compact card readability and long programme labels under McKinsey-style consulting constraints",
+        "subtitle": "Layout preserves headers, gutters, labels, icons, and footer treatment",
+        "sectionTitle": "STRESS INITIATIVES — HIGH DENSITY COPY",
+        "initiatives": [
+          {
+            "index": "01",
+            "tag": "HIGHEST IMPACT",
+            "title": "Free 3-Year\nAfter-Sales\nService",
+            "body": "Directly addresses service failure and raises confidence at repurchase.",
+            "cost": "Med-High",
+            "pillars": "Pillar 1, 2",
+            "owner": "Director B",
+            "footer": "Highest impact\n50/50 cost share",
+            "icon": "settings",
+            "accent": "DC2626"
+          },
+          {
+            "index": "02",
+            "tag": "HIGH ROI",
+            "title": "20% Loyalty\nDiscount",
+            "body": "Targets buyers considering competitor substitution.",
+            "cost": "Medium",
+            "pillars": "Pillar 2",
+            "owner": "Director A",
+            "footer": "High ROI\n50/50 cost share",
+            "icon": "currency-dollar",
+            "accent": "F59E0B"
+          },
+          {
+            "index": "03",
+            "tag": "FRICTION",
+            "title": "Enhanced\nTrade-in",
+            "body": "Lowers the economic barrier to return purchase.",
+            "cost": "Low-Med",
+            "pillars": "Pillar 2",
+            "owner": "Director A",
+            "footer": "Reduces friction\nHQ + franchises",
+            "icon": "shopping-cart",
+            "accent": "0076A8"
+          },
+          {
+            "index": "04",
+            "tag": "ENGAGEMENT",
+            "title": "Customer\nMagazine",
+            "body": "Keeps the ownership relationship warm between purchases.",
+            "cost": "Low",
+            "pillars": "Pillar 1, 4",
+            "owner": "Director A",
+            "footer": "Brand engagement\nHQ + franchises",
+            "icon": "news",
+            "accent": "4A90A4"
+          },
+          {
+            "index": "05",
+            "tag": "DATA QUALITY",
+            "title": "Survey\nIncentive",
+            "body": "Improves customer profiling and reduces unknown defection.",
+            "cost": "Very Low",
+            "pillars": "Pillar 3",
+            "owner": "Director B",
+            "footer": "Data quality\nHQ + franchises",
+            "icon": "circle-check",
+            "accent": "64748B"
+          }
+        ],
+        "source": "Source: A.CO. stress-density benchmark"
+      }
+    }
+  ]
+}

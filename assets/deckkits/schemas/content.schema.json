@@ -34,7 +34,15 @@
               "convertFlowSlide",
               "benchmarkSlide",
               "timelineSlide",
-              "askSlide"
+              "askSlide",
+              "mckCoverSlide",
+              "mckCrisisSnapshotSlide",
+              "mckDemographicProfileSlide",
+              "mckPriorityMatrixSlide",
+              "mckLossDriverSlide",
+              "mckPillarsSlide",
+              "mckInitiativeRankingSlide",
+              "mckRoadmapSlide"
             ]
           },
           "data": { "type": "object" },

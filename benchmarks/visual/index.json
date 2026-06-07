@@ -27,6 +27,33 @@
       "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
       "expectedPath": "cases/consulting-dark/mixed-language/expected.json",
       "reviewPath": "cases/consulting-dark/mixed-language/review.md"
+    },
+    {
+      "id": "mckinsey-blue.golden-loyalty",
+      "deckkit": "mckinsey-blue",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
+      "buildPath": "../../assets/deckkits/examples/mckinsey-blue-build.mjs",
+      "expectedPath": "cases/mckinsey-blue/golden-loyalty/expected.json",
+      "reviewPath": "cases/mckinsey-blue/golden-loyalty/review.md"
+    },
+    {
+      "id": "mckinsey-blue.stress-density",
+      "deckkit": "mckinsey-blue",
+      "kind": "stress",
+      "contentPath": "cases/mckinsey-blue/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/mckinsey-blue-build.mjs",
+      "expectedPath": "cases/mckinsey-blue/stress-density/expected.json",
+      "reviewPath": "cases/mckinsey-blue/stress-density/review.md"
+    },
+    {
+      "id": "mckinsey-blue.mixed-language",
+      "deckkit": "mckinsey-blue",
+      "kind": "mixed-language",
+      "contentPath": "cases/mckinsey-blue/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/mckinsey-blue-build.mjs",
+      "expectedPath": "cases/mckinsey-blue/mixed-language/expected.json",
+      "reviewPath": "cases/mckinsey-blue/mixed-language/review.md"
     }
   ]
 }

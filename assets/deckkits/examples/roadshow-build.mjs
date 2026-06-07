@@ -6,9 +6,12 @@ import { createDeck } from '../consulting-dark.kit.mjs'
 const deckkitId = 'consulting-dark'
 const content = await loadContent(process.argv[2] ?? 'roadshow-content.json')
 
-const { errors, warnings: valWarnings } = validateContent(content, { deckkit: deckkitId })
-if (errors.length > 0) {
+const validation = validateContent(content, { deckkit: deckkitId })
+const { errors, warnings: valWarnings, fitDiagnostics } = validation
+const blockingFitDiagnostics = fitDiagnostics.filter((d) => d.blocking === true)
+if (errors.length > 0 || blockingFitDiagnostics.length > 0) {
   for (const e of errors) console.error(`[error] ${e.message}`)
+  for (const d of blockingFitDiagnostics) console.error(`[fit-error:${d.code}] ${d.message}`)
   process.exit(1)
 }
 for (const w of valWarnings) console.error(`[warn:${w.diagnostic?.code ?? w.type}] ${w.message}`)

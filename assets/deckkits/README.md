@@ -30,6 +30,22 @@ assets/deckkits/
 
 **判断原则**：如果某段代码换了主题色/间距后仍然正确，它属于 primitives；如果它依赖具体的视觉决策，它属于 DeckKit。
 
+## 校验合同
+
+`validate-content.mjs`、DeckKit build 胶水和 benchmark CLI 都必须调用
+`core-primitives.kit.mjs` 导出的同一个 `validateContent(content, { deckkit, mode })`。
+
+`validateContent` 返回：
+
+- `errors`：阻塞性 schema、catalog 或 fit 问题。
+- `warnings`：非阻塞 density / fit / catalog 风险。
+- `fitDiagnostics`：结构化容量诊断，包含 `slideIndex`、`slideType`、`severity`、`code`、
+  `path`、`value`、`limit`、`blocking` 和 `suggestedActions`。
+- `normalizedContent`：当前与输入一致，保留给后续规范化。
+
+当前页型级 fit diagnostics 已覆盖 `heroSlide`、`kpiRowSlide`、`multiCardSlide`、
+`benchmarkSlide`、`timelineSlide` 和 `askSlide`，并包含长 Latin token 风险检查。
+
 ## 使用方式
 
 ```js

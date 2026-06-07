@@ -33,7 +33,7 @@ CLI is in place.
 
 For each case:
 
-1. Run `validate-content` against `contentPath`.
+1. Run shared `validateContent` schema and page-type fit diagnostics against `contentPath`.
 2. Build patch with the DeckKit example build entry.
 3. Apply the patch, run `vision-check`, and render PNG preview artifacts.
 4. Only promote a DeckKit to `production` after golden, stress, and mixed-language

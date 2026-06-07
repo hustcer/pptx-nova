@@ -238,6 +238,7 @@ const makeFitDiagnostic = ({
   limit,
   message,
   suggestedActions,
+  blocking,
 }) => ({
   slideIndex,
   slideType,
@@ -248,11 +249,41 @@ const makeFitDiagnostic = ({
   limit,
   message,
   suggestedActions,
+  blocking: blocking ?? severity === 'error',
 })
 
 const countText = (value) => (typeof value === 'string' ? value.length : 0)
 
 const arrayValue = (value) => (Array.isArray(value) ? value : null)
+
+const tupleValue = (value, index) => (Array.isArray(value) ? value[index] : undefined)
+
+const LATIN_TOKEN_RE = /[A-Za-z0-9][A-Za-z0-9._:/-]{8,}/g
+
+function longestLatinToken(value, path) {
+  let longest = null
+  const visit = (node, nodePath) => {
+    if (typeof node === 'string') {
+      for (const token of node.match(LATIN_TOKEN_RE) ?? []) {
+        if (!longest || token.length > longest.value.length) {
+          longest = { value: token, path: nodePath, length: token.length }
+        }
+      }
+      return
+    }
+    if (Array.isArray(node)) {
+      node.forEach((item, i) => visit(item, `${nodePath}[${i}]`))
+      return
+    }
+    if (node && typeof node === 'object') {
+      for (const [key, item] of Object.entries(node)) {
+        visit(item, `${nodePath}.${key}`)
+      }
+    }
+  }
+  visit(value, path)
+  return longest
+}
 
 const checkType = (value, type) => {
   if (!type) return true
@@ -260,6 +291,74 @@ const checkType = (value, type) => {
   if (type === 'array') return Array.isArray(value)
   if (type === 'object') return value !== null && typeof value === 'object' && !Array.isArray(value)
   return typeof value === type
+}
+
+const describeType = (type) => (Array.isArray(type) ? type.join('|') : type)
+
+function validateValueAgainstSchema(value, schema, path, errors) {
+  if (!schema) return
+
+  if (schema.type && !checkType(value, schema.type)) {
+    errors.push(
+      makeIssue('field', `${path}: expected ${describeType(schema.type)}`, {
+        path,
+        expected: schema.type,
+      }),
+    )
+    return
+  }
+
+  if (schema.enum && !schema.enum.includes(value)) {
+    errors.push(
+      makeIssue('field', `${path}: expected one of ${schema.enum.join(', ')}`, {
+        path,
+        expected: schema.enum,
+        value,
+      }),
+    )
+    return
+  }
+
+  if (Array.isArray(value)) {
+    validateArrayAgainstSchema(value, schema, path, errors)
+    return
+  }
+
+  if (value && typeof value === 'object') {
+    validateObjectAgainstSchema(value, schema, path, errors)
+  }
+}
+
+function validateArrayAgainstSchema(value, schema, path, errors) {
+  if (schema.minItems !== undefined && value.length < schema.minItems) {
+    errors.push(
+      makeIssue('field', `${path}: ${value.length} items below min ${schema.minItems}`, {
+        path,
+        value: value.length,
+        limit: schema.minItems,
+      }),
+    )
+  }
+  if (schema.maxItems !== undefined && value.length > schema.maxItems) {
+    errors.push(
+      makeIssue('field', `${path}: ${value.length} items exceeds max ${schema.maxItems}`, {
+        path,
+        value: value.length,
+        limit: schema.maxItems,
+      }),
+    )
+  }
+
+  const itemSchema = schema.items
+  if (!itemSchema) return
+  if (Array.isArray(itemSchema)) {
+    itemSchema.forEach((tupleSchema, i) => {
+      if (i < value.length)
+        validateValueAgainstSchema(value[i], tupleSchema, `${path}[${i}]`, errors)
+    })
+    return
+  }
+  value.forEach((item, i) => validateValueAgainstSchema(item, itemSchema, `${path}[${i}]`, errors))
 }
 
 function validateObjectAgainstSchema(value, schema, path, errors) {
@@ -284,94 +383,11 @@ function validateObjectAgainstSchema(value, schema, path, errors) {
   for (const [key, propSchema] of Object.entries(schema.properties)) {
     if (!(key in value)) continue
     const fieldPath = `${path}.${key}`
-    const fieldValue = value[key]
-
-    if (propSchema.type && !checkType(fieldValue, propSchema.type)) {
-      errors.push(
-        makeIssue('field', `${fieldPath}: expected ${propSchema.type}`, {
-          path: fieldPath,
-          expected: propSchema.type,
-        }),
-      )
-      continue
-    }
-
-    if (Array.isArray(fieldValue)) {
-      if (propSchema.minItems && fieldValue.length < propSchema.minItems) {
-        errors.push(
-          makeIssue(
-            'field',
-            `${fieldPath}: ${fieldValue.length} items below min ${propSchema.minItems}`,
-            {
-              path: fieldPath,
-              value: fieldValue.length,
-              limit: propSchema.minItems,
-            },
-          ),
-        )
-      }
-      if (propSchema.maxItems && fieldValue.length > propSchema.maxItems) {
-        errors.push(
-          makeIssue(
-            'field',
-            `${fieldPath}: ${fieldValue.length} items exceeds max ${propSchema.maxItems}`,
-            {
-              path: fieldPath,
-              value: fieldValue.length,
-              limit: propSchema.maxItems,
-            },
-          ),
-        )
-      }
-
-      const itemSchema = propSchema.items
-      if (itemSchema) {
-        fieldValue.forEach((item, i) => {
-          const itemPath = `${fieldPath}[${i}]`
-          if (itemSchema.type && !checkType(item, itemSchema.type)) {
-            errors.push(
-              makeIssue('field', `${itemPath}: expected ${itemSchema.type}`, {
-                path: itemPath,
-                expected: itemSchema.type,
-              }),
-            )
-            return
-          }
-          if (Array.isArray(item)) {
-            if (itemSchema.minItems && item.length < itemSchema.minItems) {
-              errors.push(
-                makeIssue(
-                  'field',
-                  `${itemPath}: ${item.length} items below min ${itemSchema.minItems}`,
-                  {
-                    path: itemPath,
-                    value: item.length,
-                    limit: itemSchema.minItems,
-                  },
-                ),
-              )
-            }
-            if (itemSchema.maxItems && item.length > itemSchema.maxItems) {
-              errors.push(
-                makeIssue(
-                  'field',
-                  `${itemPath}: ${item.length} items exceeds max ${itemSchema.maxItems}`,
-                  {
-                    path: itemPath,
-                    value: item.length,
-                    limit: itemSchema.maxItems,
-                  },
-                ),
-              )
-            }
-          }
-        })
-      }
-    }
+    validateValueAgainstSchema(value[key], propSchema, fieldPath, errors)
   }
 }
 
-function pushDensityDiagnostic({
+function pushFitLimitDiagnostic({
   errors,
   warnings,
   fitDiagnostics,
@@ -388,7 +404,7 @@ function pushDensityDiagnostic({
   suggestedActions,
 }) {
   if (value === null || value === undefined) return
-  if (hardLimit && value > hardLimit) {
+  if (hardLimit !== undefined && value > hardLimit) {
     const message = `${path}: ${value} ${unit} exceeds hard limit ${hardLimit}`
     const diagnostic = makeFitDiagnostic({
       slideIndex,
@@ -402,8 +418,8 @@ function pushDensityDiagnostic({
       suggestedActions,
     })
     fitDiagnostics.push(diagnostic)
-    errors.push(makeIssue('density', message, { path, field, diagnostic }))
-  } else if (softLimit && value > softLimit && !ignoreSoftLimits) {
+    errors.push(makeIssue('fit', message, { path, field, diagnostic }))
+  } else if (softLimit !== undefined && value > softLimit && !ignoreSoftLimits) {
     const message = `${path}: ${value} ${unit} exceeds soft limit ${softLimit}`
     const diagnostic = makeFitDiagnostic({
       slideIndex,
@@ -417,11 +433,11 @@ function pushDensityDiagnostic({
       suggestedActions,
     })
     fitDiagnostics.push(diagnostic)
-    warnings.push(makeIssue('density', message, { path, field, diagnostic }))
+    warnings.push(makeIssue('fit', message, { path, field, diagnostic }))
   }
 }
 
-function checkSlideDensity({
+function slideValidationContext({
   slide,
   slideIndex,
   soft,
@@ -431,120 +447,253 @@ function checkSlideDensity({
   fitDiagnostics,
   ignoreSoftLimits,
 }) {
-  const data = slide.data ?? {}
-  const slideType = slide.type
-  const prefix = `slides[${slideIndex}].data`
-
-  pushDensityDiagnostic({
+  return {
+    slide,
+    data: slide.data ?? {},
+    slideIndex,
+    slideType: slide.type,
+    prefix: `slides[${slideIndex}].data`,
+    soft,
+    hard,
     errors,
     warnings,
     fitDiagnostics,
     ignoreSoftLimits,
-    slideIndex,
-    slideType,
-    field: 'title',
-    path: `${prefix}.title`,
-    value: countText(data.title),
-    softLimit: soft.titleMaxChars,
-    hardLimit: hard.titleMaxChars,
+  }
+}
+
+function pushLimit(ctx, config) {
+  pushFitLimitDiagnostic({
+    errors: ctx.errors,
+    warnings: ctx.warnings,
+    fitDiagnostics: ctx.fitDiagnostics,
+    ignoreSoftLimits: ctx.ignoreSoftLimits,
+    slideIndex: ctx.slideIndex,
+    slideType: ctx.slideType,
+    ...config,
+  })
+}
+
+function pushTextLimit(ctx, field, { softLimit, hardLimit, codeBase, suggestedActions }) {
+  pushLimit(ctx, {
+    field,
+    path: `${ctx.prefix}.${field}`,
+    value: countText(ctx.data[field]),
+    softLimit,
+    hardLimit,
     unit: 'chars',
-    codeBase: 'text.title',
+    codeBase,
+    suggestedActions,
+  })
+}
+
+function pushArrayLimit(ctx, field, { value, softLimit, hardLimit, codeBase, suggestedActions }) {
+  pushLimit(ctx, {
+    field,
+    path: `${ctx.prefix}.${field}`,
+    value: value?.length,
+    softLimit,
+    hardLimit,
+    unit: 'items',
+    codeBase,
+    suggestedActions,
+  })
+}
+
+function checkCommonTitle(ctx, codeBase = `${ctx.slideType}.title`) {
+  pushTextLimit(ctx, 'title', {
+    softLimit: ctx.soft.titleMaxChars,
+    hardLimit: ctx.hard.titleMaxChars,
+    codeBase,
     suggestedActions: ['shorten-copy', 'split-title', 'switch-layout'],
   })
+}
 
-  const kpis = arrayValue(data.kpis ?? data.items)
-  pushDensityDiagnostic({
-    errors,
-    warnings,
-    fitDiagnostics,
-    ignoreSoftLimits,
-    slideIndex,
-    slideType,
-    field: 'kpis/items',
-    path: data.kpis ? `${prefix}.kpis` : `${prefix}.items`,
-    value: kpis?.length,
-    softLimit: soft.kpisMax,
-    hardLimit: hard.kpisMax,
-    unit: 'items',
-    codeBase: 'array.kpis',
+function checkHeroSlide(ctx) {
+  checkCommonTitle(ctx, 'hero.title')
+  pushTextLimit(ctx, 'sub', {
+    softLimit: 90,
+    hardLimit: 150,
+    codeBase: 'hero.subtitle',
+    suggestedActions: ['shorten-copy', 'move-copy-to-body-slide', 'split-slide'],
+  })
+  pushTextLimit(ctx, 'tag', {
+    softLimit: 96,
+    hardLimit: 140,
+    codeBase: 'hero.tag',
+    suggestedActions: ['shorten-copy', 'move-copy-to-notes'],
+  })
+}
+
+function checkKpiRowSlide(ctx) {
+  checkCommonTitle(ctx, 'kpi.title')
+  const items = arrayValue(ctx.data.items)
+  pushArrayLimit(ctx, 'items', {
+    value: items,
+    softLimit: Math.min(ctx.soft.kpisMax ?? 4, 4),
+    hardLimit: 4,
+    codeBase: 'kpi.items',
     suggestedActions: ['split-slide', 'switch-layout', 'remove-item'],
   })
+  items?.forEach((item, i) => {
+    pushLimit(ctx, {
+      field: 'itemBody',
+      path: `${ctx.prefix}.items[${i}][3]`,
+      value: countText(tupleValue(item, 3)),
+      softLimit: 72,
+      hardLimit: 120,
+      unit: 'chars',
+      codeBase: 'kpi.itemBody',
+      suggestedActions: ['shorten-copy', 'split-item', 'move-detail-to-notes'],
+    })
+  })
+}
 
-  const cards = arrayValue(data.cards)
-  pushDensityDiagnostic({
-    errors,
-    warnings,
-    fitDiagnostics,
-    ignoreSoftLimits,
-    slideIndex,
-    slideType,
-    field: 'cards',
-    path: `${prefix}.cards`,
-    value: cards?.length,
-    softLimit: soft.cardsMax,
-    hardLimit: hard.cardsMax,
-    unit: 'items',
-    codeBase: 'array.cards',
+function checkMultiCardSlide(ctx) {
+  checkCommonTitle(ctx, 'cards.title')
+  const cards = arrayValue(ctx.data.cards)
+  pushArrayLimit(ctx, 'cards', {
+    value: cards,
+    softLimit: ctx.soft.cardsMax,
+    hardLimit: ctx.hard.cardsMax,
+    codeBase: 'cards.count',
     suggestedActions: ['split-slide', 'switch-layout', 'remove-card'],
   })
-
-  const steps = arrayValue(data.steps)
-  pushDensityDiagnostic({
-    errors,
-    warnings,
-    fitDiagnostics,
-    ignoreSoftLimits,
-    slideIndex,
-    slideType,
-    field: 'steps',
-    path: `${prefix}.steps`,
-    value: steps?.length,
-    softLimit: soft.timelineStepsMax,
-    hardLimit: hard.timelineStepsMax,
-    unit: 'items',
-    codeBase: 'array.timelineSteps',
-    suggestedActions: ['split-slide', 'shorten-copy', 'remove-step'],
+  cards?.forEach((card, i) => {
+    pushLimit(ctx, {
+      field: 'cardTitle',
+      path: `${ctx.prefix}.cards[${i}][2]`,
+      value: countText(tupleValue(card, 2)),
+      softLimit: 24,
+      hardLimit: 42,
+      unit: 'chars',
+      codeBase: 'cards.titleText',
+      suggestedActions: ['shorten-copy', 'split-card-title'],
+    })
+    const items = tupleValue(card, 3)
+    pushLimit(ctx, {
+      field: 'cardItems',
+      path: `${ctx.prefix}.cards[${i}][3]`,
+      value: Array.isArray(items) ? items.length : undefined,
+      softLimit: ctx.soft.bulletsPerCardMax,
+      hardLimit: ctx.hard.bulletsPerCardMax,
+      unit: 'items',
+      codeBase: 'cards.items',
+      suggestedActions: ['shorten-copy', 'split-card', 'remove-bullet'],
+    })
   })
+}
 
-  const rows = arrayValue(data.rows ?? data.tableRows)
-  pushDensityDiagnostic({
-    errors,
-    warnings,
-    fitDiagnostics,
-    ignoreSoftLimits,
-    slideIndex,
-    slideType,
-    field: 'rows',
-    path: data.rows ? `${prefix}.rows` : `${prefix}.tableRows`,
-    value: rows?.length,
-    softLimit: slideType === 'benchmarkSlide' ? soft.tableRowsMax : soft.profileRowsMax,
-    hardLimit: slideType === 'benchmarkSlide' ? hard.tableRowsMax : hard.profileRowsMax,
-    unit: 'items',
-    codeBase: 'array.rows',
+function checkBenchmarkSlide(ctx) {
+  checkCommonTitle(ctx, 'table.title')
+  const rows = arrayValue(ctx.data.tableRows ?? ctx.data.rows)
+  pushArrayLimit(ctx, ctx.data.tableRows ? 'tableRows' : 'rows', {
+    value: rows,
+    softLimit: ctx.soft.tableRowsMax,
+    hardLimit: ctx.hard.tableRowsMax,
+    codeBase: 'table.rows',
     suggestedActions: ['split-slide', 'switch-layout', 'shorten-table'],
   })
-
-  if (cards) {
-    cards.forEach((card, j) => {
-      const items = Array.isArray(card) ? card[3] : card?.items
-      pushDensityDiagnostic({
-        errors,
-        warnings,
-        fitDiagnostics,
-        ignoreSoftLimits,
-        slideIndex,
-        slideType,
-        field: 'cardItems',
-        path: `${prefix}.cards[${j}].items`,
-        value: Array.isArray(items) ? items.length : undefined,
-        softLimit: soft.bulletsPerCardMax,
-        hardLimit: hard.bulletsPerCardMax,
-        unit: 'items',
-        codeBase: 'array.cardBullets',
-        suggestedActions: ['shorten-copy', 'split-card', 'remove-bullet'],
-      })
+  if (rows?.[0]) {
+    pushLimit(ctx, {
+      field: 'tableColumns',
+      path: `${ctx.prefix}.${ctx.data.tableRows ? 'tableRows' : 'rows'}[0]`,
+      value: Array.isArray(rows[0]) ? rows[0].length : undefined,
+      softLimit: 4,
+      hardLimit: 5,
+      unit: 'columns',
+      codeBase: 'table.columns',
+      suggestedActions: ['remove-column', 'split-table', 'switch-layout'],
     })
   }
+}
+
+function checkTimelineSlide(ctx) {
+  checkCommonTitle(ctx, 'timeline.title')
+  const steps = arrayValue(ctx.data.steps)
+  pushArrayLimit(ctx, 'steps', {
+    value: steps,
+    softLimit: ctx.soft.timelineStepsMax,
+    hardLimit: ctx.hard.timelineStepsMax,
+    codeBase: 'timeline.steps',
+    suggestedActions: ['split-slide', 'shorten-copy', 'remove-step'],
+  })
+  steps?.forEach((step, i) => {
+    pushLimit(ctx, {
+      field: 'stepDescription',
+      path: `${ctx.prefix}.steps[${i}][3]`,
+      value: countText(tupleValue(step, 3)),
+      softLimit: 32,
+      hardLimit: 60,
+      unit: 'chars',
+      codeBase: 'timeline.stepDescription',
+      suggestedActions: ['shorten-copy', 'split-step', 'move-detail-to-notes'],
+    })
+  })
+}
+
+function checkAskSlide(ctx) {
+  checkCommonTitle(ctx, 'ask.title')
+  pushTextLimit(ctx, 'sub', {
+    softLimit: 80,
+    hardLimit: 130,
+    codeBase: 'ask.subtitle',
+    suggestedActions: ['shorten-copy', 'split-slide'],
+  })
+  const asks = arrayValue(ctx.data.asks)
+  pushArrayLimit(ctx, 'asks', {
+    value: asks,
+    softLimit: 4,
+    hardLimit: 5,
+    codeBase: 'ask.items',
+    suggestedActions: ['split-slide', 'remove-ask', 'switch-layout'],
+  })
+  asks?.forEach((ask, i) => {
+    pushLimit(ctx, {
+      field: 'askDescription',
+      path: `${ctx.prefix}.asks[${i}][2]`,
+      value: countText(tupleValue(ask, 2)),
+      softLimit: 30,
+      hardLimit: 56,
+      unit: 'chars',
+      codeBase: 'ask.description',
+      suggestedActions: ['shorten-copy', 'split-ask', 'move-detail-to-notes'],
+    })
+  })
+}
+
+function checkGenericSlideDensity(ctx) {
+  checkCommonTitle(ctx)
+}
+
+function checkTextTokenRisk(ctx) {
+  const longest = longestLatinToken(ctx.data, ctx.prefix)
+  pushLimit(ctx, {
+    field: 'longLatinToken',
+    path: longest?.path ?? ctx.prefix,
+    value: longest?.length,
+    softLimit: 34,
+    hardLimit: 52,
+    unit: 'chars',
+    codeBase: 'text.longLatinToken',
+    suggestedActions: ['insert-break-opportunity', 'shorten-token', 'switch-layout'],
+  })
+}
+
+const SLIDE_FIT_CHECKERS = {
+  heroSlide: checkHeroSlide,
+  kpiRowSlide: checkKpiRowSlide,
+  multiCardSlide: checkMultiCardSlide,
+  benchmarkSlide: checkBenchmarkSlide,
+  timelineSlide: checkTimelineSlide,
+  askSlide: checkAskSlide,
+}
+
+function checkSlideDensity(args) {
+  const ctx = slideValidationContext(args)
+  const check = SLIDE_FIT_CHECKERS[ctx.slideType] ?? checkGenericSlideDensity
+  check(ctx)
+  checkTextTokenRisk(ctx)
 }
 
 export function validateContent(
@@ -594,12 +743,25 @@ export function validateContent(
     )
   }
   if (mode === 'delivery' && entry && !['production', 'default'].includes(entry.readiness)) {
+    const message = `DeckKit "${entry.id}" readiness is "${entry.readiness ?? 'unspecified'}"; delivery mode requires production/default readiness`
+    const diagnostic = makeFitDiagnostic({
+      slideIndex: null,
+      slideType: null,
+      severity: 'warning',
+      code: 'catalog.readiness.delivery',
+      path: 'catalog.readiness',
+      value: entry.readiness ?? null,
+      limit: 'production|default',
+      message,
+      suggestedActions: ['promote-deckkit-after-release-gate', 'use-production-deckkit'],
+    })
+    fitDiagnostics.push(diagnostic)
     warnings.push(
-      makeIssue(
-        'catalog',
-        `DeckKit "${entry.id}" readiness is "${entry.readiness ?? 'unspecified'}"; delivery mode requires production/default readiness`,
-        { path: 'catalog.readiness', readiness: entry.readiness },
-      ),
+      makeIssue('catalog', message, {
+        path: 'catalog.readiness',
+        readiness: entry.readiness,
+        diagnostic,
+      }),
     )
   }
 

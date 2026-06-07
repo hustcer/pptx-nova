@@ -30,3 +30,18 @@ For each case:
 3. Record validation errors, fit diagnostics, patch op count, and timing.
 4. Only promote a DeckKit to `production` after golden, stress, and mixed-language
    cases pass the configured gates.
+
+## Current CLI
+
+```bash
+node tools/pptx-nova-deckkit-benchmark.mjs \
+  --deckkit consulting-dark \
+  --case golden-roadshow \
+  --repeat 3 \
+  --clean
+```
+
+The first CLI version runs validate/build gates and writes `patch.json`,
+`timing.json`, and `summary.json` to `.tmp/pptx-nova-visual/<deckkit>/<case>/`.
+Vision and PNG gates are recorded as skipped until the s8fy dry-run/vision and
+preview stages are wired in.

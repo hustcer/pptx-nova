@@ -93,7 +93,13 @@ function makeChrome({ tx, box }) {
 }
 
 // ── Component helpers ─────────────────────────────────────────
-function makeComponents({ tx, box, card, fillText }) {
+function makeComponents({ tx, box, card }) {
+  // Body copy uses a wider text box than short title anchors in dense cards.
+  const cardBodyTextBox = (w) => {
+    const sideInset = w < 2 ? 0.14 : 0.18
+    return { xInset: sideInset, wInset: sideInset + 0.12 }
+  }
+
   const kpiCard = (s, base, x, y, w, h, accent, value, label, note) => {
     card(s, nm(s, `${base}Bg`), x, y, w, h, C.surface)
     box(s, nm(s, `${base}Top`), 'rounded-rectangle', x, y, w, 0.09, accent)
@@ -116,6 +122,7 @@ function makeComponents({ tx, box, card, fillText }) {
     })
   }
   const custCard = (s, base, x, y, w, h, accent, idx, name, items) => {
+    const body = cardBodyTextBox(w)
     card(s, nm(s, `${base}Bg`), x, y, w, h, C.surface)
     box(s, nm(s, `${base}Top`), 'rounded-rectangle', x, y, w, 0.09, accent)
     box(s, nm(s, `${base}Dot`), 'oval', x + 0.28, y + 0.34, 0.5, 0.5, accent)
@@ -139,22 +146,22 @@ function makeComponents({ tx, box, card, fillText }) {
     tx(
       s,
       nm(s, `${base}Items`),
-      x + 0.28,
+      x + body.xInset,
       y + 1.74,
-      w - 0.5,
+      w - body.wInset,
       h - 1.95,
       items.map((t) => `· ${t}`).join('\n'),
       { name: FONT_CN, size: '11pt', color: C.textSec },
     )
   }
-  return { kpiCard, custCard }
+  return { kpiCard, custCard, cardBodyTextBox }
 }
 
 // ── Page-type functions ───────────────────────────────────────
 function makePageTypes(
   { ops, tx, box, card, fillText, addSlide },
   { pageHeader, pageFooter, heroDots },
-  { kpiCard, custCard },
+  { kpiCard, custCard, cardBodyTextBox },
   total,
 ) {
   // slide 0: cover (deep hero)
@@ -465,6 +472,7 @@ function makePageTypes(
     data.cards.forEach(([accent, idx, name, items], i) => {
       const { x, w } = cells[i]
       if (cols === 5) {
+        const body = cardBodyTextBox(w)
         card(s, nm(s, `Cu${i}Bg`), x, cy, w, ch, C.surface)
         box(s, nm(s, `Cu${i}Top`), 'rounded-rectangle', x, cy, w, 0.09, accent)
         box(s, nm(s, `Cu${i}Dot`), 'oval', x + 0.24, cy + 0.32, 0.46, 0.46, accent)
@@ -488,9 +496,9 @@ function makePageTypes(
         tx(
           s,
           nm(s, `Cu${i}Items`),
-          x + 0.22,
+          x + body.xInset,
           cy + 1.62,
-          w - 0.4,
+          w - body.wInset,
           ch - 1.8,
           items.map((t) => `· ${t}`).join('\n'),
           { name: FONT_CN, size: '10.5pt', color: C.textSec },

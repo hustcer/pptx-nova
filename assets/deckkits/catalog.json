@@ -114,10 +114,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 318683
+                "bytes": 318541
               },
               "patchOps": 1090,
-              "p50TotalMs": 39.48
+              "p50TotalMs": 37.41
             },
             {
               "caseId": "consulting-dark.stress-density",
@@ -149,10 +149,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 194994
+                "bytes": 194560
               },
               "patchOps": 693,
-              "p50TotalMs": 35.41
+              "p50TotalMs": 36.2
             },
             {
               "caseId": "consulting-dark.mixed-language",
@@ -184,10 +184,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 138986
+                "bytes": 138983
               },
               "patchOps": 486,
-              "p50TotalMs": 34.73
+              "p50TotalMs": 42.38
             }
           ],
           "blockers": []

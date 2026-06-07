@@ -1,6 +1,6 @@
-// consulting-dark.lib.mjs — 深墨蓝咨询风格设计系统库
+// consulting-dark.kit.mjs — 深墨蓝咨询风格 DeckKit
 // version: 0.1.0
-import { createOps, nm, grid, SLIDE_W } from './core-primitives.lib.mjs'
+import { createOps, nm, grid, SLIDE_W } from './core-primitives.kit.mjs'
 
 // ── Palette ──────────────────────────────────────────────────
 const C = {

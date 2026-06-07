@@ -74,7 +74,7 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 
 ```
 ├── 简单 prompt / 要快 / 没给细节 ────────────→ Express（自动闭环）→ references/express-mode.md
-│   └── 目标 theme 有已冻结 lib？─── 是 ───→ lib-first 快路径 → §1.4
+│   └── 目标 DeckKit 已存在？────────── 是 ───→ DeckKit 快路径 → §1.4
 ├── 要精控 / 自定义布局 / 客户演示级 / 投资人级 → Studio → §1 创建 + §9 视觉丰富度
 └── 改已有 .pptx ───────────────────────────→ Edit → §2 修改 + references/inspect-and-edit.md
 ```
@@ -178,9 +178,9 @@ deck 的 token 输入；`s8fy pptx swap-style` 目前只安全地改 master plac
 default 的 title/body 样式，并保留已有 shapes、坐标、卡片几何、阴影、间距和 chart layout。
 需要重排卡片、chrome、chart/callout 比例时，用生成器、recipe 或显式 patch ops。
 
-### 1.4 设计系统库模式（lib-first 快路径）
+### 1.4 DeckKit 模式（快路径）
 
-当目标 theme 已有对应的 `assets/libs/<theme>.lib.mjs` 时，**优先使用 lib 模式**：
+当目标场景已有对应的 `assets/deckkits/<deckkit>.kit.mjs` 时，**优先使用 DeckKit 模式**：
 
 ```
 content.json (变化层，每次只改这一份)
@@ -191,21 +191,21 @@ content.json (变化层，每次只改这一份)
 
 **与手写 generator 相比的优势**：
 
-- 不需要从头写坐标 / 配色 / 组件逻辑，lib 已经冻结封装
+- 不需要从头写坐标 / 配色 / 组件逻辑，DeckKit 已经冻结封装
 - content.json 极小（~200 行），二次创作只改内容
 - 有 schema 校验 + density limit，几何错误在 apply 之前就被拦截
-- 同一 lib 反复使用时 token 开销削减 75-80%
+- 同一 DeckKit 反复使用时 token 开销削减 75-80%
 
 **使用方式**：
 
-1. 确认 `assets/libs/catalog.json` 中有目标 lib（如 `consulting-dark`）
-2. 复制 `assets/libs/examples/roadshow-build.mjs` 作为 build 入口模板
-3. 编写 `content.json`（参照同目录的 example + `assets/libs/schemas/` 下的 schema）
-4. `node validate-content.mjs content.json --lib <lib-id>` 校验
-5. `node build.mjs content.json > patch.json && s8fy pptx apply patch.json ...`
+1. 确认 `assets/deckkits/catalog.json` 中有目标 DeckKit（如 `consulting-dark`）
+2. 使用 `assets/deckkits/examples/roadshow-build.mjs` 生成 patch；需要定制时再复制为 `build.mjs` 并按当前位置修正 import 路径
+3. 编写 `content.json`（参照同目录的 example + `assets/deckkits/schemas/` 下的 schema）
+4. `node assets/deckkits/validate-content.mjs content.json --deckkit <deckkit-id>` 校验
+5. `node assets/deckkits/examples/roadshow-build.mjs content.json > patch.json && s8fy pptx apply patch.json ...`
 
-可用 lib 和支持的页型见 `assets/libs/catalog.json`；各页型 data 格式见
-`assets/libs/schemas/<slideType>.schema.json`。
+可用 DeckKit 和支持的页型见 `assets/deckkits/catalog.json`；各页型 data 格式见
+`assets/deckkits/schemas/<slideType>.schema.json`。
 
 ---
 
@@ -620,11 +620,11 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 
 `assets/examples/` 下有可直接复用的 patch / recipe / brand profile 范例。
 
-`assets/libs/` 下是冻结的设计系统库（lib-first 模式的核心资产）：
+`assets/deckkits/` 下是冻结的 DeckKit（DeckKit 模式的核心资产）：
 
-- `catalog.json` — 已注册 lib 索引（density limit、支持页型）
-- `core-primitives.lib.mjs` — 几何安全层 + op 工厂（所有 lib 共用）
-- `<theme>.lib.mjs` — 主题级视觉语言 + 页型函数
+- `catalog.json` — 已注册 DeckKit 索引（density limit、支持页型）
+- `core-primitives.kit.mjs` — 几何安全层 + op 工厂（所有 DeckKit 共用）
+- `<deckkit>.kit.mjs` — 主题级视觉语言 + 页型函数
 - `schemas/` — content manifest 校验 schema
 - `examples/` — 可直接运行的 content + build 示例
 

@@ -32,10 +32,10 @@
 Express 和 Studio 共用同一套生成器与 op，区别只在 **ceremony**：express 自动选默认、
 最小确认、自动闭环；studio 让你逐项控制。中途发现需要精控，随时按 §8 升级，不用重来。
 
-### lib-first 快路径（同 theme 二次创作）
+### DeckKit 快路径（同套件二次创作）
 
-如果目标 theme 已有冻结的设计系统库（检查 `assets/libs/catalog.json`），Express 可走
-更短的 **lib-first** 路径——不写 generator，只写 content manifest：
+如果目标场景已有冻结的 DeckKit（检查 `assets/deckkits/catalog.json`），Express 可走
+更短的 **DeckKit 模式** 路径：不写 generator，只写 content manifest。
 
 ```
 prompt → outline → content.json（~200 行纯数据）

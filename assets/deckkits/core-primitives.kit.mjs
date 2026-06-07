@@ -1,4 +1,4 @@
-// core-primitives.lib.mjs — 几何安全 + op 生成（所有风格库共用）
+// core-primitives.kit.mjs — 几何安全 + op 生成（所有 DeckKit 共用）
 // version: 0.1.0
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -218,20 +218,20 @@ export async function loadContent(path) {
 }
 
 // --- Content validation (delegates to validate-content logic) ---
-export function validateContent(content, { lib, throwOnError = false } = {}) {
+export function validateContent(content, { deckkit, throwOnError = false } = {}) {
   const catalog = JSON.parse(readFileSync(join(__dirname, 'catalog.json'), 'utf8'))
-  const entry = catalog.entries.find((e) => e.id === lib)
+  const entry = catalog.entries.find((e) => e.id === deckkit)
   const errors = []
   const warnings = []
 
-  if (!content?.meta?.theme) errors.push({ type: 'meta', message: 'meta.theme is required' })
-  if (lib && content?.meta?.theme && content.meta.theme !== lib) {
+  if (!content?.meta?.deckkit) errors.push({ type: 'meta', message: 'meta.deckkit is required' })
+  if (deckkit && content?.meta?.deckkit && content.meta.deckkit !== deckkit) {
     errors.push({
       type: 'meta',
-      message: `meta.theme "${content.meta.theme}" does not match lib "${lib}"`,
+      message: `meta.deckkit "${content.meta.deckkit}" does not match DeckKit "${deckkit}"`,
     })
   }
-  if (!entry) errors.push({ type: 'meta', message: `lib "${lib}" not found in catalog` })
+  if (!entry) errors.push({ type: 'meta', message: `DeckKit "${deckkit}" not found in catalog` })
 
   if (!Array.isArray(content?.slides) || content.slides.length === 0) {
     errors.push({ type: 'structure', message: 'slides must be a non-empty array' })

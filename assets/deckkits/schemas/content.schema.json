@@ -7,9 +7,9 @@
   "properties": {
     "meta": {
       "type": "object",
-      "required": ["theme"],
+      "required": ["deckkit"],
       "properties": {
-        "theme": { "type": "string" },
+        "deckkit": { "type": "string" },
         "style": { "type": "string" },
         "layout": { "type": "string" }
       },

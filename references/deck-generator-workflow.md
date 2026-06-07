@@ -462,24 +462,23 @@ slideKPI2(TOTAL)
 
 ---
 
-## 二次创作快路径（lib-first）
+## 二次创作快路径（DeckKit 模式）
 
-当目标 theme 已经有冻结的设计系统库（`assets/libs/<theme>.lib.mjs`），可以跳过从头写
-generator 的全流程，直接走 **content manifest → lib → patch** 的快路径：
+当目标场景已经有冻结的 DeckKit（`assets/deckkits/<deckkit>.kit.mjs`），可以跳过从头写
+generator 的全流程，直接走 **content manifest → DeckKit → patch** 的快路径：
 
 ```bash
 # 1. 只写内容清单（~200 行 JSON，不含坐标/配色/组件逻辑）
-cp assets/libs/examples/roadshow-content.json ./content.json
-#    参照 assets/libs/schemas/<slideType>.schema.json 改内容
+cp assets/deckkits/examples/roadshow-content.json ./content.json
+#    参照 assets/deckkits/schemas/<slideType>.schema.json 改内容
 
 # 2. 校验 content（schema + density limit，几何错误 apply 前拦截）
-node assets/libs/validate-content.mjs content.json --lib consulting-dark
+node assets/deckkits/validate-content.mjs content.json --deckkit consulting-dark
 
-# 3. 复制 build 入口（~18 行胶水）
-cp assets/libs/examples/roadshow-build.mjs ./build.mjs
+# 3. 生成 patch（需要定制时，可复制 example build 入口并修正 import 路径）
+node assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
 
-# 4. 生成 patch + apply
-node build.mjs content.json > patch.json
+# 4. apply + 质量门
 s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json
 s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
 s8fy pptx vision-check out.pptx --json
@@ -488,15 +487,15 @@ s8fy convert out.pptx --to png -o previews/ --overwrite --contact-sheet
 
 **与从头写 generator 对比**：
 
-| 维度       | 从头写 generator                     | lib-first 快路径                        |
-| ---------- | ------------------------------------ | --------------------------------------- |
-| 输入       | 250-400 行 JS（坐标+配色+组件+数据） | ~200 行 content.json（纯数据）          |
-| 需要理解   | op API + 坐标计算 + 视觉节奏         | schema 字段（有 description）           |
-| token 开销 | 全量                                 | 首次引用 lib 后缓存，二次创作仅 content |
-| 适用场景   | 新 theme / 深度定制布局              | 同 theme 的内容变体                     |
+| 维度       | 从头写 generator                     | DeckKit 快路径                              |
+| ---------- | ------------------------------------ | ------------------------------------------- |
+| 输入       | 250-400 行 JS（坐标+配色+组件+数据） | ~200 行 content.json（纯数据）              |
+| 需要理解   | op API + 坐标计算 + 视觉节奏         | schema 字段（有 description）               |
+| token 开销 | 全量                                 | 首次引用 DeckKit 后缓存，二次创作仅 content |
+| 适用场景   | 新 theme / 深度定制布局              | 同 theme 的内容变体                         |
 
-**何时不适合 lib-first**：新 theme 尚无 lib、需要修改布局/组件结构、需要新页型。
-这些场景仍应走完整 generator workflow + 冻结为新 lib。
+**何时不适合 DeckKit 模式**：目标场景尚无 DeckKit、需要修改布局/组件结构、需要新页型。
+这些场景仍应走完整 generator workflow + 冻结为新 DeckKit。
 
 ---
 

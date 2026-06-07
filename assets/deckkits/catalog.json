@@ -1,10 +1,10 @@
 {
-  "schemaVersion": "pptx-nova-lib-catalog/v1",
+  "schemaVersion": "pptx-nova-deckkit-catalog/v1",
   "entries": [
     {
       "id": "consulting-dark",
       "version": "0.1.0",
-      "path": "consulting-dark.lib.mjs",
+      "path": "consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
       "supportedSlideTypes": [

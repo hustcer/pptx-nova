@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// validate-content.mjs — schema + catalog density 校验入口
-// 用法: node validate-content.mjs content.json --lib consulting-dark
+// validate-content.mjs — schema + DeckKit density 校验入口
+// 用法: node validate-content.mjs content.json --deckkit consulting-dark
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -14,11 +14,11 @@ const argValue = (name, fallback = '') => {
 
 const contentPath = process.argv[2]
 if (!contentPath) {
-  console.error('Usage: node validate-content.mjs <content.json> --lib <lib-id>')
+  console.error('Usage: node validate-content.mjs <content.json> --deckkit <deckkit-id>')
   process.exit(1)
 }
 
-const libId = argValue('--lib', '')
+const deckkitId = argValue('--deckkit', '')
 const ignoreSoft = process.argv.includes('--ignore-soft-limits')
 
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -59,23 +59,23 @@ if (errors.length > 0) {
 }
 
 // --- Meta validation ---
-const theme = content.meta.theme
-if (!theme) {
-  errors.push({ type: 'meta', message: 'meta.theme is required' })
+const deckkit = content.meta.deckkit
+if (!deckkit) {
+  errors.push({ type: 'meta', message: 'meta.deckkit is required' })
 }
 
-const entry = catalog.entries.find((e) => e.id === (libId || theme))
+const entry = catalog.entries.find((e) => e.id === (deckkitId || deckkit))
 if (!entry) {
   errors.push({
     type: 'meta',
-    message: `Theme/lib "${libId || theme}" not found in catalog. Available: ${catalog.entries.map((e) => e.id).join(', ')}`,
+    message: `DeckKit "${deckkitId || deckkit}" not found in catalog. Available: ${catalog.entries.map((e) => e.id).join(', ')}`,
   })
 }
 
-if (libId && theme && libId !== theme) {
+if (deckkitId && deckkit && deckkitId !== deckkit) {
   errors.push({
     type: 'meta',
-    message: `content.meta.theme "${theme}" does not match --lib "${libId}". Use the same lib id for both.`,
+    message: `content.meta.deckkit "${deckkit}" does not match --deckkit "${deckkitId}". Use the same DeckKit id for both.`,
   })
 }
 

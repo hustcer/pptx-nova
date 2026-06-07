@@ -392,41 +392,90 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
 }
 
 function makePageTypes(builders, chrome, components, total) {
-  const { tx, box, icon, addSlide, setLine } = builders
+  const { ops, tx, box, icon, addSlide, setLine } = builders
   const { header, footer, sectionLabel, noteBox } = chrome
   const { metricCard, hBar, miniBar, pillarCard, smallInfo } = components
 
   function mckCoverSlide(s, data) {
     addSlide(s)
     box(s, nm(s, 'HeroBg'), 'rectangle', 0, 0, SLIDE_W, 3.04, C.primary)
-    box(s, nm(s, 'HeroDeep'), 'rectangle', 0, 0, 7.8, 3.04, C.navy)
-    box(s, nm(s, 'HeroBlue'), 'rectangle', 7.8, 0, 5.53, 3.04, C.blue)
+    ops.push({
+      op: 'set-shape-fill',
+      slide: s,
+      shape: { name: nm(s, 'HeroBg') },
+      fill: {
+        type: 'gradient',
+        angle: 0,
+        stops: [
+          { pos: 0, color: '001B35' },
+          { pos: 0.55, color: '00387A' },
+          { pos: 1, color: '0063A8' },
+        ],
+      },
+    })
+    box(s, nm(s, 'HeroCut'), 'right-triangle', 0, 2.625, SLIDE_W, 0.417, C.white)
+    ops.push({
+      op: 'set-shape-flip',
+      slide: s,
+      shape: { name: nm(s, 'HeroCut') },
+      horizontal: true,
+    })
     ;[
-      [8.72, 0.08, 2.88, '0E4F7E'],
-      [9.34, 0.44, 1.98, '116A9E'],
-      [9.84, 0.82, 1.12, '2A7FAF'],
-      [10.18, 1.18, 0.58, '3B8CBC'],
-    ].forEach(([x, y, d, color], i) => box(s, nm(s, `Ring${i}`), 'oval', x, y, d, d, color))
-    tx(s, nm(s, 'Eyebrow'), 0.82, 0.42, 3.4, 0.16, data.eyebrow, {
+      [8.48, 0.0, 4.74, 0.022],
+      [9.26, 0.48, 3.16, 0.028],
+      [9.94, 0.98, 1.78, 0.038],
+      [10.42, 1.42, 0.74, 0.05],
+    ].forEach(([x, y, d, alpha], i) => {
+      box(s, nm(s, `Ring${i}`), 'oval', x, y, d, d, C.white)
+      ops.push({
+        op: 'set-shape-fill',
+        slide: s,
+        shape: { name: nm(s, `Ring${i}`) },
+        fill: { type: 'solid', color: C.white, alpha },
+      })
+    })
+    ;[
+      [0.82, 2.64, 0.11],
+      [1.1, 2.64, 0.11],
+      [1.38, 2.64, 0.11],
+      [0.82, 2.4, 0.07],
+      [1.1, 2.4, 0.07],
+      [1.38, 2.4, 0.07],
+    ].forEach(([x, y, alpha], i) => {
+      box(s, nm(s, `HeroDot${i}`), 'oval', x, y, 0.045, 0.045, C.white)
+      ops.push({
+        op: 'set-shape-fill',
+        slide: s,
+        shape: { name: nm(s, `HeroDot${i}`) },
+        fill: { type: 'solid', color: C.white, alpha },
+      })
+    })
+    tx(s, nm(s, 'Eyebrow'), 0.82, 0.44, 3.9, 0.18, data.eyebrow, {
       name: FONT_EN,
-      size: '6.8pt',
+      size: '8.25pt',
       color: C.muted,
     })
-    box(s, nm(s, 'EyebrowRule'), 'rectangle', 0.83, 0.66, 4.95, 0.012, C.teal)
-    tx(s, nm(s, 'Title1'), 0.78, 1.08, 5.75, 0.46, data.title[0], {
+    box(s, nm(s, 'EyebrowRule'), 'rectangle', 0.83, 0.66, 4.95, 0.012, C.white)
+    ops.push({
+      op: 'set-shape-fill',
+      slide: s,
+      shape: { name: nm(s, 'EyebrowRule') },
+      fill: { type: 'solid', color: C.white, alpha: 0.2 },
+    })
+    tx(s, nm(s, 'Title1'), 0.78, 1.1, 5.85, 0.58, data.title[0], {
       name: FONT_EN,
-      size: '26pt',
+      size: '34.5pt',
       bold: true,
       color: C.white,
     })
-    tx(s, nm(s, 'Title2'), 0.78, 1.66, 5.75, 0.46, data.title[1], {
+    tx(s, nm(s, 'Title2'), 0.78, 1.72, 5.85, 0.58, data.title[1], {
       name: FONT_EN,
-      size: '26pt',
+      size: '34.5pt',
       bold: true,
       color: C.white,
     })
-    box(s, nm(s, 'Accent'), 'rectangle', 0.83, 2.26, 0.56, 0.035, C.sky)
-    tx(s, nm(s, 'Subtitle'), 0.82, 2.34, 7.1, 0.2, data.subtitle, {
+    box(s, nm(s, 'Accent'), 'rectangle', 0.83, 2.34, 0.56, 0.035, C.sky)
+    tx(s, nm(s, 'Subtitle'), 0.82, 2.43, 7.1, 0.24, data.subtitle, {
       name: FONT_EN,
       size: '9pt',
       color: C.line,

@@ -54,6 +54,33 @@
       "buildPath": "../../assets/deckkits/examples/mckinsey-blue-build.mjs",
       "expectedPath": "cases/mckinsey-blue/mixed-language/expected.json",
       "reviewPath": "cases/mckinsey-blue/mixed-language/review.md"
+    },
+    {
+      "id": "swiss-grid.golden-lecture",
+      "deckkit": "swiss-grid",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/swiss-grid-content.json",
+      "buildPath": "../../assets/deckkits/examples/swiss-grid-build.mjs",
+      "expectedPath": "cases/swiss-grid/golden-lecture/expected.json",
+      "reviewPath": "cases/swiss-grid/golden-lecture/review.md"
+    },
+    {
+      "id": "swiss-grid.stress-density",
+      "deckkit": "swiss-grid",
+      "kind": "stress",
+      "contentPath": "cases/swiss-grid/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/swiss-grid-build.mjs",
+      "expectedPath": "cases/swiss-grid/stress-density/expected.json",
+      "reviewPath": "cases/swiss-grid/stress-density/review.md"
+    },
+    {
+      "id": "swiss-grid.mixed-language",
+      "deckkit": "swiss-grid",
+      "kind": "mixed-language",
+      "contentPath": "cases/swiss-grid/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/swiss-grid-build.mjs",
+      "expectedPath": "cases/swiss-grid/mixed-language/expected.json",
+      "reviewPath": "cases/swiss-grid/mixed-language/review.md"
     }
   ]
 }

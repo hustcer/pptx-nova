@@ -42,7 +42,21 @@
               "mckLossDriverSlide",
               "mckPillarsSlide",
               "mckInitiativeRankingSlide",
-              "mckRoadmapSlide"
+              "mckRoadmapSlide",
+              "swissCoverSlide",
+              "swissQuoteSlide",
+              "swissTimelineSlide",
+              "swissPrinciplesSlide",
+              "swissPeopleGridSlide",
+              "swissProfileSlide",
+              "swissTypefaceSlide",
+              "swissGridTypesSlide",
+              "swissSystemSlide",
+              "swissStatementSlide",
+              "swissColumnSlide",
+              "swissProgressSlide",
+              "swissBrandGridSlide",
+              "swissClosingSlide"
             ]
           },
           "data": { "type": "object" },

@@ -403,6 +403,226 @@
         "Priority matrix supports four labelled bubbles in the current layout"
       ],
       "examples": ["examples/mckinsey-blue-loyalty-content.json"]
+    },
+    {
+      "id": "swiss-grid",
+      "version": "0.1.0",
+      "path": "swiss-grid.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "defaultFor": [
+        "swiss grid systems",
+        "Swiss International Typographic Style",
+        "design lecture",
+        "grid system lecture",
+        "瑞士网格系统",
+        "设计课程"
+      ],
+      "bestFor": [
+        "design education",
+        "typography lecture",
+        "visual design history",
+        "editorial systems",
+        "Swiss-style presentation"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal"],
+        "slideTypes": [
+          "swissCoverSlide",
+          "swissQuoteSlide",
+          "swissTimelineSlide",
+          "swissPrinciplesSlide",
+          "swissPeopleGridSlide",
+          "swissProfileSlide",
+          "swissTypefaceSlide",
+          "swissGridTypesSlide",
+          "swissSystemSlide",
+          "swissStatementSlide",
+          "swissColumnSlide",
+          "swissProgressSlide",
+          "swissBrandGridSlide",
+          "swissClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "swissCoverSlide",
+        "swissQuoteSlide",
+        "swissTimelineSlide",
+        "swissPrinciplesSlide",
+        "swissPeopleGridSlide",
+        "swissProfileSlide",
+        "swissTypefaceSlide",
+        "swissGridTypesSlide",
+        "swissSystemSlide",
+        "swissStatementSlide",
+        "swissColumnSlide",
+        "swissProgressSlide",
+        "swissBrandGridSlide",
+        "swissClosingSlide"
+      ],
+      "density": {
+        "soft": {
+          "titleMaxChars": 42,
+          "cardsMax": 8,
+          "kpisMax": 4,
+          "bulletsPerCardMax": 4,
+          "timelineStepsMax": 5,
+          "tableRowsMax": 8,
+          "profileRowsMax": 8
+        },
+        "hard": {
+          "titleMaxChars": 72,
+          "cardsMax": 8,
+          "kpisMax": 4,
+          "bulletsPerCardMax": 6,
+          "timelineStepsMax": 7,
+          "tableRowsMax": 10,
+          "profileRowsMax": 10
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "candidate pending full benchmark",
+        "pngReview": "contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-07",
+        "vision": {
+          "high": 0,
+          "medium": 0
+        },
+        "manualHardDefects": null,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-07",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "requiredKinds": ["golden", "stress", "mixed-language"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0
+          },
+          "cases": [
+            {
+              "caseId": "swiss-grid.golden-lecture",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/golden-lecture/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 213
+              },
+              "previews": {
+                "count": 14,
+                "expectedCount": 14,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 290298
+              },
+              "patchOps": 1554,
+              "p50TotalMs": 78.54
+            },
+            {
+              "caseId": "swiss-grid.stress-density",
+              "kind": "stress",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/stress-density/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/stress-density/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 48
+              },
+              "previews": {
+                "count": 4,
+                "expectedCount": 4,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 84454
+              },
+              "patchOps": 490,
+              "p50TotalMs": 77.39
+            },
+            {
+              "caseId": "swiss-grid.mixed-language",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/mixed-language/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/mixed-language/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 31
+              },
+              "previews": {
+                "count": 3,
+                "expectedCount": 3,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 52829
+              },
+              "patchOps": 283,
+              "p50TotalMs": 74.97
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Candidate DeckKit based on demos/67-swiss-grid-systems.pptx; run the visual benchmark before delivery promotion",
+        "Designed for white-background 16:9 lecture decks with short Swiss-style titles",
+        "Small footer and marker typography is intentionally sparse; avoid long legal footnotes"
+      ],
+      "examples": ["examples/swiss-grid-content.json"]
     }
   ]
 }

@@ -318,10 +318,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 280764
+                "bytes": 281430
               },
               "patchOps": 1854,
-              "p50TotalMs": 43.32
+              "p50TotalMs": 42.32
             },
             {
               "caseId": "mckinsey-blue.stress-density",
@@ -356,7 +356,7 @@
                 "bytes": 69114
               },
               "patchOps": 485,
-              "p50TotalMs": 37.82
+              "p50TotalMs": 39.27
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
@@ -391,7 +391,7 @@
                 "bytes": 112265
               },
               "patchOps": 667,
-              "p50TotalMs": 36.27
+              "p50TotalMs": 36.66
             }
           ],
           "blockers": []

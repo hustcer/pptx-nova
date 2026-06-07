@@ -683,7 +683,7 @@ function makePageTypes(builders, chrome, components, total) {
       4.8,
       'TOP CUSTOMER INTERESTS & PROGRAMME ALIGNMENT',
     )
-    box(s, nm(s, 'InterestBg'), 'rectangle', rightX, 4.28, 6.1, 1.56, C.surface)
+    box(s, nm(s, 'InterestBg'), 'rectangle', rightX, 4.28, 6.1, 1.78, C.surface)
     tx(s, nm(s, 'InterestRank'), rightX + 0.18, 4.45, 2.8, 0.14, 'RANKED BY CUSTOMER IMPORTANCE', {
       name: FONT_EN,
       size: '6.5pt',
@@ -691,37 +691,37 @@ function makePageTypes(builders, chrome, components, total) {
       color: C.muted,
     })
     ;(data.interests ?? []).forEach(([rank, interest, angle], i) => {
-      const y = 4.68 + i * 0.22
-      box(s, nm(s, `Rank${i}`), 'rectangle', rightX + 0.18, y, 0.18, 0.16, C.primary)
+      const y = 4.66 + i * 0.28
+      box(s, nm(s, `Rank${i}`), 'rectangle', rightX + 0.18, y, 0.22, 0.22, C.primary)
       tx(
         s,
         nm(s, `RankT${i}`),
-        rightX + 0.18,
-        y + 0.02,
-        0.18,
-        0.1,
+        rightX + 0.14,
+        y - 0.005,
+        0.3,
+        0.24,
         String(rank),
         {
           name: FONT_EN,
-          size: '6pt',
+          size: '7pt',
           bold: true,
           color: C.white,
         },
         'center',
       )
-      tx(s, nm(s, `Interest${i}`), rightX + 0.48, y, 1.7, 0.14, interest, {
+      tx(s, nm(s, `Interest${i}`), rightX + 0.58, y + 0.03, 1.7, 0.14, interest, {
         name: FONT_EN,
         size: '7.5pt',
         bold: true,
         color: C.text,
       })
-      tx(s, nm(s, `Angle${i}`), rightX + 2.45, y, 3.3, 0.14, `→ ${angle}`, {
+      tx(s, nm(s, `Angle${i}`), rightX + 2.55, y + 0.03, 3.3, 0.14, `→ ${angle}`, {
         name: FONT_EN,
         size: '7.1pt',
         color: C.teal,
       })
     })
-    tx(s, nm(s, 'InterestNote'), rightX + 0.18, 5.88, 5.7, 0.14, data.interestNote, {
+    tx(s, nm(s, 'InterestNote'), rightX + 0.18, 6.08, 5.7, 0.14, data.interestNote, {
       name: FONT_EN,
       size: '6.8pt',
       color: C.slate,

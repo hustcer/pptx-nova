@@ -73,7 +73,7 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 **第一级 — 选模式**（决定 ceremony：要不要逐项控制）：
 
 ```
-├── 简单 prompt / 要快 / 没给细节 ────────────→ Express（自动闭环）→ references/express-mode.md
+├── 简单 prompt / 要快 / 没给细节 ────────────→ Express（DeckKit-first 自动闭环）→ references/express-mode.md
 │   └── 目标 DeckKit 已存在？────────── 是 ───→ DeckKit 快路径 → §1.4
 ├── 要精控 / 自定义布局 / 客户演示级 / 投资人级 → Studio → §1 创建 + §9 视觉丰富度
 └── 改已有 .pptx ───────────────────────────→ Edit → §2 修改 + references/inspect-and-edit.md
@@ -91,18 +91,35 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 ```
 
 模式决定 **ceremony**（express 自动选默认、最小确认、自动闭环；studio 逐项精控；edit 改已有），
-任务类型决定走 **哪一节**。简单 prompt 默认走 **Express** —— 它共用同一套生成器与 op，只是把
-§6 完整工作流自动串起来、不逐项追问，详见 `references/express-mode.md`。每一类都有"黄金路径"
-（最少踩坑），下面给入口；详细 op 参数和示例在 `references/`。
+任务类型决定走 **哪一节**。简单 prompt 默认走 **Express** —— 它先尝试 DeckKit-first 路径，
+只有在没有合适 DeckKit、需要新页型或必须改组件结构时，才进入创建/扩展 DeckKit 的 generator
+开发流程，详见 `references/express-mode.md`。每一类都有"黄金路径"（最少踩坑），下面给入口；
+详细 op 参数和示例在 `references/`。
 
 ---
 
 ## §1 创建新 deck
 
+### 1.0 默认生产路径（DeckKit-first）
+
+创建型交付 deck 的默认顺序：
+
+1. 先查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
+   选择 DeckKit。
+2. 跑 `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate`
+   确认 golden / stress / mixed-language benchmark 已通过。
+3. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
+   只能用于草稿、迁移验证，或人工确认后的交付。
+4. 有可用 DeckKit 时，写 `content.json` → `validate-content.mjs` → `createDeck(content)`，
+   禁止回退到 `assets/examples/deck-generator-template.mjs` 作为最终交付生成器。
+5. 没有可用 DeckKit、缺页型或需要改组件结构时，先创建/扩展 DeckKit，再用 DeckKit 生产 deck。
+
+`deck-generator-template.mjs` 是新建或扩展 DeckKit 的开发起点，不是普通交付 deck 的默认路径。
+
 ### 1.1 极简最短路径（recipe-first）
 
-**首选用 recipe op**，它们已经把坐标 / 字体 / 排版预设好，比手算 `add-textbox`
-稳定一个数量级。可用 recipe：
+无可用 DeckKit、只做草稿、或需要很小范围手写页面时，**首选用 recipe op**，它们已经把坐标 /
+字体 / 排版预设好，比手算 `add-textbox` 稳定一个数量级。可用 recipe：
 
 | Recipe op                                                                                     | 用途                                     |
 | --------------------------------------------------------------------------------------------- | ---------------------------------------- |
@@ -117,8 +134,8 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 **最简流程**：写 `patch.json`（envelope + ops，recipe 与 patch op 可混用）→
 `--dry-run --json` 预演（读 `semanticChanges[]` / `visualRisks[]`）→ 去掉 `--dry-run`
 落盘（得 `out.pptx` + sidecar）→ `convert --to png` 复核。多步默认带 `--daemon`
-（auto-spawn，见 §6）。**完整自动化黄金路径**（prompt → outline → JS 生成器 →
-vision-check 闭环 → 丰富度门）见 **`references/express-mode.md` §2**。
+（auto-spawn，见 §6）。**完整自动化黄金路径**（prompt → outline → DeckKit/content
+或 DeckKit 扩展 → vision-check 闭环 → 丰富度门）见 **`references/express-mode.md` §2**。
 
 > Recipe 的完整 schema（含 `theme`、`level`、`subtitle` 等可选字段）参见
 > `references/recipes.md`。
@@ -199,10 +216,12 @@ content.json (变化层，每次只改这一份)
 **使用方式**：
 
 1. 确认 `assets/deckkits/catalog.json` 中有目标 DeckKit（如 `consulting-dark`）
-2. 使用 `assets/deckkits/examples/roadshow-build.mjs` 生成 patch；需要定制时再复制为 `build.mjs` 并按当前位置修正 import 路径
+2. `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <deckkit-id> --target candidate`
+   检查 benchmark、catalog readiness、quality metadata 和 known blocking limits
 3. 编写 `content.json`（参照同目录的 example + `assets/deckkits/schemas/` 下的 schema）
 4. `node assets/deckkits/validate-content.mjs content.json --deckkit <deckkit-id>` 校验
-5. `node assets/deckkits/examples/roadshow-build.mjs content.json > patch.json && s8fy pptx apply patch.json ...`
+5. 使用 `assets/deckkits/examples/roadshow-build.mjs` 生成 patch；需要定制时再复制为 `build.mjs` 并按当前位置修正 import 路径
+6. `node assets/deckkits/examples/roadshow-build.mjs content.json > patch.json && s8fy pptx apply patch.json ...`
 
 可用 DeckKit 和支持的页型见 `assets/deckkits/catalog.json`；各页型 data 格式见
 `assets/deckkits/schemas/<slideType>.schema.json`。
@@ -500,9 +519,10 @@ titleOnly / objText / twoObj` 等 OOXML layout，直接 `add-slide layout: { typ
   200-300 个 ops（top bar / accent vertical bar / eyebrow / colored card top
   bars / delta pills / highlight callouts / hero closing），见 §9 与
   `references/rich-deck-patterns.md`
-- **超过 100 ops 时手写 JSON 不可维护** — 上 JS 生成器（共享 helpers + 全局
-  调色板 `C` + `nm(slide, base)` 命名 helper + slide 函数循环）。可直接复制
-  `assets/examples/deck-generator-template.mjs` 起步，详见
+- **超过 100 ops 时手写 JSON 不可维护** — 先选可用 DeckKit；没有可用 DeckKit、
+  需要新页型或要改组件结构时，再用 JS 生成器抽取/扩展 DeckKit（共享 helpers +
+  全局调色板 `C` + `nm(slide, base)` 命名 helper + slide 函数循环）。可直接复制
+  `assets/examples/deck-generator-template.mjs` 作为开发起点，详见
   `references/deck-generator-workflow.md`
 - **shape 命名必须双向走 `nm()` helper** — `nm(s, "KpiBg")` 生成真名
   `"S2_KpiBg"`，但若引用 `fill(s, { name: "KpiBg" })` 用裸名就命不中。所有
@@ -605,7 +625,7 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 | `references/patch-ops-cheatsheet.md`     | 写任何 patch 之前都该扫一眼，按场景找 op                                    |
 | `references/recipes.md`                  | 用 recipe op 创建 deck 之前，看完整 schema 与示例                           |
 | `references/rich-deck-patterns.md`       | 要做"客户演示级"丰富 deck 时的视觉元素清单与起手势                          |
-| `references/deck-generator-workflow.md`  | 超过 100 ops 的 deck — JS 生成器模板、helpers、命名规范                     |
+| `references/deck-generator-workflow.md`  | 创建/扩展 DeckKit 时的 JS 生成器模板、helpers、命名规范                     |
 | `references/theme-packs.md`              | themePack / stylePack catalog、`list-themes`、`swap-theme`、`extract-style` |
 | `references/template-library.md`         | brand/layout/deck/chart/icon 资产目录、catalog 和选择规则                   |
 | `references/inspect-and-edit.md`         | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |
@@ -703,7 +723,7 @@ KPI 顶部色条 / delta pill / callout / hero closing），见 §9.1-9.2。**�
 
 > **耗时基准**:
 >
-> - 从零探索样本(10 页客户演示级 deck, 1105 ops 实测): 总耗时 ~20 min，分布
+> - 从零抽取 DeckKit 样本(10 页客户演示级 deck, 1105 ops 实测): 总耗时 ~20 min，分布
 >   ≈ 大纲提炼 15% / JS 生成器编写 **45%(最耗时)** / dry-run gate 15% / PNG
 >   验证 25%。
 > - 模板熟练样本(8 页橙色 roadmap deck, 893 ops 实测): 总耗时 ~6.6 min，分布
@@ -715,12 +735,11 @@ KPI 顶部色条 / delta pill / callout / hero closing），见 §9.1-9.2。**�
 > 4-across / 3-across / 2×2 网格都走 `grid()`, textbox 高度都走
 > `txH(sizePt, lines)`,坐标手算从最大返工源变成 0。
 
-> **超过 ~100 ops 必须上 JS 生成器**：手写 800 行 JSON envelope 不可维护，换主
-> 题色要 grep 全文 replace，改字号节奏要逐页修。用 JS 生成器把"数据 + 模板"显
-> 式拆开：全局调色板 `C` 对象 + `nm(slide, base)` 命名 helper + slide 函数循环
-> 构造，换色 / 改字号 / 加 KPI 卡都是 1 行修改。可直接复制
-> `assets/examples/deck-generator-template.mjs` 起步，详见
-> `references/deck-generator-workflow.md`。
+> **超过 ~100 ops 且没有可用 DeckKit 时，先创建/扩展 DeckKit**：手写 800 行
+> JSON envelope 不可维护，换主题色要 grep 全文 replace，改字号节奏要逐页修。
+> 用 JS 生成器把"数据 + 模板"显式拆开，再冻结为 DeckKit；之后交付 deck 只写
+> content manifest。可直接复制 `assets/examples/deck-generator-template.mjs`
+> 作为开发起点，详见 `references/deck-generator-workflow.md`。
 
 ### 9.5 7 页 deck 推荐结构
 
@@ -899,10 +918,10 @@ dry-run 通过只是"语义对"，vision-check 清零是"几何稳"，PNG 过清
 - **先选模式**：简单 prompt → Express（`references/express-mode.md`，自动闭环、最小确认）；
   要精控 / 客户演示级 → Studio（§1 + §9）；改已有 deck → Edit（§2）。三者共用同一套 op。
 - 草稿 / 速记：能用 recipe 就别用 patch。
-- **客户演示级 deck（默认）：recipe 打底、必须混搭 200+ 个 `add-shape` /
-  `add-textbox` patch ops 才能"够丰富"**，详见 §9。
-- **超过 ~100 ops 必须上 JS 生成器**（复制 `assets/examples/deck-generator-template.mjs`），
-  详见 `references/deck-generator-workflow.md`。
+- **客户演示级 deck（默认）：先选可用 DeckKit；没有可用 DeckKit 时，先创建/扩展
+  DeckKit，再用 DeckKit 生产交付 deck**，详见 §1.0 / §1.4。
+- **超过 ~100 ops 且无可用 DeckKit 时**，复制 `assets/examples/deck-generator-template.mjs`
+  只是新建/扩展 DeckKit 的开发起点，不是普通交付 deck 的默认路径。
 - 改已有 deck：能用 layout selector 就别算坐标，能用 placeholder 就别 add-textbox。
 - 永远把 dry-run 当成必经环节，把 sidecar 当成时光机。第二次 apply 同路径要加
   `--overwrite`；第二次 `convert` 同 PNG 目录也要加 `--overwrite`。

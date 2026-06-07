@@ -1,8 +1,10 @@
-# Deck Generator Workflow —— 用 JS 生成器写 200+ ops deck 的工程化方法
+# Deck Generator Workflow —— 创建/扩展 DeckKit 时的 JS 生成器工程化方法
 
-> 本文档解决的问题：**当 patch.json 超过 200 ops 时手写 JSON 就崩了**。下面给一
-> 套 "用 JS 生成 patch.json" 的标准模板和工作流，把 deck 的"数据 + 模板"显式
-> 拆开，让换主题色、换内容、换字号节奏各自 1 行修改解决。
+> 本文档解决的问题：**当没有可用 DeckKit、需要新页型或需要改组件结构时**，如何用
+> JS 生成器把视觉语言和页型抽取出来，再冻结成 DeckKit。普通交付 deck 应优先走
+> `content manifest → DeckKit → patch`；不要把临时 generator 当作最终交付默认路径。
+> 下面给一套 "用 JS 生成 patch.json" 的标准模板和工作流，把 deck 的"数据 + 模板"
+> 显式拆开，让换主题色、换内容、换字号节奏各自 1 行修改解决。
 >
 > 出处：实战做 8 页 / 775 ops 橙色 deck 后沉淀。模板代码在
 > `assets/examples/deck-generator-template.mjs`，可直接 `cp` 改用。
@@ -20,7 +22,8 @@
 | selector 命中率                   | shape name 散落，typo 不报错 | `nm(s, "X")` 双向       |
 | 维护性                            | 800 行 JSON 难审查           | 250 行 JS 可循环 / 函数 |
 
-**判断：deck 超过 ~100 ops 就该上生成器**。规模越大收益越大。
+**判断：deck 超过 ~100 ops 且没有可用 DeckKit 时，先上生成器抽取/扩展 DeckKit**。
+规模越大收益越大；冻结后后续交付回到 DeckKit/content 路径。
 
 ---
 

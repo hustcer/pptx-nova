@@ -57,10 +57,16 @@ process.stdout.write(JSON.stringify(patch))
 
 1. `validate-content` 通过，只有可解释的非阻塞 warning
 2. `node build.mjs > patch.json` 可重复生成稳定 patch
-3. `s8fy pptx apply --dry-run --json` 通过
-4. `s8fy pptx vision-check out.pptx --json` 的 high/medium 为 0
-5. PNG contact sheet 和逐页检查通过
-6. catalog 记录版本、验证命令、示例路径和已知限制
+3. DeckKit benchmark 的 golden / stress / mixed-language cases 全部通过
+4. `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate` 通过
+5. `s8fy pptx apply --dry-run --json` 通过
+6. `s8fy pptx vision-check out.pptx --json` 的 high/medium 为 0
+7. PNG contact sheet 和逐页检查通过
+8. catalog 记录版本、验证命令、示例路径和已知限制
+
+当前 readiness audit 会明确报告 candidate / delivery / default 三个结论。
+在 benchmark CLI 尚未接入 vision/PNG 真实 gate 前，不要把 DeckKit 自动提升为
+`production` 或 `default`。
 
 ## 新增 DeckKit 流程
 

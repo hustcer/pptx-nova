@@ -1,8 +1,8 @@
 # Express Mode —— 简单 prompt 一键出客户演示级 deck
 
 > 用户给一句话 / 几句话的 prompt 时的**默认创建路径**：自动走完
-> outline → 选风格 → JS 生成器 → dry-run → vision-check 闭环 → PNG 复核，
-> 最小确认、零手算坐标。
+> outline → 选择可用 DeckKit → content manifest → dry-run → vision-check 闭环 →
+> PNG 复核，最小确认、零手算坐标。
 >
 > **express ≠ 草稿**：它默认也按客户演示级（200-300 ops）产出，只是把
 > SKILL §6 的完整工作流自动串起来、不逐项追问。要草稿请明说「简单/速记版」。
@@ -10,8 +10,8 @@
 ## 目录
 
 1. [何时用 Express（vs Studio / Edit）](#1-何时用-expressvs-studio--edit)
-2. [Express 黄金路径（自动化 9 步）](#2-express-黄金路径自动化-9-步)
-3. [prompt → outline → 生成器](#3-prompt--outline--生成器)
+2. [Express 黄金路径（自动化 11 步）](#2-express-黄金路径自动化-11-步)
+3. [prompt → outline → DeckKit/content](#3-prompt--outline--deckkitcontent)
 4. [风格选择（themePack / stylePack）](#4-风格选择themepack--stylepack)
 5. [质量门与丰富度](#5-质量门与丰富度)
 6. [vision-check 自动闭环](#6-vision-check-自动闭环)
@@ -29,8 +29,9 @@
 | 指定品牌 profile / 要做品牌合规检查                    | **Studio**  | SKILL §4 + `recipes.md`（apply-corporate-rebrand） |
 | 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**    | SKILL §2 + `inspect-and-edit.md`                   |
 
-Express 和 Studio 共用同一套生成器与 op，区别只在 **ceremony**：express 自动选默认、
-最小确认、自动闭环；studio 让你逐项控制。中途发现需要精控，随时按 §8 升级，不用重来。
+Express 和 Studio 共用同一套 DeckKit / generator / op 基础设施，区别只在
+**ceremony**：express 自动选默认、最小确认、自动闭环；studio 让你逐项控制。
+中途发现需要精控，随时按 §8 升级，不用重来。
 
 ### DeckKit 快路径（同套件二次创作）
 
@@ -44,55 +45,69 @@ prompt → outline → content.json（~200 行纯数据）
   → dry-run → vision-check → PNG
 ```
 
-判断条件：`catalog.json` 中存在匹配的 `id` 且其 `supportedSlideTypes` 覆盖
-outline 所需的全部页型。不满足时回退到标准 generator 路径。
+判断条件：`catalog.json` 中存在匹配的 `id`，`supportedSlideTypes` 覆盖 outline
+所需的全部页型，且 readiness audit 通过。交付型自动选择只允许
+`readiness in ["production", "default"]`；`candidate` 只能用于草稿、迁移验证，
+或人工确认后的交付。不满足时进入创建/扩展 DeckKit 流程，而不是把通用 generator
+作为最终交付路径。
 
 详见 `deck-generator-workflow.md`「二次创作快路径」和 SKILL.md §1.4。
 
 ---
 
-## 2. Express 黄金路径（自动化 9 步）
+## 2. Express 黄金路径（自动化 11 步）
 
 ```bash
 # 0. 从 prompt 提炼 deckBrief（主题/受众/页数/语气/数据/风格）→ 见 §3、§7
-# 1. 复制生成器模板起步
-cp skills/pptx-nova/assets/examples/deck-generator-template.mjs generate.mjs
-#    按 §3 改三处：theme/style 参数 / slide 函数内容 / TOTAL 页数
+# 1. 选择 DeckKit，并先跑 readiness audit
+node tools/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target candidate
 
-# 2. 生成 patch（生成器输出 { schemaVersion:1, ops } envelope）
-node generate.mjs --theme corporate-blue --style consulting > patch.json
+# 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
+cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
+#    按 outline 改 slides[].type 和 slides[].data
 
-# 3. 丰富度自检（客户演示级目标 ≥200 ops，见 §5）
+# 3. 校验 content（schema + density + fit diagnostics）
+node skills/pptx-nova/assets/deckkits/validate-content.mjs \
+  content.json \
+  --deckkit consulting-dark
+
+# 4. 生成 patch
+node skills/pptx-nova/assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
+
+# 5. 丰富度自检（客户演示级目标 ≥200 ops，见 §5）
 jq '.ops | length' patch.json
 
-# 4. dry-run 预演（多步默认 --daemon；--explain 拿字段约束）
+# 6. dry-run 预演（多步默认 --daemon；--explain 拿字段约束）
 s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | save dry.json
 #    读 semanticChanges[] / visualRisks[] / resolvedSelectors[]
 
-# 5. 自动修复：合并 autoRetry==true 的 fixPatch 重跑 dry-run（见 troubleshooting.md）
+# 7. 自动修复：合并 autoRetry==true 的 fixPatch 重跑 dry-run（见 troubleshooting.md）
 #    ambiguous selector / fuzzy enum / RGB 规整 等机器有信心的修复直接合
 
-# 6. 真 apply（去掉 --dry-run，留 sidecar out.pptx.s8fy.json）
+# 8. 真 apply（去掉 --dry-run，留 sidecar out.pptx.s8fy.json）
 s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
 
-# 7. 几何自检闭环（render-free，见 §6）
+# 9. 几何自检闭环（render-free，见 §6）
 s8fy pptx vision-check out.pptx --json | save vision.json
 #    合并 autoRetry 的 fixPatch → 人工处理剩余 medium/high → 再 vision-check 到 medium/high 清零
 
-# 8. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 SKILL §9.6）
+# 10. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 SKILL §9.6）
 s8fy convert out.pptx --to png -o previews/ --overwrite
 #    逐页检查字符重叠、换行压字、截断、页脚/来源撞正文
 
-# 9. 产出物：out.pptx + patch.json + dry.json + vision.json + previews/
+# 11. 产出物：out.pptx + content.json + patch.json + dry.json + vision.json + previews/
 ```
 
 三道闸门职责不重叠：**dry-run（语义）→ vision-check（几何，可自动闭环）→ PNG（像素）**。
 创建型 deck 的 `vision-check` high/medium 都必须为 0；任何一道不过都回去改对应
-slide 函数重跑，不要跳步、不要在没过闸门时声称完成。
+DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称完成。
+
+如果 readiness audit 没有合适 DeckKit、outline 缺页型或需要改组件结构，先进入
+`deck-generator-workflow.md` 创建/扩展 DeckKit；不要把临时 generator 当作最终交付路径。
 
 ---
 
-## 3. prompt → outline → 生成器
+## 3. prompt → outline → DeckKit/content
 
 ### 3.1 outline 中间表示
 
@@ -114,9 +129,12 @@ outline 顶层还带 `out`（输出路径）和 `themePack` / `stylePack`（如 
 `slideChart` / `slideTable` / `slidePillars`（多列支柱）/ `slideWorkflow` / `slideHero`（全色收尾），
 挑最接近的页型改内容。
 
-### 3.2 套生成器模板（只改三处）
+### 3.2 无可用 DeckKit 时：套生成器模板扩展 DeckKit
 
-复制 `assets/examples/deck-generator-template.mjs` 后，按 outline 改这三处即可，**不要重写 helper**：
+只有 readiness audit 没有合适 DeckKit、outline 缺页型或需要改组件结构时，才复制
+`assets/examples/deck-generator-template.mjs`。目标是抽取/扩展 DeckKit，再回到
+content manifest 生产路径；不要把临时 generator 当作最终交付路径。按 outline 改这三处即可，
+**不要重写 helper**：
 
 1. **theme/style 选择** —— 默认 `--theme corporate-blue --style consulting`；可换成
    `consulting-grey` / `startup-vibrant` / `academic-formal` / `gov-blue` /
@@ -217,16 +235,16 @@ express 的核心是**不像 ppt-master 那样逐项确认**（它要 8 次 BLOC
 
 ## 8. 升级信号：何时转 Studio / Edit
 
-express 跑到一半发现下列任一信号，就升级（生成器与 op 共用，无需重来）：
+express 跑到一半发现下列任一信号，就升级（DeckKit / generator / op 基础设施共用，无需重来）：
 
-| 信号                                       | 升级到     | 去向                                    |
-| ------------------------------------------ | ---------- | --------------------------------------- |
-| 要像素级定位 / 自由布局 / 演示动效拟态     | **Studio** | SKILL §1.2 + `patch-ops-cheatsheet.md`  |
-| 要自定义 chart 样式 / 二轴 combo / chartEx | **Studio** | `charts.md`                             |
-| 要套已有品牌 profile / 做品牌合规          | **Studio** | SKILL §4 + `recipes.md`                 |
-| 要把一份 JSON/CSV 批量套进模板             | 数据驱动   | SKILL §3 + `data-driven.md`             |
-| 用户改口"在这份已有 deck 上改/加"          | **Edit**   | SKILL §2 + `inspect-and-edit.md`        |
-| op 数已超 ~100、手维护吃力                 | 仍 Express | 继续用生成器（这正是它的用途，见 §3.2） |
+| 信号                                       | 升级到     | 去向                                          |
+| ------------------------------------------ | ---------- | --------------------------------------------- |
+| 要像素级定位 / 自由布局 / 演示动效拟态     | **Studio** | SKILL §1.2 + `patch-ops-cheatsheet.md`        |
+| 要自定义 chart 样式 / 二轴 combo / chartEx | **Studio** | `charts.md`                                   |
+| 要套已有品牌 profile / 做品牌合规          | **Studio** | SKILL §4 + `recipes.md`                       |
+| 要把一份 JSON/CSV 批量套进模板             | 数据驱动   | SKILL §3 + `data-driven.md`                   |
+| 用户改口"在这份已有 deck 上改/加"          | **Edit**   | SKILL §2 + `inspect-and-edit.md`              |
+| op 数已超 ~100、手维护吃力                 | 仍 Express | 先选 DeckKit；无匹配时扩展 DeckKit（见 §3.2） |
 
 > Express 不是能力天花板，是**默认省事路径**。它产出的就是原生可编辑 PPTX + sidecar，
 > 任何时候都能用 Edit 模式继续 inspect / patch / 回滚。

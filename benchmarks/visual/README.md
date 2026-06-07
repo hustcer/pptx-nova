@@ -54,6 +54,19 @@ The first CLI version runs validate/build gates and writes `patch.json`,
 Vision and PNG gates are recorded as skipped until the s8fy dry-run/vision and
 preview stages are wired in.
 
+After benchmark output exists, run the readiness audit:
+
+```bash
+node tools/pptx-nova-deckkit-readiness.mjs \
+  --deckkit consulting-dark \
+  --target candidate
+```
+
+The audit reads `catalog.json`, `index.json`, and the generated
+`summary.json` files. It reports whether the DeckKit is ready for candidate,
+delivery, and default use. Delivery/default should remain blocked while vision
+and PNG gates are still recorded as skipped.
+
 Current consulting-dark cases:
 
 - `golden-roadshow` validates the normal delivery path.

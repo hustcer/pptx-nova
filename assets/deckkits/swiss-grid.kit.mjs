@@ -158,12 +158,12 @@ function makePageTypes(p, chrome) {
     )
     p.hRule(s, nm(s, 'EyebrowRule'), 0.62, 1.02, 1.24, C.black, 0.012)
     p.dot(s, nm(s, 'RedDot'), 9.52, 0.98, 0.64, C.red)
-    p.tx(s, nm(s, 'Title'), 0.62, 4.6, 5.2, 0.72, data.title, font(48, C.text, false))
+    p.tx(s, nm(s, 'Title'), 0.62, 4.5, 6.8, 0.95, data.title, font(48, C.text, false))
     p.tx(
       s,
       nm(s, 'Subtitle'),
       0.62,
-      5.55,
+      5.62,
       5.8,
       0.44,
       data.subtitle,
@@ -973,7 +973,7 @@ function makePageTypes(p, chrome) {
       0.55,
       1.6,
       0.2,
-      'P · 14 · CLOSING',
+      data.closingMark ?? `P · ${pad2(s + 1)} · CLOSING`,
       font(8.5, C.faint, false, FONT_EN),
     )
     p.hRule(s, nm(s, 'ClosingMarkRule'), 0.65, 0.77, 1.2, C.black, 0.012)

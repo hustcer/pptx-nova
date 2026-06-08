@@ -167,6 +167,16 @@ export function createOps() {
       font: withFontFloor(font),
     })
 
+  const addRun = (s, name, paragraph, text, font) =>
+    ops.push({
+      op: 'add-run',
+      slide: s,
+      shape: { name },
+      paragraph,
+      text,
+      ...(font ? { font: withFontFloor(font) } : {}),
+    })
+
   const pAlign = (s, name, alignment, paragraph = 0) =>
     ops.push({ op: 'set-paragraph-format', slide: s, shape: { name }, paragraph, alignment })
 
@@ -205,6 +215,7 @@ export function createOps() {
     textbox,
     setText,
     runFont,
+    addRun,
     pAlign,
     tx,
     fillText,

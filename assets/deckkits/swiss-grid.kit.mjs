@@ -1,12 +1,10 @@
 // swiss-grid.kit.mjs - Swiss International Typographic Style DeckKit
 // version: 0.1.0
-import { createOps, grid, nm, SLIDE_W } from './core-primitives.kit.mjs'
+import { createOps, grid, nm } from './core-primitives.kit.mjs'
 
 const C = {
   red: 'E2231A',
-  redDk: 'B91C16',
   black: '111111',
-  nearBlack: '1D1D1B',
   text: '171717',
   text2: '3A3A3A',
   muted: '777777',
@@ -15,7 +13,6 @@ const C = {
   grid: 'C9C9C9',
   gridLite: 'E7E7E7',
   panel: 'F4F4F4',
-  pageBg: 'FFFFFF',
   white: 'FFFFFF',
 }
 
@@ -23,10 +20,13 @@ const ACCENTS = [C.red, C.black, C.muted]
 const FONT_CN = 'Arial'
 const FONT_EN = 'Arial'
 const MX = 0.65
-const CW = SLIDE_W - MX * 2
+const TEXT_INSET = 0.1
+const FULL_GRID_W = 13.325
+const FULL_GRID_H = 7.492
 
 const pad2 = (value) => String(value).padStart(2, '0')
 const asLines = (value) => (Array.isArray(value) ? value.join('\n') : String(value ?? ''))
+const limitItems = (items, max) => (items ?? []).slice(0, max)
 const font = (size, color = C.text, bold = false, name = FONT_CN) => ({
   name,
   size: `${size}pt`,
@@ -47,6 +47,8 @@ function makeSwissOps() {
     p.setLine(s, name, lineColor, '0.75pt')
   }
   const dot = (s, name, x, y, d, color = C.red) => p.box(s, name, 'oval', x, y, d, d, color)
+  const rotate = (s, name, degrees) =>
+    p.ops.push({ op: 'set-shape-rotation', slide: s, shape: { name }, degrees })
   const richTx = (s, name, x, y, w, h, runs, align) => {
     const safeRuns = runs.filter((run) => run.text)
     if (safeRuns.length === 0) return p.tx(s, name, x, y, w, h, '', font(9, C.text), align)
@@ -58,7 +60,7 @@ function makeSwissOps() {
     return name
   }
 
-  return { ...p, line, hRule, vRule, strokeRect, dot, richTx }
+  return { ...p, line, hRule, vRule, strokeRect, dot, rotate, richTx }
 }
 
 function makeChrome(p, total) {
@@ -98,15 +100,11 @@ function makeChrome(p, total) {
         font(11, C.muted, false, FONT_EN),
       )
     }
-    p.hRule(s, nm(s, 'KickerRule'), MX, y + 1.08, 0.58, C.red, 0.026)
+    p.hRule(s, nm(s, 'KickerRule'), MX + TEXT_INSET, y + 1.08, 0.58, C.red, 0.026)
     return y + 1.52
   }
 
-  const frame = (s) => {
-    p.hRule(s, nm(s, 'FrameTop'), MX, 6.72, CW, C.gridLite, 0.012)
-  }
-
-  return { pageMark, title, frame }
+  return { pageMark, title }
 }
 
 function modularGrid(p, s, name, x, y, w, h, cols, rows, color = C.grid) {
@@ -145,7 +143,7 @@ function tinyGrid(p, s, name, x, y, w, h, cols, rows, options = {}) {
 function makePageTypes(p, chrome) {
   function swissCoverSlide(s, data) {
     p.addSlide(s)
-    modularGrid(p, s, 'CoverGrid', 0.0, 0.0, 13.325, 7.492, 10, 8, C.grid)
+    modularGrid(p, s, 'CoverGrid', 0.0, 0.0, FULL_GRID_W, FULL_GRID_H, 10, 8, C.grid)
     p.tx(
       s,
       nm(s, 'Eyebrow'),
@@ -156,7 +154,7 @@ function makePageTypes(p, chrome) {
       data.eyebrow ?? 'A LECTURE · 2026',
       font(10.5, C.muted, false, FONT_EN),
     )
-    p.hRule(s, nm(s, 'EyebrowRule'), 0.62, 1.02, 1.24, C.black, 0.012)
+    p.hRule(s, nm(s, 'EyebrowRule'), 0.62 + TEXT_INSET, 1.02, 1.24, C.black, 0.012)
     p.dot(s, nm(s, 'RedDot'), 9.52, 0.98, 0.64, C.red)
     p.tx(s, nm(s, 'Title'), 0.62, 4.5, 6.8, 0.95, data.title, font(48, C.text, false))
     p.tx(
@@ -191,34 +189,44 @@ function makePageTypes(p, chrome) {
       s,
       nm(s, 'QuoteMark'),
       1.02,
-      1.16,
-      0.9,
-      0.8,
+      1.48,
+      1.28,
+      1.24,
       data.mark ?? '«',
-      font(42, C.red, true, FONT_EN),
+      font(74, C.red, true, FONT_EN),
     )
     p.tx(
       s,
       nm(s, 'Quote'),
-      4.25,
-      1.3,
-      4.7,
-      1.05,
+      3.28,
+      1.58,
+      4.9,
+      0.95,
       asLines(data.quote),
-      font(14, C.text, true, FONT_EN),
+      font(25, C.text, false, FONT_EN),
     )
     p.tx(
       s,
       nm(s, 'Body'),
-      4.25,
-      2.65,
-      4.45,
-      0.95,
+      3.28,
+      3.1,
+      4.98,
+      1.48,
       asLines(data.body),
-      font(8.5, C.muted, false, FONT_EN),
+      font(15.2, C.muted, false, FONT_EN),
     )
-    p.tx(s, nm(s, 'Author'), 4.25, 4.1, 2.8, 0.22, data.author, font(8, C.text, true, FONT_EN))
-    p.tx(s, nm(s, 'Source'), 4.25, 4.34, 3.4, 0.2, data.source, font(7.6, C.muted, false, FONT_EN))
+    p.hRule(s, nm(s, 'AuthorRule'), 3.28 + TEXT_INSET, 5.58, 0.62, C.black, 0.016)
+    p.tx(s, nm(s, 'Author'), 3.28, 5.82, 3.2, 0.26, data.author, font(13.2, C.text, true, FONT_EN))
+    p.tx(
+      s,
+      nm(s, 'Source'),
+      3.28,
+      6.12,
+      3.7,
+      0.22,
+      data.source,
+      font(10.4, C.muted, false, FONT_EN),
+    )
   }
 
   function swissTimelineSlide(s, data) {
@@ -228,28 +236,23 @@ function makePageTypes(p, chrome) {
     const steps = data.steps ?? []
     const cols = grid(Math.max(steps.length, 1), 0.28, 1.25, 10.25)
     const lineCenterY = 3.12
-    const lineH = 0.018
+    const lineH = 0.008
     const lineX = 1.35
-    const arrowX = 12.47
+    const arrowX = 12.36
+    const arrowW = 0.18
+    const arrowH = 0.14
     p.hRule(
       s,
       nm(s, 'TimelineLine'),
       lineX,
       lineCenterY - lineH / 2,
-      arrowX - lineX,
+      arrowX - lineX + 0.006,
       C.black,
       lineH,
     )
-    p.box(
-      s,
-      nm(s, 'TimelineArrow'),
-      'right-arrow',
-      arrowX - 0.02,
-      lineCenterY - 0.075,
-      0.28,
-      0.15,
-      C.black,
-    )
+    const arrowName = nm(s, 'TimelineArrowHead')
+    p.box(s, arrowName, 'triangle', arrowX, lineCenterY - arrowH / 2, arrowW, arrowH, C.black)
+    p.rotate(s, arrowName, 90)
     steps.forEach((step, i) => {
       const col = cols[i]
       const accent = step.accent ?? (i === steps.length - 1 ? C.red : C.black)
@@ -266,7 +269,7 @@ function makePageTypes(p, chrome) {
         col.w,
         0.28,
         step.year,
-        font(accent === C.red ? 18 : 18, accent, true, FONT_EN),
+        font(18, accent, true, FONT_EN),
         'center',
       )
       p.tx(
@@ -346,9 +349,9 @@ function makePageTypes(p, chrome) {
         col.x,
         y,
         col.w,
-        0.42,
+        0.58,
         item.num,
-        font(22, accent === C.red ? C.red : C.faint, true, FONT_EN),
+        font(31, accent === C.red ? C.red : C.faint, true, FONT_EN),
       )
       p.tx(s, nm(s, `Head${i}`), col.x, y + 0.68, col.w, 0.26, item.title, font(9.4, C.text, true))
       p.tx(
@@ -393,38 +396,38 @@ function makePageTypes(p, chrome) {
         0.4,
         0.2,
         pad2(i + 1),
-        font(7.5, accent, true, FONT_EN),
+        font(8.6, C.red, false, FONT_EN),
       )
-      p.hRule(s, nm(s, `PersonRule${i}`), col.x, y + 0.32, 0.46, accent, 0.018)
       p.tx(
         s,
         nm(s, `PersonName${i}`),
         col.x,
-        y + 0.6,
+        y + 0.34,
         col.w,
-        0.25,
+        0.3,
         person.name,
-        font(9.2, accent, true, FONT_EN),
+        font(15.5, accent, true, FONT_EN),
       )
       p.tx(
         s,
         nm(s, `PersonYears${i}`),
         col.x,
-        y + 0.92,
+        y + 0.68,
         col.w,
-        0.18,
+        0.2,
         person.years,
-        font(7.2, C.muted, false, FONT_EN),
+        font(10.2, C.muted, false, FONT_EN),
       )
+      p.hRule(s, nm(s, `PersonRule${i}`), col.x + TEXT_INSET, y + 0.98, 0.58, accent, 0.014)
       p.tx(
         s,
         nm(s, `PersonBody${i}`),
         col.x,
-        y + 1.18,
+        y + 1.25,
         col.w - 0.06,
-        0.55,
+        0.7,
         asLines(person.body),
-        font(7.0, C.muted),
+        font(8.9, C.muted),
       )
     })
   }
@@ -466,7 +469,8 @@ function makePageTypes(p, chrome) {
         font(7.6, accent, true, FONT_EN),
         'right',
       )
-      p.dot(s, nm(s, `EventDot${i}`), x + 0.72, y + 0.03, 0.13, accent)
+      const dotD = accent === C.red ? 0.17 : 0.13
+      p.dot(s, nm(s, `EventDot${i}`), x + 0.785 - dotD / 2, y + 0.095 - dotD / 2, dotD, accent)
       p.tx(
         s,
         nm(s, `EventTitle${i}`),
@@ -485,7 +489,7 @@ function makePageTypes(p, chrome) {
     p.addSlide(s)
     chrome.pageMark(s)
     chrome.title(s, data, { y: 0.68 })
-    const cards = data.cards ?? []
+    const cards = limitItems(data.cards, 3)
     const cols = grid(3, 0.5, 0.75, 11.82)
     cards.forEach((card, i) => {
       const col = cols[i]
@@ -522,25 +526,45 @@ function makePageTypes(p, chrome) {
         font(7.1, C.muted, false, FONT_EN),
       )
       p.tx(s, nm(s, `TypeAa${i}`), col.x, 3.55, col.w, 0.95, 'Aa', font(54, accent, true, FONT_EN))
+      p.hRule(
+        s,
+        nm(s, `TypeAaRule${i}`),
+        col.x + TEXT_INSET,
+        5.18,
+        0.58,
+        accent === C.red ? C.red : C.black,
+        0.014,
+      )
       p.tx(
         s,
         nm(s, `TypeWeight${i}`),
         col.x,
-        4.72,
+        5.42,
         col.w,
         0.2,
         card.weight,
         font(7.8, accent, true, FONT_EN),
       )
+      const bodyLines = asLines(card.body).split('\n')
       p.tx(
         s,
-        nm(s, `TypeBody${i}`),
+        nm(s, `TypeBodyLead${i}`),
         col.x,
-        5.08,
+        5.72,
         col.w - 0.05,
-        0.9,
-        asLines(card.body),
-        font(7.2, C.muted),
+        0.42,
+        bodyLines.slice(0, 2).join('\n'),
+        font(8.8, accent === C.red ? C.red : C.text, true),
+      )
+      p.tx(
+        s,
+        nm(s, `TypeBodyRest${i}`),
+        col.x,
+        6.18,
+        col.w - 0.05,
+        0.62,
+        bodyLines.slice(2).join('\n'),
+        font(8.1, C.faint),
       )
     })
   }
@@ -549,7 +573,7 @@ function makePageTypes(p, chrome) {
     p.addSlide(s)
     chrome.pageMark(s)
     chrome.title(s, data, { y: 0.68 })
-    const items = data.items ?? []
+    const items = limitItems(data.items, 4)
     p.hRule(s, nm(s, 'GridCrossH'), 0.68, 4.52, 12.0, C.gridLite, 0.012)
     p.vRule(s, nm(s, 'GridCrossV'), 6.66, 2.08, 4.78, C.gridLite, 0.012)
     const rows = [
@@ -663,18 +687,30 @@ function makePageTypes(p, chrome) {
       font(36, C.red, true, FONT_EN),
     )
     p.tx(s, nm(s, 'BaseNote'), 0.65, 3.22, 2.5, 0.24, '所有距离的最小公因子', font(10, C.faint))
-    p.hRule(s, nm(s, 'BaseRule'), 0.65, 3.55, 3.3, C.black, 0.012)
+    p.hRule(s, nm(s, 'BaseRule'), 0.65 + TEXT_INSET, 3.55, 3.2, C.black, 0.012)
+    const bodyLines = asLines(data.body).split('\n')
     p.tx(
       s,
-      nm(s, 'BaseBody'),
+      nm(s, 'BaseBodyTitle'),
       0.65,
       4.02,
       3.7,
-      1.55,
-      asLines(data.body),
-      font(11.2, C.text2, false, FONT_EN),
+      0.22,
+      bodyLines[0] ?? '',
+      font(10.2, C.muted, false, FONT_EN),
     )
-    p.hRule(s, nm(s, 'BaseBottomRule'), 0.65, 6.28, 3.3, C.red, 0.012)
+    bodyLines.slice(1).forEach((lineText, i) => {
+      const match = lineText.match(/^(.*?)(\d+\s+px)(.*)$/)
+      const runs = match
+        ? [
+            { text: match[1], font: font(10.5, C.text2, false, FONT_EN) },
+            { text: match[2], font: font(10.5, C.text, true, FONT_EN) },
+            { text: match[3], font: font(10.5, C.text2, false, FONT_EN) },
+          ]
+        : [{ text: lineText, font: font(10.5, C.text2, false, FONT_EN) }]
+      p.richTx(s, nm(s, `BaseFormula${i}`), 0.65, 4.42 + i * 0.32, 3.85, 0.2, runs)
+    })
+    p.hRule(s, nm(s, 'BaseBottomRule'), 0.65 + TEXT_INSET, 6.28, 3.2, C.red, 0.012)
     p.tx(s, nm(s, 'BaseCallout'), 0.65, 6.52, 3.2, 0.44, asLines(data.callout), font(10.4, C.text))
     const x = 5.0
     const y = 2.18
@@ -686,7 +722,7 @@ function makePageTypes(p, chrome) {
         s,
         nm(s, `MeasureLabel${i}`),
         x + i * cellW + 0.44,
-        y - 0.32,
+        y - 0.39,
         0.5,
         0.16,
         '264',
@@ -737,39 +773,59 @@ function makePageTypes(p, chrome) {
 
   function swissStatementSlide(s, data) {
     p.addSlide(s)
-    chrome.pageMark(s, data.eyebrow ?? 'ARGUMENT · 07')
-    p.dot(s, nm(s, 'Dot'), 3.35, 2.3, 0.38, C.red)
-    p.vRule(s, nm(s, 'RedRule'), 6.92, 2.22, 0.82, C.red, 0.024)
+    chrome.pageMark(s)
+    p.dot(s, nm(s, 'Dot'), 3.72, 2.18, 0.5, C.red)
+    p.vRule(s, nm(s, 'RedRule'), 7.82, 1.28, 0.46, C.red, 0.026)
     p.tx(
       s,
       nm(s, 'Label'),
-      7.1,
-      2.2,
+      8.0,
+      1.45,
       1.5,
       0.18,
       data.label ?? 'ARGUMENT · 07',
-      font(7.2, C.muted, true, FONT_EN),
+      font(8.6, C.text2, false, FONT_EN),
     )
-    p.tx(s, nm(s, 'Title'), 7.1, 2.62, 3.6, 0.45, data.title, font(20, C.text, true))
+    p.tx(s, nm(s, 'Title'), 7.82, 1.88, 4.2, 0.74, data.title, font(39, C.text, false))
     p.tx(
       s,
       nm(s, 'Subtitle'),
-      7.1,
-      3.08,
-      4.2,
-      0.24,
+      7.82,
+      2.72,
+      5.0,
+      0.32,
       data.subtitle,
-      font(8.2, C.text, true, FONT_EN),
+      font(15.2, C.text, true, FONT_EN),
     )
-    p.hRule(s, nm(s, 'Rule'), 9.32, 5.78, 1.0, C.black, 0.012)
-    p.tx(s, nm(s, 'Body'), 7.1, 6.06, 3.6, 0.55, asLines(data.body), font(7.2, C.muted))
+    p.hRule(s, nm(s, 'Rule'), 10.24, 5.9, 1.48, C.black, 0.014)
+    const bodyLines = asLines(data.body).split('\n')
+    p.tx(
+      s,
+      nm(s, 'BodyCn'),
+      7.82,
+      6.42,
+      2.8,
+      0.42,
+      bodyLines.slice(0, 2).join('\n'),
+      font(11.4, C.muted),
+    )
+    p.tx(
+      s,
+      nm(s, 'BodyEn'),
+      7.82,
+      6.88,
+      3.85,
+      0.18,
+      bodyLines.slice(2).join('\n'),
+      font(8.6, C.muted, false, FONT_EN),
+    )
   }
 
   function swissColumnSlide(s, data) {
     p.addSlide(s)
     chrome.pageMark(s)
     chrome.title(s, data, { y: 0.68 })
-    const items = data.items ?? []
+    const items = limitItems(data.items, 4)
     const cols = grid(4, 0.48, 0.75, 11.8)
     items.forEach((item, i) => {
       const col = cols[i]
@@ -841,11 +897,11 @@ function makePageTypes(p, chrome) {
         s,
         nm(s, `ProgNum${i}`),
         col.x,
-        2.05,
+        1.9,
         col.w,
-        0.44,
+        0.72,
         pad2(i + 1),
-        font(23, accent, true, FONT_EN),
+        font(34, accent, true, FONT_EN),
         'center',
       )
       p.tx(
@@ -856,15 +912,16 @@ function makePageTypes(p, chrome) {
         col.w,
         0.2,
         step.year,
-        font(7.2, C.text, true, FONT_EN),
+        font(8.1, C.red, false, FONT_EN),
         'center',
       )
+      const dotD = accent === C.red ? 0.18 : 0.11
       p.dot(
         s,
         nm(s, `ProgDot${i}`),
-        col.x + col.w / 2 - 0.055,
-        4.0,
-        0.11,
+        col.x + col.w / 2 - dotD / 2,
+        4.05 - dotD / 2,
+        dotD,
         accent === C.faint ? C.black : accent,
       )
       p.tx(
@@ -892,16 +949,29 @@ function makePageTypes(p, chrome) {
     })
     if (data.callout) {
       p.vRule(s, nm(s, 'ProgressCalloutRule'), MX, 6.08, 0.46, C.red, 0.024)
+      const calloutLines = asLines(data.callout).split('\n')
       p.tx(
         s,
-        nm(s, 'ProgressCallout'),
+        nm(s, 'ProgressCalloutHead'),
         MX + 0.18,
         6.02,
         6.5,
-        0.34,
-        data.callout,
+        0.22,
+        calloutLines[0] ?? '',
         font(8.2, C.text, true),
       )
+      if (calloutLines.length > 1) {
+        p.tx(
+          s,
+          nm(s, 'ProgressCalloutBody'),
+          MX + 0.18,
+          6.3,
+          7.6,
+          0.24,
+          calloutLines.slice(1).join('\n'),
+          font(7.7, C.faint),
+        )
+      }
     }
   }
 
@@ -964,8 +1034,8 @@ function makePageTypes(p, chrome) {
 
   function swissClosingSlide(s, data) {
     p.addSlide(s)
-    modularGrid(p, s, 'ClosingGridFine', 0, 0, 13.325, 7.492, 80, 45, C.gridLite)
-    modularGrid(p, s, 'ClosingGridMajor', 0, 0, 13.325, 7.492, 8, 9, C.grid)
+    modularGrid(p, s, 'ClosingGridFine', 0, 0, FULL_GRID_W, FULL_GRID_H, 80, 45, C.gridLite)
+    modularGrid(p, s, 'ClosingGridMajor', 0, 0, FULL_GRID_W, FULL_GRID_H, 8, 9, C.grid)
     p.tx(
       s,
       nm(s, 'ClosingMark'),

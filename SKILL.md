@@ -568,6 +568,8 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
      如果 prompt/source 含 LaTeX、`$...$`、公式、方程、数学符号密集内容，先按
      `references/formulas.md` 记录 `typography.formulaPolicy`（默认 `mixed`）和
      `slides[].formulas[]` / `assets_manifest.json` 公式条目。
+     有 `kind: "formula"` 条目时先运行
+     `node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json` 生成 SVG 并回写状态。
    - 创建时先 `s8fy schema --index` 看 op 列表（当前 **109 个 op**：90 个 patch/control/raw
      op + 19 个 recipe op），按需 `--op <name>` 拉细节
 3. **写 content / patch JSON**：优先 DeckKit content manifest；无可用 DeckKit 或局部手写时才写

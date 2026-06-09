@@ -131,6 +131,29 @@ Use the built-in fallback for quick drafts. For final formula-heavy decks, rende
 formula asset into the run directory and insert it with `add-formula.assetSource`;
 still keep the formula metadata in `assets_manifest.json`.
 
+## Render manifest
+
+When `assets_manifest.json` contains formula entries, render them with the bundled MJS
+script before building the patch:
+
+```bash
+node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json
+```
+
+Useful variants:
+
+```bash
+node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json --dry-run
+node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json --out assets_manifest.rendered.json
+node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json --asset-root assets
+```
+
+The current bundled provider is `text-svg`: deterministic, offline, and safe for
+PowerPoint insertion. It writes SVG files, updates formula entries to
+`status: "rendered"`, records `render.mime: "image/svg+xml"`, and enforces
+`pptxUse.noCrop: true`. For typography-sensitive final decks, prefer externally
+rendered SVG assets if available and keep the same manifest fields.
+
 Simple inline formulas can stay in ordinary text when all of these are true:
 
 - The expression is readable in plain text or Unicode (`E = mc^2`, `p < 0.05`, `A/B`).

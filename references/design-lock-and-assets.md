@@ -143,6 +143,9 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 `assets_manifest.json` 只在使用外部图片、logo、复用素材、数据截图或本轮生成资源时创建；
 纯 DeckKit/native shape deck 不要创建空 manifest。它只管资源可用性、来源和 PPTX 使用方式。
 所有临时资源放在 run 目录或其子目录，例如 `.pptx-nova/<run>/assets/`。
+如果 manifest 里有 `kind: "formula"` 且状态还不是 `rendered` / `native` / `available`，
+先运行 `node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json`
+批量生成 SVG 并回写状态，再生成引用这些资源的 patch。
 
 ```json
 {

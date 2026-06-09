@@ -1,7 +1,7 @@
 # Express Mode —— 简单 prompt 一键出客户演示级 deck
 
-> 用户给一句话 / 几句话的 prompt 时的**默认创建路径**：自动走完
-> outline → 选择可用 DeckKit → content manifest → dry-run → vision-check 闭环 →
+> 用户给一句话 / 几句话的 prompt，或已经给出大纲时的**默认创建路径**：自动走完
+> outline（生成或标准化）→ 选择可用 DeckKit → content manifest → dry-run → vision-check 闭环 →
 > PNG 复核，最小确认、零手算坐标。
 >
 > **express ≠ 草稿**：它默认也按客户演示级（200-300 ops）产出，只是把
@@ -41,7 +41,7 @@ DeckKit、需要新页型或需要改组件结构时的创建/扩展阶段。
 更短的 **DeckKit 模式** 路径：不写 generator，只写 content manifest。
 
 ```
-prompt → outline → content.json（~200 行纯数据）
+prompt / 用户大纲 → outline.json → content.json（~200 行纯数据）
   → validate-content.mjs 校验
   → createDeck(content) 生成 patch
   → dry-run → apply → vision-check → PNG/contact sheet review
@@ -60,7 +60,7 @@ prompt → outline → content.json（~200 行纯数据）
 ## 2. Express 黄金路径（自动化 11 步）
 
 ```bash
-# 0. 从 prompt 提炼 deckBrief（主题/受众/页数/语气/数据/风格）→ 见 §3、§7
+# 0. 从用户大纲标准化 outline.json；若无大纲，再从 prompt 提炼 deckBrief/outline → 见 §3、§7
 # 1. 选择 production/default DeckKit
 node tools/pptx-nova-deckkit-select.mjs \
   --scenario roadshow \
@@ -75,7 +75,7 @@ node tools/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target de
 
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
 cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
-#    按 outline 改 slides[].type 和 slides[].data
+#    按 outline.json 改 slides[].type 和 slides[].data
 
 # 3. 校验 content（schema + density + fit diagnostics）
 node skills/pptx-nova/assets/deckkits/validate-content.mjs \
@@ -106,7 +106,7 @@ s8fy pptx vision-check out.pptx --json | save vision.json
 s8fy convert out.pptx --to png -o previews/ --overwrite
 #    逐页检查字符重叠、换行压字、截断、页脚/来源撞正文
 
-# 11. 产出物：out.pptx + content.json + patch.json + dry.json + vision.json + previews/
+# 11. 产出物：out.pptx + outline.json + content.json + patch.json + dry.json + vision.json + previews/
 ```
 
 三道闸门职责不重叠：**dry-run（语义）→ vision-check（几何，可自动闭环）→ PNG（像素）**。
@@ -122,7 +122,7 @@ DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称
 
 ### 3.1 outline 中间表示
 
-把 prompt 先拆成一份结构化 outline（参考 `assets/examples/qbr-outline.json`），用页型 `kind`
+先得到一份结构化 outline（参考 `assets/examples/qbr-outline.json`），用页型 `kind`
 描述每页。该示例用到的 5 种 `kind`：
 
 | `kind`    | 用途         | 关键字段                            |
@@ -139,6 +139,12 @@ outline 顶层还带 `out`（输出路径）和 `themePack` / `stylePack`（如 
 每页写一个 slide 函数即可；模板已含 8 个同型示例可改：`slideCover` / `slideAgenda` / `slideKPI` /
 `slideChart` / `slideTable` / `slidePillars`（多列支柱）/ `slideWorkflow` / `slideHero`（全色收尾），
 挑最接近的页型改内容。
+
+如果用户已经提供页序、章节、标题、Markdown 大纲、表格结构或逐页内容，直接采用用户大纲并
+标准化为 `outline.json`；不要擅自重排叙事、替换页序或删改核心观点。允许做的改动仅限于：
+结构化字段、映射 DeckKit 页型、压缩过长标题、补齐缺省受众/风格/输出路径。只有大纲自相矛盾、
+页数/内容明显装不下、缺少生成所必需的信息，或用户要求优化结构时，才给一个短修订版或问题让
+用户确认。
 
 ### 3.2 无可用 DeckKit 时：创建/扩展 DeckKit
 
@@ -235,6 +241,10 @@ vision-check 只看几何；**字符实际重叠 / 字体换行压字 / 小字�
 express 的核心是**不像 ppt-master 那样逐项确认**（它要 8 次 BLOCKING 确认）。原则：
 
 - **能合理推断的全部用默认**，并在最终回复里**说明做了哪些假设**（受众、页数、风格、配色）。
+- **用户已给大纲时默认采用**，只做标准化和页型映射；不要为了展示能力重新设计结构。若需要
+  调整页序、增删页或改核心表达，先用短版修订大纲请求确认。
+- **没有大纲时也必须先生成内部 `outline.json`**，但 Express 默认自动继续，不把大纲确认作为
+  阻塞步骤；最终摘要中列出主要假设。
 - **只在缺少以下任一关键信息且无法合理推断时**，才**一次性**问清（用一个 AskUserQuestion 合并问，
   不要来回追问）：
   - **主题/内容**：完全不知道要讲什么（连领域都推不出来）。

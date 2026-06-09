@@ -82,7 +82,7 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 - **统一工作目录**：无论创建还是修改，都在用户当前目录下创建
   `.pptx-nova/<slug>-<YYYYMMDD-HHMMSS>/` 作为本次 run 目录。`slug` 优先取最终
   PPTX basename，其次取输入 deck basename，仍未知时用 `deck`。所有临时文件都必须放在
-  run 目录或其子目录里，包括 `content.json`、`patch.json`、`build.mjs`、中间
+  run 目录或其子目录里，包括 `outline.json`、`content.json`、`patch.json`、`build.mjs`、中间
   `.pptx`、sidecar、`vision.json`、`check.json`、PNG/PDF/MD/JSON 预览和日志。
   不要把临时文件写到源 PPTX 所在目录或最终输出目录；最终产物 `.pptx` 可以放到用户
   当前目录或用户指定路径。
@@ -94,10 +94,37 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
   中间 apply 和预览都放在 run 目录中。只有最终交付时才写用户指定的输出路径；若用户要求
   原地修改，也要先在 run 目录完成验证，再按用户明确意图写回。
 - **完成摘要**：成功生成或修改后，最终回复必须包含简短摘要：耗时、最终输出 PPTX 的绝对
-  路径、run 目录、关键中间产物（sidecar、`vision.json`、预览目录 / contact sheet、
+  路径、run 目录、关键中间产物（`outline.json`、sidecar、`vision.json`、预览目录 / contact sheet、
   可选 `check.json`）、验证结果（dry-run / vision-check / PNG 复核 / 发布前预检）以及仍需
   用户注意的风险。耗时应在任务开始和结束用真实时间戳计算；如果没有记录，不要编造。token
   信息只有在平台或工具给出准确统计时才输出，不能估算，拿不到准确值就完全省略 token 行。
+
+---
+
+## 创建型大纲与确认策略
+
+创建型 deck 必须先生成或标准化结构化 `outline.json`，再进入 DeckKit 选择、`content.json` 或 patch
+生产流程。`outline.json` 是质量底座，用于固定受众、目标、页数、页序、每页意图、页型、
+主题与风格假设；不能为了省步骤直接从 prompt 跳到 patch。
+
+大纲确认遵循 **内部强制、自适应阻塞**：
+
+- **用户大纲优先**：如果用户已经提供页序、章节、标题、Markdown 大纲、表格结构或逐页内容，
+  直接采用用户大纲并标准化为 `outline.json`。不要擅自重排叙事或替换页序；只做明显必要的
+  结构化、页型映射、标题压缩和缺省字段补齐。只有大纲自相矛盾、页数/内容明显装不下、缺少
+  生成所必需的信息，或用户要求优化结构时，才提出短问题或给一个修订版请确认。
+- **Express 默认不阻塞确认**：用户要快、只给一句话或没有强调精控时，先生成 `outline.json`，
+  按合理假设继续交付，并在最终摘要里列出主要假设。过程中最多用一句话告知采用的页数和叙事结构，
+  但不要停下来等待确认。
+- **Studio / 高风险场景必须先确认大纲**：用户明确要求"先给大纲"、投资人路演 / 董事会 /
+  客户正式汇报、品牌合规、公司口径敏感、主题/受众/目标无法合理推断、页数跨度过大、或数据型
+  deck 缺关键数据时，先给用户确认页序。若用户已经提供明确大纲，视为已确认该大纲；只有需要
+  调整页序、增删页或改变核心表达时，才拿修订版再确认。
+- **确认内容必须短**：只展示页序、每页标题和一句话目的；不要把完整讲稿、长 bullet、风格细节
+  都拿去审批。一次性问清缺失项，避免多轮追问。
+- **确认通过后再生成**：阻塞确认场景中，用户同意前不写 `content.json`、不 dry-run、不生成
+  `.pptx`；用户提供的明确大纲或确认后的大纲都保存为 run 目录内 `outline.json`，后续所有内容
+  生产以它为准。
 
 ---
 
@@ -137,18 +164,21 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 
 创建型交付 deck 的默认顺序：
 
-1. 先查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
+1. 先把用户已有大纲标准化为 `outline.json`；若用户没有提供大纲，再从 prompt 拆出
+   `outline.json`，固定受众、目标、页数、页序、每页意图、页型、主题和风格假设。
+   Express 默认自动继续，Studio / 高风险场景按"创建型大纲与确认策略"先确认。
+2. 再查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
    选择 DeckKit；优先使用 `node tools/pptx-nova-deckkit-select.mjs --target delivery`
    自动过滤 readiness、页型覆盖、语言、密度和 quality metadata。
-2. 对选中的 DeckKit 跑
+3. 对选中的 DeckKit 跑
    `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
    确认 catalog readiness、benchmark、vision/PNG gate 和人工 review 元数据都满足交付要求。
-3. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
+4. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
    只能用于草稿、迁移验证，或人工确认后的交付。
-4. 有可用 DeckKit 时，严格走 `content.json` → `validate-content.mjs` →
+5. 有可用 DeckKit 时，严格走 `outline.json` → `content.json` → `validate-content.mjs` →
    `createDeck(content)` → `s8fy pptx apply --dry-run` → apply → `vision-check` →
    PNG/contact sheet review。
-5. 没有可用 DeckKit、缺页型或需要改组件结构时，先创建/扩展 DeckKit，再用 DeckKit 生产 deck。
+6. 没有可用 DeckKit、缺页型或需要改组件结构时，先创建/扩展 DeckKit，再用 DeckKit 生产 deck。
 
 `deck-generator-template.mjs` 是新建或扩展 DeckKit 的探索/迁移开发起点，不是普通交付 deck
 的默认路径；`assets/decks/examples/theme-*` 和 `tools/generate-pptx-nova-examples.mjs`
@@ -461,6 +491,8 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
    `--overwrite` 覆盖最终路径。
 2. **拿到 schema 与上下文**：
    - 修改时先 `s8fy pptx inspect <in.pptx> --json`，拿到 slide/shape 结构
+   - 创建时先生成或标准化 `outline.json`；用户已有大纲时直接采用，Express 默认自动继续，
+     Studio / 高风险场景先让用户确认短大纲
    - 创建时先 `s8fy schema --index` 看 op 列表（当前 **108 个 op**：89 个 patch/control/raw
      op + 19 个 recipe op），按需 `--op <name>` 拉细节
 3. **写 patch JSON**：优先 recipe / `fill-layout`，必要时降级到 patch op；同一份
@@ -489,7 +521,7 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
    §6.7 的几何与 PNG 门禁。
 9. **交付最终 PPTX**：验证通过后，才把 run 目录内的最终中间 `.pptx` 写到用户当前目录或
    用户指定路径。创建型任务若最终路径已在开始前存在，必须仍然保持阻塞，不能在这一步覆盖。
-10. **完成摘要**：记录结束时间并输出摘要，至少包含耗时、最终 PPTX 路径、run 目录、sidecar、
+10. **完成摘要**：记录结束时间并输出摘要，至少包含耗时、最终 PPTX 路径、run 目录、`outline.json`、sidecar、
     `vision.json`、预览目录 / contact sheet、可选 `check.json`、验证结果和剩余风险；只有准确
     token 统计可得时才输出 token。
 11. **如果出错**：用 sidecar `s8fy pptx rollback --from-sidecar` 回滚到上一态

@@ -144,6 +144,9 @@ native subset:
 }
 ```
 
+In `mode: "native-omml"`, `display` is ignored. It only affects rendered SVG
+fallback sizing (`display: false` uses the inline SVG fallback box).
+
 Use the built-in fallback for quick drafts. For final formula-heavy decks, render the
 formula asset into the run directory and insert it with `add-formula.assetSource`;
 still keep the formula metadata in `assets_manifest.json`.
@@ -187,6 +190,14 @@ The current native OMML subset is conservative: plain math text, superscript,
 subscript, top-level `\frac{...}{...}`, and top-level `\sqrt{...}`. Use rendered
 SVG for matrices, aligned equations, cases, and complex n-ary limits until the
 native subset expands.
+
+Native script handling is intentionally trailing-script-only. The whole expression
+prefix before the final top-level `^` or `_` becomes the base expression; for
+example `\frac{a}{b}^2` is emitted as a fraction with a trailing superscript.
+`x_i^2` is emitted as nested subscript then superscript, not as aligned
+`sSubSup`. Avoid native mode for expressions where exact LaTeX grouping,
+simultaneous aligned super/subscripts, or operator limits are part of the meaning;
+render those formulas to SVG instead.
 
 ## Verification
 

@@ -1,14 +1,14 @@
 // swiss-grid.kit.mjs - Swiss International Typographic Style DeckKit
 // version: 0.1.0
-import { createOps, grid, nm } from './core-primitives.kit.mjs'
+import { createOps, estimateDeckTextLineCount, grid, nm } from './core-primitives.kit.mjs'
 
 const C = {
   red: 'E2231A',
   black: '111111',
   text: '171717',
   text2: '3A3A3A',
-  muted: '777777',
-  faint: 'BDBDBD',
+  muted: '666666',
+  faint: '767676',
   hair: 'D8D8D8',
   grid: 'C9C9C9',
   gridLite: 'E7E7E7',
@@ -23,6 +23,12 @@ const MX = 0.65
 const TEXT_INSET = 0.1
 const FULL_GRID_W = 13.325
 const FULL_GRID_H = 7.492
+const TITLE_W = 6.8
+const TITLE_H = 0.38
+const SUBTITLE_W = 6.8
+const SUBTITLE_FONT_PT = 11
+const SUBTITLE_MIN_H = 0.3
+const SUBTITLE_RULE_GAP = 0.12
 
 const pad2 = (value) => String(value).padStart(2, '0')
 const asLines = (value) => (Array.isArray(value) ? value.join('\n') : String(value ?? ''))
@@ -35,7 +41,7 @@ const font = (size, color = C.text, bold = false, name = FONT_CN) => ({
 })
 
 function makeSwissOps() {
-  const p = createOps()
+  const p = createOps({ textbox: { marginTop: '0in', marginBottom: '0in' } })
 
   const line = (s, name, x, y, w, h, color = C.black) =>
     p.box(s, name, 'rectangle', x, y, w, h, color)
@@ -87,21 +93,33 @@ function makeChrome(p, total) {
         ...font(7.8, C.faint, true, FONT_EN),
       })
     }
-    p.tx(s, nm(s, 'Title'), MX, y + 0.36, 6.8, 0.38, data.title, font(27, C.text, false))
+    p.tx(s, nm(s, 'Title'), MX, y + 0.36, TITLE_W, TITLE_H, data.title, font(27, C.text, false))
+    let subtitleBottom = y + 0.78
     if (data.subtitle) {
+      const subtitleLines = estimateDeckTextLineCount(
+        String(data.subtitle),
+        SUBTITLE_FONT_PT,
+        (SUBTITLE_W - TEXT_INSET * 2) * 72,
+      )
+      const subtitleH = Math.max(
+        SUBTITLE_MIN_H,
+        Number(((subtitleLines * SUBTITLE_FONT_PT * 1.2) / 72 + 0.1).toFixed(2)),
+      )
       p.tx(
         s,
         nm(s, 'Subtitle'),
         MX,
         y + 0.78,
-        5.8,
-        0.3,
+        SUBTITLE_W,
+        subtitleH,
         data.subtitle,
-        font(11, C.muted, false, FONT_EN),
+        font(SUBTITLE_FONT_PT, C.muted, false, FONT_EN),
       )
+      subtitleBottom = y + 0.78 + subtitleH
     }
-    p.hRule(s, nm(s, 'KickerRule'), MX + TEXT_INSET, y + 1.08, 0.58, C.red, 0.026)
-    return y + 1.52
+    const ruleY = data.subtitle ? Math.max(y + 1.08, subtitleBottom + SUBTITLE_RULE_GAP) : y + 1.08
+    p.hRule(s, nm(s, 'KickerRule'), MX + TEXT_INSET, ruleY, 0.58, C.red, 0.026)
+    return ruleY + 0.44
   }
 
   return { pageMark, title }
@@ -1069,7 +1087,7 @@ function makePageTypes(p, chrome) {
       data.titleB ?? '是自由的语法',
       font(54, C.red, false),
     )
-    p.tx(s, nm(s, 'Subtitle'), 0.45, 5.23, 5.9, 0.3, data.subtitle, font(13, C.text, true, FONT_EN))
+    p.tx(s, nm(s, 'Subtitle'), 0.45, 5.23, 6.2, 0.3, data.subtitle, font(13, C.text, true, FONT_EN))
     p.vRule(s, nm(s, 'FootRule'), 0.65, 6.35, 0.55, C.black, 0.018)
     p.tx(
       s,

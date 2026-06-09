@@ -102,8 +102,9 @@ export const txH = (sizePt, lines = 1) => {
 }
 
 // --- Op builders ---
-export function createOps() {
+export function createOps(options = {}) {
   const ops = []
+  const textboxDefaults = options.textbox ?? {}
 
   const shape = (s, name, kind, x, y, w, h) => {
     assertWithinSlide(name, x, y, w, h)
@@ -151,6 +152,7 @@ export function createOps() {
       y: `${y}in`,
       w: `${w}in`,
       h: `${h}in`,
+      ...textboxDefaults,
     })
     return name
   }
@@ -884,13 +886,20 @@ function estimateQualityCharWidth(ch, fontPt) {
   return fontPt * 0.55
 }
 
+function estimateQualityTextWidth(text, fontPt) {
+  return [...String(text ?? '')].reduce((sum, ch) => sum + estimateQualityCharWidth(ch, fontPt), 0)
+}
+
 function estimateQualityLineCount(text, fontPt, maxWidthPt) {
   if (!text) return 0
   if (maxWidthPt <= 0) return 1_000_000
   let lines = 1
   let lineWidth = 0
-  let tokenWidth = 0
+  let token = ''
+  const measure = (value) => estimateQualityTextWidth(value, fontPt)
   const placeToken = () => {
+    let tokenWidth = measure(token)
+    token = ''
     if (tokenWidth <= 0) return
     if (lineWidth > 0 && lineWidth + tokenWidth > maxWidthPt) {
       lines += 1
@@ -901,18 +910,17 @@ function estimateQualityLineCount(text, fontPt, maxWidthPt) {
       tokenWidth -= maxWidthPt
     }
     lineWidth += tokenWidth
-    tokenWidth = 0
   }
   for (const ch of String(text)) {
     if (ch === '\n' || ch === '\v') {
       placeToken()
       lines += 1
       lineWidth = 0
-      tokenWidth = 0
+      token = ''
     } else if (ch === ' ' || ch === '\t') {
       placeToken()
       if (lineWidth > 0) {
-        const spaceWidth = fontPt * (ch === '\t' ? 1.36 : 0.34)
+        const spaceWidth = measure(ch === '\t' ? '    ' : ' ')
         if (lineWidth + spaceWidth > maxWidthPt) {
           lines += 1
           lineWidth = 0
@@ -921,12 +929,14 @@ function estimateQualityLineCount(text, fontPt, maxWidthPt) {
         }
       }
     } else {
-      tokenWidth += estimateQualityCharWidth(ch, fontPt)
+      token += ch
     }
   }
   placeToken()
   return lines
 }
+
+export const estimateDeckTextLineCount = estimateQualityLineCount
 
 function qualityShapeFontPt(shape) {
   const sizes = shape.fonts.map((font) => parseFontPt(font?.size)).filter((size) => size !== null)
@@ -934,9 +944,7 @@ function qualityShapeFontPt(shape) {
 }
 
 function qualityExplicitFontColors(shape) {
-  return [
-    ...new Set(shape.fonts.map((font) => normalizeHex(font?.color)).filter(Boolean)),
-  ]
+  return [...new Set(shape.fonts.map((font) => normalizeHex(font?.color)).filter(Boolean))]
 }
 
 function qualitySeverityForContrast(ratio, minRatio) {
@@ -1021,6 +1029,10 @@ function collectPatchQualityFacts(patch) {
         text: op.text ?? '',
         fonts: [],
         fillColor: null,
+        textInsetLeft: parseInches(op.marginLeft) ?? DEFAULT_TEXT_INSET_X_IN,
+        textInsetRight: parseInches(op.marginRight) ?? DEFAULT_TEXT_INSET_X_IN,
+        textInsetTop: parseInches(op.marginTop) ?? DEFAULT_TEXT_INSET_Y_IN,
+        textInsetBottom: parseInches(op.marginBottom) ?? DEFAULT_TEXT_INSET_Y_IN,
       })
       continue
     }
@@ -1056,11 +1068,11 @@ function assessTextOverflowQuality(shape, issues) {
   const text = String(shape.text ?? '').trim()
   if (!text) return
   const fontPt = qualityShapeFontPt(shape)
-  const availableWPt = Math.max(0, (shape.w - DEFAULT_TEXT_INSET_X_IN * 2) * 72)
-  const availableHPt = Math.max(0, (shape.h - DEFAULT_TEXT_INSET_Y_IN * 2) * 72)
+  const availableWPt = Math.max(0, (shape.w - shape.textInsetLeft - shape.textInsetRight) * 72)
+  const availableHPt = Math.max(0, (shape.h - shape.textInsetTop - shape.textInsetBottom) * 72)
   const lineCount = estimateQualityLineCount(text, fontPt, availableWPt)
   const neededHPt = lineCount * fontPt * 1.2
-  if (lineCount > 1 || neededHPt > availableHPt || text.length > 56) {
+  if (lineCount > 1 || neededHPt > availableHPt) {
     issues.push(
       makeQualityIssue({
         kind: 'text-overflow-risk',
@@ -1150,7 +1162,11 @@ export function assessDeckQuality({ patch, deckkit = null } = {}) {
   return {
     schemaVersion: 'pptx-nova-quality/v1',
     deckkit,
-    status: issues.some((issue) => issue.severity === 'error') ? 'error' : issues.length ? 'warning' : 'ok',
+    status: issues.some((issue) => issue.severity === 'error')
+      ? 'error'
+      : issues.length
+        ? 'warning'
+        : 'ok',
     summary: {
       issueCount: issues.length,
       bySeverity,

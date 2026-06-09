@@ -568,7 +568,7 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
      如果 prompt/source 含 LaTeX、`$...$`、公式、方程、数学符号密集内容，先按
      `references/formulas.md` 记录 `typography.formulaPolicy`（默认 `mixed`）和
      `slides[].formulas[]` / `assets_manifest.json` 公式条目。
-   - 创建时先 `s8fy schema --index` 看 op 列表（当前 **108 个 op**：89 个 patch/control/raw
+   - 创建时先 `s8fy schema --index` 看 op 列表（当前 **109 个 op**：90 个 patch/control/raw
      op + 19 个 recipe op），按需 `--op <name>` 拉细节
 3. **写 content / patch JSON**：优先 DeckKit content manifest；无可用 DeckKit 或局部手写时才写
    patch。优先 recipe / `fill-layout`，必要时降级到 patch op；同一份 patch 内可混用
@@ -728,8 +728,8 @@ titleOnly / objText / twoObj` 等 OOXML layout，直接 `add-slide layout: { typ
 - **表格 `set-cell-formula` 不是数学公式排版** — 它只把 `SUM/AVG/COUNT/MIN/MAX`
   这类表格聚合公式静态计算成单元格文本，不会创建 PowerPoint 方程，也不会渲染
   LaTeX。真正的数学公式按 `references/formulas.md` 选择 `mixed` / `text-only` /
-  `rendered` / `native-omml` 策略：复杂公式用 `add-formula`（若 schema 已支持）或
-  先渲染为 run 目录内 SVG/PNG 再用 `add-picture`，并在 `assets_manifest.json` 里保留
+  `rendered` / `native-omml` 策略：复杂公式优先用 `add-formula`；高保真排版时先渲染为
+  run 目录内 SVG 并通过 `add-formula.assetSource` 插入，并在 `assets_manifest.json` 里保留
   `kind: "formula"`、原始 `latex`、display、尺寸和 no-crop 约束。
 - **`raw-ooxml-patch` 默认禁用，需 `--allow-raw-xml`** — 这是逃生口，绕过
   schema-v1 的所有结构性校验，可以直接改 `ppt/slides/slideN.xml` 等任意 XML 部件。
@@ -811,7 +811,7 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 | `references/theme-packs.md`              | themePack / stylePack catalog、`list-themes`、`swap-theme`、`extract-style` |
 | `references/template-library.md`         | brand/layout/deck/chart/icon 资产目录、catalog 和选择规则                   |
 | `references/inspect-and-edit.md`         | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |
-| `references/schema-discovery.md`         | 想搞清楚 108 个 op 的全貌、按需拉 schema                                    |
+| `references/schema-discovery.md`         | 想搞清楚 109 个 op 的全貌、按需拉 schema                                    |
 | `references/styles-and-themes.md`        | 编辑颜色 / 渐变 / 字体 / 主题 / 母版                                        |
 | `references/formulas.md`                 | LaTeX / 数学公式策略、formula manifest、`add-formula` / fallback            |
 | `references/charts.md`                   | 创建 / 编辑图表，以及 native diagram/table preset                           |

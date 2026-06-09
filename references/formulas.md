@@ -12,7 +12,7 @@ Record the formula policy in `deck_lock.json.typography.formulaPolicy`:
 | ------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `mixed`       | Default for technical, academic, and training decks                                                 | Keep simple inline math as editable text/Unicode; render complex formulas as formula assets.                                                |
 | `text-only`   | Business decks or user explicitly values editability over typesetting                               | Use ordinary text boxes and Unicode symbols; no rendered formula assets.                                                                    |
-| `rendered`    | Formula-heavy decks where visual fidelity matters                                                   | Render every formula-worthy expression as SVG/PNG formula assets.                                                                           |
+| `rendered`    | Formula-heavy decks where visual fidelity matters                                                   | Render every formula-worthy expression as SVG formula assets and insert with `add-formula.assetSource`.                                     |
 | `native-omml` | User explicitly requests editable PowerPoint equations and the expression fits the supported subset | Use native equation insertion when `s8fy schema --op add-formula` documents native/OMML support; otherwise fall back according to the lock. |
 
 Default to `mixed` when the prompt contains LaTeX, `$...$`, `$$...$$`, equation-heavy
@@ -91,7 +91,7 @@ semantic error.
 
 ## Patch guidance
 
-Preferred patch op once supported by the installed `s8fy`:
+Preferred patch op for a built-in SVG fallback:
 
 ```json
 {
@@ -102,16 +102,34 @@ Preferred patch op once supported by the installed `s8fy`:
   "w": "5.8in",
   "h": "0.9in",
   "latex": "\\frac{\\partial L}{\\partial \\theta}=0",
-  "display": "block",
-  "mode": "rendered",
-  "color": "1F1F1F",
+  "display": true,
   "name": "S3_Formula_Objective"
 }
 ```
 
-Until `s8fy schema --op add-formula` is available, render the formula asset into the
-run directory and insert it with `add-picture` using `assetSource.path`; still keep the
-formula metadata in `assets_manifest.json`.
+Preferred patch op for production typography after rendering an SVG asset:
+
+```json
+{
+  "op": "add-formula",
+  "slide": 2,
+  "x": "1.2in",
+  "y": "2.0in",
+  "w": "5.8in",
+  "h": "0.9in",
+  "latex": "\\frac{\\partial L}{\\partial \\theta}=0",
+  "display": true,
+  "assetSource": {
+    "path": "formulas/s3-objective.svg",
+    "mime": "image/svg+xml"
+  },
+  "name": "S3_Formula_Objective"
+}
+```
+
+Use the built-in fallback for quick drafts. For final formula-heavy decks, render the
+formula asset into the run directory and insert it with `add-formula.assetSource`;
+still keep the formula metadata in `assets_manifest.json`.
 
 Simple inline formulas can stay in ordinary text when all of these are true:
 

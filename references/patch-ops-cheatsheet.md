@@ -1,6 +1,6 @@
-# Patch Ops Cheatsheet —— 108 个 op 按场景速查
+# Patch Ops Cheatsheet —— 109 个 op 按场景速查
 
-下面把 s8fy schema v1 的 108 个 op 按 **"我想做什么"** 反向归类。每条只列
+下面把 s8fy schema v1 的 109 个 op 按 **"我想做什么"** 反向归类。每条只列
 关键字段；完整 schema 用 `s8fy schema --op <name>` 拉。
 
 > 通用：所有 patch op 都嵌进 `{ "schemaVersion": 1, "ops": [ { "op": "...", ... } ] }`。
@@ -61,6 +61,7 @@
 | `add-textbox`     | 纯文本框                                                                          |
 | `add-placeholder` | 加 placeholder shape（type=title/body/content/...）                               |
 | `add-picture`     | 加图片（`assetSource.path` 或 `bytesBase64`）                                     |
+| `add-formula`     | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                 |
 | `add-movie`       | 加视频，含 poster frame                                                           |
 | `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                             |
 | `add-group`       | 创建空 group shape，可后续填子 shape                                              |

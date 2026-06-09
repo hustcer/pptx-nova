@@ -24,7 +24,7 @@ s8fy schema --minimal                # 删 verbose 字段（与上面任一组�
 s8fy schema --index | save -f schema-index.json
 ```
 
-得到所有 108 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
+得到所有 109 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
 决定 "我要 `add-chart` 还是 `add-textbox`"。
 
 ### 2. 选定 op → 拉单个 schema

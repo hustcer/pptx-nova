@@ -1,7 +1,7 @@
 # Design Lock and Assets
 
-本文件定义 `pptx-nova` 的轻量运行契约：`deck_lock.json`、按需生成的 `assets_manifest.json`
-和 `pptx-nova-check-lock.mjs`。它们只服务 s8fy 原生 PPTX / DeckKit / patch
+本文件定义 `pptx-nova` 的轻量运行契约：`deck_lock.json`、按需生成的 `assets_manifest.json`、
+split handoff 使用的 `resume_manifest.json` 和 `pptx-nova-check-lock.mjs`。它们只服务 s8fy 原生 PPTX / DeckKit / patch
 工作流，不引入 SVG executor、逐页手写或 `spec_lock.md` 阶段。
 
 ## 1. 何时生成
@@ -12,6 +12,7 @@
 prompt / 用户大纲
   -> outline.json
   -> deck_lock.json (+ assets_manifest.json when external/reused assets exist)
+  -> resume_manifest.json (only when split handoff is chosen)
   -> DeckKit content.json 或 patch.json
   -> check-lock
   -> dry-run -> apply -> vision-check -> PNG
@@ -19,6 +20,9 @@ prompt / 用户大纲
 
 Express 模式自动推断并继续，不阻塞用户。Studio / 高风险模式先做一次短确认，
 确认后把决策写入 `deck_lock.json`，后续不再凭记忆改风格。
+当用户选择 split，或长 deck / 高风险 deck 需要换新会话继续时，在 `deck_lock.json` 和必要的
+`assets_manifest.json` 完成后写 `resume_manifest.json` 并停止；恢复规则见
+`references/resume-split-mode.md`。
 
 修改已有 deck 时也可以生成 `deck_lock.json`，但只锁定本次允许修改的范围、品牌约束、
 资源和输出路径；不要强行要求 slide count 与源 deck 完全一致。
@@ -232,7 +236,28 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 `display`。公式必须 `pptxUse.noCrop: true`；若正式交付仍是 `placeholder` 或
 `needs-user`，视为阻塞。更多策略见 `references/formulas.md`。
 
-## 5. Lock Drift Check
+## 5. `resume_manifest.json`
+
+`resume_manifest.json` 只在 split handoff 时创建。它不是设计锁，也不参与 PPTX 生成；它告诉新会话
+当前 run 是否已经完成 Phase A、需要哪些文件、下一步从哪里继续。
+
+最小要求：
+
+- `schemaVersion: "pptx-nova-resume/v1"`。
+- `phase: "ready-for-execution"`。
+- `runDir` 与 `deck_lock.output.runDir` 一致。
+- `finalPptx` 与 `deck_lock.output.finalPptx` 一致。
+- `requiredFiles` 至少包含 `outline.json`、`deck_lock.json`、`resume_manifest.json`。
+- 如果需要外部、复用、生成资源或公式，`requiredFiles` 必须列出 `assets_manifest.json`，且正式交付不得有
+  `missing` / `needs-user` / 未授权或未确认的 `placeholder` 阻塞项。
+- 如果 `outline.json` 不足以承载完整事实，必须列出 `source_brief.md` 或可读取的 source 文件。
+
+Phase B 恢复时先读取 manifest 做 sanity check；通过后才生成 `content.json` / `patch.json`。
+不要从旧会话记忆补写缺失的 `outline.json`、`deck_lock.json` 或资源清单。
+
+完整 schema 和 handoff 模板见 `references/resume-split-mode.md`。
+
+## 6. Lock Drift Check
 
 在生成 `patch.json` 后、`s8fy pptx apply --dry-run` 前运行：
 
@@ -261,7 +286,7 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 `check-lock` 不是 `dry-run` 的替代品：它只证明生成材料没有偏离设计锁；schema 语义、
 selector、visualRisks 仍交给 `s8fy pptx apply --dry-run --json`。
 
-## 6. 与 DeckKit / generator 的关系
+## 7. 与 DeckKit / generator 的关系
 
 - DeckKit-first：`deck_lock.json` 锁定 DeckKit 和主题；`content.json` 只放数据。
   如果 `content.json` 需要改 slide type，应先更新 lock。

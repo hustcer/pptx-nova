@@ -60,6 +60,7 @@ Agent 交付真正的 PowerPoint 文件，而不是 SVG 截图、HTML 页面或�
 ```text
 用户需求或大纲
   -> outline.json
+  -> deck_lock.json
   -> DeckKit 选择和 readiness 检查
   -> content.json 或 patch
   -> dry-run
@@ -74,6 +75,20 @@ Agent 交付真正的 PowerPoint 文件，而不是 SVG 截图、HTML 页面或�
 如果用户只给一句话且强调“快”，默认使用 Express 模式：Agent 会自行生成大纲并继续交付，在最终
 摘要里列出关键假设。若是投资人路演、董事会、客户正式汇报、品牌口径敏感或用户明确要求“先给大纲”，
 Agent 会先展示短大纲，确认后再生成 PPTX。
+
+## Resume / Split mode
+
+长 deck 或高风险 deck 可以分两段完成。Agent 先在 run 目录里写好 `outline.json`、
+`deck_lock.json`、必要的 `assets_manifest.json`、`source_brief.md` 和 `resume_manifest.json`，
+然后停在 Phase A handoff。你可以在新会话里输入：
+
+```text
+继续生成 /abs/path/.pptx-nova/<run>
+```
+
+恢复时 Agent 会先检查 run 目录、输出路径、资源状态和设计锁，再从 `content.json` / `patch.json`
+生成阶段继续。这个模式适合 12 页以上、投资人/董事会/客户正式汇报、参考 PPTX 信息很多、公式或图片
+资源较多的任务；它不会改成 SVG 路线，最终仍是原生可编辑 PPTX。
 
 ## 参考 PPTX 生成新文件
 
@@ -121,6 +136,7 @@ input.pptx
 - 最终 `.pptx` 的绝对路径。
 - run 目录路径，例如 `.pptx-nova/<slug>-<timestamp>/`。
 - 关键中间产物：`outline.json`、`content.json` 或 `patch.json`、sidecar、`vision.json`、预览目录。
+- 若使用 split/resume，还应包含 `deck_lock.json`、`resume_manifest.json` 和 `source_brief.md`（如有）。
 - 验证结果：dry-run、vision-check、PNG/contact sheet 复核。
 - 尚需用户注意的风险，例如参考 deck 中未复用的复杂动画、缺失字体、授权素材未复制等。
 

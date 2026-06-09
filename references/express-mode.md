@@ -3,6 +3,8 @@
 > 用户给一句话 / 几句话的 prompt，或已经给出大纲时的**默认创建路径**：自动走完
 > outline（生成或标准化）→ deck_lock（有资源时 assets_manifest）→ 选择可用 DeckKit →
 > content manifest → check-lock → dry-run → vision-check 闭环 → PNG 复核，最小确认、零手算坐标。
+> 长 deck 或高风险 deck 可以在 deck_lock 后写 `resume_manifest.json`，让用户新会话
+> `继续生成 <run-dir>`；这只是会话切分，不改变 Express 的 DeckKit-first 路线。
 >
 > **express ≠ 草稿**：它默认也按客户演示级（200-300 ops）产出，只是把
 > SKILL §6 的完整工作流自动串起来、不逐项追问。要草稿请明说「简单/速记版」。
@@ -64,6 +66,7 @@ prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资�
 ```bash
 # 0. 从用户大纲标准化 outline.json；若无大纲，再从 prompt 提炼 deckBrief/outline → 见 §3、§7
 # 0b. 自动生成 deck_lock.json；只有使用外部/复用资源时生成 assets_manifest.json。Express 不阻塞确认，假设写入 assumptions[]
+# 0c. 若用户选择 split，写 resume_manifest.json + 必要的 source_brief.md，停止并给出“继续生成 <run-dir>”
 # 1. 选择 production/default DeckKit
 node <skill-root>/scripts/pptx-nova-deckkit-select.mjs \
   --scenario roadshow \
@@ -268,6 +271,10 @@ express 的核心是**不像 ppt-master 那样逐项确认**（它要 8 次 BLOC
   - **关键数据**：deck 以数据为主（财报/实验），但用户没给数也没给数据文件。
 - 风格、配色、字体、版式密度**一律不问**，按内容领域选安全牌并记录理由；用户不满意时
   用 `swap-theme` / `swap-style` 秒级换一版。
+- **长 deck / 高风险 deck 可以推荐 split，但不默认阻塞**：当页数 `>= 12`、source 材料很长、
+  Reference Create 信息多、资源/公式多，或用户要正式投资人/董事会/客户汇报时，在生成
+  `outline.json` + `deck_lock.json` 后说明“可在新会话继续生成”。用户接受时按
+  `resume-split-mode.md` 写 `resume_manifest.json` 并停止；用户没接受就同会话继续。
 
 ---
 

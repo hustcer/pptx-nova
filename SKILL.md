@@ -95,8 +95,9 @@ DeckKit 选择、readiness、benchmark 或图标查询，使用
 - **统一工作目录**：无论创建还是修改，都在用户当前目录下创建
   `.pptx-nova/<slug>-<YYYYMMDD-HHMMSS>/` 作为本次 run 目录。`slug` 优先取最终
   PPTX basename，其次取输入 deck basename，仍未知时用 `deck`。所有临时文件都必须放在
-  run 目录或其子目录里，包括 `outline.json`、`content.json`、`patch.json`、`build.mjs`、中间
-  `.pptx`、sidecar、`vision.json`、`check.json`、PNG/PDF/MD/JSON 预览和日志。
+  run 目录或其子目录里，包括 `outline.json`、`deck_lock.json`、`resume_manifest.json`、
+  `source_brief.md`、`content.json`、`patch.json`、`build.mjs`、中间 `.pptx`、sidecar、
+  `vision.json`、`check.json`、PNG/PDF/MD/JSON 预览和日志。
   不要把临时文件写到源 PPTX 所在目录或最终输出目录；最终产物 `.pptx` 可以放到用户
   当前目录或用户指定路径。
 - **创建型输出防碰撞**：如果用户明确指定要创建的最终 `.pptx` 文件名，且该最终路径在开始
@@ -108,7 +109,7 @@ DeckKit 选择、readiness、benchmark 或图标查询，使用
   原地修改，也要先在 run 目录完成验证，再按用户明确意图写回。
 - **完成摘要**：成功生成或修改后，最终回复必须包含简短摘要：耗时、最终输出 PPTX 的绝对
   路径、run 目录、关键中间产物（`outline.json`、`deck_lock.json`、`assets_manifest.json` 如有、
-  sidecar、`vision.json`、预览目录 / contact sheet、可选 `check.json`）、验证结果
+  `resume_manifest.json` 如有、sidecar、`vision.json`、预览目录 / contact sheet、可选 `check.json`）、验证结果
   （check-lock / dry-run / vision-check / PNG 复核 / 发布前预检）以及仍需
   用户注意的风险。耗时应在任务开始和结束用真实时间戳计算；如果没有记录，不要编造。token
   信息只有在平台或工具给出准确统计时才输出，不能估算，拿不到准确值就完全省略 token 行。
@@ -127,6 +128,12 @@ patch 生产流程。`outline.json` 是叙事底座；`deck_lock.json` 是本轮
 DeckKit-first 路线，只防止 generator/content/patch 在长任务里偏离已确认的 PPTX 决策。
 详细 schema、资源清单和 `check-lock` 见 `references/design-lock-and-assets.md`。
 
+**Resume / Split mode** 是创建型任务的会话控制，不是新生成路线：长 deck 或高风险 deck 可以在
+`outline.json` + `deck_lock.json` + 必要的 `assets_manifest.json` 完成后写
+`resume_manifest.json` 并停止，让用户在新会话用 `继续生成 <run-dir>` 从磁盘状态继续。Phase B
+必须先按 `references/resume-split-mode.md` 做 sanity check，再回到 §6 第 3 步生成
+`content.json` / `patch.json`；不能依赖旧会话记忆补缺失文件。
+
 大纲确认遵循 **内部强制、自适应阻塞**：
 
 - **用户大纲优先**：如果用户已经提供页序、章节、标题、Markdown 大纲、表格结构或逐页内容，
@@ -143,6 +150,10 @@ DeckKit-first 路线，只防止 generator/content/patch 在长任务里偏离�
 - **Studio 一次性确认设计锁**：Studio / 高风险场景在大纲确认时一并给出 9 项短确认：
   画布、页数、受众、风格/密度、色彩/品牌、字体与公式策略、图标/图表、图片/logo/第三方素材策略。
   用户确认后写入 `deck_lock.json`；后续不要凭记忆改配色、字体、资源或模板来源。
+- **长 deck / 高风险 deck 推荐 split**：如果页数通常 `>= 12`、source 材料很长、Reference Create
+  信息多、资源/公式/图片多，或属于投资人 / 董事会 / 客户正式汇报 / 品牌合规等高风险场景，在
+  设计锁确认时一并给出 split 选项。用户选择 split 时，只完成 Phase A handoff，不写
+  `content.json`、不 dry-run、不生成 `.pptx`；用户选择同会话继续时照常完成。
 - **确认内容必须短**：只展示页序、每页标题和一句话目的；不要把完整讲稿、长 bullet、风格细节
   都拿去审批。一次性问清缺失项，避免多轮追问。
 - **确认通过后再生成**：阻塞确认场景中，用户同意前不写 `content.json`、不 dry-run、不生成
@@ -162,6 +173,11 @@ DeckKit-first 路线，只防止 generator/content/patch 在长任务里偏离�
 ├── 要精控 / 自定义布局 / 客户演示级 / 投资人级 → Studio → §1 创建 + §9 视觉丰富度
 └── 改已有 .pptx ───────────────────────────→ Edit → §2 修改 + references/inspect-and-edit.md
 ```
+
+Split / Resume 是横跨 Express、Studio、Reference Create 的会话控制：当用户说
+`继续生成 <run-dir>`、`恢复生成 <run-dir>` 或给出 `.pptx-nova/<run>` 并要求接着做时，先读取
+`references/resume-split-mode.md`，验证 run 目录里的 `resume_manifest.json` /
+`outline.json` / `deck_lock.json`，再继续生成。
 
 **第二级 — 任务类型**（决定走哪一节）：
 
@@ -194,7 +210,7 @@ deck 再新建；studio 逐项精控；edit 改已有），
    `outline.json`，固定受众、目标、页数、页序、每页意图、页型、主题和风格假设。
    Express 默认自动继续，Studio / 高风险场景按"创建型大纲与确认策略"先确认。
 2. 生成 `deck_lock.json` 和按需生成 `assets_manifest.json`：Express 用合理默认自动锁定，
-   Studio / 高风险场景用已确认的 8 项设计决策锁定；任何后续 theme、字体、资源或页型变化都
+   Studio / 高风险场景用已确认的 9 项设计决策锁定；任何后续 theme、字体、资源或页型变化都
    先更新 lock，再改 content/patch。
 3. 再查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
    选择 DeckKit；优先使用 `node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery`
@@ -572,6 +588,11 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
      `node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json` 生成 SVG 并回写状态。
    - 创建时先 `s8fy schema --index` 看 op 列表（当前 **109 个 op**：90 个 patch/control/raw
      op + 19 个 recipe op），按需 `--op <name>` 拉细节
+   - **Split checkpoint（仅创建型）**：完成 `outline.json`、`deck_lock.json` 和必要的
+     `assets_manifest.json` / `source_brief.md` 后，如果用户选择 split，写
+     `resume_manifest.json`，按 `references/resume-split-mode.md` 的 Phase A handoff 模板回复并停止。
+     停止前不得写 `content.json`、不得 dry-run、不得生成 `.pptx`。新会话恢复时先做 sanity check，
+     通过后从本节第 3 步继续。
 3. **写 content / patch JSON**：优先 DeckKit content manifest；无可用 DeckKit 或局部手写时才写
    patch。优先 recipe / `fill-layout`，必要时降级到 patch op；同一份 patch 内可混用
    `if` / `foreach` / `try` / `define` / `use` 控制/宏 op 减少手写重复
@@ -605,7 +626,7 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
 10. **交付最终 PPTX**：验证通过后，才把 run 目录内的最终中间 `.pptx` 写到用户当前目录或
     用户指定路径。创建型任务若最终路径已在开始前存在，必须仍然保持阻塞，不能在这一步覆盖。
 11. **完成摘要**：记录结束时间并输出摘要，至少包含耗时、最终 PPTX 路径、run 目录、`outline.json`、
-    `deck_lock.json`、`assets_manifest.json`（如有）、sidecar、`vision.json`、预览目录 / contact sheet、
+    `deck_lock.json`、`assets_manifest.json`（如有）、`resume_manifest.json`（如有）、sidecar、`vision.json`、预览目录 / contact sheet、
     可选 `check.json`、验证结果和剩余风险；只有准确 token 统计可得时才输出 token。
 12. **如果出错**：用 sidecar `s8fy pptx rollback --from-sidecar` 回滚到上一态
 
@@ -808,8 +829,9 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 | `references/recipes.md`                  | 用 recipe op 创建 deck 之前，看完整 schema 与示例                           |
 | `references/rich-deck-patterns.md`       | 要做"客户演示级"丰富 deck 时的视觉元素清单与起手势                          |
 | `references/deck-generator-workflow.md`  | 创建/扩展 DeckKit 时的 JS 生成器模板、helpers、命名规范                     |
+| `references/resume-split-mode.md`        | 长 deck / 高风险 deck 的 Phase A handoff 与新会话恢复生成                   |
 | `references/reference-create.md`         | 用户给参考 PPTX + 新大纲时，抽风格 / 映射页型 / 生成新 deck 的工作流        |
-| `references/design-lock-and-assets.md`   | `deck_lock.json` / `assets_manifest.json` / Studio 8 项确认 / check-lock    |
+| `references/design-lock-and-assets.md`   | `deck_lock.json` / `assets_manifest.json` / Studio 9 项确认 / check-lock    |
 | `references/theme-packs.md`              | themePack / stylePack catalog、`list-themes`、`swap-theme`、`extract-style` |
 | `references/template-library.md`         | brand/layout/deck/chart/icon 资产目录、catalog 和选择规则                   |
 | `references/inspect-and-edit.md`         | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |

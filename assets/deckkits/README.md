@@ -55,10 +55,19 @@ assets/deckkits/
   `deliverySeverity` 升级为 error。
 - `diversityGate`：按页型分组检查长 deck 的版式多样性、必需叙事组和连续重复组上限，
   避免整套 deck 退化成同一种卡片页。
+- `visualGrammar`：声明 DeckKit 的视觉语言合同，包含定位、气质、布局原则、
+  signature elements、字体/色彩节奏、composition rules 和 avoid 清单。它让 Agent 在
+  选择 DeckKit 后知道"这套页面应该长什么样"，并在 readiness audit 中阻止缺少风格合同的
+  production/default DeckKit 进入交付。
 
 这些 gate 属于 DeckKit 元数据，不属于单个 deck 的临时 patch。新增或调整规则时优先修改
 `catalog.json` 和 `core-primitives.kit.mjs`，让 `validate-content.mjs`、build 胶水和 benchmark
 共享同一套判断。
+
+`visualGrammar` 不是运行时代码，也不替代页型函数、schema、layout contract 或 diversity gate。
+它只约束 DeckKit 使用方式和内容创作方向：选中 DeckKit 后，把 `positioning` 用作风格判断，
+用 `signatureElements` 和 `compositionRules` 指导页面构成，用 `avoid` 拦截不匹配的视觉选择。
+不要因为有 visual grammar 就在 content 里塞 `customOps` 或临时坐标。
 
 ## 使用方式
 
@@ -118,7 +127,7 @@ node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation 
 5. `s8fy pptx apply --dry-run --json` 通过
 6. `s8fy pptx vision-check out.pptx --json` 的 high/medium 为 0
 7. PNG contact sheet 和逐页检查通过
-8. catalog 记录版本、验证命令、示例路径和已知限制
+8. catalog 记录版本、visual grammar、验证命令、示例路径和已知限制
 
 当前 readiness audit 会明确报告 candidate / delivery / default 三个结论。
 benchmark CLI 已接入逐页 PNG 与 contact-sheet 机器 gate；人工视觉复核、

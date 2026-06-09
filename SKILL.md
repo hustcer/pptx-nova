@@ -214,10 +214,11 @@ deck 再新建；studio 逐项精控；edit 改已有），
    先更新 lock，再改 content/patch。
 3. 再查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
    选择 DeckKit；优先使用 `node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery`
-   自动过滤 readiness、页型覆盖、语言、密度和 quality metadata。
+   自动过滤 readiness、页型覆盖、语言、密度和 quality metadata，并读取 selected
+   `visualGrammar` 作为本轮 deck 的视觉语言约束。
 4. 对选中的 DeckKit 跑
    `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
-   确认 catalog readiness、benchmark、vision/PNG gate 和人工 review 元数据都满足交付要求。
+   确认 catalog readiness、visual grammar、benchmark、vision/PNG gate 和人工 review 元数据都满足交付要求。
 5. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
    只能用于草稿、迁移验证，或人工确认后的交付。
 6. 有可用 DeckKit 时，严格走 `outline.json` → `deck_lock.json`（有资源时加 `assets_manifest.json`）→
@@ -326,6 +327,7 @@ content.json (变化层，每次只改这一份)
 - 不需要从头写坐标 / 配色 / 组件逻辑，DeckKit 已经冻结封装
 - content.json 极小（~200 行），二次创作只改内容
 - 有 schema 校验 + density limit + layout contract + diversity gate，常见结构错误在 apply 之前就被拦截
+- 有 catalog visual grammar，选中 DeckKit 后能直接拿到定位、标志性元素、构图规则和 avoid 清单
 - 同一 DeckKit 反复使用时 token 开销削减 75-80%
 
 **DeckKit 图标规则**：常用图标默认使用
@@ -341,7 +343,7 @@ content.json (变化层，每次只改这一份)
 
 1. 确认 `assets/deckkits/catalog.json` 中有目标 DeckKit（如 `consulting-dark`）
 2. `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <deckkit-id> --target candidate`
-   检查 benchmark、catalog readiness、quality metadata 和 known blocking limits
+   检查 benchmark、catalog readiness、visual grammar、quality metadata 和 known blocking limits
 3. 编写 `content.json`（参照同目录的 example + `assets/deckkits/schemas/` 下的 schema）
 4. `node assets/deckkits/validate-content.mjs content.json --deckkit <deckkit-id>` 校验 schema、density、layout contract 和 diversity；正式交付可加 `--mode delivery`
 5. 使用 `assets/deckkits/examples/roadshow-build.mjs` 生成 patch；需要定制时再复制为 `build.mjs` 并按当前位置修正 import 路径

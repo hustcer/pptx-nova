@@ -45,6 +45,7 @@ DeckKit、需要新页型或需要改组件结构时的创建/扩展阶段。
 
 ```
 prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资源时加 assets_manifest.json）
+  → 读取 selected DeckKit visualGrammar（定位 / signature / composition / avoid）
   → content.json（~200 行纯数据）
   → validate-content.mjs 校验（schema / density / layout contract / diversity）
   → createDeck(content) 生成 patch
@@ -52,7 +53,7 @@ prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资�
 ```
 
 判断条件：`catalog.json` 中存在匹配的 `id`，`supportedSlideTypes` 覆盖 outline
-所需的全部页型，且 `--target delivery` readiness audit 通过。交付型自动选择只允许
+所需的全部页型，`visualGrammar` 足够完整，且 `--target delivery` readiness audit 通过。交付型自动选择只允许
 `readiness in ["production", "default"]`；`candidate` 只能用于草稿、迁移验证，
 或人工确认后的交付。不满足时进入创建/扩展 DeckKit 流程，而不是把通用 generator
 作为最终交付路径。
@@ -78,6 +79,10 @@ node <skill-root>/scripts/pptx-nova-deckkit-select.mjs \
 
 # 1b. 对 selected.id 再跑 delivery readiness audit
 node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target delivery
+
+# 1c. 使用 selected.visualGrammar 约束内容创作：
+#     positioning 决定风格判断，signatureElements/compositionRules 决定页面构成，
+#     avoid 清单用于拒绝不匹配的视觉选择。
 
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
 cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json

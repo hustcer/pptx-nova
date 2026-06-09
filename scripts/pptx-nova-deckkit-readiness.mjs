@@ -10,6 +10,15 @@ const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const DEFAULT_OUT = join(WORK_ROOT, '.tmp/pptx-nova-visual')
 const REQUIRED_KINDS = ['golden', 'stress', 'mixed-language']
 const READINESS = ['experimental', 'candidate', 'production', 'default']
+const VISUAL_GRAMMAR_SCHEMA_VERSION = 'pptx-nova-visual-grammar/v1'
+const REQUIRED_VISUAL_GRAMMAR_ARRAYS = [
+  'mood',
+  'layoutPrinciples',
+  'signatureElements',
+  'compositionRules',
+  'avoid',
+]
+const REQUIRED_VISUAL_GRAMMAR_OBJECTS = ['typography', 'colorSystem', 'slideRhythm']
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> [options]
@@ -88,6 +97,71 @@ function artifactBytes(path) {
   const absolutePath = resolve(WORK_ROOT, path)
   if (!existsSync(absolutePath)) return 0
   return statSync(absolutePath).size
+}
+
+function stringArray(value) {
+  return (Array.isArray(value) ? value : []).filter(
+    (item) => typeof item === 'string' && item.trim(),
+  )
+}
+
+function hasNonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function isPlainObject(value) {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
+}
+
+function auditVisualGrammar(grammar) {
+  const blockers = []
+  const warnings = []
+
+  if (!isPlainObject(grammar)) {
+    blockers.push('catalog.visualGrammar is missing')
+    return {
+      present: false,
+      schemaVersion: '',
+      positioning: '',
+      mood: [],
+      layoutPrinciples: [],
+      signatureElements: [],
+      compositionRules: [],
+      avoid: [],
+      blockers,
+      warnings,
+    }
+  }
+
+  if (grammar.schemaVersion !== VISUAL_GRAMMAR_SCHEMA_VERSION) {
+    blockers.push(`catalog.visualGrammar.schemaVersion must be ${VISUAL_GRAMMAR_SCHEMA_VERSION}`)
+  }
+  if (!hasNonEmptyString(grammar.positioning)) {
+    blockers.push('catalog.visualGrammar.positioning is missing')
+  }
+  for (const field of REQUIRED_VISUAL_GRAMMAR_ARRAYS) {
+    if (stringArray(grammar[field]).length === 0) {
+      blockers.push(`catalog.visualGrammar.${field} must be a non-empty string array`)
+    }
+  }
+  for (const field of REQUIRED_VISUAL_GRAMMAR_OBJECTS) {
+    if (!isPlainObject(grammar[field])) {
+      blockers.push(`catalog.visualGrammar.${field} must be an object`)
+    }
+  }
+
+  return {
+    present: true,
+    schemaVersion: grammar.schemaVersion ?? '',
+    positioning: grammar.positioning ?? '',
+    mood: stringArray(grammar.mood),
+    layoutPrinciples: stringArray(grammar.layoutPrinciples),
+    signatureElements: stringArray(grammar.signatureElements),
+    compositionRules: stringArray(grammar.compositionRules),
+    avoid: stringArray(grammar.avoid),
+    blockers,
+    warnings,
+  }
 }
 
 function auditPreviewArtifacts(summary) {
@@ -216,6 +290,7 @@ function auditCatalog(entry) {
   const readiness = entry?.readiness ?? ''
   const quality = entry?.quality ?? {}
   const knownBlockingLimits = quality.knownBlockingLimits
+  const visualGrammar = auditVisualGrammar(entry?.visualGrammar)
 
   if (!entry) {
     blockers.push('DeckKit is missing from catalog.json')
@@ -223,6 +298,7 @@ function auditCatalog(entry) {
       readiness,
       quality,
       knownBlockingLimits: [],
+      visualGrammar,
       blockers,
       warnings,
     }
@@ -240,11 +316,14 @@ function auditCatalog(entry) {
   if (!Array.isArray(knownBlockingLimits)) {
     warnings.push('catalog.quality.knownBlockingLimits is missing or not an array')
   }
+  warnings.push(...visualGrammar.warnings)
+  warnings.push(...visualGrammar.blockers)
 
   return {
     readiness,
     quality,
     knownBlockingLimits: Array.isArray(knownBlockingLimits) ? knownBlockingLimits : [],
+    visualGrammar,
     blockers,
     warnings,
   }
@@ -258,12 +337,18 @@ function buildEligibility({ catalogAudit, benchmarkAudit }) {
   const readiness = catalogAudit.readiness
   const quality = catalogAudit.quality
   const knownBlockingLimits = catalogAudit.knownBlockingLimits
+  const visualGrammarBlockers = catalogAudit.visualGrammar?.blockers ?? []
+
+  if (['production', 'default'].includes(readiness)) {
+    candidateBlockers.push(...visualGrammarBlockers)
+  }
 
   if (!['production', 'default'].includes(readiness)) {
     deliveryBlockers.push(
       `catalog.readiness is "${readiness || 'missing'}"; delivery requires production/default`,
     )
   }
+  deliveryBlockers.push(...visualGrammarBlockers)
   if (!quality.lastBenchmark) {
     deliveryBlockers.push('catalog.quality.lastBenchmark must be set for delivery')
   }
@@ -344,6 +429,19 @@ function printHuman(result) {
       process.stdout.write(`  - ${warning}\n`)
     }
   }
+  if (result.catalog.visualGrammar?.present) {
+    process.stdout.write(`- visual grammar: ${result.catalog.visualGrammar.positioning}\n`)
+    if (result.catalog.visualGrammar.signatureElements.length > 0) {
+      process.stdout.write(
+        `  - signatures: ${result.catalog.visualGrammar.signatureElements.slice(0, 4).join('; ')}\n`,
+      )
+    }
+    if (result.catalog.visualGrammar.avoid.length > 0) {
+      process.stdout.write(
+        `  - avoid: ${result.catalog.visualGrammar.avoid.slice(0, 4).join('; ')}\n`,
+      )
+    }
+  }
   process.stdout.write('- benchmark cases:\n')
   for (const benchCase of result.benchmark.cases) {
     const status = benchCase.passed ? 'PASS' : 'FAIL'
@@ -400,6 +498,7 @@ function main() {
     catalog: {
       found: Boolean(entry),
       readiness: catalogAudit.readiness,
+      visualGrammar: catalogAudit.visualGrammar,
       quality: entry?.quality ?? null,
       warnings: catalogAudit.warnings,
     },

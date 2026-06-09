@@ -112,6 +112,13 @@
       "prompt": "做一份 6 页产品发布 deck，需要一张 AI 生成的 hero 背景图和一张产品场景图。请先写 assets_manifest.json，图片必须有 slotId、ratio、fitPolicy，并确保 prompt 只生成素材、不生成 PPT 页面元素。用 check-lock 校验后输出到 ~/Downloads/product-launch-assets.pptx。",
       "expected_output": "assets_manifest.json 中 AI 图片条目包含 pptxUse.slotId / ratio / fitPolicy / noSlideChrome:true；content 或 deck_lock 通过 assets/imageSlots 引用这些 id；check-lock 没有 asset-ai-slide-chrome-guard-missing 错误；最终 PPTX 的标题、页码、logo 和卡片由原生 shape 绘制，不在图片里。",
       "files": []
+    },
+    {
+      "id": 17,
+      "name": "deckkit-visual-grammar-selection",
+      "prompt": "用 DeckKit-first 路线做一份 8 页技术路演 deck。请先运行 DeckKit selection，并说明选中 DeckKit 的 visual grammar 如何影响这份 deck 的页面气质、signature elements、composition rules 和 avoid 清单，然后再写 content.json。输出到 ~/Downloads/grammar-guided-roadshow.pptx。",
+      "expected_output": "DeckKit selection 的结果包含 selected.visualGrammar；Agent 在写 content.json 前明确采用 positioning / signatureElements / compositionRules / avoid，不把不匹配的风格（如轻量营销 hero、装饰插画、随意 customOps）混入 DeckKit-first 交付；validate-content 和 readiness gate 都通过。",
+      "files": []
     }
   ]
 }

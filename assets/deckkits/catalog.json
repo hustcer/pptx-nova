@@ -37,6 +37,52 @@
         "timelineSlide",
         "askSlide"
       ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Dark executive consulting deck for technical roadshows, investor updates, and dense strategic narratives.",
+        "mood": ["executive", "technical", "high-conviction", "investor-ready"],
+        "layoutPrinciples": [
+          "Use a dark canvas with disciplined top and bottom chrome.",
+          "Anchor each page with one dominant headline or KPI cluster before secondary evidence.",
+          "Keep dense pages structured with panels, tables, and consistent gutters.",
+          "Prefer native PPTX cards, rules, charts, and tables over decorative imagery."
+        ],
+        "signatureElements": [
+          "copper or coral accents on deep navy backgrounds",
+          "KPI row cards with strong numeric hierarchy",
+          "dark evidence panels with thin rules and small source notes",
+          "benchmark tables, conversion flows, roadmap steps, and ask pages"
+        ],
+        "typography": {
+          "display": "large compact sans headline with tight executive hierarchy",
+          "body": "legible consulting sans body text with restrained line lengths",
+          "numeric": "oversized tabular numbers paired with short labels"
+        },
+        "colorSystem": {
+          "background": ["deep navy", "ink blue", "near black panels"],
+          "primary": ["off-white text", "muted blue-gray dividers"],
+          "accent": ["copper", "coral", "warm orange"],
+          "semantic": ["green for positive deltas", "amber for caution", "red only for risk"]
+        },
+        "slideRhythm": {
+          "anchor": ["heroSlide", "askSlide"],
+          "evidence": ["profileTableSlide", "landscapeSlide", "benchmarkSlide"],
+          "breathing": ["previewProductSlide", "convertFlowSlide", "timelineSlide"]
+        },
+        "compositionRules": [
+          "Lead with the decision message, then expose supporting metrics or evidence below.",
+          "Use 2-4 visual zones per page; avoid scattering many unrelated mini-cards.",
+          "Reserve warm accents for emphasis, not broad fills.",
+          "Keep footers and sources quiet but consistently placed."
+        ],
+        "avoid": [
+          "pastel consumer palettes",
+          "marketing hero pages without evidence",
+          "decorative illustrations that do not carry data",
+          "arbitrary customOps outside DeckKit slide data",
+          "long legal copy inside KPI cards"
+        ]
+      },
       "layoutContract": {
         "schemaVersion": "pptx-nova-layout-contract/v1",
         "severity": "warning",
@@ -287,6 +333,57 @@
         "mckInitiativeRankingSlide",
         "mckRoadmapSlide"
       ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Blue-and-white boardroom consulting deck for customer strategy, loyalty programs, and management briefings.",
+        "mood": ["analytical", "boardroom", "structured", "consulting"],
+        "layoutPrinciples": [
+          "Use clean white pages with deep blue headers, bars, and analytical rules.",
+          "Treat every page as an argument: title states the implication, body proves it.",
+          "Balance high-density evidence with generous margins and clear section hierarchy.",
+          "Prefer matrices, ranked initiatives, driver charts, and roadmap pages over freeform layouts."
+        ],
+        "signatureElements": [
+          "deep blue title bars and rule systems",
+          "source lines and small consulting-style notes",
+          "crisis snapshot metrics, demographic profiles, and priority matrices",
+          "loss driver analysis, pillar pages, initiative ranking, and implementation roadmap"
+        ],
+        "typography": {
+          "display": "plain executive sans headline with restrained weight contrast",
+          "body": "compact consulting body text optimized for evidence pages",
+          "numeric": "clear metric numerals with concise labels and deltas"
+        },
+        "colorSystem": {
+          "background": ["white", "light blue-gray", "pale analytical panels"],
+          "primary": ["deep consulting blue", "dark navy text"],
+          "accent": ["medium blue", "cyan highlight", "muted green for upside"],
+          "semantic": ["red for loss or risk", "green for opportunity", "gray for neutral baseline"]
+        },
+        "slideRhythm": {
+          "anchor": ["mckCoverSlide"],
+          "evidence": [
+            "mckCrisisSnapshotSlide",
+            "mckDemographicProfileSlide",
+            "mckPriorityMatrixSlide",
+            "mckLossDriverSlide"
+          ],
+          "action": ["mckPillarsSlide", "mckInitiativeRankingSlide", "mckRoadmapSlide"]
+        },
+        "compositionRules": [
+          "Keep titles specific enough to read as a recommendation or finding.",
+          "Use blue structure for hierarchy; keep charts and tables visually quiet.",
+          "Place sources and assumptions consistently near the lower edge.",
+          "Do not let decorative cards compete with analytical content."
+        ],
+        "avoid": [
+          "playful color accents",
+          "loose SaaS-style card grids",
+          "oversized hero-only pages after the cover",
+          "rounded decorative containers without analytical purpose",
+          "image-led pages that hide the key finding"
+        ]
+      },
       "layoutContract": {
         "schemaVersion": "pptx-nova-layout-contract/v1",
         "severity": "warning",
@@ -548,6 +645,53 @@
         "swissBrandGridSlide",
         "swissClosingSlide"
       ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Swiss International Typographic Style deck for design lectures, grid systems, and editorial visual education.",
+        "mood": ["typographic", "editorial", "systematic", "modernist"],
+        "layoutPrinciples": [
+          "Use modular grid alignment as the primary visual system.",
+          "Build pages from asymmetry, flush-left type, thin rules, and measured whitespace.",
+          "Let large typography and red-black-white contrast carry emphasis.",
+          "Keep imagery, profiles, and timelines subordinate to the grid."
+        ],
+        "signatureElements": [
+          "red dot, red bar, or red index marker as the recurring accent",
+          "black type on white with sparse gray rule systems",
+          "oversized typographic statements and quote pages",
+          "modular people grids, typeface specimens, column systems, and progress markers"
+        ],
+        "typography": {
+          "display": "Helvetica-like bold sans, flush-left, often oversized",
+          "body": "neutral sans with short line lengths and strong alignment discipline",
+          "numeric": "small page markers, years, and index numbers used as grid anchors"
+        },
+        "colorSystem": {
+          "background": ["white", "light gray fields"],
+          "primary": ["black text", "charcoal rules"],
+          "accent": ["Swiss red"],
+          "semantic": ["red for emphasis", "gray for secondary structure"]
+        },
+        "slideRhythm": {
+          "anchor": ["swissCoverSlide", "swissClosingSlide"],
+          "statement": ["swissQuoteSlide", "swissStatementSlide", "swissColumnSlide"],
+          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"]
+        },
+        "compositionRules": [
+          "Use the grid before adding decoration; every element should justify its alignment.",
+          "Prefer one strong typographic gesture per page over many small accents.",
+          "Keep red accents small, deliberate, and repeated.",
+          "Use whitespace as structure, not as empty leftover space."
+        ],
+        "avoid": [
+          "rounded SaaS cards",
+          "drop shadows",
+          "gradients",
+          "centered marketing layouts",
+          "icons used only as decoration",
+          "multi-color palettes outside red, black, white, and gray"
+        ]
+      },
       "layoutContract": {
         "schemaVersion": "pptx-nova-layout-contract/v1",
         "severity": "warning",

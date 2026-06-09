@@ -7,6 +7,15 @@ const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CATALOG_PATH = resolve(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const VALID_TARGETS = ['candidate', 'delivery', 'default']
 const VALID_READINESS = ['experimental', 'candidate', 'production', 'default']
+const VISUAL_GRAMMAR_SCHEMA_VERSION = 'pptx-nova-visual-grammar/v1'
+const REQUIRED_VISUAL_GRAMMAR_ARRAYS = [
+  'mood',
+  'layoutPrinciples',
+  'signatureElements',
+  'compositionRules',
+  'avoid',
+]
+const REQUIRED_VISUAL_GRAMMAR_OBJECTS = ['typography', 'colorSystem', 'slideRhythm']
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-deckkit-select.mjs [options]
@@ -159,6 +168,60 @@ function qualityBlockers(entry, target) {
   return blockers
 }
 
+function stringArray(value) {
+  return (Array.isArray(value) ? value : []).filter(
+    (item) => typeof item === 'string' && item.trim(),
+  )
+}
+
+function hasNonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function isPlainObject(value) {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
+}
+
+function visualGrammarIssues(grammar) {
+  const issues = []
+  if (!isPlainObject(grammar)) {
+    return ['visualGrammar is missing']
+  }
+  if (grammar.schemaVersion !== VISUAL_GRAMMAR_SCHEMA_VERSION) {
+    issues.push(`visualGrammar.schemaVersion must be ${VISUAL_GRAMMAR_SCHEMA_VERSION}`)
+  }
+  if (!hasNonEmptyString(grammar.positioning)) {
+    issues.push('visualGrammar.positioning is missing')
+  }
+  for (const field of REQUIRED_VISUAL_GRAMMAR_ARRAYS) {
+    if (stringArray(grammar[field]).length === 0) {
+      issues.push(`visualGrammar.${field} must be a non-empty string array`)
+    }
+  }
+  for (const field of REQUIRED_VISUAL_GRAMMAR_OBJECTS) {
+    if (!isPlainObject(grammar[field])) {
+      issues.push(`visualGrammar.${field} must be an object`)
+    }
+  }
+  return issues
+}
+
+function summarizeVisualGrammar(grammar) {
+  if (!isPlainObject(grammar)) return null
+  return {
+    schemaVersion: grammar.schemaVersion ?? '',
+    positioning: grammar.positioning ?? '',
+    mood: stringArray(grammar.mood),
+    layoutPrinciples: stringArray(grammar.layoutPrinciples),
+    signatureElements: stringArray(grammar.signatureElements),
+    typography: isPlainObject(grammar.typography) ? grammar.typography : {},
+    colorSystem: isPlainObject(grammar.colorSystem) ? grammar.colorSystem : {},
+    slideRhythm: isPlainObject(grammar.slideRhythm) ? grammar.slideRhythm : {},
+    compositionRules: stringArray(grammar.compositionRules),
+    avoid: stringArray(grammar.avoid),
+  }
+}
+
 function readinessBlockers(entry, target) {
   const blockers = []
   const readiness = entry.readiness ?? ''
@@ -177,9 +240,18 @@ function evaluateEntry(entry, args) {
   const missingTypes = missingSlideTypes(entry, args.slideTypes)
   const coverage = entry.coverage ?? {}
   const quality = entry.quality ?? {}
+  const visualGrammar = summarizeVisualGrammar(entry.visualGrammar)
+  const visualGrammarProblems = visualGrammarIssues(entry.visualGrammar)
 
   blockers.push(...readinessBlockers(entry, args.target))
   blockers.push(...qualityBlockers(entry, args.target))
+  if (visualGrammarProblems.length > 0) {
+    if (['delivery', 'default'].includes(args.target)) {
+      blockers.push(...visualGrammarProblems)
+    } else {
+      warnings.push(...visualGrammarProblems)
+    }
+  }
   if (missingTypes.length > 0) {
     blockers.push(`missing slide types: ${missingTypes.join(', ')}`)
   }
@@ -222,6 +294,7 @@ function evaluateEntry(entry, args) {
       density: coverage.density ?? [],
       slideTypes: coverage.slideTypes ?? entry.supportedSlideTypes ?? [],
     },
+    visualGrammar,
     quality: {
       lastBenchmark: quality.lastBenchmark ?? null,
       vision: quality.vision ?? null,
@@ -267,12 +340,25 @@ function selectDeckKit(args) {
   }
 }
 
+function previewList(values, limit = 4) {
+  const items = stringArray(values).slice(0, limit)
+  return items.length > 0 ? items.join('; ') : ''
+}
+
 function printHuman(result) {
   if (result.selected) {
     process.stdout.write(`Selected DeckKit: ${result.selected.id}\n`)
     process.stdout.write(`- readiness: ${result.selected.readiness}\n`)
     process.stdout.write(`- score: ${result.selected.score}\n`)
     process.stdout.write(`- path: ${result.selected.path}\n`)
+    if (result.selected.visualGrammar) {
+      const grammar = result.selected.visualGrammar
+      process.stdout.write(`- visual: ${grammar.positioning || 'missing'}\n`)
+      const signatures = previewList(grammar.signatureElements)
+      if (signatures) process.stdout.write(`- signatures: ${signatures}\n`)
+      const avoid = previewList(grammar.avoid)
+      if (avoid) process.stdout.write(`- avoid: ${avoid}\n`)
+    }
   } else {
     process.stdout.write('No eligible DeckKit found.\n')
   }

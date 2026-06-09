@@ -74,6 +74,33 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 
 ---
 
+## 全局工作目录、输出与完成摘要
+
+本节优先级高于后文所有示例路径；references 里的 `patch.json` / `out.pptx` /
+`previews/` 等相对路径只是示意，实际执行时都要映射到本节的 run 目录。
+
+- **统一工作目录**：无论创建还是修改，都在用户当前目录下创建
+  `.pptx-nova/<slug>-<YYYYMMDD-HHMMSS>/` 作为本次 run 目录。`slug` 优先取最终
+  PPTX basename，其次取输入 deck basename，仍未知时用 `deck`。所有临时文件都必须放在
+  run 目录或其子目录里，包括 `content.json`、`patch.json`、`build.mjs`、中间
+  `.pptx`、sidecar、`vision.json`、`check.json`、PNG/PDF/MD/JSON 预览和日志。
+  不要把临时文件写到源 PPTX 所在目录或最终输出目录；最终产物 `.pptx` 可以放到用户
+  当前目录或用户指定路径。
+- **创建型输出防碰撞**：如果用户明确指定要创建的最终 `.pptx` 文件名，且该最终路径在开始
+  生成前已经存在，必须先提醒用户该文件已存在，并要求用户重命名、删除现有文件或提供新的
+  输出路径；在用户处理前不生成、不 dry-run、不创建同名替代文件，也不能对最终路径使用
+  `--overwrite`。迭代过程只允许覆盖 run 目录内本轮自己创建的中间 `.pptx`。
+- **修改型输出隔离**：修改已有 deck 时，源文件默认只读；先把所有 inspect、patch、dry-run、
+  中间 apply 和预览都放在 run 目录中。只有最终交付时才写用户指定的输出路径；若用户要求
+  原地修改，也要先在 run 目录完成验证，再按用户明确意图写回。
+- **完成摘要**：成功生成或修改后，最终回复必须包含简短摘要：耗时、最终输出 PPTX 的绝对
+  路径、run 目录、关键中间产物（sidecar、`vision.json`、预览目录 / contact sheet、
+  可选 `check.json`）、验证结果（dry-run / vision-check / PNG 复核 / 发布前预检）以及仍需
+  用户注意的风险。耗时应在任务开始和结束用真实时间戳计算；如果没有记录，不要编造。token
+  信息只有在平台或工具给出准确统计时才输出，不能估算，拿不到准确值就完全省略 token 行。
+
+---
+
 ## 决策树：先选模式，再看任务类型
 
 **第一级 — 选模式**（决定 ceremony：要不要逐项控制）：
@@ -428,33 +455,44 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
 
 不论创建还是修改，都按这个骨架走 — 越简单的任务越不要跳步：
 
-1. **拿到 schema 与上下文**：
+1. **初始化 run 目录与输出预检**：记录开始时间，在当前目录创建
+   `.pptx-nova/<slug>-<YYYYMMDD-HHMMSS>/`。如果是创建型任务且用户指定的最终
+   `.pptx` 已存在，立即停止并提醒用户重命名、删除或换路径；不要生成，也不要用
+   `--overwrite` 覆盖最终路径。
+2. **拿到 schema 与上下文**：
    - 修改时先 `s8fy pptx inspect <in.pptx> --json`，拿到 slide/shape 结构
    - 创建时先 `s8fy schema --index` 看 op 列表（当前 **108 个 op**：89 个 patch/control/raw
      op + 19 个 recipe op），按需 `--op <name>` 拉细节
-2. **写 patch JSON**：优先 recipe / `fill-layout`，必要时降级到 patch op；同一份
+3. **写 patch JSON**：优先 recipe / `fill-layout`，必要时降级到 patch op；同一份
    patch 内可混用 `if` / `foreach` / `try` / `define` / `use` 控制/宏 op 减少手写
    重复（见 `references/control-flow-and-raw-xml.md`）
-3. **预演**：`--dry-run --json` 看 `semanticChanges[]` 与 `visualRisks[]`；不确定
+4. **预演**：`--dry-run --json` 看 `semanticChanges[]` 与 `visualRisks[]`；不确定
    字段时加 **`--explain`**，dry-run 报告会带 `explanations[].schema.{requiredFields,optionalFields,fieldNotes}`
    告诉你每个 op 该写什么
-4. **修复**：如果有 ambiguous selector 或 enum 拼错，按 `suggestions[].fixPatch`
+5. **修复**：如果有 ambiguous selector 或 enum 拼错，按 `suggestions[].fixPatch`
    改 patch 重试；**首选 `suggestion.autoRetry: true` 的建议**（机器有信心，直接合
    patch 重 dry-run）；常见 5 个场景见 `references/troubleshooting.md` 的 scenarioCoverage
-5. **落盘**：去掉 `--dry-run`，留意 sidecar 文件 `<out>.s8fy.json`
-6. **视觉验证**（两道闸门，先几何后像素）：
-   - **几何自检（render-free）**：`s8fy pptx vision-check out.pptx --json`，把
+6. **落盘到 run 目录**：去掉 `--dry-run`，先输出到 run 目录内的中间 `.pptx`，留意
+   sidecar 文件 `<out>.s8fy.json`。反复迭代时只允许对 run 目录内本轮自己创建的中间文件
+   使用 `--overwrite`。
+7. **视觉验证**（两道闸门，先几何后像素）：
+   - **几何自检（render-free）**：`s8fy pptx vision-check <run-dir>/out.pptx --json`，把
      `autoRetry:true` 的 `fixPatch` 合并重 apply 后再 check 到清零（闭环，见 §10）。
      这一步拦 dry-run 抓不到的越界 / 重叠 / 错位，比渲染快得多。创建型 deck 的
      `high` 与 `medium` 都是阻塞项，必须清到 0；不要只用 "无 high" 放行。
-   - **像素复核**：`s8fy convert out.pptx --to png -o previews/ --overwrite --contact-sheet`
-     先 Read 总览图 `previews/contact-sheet.png` 扫跨页一致性、定位可疑页，再用 Read 逐页过
-     §9.6 清单（字符重叠、换行压字、对比度、装饰挡标题等几何看不到或估不准的问题）。
-7. **发布前预检（可选但推荐）**：需要交给外部用户、客户或公开分发时，跑
-   `s8fy check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite`。
+   - **像素复核**：`s8fy convert <run-dir>/out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet`
+     先 Read 总览图 `<run-dir>/previews/contact-sheet.png` 扫跨页一致性、定位可疑页，再用
+     Read 逐页过 §9.6 清单（字符重叠、换行压字、对比度、装饰挡标题等几何看不到或估不准的问题）。
+8. **发布前预检（可选但推荐）**：需要交给外部用户、客户或公开分发时，跑
+   `s8fy check <run-dir>/out.pptx --checks fonts,links,compat -o <run-dir>/check.json --pretty --overwrite`。
    它只检查字体 / 链接 / 兼容性，不检查版式重叠；不要把它放在 `vision-check` 前面，也不要用它替代
-   §6.6 的几何与 PNG 门禁。
-8. **如果出错**：用 sidecar `s8fy pptx rollback --from-sidecar` 回滚到上一态
+   §6.7 的几何与 PNG 门禁。
+9. **交付最终 PPTX**：验证通过后，才把 run 目录内的最终中间 `.pptx` 写到用户当前目录或
+   用户指定路径。创建型任务若最终路径已在开始前存在，必须仍然保持阻塞，不能在这一步覆盖。
+10. **完成摘要**：记录结束时间并输出摘要，至少包含耗时、最终 PPTX 路径、run 目录、sidecar、
+    `vision.json`、预览目录 / contact sheet、可选 `check.json`、验证结果和剩余风险；只有准确
+    token 统计可得时才输出 token。
+11. **如果出错**：用 sidecar `s8fy pptx rollback --from-sidecar` 回滚到上一态
 
 ### 多步 session：用 daemon 加速 inspect + apply 循环（v10 起默认零配置）
 
@@ -528,8 +566,10 @@ titleOnly / objText / twoObj` 等 OOXML layout，直接 `add-slide layout: { typ
   `{ "series": 0, "point": 2 }`；省略 = plot 0（覆盖全部）
 - **recipe 的 `titleStyle` / `bodyStyle` 不接受顶层 `bold`** — 加粗要放进 `font:
 { name, bold: true }` 子对象；schema `additionalProperties: false` 严格拒绝
-- **`OutputExists` 时加 `--overwrite`** — 第二次 apply 同一个 `-o` 路径会被拒
-  绝，CI/重跑场景显式加 `--overwrite`；如果是误覆盖，先 `s8fy pptx rollback
+- **`OutputExists` 只能在 run 目录内覆盖本轮中间文件** — 第二次 apply 到同一个
+  run 目录中间 `-o` 路径会被拒绝，确认它是本轮自己创建的文件后才加 `--overwrite`。
+  创建型任务的用户指定最终路径如果在开始前已存在，不能用 `--overwrite` 解决，必须提醒
+  用户重命名、删除或换路径后再开始；如果是误覆盖，先 `s8fy pptx rollback
 --from-sidecar` 回到上一态
 - **chart 数据 0 值看起来像业务断崖** — 时间序列若 Q3/Q4 用 `0` 占位，渲染出来
   视觉上等于"业务塌方"。要么填预测值并在类目轴标 `"Q3 (预测)"`，要么只画已有
@@ -617,7 +657,8 @@ titleOnly / objText / twoObj` 等 OOXML layout，直接 `add-slide layout: { typ
 schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent 不读源码
   也能照着 fieldNotes 填字段。`--explain` 仅在 `apply --dry-run` 上有效,
   inspect / 真 apply 加这个标志会被拒绝
-- **错误码扩到 24 类** — 新增 `OutputExists`(`-o` 已存在,加 `--overwrite`)、
+- **错误码扩到 24 类** — 新增 `OutputExists`（run 目录内本轮中间 `-o` 已存在时可加
+  `--overwrite`；创建型最终路径已存在时必须阻塞并让用户换名 / 删除 / 换路径）、
   `InvalidSidecar`(sidecar 不是 `pptx-apply-sidecar/v1`)、`DaemonUnavailable`
   (`--daemon-strict` 在 daemon 不在 / auto-spawn 失败时报)、`InvalidRequest`
   / `ProtocolError` / `UnknownMethod`(daemon RPC 三种)。Agent 看到这几个
@@ -947,10 +988,15 @@ dry-run 通过只是"语义对"，vision-check 清零是"几何稳"，PNG 过清
 - **超过 ~100 ops 且无可用 DeckKit 时**，复制 `assets/examples/deck-generator-template.mjs`
   只是新建/扩展 DeckKit 的开发起点，不是普通交付 deck 的默认路径。
 - 改已有 deck：能用 layout selector 就别算坐标，能用 placeholder 就别 add-textbox。
-- 永远把 dry-run 当成必经环节，把 sidecar 当成时光机。第二次 apply 同路径要加
-  `--overwrite`；第二次 `convert` 同 PNG 目录也要加 `--overwrite`。
+- 所有创建 / 修改工作都在当前目录 `.pptx-nova/<slug>-<timestamp>/` 下完成，最终交付前
+  不把临时文件散落到源文件目录或输出目录。创建型任务若用户指定的最终 `.pptx` 已存在，
+  先提醒并阻塞，不能生成，也不能用 `--overwrite` 覆盖最终路径。
+- 永远把 dry-run 当成必经环节，把 sidecar 当成时光机。第二次 apply 同路径或第二次
+  `convert` 同 PNG 目录需要 `--overwrite` 时，只能用于 run 目录内本轮自己创建的中间产物。
 - 生成后按 **dry-run（语义）→ vision-check（几何，§10 可自动闭环）→ PNG（像素，
   §9.6 逐页 Read）** 三道闸门收尾。创建型 deck 的 `vision-check` high/medium
   必须为 0；几何缺陷（越界 / 重叠 / 错位）交给 `s8fy pptx vision-check`，
   字符重叠 / 小字号 / 对比度 / 连接线断开 / 中轴偏移 / 装饰挡标题这类像素与审美问题仍必须 PNG 逐页确认 ——
   三道职责不重叠，别相互顶替。
+- 完成后必须输出摘要：耗时、最终 PPTX 绝对路径、run 目录、sidecar / 验证报告 /
+  预览路径、验证结果和剩余风险；token 信息只有准确可得时才输出。

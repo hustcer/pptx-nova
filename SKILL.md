@@ -6,8 +6,8 @@ description: >
   rebrand, or fill a PowerPoint deck / slides / presentation / .pptx,
   including: 创建 PPT / 做 PPT / 生成演示文稿 / 修改 PPTX / 改一下幻灯片 /
   快速做一份 / 一句话生成 / 帮我快速出一版 / 简单提示词生成 / quick deck /
-  data-driven decks, brand checks, applying a corporate rebrand, exporting
-  PDF/PNG previews. Triggers on .pptx filenames, words like
+  reference deck style matching with a new outline, data-driven decks, brand
+  checks, applying a corporate rebrand, exporting PDF/PNG previews. Triggers on .pptx filenames, words like
   deck/slides/presentation/PPT/幻灯片/演示文稿, or any request that ends in
   "a PowerPoint file". Prefer this skill over hand-writing python-pptx /
   PptxGenJS / SVG-to-PPTX pipelines — s8fy CLI produces natively editable
@@ -135,6 +135,7 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 ```
 ├── 简单 prompt / 要快 / 没给细节 ────────────→ Express（DeckKit-first 自动闭环）→ references/express-mode.md
 │   └── 目标 DeckKit 已存在？────────── 是 ───→ DeckKit 快路径 → §1.4
+├── 参考 PPTX + 新大纲 / 新主题 ─────────────→ Reference Create → §1.5 + references/reference-create.md
 ├── 要精控 / 自定义布局 / 客户演示级 / 投资人级 → Studio → §1 创建 + §9 视觉丰富度
 └── 改已有 .pptx ───────────────────────────→ Edit → §2 修改 + references/inspect-and-edit.md
 ```
@@ -144,13 +145,15 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 ```
 用户请求
 ├── 创建新 deck（从大纲 / 主题 / 数据） ─────→ §1 创建
+├── 参考 PPTX + 新大纲生成新 deck ─────────→ §1.5 Reference Create
 ├── 修改已有 .pptx ──────────────────────────→ §2 修改
 ├── 数据 + 模板 → 批量填充 ─────────────────→ §3 数据驱动
 ├── 企业品牌改装 / 品牌合规检查 ────────────→ §4 品牌
 └── 转 PDF/PNG/提取/检查 ──────────────────→ §5 导出与检查
 ```
 
-模式决定 **ceremony**（express 自动选默认、最小确认、自动闭环；studio 逐项精控；edit 改已有），
+模式决定 **ceremony**（express 自动选默认、最小确认、自动闭环；reference create 先读参考
+deck 再新建；studio 逐项精控；edit 改已有），
 任务类型决定走 **哪一节**。简单 prompt 默认走 **Express** —— 它先尝试 DeckKit-first 路径，
 只有在没有合适 DeckKit、需要新页型或必须改组件结构时，才进入创建/扩展 DeckKit 的 generator
 开发流程，详见 `references/express-mode.md`。每一类都有"黄金路径"（最少踩坑），下面给入口；
@@ -302,6 +305,40 @@ content.json (变化层，每次只改这一份)
 
 可用 DeckKit 和支持的页型见 `assets/deckkits/catalog.json`；各页型 data 格式见
 `assets/deckkits/schemas/<slideType>.schema.json`。
+
+### 1.5 Reference Create（参考 PPTX + 新大纲）
+
+当用户提供一份现有 `.pptx` 作为视觉或结构参考，同时要求按新的大纲、主题或内容生成一份新的
+`.pptx`，走 **Reference Create**。参考 deck 默认只读；这不是普通 Edit，也不是直接覆盖源文件。
+先判断用户真正要的是哪一种：
+
+- **带占位符模板**：参考 PPTX 里有 `{{path}}` / `{{#each}}` 等占位符，要把数据套进去，
+  走 §3 `from-data`。
+- **纯风格参考**：用户要"像这份 PPT 的风格"，但内容和页序来自新大纲，走
+  `extract-style` + `outline.json` + DeckKit/generator 新建。
+- **结构也要复用**：用户要复用某些页面版式、章节节奏或整页骨架，先 `inspect`，必要时用
+  `copy-from` 复制参考页到新 deck，再替换文本、图表、表格和图片。
+- **原文件上直接改**：用户明确说"就在这份 PPT 上改/替换内容"，才走 §2 Edit。
+
+标准工作流：
+
+1. 在 run 目录保存用户大纲为 `outline.json`；用户已给大纲时直接采用，只有要改页序/核心表达才确认。
+2. `s8fy pptx inspect reference.pptx --json` 保存 `reference-inspect.json`，读取 slide/layout/shape
+   结构、文本密度、页面尺寸、可复用页型和潜在复杂对象。
+3. `s8fy pptx extract-style reference.pptx --output reference-style.json --json` 抽取主题色、字体、
+   layout/slide 语义、文本密度和 `themePackDraft` / `stylePackDraft`。
+4. 写 `reference-map.json`：把 `outline.json` 每页映射到参考 deck 中最接近的页型或 slide，例如
+   cover / section / KPI / two-column / timeline / table / closing。
+5. 优先用抽取的 theme/style/profile 驱动 DeckKit 或 generator 生成新 deck；只有需要整页骨架时才用
+   `copy-from`，不要为了"模仿风格"逐页硬复制所有对象。
+6. 走统一门禁：`content.json` / `patch.json` → dry-run → apply → `vision-check` high/medium 清零 →
+   PNG/contact sheet 逐页复核。
+
+边界：`extract-style` 当前不会全量细抽 card radius、shadow、chart-specific style；这些需要结合
+`inspect`、PNG 观察和 generator token / patch ops 补齐。参考 deck 里的 logo、图片、图标、模板素材
+涉及授权时，交付摘要必须提示来源风险；不要把用户未授权素材提交进本仓库资产目录。
+
+完整步骤见 `references/reference-create.md`。
 
 ---
 
@@ -719,6 +756,7 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 | `references/recipes.md`                  | 用 recipe op 创建 deck 之前，看完整 schema 与示例                           |
 | `references/rich-deck-patterns.md`       | 要做"客户演示级"丰富 deck 时的视觉元素清单与起手势                          |
 | `references/deck-generator-workflow.md`  | 创建/扩展 DeckKit 时的 JS 生成器模板、helpers、命名规范                     |
+| `references/reference-create.md`         | 用户给参考 PPTX + 新大纲时，抽风格 / 映射页型 / 生成新 deck 的工作流        |
 | `references/theme-packs.md`              | themePack / stylePack catalog、`list-themes`、`swap-theme`、`extract-style` |
 | `references/template-library.md`         | brand/layout/deck/chart/icon 资产目录、catalog 和选择规则                   |
 | `references/inspect-and-edit.md`         | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |
@@ -1013,7 +1051,8 @@ dry-run 通过只是"语义对"，vision-check 清零是"几何稳"，PNG 过清
 **最后的判断准则**：
 
 - **先选模式**：简单 prompt → Express（`references/express-mode.md`，自动闭环、最小确认）；
-  要精控 / 客户演示级 → Studio（§1 + §9）；改已有 deck → Edit（§2）。三者共用同一套 op。
+  参考 PPTX + 新大纲 → Reference Create（§1.5）；要精控 / 客户演示级 → Studio（§1 + §9）；
+  改已有 deck → Edit（§2）。四者共用同一套 op。
 - 草稿 / 速记：能用 recipe 就别用 patch。
 - **客户演示级 deck（默认）：先选可用 DeckKit；没有可用 DeckKit 时，先创建/扩展
   DeckKit，再用 DeckKit 生产交付 deck**，详见 §1.0 / §1.4。

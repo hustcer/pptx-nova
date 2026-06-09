@@ -22,12 +22,13 @@
 
 ## 1. 何时用 Express（vs Studio / Edit）
 
-| 信号                                                   | 走哪个模式  | 去向                                                  |
-| ------------------------------------------------------ | ----------- | ----------------------------------------------------- |
-| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express** | 本文档                                                |
-| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**  | 先选 DeckKit；无匹配时见 `deck-generator-workflow.md` |
-| 指定品牌 profile / 要做品牌合规检查                    | **Studio**  | SKILL §4 + `recipes.md`（apply-corporate-rebrand）    |
-| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**    | SKILL §2 + `inspect-and-edit.md`                      |
+| 信号                                                   | 走哪个模式           | 去向                                                  |
+| ------------------------------------------------------ | -------------------- | ----------------------------------------------------- |
+| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express**          | 本文档                                                |
+| 提供参考 PPTX + 新大纲 / 新主题                        | **Reference Create** | `reference-create.md`                                 |
+| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**           | 先选 DeckKit；无匹配时见 `deck-generator-workflow.md` |
+| 指定品牌 profile / 要做品牌合规检查                    | **Studio**           | SKILL §4 + `recipes.md`（apply-corporate-rebrand）    |
+| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**             | SKILL §2 + `inspect-and-edit.md`                      |
 
 Express 和 Studio 共用同一套 DeckKit / generator / op 基础设施，区别只在
 **ceremony**：express 自动选默认、最小确认、自动闭环；studio 让你逐项控制。
@@ -259,14 +260,15 @@ express 的核心是**不像 ppt-master 那样逐项确认**（它要 8 次 BLOC
 
 express 跑到一半发现下列任一信号，就升级（DeckKit / generator / op 基础设施共用，无需重来）：
 
-| 信号                                       | 升级到     | 去向                                          |
-| ------------------------------------------ | ---------- | --------------------------------------------- |
-| 要像素级定位 / 自由布局 / 演示动效拟态     | **Studio** | SKILL §1.2 + `patch-ops-cheatsheet.md`        |
-| 要自定义 chart 样式 / 二轴 combo / chartEx | **Studio** | `charts.md`                                   |
-| 要套已有品牌 profile / 做品牌合规          | **Studio** | SKILL §4 + `recipes.md`                       |
-| 要把一份 JSON/CSV 批量套进模板             | 数据驱动   | SKILL §3 + `data-driven.md`                   |
-| 用户改口"在这份已有 deck 上改/加"          | **Edit**   | SKILL §2 + `inspect-and-edit.md`              |
-| op 数已超 ~100、手维护吃力                 | 仍 Express | 先选 DeckKit；无匹配时扩展 DeckKit（见 §3.2） |
+| 信号                                       | 升级到           | 去向                                          |
+| ------------------------------------------ | ---------------- | --------------------------------------------- |
+| 要像素级定位 / 自由布局 / 演示动效拟态     | **Studio**       | SKILL §1.2 + `patch-ops-cheatsheet.md`        |
+| 要自定义 chart 样式 / 二轴 combo / chartEx | **Studio**       | `charts.md`                                   |
+| 要套已有品牌 profile / 做品牌合规          | **Studio**       | SKILL §4 + `recipes.md`                       |
+| 用户给参考 PPTX，要求按新大纲生成新 deck   | Reference Create | `reference-create.md`                         |
+| 要把一份 JSON/CSV 批量套进模板             | 数据驱动         | SKILL §3 + `data-driven.md`                   |
+| 用户改口"在这份已有 deck 上改/加"          | **Edit**         | SKILL §2 + `inspect-and-edit.md`              |
+| op 数已超 ~100、手维护吃力                 | 仍 Express       | 先选 DeckKit；无匹配时扩展 DeckKit（见 §3.2） |
 
 > Express 不是能力天花板，是**默认省事路径**。它产出的就是原生可编辑 PPTX + sidecar，
 > 任何时候都能用 Edit 模式继续 inspect / patch / 回滚。

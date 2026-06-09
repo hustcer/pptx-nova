@@ -225,12 +225,12 @@ content.json (变化层，每次只改这一份)
 - 同一 DeckKit 反复使用时 token 开销削减 75-80%
 
 **DeckKit 图标规则**：常用图标默认使用
-`assets/icons/tabler-icons.generated.json` 里的 Tabler 高频 bundle，通过
+`assets/icons/tabler-icons.pack.br` 里的 Tabler 全量 pack，通过
 `assets/deckkits/icon-assets.kit.mjs` 或 `createOps().icon()` 内联为
-`add-picture` 的 SVG `bytesBase64`。PPTX 生成路径不得临时联网拉取图标，也不得扫描
-`/Users/hustcer/iWork/refs/tabler-icons`；要增减图标时，先改
-`assets/icons/tabler-icons.manifest.json`，再运行
-`nu tools/generate-pptx-nova-tabler-icons.nu` 和
+`add-picture` 的 SVG `bytesBase64`。查找图标时使用
+`node tools/pptx-nova-icons.mjs search <query> --json`，PPTX 生成路径不得临时联网
+拉取图标，也不得扫描 `~/iWork/refs/tabler-icons`；刷新 pack 与
+`icon-license` 时运行 `nu tools/generate-pptx-nova-tabler-icons.nu` 和
 `nu tools/generate-pptx-nova-tabler-icons.nu --check`。
 
 **使用方式**：

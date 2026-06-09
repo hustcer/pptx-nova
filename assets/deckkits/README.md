@@ -66,7 +66,7 @@ process.stdout.write(JSON.stringify(patch))
 ## 图标使用
 
 DeckKit 需要 Tabler 图标时，使用 `createOps()` 返回的 `icon()` 或直接使用
-`icon-assets.kit.mjs`。它只读取 `../icons/tabler-icons.generated.json`，并把 SVG
+`icon-assets.kit.mjs`。它只读取 `../icons/tabler-icons.pack.br`，并把 SVG
 内联为 `add-picture` 的 `bytesBase64 + mime`，不依赖网络、临时 SVG 文件或 Tabler
 源码目录：
 
@@ -79,8 +79,15 @@ p.icon(0, 'S0_StatusIcon', 'chart-line', 0.72, 0.72, 0.28, 0.28, {
 })
 ```
 
-图标名必须来自 `assets/icons/tabler-icons.manifest.json`。要增减高频图标，先改
-manifest，再运行 `nu tools/generate-pptx-nova-tabler-icons.nu` 和
+查找图标时使用 agent 入口，避免把全量 SVG 读入上下文：
+
+```bash
+node tools/pptx-nova-icons.mjs search "analytics dashboard" --style outline --limit 12 --json
+node tools/pptx-nova-icons.mjs get chart-line users presentation --style outline --json
+```
+
+图标包覆盖 Tabler `outline` 和 `filled` 全量图标。刷新 pack 与 license 时运行
+`nu tools/generate-pptx-nova-tabler-icons.nu` 和
 `nu tools/generate-pptx-nova-tabler-icons.nu --check`。
 
 ## 版本规则（semver）

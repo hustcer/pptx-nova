@@ -24,18 +24,18 @@ introduced.
   `just theme -g` from the repo root; use `just theme` to detect stale
   generated MoonBit/JS catalogs.
 - Keep binary and licensed assets out until their license source is recorded.
-- Tabler high-frequency icons are vendored as
-  `icons/tabler-icons.generated.json`, a pure `{ "icon-name": "<svg>" }` map
-  generated from `icons/tabler-icons.manifest.json`. Refresh it from the local
-  Tabler checkout with:
+- Tabler icons are vendored as a deterministic Brotli pack at
+  `icons/tabler-icons.pack.br`, with the Tabler MIT license copied to
+  `icons/icon-license`. Refresh both from the local Tabler checkout with:
 
   ```bash
   nu tools/generate-pptx-nova-tabler-icons.nu
   nu tools/generate-pptx-nova-tabler-icons.nu --check
   ```
 
-  During PPTX generation, DeckKit code should consume this fixed JSON through
-  `assets/deckkits/icon-assets.kit.mjs`; do not fetch icons from the network or
+  During PPTX generation, DeckKit code should consume this pack through
+  `assets/deckkits/icon-assets.kit.mjs`; agents should search/get icons through
+  `node tools/pptx-nova-icons.mjs ...`. Do not fetch icons from the network or
   scan the Tabler checkout in the deck generation path.
 
 - Use `s8fy pptx extract-style reference.pptx --output style.json --json` to

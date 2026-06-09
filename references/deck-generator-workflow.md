@@ -2,8 +2,7 @@
 
 > 本文档解决的问题：**当没有可用 DeckKit、需要新页型或需要改组件结构时**，如何用
 > JS 生成器把视觉语言和页型抽取出来，再冻结成 DeckKit。普通交付 deck 应优先走
-> `content manifest → DeckKit → patch`；不要把临时 generator、theme showcase 或
-> `tools/generate-pptx-nova-examples.mjs` 当作最终交付默认路径。
+> `content manifest → DeckKit → patch`；不要把临时 generator 当作最终交付默认路径。
 > 下面给一套 "用 JS 生成 patch.json" 的标准模板和工作流，把 deck 的"数据 + 模板"
 > 显式拆开，让换主题色、换内容、换字号节奏各自 1 行修改解决。
 >
@@ -165,21 +164,19 @@ node skills/pptx-nova/assets/examples/deck-generator-template.mjs \
   --layout narrative-split > .tmp-narrative.patch.json
 ```
 
-legacy/theme showcase 产物矩阵生成：
+DeckKit 视觉回归使用 benchmark 工具，而不是旧 showcase 产物矩阵：
 
 ```bash
-node tools/generate-pptx-nova-examples.mjs \
-  --out .tmp-pptx-nova-examples \
-  --clean \
-  --themes consulting-grey \
-  --style consulting \
-  --layouts all \
-  --fail-on-vision medium
+node tools/pptx-nova-deckkit-benchmark.mjs \
+  --deckkit consulting-dark \
+  --all \
+  --repeat 3 \
+  --clean
 ```
 
-`tools/generate-pptx-nova-examples.mjs` 只用于 legacy/showcase 回归和迁移参考，不是交付
-PPTX 生成入口。`executive-grid` 是默认值，用来保持旧命令兼容；需要验证 theme/style 是否真的跨版式稳定时，
-显式传 `--layouts all`。
+benchmark 输出和 `tools/pptx-nova-deckkit-readiness.mjs` 共同决定 DeckKit 是否能进入
+delivery/default 路径。需要验证 theme/style 是否跨版式稳定时，把对应 fixture 收敛到
+`skills/pptx-nova/benchmarks/visual/`。
 
 ### 3. `nm()` 命名规范（双向必经）
 

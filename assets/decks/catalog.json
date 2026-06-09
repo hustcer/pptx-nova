@@ -25,23 +25,6 @@
       "path": "../examples/quarterly-report.patch.json",
       "bestFor": ["schema-v1 patch reference", "manual apply example"],
       "status": "available"
-    },
-    {
-      "id": "pptx-nova-example-artifacts",
-      "name": "Preset and Theme Example Artifacts",
-      "type": "generatedArtifactSet",
-      "path": "examples/index.json",
-      "bestFor": [
-        "preset quality regression",
-        "themePack visual audit",
-        "vision-check summary archive"
-      ],
-      "commands": {
-        "generate": "node tools/generate-pptx-nova-examples.mjs --clean --render-previews",
-        "check": "node tools/generate-pptx-nova-examples.mjs --out .tmp-pptx-nova-examples --clean --preset-theme tech-dark --themes corporate-blue --fail-on-vision medium",
-        "preview": "node tools/generate-pptx-nova-examples.mjs --out .tmp-pptx-nova-examples --clean --preset-theme tech-dark --themes corporate-blue --fail-on-vision medium --render-previews"
-      },
-      "status": "available"
     }
   ]
 }

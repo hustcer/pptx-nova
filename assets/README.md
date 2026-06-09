@@ -45,14 +45,10 @@ introduced.
   profiles, and register the imported entries in the local catalogs.
 - Use `s8fy pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx`
   when you only need to reuse one slide in another deck.
-- Use `node tools/generate-pptx-nova-examples.mjs --clean --render-previews`
-  from the repo root to materialize the preset/theme showcase decks, persist
-  their `pptx-vision/v1` reports under `decks/examples/`, and render local
-  PNG previews plus contact sheets for visual review. The `.pptx`, patch,
-  dry-run, full vision, PNG preview, and contact sheet files are generated
-  local artifacts and remain ignored by git; README/index files and per-sample
-  `summary.json` files are the committed audit trail.
-- Commit lightweight example audit files only: README/index and `summary.json`.
-  Do not commit generated `.pptx`, PNG previews, contact sheets, regenerated
-  `patch.json`, `dry-run-summary.json`, or full `vision*.json` files unless a
-  future review explicitly needs a frozen full artifact.
+- Use `node tools/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
+  plus `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
+  for production visual gates. Store long-lived benchmark inputs under
+  `skills/pptx-nova/benchmarks/visual/`, not under `assets/decks/`.
+- Do not commit generated `.pptx`, PNG previews, contact sheets, regenerated
+  `patch.json`, dry-run reports, or full `vision*.json` files unless a future
+  review explicitly needs a frozen full artifact.

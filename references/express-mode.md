@@ -151,8 +151,7 @@ outline 顶层还带 `out`（输出路径）和 `themePack` / `stylePack`（如 
 
 只有 readiness audit 没有合适 DeckKit、outline 缺页型或需要改组件结构时，才复制
 `assets/examples/deck-generator-template.mjs`。目标是抽取/扩展 DeckKit，再回到
-content manifest 生产路径；不要把临时 generator、theme showcase 或
-`tools/generate-pptx-nova-examples.mjs` 当作最终交付路径。按 outline 改这三处即可，
+content manifest 生产路径；不要把临时 generator 当作最终交付路径。按 outline 改这三处即可，
 **不要重写 helper**：
 
 1. **theme/style 选择** —— 默认 `--theme corporate-blue --style consulting`；可换成

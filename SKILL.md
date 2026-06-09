@@ -184,8 +184,8 @@ deck 再新建；studio 逐项精控；edit 改已有），
 6. 没有可用 DeckKit、缺页型或需要改组件结构时，先创建/扩展 DeckKit，再用 DeckKit 生产 deck。
 
 `deck-generator-template.mjs` 是新建或扩展 DeckKit 的探索/迁移开发起点，不是普通交付 deck
-的默认路径；`assets/decks/examples/theme-*` 和 `tools/generate-pptx-nova-examples.mjs`
-只保留为 legacy/showcase 参考，不得作为交付 deck 生成入口。
+的默认路径；旧 showcase examples 已退役，生产与回归统一向 DeckKit 和
+`skills/pptx-nova/benchmarks/visual/` 收敛。
 
 ### 1.1 极简最短路径（recipe-first）
 

@@ -856,3 +856,305 @@ export function validateContent(
     normalizedContent: content,
   }
 }
+
+// --- Build-time patch quality preflight ---
+const QUALITY_MIN_FONT_PT = 10
+const DEFAULT_TEXT_INSET_X_IN = 0.1
+const DEFAULT_TEXT_INSET_Y_IN = 0.05
+
+function parseInches(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  const m = String(value ?? '').match(/^(-?[0-9]+(?:\.[0-9]+)?)in$/i)
+  return m ? Number.parseFloat(m[1]) : null
+}
+
+function normalizePatchFillColor(fill) {
+  if (!fill || typeof fill !== 'object') return null
+  const kind = fill.type ?? fill.kind
+  if (kind !== 'solid') return null
+  return normalizeHex(fill.color ?? fill.rgb)
+}
+
+function estimateQualityCharWidth(ch, fontPt) {
+  if (/[\u2e80-\u9fff\uf900-\ufaff\uac00-\ud7af]/u.test(ch)) return fontPt
+  if (/[A-Z]/.test(ch)) return fontPt * 0.68
+  if (/[a-z]/.test(ch)) return fontPt * 0.55
+  if (/[0-9]/.test(ch)) return fontPt * 0.56
+  if (/[!-/:-@[-`{-~]/.test(ch)) return fontPt * 0.34
+  return fontPt * 0.55
+}
+
+function estimateQualityLineCount(text, fontPt, maxWidthPt) {
+  if (!text) return 0
+  if (maxWidthPt <= 0) return 1_000_000
+  let lines = 1
+  let lineWidth = 0
+  let tokenWidth = 0
+  const placeToken = () => {
+    if (tokenWidth <= 0) return
+    if (lineWidth > 0 && lineWidth + tokenWidth > maxWidthPt) {
+      lines += 1
+      lineWidth = 0
+    }
+    while (tokenWidth > maxWidthPt) {
+      lines += 1
+      tokenWidth -= maxWidthPt
+    }
+    lineWidth += tokenWidth
+    tokenWidth = 0
+  }
+  for (const ch of String(text)) {
+    if (ch === '\n' || ch === '\v') {
+      placeToken()
+      lines += 1
+      lineWidth = 0
+      tokenWidth = 0
+    } else if (ch === ' ' || ch === '\t') {
+      placeToken()
+      if (lineWidth > 0) {
+        const spaceWidth = fontPt * (ch === '\t' ? 1.36 : 0.34)
+        if (lineWidth + spaceWidth > maxWidthPt) {
+          lines += 1
+          lineWidth = 0
+        } else {
+          lineWidth += spaceWidth
+        }
+      }
+    } else {
+      tokenWidth += estimateQualityCharWidth(ch, fontPt)
+    }
+  }
+  placeToken()
+  return lines
+}
+
+function qualityShapeFontPt(shape) {
+  const sizes = shape.fonts.map((font) => parseFontPt(font?.size)).filter((size) => size !== null)
+  return sizes.length ? Math.max(...sizes) : 12
+}
+
+function qualityExplicitFontColors(shape) {
+  return [
+    ...new Set(shape.fonts.map((font) => normalizeHex(font?.color)).filter(Boolean)),
+  ]
+}
+
+function qualitySeverityForContrast(ratio, minRatio) {
+  if (ratio < Math.min(3, minRatio)) return 'error'
+  return 'warning'
+}
+
+function makeQualityIssue({
+  kind,
+  severity = 'warning',
+  slideIndex,
+  shapeName,
+  message,
+  metrics = {},
+  suggestedActions = [],
+}) {
+  return {
+    kind,
+    severity,
+    slideIndex,
+    shapeName,
+    message,
+    metrics,
+    suggestedActions,
+  }
+}
+
+function collectPatchQualityFacts(patch) {
+  const slides = new Map()
+  const ensureSlide = (slideIndex) => {
+    if (!slides.has(slideIndex)) {
+      slides.set(slideIndex, {
+        background: 'FFFFFF',
+        shapes: [],
+        byName: new Map(),
+        byId: new Map(),
+      })
+    }
+    return slides.get(slideIndex)
+  }
+  const rememberShape = (shape) => {
+    const slide = ensureSlide(shape.slideIndex)
+    slide.shapes.push(shape)
+    if (shape.name) slide.byName.set(shape.name, shape)
+    if (shape.id !== undefined) slide.byId.set(shape.id, shape)
+  }
+  const selectShape = (slideIndex, selector) => {
+    const slide = ensureSlide(slideIndex)
+    if (selector?.name) return slide.byName.get(selector.name)
+    if (selector?.id !== undefined) return slide.byId.get(selector.id)
+    return null
+  }
+
+  let nextSlideIndex = 0
+  for (const op of patch?.ops ?? []) {
+    if (op.op === 'add-slide') {
+      ensureSlide(nextSlideIndex)
+      nextSlideIndex += 1
+      continue
+    }
+    if (op.op === 'set-slide-background') {
+      const color = normalizePatchFillColor(op.fill)
+      if (color) ensureSlide(op.slide).background = color
+      continue
+    }
+    if (op.op === 'add-textbox' || op.op === 'add-shape') {
+      const x = parseInches(op.x)
+      const y = parseInches(op.y)
+      const w = parseInches(op.w)
+      const h = parseInches(op.h)
+      if ([x, y, w, h].some((v) => v === null)) continue
+      rememberShape({
+        slideIndex: op.slide,
+        id: op.id,
+        name: op.name ?? '',
+        kind: op.op,
+        shape: op.shape,
+        x,
+        y,
+        w,
+        h,
+        text: op.text ?? '',
+        fonts: [],
+        fillColor: null,
+      })
+      continue
+    }
+    if (op.op === 'set-text') {
+      const shape = selectShape(op.slide, op.shape)
+      if (shape) shape.text = String(op.text ?? '')
+      continue
+    }
+    if (op.op === 'add-run') {
+      const shape = selectShape(op.slide, op.shape)
+      if (shape) {
+        shape.text += String(op.text ?? '')
+        if (op.font) shape.fonts.push(op.font)
+      }
+      continue
+    }
+    if (op.op === 'set-run') {
+      const shape = selectShape(op.slide, op.shape)
+      if (shape && op.font) shape.fonts.push(op.font)
+      continue
+    }
+    if (op.op === 'set-shape-fill') {
+      const shape = selectShape(op.slide, op.shape)
+      const color = normalizePatchFillColor(op.fill)
+      if (shape && color) shape.fillColor = color
+    }
+  }
+  return [...slides.entries()].map(([slideIndex, slide]) => ({ slideIndex, ...slide }))
+}
+
+function assessTextOverflowQuality(shape, issues) {
+  if (!/subtitle/i.test(shape.name ?? '')) return
+  const text = String(shape.text ?? '').trim()
+  if (!text) return
+  const fontPt = qualityShapeFontPt(shape)
+  const availableWPt = Math.max(0, (shape.w - DEFAULT_TEXT_INSET_X_IN * 2) * 72)
+  const availableHPt = Math.max(0, (shape.h - DEFAULT_TEXT_INSET_Y_IN * 2) * 72)
+  const lineCount = estimateQualityLineCount(text, fontPt, availableWPt)
+  const neededHPt = lineCount * fontPt * 1.2
+  if (lineCount > 1 || neededHPt > availableHPt || text.length > 56) {
+    issues.push(
+      makeQualityIssue({
+        kind: 'text-overflow-risk',
+        slideIndex: shape.slideIndex,
+        shapeName: shape.name,
+        message: 'subtitle copy is likely to wrap or collide with nearby chrome',
+        metrics: {
+          textLength: text.length,
+          estLines: lineCount,
+          fontPt,
+          availableHeightPt: Number(availableHPt.toFixed(2)),
+          neededHeightPt: Number(neededHPt.toFixed(2)),
+        },
+        suggestedActions: ['shorten-subtitle', 'increase-subtitle-box', 'move-rule-down'],
+      }),
+    )
+  }
+}
+
+function assessContrastQuality(shape, slide, issues) {
+  if (!String(shape.text ?? '').trim()) return
+  const colors = qualityExplicitFontColors(shape)
+  if (colors.length === 0) return
+  const bg = normalizeHex(shape.fillColor) ?? normalizeHex(slide.background)
+  if (!bg) return
+  const fontPt = qualityShapeFontPt(shape)
+  const minContrast = fontPt >= 18 ? 3 : 4.5
+  for (const color of colors) {
+    const ratio = contrastRatio(color, bg)
+    if (ratio > 0 && ratio < minContrast) {
+      issues.push(
+        makeQualityIssue({
+          kind: 'low-contrast-text',
+          severity: qualitySeverityForContrast(ratio, minContrast),
+          slideIndex: shape.slideIndex,
+          shapeName: shape.name,
+          message: 'explicit text color does not meet WCAG contrast for the solid background',
+          metrics: {
+            textColor: color,
+            backgroundColor: bg,
+            contrastRatio: Number(ratio.toFixed(3)),
+            minContrast,
+            fontPt,
+          },
+          suggestedActions: ['darken-text-color', 'increase-font-size', 'change-background'],
+        }),
+      )
+    }
+  }
+}
+
+function assessFontSizeQuality(shape, issues) {
+  if (!String(shape.text ?? '').trim()) return
+  for (const font of shape.fonts) {
+    const fontPt = parseFontPt(font?.size)
+    if (fontPt !== null && fontPt < QUALITY_MIN_FONT_PT) {
+      issues.push(
+        makeQualityIssue({
+          kind: 'font-too-small',
+          severity: fontPt < 8 ? 'error' : 'warning',
+          slideIndex: shape.slideIndex,
+          shapeName: shape.name,
+          message: 'explicit font size is below the readable threshold',
+          metrics: { fontPt, minFontPt: QUALITY_MIN_FONT_PT },
+          suggestedActions: ['increase-font-size', 'reduce-copy', 'switch-layout'],
+        }),
+      )
+      return
+    }
+  }
+}
+
+export function assessDeckQuality({ patch, deckkit = null } = {}) {
+  const issues = []
+  const slides = collectPatchQualityFacts(patch)
+  for (const slide of slides) {
+    for (const shape of slide.shapes) {
+      assessTextOverflowQuality(shape, issues)
+      assessContrastQuality(shape, slide, issues)
+      assessFontSizeQuality(shape, issues)
+    }
+  }
+  const bySeverity = issues.reduce((acc, issue) => {
+    acc[issue.severity] = (acc[issue.severity] ?? 0) + 1
+    return acc
+  }, {})
+  return {
+    schemaVersion: 'pptx-nova-quality/v1',
+    deckkit,
+    status: issues.some((issue) => issue.severity === 'error') ? 'error' : issues.length ? 'warning' : 'ok',
+    summary: {
+      issueCount: issues.length,
+      bySeverity,
+    },
+    issues,
+  }
+}

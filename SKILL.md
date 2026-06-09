@@ -120,7 +120,7 @@ DeckKit 选择、readiness、benchmark 或图标查询，使用
 创建型 deck 必须先生成或标准化结构化 `outline.json`，再生成轻量运行契约
 `deck_lock.json` 和可选 `assets_manifest.json`，最后进入 DeckKit 选择、`content.json` 或
 patch 生产流程。`outline.json` 是叙事底座；`deck_lock.json` 是本轮 PPTX 的设计锁，
-用于固定画布、DeckKit/theme/style、色彩、字体、图标、资源、模板融合和每页页型/节奏。
+用于固定画布、DeckKit/theme/style、色彩、字体、公式策略、图标、资源、模板融合和每页页型/节奏。
 不能为了省步骤直接从 prompt 跳到 patch。
 
 `deck_lock.json` 不是 `ppt-master` 的 SVG `spec_lock.md`：它不要求逐页手写 SVG，不改变
@@ -140,8 +140,8 @@ DeckKit-first 路线，只防止 generator/content/patch 在长任务里偏离�
   客户正式汇报、品牌合规、公司口径敏感、主题/受众/目标无法合理推断、页数跨度过大、或数据型
   deck 缺关键数据时，先给用户确认页序。若用户已经提供明确大纲，视为已确认该大纲；只有需要
   调整页序、增删页或改变核心表达时，才拿修订版再确认。
-- **Studio 一次性确认设计锁**：Studio / 高风险场景在大纲确认时一并给出 8 项短确认：
-  画布、页数、受众、风格/密度、色彩/品牌、字体、图标/图表、图片/logo/第三方素材策略。
+- **Studio 一次性确认设计锁**：Studio / 高风险场景在大纲确认时一并给出 9 项短确认：
+  画布、页数、受众、风格/密度、色彩/品牌、字体与公式策略、图标/图表、图片/logo/第三方素材策略。
   用户确认后写入 `deck_lock.json`；后续不要凭记忆改配色、字体、资源或模板来源。
 - **确认内容必须短**：只展示页序、每页标题和一句话目的；不要把完整讲稿、长 bullet、风格细节
   都拿去审批。一次性问清缺失项，避免多轮追问。
@@ -562,9 +562,12 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
 2. **拿到 schema 与上下文**：
    - 修改时先 `s8fy pptx inspect <in.pptx> --json`，拿到 slide/shape 结构
    - 创建时先生成或标准化 `outline.json`；用户已有大纲时直接采用，Express 默认自动继续，
-     Studio / 高风险场景先让用户确认短大纲和 8 项设计锁
+     Studio / 高风险场景先让用户确认短大纲和 9 项设计锁
    - 创建时写 `deck_lock.json` 和可选 `assets_manifest.json`，锁定画布、DeckKit/theme/style、
-     字体、颜色、图标、资源、模板融合和每页页型/节奏；后续 content/patch 不得隐式偏离
+     字体、公式策略、颜色、图标、资源、模板融合和每页页型/节奏；后续 content/patch 不得隐式偏离。
+     如果 prompt/source 含 LaTeX、`$...$`、公式、方程、数学符号密集内容，先按
+     `references/formulas.md` 记录 `typography.formulaPolicy`（默认 `mixed`）和
+     `slides[].formulas[]` / `assets_manifest.json` 公式条目。
    - 创建时先 `s8fy schema --index` 看 op 列表（当前 **108 个 op**：89 个 patch/control/raw
      op + 19 个 recipe op），按需 `--op <name>` 拉细节
 3. **写 content / patch JSON**：优先 DeckKit content manifest；无可用 DeckKit 或局部手写时才写
@@ -722,6 +725,12 @@ titleOnly / objText / twoObj` 等 OOXML layout，直接 `add-slide layout: { typ
   render-free 静态抓取并自动闭环；创建型 deck 里 `medium/high` 都必须处理到 0。
   **像素类**（字符实际重叠、字体换行导致压字、对比度、装饰是否真盖住文字）仍要靠
   **PNG 逐页 Read** 这道不可替代的闸门，见 §9.6 视觉验证清单
+- **表格 `set-cell-formula` 不是数学公式排版** — 它只把 `SUM/AVG/COUNT/MIN/MAX`
+  这类表格聚合公式静态计算成单元格文本，不会创建 PowerPoint 方程，也不会渲染
+  LaTeX。真正的数学公式按 `references/formulas.md` 选择 `mixed` / `text-only` /
+  `rendered` / `native-omml` 策略：复杂公式用 `add-formula`（若 schema 已支持）或
+  先渲染为 run 目录内 SVG/PNG 再用 `add-picture`，并在 `assets_manifest.json` 里保留
+  `kind: "formula"`、原始 `latex`、display、尺寸和 no-crop 约束。
 - **`raw-ooxml-patch` 默认禁用，需 `--allow-raw-xml`** — 这是逃生口，绕过
   schema-v1 的所有结构性校验，可以直接改 `ppt/slides/slideN.xml` 等任意 XML 部件。
   只在标准 patch op 表达不了（极少数 OOXML 边角语义）时使用；写完务必加跑
@@ -804,6 +813,7 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 | `references/inspect-and-edit.md`         | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |
 | `references/schema-discovery.md`         | 想搞清楚 108 个 op 的全貌、按需拉 schema                                    |
 | `references/styles-and-themes.md`        | 编辑颜色 / 渐变 / 字体 / 主题 / 母版                                        |
+| `references/formulas.md`                 | LaTeX / 数学公式策略、formula manifest、`add-formula` / fallback            |
 | `references/charts.md`                   | 创建 / 编辑图表，以及 native diagram/table preset                           |
 | `references/tables.md`                   | 表格创建 / 编辑 / CSV 导入 / 公式                                           |
 | `references/data-driven.md`              | `from-data` + `bind-data` 完整用法                                          |

@@ -33,8 +33,9 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 4. 风格目标与密度
 5. 色彩 / 品牌来源
 6. 字体策略
-7. 图标 / 图表风格
-8. 图片 / logo / 第三方素材策略
+7. 公式策略（`mixed` / `text-only` / `rendered` / `native-omml`，无公式时写 `none`）
+8. 图标 / 图表风格
+9. 图片 / logo / 第三方素材策略
 
 用户已经明确给出的项直接采用，不重复追问。缺项能合理推断时给推荐值；只有品牌口径、
 页序、敏感数据、外部素材授权或输出路径存在真实风险时才阻塞。
@@ -84,6 +85,9 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
     "title": "Inter, Source Han Sans SC, Microsoft YaHei, sans-serif",
     "body": "Inter, Source Han Sans SC, Microsoft YaHei, sans-serif",
     "code": "Consolas, Courier New, monospace",
+    "formulaPolicy": "mixed",
+    "formulaFallback": "rendered",
+    "mathFont": "Cambria Math, Latin Modern Math, Noto Sans Math",
     "bodyPtMin": 10.5,
     "labelPtMin": 9
   },
@@ -116,7 +120,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
       "purpose": "Show core KPI trend",
       "slideType": "kpiRowSlide",
       "rhythm": "dense",
-      "chart": { "kind": "column", "semanticSource": "content.slides[1].data" }
+      "chart": { "kind": "column", "semanticSource": "content.slides[1].data" },
+      "formulas": []
     }
   ],
   "assumptions": ["No user-provided brand guide; use corporate-blue consulting defaults."]
@@ -127,6 +132,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 
 - 必填：`schemaVersion`、`mode`、`slides[]`、`canvas`、输出路径或 run 目录。
 - 创建型：写 `deckkit`、`themePack`、`stylePack`、`colors`、`typography`。
+- 技术 / 学术 / 培训 deck：在 `typography.formulaPolicy` 写公式策略，并在相关 slide
+  用 `formulas[]` 引用公式资产 id；详情见 `references/formulas.md`。
 - 使用模板资产：写 `templateFusion`，并记录每个来源的 kind/id/path。
 - 使用图片/logo/外部素材：才写 `assetsManifestPath`，并让 slide 通过 asset id 引用。
 - 不确定项写进 `assumptions[]`，不要在后续 generator 里隐式改掉。
@@ -159,6 +166,36 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
       }
     },
     {
+      "id": "objective_loss",
+      "kind": "formula",
+      "status": "rendered",
+      "path": "assets/formulas/objective_loss.svg",
+      "source": {
+        "kind": "formula",
+        "latex": "L(\\theta)=\\sum_{i=1}^{n}(y_i-f_\\theta(x_i))^2",
+        "display": "block"
+      },
+      "pptxUse": {
+        "role": "formula-block",
+        "crop": "contain",
+        "noCrop": true
+      }
+    },
+    {
+      "id": "formula_native_example",
+      "kind": "formula",
+      "status": "native",
+      "source": {
+        "kind": "formula",
+        "latex": "E=mc^2",
+        "display": "inline"
+      },
+      "pptxUse": {
+        "role": "formula-inline",
+        "noCrop": true
+      }
+    },
+    {
       "id": "hero_photo",
       "kind": "image",
       "status": "placeholder",
@@ -177,14 +214,20 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 
 `status` 语义：
 
-| status        | 含义                        | 是否阻塞交付 |
-| ------------- | --------------------------- | ------------ |
-| `available`   | 文件或内置资源已可用        | 否           |
-| `built-in`    | 来自 skill 内置图标/模板    | 否           |
-| `generated`   | 本轮生成并已落在 run 目录   | 否           |
-| `placeholder` | 可用于草稿，正式交付需确认  | 通常阻塞     |
-| `needs-user`  | 缺用户提供或授权确认        | 是           |
-| `missing`     | manifest 中声明但文件不存在 | 是           |
+| status        | 含义                             | 是否阻塞交付 |
+| ------------- | -------------------------------- | ------------ |
+| `available`   | 文件或内置资源已可用             | 否           |
+| `built-in`    | 来自 skill 内置图标/模板         | 否           |
+| `generated`   | 本轮生成并已落在 run 目录        | 否           |
+| `rendered`    | 本轮由 LaTeX/公式 manifest 渲染  | 否           |
+| `native`      | 本轮写入 PowerPoint 原生公式对象 | 否           |
+| `placeholder` | 可用于草稿，正式交付需确认       | 通常阻塞     |
+| `needs-user`  | 缺用户提供或授权确认             | 是           |
+| `missing`     | manifest 中声明但文件不存在      | 是           |
+
+公式资源使用 `kind: "formula"`，`source.kind: "formula"`，并保留原始 `latex` 与
+`display`。公式必须 `pptxUse.noCrop: true`；若正式交付仍是 `placeholder` 或
+`needs-user`，视为阻塞。更多策略见 `references/formulas.md`。
 
 ## 5. Lock Drift Check
 

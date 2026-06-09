@@ -84,6 +84,13 @@
       "prompt": "帮我检查一份 deck 有没有「元素重叠」或「文字塞不下」的隐患并修掉能修的。要求用一次 inspect 就把每页的几何风险拉出来（不用为这个单独再跑别的命令），列出有问题的页和 shape，再给出并应用修复。为便于演示，可以先做一份故意有重叠和文字溢出的 3 页 deck 再检查。修复后输出到 ~/Downloads/geometry-clean.pptx。",
       "expected_output": "直接从 inspect 输出的 slides[].geometryOverlaps / slides[].textOverflowEstimates 定位风险（体现「一次 inspect 即拿到几何风险」，无需单独 vision-check），据此生成并应用修复 patch；修复后再次 inspect/vision-check 显示风险下降；新文件存在。",
       "files": []
+    },
+    {
+      "id": 13,
+      "name": "create-formula-heavy-training-deck",
+      "prompt": "帮我做一份 6 页技术培训 PPT，主题「线性回归损失函数与梯度下降」。必须包含：1) 封面；2) 一页展示损失函数 LaTeX：L(\\theta)=\\sum_{i=1}^{n}(y_i-f_\\theta(x_i))^2；3) 一页展示梯度公式：\\frac{\\partial L}{\\partial \\theta_j}= -2\\sum_i x_{ij}(y_i-\\hat{y}_i)；4) 一页用普通文本解释 learning rate α；5) 一页流程图展示初始化、计算梯度、更新参数、收敛；6) 结尾。输出到 ~/Downloads/linear-regression-formulas.pptx。",
+      "expected_output": "走公式策略：在 deck_lock.json 记录 typography.formulaPolicy（默认 mixed），复杂 LaTeX 进入 assets_manifest.json 的 kind=formula 条目并设置 noCrop；最终 PPTX 中公式不被裁剪、颜色对比足够，完成摘要说明公式是 rendered/native/text-only 哪种形态。若 s8fy schema 支持 add-formula，应使用 add-formula；否则应渲染为 run 目录内 SVG/PNG 并用 add-picture 插入，仍保留公式 manifest 元数据。",
+      "files": []
     }
   ]
 }

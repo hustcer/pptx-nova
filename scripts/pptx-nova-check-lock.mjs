@@ -407,6 +407,7 @@ function lockAssetReferences(lock) {
     for (const id of asArray(slide.assets)) referenced.add(id)
     for (const id of asArray(slide.assetIds)) referenced.add(id)
     for (const id of asArray(slide.images)) referenced.add(id)
+    for (const id of asArray(slide.formulas)) referenced.add(id)
   }
   return referenced
 }

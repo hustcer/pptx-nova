@@ -296,7 +296,6 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
     if (item.icon)
       icon(s, nm(s, `${base}Icon`), item.icon, x + w / 2 - 0.18, y + 0.67, 0.36, 0.36, {
         color: accent,
-        strokeWidth: 2,
       })
     tx(
       s,
@@ -1143,7 +1142,6 @@ function makePageTypes(builders, chrome, components, total) {
       if (item.icon)
         icon(s, nm(s, `Init${i}Icon`), item.icon, x + w / 2 - 0.17, 2.1, 0.34, 0.34, {
           color: accent,
-          strokeWidth: 2,
         })
       tx(
         s,
@@ -1252,7 +1250,6 @@ function makePageTypes(builders, chrome, components, total) {
         if (iconName)
           icon(s, nm(s, `Phase${i}Icon${j}`), iconName, x + 0.16, y - 0.01, 0.16, 0.16, {
             color: accent,
-            strokeWidth: 2,
           })
         tx(s, nm(s, `Phase${i}Item${j}`), x + 0.42, y, w - 0.54, 0.14, name, {
           name: FONT_EN,

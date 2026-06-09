@@ -1006,7 +1006,6 @@ function makePageTypes(p, chrome) {
       const accent = brand.accent ?? C.black
       p.icon(s, nm(s, `BrandIcon${i}`), brand.icon ?? 'layout-grid', col.x, y, 0.34, 0.34, {
         color: accent,
-        strokeWidth: 1.8,
       })
       p.tx(
         s,

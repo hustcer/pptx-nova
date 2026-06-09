@@ -75,7 +75,6 @@ const p = createOps()
 p.addSlide(0, '0B1020')
 p.icon(0, 'S0_StatusIcon', 'chart-line', 0.72, 0.72, 0.28, 0.28, {
   color: 'C8583A',
-  strokeWidth: 1.8,
 })
 ```
 

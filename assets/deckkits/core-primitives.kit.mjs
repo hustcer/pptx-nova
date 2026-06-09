@@ -714,6 +714,278 @@ function checkSlideDensity(args) {
   checkTextTokenRisk(ctx)
 }
 
+function pathValue(root, path) {
+  if (!path) return undefined
+  return String(path)
+    .split('.')
+    .reduce((cur, part) => (cur == null ? undefined : cur[part]), root)
+}
+
+function hasContractValue(root, path) {
+  const value = pathValue(root, path)
+  if (value === null || value === undefined) return false
+  if (typeof value === 'string') return value.trim().length > 0
+  if (Array.isArray(value)) return value.length > 0
+  if (typeof value === 'object') return Object.keys(value).length > 0
+  return true
+}
+
+function contractPathGroup(value) {
+  if (Array.isArray(value)) return value
+  if (typeof value === 'string') return [value]
+  if (value && typeof value === 'object') return value.paths ?? value.anyOf ?? []
+  return []
+}
+
+function pushValidationGateIssue({
+  errors,
+  warnings,
+  fitDiagnostics,
+  severity,
+  type,
+  slideIndex = null,
+  slideType = null,
+  code,
+  path,
+  value = null,
+  limit = null,
+  message,
+  suggestedActions = [],
+}) {
+  const diagnostic = makeFitDiagnostic({
+    slideIndex,
+    slideType,
+    severity,
+    code,
+    path,
+    value,
+    limit,
+    message,
+    suggestedActions,
+  })
+  fitDiagnostics.push(diagnostic)
+  const issue = makeIssue(type, message, { path, diagnostic })
+  if (severity === 'error') errors.push(issue)
+  else warnings.push(issue)
+}
+
+function validationSeverity(config = {}, mode = 'draft') {
+  if (mode === 'delivery' && config.deliverySeverity) return config.deliverySeverity
+  return config.severity ?? 'warning'
+}
+
+function checkSlideLayoutContract({
+  entry,
+  slide,
+  slideIndex,
+  mode,
+  errors,
+  warnings,
+  fitDiagnostics,
+}) {
+  const contract = entry?.layoutContract
+  if (!contract) return
+  const slideContract = contract.slideTypes?.[slide.type]
+  if (!slideContract) return
+  const basePath = `slides[${slideIndex}]`
+  const severity = validationSeverity({ ...contract, ...slideContract }, mode)
+
+  for (const slot of slideContract.requiredSlots ?? []) {
+    const slotPath = typeof slot === 'string' ? slot : slot.path
+    if (!hasContractValue(slide, slotPath)) {
+      pushValidationGateIssue({
+        errors,
+        warnings,
+        fitDiagnostics,
+        severity,
+        type: 'layout-contract',
+        slideIndex,
+        slideType: slide.type,
+        code: 'layout.requiredSlot.missing',
+        path: `${basePath}.${slotPath}`,
+        value: null,
+        limit: 'non-empty',
+        message: `${basePath}: required layout slot "${slotPath}" is missing or empty`,
+        suggestedActions: ['fill-required-slot', 'switch-slide-type', 'split-slide'],
+      })
+    }
+  }
+
+  for (const group of slideContract.requiredAny ?? []) {
+    const paths = contractPathGroup(group)
+    if (paths.length === 0) continue
+    if (paths.some((slotPath) => hasContractValue(slide, slotPath))) continue
+
+    const groupLabel =
+      group && typeof group === 'object' && !Array.isArray(group) && group.label
+        ? group.label
+        : paths.join(' | ')
+    const groupSeverity =
+      group &&
+      typeof group === 'object' &&
+      !Array.isArray(group) &&
+      (group.severity || group.deliverySeverity)
+        ? validationSeverity(group, mode)
+        : severity
+    pushValidationGateIssue({
+      errors,
+      warnings,
+      fitDiagnostics,
+      severity: groupSeverity,
+      type: 'layout-contract',
+      slideIndex,
+      slideType: slide.type,
+      code: 'layout.requiredAny.missing',
+      path: `${basePath}.${paths.join('|')}`,
+      value: null,
+      limit: groupLabel,
+      message: `${basePath}: one of "${groupLabel}" is required by the layout contract`,
+      suggestedActions: ['fill-one-required-slot', 'switch-slide-type', 'split-slide'],
+    })
+  }
+
+  const allowedLayoutIds = slideContract.allowedLayoutIds ?? []
+  if (slide.layoutId && allowedLayoutIds.length > 0 && !allowedLayoutIds.includes(slide.layoutId)) {
+    pushValidationGateIssue({
+      errors,
+      warnings,
+      fitDiagnostics,
+      severity,
+      type: 'layout-contract',
+      slideIndex,
+      slideType: slide.type,
+      code: 'layout.layoutId.unregistered',
+      path: `${basePath}.layoutId`,
+      value: slide.layoutId,
+      limit: allowedLayoutIds.join('|'),
+      message: `${basePath}: layoutId "${slide.layoutId}" is not registered for ${slide.type}`,
+      suggestedActions: ['use-registered-layout-id', 'remove-layout-id', 'extend-deckkit-contract'],
+    })
+  }
+
+  const customOpsPolicy = slideContract.customOps ?? contract.customOps ?? {}
+  if (
+    Array.isArray(slide.customOps) &&
+    slide.customOps.length > 0 &&
+    customOpsPolicy.allowed === false
+  ) {
+    pushValidationGateIssue({
+      errors,
+      warnings,
+      fitDiagnostics,
+      severity: validationSeverity(customOpsPolicy, mode),
+      type: 'layout-contract',
+      slideIndex,
+      slideType: slide.type,
+      code: 'layout.customOps.disallowed',
+      path: `${basePath}.customOps`,
+      value: slide.customOps.length,
+      limit: 0,
+      message: `${basePath}: customOps are disabled by the DeckKit layout contract`,
+      suggestedActions: [
+        'move-change-into-deckkit',
+        'choose-supported-slide-type',
+        'request-studio-override',
+      ],
+    })
+  }
+}
+
+function slideGroupFor(type, diversityGate) {
+  for (const [group, types] of Object.entries(diversityGate?.groups ?? {})) {
+    if (Array.isArray(types) && types.includes(type)) return group
+  }
+  return type
+}
+
+function matchingThreshold(thresholds = [], slideCount) {
+  return thresholds
+    .filter((item) => slideCount >= (item.minSlides ?? 0))
+    .sort((a, b) => (b.minSlides ?? 0) - (a.minSlides ?? 0))[0]
+}
+
+function checkDeckDiversity({ entry, content, mode, errors, warnings, fitDiagnostics }) {
+  const gate = entry?.diversityGate
+  if (!gate || !Array.isArray(content?.slides)) return
+  const groups = content.slides.map((slide) => slideGroupFor(slide?.type, gate))
+  const slideCount = groups.length
+  const threshold = matchingThreshold(gate.thresholds, slideCount)
+  const severity = validationSeverity(gate, mode)
+
+  if (threshold?.minUniqueGroups) {
+    const excluded = new Set(gate.excludeGroupsFromUnique ?? [])
+    const unique = new Set(groups.filter((group) => !excluded.has(group)))
+    if (unique.size < threshold.minUniqueGroups) {
+      pushValidationGateIssue({
+        errors,
+        warnings,
+        fitDiagnostics,
+        severity,
+        type: 'diversity',
+        code: 'diversity.uniqueGroups.tooLow',
+        path: 'slides',
+        value: unique.size,
+        limit: threshold.minUniqueGroups,
+        message: `deck uses ${unique.size} layout group(s); ${threshold.minUniqueGroups} required for ${slideCount} slides`,
+        suggestedActions: [
+          'vary-slide-types',
+          'insert-data-or-compare-slide',
+          'split-repeated-card-pages',
+        ],
+      })
+    }
+  }
+
+  for (const required of threshold?.requiredGroups ?? []) {
+    if (!groups.includes(required)) {
+      pushValidationGateIssue({
+        errors,
+        warnings,
+        fitDiagnostics,
+        severity,
+        type: 'diversity',
+        code: 'diversity.requiredGroup.missing',
+        path: 'slides',
+        value: groups,
+        limit: required,
+        message: `deck is missing required layout group "${required}" for ${slideCount} slides`,
+        suggestedActions: ['add-required-slide-group', 'remap-outline-to-supported-slide-type'],
+      })
+    }
+  }
+
+  const maxRun = gate.maxConsecutiveSameGroup
+  if (maxRun) {
+    let start = 0
+    for (let i = 1; i <= groups.length; i += 1) {
+      if (groups[i] === groups[start]) continue
+      const runLength = i - start
+      if (runLength > maxRun) {
+        pushValidationGateIssue({
+          errors,
+          warnings,
+          fitDiagnostics,
+          severity,
+          type: 'diversity',
+          slideIndex: start,
+          slideType: content.slides[start]?.type ?? null,
+          code: 'diversity.consecutiveGroup.tooLong',
+          path: `slides[${start}..${i - 1}]`,
+          value: runLength,
+          limit: maxRun,
+          message: `slides ${start + 1}-${i} repeat layout group "${groups[start]}" ${runLength} times`,
+          suggestedActions: [
+            'alternate-layout-group',
+            'merge-or-split-repeated-pages',
+            'insert-breathing-slide',
+          ],
+        })
+      }
+      start = i
+    }
+  }
+}
+
 export function validateContent(
   content,
   { deckkit, throwOnError = false, ignoreSoftLimits = false, mode = 'draft' } = {},
@@ -840,6 +1112,23 @@ export function validateContent(
         fitDiagnostics,
         ignoreSoftLimits,
       })
+      checkSlideLayoutContract({
+        entry,
+        slide,
+        slideIndex: i,
+        mode,
+        errors,
+        warnings,
+        fitDiagnostics,
+      })
+    })
+    checkDeckDiversity({
+      entry,
+      content,
+      mode,
+      errors,
+      warnings,
+      fitDiagnostics,
     })
   }
 

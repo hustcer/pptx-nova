@@ -98,6 +98,20 @@
       "prompt": "我要做一份 16 页的董事会战略汇报 PPTX，内容很多，先不要生成 PPTX。请先完成大纲和设计锁，然后让我新开一个会话继续生成。主题是「2027 年国际化增长计划」，受众是董事会，要求正式、数据密集、深蓝主色，后续输出到 ~/Downloads/global-growth-2027.pptx。",
       "expected_output": "识别为长 deck / 高风险 split 场景：创建 run 目录并只完成 Phase A handoff，写入 outline.json、deck_lock.json、resume_manifest.json，必要时写 source_brief.md / assets_manifest.json；不要写 content.json、不要 dry-run、不要生成 .pptx；最终回复给出“继续生成 <run-dir>”的新会话命令和当前资源/输出路径状态。",
       "files": []
+    },
+    {
+      "id": 15,
+      "name": "deckkit-layout-contract-gate",
+      "prompt": "用 consulting-dark DeckKit 做一份 8 页客户演示 deck。请展示你会先写 content.json 并运行 validate-content；如果某页缺少页型必需的数据槽位或试图在 content 里塞 customOps，delivery 模式必须拦截并修正后再生成 PPTX。输出到 ~/Downloads/contract-gated-deck.pptx。",
+      "expected_output": "走 DeckKit-first；validate-content 使用 --mode delivery；能说明 layout contract / diversity gate 的检查结果；缺必填槽位或 disallowed customOps 不会进入 dry-run；修正后才生成原生可编辑 PPTX。",
+      "files": []
+    },
+    {
+      "id": 16,
+      "name": "asset-slot-prompt-guard",
+      "prompt": "做一份 6 页产品发布 deck，需要一张 AI 生成的 hero 背景图和一张产品场景图。请先写 assets_manifest.json，图片必须有 slotId、ratio、fitPolicy，并确保 prompt 只生成素材、不生成 PPT 页面元素。用 check-lock 校验后输出到 ~/Downloads/product-launch-assets.pptx。",
+      "expected_output": "assets_manifest.json 中 AI 图片条目包含 pptxUse.slotId / ratio / fitPolicy / noSlideChrome:true；content 或 deck_lock 通过 assets/imageSlots 引用这些 id；check-lock 没有 asset-ai-slide-chrome-guard-missing 错误；最终 PPTX 的标题、页码、logo 和卡片由原生 shape 绘制，不在图片里。",
+      "files": []
     }
   ]
 }

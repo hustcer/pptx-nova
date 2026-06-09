@@ -60,6 +60,25 @@
             ]
           },
           "data": { "type": "object" },
+          "layoutId": {
+            "type": "string",
+            "description": "Optional DeckKit layout contract id when a slide type has multiple locked variants."
+          },
+          "rhythm": {
+            "type": "string",
+            "enum": ["anchor", "dense", "breathing"],
+            "description": "Narrative rhythm used by DeckKit diversity and QA gates."
+          },
+          "assets": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Asset ids referenced by this slide; each id must be present in assets_manifest.json when provided."
+          },
+          "imageSlots": {
+            "type": "object",
+            "description": "Map of semantic image slot id to asset id for image/screenshot-bearing DeckKit pages.",
+            "additionalProperties": { "type": "string" }
+          },
           "customOps": {
             "type": "array",
             "items": { "type": "object" }

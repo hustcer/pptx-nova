@@ -48,6 +48,18 @@ assets/deckkits/
 当前页型级 fit diagnostics 已覆盖 `heroSlide`、`kpiRowSlide`、`multiCardSlide`、
 `benchmarkSlide`、`timelineSlide` 和 `askSlide`，并包含长 Latin token 风险检查。
 
+`catalog.json` 可声明两类交付 gate：
+
+- `layoutContract`：按 DeckKit / 页型声明必填数据槽位、任一满足槽位组、允许的
+  `layoutId` 和 `customOps` 策略。draft 默认给 warning，delivery 可通过
+  `deliverySeverity` 升级为 error。
+- `diversityGate`：按页型分组检查长 deck 的版式多样性、必需叙事组和连续重复组上限，
+  避免整套 deck 退化成同一种卡片页。
+
+这些 gate 属于 DeckKit 元数据，不属于单个 deck 的临时 patch。新增或调整规则时优先修改
+`catalog.json` 和 `core-primitives.kit.mjs`，让 `validate-content.mjs`、build 胶水和 benchmark
+共享同一套判断。
+
 ## 使用方式
 
 ```js

@@ -37,6 +37,52 @@
         "timelineSlide",
         "askSlide"
       ],
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "heroSlide": { "requiredSlots": ["data.title"] },
+          "profileTableSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.rows"] },
+          "kpiRowSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.items"] },
+          "previewProductSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.kpis"] },
+          "multiCardSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.cards"] },
+          "landscapeSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.comps"] },
+          "convertFlowSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "benchmarkSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.tableRows", "data.chartData"]
+          },
+          "timelineSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.steps"] },
+          "askSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.asks"] }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 2,
+        "groups": {
+          "anchor": ["heroSlide"],
+          "product": ["previewProductSlide", "convertFlowSlide"],
+          "evidence": ["profileTableSlide", "landscapeSlide", "benchmarkSlide"],
+          "cards": ["kpiRowSlide", "multiCardSlide"],
+          "timeline": ["timelineSlide"],
+          "close": ["askSlide"]
+        },
+        "thresholds": [
+          { "minSlides": 5, "minUniqueGroups": 4, "requiredGroups": ["anchor", "close"] },
+          {
+            "minSlides": 8,
+            "minUniqueGroups": 5,
+            "requiredGroups": ["anchor", "evidence", "cards", "close"]
+          }
+        ]
+      },
       "density": {
         "soft": {
           "titleMaxChars": 48,
@@ -241,6 +287,47 @@
         "mckInitiativeRankingSlide",
         "mckRoadmapSlide"
       ],
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "mckCoverSlide": { "requiredSlots": ["data.title"] },
+          "mckCrisisSnapshotSlide": { "requiredSlots": ["data.title"] },
+          "mckDemographicProfileSlide": { "requiredSlots": ["data.title"] },
+          "mckPriorityMatrixSlide": { "requiredSlots": ["data.title"] },
+          "mckLossDriverSlide": { "requiredSlots": ["data.title"] },
+          "mckPillarsSlide": { "requiredSlots": ["data.title"] },
+          "mckInitiativeRankingSlide": { "requiredSlots": ["data.title"] },
+          "mckRoadmapSlide": { "requiredSlots": ["data.title"] }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 2,
+        "groups": {
+          "anchor": ["mckCoverSlide"],
+          "situation": ["mckCrisisSnapshotSlide", "mckDemographicProfileSlide"],
+          "analysis": ["mckPriorityMatrixSlide", "mckLossDriverSlide"],
+          "action": ["mckPillarsSlide", "mckInitiativeRankingSlide"],
+          "timeline": ["mckRoadmapSlide"]
+        },
+        "thresholds": [
+          { "minSlides": 5, "minUniqueGroups": 4, "requiredGroups": ["anchor", "action"] },
+          {
+            "minSlides": 8,
+            "minUniqueGroups": 5,
+            "requiredGroups": ["anchor", "analysis", "action", "timeline"]
+          }
+        ]
+      },
       "density": {
         "soft": {
           "titleMaxChars": 122,
@@ -461,6 +548,70 @@
         "swissBrandGridSlide",
         "swissClosingSlide"
       ],
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slideTypes": {
+          "swissCoverSlide": { "requiredSlots": ["data.title"] },
+          "swissQuoteSlide": { "requiredSlots": ["data.quote"] },
+          "swissTimelineSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.steps"] },
+          "swissPrinciplesSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.items"] },
+          "swissPeopleGridSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.people"]
+          },
+          "swissProfileSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.events"] },
+          "swissTypefaceSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissGridTypesSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissSystemSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissStatementSlide": {
+            "requiredAny": [
+              { "label": "statement or title", "paths": ["data.statement", "data.title"] }
+            ]
+          },
+          "swissColumnSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissProgressSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissBrandGridSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissClosingSlide": {
+            "requiredAny": [
+              {
+                "label": "title/titleA/titleB",
+                "paths": ["data.title", "data.titleA", "data.titleB"]
+              }
+            ]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": ["swissCoverSlide", "swissClosingSlide"],
+          "statement": ["swissQuoteSlide", "swissStatementSlide", "swissColumnSlide"],
+          "timeline": ["swissTimelineSlide", "swissProgressSlide"],
+          "principles": ["swissPrinciplesSlide", "swissBrandGridSlide"],
+          "people": ["swissPeopleGridSlide", "swissProfileSlide"],
+          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"]
+        },
+        "thresholds": [
+          {
+            "minSlides": 7,
+            "minUniqueGroups": 5,
+            "requiredGroups": ["anchor", "statement", "system"]
+          },
+          {
+            "minSlides": 10,
+            "minUniqueGroups": 6,
+            "requiredGroups": ["anchor", "statement", "timeline", "system"]
+          }
+        ]
+      },
       "density": {
         "soft": {
           "titleMaxChars": 42,

@@ -221,7 +221,7 @@ deck 再新建；studio 逐项精控；edit 改已有），
 5. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
    只能用于草稿、迁移验证，或人工确认后的交付。
 6. 有可用 DeckKit 时，严格走 `outline.json` → `deck_lock.json`（有资源时加 `assets_manifest.json`）→
-   `content.json` → `validate-content.mjs` → `createDeck(content)` →
+   `content.json` → `validate-content.mjs`（schema / density / layout contract / diversity）→ `createDeck(content)` →
    `node <skill-root>/scripts/pptx-nova-check-lock.mjs ...` →
    `s8fy pptx apply --dry-run` → apply → `vision-check` →
    PNG/contact sheet review。
@@ -316,7 +316,7 @@ default 的 title/body 样式，并保留已有 shapes、坐标、卡片几何�
 
 ```
 content.json (变化层，每次只改这一份)
-  → validate-content.mjs (schema + density)
+  → validate-content.mjs (schema + density + layout contract + diversity)
   → createDeck(content) → { patch, warnings }
   → s8fy pptx apply patch.json ...
 ```
@@ -325,7 +325,7 @@ content.json (变化层，每次只改这一份)
 
 - 不需要从头写坐标 / 配色 / 组件逻辑，DeckKit 已经冻结封装
 - content.json 极小（~200 行），二次创作只改内容
-- 有 schema 校验 + density limit，几何错误在 apply 之前就被拦截
+- 有 schema 校验 + density limit + layout contract + diversity gate，常见结构错误在 apply 之前就被拦截
 - 同一 DeckKit 反复使用时 token 开销削减 75-80%
 
 **DeckKit 图标规则**：常用图标默认使用
@@ -343,7 +343,7 @@ content.json (变化层，每次只改这一份)
 2. `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <deckkit-id> --target candidate`
    检查 benchmark、catalog readiness、quality metadata 和 known blocking limits
 3. 编写 `content.json`（参照同目录的 example + `assets/deckkits/schemas/` 下的 schema）
-4. `node assets/deckkits/validate-content.mjs content.json --deckkit <deckkit-id>` 校验
+4. `node assets/deckkits/validate-content.mjs content.json --deckkit <deckkit-id>` 校验 schema、density、layout contract 和 diversity；正式交付可加 `--mode delivery`
 5. 使用 `assets/deckkits/examples/roadshow-build.mjs` 生成 patch；需要定制时再复制为 `build.mjs` 并按当前位置修正 import 路径
 6. 跑 `node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`
 7. `s8fy pptx apply -p patch.json ... --dry-run --json` 预演，通过后再 apply
@@ -600,8 +600,8 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
 4. **设计锁漂移检查**：在 dry-run 前运行
    `node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`
    （有 `assets_manifest.json` 时加 `--assets assets_manifest.json`；没有 content 时省略 `--content`）。
-   品牌合规或正式客户交付加
-   `--strict-colors --strict-fonts`。有 error 先修 lock / manifest / content / patch，不要跳到 dry-run。
+   它会同时检查 content/lock 的 asset 引用、图片 slot、AI 图片 `noSlideChrome` prompt guard。
+   品牌合规或正式客户交付加 `--strict-colors --strict-fonts`。有 error 先修 lock / manifest / content / patch，不要跳到 dry-run。
 5. **预演**：`--dry-run --json` 看 `semanticChanges[]` 与 `visualRisks[]`；不确定
    字段时加 **`--explain`**，dry-run 报告会带 `explanations[].schema.{requiredFields,optionalFields,fieldNotes}`
    告诉你每个 op 该写什么
@@ -822,30 +822,34 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 
 ## §8 深入阅读（references/）
 
-| 文件                                     | 何时读                                                                      |
-| ---------------------------------------- | --------------------------------------------------------------------------- |
-| `references/express-mode.md`             | 简单 prompt → 完整 deck 的 express 自动化黄金路径与最小确认                 |
-| `references/patch-ops-cheatsheet.md`     | 写任何 patch 之前都该扫一眼，按场景找 op                                    |
-| `references/recipes.md`                  | 用 recipe op 创建 deck 之前，看完整 schema 与示例                           |
-| `references/rich-deck-patterns.md`       | 要做"客户演示级"丰富 deck 时的视觉元素清单与起手势                          |
-| `references/deck-generator-workflow.md`  | 创建/扩展 DeckKit 时的 JS 生成器模板、helpers、命名规范                     |
-| `references/resume-split-mode.md`        | 长 deck / 高风险 deck 的 Phase A handoff 与新会话恢复生成                   |
-| `references/reference-create.md`         | 用户给参考 PPTX + 新大纲时，抽风格 / 映射页型 / 生成新 deck 的工作流        |
-| `references/design-lock-and-assets.md`   | `deck_lock.json` / `assets_manifest.json` / Studio 9 项确认 / check-lock    |
-| `references/theme-packs.md`              | themePack / stylePack catalog、`list-themes`、`swap-theme`、`extract-style` |
-| `references/template-library.md`         | brand/layout/deck/chart/icon 资产目录、catalog 和选择规则                   |
-| `references/inspect-and-edit.md`         | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |
-| `references/schema-discovery.md`         | 想搞清楚 109 个 op 的全貌、按需拉 schema                                    |
-| `references/styles-and-themes.md`        | 编辑颜色 / 渐变 / 字体 / 主题 / 母版                                        |
-| `references/formulas.md`                 | LaTeX / 数学公式策略、formula manifest、`add-formula` / fallback            |
-| `references/charts.md`                   | 创建 / 编辑图表，以及 native diagram/table preset                           |
-| `references/tables.md`                   | 表格创建 / 编辑 / CSV 导入 / 公式                                           |
-| `references/data-driven.md`              | `from-data` + `bind-data` 完整用法                                          |
-| `references/control-flow-and-raw-xml.md` | `if` / `foreach` / `try` 控制流 + `raw-ooxml-patch` 逃生口                  |
-| `references/daemon-sessions.md`          | 多步 Agent 工作流用 `s8fy daemon` 复用内存中的 Presentation                 |
-| `references/troubleshooting.md`          | 遇到错误时按 `errorCatalog` 自修复                                          |
+| 文件                                      | 何时读                                                                      |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| `references/express-mode.md`              | 简单 prompt → 完整 deck 的 express 自动化黄金路径与最小确认                 |
+| `references/patch-ops-cheatsheet.md`      | 写任何 patch 之前都该扫一眼，按场景找 op                                    |
+| `references/recipes.md`                   | 用 recipe op 创建 deck 之前，看完整 schema 与示例                           |
+| `references/rich-deck-patterns.md`        | 要做"客户演示级"丰富 deck 时的视觉元素清单与起手势                          |
+| `references/visual-qa-and-asset-slots.md` | P0/P1 视觉 QA、图片槽位 manifest、AI 图片 prompt guard                      |
+| `references/deck-generator-workflow.md`   | 创建/扩展 DeckKit 时的 JS 生成器模板、helpers、命名规范                     |
+| `references/resume-split-mode.md`         | 长 deck / 高风险 deck 的 Phase A handoff 与新会话恢复生成                   |
+| `references/reference-create.md`          | 用户给参考 PPTX + 新大纲时，抽风格 / 映射页型 / 生成新 deck 的工作流        |
+| `references/design-lock-and-assets.md`    | `deck_lock.json` / `assets_manifest.json` / Studio 9 项确认 / check-lock    |
+| `references/theme-packs.md`               | themePack / stylePack catalog、`list-themes`、`swap-theme`、`extract-style` |
+| `references/template-library.md`          | brand/layout/deck/chart/icon 资产目录、catalog 和选择规则                   |
+| `references/inspect-and-edit.md`          | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |
+| `references/schema-discovery.md`          | 想搞清楚 109 个 op 的全貌、按需拉 schema                                    |
+| `references/styles-and-themes.md`         | 编辑颜色 / 渐变 / 字体 / 主题 / 母版                                        |
+| `references/formulas.md`                  | LaTeX / 数学公式策略、formula manifest、`add-formula` / fallback            |
+| `references/charts.md`                    | 创建 / 编辑图表，以及 native diagram/table preset                           |
+| `references/tables.md`                    | 表格创建 / 编辑 / CSV 导入 / 公式                                           |
+| `references/data-driven.md`               | `from-data` + `bind-data` 完整用法                                          |
+| `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` 控制流 + `raw-ooxml-patch` 逃生口                  |
+| `references/daemon-sessions.md`           | 多步 Agent 工作流用 `s8fy daemon` 复用内存中的 Presentation                 |
+| `references/troubleshooting.md`           | 遇到错误时按 `errorCatalog` 自修复                                          |
 
 `assets/examples/` 下有可直接复用的 patch / recipe / brand profile 范例。
+`assets/schemas/assets-manifest.schema.json` 是 `assets_manifest.json` 的正式 schema；
+写图片、截图、logo、公式或 AI 生成素材 manifest 时按它约束字段形状，再用 `check-lock`
+验证跨文件引用和交付阻断项。
 
 `assets/deckkits/` 下是冻结的 DeckKit（DeckKit 模式的核心资产）：
 

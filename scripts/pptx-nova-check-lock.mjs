@@ -6,6 +6,22 @@ const LOCK_SCHEMA_VERSION = 'pptx-nova-deck-lock/v1'
 const ASSETS_SCHEMA_VERSION = 'pptx-nova-assets-manifest/v1'
 const COLOR_FIELD_RE =
   /(^|\.)(color|colors|fill|fills|stroke|strokes|linecolor|fontcolor|textcolor|fillcolor|bordercolor|backgroundcolor|bgcolor|foregroundcolor|accent|accent[1-9]|primary|secondary|success|warning|risk)(\.|$)/i
+const IMAGE_READY_STATUSES = new Set(['available', 'generated', 'rendered'])
+const IMAGE_LIKE_KINDS = new Set(['image', 'photo', 'photograph', 'illustration', 'screenshot'])
+const IMAGE_SLOT_ROLE_RE = /(hero|image|photo|screenshot|background|visual|mockup|product-shot)/i
+const IMAGE_SLOT_RATIOS = new Set(['21:9', '16:10', '16:9', '4:3', '3:2', '3:4', '1:1'])
+const IMAGE_FIT_POLICIES = new Set(['cover', 'contain', 'no-crop', 'crop-safe'])
+const AI_IMAGE_SOURCE_KINDS = new Set([
+  'ai',
+  'generated',
+  'imagegen',
+  'prompt',
+  'text-to-image',
+  'dalle',
+  'dall-e',
+  'midjourney',
+  'stable-diffusion',
+])
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json [options]
@@ -267,6 +283,98 @@ function normalizeAssetPath(value) {
   return text.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+/g, '/')
 }
 
+function assetRole(entry) {
+  return String(entry?.pptxUse?.role ?? entry?.role ?? '')
+}
+
+function isImageLikeAsset(entry) {
+  const kind = String(entry?.kind ?? '').toLowerCase()
+  return IMAGE_LIKE_KINDS.has(kind) || IMAGE_SLOT_ROLE_RE.test(assetRole(entry))
+}
+
+function isAiGeneratedImageAsset(entry) {
+  if (!isImageLikeAsset(entry)) return false
+  const sourceKind = String(entry?.source?.kind ?? entry?.sourceKind ?? '').toLowerCase()
+  const generator = String(entry?.source?.generator ?? entry?.generator ?? '').toLowerCase()
+  return (
+    AI_IMAGE_SOURCE_KINDS.has(sourceKind) ||
+    typeof entry?.source?.prompt === 'string' ||
+    typeof entry?.prompt === 'string' ||
+    /imagegen|dall-?e|midjourney|stable-diffusion/i.test(generator)
+  )
+}
+
+function assetSlot(entry) {
+  const pptxUse = isPlainObject(entry?.pptxUse) ? entry.pptxUse : {}
+  const directSlot = isPlainObject(entry?.slot) ? entry.slot : {}
+  const nestedSlot = isPlainObject(pptxUse.slot) ? pptxUse.slot : {}
+  return {
+    id: pptxUse.slotId ?? nestedSlot.id ?? directSlot.id ?? entry?.slotId ?? '',
+    ratio: pptxUse.ratio ?? nestedSlot.ratio ?? directSlot.ratio ?? '',
+    fitPolicy:
+      pptxUse.fitPolicy ??
+      nestedSlot.fitPolicy ??
+      directSlot.fitPolicy ??
+      pptxUse.crop ??
+      nestedSlot.crop ??
+      directSlot.crop ??
+      '',
+    noSlideChrome:
+      pptxUse.noSlideChrome ??
+      nestedSlot.noSlideChrome ??
+      directSlot.noSlideChrome ??
+      pptxUse.promptGuard?.noSlideChrome ??
+      entry?.generationPromptGuard?.noSlideChrome ??
+      entry?.source?.promptGuard?.noSlideChrome,
+  }
+}
+
+function checkImageAssetSlot(entry, label, status, errors, warnings) {
+  if (!IMAGE_READY_STATUSES.has(status) || !isImageLikeAsset(entry)) return
+
+  const slot = assetSlot(entry)
+  if (!slot.id) {
+    push(
+      warnings,
+      'asset-image-slot-missing',
+      `image asset ${label} should declare pptxUse.slotId or slot.id`,
+    )
+  }
+  if (!slot.ratio) {
+    push(
+      warnings,
+      'asset-image-ratio-missing',
+      `image asset ${label} should declare intended slot ratio`,
+    )
+  } else if (!IMAGE_SLOT_RATIOS.has(String(slot.ratio))) {
+    push(
+      warnings,
+      'asset-image-ratio-unknown',
+      `image asset ${label} uses unsupported slot ratio "${slot.ratio}"`,
+    )
+  }
+  if (!slot.fitPolicy) {
+    push(
+      warnings,
+      'asset-image-fit-policy-missing',
+      `image asset ${label} should declare fitPolicy cover/contain/no-crop/crop-safe`,
+    )
+  } else if (!IMAGE_FIT_POLICIES.has(String(slot.fitPolicy))) {
+    push(
+      warnings,
+      'asset-image-fit-policy-unknown',
+      `image asset ${label} uses unsupported fitPolicy "${slot.fitPolicy}"`,
+    )
+  }
+  if (isAiGeneratedImageAsset(entry) && slot.noSlideChrome !== true) {
+    push(
+      errors,
+      'asset-ai-slide-chrome-guard-missing',
+      `AI-generated image asset ${label} must set pptxUse.noSlideChrome=true or slot.noSlideChrome=true`,
+    )
+  }
+}
+
 function checkLock(lock, errors, warnings) {
   if (lock.schemaVersion !== LOCK_SCHEMA_VERSION) {
     push(
@@ -308,7 +416,7 @@ function checkLock(lock, errors, warnings) {
   }
 }
 
-function checkAssets(assets, assetsPath, lock, errors, warnings) {
+function checkAssets(assets, assetsPath, referenced, errors, warnings) {
   if (!assets) return
   if (assets.schemaVersion !== ASSETS_SCHEMA_VERSION) {
     push(
@@ -319,12 +427,11 @@ function checkAssets(assets, assetsPath, lock, errors, warnings) {
   }
 
   const entries = assetEntries(assets)
-  const referenced = lockAssetReferences(lock)
   if (entries.length === 0 && referenced.size > 0) {
     push(
       errors,
       'assets-empty',
-      'deck_lock references assets but assets_manifest.json has no entries',
+      'deck/content references assets but assets_manifest.json has no entries',
     )
   }
 
@@ -339,12 +446,13 @@ function checkAssets(assets, assetsPath, lock, errors, warnings) {
     if (entry.id) ids.add(entry.id)
     if (!entry.kind) push(warnings, 'asset-kind-missing', `asset ${label} is missing kind`)
 
-    const status = entry.status ?? 'available'
+    const status = String(entry.status ?? 'available').toLowerCase()
     if (['missing', 'needs-user'].includes(status)) {
       push(errors, 'asset-not-ready', `asset ${label} is not ready: status=${status}`)
     } else if (status === 'placeholder') {
       push(warnings, 'asset-placeholder', `asset ${label} is still a placeholder`)
     }
+    checkImageAssetSlot(entry, label, status, errors, warnings)
 
     const sourceKind = entry.source?.kind ?? entry.sourceKind ?? ''
     const path = entry.path ?? entry.source?.path ?? ''
@@ -370,7 +478,7 @@ function checkAssets(assets, assetsPath, lock, errors, warnings) {
 
   for (const id of referenced) {
     if (!ids.has(id))
-      push(errors, 'asset-reference-missing', `deck_lock slide references unknown asset: ${id}`)
+      push(errors, 'asset-reference-missing', `deck/content references unknown asset: ${id}`)
   }
 }
 
@@ -408,6 +516,27 @@ function lockAssetReferences(lock) {
     for (const id of asArray(slide.assetIds)) referenced.add(id)
     for (const id of asArray(slide.images)) referenced.add(id)
     for (const id of asArray(slide.formulas)) referenced.add(id)
+    if (isPlainObject(slide.imageSlots)) {
+      for (const id of Object.values(slide.imageSlots)) {
+        if (id) referenced.add(id)
+      }
+    }
+  }
+  return referenced
+}
+
+function contentAssetReferences(content) {
+  const referenced = new Set()
+  for (const slide of asArray(content?.slides)) {
+    for (const id of asArray(slide.assets)) referenced.add(id)
+    for (const id of asArray(slide.assetIds)) referenced.add(id)
+    for (const id of asArray(slide.images)) referenced.add(id)
+    for (const id of asArray(slide.formulas)) referenced.add(id)
+    if (isPlainObject(slide.imageSlots)) {
+      for (const id of Object.values(slide.imageSlots)) {
+        if (id) referenced.add(id)
+      }
+    }
   }
   return referenced
 }
@@ -547,13 +676,17 @@ function main() {
   const assets = args.assets ? readJson(args.assets, 'assets_manifest.json') : null
   const content = args.content ? readJson(args.content, 'content.json') : null
   const patch = args.patch ? readJson(args.patch, 'patch.json') : null
+  const referencedAssets = new Set([
+    ...lockAssetReferences(lock),
+    ...contentAssetReferences(content),
+  ])
 
   checkLock(lock, errors, warnings)
-  if (!assets && lockAssetReferences(lock).size > 0) {
+  if (!assets && referencedAssets.size > 0) {
     push(
       errors,
       'assets-manifest-missing',
-      'deck_lock references slide assets but --assets was not provided',
+      'deck/content references slide assets but --assets was not provided',
     )
   } else if (!assets && lock.assetsManifestPath) {
     push(
@@ -562,7 +695,7 @@ function main() {
       'deck_lock has assetsManifestPath but --assets was not provided',
     )
   }
-  checkAssets(assets, args.assets, lock, errors, warnings)
+  checkAssets(assets, args.assets, referencedAssets, errors, warnings)
   checkContent(content, lock, errors, warnings)
   checkPatch(patch, lock, assets, args, errors, warnings)
 

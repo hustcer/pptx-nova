@@ -147,6 +147,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 `assets_manifest.json` 只在使用外部图片、logo、复用素材、数据截图或本轮生成资源时创建；
 纯 DeckKit/native shape deck 不要创建空 manifest。它只管资源可用性、来源和 PPTX 使用方式。
 所有临时资源放在 run 目录或其子目录，例如 `.pptx-nova/<run>/assets/`。
+正式 schema 位于 `assets/schemas/assets-manifest.schema.json`；它约束 manifest 形状，
+`pptx-nova-check-lock.mjs` 负责跨文件引用、文件存在、图片槽位和 AI prompt guard。
 如果 manifest 里有 `kind: "formula"` 且状态还不是 `rendered` / `native` / `available`，
 先运行 `node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json`
 批量生成 SVG 并回写状态，再生成引用这些资源的 patch。
@@ -212,7 +214,15 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
       },
       "pptxUse": {
         "role": "hero-background",
-        "crop": "cover"
+        "slotId": "hero.full_bleed",
+        "ratio": "16:9",
+        "fitPolicy": "cover",
+        "crop": "cover",
+        "noSlideChrome": true,
+        "promptGuard": {
+          "noSlideChrome": true,
+          "forbid": ["title text", "page number", "footer", "logo", "slide border"]
+        }
       }
     }
   ]
@@ -235,6 +245,24 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 公式资源使用 `kind: "formula"`，`source.kind: "formula"`，并保留原始 `latex` 与
 `display`。公式必须 `pptxUse.noCrop: true`；若正式交付仍是 `placeholder` 或
 `needs-user`，视为阻塞。更多策略见 `references/formulas.md`。
+
+图片 / 截图 / AI 生成素材要显式登记使用槽位：
+
+- `pptxUse.slotId` 或 `slot.id`：语义槽位，如 `hero.full_bleed`、`product.mockup`、
+  `case.study.photo`。
+- `pptxUse.ratio` 或 `slot.ratio`：只用 `21:9`、`16:10`、`16:9`、`4:3`、`3:2`、
+  `3:4`、`1:1`。
+- `pptxUse.fitPolicy` 或 `slot.fitPolicy`：只用 `cover`、`contain`、`no-crop`、
+  `crop-safe`；旧字段 `crop: "cover"` / `"contain"` 仍可兼容，但新 manifest 优先写
+  `fitPolicy`。
+- AI 生成图片必须写 `pptxUse.noSlideChrome: true` 或 `slot.noSlideChrome: true`。prompt
+  只生成照片、插画、纹理、产品图或场景素材，不要生成 PPT 页面本身；禁止让图片自带标题、
+  页眉、页脚、页码、logo、边框、卡片框、图表轴、按钮或任何 slide chrome。标题、数据、
+  页码、logo 和边框统一由 DeckKit / s8fy 原生 shape 绘制。
+
+`pptx-nova-check-lock.mjs` 会检查：图片资产缺 slot、ratio、fitPolicy 时给 warning；
+AI 生成图片缺 `noSlideChrome` 时给 error；`deck_lock.json` / `content.json` 中的
+`assets[]` 和 `imageSlots{}` 引用必须能在 `assets_manifest.json` 中找到。
 
 ## 5. `resume_manifest.json`
 
@@ -276,6 +304,9 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 - lock 的 slide count / slideType 与 `content.json` 是否一致。
 - DeckKit、themePack 等关键选择是否漂移。
 - `assets_manifest.json` 是否有 missing / needs-user / 重复 id / 不存在的文件。
+- 图片 / 截图资产是否声明 slot、ratio、fitPolicy；AI 生成图片是否设置 `noSlideChrome`。
+- `deck_lock.json` / `content.json` 中的 `assets[]`、`imageSlots{}`、`formulas[]`
+  是否能在 `assets_manifest.json` 找到。
 - patch 是否为 `schemaVersion: 1`，是否使用 lock 外颜色、字体或绝对资源路径。
 - patch 里任何 `assetSource.path` 是否登记在 `assets_manifest.json`；只要 patch 引用外部资源，
   `--assets` 就是必需项。

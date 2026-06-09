@@ -14,6 +14,7 @@ introduced.
 - `themes/` - themePack/stylePack catalog consumed by `list-themes`.
 - `charts/` - native chart/table/diagram presets, not SVG-only templates.
 - `icons/` - icon metadata and migration policy for vector/native assets.
+- `schemas/` - run-level JSON Schemas such as `assets_manifest.json`.
 - `examples/` - end-to-end examples and generator templates.
 
 ## Rules

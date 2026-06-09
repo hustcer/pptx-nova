@@ -46,7 +46,7 @@ DeckKit、需要新页型或需要改组件结构时的创建/扩展阶段。
 ```
 prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资源时加 assets_manifest.json）
   → content.json（~200 行纯数据）
-  → validate-content.mjs 校验
+  → validate-content.mjs 校验（schema / density / layout contract / diversity）
   → createDeck(content) 生成 patch
   → check-lock → dry-run → apply → vision-check → PNG/contact sheet review
 ```
@@ -83,7 +83,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit consulting-d
 cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
 #    按 outline.json 改 slides[].type 和 slides[].data
 
-# 3. 校验 content（schema + density + fit diagnostics）
+# 3. 校验 content（schema + density + layout contract + diversity + fit diagnostics）
 node <skill-root>/assets/deckkits/validate-content.mjs \
   content.json \
   --deckkit consulting-dark
@@ -91,7 +91,7 @@ node <skill-root>/assets/deckkits/validate-content.mjs \
 # 4. 生成 patch
 node <skill-root>/assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
 
-# 5. 设计锁漂移检查（deck_lock/assets/content/patch 一致性）
+# 5. 设计锁漂移检查（deck_lock/assets/content/patch 一致性 + image slot/prompt guard）
 node <skill-root>/scripts/pptx-nova-check-lock.mjs \
   --lock deck_lock.json \
   --content content.json \
@@ -124,7 +124,7 @@ s8fy convert out.pptx --to png -o previews/ --overwrite
 #     若使用外部/复用资源，再包含 assets_manifest.json
 ```
 
-四道闸门职责不重叠：**check-lock（设计锁漂移）→ dry-run（语义）→ vision-check（几何，可自动闭环）→ PNG（像素）**。
+四道闸门职责不重叠：**check-lock（设计锁漂移 + 资产槽位）→ dry-run（语义）→ vision-check（几何，可自动闭环）→ PNG（像素）**。
 创建型 deck 的 `vision-check` high/medium 都必须为 0；任何一道不过都回去改对应
 DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称完成。
 

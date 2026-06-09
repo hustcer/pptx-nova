@@ -74,6 +74,19 @@ PPTX 写出来后用 `s8fy convert <out.pptx> --to png -o previews/ --overwrite`
 
 ---
 
+## Skill Root 与内置脚本
+
+将包含本 `SKILL.md` 的目录视为 `<skill-root>`。本 skill 对外发布时必须自包含：
+运行时或用户工作流需要的脚本都在 `<skill-root>/scripts/`，资源都在 `<skill-root>/assets/`、
+`<skill-root>/references/` 或 `<skill-root>/benchmarks/`。
+
+不要在 skill 用户路径里调用仓库根 `tools/`、`Justfile` 或其他 skill 目录外的文件。若示例命令需要
+DeckKit 选择、readiness、benchmark 或图标查询，使用
+`node <skill-root>/scripts/<script>.mjs ...`。仓库根 `tools/` 只属于 skill 开发者维护流程，
+不能作为生成 PPTX 的发布依赖。
+
+---
+
 ## 全局工作目录、输出与完成摘要
 
 本节优先级高于后文所有示例路径；references 里的 `patch.json` / `out.pptx` /
@@ -171,10 +184,10 @@ deck 再新建；studio 逐项精控；edit 改已有），
    `outline.json`，固定受众、目标、页数、页序、每页意图、页型、主题和风格假设。
    Express 默认自动继续，Studio / 高风险场景按"创建型大纲与确认策略"先确认。
 2. 再查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
-   选择 DeckKit；优先使用 `node tools/pptx-nova-deckkit-select.mjs --target delivery`
+   选择 DeckKit；优先使用 `node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery`
    自动过滤 readiness、页型覆盖、语言、密度和 quality metadata。
 3. 对选中的 DeckKit 跑
-   `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
+   `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
    确认 catalog readiness、benchmark、vision/PNG gate 和人工 review 元数据都满足交付要求。
 4. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
    只能用于草稿、迁移验证，或人工确认后的交付。
@@ -288,15 +301,15 @@ content.json (变化层，每次只改这一份)
 `assets/icons/tabler-icons.pack.br` 里的 Tabler 全量 pack，通过
 `assets/deckkits/icon-assets.kit.mjs` 或 `createOps().icon()` 内联为
 `add-picture` 的 SVG `bytesBase64`。查找图标时使用
-`node tools/pptx-nova-icons.mjs search <query> --json`，PPTX 生成路径不得临时联网
+`node <skill-root>/scripts/pptx-nova-icons.mjs search <query> --json`，PPTX 生成路径不得临时联网
 拉取图标，也不得扫描 `~/iWork/refs/tabler-icons`；刷新 pack 与
-`icon-license` 时运行 `nu tools/generate-pptx-nova-tabler-icons.nu` 和
-`nu tools/generate-pptx-nova-tabler-icons.nu --check`。
+`icon-license` 时运行 `node <skill-root>/scripts/pptx-nova-icons.mjs generate` 和
+`node <skill-root>/scripts/pptx-nova-icons.mjs generate --check`。
 
 **使用方式**：
 
 1. 确认 `assets/deckkits/catalog.json` 中有目标 DeckKit（如 `consulting-dark`）
-2. `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <deckkit-id> --target candidate`
+2. `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <deckkit-id> --target candidate`
    检查 benchmark、catalog readiness、quality metadata 和 known blocking limits
 3. 编写 `content.json`（参照同目录的 example + `assets/deckkits/schemas/` 下的 schema）
 4. `node assets/deckkits/validate-content.mjs content.json --deckkit <deckkit-id>` 校验
@@ -950,7 +963,7 @@ jq '.outputs.contactSheet.cells[2].slide' manifest.json   # 总览第 3 格 → 
 
 **何时不必用**：≤3-4 页小 deck 逐页 Read 就够，总览意义不大。contact sheet 是**多页
 deck 跨页扫视 + 省 Read**的提速器，不替代逐页细节复核（§9.6 清单）、vision-check（§10）
-或 PowerPoint 保真度对比（仍属 `tools/visual-compare.nu`）。
+或按当前环境可用工具执行的 PowerPoint 保真度对比；后者不是本 skill 的默认发布依赖。
 
 ---
 

@@ -38,7 +38,8 @@ production/default DeckKit。若有可用 DeckKit，直接回到 SKILL §1.0 的
 # 1. 复制模板
 cp skills/pptx-nova/assets/examples/deck-generator-template.mjs ./generate.mjs
 
-# 2. 选择 themePack/stylePack；要新增风格时先改 assets/themes/catalog.json 再 just theme -g
+# 2. 选择 themePack/stylePack；要新增风格时先改 assets/themes/catalog.json
+#    并在发布前同步生成的 theme catalogs
 #    然后只改各 slide 函数里的文字/数据
 
 # 3. 生成探索 patch + 丰富度自检 + dry-run gate + 落盘
@@ -123,8 +124,8 @@ const C = {
 
 模板里的 `C` 由 `themePack.generator.colors` 派生。**所有 hex 字面量都必须走 `C.*`**，
 整个文件里不应该出现第二个 `"F57C00"`。换主题优先传 `--theme` 或新增/修改
-`assets/themes/catalog.json` 后运行 `just theme -g`，不要在复制出的 generator 里维护一份完整
-主题色。
+`assets/themes/catalog.json` 后同步生成的 theme catalogs，不要在复制出的 generator 里维护一份
+完整主题色。
 
 ### 2. 字号节奏 `F` 对象（来自 themePack + stylePack）
 
@@ -158,7 +159,7 @@ consulting/minimal/product 的完整字号 token 属于 `assets/themes/catalog.j
 探索用单 deck 生成：
 
 ```bash
-node skills/pptx-nova/assets/examples/deck-generator-template.mjs \
+node <skill-root>/assets/examples/deck-generator-template.mjs \
   --theme consulting-grey \
   --style consulting \
   --layout narrative-split > .tmp-narrative.patch.json
@@ -167,14 +168,14 @@ node skills/pptx-nova/assets/examples/deck-generator-template.mjs \
 DeckKit 视觉回归使用 benchmark 工具，而不是旧 showcase 产物矩阵：
 
 ```bash
-node tools/pptx-nova-deckkit-benchmark.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs \
   --deckkit consulting-dark \
   --all \
   --repeat 3 \
   --clean
 ```
 
-benchmark 输出和 `tools/pptx-nova-deckkit-readiness.mjs` 共同决定 DeckKit 是否能进入
+benchmark 输出和 `scripts/pptx-nova-deckkit-readiness.mjs` 共同决定 DeckKit 是否能进入
 delivery/default 路径。需要验证 theme/style 是否跨版式稳定时，把对应 fixture 收敛到
 `skills/pptx-nova/benchmarks/visual/`。
 

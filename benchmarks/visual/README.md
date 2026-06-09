@@ -42,7 +42,7 @@ For each case:
 ## Current CLI
 
 ```bash
-node tools/pptx-nova-deckkit-benchmark.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs \
   --deckkit consulting-dark \
   --case golden-roadshow \
   --repeat 3 \
@@ -58,7 +58,7 @@ PNG preview, and contact-sheet gates. It writes `patch.json`, `deck.pptx`,
 After benchmark output exists, run the readiness audit:
 
 ```bash
-node tools/pptx-nova-deckkit-readiness.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
   --deckkit consulting-dark \
   --target candidate
 ```
@@ -72,7 +72,7 @@ with the slide count.
 To write machine-verifiable benchmark metadata back to `catalog.json`, run:
 
 ```bash
-node tools/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
   --deckkit consulting-dark \
   --write
 ```
@@ -91,7 +91,7 @@ Manual PNG review remains a separate human step:
    manual count:
 
 ```bash
-node tools/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
   --deckkit consulting-dark \
   --manual-hard-defects 0 \
   --write
@@ -100,7 +100,7 @@ node tools/pptx-nova-deckkit-catalog-update.mjs \
 Promotion requires an explicit manual review confirmation:
 
 ```bash
-node tools/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
   --deckkit consulting-dark \
   --manual-hard-defects 0 \
   --readiness production \

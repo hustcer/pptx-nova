@@ -54,7 +54,7 @@ s8fy pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 - For common deck icons, use the Tabler full icon pack:
   `icons/tabler-icons.pack.br` contains outline and filled icons, and
   `icons/icon-license` carries the Tabler MIT license. Agents should search or
-  fetch icon names through `node tools/pptx-nova-icons.mjs ...`; DeckKit
+  fetch icon names through `node <skill-root>/scripts/pptx-nova-icons.mjs ...`; DeckKit
   generators should read icons through `assets/deckkits/icon-assets.kit.mjs`
   instead of fetching icons online or reading the Tabler checkout during PPTX
   generation.

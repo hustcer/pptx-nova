@@ -66,24 +66,21 @@ built-ins are generated from that file; do not hand-edit `s8fy/cmd/main/pptx_the
 or `assets/examples/theme-packs.generated.mjs`.
 
 Built-in style packs must include a complete `generator` object with `sizes`, `layout`, `surface`,
-`effects`, `chrome`, and `chart`. `just theme` validates required fields, unknown fields, numeric
-ranges, allowed shapes (`rectangle` / `rounded-rectangle`), and nullable shadow effect objects.
-Keep the full consulting/minimal/product visual token values in `assets/themes/catalog.json`; the
-JS template only carries a small compatibility fallback for external hand-written packs.
+`effects`, `chrome`, and `chart`. The source-repository theme sync validates required fields,
+unknown fields, numeric ranges, allowed shapes (`rectangle` / `rounded-rectangle`), and nullable
+shadow effect objects before a skill release. Keep the full consulting/minimal/product visual token
+values in `assets/themes/catalog.json`; the JS template only carries a small compatibility fallback
+for external hand-written packs.
 
-After changing the source catalog, run from the repository root:
-
-```bash
-just theme -g
-just theme
-```
+Packaged skill consumers should treat the bundled generated catalogs as ready-to-use. Maintainers
+who change `assets/themes/catalog.json` must regenerate the derived catalogs before publishing.
 
 The CLI exposes the generated schema-backed catalog through `s8fy pptx list-themes --json`.
 
 ## Generator Usage
 
 ```bash
-node skills/pptx-nova/assets/examples/deck-generator-template.mjs \
+node <skill-root>/assets/examples/deck-generator-template.mjs \
   --theme corporate-blue \
   --style consulting > patch.json
 ```

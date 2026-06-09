@@ -81,13 +81,13 @@ p.icon(0, 'S0_StatusIcon', 'chart-line', 0.72, 0.72, 0.28, 0.28, {
 查找图标时使用 agent 入口，避免把全量 SVG 读入上下文：
 
 ```bash
-node tools/pptx-nova-icons.mjs search "analytics dashboard" --style outline --limit 12 --json
-node tools/pptx-nova-icons.mjs get chart-line users presentation --style outline --json
+node <skill-root>/scripts/pptx-nova-icons.mjs search "analytics dashboard" --style outline --limit 12 --json
+node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation --style outline --json
 ```
 
 图标包覆盖 Tabler `outline` 和 `filled` 全量图标。刷新 pack 与 license 时运行
-`nu tools/generate-pptx-nova-tabler-icons.nu` 和
-`nu tools/generate-pptx-nova-tabler-icons.nu --check`。
+`node <skill-root>/scripts/pptx-nova-icons.mjs generate` 和
+`node <skill-root>/scripts/pptx-nova-icons.mjs generate --check`。
 
 ## 版本规则（semver）
 
@@ -102,7 +102,7 @@ node tools/pptx-nova-icons.mjs get chart-line users presentation --style outline
 1. `validate-content` 通过，只有可解释的非阻塞 warning
 2. `node build.mjs > patch.json` 可重复生成稳定 patch
 3. DeckKit benchmark 的 golden / stress / mixed-language cases 全部通过
-4. `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate` 通过
+4. `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate` 通过
 5. `s8fy pptx apply --dry-run --json` 通过
 6. `s8fy pptx vision-check out.pptx --json` 的 high/medium 为 0
 7. PNG contact sheet 和逐页检查通过
@@ -119,7 +119,7 @@ benchmark 通过后，用 catalog update 工具把机器可证明的结果写回
 `assets/deckkits/catalog.json`：
 
 ```bash
-node tools/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
   --deckkit consulting-dark \
   --write
 ```
@@ -129,7 +129,7 @@ node tools/pptx-nova-deckkit-catalog-update.mjs \
 结果假定为通过。人工复核完成后，再显式写入 hard defect 数：
 
 ```bash
-node tools/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
   --deckkit consulting-dark \
   --manual-hard-defects 0 \
   --write

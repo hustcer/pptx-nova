@@ -20,22 +20,22 @@ introduced.
 
 - Prefer JSON catalogs over undocumented loose files.
 - Treat `themes/catalog.json` as the source of truth for built-in
-  themePack/stylePack data. After editing it, run
-  `just theme -g` from the repo root; use `just theme` to detect stale
-  generated MoonBit/JS catalogs.
+  themePack/stylePack data. If maintainers edit it in the source repository,
+  regenerate the derived catalogs before publishing the skill. Packaged skill
+  consumers should use the bundled generated catalogs as-is.
 - Keep binary and licensed assets out until their license source is recorded.
 - Tabler icons are vendored as a deterministic Brotli pack at
   `icons/tabler-icons.pack.br`, with the Tabler MIT license copied to
   `icons/icon-license`. Refresh both from the local Tabler checkout with:
 
   ```bash
-  nu tools/generate-pptx-nova-tabler-icons.nu
-  nu tools/generate-pptx-nova-tabler-icons.nu --check
+  node <skill-root>/scripts/pptx-nova-icons.mjs generate
+  node <skill-root>/scripts/pptx-nova-icons.mjs generate --check
   ```
 
   During PPTX generation, DeckKit code should consume this pack through
   `assets/deckkits/icon-assets.kit.mjs`; agents should search/get icons through
-  `node tools/pptx-nova-icons.mjs ...`. Do not fetch icons from the network or
+  `node <skill-root>/scripts/pptx-nova-icons.mjs ...`. Do not fetch icons from the network or
   scan the Tabler checkout in the deck generation path.
 
 - Use `s8fy pptx extract-style reference.pptx --output style.json --json` to
@@ -45,8 +45,8 @@ introduced.
   profiles, and register the imported entries in the local catalogs.
 - Use `s8fy pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx`
   when you only need to reuse one slide in another deck.
-- Use `node tools/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
-  plus `node tools/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
+- Use `node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
+  plus `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
   for production visual gates. Store long-lived benchmark inputs under
   `skills/pptx-nova/benchmarks/visual/`, not under `assets/decks/`.
 - Do not commit generated `.pptx`, PNG previews, contact sheets, regenerated

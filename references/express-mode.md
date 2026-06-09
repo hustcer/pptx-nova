@@ -63,7 +63,7 @@ prompt / 用户大纲 → outline.json → content.json（~200 行纯数据）
 ```bash
 # 0. 从用户大纲标准化 outline.json；若无大纲，再从 prompt 提炼 deckBrief/outline → 见 §3、§7
 # 1. 选择 production/default DeckKit
-node tools/pptx-nova-deckkit-select.mjs \
+node <skill-root>/scripts/pptx-nova-deckkit-select.mjs \
   --scenario roadshow \
   --language mixed \
   --density dense \
@@ -72,19 +72,19 @@ node tools/pptx-nova-deckkit-select.mjs \
   --json
 
 # 1b. 对 selected.id 再跑 delivery readiness audit
-node tools/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target delivery
+node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target delivery
 
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
 cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
 #    按 outline.json 改 slides[].type 和 slides[].data
 
 # 3. 校验 content（schema + density + fit diagnostics）
-node skills/pptx-nova/assets/deckkits/validate-content.mjs \
+node <skill-root>/assets/deckkits/validate-content.mjs \
   content.json \
   --deckkit consulting-dark
 
 # 4. 生成 patch
-node skills/pptx-nova/assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
+node <skill-root>/assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
 
 # 5. 丰富度自检（客户演示级目标 ≥200 ops，见 §5）
 jq '.ops | length' patch.json

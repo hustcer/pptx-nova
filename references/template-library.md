@@ -44,6 +44,84 @@ s8fy pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 5. For generated decks, start from `assets/examples/deck-generator-template.mjs`
    and pass selected theme/style IDs.
 
+## Brand / Layout / Deck Fusion
+
+`pptx-nova` 支持把 catalog 中的 brand、layout、deck 资产组合成一次生成任务，但融合结果必须
+进入 run 目录的 `deck_lock.json`，不要在 generator 里临时猜测。触发方式是用户明确给出
+精确 catalog id 或显式路径；不要用模糊品牌名、风格形容词或相似文件名自动匹配。
+
+### 三类资产的职责
+
+| kind     | 拥有的段                     | 典型内容                                                         |
+| -------- | ---------------------------- | ---------------------------------------------------------------- |
+| `brand`  | identity                     | 颜色、字体、logo、品牌标识、页脚口径、图标风格、禁止项           |
+| `layout` | structure                    | 画布、网格、边距、page rhythm、slide type 到布局的映射、密度限制 |
+| `deck`   | complete deck starting point | 完整 generator / outline / patch bundle、默认 identity/structure |
+
+融合优先级按段而不是按字段：
+
+| 输入组合              | identity 来源 | structure 来源 | deck 起点 |
+| --------------------- | ------------- | -------------- | --------- |
+| brand only            | brand         | 当前模式默认   | 无        |
+| layout only           | 当前模式默认  | layout         | 无        |
+| deck only             | deck          | deck           | deck      |
+| brand + layout        | brand         | layout         | 无        |
+| brand + deck          | brand         | deck           | deck      |
+| layout + deck         | deck          | layout         | deck      |
+| brand + layout + deck | brand         | layout         | deck      |
+
+同段内不做隐式字段级混搭。例如 `brand` 覆盖 identity 时，颜色、字体、logo、图标风格作为
+一个整体进入 `deck_lock.templateFusion.identityFrom`；如果用户要求“用 A 品牌但主色改成
+红色”，把这个改动记录为 Studio 确认后的 override，而不是在 fusion 阶段偷偷改 catalog。
+
+### 冲突处理
+
+- 同 kind 多个资产（两个 brand、两个 layout、两个 deck）默认冲突，先问用户选哪个；只有用户
+  明确要求逐段挑选时，才列出可选段。
+- brand 与 deck 的 identity 冲突时，显式 brand 覆盖 deck；layout 与 deck 的 structure 冲突时，
+  显式 layout 覆盖 deck。
+- 如果 deck 的 generator 不支持 layout 要求的 slide type 或密度，fusion 失败；先扩展 DeckKit
+  或换 deck 起点，不要硬套。
+- 任何被复用的 logo、照片、插画或第三方图标都要进入 `assets_manifest.json`，并记录来源和授权。
+
+### Run 目录产物
+
+融合结果默认只写入 `deck_lock.json.templateFusion`。只有同时满足以下任一条件时，才额外写
+`template_fusion.json`：多来源有冲突、用户做了 override、需要给后续人类审计或模板沉淀复用。
+
+- `deck_lock.json.templateFusion`：只保留生成所需的段级结果，例如
+  `identityFrom`、`structureFrom`、`deckFrom`、`overrides[]`。
+- `template_fusion.json`（按需）：完整记录输入资产、段级来源、冲突和用户 override，方便审计。
+
+需要审计时的最小 `template_fusion.json`：
+
+```json
+{
+  "schemaVersion": "pptx-nova-template-fusion/v1",
+  "sources": [
+    { "kind": "brand", "id": "example-brand-profile", "path": "assets/brand-profile.example.json" },
+    { "kind": "layout", "id": "executive-grid" },
+    { "kind": "deck", "id": "deck-generator-template" }
+  ],
+  "segments": {
+    "identityFrom": "brand:example-brand-profile",
+    "structureFrom": "layout:executive-grid",
+    "deckFrom": "deck:deck-generator-template"
+  },
+  "overrides": [
+    {
+      "segment": "identity",
+      "reason": "User requested darker primary blue in Studio confirmation",
+      "path": "colors.primary"
+    }
+  ],
+  "conflicts": []
+}
+```
+
+`pptx-nova-check-lock.mjs` 不解析完整 fusion 语义，但会检查 `deck_lock.json` 中的颜色、
+字体、资源和 slide type 是否被 content/patch 漂移。fusion 阶段的目标是让这些约束先进入 lock。
+
 ## Adding Assets
 
 - Add metadata to the relevant `catalog.json` before adding binaries.

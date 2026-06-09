@@ -1,0 +1,602 @@
+#!/usr/bin/env node
+import { existsSync, readFileSync, statSync } from 'node:fs'
+import { dirname, isAbsolute, resolve } from 'node:path'
+
+const LOCK_SCHEMA_VERSION = 'pptx-nova-deck-lock/v1'
+const ASSETS_SCHEMA_VERSION = 'pptx-nova-assets-manifest/v1'
+const COLOR_FIELD_RE =
+  /(^|\.)(color|colors|fill|fills|stroke|strokes|linecolor|fontcolor|textcolor|fillcolor|bordercolor|backgroundcolor|bgcolor|foregroundcolor|accent|accent[1-9]|primary|secondary|success|warning|risk)(\.|$)/i
+
+const usage = `Usage:
+  node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json [options]
+
+Options:
+  --lock <path>        Required run-level design lock.
+  --assets <path>      Optional assets_manifest.json.
+  --content <path>     Optional DeckKit content manifest.
+  --patch <path>       Optional s8fy patch envelope.
+  --strict-colors      Treat colors not declared in deck_lock.json as errors.
+  --strict-fonts       Treat font families not declared in deck_lock.json as errors.
+  --json               Print machine-readable report.
+  --help               Show this help.
+
+Example:
+  node <skill-root>/scripts/pptx-nova-check-lock.mjs \\
+    --lock .pptx-nova/run/deck_lock.json \\
+    --assets .pptx-nova/run/assets_manifest.json \\
+    --content .pptx-nova/run/content.json \\
+    --patch .pptx-nova/run/patch.json \\
+    --json
+`
+
+function parseArgs(argv) {
+  const args = {
+    lock: '',
+    assets: '',
+    content: '',
+    patch: '',
+    strictColors: false,
+    strictFonts: false,
+    json: false,
+  }
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i]
+    if (arg === '--help' || arg === '-h') {
+      process.stdout.write(usage)
+      process.exit(0)
+    } else if (arg === '--json') {
+      args.json = true
+    } else if (arg === '--strict-colors') {
+      args.strictColors = true
+    } else if (arg === '--strict-fonts') {
+      args.strictFonts = true
+    } else if (arg === '--lock') {
+      args.lock = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else if (arg === '--assets') {
+      args.assets = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else if (arg === '--content') {
+      args.content = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else if (arg === '--patch') {
+      args.patch = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else {
+      throw new Error(`Unknown option: ${arg}\n\n${usage}`)
+    }
+  }
+
+  if (!args.lock) throw new Error(`--lock is required\n\n${usage}`)
+  return args
+}
+
+function valueAfter(argv, index, flag) {
+  const value = argv[index + 1]
+  if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`)
+  return value
+}
+
+function readJson(path, label) {
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch (error) {
+    throw new Error(`Failed to read ${label} at ${path}: ${error.message}`)
+  }
+}
+
+function push(list, code, message, details = {}) {
+  list.push({ code, message, ...details })
+}
+
+function isPlainObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : []
+}
+
+function normalizeHex(value) {
+  const match = String(value ?? '').match(/^#?([0-9a-f]{6})(?:[0-9a-f]{2})?$/i)
+  return match ? match[1].toUpperCase() : ''
+}
+
+function collectHexStrings(value, out = new Set()) {
+  if (typeof value === 'string') {
+    const matches = value.match(/(?<![0-9a-f])#?[0-9a-f]{6}(?:[0-9a-f]{2})?(?![0-9a-f])/gi) ?? []
+    for (const item of matches) {
+      const normalized = normalizeHex(item)
+      if (normalized) out.add(normalized)
+    }
+    return out
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectHexStrings(item, out)
+    return out
+  }
+  if (isPlainObject(value)) {
+    for (const item of Object.values(value)) collectHexStrings(item, out)
+  }
+  return out
+}
+
+function collectAllowedColors(lock) {
+  const colors = new Set()
+  for (const source of [
+    lock.colors,
+    lock.theme,
+    lock.themePack,
+    lock.stylePack,
+    lock.brand?.colors,
+    lock.templateFusion?.identity,
+  ]) {
+    collectHexStrings(source, colors)
+  }
+  return colors
+}
+
+function normalizeFontName(value) {
+  return String(value ?? '')
+    .trim()
+    .replace(/^['"]|['"]$/g, '')
+    .replace(/\s+/g, ' ')
+}
+
+function splitFontStack(value) {
+  return String(value ?? '')
+    .split(',')
+    .map(normalizeFontName)
+    .filter(Boolean)
+    .filter((item) => !['serif', 'sans-serif', 'monospace', 'system-ui'].includes(item))
+}
+
+function collectAllowedFonts(lock) {
+  const fonts = new Set()
+  const collect = (value) => {
+    if (typeof value === 'string') {
+      for (const font of splitFontStack(value)) fonts.add(font.toLowerCase())
+    } else if (Array.isArray(value)) {
+      for (const item of value) collect(item)
+    } else if (isPlainObject(value)) {
+      for (const item of Object.values(value)) collect(item)
+    }
+  }
+  collect(lock.typography)
+  collect(lock.fonts)
+  collect(lock.brand?.fonts)
+  return fonts
+}
+
+function collectFieldValues(value, predicate, path = [], out = []) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) =>
+      collectFieldValues(item, predicate, [...path, String(index)], out),
+    )
+    return out
+  }
+  if (!isPlainObject(value)) return out
+  for (const [key, item] of Object.entries(value)) {
+    const nextPath = [...path, key]
+    if (predicate(key, nextPath, item)) out.push({ path: nextPath.join('.'), value: item })
+    collectFieldValues(item, predicate, nextPath, out)
+  }
+  return out
+}
+
+function collectPatchFonts(patch) {
+  const fontFields = collectFieldValues(patch, (key, path, value) => {
+    if (typeof value !== 'string') return false
+    const field = key.toLowerCase()
+    const joined = path.join('.').toLowerCase()
+    return (
+      field === 'fontface' ||
+      field === 'fontfamily' ||
+      field === 'typeface' ||
+      field === 'family' ||
+      field === 'font' ||
+      joined.includes('.font.')
+    )
+  })
+
+  const fonts = []
+  for (const field of fontFields) {
+    for (const font of splitFontStack(field.value)) {
+      fonts.push({ path: field.path, font })
+    }
+  }
+  return fonts
+}
+
+function collectPatchColors(patch) {
+  const colorFields = collectFieldValues(patch, (key, path, value) => {
+    if (typeof value !== 'string' && !Array.isArray(value) && !isPlainObject(value)) return false
+    const joined = path
+      .map((part) => (Number.isNaN(Number(part)) ? part : '[]'))
+      .join('.')
+      .toLowerCase()
+    return COLOR_FIELD_RE.test(joined) || COLOR_FIELD_RE.test(key.toLowerCase())
+  })
+
+  const colors = new Set()
+  for (const field of colorFields) collectHexStrings(field.value, colors)
+  return colors
+}
+
+function collectAssetPaths(patch) {
+  return collectFieldValues(patch, (key, path, value) => {
+    if (typeof value !== 'string') return false
+    const joined = path.join('.').toLowerCase()
+    return joined.endsWith('assetsource.path') || joined.endsWith('.image.path')
+  })
+}
+
+function slideTypeOf(slide) {
+  return slide?.slideType ?? slide?.type ?? slide?.kind ?? slide?.layout ?? ''
+}
+
+function assetEntries(assets) {
+  if (!assets) return []
+  if (Array.isArray(assets.entries)) return assets.entries
+  if (Array.isArray(assets.assets)) return assets.assets
+  return []
+}
+
+function resolveMaybeRelative(path, baseDir) {
+  if (!path || /^https?:\/\//i.test(path) || path.startsWith('data:')) return ''
+  return isAbsolute(path) ? path : resolve(baseDir, path)
+}
+
+function assetFileCandidates(path, baseDir, assetRoot) {
+  const normalized = normalizeAssetPath(path)
+  if (!normalized || /^https?:\/\//i.test(normalized) || normalized.startsWith('data:')) return []
+  if (isAbsolute(path)) return [path]
+
+  const candidates = [resolveMaybeRelative(normalized, baseDir)]
+  const root = normalizeAssetPath(assetRoot)
+  if (root && !normalized.startsWith(`${root}/`)) {
+    candidates.unshift(resolveMaybeRelative(`${root}/${normalized}`, baseDir))
+  }
+  return [...new Set(candidates)]
+}
+
+function normalizeAssetPath(value) {
+  const text = String(value ?? '').trim()
+  if (!text || /^https?:\/\//i.test(text) || text.startsWith('data:')) return text
+  return text.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+/g, '/')
+}
+
+function checkLock(lock, errors, warnings) {
+  if (lock.schemaVersion !== LOCK_SCHEMA_VERSION) {
+    push(
+      errors,
+      'lock-schema-version',
+      `deck_lock.json schemaVersion must be ${LOCK_SCHEMA_VERSION}`,
+    )
+  }
+  if (!lock.mode) push(warnings, 'lock-mode-missing', 'deck_lock.json mode is missing')
+  if (!lock.outlinePath && !lock.outline) {
+    push(
+      warnings,
+      'lock-outline-missing',
+      'deck_lock.json should point to outline.json or embed outline',
+    )
+  }
+  if (!isPlainObject(lock.canvas)) push(warnings, 'lock-canvas-missing', 'canvas is missing')
+  if (!isPlainObject(lock.colors) || collectAllowedColors(lock).size === 0) {
+    push(warnings, 'lock-colors-missing', 'colors are missing or contain no 6-digit HEX values')
+  }
+  if (!isPlainObject(lock.typography) && !isPlainObject(lock.fonts)) {
+    push(warnings, 'lock-typography-missing', 'typography/font declarations are missing')
+  }
+  if (!Array.isArray(lock.slides) || lock.slides.length === 0) {
+    push(errors, 'lock-slides-missing', 'deck_lock.json must contain a non-empty slides[] array')
+  } else {
+    lock.slides.forEach((slide, index) => {
+      if (!slideTypeOf(slide)) {
+        push(warnings, 'lock-slide-type-missing', `slides[${index}] has no slideType/type/kind`)
+      }
+      if (!slide.title && !slide.purpose) {
+        push(
+          warnings,
+          'lock-slide-purpose-missing',
+          `slides[${index}] should have title or purpose`,
+        )
+      }
+    })
+  }
+}
+
+function checkAssets(assets, assetsPath, lock, errors, warnings) {
+  if (!assets) return
+  if (assets.schemaVersion !== ASSETS_SCHEMA_VERSION) {
+    push(
+      errors,
+      'assets-schema-version',
+      `assets_manifest.json schemaVersion must be ${ASSETS_SCHEMA_VERSION}`,
+    )
+  }
+
+  const entries = assetEntries(assets)
+  const referenced = lockAssetReferences(lock)
+  if (entries.length === 0 && referenced.size > 0) {
+    push(
+      errors,
+      'assets-empty',
+      'deck_lock references assets but assets_manifest.json has no entries',
+    )
+  }
+
+  const ids = new Set()
+  const baseDir = dirname(assetsPath)
+  const assetRoot = assets.assetRoot ?? ''
+  for (const [index, entry] of entries.entries()) {
+    const label = entry.id ?? `entries[${index}]`
+    if (!entry.id) push(errors, 'asset-id-missing', `assets entry ${index} is missing id`)
+    if (entry.id && ids.has(entry.id))
+      push(errors, 'asset-id-duplicate', `duplicate asset id: ${entry.id}`)
+    if (entry.id) ids.add(entry.id)
+    if (!entry.kind) push(warnings, 'asset-kind-missing', `asset ${label} is missing kind`)
+
+    const status = entry.status ?? 'available'
+    if (['missing', 'needs-user'].includes(status)) {
+      push(errors, 'asset-not-ready', `asset ${label} is not ready: status=${status}`)
+    } else if (status === 'placeholder') {
+      push(warnings, 'asset-placeholder', `asset ${label} is still a placeholder`)
+    }
+
+    const sourceKind = entry.source?.kind ?? entry.sourceKind ?? ''
+    const path = entry.path ?? entry.source?.path ?? ''
+    const shouldExist =
+      path &&
+      !['built-in', 'web', 'placeholder'].includes(sourceKind) &&
+      !/^https?:\/\//i.test(path) &&
+      !path.startsWith('data:')
+    const candidates = assetFileCandidates(path, baseDir, assetRoot)
+    const resolved = candidates.find((candidate) => existsSync(candidate))
+    if (shouldExist && candidates.length > 0 && !resolved) {
+      push(errors, 'asset-file-missing', `asset ${label} points to a missing file: ${path}`)
+    } else if (shouldExist && resolved) {
+      try {
+        if (!statSync(resolved).isFile()) {
+          push(errors, 'asset-not-file', `asset ${label} path is not a file: ${path}`)
+        }
+      } catch {
+        push(errors, 'asset-file-missing', `asset ${label} points to a missing file: ${path}`)
+      }
+    }
+  }
+
+  for (const id of referenced) {
+    if (!ids.has(id))
+      push(errors, 'asset-reference-missing', `deck_lock slide references unknown asset: ${id}`)
+  }
+}
+
+function manifestAssetPaths(assets) {
+  const paths = new Set()
+  const assetRoot = normalizeAssetPath(assets?.assetRoot)
+  const addPath = (value) => {
+    const normalized = normalizeAssetPath(value)
+    if (!normalized) return
+    paths.add(normalized)
+    if (assetRoot && normalized.startsWith(`${assetRoot}/`)) {
+      paths.add(normalized.slice(assetRoot.length + 1))
+    } else if (assetRoot && !isAbsolute(normalized) && !/^https?:\/\//i.test(normalized)) {
+      paths.add(`${assetRoot}/${normalized}`)
+    }
+  }
+
+  for (const entry of assetEntries(assets)) {
+    for (const value of [
+      entry.path,
+      entry.source?.path,
+      entry.pptxUse?.path,
+      entry.assetSource?.path,
+    ]) {
+      addPath(value)
+    }
+  }
+  return paths
+}
+
+function lockAssetReferences(lock) {
+  const referenced = new Set()
+  for (const slide of asArray(lock.slides)) {
+    for (const id of asArray(slide.assets)) referenced.add(id)
+    for (const id of asArray(slide.assetIds)) referenced.add(id)
+    for (const id of asArray(slide.images)) referenced.add(id)
+  }
+  return referenced
+}
+
+function checkContent(content, lock, errors, warnings) {
+  if (!content) return
+  if (!Array.isArray(content.slides)) {
+    push(errors, 'content-slides-missing', 'content.json must contain slides[]')
+    return
+  }
+  if (Array.isArray(lock.slides) && lock.slides.length !== content.slides.length) {
+    push(
+      errors,
+      'slide-count-mismatch',
+      `deck_lock has ${lock.slides.length} slide(s), content has ${content.slides.length}`,
+    )
+  }
+
+  const limit = Math.min(lock.slides?.length ?? 0, content.slides.length)
+  for (let index = 0; index < limit; index += 1) {
+    const lockedType = slideTypeOf(lock.slides[index])
+    const contentType = slideTypeOf(content.slides[index])
+    if (lockedType && contentType && lockedType !== contentType) {
+      push(
+        errors,
+        'slide-type-mismatch',
+        `slide ${index + 1} type drift: deck_lock=${lockedType}, content=${contentType}`,
+      )
+    }
+  }
+
+  const lockedDeckkit = lock.deckkit?.id ?? lock.deckkitId ?? ''
+  const contentDeckkit = content.meta?.deckkit ?? content.deckkit ?? ''
+  if (lockedDeckkit && contentDeckkit && lockedDeckkit !== contentDeckkit) {
+    push(
+      errors,
+      'deckkit-mismatch',
+      `deckkit drift: deck_lock=${lockedDeckkit}, content=${contentDeckkit}`,
+    )
+  }
+
+  if (
+    content.meta?.themePack &&
+    lock.themePack?.id &&
+    content.meta.themePack !== lock.themePack.id
+  ) {
+    push(
+      warnings,
+      'theme-mismatch',
+      `themePack differs: deck_lock=${lock.themePack.id}, content=${content.meta.themePack}`,
+    )
+  }
+}
+
+function checkPatch(patch, lock, assets, args, errors, warnings) {
+  if (!patch) return
+  if (patch.schemaVersion !== 1) {
+    push(errors, 'patch-schema-version', 'patch.json schemaVersion must be 1')
+  }
+  if (!Array.isArray(patch.ops)) {
+    push(errors, 'patch-ops-missing', 'patch.json must contain ops[]')
+    return
+  }
+
+  const allowedColors = collectAllowedColors(lock)
+  if (allowedColors.size > 0) {
+    const usedColors = collectPatchColors(patch)
+    const unknown = [...usedColors].filter((color) => !allowedColors.has(color))
+    for (const color of unknown) {
+      push(
+        args.strictColors ? errors : warnings,
+        'patch-color-outside-lock',
+        `patch uses color #${color} that is not declared in deck_lock.json`,
+      )
+    }
+  }
+
+  const allowedFonts = collectAllowedFonts(lock)
+  if (allowedFonts.size > 0) {
+    for (const item of collectPatchFonts(patch)) {
+      if (!allowedFonts.has(item.font.toLowerCase())) {
+        push(
+          args.strictFonts ? errors : warnings,
+          'patch-font-outside-lock',
+          `patch uses font "${item.font}" outside deck_lock typography at ${item.path}`,
+        )
+      }
+    }
+  }
+
+  const addSlideCount = patch.ops.filter(
+    (op) => op?.op === 'add-slide' || op?.type === 'add-slide',
+  ).length
+  if (addSlideCount > 0 && Array.isArray(lock.slides) && addSlideCount !== lock.slides.length) {
+    push(
+      warnings,
+      'patch-slide-count-mismatch',
+      `patch adds ${addSlideCount} slide(s), deck_lock has ${lock.slides.length}; verify this is not an edit flow`,
+    )
+  }
+
+  const patchAssetPaths = collectAssetPaths(patch)
+  if (patchAssetPaths.length > 0 && !assets) {
+    push(
+      errors,
+      'assets-manifest-missing',
+      'patch references assetSource.path but --assets was not provided',
+    )
+  }
+
+  const registeredAssetPaths = assets ? manifestAssetPaths(assets) : new Set()
+  for (const field of patchAssetPaths) {
+    const normalizedPath = normalizeAssetPath(field.value)
+    if (isAbsolute(field.value)) {
+      push(
+        warnings,
+        'patch-absolute-asset-path',
+        `patch uses absolute asset path at ${field.path}; prefer run-dir assets_manifest + --asset-root`,
+      )
+    }
+    if (assets && normalizedPath && !registeredAssetPaths.has(normalizedPath)) {
+      push(
+        errors,
+        'patch-asset-not-manifested',
+        `patch asset path "${field.value}" at ${field.path} is not registered in assets_manifest.json`,
+      )
+    }
+  }
+}
+
+function main() {
+  const args = parseArgs(process.argv.slice(2))
+  const errors = []
+  const warnings = []
+
+  const lock = readJson(args.lock, 'deck_lock.json')
+  const assets = args.assets ? readJson(args.assets, 'assets_manifest.json') : null
+  const content = args.content ? readJson(args.content, 'content.json') : null
+  const patch = args.patch ? readJson(args.patch, 'patch.json') : null
+
+  checkLock(lock, errors, warnings)
+  if (!assets && lockAssetReferences(lock).size > 0) {
+    push(
+      errors,
+      'assets-manifest-missing',
+      'deck_lock references slide assets but --assets was not provided',
+    )
+  } else if (!assets && lock.assetsManifestPath) {
+    push(
+      warnings,
+      'assets-manifest-not-checked',
+      'deck_lock has assetsManifestPath but --assets was not provided',
+    )
+  }
+  checkAssets(assets, args.assets, lock, errors, warnings)
+  checkContent(content, lock, errors, warnings)
+  checkPatch(patch, lock, assets, args, errors, warnings)
+
+  const report = {
+    schemaVersion: 'pptx-nova-lock-check/v1',
+    valid: errors.length === 0,
+    summary: {
+      errors: errors.length,
+      warnings: warnings.length,
+      slides: Array.isArray(lock.slides) ? lock.slides.length : 0,
+      assets: assets ? assetEntries(assets).length : 0,
+      patchOps: patch?.ops?.length ?? 0,
+    },
+    errors,
+    warnings,
+  }
+
+  if (args.json) {
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+  } else {
+    for (const error of errors) console.error(`[error] ${error.code}: ${error.message}`)
+    for (const warning of warnings) console.error(`[warn]  ${warning.code}: ${warning.message}`)
+    process.stdout.write(
+      report.valid
+        ? `Valid with ${warnings.length} warning(s).\n`
+        : `Failed with ${errors.length} error(s), ${warnings.length} warning(s).\n`,
+    )
+  }
+
+  if (!report.valid) process.exit(1)
+}
+
+try {
+  main()
+} catch (error) {
+  console.error(`[error] ${error.message}`)
+  process.exit(1)
+}

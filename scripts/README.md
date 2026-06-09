@@ -11,6 +11,8 @@ Use these entry points from skill workflows:
 - `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
 - `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.
 - `pptx-nova-icons.mjs` - query and generate the bundled Tabler icon pack.
+- `pptx-nova-check-lock.mjs` - validate `deck_lock.json`, `assets_manifest.json`,
+  DeckKit content, and patch output before s8fy dry-run.
 
 Repository-root `tools/` scripts may wrap or test these files during skill
 development, but published skill users should call scripts from this directory.

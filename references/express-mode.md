@@ -1,8 +1,8 @@
 # Express Mode —— 简单 prompt 一键出客户演示级 deck
 
 > 用户给一句话 / 几句话的 prompt，或已经给出大纲时的**默认创建路径**：自动走完
-> outline（生成或标准化）→ 选择可用 DeckKit → content manifest → dry-run → vision-check 闭环 →
-> PNG 复核，最小确认、零手算坐标。
+> outline（生成或标准化）→ deck_lock（有资源时 assets_manifest）→ 选择可用 DeckKit →
+> content manifest → check-lock → dry-run → vision-check 闭环 → PNG 复核，最小确认、零手算坐标。
 >
 > **express ≠ 草稿**：它默认也按客户演示级（200-300 ops）产出，只是把
 > SKILL §6 的完整工作流自动串起来、不逐项追问。要草稿请明说「简单/速记版」。
@@ -10,7 +10,7 @@
 ## 目录
 
 1. [何时用 Express（vs Studio / Edit）](#1-何时用-expressvs-studio--edit)
-2. [Express 黄金路径（自动化 11 步）](#2-express-黄金路径自动化-11-步)
+2. [Express 黄金路径（自动化 12 步）](#2-express-黄金路径自动化-12-步)
 3. [prompt → outline → DeckKit/content](#3-prompt--outline--deckkitcontent)
 4. [风格选择（themePack / stylePack）](#4-风格选择themepack--stylepack)
 5. [质量门与丰富度](#5-质量门与丰富度)
@@ -42,10 +42,11 @@ DeckKit、需要新页型或需要改组件结构时的创建/扩展阶段。
 更短的 **DeckKit 模式** 路径：不写 generator，只写 content manifest。
 
 ```
-prompt / 用户大纲 → outline.json → content.json（~200 行纯数据）
+prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资源时加 assets_manifest.json）
+  → content.json（~200 行纯数据）
   → validate-content.mjs 校验
   → createDeck(content) 生成 patch
-  → dry-run → apply → vision-check → PNG/contact sheet review
+  → check-lock → dry-run → apply → vision-check → PNG/contact sheet review
 ```
 
 判断条件：`catalog.json` 中存在匹配的 `id`，`supportedSlideTypes` 覆盖 outline
@@ -58,10 +59,11 @@ prompt / 用户大纲 → outline.json → content.json（~200 行纯数据）
 
 ---
 
-## 2. Express 黄金路径（自动化 11 步）
+## 2. Express 黄金路径（自动化 12 步）
 
 ```bash
 # 0. 从用户大纲标准化 outline.json；若无大纲，再从 prompt 提炼 deckBrief/outline → 见 §3、§7
+# 0b. 自动生成 deck_lock.json；只有使用外部/复用资源时生成 assets_manifest.json。Express 不阻塞确认，假设写入 assumptions[]
 # 1. 选择 production/default DeckKit
 node <skill-root>/scripts/pptx-nova-deckkit-select.mjs \
   --scenario roadshow \
@@ -86,31 +88,40 @@ node <skill-root>/assets/deckkits/validate-content.mjs \
 # 4. 生成 patch
 node <skill-root>/assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
 
-# 5. 丰富度自检（客户演示级目标 ≥200 ops，见 §5）
+# 5. 设计锁漂移检查（deck_lock/assets/content/patch 一致性）
+node <skill-root>/scripts/pptx-nova-check-lock.mjs \
+  --lock deck_lock.json \
+  --content content.json \
+  --patch patch.json \
+  --json
+# 有 assets_manifest.json 时加：--assets assets_manifest.json
+
+# 6. 丰富度自检（客户演示级目标 ≥200 ops，见 §5）
 jq '.ops | length' patch.json
 
-# 6. dry-run 预演（多步默认 --daemon；--explain 拿字段约束）
+# 7. dry-run 预演（多步默认 --daemon；--explain 拿字段约束）
 s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | save dry.json
 #    读 semanticChanges[] / visualRisks[] / resolvedSelectors[]
 
-# 7. 自动修复：合并 autoRetry==true 的 fixPatch 重跑 dry-run（见 troubleshooting.md）
+# 8. 自动修复：合并 autoRetry==true 的 fixPatch 重跑 dry-run（见 troubleshooting.md）
 #    ambiguous selector / fuzzy enum / RGB 规整 等机器有信心的修复直接合
 
-# 8. 真 apply（去掉 --dry-run，留 sidecar out.pptx.s8fy.json）
+# 9. 真 apply（去掉 --dry-run，留 sidecar out.pptx.s8fy.json）
 s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
 
-# 9. 几何自检闭环（render-free，见 §6）
+# 10. 几何自检闭环（render-free，见 §6）
 s8fy pptx vision-check out.pptx --json | save vision.json
 #    合并 autoRetry 的 fixPatch → 人工处理剩余 medium/high → 再 vision-check 到 medium/high 清零
 
-# 10. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 SKILL §9.6）
+# 11. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 SKILL §9.6）
 s8fy convert out.pptx --to png -o previews/ --overwrite
 #    逐页检查字符重叠、换行压字、截断、页脚/来源撞正文
 
-# 11. 产出物：out.pptx + outline.json + content.json + patch.json + dry.json + vision.json + previews/
+# 12. 产出物：out.pptx + outline.json + deck_lock.json + content.json + patch.json + dry.json + vision.json + previews/
+#     若使用外部/复用资源，再包含 assets_manifest.json
 ```
 
-三道闸门职责不重叠：**dry-run（语义）→ vision-check（几何，可自动闭环）→ PNG（像素）**。
+四道闸门职责不重叠：**check-lock（设计锁漂移）→ dry-run（语义）→ vision-check（几何，可自动闭环）→ PNG（像素）**。
 创建型 deck 的 `vision-check` high/medium 都必须为 0；任何一道不过都回去改对应
 DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称完成。
 
@@ -146,6 +157,11 @@ outline 顶层还带 `out`（输出路径）和 `themePack` / `stylePack`（如 
 结构化字段、映射 DeckKit 页型、压缩过长标题、补齐缺省受众/风格/输出路径。只有大纲自相矛盾、
 页数/内容明显装不下、缺少生成所必需的信息，或用户要求优化结构时，才给一个短修订版或问题让
 用户确认。
+
+Express 生成的 `deck_lock.json` 必须记录这些推断值和 `assumptions[]`，但不等待用户批准。
+如果后续 DeckKit 选择、theme/style 或 slide type 发生变化，先更新 lock，再生成 content/patch；
+不要让 patch 里的颜色、字体或资源来源绕过 lock。没有外部图片、logo、复用素材或本轮生成资产时，
+不要创建空的 `assets_manifest.json`。
 
 ### 3.2 无可用 DeckKit 时：创建/扩展 DeckKit
 

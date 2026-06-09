@@ -24,6 +24,9 @@ deck 后新建 deck。
 - `reference-style.json`：`extract-style` 输出，包含主题色、字体、layout/slide 语义和 draft pack。
 - `reference-map.json`：新大纲每页到参考页型/参考 slide 的映射。
 - `outline.json`：用户大纲或标准化后的新大纲；用户已给大纲时直接采用。
+- `template_fusion.json`：仅在多来源冲突、用户 override 或需要审计时记录完整段级融合结果。
+- `deck_lock.json`：锁定参考 deck 可复用的风格/结构、模板融合、输出路径和每页页型/节奏。
+- `assets_manifest.json`：仅在有被允许复用或新生成的 logo、图片、图标、数据截图等资源时创建。
 
 ## 3. 标准流程
 
@@ -57,15 +60,33 @@ s8fy pptx extract-style reference.pptx --output reference-style.json --json
 - `copy-slide`：用 `copy-from` 复制整页骨架后替换内容；只在参考页结构很难重建时使用。
 - `template`：已有占位符模板，改走 `from-data`。
 
+如果用户同时给了精确 brand/layout/deck catalog id 或显式模板路径，先按
+`template-library.md` 的段级融合规则写入 `deck_lock.json.templateFusion`：
+
+- brand 只覆盖 identity（颜色、字体、logo、图标风格、品牌口径）。
+- layout 只覆盖 structure（画布、网格、页型结构、密度和 page rhythm）。
+- deck 作为完整起点；显式 brand/layout 可分别覆盖它的 identity/structure。
+
+融合结果进入 `deck_lock.json.templateFusion`。参考 PPTX 自身也是一个输入源，但它默认只提供
+style/layout evidence；除非用户明确允许复用素材，不把参考 deck 的旧图片、logo 或图标复制进新文件。
+
 生成路径：
 
 1. 根据 `reference-style.json` 选择已有 theme/style，或临时使用抽取出的 draft pack。
-2. 根据 `reference-map.json` 把 `outline.json` 转为 `content.json` 或 generator 输入。
-3. 优先用 DeckKit / generator 新建页面；只有 `reuse: copy-slide` 时才用 `copy-from`。
-4. 跑 dry-run，确认 selector、layout 和 visualRisks。
-5. apply 到 run 目录中间 `.pptx`。
-6. 跑 `vision-check`，创建型 deck 的 high/medium 必须清零。
-7. 转 PNG/contact sheet，逐页检查参考风格是否一致、文字是否溢出、页面是否像新内容而不是旧页残留。
+2. 写 `deck_lock.json`：记录参考来源、template fusion、DeckKit/theme/style、每页
+   `referenceSlide` / `reuse` / `slideType` / `rhythm`，以及所有假设。
+3. 只有允许复用或必须补齐图片/logo/图标/数据截图时才写 `assets_manifest.json`；未授权参考素材标为
+   `placeholder` 或 `needs-user`，不要在 patch 中偷偷引用。无外部资源时不要创建空 manifest。
+4. 根据 `reference-map.json` 和 `deck_lock.json` 把 `outline.json` 转为 `content.json`
+   或 generator 输入。
+5. 优先用 DeckKit / generator 新建页面；只有 `reuse: copy-slide` 时才用 `copy-from`。
+6. 生成 patch 后跑
+   `node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`；
+   有 `assets_manifest.json` 时加 `--assets assets_manifest.json`。
+7. 跑 dry-run，确认 selector、layout 和 visualRisks。
+8. apply 到 run 目录中间 `.pptx`。
+9. 跑 `vision-check`，创建型 deck 的 high/medium 必须清零。
+10. 转 PNG/contact sheet，逐页检查参考风格是否一致、文字是否溢出、页面是否像新内容而不是旧页残留。
 
 ## 4. 复制整页时的规则
 
@@ -84,8 +105,9 @@ s8fy pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 - `extract-style` 当前不会全量细抽 card radius、shadow、chart-specific style；这些需要用
   `inspect`、PNG 观察、generator token 和显式 patch ops 补齐。
 - 如果参考 deck 含 logo、照片、插画或第三方图标，只有用户明确允许复用时才复制素材；否则抽象成
-  布局和风格，不复制资产。
+  布局和风格，不复制资产。允许复用的素材必须登记到 `assets_manifest.json`。
 - 如果参考 deck 有动画、转场、SmartArt、复杂 chartEx，`inspect` 发现后在摘要中说明保真风险；
   必要时改用普通可编辑 shape/table/chart 重建。
-- 完成摘要必须列出参考 deck 路径、`reference-style.json`、`reference-map.json`、最终 PPTX 路径、
-  vision-check 和 PNG 复核结果。
+- 完成摘要必须列出参考 deck 路径、`reference-style.json`、`reference-map.json`、
+  `template_fusion.json`（如有）、`deck_lock.json`、`assets_manifest.json`（如有）、最终 PPTX 路径、
+  check-lock、vision-check 和 PNG 复核结果。

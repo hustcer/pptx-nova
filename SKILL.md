@@ -107,18 +107,25 @@ DeckKit 选择、readiness、benchmark 或图标查询，使用
   中间 apply 和预览都放在 run 目录中。只有最终交付时才写用户指定的输出路径；若用户要求
   原地修改，也要先在 run 目录完成验证，再按用户明确意图写回。
 - **完成摘要**：成功生成或修改后，最终回复必须包含简短摘要：耗时、最终输出 PPTX 的绝对
-  路径、run 目录、关键中间产物（`outline.json`、sidecar、`vision.json`、预览目录 / contact sheet、
-  可选 `check.json`）、验证结果（dry-run / vision-check / PNG 复核 / 发布前预检）以及仍需
+  路径、run 目录、关键中间产物（`outline.json`、`deck_lock.json`、`assets_manifest.json` 如有、
+  sidecar、`vision.json`、预览目录 / contact sheet、可选 `check.json`）、验证结果
+  （check-lock / dry-run / vision-check / PNG 复核 / 发布前预检）以及仍需
   用户注意的风险。耗时应在任务开始和结束用真实时间戳计算；如果没有记录，不要编造。token
   信息只有在平台或工具给出准确统计时才输出，不能估算，拿不到准确值就完全省略 token 行。
 
 ---
 
-## 创建型大纲与确认策略
+## 创建型大纲、设计锁与确认策略
 
-创建型 deck 必须先生成或标准化结构化 `outline.json`，再进入 DeckKit 选择、`content.json` 或 patch
-生产流程。`outline.json` 是质量底座，用于固定受众、目标、页数、页序、每页意图、页型、
-主题与风格假设；不能为了省步骤直接从 prompt 跳到 patch。
+创建型 deck 必须先生成或标准化结构化 `outline.json`，再生成轻量运行契约
+`deck_lock.json` 和可选 `assets_manifest.json`，最后进入 DeckKit 选择、`content.json` 或
+patch 生产流程。`outline.json` 是叙事底座；`deck_lock.json` 是本轮 PPTX 的设计锁，
+用于固定画布、DeckKit/theme/style、色彩、字体、图标、资源、模板融合和每页页型/节奏。
+不能为了省步骤直接从 prompt 跳到 patch。
+
+`deck_lock.json` 不是 `ppt-master` 的 SVG `spec_lock.md`：它不要求逐页手写 SVG，不改变
+DeckKit-first 路线，只防止 generator/content/patch 在长任务里偏离已确认的 PPTX 决策。
+详细 schema、资源清单和 `check-lock` 见 `references/design-lock-and-assets.md`。
 
 大纲确认遵循 **内部强制、自适应阻塞**：
 
@@ -127,17 +134,20 @@ DeckKit 选择、readiness、benchmark 或图标查询，使用
   结构化、页型映射、标题压缩和缺省字段补齐。只有大纲自相矛盾、页数/内容明显装不下、缺少
   生成所必需的信息，或用户要求优化结构时，才提出短问题或给一个修订版请确认。
 - **Express 默认不阻塞确认**：用户要快、只给一句话或没有强调精控时，先生成 `outline.json`，
-  按合理假设继续交付，并在最终摘要里列出主要假设。过程中最多用一句话告知采用的页数和叙事结构，
-  但不要停下来等待确认。
+  再按合理假设生成 `deck_lock.json`，有外部/复用资源时才生成 `assets_manifest.json`，并继续交付，在最终摘要里列出主要假设。
+  过程中最多用一句话告知采用的页数和叙事结构，但不要停下来等待确认。
 - **Studio / 高风险场景必须先确认大纲**：用户明确要求"先给大纲"、投资人路演 / 董事会 /
   客户正式汇报、品牌合规、公司口径敏感、主题/受众/目标无法合理推断、页数跨度过大、或数据型
   deck 缺关键数据时，先给用户确认页序。若用户已经提供明确大纲，视为已确认该大纲；只有需要
   调整页序、增删页或改变核心表达时，才拿修订版再确认。
+- **Studio 一次性确认设计锁**：Studio / 高风险场景在大纲确认时一并给出 8 项短确认：
+  画布、页数、受众、风格/密度、色彩/品牌、字体、图标/图表、图片/logo/第三方素材策略。
+  用户确认后写入 `deck_lock.json`；后续不要凭记忆改配色、字体、资源或模板来源。
 - **确认内容必须短**：只展示页序、每页标题和一句话目的；不要把完整讲稿、长 bullet、风格细节
   都拿去审批。一次性问清缺失项，避免多轮追问。
 - **确认通过后再生成**：阻塞确认场景中，用户同意前不写 `content.json`、不 dry-run、不生成
-  `.pptx`；用户提供的明确大纲或确认后的大纲都保存为 run 目录内 `outline.json`，后续所有内容
-  生产以它为准。
+  `.pptx`；用户提供的明确大纲或确认后的大纲都保存为 run 目录内 `outline.json`，确认后的设计
+  决策保存为 `deck_lock.json`，后续所有内容生产以它们为准。
 
 ---
 
@@ -183,18 +193,23 @@ deck 再新建；studio 逐项精控；edit 改已有），
 1. 先把用户已有大纲标准化为 `outline.json`；若用户没有提供大纲，再从 prompt 拆出
    `outline.json`，固定受众、目标、页数、页序、每页意图、页型、主题和风格假设。
    Express 默认自动继续，Studio / 高风险场景按"创建型大纲与确认策略"先确认。
-2. 再查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
+2. 生成 `deck_lock.json` 和按需生成 `assets_manifest.json`：Express 用合理默认自动锁定，
+   Studio / 高风险场景用已确认的 8 项设计决策锁定；任何后续 theme、字体、资源或页型变化都
+   先更新 lock，再改 content/patch。
+3. 再查 `assets/deckkits/catalog.json`，按场景、语言、密度和 `supportedSlideTypes`
    选择 DeckKit；优先使用 `node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery`
    自动过滤 readiness、页型覆盖、语言、密度和 quality metadata。
-3. 对选中的 DeckKit 跑
+4. 对选中的 DeckKit 跑
    `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
    确认 catalog readiness、benchmark、vision/PNG gate 和人工 review 元数据都满足交付要求。
-4. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
+5. 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit；`candidate`
    只能用于草稿、迁移验证，或人工确认后的交付。
-5. 有可用 DeckKit 时，严格走 `outline.json` → `content.json` → `validate-content.mjs` →
-   `createDeck(content)` → `s8fy pptx apply --dry-run` → apply → `vision-check` →
+6. 有可用 DeckKit 时，严格走 `outline.json` → `deck_lock.json`（有资源时加 `assets_manifest.json`）→
+   `content.json` → `validate-content.mjs` → `createDeck(content)` →
+   `node <skill-root>/scripts/pptx-nova-check-lock.mjs ...` →
+   `s8fy pptx apply --dry-run` → apply → `vision-check` →
    PNG/contact sheet review。
-6. 没有可用 DeckKit、缺页型或需要改组件结构时，先创建/扩展 DeckKit，再用 DeckKit 生产 deck。
+7. 没有可用 DeckKit、缺页型或需要改组件结构时，先创建/扩展 DeckKit，再用 DeckKit 生产 deck。
 
 `deck-generator-template.mjs` 是新建或扩展 DeckKit 的探索/迁移开发起点，不是普通交付 deck
 的默认路径；旧 showcase examples 已退役，生产与回归统一向 DeckKit 和
@@ -314,7 +329,8 @@ content.json (变化层，每次只改这一份)
 3. 编写 `content.json`（参照同目录的 example + `assets/deckkits/schemas/` 下的 schema）
 4. `node assets/deckkits/validate-content.mjs content.json --deckkit <deckkit-id>` 校验
 5. 使用 `assets/deckkits/examples/roadshow-build.mjs` 生成 patch；需要定制时再复制为 `build.mjs` 并按当前位置修正 import 路径
-6. `node assets/deckkits/examples/roadshow-build.mjs content.json > patch.json && s8fy pptx apply patch.json ...`
+6. 跑 `node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`
+7. `s8fy pptx apply -p patch.json ... --dry-run --json` 预演，通过后再 apply
 
 可用 DeckKit 和支持的页型见 `assets/deckkits/catalog.json`；各页型 data 格式见
 `assets/deckkits/schemas/<slideType>.schema.json`。
@@ -342,10 +358,14 @@ content.json (变化层，每次只改这一份)
    layout/slide 语义、文本密度和 `themePackDraft` / `stylePackDraft`。
 4. 写 `reference-map.json`：把 `outline.json` 每页映射到参考 deck 中最接近的页型或 slide，例如
    cover / section / KPI / two-column / timeline / table / closing。
-5. 优先用抽取的 theme/style/profile 驱动 DeckKit 或 generator 生成新 deck；只有需要整页骨架时才用
+5. 若用户同时指定 brand/layout/deck catalog 资产，按 `references/template-library.md` 的段级融合规则
+   把结果写入 `deck_lock.json.templateFusion`；只有多来源冲突、用户 override 或后续审计需要时才额外写 `template_fusion.json`。
+6. 写 `deck_lock.json`，并在允许复用或必须补齐图片/logo/图标/数据截图时写 `assets_manifest.json`；
+   参考 deck 默认只提供 style/layout evidence，未授权的旧图片/logo 不进入 manifest 的 `available` 资源。
+7. 优先用抽取的 theme/style/profile 驱动 DeckKit 或 generator 生成新 deck；只有需要整页骨架时才用
    `copy-from`，不要为了"模仿风格"逐页硬复制所有对象。
-6. 走统一门禁：`content.json` / `patch.json` → dry-run → apply → `vision-check` high/medium 清零 →
-   PNG/contact sheet 逐页复核。
+8. 走统一门禁：`content.json` / `patch.json` → check-lock → dry-run → apply →
+   `vision-check` high/medium 清零 → PNG/contact sheet 逐页复核。
 
 边界：`extract-style` 当前不会全量细抽 card radius、shadow、chart-specific style；这些需要结合
 `inspect`、PNG 观察和 generator token / patch ops 补齐。参考 deck 里的 logo、图片、图标、模板素材
@@ -527,7 +547,7 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
 > （s8fy 原生渲染，无需任何外部图像工具）：**先 Read 总览图**一眼扫跨页一致性（配色 /
 > 字号节奏 / 页码 / 深浅底交替 / 构图平衡）并快速定位可疑页，**再**逐页 Read 全分辨率
 > `slide-0NN.png` 抠单页细节。总览看全局、逐页看细节，二者互补——怎么调参 / 回溯页码见
-> §9.7，三道闸门的分工见 §10.3。
+> §9.7，四道闸门的分工见 §10.3。
 
 ---
 
@@ -542,22 +562,30 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
 2. **拿到 schema 与上下文**：
    - 修改时先 `s8fy pptx inspect <in.pptx> --json`，拿到 slide/shape 结构
    - 创建时先生成或标准化 `outline.json`；用户已有大纲时直接采用，Express 默认自动继续，
-     Studio / 高风险场景先让用户确认短大纲
+     Studio / 高风险场景先让用户确认短大纲和 8 项设计锁
+   - 创建时写 `deck_lock.json` 和可选 `assets_manifest.json`，锁定画布、DeckKit/theme/style、
+     字体、颜色、图标、资源、模板融合和每页页型/节奏；后续 content/patch 不得隐式偏离
    - 创建时先 `s8fy schema --index` 看 op 列表（当前 **108 个 op**：89 个 patch/control/raw
      op + 19 个 recipe op），按需 `--op <name>` 拉细节
-3. **写 patch JSON**：优先 recipe / `fill-layout`，必要时降级到 patch op；同一份
-   patch 内可混用 `if` / `foreach` / `try` / `define` / `use` 控制/宏 op 减少手写
-   重复（见 `references/control-flow-and-raw-xml.md`）
-4. **预演**：`--dry-run --json` 看 `semanticChanges[]` 与 `visualRisks[]`；不确定
+3. **写 content / patch JSON**：优先 DeckKit content manifest；无可用 DeckKit 或局部手写时才写
+   patch。优先 recipe / `fill-layout`，必要时降级到 patch op；同一份 patch 内可混用
+   `if` / `foreach` / `try` / `define` / `use` 控制/宏 op 减少手写重复
+   （见 `references/control-flow-and-raw-xml.md`）
+4. **设计锁漂移检查**：在 dry-run 前运行
+   `node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`
+   （有 `assets_manifest.json` 时加 `--assets assets_manifest.json`；没有 content 时省略 `--content`）。
+   品牌合规或正式客户交付加
+   `--strict-colors --strict-fonts`。有 error 先修 lock / manifest / content / patch，不要跳到 dry-run。
+5. **预演**：`--dry-run --json` 看 `semanticChanges[]` 与 `visualRisks[]`；不确定
    字段时加 **`--explain`**，dry-run 报告会带 `explanations[].schema.{requiredFields,optionalFields,fieldNotes}`
    告诉你每个 op 该写什么
-5. **修复**：如果有 ambiguous selector 或 enum 拼错，按 `suggestions[].fixPatch`
+6. **修复**：如果有 ambiguous selector 或 enum 拼错，按 `suggestions[].fixPatch`
    改 patch 重试；**首选 `suggestion.autoRetry: true` 的建议**（机器有信心，直接合
    patch 重 dry-run）；常见 5 个场景见 `references/troubleshooting.md` 的 scenarioCoverage
-6. **落盘到 run 目录**：去掉 `--dry-run`，先输出到 run 目录内的中间 `.pptx`，留意
+7. **落盘到 run 目录**：去掉 `--dry-run`，先输出到 run 目录内的中间 `.pptx`，留意
    sidecar 文件 `<out>.s8fy.json`。反复迭代时只允许对 run 目录内本轮自己创建的中间文件
    使用 `--overwrite`。
-7. **视觉验证**（两道闸门，先几何后像素）：
+8. **视觉验证**（两道闸门，先几何后像素）：
    - **几何自检（render-free）**：`s8fy pptx vision-check <run-dir>/out.pptx --json`，把
      `autoRetry:true` 的 `fixPatch` 合并重 apply 后再 check 到清零（闭环，见 §10）。
      这一步拦 dry-run 抓不到的越界 / 重叠 / 错位，比渲染快得多。创建型 deck 的
@@ -565,16 +593,16 @@ s8fy pptx check-brand deck.pptx --brand brand-profile.json --json
    - **像素复核**：`s8fy convert <run-dir>/out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet`
      先 Read 总览图 `<run-dir>/previews/contact-sheet.png` 扫跨页一致性、定位可疑页，再用
      Read 逐页过 §9.6 清单（字符重叠、换行压字、对比度、装饰挡标题等几何看不到或估不准的问题）。
-8. **发布前预检（可选但推荐）**：需要交给外部用户、客户或公开分发时，跑
+9. **发布前预检（可选但推荐）**：需要交给外部用户、客户或公开分发时，跑
    `s8fy check <run-dir>/out.pptx --checks fonts,links,compat -o <run-dir>/check.json --pretty --overwrite`。
    它只检查字体 / 链接 / 兼容性，不检查版式重叠；不要把它放在 `vision-check` 前面，也不要用它替代
-   §6.7 的几何与 PNG 门禁。
-9. **交付最终 PPTX**：验证通过后，才把 run 目录内的最终中间 `.pptx` 写到用户当前目录或
-   用户指定路径。创建型任务若最终路径已在开始前存在，必须仍然保持阻塞，不能在这一步覆盖。
-10. **完成摘要**：记录结束时间并输出摘要，至少包含耗时、最终 PPTX 路径、run 目录、`outline.json`、sidecar、
-    `vision.json`、预览目录 / contact sheet、可选 `check.json`、验证结果和剩余风险；只有准确
-    token 统计可得时才输出 token。
-11. **如果出错**：用 sidecar `s8fy pptx rollback --from-sidecar` 回滚到上一态
+   §6.8 的几何与 PNG 门禁。
+10. **交付最终 PPTX**：验证通过后，才把 run 目录内的最终中间 `.pptx` 写到用户当前目录或
+    用户指定路径。创建型任务若最终路径已在开始前存在，必须仍然保持阻塞，不能在这一步覆盖。
+11. **完成摘要**：记录结束时间并输出摘要，至少包含耗时、最终 PPTX 路径、run 目录、`outline.json`、
+    `deck_lock.json`、`assets_manifest.json`（如有）、sidecar、`vision.json`、预览目录 / contact sheet、
+    可选 `check.json`、验证结果和剩余风险；只有准确 token 统计可得时才输出 token。
+12. **如果出错**：用 sidecar `s8fy pptx rollback --from-sidecar` 回滚到上一态
 
 ### 多步 session：用 daemon 加速 inspect + apply 循环（v10 起默认零配置）
 
@@ -770,6 +798,7 @@ schema --op <name>` 更轻量,**只覆盖当前 patch 真用到的 op**;Agent �
 | `references/rich-deck-patterns.md`       | 要做"客户演示级"丰富 deck 时的视觉元素清单与起手势                          |
 | `references/deck-generator-workflow.md`  | 创建/扩展 DeckKit 时的 JS 生成器模板、helpers、命名规范                     |
 | `references/reference-create.md`         | 用户给参考 PPTX + 新大纲时，抽风格 / 映射页型 / 生成新 deck 的工作流        |
+| `references/design-lock-and-assets.md`   | `deck_lock.json` / `assets_manifest.json` / Studio 8 项确认 / check-lock    |
 | `references/theme-packs.md`              | themePack / stylePack catalog、`list-themes`、`swap-theme`、`extract-style` |
 | `references/template-library.md`         | brand/layout/deck/chart/icon 资产目录、catalog 和选择规则                   |
 | `references/inspect-and-edit.md`         | 修改已有 deck 时，看 selector / inspect 输出怎么用                          |
@@ -1050,13 +1079,14 @@ vision-check 只看**几何**，看不到这些——所以 §9.6 的 PNG 逐页
 推荐顺序（越靠前越便宜，能拦就别留到后面）：
 
 ```
-dry-run（语义，--dry-run --json）
+check-lock（设计锁漂移，deck_lock/assets/content/patch）
+  → dry-run（语义，--dry-run --json）
   → vision-check（几何，可自动闭环，render-free）
   → PNG（像素，§9.6）：先 contact sheet 总览扫跨页 → 再逐页 Read 抠单页细节
 ```
 
-dry-run 通过只是"语义对"，vision-check 清零是"几何稳"，PNG 过清单才是"看着对"。
-三道闸门职责不重叠，**别用任何一道顶替另一道**；PNG 这道内部也分工：
+check-lock 通过只是"没有偏离设计锁"，dry-run 通过只是"语义对"，vision-check 清零是"几何稳"，
+PNG 过清单才是"看着对"。四道闸门职责不重叠，**别用任何一道顶替另一道**；PNG 这道内部也分工：
 **contact sheet 总览看跨页全局（配色 / 页码 / 节奏 / 构图），逐页 PNG 看单页细节（重叠 / 压字 / 对比度）**。
 
 ---
@@ -1077,10 +1107,10 @@ dry-run 通过只是"语义对"，vision-check 清零是"几何稳"，PNG 过清
   先提醒并阻塞，不能生成，也不能用 `--overwrite` 覆盖最终路径。
 - 永远把 dry-run 当成必经环节，把 sidecar 当成时光机。第二次 apply 同路径或第二次
   `convert` 同 PNG 目录需要 `--overwrite` 时，只能用于 run 目录内本轮自己创建的中间产物。
-- 生成后按 **dry-run（语义）→ vision-check（几何，§10 可自动闭环）→ PNG（像素，
-  §9.6 逐页 Read）** 三道闸门收尾。创建型 deck 的 `vision-check` high/medium
+- 生成后按 **check-lock（设计锁漂移）→ dry-run（语义）→ vision-check（几何，§10 可自动闭环）→ PNG（像素，
+  §9.6 逐页 Read）** 四道闸门收尾。创建型 deck 的 `vision-check` high/medium
   必须为 0；几何缺陷（越界 / 重叠 / 错位）交给 `s8fy pptx vision-check`，
   字符重叠 / 小字号 / 对比度 / 连接线断开 / 中轴偏移 / 装饰挡标题这类像素与审美问题仍必须 PNG 逐页确认 ——
-  三道职责不重叠，别相互顶替。
+  四道职责不重叠，别相互顶替。
 - 完成后必须输出摘要：耗时、最终 PPTX 绝对路径、run 目录、sidecar / 验证报告 /
   预览路径、验证结果和剩余风险；token 信息只有准确可得时才输出。

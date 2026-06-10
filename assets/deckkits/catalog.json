@@ -534,7 +534,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 299
+                "low": 319
               },
               "previews": {
                 "count": 8,
@@ -544,10 +544,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 296453
+                "bytes": 294051
               },
-              "patchOps": 1882,
-              "p50TotalMs": 68.28
+              "patchOps": 2455,
+              "p50TotalMs": 70.84
             },
             {
               "caseId": "mckinsey-blue.stress-density",
@@ -569,7 +569,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 81
+                "low": 86
               },
               "previews": {
                 "count": 2,
@@ -579,10 +579,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 69349
+                "bytes": 65314
               },
-              "patchOps": 485,
-              "p50TotalMs": 71.62
+              "patchOps": 810,
+              "p50TotalMs": 62.42
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
@@ -604,7 +604,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 105
+                "low": 113
               },
               "previews": {
                 "count": 3,
@@ -614,10 +614,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 124462
+                "bytes": 122672
               },
-              "patchOps": 695,
-              "p50TotalMs": 63.23
+              "patchOps": 702,
+              "p50TotalMs": 64.18
             }
           ],
           "blockers": []

@@ -18,9 +18,12 @@ const C = {
   sky: '38BDF8',
   teal: '0E7490',
   red: 'B91C1C',
-  amber: 'B45309',
+  redBright: 'DC2626',
+  amber: 'F59E0B',
+  amberText: '92400E',
   amberBright: 'F59E0B',
   green: '047857',
+  greenBright: '059669',
   slate: '475569',
   muted: '475569',
   line: 'CBD5E1',
@@ -39,9 +42,9 @@ const C = {
 
 const ACCENTS = [C.red, C.amber, C.blue, C.teal, C.slate]
 const LEGACY_TONES = new Map([
-  ['DC2626', C.red],
+  ['DC2626', C.redBright],
   ['F59E0B', C.amber],
-  ['059669', C.green],
+  ['059669', C.greenBright],
   ['4A90A4', C.teal],
   ['64748B', C.slate],
   ['94A3B8', C.muted],
@@ -54,13 +57,27 @@ const CW = SLIDE_W - MX * 2
 const asLines = (value) => (Array.isArray(value) ? value.join('\n') : value)
 const pct = (value) => Number(String(value).replace('%', ''))
 const tone = (value) => LEGACY_TONES.get(normalizeHex(value) ?? '') ?? value
+const accentText = (value) => {
+  const color = tone(value)
+  if (color === C.amber || color === C.amberBright) return C.amberText
+  if (color === C.green || color === C.greenBright) return '065F46'
+  if (color === C.red || color === C.redBright) return '991B1B'
+  return readableInk(color)
+}
 const readableInk = (value, background = C.white) => {
   const color = tone(value)
   return contrastRatio(color, background) >= 4.5 ? color : C.slate
 }
+const displayInk = (value, background = C.white) => {
+  const color = tone(value)
+  if (color === C.amber || color === C.amberBright) return C.amberBright
+  if (color === C.green || color === C.greenBright) return C.greenBright
+  if (color === C.redBright) return C.redBright
+  return readableInk(color, background)
+}
 const textOnTone = (value) => {
   const background = tone(value)
-  return contrastRatio(C.white, background) >= 4.5 ? C.white : C.slate
+  return contrastRatio(C.white, background) >= 4.5 ? C.white : C.text
 }
 
 function createMckOps() {
@@ -105,6 +122,9 @@ function createMckOps() {
       for (let p = 0; p < paragraphCount; p += 1) applyRunFont(slide, name, font, p)
       if (align) for (let p = 0; p < paragraphCount; p += 1) applyAlign(slide, name, align, p)
     },
+    rotate(slide, name, degrees) {
+      builders.ops.push({ op: 'set-shape-rotation', slide, shape: { name }, degrees })
+    },
   }
 }
 
@@ -114,14 +134,15 @@ function makeChrome({ tx, box, fillText }) {
 
   const header = (s, title, subtitle) => {
     topRule(s)
-    tx(s, nm(s, 'Title'), MX, 0.25, CW, 0.45, title, {
+    tx(s, nm(s, 'Title'), MX, 0.16, CW, 0.42, title, {
       name: FONT_EN,
       size: '14pt',
       bold: true,
       color: C.text,
     })
-    box(s, nm(s, 'SubtitleBar'), 'rectangle', MX, 0.72, CW, 0.38, C.deep)
-    tx(s, nm(s, 'Subtitle'), MX + 0.18, 0.78, CW - 0.36, 0.3, subtitle, {
+    box(s, nm(s, 'SubtitleBar'), 'rectangle', MX, 0.58, CW, 0.46, C.deep)
+    box(s, nm(s, 'SubtitleAccent'), 'rectangle', MX, 0.58, 0.05, 0.46, C.sky)
+    tx(s, nm(s, 'Subtitle'), MX + 0.18, 0.75, CW - 0.36, 0.22, subtitle, {
       name: FONT_EN,
       size: '8pt',
       bold: true,
@@ -131,8 +152,9 @@ function makeChrome({ tx, box, fillText }) {
   }
 
   const footer = (s, total, source) => {
-    box(s, nm(s, 'FootLine'), 'rectangle', MX, 6.82, CW, 0.012, C.grid)
-    tx(s, nm(s, 'Source'), MX, 6.92, 4.8, 0.14, source ?? '', {
+    box(s, nm(s, 'FooterBg'), 'rectangle', 0, 7.23, SLIDE_W, 0.27, C.surface)
+    box(s, nm(s, 'FootLine'), 'rectangle', 0, 7.23, SLIDE_W, 0.012, C.grid)
+    tx(s, nm(s, 'Source'), MX, 7.32, 4.8, 0.17, source ?? '', {
       name: FONT_EN,
       size: '6.6pt',
       color: C.muted,
@@ -141,9 +163,9 @@ function makeChrome({ tx, box, fillText }) {
       s,
       nm(s, 'Confidential'),
       4.95,
-      6.92,
+      7.32,
       3.9,
-      0.14,
+      0.17,
       'STRICTLY CONFIDENTIAL | NOT FOR DISTRIBUTION',
       { name: FONT_EN, size: '6.6pt', color: C.muted },
       'center',
@@ -152,9 +174,9 @@ function makeChrome({ tx, box, fillText }) {
       s,
       nm(s, 'PageNum'),
       12.45,
-      6.92,
+      7.32,
       0.45,
-      0.14,
+      0.17,
       String(s + 1),
       { name: FONT_EN, size: '6.6pt', color: C.muted },
       'right',
@@ -202,7 +224,7 @@ function makeChrome({ tx, box, fillText }) {
   return { topRule, header, footer, sectionLabel, noteBox, cardCaption }
 }
 
-function makeComponents({ tx, box, card, icon, fillText, setLine }) {
+function makeComponents({ tx, box, card, icon, fillText, setLine, rotate }) {
   const metricCard = (s, base, x, y, w, h, item) => {
     const accent = tone(item.accent ?? C.blue)
     box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, item.bg ?? C.surface)
@@ -218,7 +240,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
       name: FONT_EN,
       size: item.value.length > 3 ? '27pt' : '30pt',
       bold: true,
-      color: readableInk(accent, item.bg ?? C.surface),
+      color: displayInk(accent, item.bg ?? C.surface),
     })
     if (item.sub) {
       tx(s, nm(s, `${base}Sub`), x + 0.18, y + 1.02, w - 0.36, 0.2, item.sub, {
@@ -232,7 +254,40 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
         name: FONT_EN,
         size: '7.2pt',
         bold: true,
-        color: readableInk(accent, item.bg ?? C.surface),
+        color: accentText(accent),
+      })
+    }
+  }
+
+  const compactMetricCard = (s, base, x, y, w, h, item) => {
+    const accent = tone(item.accent ?? C.blue)
+    const bg = item.bg ?? C.surface
+    box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, bg)
+    box(s, nm(s, `${base}Side`), 'rectangle', x, y, 0.05, h, accent)
+    tx(s, nm(s, `${base}Lab`), x + 0.28, y + 0.29, w - 0.56, 0.18, item.label, {
+      name: FONT_EN,
+      size: '7.5pt',
+      color: C.muted,
+    })
+    tx(s, nm(s, `${base}Val`), x + 0.24, y + 0.46, Math.min(1.28, w - 0.6), 0.48, item.value, {
+      name: FONT_EN,
+      size: item.value.length > 3 ? '27pt' : '30pt',
+      bold: true,
+      color: displayInk(accent, bg),
+    })
+    if (item.sub) {
+      tx(s, nm(s, `${base}Sub`), x + Math.min(1.72, w - 2.05), y + 0.75, 1.4, 0.18, item.sub, {
+        name: FONT_EN,
+        size: '7.5pt',
+        color: C.muted,
+      })
+    }
+    if (item.note) {
+      tx(s, nm(s, `${base}Note`), x + 0.28, y + 0.94, w - 0.5, 0.16, item.note, {
+        name: FONT_EN,
+        size: '7.2pt',
+        bold: true,
+        color: accentText(accent),
       })
     }
   }
@@ -316,34 +371,34 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
 
   const pillarCard = (s, base, x, y, w, h, item, i) => {
     const accent = tone(item.accent ?? ACCENTS[i % ACCENTS.length])
-    box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, 0.36, accent)
+    const topH = 0.64
+    box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, C.white)
+    box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, topH, accent)
     tx(
       s,
       nm(s, `${base}Idx`),
       x,
-      y + 0.06,
+      y + 0.14,
       w,
-      0.26,
+      0.36,
       item.index,
       {
         name: FONT_EN,
-        size: '12pt',
+        size: '20pt',
         bold: true,
         color: textOnTone(accent),
       },
       'center',
     )
-    box(s, nm(s, `${base}Bg`), 'rectangle', x, y + 0.36, w, h - 0.36, C.white)
-    setLine(s, nm(s, `${base}Bg`), C.grid, '0.7pt')
     if (item.icon)
-      icon(s, nm(s, `${base}Icon`), item.icon, x + w / 2 - 0.18, y + 0.67, 0.36, 0.36, {
+      icon(s, nm(s, `${base}Icon`), item.icon, x + w / 2 - 0.22, y + 0.92, 0.44, 0.44, {
         color: accent,
       })
     tx(
       s,
       nm(s, `${base}Title`),
       x + 0.18,
-      y + 1.08,
+      y + 1.42,
       w - 0.36,
       0.42,
       asLines(item.title),
@@ -355,54 +410,53 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
       },
       'center',
     )
-    box(s, nm(s, `${base}Rule1`), 'rectangle', x + 0.28, y + 1.62, w - 0.56, 0.012, C.grid)
-    tx(
-      s,
-      nm(s, `${base}Body`),
-      x + 0.24,
-      y + 1.78,
-      w - 0.48,
-      0.78,
-      asLines(item.body),
-      {
-        name: FONT_EN,
-        size: '8.2pt',
-        color: C.text2,
-      },
-      'center',
-    )
-    box(s, nm(s, `${base}Rule2`), 'rectangle', x + 0.28, y + 2.72, w - 0.56, 0.012, C.grid)
-    tx(s, nm(s, `${base}OutLab`), x + 0.24, y + 2.9, w - 0.48, 0.14, 'BUSINESS OUTCOME:', {
+    box(s, nm(s, `${base}Rule1`), 'rectangle', x + 0.16, y + 2.18, w - 0.32, 0.012, C.grid)
+    tx(s, nm(s, `${base}Body`), x + 0.16, y + 2.36, w - 0.32, 0.82, asLines(item.body), {
+      name: FONT_EN,
+      size: '8.3pt',
+      color: C.text2,
+    })
+    box(s, nm(s, `${base}Rule2`), 'rectangle', x + 0.16, y + 3.38, w - 0.32, 0.012, C.grid)
+    tx(s, nm(s, `${base}OutLab`), x + 0.16, y + 3.56, w - 0.32, 0.14, 'BUSINESS OUTCOME:', {
       name: FONT_EN,
       size: '6.3pt',
       bold: true,
       color: C.muted,
     })
-    tx(s, nm(s, `${base}Out`), x + 0.24, y + 3.12, w - 0.48, 0.36, asLines(item.outcome), {
+    tx(s, nm(s, `${base}Out`), x + 0.16, y + 3.8, w - 0.32, 0.34, asLines(item.outcome), {
       name: FONT_EN,
       size: '8pt',
       bold: true,
       color: C.primary,
     })
-    box(s, nm(s, `${base}Rule3`), 'rectangle', x + 0.28, y + 3.66, w - 0.56, 0.012, C.grid)
-    tx(s, nm(s, `${base}KpiLab`), x + 0.24, y + 3.84, w - 0.48, 0.14, 'KPI TARGET', {
+    box(s, nm(s, `${base}Rule3`), 'rectangle', x + 0.16, y + 4.36, w - 0.32, 0.012, C.grid)
+    tx(s, nm(s, `${base}KpiLab`), x + 0.16, y + 4.56, w - 0.32, 0.14, 'KPI TARGET', {
       name: FONT_EN,
       size: '6.3pt',
       bold: true,
       color: C.muted,
     })
-    tx(s, nm(s, `${base}Kpi`), x + 0.24, y + 4.1, w - 0.48, 0.42, asLines(item.kpi), {
+    const kpiLines = String(item.kpi ?? '').split(/\r?\n/)
+    tx(s, nm(s, `${base}Kpi`), x + 0.16, y + 5.02, w - 0.32, 0.34, kpiLines[0] ?? '', {
       name: FONT_EN,
-      size: '12pt',
+      size: '20pt',
       bold: true,
-      color: readableInk(item.kpiColor ?? C.amber),
+      color: displayInk(item.kpiColor ?? C.amber),
     })
+    const kpiRest = kpiLines.slice(1).join('\n')
+    if (kpiRest != '') {
+      tx(s, nm(s, `${base}KpiSub`), x + 0.16, y + 5.42, w - 0.32, 0.24, kpiRest, {
+        name: FONT_EN,
+        size: '7.8pt',
+        color: C.text2,
+      })
+    }
     tx(
       s,
       nm(s, `${base}Time`),
-      x + 0.24,
-      y + 4.58,
-      w - 0.48,
+      x + 0.16,
+      y + 5.74,
+      w - 0.32,
       0.14,
       item.time ?? 'within 12 months',
       {
@@ -415,28 +469,92 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
 
   const smallInfo = (s, base, x, y, w, h, title, lines, color = C.blue) => {
     const accent = tone(color)
-    box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, C.surface)
-    box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, 0.05, accent)
-    tx(s, nm(s, `${base}Title`), x + 0.16, y + 0.18, w - 0.32, 0.17, title, {
+    const bg =
+      accent === C.amber || accent === C.amberBright
+        ? C.amberTint
+        : accent === C.green || accent === C.greenBright
+          ? C.greenTint
+          : accent === C.primary || accent === C.blue
+            ? C.blueTint
+            : C.surface
+    box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, bg)
+    box(s, nm(s, `${base}Rule`), 'rectangle', x, y, 0.05, h, accent)
+    tx(s, nm(s, `${base}Title`), x + 0.2, y + 0.14, w - 0.36, 0.17, title, {
       name: FONT_EN,
       size: '7.5pt',
       bold: true,
-      color: readableInk(accent, C.surface),
+      color: accentText(accent),
     })
-    tx(s, nm(s, `${base}Text`), x + 0.16, y + 0.36, w - 0.32, h - 0.4, asLines(lines), {
+    tx(s, nm(s, `${base}Text`), x + 0.2, y + 0.33, w - 0.36, h - 0.36, asLines(lines), {
       name: FONT_EN,
       size: '7.3pt',
       color: C.text2,
     })
   }
 
-  return { metricCard, hBar, miniBar, pillarCard, smallInfo, card, tx, box, icon, fillText }
+  const dashedHArrow = (s, base, x1, y, x2, color = C.redBright) => {
+    const dashW = 0.045
+    const gap = 0.045
+    const h = 0.012
+    let x = x1 + 0.12
+    let i = 0
+    while (x + dashW < x2 - 0.12) {
+      box(s, nm(s, `${base}Dash${i}`), 'rectangle', x, y, dashW, h, color)
+      x += dashW + gap
+      i += 1
+    }
+    const headW = 0.08
+    const headH = 0.09
+    const left = nm(s, `${base}Left`)
+    const right = nm(s, `${base}Right`)
+    box(s, left, 'triangle', x1 - headW / 2, y - headH / 2 + h / 2, headW, headH, color)
+    rotate(s, left, 270)
+    box(s, right, 'triangle', x2 - headW / 2, y - headH / 2 + h / 2, headW, headH, color)
+    rotate(s, right, 90)
+  }
+
+  const dashedVLine = (s, base, x, y1, y2, color = C.grid) => {
+    const dashH = 0.12
+    const gap = 0.08
+    let y = y1
+    let i = 0
+    while (y + dashH < y2) {
+      box(s, nm(s, `${base}${i}`), 'rectangle', x, y, 0.01, dashH, color)
+      y += dashH + gap
+      i += 1
+    }
+  }
+
+  return {
+    metricCard,
+    compactMetricCard,
+    hBar,
+    miniBar,
+    pillarCard,
+    smallInfo,
+    dashedHArrow,
+    dashedVLine,
+    card,
+    tx,
+    box,
+    icon,
+    fillText,
+  }
 }
 
 function makePageTypes(builders, chrome, components, total) {
   const { ops, tx, box, icon, addSlide, setLine } = builders
   const { header, footer, sectionLabel, noteBox } = chrome
-  const { metricCard, hBar, miniBar, pillarCard, smallInfo } = components
+  const {
+    metricCard,
+    compactMetricCard,
+    hBar,
+    miniBar,
+    pillarCard,
+    smallInfo,
+    dashedHArrow,
+    dashedVLine,
+  } = components
 
   function mckCoverSlide(s, data) {
     addSlide(s)
@@ -579,7 +697,7 @@ function makePageTypes(builders, chrome, components, total) {
       name: FONT_EN,
       size: '7.2pt',
       bold: true,
-      color: C.amber,
+      color: C.amberText,
     })
     footer(s, total, data.source)
   }
@@ -588,18 +706,26 @@ function makePageTypes(builders, chrome, components, total) {
     addSlide(s)
     header(s, data.title, data.subtitle)
     const cards = data.metrics ?? []
-    const cells = grid(3, 0.22, MX, CW)
-    cards.forEach((item, i) =>
-      metricCard(s, `Metric${i}`, cells[i].x, 1.34, cells[i].w, 1.52, {
+    const metricLayout =
+      cards.length === 3
+        ? [
+            { x: MX, w: 3.85 },
+            { x: 4.48, w: 3.85 },
+            { x: 8.54, w: 4.38 },
+          ]
+        : grid(Math.max(cards.length, 1), 0.22, MX, CW)
+    cards.forEach((item, i) => {
+      const cell = metricLayout[i]
+      compactMetricCard(s, `Metric${i}`, cell.x, 1.38, cell.w, 1.15, {
         ...item,
         bg: item.bg ?? [C.redTint, C.amberTint, C.redTint][i],
-      }),
-    )
-    sectionLabel(s, nm(s, 'FateLabel'), MX, 3.02, 4.4, data.cohortTitle)
+      })
+    })
+    sectionLabel(s, nm(s, 'FateLabel'), MX, 2.72, 4.4, data.cohortTitle)
     const x = MX
-    const y = 3.25
+    const y = 2.92
     const w = CW
-    const h = 0.42
+    const h = 0.54
     let cursor = x
     ;(data.cohort ?? []).forEach((item, i) => {
       const color = tone(item.color)
@@ -609,7 +735,7 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `CohortVal${i}`),
         cursor,
-        y + 0.12,
+        y + 0.16,
         segW,
         0.16,
         String(item.value),
@@ -625,9 +751,9 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `CohortLab${i}`),
         cursor,
-        y + 0.62,
+        y + 0.8,
         segW,
-        0.2,
+        0.14,
         item.label,
         {
           name: FONT_EN,
@@ -642,9 +768,9 @@ function makePageTypes(builders, chrome, components, total) {
           s,
           nm(s, `CohortNote${i}`),
           cursor,
-          y + 0.82,
+          y + 0.98,
           segW,
-          0.18,
+          0.14,
           item.note,
           {
             name: FONT_EN,
@@ -656,12 +782,16 @@ function makePageTypes(builders, chrome, components, total) {
       }
       cursor += segW
     })
-    box(s, nm(s, 'CohortRule'), 'rectangle', 5.38, 4.45, 3.0, 0.02, C.red)
+    ;[15, 67, 93].forEach((value, i) => {
+      const sepX = x + (CW * value) / 100
+      box(s, nm(s, `CohortSep${i}`), 'rectangle', sepX, y - 0.04, 0.01, h + 0.08, C.white)
+    })
+    dashedHArrow(s, 'CohortArrow', 2.29, 4.22, 12.04, C.redBright)
     tx(
       s,
       nm(s, 'CohortSum'),
-      5.0,
-      4.55,
+      5.65,
+      4.1,
       4.1,
       0.16,
       data.cohortSum,
@@ -669,7 +799,7 @@ function makePageTypes(builders, chrome, components, total) {
         name: FONT_EN,
         size: '7.4pt',
         bold: true,
-        color: C.red,
+        color: C.redBright,
       },
       'center',
     )
@@ -677,16 +807,28 @@ function makePageTypes(builders, chrome, components, total) {
       s,
       'Imp',
       MX,
-      4.98,
+      4.42,
       CW,
-      0.88,
+      0.85,
       data.implication.title,
       data.implication.body,
       C.blue,
       C.blueTint,
     )
-    smallInfo(s, 'Gap', MX, 5.92, 4.4, 0.68, data.gap.title, data.gap.body, C.amber)
-    smallInfo(s, 'Lever', 8.6, 5.92, 4.32, 0.68, data.lever.title, data.lever.body, C.green)
+    const infoGap = 0.31
+    const infoW = (CW - infoGap) / 2
+    smallInfo(s, 'Gap', MX, 5.48, infoW, 0.63, data.gap.title, data.gap.body, C.amber)
+    smallInfo(
+      s,
+      'Lever',
+      MX + infoW + infoGap,
+      5.48,
+      infoW,
+      0.63,
+      data.lever.title,
+      data.lever.body,
+      C.greenBright,
+    )
     footer(s, total, data.source)
   }
 
@@ -921,7 +1063,7 @@ function makePageTypes(builders, chrome, components, total) {
           name: FONT_EN,
           size: b.size > 0.62 ? '6.4pt' : '5.8pt',
           bold: true,
-          color: C.white,
+          color: textOnTone(b.color),
         },
         'center',
       )
@@ -988,74 +1130,131 @@ function makePageTypes(builders, chrome, components, total) {
     addSlide(s)
     header(s, data.title, data.subtitle)
     sectionLabel(s, nm(s, 'BarLabel'), MX, 1.28, 6.8, data.chartTitle)
-    const chartX = MX
-    const chartY = 1.72
-    const chartW = 7.85
+    const labelX = MX
+    const labelW = 2.48
+    const barX = 3.02
+    const barW = 6.38
+    const barH = 0.38
+    const axisTop = 1.4
+    const axisBottom = 5.79
+    ;[
+      [2.98, 'DriverGrid0', false],
+      [4.61, 'DriverGrid25', true],
+      [6.21, 'DriverGrid50', true],
+      [7.8, 'DriverGrid75', true],
+    ].forEach(([x, base, dashed]) => {
+      if (dashed) dashedVLine(s, base, x, axisTop, axisBottom, C.grid)
+      else box(s, nm(s, base), 'rectangle', x, axisTop, 0.01, axisBottom - axisTop, C.grid)
+    })
+    ;[
+      [2.9, '0%'],
+      [4.51, '25%'],
+      [6.1, '50%'],
+      [7.69, '75%'],
+    ].forEach(([x, label], i) =>
+      tx(s, nm(s, `AxisTick${i}`), x, 5.89, 0.28, 0.17, label, {
+        name: FONT_EN,
+        size: '6.6pt',
+        color: C.muted,
+      }),
+    )
+    const rowBarY = [1.49, 2.3, 3.24, 4.07, 4.91]
     ;(data.drivers ?? []).forEach((item, i) => {
       const color = tone(item.color)
-      hBar(
+      const y = rowBarY[i] ?? 1.49 + i * 0.82
+      const labelBg = i === 0 ? C.redTint : i === 1 ? C.amberTint : null
+      if (labelBg)
+        box(s, nm(s, `DriverLabelBg${i}`), 'rectangle', labelX, y - 0.03, labelW, 0.71, labelBg)
+      tx(
         s,
-        `Driver${i}`,
-        chartX,
-        chartY + i * 0.72,
-        chartW - 2.25,
-        0.34,
-        item.value,
-        75,
-        color,
+        nm(s, `Driver${i}Label`),
+        labelX + 0.78,
+        y + 0.08,
+        labelW - 0.84,
+        0.22,
         item.label,
+        {
+          name: FONT_EN,
+          size: '8.6pt',
+          bold: true,
+          color: C.text,
+        },
+        'right',
+      )
+      tx(
+        s,
+        nm(s, `Driver${i}Sub`),
+        labelX + 0.78,
+        y + 0.31,
+        labelW - 0.84,
+        0.17,
         item.sub,
+        {
+          name: FONT_EN,
+          size: '7pt',
+          color: C.muted,
+        },
+        'right',
+      )
+      const track = i === 0 ? 'FEE2E2' : i === 1 ? 'FEF3C7' : i === 2 ? C.surface2 : C.surface2
+      box(s, nm(s, `Driver${i}Track`), 'rectangle', barX, y, barW, barH, track)
+      const fillW = Math.max(0.05, barW * (item.value / 100))
+      box(s, nm(s, `Driver${i}Fill`), 'rectangle', barX, y, fillW, barH, color)
+      const valueInside = i < 2
+      tx(
+        s,
+        nm(s, `Driver${i}Val`),
+        valueInside ? barX + Math.max(0.08, fillW - 0.48) : barX + fillW + 0.08,
+        y + 0.1,
+        0.38,
+        0.18,
         `${item.value}%`,
+        {
+          name: FONT_EN,
+          size: '8pt',
+          bold: true,
+          color: valueInside ? textOnTone(color) : C.slate,
+        },
+        'right',
       )
       if (item.tag) {
-        const tagBg = item.tagBg ?? C.redTint
-        box(
-          s,
-          nm(s, `DriverTag${i}`),
-          'rectangle',
-          chartX + 6.35,
-          chartY + i * 0.72 + 0.03,
-          1.25,
-          0.25,
-          tagBg,
-        )
-        tx(
-          s,
-          nm(s, `DriverTagT${i}`),
-          chartX + 6.4,
-          chartY + i * 0.72 + 0.1,
-          1.14,
-          0.1,
-          item.tag,
-          {
-            name: FONT_EN,
-            size: '6pt',
-            bold: true,
-            color: readableInk(item.tagColor ?? color, tagBg),
-          },
-          'center',
-        )
-      }
-      if (item.action) {
-        const actionX = item.tag ? chartX + 6.4 : chartX + 4.95
-        const actionW = item.tag ? 1.95 : 3.3
-        tx(
-          s,
-          nm(s, `DriverAct${i}`),
-          actionX,
-          chartY + i * 0.72 + 0.3,
-          actionW,
-          0.14,
-          item.action,
-          {
-            name: FONT_EN,
-            size: '6.6pt',
-            color: readableInk(color),
-          },
-        )
+        const tagBg =
+          item.tagBg ?? (color === C.redBright || color === C.red ? 'FECACA' : C.amberTint)
+        const tagX = barX + fillW + 0.18
+        box(s, nm(s, `DriverTag${i}`), 'rectangle', tagX, y + 0.06, 1.46, 0.25, tagBg)
+        tx(s, nm(s, `DriverTagT${i}`), tagX + 0.07, y + 0.055, 1.26, 0.14, item.tag, {
+          name: FONT_EN,
+          size: '6pt',
+          bold: true,
+          color: accentText(item.tagColor ?? color),
+        })
+        tx(s, nm(s, `DriverAct${i}`), tagX + 0.07, y + 0.19, 1.35, 0.13, item.action, {
+          name: FONT_EN,
+          size: '6.4pt',
+          color: accentText(color),
+        })
+      } else if (item.action) {
+        tx(s, nm(s, `DriverAct${i}`), barX + fillW + 0.52, y + 0.1, 3.4, 0.14, item.action, {
+          name: FONT_EN,
+          size: '6.6pt',
+          color: C.muted,
+        })
       }
     })
-    box(s, nm(s, 'ControllableBracket'), 'rectangle', chartX, chartY + 0.42, 0.02, 1.05, C.red)
+    box(s, nm(s, 'ControllableBracketV'), 'rectangle', MX, 2.13, 0.015, 0.96, C.redBright)
+    box(s, nm(s, 'ControllableBracketT'), 'rectangle', MX, 2.13, 0.13, 0.012, C.redBright)
+    box(s, nm(s, 'ControllableBracketB'), 'rectangle', MX, 3.08, 0.13, 0.012, C.redBright)
+    tx(s, nm(s, 'ControllablePct'), MX + 0.15, 2.51, 0.42, 0.14, '78%', {
+      name: FONT_EN,
+      size: '7pt',
+      bold: true,
+      color: C.redBright,
+    })
+    tx(s, nm(s, 'ControllableText'), MX + 0.15, 2.69, 0.58, 0.32, 'control-\nlable', {
+      name: FONT_EN,
+      size: '6.7pt',
+      color: C.redBright,
+    })
     box(s, nm(s, 'Summary'), 'rectangle', 9.65, 1.52, 2.95, 2.8, C.deep)
     tx(
       s,
@@ -1110,12 +1309,36 @@ function makePageTypes(builders, chrome, components, total) {
       10.05,
       3.58,
       2.15,
-      0.42,
-      asLines(data.summary.eq),
+      0.36,
+      asLines(
+        String(data.summary.eq ?? '')
+          .split(/\r?\n/)
+          .slice(0, 2),
+      ),
       {
         name: FONT_EN,
         size: '7.5pt',
         color: C.line,
+      },
+      'center',
+    )
+    tx(
+      s,
+      nm(s, 'SummaryGreen'),
+      10.05,
+      4.02,
+      2.15,
+      0.24,
+      asLines(
+        String(data.summary.eq ?? '')
+          .split(/\r?\n/)
+          .slice(2),
+      ),
+      {
+        name: FONT_EN,
+        size: '7.2pt',
+        bold: true,
+        color: '4ADE80',
       },
       'center',
     )
@@ -1128,14 +1351,14 @@ function makePageTypes(builders, chrome, components, total) {
       1.0,
       data.uncontrollable.title,
       data.uncontrollable.body,
-      C.slate,
+      C.primary,
     )
     noteBox(
       s,
       'Pareto',
       MX,
-      6.0,
-      8.5,
+      6.12,
+      8.98,
       0.66,
       data.pareto.title,
       data.pareto.body,
@@ -1148,9 +1371,9 @@ function makePageTypes(builders, chrome, components, total) {
   function mckPillarsSlide(s, data) {
     addSlide(s)
     header(s, data.title, data.subtitle)
-    const cells = grid(4, 0.08, MX, CW)
+    const cells = grid(4, 0.12, MX, CW)
     ;(data.pillars ?? []).forEach((item, i) =>
-      pillarCard(s, `Pillar${i}`, cells[i].x, 1.32, cells[i].w, 5.6, item, i),
+      pillarCard(s, `Pillar${i}`, cells[i].x, 1.22, cells[i].w, 5.86, item, i),
     )
     footer(s, total, data.source)
   }
@@ -1163,20 +1386,21 @@ function makePageTypes(builders, chrome, components, total) {
     ;(data.initiatives ?? []).forEach((item, i) => {
       const { x, w } = cells[i]
       const accent = tone(item.accent ?? ACCENTS[i])
-      box(s, nm(s, `Init${i}Bg`), 'rectangle', x, 1.55, w, 5.35, C.white)
-      setLine(s, nm(s, `Init${i}Bg`), C.grid, '0.7pt')
-      box(s, nm(s, `Init${i}Top`), 'rectangle', x, 1.55, w, 0.06, accent)
-      tx(s, nm(s, `Init${i}Idx`), x + 0.12, 1.72, 0.38, 0.18, item.index, {
+      const cardY = 1.36
+      const cardH = 5.68
+      box(s, nm(s, `Init${i}Bg`), 'rectangle', x, cardY, w, cardH, C.white)
+      box(s, nm(s, `Init${i}Top`), 'rectangle', x, cardY, w, 0.08, accent)
+      tx(s, nm(s, `Init${i}Idx`), x + 0.12, 1.56, 0.38, 0.22, item.index, {
         name: FONT_EN,
-        size: '11pt',
+        size: '13.5pt',
         bold: true,
-        color: readableInk(accent),
+        color: accentText(accent),
       })
       tx(
         s,
         nm(s, `Init${i}Tag`),
         x + 0.78,
-        1.74,
+        1.58,
         w - 0.9,
         0.12,
         item.tag,
@@ -1184,19 +1408,19 @@ function makePageTypes(builders, chrome, components, total) {
           name: FONT_EN,
           size: '6pt',
           bold: true,
-          color: readableInk(accent),
+          color: accentText(accent),
         },
         'right',
       )
       if (item.icon)
-        icon(s, nm(s, `Init${i}Icon`), item.icon, x + w / 2 - 0.17, 2.1, 0.34, 0.34, {
+        icon(s, nm(s, `Init${i}Icon`), item.icon, x + w / 2 - 0.2, 1.94, 0.4, 0.4, {
           color: accent,
         })
       tx(
         s,
         nm(s, `Init${i}Title`),
         x + 0.18,
-        2.56,
+        2.54,
         w - 0.36,
         0.52,
         asLines(item.title),
@@ -1208,22 +1432,12 @@ function makePageTypes(builders, chrome, components, total) {
         },
         'center',
       )
-      box(s, nm(s, `Init${i}Rule1`), 'rectangle', x + 0.18, 3.2, w - 0.36, 0.012, C.grid)
-      tx(
-        s,
-        nm(s, `Init${i}Body`),
-        x + 0.18,
-        3.38,
-        w - 0.36,
-        0.78,
-        asLines(item.body),
-        {
-          name: FONT_EN,
-          size: '7.6pt',
-          color: C.text2,
-        },
-        'center',
-      )
+      box(s, nm(s, `Init${i}Rule1`), 'rectangle', x + 0.16, 3.2, w - 0.32, 0.012, C.grid)
+      tx(s, nm(s, `Init${i}Body`), x + 0.16, 3.34, w - 0.32, 0.78, asLines(item.body), {
+        name: FONT_EN,
+        size: '7.6pt',
+        color: C.text2,
+      })
       const labels = [
         ['COST LEVEL', item.cost],
         ['STRATEGIC PILLARS', item.pillars],
@@ -1231,21 +1445,21 @@ function makePageTypes(builders, chrome, components, total) {
       ]
       labels.forEach(([label, value], j) => {
         const y = 4.38 + j * 0.46
-        tx(s, nm(s, `Init${i}Lab${j}`), x + 0.18, y, w - 0.36, 0.12, label, {
+        tx(s, nm(s, `Init${i}Lab${j}`), x + 0.16, y, w - 0.32, 0.12, label, {
           name: FONT_EN,
           size: '6.1pt',
           bold: true,
           color: C.muted,
         })
-        tx(s, nm(s, `Init${i}Val${j}`), x + 0.18, y + 0.16, w - 0.36, 0.16, value, {
+        tx(s, nm(s, `Init${i}Val${j}`), x + 0.16, y + 0.16, w - 0.32, 0.16, value, {
           name: FONT_EN,
           size: '7.6pt',
           bold: true,
-          color: j === 0 ? C.text : accent,
+          color: j === 0 ? C.text : accentText(accent),
         })
       })
-      box(s, nm(s, `Init${i}Rule2`), 'rectangle', x + 0.18, 5.9, w - 0.36, 0.012, C.grid)
-      tx(s, nm(s, `Init${i}Foot`), x + 0.18, 6.1, w - 0.36, 0.44, asLines(item.footer), {
+      box(s, nm(s, `Init${i}Rule2`), 'rectangle', x + 0.16, 5.9, w - 0.32, 0.012, C.grid)
+      tx(s, nm(s, `Init${i}Foot`), x + 0.16, 6.1, w - 0.32, 0.44, asLines(item.footer), {
         name: FONT_EN,
         size: '7pt',
         color: C.text2,
@@ -1261,12 +1475,16 @@ function makePageTypes(builders, chrome, components, total) {
     ;(data.phases ?? []).forEach((phase, i) => {
       const { x, w } = cells[i]
       const accent = tone(phase.accent ?? [C.navy, C.primary, C.blue, C.teal][i])
-      box(s, nm(s, `Phase${i}Top`), 'rectangle', x, 1.32, w, 0.42, accent)
+      const phaseY = 1.22
+      const phaseH = 1.94
+      const phaseTopH = 0.52
+      box(s, nm(s, `Phase${i}Bg`), 'rectangle', x, phaseY, w, phaseH, C.white)
+      box(s, nm(s, `Phase${i}Top`), 'rectangle', x, phaseY, w, phaseTopH, accent)
       tx(
         s,
         nm(s, `Phase${i}Title`),
         x + 0.05,
-        1.43,
+        1.38,
         w - 0.1,
         0.2,
         phase.title,
@@ -1278,41 +1496,40 @@ function makePageTypes(builders, chrome, components, total) {
         },
         'center',
       )
-      box(s, nm(s, `Phase${i}Bg`), 'rectangle', x, 1.74, w, 1.24, C.surface)
       tx(
         s,
         nm(s, `Phase${i}Sub`),
         x + 0.12,
-        1.88,
+        1.59,
         w - 0.24,
         0.14,
         phase.sub,
         {
           name: FONT_EN,
           size: '6.8pt',
-          color: C.slate,
+          color: C.white,
         },
         'center',
       )
       ;(phase.items ?? []).forEach(([name, desc, iconName], j) => {
-        const y = 2.08 + j * 0.34
+        const y = 1.92 + j * 0.45
         if (iconName)
-          icon(s, nm(s, `Phase${i}Icon${j}`), iconName, x + 0.16, y - 0.01, 0.16, 0.16, {
+          icon(s, nm(s, `Phase${i}Icon${j}`), iconName, x + 0.18, y - 0.01, 0.17, 0.17, {
             color: accent,
           })
-        tx(s, nm(s, `Phase${i}Item${j}`), x + 0.42, y, w - 0.54, 0.14, name, {
+        tx(s, nm(s, `Phase${i}Item${j}`), x + 0.45, y, w - 0.58, 0.14, name, {
           name: FONT_EN,
           size: '7.5pt',
           bold: true,
           color: C.text,
         })
-        tx(s, nm(s, `Phase${i}Desc${j}`), x + 0.42, y + 0.16, w - 0.54, 0.12, desc, {
+        tx(s, nm(s, `Phase${i}Desc${j}`), x + 0.45, y + 0.16, w - 0.58, 0.12, desc, {
           name: FONT_EN,
           size: '6.5pt',
           color: C.slate,
         })
       })
-      tx(s, nm(s, `Phase${i}Cost`), x + 0.12, 2.76, w - 0.24, 0.14, phase.cost, {
+      tx(s, nm(s, `Phase${i}Cost`), x + 0.12, 2.89, w - 0.24, 0.14, phase.cost, {
         name: FONT_EN,
         size: '6.5pt',
         color: C.slate,
@@ -1355,22 +1572,22 @@ function makePageTypes(builders, chrome, components, total) {
     metrics.forEach((m, i) => {
       const { x, w } = metricCells[i]
       const accent = tone(m.accent ?? ACCENTS[i % ACCENTS.length])
-      box(s, nm(s, `RoadM${i}Bg`), 'rectangle', x, 3.78, w, 1.42, C.white)
+      box(s, nm(s, `RoadM${i}Bg`), 'rectangle', x, 3.56, w, 1.46, C.white)
       setLine(s, nm(s, `RoadM${i}Bg`), C.grid, '0.7pt')
-      box(s, nm(s, `RoadM${i}Top`), 'rectangle', x, 3.78, w, 0.05, accent)
-      tx(s, nm(s, `RoadM${i}Lab`), x + 0.2, 4.02, 1.9, 0.12, m.label, {
+      box(s, nm(s, `RoadM${i}Top`), 'rectangle', x, 3.56, w, 0.05, accent)
+      tx(s, nm(s, `RoadM${i}Lab`), x + 0.2, 3.79, 1.9, 0.12, m.label, {
         name: FONT_EN,
         size: '6.6pt',
         color: C.muted,
       })
-      tx(s, nm(s, `RoadM${i}Val`), x + 0.22, 4.28, 1.35, 0.34, m.value, {
+      tx(s, nm(s, `RoadM${i}Val`), x + 0.22, 3.99, 1.35, 0.34, m.value, {
         name: FONT_EN,
         size: '22pt',
         bold: true,
-        color: readableInk(accent),
+        color: displayInk(accent),
       })
-      box(s, nm(s, `RoadM${i}Sep`), 'rectangle', x + 1.75, 4.12, 0.012, 0.72, C.grid)
-      tx(s, nm(s, `RoadM${i}Target`), x + 1.95, 4.12, w - 2.16, 0.28, m.target, {
+      box(s, nm(s, `RoadM${i}Sep`), 'rectangle', x + 1.75, 3.83, 0.012, 1.06, C.grid)
+      tx(s, nm(s, `RoadM${i}Target`), x + 1.95, 3.98, w - 2.16, 0.28, m.target, {
         name: FONT_EN,
         size: '8pt',
         bold: true,
@@ -1379,21 +1596,21 @@ function makePageTypes(builders, chrome, components, total) {
       tx(s, nm(s, `RoadM${i}By`), x + 1.95, 4.48, w - 2.16, 0.14, m.by, {
         name: FONT_EN,
         size: '6.6pt',
-        color: C.slate,
+        color: accentText(accent),
       })
-      tx(s, nm(s, `RoadM${i}Note`), x + 0.22, 4.86, w - 0.44, 0.16, m.note, {
+      tx(s, nm(s, `RoadM${i}Note`), x + 0.22, 4.67, w - 0.44, 0.16, m.note, {
         name: FONT_EN,
         size: '7pt',
         color: C.text2,
       })
     })
 
-    box(s, nm(s, 'GovernanceBg'), 'rectangle', MX, 5.56, CW, 1.12, C.deep)
+    box(s, nm(s, 'GovernanceBg'), 'rectangle', MX, 5.23, CW, 1.15, C.deep)
     tx(
       s,
       nm(s, 'GovTitle'),
       MX,
-      5.78,
+      5.42,
       CW,
       0.14,
       data.governance.title,
@@ -1412,7 +1629,7 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `GovLab${i}`),
         x,
-        6.08,
+        5.81,
         w,
         0.15,
         label,
@@ -1427,7 +1644,7 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `GovPri${i}`),
         x,
-        6.28,
+        6.03,
         w,
         0.16,
         primary,
@@ -1443,7 +1660,7 @@ function makePageTypes(builders, chrome, components, total) {
         s,
         nm(s, `GovSec${i}`),
         x,
-        6.48,
+        6.22,
         w,
         0.16,
         secondary,

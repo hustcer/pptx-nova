@@ -18,7 +18,7 @@ deck 后新建 deck。
 
 ## 2. Run 目录产物
 
-除 SKILL.md 的通用产物外，Reference Create 还要把这些文件放在 run 目录：
+除 `common-workflow.md` 规定的通用产物外，Reference Create 还要把这些文件放在 run 目录：
 
 - `reference-inspect.json`：`inspect` 输出，用来判断页面尺寸、layout、shape、文本密度和复杂对象。
 - `reference-style.json`：`extract-style` 输出，包含主题色、字体、layout/slide 语义和 draft pack。

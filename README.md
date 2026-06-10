@@ -169,9 +169,13 @@ node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery --json
 
 ## 进一步阅读
 
-- `SKILL.md`：Agent 执行时的完整规则。
-- `references/express-mode.md`：一句话或已有大纲快速生成 deck。
+- `SKILL.md`：Agent 执行时的触发、路由和公共红线。
+- `references/common-workflow.md`：run 目录、输出防碰撞、dry-run/apply/vision/PNG 公共流程。
+- `references/deckkit-mode.md`：DeckKit 选择、readiness、content 和用户可见 examples。
+- `references/create-express.md`：一句话或已有大纲快速生成 deck。
+- `references/create-studio.md`：客户级 / 投资人级 / 精控 deck。
 - `references/reference-create.md`：参考 PPTX + 新大纲生成新 deck。
-- `references/inspect-and-edit.md`：修改已有 PPTX。
+- `references/edit-mode.md` / `references/inspect-and-edit.md`：修改已有 PPTX。
+- `references/export-and-check.md`：PDF/PNG/MD/JSON 导出、提取和检查。
 - `references/data-driven.md`：数据驱动和模板填充。
 - `references/troubleshooting.md`：常见失败与修复方式。

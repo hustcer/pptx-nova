@@ -30,7 +30,7 @@
 ## 探索生成器起手三步
 
 先确认 `assets/deckkits/catalog.json` 里没有满足场景、语言、密度和页型覆盖的
-production/default DeckKit。若有可用 DeckKit，直接回到 SKILL §1.0 的
+production/default DeckKit。若有可用 DeckKit，直接回到 `deckkit-mode.md` 的
 `content.json → validate-content → createDeck → s8fy → vision-check → PNG review` 生产路径。
 只有确实需要新 DeckKit 或新页型时，才进入下面的探索生成器流程。
 
@@ -439,7 +439,7 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 ## 升级路径：从模板到完整 deck
 
 模板里 8 个 slide 函数（cover / agenda / KPI / chart / table / pillars /
-workflow / hero）覆盖 [SKILL.md §9.5 推荐结构](../SKILL.md) 全部页型。
+workflow / hero）覆盖 `rich-deck-patterns.md` 的 7 页推荐结构和常用页型。
 
 按需 **复制函数 + 改函数名** 即可生成第 9、10 页：
 

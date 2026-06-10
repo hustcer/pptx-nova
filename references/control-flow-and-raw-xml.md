@@ -245,7 +245,7 @@ op 才进入 schema 校验，所以**坐标/枚举字段**最终仍然必须是�
 
 - `{{args.*}}` 只做字符串插值，**不做算术**（要算坐标用 JS 生成器在外面算好）
 - 宏体内引用的 selector / id 仍然要遵守 `nm()` 命名规范，否则 resolvedSelectors
-  会报 not-found（见 SKILL.md §7 的命名 helper 避坑条）
+  会报 not-found（见 `deck-generator-workflow.md` 的命名 helper 规范）
 - 宏 **不会被持久化**到生成的 PPTX 里 — 它纯粹是 patch JSON 的"复用快捷方式"
 
 ### 5.4 常见错误

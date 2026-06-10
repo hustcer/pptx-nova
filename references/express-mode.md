@@ -7,7 +7,7 @@
 > `继续生成 <run-dir>`；这只是会话切分，不改变 Express 的 DeckKit-first 路线。
 >
 > **express ≠ 草稿**：它默认也按客户演示级（200-300 ops）产出，只是把
-> SKILL §6 的完整工作流自动串起来、不逐项追问。要草稿请明说「简单/速记版」。
+> `common-workflow.md` 的完整工作流自动串起来、不逐项追问。要草稿请明说「简单/速记版」。
 
 ## 目录
 
@@ -24,13 +24,13 @@
 
 ## 1. 何时用 Express（vs Studio / Edit）
 
-| 信号                                                   | 走哪个模式           | 去向                                                  |
-| ------------------------------------------------------ | -------------------- | ----------------------------------------------------- |
-| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express**          | 本文档                                                |
-| 提供参考 PPTX + 新大纲 / 新主题                        | **Reference Create** | `reference-create.md`                                 |
-| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**           | 先选 DeckKit；无匹配时见 `deck-generator-workflow.md` |
-| 指定品牌 profile / 要做品牌合规检查                    | **Studio**           | SKILL §4 + `recipes.md`（apply-corporate-rebrand）    |
-| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**             | SKILL §2 + `inspect-and-edit.md`                      |
+| 信号                                                   | 走哪个模式           | 去向                                                             |
+| ------------------------------------------------------ | -------------------- | ---------------------------------------------------------------- |
+| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express**          | 本文档                                                           |
+| 提供参考 PPTX + 新大纲 / 新主题                        | **Reference Create** | `reference-create.md`                                            |
+| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**           | 先选 DeckKit；无匹配时见 `deck-generator-workflow.md`            |
+| 指定品牌 profile / 要做品牌合规检查                    | **Studio**           | `styles-and-themes.md` + `recipes.md`（apply-corporate-rebrand） |
+| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**             | `edit-mode.md` + `inspect-and-edit.md`                           |
 
 Express 和 Studio 共用同一套 DeckKit / generator / op 基础设施，区别只在
 **ceremony**：express 自动选默认、最小确认、自动闭环；studio 让你逐项控制。
@@ -58,7 +58,7 @@ prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资�
 或人工确认后的交付。不满足时进入创建/扩展 DeckKit 流程，而不是把通用 generator
 作为最终交付路径。
 
-详见 `deck-generator-workflow.md`「二次创作快路径」和 SKILL.md §1.4。
+详见 `deckkit-mode.md` 和 `deck-generator-workflow.md`「二次创作快路径」。
 
 ---
 
@@ -121,7 +121,7 @@ s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
 s8fy pptx vision-check out.pptx --json | save vision.json
 #    合并 autoRetry 的 fixPatch → 人工处理剩余 medium/high → 再 vision-check 到 medium/high 清零
 
-# 11. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 SKILL §9.6）
+# 11. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 common-workflow.md）
 s8fy convert out.pptx --to png -o previews/ --overwrite
 #    逐页检查字符重叠、换行压字、截断、页脚/来源撞正文
 
@@ -209,8 +209,8 @@ helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `page
 
 ## 5. 质量门与丰富度
 
-express 默认按**客户演示级**产出，不交 recipe-only 草稿。硬指标（详见 SKILL §9 与
-`rich-deck-patterns.md` 的 op 量级表）：
+express 默认按**客户演示级**产出，不交 recipe-only 草稿。硬指标（详见
+`create-studio.md` 的可读性红线与 `rich-deck-patterns.md` 的 op 量级表）：
 
 - **op 量级**：7 页左右 deck **≥200 ops**；`jq '.ops|length'` < 100 说明只堆了 recipe、视觉太空，
   回去给每页加视觉元素（顶部品牌条 / accent 竖条 / eyebrow / KPI 顶部色条 / delta pill /
@@ -223,18 +223,18 @@ express 默认按**客户演示级**产出，不交 recipe-only 草稿。硬指�
 - **构图有几何纪律**：对比页中轴、VS 圆、流程中心框、连接线和箭头端点必须从 shape bbox
   推导；同排文字与形状垂直居中，左右对称布局要数学居中。
 
-每页该长什么样、可粘贴的 patch 骨架见 `rich-deck-patterns.md` §1-§8；7 页推荐结构见 SKILL §9.5。
+每页该长什么样、可粘贴的 patch 骨架和 7 页推荐结构见 `rich-deck-patterns.md`。
 
 ---
 
 ## 6. vision-check 自动闭环
 
-apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检，6 类问题，详见 SKILL §10）。
+apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检；公共门禁见 `common-workflow.md`）。
 闭环规则：
 
 - **自动套**：只把 `fix.autoRetry == true` 的两类（`shape-out-of-bounds` 越界回夹、
   `text-edge-margin` 贴边推回）合成一个 patch envelope 重 apply，再 vision-check 确认清零。
-  合并脚本（nu）见 SKILL §10.2；bash 等价：
+  bash 等价：
 
   ```bash
   jq '{schemaVersion:1, ops:[.issues[] | select(.fix.autoRetry==true) | .fix.fixPatch[]]}' \
@@ -256,7 +256,7 @@ apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检
 
 vision-check 只看几何；**字符实际重叠 / 字体换行压字 / 小字号可读性 / 对比度 /
 箭头是否歪、连接线是否接上 / 中轴标识是否真居中 / 装饰是否真盖住文字 / 配色协调仍靠
-§2 第 8 步的 PNG 复核**（SKILL §9.6 清单），不可省。
+§2 第 8 步的 PNG 复核**（公共检查清单见 `common-workflow.md`），不可省。
 
 ---
 
@@ -287,15 +287,15 @@ express 的核心是**不像 ppt-master 那样逐项确认**（它要 8 次 BLOC
 
 express 跑到一半发现下列任一信号，就升级（DeckKit / generator / op 基础设施共用，无需重来）：
 
-| 信号                                       | 升级到           | 去向                                          |
-| ------------------------------------------ | ---------------- | --------------------------------------------- |
-| 要像素级定位 / 自由布局 / 演示动效拟态     | **Studio**       | SKILL §1.2 + `patch-ops-cheatsheet.md`        |
-| 要自定义 chart 样式 / 二轴 combo / chartEx | **Studio**       | `charts.md`                                   |
-| 要套已有品牌 profile / 做品牌合规          | **Studio**       | SKILL §4 + `recipes.md`                       |
-| 用户给参考 PPTX，要求按新大纲生成新 deck   | Reference Create | `reference-create.md`                         |
-| 要把一份 JSON/CSV 批量套进模板             | 数据驱动         | SKILL §3 + `data-driven.md`                   |
-| 用户改口"在这份已有 deck 上改/加"          | **Edit**         | SKILL §2 + `inspect-and-edit.md`              |
-| op 数已超 ~100、手维护吃力                 | 仍 Express       | 先选 DeckKit；无匹配时扩展 DeckKit（见 §3.2） |
+| 信号                                       | 升级到           | 去向                                           |
+| ------------------------------------------ | ---------------- | ---------------------------------------------- |
+| 要像素级定位 / 自由布局 / 演示动效拟态     | **Studio**       | `create-studio.md` + `patch-ops-cheatsheet.md` |
+| 要自定义 chart 样式 / 二轴 combo / chartEx | **Studio**       | `charts.md`                                    |
+| 要套已有品牌 profile / 做品牌合规          | **Studio**       | `styles-and-themes.md` + `recipes.md`          |
+| 用户给参考 PPTX，要求按新大纲生成新 deck   | Reference Create | `reference-create.md`                          |
+| 要把一份 JSON/CSV 批量套进模板             | 数据驱动         | `data-driven.md`                               |
+| 用户改口"在这份已有 deck 上改/加"          | **Edit**         | `edit-mode.md` + `inspect-and-edit.md`         |
+| op 数已超 ~100、手维护吃力                 | 仍 Express       | 先选 DeckKit；无匹配时扩展 DeckKit（见 §3.2）  |
 
 > Express 不是能力天花板，是**默认省事路径**。它产出的就是原生可编辑 PPTX + sidecar，
 > 任何时候都能用 Edit 模式继续 inspect / patch / 回滚。

@@ -54,10 +54,10 @@ Phase A 不写 `content.json` / `patch.json`，不 dry-run，不生成 `.pptx`�
 1. 读取 `resume_manifest.json`、`outline.json`、`deck_lock.json` 和必要的
    `assets_manifest.json` / `source_brief.md`。
 2. 做 sanity check；缺必需文件时停止，不从记忆重建。
-3. 重新检查最终输出路径是否已存在；若存在且不是本 run 中间文件，按 SKILL 的输出防碰撞规则阻塞。
+3. 重新检查最终输出路径是否已存在；若存在且不是本 run 中间文件，按 `common-workflow.md` 的输出防碰撞规则阻塞。
 4. 检查资源状态；`missing` / `needs-user` / 未授权 placeholder 在正式交付中阻塞。
 5. 从 `outline.json` + `deck_lock.json` 选择 DeckKit 或 generator，生成 `content.json` 或 `patch.json`。
-6. 从 SKILL §6 第 4 步继续：check-lock -> dry-run -> fix -> apply -> vision-check -> PNG -> final output。
+6. 从 `common-workflow.md` 的 shared pipeline 继续：check-lock -> dry-run -> fix -> apply -> vision-check -> PNG -> final output。
 
 ## 3. `resume_manifest.json`
 
@@ -162,7 +162,7 @@ Phase A 已完成，可以在新会话继续。
    列出缺失项和需要用户确认或替换的占位资源。
 9. 若 `content.json` 或 `patch.json` 已存在，先运行 check-lock 判断是否与当前 lock 一致；不一致就重建。
 
-sanity check 通过后，从 SKILL §6 第 3 步继续。
+sanity check 通过后，从 `common-workflow.md` 的 content/patch 生成步骤继续。
 
 ## 7. 失败处理
 

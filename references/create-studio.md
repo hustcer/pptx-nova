@@ -1,0 +1,102 @@
+# Create Studio Mode
+
+Read this file for investor/customer/board decks, brand-sensitive work,
+high-risk content, "Studio" requests, or any request where the user asks for
+precise control over narrative, style, resources, or page structure.
+
+Studio mode adds confirmation and design locking. It does not replace the
+DeckKit-first production path.
+
+## Load Order
+
+For Studio creation read:
+
+1. `common-workflow.md`
+2. `deckkit-mode.md`
+3. `design-lock-and-assets.md`
+4. This file
+5. `visual-qa-and-asset-slots.md` when images/assets are involved
+6. `rich-deck-patterns.md` only if no suitable DeckKit exists or a DeckKit must
+   be extended for a richer pattern
+
+Read `formulas.md`, `charts.md`, or `tables.md` only when the deck actually
+contains those structures.
+
+## Confirmation Strategy
+
+If the user already provides a clear outline, preserve it. Only propose changes
+when the sequence is contradictory, cannot fit, misses required information, or
+the user asks for structure improvement.
+
+If the user has not provided a confirmed outline, pause before content/patch
+generation and ask for confirmation of:
+
+- page sequence and purpose for each slide
+- canvas and page count
+- audience and decision goal
+- style and density
+- brand colors and typography
+- formula policy if math appears
+- chart/table/icon strategy
+- image/logo/third-party asset strategy
+- whether to continue in the same session or split after the lock
+
+Keep confirmation short: page titles plus one-line purpose, not full copy.
+
+## Design Lock
+
+Write `deck_lock.json` after outline confirmation. It should freeze:
+
+- output and canvas
+- DeckKit/theme/style decisions
+- colors and typography
+- formula policy
+- icons/charts/tables
+- image/logo/resource policy
+- page types and per-slide rhythm
+- template or reference deck fusion decisions
+
+Any later change to theme, DeckKit, fonts, resource policy, or page type should
+update the lock before changing content or patch.
+
+Use `assets_manifest.json` only when resources exist. Do not create empty asset
+manifests for pure native-shape decks.
+
+## Split / Resume
+
+For long decks, high-risk decks, long source materials, many resources, or
+formal customer/investor/board work, offer split mode after `outline.json`,
+`deck_lock.json`, and necessary `assets_manifest.json` are complete.
+
+If the user chooses split, write `resume_manifest.json` and stop. Do not write
+`content.json`, do not dry-run, and do not generate `.pptx` before the resume.
+
+When resuming, read `resume-split-mode.md`, verify run-dir sanity, then continue
+from content/patch generation.
+
+## Studio Production Path
+
+After confirmation and lock, return to the common DeckKit-first path:
+
+```text
+outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> check-lock
+  -> dry-run -> apply -> vision-check -> PNG/contact-sheet review
+```
+
+If a DeckKit lacks needed page types or visual structure, extend/create the
+DeckKit following `deck-generator-workflow.md`. Avoid local one-off patches for
+large delivery decks unless the task is explicitly a small local edit.
+
+## Quality Bar
+
+Studio decks must preserve readable typography:
+
+- core body text should generally be at least `10.5pt`
+- labels, badges, chart/table text should generally be at least `9pt`
+- footer/source text may be `8.5-9pt` only when it is non-critical
+- numbers, units, percentages, and short labels must not split awkwardly
+- circle/square badges need centered readable labels
+- arrows, connectors, and center markers must be derived from real geometry
+
+If text does not fit, first delete copy, change layout, split slides, or enlarge
+containers. Do not keep shrinking font sizes to force content into a fixed box.

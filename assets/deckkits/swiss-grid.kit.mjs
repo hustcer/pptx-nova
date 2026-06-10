@@ -1,6 +1,12 @@
 // swiss-grid.kit.mjs - Swiss International Typographic Style DeckKit
 // version: 0.1.0
-import { createOps, estimateDeckTextLineCount, grid, nm } from './core-primitives.kit.mjs'
+import {
+  createOps,
+  estimateDeckTextLineCount,
+  grid,
+  nm,
+  normalizeHex,
+} from './core-primitives.kit.mjs'
 
 const C = {
   red: 'E2231A',
@@ -33,12 +39,61 @@ const SUBTITLE_RULE_GAP = 0.12
 const pad2 = (value) => String(value).padStart(2, '0')
 const asLines = (value) => (Array.isArray(value) ? value.join('\n') : String(value ?? ''))
 const limitItems = (items, max) => (items ?? []).slice(0, max)
+const roundIn = (value) => Number(value.toFixed(3))
+const explicitLineCount = (value) =>
+  Math.max(
+    1,
+    asLines(value)
+      .split('\n')
+      .filter((line) => line.trim().length > 0).length,
+  )
+const textLineCount = (value, fontPt, widthIn) =>
+  Math.max(
+    explicitLineCount(value),
+    estimateDeckTextLineCount(
+      String(value ?? ''),
+      fontPt,
+      Math.max(0, widthIn - TEXT_INSET * 2) * 72,
+    ),
+  )
+const textVisualBottom = (textY, fontPt, lines, bottomPad = 0.015) =>
+  roundIn(textY + (Math.max(1, lines) * fontPt * 1.2) / 72 + bottomPad)
+const ruleHeightToTextBottom = (ruleY, textBottom, minHeight = 0.12) =>
+  roundIn(Math.max(minHeight, textBottom - ruleY))
+const brandKey = (name) =>
+  String(name ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
 const font = (size, color = C.text, bold = false, name = FONT_CN) => ({
   name,
   size: `${size}pt`,
   color,
   ...(bold ? { bold: true } : {}),
 })
+
+const BRAND_LOGOS = {
+  airbnb: {
+    path: 'M12.001 18.275c-1.353-1.697-2.148-3.184-2.413-4.457-.263-1.027-.16-1.848.291-2.465.477-.71 1.188-1.056 2.121-1.056s1.643.345 2.12 1.063c.446.61.558 1.432.286 2.465-.291 1.298-1.085 2.785-2.412 4.458zm9.601 1.14c-.185 1.246-1.034 2.28-2.2 2.783-2.253.98-4.483-.583-6.392-2.704 3.157-3.951 3.74-7.028 2.385-9.018-.795-1.14-1.933-1.695-3.394-1.695-2.944 0-4.563 2.49-3.927 5.382.37 1.565 1.352 3.343 2.917 5.332-.98 1.085-1.91 1.856-2.732 2.333-.636.344-1.245.558-1.828.609-2.679.399-4.778-2.2-3.825-4.88.132-.345.395-.98.845-1.961l.025-.053c1.464-3.178 3.242-6.79 5.285-10.795l.053-.132.58-1.116c.45-.822.635-1.19 1.351-1.643.346-.21.77-.315 1.246-.315.954 0 1.698.558 2.016 1.007.158.239.345.557.582.953l.558 1.089.08.159c2.041 4.004 3.821 7.608 5.279 10.794l.026.025.533 1.22.318.764c.243.613.294 1.222.213 1.858zm1.22-2.39c-.186-.583-.505-1.271-.9-2.094v-.03c-1.889-4.006-3.642-7.608-5.307-10.844l-.111-.163C15.317 1.461 14.468 0 12.001 0c-2.44 0-3.476 1.695-4.535 3.898l-.081.16c-1.669 3.236-3.421 6.843-5.303 10.847v.053l-.559 1.22c-.21.504-.317.768-.345.847C-.172 20.74 2.611 24 5.98 24c.027 0 .132 0 .265-.027h.372c1.75-.213 3.554-1.325 5.384-3.317 1.829 1.989 3.635 3.104 5.382 3.317h.372c.133.027.239.027.265.027 3.37.003 6.152-3.261 4.802-6.975z',
+  },
+  apple: {
+    path: 'M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701',
+  },
+  google: {
+    path: 'M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z',
+  },
+  ibm: {
+    h: 0.28,
+    path: 'M23.544 15.993c.038 0 .06-.017.06-.053v-.036c0-.035-.022-.052-.06-.052h-.09v.14zm-.09.262h-.121v-.498h.225c.112 0 .169.066.169.157 0 .079-.036.129-.09.15l.111.19h-.133l-.092-.17h-.07zm.434-.222v-.062c0-.2-.157-.357-.363-.357a.355.355 0 00-.363.357v.062c0 .2.156.358.363.358a.355.355 0 00.363-.358zm-.838-.03c0-.28.212-.492.475-.492.264 0 .475.213.475.491 0 .279-.211.491-.475.491a.477.477 0 01-.475-.49zM16.21 8.13l-.216-.624h-3.56v.624zm.413 1.19l-.216-.623h-3.973v.624zm2.65 7.147h3.107v-.624h-3.108zm0-1.192h3.107v-.623h-3.108zm0-1.19h1.864v-.624h-1.865zm0-1.191h1.864v-.624h-1.865zm0-1.191h1.864v-.624h-3.555l-.175.504-.175-.504h-3.555v.624h1.865v-.574l.2.574h3.33l.2-.574zm1.864-1.815h-3.142l-.217.624h3.359zm-7.46 3.006h1.865v-.624h-1.865zm0 1.19h1.865v-.623h-1.865zm-1.243 1.191h3.108v-.623h-3.108zm0 1.192h3.108v-.624h-3.108zm6.386-8.961l-.216.624h3.776v-.624zm-.629 1.815h4.19v-.624h-3.974zm-4.514 1.19h3.359l-.216-.623h-3.143zm2.482 2.383h2.496l.218-.624h-2.932zm.417 1.19h1.662l.218-.623h-2.098zm.416 1.191h.83l.218-.623h-1.266zm.414 1.192l.217-.624h-.432zm-12.433-.006l4.578.006c.622 0 1.18-.237 1.602-.624h-6.18zm4.86-3v.624h2.092c0-.216-.03-.425-.083-.624zm-3.616.624h1.865v-.624H6.217zm3.617-3.573h2.008c.053-.199.083-.408.083-.624H9.834zm-3.617 0h1.865v-.624H6.217zM9.55 7.507H4.973v.624h6.18a2.36 2.36 0 00-1.602-.624zm2.056 1.191H4.973v.624h6.884a2.382 2.382 0 00-.25-.624zm-5.39 2.382v.624h4.87c.207-.176.382-.387.519-.624zm4.87 1.191h-4.87v.624h5.389a2.39 2.39 0 00-.519-.624zm-6.114 3.006h6.634c.11-.193.196-.402.25-.624H4.973zM0 8.13h4.352v-.624H0zm0 1.191h4.352v-.624H0zm1.243 1.191h1.865v-.624H1.243zm0 1.191h1.865v-.624H1.243zm0 1.19h1.865v-.623H1.243zm0 1.192h1.865v-.624H1.243zM0 15.276h4.352v-.623H0zm0 1.192h4.352v-.624H0Z',
+    w: 0.46,
+    yOffset: 0.03,
+  },
+  lufthansa: {
+    path: 'M24,12c0-6.648-5.352-12-12-12C5.376,0,0,5.352,0,12c0,6.624,5.376,12,12,12C18.648,24,24,18.624,24,12z M23.136,12c0,6.12-4.992,11.136-11.136,11.136C5.88,23.136,0.864,18.121,0.864,12C0.864,5.856,5.88,0.864,12,0.864 C18.144,0.864,23.136,5.856,23.136,12z M16.248,11.28c-0.264,0-0.6,0-1.032,0.024l0.312-0.528h0.504c1.8,0,3.144,0.096,4.368,0.312 l0.552-0.528c-1.368-0.24-3.024-0.384-4.704-0.384H15.84l0.264-0.504h0.456c1.752,0,3.336,0.144,4.872,0.432l0.576-0.552 c-1.728-0.336-3.576-0.503-5.568-0.503c-0.849,0.003-1.698,0.043-2.544,0.12c-0.96,2.063-2.496,3.264-4.224,3.24 C9,12.384,8.159,12.097,7.08,11.52l-1.008-0.576l0.312-0.288l2.328,1.008l0.504-0.384L4.512,9.144l-0.72,0.552L2.112,9l0.024,0.696 c2.256,1.032,3.192,1.608,5.568,3.312c3.096,2.208,5.856,3.408,9.696,4.176l1.008-0.96h-0.24c-2.544,0-4.824-0.84-6.144-2.256 c1.104-0.672,2.471-0.983,4.368-0.983c0.504,0,1.224,0.047,1.896,0.119l0.576-0.552c-0.9-0.11-1.805-0.166-2.712-0.168 c-0.609-0.001-1.217,0.023-1.824,0.072l0.432-0.528c0.511-0.03,1.024-0.046,1.536-0.048c1.272,0,2.112,0.048,3.072,0.192 l0.552-0.528C18.912,11.377,17.52,11.28,16.248,11.28z',
+  },
+  spotify: {
+    path: 'M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z',
+  },
+}
 
 function makeSwissOps() {
   const p = createOps({ textbox: { marginTop: '0in', marginBottom: '0in' } })
@@ -55,6 +110,24 @@ function makeSwissOps() {
   const dot = (s, name, x, y, d, color = C.red) => p.box(s, name, 'oval', x, y, d, d, color)
   const rotate = (s, name, degrees) =>
     p.ops.push({ op: 'set-shape-rotation', slide: s, shape: { name }, degrees })
+  const brandLogo = (s, name, key, x, y, color = C.black) => {
+    const logo = BRAND_LOGOS[key]
+    if (!logo) return false
+    const fill = normalizeHex(color) ?? C.black
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#${fill}" d="${logo.path}"/></svg>`
+    p.ops.push({
+      op: 'add-picture',
+      slide: s,
+      name,
+      x: `${x}in`,
+      y: `${y + (logo.yOffset ?? 0)}in`,
+      w: `${logo.w ?? 0.34}in`,
+      h: `${logo.h ?? 0.34}in`,
+      bytesBase64: Buffer.from(svg).toString('base64'),
+      mime: 'image/svg+xml',
+    })
+    return true
+  }
   const richTx = (s, name, x, y, w, h, runs, align) => {
     const safeRuns = runs.filter((run) => run.text)
     if (safeRuns.length === 0) return p.tx(s, name, x, y, w, h, '', font(9, C.text), align)
@@ -66,7 +139,7 @@ function makeSwissOps() {
     return name
   }
 
-  return { ...p, line, hRule, vRule, strokeRect, dot, rotate, richTx }
+  return { ...p, line, hRule, vRule, strokeRect, dot, rotate, brandLogo, richTx }
 }
 
 function makeChrome(p, total) {
@@ -167,12 +240,12 @@ function makePageTypes(p, chrome) {
       nm(s, 'Eyebrow'),
       0.62,
       0.8,
-      1.5,
-      0.18,
+      2.4,
+      0.2,
       data.eyebrow ?? 'A LECTURE · 2026',
       font(10.5, C.muted, false, FONT_EN),
     )
-    p.hRule(s, nm(s, 'EyebrowRule'), 0.62 + TEXT_INSET, 1.02, 1.24, C.black, 0.012)
+    p.hRule(s, nm(s, 'EyebrowRule'), 0.62 + TEXT_INSET, 1.04, 1.24, C.black, 0.012)
     p.dot(s, nm(s, 'RedDot'), 9.52, 0.98, 0.64, C.red)
     p.tx(s, nm(s, 'Title'), 0.62, 4.5, 6.8, 0.95, data.title, font(48, C.text, false))
     p.tx(
@@ -185,8 +258,20 @@ function makePageTypes(p, chrome) {
       data.subtitle,
       font(24, C.text, true, FONT_EN),
     )
-    p.vRule(s, nm(s, 'RedRule'), 0.62, 6.2, 0.46, C.red, 0.026)
-    p.tx(s, nm(s, 'Tag'), 0.82, 6.16, 4.8, 0.5, data.tag, font(10, C.muted, false, FONT_EN))
+    const tagY = 6.16
+    const tagW = 4.8
+    const tagLines = textLineCount(data.tag, 10, tagW)
+    const tagRuleY = 6.2
+    p.vRule(
+      s,
+      nm(s, 'RedRule'),
+      0.62,
+      tagRuleY,
+      ruleHeightToTextBottom(tagRuleY, textVisualBottom(tagY, 10, tagLines)),
+      C.red,
+      0.026,
+    )
+    p.tx(s, nm(s, 'Tag'), 0.82, tagY, tagW, 0.5, data.tag, font(10, C.muted, false, FONT_EN))
     p.tx(
       s,
       nm(s, 'Foot'),
@@ -229,7 +314,7 @@ function makePageTypes(p, chrome) {
       3.28,
       3.1,
       4.98,
-      1.48,
+      2.04,
       asLines(data.body),
       font(15.2, C.muted, false, FONT_EN),
     )
@@ -314,7 +399,20 @@ function makePageTypes(p, chrome) {
       )
     })
     if (data.calloutTitle) {
-      p.vRule(s, nm(s, 'CalloutRule'), MX, 5.92, 0.46, C.red, 0.024)
+      const callout = String(data.callout ?? '')
+      const calloutRuleY = 5.92
+      p.vRule(
+        s,
+        nm(s, 'CalloutRule'),
+        MX,
+        calloutRuleY,
+        ruleHeightToTextBottom(
+          calloutRuleY,
+          textVisualBottom(6.08, 8.4, textLineCount(callout, 8.4, 5.8)),
+        ),
+        C.red,
+        0.024,
+      )
       p.tx(
         s,
         nm(s, 'CalloutTitle'),
@@ -325,7 +423,6 @@ function makePageTypes(p, chrome) {
         data.calloutTitle,
         font(8.4, C.text, true),
       )
-      const callout = String(data.callout ?? '')
       const emphasis = '字体 · 学校 · 教学'
       const parts = callout.includes(emphasis)
         ? [
@@ -763,7 +860,7 @@ function makePageTypes(p, chrome) {
       cellW * 2,
       0.18,
       data.labels?.image ?? 'IMAGE 2x2',
-      font(7.1, C.red, true, FONT_EN),
+      font(7.1, 'C01812', true, FONT_EN),
       'center',
     )
     p.tx(
@@ -793,17 +890,21 @@ function makePageTypes(p, chrome) {
     p.addSlide(s)
     chrome.pageMark(s)
     p.dot(s, nm(s, 'Dot'), 3.72, 2.18, 0.5, C.red)
-    p.vRule(s, nm(s, 'RedRule'), 7.82, 1.28, 0.46, C.red, 0.026)
-    p.tx(
+    const label = data.label ?? 'ARGUMENT · 07'
+    const labelRuleY = 1.28
+    p.vRule(
       s,
-      nm(s, 'Label'),
-      8.0,
-      1.45,
-      1.5,
-      0.18,
-      data.label ?? 'ARGUMENT · 07',
-      font(8.6, C.text2, false, FONT_EN),
+      nm(s, 'RedRule'),
+      7.82,
+      labelRuleY,
+      ruleHeightToTextBottom(
+        labelRuleY,
+        textVisualBottom(1.45, 8.6, textLineCount(label, 8.6, 1.5)),
+      ),
+      C.red,
+      0.026,
     )
+    p.tx(s, nm(s, 'Label'), 8.0, 1.45, 1.5, 0.18, label, font(8.6, C.text2, false, FONT_EN))
     p.tx(s, nm(s, 'Title'), 7.82, 1.88, 4.2, 0.74, data.title, font(39, C.text, false))
     p.tx(
       s,
@@ -966,8 +1067,22 @@ function makePageTypes(p, chrome) {
       )
     })
     if (data.callout) {
-      p.vRule(s, nm(s, 'ProgressCalloutRule'), MX, 6.08, 0.46, C.red, 0.024)
       const calloutLines = asLines(data.callout).split('\n')
+      const progressRuleY = 6.08
+      const progressBody = calloutLines.slice(1).join('\n')
+      const progressBottom =
+        calloutLines.length > 1
+          ? textVisualBottom(6.3, 7.7, textLineCount(progressBody, 7.7, 7.6))
+          : textVisualBottom(6.02, 8.2, textLineCount(calloutLines[0] ?? '', 8.2, 6.5))
+      p.vRule(
+        s,
+        nm(s, 'ProgressCalloutRule'),
+        MX,
+        progressRuleY,
+        ruleHeightToTextBottom(progressRuleY, progressBottom),
+        C.red,
+        0.024,
+      )
       p.tx(
         s,
         nm(s, 'ProgressCalloutHead'),
@@ -986,7 +1101,7 @@ function makePageTypes(p, chrome) {
           6.3,
           7.6,
           0.24,
-          calloutLines.slice(1).join('\n'),
+          progressBody,
           font(7.7, C.faint),
         )
       }
@@ -1004,9 +1119,13 @@ function makePageTypes(p, chrome) {
       const col = cols[i % 3]
       const y = 2.05 + row * 2.1
       const accent = brand.accent ?? C.black
-      p.icon(s, nm(s, `BrandIcon${i}`), brand.icon ?? 'layout-grid', col.x, y, 0.34, 0.34, {
-        color: accent,
-      })
+      const logoKey = brand.logo ?? brandKey(brand.name)
+      const hasLogo = p.brandLogo(s, nm(s, `BrandIcon${i}`), logoKey, col.x, y, accent)
+      if (!hasLogo) {
+        p.icon(s, nm(s, `BrandIcon${i}`), brand.icon ?? 'layout-grid', col.x, y, 0.34, 0.34, {
+          color: accent,
+        })
+      }
       p.tx(
         s,
         nm(s, `BrandName${i}`),
@@ -1066,12 +1185,13 @@ function makePageTypes(p, chrome) {
     p.hRule(s, nm(s, 'ClosingMarkRule'), 0.65, 0.77, 1.2, C.black, 0.012)
     for (const [x, y] of data.dots ?? [])
       p.dot(s, nm(s, `Dot${Math.round(x * 100)}_${Math.round(y * 100)}`), x, y, 0.085, C.red)
+    const closingTitleW = 6.8
     p.tx(
       s,
       nm(s, 'TitleA'),
       0.45,
       3.08,
-      5.0,
+      closingTitleW,
       0.9,
       data.titleA ?? '网格不是限制',
       font(54, C.text, false),
@@ -1081,13 +1201,49 @@ function makePageTypes(p, chrome) {
       nm(s, 'TitleB'),
       0.45,
       4.15,
-      5.3,
+      closingTitleW,
       0.9,
       data.titleB ?? '是自由的语法',
       font(54, C.red, false),
     )
-    p.tx(s, nm(s, 'Subtitle'), 0.45, 5.23, 6.2, 0.3, data.subtitle, font(13, C.text, true, FONT_EN))
-    p.vRule(s, nm(s, 'FootRule'), 0.65, 6.35, 0.55, C.black, 0.018)
+    const closingSubtitleW = 6.8
+    const closingSubtitleFontPt = 13
+    const closingSubtitleLines = estimateDeckTextLineCount(
+      String(data.subtitle ?? ''),
+      closingSubtitleFontPt,
+      (closingSubtitleW - TEXT_INSET * 2) * 72,
+    )
+    const closingSubtitleH = Math.max(
+      0.34,
+      Number(((closingSubtitleLines * closingSubtitleFontPt * 1.2) / 72 + 0.05).toFixed(2)),
+    )
+    p.tx(
+      s,
+      nm(s, 'Subtitle'),
+      0.45,
+      5.23,
+      closingSubtitleW,
+      closingSubtitleH,
+      data.subtitle,
+      font(closingSubtitleFontPt, C.text, true, FONT_EN),
+    )
+    const footRuleY = 6.35
+    p.vRule(
+      s,
+      nm(s, 'FootRule'),
+      0.65,
+      footRuleY,
+      ruleHeightToTextBottom(
+        footRuleY,
+        textVisualBottom(
+          6.46,
+          10,
+          textLineCount(data.footerL ?? 'SWISS GRID SYSTEMS · A LECTURE', 10, 3.2),
+        ),
+      ),
+      C.black,
+      0.018,
+    )
     p.tx(
       s,
       nm(s, 'FootL'),

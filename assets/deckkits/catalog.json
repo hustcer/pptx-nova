@@ -635,7 +635,7 @@
       "version": "0.1.0",
       "path": "swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "defaultFor": [
         "swiss grid systems",
         "Swiss International Typographic Style",
@@ -850,15 +850,15 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-07",
+        "lastBenchmark": "2026-06-10",
         "vision": {
           "high": 0,
           "medium": 0
         },
-        "manualHardDefects": null,
+        "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-07",
+          "date": "2026-06-10",
           "source": {
             "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
             "out": ".tmp/pptx-nova-visual"
@@ -890,7 +890,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 213
+                "low": 169
               },
               "previews": {
                 "count": 14,
@@ -900,10 +900,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 290298
+                "bytes": 347385
               },
-              "patchOps": 1554,
-              "p50TotalMs": 78.54
+              "patchOps": 2030,
+              "p50TotalMs": 48.47
             },
             {
               "caseId": "swiss-grid.stress-density",
@@ -925,7 +925,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 48
+                "low": 44
               },
               "previews": {
                 "count": 4,
@@ -935,10 +935,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 84454
+                "bytes": 106187
               },
-              "patchOps": 490,
-              "p50TotalMs": 77.39
+              "patchOps": 817,
+              "p50TotalMs": 40.19
             },
             {
               "caseId": "swiss-grid.mixed-language",
@@ -960,7 +960,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 31
+                "low": 27
               },
               "previews": {
                 "count": 3,
@@ -970,10 +970,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 52829
+                "bytes": 70494
               },
-              "patchOps": 283,
-              "p50TotalMs": 74.97
+              "patchOps": 610,
+              "p50TotalMs": 37.82
             }
           ],
           "blockers": []

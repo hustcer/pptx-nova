@@ -1,6 +1,13 @@
 // consulting-dark.kit.mjs — 深墨蓝咨询风格 DeckKit
 // version: 0.1.0
-import { createOps, nm, grid, SLIDE_W } from './core-primitives.kit.mjs'
+import {
+  createOps,
+  nm,
+  grid,
+  SLIDE_W,
+  normalizeHex,
+  readableTextOn,
+} from './core-primitives.kit.mjs'
 
 // ── Palette ──────────────────────────────────────────────────
 const C = {
@@ -12,7 +19,9 @@ const C = {
   green: '3E9D6E',
   purple: '7B6AAE',
   amber: 'CF9B43',
+  amberDk: '8A621F',
   warn: 'BE4632',
+  heroAccent: 'F2A36E',
   heroBg: '0E2638',
   heroPanel: '15334A',
   heroLine: '20435E',
@@ -39,6 +48,27 @@ const FONT_EN = 'Inter'
 const MX = 0.7
 const CW = SLIDE_W - MX * 2
 
+const ACCESSIBLE_ACCENT = {
+  [C.primary]: C.primaryDk,
+  [C.secondary]: '256B78',
+  [C.green]: C.posTxt,
+  [C.amber]: C.amberDk,
+}
+
+function accessibleAccent(accent) {
+  const key = normalizeHex(accent)
+  return key ? (ACCESSIBLE_ACCENT[key] ?? key) : C.primaryDk
+}
+
+function accentTextOnLight(accent, background = C.white) {
+  return readableTextOn(background, accessibleAccent(accent), [C.textPri, C.textSec])
+}
+
+function accentBadge(accent) {
+  const fill = accessibleAccent(accent)
+  return { fill, text: readableTextOn(fill, C.white, [C.textPri, C.heroBg]) }
+}
+
 // ── Chrome helpers ────────────────────────────────────────────
 function makeChrome({ tx, box }) {
   const pageHeader = (s, eyebrow, title) => {
@@ -46,7 +76,7 @@ function makeChrome({ tx, box }) {
       name: FONT_EN,
       size: '12pt',
       bold: true,
-      color: C.primary,
+      color: C.primaryDk,
     })
     tx(s, nm(s, 'Title'), MX, 0.9, CW, 0.68, title, {
       name: FONT_CN,
@@ -62,7 +92,7 @@ function makeChrome({ tx, box }) {
     tx(s, nm(s, 'FootL'), MX, 6.84, 4.5, 0.24, 'PPTX 全链路渲染与生成 · Roadshow 2026', {
       name: FONT_CN,
       size: '10pt',
-      color: C.textMut,
+      color: C.textSec,
     })
     tx(
       s,
@@ -72,7 +102,7 @@ function makeChrome({ tx, box }) {
       2.333,
       0.24,
       `${String(s + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`,
-      { name: FONT_EN, size: '10pt', color: C.textMut },
+      { name: FONT_EN, size: '10pt', color: C.textSec },
       'center',
     )
   }
@@ -101,13 +131,14 @@ function makeComponents({ tx, box, card }) {
   }
 
   const kpiCard = (s, base, x, y, w, h, accent, value, label, note) => {
+    const valueColor = accentTextOnLight(accent, C.surface)
     card(s, nm(s, `${base}Bg`), x, y, w, h, C.surface)
     box(s, nm(s, `${base}Top`), 'rounded-rectangle', x, y, w, 0.09, accent)
     tx(s, nm(s, `${base}Val`), x + 0.28, y + 0.32, w - 0.56, 0.72, value, {
       name: FONT_EN,
       size: '40pt',
       bold: true,
-      color: accent,
+      color: valueColor,
     })
     tx(s, nm(s, `${base}Lab`), x + 0.28, y + 1.12, w - 0.56, 0.34, label, {
       name: FONT_CN,
@@ -123,9 +154,10 @@ function makeComponents({ tx, box, card }) {
   }
   const custCard = (s, base, x, y, w, h, accent, idx, name, items) => {
     const body = cardBodyTextBox(w)
+    const badge = accentBadge(accent)
     card(s, nm(s, `${base}Bg`), x, y, w, h, C.surface)
     box(s, nm(s, `${base}Top`), 'rounded-rectangle', x, y, w, 0.09, accent)
-    box(s, nm(s, `${base}Dot`), 'oval', x + 0.28, y + 0.34, 0.5, 0.5, accent)
+    box(s, nm(s, `${base}Dot`), 'oval', x + 0.28, y + 0.34, 0.5, 0.5, badge.fill)
     tx(
       s,
       nm(s, `${base}Num`),
@@ -134,7 +166,7 @@ function makeComponents({ tx, box, card }) {
       0.5,
       0.36,
       idx,
-      { name: FONT_EN, size: '15pt', bold: true, color: C.white },
+      { name: FONT_EN, size: '15pt', bold: true, color: badge.text },
       'center',
     )
     tx(s, nm(s, `${base}Name`), x + 0.28, y + 1.0, w - 0.56, 0.66, name, {
@@ -172,21 +204,21 @@ function makePageTypes(
       name: FONT_EN,
       size: '13pt',
       bold: true,
-      color: C.primary,
+      color: C.heroAccent,
     })
     box(s, nm(s, 'Tick'), 'rectangle', 1.02, 2.06, 0.62, 0.045, C.primary)
-    tx(s, nm(s, 'Title'), 1.0, 2.4, 11.3, 1.75, data.title, {
+    tx(s, nm(s, 'Title'), 1.0, 2.4, 11.3, 2.15, data.title, {
       name: FONT_CN,
       size: '40pt',
       bold: true,
       color: C.onHero,
     })
-    tx(s, nm(s, 'Sub'), 1.0, 4.4, 11.2, 0.5, data.sub, {
+    tx(s, nm(s, 'Sub'), 1.0, 4.75, 11.2, 0.78, data.sub, {
       name: FONT_CN,
       size: '18pt',
       color: C.heroMut,
     })
-    tx(s, nm(s, 'Tag'), 1.0, 5.05, 11.2, 0.4, data.tag, {
+    tx(s, nm(s, 'Tag'), 1.0, 5.62, 11.2, 0.4, data.tag, {
       name: FONT_CN,
       size: '13pt',
       color: C.heroMut2,
@@ -269,7 +301,7 @@ function makePageTypes(
         name: FONT_EN,
         size: '34pt',
         bold: true,
-        color: accent,
+        color: accentTextOnLight(accent),
       })
       tx(s, nm(s, `Hi${i}Lab`), cx + 2.15, y + 0.3, cw - 2.45, 0.4, label, {
         name: FONT_CN,
@@ -296,9 +328,10 @@ function makePageTypes(
     items.forEach(([accent, idx, title, body, badge], i) => {
       const { x, w } = cells[i % 2]
       const y = 2.05 + Math.floor(i / 2) * (cardH + 0.16)
+      const badgeStyle = accentBadge(accent)
       card(s, nm(s, `A${i}Bg`), x, y, w, cardH)
       box(s, nm(s, `A${i}Top`), 'rounded-rectangle', x, y, w, 0.09, accent)
-      box(s, nm(s, `A${i}Dot`), 'oval', x + 0.32, y + 0.36, 0.56, 0.56, accent)
+      box(s, nm(s, `A${i}Dot`), 'oval', x + 0.32, y + 0.36, 0.56, 0.56, badgeStyle.fill)
       tx(
         s,
         nm(s, `A${i}Num`),
@@ -307,7 +340,7 @@ function makePageTypes(
         0.56,
         0.4,
         idx,
-        { name: FONT_EN, size: '17pt', bold: true, color: C.white },
+        { name: FONT_EN, size: '17pt', bold: true, color: badgeStyle.text },
         'center',
       )
       tx(s, nm(s, `A${i}T`), x + 1.08, y + 0.42, badge ? w - 3.0 : w - 1.35, 0.45, title, {
@@ -330,7 +363,7 @@ function makePageTypes(
           1.4,
           0.6,
           badge,
-          { name: FONT_EN, size: '24pt', bold: true, color: accent },
+          { name: FONT_EN, size: '24pt', bold: true, color: accentTextOnLight(accent) },
           'right',
         )
     })
@@ -363,7 +396,7 @@ function makePageTypes(
       name: FONT_CN,
       size: '13pt',
       bold: true,
-      color: C.secondary,
+      color: accentTextOnLight(C.secondary, C.surface),
     })
     tx(
       s,
@@ -398,7 +431,7 @@ function makePageTypes(
       name: FONT_CN,
       size: '12pt',
       bold: true,
-      color: C.primary,
+      color: C.heroAccent,
     })
     tx(s, nm(s, 'UsTitle'), MX + 0.34, 2.5, CW - 0.7, 0.4, data.usTitle, {
       name: FONT_CN,
@@ -436,7 +469,7 @@ function makePageTypes(
         name: FONT_CN,
         size: '11pt',
         bold: true,
-        color: C.green,
+        color: accentTextOnLight(C.green),
       })
       tx(s, nm(s, `Cm${i}Con`), x + 0.28, cy + 1.74, w - 0.5, 0.7, `局限：${con}`, {
         name: FONT_CN,
@@ -473,9 +506,10 @@ function makePageTypes(
       const { x, w } = cells[i]
       if (cols === 5) {
         const body = cardBodyTextBox(w)
+        const badge = accentBadge(accent)
         card(s, nm(s, `Cu${i}Bg`), x, cy, w, ch, C.surface)
         box(s, nm(s, `Cu${i}Top`), 'rounded-rectangle', x, cy, w, 0.09, accent)
-        box(s, nm(s, `Cu${i}Dot`), 'oval', x + 0.24, cy + 0.32, 0.46, 0.46, accent)
+        box(s, nm(s, `Cu${i}Dot`), 'oval', x + 0.24, cy + 0.32, 0.46, 0.46, badge.fill)
         tx(
           s,
           nm(s, `Cu${i}Num`),
@@ -484,7 +518,7 @@ function makePageTypes(
           0.6,
           0.34,
           idx,
-          { name: FONT_EN, size: '14pt', bold: true, color: C.white },
+          { name: FONT_EN, size: '14pt', bold: true, color: badge.text },
           'center',
         )
         tx(s, nm(s, `Cu${i}Name`), x + 0.22, cy + 0.94, w - 0.44, 0.62, name, {
@@ -539,7 +573,7 @@ function makePageTypes(
       'center',
     )
     box(s, nm(s, 'Arr1'), 'right-arrow', 3.4, fy + 0.78, 0.85, 0.5, C.primary)
-    card(s, nm(s, 'Eng'), 4.45, fy, 2.85, 2.05, C.primary, null)
+    card(s, nm(s, 'Eng'), 4.45, fy, 2.85, 2.05, C.primaryDk, null)
     tx(
       s,
       nm(s, 'EngT'),
@@ -581,7 +615,7 @@ function makePageTypes(
         name: FONT_EN,
         size: '16pt',
         bold: true,
-        color: accent,
+        color: accentTextOnLight(accent),
       })
       tx(s, nm(s, `O${i}D`), x + 0.22, y + 0.56, ow - 0.34, 0.3, d, {
         name: FONT_CN,
@@ -596,7 +630,7 @@ function makePageTypes(
       name: FONT_CN,
       size: '13pt',
       bold: true,
-      color: C.secondary,
+      color: accentTextOnLight(C.secondary, C.surface),
     })
     tx(
       s,
@@ -788,8 +822,8 @@ function makePageTypes(
       const { x, w } = cells[i]
       const cx = x + w / 2
       const up = i % 2 === 0
-      const cardY = up ? 2.32 : 4.66
-      const ch = 1.5
+      const cardY = up ? 2.25 : 4.55
+      const ch = 1.7
       box(s, nm(s, `N${i}`), 'oval', cx - 0.11, axisY - 0.095, 0.22, 0.22, accent)
       if (up)
         box(
@@ -819,7 +853,7 @@ function makePageTypes(
         name: FONT_EN,
         size: '20pt',
         bold: true,
-        color: accent,
+        color: accentTextOnLight(accent),
       })
       const isNow = status === '进行中'
       card(
@@ -836,16 +870,23 @@ function makePageTypes(
         s,
         nm(s, `R${i}St`),
         status,
-        { name: FONT_CN, size: '10pt', bold: true, color: isNow ? C.posTxt : C.textSec },
+        {
+          name: FONT_CN,
+          size: '10pt',
+          bold: true,
+          color: readableTextOn(isNow ? C.posBg : C.surfaceAlt, isNow ? C.posTxt : C.textSec, [
+            C.textPri,
+          ]),
+        },
         'center',
       )
-      tx(s, nm(s, `R${i}T`), x + 0.24, cardY + 0.66, w - 0.48, 0.36, title, {
+      tx(s, nm(s, `R${i}T`), x + 0.24, cardY + 0.66, w - 0.48, 0.48, title, {
         name: FONT_CN,
         size: '13.5pt',
         bold: true,
         color: C.textPri,
       })
-      tx(s, nm(s, `R${i}D`), x + 0.24, cardY + 1.04, w - 0.42, 0.4, desc, {
+      tx(s, nm(s, `R${i}D`), x + 0.24, cardY + 1.14, w - 0.42, 0.48, desc, {
         name: FONT_CN,
         size: '10pt',
         color: C.textSec,
@@ -861,7 +902,7 @@ function makePageTypes(
       name: FONT_EN,
       size: '13pt',
       bold: true,
-      color: C.primary,
+      color: C.heroAccent,
     })
     box(s, nm(s, 'Tick'), 'rectangle', 1.02, 1.94, 0.62, 0.045, C.primary)
     tx(s, nm(s, 'Title'), 1.0, 2.25, 11.3, 0.9, data.title, {
@@ -881,9 +922,10 @@ function makePageTypes(
     const ch = 2.1
     asks.forEach(([accent, title, desc], i) => {
       const { x, w } = cells[i]
+      const badge = accentBadge(accent)
       card(s, nm(s, `Ask${i}Bg`), x, cy, w, ch, C.heroPanel, C.heroLine)
       box(s, nm(s, `Ask${i}Top`), 'rounded-rectangle', x, cy, w, 0.09, accent)
-      box(s, nm(s, `Ask${i}Dot`), 'oval', x + 0.3, cy + 0.34, 0.5, 0.5, accent)
+      box(s, nm(s, `Ask${i}Dot`), 'oval', x + 0.3, cy + 0.34, 0.5, 0.5, badge.fill)
       tx(
         s,
         nm(s, `Ask${i}Num`),
@@ -892,7 +934,7 @@ function makePageTypes(
         0.5,
         0.36,
         `0${i + 1}`,
-        { name: FONT_EN, size: '14pt', bold: true, color: C.white },
+        { name: FONT_EN, size: '14pt', bold: true, color: badge.text },
         'center',
       )
       tx(s, nm(s, `Ask${i}T`), x + 0.3, cy + 1.0, w - 0.6, 0.44, title, {

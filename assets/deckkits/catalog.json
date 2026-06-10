@@ -155,7 +155,7 @@
         "pngReview": "full"
       },
       "quality": {
-        "lastBenchmark": "2026-06-07",
+        "lastBenchmark": "2026-06-10",
         "vision": {
           "high": 0,
           "medium": 0
@@ -164,7 +164,7 @@
         "knownBlockingLimits": [],
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-07",
+          "date": "2026-06-10",
           "source": {
             "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
             "out": ".tmp/pptx-nova-visual"
@@ -196,7 +196,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 5
+                "low": 8
               },
               "previews": {
                 "count": 10,
@@ -206,10 +206,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 318541
+                "bytes": 318845
               },
               "patchOps": 1090,
-              "p50TotalMs": 38.21
+              "p50TotalMs": 51.57
             },
             {
               "caseId": "consulting-dark.stress-density",
@@ -231,7 +231,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 0
+                "low": 3
               },
               "previews": {
                 "count": 6,
@@ -241,10 +241,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 194560
+                "bytes": 194487
               },
               "patchOps": 693,
-              "p50TotalMs": 35.06
+              "p50TotalMs": 38.16
             },
             {
               "caseId": "consulting-dark.mixed-language",
@@ -266,7 +266,7 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 0
+                "low": 3
               },
               "previews": {
                 "count": 5,
@@ -276,10 +276,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 138983
+                "bytes": 139415
               },
               "patchOps": 486,
-              "p50TotalMs": 34.74
+              "p50TotalMs": 37.75
             }
           ],
           "blockers": []

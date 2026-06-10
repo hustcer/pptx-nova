@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "mckinsey-blue",
+  "caseId": "mckinsey-blue.golden-loyalty",
+  "kind": "golden",
+  "title": "A.CO. Customer,Loyalty Programme",
+  "source": {
+    "content": "skills/pptx-nova/assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
+    "build": "skills/pptx-nova/assets/deckkits/examples/mckinsey-blue-build.mjs",
+    "expected": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/expected.json",
+    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "fitDiagnostics": 0,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": 1,
+    "ops": 2471
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 35,
+    "opResults": 2471,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 35,
+    "opResults": 2471,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 8,
+    "issueCount": 319,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 319
+    }
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 303242,
+      "sha256": "50c13de274d5ce6582d47365856209e6e93e9af5a35408e9d0cb119ee2353ac0"
+    },
+    "webp": {
+      "bytes": 109248,
+      "sha256": "a24244719ba9680a7d80fc08232d6c752e66baf0bb094ce898da209f434dbd35"
+    }
+  }
+}

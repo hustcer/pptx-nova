@@ -1,0 +1,205 @@
+{
+  "meta": {
+    "deckkit": "consulting-dark",
+    "style": "consulting",
+    "layout": "executive-grid"
+  },
+  "slides": [
+    {
+      "type": "heroSlide",
+      "data": {
+        "eyebrow": "PPTX ROADSHOW · 2026",
+        "title": "浏览器端高保真 PPTX 渲染\n与 AI 原生生成",
+        "sub": "纯前端预览 SDK · PDF / PNG 转换服务 · AI 原生 PPTX 生成 CLI",
+        "tag": "一套自研引擎，覆盖 PPTX 的预览、导出与生成全链路",
+        "infoL": "hustcer · 高级技术专家",
+        "infoR": "RENDERING · CONVERSION · GENERATION"
+      }
+    },
+    {
+      "type": "previewProductSlide",
+      "data": {
+        "eyebrow": "03 · PRODUCT Ⅰ",
+        "title": "浏览器端预览 SDK & PDF 渲染",
+        "banner": "纯浏览器端 PPTX 高保真预览 SDK + 纯前端 PDF 渲染导出，多框架支持，整体体积 < 2M",
+        "kpis": [
+          ["C8583A", "96%", "HTML 预览保真度", "数学公式 · 图表 · 部分动画"],
+          ["3C6FA6", "93%", "PDF 静态保真度", "wasm 引擎 · 体积 < 2M"],
+          ["3E9D6E", "2", "解析引擎", "wasm + js 双引擎降级"],
+          ["7B6AAE", "6+", "前端框架适配", "React/Vue/Svelte/Solid/WC/Vanilla"]
+        ],
+        "capHeader": "核心能力",
+        "capLeft": [
+          "浏览器端解析：wasm & js 双引擎",
+          "HTML 保真 ~96%，支持公式 / 图表 / 部分动画",
+          "纯前端 PDF 渲染，静态保真 ~93%"
+        ],
+        "capRight": [
+          "多框架 SDK，体积 < 2M",
+          "React / Vue / Svelte / Solid / Web Component / Vanilla",
+          "中文友好，支持加载 Google Fonts 减少字体失真"
+        ]
+      }
+    },
+    {
+      "type": "landscapeSlide",
+      "data": {
+        "eyebrow": "04 · LANDSCAPE",
+        "title": "国外类似产品 · 横向定位",
+        "usLabel": "本产品 · 纯浏览器端",
+        "usTitle": "零后端依赖 · 高保真 HTML + PDF · 体积 < 2M · wasm+js 双引擎 · 中文友好",
+        "usSub": "填补「纯前端高保真 PPTX 预览 / 导出」的市场空白",
+        "comps": [
+          [
+            "3C6FA6",
+            "Aspose.Slides",
+            "商业 SDK",
+            "功能全面、格式覆盖广",
+            "偏服务端、授权成本高，包体大、不面向纯前端"
+          ],
+          [
+            "3E9D6E",
+            "GroupDocs / PSPDFKit",
+            "文档渲染 SDK",
+            "渲染质量稳定",
+            "多偏 PDF / 服务端，纯前端高保真 PPTX 能力弱"
+          ],
+          [
+            "7B6AAE",
+            "MS Graph / Office Online",
+            "云端服务",
+            "官方保真度高",
+            "强依赖微软生态与云，难私有化、难嵌入前端"
+          ]
+        ],
+        "conclusion": "差异化：浏览器端零依赖 + 高保真 + 轻量 + 中文友好，是这条赛道里少见的纯前端方案"
+      }
+    },
+    {
+      "type": "multiCardSlide",
+      "data": {
+        "eyebrow": "05 · CUSTOMERS",
+        "title": "预览 & PDF 导出 · 目标客户",
+        "intro": "面向有大量 PPTX 文件、需要高保真在线预览与导出的客户",
+        "cards": [
+          ["C8583A", "01", "文档与内容平台", ["文档管理 / 知识库", "企业网盘", "内容中台"]],
+          ["3C6FA6", "02", "教育与培训", ["学校", "教培机构", "在线教育平台"]],
+          ["3E9D6E", "03", "AI 与生成平台", ["PPT 生成平台", "大模型厂商", "在线演示工具"]],
+          ["7B6AAE", "04", "专业服务行业", ["招投标", "政企采购", "金融路演 / 咨询"]]
+        ]
+      }
+    },
+    {
+      "type": "convertFlowSlide",
+      "data": {
+        "eyebrow": "06 · PRODUCT Ⅱ",
+        "title": "本地 CLI & 私有化 API 转换服务",
+        "outputs": [
+          ["3C6FA6", "PDF", "高保真导出"],
+          ["3E9D6E", "PNG", "逐页截图"],
+          ["CF9B43", "Markdown", "保留层级"],
+          ["7B6AAE", "JSON", "结构化数据"]
+        ],
+        "featHeader": "能力要点",
+        "featLeft": [
+          "本地 CLI 与 API 底层引擎复用 90%+",
+          "转 PDF 与浏览器端渲染复用 80%+，支持公式 & 基础图表",
+          "转 Markdown / JSON 保留文本层级结构与语义关系"
+        ],
+        "featRight": [
+          "CLI 批量转换，对 AI 友好",
+          "跨平台：macOS / Linux / Windows",
+          "跨架构：Arm64 / AMD64"
+        ]
+      }
+    },
+    {
+      "type": "multiCardSlide",
+      "data": {
+        "eyebrow": "07 · CUSTOMERS",
+        "title": "CLI & API 转换服务 · 目标客户",
+        "intro": "面向需要把 PPTX 批量、自动化转换为多种格式的平台与团队",
+        "cards": [
+          ["C8583A", "01", "AI 文档处理", ["AI PPT", "AI 文档处理", "Agent 平台"]],
+          ["3C6FA6", "02", "知识库 & 检索", ["企业知识库", "RAG / 企业搜索", "文档中台"]],
+          ["3E9D6E", "03", "文档管理", ["文档管理系统", "企业网盘", "内容管理"]],
+          ["7B6AAE", "04", "政企办公", ["招投标", "政企办公", "合规归档"]]
+        ]
+      }
+    },
+    {
+      "type": "benchmarkSlide",
+      "data": {
+        "eyebrow": "08 · PRODUCT Ⅲ · BENCHMARK",
+        "title": "AI 原生 PPTX 生成 CLI · 横向对比",
+        "tableRows": [
+          ["维度", "本产品", "python-pptx", "PptxGenJS"],
+          ["Agent 可发现性", "9.9", "5.5", "6.0"],
+          ["变更可审计性", "9.9", "5.8", "4.0"],
+          ["基础创建 / 修改", "9.5", "8.4", "7.8"],
+          ["chart 创建覆盖", "9.3", "8.7", "6.5"],
+          ["验证 / 转换闭环", "9.7", "4.5", "3.5"],
+          ["跨语言 / 沙箱适配", "9.7", "5.8", "8.0"],
+          ["当前综合分", "9.8", "7.3", "6.5"]
+        ],
+        "chartTitle": "综合评分对比",
+        "chartData": {
+          "categories": ["本产品", "python-pptx", "PptxGenJS"],
+          "series": [
+            {
+              "name": "综合分",
+              "values": [9.8, 7.3, 6.5]
+            }
+          ]
+        },
+        "calloutNum": "9.8",
+        "calloutText": "综合分领先，Agent 可发现性、可审计性、验证闭环显著拉开差距"
+      }
+    },
+    {
+      "type": "multiCardSlide",
+      "data": {
+        "eyebrow": "09 · CUSTOMERS",
+        "title": "AI 原生 PPTX CLI · 目标客户",
+        "intro": "面向需要程序化、自动化生成与修改 PPTX 的 AI 与企业团队",
+        "cards": [
+          ["C8583A", "01", "AI 智能体", ["AI Agent", "AI 办公平台", "AI 文档产品"]],
+          ["3C6FA6", "02", "AI 生成平台", ["AI PPT", "在线演示生成", "大模型厂商"]],
+          ["3E9D6E", "03", "企业商业团队", ["销售", "市场", "客户成功"]],
+          ["CF9B43", "04", "专业金融", ["咨询公司", "投行 / 券商", "财务顾问"]],
+          ["7B6AAE", "05", "教育内容", ["教育", "培训", "内容生产"]]
+        ]
+      }
+    },
+    {
+      "type": "timelineSlide",
+      "data": {
+        "eyebrow": "10 · ROADMAP",
+        "title": "近期规划",
+        "steps": [
+          ["C8583A", "01", "PPTX 创建 SKILL", "原生创建 & 编辑 SKILL 持续打磨", "进行中"],
+          ["3C6FA6", "02", "功能充分测试", "已有功能完善测试与回归", "进行中"],
+          ["3E9D6E", "03", "产品授权方案", "授权方案落地及验证", "规划中"],
+          ["CF9B43", "04", "商业化补齐", "官网 · 支付 · 线上授权 · 交付支持", "规划中"],
+          ["7B6AAE", "05", "MCP 接入", "提供 MCP 服务接入能力", "规划中"]
+        ]
+      }
+    },
+    {
+      "type": "askSlide",
+      "data": {
+        "eyebrow": "11 · WHAT WE NEED",
+        "title": "亟待支持",
+        "sub": "一起把这套自研 PPTX 引擎，推向更大的国内外市场",
+        "asks": [
+          ["C8583A", "对接国内市场", "渠道、客户资源与行业 know-how"],
+          ["3C6FA6", "开拓海外市场", "出海渠道、合规与品牌建设"],
+          ["3E9D6E", "各类 OPC 政策支持", "政策对接与生态合作资源"],
+          ["CF9B43", "算力 & Token", "模型算力与 Token 支持"]
+        ],
+        "closing": "Thank you · hustcer",
+        "closingR": "PPTX RENDERING · CONVERSION · GENERATION"
+      }
+    }
+  ]
+}

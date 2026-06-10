@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "pptx-nova-deckkit-examples/v1",
+  "description": "Committed user-facing DeckKit showcase decks for pptx-nova.",
+  "updateCommand": "just deckkit-examples",
+  "checkCommand": "just deckkit-examples check",
+  "source": {
+    "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+    "deckkitCatalog": "skills/pptx-nova/assets/deckkits/catalog.json"
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "source": "s8fy contact-sheet.png converted with cwebp or ImageMagick"
+  },
+  "examples": [
+    {
+      "id": "consulting-dark",
+      "deckkit": "consulting-dark",
+      "caseId": "consulting-dark.golden-roadshow",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "浏览器端高保真 PPTX 渲染 与 AI 原生生成",
+      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "defaultFor": ["roadshow", "executive consulting", "technical roadshow", "技术路演"],
+      "files": {
+        "deck": {
+          "path": "consulting-dark/deck.pptx",
+          "bytes": 34171,
+          "sha256": "30fbc1718729e6274e72c1f56bcf1c5970fadf4b62f1d8fad2a7ea96c434c737"
+        },
+        "contactSheet": {
+          "path": "consulting-dark/contact-sheet.webp",
+          "bytes": 107236,
+          "sha256": "e617f52d95d74ed3c5b1b28b1f6b76ff8c82099cac11fbbfda5407f82b01def5",
+          "quality": 82
+        },
+        "content": {
+          "path": "consulting-dark/content.json",
+          "bytes": 8421,
+          "sha256": "a2c622e40af86e8bbe35bfd529731ab3d178b441c40d0efd920759ef07ea7d0e"
+        },
+        "brief": {
+          "path": "consulting-dark/brief.md",
+          "bytes": 731,
+          "sha256": "88c09ce51cb28517358cf1015e66924528a12a9757c3ba2829cbf4ebe28bded0"
+        },
+        "summary": {
+          "path": "consulting-dark/summary.json",
+          "bytes": 1795,
+          "sha256": "aceb3475f5d23de3751baf838ee6001252e701fd90949d19d0393329b3b048db"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 1,
+        "fitDiagnostics": 1,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 1090
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 8,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 8
+        }
+      }
+    },
+    {
+      "id": "mckinsey-blue",
+      "deckkit": "mckinsey-blue",
+      "caseId": "mckinsey-blue.golden-loyalty",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "A.CO. Customer,Loyalty Programme",
+      "bestFor": [
+        "customer strategy",
+        "loyalty programme",
+        "executive consulting",
+        "McKinsey-style management deck"
+      ],
+      "defaultFor": [
+        "McKinsey-style consulting",
+        "customer loyalty strategy",
+        "management briefing"
+      ],
+      "files": {
+        "deck": {
+          "path": "mckinsey-blue/deck.pptx",
+          "bytes": 48385,
+          "sha256": "8507199372847c81883ccc5f494bb151765e2979f7252f9f2db5d6882d8a68e6"
+        },
+        "contactSheet": {
+          "path": "mckinsey-blue/contact-sheet.webp",
+          "bytes": 109248,
+          "sha256": "a24244719ba9680a7d80fc08232d6c752e66baf0bb094ce898da209f434dbd35",
+          "quality": 82
+        },
+        "content": {
+          "path": "mckinsey-blue/content.json",
+          "bytes": 17785,
+          "sha256": "48a24f44f28e4edf9d434f9e2722ae8bef1de381ff1b6313200e3954fc69d89a"
+        },
+        "brief": {
+          "path": "mckinsey-blue/brief.md",
+          "bytes": 740,
+          "sha256": "acd66f5be42d3336f86309cbe77c6ab8a347f1bf45d5b72a00c846dd77cb4136"
+        },
+        "summary": {
+          "path": "mckinsey-blue/summary.json",
+          "bytes": 1787,
+          "sha256": "65ba353d63d90b5d25fbef9aacad3c22c0e4465b16871ee445c46114a060caba"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 2471
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 319,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 319
+        }
+      }
+    },
+    {
+      "id": "swiss-grid",
+      "deckkit": "swiss-grid",
+      "caseId": "swiss-grid.golden-lecture",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "网格系统",
+      "bestFor": [
+        "design education",
+        "typography lecture",
+        "visual design history",
+        "editorial systems",
+        "Swiss-style presentation"
+      ],
+      "defaultFor": [
+        "swiss grid systems",
+        "Swiss International Typographic Style",
+        "design lecture",
+        "grid system lecture",
+        "瑞士网格系统",
+        "设计课程"
+      ],
+      "files": {
+        "deck": {
+          "path": "swiss-grid/deck.pptx",
+          "bytes": 48006,
+          "sha256": "92c73d653c08cbd74bfcce1e8249bc6bf4cf19b22b219e02d977c2b8e59a3586"
+        },
+        "contactSheet": {
+          "path": "swiss-grid/contact-sheet.webp",
+          "bytes": 131194,
+          "sha256": "f133ef70e7fe0c5788d7320b57393e90b541fbbfe0d889722526b265f84ef030",
+          "quality": 82
+        },
+        "content": {
+          "path": "swiss-grid/content.json",
+          "bytes": 16587,
+          "sha256": "5419204ec72587054ad9633093c0be69505413ad6e507adb9267551072423ae3"
+        },
+        "brief": {
+          "path": "swiss-grid/brief.md",
+          "bytes": 781,
+          "sha256": "528d93c02f7357293ad27b4cc3fd0ead31ec16cd47f01926960c8bacaeff27a1"
+        },
+        "summary": {
+          "path": "swiss-grid/summary.json",
+          "bytes": 1745,
+          "sha256": "676789be622f1440095e45c3a6556ed2ae4445e64451a1c7e9c19ec5a118fe00"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 2030
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 14,
+        "issueCount": 169,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 169
+        }
+      }
+    }
+  ]
+}

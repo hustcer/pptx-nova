@@ -53,6 +53,13 @@ const FONT_EN = 'Arial'
 const FONT_CN = 'Arial'
 const MX = 0.45
 const CW = SLIDE_W - MX * 2
+const CARD_SHADOW = {
+  color: '000000',
+  alpha: 0.11,
+  blur: '12pt',
+  distance: '3.75pt',
+  angle: 180,
+}
 
 const asLines = (value) => (Array.isArray(value) ? value.join('\n') : value)
 const pct = (value) => Number(String(value).replace('%', ''))
@@ -106,6 +113,13 @@ function createMckOps() {
       paragraph,
       alignment,
     })
+  const applyCardShadow = (slide, name) =>
+    builders.ops.push({
+      op: 'set-shape-effect',
+      slide,
+      shape: { name },
+      effect: { shadow: { ...CARD_SHADOW } },
+    })
   return {
     ...builders,
     tx(slide, name, x, y, w, h, text, font, align) {
@@ -124,6 +138,12 @@ function createMckOps() {
     },
     rotate(slide, name, degrees) {
       builders.ops.push({ op: 'set-shape-rotation', slide, shape: { name }, degrees })
+    },
+    applyCardShadow,
+    cardPanel(slide, name, x, y, w, h, fill = C.white) {
+      builders.box(slide, name, 'rectangle', x, y, w, h, fill)
+      applyCardShadow(slide, name)
+      return name
     },
   }
 }
@@ -224,7 +244,7 @@ function makeChrome({ tx, box, fillText }) {
   return { topRule, header, footer, sectionLabel, noteBox, cardCaption }
 }
 
-function makeComponents({ tx, box, card, icon, fillText, setLine, rotate }) {
+function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPanel }) {
   const metricCard = (s, base, x, y, w, h, item) => {
     const accent = tone(item.accent ?? C.blue)
     box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, item.bg ?? C.surface)
@@ -372,7 +392,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate }) {
   const pillarCard = (s, base, x, y, w, h, item, i) => {
     const accent = tone(item.accent ?? ACCENTS[i % ACCENTS.length])
     const topH = 0.64
-    box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, C.white)
+    cardPanel(s, nm(s, `${base}Bg`), x, y, w, h)
     box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, topH, accent)
     tx(
       s,
@@ -543,7 +563,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate }) {
 }
 
 function makePageTypes(builders, chrome, components, total) {
-  const { ops, tx, box, icon, addSlide, setLine } = builders
+  const { ops, tx, box, icon, addSlide, setLine, cardPanel } = builders
   const { header, footer, sectionLabel, noteBox } = chrome
   const {
     metricCard,
@@ -1388,7 +1408,7 @@ function makePageTypes(builders, chrome, components, total) {
       const accent = tone(item.accent ?? ACCENTS[i])
       const cardY = 1.36
       const cardH = 5.68
-      box(s, nm(s, `Init${i}Bg`), 'rectangle', x, cardY, w, cardH, C.white)
+      cardPanel(s, nm(s, `Init${i}Bg`), x, cardY, w, cardH)
       box(s, nm(s, `Init${i}Top`), 'rectangle', x, cardY, w, 0.08, accent)
       tx(s, nm(s, `Init${i}Idx`), x + 0.12, 1.56, 0.38, 0.22, item.index, {
         name: FONT_EN,
@@ -1478,7 +1498,7 @@ function makePageTypes(builders, chrome, components, total) {
       const phaseY = 1.22
       const phaseH = 1.94
       const phaseTopH = 0.52
-      box(s, nm(s, `Phase${i}Bg`), 'rectangle', x, phaseY, w, phaseH, C.white)
+      cardPanel(s, nm(s, `Phase${i}Bg`), x, phaseY, w, phaseH)
       box(s, nm(s, `Phase${i}Top`), 'rectangle', x, phaseY, w, phaseTopH, accent)
       tx(
         s,
@@ -1572,7 +1592,7 @@ function makePageTypes(builders, chrome, components, total) {
     metrics.forEach((m, i) => {
       const { x, w } = metricCells[i]
       const accent = tone(m.accent ?? ACCENTS[i % ACCENTS.length])
-      box(s, nm(s, `RoadM${i}Bg`), 'rectangle', x, 3.56, w, 1.46, C.white)
+      cardPanel(s, nm(s, `RoadM${i}Bg`), x, 3.56, w, 1.46)
       setLine(s, nm(s, `RoadM${i}Bg`), C.grid, '0.7pt')
       box(s, nm(s, `RoadM${i}Top`), 'rectangle', x, 3.56, w, 0.05, accent)
       tx(s, nm(s, `RoadM${i}Lab`), x + 0.2, 3.79, 1.9, 0.12, m.label, {

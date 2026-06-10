@@ -93,18 +93,36 @@
           "deliverySeverity": "error"
         },
         "slideTypes": {
-          "heroSlide": { "requiredSlots": ["data.title"] },
-          "profileTableSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.rows"] },
-          "kpiRowSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.items"] },
-          "previewProductSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.kpis"] },
-          "multiCardSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.cards"] },
-          "landscapeSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.comps"] },
-          "convertFlowSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "heroSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "profileTableSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.rows"]
+          },
+          "kpiRowSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.items"]
+          },
+          "previewProductSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.kpis"]
+          },
+          "multiCardSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.cards"]
+          },
+          "landscapeSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.comps"]
+          },
+          "convertFlowSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
           "benchmarkSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.tableRows", "data.chartData"]
           },
-          "timelineSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.steps"] },
-          "askSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.asks"] }
+          "timelineSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.steps"]
+          },
+          "askSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.asks"]
+          }
         }
       },
       "diversityGate": {
@@ -121,7 +139,11 @@
           "close": ["askSlide"]
         },
         "thresholds": [
-          { "minSlides": 5, "minUniqueGroups": 4, "requiredGroups": ["anchor", "close"] },
+          {
+            "minSlides": 5,
+            "minUniqueGroups": 4,
+            "requiredGroups": ["anchor", "close"]
+          },
           {
             "minSlides": 8,
             "minUniqueGroups": 5,
@@ -394,14 +416,30 @@
           "deliverySeverity": "error"
         },
         "slideTypes": {
-          "mckCoverSlide": { "requiredSlots": ["data.title"] },
-          "mckCrisisSnapshotSlide": { "requiredSlots": ["data.title"] },
-          "mckDemographicProfileSlide": { "requiredSlots": ["data.title"] },
-          "mckPriorityMatrixSlide": { "requiredSlots": ["data.title"] },
-          "mckLossDriverSlide": { "requiredSlots": ["data.title"] },
-          "mckPillarsSlide": { "requiredSlots": ["data.title"] },
-          "mckInitiativeRankingSlide": { "requiredSlots": ["data.title"] },
-          "mckRoadmapSlide": { "requiredSlots": ["data.title"] }
+          "mckCoverSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "mckCrisisSnapshotSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "mckDemographicProfileSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "mckPriorityMatrixSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "mckLossDriverSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "mckPillarsSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "mckInitiativeRankingSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "mckRoadmapSlide": {
+            "requiredSlots": ["data.title"]
+          }
         }
       },
       "diversityGate": {
@@ -417,7 +455,11 @@
           "timeline": ["mckRoadmapSlide"]
         },
         "thresholds": [
-          { "minSlides": 5, "minUniqueGroups": 4, "requiredGroups": ["anchor", "action"] },
+          {
+            "minSlides": 5,
+            "minUniqueGroups": 4,
+            "requiredGroups": ["anchor", "action"]
+          },
           {
             "minSlides": 8,
             "minUniqueGroups": 5,
@@ -452,7 +494,7 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-07",
+        "lastBenchmark": "2026-06-10",
         "vision": {
           "high": 0,
           "medium": 0
@@ -460,7 +502,7 @@
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-07",
+          "date": "2026-06-10",
           "source": {
             "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
             "out": ".tmp/pptx-nova-visual"
@@ -502,10 +544,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 294328
+                "bytes": 296453
               },
               "patchOps": 1882,
-              "p50TotalMs": 44.8
+              "p50TotalMs": 68.28
             },
             {
               "caseId": "mckinsey-blue.stress-density",
@@ -537,10 +579,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 69114
+                "bytes": 69349
               },
               "patchOps": 485,
-              "p50TotalMs": 41.49
+              "p50TotalMs": 71.62
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
@@ -572,10 +614,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 123525
+                "bytes": 124462
               },
               "patchOps": 695,
-              "p50TotalMs": 37.4
+              "p50TotalMs": 63.23
             }
           ],
           "blockers": []
@@ -701,25 +743,50 @@
           "severity": "error"
         },
         "slideTypes": {
-          "swissCoverSlide": { "requiredSlots": ["data.title"] },
-          "swissQuoteSlide": { "requiredSlots": ["data.quote"] },
-          "swissTimelineSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.steps"] },
-          "swissPrinciplesSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.items"] },
+          "swissCoverSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "swissQuoteSlide": {
+            "requiredSlots": ["data.quote"]
+          },
+          "swissTimelineSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.steps"]
+          },
+          "swissPrinciplesSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.items"]
+          },
           "swissPeopleGridSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.people"]
           },
-          "swissProfileSlide": { "requiredSlots": ["data.eyebrow", "data.title", "data.events"] },
-          "swissTypefaceSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
-          "swissGridTypesSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
-          "swissSystemSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissProfileSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.events"]
+          },
+          "swissTypefaceSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
+          "swissGridTypesSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
+          "swissSystemSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
           "swissStatementSlide": {
             "requiredAny": [
-              { "label": "statement or title", "paths": ["data.statement", "data.title"] }
+              {
+                "label": "statement or title",
+                "paths": ["data.statement", "data.title"]
+              }
             ]
           },
-          "swissColumnSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
-          "swissProgressSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
-          "swissBrandGridSlide": { "requiredSlots": ["data.eyebrow", "data.title"] },
+          "swissColumnSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
+          "swissProgressSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
+          "swissBrandGridSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
           "swissClosingSlide": {
             "requiredAny": [
               {

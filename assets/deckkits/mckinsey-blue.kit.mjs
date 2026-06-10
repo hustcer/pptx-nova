@@ -1,6 +1,13 @@
 // mckinsey-blue.kit.mjs — white + McKinsey-blue consulting DeckKit
 // version: 0.1.0
-import { createOps, grid, nm, SLIDE_W } from './core-primitives.kit.mjs'
+import {
+  contrastRatio,
+  createOps,
+  grid,
+  nm,
+  normalizeHex,
+  SLIDE_W,
+} from './core-primitives.kit.mjs'
 
 // Palette extracted from the local McKinsey-style loyalty reference deck.
 const C = {
@@ -9,12 +16,13 @@ const C = {
   primary: '005587',
   blue: '0076A8',
   sky: '38BDF8',
-  teal: '4A90A4',
-  red: 'DC2626',
-  amber: 'F59E0B',
-  green: '059669',
-  slate: '64748B',
-  muted: '94A3B8',
+  teal: '0E7490',
+  red: 'B91C1C',
+  amber: 'B45309',
+  amberBright: 'F59E0B',
+  green: '047857',
+  slate: '475569',
+  muted: '475569',
   line: 'CBD5E1',
   grid: 'E2E8F0',
   pageBg: 'FFFFFF',
@@ -30,6 +38,14 @@ const C = {
 }
 
 const ACCENTS = [C.red, C.amber, C.blue, C.teal, C.slate]
+const LEGACY_TONES = new Map([
+  ['DC2626', C.red],
+  ['F59E0B', C.amber],
+  ['059669', C.green],
+  ['4A90A4', C.teal],
+  ['64748B', C.slate],
+  ['94A3B8', C.muted],
+])
 const FONT_EN = 'Arial'
 const FONT_CN = 'Arial'
 const MX = 0.45
@@ -37,9 +53,25 @@ const CW = SLIDE_W - MX * 2
 
 const asLines = (value) => (Array.isArray(value) ? value.join('\n') : value)
 const pct = (value) => Number(String(value).replace('%', ''))
+const tone = (value) => LEGACY_TONES.get(normalizeHex(value) ?? '') ?? value
+const readableInk = (value, background = C.white) => {
+  const color = tone(value)
+  return contrastRatio(color, background) >= 4.5 ? color : C.slate
+}
+const textOnTone = (value) => {
+  const background = tone(value)
+  return contrastRatio(C.white, background) >= 4.5 ? C.white : C.slate
+}
 
 function createMckOps() {
-  const builders = createOps()
+  const builders = createOps({
+    textbox: {
+      marginLeft: '0.02in',
+      marginRight: '0.02in',
+      marginTop: '0in',
+      marginBottom: '0in',
+    },
+  })
   const applyRunFont = (slide, name, font, paragraph = 0, run = 0) =>
     builders.ops.push({
       op: 'set-run',
@@ -130,22 +162,24 @@ function makeChrome({ tx, box, fillText }) {
   }
 
   const sectionLabel = (s, name, x, y, w, label, color = C.muted) => {
+    const accent = tone(color)
     tx(s, name, x, y, w, 0.15, label, {
       name: FONT_EN,
       size: '6.8pt',
       bold: true,
-      color,
+      color: readableInk(accent),
     })
   }
 
   const noteBox = (s, base, x, y, w, h, title, body, color = C.blue, bg = C.blueTint) => {
+    const accent = tone(color)
     box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, bg)
-    box(s, nm(s, `${base}Rule`), 'rectangle', x, y, 0.04, h, color)
+    box(s, nm(s, `${base}Rule`), 'rectangle', x, y, 0.04, h, accent)
     tx(s, nm(s, `${base}T`), x + 0.18, y + 0.12, w - 0.3, 0.18, title, {
       name: FONT_EN,
       size: '8.6pt',
       bold: true,
-      color,
+      color: readableInk(accent, bg),
     })
     tx(s, nm(s, `${base}B`), x + 0.18, y + 0.35, w - 0.3, h - 0.4, asLines(body), {
       name: FONT_EN,
@@ -155,7 +189,13 @@ function makeChrome({ tx, box, fillText }) {
   }
 
   const cardCaption = (s, name, x, y, w, text, color = C.muted) => {
-    fillText(s, name, text, { name: FONT_EN, size: '7.5pt', bold: true, color }, 'center')
+    fillText(
+      s,
+      name,
+      text,
+      { name: FONT_EN, size: '7.5pt', bold: true, color: readableInk(color) },
+      'center',
+    )
     box(s, `${name}Line`, 'rectangle', x, y + 0.26, w, 0.01, C.grid)
   }
 
@@ -164,7 +204,7 @@ function makeChrome({ tx, box, fillText }) {
 
 function makeComponents({ tx, box, card, icon, fillText, setLine }) {
   const metricCard = (s, base, x, y, w, h, item) => {
-    const accent = item.accent ?? C.blue
+    const accent = tone(item.accent ?? C.blue)
     box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, item.bg ?? C.surface)
     box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, 0.06, accent)
     box(s, nm(s, `${base}Side`), 'rectangle', x, y, 0.035, h, accent)
@@ -178,7 +218,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
       name: FONT_EN,
       size: item.value.length > 3 ? '27pt' : '30pt',
       bold: true,
-      color: accent,
+      color: readableInk(accent, item.bg ?? C.surface),
     })
     if (item.sub) {
       tx(s, nm(s, `${base}Sub`), x + 0.18, y + 1.02, w - 0.36, 0.2, item.sub, {
@@ -192,12 +232,13 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
         name: FONT_EN,
         size: '7.2pt',
         bold: true,
-        color: accent,
+        color: readableInk(accent, item.bg ?? C.surface),
       })
     }
   }
 
   const hBar = (s, base, x, y, w, h, value, max, color, label, sub, valueLabel) => {
+    const accent = tone(color)
     tx(s, nm(s, `${base}Label`), x, y - 0.04, 1.9, 0.18, label, {
       name: FONT_EN,
       size: '8.2pt',
@@ -213,7 +254,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
     }
     box(s, nm(s, `${base}Track`), 'rectangle', x + 2.05, y, w, h, C.surface2)
     const fillW = Math.max(0.05, (w * value) / max)
-    box(s, nm(s, `${base}Bar`), 'rectangle', x + 2.05, y, fillW, h, color)
+    box(s, nm(s, `${base}Bar`), 'rectangle', x + 2.05, y, fillW, h, accent)
     const valueW = 0.68
     const valueX = x + 2.05 + Math.max(0, Math.min(fillW - valueW - 0.08, w - valueW - 0.08))
     tx(
@@ -224,12 +265,13 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
       valueW,
       0.18,
       valueLabel ?? `${value}%`,
-      { name: FONT_EN, size: '8pt', bold: true, color: C.white },
+      { name: FONT_EN, size: '8pt', bold: true, color: textOnTone(accent) },
       'right',
     )
   }
 
   const miniBar = (s, base, x, y, w, label, value, note, color = C.primary) => {
+    const accent = tone(color)
     tx(s, nm(s, `${base}L`), x, y, 1.35, 0.17, label, {
       name: FONT_EN,
       size: '8pt',
@@ -245,7 +287,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
       y + 0.02,
       (w - 2.7) * (pct(value) / 100),
       0.18,
-      color,
+      accent,
     )
     tx(
       s,
@@ -259,7 +301,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
         name: FONT_EN,
         size: '8pt',
         bold: true,
-        color,
+        color: readableInk(accent),
       },
       'right',
     )
@@ -273,7 +315,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
   }
 
   const pillarCard = (s, base, x, y, w, h, item, i) => {
-    const accent = item.accent ?? ACCENTS[i % ACCENTS.length]
+    const accent = tone(item.accent ?? ACCENTS[i % ACCENTS.length])
     box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, 0.36, accent)
     tx(
       s,
@@ -287,7 +329,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
         name: FONT_EN,
         size: '12pt',
         bold: true,
-        color: C.white,
+        color: textOnTone(accent),
       },
       'center',
     )
@@ -353,7 +395,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
       name: FONT_EN,
       size: '12pt',
       bold: true,
-      color: item.kpiColor ?? C.amber,
+      color: readableInk(item.kpiColor ?? C.amber),
     })
     tx(
       s,
@@ -372,13 +414,14 @@ function makeComponents({ tx, box, card, icon, fillText, setLine }) {
   }
 
   const smallInfo = (s, base, x, y, w, h, title, lines, color = C.blue) => {
+    const accent = tone(color)
     box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, C.surface)
-    box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, 0.05, color)
+    box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, 0.05, accent)
     tx(s, nm(s, `${base}Title`), x + 0.16, y + 0.18, w - 0.32, 0.17, title, {
       name: FONT_EN,
       size: '7.5pt',
       bold: true,
-      color,
+      color: readableInk(accent, C.surface),
     })
     tx(s, nm(s, `${base}Text`), x + 0.16, y + 0.36, w - 0.32, h - 0.4, asLines(lines), {
       name: FONT_EN,
@@ -452,7 +495,7 @@ function makePageTypes(builders, chrome, components, total) {
     tx(s, nm(s, 'Eyebrow'), 0.82, 0.44, 3.9, 0.18, data.eyebrow, {
       name: FONT_EN,
       size: '8.25pt',
-      color: C.muted,
+      color: C.white,
     })
     box(s, nm(s, 'EyebrowRule'), 'rectangle', 0.83, 0.66, 4.95, 0.012, C.white)
     ops.push({
@@ -477,7 +520,7 @@ function makePageTypes(builders, chrome, components, total) {
     tx(s, nm(s, 'Subtitle'), 0.82, 2.43, 7.1, 0.24, data.subtitle, {
       name: FONT_EN,
       size: '9pt',
-      color: C.line,
+      color: C.white,
     })
 
     sectionLabel(s, nm(s, 'ProjectLabel'), 0.82, 3.55, 2.0, 'PROJECT DETAILS')
@@ -559,8 +602,9 @@ function makePageTypes(builders, chrome, components, total) {
     const h = 0.42
     let cursor = x
     ;(data.cohort ?? []).forEach((item, i) => {
+      const color = tone(item.color)
       const segW = w * (item.value / 100)
-      box(s, nm(s, `Cohort${i}`), 'rectangle', cursor, y, segW, h, item.color)
+      box(s, nm(s, `Cohort${i}`), 'rectangle', cursor, y, segW, h, color)
       tx(
         s,
         nm(s, `CohortVal${i}`),
@@ -573,7 +617,7 @@ function makePageTypes(builders, chrome, components, total) {
           name: FONT_EN,
           size: '8.8pt',
           bold: true,
-          color: item.color === C.line ? C.slate : C.white,
+          color: textOnTone(color),
         },
         'center',
       )
@@ -589,7 +633,7 @@ function makePageTypes(builders, chrome, components, total) {
           name: FONT_EN,
           size: '7pt',
           bold: true,
-          color: item.color,
+          color: readableInk(color),
         },
         'center',
       )
@@ -605,7 +649,7 @@ function makePageTypes(builders, chrome, components, total) {
           {
             name: FONT_EN,
             size: '6.5pt',
-            color: item.color,
+            color: readableInk(color),
           },
           'center',
         )
@@ -738,16 +782,19 @@ function makePageTypes(builders, chrome, components, total) {
       bold: true,
       color: C.muted,
     })
+    const rankBoxSize = 0.22
+    const rankTextH = 0.15
+    const rankTextYOffset = (rankBoxSize - rankTextH) / 2 + 0.005
     ;(data.interests ?? []).forEach(([rank, interest, angle], i) => {
       const y = 4.66 + i * 0.28
-      box(s, nm(s, `Rank${i}`), 'rectangle', rightX + 0.18, y, 0.22, 0.22, C.primary)
+      box(s, nm(s, `Rank${i}`), 'rectangle', rightX + 0.18, y, rankBoxSize, rankBoxSize, C.primary)
       tx(
         s,
         nm(s, `RankT${i}`),
         rightX + 0.14,
-        y - 0.005,
+        y + rankTextYOffset,
         0.3,
-        0.24,
+        rankTextH,
         String(rank),
         {
           name: FONT_EN,
@@ -861,7 +908,7 @@ function makePageTypes(builders, chrome, components, total) {
       const x = mx + b.x * mw
       const y = my + b.y * mh
       const d = b.size ?? 0.48
-      box(s, nm(s, `Bubble${i}`), 'oval', x - d / 2, y - d / 2, d, d, b.color)
+      box(s, nm(s, `Bubble${i}`), 'oval', x - d / 2, y - d / 2, d, d, tone(b.color))
       tx(
         s,
         nm(s, `BubbleText${i}`),
@@ -891,7 +938,7 @@ function makePageTypes(builders, chrome, components, total) {
     )
     ;(data.legend ?? []).forEach(([color, label], i) => {
       const y = 1.68 + i * 0.32
-      box(s, nm(s, `LegDot${i}`), 'oval', legendX, y, 0.18, 0.18, color)
+      box(s, nm(s, `LegDot${i}`), 'oval', legendX, y, 0.18, 0.18, tone(color))
       tx(s, nm(s, `LegText${i}`), legendX + 0.28, y + 0.02, 3.2, 0.14, label, {
         name: FONT_EN,
         size: '7pt',
@@ -945,6 +992,7 @@ function makePageTypes(builders, chrome, components, total) {
     const chartY = 1.72
     const chartW = 7.85
     ;(data.drivers ?? []).forEach((item, i) => {
+      const color = tone(item.color)
       hBar(
         s,
         `Driver${i}`,
@@ -954,12 +1002,13 @@ function makePageTypes(builders, chrome, components, total) {
         0.34,
         item.value,
         75,
-        item.color,
+        color,
         item.label,
         item.sub,
         `${item.value}%`,
       )
       if (item.tag) {
+        const tagBg = item.tagBg ?? C.redTint
         box(
           s,
           nm(s, `DriverTag${i}`),
@@ -968,7 +1017,7 @@ function makePageTypes(builders, chrome, components, total) {
           chartY + i * 0.72 + 0.03,
           1.25,
           0.25,
-          item.tagBg ?? C.redTint,
+          tagBg,
         )
         tx(
           s,
@@ -982,7 +1031,7 @@ function makePageTypes(builders, chrome, components, total) {
             name: FONT_EN,
             size: '6pt',
             bold: true,
-            color: item.tagColor ?? item.color,
+            color: readableInk(item.tagColor ?? color, tagBg),
           },
           'center',
         )
@@ -1001,7 +1050,7 @@ function makePageTypes(builders, chrome, components, total) {
           {
             name: FONT_EN,
             size: '6.6pt',
-            color: item.color,
+            color: readableInk(color),
           },
         )
       }
@@ -1019,7 +1068,7 @@ function makePageTypes(builders, chrome, components, total) {
       {
         name: FONT_EN,
         size: '7pt',
-        color: C.muted,
+        color: C.line,
       },
       'center',
     )
@@ -1035,7 +1084,7 @@ function makePageTypes(builders, chrome, components, total) {
         name: FONT_EN,
         size: '30pt',
         bold: true,
-        color: C.amber,
+        color: C.amberBright,
       },
       'center',
     )
@@ -1113,7 +1162,7 @@ function makePageTypes(builders, chrome, components, total) {
     const cells = grid(5, 0.08, MX, CW)
     ;(data.initiatives ?? []).forEach((item, i) => {
       const { x, w } = cells[i]
-      const accent = item.accent ?? ACCENTS[i]
+      const accent = tone(item.accent ?? ACCENTS[i])
       box(s, nm(s, `Init${i}Bg`), 'rectangle', x, 1.55, w, 5.35, C.white)
       setLine(s, nm(s, `Init${i}Bg`), C.grid, '0.7pt')
       box(s, nm(s, `Init${i}Top`), 'rectangle', x, 1.55, w, 0.06, accent)
@@ -1121,7 +1170,7 @@ function makePageTypes(builders, chrome, components, total) {
         name: FONT_EN,
         size: '11pt',
         bold: true,
-        color: accent,
+        color: readableInk(accent),
       })
       tx(
         s,
@@ -1135,7 +1184,7 @@ function makePageTypes(builders, chrome, components, total) {
           name: FONT_EN,
           size: '6pt',
           bold: true,
-          color: accent,
+          color: readableInk(accent),
         },
         'right',
       )
@@ -1211,7 +1260,7 @@ function makePageTypes(builders, chrome, components, total) {
     const cells = grid(4, 0.08, MX, CW)
     ;(data.phases ?? []).forEach((phase, i) => {
       const { x, w } = cells[i]
-      const accent = phase.accent ?? [C.navy, C.primary, C.blue, C.teal][i]
+      const accent = tone(phase.accent ?? [C.navy, C.primary, C.blue, C.teal][i])
       box(s, nm(s, `Phase${i}Top`), 'rectangle', x, 1.32, w, 0.42, accent)
       tx(
         s,
@@ -1225,7 +1274,7 @@ function makePageTypes(builders, chrome, components, total) {
           name: FONT_EN,
           size: '7.2pt',
           bold: true,
-          color: C.white,
+          color: textOnTone(accent),
         },
         'center',
       )
@@ -1305,9 +1354,10 @@ function makePageTypes(builders, chrome, components, total) {
     const metricCells = grid(3, 0.18, MX, CW)
     metrics.forEach((m, i) => {
       const { x, w } = metricCells[i]
+      const accent = tone(m.accent ?? ACCENTS[i % ACCENTS.length])
       box(s, nm(s, `RoadM${i}Bg`), 'rectangle', x, 3.78, w, 1.42, C.white)
       setLine(s, nm(s, `RoadM${i}Bg`), C.grid, '0.7pt')
-      box(s, nm(s, `RoadM${i}Top`), 'rectangle', x, 3.78, w, 0.05, m.accent)
+      box(s, nm(s, `RoadM${i}Top`), 'rectangle', x, 3.78, w, 0.05, accent)
       tx(s, nm(s, `RoadM${i}Lab`), x + 0.2, 4.02, 1.9, 0.12, m.label, {
         name: FONT_EN,
         size: '6.6pt',
@@ -1317,7 +1367,7 @@ function makePageTypes(builders, chrome, components, total) {
         name: FONT_EN,
         size: '22pt',
         bold: true,
-        color: m.accent,
+        color: readableInk(accent),
       })
       box(s, nm(s, `RoadM${i}Sep`), 'rectangle', x + 1.75, 4.12, 0.012, 0.72, C.grid)
       tx(s, nm(s, `RoadM${i}Target`), x + 1.95, 4.12, w - 2.16, 0.28, m.target, {
@@ -1385,7 +1435,7 @@ function makePageTypes(builders, chrome, components, total) {
           name: FONT_EN,
           size: '7.5pt',
           bold: true,
-          color: i === 1 ? C.amber : C.white,
+          color: i === 1 ? C.amberBright : C.white,
         },
         'center',
       )

@@ -793,6 +793,11 @@ function checkSlideLayoutContract({
   for (const slot of slideContract.requiredSlots ?? []) {
     const slotPath = typeof slot === 'string' ? slot : slot.path
     if (!hasContractValue(slide, slotPath)) {
+      const slotHint =
+        (typeof slot === 'object' && slot !== null && slot.hint) ||
+        slideContract.slotHints?.[slotPath] ||
+        contract.slotHints?.[slotPath] ||
+        ''
       pushValidationGateIssue({
         errors,
         warnings,
@@ -805,7 +810,9 @@ function checkSlideLayoutContract({
         path: `${basePath}.${slotPath}`,
         value: null,
         limit: 'non-empty',
-        message: `${basePath}: required layout slot "${slotPath}" is missing or empty`,
+        message: `${basePath}: required layout slot "${slotPath}" is missing or empty${
+          slotHint ? ` — ${slotHint}` : ''
+        }`,
         suggestedActions: ['fill-required-slot', 'switch-slide-type', 'split-slide'],
       })
     }

@@ -742,6 +742,9 @@
           "allowed": false,
           "severity": "error"
         },
+        "slotHints": {
+          "data.eyebrow": "swiss-grid 内页 eyebrow 为顶部排版必填项；页码型 kicker 填 \"P · <两位页码>\"（如 \"P · 04\"，chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案"
+        },
         "slideTypes": {
           "swissCoverSlide": {
             "requiredSlots": ["data.title"]
@@ -850,7 +853,7 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-10",
+        "lastBenchmark": "2026-06-11",
         "vision": {
           "high": 0,
           "medium": 0
@@ -858,7 +861,7 @@
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-10",
+          "date": "2026-06-11",
           "source": {
             "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
             "out": ".tmp/pptx-nova-visual"
@@ -903,7 +906,7 @@
                 "bytes": 347385
               },
               "patchOps": 2030,
-              "p50TotalMs": 48.47
+              "p50TotalMs": 52.79
             },
             {
               "caseId": "swiss-grid.stress-density",
@@ -938,7 +941,7 @@
                 "bytes": 106187
               },
               "patchOps": 817,
-              "p50TotalMs": 40.19
+              "p50TotalMs": 40.83
             },
             {
               "caseId": "swiss-grid.mixed-language",
@@ -973,7 +976,7 @@
                 "bytes": 70494
               },
               "patchOps": 610,
-              "p50TotalMs": 37.82
+              "p50TotalMs": 42.34
             }
           ],
           "blockers": []

@@ -236,6 +236,21 @@ scatter / bubble 误传 `categories + values`：
 
 修复：按 suggestion 找替代，或告诉用户这种特性 s8fy 当前不支持。
 
+### 9. layout.requiredSlot.missing（DeckKit validate-content）
+
+来源是 DeckKit 的 `validate-content.mjs`（layout-contract），不是 s8fy：
+
+```text
+[error] slides[3]: required layout slot "data.eyebrow" is missing or empty
+  — swiss-grid 内页 eyebrow 为顶部排版必填项；页码型 kicker 填 "P · <两位页码>" ...
+```
+
+修复：按错误信息尾部的 hint 补齐对应槽位（hint 来自 catalog `layoutContract.slotHints`）。
+常见案例 swiss-grid 的 `data.eyebrow`：它是顶部排版契约的一部分，**必填且不可放宽**；
+不需要可见 kicker 时填页码型 `"P · <两位页码>"`（与页码一致，如第 4 页填 `"P · 04"`，
+chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案（如 `"ARGUMENT · 07"`）。
+没有 hint 的槽位按 DeckKit 的 `assets/examples/<deckkit>/content.json` 对照补齐。
+
 ## visualRisks[] 警告处理
 
 `visualRisks[]` 不是 error，是**潜在视觉问题**。每条 risk 形如：

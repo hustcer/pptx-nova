@@ -37,8 +37,8 @@
         },
         "content": {
           "path": "consulting-dark/content.json",
-          "bytes": 8421,
-          "sha256": "a2c622e40af86e8bbe35bfd529731ab3d178b441c40d0efd920759ef07ea7d0e"
+          "bytes": 8655,
+          "sha256": "17ad566fda69da918d2727843a20bfc9425ee5f3d5ed3252a32aad965fc5f247"
         },
         "brief": {
           "path": "consulting-dark/brief.md",
@@ -96,19 +96,19 @@
       "files": {
         "deck": {
           "path": "mckinsey-blue/deck.pptx",
-          "bytes": 48385,
-          "sha256": "8507199372847c81883ccc5f494bb151765e2979f7252f9f2db5d6882d8a68e6"
+          "bytes": 48389,
+          "sha256": "945c38122c6145441a0ef58a61c373f6a1451a3e7eb6cbb17f6af3783be53ce1"
         },
         "contactSheet": {
           "path": "mckinsey-blue/contact-sheet.webp",
-          "bytes": 109248,
-          "sha256": "a24244719ba9680a7d80fc08232d6c752e66baf0bb094ce898da209f434dbd35",
+          "bytes": 109244,
+          "sha256": "9a78e65d3d7896a751feb435893bd8cc17ddef4de755f6a9c84fd0ce8b9eb57e",
           "quality": 82
         },
         "content": {
           "path": "mckinsey-blue/content.json",
-          "bytes": 17785,
-          "sha256": "48a24f44f28e4edf9d434f9e2722ae8bef1de381ff1b6313200e3954fc69d89a"
+          "bytes": 17933,
+          "sha256": "6b7ddded8e377bb0bf638e66b5406fb9cd456ed2b9a5c0bfc3c9d9fa7fa8ec60"
         },
         "brief": {
           "path": "mckinsey-blue/brief.md",
@@ -118,7 +118,7 @@
         "summary": {
           "path": "mckinsey-blue/summary.json",
           "bytes": 1787,
-          "sha256": "65ba353d63d90b5d25fbef9aacad3c22c0e4465b16871ee445c46114a060caba"
+          "sha256": "aa366f0a256327ee614827fc4416dda3d4b000a70b5d3a04ad2691d231122b1a"
         }
       },
       "validation": {
@@ -181,8 +181,8 @@
         },
         "content": {
           "path": "swiss-grid/content.json",
-          "bytes": 16587,
-          "sha256": "5419204ec72587054ad9633093c0be69505413ad6e507adb9267551072423ae3"
+          "bytes": 16785,
+          "sha256": "89a0d96549eea821a333d7b44c2864e46e163d86aec17505c51caff8e4d5cf85"
         },
         "brief": {
           "path": "swiss-grid/brief.md",

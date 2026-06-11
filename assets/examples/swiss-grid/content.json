@@ -59,7 +59,8 @@
           }
         ],
         "calloutTitle": "理性主义不是凭空而至",
-        "callout": "而是来自字体 · 学校 · 教学三条线索半个世纪的累积。"
+        "callout": "而是来自字体 · 学校 · 教学三条线索半个世纪的累积。",
+        "calloutHighlights": ["字体 · 学校 · 教学"]
       }
     },
     {
@@ -229,6 +230,7 @@
         "eyebrow": "P · 07",
         "title": "三款决定性字体",
         "subtitle": "THREE TYPEFACES THAT WROTE THE SWISS STYLE",
+        "sampleText": "Aa",
         "cards": [
           {
             "name": "Akzidenz-Grotesk",
@@ -299,9 +301,11 @@
         "subtitle": "EVERYTHING DERIVES FROM THE BASE UNIT",
         "baseLabel": "BASE UNIT",
         "baseValue": "16px",
+        "baseNote": "所有距离的最小公因子",
         "body": "DERIVED FROM 16\nsafe margin 64 px = 4 × 16\ncolumn width 264 px = 16 × 16 + 8\ncolumn gap 32 px = 2 × 16\nrow height 96 px = 6 × 16\nbody line-height 27 px = 1.5 × 18\ntitle size 32 px = 2 × 16",
         "callout": "设计师不再“画”版面\n而是“建立系统并按系统落子”",
         "measure": "528",
+        "measureLabels": ["264", "264", "264", "264"],
         "labels": {
           "image": "IMAGE 2×2",
           "text": "TEXT 1×2",

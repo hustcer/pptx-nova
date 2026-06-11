@@ -97,6 +97,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 - 核心正文通常不低于 `10.5pt`。
 - label / badge / chart/table 文字通常不低于 `9pt`。
 - 页脚/来源可到 `8.5-9pt`，但不能承载关键信息。
+- DeckKit-first 创建以 catalog `qualityProfile` 和该 DeckKit 的 golden 基线为机器门禁；
+  不要为了满足通用字号红线改坏已验证的 DeckKit 版式常量。
 - 百分比、数字+单位、金额、季度、年份、`ROI`、`KPI` 等短标签不得被拆开。
 - 圆形或正方形编号必须水平和垂直居中。
 - 文本放不下时，先删字、换布局、增高容器或拆页；不要继续缩小字体硬塞。

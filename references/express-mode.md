@@ -84,6 +84,11 @@ node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit consulting-d
 #     positioning 决定风格判断，signatureElements/compositionRules 决定页面构成，
 #     avoid 清单用于拒绝不匹配的视觉选择。
 
+# 1d. 生成槽位速查，按字段、数组上限和字数/行数预算写 content
+node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs \
+  --deckkit consulting-dark \
+  > deckkit-slots.md
+
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
 cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
 #    按 outline.json 改 slides[].type 和 slides[].data
@@ -91,10 +96,15 @@ cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
 # 3. 校验 content（schema + density + layout contract + diversity + fit diagnostics）
 node <skill-root>/assets/deckkits/validate-content.mjs \
   content.json \
-  --deckkit consulting-dark
+  --deckkit consulting-dark \
+  --mode delivery
 
 # 4. 生成 patch
-node <skill-root>/assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
+node <skill-root>/scripts/pptx-nova-build.mjs \
+  --deckkit consulting-dark \
+  content.json \
+  -o patch.json \
+  --quality-json quality.json
 
 # 5. 设计锁漂移检查（deck_lock/assets/content/patch 一致性 + image slot/prompt guard）
 node <skill-root>/scripts/pptx-nova-check-lock.mjs \

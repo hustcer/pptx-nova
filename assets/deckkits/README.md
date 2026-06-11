@@ -71,18 +71,25 @@ assets/deckkits/
 
 ## 使用方式
 
-```js
-// build.mjs（每个 deck 一份，~15 行）
-import { loadContent, validateContent } from './assets/deckkits/core-primitives.kit.mjs'
-import { createDeck } from './assets/deckkits/consulting-dark.kit.mjs'
+```bash
+node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs \
+  --deckkit consulting-dark \
+  > deckkit-slots.md
 
-const deckkitId = 'consulting-dark'
-const content = await loadContent(process.argv[2] ?? 'content.json')
-validateContent(content, { deckkit: deckkitId, throwOnError: true })
-const { patch, warnings } = createDeck(content)
-for (const w of warnings) console.error(`[warning] ${w.message}`)
-process.stdout.write(JSON.stringify(patch))
+node <skill-root>/assets/deckkits/validate-content.mjs \
+  content.json \
+  --deckkit consulting-dark \
+  --mode delivery
+
+node <skill-root>/scripts/pptx-nova-build.mjs \
+  --deckkit consulting-dark \
+  content.json \
+  -o patch.json \
+  --quality-json quality.json
 ```
+
+不要为普通交付手写每次一份的 `build.mjs`。只有在开发或调试 DeckKit 本身时，才临时导入
+`.kit.mjs` 调用 `createDeck(content)`。
 
 ## 图标使用
 
@@ -121,7 +128,7 @@ node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation 
 ## 冻结准入
 
 1. `validate-content` 通过，只有可解释的非阻塞 warning
-2. `node build.mjs > patch.json` 可重复生成稳定 patch
+2. `pptx-nova-build.mjs` 可重复生成稳定 patch 和 `quality.json`
 3. DeckKit benchmark 的 golden / stress / mixed-language cases 全部通过
 4. `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate` 通过
 5. `s8fy pptx apply --dry-run --json` 通过
@@ -165,6 +172,6 @@ promotion。
 
 1. 从已验证的 gen.mjs 抽取视觉语言和页型 → `<name>.kit.mjs`
 2. 把内容数据 → `examples/<name>-content.json`
-3. 写 `examples/<name>-build.mjs` 胶水
+3. 写 `schemas/<name>/<slideType>.schema.json` 和 slot budget
 4. 跑验证矩阵（文本长度 × 语言 × 密度 × 主题 × 页数 × 页型组合）
 5. 在 `catalog.json` 注册

@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, statSync } from 'node:fs'
-import { dirname, isAbsolute, resolve } from 'node:path'
+import { dirname, isAbsolute, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const skillRoot = resolve(__dirname, '..')
+const deckkitRoot = join(skillRoot, 'assets', 'deckkits')
 
 const LOCK_SCHEMA_VERSION = 'pptx-nova-deck-lock/v1'
 const ASSETS_SCHEMA_VERSION = 'pptx-nova-assets-manifest/v1'
@@ -168,6 +173,15 @@ function splitFontStack(value) {
     .filter((item) => !['serif', 'sans-serif', 'monospace', 'system-ui'].includes(item))
 }
 
+function looksLikeFontName(value) {
+  const text = normalizeFontName(value)
+  if (!text) return false
+  if (/^[0-9]+(?:\.[0-9]+)?pt$/i.test(text)) return false
+  if (/^#?[0-9a-f]{6}(?:[0-9a-f]{2})?$/i.test(text)) return false
+  if (/^(true|false|bold|italic|regular|normal|none)$/i.test(text)) return false
+  return /[A-Za-z\u4e00-\u9fa5]/.test(text)
+}
+
 function collectAllowedFonts(lock) {
   const fonts = new Set()
   const collect = (value) => {
@@ -206,13 +220,18 @@ function collectPatchFonts(patch) {
     if (typeof value !== 'string') return false
     const field = key.toLowerCase()
     const joined = path.join('.').toLowerCase()
+    if (!looksLikeFontName(value)) return false
     return (
       field === 'fontface' ||
       field === 'fontfamily' ||
       field === 'typeface' ||
       field === 'family' ||
       field === 'font' ||
-      joined.includes('.font.')
+      joined.endsWith('.font.name') ||
+      joined.endsWith('.font.family') ||
+      joined.endsWith('.font.fontface') ||
+      joined.endsWith('.font.fontfamily') ||
+      joined.endsWith('.font.typeface')
     )
   })
 
@@ -223,6 +242,37 @@ function collectPatchFonts(patch) {
     }
   }
   return fonts
+}
+
+function deckkitIdFrom(lock, content) {
+  return lock.deckkit?.id ?? lock.deckkitId ?? content?.meta?.deckkit ?? content?.deckkit ?? ''
+}
+
+function loadDeckkitEntry(deckkitId) {
+  if (!deckkitId) return null
+  const catalogPath = join(deckkitRoot, 'catalog.json')
+  if (!existsSync(catalogPath)) return null
+  try {
+    const catalog = readJson(catalogPath, 'DeckKit catalog')
+    return catalog.entries?.find((entry) => entry.id === deckkitId) ?? null
+  } catch {
+    return null
+  }
+}
+
+function collectDeckkitTokens(deckkitId) {
+  const colors = new Set()
+  const fonts = new Set()
+  const entry = loadDeckkitEntry(deckkitId)
+  if (!entry?.path) return { colors, fonts }
+  const kitPath = join(deckkitRoot, entry.path)
+  if (!existsSync(kitPath)) return { colors, fonts }
+  const source = readFileSync(kitPath, 'utf8')
+  collectHexStrings(source, colors)
+  for (const match of source.matchAll(/\bFONT_[A-Z0-9_]*\s*=\s*['"]([^'"]+)['"]/g)) {
+    for (const font of splitFontStack(match[1])) fonts.add(font.toLowerCase())
+  }
+  return { colors, fonts }
 }
 
 function collectPatchColors(patch) {
@@ -591,7 +641,7 @@ function checkContent(content, lock, errors, warnings) {
   }
 }
 
-function checkPatch(patch, lock, assets, args, errors, warnings) {
+function checkPatch(patch, lock, content, assets, args, errors, warnings) {
   if (!patch) return
   if (patch.schemaVersion !== 1) {
     push(errors, 'patch-schema-version', 'patch.json schemaVersion must be 1')
@@ -601,7 +651,9 @@ function checkPatch(patch, lock, assets, args, errors, warnings) {
     return
   }
 
+  const deckkitTokens = collectDeckkitTokens(deckkitIdFrom(lock, content))
   const allowedColors = collectAllowedColors(lock)
+  for (const color of deckkitTokens.colors) allowedColors.add(color)
   if (allowedColors.size > 0) {
     const usedColors = collectPatchColors(patch)
     const unknown = [...usedColors].filter((color) => !allowedColors.has(color))
@@ -615,6 +667,7 @@ function checkPatch(patch, lock, assets, args, errors, warnings) {
   }
 
   const allowedFonts = collectAllowedFonts(lock)
+  for (const font of deckkitTokens.fonts) allowedFonts.add(font)
   if (allowedFonts.size > 0) {
     for (const item of collectPatchFonts(patch)) {
       if (!allowedFonts.has(item.font.toLowerCase())) {
@@ -697,7 +750,7 @@ function main() {
   }
   checkAssets(assets, args.assets, referencedAssets, errors, warnings)
   checkContent(content, lock, errors, warnings)
-  checkPatch(patch, lock, assets, args, errors, warnings)
+  checkPatch(patch, lock, content, assets, args, errors, warnings)
 
   const report = {
     schemaVersion: 'pptx-nova-lock-check/v1',

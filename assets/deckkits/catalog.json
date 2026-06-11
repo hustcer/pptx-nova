@@ -7,6 +7,11 @@
       "path": "consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 9,
+        "labelFontPt": 9,
+        "sourceFontPt": 8.5
+      },
       "defaultFor": ["roadshow", "executive consulting", "technical roadshow", "技术路演"],
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
       "coverage": {
@@ -347,6 +352,11 @@
       "path": "mckinsey-blue.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 6,
+        "labelFontPt": 6,
+        "sourceFontPt": 6
+      },
       "defaultFor": [
         "McKinsey-style consulting",
         "customer loyalty strategy",
@@ -721,6 +731,12 @@
       "path": "swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 6.8,
+        "labelFontPt": 6.8,
+        "sourceFontPt": 6.8,
+        "baseline": "DeckKit golden constants override generic prose readability floors for Swiss typographic labels."
+      },
       "defaultFor": [
         "swiss grid systems",
         "Swiss International Typographic Style",

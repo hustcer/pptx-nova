@@ -311,6 +311,10 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 - patch 里任何 `assetSource.path` 是否登记在 `assets_manifest.json`；只要 patch 引用外部资源，
   `--assets` 就是必需项。
 
+DeckKit-first run 会自动把选中 DeckKit `.kit.mjs` 里的调色板 HEX 和 `FONT_*` token 视为锁内来源。
+`font.size`、`font.color` 等样式值不会被当成字体名；如果仍出现 `patch-font-outside-lock`，优先检查是否
+真的引入了 lock 和 DeckKit 都未声明的新字体。
+
 默认策略是“硬错误拦真实漂移，颜色/字体越界先 warning”。正式品牌合规或客户交付时，
 加 `--strict-colors --strict-fonts` 把 lock 外颜色/字体也变成 error。
 

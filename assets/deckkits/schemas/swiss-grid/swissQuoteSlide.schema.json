@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/swiss-grid/swissQuoteSlide",
+  "title": "swissQuoteSlide data schema",
+  "type": "object",
+  "properties": {
+    "quote": { "type": "string", "x-slotBudget": { "maxLines": 3, "fontPt": 42, "widthIn": 7.8 } },
+    "body": { "type": "string", "x-slotBudget": { "maxLines": 4, "fontPt": 11, "widthIn": 4.8 } },
+    "author": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 8, "widthIn": 3.2 } },
+    "source": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 3.5 } }
+  },
+  "additionalProperties": true
+}

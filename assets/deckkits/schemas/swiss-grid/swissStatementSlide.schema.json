@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/swiss-grid/swissStatementSlide",
+  "title": "swissStatementSlide data schema",
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.8, "widthIn": 1.5 }
+    },
+    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 8.6, "widthIn": 1.5 } },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 2, "fontPt": 39, "widthIn": 4.0 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 15.2, "widthIn": 4.8 }
+    },
+    "body": { "type": "string", "x-slotBudget": { "maxLines": 3, "fontPt": 11.4, "widthIn": 3.6 } },
+    "statement": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 2, "fontPt": 39, "widthIn": 4.0 }
+    }
+  },
+  "additionalProperties": true
+}

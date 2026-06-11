@@ -489,12 +489,17 @@ generator 的全流程，直接走 **content manifest → DeckKit → patch** �
 # 1. 只写内容清单（~200 行 JSON，不含坐标/配色/组件逻辑）
 cp assets/deckkits/examples/roadshow-content.json ./content.json
 #    参照 assets/deckkits/schemas/<slideType>.schema.json 改内容
+#    或运行 node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs --deckkit <id> 查看槽位速查
 
 # 2. 校验 content（schema + density limit，几何错误 apply 前拦截）
 node assets/deckkits/validate-content.mjs content.json --deckkit consulting-dark
 
-# 3. 生成 patch（需要定制时，可复制 example build 入口并修正 import 路径）
-node assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
+# 3. 生成 patch（默认使用通用 driver；只有开发 DeckKit 时才写临时 build.mjs）
+node <skill-root>/scripts/pptx-nova-build.mjs \
+  --deckkit consulting-dark \
+  content.json \
+  -o patch.json \
+  --quality-json quality.json
 
 # 4. apply + 质量门
 s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json

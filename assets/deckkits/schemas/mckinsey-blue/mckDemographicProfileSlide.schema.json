@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/mckinsey-blue/mckDemographicProfileSlide",
+  "title": "mckDemographicProfileSlide data schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 2, "fontPt": 19, "widthIn": 10.5 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8, "widthIn": 10.2 }
+    },
+    "age": { "type": "array", "maxItems": 4, "x-slotBudget": { "maxItems": 4 } },
+    "ageNote": { "type": "object" },
+    "income": { "type": "array", "maxItems": 4, "x-slotBudget": { "maxItems": 4 } },
+    "incomeNote": { "type": "object" },
+    "occupation": { "type": "array", "maxItems": 4, "x-slotBudget": { "maxItems": 4 } },
+    "occupationNote": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 5.8 }
+    },
+    "interests": { "type": "array", "maxItems": 5, "x-slotBudget": { "maxItems": 5 } },
+    "interestNote": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 6.8, "widthIn": 5.5 }
+    },
+    "source": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 6.3, "widthIn": 4.7 } }
+  },
+  "additionalProperties": true
+}

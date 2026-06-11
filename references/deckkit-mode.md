@@ -30,6 +30,19 @@ node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
 Delivery auto-selection only allows `readiness in ["production", "default"]`.
 Use `candidate` only for drafts, migration checks, or explicit human approval.
 
+Before writing `content.json`, generate the DeckKit slot reference and keep it
+beside the run artifacts:
+
+```bash
+node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs \
+  --deckkit <id> \
+  > deckkit-slots.md
+```
+
+Use it as the per-slide quick reference for fields, required slots, item limits,
+and approximate text budgets. Do not infer slot limits by reading `.kit.mjs`
+source when a schema row exists.
+
 ## Production Path
 
 Use this flow for DeckKit-first creation:
@@ -52,7 +65,11 @@ The important command sequence is:
 ```bash
 node <skill-root>/assets/deckkits/validate-content.mjs \
   content.json --deckkit <id> --mode delivery
-node build.mjs content.json > patch.json
+node <skill-root>/scripts/pptx-nova-build.mjs \
+  --deckkit <id> \
+  content.json \
+  -o patch.json \
+  --quality-json quality.json
 node <skill-root>/scripts/pptx-nova-check-lock.mjs \
   --lock deck_lock.json --content content.json --patch patch.json --json
 s8fy pptx apply -p patch.json -o out.pptx --dry-run --json
@@ -60,9 +77,9 @@ s8fy pptx apply -p patch.json -o out.pptx --json
 s8fy pptx vision-check out.pptx --json
 ```
 
-Build glue can be the DeckKit example build script, or a short run-dir
-`build.mjs` that imports `createDeck` from the selected `.kit.mjs`. Keep the
-content layer separate from the visual generator.
+Use the generic build driver by default. Only write a run-dir `build.mjs` when
+developing a new DeckKit or debugging the generator itself. Keep the content
+layer separate from the visual generator.
 
 ## Content Rules
 
@@ -71,8 +88,10 @@ types, and structured slide data. Do not put arbitrary `customOps` in delivery
 content unless the DeckKit contract explicitly allows it.
 
 Run validation before dry-run. In delivery mode, missing required slots,
-disallowed `customOps`, blocking fit diagnostics, and diversity gate failures
-must be fixed before any apply.
+disallowed `customOps`, schema errors, blocking fit diagnostics, and diversity
+gate failures must be fixed before any apply. Slot budget warnings are still
+actionable: fix likely subtitle/label widow lines and dense text before relying
+on PNG review.
 
 If validation reports density/fit warnings, prefer deleting text, splitting
 slides, changing a slide type, or using a DeckKit-supported layout variant.

@@ -1,6 +1,6 @@
 // core-primitives.kit.mjs — 几何安全 + op 生成（所有 DeckKit 共用）
 // version: 0.1.0
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { addTablerIconPicture } from './icon-assets.kit.mjs'
@@ -244,6 +244,18 @@ export function loadCatalog() {
 
 const loadSchema = (name) => readJson(join(__dirname, 'schemas', name))
 
+const schemaPath = (...parts) => join(__dirname, 'schemas', ...parts)
+
+function loadSlideSchema(deckkit, slideType) {
+  if (deckkit) {
+    const deckkitPath = schemaPath(deckkit, `${slideType}.schema.json`)
+    if (existsSync(deckkitPath)) return readJson(deckkitPath)
+  }
+  const globalPath = schemaPath(`${slideType}.schema.json`)
+  if (existsSync(globalPath)) return readJson(globalPath)
+  return null
+}
+
 const makeIssue = (type, message, extra = {}) => ({ type, message, ...extra })
 
 const makeFitDiagnostic = ({
@@ -335,6 +347,27 @@ function validateValueAgainstSchema(value, schema, path, errors) {
       }),
     )
     return
+  }
+
+  if (typeof value === 'string') {
+    if (schema.minLength !== undefined && value.length < schema.minLength) {
+      errors.push(
+        makeIssue('field', `${path}: ${value.length} chars below min ${schema.minLength}`, {
+          path,
+          value: value.length,
+          limit: schema.minLength,
+        }),
+      )
+    }
+    if (schema.maxLength !== undefined && value.length > schema.maxLength) {
+      errors.push(
+        makeIssue('field', `${path}: ${value.length} chars exceeds max ${schema.maxLength}`, {
+          path,
+          value: value.length,
+          limit: schema.maxLength,
+        }),
+      )
+    }
   }
 
   if (Array.isArray(value)) {
@@ -464,6 +497,7 @@ function slideValidationContext({
   warnings,
   fitDiagnostics,
   ignoreSoftLimits,
+  mode,
 }) {
   return {
     slide,
@@ -477,6 +511,7 @@ function slideValidationContext({
     warnings,
     fitDiagnostics,
     ignoreSoftLimits,
+    mode,
   }
 }
 
@@ -712,6 +747,117 @@ function checkSlideDensity(args) {
   const check = SLIDE_FIT_CHECKERS[ctx.slideType] ?? checkGenericSlideDensity
   check(ctx)
   checkTextTokenRisk(ctx)
+}
+
+function catalogEntryForDeckkit(deckkit) {
+  if (!deckkit) return null
+  try {
+    return loadCatalog().entries.find((entry) => entry.id === deckkit) ?? null
+  } catch {
+    return null
+  }
+}
+
+function slotBudgetSeverity(config, mode) {
+  if (mode === 'delivery' && config.deliverySeverity) return config.deliverySeverity
+  return config.severity ?? 'warning'
+}
+
+function pushSlotBudgetIssue(ctx, budget, path, code, value, limit, message) {
+  const severity = slotBudgetSeverity(budget, ctx.mode)
+  const diagnostic = makeFitDiagnostic({
+    slideIndex: ctx.slideIndex,
+    slideType: ctx.slideType,
+    severity,
+    code,
+    path,
+    value,
+    limit,
+    message,
+    suggestedActions: budget.suggestedActions ?? ['shorten-copy', 'split-slide', 'switch-layout'],
+  })
+  ctx.fitDiagnostics.push(diagnostic)
+  const issue = makeIssue('fit', message, { path, field: path.split('.').pop(), diagnostic })
+  if (severity === 'error') ctx.errors.push(issue)
+  else ctx.warnings.push(issue)
+}
+
+function estimateSlotLines(value, budget) {
+  const text = Array.isArray(value)
+    ? value.map((item) => String(item ?? '')).join('\n')
+    : String(value ?? '')
+  const fontPt = budget.fontPt ?? budget.fontSizePt
+  const widthPt =
+    budget.widthPt ?? (budget.widthIn !== undefined ? Number(budget.widthIn) * 72 : undefined)
+  if (!fontPt || !widthPt) return null
+  const hardLines = text.split('\n').length
+  return Math.max(hardLines, estimateQualityLineCount(text, fontPt, Math.max(1, widthPt)))
+}
+
+function checkSlotBudgetValue(ctx, value, schema, path) {
+  const budget = schema?.['x-slotBudget']
+  if (!budget || value === null || value === undefined) return
+  if (typeof value === 'string' || Array.isArray(value)) {
+    const text = Array.isArray(value) ? value.map((item) => String(item ?? '')).join('\n') : value
+    if (budget.maxChars !== undefined && text.length > budget.maxChars) {
+      pushSlotBudgetIssue(
+        ctx,
+        budget,
+        path,
+        'slotBudget.chars.limit',
+        text.length,
+        budget.maxChars,
+        `${path}: ${text.length} chars exceeds budget ${budget.maxChars}`,
+      )
+    }
+    const estLines = estimateSlotLines(text, budget)
+    if (estLines !== null && budget.maxLines !== undefined && estLines > budget.maxLines) {
+      pushSlotBudgetIssue(
+        ctx,
+        budget,
+        path,
+        'slotBudget.lines.limit',
+        estLines,
+        budget.maxLines,
+        `${path}: estimated ${estLines} lines exceeds budget ${budget.maxLines}`,
+      )
+    }
+  }
+  if (Array.isArray(value) && budget.maxItems !== undefined && value.length > budget.maxItems) {
+    pushSlotBudgetIssue(
+      ctx,
+      budget,
+      path,
+      'slotBudget.items.limit',
+      value.length,
+      budget.maxItems,
+      `${path}: ${value.length} items exceeds budget ${budget.maxItems}`,
+    )
+  }
+}
+
+function checkSlotBudgets(ctx, value, schema, path) {
+  if (!schema || value === null || value === undefined) return
+  checkSlotBudgetValue(ctx, value, schema, path)
+  if (Array.isArray(value)) {
+    const itemSchema = schema.items
+    if (Array.isArray(itemSchema)) {
+      value.forEach((item, index) => {
+        const tupleSchema = itemSchema[index]
+        if (tupleSchema) checkSlotBudgets(ctx, item, tupleSchema, `${path}[${index}]`)
+      })
+      return
+    }
+    if (itemSchema) {
+      value.forEach((item, index) => checkSlotBudgets(ctx, item, itemSchema, `${path}[${index}]`))
+    }
+    return
+  }
+  if (value && typeof value === 'object' && schema.properties) {
+    for (const [key, childSchema] of Object.entries(schema.properties)) {
+      if (key in value) checkSlotBudgets(ctx, value[key], childSchema, `${path}.${key}`)
+    }
+  }
 }
 
 function pathValue(root, path) {
@@ -1103,8 +1249,22 @@ export function validateContent(
       }
 
       try {
-        const schema = loadSchema(`${slide.type}.schema.json`)
+        const schema = loadSlideSchema(requestedDeckkit, slide.type)
+        if (!schema) throw new Error('schema not found')
         validateObjectAgainstSchema(slide.data, schema, `${prefix}.data`, errors)
+        checkSlotBudgets(
+          {
+            slideIndex: i,
+            slideType: slide.type,
+            mode,
+            errors,
+            warnings,
+            fitDiagnostics,
+          },
+          slide.data,
+          schema,
+          `${prefix}.data`,
+        )
       } catch {
         // Schema coverage is intentionally progressive.
       }
@@ -1118,6 +1278,7 @@ export function validateContent(
         warnings,
         fitDiagnostics,
         ignoreSoftLimits,
+        mode,
       })
       checkSlideLayoutContract({
         entry,
@@ -1420,19 +1581,19 @@ function assessContrastQuality(shape, slide, issues) {
   }
 }
 
-function assessFontSizeQuality(shape, issues) {
+function assessFontSizeQuality(shape, issues, minFontPt = QUALITY_MIN_FONT_PT) {
   if (!String(shape.text ?? '').trim()) return
   for (const font of shape.fonts) {
     const fontPt = parseFontPt(font?.size)
-    if (fontPt !== null && fontPt < QUALITY_MIN_FONT_PT) {
+    if (fontPt !== null && fontPt < minFontPt) {
       issues.push(
         makeQualityIssue({
           kind: 'font-too-small',
-          severity: fontPt < 8 ? 'error' : 'warning',
+          severity: fontPt < Math.max(6, minFontPt - 2) ? 'error' : 'warning',
           slideIndex: shape.slideIndex,
           shapeName: shape.name,
           message: 'explicit font size is below the readable threshold',
-          metrics: { fontPt, minFontPt: QUALITY_MIN_FONT_PT },
+          metrics: { fontPt, minFontPt },
           suggestedActions: ['increase-font-size', 'reduce-copy', 'switch-layout'],
         }),
       )
@@ -1444,11 +1605,13 @@ function assessFontSizeQuality(shape, issues) {
 export function assessDeckQuality({ patch, deckkit = null } = {}) {
   const issues = []
   const slides = collectPatchQualityFacts(patch)
+  const qualityProfile = catalogEntryForDeckkit(deckkit)?.qualityProfile ?? {}
+  const minFontPt = qualityProfile.minFontPt ?? QUALITY_MIN_FONT_PT
   for (const slide of slides) {
     for (const shape of slide.shapes) {
       assessTextOverflowQuality(shape, issues)
       assessContrastQuality(shape, slide, issues)
-      assessFontSizeQuality(shape, issues)
+      assessFontSizeQuality(shape, issues, minFontPt)
     }
   }
   const bySeverity = issues.reduce((acc, issue) => {

@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/mckinsey-blue/mckLossDriverSlide",
+  "title": "mckLossDriverSlide data schema",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 2, "fontPt": 19, "widthIn": 10.5 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8, "widthIn": 10.2 }
+    },
+    "chartTitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 7, "widthIn": 6.6 }
+    },
+    "drivers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "x-slotBudget": { "maxItems": 5 },
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 2, "fontPt": 8.6, "widthIn": 1.6 }
+          },
+          "sub": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 7, "widthIn": 1.6 }
+          },
+          "action": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 6.6, "widthIn": 3.2 }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "controllable": { "type": "object" },
+    "summary": { "type": "object" },
+    "uncontrollable": { "type": "object" },
+    "pareto": { "type": "object" },
+    "source": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 6.3, "widthIn": 4.7 } }
+  },
+  "additionalProperties": true
+}

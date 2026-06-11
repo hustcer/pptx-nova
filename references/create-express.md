@@ -34,7 +34,8 @@ main assumptions in the final summary.
 
 ## Minimal Express Pipeline
 
-1. Create run directory and check final output collision.
+1. Create run directory and check final output collision; for DeckKit-first runs prefer
+   `pptx-nova-init-run.mjs`.
 2. Generate or normalize `outline.json`.
 3. Generate `deck_lock.json` with canvas, DeckKit, theme/style, font, color,
    language, and page-type decisions.

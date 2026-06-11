@@ -15,6 +15,16 @@ including create, edit, export, extraction, preview, and check workflows:
 .pptx-nova/<slug>-<YYYYMMDD-HHMMSS>/
 ```
 
+For DeckKit-first create workflows, prefer the bundled initializer so path names,
+placeholder files, and output collision checks are consistent:
+
+```bash
+node <skill-root>/scripts/pptx-nova-init-run.mjs \
+  --slug <slug> \
+  --deckkit <id> \
+  --output <final.pptx>
+```
+
 Keep all temporary files in that run directory, including `outline.json`,
 `deck_lock.json`, `assets_manifest.json`, `content.json`, `patch.json`,
 intermediate `.pptx`, sidecar files, `vision.json`, `check.json`, previews,

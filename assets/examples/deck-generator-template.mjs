@@ -13,9 +13,9 @@ import { BUILTIN_STYLE_PACKS, BUILTIN_THEME_PACKS } from './theme-packs.generate
 //   3. 改各 slide 函数里的文字与数据
 //   4. node generate.mjs --theme corporate-blue > patch.json
 //   5. jq '.ops | length' patch.json  # 丰富度自检:客户演示级 ≥ 200,低于这条线视觉一定空
-//   6. s8fy pptx apply -p patch.json -o out.pptx --dry-run --json | tee dry-run.json
+//   6. xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | tee dry-run.json
 //   7. apply 后跑 vision-check；创建型 deck 必须 high=0 且 medium=0
-//   8. s8fy convert out.pptx --to png -o previews --overwrite
+//   8. xdoc convert out.pptx --to png -o previews --overwrite
 //   9. 逐页 Read PNG，确认没有字符重叠/换行压字/截断
 //
 // 为什么用 JS 生成器：手写 700+ 行 JSON envelope 不可维护；JS 生成器允许共享
@@ -662,8 +662,8 @@ const _txH = (sizePt, lines = 1) => `${((sizePt / 72) * 1.5 * lines).toFixed(2)}
 
 // 每页通用底层：顶部品牌色横条 + 页脚 + 页码 + watermark
 // watermark 参数化:默认空串(不渲染);传字串则渲染为右上角半透明品牌标识。
-// 早期模板把 'S8FY DEMO' 硬编码在这里,导致换品牌时左下角 footerLeft 写"BRAND·X"、
-// 右上角 watermark 仍写"S8FY DEMO"—— 同一页面两种身份。
+// 早期模板把 'XDOC DEMO' 硬编码在这里,导致换品牌时左下角 footerLeft 写"BRAND·X"、
+// 右上角 watermark 仍写"XDOC DEMO"—— 同一页面两种身份。
 const pageChrome = (slide, total, footerLeft, watermark = '') => {
   const top = nm(slide, 'TopBar')
   if (S.chrome.topBarH > 0) {

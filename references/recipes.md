@@ -1,6 +1,6 @@
 # Recipes —— 高层意图 → 自动 patch
 
-Recipe 是 s8fy 暴露的 **19 个高层意图 op**，相比手堆 `add-textbox`/`add-shape`，
+Recipe 是 xdoc 暴露的 **19 个高层意图 op**，相比手堆 `add-textbox`/`add-shape`，
 recipe 已经把字体、间距、坐标、placeholder 类型预设好；模型选错坐标的概率几乎
 为 0，是创建 deck 的首选。
 

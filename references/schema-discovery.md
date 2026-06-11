@@ -1,6 +1,6 @@
-# s8fy Schema 渐进式披露
+# xdoc Schema 渐进式披露
 
-s8fy 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema 几千行 / 几十万 token
+xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema 几千行 / 几十万 token
 ——你不需要一次拉全部，按需取就行。
 
 ## 拉法

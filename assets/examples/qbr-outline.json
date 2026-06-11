@@ -45,7 +45,7 @@
       },
       "right": {
         "heading": "新方案",
-        "text": "s8fy CLI，单命令调用",
+        "text": "xdoc CLI，单命令调用",
         "bullets": ["原生可编辑", "结构化错误", "可回放审计"]
       }
     },

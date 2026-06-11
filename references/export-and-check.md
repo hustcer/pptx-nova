@@ -22,14 +22,14 @@ xdoc convert deck.pptx --to text -o <run-dir>/out/
 ```
 
 The command shape is `xdoc convert <pptx> --to <format>`, not
-`s8fy <pptx> -t png`.
+`xdoc <pptx> -t png`.
 
 For PNG and multi-format outputs, path shape matters:
 
 - `-o <run-dir>/previews` means `<run-dir>/previews` is the output root. It
   contains `slide-001.png`, `manifest.json`, and `contact-sheet.png`.
 - `-o <run-dir>/previews/` means parent-directory mode. It creates
-  `<run-dir>/previews/<deck>-img/` for PNG or `<deck>.s8fy/` for multi-format
+  `<run-dir>/previews/<deck>-img/` for PNG or `<deck>.xdoc/` for multi-format
   output.
 
 Use `--overwrite` only when replacing outputs that belong to this conversion

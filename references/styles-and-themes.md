@@ -1,7 +1,7 @@
 # 颜色、字体、主题、母版
 
 PPTX 的视觉风格由四个层次决定：**theme（主题）→ master（母版）→ layout（版式）→ slide**。
-s8fy 让这四层都能改，从最上到最下成本递增 — 优先在 theme 层改，影响最广、最便宜。
+xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 层改，影响最广、最便宜。
 
 ## 颜色
 
@@ -171,7 +171,7 @@ PowerPoint 在中英混排时会根据字符类型选择 `latin` 或 `ea` 字体
 
 ### 权重后缀字体名（`Inter Black` / `Barlow Light` / `Roboto Medium`...）
 
-OOXML 允许在 `typeface` 里直接写带权重后缀的字体名（设计师常这么用）。s8fy 现在
+OOXML 允许在 `typeface` 里直接写带权重后缀的字体名（设计师常这么用）。xdoc 现在
 会识别这种命名，把它拆成 **base family + weight**，并在 PDF 导出时拉对应的 Google
 Fonts 权重子集:
 
@@ -202,7 +202,7 @@ PDF 导出会自动拉 `Barlow` 的 `wght=900` 子集；浏览器 viewer 也会�
 当成 `Barlow` family + `font-weight: 900`。
 
 > 旧版（< `8d10d8ec`）总是拉 Regular 权重,Bold/Light 等带后缀的字体在 PDF 里
-> 会被静默回退到 400。如果用户报告"导出的 PDF 字重不对",先确认 s8fy 版本。
+> 会被静默回退到 400。如果用户报告"导出的 PDF 字重不对",先确认 xdoc 版本。
 
 ### PDF 导出的 bold / italic 现在正确解析
 
@@ -224,7 +224,7 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 上面这种 boldItalic 组合在旧版 PDF 里会回退到 regular(无粗体也无斜体)。现在
 正确显示。**注意**: 浏览器 viewer 一直支持,这条修复只针对 PDF 导出路径。
 
-如果用了**离线字体缓存**(`cache/<family>/<style>.ttf`),s8fy 会按 style 拼文件
+如果用了**离线字体缓存**(`cache/<family>/<style>.ttf`),xdoc 会按 style 拼文件
 名:`bold.ttf` / `italic.ttf` / `bold_italic.ttf`。缺哪种 style 哪种 style 回退
 到 regular。
 

@@ -1,6 +1,6 @@
 # 修改已有 PPTX 的完整套路
 
-修改是 s8fy 相对其它工具的核心差异化场景。这里讲清楚 **怎样不踩坑地改一份
+修改是 xdoc 相对其它工具的核心差异化场景。这里讲清楚 **怎样不踩坑地改一份
 已有 deck**。
 
 ## 0. 心智模型
@@ -376,7 +376,7 @@ dry-run 报告里会有：
 
 ## 6. Preserve-only 提示
 
-inspect 报告中下面三个布尔字段如果是 true，说明该页有 s8fy **当前不能编辑**的内容：
+inspect 报告中下面三个布尔字段如果是 true，说明该页有 xdoc **当前不能编辑**的内容：
 
 | 字段            | 含义                | 处理                                     |
 | --------------- | ------------------- | ---------------------------------------- |
@@ -384,22 +384,22 @@ inspect 报告中下面三个布尔字段如果是 true，说明该页有 s8fy *
 | `hasTiming`     | 有动画/timing       | 不要尝试改动画                           |
 | `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape |
 
-遇到时直接告诉用户："这页有 SmartArt / 动画，s8fy 当前只能保留原样不能编辑，
+遇到时直接告诉用户："这页有 SmartArt / 动画，xdoc 当前只能保留原样不能编辑，
 要改的话需要在 PowerPoint 里手工调整。" 不要假装做了。
 
 ## 7. Sidecar 时光机
 
-每次 `apply`（除非 `--no-sidecar`）都会写一份 `<out>.s8fy.json` sidecar。用法：
+每次 `apply`（除非 `--no-sidecar`）都会写一份 `<out>.xdoc.json` sidecar。用法：
 
 ```bash
 # 回放（用 sidecar 从 input.pptx 重建 output.pptx，验证可重现性）
-xdoc pptx replay --from-sidecar output.pptx.s8fy.json -o recovered.pptx
+xdoc pptx replay --from-sidecar output.pptx.xdoc.json -o recovered.pptx
 
 # 审计（输出 sidecar 的 op 列表与 createdIds）
-xdoc pptx audit --from-sidecar output.pptx.s8fy.json --json
+xdoc pptx audit --from-sidecar output.pptx.xdoc.json --json
 
 # 回滚（撤销最近一次 apply）
-xdoc pptx rollback --from-sidecar output.pptx.s8fy.json -o input-restored.pptx
+xdoc pptx rollback --from-sidecar output.pptx.xdoc.json -o input-restored.pptx
 ```
 
 每次给用户输出 `.pptx` 时，也提醒一下 sidecar 在哪：用户可以保留它做 audit。

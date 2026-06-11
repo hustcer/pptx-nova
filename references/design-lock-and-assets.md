@@ -1,7 +1,7 @@
 # Design Lock and Assets
 
 本文件定义 `pptx-nova` 的轻量运行契约：`deck_lock.json`、按需生成的 `assets_manifest.json`、
-split handoff 使用的 `resume_manifest.json` 和 `pptx-nova-check-lock.mjs`。它们只服务 s8fy 原生 PPTX / DeckKit / patch
+split handoff 使用的 `resume_manifest.json` 和 `pptx-nova-check-lock.mjs`。它们只服务 xdoc 原生 PPTX / DeckKit / patch
 工作流，不引入 SVG executor、逐页手写或 `spec_lock.md` 阶段。
 
 ## 1. 何时生成
@@ -260,7 +260,7 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 - AI 生成图片必须写 `pptxUse.noSlideChrome: true` 或 `slot.noSlideChrome: true`。prompt
   只生成照片、插画、纹理、产品图或场景素材，不要生成 PPT 页面本身；禁止让图片自带标题、
   页眉、页脚、页码、logo、边框、卡片框、图表轴、按钮或任何 slide chrome。标题、数据、
-  页码、logo 和边框统一由 DeckKit / s8fy 原生 shape 绘制。
+  页码、logo 和边框统一由 DeckKit / xdoc 原生 shape 绘制。
 
 `pptx-nova-check-lock.mjs` 会检查：图片资产缺 slot、ratio、fitPolicy 时给 warning；
 AI 生成图片缺 `noSlideChrome` 时给 error；`deck_lock.json` / `content.json` 中的

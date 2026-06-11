@@ -136,7 +136,7 @@ just deckkit-examples all
 
 The update script runs golden benchmark cases, verifies gates, converts contact
 sheets to WebP, and writes only changed hashes. When DeckKit code, content, and
-s8fy output logic do not change, repeated `just deckkit-examples` runs should
+xdoc output logic do not change, repeated `just deckkit-examples` runs should
 not create git-visible changes.
 
 ## Deep References

@@ -1,7 +1,7 @@
 # 数据驱动 Deck —— from-data + bind-data
 
 数据驱动场景的核心思路：**模板与数据分离**。Deck 里写占位符 `{{path}}`，数据塞在
-JSON 里，s8fy 渲染时把占位符替换成真值。
+JSON 里，xdoc 渲染时把占位符替换成真值。
 
 适用：
 
@@ -31,7 +31,7 @@ JSON 里，s8fy 渲染时把占位符替换成真值。
 
 ### 1.1 准备模板
 
-用 PowerPoint 或 s8fy 提前做一份 `template.pptx`，在文本里写占位符：
+用 PowerPoint 或 xdoc 提前做一份 `template.pptx`，在文本里写占位符：
 
 ```
 标题占位:   "{{title}}"
@@ -71,7 +71,7 @@ KPI 变化:   "{{kpi.revenue.delta}}"
 
 ### 1.3 准备 bindings.json（可选）
 
-`bindings.json` 告诉 s8fy 哪些 shape 不是简单文本替换 —— 而是 table / chart 整体绑定：
+`bindings.json` 告诉 xdoc 哪些 shape 不是简单文本替换 —— 而是 table / chart 整体绑定：
 
 ```json
 [
@@ -105,7 +105,7 @@ KPI 变化:   "{{kpi.revenue.delta}}"
 | `table`      | 整张表用 `data` 里的二维数组覆盖（可 `resize: true`） |
 | `chart`      | 用 `data.categories` + `data.series` 替换 chart 数据  |
 
-> 如果 deck 里的占位符都是文本类型，bindings.json 可以省略；s8fy 默认会扫所有
+> 如果 deck 里的占位符都是文本类型，bindings.json 可以省略；xdoc 默认会扫所有
 > shape 的 text 做 `{{path}}` 替换。
 
 ### 1.4 执行

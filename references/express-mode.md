@@ -124,7 +124,7 @@ xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | save dry.j
 # 8. 自动修复：合并 autoRetry==true 的 fixPatch 重跑 dry-run（见 troubleshooting.md）
 #    ambiguous selector / fuzzy enum / RGB 规整 等机器有信心的修复直接合
 
-# 9. 真 apply（去掉 --dry-run，留 sidecar out.pptx.s8fy.json）
+# 9. 真 apply（去掉 --dry-run，留 sidecar out.pptx.xdoc.json）
 xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
 
 # 10. 几何自检闭环（render-free，见 §6）

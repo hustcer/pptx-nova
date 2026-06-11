@@ -17,7 +17,7 @@ Check that committed assets are in sync without writing files:
 just deckkit-examples check
 ```
 
-When DeckKit code, content, or s8fy output logic has not changed, repeating
+When DeckKit code, content, or xdoc output logic has not changed, repeating
 `just deckkit-examples` should not create git-visible changes. A repeated
 change in `deck.pptx`, `contact-sheet.webp`, `summary.json`, or
 `manifest.json` is treated as a reproducibility bug.

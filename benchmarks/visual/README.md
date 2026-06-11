@@ -49,7 +49,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs \
   --clean
 ```
 
-The current CLI runs validate/build, s8fy dry-run, real apply, `vision-check`,
+The current CLI runs validate/build, xdoc dry-run, real apply, `vision-check`,
 PNG preview, and contact-sheet gates. It writes `patch.json`, `deck.pptx`,
 `dry-run.json`, `apply.json`, `vision.json`, `convert-report.json`,
 `previews/`, `contact-sheet.png`, `timing.json`, and `summary.json` to

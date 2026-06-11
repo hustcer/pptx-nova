@@ -35,7 +35,7 @@ Options:
   --lock <path>        Required run-level design lock.
   --assets <path>      Optional assets_manifest.json.
   --content <path>     Optional DeckKit content manifest.
-  --patch <path>       Optional s8fy patch envelope.
+  --patch <path>       Optional xdoc patch envelope.
   --strict-colors      Treat colors not declared in deck_lock.json as errors.
   --strict-fonts       Treat font families not declared in deck_lock.json as errors.
   --json               Print machine-readable report.

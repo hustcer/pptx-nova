@@ -1,6 +1,6 @@
 # 图表（Chart）创建与编辑
 
-s8fy 支持 **19 种 chart kind**，每种支持若干 variant。背后映射 Office 标准
+xdoc 支持 **19 种 chart kind**，每种支持若干 variant。背后映射 Office 标准
 `XlChartType` 103 项 catalog；当前 45 项 supported / 32 项 partial / 26 项 unsupported。
 
 ## Native diagram/table presets
@@ -603,7 +603,7 @@ triangle / x / star / dash / dot / plus / none / auto`。
 
 ## Unsupported 时怎么办
 
-下列 Office `XlChartType` / 高级特性当前 s8fy 标为 unsupported：
+下列 Office `XlChartType` / 高级特性当前 xdoc 标为 unsupported：
 
 - 3D series-axis / 高级 date-axis
 - volume stock（含 volume 维度的 K 线）
@@ -611,7 +611,7 @@ triangle / x / star / dash / dot / plus / none / auto`。
 
 遇到时：
 
-1. 告诉用户 "这种图表 s8fy 当前不支持，可以用..." 给出替代方案
+1. 告诉用户 "这种图表 xdoc 当前不支持，可以用..." 给出替代方案
 2. 备选方案：
    - volume stock → 拆成 stock + bar 两张图
    - 高级 secondary-axis 之外的多轴 → 用 `combo` 的 `secondaryAxis` 加单轴方案

@@ -29,12 +29,12 @@ Options:
   --repeat <n>                Repeat validate+build for timing. Defaults to 1
   --fail-on-fit <level>       none|error|warning. Defaults to error
   --fail-on-vision <level>    none|high|medium|any. Defaults to medium
-  --render-previews           Render per-slide PNG previews with s8fy convert. Default
+  --render-previews           Render per-slide PNG previews with xdoc convert. Default
   --no-render-previews        Skip PNG preview and contact-sheet rendering
   --contact-sheet             Render PNG previews and contact sheet. Default
   --no-contact-sheet          Skip contact sheet while keeping per-slide previews
   --update-baseline           Copy summary.json into visual baselines
-  --s8fy-bin <path>           xdoc binary path. Defaults to s8fy
+  --xdoc-bin <path>           xdoc binary path. Defaults to xdoc
   --clean                     Remove each case output directory before running
   --json                      Print machine-readable summary
   --help                      Show this help
@@ -52,7 +52,7 @@ function parseArgs(argv) {
     renderPreviews: true,
     contactSheet: true,
     updateBaseline: false,
-    s8fyBin: '',
+    xdocBin: '',
     clean: false,
     json: false,
   }
@@ -98,8 +98,8 @@ function parseArgs(argv) {
     } else if (arg === '--fail-on-vision') {
       args.failOnVision = valueAfter(argv, i, arg)
       i += 1
-    } else if (arg === '--s8fy-bin') {
-      args.s8fyBin = valueAfter(argv, i, arg)
+    } else if (arg === '--xdoc-bin') {
+      args.xdocBin = valueAfter(argv, i, arg)
       i += 1
     } else {
       throw new Error(`Unknown option: ${arg}\n\n${usage}`)
@@ -319,8 +319,8 @@ function summarizeVisionReport(report) {
   }
 }
 
-function runS8fyStages({ args, patchPath, deckPath, outDir }) {
-  const bin = args.s8fyBin || 's8fy'
+function runXdocStages({ args, patchPath, deckPath, outDir }) {
+  const bin = args.xdocBin || 'xdoc'
   const dryRunPath = join(outDir, 'dry-run.json')
   const applyPath = join(outDir, 'apply.json')
   const visionPath = join(outDir, 'vision.json')
@@ -329,7 +329,7 @@ function runS8fyStages({ args, patchPath, deckPath, outDir }) {
   const dryRun = runJsonCommand(
     bin,
     ['pptx', 'apply', '-p', patchPath, '-o', deckPath, '--dry-run', '--json'],
-    's8fy dry-run',
+    'xdoc dry-run',
   )
   const dryRunMs = elapsedMs(dryRunStart)
   writeJson(dryRunPath, dryRun.json)
@@ -339,7 +339,7 @@ function runS8fyStages({ args, patchPath, deckPath, outDir }) {
   const apply = runJsonCommand(
     bin,
     ['pptx', 'apply', '-p', patchPath, '-o', deckPath, '--overwrite', '--json'],
-    's8fy apply',
+    'xdoc apply',
   )
   const applyMs = elapsedMs(applyStart)
   writeJson(applyPath, apply.json)
@@ -349,7 +349,7 @@ function runS8fyStages({ args, patchPath, deckPath, outDir }) {
   const vision = runJsonCommand(
     bin,
     ['pptx', 'vision-check', deckPath, '--json'],
-    's8fy vision-check',
+    'xdoc vision-check',
   )
   const visionMs = elapsedMs(visionStart)
   writeJson(visionPath, vision.json)
@@ -416,7 +416,7 @@ function runPreviewStages({ args, deckPath, outDir, expectedCount }) {
   rmSync(contactSheetPath, { force: true })
   rmSync(convertReportPath, { force: true })
 
-  const bin = args.s8fyBin || 's8fy'
+  const bin = args.xdocBin || 'xdoc'
   const commandArgs = [
     'convert',
     deckPath,
@@ -434,7 +434,7 @@ function runPreviewStages({ args, deckPath, outDir, expectedCount }) {
   }
 
   const convertStart = performance.now()
-  const convert = runCommand(bin, commandArgs, 's8fy convert png')
+  const convert = runCommand(bin, commandArgs, 'xdoc convert png')
   const convertMs = elapsedMs(convertStart)
   if (convert.stdout.trim()) writeFileSync(join(outDir, 'convert-stdout.txt'), convert.stdout)
   if (convert.stderr.trim()) writeFileSync(join(outDir, 'convert-stderr.txt'), convert.stderr)
@@ -768,12 +768,12 @@ async function runCase(benchCase, args) {
   writeJson(patchPath, build.patch)
   writeJson(timingPath, timing)
   if (build.stderr.trim()) writeFileSync(join(outDir, 'build-stderr.txt'), build.stderr)
-  const s8fy = runS8fyStages({ args, patchPath, deckPath, outDir })
+  const xdoc = runXdocStages({ args, patchPath, deckPath, outDir })
   const preview = runPreviewStages({
     args,
-    deckPath: s8fy.paths.deck,
+    deckPath: xdoc.paths.deck,
     outDir,
-    expectedCount: expectedPreviewCount({ content, vision: s8fy.vision }),
+    expectedCount: expectedPreviewCount({ content, vision: xdoc.vision }),
   })
 
   const gate = evaluateExpected({
@@ -782,9 +782,9 @@ async function runCase(benchCase, args) {
     content,
     validation,
     patch: build.patch,
-    dryRun: s8fy.dryRun,
-    apply: s8fy.apply,
-    vision: s8fy.vision,
+    dryRun: xdoc.dryRun,
+    apply: xdoc.apply,
+    vision: xdoc.vision,
     previews: preview.previews,
     contactSheet: preview.contactSheet,
     args,
@@ -800,10 +800,10 @@ async function runCase(benchCase, args) {
       expected: relative(WORK_ROOT, expectedPath),
       patch: relative(WORK_ROOT, patchPath),
       timing: relative(WORK_ROOT, timingPath),
-      deck: relative(WORK_ROOT, s8fy.paths.deck),
-      dryRun: relative(WORK_ROOT, s8fy.paths.dryRun),
-      apply: relative(WORK_ROOT, s8fy.paths.apply),
-      vision: relative(WORK_ROOT, s8fy.paths.vision),
+      deck: relative(WORK_ROOT, xdoc.paths.deck),
+      dryRun: relative(WORK_ROOT, xdoc.paths.dryRun),
+      apply: relative(WORK_ROOT, xdoc.paths.apply),
+      vision: relative(WORK_ROOT, xdoc.paths.vision),
       previews: relative(WORK_ROOT, preview.paths.previews),
       convertReport: preview.paths.convertReport
         ? relative(WORK_ROOT, preview.paths.convertReport)
@@ -822,9 +822,9 @@ async function runCase(benchCase, args) {
       schemaVersion: build.patch.schemaVersion,
       ops: build.patch.ops?.length ?? 0,
     },
-    dryRun: s8fy.dryRun,
-    apply: s8fy.apply,
-    vision: s8fy.vision,
+    dryRun: xdoc.dryRun,
+    apply: xdoc.apply,
+    vision: xdoc.vision,
     previews: preview.previews,
     contactSheet: preview.contactSheet,
     skipped: {
@@ -833,7 +833,7 @@ async function runCase(benchCase, args) {
       vision: false,
       previews: preview.skipped.previews,
       contactSheet: preview.skipped.contactSheet,
-      s8fyBin: args.s8fyBin ? relative(WORK_ROOT, resolve(args.s8fyBin)) : '',
+      xdocBin: args.xdocBin ? relative(WORK_ROOT, resolve(args.xdocBin)) : '',
     },
     requested: {
       renderPreviews: args.renderPreviews,
@@ -842,7 +842,7 @@ async function runCase(benchCase, args) {
     },
     timing: {
       ...timing,
-      s8fy: s8fy.timing,
+      xdoc: xdoc.timing,
       preview: preview.timing,
     },
     gate,

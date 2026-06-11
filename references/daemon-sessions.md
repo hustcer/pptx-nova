@@ -84,7 +84,7 @@ session 按 `canonical(input_path)` 键化：同一个 input deck 多次调用�
 daemon 不改变 patch 语义，只改变执行链路：
 
 - `--dry-run --json` 在 daemon 模式下同样工作，且更快（共用 in-memory model）
-- 写盘时 sidecar 文件 `<out>.s8fy.json` 照常生成，后续 `rollback --from-sidecar`
+- 写盘时 sidecar 文件 `<out>.xdoc.json` 照常生成，后续 `rollback --from-sidecar`
   不依赖 daemon
 - `apply` 失败时 live session 不变，可以接着 inspect 看当前状态
 - **agent schema 渲染缓存**：daemon 启动时会预热一次 `xdoc schema` 的 JSON
@@ -156,7 +156,7 @@ export XDOC_DAEMON_AUTO_SPAWN=0
 - **不要假设 daemon 长时间常驻** — `XDOC_DAEMON_IDLE_MS` 默认 5 分钟，Agent 工作流
   之间有长时间停顿时模型已经被释放，下一次调用会重新加载（行为正确，但失去
   加速）
-- **不要在 daemon 模式下手动覆写 `<out>.s8fy.json`** — sidecar 由 apply 路径自己
+- **不要在 daemon 模式下手动覆写 `<out>.xdoc.json`** — sidecar 由 apply 路径自己
   写；手动改会让 rollback 失败
 - **不要给 `from-data` / `check-brand` / `apply-brand` / `copy-from` /
   `extract-style` / `import-template` / `new` / `catalog` / `recipe` /

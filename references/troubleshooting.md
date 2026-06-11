@@ -1,6 +1,6 @@
 # 错误排查与自修复
 
-s8fy 的错误是**结构化的**，每个错误带：
+xdoc 的错误是**结构化的**，每个错误带：
 
 ```json
 {
@@ -75,7 +75,7 @@ xdoc schema | jq '.errorCatalog.scenarioCoverage'
 | -------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ |
 | `INVALID_SCHEMA`           | patch JSON 不符合 schema                        | 按 `path` / `expected` 改字段                                            |
 | `INVALID_OPERATION`        | op 字段错或必填缺失                             | 检查 `xdoc schema --op <name>`                                           |
-| `UNSUPPORTED_FEATURE`      | 用了 s8fy 不支持的 op / 枚举值                  | 告诉用户限制，找替代                                                     |
+| `UNSUPPORTED_FEATURE`      | 用了 xdoc 不支持的 op / 枚举值                  | 告诉用户限制，找替代                                                     |
 | `AMBIGUOUS_SELECTOR`       | shape selector 匹配多个                         | 用 `suggestions[].fixPatch` 选具体 id                                    |
 | `MISSING_SELECTOR_TARGET`  | selector 没匹配到                               | 重新 inspect 确认 shape 真存在                                           |
 | `INVALID_LAYOUT_SELECTOR`  | `add-slide.layout` 选不到                       | 报告会给候选 layouts                                                     |
@@ -100,7 +100,7 @@ xdoc schema | jq '.errorCatalog.scenarioCoverage'
 
 ## PNG 预览落点漂移 / 陈旧 PNG
 
-如果复核 PNG 时看到旧内容，先确认本轮 `xdoc convert` 的实际输出目录。旧版 s8fy
+如果复核 PNG 时看到旧内容，先确认本轮 `xdoc convert` 的实际输出目录。旧版 xdoc
 曾经把 `-o previews` 的语义绑定到文件系统状态：第一次 `previews` 不存在时写到
 `previews/slide-*.png`，第二次目录已存在时可能静默写到
 `previews/<deck>-img/slide-*.png`，导致 agent 误读上一轮 PNG。
@@ -251,11 +251,11 @@ scatter / bubble 误传 `categories + values`：
 }
 ```
 
-修复：按 suggestion 找替代，或告诉用户这种特性 s8fy 当前不支持。
+修复：按 suggestion 找替代，或告诉用户这种特性 xdoc 当前不支持。
 
 ### 9. layout.requiredSlot.missing（DeckKit validate-content）
 
-来源是 DeckKit 的 `validate-content.mjs`（layout-contract），不是 s8fy：
+来源是 DeckKit 的 `validate-content.mjs`（layout-contract），不是 xdoc;
 
 ```text
 [error] slides[3]: required layout slot "data.eyebrow" is missing or empty
@@ -338,7 +338,7 @@ cat patch.json | jq -e '.schemaVersion == 1 and (.ops | type == "array")'
 如果意外把 deck 改坏了：
 
 ```bash
-xdoc pptx rollback --from-sidecar out.pptx.s8fy.json -o restored.pptx
+xdoc pptx rollback --from-sidecar out.pptx.xdoc.json -o restored.pptx
 ```
 
 会用 sidecar 重新执行除最后一次 apply 之外的所有历史 op，给出修改前的 deck。

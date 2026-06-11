@@ -49,7 +49,7 @@ current iteration.
 
 For PNG previews and multi-format exports, `xdoc convert -o <dir>` uses `<dir>`
 itself as the output root. A trailing separator, `-o <dir>/`, means parent
-directory mode and creates `<dir>/<deck>-img/` or `<dir>/<deck>.s8fy/`. Prefer a
+directory mode and creates `<dir>/<deck>-img/` or `<dir>/<deck>.xdoc/`. Prefer a
 current-run root such as `<run-dir>/previews` for visual QA. Before regenerating
 previews, make sure the preview root belongs to the current run, then replace it
 with `--overwrite` or clear that current-run directory so stale PNG files cannot

@@ -109,7 +109,7 @@
     "x": "11.5in", "y": "0.2in", "w": "1.7in", "h": "0.3in",
     "name": "Watermark" },
   { "op": "set-text", "slide": N, "shape": { "name": "Watermark" },
-    "text": "S8FY DEMO" },
+    "text": "XDOC DEMO" },
   { "op": "set-run", "slide": N, "shape": { "name": "Watermark" },
     "paragraph": 0, "run": 0,
     "font": { "name": "Inter", "size": "9pt", "bold": true, "color": "E8EAED" } }

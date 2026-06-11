@@ -131,8 +131,8 @@ node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation 
 2. `pptx-nova-build.mjs` 可重复生成稳定 patch 和 `quality.json`
 3. DeckKit benchmark 的 golden / stress / mixed-language cases 全部通过
 4. `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate` 通过
-5. `s8fy pptx apply --dry-run --json` 通过
-6. `s8fy pptx vision-check out.pptx --json` 的 high/medium 为 0
+5. `xdoc pptx apply --dry-run --json` 通过
+6. `xdoc pptx vision-check out.pptx --json` 的 high/medium 为 0
 7. PNG contact sheet 和逐页检查通过
 8. catalog 记录版本、visual grammar、验证命令、示例路径和已知限制
 

@@ -1,7 +1,7 @@
 {
   "_comment": "示例：修改已有 deck 的标题文字+颜色+备注。注意：recipe 生成的 shape 是 textBox 不是 placeholder，需要先 inspect 看 name，或者用 query.nameRegex 模糊匹配。",
-  "_step1_inspect": "s8fy pptx inspect input.pptx --json",
-  "_step2_dry_run": "s8fy pptx apply -p edit-title.patch.json -i input.pptx -o output.pptx --dry-run --json",
+  "_step1_inspect": "xdoc pptx inspect input.pptx --json",
+  "_step2_dry_run": "xdoc pptx apply -p edit-title.patch.json -i input.pptx -o output.pptx --dry-run --json",
   "schemaVersion": 1,
   "ops": [
     {

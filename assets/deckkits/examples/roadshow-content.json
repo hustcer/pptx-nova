@@ -97,7 +97,7 @@
         "title": "本地 CLI & 私有化 API 转换服务",
         "srcLabel": "PPTX",
         "srcSub": "源文件",
-        "engTitle": "s8fy 引擎",
+        "engTitle": "xdoc 引擎",
         "engSub": "本地 CLI 与 API 服务\n底层引擎复用 90%+",
         "outputs": [
           ["3C6FA6", "PDF", "高保真导出"],

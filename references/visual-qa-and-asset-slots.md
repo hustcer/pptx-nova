@@ -1,6 +1,6 @@
 # Visual QA and Asset Slots
 
-本文件把 guizang 可借鉴的视觉验收经验转成 pptx-nova 可执行规则：PPTX 仍由 DeckKit / s8fy
+本文件把 guizang 可借鉴的视觉验收经验转成 pptx-nova 可执行规则：PPTX 仍由 DeckKit / xdoc
 原生 shape 生成，图片只作为素材进入明确槽位，不生成整页 slide chrome。
 
 ## P0 必修项

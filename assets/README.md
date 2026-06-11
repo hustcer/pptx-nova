@@ -39,12 +39,12 @@ introduced.
   `node <skill-root>/scripts/pptx-nova-icons.mjs ...`. Do not fetch icons from the network or
   scan the Tabler checkout in the deck generation path.
 
-- Use `s8fy pptx extract-style reference.pptx --output style.json --json` to
+- Use `xdoc pptx extract-style reference.pptx --output style.json --json` to
   create a draft profile before adding a new brand or theme entry.
-- Use `s8fy pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json`
+- Use `xdoc pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json`
   to copy a reference PPTX into `decks/<id>/`, write brand/layout/theme/style
   profiles, and register the imported entries in the local catalogs.
-- Use `s8fy pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx`
+- Use `xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx`
   when you only need to reuse one slide in another deck.
 - Use `node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
   plus `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`

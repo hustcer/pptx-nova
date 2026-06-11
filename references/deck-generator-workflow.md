@@ -31,7 +31,7 @@
 
 先确认 `assets/deckkits/catalog.json` 里没有满足场景、语言、密度和页型覆盖的
 production/default DeckKit。若有可用 DeckKit，直接回到 `deckkit-mode.md` 的
-`content.json → validate-content → createDeck → s8fy → vision-check → PNG review` 生产路径。
+`content.json → validate-content → createDeck → xdoc → vision-check → PNG review` 生产路径。
 只有确实需要新 DeckKit 或新页型时，才进入下面的探索生成器流程。
 
 ```bash
@@ -432,10 +432,10 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 | 主题色没换干净（部分 shape 还是旧色）                   | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                      |
 | KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                |
 | textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                     |
-| 同页左下 footer 写"BRAND·X"右上 watermark 写"S8FY DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化            |
+| 同页左下 footer 写"BRAND·X"右上 watermark 写"XDOC DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化            |
 | 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                  |
 | 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                            |
-| `s8fy -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                              |
+| `xdoc -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                              |
 | `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须全名 `"bottom"` / `"outsideEnd"`，shorthand 拒                                                   |
 | `titleStyle.bold` 被拒                                  | 放进 `font: { bold: true }` 子对象                                                                        |
 

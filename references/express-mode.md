@@ -244,7 +244,7 @@ apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检
   s8fy pptx vision-check out.pptx --json | jq '.summary'
   ```
 
-- **人工确认**：`autoRetry==false` 的三类（overlap / overflow / alignment，confidence 0.45-0.5）
+- **人工确认**：`autoRetry==false` 的静态视觉问题（overlap / overflow / unexpected-wrap / alignment）
   不是可忽略项；它们是需要人工处理的候选修复。放大盒子或挪形状可能引入**新**碰撞，
   看 `reason` 后改 generator / layout / 文案 / textbox 尺寸，再重 apply。
   `font-too-small` 无 fix（放大字号会反触发 overflow），但创建型 deck 不能把它当装饰性
@@ -252,8 +252,8 @@ apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检
 
 - **交付门槛**：创建型 deck 必须让 `summary.bySeverity.high == 0` 且
   `summary.bySeverity.medium == 0`。`text-overflow-estimate`、`geometry-overlap`、
-  `text-edge-margin` 这类 medium 常常对应真实字符重叠、换行压字或页脚撞正文，不能
-  因为不是 high 就放行。
+  `text-unexpected-wrap`、`text-edge-margin` 这类 medium 常常对应真实字符重叠、
+  换行压字、subtitle 孤行或页脚撞正文，不能因为不是 high 就放行。
 
 vision-check 是静态估算；**字符实际重叠 / 字体换行压字 / 小字号可读性 / 对比度 /
 箭头是否歪、连接线是否接上 / 中轴标识是否真居中 / 装饰是否真盖住文字 / 配色协调仍靠

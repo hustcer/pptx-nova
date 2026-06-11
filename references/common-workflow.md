@@ -108,7 +108,8 @@ check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> optional s8
 ```
 
 `vision-check` high/medium issues are blockers for create workflows. Low issues
-still deserve judgment, especially small fonts, dense text, and alignment.
+still deserve judgment, especially small fonts, unexpected subtitle/label wraps,
+dense text, and alignment.
 
 PNG/contact-sheet review remains required for pixel-level concerns:
 

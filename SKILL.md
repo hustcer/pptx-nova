@@ -103,6 +103,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 - 连接线、箭头、中轴、VS 标识和编号圆应从目标 shape 的 bbox 推导，不凭感觉摆放。
 - dry-run 的 `text-overflow-estimate` 与 `vision-check` 复用同一套静态文本溢出估算；
   看到 medium 时先在写文件前改高度、删字、拆页或调整 autofit。
+- `subtitle`、`eyebrow`、`kicker`、`badge`、`label` 等预期单行文本不能出现尾词孤行；
+  `vision-check` 的 `text-unexpected-wrap` 需要通过缩短文案、增宽或换布局处理。
 
 ## 必经验证
 

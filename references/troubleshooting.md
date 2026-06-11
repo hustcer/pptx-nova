@@ -287,6 +287,7 @@ chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案�
 | code                           | 含义                    | 处理                                       |
 | ------------------------------ | ----------------------- | ------------------------------------------ |
 | `text-overflow-estimate`       | 文字可能超出 shape 边界 | 加大 shape / 用 `fit-text` / 缩短文本      |
+| `text-unexpected-wrap`         | 预期单行文本出现孤行    | 缩短 subtitle/label / 加宽 / 换布局        |
 | `chart-label-density-possible` | chart 标签太密          | 改 `set-chart-data-labels.position` 或缩放 |
 | `table-data-outside-grid`      | 表格数据超出 grid       | 加行列 / 调整数据                          |
 | `table-cell-text-long`         | 表格单元格文本过长      | 加列宽 / 缩字号 / 拆行                     |
@@ -294,7 +295,7 @@ chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案�
 | `ole-icon-missing-or-unsized`  | OLE icon 未显式定尺寸   | 加 `iconW` / `iconH` 或确认默认 icon       |
 
 不一定每条 risk 都要处理 —— **轻量警告可以让用户决定**。但 PPT 给老板看的话，
-至少把 `text-overflow-estimate` 和 chart/table 相关风险处理掉。
+至少把 `text-overflow-estimate`、`text-unexpected-wrap` 和 chart/table 相关风险处理掉。
 
 ## 调试技巧
 

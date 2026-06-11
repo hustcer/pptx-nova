@@ -389,10 +389,13 @@ medium 时优先加高、删字、拆页或改 autofit。**单行最小给字号
 
 dry-run 做 schema / selector / op-level 语义校验，并用和 `vision-check` 相同的
 文本溢出估算器提前报告 `text-overflow-estimate`。`vision-check` 继续负责几何重叠、
-边界、字号等静态风险。下面这些仍必须靠 PNG 人工 Read 才能发现：
+边界、字号和预期单行文本的 `text-unexpected-wrap` 等静态风险。下面这些仍必须靠 PNG
+人工 Read 才能发现：
 
 1. **字符重叠 / 换行压字 / 截断** —— 字体、theme/style、平台渲染差异会改变实际
    换行和字高；dry-run / vision-check 的 medium 风险要处理，PNG 里还要人工确认没有撞字。
+   subtitle、eyebrow、badge、label 这类单行角色如果出现孤行，先处理
+   `text-unexpected-wrap`，再看 PNG。
 2. **小字号可读性** —— `font-too-small` 可能只是 low，甚至手写生成器可能没触发；
    PNG 上如果圆形编号、badge、risk 标签、灰色说明、chart/table label 需要凑近看，就必须返工。
 3. **装饰元素遮挡主标题** —— textbox 在 dry-run 看来高度合法，但坐标和装饰

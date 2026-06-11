@@ -43,7 +43,14 @@ const SUBTITLE_RULE_GAP = 0.12
 
 const pad2 = (value) => String(value).padStart(2, '0')
 const asLines = (value) => (Array.isArray(value) ? value.join('\n') : String(value ?? ''))
-const limitItems = (items, max) => (items ?? []).slice(0, max)
+const limitItems = (items, max, path = 'items') => {
+  const list = items ?? []
+  if (!Array.isArray(list)) return []
+  if (list.length > max) {
+    throw new Error(`${path}: ${list.length} items exceeds layout limit ${max}`)
+  }
+  return list
+}
 const roundIn = (value) => Number(value.toFixed(3))
 const explicitLineCount = (value) =>
   Math.max(
@@ -141,10 +148,10 @@ const inferTableColumns = (rows) => {
   ]
 }
 
-const normalizeTableColumns = (data, rows) => {
+const normalizeTableColumns = (data, rows, path = 'columns') => {
   const raw =
     Array.isArray(data.columns) && data.columns.length > 0 ? data.columns : inferTableColumns(rows)
-  return limitItems(raw, 6).map((column, i) => {
+  return limitItems(raw, 6, path).map((column, i) => {
     const source = typeof column === 'string' ? { key: column, label: column } : (column ?? {})
     const key = String(source.key ?? source.id ?? source.label ?? `c${i + 1}`)
     const widthValue = Number(source.width ?? source.weight)
@@ -699,7 +706,19 @@ function makePageTypes(p, chrome) {
     const x = 4.62
     const y0 = 1.95
     const step = 0.66
-    p.vRule(s, nm(s, 'LifeLine'), x + 0.78, y0 + 0.18, 4.22, C.black, 0.015)
+    if (items.length > 1) {
+      const firstDotCenterY = y0 + 0.095
+      const lastDotCenterY = y0 + (items.length - 1) * step + 0.095
+      p.vRule(
+        s,
+        nm(s, 'LifeLine'),
+        x + 0.78,
+        roundIn(firstDotCenterY),
+        roundIn(lastDotCenterY - firstDotCenterY),
+        C.black,
+        0.015,
+      )
+    }
     items.forEach((event, i) => {
       const y = y0 + i * step
       const accent = event.accent ?? C.black
@@ -730,11 +749,11 @@ function makePageTypes(p, chrome) {
     })
   }
 
-  function swissTypefaceSlide(s, data) {
+  function swissTypefaceSlide(s, data, ctx = {}) {
     p.addSlide(s)
     chrome.pageMark(s)
     chrome.title(s, data, { y: 0.68 })
-    const cards = limitItems(data.cards, 3)
+    const cards = limitItems(data.cards, 3, `${ctx.path ?? 'data'}.cards`)
     const cols = grid(3, 0.5, 0.75, 11.82)
     cards.forEach((card, i) => {
       const col = cols[i]
@@ -823,11 +842,11 @@ function makePageTypes(p, chrome) {
     })
   }
 
-  function swissGridTypesSlide(s, data) {
+  function swissGridTypesSlide(s, data, ctx = {}) {
     p.addSlide(s)
     chrome.pageMark(s)
     chrome.title(s, data, { y: 0.68 })
-    const items = limitItems(data.items, 4)
+    const items = limitItems(data.items, 4, `${ctx.path ?? 'data'}.items`)
     p.hRule(s, nm(s, 'GridCrossH'), 0.68, 4.52, 12.0, C.gridLite, 0.012)
     p.vRule(s, nm(s, 'GridCrossV'), 6.66, 2.08, 4.78, C.gridLite, 0.012)
     const rows = [
@@ -1079,11 +1098,11 @@ function makePageTypes(p, chrome) {
     )
   }
 
-  function swissColumnSlide(s, data) {
+  function swissColumnSlide(s, data, ctx = {}) {
     p.addSlide(s)
     chrome.pageMark(s)
     chrome.title(s, data, { y: 0.68 })
-    const items = limitItems(data.items, 4)
+    const items = limitItems(data.items, 4, `${ctx.path ?? 'data'}.items`)
     const cols = grid(4, 0.48, 0.75, 11.8)
     items.forEach((item, i) => {
       const col = cols[i]
@@ -1307,7 +1326,7 @@ function makePageTypes(p, chrome) {
     })
   }
 
-  function swissTableSlide(s, data) {
+  function swissTableSlide(s, data, ctx = {}) {
     p.addSlide(s)
     chrome.pageMark(s)
     const startY = chrome.title(s, data, { y: 0.68 })
@@ -1316,8 +1335,8 @@ function makePageTypes(p, chrome) {
       : Array.isArray(data.items)
         ? data.items
         : []
-    const rows = limitItems(sourceRows, 11)
-    const columns = normalizeTableColumns(data, rows)
+    const rows = limitItems(sourceRows, 11, `${ctx.path ?? 'data'}.rows`)
+    const columns = normalizeTableColumns(data, rows, `${ctx.path ?? 'data'}.columns`)
     const tableX = 0.75
     const tableY = Math.max(2.08, startY - 0.04)
     const tableW = 11.86
@@ -1569,7 +1588,7 @@ export function createDeck(content) {
       warnings.push(`Unknown slide type "${slide.type}" at index ${s}`)
       return
     }
-    fn(s, slide.data ?? {})
+    fn(s, slide.data ?? {}, { path: `slides[${s}].data`, slideType: slide.type })
   })
 
   return { patch: { schemaVersion: 1, ops: p.ops }, warnings }

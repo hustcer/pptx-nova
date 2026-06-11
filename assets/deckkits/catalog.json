@@ -1046,10 +1046,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 369728
+                "bytes": 369685
               },
               "patchOps": 2248,
-              "p50TotalMs": 55.08
+              "p50TotalMs": 58.78
             },
             {
               "caseId": "swiss-grid.stress-density",
@@ -1084,7 +1084,7 @@
                 "bytes": 104520
               },
               "patchOps": 815,
-              "p50TotalMs": 44.51
+              "p50TotalMs": 45.67
             },
             {
               "caseId": "swiss-grid.mixed-language",
@@ -1119,7 +1119,7 @@
                 "bytes": 68350
               },
               "patchOps": 608,
-              "p50TotalMs": 40.94
+              "p50TotalMs": 44.38
             }
           ],
           "blockers": []

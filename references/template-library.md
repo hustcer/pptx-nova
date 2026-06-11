@@ -16,18 +16,18 @@ Use this reference when choosing or adding local assets under
 
 ## Selection Flow
 
-1. Pick theme/style first with `s8fy pptx list-themes --json`.
+1. Pick theme/style first with `xdoc pptx list-themes --json`.
 2. If the user provided a reference deck and a new outline/content goal, follow
    `reference-create.md` first. If the reference deck is only for style study, run:
 
 ```bash
-s8fy pptx extract-style reference.pptx --output style.json --json
+xdoc pptx extract-style reference.pptx --output style.json --json
 ```
 
 3. If the reference deck should become a reusable local template asset, run:
 
 ```bash
-s8fy pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json
+xdoc pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json
 ```
 
 This writes `decks/<id>/template.pptx`, `decks/<id>/profile.json`,
@@ -38,7 +38,7 @@ brand/layout/deck profile JSON, theme/style pack JSON, and updates
 4. For whole-slide reuse, use:
 
 ```bash
-s8fy pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.pptx
+xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.pptx
 ```
 
 5. For generated decks, start from `assets/examples/deck-generator-template.mjs`

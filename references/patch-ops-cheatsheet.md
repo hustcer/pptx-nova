@@ -1,7 +1,7 @@
 # Patch Ops Cheatsheet —— 109 个 op 按场景速查
 
-下面把 s8fy schema v1 的 109 个 op 按 **"我想做什么"** 反向归类。每条只列
-关键字段；完整 schema 用 `s8fy schema --op <name>` 拉。
+下面把 xdoc schema v1 的 109 个 op 按 **"我想做什么"** 反向归类。每条只列
+关键字段；完整 schema 用 `xdoc schema --op <name>` 拉。
 
 > 通用：所有 patch op 都嵌进 `{ "schemaVersion": 1, "ops": [ { "op": "...", ... } ] }`。
 >
@@ -85,7 +85,7 @@
 }
 ```
 
-用 `s8fy pptx catalog shapes --json` 看完整 182 个预设；常用别名：
+用 `xdoc pptx catalog shapes --json` 看完整 182 个预设；常用别名：
 `rounded-rectangle / right-arrow / star-5 / smiley-face / pentagon / cube /
 cloud-callout`。
 

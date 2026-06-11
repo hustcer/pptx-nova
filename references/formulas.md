@@ -215,5 +215,5 @@ Add formula-specific checks during PNG review:
 4. Block formulas have stable visual rhythm and do not overpower the slide title.
 5. The final summary mentions whether formulas are editable text, rendered assets, or native equations.
 
-When exporting to PDF, run `s8fy check --checks fonts,links,compat` if the deck uses
+When exporting to PDF, run `xdoc check --checks fonts,links,compat` if the deck uses
 native equations or math fonts; font fallback issues can change glyph coverage.

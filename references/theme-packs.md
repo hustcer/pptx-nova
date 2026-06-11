@@ -7,11 +7,11 @@ and header/footer rhythm.
 ## Commands
 
 ```bash
-s8fy pptx list-themes --json
-s8fy pptx swap-theme deck.pptx --to corporate-blue -o out.pptx
-s8fy pptx swap-style deck.pptx --to consulting -o out.pptx
-s8fy pptx apply-brand deck.pptx --brand brand-profile.json -o out.pptx
-s8fy pptx extract-style reference.pptx --output style.json --json
+xdoc pptx list-themes --json
+xdoc pptx swap-theme deck.pptx --to corporate-blue -o out.pptx
+xdoc pptx swap-style deck.pptx --to consulting -o out.pptx
+xdoc pptx apply-brand deck.pptx --brand brand-profile.json -o out.pptx
+xdoc pptx extract-style reference.pptx --output style.json --json
 ```
 
 `swap-theme` compiles the selected themePack into `apply-corporate-rebrand`, then reuses the normal
@@ -28,7 +28,7 @@ chart-specific style details.
 ## Capability Boundary
 
 `stylePack.generator` tokens are full-fidelity inputs for `deck-generator-template.mjs` and custom
-deck generators. They are not a promise that `s8fy pptx swap-style` will re-layout an arbitrary
+deck generators. They are not a promise that `xdoc pptx swap-style` will re-layout an arbitrary
 existing deck. Today `swap-style` intentionally stays on the safe text-style surface: it updates
 master placeholder/default title and body styles through the rebrand compiler, then preserves the
 user's existing shapes, coordinates, card geometry, shadows, spacing, and chart layout.
@@ -75,7 +75,7 @@ for external hand-written packs.
 Packaged skill consumers should treat the bundled generated catalogs as ready-to-use. Maintainers
 who change `assets/themes/catalog.json` must regenerate the derived catalogs before publishing.
 
-The CLI exposes the generated schema-backed catalog through `s8fy pptx list-themes --json`.
+The CLI exposes the generated schema-backed catalog through `xdoc pptx list-themes --json`.
 
 ## Generator Usage
 

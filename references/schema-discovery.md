@@ -6,12 +6,12 @@ s8fy 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema
 ## 拉法
 
 ```bash
-s8fy schema                          # 完整 schema（贵）
-s8fy schema --index                  # 只 op 名 + level + required/optional 字段
-s8fy schema --op add-textbox         # 单个 op 完整 jsonSchema
-s8fy schema --ops add-slide,add-chart   # 多个 op
-s8fy schema --examples               # 内置 12 个 patch 示例
-s8fy schema --minimal                # 删 verbose 字段（与上面任一组合用）
+xdoc schema                          # 完整 schema（贵）
+xdoc schema --index                  # 只 op 名 + level + required/optional 字段
+xdoc schema --op add-textbox         # 单个 op 完整 jsonSchema
+xdoc schema --ops add-slide,add-chart   # 多个 op
+xdoc schema --examples               # 内置 12 个 patch 示例
+xdoc schema --minimal                # 删 verbose 字段（与上面任一组合用）
 ```
 
 约束：`--examples` 和 `--op/--ops` 互斥（要看示例就单独跑一次）。
@@ -21,7 +21,7 @@ s8fy schema --minimal                # 删 verbose 字段（与上面任一组�
 ### 1. 初次进 deck → 取 op 索引
 
 ```bash
-s8fy schema --index | save -f schema-index.json
+xdoc schema --index | save -f schema-index.json
 ```
 
 得到所有 109 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
@@ -30,7 +30,7 @@ s8fy schema --index | save -f schema-index.json
 ### 2. 选定 op → 拉单个 schema
 
 ```bash
-s8fy schema --op add-chart --minimal | save -f schema-add-chart.json
+xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
 ```
 
 拿到完整 jsonSchema，里面有：
@@ -42,7 +42,7 @@ s8fy schema --op add-chart --minimal | save -f schema-add-chart.json
 ### 3. 想抄个例子 → 拉 examples
 
 ```bash
-s8fy schema --examples | save -f examples.json
+xdoc schema --examples | save -f examples.json
 ```
 
 里面 12 个示例覆盖 fill-layout / bind-data / rich notes / charts / tables /
@@ -146,7 +146,7 @@ outerShadow / innerShadow / glow / reflection / softEdge
 
 | Catalog               | 拉法                                                        |
 | --------------------- | ----------------------------------------------------------- |
-| 182 个 preset shape   | `s8fy pptx catalog shapes --json`                           |
+| 182 个 preset shape   | `xdoc pptx catalog shapes --json`                           |
 | 103 个 XlChartType    | 在 `schema` 输出的 `commands.pptx.catalogs.xlChartTypeMap`  |
 | 24 个 preset gradient | 在 `schema` 输出的 `commands.pptx.catalogs.presetGradients` |
 | Layout 契约           | 在 `schema` 输出的 `commands.pptx.catalogs.layouts`         |
@@ -157,13 +157,13 @@ outerShadow / innerShadow / glow / reflection / softEdge
 
 ```nu
 # 找 "做表" 相关的 op
-s8fy schema --index --minimal | from json | get operations | where op =~ 'table' | select op level required
+xdoc schema --index --minimal | from json | get operations | where op =~ 'table' | select op level required
 
 # 看 add-chart 必填 / 可选字段
-s8fy schema --op add-chart --minimal | from json | get operations.0 | { required: $in.required, optional: $in.optional }
+xdoc schema --op add-chart --minimal | from json | get operations.0 | { required: $in.required, optional: $in.optional }
 
 # 把所有 recipe op 列出来
-s8fy schema --index | from json | get operations | where level == 'recipe' | select op required optional
+xdoc schema --index | from json | get operations | where level == 'recipe' | select op required optional
 ```
 
 ## 何时不查 schema
@@ -183,7 +183,7 @@ s8fy schema --index | from json | get operations | where level == 'recipe' | sel
 schema 全集时，可以在 `apply --dry-run` 上加 `--explain`：
 
 ```bash
-s8fy pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.json
+xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.json
 ```
 
 报告顶层会新增 `explanations[]`，与 `opResults[]` / `traces[]` 一一对应，每项形如：
@@ -221,7 +221,7 @@ s8fy pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.j
 - **元 op 展开审计**：对 `if` / `foreach` / `try` / `use` / recipe 等会展开的
   元 op，`explanations[i].expandedOps[]` 列出展开后实际执行的底层 op 名，比
   自己读 `opResults[].controlExpansion` 更直观
-- **token 友好**：与 `s8fy schema` 一次性几万 token 不同，`--explain` 只在
+- **token 友好**：与 `xdoc schema` 一次性几万 token 不同，`--explain` 只在
   dry-run 时按需附带、且只覆盖当前 patch 里**真正用到**的 op
 
 ### 约束

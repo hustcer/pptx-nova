@@ -20,7 +20,7 @@ inspect → 写 patch → dry-run ──┤
 ```bash
 # 多步流程默认加 --daemon（v10 auto-spawn，按需自动起 daemon）；
 # 单次一次性 inspect 不加也行。
-s8fy pptx inspect input.pptx --daemon --json | save inspect.json
+xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 ```
 
 输出 `pptx-inspect/v1`，**实际结构**（注意字段名）：
@@ -115,7 +115,7 @@ s8fy pptx inspect input.pptx --daemon --json | save inspect.json
 
 ```nu
 # 列出每页类型与第一句文字预览
-^s8fy pptx inspect input.pptx --json | from json
+^xdoc pptx inspect input.pptx --json | from json
   | get slides
   | each {|s| {
       idx: $s.index,
@@ -126,14 +126,14 @@ s8fy pptx inspect input.pptx --daemon --json | save inspect.json
   | table
 
 # 找所有 name 包含 "KPI" 的 shape
-^s8fy pptx inspect input.pptx --json | from json
+^xdoc pptx inspect input.pptx --json | from json
   | get slides
   | each {|s| $s.shapes | each {|sh| { slide: $s.index, id: $sh.id, name: $sh.name, bbox: $sh.bbox } } }
   | flatten
   | where name =~ KPI
 
 # 找所有 chart
-^s8fy pptx inspect input.pptx --json | from json
+^xdoc pptx inspect input.pptx --json | from json
   | get slides
   | each {|s| $s.shapes | where shapeType == "chart" | each {|sh| { slide: $s.index, shape: $sh.name, id: $sh.id } } }
   | flatten
@@ -393,13 +393,13 @@ inspect 报告中下面三个布尔字段如果是 true，说明该页有 s8fy *
 
 ```bash
 # 回放（用 sidecar 从 input.pptx 重建 output.pptx，验证可重现性）
-s8fy pptx replay --from-sidecar output.pptx.s8fy.json -o recovered.pptx
+xdoc pptx replay --from-sidecar output.pptx.s8fy.json -o recovered.pptx
 
 # 审计（输出 sidecar 的 op 列表与 createdIds）
-s8fy pptx audit --from-sidecar output.pptx.s8fy.json --json
+xdoc pptx audit --from-sidecar output.pptx.s8fy.json --json
 
 # 回滚（撤销最近一次 apply）
-s8fy pptx rollback --from-sidecar output.pptx.s8fy.json -o input-restored.pptx
+xdoc pptx rollback --from-sidecar output.pptx.s8fy.json -o input-restored.pptx
 ```
 
 每次给用户输出 `.pptx` 时，也提醒一下 sidecar 在哪：用户可以保留它做 audit。

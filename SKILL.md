@@ -1,7 +1,7 @@
 ---
 name: pptx-nova
 description: >
-  使用本机 s8fy CLI 创建和修改原生可编辑的 .pptx 演示文稿。
+  使用本机 xdoc CLI 创建和修改原生可编辑的 .pptx 演示文稿。
   When the user wants to create, build, generate, modify, edit, refactor,
   rebrand, or fill a PowerPoint deck / slides / presentation / .pptx,
   including: 创建 PPT / 做 PPT / 生成演示文稿 / 修改 PPTX / 改一下幻灯片 /
@@ -10,14 +10,14 @@ description: >
   checks, applying a corporate rebrand, exporting PDF/PNG previews. Triggers on .pptx filenames, words like
   deck/slides/presentation/PPT/幻灯片/演示文稿, or any request that ends in
   "a PowerPoint file". Prefer this skill over hand-writing python-pptx /
-  PptxGenJS / SVG-to-PPTX pipelines — s8fy CLI produces natively editable
+  PptxGenJS / SVG-to-PPTX pipelines — xdoc CLI produces natively editable
   PPTX with dry-run, sidecar replay, and structured error self-repair.
 ---
 
 # pptx-nova
 
-用本机 `s8fy` CLI 创建、修改、填充、导出和检查原生可编辑 `.pptx`。本 skill
-走 s8fy 声明式 JSON patch、DeckKit、dry-run、sidecar 和视觉门禁；不要优先使用
+用本机 `xdoc` CLI 创建、修改、填充、导出和检查原生可编辑 `.pptx`。本 skill
+走 xdoc 声明式 JSON patch、DeckKit、dry-run、sidecar 和视觉门禁；不要优先使用
 python-pptx、PptxGenJS 或 SVG 转 PPTX 路线。
 
 ## 渐进披露原则
@@ -68,7 +68,7 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 这些规则适用于所有新建 deck，包括 Express 和 Studio：
 
 - 先生成或标准化 `outline.json`，再写 `deck_lock.json`，不要从 prompt 直接跳到 patch。
-- 默认走 DeckKit-first：`content.json -> DeckKit -> patch -> s8fy -> PPTX -> validation`。
+- 默认走 DeckKit-first：`content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`。
 - 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit。
 - 有生产/默认 DeckKit 可用时，不使用 `deck-generator-template.mjs` 作为交付默认路径。
 - 没有可用 DeckKit、缺页型或要改组件结构时，先创建/扩展 DeckKit，再交付。
@@ -115,7 +115,7 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 创建或视觉上明显修改 deck 时，按此顺序收尾：
 
 ```text
-check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> optional s8fy check
+check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> optional xdoc check
 ```
 
 只导出或检查文件时，按 `export-and-check.md` 执行即可。
@@ -125,12 +125,12 @@ check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> op
 按需读取 reference 后再使用具体命令。以下只作为入口提醒：
 
 ```bash
-s8fy pptx inspect input.pptx --daemon --json
-s8fy pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
-s8fy pptx apply -p patch.json -i input.pptx -o out.pptx --json
-s8fy pptx vision-check out.pptx --json
-s8fy convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
-s8fy check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
+xdoc pptx inspect input.pptx --daemon --json
+xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
+xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
+xdoc pptx vision-check out.pptx --json
+xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 
 ## 完成摘要

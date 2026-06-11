@@ -23,7 +23,7 @@ when the requested edit touches those domains.
 Inspect first:
 
 ```bash
-s8fy pptx inspect input.pptx --daemon --json
+xdoc pptx inspect input.pptx --daemon --json
 ```
 
 Save the inspect output in the run directory. Use it to identify slide indexes,
@@ -40,7 +40,7 @@ Write a patch using the most specific stable selector available:
 Dry-run before writing:
 
 ```bash
-s8fy pptx apply -p patch.json -i input.pptx -o out.pptx \
+xdoc pptx apply -p patch.json -i input.pptx -o out.pptx \
   --daemon --dry-run --json
 ```
 
@@ -51,7 +51,7 @@ unexpected selector resolution.
 After dry-run is clean, apply to a run-dir output:
 
 ```bash
-s8fy pptx apply -p patch.json -i input.pptx -o out.pptx --daemon --json
+xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --daemon --json
 ```
 
 Run `vision-check` and render PNG/contact-sheet previews when the edit changes
@@ -65,7 +65,7 @@ enough to risk regression.
   alignment.
 - Theme/font changes: `set-theme-color`, `set-theme-font`, or brand helpers.
 - Slide duplication: `duplicate-slide`.
-- Cross-deck whole-slide copy: `s8fy pptx copy-from`.
+- Cross-deck whole-slide copy: `xdoc pptx copy-from`.
 - Chart data: `replace-chart-data`; read `charts.md` for chart semantics.
 - Table edits: `set-table-cell`, `set-table-data`, `import-table-data`; read
   `tables.md` for formulas and CSV imports.

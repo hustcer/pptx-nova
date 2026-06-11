@@ -54,7 +54,7 @@ outline.json
   -> validate-content.mjs
   -> createDeck(content)
   -> check-lock
-  -> s8fy pptx apply --dry-run
+  -> xdoc pptx apply --dry-run
   -> apply
   -> vision-check
   -> PNG/contact-sheet review
@@ -72,9 +72,9 @@ node <skill-root>/scripts/pptx-nova-build.mjs \
   --quality-json quality.json
 node <skill-root>/scripts/pptx-nova-check-lock.mjs \
   --lock deck_lock.json --content content.json --patch patch.json --json
-s8fy pptx apply -p patch.json -o out.pptx --dry-run --json
-s8fy pptx apply -p patch.json -o out.pptx --json
-s8fy pptx vision-check out.pptx --json
+xdoc pptx apply -p patch.json -o out.pptx --dry-run --json
+xdoc pptx apply -p patch.json -o out.pptx --json
+xdoc pptx vision-check out.pptx --json
 ```
 
 Use the generic build driver by default. Only write a run-dir `build.mjs` when

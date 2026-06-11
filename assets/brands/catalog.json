@@ -8,8 +8,8 @@
       "path": "../brand-profile.example.json",
       "description": "Minimal profile showing colors, fonts, logo, and footer fields for apply-brand/check-brand workflows.",
       "commands": {
-        "apply": "s8fy pptx apply-brand deck.pptx --brand skills/pptx-nova/assets/brand-profile.example.json --output out.pptx --json",
-        "check": "s8fy pptx check-brand out.pptx --brand skills/pptx-nova/assets/brand-profile.example.json --json"
+        "apply": "xdoc pptx apply-brand deck.pptx --brand skills/pptx-nova/assets/brand-profile.example.json --output out.pptx --json",
+        "check": "xdoc pptx check-brand out.pptx --brand skills/pptx-nova/assets/brand-profile.example.json --json"
       },
       "status": "seed"
     }

@@ -657,7 +657,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "name": "CompareTable",
     "data": [
       ["维度", "旧方案", "新方案"],
-      ["技术栈", "python-pptx + 手工脚本", "s8fy CLI + 声明式 patch"],
+      ["技术栈", "python-pptx + 手工脚本", "xdoc CLI + 声明式 patch"],
       ["编辑性", "部分可编辑、样式易丢失", "原生可编辑,保留主题"],
       ["预演能力", "无 dry-run", "支持 --dry-run --json"],
       ["错误处理", "Python 异常,难以恢复", "结构化错误 + fixPatch"],
@@ -896,7 +896,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 
 ## §9 视觉验证清单（apply 完必做）
 
-1. `s8fy convert out.pptx --to png -o previews --overwrite`
+1. `xdoc convert out.pptx --to png -o previews --overwrite`
 2. 用 Read 逐页看 PNG（7 张）
 3. 检查：
    - [ ] 字符重叠 / 换行压字 / 文字溢出 / 截断

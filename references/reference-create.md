@@ -31,8 +31,8 @@ deck 后新建 deck。
 ## 3. 标准流程
 
 ```bash
-s8fy pptx inspect reference.pptx --json > reference-inspect.json
-s8fy pptx extract-style reference.pptx --output reference-style.json --json
+xdoc pptx inspect reference.pptx --json > reference-inspect.json
+xdoc pptx extract-style reference.pptx --output reference-style.json --json
 ```
 
 然后创建 `reference-map.json`，最小结构如下：
@@ -93,7 +93,7 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
 `copy-from` 适合保留复杂整页结构：
 
 ```bash
-s8fy pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.pptx --json
+xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.pptx --json
 ```
 
 复制后必须立刻用 patch 替换旧文本、图表数据、表格数据和图片；不要交付带有参考 deck 旧内容的页面。

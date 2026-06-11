@@ -10,18 +10,18 @@ rules.
 
 ## Conversion
 
-Use `s8fy convert`:
+Use `xdoc convert`:
 
 ```bash
-s8fy convert deck.pptx --to pdf -o <run-dir>/out/
-s8fy convert deck.pptx --to png -o <run-dir>/previews --overwrite
-s8fy convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
-s8fy convert deck.pptx --to md -o <run-dir>/out/
-s8fy convert deck.pptx --to json -o <run-dir>/out/
-s8fy convert deck.pptx --to text -o <run-dir>/out/
+xdoc convert deck.pptx --to pdf -o <run-dir>/out/
+xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite
+xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+xdoc convert deck.pptx --to md -o <run-dir>/out/
+xdoc convert deck.pptx --to json -o <run-dir>/out/
+xdoc convert deck.pptx --to text -o <run-dir>/out/
 ```
 
-The command shape is `s8fy convert <pptx> --to <format>`, not
+The command shape is `xdoc convert <pptx> --to <format>`, not
 `s8fy <pptx> -t png`.
 
 For PNG and multi-format outputs, path shape matters:
@@ -41,7 +41,7 @@ path that already exists, ask before replacing it.
 For visual review, prefer:
 
 ```bash
-s8fy convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 ```
 
 Read the contact sheet first to detect cross-slide issues such as rhythm, page
@@ -60,14 +60,14 @@ Adjust contact sheet options only when needed:
 For fonts, links, and compatibility:
 
 ```bash
-s8fy check deck.pptx \
+xdoc check deck.pptx \
   --checks fonts,links,compat \
   -o <run-dir>/check.json \
   --pretty \
   --overwrite
 ```
 
-`s8fy check` is not a visual gate. It does not replace `vision-check` or PNG
+`xdoc check` is not a visual gate. It does not replace `vision-check` or PNG
 review for created/edited decks.
 
 For `fonts`, `missingRiskCandidates` excludes common system fonts such as
@@ -82,7 +82,7 @@ the font or switching to an approved system/DeckKit font.
 Use extract for notes, resources, links, and fonts:
 
 ```bash
-s8fy extract deck.pptx --parts notes,resources,links,fonts
+xdoc extract deck.pptx --parts notes,resources,links,fonts
 ```
 
 Save extracted JSON/report files in the run directory unless the user asks for a

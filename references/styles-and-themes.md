@@ -63,7 +63,7 @@ s8fy 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 { "kind": "gradient", "preset": "topSpotlight1" }
 ```
 
-预设清单跑 `s8fy schema | jq '.commands.pptx.catalogs.presetGradients'` 取。常用：
+预设清单跑 `xdoc schema | jq '.commands.pptx.catalogs.presetGradients'` 取。常用：
 `topSpotlight1 / centerSpotlight / horizon / shadowDark / chrome`。
 
 ### Pattern
@@ -354,8 +354,8 @@ set-master-placeholder-style / set-presentation-default-text-style` 底层 op。
 写完样式 patch 一定要：
 
 1. `--dry-run --json` 看 `semanticChanges[]` 是不是覆盖了所有目标 slide
-2. apply 后 `s8fy convert out.pptx --to png -o previews --overwrite` 转 PNG，肉眼确认
-3. 重要场合用 `s8fy pptx check-brand` 校验品牌合规（见 `data-driven.md`）
+2. apply 后 `xdoc convert out.pptx --to png -o previews --overwrite` 转 PNG，肉眼确认
+3. 重要场合用 `xdoc pptx check-brand` 校验品牌合规（见 `data-driven.md`）
 
 ## 不要做的事
 

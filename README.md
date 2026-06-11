@@ -1,6 +1,6 @@
 # pptx-nova Skill 使用指南
 
-`pptx-nova` 用本机 `s8fy` CLI 创建、修改和检查原生可编辑的 `.pptx` 演示文稿。它适合让
+`pptx-nova` 用本机 `xdoc` CLI 创建、修改和检查原生可编辑的 `.pptx` 演示文稿。它适合让
 Agent 交付真正的 PowerPoint 文件，而不是 SVG 截图、HTML 页面或不可编辑图片。
 
 本文面向 skill 使用者和执行 Agent。维护者开发流程见仓库文档；使用本 skill 时不需要仓库根
@@ -17,7 +17,7 @@ Agent 交付真正的 PowerPoint 文件，而不是 SVG 截图、HTML 页面或�
 
 ## 使用前提
 
-- 本机可运行 `s8fy` CLI。
+- 本机可运行 `xdoc` CLI。
 - 本机可运行 Node.js，用于 skill 内置脚本和 DeckKit 生成器。
 - `skills/pptx-nova/` 目录保持完整，至少包含 `SKILL.md`、`assets/`、`references/` 和
   `scripts/`。
@@ -121,8 +121,8 @@ input.pptx
 
 创建型 deck 交付前必须通过这些检查：
 
-- `s8fy pptx apply --dry-run --json` 没有未解决的语义风险。
-- `s8fy pptx vision-check` 的 high 和 medium 都为 0。
+- `xdoc pptx apply --dry-run --json` 没有未解决的语义风险。
+- `xdoc pptx vision-check` 的 high 和 medium 都为 0。
 - PNG 或 contact sheet 逐页复核无文字重叠、截断、贴边、页脚撞正文、连接线偏移等问题。
 - 可见正文有阅读底线：核心正文通常不低于 `10.5pt`，辅助标签不低于 `9pt`。
 - 最终 PPTX 是原生可编辑内容，不是整页截图或 SVG 中转。

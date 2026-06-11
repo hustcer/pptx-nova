@@ -289,7 +289,7 @@ Phase B 恢复时先读取 manifest 做 sanity check；通过后才生成 `conte
 
 ## 6. Lock Drift Check
 
-在生成 `patch.json` 后、`s8fy pptx apply --dry-run` 前运行：
+在生成 `patch.json` 后、`xdoc pptx apply --dry-run` 前运行：
 
 ```bash
 node <skill-root>/scripts/pptx-nova-check-lock.mjs \
@@ -321,7 +321,7 @@ DeckKit-first run 会自动把选中 DeckKit `.kit.mjs` 里的调色板 HEX 和 
 加 `--strict-colors --strict-fonts` 把 lock 外颜色/字体也变成 error。
 
 `check-lock` 不是 `dry-run` 的替代品：它只证明生成材料没有偏离设计锁；schema 语义、
-selector、visualRisks 仍交给 `s8fy pptx apply --dry-run --json`。
+selector、visualRisks 仍交给 `xdoc pptx apply --dry-run --json`。
 
 ## 7. 与 DeckKit / generator 的关系
 

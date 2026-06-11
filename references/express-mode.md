@@ -118,21 +118,21 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 jq '.ops | length' patch.json
 
 # 7. dry-run 预演（多步默认 --daemon；--explain 拿字段约束）
-s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | save dry.json
+xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | save dry.json
 #    读 semanticChanges[] / visualRisks[] / resolvedSelectors[]
 
 # 8. 自动修复：合并 autoRetry==true 的 fixPatch 重跑 dry-run（见 troubleshooting.md）
 #    ambiguous selector / fuzzy enum / RGB 规整 等机器有信心的修复直接合
 
 # 9. 真 apply（去掉 --dry-run，留 sidecar out.pptx.s8fy.json）
-s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
+xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
 
 # 10. 几何自检闭环（render-free，见 §6）
-s8fy pptx vision-check out.pptx --json | save vision.json
+xdoc pptx vision-check out.pptx --json | save vision.json
 #    合并 autoRetry 的 fixPatch → 人工处理剩余 medium/high → 再 vision-check 到 medium/high 清零
 
 # 11. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 common-workflow.md）
-s8fy convert out.pptx --to png -o previews --overwrite
+xdoc convert out.pptx --to png -o previews --overwrite
 #    逐页检查字符重叠、换行压字、截断、页脚/来源撞正文
 
 # 12. 产出物：out.pptx + outline.json + deck_lock.json + content.json + patch.json + dry.json + vision.json + previews/
@@ -209,12 +209,12 @@ helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `page
   themePack JSON，并在生成后用 `apply-corporate-rebrand` / `swap-theme` 保持 deck 主题一致。
 - 用户**没指定** → 按内容领域推断一个安全牌，并在产出说明里记录理由（避免自嗨）。
   默认安全牌是 `corporate-blue` + `consulting`，字体 `Inter` + `Source Han Sans SC`。
-- 可用 catalog：`s8fy pptx list-themes --json`，或查看
+- 可用 catalog：`xdoc pptx list-themes --json`，或查看
   `assets/themes/catalog.json` / `references/theme-packs.md`。
 
 生成后换风格不用改 `C` 重跑：直接执行
-`s8fy pptx swap-theme out.pptx --to consulting-grey -o out-grey.pptx` 或
-`s8fy pptx swap-style out.pptx --to minimal -o out-minimal.pptx`。
+`xdoc pptx swap-theme out.pptx --to consulting-grey -o out-grey.pptx` 或
+`xdoc pptx swap-style out.pptx --to minimal -o out-minimal.pptx`。
 
 ---
 
@@ -240,7 +240,7 @@ express 默认按**客户演示级**产出，不交 recipe-only 草稿。硬指�
 
 ## 6. vision-check 自动闭环
 
-apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检；公共门禁见 `common-workflow.md`）。
+apply 后跑 `xdoc pptx vision-check out.pptx --json`（render-free 几何自检；公共门禁见 `common-workflow.md`）。
 闭环规则：
 
 - **自动套**：只把 `fix.autoRetry == true` 的两类（`shape-out-of-bounds` 越界回夹、
@@ -250,8 +250,8 @@ apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检
   ```bash
   jq '{schemaVersion:1, ops:[.issues[] | select(.fix.autoRetry==true) | .fix.fixPatch[]]}' \
      vision.json > fix.json
-  s8fy pptx apply -p fix.json -i out.pptx -o out.pptx --overwrite
-  s8fy pptx vision-check out.pptx --json | jq '.summary'
+  xdoc pptx apply -p fix.json -i out.pptx -o out.pptx --overwrite
+  xdoc pptx vision-check out.pptx --json | jq '.summary'
   ```
 
 - **人工确认**：`autoRetry==false` 的静态视觉问题（overlap / overflow / unexpected-wrap / alignment）

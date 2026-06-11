@@ -47,7 +47,7 @@ in-place modification, still validate through a run-dir copy before writing back
 Use `--overwrite` only for files created in the current run directory during the
 current iteration.
 
-For PNG previews and multi-format exports, `s8fy convert -o <dir>` uses `<dir>`
+For PNG previews and multi-format exports, `xdoc convert -o <dir>` uses `<dir>`
 itself as the output root. A trailing separator, `-o <dir>/`, means parent
 directory mode and creates `<dir>/<deck>-img/` or `<dir>/<deck>.s8fy/`. Prefer a
 current-run root such as `<run-dir>/previews` for visual QA. Before regenerating
@@ -67,7 +67,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 1. Initialize run directory and check output collision rules.
 2. Gather mode-specific context:
    - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
-   - Edit: `s8fy pptx inspect <input.pptx> --json`.
+   - Edit: `xdoc pptx inspect <input.pptx> --json`.
    - Data/template: template, data, bindings, and asset paths.
    - If the source outline only gives a slide title or leaves factual content
      blank, record any AI-filled facts, competitors, metrics, or examples in
@@ -84,25 +84,25 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    delivery add `--strict-colors --strict-fonts`.
 5. Run dry-run before any real write:
    ```bash
-   s8fy pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
+   xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
    ```
    Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
 6. Apply only after dry-run is clean and selectors are correct.
 7. Run static geometry validation:
    ```bash
-   s8fy pptx vision-check out.pptx --json
+   xdoc pptx vision-check out.pptx --json
    ```
    For create workflows, `summary.bySeverity.high` and
    `summary.bySeverity.medium` must both be 0.
 8. Render visual previews when creating or materially changing a deck:
    ```bash
-   s8fy convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+   xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
    ```
    Review the contact sheet for cross-slide rhythm, then inspect suspicious
    slides at full size.
 9. For external/customer/public delivery, run:
    ```bash
-   s8fy check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
+   xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
    ```
 10. Copy or write the validated final deck to the requested final path.
 11. Summarize final output path, run directory, important intermediate files,
@@ -117,7 +117,7 @@ pixel-level visual quality.
 Use these gates in order:
 
 ```text
-check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> optional s8fy check
+check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> optional xdoc check
 ```
 
 `vision-check` high/medium issues are blockers for create workflows. Low issues
@@ -142,8 +142,8 @@ asset slots read `visual-qa-and-asset-slots.md`.
 
 ## Daemon
 
-For multi-step inspect/apply loops, pass `--daemon` to `s8fy pptx inspect` and
-`s8fy pptx apply`. v10 auto-spawns the daemon on first use. Read
+For multi-step inspect/apply loops, pass `--daemon` to `xdoc pptx inspect` and
+`xdoc pptx apply`. v10 auto-spawns the daemon on first use. Read
 `daemon-sessions.md` only when tuning daemon behavior or debugging daemon errors.
 
 ## Error Handling

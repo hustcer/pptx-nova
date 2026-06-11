@@ -260,7 +260,7 @@ op 才进入 schema 校验，所以**坐标/枚举字段**最终仍然必须是�
 ## §6 `raw-ooxml-patch` —— 逃生口（默认禁用）
 
 ```bash
-s8fy pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
+xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 ```
 
 ```json
@@ -288,7 +288,7 @@ s8fy pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 - `target` 只接受 OPC 包内部部件路径,会拒绝任意路径穿越
 - 写完会同时 emit `semanticChange` 和 `visualRisk`(severity=`medium`,kind=`raw-ooxml`)
 - 不参与 schema-v1 的字段校验,**写错了 dry-run 只能告诉你 XPath 没命中,无法告
-  诉你 OOXML 结构错** — 最后必须跑 `s8fy check deck.pptx --checks compat` 兜底
+  诉你 OOXML 结构错** — 最后必须跑 `xdoc check deck.pptx --checks compat` 兜底
 
 **何时用**:
 
@@ -314,14 +314,14 @@ s8fy pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 
 - dry-run 报告的 `opResults[]` 里,展开过的元 op 会带 `controlExpansion`
   metadata,记录子 op 数量;有歧义时这里也会带 `suggestions[]`
-- `recoverable` 写错 kind 名 → try 块照样冒错;先 `s8fy schema --op try` 查可用
+- `recoverable` 写错 kind 名 → try 块照样冒错;先 `xdoc schema --op try` 查可用
   enum,再对照 `references/troubleshooting.md` 的错误名
 - `foreach` 模板里 `{{$item.x}}` 漏写 `$` 不会报错 — schema 把它当成普通字面量
   字符串。看 dry-run `semanticChanges[]` 里的 text 字段确认是否被替换
 - `use` 模板里 `{{args.x}}` **不带 `$`**(与 `foreach` 的 `{{$item}}` 区分),
   漏写或拼错同样不会报错 — 看 `semanticChanges[]` / `--explain` 的 `expandedOps`
   确认占位符是否被替换
-- 排查宏展开:`s8fy pptx apply -p patch.json -i in.pptx --dry-run --explain --json`
+- 排查宏展开:`xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json`
   会在 `explanations[<i>].expandedOps` 列出每个 `use` 展开成哪些底层 op
 
 ## §9 不要做的事

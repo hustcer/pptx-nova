@@ -34,7 +34,7 @@ Options:
   --contact-sheet             Render PNG previews and contact sheet. Default
   --no-contact-sheet          Skip contact sheet while keeping per-slide previews
   --update-baseline           Copy summary.json into visual baselines
-  --s8fy-bin <path>           s8fy binary path. Defaults to s8fy
+  --s8fy-bin <path>           xdoc binary path. Defaults to s8fy
   --clean                     Remove each case output directory before running
   --json                      Print machine-readable summary
   --help                      Show this help

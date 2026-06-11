@@ -105,7 +105,7 @@ mix 与底层 patch op 自由：可以一份 patch 里同时有 `add-title-slide
   },
   "right": {
     "heading": "新方案",
-    "text": "s8fy CLI，单命令调用",
+    "text": "xdoc CLI，单命令调用",
     "bullets": ["原生可编辑", "结构化错误", "可回放审计"]
   }
 }
@@ -276,7 +276,7 @@ alignment` 五个字段，**不接受**顶层 `bold` / `italic` —— 这是新
 }
 ```
 
-执行：`s8fy pptx apply -p patch.json -o out.pptx --dry-run --json` 看
+执行：`xdoc pptx apply -p patch.json -o out.pptx --dry-run --json` 看
 `expandedOps[]`。
 
 ## 何时降级到底层 patch op

@@ -111,7 +111,7 @@ KPI 变化:   "{{kpi.revenue.delta}}"
 ### 1.4 执行
 
 ```bash
-s8fy pptx from-data data.json \
+xdoc pptx from-data data.json \
      --template template.pptx \
      --bindings bindings.json \
      -o out.pptx
@@ -199,7 +199,7 @@ s8fy pptx from-data data.json \
 执行：
 
 ```bash
-s8fy pptx apply -p patch.json -o out.pptx
+xdoc pptx apply -p patch.json -o out.pptx
 ```
 
 `bind-data` op 也支持把 data 放外部文件：
@@ -275,7 +275,7 @@ B - $20
 写完 `from-data` / `bind-data` patch 后：
 
 ```bash
-s8fy pptx apply -p patch.json -o out.pptx --dry-run --json | jq '.opResults[] | select(.op == "bind-data")'
+xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | jq '.opResults[] | select(.op == "bind-data")'
 ```
 
 看 `analysis` 字段：哪些 binding 命中、哪些 path 没找到（warning）。

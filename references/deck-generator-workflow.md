@@ -47,12 +47,12 @@ node generate.mjs --theme corporate-blue --style consulting --layout executive-g
 jq '.ops | length' patch.json   # ← 客户演示级 ≥ 200,低于这条线视觉一定空,回去加装饰
 # 多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：v10 起 daemon
 # 自动按需拉起，首次 ~200ms、之后调用 ~5ms 走 RPC。CI 用 --daemon-strict。
-s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json
+xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json
 # 检查 dry-run.json 里没有阻塞性 visualRisks，并在 apply 后用 vision-check 清零 high/medium
-s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
-s8fy pptx vision-check out.pptx --json | tee vision.json
+xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
+xdoc pptx vision-check out.pptx --json | tee vision.json
 # 创建型 deck 必须 high=0 且 medium=0；medium 也要改 generator/layout 后重跑
-s8fy convert out.pptx --to png -o previews --overwrite --contact-sheet
+xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 # 先 Read previews/contact-sheet.png 总览图扫跨页一致性（配色/页码/节奏/构图）、定位可疑页，
 # 再逐页 Read previews/slide-00*.png 抠单页细节：字符重叠/换行压字/截断、
 # 小字号、连接线/箭头、中轴居中和对称平衡
@@ -333,7 +333,7 @@ medium 时优先加高、删字、拆页或改 autofit。**单行最小给字号
                         │
                         v
 ┌─ 3. dry-run gate ─────────────────────────┐
-│   s8fy pptx apply -p patch.json \         │
+│   xdoc pptx apply -p patch.json \         │
 │     -o out.pptx --daemon --dry-run --json\│
 │     | tee dry-run.json                    │
 │                                           │
@@ -349,7 +349,7 @@ medium 时优先加高、删字、拆页或改 autofit。**单行最小给字号
               yes │           │ no
                   v           v
         ┌─修 generate.mjs┐  ┌─ 4. apply 落盘 ─────────────┐
-        │  re-loop      │  │ s8fy pptx apply -p patch.json│
+        │  re-loop      │  │ xdoc pptx apply -p patch.json│
         └───────────────┘  │   -o out.pptx --daemon       │
                            │   --overwrite                │
                            │ 产物：out.pptx + sidecar       │
@@ -357,14 +357,14 @@ medium 时优先加高、删字、拆页或改 autofit。**单行最小给字号
                                          │
                                          v
                            ┌─ 5. vision-check 几何门 ─────┐
-                           │ s8fy pptx vision-check out.pptx│
+                           │ xdoc pptx vision-check out.pptx│
                            │   --json | tee vision.json    │
                            │ high / medium 必须为 0         │
                            └─────────────┬─────────────────┘
                                          │
                                          v
                            ┌─ 6. PNG 视觉验证 ───────────┐
-                           │ s8fy convert out.pptx \      │
+                           │ xdoc convert out.pptx \      │
                            │   --to png -o previews \     │
                            │   --overwrite --contact-sheet│
                            │                              │
@@ -433,9 +433,9 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 | KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                |
 | textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                     |
 | 同页左下 footer 写"BRAND·X"右上 watermark 写"S8FY DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化            |
-| 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `s8fy pptx rollback --from-sidecar`                                                  |
+| 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                  |
 | 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                            |
-| `s8fy -t png` 返回 help                                 | 错误命令格式，正确是 `s8fy convert <pptx> --to png -o <dir>`                                              |
+| `s8fy -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                              |
 | `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须全名 `"bottom"` / `"outsideEnd"`，shorthand 拒                                                   |
 | `titleStyle.bold` 被拒                                  | 放进 `font: { bold: true }` 子对象                                                                        |
 
@@ -502,10 +502,10 @@ node <skill-root>/scripts/pptx-nova-build.mjs \
   --quality-json quality.json
 
 # 4. apply + 质量门
-s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json
-s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
-s8fy pptx vision-check out.pptx --json
-s8fy convert out.pptx --to png -o previews --overwrite --contact-sheet
+xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json
+xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
+xdoc pptx vision-check out.pptx --json
+xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 ```
 
 **与从头写 generator 对比**：

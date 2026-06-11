@@ -141,6 +141,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 - 使用模板资产：写 `templateFusion`，并记录每个来源的 kind/id/path。
 - 使用图片/logo/外部素材：才写 `assetsManifestPath`，并让 slide 通过 asset id 引用。
 - 不确定项写进 `assumptions[]`，不要在后续 generator 里隐式改掉。
+- 源大纲只有标题、占位或留白时，AI 补全的事实性内容也必须写进 `assumptions[]`，包括
+  竞品名称、产品判断、市场指标、案例、时间线和来源不明的结论；交付摘要要逐条披露。
 
 ## 4. `assets_manifest.json`
 

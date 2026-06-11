@@ -69,6 +69,9 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
    - Edit: `s8fy pptx inspect <input.pptx> --json`.
    - Data/template: template, data, bindings, and asset paths.
+   - If the source outline only gives a slide title or leaves factual content
+     blank, record any AI-filled facts, competitors, metrics, or examples in
+     `deck_lock.assumptions[]` before writing `content.json`.
 3. Produce the smallest durable input:
    - Prefer DeckKit `content.json` for create workflows.
    - Use patch ops only when the DeckKit path cannot express the work.

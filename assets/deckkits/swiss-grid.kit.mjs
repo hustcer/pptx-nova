@@ -190,6 +190,20 @@ function makeChrome(p, total) {
     )
   }
 
+  const coverFooter = (s, label = `${pad2(s + 1)} / ${pad2(total)}`) => {
+    p.tx(
+      s,
+      nm(s, 'Foot'),
+      11.42,
+      6.92,
+      1.05,
+      0.16,
+      label,
+      font(7.5, C.faint, false, FONT_EN),
+      'right',
+    )
+  }
+
   const title = (s, data, options = {}) => {
     const y = options.y ?? 0.68
     const kicker = data.eyebrow ?? `P · ${pad2(s + 1)}`
@@ -227,7 +241,7 @@ function makeChrome(p, total) {
     return ruleY + 0.44
   }
 
-  return { pageMark, title }
+  return { pageMark, coverFooter, title }
 }
 
 function modularGrid(p, s, name, x, y, w, h, cols, rows, color = C.grid) {
@@ -304,17 +318,7 @@ function makePageTypes(p, chrome) {
       0.026,
     )
     p.tx(s, nm(s, 'Tag'), 0.82, tagY, tagW, 0.5, data.tag, font(10, C.muted, false, FONT_EN))
-    p.tx(
-      s,
-      nm(s, 'Foot'),
-      11.42,
-      6.92,
-      1.05,
-      0.16,
-      data.footer ?? '',
-      font(7.5, C.faint, false, FONT_EN),
-      'right',
-    )
+    chrome.coverFooter(s, data.footer)
   }
 
   function swissQuoteSlide(s, data) {

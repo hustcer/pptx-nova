@@ -848,13 +848,7 @@
         },
         "slideTypes": {
           "swissCoverSlide": {
-            "requiredSlots": [
-              "data.eyebrow",
-              "data.title",
-              "data.subtitle",
-              "data.tag",
-              "data.footer"
-            ]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.tag"]
           },
           "swissQuoteSlide": {
             "requiredSlots": ["data.quote", "data.body", "data.author", "data.source"]

@@ -97,6 +97,12 @@ If validation reports density/fit warnings, prefer deleting text, splitting
 slides, changing a slide type, or using a DeckKit-supported layout variant.
 Avoid patching around the DeckKit with raw coordinates.
 
+When a deck has more slides than reusable page types, reuse is expected. Keep
+the same slide type at least three slides apart when possible, and vary accent,
+density, title structure, or content rhythm on reused layouts. If the outline
+forces closer reuse, note the tradeoff in `deck_lock.assumptions[]` and rely on
+PNG/contact-sheet review to verify the rhythm.
+
 ## When DeckKit Is Not Enough
 
 Do not fall back to a one-off large patch just because a page is hard. If the

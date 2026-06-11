@@ -72,6 +72,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 - 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit。
 - 有生产/默认 DeckKit 可用时，不使用 `deck-generator-template.mjs` 作为交付默认路径。
 - 没有可用 DeckKit、缺页型或要改组件结构时，先创建/扩展 DeckKit，再交付。
+- 源大纲只有标题或留白时，AI 补全的事实性内容必须写入 `deck_lock.assumptions[]`；
+  不能把未验证竞品、指标、案例或市场事实伪装成用户提供内容。
 - 创建型最终输出路径如果在开始前已存在，必须先让用户重命名、删除或换路径；不能用
   `--overwrite` 覆盖最终路径。
 - 创建型 `vision-check` 的 `summary.bySeverity.high` 和 `summary.bySeverity.medium`
@@ -140,6 +142,7 @@ s8fy check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - 关键中间产物：`outline.json`、`deck_lock.json`、`content.json`、`patch.json`、sidecar、
   `vision.json`、预览目录、contact sheet、`check.json` 等实际存在项
 - 验证结果：dry-run、apply、vision-check、PNG/contact-sheet 复核、可选 preflight
+- AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全
 - 剩余风险，例如字体未嵌入、外链、unsupported 对象、人工未审资源授权
 
 只有平台或工具给出准确 token 统计时才输出 token 信息；不要估算。

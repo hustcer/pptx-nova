@@ -70,6 +70,13 @@ s8fy check deck.pptx \
 `s8fy check` is not a visual gate. It does not replace `vision-check` or PNG
 review for created/edited decks.
 
+For `fonts`, `missingRiskCandidates` excludes common system fonts such as
+Arial, Aptos, Calibri, Times New Roman, Courier New, Helvetica, Verdana, and
+Tahoma. These may appear under `systemFontCandidates`: acceptable for many
+internal decks, but still a cross-machine consistency risk for strict external
+delivery. Non-system `font_not_embedded` warnings should be fixed by embedding
+the font or switching to an approved system/DeckKit font.
+
 ## Extract
 
 Use extract for notes, resources, links, and fonts:

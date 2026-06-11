@@ -94,7 +94,7 @@
         },
         "slideTypes": {
           "heroSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.sub"]
           },
           "profileTableSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.rows"]
@@ -103,7 +103,15 @@
             "requiredSlots": ["data.eyebrow", "data.title", "data.items"]
           },
           "previewProductSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.kpis"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.banner",
+              "data.kpis",
+              "data.capHeader",
+              "data.capLeft",
+              "data.capRight"
+            ]
           },
           "multiCardSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.cards"]
@@ -112,10 +120,29 @@
             "requiredSlots": ["data.eyebrow", "data.title", "data.comps"]
           },
           "convertFlowSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.srcLabel",
+              "data.srcSub",
+              "data.engTitle",
+              "data.engSub",
+              "data.outputs",
+              "data.featHeader",
+              "data.featLeft",
+              "data.featRight"
+            ]
           },
           "benchmarkSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.tableRows", "data.chartData"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.tableRows",
+              "data.chartTitle",
+              "data.chartData",
+              "data.calloutNum",
+              "data.calloutText"
+            ]
           },
           "timelineSlide": {
             "requiredSlots": ["data.eyebrow", "data.title", "data.steps"]
@@ -417,28 +444,86 @@
         },
         "slideTypes": {
           "mckCoverSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.primaryMetric",
+              "data.lossMetric"
+            ]
           },
           "mckCrisisSnapshotSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.metrics",
+              "data.cohortTitle",
+              "data.cohort",
+              "data.cohortSum",
+              "data.implication",
+              "data.gap",
+              "data.lever"
+            ]
           },
           "mckDemographicProfileSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.age",
+              "data.ageNote",
+              "data.income",
+              "data.incomeNote",
+              "data.occupation",
+              "data.occupationNote",
+              "data.interests",
+              "data.interestNote"
+            ]
           },
           "mckPriorityMatrixSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.bubbles",
+              "data.legend",
+              "data.finding"
+            ]
           },
           "mckLossDriverSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.chartTitle",
+              "data.drivers",
+              "data.controllable",
+              "data.summary",
+              "data.uncontrollable",
+              "data.pareto"
+            ]
           },
           "mckPillarsSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.pillars",
+              "data.defaultTimeframe"
+            ]
           },
           "mckInitiativeRankingSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.sectionTitle",
+              "data.initiatives"
+            ]
           },
           "mckRoadmapSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.phases",
+              "data.metrics",
+              "data.governance"
+            ]
           }
         }
       },
@@ -747,31 +832,71 @@
         },
         "slideTypes": {
           "swissCoverSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.tag",
+              "data.footer"
+            ]
           },
           "swissQuoteSlide": {
-            "requiredSlots": ["data.quote"]
+            "requiredSlots": ["data.quote", "data.body", "data.author", "data.source"]
           },
           "swissTimelineSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.steps"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.steps",
+              "data.calloutTitle",
+              "data.callout",
+              "data.calloutHighlights"
+            ]
           },
           "swissPrinciplesSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.items"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"]
           },
           "swissPeopleGridSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.people"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.people"]
           },
           "swissProfileSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.events"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.initials",
+              "data.name",
+              "data.bio",
+              "data.meta",
+              "data.events"
+            ]
           },
           "swissTypefaceSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.sampleText",
+              "data.cards"
+            ]
           },
           "swissGridTypesSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"]
           },
           "swissSystemSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.baseLabel",
+              "data.baseValue",
+              "data.baseNote",
+              "data.body",
+              "data.callout",
+              "data.measureLabels",
+              "data.labels"
+            ]
           },
           "swissStatementSlide": {
             "requiredAny": [

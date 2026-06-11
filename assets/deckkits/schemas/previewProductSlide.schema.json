@@ -3,7 +3,7 @@
   "$id": "pptx-nova-slide/previewProductSlide",
   "title": "previewProductSlide data schema",
   "type": "object",
-  "required": ["eyebrow", "title", "kpis"],
+  "required": ["eyebrow", "title", "banner", "kpis", "capHeader", "capLeft", "capRight"],
   "properties": {
     "eyebrow": { "type": "string" },
     "title": { "type": "string" },

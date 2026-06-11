@@ -227,6 +227,10 @@
           "text": "of customer loss is\ncontrollable",
           "eq": "= 52% competitor\n+ 26% service\nBoth are addressable\nwith 5 targeted initiatives"
         },
+        "controllable": {
+          "value": "78%",
+          "label": "control-\nlabel"
+        },
         "uncontrollable": {
           "title": "UNCONTROLLABLE (22%)",
           "body": "Structural losses:\nRelocation (8%) + stopped driving (5%) = 13% genuinely unaddressable\nUnknown (9%) is reducible"
@@ -243,6 +247,7 @@
       "data": {
         "title": "Four strategic pillars translate loyalty objectives into measurable business outcomes — each with a clear KPI target",
         "subtitle": "The programme links customer behaviour change to accountable revenue impact",
+        "defaultTimeframe": "within 12 months",
         "pillars": [
           {
             "index": "01",

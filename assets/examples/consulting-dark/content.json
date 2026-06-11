@@ -2,7 +2,8 @@
   "meta": {
     "deckkit": "consulting-dark",
     "style": "consulting",
-    "layout": "executive-grid"
+    "layout": "executive-grid",
+    "footerLeft": "PPTX 全链路渲染与生成 · Roadshow 2026"
   },
   "slides": [
     {
@@ -94,6 +95,10 @@
       "data": {
         "eyebrow": "06 · PRODUCT Ⅱ",
         "title": "本地 CLI & 私有化 API 转换服务",
+        "srcLabel": "PPTX",
+        "srcSub": "源文件",
+        "engTitle": "s8fy 引擎",
+        "engSub": "本地 CLI 与 API 服务\n底层引擎复用 90%+",
         "outputs": [
           ["3C6FA6", "PDF", "高保真导出"],
           ["3E9D6E", "PNG", "逐页截图"],

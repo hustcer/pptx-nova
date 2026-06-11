@@ -3,7 +3,18 @@
   "$id": "pptx-nova-slide/convertFlowSlide",
   "title": "convertFlowSlide data schema",
   "type": "object",
-  "required": ["eyebrow", "title"],
+  "required": [
+    "eyebrow",
+    "title",
+    "srcLabel",
+    "srcSub",
+    "engTitle",
+    "engSub",
+    "outputs",
+    "featHeader",
+    "featLeft",
+    "featRight"
+  ],
   "properties": {
     "eyebrow": { "type": "string" },
     "title": { "type": "string" },

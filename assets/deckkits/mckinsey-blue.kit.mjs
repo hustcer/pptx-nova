@@ -389,8 +389,12 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
     }
   }
 
-  const pillarCard = (s, base, x, y, w, h, item, i) => {
+  const pillarCard = (s, base, x, y, w, h, item, i, labels = {}, defaultTimeframe = '') => {
     const accent = tone(item.accent ?? ACCENTS[i % ACCENTS.length])
+    const itemLabels = item.labels ?? {}
+    const outcomeLabel =
+      itemLabels.outcome ?? labels.businessOutcome ?? labels.outcome ?? 'BUSINESS OUTCOME:'
+    const kpiLabel = itemLabels.kpi ?? labels.kpiTarget ?? labels.kpi ?? 'KPI TARGET'
     const topH = 0.64
     cardPanel(s, nm(s, `${base}Bg`), x, y, w, h)
     box(s, nm(s, `${base}Top`), 'rectangle', x, y, w, topH, accent)
@@ -437,7 +441,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
       color: C.text2,
     })
     box(s, nm(s, `${base}Rule2`), 'rectangle', x + 0.16, y + 3.38, w - 0.32, 0.012, C.grid)
-    tx(s, nm(s, `${base}OutLab`), x + 0.16, y + 3.56, w - 0.32, 0.14, 'BUSINESS OUTCOME:', {
+    tx(s, nm(s, `${base}OutLab`), x + 0.16, y + 3.56, w - 0.32, 0.14, outcomeLabel, {
       name: FONT_EN,
       size: '6.3pt',
       bold: true,
@@ -450,7 +454,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
       color: C.primary,
     })
     box(s, nm(s, `${base}Rule3`), 'rectangle', x + 0.16, y + 4.36, w - 0.32, 0.012, C.grid)
-    tx(s, nm(s, `${base}KpiLab`), x + 0.16, y + 4.56, w - 0.32, 0.14, 'KPI TARGET', {
+    tx(s, nm(s, `${base}KpiLab`), x + 0.16, y + 4.56, w - 0.32, 0.14, kpiLabel, {
       name: FONT_EN,
       size: '6.3pt',
       bold: true,
@@ -471,20 +475,11 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
         color: C.text2,
       })
     }
-    tx(
-      s,
-      nm(s, `${base}Time`),
-      x + 0.16,
-      y + 5.74,
-      w - 0.32,
-      0.14,
-      item.time ?? 'within 12 months',
-      {
-        name: FONT_EN,
-        size: '6.5pt',
-        color: C.slate,
-      },
-    )
+    tx(s, nm(s, `${base}Time`), x + 0.16, y + 5.74, w - 0.32, 0.14, item.time ?? defaultTimeframe, {
+      name: FONT_EN,
+      size: '6.5pt',
+      color: C.slate,
+    })
   }
 
   const smallInfo = (s, base, x, y, w, h, title, lines, color = C.blue) => {
@@ -1264,17 +1259,36 @@ function makePageTypes(builders, chrome, components, total) {
     box(s, nm(s, 'ControllableBracketV'), 'rectangle', MX, 2.13, 0.015, 0.96, C.redBright)
     box(s, nm(s, 'ControllableBracketT'), 'rectangle', MX, 2.13, 0.13, 0.012, C.redBright)
     box(s, nm(s, 'ControllableBracketB'), 'rectangle', MX, 3.08, 0.13, 0.012, C.redBright)
-    tx(s, nm(s, 'ControllablePct'), MX + 0.15, 2.51, 0.42, 0.14, '78%', {
-      name: FONT_EN,
-      size: '7pt',
-      bold: true,
-      color: C.redBright,
-    })
-    tx(s, nm(s, 'ControllableText'), MX + 0.15, 2.69, 0.58, 0.32, 'control-\nlable', {
-      name: FONT_EN,
-      size: '6.7pt',
-      color: C.redBright,
-    })
+    const controllable = data.controllable ?? {}
+    tx(
+      s,
+      nm(s, 'ControllablePct'),
+      MX + 0.15,
+      2.51,
+      0.42,
+      0.14,
+      controllable.value ?? data.summary?.value ?? '',
+      {
+        name: FONT_EN,
+        size: '7pt',
+        bold: true,
+        color: C.redBright,
+      },
+    )
+    tx(
+      s,
+      nm(s, 'ControllableText'),
+      MX + 0.15,
+      2.69,
+      0.58,
+      0.32,
+      controllable.label ?? controllable.text ?? '',
+      {
+        name: FONT_EN,
+        size: '6.7pt',
+        color: C.redBright,
+      },
+    )
     box(s, nm(s, 'Summary'), 'rectangle', 9.65, 1.52, 2.95, 2.8, C.deep)
     tx(
       s,
@@ -1393,7 +1407,18 @@ function makePageTypes(builders, chrome, components, total) {
     header(s, data.title, data.subtitle)
     const cells = grid(4, 0.12, MX, CW)
     ;(data.pillars ?? []).forEach((item, i) =>
-      pillarCard(s, `Pillar${i}`, cells[i].x, 1.22, cells[i].w, 5.86, item, i),
+      pillarCard(
+        s,
+        `Pillar${i}`,
+        cells[i].x,
+        1.22,
+        cells[i].w,
+        5.86,
+        item,
+        i,
+        data.labels,
+        data.defaultTimeframe ?? '',
+      ),
     )
     footer(s, total, data.source)
   }
@@ -1458,10 +1483,20 @@ function makePageTypes(builders, chrome, components, total) {
         size: '7.6pt',
         color: C.text2,
       })
+      const itemLabels = item.labels ?? {}
       const labels = [
-        ['COST LEVEL', item.cost],
-        ['STRATEGIC PILLARS', item.pillars],
-        ['PROPOSED BY', item.owner],
+        [itemLabels.cost ?? data.labels?.costLevel ?? data.labels?.cost ?? 'COST LEVEL', item.cost],
+        [
+          itemLabels.pillars ??
+            data.labels?.strategicPillars ??
+            data.labels?.pillars ??
+            'STRATEGIC PILLARS',
+          item.pillars,
+        ],
+        [
+          itemLabels.owner ?? data.labels?.proposedBy ?? data.labels?.owner ?? 'PROPOSED BY',
+          item.owner,
+        ],
       ]
       labels.forEach(([label, value], j) => {
         const y = 4.38 + j * 0.46

@@ -70,6 +70,38 @@ const font = (size, color = C.text, bold = false, name = FONT_CN) => ({
   color,
   ...(bold ? { bold: true } : {}),
 })
+const textArray = (value) =>
+  (Array.isArray(value) ? value : value ? [value] : [])
+    .map((item) => String(item ?? '').trim())
+    .filter(Boolean)
+const highlightedRuns = (text, highlights, baseFont, emphasisFont) => {
+  const source = String(text ?? '')
+  const terms = textArray(highlights)
+  if (!source || terms.length === 0) return [{ text: source, font: baseFont }]
+
+  const matches = []
+  for (const term of terms) {
+    let cursor = 0
+    while (cursor < source.length) {
+      const start = source.indexOf(term, cursor)
+      if (start < 0) break
+      matches.push({ start, end: start + term.length })
+      cursor = start + term.length
+    }
+  }
+  matches.sort((a, b) => a.start - b.start || b.end - a.end)
+
+  const runs = []
+  let cursor = 0
+  for (const match of matches) {
+    if (match.start < cursor) continue
+    if (match.start > cursor) runs.push({ text: source.slice(cursor, match.start), font: baseFont })
+    runs.push({ text: source.slice(match.start, match.end), font: emphasisFont })
+    cursor = match.end
+  }
+  if (cursor < source.length) runs.push({ text: source.slice(cursor), font: baseFont })
+  return runs.length > 0 ? runs : [{ text: source, font: baseFont }]
+}
 
 const BRAND_LOGOS = {
   airbnb: {
@@ -242,7 +274,7 @@ function makePageTypes(p, chrome) {
       0.8,
       2.4,
       0.2,
-      data.eyebrow ?? 'A LECTURE · 2026',
+      data.eyebrow ?? '',
       font(10.5, C.muted, false, FONT_EN),
     )
     p.hRule(s, nm(s, 'EyebrowRule'), 0.62 + TEXT_INSET, 1.04, 1.24, C.black, 0.012)
@@ -279,7 +311,7 @@ function makePageTypes(p, chrome) {
       6.92,
       1.05,
       0.16,
-      data.footer ?? '01 / 14',
+      data.footer ?? '',
       font(7.5, C.faint, false, FONT_EN),
       'right',
     )
@@ -423,17 +455,12 @@ function makePageTypes(p, chrome) {
         data.calloutTitle,
         font(8.4, C.text, true),
       )
-      const emphasis = '字体 · 学校 · 教学'
-      const parts = callout.includes(emphasis)
-        ? [
-            { text: callout.slice(0, callout.indexOf(emphasis)), font: font(8.4, C.muted) },
-            { text: emphasis, font: font(8.4, C.text, true) },
-            {
-              text: callout.slice(callout.indexOf(emphasis) + emphasis.length),
-              font: font(8.4, C.muted),
-            },
-          ]
-        : [{ text: callout, font: font(8.4, C.muted) }]
+      const parts = highlightedRuns(
+        callout,
+        data.calloutHighlights ?? data.calloutEmphasis,
+        font(8.4, C.muted),
+        font(8.4, C.text, true),
+      )
       p.richTx(s, nm(s, 'Callout'), MX + 0.18, 6.08, 5.8, 0.28, parts)
     }
   }
@@ -558,7 +585,7 @@ function makePageTypes(p, chrome) {
       2.35,
       2.1,
       0.75,
-      data.initials ?? 'JMB',
+      data.initials ?? '',
       font(35, C.text, true, FONT_EN),
     )
     p.hRule(s, nm(s, 'InitialRule'), 0.78, 3.23, 1.5, C.black, 0.018)
@@ -640,7 +667,16 @@ function makePageTypes(p, chrome) {
         card.meta,
         font(7.1, C.muted, false, FONT_EN),
       )
-      p.tx(s, nm(s, `TypeAa${i}`), col.x, 3.55, col.w, 0.95, 'Aa', font(54, accent, true, FONT_EN))
+      p.tx(
+        s,
+        nm(s, `TypeAa${i}`),
+        col.x,
+        3.55,
+        col.w,
+        0.95,
+        card.sampleText ?? data.sampleText ?? '',
+        font(54, accent, true, FONT_EN),
+      )
       p.hRule(
         s,
         nm(s, `TypeAaRule${i}`),
@@ -788,7 +824,7 @@ function makePageTypes(p, chrome) {
       2.34,
       1.8,
       0.2,
-      data.baseLabel ?? 'BASE UNIT',
+      data.baseLabel ?? '',
       font(11, C.muted, false, FONT_EN),
     )
     p.tx(
@@ -798,10 +834,10 @@ function makePageTypes(p, chrome) {
       2.55,
       1.9,
       0.7,
-      data.baseValue ?? '16px',
+      data.baseValue ?? '',
       font(36, C.red, true, FONT_EN),
     )
-    p.tx(s, nm(s, 'BaseNote'), 0.65, 3.22, 2.5, 0.24, '所有距离的最小公因子', font(10, C.faint))
+    p.tx(s, nm(s, 'BaseNote'), 0.65, 3.22, 2.5, 0.24, data.baseNote ?? '', font(10, C.faint))
     p.hRule(s, nm(s, 'BaseRule'), 0.65 + TEXT_INSET, 3.55, 3.2, C.black, 0.012)
     const bodyLines = asLines(data.body).split('\n')
     p.tx(
@@ -840,7 +876,7 @@ function makePageTypes(p, chrome) {
         y - 0.39,
         0.5,
         0.16,
-        '264',
+        data.measureLabels?.[i] ?? data.measureLabel ?? '',
         font(7.5, C.muted, false, FONT_EN),
         'center',
       )
@@ -890,7 +926,7 @@ function makePageTypes(p, chrome) {
     p.addSlide(s)
     chrome.pageMark(s)
     p.dot(s, nm(s, 'Dot'), 3.72, 2.18, 0.5, C.red)
-    const label = data.label ?? 'ARGUMENT · 07'
+    const label = data.label ?? ''
     const labelRuleY = 1.28
     p.vRule(
       s,
@@ -1193,7 +1229,7 @@ function makePageTypes(p, chrome) {
       3.08,
       closingTitleW,
       0.9,
-      data.titleA ?? '网格不是限制',
+      data.titleA ?? '',
       font(54, C.text, false),
     )
     p.tx(
@@ -1203,7 +1239,7 @@ function makePageTypes(p, chrome) {
       4.15,
       closingTitleW,
       0.9,
-      data.titleB ?? '是自由的语法',
+      data.titleB ?? '',
       font(54, C.red, false),
     )
     const closingSubtitleW = 6.8
@@ -1235,11 +1271,7 @@ function makePageTypes(p, chrome) {
       footRuleY,
       ruleHeightToTextBottom(
         footRuleY,
-        textVisualBottom(
-          6.46,
-          10,
-          textLineCount(data.footerL ?? 'SWISS GRID SYSTEMS · A LECTURE', 10, 3.2),
-        ),
+        textVisualBottom(6.46, 10, textLineCount(data.footerL ?? '', 10, 3.2)),
       ),
       C.black,
       0.018,
@@ -1251,7 +1283,7 @@ function makePageTypes(p, chrome) {
       6.46,
       3.2,
       0.22,
-      data.footerL ?? 'SWISS GRID SYSTEMS · A LECTURE',
+      data.footerL ?? '',
       font(10, C.text, false, FONT_EN),
     )
     p.tx(
@@ -1261,7 +1293,7 @@ function makePageTypes(p, chrome) {
       6.72,
       1.8,
       0.18,
-      data.footerR ?? 'END · 14 / 14 · 2026',
+      data.footerR ?? '',
       font(8.4, C.muted, false, FONT_EN),
     )
     p.tx(

@@ -3,7 +3,15 @@
   "$id": "pptx-nova-slide/benchmarkSlide",
   "title": "benchmarkSlide data schema",
   "type": "object",
-  "required": ["eyebrow", "title", "tableRows", "chartData"],
+  "required": [
+    "eyebrow",
+    "title",
+    "tableRows",
+    "chartTitle",
+    "chartData",
+    "calloutNum",
+    "calloutText"
+  ],
   "properties": {
     "eyebrow": { "type": "string" },
     "title": { "type": "string" },

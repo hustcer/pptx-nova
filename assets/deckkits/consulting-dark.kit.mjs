@@ -88,8 +88,8 @@ function makeChrome({ tx, box }) {
     box(s, nm(s, 'RuleAccent'), 'rectangle', MX, 1.655, 1.05, 0.028, C.primary)
     return 1.98
   }
-  const pageFooter = (s, total) => {
-    tx(s, nm(s, 'FootL'), MX, 6.84, 4.5, 0.24, 'PPTX 全链路渲染与生成 · Roadshow 2026', {
+  const pageFooter = (s, total, footerLeft = '') => {
+    tx(s, nm(s, 'FootL'), MX, 6.84, 4.5, 0.24, footerLeft, {
       name: FONT_CN,
       size: '10pt',
       color: C.textSec,
@@ -195,12 +195,15 @@ function makePageTypes(
   { pageHeader, pageFooter, heroDots },
   { kpiCard, custCard, cardBodyTextBox },
   total,
+  meta = {},
 ) {
+  const footerLeft = (data) => data.footerLeft ?? meta.footerLeft ?? ''
+
   // slide 0: cover (deep hero)
   function heroSlide(s, data) {
     addSlide(s, C.heroBg)
     heroDots(s)
-    tx(s, nm(s, 'Eyebrow'), 1.0, 1.62, 9, 0.34, data.eyebrow ?? 'PPTX ROADSHOW · 2026', {
+    tx(s, nm(s, 'Eyebrow'), 1.0, 1.62, 9, 0.34, data.eyebrow ?? '', {
       name: FONT_EN,
       size: '13pt',
       bold: true,
@@ -246,7 +249,7 @@ function makePageTypes(
   function profileTableSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     const rows = data.rows
     const lineX = 1.02
     const top = 2.34
@@ -321,7 +324,7 @@ function makePageTypes(
   function kpiRowSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     const items = data.items
     const cells = grid(2, 0.35)
     const cardH = 1.92
@@ -373,7 +376,7 @@ function makePageTypes(
   function previewProductSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     card(s, nm(s, 'Banner'), MX, 1.98, CW, 0.6, C.surfaceAlt, null)
     box(s, nm(s, 'BannerRule'), 'rectangle', MX, 2.08, 0.07, 0.4, C.primary)
     tx(s, nm(s, 'BannerTxt'), MX + 0.3, 2.12, CW - 0.6, 0.34, data.banner, {
@@ -392,7 +395,7 @@ function makePageTypes(
     const py = 4.98
     card(s, nm(s, 'Cap'), MX, py, CW, 1.62, C.surface)
     box(s, nm(s, 'CapTop'), 'rounded-rectangle', MX, py, CW, 0.09, C.secondary)
-    tx(s, nm(s, 'CapH'), MX + 0.32, py + 0.22, 5, 0.32, data.capHeader ?? '核心能力', {
+    tx(s, nm(s, 'CapH'), MX + 0.32, py + 0.22, 5, 0.32, data.capHeader ?? '', {
       name: FONT_CN,
       size: '13pt',
       bold: true,
@@ -424,7 +427,7 @@ function makePageTypes(
   function landscapeSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     card(s, nm(s, 'Us'), MX, 2.0, CW, 1.2, C.heroBg, null)
     box(s, nm(s, 'UsRule'), 'rectangle', MX, 2.14, 0.08, 0.92, C.primary)
     tx(s, nm(s, 'UsLab'), MX + 0.34, 2.18, 4, 0.3, data.usLabel, {
@@ -491,7 +494,7 @@ function makePageTypes(
   function multiCardSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     tx(s, nm(s, 'Intro'), MX, 1.98, CW, 0.34, data.intro, {
       name: FONT_CN,
       size: '13pt',
@@ -547,7 +550,7 @@ function makePageTypes(
   function convertFlowSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     const fy = 2.35
     card(s, nm(s, 'Src'), MX, fy, 2.5, 2.05, C.heroBg, null)
     tx(
@@ -557,7 +560,7 @@ function makePageTypes(
       fy + 0.55,
       2.5,
       0.6,
-      data.srcLabel ?? 'PPTX',
+      data.srcLabel ?? '',
       { name: FONT_EN, size: '30pt', bold: true, color: C.onHero },
       'center',
     )
@@ -568,7 +571,7 @@ function makePageTypes(
       fy + 1.25,
       2.5,
       0.4,
-      data.srcSub ?? '源文件',
+      data.srcSub ?? '',
       { name: FONT_CN, size: '12pt', color: C.heroMut },
       'center',
     )
@@ -581,7 +584,7 @@ function makePageTypes(
       fy + 0.42,
       2.85,
       0.5,
-      data.engTitle ?? 's8fy 引擎',
+      data.engTitle ?? '',
       { name: FONT_CN, size: '19pt', bold: true, color: C.white },
       'center',
     )
@@ -592,17 +595,12 @@ function makePageTypes(
       fy + 1.0,
       2.65,
       0.85,
-      data.engSub ?? '本地 CLI 与 API 服务\n底层引擎复用 90%+',
+      data.engSub ?? '',
       { name: FONT_CN, size: '11.5pt', color: C.onHero },
       'center',
     )
     box(s, nm(s, 'Arr2'), 'right-arrow', 7.45, fy + 0.78, 0.85, 0.5, C.primary)
-    const outs = data.outputs ?? [
-      [C.blue, 'PDF', '高保真导出'],
-      [C.green, 'PNG', '逐页截图'],
-      [C.amber, 'Markdown', '保留层级'],
-      [C.purple, 'JSON', '结构化数据'],
-    ]
+    const outs = data.outputs ?? []
     const ox = 8.5,
       ow = 2.0,
       oh = 0.95
@@ -626,7 +624,7 @@ function makePageTypes(
     const py = 4.78
     card(s, nm(s, 'Feat'), MX, py, CW, 1.78, C.surface)
     box(s, nm(s, 'FeatTop'), 'rounded-rectangle', MX, py, CW, 0.09, C.secondary)
-    tx(s, nm(s, 'FeatH'), MX + 0.32, py + 0.22, 6, 0.32, data.featHeader ?? '能力要点', {
+    tx(s, nm(s, 'FeatH'), MX + 0.32, py + 0.22, 6, 0.32, data.featHeader ?? '', {
       name: FONT_CN,
       size: '13pt',
       bold: true,
@@ -658,7 +656,7 @@ function makePageTypes(
   function benchmarkSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     const tableName = data.tableName ?? 'BenchTable'
     const tw = data.tableWidth ?? 7.7
     const rowsData = data.tableRows ?? data.rows
@@ -680,7 +678,7 @@ function makePageTypes(
     const chartName = data.chartName ?? 'BenchChart'
     card(s, nm(s, 'ChartPanel'), chX, 2.1, chW, 2.7, C.white)
     box(s, nm(s, 'ChartTop'), 'rounded-rectangle', chX, 2.1, chW, 0.09, C.primary)
-    tx(s, nm(s, 'ChartH'), chX + 0.26, 2.28, chW - 0.5, 0.3, data.chartTitle ?? '综合评分对比', {
+    tx(s, nm(s, 'ChartH'), chX + 0.26, 2.28, chW - 0.5, 0.3, data.chartTitle ?? '', {
       name: FONT_CN,
       size: '12pt',
       bold: true,
@@ -813,7 +811,7 @@ function makePageTypes(
   function timelineSlide(s, data) {
     addSlide(s)
     pageHeader(s, data.eyebrow, data.title)
-    pageFooter(s, total)
+    pageFooter(s, total, footerLeft(data))
     const axisY = 4.2
     box(s, nm(s, 'Axis'), 'rectangle', MX, axisY, CW, 0.02, C.divider)
     const steps = data.steps
@@ -993,7 +991,7 @@ export function createDeck(content) {
   const { ops } = builders
   const chrome = makeChrome(builders)
   const components = makeComponents(builders)
-  const dispatch = makePageTypes(builders, chrome, components, total)
+  const dispatch = makePageTypes(builders, chrome, components, total, content.meta ?? {})
   const warnings = []
 
   slides.forEach((slide, s) => {

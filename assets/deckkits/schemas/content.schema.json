@@ -11,7 +11,8 @@
       "properties": {
         "deckkit": { "type": "string" },
         "style": { "type": "string" },
-        "layout": { "type": "string" }
+        "layout": { "type": "string" },
+        "footerLeft": { "type": "string" }
       },
       "additionalProperties": false
     },

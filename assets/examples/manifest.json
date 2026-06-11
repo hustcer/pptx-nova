@@ -172,12 +172,12 @@
         "deck": {
           "path": "swiss-grid/deck.pptx",
           "bytes": 51303,
-          "sha256": "ed88681aff4aab3cc13fac551492cb2deb99694f65601888ff7ab24977ef15f0"
+          "sha256": "c9d20a0258cfc70734964979991970f29b34a3afdcf1cec2ede68674c1556f53"
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 138950,
-          "sha256": "6968f689f26dd1a9ab8f368b56870ed2d4e7491aaea07716484558c382912194",
+          "bytes": 139196,
+          "sha256": "021976c6c636059b589bcddf93b5831f06e4f28dd8b70d1c0566e6dcdf792440",
           "quality": 82
         },
         "content": {
@@ -193,7 +193,7 @@
         "summary": {
           "path": "swiss-grid/summary.json",
           "bytes": 1745,
-          "sha256": "880b7a1ed8c704bcff3bc75915533cdc858a9634b6fe8b06492e037f3a90bd4c"
+          "sha256": "e0bb82752013983612ca9733dadb05c48f397bbd9dc23e098796ac23cc48fbe7"
         }
       },
       "validation": {

@@ -122,7 +122,7 @@ s8fy pptx vision-check out.pptx --json | save vision.json
 #    合并 autoRetry 的 fixPatch → 人工处理剩余 medium/high → 再 vision-check 到 medium/high 清零
 
 # 11. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 common-workflow.md）
-s8fy convert out.pptx --to png -o previews/ --overwrite
+s8fy convert out.pptx --to png -o previews --overwrite
 #    逐页检查字符重叠、换行压字、截断、页脚/来源撞正文
 
 # 12. 产出物：out.pptx + outline.json + deck_lock.json + content.json + patch.json + dry.json + vision.json + previews/

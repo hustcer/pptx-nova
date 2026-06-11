@@ -354,7 +354,7 @@ set-master-placeholder-style / set-presentation-default-text-style` 底层 op。
 写完样式 patch 一定要：
 
 1. `--dry-run --json` 看 `semanticChanges[]` 是不是覆盖了所有目标 slide
-2. apply 后 `s8fy convert out.pptx --to png -o previews/ --overwrite` 转 PNG，肉眼确认
+2. apply 后 `s8fy convert out.pptx --to png -o previews --overwrite` 转 PNG，肉眼确认
 3. 重要场合用 `s8fy pptx check-brand` 校验品牌合规（见 `data-driven.md`）
 
 ## 不要做的事

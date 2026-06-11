@@ -98,6 +98,23 @@ s8fy schema | jq '.errorCatalog.scenarioCoverage'
 | `ProtocolError`            | daemon RPC frame 解析失败                       | 重新连接 daemon 重发完整 JSON                                            |
 | `UnknownMethod`            | daemon RPC method 名不支持                      | 用 `commands.daemon` 列出的方法名                                        |
 
+## PNG 预览落点漂移 / 陈旧 PNG
+
+如果复核 PNG 时看到旧内容，先确认本轮 `s8fy convert` 的实际输出目录。旧版 s8fy
+曾经把 `-o previews` 的语义绑定到文件系统状态：第一次 `previews` 不存在时写到
+`previews/slide-*.png`，第二次目录已存在时可能静默写到
+`previews/<deck>-img/slide-*.png`，导致 agent 误读上一轮 PNG。
+
+当前工作流规避方式：
+
+1. 预览输出放在当前 run 目录，例如 `-o <run-dir>/previews`。
+2. 无尾随分隔符的 `-o <dir>` 表示 `<dir>` 就是 PNG/multi 输出根；有尾随分隔符的
+   `-o <dir>/` 才表示父目录模式。
+3. 重渲前只清理当前 run 的 preview 根，或使用 `--overwrite` 替换它。不要清理用户
+   自有目录。
+4. 复核前确认 `contact-sheet.png` 和 `slide-*.png` 的修改时间属于本轮命令，并在完成
+   摘要里写出实际预览目录和 contact sheet 路径。
+
 ## Fuzzy 修复支持别名（alias-aware）
 
 写错枚举名时,suggestions 不只看 Levenshtein 距离,还会优先匹配**别名表**。

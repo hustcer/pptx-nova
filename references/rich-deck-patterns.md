@@ -896,7 +896,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 
 ## §9 视觉验证清单（apply 完必做）
 
-1. `s8fy convert out.pptx --to png -o previews/ --overwrite`
+1. `s8fy convert out.pptx --to png -o previews --overwrite`
 2. 用 Read 逐页看 PNG（7 张）
 3. 检查：
    - [ ] 字符重叠 / 换行压字 / 文字溢出 / 截断

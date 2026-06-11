@@ -121,7 +121,7 @@ s8fy pptx inspect input.pptx --daemon --json
 s8fy pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 s8fy pptx apply -p patch.json -i input.pptx -o out.pptx --json
 s8fy pptx vision-check out.pptx --json
-s8fy convert out.pptx --to png -o previews --overwrite --contact-sheet
+s8fy convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 s8fy check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 

@@ -52,7 +52,7 @@ s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-ru
 s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
 s8fy pptx vision-check out.pptx --json | tee vision.json
 # 创建型 deck 必须 high=0 且 medium=0；medium 也要改 generator/layout 后重跑
-s8fy convert out.pptx --to png -o previews/ --overwrite --contact-sheet
+s8fy convert out.pptx --to png -o previews --overwrite --contact-sheet
 # 先 Read previews/contact-sheet.png 总览图扫跨页一致性（配色/页码/节奏/构图）、定位可疑页，
 # 再逐页 Read previews/slide-00*.png 抠单页细节：字符重叠/换行压字/截断、
 # 小字号、连接线/箭头、中轴居中和对称平衡
@@ -364,7 +364,7 @@ dry-run 报告难读,偶尔确实会截断。**单行最小给字号的 1.4 倍,
                                          v
                            ┌─ 6. PNG 视觉验证 ───────────┐
                            │ s8fy convert out.pptx \      │
-                           │   --to png -o previews/ \    │
+                           │   --to png -o previews \     │
                            │   --overwrite --contact-sheet│
                            │                              │
                            │ 先 Read contact-sheet.png    │
@@ -495,7 +495,7 @@ node assets/deckkits/examples/roadshow-build.mjs content.json > patch.json
 s8fy pptx apply -p patch.json -o out.pptx --daemon --dry-run --json
 s8fy pptx apply -p patch.json -o out.pptx --daemon --overwrite
 s8fy pptx vision-check out.pptx --json
-s8fy convert out.pptx --to png -o previews/ --overwrite --contact-sheet
+s8fy convert out.pptx --to png -o previews --overwrite --contact-sheet
 ```
 
 **与从头写 generator 对比**：

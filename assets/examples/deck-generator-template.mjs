@@ -15,7 +15,7 @@ import { BUILTIN_STYLE_PACKS, BUILTIN_THEME_PACKS } from './theme-packs.generate
 //   5. jq '.ops | length' patch.json  # 丰富度自检:客户演示级 ≥ 200,低于这条线视觉一定空
 //   6. s8fy pptx apply -p patch.json -o out.pptx --dry-run --json | tee dry-run.json
 //   7. apply 后跑 vision-check；创建型 deck 必须 high=0 且 medium=0
-//   8. s8fy convert out.pptx --to png -o previews/ --overwrite
+//   8. s8fy convert out.pptx --to png -o previews --overwrite
 //   9. 逐页 Read PNG，确认没有字符重叠/换行压字/截断
 //
 // 为什么用 JS 生成器：手写 700+ 行 JSON envelope 不可维护；JS 生成器允许共享

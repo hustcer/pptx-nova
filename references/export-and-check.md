@@ -14,8 +14,8 @@ Use `s8fy convert`:
 
 ```bash
 s8fy convert deck.pptx --to pdf -o <run-dir>/out/
-s8fy convert deck.pptx --to png -o <run-dir>/previews/ --overwrite
-s8fy convert deck.pptx --to png -o <run-dir>/previews/ --overwrite --contact-sheet
+s8fy convert deck.pptx --to png -o <run-dir>/previews --overwrite
+s8fy convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 s8fy convert deck.pptx --to md -o <run-dir>/out/
 s8fy convert deck.pptx --to json -o <run-dir>/out/
 s8fy convert deck.pptx --to text -o <run-dir>/out/
@@ -23,6 +23,14 @@ s8fy convert deck.pptx --to text -o <run-dir>/out/
 
 The command shape is `s8fy convert <pptx> --to <format>`, not
 `s8fy <pptx> -t png`.
+
+For PNG and multi-format outputs, path shape matters:
+
+- `-o <run-dir>/previews` means `<run-dir>/previews` is the output root. It
+  contains `slide-001.png`, `manifest.json`, and `contact-sheet.png`.
+- `-o <run-dir>/previews/` means parent-directory mode. It creates
+  `<run-dir>/previews/<deck>-img/` for PNG or `<deck>.s8fy/` for multi-format
+  output.
 
 Use `--overwrite` only when replacing outputs that belong to this conversion
 run, usually under `<run-dir>`. If the user explicitly requests a final export
@@ -33,7 +41,7 @@ path that already exists, ask before replacing it.
 For visual review, prefer:
 
 ```bash
-s8fy convert deck.pptx --to png -o <run-dir>/previews/ --overwrite --contact-sheet
+s8fy convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 ```
 
 Read the contact sheet first to detect cross-slide issues such as rhythm, page

@@ -37,6 +37,14 @@ in-place modification, still validate through a run-dir copy before writing back
 Use `--overwrite` only for files created in the current run directory during the
 current iteration.
 
+For PNG previews and multi-format exports, `s8fy convert -o <dir>` uses `<dir>`
+itself as the output root. A trailing separator, `-o <dir>/`, means parent
+directory mode and creates `<dir>/<deck>-img/` or `<dir>/<deck>.s8fy/`. Prefer a
+current-run root such as `<run-dir>/previews` for visual QA. Before regenerating
+previews, make sure the preview root belongs to the current run, then replace it
+with `--overwrite` or clear that current-run directory so stale PNG files cannot
+be reviewed by mistake.
+
 For export/check workflows, default output directories should also live under
 the run directory unless the user explicitly requested a final output path.
 Do not use `--overwrite` on user-owned export paths unless the user asked to
@@ -75,7 +83,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    `summary.bySeverity.medium` must both be 0.
 8. Render visual previews when creating or materially changing a deck:
    ```bash
-   s8fy convert out.pptx --to png -o previews --overwrite --contact-sheet
+   s8fy convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
    ```
    Review the contact sheet for cross-slide rhythm, then inspect suspicious
    slides at full size.

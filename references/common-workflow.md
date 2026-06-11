@@ -97,7 +97,10 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 
 ## Visual Gates
 
-Dry-run catches schema and semantic errors; it does not prove visual quality.
+Dry-run catches schema and semantic errors. Its `text-overflow-estimate`
+visual risk uses the same static text-fit estimator as `vision-check`, so fix
+those medium risks before apply when possible. Dry-run still does not prove
+pixel-level visual quality.
 Use these gates in order:
 
 ```text

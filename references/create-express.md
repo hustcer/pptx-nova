@@ -63,5 +63,5 @@ Even in Express, pause for user input when:
 
 Create workflows must satisfy the common gates. `vision-check` high/medium must
 be 0 before delivery. PNG/contact-sheet review is still required for generated
-decks because dry-run and geometry checks do not catch all text, contrast, and
+decks because static checks do not catch all font rendering, contrast, and
 visual rhythm problems.

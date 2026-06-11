@@ -274,27 +274,27 @@ chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案�
 
 ```json
 {
-  "kind": "text-overflow",
-  "severity": "warning",
-  "slide": 0,
-  "shape": { "id": "..." },
-  "message": "text content estimated to exceed shape bounds",
-  "estimatedOverflow": "0.4in"
+  "code": "text-overflow-estimate",
+  "severity": "medium",
+  "message": "text is unlikely to fit its box at the current font size",
+  "target": { "kind": "shape", "slide": 0, "id": 12, "name": "Title" },
+  "detail": "textLength=42 estLines=2 fontPt=44"
 }
 ```
 
-常见 risk kind：
+常见 risk code：
 
-| kind                         | 含义                    | 处理                                       |
-| ---------------------------- | ----------------------- | ------------------------------------------ |
-| `text-overflow`              | 文字可能超出 shape 边界 | 加大 shape / 用 `fit-text` / 缩短文本      |
-| `chart-dense-labels`         | chart 标签太密          | 改 `set-chart-data-labels.position` 或缩放 |
-| `table-overflow`             | 表格内容超出 cell       | 加列宽 / 缩字号                            |
-| `missing-picture-dimensions` | 加图片没指定 w/h        | 加 `w` / `h` 字段                          |
-| `ole-missing-icon`           | OLE 没显式 icon         | 省略 icon 会用内置 ProgID matrix，可忽略   |
+| code                           | 含义                    | 处理                                       |
+| ------------------------------ | ----------------------- | ------------------------------------------ |
+| `text-overflow-estimate`       | 文字可能超出 shape 边界 | 加大 shape / 用 `fit-text` / 缩短文本      |
+| `chart-label-density-possible` | chart 标签太密          | 改 `set-chart-data-labels.position` 或缩放 |
+| `table-data-outside-grid`      | 表格数据超出 grid       | 加行列 / 调整数据                          |
+| `table-cell-text-long`         | 表格单元格文本过长      | 加列宽 / 缩字号 / 拆行                     |
+| `picture-missing-dimension`    | 加图片没指定 w/h        | 加 `w` / `h` 字段                          |
+| `ole-icon-missing-or-unsized`  | OLE icon 未显式定尺寸   | 加 `iconW` / `iconH` 或确认默认 icon       |
 
 不一定每条 risk 都要处理 —— **轻量警告可以让用户决定**。但 PPT 给老板看的话，
-至少把 `text-overflow` 和 `chart-dense-labels` 处理掉。
+至少把 `text-overflow-estimate` 和 chart/table 相关风险处理掉。
 
 ## 调试技巧
 

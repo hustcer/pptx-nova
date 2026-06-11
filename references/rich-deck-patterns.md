@@ -976,8 +976,8 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 
 ### 文字 textbox 高度防溢出规则
 
-dry-run 的 `text-overflow-possible` 是 low severity，但累积多了报告难读。
-按字号给最小高度：
+dry-run 的 `text-overflow-estimate` 与 `vision-check` 复用同一套静态文本溢出估算。
+按字号给最小高度，尽量在写文件前消掉 medium 风险：
 
 | 字号 | 单行最小 h | 推荐 h | 两行推荐 h |
 | ---- | ---------- | ------ | ---------- |

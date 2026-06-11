@@ -129,7 +129,8 @@ s8fy convert out.pptx --to png -o previews --overwrite
 #     若使用外部/复用资源，再包含 assets_manifest.json
 ```
 
-四道闸门职责不重叠：**check-lock（设计锁漂移 + 资产槽位）→ dry-run（语义）→ vision-check（几何，可自动闭环）→ PNG（像素）**。
+四道闸门分层：**check-lock（设计锁漂移 + 资产槽位）→ dry-run（语义 + touched
+shape 文本溢出估算）→ vision-check（全 deck 静态几何/文本门禁，可自动闭环）→ PNG（像素）**。
 创建型 deck 的 `vision-check` high/medium 都必须为 0；任何一道不过都回去改对应
 DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称完成。
 
@@ -254,7 +255,7 @@ apply 后跑 `s8fy pptx vision-check out.pptx --json`（render-free 几何自检
   `text-edge-margin` 这类 medium 常常对应真实字符重叠、换行压字或页脚撞正文，不能
   因为不是 high 就放行。
 
-vision-check 只看几何；**字符实际重叠 / 字体换行压字 / 小字号可读性 / 对比度 /
+vision-check 是静态估算；**字符实际重叠 / 字体换行压字 / 小字号可读性 / 对比度 /
 箭头是否歪、连接线是否接上 / 中轴标识是否真居中 / 装饰是否真盖住文字 / 配色协调仍靠
 §2 第 8 步的 PNG 复核**（公共检查清单见 `common-workflow.md`），不可省。
 

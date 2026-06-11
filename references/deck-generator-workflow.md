@@ -201,7 +201,7 @@ box(s, name, kind, x, y, w, h, color) // add-shape + fill + noLine
 textbox(s, name, x, y, w, h) // add-textbox
 tx(s, name, x, y, w, h, text, font) // textbox + setText + setRun
 grid(cols, gap, startX, contentW) // 自动算 N 列等距网格 → [{x, w}, ...]
-txH(sizePt, (lines = 1)) // 自动算 textbox 高度,防 text-overflow-possible
+txH(sizePt, (lines = 1)) // 自动算 textbox 高度,防 text-overflow-estimate
 ```
 
 `box` 是装饰元素的 one-liner，`tx` 是文字元素的 one-liner，`grid` 把"4 张 KPI
@@ -253,7 +253,7 @@ tx(s, nm(s, 'Body'), 0.85, 3.0, 6, txH(14, 4), longBody, {
 
 ---
 
-## textbox 高度规则（防 text-overflow-possible）
+## textbox 高度规则（防 text-overflow-estimate）
 
 **首选用 `txH(sizePt, lines)` helper**：
 
@@ -265,9 +265,10 @@ txH(14, 4) // → "0.58in"  (4 行 14pt body)
 
 公式：`(sizePt / 72) * 1.5 * lines` —— 中文环境给 1.5 倍系数(西文可以 1.4)。
 
-`text-overflow-possible` 是 low severity advisory,不阻塞 apply,但累积多了
-dry-run 报告难读,偶尔确实会截断。**单行最小给字号的 1.4 倍,中文给 1.5 倍**;
-多行按行数线性放大。
+`text-overflow-estimate` 是 dry-run 和 `vision-check` 共用的静态估算信号。
+它会基于最终 shape 文本、字号、inset 和 autofit 判断可用空间；创建型 deck 里出现
+medium 时优先加高、删字、拆页或改 autofit。**单行最小给字号的 1.4 倍,中文给
+1.5 倍**;多行按行数线性放大。
 
 | 字号 | 单行 `txH()` 输出 | 2 行 `txH()` 输出 | 4 行 `txH()` 输出 |
 | ---- | ----------------- | ----------------- | ----------------- |
@@ -384,13 +385,14 @@ dry-run 报告难读,偶尔确实会截断。**单行最小给字号的 1.4 倍,
 
 ---
 
-## 视觉验证盲点（dry-run 抓不到的）
+## 视觉验证盲点（静态检查抓不到的）
 
-dry-run 做的是**语义校验**（schema / selector / op-level 关系），它**抓不到几何
-层面的问题**。下面这些必须靠 PNG 人工 Read 才能发现：
+dry-run 做 schema / selector / op-level 语义校验，并用和 `vision-check` 相同的
+文本溢出估算器提前报告 `text-overflow-estimate`。`vision-check` 继续负责几何重叠、
+边界、字号等静态风险。下面这些仍必须靠 PNG 人工 Read 才能发现：
 
 1. **字符重叠 / 换行压字 / 截断** —— 字体、theme/style、平台渲染差异会改变实际
-   换行和字高；vision-check 的 medium 风险要处理，PNG 里还要人工确认没有撞字。
+   换行和字高；dry-run / vision-check 的 medium 风险要处理，PNG 里还要人工确认没有撞字。
 2. **小字号可读性** —— `font-too-small` 可能只是 low，甚至手写生成器可能没触发；
    PNG 上如果圆形编号、badge、risk 标签、灰色说明、chart/table label 需要凑近看，就必须返工。
 3. **装饰元素遮挡主标题** —— textbox 在 dry-run 看来高度合法，但坐标和装饰
@@ -426,7 +428,7 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 | fill / line op 命不中（resolvedSelectors 报 not-found） | shape name 引用裸名，应用 `nm(s, "...")`                                                                  |
 | 主题色没换干净（部分 shape 还是旧色）                   | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                      |
 | KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                |
-| textbox 大量 text-overflow-possible warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                     |
+| textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                     |
 | 同页左下 footer 写"BRAND·X"右上 watermark 写"S8FY DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化            |
 | 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `s8fy pptx rollback --from-sidecar`                                                  |
 | 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                            |

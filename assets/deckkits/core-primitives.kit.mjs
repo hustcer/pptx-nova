@@ -182,10 +182,15 @@ export function createOps(options = {}) {
   const pAlign = (s, name, alignment, paragraph = 0) =>
     ops.push({ op: 'set-paragraph-format', slide: s, shape: { name }, paragraph, alignment })
 
+  const textParagraphCount = (text) => {
+    const value = String(text ?? '')
+    return value.length === 0 ? 0 : value.split(/\r\n|\r|\n/).length
+  }
+
   const tx = (s, name, x, y, w, h, text, font, align) => {
     textbox(s, name, x, y, w, h)
     setText(s, name, text)
-    const n = String(text).split(/\r\n|\r|\n/).length
+    const n = textParagraphCount(text)
     for (let p = 0; p < n; p++) runFont(s, name, font, p)
     if (align) for (let p = 0; p < n; p++) pAlign(s, name, align, p)
     return name
@@ -193,7 +198,7 @@ export function createOps(options = {}) {
 
   const fillText = (s, name, text, font, align) => {
     setText(s, name, text)
-    const n = String(text).split(/\r\n|\r|\n/).length
+    const n = textParagraphCount(text)
     for (let p = 0; p < n; p++) runFont(s, name, font, p)
     if (align) for (let p = 0; p < n; p++) pAlign(s, name, align, p)
   }

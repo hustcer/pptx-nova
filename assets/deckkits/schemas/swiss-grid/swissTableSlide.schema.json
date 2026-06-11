@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/swiss-grid/swissTableSlide",
+  "title": "swissTableSlide data schema",
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.8, "widthIn": 1.5 }
+    },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 30, "widthIn": 6.6 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 11, "widthIn": 6.6 }
+    },
+    "columns": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "description": "Column definitions. Use width/weight for relative width, align for left|center|right, and kind=status for dot+label status cells.",
+      "x-slotBudget": { "maxItems": 6 },
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Field key read from each row object."
+          },
+          "label": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 8.2, "widthIn": 1.8 }
+          },
+          "align": {
+            "type": "string",
+            "enum": ["left", "center", "right"]
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["text", "number", "status"]
+          },
+          "width": {
+            "type": "number",
+            "description": "Relative column width; first text column usually uses 1.5-2.0."
+          },
+          "weight": {
+            "type": "number",
+            "description": "Alias for width."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 11,
+      "description": "Object rows keyed by columns[].key, or array rows matching column order. Status cells may be { label, tone, color }.",
+      "x-slotBudget": { "maxItems": 11 },
+      "items": {
+        "type": ["object", "array"],
+        "additionalProperties": true
+      }
+    },
+    "source": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 7.8 }
+    },
+    "note": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 7.8 }
+    }
+  },
+  "additionalProperties": true
+}

@@ -4,12 +4,13 @@
   "case": "golden-lecture",
   "contentPath": "../../../../../assets/deckkits/examples/swiss-grid-content.json",
   "expected": {
-    "minSlides": 14,
+    "minSlides": 15,
     "requiredSlideTypes": [
       "swissCoverSlide",
       "swissQuoteSlide",
       "swissTimelineSlide",
       "swissPrinciplesSlide",
+      "swissTableSlide",
       "swissClosingSlide"
     ],
     "validate": { "errors": 0, "blockingWarnings": 0 },

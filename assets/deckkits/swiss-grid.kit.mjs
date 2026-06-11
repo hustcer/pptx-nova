@@ -10,6 +10,8 @@ import {
 
 const C = {
   red: 'E2231A',
+  green: '15803D',
+  amber: 'B45309',
   black: '111111',
   text: '171717',
   text2: '3A3A3A',
@@ -31,6 +33,9 @@ const FULL_GRID_W = 13.325
 const FULL_GRID_H = 7.492
 const TITLE_W = 6.8
 const TITLE_H = 0.38
+const TITLE_Y = 0.36
+const TITLE_SUBTITLE_EXTRA_GAP = 3 / 96
+const SUBTITLE_Y = 0.78 + TITLE_SUBTITLE_EXTRA_GAP
 const SUBTITLE_W = 6.8
 const SUBTITLE_FONT_PT = 11
 const SUBTITLE_MIN_H = 0.3
@@ -101,6 +106,100 @@ const highlightedRuns = (text, highlights, baseFont, emphasisFont) => {
   }
   if (cursor < source.length) runs.push({ text: source.slice(cursor), font: baseFont })
   return runs.length > 0 ? runs : [{ text: source, font: baseFont }]
+}
+
+const TABLE_TONE_COLORS = {
+  success: C.green,
+  good: C.green,
+  green: C.green,
+  ok: C.green,
+  warning: C.amber,
+  caution: C.amber,
+  amber: C.amber,
+  risk: C.red,
+  critical: C.red,
+  red: C.red,
+  neutral: C.faint,
+  gray: C.faint,
+  grey: C.faint,
+  black: C.black,
+}
+
+const inferTableColumns = (rows) => {
+  const first = rows.find((row) => row && typeof row === 'object')
+  if (Array.isArray(first)) {
+    return first.map((_, i) => ({ key: `c${i + 1}`, label: `COL ${i + 1}` }))
+  }
+  if (first && typeof first === 'object') {
+    const keys = Object.keys(first).filter((key) => key !== 'cells')
+    if (keys.length > 0) return keys.map((key) => ({ key, label: key }))
+  }
+  return [
+    { key: 'item', label: 'Item', align: 'left', width: 1.7 },
+    { key: 'score', label: 'Score', align: 'center', width: 0.8 },
+    { key: 'status', label: 'Status', align: 'left', kind: 'status', width: 1.2 },
+  ]
+}
+
+const normalizeTableColumns = (data, rows) => {
+  const raw =
+    Array.isArray(data.columns) && data.columns.length > 0 ? data.columns : inferTableColumns(rows)
+  return limitItems(raw, 6).map((column, i) => {
+    const source = typeof column === 'string' ? { key: column, label: column } : (column ?? {})
+    const key = String(source.key ?? source.id ?? source.label ?? `c${i + 1}`)
+    const widthValue = Number(source.width ?? source.weight)
+    const kind =
+      source.kind ??
+      (key.toLowerCase().includes('status') || key.toLowerCase().includes('state')
+        ? 'status'
+        : 'text')
+    const align = ['left', 'center', 'right'].includes(source.align)
+      ? source.align
+      : i === 0 || kind === 'status'
+        ? 'left'
+        : 'center'
+    return {
+      key,
+      label: String(source.label ?? source.title ?? key),
+      align,
+      kind,
+      width:
+        Number.isFinite(widthValue) && widthValue > 0
+          ? widthValue
+          : i === 0
+            ? 1.65
+            : kind === 'status'
+              ? 1.2
+              : 1,
+    }
+  })
+}
+
+const tableCellValue = (row, column, index) => {
+  if (Array.isArray(row)) return row[index]
+  if (row && typeof row === 'object') {
+    if (column.key in row) return row[column.key]
+    if (column.label in row) return row[column.label]
+    if (Array.isArray(row.cells)) return row.cells[index]
+  }
+  return ''
+}
+
+const tableCellText = (value) => {
+  if (value === null || value === undefined) return ''
+  if (Array.isArray(value)) return asLines(value)
+  if (typeof value === 'object') {
+    return String(value.label ?? value.text ?? value.value ?? value.status ?? '')
+  }
+  return String(value)
+}
+
+const tableToneColor = (value) => {
+  if (!value || typeof value !== 'object') return C.black
+  const explicit = normalizeHex(value.color)
+  if (explicit) return explicit
+  const key = String(value.tone ?? value.status ?? value.kind ?? '').toLowerCase()
+  return TABLE_TONE_COLORS[key] ?? C.black
 }
 
 const BRAND_LOGOS = {
@@ -212,8 +311,8 @@ function makeChrome(p, total) {
         ...font(7.8, C.faint, true, FONT_EN),
       })
     }
-    p.tx(s, nm(s, 'Title'), MX, y + 0.36, TITLE_W, TITLE_H, data.title, font(27, C.text, false))
-    let subtitleBottom = y + 0.78
+    p.tx(s, nm(s, 'Title'), MX, y + TITLE_Y, TITLE_W, TITLE_H, data.title, font(27, C.text, false))
+    let subtitleBottom = y + SUBTITLE_Y
     if (data.subtitle) {
       const subtitleLines = estimateDeckTextLineCount(
         String(data.subtitle),
@@ -228,13 +327,13 @@ function makeChrome(p, total) {
         s,
         nm(s, 'Subtitle'),
         MX,
-        y + 0.78,
+        y + SUBTITLE_Y,
         SUBTITLE_W,
         subtitleH,
         data.subtitle,
         font(SUBTITLE_FONT_PT, C.muted, false, FONT_EN),
       )
-      subtitleBottom = y + 0.78 + subtitleH
+      subtitleBottom = y + SUBTITLE_Y + subtitleH
     }
     const ruleY = data.subtitle ? Math.max(y + 1.08, subtitleBottom + SUBTITLE_RULE_GAP) : y + 1.08
     p.hRule(s, nm(s, 'KickerRule'), MX + TEXT_INSET, ruleY, 0.58, C.red, 0.026)
@@ -1208,6 +1307,130 @@ function makePageTypes(p, chrome) {
     })
   }
 
+  function swissTableSlide(s, data) {
+    p.addSlide(s)
+    chrome.pageMark(s)
+    const startY = chrome.title(s, data, { y: 0.68 })
+    const sourceRows = Array.isArray(data.rows)
+      ? data.rows
+      : Array.isArray(data.items)
+        ? data.items
+        : []
+    const rows = limitItems(sourceRows, 11)
+    const columns = normalizeTableColumns(data, rows)
+    const tableX = 0.75
+    const tableY = Math.max(2.08, startY - 0.04)
+    const tableW = 11.86
+    const tableBottom = data.source || data.note ? 6.5 : 6.68
+    const tableH = tableBottom - tableY
+    const headerH = rows.length > 9 ? 0.36 : 0.4
+    const bodyH = Math.max(0.3, tableH - headerH)
+    const rowH = bodyH / Math.max(rows.length, 1)
+    const bodyFontPt = rowH < 0.35 ? 7.0 : rows.length > 9 ? 7.25 : 7.8
+    const headerFontPt = columns.length > 4 ? 7.6 : 8.2
+    const totalWeight = columns.reduce((sum, column) => sum + column.width, 0) || columns.length
+    const colWidths = columns.map((column) => (tableW * column.width) / totalWeight)
+    const colXs = []
+    colWidths.reduce((x, w) => {
+      colXs.push(x)
+      return x + w
+    }, tableX)
+
+    p.hRule(s, nm(s, 'TableTopRule'), tableX, tableY, tableW, C.black, 0.012)
+    columns.forEach((column, i) => {
+      const x = colXs[i]
+      const w = colWidths[i]
+      const align =
+        column.align === 'right' ? 'right' : column.align === 'center' ? 'center' : undefined
+      const headerX = align ? x : x + 0.1
+      const headerW = align ? w : Math.max(0.1, w - 0.16)
+      p.tx(
+        s,
+        nm(s, `TableHead${i}`),
+        headerX,
+        tableY + 0.1,
+        headerW,
+        0.18,
+        column.label,
+        font(headerFontPt, C.text, true, FONT_EN),
+        align,
+      )
+      if (i > 0) {
+        p.vRule(s, nm(s, `TableColRule${i}`), x, tableY, tableH, C.gridLite, 0.008)
+      }
+    })
+    const headerRuleY = tableY + headerH
+    p.hRule(s, nm(s, 'TableHeaderRule'), tableX, headerRuleY, tableW, C.black, 0.018)
+
+    rows.forEach((row, r) => {
+      const rowY = headerRuleY + r * rowH
+      columns.forEach((column, c) => {
+        const x = colXs[c]
+        const w = colWidths[c]
+        const rawValue = tableCellValue(row, column, c)
+        const align =
+          column.align === 'right' ? 'right' : column.align === 'center' ? 'center' : undefined
+        const textH = Math.min(0.24, Math.max(0.17, rowH - 0.1))
+        const textY = rowY + Math.max(0.055, (rowH - textH) / 2)
+        if (
+          column.kind === 'status' ||
+          (rawValue && typeof rawValue === 'object' && !Array.isArray(rawValue))
+        ) {
+          const dotD = Math.min(0.078, Math.max(0.056, rowH * 0.18))
+          const dotX = x + 0.13
+          const dotY = rowY + rowH / 2 - dotD / 2
+          p.dot(s, nm(s, `TableStatusDot${r}_${c}`), dotX, dotY, dotD, tableToneColor(rawValue))
+          p.tx(
+            s,
+            nm(s, `TableCell${r}_${c}`),
+            x + 0.3,
+            textY,
+            Math.max(0.1, w - 0.36),
+            textH,
+            tableCellText(rawValue),
+            font(bodyFontPt, C.text2, false, FONT_CN),
+          )
+          return
+        }
+        const pad = align ? 0.06 : 0.12
+        p.tx(
+          s,
+          nm(s, `TableCell${r}_${c}`),
+          x + pad,
+          textY,
+          Math.max(0.1, w - pad * 2),
+          textH,
+          tableCellText(rawValue),
+          font(bodyFontPt, c === 0 ? C.text : C.text2, c === 0, FONT_CN),
+          align,
+        )
+      })
+      p.hRule(
+        s,
+        nm(s, `TableRowRule${r + 1}`),
+        tableX,
+        headerRuleY + (r + 1) * rowH,
+        tableW,
+        r === rows.length - 1 ? C.grid : C.gridLite,
+        r === rows.length - 1 ? 0.01 : 0.008,
+      )
+    })
+
+    const source = data.source ?? data.note
+    if (source) {
+      p.tx(
+        s,
+        nm(s, 'TableSource'),
+        tableX,
+        tableBottom + 0.15,
+        7.8,
+        0.18,
+        source,
+        font(7.2, C.faint, false, FONT_EN),
+      )
+    }
+  }
+
   function swissClosingSlide(s, data) {
     p.addSlide(s)
     modularGrid(p, s, 'ClosingGridFine', 0, 0, FULL_GRID_W, FULL_GRID_H, 80, 45, C.gridLite)
@@ -1327,6 +1550,7 @@ function makePageTypes(p, chrome) {
     swissColumnSlide,
     swissProgressSlide,
     swissBrandGridSlide,
+    swissTableSlide,
     swissClosingSlide,
   }
 }

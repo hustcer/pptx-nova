@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": 1,
-    "ops": 2030
+    "ops": 2248
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 37,
-    "opResults": 2030,
+    "changedParts": 39,
+    "opResults": 2248,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -36,8 +36,8 @@
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 37,
-    "opResults": 2030,
+    "changedParts": 39,
+    "opResults": 2248,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -47,13 +47,13 @@
   },
   "vision": {
     "status": "success",
-    "slideCount": 14,
-    "issueCount": 169,
+    "slideCount": 15,
+    "issueCount": 208,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 169
+      "low": 208
     }
   },
   "contactSheet": {
@@ -64,12 +64,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 347385,
-      "sha256": "f0fc417853ee6660cdd14650aefa4b2396bb246d1372fd711595064d5d642331"
+      "bytes": 369728,
+      "sha256": "f544a924bc2634be6333a5acbf0cc2004e90314b4e35d159d1ff0ec572f89bc4"
     },
     "webp": {
-      "bytes": 131194,
-      "sha256": "f133ef70e7fe0c5788d7320b57393e90b541fbbfe0d889722526b265f84ef030"
+      "bytes": 138950,
+      "sha256": "6968f689f26dd1a9ab8f368b56870ed2d4e7491aaea07716484558c382912194"
     }
   }
 }

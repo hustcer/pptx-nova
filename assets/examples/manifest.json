@@ -157,6 +157,7 @@
         "typography lecture",
         "visual design history",
         "editorial systems",
+        "minimal comparison tables",
         "Swiss-style presentation"
       ],
       "defaultFor": [
@@ -170,29 +171,29 @@
       "files": {
         "deck": {
           "path": "swiss-grid/deck.pptx",
-          "bytes": 48006,
-          "sha256": "92c73d653c08cbd74bfcce1e8249bc6bf4cf19b22b219e02d977c2b8e59a3586"
+          "bytes": 51303,
+          "sha256": "ed88681aff4aab3cc13fac551492cb2deb99694f65601888ff7ab24977ef15f0"
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 131194,
-          "sha256": "f133ef70e7fe0c5788d7320b57393e90b541fbbfe0d889722526b265f84ef030",
+          "bytes": 138950,
+          "sha256": "6968f689f26dd1a9ab8f368b56870ed2d4e7491aaea07716484558c382912194",
           "quality": 82
         },
         "content": {
           "path": "swiss-grid/content.json",
-          "bytes": 16785,
-          "sha256": "89a0d96549eea821a333d7b44c2864e46e163d86aec17505c51caff8e4d5cf85"
+          "bytes": 19121,
+          "sha256": "b295d41ffd91d15f41372c269be59e9d72f666cca1c604e3301a55e21f995d90"
         },
         "brief": {
           "path": "swiss-grid/brief.md",
-          "bytes": 781,
-          "sha256": "528d93c02f7357293ad27b4cc3fd0ead31ec16cd47f01926960c8bacaeff27a1"
+          "bytes": 808,
+          "sha256": "7d007e9bb23bc04700eb614ea8ddabce07a6bcf5a0d5e032c0e5195b0ada83d8"
         },
         "summary": {
           "path": "swiss-grid/summary.json",
           "bytes": 1745,
-          "sha256": "676789be622f1440095e45c3a6556ed2ae4445e64451a1c7e9c19ec5a118fe00"
+          "sha256": "880b7a1ed8c704bcff3bc75915533cdc858a9634b6fe8b06492e037f3a90bd4c"
         }
       },
       "validation": {
@@ -204,17 +205,17 @@
       },
       "patch": {
         "schemaVersion": 1,
-        "ops": 2030
+        "ops": 2248
       },
       "vision": {
         "status": "success",
-        "slideCount": 14,
-        "issueCount": 169,
+        "slideCount": 15,
+        "issueCount": 208,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 169
+          "low": 208
         }
       }
     }

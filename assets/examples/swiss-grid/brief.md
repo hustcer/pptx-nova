@@ -3,13 +3,13 @@
 DeckKit: `swiss-grid`
 Showcase case: `swiss-grid.golden-lecture`
 Readiness: `production`
-Slides: 14
-Patch ops: 2030
+Slides: 15
+Patch ops: 2248
 Title: 网格系统
 
 ## Best For
 
-design education, typography lecture, visual design history, editorial systems, Swiss-style presentation
+design education, typography lecture, visual design history, editorial systems, minimal comparison tables, Swiss-style presentation
 
 ## Default For
 

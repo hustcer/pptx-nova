@@ -118,14 +118,14 @@
         "summary": {
           "path": "mckinsey-blue/summary.json",
           "bytes": 1787,
-          "sha256": "4bae43b8bb964cace79d35ab10969c7b9a3d86318348e6aaa4869079ed2ab81d"
+          "sha256": "aa366f0a256327ee614827fc4416dda3d4b000a70b5d3a04ad2691d231122b1a"
         }
       },
       "validation": {
         "valid": true,
         "errors": 0,
-        "warnings": 2,
-        "fitDiagnostics": 2,
+        "warnings": 0,
+        "fitDiagnostics": 0,
         "blockingFitDiagnostics": 0
       },
       "patch": {

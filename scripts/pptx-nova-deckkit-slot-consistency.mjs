@@ -86,11 +86,12 @@ function buildProbe(schema, basePath) {
     return out
   }
 
-  function fillField(field, fieldSchema, path) {
+  function fillField(field, fieldSchema, path, inheritedSlotRole = null) {
     const type = Array.isArray(fieldSchema.type) ? fieldSchema.type[0] : fieldSchema.type
+    const slotRole = fieldSchema['x-slotRole'] ?? inheritedSlotRole
     if (fieldSchema.enum) return fieldSchema.enum[0]
     if (type === 'string') {
-      if (fieldSchema['x-slotRole'] === 'control' || CONTROL_FIELD_NAMES.has(field)) {
+      if (slotRole === 'control' || CONTROL_FIELD_NAMES.has(field)) {
         return `probe-${field}`
       }
       const token = nextToken()
@@ -110,10 +111,12 @@ function buildProbe(schema, basePath) {
       const count = max === 0 ? 0 : Math.max(Math.min(2, max), min, 1)
       if (Array.isArray(itemSchema)) {
         return itemSchema.map((tupleSchema, i) =>
-          fillField(`${field}${i}`, tupleSchema, `${path}[${i}]`),
+          fillField(`${field}${i}`, tupleSchema, `${path}[${i}]`, slotRole),
         )
       }
-      return Array.from({ length: count }, (_, i) => fillField(field, itemSchema, `${path}[${i}]`))
+      return Array.from({ length: count }, (_, i) =>
+        fillField(field, itemSchema, `${path}[${i}]`, slotRole),
+      )
     }
     if (type === 'object') {
       if (fieldSchema.properties) return fillObject(fieldSchema, path)

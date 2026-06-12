@@ -38,6 +38,23 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 不要在 skill 用户路径里依赖仓库根 `tools/`、`Justfile` 或其他 skill 目录外文件。
 仓库根工具只服务本仓库维护者。
 
+## 直接支持的输入格式
+
+创建或修改 PPTX 时，当前 skill 可直接消费这些输入：
+
+- 自然语言 brief、聊天内容、已整理的大纲文本或 Markdown 大纲。
+- `.pptx`：参考 deck、模板 deck、`copy-from` 来源、`from-data` 模板或待修改输入。
+- pptx-nova / xdoc 工作流 JSON：`outline.json`、`deck_lock.json`、`content.json`、
+  `patch.json`、`assets_manifest.json`、品牌 / 模板 profile 等。这些是本 skill 生成、
+  xdoc 生成，或用户明确提供且符合对应 schema 的专有结构化输入；不要把任意 `.json`
+  当作可直接生成 PPTX 的 content/patch。
+- 数据绑定 JSON：`data.json` 可作为 `from-data` / `bind-data` 的业务数据；
+  `bindings.json` 必须符合 xdoc binding 结构，用来声明 text/table/chart 绑定关系。
+- CSV 或 JSON 表格数据：用于 table/chart/content 数据填充，可进入 `import-table-data`、
+  `bind-data` 的 data，或标准化进 DeckKit `content.json`。
+- 资源文件：图片、logo、截图、SVG 公式资产等；使用时登记到 `assets_manifest.json`，
+  并通过 asset id 或 `assetSource.path` 引用。
+
 ## 任务路由
 
 先判断任务类型，再读对应文件：

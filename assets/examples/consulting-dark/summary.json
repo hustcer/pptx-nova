@@ -54,7 +54,41 @@
       "high": 0,
       "medium": 0,
       "low": 8
-    }
+    },
+    "lowBuckets": {
+      "total": 8,
+      "styleAllowed": 0,
+      "baselineKnown": 8,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": false,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "composition": 8
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
+      "available": true,
+      "issueCount": 8
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 9,
+      "labelFontPt": 9,
+      "sourceFontPt": 8.5,
+      "note": ""
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
   },
   "contactSheet": {
     "format": "webp",

@@ -209,16 +209,28 @@
         "pngReview": "full"
       },
       "quality": {
-        "lastBenchmark": "2026-06-10",
+        "lastBenchmark": "2026-06-12",
         "vision": {
           "high": 0,
-          "medium": 0
+          "medium": 0,
+          "low": 14,
+          "lowBuckets": {
+            "total": 14,
+            "styleAllowed": 0,
+            "baselineKnown": 14,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 0
+          }
         },
         "manualHardDefects": 0,
         "knownBlockingLimits": [],
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-10",
+          "date": "2026-06-12",
           "source": {
             "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
             "out": ".tmp/pptx-nova-visual"
@@ -227,7 +239,19 @@
           "passed": true,
           "vision": {
             "high": 0,
-            "medium": 0
+            "medium": 0,
+            "low": 14,
+            "lowBuckets": {
+              "total": 14,
+              "styleAllowed": 0,
+              "baselineKnown": 14,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 0
+            }
           },
           "cases": [
             {
@@ -250,7 +274,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 8
+                "low": 8,
+                "lowBuckets": {
+                  "total": 8,
+                  "styleAllowed": 0,
+                  "baselineKnown": 8,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 10,
@@ -260,10 +295,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 318845
+                "bytes": 318823
               },
               "patchOps": 1090,
-              "p50TotalMs": 51.57
+              "p50TotalMs": 46.63
             },
             {
               "caseId": "consulting-dark.stress-density",
@@ -285,7 +320,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 3
+                "low": 3,
+                "lowBuckets": {
+                  "total": 3,
+                  "styleAllowed": 0,
+                  "baselineKnown": 3,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 6,
@@ -295,10 +341,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 194487
+                "bytes": 190347
               },
-              "patchOps": 693,
-              "p50TotalMs": 38.16
+              "patchOps": 689,
+              "p50TotalMs": 44.67
             },
             {
               "caseId": "consulting-dark.mixed-language",
@@ -320,7 +366,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 3
+                "low": 3,
+                "lowBuckets": {
+                  "total": 3,
+                  "styleAllowed": 0,
+                  "baselineKnown": 3,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 5,
@@ -330,10 +387,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 139415
+                "bytes": 136744
               },
-              "patchOps": 486,
-              "p50TotalMs": 37.75
+              "patchOps": 483,
+              "p50TotalMs": 39.66
             }
           ],
           "blockers": []
@@ -589,15 +646,27 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-10",
+        "lastBenchmark": "2026-06-12",
         "vision": {
           "high": 0,
-          "medium": 0
+          "medium": 0,
+          "low": 514,
+          "lowBuckets": {
+            "total": 514,
+            "styleAllowed": 482,
+            "baselineKnown": 32,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 0
+          }
         },
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-10",
+          "date": "2026-06-12",
           "source": {
             "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
             "out": ".tmp/pptx-nova-visual"
@@ -606,7 +675,19 @@
           "passed": true,
           "vision": {
             "high": 0,
-            "medium": 0
+            "medium": 0,
+            "low": 514,
+            "lowBuckets": {
+              "total": 514,
+              "styleAllowed": 482,
+              "baselineKnown": 32,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 0
+            }
           },
           "cases": [
             {
@@ -629,7 +710,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 319
+                "low": 319,
+                "lowBuckets": {
+                  "total": 319,
+                  "styleAllowed": 300,
+                  "baselineKnown": 19,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 8,
@@ -639,10 +731,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 294051
+                "bytes": 303234
               },
-              "patchOps": 2455,
-              "p50TotalMs": 70.84
+              "patchOps": 2471,
+              "p50TotalMs": 80.21
             },
             {
               "caseId": "mckinsey-blue.stress-density",
@@ -664,7 +756,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 86
+                "low": 86,
+                "lowBuckets": {
+                  "total": 86,
+                  "styleAllowed": 81,
+                  "baselineKnown": 5,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 2,
@@ -674,10 +777,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 65314
+                "bytes": 69762
               },
-              "patchOps": 810,
-              "p50TotalMs": 62.42
+              "patchOps": 815,
+              "p50TotalMs": 70.68
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
@@ -688,8 +791,8 @@
               "validation": {
                 "valid": true,
                 "errors": 0,
-                "warnings": 0,
-                "fitDiagnostics": 0,
+                "warnings": 1,
+                "fitDiagnostics": 1,
                 "blockingFitDiagnostics": 0
               },
               "dryRun": {
@@ -699,7 +802,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 113
+                "low": 109,
+                "lowBuckets": {
+                  "total": 109,
+                  "styleAllowed": 101,
+                  "baselineKnown": 8,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 3,
@@ -709,10 +823,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 122672
+                "bytes": 127063
               },
-              "patchOps": 702,
-              "p50TotalMs": 64.18
+              "patchOps": 701,
+              "p50TotalMs": 70.55
             }
           ],
           "blockers": []
@@ -1002,15 +1116,27 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-11",
+        "lastBenchmark": "2026-06-12",
         "vision": {
           "high": 0,
-          "medium": 0
+          "medium": 0,
+          "low": 277,
+          "lowBuckets": {
+            "total": 277,
+            "styleAllowed": 277,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 0
+          }
         },
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-11",
+          "date": "2026-06-12",
           "source": {
             "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
             "out": ".tmp/pptx-nova-visual"
@@ -1019,7 +1145,19 @@
           "passed": true,
           "vision": {
             "high": 0,
-            "medium": 0
+            "medium": 0,
+            "low": 277,
+            "lowBuckets": {
+              "total": 277,
+              "styleAllowed": 277,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 0
+            }
           },
           "cases": [
             {
@@ -1042,7 +1180,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 208
+                "low": 208,
+                "lowBuckets": {
+                  "total": 208,
+                  "styleAllowed": 208,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 15,
@@ -1052,10 +1201,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 369685
+                "bytes": 369655
               },
               "patchOps": 2248,
-              "p50TotalMs": 58.78
+              "p50TotalMs": 55.78
             },
             {
               "caseId": "swiss-grid.stress-density",
@@ -1077,7 +1226,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 43
+                "low": 43,
+                "lowBuckets": {
+                  "total": 43,
+                  "styleAllowed": 43,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 4,
@@ -1090,7 +1250,7 @@
                 "bytes": 104520
               },
               "patchOps": 815,
-              "p50TotalMs": 45.67
+              "p50TotalMs": 45.24
             },
             {
               "caseId": "swiss-grid.mixed-language",
@@ -1112,7 +1272,18 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 26
+                "low": 26,
+                "lowBuckets": {
+                  "total": 26,
+                  "styleAllowed": 26,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
               },
               "previews": {
                 "count": 3,
@@ -1125,7 +1296,7 @@
                 "bytes": 68350
               },
               "patchOps": 608,
-              "p50TotalMs": 44.38
+              "p50TotalMs": 44.53
             }
           ],
           "blockers": []

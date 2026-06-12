@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { normalizeVisionLowBuckets } from './pptx-nova-vision-baseline.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const WORK_ROOT = process.cwd()
@@ -90,6 +91,10 @@ function summaryPathFor(outDir, benchCase) {
 
 function countFitErrors(summary) {
   return (summary?.validation?.fitDiagnostics ?? []).filter((d) => d.severity === 'error').length
+}
+
+function visionLowBuckets(summary) {
+  return normalizeVisionLowBuckets(summary?.vision?.lowBuckets)
 }
 
 function artifactBytes(path) {
@@ -234,6 +239,7 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
     const skipped = summary.skipped ?? {}
     const previews = auditPreviewArtifacts(summary)
     const contactSheet = auditContactSheetArtifact(summary)
+    const lowBuckets = visionLowBuckets(summary)
 
     if (!passed) benchmarkBlockers.push(`${benchCase.id} gate did not pass`)
     if (errors > 0) benchmarkBlockers.push(`${benchCase.id} has ${errors} validation error(s)`)
@@ -273,7 +279,12 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
       },
       dryRun: summary.dryRun ?? null,
       apply: summary.apply ?? null,
-      vision: summary.vision ?? null,
+      vision: summary.vision
+        ? {
+            ...summary.vision,
+            lowBuckets,
+          }
+        : null,
       previews,
       contactSheet,
       patchOps: summary.patch?.ops ?? 0,
@@ -361,6 +372,15 @@ function buildEligibility({ catalogAudit, benchmarkAudit }) {
   if ((quality.vision?.high ?? null) !== 0 || (quality.vision?.medium ?? null) !== 0) {
     deliveryBlockers.push('catalog.quality.vision high/medium must both be 0 for delivery')
   }
+  if ((quality.benchmark?.vision?.lowBuckets?.new ?? 0) !== 0) {
+    deliveryBlockers.push('catalog.quality.benchmark.vision.lowBuckets.new must be 0')
+  }
+  if ((quality.benchmark?.vision?.lowBuckets?.changed ?? 0) !== 0) {
+    deliveryBlockers.push('catalog.quality.benchmark.vision.lowBuckets.changed must be 0')
+  }
+  if ((quality.benchmark?.vision?.lowBuckets?.baselineUnavailableCases ?? 0) !== 0) {
+    deliveryBlockers.push('catalog.quality.benchmark vision low baselines must be available')
+  }
 
   const skippedDryRunCases = benchmarkAudit.cases.filter(
     (benchCase) => benchCase.exists && benchCase.skipped?.dryRun,
@@ -381,6 +401,27 @@ function buildEligibility({ catalogAudit, benchmarkAudit }) {
   )
   if (skippedVisionCases.length > 0) {
     deliveryBlockers.push('benchmark vision gates are still skipped')
+  }
+
+  const newLowCases = benchmarkAudit.cases.filter(
+    (benchCase) => (benchCase.vision?.lowBuckets?.new ?? 0) > 0,
+  )
+  if (newLowCases.length > 0) {
+    deliveryBlockers.push('benchmark vision has new low issues that need review')
+  }
+
+  const changedLowCases = benchmarkAudit.cases.filter(
+    (benchCase) => (benchCase.vision?.lowBuckets?.changed ?? 0) > 0,
+  )
+  if (changedLowCases.length > 0) {
+    deliveryBlockers.push('benchmark vision has changed low issues that need review')
+  }
+
+  const missingBaselineCases = benchmarkAudit.cases.filter(
+    (benchCase) => benchCase.vision?.lowBuckets?.baselineUnavailable === true,
+  )
+  if (missingBaselineCases.length > 0) {
+    deliveryBlockers.push('benchmark vision low baselines are missing')
   }
 
   const skippedPngCases = benchmarkAudit.cases.filter(
@@ -458,7 +499,7 @@ function printHuman(result) {
       ? `, dryRun=H${benchCase.dryRun.visualRisks.high}/M${benchCase.dryRun.visualRisks.medium}`
       : ''
     const vision = benchCase.vision
-      ? `, vision=H${benchCase.vision.bySeverity.high}/M${benchCase.vision.bySeverity.medium}`
+      ? `, vision=H${benchCase.vision.bySeverity.high}/M${benchCase.vision.bySeverity.medium}/L${benchCase.vision.bySeverity.low} new=${benchCase.vision.lowBuckets.new} changed=${benchCase.vision.lowBuckets.changed}`
       : ''
     const previews = benchCase.previews
       ? `, png=${benchCase.previews.count}/${benchCase.previews.expectedCount ?? '?'}`

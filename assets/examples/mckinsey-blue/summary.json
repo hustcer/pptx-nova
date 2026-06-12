@@ -54,7 +54,43 @@
       "high": 0,
       "medium": 0,
       "low": 319
-    }
+    },
+    "lowBuckets": {
+      "total": 319,
+      "styleAllowed": 300,
+      "baselineKnown": 19,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": false,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "small-font": 303,
+      "composition": 13,
+      "overlap": 3
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
+      "available": true,
+      "issueCount": 319
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 6,
+      "labelFontPt": 6,
+      "sourceFontPt": 6,
+      "note": ""
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
   },
   "contactSheet": {
     "format": "webp",

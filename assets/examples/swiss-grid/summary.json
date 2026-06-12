@@ -54,7 +54,41 @@
       "high": 0,
       "medium": 0,
       "low": 208
-    }
+    },
+    "lowBuckets": {
+      "total": 208,
+      "styleAllowed": 208,
+      "baselineKnown": 0,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": false,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "small-font": 208
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
+      "available": true,
+      "issueCount": 208
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 6.8,
+      "labelFontPt": 6.8,
+      "sourceFontPt": 6.8,
+      "note": "DeckKit golden constants override generic prose readability floors for Swiss typographic labels."
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
   },
   "contactSheet": {
     "format": "webp",

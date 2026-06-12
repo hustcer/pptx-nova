@@ -12,6 +12,7 @@ import {
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadContent, validateContent } from '../assets/deckkits/core-primitives.kit.mjs'
+import { createVisionBaseline, summarizeVisionReport } from './pptx-nova-vision-baseline.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const WORK_ROOT = process.cwd()
@@ -28,12 +29,12 @@ Options:
   --out <dir>                 Output directory. Defaults to <cwd>/.tmp/pptx-nova-visual
   --repeat <n>                Repeat validate+build for timing. Defaults to 1
   --fail-on-fit <level>       none|error|warning. Defaults to error
-  --fail-on-vision <level>    none|high|medium|any. Defaults to medium
+  --fail-on-vision <level>    none|high|medium|new-low|any. Defaults to medium
   --render-previews           Render per-slide PNG previews with xdoc convert. Default
   --no-render-previews        Skip PNG preview and contact-sheet rendering
   --contact-sheet             Render PNG previews and contact sheet. Default
   --no-contact-sheet          Skip contact sheet while keeping per-slide previews
-  --update-baseline           Copy summary.json into visual baselines
+  --update-baseline           Accept current low vision issues as reviewed visual baselines
   --xdoc-bin <path>           xdoc binary path. Defaults to xdoc
   --clean                     Remove each case output directory before running
   --json                      Print machine-readable summary
@@ -115,8 +116,8 @@ function parseArgs(argv) {
   if (!['none', 'error', 'warning'].includes(args.failOnFit)) {
     throw new Error('--fail-on-fit must be one of none|error|warning')
   }
-  if (!['none', 'high', 'medium', 'any'].includes(args.failOnVision)) {
-    throw new Error('--fail-on-vision must be one of none|high|medium|any')
+  if (!['none', 'high', 'medium', 'new-low', 'any'].includes(args.failOnVision)) {
+    throw new Error('--fail-on-vision must be one of none|high|medium|new-low|any')
   }
   return args
 }
@@ -132,11 +133,25 @@ function readJson(path) {
 }
 
 function writeJson(path, value) {
+  mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
 function resolveVisual(path) {
   return resolve(VISUAL_ROOT, path)
+}
+
+let catalogCache = null
+
+function loadDeckkitEntry(deckkit) {
+  if (!catalogCache) {
+    catalogCache = readJson(join(SKILL_ROOT, 'assets/deckkits/catalog.json'))
+  }
+  return catalogCache.entries?.find((entry) => entry.id === deckkit) ?? null
+}
+
+function readOptionalJson(path) {
+  return existsSync(path) ? readJson(path) : null
 }
 
 function caseSlug(benchCase) {
@@ -304,21 +319,6 @@ function summarizeApplyReport(report) {
   }
 }
 
-function summarizeVisionReport(report) {
-  const bySeverity = report.summary?.bySeverity ?? {}
-  return {
-    status: report.status ?? '',
-    slideCount: report.slideCount ?? null,
-    issueCount: report.summary?.issueCount ?? countArray(report.issues),
-    autoFixable: report.summary?.autoFixable ?? null,
-    bySeverity: {
-      high: bySeverity.high ?? 0,
-      medium: bySeverity.medium ?? 0,
-      low: bySeverity.low ?? 0,
-    },
-  }
-}
-
 function runXdocStages({ args, patchPath, deckPath, outDir }) {
   const bin = args.xdocBin || 'xdoc'
   const dryRunPath = join(outDir, 'dry-run.json')
@@ -370,6 +370,7 @@ function runXdocStages({ args, patchPath, deckPath, outDir }) {
     dryRun: summarizeApplyReport(dryRun.json),
     apply: summarizeApplyReport(apply.json),
     vision: summarizeVisionReport(vision.json),
+    visionReport: vision.json,
   }
 }
 
@@ -666,6 +667,19 @@ function evaluateExpected({
     addMaxGate(addGate, 'vision.high', vision.bySeverity.high, expectedCfg.vision.high)
     addMaxGate(addGate, 'vision.medium', vision.bySeverity.medium, expectedCfg.vision.medium)
     addMaxGate(addGate, 'vision.low', vision.bySeverity.low, expectedCfg.vision.low)
+    addMaxGate(addGate, 'vision.newLow', vision.lowBuckets?.new, expectedCfg.vision.newLow)
+    addMaxGate(
+      addGate,
+      'vision.changedLow',
+      vision.lowBuckets?.changed,
+      expectedCfg.vision.changedLow,
+    )
+    addMaxGate(
+      addGate,
+      'vision.reviewableLow',
+      vision.lowBuckets?.reviewable,
+      expectedCfg.vision.reviewableLow,
+    )
     addMaxGate(addGate, 'vision.issueCount', vision.issueCount, expectedCfg.vision.issueCount)
   }
   if (args.failOnVision === 'high') {
@@ -675,6 +689,13 @@ function evaluateExpected({
   } else if (args.failOnVision === 'medium') {
     addGate('vision.failOnMedium', vision.bySeverity.high + vision.bySeverity.medium === 0, {
       actual: vision.bySeverity.high + vision.bySeverity.medium,
+    })
+  } else if (args.failOnVision === 'new-low') {
+    const hardIssues = vision.bySeverity.high + vision.bySeverity.medium
+    const reviewableLow = vision.lowBuckets?.reviewable ?? 0
+    addGate('vision.failOnNewLow', hardIssues + reviewableLow === 0, {
+      hardIssues,
+      reviewableLow,
     })
   } else if (args.failOnVision === 'any') {
     addGate('vision.failOnAny', vision.issueCount === 0, { actual: vision.issueCount })
@@ -764,11 +785,30 @@ async function runCase(benchCase, args) {
   const deckPath = join(outDir, 'deck.pptx')
   const timingPath = join(outDir, 'timing.json')
   const summaryPath = join(outDir, 'summary.json')
-  const baselineSummaryPath = join(VISUAL_ROOT, 'baselines', `${benchCase.id}.summary.json`)
+  const baselinePath = join(VISUAL_ROOT, 'baselines', `${benchCase.id}.vision-baseline.json`)
+  const deckkitEntry = loadDeckkitEntry(benchCase.deckkit)
   writeJson(patchPath, build.patch)
   writeJson(timingPath, timing)
   if (build.stderr.trim()) writeFileSync(join(outDir, 'build-stderr.txt'), build.stderr)
   const xdoc = runXdocStages({ args, patchPath, deckPath, outDir })
+  let visionBaseline = readOptionalJson(baselinePath)
+  let baselineUpdated = false
+  if (args.updateBaseline) {
+    visionBaseline = createVisionBaseline(xdoc.visionReport, {
+      deckkit: benchCase.deckkit,
+      caseId: benchCase.id,
+      kind: benchCase.kind,
+      deckkitEntry,
+    })
+    writeJson(baselinePath, visionBaseline)
+    baselineUpdated = true
+  }
+  xdoc.vision = summarizeVisionReport(xdoc.visionReport, {
+    baseline: visionBaseline,
+    deckkitEntry,
+    baselinePath: relative(WORK_ROOT, baselinePath),
+    baselineUpdated,
+  })
   const preview = runPreviewStages({
     args,
     deckPath: xdoc.paths.deck,
@@ -804,6 +844,7 @@ async function runCase(benchCase, args) {
       dryRun: relative(WORK_ROOT, xdoc.paths.dryRun),
       apply: relative(WORK_ROOT, xdoc.paths.apply),
       vision: relative(WORK_ROOT, xdoc.paths.vision),
+      visionBaseline: relative(WORK_ROOT, baselinePath),
       previews: relative(WORK_ROOT, preview.paths.previews),
       convertReport: preview.paths.convertReport
         ? relative(WORK_ROOT, preview.paths.convertReport)
@@ -839,6 +880,7 @@ async function runCase(benchCase, args) {
       renderPreviews: args.renderPreviews,
       contactSheet: args.contactSheet,
       failOnVision: args.failOnVision,
+      updateBaseline: args.updateBaseline,
     },
     timing: {
       ...timing,
@@ -848,7 +890,6 @@ async function runCase(benchCase, args) {
     gate,
   }
   writeJson(summaryPath, summary)
-  if (args.updateBaseline) writeJson(baselineSummaryPath, summary)
   return summary
 }
 
@@ -869,7 +910,11 @@ async function main() {
         `warnings=${summary.validation.warnings.length}, ` +
         `fit=${summary.validation.fitDiagnostics.length}`
       const dryRunText = `dryRun=H${summary.dryRun.visualRisks.high}/M${summary.dryRun.visualRisks.medium}`
-      const visionText = `vision=H${summary.vision.bySeverity.high}/M${summary.vision.bySeverity.medium}`
+      const lowBuckets = summary.vision.lowBuckets ?? {}
+      const visionText =
+        `vision=H${summary.vision.bySeverity.high}/M${summary.vision.bySeverity.medium}` +
+        `/L${summary.vision.bySeverity.low}` +
+        ` new=${lowBuckets.new ?? 0} changed=${lowBuckets.changed ?? 0}`
       const pngText = `png=${summary.previews.count}/${summary.previews.expectedCount ?? '?'}`
       const contactText = `contactSheet=${summary.contactSheet.nonEmpty ? 'ok' : 'missing'}`
       process.stdout.write(
@@ -892,6 +937,10 @@ async function main() {
       dryRunMedium: summary.dryRun.visualRisks.medium,
       visionHigh: summary.vision.bySeverity.high,
       visionMedium: summary.vision.bySeverity.medium,
+      visionLow: summary.vision.bySeverity.low,
+      visionNewLow: summary.vision.lowBuckets?.new ?? 0,
+      visionChangedLow: summary.vision.lowBuckets?.changed ?? 0,
+      visionBaselineUnavailable: summary.vision.lowBuckets?.baselineUnavailable === true,
       previewCount: summary.previews.count,
       previewExpectedCount: summary.previews.expectedCount,
       contactSheetBytes: summary.contactSheet.bytes,

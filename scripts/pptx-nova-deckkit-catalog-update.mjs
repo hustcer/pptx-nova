@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { normalizeVisionLowBuckets } from './pptx-nova-vision-baseline.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const WORK_ROOT = process.cwd()
@@ -136,10 +137,42 @@ function countBlockingFitDiagnostics(fitDiagnostics) {
   return fitDiagnostics.filter((item) => item.blocking === true || item.severity === 'error').length
 }
 
+function sumLowBuckets(items) {
+  return items.reduce(
+    (acc, item) => {
+      const buckets = normalizeVisionLowBuckets(item.vision.lowBuckets)
+      return {
+        total: acc.total + buckets.total,
+        styleAllowed: acc.styleAllowed + buckets.styleAllowed,
+        baselineKnown: acc.baselineKnown + buckets.baselineKnown,
+        new: acc.new + buckets.new,
+        changed: acc.changed + buckets.changed,
+        resolved: acc.resolved + buckets.resolved,
+        reviewable: acc.reviewable + buckets.reviewable,
+        baselineUnavailableCases:
+          acc.baselineUnavailableCases + (buckets.baselineUnavailable ? 1 : 0),
+        baselineUpdatedCases: acc.baselineUpdatedCases + (buckets.baselineUpdated ? 1 : 0),
+      }
+    },
+    {
+      total: 0,
+      styleAllowed: 0,
+      baselineKnown: 0,
+      new: 0,
+      changed: 0,
+      resolved: 0,
+      reviewable: 0,
+      baselineUnavailableCases: 0,
+      baselineUpdatedCases: 0,
+    },
+  )
+}
+
 function summarizeCase(summaryPath, benchCase, indexRoot) {
   const summary = readJson(summaryPath)
   const fitDiagnostics = summary.validation?.fitDiagnostics ?? []
   const vision = summary.vision?.bySeverity ?? {}
+  const lowBuckets = normalizeVisionLowBuckets(summary.vision?.lowBuckets)
   const previews = summary.previews ?? {}
   const contactSheet = summary.contactSheet ?? {}
 
@@ -164,6 +197,7 @@ function summarizeCase(summaryPath, benchCase, indexRoot) {
       high: vision.high ?? 0,
       medium: vision.medium ?? 0,
       low: vision.low ?? 0,
+      lowBuckets,
     },
     previews: {
       count: previews.count ?? 0,
@@ -227,9 +261,11 @@ function collectBenchmark({ index, outDir, deckkit, date }) {
     (acc, item) => ({
       high: acc.high + item.vision.high,
       medium: acc.medium + item.vision.medium,
+      low: acc.low + item.vision.low,
     }),
-    { high: 0, medium: 0 },
+    { high: 0, medium: 0, low: 0 },
   )
+  vision.lowBuckets = sumLowBuckets(cases)
 
   return {
     schemaVersion: 'pptx-nova-deckkit-quality-benchmark/v1',
@@ -247,6 +283,8 @@ function collectBenchmark({ index, outDir, deckkit, date }) {
 }
 
 function assertPromotionAllowed({
+  previousReadiness,
+  requestedReadiness,
   targetReadiness,
   benchmark,
   nextQuality,
@@ -258,13 +296,26 @@ function assertPromotionAllowed({
   if (benchmark.vision.high !== 0 || benchmark.vision.medium !== 0) {
     blockers.push('benchmark vision high/medium must both be 0')
   }
+  if (
+    (benchmark.vision.lowBuckets?.new ?? 0) !== 0 ||
+    (benchmark.vision.lowBuckets?.changed ?? 0) !== 0
+  ) {
+    blockers.push('benchmark vision new/changed low issues must both be 0')
+  }
+  if ((benchmark.vision.lowBuckets?.baselineUnavailableCases ?? 0) !== 0) {
+    blockers.push('benchmark vision low baseline must be available for every case')
+  }
   if (nextQuality.manualHardDefects !== 0) {
     blockers.push('manualHardDefects must be 0 before production/default promotion')
   }
   if ((nextQuality.knownBlockingLimits ?? []).length > 0) {
     blockers.push('knownBlockingLimits must be empty before production/default promotion')
   }
-  if (!confirmManualPngReview) {
+  const isPromotionRequest =
+    requestedReadiness &&
+    ['production', 'default'].includes(targetReadiness) &&
+    previousReadiness !== targetReadiness
+  if (isPromotionRequest && !confirmManualPngReview) {
     blockers.push('--confirm-manual-png-review is required for production/default promotion')
   }
   return blockers
@@ -311,6 +362,8 @@ function updateCatalog(args) {
 
   const nextReadiness = args.readiness || entry.readiness
   const promotionBlockers = assertPromotionAllowed({
+    previousReadiness,
+    requestedReadiness: args.readiness,
     targetReadiness: nextReadiness,
     benchmark,
     nextQuality,
@@ -345,7 +398,10 @@ function printHuman(result) {
   process.stdout.write(`- write: ${result.written ? 'yes' : 'no (dry run)'}\n`)
   process.stdout.write(`- lastBenchmark: ${result.quality.lastBenchmark}\n`)
   process.stdout.write(
-    `- vision: high=${result.quality.vision.high} medium=${result.quality.vision.medium}\n`,
+    `- vision: high=${result.quality.vision.high} medium=${result.quality.vision.medium} low=${result.quality.vision.low}\n`,
+  )
+  process.stdout.write(
+    `- vision low review: new=${result.quality.vision.lowBuckets.new} changed=${result.quality.vision.lowBuckets.changed} styleAllowed=${result.quality.vision.lowBuckets.styleAllowed} known=${result.quality.vision.lowBuckets.baselineKnown}\n`,
   )
   process.stdout.write(`- manualHardDefects: ${result.quality.manualHardDefects ?? 'unset'}\n`)
   process.stdout.write(`- benchmark cases: ${result.quality.benchmark.cases.length}\n`)

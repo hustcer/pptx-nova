@@ -475,11 +475,14 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
         color: C.text2,
       })
     }
-    tx(s, nm(s, `${base}Time`), x + 0.16, y + 5.74, w - 0.32, 0.14, item.time ?? defaultTimeframe, {
-      name: FONT_EN,
-      size: '6.5pt',
-      color: C.slate,
-    })
+    const timeframe = String(item.time ?? defaultTimeframe ?? '').trim()
+    if (timeframe) {
+      tx(s, nm(s, `${base}Time`), x + 0.16, y + 5.74, w - 0.32, 0.14, timeframe, {
+        name: FONT_EN,
+        size: '6.5pt',
+        color: C.slate,
+      })
+    }
   }
 
   const smallInfo = (s, base, x, y, w, h, title, lines, color = C.blue) => {

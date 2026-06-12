@@ -132,12 +132,18 @@ Maintain examples with:
 just deckkit-examples
 just deckkit-examples check
 just deckkit-examples all
+just deckkit-examples all --update-baseline
 ```
 
 The update script runs golden benchmark cases, verifies gates, converts contact
 sheets to WebP, and writes only changed hashes. When DeckKit code, content, and
 xdoc output logic do not change, repeated `just deckkit-examples` runs should
 not create git-visible changes.
+
+`just deckkit-examples all` runs every golden, stress, and mixed-language visual
+benchmark. Add `--update-baseline` only after reviewing the current low-severity
+vision findings; it writes reviewed `*.vision-baseline.json` files so future
+runs surface only new or changed low findings.
 
 ## Deep References
 

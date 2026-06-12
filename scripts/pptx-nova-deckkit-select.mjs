@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs'
 import { dirname, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { normalizeVisionLowBuckets } from './pptx-nova-vision-baseline.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CATALOG_PATH = resolve(SKILL_ROOT, 'assets/deckkits/catalog.json')
@@ -162,6 +163,13 @@ function qualityBlockers(entry, target) {
   ) {
     blockers.push('quality.benchmark.vision high/medium must both be 0')
   }
+  const lowBuckets = normalizeVisionLowBuckets(quality.benchmark?.vision?.lowBuckets)
+  if (lowBuckets.new !== 0 || lowBuckets.changed !== 0) {
+    blockers.push('quality.benchmark.vision new/changed low issues must both be 0')
+  }
+  if ((quality.benchmark?.vision?.lowBuckets?.baselineUnavailableCases ?? 0) !== 0) {
+    blockers.push('quality.benchmark.vision low baselines must be available')
+  }
   if (target === 'default' && readiness !== 'default') {
     blockers.push(`readiness "${readiness || 'missing'}" is not eligible for default`)
   }
@@ -300,6 +308,7 @@ function evaluateEntry(entry, args) {
       vision: quality.vision ?? null,
       manualHardDefects: quality.manualHardDefects ?? null,
       benchmarkPassed: quality.benchmark?.passed ?? null,
+      benchmarkVision: quality.benchmark?.vision ?? null,
     },
     score,
     scoreParts,

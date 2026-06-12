@@ -13,7 +13,10 @@
       "type": "string",
       "x-slotBudget": { "maxLines": 1, "fontPt": 24, "widthIn": 5.6 }
     },
-    "tag": { "type": "string", "x-slotBudget": { "maxLines": 4, "fontPt": 10, "widthIn": 4.6 } },
+    "tag": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 4, "fontPt": 10, "widthIn": 4.6, "heightIn": 0.7 }
+    },
     "footer": {
       "type": "string",
       "description": "Optional page-count override; defaults to 01 / <total slides>.",

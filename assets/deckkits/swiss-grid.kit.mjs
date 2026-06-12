@@ -424,7 +424,7 @@ function makePageTypes(p, chrome) {
       C.red,
       0.026,
     )
-    p.tx(s, nm(s, 'Tag'), 0.82, tagY, tagW, 0.5, data.tag, font(10, C.muted, false, FONT_EN))
+    p.tx(s, nm(s, 'Tag'), 0.82, tagY, tagW, 0.7, data.tag, font(10, C.muted, false, FONT_EN))
     chrome.coverFooter(s, data.footer)
   }
 

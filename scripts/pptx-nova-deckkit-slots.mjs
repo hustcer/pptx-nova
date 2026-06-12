@@ -2,6 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { summarizeSlotBudgetFit } from '../assets/deckkits/core-primitives.kit.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const skillRoot = resolve(__dirname, '..')
@@ -80,7 +81,18 @@ function budgetSummary(schema = {}) {
     (budget.widthIn !== undefined || budget.widthPt !== undefined)
   ) {
     const width = budget.widthIn !== undefined ? `${budget.widthIn}in` : `${budget.widthPt}pt`
-    parts.push(`${budget.fontPt}pt @ ${width}`)
+    const height =
+      budget.heightIn !== undefined
+        ? `${budget.heightIn}in`
+        : budget.heightPt !== undefined
+          ? `${budget.heightPt}pt`
+          : ''
+    parts.push(`${budget.fontPt}pt @ ${height ? `${width} x ${height}` : width}`)
+    const fit = summarizeSlotBudgetFit(budget)
+    if (fit.cjkCharsPerLine !== null) {
+      const lineText = fit.safeLines !== null ? ` x ${fit.safeLines} line(s)` : ''
+      parts.push(`CJK ~${fit.cjkCharsPerLine} chars${lineText}`)
+    }
   }
   return parts.join('; ')
 }

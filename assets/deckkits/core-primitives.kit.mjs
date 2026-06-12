@@ -787,16 +787,67 @@ function pushSlotBudgetIssue(ctx, budget, path, code, value, limit, message) {
   else ctx.warnings.push(issue)
 }
 
-function estimateSlotLines(value, budget) {
+const SLOT_BUDGET_LINE_HEIGHT = 1.2
+
+function finitePositiveNumber(value) {
+  const n = Number(value)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
+function budgetLengthPt(budget, ptKey, inKey) {
+  const pt = finitePositiveNumber(budget?.[ptKey])
+  if (pt !== null) return pt
+  const inches = finitePositiveNumber(budget?.[inKey])
+  return inches !== null ? inches * 72 : null
+}
+
+export function summarizeSlotBudgetFit(budget = {}) {
+  const fontPt = finitePositiveNumber(budget.fontPt ?? budget.fontSizePt)
+  const widthPt = budgetLengthPt(budget, 'widthPt', 'widthIn')
+  const heightPt = budgetLengthPt(budget, 'heightPt', 'heightIn')
+  const lineHeight = finitePositiveNumber(budget.lineHeight) ?? SLOT_BUDGET_LINE_HEIGHT
+  const maxLines = finitePositiveNumber(budget.maxLines)
+  const cjkCharsPerLine =
+    fontPt !== null && widthPt !== null ? Math.max(1, Math.floor(widthPt / fontPt)) : null
+  const heightSafeLines =
+    fontPt !== null && heightPt !== null
+      ? Math.max(0, Math.floor(heightPt / (fontPt * lineHeight)))
+      : null
+  const safeLines =
+    maxLines !== null && heightSafeLines !== null
+      ? Math.min(maxLines, heightSafeLines)
+      : (heightSafeLines ?? maxLines)
+  return {
+    fontPt,
+    widthPt,
+    heightPt,
+    lineHeight,
+    maxLines,
+    cjkCharsPerLine,
+    heightSafeLines,
+    safeLines,
+  }
+}
+
+export function estimateSlotBudgetTextFit(value, budget = {}) {
   const text = Array.isArray(value)
     ? value.map((item) => String(item ?? '')).join('\n')
     : String(value ?? '')
-  const fontPt = budget.fontPt ?? budget.fontSizePt
-  const widthPt =
-    budget.widthPt ?? (budget.widthIn !== undefined ? Number(budget.widthIn) * 72 : undefined)
-  if (!fontPt || !widthPt) return null
+  const fit = summarizeSlotBudgetFit(budget)
+  if (!fit.fontPt || !fit.widthPt)
+    return { ...fit, text, estimatedLines: null, neededHeightPt: null }
   const hardLines = text.split('\n').length
-  return Math.max(hardLines, estimateQualityLineCount(text, fontPt, Math.max(1, widthPt)))
+  const estimatedLines = Math.max(
+    hardLines,
+    estimateQualityLineCount(text, fit.fontPt, Math.max(1, fit.widthPt)),
+  )
+  return {
+    ...fit,
+    text,
+    hardLines,
+    estimatedLines,
+    neededHeightPt: estimatedLines * fit.fontPt * fit.lineHeight,
+  }
 }
 
 function checkSlotBudgetValue(ctx, value, schema, path) {
@@ -815,7 +866,8 @@ function checkSlotBudgetValue(ctx, value, schema, path) {
         `${path}: ${text.length} chars exceeds budget ${budget.maxChars}`,
       )
     }
-    const estLines = estimateSlotLines(text, budget)
+    const textFit = estimateSlotBudgetTextFit(text, budget)
+    const estLines = textFit.estimatedLines
     if (estLines !== null && budget.maxLines !== undefined && estLines > budget.maxLines) {
       pushSlotBudgetIssue(
         ctx,
@@ -825,6 +877,21 @@ function checkSlotBudgetValue(ctx, value, schema, path) {
         estLines,
         budget.maxLines,
         `${path}: estimated ${estLines} lines exceeds budget ${budget.maxLines}`,
+      )
+    }
+    if (
+      textFit.neededHeightPt !== null &&
+      textFit.heightPt !== null &&
+      textFit.neededHeightPt > textFit.heightPt
+    ) {
+      pushSlotBudgetIssue(
+        ctx,
+        budget,
+        path,
+        'slotBudget.height.limit',
+        Number(textFit.neededHeightPt.toFixed(2)),
+        Number(textFit.heightPt.toFixed(2)),
+        `${path}: estimated ${Number(textFit.neededHeightPt.toFixed(2))}pt text height exceeds budget ${Number(textFit.heightPt.toFixed(2))}pt`,
       )
     }
   }

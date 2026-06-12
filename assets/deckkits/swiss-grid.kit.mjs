@@ -4,6 +4,7 @@ import {
   createOps,
   estimateDeckTextLineCount,
   grid,
+  labelDuplicatesAutoIndex,
   nm,
   normalizeHex,
 } from './core-primitives.kit.mjs'
@@ -899,11 +900,13 @@ function makePageTypes(p, chrome) {
         asLines(item.body),
         font(10.2, C.muted),
       )
-      if (item.diagram === 'manuscript')
+      // diagram 未指定时按 index 轮换四种图形，避免同页装饰完全重复
+      const diagram = item.diagram ?? ['mosaic', 'columns', 'manuscript', 'modular'][i % 4]
+      if (diagram === 'manuscript')
         tinyGrid(p, s, `Diag${i}`, dX, row.diagramY, 1.68, 1.88, 1, 8, {
           blocks: [[0.12, 0.12, 0.76, 0.78, C.panel]],
         })
-      else if (item.diagram === 'columns')
+      else if (diagram === 'columns')
         tinyGrid(p, s, `Diag${i}`, dX, row.diagramY, 1.68, 1.88, 3, 1, {
           blocks: [
             [0.18, 0.12, 0.68, 0.78, C.panel],
@@ -911,7 +914,7 @@ function makePageTypes(p, chrome) {
             [2.14, 0.12, 0.68, 0.78, C.panel],
           ],
         })
-      else if (item.diagram === 'modular')
+      else if (diagram === 'modular')
         tinyGrid(p, s, `Diag${i}`, dX, row.diagramY, 1.68, 1.88, 4, 5, {
           line: C.red,
           blocks: [
@@ -922,14 +925,14 @@ function makePageTypes(p, chrome) {
         })
       else
         tinyGrid(p, s, `Diag${i}`, dX, row.diagramY, 1.68, 1.88, 3, 4, {
-          line: C.black,
+          line: C.grid,
           blocks: [
-            [0, 0, 3, 1, C.text2],
-            [0, 1, 2, 2, C.hair],
-            [2, 1, 1, 1, C.faint],
+            [0, 0, 3, 1, C.hair],
+            [0, 1, 2, 2, C.panel],
+            [2, 1, 1, 1, C.gridLite],
             [2, 2, 1, 1, C.hair],
-            [0, 3, 1, 1, C.faint],
-            [1, 3, 2, 1, C.hair],
+            [0, 3, 1, 1, 'F7D8D5'],
+            [1, 3, 2, 1, C.panel],
           ],
         })
     })
@@ -1063,7 +1066,16 @@ function makePageTypes(p, chrome) {
       0.026,
     )
     p.tx(s, nm(s, 'Label'), 8.0, 1.45, 1.5, 0.18, label, font(8.6, C.text2, false, FONT_EN))
-    p.tx(s, nm(s, 'Title'), 7.82, 1.88, 4.2, 0.74, data.title, font(39, C.text, false))
+    p.tx(
+      s,
+      nm(s, 'Title'),
+      7.82,
+      1.88,
+      4.2,
+      0.74,
+      data.title ?? data.statement,
+      font(39, C.text, false),
+    )
     p.tx(
       s,
       nm(s, 'Subtitle'),
@@ -1181,17 +1193,20 @@ function makePageTypes(p, chrome) {
         font(34, accent, true, FONT_EN),
         'center',
       )
-      p.tx(
-        s,
-        nm(s, `ProgYear${i}`),
-        col.x,
-        3.15,
-        col.w,
-        0.2,
-        step.year,
-        font(8.1, C.red, false, FONT_EN),
-        'center',
-      )
+      const yearLabel = labelDuplicatesAutoIndex(step.year, i) ? '' : step.year
+      if (yearLabel) {
+        p.tx(
+          s,
+          nm(s, `ProgYear${i}`),
+          col.x,
+          3.15,
+          col.w,
+          0.2,
+          yearLabel,
+          font(8.1, C.red, false, FONT_EN),
+          'center',
+        )
+      }
       const dotD = accent === C.red ? 0.18 : 0.11
       p.dot(
         s,
@@ -1224,14 +1239,18 @@ function makePageTypes(p, chrome) {
         'center',
       )
     })
-    if (data.callout) {
-      const calloutLines = asLines(data.callout).split('\n')
+    if (data.callout || data.calloutTitle) {
+      const calloutLines = asLines(data.callout ?? '')
+        .split('\n')
+        .filter((line) => line.trim() !== '')
+      const headText = data.calloutTitle ? String(data.calloutTitle) : (calloutLines[0] ?? '')
+      const bodyLines = data.calloutTitle ? calloutLines : calloutLines.slice(1)
+      const progressBody = bodyLines.join('\n')
       const progressRuleY = 6.08
-      const progressBody = calloutLines.slice(1).join('\n')
       const progressBottom =
-        calloutLines.length > 1
+        bodyLines.length > 0
           ? textVisualBottom(6.3, 7.7, textLineCount(progressBody, 7.7, 7.6))
-          : textVisualBottom(6.02, 8.2, textLineCount(calloutLines[0] ?? '', 8.2, 6.5))
+          : textVisualBottom(6.02, 8.2, textLineCount(headText, 8.2, 6.5))
       p.vRule(
         s,
         nm(s, 'ProgressCalloutRule'),
@@ -1248,10 +1267,10 @@ function makePageTypes(p, chrome) {
         6.02,
         6.5,
         0.22,
-        calloutLines[0] ?? '',
+        headText,
         font(8.2, C.text, true),
       )
-      if (calloutLines.length > 1) {
+      if (bodyLines.length > 0) {
         p.tx(
           s,
           nm(s, 'ProgressCalloutBody'),
@@ -1340,7 +1359,9 @@ function makePageTypes(p, chrome) {
     const tableX = 0.75
     const tableY = Math.max(2.08, startY - 0.04)
     const tableW = 11.86
-    const tableBottom = data.source || data.note ? 6.5 : 6.68
+    const hasSource = Boolean(data.source)
+    const hasNote = Boolean(data.note)
+    const tableBottom = hasSource && hasNote ? 6.34 : hasSource || hasNote ? 6.5 : 6.68
     const tableH = tableBottom - tableY
     const headerH = rows.length > 9 ? 0.36 : 0.4
     const bodyH = Math.max(0.3, tableH - headerH)
@@ -1435,16 +1456,27 @@ function makePageTypes(p, chrome) {
       )
     })
 
-    const source = data.source ?? data.note
-    if (source) {
+    if (hasNote) {
+      p.tx(
+        s,
+        nm(s, 'TableNote'),
+        tableX,
+        tableBottom + (hasSource ? 0.13 : 0.15),
+        7.8,
+        0.18,
+        data.note,
+        font(7.2, C.muted, false, FONT_CN),
+      )
+    }
+    if (hasSource) {
       p.tx(
         s,
         nm(s, 'TableSource'),
         tableX,
-        tableBottom + 0.15,
+        tableBottom + (hasNote ? 0.37 : 0.15),
         7.8,
         0.18,
-        source,
+        data.source,
         font(7.2, C.faint, false, FONT_EN),
       )
     }

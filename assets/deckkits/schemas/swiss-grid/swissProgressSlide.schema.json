@@ -23,6 +23,7 @@
         "properties": {
           "year": {
             "type": "string",
+            "description": "序号下方的红色语义小标签（年份 / 阶段名 / 格式名等）。版式会自动渲染 01/02/… 大号序号，填与序号重复的数字会被去重跳过。",
             "x-slotBudget": { "maxLines": 1, "fontPt": 8.1, "widthIn": 1.5 }
           },
           "title": {
@@ -39,10 +40,12 @@
     },
     "calloutTitle": {
       "type": "string",
+      "description": "底部 callout 区的加粗标题；缺省时取 callout 第一行加粗作为标题。",
       "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 2.6 }
     },
     "callout": {
       "type": "string",
+      "description": "底部结论；提供 calloutTitle 时整段作为正文，否则第一行加粗为标题、其余为正文。",
       "x-slotBudget": { "maxLines": 2, "fontPt": 8.2, "widthIn": 6.3 }
     }
   },

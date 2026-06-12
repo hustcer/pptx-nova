@@ -11,6 +11,8 @@
     },
     "defaultTimeframe": {
       "type": "string",
+      "description": "pillars[].time 缺省时的统一时间范围回退值。",
+      "x-slotFallbackOf": "pillars[].time",
       "x-slotBudget": { "maxLines": 1, "fontPt": 6.5, "widthIn": 2.4 }
     },
     "labels": { "type": "object" },

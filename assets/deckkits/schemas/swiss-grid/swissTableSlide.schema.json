@@ -63,10 +63,12 @@
     },
     "source": {
       "type": "string",
+      "description": "表格下方的来源行（faint，西文字体）；与 note 同时存在时来源在下。",
       "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 7.8 }
     },
     "note": {
       "type": "string",
+      "description": "表格下方的备注行（muted，中文字体）；与 source 同时存在时备注在上、来源在下。",
       "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 7.8 }
     }
   },

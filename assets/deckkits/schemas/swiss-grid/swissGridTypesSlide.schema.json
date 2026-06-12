@@ -36,6 +36,11 @@
           "body": {
             "type": "string",
             "x-slotBudget": { "maxLines": 2, "fontPt": 10.2, "widthIn": 3.3 }
+          },
+          "diagram": {
+            "type": "string",
+            "enum": ["manuscript", "columns", "modular", "mosaic", "hierarchical"],
+            "description": "右侧装饰图形样式（hierarchical 与 mosaic 同形）；未指定时按条目顺序自动轮换 mosaic → columns → manuscript → modular，避免同页四个图形完全相同。"
           }
         },
         "additionalProperties": true

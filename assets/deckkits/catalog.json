@@ -924,7 +924,13 @@
             "requiredSlots": ["data.eyebrow", "data.title"]
           },
           "swissProgressSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"]
+            "requiredSlots": ["data.eyebrow", "data.title"],
+            "autoIndexSlots": [
+              {
+                "path": "data.steps[].year",
+                "hint": "swissProgressSlide 会自动渲染 01/02/… 大号序号；steps[].year 是序号下方的红色语义小标签（年份 / 阶段名 / 格式名等），填与序号重复的数字会被渲染层去重跳过，等于浪费这个槽位"
+              }
+            ]
           },
           "swissBrandGridSlide": {
             "requiredSlots": ["data.eyebrow", "data.title"]

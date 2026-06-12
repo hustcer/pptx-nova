@@ -27,18 +27,18 @@
         "deck": {
           "path": "consulting-dark/deck.pptx",
           "bytes": 34171,
-          "sha256": "30fbc1718729e6274e72c1f56bcf1c5970fadf4b62f1d8fad2a7ea96c434c737"
+          "sha256": "c5852094db3cc89f581aebc590755aca6b91e90454b23ff23b48992c9fdf62ca"
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 107236,
-          "sha256": "e617f52d95d74ed3c5b1b28b1f6b76ff8c82099cac11fbbfda5407f82b01def5",
+          "bytes": 107196,
+          "sha256": "afd9cf98df3cc82e0c01b5db5898cf25ff651db1d761de155b7447fc2dabcd55",
           "quality": 82
         },
         "content": {
           "path": "consulting-dark/content.json",
           "bytes": 8655,
-          "sha256": "17ad566fda69da918d2727843a20bfc9425ee5f3d5ed3252a32aad965fc5f247"
+          "sha256": "469d1882981f892d21357548847ae55f212f710ebed6b8a52f458b93a099e1e1"
         },
         "brief": {
           "path": "consulting-dark/brief.md",
@@ -48,7 +48,7 @@
         "summary": {
           "path": "consulting-dark/summary.json",
           "bytes": 1795,
-          "sha256": "aceb3475f5d23de3751baf838ee6001252e701fd90949d19d0393329b3b048db"
+          "sha256": "aa4fa34a610a5c645d5c4af5390d348456296947e8adb26c5c6771eaa011f549"
         }
       },
       "validation": {
@@ -118,14 +118,14 @@
         "summary": {
           "path": "mckinsey-blue/summary.json",
           "bytes": 1787,
-          "sha256": "aa366f0a256327ee614827fc4416dda3d4b000a70b5d3a04ad2691d231122b1a"
+          "sha256": "4bae43b8bb964cace79d35ab10969c7b9a3d86318348e6aaa4869079ed2ab81d"
         }
       },
       "validation": {
         "valid": true,
         "errors": 0,
-        "warnings": 0,
-        "fitDiagnostics": 0,
+        "warnings": 2,
+        "fitDiagnostics": 2,
         "blockingFitDiagnostics": 0
       },
       "patch": {
@@ -171,13 +171,13 @@
       "files": {
         "deck": {
           "path": "swiss-grid/deck.pptx",
-          "bytes": 51303,
-          "sha256": "c9d20a0258cfc70734964979991970f29b34a3afdcf1cec2ede68674c1556f53"
+          "bytes": 51304,
+          "sha256": "22a9b85e5c1b94d32fed2f7869a3156d9ceeb0841247c026c1240287c32161b1"
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 139196,
-          "sha256": "021976c6c636059b589bcddf93b5831f06e4f28dd8b70d1c0566e6dcdf792440",
+          "bytes": 139238,
+          "sha256": "579417c7fef7907e793650aea8e01b17e2f709388cb20e033a5ea9d620ed919e",
           "quality": 82
         },
         "content": {
@@ -193,7 +193,7 @@
         "summary": {
           "path": "swiss-grid/summary.json",
           "bytes": 1745,
-          "sha256": "e0bb82752013983612ca9733dadb05c48f397bbd9dc23e098796ac23cc48fbe7"
+          "sha256": "0f5fc6e5979eb43c1ae566d69ac45e87ee603933f0df322646e55ae91d81745e"
         }
       },
       "validation": {

@@ -85,33 +85,51 @@ function budgetSummary(schema = {}) {
   return parts.join('; ')
 }
 
+function schemaType(schema = {}) {
+  return Array.isArray(schema.type) ? schema.type.join('|') : (schema.type ?? '')
+}
+
+function pushSchemaRow(rows, path, schema) {
+  rows.push({
+    path,
+    type: schemaType(schema),
+    budget: budgetSummary(schema),
+    description: schema.description ?? '',
+  })
+}
+
+function collectNestedRows(schema, path, rows) {
+  if (schema.type === 'object' && schema.properties) collectSchemaRows(schema, path, rows)
+  if (schema.type === 'array') collectArrayItemRows(schema, path, rows)
+}
+
+function collectArrayItemRows(schema, path, rows) {
+  const itemSchema = schema.items
+  if (!itemSchema) return
+  if (itemSchema.properties) {
+    collectSchemaRows(itemSchema, `${path}[]`, rows)
+    return
+  }
+  if (Array.isArray(itemSchema)) {
+    itemSchema.forEach((tupleSchema, index) => {
+      const tuplePath = `${path}[${index}]`
+      pushSchemaRow(rows, tuplePath, tupleSchema)
+      collectNestedRows(tupleSchema, tuplePath, rows)
+    })
+    return
+  }
+  if (itemSchema.type === 'array') collectArrayItemRows(itemSchema, `${path}[]`, rows)
+}
+
 function collectSchemaRows(schema, basePath = 'data', rows = []) {
   if (!schema?.properties) return rows
   for (const [field, fieldSchema] of Object.entries(schema.properties)) {
     const path = `${basePath}.${field}`
-    rows.push({
-      path,
-      type: Array.isArray(fieldSchema.type) ? fieldSchema.type.join('|') : (fieldSchema.type ?? ''),
-      budget: budgetSummary(fieldSchema),
-      description: fieldSchema.description ?? '',
-    })
+    pushSchemaRow(rows, path, fieldSchema)
     if (fieldSchema.type === 'object' && fieldSchema.properties) {
       collectSchemaRows(fieldSchema, path, rows)
     }
-    const itemSchema = fieldSchema.items
-    if (itemSchema?.properties) collectSchemaRows(itemSchema, `${path}[]`, rows)
-    if (Array.isArray(itemSchema)) {
-      itemSchema.forEach((tupleSchema, index) => {
-        rows.push({
-          path: `${path}[${index}]`,
-          type: Array.isArray(tupleSchema.type)
-            ? tupleSchema.type.join('|')
-            : (tupleSchema.type ?? ''),
-          budget: budgetSummary(tupleSchema),
-          description: tupleSchema.description ?? '',
-        })
-      })
-    }
+    if (fieldSchema.type === 'array') collectArrayItemRows(fieldSchema, path, rows)
   }
   return rows
 }

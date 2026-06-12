@@ -45,7 +45,12 @@
       "type": "string",
       "x-slotBudget": { "maxLines": 2, "fontPt": 8.4, "widthIn": 5.6 }
     },
-    "calloutHighlights": { "type": "array", "items": { "type": "string" } }
+    "calloutHighlights": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "callout 文本中需要加粗强调的子串列表（匹配器，不直接输出）。",
+      "x-slotRole": "control"
+    }
   },
   "additionalProperties": true
 }

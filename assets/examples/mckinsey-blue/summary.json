@@ -13,8 +13,8 @@
   "validation": {
     "valid": true,
     "errors": 0,
-    "warnings": 0,
-    "fitDiagnostics": 0,
+    "warnings": 2,
+    "fitDiagnostics": 2,
     "blockingFitDiagnostics": 0
   },
   "patch": {

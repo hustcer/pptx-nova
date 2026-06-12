@@ -888,6 +888,21 @@ function contractPathGroup(value) {
   return []
 }
 
+// 判定一个 item 级标签是否只是重复了版式自动生成的序号（如 steps[].year 填 "01"/"step 2"），
+// 渲染层用它去重，validate 层用它提示作者改填语义标签。两侧共用同一判定，避免口径漂移。
+const AUTO_INDEX_PREFIXES = new Set(['no', 'n', 'p', 'step', 'phase', 'stage', '第', '步', '第步'])
+
+export function labelDuplicatesAutoIndex(value, index) {
+  const str = String(value ?? '')
+    .trim()
+    .toLowerCase()
+  if (!str) return false
+  const digits = str.replace(/\D+/g, '')
+  if (!digits || Number.parseInt(digits, 10) !== index + 1) return false
+  const rest = str.replace(/[0-9\s·.\-_/]+/g, '')
+  return rest === '' || AUTO_INDEX_PREFIXES.has(rest)
+}
+
 function pushValidationGateIssue({
   errors,
   warnings,
@@ -1003,6 +1018,45 @@ function checkSlideLayoutContract({
   }
 
   const allowedLayoutIds = slideContract.allowedLayoutIds ?? []
+  for (const slot of slideContract.autoIndexSlots ?? []) {
+    const slotPath = typeof slot === 'string' ? slot : slot?.path
+    if (!slotPath) continue
+    const match = slotPath.match(/^(.+)\[\]\.([A-Za-z0-9_]+)$/)
+    if (!match) continue
+    const items = pathValue(slide, match[1])
+    if (!Array.isArray(items)) continue
+    const offenders = []
+    items.forEach((item, idx) => {
+      const value = item?.[match[2]]
+      if (labelDuplicatesAutoIndex(value, idx)) {
+        offenders.push(`${match[1]}[${idx}].${match[2]}="${value}"`)
+      }
+    })
+    if (offenders.length === 0) continue
+    const slotHint =
+      (typeof slot === 'object' && slot !== null && slot.hint) ||
+      slideContract.slotHints?.[slotPath] ||
+      contract.slotHints?.[slotPath] ||
+      ''
+    pushValidationGateIssue({
+      errors,
+      warnings,
+      fitDiagnostics,
+      severity: 'warning',
+      type: 'layout-contract',
+      slideIndex,
+      slideType: slide.type,
+      code: 'layout.autoIndexSlot.duplicate',
+      path: `${basePath}.${slotPath}`,
+      value: offenders.join(', '),
+      limit: 'semantic-label',
+      message: `${basePath}: "${slotPath}" duplicates the layout's auto-generated index (${offenders.join(
+        ', ',
+      )}); the renderer will suppress the duplicate label${slotHint ? ` — ${slotHint}` : ''}`,
+      suggestedActions: ['use-semantic-label', 'drop-redundant-index'],
+    })
+  }
+
   if (slide.layoutId && allowedLayoutIds.length > 0 && !allowedLayoutIds.includes(slide.layoutId)) {
     pushValidationGateIssue({
       errors,

@@ -63,6 +63,18 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。
 - **Export/Check**：只转换、预览、提取或检查，不修改 PPTX。
 
+## Feedback 模式
+
+如果用户 prompt 中包含 `need feedback`、`给反馈`、`需要反馈` 等明确反馈意图，除了完成原本的
+生成、修改或检查任务外，还必须以 SKILL 使用体验官视角记录执行过程中的问题和改进建议：
+
+- 记录实际遇到的 SKILL 使用问题，例如 reference 路由不清、命令链过长、DeckKit 选择不稳、
+  dry-run/vision 输出难以行动、错误修复提示不足、slots/budget 文档不一致、示例数据缺口等。
+- 对每个问题给出面向 `pptx-nova` SKILL 的最佳解决方案，优先说明应改文档、脚本、DeckKit
+  schema、benchmark、catalog 还是最终回复规范。
+- 最后可以从 Agent 角度补充真实使用感受或建议，聚焦流程摩擦、认知负担、验证闭环和可维护性；
+  不要把它写成泛泛表扬或用户内容本身的设计点评。
+
 ## 创建型公共红线
 
 这些规则适用于所有新建 deck，包括 Express 和 Studio：
@@ -109,6 +121,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
   看到 medium 时先在写文件前改高度、删字、拆页或调整 autofit。
 - `subtitle`、`eyebrow`、`kicker`、`badge`、`label` 等预期单行文本不能出现尾词孤行；
   `vision-check` 的 `text-unexpected-wrap` 需要通过缩短文案、增宽或换布局处理。
+- 将 PPTX 转成 PNG/PDF 或检查生成的 PPTX 时，可能出现 `XDOC DEMO` 等工具水印；这类水印通常只在
+  slide 右上角出现，可在人工视觉复核中忽略，不应当作 DeckKit 构图、遮挡或内容缺陷处理。
 
 ## 必经验证
 
@@ -144,6 +158,8 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - 验证结果：dry-run、apply、vision-check、PNG/contact-sheet 复核、可选 preflight
 - AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全
 - 剩余风险，例如字体未嵌入、外链、unsupported 对象、人工未审资源授权
+- 如果触发 Feedback 模式，追加“SKILL 使用反馈”：列出过程问题、针对 `pptx-nova` 的最佳解决方案，
+  以及可选的 Agent 真实使用感受或建议
 
 只有平台或工具给出准确 token 统计时才输出 token 信息；不要估算。
 

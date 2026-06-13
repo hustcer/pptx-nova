@@ -79,6 +79,9 @@ export const readableTextOn = (background, preferred, candidates = []) => {
 }
 
 export const assertWithinSlide = (name, x, y, w, h) => {
+  if (![x, y, w, h].every(Number.isFinite) || w <= 0 || h <= 0) {
+    throw new Error(`Invalid geometry ${name}: x=${x} y=${y} w=${w} h=${h}`)
+  }
   if (
     x < -BOUNDS_EPS ||
     y < -BOUNDS_EPS ||

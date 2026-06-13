@@ -4,6 +4,15 @@
 （`style-spec.md` + `slide-inventory.md`），作为 Phase 1 重建和 Phase 2 抽象的唯一依据。
 不要凭印象重建；每个视觉决策都应能在本阶段产物中找到出处。
 
+## 目录
+
+1. 解包参考文件
+2. 生成结构化 inspect 输出
+3. 生成参考 PNG 基准
+4. `style-spec.md` 模板
+5. `slide-inventory.md` 模板
+6. 完成判据
+
 ## 1. 解包参考文件
 
 务必先看帮助再使用：
@@ -36,7 +45,24 @@ nu tools/unpack-pptx.nu <ref.pptx> -f "某文案"  # 全文搜索定位文案所
 标准 16:9 幕布为 12192000 × 6858000 EMU = 13.333 × 7.5 in；如果参考 deck 不是
 16:9，先与用户确认目标尺寸再继续。
 
-## 2. 生成参考 PNG 基准
+## 2. 生成结构化 inspect 输出
+
+解包 XML 是事实源，`xdoc inspect` 是辅助索引。两者都保留：XML 用于核对色、字、坐标，
+inspect 用于快速定位 shape、文本、图片、关系和页型分布。
+
+```bash
+xdoc pptx inspect <ref.pptx> --daemon --json > .tmp-deckkit-<id>/ref-inspect.json
+```
+
+使用方式：
+
+- 先从 `ref-inspect.json` 获取 slide count、shape count、文本清单、图片/媒体关系和可能的
+  unsupported 对象。
+- 再回到 `.tmp-slides/` 的 XML 查证具体 `a:xfrm`、`a:solidFill`、`a:rPr sz`、
+  placeholder、layout/master 继承来源。
+- 如果 inspect 与 XML/PNG 不一致，以 XML + PNG 为准，并在 `findings.md` 记录差异。
+
+## 3. 生成参考 PNG 基准
 
 ```bash
 xdoc convert <ref.pptx> --to png -o .tmp-deckkit-<id>/ref-previews --overwrite --contact-sheet
@@ -47,7 +73,7 @@ xdoc convert <ref.pptx> --to png -o .tmp-deckkit-<id>/ref-previews --overwrite -
 `slide-inventory.md`**（多模态信息不落盘就会丢失）。转换产物若带 `XDOC DEMO`
 水印，是渲染期叠加，分析与后续对比时一律忽略。
 
-## 3. style-spec.md 模板
+## 4. style-spec.md 模板
 
 逐项从 XML + PNG 提取，**hex/字号/坐标必须来自 XML，不要从 PNG 目测**：
 
@@ -92,9 +118,19 @@ xdoc convert <ref.pptx> --to png -o .tmp-deckkit-<id>/ref-previews --overwrite -
 - 参考 deck 用到的图标语义清单 → 每个给出 Tabler 候选
   （用 node skills/pptx-nova/scripts/pptx-nova-icons.mjs search <概念> --json 查）
 - 内容性图片/logo：记录位置与角色；kit 中处理为 asset 槽位或省略，需向用户披露
+
+## 资产分类
+
+| 资产类型               | Phase 1 高保真重建             | Phase 2 DeckKit 抽象                                       |
+| ---------------------- | ------------------------------ | ---------------------------------------------------------- |
+| 图标/装饰符号          | 用 Tabler 最接近图标替代       | 固定为 kit 图标选择，图标名来自现有 pack                   |
+| logo/品牌标识          | 可提取到 run 目录并复用        | 变成 `asset` 槽位或 catalog known limit，不能硬编码进 kit  |
+| 内容截图/产品界面图    | 可提取到 run 目录并复用        | 变成显式 `assetSource`/slot，或在 knownLimits 披露         |
+| 照片/插画/背景位图     | 只在高保真需要时临时复用       | 默认不进 kit；需通用价值和授权确认才纳入 examples/assets   |
+| 嵌入对象/视频/SmartArt | 记录位置和预览，必要时保留截图 | 默认 unsupported/known limit，不为单一 deck 下沉 primitive |
 ```
 
-## 4. slide-inventory.md 模板
+## 5. slide-inventory.md 模板
 
 逐页登记，并做**页型归并**——这是 Phase 2 schema 设计的雏形：
 
@@ -122,12 +158,14 @@ DeckKit 的页型名不冲突。归并原则：结构相同、仅内容不同的
 结构差异大到需要不同槽位集合的，拆成不同页型。**尽可能保留所有 slides**——
 宁可多一个页型，也不要丢页或把两页硬塞进一个不合身的页型。
 
-## 5. 完成判据
+## 6. 完成判据
 
 - [ ] `style-spec.md` 的色/字/几何均有 XML 出处
 - [ ] `slide-inventory.md` 覆盖参考 deck 全部页，无遗漏
+- [ ] `ref-inspect.json` 已生成，并与 XML/PNG 的关键结论交叉核对
 - [ ] 页型归并完成，每种页型的可变槽位与固定结构已区分
 - [ ] 图标映射表完成（含查不到合适 Tabler 替代的项，单独列出待用户决策）
+- [ ] 资产分类完成：Phase 1 复用、Phase 2 asset slot、known limit 或省略的决策已记录
 - [ ] 字体不可用、非 16:9、嵌入媒体等风险已记录
 
 完成后进入 `rebuild-high-fidelity.md`。

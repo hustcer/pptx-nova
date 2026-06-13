@@ -5,6 +5,17 @@ readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）�
 契约与字符串分层）和 `skills/pptx-nova/assets/deckkits/README.md`（冻结准入）为准，
 本文件按复刻场景串起执行顺序。
 
+## 目录
+
+1. 拆分：什么进 kit，什么进 content
+2. Schema 与槽位
+3. catalog 注册
+4. 验证与 build
+5. 测试
+6. benchmark 与 readiness
+7. core-primitives 修改门槛
+8. 收尾清单
+
 ## 1. 拆分：什么进 kit，什么进 content
 
 把 `generate.mjs` 一拆为二：
@@ -21,6 +32,21 @@ readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）�
 颜色 token、字体名、可被 `data.labels` 覆盖的中性结构标签和自动页码。检查方法：
 对 kit 源码 grep 参考 deck 的主题词，命中即泄漏。允许的 fallback 只能是
 空/隐藏/中性结构默认，不能是参考 deck 的替代内容。
+
+把参考 deck 的业务词写成 denylist，并把脚本输出作为审计产物保留：
+
+```bash
+mkdir -p .tmp-deckkit-<id>/audit
+node .claude/skills/deckkit-maker/scripts/content-leak-audit.mjs \
+  --patch .tmp-deckkit-<id>/kit-patch.json \
+  --denylist .tmp-deckkit-<id>/audit/content-leak-denylist.txt \
+  --json > .tmp-deckkit-<id>/audit/content-leak-audit.json
+```
+
+先创建 `content-leak-denylist.txt`，每行一个词；它至少包含参考 deck 的主题词、产品名、
+组织名、示例指标、年份、来源、专有 callout 强调词。脚本命中时不要简单删词，要回到
+schema、layoutContract 和页型函数，确认该字符串应由 `content.json`、`data.labels` 或
+asset slot 驱动。
 
 借鉴成熟 kit 的契约细节：必填槽位（如 swiss-grid 的 eyebrow）是设计意图时就声明为
 必填并在 catalog `layoutContract.slotHints` 给填写提示；条目超限走 schema
@@ -85,6 +111,8 @@ node skills/pptx-nova/scripts/pptx-nova-build.mjs \
   文本，断言不出现参考 deck 的主题词、产品名、示例指标、示例年份；
   rich text 页型断言 `data.calloutHighlights` 等字段能驱动 emphasis run。
 - **参数化测试**：每个页型至少一个非参考主题的输入被正确渲染。
+- **asset slot 测试**：Phase 1 复用过的 logo/截图/图片若进入 Phase 2，必须验证缺失时
+  delivery validation 报错或渲染为明确的空/隐藏状态；不能回退到参考 deck 图片。
 
 ```bash
 node --test tools/tests/pptx-nova-deckkit-validation.test.mjs
@@ -127,6 +155,7 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 - [ ] kit / schemas / example content / catalog / benchmark cases / tests 全部落盘
 - [ ] slots + slot-consistency 通过；validate-content delivery 模式通过
 - [ ] kit 产出 deck 与 Phase 1 重建 deck PNG 对比无回归
+- [ ] `content-leak-audit.mjs` 通过，审计 JSON 保留在 run 目录
 - [ ] validation tests（含 content leak regression）通过
 - [ ] benchmark 三 case 通过；readiness audit 达到 candidate
 - [ ] 若改了默认行为/文档：按 skill-dev-guide §8.2 同步清单检查 pptx-nova 各文档

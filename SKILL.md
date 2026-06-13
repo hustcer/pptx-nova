@@ -6,7 +6,7 @@ description: >
   要求"创建 DeckKit / 新增 DeckKit / 把这个 pptx 做成 DeckKit / 复刻这个 pptx
   的风格做成套件 / 模仿这个 deck 新建 DeckKit" 时触发。两阶段工作流：
   第一阶段对参考 deck 做高保真重建（保留所有 slides、风格、主题、内容可照搬），
-  第二阶段组件化抽象为 <id>.kit.mjs + schema + catalog + benchmark 并走 readiness
+  第二阶段组件化抽象为 id.kit.mjs + schema + catalog + benchmark 并走 readiness
   流程。不要把本 skill 用于普通交付型 deck 生成——那是 pptx-nova 的 DeckKit 模式。
 ---
 
@@ -18,6 +18,7 @@ description: >
 本 skill 是 **开发者侧** skill：它修改 `skills/pptx-nova/` 源码，可以使用仓库根
 `tools/`、`Justfile` 等 developer-only 工具链；但写进 pptx-nova 的任何用户路径
 （kit、schema、scripts、references）必须保持 skill 自包含，不得依赖 skill 目录外文件。
+本 skill 自带的 `scripts/` 只服务 DeckKit 创建流程，不会随 pptx-nova 发布。
 
 ## 输入
 
@@ -27,6 +28,28 @@ description: >
 2. **新 DeckKit 的名字** —— kebab-case id（如 `swiss-grid`、`consulting-dark`）。
 
 如果两者缺一，先向用户索取，不要自己猜测或挑选文件。
+
+## 开工前 preflight（必做）
+
+在读取参考 deck 或创建 run 目录前，先完成这些检查并把结果写进
+`.tmp-deckkit-<id>/progress.md`；若 run 目录已存在，改用带时间戳的目录或先询问用户，
+不要覆盖旧分析产物。
+
+```bash
+git status --short
+node -e "const id=process.argv[1]; if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) process.exit(1)" <id>
+test -f <ref.pptx>
+node -e "const c=require('./skills/pptx-nova/assets/deckkits/catalog.json'); const id=process.argv[1]; if ((c.entries||[]).some(e=>e.id===id)) process.exit(1)" <id>
+test ! -e skills/pptx-nova/assets/deckkits/<id>.kit.mjs
+test ! -e skills/pptx-nova/assets/deckkits/schemas/<id>
+test ! -e skills/pptx-nova/assets/deckkits/examples/<id>-content.json
+test ! -e skills/pptx-nova/benchmarks/visual/cases/<id>
+test ! -e skills/pptx-nova/assets/examples/<id>
+```
+
+如果任一目标文件或目录已存在，先确认是继续扩展、接管未完成工作，还是换新 id。不要删除或覆盖
+不是本次任务创建的内容。参考 `.pptx` 必须只读；任何导出、解包和分析产物只写入 run 目录或
+`.tmp-slides/`。
 
 ## 前置阅读（必读，按序）
 
@@ -91,22 +114,30 @@ description: >
 
 ## 长任务管理
 
-本任务通常跨 50+ 工具调用，建议配合 planning-with-files SKILL：开工即建
-`task_plan.md` / `findings.md` / `progress.md`，把风格提取结论、逐页对比结果、
-踩坑记录及时落盘。需要深入读取参考 pptx 内部 XML 之外的内容（如嵌入对象）时，
-可借助 pptx SKILL。
+本任务通常跨 50+ 工具调用，必须有可恢复的状态文件。若 planning-with-files SKILL
+可用，开工即使用它；否则在 run 目录手动创建并持续维护：
+
+- `task_plan.md`：Phase 0/1/2 分阶段 checklist，阶段完成时更新状态。
+- `findings.md`：风格提取、XML 证据、字体/资产风险、用户确认事项。
+- `progress.md`：已执行命令、产物路径、失败与修复、下一步。
+
+每看完 1–2 页参考 PNG、每轮重建对比、每次 benchmark/readiness 后都要落盘。需要深入读取
+参考 pptx 内部 XML 之外的内容（如嵌入对象）时，可借助 pptx SKILL。
 
 ## Run 目录约定
 
 ```text
 .tmp-deckkit-<id>/
 ├── ref-previews/          # 参考 deck PNG 基准（contact-sheet + 逐页）
+├── ref-inspect.json       # xdoc inspect 结构化输出
 ├── style-spec.md          # Phase 0 风格提取结论
 ├── slide-inventory.md     # Phase 0 逐页清单与页型归并
+├── task_plan.md / findings.md / progress.md
 ├── generate.mjs           # Phase 1 探索生成器
 ├── patch.json / out.pptx / dry-run.json / vision.json
 ├── previews/              # 重建 deck PNG（每次重渲前 rm -rf）
-└── compare-notes.md       # Phase 1 逐页对比记录
+├── compare-notes.md       # Phase 1 逐页对比记录
+└── audit/                 # Phase 2 content leak / text extraction / slot audit 产物
 ```
 
 `.tmp-deckkit-*` 与 `.tmp-slides/` 均不提交。Phase 2 的正式产物写入
@@ -120,7 +151,7 @@ description: >
 - Phase 1 重建 deck 路径与逐页对比结论（保留页数 / 参考页数）
 - Phase 2 落盘文件清单（kit / schemas / content / catalog / benchmark / tests）
 - 验证结果：validate-content、dry-run、vision-check、slot-consistency、
-  benchmark summary、readiness audit
+  content leak audit、benchmark summary、readiness audit
 - 与参考 deck 的已知差异（字体替代、图标替代、未还原元素）逐条披露
 - 是否动了 core-primitives；若动了，列出改动与全量 DeckKit 回归结果
 

@@ -7,6 +7,15 @@
 先读 `skills/pptx-nova/references/deck-generator-workflow.md`（模板设计、txH 表、
 装饰安全区、视觉验证盲点清单），本文件只补充复刻场景的差异点与已知坑。
 
+## 目录
+
+1. 生成器起步
+2. 资产处理
+3. 重建循环
+4. 逐页对比
+5. 已知坑
+6. 阶段验收
+
 ## 1. 生成器起步
 
 ```bash
@@ -26,7 +35,19 @@ cp skills/pptx-nova/assets/examples/deck-generator-template.mjs .tmp-deckkit-<id
 可参考的成熟 kit 写法：`skills/pptx-nova/assets/deckkits/swiss-grid.kit.mjs`
 （常量区 → makeChrome → 几何 helper → makePageTypes → createDeck 的分层）。
 
-## 2. 重建循环
+## 2. 资产处理
+
+Phase 1 的目标是高保真，所以允许把参考 deck 中的内容性资产提取到 run 目录并临时复用。
+这不等于允许把这些资产硬编码进最终 DeckKit。
+
+- 图标/装饰符号：优先用 Tabler 替代；若替代会明显破坏高保真，在 `compare-notes.md` 记录差异。
+- logo、内容截图、产品界面图：可从 `.tmp-slides/` 或 inspect 关系中提取到
+  `.tmp-deckkit-<id>/assets/`，在 `generate.mjs` 中按路径引用。
+- 照片、背景图、嵌入对象预览：只在重建需要时临时使用；记录来源、页码、用途和后续 Phase 2 决策。
+- Phase 2 必须把这些资产转成 `asset` 槽位、examples 资产、known limit，或明确省略；不得把单个参考
+  deck 的业务图片作为 kit 默认内容。
+
+## 3. 重建循环
 
 ```bash
 cd .tmp-deckkit-<id>
@@ -41,7 +62,7 @@ rm -rf previews && xdoc convert out.pptx --to png -o previews --overwrite --cont
 **每次重渲前 `rm -rf previews`**：convert 在目录已存在且参数变化时会写进
 `previews/deck-img/` 子目录，复核时会看到陈旧图。
 
-## 3. 逐页对比
+## 4. 逐页对比
 
 对比是本阶段的核心验收，不能用 contact-sheet 一眼带过：
 
@@ -68,7 +89,7 @@ rm -rf previews && xdoc convert out.pptx --to png -o previews --overwrite --cont
 
 修复后整个循环重跑，直到所有页 pass。
 
-## 4. 已知坑（历史返工教训，先读再写）
+## 5. 已知坑（历史返工教训，先读再写）
 
 - `pAlign` 类 helper 误用 `op: 'set-paragraph'` → 应为 `set-paragraph-format`；
   模板已修，但自己新写 helper 时别再踩。
@@ -83,12 +104,15 @@ rm -rf previews && xdoc convert out.pptx --to png -o previews --overwrite --cont
 - 二次 `apply` / `convert` 记得 `--overwrite`。
 - 图标：`p.icon(s, nm(s,'Xxx'), '<tabler-name>', x, y, w, h, { color, strokeWidth })`；
   名字必须先用 `pptx-nova-icons.mjs search` 确认存在。
+- 引用本地图片资产时，路径必须相对当前 `generate.mjs` 或使用绝对路径；移动到 Phase 2 时再改成
+  content `assetSource` 或 examples 资产路径。
 
-## 5. 阶段验收
+## 6. 阶段验收
 
 - [ ] 参考 deck 每一页都有对应重建页（页数、页序一致）
 - [ ] dry-run 无阻塞 visualRisks；vision-check high/medium = 0
 - [ ] `compare-notes.md` 全部页 pass；可接受替代逐条披露
+- [ ] 临时复用的图片/logo/截图均登记在 `findings.md`，并有 Phase 2 处理决策
 - [ ] generate.mjs 内：hex 全走 `C.*`、字号全走 `F.*`、shape 名全走 `nm()`、
       每个页型函数只读自己的 data 对象（为 Phase 2 抽取做好准备）
 

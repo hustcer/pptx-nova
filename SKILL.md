@@ -43,6 +43,13 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 创建或修改 PPTX 时，当前 skill 可直接消费这些输入：
 
 - 自然语言 brief、聊天内容、已整理的大纲文本或 Markdown 大纲。
+- HTML 文件、网页 URL、PDF：作为素材输入。先用 `xdoc html2md`（HTML/URL）或
+  `xdoc pdf extract-text`（PDF）归一化为 Markdown/文本，再当作 brief 或大纲来源进入
+  create / data / edit 管道；不是把网页或 PDF 一键变成成品 deck。摄取产物等同用户提供的
+  brief，仍需走 outline → content → DeckKit → 验证。PDF 文本保真度因源文件而异（扫描件、
+  嵌字异常会缺字或乱序），据此补全的事实必须写入 `deck_lock.assumptions[]`。把原始摄取
+  结果存到 run 目录（如 `source_brief.md` / `source_extract.txt`），摄取细节见
+  `references/common-workflow.md` 的 Source Ingestion。
 - `.pptx`：参考 deck、模板 deck、`copy-from` 来源、`from-data` 模板或待修改输入。
 - pptx-nova / xdoc 工作流 JSON：`outline.json`、`deck_lock.json`、`content.json`、
   `patch.json`、`assets_manifest.json`、品牌 / 模板 profile 等。这些是本 skill 生成、
@@ -70,6 +77,11 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 | 只导出 PDF/PNG/MD/JSON、提取或检查       | `references/common-workflow.md`、`references/export-and-check.md`                                                                    | 无需读取创建/编辑文档，除非用户随后要求修复                                   |
 | 长任务 split / 继续生成                  | `references/common-workflow.md`、`references/resume-split-mode.md`                                                                   | 原任务类型的 reference                                                        |
 | 公式、图表、表格、raw XML                | 当前任务 reference + 对应 `formulas.md` / `charts.md` / `tables.md` / `control-flow-and-raw-xml.md`                                  | `troubleshooting.md`                                                          |
+
+用户给 HTML 文件、网页 URL 或 PDF 作为素材时，先按 `references/common-workflow.md` 的
+Source Ingestion 用 xdoc 归一化为 Markdown/文本，再按真正的任务类型（create / data / edit）
+路由到上表对应 reference；摄取本身不改变目标任务类型。若用户只想把 HTML/URL/PDF 转成
+Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行即可。
 
 ## 模式判断
 
@@ -156,6 +168,8 @@ check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> op
 按需读取 reference 后再使用具体命令。以下只作为入口提醒：
 
 ```bash
+xdoc html2md page.html -o source_brief.md             # HTML 文件 / URL → Markdown 素材
+xdoc pdf extract-text input.pdf -o source_extract.txt # PDF → 文本素材
 xdoc pptx inspect input.pptx --daemon --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json

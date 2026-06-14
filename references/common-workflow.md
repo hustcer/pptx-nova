@@ -108,6 +108,57 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 11. Summarize final output path, run directory, important intermediate files,
     validation results, preview/contact sheet path, and remaining risks.
 
+## Source Ingestion (HTML / URL / PDF)
+
+When the user supplies a web URL, an HTML file, or a PDF as content material
+(not as a deck/template), normalize it to text with `xdoc` first, then feed the
+result into the normal pipeline. This applies to create, reference-create, and
+data-driven workflows, and to edit workflows that need to pull in new content.
+
+```bash
+# HTML file or URL -> Markdown (omit -o to print to stdout)
+xdoc html2md "https://example.com/post" -o <run-dir>/source_brief.md
+xdoc html2md page.html -o <run-dir>/source_brief.md
+xdoc html2md page.html --html-base-url "https://site.com/guide/"  # resolve relative links
+# Equivalent path (a URL auto-detects as html):
+xdoc convert "https://example.com/post" --to md -o <run-dir>/source_brief.md
+
+# PDF -> copyable text (omit -o for stdout; --json emits pdf-text/v1)
+xdoc pdf extract-text input.pdf -o <run-dir>/source_extract.txt
+xdoc pdf extract-text input.pdf --pages 1,3-5 --mode layout
+xdoc pdf extract-text input.pdf --engine pdfium --json --pretty
+```
+
+`--engine auto` resolves to PDFium in native builds (`pdflite` is not yet
+available). `--pages` is 1-based. `--mode layout` keeps the visual reading order;
+`natural` is the default reading flow.
+
+Writing with `-o file.md` also emits a `file.manifest.json` sidecar (manifest
+mode `auto`) and refuses to overwrite an existing output. Write into the current
+run directory so reruns do not collide; add `--overwrite` to replace a current-run
+file, or `--manifest false` (or stdout without `-o`) for a single clean file.
+
+Pipeline integration:
+
+- Always write the raw ingested output into the run directory (for example
+  `source_brief.md` / `source_extract.txt`); do not scatter it elsewhere.
+- Treat the ingested text exactly like a user-provided brief. It does not skip
+  any step: still produce `outline.json` and the DeckKit `content.json` (or the
+  edit-mode patch), and still run the gates in `## Visual Gates`.
+
+Red lines:
+
+- Fidelity first: use the source text verbatim for facts; do not invent figures,
+  quotes, dates, or names that are not in the ingested material.
+- Record any AI-filled facts in `deck_lock.assumptions[]` before writing
+  `content.json`, same as any other create workflow.
+- PDF extraction fidelity varies by source. Scanned pages or broken font
+  embedding can drop or reorder characters; review `source_extract.txt` before
+  relying on it, and check `summary`/`warnings` when using `--json`.
+- `html2md` captures body text and links only. Images, styles, and layout are
+  not imported; route any required images through the normal asset flow and
+  `assets_manifest.json`.
+
 ## Visual Gates
 
 Dry-run catches schema and semantic errors. Its `text-overflow-estimate`

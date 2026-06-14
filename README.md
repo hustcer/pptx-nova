@@ -9,6 +9,7 @@ Agent 交付真正的 PowerPoint 文件，而不是 SVG 截图、HTML 页面或�
 ## 适用场景
 
 - 从一句话、需求说明、Markdown 大纲、表格或数据生成新的 `.pptx`。
+- 从网页 URL、HTML 文件或 PDF 提取文本作为素材生成或填充 deck（先由 xdoc 归一化为 Markdown/文本）。
 - 按用户已经提供的大纲直接生成 deck。
 - 参考一份已有 PPTX 的风格，再用新的大纲或内容生成新 PPTX。
 - 修改已有 `.pptx`，例如改文字、增删页、替换图表数据、重排元素或套品牌色。

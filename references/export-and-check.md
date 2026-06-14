@@ -88,6 +88,40 @@ xdoc extract deck.pptx --parts notes,resources,links,fonts
 Save extracted JSON/report files in the run directory unless the user asks for a
 specific output location.
 
+## Ingest HTML / URL / PDF (inbound)
+
+The commands above send a PPTX outward. These two go the other way: they turn an
+external HTML page, URL, or PDF into Markdown/text. Use them when the user just
+wants the converted Markdown/text. If the result will become a new or edited
+deck, follow `common-workflow.md` -> Source Ingestion instead.
+
+```bash
+# HTML file / glob / directory / URL -> Markdown (omit -o for stdout)
+xdoc html2md page.html -o <run-dir>/page.md
+xdoc html2md "https://example.com/post" -o <run-dir>/page.md
+xdoc html2md ./pages --recursive --out-dir <run-dir>/md     # batch
+xdoc html2md page.html --html-base-url "https://site.com/"  # resolve relative links
+xdoc html2md ./pages --recursive --report <run-dir>/html2md-report.json
+
+# PDF -> copyable text (omit -o for stdout)
+xdoc pdf extract-text input.pdf -o <run-dir>/text.txt
+xdoc pdf extract-text input.pdf --pages 1,3-5 --mode layout
+xdoc pdf extract-text input.pdf --engine pdfium --json --pretty  # pdf-text/v1
+```
+
+Notes:
+
+- `xdoc html2md` and `xdoc convert <input> --from html --to md` share the same
+  HTML-to-Markdown engine; a URL passed to `convert` auto-detects as `html`.
+- `xdoc pdf extract-text`: `--engine auto` resolves to PDFium in native builds
+  (`pdflite` is not yet available); `--pages` is 1-based; `--mode layout` keeps
+  visual order, `natural` is the reading flow. With `--json --pretty` inspect
+  `summary` and `warnings` for dropped/reordered characters.
+- This is text only. Images, styles, and layout from the source are not imported.
+- `html2md -o file.md` also writes a `file.manifest.json` sidecar and refuses to
+  overwrite an existing output; add `--overwrite` for current-run files, or use
+  `--manifest false` (or stdout without `-o`) for a single clean file.
+
 ## When Export Finds A Problem
 
 If conversion/check reveals a problem and the user asks you to fix it, switch to

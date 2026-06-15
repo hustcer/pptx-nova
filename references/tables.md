@@ -3,6 +3,32 @@
 xdoc 的表格支持完整的对象模型：创建、改单元格、改样式、改宽高、合并、边框、
 导入 CSV/JSON、静态公式。
 
+## 先分辨：真表格还是视觉表格
+
+编辑已有 deck 前先看 inspect。只有 `shapeType == "table"` 的对象才使用
+`set-table-cell`、`set-table-data`、`set-table-range-borders` 等 table ops。
+
+很多高设计感 deck 会用文本框 + 细矩形/连接线模拟表格。这类对象在 inspect 中通常表现为：
+
+- 多个 `textBox` 单元格文字
+- 多个 `autoShape` / `connector` / `freeform` 分割线
+- shape name 常含 `TableCell`、`TableRowRule`、`TableColRule`、`Rule`、`Divider`
+- 没有任何 `shapeType == "table"` 对象
+
+遇到这种视觉表格时，不要强行使用 table ops；按普通 shape 编辑：
+
+```nu
+^xdoc pptx inspect input.pptx --json | from json
+  | get slides.4.shapes
+  | where shapeType in ["autoShape" "connector" "freeform"]
+  | where ($it.name =~ "Table|Rule|Divider") or ($it.fillColor? != null) or ($it.lineColor? != null)
+  | select id name shapeType fillColor lineColor lineWidthEmu bbox
+```
+
+改视觉表格分割线颜色时，优先用这些 line/rule shape 的 `id` 或唯一 `name` 写
+`set-shape-fill` / `set-shape-line`，再 dry-run 检查 `resolvedSelectors[]`。若分割线是
+细矩形，通常要改 `fill`；若是 connector/freeform 线，通常要改 `line`。
+
 ## 创建
 
 ```json

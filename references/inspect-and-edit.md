@@ -73,6 +73,10 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
           "shapeType": "textBox",
           "resolvedFrom": "element",
           "localOverrides": ["position", "size", "text", "fill"],
+          "fillType": "solid",
+          "fillColor": "FFFFFF",
+          "lineColor": "D0D5DD",
+          "lineWidthEmu": 12700,
           "hasText": true,
           "contentKind": "text",
           "textPreview": "Q2 2026 Review",
@@ -101,6 +105,8 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 | Shape 类型                  | `.slides[N].shapes[M].shapeType`（`textBox / autoShape / picture / table / chart / group / ...`） |
 | Shape 文字预览              | `.slides[N].shapes[M].textPreview`                                                                |
 | Shape bbox (EMU)            | `.slides[N].shapes[M].bbox.{xEmu, yEmu, wEmu, hEmu}`                                              |
+| Shape 填充                  | `.slides[N].shapes[M].fillType / fillColor / fillSchemeColor`                                     |
+| Shape 线条                  | `.slides[N].shapes[M].lineColor / lineSchemeColor / lineWidthEmu / lineDash / lineNoFill`         |
 | 几何重叠（同 vision-check） | `.slides[N].geometryOverlaps[]`（`{topShapeId, bottomShapeId, overlapRatio, kind, severity}`）    |
 | 文字溢出估计                | `.slides[N].textOverflowEstimates[]`（`{shapeId, estLines, fontPt}`）                             |
 
@@ -108,6 +114,8 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 
 - `bbox` 用 `xEmu / yEmu / wEmu / hEmu`（字符串，单位 EMU；1 in = 914400 EMU）
 - shape **不直接有** `placeholder` 字段，是否是 placeholder 看 `shapeType` 与 `name`；但**写 patch** 时仍可用 `{ "placeholder": { "type": "title" } }` selector
+- 普通 RGB 颜色在 inspect 中输出为不带 `#` 的 6 位大写十六进制；主题色输出在 `fillSchemeColor` /
+  `lineSchemeColor`。复杂渐变、图案、图片填充只保证 `fillType`，必要时仍要 PNG 复核。
 - preserve-only 状态（动画/SmartArt/过渡）通过顶层 `capabilities` 字段报告，不在每页上
 - **`geometryOverlaps` / `textOverflowEstimates` 是每页的几何风险**，复用 `vision-check` 的重叠/溢出核心算出来——Edit 模式一次 inspect 就能看到这两类风险，不必单独再跑 `vision-check`；但对比度、装饰是否真盖住文字仍要 PNG 复核。`kind` 取 `both-text`（两个文本框重叠）或 `decoration-over-text`（色块压住文字）
 
@@ -137,6 +145,12 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
   | get slides
   | each {|s| $s.shapes | where shapeType == "chart" | each {|sh| { slide: $s.index, shape: $sh.name, id: $sh.id } } }
   | flatten
+
+# 找某页的可见线条/规则线，适合视觉表格、分隔线、下划线等 shape-based 版式
+^xdoc pptx inspect input.pptx --json | from json
+  | get slides.4.shapes
+  | where shapeType in ["autoShape" "connector" "freeform"]
+  | select id name shapeType fillColor lineColor lineWidthEmu bbox
 ```
 
 ## 2. 选 shape 的四种 selector

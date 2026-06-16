@@ -56,7 +56,11 @@ xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --daemon --json
 
 Run `vision-check` and render PNG/contact-sheet previews when the edit changes
 layout, visual style, chart/table contents, images, or anything user-visible
-enough to risk regression.
+enough to risk regression. For append or targeted edit workflows, inspect the
+changed slide indexes explicitly and review their PNGs at full size before
+treating the full-deck `vision-check` summary as blocking. Existing decks often
+have unrelated legacy issues; separate "changed-slide blockers" from
+"pre-existing residual risk" in the final summary.
 
 ## Common Edit Operations
 

@@ -141,6 +141,12 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 文本写入有两条路径：**简单文本** 用 `set-text`；**段落 / 段落格式 / run 字体**
 用 `set-paragraph` / `set-paragraph-format` / `set-run` / `add-paragraph` / `add-run`。
 
+`set-text` 写入含 `\n` 的字符串时会生成多个 paragraph。后续 `set-run` 只会修改指定
+`paragraph/run`，不会自动把第 0 段的字体复制到其它段。凡是卡片、badge、diagram
+节点、说明框里使用多行文本，都要逐段设置 `set-run` 和 `set-paragraph-format`，或把
+标题/正文拆成独立 text box。否则 PNG 渲染时常见问题是第二行以后回到默认大字号，
+导致文本越界、卡片拥挤或版式失衡。
+
 | op                     | 用途                                          |
 | ---------------------- | --------------------------------------------- |
 | `set-text`             | 整个 text frame 覆盖 plain text               |
@@ -276,6 +282,13 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 ---
 
 ## 8. 高层 / Recipe / 数据驱动 / 控制流
+
+Recipe diagram ops（`add-process-flow` / `add-cycle` / `add-hub-spoke` /
+`add-funnel` / `add-pyramid` / `add-roadmap` 等）生成的是原生可编辑形状、文本框和
+连接线，适合做 SmartArt 等价表达。当前没有通用 `add-smartart` op；已有真实
+SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成 SmartArt
+风格内容时，优先使用这些 recipe diagram ops 或显式 shape/connector patch；不要假设
+可以直接创建或编辑 OOXML SmartArt。
 
 | op                        | 等级   | 用途                                                     |
 | ------------------------- | ------ | -------------------------------------------------------- |

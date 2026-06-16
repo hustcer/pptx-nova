@@ -87,7 +87,10 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
    ```
    Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
-6. Apply only after dry-run is clean and selectors are correct.
+6. Apply only after dry-run is clean and selectors are correct. Any validation
+   that consumes the applied output (`vision-check`, `convert`, `check`,
+   replay/audit) must run after the apply command has completed; do not launch
+   apply-dependent checks in parallel with the write.
 7. Run static geometry validation:
    ```bash
    xdoc pptx vision-check out.pptx --json
@@ -182,7 +185,15 @@ PNG/contact-sheet review remains required for pixel-level concerns:
 - weak contrast on dark/light backgrounds
 - decorative elements covering content
 - disconnected arrows or wrong center alignment
+- SmartArt/diagram groups that are visually too high, too low, or poorly
+  balanced inside the content area even when no object overflows
 - broken page number rhythm
+
+For edit/append workflows, review changed slides first, then use the full-deck
+report as residual context. A pre-existing deck can contain unrelated
+`vision-check` high/medium issues; do not let old-slide noise hide regressions
+on newly created or edited slides. Save before/after previews when the edit is
+visual so the changed slide rhythm can be compared directly.
 
 ## Formula And Asset Handling
 

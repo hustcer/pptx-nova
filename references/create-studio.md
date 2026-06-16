@@ -14,9 +14,10 @@ For Studio creation read:
 1. `common-workflow.md`
 2. `deckkit-mode.md`
 3. `design-lock-and-assets.md`
-4. This file
-5. `visual-qa-and-asset-slots.md` when images/assets are involved
-6. `rich-deck-patterns.md` only if no suitable DeckKit exists or a DeckKit must
+4. `narrative-quality.md`
+5. This file
+6. `visual-qa-and-asset-slots.md` when images/assets are involved
+7. `rich-deck-patterns.md` only if no suitable DeckKit exists or a DeckKit must
    be extended for a richer pattern
 
 Read `formulas.md`, `charts.md`, or `tables.md` only when the deck actually
@@ -32,6 +33,7 @@ If the user has not provided a confirmed outline, pause before content/patch
 generation and ask for confirmation of:
 
 - page sequence and purpose for each slide
+- primary deck profile and the claim/proof spine for formal persuasive decks
 - canvas and page count
 - audience and decision goal
 - style and density
@@ -48,6 +50,8 @@ Keep confirmation short: page titles plus one-line purpose, not full copy.
 Write `deck_lock.json` after outline confirmation. It should freeze:
 
 - output and canvas
+- `deckProfile` and per-slide `claimTitle` / `proofObject` / `rhythm` /
+  `macroLayout` for formal persuasive decks
 - DeckKit/theme/style decisions
 - colors and typography
 - formula policy
@@ -81,6 +85,7 @@ After confirmation and lock, return to the common DeckKit-first path:
 ```text
 outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> check-lock
   -> dry-run -> apply -> vision-check -> PNG/contact-sheet review
+  -> narrative_quality_review.json
 ```
 
 If a DeckKit lacks needed page types or visual structure, extend/create the
@@ -97,6 +102,8 @@ Studio decks must preserve readable typography:
 - numbers, units, percentages, and short labels must not split awkwardly
 - circle/square badges need centered readable labels
 - arrows, connectors, and center markers must be derived from real geometry
+- claim titles should survive the noun-swap test; if the title works after
+  replacing the product/company name, sharpen the proof or weaken the claim
 
 If text does not fit, first delete copy, change layout, split slides, or enlarge
 containers. Do not keep shrinking font sizes to force content into a fixed box.

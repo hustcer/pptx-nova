@@ -306,3 +306,7 @@ xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | jq '.opResults[] | 
 - ❌ 不要在 binding `data` 字段里写裸字符串（如 `"rows"`）— 必须 `"{{rows}}"`
 - ❌ 不要假设 `from-data` 会创建新页 — 它只填充模板里已有的 placeholder / shape
 - ❌ 不要忘了 chart data 类型要匹配（column/line 用 `{categories, series}`，scatter 用 `{points}`）
+- ❌ 不要用新增 overlay 文本框遮住模板占位符来完成填充；`from-data` 应填充模板已有 placeholder /
+  shape，无法填充时先修模板或改走 Template Following。
+- ❌ 不要忽略空 placeholder。模板中未绑定的 title/body/date/footer/slide-number 占位符必须填充、
+  删除或在交付摘要中列为阻塞风险。

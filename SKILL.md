@@ -66,17 +66,18 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 先判断任务类型，再读对应文件：
 
-| 用户意图                                 | 必读 reference                                                                                                                       | 视情况再读                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| 简单 prompt / 要快 / 默认生成新 deck     | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-express.md`                                        | `references/express-mode.md`、`references/recipes.md`                         |
-| 投资人 / 客户 / 董事会 / Studio / 要精控 | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-studio.md`、`references/design-lock-and-assets.md` | `references/visual-qa-and-asset-slots.md`、`references/rich-deck-patterns.md` |
-| 参考 PPTX + 新大纲生成新 deck            | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                      | `references/template-library.md`                                              |
-| 修改已有 `.pptx`                         | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                         | `references/patch-ops-cheatsheet.md`                                          |
-| 数据 + 模板 / JSON 填充                  | `references/common-workflow.md`、`references/data-driven.md`                                                                         | `references/tables.md`、`references/charts.md`                                |
-| 品牌改装 / 品牌检查                      | `references/common-workflow.md`、`references/styles-and-themes.md`                                                                   | `references/template-library.md`                                              |
-| 只导出 PDF/PNG/MD/JSON、提取或检查       | `references/common-workflow.md`、`references/export-and-check.md`                                                                    | 无需读取创建/编辑文档，除非用户随后要求修复                                   |
-| 长任务 split / 继续生成                  | `references/common-workflow.md`、`references/resume-split-mode.md`                                                                   | 原任务类型的 reference                                                        |
-| 公式、图表、表格、raw XML                | 当前任务 reference + 对应 `formulas.md` / `charts.md` / `tables.md` / `control-flow-and-raw-xml.md`                                  | `troubleshooting.md`                                                          |
+| 用户意图                                 | 必读 reference                                                                                                                                                          | 视情况再读                                                                                                      |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 简单 prompt / 要快 / 默认生成新 deck     | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-express.md`                                                                           | `references/narrative-quality.md`（6+ 页或需要说服力时）、`references/express-mode.md`、`references/recipes.md` |
+| 投资人 / 客户 / 董事会 / Studio / 要精控 | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-studio.md`、`references/design-lock-and-assets.md`、`references/narrative-quality.md` | `references/visual-qa-and-asset-slots.md`、`references/rich-deck-patterns.md`                                   |
+| 严格跟随已有 PPTX 模板 / 套模板改内容    | `references/common-workflow.md`、`references/template-following.md`、`references/edit-mode.md`                                                                          | `references/design-lock-and-assets.md`、`references/inspect-and-edit.md`                                        |
+| 参考 PPTX + 新大纲生成新 deck            | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                |
+| 修改已有 `.pptx`                         | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                            |
+| 数据 + 模板 / JSON 填充                  | `references/common-workflow.md`、`references/data-driven.md`                                                                                                            | `references/tables.md`、`references/charts.md`                                                                  |
+| 品牌改装 / 品牌检查                      | `references/common-workflow.md`、`references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                |
+| 只导出 PDF/PNG/MD/JSON、提取或检查       | `references/common-workflow.md`、`references/export-and-check.md`                                                                                                       | 无需读取创建/编辑文档，除非用户随后要求修复                                                                     |
+| 长任务 split / 继续生成                  | `references/common-workflow.md`、`references/resume-split-mode.md`                                                                                                      | 原任务类型的 reference                                                                                          |
+| 公式、图表、表格、raw XML                | 当前任务 reference + 对应 `formulas.md` / `charts.md` / `tables.md` / `control-flow-and-raw-xml.md`                                                                     | `troubleshooting.md`                                                                                            |
 
 用户给 HTML 文件、网页 URL 或 PDF 作为素材时，先按 `references/common-workflow.md` 的
 Source Ingestion 用 xdoc 归一化为 Markdown/文本，再按真正的任务类型（create / data / edit）
@@ -87,6 +88,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 
 - **Express**：用户要快、只给一句话、没有强调精控；默认 DeckKit-first 自动闭环，合理假设可直接继续。
 - **Studio**：正式汇报、客户/投资人/董事会、品牌敏感、资源多、页数多、需要确认；先确认大纲和设计锁。
+- **Template Following**：用户要求"套这个模板"、"严格按这份 PPT"、"保留模板版式/占位符/品牌 chrome"
+  并替换内容；复制源 slide 或使用模板占位符，编辑 inherited objects，不重画一个"看起来像"的版本。
 - **Reference Create**：用户给参考 PPTX，但要用新大纲或新内容生成新 deck；参考 deck 默认只读。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。
@@ -110,6 +113,11 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 
 - 先生成或标准化 `outline.json`，再写 `deck_lock.json`，不要从 prompt 直接跳到 patch。
 - 默认走 DeckKit-first：`content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`。
+- 正式汇报、客户/投资人/董事会/路演/策略/product-platform 等说服型 deck 必须读取
+  `references/narrative-quality.md`，在 `deck_lock.json` 中锁定 `deckProfile`、每页
+  `claimTitle` / `proofObject` / `rhythm`，并在 PNG 复核后写 `narrative_quality_review.json`。
+- 非 appendix 页标题优先写成结论句；不要让 `产品概览`、`市场分析`、`路线图` 这类 topic label
+  直接成为正式交付页的唯一标题。
 - 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit。
 - 有生产/默认 DeckKit 可用时，不使用 `deck-generator-template.mjs` 作为交付默认路径。
 - 没有可用 DeckKit、缺页型或要改组件结构时，先创建/扩展 DeckKit，再交付。
@@ -129,6 +137,12 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - 输入 deck 默认只读；先 inspect，再 dry-run，再写 run 目录中间文件。
 - 不要靠猜 selector 修改对象。检查 dry-run 的 `resolvedSelectors[]`，歧义时使用
   `suggestions[].fixPatch` 后重试。
+- 严格模板跟随时，必须编辑 copied / inherited 对象或模板 placeholder；不要用新 textbox、
+  半透明矩形或整页图片 overlay 掩盖旧内容来制造"看起来对"的页面。
+- 复制源 slide 或填模板时，空结构 placeholder（title/body/dt/sldNum/ftr 等）也必须显式填充或删除；
+  不能因为 PNG 里看不见就保留 PowerPoint 编辑态的空占位符。
+- logo、客户 mark、产品截图、人物照片、App icon、第三方品牌图形等身份资产必须来自用户提供、
+  源 deck 允许复用、官方可验证来源或已登记授权；无法确认时用文字/原生 shape 代替，不生成伪官方素材。
 - 如果用户要求原地修改，也先在 run 目录完成验证，再按用户明确意图写回。
 - 对 SmartArt、宏、复杂动画、unsupported 对象优先 preserve；不能编辑时说明边界。
 
@@ -158,7 +172,7 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 创建或视觉上明显修改 deck 时，按此顺序收尾：
 
 ```text
-check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> optional xdoc check
+check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> narrative quality review when required -> optional xdoc check
 ```
 
 只导出或检查文件时，按 `export-and-check.md` 执行即可。
@@ -187,6 +201,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - 关键中间产物：`outline.json`、`deck_lock.json`、`content.json`、`patch.json`、sidecar、
   `vision.json`、预览目录、contact sheet、`check.json` 等实际存在项
 - 验证结果：dry-run、apply、vision-check、PNG/contact-sheet 复核、可选 preflight
+- 正式说服型 deck 的叙事质量结果：`deckProfile`、最低评分、最弱页、已接受 tradeoff
 - AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全
 - 剩余风险，例如字体未嵌入、外链、unsupported 对象、人工未审资源授权
 - 如果触发 Feedback 模式，追加“SKILL 使用反馈”：列出过程问题、针对 `pptx-nova` 的最佳解决方案，
@@ -198,30 +213,32 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 
 优先读路由要求的文件，不要一次性读取全部 reference。
 
-| 文件                                      | 用途                                                    |
-| ----------------------------------------- | ------------------------------------------------------- |
-| `references/common-workflow.md`           | run 目录、输出防碰撞、dry-run/apply/vision/PNG 公共流程 |
-| `references/deckkit-mode.md`              | DeckKit 选择、readiness、content、用户可见 examples     |
-| `references/create-express.md`            | 简单 prompt 快速生成 deck                               |
-| `references/create-studio.md`             | 高风险/正式/精控 deck 的确认、设计锁和 split            |
-| `references/edit-mode.md`                 | 修改已有 PPTX 的 inspect/dry-run/selector 流程          |
-| `references/export-and-check.md`          | PDF/PNG/MD/JSON 导出、extract、check                    |
-| `references/express-mode.md`              | Express 模式完整黄金路径                                |
-| `references/reference-create.md`          | 参考 PPTX + 新大纲生成                                  |
-| `references/inspect-and-edit.md`          | selector、inspect 输出和编辑细节                        |
-| `references/design-lock-and-assets.md`    | `deck_lock.json`、`assets_manifest.json`、check-lock    |
-| `references/patch-ops-cheatsheet.md`      | patch op 速查                                           |
-| `references/recipes.md`                   | recipe op schema 和示例                                 |
-| `references/charts.md`                    | chart 创建/编辑和 OOXML chart 语义                      |
-| `references/tables.md`                    | table 创建/编辑、CSV、公式                              |
-| `references/formulas.md`                  | LaTeX/数学公式策略和 formula assets                     |
-| `references/styles-and-themes.md`         | 颜色、渐变、字体、主题、母版                            |
-| `references/data-driven.md`               | `from-data` 和 `bind-data`                              |
-| `references/rich-deck-patterns.md`        | 无合适 DeckKit 时的丰富视觉模式                         |
-| `references/visual-qa-and-asset-slots.md` | 图片槽位、AI 图片 prompt guard、P0/P1 QA                |
-| `references/deck-generator-workflow.md`   | 创建或扩展 DeckKit                                      |
-| `references/template-library.md`          | brand/layout/deck/chart/icon catalog 融合               |
-| `references/resume-split-mode.md`         | split handoff 和继续生成                                |
-| `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` / raw OOXML                    |
-| `references/daemon-sessions.md`           | daemon 调优和故障排查                                   |
-| `references/troubleshooting.md`           | 常见错误与自动修复建议                                  |
+| 文件                                      | 用途                                                             |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| `references/common-workflow.md`           | run 目录、输出防碰撞、dry-run/apply/vision/PNG 公共流程          |
+| `references/deckkit-mode.md`              | DeckKit 选择、readiness、content、用户可见 examples              |
+| `references/create-express.md`            | 简单 prompt 快速生成 deck                                        |
+| `references/create-studio.md`             | 高风险/正式/精控 deck 的确认、设计锁和 split                     |
+| `references/edit-mode.md`                 | 修改已有 PPTX 的 inspect/dry-run/selector 流程                   |
+| `references/template-following.md`        | 严格套模板：复制源 slide、编辑 inherited objects、placeholder QA |
+| `references/export-and-check.md`          | PDF/PNG/MD/JSON 导出、extract、check                             |
+| `references/express-mode.md`              | Express 模式完整黄金路径                                         |
+| `references/reference-create.md`          | 参考 PPTX + 新大纲生成                                           |
+| `references/inspect-and-edit.md`          | selector、inspect 输出和编辑细节                                 |
+| `references/design-lock-and-assets.md`    | `deck_lock.json`、`assets_manifest.json`、check-lock             |
+| `references/narrative-quality.md`         | deck profile、claim spine、contact-sheet plan、comeback review   |
+| `references/patch-ops-cheatsheet.md`      | patch op 速查                                                    |
+| `references/recipes.md`                   | recipe op schema 和示例                                          |
+| `references/charts.md`                    | chart 创建/编辑和 OOXML chart 语义                               |
+| `references/tables.md`                    | table 创建/编辑、CSV、公式                                       |
+| `references/formulas.md`                  | LaTeX/数学公式策略和 formula assets                              |
+| `references/styles-and-themes.md`         | 颜色、渐变、字体、主题、母版                                     |
+| `references/data-driven.md`               | `from-data` 和 `bind-data`                                       |
+| `references/rich-deck-patterns.md`        | 无合适 DeckKit 时的丰富视觉模式                                  |
+| `references/visual-qa-and-asset-slots.md` | 图片槽位、AI 图片 prompt guard、P0/P1 QA                         |
+| `references/deck-generator-workflow.md`   | 创建或扩展 DeckKit                                               |
+| `references/template-library.md`          | brand/layout/deck/chart/icon catalog 融合                        |
+| `references/resume-split-mode.md`         | split handoff 和继续生成                                         |
+| `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` / raw OOXML                             |
+| `references/daemon-sessions.md`           | daemon 调优和故障排查                                            |
+| `references/troubleshooting.md`           | 常见错误与自动修复建议                                           |

@@ -67,6 +67,8 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 1. Initialize run directory and check output collision rules.
 2. Gather mode-specific context:
    - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
+   - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
+     per-slide `claimTitle`, `proofObject`, `rhythm`, and `macroLayout`.
    - Edit: `xdoc pptx inspect <input.pptx> --json`.
    - Data/template: template, data, bindings, and asset paths.
    - If the source outline only gives a slide title or leaves factual content
@@ -103,12 +105,18 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    ```
    Review the contact sheet for cross-slide rhythm, then inspect suspicious
    slides at full size.
-9. For external/customer/public delivery, run:
-   ```bash
-   xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
-   ```
-10. Copy or write the validated final deck to the requested final path.
-11. Summarize final output path, run directory, important intermediate files,
+9. For formal create workflows covered by `narrative-quality.md`, write
+   `narrative_quality_review.json` after the PNG review. If any score is below
+   4, fix the weakest 1-3 slides before delivery unless the user explicitly
+   accepts a draft.
+10. For external/customer/public delivery, run:
+
+```bash
+xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
+```
+
+11. Copy or write the validated final deck to the requested final path.
+12. Summarize final output path, run directory, important intermediate files,
     validation results, preview/contact sheet path, and remaining risks.
 
 ## Source Ingestion (HTML / URL / PDF)
@@ -171,7 +179,7 @@ pixel-level visual quality.
 Use these gates in order:
 
 ```text
-check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> optional xdoc check
+check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> narrative review when required -> optional xdoc check
 ```
 
 `vision-check` high/medium issues are blockers for create workflows. Low issues
@@ -188,6 +196,8 @@ PNG/contact-sheet review remains required for pixel-level concerns:
 - SmartArt/diagram groups that are visually too high, too low, or poorly
   balanced inside the content area even when no object overflows
 - broken page number rhythm
+- formal deck issues such as topic-only titles, weak proof objects, repeated
+  card-grid rhythms, or decorative containers that do not encode meaning
 
 For edit/append workflows, review changed slides first, then use the full-deck
 report as residual context. A pre-existing deck can contain unrelated

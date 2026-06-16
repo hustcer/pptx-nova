@@ -43,6 +43,10 @@ Use it as the per-slide quick reference for fields, required slots, item limits,
 and approximate text budgets. Do not infer slot limits by reading `.kit.mjs`
 source when a schema row exists.
 
+For formal persuasive decks, also read `narrative-quality.md` before
+`content.json`. The DeckKit chooses visual grammar; the narrative layer chooses
+what each slide must prove.
+
 ## Production Path
 
 Use this flow for DeckKit-first creation:
@@ -87,6 +91,15 @@ layer separate from the visual generator.
 types, and structured slide data. Do not put arbitrary `customOps` in delivery
 content unless the DeckKit contract explicitly allows it.
 
+For formal decks, content must preserve the lock's claim/proof intent:
+
+- use `claimTitle` as the strongest headline when the DeckKit exposes one
+- map `proofObject` to structured fields such as chart data, table rows, stages,
+  workflow nodes, timeline items, or comparison columns
+- keep `rhythm` and `macroLayout` aligned with the chosen slide type
+- if a DeckKit cannot express the proof object without generic bullets, extend
+  the DeckKit rather than hiding the argument in prose
+
 Run validation before dry-run. In delivery mode, missing required slots,
 disallowed `customOps`, schema errors, blocking fit diagnostics, and diversity
 gate failures must be fixed before any apply. Slot budget warnings are still
@@ -102,6 +115,10 @@ the same slide type at least three slides apart when possible, and vary accent,
 density, title structure, or content rhythm on reused layouts. If the outline
 forces closer reuse, note the tradeoff in `deck_lock.assumptions[]` and rely on
 PNG/contact-sheet review to verify the rhythm.
+
+For decks covered by `narrative-quality.md`, repeated slide types also need a
+different `macroLayout`, proof object, or density treatment. A clean repeated
+template is still weak if the contact sheet reads like a template pack.
 
 ## When DeckKit Is Not Enough
 

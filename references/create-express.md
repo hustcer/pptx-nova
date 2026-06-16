@@ -14,7 +14,9 @@ For Express creation read:
 1. `common-workflow.md`
 2. `deckkit-mode.md`
 3. This file
-4. `express-mode.md` when you need the full golden path details
+4. `narrative-quality.md` when the deck has 6+ slides, a persuasive audience,
+   or needs roadshow / customer / strategy polish
+5. `express-mode.md` when you need the full golden path details
 
 Read `recipes.md` only for recipe-only drafts or tiny hand-authored pages. Read
 `patch-ops-cheatsheet.md` only when DeckKit cannot express a required local
@@ -38,7 +40,8 @@ main assumptions in the final summary.
    `pptx-nova-init-run.mjs`.
 2. Generate or normalize `outline.json`.
 3. Generate `deck_lock.json` with canvas, DeckKit, theme/style, font, color,
-   language, and page-type decisions.
+   language, page-type decisions, and for persuasive decks the lightweight
+   narrative fields from `narrative-quality.md`.
 4. Select a production/default DeckKit through `deckkit-mode.md`.
 5. Write `content.json`.
 6. Validate content in delivery mode.
@@ -66,3 +69,10 @@ Create workflows must satisfy the common gates. `vision-check` high/medium must
 be 0 before delivery. PNG/contact-sheet review is still required for generated
 decks because static checks do not catch all font rendering, contrast, and
 visual rhythm problems.
+
+For quick decks, do not over-document. The minimum narrative bar is:
+
+- use claim-like titles when the source supports them
+- avoid repeated card grids dominating the contact sheet
+- avoid invented facts
+- make each non-appendix slide carry one visible proof object or clear purpose

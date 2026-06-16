@@ -16,6 +16,8 @@ const IMAGE_LIKE_KINDS = new Set(['image', 'photo', 'photograph', 'illustration'
 const IMAGE_SLOT_ROLE_RE = /(hero|image|photo|screenshot|background|visual|mockup|product-shot)/i
 const IMAGE_SLOT_RATIOS = new Set(['21:9', '16:10', '16:9', '4:3', '3:2', '3:4', '1:1'])
 const IMAGE_FIT_POLICIES = new Set(['cover', 'contain', 'no-crop', 'crop-safe'])
+const TOPIC_TITLE_RE =
+  /^(agenda|overview|market|roadmap|strategy|product|competition|competitors|summary|appendix|产品概览|市场分析|路线图|竞品|竞争|总结|目录|附录)$/i
 const AI_IMAGE_SOURCE_KINDS = new Set([
   'ai',
   'generated',
@@ -302,6 +304,36 @@ function slideTypeOf(slide) {
   return slide?.slideType ?? slide?.type ?? slide?.kind ?? slide?.layout ?? ''
 }
 
+function isFormalNarrativeLock(lock) {
+  const mode = String(lock.mode ?? '').toLowerCase()
+  const audience = String(lock.audience ?? lock.objective ?? '').toLowerCase()
+  return (
+    mode === 'studio' ||
+    lock.narrativeQuality?.required === true ||
+    isPlainObject(lock.deckProfile) ||
+    /investor|customer|board|roadshow|strategy|executive|client|董事会|客户|投资人|路演|战略/.test(
+      audience,
+    )
+  )
+}
+
+function proofObjectOf(slide) {
+  return slide?.proofObject ?? slide?.proof ?? slide?.evidence ?? null
+}
+
+function isAppendixLike(slide) {
+  const rhythm = String(slide?.rhythm ?? '').toLowerCase()
+  const type = String(slideTypeOf(slide)).toLowerCase()
+  return rhythm === 'appendix' || type.includes('appendix')
+}
+
+function looksTopicOnly(title) {
+  const normalized = String(title ?? '')
+    .trim()
+    .replace(/[：:。.\s]+$/g, '')
+  return TOPIC_TITLE_RE.test(normalized)
+}
+
 function assetEntries(assets) {
   if (!assets) return []
   if (Array.isArray(assets.entries)) return assets.entries
@@ -448,6 +480,14 @@ function checkLock(lock, errors, warnings) {
   if (!isPlainObject(lock.typography) && !isPlainObject(lock.fonts)) {
     push(warnings, 'lock-typography-missing', 'typography/font declarations are missing')
   }
+  const formalNarrative = isFormalNarrativeLock(lock)
+  if (formalNarrative && !lock.deckProfile?.primary) {
+    push(
+      warnings,
+      'lock-deck-profile-missing',
+      'formal create deck should declare deckProfile.primary',
+    )
+  }
   if (!Array.isArray(lock.slides) || lock.slides.length === 0) {
     push(errors, 'lock-slides-missing', 'deck_lock.json must contain a non-empty slides[] array')
   } else {
@@ -461,6 +501,36 @@ function checkLock(lock, errors, warnings) {
           'lock-slide-purpose-missing',
           `slides[${index}] should have title or purpose`,
         )
+      }
+      if (formalNarrative && !isAppendixLike(slide)) {
+        if (!slide.claimTitle) {
+          push(
+            warnings,
+            'lock-slide-claim-missing',
+            `slides[${index}] formal narrative slide should have claimTitle`,
+          )
+        }
+        if (!proofObjectOf(slide)) {
+          push(
+            warnings,
+            'lock-slide-proof-missing',
+            `slides[${index}] formal narrative slide should have proofObject`,
+          )
+        }
+        if (!slide.rhythm) {
+          push(
+            warnings,
+            'lock-slide-rhythm-missing',
+            `slides[${index}] formal narrative slide should declare rhythm`,
+          )
+        }
+        if (looksTopicOnly(slide.claimTitle ?? slide.title)) {
+          push(
+            warnings,
+            'lock-slide-topic-title',
+            `slides[${index}] title looks topic-only; prefer a conclusion-style claimTitle`,
+          )
+        }
       }
     })
   }

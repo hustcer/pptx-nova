@@ -113,21 +113,43 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
     {
       "index": 0,
       "title": "Q2 performance review",
+      "claimTitle": "Q2 growth slowed, but retention and margin quality improved.",
       "purpose": "Frame the quarter and decision needed",
       "slideType": "heroSlide",
       "rhythm": "anchor",
+      "macroLayout": "cover-with-kpi-rail",
+      "proofObject": {
+        "kind": "metric-rail",
+        "proves": "Growth, retention, and margin can be read together"
+      },
       "assets": ["company_logo"]
     },
     {
       "index": 1,
       "title": "Revenue and retention",
+      "claimTitle": "Expansion revenue offset weaker new-logo conversion.",
       "purpose": "Show core KPI trend",
       "slideType": "kpiRowSlide",
       "rhythm": "dense",
+      "macroLayout": "kpi-row-with-context",
+      "proofObject": {
+        "kind": "column-chart",
+        "proves": "Retention is the main bridge between revenue and margin"
+      },
       "chart": { "kind": "column", "semanticSource": "content.slides[1].data" },
       "formulas": []
     }
   ],
+  "deckProfile": {
+    "primary": "finance-ir",
+    "secondaryGates": ["strategy-leadership"],
+    "requiredProofObjects": ["metric bridge", "source-backed KPI table"],
+    "knownMissingInputs": ["No customer cohort detail supplied"]
+  },
+  "contactSheetPlan": {
+    "maxConsecutiveSameMacroLayout": 2,
+    "avoid": ["three repeated card-grid slides", "topic-only titles"]
+  },
   "assumptions": ["No user-provided brand guide; use corporate-blue consulting defaults."]
 }
 ```
@@ -136,6 +158,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 
 - 必填：`schemaVersion`、`mode`、`slides[]`、`canvas`、输出路径或 run 目录。
 - 创建型：写 `deckkit`、`themePack`、`stylePack`、`colors`、`typography`。
+- 正式说服型 deck：写 `deckProfile`，并在每个非 appendix slide 写 `claimTitle`、
+  `proofObject`、`rhythm`、`macroLayout`；详情见 `references/narrative-quality.md`。
 - 技术 / 学术 / 培训 deck：在 `typography.formulaPolicy` 写公式策略，并在相关 slide
   用 `formulas[]` 引用公式资产 id；详情见 `references/formulas.md`。
 - 使用模板资产：写 `templateFusion`，并记录每个来源的 kind/id/path。
@@ -143,6 +167,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 - 不确定项写进 `assumptions[]`，不要在后续 generator 里隐式改掉。
 - 源大纲只有标题、占位或留白时，AI 补全的事实性内容也必须写进 `assumptions[]`，包括
   竞品名称、产品判断、市场指标、案例、时间线和来源不明的结论；交付摘要要逐条披露。
+- `claimTitle` 只能表达已由用户/source 提供或可验证推导出的结论；如果证明材料不足，把缺口写进
+  `slides[].omissionNotes[]` 或 `assumptions[]`，不要用更强的措辞掩盖事实缺口。
 
 ## 4. `assets_manifest.json`
 
@@ -248,6 +274,20 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 `display`。公式必须 `pptxUse.noCrop: true`；若正式交付仍是 `placeholder` 或
 `needs-user`，视为阻塞。更多策略见 `references/formulas.md`。
 
+### Identity Asset Provenance
+
+Logo、客户 mark、产品 UI、产品截图、App icon、人物照片、活动照片、第三方品牌图形等身份资产必须有
+可说明来源。正式交付只允许这些来源：
+
+- `source.kind: "user"`：用户提供并允许用于本 deck。
+- `source.kind: "source-deck"`：来自模板/参考 deck，且用户明确允许复用。
+- `source.kind: "official"`：官方或可验证公开来源，manifest 中记录 URL、访问日期或来源说明。
+- `source.kind: "built-in"`：来自 skill 内置资产或图标包，并带有 license 信息。
+
+不要生成假 logo、假产品截图、假 App icon、假客户 mark 或伪官方 UI。无法确认来源时，使用
+`status: "needs-user"` 或文字/原生 shape 占位；正式客户、投资人、公开或品牌敏感交付不得带着
+未确认身份资产继续。
+
 图片 / 截图 / AI 生成素材要显式登记使用槽位：
 
 - `pptxUse.slotId` 或 `slot.id`：语义槽位，如 `hero.full_bleed`、`product.mockup`、
@@ -261,6 +301,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
   只生成照片、插画、纹理、产品图或场景素材，不要生成 PPT 页面本身；禁止让图片自带标题、
   页眉、页脚、页码、logo、边框、卡片框、图表轴、按钮或任何 slide chrome。标题、数据、
   页码、logo 和边框统一由 DeckKit / xdoc 原生 shape 绘制。
+- AI 生成素材不能充当真实公司的 logo、真实产品 UI、客户证据、人物照片、新闻/活动照片或
+  第三方品牌资产；这类证据只能来自用户、源 deck 授权资产或官方可验证来源。
 
 `pptx-nova-check-lock.mjs` 会检查：图片资产缺 slot、ratio、fitPolicy 时给 warning；
 AI 生成图片缺 `noSlideChrome` 时给 error；`deck_lock.json` / `content.json` 中的
@@ -304,6 +346,8 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 
 - `deck_lock.json` 和 `assets_manifest.json` schemaVersion。
 - lock 的 slide count / slideType 与 `content.json` 是否一致。
+- 正式 deck 的 `deckProfile`、`claimTitle`、`proofObject`、`rhythm` 是否缺失（缺失先给 warning，
+  由 `narrative-quality.md` 和 PNG 复核决定是否阻塞）。
 - DeckKit、themePack 等关键选择是否漂移。
 - `assets_manifest.json` 是否有 missing / needs-user / 重复 id / 不存在的文件。
 - 图片 / 截图资产是否声明 slot、ratio、fitPolicy；AI 生成图片是否设置 `noSlideChrome`。
@@ -330,4 +374,7 @@ selector、visualRisks 仍交给 `xdoc pptx apply --dry-run --json`。
 - 手写 patch：`deck_lock.json` 锁定颜色、字体、资源、页型；patch 只实现这些决策。
 - Reference Create：参考 deck 的可复用部分先进入 `templateFusion` 和
   `assets_manifest.json`（仅当允许复用或需要补齐资源时），不要把参考页旧文字、旧图片隐式带入新 deck。
+- Template Following：复制源 slide 时，允许保留模板 chrome 和被授权素材；所有被替换、删除或新增的
+  身份资产必须进入 `assets_manifest.json` 或 `template-edit-plan.json`，不能用 overlay 掩盖未处理的
+  旧素材。
 - Edit：lock 可只覆盖本次允许改的范围；不要要求所有源 deck 颜色都被 lock 枚举。

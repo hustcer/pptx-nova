@@ -19,11 +19,13 @@
 
 P1 不一定阻塞草稿，但客户演示级 / 投资人级 / 董事会 deck 需要修到可解释：
 
+- 非 appendix 页的标题是结论而不是 topic label；证明对象能支撑标题。
 - 长 deck 的 layout group 有足够变化，避免连续多页同一张卡片网格。
 - 卡片、表格、caption、footnote 不贴边，安全区和内边距节奏一致。
 - 图片按 `slotId + ratio + fitPolicy` 放置，人物脸、产品主体、截图关键区域不被裁掉。
 - 图表页有结论 callout，legend / axis / data label 不互相遮挡。
 - 每页节奏可归类为 `anchor`、`dense` 或 `breathing`，相邻页面不要全是同一种密度。
+- 容器、箭头、badge、icon 需要表达分组、方向、层级或数据关系；只为填空的装饰应删除。
 
 ## Asset Slot Manifest
 

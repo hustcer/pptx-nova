@@ -296,25 +296,27 @@ function makePageTypes(
     })
     const cx = 7.65
     const cw = 4.97
+    const hiH = 1.08
+    const hiStep = 1.2
     ;(data.cards ?? []).forEach(([accent, num, label, desc], i) => {
-      const y = 2.1 + i * 1.55
-      card(s, nm(s, `Hi${i}Bg`), cx, y, cw, 1.34)
-      box(s, nm(s, `Hi${i}Rule`), 'rectangle', cx, y + 0.14, 0.07, 1.34 - 0.28, accent)
-      tx(s, nm(s, `Hi${i}Num`), cx + 0.32, y + 0.26, 1.85, 0.78, num, {
+      const y = 2.1 + i * hiStep
+      card(s, nm(s, `Hi${i}Bg`), cx, y, cw, hiH)
+      box(s, nm(s, `Hi${i}Rule`), 'rectangle', cx, y + 0.14, 0.07, hiH - 0.28, accent)
+      tx(s, nm(s, `Hi${i}Num`), cx + 0.32, y + 0.23, 1.85, 0.56, num, {
         name: FONT_EN,
-        size: '34pt',
+        size: '29pt',
         bold: true,
         color: accentTextOnLight(accent),
       })
-      tx(s, nm(s, `Hi${i}Lab`), cx + 2.15, y + 0.3, cw - 2.45, 0.4, label, {
+      tx(s, nm(s, `Hi${i}Lab`), cx + 2.15, y + 0.24, cw - 2.45, 0.32, label, {
         name: FONT_CN,
-        size: '14pt',
+        size: '13pt',
         bold: true,
         color: C.textPri,
       })
-      tx(s, nm(s, `Hi${i}Desc`), cx + 2.15, y + 0.74, cw - 2.45, 0.5, desc, {
+      tx(s, nm(s, `Hi${i}Desc`), cx + 2.15, y + 0.6, cw - 2.45, 0.34, desc, {
         name: FONT_CN,
-        size: '10.5pt',
+        size: '9.5pt',
         color: C.textSec,
       })
     })

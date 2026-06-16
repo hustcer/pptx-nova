@@ -57,7 +57,7 @@ xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --daemon --json
 Run `vision-check` and render PNG/contact-sheet previews when the edit changes
 layout, visual style, chart/table contents, images, or anything user-visible
 enough to risk regression. For append or targeted edit workflows, inspect the
-changed slide indexes explicitly and review their PNGs at full size before
+changed slide indexes explicitly and review their PNG images at full size before
 treating the full-deck `vision-check` summary as blocking. Existing decks often
 have unrelated legacy issues; separate "changed-slide blockers" from
 "pre-existing residual risk" in the final summary.
@@ -83,6 +83,24 @@ Preserve SmartArt, VBA macros, unsupported animation/timing, and complex objects
 unless the user explicitly asks for a destructive transformation and the tool
 supports it. If inspect reports unsupported objects, say what can be preserved
 and what cannot be edited.
+
+## Template-Sensitive Edits
+
+When the input deck is a template or the user asks to preserve the source deck's
+look, apply the stricter `template-following.md` rules:
+
+- Edit inherited objects in place whenever possible. New objects are allowed
+  only for explicit additions, not as a cover-up for old content.
+- Do not overlay opaque shapes, screenshots, or full-slide images to hide
+  template text, logos, footers, page numbers, or placeholders. Rewrite,
+  replace, or delete the original object.
+- Do not blanket-clear all text. Default unmentioned source objects to keep.
+- Treat empty structural placeholders as real objects. Fill or delete title,
+  body, date, footer, and slide-number placeholders explicitly.
+- If replacing logos, product screenshots, customer marks, people photos, app
+  icons, or other identity assets, register provenance in `assets_manifest.json`
+  or leave a `needs-user` placeholder. Do not generate lookalike official
+  assets.
 
 ## In-Place Edits
 

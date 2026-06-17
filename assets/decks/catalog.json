@@ -60,6 +60,26 @@
       "status": "available"
     },
     {
+      "id": "coral-showcase",
+      "name": "coral DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "coral",
+      "caseId": "coral.golden-html",
+      "path": "../examples/coral/deck.pptx",
+      "preview": "../examples/coral/contact-sheet.webp",
+      "content": "../examples/coral/content.json",
+      "summary": "../examples/coral/summary.json",
+      "bestFor": [
+        "creative agency",
+        "fashion and beauty pitch",
+        "fitness brand",
+        "food and beverage brand deck",
+        "lifestyle launch",
+        "editorial manifesto"
+      ],
+      "status": "preview"
+    },
+    {
       "id": "mckinsey-blue-showcase",
       "name": "mckinsey-blue DeckKit Showcase",
       "type": "deckkit-showcase",

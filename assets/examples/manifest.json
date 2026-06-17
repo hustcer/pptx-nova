@@ -443,6 +443,108 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "coral",
+      "deckkit": "coral",
+      "caseId": "coral.golden-html",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "QUARTERLY STRATEGY SESSION 2026",
+      "bestFor": [
+        "creative agency",
+        "fashion and beauty pitch",
+        "fitness brand",
+        "food and beverage brand deck",
+        "lifestyle launch",
+        "editorial manifesto"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "coral/deck.pptx",
+          "bytes": 26238,
+          "sha256": "6facdba00dc7d9265119103d9805aea71666a74666c5e811c719e09e026a884e"
+        },
+        "contactSheet": {
+          "path": "coral/contact-sheet.webp",
+          "bytes": 54136,
+          "sha256": "33a20cdb84f8841bec342bc081626a54f6f1ef346e5522b4ef277fec74c7aab1",
+          "quality": 82
+        },
+        "content": {
+          "path": "coral/content.json",
+          "bytes": 5925,
+          "sha256": "aa69b494720234b991ac70a41037608fa7e668208dc71f57abf24300208b35d6"
+        },
+        "brief": {
+          "path": "coral/brief.md",
+          "bytes": 729,
+          "sha256": "a930ec4534574c3a3401aa1105f39d31fa0011a5487b6003c061c0a07d324e72"
+        },
+        "summary": {
+          "path": "coral/summary.json",
+          "bytes": 2701,
+          "sha256": "792add24c422361354c610a67fde5d5297894f5b3af4b0d9d6d65e2ae901f088"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 724
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 54,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 54
+        },
+        "lowBuckets": {
+          "total": 54,
+          "styleAllowed": 54,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 54
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 8.5,
+          "labelFontPt": 8.5,
+          "sourceFontPt": 8.5,
+          "note": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

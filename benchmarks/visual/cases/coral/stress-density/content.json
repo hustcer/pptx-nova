@@ -1,0 +1,160 @@
+{
+  "meta": {
+    "deckkit": "coral"
+  },
+  "slides": [
+    {
+      "type": "coralCoverSlide",
+      "data": {
+        "brand": "NOVA LAB",
+        "title": "CREATIVE\nOPERATING\nSYSTEM 2027",
+        "locationLabel": "Region",
+        "location": "GLOBAL",
+        "dateLabel": "Oct 02 / 14:30 Review",
+        "year": "2027"
+      }
+    },
+    {
+      "type": "coralStatementSlide",
+      "data": {
+        "section": "01 / Thesis",
+        "title": "TURNING FAST IDEAS INTO\nREPEATABLE MARKET MOTION",
+        "body": "A disciplined operating system lets creative teams ship sharper campaigns, compare evidence faster, and protect the distinct voice that customers remember after the launch window closes."
+      }
+    },
+    {
+      "type": "coralPillarsSplitSlide",
+      "data": {
+        "number": "04",
+        "title": "GROWTH\nPILLARS",
+        "items": [
+          {
+            "label": "Signal",
+            "text": "Capture demand indicators across community, retail, and partner channels."
+          },
+          {
+            "label": "System",
+            "text": "Translate repeatable moves into a shared calendar and operating cadence."
+          },
+          {
+            "label": "Scale",
+            "text": "Move the strongest concepts into measurable always-on acquisition programs."
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralMetricsChartSlide",
+      "data": {
+        "section": "02 / Funnel",
+        "title": "CHANNEL LIFT",
+        "stat": "+132%",
+        "statLabel": "Pipeline Growth",
+        "chart": {
+          "categories": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"],
+          "series": [
+            { "name": "Actual", "values": [38, 52, 61, 88, 104, 126] },
+            { "name": "Plan", "values": [42, 50, 68, 84, 96, 112] }
+          ]
+        },
+        "metrics": [
+          { "value": "3.8M", "label": "Audience" },
+          { "value": "91%", "label": "Renewal" },
+          { "value": "184", "label": "Partners" }
+        ]
+      }
+    },
+    {
+      "type": "coralImpactPosterSlide",
+      "data": {
+        "word": "MOMENTUM",
+        "title": "MARKET ACTIVATION 2027",
+        "meta": ["Wave Two / Launch Q4", "18 Cities / 6 Regions"]
+      }
+    },
+    {
+      "type": "coralObjectiveCardsSlide",
+      "data": {
+        "title": "OPERATING FOCUS",
+        "subtitle": "Three priorities for repeatable commercial motion",
+        "cards": [
+          {
+            "marker": "A",
+            "title": "OWN THE MOMENT",
+            "text": "Build a sharper campaign calendar around cultural peaks and category demand signals.",
+            "stat": "18"
+          },
+          {
+            "marker": "B",
+            "title": "TIGHTEN LOOPS",
+            "text": "Reduce approval cycles while preserving distinct creative review and QA standards.",
+            "stat": "-32%"
+          },
+          {
+            "marker": "C",
+            "title": "SCALE WINNERS",
+            "text": "Move proven stories into partner kits, local playbooks, and always-on channels.",
+            "stat": "4.1x"
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralQuoteSplitSlide",
+      "data": {
+        "mark": "!",
+        "quote": "Creative velocity only matters when the system can remember what worked and make the next launch sharper.",
+        "author": "Mira Stone",
+        "role": "VP Brand Systems"
+      }
+    },
+    {
+      "type": "coralTimelineSlide",
+      "data": {
+        "section": "03 / Build",
+        "title": "ACTIVATION PATH",
+        "steps": [
+          {
+            "phase": "01",
+            "title": "Map",
+            "desc": "Collect market signals and align campaign territory"
+          },
+          { "phase": "02", "title": "Frame", "desc": "Define content pillars and success metrics" },
+          { "phase": "03", "title": "Make", "desc": "Produce hero assets and modular launch kits" },
+          {
+            "phase": "04",
+            "title": "Move",
+            "desc": "Deploy across owned, partner, and paid channels"
+          },
+          { "phase": "05", "title": "Learn", "desc": "Review results and update the next sprint" }
+        ]
+      }
+    },
+    {
+      "type": "coralTeamGridSlide",
+      "data": {
+        "title": "WORKSTREAMS",
+        "subtitle": "Owners for strategy, creative, growth, ops",
+        "people": [
+          { "initials": "ST", "name": "Strategy", "role": "Portfolio Lead" },
+          { "initials": "CR", "name": "Creative", "role": "Editorial Lead" },
+          { "initials": "GR", "name": "Growth", "role": "Channel Lead" },
+          { "initials": "OP", "name": "Ops", "role": "Delivery Lead" }
+        ]
+      }
+    },
+    {
+      "type": "coralClosingSlide",
+      "data": {
+        "title": "NEXT\nSPRINT",
+        "subtitle": "Lock rhythm. Test launch one. Publish kit.",
+        "contacts": [
+          { "label": "Email", "value": "TEAM@NOVA.LAB" },
+          { "label": "Phone", "value": "+1 (555) 018-4400" },
+          { "label": "Office", "value": "NEW YORK, NY" }
+        ],
+        "socials": ["IN", "X", "YT"]
+      }
+    }
+  ]
+}

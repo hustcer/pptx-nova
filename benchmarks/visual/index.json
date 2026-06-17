@@ -108,6 +108,33 @@
       "buildPath": "../../assets/deckkits/examples/broadside-build.mjs",
       "expectedPath": "cases/broadside/mixed-language/expected.json",
       "reviewPath": "cases/broadside/mixed-language/review.md"
+    },
+    {
+      "id": "coral.golden-html",
+      "deckkit": "coral",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/coral-content.json",
+      "buildPath": "../../assets/deckkits/examples/coral-build.mjs",
+      "expectedPath": "cases/coral/golden-html/expected.json",
+      "reviewPath": "cases/coral/golden-html/review.md"
+    },
+    {
+      "id": "coral.stress-density",
+      "deckkit": "coral",
+      "kind": "stress",
+      "contentPath": "cases/coral/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/coral-build.mjs",
+      "expectedPath": "cases/coral/stress-density/expected.json",
+      "reviewPath": "cases/coral/stress-density/review.md"
+    },
+    {
+      "id": "coral.mixed-language",
+      "deckkit": "coral",
+      "kind": "mixed-language",
+      "contentPath": "cases/coral/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/coral-build.mjs",
+      "expectedPath": "cases/coral/mixed-language/expected.json",
+      "reviewPath": "cases/coral/mixed-language/review.md"
     }
   ]
 }

@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "deckkit": "coral"
+  },
+  "slides": [
+    {
+      "type": "coralCoverSlide",
+      "data": {
+        "brand": "BRAND OPS",
+        "title": "LOCAL\nGROWTH\nPLAYBOOK",
+        "locationLabel": "市场",
+        "location": "华东",
+        "dateLabel": "2027 Q1 / Review",
+        "year": "2027"
+      }
+    },
+    {
+      "type": "coralStatementSlide",
+      "data": {
+        "section": "01 / Strategy",
+        "title": "把品牌声量转化为\n可复用增长动作",
+        "body": "The playbook links campaign insight, partner execution, and weekly decision loops so regional teams can move faster without losing the brand's editorial tone."
+      }
+    },
+    {
+      "type": "coralPillarsSplitSlide",
+      "data": {
+        "number": "03",
+        "title": "核心\n动作",
+        "items": [
+          {
+            "label": "Insight",
+            "text": "Combine search, social, and retail feedback into a shared signal board."
+          },
+          {
+            "label": "内容",
+            "text": "Use repeatable story modules for launches, community drops, and retail moments."
+          },
+          {
+            "label": "Rhythm",
+            "text": "Run weekly reviews to decide what scales, pauses, or changes direction."
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralMetricsChartSlide",
+      "data": {
+        "section": "02 / Metrics",
+        "title": "增长看板",
+        "stat": "+88%",
+        "statLabel": "GMV Lift",
+        "chart": {
+          "categories": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+          "series": [
+            { "name": "Actual", "values": [22, 36, 48, 63, 79, 92] },
+            { "name": "Plan", "values": [24, 35, 45, 60, 72, 84] }
+          ]
+        },
+        "metrics": [
+          { "value": "42K", "label": "新增会员" },
+          { "value": "76%", "label": "复购率" },
+          { "value": "12", "label": "城市" }
+        ]
+      }
+    },
+    {
+      "type": "coralImpactPosterSlide",
+      "data": {
+        "word": "BOOST",
+        "title": "REGIONAL GROWTH 计划",
+        "meta": ["Phase A / 春季", "12 城市 / 3 渠道"]
+      }
+    },
+    {
+      "type": "coralObjectiveCardsSlide",
+      "data": {
+        "title": "关键目标",
+        "subtitle": "Focus areas for local teams and partner execution",
+        "cards": [
+          {
+            "marker": "A",
+            "title": "内容共创",
+            "text": "Create repeatable campaign modules for local creators and retail partners.",
+            "stat": "36"
+          },
+          {
+            "marker": "B",
+            "title": "渠道提效",
+            "text": "Shorten decision loops between demand signals, inventory, and media spend.",
+            "stat": "+28%"
+          },
+          {
+            "marker": "C",
+            "title": "复盘沉淀",
+            "text": "Turn weekly campaign learning into reusable launch standards.",
+            "stat": "2.6x"
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralQuoteSplitSlide",
+      "data": {
+        "mark": "\"",
+        "quote": "Local growth works when every team can see the same signal and act with the same brand confidence.",
+        "author": "Lin Chen",
+        "role": "Regional GM"
+      }
+    },
+    {
+      "type": "coralTimelineSlide",
+      "data": {
+        "section": "03 / Roadmap",
+        "title": "执行节奏",
+        "steps": [
+          { "phase": "W1", "title": "Signal", "desc": "整理搜索、社媒与门店反馈" },
+          { "phase": "W2", "title": "Plan", "desc": "确定主题、预算和渠道组合" },
+          { "phase": "W3", "title": "Build", "desc": "完成素材、店铺和达人 brief" },
+          { "phase": "W4", "title": "Launch", "desc": "投放上线并跟踪关键指标" },
+          { "phase": "+", "title": "Scale", "desc": "复盘并复制到下一批城市" }
+        ]
+      }
+    },
+    {
+      "type": "coralTeamGridSlide",
+      "data": {
+        "title": "团队角色",
+        "subtitle": "Strategy / content / channel / retail owners",
+        "people": [
+          { "initials": "策", "name": "Strategy", "role": "策略负责人" },
+          { "initials": "内", "name": "Content", "role": "内容负责人" },
+          { "initials": "渠", "name": "Channel", "role": "渠道负责人" },
+          { "initials": "店", "name": "Retail", "role": "零售负责人" }
+        ]
+      }
+    },
+    {
+      "type": "coralClosingSlide",
+      "data": {
+        "title": "开始\n执行",
+        "subtitle": "Align sprint one. Publish kit. Review.",
+        "contacts": [
+          { "label": "Email", "value": "OPS@BRAND.CN" },
+          { "label": "Phone", "value": "+86 400 800 2027" },
+          { "label": "Office", "value": "SHANGHAI" }
+        ],
+        "socials": ["微", "抖", "小"]
+      }
+    }
+  ]
+}

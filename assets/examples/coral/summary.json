@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "coral",
+  "caseId": "coral.golden-html",
+  "kind": "golden",
+  "title": "QUARTERLY STRATEGY SESSION 2026",
+  "source": {
+    "content": "skills/pptx-nova/assets/deckkits/examples/coral-content.json",
+    "build": "skills/pptx-nova/assets/deckkits/examples/coral-build.mjs",
+    "expected": "skills/pptx-nova/benchmarks/visual/cases/coral/golden-html/expected.json",
+    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "fitDiagnostics": 0,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": 1,
+    "ops": 724
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 26,
+    "opResults": 724,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 26,
+    "opResults": 724,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 10,
+    "issueCount": 54,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 54
+    },
+    "lowBuckets": {
+      "total": 54,
+      "styleAllowed": 54,
+      "baselineKnown": 0,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": true,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "small-font": 54
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "",
+      "fingerprintVersion": "",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
+      "available": false,
+      "issueCount": 0
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 8.5,
+      "labelFontPt": 8.5,
+      "sourceFontPt": 8.5,
+      "note": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 201151,
+      "sha256": "d28c5de8ef7463067e147daf20a896f1aa81c26fbd5da42d1de0952fc297a669"
+    },
+    "webp": {
+      "bytes": 54136,
+      "sha256": "33a20cdb84f8841bec342bc081626a54f6f1ef346e5522b4ef277fec74c7aab1"
+    }
+  }
+}

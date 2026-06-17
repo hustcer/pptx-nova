@@ -74,7 +74,17 @@
               "broadsidePyramidSlide",
               "broadsideTimelineSlide",
               "broadsideCycleSlide",
-              "broadsideEndSlide"
+              "broadsideEndSlide",
+              "coralCoverSlide",
+              "coralStatementSlide",
+              "coralPillarsSplitSlide",
+              "coralMetricsChartSlide",
+              "coralImpactPosterSlide",
+              "coralObjectiveCardsSlide",
+              "coralQuoteSplitSlide",
+              "coralTimelineSlide",
+              "coralTeamGridSlide",
+              "coralClosingSlide"
             ]
           },
           "data": { "type": "object" },

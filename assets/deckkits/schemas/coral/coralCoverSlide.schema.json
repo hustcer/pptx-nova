@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/coral/coralCoverSlide",
+  "title": "coralCoverSlide data schema",
+  "type": "object",
+  "required": ["brand", "title", "locationLabel", "location", "dateLabel", "year"],
+  "properties": {
+    "brand": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 1.0 } },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 3, "fontPt": 58, "widthIn": 8.0 } },
+    "locationLabel": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 1.2 }
+    },
+    "location": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 24, "widthIn": 2.1 }
+    },
+    "dateLabel": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 1.55 }
+    },
+    "year": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 24, "widthIn": 1.05 } }
+  },
+  "additionalProperties": false
+}

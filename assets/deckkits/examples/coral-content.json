@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "deckkit": "coral"
+  },
+  "slides": [
+    {
+      "type": "coralCoverSlide",
+      "data": {
+        "brand": "VENTURE",
+        "title": "QUARTERLY\nSTRATEGY\nSESSION 2026",
+        "locationLabel": "Location",
+        "location": "7TH FLOOR",
+        "dateLabel": "May 15 / 09:00 Start",
+        "year": "2026"
+      }
+    },
+    {
+      "type": "coralStatementSlide",
+      "data": {
+        "section": "01 / Overview",
+        "title": "REDEFINING THE BOUNDARIES OF\nWHAT IS POSSIBLE",
+        "body": "We bring together diverse perspectives and bold ideas to create meaningful impact. Our approach combines strategic thinking with creative execution, ensuring every initiative delivers measurable results and lasting value for our partners and community."
+      }
+    },
+    {
+      "type": "coralPillarsSplitSlide",
+      "data": {
+        "number": "03",
+        "title": "CORE\nPILLARS",
+        "items": [
+          {
+            "label": "Innovation",
+            "text": "Pushing boundaries with cutting-edge solutions and forward-thinking methodologies."
+          },
+          {
+            "label": "Collaboration",
+            "text": "Building strong partnerships across teams, disciplines, and industries."
+          },
+          {
+            "label": "Execution",
+            "text": "Delivering results with precision, speed, and uncompromising quality."
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralMetricsChartSlide",
+      "data": {
+        "section": "02 / Performance",
+        "title": "GROWTH METRICS",
+        "stat": "+147%",
+        "statLabel": "Year Over Year",
+        "chart": {
+          "categories": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+          "series": [
+            {
+              "name": "Revenue (K)",
+              "values": [45, 62, 55, 78, 95, 112]
+            },
+            {
+              "name": "Target (K)",
+              "values": [50, 58, 65, 72, 85, 100]
+            }
+          ]
+        },
+        "metrics": [
+          {
+            "value": "2.4M",
+            "label": "Total Reach"
+          },
+          {
+            "value": "89%",
+            "label": "Retention Rate"
+          },
+          {
+            "value": "156",
+            "label": "New Partners"
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralImpactPosterSlide",
+      "data": {
+        "word": "IMPACT",
+        "title": "GLOBAL INITIATIVE 2026",
+        "meta": ["Phase One / Launch Q2", "12 Cities / 4 Continents"]
+      }
+    },
+    {
+      "type": "coralObjectiveCardsSlide",
+      "data": {
+        "title": "KEY OBJECTIVES",
+        "subtitle": "Strategic priorities for the upcoming fiscal period",
+        "cards": [
+          {
+            "marker": "A",
+            "title": "EXPAND REACH",
+            "text": "Enter new markets and establish presence in emerging territories through targeted campaigns.",
+            "stat": "24"
+          },
+          {
+            "marker": "B",
+            "title": "DEEPEN ENGAGEMENT",
+            "text": "Strengthen relationships with existing partners through enhanced service offerings.",
+            "stat": "+45%"
+          },
+          {
+            "marker": "C",
+            "title": "OPTIMIZE FLOW",
+            "text": "Streamline internal processes to improve delivery times and resource allocation.",
+            "stat": "3.2x"
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralQuoteSplitSlide",
+      "data": {
+        "mark": "\"",
+        "quote": "The best way to predict the future is to create it with intention, precision, and the courage to challenge convention.",
+        "author": "Alexandra Chen",
+        "role": "Chief Strategy Officer"
+      }
+    },
+    {
+      "type": "coralTimelineSlide",
+      "data": {
+        "section": "03 / Roadmap",
+        "title": "PROJECT TIMELINE",
+        "steps": [
+          {
+            "phase": "Q1",
+            "title": "Discovery",
+            "desc": "Research & planning phase with stakeholder alignment"
+          },
+          {
+            "phase": "Q2",
+            "title": "Design",
+            "desc": "Concept development and prototype validation"
+          },
+          {
+            "phase": "Q3",
+            "title": "Build",
+            "desc": "Full implementation and iterative refinement"
+          },
+          {
+            "phase": "Q4",
+            "title": "Launch",
+            "desc": "Market release and performance monitoring"
+          },
+          {
+            "phase": "+",
+            "title": "Scale",
+            "desc": "Expansion and long-term optimization"
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralTeamGridSlide",
+      "data": {
+        "title": "LEADERSHIP",
+        "subtitle": "The people driving our vision forward",
+        "people": [
+          {
+            "initials": "JD",
+            "name": "Jordan Davis",
+            "role": "Chief Executive"
+          },
+          {
+            "initials": "MK",
+            "name": "Morgan Kim",
+            "role": "Head of Product"
+          },
+          {
+            "initials": "SR",
+            "name": "Sam Rivera",
+            "role": "Creative Director"
+          },
+          {
+            "initials": "TW",
+            "name": "Taylor Wong",
+            "role": "Operations Lead"
+          }
+        ]
+      }
+    },
+    {
+      "type": "coralClosingSlide",
+      "data": {
+        "title": "THANK\nYOU",
+        "subtitle": "Let's build something extraordinary together.\nReach out to start the conversation.",
+        "contacts": [
+          {
+            "label": "Email",
+            "value": "HELLO@VENTURE.IO"
+          },
+          {
+            "label": "Phone",
+            "value": "+1 (555) 014-2298"
+          },
+          {
+            "label": "Office",
+            "value": "SEATTLE, WA"
+          }
+        ],
+        "socials": ["LI", "TW", "IG"]
+      }
+    }
+  ]
+}

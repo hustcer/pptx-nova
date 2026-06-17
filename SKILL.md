@@ -131,6 +131,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   `references/narrative-quality.md`，在 `deck_lock.json` 中锁定 `deckProfile`、每页
   `claimTitle` / `proofObject` / `rhythm` / `layoutIntent` / `visualDensity`，并在 PNG
   复核后写 `narrative_quality_review.json`。
+- 写 `content.json` 或手工 patch 前，先按页对照 `deck_lock.slides[]`，确认页型、节奏、
+  结构意图、密度和证明对象没有靠记忆漂移；发现不匹配时先改 lock 或内容源，不在 patch
+  里临时补救。
 - 非 appendix 页标题优先写成结论句；不要让 `产品概览`、`市场分析`、`路线图` 这类 topic label
   直接成为正式交付页的唯一标题。
 - 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit。

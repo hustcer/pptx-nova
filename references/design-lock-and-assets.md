@@ -101,6 +101,7 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
     "title": "Inter, Source Han Sans SC, Microsoft YaHei, sans-serif",
     "body": "Inter, Source Han Sans SC, Microsoft YaHei, sans-serif",
     "code": "Consolas, Courier New, monospace",
+    "strategy": "concord",
     "formulaPolicy": "mixed",
     "formulaFallback": "rendered",
     "mathFont": "Cambria Math, Latin Modern Math, Noto Sans Math",
@@ -178,6 +179,9 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
 
 - 必填：`schemaVersion`、`mode`、`slides[]`、`canvas`、输出路径或 run 目录。
 - 创建型：写 `deckkit`、`themePack`、`stylePack`、`colors`、`typography`。
+- `typography` 不只写首选字体；标题、正文、代码栈要带可用 fallback，并说明是
+  `concord`（同族/同调）、`contrast`（明确对比）还是品牌指定。相似但不同的系统字体
+  适合做同一栈 fallback，不适合分别担任标题和正文角色。
 - 所有创建型 deck：每页至少写 `rhythm`、`layoutIntent` 或 `macroLayout`。建议写
   `visualDensity`，取值 `low` / `medium` / `high`。这些字段只描述页面节奏和结构意图，
   不替代 DeckKit 的具体坐标。
@@ -391,6 +395,7 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 - 正式 deck 的 `deckProfile`、`claimTitle`、`proofObject`、`rhythm` 是否缺失（缺失先给 warning，
   由 `narrative-quality.md` 和 PNG 复核决定是否阻塞）。
 - DeckKit、themePack 等关键选择是否漂移。
+- typography 栈是否缺少常见 PowerPoint fallback，以及标题/正文是否使用相似但不同的系统字体组合。
 - `assets_manifest.json` 是否有 missing / needs-user / 重复 id / 不存在的文件。
 - 图片 / 截图资产是否声明 slot、ratio、fitPolicy；AI 生成图片是否设置 `noSlideChrome`。
 - `deck_lock.json` / `content.json` 中的 `assets[]`、`imageSlots{}`、`formulas[]`

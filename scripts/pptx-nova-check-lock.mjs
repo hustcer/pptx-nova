@@ -53,6 +53,37 @@ const AI_IMAGE_SOURCE_KINDS = new Set([
   'midjourney',
   'stable-diffusion',
 ])
+const PPT_SAFE_FONTS = new Set(
+  [
+    'Microsoft YaHei',
+    'SimHei',
+    'SimSun',
+    'FangSong',
+    'KaiTi',
+    'Arial',
+    'Calibri',
+    'Segoe UI',
+    'Verdana',
+    'Trebuchet MS',
+    'Times New Roman',
+    'Georgia',
+    'Cambria',
+    'Palatino',
+    'Garamond',
+    'Cambria Math',
+    'Consolas',
+    'Courier New',
+    'Impact',
+    'Arial Black',
+  ].map((item) => item.toLowerCase()),
+)
+const SIMILAR_FONT_GROUPS = [
+  ['microsoft yahei', 'pingfang sc', 'heiti sc'],
+  ['simsun', 'songti sc', 'stsong'],
+  ['arial', 'helvetica neue', 'segoe ui'],
+  ['times new roman', 'times'],
+  ['georgia', 'cambria'],
+]
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json [options]
@@ -223,6 +254,95 @@ function collectAllowedFonts(lock) {
   collect(lock.fonts)
   collect(lock.brand?.fonts)
   return fonts
+}
+
+function collectDeclaredFontStacks(lock) {
+  const stacks = []
+  const collect = (value, path) => {
+    if (typeof value === 'string') {
+      const key = path.at(-1)?.toLowerCase() ?? ''
+      const root = path[0]?.toLowerCase() ?? ''
+      const joined = path.join('.').toLowerCase()
+      const isFontField =
+        root === 'fonts' ||
+        joined.includes('font') ||
+        [
+          'title',
+          'heading',
+          'major',
+          'body',
+          'minor',
+          'code',
+          'mono',
+          'math',
+          'caption',
+          'label',
+        ].includes(key)
+      if (isFontField) {
+        const fonts = splitFontStack(value)
+        if (fonts.length > 0) stacks.push({ path: path.join('.'), fonts })
+      }
+      return
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => collect(item, [...path, String(index)]))
+      return
+    }
+    if (isPlainObject(value)) {
+      for (const [key, item] of Object.entries(value)) collect(item, [...path, key])
+    }
+  }
+  collect(lock.typography, ['typography'])
+  collect(lock.fonts, ['fonts'])
+  collect(lock.brand?.fonts, ['brand', 'fonts'])
+  return stacks
+}
+
+function fontRoleValue(lock, aliases) {
+  for (const source of [lock.typography, lock.fonts, lock.brand?.fonts]) {
+    if (!isPlainObject(source)) continue
+    for (const key of aliases) {
+      if (typeof source[key] === 'string') return source[key]
+    }
+  }
+  return ''
+}
+
+function firstRoleFont(lock, role) {
+  const aliases =
+    role === 'title'
+      ? ['title', 'heading', 'major', 'titleFont', 'headingFont']
+      : ['body', 'minor', 'bodyFont', 'contentFont']
+  return splitFontStack(fontRoleValue(lock, aliases))[0]?.toLowerCase() ?? ''
+}
+
+function similarFontGroup(font) {
+  return SIMILAR_FONT_GROUPS.find((group) => group.includes(font)) ?? null
+}
+
+function checkTypographyQuality(lock, warnings) {
+  for (const stack of collectDeclaredFontStacks(lock)) {
+    const hasSafeFallback = stack.fonts.some((font) => PPT_SAFE_FONTS.has(font.toLowerCase()))
+    if (!hasSafeFallback) {
+      push(
+        warnings,
+        'font-stack-no-safe-fallback',
+        `${stack.path} should include a common PowerPoint fallback font`,
+      )
+    }
+  }
+
+  const titleFont = firstRoleFont(lock, 'title')
+  const bodyFont = firstRoleFont(lock, 'body')
+  if (!titleFont || !bodyFont || titleFont === bodyFont) return
+  const titleGroup = similarFontGroup(titleFont)
+  if (titleGroup && titleGroup === similarFontGroup(bodyFont)) {
+    push(
+      warnings,
+      'font-role-pair-too-similar',
+      `title font "${titleFont}" and body font "${bodyFont}" are similar-but-different; use one stack or choose a clearer contrast`,
+    )
+  }
 }
 
 function collectFieldValues(value, predicate, path = [], out = []) {
@@ -644,6 +764,8 @@ function checkLock(lock, errors, warnings) {
   }
   if (!isPlainObject(lock.typography) && !isPlainObject(lock.fonts)) {
     push(warnings, 'lock-typography-missing', 'typography/font declarations are missing')
+  } else {
+    checkTypographyQuality(lock, warnings)
   }
   const formalNarrative = isFormalNarrativeLock(lock)
   if (formalNarrative && !lock.deckProfile?.primary) {

@@ -101,6 +101,13 @@ For formal decks, content must preserve the lock's claim/proof intent:
 - if a DeckKit cannot express the proof object without generic bullets, extend
   the DeckKit rather than hiding the argument in prose
 
+Before running `validate-content.mjs`, read the slide row in `deck_lock.json`
+beside the content slide you are writing. This is not a new approval step; it is
+the guard against long-deck drift. If the current content would change the slide
+from "evidence chart" to "generic bullets", or from `breathing` to a dense grid,
+fix the source plan or choose a different DeckKit slide type before generating
+patch ops.
+
 Run validation before dry-run. In delivery mode, missing required slots,
 disallowed `customOps`, schema errors, blocking fit diagnostics, and diversity
 gate failures must be fixed before any apply. Slot budget warnings are still

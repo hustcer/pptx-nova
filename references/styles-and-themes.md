@@ -169,6 +169,25 @@ PowerPoint 在中英混排时会根据字符类型选择 `latin` 或 `ea` 字体
 
 某些字体（如 `Inter`）只覆盖拉丁字符，中文会 fallback；显式设 `ea` 才能保证中文也用指定字体。
 
+### 字体栈质量策略
+
+字体策略要同时服务设计气质和交付稳定性。不要只写一个看起来高级但用户机器上可能没有的字体名；
+`deck_lock.typography` 中的标题、正文、代码等栈应包含可用 fallback，正式交付时再用
+`check-lock --strict-fonts` 防止 patch 引入锁外字体。
+
+实用规则：
+
+- 每个主要字体栈至少包含一个常见 PowerPoint 可用字体。CJK 常用 `Microsoft YaHei` /
+  `SimHei` / `SimSun` / `KaiTi`；Latin 常用 `Arial` / `Calibri` / `Segoe UI` /
+  `Georgia` / `Times New Roman`；代码用 `Consolas` / `Courier New`。
+- 标题和正文可以形成“同族不同权重”或“明确对比”（serif × sans、display × neutral）。
+  避免标题用 `Microsoft YaHei`、正文用 `PingFang SC` 这类相似但不相同的组合；它们更适合
+  出现在同一个 fallback 栈中，而不是分任两个视觉角色。
+- 品牌字体、Google Fonts 或本机未必安装的字体可以放在栈首，但必须写 fallback；如果客户要求
+  严格品牌字体，最终摘要要说明字体安装/嵌入风险。
+- 不要把字体选择藏在零散 `set-run` 里。优先用 `set-theme-font`、master placeholder style 或
+  DeckKit token 统一角色字体；单个 run 只处理局部强调。
+
 ### 权重后缀字体名（`Inter Black` / `Barlow Light` / `Roboto Medium`...）
 
 OOXML 允许在 `typeface` 里直接写带权重后缀的字体名（设计师常这么用）。xdoc 现在

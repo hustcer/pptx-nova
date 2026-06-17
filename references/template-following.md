@@ -30,6 +30,9 @@ Place these in the run directory:
 - `template-inspect.json`: full `xdoc pptx inspect` output for the source deck.
 - `template-audit.json`: reusable slide patterns, placeholders, brand chrome,
   asset provenance, unsupported objects, and preserve rules.
+- `template-affordances.json`: source slide layout affordances inferred from
+  inspect geometry, text density, placeholders, chart/table frames, and visual
+  chrome.
 - `template-frame-map.json`: one mapping entry per output slide.
 - `template-edit-plan.json`: object-level edits, deletes, replacements, and
   intentional insertions.
@@ -49,6 +52,8 @@ Minimum `template-frame-map.json`:
       "sourceSlide": 3,
       "reuseMode": "duplicate-slide",
       "narrativeRole": "opening thesis",
+      "layoutAffordance": "hero statement with subtitle",
+      "fitReason": "large title slot and protected brand chrome match the opening claim",
       "editTargets": [{ "shape": { "placeholder": { "type": "title" } }, "action": "rewrite" }]
     }
   ],
@@ -67,7 +72,8 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
 2. Review source slide images if available, or render a source contact sheet with
    `xdoc convert`. Identify slide roles, recurring chrome, typography, object
    frames, media crops, placeholder-like text, and unsupported objects.
-3. Write `template-audit.json` and `template-frame-map.json`.
+3. Write `template-audit.json` and `template-affordances.json`, then use those
+   affordances to write `template-frame-map.json`.
 4. Build the starter deck by duplicating or copying mapped source slides into a
    run-dir PPTX. Do not create blank mapped slides.
 5. Write `template-edit-plan.json` from inspect IDs, names, placeholders, and
@@ -94,6 +100,32 @@ Omit optional inputs only when they truly do not exist. For example, pure text
 template filling may have no `assets_manifest.json`, but a deck that replaces or
 keeps logos, screenshots, customer marks, product UI, or photos should include
 one.
+
+## Layout Affordance Pass
+
+Treat the source deck as a slide library, not an ordered outline. Before mapping
+new content, infer what each reusable source slide is good at expressing:
+
+| Inspect / preview signal                  | Affordance to record                                |
+| ----------------------------------------- | --------------------------------------------------- |
+| One large title slot, little body text    | hero claim, section divider, closing statement      |
+| Two balanced content zones                | comparison, before/after, problem/solution          |
+| Three to five equal modules               | capability list, pillar model, workflow stages      |
+| Numeric cards or KPI-sized text boxes     | metric row, scorecard, executive summary            |
+| Wide chart/table frame                    | data proof, trend, ranking, operating review        |
+| Timeline-like geometry or repeated arrows | roadmap, process, phased plan                       |
+| Image-dominant frame                      | product screenshot, customer proof, visual evidence |
+
+Each `template-affordances.json` entry should record the source slide index,
+`affordance`, likely capacity, reusable objects to preserve, and risks such as
+small label slots or hard-coded old page markers. Then each `template-frame-map`
+entry must cite the chosen affordance and a short `fitReason`.
+
+Do not preserve source order by default. The target story controls output order;
+a good source slide may be reused for several output slides, and weak source
+slides may be omitted. If no source slide's affordance fits a target message,
+shorten/split the content or ask for an allowed insertion instead of pouring a
+dense argument into a label-sized placeholder.
 
 ## Edit Rules
 

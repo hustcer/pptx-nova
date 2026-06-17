@@ -80,6 +80,12 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 3. Produce the smallest durable input:
    - Prefer DeckKit `content.json` for create workflows.
    - Use patch ops only when the DeckKit path cannot express the work.
+   - Before writing or rebuilding `content.json` / hand-authored patch ops,
+     do a slide-by-slide lock alignment pass: for each slide, compare the
+     intended `slideType`, `claimTitle`, `proofObject`, `rhythm`,
+     `layoutIntent` / `macroLayout`, and `visualDensity` against the current
+     source content. If they disagree, update the durable source (`deck_lock` or
+     `content.json`) first; do not let the patch become a hidden second plan.
 4. Run design-lock drift check before dry-run when `deck_lock.json` exists:
    ```bash
    node <skill-root>/scripts/pptx-nova-check-lock.mjs \

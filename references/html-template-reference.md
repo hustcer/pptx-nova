@@ -1,0 +1,87 @@
+# HTML Template Reference Workflow
+
+Use this supplement when the reference source is an HTML presentation template instead of a `.pptx` file.
+
+## Goal
+
+Turn browser-rendered HTML slide evidence into the same Phase 0 artifacts required for PPTX-derived DeckKits:
+
+- `ref-previews/slide-XX.png` and `contact-sheet.png`
+- `style-spec.md`
+- `slide-inventory.md`
+- `fidelity-scope.md`
+
+The browser is the visual fact source. The HTML/CSS is the token and structure fact source.
+
+## Capture Baseline Screenshots
+
+Use `agent-browser` after reading its current `skills get core` output.
+
+Recommended local-file flow:
+
+```bash
+agent-browser --session <id>-html set viewport 1440 810
+agent-browser --session <id>-html --allow-file-access open "file:///abs/path/template.html"
+agent-browser --session <id>-html wait --load networkidle
+```
+
+Before screenshots, inject a capture stylesheet/script that:
+
+- waits for `document.fonts.ready`
+- hides `#nav-dots`, slide counters, browser-only controls, and pagination UI
+- disables deck transition and entry animation
+- makes `[data-anim]` elements visible
+- moves to each slide by changing the deck transform or clicking the real navigation
+
+Use absolute screenshot output paths. Some browser tools can treat relative `.tmp/...` paths as selectors or resolve them
+against their own working directory.
+
+## Extract Structure
+
+Record:
+
+- Actual slide count from DOM, e.g. `document.querySelectorAll('.slide').length`
+- Source order and classes, e.g. `slide--cover`, `slide--stats`
+- Text samples per slide
+- CSS variables for palette, fonts, type scale, spacing, motion
+- Metadata mismatches between `template.json` and DOM
+
+If metadata and DOM disagree, DOM + screenshots win; record the mismatch in `findings.md` and catalog `knownLimits`.
+
+## Transfer Decisions
+
+Transfer:
+
+- static composition, palette, typography, spacing, chrome
+- reusable page structures and content slots
+- chart, process, comparison, list, image-shell, and diagram semantics
+- placeholders/asset slots for image-bearing regions
+
+Do not transfer:
+
+- pagination dots, slide counters, keyboard handlers, scroll transforms
+- entry/hover animations, JS transition timing, click-only affordances
+- HTML-only responsive behavior that has no PPTX editing equivalent
+- one-off remote images, screenshots, CSS background images, or decorative media
+
+## Unit Mapping
+
+Use a 16:9 capture viewport so ratios map cleanly to PPTX:
+
+- `1440×810` px -> `13.333×7.5in`
+- `x_px / 1440 * 13.333` -> inches
+- `y_px / 810 * 7.5` -> inches
+- `vw` font sizes can be mapped from `1440 * vw / 100` px, then approximated to PPTX points.
+
+Do not preserve viewport-scaled type blindly. PPTX needs text to pass dry-run and vision gates; use the HTML scale as a
+visual reference, then choose stable PPTX point sizes and text box heights.
+
+## Phase 2 Notes
+
+- Use the HTML example text only in `examples/<id>-content.json` and benchmark fixtures.
+- Run content leak audit against a non-reference content patch, not the golden example patch.
+- For HTML templates, catalog `knownLimits` should disclose:
+  - source is HTML, not PPTX
+  - browser-only interactions were excluded
+  - any metadata vs DOM slide-count mismatch
+  - any CSS-only visual that was approximated with editable PPTX shapes

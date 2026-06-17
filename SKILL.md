@@ -1,10 +1,11 @@
 ---
 name: deckkit-maker
 description: >
-  从参考 .pptx 文件为 pptx-nova SKILL 创建新的 DeckKit（开发者侧 skill，操作
-  skills/pptx-nova/ 源码）。当用户提供一个参考 .pptx 文件和新 DeckKit 的名字，
-  要求"创建 DeckKit / 新增 DeckKit / 把这个 pptx 做成 DeckKit / 复刻这个 pptx
-  的风格做成套件 / 模仿这个 deck 新建 DeckKit" 时触发。两阶段工作流：
+  从参考 .pptx 文件或 HTML 演示模板为 pptx-nova SKILL 创建新的 DeckKit（开发者侧
+  skill，操作 skills/pptx-nova/ 源码）。当用户提供一个参考 .pptx 文件、template.html
+  或 HTML 模板目录和新 DeckKit 的名字，要求"创建 DeckKit / 新增 DeckKit / 把这个 pptx
+  做成 DeckKit / 把这个 HTML template 转成 DeckKit / 复刻这个 deck 的风格做成套件 /
+  模仿这个 deck 新建 DeckKit" 时触发。两阶段工作流：
   第一阶段对参考 deck 做高保真基线重建（默认覆盖所有 slides；大型或高度重复 deck
   先确认代表页型范围，风格、主题、内容可照搬），第二阶段组件化抽象为 id.kit.mjs +
   schema + catalog + benchmark 并走 readiness
@@ -13,7 +14,7 @@ description: >
 
 # deckkit-maker
 
-从一个参考 `.pptx` 文件出发，为 pptx-nova 创建新的 DeckKit。目标是让以后的 Agent
+从一个参考 `.pptx` 文件或 HTML 演示模板出发，为 pptx-nova 创建新的 DeckKit。目标是让以后的 Agent
 能用 `content.json → DeckKit → patch → xdoc` 稳定高效地产出同主题、同质量的 PPTX。
 
 本 skill 是 **开发者侧** skill：它修改 `skills/pptx-nova/` 源码，可以使用仓库根
@@ -25,10 +26,11 @@ description: >
 
 用户会提供：
 
-1. **参考 `.pptx` 文件路径** —— 风格、主题、模板、内容的唯一事实来源。参考文件只读。
+1. **参考 `.pptx` 文件路径，或 HTML template 文件/目录** —— 风格、主题、模板、内容的唯一事实来源。参考文件只读。
 2. **新 DeckKit 的名字** —— kebab-case id（如 `swiss-grid`、`consulting-dark`）。
 
-如果两者缺一，先向用户索取，不要自己猜测或挑选文件。
+如果两者缺一，先向用户索取，不要自己猜测或挑选文件。若参考源是 HTML 目录，优先确认其中
+的入口文件（通常是 `template.html`）和元数据文件（如 `template.json` / `design.md`）。
 
 ## 开工前 preflight（必做）
 
@@ -39,7 +41,7 @@ description: >
 ```bash
 git status --short
 node -e "const id=process.argv[1]; if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) process.exit(1)" <id>
-test -f <ref.pptx>
+test -f <ref.pptx-or-template.html>   # HTML 目录输入时检查入口 template.html
 node -e "const c=require('./skills/pptx-nova/assets/deckkits/catalog.json'); const id=process.argv[1]; if ((c.entries||[]).some(e=>e.id===id)) process.exit(1)" <id>
 test ! -e skills/pptx-nova/assets/deckkits/<id>.kit.mjs
 test ! -e skills/pptx-nova/assets/deckkits/schemas/<id>
@@ -49,8 +51,8 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 ```
 
 如果任一目标文件或目录已存在，先确认是继续扩展、接管未完成工作，还是换新 id。不要删除或覆盖
-不是本次任务创建的内容。参考 `.pptx` 必须只读；任何导出、解包和分析产物只写入 run 目录或
-`.tmp-slides/`。
+不是本次任务创建的内容。参考 `.pptx` / HTML 模板必须只读；任何导出、解包、截图和分析产物只写入
+run 目录或 `.tmp-slides/`。
 
 ## 前置阅读（必读，按序）
 
@@ -66,10 +68,12 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 ## 两阶段总览
 
 ```text
-参考 .pptx + 新 DeckKit 名字
+参考 .pptx / HTML template + 新 DeckKit 名字
   │
-  ├─ Phase 0  分析参考 deck            → references/analyze-reference.md
-  │    unpack → 参考 PNG 基准 → style-spec.md + slide-inventory.md + fidelity-scope.md
+  ├─ Phase 0  分析参考 deck/template   → references/analyze-reference.md
+  │    pptx: unpack → 参考 PNG 基准
+  │    html: browser screenshots → DOM/CSS/token extraction
+  │    → style-spec.md + slide-inventory.md + fidelity-scope.md
   │
   ├─ Phase 1  高保真重建（第一交付物）  → references/rebuild-high-fidelity.md
   │    探索生成器 generate.mjs → 按 fidelity-scope 重建 → 逐页与参考 PNG 对比
@@ -85,6 +89,28 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 范围内逐页对比通过的重建产物，就没有资格冻结 kit。这里的高保真指无 hard defect 的
 视觉/结构基线，不要求像素级一致；最终 kit 只保留可复用视觉系统，不保留业务内容。
 两阶段的产物都保留在 run 目录中。
+
+### HTML 模板输入补充流程
+
+HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` 作为事实源。遇到
+`template.html`、网页 URL、本地 HTML 模板目录或 `beautiful-html-templates` 类素材时：
+
+1. 读取 `template.json`、`design.md`、入口 HTML 的 CSS token、slide section 和脚本。记录
+   HTML 元数据与实际 DOM 的不一致（如 `slide_count` 与 `.slide` 数量不同）。
+2. 使用 agent-browser 或等效浏览器工具，以 16:9 viewport（建议 1440×810）逐页截图到
+   `ref-previews/`，并生成 contact sheet。截图前冻结动画，隐藏网页导航控件、圆点、浏览器
+   slide counter、hover-only UI 等 PPTX 不应复刻的交互元素。
+3. `style-spec.md` 必须同时引用 CSS token 与浏览器截图；字号从 CSS `vw/vh/rem/px`
+   映射为 PPTX pt，间距从 viewport 比例映射到 13.333×7.5in。
+4. `slide-inventory.md` 以真实 DOM slide 顺序为准，不以元数据声明为准；把 CSS class
+   映射为 DeckKit page type。
+5. HTML 的 motion、keyboard handlers、pagination dots、scroll transforms、hover states
+   只记录为"不迁移"决策；DeckKit 只冻结静态演示视觉系统、可编辑 shape/text、asset slot
+   和可复用 chart/diagram 结构。
+6. 图片/截图区域默认转为 asset slot 或占位框；不把 HTML 模板中的一次性位图、远程图、CSS
+   背景图直接写入 kit。
+7. Phase 1 对比时用浏览器截图作为参考 PNG；Phase 2 benchmark 仍必须用 xdoc 生成 PPTX
+   PNG 并走 `dry-run → apply → vision-check → contact-sheet review`。
 
 ### 高保真范围决策
 
@@ -186,8 +212,9 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 
 ## Reference 索引
 
-| 文件                                  | 用途                                               |
-| ------------------------------------- | -------------------------------------------------- |
-| `references/analyze-reference.md`     | Phase 0：解包、PNG 基准、风格提取、页型归并        |
-| `references/rebuild-high-fidelity.md` | Phase 1：探索生成器、逐页重建与对比循环、避坑清单  |
-| `references/componentize.md`          | Phase 2：抽 kit/schema/catalog/benchmark/readiness |
+| 文件                                    | 用途                                                |
+| --------------------------------------- | --------------------------------------------------- |
+| `references/analyze-reference.md`       | Phase 0：解包、PNG 基准、风格提取、页型归并         |
+| `references/html-template-reference.md` | Phase 0 补充：HTML 模板截图、DOM/CSS 分析、交互过滤 |
+| `references/rebuild-high-fidelity.md`   | Phase 1：探索生成器、逐页重建与对比循环、避坑清单   |
+| `references/componentize.md`            | Phase 2：抽 kit/schema/catalog/benchmark/readiness  |

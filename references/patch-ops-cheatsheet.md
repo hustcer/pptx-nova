@@ -70,6 +70,42 @@
 | `add-table`       | 加表 `rows x cols`，可选 `data: [[...]]` 初始化                                   |
 | `add-chart`       | 加图表，详见 `charts.md`                                                          |
 
+### add-freeform 可见性
+
+`add-freeform` 的 `points` 是局部路径坐标，不等同于 slide 上的英寸绝对坐标。
+如果直接把 `"3.2in"` 级别的几何换成小数点数组传进去，生成的 XML 可能只有几个 EMU
+的 `<a:ext>`，PowerPoint 能打开但 PNG 里几乎不可见。
+
+写自由形状时优先使用整数局部坐标，并显式给：
+
+- `originX` / `originY`：形状放到 slide 上的位置，例如 `"2.06in"`。
+- `startX` / `startY`：路径起点，使用同一局部坐标系。
+- `xScale` / `yScale`：局部单位到 EMU 的缩放。若局部坐标使用 1/100in，scale 为 `9144`。
+
+```json
+{
+  "op": "add-freeform",
+  "slide": 0,
+  "name": "DonutSegment0",
+  "originX": "2.06in",
+  "originY": "2.3in",
+  "startX": 152,
+  "startY": 0,
+  "xScale": 9144,
+  "yScale": 9144,
+  "points": [
+    [160, 8],
+    [188, 20],
+    [224, 60]
+  ],
+  "close": true
+}
+```
+
+复刻 donut segment、conic-gradient、SVG-like polygon 或斜切块时，apply 后至少检查
+PNG；若图形看不见，再解包 slide XML 查对应 shape 的 `<a:ext cx="..." cy="...">`
+是否是实际英寸量级，而不是个位数 EMU。
+
 ### add-shape 示例
 
 ```json

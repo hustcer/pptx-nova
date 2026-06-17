@@ -1,6 +1,6 @@
 // broadside.kit.mjs - Protest-poster editorial DeckKit
 // version: 0.1.0
-import { SLIDE_H, SLIDE_W, createOps, grid, nm, txH } from './core-primitives.kit.mjs'
+import { SLIDE_W, createOps, grid, nm } from './core-primitives.kit.mjs'
 
 const C = {
   ink: '111111',
@@ -9,10 +9,22 @@ const C = {
   cream: 'F0ECE5',
   muted: 'B8B8AE',
   hint: 'A8A8A0',
+  fg2: '888880',
+  fg3: '505048',
   border: '282826',
-  orangeMuted: '2A1008',
-  orangeHint: '111111',
-  orangeLine: '7A2B12',
+  orangeMuted: '331D14',
+  orangeHint: '331D14',
+  orangeLine: 'BD4E22',
+  orangeInk20: '923F1E',
+  orangeInk30: '672F19',
+  orangeInk40: '923F1E',
+  orangeInk45: '873B1D',
+  orangeInk55: '331D14',
+  orangeInk60: '331D14',
+  orangeInk65: '331D14',
+  orangeInk70: '331D14',
+  fadeMid: '743119',
+  fadeSoft: '9B4020',
   dark2: '3A3A38',
   dark3: '555550',
 }
@@ -22,12 +34,53 @@ const FONT_MONO = 'IBM Plex Mono'
 const FONT_CN = 'Noto Sans SC'
 const MX = 0.73
 const MY = 0.42
-const BODY_TOP = 1.08
 const FOOT_Y = 7.05
+const FREEFORM_UNITS_PER_IN = 100
+const FREEFORM_SCALE = 914400 / FREEFORM_UNITS_PER_IN
 
 const pad2 = (value) => String(value).padStart(2, '0')
 const str = (value) => String(value ?? '')
 const clean = (value) => str(value).trim()
+const numeric = (value, fallback = 1) => {
+  const match = str(value).match(/-?\d+(?:\.\d+)?/)
+  if (!match) return fallback
+  const parsed = Number(match[0])
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+const ringSegmentPath = (cx, cy, outerR, innerR, startDeg, endDeg) => {
+  const span = Math.max(0.5, endDeg - startDeg)
+  const steps = Math.max(4, Math.ceil(span / 8))
+  const left = cx - outerR
+  const top = cy - outerR
+  const pointAt = (radius, deg) => {
+    const rad = (deg * Math.PI) / 180
+    return [
+      Number((cx + Math.sin(rad) * radius).toFixed(3)),
+      Number((cy - Math.cos(rad) * radius).toFixed(3)),
+    ]
+  }
+  const points = []
+  for (let step = 0; step <= steps; step += 1) {
+    points.push(pointAt(outerR, startDeg + (span * step) / steps))
+  }
+  for (let step = steps; step >= 0; step -= 1) {
+    points.push(pointAt(innerR, startDeg + (span * step) / steps))
+  }
+  const localPoints = points.map(([x, y]) => [
+    Math.round((x - left) * FREEFORM_UNITS_PER_IN),
+    Math.round((y - top) * FREEFORM_UNITS_PER_IN),
+  ])
+  const [startX, startY] = localPoints[0] ?? [0, 0]
+  return {
+    startX,
+    startY,
+    xScale: FREEFORM_SCALE,
+    yScale: FREEFORM_SCALE,
+    originX: `${Number(left.toFixed(3))}in`,
+    originY: `${Number(top.toFixed(3))}in`,
+    points: localPoints.slice(1),
+  }
+}
 const list = (value) =>
   (Array.isArray(value) ? value : value ? [value] : []).map(clean).filter(Boolean)
 const limit = (items, max, path) => {
@@ -323,20 +376,21 @@ function makePageTypes(api, total) {
     add(s, C.orange)
     tx(s, nm(s, 'Num'), MX, MY, 1.2, 0.2, clean(data.number ?? pad2(s + 1)), mono(9, C.orangeHint))
     const items = limit(data.items, 3, 'fadelist.items')
-    const opColors = [C.ink, C.orangeMuted, C.orangeHint]
+    const opColors = [C.ink, C.fadeMid, C.fadeSoft]
     items.forEach((item, i) =>
       tx(
         s,
         nm(s, `Item${i}`),
-        8.0,
-        1.6 + i * 0.66,
-        3.8,
-        0.7,
+        8.18,
+        0.48 + i * 1.02,
+        4.7,
+        0.95,
         item,
-        font(40, opColors[i] ?? C.orangeHint),
+        font(54, opColors[i] ?? C.fadeSoft),
+        'right',
       ),
     )
-    tx(s, nm(s, 'Title'), 7.45, 3.9, 4.6, 2.45, clean(data.title), font(58, C.ink), 'right')
+    tx(s, nm(s, 'Title'), 7.28, 4.03, 5.35, 2.35, clean(data.title), font(76, C.ink), 'right')
     bottomMeta(s, data, 'orange')
   }
 
@@ -373,7 +427,7 @@ function makePageTypes(api, total) {
     const mid = 6.6
     vRule(s, nm(s, 'Divider'), mid, 1.22, 5.2, C.border)
     p.box(s, nm(s, 'RightPanel'), 'rectangle', mid + 0.22, 1.22, 5.98, 5.2, C.orange)
-    tx(s, nm(s, 'LeftLabel'), MX, 1.55, 3, 0.22, clean(left.label ?? 'Before'), mono(9, C.hint))
+    tx(s, nm(s, 'LeftLabel'), MX, 1.55, 3, 0.22, clean(left.label ?? 'Before'), mono(9, C.fg2))
     hRule(s, nm(s, 'LeftRule'), MX, 1.88, 4.9, C.border)
     tx(s, nm(s, 'LeftTitle'), MX, 2.22, 4.8, 0.7, clean(left.title), font(24, C.cream))
     tx(
@@ -384,7 +438,7 @@ function makePageTypes(api, total) {
       4.9,
       0.72,
       clean(left.body),
-      font(13, C.muted, { bold: false }),
+      font(13, C.fg2, { bold: false }),
     )
     bullets(s, 'LeftBullet', MX, 4.08, 4.9, left.bullets, 'dark', 10.5, 0.34)
     tx(
@@ -395,7 +449,7 @@ function makePageTypes(api, total) {
       3,
       0.22,
       clean(right.label ?? 'After'),
-      mono(9, C.orangeHint),
+      mono(9, C.orangeInk55),
     )
     hRule(s, nm(s, 'RightRule'), mid + 0.55, 1.88, 5.1, C.orangeLine)
     tx(s, nm(s, 'RightTitle'), mid + 0.55, 2.22, 4.9, 0.7, clean(right.title), font(24, C.ink))
@@ -407,7 +461,7 @@ function makePageTypes(api, total) {
       4.9,
       0.72,
       clean(right.body),
-      font(13, C.orangeMuted, { bold: false }),
+      font(13, C.orangeInk65, { bold: false }),
     )
     bullets(s, 'RightBullet', mid + 0.55, 4.08, 4.9, right.bullets, 'orange', 10.5, 0.34)
   }
@@ -475,32 +529,32 @@ function makePageTypes(api, total) {
         nm(s, `StepNum${i}`),
         c.x,
         3.0,
-        0.7,
-        0.48,
+        1.05,
+        0.78,
         clean(step.num ?? pad2(i + 1)),
-        font(28, C.orangeHint),
+        font(42, C.orangeInk20),
       )
-      tx(s, nm(s, `StepTitle${i}`), c.x, 3.55, c.w - 0.12, 0.34, clean(step.title), font(20, C.ink))
+      tx(s, nm(s, `StepTitle${i}`), c.x, 3.78, c.w - 0.12, 0.38, clean(step.title), font(21, C.ink))
       tx(
         s,
         nm(s, `StepBody${i}`),
         c.x,
-        4.02,
+        4.28,
         c.w - 0.12,
         0.95,
         clean(step.body),
-        font(10.5, C.orangeMuted, { bold: false }),
+        font(11, C.orangeInk60, { bold: false }),
       )
       if (i < steps.length - 1)
         tx(
           s,
           nm(s, `Arrow${i}`),
           c.x + c.w - 0.18,
-          3.38,
+          3.58,
           0.35,
           0.3,
           '→',
-          font(16, C.orangeHint, { bold: false }),
+          font(18, C.orangeInk30, { bold: false }),
         )
     })
   }
@@ -509,17 +563,36 @@ function makePageTypes(api, total) {
     add(s, C.ink)
     chrome(s, data, s, total)
     tx(s, nm(s, 'Title'), MX, 1.35, 7, 0.62, clean(data.title), font(32, C.cream))
-    p.box(s, nm(s, 'DonutOuter'), 'oval', 4.1, 2.45, 2.05, 2.05, C.orange)
-    p.box(s, nm(s, 'DonutMid'), 'oval', 4.45, 2.8, 1.35, 1.35, C.dark2)
-    p.box(s, nm(s, 'DonutInner'), 'oval', 4.83, 3.18, 0.6, 0.6, C.ink)
     const items = objectList(data.items, 5, 'items')
+    const chartItems = items.length ? items : [{ label: 'Segment', value: '100%', color: C.orange }]
+    const values = chartItems.map((item) => numeric(item.value))
+    const totalValue = values.reduce((sum, value) => sum + value, 0) || 1
+    let cursor = 0
+    chartItems.forEach((item, i) => {
+      const color = item.color ?? [C.orange, C.dark2, C.dark3, C.border, C.hint][i] ?? C.hint
+      const start = cursor
+      const end = i === chartItems.length - 1 ? 360 : cursor + (values[i] / totalValue) * 360
+      const name = nm(s, `DonutSeg${i}`)
+      const segment = ringSegmentPath(3.58, 3.82, 1.52, 0.73, start, end)
+      p.ops.push({
+        op: 'add-freeform',
+        slide: s,
+        name,
+        ...segment,
+        close: true,
+      })
+      p.fill(s, name, color)
+      p.noLine(s, name)
+      cursor = end
+    })
+    p.box(s, nm(s, 'DonutHole'), 'oval', 2.85, 3.09, 1.46, 1.46, C.ink)
     items.forEach((item, i) => {
-      const y = 2.25 + i * 0.43
+      const y = 2.36 + i * 0.52
       p.box(
         s,
         nm(s, `Swatch${i}`),
         'rectangle',
-        8.0,
+        7.05,
         y + 0.06,
         0.12,
         0.12,
@@ -528,27 +601,36 @@ function makePageTypes(api, total) {
       tx(
         s,
         nm(s, `LegendLabel${i}`),
-        8.28,
+        7.32,
         y,
-        2.4,
-        0.22,
+        2.75,
+        0.28,
         clean(item.label),
-        font(11, C.cream, { bold: false }),
+        font(16, C.cream, { bold: false }),
       )
       tx(
         s,
         nm(s, `LegendValue${i}`),
-        11.35,
+        11.25,
         y,
-        0.75,
-        0.22,
+        0.85,
+        0.26,
         clean(item.value),
-        mono(9, C.orange),
+        mono(12, C.orange),
         'right',
       )
     })
-    hRule(s, nm(s, 'TotalRule'), 8.0, 4.55, 4.1, C.border)
-    tx(s, nm(s, 'Total'), 8.0, 4.78, 4.2, 0.24, clean(data.total), mono(9, C.hint, { bold: false }))
+    hRule(s, nm(s, 'TotalRule'), 7.05, 4.75, 5.05, C.border)
+    tx(
+      s,
+      nm(s, 'Total'),
+      7.05,
+      4.98,
+      5.05,
+      0.24,
+      clean(data.total),
+      mono(9, C.fg2, { bold: false }),
+    )
     tx(s, nm(s, 'Source'), MX, 6.05, 8, 0.22, clean(data.source), mono(9, C.hint, { bold: false }))
   }
 
@@ -557,34 +639,38 @@ function makePageTypes(api, total) {
     chrome(s, data, s, total)
     tx(s, nm(s, 'Title'), MX, 1.35, 6.4, 0.62, clean(data.title), font(32, C.cream))
     const items = objectList(data.levels, 5, 'levels')
-    const widths = [3.2, 4.6, 6.0, 7.5, 9.0]
+    const widths = [4.2, 5.4, 6.6, 7.8, 9.2]
     items.forEach((item, i) => {
       const w = widths[i] ?? 9
       const x = (SLIDE_W - w) / 2
-      const y = 2.18 + i * 0.62
+      const y = 2.12 + i * 0.68
       const fillColor = [C.orange, '8F3D20', '65301E', '45251B', C.inkAlt][i] ?? C.inkAlt
       const textColor = i === 0 ? C.ink : C.cream
-      const descColor = i === 0 ? C.ink : C.cream
-      p.box(s, nm(s, `Level${i}`), 'rectangle', x, y, w, 0.56, fillColor)
+      const descColor = i === 0 ? C.orangeInk70 : C.cream
+      const nameW = w * 0.42
+      const descX = x + w * 0.55
+      const descW = w * 0.42
+      p.box(s, nm(s, `Level${i}`), 'rectangle', x, y, w, 0.62, fillColor)
+      p.box(s, nm(s, `LevelAccent${i}`), 'rectangle', x, y, 0.04, 0.62, C.orange)
       tx(
         s,
         nm(s, `LevelName${i}`),
-        x + 0.18,
-        y + 0.05,
-        w - 0.36,
-        0.24,
+        x + 0.22,
+        y + 0.12,
+        nameW,
+        0.36,
         clean(item.name),
-        font(13, textColor),
+        font(23, textColor),
       )
       tx(
         s,
         nm(s, `LevelDesc${i}`),
-        x + 0.18,
-        y + 0.31,
-        w - 0.36,
-        0.2,
+        descX,
+        y + 0.22,
+        descW - 0.18,
+        0.22,
         clean(item.desc),
-        font(9, descColor, { bold: false }),
+        font(10.5, descColor, { bold: false }),
         'right',
       )
     })
@@ -593,17 +679,18 @@ function makePageTypes(api, total) {
   const timeline = (s, data) => {
     add(s, C.ink)
     chrome(s, data, s, total)
-    tx(s, nm(s, 'Title'), MX, 1.18, 6.8, 0.62, clean(data.title), font(32, C.cream))
-    hRule(s, nm(s, 'TitleRule'), MX, 1.9, SLIDE_W - MX * 2, C.border)
+    tx(s, nm(s, 'Title'), MX, 1.04, 8.0, 0.9, clean(data.title), font(46, C.cream))
+    hRule(s, nm(s, 'TitleRule'), MX, 2.12, SLIDE_W - MX * 2, C.border)
     const items = objectList(data.events, 5, 'events')
     const compact = items.length > 4
-    const stepGap = compact ? 0.86 : 1.16
-    const titlePt = compact ? 12 : 14
-    const bodyPt = compact ? 9 : 9.5
-    const bodyH = compact ? 0.28 : 0.36
-    vRule(s, nm(s, 'Spine'), 3.1, 2.25, 3.8, C.border)
+    const startY = compact ? 2.36 : 2.45
+    const stepGap = compact ? 0.76 : 1.0
+    const titlePt = compact ? 16 : 18
+    const bodyPt = compact ? 9.8 : 10.5
+    const bodyH = compact ? 0.34 : 0.42
+    vRule(s, nm(s, 'Spine'), 3.1, startY + 0.2, 3.42, C.border)
     items.forEach((item, i) => {
-      const y = 2.05 + i * stepGap
+      const y = startY + i * stepGap
       tx(
         s,
         nm(s, `Date${i}`),
@@ -622,7 +709,7 @@ function makePageTypes(api, total) {
         3.45,
         y - 0.04,
         3.5,
-        0.3,
+        0.34,
         clean(item.title),
         font(titlePt, C.cream),
       )

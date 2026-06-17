@@ -414,7 +414,11 @@ dry-run 做 schema / selector / op-level 语义校验，并用和 `vision-check`
    = 7.3，页脚 y=7.1，会重叠；dry-run 不报。
 10. **hero 页深底白字遗漏改色** —— 复制白底页代码到 hero 时忘记把 textPri
     改成 white；dry-run 看到的只是合法 hex。
-11. **页码连续性** —— `01 / 08` 跳到 `03 / 08` 因为漏调函数；dry-run 不知道
+11. **freeform 小到不可见** —— `add-freeform` 使用局部路径坐标；如果把 slide
+    英寸坐标当 `points` 直接传进去，生成的 `<a:ext>` 可能只有几个 EMU，PNG 里看不到。
+    donut segment、conic-gradient 替代、斜切块和 SVG-like polygon 要显式设置
+    `originX/originY` 与 `xScale/yScale`，并用 PNG 或解包 XML 检查真实尺寸。
+12. **页码连续性** —— `01 / 08` 跳到 `03 / 08` 因为漏调函数；dry-run 不知道
     你期望的页序。
 
 **先 Read `previews/contact-sheet.png` 总览图**一屏扫跨页/全局问题（尤其上面第 4 条卡片对齐、
@@ -425,19 +429,20 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 
 ## 常见返工原因（生成器特有）
 
-| 现象                                                    | 根因                                                                                                      |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 第一发 dry-run 报 `set-paragraph requires text`         | `pAlign` helper 误用 `op: 'set-paragraph'`,改成 `set-paragraph-format`(模板已修,自己写新 helper 时别再踩) |
-| fill / line op 命不中（resolvedSelectors 报 not-found） | shape name 引用裸名，应用 `nm(s, "...")`                                                                  |
-| 主题色没换干净（部分 shape 还是旧色）                   | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                      |
-| KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                |
-| textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                     |
-| 同页左下 footer 写"BRAND·X"右上 watermark 写"XDOC DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化            |
-| 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                  |
-| 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                            |
-| `xdoc -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                              |
-| `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须全名 `"bottom"` / `"outsideEnd"`，shorthand 拒                                                   |
-| `titleStyle.bold` 被拒                                  | 放进 `font: { bold: true }` 子对象                                                                        |
+| 现象                                                    | 根因                                                                                                                             |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 第一发 dry-run 报 `set-paragraph requires text`         | `pAlign` helper 误用 `op: 'set-paragraph'`,改成 `set-paragraph-format`(模板已修,自己写新 helper 时别再踩)                        |
+| fill / line op 命不中（resolvedSelectors 报 not-found） | shape name 引用裸名，应用 `nm(s, "...")`                                                                                         |
+| 主题色没换干净（部分 shape 还是旧色）                   | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                                             |
+| KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                                       |
+| textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                                            |
+| freeform / donut / polygon 在 PNG 中看不见              | `add-freeform` points 写成了英寸绝对小数，导致 XML extent 只有个位数 EMU；改用局部整数坐标 + `originX/originY` + `xScale/yScale` |
+| 同页左下 footer 写"BRAND·X"右上 watermark 写"XDOC DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化                                   |
+| 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                         |
+| 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                                                   |
+| `xdoc -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                                                     |
+| `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须全名 `"bottom"` / `"outsideEnd"`，shorthand 拒                                                                          |
+| `titleStyle.bold` 被拒                                  | 放进 `font: { bold: true }` 子对象                                                                                               |
 
 ---
 

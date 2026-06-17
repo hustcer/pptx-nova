@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": 1,
-    "ops": 864
+    "ops": 888
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
     "changedParts": 35,
-    "opResults": 864,
+    "opResults": 888,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -37,7 +37,7 @@
     "status": "success",
     "warnings": 0,
     "changedParts": 35,
-    "opResults": 864,
+    "opResults": 888,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -48,32 +48,30 @@
   "vision": {
     "status": "success",
     "slideCount": 16,
-    "issueCount": 100,
+    "issueCount": 82,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 100
+      "low": 82
     },
     "lowBuckets": {
-      "total": 100,
-      "styleAllowed": 94,
+      "total": 82,
+      "styleAllowed": 81,
       "baselineKnown": 0,
-      "new": 6,
+      "new": 1,
       "changed": 0,
       "resolved": 0,
-      "reviewable": 6,
+      "reviewable": 1,
       "baselineUnavailable": true,
       "baselineUpdated": false
     },
     "lowByFamily": {
-      "small-font": 94,
-      "unexpected-wrap": 1,
-      "composition": 5
+      "small-font": 81,
+      "unexpected-wrap": 1
     },
     "newLowByFamily": {
-      "unexpected-wrap": 1,
-      "composition": 5
+      "unexpected-wrap": 1
     },
     "changedLowByFamily": {},
     "baseline": {
@@ -106,71 +104,6 @@
         },
         "identity": "dd284499d8bee0af53f4",
         "fingerprint": "e022c971b11fff908cad"
-      },
-      {
-        "severity": "low",
-        "family": "composition",
-        "kind": "arrangement-imbalance",
-        "slideIndex": 12,
-        "target": "S12_LevelDesc0",
-        "metrics": {
-          "deltaEmu": 283464,
-          "rowSize": 3
-        },
-        "identity": "d276e7ac6775a2b01650",
-        "fingerprint": "f23b668796bfca372a0e"
-      },
-      {
-        "severity": "low",
-        "family": "composition",
-        "kind": "arrangement-imbalance",
-        "slideIndex": 12,
-        "target": "S12_LevelDesc1",
-        "metrics": {
-          "deltaEmu": 283464,
-          "rowSize": 3
-        },
-        "identity": "8af723ba6af6a2b3237e",
-        "fingerprint": "3bb8209805bf91465698"
-      },
-      {
-        "severity": "low",
-        "family": "composition",
-        "kind": "arrangement-imbalance",
-        "slideIndex": 12,
-        "target": "S12_LevelDesc2",
-        "metrics": {
-          "deltaEmu": 283464,
-          "rowSize": 3
-        },
-        "identity": "854c911bda1529e57aff",
-        "fingerprint": "6a0c25979350a4427cbf"
-      },
-      {
-        "severity": "low",
-        "family": "composition",
-        "kind": "arrangement-imbalance",
-        "slideIndex": 12,
-        "target": "S12_LevelDesc3",
-        "metrics": {
-          "deltaEmu": 283463,
-          "rowSize": 3
-        },
-        "identity": "4f0a64b502acbce88f32",
-        "fingerprint": "3fe728f3ee489e39925c"
-      },
-      {
-        "severity": "low",
-        "family": "composition",
-        "kind": "arrangement-imbalance",
-        "slideIndex": 12,
-        "target": "S12_LevelDesc4",
-        "metrics": {
-          "deltaEmu": 283464,
-          "rowSize": 3
-        },
-        "identity": "fa400aaffc0c04ee7526",
-        "fingerprint": "755eab482b5d2eae7f89"
       }
     ],
     "changedLowSamples": [],
@@ -184,12 +117,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 301259,
-      "sha256": "fe2ec15326ce9019d46b4699c898185b51c0d5445f4633485b0bcf3ec3673f8c"
+      "bytes": 312848,
+      "sha256": "bbe8568a773a62d2f1bc9186b4100b0b725509dd9ee7a5fd239c70f8b0de4873"
     },
     "webp": {
-      "bytes": 95714,
-      "sha256": "6c6ea76f3946582c30aa916f22f567dae7a5ff78f7a0a1588063d829baf5d53e"
+      "bytes": 99172,
+      "sha256": "5835d7fde62800e52a4ad31ebcf47100c4685f1d001578c6d3bf11506c611275"
     }
   }
 }

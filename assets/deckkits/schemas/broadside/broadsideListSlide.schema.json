@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "broadsideListSlide data",
+  "type": "object",
+  "required": ["kicker", "title", "items"],
+  "properties": {
+    "section": { "type": "string" },
+    "page": { "type": "string" },
+    "kicker": { "type": "string" },
+    "title": { "type": "string", "x-slotBudget": { "fontPt": 34, "maxLines": 3, "widthIn": 4.4 } },
+    "items": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": { "type": "string", "x-slotBudget": { "fontPt": 12, "maxLines": 2, "widthIn": 6.4 } }
+    },
+    "footerLeft": { "type": "string" },
+    "footerRight": { "type": "string" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,301 @@
+{
+  "meta": {
+    "deckkit": "broadside",
+    "footerLeft": "Broadside"
+  },
+  "slides": [
+    {
+      "type": "broadsideCoverSlide",
+      "data": {
+        "number": "01",
+        "label": "Broadside",
+        "title": "this is the broadside style",
+        "subtitle": "Protest poster meets publication cover. Type so large it becomes image.",
+        "author": "[[Author Name]]",
+        "context": "[Year] · Context"
+      }
+    },
+    {
+      "type": "broadsideChapterSlide",
+      "data": {
+        "number": "02 / Chapter",
+        "title": "the next chapter begins here",
+        "lead": "One optional sentence that frames what this section is about."
+      }
+    },
+    {
+      "type": "broadsideStatementSlide",
+      "data": {
+        "section": "The Argument",
+        "page": "03",
+        "kicker": "Core Thesis",
+        "title": "orange is not an accent. it is the room.",
+        "footerRight": "[Author Name]"
+      }
+    },
+    {
+      "type": "broadsideSplitSlide",
+      "data": {
+        "section": "Details",
+        "page": "04",
+        "kicker": "Context",
+        "title": "when content needs image support",
+        "lead": "One or two sentences of supporting context. Short. Dense. No padding.",
+        "bullets": [
+          "First key supporting point",
+          "Second point, equally direct",
+          "Third and final - end strong"
+        ],
+        "imageLabel": "Image Placeholder",
+        "caption": "Image caption or source · Year",
+        "footerRight": "[Author Name]"
+      }
+    },
+    {
+      "type": "broadsideStatsSlide",
+      "data": {
+        "section": "By the numbers",
+        "page": "05",
+        "items": [
+          {
+            "value": "$3.5B",
+            "label": "Series E closed at $61.5B valuation",
+            "note": "[Source] · [Year]"
+          },
+          {
+            "value": "3x",
+            "label": "Enterprise deployments up quarter over quarter",
+            "note": "Primary research"
+          },
+          {
+            "value": "#1",
+            "label": "App Store ranking · [Product Name] · [Date]",
+            "note": "App Store Charts"
+          }
+        ],
+        "footerRight": "[Author Name]"
+      }
+    },
+    {
+      "type": "broadsideFadeListSlide",
+      "data": {
+        "number": "01",
+        "items": ["Before", "During", "After"],
+        "title": "the\nsession",
+        "author": "[Studio X] Guidelines",
+        "context": "06 / 10"
+      }
+    },
+    {
+      "type": "broadsideListSlide",
+      "data": {
+        "section": "The Framework",
+        "page": "07",
+        "kicker": "Four rules",
+        "title": "what separates\nsignal from noise",
+        "items": [
+          "Ship before it's ready - learn faster than you plan",
+          "One metric that matters - ignore everything else this quarter",
+          "The customer is always wrong about solutions, never about problems",
+          "Speed is a feature - slow companies don't get a second chance"
+        ],
+        "footerRight": "[Author Name]"
+      }
+    },
+    {
+      "type": "broadsideQuoteSlide",
+      "data": {
+        "kicker": "On speed",
+        "quote": "\"Move fast and you'll break things. Move slow and something else will break you.\"",
+        "author": "[Industry Leader]",
+        "source": "[Source] · [Year]"
+      }
+    },
+    {
+      "type": "broadsideCompareSlide",
+      "data": {
+        "section": "Before · After",
+        "page": "09",
+        "left": {
+          "label": "Before",
+          "title": "six-month build cycles",
+          "body": "Teams planned for months before shipping anything. By launch, the market had moved.",
+          "bullets": [
+            "Waterfall planning, quarterly roadmaps",
+            "User testing at the end, not the start",
+            "Success measured by features shipped"
+          ]
+        },
+        "right": {
+          "label": "After",
+          "title": "two-week iteration loops",
+          "body": "Ship a rough version. Watch what users actually do. Rebuild. Ship again.",
+          "bullets": [
+            "Weekly user sessions, continuous discovery",
+            "Metrics reviewed daily, not quarterly",
+            "Success measured by behavior change"
+          ]
+        },
+        "footerRight": "[Author Name]"
+      }
+    },
+    {
+      "type": "broadsideBarChartSlide",
+      "data": {
+        "section": "Growth Metrics",
+        "page": "11",
+        "title": "revenue by quarter",
+        "caption": "USD · Millions · FY 2025",
+        "bars": [
+          { "label": "Q1", "value": 1.2, "display": "$1.2M" },
+          { "label": "Q2", "value": 1.7, "display": "$1.7M" },
+          { "label": "Q3", "value": 2.1, "display": "$2.1M" },
+          { "label": "Q4", "value": 2.8, "display": "$2.8M", "accent": true }
+        ],
+        "source": "Source: Internal finance data · Q4 2025 Annual Report",
+        "footerRight": "[Author Name]"
+      }
+    },
+    {
+      "type": "broadsideFlowSlide",
+      "data": {
+        "section": "The Process",
+        "page": "12",
+        "title": "how it works",
+        "steps": [
+          {
+            "num": "01",
+            "title": "Discover",
+            "body": "Talk to users. Read the data. Surface what's actually true vs. what the team assumes."
+          },
+          {
+            "num": "02",
+            "title": "Define",
+            "body": "Narrow to one problem worth solving. Write it as a testable hypothesis, not a feature request."
+          },
+          {
+            "num": "03",
+            "title": "Design",
+            "body": "Build the simplest thing that could prove or disprove the hypothesis. Skip the polish."
+          },
+          {
+            "num": "04",
+            "title": "Deploy",
+            "body": "Ship to real users. Measure behavior, not opinions. Repeat from step one with new data."
+          }
+        ],
+        "footerRight": "[Author Name]"
+      }
+    },
+    {
+      "type": "broadsideDonutSlide",
+      "data": {
+        "section": "Market Share",
+        "page": "13",
+        "title": "where the market sits",
+        "items": [
+          { "label": "Leader", "value": "40%", "color": "E85D26" },
+          { "label": "Challenger", "value": "28%", "color": "3A3A38" },
+          { "label": "Followers", "value": "20%", "color": "555550" },
+          { "label": "Other", "value": "12%", "color": "282826" }
+        ],
+        "total": "TOTAL MARKET: $[X]B · [Year] ESTIMATE",
+        "source": "Source: [Industry report] · [Year] · Estimates only",
+        "footerLeft": "[Author]",
+        "footerRight": "[Year]"
+      }
+    },
+    {
+      "type": "broadsidePyramidSlide",
+      "data": {
+        "section": "The Hierarchy",
+        "page": "14",
+        "title": "what actually matters",
+        "levels": [
+          { "name": "mission", "desc": "why this exists" },
+          { "name": "strategy", "desc": "what we're betting on" },
+          { "name": "product", "desc": "what we're building" },
+          { "name": "growth", "desc": "how we reach people" },
+          { "name": "operations", "desc": "how we run the day-to-day" }
+        ],
+        "footerLeft": "[Author]",
+        "footerRight": "[Year]"
+      }
+    },
+    {
+      "type": "broadsideTimelineSlide",
+      "data": {
+        "section": "The Story",
+        "page": "15",
+        "title": "how we got here",
+        "events": [
+          {
+            "date": "[Year -3]",
+            "title": "the idea",
+            "body": "One slide. Three slides. Nineteen rejections. One yes."
+          },
+          {
+            "date": "[Year -2]",
+            "title": "first product",
+            "body": "Launched to [N] users. [X]% used it daily after week one."
+          },
+          {
+            "date": "[Year -1]",
+            "title": "the pivot",
+            "body": "Killed [X] features. Found the one thing that changed retention."
+          },
+          {
+            "date": "[Year 0]",
+            "title": "now",
+            "body": "[N]k users. $[X]M ARR. The hard part starts here."
+          }
+        ],
+        "footerLeft": "[Author] / [Year]",
+        "footerRight": "15"
+      }
+    },
+    {
+      "type": "broadsideCycleSlide",
+      "data": {
+        "section": "The Loop",
+        "page": "16",
+        "title": "build · measure · learn",
+        "steps": [
+          {
+            "num": "01",
+            "title": "build",
+            "body": "Ship the smallest version that could prove the idea wrong."
+          },
+          {
+            "num": "02",
+            "title": "measure",
+            "body": "What did users actually do? Not what they said - what they did."
+          },
+          {
+            "num": "03",
+            "title": "decide",
+            "body": "Ship to more users or go back to step one. There is no third option."
+          },
+          {
+            "num": "04",
+            "title": "learn",
+            "body": "Update the hypothesis. Kill what didn't work. Double what did."
+          }
+        ],
+        "footerLeft": "[Author] / [Year]",
+        "footerRight": "16"
+      }
+    },
+    {
+      "type": "broadsideEndSlide",
+      "data": {
+        "number": "10",
+        "label": "End",
+        "title": "let's\ntalk.",
+        "contact": "[hello@company.com] · [@handle] · [company.com]",
+        "author": "[Author Name]",
+        "context": "[Year]"
+      }
+    }
+  ]
+}

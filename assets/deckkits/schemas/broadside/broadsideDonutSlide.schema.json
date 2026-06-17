@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "broadsideDonutSlide data",
+  "type": "object",
+  "required": ["title", "items"],
+  "properties": {
+    "section": { "type": "string" },
+    "page": { "type": "string" },
+    "title": { "type": "string", "x-slotBudget": { "fontPt": 32, "maxLines": 1, "widthIn": 7 } },
+    "items": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["label", "value"],
+        "properties": {
+          "label": { "type": "string" },
+          "value": { "type": "string" },
+          "color": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "total": { "type": "string" },
+    "source": { "type": "string" },
+    "footerLeft": { "type": "string" },
+    "footerRight": { "type": "string" }
+  },
+  "additionalProperties": false
+}

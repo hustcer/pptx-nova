@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "broadsideFadeListSlide data",
+  "type": "object",
+  "required": ["items", "title"],
+  "properties": {
+    "number": { "type": "string" },
+    "items": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 3,
+      "items": { "type": "string", "x-slotBudget": { "fontPt": 40, "maxLines": 1, "widthIn": 3.8 } }
+    },
+    "title": { "type": "string", "x-slotBudget": { "fontPt": 62, "maxLines": 2, "widthIn": 4.6 } },
+    "author": { "type": "string" },
+    "context": { "type": "string" }
+  },
+  "additionalProperties": false
+}

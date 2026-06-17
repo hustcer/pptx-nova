@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "broadsideChapterSlide data",
+  "type": "object",
+  "required": ["title"],
+  "properties": {
+    "number": { "type": "string" },
+    "title": { "type": "string", "x-slotBudget": { "fontPt": 54, "maxLines": 2, "widthIn": 8.5 } },
+    "lead": { "type": "string", "x-slotBudget": { "fontPt": 15, "maxLines": 2, "widthIn": 6.2 } }
+  },
+  "additionalProperties": false
+}

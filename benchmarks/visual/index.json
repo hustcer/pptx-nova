@@ -81,6 +81,33 @@
       "buildPath": "../../assets/deckkits/examples/swiss-grid-build.mjs",
       "expectedPath": "cases/swiss-grid/mixed-language/expected.json",
       "reviewPath": "cases/swiss-grid/mixed-language/review.md"
+    },
+    {
+      "id": "broadside.golden-html",
+      "deckkit": "broadside",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/broadside-content.json",
+      "buildPath": "../../assets/deckkits/examples/broadside-build.mjs",
+      "expectedPath": "cases/broadside/golden-html/expected.json",
+      "reviewPath": "cases/broadside/golden-html/review.md"
+    },
+    {
+      "id": "broadside.stress-density",
+      "deckkit": "broadside",
+      "kind": "stress",
+      "contentPath": "cases/broadside/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/broadside-build.mjs",
+      "expectedPath": "cases/broadside/stress-density/expected.json",
+      "reviewPath": "cases/broadside/stress-density/review.md"
+    },
+    {
+      "id": "broadside.mixed-language",
+      "deckkit": "broadside",
+      "kind": "mixed-language",
+      "contentPath": "cases/broadside/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/broadside-build.mjs",
+      "expectedPath": "cases/broadside/mixed-language/expected.json",
+      "reviewPath": "cases/broadside/mixed-language/review.md"
     }
   ]
 }

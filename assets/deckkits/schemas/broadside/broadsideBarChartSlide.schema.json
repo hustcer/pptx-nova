@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "broadsideBarChartSlide data",
+  "type": "object",
+  "required": ["title", "bars"],
+  "properties": {
+    "section": { "type": "string" },
+    "page": { "type": "string" },
+    "title": { "type": "string", "x-slotBudget": { "fontPt": 32, "maxLines": 1, "widthIn": 5.4 } },
+    "caption": { "type": "string" },
+    "bars": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["label", "value"],
+        "properties": {
+          "label": { "type": "string" },
+          "value": { "type": "number" },
+          "display": { "type": "string" },
+          "accent": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "source": { "type": "string" },
+    "footerLeft": { "type": "string" },
+    "footerRight": { "type": "string" }
+  },
+  "additionalProperties": false
+}

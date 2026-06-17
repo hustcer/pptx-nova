@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "broadsidePyramidSlide data",
+  "type": "object",
+  "required": ["title", "levels"],
+  "properties": {
+    "section": { "type": "string" },
+    "page": { "type": "string" },
+    "title": { "type": "string", "x-slotBudget": { "fontPt": 32, "maxLines": 1, "widthIn": 6.4 } },
+    "levels": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["name", "desc"],
+        "properties": {
+          "name": { "type": "string" },
+          "desc": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "footerLeft": { "type": "string" },
+    "footerRight": { "type": "string" }
+  },
+  "additionalProperties": false
+}

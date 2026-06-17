@@ -172,7 +172,8 @@ Red lines:
 
 ## Visual Gates
 
-Dry-run catches schema and semantic errors. Its `text-overflow-estimate`
+Treat the first rendered deck as a candidate, not as proof that the work is
+done. Dry-run catches schema and semantic errors. Its `text-overflow-estimate`
 visual risk uses the same static text-fit estimator as `vision-check`, so fix
 those medium risks before apply when possible. Dry-run still does not prove
 pixel-level visual quality.
@@ -188,16 +189,38 @@ dense text, and alignment.
 
 PNG/contact-sheet review remains required for pixel-level concerns:
 
+- title wraps colliding with decorative rules, logo areas, headers, or page
+  chrome
 - characters overlapping or line wrapping into the next line
 - text clipped by a shape or table cell
+- source citations, footers, page numbers, and legends colliding with content
+  above
 - weak contrast on dark/light backgrounds
 - decorative elements covering content
+- cards, columns, icons, numbered circles, and comparison blocks with uneven
+  alignment or inconsistent gaps
 - disconnected arrows or wrong center alignment
 - SmartArt/diagram groups that are visually too high, too low, or poorly
   balanced inside the content area even when no object overflows
+- leftover placeholder text, empty picture frames, old dates, old footers, or
+  invisible-but-editable structural placeholders in template-derived decks
 - broken page number rhythm
 - formal deck issues such as topic-only titles, weak proof objects, repeated
   card-grid rhythms, or decorative containers that do not encode meaning
+
+When review finds an issue, fix the smallest durable source of truth:
+
+- DeckKit create: edit `content.json` first; adjust the DeckKit only when the
+  slot contract or reusable component is the real limitation.
+- Patch-based create/edit: change `patch.json`; do not manually repair the
+  generated output PPTX and leave the patch stale.
+- Template edits: edit, fill, or delete the original object. Do not use opaque
+  overlays or screenshots to hide bad state.
+
+After each fix, rerun only the necessary downstream gates, but always rerender
+the affected slide PNG before delivery. A text shortening fix can move line
+breaks, a bbox fix can expose alignment drift, and a selector fix can change a
+different object than intended.
 
 For edit/append workflows, review changed slides first, then use the full-deck
 report as residual context. A pre-existing deck can contain unrelated

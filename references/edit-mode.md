@@ -62,6 +62,33 @@ treating the full-deck `vision-check` summary as blocking. Existing decks often
 have unrelated legacy issues; separate "changed-slide blockers" from
 "pre-existing residual risk" in the final summary.
 
+## Micro Edit Flow
+
+Use this narrowed path when the user asks for a small, localized edit such as
+changing one or two text boxes, speaker notes, page footers, dates, or document
+metadata. The goal is low friction without giving up selector safety.
+
+Still do:
+
+- create a run directory
+- inspect the input deck and save the JSON
+- use a stable selector from inspect
+- dry-run and check `resolvedSelectors[]`
+- apply to a run-dir copy before writing the requested final file
+
+Skip unless the edit needs it:
+
+- DeckKit selection and `content.json`
+- `deck_lock.json` and design-lock checks
+- narrative quality review
+- full-deck PNG review
+
+For text-only micro edits, run `vision-check` and render the changed slide PNG
+when the replacement is materially longer, changes language/script, touches a
+title/subtitle/footer, or sits inside a tight bbox. If the replacement is same
+length or shorter and dry-run resolves exactly one selector, the final summary
+may record that visual rendering was not needed.
+
 ## Common Edit Operations
 
 - Text replacement: `set-text`, `set-paragraph`, `set-run`.

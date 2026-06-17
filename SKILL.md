@@ -29,6 +29,17 @@ python-pptx、PptxGenJS 或 SVG 转 PPTX 路线。
 如果一个任务跨多个类型，读取每个相关类型的入口 reference。遇到 charts、tables、
 formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专项 reference。
 
+## 快速路径
+
+先用下面的最短路径定向，再进入任务路由表读取细节。不要把它当成替代流程；它只是防止
+简单任务被过度展开、复杂任务漏掉关键门禁。
+
+- **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
+- **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
+- **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
+- **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
+- **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。
+
 ## Skill Root
 
 将包含本 `SKILL.md` 的目录视为 `<skill-root>`。发布后的 skill 必须自包含：用户工作流
@@ -92,6 +103,7 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   并替换内容；复制源 slide 或使用模板占位符，编辑 inherited objects，不重画一个"看起来像"的版本。
 - **Reference Create**：用户给参考 PPTX，但要用新大纲或新内容生成新 deck；参考 deck 默认只读。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
+- **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。
 - **Export/Check**：只转换、预览、提取或检查，不修改 PPTX。
 
@@ -166,6 +178,16 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   `vision-check` 的 `text-unexpected-wrap` 需要通过缩短文案、增宽或换布局处理。
 - 将 PPTX 转成 PNG/PDF 或检查生成的 PPTX 时，可能出现 `XDOC DEMO` 等工具水印；这类水印通常只在
   slide 右上角出现，可在人工视觉复核中忽略，不应当作 DeckKit 构图、遮挡或内容缺陷处理。
+
+PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。机器门禁不能看出所有像素级缺陷，
+尤其要检查：
+
+- 标题换行后是否撞到装饰、分隔线、页眉或 logo。
+- 正文、来源、脚注、图例、表格单元格是否被截断、重叠或贴边。
+- 相邻卡片、列、图标圆、编号圆、箭头和连接线是否对齐，间距是否忽大忽小。
+- 深浅背景上的文字、图标、边框和网格线是否有足够对比。
+- 模板页是否残留 placeholder、旧页脚、旧日期、旧页码、空图框或看不见但可编辑的空对象。
+- 多页 contact sheet 是否出现重复的版式节奏、无意义装饰容器、topic-only 标题或突兀留白。
 
 ## 必经验证
 

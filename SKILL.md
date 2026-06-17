@@ -32,16 +32,33 @@ description: >
 如果两者缺一，先向用户索取，不要自己猜测或挑选文件。若参考源是 HTML 目录，优先确认其中
 的入口文件（通常是 `template.html`）和元数据文件（如 `template.json` / `design.md`）。
 
-## 开工前 preflight（必做）
+## 修复或扩展已有 DeckKit
 
-在读取参考 deck 或创建 run 目录前，先完成这些检查并把结果写进
-`.tmp-deckkit-<id>/progress.md`；若 run 目录已存在，改用带时间戳的目录或先询问用户，
+当用户要求“修一下现有 DeckKit / 重新走一遍 broadside / 对照参考源修几页”时，按
+**existing DeckKit repair** 处理，而不是新建 DeckKit：
+
+- `catalog.json` 已注册该 id、`<id>.kit.mjs`、schema、examples 和 benchmark case 已存在是
+  预期状态，不要按“目标文件已存在”判定为阻塞；只需确认这些文件确实属于本次要修的 DeckKit。
+- run 目录仍优先使用 `.tmp/deckkit-<id>/`，继续追加 `progress.md` / `findings.md`，并把新的
+  benchmark、PNG、审计 patch、实验 deck 放进其下的 `benchmark/`、`audit/`、`previews/`
+  等子目录。不要因为目录已存在就散落到 `.tmp/` 其他位置。
+- 若 `.tmp/deckkit-<id>/` 中已有不相关或需要保留的旧分析产物，创建同目录下带语义名的子目录
+  （如 `audit/freeform-visibility/`）或在 `progress.md` 记录覆盖原因；只有无法安全区分时再询问用户。
+- 修复流程应以参考源和现有 benchmark 为事实来源：先复现/查看当前 PNG，再改 kit/test，最后跑
+  validation、目标 benchmark、必要时全量 benchmark 和 showcase 更新。不要重新执行新建 DeckKit
+  的 catalog/schema 初始化步骤。
+
+## 新建 DeckKit preflight（必做）
+
+新建 DeckKit 时，在读取参考 deck 或创建 run 目录前，先完成这些检查并把结果写进
+`.tmp/deckkit-<id>/progress.md`；若 run 目录已存在，改用带时间戳的目录或先询问用户，
 不要覆盖旧分析产物。
 
 ```bash
 git status --short
 node -e "const id=process.argv[1]; if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) process.exit(1)" <id>
 test -f <ref.pptx-or-template.html>   # HTML 目录输入时检查入口 template.html
+test ! -e .tmp/deckkit-<id>
 node -e "const c=require('./skills/pptx-nova/assets/deckkits/catalog.json'); const id=process.argv[1]; if ((c.entries||[]).some(e=>e.id===id)) process.exit(1)" <id>
 test ! -e skills/pptx-nova/assets/deckkits/<id>.kit.mjs
 test ! -e skills/pptx-nova/assets/deckkits/schemas/<id>
@@ -51,8 +68,9 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 ```
 
 如果任一目标文件或目录已存在，先确认是继续扩展、接管未完成工作，还是换新 id。不要删除或覆盖
-不是本次任务创建的内容。参考 `.pptx` / HTML 模板必须只读；任何导出、解包、截图和分析产物只写入
-run 目录或 `.tmp-slides/`。
+不是本次任务创建的内容。参考 `.pptx` / HTML 模板必须只读；除 Phase 2 正式产物写入
+`skills/pptx-nova/` 外，任何导出、解包、截图、patch、PPTX、PNG、benchmark、审计和草稿文件
+都必须写入当前 run 目录，不得散落到仓库根目录、`.tmp/` 其他子目录或临时的一次性目录。
 
 ## 前置阅读（必读，按序）
 
@@ -112,6 +130,23 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
 7. Phase 1 对比时用浏览器截图作为参考 PNG；Phase 2 benchmark 仍必须用 xdoc 生成 PPTX
    PNG 并走 `dry-run → apply → vision-check → contact-sheet review`。
 
+### HTML 到 PPTX 视觉语义避坑
+
+HTML/CSS 的视觉语义不能逐字搬到 PPTX patch，尤其是透明色和自定义图形：
+
+- **CSS alpha 颜色要折算并过门禁**：PowerPoint 文本 font color 通常是实体色，不能直接表达
+  `rgba(...)` 的网页透明感。把 CSS token 折算到目标背景色上后，还要跑 `vision-check`；
+  若可读正文、label、页眉页脚触发低对比 high/medium，就区分“可读 muted token”和“装饰 muted token”。
+  大号背景编号、装饰 slash、非关键信息可以更淡；正文和小号 chrome 必须满足交付门禁。
+- **不要为了贴近参考而接受不可读色**：参考 HTML 里的 `rgba(17,17,17,.45/.55/.60)` 在橙底上
+  可能只有 2-3:1 对比度。DeckKit 要服务后续交付，优先级是参考视觉语气 + PPT 可读性 +
+  `vision high/medium = 0`，而不是像素级复制网页透明度。
+- **freeform 必须验证真实尺寸**：用 `add-freeform` 复刻 donut、conic-gradient、斜切块、
+  不规则图形或 SVG-like 分段时，不要只传英寸绝对 `points`。xdoc freeform 使用局部坐标，
+  通常需要显式 `originX` / `originY` 和 `xScale` / `yScale`；否则 PPTX 可打开但形状可能只有
+  几个 EMU，PNG 中几乎不可见。修这类图形时，至少用一个最小实验或解包 XML 检查
+  `<a:ext cx="..." cy="...">` 是实际英寸量级，再看 PNG。
+
 ### 高保真范围决策
 
 默认做全量重建：参考 deck 每一页都有对应重建页。若参考 deck 页数很多、重复页占比高，
@@ -142,7 +177,8 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 - **core-primitives 只读为默认**。`core-primitives.kit.mjs` 不承担任何 DeckKit 专属
   风格。只有当一段逻辑"换了主题色/间距后仍然正确"且至少有跨 kit 复用证据时，才考虑
   下沉；下沉前必须与用户确认，并跑全部现有 DeckKit 的 validation tests。
-- **参考 pptx 只读**。所有分析在 `.tmp-slides/`（unpack 输出）和 run 目录中进行。
+- **参考 pptx / HTML 只读**。所有解包、DOM/CSS 抽取和分析副本都放进
+  `.tmp/deckkit-<id>/ref-unpack/` 或同一 run 目录下的对应子目录。
 - **content leak 防线**（详见 `docs/skill-dev-guide.md` §3 字符串分层规则）：
   `.kit.mjs` 只冻结视觉语言、几何、chrome、结构标签；参考 deck 的业务文案
   （标题、观点、指标、实体、年份、来源、callout 强调词）最终只能进入
@@ -181,9 +217,10 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 ## Run 目录约定
 
 ```text
-.tmp-deckkit-<id>/
+.tmp/deckkit-<id>/
 ├── ref-previews/          # 参考 deck PNG 基准（contact-sheet + 逐页）
-├── ref-inspect.json       # xdoc inspect 结构化输出
+├── ref-unpack/            # 参考 PPTX 解包、HTML DOM/CSS 抽取等只读分析副本
+├── ref-inspect.json       # xdoc inspect / DOM inspect 结构化输出
 ├── style-spec.md          # Phase 0 风格提取结论
 ├── slide-inventory.md     # Phase 0 逐页清单与页型归并
 ├── fidelity-scope.md      # Phase 0 高保真范围决策（full/scoped）
@@ -191,12 +228,18 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 ├── generate.mjs           # Phase 1 探索生成器
 ├── patch.json / out.pptx / dry-run.json / vision.json
 ├── previews/              # 重建 deck PNG（每次重渲前 rm -rf）
+├── benchmark/             # 本次候选 kit 的 benchmark 输出、summary、contact sheets
 ├── compare-notes.md       # Phase 1 逐页对比记录
 └── audit/                 # Phase 2 content leak / text extraction / slot audit 产物
 ```
 
-`.tmp-deckkit-*` 与 `.tmp-slides/` 均不提交。Phase 2 的正式产物写入
+`.tmp/deckkit-*` 均不提交。Phase 2 的正式产物写入
 `skills/pptx-nova/`（kit、schema、catalog、examples、benchmark、tests）。
+
+不要再创建 `.tmp-deckkit-<id>`、`.tmp-slides/`、`.tmp-pptx-*`、散落的根目录 JSON，或按脚本名
+临时拼出来的目录。若外部工具默认输出到别处，显式传 `--out` / `-o` / 输出路径，把结果收束到
+`.tmp/deckkit-<id>/` 下；需要保留的错误日志、CLI stdout JSON、截图和对比图也放在这里。旧任务
+留下的 legacy 目录可以只读参考，但新任务和新产物一律使用 `.tmp/deckkit-<id>/`。
 
 ## 完成摘要
 

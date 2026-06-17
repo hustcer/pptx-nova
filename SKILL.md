@@ -5,8 +5,9 @@ description: >
   skills/pptx-nova/ 源码）。当用户提供一个参考 .pptx 文件和新 DeckKit 的名字，
   要求"创建 DeckKit / 新增 DeckKit / 把这个 pptx 做成 DeckKit / 复刻这个 pptx
   的风格做成套件 / 模仿这个 deck 新建 DeckKit" 时触发。两阶段工作流：
-  第一阶段对参考 deck 做高保真重建（保留所有 slides、风格、主题、内容可照搬），
-  第二阶段组件化抽象为 id.kit.mjs + schema + catalog + benchmark 并走 readiness
+  第一阶段对参考 deck 做高保真基线重建（默认覆盖所有 slides；大型或高度重复 deck
+  先确认代表页型范围，风格、主题、内容可照搬），第二阶段组件化抽象为 id.kit.mjs +
+  schema + catalog + benchmark 并走 readiness
   流程。不要把本 skill 用于普通交付型 deck 生成——那是 pptx-nova 的 DeckKit 模式。
 ---
 
@@ -68,11 +69,11 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 参考 .pptx + 新 DeckKit 名字
   │
   ├─ Phase 0  分析参考 deck            → references/analyze-reference.md
-  │    unpack → 参考 PNG 基准 → style-spec.md + slide-inventory.md
+  │    unpack → 参考 PNG 基准 → style-spec.md + slide-inventory.md + fidelity-scope.md
   │
   ├─ Phase 1  高保真重建（第一交付物）  → references/rebuild-high-fidelity.md
-  │    探索生成器 generate.mjs → 重建全部 slides → 逐页与参考 PNG 对比
-  │    门禁：dry-run 无阻塞 + vision-check high/medium=0 + 逐页人工对比通过
+  │    探索生成器 generate.mjs → 按 fidelity-scope 重建 → 逐页与参考 PNG 对比
+  │    门禁：dry-run 无阻塞 + vision-check high/medium=0 + 范围内逐页人工对比通过
   │
   └─ Phase 2  组件化抽象（第二交付物）  → references/componentize.md
        抽 <id>.kit.mjs + schemas + content.json + catalog 注册
@@ -80,8 +81,35 @@ test ! -e skills/pptx-nova/assets/examples/<id>
        → validation tests + content leak regression → readiness audit
 ```
 
-**先完成并验收 Phase 1，再开始 Phase 2。** 高保真重建是组件化的证据基础：没有逐页
-对比通过的重建产物，就没有资格冻结 kit。两阶段的产物都保留在 run 目录中。
+**先完成并验收 Phase 1，再开始 Phase 2。** 高保真重建是组件化的证据基础：没有约定
+范围内逐页对比通过的重建产物，就没有资格冻结 kit。这里的高保真指无 hard defect 的
+视觉/结构基线，不要求像素级一致；最终 kit 只保留可复用视觉系统，不保留业务内容。
+两阶段的产物都保留在 run 目录中。
+
+### 高保真范围决策
+
+默认做全量重建：参考 deck 每一页都有对应重建页。若参考 deck 页数很多、重复页占比高，
+或包含大量一次性/低复用页面，Phase 0 必须在 `fidelity-scope.md` 中先做范围决策：
+
+- `full`：默认模式，全量重建全部 slides。
+- `scoped`：只在用户确认后使用；必须覆盖每种页型、每个 signature visual element、
+  每类图表/表格/资产形态和所有可复用 chrome；未重建页逐页记录归属页型、省略原因与
+  Phase 2 影响。
+
+`scoped` 只能降低一次性页面的重建成本，不能跳过风格证据、页型证据、资产决策或
+benchmark 覆盖；最终 catalog 必须把未覆盖内容写入 `knownLimits` 或 coverage 说明。
+
+### 图片资产原则
+
+DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片、截图、插画、产品界面图、
+背景位图占主要表达价值）默认不进入 Phase 1 高保真 rebuild set；只登记其页型、图片角色、
+裁切/边框/callout/caption 等可复用外壳。若该页贡献了新的可复用页型，重建外壳和
+`asset` 槽位，用占位框、语义相关的原生 shape、Tabler icon、图表/表格或 SmartArt-like
+组合替代，不搬参考图片。
+
+替代元素必须和原页表达含义相关；禁止为填充画面而塞入无关图标、装饰或抽象形状。参考 deck
+提取出的图片不得写入 `.kit.mjs`，默认也不得进入 DeckKit examples/assets；只有授权明确、
+跨 deck 可复用且用户确认的品牌资产才可例外纳入。
 
 ## 不可跳过的红线
 
@@ -100,9 +128,9 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 - **图标只用 pptx-nova 现有 Tabler pack**：用
   `node skills/pptx-nova/scripts/pptx-nova-icons.mjs search <query> --json` 查询、
   `createOps().icon()` 内联。参考 deck 中的图标/装饰图找最接近的 Tabler 替代；
-  不联网取图，不把参考 deck 的位图直接打进 kit。
+  不联网取图，不把参考 deck 的位图直接打进 kit。替代图标/shape 必须语义相关。
 - **视觉门禁**：每次 build 走
-  `dry-run → apply → vision-check(high/medium=0) → PNG/contact-sheet 人工逐页`。
+  `dry-run → apply → vision-check(high/medium=0) → 按 fidelity-scope 做 PNG/contact-sheet 人工逐页`。
   dry-run 与 vision-check 的溢出估算阈值不同，两个都要跑。
 - **字号下限**：正文 ≥10.5pt；label/badge/chart/table ≥9pt；页脚/来源 8.5–9pt。
   若参考 deck 本身使用更小的风格字号（如 Swiss 标签），在 catalog
@@ -132,6 +160,7 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 ├── ref-inspect.json       # xdoc inspect 结构化输出
 ├── style-spec.md          # Phase 0 风格提取结论
 ├── slide-inventory.md     # Phase 0 逐页清单与页型归并
+├── fidelity-scope.md      # Phase 0 高保真范围决策（full/scoped）
 ├── task_plan.md / findings.md / progress.md
 ├── generate.mjs           # Phase 1 探索生成器
 ├── patch.json / out.pptx / dry-run.json / vision.json

@@ -25,7 +25,9 @@ readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）�
   `{ patch, warnings }`。页型函数只消费 `slide.data`。
 - `skills/pptx-nova/assets/deckkits/examples/<id>-content.json` —— Phase 1 内联的
   **全部业务内容**原样搬入，结构 `{ meta: { deckkit: "<id>" }, slides: [{ type, data }] }`。
-  这份"参考 deck 内容"就是天然的 golden example。
+  这份"参考 deck 内容"就是天然的 golden example。例外：参考 deck 中的一次性图片、截图、
+  照片、插画和背景位图不搬入 examples/assets；对应字段写成 `asset` 槽位、占位行为或
+  known limit。
 
 **逐字符串过 content leak 防线**（字符串分层表见 skill-dev-guide §3）：标题、观点、
 指标、实体、年份、来源、callout 强调词一律进 content；kit 里只允许 shape 名、
@@ -47,6 +49,11 @@ node .claude/skills/deckkit-maker/scripts/content-leak-audit.mjs \
 组织名、示例指标、年份、来源、专有 callout 强调词。脚本命中时不要简单删词，要回到
 schema、layoutContract 和页型函数，确认该字符串应由 `content.json`、`data.labels` 或
 asset slot 驱动。
+
+**图片资产防线**：对 kit 源码、examples、benchmark fixture 和新增 assets 搜索参考 deck
+提取出的图片文件名、hash、media 路径和 alt/name。除非是授权明确、跨 deck 可复用且用户确认的
+品牌资产，否则命中即泄漏。图片页型应只冻结图片使用结构：slot 名、裁切规则、边框、caption、
+callout 和缺失图片时的隐藏/占位策略。
 
 借鉴成熟 kit 的契约细节：必填槽位（如 swiss-grid 的 eyebrow）是设计意图时就声明为
 必填并在 catalog `layoutContract.slotHints` 给填写提示；条目超限走 schema
@@ -98,7 +105,9 @@ node skills/pptx-nova/scripts/pptx-nova-build.mjs \
 ```
 
 用 kit 产出的 deck 与 Phase 1 重建 deck 再做一轮 PNG 对比：组件化不允许引入视觉
-回归。需要直接调试 `createDeck` 时才临时 import `.kit.mjs`；交付路径一律走
+回归。若 `fidelity-scope.md` 是 `scoped`，只把 rebuild set 用作视觉回归基线；未重建页
+仍必须通过 validation、slot budget、density 和 benchmark 覆盖，不能因为 Phase 1 未重建就从
+schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 import `.kit.mjs`；交付路径一律走
 `pptx-nova-build.mjs` 通用 driver。
 
 ## 5. 测试（强制）
@@ -111,8 +120,11 @@ node skills/pptx-nova/scripts/pptx-nova-build.mjs \
   文本，断言不出现参考 deck 的主题词、产品名、示例指标、示例年份；
   rich text 页型断言 `data.calloutHighlights` 等字段能驱动 emphasis run。
 - **参数化测试**：每个页型至少一个非参考主题的输入被正确渲染。
-- **asset slot 测试**：Phase 1 复用过的 logo/截图/图片若进入 Phase 2，必须验证缺失时
+- **asset slot 测试**：Phase 1 登记过的 logo/截图/图片槽位若进入 Phase 2，必须验证缺失时
   delivery validation 报错或渲染为明确的空/隐藏状态；不能回退到参考 deck 图片。
+- **reference image leak regression**：断言 kit、examples、benchmark fixtures 和新增 assets
+  不包含参考 deck 的一次性图片文件名/hash/media 路径；允许项必须在 catalog knownLimits 或
+  asset policy 中说明用户确认依据。
 
 ```bash
 node --test tools/tests/pptx-nova-deckkit-validation.test.mjs
@@ -125,6 +137,9 @@ node --test tools/tests/pptx-nova-deckkit-validation.test.mjs
 - `golden-*`：直接用 `<id>-content.json`（即参考 deck 内容）。
 - `stress-density`：按 density.hard 顶格构造。
 - `mixed-language`：中英混排、数字、紧凑业务词。
+
+如果 Phase 1 使用 `scoped`，再补一个 `coverage-*` case：覆盖未重建页对应的页型、资产形态
+和密度边界，防止 scope 缩减掩盖组件化缺口。
 
 ```bash
 node skills/pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean
@@ -154,7 +169,7 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 
 - [ ] kit / schemas / example content / catalog / benchmark cases / tests 全部落盘
 - [ ] slots + slot-consistency 通过；validate-content delivery 模式通过
-- [ ] kit 产出 deck 与 Phase 1 重建 deck PNG 对比无回归
+- [ ] kit 产出 deck 与 Phase 1 重建 deck PNG 对比无回归；若 scoped，未重建页有 coverage benchmark
 - [ ] `content-leak-audit.mjs` 通过，审计 JSON 保留在 run 目录
 - [ ] validation tests（含 content leak regression）通过
 - [ ] benchmark 三 case 通过；readiness audit 达到 candidate

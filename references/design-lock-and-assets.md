@@ -19,7 +19,9 @@ prompt / 用户大纲
 ```
 
 Express 模式自动推断并继续，不阻塞用户。Studio / 高风险模式先做一次短确认，
-确认后把决策写入 `deck_lock.json`，后续不再凭记忆改风格。
+确认后把决策写入 `deck_lock.json`。这个确认包不是额外仪式，而是后续 DeckKit 选择、
+页级节奏、模板融合、资源状态和 chart/table 语义验证的 source of truth；确认后不要凭记忆
+改风格、页型、素材来源或图表口径。
 当用户选择 split，或长 deck / 高风险 deck 需要换新会话继续时，在 `deck_lock.json` 和必要的
 `assets_manifest.json` 完成后写 `resume_manifest.json` 并停止；恢复规则见
 `references/resume-split-mode.md`。
@@ -29,7 +31,8 @@ Express 模式自动推断并继续，不阻塞用户。Studio / 高风险模式
 
 ## 2. Studio 确认包
 
-Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
+Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Express / Micro Edit
+不触发这一步；用户已经明确给出的项直接采用，不重复追问。
 
 1. 画布与输出比例
 2. 页数与页序
@@ -41,7 +44,16 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 8. 图标 / 图表风格
 9. 图片 / logo / 第三方素材策略
 
-用户已经明确给出的项直接采用，不重复追问。缺项能合理推断时给推荐值；只有品牌口径、
+确认完成后，至少把下面这些结果写入 lock，而不是只留在对话里：
+
+- `canvas`、`deckProfile`、`colors`、`typography`。
+- 每页 `rhythm`、`layoutIntent`、`visualDensity`，正式说服型页还要写
+  `claimTitle` 和 `proofObject`。
+- `templateFusion` 的 identity / structure / deck 来源。
+- 外部、复用、生成或公式资产的 `assets_manifest.json` 状态。
+- chart/table 页的数据来源、语义角色和验证要求。
+
+缺项能合理推断时给推荐值；只有品牌口径、
 页序、敏感数据、外部素材授权或输出路径存在真实风险时才阻塞。
 
 ## 3. `deck_lock.json` 最小结构
@@ -117,6 +129,8 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
       "purpose": "Frame the quarter and decision needed",
       "slideType": "heroSlide",
       "rhythm": "anchor",
+      "layoutIntent": "opening-thesis",
+      "visualDensity": "low",
       "macroLayout": "cover-with-kpi-rail",
       "proofObject": {
         "kind": "metric-rail",
@@ -131,12 +145,18 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
       "purpose": "Show core KPI trend",
       "slideType": "kpiRowSlide",
       "rhythm": "dense",
+      "layoutIntent": "evidence-chart",
+      "visualDensity": "high",
       "macroLayout": "kpi-row-with-context",
       "proofObject": {
         "kind": "column-chart",
         "proves": "Retention is the main bridge between revenue and margin"
       },
-      "chart": { "kind": "column", "semanticSource": "content.slides[1].data" },
+      "chart": {
+        "kind": "column",
+        "semanticSource": "content.slides[1].data",
+        "validation": ["category-series-length", "legend-label-clearance"]
+      },
       "formulas": []
     }
   ],
@@ -158,12 +178,18 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 
 - 必填：`schemaVersion`、`mode`、`slides[]`、`canvas`、输出路径或 run 目录。
 - 创建型：写 `deckkit`、`themePack`、`stylePack`、`colors`、`typography`。
+- 所有创建型 deck：每页至少写 `rhythm`、`layoutIntent` 或 `macroLayout`。建议写
+  `visualDensity`，取值 `low` / `medium` / `high`。这些字段只描述页面节奏和结构意图，
+  不替代 DeckKit 的具体坐标。
 - 正式说服型 deck：写 `deckProfile`，并在每个非 appendix slide 写 `claimTitle`、
-  `proofObject`、`rhythm`、`macroLayout`；详情见 `references/narrative-quality.md`。
+  `proofObject`、`rhythm`、`layoutIntent`、`visualDensity`；详情见
+  `references/narrative-quality.md`。
 - 技术 / 学术 / 培训 deck：在 `typography.formulaPolicy` 写公式策略，并在相关 slide
   用 `formulas[]` 引用公式资产 id；详情见 `references/formulas.md`。
 - 使用模板资产：写 `templateFusion`，并记录每个来源的 kind/id/path。
 - 使用图片/logo/外部素材：才写 `assetsManifestPath`，并让 slide 通过 asset id 引用。
+- 图表和表格页：在 slide 里写 `chart` / `table` 语义对象，至少记录 kind、数据来源和
+  需要验证的语义点；不要只把图表当作一组坐标或截图。
 - 不确定项写进 `assumptions[]`，不要在后续 generator 里隐式改掉。
 - 源大纲只有标题、占位或留白时，AI 补全的事实性内容也必须写进 `assumptions[]`，包括
   竞品名称、产品判断、市场指标、案例、时间线和来源不明的结论；交付摘要要逐条披露。
@@ -191,10 +217,13 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
       "kind": "logo",
       "status": "available",
       "path": "assets/company-logo.png",
+      "usage": "logo",
+      "licenseRisk": "none",
       "source": {
         "kind": "user",
         "originalPath": "/abs/path/company-logo.png",
-        "licenseNote": "Provided by user for this deck"
+        "licenseNote": "Provided by user for this deck",
+        "licenseRisk": "none"
       },
       "pptxUse": {
         "role": "brand-mark",
@@ -236,6 +265,7 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
       "id": "hero_photo",
       "kind": "image",
       "status": "placeholder",
+      "licenseRisk": "unknown",
       "source": {
         "kind": "placeholder",
         "reason": "User has not supplied approved campaign photo"
@@ -259,20 +289,28 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短：
 
 `status` 语义：
 
-| status        | 含义                             | 是否阻塞交付 |
-| ------------- | -------------------------------- | ------------ |
-| `available`   | 文件或内置资源已可用             | 否           |
-| `built-in`    | 来自 skill 内置图标/模板         | 否           |
-| `generated`   | 本轮生成并已落在 run 目录        | 否           |
-| `rendered`    | 本轮由 LaTeX/公式 manifest 渲染  | 否           |
-| `native`      | 本轮写入 PowerPoint 原生公式对象 | 否           |
-| `placeholder` | 可用于草稿，正式交付需确认       | 通常阻塞     |
-| `needs-user`  | 缺用户提供或授权确认             | 是           |
-| `missing`     | manifest 中声明但文件不存在      | 是           |
+| status         | 含义                                              | 是否阻塞交付 |
+| -------------- | ------------------------------------------------- | ------------ |
+| `available`    | 文件或内置资源已可用                              | 否           |
+| `built-in`     | 来自 skill 内置图标/模板                          | 否           |
+| `generated`    | 本轮生成并已落在 run 目录                         | 否           |
+| `rendered`     | 本轮由 LaTeX/公式 manifest 渲染                   | 否           |
+| `native`       | 本轮写入 PowerPoint 原生公式对象                  | 否           |
+| `placeholder`  | 可用于草稿，正式交付需确认                        | 通常阻塞     |
+| `needs-review` | 文件已在 run 目录，但授权、裁切或语义仍需人工确认 | 正式交付阻塞 |
+| `needs-user`   | 缺用户提供或授权确认                              | 是           |
+| `missing`      | manifest 中声明但文件不存在                       | 是           |
+| `forbidden`    | 已确认不可用于本 deck                             | 是           |
 
 公式资源使用 `kind: "formula"`，`source.kind: "formula"`，并保留原始 `latex` 与
 `display`。公式必须 `pptxUse.noCrop: true`；若正式交付仍是 `placeholder` 或
 `needs-user`，视为阻塞。更多策略见 `references/formulas.md`。
+
+`licenseRisk` 语义：
+
+- `none`：来源和使用权已足够明确。
+- `unknown`：可以用于内部草稿，但正式客户、投资人、公开或品牌敏感交付前必须确认。
+- `blocked`：不得交付，改为用户提供素材、官方来源、内置图形或原生 shape。
 
 ### Identity Asset Provenance
 
@@ -285,8 +323,8 @@ Logo、客户 mark、产品 UI、产品截图、App icon、人物照片、活动
 - `source.kind: "built-in"`：来自 skill 内置资产或图标包，并带有 license 信息。
 
 不要生成假 logo、假产品截图、假 App icon、假客户 mark 或伪官方 UI。无法确认来源时，使用
-`status: "needs-user"` 或文字/原生 shape 占位；正式客户、投资人、公开或品牌敏感交付不得带着
-未确认身份资产继续。
+`status: "needs-user"` / `needs-review`，或改为文字/原生 shape 占位；正式客户、投资人、
+公开或品牌敏感交付不得带着未确认身份资产继续。
 
 图片 / 截图 / AI 生成素材要显式登记使用槽位：
 
@@ -304,9 +342,11 @@ Logo、客户 mark、产品 UI、产品截图、App icon、人物照片、活动
 - AI 生成素材不能充当真实公司的 logo、真实产品 UI、客户证据、人物照片、新闻/活动照片或
   第三方品牌资产；这类证据只能来自用户、源 deck 授权资产或官方可验证来源。
 
-`pptx-nova-check-lock.mjs` 会检查：图片资产缺 slot、ratio、fitPolicy 时给 warning；
-AI 生成图片缺 `noSlideChrome` 时给 error；`deck_lock.json` / `content.json` 中的
-`assets[]` 和 `imageSlots{}` 引用必须能在 `assets_manifest.json` 中找到。
+`pptx-nova-check-lock.mjs` 会检查：`missing` / `needs-user` / `forbidden` 为 error；
+`placeholder` / `needs-review` 和 `licenseRisk: "unknown"` 为 warning；身份资产来源不在
+`user` / `source-deck` / `official` / `built-in` 时为 error；图片资产缺 slot、ratio、
+fitPolicy 时给 warning；AI 生成图片缺 `noSlideChrome` 时给 error；`deck_lock.json` /
+`content.json` 中的 `assets[]` 和 `imageSlots{}` 引用必须能在 `assets_manifest.json` 中找到。
 
 ## 5. `resume_manifest.json`
 
@@ -346,6 +386,8 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 
 - `deck_lock.json` 和 `assets_manifest.json` schemaVersion。
 - lock 的 slide count / slideType 与 `content.json` 是否一致。
+- lock/content 的 `rhythm`、`layoutIntent` / `macroLayout`、`visualDensity` 是否漂移；
+  长 deck 连续多页同一 rhythm 会提示接触表复核。
 - 正式 deck 的 `deckProfile`、`claimTitle`、`proofObject`、`rhythm` 是否缺失（缺失先给 warning，
   由 `narrative-quality.md` 和 PNG 复核决定是否阻塞）。
 - DeckKit、themePack 等关键选择是否漂移。
@@ -354,6 +396,8 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 - `deck_lock.json` / `content.json` 中的 `assets[]`、`imageSlots{}`、`formulas[]`
   是否能在 `assets_manifest.json` 找到。
 - patch 是否为 `schemaVersion: 1`，是否使用 lock 外颜色、字体或绝对资源路径。
+- patch 中 chart/table ops 的明显语义错误：chart series/category 长度不一致、combo 不是
+  真实组合、table data 行列不齐、未设置 `resize` 却和表格维度冲突。
 - patch 里任何 `assetSource.path` 是否登记在 `assets_manifest.json`；只要 patch 引用外部资源，
   `--assets` 就是必需项。
 

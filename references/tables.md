@@ -3,6 +3,21 @@
 xdoc 的表格支持完整的对象模型：创建、改单元格、改样式、改宽高、合并、边框、
 导入 CSV/JSON、静态公式。
 
+## 专项语义验证
+
+table 页优先保留 PowerPoint 原生 table 语义；只有 inspect 证明源 deck 是视觉表格时，才按
+普通 shape 编辑。写 table 前先在 `deck_lock.slides[].table` 记录数据来源、表格角色和验证点；
+生成 `patch.json` 后由 `pptx-nova-check-lock.mjs` 检查明显行列错误，再交给 dry-run /
+vision-check / PNG 复核。
+
+最小检查清单：
+
+- `add-table` 必须有正数 `rows` / `cols`。
+- `data` 每一行列数一致；不一致是数据错误，不靠视觉裁切掩盖。
+- `data` 行列数和声明表格尺寸不一致时，显式写 `resize: true`，否则修正尺寸或数据。
+- header、单位、时间范围、来源说明必须随表格进入 content/patch，不能只在备注里解释。
+- 单元格字号和边距要满足 deck 的可读性红线；PNG 复核仍要看截断、贴边、合并区域和网格线。
+
 ## 先分辨：真表格还是视觉表格
 
 编辑已有 deck 前先看 inspect。只有 `shapeType == "table"` 的对象才使用

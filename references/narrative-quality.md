@@ -57,7 +57,10 @@ should carry:
     "proves": "Shared parser/render core supports multiple commercial surfaces"
   },
   "source": "user brief / source_brief.md",
-  "omissionNotes": ["No revenue or customer count provided; do not invent."]
+  "omissionNotes": ["No revenue or customer count provided; do not invent."],
+  "rhythm": "anchor",
+  "layoutIntent": "platform-map",
+  "visualDensity": "medium"
 }
 ```
 
@@ -84,6 +87,8 @@ equivalent fields in `deck_lock.slides[]`:
 {
   "index": 3,
   "rhythm": "anchor",
+  "layoutIntent": "platform-map",
+  "visualDensity": "medium",
   "macroLayout": "platform-map",
   "density": "medium",
   "proofObject": "shared-engine-flow"
@@ -92,7 +97,7 @@ equivalent fields in `deck_lock.slides[]`:
 
 Gates:
 
-- No 3 consecutive slides should share the same `macroLayout`.
+- No 3 consecutive slides should share the same `layoutIntent` / `macroLayout`.
 - In a 10-slide formal deck, no more than 2 slides should be plain card grids.
 - A repeated DeckKit slide type must vary rhythm, accent, density, title shape,
   or proof object.
@@ -111,8 +116,9 @@ Use the selected DeckKit's slots to express the claim spine:
 - Map `claimTitle` to the strongest title/headline slot.
 - Map `proofObject` to a DeckKit-supported visual field such as chart data,
   table rows, stages, timeline items, map nodes, or comparison columns.
-- Keep `purpose`, `source`, `omissionNotes`, `rhythm`, and `macroLayout` in
-  `deck_lock.json` even when the DeckKit schema does not expose those fields.
+- Keep `purpose`, `source`, `omissionNotes`, `rhythm`, `layoutIntent`,
+  `visualDensity`, and `macroLayout` in `deck_lock.json` even when the DeckKit
+  schema does not expose those fields.
 - If no production/default DeckKit can express the required proof object, extend
   a DeckKit instead of hiding the proof in generic bullets.
 

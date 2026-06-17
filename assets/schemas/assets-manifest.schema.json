@@ -50,10 +50,20 @@
             "rendered",
             "native",
             "placeholder",
+            "needs-review",
             "needs-user",
-            "missing"
+            "missing",
+            "forbidden"
           ],
           "default": "available"
+        },
+        "licenseRisk": {
+          "type": "string",
+          "enum": ["none", "unknown", "blocked"]
+        },
+        "usage": {
+          "type": "string",
+          "description": "Business usage such as logo, product-screenshot, icon, chart-image, formula."
         },
         "path": {
           "type": "string"
@@ -93,6 +103,10 @@
         },
         "licenseNote": {
           "type": "string"
+        },
+        "licenseRisk": {
+          "type": "string",
+          "enum": ["none", "unknown", "blocked"]
         },
         "generator": {
           "type": "string"

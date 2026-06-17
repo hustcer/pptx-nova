@@ -104,7 +104,7 @@ Phase A 不写 `content.json` / `patch.json`，不 dry-run，不生成 `.pptx`�
 - 使用外部、复用、生成资源或公式时，`assets_manifest.json` 必须进入 `requiredFiles`；
   不得只放在 `optionalFiles`。
 - 如果 `assets_manifest.json` 存在，`gates.assetsReady` 只有在没有 `missing` / `needs-user` /
-  未授权或未确认的 `placeholder` 阻塞项时才写 `true`。
+  `forbidden`，且没有未授权或未确认的 `placeholder` / `needs-review` 阻塞项时才写 `true`。
 - `outlineSelfContained` 为 `false` 时，必须存在 `source_brief.md` 或可读取的 source 文件引用。
 
 ## 4. Phase A handoff 回复模板

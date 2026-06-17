@@ -39,6 +39,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
 - **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。
+- **Studio / 高风险 deck**：用 `deck_lock.json` 锁定轻量确认、页级节奏、模板融合、
+  资源状态和 chart/table 语义；不要引入 SVG-first 或逐页手写流程。
 
 ## Skill Root
 
@@ -127,12 +129,15 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - 默认走 DeckKit-first：`content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`。
 - 正式汇报、客户/投资人/董事会/路演/策略/product-platform 等说服型 deck 必须读取
   `references/narrative-quality.md`，在 `deck_lock.json` 中锁定 `deckProfile`、每页
-  `claimTitle` / `proofObject` / `rhythm`，并在 PNG 复核后写 `narrative_quality_review.json`。
+  `claimTitle` / `proofObject` / `rhythm` / `layoutIntent` / `visualDensity`，并在 PNG
+  复核后写 `narrative_quality_review.json`。
 - 非 appendix 页标题优先写成结论句；不要让 `产品概览`、`市场分析`、`路线图` 这类 topic label
   直接成为正式交付页的唯一标题。
 - 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit。
 - 有生产/默认 DeckKit 可用时，不使用 `deck-generator-template.mjs` 作为交付默认路径。
 - 没有可用 DeckKit、缺页型或要改组件结构时，先创建/扩展 DeckKit，再交付。
+- 参考模板、品牌或布局时，按 `brand` / `layout` / `deck` 语义分层写入
+  `deck_lock.templateFusion`；冲突和 override 不在 generator 中临时猜。
 - 源大纲只有标题或留白时，AI 补全的事实性内容必须写入 `deck_lock.assumptions[]`；
   不能把未验证竞品、指标、案例或市场事实伪装成用户提供内容。
 - 创建型最终输出路径如果在开始前已存在，必须先让用户重命名、删除或换路径；不能用
@@ -155,6 +160,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   不能因为 PNG 里看不见就保留 PowerPoint 编辑态的空占位符。
 - logo、客户 mark、产品截图、人物照片、App icon、第三方品牌图形等身份资产必须来自用户提供、
   源 deck 允许复用、官方可验证来源或已登记授权；无法确认时用文字/原生 shape 代替，不生成伪官方素材。
+- 使用外部、复用、生成或公式资产时，`assets_manifest.json` 必须记录 `status`、
+  `source.kind`、`licenseRisk` 和 PPTX 使用槽位；`missing` / `needs-user` /
+  `forbidden` 阻塞交付。
 - 如果用户要求原地修改，也先在 run 目录完成验证，再按用户明确意图写回。
 - 对 SmartArt、宏、复杂动画、unsupported 对象优先 preserve；不能编辑时说明边界。
 
@@ -188,6 +196,8 @@ PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。�
 - 深浅背景上的文字、图标、边框和网格线是否有足够对比。
 - 模板页是否残留 placeholder、旧页脚、旧日期、旧页码、空图框或看不见但可编辑的空对象。
 - 多页 contact sheet 是否出现重复的版式节奏、无意义装饰容器、topic-only 标题或突兀留白。
+- chart/table 页是否通过专项语义检查：数据维度、系列/类目、legend/label、table 行列和
+  绑定来源必须与内容一致，再看 PNG 是否遮挡。
 
 ## 必经验证
 

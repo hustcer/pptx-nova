@@ -25,6 +25,8 @@ P1 不一定阻塞草稿，但客户演示级 / 投资人级 / 董事会 deck �
 - 图片按 `slotId + ratio + fitPolicy` 放置，人物脸、产品主体、截图关键区域不被裁掉。
 - 图表页有结论 callout，legend / axis / data label 不互相遮挡。
 - 每页节奏可归类为 `anchor`、`dense` 或 `breathing`，相邻页面不要全是同一种密度。
+- `layoutIntent` 和 `visualDensity` 与最终 PNG 一致；如果 lock 写的是 breathing，PNG
+  不应呈现为高密度表格墙。
 - 容器、箭头、badge、icon 需要表达分组、方向、层级或数据关系；只为填空的装饰应删除。
 
 ## Asset Slot Manifest
@@ -37,6 +39,7 @@ P1 不一定阻塞草稿，但客户演示级 / 投资人级 / 董事会 deck �
   "id": "hero_photo",
   "kind": "image",
   "status": "generated",
+  "licenseRisk": "none",
   "path": "assets/hero-photo.png",
   "source": {
     "kind": "ai",
@@ -75,4 +78,6 @@ P1 不一定阻塞草稿，但客户演示级 / 投资人级 / 董事会 deck �
 ```
 
 `pptx-nova-check-lock.mjs` 会检查 manifest id 覆盖、图片 slot 字段和 AI 图片
-`noSlideChrome`；`validate-content.mjs` 会检查 DeckKit 的 layout contract 与 diversity gate。
+`noSlideChrome`；`missing` / `needs-user` / `forbidden` 会阻塞，`placeholder` /
+`needs-review` 会提示复核；`validate-content.mjs` 会检查 DeckKit 的 layout contract 与
+diversity gate。

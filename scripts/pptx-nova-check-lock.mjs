@@ -12,10 +12,28 @@ const ASSETS_SCHEMA_VERSION = 'pptx-nova-assets-manifest/v1'
 const COLOR_FIELD_RE =
   /(^|\.)(color|colors|fill|fills|stroke|strokes|linecolor|fontcolor|textcolor|fillcolor|bordercolor|backgroundcolor|bgcolor|foregroundcolor|accent|accent[1-9]|primary|secondary|success|warning|risk)(\.|$)/i
 const IMAGE_READY_STATUSES = new Set(['available', 'generated', 'rendered'])
+const ASSET_BLOCKING_STATUSES = new Set(['missing', 'needs-user', 'forbidden'])
+const ASSET_REVIEW_STATUSES = new Set(['placeholder', 'needs-review'])
 const IMAGE_LIKE_KINDS = new Set(['image', 'photo', 'photograph', 'illustration', 'screenshot'])
 const IMAGE_SLOT_ROLE_RE = /(hero|image|photo|screenshot|background|visual|mockup|product-shot)/i
+const IDENTITY_ASSET_RE =
+  /(logo|brand|mark|app-icon|product-ui|product-screenshot|customer|client|portrait|person|headshot)/i
 const IMAGE_SLOT_RATIOS = new Set(['21:9', '16:10', '16:9', '4:3', '3:2', '3:4', '1:1'])
 const IMAGE_FIT_POLICIES = new Set(['cover', 'contain', 'no-crop', 'crop-safe'])
+const SLIDE_RHYTHMS = new Set(['anchor', 'dense', 'breathing', 'appendix'])
+const VISUAL_DENSITIES = new Set(['low', 'medium', 'high'])
+const CHART_LEGENDS = new Set(['right', 'left', 'top', 'bottom', 'corner', 'none'])
+const CHART_LABEL_POSITIONS = new Set([
+  'above',
+  'below',
+  'bestFit',
+  'center',
+  'insideBase',
+  'insideEnd',
+  'left',
+  'outsideEnd',
+  'right',
+])
 const TOPIC_TITLE_RE =
   /^(agenda|overview|market|roadmap|strategy|product|competition|competitors|summary|appendix|产品概览|市场分析|路线图|竞品|竞争|总结|目录|附录)$/i
 // Category head-nouns: a short noun phrase ending in one of these reads as a topic
@@ -327,6 +345,14 @@ function proofObjectOf(slide) {
   return slide?.proofObject ?? slide?.proof ?? slide?.evidence ?? null
 }
 
+function layoutIntentOf(slide) {
+  return slide?.layoutIntent ?? slide?.macroLayout ?? slide?.layoutRole ?? ''
+}
+
+function visualDensityOf(slide) {
+  return slide?.visualDensity ?? slide?.density ?? ''
+}
+
 function isAppendixLike(slide) {
   const rhythm = String(slide?.rhythm ?? '').toLowerCase()
   const type = String(slideTypeOf(slide)).toLowerCase()
@@ -399,6 +425,15 @@ function isAiGeneratedImageAsset(entry) {
   )
 }
 
+function isIdentityAsset(entry) {
+  const kind = String(entry?.kind ?? '').toLowerCase()
+  const role = assetRole(entry).toLowerCase()
+  const slot = String(
+    entry?.pptxUse?.slotId ?? entry?.slot?.id ?? entry?.slotId ?? '',
+  ).toLowerCase()
+  return IDENTITY_ASSET_RE.test(`${kind} ${role} ${slot}`)
+}
+
 function assetSlot(entry) {
   const pptxUse = isPlainObject(entry?.pptxUse) ? entry.pptxUse : {}
   const directSlot = isPlainObject(entry?.slot) ? entry.slot : {}
@@ -421,6 +456,123 @@ function assetSlot(entry) {
       pptxUse.promptGuard?.noSlideChrome ??
       entry?.generationPromptGuard?.noSlideChrome ??
       entry?.source?.promptGuard?.noSlideChrome,
+  }
+}
+
+function dataSeriesValues(series) {
+  if (!isPlainObject(series)) return []
+  if (Array.isArray(series.values)) return series.values
+  if (Array.isArray(series.points)) return series.points
+  return []
+}
+
+function chartDataOf(op) {
+  return op?.data ?? op?.chart?.data ?? null
+}
+
+function checkChartSemantic(op, index, errors, warnings) {
+  const data = chartDataOf(op)
+  const label = `ops[${index}] ${op.op}`
+  if (!data) {
+    push(warnings, 'chart-data-missing', `${label} has no data object to validate`)
+    return
+  }
+
+  const categories = Array.isArray(data.categories) ? data.categories : null
+  const series = Array.isArray(data.series) ? data.series : []
+  if (series.length === 0 && !['stock'].includes(String(op.kind ?? '').toLowerCase())) {
+    push(errors, 'chart-series-missing', `${label} must provide at least one data series`)
+  }
+  if (categories && series.length > 0) {
+    series.forEach((item, seriesIndex) => {
+      const values = dataSeriesValues(item)
+      if (Array.isArray(item.values) && item.values.length !== categories.length) {
+        push(
+          errors,
+          'chart-series-category-mismatch',
+          `${label} series[${seriesIndex}] has ${item.values.length} value(s), but categories has ${categories.length}`,
+        )
+      }
+      if (values.length === 0) {
+        push(warnings, 'chart-series-empty', `${label} series[${seriesIndex}] has no values`)
+      }
+      if (!item.name) {
+        push(warnings, 'chart-series-name-missing', `${label} series[${seriesIndex}] has no name`)
+      }
+    })
+  }
+
+  if (op.legend && !CHART_LEGENDS.has(String(op.legend))) {
+    push(
+      errors,
+      'chart-legend-invalid',
+      `${label} legend must be one of ${[...CHART_LEGENDS].join(', ')}`,
+    )
+  }
+  if (op.position && !CHART_LABEL_POSITIONS.has(String(op.position))) {
+    push(
+      warnings,
+      'chart-label-position-suspicious',
+      `${label} uses chart label position "${op.position}"; verify schema spelling`,
+    )
+  }
+  if (String(op.kind ?? '').toLowerCase() === 'combo') {
+    const kinds = new Set(series.map((item) => item.kind).filter(Boolean))
+    const hasSecondaryAxis = series.some((item) => item.secondaryAxis === true)
+    if (kinds.size < 2 && !hasSecondaryAxis) {
+      push(
+        errors,
+        'chart-combo-not-combo',
+        `${label} combo chart needs either multiple series kinds or secondaryAxis=true`,
+      )
+    }
+  }
+}
+
+function tableDataRows(op) {
+  if (Array.isArray(op.data)) return op.data
+  if (Array.isArray(op.json)) return op.json
+  return []
+}
+
+function checkTableSemantic(op, index, errors, warnings) {
+  const label = `ops[${index}] ${op.op}`
+  const rows = tableDataRows(op)
+  if (op.op === 'add-table') {
+    if (!Number.isInteger(op.rows) || op.rows <= 0) {
+      push(errors, 'table-rows-invalid', `${label} must declare a positive rows count`)
+    }
+    if (!Number.isInteger(op.cols) || op.cols <= 0) {
+      push(errors, 'table-cols-invalid', `${label} must declare a positive cols count`)
+    }
+  }
+  if (rows.length > 0 && Array.isArray(rows[0])) {
+    const width = rows[0].length
+    rows.forEach((row, rowIndex) => {
+      if (!Array.isArray(row)) {
+        push(errors, 'table-row-invalid', `${label} data row ${rowIndex} is not an array`)
+      } else if (row.length !== width) {
+        push(
+          errors,
+          'table-row-width-mismatch',
+          `${label} data row ${rowIndex} has ${row.length} cell(s), expected ${width}`,
+        )
+      }
+    })
+    if (op.cols && width !== op.cols && op.resize !== true) {
+      push(
+        errors,
+        'table-data-cols-mismatch',
+        `${label} data has ${width} column(s), table has ${op.cols}; set resize=true or fix data`,
+      )
+    }
+    if (op.rows && rows.length !== op.rows && op.resize !== true) {
+      push(
+        errors,
+        'table-data-rows-mismatch',
+        `${label} data has ${rows.length} row(s), table has ${op.rows}; set resize=true or fix data`,
+      )
+    }
   }
 }
 
@@ -504,7 +656,29 @@ function checkLock(lock, errors, warnings) {
   if (!Array.isArray(lock.slides) || lock.slides.length === 0) {
     push(errors, 'lock-slides-missing', 'deck_lock.json must contain a non-empty slides[] array')
   } else {
+    let sameRhythmRun = 1
+    let previousRhythm = ''
     lock.slides.forEach((slide, index) => {
+      const currentRhythm = String(slide?.rhythm ?? '').toLowerCase()
+      if (currentRhythm && currentRhythm === previousRhythm) {
+        sameRhythmRun += 1
+      } else {
+        sameRhythmRun = 1
+      }
+      if (
+        sameRhythmRun >= 4 &&
+        currentRhythm &&
+        currentRhythm !== 'appendix' &&
+        lock.slides.length >= 6
+      ) {
+        push(
+          warnings,
+          'lock-slide-rhythm-repetition',
+          `slides ${index - 2}-${index + 1} repeat rhythm "${currentRhythm}"; verify contact-sheet variety`,
+        )
+      }
+      previousRhythm = currentRhythm
+
       if (!slideTypeOf(slide)) {
         push(warnings, 'lock-slide-type-missing', `slides[${index}] has no slideType/type/kind`)
       }
@@ -513,6 +687,34 @@ function checkLock(lock, errors, warnings) {
           warnings,
           'lock-slide-purpose-missing',
           `slides[${index}] should have title or purpose`,
+        )
+      }
+      if (!slide.rhythm) {
+        push(
+          warnings,
+          'lock-slide-rhythm-missing',
+          `slides[${index}] should declare rhythm anchor/dense/breathing/appendix`,
+        )
+      } else if (!SLIDE_RHYTHMS.has(String(slide.rhythm))) {
+        push(
+          warnings,
+          'lock-slide-rhythm-unknown',
+          `slides[${index}] uses unknown rhythm "${slide.rhythm}"`,
+        )
+      }
+      if (!layoutIntentOf(slide)) {
+        push(
+          warnings,
+          'lock-slide-layout-intent-missing',
+          `slides[${index}] should declare layoutIntent or macroLayout`,
+        )
+      }
+      const visualDensity = visualDensityOf(slide)
+      if (visualDensity && !VISUAL_DENSITIES.has(String(visualDensity))) {
+        push(
+          warnings,
+          'lock-slide-density-unknown',
+          `slides[${index}] uses unknown visualDensity "${visualDensity}"`,
         )
       }
       if (formalNarrative && !isAppendixLike(slide)) {
@@ -533,7 +735,7 @@ function checkLock(lock, errors, warnings) {
         if (!slide.rhythm) {
           push(
             warnings,
-            'lock-slide-rhythm-missing',
+            'lock-formal-slide-rhythm-missing',
             `slides[${index}] formal narrative slide should declare rhythm`,
           )
         }
@@ -580,10 +782,26 @@ function checkAssets(assets, assetsPath, referenced, errors, warnings) {
     if (!entry.kind) push(warnings, 'asset-kind-missing', `asset ${label} is missing kind`)
 
     const status = String(entry.status ?? 'available').toLowerCase()
-    if (['missing', 'needs-user'].includes(status)) {
+    if (ASSET_BLOCKING_STATUSES.has(status)) {
       push(errors, 'asset-not-ready', `asset ${label} is not ready: status=${status}`)
-    } else if (status === 'placeholder') {
-      push(warnings, 'asset-placeholder', `asset ${label} is still a placeholder`)
+    } else if (ASSET_REVIEW_STATUSES.has(status)) {
+      push(warnings, 'asset-review-needed', `asset ${label} still needs review: status=${status}`)
+    }
+    const licenseRisk = String(entry.licenseRisk ?? entry.source?.licenseRisk ?? '').toLowerCase()
+    if (licenseRisk === 'blocked') {
+      push(errors, 'asset-license-blocked', `asset ${label} has blocked license risk`)
+    } else if (licenseRisk === 'unknown') {
+      push(warnings, 'asset-license-unknown', `asset ${label} has unknown license risk`)
+    }
+    if (isIdentityAsset(entry)) {
+      const sourceKind = String(entry.source?.kind ?? entry.sourceKind ?? '').toLowerCase()
+      if (!['user', 'source-deck', 'official', 'built-in'].includes(sourceKind)) {
+        push(
+          errors,
+          'asset-identity-source-untrusted',
+          `identity asset ${label} must come from user, source-deck, official, or built-in source`,
+        )
+      }
     }
     checkImageAssetSlot(entry, label, status, errors, warnings)
 
@@ -699,6 +917,33 @@ function checkContent(content, lock, errors, warnings) {
         `slide ${index + 1} type drift: deck_lock=${lockedType}, content=${contentType}`,
       )
     }
+    const lockedRhythm = lock.slides[index]?.rhythm
+    const contentRhythm = content.slides[index]?.rhythm
+    if (lockedRhythm && contentRhythm && lockedRhythm !== contentRhythm) {
+      push(
+        warnings,
+        'slide-rhythm-mismatch',
+        `slide ${index + 1} rhythm drift: deck_lock=${lockedRhythm}, content=${contentRhythm}`,
+      )
+    }
+    const lockedLayoutIntent = layoutIntentOf(lock.slides[index])
+    const contentLayoutIntent = layoutIntentOf(content.slides[index])
+    if (lockedLayoutIntent && contentLayoutIntent && lockedLayoutIntent !== contentLayoutIntent) {
+      push(
+        warnings,
+        'slide-layout-intent-mismatch',
+        `slide ${index + 1} layout intent drift: deck_lock=${lockedLayoutIntent}, content=${contentLayoutIntent}`,
+      )
+    }
+    const lockedDensity = visualDensityOf(lock.slides[index])
+    const contentDensity = visualDensityOf(content.slides[index])
+    if (lockedDensity && contentDensity && lockedDensity !== contentDensity) {
+      push(
+        warnings,
+        'slide-density-mismatch',
+        `slide ${index + 1} visual density drift: deck_lock=${lockedDensity}, content=${contentDensity}`,
+      )
+    }
   }
 
   const lockedDeckkit = lock.deckkit?.id ?? lock.deckkitId ?? ''
@@ -775,6 +1020,27 @@ function checkPatch(patch, lock, content, assets, args, errors, warnings) {
   }
 
   const patchAssetPaths = collectAssetPaths(patch)
+  patch.ops.forEach((op, index) => {
+    if (!isPlainObject(op)) return
+    if (
+      ['add-chart', 'replace-chart-data'].includes(op.op) ||
+      String(op.op ?? '').startsWith('set-chart-')
+    ) {
+      if (['add-chart', 'replace-chart-data'].includes(op.op)) {
+        checkChartSemantic(op, index, errors, warnings)
+      }
+    }
+    if (
+      ['add-table', 'set-table-data', 'import-table-data'].includes(op.op) ||
+      String(op.op ?? '').startsWith('set-table-') ||
+      op.op === 'merge-table-cells'
+    ) {
+      if (['add-table', 'set-table-data', 'import-table-data'].includes(op.op)) {
+        checkTableSemantic(op, index, errors, warnings)
+      }
+    }
+  })
+
   if (patchAssetPaths.length > 0 && !assets) {
     push(
       errors,

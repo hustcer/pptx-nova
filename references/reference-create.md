@@ -77,9 +77,10 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
 
 1. 根据 `reference-style.json` 选择已有 theme/style，或临时使用抽取出的 draft pack。
 2. 写 `deck_lock.json`：记录参考来源、template fusion、DeckKit/theme/style、每页
-   `referenceSlide` / `reuse` / `slideType` / `rhythm`，以及所有假设。
+   `referenceSlide` / `reuse` / `slideType` / `rhythm` / `layoutIntent` /
+   `visualDensity`，以及所有假设。
 3. 只有允许复用或必须补齐图片/logo/图标/数据截图时才写 `assets_manifest.json`；未授权参考素材标为
-   `placeholder` 或 `needs-user`，不要在 patch 中偷偷引用。无外部资源时不要创建空 manifest。
+   `needs-review` / `needs-user` / `forbidden`，不要在 patch 中偷偷引用。无外部资源时不要创建空 manifest。
 4. 根据 `reference-map.json` 和 `deck_lock.json` 把 `outline.json` 转为 `content.json`
    或 generator 输入。
 5. 优先用 DeckKit / generator 新建页面；只有 `reuse: copy-slide` 时才用 `copy-from`。

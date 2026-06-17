@@ -96,7 +96,8 @@ For formal decks, content must preserve the lock's claim/proof intent:
 - use `claimTitle` as the strongest headline when the DeckKit exposes one
 - map `proofObject` to structured fields such as chart data, table rows, stages,
   workflow nodes, timeline items, or comparison columns
-- keep `rhythm` and `macroLayout` aligned with the chosen slide type
+- keep `rhythm`, `layoutIntent` / `macroLayout`, and `visualDensity` aligned with
+  the chosen slide type and the slot budget
 - if a DeckKit cannot express the proof object without generic bullets, extend
   the DeckKit rather than hiding the argument in prose
 
@@ -112,9 +113,9 @@ Avoid patching around the DeckKit with raw coordinates.
 
 When a deck has more slides than reusable page types, reuse is expected. Keep
 the same slide type at least three slides apart when possible, and vary accent,
-density, title structure, or content rhythm on reused layouts. If the outline
-forces closer reuse, note the tradeoff in `deck_lock.assumptions[]` and rely on
-PNG/contact-sheet review to verify the rhythm.
+density, `layoutIntent`, title structure, or content rhythm on reused layouts.
+If the outline forces closer reuse, note the tradeoff in `deck_lock.assumptions[]`
+and rely on PNG/contact-sheet review to verify the rhythm.
 
 For decks covered by `narrative-quality.md`, repeated slide types also need a
 different `macroLayout`, proof object, or density treatment. A clean repeated

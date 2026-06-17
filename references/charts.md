@@ -3,6 +3,23 @@
 xdoc 支持 **19 种 chart kind**，每种支持若干 variant。背后映射 Office 标准
 `XlChartType` 103 项 catalog；当前 45 项 supported / 32 项 partial / 26 项 unsupported。
 
+## 专项语义验证
+
+chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标校准。写 chart 前先在
+`deck_lock.slides[].chart` 记录 kind、数据来源和验证点；生成 `patch.json` 后由
+`pptx-nova-check-lock.mjs` 做静态语义检查，再交给 xdoc dry-run / vision-check / PNG
+复核。
+
+最小检查清单：
+
+- `categories.length` 必须和每个普通 series 的 `values.length` 一致。
+- 每个 series 要有可读 `name`；多系列图尤其不能留空，否则 legend 失去语义。
+- `combo` 必须真的是组合：至少两种 series kind，或至少一个 `secondaryAxis: true`。
+- legend、data label、axis tick label 使用 schema 全名，不用 `b`、`r`、`outEnd` 之类简写。
+- 图表要能证明 slide 的 `claimTitle` / `proofObject`，不要只因为有数据就塞图。
+- PNG/contact-sheet 复核负责判断 legend、axis、data label、callout 是否遮挡；静态语义检查
+  不替代视觉复核。
+
 ## Native diagram/table presets
 
 常见商务图示优先用 recipe preset，而不是手算几十个 `add-shape` 坐标。这些 preset

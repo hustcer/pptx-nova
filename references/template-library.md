@@ -49,14 +49,16 @@ xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 `pptx-nova` 支持把 catalog 中的 brand、layout、deck 资产组合成一次生成任务，但融合结果必须
 进入 run 目录的 `deck_lock.json`，不要在 generator 里临时猜测。触发方式是用户明确给出
 精确 catalog id 或显式路径；不要用模糊品牌名、风格形容词或相似文件名自动匹配。
+这不是一套独立模板流程；它只是把模板影响拆成 identity / structure / deck 起点三段，
+然后自然落进 `deck_lock`、DeckKit 选择和 `assets_manifest`。
 
 ### 三类资产的职责
 
-| kind     | 拥有的段                     | 典型内容                                                         |
-| -------- | ---------------------------- | ---------------------------------------------------------------- |
-| `brand`  | identity                     | 颜色、字体、logo、品牌标识、页脚口径、图标风格、禁止项           |
-| `layout` | structure                    | 画布、网格、边距、page rhythm、slide type 到布局的映射、密度限制 |
-| `deck`   | complete deck starting point | 完整 generator / outline / patch bundle、默认 identity/structure |
+| kind     | 拥有的段                     | 典型内容                                                                       |
+| -------- | ---------------------------- | ------------------------------------------------------------------------------ |
+| `brand`  | identity                     | 颜色、字体、logo、品牌标识、页脚口径、图标风格、禁止项                         |
+| `layout` | structure                    | 画布、网格、边距、page rhythm、layoutIntent、slide type 到布局的映射、密度限制 |
+| `deck`   | complete deck starting point | 完整 generator / outline / patch bundle、默认 identity/structure               |
 
 融合优先级按段而不是按字段：
 
@@ -90,7 +92,8 @@ xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 `template_fusion.json`：多来源有冲突、用户做了 override、需要给后续人类审计或模板沉淀复用。
 
 - `deck_lock.json.templateFusion`：只保留生成所需的段级结果，例如
-  `identityFrom`、`structureFrom`、`deckFrom`、`overrides[]`。
+  `identityFrom`、`structureFrom`、`deckFrom`、`overrides[]`。structure 约束还应反映到
+  `slides[].rhythm`、`slides[].layoutIntent` 和 `slides[].visualDensity`，不要只记录模板 id。
 - `template_fusion.json`（按需）：完整记录输入资产、段级来源、冲突和用户 override，方便审计。
 
 需要审计时的最小 `template_fusion.json`：

@@ -68,12 +68,15 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 2. Gather mode-specific context:
    - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
    - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
-     per-slide `claimTitle`, `proofObject`, `rhythm`, and `macroLayout`.
+     per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
+     `visualDensity`.
    - Edit: `xdoc pptx inspect <input.pptx> --json`.
    - Data/template: template, data, bindings, and asset paths.
    - If the source outline only gives a slide title or leaves factual content
      blank, record any AI-filled facts, competitors, metrics, or examples in
      `deck_lock.assumptions[]` before writing `content.json`.
+   - If a slide contains chart/table proof, record the semantic source and
+     validation expectations in `deck_lock.slides[].chart` or `.table`.
 3. Produce the smallest durable input:
    - Prefer DeckKit `content.json` for create workflows.
    - Use patch ops only when the DeckKit path cannot express the work.
@@ -180,7 +183,7 @@ pixel-level visual quality.
 Use these gates in order:
 
 ```text
-check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> narrative review when required -> optional xdoc check
+check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
 ```
 
 `vision-check` high/medium issues are blockers for create workflows. Low issues
@@ -207,6 +210,10 @@ PNG/contact-sheet review remains required for pixel-level concerns:
 - broken page number rhythm
 - formal deck issues such as topic-only titles, weak proof objects, repeated
   card-grid rhythms, or decorative containers that do not encode meaning
+- chart/table pages whose data dimensions are technically valid but misleading:
+  missing categories, unlabeled series, inconsistent units, truncated legend,
+  data labels colliding with bars/points, or table columns squeezed below
+  readable width
 
 When review finds an issue, fix the smallest durable source of truth:
 

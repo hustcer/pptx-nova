@@ -39,11 +39,13 @@ generation and ask for confirmation of:
 - style and density
 - brand colors and typography
 - formula policy if math appears
-- chart/table/icon strategy
+- chart/table/icon strategy, including data source and semantic validation needs
 - image/logo/third-party asset strategy
 - whether to continue in the same session or split after the lock
 
-Keep confirmation short: page titles plus one-line purpose, not full copy.
+Keep confirmation short: page titles plus one-line purpose, not full copy. The
+confirmation should settle decisions that materially affect quality or control;
+do not add a design interview for choices that can be safely inferred.
 
 ## Design Lock
 
@@ -51,11 +53,11 @@ Write `deck_lock.json` after outline confirmation. It should freeze:
 
 - output and canvas
 - `deckProfile` and per-slide `claimTitle` / `proofObject` / `rhythm` /
-  `macroLayout` for formal persuasive decks
+  `layoutIntent` / `visualDensity` for formal persuasive decks
 - DeckKit/theme/style decisions
 - colors and typography
 - formula policy
-- icons/charts/tables
+- icons/charts/tables, including source data and validation expectations
 - image/logo/resource policy
 - page types and per-slide rhythm
 - template or reference deck fusion decisions

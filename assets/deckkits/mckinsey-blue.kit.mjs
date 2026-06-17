@@ -1216,7 +1216,9 @@ function makePageTypes(builders, chrome, components, total) {
       )
       const track = i === 0 ? 'FEE2E2' : i === 1 ? 'FEF3C7' : i === 2 ? C.surface2 : C.surface2
       box(s, nm(s, `Driver${i}Track`), 'rectangle', barX, y, barW, barH, track)
-      const fillW = Math.max(0.05, barW * (item.value / 100))
+      const parsedValue = pct(item.value)
+      const driverValue = Number.isFinite(parsedValue) ? Math.min(100, Math.max(0, parsedValue)) : 0
+      const fillW = Math.max(0.05, barW * (driverValue / 100))
       box(s, nm(s, `Driver${i}Fill`), 'rectangle', barX, y, fillW, barH, color)
       const valueInside = i < 2
       tx(
@@ -1226,7 +1228,7 @@ function makePageTypes(builders, chrome, components, total) {
         y + 0.1,
         0.38,
         0.18,
-        `${item.value}%`,
+        `${driverValue}%`,
         {
           name: FONT_EN,
           size: '8pt',
@@ -1263,6 +1265,9 @@ function makePageTypes(builders, chrome, components, total) {
     box(s, nm(s, 'ControllableBracketT'), 'rectangle', MX, 2.13, 0.13, 0.012, C.redBright)
     box(s, nm(s, 'ControllableBracketB'), 'rectangle', MX, 3.08, 0.13, 0.012, C.redBright)
     const controllable = data.controllable ?? {}
+    const summary = data.summary ?? {}
+    const uncontrollable = data.uncontrollable ?? {}
+    const pareto = data.pareto ?? {}
     tx(
       s,
       nm(s, 'ControllablePct'),
@@ -1270,7 +1275,7 @@ function makePageTypes(builders, chrome, components, total) {
       2.51,
       0.42,
       0.14,
-      controllable.value ?? data.summary?.value ?? '',
+      controllable.value ?? summary.value ?? '',
       {
         name: FONT_EN,
         size: '7pt',
@@ -1300,7 +1305,7 @@ function makePageTypes(builders, chrome, components, total) {
       1.82,
       2.3,
       0.16,
-      data.summary.label,
+      summary.label,
       {
         name: FONT_EN,
         size: '7pt',
@@ -1315,7 +1320,7 @@ function makePageTypes(builders, chrome, components, total) {
       2.18,
       1.4,
       0.5,
-      data.summary.value,
+      summary.value,
       {
         name: FONT_EN,
         size: '30pt',
@@ -1331,7 +1336,7 @@ function makePageTypes(builders, chrome, components, total) {
       2.78,
       2.2,
       0.45,
-      asLines(data.summary.text),
+      asLines(summary.text),
       {
         name: FONT_EN,
         size: '8.4pt',
@@ -1348,7 +1353,7 @@ function makePageTypes(builders, chrome, components, total) {
       2.15,
       0.36,
       asLines(
-        String(data.summary.eq ?? '')
+        String(summary.eq ?? '')
           .split(/\r?\n/)
           .slice(0, 2),
       ),
@@ -1367,7 +1372,7 @@ function makePageTypes(builders, chrome, components, total) {
       2.15,
       0.24,
       asLines(
-        String(data.summary.eq ?? '')
+        String(summary.eq ?? '')
           .split(/\r?\n/)
           .slice(2),
       ),
@@ -1386,22 +1391,11 @@ function makePageTypes(builders, chrome, components, total) {
       4.52,
       2.95,
       1.0,
-      data.uncontrollable.title,
-      data.uncontrollable.body,
+      uncontrollable.title,
+      uncontrollable.body,
       C.primary,
     )
-    noteBox(
-      s,
-      'Pareto',
-      MX,
-      6.12,
-      8.98,
-      0.66,
-      data.pareto.title,
-      data.pareto.body,
-      C.primary,
-      C.surface,
-    )
+    noteBox(s, 'Pareto', MX, 6.12, 8.98, 0.66, pareto.title, pareto.body, C.primary, C.surface)
     footer(s, total, data.source)
   }
 

@@ -29,6 +29,12 @@
             "type": "string",
             "x-slotBudget": { "maxLines": 1, "fontPt": 7, "widthIn": 1.6 }
           },
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Bar fill percentage (0-100). Missing or out-of-range values clamp to a minimal visible bar."
+          },
           "action": {
             "type": "string",
             "x-slotBudget": { "maxLines": 1, "fontPt": 6.6, "widthIn": 3.2 }

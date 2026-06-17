@@ -18,6 +18,12 @@ const IMAGE_SLOT_RATIOS = new Set(['21:9', '16:10', '16:9', '4:3', '3:2', '3:4',
 const IMAGE_FIT_POLICIES = new Set(['cover', 'contain', 'no-crop', 'crop-safe'])
 const TOPIC_TITLE_RE =
   /^(agenda|overview|market|roadmap|strategy|product|competition|competitors|summary|appendix|产品概览|市场分析|路线图|竞品|竞争|总结|目录|附录)$/i
+// Category head-nouns: a short noun phrase ending in one of these reads as a topic
+// label, not a conclusion. Catches multi-word titles like "Product Overview" /
+// "Market Analysis" / "Competitive Landscape" that the single-word list above misses.
+const TOPIC_HEAD_EN_RE =
+  /\b(overview|introduction|background|analysis|roadmap|landscape|summary|recap|highlights|agenda)$/i
+const TOPIC_HEAD_CN_RE = /(概览|综述|分析|路线图|总结|小结|介绍|背景)$/
 const AI_IMAGE_SOURCE_KINDS = new Set([
   'ai',
   'generated',
@@ -331,7 +337,14 @@ function looksTopicOnly(title) {
   const normalized = String(title ?? '')
     .trim()
     .replace(/[：:。.\s]+$/g, '')
-  return TOPIC_TITLE_RE.test(normalized)
+  if (!normalized) return false
+  if (TOPIC_TITLE_RE.test(normalized)) return true
+  // Multi-word labels: only flag short noun phrases ending in a category head-noun,
+  // so conclusion sentences (which put the predicate after the noun) are not flagged.
+  if (/[一-鿿]/.test(normalized)) {
+    return normalized.length <= 8 && TOPIC_HEAD_CN_RE.test(normalized)
+  }
+  return normalized.split(/\s+/).length <= 4 && TOPIC_HEAD_EN_RE.test(normalized)
 }
 
 function assetEntries(assets) {

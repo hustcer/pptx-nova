@@ -93,13 +93,22 @@ content unless the DeckKit contract explicitly allows it.
 
 For formal decks, content must preserve the lock's claim/proof intent:
 
-- use `claimTitle` as the strongest headline when the DeckKit exposes one
+- use `claimTitle` to derive the strongest display headline only when it fits
+  the DeckKit title slot; otherwise keep the complete claim in `deck_lock` and
+  use a shorter `data.title` / `data.subtitle` plus callout or proof object
 - map `proofObject` to structured fields such as chart data, table rows, stages,
   workflow nodes, timeline items, or comparison columns
 - keep `rhythm`, `layoutIntent` / `macroLayout`, and `visualDensity` aligned with
   the chosen slide type and the slot budget
 - if a DeckKit cannot express the proof object without generic bullets, extend
   the DeckKit rather than hiding the argument in prose
+- display `title` and `subtitle` should be short, scannable, and layout-safe;
+  avoid sentence-ending periods in both fields, with `?` / `!` only when the
+  rhetoric explicitly needs them
+- user-specified outline titles/subtitles override these style preferences:
+  preserve them as display text, mark `titleSource: "user"` /
+  `subtitleSource: "user"` in `deck_lock`, and only adjust after a fit failure
+  or explicit polishing request
 
 Before running `validate-content.mjs`, read the slide row in `deck_lock.json`
 beside the content slide you are writing. This is not a new approval step; it is

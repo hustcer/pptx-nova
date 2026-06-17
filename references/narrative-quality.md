@@ -66,9 +66,19 @@ should carry:
 
 Rules:
 
-- `claimTitle` is a conclusion. Avoid topic titles such as `Product Overview`,
-  `Market`, `Roadmap`, or `Competitors` unless the deck is intentionally a raw
-  appendix.
+- `claimTitle` is the internal conclusion the slide must prove, not necessarily
+  the exact on-slide title. Avoid topic-only claim titles such as
+  `Product Overview`, `Market`, `Roadmap`, or `Competitors` unless the deck is
+  intentionally a raw appendix.
+- Display `title` and `subtitle` should be short, scannable, and compatible with
+  the selected DeckKit slot. If the full claim is too long, keep it in
+  `claimTitle` and split evidence or qualifiers into subtitle, callout, body, or
+  `proofObject`. Do not make the page title long merely to sound conclusive.
+- Display `title` and `subtitle` should not end with a period. Use `?` or `!`
+  only when the page is intentionally framed as a question or emphatic call.
+- User-specified outline titles/subtitles have priority over this style rule.
+  Preserve them as display text, mark the source in `deck_lock`, and use
+  `claimTitle` separately for the fuller conclusion.
 - `proofObject.kind` should be concrete: `timeline`, `platform-map`,
   `workflow`, `comparison-table`, `customer-map`, `roadmap`, `metric-rail`,
   `bar-chart`, `matrix`, `source-table`, etc.
@@ -113,7 +123,9 @@ make one slide look bespoke.
 
 Use the selected DeckKit's slots to express the claim spine:
 
-- Map `claimTitle` to the strongest title/headline slot.
+- Derive the strongest title/headline slot from `claimTitle` only when it fits
+  the layout; otherwise use a shorter display title/subtitle and keep the full
+  claim in `deck_lock`.
 - Map `proofObject` to a DeckKit-supported visual field such as chart data,
   table rows, stages, timeline items, map nodes, or comparison columns.
 - Keep `purpose`, `source`, `omissionNotes`, `rhythm`, `layoutIntent`,

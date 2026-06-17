@@ -42,6 +42,7 @@ const TOPIC_TITLE_RE =
 const TOPIC_HEAD_EN_RE =
   /\b(overview|introduction|background|analysis|roadmap|landscape|summary|recap|highlights|agenda)$/i
 const TOPIC_HEAD_CN_RE = /(概览|综述|分析|路线图|总结|小结|介绍|背景)$/
+const CLOSING_QUOTE_OR_BRACKET_RE = /["'”’）》】）\]]+$/u
 const AI_IMAGE_SOURCE_KINDS = new Set([
   'ai',
   'generated',
@@ -493,6 +494,55 @@ function looksTopicOnly(title) {
   return normalized.split(/\s+/).length <= 4 && TOPIC_HEAD_EN_RE.test(normalized)
 }
 
+function stripClosingQuoteOrBracket(value) {
+  let text = String(value ?? '').trim()
+  while (CLOSING_QUOTE_OR_BRACKET_RE.test(text)) {
+    text = text.replace(CLOSING_QUOTE_OR_BRACKET_RE, '').trim()
+  }
+  return text
+}
+
+function hasSentenceEndingPeriod(value) {
+  const text = stripClosingQuoteOrBracket(value)
+  if (!text) return false
+  if (/[。．｡]$/u.test(text)) return true
+  if (!text.endsWith('.')) return false
+  if (/(?:^|[\s([])(?:[A-Z]\.){2,}$/.test(text)) return false
+  const previous = text.at(-2) ?? ''
+  return !/\d/.test(previous)
+}
+
+function isUserSpecifiedDisplayText(slide, role) {
+  const sourceFields =
+    role === 'title'
+      ? [slide?.titleSource, slide?.displayTitleSource, slide?.sources?.title]
+      : [slide?.subtitleSource, slide?.displaySubtitleSource, slide?.sources?.subtitle]
+  return sourceFields.some((source) => String(source ?? '').toLowerCase() === 'user')
+}
+
+function checkDisplayTextPunctuation(
+  value,
+  { path, role, warnings, preserveUserSpecified = false },
+) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      checkDisplayTextPunctuation(item, {
+        path: `${path}[${index}]`,
+        role,
+        warnings,
+        preserveUserSpecified,
+      })
+    })
+    return
+  }
+  if (preserveUserSpecified || typeof value !== 'string' || !hasSentenceEndingPeriod(value)) return
+  push(
+    warnings,
+    `display-${role}-terminal-period`,
+    `${path} ends with a period; prefer no sentence-ending period in display ${role}, with ?/! only when intentional`,
+  )
+}
+
 function assetEntries(assets) {
   if (!assets) return []
   if (Array.isArray(assets.entries)) return assets.entries
@@ -811,6 +861,24 @@ function checkLock(lock, errors, warnings) {
           `slides[${index}] should have title or purpose`,
         )
       }
+      checkDisplayTextPunctuation(slide.title, {
+        path: `slides[${index}].title`,
+        role: 'title',
+        warnings,
+        preserveUserSpecified: isUserSpecifiedDisplayText(slide, 'title'),
+      })
+      checkDisplayTextPunctuation(slide.displayTitle, {
+        path: `slides[${index}].displayTitle`,
+        role: 'title',
+        warnings,
+        preserveUserSpecified: isUserSpecifiedDisplayText(slide, 'title'),
+      })
+      checkDisplayTextPunctuation(slide.subtitle ?? slide.displaySubtitle, {
+        path: slide.subtitle ? `slides[${index}].subtitle` : `slides[${index}].displaySubtitle`,
+        role: 'subtitle',
+        warnings,
+        preserveUserSpecified: isUserSpecifiedDisplayText(slide, 'subtitle'),
+      })
       if (!slide.rhythm) {
         push(
           warnings,
@@ -1027,6 +1095,41 @@ function checkContent(content, lock, errors, warnings) {
       `deck_lock has ${lock.slides.length} slide(s), content has ${content.slides.length}`,
     )
   }
+
+  content.slides.forEach((slide, index) => {
+    const data = slide?.data ?? {}
+    const lockSlide = lock.slides?.[index] ?? {}
+    checkDisplayTextPunctuation(data.title ?? slide?.title, {
+      path: data.title !== undefined ? `slides[${index}].data.title` : `slides[${index}].title`,
+      role: 'title',
+      warnings,
+      preserveUserSpecified: isUserSpecifiedDisplayText(lockSlide, 'title'),
+    })
+    checkDisplayTextPunctuation(data.displayTitle, {
+      path: `slides[${index}].data.displayTitle`,
+      role: 'title',
+      warnings,
+      preserveUserSpecified: isUserSpecifiedDisplayText(lockSlide, 'title'),
+    })
+    checkDisplayTextPunctuation(data.subtitle, {
+      path: `slides[${index}].data.subtitle`,
+      role: 'subtitle',
+      warnings,
+      preserveUserSpecified: isUserSpecifiedDisplayText(lockSlide, 'subtitle'),
+    })
+    checkDisplayTextPunctuation(data.sub, {
+      path: `slides[${index}].data.sub`,
+      role: 'subtitle',
+      warnings,
+      preserveUserSpecified: isUserSpecifiedDisplayText(lockSlide, 'subtitle'),
+    })
+    checkDisplayTextPunctuation(data.displaySubtitle, {
+      path: `slides[${index}].data.displaySubtitle`,
+      role: 'subtitle',
+      warnings,
+      preserveUserSpecified: isUserSpecifiedDisplayText(lockSlide, 'subtitle'),
+    })
+  })
 
   const limit = Math.min(lock.slides?.length ?? 0, content.slides.length)
   for (let index = 0; index < limit; index += 1) {

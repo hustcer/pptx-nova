@@ -134,8 +134,13 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - 写 `content.json` 或手工 patch 前，先按页对照 `deck_lock.slides[]`，确认页型、节奏、
   结构意图、密度和证明对象没有靠记忆漂移；发现不匹配时先改 lock 或内容源，不在 patch
   里临时补救。
-- 非 appendix 页标题优先写成结论句；不要让 `产品概览`、`市场分析`、`路线图` 这类 topic label
-  直接成为正式交付页的唯一标题。
+- 非 appendix 页应有明确观点或方向；展示主标题/副标题优先短、可扫读并适配 DeckKit 槽位，
+  避免纯 `产品概览`、`市场分析`、`路线图` 这类 topic label。完整结论写入 `claimTitle`，
+  必要时拆到 subtitle、callout 或 `proofObject`，不要为了结论化牺牲布局。
+- 主标题和副标题默认不使用句末句号；问号/感叹号只在语气或互动意图明确时使用。
+- 如果用户给定的大纲已经明确指定主标题或副标题，指定文案优先；不要为了改成结论句、
+  缩短或去句号而静默改写。把来源写入 `titleSource: "user"` / `subtitleSource: "user"`，
+  只有在硬性版式溢出或用户要求润色时才调整，并说明 tradeoff。
 - 交付型自动选择只允许 `readiness in ["production", "default"]` 的 DeckKit。
 - 有生产/默认 DeckKit 可用时，不使用 `deck-generator-template.mjs` 作为交付默认路径。
 - 没有可用 DeckKit、缺页型或要改组件结构时，先创建/扩展 DeckKit，再交付。
@@ -187,6 +192,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   看到 medium 时先在写文件前改高度、删字、拆页或调整 autofit。
 - `subtitle`、`eyebrow`、`kicker`、`badge`、`label` 等预期单行文本不能出现尾词孤行；
   `vision-check` 的 `text-unexpected-wrap` 需要通过缩短文案、增宽或换布局处理。
+- 主标题和副标题不应为了表达完整句子而破坏版式；句末句号默认移除，过长内容拆到
+  subtitle、callout、正文或 notes。
 - 将 PPTX 转成 PNG/PDF 或检查生成的 PPTX 时，可能出现 `XDOC DEMO` 等工具水印；这类水印通常只在
   slide 右上角出现，可在人工视觉复核中忽略，不应当作 DeckKit 构图、遮挡或内容缺陷处理。
 

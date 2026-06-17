@@ -75,6 +75,10 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    - If the source outline only gives a slide title or leaves factual content
      blank, record any AI-filled facts, competitors, metrics, or examples in
      `deck_lock.assumptions[]` before writing `content.json`.
+   - If the user-provided outline explicitly fixes slide titles or subtitles,
+     preserve that wording in display `title` / `subtitle`, mark
+     `titleSource: "user"` / `subtitleSource: "user"` in `deck_lock.slides[]`,
+     and do not silently rewrite it into a claim title or house style.
    - If a slide contains chart/table proof, record the semantic source and
      validation expectations in `deck_lock.slides[].chart` or `.table`.
 3. Produce the smallest durable input:
@@ -200,6 +204,8 @@ PNG/contact-sheet review remains required for pixel-level concerns:
 
 - title wraps colliding with decorative rules, logo areas, headers, or page
   chrome
+- display titles/subtitles that become long sentences, end with periods, or pull
+  attention away from the proof object
 - characters overlapping or line wrapping into the next line
 - text clipped by a shape or table cell
 - source citations, footers, page numbers, and legends colliding with content

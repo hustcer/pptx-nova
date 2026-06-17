@@ -199,6 +199,13 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
   竞品名称、产品判断、市场指标、案例、时间线和来源不明的结论；交付摘要要逐条披露。
 - `claimTitle` 只能表达已由用户/source 提供或可验证推导出的结论；如果证明材料不足，把缺口写进
   `slides[].omissionNotes[]` 或 `assumptions[]`，不要用更强的措辞掩盖事实缺口。
+- `claimTitle` 是叙事锁，不等于必须上屏的完整标题。`content.json` 的展示 `title` /
+  `subtitle` 应短、可扫读、适配槽位；完整结论过长时拆到 subtitle、callout、正文或
+  `proofObject`。
+- 展示主标题和副标题默认不使用句末句号；问号/感叹号仅在刻意提问或强调时使用。
+- 用户大纲明确指定的展示主标题/副标题优先；保留原文，并在 slide 上写
+  `titleSource: "user"` / `subtitleSource: "user"`。除非出现硬性溢出、事实错误或用户要求润色，
+  不用 `claimTitle` 或风格规范静默覆盖用户指定文案。
 
 ## 4. `assets_manifest.json`
 

@@ -28,6 +28,9 @@ contains those structures.
 If the user already provides a clear outline, preserve it. Only propose changes
 when the sequence is contradictory, cannot fit, misses required information, or
 the user asks for structure improvement.
+If that outline explicitly fixes slide titles or subtitles, treat those display
+texts as user-specified and preserve them ahead of claim-title/style preferences.
+Use `claimTitle` separately for the internal narrative claim.
 
 If the user has not provided a confirmed outline, pause before content/patch
 generation and ask for confirmation of:
@@ -106,6 +109,9 @@ Studio decks must preserve readable typography:
 - arrows, connectors, and center markers must be derived from real geometry
 - claim titles should survive the noun-swap test; if the title works after
   replacing the product/company name, sharpen the proof or weaken the claim
+- display titles and subtitles should be shorter than the full claim when the
+  claim would wrap poorly or dominate the slide; avoid sentence-ending periods
+  in both fields unless a question/exclamation is intentional
 
 If text does not fit, first delete copy, change layout, split slides, or enlarge
 containers. Do not keep shrinking font sizes to force content into a fixed box.

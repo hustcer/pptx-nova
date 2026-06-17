@@ -72,7 +72,11 @@ visual rhythm problems.
 
 For quick decks, do not over-document. The minimum narrative bar is:
 
-- use claim-like titles when the source supports them
+- use short claim-like display titles/subtitles when the source supports them,
+  while keeping complete claims in `deck_lock.claimTitle` when needed
+- avoid sentence-ending periods in display titles and subtitles
+- preserve user-specified outline titles/subtitles exactly unless they create a
+  hard fit problem; mark their source in `deck_lock`
 - avoid repeated card grids dominating the contact sheet
 - avoid invented facts
 - make each non-appendix slide carry one visible proof object or clear purpose

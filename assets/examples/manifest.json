@@ -464,13 +464,13 @@
       "files": {
         "deck": {
           "path": "coral/deck.pptx",
-          "bytes": 26238,
-          "sha256": "6facdba00dc7d9265119103d9805aea71666a74666c5e811c719e09e026a884e"
+          "bytes": 27491,
+          "sha256": "4c7e4704d07493e29bc2739af68c3de897aee4796ca051b65ebf657964111c48"
         },
         "contactSheet": {
           "path": "coral/contact-sheet.webp",
-          "bytes": 54136,
-          "sha256": "33a20cdb84f8841bec342bc081626a54f6f1ef346e5522b4ef277fec74c7aab1",
+          "bytes": 75094,
+          "sha256": "8326395c176f4b0d408d2785815599142a3d18242fe7651cc9dd4e3c35a07218",
           "quality": 82
         },
         "content": {
@@ -481,12 +481,12 @@
         "brief": {
           "path": "coral/brief.md",
           "bytes": 729,
-          "sha256": "a930ec4534574c3a3401aa1105f39d31fa0011a5487b6003c061c0a07d324e72"
+          "sha256": "0b5c5d5644e5710a17cbfeadda6a6968637e63e80f0ba81a67c4d9cf61909919"
         },
         "summary": {
           "path": "coral/summary.json",
-          "bytes": 2701,
-          "sha256": "792add24c422361354c610a67fde5d5297894f5b3af4b0d9d6d65e2ae901f088"
+          "bytes": 3065,
+          "sha256": "5afd986c671b8c19957c196f9d411565d9e937a27ce7994e50ff18eb49b2d77d"
         }
       },
       "validation": {
@@ -498,33 +498,36 @@
       },
       "patch": {
         "schemaVersion": 1,
-        "ops": 724
+        "ops": 535
       },
       "vision": {
         "status": "success",
         "slideCount": 10,
-        "issueCount": 54,
+        "issueCount": 31,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 54
+          "low": 31
         },
         "lowBuckets": {
-          "total": 54,
-          "styleAllowed": 54,
+          "total": 31,
+          "styleAllowed": 30,
           "baselineKnown": 0,
-          "new": 0,
+          "new": 1,
           "changed": 0,
           "resolved": 0,
-          "reviewable": 0,
+          "reviewable": 1,
           "baselineUnavailable": true,
           "baselineUpdated": false
         },
         "lowByFamily": {
-          "small-font": 54
+          "overlap": 1,
+          "small-font": 30
         },
-        "newLowByFamily": {},
+        "newLowByFamily": {
+          "overlap": 1
+        },
         "changedLowByFamily": {},
         "baseline": {
           "schemaVersion": "",
@@ -541,7 +544,20 @@
           "sourceFontPt": 8.5,
           "note": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
         },
-        "newLowSamples": [],
+        "newLowSamples": [
+          {
+            "severity": "low",
+            "family": "overlap",
+            "kind": "geometry-overlap",
+            "slideIndex": 0,
+            "target": "S0_Rule",
+            "metrics": {
+              "overlapRatio": 0.64
+            },
+            "identity": "a1253fba0ddcf28bc491",
+            "fingerprint": "ae0df001a2b258513317"
+          }
+        ],
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }

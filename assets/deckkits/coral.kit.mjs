@@ -5,6 +5,8 @@ import { createOps, grid, nm } from './core-primitives.kit.mjs'
 export const C = {
   coral: 'E85D5D',
   coralDark: 'D44A4A',
+  coralStripe: 'C94A4A',
+  coralShadow: '9D2727',
   coralText: '9D2727',
   cream: 'F5F0E8',
   creamDark: 'E8E0D4',
@@ -31,73 +33,132 @@ function makeCoralOps() {
   const rect = (s, base, x, y, w, h, color) => p.box(s, nm(s, base), 'rectangle', x, y, w, h, color)
   const tx = (s, base, x, y, w, h, text, font, align) =>
     p.tx(s, nm(s, base), x, y, w, h, String(text ?? ''), font, align)
-  const rotate = (s, base, degrees) =>
-    p.ops.push({ op: 'set-shape-rotation', slide: s, shape: { name: nm(s, base) }, degrees })
   const outline = (s, base, color = C.ink, width = '1pt') => p.setLine(s, nm(s, base), color, width)
+  const svg = (s, base, x, y, w, h, markup) =>
+    p.ops.push({
+      op: 'add-picture',
+      slide: s,
+      name: nm(s, base),
+      x: `${x}in`,
+      y: `${y}in`,
+      w: `${w}in`,
+      h: `${h}in`,
+      bytesBase64: Buffer.from(markup, 'utf8').toString('base64'),
+      mime: 'image/svg+xml',
+    })
 
-  const hatch = (s, prefix, x, y, w, h, angle = 45, color = C.coralDark, count = 10) => {
-    for (let i = 0; i < count; i++) {
-      const base = `${prefix}${i}`
-      rect(s, base, x + i * (w / count), y + 0.08, 0.08, Math.max(0.1, h - 0.16), color)
-      rotate(s, base, angle)
+  const hatchSvg = (s, base, x, y, w, h, angle = 45) => {
+    const rotation = angle < 0 ? -45 : 45
+    const stripes = Array.from({ length: 56 }, (_, i) => {
+      const stripeX = -1100 + i * 48
+      return `<rect x="${stripeX}" y="-1000" width="20" height="2600" fill="#${C.ink}" opacity="0.1"/>`
+    }).join('')
+    svg(
+      s,
+      base,
+      x,
+      y,
+      w,
+      h,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="none">
+        <rect width="600" height="800" fill="#${C.coral}"/>
+        <g transform="rotate(${rotation} 300 400)">${stripes}</g>
+      </svg>`,
+    )
+  }
+
+  const coverTopZigzag = (s, base, x, y, w, h) => {
+    const zigzag = (low, high, strokeWidth, opacity) => {
+      const points = Array.from(
+        { length: 15 },
+        (_, i) => `${-50 + i * 100},${i % 2 === 0 ? low : high}`,
+      ).join(' ')
+      return `<polyline points="${points}" fill="none" stroke="#${C.ink}" stroke-width="${strokeWidth}" stroke-linejoin="miter" stroke-linecap="butt" opacity="${opacity}"/>`
     }
+
+    svg(
+      s,
+      base,
+      x,
+      y,
+      w,
+      h,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" preserveAspectRatio="none">
+        <rect width="1200" height="400" fill="#${C.coral}"/>
+        ${zigzag(320, 120, 18, 0.22)}
+        ${zigzag(380, 180, 14, 0.16)}
+        ${zigzag(350, 150, 8, 0.11)}
+      </svg>`,
+    )
   }
 
-  const zigzag = (s, prefix, x, y, w, h, count = 6) => {
-    const step = w / count
-    for (let i = 0; i < count; i++) {
-      const cx = x + i * step
-      rect(s, `${prefix}A${i}`, cx + step * 0.22, y + h * 0.18, 0.08, h * 0.75, C.coralDark)
-      rotate(s, `${prefix}A${i}`, 28)
-      rect(s, `${prefix}B${i}`, cx + step * 0.5, y + h * 0.18, 0.08, h * 0.75, C.coralDark)
-      rotate(s, `${prefix}B${i}`, -28)
-    }
+  const bottomZigzag = (s, base, x, y, w, h) => {
+    svg(
+      s,
+      base,
+      x,
+      y,
+      w,
+      h,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 60" preserveAspectRatio="none">
+        <path d="M0,30 L40,10 L80,30 L120,10 L160,30 L200,10 L240,30 L280,10 L320,30 L360,10 L400,30 L400,60 L0,60 Z"
+          fill="#1A1A1A" opacity="0.2"/>
+      </svg>`,
+    )
   }
 
-  const badge = (s, base, x, y, text, fill = C.coral, color = C.ink) => {
-    rect(s, `${base}Bg`, x, y, 0.4, 0.36, fill)
-    tx(s, `${base}Txt`, x + 0.05, y + 0.06, 0.3, 0.26, text, label(9, color), 'center')
+  const badge = (s, base, x, y, text, fill = C.coral, color = C.white) => {
+    rect(s, `${base}Bg`, x, y, 0.46, 0.46, fill)
+    tx(s, `${base}Txt`, x, y + 0.07, 0.46, 0.34, text, d(18, color), 'center')
   }
 
-  return { p, rect, tx, outline, hatch, zigzag, badge }
+  return { p, rect, tx, outline, hatchSvg, coverTopZigzag, bottomZigzag, badge }
 }
 
 function renderSlide(ctx, s, slide) {
-  const { p, rect, tx, outline, hatch, zigzag, badge } = ctx
+  const { p, rect, tx, outline, hatchSvg, coverTopZigzag, bottomZigzag, badge } = ctx
   const data = slide.data ?? {}
   p.addSlide(s, C.cream)
 
   if (slide.type === 'coralCoverSlide') {
-    rect(s, 'Top', 0, 0, 13.333, 2.4, C.coral)
-    zigzag(s, 'Zig', 0.2, 0.05, 12.1, 2.2, 6)
-    tx(s, 'Brand', 1.1, 0.42, 1.0, 0.18, data.brand, label(8.5, C.ink))
-    tx(s, 'Title', 0.92, 2.66, 8.0, 2.55, data.title, d(58, C.ink))
-    rect(s, 'Rule', 0.92, 5.55, 11.5, 0.03, C.creamDark)
-    tx(s, 'LocationLabel', 1.1, 6.35, 1.2, 0.15, data.locationLabel, label(8.5, C.gray))
-    tx(s, 'Location', 1.1, 6.52, 2.1, 0.55, data.location, d(24, C.ink))
-    tx(s, 'DateLabel', 10.1, 6.35, 1.55, 0.15, data.dateLabel, label(8.5, C.gray), 'right')
-    tx(s, 'Year', 11.15, 6.52, 1.05, 0.55, data.year, d(24, C.ink), 'right')
+    coverTopZigzag(s, 'TopZigzag', 0, 0, 13.333, 2.4)
+    tx(s, 'Brand', 0.92, 0.42, 1.25, 0.24, data.brand, label(9, C.ink))
+    tx(s, 'Title', 0.92, 2.78, 7.4, 3.02, data.title, d(58, C.ink))
+    rect(s, 'Rule', 0.92, 5.56, 11.5, 0.025, C.creamDark)
+    tx(s, 'LocationLabel', 0.92, 5.88, 1.4, 0.16, data.locationLabel, label(8.5, C.gray))
+    tx(s, 'Location', 0.92, 6.06, 2.65, 1.0, data.location, d(30, C.ink))
+    tx(s, 'DateLabel', 10.0, 5.88, 2.05, 0.16, data.dateLabel, label(8.5, C.gray), 'right')
+    tx(s, 'Year', 10.95, 6.06, 1.25, 1.0, data.year, d(30, C.ink), 'right')
     return
   }
 
   if (slide.type === 'coralStatementSlide') {
-    tx(s, 'Section', 6.05, 0.45, 1.6, 0.18, data.section, label(8.5, C.coralText))
-    tx(s, 'Title', 6.05, 0.8, 5.8, 2.25, data.title, d(40, C.ink))
-    tx(s, 'Body', 6.05, 3.15, 4.7, 1.1, data.body, f(10.8, C.gray))
-    rect(s, 'Accent', 6.05, 5.92, 0.55, 0.04, C.coral)
+    tx(s, 'Section', 0.92, 0.48, 1.8, 0.18, data.section, label(9, C.coralText))
+    tx(s, 'Title', 0.92, 0.9, 11.6, 2.72, data.title, d(62, C.ink))
+    tx(s, 'Body', 0.92, 3.72, 5.95, 1.62, data.body, f(15, C.gray))
+    rect(s, 'Accent', 0.92, 7.02, 0.74, 0.04, C.coral)
     return
   }
 
   if (slide.type === 'coralPillarsSplitSlide') {
     rect(s, 'Left', 0, 0, 6.67, 7.5, C.coral)
     rect(s, 'Right', 6.67, 0, 6.663, 7.5, C.ink)
-    hatch(s, 'Hatch', 2.35, 0.0, 3.25, 7.5, 45, C.coralDark, 12)
-    tx(s, 'Number', 0.55, 0.58, 1.35, 0.75, data.number, d(40, C.ink))
-    tx(s, 'Title', 0.55, 5.05, 1.9, 1.35, data.title, d(28, C.ink))
+    hatchSvg(s, 'Hatch', 3.33, 0, 3.34, 7.5, 45)
+    tx(s, 'Number', 0.55, 0.5, 2.05, 3.5, data.number, d(105, C.coralShadow))
+    tx(s, 'Title', 0.55, 5.32, 2.3, 1.75, data.title, d(42, C.ink))
     ;(data.items ?? []).forEach((item, i) => {
-      const y = 2.35 + i * 1.2
-      tx(s, `ItemLabel${i}`, 7.0, y, 1.4, 0.16, item.label, label(9, C.coral))
-      tx(s, `ItemText${i}`, 7.0, y + 0.23, 5.0, 0.46, item.text, f(10.5, C.white))
+      const y = 2.68 + i * 0.78
+      tx(
+        s,
+        `ItemLabel${i}`,
+        7.2,
+        y,
+        1.7,
+        0.16,
+        String(item.label ?? '').toUpperCase(),
+        label(9, C.coral),
+      )
+      tx(s, `ItemText${i}`, 7.2, y + 0.24, 5.15, 0.42, item.text, f(13.5, C.white))
     })
     return
   }
@@ -147,10 +208,9 @@ function renderSlide(ctx, s, slide) {
   if (slide.type === 'coralImpactPosterSlide') {
     rect(s, 'Visual', 0, 0, 13.333, 6.25, C.coral)
     for (let i = 0; i < 18; i++) rect(s, `Stripe${i}`, i * 0.74, 0, 0.02, 6.25, C.coralDark)
-    tx(s, 'Word', 4.25, 2.8, 4.9, 0.7, data.word, d(44, C.ink), 'center')
-    tx(s, 'BarTitle', 1.1, 6.28, 4.4, 0.7, data.title, d(18, C.ink))
-    tx(s, 'BarMeta', 10.25, 6.55, 1.5, 0.28, data.meta?.[0], label(9, C.gray), 'right')
-    tx(s, 'BarMeta2', 11.78, 6.55, 1.1, 0.28, data.meta?.[1], label(9, C.gray), 'right')
+    tx(s, 'Word', 3.55, 2.05, 6.2, 3.25, data.word, d(112, C.ink), 'center')
+    tx(s, 'BarTitle', 0.92, 6.36, 7.55, 0.7, data.title, d(34, C.ink))
+    tx(s, 'BarMeta', 9.55, 6.52, 2.6, 0.52, (data.meta ?? []).join('\n'), label(9, C.gray), 'right')
     return
   }
 
@@ -162,43 +222,55 @@ function renderSlide(ctx, s, slide) {
       rect(s, `Card${i}`, cell.x, 2.2, cell.w, 3.9, C.white)
       rect(s, `CardTop${i}`, cell.x, 2.2, cell.w, 0.04, C.coral)
       badge(s, `Badge${i}`, cell.x + 0.25, 2.55, card.marker)
-      tx(s, `CardTitle${i}`, cell.x + 0.25, 2.95, cell.w - 0.5, 0.35, card.title, d(18, C.ink))
+      tx(s, `CardTitle${i}`, cell.x + 0.25, 3.08, cell.w - 0.5, 0.35, card.title, d(18, C.ink))
       tx(s, `CardText${i}`, cell.x + 0.25, 3.43, cell.w - 0.5, 0.9, card.text, f(10.5, C.gray))
-      tx(s, `CardStat${i}`, cell.x + 0.25, 5.55, 1.1, 0.35, card.stat, d(22, C.coral))
+      tx(s, `CardStat${i}`, cell.x + 0.25, 5.42, 1.45, 0.55, card.stat, d(34, C.coral))
     })
     return
   }
 
   if (slide.type === 'coralQuoteSplitSlide') {
-    rect(s, 'Left', 0, 0, 5.45, 7.5, C.coral)
-    rect(s, 'Right', 5.45, 0, 7.883, 7.5, C.ink)
-    hatch(s, 'QuoteHatch', 0.15, 0, 3.9, 7.5, -45, C.coralDark, 10)
-    tx(s, 'Mark', 2.4, 3.05, 0.75, 0.75, data.mark, d(38, C.ink), 'center')
-    rect(s, 'Accent', 6.35, 3.0, 0.6, 0.035, C.coral)
-    tx(s, 'Quote', 6.35, 3.35, 5.2, 1.2, data.quote, f(16, C.white))
-    tx(s, 'Author', 6.35, 5.05, 2.2, 0.16, data.author, label(8.5, C.coral))
-    tx(s, 'Role', 6.35, 5.25, 2.2, 0.16, data.role, f(9, C.lightGray))
+    rect(s, 'Left', 0, 0, 5.33, 7.5, C.coral)
+    rect(s, 'Right', 5.33, 0, 8.003, 7.5, C.ink)
+    hatchSvg(s, 'QuoteHatch', 0, 0, 5.33, 7.5, -45)
+    tx(s, 'Mark', 1.95, 2.22, 1.65, 2.34, data.mark, d(140, C.coralShadow), 'center')
+    rect(s, 'Accent', 6.25, 2.48, 0.55, 0.04, C.coral)
+    tx(s, 'Quote', 6.25, 2.88, 5.8, 1.78, data.quote, f(22, C.cream))
+    tx(
+      s,
+      'Author',
+      6.25,
+      4.72,
+      2.1,
+      0.18,
+      String(data.author ?? '').toUpperCase(),
+      label(10.5, C.coral),
+    )
+    tx(s, 'Role', 6.25, 4.92, 2.2, 0.16, data.role, f(9, C.lightGray))
     return
   }
 
   if (slide.type === 'coralTimelineSlide') {
-    tx(s, 'Section', 0.92, 0.45, 1.4, 0.18, data.section, label(8.5, C.coralText))
-    tx(s, 'Title', 0.92, 0.68, 5.0, 1.02, data.title, d(30, C.ink))
-    rect(s, 'Axis', 2.0, 4.05, 9.5, 0.025, C.ink)
+    tx(s, 'Section', 0.92, 0.48, 1.6, 0.18, data.section, label(9, C.coralText))
+    tx(s, 'Title', 0.92, 0.78, 7.0, 1.88, data.title, d(56, C.ink))
+    const axisY = 4.48
+    const bubble = 0.92
+    rect(s, 'Axis', 0.92, axisY, 11.5, 0.035, C.ink)
     ;(data.steps ?? []).forEach((step, i) => {
-      const x = 2.0 + i * (9.5 / 4)
+      const x = 1.95 + i * 2.36
       const up = i % 2 === 0
-      p.box(s, nm(s, `Node${i}`), 'oval', x - 0.22, 3.82, 0.44, 0.44, C.coral)
+      const bubbleY = up ? axisY - bubble + 0.02 : axisY + 0.02
+      p.box(s, nm(s, `Node${i}`), 'oval', x - bubble / 2, bubbleY, bubble, bubble, C.coral)
       outline(s, `Node${i}`, C.ink, '1pt')
-      tx(s, `Phase${i}`, x - 0.2, 3.92, 0.4, 0.24, step.phase, label(9, C.ink), 'center')
+      tx(s, `Phase${i}`, x - 0.38, bubbleY + 0.26, 0.76, 0.34, step.phase, d(22, C.white), 'center')
       tx(
         s,
         `StepTitle${i}`,
-        x - 0.65,
-        up ? 3.05 : 4.62,
+        x - 0.85,
+        up ? axisY + 0.22 : axisY - 1.0,
         1.3,
         0.22,
-        step.title,
+        String(step.title ?? '').toUpperCase(),
         label(9, C.coralText),
         'center',
       )
@@ -206,11 +278,11 @@ function renderSlide(ctx, s, slide) {
         s,
         `StepDesc${i}`,
         x - 0.85,
-        up ? 3.27 : 4.84,
+        up ? axisY + 0.47 : axisY - 0.75,
         1.7,
-        0.58,
+        0.76,
         step.desc,
-        f(9, C.gray),
+        f(10.5, C.gray),
         'center',
       )
     })
@@ -219,21 +291,22 @@ function renderSlide(ctx, s, slide) {
 
   if (slide.type === 'coralTeamGridSlide') {
     p.ops.push({ op: 'set-slide-background', slide: s, fill: { type: 'solid', color: C.ink } })
-    tx(s, 'Title', 0.92, 0.5, 3.6, 0.95, data.title, d(30, C.white))
-    tx(s, 'Subtitle', 0.92, 1.48, 3.2, 0.22, data.subtitle, f(9.5, C.lightGray))
+    tx(s, 'Title', 0.92, 0.5, 6.4, 1.28, data.title, d(56, C.cream))
+    tx(s, 'Subtitle', 0.92, 1.86, 3.9, 0.26, data.subtitle, f(10.5, C.lightGray))
     grid(4, 0.28, 0.92, 11.5).forEach((cell, i) => {
       const person = data.people?.[i] ?? {}
       rect(s, `Member${i}`, cell.x, 2.05, cell.w, 4.6, '232323')
-      p.box(s, nm(s, `Avatar${i}`), 'oval', cell.x + cell.w / 2 - 0.25, 2.55, 0.5, 0.5, C.coral)
+      outline(s, `Member${i}`, '3A3A3A', '0.75pt')
+      p.box(s, nm(s, `Avatar${i}`), 'oval', cell.x + cell.w / 2 - 0.46, 2.25, 0.92, 0.92, C.coral)
       tx(
         s,
         `Initials${i}`,
-        cell.x + cell.w / 2 - 0.22,
-        2.68,
-        0.44,
-        0.26,
+        cell.x + cell.w / 2 - 0.4,
+        2.5,
+        0.8,
+        0.42,
         person.initials,
-        label(9, C.ink),
+        d(26, C.white),
         'center',
       )
       tx(
@@ -244,7 +317,7 @@ function renderSlide(ctx, s, slide) {
         cell.w - 0.7,
         0.2,
         person.name,
-        f(9, C.white, { bold: true }),
+        f(12, C.cream, { bold: true }),
         'center',
       )
       tx(
@@ -263,19 +336,20 @@ function renderSlide(ctx, s, slide) {
   }
 
   if (slide.type === 'coralClosingSlide') {
-    rect(s, 'LeftPanel', 0, 0, 7.1, 7.5, C.coral)
-    tx(s, 'Title', 0.92, 2.72, 2.9, 1.25, data.title, d(38, C.ink))
-    tx(s, 'Subtitle', 0.92, 4.25, 3.8, 0.6, data.subtitle, f(10.5, C.ink))
-    zigzag(s, 'BottomZig', 0.0, 6.85, 7.1, 0.65, 7)
+    rect(s, 'LeftPanel', 0, 0, 7.33, 7.5, C.coral)
+    tx(s, 'Title', 0.74, 2.1, 5.0, 2.48, data.title, d(70, C.ink))
+    tx(s, 'Subtitle', 0.74, 4.62, 5.85, 0.78, data.subtitle, f(15, C.ink))
+    bottomZigzag(s, 'BottomZig', 0, 6.94, 7.33, 0.56)
     ;(data.contacts ?? []).forEach((contact, i) => {
-      const y = 1.9 + i * 1.15
-      tx(s, `ContactLabel${i}`, 8.1, y, 1.2, 0.16, contact.label, label(8.5, C.gray))
-      tx(s, `ContactValue${i}`, 8.1, y + 0.25, 3.05, 0.42, contact.value, d(17, C.ink))
+      const y = 2.02 + i * 1.16
+      tx(s, `ContactLabel${i}`, 8.07, y, 1.2, 0.16, contact.label, label(9, C.gray))
+      tx(s, `ContactValue${i}`, 8.07, y + 0.26, 4.2, 0.58, contact.value, d(28, C.ink))
     })
     ;(data.socials ?? []).forEach((soc, i) => {
-      rect(s, `Social${i}`, 8.1 + i * 0.45, 5.7, 0.32, 0.32, C.cream)
+      const x = 8.07 + i * 0.55
+      rect(s, `Social${i}`, x, 5.92, 0.41, 0.41, C.cream)
       outline(s, `Social${i}`, C.ink, '0.75pt')
-      tx(s, `SocialText${i}`, 8.13 + i * 0.45, 5.72, 0.3, 0.3, soc, label(9, C.ink), 'center')
+      tx(s, `SocialText${i}`, x, 6.03, 0.41, 0.16, soc, label(8.5, C.ink), 'center')
     })
   }
 }

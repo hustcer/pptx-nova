@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": 1,
-    "ops": 724
+    "ops": 535
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 26,
-    "opResults": 724,
+    "changedParts": 30,
+    "opResults": 535,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -36,8 +36,8 @@
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 26,
-    "opResults": 724,
+    "changedParts": 30,
+    "opResults": 535,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -48,28 +48,31 @@
   "vision": {
     "status": "success",
     "slideCount": 10,
-    "issueCount": 54,
+    "issueCount": 31,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 54
+      "low": 31
     },
     "lowBuckets": {
-      "total": 54,
-      "styleAllowed": 54,
+      "total": 31,
+      "styleAllowed": 30,
       "baselineKnown": 0,
-      "new": 0,
+      "new": 1,
       "changed": 0,
       "resolved": 0,
-      "reviewable": 0,
+      "reviewable": 1,
       "baselineUnavailable": true,
       "baselineUpdated": false
     },
     "lowByFamily": {
-      "small-font": 54
+      "overlap": 1,
+      "small-font": 30
     },
-    "newLowByFamily": {},
+    "newLowByFamily": {
+      "overlap": 1
+    },
     "changedLowByFamily": {},
     "baseline": {
       "schemaVersion": "",
@@ -86,7 +89,20 @@
       "sourceFontPt": 8.5,
       "note": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
     },
-    "newLowSamples": [],
+    "newLowSamples": [
+      {
+        "severity": "low",
+        "family": "overlap",
+        "kind": "geometry-overlap",
+        "slideIndex": 0,
+        "target": "S0_Rule",
+        "metrics": {
+          "overlapRatio": 0.64
+        },
+        "identity": "a1253fba0ddcf28bc491",
+        "fingerprint": "ae0df001a2b258513317"
+      }
+    ],
     "changedLowSamples": [],
     "resolvedLowSamples": []
   },
@@ -98,12 +114,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 201151,
-      "sha256": "d28c5de8ef7463067e147daf20a896f1aa81c26fbd5da42d1de0952fc297a669"
+      "bytes": 261893,
+      "sha256": "e3cad26c202933ef79101612d38d10622d48ba9bae204fea2180bf3d39f685a1"
     },
     "webp": {
-      "bytes": 54136,
-      "sha256": "33a20cdb84f8841bec342bc081626a54f6f1ef346e5522b4ef277fec74c7aab1"
+      "bytes": 75094,
+      "sha256": "8326395c176f4b0d408d2785815599142a3d18242fe7651cc9dd4e3c35a07218"
     }
   }
 }

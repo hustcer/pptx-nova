@@ -117,11 +117,19 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
    HTML 元数据与实际 DOM 的不一致（如 `slide_count` 与 `.slide` 数量不同）。
 2. 使用 agent-browser 或等效浏览器工具，以 16:9 viewport（建议 1440×810）逐页截图到
    `ref-previews/`，并生成 contact sheet。截图前冻结动画，隐藏网页导航控件、圆点、浏览器
-   slide counter、hover-only UI 等 PPTX 不应复刻的交互元素。
+   slide counter、hover-only UI 等 PPTX 不应复刻的交互元素。截图流程必须可复现：
+   记录 `agent-browser set viewport 1440 810`、注入的 capture CSS、slide 切换方式，以及
+   绝对 screenshot path；不要只留下手工点击后的散图。优先使用
+   `node .claude/skills/deckkit-maker/scripts/capture-html-slides.mjs --url <template.html-or-url> --out .tmp/deckkit-<id>/ref-previews`
+   生成逐页 PNG 与 `capture-manifest.json`；非 `.slide` 模板通过 `--selector` 调整，只有
+   slide 原本是 `display:none` 且无法靠 `.active` 恢复时才传 `--active-display`，避免破坏
+   源 HTML 的 grid/flex 布局。
 3. `style-spec.md` 必须同时引用 CSS token 与浏览器截图；字号从 CSS `vw/vh/rem/px`
    映射为 PPTX pt，间距从 viewport 比例映射到 13.333×7.5in。
 4. `slide-inventory.md` 以真实 DOM slide 顺序为准，不以元数据声明为准；把 CSS class
-   映射为 DeckKit page type。
+   映射为 DeckKit page type。文案抽取建议用 `xdoc html2md <template.html>` 做交叉校验；
+   对隐藏 slide、off-screen slide 或当前未激活的 slide，用 DOM `textContent` 抽取，不要只用
+   `innerText`，否则会漏掉 `display:none` 页面。
 5. HTML 的 motion、keyboard handlers、pagination dots、scroll transforms、hover states
    只记录为"不迁移"决策；DeckKit 只冻结静态演示视觉系统、可编辑 shape/text、asset slot
    和可复用 chart/diagram 结构。
@@ -141,11 +149,32 @@ HTML/CSS 的视觉语义不能逐字搬到 PPTX patch，尤其是透明色和自
 - **不要为了贴近参考而接受不可读色**：参考 HTML 里的 `rgba(17,17,17,.45/.55/.60)` 在橙底上
   可能只有 2-3:1 对比度。DeckKit 要服务后续交付，优先级是参考视觉语气 + PPT 可读性 +
   `vision high/medium = 0`，而不是像素级复制网页透明度。
+- **小号透明/白色文本允许可读性适配**：HTML 中的小号透明黑、透明白或低 alpha chrome
+  在 PPTX 门禁中可能触发低对比。正文、小号 label、页眉页脚、来源和按钮文字可以加深为
+  同色系高对比实体色；在 `compare-notes.md` 标记为可读性适配即可。
 - **freeform 必须验证真实尺寸**：用 `add-freeform` 复刻 donut、conic-gradient、斜切块、
   不规则图形或 SVG-like 分段时，不要只传英寸绝对 `points`。xdoc freeform 使用局部坐标，
   通常需要显式 `originX` / `originY` 和 `xScale` / `yScale`；否则 PPTX 可打开但形状可能只有
   几个 EMU，PNG 中几乎不可见。修这类图形时，至少用一个最小实验或解包 XML 检查
   `<a:ext cx="..." cy="...">` 是实际英寸量级，再看 PNG。
+
+### 门禁与 benchmark 判读
+
+- **vision 字段不同于 dry-run**：`vision.json` 的定位字段是 `issues[].slideIndex` 和
+  `issues[].shapeName`，不是 dry-run 的 `target.name`。汇总 high/medium 时用：
+
+  ```bash
+  VISION_JSON=.tmp/deckkit-ID/vision.json
+  node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); const xs=(r.issues||[]).filter(i=>["high","medium"].includes(i.severity)); console.log(xs.map(i=>`${i.severity}\tslide ${(i.slideIndex??-1)+1}\t${i.shapeName||i.shapeId}\t${i.kind||""}\t${i.message||""}`).join("\n")||"vision high/medium: 0"); process.exit(xs.length?1:0)' "$VISION_JSON"
+  ```
+
+- **candidate readiness warning 是预期状态**：新 kit 推到 `candidate` 时，
+  `validate-content --mode delivery` 可能仍提示 readiness 相关 warning。只要没有 schema、
+  slot 或 content-contract error，并且 benchmark/readiness audit 通过，不要把这类 warning
+  当作交付阻塞。
+- **stress/mixed fixture 测槽位韧性，不测无意义超长文案**：benchmark 文案应当比 golden 更密、
+  覆盖多语言和边界长度，但仍在 schema max length、slot budget 和真实交付可读性内。若稳定
+  溢出来自 fixture 过长，先修 fixture；真实合理内容仍失败时再改 kit 几何或容量策略。
 
 ### 高保真范围决策
 
@@ -194,6 +223,10 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 - **视觉门禁**：每次 build 走
   `dry-run → apply → vision-check(high/medium=0) → 按 fidelity-scope 做 PNG/contact-sheet 人工逐页`。
   dry-run 与 vision-check 的溢出估算阈值不同，两个都要跑。
+- **常规 shape 也必须高保真**：不要只复刻版式语义而放松基础元素。人工 PNG 对比时逐页检查
+  文本字号、字色、大小写、对齐、行高、圆形/方块尺寸、圆内文字颜色与居中、斜线/纹理方向、
+  裁切边界和是否越界。除非为了通过可读性门禁并在 compare notes 中说明，PPTX 字号不应小于
+  参考源；圆形、badge、编号、标题这类高识别元素必须优先按参考截图尺寸还原。
 - **字号下限**：正文 ≥10.5pt；label/badge/chart/table ≥9pt；页脚/来源 8.5–9pt。
   若参考 deck 本身使用更小的风格字号（如 Swiss 标签），在 catalog
   `qualityProfile` 中声明并说明理由，不要静默违反。

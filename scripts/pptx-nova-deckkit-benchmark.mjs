@@ -24,7 +24,7 @@ const usage = `Usage:
 
 Options:
   --all                       Run all cases
-  --deckkit <id>              Filter by DeckKit id
+  --deckkit, -d <id>          Filter by DeckKit id
   --case <id>                 Run one case id or case suffix
   --out <dir>                 Output directory. Defaults to <cwd>/.tmp/pptx-nova-visual
   --repeat <n>                Repeat validate+build for timing. Defaults to 1
@@ -81,7 +81,7 @@ function parseArgs(argv) {
       args.contactSheet = false
     } else if (arg === '--update-baseline') {
       args.updateBaseline = true
-    } else if (arg === '--deckkit') {
+    } else if (arg === '--deckkit' || arg === '-d') {
       args.deckkit = valueAfter(argv, i, arg)
       i += 1
     } else if (arg === '--case') {
@@ -108,7 +108,7 @@ function parseArgs(argv) {
   }
 
   if (!args.all && !args.deckkit && !args.caseId) {
-    throw new Error(`Specify --all, --deckkit <id>, or --case <id>.\n\n${usage}`)
+    throw new Error(`Specify --all, --deckkit/-d <id>, or --case <id>.\n\n${usage}`)
   }
   if (!Number.isInteger(args.repeat) || args.repeat < 1) {
     throw new Error('--repeat must be a positive integer')

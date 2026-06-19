@@ -28,8 +28,12 @@
 - `reference-map.json`：新大纲每页到参考页型/参考 slide 的映射。
 - `content-audit.json`：Refurbish Existing Deck 时逐页对账文本、表格、chart、SmartArt、图片/媒体、
   shape/group 和 notes 的保留状态。
-- `content-audit-final.json`：Refurbish Existing Deck 时由 `pptx-nova-refurbish-audit.mjs`
-  生成的最终内容保真门禁报告；用于交付前证明页数、文本、shape type、媒体、备注和外链未未经批准减少。
+- `content-audit-final.json`：Refurbish Existing Deck 时由 `xdoc pptx refurbish-audit`
+  生成的最终内容保真门禁报告；用于交付前证明页数、文本、shape type、媒体、备注和外链未经批准减少。
+- `vision-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx vision-diff` 生成的 source/candidate
+  视觉问题 delta 报告。
+- `contact-diff.png` / `contact-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx contact-diff`
+  生成的 source/candidate 并排 contact sheet 和状态报告。
 - `outline.json`：用户大纲或标准化后的新大纲；用户已给大纲时直接采用。
 - `template_fusion.json`：仅在多来源冲突、用户 override 或需要审计时记录完整段级融合结果。
 - `deck_lock.json`：锁定参考 deck 可复用的风格/结构、模板融合、输出路径和每页页型/节奏。
@@ -204,12 +208,25 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
    和页级 chrome。只有当原颜色本身承载内容语义（例如风险红、品牌色、图例颜色、截图真实像素）时才保留，
    并在 `content-audit.json` 或 `deck_lock.assumptions[]` 中记录理由。不得留下大面积原主题色导致
    输出与目标 DeckKit 风格割裂。
-10. 生成全量候选后必须运行视觉差异复核：把源 contact sheet、已认可预览 contact sheet（如有）和候选
-    contact sheet 放在一起看。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
+10. 生成全量候选后必须运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
+    contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
     回到 `content.json` / DeckKit 页型映射重做，不能只解释为"保真优先"。
 11. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
     不能停留在第一次生成的旧映射。
-12. 候选 PPTX apply、inspect 和 PNG 复核后，运行最终 refurbish audit；默认不得有 `error`：
+12. 候选 PPTX apply、inspect 和 PNG 复核后，运行原生最终 refurbish audit；默认不得有 `error`：
+
+```bash
+xdoc pptx refurbish-audit \
+  --source source.pptx \
+  --final candidate.pptx \
+  --map reference-map.json \
+  --json > content-audit-final.json
+```
+
+如果没有拆页、合页或重排，可用 `--assume-one-to-one` 省略 `--map`，但仍必须在
+`reference-map.json` 或最终摘要中说明采用默认 1:1 映射。
+
+如果任务还需要检查 OOXML 可见文本泄漏，或需要禁止某类遗留 shape name，可额外运行 legacy supplemental audit：
 
 ```bash
 node <skill-root>/scripts/pptx-nova-refurbish-audit.mjs \
@@ -218,17 +235,19 @@ node <skill-root>/scripts/pptx-nova-refurbish-audit.mjs \
   --source-inspect reference-inspect.json \
   --final-inspect candidate-inspect.json \
   --reference-map reference-map.json \
-  --output content-audit-final.json \
+  --forbidden-shape-name-regex '<pattern>' \
+  --output content-audit-legacy.json \
   --json
 ```
 
-可按任务增加 `--forbidden-shape-name-regex <pattern>`，例如禁止空内容下方的遗留 bottom rule。
-该脚本只使用 Node 内置模块，并通过系统 `unzip` 读取 PPTX XML；不要为 skill 用户路径引入额外 npm 依赖。
+该脚本只是原生命令尚未覆盖检查的补充，不再是默认 gate；它只使用 Node 内置模块，并通过系统
+`unzip` 读取 PPTX XML，不要为 skill 用户路径引入额外 npm 依赖。
 
 翻新 run 的实操 guardrail：
 
-- 先对源 deck 跑一次 `vision-check` 作为 baseline，再对候选跑 `vision-check`。已有源稿问题要和新增问题分开记录；
-  候选不得新增 high severity，新增 medium 必须能用 PNG/contact sheet 解释并尽量修掉。
+- 对源 deck 和候选运行 `xdoc pptx vision-diff --source source.pptx --candidate candidate.pptx --json`
+  并保存为 `vision-diff.json`。已有源稿问题要和新增问题分开记录；候选不得新增 high severity，
+  新增 medium 必须能用 PNG/contact sheet 解释并尽量修掉。
 - 不要通过把旧 header、footer、页码或标题移到画布外来隐藏它们；这会制造 `shape-out-of-bounds`
   并污染后续自动修复。优先把已经镜像到新 header 的旧标题文本设为空，或在原位置把旧装饰 fill/line
   改成目标背景色并保留在画布内。
@@ -290,10 +309,11 @@ DeckKit 选择注意事项：
 - `content-validation` 除用户显式接受的 DeckKit readiness 例外外，不应有文本 fit warning。
 - `check-lock` 应为 valid，最好 warnings=0；如果资料型翻新导致连续相同节奏，可把资料页标为
   `appendix`，但必须用 contact sheet 复核整体节奏。
-- `vision-check` 默认要求 high/medium 为 0；如果源 deck baseline 已有 high/medium，则候选必须做
-  delta 判断：不得新增 high，新增 medium 需要修复或在最终摘要中列为源内容保真导致的已复核风险。
+- `vision-check` 默认要求 high/medium 为 0；如果源 deck baseline 已有 high/medium，则候选必须用
+  `vision-diff.json` 做 delta 判断：不得新增 high，新增 medium 需要修复或在最终摘要中列为源内容保真导致的已复核风险。
   low 需要人工判断。
-- PNG/contact-sheet 复核要抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。
+- PNG/contact-sheet 复核要用 `xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx --output contact-diff.png --json`
+  生成并排对比后抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。
   对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。
   同时检查 proof object 是否过满、圆角/图片/图案示例是否压住标签、空内容区域是否残留无意义横线。
 - 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram
@@ -302,5 +322,6 @@ DeckKit 选择注意事项：
 - 对富文本、tab stops、表格和 connector-heavy 页面，再做文本泄漏审计：候选可见文本中不得出现 `<a:`、
   `<p:`、`xmlns` 等 OOXML 片段；逐页 shape type 数量不得少于源页，除非已在 `content-audit.json`
   中记录为用户批准的删除或降级。
-  这些检查应优先由 `pptx-nova-refurbish-audit.mjs` 生成 `content-audit-final.json`，再由 Agent
-  人工复核机器无法判断的视觉差异、留白和 DeckKit 风格一致性。
+  常规内容保真检查应优先由 `xdoc pptx refurbish-audit` 生成 `content-audit-final.json`；OOXML 文本泄漏
+  和 forbidden shape name 暂时由 legacy supplemental audit 补充。Agent 仍需人工复核机器无法判断的视觉差异、
+  留白和 DeckKit 风格一致性。

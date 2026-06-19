@@ -36,7 +36,7 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
-- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG for audit -> lock visual target/example -> reconcile slide inventory -> editable object rebuild -> visual-delta gate -> refurbish-audit -> gates`；
+- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG/contact-diff for audit -> lock visual target/example -> reconcile slide inventory -> editable object rebuild -> vision-diff + contact-diff -> native refurbish-audit -> gates`；
   源 deck 是内容真源；默认保持页数和全部用户可见内容，任何拆页、合页、对象降级或内容丢失都必须先确认。
   翻新目标是"内容不变 + 目标 DeckKit 风格一致"：色系、字体层级、header/footer、页码、背景、规则线和 page chrome
   必须跟目标 DeckKit 对齐。
@@ -46,8 +46,10 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
   复制对象仍必须是可编辑内容，不得变成源页截图或截图 overlay。
   如果目标 DeckKit 缺少能承载源页内容的页型，必须扩展该 DeckKit 或阻塞说明缺口；不能为了套现有页型而压缩、
   改写、省略、合并或降级源内容。
-  交付前运行 `scripts/pptx-nova-refurbish-audit.mjs` 生成 `content-audit-final.json`，用当前源/候选
-  PPTX 和 inspect JSON 自动检查页数、源文本、OOXML 文本泄漏、shape type、媒体、备注、外链和 reference-map 覆盖。
+  交付前运行 `xdoc pptx refurbish-audit` 生成 `content-audit-final.json`，用当前源/候选 PPTX
+  自动检查页数、源文本、shape type、媒体、备注、外链和 reference-map 覆盖；仅在还需要 OOXML
+  可见文本泄漏扫描或 forbidden shape name regex 时，再运行 `scripts/pptx-nova-refurbish-audit.mjs`
+  作为 legacy supplemental audit。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
 - **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。
@@ -130,11 +132,11 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   目标 DeckKit 缺少合适页型时，应先扩展 DeckKit 的可复用页型/组件/slot contract，再继续生成；
   不允许为了适配现有 DeckKit 而削足适履，导致内容、省略项、对象语义或可编辑性发生变化。
   如果用户认可了某个预览页或小样，后续全量输出必须以该小样作为视觉目标，而不是退回保守保真版本。
-  全量候选必须和源 contact sheet 并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
+  全量候选必须通过 `xdoc pptx contact-diff` 和源稿并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
   若肉眼看起来"基本没变"，视为未完成，即使 check-lock 和 vision-check 通过。
-  同时必须保留源 `vision-check` baseline，并对候选做 delta 判断；源稿已有 high/medium 不等于可忽略，
+  同时必须运行 `xdoc pptx vision-diff` 做 delta 判断；源稿已有 high/medium 不等于可忽略，
   但候选不得新增 high，新增 medium 必须修复或在最终摘要中列为已复核风险。
-  最终必须运行 `pptx-nova-refurbish-audit.mjs`，确认 slide count、源文本、媒体、备注、外链和
+  最终必须运行 `xdoc pptx refurbish-audit`，确认 slide count、源文本、媒体、备注、外链和
   shape type 没有未经批准的减少；不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
@@ -251,6 +253,12 @@ PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。�
 check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> narrative quality review when required -> optional xdoc check
 ```
 
+Refurbish Existing Deck 还必须追加：
+
+```text
+vision-diff -> contact-diff -> refurbish-audit -> optional legacy supplemental audit
+```
+
 只导出或检查文件时，按 `export-and-check.md` 执行即可。
 
 ## 常用命令入口
@@ -264,6 +272,9 @@ xdoc pptx inspect input.pptx --daemon --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
 xdoc pptx vision-check out.pptx --json
+xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
+xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
+xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
 xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```

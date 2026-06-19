@@ -36,6 +36,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
+- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG -> reconcile slide inventory -> outline/reference-map -> deck_lock -> DeckKit content -> gates`；
+  源 deck 是内容真源，不要求保持原页数，密集页可拆成多页以保留可读性。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
 - **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。
@@ -85,6 +87,7 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 | 投资人 / 客户 / 董事会 / Studio / 要精控 | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-studio.md`、`references/design-lock-and-assets.md`、`references/narrative-quality.md` | `references/visual-qa-and-asset-slots.md`、`references/rich-deck-patterns.md`                                   |
 | 严格跟随已有 PPTX 模板 / 套模板改内容    | `references/common-workflow.md`、`references/template-following.md`、`references/edit-mode.md`                                                                          | `references/design-lock-and-assets.md`、`references/inspect-and-edit.md`                                        |
 | 参考 PPTX + 新大纲生成新 deck            | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                |
+| 美化 / 翻新已有 PPTX，保持原内容但换风格 | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`、`references/export-and-check.md`                                              |
 | 修改已有 `.pptx`                         | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                            |
 | 数据 + 模板 / JSON 填充                  | `references/common-workflow.md`、`references/data-driven.md`                                                                                                            | `references/tables.md`、`references/charts.md`                                                                  |
 | 品牌改装 / 品牌检查                      | `references/common-workflow.md`、`references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                |
@@ -104,6 +107,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - **Template Following**：用户要求"套这个模板"、"严格按这份 PPT"、"保留模板版式/占位符/品牌 chrome"
   并替换内容；复制源 slide 或使用模板占位符，编辑 inherited objects，不重画一个"看起来像"的版本。
 - **Reference Create**：用户给参考 PPTX，但要用新大纲或新内容生成新 deck；参考 deck 默认只读。
+- **Refurbish Existing Deck**：用户要求"美化/翻新/重写这份 PPTX"且"内容不变/保持内容"，
+  但指定新风格、DeckKit 或更高质量外观；源 PPTX 默认只读，先抽取和核对全部源页内容，再用
+  DeckKit 生成新文件。不要误判成普通 Edit，也不要为了保持原页数压缩文字导致不可读。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。

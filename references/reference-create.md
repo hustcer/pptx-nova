@@ -11,6 +11,7 @@
 | "按占位符填数据"                  | `from-data`，见 `data-driven.md`               |
 | "风格像这份 PPT，内容按新大纲"    | `extract-style` + 新建 deck                    |
 | "结构/版式也参考这份 PPT"         | `inspect` + `reference-map.json`               |
+| "美化/翻新这份 PPT，内容不变"     | Refurbish Existing Deck，见本文件第 6 节       |
 | "直接在这份 PPT 上改成新内容"     | Edit 模式，见 `inspect-and-edit.md`            |
 | "这份模板以后反复复用"            | `import-template`，见 `template-library.md`    |
 
@@ -118,3 +119,41 @@ xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 - 完成摘要必须列出参考 deck 路径、`reference-style.json`、`reference-map.json`、
   `template_fusion.json`（如有）、`deck_lock.json`、`assets_manifest.json`（如有）、最终 PPTX 路径、
   check-lock、vision-check 和 PNG 复核结果。
+
+## 6. Refurbish Existing Deck —— 保持内容的已有 deck 翻新
+
+当用户要求"美化/翻新/重写这份 PPTX"并明确说"保持内容不变"时，源 PPTX 是内容真源，
+目标是输出一个新的、可编辑的、更高质量 deck。不要把这个场景等同于普通 Edit：普通 Edit
+是在原结构上改少量对象；Refurbish 是读取源内容后用新风格重建。
+
+必做步骤：
+
+1. 同时生成 `reference-inspect.json`、`source_extract.md`（或等价文本提取）和源 deck PNG/contact sheet。
+2. 以 `reference-inspect.json.presentation.slideCount` 和 `slides[]` 作为源页清单权威。
+   Markdown/文本提取可能漏掉无文本页、SmartArt-only 页、纯图页或 preserve-only 页；必须对账并在
+   `content-audit.json` 中标出补齐方式。
+3. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。内容密集时允许 1:N 拆页；
+   不要为了保持原页数而让文字小到不可读或触发 text overflow。
+4. `deck_lock.assumptions[]` 必须披露保真边界：是否复制图片/图表/SmartArt、是否只保留可见文本、
+   是否因 DeckKit 槽位拆页、是否存在字体或资产授权风险。
+5. 写 `content.json` 前先按 DeckKit slot budget 粗分块。中英混排、长 URL、OOXML 路径、代码样文本
+   很容易被静态估算判为换行/溢出；优先插入断点、缩短 display label、拆成更多页，或换更适合密集内容的页型。
+6. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
+   不能停留在第一次生成的旧映射。
+
+DeckKit 选择注意事项：
+
+- 如果用户显式指定某个 DeckKit，即使该 DeckKit 不是 delivery-ready，也可以继续，但必须在
+  `deck_lock.assumptions[]` 和最终摘要中记录 readiness 例外，并用 `vision-check` 与 PNG 复核补足风险。
+- 若指定 DeckKit 缺少适合密集内容的页型，不要硬塞到表格/菜单槽位。优先拆页；若仍不稳，
+  应扩展 DeckKit 增加 dense-text / ledger / comparison 等可复用页型，再重新生成。
+- 图片、图表、SmartArt 和复杂媒体只有在用户明确允许复用、来源可验证且 DeckKit 支持对应槽位时才复制。
+  否则保留其可见文本、源页标记和 preserve-only 说明，不要生成伪截图或 overlay。
+
+验证侧重点：
+
+- `content-validation` 除用户显式接受的 DeckKit readiness 例外外，不应有文本 fit warning。
+- `check-lock` 应为 valid，最好 warnings=0；如果资料型翻新导致连续相同节奏，可把资料页标为
+  `appendix`，但必须用 contact sheet 复核整体节奏。
+- `vision-check` high/medium 必须为 0；low 需要人工判断。
+- PNG/contact-sheet 复核要抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。

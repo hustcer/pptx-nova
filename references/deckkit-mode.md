@@ -174,10 +174,11 @@ sheets to WebP, and writes only changed hashes. When DeckKit code, content, and
 xdoc output logic do not change, repeated `just deckkit-examples` runs should
 not create git-visible changes.
 
-`just deckkit-examples all` runs every golden, stress, and mixed-language visual
-benchmark. Add `--update-baseline` only after reviewing the current low-severity
-vision findings; it writes reviewed `*.vision-baseline.json` files so future
-runs surface only new or changed low findings.
+`just deckkit-examples all` runs every visual benchmark case currently registered
+in `benchmarks/visual/index.json`. Add `--update-baseline` only after reviewing
+the current low-severity vision findings; it writes reviewed
+`*.vision-baseline.json` files so future runs surface only new or changed low
+findings.
 
 ## Deep References
 

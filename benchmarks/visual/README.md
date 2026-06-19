@@ -40,8 +40,10 @@ For each case:
 2. Build patch with the DeckKit example build entry.
 3. Apply the patch, run `vision-check`, classify low issues against the DeckKit
    visual policy and reviewed baseline, and render PNG preview artifacts.
-4. Only promote a DeckKit to `production` after golden, stress, and mixed-language
-   cases pass the configured gates.
+4. Only promote a DeckKit after the repo-indexed benchmark cases pass. Golden is
+   the minimum committed case for new DeckKits; stress and mixed-language inputs
+   must still be reviewed, but may live in `.tmp` unless they are useful as
+   long-term visual regression fixtures.
 
 ## Low-Severity Baseline Lifecycle
 
@@ -102,12 +104,14 @@ node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
   --target candidate
 ```
 
-The audit reads `catalog.json`, `index.json`, and the generated
-`summary.json` files. It reports whether the DeckKit is ready for candidate,
-delivery, and default use. Delivery/default should remain blocked when PNG
-preview or contact-sheet artifacts are skipped, missing, empty, or out of sync
-with the slide count, or when `vision.lowBuckets.new` /
-`vision.lowBuckets.changed` is non-zero.
+The audit reads `catalog.json`, `index.json`, and the generated `summary.json`
+files. Golden is required. Any additional case registered for the DeckKit in
+`index.json` is also gated, so existing stress and mixed-language fixtures keep
+their coverage while new DeckKits can commit only golden. It reports whether the
+DeckKit is ready for candidate, delivery, and default use. Delivery/default
+should remain blocked when PNG preview or contact-sheet artifacts are skipped,
+missing, empty, or out of sync with the slide count, or when
+`vision.lowBuckets.new` / `vision.lowBuckets.changed` is non-zero.
 
 To write machine-verifiable benchmark metadata back to `catalog.json`, run:
 
@@ -119,8 +123,9 @@ node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
 
 This updates `quality.lastBenchmark`, aggregate `quality.vision`, and
 `quality.benchmark` from `.tmp/pptx-nova-visual/<deckkit>/<case>/summary.json`.
-Aggregate vision metadata includes low buckets across all required cases. It
-does not change readiness by default and does not invent manual PNG review data.
+Aggregate vision metadata includes low buckets across all repo-indexed gated
+cases. It does not change readiness by default and does not invent manual PNG
+review data.
 
 Manual PNG review remains a separate human step:
 
@@ -149,7 +154,9 @@ node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
   --write
 ```
 
-Do not run the promotion command until all required PNG reviews are complete.
+Do not run the promotion command until all repo-indexed PNG reviews are complete
+and any non-committed stress/mixed-language reviews required by the DeckKit
+creation workflow have been recorded in `.tmp`.
 
 Current consulting-dark cases:
 

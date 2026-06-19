@@ -9,7 +9,8 @@ const WORK_ROOT = process.cwd()
 const VISUAL_ROOT = join(SKILL_ROOT, 'benchmarks/visual')
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const DEFAULT_OUT = join(WORK_ROOT, '.tmp/pptx-nova-visual')
-const REQUIRED_KINDS = ['golden', 'stress', 'mixed-language']
+const MINIMUM_REQUIRED_KINDS = ['golden']
+const PREFERRED_KIND_ORDER = ['golden', 'stress', 'mixed-language']
 const READINESS = ['experimental', 'candidate', 'production', 'default']
 
 const usage = `Usage:
@@ -133,6 +134,23 @@ function summaryPathFor(outDir, benchCase) {
   return join(outDir, benchCase.deckkit, caseSlug(benchCase), 'summary.json')
 }
 
+function kindRank(kind) {
+  const rank = PREFERRED_KIND_ORDER.indexOf(kind)
+  return rank === -1 ? PREFERRED_KIND_ORDER.length : rank
+}
+
+function orderedBenchmarkCases(deckkitCases) {
+  return [...deckkitCases].sort((a, b) => {
+    const rankDiff = kindRank(a.kind) - kindRank(b.kind)
+    if (rankDiff !== 0) return rankDiff
+    return a.id.localeCompare(b.id, 'en')
+  })
+}
+
+function uniqueKinds(deckkitCases) {
+  return [...new Set(orderedBenchmarkCases(deckkitCases).map((benchCase) => benchCase.kind))]
+}
+
 function countBlockingFitDiagnostics(fitDiagnostics) {
   return fitDiagnostics.filter((item) => item.blocking === true || item.severity === 'error').length
 }
@@ -219,14 +237,14 @@ function collectBenchmark({ index, outDir, deckkit, date }) {
   const indexRoot = dirname(index.__path)
   const blockers = []
   const cases = []
+  const indexedKinds = uniqueKinds(deckkitCases)
 
-  for (const kind of REQUIRED_KINDS) {
-    const benchCase = deckkitCases.find((candidate) => candidate.kind === kind)
-    if (!benchCase) {
+  for (const kind of MINIMUM_REQUIRED_KINDS) {
+    if (!indexedKinds.includes(kind))
       blockers.push(`missing ${kind} case in visual benchmark index`)
-      continue
-    }
+  }
 
+  for (const benchCase of orderedBenchmarkCases(deckkitCases)) {
     const summaryPath = summaryPathFor(outDir, benchCase)
     if (!existsSync(summaryPath)) {
       blockers.push(`missing summary for ${benchCase.id}; run benchmark first`)
@@ -274,7 +292,9 @@ function collectBenchmark({ index, outDir, deckkit, date }) {
       visualIndex: rel(resolve(index.__path)),
       out: rel(outDir),
     },
-    requiredKinds: REQUIRED_KINDS,
+    minimumRequiredKinds: MINIMUM_REQUIRED_KINDS,
+    requiredKinds: indexedKinds.length > 0 ? indexedKinds : MINIMUM_REQUIRED_KINDS,
+    gatedKinds: indexedKinds,
     passed: blockers.length === 0,
     vision,
     cases,

@@ -9,7 +9,8 @@ const WORK_ROOT = process.cwd()
 const VISUAL_ROOT = join(SKILL_ROOT, 'benchmarks/visual')
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const DEFAULT_OUT = join(WORK_ROOT, '.tmp/pptx-nova-visual')
-const REQUIRED_KINDS = ['golden', 'stress', 'mixed-language']
+const MINIMUM_REQUIRED_KINDS = ['golden']
+const PREFERRED_KIND_ORDER = ['golden', 'stress', 'mixed-language']
 const READINESS = ['experimental', 'candidate', 'production', 'default']
 const VISUAL_GRAMMAR_SCHEMA_VERSION = 'pptx-nova-visual-grammar/v1'
 const REQUIRED_VISUAL_GRAMMAR_ARRAYS = [
@@ -27,6 +28,8 @@ const usage = `Usage:
 Options:
   --deckkit <id>          DeckKit id to audit
   --out <dir>             Benchmark output directory. Defaults to <cwd>/.tmp/pptx-nova-visual
+  --catalog <path>        Catalog path. Defaults to <skill-root>/assets/deckkits/catalog.json
+  --visual-index <path>   Visual benchmark index path. Defaults to <skill-root>/benchmarks/visual/index.json
   --target <level>        candidate|delivery|default. Defaults to candidate
   --json                  Print machine-readable audit result
   --help                  Show this help
@@ -39,6 +42,8 @@ function parseArgs(argv) {
   const args = {
     deckkit: '',
     out: DEFAULT_OUT,
+    catalog: CATALOG_PATH,
+    visualIndex: join(VISUAL_ROOT, 'index.json'),
     target: 'candidate',
     json: false,
   }
@@ -55,6 +60,12 @@ function parseArgs(argv) {
       i += 1
     } else if (arg === '--out') {
       args.out = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else if (arg === '--catalog') {
+      args.catalog = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else if (arg === '--visual-index') {
+      args.visualIndex = resolve(valueAfter(argv, i, arg))
       i += 1
     } else if (arg === '--target') {
       args.target = valueAfter(argv, i, arg)
@@ -87,6 +98,23 @@ function caseSlug(benchCase) {
 
 function summaryPathFor(outDir, benchCase) {
   return join(outDir, benchCase.deckkit, caseSlug(benchCase), 'summary.json')
+}
+
+function kindRank(kind) {
+  const rank = PREFERRED_KIND_ORDER.indexOf(kind)
+  return rank === -1 ? PREFERRED_KIND_ORDER.length : rank
+}
+
+function orderedBenchmarkCases(deckkitCases) {
+  return [...deckkitCases].sort((a, b) => {
+    const rankDiff = kindRank(a.kind) - kindRank(b.kind)
+    if (rankDiff !== 0) return rankDiff
+    return a.id.localeCompare(b.id, 'en')
+  })
+}
+
+function uniqueKinds(deckkitCases) {
+  return [...new Set(orderedBenchmarkCases(deckkitCases).map((benchCase) => benchCase.kind))]
 }
 
 function countFitErrors(summary) {
@@ -208,20 +236,21 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
   const deckkitCases = index.cases.filter((benchCase) => benchCase.deckkit === deckkit)
   const cases = []
   const benchmarkBlockers = []
+  const indexedKinds = uniqueKinds(deckkitCases)
 
-  for (const kind of REQUIRED_KINDS) {
-    const benchCase = deckkitCases.find((candidate) => candidate.kind === kind)
-    if (!benchCase) {
+  for (const kind of MINIMUM_REQUIRED_KINDS) {
+    if (!indexedKinds.includes(kind)) {
       benchmarkBlockers.push(`missing ${kind} case in visual benchmark index`)
       cases.push({ kind, caseId: '', summaryPath: '', exists: false, passed: false })
-      continue
     }
+  }
 
+  for (const benchCase of orderedBenchmarkCases(deckkitCases)) {
     const summaryPath = summaryPathFor(outDir, benchCase)
     if (!existsSync(summaryPath)) {
       benchmarkBlockers.push(`missing summary for ${benchCase.id}; run benchmark first`)
       cases.push({
-        kind,
+        kind: benchCase.kind,
         caseId: benchCase.id,
         summaryPath: relative(WORK_ROOT, summaryPath),
         exists: false,
@@ -261,7 +290,7 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
     }
 
     cases.push({
-      kind,
+      kind: benchCase.kind,
       caseId: benchCase.id,
       summaryPath: relative(WORK_ROOT, summaryPath),
       exists: true,
@@ -292,7 +321,12 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
     })
   }
 
-  return { cases, benchmarkBlockers }
+  return {
+    minimumRequiredKinds: MINIMUM_REQUIRED_KINDS,
+    gatedKinds: indexedKinds,
+    cases,
+    benchmarkBlockers,
+  }
 }
 
 function auditCatalog(entry) {
@@ -516,8 +550,8 @@ function printHuman(result) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2))
-  const catalog = readJson(CATALOG_PATH)
-  const index = readJson(join(VISUAL_ROOT, 'index.json'))
+  const catalog = readJson(args.catalog)
+  const index = readJson(args.visualIndex)
   const entry = catalog.entries.find((candidate) => candidate.id === args.deckkit)
   const catalogAudit = auditCatalog(entry)
   const benchmarkAudit = auditBenchmarkCases({
@@ -532,8 +566,8 @@ function main() {
     target: args.target,
     passed: eligibility[args.target].ready,
     paths: {
-      catalog: relative(SKILL_ROOT, CATALOG_PATH),
-      visualIndex: relative(SKILL_ROOT, join(VISUAL_ROOT, 'index.json')),
+      catalog: relative(SKILL_ROOT, args.catalog),
+      visualIndex: relative(SKILL_ROOT, args.visualIndex),
       benchmarkOut: relative(WORK_ROOT, args.out),
     },
     catalog: {

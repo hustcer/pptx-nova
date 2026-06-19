@@ -128,6 +128,29 @@ xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 目标是输出一个新的、可编辑的、更高质量 deck。不要把这个场景等同于普通 Edit：普通 Edit
 是在原结构上改少量对象；Refurbish 是读取源内容后用新风格重建。
 
+### 视觉目标硬定义
+
+"保持内容不变"不等于"视觉上尽量不动"。当用户说美化、翻新、换风格、按某个 DeckKit
+完成时，交付物必须在 contact sheet 上明显区别于源稿：页面网格、标题层级、内容重排、
+留白、规则线、色彩节奏和证明对象摆放都应体现新风格。只做这些事情不算完成翻新：
+
+翻新重建的目标是"源内容不变 + 目标 DeckKit 风格一致"。目标 DeckKit 的 palette、字体层级、
+header/footer、页码、背景、规则线、图标语言、表格/图表外观和 page chrome 都是视觉合同。
+可以复制原 slide 或原对象作为保真起点，但复制后必须编辑对象本身并重新主题化，而不是把源页
+截图化、overlay 化，或保留原 deck 的色系、页眉、页脚和 chrome。`deck_lock.visualTarget`
+应记录目标 DeckKit 的 palette/chrome/typography 规则；`content-audit.json` 可把这类处理记录为
+`preserved object + restyled` 的说明，但状态仍应落在 `preserved` 或 `rebuilt-editable` 等合法枚举。
+
+- 在源页上加页码、kicker、细红线、淡背景或轻量边框。
+- 保留原版式和原对象位置，只微调颜色或字体。
+- 用源 slide 渲染截图、整页图片或大面积透明 overlay 掩盖旧版式。
+- 为了保真把绝大多数页退回源稿样貌，却声称通过了检查。
+
+如果用户先要求预览前几页并认可其中某一版，全量输出必须把该预览版写入
+`deck_lock.visualTarget`，并以它作为视觉合同。后续全量生成前，先打开预览 contact sheet
+和源 contact sheet，明确记录哪些视觉特征要扩展到全 deck。不能因为遇到表格、chart 或
+SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略是"对象保留 + 页面重排"。
+
 ### 内容不变的硬定义
 
 除非用户明确允许，"内容不变"默认包含：
@@ -139,9 +162,16 @@ xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 - 图片、logo、图标、截图、媒体、OLE、公式、形状组合和其它用户可见对象的语义存在。
 - 每页的内容归属关系：源 slide N 的内容必须能在输出中被明确追溯到相同 slide，或用户确认过的拆分/合并 slide。
 
-禁止把"保持内容"降级理解为"只保留可见文本"。如果 DeckKit、xdoc 或当前工具链不能保真复制某类对象，
-必须停下来请求确认：复制原对象、截图保留、重建为可编辑对象、只保留文本、还是放弃该翻新。不能静默丢弃
-chart、SmartArt、shape、图片、媒体或备注，也不能用 `deck_lock.assumptions[]` 把未经确认的内容损失合理化。
+禁止把"保持内容"降级理解为"只保留可见文本"，也禁止把源 slide 渲染 PNG 当作内容保真捷径。
+如果 DeckKit、xdoc 或当前工具链不能保真复制某类对象，默认处理是阻塞并说明能力缺口；优先选项只能是
+复制原对象、用可编辑 shape/table/chart/picture 重建、或调整页型后重建。只有用户明确批准降低可编辑性时，
+才可讨论截图保留、只保留文本或放弃该翻新。不能静默丢弃 chart、SmartArt、shape、图片、媒体或备注，
+也不能用 `deck_lock.assumptions[]` 把未经确认的内容损失合理化。
+
+目标 DeckKit 只是视觉和组件工具，不是内容裁剪器。如果现有页型、slot 数量、表格/图表组件或密度预算
+无法完整承载源 slide 的内容，必须先扩展目标 DeckKit 的页型、组件或 slot contract，再重新生成；
+不能为了塞进现有页型而改写标题、删减 bullet、合并表格列、丢弃图片/连接线/备注、降低对象可编辑性，
+或把源页内容改成摘要。扩展 DeckKit 是翻新流程的正常步骤，不是最后手段。
 
 必做步骤：
 
@@ -151,27 +181,70 @@ chart、SmartArt、shape、图片、媒体或备注，也不能用 `deck_lock.as
    `content-audit.json` 中标出补齐方式。
 3. 建立 `content-audit.json`，逐页记录 `text`、`tables`、`charts`、`smartArtOrDiagrams`、
    `imagesAndMedia`、`groupsAndShapes`、`notes`、`unsupportedObjects` 的数量、摘要、输出处理方式和状态。
-   每项状态只能是 `preserved`、`rebuilt-editable`、`rebuilt-visual`、`user-approved-drop` 或 `blocked`。
-   交付前不得存在 `blocked`，也不得出现未经用户确认的 `user-approved-drop`。
+   每项状态只能是 `preserved`、`rebuilt-editable`、`user-approved-raster`、`user-approved-drop` 或 `blocked`。
+   默认交付不得存在 `blocked`，也不得出现未经用户确认的 `user-approved-raster` / `user-approved-drop`。
+   `user-approved-raster` 只能用于用户明确批准的降级；不能由 Agent 为了省事自行选择。
 4. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。默认 `1:1` 保持页数；
    任何 `1:N` 拆页、`N:1` 合页、重排序或 appendix 化都必须先让用户确认，并写入 `approvedChanges[]`。
    不要为了保持原页数而让文字小到不可读或触发 text overflow；但也不能擅自改变页数。
 5. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
-   如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或重建，状态必须是 `blocked`，先询问用户。
+   如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。
 6. 写 `content.json` 前先按 DeckKit slot budget 粗分块。中英混排、长 URL、OOXML 路径、代码样文本
    很容易被静态估算判为换行/溢出；优先插入断点、缩短 display label、拆成更多页，或换更适合密集内容的页型。
-7. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
-   不能停留在第一次生成的旧映射。
+7. 若目标 DeckKit 没有匹配源页内容结构的页型，先扩展 DeckKit（新增可复用页型、组件、slot schema 和
+   catalog/layout contract），再写 `content.json` 或 `patch.json`。不得先把源内容裁剪成现有页型能容纳的形状。
+8. 源 slide 含原生 styled table、chart 或富样式图形时，优先复制/保留源对象本身，再添加新风格 chrome。
+   不要为了套 DeckKit 表格/卡片页型而把源原生表格降级成视觉表格或纯文本重画；这会丢失单元格
+   fill、run 样式、对齐、合并、边框和 PowerPoint table 语义。确实需要重建时，必须在
+   `content-audit.json` 中把该项标为 `rebuilt-editable`，并逐项验证样式等价。
+9. 对复制或保留的 chart、table、shape、icon、SmartArt 和图片对象，尽量把 fill、line、text、
+   gridline、label 和 accent colors 映射到目标 DeckKit palette，并统一目标字体层级、header/footer
+   和页级 chrome。只有当原颜色本身承载内容语义（例如风险红、品牌色、图例颜色、截图真实像素）时才保留，
+   并在 `content-audit.json` 或 `deck_lock.assumptions[]` 中记录理由。不得留下大面积原主题色导致
+   输出与目标 DeckKit 风格割裂。
+10. 生成全量候选后必须运行视觉差异复核：把源 contact sheet、已认可预览 contact sheet（如有）和候选
+    contact sheet 放在一起看。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
+    回到 `content.json` / DeckKit 页型映射重做，不能只解释为"保真优先"。
+11. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
+    不能停留在第一次生成的旧映射。
+
+对象保留但版式重排的推荐策略：
+
+- 表格、chart、SmartArt、媒体等复杂对象优先保留为原生对象；围绕它们重做标题区、网格、留白和说明层级。
+- 图片页可以保留源图片对象，但应按新 DeckKit 的网格位置重新摆放，而不是保留原图坐标。
+- 图示页若源对象可编辑且语义简单，可用 DeckKit 原生 shape 重建；若复杂对象不能等价重建，应保留源对象并显著调整页面框架。
+- 复制原 slide 后，不要把它当成最终页；先移除或替换原 header/footer、页码、母版残留、背景和旧品牌
+  chrome，再套目标 DeckKit 的 page chrome、色系和字体层级。
+- 对 feature-test、组件验收、产品截图走查这类“视觉效果本身就是内容”的 deck，也必须逐元素重建为
+  可编辑对象：图片使用源图片对象或重新插入图片并设置可编辑 crop/line/effect；连接线用 connector；
+  图案、形状、裁剪、文本和表格用原生 shape/table/text 重建。源页 PNG/contact sheet 只能作为视觉对照，
+  不能嵌入输出页。若当前 patch 层不能逐对象表达 filter、clip、line、transition、hyperlink tooltip 等属性，
+  该项标为 `blocked`，不要用“源页视觉证据面板 + 可编辑语义卡片”冒充内容保留。
+- 如果当前 xdoc patch 缺少单对象复制能力，可在 run 目录中用包级 XML 方式作为保真逃生口，但必须重新 inspect
+  输出，确认 `shapeType`、table/chart 数量和对象名称符合 `content-audit.json`，并在最终摘要列为风险/技术债。
 
 DeckKit 选择注意事项：
 
 - 如果用户显式指定某个 DeckKit，即使该 DeckKit 不是 delivery-ready，也可以继续，但必须在
   `deck_lock.assumptions[]` 和最终摘要中记录 readiness 例外，并用 `vision-check` 与 PNG 复核补足风险。
-- 若指定 DeckKit 缺少适合密集内容的页型，不要硬塞到表格/菜单槽位。优先拆页；若仍不稳，
-  应扩展 DeckKit 增加 dense-text / ledger / comparison 等可复用页型，再重新生成。
+- 若指定 DeckKit 缺少适合源内容的页型，不要硬塞到表格/菜单/卡片槽位。优先判断是否需要扩展 DeckKit；
+  只有用户确认可拆页时才拆页，且拆页不能改变内容归属或遗漏任何对象。若仍不稳，应扩展 DeckKit 增加
+  dense-text / ledger / comparison / diagram / media-grid / object-preserve 等可复用页型，再重新生成。
+  不能把“DeckKit 没有合适页型”当作删减、摘要化或降低保真的理由。
 - 图片、图表、SmartArt 和复杂媒体属于内容资产。若用户要求内容完全不变，优先复用源对象或重建等价
   可编辑对象；不能复制或重建时必须阻塞确认。不要默认只保留可见文本、源页标记或 preserve-only 说明，
-  也不要生成伪截图或 overlay。对第三方品牌/授权不明资产，先在 `assets_manifest.json` 标风险并请求确认。
+  也不要生成伪截图、源页截图或 overlay。对第三方品牌/授权不明资产，先在 `assets_manifest.json` 标风险并请求确认。
+- 对表格页尤其要区分 "DeckKit table look" 和 "source table fidelity"。如果用户强调表格内容和样式不变，
+  DeckKit 只能提供页级网格、标题、规则线或背景，不能替换源表格对象。
+- 翻新类 DeckKit 若需要新增 evidence / gallery / table / feature 页型，不能只改 `.kit.mjs`：
+  同步更新 `catalog.json` 的 `coverage.slideTypes`、`supportedSlideTypes`、`visualGrammar.slideRhythm`、
+  `layoutContract.slideTypes`、`diversityGate.groups`，并更新 `schemas/content.schema.json` 的枚举。
+  否则 `validate-content` 会报 unknown slide type，或 diversity gate 会把 1:1 翻新误判为缺少 roadshow 的
+  anchor / close。
+- 图片、截图和其它资源路径不要把长 run 目录路径直接写进 `content.json` 的文本字段；优先使用相对
+  `assetRoot` 的短路径，并在 `xdoc pptx apply` 时传 `--asset-root <run-dir>`。这里的截图指用户提供、
+  源 deck 内已有的截图对象或经用户批准的新截图资产，不包括源 slide 渲染 PNG。当前文本 fit 检查会扫描
+  content 中的长 Latin token，长绝对路径容易被误判为显示文本溢出。
 
 验证侧重点：
 
@@ -180,6 +253,7 @@ DeckKit 选择注意事项：
   `appendix`，但必须用 contact sheet 复核整体节奏。
 - `vision-check` high/medium 必须为 0；low 需要人工判断。
 - PNG/contact-sheet 复核要抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。
+  对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。
 - 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram
   数量、图片/媒体数量、备注存在性和 `reference-map.json` 覆盖率。任何减少、缺页、未映射对象或未经批准的
   页数变化都是交付阻塞项。

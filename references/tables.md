@@ -10,6 +10,18 @@ table 页优先保留 PowerPoint 原生 table 语义；只有 inspect 证明源 
 生成 `patch.json` 后由 `pptx-nova-check-lock.mjs` 检查明显行列错误，再交给 dry-run /
 vision-check / PNG 复核。
 
+在已有 deck 美化 / 翻新场景中，源表格若是 `shapeType == "table"` 且用户要求内容或样式不变，
+默认处理方式是 `preserved`：复制或保留原生 table 对象，只在页级添加新风格 chrome。不要用
+DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代，除非已逐项重建并验证这些语义：
+单元格 fill、run 样式、字号、颜色、加粗/斜体/下划线/删除线、对齐、边框、合并、表格 styleId、
+行高和列宽。无法验证等价时，`content-audit.json.tables.status` 必须保持 `preserved` 或
+`blocked`，不能写成已完成的 `rebuilt-editable`。
+
+若同一任务还要求明显翻新页面，保留 table 不代表整页保持原样。正确处理是：保留原生 table 的 XML /
+对象语义，同时重做页眉、标题层级、网格、留白、说明和页脚节奏；表格可以在新网格内重新定位或缩放，
+但不能丢失 PowerPoint 原生 table。最终必须重新 `inspect` 输出 PPTX，并把对应页记录为
+`shapeType == "table"`；只看 PNG 像表格不算通过。
+
 最小检查清单：
 
 - `add-table` 必须有正数 `rows` / `cols`。
@@ -17,6 +29,8 @@ vision-check / PNG 复核。
 - `data` 行列数和声明表格尺寸不一致时，显式写 `resize: true`，否则修正尺寸或数据。
 - header、单位、时间范围、来源说明必须随表格进入 content/patch，不能只在备注里解释。
 - 单元格字号和边距要满足 deck 的可读性红线；PNG 复核仍要看截断、贴边、合并区域和网格线。
+- 翻新后重新 `inspect` 输出 PPTX，确认需要保真的表格仍然是 `shapeType == "table"`，而不是一组
+  `textBox` / `autoShape`。
 
 ## 先分辨：真表格还是视觉表格
 

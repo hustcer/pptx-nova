@@ -36,8 +36,16 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
-- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG -> reconcile slide inventory -> outline/reference-map -> deck_lock -> DeckKit content -> gates`；
+- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG for audit -> lock visual target/example -> reconcile slide inventory -> editable object rebuild -> visual-delta gate -> gates`；
   源 deck 是内容真源；默认保持页数和全部用户可见内容，任何拆页、合页、对象降级或内容丢失都必须先确认。
+  翻新目标是"内容不变 + 目标 DeckKit 风格一致"：色系、字体层级、header/footer、页码、背景、规则线和 page chrome
+  必须跟目标 DeckKit 对齐。
+  "美化/翻新"同时要求可见视觉差异：不能只加页眉、细线、页码或轻量 chrome 后交付。
+  源页 PNG/contact sheet 只能用于审计和对比，禁止把原页面整页截图嵌入输出页来替代可编辑重建。
+  必要时可以复制原 slide 或原对象作为保真起点，再调整主题色、布局、header/footer 和目标 DeckKit chrome；
+  复制对象仍必须是可编辑内容，不得变成源页截图或截图 overlay。
+  如果目标 DeckKit 缺少能承载源页内容的页型，必须扩展该 DeckKit 或阻塞说明缺口；不能为了套现有页型而压缩、
+  改写、省略、合并或降级源内容。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
 - **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。
@@ -110,8 +118,18 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - **Refurbish Existing Deck**：用户要求"美化/翻新/重写这份 PPTX"且"内容不变/保持内容"，
   但指定新风格、DeckKit 或更高质量外观；源 PPTX 默认只读，先抽取和核对全部源页内容，再用
   DeckKit 生成新文件。不要误判成普通 Edit，也不要为了保持原页数压缩文字导致不可读。
+  翻新重建必须在内容不变的基础上采用目标 DeckKit 的风格，尤其保持目标色系一致；不能为了风格一致
+  改写或删减内容，也不能为了内容保真而完全保留原 deck 的视觉系统。
   "内容不变"默认包含文本、表格、chart、SmartArt、图片、图标、媒体、备注和页级结构的用户可见语义；
   不能保真时必须阻塞并请求确认，不能静默丢弃或只保留可见文本。
+  翻新输出默认必须是可编辑对象重建：不能把源 slide 的渲染截图、整页图片或截图面板当作内容保留策略。
+  允许把原 slide 或原对象复制到输出 deck 作为保真起点，但随后必须重新主题化：映射到目标 DeckKit
+  palette、字体层级、header/footer、页码、背景和 chrome；不要把原 deck 的色系和页眉页脚原样带入。
+  目标 DeckKit 缺少合适页型时，应先扩展 DeckKit 的可复用页型/组件/slot contract，再继续生成；
+  不允许为了适配现有 DeckKit 而削足适履，导致内容、省略项、对象语义或可编辑性发生变化。
+  如果用户认可了某个预览页或小样，后续全量输出必须以该小样作为视觉目标，而不是退回保守保真版本。
+  全量候选必须和源 contact sheet 并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
+  若肉眼看起来"基本没变"，视为未完成，即使 check-lock 和 vision-check 通过。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。
@@ -208,6 +226,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。机器门禁不能看出所有像素级缺陷，
 尤其要检查：
 
+- 对翻新 deck，先问一个更直接的问题：不看文件名时，这份输出是否明显是重新设计过的版本？
+  若只是原稿加线、加页码、加浅色背景或局部 accent，不能交付为"翻新/美化"。
 - 标题换行后是否撞到装饰、分隔线、页眉或 logo。
 - 正文、来源、脚注、图例、表格单元格是否被截断、重叠或贴边。
 - 相邻卡片、列、图标圆、编号圆、箭头和连接线是否对齐，间距是否忽大忽小。

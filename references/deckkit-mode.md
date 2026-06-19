@@ -18,6 +18,12 @@ node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery
 
 Use the selected DeckKit's `visualGrammar` as the deck's visual contract:
 positioning, mood, signature elements, composition rules, and avoid list.
+For refurbishing or rebuilding an existing deck, that contract also covers the
+target palette, typography hierarchy, header/footer, page numbers, backgrounds,
+rules, chart/table treatments, and page chrome. If you copy a source slide or
+source object for fidelity, re-theme the editable object into the target DeckKit
+style; do not preserve the source deck's old color system, master chrome, header,
+or footer unless that visible detail is itself user-confirmed content.
 
 For the selected DeckKit, run readiness:
 
@@ -143,6 +149,25 @@ Do not fall back to a one-off large patch just because a page is hard. If the
 deck needs a new reusable page type, component, or visual language, read
 `deck-generator-workflow.md` and create or extend a DeckKit. The old showcase examples have retired as the production path; production and regression now
 flow through DeckKit plus `benchmarks/visual/`.
+
+For refurbishing or rebuilding an existing deck, the source content contract
+outranks the current DeckKit catalog. If no existing page type can carry the
+source slide's full text, table/chart semantics, media objects, diagrams, notes,
+or editability requirements, extend the target DeckKit first. Do not squeeze the
+source into an unsuitable card/table/menu layout by summarizing, dropping
+objects, merging fields, rasterizing editable content, or changing slide
+ownership.
+
+When extending an existing DeckKit, update every public contract in the same
+change: the `.kit.mjs` dispatch, `assets/deckkits/catalog.json`
+(`coverage.slideTypes`, `supportedSlideTypes`, `layoutContract.slideTypes`,
+`visualGrammar.slideRhythm`, and `diversityGate.groups`), and
+`schemas/content.schema.json`. If the new page type consumes image assets such
+as user-provided photos, product screenshots, or source deck picture objects,
+keep `content.json` paths short and resolve them with `--asset-root` so fit
+diagnostics do not treat long filesystem paths as visible text. For refurbish
+workflows, do not design page types that depend on rendered source-slide
+screenshots; those PNG files are review evidence, not deliverable content.
 
 Use `assets/examples/deck-generator-template.mjs` only as a development starting
 point for creating or extending DeckKits. Do not use it as the default delivery

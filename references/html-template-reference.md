@@ -63,6 +63,12 @@ Do not transfer:
 - entry/hover animations, JS transition timing, click-only affordances
 - HTML-only responsive behavior that has no PPTX editing equivalent
 - one-off remote images, screenshots, CSS background images, or decorative media
+- full-slide SVG/bitmap texture backgrounds as direct `add-picture` layers unless a minimal xdoc render experiment
+  proves they do not create placeholder overlays or cover editable content
+
+For paper grain, hatch, noise, SVG pattern, or CSS texture effects, prefer editable PPTX approximations: flat fills,
+thin rules, repeated native shapes, low-density hatch marks, or an explicit known limit. If a picture background is
+unavoidable, validate layer order in the rendered PNG and in PowerPoint before freezing the kit.
 
 ## Unit Mapping
 
@@ -79,7 +85,9 @@ visual reference, then choose stable PPTX point sizes and text box heights.
 ## Phase 2 Notes
 
 - Use the HTML example text only in `examples/<id>-content.json` and benchmark fixtures.
-- Run content leak audit against a non-reference content patch, not the golden example patch.
+- Run content leak audit against a non-reference content patch, not the golden example patch. The golden patch is
+  expected to contain reference text because its content fixture is the HTML example; it cannot distinguish legitimate
+  content output from `.kit.mjs` hard-coded leaks.
 - For HTML templates, catalog `knownLimits` should disclose:
   - source is HTML, not PPTX
   - browser-only interactions were excluded

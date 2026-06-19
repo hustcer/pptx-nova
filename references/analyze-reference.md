@@ -53,7 +53,7 @@ nu tools/unpack-pptx.nu <ref.pptx> -f "某文案"  # 全文搜索定位文案所
 inspect 用于快速定位 shape、文本、图片、关系和页型分布。
 
 ```bash
-xdoc pptx inspect <ref.pptx> --daemon --json > .tmp-deckkit-<id>/ref-inspect.json
+xdoc pptx inspect <ref.pptx> --daemon --json > .tmp/deckkit-<id>/ref-inspect.json
 ```
 
 使用方式：
@@ -67,7 +67,7 @@ xdoc pptx inspect <ref.pptx> --daemon --json > .tmp-deckkit-<id>/ref-inspect.jso
 ## 3. 生成参考 PNG 基准
 
 ```bash
-xdoc convert <ref.pptx> --to png -o .tmp-deckkit-<id>/ref-previews --overwrite --contact-sheet
+xdoc convert <ref.pptx> --to png -o .tmp/deckkit-<id>/ref-previews --overwrite --contact-sheet
 ```
 
 先 Read `ref-previews/contact-sheet.png` 总览全 deck 的配色节奏、页型分布、chrome

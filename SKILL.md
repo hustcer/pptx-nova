@@ -99,7 +99,7 @@ test ! -e skills/pptx-nova/assets/examples/<id>
   │
   └─ Phase 2  组件化抽象（第二交付物）  → references/componentize.md
        抽 <id>.kit.mjs + schemas + content.json + catalog 注册
-       → slots/slot-consistency → benchmark(golden/stress/mixed-language)
+       → slots/slot-consistency → benchmark(golden)
        → validation tests + content leak regression → readiness audit
 ```
 
@@ -107,6 +107,22 @@ test ! -e skills/pptx-nova/assets/examples/<id>
 范围内逐页对比通过的重建产物，就没有资格冻结 kit。这里的高保真指无 hard defect 的
 视觉/结构基线，不要求像素级一致；最终 kit 只保留可复用视觉系统，不保留业务内容。
 两阶段的产物都保留在 run 目录中。
+
+## Skill 反馈闭环（必做）
+
+每次使用本 skill 创建、修复或扩展 DeckKit 时，都要把 **deckkit-maker 自身的流程问题**
+当作显式观察对象，而不是只关注目标 DeckKit。过程中持续记录：
+
+- 文档不清、前后矛盾、路径/命令过期、示例不可直接运行。
+- 脚本参数、退出码、输出格式、错误信息或默认行为影响效率。
+- xdoc、browser、benchmark、readiness、content leak audit 等工具链的误报、漏报或需要人工绕行的地方。
+- HTML/PPTX 迁移中反复踩到、但当前 skill 尚未覆盖的视觉、资产、schema、测试或目录管理问题。
+- 可以通过补脚本、补模板、补检查项、改文档顺序来让下一个 Agent 更快完成的机会。
+
+这些记录应追加到 run 目录的 `skill-feedback.md`，或在 `findings.md` 中单独开
+`## deckkit-maker feedback` 小节；不要等任务结束后凭记忆回想。完成 DeckKit 后，最终回复
+必须包含“deckkit-maker 改进意见和反馈”：列出本次发现的问题、影响、建议改法和是否已在本次
+顺手修复。若本次没有发现新问题，也要明确说明“未发现新的 deckkit-maker 改进项”。
 
 ### HTML 模板输入补充流程
 
@@ -135,7 +151,11 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
    和可复用 chart/diagram 结构。
 6. 图片/截图区域默认转为 asset slot 或占位框；不把 HTML 模板中的一次性位图、远程图、CSS
    背景图直接写入 kit。
-7. Phase 1 对比时用浏览器截图作为参考 PNG；Phase 2 benchmark 仍必须用 xdoc 生成 PPTX
+7. CSS texture、SVG pattern、全页背景 SVG/bitmap 默认不要直接迁移为整页 `add-picture`。
+   这类资源在 xdoc demo/render 路径中可能变成图片占位覆盖层，遮住后续可编辑内容；优先用
+   flat fill、线条、重复 shape 或低密度 hatch 表达纹理语气。若必须用图片背景，先在 run
+   目录做最小实验并确认 PNG、PowerPoint 打开效果和 layer order，再写入 knownLimits。
+8. Phase 1 对比时用浏览器截图作为参考 PNG；Phase 2 benchmark 仍必须用 xdoc 生成 PPTX
    PNG 并走 `dry-run → apply → vision-check → contact-sheet review`。
 
 ### HTML 到 PPTX 视觉语义避坑
@@ -172,9 +192,9 @@ HTML/CSS 的视觉语义不能逐字搬到 PPTX patch，尤其是透明色和自
   `validate-content --mode delivery` 可能仍提示 readiness 相关 warning。只要没有 schema、
   slot 或 content-contract error，并且 benchmark/readiness audit 通过，不要把这类 warning
   当作交付阻塞。
-- **stress/mixed fixture 测槽位韧性，不测无意义超长文案**：benchmark 文案应当比 golden 更密、
-  覆盖多语言和边界长度，但仍在 schema max length、slot budget 和真实交付可读性内。若稳定
-  溢出来自 fixture 过长，先修 fixture；真实合理内容仍失败时再改 kit 几何或容量策略。
+- **golden benchmark 之外的韧性覆盖**：不要默认新增 stress-density 或 mixed-language 视觉
+  benchmark；长标题、密度、多语言和边界长度优先放进 schema slot budget、validation tests、
+  content leak regression 或有针对性的非视觉单测。真实合理内容仍失败时再改 kit 几何或容量策略。
 
 ### 高保真范围决策
 
@@ -243,6 +263,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 - `task_plan.md`：Phase 0/1/2 分阶段 checklist，阶段完成时更新状态。
 - `findings.md`：风格提取、XML 证据、字体/资产风险、用户确认事项。
 - `progress.md`：已执行命令、产物路径、失败与修复、下一步。
+- `skill-feedback.md`：deckkit-maker 自身的问题、摩擦点、误报/绕行、改进建议和已修复项。
 
 每看完 1–2 页参考 PNG、每轮重建对比、每次 benchmark/readiness 后都要落盘。需要深入读取
 参考 pptx 内部 XML 之外的内容（如嵌入对象）时，可借助 pptx SKILL。
@@ -257,7 +278,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 ├── style-spec.md          # Phase 0 风格提取结论
 ├── slide-inventory.md     # Phase 0 逐页清单与页型归并
 ├── fidelity-scope.md      # Phase 0 高保真范围决策（full/scoped）
-├── task_plan.md / findings.md / progress.md
+├── task_plan.md / findings.md / progress.md / skill-feedback.md
 ├── generate.mjs           # Phase 1 探索生成器
 ├── patch.json / out.pptx / dry-run.json / vision.json
 ├── previews/              # 重建 deck PNG（每次重渲前 rm -rf）
@@ -269,8 +290,8 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 `.tmp/deckkit-*` 均不提交。Phase 2 的正式产物写入
 `skills/pptx-nova/`（kit、schema、catalog、examples、benchmark、tests）。
 
-不要再创建 `.tmp-deckkit-<id>`、`.tmp-slides/`、`.tmp-pptx-*`、散落的根目录 JSON，或按脚本名
-临时拼出来的目录。若外部工具默认输出到别处，显式传 `--out` / `-o` / 输出路径，把结果收束到
+不要再创建 legacy 根目录 run 目录、散落的截图/解包目录、根目录 JSON，或按脚本名临时拼出来的
+目录。若外部工具默认输出到别处，显式传 `--out` / `-o` / 输出路径，把结果收束到
 `.tmp/deckkit-<id>/` 下；需要保留的错误日志、CLI stdout JSON、截图和对比图也放在这里。旧任务
 留下的 legacy 目录可以只读参考，但新任务和新产物一律使用 `.tmp/deckkit-<id>/`。
 
@@ -285,6 +306,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   content leak audit、benchmark summary、readiness audit
 - 与参考 deck 的已知差异（字体替代、图标替代、未还原元素）逐条披露
 - 是否动了 core-primitives；若动了，列出改动与全量 DeckKit 回归结果
+- deckkit-maker 改进意见和反馈：本次发现的问题、影响、建议改法、已修复项；若无新问题则明确说明
 
 ## Reference 索引
 

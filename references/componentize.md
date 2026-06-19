@@ -38,17 +38,18 @@ readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）�
 把参考 deck 的业务词写成 denylist，并把脚本输出作为审计产物保留：
 
 ```bash
-mkdir -p .tmp-deckkit-<id>/audit
+mkdir -p .tmp/deckkit-<id>/audit
 node .claude/skills/deckkit-maker/scripts/content-leak-audit.mjs \
-  --patch .tmp-deckkit-<id>/kit-patch.json \
-  --denylist .tmp-deckkit-<id>/audit/content-leak-denylist.txt \
-  --json > .tmp-deckkit-<id>/audit/content-leak-audit.json
+  --patch .tmp/deckkit-<id>/audit/non-reference-patch.json \
+  --denylist .tmp/deckkit-<id>/audit/content-leak-denylist.txt \
+  --json > .tmp/deckkit-<id>/audit/content-leak-audit.json
 ```
 
 先创建 `content-leak-denylist.txt`，每行一个词；它至少包含参考 deck 的主题词、产品名、
-组织名、示例指标、年份、来源、专有 callout 强调词。脚本命中时不要简单删词，要回到
-schema、layoutContract 和页型函数，确认该字符串应由 `content.json`、`data.labels` 或
-asset slot 驱动。
+组织名、示例指标、年份、来源、专有 callout 强调词。审计用的 patch 必须来自一份
+**非参考主题 content**，不能直接使用 golden example patch；golden content 本来就包含参考文案，
+用它审计会把正常 content 输出误报成 kit 泄漏。脚本命中时不要简单删词，要回到 schema、
+layoutContract 和页型函数，确认该字符串应由 `content.json`、`data.labels` 或 asset slot 驱动。
 
 **图片资产防线**：对 kit 源码、examples、benchmark fixture 和新增 assets 搜索参考 deck
 提取出的图片文件名、hash、media 路径和 alt/name。除非是授权明确、跨 deck 可复用且用户确认的
@@ -101,7 +102,7 @@ node skills/pptx-nova/assets/deckkits/validate-content.mjs \
   --deckkit <id> --mode delivery --json
 node skills/pptx-nova/scripts/pptx-nova-build.mjs \
   --deckkit <id> skills/pptx-nova/assets/deckkits/examples/<id>-content.json \
-  -o .tmp-deckkit-<id>/kit-patch.json --quality-json .tmp-deckkit-<id>/kit-quality.json
+  -o .tmp/deckkit-<id>/kit-patch.json --quality-json .tmp/deckkit-<id>/kit-quality.json
 ```
 
 用 kit 产出的 deck 与 Phase 1 重建 deck 再做一轮 PNG 对比：组件化不允许引入视觉
@@ -132,11 +133,13 @@ node --test tools/tests/pptx-nova-deckkit-validation.test.mjs
 
 ## 6. benchmark 与 readiness
 
-在 `skills/pptx-nova/benchmarks/visual/` 落三个 case 并登记 `index.json`：
+在 `skills/pptx-nova/benchmarks/visual/` 落 golden case 并登记 `index.json`：
 
 - `golden-*`：直接用 `<id>-content.json`（即参考 deck 内容）。
-- `stress-density`：按 density.hard 顶格构造。
-- `mixed-language`：中英混排、数字、紧凑业务词。
+
+默认不要新增 `stress-density` 或 `mixed-language` case。密度、多语言和长文案韧性应优先由
+schema slot budget、validation tests 和有针对性的非视觉单测覆盖，避免把不需要的视觉 benchmark
+长期固化进仓库。
 
 如果 Phase 1 使用 `scoped`，再补一个 `coverage-*` case：覆盖未重建页对应的页型、资产形态
 和密度边界，防止 scope 缩减掩盖组件化缺口。
@@ -172,6 +175,6 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 - [ ] kit 产出 deck 与 Phase 1 重建 deck PNG 对比无回归；若 scoped，未重建页有 coverage benchmark
 - [ ] `content-leak-audit.mjs` 通过，审计 JSON 保留在 run 目录
 - [ ] validation tests（含 content leak regression）通过
-- [ ] benchmark 三 case 通过；readiness audit 达到 candidate
+- [ ] golden benchmark 通过；readiness audit 达到 candidate
 - [ ] 若改了默认行为/文档：按 skill-dev-guide §8.2 同步清单检查 pptx-nova 各文档
 - [ ] `git diff --check`；按仓库规范提交（English Conventional Commit）

@@ -23,9 +23,9 @@ const DEFAULT_HIDE_SELECTORS = [
   'button[aria-label*="previous" i]',
 ].join(', ')
 
-function usage() {
-  console.error(`Usage:
-  node scripts/capture-html-slides.mjs --url template.html --out .tmp/deckkit-id/ref-previews [options]
+function usage(stream = process.stderr) {
+  stream.write(`Usage:
+  node scripts/capture-html-slides.mjs --url template.html --out .tmp/deckkit-<id>/ref-previews [options]
 
 Options:
   --selector <css>          Slide selector. Default: .slide
@@ -38,7 +38,7 @@ Options:
 
 The script is intentionally generic: it only assumes that each slide can be
 selected with one CSS selector. By default it preserves each slide's CSS display
-mode; pass --active-display only when the template leaves slides display:none.`)
+mode; pass --active-display only when the template leaves slides display:none.\n`)
 }
 
 function parseArgs(argv) {
@@ -54,6 +54,10 @@ function parseArgs(argv) {
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
+    if (arg === '--help' || arg === '-h') {
+      usage(process.stdout)
+      process.exit(0)
+    }
     if (arg === '--keep-open') {
       args.keepOpen = true
       continue

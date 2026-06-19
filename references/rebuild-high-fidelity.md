@@ -24,7 +24,7 @@ hard defect；字体替代、Tabler 近似图标、明确披露的 unsupported �
 ## 1. 生成器起步
 
 ```bash
-cp skills/pptx-nova/assets/examples/deck-generator-template.mjs .tmp-deckkit-<id>/generate.mjs
+cp skills/pptx-nova/assets/examples/deck-generator-template.mjs .tmp/deckkit-<id>/generate.mjs
 ```
 
 按 `style-spec.md` 改造：
@@ -55,13 +55,17 @@ Phase 1 的高保真目标不包括复刻一次性图片素材。优先重建图
 - 内容截图/产品界面图：不从参考 deck 搬图；重建截图容器、标注和信息架构，真实截图由 content
   的 `assetSource` 提供。
 - 照片、插画、背景位图、嵌入对象预览：默认 scope out 或用中性占位，不为单一 deck 下沉 primitive。
+- HTML/CSS texture、SVG pattern、全页背景图：默认用可编辑 flat fill、线条、重复 shape 或
+  hatch 近似，不直接作为整页 `add-picture` 背景。整页 SVG/bitmap 在 xdoc demo/render 中可能
+  生成占位覆盖层并遮住内容；确需使用时先做最小实验，验证 layer order、PNG 渲染和 PowerPoint
+  打开效果，并在 `compare-notes.md` / catalog `knownLimits` 披露。
 - 替代元素必须语义相关：例如流程图可用箭头/节点，指标看板可用表格/图表，人物照片 quote 可用
   avatar slot；禁止用无关图标或装饰形状填满画面。
 
 ## 3. 重建循环
 
 ```bash
-cd .tmp-deckkit-<id>
+cd .tmp/deckkit-<id>
 node generate.mjs > patch.json
 jq '.ops | length' patch.json        # 客户演示级通常 ≥200 ops；明显偏低先怀疑装饰缺失
 xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json

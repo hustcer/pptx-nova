@@ -35,7 +35,7 @@ readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）�
 对 kit 源码 grep 参考 deck 的主题词，命中即泄漏。允许的 fallback 只能是
 空/隐藏/中性结构默认，不能是参考 deck 的替代内容。
 
-把参考 deck 的业务词写成 denylist，并把脚本输出作为审计产物保留：
+把参考 deck 的专有业务词写成 denylist，并把脚本输出作为审计产物保留：
 
 ```bash
 mkdir -p .tmp/deckkit-<id>/audit
@@ -45,8 +45,11 @@ node .claude/skills/deckkit-maker/scripts/content-leak-audit.mjs \
   --json > .tmp/deckkit-<id>/audit/content-leak-audit.json
 ```
 
-先创建 `content-leak-denylist.txt`，每行一个词；它至少包含参考 deck 的主题词、产品名、
-组织名、示例指标、年份、来源、专有 callout 强调词。审计用的 patch 必须来自一份
+先创建 `content-leak-denylist.txt`，每行一个规则；它至少包含参考 deck 的产品名、组织名、
+专有指标名、来源、年份+主题组合、专有 callout 强调短语。避免只写 `Strategy`、
+`Execution`、`Growth` 这类通用业务词；优先写参考专有短语（如 `phrase:Acme 2026 expansion`
+或 `regex:\\bAcme\\s+FY26\\b`）。脚本支持 `word:`、`phrase:`、`contains:`、`regex:` 前缀；
+无前缀时，单词按 whole-token 匹配，短语按空白归一化匹配。审计用的 patch 必须来自一份
 **非参考主题 content**，不能直接使用 golden example patch；golden content 本来就包含参考文案，
 用它审计会把正常 content 输出误报成 kit 泄漏。脚本命中时不要简单删词，要回到 schema、
 layoutContract 和页型函数，确认该字符串应由 `content.json`、`data.labels` 或 asset slot 驱动。
@@ -137,9 +140,13 @@ node --test tools/tests/pptx-nova-deckkit-validation.test.mjs
 
 - `golden-*`：直接用 `<id>-content.json`（即参考 deck 内容）。
 
-默认不要新增 `stress-density` 或 `mixed-language` case。密度、多语言和长文案韧性应优先由
-schema slot budget、validation tests 和有针对性的非视觉单测覆盖，避免把不需要的视觉 benchmark
-长期固化进仓库。
+必须额外审查 `stress-density` 和 `mixed-language`，但默认不要把这两个 case 写入
+`benchmarks/visual/index.json` 或提交到 git。把临时 content、patch、PPTX、PNG、
+contact sheet 和审查结论放在 `.tmp/deckkit-<id>/benchmark/stress-density/` 与
+`.tmp/deckkit-<id>/benchmark/mixed-language/`。密度、多语言和长文案韧性应优先由 schema
+slot budget、validation tests 和有针对性的非视觉单测覆盖，避免把不需要的视觉 benchmark
+长期固化进仓库。只有当某个非 golden case 是真实长期回归风险时，才登记进 visual index；
+一旦登记，readiness/catalog-update 会要求它和 golden 一起通过。
 
 如果 Phase 1 使用 `scoped`，再补一个 `coverage-*` case：覆盖未重建页对应的页型、资产形态
 和密度边界，防止 scope 缩减掩盖组件化缺口。
@@ -175,6 +182,7 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 - [ ] kit 产出 deck 与 Phase 1 重建 deck PNG 对比无回归；若 scoped，未重建页有 coverage benchmark
 - [ ] `content-leak-audit.mjs` 通过，审计 JSON 保留在 run 目录
 - [ ] validation tests（含 content leak regression）通过
-- [ ] golden benchmark 通过；readiness audit 达到 candidate
+- [ ] golden benchmark 通过；stress-density 和 mixed-language 已在 `.tmp` 审查并记录；
+      readiness audit 达到 candidate
 - [ ] 若改了默认行为/文档：按 skill-dev-guide §8.2 同步清单检查 pptx-nova 各文档
 - [ ] `git diff --check`；按仓库规范提交（English Conventional Commit）

@@ -99,7 +99,7 @@ test ! -e skills/pptx-nova/assets/examples/<id>
   │
   └─ Phase 2  组件化抽象（第二交付物）  → references/componentize.md
        抽 <id>.kit.mjs + schemas + content.json + catalog 注册
-       → slots/slot-consistency → benchmark(golden)
+       → slots/slot-consistency → benchmark(golden 入库；stress/mixed-language 在 .tmp 审查)
        → validation tests + content leak regression → readiness audit
 ```
 
@@ -137,9 +137,12 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
    记录 `agent-browser set viewport 1440 810`、注入的 capture CSS、slide 切换方式，以及
    绝对 screenshot path；不要只留下手工点击后的散图。优先使用
    `node .claude/skills/deckkit-maker/scripts/capture-html-slides.mjs --url <template.html-or-url> --out .tmp/deckkit-<id>/ref-previews`
-   生成逐页 PNG 与 `capture-manifest.json`；非 `.slide` 模板通过 `--selector` 调整，只有
+   生成逐页 PNG、`contact-sheet.png` 与 `capture-manifest.json`；非 `.slide` 模板通过
+   `--selector` 调整，只有
    slide 原本是 `display:none` 且无法靠 `.active` 恢复时才传 `--active-display`，避免破坏
-   源 HTML 的 grid/flex 布局。
+   源 HTML 的 grid/flex 布局。macOS 上 ImageMagick 可能找不到默认字体；脚本会优先使用
+   `DECKKIT_CONTACT_SHEET_FONT` / `--contact-sheet-font`，否则回退到系统 Arial/Helvetica
+   路径，避免 contact sheet 因空字体失败。
 3. `style-spec.md` 必须同时引用 CSS token 与浏览器截图；字号从 CSS `vw/vh/rem/px`
    映射为 PPTX pt，间距从 viewport 比例映射到 13.333×7.5in。
 4. `slide-inventory.md` 以真实 DOM slide 顺序为准，不以元数据声明为准；把 CSS class
@@ -192,8 +195,11 @@ HTML/CSS 的视觉语义不能逐字搬到 PPTX patch，尤其是透明色和自
   `validate-content --mode delivery` 可能仍提示 readiness 相关 warning。只要没有 schema、
   slot 或 content-contract error，并且 benchmark/readiness audit 通过，不要把这类 warning
   当作交付阻塞。
-- **golden benchmark 之外的韧性覆盖**：不要默认新增 stress-density 或 mixed-language 视觉
-  benchmark；长标题、密度、多语言和边界长度优先放进 schema slot budget、validation tests、
+- **golden benchmark 之外的韧性覆盖**：新 kit 必须审查 golden、stress-density 和
+  mixed-language 三类输入，但默认只有 golden 视觉 benchmark 落进 git。stress-density 和
+  mixed-language 的临时 content、patch、PNG、contact sheet、结论写入
+  `.tmp/deckkit-<id>/benchmark/`，不登记 `benchmarks/visual/index.json`，除非它们确实提供
+  长期回归价值。长标题、密度、多语言和边界长度优先放进 schema slot budget、validation tests、
   content leak regression 或有针对性的非视觉单测。真实合理内容仍失败时再改 kit 几何或容量策略。
 
 ### 高保真范围决策

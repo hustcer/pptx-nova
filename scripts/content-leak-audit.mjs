@@ -3,12 +3,20 @@
 import { readFileSync } from 'node:fs'
 
 function usage() {
-  console.error(`Usage:
+  process.stderr.write(`Usage:
   node scripts/content-leak-audit.mjs --patch patch.json --denylist terms.txt [--json]
 
 Checks visible text emitted by set-text, add-run, and add-textbox ops for forbidden
 reference-deck business terms. The denylist is one term per line; blank lines and
-lines starting with # are ignored.`)
+lines starting with # are ignored.
+
+Denylist entry modes:
+  proprietary phrase         Defaults to word matching for single words, phrase matching otherwise
+  word:Strategy              Match Strategy as a whole token, not StrategyMap
+  phrase:Acme 2026 plan      Match the whitespace-normalized phrase
+  contains:AcmeStrategy      Match any case-insensitive substring
+  regex:\\bAcme\\s+2026\\b    Match a JavaScript regular expression with i/u flags
+`)
 }
 
 function parseArgs(argv) {
@@ -48,6 +56,7 @@ function loadTerms(path) {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith('#'))
+    .map(parseTerm)
 }
 
 function collectVisibleText(patch) {
@@ -66,15 +75,55 @@ function collectVisibleText(patch) {
   return texts
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function normalizeSpaces(value) {
+  return String(value).replace(/\s+/g, ' ').trim()
+}
+
+function parseTerm(line) {
+  const match = /^(word|phrase|contains|regex):(.*)$/i.exec(line)
+  const mode = match ? match[1].toLowerCase() : line.includes(' ') ? 'phrase' : 'word'
+  const value = match ? match[2].trim() : line
+  if (!value) throw new Error(`denylist entry "${line}" has no value`)
+  if (mode === 'regex') {
+    return {
+      raw: line,
+      mode,
+      value,
+      pattern: new RegExp(value, 'iu'),
+    }
+  }
+  if (mode === 'word') {
+    return {
+      raw: line,
+      mode,
+      value,
+      pattern: new RegExp(`(^|[^\\p{L}\\p{N}_])${escapeRegExp(value)}(?=$|[^\\p{L}\\p{N}_])`, 'iu'),
+    }
+  }
+  return {
+    raw: line,
+    mode,
+    value: normalizeSpaces(value),
+  }
+}
+
+function termMatches(text, textLower, normalizedTextLower, term) {
+  if (term.mode === 'regex' || term.mode === 'word') return term.pattern.test(text)
+  if (term.mode === 'contains') return textLower.includes(term.value.toLowerCase())
+  return normalizedTextLower.includes(term.value.toLowerCase())
+}
+
 function findMatches(texts, terms) {
   return texts.flatMap((entry) => {
     const textLower = entry.text.toLowerCase()
+    const normalizedTextLower = normalizeSpaces(entry.text).toLowerCase()
     return terms
-      .filter((term) => {
-        const termLower = term.toLowerCase()
-        return entry.text.includes(term) || textLower.includes(termLower)
-      })
-      .map((term) => ({ ...entry, term }))
+      .filter((term) => termMatches(entry.text, textLower, normalizedTextLower, term))
+      .map((term) => ({ ...entry, term: term.value, mode: term.mode, rawTerm: term.raw }))
   })
 }
 
@@ -92,16 +141,17 @@ const result = {
 }
 
 if (args.json) {
-  console.log(JSON.stringify(result, null, 2))
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
 } else if (matches.length === 0) {
-  console.log(
+  process.stdout.write(
     `content-leak-audit ok: ${texts.length} visible text ops checked, ${terms.length} deny terms`,
   )
+  process.stdout.write('\n')
 } else {
-  console.error(`content-leak-audit failed: ${matches.length} match(es)`)
+  process.stderr.write(`content-leak-audit failed: ${matches.length} match(es)\n`)
   for (const match of matches) {
-    console.error(
-      `- op#${match.index} ${match.op} ${match.shape ?? '(unknown)'} matched "${match.term}": ${match.text}`,
+    process.stderr.write(
+      `- op#${match.index} ${match.op} ${match.shape ?? '(unknown)'} matched ${match.mode}:${JSON.stringify(match.term)}: ${match.text}\n`,
     )
   }
 }

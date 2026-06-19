@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
@@ -23,6 +22,17 @@ const DEFAULT_HIDE_SELECTORS = [
   'button[aria-label*="previous" i]',
 ].join(', ')
 
+const CONTACT_SHEET_FONT_CANDIDATES = [
+  process.env.DECKKIT_CONTACT_SHEET_FONT,
+  '/System/Library/Fonts/Supplemental/Arial.ttf',
+  '/System/Library/Fonts/Helvetica.ttc',
+  '/Library/Fonts/Arial.ttf',
+  '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+  'Arial',
+  'Helvetica',
+  'DejaVu-Sans',
+].filter(Boolean)
+
 function usage(stream = process.stderr) {
   stream.write(`Usage:
   node scripts/capture-html-slides.mjs --url template.html --out .tmp/deckkit-<id>/ref-previews [options]
@@ -32,6 +42,11 @@ Options:
   --viewport <WxH>          Browser viewport in CSS pixels. Default: 1440x810
   --active-display <value>  Optional forced display for the active slide. Default: preserve CSS
   --hide-selectors <css>    Comma-separated UI selectors to hide. Default hides common deck controls
+  --no-contact-sheet        Skip ImageMagick contact sheet generation
+  --contact-sheet-font <f>  Font name/path for ImageMagick labels. Default: DECKKIT_CONTACT_SHEET_FONT or macOS/Linux fallback
+  --contact-cols <n>        Contact sheet columns. Default: 2
+  --contact-thumb <WxH>     Contact sheet thumbnail size. Default: 640x360
+  --contact-gap <px>        Contact sheet gap and outer margin. Default: 16
   --session <name>          agent-browser session name. Default: deckkit-html-capture
   --keep-open               Leave the browser session open after capture
   --json                    Print capture manifest JSON
@@ -47,6 +62,11 @@ function parseArgs(argv) {
     viewport: '1440x810',
     activeDisplay: null,
     hideSelectors: DEFAULT_HIDE_SELECTORS,
+    contactSheet: true,
+    contactSheetFont: '',
+    contactCols: 2,
+    contactThumb: '640x360',
+    contactGap: 16,
     session: 'deckkit-html-capture',
     keepOpen: false,
     json: false,
@@ -66,6 +86,10 @@ function parseArgs(argv) {
       args.json = true
       continue
     }
+    if (arg === '--no-contact-sheet') {
+      args.contactSheet = false
+      continue
+    }
     if (
       [
         '--url',
@@ -74,6 +98,10 @@ function parseArgs(argv) {
         '--viewport',
         '--active-display',
         '--hide-selectors',
+        '--contact-sheet-font',
+        '--contact-cols',
+        '--contact-thumb',
+        '--contact-gap',
         '--session',
       ].includes(arg)
     ) {
@@ -97,11 +125,27 @@ function parseArgs(argv) {
 
   const viewport = /^(\d+)x(\d+)$/i.exec(args.viewport)
   if (!viewport) {
-    console.error(`Invalid --viewport "${args.viewport}". Expected WxH, for example 1440x810.`)
+    process.stderr.write(
+      `Invalid --viewport "${args.viewport}". Expected WxH, for example 1440x810.\n`,
+    )
     process.exit(1)
   }
   args.viewportWidth = Number(viewport[1])
   args.viewportHeight = Number(viewport[2])
+  args.contactCols = Number.parseInt(args.contactCols, 10)
+  args.contactGap = Number.parseInt(args.contactGap, 10)
+  if (!Number.isInteger(args.contactCols) || args.contactCols < 1) {
+    process.stderr.write('--contact-cols must be a positive integer\n')
+    process.exit(1)
+  }
+  if (!Number.isInteger(args.contactGap) || args.contactGap < 0) {
+    process.stderr.write('--contact-gap must be a non-negative integer\n')
+    process.exit(1)
+  }
+  if (!/^\d+x\d+$/i.test(args.contactThumb)) {
+    process.stderr.write('--contact-thumb must use WxH, for example 640x360\n')
+    process.exit(1)
+  }
   return args
 }
 
@@ -131,6 +175,93 @@ function parseEvalJson(stdout) {
 
 function screenshotName(index) {
   return `slide-${String(index + 1).padStart(2, '0')}.png`
+}
+
+function commandWorks(command, args = ['-version']) {
+  const result = spawnSync(command, args, { encoding: 'utf8' })
+  return result.status === 0
+}
+
+function imageMagickCommand() {
+  if (commandWorks('magick')) return ['magick', 'montage']
+  if (commandWorks('montage')) return ['montage']
+  return null
+}
+
+function contactSheetFont(explicitFont) {
+  if (explicitFont) return explicitFont
+  return (
+    CONTACT_SHEET_FONT_CANDIDATES.find(
+      (candidate) => !candidate.includes('/') || existsSync(candidate),
+    ) ?? 'Arial'
+  )
+}
+
+function renderContactSheet(args, screenshots, outDir) {
+  if (!args.contactSheet) {
+    return {
+      enabled: false,
+      generated: false,
+      path: null,
+      font: null,
+      command: null,
+      warning: null,
+      bytes: 0,
+    }
+  }
+
+  const command = imageMagickCommand()
+  const contactSheetPath = resolve(outDir, 'contact-sheet.png')
+  if (!command) {
+    return {
+      enabled: true,
+      generated: false,
+      path: contactSheetPath,
+      font: null,
+      command: null,
+      warning: 'ImageMagick magick/montage command was not found',
+      bytes: 0,
+    }
+  }
+
+  const font = contactSheetFont(args.contactSheetFont)
+  const commandArgs = [
+    ...command.slice(1),
+    '-label',
+    '%f',
+    '-font',
+    font,
+    '-pointsize',
+    '18',
+    ...screenshots.map((shot) => shot.path),
+    '-thumbnail',
+    args.contactThumb,
+    '-tile',
+    `${args.contactCols}x`,
+    '-geometry',
+    `+${args.contactGap}+${args.contactGap}`,
+    '-background',
+    '#FFFFFF',
+    contactSheetPath,
+  ]
+  const result = spawnSync(command[0], commandArgs, { encoding: 'utf8' })
+  if (result.status !== 0) {
+    if (result.stdout) process.stderr.write(result.stdout)
+    if (result.stderr) process.stderr.write(result.stderr)
+    throw new Error(
+      `ImageMagick contact sheet failed with font "${font}". Set DECKKIT_CONTACT_SHEET_FONT or pass --contact-sheet-font.`,
+    )
+  }
+  const bytes = existsSync(contactSheetPath) ? statSync(contactSheetPath).size : 0
+  return {
+    enabled: true,
+    generated: bytes > 0,
+    path: contactSheetPath,
+    font,
+    command: [command[0], ...commandArgs],
+    warning: bytes > 0 ? null : 'ImageMagick finished but contact-sheet.png is missing or empty',
+    bytes,
+  }
 }
 
 const args = parseArgs(process.argv.slice(2))
@@ -223,6 +354,7 @@ return JSON.stringify({ activeIndex });
     screenshots.push({ slideIndex: index, path })
   }
 
+  const contactSheet = renderContactSheet(args, screenshots, outDir)
   const manifest = {
     ok: true,
     title: init.title,
@@ -237,18 +369,21 @@ return JSON.stringify({ activeIndex });
     captureCss,
     slideCount: init.count,
     screenshots,
+    contactSheet,
   }
   const manifestPath = resolve(outDir, 'capture-manifest.json')
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`)
 
   if (args.json) {
-    console.log(JSON.stringify({ ...manifest, manifestPath }, null, 2))
+    process.stdout.write(`${JSON.stringify({ ...manifest, manifestPath }, null, 2)}\n`)
   } else {
-    console.log(`captured ${init.count} slide screenshot(s) to ${outDir}`)
-    console.log(`manifest: ${manifestPath}`)
+    process.stdout.write(`captured ${init.count} slide screenshot(s) to ${outDir}\n`)
+    if (contactSheet.generated) process.stdout.write(`contact sheet: ${contactSheet.path}\n`)
+    if (contactSheet.warning) process.stderr.write(`warning: ${contactSheet.warning}\n`)
+    process.stdout.write(`manifest: ${manifestPath}\n`)
   }
 } catch (error) {
-  console.error(error instanceof Error ? error.message : String(error))
+  process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
   process.exitCode = 1
 } finally {
   if (!args.keepOpen) {

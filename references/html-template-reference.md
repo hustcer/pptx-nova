@@ -36,6 +36,11 @@ Before screenshots, inject a capture stylesheet/script that:
 Use absolute screenshot output paths. Some browser tools can treat relative `.tmp/...` paths as selectors or resolve them
 against their own working directory.
 
+The bundled `capture-html-slides.mjs` also creates `contact-sheet.png` with ImageMagick when `magick` or `montage` is
+available. On macOS, do not rely on ImageMagick's empty/default font; pass `--contact-sheet-font` or set
+`DECKKIT_CONTACT_SHEET_FONT` when needed. The script's default fallback checks the common macOS Arial/Helvetica font
+paths before falling back to font names.
+
 ## Extract Structure
 
 Record:

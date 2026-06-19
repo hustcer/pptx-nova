@@ -37,7 +37,7 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
 - **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG -> reconcile slide inventory -> outline/reference-map -> deck_lock -> DeckKit content -> gates`；
-  源 deck 是内容真源，不要求保持原页数，密集页可拆成多页以保留可读性。
+  源 deck 是内容真源；默认保持页数和全部用户可见内容，任何拆页、合页、对象降级或内容丢失都必须先确认。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
 - **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。
@@ -110,6 +110,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - **Refurbish Existing Deck**：用户要求"美化/翻新/重写这份 PPTX"且"内容不变/保持内容"，
   但指定新风格、DeckKit 或更高质量外观；源 PPTX 默认只读，先抽取和核对全部源页内容，再用
   DeckKit 生成新文件。不要误判成普通 Edit，也不要为了保持原页数压缩文字导致不可读。
+  "内容不变"默认包含文本、表格、chart、SmartArt、图片、图标、媒体、备注和页级结构的用户可见语义；
+  不能保真时必须阻塞并请求确认，不能静默丢弃或只保留可见文本。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。

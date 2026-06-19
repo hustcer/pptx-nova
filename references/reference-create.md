@@ -26,6 +26,8 @@
 - `reference-inspect.json`：`inspect` 输出，用来判断页面尺寸、layout、shape、文本密度和复杂对象。
 - `reference-style.json`：`extract-style` 输出，包含主题色、字体、layout/slide 语义和 draft pack。
 - `reference-map.json`：新大纲每页到参考页型/参考 slide 的映射。
+- `content-audit.json`：Refurbish Existing Deck 时逐页对账文本、表格、chart、SmartArt、图片/媒体、
+  shape/group 和 notes 的保留状态。
 - `outline.json`：用户大纲或标准化后的新大纲；用户已给大纲时直接采用。
 - `template_fusion.json`：仅在多来源冲突、用户 override 或需要审计时记录完整段级融合结果。
 - `deck_lock.json`：锁定参考 deck 可复用的风格/结构、模板融合、输出路径和每页页型/节奏。
@@ -126,19 +128,39 @@ xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
 目标是输出一个新的、可编辑的、更高质量 deck。不要把这个场景等同于普通 Edit：普通 Edit
 是在原结构上改少量对象；Refurbish 是读取源内容后用新风格重建。
 
+### 内容不变的硬定义
+
+除非用户明确允许，"内容不变"默认包含：
+
+- 所有可见文本、标题、副标题、脚注、页码、备注和 speaker notes。
+- 表格的行列、单元格文本、合并关系、数据含义和表头层级。
+- chart 的图表类型、系列、类目、数值、标签、legend、轴含义和标题。
+- SmartArt / diagram / 流程图 / 组织结构图的节点文本、层级、连线关系和顺序。
+- 图片、logo、图标、截图、媒体、OLE、公式、形状组合和其它用户可见对象的语义存在。
+- 每页的内容归属关系：源 slide N 的内容必须能在输出中被明确追溯到相同 slide，或用户确认过的拆分/合并 slide。
+
+禁止把"保持内容"降级理解为"只保留可见文本"。如果 DeckKit、xdoc 或当前工具链不能保真复制某类对象，
+必须停下来请求确认：复制原对象、截图保留、重建为可编辑对象、只保留文本、还是放弃该翻新。不能静默丢弃
+chart、SmartArt、shape、图片、媒体或备注，也不能用 `deck_lock.assumptions[]` 把未经确认的内容损失合理化。
+
 必做步骤：
 
 1. 同时生成 `reference-inspect.json`、`source_extract.md`（或等价文本提取）和源 deck PNG/contact sheet。
 2. 以 `reference-inspect.json.presentation.slideCount` 和 `slides[]` 作为源页清单权威。
    Markdown/文本提取可能漏掉无文本页、SmartArt-only 页、纯图页或 preserve-only 页；必须对账并在
    `content-audit.json` 中标出补齐方式。
-3. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。内容密集时允许 1:N 拆页；
-   不要为了保持原页数而让文字小到不可读或触发 text overflow。
-4. `deck_lock.assumptions[]` 必须披露保真边界：是否复制图片/图表/SmartArt、是否只保留可见文本、
-   是否因 DeckKit 槽位拆页、是否存在字体或资产授权风险。
-5. 写 `content.json` 前先按 DeckKit slot budget 粗分块。中英混排、长 URL、OOXML 路径、代码样文本
+3. 建立 `content-audit.json`，逐页记录 `text`、`tables`、`charts`、`smartArtOrDiagrams`、
+   `imagesAndMedia`、`groupsAndShapes`、`notes`、`unsupportedObjects` 的数量、摘要、输出处理方式和状态。
+   每项状态只能是 `preserved`、`rebuilt-editable`、`rebuilt-visual`、`user-approved-drop` 或 `blocked`。
+   交付前不得存在 `blocked`，也不得出现未经用户确认的 `user-approved-drop`。
+4. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。默认 `1:1` 保持页数；
+   任何 `1:N` 拆页、`N:1` 合页、重排序或 appendix 化都必须先让用户确认，并写入 `approvedChanges[]`。
+   不要为了保持原页数而让文字小到不可读或触发 text overflow；但也不能擅自改变页数。
+5. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
+   如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或重建，状态必须是 `blocked`，先询问用户。
+6. 写 `content.json` 前先按 DeckKit slot budget 粗分块。中英混排、长 URL、OOXML 路径、代码样文本
    很容易被静态估算判为换行/溢出；优先插入断点、缩短 display label、拆成更多页，或换更适合密集内容的页型。
-6. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
+7. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
    不能停留在第一次生成的旧映射。
 
 DeckKit 选择注意事项：
@@ -147,8 +169,9 @@ DeckKit 选择注意事项：
   `deck_lock.assumptions[]` 和最终摘要中记录 readiness 例外，并用 `vision-check` 与 PNG 复核补足风险。
 - 若指定 DeckKit 缺少适合密集内容的页型，不要硬塞到表格/菜单槽位。优先拆页；若仍不稳，
   应扩展 DeckKit 增加 dense-text / ledger / comparison 等可复用页型，再重新生成。
-- 图片、图表、SmartArt 和复杂媒体只有在用户明确允许复用、来源可验证且 DeckKit 支持对应槽位时才复制。
-  否则保留其可见文本、源页标记和 preserve-only 说明，不要生成伪截图或 overlay。
+- 图片、图表、SmartArt 和复杂媒体属于内容资产。若用户要求内容完全不变，优先复用源对象或重建等价
+  可编辑对象；不能复制或重建时必须阻塞确认。不要默认只保留可见文本、源页标记或 preserve-only 说明，
+  也不要生成伪截图或 overlay。对第三方品牌/授权不明资产，先在 `assets_manifest.json` 标风险并请求确认。
 
 验证侧重点：
 
@@ -157,3 +180,6 @@ DeckKit 选择注意事项：
   `appendix`，但必须用 contact sheet 复核整体节奏。
 - `vision-check` high/medium 必须为 0；low 需要人工判断。
 - PNG/contact-sheet 复核要抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。
+- 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram
+  数量、图片/媒体数量、备注存在性和 `reference-map.json` 覆盖率。任何减少、缺页、未映射对象或未经批准的
+  页数变化都是交付阻塞项。

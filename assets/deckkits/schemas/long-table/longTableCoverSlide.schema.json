@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/long-table/longTableCoverSlide",
+  "title": "longTableCoverSlide data schema",
+  "type": "object",
+  "required": [
+    "edition",
+    "editionLabel",
+    "title",
+    "pills",
+    "stat",
+    "statNote",
+    "tagline",
+    "description"
+  ],
+  "properties": {
+    "edition": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 12, "widthIn": 0.38 }
+    },
+    "editionLabel": {
+      "type": "string",
+      "maxLength": 32,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 15.5, "widthIn": 2.65 }
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 40,
+      "x-slotBudget": { "maxLines": 2, "fontPt": 48, "widthIn": 7.25 }
+    },
+    "pills": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "maxLength": 18,
+        "x-slotBudget": { "maxLines": 1, "fontPt": 13, "widthIn": 1.4 }
+      }
+    },
+    "stat": {
+      "type": "string",
+      "maxLength": 28,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 13.2, "widthIn": 4.05 }
+    },
+    "statNote": {
+      "type": "string",
+      "maxLength": 64,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 13.2, "widthIn": 4.05 }
+    },
+    "tagline": {
+      "type": "string",
+      "maxLength": 44,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 17, "widthIn": 3.4 }
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 160,
+      "x-slotBudget": { "maxLines": 3, "fontPt": 12.8, "widthIn": 4.35 }
+    },
+    "bigEdition": {
+      "type": "string",
+      "maxLength": 8,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 72, "widthIn": 3.42 }
+    },
+    "bigLabel": {
+      "type": "string",
+      "maxLength": 42,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 11.2, "widthIn": 3.2 }
+    },
+    "bigMeta": {
+      "type": "string",
+      "maxLength": 120,
+      "x-slotBudget": { "maxLines": 3, "fontPt": 13.5, "widthIn": 3.92 }
+    }
+  },
+  "additionalProperties": false
+}

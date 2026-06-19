@@ -84,7 +84,15 @@
               "coralQuoteSplitSlide",
               "coralTimelineSlide",
               "coralTeamGridSlide",
-              "coralClosingSlide"
+              "coralClosingSlide",
+              "longTableCoverSlide",
+              "longTableManifestoSlide",
+              "longTableIndexSlide",
+              "longTableFeaturedSlide",
+              "longTableMenuSlide",
+              "longTableQuoteSlide",
+              "longTableCalendarSlide",
+              "longTableClosingSlide"
             ]
           },
           "data": { "type": "object" },

@@ -80,6 +80,25 @@
       "status": "preview"
     },
     {
+      "id": "long-table-showcase",
+      "name": "long-table DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "long-table",
+      "caseId": "long-table.golden-html",
+      "path": "../examples/long-table/deck.pptx",
+      "preview": "../examples/long-table/contact-sheet.webp",
+      "content": "../examples/long-table/content.json",
+      "summary": "../examples/long-table/summary.json",
+      "bestFor": [
+        "hospitality brand",
+        "food and beverage editorial deck",
+        "event series showcase",
+        "cultural supper club",
+        "lifestyle launch"
+      ],
+      "status": "preview"
+    },
+    {
       "id": "mckinsey-blue-showcase",
       "name": "mckinsey-blue DeckKit Showcase",
       "type": "deckkit-showcase",

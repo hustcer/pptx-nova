@@ -119,6 +119,15 @@
       "reviewPath": "cases/coral/golden-html/review.md"
     },
     {
+      "id": "long-table.golden-html",
+      "deckkit": "long-table",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/long-table-content.json",
+      "buildPath": "../../assets/deckkits/examples/long-table-build.mjs",
+      "expectedPath": "cases/long-table/golden-html/expected.json",
+      "reviewPath": "cases/long-table/golden-html/review.md"
+    },
+    {
       "id": "coral.stress-density",
       "deckkit": "coral",
       "kind": "stress",

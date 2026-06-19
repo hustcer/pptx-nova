@@ -11,6 +11,12 @@ Update the showcase decks with:
 just deckkit-examples
 ```
 
+Update one DeckKit showcase by id:
+
+```bash
+just deckkit-examples -d broadside
+```
+
 Check that committed assets are in sync without writing files:
 
 ```bash

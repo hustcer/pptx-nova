@@ -2148,6 +2148,258 @@
           "contentPath": "examples/coral-content.json"
         }
       ]
+    },
+    {
+      "id": "long-table",
+      "version": "0.1.0",
+      "path": "long-table.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "experimental",
+      "qualityProfile": {
+        "minFontPt": 8.5,
+        "labelFontPt": 8.5,
+        "sourceFontPt": 8.5,
+        "baseline": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "hospitality brand",
+        "food and beverage editorial deck",
+        "event series showcase",
+        "cultural supper club",
+        "lifestyle launch"
+      ],
+      "coverage": {
+        "languages": ["en"],
+        "density": ["normal"],
+        "slideTypes": [
+          "longTableCoverSlide",
+          "longTableManifestoSlide",
+          "longTableIndexSlide",
+          "longTableFeaturedSlide",
+          "longTableMenuSlide",
+          "longTableQuoteSlide",
+          "longTableCalendarSlide",
+          "longTableClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "longTableCoverSlide",
+        "longTableManifestoSlide",
+        "longTableIndexSlide",
+        "longTableFeaturedSlide",
+        "longTableMenuSlide",
+        "longTableQuoteSlide",
+        "longTableCalendarSlide",
+        "longTableClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Warm editorial dinner-series DeckKit with paper textures implied through flat cream surfaces, rust ink, serif copy, and oversized display typography.",
+        "mood": ["warm", "editorial", "intimate", "culinary", "literary"],
+        "layoutPrinciples": [
+          "Use flat cream paper fields and rust-red rules instead of gradients or soft cards.",
+          "Let oversized display type and generous whitespace define the composition.",
+          "Use thin rules, badges, tags, and table rows as the primary structural chrome.",
+          "Keep the system image-free and fully editable through PPTX text and geometry."
+        ],
+        "signatureElements": [
+          "edition badges",
+          "serif editorial paragraphs",
+          "oversized issue-number typography",
+          "thin rust-red table rules",
+          "menu rows and calendar structure"
+        ],
+        "typography": {
+          "display": "Bricolage Grotesque bold for large titles",
+          "body": "Fraunces italic-style editorial body copy",
+          "label": "Small serif labels and table metadata"
+        },
+        "colorSystem": {
+          "background": ["warm paper #FAF1E2", "aged paper #F2E5CF"],
+          "primary": ["rust ink #B53D2A"],
+          "accent": ["deep rust #8E2D1F", "soft rule #DEC0A5"],
+          "semantic": ["rust red carries all emphasis and structure"]
+        },
+        "avoid": [
+          "stock food photography",
+          "restaurant-menu clip art",
+          "SaaS cards",
+          "soft gradients",
+          "decorative shadows"
+        ],
+        "compositionRules": [
+          "Keep the cover title dominant; the optional edition-number block must never crowd long titles.",
+          "Use one strong editorial structure per slide: poster cover, note, card index, feature ledger, menu rows, quote, calendar, or closing CTA.",
+          "Use rust-red outlines and rules as the primary structure instead of photos, shadows, or multi-color accents.",
+          "Keep body copy short and warm; dense information belongs in menu and calendar page types."
+        ],
+        "slideRhythm": {
+          "anchor": ["longTableCoverSlide", "longTableClosingSlide"],
+          "editorial": ["longTableManifestoSlide", "longTableQuoteSlide"],
+          "catalogue": [
+            "longTableIndexSlide",
+            "longTableFeaturedSlide",
+            "longTableMenuSlide",
+            "longTableCalendarSlide"
+          ]
+        }
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "slideTypes": {
+          "longTableCoverSlide": {
+            "requiredSlots": ["data.edition", "data.title", "data.description"]
+          },
+          "longTableManifestoSlide": {
+            "requiredSlots": ["data.title", "data.paragraphs"]
+          },
+          "longTableIndexSlide": {
+            "requiredSlots": ["data.title", "data.cards"]
+          },
+          "longTableFeaturedSlide": {
+            "requiredSlots": ["data.title", "data.body", "data.details"]
+          },
+          "longTableMenuSlide": {
+            "requiredSlots": ["data.title", "data.items"]
+          },
+          "longTableQuoteSlide": {
+            "requiredSlots": ["data.quote", "data.author"]
+          },
+          "longTableCalendarSlide": {
+            "requiredSlots": ["data.title", "data.columns", "data.rows"]
+          },
+          "longTableClosingSlide": {
+            "requiredSlots": ["data.title", "data.body", "data.footer"]
+          }
+        }
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 64,
+          "cardsMax": 3,
+          "menuItemsMax": 5,
+          "calendarRowsMax": 6
+        },
+        "hard": {
+          "titleMaxChars": 90,
+          "cardsMax": 3,
+          "menuItemsMax": 5,
+          "calendarRowsMax": 6
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "golden high=0 medium=0",
+        "pngReview": "golden contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-19",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 41,
+          "lowBuckets": {
+            "total": 41,
+            "styleAllowed": 40,
+            "baselineKnown": 0,
+            "new": 1,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 1,
+            "baselineUnavailable": true,
+            "baselineUpdated": false
+          }
+        },
+        "manualHardDefects": null,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-19",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "requiredKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 41,
+            "lowBuckets": {
+              "total": 41,
+              "styleAllowed": 40,
+              "baselineKnown": 0,
+              "new": 1,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 1,
+              "baselineUnavailable": true,
+              "baselineUpdated": false
+            }
+          },
+          "cases": [
+            {
+              "caseId": "long-table.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/long-table/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/long-table/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": [],
+                "warnings": [],
+                "fitDiagnostics": []
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 41,
+                "lowBuckets": {
+                  "total": 41,
+                  "styleAllowed": 40,
+                  "baselineKnown": 0,
+                  "new": 1,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 1,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 233573
+              },
+              "patchOps": 632,
+              "p50TotalMs": null
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Bricolage Grotesque and Fraunces are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
+        "Paper texture is represented by flat editable fills rather than bitmap texture assets because full-slide SVG texture pictures render as xdoc demo placeholders.",
+        "The cover edition-number block is optional; omit bigEdition/bigLabel/bigMeta when a deck has no meaningful issue-number content."
+      ],
+      "examples": [
+        {
+          "name": "long-table-editorial",
+          "contentPath": "examples/long-table-content.json"
+        }
+      ]
     }
   ]
 }

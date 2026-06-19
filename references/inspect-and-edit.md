@@ -283,6 +283,11 @@ dry-run 报告里会有：
 
 > `set-text` 会清掉原 text frame 里所有 run 与 paragraph。如果要保留多 run / 多段
 > 结构，改用 `set-paragraph` + `set-run`。
+> `textPreview` 只是 inspect 的摘要字段，不是可回写的内容真源；它可能被截断、合并 run，
+> 或无法表达 tab stops、paragraph properties、table cell rich text 等结构。翻新已有 deck
+> 时不要把 `textPreview` 原样喂给 `set-text`，尤其不要用它重写 tab stop、富文本、多段落或表格文本。
+> 这类页面优先用 `set-run` / 样式局部修改；完成后检查候选可见文本中没有 `<a:`、`<p:`、`xmlns`
+> 等 OOXML 片段泄漏。
 
 ### 5.2 改某段第一个 run 的字体颜色
 

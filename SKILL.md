@@ -36,7 +36,7 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
-- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG for audit -> lock visual target/example -> reconcile slide inventory -> editable object rebuild -> visual-delta gate -> gates`；
+- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG for audit -> lock visual target/example -> reconcile slide inventory -> editable object rebuild -> visual-delta gate -> refurbish-audit -> gates`；
   源 deck 是内容真源；默认保持页数和全部用户可见内容，任何拆页、合页、对象降级或内容丢失都必须先确认。
   翻新目标是"内容不变 + 目标 DeckKit 风格一致"：色系、字体层级、header/footer、页码、背景、规则线和 page chrome
   必须跟目标 DeckKit 对齐。
@@ -46,6 +46,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
   复制对象仍必须是可编辑内容，不得变成源页截图或截图 overlay。
   如果目标 DeckKit 缺少能承载源页内容的页型，必须扩展该 DeckKit 或阻塞说明缺口；不能为了套现有页型而压缩、
   改写、省略、合并或降级源内容。
+  交付前运行 `scripts/pptx-nova-refurbish-audit.mjs` 生成 `content-audit-final.json`，用当前源/候选
+  PPTX 和 inspect JSON 自动检查页数、源文本、OOXML 文本泄漏、shape type、媒体、备注、外链和 reference-map 覆盖。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
 - **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。

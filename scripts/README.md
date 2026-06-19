@@ -13,6 +13,9 @@ Use these entry points from skill workflows:
 - `pptx-nova-icons.mjs` - query and generate the bundled Tabler icon pack.
 - `pptx-nova-check-lock.mjs` - validate `deck_lock.json`, `assets_manifest.json`,
   DeckKit content, and patch output before xdoc dry-run.
+- `pptx-nova-refurbish-audit.mjs` - validate Refurbish Existing Deck outputs:
+  slide ownership, source text preservation, OOXML text leaks, media/notes/link
+  counts, and source shape-type count regressions.
 - `pptx-nova-template-gate.mjs` - validate strict template-following artifacts:
   frame-map coverage, empty placeholders, overlay-like additions, and identity
   asset provenance.

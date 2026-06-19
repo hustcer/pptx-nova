@@ -678,6 +678,107 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "cartesian",
+      "deckkit": "cartesian",
+      "caseId": "cartesian.golden-html",
+      "kind": "golden",
+      "readiness": "experimental",
+      "version": "0.1.0",
+      "title": "Cartesian",
+      "bestFor": [
+        "minimal strategy narrative",
+        "editorial business review",
+        "board discussion",
+        "research readout",
+        "quiet data presentation"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "cartesian/deck.pptx",
+          "bytes": 27220,
+          "sha256": "9bfc05fa4daedbdb411cf7bcca21ed14913a9633382895e031945f3a2613dc16"
+        },
+        "contactSheet": {
+          "path": "cartesian/contact-sheet.webp",
+          "bytes": 58626,
+          "sha256": "ed51e33088c6c75a9dfd3d8584d52c339ee91a01aba3c28d23a1db8132fd7bdf",
+          "quality": 82
+        },
+        "content": {
+          "path": "cartesian/content.json",
+          "bytes": 5260,
+          "sha256": "e22acbb6f4b0bfb3db14868dd1ef787c0a9ed611743a49c47eb73159cd457c69"
+        },
+        "brief": {
+          "path": "cartesian/brief.md",
+          "bytes": 711,
+          "sha256": "0c25c79b2739b78fe91cdd49a59b4ffa2f383c4d36af23913ce9163f9917cee7"
+        },
+        "summary": {
+          "path": "cartesian/summary.json",
+          "bytes": 2750,
+          "sha256": "00a0a1ddb057c1e9a51c8f0a4ac120830bbf2a9b892ee532201b9cc87009156d"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 383
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 24,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 24
+        },
+        "lowBuckets": {
+          "total": 24,
+          "styleAllowed": 24,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 24
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 8.5,
+          "labelFontPt": 7.5,
+          "sourceFontPt": 8.5,
+          "note": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

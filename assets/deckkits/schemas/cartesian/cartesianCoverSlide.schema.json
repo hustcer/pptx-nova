@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/cartesian/cartesianCoverSlide",
+  "title": "cartesianCoverSlide data schema",
+  "type": "object",
+  "required": ["label", "title", "subtitle"],
+  "properties": {
+    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.4 } },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 65, "widthIn": 8.7 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 3, "fontPt": 15.5, "widthIn": 5.4 }
+    }
+  },
+  "additionalProperties": false
+}

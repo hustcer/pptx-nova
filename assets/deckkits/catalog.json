@@ -1945,8 +1945,8 @@
       },
       "validatedWith": {
         "s8fy": ">=10",
-        "visionCheck": "candidate pending benchmark",
-        "pngReview": "contact-sheet"
+        "visionCheck": "golden high=0 medium=0; stress/mixed reviewed in .tmp",
+        "pngReview": "golden contact-sheet"
       },
       "quality": {
         "knownBlockingLimits": [],
@@ -2146,6 +2146,329 @@
         {
           "name": "coral-html-reference",
           "contentPath": "examples/coral-content.json"
+        }
+      ]
+    },
+    {
+      "id": "cartesian",
+      "version": "0.1.0",
+      "path": "cartesian.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "experimental",
+      "qualityProfile": {
+        "minFontPt": 8.5,
+        "labelFontPt": 7.5,
+        "sourceFontPt": 8.5,
+        "baseline": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "minimal strategy narrative",
+        "editorial business review",
+        "board discussion",
+        "research readout",
+        "quiet data presentation"
+      ],
+      "coverage": {
+        "languages": ["en", "mixed"],
+        "density": ["normal"],
+        "slideTypes": [
+          "cartesianCoverSlide",
+          "cartesianAgendaSlide",
+          "cartesianStatementSlide",
+          "cartesianBarChartSlide",
+          "cartesianImageStatsSlide",
+          "cartesianCardsSlide",
+          "cartesianLineChartSlide",
+          "cartesianTimelineSlide",
+          "cartesianTeamSlide",
+          "cartesianClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "cartesianCoverSlide",
+        "cartesianAgendaSlide",
+        "cartesianStatementSlide",
+        "cartesianBarChartSlide",
+        "cartesianImageStatsSlide",
+        "cartesianCardsSlide",
+        "cartesianLineChartSlide",
+        "cartesianTimelineSlide",
+        "cartesianTeamSlide",
+        "cartesianClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Minimal warm editorial DeckKit based on Cartesian HTML template geometry, suited to quiet strategy narratives and low-density data readouts.",
+        "mood": ["minimal", "editorial", "precise", "restrained", "warm"],
+        "layoutPrinciples": [
+          "Use sandstone paper backgrounds with sparse taupe rules and large negative space.",
+          "Let Playfair Display headlines carry hierarchy while Inter body text stays compact and readable.",
+          "Keep all components flat, square, and hairline-driven; avoid shadows, rounded SaaS cards, and gradients.",
+          "Use native PPTX charts and editable geometry instead of screenshot or canvas captures."
+        ],
+        "signatureElements": [
+          "solid and dashed concentric geo rings",
+          "uppercase Inter micro labels in muted taupe",
+          "Playfair Display headlines and numerals",
+          "crossed image placeholder shell",
+          "thin agenda, card, stat, and timeline rules",
+          "native column and line charts with softened #555 primary bar series and taupe comparison series"
+        ],
+        "typography": {
+          "display": "Playfair Display regular for titles, quote marks, numerals, and initials",
+          "body": "Inter regular for body copy and compact descriptions",
+          "label": "Inter uppercase micro labels, darkened from the HTML accent for PPTX readability"
+        },
+        "colorSystem": {
+          "background": ["warm sandstone", "stone secondary"],
+          "primary": ["near-black ink", "charcoal body text"],
+          "accent": ["readable taupe", "pale taupe rules"],
+          "semantic": [
+            "soft charcoal primary bar series",
+            "ink line-chart series",
+            "dashed taupe comparison series"
+          ]
+        },
+        "slideRhythm": {
+          "anchor": ["cartesianCoverSlide", "cartesianClosingSlide"],
+          "statement": ["cartesianStatementSlide"],
+          "evidence": [
+            "cartesianBarChartSlide",
+            "cartesianImageStatsSlide",
+            "cartesianLineChartSlide"
+          ],
+          "structure": [
+            "cartesianAgendaSlide",
+            "cartesianCardsSlide",
+            "cartesianTimelineSlide",
+            "cartesianTeamSlide"
+          ]
+        },
+        "compositionRules": [
+          "Prefer one primary content block and one supporting structure per page.",
+          "Keep copy concise; reject overcrowding rather than shrinking body text.",
+          "Use rules, rings, and empty space as chrome instead of icons or illustrations.",
+          "Do not preserve browser navigation, counters, transitions, keyboard handlers, or hover behavior."
+        ],
+        "avoid": [
+          "decorative gradient backgrounds",
+          "image-only slides",
+          "rounded card-heavy SaaS layouts",
+          "saturated accent colors",
+          "dense paragraph pages",
+          "customOps outside the DeckKit content contract"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "cartesianCoverSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.subtitle"]
+          },
+          "cartesianAgendaSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.body", "data.items"]
+          },
+          "cartesianStatementSlide": {
+            "requiredSlots": ["data.quote", "data.attribution"]
+          },
+          "cartesianBarChartSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.body", "data.chart"]
+          },
+          "cartesianImageStatsSlide": {
+            "requiredSlots": [
+              "data.imageLabel",
+              "data.label",
+              "data.title",
+              "data.paragraphs",
+              "data.stats"
+            ]
+          },
+          "cartesianCardsSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.cards"]
+          },
+          "cartesianLineChartSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.body", "data.chart"]
+          },
+          "cartesianTimelineSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.items"]
+          },
+          "cartesianTeamSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.members"]
+          },
+          "cartesianClosingSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.cta", "data.contact"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": ["cartesianCoverSlide", "cartesianClosingSlide"],
+          "statement": ["cartesianStatementSlide"],
+          "evidence": [
+            "cartesianBarChartSlide",
+            "cartesianImageStatsSlide",
+            "cartesianLineChartSlide"
+          ],
+          "structure": [
+            "cartesianAgendaSlide",
+            "cartesianCardsSlide",
+            "cartesianTimelineSlide",
+            "cartesianTeamSlide"
+          ]
+        },
+        "thresholds": [
+          {
+            "minSlides": 7,
+            "minUniqueGroups": 4,
+            "requiredGroups": ["anchor", "evidence", "structure"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 54,
+          "agendaItemsMax": 4,
+          "cardsMax": 3,
+          "timelineStepsMax": 4,
+          "teamMembersMax": 4,
+          "statsMax": 3,
+          "chartCategoriesMax": 6
+        },
+        "hard": {
+          "titleMaxChars": 72,
+          "agendaItemsMax": 5,
+          "cardsMax": 3,
+          "timelineStepsMax": 4,
+          "teamMembersMax": 4,
+          "statsMax": 3,
+          "chartCategoriesMax": 8
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "golden high=0 medium=0; stress/mixed reviewed in .tmp",
+        "pngReview": "golden contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-19",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 24,
+          "lowBuckets": {
+            "total": 24,
+            "styleAllowed": 24,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailable": true,
+            "baselineUpdated": false
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-19",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "requiredKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 24,
+            "lowBuckets": {
+              "total": 24,
+              "styleAllowed": 24,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailable": true,
+              "baselineUpdated": false
+            }
+          },
+          "cases": [
+            {
+              "caseId": "cartesian.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/cartesian/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 24,
+                "lowBuckets": {
+                  "total": 24,
+                  "styleAllowed": 24,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 229674
+              },
+              "patchOps": 383,
+              "p50TotalMs": 42.44
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on beautiful-html-templates/templates/cartesian/template.html; source was HTML, not PPTX.",
+        "Browser navigation dots, arrows, slide counter, keyboard handlers, CSS transitions, and hover states are intentionally excluded.",
+        "Chart.js canvas charts are rebuilt as native editable PPTX charts driven by semantic chart data.",
+        "The HTML accent #8A8178 is darkened to #665D56 for readable PPTX micro text on the sandstone background.",
+        "Image-bearing layout exposes an editable placeholder shell; no reference image or remote asset is bundled.",
+        "Playfair Display and Inter are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution."
+      ],
+      "examples": [
+        {
+          "name": "cartesian-html-reference",
+          "contentPath": "examples/cartesian-content.json"
         }
       ]
     },

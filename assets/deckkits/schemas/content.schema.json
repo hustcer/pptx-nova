@@ -92,7 +92,17 @@
               "longTableMenuSlide",
               "longTableQuoteSlide",
               "longTableCalendarSlide",
-              "longTableClosingSlide"
+              "longTableClosingSlide",
+              "cartesianCoverSlide",
+              "cartesianAgendaSlide",
+              "cartesianStatementSlide",
+              "cartesianBarChartSlide",
+              "cartesianImageStatsSlide",
+              "cartesianCardsSlide",
+              "cartesianLineChartSlide",
+              "cartesianTimelineSlide",
+              "cartesianTeamSlide",
+              "cartesianClosingSlide"
             ]
           },
           "data": { "type": "object" },

@@ -119,6 +119,15 @@
       "reviewPath": "cases/coral/golden-html/review.md"
     },
     {
+      "id": "cartesian.golden-html",
+      "deckkit": "cartesian",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/cartesian-content.json",
+      "buildPath": "../../assets/deckkits/examples/cartesian-build.mjs",
+      "expectedPath": "cases/cartesian/golden-html/expected.json",
+      "reviewPath": "cases/cartesian/golden-html/review.md"
+    },
+    {
       "id": "long-table.golden-html",
       "deckkit": "long-table",
       "kind": "golden",

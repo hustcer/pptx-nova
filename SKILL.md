@@ -132,6 +132,10 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   如果用户认可了某个预览页或小样，后续全量输出必须以该小样作为视觉目标，而不是退回保守保真版本。
   全量候选必须和源 contact sheet 并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
   若肉眼看起来"基本没变"，视为未完成，即使 check-lock 和 vision-check 通过。
+  同时必须保留源 `vision-check` baseline，并对候选做 delta 判断；源稿已有 high/medium 不等于可忽略，
+  但候选不得新增 high，新增 medium 必须修复或在最终摘要中列为已复核风险。
+  最终必须运行 `pptx-nova-refurbish-audit.mjs`，确认 slide count、源文本、媒体、备注、外链和
+  shape type 没有未经批准的减少；不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。

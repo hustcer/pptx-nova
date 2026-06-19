@@ -225,6 +225,22 @@ node <skill-root>/scripts/pptx-nova-refurbish-audit.mjs \
 可按任务增加 `--forbidden-shape-name-regex <pattern>`，例如禁止空内容下方的遗留 bottom rule。
 该脚本只使用 Node 内置模块，并通过系统 `unzip` 读取 PPTX XML；不要为 skill 用户路径引入额外 npm 依赖。
 
+翻新 run 的实操 guardrail：
+
+- 先对源 deck 跑一次 `vision-check` 作为 baseline，再对候选跑 `vision-check`。已有源稿问题要和新增问题分开记录；
+  候选不得新增 high severity，新增 medium 必须能用 PNG/contact sheet 解释并尽量修掉。
+- 不要通过把旧 header、footer、页码或标题移到画布外来隐藏它们；这会制造 `shape-out-of-bounds`
+  并污染后续自动修复。优先把已经镜像到新 header 的旧标题文本设为空，或在原位置把旧装饰 fill/line
+  改成目标背景色并保留在画布内。
+- 不要把编号、quote、URL、template 文案、diagram 节点或 proof label 误判为可丢弃 chrome。
+  任何被清空的源文本都必须已经以等价可见文本重建；否则最终 refurbish audit 应视为阻塞。
+- 不要跨一组 slide 硬编码 shape id。很多导入 deck 在中段会换 layout 或对象顺序；应按
+  `name`、`textPreview`、bbox、fill/line、pageType 和 contact sheet 逐页识别 top chrome。
+- 异构 deck 中的导入模板页、整页 quote/cover、mismatched-canvas 页面和复杂图示页，不应机械套用普通
+  header/rule。先判断目标 chrome 是否会压住源内容；必要时只加轻量页码/标记，或扩展 DeckKit 页型。
+- 对 xdoc op 或 selector schema 不确定时，先用 `xdoc schema --op <op>` 和一页最小 dry-run smoke
+  验证。若主题级 op 在当前版本不稳定，优先对新增 textbox 使用显式 `set-run` 字体和颜色。
+
 对象保留但版式重排的推荐策略：
 
 - 表格、chart、SmartArt、媒体等复杂对象优先保留为原生对象；围绕它们重做标题区、网格、留白和说明层级。
@@ -274,7 +290,9 @@ DeckKit 选择注意事项：
 - `content-validation` 除用户显式接受的 DeckKit readiness 例外外，不应有文本 fit warning。
 - `check-lock` 应为 valid，最好 warnings=0；如果资料型翻新导致连续相同节奏，可把资料页标为
   `appendix`，但必须用 contact sheet 复核整体节奏。
-- `vision-check` high/medium 必须为 0；low 需要人工判断。
+- `vision-check` 默认要求 high/medium 为 0；如果源 deck baseline 已有 high/medium，则候选必须做
+  delta 判断：不得新增 high，新增 medium 需要修复或在最终摘要中列为源内容保真导致的已复核风险。
+  low 需要人工判断。
 - PNG/contact-sheet 复核要抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。
   对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。
   同时检查 proof object 是否过满、圆角/图片/图案示例是否压住标签、空内容区域是否残留无意义横线。

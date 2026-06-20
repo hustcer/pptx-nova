@@ -36,7 +36,11 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
-- **翻新已有 deck 且保持内容**：默认 `copy/preserve source deck -> inspect/source previews -> chrome-detect -> chrome-remove -> remap-theme text,shapes,tables,charts -> chrome-apply -> selective layout polish -> vision-diff + contact-diff -> native refurbish-audit -> gates`；
+- **翻新已有 deck 且保持内容**：默认优先运行 `xdoc pptx refurbish-skin --source source.pptx --deckkit <id> --output out.pptx --json`；
+  该命令会复制保留源 deck，替换旧 chrome/background，应用目标 DeckKit chrome，remap text/shapes/tables/charts，并运行
+  `vision-diff` + native `refurbish-audit` gate。只有在目标 DeckKit 不支持 native skinning、需要跳过/定制 chrome-remove、
+  或需要逐页局部 polish 时，才退回手工串联 `chrome-detect -> chrome-remove -> remap-theme -> chrome-apply`。
+  `contact-diff` 不再作为默认同步 gate；需要人工视觉复核时显式运行并保存并排 contact sheet。
   源 deck 是内容真源；默认保持页数和全部用户可见内容，任何拆页、合页、对象降级或内容丢失都必须先确认。
   翻新目标是"内容不变 + 目标 DeckKit 风格一致"：色系、字体层级、header/footer、页码、背景、规则线和 page chrome
   必须跟目标 DeckKit 对齐。
@@ -132,11 +136,12 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   翻新输出默认必须是可编辑对象重建：不能把源 slide 的渲染截图、整页图片或截图面板当作内容保留策略。
   允许把原 slide 或原对象复制到输出 deck 作为保真起点，但随后必须重新主题化：映射到目标 DeckKit
   palette、字体层级、header/footer、页码、背景和 chrome；不要把原 deck 的色系和页眉页脚原样带入。
-  当前优先使用 `chrome-detect` / `chrome-remove` / `remap-theme` / `chrome-apply` 手工串联
-  skin-first 流程；等 `refurbish-skin` 一等命令可用后再用它替代编排。
-  运行前先确认当前 xdoc 版本真的支持目标 DeckKit 的 `chrome-apply` 和对应 `remap-theme`
-  alias；如果用户显式指定的 DeckKit 还不是 delivery-ready，或 CLI 只支持部分 DeckKit
-  chrome，不要静默改用其它风格。记录 readiness/CLI 限制后，改用 `apply-brand` +
+  当前优先使用 `xdoc pptx refurbish-skin --source source.pptx --deckkit <id> --output out.pptx --json`
+  执行 skin-first 流程；它会内置旧 chrome 替换、DeckKit 背景、remap、vision-diff 和 refurbish-audit gate。
+  手工串联 `chrome-detect` / `chrome-remove` / `remap-theme` / `chrome-apply` 只作为 fallback 或局部修复路径。
+  运行前先确认当前 xdoc 版本真的支持目标 DeckKit 的 `refurbish-skin` / `chrome-apply` native skinning
+  和对应 `remap-theme` alias；如果用户显式指定的 DeckKit 还不是 delivery-ready，或 CLI 只支持部分
+  DeckKit chrome，不要静默改用其它风格。记录 readiness/CLI 限制后，改用 `apply-brand` +
   inspect 驱动的批量 patch 显式实现目标 palette、字体、背景、规则线和页码 chrome。
   `remap-theme` 已可覆盖 text、shapes、tables、charts 的 MVP 换肤，并通过 dry-run 报告对象级
   changed/skipped/unsupported/preserved；这些报告要用于判断旧风格残留，而不是只看最终文件。
@@ -145,7 +150,7 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   目标 DeckKit 缺少合适页型时，应先扩展 DeckKit 的可复用页型/组件/slot contract，再继续生成；
   不允许为了适配现有 DeckKit 而削足适履，导致内容、省略项、对象语义或可编辑性发生变化。
   如果用户认可了某个预览页或小样，后续全量输出必须以该小样作为视觉目标，而不是退回保守保真版本。
-  全量候选必须通过 `xdoc pptx contact-diff` 和源稿并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
+  全量候选需要人工视觉复核时，显式运行 `xdoc pptx contact-diff` 和源稿并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
   若肉眼看起来"基本没变"，视为未完成，即使 check-lock 和 vision-check 通过。
   同时必须运行 `xdoc pptx vision-diff` 做 delta 判断；源稿已有 high/medium 不等于可忽略，
   但候选不得新增 high；由本轮新增 chrome、背景、页码、文字颜色或布局造成的 medium 必须迭代修复到 0。
@@ -272,7 +277,7 @@ check-lock -> dry-run -> apply -> vision-check -> PNG/contact-sheet review -> na
 Refurbish Existing Deck 还必须追加：
 
 ```text
-vision-diff -> contact-diff -> refurbish-audit -> optional legacy supplemental audit
+refurbish-skin report gate -> optional contact-diff for manual review -> optional legacy supplemental audit
 ```
 
 只导出或检查文件时，按 `export-and-check.md` 执行即可。
@@ -293,6 +298,7 @@ xdoc pptx chrome-remove source.pptx --roles header,footer,page-number,rule --out
 xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --dry-run --json
 xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --json
 xdoc pptx chrome-apply remapped.pptx --deckkit mckinsey-blue --output styled.pptx --json
+xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output out.pptx --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json

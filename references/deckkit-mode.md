@@ -25,10 +25,14 @@ source object for fidelity, re-theme the editable object into the target DeckKit
 style; do not preserve the source deck's old color system, master chrome, header,
 or footer unless that visible detail is itself user-confirmed content.
 For existing-deck refurbishment, apply the DeckKit contract with the native
-skin-first commands before considering a rebuild:
-`chrome-detect -> chrome-remove -> remap-theme --scope text,shapes,tables,charts -> chrome-apply`.
-Use `remap-theme` dry-run analysis to find preserved or skipped objects that
-still carry old visual language.
+skin-first command before considering a rebuild:
+`xdoc pptx refurbish-skin --source source.pptx --deckkit <id> --output out.pptx --json`.
+It copies and preserves the source deck, replaces old chrome/background, applies
+DeckKit chrome, remaps text/shapes/tables/charts, and runs audit/vision gates.
+Use the lower-level `chrome-detect -> chrome-remove -> remap-theme --scope
+text,shapes,tables,charts -> chrome-apply` chain only when the deck needs a
+custom chrome-removal policy, a native skinning DeckKit is unavailable, or a
+page-level repair requires inspecting intermediate reports.
 
 For the selected DeckKit, run readiness:
 
@@ -48,12 +52,12 @@ the target visual grammar is visible, and content audit must prove no source
 content/object semantics were reduced.
 
 Do not assume every DeckKit id is supported by every xdoc skinning command.
-`remap-theme --to` currently targets theme/style aliases, and `chrome-apply
---deckkit` may support only a subset of DeckKits in a given xdoc version. For a
-named DeckKit without native chrome/remap support, implement the visual contract
-with an explicit brand profile plus inspect-driven patch ops for background,
-text, fills, lines, and page chrome; save the command error JSON as evidence
-instead of silently switching to another DeckKit.
+`refurbish-skin` and `chrome-apply --deckkit` require native skinning catalog
+entries; unsupported ids must fail with JSON instead of silently falling back.
+For a named DeckKit without native chrome/remap support, implement the visual
+contract with an explicit brand profile plus inspect-driven patch ops for
+background, text, fills, lines, and page chrome; save the command error JSON as
+evidence instead of silently switching to another DeckKit.
 
 Before writing `content.json`, generate the DeckKit slot reference and keep it
 beside the run artifacts:

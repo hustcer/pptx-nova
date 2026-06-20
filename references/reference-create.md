@@ -200,13 +200,33 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
 4. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。默认 `1:1` 保持页数；
    任何 `1:N` 拆页、`N:1` 合页、重排序或 appendix 化都必须先让用户确认，并写入 `approvedChanges[]`。
    不要为了保持原页数而让文字小到不可读或触发 text overflow；但也不能擅自改变页数。
-5. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。先判断 `chrome-remove`
-   是否会误删真实内容：feature-test deck、模板验收页、页脚/页码/日期能力演示页、placeholder
-   验证页、或任何把 header/footer/page number/rule 当作内容展示的 slide，不能机械执行
-   `chrome-remove`。这类 deck 应跳过删除旧 chrome，直接从源 deck 或源 deck 的 `apply-brand`
-   副本开始，用 inspect 驱动的批量 patch 重设背景、fill、line、字体和目标 DeckKit chrome。
-   当前没有一等
-   `refurbish-skin` 命令时，按下面的原生命令手工串联：
+5. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。默认先运行一等编排命令：
+
+```bash
+xdoc pptx refurbish-skin \
+  --source source.pptx \
+  --deckkit mckinsey-blue \
+  --output candidate.pptx \
+  --json > refurbish-skin.json
+```
+
+`refurbish-skin` 会复制保留源 deck，检测/删除高置信旧 chrome，应用 DeckKit 背景和 page chrome，
+对 text/shapes/tables/charts 做批量 remap，并运行 `vision-diff` 与原生 `refurbish-audit` gate。
+读取 `refurbish-skin.json`：`status` 必须为 `passed`，`gate.passed` 必须为 `true`，且
+`gate.newHighIssues` / `gate.newMediumIssues` 必须为 0。`artifacts.contactDiff.status` 默认为
+`skipped`；需要人工视觉复核时，再按报告里的建议路径显式运行 `xdoc pptx contact-diff`。
+
+如果 `refurbish-skin` 返回 `UnsupportedComplexity`，不要重试同一条命令，也不要让用户等待长流程；
+改用下方低层命令对 deck 分段处理，或先做 inspect/audit 后向用户说明当前 MVP 的大 deck 限制。
+如果返回 unsupported DeckKit/native skinning 错误，记录 JSON，并改用目标 DeckKit 对应的 brand profile
+或 inspect 驱动 patch；不得静默切换到其它 DeckKit。
+
+只有需要定制删除策略或排查中间报告时，才先判断 `chrome-remove`
+是否会误删真实内容：feature-test deck、模板验收页、页脚/页码/日期能力演示页、placeholder
+验证页、或任何把 header/footer/page number/rule 当作内容展示的 slide，不能机械执行
+`chrome-remove`。这类 deck 应跳过删除旧 chrome，直接从源 deck 或源 deck 的 `apply-brand`
+副本开始，用 inspect 驱动的批量 patch 重设背景、fill、line、字体和目标 DeckKit chrome。
+手工 fallback 命令链如下：
 
 ```bash
 xdoc pptx chrome-detect source.pptx --json > chrome-detect.json
@@ -223,7 +243,7 @@ xdoc pptx chrome-apply 02-remapped.pptx --deckkit mckinsey-blue --output 03-styl
 或缺少匹配 theme/style alias，必须记录限制并 fallback 到 `apply-brand` + patch 实现目标视觉合同；
 不要静默改用其它 DeckKit 或只做轻量 chrome。
 
-6. 读取 `chrome-detect.json`、`chrome-remove.json`、`remap-dry-run.json` 和 `chrome-apply.json`。
+6. 如果走 fallback，读取 `chrome-detect.json`、`chrome-remove.json`、`remap-dry-run.json` 和 `chrome-apply.json`。
    `remap-theme` 的 `opResults[].analysis` 会给出 visited/changed/skipped/unsupported/preserved
    统计和对象级原因；跳过项可能是合理语义保留，也可能是旧风格残留，必须在
    `content-audit.json` 或修复 patch 中处理。如果走 `apply-brand` + patch fallback，仍要保存
@@ -248,7 +268,7 @@ xdoc pptx chrome-apply 02-remapped.pptx --deckkit mckinsey-blue --output 03-styl
    DeckKit slot budget 粗分块；若目标 DeckKit 没有匹配源页内容结构的页型，先扩展 DeckKit（新增
    可复用页型、组件、slot schema 和 catalog/layout contract），再写 `content.json` 或 `patch.json`。
    不得先把源内容裁剪成现有页型能容纳的形状。10. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
-   如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。11. 生成全量候选后必须运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
+   如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。11. 生成全量候选后按需运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
    contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
    回到 chrome/remap/layout polish 或 DeckKit 页型映射重做，不能只解释为"保真优先"。12. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
    不能停留在第一次生成的旧映射。13. 候选 PPTX apply、inspect 和 PNG 复核后，运行原生最终 refurbish audit；默认不得有 `error`：

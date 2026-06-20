@@ -72,9 +72,10 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
      `visualDensity`.
    - Edit: `xdoc pptx inspect <input.pptx> --json`.
    - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
-     `reference-map.json`, plus skin-first reports from `chrome-detect`,
-     `chrome-remove`, `remap-theme --scope text,shapes,tables,charts`, and
-     `chrome-apply`.
+     `reference-map.json`, and the `xdoc pptx refurbish-skin` JSON report.
+     Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
+text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
+     or page-level repair.
    - Data/template: template, data, bindings, and asset paths.
    - If the source outline only gives a slide title or leaves factual content
      blank, record any AI-filled facts, competitors, metrics, or examples in
@@ -122,9 +123,10 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    ```
    Review the contact sheet for cross-slide rhythm, then inspect suspicious
    slides at full size.
-   For existing-deck refurbishment, also run `xdoc pptx contact-diff` so the
-   source and candidate can be reviewed side by side; a deck that visually still
-   reads like the source with only light chrome added is not done.
+   For existing-deck refurbishment, run `xdoc pptx contact-diff` when manual
+   side-by-side review is needed; `refurbish-skin` reports the suggested path
+   but skips generation by default. A deck that visually still reads like the
+   source with only light chrome added is not done.
 9. For formal create workflows covered by `narrative-quality.md`, write
    `narrative_quality_review.json` after the PNG review. If any score is below
    4, fix the weakest 1-3 slides before delivery unless the user explicitly

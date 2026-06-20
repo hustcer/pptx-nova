@@ -563,123 +563,6 @@
       }
     },
     {
-      "id": "long-table",
-      "deckkit": "long-table",
-      "caseId": "long-table.golden-html",
-      "kind": "golden",
-      "readiness": "candidate",
-      "version": "0.1.0",
-      "title": "Long Table",
-      "bestFor": [
-        "hospitality brand",
-        "food and beverage editorial deck",
-        "event series showcase",
-        "cultural supper club",
-        "lifestyle launch"
-      ],
-      "defaultFor": [],
-      "files": {
-        "deck": {
-          "path": "long-table/deck.pptx",
-          "bytes": 22573,
-          "sha256": "f48ac3852ea306b51258e7515888693e3e67348e43dd3cd1bfbe827bc65a79ac"
-        },
-        "contactSheet": {
-          "path": "long-table/contact-sheet.webp",
-          "bytes": 89642,
-          "sha256": "81d4f72e45b6579a29b03f63bcd36282bd35455f99d49f7c2f192e87b8f7c8c2",
-          "quality": 82
-        },
-        "content": {
-          "path": "long-table/content.json",
-          "bytes": 6669,
-          "sha256": "eab2c349ca9d5d1e03ee0536ce0d2361f11cff082400f44527fce246bbf62ce7"
-        },
-        "brief": {
-          "path": "long-table/brief.md",
-          "bytes": 711,
-          "sha256": "bd1c7b0778cd36f418a5ced4bd004f94fd1f517a5d04ad7bfeb1d2a39b8fa87d"
-        },
-        "summary": {
-          "path": "long-table/summary.json",
-          "bytes": 3100,
-          "sha256": "a03e0b88ac381b67aaa9b75f96f3f19515536ee5115ecaba3fbe854cc70d243c"
-        }
-      },
-      "validation": {
-        "valid": true,
-        "errors": 0,
-        "warnings": 0,
-        "fitDiagnostics": 0,
-        "blockingFitDiagnostics": 0
-      },
-      "patch": {
-        "schemaVersion": 1,
-        "ops": 632
-      },
-      "vision": {
-        "status": "success",
-        "slideCount": 8,
-        "issueCount": 41,
-        "autoFixable": 0,
-        "bySeverity": {
-          "high": 0,
-          "medium": 0,
-          "low": 41
-        },
-        "lowBuckets": {
-          "total": 41,
-          "styleAllowed": 40,
-          "baselineKnown": 0,
-          "new": 1,
-          "changed": 0,
-          "resolved": 0,
-          "reviewable": 1,
-          "baselineUnavailable": true,
-          "baselineUpdated": false
-        },
-        "lowByFamily": {
-          "overlap": 1,
-          "small-font": 40
-        },
-        "newLowByFamily": {
-          "overlap": 1
-        },
-        "changedLowByFamily": {},
-        "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
-          "available": false,
-          "issueCount": 0
-        },
-        "stylePolicy": {
-          "schemaVersion": "pptx-nova-vision-style-policy/v1",
-          "source": "catalog.qualityProfile",
-          "minFontPt": 8.5,
-          "labelFontPt": 8.5,
-          "sourceFontPt": 8.5,
-          "note": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
-        },
-        "newLowSamples": [
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 0,
-            "target": "S0_EditionBadge",
-            "metrics": {
-              "overlapRatio": 0.95
-            },
-            "identity": "4a62521d2aec1fc44d3b",
-            "fingerprint": "791b917a101c4c8b3876"
-          }
-        ],
-        "changedLowSamples": [],
-        "resolvedLowSamples": []
-      }
-    },
-    {
       "id": "cartesian",
       "deckkit": "cartesian",
       "caseId": "cartesian.golden-html",
@@ -776,6 +659,123 @@
           "note": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
         },
         "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "long-table",
+      "deckkit": "long-table",
+      "caseId": "long-table.golden-html",
+      "kind": "golden",
+      "readiness": "experimental",
+      "version": "0.1.0",
+      "title": "Long Table",
+      "bestFor": [
+        "hospitality brand",
+        "food and beverage editorial deck",
+        "event series showcase",
+        "cultural supper club",
+        "lifestyle launch"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "long-table/deck.pptx",
+          "bytes": 22573,
+          "sha256": "f48ac3852ea306b51258e7515888693e3e67348e43dd3cd1bfbe827bc65a79ac"
+        },
+        "contactSheet": {
+          "path": "long-table/contact-sheet.webp",
+          "bytes": 89642,
+          "sha256": "81d4f72e45b6579a29b03f63bcd36282bd35455f99d49f7c2f192e87b8f7c8c2",
+          "quality": 82
+        },
+        "content": {
+          "path": "long-table/content.json",
+          "bytes": 6669,
+          "sha256": "eab2c349ca9d5d1e03ee0536ce0d2361f11cff082400f44527fce246bbf62ce7"
+        },
+        "brief": {
+          "path": "long-table/brief.md",
+          "bytes": 714,
+          "sha256": "8dab1e671b3515873bf9d24ecad4b1062a455c71175b4e60cc4ad306a8182194"
+        },
+        "summary": {
+          "path": "long-table/summary.json",
+          "bytes": 3100,
+          "sha256": "a03e0b88ac381b67aaa9b75f96f3f19515536ee5115ecaba3fbe854cc70d243c"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 632
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 41,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 41
+        },
+        "lowBuckets": {
+          "total": 41,
+          "styleAllowed": 40,
+          "baselineKnown": 0,
+          "new": 1,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 1,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "overlap": 1,
+          "small-font": 40
+        },
+        "newLowByFamily": {
+          "overlap": 1
+        },
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 8.5,
+          "labelFontPt": 8.5,
+          "sourceFontPt": 8.5,
+          "note": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
+        },
+        "newLowSamples": [
+          {
+            "severity": "low",
+            "family": "overlap",
+            "kind": "geometry-overlap",
+            "slideIndex": 0,
+            "target": "S0_EditionBadge",
+            "metrics": {
+              "overlapRatio": 0.95
+            },
+            "identity": "4a62521d2aec1fc44d3b",
+            "fingerprint": "791b917a101c4c8b3876"
+          }
+        ],
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }

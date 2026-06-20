@@ -12,9 +12,9 @@ export const C = {
   ember: 'E26B4A',
 }
 
-export const FONT_DISPLAY = 'Instrument Serif'
-export const FONT_BODY = 'Archivo'
-export const FONT_MONO = 'JetBrains Mono'
+export const FONT_DISPLAY = 'Times New Roman'
+export const FONT_BODY = 'Arial'
+export const FONT_MONO = 'Courier New'
 
 const str = (value) => String(value ?? '')
 const list = (value) => (Array.isArray(value) ? value : value ? [value] : [])
@@ -137,6 +137,9 @@ function makeOps() {
     )
   }
 
+  const hazeOval = (s, base, cx, cy, w, h, color = C.sunSoft, alpha = 0.12) =>
+    softOval(s, base, cx - w / 2, cy - h / 2, w, h, color, alpha, '48pt')
+
   const emberBloom = (s, base, cx, cy, w, h, alpha = 0.16) =>
     softOval(s, base, cx - w / 2, cy - h / 2, w, h, C.ember, alpha, '38pt')
 
@@ -197,12 +200,24 @@ function makeOps() {
     text,
     pageNum,
     footerBand,
+    hazeOval,
   }
 }
 
 function makePageTypes(api, total) {
-  const { p, add, alphaBox, line, strokeRect, sunBloom, emberBloom, text, pageNum, footerBand } =
-    api
+  const {
+    p,
+    add,
+    alphaBox,
+    line,
+    strokeRect,
+    sunBloom,
+    emberBloom,
+    hazeOval,
+    text,
+    pageNum,
+    footerBand,
+  } = api
 
   const cover = (s, data) => {
     add(s)
@@ -214,13 +229,13 @@ function makePageTypes(api, total) {
     alphaBox(s, 'Tile4', col * 2, row * 5, col * 2, row * 2, C.sun, 0.45)
     sunBloom(s, 'Sun', 6.95, 3.45, 5.7, 3.15, 0.32)
     emberBloom(s, 'Ember', 11.9, 1.05, 2.7, 2.1, 0.16)
-    text(s, 'DateRail', 9.95, 0.48, 2.6, 1.25, data.dateRange, font(50, C.ink, FONT_DISPLAY), {
+    text(s, 'DateRail', 9.72, 0.48, 2.86, 1.25, data.dateRange, font(42, C.ink, FONT_DISPLAY), {
       align: 'right',
       lineSpacing: 0.9,
       spaceAfter: '0pt',
       autoSize: 'text',
     })
-    text(s, 'Title', 0.53, 2.08, 6.7, 2.95, data.title, font(132, C.ink, FONT_DISPLAY), {
+    text(s, 'Title', 0.53, 2.08, 7.25, 2.95, data.title, font(92, C.ink, FONT_DISPLAY), {
       lineSpacing: 0.86,
       spaceAfter: '0pt',
       autoSize: 'text',
@@ -241,17 +256,17 @@ function makePageTypes(api, total) {
 
   const manifesto = (s, data) => {
     add(s)
-    sunBloom(s, 'Haze', 6.75, 3.75, 9.2, 4.8, 0.3)
-    emberBloom(s, 'Ember', 1.3, 6.65, 2.6, 1.4, 0.12)
+    hazeOval(s, 'Haze', 6.75, 3.75, 8.8, 4.3, C.sunSoft, 0.14)
+    emberBloom(s, 'Ember', 1.3, 6.65, 2.6, 1.4, 0.06)
     text(
       s,
       'Quote',
       0.92,
-      2.2,
+      2.05,
       11.65,
-      2.45,
+      2.7,
       data.quote,
-      font(63, C.ink, FONT_DISPLAY, { italic: true }),
+      font(56, C.ink, FONT_DISPLAY, { italic: true }),
       {
         lineSpacing: 1.04,
         spaceAfter: '0pt',
@@ -275,7 +290,7 @@ function makePageTypes(api, total) {
     add(s)
     p.box(s, nm(s, 'LeftPanel'), 'rectangle', 0, 0, SLIDE_W / 2, SLIDE_H, C.sun)
     text(s, 'Kicker', 0.53, 0.52, 3.5, 0.18, data.kicker, font(9, C.ink, FONT_BODY, { bold: true }))
-    text(s, 'Word', 0.53, 3.0, 5.8, 1.25, data.word, font(108, C.ink, FONT_DISPLAY), {
+    text(s, 'Word', 0.53, 3.05, 6.05, 1.25, data.word, font(84, C.ink, FONT_DISPLAY), {
       lineSpacing: 0.86,
       spaceAfter: '0pt',
       autoSize: 'text',
@@ -320,30 +335,15 @@ function makePageTypes(api, total) {
 
   const chapter = (s, data) => {
     add(s)
-    sunBloom(s, 'CornerSun', 0.9, 0.85, 3.4, 2.4, 0.28)
-    emberBloom(s, 'CornerEmber', 11.2, 6.05, 2.0, 1.0, 0.1)
-    const rail = text(
-      s,
-      'Rail',
-      0.5,
-      0.82,
-      0.24,
-      3.2,
-      data.rail,
-      font(9, C.ink, FONT_BODY, { bold: true }),
-    )
-    p.ops.push({
-      op: 'set-text-frame-vertical-text',
-      slide: s,
-      shape: { name: rail },
-      verticalText: 'vertical270',
-    })
-    text(s, 'Number', 1.65, 0.48, 5.0, 3.55, data.number, font(245, C.ink, FONT_DISPLAY), {
+    hazeOval(s, 'CornerSun', 0.7, 0.55, 2.9, 1.6, C.sunSoft, 0.12)
+    emberBloom(s, 'CornerEmber', 11.2, 6.05, 2.0, 1.0, 0.04)
+    text(s, 'Rail', 0.53, 0.52, 3.75, 0.18, data.rail, font(9, C.ink, FONT_BODY, { bold: true }))
+    text(s, 'Number', 1.55, 0.75, 5.0, 3.3, data.number, font(195, C.ink, FONT_DISPLAY), {
       lineSpacing: 0.84,
       spaceAfter: '0pt',
     })
-    text(s, 'Title', 1.55, 4.32, 9.3, 1.35, data.title, font(40, C.ink, FONT_DISPLAY))
-    text(s, 'Lede', 1.55, 5.75, 6.25, 0.72, data.lede, font(10.5, C.ink, FONT_BODY), {
+    text(s, 'Title', 1.55, 4.22, 9.3, 1.28, data.title, font(38, C.ink, FONT_DISPLAY))
+    text(s, 'Lede', 1.55, 5.58, 6.25, 0.9, data.lede, font(10.5, C.ink, FONT_BODY), {
       lineSpacing: 1.25,
       spaceAfter: '0pt',
     })
@@ -352,8 +352,8 @@ function makePageTypes(api, total) {
 
   const dataSlide = (s, data) => {
     add(s)
-    sunBloom(s, 'TopBloom', 11.6, 0.85, 3.5, 1.8, 0.22)
-    text(s, 'Title', 0.53, 0.48, 3.4, 0.75, data.title, font(36, C.ink, FONT_DISPLAY), {
+    hazeOval(s, 'TopBloom', 11.6, 0.85, 3.5, 1.8, C.sunSoft, 0.1)
+    text(s, 'Title', 0.53, 0.48, 5.6, 0.75, data.title, font(34, C.ink, FONT_DISPLAY), {
       autoSize: 'text',
     })
     text(s, 'Label', 10.3, 0.83, 2.5, 0.18, data.label, font(9, C.ink, FONT_BODY, { bold: true }), {
@@ -367,10 +367,10 @@ function makePageTypes(api, total) {
         `Stat${i}`,
         0.53,
         y,
-        1.8,
+        2.8,
         0.85,
         `${str(item.value)}${str(item.suffix)}`,
-        font(72, C.ink, FONT_DISPLAY),
+        font(62, C.ink, FONT_DISPLAY),
         {
           lineSpacing: 0.9,
           spaceAfter: '0pt',
@@ -418,16 +418,16 @@ function makePageTypes(api, total) {
   const quote = (s, data) => {
     add(s)
     p.box(s, nm(s, 'YellowPanel'), 'rectangle', 10.4, 0, 2.93, SLIDE_H, C.sun)
-    sunBloom(s, 'LeftBloom', 1.1, 6.6, 3.2, 1.7, 0.2)
+    hazeOval(s, 'LeftBloom', 1.1, 6.6, 3.2, 1.7, C.sunSoft, 0.08)
     text(s, 'Kicker', 0.53, 2.18, 4.0, 0.18, data.kicker, font(9, C.ink, FONT_BODY, { bold: true }))
-    text(s, 'Quote', 0.53, 2.82, 8.1, 1.75, data.quote, font(42, C.ink, FONT_DISPLAY), {
+    text(s, 'Quote', 0.53, 2.72, 8.5, 2.25, data.quote, font(34, C.ink, FONT_DISPLAY), {
       lineSpacing: 1.02,
       spaceAfter: '0pt',
       autoSize: 'text',
     })
-    line(s, 'AttrRule', 0.53, 5.1, 8.0, 0.008, C.ink)
-    text(s, 'Author', 0.53, 5.22, 1.6, 0.15, data.author, font(9, C.ink, FONT_BODY, { bold: true }))
-    text(s, 'Role', 2.25, 5.22, 6.25, 0.15, data.role, font(9, C.ink, FONT_BODY))
+    line(s, 'AttrRule', 0.53, 5.18, 8.0, 0.008, C.ink)
+    text(s, 'Author', 0.53, 5.3, 1.6, 0.15, data.author, font(9, C.ink, FONT_BODY, { bold: true }))
+    text(s, 'Role', 2.25, 5.3, 6.25, 0.15, data.role, font(9, C.ink, FONT_BODY))
     p.box(s, nm(s, 'DotA'), 'oval', 11.85, 6.33, 0.08, 0.08, C.ink)
     p.box(s, nm(s, 'DotB'), 'oval', 12.0, 6.33, 0.08, 0.08, C.ink)
     pageNum(s, total)
@@ -435,8 +435,8 @@ function makePageTypes(api, total) {
 
   const calendar = (s, data) => {
     add(s)
-    sunBloom(s, 'TopBloom', 12.0, 0.2, 3.4, 1.7, 0.2)
-    text(s, 'Title', 0.53, 0.48, 3.4, 0.75, data.title, font(42, C.ink, FONT_DISPLAY), {
+    hazeOval(s, 'TopBloom', 12.0, 0.2, 3.4, 1.7, C.sunSoft, 0.08)
+    text(s, 'Title', 0.53, 0.48, 5.5, 0.75, data.title, font(38, C.ink, FONT_DISPLAY), {
       autoSize: 'text',
     })
     text(
@@ -497,8 +497,8 @@ function makePageTypes(api, total) {
     const row = SLIDE_H / 8
     alphaBox(s, 'Tile1', 0, 0, col * 2, row * 2, C.sun, 0.55)
     alphaBox(s, 'Tile2', col * 3, row * 4, col, row * 3, C.sun, 0.4)
-    sunBloom(s, 'BottomBloom', 6.8, 7.25, 7.3, 2.4, 0.3)
-    emberBloom(s, 'Ember', 1.4, 1.1, 2.4, 1.6, 0.12)
+    hazeOval(s, 'BottomBloom', 6.8, 7.25, 7.3, 2.4, C.sunSoft, 0.16)
+    emberBloom(s, 'Ember', 1.4, 1.1, 2.4, 1.6, 0.06)
     text(s, 'Kicker', 0.65, 0.45, 3.6, 0.18, data.kicker, font(9, C.ink, FONT_BODY, { bold: true }))
     text(s, 'Title', 0.53, 1.1, 6.3, 4.75, data.title, font(76, C.ink, FONT_DISPLAY), {
       lineSpacing: 0.86,

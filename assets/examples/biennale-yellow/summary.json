@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": 1,
-    "ops": 744
+    "ops": 683
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
     "changedParts": 19,
-    "opResults": 744,
+    "opResults": 683,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -37,7 +37,7 @@
     "status": "success",
     "warnings": 0,
     "changedParts": 19,
-    "opResults": 744,
+    "opResults": 683,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -48,32 +48,30 @@
   "vision": {
     "status": "success",
     "slideCount": 8,
-    "issueCount": 74,
+    "issueCount": 72,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 74
+      "low": 72
     },
     "lowBuckets": {
-      "total": 74,
+      "total": 72,
       "styleAllowed": 67,
       "baselineKnown": 0,
-      "new": 7,
+      "new": 5,
       "changed": 0,
       "resolved": 0,
-      "reviewable": 7,
+      "reviewable": 5,
       "baselineUnavailable": true,
       "baselineUpdated": false
     },
     "lowByFamily": {
       "small-font": 67,
-      "overlap": 5,
-      "composition": 2
+      "overlap": 5
     },
     "newLowByFamily": {
-      "overlap": 5,
-      "composition": 2
+      "overlap": 5
     },
     "changedLowByFamily": {},
     "baseline": {
@@ -151,32 +149,6 @@
         },
         "identity": "c805359acaf46e8c86cc",
         "fingerprint": "8445ece0b309211f521f"
-      },
-      {
-        "severity": "low",
-        "family": "composition",
-        "kind": "arrangement-imbalance",
-        "slideIndex": 6,
-        "target": "S6_Title",
-        "metrics": {
-          "deltaEmu": 438912,
-          "rowSize": 3
-        },
-        "identity": "3c77bd168bc86902bab9",
-        "fingerprint": "b7b00411f7539d21f374"
-      },
-      {
-        "severity": "low",
-        "family": "composition",
-        "kind": "arrangement-imbalance",
-        "slideIndex": 7,
-        "target": "S7_BottomBloomCore",
-        "metrics": {
-          "deltaEmu": 267004,
-          "rowSize": 3
-        },
-        "identity": "8c0ec6ea14da73f664de",
-        "fingerprint": "ab46e9126e5e6c9bc3c0"
       }
     ],
     "changedLowSamples": [],
@@ -190,12 +162,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 272148,
-      "sha256": "f3cf1a5fe43112113618d3993953ddbfbec63c39e3eb7dbc8573883687f113a6"
+      "bytes": 265381,
+      "sha256": "51c5cb9693775af290cb35415f2dcff3ff74ff5672bd9d08aad0689db2763a6c"
     },
     "webp": {
-      "bytes": 87252,
-      "sha256": "12b64dc368e146d4f5aeefdde1468bccd2f8770bed906eb0f432ae140e547f1f"
+      "bytes": 93580,
+      "sha256": "e9699d982969c8597981a07460ac3f5ecf803ee454df2ea6697e94fdff6a9ad7"
     }
   }
 }

@@ -2786,9 +2786,9 @@
           "four-column metadata footer bands"
         ],
         "typography": {
-          "display": "Instrument Serif for large editorial titles, quotes, numerals, and poster words",
-          "body": "Archivo for compact labels, body copy, footer metadata, and institutional notes",
-          "mono": "JetBrains Mono for page numbers, dates, durations, and chart labels"
+          "display": "Times New Roman for large editorial titles, quotes, numerals, and poster words",
+          "body": "Arial for compact labels, body copy, footer metadata, and institutional notes",
+          "mono": "Courier New for page numbers, dates, durations, and chart labels"
         },
         "colorSystem": {
           "background": ["warm paper #E9E5DB", "deep paper #DCD6C4"],
@@ -2999,7 +2999,7 @@
       },
       "knownLimits": [
         "Based on the HTML template at beautiful-html-templates/templates/biennale-yellow; browser-only navigation, keyboard/touch interaction, crossfade transitions, and hover states are excluded.",
-        "Instrument Serif and Archivo are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
+        "Typography uses PowerPoint-safe system families (Times New Roman, Arial, and Courier New) so browser viewer output does not depend on remote font loading.",
         "CSS radial gradients are approximated with editable PowerPoint soft-edge oval shapes and translucent yellow rectangles.",
         "The chapter rail uses native PPTX vertical text rather than a rasterized CSS rotated label.",
         "The source template has no reusable image assets; the DeckKit intentionally remains image-free."

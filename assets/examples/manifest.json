@@ -799,13 +799,13 @@
       "files": {
         "deck": {
           "path": "biennale-yellow/deck.pptx",
-          "bytes": 23667,
-          "sha256": "e610b0ddd822281442099aa3eb51dc42294c199b6d5cce38969957707084c429"
+          "bytes": 22902,
+          "sha256": "983bd5741dec7d3d50f195b8d0746cfd6fb72cbe5a39c7261361bb7dc9f8aa2d"
         },
         "contactSheet": {
           "path": "biennale-yellow/contact-sheet.webp",
-          "bytes": 87252,
-          "sha256": "12b64dc368e146d4f5aeefdde1468bccd2f8770bed906eb0f432ae140e547f1f",
+          "bytes": 93580,
+          "sha256": "e9699d982969c8597981a07460ac3f5ecf803ee454df2ea6697e94fdff6a9ad7",
           "quality": 82
         },
         "content": {
@@ -816,12 +816,12 @@
         "brief": {
           "path": "biennale-yellow/brief.md",
           "bytes": 755,
-          "sha256": "b1b1963afb396ba22433a0604b3a70fd6d3f08e581ee20413b1379b1f1695da0"
+          "sha256": "7da073d89a363fce0aa2e2dabb72e56a2140996ede709db82bc5bf41d7451c9a"
         },
         "summary": {
           "path": "biennale-yellow/summary.json",
-          "bytes": 5164,
-          "sha256": "140f269afbac6c43727bbe2940af6b501d657d672dfbe38219e67f7dc404fd17"
+          "bytes": 4410,
+          "sha256": "4910730e75ecfce5c76cb5c402d51d4f9334eaf64d2d38c587d4b1ade36b715e"
         }
       },
       "validation": {
@@ -833,37 +833,35 @@
       },
       "patch": {
         "schemaVersion": 1,
-        "ops": 744
+        "ops": 683
       },
       "vision": {
         "status": "success",
         "slideCount": 8,
-        "issueCount": 74,
+        "issueCount": 72,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 74
+          "low": 72
         },
         "lowBuckets": {
-          "total": 74,
+          "total": 72,
           "styleAllowed": 67,
           "baselineKnown": 0,
-          "new": 7,
+          "new": 5,
           "changed": 0,
           "resolved": 0,
-          "reviewable": 7,
+          "reviewable": 5,
           "baselineUnavailable": true,
           "baselineUpdated": false
         },
         "lowByFamily": {
           "small-font": 67,
-          "overlap": 5,
-          "composition": 2
+          "overlap": 5
         },
         "newLowByFamily": {
-          "overlap": 5,
-          "composition": 2
+          "overlap": 5
         },
         "changedLowByFamily": {},
         "baseline": {
@@ -941,32 +939,6 @@
             },
             "identity": "c805359acaf46e8c86cc",
             "fingerprint": "8445ece0b309211f521f"
-          },
-          {
-            "severity": "low",
-            "family": "composition",
-            "kind": "arrangement-imbalance",
-            "slideIndex": 6,
-            "target": "S6_Title",
-            "metrics": {
-              "deltaEmu": 438912,
-              "rowSize": 3
-            },
-            "identity": "3c77bd168bc86902bab9",
-            "fingerprint": "b7b00411f7539d21f374"
-          },
-          {
-            "severity": "low",
-            "family": "composition",
-            "kind": "arrangement-imbalance",
-            "slideIndex": 7,
-            "target": "S7_BottomBloomCore",
-            "metrics": {
-              "deltaEmu": 267004,
-              "rowSize": 3
-            },
-            "identity": "8c0ec6ea14da73f664de",
-            "fingerprint": "ab46e9126e5e6c9bc3c0"
           }
         ],
         "changedLowSamples": [],

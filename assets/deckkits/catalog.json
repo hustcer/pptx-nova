@@ -409,6 +409,11 @@
       "path": "mckinsey-blue.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
+      "nativeSkinning": {
+        "themePack": "corporate-blue",
+        "stylePack": "consulting",
+        "chromeSource": "themePack.generator.colors + stylePack.generator.chrome"
+      },
       "qualityProfile": {
         "minFontPt": 6,
         "labelFontPt": 6,

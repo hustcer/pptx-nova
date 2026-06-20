@@ -2723,6 +2723,293 @@
           "contentPath": "examples/long-table-content.json"
         }
       ]
+    },
+    {
+      "id": "biennale-yellow",
+      "version": "0.1.0",
+      "path": "biennale-yellow.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 9,
+        "labelFontPt": 9,
+        "sourceFontPt": 9,
+        "baseline": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "cultural institution programme",
+        "festival and biennale deck",
+        "editorial annual report",
+        "museum exhibition narrative",
+        "arts residency showcase"
+      ],
+      "coverage": {
+        "languages": ["en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "biennaleCoverSlide",
+          "biennaleManifestoSlide",
+          "biennaleProgrammeSlide",
+          "biennaleChapterSlide",
+          "biennaleDataSlide",
+          "biennaleQuoteSlide",
+          "biennaleCalendarSlide",
+          "biennaleColophonSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "biennaleCoverSlide",
+        "biennaleManifestoSlide",
+        "biennaleProgrammeSlide",
+        "biennaleChapterSlide",
+        "biennaleDataSlide",
+        "biennaleQuoteSlide",
+        "biennaleCalendarSlide",
+        "biennaleColophonSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Warm editorial biennale DeckKit with paper fields, disciplined ink typography, yellow structural blocks, and atmospheric native PowerPoint bloom shapes.",
+        "mood": ["editorial", "cultural", "solar", "quiet", "institutional"],
+        "layoutPrinciples": [
+          "Use a warm paper canvas with one disciplined ink color for all text and rules.",
+          "Let yellow planes, translucent block tiles, and native soft-edge ovals carry the visual identity.",
+          "Use large serif display type as the primary composition anchor.",
+          "Structure dense pages with hairline rules, ledger rows, numbered strands, and editable native bars."
+        ],
+        "signatureElements": [
+          "solar yellow blocks and soft native oval blooms",
+          "bottom-right mono page number",
+          "oversized editorial serif titles and numerals",
+          "thin ink rules with low-alpha row separators",
+          "four-column metadata footer bands"
+        ],
+        "typography": {
+          "display": "Instrument Serif for large editorial titles, quotes, numerals, and poster words",
+          "body": "Archivo for compact labels, body copy, footer metadata, and institutional notes",
+          "mono": "JetBrains Mono for page numbers, dates, durations, and chart labels"
+        },
+        "colorSystem": {
+          "background": ["warm paper #E9E5DB", "deep paper #DCD6C4"],
+          "primary": ["ink blue #1B2566"],
+          "accent": ["solar yellow #F1EE2E", "soft yellow #F8F39B", "haze #F0DA7C"],
+          "secondary": ["low-opacity ember #E26B4A for atmospheric blooms only"]
+        },
+        "slideRhythm": {
+          "anchor": ["biennaleCoverSlide", "biennaleColophonSlide"],
+          "editorial": ["biennaleManifestoSlide", "biennaleChapterSlide", "biennaleQuoteSlide"],
+          "programme": ["biennaleProgrammeSlide", "biennaleCalendarSlide"],
+          "evidence": ["biennaleDataSlide"]
+        },
+        "compositionRules": [
+          "Keep every slide image-free and editable through native PPTX shapes and text.",
+          "Do not add shadows, rounded cards, icons, or decorative bitmap overlays.",
+          "Use yellow as plane, bloom, tile, or chart emphasis rather than colored text.",
+          "Prefer fixed item counts that match the locked layouts; reject oversized arrays through schema and density gates."
+        ],
+        "avoid": [
+          "browser navigation or transition controls",
+          "full-slide screenshot backgrounds",
+          "multi-color infographic palettes",
+          "SaaS card grids",
+          "decorative photography or stock illustration"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slideTypes": {
+          "biennaleCoverSlide": {
+            "requiredSlots": ["data.dateRange", "data.title", "data.subline", "data.footerItems"]
+          },
+          "biennaleManifestoSlide": {
+            "requiredSlots": ["data.quote", "data.attribution"]
+          },
+          "biennaleProgrammeSlide": {
+            "requiredSlots": [
+              "data.kicker",
+              "data.word",
+              "data.description",
+              "data.headLabel",
+              "data.strands"
+            ]
+          },
+          "biennaleChapterSlide": {
+            "requiredSlots": ["data.rail", "data.number", "data.title", "data.lede"]
+          },
+          "biennaleDataSlide": {
+            "requiredSlots": ["data.title", "data.label", "data.stats", "data.bars"]
+          },
+          "biennaleQuoteSlide": {
+            "requiredSlots": ["data.kicker", "data.quote", "data.author", "data.role"]
+          },
+          "biennaleCalendarSlide": {
+            "requiredSlots": ["data.title", "data.label", "data.columns", "data.rows"]
+          },
+          "biennaleColophonSlide": {
+            "requiredSlots": ["data.kicker", "data.title", "data.footerItems"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": ["biennaleCoverSlide", "biennaleColophonSlide"],
+          "editorial": ["biennaleManifestoSlide", "biennaleChapterSlide", "biennaleQuoteSlide"],
+          "programme": ["biennaleProgrammeSlide", "biennaleCalendarSlide"],
+          "evidence": ["biennaleDataSlide"]
+        },
+        "thresholds": [
+          {
+            "minSlides": 6,
+            "minUniqueGroups": 3,
+            "requiredGroups": ["anchor", "editorial"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 78,
+          "footerItemsMax": 4,
+          "strandsMax": 5,
+          "statsMax": 2,
+          "barsMax": 6,
+          "calendarRowsMax": 8
+        },
+        "hard": {
+          "titleMaxChars": 120,
+          "footerItemsMax": 4,
+          "strandsMax": 5,
+          "statsMax": 2,
+          "barsMax": 6,
+          "calendarRowsMax": 8
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "golden pending benchmark",
+        "pngReview": "Phase 1 full rebuild contact-sheet reviewed"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "manualHardDefects": null,
+        "lastBenchmark": "2026-06-20",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 74,
+          "lowBuckets": {
+            "total": 74,
+            "styleAllowed": 67,
+            "baselineKnown": 0,
+            "new": 7,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 7,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-20",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 74,
+            "lowBuckets": {
+              "total": 74,
+              "styleAllowed": 67,
+              "baselineKnown": 0,
+              "new": 7,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 7,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "biennale-yellow.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/biennale-yellow/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 74,
+                "lowBuckets": {
+                  "total": 74,
+                  "styleAllowed": 67,
+                  "baselineKnown": 0,
+                  "new": 7,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 7,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 274511
+              },
+              "patchOps": 744,
+              "p50TotalMs": 77.28
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on the HTML template at beautiful-html-templates/templates/biennale-yellow; browser-only navigation, keyboard/touch interaction, crossfade transitions, and hover states are excluded.",
+        "Instrument Serif and Archivo are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
+        "CSS radial gradients are approximated with editable PowerPoint soft-edge oval shapes and translucent yellow rectangles.",
+        "The chapter rail uses native PPTX vertical text rather than a rasterized CSS rotated label.",
+        "The source template has no reusable image assets; the DeckKit intentionally remains image-free."
+      ],
+      "examples": [
+        {
+          "name": "biennale-yellow-html-reference",
+          "contentPath": "examples/biennale-yellow-content.json"
+        }
+      ]
     }
   ]
 }

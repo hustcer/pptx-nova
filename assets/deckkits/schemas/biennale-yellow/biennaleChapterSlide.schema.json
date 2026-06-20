@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/biennale-yellow/biennaleChapterSlide",
+  "title": "biennaleChapterSlide data schema",
+  "type": "object",
+  "required": ["rail", "number", "title", "lede"],
+  "properties": {
+    "rail": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.2 }
+    },
+    "number": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 245, "widthIn": 5.0 }
+    },
+    "title": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 2, "fontPt": 40, "widthIn": 9.3 }
+    },
+    "lede": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 4, "fontPt": 10.5, "widthIn": 6.25 }
+    }
+  },
+  "additionalProperties": false
+}

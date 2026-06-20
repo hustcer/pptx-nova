@@ -137,6 +137,15 @@
       "reviewPath": "cases/long-table/golden-html/review.md"
     },
     {
+      "id": "biennale-yellow.golden-html",
+      "deckkit": "biennale-yellow",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/biennale-yellow-content.json",
+      "buildPath": "../../assets/deckkits/examples/biennale-yellow-build.mjs",
+      "expectedPath": "cases/biennale-yellow/golden-html/expected.json",
+      "reviewPath": "cases/biennale-yellow/golden-html/review.md"
+    },
+    {
       "id": "coral.stress-density",
       "deckkit": "coral",
       "kind": "stress",

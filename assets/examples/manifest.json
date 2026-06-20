@@ -779,6 +779,199 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "biennale-yellow",
+      "deckkit": "biennale-yellow",
+      "caseId": "biennale-yellow.golden-html",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Aurora Programme",
+      "bestFor": [
+        "cultural institution programme",
+        "festival and biennale deck",
+        "editorial annual report",
+        "museum exhibition narrative",
+        "arts residency showcase"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "biennale-yellow/deck.pptx",
+          "bytes": 23667,
+          "sha256": "e610b0ddd822281442099aa3eb51dc42294c199b6d5cce38969957707084c429"
+        },
+        "contactSheet": {
+          "path": "biennale-yellow/contact-sheet.webp",
+          "bytes": 87252,
+          "sha256": "12b64dc368e146d4f5aeefdde1468bccd2f8770bed906eb0f432ae140e547f1f",
+          "quality": 82
+        },
+        "content": {
+          "path": "biennale-yellow/content.json",
+          "bytes": 7579,
+          "sha256": "8f8ae9291575fb4bbf1461f09cb2d5a25e9087c4b3b5e37f12f8c213774e0f05"
+        },
+        "brief": {
+          "path": "biennale-yellow/brief.md",
+          "bytes": 755,
+          "sha256": "b1b1963afb396ba22433a0604b3a70fd6d3f08e581ee20413b1379b1f1695da0"
+        },
+        "summary": {
+          "path": "biennale-yellow/summary.json",
+          "bytes": 5164,
+          "sha256": "140f269afbac6c43727bbe2940af6b501d657d672dfbe38219e67f7dc404fd17"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 744
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 74,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 74
+        },
+        "lowBuckets": {
+          "total": 74,
+          "styleAllowed": 67,
+          "baselineKnown": 0,
+          "new": 7,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 7,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 67,
+          "overlap": 5,
+          "composition": 2
+        },
+        "newLowByFamily": {
+          "overlap": 5,
+          "composition": 2
+        },
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 9,
+          "labelFontPt": 9,
+          "sourceFontPt": 9,
+          "note": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
+        },
+        "newLowSamples": [
+          {
+            "severity": "low",
+            "family": "overlap",
+            "kind": "geometry-overlap",
+            "slideIndex": 2,
+            "target": "S2_StrandRule0",
+            "metrics": {
+              "overlapRatio": 0.82
+            },
+            "identity": "b64a1e6b8d105297af57",
+            "fingerprint": "97678b968ca8a233621f"
+          },
+          {
+            "severity": "low",
+            "family": "overlap",
+            "kind": "geometry-overlap",
+            "slideIndex": 2,
+            "target": "S2_StrandRule1",
+            "metrics": {
+              "overlapRatio": 0.82
+            },
+            "identity": "6c89dac35b99249609d2",
+            "fingerprint": "083526495303cb386350"
+          },
+          {
+            "severity": "low",
+            "family": "overlap",
+            "kind": "geometry-overlap",
+            "slideIndex": 2,
+            "target": "S2_StrandRule2",
+            "metrics": {
+              "overlapRatio": 0.82
+            },
+            "identity": "ab692c40f022c2b610ec",
+            "fingerprint": "0397cb561355a55cf7bb"
+          },
+          {
+            "severity": "low",
+            "family": "overlap",
+            "kind": "geometry-overlap",
+            "slideIndex": 2,
+            "target": "S2_StrandRule3",
+            "metrics": {
+              "overlapRatio": 0.82
+            },
+            "identity": "1dbc5dcdd00cf63a8f77",
+            "fingerprint": "8d17a3c95cf4355e3415"
+          },
+          {
+            "severity": "low",
+            "family": "overlap",
+            "kind": "geometry-overlap",
+            "slideIndex": 2,
+            "target": "S2_StrandRule4",
+            "metrics": {
+              "overlapRatio": 0.82
+            },
+            "identity": "c805359acaf46e8c86cc",
+            "fingerprint": "8445ece0b309211f521f"
+          },
+          {
+            "severity": "low",
+            "family": "composition",
+            "kind": "arrangement-imbalance",
+            "slideIndex": 6,
+            "target": "S6_Title",
+            "metrics": {
+              "deltaEmu": 438912,
+              "rowSize": 3
+            },
+            "identity": "3c77bd168bc86902bab9",
+            "fingerprint": "b7b00411f7539d21f374"
+          },
+          {
+            "severity": "low",
+            "family": "composition",
+            "kind": "arrangement-imbalance",
+            "slideIndex": 7,
+            "target": "S7_BottomBloomCore",
+            "metrics": {
+              "deltaEmu": 267004,
+              "rowSize": 3
+            },
+            "identity": "8c0ec6ea14da73f664de",
+            "fingerprint": "ab46e9126e5e6c9bc3c0"
+          }
+        ],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

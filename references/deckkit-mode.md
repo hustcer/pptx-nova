@@ -40,6 +40,20 @@ node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
 
 Delivery auto-selection only allows `readiness in ["production", "default"]`.
 Use `candidate` only for drafts, migration checks, or explicit human approval.
+When the user explicitly names a candidate DeckKit for an existing-deck
+refurbish, keep that DeckKit as the visual target, but record the readiness
+exception in `deck_lock`/final summary and tighten the gates: `vision-diff`
+must have no new high/medium from the agent's restyle, PNG review must confirm
+the target visual grammar is visible, and content audit must prove no source
+content/object semantics were reduced.
+
+Do not assume every DeckKit id is supported by every xdoc skinning command.
+`remap-theme --to` currently targets theme/style aliases, and `chrome-apply
+--deckkit` may support only a subset of DeckKits in a given xdoc version. For a
+named DeckKit without native chrome/remap support, implement the visual contract
+with an explicit brand profile plus inspect-driven patch ops for background,
+text, fills, lines, and page chrome; save the command error JSON as evidence
+instead of silently switching to another DeckKit.
 
 Before writing `content.json`, generate the DeckKit slot reference and keep it
 beside the run artifacts:

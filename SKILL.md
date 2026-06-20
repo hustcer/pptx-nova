@@ -134,6 +134,10 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   palette、字体层级、header/footer、页码、背景和 chrome；不要把原 deck 的色系和页眉页脚原样带入。
   当前优先使用 `chrome-detect` / `chrome-remove` / `remap-theme` / `chrome-apply` 手工串联
   skin-first 流程；等 `refurbish-skin` 一等命令可用后再用它替代编排。
+  运行前先确认当前 xdoc 版本真的支持目标 DeckKit 的 `chrome-apply` 和对应 `remap-theme`
+  alias；如果用户显式指定的 DeckKit 还不是 delivery-ready，或 CLI 只支持部分 DeckKit
+  chrome，不要静默改用其它风格。记录 readiness/CLI 限制后，改用 `apply-brand` +
+  inspect 驱动的批量 patch 显式实现目标 palette、字体、背景、规则线和页码 chrome。
   `remap-theme` 已可覆盖 text、shapes、tables、charts 的 MVP 换肤，并通过 dry-run 报告对象级
   changed/skipped/unsupported/preserved；这些报告要用于判断旧风格残留，而不是只看最终文件。
   从零重建只是 fallback：源页本身不可读、用户明确要求重排/拆合页、skin-first 无法达到目标风格，
@@ -144,9 +148,12 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   全量候选必须通过 `xdoc pptx contact-diff` 和源稿并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
   若肉眼看起来"基本没变"，视为未完成，即使 check-lock 和 vision-check 通过。
   同时必须运行 `xdoc pptx vision-diff` 做 delta 判断；源稿已有 high/medium 不等于可忽略，
-  但候选不得新增 high，新增 medium 必须修复或在最终摘要中列为已复核风险。
+  但候选不得新增 high；由本轮新增 chrome、背景、页码、文字颜色或布局造成的 medium 必须迭代修复到 0。
+  只有无法不改变源内容语义时，才可把新增 medium 作为已复核风险列入最终摘要。
   最终必须运行 `xdoc pptx refurbish-audit`，确认 slide count、源文本、媒体、备注、外链和
-  shape type 没有未经批准的减少；不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
+  shape type 没有未经批准的减少；如果原生命令崩溃、空输出或非零退出，记录 exit/stderr，
+  再运行 legacy supplemental audit 和 inspect 数量/文本对账，且最终摘要必须说明 native audit
+  未通过工具层面执行。不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。

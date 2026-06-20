@@ -200,7 +200,12 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
 4. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。默认 `1:1` 保持页数；
    任何 `1:N` 拆页、`N:1` 合页、重排序或 appendix 化都必须先让用户确认，并写入 `approvedChanges[]`。
    不要为了保持原页数而让文字小到不可读或触发 text overflow；但也不能擅自改变页数。
-5. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。当前没有一等
+5. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。先判断 `chrome-remove`
+   是否会误删真实内容：feature-test deck、模板验收页、页脚/页码/日期能力演示页、placeholder
+   验证页、或任何把 header/footer/page number/rule 当作内容展示的 slide，不能机械执行
+   `chrome-remove`。这类 deck 应跳过删除旧 chrome，直接从源 deck 或源 deck 的 `apply-brand`
+   副本开始，用 inspect 驱动的批量 patch 重设背景、fill、line、字体和目标 DeckKit chrome。
+   当前没有一等
    `refurbish-skin` 命令时，按下面的原生命令手工串联：
 
 ```bash
@@ -213,27 +218,40 @@ xdoc pptx chrome-apply 02-remapped.pptx --deckkit mckinsey-blue --output 03-styl
 
 `remap-theme` 当前使用 `--to <themePack/stylePack>`；用目标 DeckKit 对应的 theme/style alias
 （例如 `corporate-blue`）替代示例值。始终显式传 `--scope text,shapes,tables,charts`，
-因为默认 scope 可能只覆盖 `text,shapes`。6. 读取 `chrome-detect.json`、`chrome-remove.json`、`remap-dry-run.json` 和 `chrome-apply.json`。
-`remap-theme` 的 `opResults[].analysis` 会给出 visited/changed/skipped/unsupported/preserved
-统计和对象级原因；跳过项可能是合理语义保留，也可能是旧风格残留，必须在
-`content-audit.json` 或修复 patch 中处理。7. 对复制或保留的 chart、table、shape、icon、SmartArt 和图片对象，尽量把 fill、line、text、
-gridline、label 和 accent colors 映射到目标 DeckKit palette，并统一目标字体层级、header/footer
-和页级 chrome。`remap-theme` 已覆盖 text、普通 shape、table 和 chart 的 MVP；SmartArt/diagram
-仍按 preserve/report-only 思路处理。只有当原颜色本身承载内容语义（例如风险红、品牌色、图例颜色、
-截图真实像素）时才保留，并在 `content-audit.json` 或 `deck_lock.assumptions[]` 中记录理由。
-不得留下大面积原主题色导致输出与目标 DeckKit 风格割裂。8. 对换肤后仍显得拥挤、旧版式痕迹重、标题层级混乱或目标风格不足的页面，做 selective layout polish：
-用 patch 调整可编辑对象位置、尺寸、标题区、说明层级、留白和背景，不要先进入全页重建。
-源 slide 含原生 styled table、chart 或富样式图形时，优先复制/保留源对象本身；不要为了套
-DeckKit 表格/卡片页型而把源原生表格降级成视觉表格或纯文本重画。确实需要重建时，必须在
-`content-audit.json` 中把该项标为 `rebuilt-editable`，并逐项验证样式等价。9. 只有以下情况才切到 DeckKit rebuild fallback：源页本身不可读，skin-first 后仍无法达到目标风格，
-用户明确要求重排/拆页/合页，或 xdoc 无法安全复制/保留对象且用户同意可编辑重建。fallback 前按
-DeckKit slot budget 粗分块；若目标 DeckKit 没有匹配源页内容结构的页型，先扩展 DeckKit（新增
-可复用页型、组件、slot schema 和 catalog/layout contract），再写 `content.json` 或 `patch.json`。
-不得先把源内容裁剪成现有页型能容纳的形状。10. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
-如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。11. 生成全量候选后必须运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
-contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
-回到 chrome/remap/layout polish 或 DeckKit 页型映射重做，不能只解释为"保真优先"。12. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
-不能停留在第一次生成的旧映射。13. 候选 PPTX apply、inspect 和 PNG 复核后，运行原生最终 refurbish audit；默认不得有 `error`：
+因为默认 scope 可能只覆盖 `text,shapes`。不要假设所有 DeckKit id 都能传给 `chrome-apply`：
+先运行命令并读取 JSON 报告。若报告 `unknown DeckKit`、目标 DeckKit 是 `candidate` 但用户显式指定，
+或缺少匹配 theme/style alias，必须记录限制并 fallback 到 `apply-brand` + patch 实现目标视觉合同；
+不要静默改用其它 DeckKit 或只做轻量 chrome。
+
+6. 读取 `chrome-detect.json`、`chrome-remove.json`、`remap-dry-run.json` 和 `chrome-apply.json`。
+   `remap-theme` 的 `opResults[].analysis` 会给出 visited/changed/skipped/unsupported/preserved
+   统计和对象级原因；跳过项可能是合理语义保留，也可能是旧风格残留，必须在
+   `content-audit.json` 或修复 patch 中处理。如果走 `apply-brand` + patch fallback，仍要保存
+   brand profile、生成 patch、dry-run/apply 报告和 inspect 色彩统计，证明它确实实现了目标
+   DeckKit 的 palette、typography、background、rules 和 page number chrome。
+
+7. 对复制或保留的 chart、table、shape、icon、SmartArt 和图片对象，尽量把 fill、line、text、
+   gridline、label 和 accent colors 映射到目标 DeckKit palette，并统一目标字体层级、header/footer
+   和页级 chrome。`remap-theme` 已覆盖 text、普通 shape、table 和 chart 的 MVP；SmartArt/diagram
+   仍按 preserve/report-only 思路处理。只有当原颜色本身承载内容语义（例如风险红、品牌色、图例颜色、
+   截图真实像素）时才保留，并在 `content-audit.json` 或 `deck_lock.assumptions[]` 中记录理由。
+   不得留下大面积原主题色导致输出与目标 DeckKit 风格割裂。新增 page chrome 后必须运行
+   `vision-diff` 并修掉由本轮新增页码、规则线、背景色、文字颜色造成的 high/medium；常见问题是
+   页码贴边、页码压住源底部标签、深色按钮文字仍保持旧 hyperlink 颜色、以及浅黄背景降低链接对比度。
+
+8. 对换肤后仍显得拥挤、旧版式痕迹重、标题层级混乱或目标风格不足的页面，做 selective layout polish：
+   用 patch 调整可编辑对象位置、尺寸、标题区、说明层级、留白和背景，不要先进入全页重建。
+   源 slide 含原生 styled table、chart 或富样式图形时，优先复制/保留源对象本身；不要为了套
+   DeckKit 表格/卡片页型而把源原生表格降级成视觉表格或纯文本重画。确实需要重建时，必须在
+   `content-audit.json` 中把该项标为 `rebuilt-editable`，并逐项验证样式等价。9. 只有以下情况才切到 DeckKit rebuild fallback：源页本身不可读，skin-first 后仍无法达到目标风格，
+   用户明确要求重排/拆页/合页，或 xdoc 无法安全复制/保留对象且用户同意可编辑重建。fallback 前按
+   DeckKit slot budget 粗分块；若目标 DeckKit 没有匹配源页内容结构的页型，先扩展 DeckKit（新增
+   可复用页型、组件、slot schema 和 catalog/layout contract），再写 `content.json` 或 `patch.json`。
+   不得先把源内容裁剪成现有页型能容纳的形状。10. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
+   如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。11. 生成全量候选后必须运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
+   contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
+   回到 chrome/remap/layout polish 或 DeckKit 页型映射重做，不能只解释为"保真优先"。12. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
+   不能停留在第一次生成的旧映射。13. 候选 PPTX apply、inspect 和 PNG 复核后，运行原生最终 refurbish audit；默认不得有 `error`：
 
 ```bash
 xdoc pptx refurbish-audit \
@@ -345,6 +363,12 @@ DeckKit 选择注意事项：
 - 对富文本、tab stops、表格和 connector-heavy 页面，再做文本泄漏审计：候选可见文本中不得出现 `<a:`、
   `<p:`、`xmlns` 等 OOXML 片段；逐页 shape type 数量不得少于源页，除非已在 `content-audit.json`
   中记录为用户批准的删除或降级。
-  常规内容保真检查应优先由 `xdoc pptx refurbish-audit` 生成 `content-audit-final.json`；OOXML 文本泄漏
-  和 forbidden shape name 暂时由 legacy supplemental audit 补充。Agent 仍需人工复核机器无法判断的视觉差异、
+  常规内容保真检查应优先由 `xdoc pptx refurbish-audit` 生成 `content-audit-final.json`。如果
+  原生命令非零退出、被系统 kill、崩溃、或写出空 JSON，不要把文件存在当作通过；保存
+  `*.exit` / `*.stderr`，单独重试一次，并立刻运行
+  `scripts/pptx-nova-refurbish-audit.mjs`。若 legacy audit 也不足以覆盖当前风险，再用
+  `inspect` 生成 supplemental audit，对比 slide count、可见文本、picture/table/chart/connector/
+  graphicFrame/placeholder 数量、notes、links 和 `reference-map.json` 覆盖率。最终摘要必须明确
+  native audit 的工具失败和 supplemental audit 的结论。
+  OOXML 文本泄漏和 forbidden shape name 暂时由 legacy supplemental audit 补充。Agent 仍需人工复核机器无法判断的视觉差异、
   留白和 DeckKit 风格一致性。

@@ -187,20 +187,33 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
 
 必做步骤：
 
-1. 同时生成 `reference-inspect.json`、`source_extract.md`（或等价文本提取）和源 deck PNG/contact sheet。
-2. 以 `reference-inspect.json.presentation.slideCount` 和 `slides[]` 作为源页清单权威。
+1. 先生成 `refurbish-plan.json`，再执行任何 `xdoc` 换肤命令：
+
+```bash
+node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
+  --deckkit <id> \
+  --source source.pptx \
+  --output candidate.pptx \
+  --json > refurbish-plan.json
+```
+
+如果用户显式指定 experimental/candidate DeckKit，加 `--explicit`。`status: blocked`
+时停止并说明缺口；`status: explicit-only` 时继续但必须逐项执行 `requiredGates[]`。
+
+2. 同时生成 `reference-inspect.json`、`source_extract.md`（或等价文本提取）和源 deck PNG/contact sheet。
+3. 以 `reference-inspect.json.presentation.slideCount` 和 `slides[]` 作为源页清单权威。
    Markdown/文本提取可能漏掉无文本页、SmartArt-only 页、纯图页或 preserve-only 页；必须对账并在
    `content-audit.json` 中标出补齐方式。
-3. 建立 `content-audit.json`，逐页记录 `text`、`tables`、`charts`、`smartArtOrDiagrams`、
+4. 建立 `content-audit.json`，逐页记录 `text`、`tables`、`charts`、`smartArtOrDiagrams`、
    `imagesAndMedia`、`groupsAndShapes`、`notes`、`unsupportedObjects` 的数量、摘要、输出处理方式和状态。
    每项状态只能是 `preserved`、`rebuilt-editable`、`user-approved-raster`、`user-approved-drop` 或 `blocked`。
    skin-first 中大多数复杂对象应先标为 `preserved`，后续通过 `remap-theme` 和局部 patch 改视觉；
    默认交付不得存在 `blocked`，也不得出现未经用户确认的 `user-approved-raster` / `user-approved-drop`。
    `user-approved-raster` 只能用于用户明确批准的降级；不能由 Agent 为了省事自行选择。
-4. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。默认 `1:1` 保持页数；
+5. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。默认 `1:1` 保持页数；
    任何 `1:N` 拆页、`N:1` 合页、重排序或 appendix 化都必须先让用户确认，并写入 `approvedChanges[]`。
    不要为了保持原页数而让文字小到不可读或触发 text overflow；但也不能擅自改变页数。
-5. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。默认先运行一等编排命令：
+6. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。默认先运行一等编排命令：
 
 ```bash
 xdoc pptx refurbish-skin \
@@ -243,14 +256,29 @@ xdoc pptx chrome-apply 02-remapped.pptx --deckkit mckinsey-blue --output 03-styl
 或缺少匹配 theme/style alias，必须记录限制并 fallback 到 `apply-brand` + patch 实现目标视觉合同；
 不要静默改用其它 DeckKit 或只做轻量 chrome。
 
-6. 如果走 fallback，读取 `chrome-detect.json`、`chrome-remove.json`、`remap-dry-run.json` 和 `chrome-apply.json`。
+Fallback 的最小可交付动作是硬规则：
+
+- `refurbish-plan.json` 必须说明 route、native skinning、fallback strategy、duplicate chrome policy
+  和 `requiredGates[]`；不要边试命令边决定路线。
+- 必须保存 `chrome-detect.json`。对已有 header/footer/page/rule，逐类选择
+  `replace`、`restyle-existing`、`skip-duplicate` 或 `add`，并在报告或 patch 备注中体现；发现重复
+  chrome 时优先移除新增重复项或复用源对象，不能只移动到别处。
+- 主题/字体/颜色 fallback 必须用目标 DeckKit 的 theme/style/profile 驱动。整 text frame
+  换字体、字号、颜色时用 `set-text-style` / `set-shape-text-style`；只有 inspect 或 smoke test
+  证明段落/run 索引存在时才使用 `set-run`。
+- 必须有 dry-run/apply、`vision-diff.json`、PNG/contact-sheet 复核和最终
+  `refurbish-audit`/supplemental audit。缺任一项就不能交付。
+- fallback 输出必须能在 PNG/contact sheet 上看出目标 DeckKit 的 palette、typography、background、
+  rules、page number chrome 和空间节奏；只改几条线、页码或局部字体不算完成。
+
+7. 如果走 fallback，读取 `chrome-detect.json`、`chrome-remove.json`、`remap-dry-run.json` 和 `chrome-apply.json`。
    `remap-theme` 的 `opResults[].analysis` 会给出 visited/changed/skipped/unsupported/preserved
    统计和对象级原因；跳过项可能是合理语义保留，也可能是旧风格残留，必须在
    `content-audit.json` 或修复 patch 中处理。如果走 `apply-brand` + patch fallback，仍要保存
    brand profile、生成 patch、dry-run/apply 报告和 inspect 色彩统计，证明它确实实现了目标
    DeckKit 的 palette、typography、background、rules 和 page number chrome。
 
-7. 对复制或保留的 chart、table、shape、icon、SmartArt 和图片对象，尽量把 fill、line、text、
+8. 对复制或保留的 chart、table、shape、icon、SmartArt 和图片对象，尽量把 fill、line、text、
    gridline、label 和 accent colors 映射到目标 DeckKit palette，并统一目标字体层级、header/footer
    和页级 chrome。`remap-theme` 已覆盖 text、普通 shape、table 和 chart 的 MVP；SmartArt/diagram
    仍按 preserve/report-only 思路处理。只有当原颜色本身承载内容语义（例如风险红、品牌色、图例颜色、
@@ -259,19 +287,24 @@ xdoc pptx chrome-apply 02-remapped.pptx --deckkit mckinsey-blue --output 03-styl
    `vision-diff` 并修掉由本轮新增页码、规则线、背景色、文字颜色造成的 high/medium；常见问题是
    页码贴边、页码压住源底部标签、深色按钮文字仍保持旧 hyperlink 颜色、以及浅黄背景降低链接对比度。
 
-8. 对换肤后仍显得拥挤、旧版式痕迹重、标题层级混乱或目标风格不足的页面，做 selective layout polish：
+9. 对换肤后仍显得拥挤、旧版式痕迹重、标题层级混乱或目标风格不足的页面，做 selective layout polish：
    用 patch 调整可编辑对象位置、尺寸、标题区、说明层级、留白和背景，不要先进入全页重建。
    源 slide 含原生 styled table、chart 或富样式图形时，优先复制/保留源对象本身；不要为了套
    DeckKit 表格/卡片页型而把源原生表格降级成视觉表格或纯文本重画。确实需要重建时，必须在
-   `content-audit.json` 中把该项标为 `rebuilt-editable`，并逐项验证样式等价。9. 只有以下情况才切到 DeckKit rebuild fallback：源页本身不可读，skin-first 后仍无法达到目标风格，
-   用户明确要求重排/拆页/合页，或 xdoc 无法安全复制/保留对象且用户同意可编辑重建。fallback 前按
-   DeckKit slot budget 粗分块；若目标 DeckKit 没有匹配源页内容结构的页型，先扩展 DeckKit（新增
-   可复用页型、组件、slot schema 和 catalog/layout contract），再写 `content.json` 或 `patch.json`。
-   不得先把源内容裁剪成现有页型能容纳的形状。10. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
-   如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。11. 生成全量候选后按需运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
-   contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
-   回到 chrome/remap/layout polish 或 DeckKit 页型映射重做，不能只解释为"保真优先"。12. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
-   不能停留在第一次生成的旧映射。13. 候选 PPTX apply、inspect 和 PNG 复核后，运行原生最终 refurbish audit；默认不得有 `error`：
+   `content-audit.json` 中把该项标为 `rebuilt-editable`，并逐项验证样式等价。
+10. 只有以下情况才切到 DeckKit rebuild fallback：源页本身不可读，skin-first 后仍无法达到目标风格，
+    用户明确要求重排/拆页/合页，或 xdoc 无法安全复制/保留对象且用户同意可编辑重建。fallback 前按
+    DeckKit slot budget 粗分块；若目标 DeckKit 没有匹配源页内容结构的页型，先扩展 DeckKit（新增
+    可复用页型、组件、slot schema 和 catalog/layout contract），再写 `content.json` 或 `patch.json`。
+    不得先把源内容裁剪成现有页型能容纳的形状。
+11. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
+    如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。
+12. 生成全量候选后按需运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
+    contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
+    回到 chrome/remap/layout polish 或 DeckKit 页型映射重做，不能只解释为"保真优先"。
+13. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
+    不能停留在第一次生成的旧映射。
+14. 候选 PPTX apply、inspect 和 PNG 复核后，运行原生最终 refurbish audit；默认不得有 `error`：
 
 ```bash
 xdoc pptx refurbish-audit \

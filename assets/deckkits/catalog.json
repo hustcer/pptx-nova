@@ -2160,6 +2160,39 @@
       "path": "cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "experimental",
+      "nativeSkinning": {
+        "themePack": "cartesian-warm",
+        "stylePack": "cartesian",
+        "chromeSource": "themePack.generator.colors + stylePack.generator.chrome"
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "explicit-only",
+        "nativeSkinning": {
+          "supported": true,
+          "themePack": "cartesian-warm",
+          "stylePack": "cartesian",
+          "commands": ["refurbish-skin", "chrome-apply", "remap-theme"]
+        },
+        "fallback": {
+          "strategy": "apply-brand-and-text-frame-style",
+          "brandProfile": "cartesian-warm",
+          "styleOps": ["set-text-style", "set-shape-text-style"],
+          "chromePolicy": "replace-or-restyle-existing"
+        },
+        "requiredGates": [
+          "readiness-explicit-exception",
+          "refurbish-plan",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Experimental for automatic delivery; allowed when the user explicitly names cartesian.",
+          "Use native skinning first when the generated xdoc catalog includes cartesian; otherwise use the fallback strategy without switching DeckKits."
+        ]
+      },
       "qualityProfile": {
         "minFontPt": 8.5,
         "labelFontPt": 7.5,

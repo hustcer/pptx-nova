@@ -791,6 +791,108 @@ export const BUILTIN_THEME_PACKS = {
       "4B5563"
     ],
     "iconStyle": "monoline"
+  },
+  "cartesian-warm": {
+    "id": "cartesian-warm",
+    "name": "Cartesian Warm",
+    "type": "themePack",
+    "description": "Warm editorial Cartesian palette with sandstone paper backgrounds, taupe rules, and high-contrast ink typography.",
+    "useCases": [
+      "editorial strategy",
+      "board discussion",
+      "research readout",
+      "quiet data"
+    ],
+    "colors": {
+      "accent1": "555555",
+      "accent2": "8A8178",
+      "accent3": "C8BFB5",
+      "accent4": "B8AA9C",
+      "accent5": "665D56",
+      "accent6": "2C2C2C",
+      "dk1": "1F1F1F",
+      "lt1": "F6F2EA",
+      "dk2": "3A3632",
+      "lt2": "E7DED2",
+      "hlink": "665D56",
+      "folHlink": "8A8178"
+    },
+    "fonts": {
+      "heading": "Playfair Display",
+      "body": "Inter"
+    },
+    "background": "F6F2EA",
+    "titleStyle": {
+      "font": {
+        "name": "Playfair Display",
+        "bold": false
+      },
+      "color": "1F1F1F",
+      "size": "34pt",
+      "alignment": "left"
+    },
+    "bodyStyle": {
+      "font": "Inter",
+      "color": "3A3632",
+      "size": "12pt"
+    },
+    "generator": {
+      "colors": {
+        "primary": "555555",
+        "primaryDk": "2C2C2C",
+        "primaryDp": "1F1F1F",
+        "secondary": "8A8178",
+        "light": "C8BFB5",
+        "amber": "B8AA9C",
+        "warn": "6E3D34",
+        "textPri": "1F1F1F",
+        "textSec": "3A3632",
+        "textMut": "665D56",
+        "pageBg": "F6F2EA",
+        "surfaceBg": "EFE8DE",
+        "surfaceAlt": "E7DED2",
+        "heroBg": "F6F2EA",
+        "accentTextBg": "E7DED2",
+        "accentText": "665D56",
+        "onHero": "1F1F1F",
+        "onAccent": "1F1F1F",
+        "chartBg": "F6F2EA",
+        "chartAxis": "3A3632",
+        "chartGrid": "C8BFB5",
+        "tableHeaderBg": "E7DED2",
+        "tableHeaderText": "1F1F1F",
+        "tableFirstColBg": "EFE8DE",
+        "tableBodyBg": "F6F2EA",
+        "tableBandBg": "EFE8DE",
+        "tableBorder": "C8BFB5",
+        "cardBg": "EFE8DE",
+        "cream": "F6F2EA",
+        "pale": "E7DED2",
+        "divider": "C8BFB5",
+        "chromeColor": "C8BFB5",
+        "headerAccent": "8A8178",
+        "posBg": "E4E9DD",
+        "posTxt": "46533F",
+        "negBg": "EADDD8",
+        "negTxt": "6E3D34",
+        "white": "FFFFFF"
+      },
+      "sizes": {
+        "cover": "44pt",
+        "pageH1": "34pt",
+        "body": "12pt",
+        "eyebrow": "8pt",
+        "foot": "8pt"
+      }
+    },
+    "chartPalette": [
+      "555555",
+      "8A8178",
+      "C8BFB5",
+      "665D56",
+      "2C2C2C"
+    ],
+    "iconStyle": "hairline"
   }
 }
 
@@ -916,6 +1018,70 @@ export const BUILTIN_STYLE_PACKS = {
       "chart": {
         "panelW": 8.0,
         "calloutW": 3.25
+      }
+    }
+  },
+  "cartesian": {
+    "id": "cartesian",
+    "name": "Cartesian",
+    "type": "stylePack",
+    "description": "Sparse editorial style with square geometry, hairline rules, wide margins, and micro-label chrome.",
+    "density": "low",
+    "radius": "none",
+    "stroke": "hairline",
+    "shadow": "none",
+    "imageRatio": "editorial",
+    "headerFooter": "micro",
+    "titleStyle": {
+      "font": {
+        "bold": false
+      },
+      "size": "34pt",
+      "alignment": "left"
+    },
+    "bodyStyle": {
+      "size": "12pt"
+    },
+    "generator": {
+      "sizes": {
+        "cover": "44pt",
+        "pageH1": "34pt",
+        "body": "12pt",
+        "eyebrow": "8pt",
+        "foot": "8pt"
+      },
+      "layout": {
+        "marginX": 0.78,
+        "gridGap": 0.32,
+        "rowGap": 0.38,
+        "cardPadX": 0.26,
+        "cardPadY": 0.22,
+        "agendaRowH": 1.08,
+        "kpiCardH": 3.2,
+        "pillarCardH": 3.5,
+        "workflowCardH": 3.15
+      },
+      "surface": {
+        "cardShape": "rectangle",
+        "panelShape": "rectangle",
+        "cardLine": true,
+        "cardLineWidth": "0.35pt",
+        "accentBarH": 0.02
+      },
+      "effects": {
+        "cardShadow": null,
+        "panelShadow": null
+      },
+      "chrome": {
+        "topBarH": 0.02,
+        "headerAccentW": 0.02,
+        "headerAccentH": 0.42,
+        "footerY": 7.05,
+        "watermark": false
+      },
+      "chart": {
+        "panelW": 8.2,
+        "calloutW": 3.0
       }
     }
   },

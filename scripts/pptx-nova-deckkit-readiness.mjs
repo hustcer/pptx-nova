@@ -31,6 +31,7 @@ Options:
   --catalog <path>        Catalog path. Defaults to <skill-root>/assets/deckkits/catalog.json
   --visual-index <path>   Visual benchmark index path. Defaults to <skill-root>/benchmarks/visual/index.json
   --target <level>        candidate|delivery|default. Defaults to candidate
+  --explicit              User explicitly named this DeckKit; allow explicit-only continuation gates
   --json                  Print machine-readable audit result
   --help                  Show this help
 
@@ -45,6 +46,7 @@ function parseArgs(argv) {
     catalog: CATALOG_PATH,
     visualIndex: join(VISUAL_ROOT, 'index.json'),
     target: 'candidate',
+    explicit: false,
     json: false,
   }
 
@@ -55,6 +57,8 @@ function parseArgs(argv) {
       process.exit(0)
     } else if (arg === '--json') {
       args.json = true
+    } else if (arg === '--explicit') {
+      args.explicit = true
     } else if (arg === '--deckkit') {
       args.deckkit = valueAfter(argv, i, arg)
       i += 1
@@ -336,6 +340,8 @@ function auditCatalog(entry) {
   const quality = entry?.quality ?? {}
   const knownBlockingLimits = quality.knownBlockingLimits
   const visualGrammar = auditVisualGrammar(entry?.visualGrammar)
+  const nativeSkinning = auditNativeSkinning(entry?.nativeSkinning)
+  const refurbishProfile = auditRefurbishProfile(entry?.refurbishProfile, nativeSkinning)
 
   if (!entry) {
     blockers.push('DeckKit is missing from catalog.json')
@@ -344,6 +350,8 @@ function auditCatalog(entry) {
       quality,
       knownBlockingLimits: [],
       visualGrammar,
+      nativeSkinning,
+      refurbishProfile,
       blockers,
       warnings,
     }
@@ -363,14 +371,121 @@ function auditCatalog(entry) {
   }
   warnings.push(...visualGrammar.warnings)
   warnings.push(...visualGrammar.blockers)
+  warnings.push(...nativeSkinning.warnings)
+  warnings.push(...refurbishProfile.warnings)
 
   return {
     readiness,
     quality,
     knownBlockingLimits: Array.isArray(knownBlockingLimits) ? knownBlockingLimits : [],
     visualGrammar,
+    nativeSkinning,
+    refurbishProfile,
     blockers,
     warnings,
+  }
+}
+
+function auditNativeSkinning(value) {
+  if (!isPlainObject(value)) {
+    return {
+      supported: false,
+      themePack: '',
+      stylePack: '',
+      chromeSource: '',
+      commands: [],
+      warnings: [],
+    }
+  }
+  const warnings = []
+  if (!hasNonEmptyString(value.themePack))
+    warnings.push('catalog.nativeSkinning.themePack is missing')
+  if (!hasNonEmptyString(value.stylePack))
+    warnings.push('catalog.nativeSkinning.stylePack is missing')
+  if (!hasNonEmptyString(value.chromeSource)) {
+    warnings.push('catalog.nativeSkinning.chromeSource is missing')
+  }
+  return {
+    supported: warnings.length === 0,
+    themePack: value.themePack ?? '',
+    stylePack: value.stylePack ?? '',
+    chromeSource: value.chromeSource ?? '',
+    commands: ['refurbish-skin', 'chrome-apply', 'remap-theme'],
+    warnings,
+  }
+}
+
+function auditRefurbishProfile(value, nativeSkinning) {
+  if (!isPlainObject(value)) {
+    return {
+      present: false,
+      mode: '',
+      nativeSkinning,
+      fallback: null,
+      requiredGates: [],
+      warnings: [],
+    }
+  }
+  const warnings = []
+  const requiredGates = stringArray(value.requiredGates)
+  if (value.schemaVersion !== 'pptx-nova-refurbish-profile/v1') {
+    warnings.push('catalog.refurbishProfile.schemaVersion must be pptx-nova-refurbish-profile/v1')
+  }
+  if (!hasNonEmptyString(value.mode)) {
+    warnings.push('catalog.refurbishProfile.mode is missing')
+  }
+  if (requiredGates.length === 0) {
+    warnings.push('catalog.refurbishProfile.requiredGates must be a non-empty string array')
+  }
+  return {
+    present: true,
+    mode: value.mode ?? '',
+    nativeSkinning: isPlainObject(value.nativeSkinning)
+      ? {
+          supported: value.nativeSkinning.supported === true,
+          themePack: value.nativeSkinning.themePack ?? nativeSkinning.themePack,
+          stylePack: value.nativeSkinning.stylePack ?? nativeSkinning.stylePack,
+          commands: stringArray(value.nativeSkinning.commands),
+        }
+      : nativeSkinning,
+    fallback: isPlainObject(value.fallback) ? value.fallback : null,
+    requiredGates,
+    notes: stringArray(value.notes),
+    warnings,
+  }
+}
+
+function defaultExplicitGates() {
+  return [
+    'record-readiness-exception',
+    'dry-run',
+    'vision-check',
+    'png-contact-review',
+    'content-audit',
+  ]
+}
+
+function buildExplicitSelection({ requested, target, catalogAudit, targetEligibility }) {
+  const readiness = catalogAudit.readiness
+  const profile = catalogAudit.refurbishProfile
+  const canUseException =
+    requested &&
+    ['experimental', 'candidate'].includes(readiness) &&
+    (profile.present ? ['explicit-only', 'explicit-exception'].includes(profile.mode) : true)
+  const requiredGates =
+    profile.requiredGates.length > 0 ? profile.requiredGates : defaultExplicitGates()
+  return {
+    requested,
+    canContinue: canUseException,
+    passedByExplicitException: canUseException && !targetEligibility.ready,
+    mode: profile.mode || (canUseException ? 'explicit-exception' : ''),
+    target,
+    readiness,
+    nativeSkinning: profile.nativeSkinning ?? catalogAudit.nativeSkinning,
+    fallback: profile.fallback,
+    requiredGates: canUseException ? requiredGates : [],
+    notes: profile.notes ?? [],
+    blockers: targetEligibility.blockers,
   }
 }
 
@@ -517,6 +632,16 @@ function printHuman(result) {
       )
     }
   }
+  if (result.explicitSelection?.requested) {
+    process.stdout.write(
+      `- explicit selection: ${result.explicitSelection.canContinue ? 'CAN CONTINUE' : 'BLOCKED'} mode=${result.explicitSelection.mode || 'n/a'}\n`,
+    )
+    if (result.explicitSelection.requiredGates.length > 0) {
+      process.stdout.write(
+        `  - required gates: ${result.explicitSelection.requiredGates.join(', ')}\n`,
+      )
+    }
+  }
   process.stdout.write('- benchmark cases:\n')
   for (const benchCase of result.benchmark.cases) {
     const status = benchCase.passed ? 'PASS' : 'FAIL'
@@ -560,11 +685,19 @@ function main() {
     deckkit: args.deckkit,
   })
   const eligibility = buildEligibility({ catalogAudit, benchmarkAudit })
+  const explicitSelection = buildExplicitSelection({
+    requested: args.explicit,
+    target: args.target,
+    catalogAudit,
+    targetEligibility: eligibility[args.target],
+  })
+  const passed = eligibility[args.target].ready || explicitSelection.passedByExplicitException
   const result = {
     schemaVersion: 'pptx-nova-deckkit-readiness-audit/v1',
     deckkit: args.deckkit,
     target: args.target,
-    passed: eligibility[args.target].ready,
+    explicit: args.explicit,
+    passed,
     paths: {
       catalog: relative(SKILL_ROOT, args.catalog),
       visualIndex: relative(SKILL_ROOT, args.visualIndex),
@@ -573,12 +706,15 @@ function main() {
     catalog: {
       found: Boolean(entry),
       readiness: catalogAudit.readiness,
+      nativeSkinning: catalogAudit.nativeSkinning,
+      refurbishProfile: catalogAudit.refurbishProfile,
       visualGrammar: catalogAudit.visualGrammar,
       quality: entry?.quality ?? null,
       warnings: catalogAudit.warnings,
     },
     benchmark: benchmarkAudit,
     eligibility,
+    explicitSelection,
   }
 
   if (args.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)

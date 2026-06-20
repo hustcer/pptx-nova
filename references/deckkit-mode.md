@@ -34,6 +34,21 @@ text,shapes,tables,charts -> chrome-apply` chain only when the deck needs a
 custom chrome-removal policy, a native skinning DeckKit is unavailable, or a
 page-level repair requires inspecting intermediate reports.
 
+Before running any refurbish command, generate an executable route plan:
+
+```bash
+node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
+  --deckkit <id> \
+  --source source.pptx \
+  --output candidate.pptx \
+  --json > refurbish-plan.json
+```
+
+If the user explicitly named a non-production DeckKit, add `--explicit`. The plan
+is the source of truth for native skinning availability, `requiredGates[]`,
+fallback style ops, and duplicate chrome policy. A `blocked` plan is a real
+blocker; do not discover the same failure later by trial-running `xdoc`.
+
 For the selected DeckKit, run readiness:
 
 ```bash
@@ -50,6 +65,9 @@ exception in `deck_lock`/final summary and tighten the gates: `vision-diff`
 must have no new high/medium from the agent's restyle, PNG review must confirm
 the target visual grammar is visible, and content audit must prove no source
 content/object semantics were reduced.
+Use `--explicit` with readiness in this case so the JSON reports
+`explicitSelection.passedByExplicitException`, `mode`, native skinning, fallback
+profile, and required gates instead of acting like a terminal command failure.
 
 Do not assume every DeckKit id is supported by every xdoc skinning command.
 `refurbish-skin` and `chrome-apply --deckkit` require native skinning catalog
@@ -58,6 +76,19 @@ For a named DeckKit without native chrome/remap support, implement the visual
 contract with an explicit brand profile plus inspect-driven patch ops for
 background, text, fills, lines, and page chrome; save the command error JSON as
 evidence instead of silently switching to another DeckKit.
+Fallback minimums are mandatory, not suggestions:
+
+- Run and save `refurbish-plan.json`, `chrome-detect.json`, dry-run/apply report,
+  `vision-diff.json`, and final `refurbish-audit` or supplemental audit report.
+- For whole text-frame restyling, use `set-text-style` or
+  `set-shape-text-style`; use indexed `set-run` only after inspect exposes the
+  actual paragraph/run target or a minimal smoke proves the index exists.
+- Duplicate page chrome must resolve by `replace`, `restyle-existing`,
+  `skip-duplicate`, or `add`; do not nudge overlapping duplicate header/footer,
+  page number, or rule shapes into place.
+- The fallback must show target palette, typography, background, rules, and page
+  number chrome in inspect/PNG evidence; a text-only or light-line pass is not a
+  refurbish deliverable.
 
 Before writing `content.json`, generate the DeckKit slot reference and keep it
 beside the run artifacts:

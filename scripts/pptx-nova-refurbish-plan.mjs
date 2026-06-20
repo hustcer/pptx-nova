@@ -1,0 +1,279 @@
+#!/usr/bin/env node
+import { readFileSync } from 'node:fs'
+import { dirname, join, relative, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
+
+const usage = `Usage:
+  node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs --deckkit <id> [options]
+
+Options:
+  --deckkit <id>       Target DeckKit id
+  --source <path>      Source PPTX path used in suggested commands
+  --output <path>      Candidate PPTX path used in suggested commands
+  --catalog <path>     DeckKit catalog path. Defaults to <skill-root>/assets/deckkits/catalog.json
+  --explicit           User explicitly named this DeckKit
+  --json               Print machine-readable plan
+  --help               Show this help
+`
+
+function parseArgs(argv) {
+  const args = {
+    deckkit: '',
+    source: 'source.pptx',
+    output: 'candidate.pptx',
+    catalog: CATALOG_PATH,
+    explicit: false,
+    json: false,
+  }
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i]
+    if (arg === '--help' || arg === '-h') {
+      process.stdout.write(usage)
+      process.exit(0)
+    } else if (arg === '--json') {
+      args.json = true
+    } else if (arg === '--explicit') {
+      args.explicit = true
+    } else if (arg === '--deckkit') {
+      args.deckkit = valueAfter(argv, i, arg)
+      i += 1
+    } else if (arg === '--source') {
+      args.source = valueAfter(argv, i, arg)
+      i += 1
+    } else if (arg === '--output') {
+      args.output = valueAfter(argv, i, arg)
+      i += 1
+    } else if (arg === '--catalog') {
+      args.catalog = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else {
+      throw new Error(`Unknown option: ${arg}\n\n${usage}`)
+    }
+  }
+
+  if (!args.deckkit) throw new Error(`--deckkit is required.\n\n${usage}`)
+  return args
+}
+
+function valueAfter(argv, index, flag) {
+  const value = argv[index + 1]
+  if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`)
+  return value
+}
+
+function readJson(path) {
+  return JSON.parse(readFileSync(path, 'utf8'))
+}
+
+function isPlainObject(value) {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
+}
+
+function stringArray(value) {
+  return (Array.isArray(value) ? value : []).filter(
+    (item) => typeof item === 'string' && item.trim(),
+  )
+}
+
+function shell(value) {
+  return JSON.stringify(value)
+}
+
+function nativeSkinningFor(entry) {
+  const native = entry?.nativeSkinning
+  if (!isPlainObject(native)) {
+    return {
+      supported: false,
+      themePack: '',
+      stylePack: '',
+      chromeSource: '',
+      commands: [],
+    }
+  }
+  const supported = Boolean(native.themePack && native.stylePack && native.chromeSource)
+  return {
+    supported,
+    themePack: native.themePack ?? '',
+    stylePack: native.stylePack ?? '',
+    chromeSource: native.chromeSource ?? '',
+    commands: supported ? ['refurbish-skin', 'chrome-apply', 'remap-theme'] : [],
+  }
+}
+
+function profileFor(entry, nativeSkinning) {
+  const profile = entry?.refurbishProfile
+  if (!isPlainObject(profile)) {
+    return {
+      present: false,
+      mode: nativeSkinning.supported ? 'native' : 'manual-fallback',
+      nativeSkinning,
+      fallback: null,
+      requiredGates: defaultGates(nativeSkinning.supported),
+      notes: [],
+    }
+  }
+  return {
+    present: true,
+    mode: profile.mode ?? (nativeSkinning.supported ? 'native' : 'manual-fallback'),
+    nativeSkinning: isPlainObject(profile.nativeSkinning)
+      ? {
+          supported: profile.nativeSkinning.supported === true,
+          themePack: profile.nativeSkinning.themePack ?? nativeSkinning.themePack,
+          stylePack: profile.nativeSkinning.stylePack ?? nativeSkinning.stylePack,
+          commands: stringArray(profile.nativeSkinning.commands),
+        }
+      : nativeSkinning,
+    fallback: isPlainObject(profile.fallback) ? profile.fallback : null,
+    requiredGates: stringArray(profile.requiredGates).length
+      ? stringArray(profile.requiredGates)
+      : defaultGates(nativeSkinning.supported),
+    notes: stringArray(profile.notes),
+  }
+}
+
+function defaultGates(nativeSupported) {
+  const gates = ['dry-run', 'vision-diff', 'refurbish-audit', 'png-contact-review']
+  return nativeSupported ? ['refurbish-skin-report', ...gates] : ['fallback-patch-report', ...gates]
+}
+
+function buildCommands(args, entry, nativeSkinning, profile) {
+  if (nativeSkinning.supported) {
+    return [
+      {
+        name: 'native-refurbish-skin',
+        required: true,
+        command: `xdoc pptx refurbish-skin --source ${shell(args.source)} --deckkit ${shell(entry.id)} --output ${shell(args.output)} --json`,
+      },
+      {
+        name: 'manual-contact-diff',
+        required: false,
+        command: `xdoc pptx contact-diff --source ${shell(args.source)} --candidate ${shell(args.output)} --output contact-diff.png --json`,
+      },
+    ]
+  }
+
+  const fallback = profile.fallback ?? {}
+  const styleOps = stringArray(fallback.styleOps)
+  return [
+    {
+      name: 'detect-existing-chrome',
+      required: true,
+      command: `xdoc pptx chrome-detect ${shell(args.source)} --json`,
+    },
+    {
+      name: 'fallback-theme-and-style-patch',
+      required: true,
+      command:
+        `Use apply-brand/remap-theme plus inspect-driven patch ops` +
+        (styleOps.length ? `; prefer ${styleOps.join(', ')} for whole text-frame styling` : ''),
+    },
+    {
+      name: 'vision-diff',
+      required: true,
+      command: `xdoc pptx vision-diff --source ${shell(args.source)} --candidate ${shell(args.output)} --json`,
+    },
+  ]
+}
+
+function buildPlan(args) {
+  const catalog = readJson(args.catalog)
+  const entry = catalog.entries.find((candidate) => candidate.id === args.deckkit)
+  const blockers = []
+  if (!entry) {
+    blockers.push(`DeckKit "${args.deckkit}" is missing from catalog`)
+    return planResult(args, null, blockers)
+  }
+
+  const nativeSkinning = nativeSkinningFor(entry)
+  const profile = profileFor(entry, nativeSkinning)
+  const readiness = entry.readiness ?? ''
+  const explicitOnly = ['experimental', 'candidate'].includes(readiness)
+  if (explicitOnly && !args.explicit) {
+    blockers.push(
+      `DeckKit "${entry.id}" readiness is "${readiness}"; pass --explicit only when the user named it`,
+    )
+  }
+  if (!nativeSkinning.supported && !profile.fallback) {
+    blockers.push(`DeckKit "${entry.id}" has no nativeSkinning and no refurbishProfile.fallback`)
+  }
+
+  const status = blockers.length
+    ? 'blocked'
+    : explicitOnly && args.explicit
+      ? 'explicit-only'
+      : 'ready'
+  const route = nativeSkinning.supported ? 'native-skin-first' : 'fallback-patch'
+  return {
+    ...planResult(args, entry, blockers),
+    status,
+    route,
+    explicitSelection: {
+      requested: args.explicit,
+      required: explicitOnly,
+      mode: explicitOnly ? profile.mode : 'standard',
+    },
+    readiness,
+    nativeSkinning,
+    refurbishProfile: profile,
+    chromePolicy:
+      profile.fallback?.chromePolicy ??
+      (nativeSkinning.supported ? 'replace-or-restyle-existing' : 'detect-and-restyle-existing'),
+    requiredGates: profile.requiredGates,
+    commands: buildCommands(args, entry, nativeSkinning, profile),
+  }
+}
+
+function planResult(args, entry, blockers) {
+  return {
+    schemaVersion: 'pptx-nova-refurbish-plan/v1',
+    deckkit: args.deckkit,
+    source: args.source,
+    output: args.output,
+    paths: {
+      catalog: relative(SKILL_ROOT, args.catalog),
+    },
+    catalog: {
+      found: Boolean(entry),
+      id: entry?.id ?? '',
+      path: entry?.path ?? '',
+    },
+    blockers,
+    status: blockers.length ? 'blocked' : 'ready',
+  }
+}
+
+function printHuman(result) {
+  process.stdout.write(`PPTX refurbish plan: ${result.deckkit}\n`)
+  process.stdout.write(`- status: ${result.status}\n`)
+  if (result.route) process.stdout.write(`- route: ${result.route}\n`)
+  if (result.nativeSkinning) {
+    process.stdout.write(
+      `- native skinning: ${result.nativeSkinning.supported ? 'yes' : 'no'}${result.nativeSkinning.themePack ? ` theme=${result.nativeSkinning.themePack} style=${result.nativeSkinning.stylePack}` : ''}\n`,
+    )
+  }
+  if (result.requiredGates?.length) {
+    process.stdout.write(`- required gates: ${result.requiredGates.join(', ')}\n`)
+  }
+  for (const blocker of result.blockers) process.stdout.write(`- blocker: ${blocker}\n`)
+  if (result.commands?.length) {
+    process.stdout.write('- commands:\n')
+    for (const command of result.commands) {
+      process.stdout.write(`  - ${command.name}: ${command.command}\n`)
+    }
+  }
+}
+
+try {
+  const args = parseArgs(process.argv.slice(2))
+  const result = buildPlan(args)
+  if (args.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+  else printHuman(result)
+  if (result.status === 'blocked') process.exit(1)
+} catch (error) {
+  process.stderr.write(`[error] ${error.message}\n`)
+  process.exit(1)
+}

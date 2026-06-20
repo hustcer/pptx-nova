@@ -24,6 +24,11 @@ rules, chart/table treatments, and page chrome. If you copy a source slide or
 source object for fidelity, re-theme the editable object into the target DeckKit
 style; do not preserve the source deck's old color system, master chrome, header,
 or footer unless that visible detail is itself user-confirmed content.
+For existing-deck refurbishment, apply the DeckKit contract with the native
+skin-first commands before considering a rebuild:
+`chrome-detect -> chrome-remove -> remap-theme --scope text,shapes,tables,charts -> chrome-apply`.
+Use `remap-theme` dry-run analysis to find preserved or skipped objects that
+still carry old visual language.
 
 For the selected DeckKit, run readiness:
 

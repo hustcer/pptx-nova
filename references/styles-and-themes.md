@@ -57,6 +57,26 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 
 `pos` 范围 `[0, 1]`；`angle` 度数（0 = 上→下）。stop 可以混用 `color` 与 `schemeClr`。
 
+### Radial gradient
+
+需要径向光晕或 spotlight 时，优先用原生 radial gradient fill，而不是嵌入 SVG 或整页位图。
+当前 patch 层支持 `type: "radialGradient"`，会写入 DrawingML path gradient，仍保持可编辑：
+
+```json
+{
+  "type": "radialGradient",
+  "fillToRect": { "l": 0.5, "t": 0.5, "r": 0.5, "b": 0.5 },
+  "stops": [
+    { "pos": 0, "color": "F1EE2E" },
+    { "pos": 0.72, "color": { "rgb": "F8F39B", "alpha": 0.42 } },
+    { "pos": 1, "color": { "rgb": "F0DA7C", "alpha": 0 } }
+  ]
+}
+```
+
+`fillToRect` 控制焦点/扩散区域；不确定当前 xdoc 版本的字段时先跑
+`xdoc schema --op set-shape-fill --minimal`。
+
 ### Preset Gradient（24 个内置）
 
 ```json
@@ -260,6 +280,26 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 ```json
 { "op": "set-shape-fill", "slide": 0, "shape": {...}, "fill": { "kind": "solid", "color": "1A73E8" } }
 ```
+
+## 整 deck 换肤：remap-theme
+
+已有 deck 翻新优先用 `remap-theme` 做批量换肤，再用单对象 patch 补漏。它会编译为
+`remap-theme` patch op，当前可覆盖 text、普通 shape、table 和 chart 的基础颜色/字体 remap。
+翻新时必须显式传全 scope，避免 table/chart 保留旧样式：
+
+```bash
+xdoc pptx remap-theme clean.pptx \
+  --to corporate-blue \
+  --scope text,shapes,tables,charts \
+  --output remapped.pptx \
+  --dry-run \
+  --json
+```
+
+查看 dry-run 的 `opResults[].analysis`：`changed` 是已换肤对象，`preserved` 可能是语义色、
+亮度变换或截图真实像素，`skipped` / `unsupported` 需要判断是合理保留还是旧风格残留。不要为了
+统一视觉覆盖 chart 数据、table 数据、category label、notes 或截图真实像素；需要保留的语义色要写入
+`content-audit.json` 或 `deck_lock.assumptions[]`。
 
 ## Background（背景）
 

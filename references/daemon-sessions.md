@@ -44,7 +44,8 @@ xdoc pptx inspect deck.pptx --daemon --json | save inspect.json
 xdoc pptx apply -p patch.json -i deck.pptx -o deck.pptx --daemon-strict --overwrite
 ```
 
-⚠️ **`--daemon` 只对 `pptx apply` / `pptx inspect` 生效**。`pptx from-data` /
+⚠️ **`--daemon` 只对 `pptx apply` / `pptx inspect` 生效**。`pptx chrome-detect` /
+`pptx chrome-remove` / `pptx chrome-apply` / `pptx remap-theme` / `pptx from-data` /
 `pptx check-brand` / `pptx new` / `pptx catalog` / `pptx recipe` /
 `pptx replay|audit|rollback` 都**不接受** `--daemon`（解析阶段会报
 `xdoc pptx --daemon is only valid with apply or inspect`）。

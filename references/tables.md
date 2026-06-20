@@ -21,6 +21,9 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 对象语义，同时重做页眉、标题层级、网格、留白、说明和页脚节奏；表格可以在新网格内重新定位或缩放，
 但不能丢失 PowerPoint 原生 table。最终必须重新 `inspect` 输出 PPTX，并把对应页记录为
 `shapeType == "table"`；只看 PNG 像表格不算通过。
+当前 xdoc 的 `remap-theme --scope tables` 已能对 table fill、border 和字体做 MVP 换肤。
+翻新时先用 dry-run 报告确认 table 对象是 `changed`、`preserved` 还是 `skipped`；如果跳过后仍明显
+带着旧主题色，再用 table ops 做最小补丁，不要直接把原生 table 重画成文本框网格。
 
 最小检查清单：
 

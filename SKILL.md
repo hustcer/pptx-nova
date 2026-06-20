@@ -36,7 +36,7 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
-- **翻新已有 deck 且保持内容**：`inspect + extract/Markdown + source PNG/contact-diff for audit -> lock visual target/example -> reconcile slide inventory -> editable object rebuild -> vision-diff + contact-diff -> native refurbish-audit -> gates`；
+- **翻新已有 deck 且保持内容**：默认 `copy/preserve source deck -> inspect/source previews -> chrome-detect -> chrome-remove -> remap-theme text,shapes,tables,charts -> chrome-apply -> selective layout polish -> vision-diff + contact-diff -> native refurbish-audit -> gates`；
   源 deck 是内容真源；默认保持页数和全部用户可见内容，任何拆页、合页、对象降级或内容丢失都必须先确认。
   翻新目标是"内容不变 + 目标 DeckKit 风格一致"：色系、字体层级、header/footer、页码、背景、规则线和 page chrome
   必须跟目标 DeckKit 对齐。
@@ -44,6 +44,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
   源页 PNG/contact sheet 只能用于审计和对比，禁止把原页面整页截图嵌入输出页来替代可编辑重建。
   必要时可以复制原 slide 或原对象作为保真起点，再调整主题色、布局、header/footer 和目标 DeckKit chrome；
   复制对象仍必须是可编辑内容，不得变成源页截图或截图 overlay。
+  只有当 skin-first 换肤后仍不可读、目标风格与源结构冲突、用户要求重排，或源对象无法安全保留且用户同意时，
+  才进入从源内容抽取后 DeckKit 重建的 fallback。
   如果目标 DeckKit 缺少能承载源页内容的页型，必须扩展该 DeckKit 或阻塞说明缺口；不能为了套现有页型而压缩、
   改写、省略、合并或降级源内容。
   交付前运行 `xdoc pptx refurbish-audit` 生成 `content-audit-final.json`，用当前源/候选 PPTX
@@ -120,15 +122,22 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   并替换内容；复制源 slide 或使用模板占位符，编辑 inherited objects，不重画一个"看起来像"的版本。
 - **Reference Create**：用户给参考 PPTX，但要用新大纲或新内容生成新 deck；参考 deck 默认只读。
 - **Refurbish Existing Deck**：用户要求"美化/翻新/重写这份 PPTX"且"内容不变/保持内容"，
-  但指定新风格、DeckKit 或更高质量外观；源 PPTX 默认只读，先抽取和核对全部源页内容，再用
-  DeckKit 生成新文件。不要误判成普通 Edit，也不要为了保持原页数压缩文字导致不可读。
-  翻新重建必须在内容不变的基础上采用目标 DeckKit 的风格，尤其保持目标色系一致；不能为了风格一致
+  但指定新风格、DeckKit 或更高质量外观；源 PPTX 默认只读，先复制或保留源 slide/object 作为
+  保真起点，再用 xdoc 的 chrome 与 remap 能力换成目标视觉系统。不要误判成普通 Edit，也不要为了
+  保持原页数压缩文字导致不可读。
+  翻新必须在内容不变的基础上采用目标 DeckKit 的风格，尤其保持目标色系一致；不能为了风格一致
   改写或删减内容，也不能为了内容保真而完全保留原 deck 的视觉系统。
   "内容不变"默认包含文本、表格、chart、SmartArt、图片、图标、媒体、备注和页级结构的用户可见语义；
   不能保真时必须阻塞并请求确认，不能静默丢弃或只保留可见文本。
   翻新输出默认必须是可编辑对象重建：不能把源 slide 的渲染截图、整页图片或截图面板当作内容保留策略。
   允许把原 slide 或原对象复制到输出 deck 作为保真起点，但随后必须重新主题化：映射到目标 DeckKit
   palette、字体层级、header/footer、页码、背景和 chrome；不要把原 deck 的色系和页眉页脚原样带入。
+  当前优先使用 `chrome-detect` / `chrome-remove` / `remap-theme` / `chrome-apply` 手工串联
+  skin-first 流程；等 `refurbish-skin` 一等命令可用后再用它替代编排。
+  `remap-theme` 已可覆盖 text、shapes、tables、charts 的 MVP 换肤，并通过 dry-run 报告对象级
+  changed/skipped/unsupported/preserved；这些报告要用于判断旧风格残留，而不是只看最终文件。
+  从零重建只是 fallback：源页本身不可读、用户明确要求重排/拆合页、skin-first 无法达到目标风格，
+  或对象无法安全保留且用户同意可编辑重建时才使用。
   目标 DeckKit 缺少合适页型时，应先扩展 DeckKit 的可复用页型/组件/slot contract，再继续生成；
   不允许为了适配现有 DeckKit 而削足适履，导致内容、省略项、对象语义或可编辑性发生变化。
   如果用户认可了某个预览页或小样，后续全量输出必须以该小样作为视觉目标，而不是退回保守保真版本。
@@ -272,6 +281,11 @@ xdoc pptx inspect input.pptx --daemon --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
 xdoc pptx vision-check out.pptx --json
+xdoc pptx chrome-detect source.pptx --json
+xdoc pptx chrome-remove source.pptx --roles header,footer,page-number,rule --output clean.pptx --json
+xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --dry-run --json
+xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --json
+xdoc pptx chrome-apply remapped.pptx --deckkit mckinsey-blue --output styled.pptx --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json

@@ -112,29 +112,32 @@ function makeOps() {
   }
 
   const sunBloom = (s, base, cx, cy, w, h, alpha = 0.38) => {
-    softOval(s, `${base}Outer`, cx - w / 2, cy - h / 2, w, h, C.haze, alpha * 0.55, '36pt')
-    softOval(
-      s,
-      `${base}Mid`,
-      cx - w * 0.38,
-      cy - h * 0.38,
-      w * 0.76,
-      h * 0.76,
-      C.sunSoft,
-      alpha * 0.75,
-      '30pt',
-    )
-    softOval(
-      s,
-      `${base}Core`,
-      cx - w * 0.22,
-      cy - h * 0.22,
-      w * 0.44,
-      h * 0.44,
-      C.sun,
-      alpha,
-      '24pt',
-    )
+    const bands = [
+      { scale: 1, color: C.haze, alpha: 0.18, radius: '58pt' },
+      { scale: 0.88, color: C.haze, alpha: 0.14, radius: '54pt' },
+      { scale: 0.76, color: C.sunSoft, alpha: 0.16, radius: '50pt' },
+      { scale: 0.64, color: C.sunSoft, alpha: 0.14, radius: '44pt' },
+      { scale: 0.53, color: C.sunSoft, alpha: 0.13, radius: '38pt' },
+      { scale: 0.43, color: C.sun, alpha: 0.13, radius: '32pt' },
+      { scale: 0.34, color: C.sun, alpha: 0.12, radius: '28pt' },
+      { scale: 0.26, color: C.sun, alpha: 0.1, radius: '24pt' },
+      { scale: 0.19, color: C.sun, alpha: 0.08, radius: '20pt' },
+    ]
+    bands.forEach((band, i) => {
+      const bw = w * band.scale
+      const bh = h * band.scale
+      softOval(
+        s,
+        `${base}Band${i}`,
+        cx - bw / 2,
+        cy - bh / 2,
+        bw,
+        bh,
+        band.color,
+        alpha * band.alpha,
+        band.radius,
+      )
+    })
   }
 
   const hazeOval = (s, base, cx, cy, w, h, color = C.sunSoft, alpha = 0.12) =>

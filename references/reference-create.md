@@ -198,7 +198,10 @@ node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
 ```
 
 如果用户显式指定 experimental/candidate DeckKit，加 `--explicit`。`status: blocked`
-时停止并说明缺口；`status: explicit-only` 时继续但必须逐项执行 `requiredGates[]`。
+时停止并说明缺口；`status: explicit-only`、`manual-fallback` 或
+`explicit-manual-fallback` 时继续但必须逐项执行 `requiredGates[]`。`manual-fallback`
+不是自由发挥路线：先用 `pptx-nova-refurbish-fallback-patch.mjs` 从 inspect 和 catalog
+生成可审计 patch，再 dry-run/apply。
 
 2. 同时生成 `reference-inspect.json`、`source_extract.md`（或等价文本提取）和源 deck PNG/contact sheet。
 3. 以 `reference-inspect.json.presentation.slideCount` 和 `slides[]` 作为源页清单权威。
@@ -232,7 +235,28 @@ xdoc pptx refurbish-skin \
 如果 `refurbish-skin` 返回 `UnsupportedComplexity`，不要重试同一条命令，也不要让用户等待长流程；
 改用下方低层命令对 deck 分段处理，或先做 inspect/audit 后向用户说明当前 MVP 的大 deck 限制。
 如果返回 unsupported DeckKit/native skinning 错误，记录 JSON，并改用目标 DeckKit 对应的 brand profile
-或 inspect 驱动 patch；不得静默切换到其它 DeckKit。
+或 inspect 驱动 patch；不得静默切换到其它 DeckKit。若 `refurbish-plan.json` 已返回
+`manual-fallback` / `explicit-manual-fallback`，不要先试 `refurbish-skin`，直接运行：
+
+```bash
+node <skill-root>/scripts/pptx-nova-refurbish-fallback-patch.mjs \
+  --deckkit <id> \
+  --source source.pptx \
+  --inspect reference-inspect.json \
+  --output candidate.pptx \
+  --patch patch.json \
+  --lock deck_lock.json \
+  --audit content-audit.json \
+  --map reference-map.json \
+  --json > fallback-patch-report.json
+
+xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --dry-run --json > dry-run.json
+xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --json > apply.json
+```
+
+该脚本优先读取 `refurbishProfile.fallback`；若 DeckKit 没有专用 fallback，则从
+`visualGrammar.colorSystem` / `visualGrammar.typography` 合成通用 palette、字体和对象保留策略。
+这条路线服务所有 DeckKit，不能在脚本里对单个 DeckKit id 做硬编码特判。
 
 只有需要定制删除策略或排查中间报告时，才先判断 `chrome-remove`
 是否会误删真实内容：feature-test deck、模板验收页、页脚/页码/日期能力演示页、placeholder
@@ -260,6 +284,8 @@ Fallback 的最小可交付动作是硬规则：
 
 - `refurbish-plan.json` 必须说明 route、native skinning、fallback strategy、duplicate chrome policy
   和 `requiredGates[]`；不要边试命令边决定路线。
+- `fallback-patch-report.json` 必须说明 fallback 来源、slide count 和 patch op 数；生成的
+  `deck_lock.json`、`content-audit.json`、`reference-map.json` 必须与当前候选同步。
 - 必须保存 `chrome-detect.json`。对已有 header/footer/page/rule，逐类选择
   `replace`、`restyle-existing`、`skip-duplicate` 或 `add`，并在报告或 patch 备注中体现；发现重复
   chrome 时优先移除新增重复项或复用源对象，不能只移动到别处。

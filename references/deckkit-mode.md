@@ -48,6 +48,13 @@ If the user explicitly named a non-production DeckKit, add `--explicit`. The pla
 is the source of truth for native skinning availability, `requiredGates[]`,
 fallback style ops, and duplicate chrome policy. A `blocked` plan is a real
 blocker; do not discover the same failure later by trial-running `xdoc`.
+For DeckKits without native skinning, the plan should return `manual-fallback`
+or `explicit-manual-fallback` instead of blocking when a generic inspect-driven
+fallback can preserve source slides and editable objects. In that route, run
+`scripts/pptx-nova-refurbish-fallback-patch.mjs` after `inspect` to generate
+`patch.json`, `deck_lock.json`, `content-audit.json`, and `reference-map.json`
+from the DeckKit's `refurbishProfile.fallback` or, when absent, from
+`visualGrammar`.
 
 For the selected DeckKit, run readiness:
 
@@ -73,13 +80,18 @@ Do not assume every DeckKit id is supported by every xdoc skinning command.
 `refurbish-skin` and `chrome-apply --deckkit` require native skinning catalog
 entries; unsupported ids must fail with JSON instead of silently falling back.
 For a named DeckKit without native chrome/remap support, implement the visual
-contract with an explicit brand profile plus inspect-driven patch ops for
-background, text, fills, lines, and page chrome; save the command error JSON as
-evidence instead of silently switching to another DeckKit.
+contract with the fallback patch generator plus inspect-driven patch ops for
+background, text, fills, lines, and page chrome; save command error JSON as
+evidence instead of silently switching to another DeckKit. The generator is the
+default starting point for all DeckKits because it uses catalog data rather than
+DeckKit-specific hardcoding.
 Fallback minimums are mandatory, not suggestions:
 
 - Run and save `refurbish-plan.json`, `chrome-detect.json`, dry-run/apply report,
   `vision-diff.json`, and final `refurbish-audit` or supplemental audit report.
+- Run and save `fallback-patch-report.json` from
+  `pptx-nova-refurbish-fallback-patch.mjs` when route is `manual-fallback` or
+  `explicit-manual-fallback`.
 - For whole text-frame restyling, use `set-text-style` or
   `set-shape-text-style`; use indexed `set-run` only after inspect exposes the
   actual paragraph/run target or a minimal smoke proves the index exists.

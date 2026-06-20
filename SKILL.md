@@ -42,9 +42,14 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
   `requiredGates[]` 执行。默认优先运行 `xdoc pptx refurbish-skin --source source.pptx --deckkit <id> --output out.pptx --json`；
   该命令会复制保留源 deck，替换旧 chrome/background，应用目标 DeckKit chrome，remap text/shapes/tables/charts，并运行
   `vision-diff` + native `refurbish-audit` gate。只有在目标 DeckKit 不支持 native skinning、需要跳过/定制 chrome-remove、
-  或需要逐页局部 polish 时，才按计划退回手工串联 `chrome-detect -> chrome-remove -> remap-theme -> chrome-apply`
-  或 `apply-brand` + inspect-driven patch；整 text frame 换字体/字号/颜色优先用 `set-text-style` /
-  `set-shape-text-style`，不要为未知段落/run 数量生成猜测性 `set-run` 队列。
+  或需要逐页局部 polish 时，才按计划退回 fallback。若 plan 返回 `manual-fallback` 或
+  `explicit-manual-fallback`，先运行 `scripts/pptx-nova-refurbish-fallback-patch.mjs` 从
+  `reference-inspect.json` 生成 `patch.json`、`deck_lock.json`、`content-audit.json` 和
+  `reference-map.json`，再 dry-run/apply；不要临场手写大批 selector ops。该通用 fallback
+  适用于所有 DeckKit：优先使用 `refurbishProfile.fallback`，缺失时从 `visualGrammar`
+  合成 palette/字体/对象保留策略；它默认保留源 slide 和可编辑对象，不截图化、不拆页。
+  整 text frame 换字体/字号/颜色优先用 `set-text-style` / `set-shape-text-style`，不要为未知段落/run
+  数量生成猜测性 `set-run` 队列。
   `contact-diff` 不再作为默认同步 gate；需要人工视觉复核时显式运行并保存并排 contact sheet。
   源 deck 是内容真源；默认保持页数和全部用户可见内容，任何拆页、合页、对象降级或内容丢失都必须先确认。
   翻新目标是"内容不变 + 目标 DeckKit 风格一致"：色系、字体层级、header/footer、页码、背景、规则线和 page chrome

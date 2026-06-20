@@ -79,6 +79,20 @@ function stringArray(value) {
   )
 }
 
+function hexFrom(value) {
+  if (typeof value !== 'string') return ''
+  const match = value.match(/#?([0-9A-Fa-f]{6})\b/)
+  return match ? match[1].toUpperCase() : ''
+}
+
+function firstHex(values, fallback) {
+  for (const value of Array.isArray(values) ? values : []) {
+    const hex = hexFrom(value)
+    if (hex) return hex
+  }
+  return fallback
+}
+
 function shell(value) {
   return JSON.stringify(value)
 }
@@ -107,32 +121,105 @@ function nativeSkinningFor(entry) {
 function profileFor(entry, nativeSkinning) {
   const profile = entry?.refurbishProfile
   if (!isPlainObject(profile)) {
+    const fallback = nativeSkinning.supported ? null : genericFallbackFor(entry)
     return {
       present: false,
       mode: nativeSkinning.supported ? 'native' : 'manual-fallback',
       nativeSkinning,
-      fallback: null,
+      fallback,
       requiredGates: defaultGates(nativeSkinning.supported),
-      notes: [],
+      notes: fallback
+        ? [
+            'No DeckKit-specific refurbishProfile was found; use the generic inspect-driven fallback.',
+          ]
+        : [],
     }
   }
+  const profileNative = isPlainObject(profile.nativeSkinning)
+    ? {
+        supported: profile.nativeSkinning.supported === true,
+        themePack: profile.nativeSkinning.themePack ?? nativeSkinning.themePack,
+        stylePack: profile.nativeSkinning.stylePack ?? nativeSkinning.stylePack,
+        commands: stringArray(profile.nativeSkinning.commands),
+      }
+    : nativeSkinning
+  const fallback = isPlainObject(profile.fallback)
+    ? { ...genericFallbackFor(entry), ...profile.fallback, source: 'catalog' }
+    : profileNative.supported
+      ? null
+      : genericFallbackFor(entry)
   return {
     present: true,
     mode: profile.mode ?? (nativeSkinning.supported ? 'native' : 'manual-fallback'),
-    nativeSkinning: isPlainObject(profile.nativeSkinning)
-      ? {
-          supported: profile.nativeSkinning.supported === true,
-          themePack: profile.nativeSkinning.themePack ?? nativeSkinning.themePack,
-          stylePack: profile.nativeSkinning.stylePack ?? nativeSkinning.stylePack,
-          commands: stringArray(profile.nativeSkinning.commands),
-        }
-      : nativeSkinning,
-    fallback: isPlainObject(profile.fallback) ? profile.fallback : null,
+    nativeSkinning: profileNative,
+    fallback,
     requiredGates: stringArray(profile.requiredGates).length
       ? stringArray(profile.requiredGates)
       : defaultGates(nativeSkinning.supported),
     notes: stringArray(profile.notes),
   }
+}
+
+function genericFallbackFor(entry) {
+  const colors = entry?.visualGrammar?.colorSystem ?? {}
+  const typography = entry?.visualGrammar?.typography ?? {}
+  return {
+    schemaVersion: 'pptx-nova-refurbish-fallback/v1',
+    source: 'generic-visual-grammar',
+    strategy: 'inspect-driven-editable-object-restyle',
+    patchScript: 'scripts/pptx-nova-refurbish-fallback-patch.mjs',
+    palette: {
+      background: firstHex(colors.background, 'F7F3E8'),
+      text: firstHex(colors.primary, '1F1F1F'),
+      accent: firstHex(colors.accent, 'D9B44A'),
+      softAccent: firstHex(colors.accent?.slice?.(1), 'EFE2B7'),
+      secondary: firstHex(colors.secondary, '6B7280'),
+      surface: firstHex(colors.background?.slice?.(1), 'FFFFFF'),
+      rule: firstHex(colors.primary, '1F1F1F'),
+    },
+    fonts: {
+      heading: fontFamilyFrom(typography.display, 'Aptos Display'),
+      body: fontFamilyFrom(typography.body, 'Aptos'),
+      label: fontFamilyFrom(typography.label ?? typography.mono ?? typography.chrome, 'Aptos'),
+      cjk: fontFamilyFrom(typography.cjk, 'Microsoft YaHei'),
+    },
+    styleOps: [
+      'set-theme-color',
+      'set-theme-font',
+      'set-slide-background',
+      'set-text-style',
+      'set-shape-fill',
+      'set-shape-line',
+    ],
+    chromePolicy: 'preserve-and-restyle-existing',
+    contentPolicy: 'preserve-source-slides-and-editable-objects',
+  }
+}
+
+function fontFamilyFrom(value, fallback) {
+  if (typeof value !== 'string') return fallback
+  const beforeFor = value.split(/\s+for\s+/i)[0]?.trim()
+  if (!beforeFor) return fallback
+  const quoted = beforeFor.match(/["“”']([^"“”']+)["“”']/)
+  if (quoted?.[1]) return quoted[1].trim()
+  const lower = beforeFor.toLowerCase()
+  const markers = [
+    ' weight ',
+    ' regular',
+    ' bold',
+    ' sans',
+    ' serif',
+    ' condensed',
+    ' uppercase',
+    ' all-caps',
+    ' display',
+  ]
+  let cut = beforeFor.length
+  for (const marker of markers) {
+    const index = lower.indexOf(marker)
+    if (index > 0) cut = Math.min(cut, index)
+  }
+  return beforeFor.slice(0, cut).replace(/,$/, '').trim() || fallback
 }
 
 function defaultGates(nativeSupported) {
@@ -165,11 +252,21 @@ function buildCommands(args, entry, nativeSkinning, profile) {
       command: `xdoc pptx chrome-detect ${shell(args.source)} --json`,
     },
     {
-      name: 'fallback-theme-and-style-patch',
+      name: 'generate-fallback-patch',
       required: true,
       command:
-        `Use apply-brand/remap-theme plus inspect-driven patch ops` +
-        (styleOps.length ? `; prefer ${styleOps.join(', ')} for whole text-frame styling` : ''),
+        `node ${shell(join(SKILL_ROOT, 'scripts/pptx-nova-refurbish-fallback-patch.mjs'))} --deckkit ${shell(entry.id)} --source ${shell(args.source)} --inspect reference-inspect.json --output ${shell(args.output)} --patch patch.json --lock deck_lock.json --audit content-audit.json --map reference-map.json --json` +
+        (styleOps.length ? `; generated patch uses ${styleOps.join(', ')}` : ''),
+    },
+    {
+      name: 'dry-run',
+      required: true,
+      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --dry-run --json`,
+    },
+    {
+      name: 'apply',
+      required: true,
+      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --json`,
     },
     {
       name: 'vision-diff',
@@ -197,15 +294,18 @@ function buildPlan(args) {
       `DeckKit "${entry.id}" readiness is "${readiness}"; pass --explicit only when the user named it`,
     )
   }
-  if (!nativeSkinning.supported && !profile.fallback) {
-    blockers.push(`DeckKit "${entry.id}" has no nativeSkinning and no refurbishProfile.fallback`)
-  }
+  const usesGenericFallback =
+    !nativeSkinning.supported && profile.fallback?.source === 'generic-visual-grammar'
 
   const status = blockers.length
     ? 'blocked'
-    : explicitOnly && args.explicit
-      ? 'explicit-only'
-      : 'ready'
+    : explicitOnly && args.explicit && usesGenericFallback
+      ? 'explicit-manual-fallback'
+      : explicitOnly && args.explicit
+        ? 'explicit-only'
+        : usesGenericFallback
+          ? 'manual-fallback'
+          : 'ready'
   const route = nativeSkinning.supported ? 'native-skin-first' : 'fallback-patch'
   return {
     ...planResult(args, entry, blockers),

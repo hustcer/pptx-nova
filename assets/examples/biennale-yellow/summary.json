@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": 1,
-    "ops": 713
+    "ops": 671
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
     "changedParts": 19,
-    "opResults": 713,
+    "opResults": 671,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -37,7 +37,7 @@
     "status": "success",
     "warnings": 0,
     "changedParts": 19,
-    "opResults": 713,
+    "opResults": 671,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -162,12 +162,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 266758,
-      "sha256": "63b1e55f36672756dbc6e818e8312e48773993692a47a8d2142b7e7ef5dd9c91"
+      "bytes": 270291,
+      "sha256": "f6e661fb83f8f57b01f477b541b0e237513626673f857eeccd257451866680cc"
     },
     "webp": {
-      "bytes": 93118,
-      "sha256": "760bee67034f1d389dfe4231cd0ce842e329d3e56e0e8998870099c2908c365f"
+      "bytes": 93186,
+      "sha256": "28ab645cc144f2c76462f883a74b634c82eb305a953bbd3d5a460a9a27041448"
     }
   }
 }

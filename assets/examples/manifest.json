@@ -799,13 +799,13 @@
       "files": {
         "deck": {
           "path": "biennale-yellow/deck.pptx",
-          "bytes": 23196,
-          "sha256": "babf3f24d241a98e949bbc91a170fe7517f16f84bf7c1d936c29cf0d6bbd0add"
+          "bytes": 22897,
+          "sha256": "f220cd7ec11e2e7f65d482c5150d50fee1033684fe004c66e24c696593c791e8"
         },
         "contactSheet": {
           "path": "biennale-yellow/contact-sheet.webp",
-          "bytes": 93118,
-          "sha256": "760bee67034f1d389dfe4231cd0ce842e329d3e56e0e8998870099c2908c365f",
+          "bytes": 93186,
+          "sha256": "28ab645cc144f2c76462f883a74b634c82eb305a953bbd3d5a460a9a27041448",
           "quality": 82
         },
         "content": {
@@ -816,12 +816,12 @@
         "brief": {
           "path": "biennale-yellow/brief.md",
           "bytes": 755,
-          "sha256": "aa6b7274e1c67ce8c03feb2f55e6341e70bc37f04154a204062ef34f63a73440"
+          "sha256": "4bea1a334fbb6e6e07d3cddf0039aea4a37160b2a5f854ab5ebb3674edb7a271"
         },
         "summary": {
           "path": "biennale-yellow/summary.json",
           "bytes": 4410,
-          "sha256": "074a7314e3c8563a3f906b59a553d141b900f147cc735703b24c07aedb6d4bad"
+          "sha256": "359f2a6b498507643e9f70601eb693289673550ceb603bae20b4a9b71e2a94dd"
         }
       },
       "validation": {
@@ -833,7 +833,7 @@
       },
       "patch": {
         "schemaVersion": 1,
-        "ops": 713
+        "ops": 671
       },
       "vision": {
         "status": "success",

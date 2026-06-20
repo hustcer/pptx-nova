@@ -112,31 +112,28 @@ function makeOps() {
   }
 
   const sunBloom = (s, base, cx, cy, w, h, alpha = 0.38) => {
-    const bands = [
-      { scale: 1, color: C.haze, alpha: 0.18, radius: '58pt' },
-      { scale: 0.88, color: C.haze, alpha: 0.14, radius: '54pt' },
-      { scale: 0.76, color: C.sunSoft, alpha: 0.16, radius: '50pt' },
-      { scale: 0.64, color: C.sunSoft, alpha: 0.14, radius: '44pt' },
-      { scale: 0.53, color: C.sunSoft, alpha: 0.13, radius: '38pt' },
-      { scale: 0.43, color: C.sun, alpha: 0.13, radius: '32pt' },
-      { scale: 0.34, color: C.sun, alpha: 0.12, radius: '28pt' },
-      { scale: 0.26, color: C.sun, alpha: 0.1, radius: '24pt' },
-      { scale: 0.19, color: C.sun, alpha: 0.08, radius: '20pt' },
-    ]
-    bands.forEach((band, i) => {
-      const bw = w * band.scale
-      const bh = h * band.scale
-      softOval(
-        s,
-        `${base}Band${i}`,
-        cx - bw / 2,
-        cy - bh / 2,
-        bw,
-        bh,
-        band.color,
-        alpha * band.alpha,
-        band.radius,
-      )
+    const name = nm(s, base)
+    p.shape(s, name, 'oval', cx - w / 2, cy - h / 2, w, h)
+    p.ops.push({
+      op: 'set-shape-fill',
+      slide: s,
+      shape: { name },
+      fill: {
+        type: 'radialGradient',
+        fillToRect: { l: 0.5, t: 0.5, r: 0.5, b: 0.5 },
+        stops: [
+          { pos: 0, color: { rgb: C.sun, alpha: alpha * 0.95 } },
+          { pos: 0.46, color: { rgb: C.sunSoft, alpha: alpha * 0.62 } },
+          { pos: 0.76, color: { rgb: C.haze, alpha: alpha * 0.3 } },
+          { pos: 1, color: { rgb: C.haze, alpha: 0 } },
+        ],
+      },
+    })
+    p.ops.push({
+      op: 'set-shape-line',
+      slide: s,
+      shape: { name },
+      line: { noLine: true },
     })
   }
 

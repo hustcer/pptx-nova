@@ -86,7 +86,9 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
   作为 legacy supplemental audit。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
-- **小改文字或备注**：仍走 inspect 与 dry-run，但不读取 DeckKit、设计锁或叙事质量文档，除非改动影响版式或品牌。
+- **小改文字、备注、页脚或元数据**：只读 `common-workflow.md` 和
+  `micro-edit-cheatsheet.md`，仍走 inspect、dry-run 和 selector 校验；不读取 DeckKit、设计锁、
+  叙事质量或完整 edit 文档，除非 selector 模糊、涉及复杂对象或改动影响版式/品牌。
 - **Studio / 高风险 deck**：用 `deck_lock.json` 锁定轻量确认、页级节奏、模板融合、
   资源状态和 chart/table 语义；不要引入 SVG-first 或逐页手写流程。
 
@@ -134,6 +136,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 | 严格跟随已有 PPTX 模板 / 套模板改内容    | `references/common-workflow.md`、`references/template-following.md`、`references/edit-mode.md`                                                                          | `references/design-lock-and-assets.md`、`references/inspect-and-edit.md`                                        |
 | 参考 PPTX + 新大纲生成新 deck            | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                |
 | 美化 / 翻新已有 PPTX，保持原内容但换风格 | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`、`references/export-and-check.md`                                              |
+| 少量文字/备注/页脚/元数据小改            | `references/common-workflow.md`、`references/micro-edit-cheatsheet.md`                                                                                                  | selector 模糊、复杂图片或多对象编辑时再读 `references/edit-mode.md`、`references/inspect-and-edit.md`           |
 | 修改已有 `.pptx`                         | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                            |
 | 数据 + 模板 / JSON 填充                  | `references/common-workflow.md`、`references/data-driven.md`                                                                                                            | `references/tables.md`、`references/charts.md`                                                                  |
 | 品牌改装 / 品牌检查                      | `references/common-workflow.md`、`references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                |
@@ -188,7 +191,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   再运行 legacy supplemental audit 和 inspect 数量/文本对账，且最终摘要必须说明 native audit
   未通过工具层面执行。不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
-- **Micro Edit**：只改少量文字、备注、页脚或元数据；保持 edit 安全门禁，但避免加载创建型 reference。
+- **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，
+  保持 inspect、dry-run、`resolvedSelectors[]` 和 run-dir 副本门禁，但避免加载创建型和普通 Edit
+  重文档。
 - **Data-driven**：用户有模板和 JSON/CSV/表格数据，要批量填充或绑定数据。
 - **Export/Check**：只转换、预览、提取或检查，不修改 PPTX。
 
@@ -364,6 +369,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 | `references/create-express.md`            | 简单 prompt 快速生成 deck                                        |
 | `references/create-studio.md`             | 高风险/正式/精控 deck 的确认、设计锁和 split                     |
 | `references/edit-mode.md`                 | 修改已有 PPTX 的 inspect/dry-run/selector 流程                   |
+| `references/micro-edit-cheatsheet.md`     | 少量文字、备注、页脚、元数据和单对象小改的极速路径               |
 | `references/template-following.md`        | 严格套模板：复制源 slide、编辑 inherited objects、placeholder QA |
 | `references/export-and-check.md`          | PDF/PNG/MD/JSON 导出、extract、check                             |
 | `references/express-mode.md`              | Express 模式完整黄金路径                                         |

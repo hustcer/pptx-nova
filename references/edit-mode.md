@@ -8,6 +8,11 @@ Editing is selector-sensitive. The main risk is changing the wrong object.
 
 ## Load Order
 
+For small localized text, notes, footer/date/page-number, metadata, color/font,
+or single-image edits, read `micro-edit-cheatsheet.md` instead of this file. Come
+back here only when the selector is ambiguous, the edit touches complex objects,
+or the request grows beyond a localized change.
+
 For existing deck edits read:
 
 1. `common-workflow.md`
@@ -64,30 +69,10 @@ have unrelated legacy issues; separate "changed-slide blockers" from
 
 ## Micro Edit Flow
 
-Use this narrowed path when the user asks for a small, localized edit such as
-changing one or two text boxes, speaker notes, page footers, dates, or document
-metadata. The goal is low friction without giving up selector safety.
-
-Still do:
-
-- create a run directory
-- inspect the input deck and save the JSON
-- use a stable selector from inspect
-- dry-run and check `resolvedSelectors[]`
-- apply to a run-dir copy before writing the requested final file
-
-Skip unless the edit needs it:
-
-- DeckKit selection and `content.json`
-- `deck_lock.json` and design-lock checks
-- narrative quality review
-- full-deck PNG review
-
-For text-only micro edits, run `vision-check` and render the changed slide PNG
-when the replacement is materially longer, changes language/script, touches a
-title/subtitle/footer, or sits inside a tight bbox. If the replacement is same
-length or shorter and dry-run resolves exactly one selector, the final summary
-may record that visual rendering was not needed.
+Micro edits have a separate one-screen route in `micro-edit-cheatsheet.md`.
+Follow that file first. This document is the escalation path when the task needs
+deeper selector analysis, multi-object edits, chart/table/image semantics,
+template rules, brand/style changes, or full visual QA.
 
 ## Common Edit Operations
 

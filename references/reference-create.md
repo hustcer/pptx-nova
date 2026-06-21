@@ -34,6 +34,9 @@
   视觉问题 delta 报告。
 - `fidelity-gate.json`：Refurbish Existing Deck 时由 `pptx-nova-fidelity-gate.mjs`
   汇总 `vision-diff`、最终 `refurbish-audit` 和可用 `reference-map` 的保真门禁报告。
+- `candidate-inspect.json` / `layout-final.json`：Refurbish Existing Deck 时对候选 PPTX
+  做最终 inspect，并由 `pptx-nova-layout-snapshot.mjs` 生成对象 bbox、文本、字体、颜色、
+  placeholder、frame 和 z-order 的结构化布局证据。
 - `contact-diff.png` / `contact-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx contact-diff`
   生成的 source/candidate 并排 contact sheet 和状态报告。
 - `chrome-detect.json` / `chrome-remove.json` / `chrome-apply.json`：Refurbish Existing Deck
@@ -367,6 +370,13 @@ node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
   --final-audit content-audit-final.json \
   --vision-diff vision-diff.json \
   --json > fidelity-gate.json
+
+xdoc pptx inspect candidate.pptx --json > candidate-inspect.json
+
+node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
+  --inspect candidate-inspect.json \
+  --output layout-final.json \
+  --json
 ```
 
 如果没有拆页、合页或重排，可用 `--assume-one-to-one` 省略 `--map`，但仍必须在
@@ -478,7 +488,7 @@ DeckKit 选择注意事项：
   `inspect` 生成 supplemental audit，对比 slide count、可见文本、picture/table/chart/connector/
   graphicFrame/placeholder 数量、notes、links 和 `reference-map.json` 覆盖率。最终摘要必须明确
   native audit 的工具失败和 supplemental audit 的结论。
-  `fidelity-gate.json` 应作为最终保真结论入口；它只汇总和加严已有机器证据，不替代人工
-  PNG/contact-sheet 视觉判断。
+  `fidelity-gate.json` 应作为最终保真结论入口；`layout-final.json` 应作为最终布局结构证据。
+  两者都不替代人工 PNG/contact-sheet 视觉判断。
   OOXML 文本泄漏和 forbidden shape name 暂时由 legacy supplemental audit 补充。Agent 仍需人工复核机器无法判断的视觉差异、
   留白和 DeckKit 风格一致性。

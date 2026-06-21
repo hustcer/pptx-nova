@@ -102,6 +102,11 @@ node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
   --frame-map template-frame-map.json \
   --template-gate template-gate.json \
   --json > fidelity-gate.json
+
+node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
+  --inspect final-inspect.json \
+  --output layout-final.json \
+  --json
 ```
 
 Omit optional inputs only when they truly do not exist. For example, pure text
@@ -202,3 +207,7 @@ gate. It does not replace `template-gate`; it verifies the final inspect,
 template frame-map coverage, and `template-gate.json` result into one
 `fidelity-gate.json` artifact. A failed `template-gate` remains a failed
 fidelity gate.
+
+`pptx-nova-layout-snapshot.mjs` records final object bbox, text, font, color,
+placeholder, frame, and z-order evidence into `layout-final.json`. Treat it as
+QA evidence and warning source, not as a replacement for PNG/contact-sheet review.

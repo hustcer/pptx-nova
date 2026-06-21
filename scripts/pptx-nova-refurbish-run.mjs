@@ -23,6 +23,7 @@ const FALLBACK_PATCH_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-refurbish-fallback-pat
 const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
+const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source <source.pptx> --output <output.pptx> [options]
@@ -412,6 +413,8 @@ function artifactPaths(runDir) {
     visionDiff: join(runDir, 'vision-diff.json'),
     contentAuditFinal: join(runDir, 'content-audit-final.json'),
     fidelityGate: join(runDir, 'fidelity-gate.json'),
+    finalInspect: join(runDir, 'candidate-inspect.json'),
+    layoutFinal: join(runDir, 'layout-final.json'),
     candidate: join(runDir, 'candidate.pptx'),
     previews: join(runDir, 'previews'),
     convertReport: join(runDir, 'convert-report.json'),
@@ -796,6 +799,34 @@ function runFidelityGate(summary, artifacts) {
   }
 }
 
+function runLayoutSnapshot(summary, args, artifacts) {
+  runJsonPhase(summary, {
+    name: 'final-inspect',
+    bin: args.xdocBin,
+    args: ['pptx', 'inspect', artifacts.candidate, '--json'],
+    artifact: artifacts.finalInspect,
+  })
+  const snapshot = runJsonPhase(summary, {
+    name: 'layout-snapshot',
+    bin: process.execPath,
+    args: [
+      LAYOUT_SNAPSHOT_SCRIPT,
+      '--inspect',
+      artifacts.finalInspect,
+      '--output',
+      artifacts.layoutFinal,
+      '--json',
+    ],
+    artifact: artifacts.layoutFinal,
+  })
+  const riskCount = Number(snapshot?.summary?.riskCount ?? 0)
+  if (riskCount > 0) {
+    summary.warnings.push(
+      `layout-snapshot: ${riskCount} structural layout risk(s) recorded in layout-final.json`,
+    )
+  }
+}
+
 function listPngFiles(dir) {
   if (!existsSync(dir)) return []
   return readdirSync(dir)
@@ -1013,6 +1044,7 @@ function runRefurbish(inputArgs) {
     }
 
     runFidelityGate(summary, artifacts)
+    runLayoutSnapshot(summary, args, artifacts)
     runPreviews(summary, args, artifacts, inspect)
     runContactDiff(summary, args, artifacts)
     publishCandidate(summary, args, artifacts)

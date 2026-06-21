@@ -113,7 +113,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
      `visualDensity`.
    - Edit: `xdoc pptx inspect <input.pptx> --json`.
    - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
-     `reference-map.json`, `fidelity-gate.json`, and the
+     `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
      `xdoc pptx refurbish-skin` JSON report.
      Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
      artifacts, phase failures, previews, and final publication use one run-dir
@@ -174,10 +174,11 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
    but skips generation by default. A deck that visually still reads like the
    source with only light chrome added is not done.
    For existing-deck refurbishment, the standard runner writes
-   `fidelity-gate.json` before preview rendering. If running low-level commands
-   manually, run `pptx-nova-fidelity-gate.mjs --mode refurbish` after
-   `vision-diff` and final `refurbish-audit`, then keep the report with the run
-   artifacts.
+   `fidelity-gate.json`, `candidate-inspect.json`, and `layout-final.json`
+   before preview rendering. If running low-level commands manually, run
+   `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
+   `refurbish-audit`, then run `pptx-nova-layout-snapshot.mjs` on final inspect
+   and keep both reports with the run artifacts.
 10. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly
@@ -258,8 +259,10 @@ check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> chart/table
 ```
 
 For strict Template Following and Refurbish Existing Deck, insert
-`fidelity-gate.json` before PNG/contact-sheet review. The gate consolidates
-template/refurbish machine evidence; it does not decide visual taste, layout
+`fidelity-gate.json` and `layout-final.json` before PNG/contact-sheet review.
+The fidelity gate consolidates template/refurbish machine evidence. The layout
+snapshot records final object bbox, text, font, color, placeholder, frame, and
+z-order evidence. Neither report decides visual taste, pixel-level layout
 quality, or whether a refurbished deck visibly adopted the requested DeckKit.
 
 `vision-check` high/medium issues are blockers for create workflows. Low issues

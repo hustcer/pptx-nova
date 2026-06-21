@@ -22,6 +22,7 @@ const READINESS_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-deckkit-readiness.mjs')
 const FALLBACK_PATCH_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-refurbish-fallback-patch.mjs')
 const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
+const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source <source.pptx> --output <output.pptx> [options]
@@ -410,6 +411,7 @@ function artifactPaths(runDir) {
     apply: join(runDir, 'apply.json'),
     visionDiff: join(runDir, 'vision-diff.json'),
     contentAuditFinal: join(runDir, 'content-audit-final.json'),
+    fidelityGate: join(runDir, 'fidelity-gate.json'),
     candidate: join(runDir, 'candidate.pptx'),
     previews: join(runDir, 'previews'),
     convertReport: join(runDir, 'convert-report.json'),
@@ -753,6 +755,47 @@ function runFallback(summary, args, artifacts) {
   gateAudit(summary, audit)
 }
 
+function runFidelityGate(summary, artifacts) {
+  const gateArgs = [
+    FIDELITY_GATE_SCRIPT,
+    '--mode',
+    'refurbish',
+    '--source-inspect',
+    artifacts.inspect,
+    '--final-audit',
+    artifacts.contentAuditFinal,
+    '--vision-diff',
+    artifacts.visionDiff,
+  ]
+  if (existsSync(artifacts.referenceMap)) {
+    gateArgs.push('--reference-map', artifacts.referenceMap)
+  }
+  if (existsSync(artifacts.contentAuditBaseline)) {
+    gateArgs.push('--content-audit', artifacts.contentAuditBaseline)
+  }
+  gateArgs.push('--json')
+
+  const report = runJsonPhase(summary, {
+    name: 'fidelity-gate',
+    bin: process.execPath,
+    args: gateArgs,
+    artifact: artifacts.fidelityGate,
+  })
+  requireGate(summary, 'fidelity-gate', report?.status !== 'fail', {
+    status: report?.status ?? '',
+    errors: Number(report?.summary?.errors ?? 0),
+    warnings: Number(report?.summary?.warnings ?? 0),
+    sourceSlides: report?.summary?.sourceSlides ?? null,
+    finalSlides: report?.summary?.finalSlides ?? null,
+    mappedSlides: report?.summary?.mappedSlides ?? null,
+    message:
+      'fidelity-gate must pass or warn using final audit, vision diff, and available reference-map evidence',
+  })
+  for (const warning of report?.warnings ?? []) {
+    summary.warnings.push(`fidelity-gate ${warning.code ?? 'warning'}: ${warning.message ?? ''}`)
+  }
+}
+
 function listPngFiles(dir) {
   if (!existsSync(dir)) return []
   return readdirSync(dir)
@@ -969,6 +1012,7 @@ function runRefurbish(inputArgs) {
       summary.route.executed = 'fallback-patch'
     }
 
+    runFidelityGate(summary, artifacts)
     runPreviews(summary, args, artifacts, inspect)
     runContactDiff(summary, args, artifacts)
     publishCandidate(summary, args, artifacts)

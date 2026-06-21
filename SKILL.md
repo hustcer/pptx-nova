@@ -83,7 +83,8 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
   交付前运行 `xdoc pptx refurbish-audit` 生成 `content-audit-final.json`，用当前源/候选 PPTX
   自动检查页数、源文本、shape type、媒体、备注、外链和 reference-map 覆盖；仅在还需要 OOXML
   可见文本泄漏扫描或 forbidden shape name regex 时，再运行 `scripts/pptx-nova-refurbish-audit.mjs`
-  作为 legacy supplemental audit。
+  作为 legacy supplemental audit。标准 runner 还会生成 `fidelity-gate.json` 汇总并加严
+  `vision-diff`、`refurbish-audit` 和可用 `reference-map` 证据。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
 - **小改文字、备注、页脚或元数据**：只读 `common-workflow.md` 和
@@ -168,7 +169,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   允许把原 slide 或原对象复制到输出 deck 作为保真起点，但随后必须重新主题化：映射到目标 DeckKit
   palette、字体层级、header/footer、页码、背景和 chrome；不要把原 deck 的色系和页眉页脚原样带入。
   当前优先使用 `xdoc pptx refurbish-skin --source source.pptx --deckkit <id> --output out.pptx --json`
-  执行 skin-first 流程；它会内置旧 chrome 替换、DeckKit 背景、remap、vision-diff 和 refurbish-audit gate。
+  执行 skin-first 流程；它会内置旧 chrome 替换、DeckKit 背景、remap、vision-diff、refurbish-audit
+  和 fidelity gate。
   手工串联 `chrome-detect` / `chrome-remove` / `remap-theme` / `chrome-apply` 只作为 fallback 或局部修复路径。
   运行前先确认当前 xdoc 版本真的支持目标 DeckKit 的 `refurbish-skin` / `chrome-apply` native skinning
   和对应 `remap-theme` alias；如果用户显式指定的 DeckKit 还不是 delivery-ready，或 CLI 只支持部分
@@ -350,6 +352,8 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - xdoc 审计信息：版本、CLI schema 版本、任务必需能力是否 fully disclosed、是否使用
   degraded discovery 或 fallback；不要把 undisclosed 写成 unsupported
 - 验证结果：dry-run、apply、vision-check、PNG/contact-sheet 复核、可选 preflight
+- 翻新/严格套模板任务的保真门禁：`fidelity-gate.json`、`template-gate.json` 或
+  `content-audit-final.json` 中实际存在项
 - 正式说服型 deck 的叙事质量结果：`deckProfile`、最低评分、最弱页、已接受 tradeoff
 - AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全
 - 剩余风险，例如字体未嵌入、外链、unsupported 对象、人工未审资源授权

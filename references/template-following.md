@@ -94,6 +94,14 @@ node <skill-root>/scripts/pptx-nova-template-gate.mjs \
   --dry-run dry-run.json \
   --final-pptx out.pptx \
   --json > template-gate.json
+
+node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
+  --mode template-following \
+  --source-inspect template-inspect.json \
+  --final-inspect final-inspect.json \
+  --frame-map template-frame-map.json \
+  --template-gate template-gate.json \
+  --json > fidelity-gate.json
 ```
 
 Omit optional inputs only when they truly do not exist. For example, pure text
@@ -188,3 +196,9 @@ slide. Do not switch to a parallel rebuild that only resembles the template.
   default prompt text;
 - identity assets in `assets_manifest.json` / `template-audit.json` must have
   approved provenance and cannot be generated lookalikes.
+
+`pptx-nova-fidelity-gate.mjs --mode template-following` is the delivery summary
+gate. It does not replace `template-gate`; it verifies the final inspect,
+template frame-map coverage, and `template-gate.json` result into one
+`fidelity-gate.json` artifact. A failed `template-gate` remains a failed
+fidelity gate.

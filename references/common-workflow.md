@@ -113,7 +113,8 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
      `visualDensity`.
    - Edit: `xdoc pptx inspect <input.pptx> --json`.
    - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
-     `reference-map.json`, and the `xdoc pptx refurbish-skin` JSON report.
+     `reference-map.json`, `fidelity-gate.json`, and the
+     `xdoc pptx refurbish-skin` JSON report.
      Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
      artifacts, phase failures, previews, and final publication use one run-dir
      contract. Use the lower-level commands directly only for diagnosis or
@@ -172,6 +173,11 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
    side-by-side review is needed; `refurbish-skin` reports the suggested path
    but skips generation by default. A deck that visually still reads like the
    source with only light chrome added is not done.
+   For existing-deck refurbishment, the standard runner writes
+   `fidelity-gate.json` before preview rendering. If running low-level commands
+   manually, run `pptx-nova-fidelity-gate.mjs --mode refurbish` after
+   `vision-diff` and final `refurbish-audit`, then keep the report with the run
+   artifacts.
 10. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly
@@ -250,6 +256,11 @@ Use these gates in order:
 ```text
 check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
 ```
+
+For strict Template Following and Refurbish Existing Deck, insert
+`fidelity-gate.json` before PNG/contact-sheet review. The gate consolidates
+template/refurbish machine evidence; it does not decide visual taste, layout
+quality, or whether a refurbished deck visibly adopted the requested DeckKit.
 
 `vision-check` high/medium issues are blockers for create workflows. Low issues
 still deserve judgment, especially small fonts, unexpected subtitle/label wraps,

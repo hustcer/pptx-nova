@@ -465,6 +465,15 @@ function defaultExplicitGates() {
   ]
 }
 
+function normalizeRequiredGates(gates) {
+  const normalized = [...gates]
+  const auditIndex = normalized.indexOf('refurbish-audit')
+  if (auditIndex >= 0 && !normalized.includes('fidelity-gate')) {
+    normalized.splice(auditIndex + 1, 0, 'fidelity-gate')
+  }
+  return normalized
+}
+
 function buildExplicitSelection({ requested, target, catalogAudit, targetEligibility }) {
   const readiness = catalogAudit.readiness
   const profile = catalogAudit.refurbishProfile
@@ -472,8 +481,9 @@ function buildExplicitSelection({ requested, target, catalogAudit, targetEligibi
     requested &&
     ['experimental', 'candidate'].includes(readiness) &&
     (profile.present ? ['explicit-only', 'explicit-exception'].includes(profile.mode) : true)
-  const requiredGates =
-    profile.requiredGates.length > 0 ? profile.requiredGates : defaultExplicitGates()
+  const requiredGates = normalizeRequiredGates(
+    profile.requiredGates.length > 0 ? profile.requiredGates : defaultExplicitGates(),
+  )
   return {
     requested,
     canContinue: canUseException,

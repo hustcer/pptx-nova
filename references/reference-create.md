@@ -32,6 +32,8 @@
   生成的最终内容保真门禁报告；用于交付前证明页数、文本、shape type、媒体、备注和外链未经批准减少。
 - `vision-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx vision-diff` 生成的 source/candidate
   视觉问题 delta 报告。
+- `fidelity-gate.json`：Refurbish Existing Deck 时由 `pptx-nova-fidelity-gate.mjs`
+  汇总 `vision-diff`、最终 `refurbish-audit` 和可用 `reference-map` 的保真门禁报告。
 - `contact-diff.png` / `contact-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx contact-diff`
   生成的 source/candidate 并排 contact sheet 和状态报告。
 - `chrome-detect.json` / `chrome-remove.json` / `chrome-apply.json`：Refurbish Existing Deck
@@ -310,8 +312,8 @@ Fallback 的最小可交付动作是硬规则：
 - 主题/字体/颜色 fallback 必须用目标 DeckKit 的 theme/style/profile 驱动。整 text frame
   换字体、字号、颜色时用 `set-text-style` / `set-shape-text-style`；只有 inspect 或 smoke test
   证明段落/run 索引存在时才使用 `set-run`。
-- 必须有 dry-run/apply、`vision-diff.json`、PNG/contact-sheet 复核和最终
-  `refurbish-audit`/supplemental audit。缺任一项就不能交付。
+- 必须有 dry-run/apply、`vision-diff.json`、`fidelity-gate.json`、PNG/contact-sheet
+  复核和最终 `refurbish-audit`/supplemental audit。缺任一项就不能交付。
 - fallback 输出必须能在 PNG/contact sheet 上看出目标 DeckKit 的 palette、typography、background、
   rules、page number chrome 和空间节奏；只改几条线、页码或局部字体不算完成。
 
@@ -356,6 +358,15 @@ xdoc pptx refurbish-audit \
   --final candidate.pptx \
   --map reference-map.json \
   --json > content-audit-final.json
+
+node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
+  --mode refurbish \
+  --source-inspect reference-inspect.json \
+  --reference-map reference-map.json \
+  --content-audit content-audit.json \
+  --final-audit content-audit-final.json \
+  --vision-diff vision-diff.json \
+  --json > fidelity-gate.json
 ```
 
 如果没有拆页、合页或重排，可用 `--assume-one-to-one` 省略 `--map`，但仍必须在
@@ -467,5 +478,7 @@ DeckKit 选择注意事项：
   `inspect` 生成 supplemental audit，对比 slide count、可见文本、picture/table/chart/connector/
   graphicFrame/placeholder 数量、notes、links 和 `reference-map.json` 覆盖率。最终摘要必须明确
   native audit 的工具失败和 supplemental audit 的结论。
+  `fidelity-gate.json` 应作为最终保真结论入口；它只汇总和加严已有机器证据，不替代人工
+  PNG/contact-sheet 视觉判断。
   OOXML 文本泄漏和 forbidden shape name 暂时由 legacy supplemental audit 补充。Agent 仍需人工复核机器无法判断的视觉差异、
   留白和 DeckKit 风格一致性。

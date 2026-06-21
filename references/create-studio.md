@@ -89,9 +89,17 @@ After confirmation and lock, return to the common DeckKit-first path:
 
 ```text
 outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> check-lock
-  -> dry-run -> apply -> vision-check -> PNG/contact-sheet review
+  -> dry-run -> apply -> vision-check -> final inspect -> high-risk evidence
+  -> PNG/contact-sheet review
   -> narrative_quality_review.json
 ```
+
+After `vision.json` is clean, run the shared finalizer with
+`--mode studio-create`. It writes `layout-final.json` and
+`evidence-summary.json` from the final inspect report before PNG review. Layout
+warnings are review evidence, not automatic failures; merely undisclosed inspect
+fields are counted separately. Do not add this finalizer to Express or Micro
+Edit merely because it exists.
 
 If a DeckKit lacks needed page types or visual structure, extend/create the
 DeckKit following `deck-generator-workflow.md`. Avoid local one-off patches for

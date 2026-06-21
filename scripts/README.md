@@ -34,6 +34,10 @@ Use these entry points from skill workflows:
 - `pptx-nova-template-gate.mjs` - validate strict template-following artifacts:
   frame-map coverage, empty placeholders, overlay-like additions, and identity
   asset provenance.
+- `pptx-nova-finalize-evidence.mjs` - finalize existing high-risk routes from
+  final inspect plus their existing vision/fidelity reports. It writes
+  `layout-final.json` and `evidence-summary.json`; it intentionally excludes
+  Micro Edit and does not replace mode-specific gates or PNG review.
 
 Repository-root `tools/` scripts may wrap or test these files during skill
 development, but published skill users should call scripts from this directory.

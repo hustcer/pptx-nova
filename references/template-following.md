@@ -103,9 +103,12 @@ node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
   --template-gate template-gate.json \
   --json > fidelity-gate.json
 
-node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
-  --inspect final-inspect.json \
-  --output layout-final.json \
+node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
+  --mode template-following \
+  --run-dir <run-dir> \
+  --final-inspect final-inspect.json \
+  --vision vision.json \
+  --fidelity-gate fidelity-gate.json \
   --json
 ```
 
@@ -208,6 +211,8 @@ template frame-map coverage, and `template-gate.json` result into one
 `fidelity-gate.json` artifact. A failed `template-gate` remains a failed
 fidelity gate.
 
-`pptx-nova-layout-snapshot.mjs` records final object bbox, text, font, color,
-placeholder, frame, and z-order evidence into `layout-final.json`. Treat it as
-QA evidence and warning source, not as a replacement for PNG/contact-sheet review.
+`pptx-nova-finalize-evidence.mjs` runs the layout snapshot and records final
+object bbox, text, font, color, placeholder, frame, and z-order evidence into
+`layout-final.json`, then summarizes the existing vision/fidelity reports in
+`evidence-summary.json`. Treat layout risks as QA warnings, not as a replacement
+for the template gate or PNG/contact-sheet review.

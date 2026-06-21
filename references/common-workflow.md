@@ -158,11 +158,36 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
    replay/audit) must run after the apply command has completed; do not launch
    apply-dependent checks in parallel with the write.
 8. Run static geometry validation:
+
    ```bash
-   xdoc pptx vision-check out.pptx --json
+   xdoc pptx vision-check out.pptx --json > <run-dir>/vision.json
    ```
+
    For create workflows, `summary.bySeverity.high` and
    `summary.bySeverity.medium` must both be 0.
+   For Studio Create, Reference Create, structural Edit, and manual Template
+   Following, save a final inspect report after apply and run the bundled
+   high-risk evidence finalizer before preview rendering:
+
+   ```bash
+   xdoc pptx inspect out.pptx --daemon --json > <run-dir>/final-inspect.json
+   node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
+     --mode <studio-create|reference-create|structural-edit|template-following> \
+     --run-dir <run-dir> \
+     --final-inspect <run-dir>/final-inspect.json \
+     --vision <run-dir>/vision.json \
+     --json
+   ```
+
+   Template Following also passes
+   `--fidelity-gate <run-dir>/fidelity-gate.json`. Refurbish runner already creates its
+   mode-specific fidelity gate and layout snapshot; a manual refurbish route can
+   call the finalizer with `--mode refurbish --fidelity-gate ...` and does not
+   need a duplicate `vision.json`. The helper writes `layout-final.json` and
+   `evidence-summary.json`. Actionable layout risks remain warnings; inspect
+   fields that are merely undisclosed are counted separately and do not make the
+   finalizer noisy. The helper does not replace PNG review or expand Micro Edit.
+
 9. Render visual previews when creating or materially changing a deck:
    ```bash
    xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
@@ -192,6 +217,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 12. Copy or write the validated final deck to the requested final path.
 13. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
     xdoc/schema versions, important intermediate files, validation results,
+    high-risk `evidence-summary.json` / `layout-final.json` when applicable,
     preview/contact sheet path, discovery/fallback warnings, and remaining risks.
 
 ## Source Ingestion (HTML / URL / PDF)
@@ -255,15 +281,18 @@ pixel-level visual quality.
 Use these gates in order:
 
 ```text
-check-lock -> dry-run -> vision-check -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
+check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
 ```
 
-For strict Template Following and Refurbish Existing Deck, insert
-`fidelity-gate.json` and `layout-final.json` before PNG/contact-sheet review.
-The fidelity gate consolidates template/refurbish machine evidence. The layout
-snapshot records final object bbox, text, font, color, placeholder, frame, and
-z-order evidence. Neither report decides visual taste, pixel-level layout
-quality, or whether a refurbished deck visibly adopted the requested DeckKit.
+For Studio Create, Reference Create, structural Edit, strict Template Following,
+and Refurbish Existing Deck, keep `layout-final.json` before PNG/contact-sheet
+review. The bundled finalizer makes this default for manual high-risk routes and
+writes `evidence-summary.json`; Template Following and Refurbish additionally
+reuse their existing `fidelity-gate.json`. The layout snapshot records final
+object bbox, text, font, color, placeholder, frame, and z-order evidence. These
+reports do not decide visual taste, pixel-level layout quality, or whether a
+refurbished deck visibly adopted the requested DeckKit. Micro Edit stays on its
+separate lightweight path.
 
 `vision-check` high/medium issues are blockers for create workflows. Low issues
 still deserve judgment, especially small fonts, unexpected subtitle/label wraps,

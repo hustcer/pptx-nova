@@ -4,8 +4,9 @@ import { resolve } from 'node:path'
 
 const SCHEMA_VERSION = 'pptx-nova-layout-snapshot/v1'
 const EMU_PER_INCH = 914400
-const DEFAULT_TEXT_RE =
-  /^(click to add|click to add title|click to add subtitle|title goes here|subtitle goes here|name goes here|date|footer|slide number|单击此处|单击添加|添加标题|添加副标题|页脚|日期|幻灯片编号)$/i
+const DEFAULT_PROMPT_TEXT_RE =
+  /^(click to add|click to add title|click to add subtitle|title goes here|subtitle goes here|name goes here|单击此处|单击添加|添加标题|添加副标题)$/i
+const STRUCTURAL_PLACEHOLDER_TEXT_RE = /^(date|footer|slide number|页脚|日期|幻灯片编号)$/i
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs --inspect final-inspect.json [options]
@@ -342,7 +343,11 @@ function validateObject({ risks, bbox, size, type, textPreview, font, placeholde
       placeholder,
     })
   }
-  if (textPreview && DEFAULT_TEXT_RE.test(textPreview)) {
+  if (
+    textPreview &&
+    (DEFAULT_PROMPT_TEXT_RE.test(textPreview) ||
+      (placeholder && STRUCTURAL_PLACEHOLDER_TEXT_RE.test(textPreview)))
+  ) {
     pushRisk(
       risks,
       'warning',

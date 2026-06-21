@@ -67,6 +67,15 @@ treating the full-deck `vision-check` summary as blocking. Existing decks often
 have unrelated legacy issues; separate "changed-slide blockers" from
 "pre-existing residual risk" in the final summary.
 
+For structural edits—slide/object additions or deletion, geometry/layout,
+theme/brand, chart/table, image/crop, or multi-slide visual changes—save
+`final-inspect.json` after apply and run
+`pptx-nova-finalize-evidence.mjs --mode structural-edit` with `vision.json`
+before PNG review. It writes `layout-final.json` and `evidence-summary.json`.
+Existing high/medium vision findings remain warnings here because the helper
+cannot attribute them to changed slides; use before/after changed-slide review
+to decide blockers. Localized Micro Edit remains on its separate fast path.
+
 ## Micro Edit Flow
 
 Micro edits have a separate one-screen route in `micro-edit-cheatsheet.md`.

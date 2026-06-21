@@ -108,7 +108,10 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
 7. 跑 dry-run，确认 selector、layout 和 visualRisks。
 8. apply 到 run 目录中间 `.pptx`。
 9. 跑 `vision-check`，创建型 deck 的 high/medium 必须清零。
-10. 转 PNG/contact sheet，逐页检查参考风格是否一致、文字是否溢出、页面是否像新内容而不是旧页残留。
+10. 对最终 PPTX 保存 `final-inspect.json`，运行
+    `pptx-nova-finalize-evidence.mjs --mode reference-create`，生成
+    `layout-final.json` 和 `evidence-summary.json`。
+11. 转 PNG/contact sheet，逐页检查参考风格是否一致、文字是否溢出、页面是否像新内容而不是旧页残留。
 
 ## 4. 复制整页时的规则
 
@@ -135,7 +138,7 @@ xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.ppt
   必要时改用普通可编辑 shape/table/chart 重建。
 - 完成摘要必须列出参考 deck 路径、`reference-style.json`、`reference-map.json`、
   `template_fusion.json`（如有）、`deck_lock.json`、`assets_manifest.json`（如有）、最终 PPTX 路径、
-  check-lock、vision-check 和 PNG 复核结果。
+  check-lock、vision-check、`evidence-summary.json`、`layout-final.json` 和 PNG 复核结果。
 
 ## 6. Refurbish Existing Deck —— 保持内容的已有 deck 翻新
 

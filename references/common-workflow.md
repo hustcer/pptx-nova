@@ -103,107 +103,116 @@ human-readable fallback.
 
 Use this order unless a mode-specific file explicitly narrows the workflow:
 
-1. Initialize run directory and check output collision rules.
-2. Generate `<run-dir>/xdoc-capabilities.json`. Review warnings and task-specific
-   undisclosed requirements, but do not turn the snapshot into an allowlist.
-3. Gather mode-specific context:
-   - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
-   - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
-     per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
-     `visualDensity`.
-   - Edit: `xdoc pptx inspect <input.pptx> --json`.
-   - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
-     `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
-     `xdoc pptx refurbish-skin` JSON report.
-     Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
-     artifacts, phase failures, previews, and final publication use one run-dir
-     contract. Use the lower-level commands directly only for diagnosis or
-     selective page repair.
-     Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
+1.  Initialize run directory and check output collision rules.
+2.  Generate `<run-dir>/xdoc-capabilities.json`. Review warnings and task-specific
+    undisclosed requirements, but do not turn the snapshot into an allowlist.
+3.  Gather mode-specific context:
+    - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
+    - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
+      per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
+      `visualDensity`.
+    - Edit: `xdoc pptx inspect <input.pptx> --json`.
+    - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
+      `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
+      `xdoc pptx refurbish-skin` JSON report.
+      Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
+      artifacts, phase failures, previews, and final publication use one run-dir
+      contract. Use the lower-level commands directly only for diagnosis or
+      selective page repair.
+      Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
 text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
-     or page-level repair.
-   - Data/template: template, data, bindings, and asset paths.
-   - If the source outline only gives a slide title or leaves factual content
-     blank, record any AI-filled facts, competitors, metrics, or examples in
-     `deck_lock.assumptions[]` before writing `content.json`.
-   - If the user-provided outline explicitly fixes slide titles or subtitles,
-     preserve that wording in display `title` / `subtitle`, mark
-     `titleSource: "user"` / `subtitleSource: "user"` in `deck_lock.slides[]`,
-     and do not silently rewrite it into a claim title or house style.
-   - If a slide contains chart/table proof, record the semantic source and
-     validation expectations in `deck_lock.slides[].chart` or `.table`.
-4. Produce the smallest durable input:
-   - Prefer DeckKit `content.json` for create workflows.
-   - Use patch ops only when the DeckKit path cannot express the work.
-   - Before writing or rebuilding `content.json` / hand-authored patch ops,
-     do a slide-by-slide lock alignment pass: for each slide, compare the
-     intended `slideType`, `claimTitle`, `proofObject`, `rhythm`,
-     `layoutIntent` / `macroLayout`, and `visualDensity` against the current
-     source content. If they disagree, update the durable source (`deck_lock` or
-     `content.json`) first; do not let the patch become a hidden second plan.
-5. Run design-lock drift check before dry-run when `deck_lock.json` exists:
-   ```bash
-   node <skill-root>/scripts/pptx-nova-check-lock.mjs \
-     --lock deck_lock.json --content content.json --patch patch.json --json
-   ```
-   Add `--assets assets_manifest.json` when assets exist. For brand-sensitive
-   delivery add `--strict-colors --strict-fonts`.
-6. Run dry-run before any real write:
-   ```bash
-   xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
-   ```
-   Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
-7. Apply only after dry-run is clean and selectors are correct. Any validation
-   that consumes the applied output (`vision-check`, `convert`, `check`,
-   replay/audit) must run after the apply command has completed; do not launch
-   apply-dependent checks in parallel with the write.
-8. Run static geometry validation:
+      or page-level repair.
+    - Data/template: template, data, bindings, and asset paths.
+    - If the source outline only gives a slide title or leaves factual content
+      blank, record any AI-filled facts, competitors, metrics, or examples in
+      `deck_lock.assumptions[]` before writing `content.json`.
+    - If the user-provided outline explicitly fixes slide titles or subtitles,
+      preserve that wording in display `title` / `subtitle`, mark
+      `titleSource: "user"` / `subtitleSource: "user"` in `deck_lock.slides[]`,
+      and do not silently rewrite it into a claim title or house style.
+    - If a slide contains chart/table proof, record the semantic source and
+      validation expectations in `deck_lock.slides[].chart` or `.table`.
+4.  Produce the smallest durable input:
+    - Prefer DeckKit `content.json` for create workflows.
+    - Use patch ops only when the DeckKit path cannot express the work.
+    - Before writing or rebuilding `content.json` / hand-authored patch ops,
+      do a slide-by-slide lock alignment pass: for each slide, compare the
+      intended `slideType`, `claimTitle`, `proofObject`, `rhythm`,
+      `layoutIntent` / `macroLayout`, and `visualDensity` against the current
+      source content. If they disagree, update the durable source (`deck_lock` or
+      `content.json`) first; do not let the patch become a hidden second plan.
+5.  Run design-lock drift check before dry-run when `deck_lock.json` exists:
+    ```bash
+    node <skill-root>/scripts/pptx-nova-check-lock.mjs \
+      --lock deck_lock.json --content content.json --patch patch.json --json
+    ```
+    Add `--assets assets_manifest.json` when assets exist. For brand-sensitive
+    delivery add `--strict-colors --strict-fonts`.
+6.  Run dry-run before any real write:
+    ```bash
+    xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
+    ```
+    Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
+7.  Apply only after dry-run is clean and selectors are correct. Any validation
+    that consumes the applied output (`vision-check`, `convert`, `check`,
+    replay/audit) must run after the apply command has completed; do not launch
+    apply-dependent checks in parallel with the write.
+8.  Run static geometry validation:
 
-   ```bash
-   xdoc pptx vision-check out.pptx --json > <run-dir>/vision.json
-   ```
+    ```bash
+    xdoc pptx vision-check out.pptx --json > <run-dir>/vision.json
+    ```
 
-   For create workflows, `summary.bySeverity.high` and
-   `summary.bySeverity.medium` must both be 0.
-   For Studio Create, Reference Create, structural Edit, and manual Template
-   Following, save a final inspect report after apply and run the bundled
-   high-risk evidence finalizer before preview rendering:
+    For create workflows, `summary.bySeverity.high` and
+    `summary.bySeverity.medium` must both be 0.
+    For Studio Create, Reference Create, structural Edit, and manual Template
+    Following, save a final inspect report after apply and run the bundled
+    high-risk evidence finalizer before preview rendering. If the patch contains
+    native chart/table data ops, run the lightweight semantic audit first so the
+    finalizer can consume semantic-audit.json from the run directory:
 
-   ```bash
-   xdoc pptx inspect out.pptx --daemon --json > <run-dir>/final-inspect.json
-   node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
-     --mode <studio-create|reference-create|structural-edit|template-following> \
-     --run-dir <run-dir> \
-     --final-inspect <run-dir>/final-inspect.json \
-     --vision <run-dir>/vision.json \
-     --json
-   ```
+        node <skill-root>/scripts/pptx-nova-semantic-audit.mjs \
+          --deck-lock deck_lock.json \
+          --patch patch.json \
+          --final-inspect <run-dir>/final-inspect.json \
+          --output <run-dir>/semantic-audit.json \
+          --json
 
-   Template Following also passes
-   `--fidelity-gate <run-dir>/fidelity-gate.json`. Refurbish runner already creates its
-   mode-specific fidelity gate and layout snapshot; a manual refurbish route can
-   call the finalizer with `--mode refurbish --fidelity-gate ...` and does not
-   need a duplicate `vision.json`. The helper writes `layout-final.json` and
-   `evidence-summary.json`. Actionable layout risks remain warnings; inspect
-   fields that are merely undisclosed are counted separately and do not make the
-   finalizer noisy. The helper does not replace PNG review or expand Micro Edit.
+    ```bash
+    xdoc pptx inspect out.pptx --daemon --json > <run-dir>/final-inspect.json
+    node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
+      --mode <studio-create|reference-create|structural-edit|template-following> \
+      --run-dir <run-dir> \
+      --final-inspect <run-dir>/final-inspect.json \
+      --vision <run-dir>/vision.json \
+      --json
+    ```
 
-9. Render visual previews when creating or materially changing a deck:
-   ```bash
-   xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
-   ```
-   Review the contact sheet for cross-slide rhythm, then inspect suspicious
-   slides at full size.
-   For existing-deck refurbishment, run `xdoc pptx contact-diff` when manual
-   side-by-side review is needed; `refurbish-skin` reports the suggested path
-   but skips generation by default. A deck that visually still reads like the
-   source with only light chrome added is not done.
-   For existing-deck refurbishment, the standard runner writes
-   `fidelity-gate.json`, `candidate-inspect.json`, and `layout-final.json`
-   before preview rendering. If running low-level commands manually, run
-   `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
-   `refurbish-audit`, then run `pptx-nova-layout-snapshot.mjs` on final inspect
-   and keep both reports with the run artifacts.
+    Template Following also passes
+    `--fidelity-gate <run-dir>/fidelity-gate.json`. Refurbish runner already creates its
+    mode-specific fidelity gate and layout snapshot; a manual refurbish route can
+    call the finalizer with `--mode refurbish --fidelity-gate ...` and does not
+    need a duplicate `vision.json`. The helper writes `layout-final.json` and
+    `evidence-summary.json`. Actionable layout risks remain warnings; inspect
+    fields that are merely undisclosed are counted separately and do not make the
+    finalizer noisy. The helper does not replace PNG review or expand Micro Edit.
+
+9.  Render visual previews when creating or materially changing a deck:
+    ```bash
+    xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+    ```
+    Review the contact sheet for cross-slide rhythm, then inspect suspicious
+    slides at full size.
+    For existing-deck refurbishment, run `xdoc pptx contact-diff` when manual
+    side-by-side review is needed; `refurbish-skin` reports the suggested path
+    but skips generation by default. A deck that visually still reads like the
+    source with only light chrome added is not done.
+    For existing-deck refurbishment, the standard runner writes
+    `fidelity-gate.json`, `candidate-inspect.json`, and `layout-final.json`
+    before preview rendering. If running low-level commands manually, run
+    `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
+    `refurbish-audit`, then run `pptx-nova-layout-snapshot.mjs` on final inspect
+    and keep both reports with the run artifacts.
 10. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly

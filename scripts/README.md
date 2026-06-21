@@ -38,6 +38,11 @@ Use these entry points from skill workflows:
   final inspect plus their existing vision/fidelity reports. It writes
   `layout-final.json` and `evidence-summary.json`; it intentionally excludes
   Micro Edit and does not replace mode-specific gates or PNG review.
+- pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
+  data-driven, Studio, structural edit, template-following, and refurbish runs
+  that contain native chart/table ops. It validates data shape, source/claim
+  disclosure, and final native chart/table object presence without attempting a
+  full OOXML equivalence audit.
 
 Repository-root `tools/` scripts may wrap or test these files during skill
 development, but published skill users should call scripts from this directory.

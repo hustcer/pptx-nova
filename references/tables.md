@@ -5,6 +5,13 @@ xdoc 的表格支持完整的对象模型：创建、改单元格、改样式、
 
 ## 专项语义验证
 
+在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
+add-table / set-table-data / import-table-data，apply 后保存 final-inspect.json，并运行
+pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
+行列维度、header/source/unit 或时间范围披露，以及最终原生 table 对象存在性；它不是完整
+table XML 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
+可以披露后继续视觉复核。
+
 table 页优先保留 PowerPoint 原生 table 语义；只有 inspect 证明源 deck 是视觉表格时，才按
 普通 shape 编辑。写 table 前先在 `deck_lock.slides[].table` 记录数据来源、表格角色和验证点；
 生成 `patch.json` 后由 `pptx-nova-check-lock.mjs` 检查明显行列错误，再交给 dry-run /

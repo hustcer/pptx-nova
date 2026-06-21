@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 const SCHEMA_VERSION = 'pptx-nova-finalize-evidence/v1'
 const LAYOUT_SCHEMA_VERSION = 'pptx-nova-layout-snapshot/v1'
 const FIDELITY_SCHEMA_VERSION = 'pptx-nova-fidelity-gate/v1'
+const SEMANTIC_AUDIT_SCHEMA_VERSION = 'pptx-nova-semantic-audit/v1'
 const LAYOUT_SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'pptx-nova-layout-snapshot.mjs')
 const DISCLOSURE_ONLY_LAYOUT_CODES = new Set(['font-family-missing', 'font-size-missing'])
 const MODES = {
@@ -27,6 +28,8 @@ Options:
   --final-inspect <path>    Required final xdoc pptx inspect JSON.
   --vision <path>           vision.json. Required except for refurbish.
   --fidelity-gate <path>    Required for template-following and refurbish.
+  --semantic-audit <path>   Optional chart/table semantic-audit.json. If omitted,
+                            run-dir/semantic-audit.json is consumed when present.
   --json                    Print evidence-summary.json to stdout.
   --help                    Show this help.
 
@@ -36,13 +39,22 @@ Micro Edit.
 `
 
 function parseArgs(argv) {
-  const args = { mode: '', runDir: '', finalInspect: '', vision: '', fidelityGate: '', json: false }
+  const args = {
+    mode: '',
+    runDir: '',
+    finalInspect: '',
+    vision: '',
+    fidelityGate: '',
+    semanticAudit: '',
+    json: false,
+  }
   const flags = {
     '--mode': 'mode',
     '--run-dir': 'runDir',
     '--final-inspect': 'finalInspect',
     '--vision': 'vision',
     '--fidelity-gate': 'fidelityGate',
+    '--semantic-audit': 'semanticAudit',
   }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
@@ -67,6 +79,10 @@ function parseArgs(argv) {
   if (!args.runDir) throw new Error(`--run-dir is required\n\n${usage}`)
   if (!existsSync(args.runDir)) throw new Error(`--run-dir does not exist: ${args.runDir}`)
   if (!args.finalInspect) throw new Error(`--final-inspect is required\n\n${usage}`)
+  if (!args.semanticAudit) {
+    const defaultSemanticAudit = join(args.runDir, 'semantic-audit.json')
+    if (existsSync(defaultSemanticAudit)) args.semanticAudit = defaultSemanticAudit
+  }
   return args
 }
 
@@ -81,12 +97,14 @@ function makeReport(args) {
       layoutFinal: join(args.runDir, 'layout-final.json'),
       vision: args.vision || null,
       fidelityGate: args.fidelityGate || null,
+      semanticAudit: args.semanticAudit || null,
     },
     summary: {
       slideCount: null,
       objectCount: null,
       layoutRisks: { total: null, actionable: null, disclosureOnly: null },
       vision: null,
+      semanticAudit: null,
       errors: 0,
       warnings: 0,
     },
@@ -331,6 +349,64 @@ function validateFidelity(args, config, report) {
   )
 }
 
+function validateSemanticAudit(args, report) {
+  if (!args.semanticAudit) {
+    check(report, 'chart-table-semantic-audit', 'not-run', { required: false })
+    return
+  }
+  const audit = readJson(report, args.semanticAudit, 'semantic-audit')
+  if (!audit) return
+  const validStatus = ['pass', 'warn', 'fail'].includes(audit?.status)
+  const counts = {
+    charts: number(audit?.summary?.charts) ?? 0,
+    tables: number(audit?.summary?.tables) ?? 0,
+    errors: number(audit?.summary?.errors) ?? 0,
+    warnings: number(audit?.summary?.warnings) ?? 0,
+  }
+  const failed =
+    audit?.schemaVersion !== SEMANTIC_AUDIT_SCHEMA_VERSION ||
+    !validStatus ||
+    audit.status === 'fail' ||
+    counts.errors > 0
+  if (failed) {
+    issue(
+      report,
+      'error',
+      'semantic-audit-failed',
+      'chart/table semantic audit failed or is incompatible',
+      {
+        schemaVersion: audit?.schemaVersion ?? null,
+        status: audit?.status ?? null,
+        ...counts,
+      },
+    )
+  } else if (audit.status === 'warn' || counts.warnings > 0) {
+    issue(
+      report,
+      'warning',
+      'semantic-audit-warning',
+      'chart/table semantic audit passed with warnings',
+      {
+        schemaVersion: audit?.schemaVersion ?? null,
+        status: audit.status,
+        ...counts,
+      },
+    )
+  }
+  check(
+    report,
+    'chart-table-semantic-audit',
+    failed ? 'failed' : audit.status === 'warn' ? 'warning' : 'passed',
+    {
+      required: false,
+      schemaVersion: audit?.schemaVersion ?? null,
+      auditStatus: audit?.status ?? null,
+      ...counts,
+    },
+  )
+  report.summary.semanticAudit = counts
+}
+
 function finish(args, report) {
   report.summary.errors = report.errors.length
   report.summary.warnings = report.warnings.length
@@ -354,6 +430,7 @@ try {
   if (validateInspect(args, report)) generateLayout(args, report)
   validateVision(args, MODES[args.mode], report)
   validateFidelity(args, MODES[args.mode], report)
+  validateSemanticAudit(args, report)
   finish(args, report)
 } catch (error) {
   process.stderr.write(`${error.message}\n`)

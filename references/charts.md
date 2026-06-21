@@ -20,6 +20,13 @@ chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标
 - PNG/contact-sheet 复核负责判断 legend、axis、data label、callout 是否遮挡；静态语义检查
   不替代视觉复核。
 
+在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
+add-chart / replace-chart-data，apply 后保存 final-inspect.json，并运行
+pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
+数据维度、数值类型、source/claim 披露和最终原生 chart 对象存在性；它不是完整 OOXML
+chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
+可以披露后继续视觉复核。
+
 ## Native diagram/table presets
 
 常见商务图示优先用 recipe preset，而不是手算几十个 `add-shape` 坐标。这些 preset

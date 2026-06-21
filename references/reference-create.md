@@ -239,10 +239,13 @@ xdoc pptx refurbish-skin \
 `manual-fallback` / `explicit-manual-fallback`，不要先试 `refurbish-skin`，直接运行：
 
 ```bash
+xdoc pptx chrome-detect source.pptx --json > chrome-detect.json
+
 node <skill-root>/scripts/pptx-nova-refurbish-fallback-patch.mjs \
   --deckkit <id> \
   --source source.pptx \
   --inspect reference-inspect.json \
+  --chrome-detect chrome-detect.json \
   --output candidate.pptx \
   --patch patch.json \
   --lock deck_lock.json \
@@ -256,7 +259,8 @@ xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --json > apply.js
 
 该脚本优先读取 `refurbishProfile.fallback`；若 DeckKit 没有专用 fallback，则从
 `visualGrammar.colorSystem` / `visualGrammar.typography` 合成通用 palette、字体和对象保留策略。
-这条路线服务所有 DeckKit，不能在脚本里对单个 DeckKit id 做硬编码特判。
+这条路线服务所有 DeckKit，不能在脚本里对单个 DeckKit id 做硬编码特判。`content-audit.json`
+是 apply 前的保留基线和操作计划，最终交付仍必须由 `content-audit-final.json` 证明。
 
 只有需要定制删除策略或排查中间报告时，才先判断 `chrome-remove`
 是否会误删真实内容：feature-test deck、模板验收页、页脚/页码/日期能力演示页、placeholder
@@ -284,7 +288,7 @@ Fallback 的最小可交付动作是硬规则：
 
 - `refurbish-plan.json` 必须说明 route、native skinning、fallback strategy、duplicate chrome policy
   和 `requiredGates[]`；不要边试命令边决定路线。
-- `fallback-patch-report.json` 必须说明 fallback 来源、slide count 和 patch op 数；生成的
+- `fallback-patch-report.json` 必须说明 fallback 来源、chrome-detect 状态、slide count 和 patch op 数；生成的
   `deck_lock.json`、`content-audit.json`、`reference-map.json` 必须与当前候选同步。
 - 必须保存 `chrome-detect.json`。对已有 header/footer/page/rule，逐类选择
   `replace`、`restyle-existing`、`skip-duplicate` 或 `add`，并在报告或 patch 备注中体现；发现重复

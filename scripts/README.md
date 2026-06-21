@@ -17,10 +17,11 @@ Use these entry points from skill workflows:
   refurbishment: readiness exception, native skinning support, fallback strategy,
   duplicate chrome policy, and required gates.
 - `pptx-nova-refurbish-fallback-patch.mjs` - generate generic inspect-driven
-  fallback artifacts (`patch.json`, `deck_lock.json`, `content-audit.json`, and
-  `reference-map.json`) for DeckKits without native skinning. It should use
-  `refurbishProfile.fallback` when present and otherwise derive palette/fonts
-  from `visualGrammar`; do not hardcode a single DeckKit id.
+  fallback artifacts (`patch.json`, `deck_lock.json`, baseline
+  `content-audit.json`, and `reference-map.json`) for DeckKits without native
+  skinning. It should use `refurbishProfile.fallback` when present, otherwise
+  derive palette/fonts from `visualGrammar`, and consume `chrome-detect.json`
+  for existing chrome restyling; do not hardcode a single DeckKit id.
 - `pptx-nova-refurbish-audit.mjs` - legacy supplemental Refurbish Existing Deck audit:
   use native `xdoc pptx refurbish-audit` as the default content-preservation gate;
   keep this script only for checks not yet native, especially OOXML visible text

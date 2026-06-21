@@ -44,8 +44,8 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
   `vision-diff` + native `refurbish-audit` gate。只有在目标 DeckKit 不支持 native skinning、需要跳过/定制 chrome-remove、
   或需要逐页局部 polish 时，才按计划退回 fallback。若 plan 返回 `manual-fallback` 或
   `explicit-manual-fallback`，先运行 `scripts/pptx-nova-refurbish-fallback-patch.mjs` 从
-  `reference-inspect.json` 生成 `patch.json`、`deck_lock.json`、`content-audit.json` 和
-  `reference-map.json`，再 dry-run/apply；不要临场手写大批 selector ops。该通用 fallback
+  `reference-inspect.json` 和 `chrome-detect.json` 生成 `patch.json`、`deck_lock.json`、
+  baseline `content-audit.json` 和 `reference-map.json`，再 dry-run/apply；不要临场手写大批 selector ops。该通用 fallback
   适用于所有 DeckKit：优先使用 `refurbishProfile.fallback`，缺失时从 `visualGrammar`
   合成 palette/字体/对象保留策略；它默认保留源 slide 和可编辑对象，不截图化、不拆页。
   整 text frame 换字体/字号/颜色优先用 `set-text-style` / `set-shape-text-style`，不要为未知段落/run

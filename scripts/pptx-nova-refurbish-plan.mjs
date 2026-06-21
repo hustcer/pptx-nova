@@ -2,6 +2,11 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  genericFallbackFor,
+  isPlainObject,
+  mergeFallbackFor,
+} from './pptx-nova-refurbish-style.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
@@ -69,28 +74,10 @@ function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'))
 }
 
-function isPlainObject(value) {
-  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
-}
-
 function stringArray(value) {
   return (Array.isArray(value) ? value : []).filter(
     (item) => typeof item === 'string' && item.trim(),
   )
-}
-
-function hexFrom(value) {
-  if (typeof value !== 'string') return ''
-  const match = value.match(/#?([0-9A-Fa-f]{6})\b/)
-  return match ? match[1].toUpperCase() : ''
-}
-
-function firstHex(values, fallback) {
-  for (const value of Array.isArray(values) ? values : []) {
-    const hex = hexFrom(value)
-    if (hex) return hex
-  }
-  return fallback
 }
 
 function shell(value) {
@@ -144,7 +131,7 @@ function profileFor(entry, nativeSkinning) {
       }
     : nativeSkinning
   const fallback = isPlainObject(profile.fallback)
-    ? { ...genericFallbackFor(entry), ...profile.fallback, source: 'catalog' }
+    ? mergeFallbackFor(entry, profile.fallback)
     : profileNative.supported
       ? null
       : genericFallbackFor(entry)
@@ -158,68 +145,6 @@ function profileFor(entry, nativeSkinning) {
       : defaultGates(nativeSkinning.supported),
     notes: stringArray(profile.notes),
   }
-}
-
-function genericFallbackFor(entry) {
-  const colors = entry?.visualGrammar?.colorSystem ?? {}
-  const typography = entry?.visualGrammar?.typography ?? {}
-  return {
-    schemaVersion: 'pptx-nova-refurbish-fallback/v1',
-    source: 'generic-visual-grammar',
-    strategy: 'inspect-driven-editable-object-restyle',
-    patchScript: 'scripts/pptx-nova-refurbish-fallback-patch.mjs',
-    palette: {
-      background: firstHex(colors.background, 'F7F3E8'),
-      text: firstHex(colors.primary, '1F1F1F'),
-      accent: firstHex(colors.accent, 'D9B44A'),
-      softAccent: firstHex(colors.accent?.slice?.(1), 'EFE2B7'),
-      secondary: firstHex(colors.secondary, '6B7280'),
-      surface: firstHex(colors.background?.slice?.(1), 'FFFFFF'),
-      rule: firstHex(colors.primary, '1F1F1F'),
-    },
-    fonts: {
-      heading: fontFamilyFrom(typography.display, 'Aptos Display'),
-      body: fontFamilyFrom(typography.body, 'Aptos'),
-      label: fontFamilyFrom(typography.label ?? typography.mono ?? typography.chrome, 'Aptos'),
-      cjk: fontFamilyFrom(typography.cjk, 'Microsoft YaHei'),
-    },
-    styleOps: [
-      'set-theme-color',
-      'set-theme-font',
-      'set-slide-background',
-      'set-text-style',
-      'set-shape-fill',
-      'set-shape-line',
-    ],
-    chromePolicy: 'preserve-and-restyle-existing',
-    contentPolicy: 'preserve-source-slides-and-editable-objects',
-  }
-}
-
-function fontFamilyFrom(value, fallback) {
-  if (typeof value !== 'string') return fallback
-  const beforeFor = value.split(/\s+for\s+/i)[0]?.trim()
-  if (!beforeFor) return fallback
-  const quoted = beforeFor.match(/["“”']([^"“”']+)["“”']/)
-  if (quoted?.[1]) return quoted[1].trim()
-  const lower = beforeFor.toLowerCase()
-  const markers = [
-    ' weight ',
-    ' regular',
-    ' bold',
-    ' sans',
-    ' serif',
-    ' condensed',
-    ' uppercase',
-    ' all-caps',
-    ' display',
-  ]
-  let cut = beforeFor.length
-  for (const marker of markers) {
-    const index = lower.indexOf(marker)
-    if (index > 0) cut = Math.min(cut, index)
-  }
-  return beforeFor.slice(0, cut).replace(/,$/, '').trim() || fallback
 }
 
 function defaultGates(nativeSupported) {
@@ -249,29 +174,33 @@ function buildCommands(args, entry, nativeSkinning, profile) {
     {
       name: 'detect-existing-chrome',
       required: true,
-      command: `xdoc pptx chrome-detect ${shell(args.source)} --json`,
+      command: `xdoc pptx chrome-detect ${shell(args.source)} --json > chrome-detect.json`,
     },
     {
       name: 'generate-fallback-patch',
       required: true,
-      command:
-        `node ${shell(join(SKILL_ROOT, 'scripts/pptx-nova-refurbish-fallback-patch.mjs'))} --deckkit ${shell(entry.id)} --source ${shell(args.source)} --inspect reference-inspect.json --output ${shell(args.output)} --patch patch.json --lock deck_lock.json --audit content-audit.json --map reference-map.json --json` +
-        (styleOps.length ? `; generated patch uses ${styleOps.join(', ')}` : ''),
+      command: `node ${shell(join(SKILL_ROOT, 'scripts/pptx-nova-refurbish-fallback-patch.mjs'))} --deckkit ${shell(entry.id)} --source ${shell(args.source)} --inspect reference-inspect.json --chrome-detect chrome-detect.json --output ${shell(args.output)} --patch patch.json --lock deck_lock.json --audit content-audit.json --map reference-map.json --json > fallback-patch-report.json`,
+      notes: styleOps.length ? [`Generated patch uses ${styleOps.join(', ')}.`] : [],
     },
     {
       name: 'dry-run',
       required: true,
-      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --dry-run --json`,
+      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --dry-run --json > dry-run.json`,
     },
     {
       name: 'apply',
       required: true,
-      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --json`,
+      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --json > apply.json`,
     },
     {
       name: 'vision-diff',
       required: true,
-      command: `xdoc pptx vision-diff --source ${shell(args.source)} --candidate ${shell(args.output)} --json`,
+      command: `xdoc pptx vision-diff --source ${shell(args.source)} --candidate ${shell(args.output)} --json > vision-diff.json`,
+    },
+    {
+      name: 'refurbish-audit',
+      required: true,
+      command: `xdoc pptx refurbish-audit --source ${shell(args.source)} --final ${shell(args.output)} --map reference-map.json --json > content-audit-final.json`,
     },
   ]
 }
@@ -294,16 +223,15 @@ function buildPlan(args) {
       `DeckKit "${entry.id}" readiness is "${readiness}"; pass --explicit only when the user named it`,
     )
   }
-  const usesGenericFallback =
-    !nativeSkinning.supported && profile.fallback?.source === 'generic-visual-grammar'
+  const usesFallback = !nativeSkinning.supported && Boolean(profile.fallback)
 
   const status = blockers.length
     ? 'blocked'
-    : explicitOnly && args.explicit && usesGenericFallback
+    : explicitOnly && args.explicit && usesFallback
       ? 'explicit-manual-fallback'
       : explicitOnly && args.explicit
         ? 'explicit-only'
-        : usesGenericFallback
+        : usesFallback
           ? 'manual-fallback'
           : 'ready'
   const route = nativeSkinning.supported ? 'native-skin-first' : 'fallback-patch'

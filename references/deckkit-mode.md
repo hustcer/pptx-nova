@@ -51,10 +51,10 @@ blocker; do not discover the same failure later by trial-running `xdoc`.
 For DeckKits without native skinning, the plan should return `manual-fallback`
 or `explicit-manual-fallback` instead of blocking when a generic inspect-driven
 fallback can preserve source slides and editable objects. In that route, run
-`scripts/pptx-nova-refurbish-fallback-patch.mjs` after `inspect` to generate
-`patch.json`, `deck_lock.json`, `content-audit.json`, and `reference-map.json`
-from the DeckKit's `refurbishProfile.fallback` or, when absent, from
-`visualGrammar`.
+`scripts/pptx-nova-refurbish-fallback-patch.mjs` after `inspect` and
+`chrome-detect` to generate `patch.json`, `deck_lock.json`, baseline
+`content-audit.json`, and `reference-map.json` from the DeckKit's
+`refurbishProfile.fallback` or, when absent, from `visualGrammar`.
 
 For the selected DeckKit, run readiness:
 

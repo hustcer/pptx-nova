@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { fallbackFor, luminance } from './pptx-nova-refurbish-style.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
@@ -15,6 +16,8 @@ Options:
   --source <path>      Source PPTX path recorded in generated artifacts
   --output <path>      Candidate/final PPTX path recorded in generated artifacts
   --catalog <path>     DeckKit catalog path. Defaults to <skill-root>/assets/deckkits/catalog.json
+  --chrome-detect <path>
+                       Optional xdoc pptx chrome-detect JSON report
   --patch <path>       Output patch JSON. Defaults to patch.json
   --lock <path>        Output deck_lock JSON. Defaults to deck_lock.json
   --audit <path>       Output content-audit JSON. Defaults to content-audit.json
@@ -30,6 +33,7 @@ function parseArgs(argv) {
     source: 'source.pptx',
     output: 'candidate.pptx',
     catalog: CATALOG_PATH,
+    chromeDetect: '',
     patch: 'patch.json',
     lock: 'deck_lock.json',
     audit: 'content-audit.json',
@@ -62,6 +66,7 @@ const flagSet = {
   '--source': 'source',
   '--output': 'output',
   '--catalog': 'catalog',
+  '--chrome-detect': 'chromeDetect',
   '--patch': 'patch',
   '--lock': 'lock',
   '--audit': 'audit',
@@ -78,84 +83,13 @@ function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'))
 }
 
-function isPlainObject(value) {
-  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
-}
-
-function hexFrom(value) {
-  if (typeof value !== 'string') return ''
-  const match = value.match(/#?([0-9A-Fa-f]{6})\b/)
-  return match ? match[1].toUpperCase() : ''
-}
-
-function firstHex(values, fallback) {
-  for (const value of Array.isArray(values) ? values : []) {
-    const hex = hexFrom(value)
-    if (hex) return hex
+function readChromeDetect(path) {
+  if (!path) return null
+  const report = readJson(path)
+  if (report?.schemaVersion !== 'pptx-chrome-detect/v1') {
+    throw new Error(`--chrome-detect must point to a pptx-chrome-detect/v1 report: ${path}`)
   }
-  return fallback
-}
-
-function fontFamilyFrom(value, fallback) {
-  if (typeof value !== 'string') return fallback
-  const beforeFor = value.split(/\s+for\s+/i)[0]?.trim()
-  if (!beforeFor) return fallback
-  const quoted = beforeFor.match(/["“”']([^"“”']+)["“”']/)
-  if (quoted?.[1]) return quoted[1].trim()
-  const lower = beforeFor.toLowerCase()
-  const markers = [
-    ' weight ',
-    ' regular',
-    ' bold',
-    ' sans',
-    ' serif',
-    ' condensed',
-    ' uppercase',
-    ' all-caps',
-    ' display',
-  ]
-  let cut = beforeFor.length
-  for (const marker of markers) {
-    const index = lower.indexOf(marker)
-    if (index > 0) cut = Math.min(cut, index)
-  }
-  return beforeFor.slice(0, cut).replace(/,$/, '').trim() || fallback
-}
-
-function fallbackFor(entry) {
-  const colors = entry?.visualGrammar?.colorSystem ?? {}
-  const typography = entry?.visualGrammar?.typography ?? {}
-  const generic = {
-    schemaVersion: 'pptx-nova-refurbish-fallback/v1',
-    source: 'generic-visual-grammar',
-    strategy: 'inspect-driven-editable-object-restyle',
-    palette: {
-      background: firstHex(colors.background, 'F7F3E8'),
-      text: firstHex(colors.primary, '1F1F1F'),
-      accent: firstHex(colors.accent, 'D9B44A'),
-      softAccent: firstHex(colors.accent?.slice?.(1), 'EFE2B7'),
-      secondary: firstHex(colors.secondary, '6B7280'),
-      surface: firstHex(colors.background?.slice?.(1), 'FFFFFF'),
-      rule: firstHex(colors.primary, '1F1F1F'),
-    },
-    fonts: {
-      heading: fontFamilyFrom(typography.display, 'Aptos Display'),
-      body: fontFamilyFrom(typography.body, 'Aptos'),
-      label: fontFamilyFrom(typography.label ?? typography.mono ?? typography.chrome, 'Aptos'),
-      cjk: fontFamilyFrom(typography.cjk, 'Microsoft YaHei'),
-    },
-    chromePolicy: 'preserve-and-restyle-existing',
-    contentPolicy: 'preserve-source-slides-and-editable-objects',
-  }
-  const profileFallback = entry?.refurbishProfile?.fallback
-  if (!isPlainObject(profileFallback)) return generic
-  return {
-    ...generic,
-    ...profileFallback,
-    source: 'catalog',
-    palette: { ...generic.palette, ...(profileFallback.palette ?? {}) },
-    fonts: { ...generic.fonts, ...(profileFallback.fonts ?? {}) },
-  }
+  return report
 }
 
 function fontForShape(shape, fallback) {
@@ -170,13 +104,6 @@ function fontForShape(shape, fallback) {
   return { name: fallback.fonts.body, color: fallback.palette.text }
 }
 
-function luminance(hex) {
-  const value = hexFrom(hex)
-  if (!value) return 1
-  const [r, g, b] = [0, 2, 4].map((offset) => parseInt(value.slice(offset, offset + 2), 16) / 255)
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
-
 function fillForShape(shape, fallback) {
   const original = shape.fillColor ?? ''
   if (!original) return null
@@ -189,12 +116,142 @@ function fillForShape(shape, fallback) {
   return fallback.palette.softAccent
 }
 
+function chromeKey(slide, shapeId) {
+  return `${Number(slide)}:${String(shapeId ?? '')}`
+}
+
+function chromeShapeId(candidate) {
+  return candidate?.shapeId ?? candidate?.patchSelector?.shape?.id
+}
+
+function summarizeChromeCandidate(candidate) {
+  return {
+    slide: candidate.slide,
+    role: candidate.role,
+    confidence: candidate.confidence,
+    shapeId: chromeShapeId(candidate),
+    shapeName: candidate.shapeName ?? '',
+    patchSelector: candidate.patchSelector ?? {
+      slide: candidate.slide,
+      shape: { id: chromeShapeId(candidate) },
+    },
+  }
+}
+
+function chromeModelFrom(report) {
+  if (!report) {
+    return {
+      status: 'not-provided',
+      summary: null,
+      candidates: [],
+      duplicateRoles: [],
+      byShape: new Map(),
+      warnings: [
+        'No chrome-detect report was provided; existing header/footer/page-number/rule chrome was not classified.',
+      ],
+    }
+  }
+  const highConfidence = (Array.isArray(report.candidates) ? report.candidates : [])
+    .filter((candidate) => Number(candidate.confidence) >= 0.75)
+    .map(summarizeChromeCandidate)
+  const byShape = new Map()
+  const bySlideRole = new Map()
+  for (const candidate of highConfidence) {
+    const key = chromeKey(candidate.slide, candidate.shapeId)
+    const current = byShape.get(key)
+    if (!current || Number(candidate.confidence) > Number(current.confidence))
+      byShape.set(key, candidate)
+
+    const slideRole = `${candidate.slide}:${candidate.role}`
+    const entries = bySlideRole.get(slideRole) ?? []
+    entries.push(candidate)
+    bySlideRole.set(slideRole, entries)
+  }
+  const duplicateRoles = [...bySlideRole.entries()]
+    .filter(([, entries]) => entries.length > 1)
+    .map(([key, entries]) => {
+      const [slide, role] = key.split(':')
+      return {
+        slide: Number(slide),
+        role,
+        count: entries.length,
+        shapeIds: entries.map((entry) => entry.shapeId),
+      }
+    })
+  const warnings = duplicateRoles.map(
+    (item) =>
+      `Slide ${item.slide} has ${item.count} high-confidence ${item.role} chrome candidates; fallback restyles them but does not remove duplicates.`,
+  )
+  return {
+    status: 'loaded',
+    summary: report.summary ?? null,
+    candidates: highConfidence,
+    duplicateRoles,
+    byShape,
+    warnings,
+  }
+}
+
+function chromeCandidateForShape(model, slideIndex, shape) {
+  return model.byShape.get(chromeKey(slideIndex, shape.id))
+}
+
+function chromeCandidatesForSlide(model, slideIndex) {
+  return model.candidates.filter((candidate) => Number(candidate.slide) === Number(slideIndex))
+}
+
+function duplicateChromeForSlide(model, slideIndex) {
+  return model.duplicateRoles.filter((item) => Number(item.slide) === Number(slideIndex))
+}
+
+function chromeOutput(model) {
+  return {
+    status: model.status,
+    summary: model.summary,
+    highConfidenceCount: model.candidates.length,
+    duplicateRoles: model.duplicateRoles,
+    warnings: model.warnings,
+  }
+}
+
+function chromeFontFor(role, fallback) {
+  return {
+    name: fallback.fonts.label,
+    color: role === 'header' ? fallback.palette.text : fallback.palette.secondary,
+    bold: role === 'header' || role === 'page-number',
+  }
+}
+
+function appendChromeRestyleOps(ops, slideIndex, shape, candidate, fallback) {
+  const selector = candidate.patchSelector?.shape ?? { id: shape.id }
+  if (shape.hasText || (shape.textPreview ?? '').trim()) {
+    ops.push({
+      op: 'set-text-style',
+      slide: slideIndex,
+      shape: selector,
+      font: chromeFontFor(candidate.role, fallback),
+    })
+  }
+  if (candidate.role === 'rule') {
+    ops.push({
+      op: 'set-shape-line',
+      slide: slideIndex,
+      shape: selector,
+      width: '0.5pt',
+      color: fallback.palette.rule,
+    })
+  }
+}
+
 function buildArtifacts(args) {
   const catalog = readJson(args.catalog)
   const entry = catalog.entries.find((candidate) => candidate.id === args.deckkit)
   if (!entry) throw new Error(`DeckKit "${args.deckkit}" is missing from catalog`)
   const inspect = readJson(args.inspect)
+  const chromeDetect = readChromeDetect(args.chromeDetect)
+  const chrome = chromeModelFrom(chromeDetect)
   const fallback = fallbackFor(entry)
+  const warnings = [...(fallback.derivationWarnings ?? []), ...chrome.warnings]
   const ops = []
   const palette = fallback.palette
 
@@ -276,9 +333,20 @@ function buildArtifacts(args) {
         status:
           Array.isArray(slide.preserveOnly) && slide.preserveOnly.length ? 'blocked' : 'preserved',
       },
+      chrome: {
+        status: chrome.status === 'loaded' ? 'classified-and-restyled' : 'not-classified',
+        policy: fallback.chromePolicy,
+        candidates: chromeCandidatesForSlide(chrome, slideIndex),
+        duplicateRoles: duplicateChromeForSlide(chrome, slideIndex),
+      },
     })
     for (const shape of slide.shapes ?? []) {
       const selector = { id: shape.id }
+      const chromeCandidate = chromeCandidateForShape(chrome, slideIndex, shape)
+      if (chromeCandidate) {
+        appendChromeRestyleOps(ops, slideIndex, shape, chromeCandidate, fallback)
+        continue
+      }
       if (shape.hasText && (shape.textPreview ?? '').trim()) {
         ops.push({
           op: 'set-text-style',
@@ -316,8 +384,10 @@ function buildArtifacts(args) {
       deckkit: entry.id,
       strategy: fallback.strategy,
       fallbackSource: fallback.source,
+      chromeDetection: chromeOutput(chrome),
       source: args.source,
       output: args.output,
+      warnings,
       notes: [
         'Generated by pptx-nova-refurbish-fallback-patch.mjs.',
         'This fallback preserves source slides and editable objects; it does not rasterize source slides.',
@@ -337,13 +407,18 @@ function buildArtifacts(args) {
       fallbackSource: fallback.source,
       fallbackStrategy: fallback.strategy,
     },
+    chromeDetection: chromeOutput(chrome),
     visualTarget: {
       palette,
       typography: fallback.fonts,
       chromePolicy: fallback.chromePolicy,
       contentPolicy: fallback.contentPolicy,
     },
-    assumptions: ['No factual content is added or rewritten by the fallback patch generator.'],
+    assumptions: [
+      'No factual content is added or rewritten by the fallback patch generator.',
+      'content-audit.json is a pre-apply preservation baseline; content-audit-final.json from xdoc pptx refurbish-audit remains required before delivery.',
+      ...warnings.map((warning) => `Fallback warning: ${warning}`),
+    ],
     slides: slides.map((slide) => ({
       index: slide.index,
       sourceSlide: slide.index,
@@ -354,11 +429,15 @@ function buildArtifacts(args) {
   }
   const audit = {
     schemaVersion: 'pptx-nova-content-audit/v1',
+    phase: 'pre-apply-baseline',
+    finalAuditRequired: true,
     source: args.source,
     final: args.output,
     strategy: fallback.strategy,
     deckkit: entry.id,
     fallbackSource: fallback.source,
+    chromeDetection: chromeOutput(chrome),
+    warnings,
     slides: auditSlides,
   }
   const referenceMap = {
@@ -373,7 +452,14 @@ function buildArtifacts(args) {
     deckLock,
     audit,
     referenceMap,
-    summary: { deckkit: entry.id, fallback, slideCount: slides.length, ops: ops.length },
+    summary: {
+      deckkit: entry.id,
+      fallback,
+      chromeDetection: chromeOutput(chrome),
+      warnings,
+      slideCount: slides.length,
+      ops: ops.length,
+    },
   }
 }
 

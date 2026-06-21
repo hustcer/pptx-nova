@@ -73,6 +73,10 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
    - Edit: `xdoc pptx inspect <input.pptx> --json`.
    - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
      `reference-map.json`, and the `xdoc pptx refurbish-skin` JSON report.
+     Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
+     artifacts, phase failures, previews, and final publication use one run-dir
+     contract. Use the lower-level commands directly only for diagnosis or
+     selective page repair.
      Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
 text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
      or page-level repair.

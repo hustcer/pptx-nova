@@ -187,6 +187,20 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
 
 必做步骤：
 
+标准路线优先使用一键 runner；它会把下述 plan、inspect、native/fallback、dry-run/apply、
+vision-diff、refurbish-audit 和 preview 阶段写入同一个 run 目录：
+
+```bash
+node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
+  --deckkit <id> \
+  --source source.pptx \
+  --output candidate.pptx \
+  --json
+```
+
+机器门禁通过后 runner 返回 `status: "needs-human-review"`，而不是伪造视觉复核通过。
+下面的分步命令仍是 runner 的行为合同，也是局部修复和故障排查入口。
+
 1. 先生成 `refurbish-plan.json`，再执行任何 `xdoc` 换肤命令：
 
 ```bash

@@ -34,7 +34,23 @@ text,shapes,tables,charts -> chrome-apply` chain only when the deck needs a
 custom chrome-removal policy, a native skinning DeckKit is unavailable, or a
 page-level repair requires inspecting intermediate reports.
 
-Before running any refurbish command, generate an executable route plan:
+For the standard existing-deck workflow, run the bundled orchestrator:
+
+```bash
+node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
+  --deckkit <id> \
+  --source source.pptx \
+  --output candidate.pptx \
+  --json
+```
+
+It creates a new run directory, saves the plan and inspect evidence, executes the
+native or fallback route, fails closed on machine gates, renders PNG/contact-sheet
+artifacts, and publishes the requested output only after those gates pass. Exit 0
+means the machine pipeline completed; `status: "needs-human-review"` remains until
+the contact sheet and suspicious full-size PNG files are reviewed.
+
+To inspect the route without executing it, generate the plan directly:
 
 ```bash
 node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
@@ -55,6 +71,11 @@ fallback can preserve source slides and editable objects. In that route, run
 `chrome-detect` to generate `patch.json`, `deck_lock.json`, baseline
 `content-audit.json`, and `reference-map.json` from the DeckKit's
 `refurbishProfile.fallback` or, when absent, from `visualGrammar`.
+
+The runner uses the same structured plan API; it does not execute the human-readable
+shell strings in `commands[]`. In `--route auto`, only native
+`UnsupportedComplexity` triggers a recorded switch to the catalog-driven fallback.
+Other native failures stop the run, and the runner never switches DeckKit silently.
 
 For the selected DeckKit, run readiness:
 

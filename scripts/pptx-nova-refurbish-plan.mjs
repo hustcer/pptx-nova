@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   genericFallbackFor,
   isPlainObject,
@@ -205,7 +205,7 @@ function buildCommands(args, entry, nativeSkinning, profile) {
   ]
 }
 
-function buildPlan(args) {
+export function buildRefurbishPlan(args) {
   const catalog = readJson(args.catalog)
   const entry = catalog.entries.find((candidate) => candidate.id === args.deckkit)
   const blockers = []
@@ -268,6 +268,7 @@ function planResult(args, entry, blockers) {
       found: Boolean(entry),
       id: entry?.id ?? '',
       path: entry?.path ?? '',
+      benchmarkPassed: entry?.quality?.benchmark?.passed ?? null,
     },
     blockers,
     status: blockers.length ? 'blocked' : 'ready',
@@ -295,13 +296,18 @@ function printHuman(result) {
   }
 }
 
-try {
-  const args = parseArgs(process.argv.slice(2))
-  const result = buildPlan(args)
-  if (args.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
-  else printHuman(result)
-  if (result.status === 'blocked') process.exit(1)
-} catch (error) {
-  process.stderr.write(`[error] ${error.message}\n`)
-  process.exit(1)
+function main() {
+  try {
+    const args = parseArgs(process.argv.slice(2))
+    const result = buildRefurbishPlan(args)
+    if (args.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
+    else printHuman(result)
+    if (result.status === 'blocked') process.exit(1)
+  } catch (error) {
+    process.stderr.write(`[error] ${error.message}\n`)
+    process.exit(1)
+  }
 }
+
+const invokedPath = process.argv[1] ? pathToFileURL(resolve(process.argv[1])).href : ''
+if (import.meta.url === invokedPath) main()

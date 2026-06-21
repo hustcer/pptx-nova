@@ -36,10 +36,13 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
-- **翻新已有 deck 且保持内容**：先运行
-  `node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs --deckkit <id> --source source.pptx --output out.pptx --json`
-  生成路线计划；用户显式指定非 production/default DeckKit 时加 `--explicit`，并按计划中的
-  `requiredGates[]` 执行。默认优先运行 `xdoc pptx refurbish-skin --source source.pptx --deckkit <id> --output out.pptx --json`；
+- **翻新已有 deck 且保持内容**：默认运行
+  `node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source source.pptx --output out.pptx --json`
+  一次执行 plan、inspect、native/fallback 路线、机器门禁和 PNG/contact sheet 生成；用户显式指定非
+  production/default DeckKit 时加 `--explicit`。runner 只在机器门禁通过后发布最终输出，成功状态仍是
+  `needs-human-review`，必须打开 contact sheet/逐页 PNG 复核后才能交付。只想预检路线或调试低层命令时，
+  再单独运行 `pptx-nova-refurbish-plan.mjs`。runner 默认优先运行
+  `xdoc pptx refurbish-skin --source source.pptx --deckkit <id> --output out.pptx --json`；
   该命令会复制保留源 deck，替换旧 chrome/background，应用目标 DeckKit chrome，remap text/shapes/tables/charts，并运行
   `vision-diff` + native `refurbish-audit` gate。只有在目标 DeckKit 不支持 native skinning、需要跳过/定制 chrome-remove、
   或需要逐页局部 polish 时，才按计划退回 fallback。若 plan 返回 `manual-fallback` 或

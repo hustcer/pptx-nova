@@ -4,7 +4,7 @@
   "deckkit": "swiss-grid",
   "caseId": "swiss-grid.golden-lecture",
   "kind": "golden",
-  "generatedAt": "2026-06-12T03:22:51.771Z",
+  "generatedAt": "2026-06-21T01:34:59.840Z",
   "review": {
     "status": "accepted",
     "source": "--update-baseline",

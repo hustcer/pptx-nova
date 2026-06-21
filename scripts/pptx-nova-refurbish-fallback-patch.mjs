@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { fallbackFor, luminance } from './pptx-nova-refurbish-style.mjs'
+import { fallbackFor, hexFrom, luminance } from './pptx-nova-refurbish-style.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
@@ -92,16 +92,87 @@ function readChromeDetect(path) {
   return report
 }
 
-function fontForShape(shape, fallback) {
+function srgbChannel(value) {
+  const channel = value / 255
+  return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+}
+
+function relativeLuminance(hex) {
+  const value = hexFrom(hex)
+  if (!value) return 1
+  const r = srgbChannel(parseInt(value.slice(0, 2), 16))
+  const g = srgbChannel(parseInt(value.slice(2, 4), 16))
+  const b = srgbChannel(parseInt(value.slice(4, 6), 16))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+function contrastRatio(foreground, background) {
+  const fg = relativeLuminance(foreground)
+  const bg = relativeLuminance(background)
+  const light = Math.max(fg, bg)
+  const dark = Math.min(fg, bg)
+  return (light + 0.05) / (dark + 0.05)
+}
+
+function uniqueColors(values) {
+  const seen = new Set()
+  return values
+    .map(hexFrom)
+    .filter(Boolean)
+    .filter((value) => {
+      if (seen.has(value)) return false
+      seen.add(value)
+      return true
+    })
+}
+
+function contrastSafeColor(preferred, background, fallback) {
+  const bg = hexFrom(background) || fallback.palette.background
+  for (const color of uniqueColors([
+    preferred,
+    fallback.palette.text,
+    fallback.palette.accent,
+    fallback.palette.secondary,
+    '7A241A',
+    '374151',
+    fallback.palette.background,
+    fallback.palette.surface,
+    '111111',
+    'FFFFFF',
+  ])) {
+    if (contrastRatio(color, bg) >= 4.5) return color
+  }
+  return relativeLuminance(bg) < 0.45 ? 'FFFFFF' : '111111'
+}
+
+function fontForShape(shape, fallback, backgroundColor) {
   const name = shape.name ?? ''
   const text = (shape.textPreview ?? '').trim()
   const isTitle = /(^|_)Title$|_Title|title/i.test(name)
   const isLabel = /Eyebrow|Kicker|Foot|PageNum|Label|Badge/i.test(name)
   const isMetric = /Val|Num|Score|Pct|Metric/i.test(name) || /^[0-9.→+\-%年]+$/.test(text)
-  if (isTitle) return { name: fallback.fonts.heading, color: fallback.palette.text, bold: true }
-  if (isMetric) return { name: fallback.fonts.heading, color: fallback.palette.text, bold: true }
-  if (isLabel) return { name: fallback.fonts.label, color: fallback.palette.secondary, bold: true }
-  return { name: fallback.fonts.body, color: fallback.palette.text }
+  if (isTitle)
+    return {
+      name: fallback.fonts.heading,
+      color: contrastSafeColor(fallback.palette.text, backgroundColor, fallback),
+      bold: true,
+    }
+  if (isMetric)
+    return {
+      name: fallback.fonts.heading,
+      color: contrastSafeColor(fallback.palette.text, backgroundColor, fallback),
+      bold: true,
+    }
+  if (isLabel)
+    return {
+      name: fallback.fonts.label,
+      color: contrastSafeColor(fallback.palette.secondary, backgroundColor, fallback),
+      bold: true,
+    }
+  return {
+    name: fallback.fonts.body,
+    color: contrastSafeColor(fallback.palette.text, backgroundColor, fallback),
+  }
 }
 
 function fillForShape(shape, fallback) {
@@ -114,6 +185,88 @@ function fillForShape(shape, fallback) {
   if (lum > 0.86) return fallback.palette.surface
   if (lum > 0.65) return fallback.palette.softAccent
   return fallback.palette.softAccent
+}
+
+function slideTextShapes(slide) {
+  return (Array.isArray(slide.shapes) ? slide.shapes : []).filter((shape) =>
+    (shape.textPreview ?? '').trim(),
+  )
+}
+
+function slideTitle(slide) {
+  const textShapes = slideTextShapes(slide)
+  const titleShape =
+    textShapes.find((shape) => /(^|_)Title$|_Title|title/i.test(shape.name ?? '')) ??
+    textShapes.find((shape) => Number(shape.fontSizePt ?? shape.fontSize ?? 0) >= 18) ??
+    textShapes[0]
+  return (titleShape?.textPreview ?? `Source slide ${Number(slide.index) + 1}`).trim()
+}
+
+function refurbishRhythmFor(index, count) {
+  if (index === 0 || index === count - 1) return 'anchor'
+  return index % 2 === 0 ? 'breathing' : 'dense'
+}
+
+function densityForSlide(slide) {
+  const stats = slide.semantic?.elementStats ?? {}
+  const total = Number(stats.total ?? (Array.isArray(slide.shapes) ? slide.shapes.length : 0))
+  const text = Number(stats.text ?? slideTextShapes(slide).length)
+  if (total >= 36 || text >= 20) return 'high'
+  if (total >= 18 || text >= 10) return 'medium'
+  return 'low'
+}
+
+function emu(value) {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+
+function bboxOf(shape) {
+  const bbox = shape?.bbox
+  if (!bbox) return null
+  const x = emu(bbox.xEmu)
+  const y = emu(bbox.yEmu)
+  const w = emu(bbox.wEmu)
+  const h = emu(bbox.hEmu)
+  if (w <= 0 || h <= 0) return null
+  return { x, y, w, h, cx: x + w / 2, cy: y + h / 2, area: w * h }
+}
+
+function containsPoint(box, x, y) {
+  return x >= box.x && x <= box.x + box.w && y >= box.y && y <= box.y + box.h
+}
+
+function overlapRatio(inner, outer) {
+  const left = Math.max(inner.x, outer.x)
+  const top = Math.max(inner.y, outer.y)
+  const right = Math.min(inner.x + inner.w, outer.x + outer.w)
+  const bottom = Math.min(inner.y + inner.h, outer.y + outer.h)
+  if (right <= left || bottom <= top) return 0
+  return ((right - left) * (bottom - top)) / inner.area
+}
+
+function textBackgroundForShape(shape, slideShapes, targetFills, fallback) {
+  const ownFill = targetFills.get(shape.id)
+  if (ownFill) return ownFill
+
+  const box = bboxOf(shape)
+  if (!box) return fallback.palette.background
+
+  let best = null
+  for (const candidate of slideShapes) {
+    if (candidate === shape || candidate.shapeType !== 'autoShape') continue
+    const fill = targetFills.get(candidate.id)
+    if (!fill) continue
+    const candidateBox = bboxOf(candidate)
+    if (!candidateBox) continue
+    const containsCenter = containsPoint(candidateBox, box.cx, box.cy)
+    const overlap = overlapRatio(box, candidateBox)
+    if (!containsCenter && overlap < 0.6) continue
+    const score = (containsCenter ? 2 : 0) + overlap - candidateBox.area / 1e16
+    if (!best || score > best.score) best = { score, fill }
+  }
+
+  return best?.fill ?? fallback.palette.background
 }
 
 function chromeKey(slide, shapeId) {
@@ -214,22 +367,23 @@ function chromeOutput(model) {
   }
 }
 
-function chromeFontFor(role, fallback) {
+function chromeFontFor(role, fallback, backgroundColor) {
+  const preferred = role === 'header' ? fallback.palette.text : fallback.palette.secondary
   return {
     name: fallback.fonts.label,
-    color: role === 'header' ? fallback.palette.text : fallback.palette.secondary,
+    color: contrastSafeColor(preferred, backgroundColor, fallback),
     bold: role === 'header' || role === 'page-number',
   }
 }
 
-function appendChromeRestyleOps(ops, slideIndex, shape, candidate, fallback) {
+function appendChromeRestyleOps(ops, slideIndex, shape, candidate, fallback, backgroundColor) {
   const selector = candidate.patchSelector?.shape ?? { id: shape.id }
   if (shape.hasText || (shape.textPreview ?? '').trim()) {
     ops.push({
       op: 'set-text-style',
       slide: slideIndex,
       shape: selector,
-      font: chromeFontFor(candidate.role, fallback),
+      font: chromeFontFor(candidate.role, fallback, backgroundColor),
     })
   }
   if (candidate.role === 'rule') {
@@ -296,6 +450,16 @@ function buildArtifacts(args) {
   })
 
   const slides = Array.isArray(inspect.slides) ? inspect.slides : []
+  const canvas = {
+    width: inspect.presentation?.size?.width ?? inspect.presentation?.slideSize?.width ?? '16:9',
+    height: inspect.presentation?.size?.height ?? inspect.presentation?.slideSize?.height ?? '16:9',
+    source: 'reference-inspect',
+  }
+  const outline = slides.map((slide) => ({
+    slide: slide.index,
+    title: slideTitle(slide),
+    purpose: `Preserve and restyle source slide ${Number(slide.index) + 1}.`,
+  }))
   const auditSlides = []
   const mapSlides = []
   for (const slide of slides) {
@@ -340,11 +504,20 @@ function buildArtifacts(args) {
         duplicateRoles: duplicateChromeForSlide(chrome, slideIndex),
       },
     })
-    for (const shape of slide.shapes ?? []) {
+    const slideShapes = Array.isArray(slide.shapes) ? slide.shapes : []
+    const targetFills = new Map(
+      slideShapes
+        .filter((candidate) => candidate.shapeType === 'autoShape' && candidate.fillColor)
+        .map((candidate) => [candidate.id, fillForShape(candidate, fallback)])
+        .filter(([, fill]) => fill),
+    )
+    for (const shape of slideShapes) {
       const selector = { id: shape.id }
+      const targetFill = targetFills.get(shape.id) ?? null
+      const textBackground = textBackgroundForShape(shape, slideShapes, targetFills, fallback)
       const chromeCandidate = chromeCandidateForShape(chrome, slideIndex, shape)
       if (chromeCandidate) {
-        appendChromeRestyleOps(ops, slideIndex, shape, chromeCandidate, fallback)
+        appendChromeRestyleOps(ops, slideIndex, shape, chromeCandidate, fallback, textBackground)
         continue
       }
       if (shape.hasText && (shape.textPreview ?? '').trim()) {
@@ -352,11 +525,11 @@ function buildArtifacts(args) {
           op: 'set-text-style',
           slide: slideIndex,
           shape: selector,
-          font: fontForShape(shape, fallback),
+          font: fontForShape(shape, fallback, textBackground),
         })
       }
       if (shape.shapeType === 'autoShape' && shape.fillColor) {
-        const color = fillForShape(shape, fallback)
+        const color = targetFill
         if (color) {
           ops.push({
             op: 'set-shape-fill',
@@ -398,9 +571,27 @@ function buildArtifacts(args) {
   const deckLock = {
     schemaVersion: 'pptx-nova-deck-lock/v1',
     mode: 'Refurbish Existing Deck',
+    outline,
+    canvas,
     source: args.source,
     output: args.output,
     deckkit: entry.id,
+    colors: {
+      background: palette.background,
+      text: palette.text,
+      accent: palette.accent,
+      softAccent: palette.softAccent,
+      secondary: palette.secondary,
+      surface: palette.surface,
+      rule: palette.rule,
+    },
+    typography: {
+      title: `${fallback.fonts.heading}, Arial`,
+      heading: `${fallback.fonts.heading}, Arial`,
+      body: `${fallback.fonts.body}, Times New Roman`,
+      label: `${fallback.fonts.label}, Arial`,
+      cjk: fallback.fonts.cjk,
+    },
     readiness: {
       readiness: entry.readiness ?? '',
       nativeSkinning: Boolean(entry.nativeSkinning),
@@ -419,10 +610,15 @@ function buildArtifacts(args) {
       'content-audit.json is a pre-apply preservation baseline; content-audit-final.json from xdoc pptx refurbish-audit remains required before delivery.',
       ...warnings.map((warning) => `Fallback warning: ${warning}`),
     ],
-    slides: slides.map((slide) => ({
+    slides: slides.map((slide, index) => ({
       index: slide.index,
       sourceSlide: slide.index,
       outputSlide: slide.index,
+      slideType: 'preserve-restyle',
+      title: slideTitle(slide),
+      purpose: `Preserve source slide ${Number(slide.index) + 1} content while applying the ${entry.id} visual system.`,
+      rhythm: refurbishRhythmFor(index, slides.length),
+      visualDensity: densityForSlide(slide),
       layoutIntent: 'preserve source layout and restyle editable objects',
       contentStatus: 'preserved',
     })),

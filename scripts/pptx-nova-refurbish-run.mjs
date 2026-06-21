@@ -21,6 +21,7 @@ const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const READINESS_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-deckkit-readiness.mjs')
 const FALLBACK_PATCH_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-refurbish-fallback-patch.mjs')
 const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
+const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source <source.pptx> --output <output.pptx> [options]
@@ -393,6 +394,7 @@ function validatePaths(args) {
 
 function artifactPaths(runDir) {
   return {
+    capabilities: join(runDir, 'xdoc-capabilities.json'),
     plan: join(runDir, 'refurbish-plan.json'),
     readiness: join(runDir, 'readiness.json'),
     inspect: join(runDir, 'reference-inspect.json'),
@@ -881,6 +883,32 @@ function runRefurbish(inputArgs) {
   const summary = initialSummary(args, artifacts)
 
   try {
+    const capabilityReport = runJsonPhase(summary, {
+      name: 'xdoc-capability-probe',
+      bin: process.execPath,
+      args: [
+        CAPABILITY_PROBE_SCRIPT,
+        '--xdoc-bin',
+        args.xdocBin,
+        '--require-command',
+        'pptx.refurbish-skin',
+        '--require-native-deckkit',
+        args.deckkit,
+        '--json',
+      ],
+      artifact: artifacts.capabilities,
+    })
+    if (capabilityReport.status !== 'ready') {
+      summary.warnings.push(
+        'xdoc capability schema is degraded; the runner will continue with its existing plan, command errors, and fallback gates instead of assuming missing capabilities are unsupported.',
+      )
+    }
+    if (capabilityReport.requirements?.status === 'attention') {
+      summary.warnings.push(
+        'One or more refurbish capabilities are undisclosed by the runtime schema. This is audit evidence only and does not disable native or fallback execution.',
+      )
+    }
+
     const plan = buildRefurbishPlan({
       deckkit: args.deckkit,
       source: args.source,

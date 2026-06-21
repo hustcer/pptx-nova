@@ -29,6 +29,21 @@ python-pptx、PptxGenJS 或 SVG 转 PPTX 路线。
 如果一个任务跨多个类型，读取每个相关类型的入口 reference。遇到 charts、tables、
 formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专项 reference。
 
+## xdoc 渐进式能力发现
+
+每个 run 创建后先运行一次 `<skill-root>/scripts/pptx-nova-probe.mjs`，将结果保存为
+`xdoc-capabilities.json`。版本号只用于审计，命令路由以运行时 schema 和实际 dry-run
+证据为准。能力快照是名称索引，不是 allowlist；未出现的能力表示 `undisclosed`，不能直接
+判定为 `unsupported`。
+
+不确定时按需深入：先查 `xdoc-capabilities.json` 中的 op 索引；快照缺失或需要刷新时才用
+`xdoc schema --index`。再用 `xdoc schema --op <name> --minimal` 查字段和 enum；
+theme/style/native DeckKit 从快照对应 catalog 索引读取；selector 依次依据 inspect、目标
+op schema 和 dry-run suggestions。`xdoc <command...> --help` 仅作补充，不要假设
+`--help --json` 输出 JSON。
+只有调用方显式要求 strict gate 且任务必需能力仍未披露时才阻塞；否则继续探索或走已有
+fallback，不得因快照精简而禁用 xdoc 新能力。
+
 ## 快速路径
 
 先用下面的最短路径定向，再进入任务路由表读取细节。不要把它当成替代流程；它只是防止
@@ -326,7 +341,9 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - 最终输出 PPTX 或导出文件的绝对路径
 - run 目录
 - 关键中间产物：`outline.json`、`deck_lock.json`、`content.json`、`patch.json`、sidecar、
-  `vision.json`、预览目录、contact sheet、`check.json` 等实际存在项
+  `xdoc-capabilities.json`、`vision.json`、预览目录、contact sheet、`check.json` 等实际存在项
+- xdoc 审计信息：版本、CLI schema 版本、任务必需能力是否 fully disclosed、是否使用
+  degraded discovery 或 fallback；不要把 undisclosed 写成 unsupported
 - 验证结果：dry-run、apply、vision-check、PNG/contact-sheet 复核、可选 preflight
 - 正式说服型 deck 的叙事质量结果：`deckProfile`、最低评分、最弱页、已接受 tradeoff
 - AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全

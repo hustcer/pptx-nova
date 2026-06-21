@@ -60,12 +60,53 @@ the run directory unless the user explicitly requested a final output path.
 Do not use `--overwrite` on user-owned export paths unless the user asked to
 replace them or they are current-run intermediate outputs.
 
+## Runtime Capability Discovery
+
+After creating the run directory, capture one runtime capability index:
+
+```bash
+node <skill-root>/scripts/pptx-nova-probe.mjs \
+  --output <run-dir>/xdoc-capabilities.json
+```
+
+The snapshot records the xdoc version, CLI/capability schema versions, top-level
+commands, PPTX subcommands, patch/recipe op names, enum registry names,
+theme/style ids, and native DeckKit declarations. It intentionally omits full op
+schemas; fetch those only when needed with `xdoc schema --op <name> --minimal`.
+Consult this snapshot before running `xdoc schema --index`; refresh the index only
+when the snapshot is missing, stale, or does not disclose a capability you need.
+
+Treat the snapshot as runtime discovery evidence, not an allowlist. A capability
+missing from the schema index is `undisclosed`, not proven `unsupported`. Continue
+with targeted command help, dry-run, or a documented fallback unless the current
+task explicitly requires a strict gate. Version strings are audit metadata and
+must not be used to infer feature support.
+
+For a task-specific check, add repeatable requirements such as:
+
+```bash
+node <skill-root>/scripts/pptx-nova-probe.mjs \
+  --require-command pptx.apply \
+  --require-op set-text \
+  --require-theme corporate-blue \
+  --json
+```
+
+By default undisclosed requirements produce `status: attention` and exit 0 so
+new or partially disclosed xdoc features remain explorable. Use `--strict` only
+when the caller has already decided that an undisclosed requirement must block
+this workflow. Do not assume `xdoc --help --json` is structured JSON; use
+`xdoc schema` for machine-readable discovery and plain `--help` only as a
+human-readable fallback.
+
 ## Shared Pipeline
 
 Use this order unless a mode-specific file explicitly narrows the workflow:
 
 1. Initialize run directory and check output collision rules.
-2. Gather mode-specific context:
+2. Generate `<run-dir>/xdoc-capabilities.json`. Review warnings and task-specific
+   undisclosed requirements, but do not turn the snapshot into an allowlist.
+3. Gather mode-specific context:
    - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
    - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
      per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
@@ -90,7 +131,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
      and do not silently rewrite it into a claim title or house style.
    - If a slide contains chart/table proof, record the semantic source and
      validation expectations in `deck_lock.slides[].chart` or `.table`.
-3. Produce the smallest durable input:
+4. Produce the smallest durable input:
    - Prefer DeckKit `content.json` for create workflows.
    - Use patch ops only when the DeckKit path cannot express the work.
    - Before writing or rebuilding `content.json` / hand-authored patch ops,
@@ -99,29 +140,29 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
      `layoutIntent` / `macroLayout`, and `visualDensity` against the current
      source content. If they disagree, update the durable source (`deck_lock` or
      `content.json`) first; do not let the patch become a hidden second plan.
-4. Run design-lock drift check before dry-run when `deck_lock.json` exists:
+5. Run design-lock drift check before dry-run when `deck_lock.json` exists:
    ```bash
    node <skill-root>/scripts/pptx-nova-check-lock.mjs \
      --lock deck_lock.json --content content.json --patch patch.json --json
    ```
    Add `--assets assets_manifest.json` when assets exist. For brand-sensitive
    delivery add `--strict-colors --strict-fonts`.
-5. Run dry-run before any real write:
+6. Run dry-run before any real write:
    ```bash
    xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
    ```
    Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
-6. Apply only after dry-run is clean and selectors are correct. Any validation
+7. Apply only after dry-run is clean and selectors are correct. Any validation
    that consumes the applied output (`vision-check`, `convert`, `check`,
    replay/audit) must run after the apply command has completed; do not launch
    apply-dependent checks in parallel with the write.
-7. Run static geometry validation:
+8. Run static geometry validation:
    ```bash
    xdoc pptx vision-check out.pptx --json
    ```
    For create workflows, `summary.bySeverity.high` and
    `summary.bySeverity.medium` must both be 0.
-8. Render visual previews when creating or materially changing a deck:
+9. Render visual previews when creating or materially changing a deck:
    ```bash
    xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
    ```
@@ -131,19 +172,20 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
    side-by-side review is needed; `refurbish-skin` reports the suggested path
    but skips generation by default. A deck that visually still reads like the
    source with only light chrome added is not done.
-9. For formal create workflows covered by `narrative-quality.md`, write
-   `narrative_quality_review.json` after the PNG review. If any score is below
-   4, fix the weakest 1-3 slides before delivery unless the user explicitly
-   accepts a draft.
-10. For external/customer/public delivery, run:
+10. For formal create workflows covered by `narrative-quality.md`, write
+    `narrative_quality_review.json` after the PNG review. If any score is below
+    4, fix the weakest 1-3 slides before delivery unless the user explicitly
+    accepts a draft.
+11. For external/customer/public delivery, run:
 
 ```bash
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 
-11. Copy or write the validated final deck to the requested final path.
-12. Summarize final output path, run directory, important intermediate files,
-    validation results, preview/contact sheet path, and remaining risks.
+12. Copy or write the validated final deck to the requested final path.
+13. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
+    xdoc/schema versions, important intermediate files, validation results,
+    preview/contact sheet path, discovery/fallback warnings, and remaining risks.
 
 ## Source Ingestion (HTML / URL / PDF)
 
@@ -279,3 +321,9 @@ If dry-run returns ambiguous selectors, enum fixes, or field suggestions, prefer
 `suggestion.autoRetry: true` fixes and rerun dry-run. For unclear failures read
 `troubleshooting.md`. Do not silently ignore failed dry-run, failed apply, failed
 vision-check, or preview conversion failures.
+
+If a capability is absent from `xdoc-capabilities.json`, query the targeted op or
+command and try a safe dry-run before calling it unsupported. Preserve the
+distinction in logs and summaries: `undisclosed` means the runtime schema did not
+advertise it; `unsupported` requires an explicit structured CLI result or a
+documented compatibility boundary.

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -16,6 +17,7 @@ Options:
   --objective <text>  Short objective written to deck_lock.json and outline.json.
   --mode <mode>       express, studio, edit, or export. Defaults to express.
   --root <path>       Project root. Defaults to current working directory.
+  --xdoc-bin <path>   xdoc executable. Defaults to xdoc.
   --json              Print machine-readable paths.
   --help              Show this help.
 `
@@ -28,6 +30,7 @@ function parseArgs(argv) {
     objective: '',
     mode: 'express',
     root: process.cwd(),
+    xdocBin: 'xdoc',
     json: false,
   }
   for (let i = 0; i < argv.length; i += 1) {
@@ -54,6 +57,9 @@ function parseArgs(argv) {
       i += 1
     } else if (arg === '--root') {
       args.root = valueAfter(argv, i, arg)
+      i += 1
+    } else if (arg === '--xdoc-bin') {
+      args.xdocBin = valueAfter(argv, i, arg)
       i += 1
     } else {
       throw new Error(`Unknown option: ${arg}\n\n${usage}`)
@@ -120,6 +126,19 @@ try {
   const contentPath = join(runDir, 'content.json')
   const patchPath = join(runDir, 'patch.json')
   const qualityPath = join(runDir, 'quality.json')
+  const capabilityPath = join(runDir, 'xdoc-capabilities.json')
+
+  const probeScript = join(__dirname, 'pptx-nova-probe.mjs')
+  const probeResult = spawnSync(
+    process.execPath,
+    [probeScript, '--xdoc-bin', args.xdocBin, '--output', capabilityPath],
+    { encoding: 'utf8' },
+  )
+  if (probeResult.status !== 0) {
+    throw new Error(
+      `xdoc capability probe failed (${probeResult.status ?? 'spawn error'}): ${probeResult.stderr || probeResult.stdout}`,
+    )
+  }
 
   writeJson(outlinePath, {
     schemaVersion: 'pptx-nova-outline/v1',
@@ -156,6 +175,7 @@ try {
   })
 
   const commands = {
+    probe: `node ${shellQuote(probeScript)} --xdoc-bin ${shellQuote(args.xdocBin)} --output ${shellQuote(capabilityPath)} --overwrite`,
     build: `node ${shellQuote(join(__dirname, 'pptx-nova-build.mjs'))} --deckkit ${shellQuote(args.deckkit)} ${shellQuote(contentPath)} -o ${shellQuote(patchPath)} --quality-json ${shellQuote(qualityPath)}`,
     validate: `node ${shellQuote(join(skillRoot, 'assets', 'deckkits', 'validate-content.mjs'))} ${shellQuote(contentPath)} --deckkit ${shellQuote(args.deckkit)} --mode delivery`,
   }
@@ -168,6 +188,7 @@ try {
     contentPath,
     patchPath,
     qualityPath,
+    capabilityPath,
     assetsDir,
     previewsDir,
     finalPptx,

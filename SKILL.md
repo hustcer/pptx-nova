@@ -306,7 +306,7 @@ PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。�
 创建或视觉上明显修改 deck 时，按此顺序收尾：
 
 ```text
-check-lock -> dry-run -> apply -> vision-check -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> narrative quality review when required -> optional xdoc check
+check-lock -> dry-run -> apply -> vision-check -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> visual_review.json -> narrative quality review when required -> optional xdoc check
 ```
 
 Refurbish Existing Deck 还必须追加：
@@ -351,8 +351,8 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
   `xdoc-capabilities.json`、`vision.json`、预览目录、contact sheet、`check.json` 等实际存在项
 - xdoc 审计信息：版本、CLI schema 版本、任务必需能力是否 fully disclosed、是否使用
   degraded discovery 或 fallback；不要把 undisclosed 写成 unsupported
-- 验证结果：dry-run、apply、vision-check、PNG/contact-sheet 复核、可选 preflight
-- 高风险任务的结构证据：`evidence-summary.json`、`layout-final.json`；翻新/严格套模板还列出 `fidelity-gate.json`、`template-gate.json` 或
+- 验证结果：dry-run、apply、vision-check、PNG/contact-sheet 复核、`visual_review.json`、可选 preflight
+- 高风险任务的结构证据：`evidence-summary.json`、`layout-final.json`；有图表/表格或结构化视觉复核时列出 `semantic-audit.json`、`visual_review.json`；翻新/严格套模板还列出 `fidelity-gate.json`、`template-gate.json` 或
   `content-audit-final.json` 中实际存在项
 - 正式说服型 deck 的叙事质量结果：`deckProfile`、最低评分、最弱页、已接受 tradeoff
 - AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全

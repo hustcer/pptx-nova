@@ -43,6 +43,10 @@ Use these entry points from skill workflows:
   that contain native chart/table ops. It validates data shape, source/claim
   disclosure, and final native chart/table object presence without attempting a
   full OOXML equivalence audit.
+- pptx-nova-visual-review.mjs - structured PNG/contact-sheet review helper. It
+  records required visual QA checks into visual_review.json, validates that
+  visual evidence and reviewed slide counts are present, and leaves actual
+  visual judgment to the human or agent reviewer.
 
 Repository-root `tools/` scripts may wrap or test these files during skill
 development, but published skill users should call scripts from this directory.

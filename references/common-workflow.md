@@ -106,32 +106,24 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 1.  Initialize run directory and check output collision rules.
 2.  Generate `<run-dir>/xdoc-capabilities.json`. Review warnings and task-specific
     undisclosed requirements, but do not turn the snapshot into an allowlist.
-3.  Gather mode-specific context:
-    - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`.
-    - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
-      per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
-      `visualDensity`.
-    - Edit: `xdoc pptx inspect <input.pptx> --json`.
-    - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
-      `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
-      `xdoc pptx refurbish-skin` JSON report.
-      Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
-      artifacts, phase failures, previews, and final publication use one run-dir
-      contract. Use the lower-level commands directly only for diagnosis or
-      selective page repair.
-      Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
+3.  Gather mode-specific context: - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`. - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
+    per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
+    `visualDensity`. - Edit: `xdoc pptx inspect <input.pptx> --json`. - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
+    `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
+    `xdoc pptx refurbish-skin` JSON report.
+    Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
+    artifacts, phase failures, previews, and final publication use one run-dir
+    contract. Use the lower-level commands directly only for diagnosis or
+    selective page repair.
+    Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
 text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
-      or page-level repair.
-    - Data/template: template, data, bindings, and asset paths.
-    - If the source outline only gives a slide title or leaves factual content
-      blank, record any AI-filled facts, competitors, metrics, or examples in
-      `deck_lock.assumptions[]` before writing `content.json`.
-    - If the user-provided outline explicitly fixes slide titles or subtitles,
-      preserve that wording in display `title` / `subtitle`, mark
-      `titleSource: "user"` / `subtitleSource: "user"` in `deck_lock.slides[]`,
-      and do not silently rewrite it into a claim title or house style.
-    - If a slide contains chart/table proof, record the semantic source and
-      validation expectations in `deck_lock.slides[].chart` or `.table`.
+    or page-level repair. - Data/template: template, data, bindings, and asset paths. - If the source outline only gives a slide title or leaves factual content
+    blank, record any AI-filled facts, competitors, metrics, or examples in
+    `deck_lock.assumptions[]` before writing `content.json`. - If the user-provided outline explicitly fixes slide titles or subtitles,
+    preserve that wording in display `title` / `subtitle`, mark
+    `titleSource: "user"` / `subtitleSource: "user"` in `deck_lock.slides[]`,
+    and do not silently rewrite it into a claim title or house style. - If a slide contains chart/table proof, record the semantic source and
+    validation expectations in `deck_lock.slides[].chart` or `.table`.
 4.  Produce the smallest durable input:
     - Prefer DeckKit `content.json` for create workflows.
     - Use patch ops only when the DeckKit path cannot express the work.
@@ -198,11 +190,36 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     finalizer noisy. The helper does not replace PNG review or expand Micro Edit.
 
 9.  Render visual previews when creating or materially changing a deck:
+
     ```bash
     xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
     ```
+
     Review the contact sheet for cross-slide rhythm, then inspect suspicious
-    slides at full size.
+    slides at full size. Record the review as visual_review.json so the final
+    summary can disclose which visual checks were actually performed:
+
+        node <skill-root>/scripts/pptx-nova-visual-review.mjs \
+          --run-dir <run-dir> \
+          --contact-sheet <run-dir>/previews/contact-sheet.png \
+          --previews <run-dir>/previews \
+          --slides-reviewed <n> \
+          --check titleWrap=pass \
+          --check bodyReadability=pass \
+          --check alignment=pass \
+          --check spacing=pass \
+          --check contrast=pass \
+          --check chartTableLegibility=pass \
+          --check repeatedLayoutRhythm=pass \
+          --check placeholderResidue=pass \
+          --check footerPageChrome=pass \
+          --check assetFit=pass \
+          --json
+
+    If any check is warn/fail, record it with --issue and either fix the deck or
+    disclose the residual visual risk. The high-risk finalizer automatically
+    consumes <run-dir>/visual_review.json when present; rerun it after visual
+    review if evidence-summary.json should include this final visual QA result.
     For existing-deck refurbishment, run `xdoc pptx contact-diff` when manual
     side-by-side review is needed; `refurbish-skin` reports the suggested path
     but skips generation by default. A deck that visually still reads like the
@@ -213,6 +230,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
     `refurbish-audit`, then run `pptx-nova-layout-snapshot.mjs` on final inspect
     and keep both reports with the run artifacts.
+
 10. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly

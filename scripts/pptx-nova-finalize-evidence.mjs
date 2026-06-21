@@ -8,6 +8,7 @@ const SCHEMA_VERSION = 'pptx-nova-finalize-evidence/v1'
 const LAYOUT_SCHEMA_VERSION = 'pptx-nova-layout-snapshot/v1'
 const FIDELITY_SCHEMA_VERSION = 'pptx-nova-fidelity-gate/v1'
 const SEMANTIC_AUDIT_SCHEMA_VERSION = 'pptx-nova-semantic-audit/v1'
+const VISUAL_REVIEW_SCHEMA_VERSION = 'pptx-nova-visual-review/v1'
 const LAYOUT_SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'pptx-nova-layout-snapshot.mjs')
 const DISCLOSURE_ONLY_LAYOUT_CODES = new Set(['font-family-missing', 'font-size-missing'])
 const MODES = {
@@ -30,6 +31,8 @@ Options:
   --fidelity-gate <path>    Required for template-following and refurbish.
   --semantic-audit <path>   Optional chart/table semantic-audit.json. If omitted,
                             run-dir/semantic-audit.json is consumed when present.
+  --visual-review <path>    Optional visual_review.json. If omitted,
+                            run-dir/visual_review.json is consumed when present.
   --json                    Print evidence-summary.json to stdout.
   --help                    Show this help.
 
@@ -46,6 +49,7 @@ function parseArgs(argv) {
     vision: '',
     fidelityGate: '',
     semanticAudit: '',
+    visualReview: '',
     json: false,
   }
   const flags = {
@@ -55,6 +59,7 @@ function parseArgs(argv) {
     '--vision': 'vision',
     '--fidelity-gate': 'fidelityGate',
     '--semantic-audit': 'semanticAudit',
+    '--visual-review': 'visualReview',
   }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
@@ -83,6 +88,10 @@ function parseArgs(argv) {
     const defaultSemanticAudit = join(args.runDir, 'semantic-audit.json')
     if (existsSync(defaultSemanticAudit)) args.semanticAudit = defaultSemanticAudit
   }
+  if (!args.visualReview) {
+    const defaultVisualReview = join(args.runDir, 'visual_review.json')
+    if (existsSync(defaultVisualReview)) args.visualReview = defaultVisualReview
+  }
   return args
 }
 
@@ -98,6 +107,7 @@ function makeReport(args) {
       vision: args.vision || null,
       fidelityGate: args.fidelityGate || null,
       semanticAudit: args.semanticAudit || null,
+      visualReview: args.visualReview || null,
     },
     summary: {
       slideCount: null,
@@ -105,6 +115,7 @@ function makeReport(args) {
       layoutRisks: { total: null, actionable: null, disclosureOnly: null },
       vision: null,
       semanticAudit: null,
+      visualReview: null,
       errors: 0,
       warnings: 0,
     },
@@ -407,6 +418,65 @@ function validateSemanticAudit(args, report) {
   report.summary.semanticAudit = counts
 }
 
+function validateVisualReview(args, report) {
+  if (!args.visualReview) {
+    check(report, 'structured-visual-review', 'not-run', { required: false })
+    return
+  }
+  const review = readJson(report, args.visualReview, 'visual-review')
+  if (!review) return
+  const validStatus = ['pass', 'warn', 'fail'].includes(review?.status)
+  const counts = {
+    slidesReviewed: number(review?.summary?.slidesReviewed) ?? 0,
+    checks: number(review?.summary?.checks?.total) ?? 0,
+    errors: number(review?.summary?.errors) ?? 0,
+    warnings: number(review?.summary?.warnings) ?? 0,
+    issues: number(review?.summary?.issueCount) ?? 0,
+  }
+  const failed =
+    review?.schemaVersion !== VISUAL_REVIEW_SCHEMA_VERSION ||
+    !validStatus ||
+    review.status === 'fail' ||
+    counts.errors > 0
+  if (failed) {
+    issue(
+      report,
+      'error',
+      'visual-review-failed',
+      'structured visual review failed or is incompatible',
+      {
+        schemaVersion: review?.schemaVersion ?? null,
+        status: review?.status ?? null,
+        ...counts,
+      },
+    )
+  } else if (review.status === 'warn' || counts.warnings > 0) {
+    issue(
+      report,
+      'warning',
+      'visual-review-warning',
+      'structured visual review passed with warnings',
+      {
+        schemaVersion: review?.schemaVersion ?? null,
+        status: review.status,
+        ...counts,
+      },
+    )
+  }
+  check(
+    report,
+    'structured-visual-review',
+    failed ? 'failed' : review.status === 'warn' ? 'warning' : 'passed',
+    {
+      required: false,
+      schemaVersion: review?.schemaVersion ?? null,
+      reviewStatus: review?.status ?? null,
+      ...counts,
+    },
+  )
+  report.summary.visualReview = counts
+}
+
 function finish(args, report) {
   report.summary.errors = report.errors.length
   report.summary.warnings = report.warnings.length
@@ -431,6 +501,7 @@ try {
   validateVision(args, MODES[args.mode], report)
   validateFidelity(args, MODES[args.mode], report)
   validateSemanticAudit(args, report)
+  validateVisualReview(args, report)
   finish(args, report)
 } catch (error) {
   process.stderr.write(`${error.message}\n`)

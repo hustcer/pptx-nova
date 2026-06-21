@@ -47,6 +47,10 @@ Use these entry points from skill workflows:
   records required visual QA checks into visual_review.json, validates that
   visual evidence and reviewed slide counts are present, and leaves actual
   visual judgment to the human or agent reviewer.
+- pptx-nova-structure-check.mjs - lightweight PPTX OOXML structure check. It
+  scans XML inside the PPTX for expected font declarations, expected sRGB/theme
+  colors, and empty/default-text placeholder residue, then writes
+  structure-check.json for the final evidence summary.
 
 Repository-root `tools/` scripts may wrap or test these files during skill
 development, but published skill users should call scripts from this directory.

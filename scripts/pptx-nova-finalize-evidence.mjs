@@ -9,6 +9,7 @@ const LAYOUT_SCHEMA_VERSION = 'pptx-nova-layout-snapshot/v1'
 const FIDELITY_SCHEMA_VERSION = 'pptx-nova-fidelity-gate/v1'
 const SEMANTIC_AUDIT_SCHEMA_VERSION = 'pptx-nova-semantic-audit/v1'
 const VISUAL_REVIEW_SCHEMA_VERSION = 'pptx-nova-visual-review/v1'
+const STRUCTURE_CHECK_SCHEMA_VERSION = 'pptx-nova-structure-check/v1'
 const LAYOUT_SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'pptx-nova-layout-snapshot.mjs')
 const DISCLOSURE_ONLY_LAYOUT_CODES = new Set(['font-family-missing', 'font-size-missing'])
 const MODES = {
@@ -33,6 +34,8 @@ Options:
                             run-dir/semantic-audit.json is consumed when present.
   --visual-review <path>    Optional visual_review.json. If omitted,
                             run-dir/visual_review.json is consumed when present.
+  --structure-check <path>  Optional structure-check.json. If omitted,
+                            run-dir/structure-check.json is consumed when present.
   --json                    Print evidence-summary.json to stdout.
   --help                    Show this help.
 
@@ -50,6 +53,7 @@ function parseArgs(argv) {
     fidelityGate: '',
     semanticAudit: '',
     visualReview: '',
+    structureCheck: '',
     json: false,
   }
   const flags = {
@@ -60,6 +64,7 @@ function parseArgs(argv) {
     '--fidelity-gate': 'fidelityGate',
     '--semantic-audit': 'semanticAudit',
     '--visual-review': 'visualReview',
+    '--structure-check': 'structureCheck',
   }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
@@ -92,6 +97,10 @@ function parseArgs(argv) {
     const defaultVisualReview = join(args.runDir, 'visual_review.json')
     if (existsSync(defaultVisualReview)) args.visualReview = defaultVisualReview
   }
+  if (!args.structureCheck) {
+    const defaultStructureCheck = join(args.runDir, 'structure-check.json')
+    if (existsSync(defaultStructureCheck)) args.structureCheck = defaultStructureCheck
+  }
   return args
 }
 
@@ -108,6 +117,7 @@ function makeReport(args) {
       fidelityGate: args.fidelityGate || null,
       semanticAudit: args.semanticAudit || null,
       visualReview: args.visualReview || null,
+      structureCheck: args.structureCheck || null,
     },
     summary: {
       slideCount: null,
@@ -116,6 +126,7 @@ function makeReport(args) {
       vision: null,
       semanticAudit: null,
       visualReview: null,
+      structureCheck: null,
       errors: 0,
       warnings: 0,
     },
@@ -477,6 +488,66 @@ function validateVisualReview(args, report) {
   report.summary.visualReview = counts
 }
 
+function validateStructureCheck(args, report) {
+  if (!args.structureCheck) {
+    check(report, 'pptx-xml-structure-check', 'not-run', { required: false })
+    return
+  }
+  const structure = readJson(report, args.structureCheck, 'structure-check')
+  if (!structure) return
+  const validStatus = ['pass', 'warn', 'fail'].includes(structure?.status)
+  const counts = {
+    xmlFiles: number(structure?.summary?.xmlFiles) ?? 0,
+    expectedFonts: number(structure?.summary?.expectedFonts) ?? 0,
+    expectedColors: number(structure?.summary?.expectedColors) ?? 0,
+    placeholderResidue: number(structure?.summary?.placeholders?.emptyOrDefaultText) ?? 0,
+    errors: number(structure?.summary?.errors) ?? 0,
+    warnings: number(structure?.summary?.warnings) ?? 0,
+  }
+  const failed =
+    structure?.schemaVersion !== STRUCTURE_CHECK_SCHEMA_VERSION ||
+    !validStatus ||
+    structure.status === 'fail' ||
+    counts.errors > 0
+  if (failed) {
+    issue(
+      report,
+      'error',
+      'structure-check-failed',
+      'PPTX XML structure check failed or is incompatible',
+      {
+        schemaVersion: structure?.schemaVersion ?? null,
+        status: structure?.status ?? null,
+        ...counts,
+      },
+    )
+  } else if (structure.status === 'warn' || counts.warnings > 0) {
+    issue(
+      report,
+      'warning',
+      'structure-check-warning',
+      'PPTX XML structure check passed with warnings',
+      {
+        schemaVersion: structure?.schemaVersion ?? null,
+        status: structure.status,
+        ...counts,
+      },
+    )
+  }
+  check(
+    report,
+    'pptx-xml-structure-check',
+    failed ? 'failed' : structure.status === 'warn' ? 'warning' : 'passed',
+    {
+      required: false,
+      schemaVersion: structure?.schemaVersion ?? null,
+      checkStatus: structure?.status ?? null,
+      ...counts,
+    },
+  )
+  report.summary.structureCheck = counts
+}
+
 function finish(args, report) {
   report.summary.errors = report.errors.length
   report.summary.warnings = report.warnings.length
@@ -502,6 +573,7 @@ try {
   validateFidelity(args, MODES[args.mode], report)
   validateSemanticAudit(args, report)
   validateVisualReview(args, report)
+  validateStructureCheck(args, report)
   finish(args, report)
 } catch (error) {
   process.stderr.write(`${error.message}\n`)

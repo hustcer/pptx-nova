@@ -170,6 +170,17 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
           --output <run-dir>/semantic-audit.json \
           --json
 
+    For brand-sensitive or template-derived output, run the lightweight XML
+    structure check before the finalizer so it can prove target fonts/colors are
+    written into the PPTX and catch empty placeholder residue:
+
+        node <skill-root>/scripts/pptx-nova-structure-check.mjs \
+          --pptx out.pptx \
+          --deck-lock deck_lock.json \
+          --strict-placeholders \
+          --output <run-dir>/structure-check.json \
+          --json
+
     ```bash
     xdoc pptx inspect out.pptx --daemon --json > <run-dir>/final-inspect.json
     node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \

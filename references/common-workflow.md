@@ -421,6 +421,15 @@ If dry-run returns ambiguous selectors, enum fixes, or field suggestions, prefer
 `troubleshooting.md`. Do not silently ignore failed dry-run, failed apply, failed
 vision-check, or preview conversion failures.
 
+Some xdoc commands may still write a structured JSON report when the process
+exit code is non-zero. Treat this as an inconsistency to investigate, not as a
+success shortcut: inspect stderr, parse the JSON `status`, verify the expected
+output file or report exists, and record the mismatch in the run artifacts. If
+the JSON says `status: "success"`, stderr is empty, and the expected output is
+present, it is acceptable to continue after an independent verification step
+such as inspect, semantic audit, or PNG/PowerPoint preview. If the JSON status
+is missing, non-success, or the output is absent, stop and fix the command.
+
 If a capability is absent from `xdoc-capabilities.json`, query the targeted op or
 command and try a safe dry-run before calling it unsupported. Preserve the
 distinction in logs and summaries: `undisclosed` means the runtime schema did not

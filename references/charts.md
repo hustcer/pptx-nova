@@ -292,6 +292,17 @@ bubble 多一个 `size`：
 
 `open` 可省略 → HLC；含 `open` → OHLC。volume stock 暂未支持。
 
+Stock 数据必须先做语义不变量检查，再写入或交付：
+
+- HLC：每个 category 上必须满足 `low[i] <= close[i] <= high[i]`。
+- OHLC：每个 category 上必须满足
+  `low[i] <= min(open[i], close[i], high[i])` 且
+  `high[i] >= max(open[i], close[i], low[i])`。
+- 修复单个异常点时，优先做最小数据改动，保持趋势、类别、系列名称和图表样式不变。
+- 用 `replace-chart-data` 修改既有 stock chart 时，xdoc 会同步 chart XML 和 embedded
+  workbook；不要用 raw XML 只改 `ppt/charts/chartN.xml`，否则 PowerPoint 刷新图表时
+  可能从 workbook 恢复旧数据。
+
 ### Combo
 
 `combo` 的 `data.series` 每个元素可加 `kind`（覆盖 chart kind）；要把某个系列
@@ -382,6 +393,16 @@ chart 部件),并自动建立 `chartEx` 关系类型。`variant` 必须是 `stan
   "data": { "categories": [...], "series": [...] }
 }
 ```
+
+改完 chart 数据后，至少做三步验证：
+
+1. dry-run 中确认 `resolvedSelectors[]` 命中目标 chart，`changedParts[]` 包含 chart
+   part；若是 embedded workbook-backed chart，也应看到 workbook part 变化。
+2. 对关键业务语义做轻量审计，例如 stock 的 low/high 不变量、series/category 长度一致、
+   legend 系列名不为空。把结果保存到 run 目录（如 `semantic-audit.json`）。
+3. 做视觉复核。若 `xdoc convert --to png` 对某类复杂/长尾 chart 没有渲染完整图体，
+   不要把空白预览当作 deck 内容缺失；改用 PowerPoint、LibreOffice、PDF 渲染或用户提供的
+   权威预览作为视觉依据，并在 `visual_review.json` 中记录 fallback 原因。
 
 ### 一键换 PowerPoint 内置 style（1-48）
 

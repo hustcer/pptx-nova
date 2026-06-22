@@ -962,6 +962,57 @@
           "multi-color palettes outside red, black, white, and gray"
         ]
       },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "manual-fallback",
+        "nativeSkinning": {
+          "supported": false,
+          "commands": []
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "swiss-grid-refurbish-profile",
+          "strategy": "inspect-driven-swiss-grid-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "FFFFFF",
+            "text": "111111",
+            "accent": "DC2626",
+            "softAccent": "F3F4F6",
+            "secondary": "6B7280",
+            "surface": "FFFFFF",
+            "rule": "111111"
+          },
+          "fonts": {
+            "heading": "Helvetica",
+            "body": "Aptos",
+            "label": "Aptos",
+            "cjk": "Microsoft YaHei"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "preserve-and-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects"
+        },
+        "requiredGates": [
+          "fallback-patch-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Swiss Grid refurbish uses an explicit red/black/white/gray palette instead of generic visualGrammar color derivation.",
+          "Preserve source slides and editable objects, then restyle backgrounds, theme fonts, text frames, shapes, tables, charts, and existing page chrome into the Swiss grid system."
+        ]
+      },
       "layoutContract": {
         "schemaVersion": "pptx-nova-layout-contract/v1",
         "severity": "warning",

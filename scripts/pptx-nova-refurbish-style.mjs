@@ -62,6 +62,14 @@ function asArray(value) {
   return value === null || value === undefined ? [] : [value]
 }
 
+function hasOwnValue(value, key) {
+  return Object.prototype.hasOwnProperty.call(value ?? {}, key)
+}
+
+function stringArray(value) {
+  return Array.isArray(value) ? value.filter((item) => typeof item === 'string') : []
+}
+
 function namedHexFrom(value) {
   if (typeof value !== 'string') return ''
   const normalized = value.toLowerCase().replace(/[-_]+/g, ' ')
@@ -126,6 +134,32 @@ export function fontFamilyFrom(value, fallback, label = 'font', warnings = []) {
     `Could not derive a concrete ${label} font family from "${value}"; using ${fallback}.`,
   )
   return fallback
+}
+
+function warningCoveredByProfile(warning, profileFallback) {
+  const palette = isPlainObject(profileFallback.palette) ? profileFallback.palette : {}
+  const fonts = isPlainObject(profileFallback.fonts) ? profileFallback.fonts : {}
+  const paletteCoverage = [
+    ['background color', 'background'],
+    ['primary text color', 'text'],
+    ['accent color', 'accent'],
+    ['secondary color', 'secondary'],
+    ['surface color', 'surface'],
+    ['soft accent color', 'softAccent'],
+  ]
+  for (const [needle, key] of paletteCoverage) {
+    if (warning.includes(needle) && hasOwnValue(palette, key)) return true
+  }
+  const fontCoverage = [
+    ['heading', 'heading'],
+    ['body', 'body'],
+    ['label', 'label'],
+    ['CJK', 'cjk'],
+  ]
+  for (const [needle, key] of fontCoverage) {
+    if (warning.includes(needle) && hasOwnValue(fonts, key)) return true
+  }
+  return false
 }
 
 export function genericFallbackFor(entry) {
@@ -195,13 +229,16 @@ export function genericFallbackFor(entry) {
 export function mergeFallbackFor(entry, profileFallback) {
   const generic = genericFallbackFor(entry)
   if (!isPlainObject(profileFallback)) return generic
+  const derivationWarnings = generic.derivationWarnings.filter(
+    (warning) => !warningCoveredByProfile(warning, profileFallback),
+  )
   return {
     ...generic,
     ...profileFallback,
-    source: 'catalog',
+    source: profileFallback.source ?? 'catalog',
     palette: { ...generic.palette, ...(profileFallback.palette ?? {}) },
     fonts: { ...generic.fonts, ...(profileFallback.fonts ?? {}) },
-    derivationWarnings: generic.derivationWarnings,
+    derivationWarnings: [...derivationWarnings, ...stringArray(profileFallback.derivationWarnings)],
   }
 }
 

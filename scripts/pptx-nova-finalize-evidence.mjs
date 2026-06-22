@@ -36,6 +36,10 @@ Options:
                             run-dir/visual_review.json is consumed when present.
   --structure-check <path>  Optional structure-check.json. If omitted,
                             run-dir/structure-check.json is consumed when present.
+  --changed-slides <expr>   Optional 1-based changed-slide scope, e.g. 25-38.
+                            Structural edit/template gates use this scoped
+                            vision risk while preserving full-deck residuals.
+  --slides <expr>           Alias for --changed-slides.
   --json                    Print evidence-summary.json to stdout.
   --help                    Show this help.
 
@@ -54,6 +58,7 @@ function parseArgs(argv) {
     semanticAudit: '',
     visualReview: '',
     structureCheck: '',
+    changedSlides: '',
     json: false,
   }
   const flags = {
@@ -65,6 +70,8 @@ function parseArgs(argv) {
     '--semantic-audit': 'semanticAudit',
     '--visual-review': 'visualReview',
     '--structure-check': 'structureCheck',
+    '--changed-slides': 'changedSlides',
+    '--slides': 'changedSlides',
   }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
@@ -80,7 +87,7 @@ function parseArgs(argv) {
     const value = argv[index + 1]
     if (!key) throw new Error(`Unknown option: ${arg}\n\n${usage}`)
     if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
-    args[key] = key === 'mode' ? value : resolve(value)
+    args[key] = key === 'mode' || key === 'changedSlides' ? value : resolve(value)
     index += 1
   }
   if (!Object.hasOwn(MODES, args.mode)) {
@@ -124,6 +131,9 @@ function makeReport(args) {
       objectCount: null,
       layoutRisks: { total: null, actionable: null, disclosureOnly: null },
       vision: null,
+      visionScope: null,
+      changedSlideRisk: null,
+      deckResidualRisk: null,
       semanticAudit: null,
       visualReview: null,
       structureCheck: null,
@@ -168,6 +178,101 @@ function readJson(report, path, label) {
 function number(value) {
   const result = Number(value)
   return Number.isFinite(result) ? result : null
+}
+
+function parseSlideScope(expr) {
+  if (!expr) return null
+  const trimmed = String(expr).trim()
+  if (!trimmed) throw new Error('--changed-slides must not be empty')
+  const selected = []
+  for (const raw of trimmed.split(',')) {
+    const part = raw.trim()
+    if (!part) throw new Error(`invalid slide expression: ${expr}`)
+    const pieces = part.split('-')
+    if (pieces.length > 2) throw new Error(`invalid slide expression: ${expr}`)
+    const start = parsePositiveSlideNumber(pieces[0], expr)
+    const end = pieces.length === 2 ? parsePositiveSlideNumber(pieces[1], expr) : start
+    if (start > end) throw new Error(`invalid slide range: ${part}`)
+    for (let slide = start; slide <= end; slide += 1) {
+      if (!selected.includes(slide)) selected.push(slide)
+    }
+  }
+  selected.sort((a, b) => a - b)
+  return selected
+}
+
+function parsePositiveSlideNumber(value, original) {
+  if (!/^[0-9]+$/.test(String(value))) throw new Error(`invalid slide expression: ${original}`)
+  const parsed = Number(value)
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new Error(`invalid slide expression: ${original}`)
+  }
+  return parsed
+}
+
+function slideArraysEqual(left, right) {
+  if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false
+  return left.every((value, index) => value === right[index])
+}
+
+function severityCountsFromSummary(summary) {
+  return {
+    high: number(summary?.bySeverity?.high),
+    medium: number(summary?.bySeverity?.medium),
+    low: number(summary?.bySeverity?.low),
+  }
+}
+
+function severityCountsFromIssues(issues, slides, includeSelected) {
+  const set = new Set(slides)
+  const counts = { high: 0, medium: 0, low: 0 }
+  for (const issue of Array.isArray(issues) ? issues : []) {
+    const slide = issueSlideNumber(issue)
+    if (!Number.isInteger(slide)) continue
+    if (set.has(slide) !== includeSelected) continue
+    if (issue?.severity === 'high') counts.high += 1
+    else if (issue?.severity === 'medium') counts.medium += 1
+    else if (issue?.severity === 'low') counts.low += 1
+  }
+  return counts
+}
+
+function issueSlideNumber(issue) {
+  const slideIndex = number(issue?.slideIndex)
+  if (Number.isInteger(slideIndex) && slideIndex >= 0) return slideIndex + 1
+  const oneBased =
+    number(issue?.target?.slide) ??
+    number(issue?.slide) ??
+    number(issue?.slideNumber) ??
+    number(issue?.targetSlide)
+  return Number.isInteger(oneBased) && oneBased > 0 ? oneBased : null
+}
+
+function countsValid(counts) {
+  return Object.values(counts).every((value) => value !== null && value >= 0)
+}
+
+function scopedVisionEvidence(args, vision) {
+  const requestedSlides = parseSlideScope(args.changedSlides)
+  const visionSlides = Array.isArray(vision?.scope?.slides)
+    ? vision.scope.slides.map(number).filter((value) => Number.isInteger(value) && value > 0)
+    : null
+  const slides = requestedSlides ?? visionSlides
+  if (!slides || slides.length === 0) return null
+  const scopedSummaryMatches =
+    vision?.scopedSummary && (!requestedSlides || slideArraysEqual(requestedSlides, visionSlides))
+  const scopedCounts = scopedSummaryMatches
+    ? severityCountsFromSummary(vision.scopedSummary)
+    : severityCountsFromIssues(vision?.issues, slides, true)
+  const residualCounts = vision?.deckResidualRisk?.bySeverity
+    ? severityCountsFromSummary(vision.deckResidualRisk)
+    : severityCountsFromIssues(vision?.issues, slides, false)
+  return {
+    slides,
+    source: requestedSlides ? 'changed-slides' : 'vision-scope',
+    counts: scopedCounts,
+    residual: residualCounts,
+  }
 }
 
 function validateInspect(args, report) {
@@ -271,20 +376,21 @@ function validateVision(args, config, report) {
   }
   const vision = readJson(report, args.vision, 'vision-evidence')
   if (!vision) return
-  const counts = {
-    high: number(vision?.summary?.bySeverity?.high),
-    medium: number(vision?.summary?.bySeverity?.medium),
-    low: number(vision?.summary?.bySeverity?.low),
-  }
+  const counts = severityCountsFromSummary(vision?.summary)
+  const scoped = scopedVisionEvidence(args, vision)
+  const gateCounts = !config.clearVision && scoped ? scoped.counts : counts
   let status = 'passed'
-  if (Object.values(counts).some((value) => value === null || value < 0)) {
+  if (
+    !countsValid(counts) ||
+    (scoped && (!countsValid(scoped.counts) || !countsValid(scoped.residual)))
+  ) {
     status = 'failed'
     issue(
       report,
       'error',
       'vision-severity-counts-invalid',
       'vision report must disclose non-negative high, medium, and low counts',
-      counts,
+      { counts, scoped: scoped?.counts ?? null, residual: scoped?.residual ?? null },
     )
   } else if (vision?.status !== 'success') {
     status = 'failed'
@@ -300,15 +406,25 @@ function validateVision(args, config, report) {
       'new-deck workflows require zero high and medium vision issues',
       counts,
     )
-  } else if (counts.high > 0 || counts.medium > 0) {
+  } else if (gateCounts.high > 0 || gateCounts.medium > 0) {
     status = 'warning'
-    issue(
-      report,
-      'warning',
-      'vision-residual-risk',
-      'high/medium issues require changed-slide or inherited-risk review',
-      counts,
-    )
+    if (scoped) {
+      issue(
+        report,
+        'warning',
+        'vision-changed-slide-risk',
+        'high/medium issues remain on changed slides',
+        { slides: scoped.slides, ...gateCounts },
+      )
+    } else {
+      issue(
+        report,
+        'warning',
+        'vision-residual-risk',
+        'high/medium issues require changed-slide or inherited-risk review',
+        counts,
+      )
+    }
   }
   if (vision?.schemaVersion !== 'pptx-vision/v1') {
     issue(
@@ -323,8 +439,16 @@ function validateVision(args, config, report) {
     required: config.vision,
     schemaVersion: vision?.schemaVersion ?? null,
     ...counts,
+    scope: scoped ? { slides: scoped.slides, source: scoped.source } : null,
+    changedSlideRisk: scoped?.counts ?? null,
+    deckResidualRisk: scoped?.residual ?? null,
   })
   report.summary.vision = counts
+  if (scoped) {
+    report.summary.visionScope = { slides: scoped.slides, source: scoped.source }
+    report.summary.changedSlideRisk = scoped.counts
+    report.summary.deckResidualRisk = scoped.residual
+  }
 }
 
 function validateFidelity(args, config, report) {

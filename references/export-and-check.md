@@ -16,6 +16,7 @@ Use `xdoc convert`:
 xdoc convert deck.pptx --to pdf -o <run-dir>/out/
 xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite
 xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+xdoc convert deck.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
 xdoc convert deck.pptx --to md -o <run-dir>/out/
 xdoc convert deck.pptx --to json -o <run-dir>/out/
 xdoc convert deck.pptx --to text -o <run-dir>/out/
@@ -43,6 +44,17 @@ For visual review, prefer:
 ```bash
 xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 ```
+
+For targeted edits, render only the changed slides as a first-class review
+artifact instead of hand-making a montage:
+
+```bash
+xdoc convert deck.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
+```
+
+The PNG filenames and contact-sheet metadata preserve original slide numbers,
+so `slide-025.png` still refers to slide 25 even though the contact sheet starts
+at page 1.
 
 Read the contact sheet first to detect cross-slide issues such as rhythm, page
 number jumps, inconsistent dark/light pages, and obvious layout problems. Then

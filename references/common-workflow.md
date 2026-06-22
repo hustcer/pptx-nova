@@ -383,6 +383,24 @@ report as residual context. A pre-existing deck can contain unrelated
 on newly created or edited slides. Save before/after previews when the edit is
 visual so the changed slide rhythm can be compared directly.
 
+Use the same scope for both machine and PNG gates:
+
+```bash
+xdoc pptx vision-check out.pptx --slides 25-38 --json > <run-dir>/vision.json
+xdoc convert out.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
+node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
+  --mode structural-edit \
+  --run-dir <run-dir> \
+  --final-inspect <run-dir>/final-inspect.json \
+  --vision <run-dir>/vision.json \
+  --changed-slides 25-38 \
+  --json
+```
+
+In scoped runs, `summary/issues` remain full-deck evidence while
+`scopedSummary/scopedIssues` gate the changed pages and `deckResidualRisk`
+discloses inherited problems outside the scope.
+
 ## Formula And Asset Handling
 
 If the prompt/source contains LaTeX, equations, dense math symbols, screenshots,

@@ -328,6 +328,7 @@ xdoc pptx inspect input.pptx --daemon --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
 xdoc pptx vision-check out.pptx --json
+xdoc pptx vision-check out.pptx --slides 25-38 --json
 xdoc pptx chrome-detect source.pptx --json
 xdoc pptx chrome-remove source.pptx --roles header,footer,page-number,rule --output clean.pptx --json
 xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --dry-run --json
@@ -338,6 +339,7 @@ xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
 xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+xdoc convert out.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 

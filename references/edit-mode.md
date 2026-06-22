@@ -67,14 +67,26 @@ treating the full-deck `vision-check` summary as blocking. Existing decks often
 have unrelated legacy issues; separate "changed-slide blockers" from
 "pre-existing residual risk" in the final summary.
 
+For targeted visual edits, run scoped machine and PNG gates first:
+
+```bash
+xdoc pptx vision-check out.pptx --slides 25-38 --json > <run-dir>/vision.json
+xdoc convert out.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
+```
+
+The `vision.json` still retains full-deck `summary/issues`, but also includes
+`scope`, `scopedSummary`, `scopedIssues`, and `deckResidualRisk`; use
+`scopedSummary` for the changed-slide gate and disclose residual full-deck risk
+separately.
+
 For structural edits—slide/object additions or deletion, geometry/layout,
 theme/brand, chart/table, image/crop, or multi-slide visual changes—save
 `final-inspect.json` after apply and run
-`pptx-nova-finalize-evidence.mjs --mode structural-edit` with `vision.json`
-before PNG review. It writes `layout-final.json` and `evidence-summary.json`.
-Existing high/medium vision findings remain warnings here because the helper
-cannot attribute them to changed slides; use before/after changed-slide review
-to decide blockers. Localized Micro Edit remains on its separate fast path.
+`pptx-nova-finalize-evidence.mjs --mode structural-edit --changed-slides 25-38`
+with `vision.json` before PNG review. It writes `layout-final.json` and
+`evidence-summary.json`. With a changed-slide scope, high/medium issues outside
+the scope are recorded as `deckResidualRisk` rather than keeping the finalizer in
+warn. Localized Micro Edit remains on its separate fast path.
 
 ## Micro Edit Flow
 

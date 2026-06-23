@@ -129,7 +129,7 @@ review data.
 
 Manual PNG review remains a separate human step:
 
-1. Open each case `contact-sheet.png` and inspect the per-slide PNG files under
+1. Open each case `contact-sheet.png` and inspect the per-slide PNGs under
    `.tmp/pptx-nova-visual/consulting-dark/<case>/previews/`.
 2. Fill the corresponding `review.md` with last reviewed date, reviewer, result,
    checked manual items, and notes.

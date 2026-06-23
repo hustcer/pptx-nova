@@ -58,7 +58,7 @@ at page 1.
 
 Read the contact sheet first to detect cross-slide issues such as rhythm, page
 number jumps, inconsistent dark/light pages, and obvious layout problems. Then
-inspect full-size PNG files for suspicious slides.
+inspect full-size PNGs for suspicious slides.
 
 Adjust contact sheet options only when needed:
 

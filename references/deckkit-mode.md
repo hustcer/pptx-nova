@@ -48,7 +48,7 @@ It creates a new run directory, saves the plan and inspect evidence, executes th
 native or fallback route, fails closed on machine gates, renders PNG/contact-sheet
 artifacts, and publishes the requested output only after those gates pass. Exit 0
 means the machine pipeline completed; `status: "needs-human-review"` remains until
-the contact sheet and suspicious full-size PNG files are reviewed.
+the contact sheet and suspicious full-size PNGs are reviewed.
 
 To inspect the route without executing it, generate the plan directly:
 
@@ -254,7 +254,7 @@ as user-provided photos, product screenshots, or source deck picture objects,
 keep `content.json` paths short and resolve them with `--asset-root` so fit
 diagnostics do not treat long filesystem paths as visible text. For refurbish
 workflows, do not design page types that depend on rendered source-slide
-screenshots; those PNG files are review evidence, not deliverable content.
+screenshots; those PNGs are review evidence, not deliverable content.
 
 Use `assets/examples/deck-generator-template.mjs` only as a development starting
 point for creating or extending DeckKits. Do not use it as the default delivery

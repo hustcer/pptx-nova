@@ -450,7 +450,7 @@ function initialSummary(args, artifacts) {
       completed: false,
       contactDiffRequested: args.contactDiff,
       instructions:
-        'Review contact-sheet.png and suspicious full-size PNG files. Confirm the target DeckKit is visibly applied and source content remains intact.',
+        'Review contact-sheet.png and suspicious full-size PNGs. Confirm the target DeckKit is visibly applied and source content remains intact.',
     },
     warnings: [],
     error: null,

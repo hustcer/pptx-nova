@@ -46,7 +46,7 @@ Keep this minimum evidence set after successful delivery when the files exist:
 `vision.json`, `visual_review.json`, `check.json`, `semantic-audit.json`,
 `structure-check.json`, `evidence-summary.json`, `layout-final.json`,
 `fidelity-gate.json`, `content-audit-final.json`, the final candidate PPTX, the
-contact sheet, and any PNG files needed to explain suspicious or manually
+contact sheet, and any PNGs needed to explain suspicious or manually
 reviewed slides.
 
 After a successful task, optional cleanup may remove only current-run artifacts
@@ -94,7 +94,7 @@ itself as the output root. A trailing separator, `-o <dir>/`, means parent
 directory mode and creates `<dir>/<deck>-img/` or `<dir>/<deck>.xdoc/`. Prefer a
 current-run root such as `<run-dir>/previews` for visual QA. Before regenerating
 previews, make sure the preview root belongs to the current run, then replace it
-with `--overwrite` or clear that current-run directory so stale PNG files cannot
+with `--overwrite` or clear that current-run directory so stale PNGs cannot
 be reviewed by mistake.
 
 For export/check workflows, default output directories should also live under

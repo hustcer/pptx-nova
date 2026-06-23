@@ -289,6 +289,16 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   `forbidden` 阻塞交付。
 - 如果用户要求原地修改，也先在 run 目录完成验证，再按用户明确意图写回。
 - 对 SmartArt、宏、复杂动画、unsupported 对象优先 preserve；不能编辑时说明边界。
+- **PowerPoint Repair 是交付阻断问题**：任何候选 PPTX 在 PowerPoint 中出现
+  "PowerPoint found a problem with content"、`Repair` 按钮、打开后自动修复、或等价损坏提示，
+  都视为失败候选，不能交付，也不能把 PowerPoint 修复后的文件当作无根因的最终产物。
+  必须保留触发问题的候选 PPTX、patch、dry-run/apply 报告和最小复现证据，定位到具体 op /
+  OOXML part / 结构顺序后再生成新候选。
+- 对 chart、table、raw OOXML、关系包、嵌入 workbook、主题/样式等高风险修改，`xdoc check`、
+  `vision-check` 和 PNG 预览不能单独作为结构安全证明；还要做 OPC/OOXML 结构校验，例如
+  `unzip -t`、XML well-formed 检查、专项语义审计（chart axis/legend/data-label/gridline
+  子元素顺序、关系目标、embedded workbook 同步等）。发现 op 对某类输入会生成 PowerPoint
+  Repair 文件时，正确行为是在 xdoc/pptx-gen 源头让该 op 报错，而不是生成有问题的内容。
 
 ## 视觉和可读性红线
 
@@ -326,13 +336,18 @@ PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。�
 - 多页 contact sheet 是否出现重复的版式节奏、无意义装饰容器、topic-only 标题或突兀留白。
 - chart/table 页是否通过专项语义检查：数据维度、系列/类目、legend/label、table 行列和
   绑定来源必须与内容一致，再看 PNG 是否遮挡。
+- 对可交付 PPTX，尤其是正式/企业用户、图表/表格/OOXML 高风险变更，若本机有 Microsoft
+  PowerPoint，必须运行 clean-open smoke gate：自动打开候选并检查是否出现 `Repair` / `Cancel`
+  修复对话框或等价 UI。只检查 presentation 对象是否打开不够，因为 PowerPoint 可能同时打开对象并
+  弹出 Repair 对话。没有 PowerPoint 时，最终摘要必须明确说明 clean-open gate 未运行，并列出已执行的
+  替代结构校验。
 
 ## 必经验证
 
 创建或视觉上明显修改 deck 时，按此顺序收尾：
 
 ```text
-check-lock -> dry-run -> apply -> vision-check -> structure-check when needed -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> visual_review.json -> narrative quality review when required -> optional xdoc check
+check-lock -> dry-run -> apply -> vision-check -> structure-check when needed -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> visual_review.json -> clean-open gate when available/high-risk -> narrative quality review when required -> optional xdoc check
 ```
 
 Refurbish Existing Deck 还必须追加：
@@ -340,6 +355,16 @@ Refurbish Existing Deck 还必须追加：
 ```text
 refurbish-skin report gate -> optional contact-diff for manual review -> optional legacy supplemental audit
 ```
+
+结构或兼容性高风险任务还必须追加：
+
+```text
+OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> PowerPoint clean-open smoke gate when available
+```
+
+若任一门禁发现 PowerPoint Repair、OOXML 子元素顺序错误、关系目标缺失、embedded workbook
+与 chart cache 不一致、或 op 对输入组合生成损坏内容，停止交付；先修 xdoc/pptx-gen 源头并补回归测试。
+回归测试应覆盖失败前会生成坏文件的场景，并断言修复后要么生成结构合法文件，要么在 op 层返回清晰错误。
 
 只导出或检查文件时，按 `export-and-check.md` 执行即可。
 
@@ -383,6 +408,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - 验证结果：dry-run、apply、vision-check、`structure-check.json`、PNG/contact-sheet 复核、`visual_review.json`、可选 preflight
 - 高风险任务的结构证据：`evidence-summary.json`、`layout-final.json`；有图表/表格、XML 结构检查或结构化视觉复核时列出 `semantic-audit.json`、`structure-check.json`、`visual_review.json`；翻新/严格套模板还列出 `fidelity-gate.json`、`template-gate.json` 或
   `content-audit-final.json` 中实际存在项
+- PowerPoint clean-open 结果：若运行过，说明是否检测到 `Repair` 对话框；若未运行，说明原因和替代结构校验。出现 Repair 的候选必须作为失败候选记录，不能当最终输出。
 - 正式说服型 deck 的叙事质量结果：`deckProfile`、最低评分、最弱页、已接受 tradeoff
 - AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全
 - 剩余风险，例如字体未嵌入、外链、unsupported 对象、人工未审资源授权

@@ -10,6 +10,10 @@ Use these entry points from skill workflows:
 - `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
 - `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
 - `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.
+- `pptx-nova-deckkit-refurbish-profile-fill.mjs` - generate missing
+  `refurbishProfile` catalog entries for delivery DeckKits. It uses
+  DeckKit-specific palette/font overrides where available, preserves true native
+  skinning declarations, defaults to dry-run, and supports `--check` for CI.
 - `pptx-nova-icons.mjs` - query and generate the bundled Tabler icon pack.
 - `pptx-nova-check-lock.mjs` - validate `deck_lock.json`, `assets_manifest.json`,
   DeckKit content, and patch output before xdoc dry-run.

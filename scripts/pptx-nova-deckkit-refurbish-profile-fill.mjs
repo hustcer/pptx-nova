@@ -49,6 +49,39 @@ const PROFILE_OVERRIDES = {
       label: 'Inter',
       cjk: 'PingFang SC',
     },
+    titleZone: {
+      placement: 'top executive header with quiet eyebrow and decision headline',
+      headingStyle: 'Inter semibold, off-white, compact line height',
+      labelStyle: 'Inter uppercase, secondary blue-gray',
+      accentRule: 'thin copper rule or small copper label marker',
+      avoid: ['oversized poster titles', 'bright full-width title bars'],
+    },
+    tableRemap: {
+      structure: 'dense consulting benchmark table on dark evidence panel',
+      headerFill: 'palette.softAccent',
+      headerText: 'palette.text',
+      bodyFill: 'palette.surface',
+      borderColor: 'palette.rule',
+      emphasis: 'use palette.accent only for winning cells, deltas, or callout rows',
+      rules: [
+        'Keep table geometry and row count from the source deck.',
+        'Use tight Inter body text and muted secondary labels for sources or units.',
+        'Prefer thin internal rules over heavy boxed cells.',
+      ],
+    },
+    chartRemap: {
+      structure: 'compact data-first chart on dark surface panel',
+      backgroundFill: 'palette.surface',
+      primarySeries: 'palette.accent',
+      secondarySeries: 'palette.secondary',
+      axisColor: 'palette.secondary',
+      gridColor: 'palette.rule',
+      rules: [
+        'Keep native chart data and chart type unchanged unless the source is non-editable.',
+        'Use warm accent only for the key series or highlighted bar.',
+        'Keep labels concise and put interpretation in the title zone or callout.',
+      ],
+    },
   },
   'mckinsey-blue': {
     palette: {
@@ -67,6 +100,39 @@ const PROFILE_OVERRIDES = {
       cjk: 'Arial',
     },
     chromePolicy: 'replace-or-restyle-existing',
+    titleZone: {
+      placement: 'top boardroom header with blue subtitle bar',
+      headingStyle: 'Arial bold, dark navy, implication-led sentence case',
+      labelStyle: 'Arial uppercase, medium blue or slate',
+      accentRule: 'deep blue title bar with narrow cyan accent when subtitle exists',
+      avoid: ['poster typography', 'playful badges', 'decorative image headers'],
+    },
+    tableRemap: {
+      structure: 'white consulting matrix with blue header and light grid',
+      headerFill: 'palette.accent',
+      headerText: 'palette.background',
+      bodyFill: 'palette.surface',
+      borderColor: 'palette.rule',
+      emphasis: 'use medium blue for priority cells and muted green/red only for semantic deltas',
+      rules: [
+        'Preserve analytical row and column structure.',
+        'Use compact Arial text and clear source or assumption notes below the table.',
+        'Avoid rounded card-heavy table treatments.',
+      ],
+    },
+    chartRemap: {
+      structure: 'quiet boardroom chart with blue hierarchy',
+      backgroundFill: 'palette.background',
+      primarySeries: 'palette.accent',
+      secondarySeries: 'palette.secondary',
+      axisColor: 'palette.secondary',
+      gridColor: 'palette.rule',
+      rules: [
+        'Keep chart type and data series stable for auditability.',
+        'Use blue for the main proof series and slate for baselines.',
+        'Keep legends, axes, and notes compact rather than decorative.',
+      ],
+    },
   },
   broadside: {
     palette: {
@@ -83,6 +149,39 @@ const PROFILE_OVERRIDES = {
       body: 'Barlow',
       label: 'IBM Plex Mono',
       cjk: 'Noto Sans SC',
+    },
+    titleZone: {
+      placement: 'poster-scale typographic block, usually left or low on the page',
+      headingStyle: 'Barlow 900 lowercase, oversized, tight and flat',
+      labelStyle: 'IBM Plex Mono uppercase catalogue label',
+      accentRule: '1px rule or slash label, never a glossy title bar',
+      avoid: ['cream paper slides', 'multi-color title badges', 'rounded title cards'],
+    },
+    tableRemap: {
+      structure: 'editorial ledger or manifesto list rather than spreadsheet-like table',
+      headerFill: 'palette.background',
+      headerText: 'palette.accent',
+      bodyFill: 'palette.background',
+      borderColor: 'palette.rule',
+      emphasis: 'use fire orange for payoff cells or one comparison column only',
+      rules: [
+        'Convert dense tables into flat ledgers with mono labels when possible.',
+        'Use slash bullets and thin rules as table chrome.',
+        'Keep cell backgrounds flat and avoid alternating multicolor bands.',
+      ],
+    },
+    chartRemap: {
+      structure: 'flat editorial chart with one orange proof gesture',
+      backgroundFill: 'palette.background',
+      primarySeries: 'palette.accent',
+      secondarySeries: 'palette.secondary',
+      axisColor: 'palette.secondary',
+      gridColor: 'palette.rule',
+      rules: [
+        'Use orange for the dominant series or payoff panel only.',
+        'Reduce grid and legend chrome to mono labels and thin rules.',
+        'Prefer large labels and direct annotation over small decorative legends.',
+      ],
     },
   },
   coral: {
@@ -101,6 +200,39 @@ const PROFILE_OVERRIDES = {
       label: 'Inter',
       cjk: 'Noto Sans SC',
     },
+    titleZone: {
+      placement: 'hard-edged poster title block on cream, ink, or coral plane',
+      headingStyle: 'Bebas Neue all-caps, large condensed display',
+      labelStyle: 'Inter uppercase labels with restrained tracking',
+      accentRule: 'coral plane, top rule, hatch edge, or zigzag marker',
+      avoid: ['soft glass cards', 'low-contrast small white text on coral'],
+    },
+    tableRemap: {
+      structure: 'graphic card stack or objective table with coral top rules',
+      headerFill: 'palette.accent',
+      headerText: 'palette.text',
+      bodyFill: 'palette.surface',
+      borderColor: 'palette.text',
+      emphasis: 'use coral blocks and ink rules, not pastel bands',
+      rules: [
+        'Keep table shapes hard-edged with no shadow and no rounded SaaS card language.',
+        'Use Bebas Neue only for short headers or large numeric values.',
+        'Use Inter body text for readable table cells.',
+      ],
+    },
+    chartRemap: {
+      structure: 'native bar or KPI chart with coral and ink series',
+      backgroundFill: 'palette.background',
+      primarySeries: 'palette.accent',
+      secondarySeries: 'palette.text',
+      axisColor: 'palette.secondary',
+      gridColor: 'palette.softAccent',
+      rules: [
+        'Keep charts native and editable.',
+        'Use coral for progress or emphasis and ink for baselines.',
+        'Avoid gradients, shadows, and decorative chart containers.',
+      ],
+    },
   },
   'long-table': {
     palette: {
@@ -118,6 +250,39 @@ const PROFILE_OVERRIDES = {
       label: 'Fraunces',
       cjk: 'Microsoft YaHei',
     },
+    titleZone: {
+      placement: 'warm editorial title with optional edition badge or small right metadata',
+      headingStyle: 'Bricolage Grotesque bold, oversized, rust ink',
+      labelStyle: 'Fraunces small serif metadata',
+      accentRule: 'thin rust rule, badge outline, or menu divider',
+      avoid: ['stock food photo headers', 'SaaS cards', 'blue corporate title bars'],
+    },
+    tableRemap: {
+      structure: 'menu ledger or calendar row system on warm paper',
+      headerFill: 'palette.softAccent',
+      headerText: 'palette.text',
+      bodyFill: 'palette.background',
+      borderColor: 'palette.secondary',
+      emphasis: 'use deep rust for section labels, prices, or selected row markers',
+      rules: [
+        'Prefer row ledgers and menu sections over boxed spreadsheet grids.',
+        'Use thin rust dividers and serif metadata for units or dates.',
+        'Keep body copy short and editorial; dense data belongs in menu/calendar rows.',
+      ],
+    },
+    chartRemap: {
+      structure: 'simple editorial bar or count ledger in rust ink',
+      backgroundFill: 'palette.background',
+      primarySeries: 'palette.accent',
+      secondarySeries: 'palette.secondary',
+      axisColor: 'palette.text',
+      gridColor: 'palette.secondary',
+      rules: [
+        'Use charts sparingly; favor menu-style ledgers when data is categorical.',
+        'Keep all marks flat rust or soft paper tones.',
+        'Avoid multi-color infographic palettes.',
+      ],
+    },
   },
   'biennale-yellow': {
     palette: {
@@ -134,6 +299,39 @@ const PROFILE_OVERRIDES = {
       body: 'Arial',
       label: 'Courier New',
       cjk: 'Microsoft YaHei',
+    },
+    titleZone: {
+      placement: 'large editorial serif title on warm paper with mono page chrome',
+      headingStyle: 'Times New Roman large, ink blue, generous line height',
+      labelStyle: 'Courier New mono metadata for dates, page numbers, and strands',
+      accentRule: 'solar yellow block, translucent tile, or thin ink rule',
+      avoid: ['rounded cards', 'decorative icons', 'bitmap image headers'],
+    },
+    tableRemap: {
+      structure: 'institutional ledger with hairline ink rules and yellow markers',
+      headerFill: 'palette.surface',
+      headerText: 'palette.text',
+      bodyFill: 'palette.background',
+      borderColor: 'palette.rule',
+      emphasis: 'use solar yellow as a row marker or header plane, not colored body text',
+      rules: [
+        'Preserve editable rows and columns while reducing visual noise.',
+        'Use Arial for compact body cells and Courier New for dates or codes.',
+        'Keep separators thin and low-contrast except for structural ink rules.',
+      ],
+    },
+    chartRemap: {
+      structure: 'editable native bar/data block with solar yellow emphasis',
+      backgroundFill: 'palette.background',
+      primarySeries: 'palette.accent',
+      secondarySeries: 'palette.secondary',
+      axisColor: 'palette.text',
+      gridColor: 'palette.surface',
+      rules: [
+        'Use yellow as plane or bar emphasis and keep labels ink blue.',
+        'Keep atmospheric ember only for soft bloom shapes, not chart series.',
+        'Avoid multi-color infographic palettes and decorative chart frames.',
+      ],
     },
   },
 }
@@ -242,6 +440,42 @@ function fallbackFor(entry, nativeSkinning) {
     styleOps: override.styleOps ?? COMMON_STYLE_OPS,
     chromePolicy,
     contentPolicy: 'preserve-source-slides-and-editable-objects',
+    titleZone: override.titleZone ?? {
+      placement: 'preserve source title geometry and restyle into DeckKit typography',
+      headingStyle: fonts.heading + ' heading with palette.text',
+      labelStyle: fonts.label + ' label with palette.secondary',
+      accentRule: 'use palette.accent only for rule, marker, or short label emphasis',
+      avoid: [
+        'generic theme title bars',
+        'decorative title containers unrelated to source content',
+      ],
+    },
+    tableRemap: override.tableRemap ?? {
+      structure: 'preserve native table data and restyle cells into DeckKit palette',
+      headerFill: 'palette.softAccent',
+      headerText: 'palette.text',
+      bodyFill: 'palette.surface',
+      borderColor: 'palette.rule',
+      emphasis: 'use palette.accent for header, deltas, or selected cells only',
+      rules: [
+        'Keep source row and column semantics stable.',
+        'Use DeckKit fonts and high-contrast text for all readable cells.',
+        'Avoid decorative fills that obscure table data.',
+      ],
+    },
+    chartRemap: override.chartRemap ?? {
+      structure: 'preserve native chart data and restyle chart chrome into DeckKit palette',
+      backgroundFill: 'palette.background',
+      primarySeries: 'palette.accent',
+      secondarySeries: 'palette.secondary',
+      axisColor: 'palette.secondary',
+      gridColor: 'palette.rule',
+      rules: [
+        'Keep source chart type and data series stable.',
+        'Use palette.accent for the primary proof series.',
+        'Keep axes, gridlines, and legends quiet and readable.',
+      ],
+    },
   }
 }
 

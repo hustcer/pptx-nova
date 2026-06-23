@@ -44,6 +44,32 @@ op schema 和 dry-run suggestions。`xdoc <command...> --help` 仅作补充，�
 只有调用方显式要求 strict gate 且任务必需能力仍未披露时才阻塞；否则继续探索或走已有
 fallback，不得因快照精简而禁用 xdoc 新能力。
 
+## 产物保留与清理策略
+
+`.pptx-nova/<slug>-<timestamp>/` 是可审计 run 目录，不是普通缓存。任务完成后不要默认删除
+整个 run 目录，也不要在最终回复前清理会影响复现、审计或继续编辑的证据。
+
+默认保留最小证据包：`xdoc-capabilities.json`、`outline.json`、`deck_lock.json`、
+`content.json`、`patch.json`、sidecar、dry-run/apply/refurbish 报告、`vision.json`、
+`visual_review.json`、`check.json`、`evidence-summary.json`、`layout-final.json`、
+`fidelity-gate.json`、`content-audit-final.json`、最终候选 PPTX、contact sheet 和人工复核
+必需的少量问题页 PNG。实际不存在的项无需补造。
+
+成功交付后可以瘦身当前 run 的可重建重型产物，例如全量逐页 PNG、重复导出目录、临时转换缓存、
+调试日志、失败迭代的中间 PPTX 和不再引用的 scratch 文件；但必须保留 contact sheet、失败或可疑
+页面的 PNG、最终候选、关键 JSON 报告和 sidecar。任务失败、被中断、验证未通过或用户可能继续排错时，
+保留完整现场，不做自动瘦身。
+
+清理只能作用于本次 run 的可重建产物。不得删除用户源 PPTX、最终输出、用户提供的资源文件、
+参考模板、工作区外路径、整个 `.pptx-nova` 目录，或任何不是本 skill 当前 run 创建的内容。
+跨 run 清理必须由用户显式要求，并先列出候选 run、清理范围和保留证据；建议只清理成功 run 中
+超过 14 天的可重建重型产物，并保留每个 run 的最小证据包。
+
+如果用户显式要求 `--cleanup`、"清理中间产物" 或等价指令，执行最小证据包保留策略，而不是删除
+全部证据。如果用户要求 `--keep-all` 或需要 debug / 复现 / 继续编辑，保留全部产物。发生清理时写
+`cleanup-manifest.json`，记录保留证据和删除的可重建产物类型。最终摘要必须说明 run 目录是否已瘦身、
+保留了哪些关键证据、删除了哪类可重建产物；未执行清理时也要说清楚。
+
 ## 快速路径
 
 先用下面的最短路径定向，再进入任务路由表读取细节。不要把它当成替代流程；它只是防止
@@ -351,6 +377,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - run 目录
 - 关键中间产物：`outline.json`、`deck_lock.json`、`content.json`、`patch.json`、sidecar、
   `xdoc-capabilities.json`、`vision.json`、预览目录、contact sheet、`check.json` 等实际存在项
+- 产物保留/清理状态：是否保留完整 run、是否按最小证据包瘦身、清理了哪些可重建重型产物
 - xdoc 审计信息：版本、CLI schema 版本、任务必需能力是否 fully disclosed、是否使用
   degraded discovery 或 fallback；不要把 undisclosed 写成 unsupported
 - 验证结果：dry-run、apply、vision-check、`structure-check.json`、PNG/contact-sheet 复核、`visual_review.json`、可选 preflight
@@ -370,7 +397,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 
 | 文件                                      | 用途                                                             |
 | ----------------------------------------- | ---------------------------------------------------------------- |
-| `references/common-workflow.md`           | run 目录、输出防碰撞、dry-run/apply/vision/PNG 公共流程          |
+| `references/common-workflow.md`           | run 目录、输出防碰撞、产物保留/清理、公共流程                    |
 | `references/deckkit-mode.md`              | DeckKit 选择、readiness、content、用户可见 examples              |
 | `references/create-express.md`            | 简单 prompt 快速生成 deck                                        |
 | `references/create-studio.md`             | 高风险/正式/精控 deck 的确认、设计锁和 split                     |

@@ -32,6 +32,48 @@ contact sheets, logs, and generated helper scripts.
 
 Do not scatter temporary files beside the source PPTX or final output.
 
+## Artifact Retention And Cleanup
+
+Treat each `.pptx-nova/<slug>-<YYYYMMDD-HHMMSS>/` run directory as an audit
+record, not a disposable cache. Do not delete the run directory automatically at
+the end of a task, and do not clean files before the final summary if that would
+hide validation evidence, selector resolution, sidecar replay data, visual
+review context, or a failure state.
+
+Keep this minimum evidence set after successful delivery when the files exist:
+`xdoc-capabilities.json`, `outline.json`, `deck_lock.json`, `content.json`,
+`patch.json`, sidecar files, dry-run/apply/refurbish JSON reports,
+`vision.json`, `visual_review.json`, `check.json`, `semantic-audit.json`,
+`structure-check.json`, `evidence-summary.json`, `layout-final.json`,
+`fidelity-gate.json`, `content-audit-final.json`, the final candidate PPTX, the
+contact sheet, and any PNG files needed to explain suspicious or manually
+reviewed slides.
+
+After a successful task, optional cleanup may remove only current-run artifacts
+that are heavy and reproducible: full per-slide PNG sets once the contact sheet
+and reviewed issue pages are kept, duplicate export directories, transient
+conversion caches, scratch logs, failed-iteration intermediate PPTX files, and
+unreferenced helper scratch files. If the task failed, was interrupted, has
+unresolved validation risk, or is likely to continue in a later turn, keep the
+full run directory.
+
+Cleanup is scoped to reproducible artifacts from the current run. Never delete
+the source PPTX, final output, user-provided assets, reference templates, files
+outside the selected run directory, the entire `.pptx-nova` directory, or files
+not created by the current `pptx-nova` workflow. Cross-run cleanup requires an
+explicit user request; first list the candidate runs, cleanup scope, and
+evidence that will be preserved. A safe default is to prune only reproducible
+heavy artifacts from successful runs older than 14 days while keeping the
+minimum evidence set.
+
+If the user asks for `--cleanup` or "清理中间产物", apply the minimum evidence
+policy instead of deleting everything. If the user asks for `--keep-all`, or if
+debugging/replay/continued editing is expected, keep every artifact. Record the
+cleanup decision in the final summary: full run kept, slimmed to evidence set,
+or cleanup skipped, plus the artifact classes removed when slimming happened.
+When slimming removes files, write `<run-dir>/cleanup-manifest.json` with the
+preserved evidence list and removed artifact classes.
+
 ## Output Safety
 
 For create workflows, if the user explicitly names a final `.pptx` output path
@@ -253,10 +295,15 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 ```
 
 12. Copy or write the validated final deck to the requested final path.
-13. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
+13. Apply the artifact retention decision. Keep the full run by default; slim
+    only reproducible current-run heavy artifacts when the task succeeded and
+    no debug/replay continuation is expected, or when the user explicitly asked
+    for cleanup. If files are removed, write `cleanup-manifest.json`.
+14. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
     xdoc/schema versions, important intermediate files, validation results,
     high-risk `evidence-summary.json` / `layout-final.json` when applicable,
-    preview/contact sheet path, discovery/fallback warnings, and remaining risks.
+    preview/contact sheet path, artifact retention/cleanup status,
+    discovery/fallback warnings, and remaining risks.
 
 ## Source Ingestion (HTML / URL / PDF)
 

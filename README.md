@@ -1,182 +1,218 @@
-# pptx-nova Skill 使用指南
+# pptx-nova 使用指南
 
-`pptx-nova` 用本机 `xdoc` CLI 创建、修改和检查原生可编辑的 `.pptx` 演示文稿。它适合让
-Agent 交付真正的 PowerPoint 文件，而不是 SVG 截图、HTML 页面或不可编辑图片。
+`pptx-nova` 可以帮你制作、修改、翻新和检查 PowerPoint 演示文稿。你只需要用日常语言说明想要什么，
+它会尽量交付一份真正可编辑的 `.pptx` 文件，而不是一张张截图。
 
-本文面向 skill 使用者和执行 Agent。维护者开发流程见仓库文档；使用本 skill 时不需要仓库根
-`tools/` 或 `Justfile`。
+这份文档写给普通使用者。你不需要了解命令行、配置文件或内部流程。
 
-## 适用场景
+## 你可以让它做什么
 
-- 从一句话、需求说明、Markdown 大纲、表格或数据生成新的 `.pptx`。
-- 从网页 URL、HTML 文件或 PDF 提取文本作为素材生成或填充 deck（先由 xdoc 归一化为 Markdown/文本）。
-- 按用户已经提供的大纲直接生成 deck。
-- 参考一份已有 PPTX 的风格，再用新的大纲或内容生成新 PPTX。
-- 修改已有 `.pptx`，例如改文字、增删页、替换图表数据、重排元素或套品牌色。
-- 把数据填入模板，做季度汇报、路演、管理汇报、课程、产品更新等演示文稿。
-- 导出 PNG/PDF 预览、做视觉检查、做品牌合规检查。
+你可以用 `pptx-nova` 做这些事情：
 
-## 使用前提
+- 从一句话或一段说明生成一份新的 PPT。
+- 根据你给的大纲、文档、网页、PDF 或表格资料整理成 PPT。
+- 参考一份已有 PPT 的风格，做一份内容不同的新 PPT。
+- 套用公司模板，把新内容填进去。
+- 翻新一份旧 PPT，让它更统一、更专业，但保留原本内容。
+- 修改已有 PPT，比如改标题、替换数据、调整页面、换图片、改配色。
+- 把 Excel、表格或其他数据文件做成表格页或图表页。
+- 导出 PDF 或图片预览，方便检查和分享。
+- 检查 PPT 是否有文字重叠、内容被截断、页面不整齐等问题。
 
-- 本机可运行 `xdoc` CLI。
-- 本机可运行 Node.js，用于 skill 内置脚本和 DeckKit 生成器。
-- `skills/pptx-nova/` 目录保持完整，至少包含 `SKILL.md`、`assets/`、`references/` 和
-  `scripts/`。
-- 生成或修改 PPTX 时，Agent 会在当前工作目录下创建 `.pptx-nova/<run>/` 保存中间产物。
+## 最简单的用法
 
-## 如何向 Agent 提需求
+你可以直接这样说：
 
-给的信息越明确，成品越稳定。建议至少说明：
+```text
+用 pptx-nova 做一份 8 页中文路演 PPT，主题是 AI 质检平台，受众是制造业 CIO，
+风格要专业、清爽，输出 ai-roadshow.pptx。
+```
 
-- 目标：这份 deck 要解决什么问题，给谁看。
-- 输出：最终文件名、语言、页数范围、是否需要 PDF/PNG 预览。
-- 内容：已有大纲、每页标题、关键数据、表格、图表或材料链接。
-- 风格：正式/咨询/产品/课程/极简，是否有品牌色、字体、参考 PPTX。
-- 约束：必须保留的观点、不能改的页序、需要避开的表达或敏感信息。
+也可以这样说：
+
+```text
+把 qbr.pptx 翻新一下，内容不要变，视觉更像咨询公司汇报，输出 qbr-new.pptx。
+```
+
+或者：
+
+```text
+修改 qbr.pptx，把第 3 页的 KPI 数据换成 data.csv 里的数据，不要覆盖原文件。
+```
+
+## 你最好提供哪些信息
+
+不需要一次说得很完美，但如果你能提供下面这些信息，结果通常会更好：
+
+- **用途**：这是路演、内部汇报、销售材料、培训课件，还是客户提案？
+- **受众**：给老板、客户、投资人、同事、学生，还是公开演讲？
+- **页数**：大概几页，或者是否有固定页数。
+- **语言**：中文、英文，还是中英混合。
+- **内容**：大纲、文档、表格、旧 PPT、网页链接、PDF、图片或 logo。
+- **风格**：正式、简洁、咨询风、科技感、品牌规范、课程风等。
+- **限制**：哪些内容不能改，哪些页面必须保留，是否允许重排结构。
+- **输出**：最终文件名，是否需要 PDF 或图片预览。
+
+你可以只给一句话开始；如果信息不够，助手会根据任务情况继续推进，或在关键地方向你确认。
+
+## 常见需求写法
+
+### 1. 快速生成一份新 PPT
+
+```text
+用 pptx-nova 快速做一份 6 页中文产品介绍 PPT，主题是企业知识库助手。
+受众是销售团队，风格简洁、商务，输出 product-intro.pptx。
+```
+
+适合：你有一个主题，但还没有完整大纲。
+
+### 2. 按大纲生成 PPT
+
+```text
+根据下面大纲生成一份 10 页 PPT，中文，风格正式，用于季度业务复盘。
+1. 封面
+2. 本季度业绩概览
+3. 收入变化
+4. 用户增长
+5. 重点项目进展
+6. 风险与问题
+7. 下季度目标
+8. 资源需求
+9. 行动计划
+10. Q&A
+```
+
+适合：你已经知道每页要讲什么。
+
+### 3. 参考已有 PPT 风格
+
+```text
+参考 reference.pptx 的视觉风格，用 new-outline.md 的内容生成一份新 PPT。
+不要复用 reference.pptx 里的旧文案，只参考风格和页面节奏。
+```
+
+适合：你喜欢某份 PPT 的风格，但要做一份新内容。
+
+### 4. 翻新旧 PPT
+
+```text
+翻新 old-report.pptx，页数和内容保持不变，整体更专业、更统一。
+输出 old-report-refined.pptx，并给我图片预览。
+```
+
+适合：旧 PPT 内容还可以，但视觉过时、不统一或不够正式。
+
+### 5. 修改已有 PPT
+
+```text
+修改 sales.pptx：
+第 2 页标题改成「2026 年销售目标」；
+第 5 页替换成 new-chart-data.csv 的数据；
+输出 sales-updated.pptx。
+```
+
+适合：你只想改现有 PPT 的一部分。
+
+### 6. 套公司模板
+
+```text
+用 company-template.pptx 的模板和品牌风格，把 outline.md 做成一份新 PPT。
+尽量保留模板的版式和占位符。
+```
+
+适合：公司有固定模板，不能随便换风格。
+
+### 7. 只做检查或导出
+
+```text
+检查 final.pptx 有没有文字重叠、截断或版式问题，不要修改文件。
+```
+
+```text
+把 final.pptx 导出成 PDF 和每页 PNG 预览。
+```
+
+适合：你已经有 PPT，只需要确认质量或导出材料。
+
+## 交付时你会得到什么
+
+通常会包含：
+
+- 一份最终 `.pptx` 文件。
+- 如果你要求，会有 PDF 或图片预览。
+- 简短说明：改了什么、生成了什么、有没有需要你注意的地方。
+- 如果任务复杂，会保留一份工作记录，方便后续继续修改或排查问题。
+
+默认不会覆盖你的原始 PPT。除非你明确要求“直接覆盖原文件”，否则会输出到一个新文件。
+
+## 哪些材料特别有帮助
+
+如果你有这些材料，可以一起提供：
+
+- 公司 logo、品牌色、字体要求。
+- 以前做过且你喜欢的 PPT。
+- 公司标准模板。
+- 产品截图、架构图、人物照片、客户案例图片。
+- 表格数据、图表数据、指标口径说明。
+- 参考文案、官网、白皮书、PDF、会议纪要。
+
+如果缺少 logo、截图或官方素材，助手不会假装生成“官方素材”。它会用文字、简单图形或占位说明替代，
+并在结果里告诉你。
+
+## 翻新 PPT 时要知道的事
+
+“翻新”通常表示：内容不变，视觉变好。
+
+所以默认会尽量保留：
+
+- 原来的页数。
+- 原来的文字和主要观点。
+- 表格、图表、图片、备注等可见内容。
+- 页面之间的逻辑顺序。
+
+如果旧 PPT 本身内容太密、页面装不下，可能需要你确认是否允许拆页、删减文字或重排结构。
+
+## 什么时候需要先确认
+
+这些情况通常更适合先确认大纲或方向，再生成完整 PPT：
+
+- 投资人路演、董事会材料、客户正式提案。
+- 公司品牌要求很严格。
+- 页数很多，或资料很多。
+- 你要求“严格套模板”。
+- 你不希望助手自行补充事实或改写观点。
+- 旧 PPT 内容很复杂，翻新时可能影响原内容。
+
+如果你赶时间，也可以直接说明“先快速出一版”，助手会尽量减少来回确认。
+
+## 不适合这样要求
+
+为了保证 PPT 能继续编辑，不建议这样使用：
+
+- “直接把每页截图塞进 PPT 就行。”
+- “旧内容可以随便删，只要看起来高级。”
+- “参考 PPT 里的图片都拿来用”，但没有授权或来源说明。
+- “覆盖原文件”，但没有明确备份或输出路径。
+- “严格按模板”，同时又要求完全不同的页面结构。
+
+## 一句话模板
+
+你可以复制下面这个格式来提需求：
+
+```text
+用 pptx-nova 做一份【页数】【语言】PPT，主题是【主题】，
+受众是【受众】，用途是【用途】，
+风格希望【风格】，
+内容来自【大纲/文档/旧 PPT/表格/链接】，
+输出文件名是【文件名.pptx】。
+```
 
 示例：
 
 ```text
-用 pptx-nova 生成一份 8 页中文投资人路演 PPTX，文件名叫 ai-roadshow.pptx。
-受众是制造业 CIO，风格参考 reference.pptx，但内容按下面大纲走：
-1. 封面：AI 质检平台
-2. 行业痛点
-3. 方案架构
-4. 核心指标
-5. 客户案例
-6. 商业模式
-7. 路线图
-8. 融资用途
+用 pptx-nova 做一份 12 页中文 PPT，主题是 2026 年产品路线图，
+受众是公司管理层，用途是季度战略会，
+风格希望正式、清爽、偏咨询风，
+内容来自 roadmap.md 和 metrics.csv，
+输出文件名是 product-roadmap-2026.pptx。
 ```
-
-```text
-修改 qbr.pptx，把第 3 页 KPI 数据替换成这个表格，并输出 qbr-updated.pptx。
-不要覆盖原文件，完成后导出 PNG 预览。
-```
-
-## 生成新 PPTX 的工作流
-
-新建 deck 默认走 DeckKit-first 路径：
-
-```text
-用户需求或大纲
-  -> outline.json
-  -> deck_lock.json
-  -> DeckKit 选择和 readiness 检查
-  -> content.json 或 patch
-  -> dry-run
-  -> apply 生成 PPTX
-  -> vision-check
-  -> PNG/contact sheet 复核
-```
-
-如果用户已经提供大纲，Agent 会直接采用并标准化为 `outline.json`。只有大纲互相矛盾、内容明显
-装不下、缺少关键数据，或用户要求优化结构时，才会先给修订版或问题让用户确认。
-
-如果用户只给一句话且强调“快”，默认使用 Express 模式：Agent 会自行生成大纲并继续交付，在最终
-摘要里列出关键假设。若是投资人路演、董事会、客户正式汇报、品牌口径敏感或用户明确要求“先给大纲”，
-Agent 会先展示短大纲，确认后再生成 PPTX。
-
-## Resume / Split mode
-
-长 deck 或高风险 deck 可以分两段完成。Agent 先在 run 目录里写好 `outline.json`、
-`deck_lock.json`、必要的 `assets_manifest.json`、`source_brief.md` 和 `resume_manifest.json`，
-然后停在 Phase A handoff。你可以在新会话里输入：
-
-```text
-继续生成 /abs/path/.pptx-nova/<run>
-```
-
-恢复时 Agent 会先检查 run 目录、输出路径、资源状态和设计锁，再从 `content.json` / `patch.json`
-生成阶段继续。这个模式适合 12 页以上、投资人/董事会/客户正式汇报、参考 PPTX 信息很多、公式或图片
-资源较多的任务；它不会改成 SVG 路线，最终仍是原生可编辑 PPTX。
-
-## 参考 PPTX 生成新文件
-
-当用户提供参考 PPTX 和新大纲时，`pptx-nova` 会把参考文件当作视觉和结构输入，源文件默认只读。
-常见路线：
-
-- 只要风格相似：抽取参考 deck 的颜色、字体、密度和页面节奏，再用新内容重建。
-- 需要版式相似：inspect 参考 deck，建立新大纲页到参考页型的映射。
-- 需要复用模板占位符：走 data-driven/template 路线。
-- 要直接改参考文件本身：走 Edit 模式，而不是 Reference Create。
-
-交付时不应把参考 deck 的旧文本、旧数据或未授权图片带进新文件，除非用户明确要求复用。
-
-## 修改已有 PPTX 的工作流
-
-修改已有 deck 时，源文件默认只读。Agent 会先 inspect，再写 patch，并通过 dry-run 预演选择器和风险：
-
-```text
-input.pptx
-  -> inspect.json
-  -> patch.json
-  -> dry-run
-  -> apply 到新输出文件
-  -> vision-check / PNG 复核
-```
-
-如果用户要求原地修改，也应先在 `.pptx-nova/<run>/` 里完成验证，再按用户明确意图写回原路径。
-
-## 质量标准
-
-创建型 deck 交付前必须通过这些检查：
-
-- `xdoc pptx apply --dry-run --json` 没有未解决的语义风险。
-- `xdoc pptx vision-check` 的 high 和 medium 都为 0。
-- PNG 或 contact sheet 逐页复核无文字重叠、截断、贴边、页脚撞正文、连接线偏移等问题。
-- 可见正文有阅读底线：核心正文通常不低于 `10.5pt`，辅助标签不低于 `9pt`。
-- 最终 PPTX 是原生可编辑内容，不是整页截图或 SVG 中转。
-
-如果任一检查失败，Agent 应回到 `outline.json`、`content.json`、DeckKit 或 patch 修正后重跑。
-
-## 交付物
-
-成功完成后，Agent 的最终回复应包含：
-
-- 最终 `.pptx` 的绝对路径。
-- run 目录路径，例如 `.pptx-nova/<slug>-<timestamp>/`。
-- 关键中间产物：`outline.json`、`content.json` 或 `patch.json`、sidecar、`vision.json`、预览目录。
-- 若使用 split/resume，还应包含 `deck_lock.json`、`resume_manifest.json` 和 `source_brief.md`（如有）。
-- 验证结果：dry-run、vision-check、PNG/contact sheet 复核。
-- 尚需用户注意的风险，例如参考 deck 中未复用的复杂动画、缺失字体、授权素材未复制等。
-
-## 内置脚本
-
-`skills/pptx-nova/scripts/` 是发布包的一部分。常用脚本包括：
-
-- `pptx-nova-deckkit-select.mjs`：选择符合场景、语言、密度和页型要求的 DeckKit。
-- `pptx-nova-deckkit-readiness.mjs`：检查 DeckKit 是否满足 candidate/delivery/default 要求。
-- `pptx-nova-deckkit-benchmark.mjs`：运行内置视觉 benchmark。
-- `pptx-nova-deckkit-catalog-update.mjs`：更新 DeckKit 质量元数据。
-- `pptx-nova-icons.mjs`：离线查询和读取内置 Tabler 图标 pack。
-
-命令示例中的 `<skill-root>` 指 `skills/pptx-nova/` 目录：
-
-```bash
-node <skill-root>/scripts/pptx-nova-icons.mjs search "analytics dashboard" --json
-node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery --json
-```
-
-普通使用时通常不需要手动调用这些脚本；Agent 会在需要时调用它们。
-
-## 不要这样使用
-
-- 不要要求 Agent 用整页截图、SVG 中转或不可编辑图片冒充 PPTX。
-- 不要在创建型 deck 中跳过大纲、dry-run、vision-check 或 PNG 复核。
-- 不要把根仓库 `tools/`、`Justfile` 或 skill 目录外的脚本作为发布后使用路径。
-- 不要直接覆盖用户已有 PPTX；除非用户明确要求，始终输出到新文件。
-- 不要在用户已提供大纲时擅自重排核心页序或改写主要观点。
-
-## 进一步阅读
-
-- `SKILL.md`：Agent 执行时的触发、路由和公共红线。
-- `references/common-workflow.md`：run 目录、输出防碰撞、dry-run/apply/vision/PNG 公共流程。
-- `references/deckkit-mode.md`：DeckKit 选择、readiness、content 和用户可见 examples。
-- `references/create-express.md`：一句话或已有大纲快速生成 deck。
-- `references/create-studio.md`：客户级 / 投资人级 / 精控 deck。
-- `references/reference-create.md`：参考 PPTX + 新大纲生成新 deck。
-- `references/edit-mode.md` / `references/inspect-and-edit.md`：修改已有 PPTX。
-- `references/export-and-check.md`：PDF/PNG/MD/JSON 导出、提取和检查。
-- `references/data-driven.md`：数据驱动和模板填充。
-- `references/troubleshooting.md`：常见失败与修复方式。

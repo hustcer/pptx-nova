@@ -668,3 +668,28 @@ triangle / x / star / dash / dot / plus / none / auto`。
 - ❌ scatter / bubble 用了 `categories + values` 会失败 — 用 `points: [{x,y}]`
 - ❌ stock 的 high/low/close 数组长度必须等于 categories
 - ❌ 不要假定 chart 内部坐标系跟 slide 一样 — `set-chart-axis-scale` 是 chart-local
+
+## ChartEx creation and verification notes
+
+For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
+`histogram`, `boxWhisker`, and `funnel`, do not assume that a successful
+`xdoc pptx apply --dry-run` means the object will render in PowerPoint.
+
+- Use the ChartEx-specific `dataEx` payload shape. Do not pass the ordinary
+  chart `data.categories` / `data.series` shape for these kinds unless the
+  current xdoc schema explicitly documents that mapping.
+- Avoid ordinary chart mutators on ChartEx parts. In particular, do not write
+  normal `<c:title>` or `<c:legend>` nodes into `ppt/charts/chartEx*.xml`.
+  Put page titles, legends, and explanatory labels in separate editable
+  textboxes when needed.
+- `xdoc convert` is not sufficient evidence for ChartEx rendering. Always
+  verify these chart types with PowerPoint snapshots:
+  `nu tools/pptx-snapshot.nu deck.pptx --slides N-M --out out/slide-%d.png --json`.
+  If PDF export and live rendering disagree, use `--method window` on a single
+  suspect slide to inspect the live PowerPoint window.
+- If PowerPoint displays `This chart isn't available in your version.`, the
+  candidate is not shippable as a ChartEx object even if the OOXML is
+  well-formed and xdoc inspect succeeds.
+- When a deadline requires a PowerPoint-renderable deliverable before ChartEx
+  OOXML support is fixed, use native editable shapes/text to recreate the
+  visual chart and document that it is not a native chart object.

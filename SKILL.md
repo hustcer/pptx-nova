@@ -322,6 +322,10 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   subtitle、callout、正文或 notes。
 - 将 PPTX 转成 PNG/PDF 或检查生成的 PPTX 时，可能出现 `XDOC DEMO` 等工具水印；这类水印通常只在
   slide 右上角出现，可在人工视觉复核中忽略，不应当作 DeckKit 构图、遮挡或内容缺陷处理。
+- 凡是需要以 PowerPoint 显示效果为准进行截图、预览、并排对比或视觉验证时，优先使用
+  `nu tools/pptx-snapshot.nu ... --method pdf-render`。只有 `pdf-render` 失败并保留失败
+  JSON/stderr 证据后，才允许退回 `--method window`；不要把用户说的"PowerPoint 截图"理解成
+  默认使用窗口模式截图。
 
 PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。机器门禁不能看出所有像素级缺陷，
 尤其要检查：

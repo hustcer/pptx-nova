@@ -329,6 +329,10 @@ Stock 数据必须先做语义不变量检查，再写入或交付：
 
 走同样的 `add-chart`,kind 选对即可;内部会写入 `ppt/charts/chartExN.xml`(modern
 chart 部件),并自动建立 `chartEx` 关系类型。`variant` 必须是 `standard`。
+这些 PowerPoint-only 图表必须使用 ChartEx 专用 `dataEx` 载荷，不要把普通
+`data.categories` / `data.series` 当作等价输入，除非当前 xdoc schema 明确说明支持自动
+lowering。对照参考 deck 时，以 PowerPoint 生成的 `chartEx*.xml` 语义为准，而不是用
+普通 chart 经验猜维度、axis、dataLabels 或 layoutPr。
 
 ```json
 {
@@ -340,12 +344,33 @@ chart 部件),并自动建立 `chartEx` 关系类型。`variant` 必须是 `stan
   "y": "1.5in",
   "w": "10in",
   "h": "5in",
-  "data": {
-    "categories": ["起始", "Q1", "Q2", "Q3", "结束"],
-    "series": [{ "name": "现金流", "values": [100, -20, 35, 50, 165] }]
+  "dataEx": {
+    "points": [
+      { "label": "起始", "value": 100, "kind": "total" },
+      { "label": "Q1", "value": -20, "kind": "decrease" },
+      { "label": "Q2", "value": 35, "kind": "increase" },
+      { "label": "Q3", "value": 50, "kind": "increase" },
+      { "label": "结束", "value": 165, "kind": "total" }
+    ]
   }
 }
 ```
+
+ChartEx 语义要点：
+
+- `waterfall`：`points[].kind` 使用 `increase` / `decrease` / `subtotal` / `total`；
+  subtotal/total 应映射到 `<cx:subtotals>`，不要凭空写 `<cx:aggregation/>`。
+- `funnel`：`stages[]` 的数值维度应是 `numDim type="val"`，不是 `size`；通常需要
+  value data labels 和 funnel 自己的 category axis gapWidth。
+- `histogram`：用原始样本 `values[]`，PowerPoint 语义通常是
+  `layoutId="clusteredColumn"` + `<cx:binning intervalClosed="r">`，不是自造普通柱图。
+- `sunburst` / `treemap`：层级输入可用 `nodes[]`，但写入 ChartEx 时通常只输出叶子行；
+  多级 category cache 按 PowerPoint 的 leaf-to-root 层级顺序写入，不能把中间节点也当成
+  独立 data point。
+- `boxWhisker`：每个 series 可带 `categories[]`，长度必须等于 `values[]`；重复的
+  `Day1` / `Day2` / `Day3` 等 category label 用来形成分组轴，不能退化成单一 category。
+- 参考 deck 复刻时，优先复用同类型既有 ChartEx 的 `chartStyle` / `chartColorStyle`
+  关系，并补 parser/generator 回归测试固定上述语义。
 
 > ⚠️ chartEx 部件在 PowerPoint 2016+ 才完整支持;部分老旧渲染器(WPS 旧版、
 > LibreOffice <7.4) 会忽略 chartEx 节点回退到 fallback 图。要 100% 兼容时优先
@@ -683,10 +708,13 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   Put page titles, legends, and explanatory labels in separate editable
   textboxes when needed.
 - `xdoc convert` is not sufficient evidence for ChartEx rendering. Always
-  verify these chart types with PowerPoint snapshots:
-  `nu tools/pptx-snapshot.nu deck.pptx --slides N-M --out out/slide-%d.png --json`.
-  If PDF export and live rendering disagree, use `--method window` on a single
-  suspect slide to inspect the live PowerPoint window.
+  verify these chart types with a non-interactive PowerPoint baseline render:
+  `nu tools/pptx-snapshot.nu deck.pptx --slides N-M --out out/slide-%d.png --method pdf-render --json`.
+  Treat user phrases such as "PowerPoint 截图" or "用 PowerPoint 显示效果对比" as
+  PowerPoint render verification, not as permission to use window-mode screenshots.
+  Use `--method window` only if `pdf-render` fails; keep the failed pdf-render
+  report and record the fallback reason. Window capture is slow and can
+  interfere with the user's desktop, so scope it to the minimum suspect slides.
 - If PowerPoint displays `This chart isn't available in your version.`, the
   candidate is not shippable as a ChartEx object even if the OOXML is
   well-formed and xdoc inspect succeeds.

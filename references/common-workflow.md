@@ -383,6 +383,19 @@ separate lightweight path.
 still deserve judgment, especially small fonts, unexpected subtitle/label wraps,
 dense text, and alignment.
 
+PowerPoint display-effect screenshots and comparisons:
+
+- When a visual gate must reflect PowerPoint's display/export result, render
+  with `pptx-snapshot.nu --method pdf-render` first:
+  `nu tools/pptx-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json`.
+- Treat phrases such as "PowerPoint 截图", "PowerPoint 显示效果", "PowerPoint
+  preview", and "PowerPoint 对比" as this non-interactive PowerPoint render
+  verification path, not as a request for window capture.
+- Use `--method window` only after `pdf-render` fails. Preserve the failed
+  `pdf-render` JSON/stderr in the run directory, record the fallback reason in
+  `visual_review.json` or the final summary, and scope window capture to the
+  minimum suspect slides.
+
 PNG/contact-sheet review remains required for pixel-level concerns:
 
 - title wraps colliding with decorative rules, logo areas, headers, or page

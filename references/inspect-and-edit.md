@@ -159,7 +159,7 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 `select`，不要把完整 `inspect.json` 全量喂给模型反复筛选。
 
 ```bash
-xdoc pptx select input.pptx --query '{"textRegex":"(?i)revenue"}' --json \
+xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json \
   > <run-dir>/select-revenue.json
 
 xdoc pptx select input.pptx --query '{"nameRegex":"^KPI"}' --slides 2-4 --json \
@@ -176,7 +176,7 @@ query 复用 patch 的 `ShapeQuery`：
 
 ```json
 {
-  "textRegex": "(?i)revenue",
+  "textRegex": "Revenue",
   "nameRegex": "^KPI",
   "placeholder": { "type": "title", "idx": 0 },
   "bboxNear": { "x": "1in", "y": "1in", "radius": "0.4in" }
@@ -242,7 +242,7 @@ obj / chart / tbl / clipArt / dgm / media / sldImg / pic`。
 "shape": {
   "query": {
     "nameRegex": "^Section.*",
-    "textRegex": "(?i)revenue",
+    "textRegex": "Revenue",
     "placeholder": { "type": "title" },
     "bboxNear": { "x": "1in", "y": "1in", "radius": "0.25in" }
   }

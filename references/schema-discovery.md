@@ -164,7 +164,7 @@ outerShadow / innerShadow / glow / reflection / softEdge
 典型查询：
 
 ```bash
-xdoc pptx select input.pptx --query '{"textRegex":"(?i)revenue"}' --json
+xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
 xdoc pptx select input.pptx --query '{"nameRegex":"^KPI","slideIndex":0}' --json
 xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
 ```

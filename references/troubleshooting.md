@@ -89,7 +89,7 @@ xdoc schema | jq '.errorCatalog.scenarioCoverage'
 | `CHART_DATA_MISMATCH`      | chart data 形状错                               | 看 `expected` / `actual`                                                 |
 | `TABLE_DIMENSION_MISMATCH` | set-table-data 无 resize 时维度错               | 加 `resize: true` 或对齐                                                 |
 | `MERGE_CONFLICT`           | merge 与既有合并冲突                            | 先 unmerge 再合并                                                        |
-| `INVALID_LENGTH`           | length 字段格式错                               | 用 `"1in"` / 数字 EMU                                                    |
+| `INVALID_LENGTH`           | length 字段格式错                               | 用数字 EMU 或带 `emu/in/cm/mm/pt/px` 后缀的字符串                        |
 | `INVALID_COLOR`            | color 格式错                                    | 用 6 位 hex                                                              |
 | `OutputExists`             | `-o` 指向的文件已存在                           | 加 `--overwrite` 或换路径                                                |
 | `InvalidSidecar`           | sidecar JSON 不是 `pptx-apply-sidecar/v1`       | 重新生成 sidecar / 换路径                                                |

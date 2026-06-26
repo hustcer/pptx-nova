@@ -153,6 +153,52 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
   | select id name shapeType fillColor lineColor lineWidthEmu bbox
 ```
 
+## 1.5 用 `xdoc pptx select` 缩小候选
+
+当目标 shape 能用文字、名称、placeholder 或大致位置描述时，优先用只读
+`select`，不要把完整 `inspect.json` 全量喂给模型反复筛选。
+
+```bash
+xdoc pptx select input.pptx --query '{"textRegex":"(?i)revenue"}' --json \
+  > <run-dir>/select-revenue.json
+
+xdoc pptx select input.pptx --query '{"nameRegex":"^KPI"}' --slides 2-4 --json \
+  > <run-dir>/select-kpi.json
+
+xdoc pptx select input.pptx --query query.json --json > <run-dir>/select.json
+```
+
+`pptx-select/v1` 输出 `summary.matchCount` 和 `matches[]`，每个 match 含
+`slideIndex`、`shapeId`、`name`、`kind`、`shapeType`、`contentKind`、
+`placeholder`、`bbox`、`text` 与可直接复制的 `patchSelector`。
+
+query 复用 patch 的 `ShapeQuery`：
+
+```json
+{
+  "textRegex": "(?i)revenue",
+  "nameRegex": "^KPI",
+  "placeholder": { "type": "title", "idx": 0 },
+  "bboxNear": { "x": "1in", "y": "1in", "radius": "0.4in" }
+}
+```
+
+可选范围：
+
+- CLI `--slides 1,3-5` 是 1-based，适合人类页码。
+- query 顶层 `slideIndex` 是 0-based 单页。
+- query 顶层 `slides` 可写 1-based selector 字符串。
+
+使用原则：
+
+- `select` 用于**找候选**，不是替代 dry-run。写 patch 后仍必须检查
+  `resolvedSelectors[]`。
+- `matchCount == 1` 时优先复制 `matches[0].patchSelector` 到 patch。
+- `matchCount > 1` 时用 `bbox` / `text` / `name` 继续收窄 query，或改用具体
+  `{ "id": <shapeId> }`。
+- `matchCount == 0` 时回到 inspect 看实际文本、placeholder 和 group/SmartArt 边界，
+  不要凭猜测生成 destructive op。
+
 ## 2. 选 shape 的四种 selector
 
 按"先确定再模糊"的顺序选：

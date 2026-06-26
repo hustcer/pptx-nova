@@ -76,7 +76,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 简单任务被过度展开、复杂任务漏掉关键门禁。
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
-- **修改 deck**：`inspect -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
+- **修改 deck**：`inspect -> select(定位候选) -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
 - **翻新已有 deck 且保持内容**：默认运行
   `node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source source.pptx --output out.pptx --json`
   一次执行 plan、inspect、native/fallback 路线、机器门禁和 PNG/contact sheet 生成；用户显式指定非
@@ -276,7 +276,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 这些规则适用于修改已有 PPTX：
 
 - 输入 deck 默认只读；先 inspect，再 dry-run，再写 run 目录中间文件。
-- 不要靠猜 selector 修改对象。检查 dry-run 的 `resolvedSelectors[]`，歧义时使用
+- 不要靠猜 selector 修改对象。目标对象不明确时先用
+  `xdoc pptx select input.pptx --query '{"textRegex":"..."}' --json` 或 query 文件缩小候选，
+  再写 patch。检查 dry-run 的 `resolvedSelectors[]`，歧义时使用
   `suggestions[].fixPatch` 后重试。
 - 严格模板跟随时，必须编辑 copied / inherited 对象或模板 placeholder；不要用新 textbox、
   半透明矩形或整页图片 overlay 掩盖旧内容来制造"看起来对"的页面。
@@ -380,6 +382,8 @@ OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> Power
 xdoc html2md page.html -o source_brief.md             # HTML 文件 / URL → Markdown 素材
 xdoc pdf extract-text input.pdf -o source_extract.txt # PDF → 文本素材
 xdoc pptx inspect input.pptx --daemon --json
+xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
+xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
 xdoc pptx vision-check out.pptx --json

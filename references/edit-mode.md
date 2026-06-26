@@ -35,6 +35,19 @@ Save the inspect output in the run directory. Use it to identify slide indexes,
 shape IDs, names, placeholders, bounding boxes, table/chart facts, notes, and
 warnings such as SmartArt or transitions.
 
+When the target object is not immediately obvious from a small inspect snippet,
+use read-only `select` to get a compact candidate list:
+
+```bash
+xdoc pptx select input.pptx --query '{"textRegex":"(?i)revenue"}' --json \
+  > <run-dir>/select.json
+xdoc pptx select input.pptx --query query.json --slides 2-4 --json \
+  > <run-dir>/select-scoped.json
+```
+
+Use `matches[].patchSelector` only after confirming `summary.matchCount`,
+`text`, `bbox`, and `name` match the user intent.
+
 Write a patch using the most specific stable selector available:
 
 1. `id` from inspect

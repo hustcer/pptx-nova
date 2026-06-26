@@ -28,6 +28,7 @@ Create a run directory and capture xdoc capability evidence as required by
 
 ```bash
 xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
+xdoc pptx select input.pptx --query '{"textRegex":"old text"}' --json > <run-dir>/select.json # optional target lookup
 xdoc pptx apply -p <run-dir>/patch.json -i input.pptx -o <run-dir>/candidate.pptx \
   --daemon --dry-run --json > <run-dir>/dry-run.json
 xdoc pptx apply -p <run-dir>/patch.json -i input.pptx -o <run-dir>/candidate.pptx \
@@ -54,6 +55,11 @@ Use the most stable selector inspect exposes:
 2. shape `name`
 3. placeholder selector such as `{ "placeholder": { "type": "title" } }`
 4. query selector only when the previous selectors are not available
+
+If the exact target text/name is known but buried in a large deck, run
+`xdoc pptx select input.pptx --query '{"textRegex":"..."}' --json` first and
+copy `matches[0].patchSelector` only when `summary.matchCount == 1` and the
+`text`/`bbox` confirms the target.
 
 If the selector is ambiguous, stop the micro path and use `edit-mode.md` plus
 `inspect-and-edit.md`.

@@ -153,6 +153,24 @@ outerShadow / innerShadow / glow / reflection / softEdge
 | Brand profile         | 在 `schema` 输出的 `commands.pptx.catalogs.brands`          |
 | Chart styles 1-48     | 在 `schema` 输出的 `commands.pptx.catalogs.chartStyles`     |
 
+## Select 查询 schema
+
+`xdoc pptx select` 用于只读定位 shape 候选。完整 schema 中相关入口：
+
+- `commands.pptx.subcommands.select`：CLI 用法、IO contract、`--slides` 范围规则。
+- `commands.pptx.selectReportSchema`：`pptx-select/v1` 输出结构。
+- `commands.pptx.patchSchema.jsonSchema.$defs.shapeQuery`：query 字段定义。
+
+典型查询：
+
+```bash
+xdoc pptx select input.pptx --query '{"textRegex":"(?i)revenue"}' --json
+xdoc pptx select input.pptx --query '{"nameRegex":"^KPI","slideIndex":0}' --json
+xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
+```
+
+`select` 是定位工具，不能替代 `apply --dry-run` 的 `resolvedSelectors[]` 校验。
+
 ## Schema 检索的 nushell 高效模式
 
 ```nu

@@ -39,7 +39,7 @@ When the target object is not immediately obvious from a small inspect snippet,
 use read-only `select` to get a compact candidate list:
 
 ```bash
-xdoc pptx select input.pptx --query '{"textRegex":"(?i)revenue"}' --json \
+xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json \
   > <run-dir>/select.json
 xdoc pptx select input.pptx --query query.json --slides 2-4 --json \
   > <run-dir>/select-scoped.json

@@ -2,7 +2,7 @@
 
 DeckKit: `coral`
 Showcase case: `coral.golden-html`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 10
 Patch ops: 535
 Title: QUARTERLY STRATEGY SESSION 2026

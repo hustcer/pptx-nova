@@ -58,28 +58,26 @@
     "lowBuckets": {
       "total": 82,
       "styleAllowed": 81,
-      "baselineKnown": 0,
-      "new": 1,
+      "baselineKnown": 1,
+      "new": 0,
       "changed": 0,
       "resolved": 0,
-      "reviewable": 1,
-      "baselineUnavailable": true,
+      "reviewable": 0,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {
       "small-font": 81,
       "unexpected-wrap": 1
     },
-    "newLowByFamily": {
-      "unexpected-wrap": 1
-    },
+    "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "skills/pptx-nova/benchmarks/visual/baselines/broadside.golden-html.vision-baseline.json",
-      "available": false,
-      "issueCount": 0
+      "available": true,
+      "issueCount": 82
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -89,23 +87,7 @@
       "sourceFontPt": 9,
       "note": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above."
     },
-    "newLowSamples": [
-      {
-        "severity": "low",
-        "family": "unexpected-wrap",
-        "kind": "text-unexpected-wrap",
-        "slideIndex": 4,
-        "target": "S4_StatLabel1",
-        "metrics": {
-          "availableWidthPt": 266.23,
-          "estLines": 2,
-          "fontPt": 11.5,
-          "textLength": 46
-        },
-        "identity": "dd284499d8bee0af53f4",
-        "fingerprint": "e022c971b11fff908cad"
-      }
-    ],
+    "newLowSamples": [],
     "changedLowSamples": [],
     "resolvedLowSamples": []
   },

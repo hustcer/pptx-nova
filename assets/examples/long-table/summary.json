@@ -58,28 +58,26 @@
     "lowBuckets": {
       "total": 41,
       "styleAllowed": 40,
-      "baselineKnown": 0,
-      "new": 1,
+      "baselineKnown": 1,
+      "new": 0,
       "changed": 0,
       "resolved": 0,
-      "reviewable": 1,
-      "baselineUnavailable": true,
+      "reviewable": 0,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {
       "overlap": 1,
       "small-font": 40
     },
-    "newLowByFamily": {
-      "overlap": 1
-    },
+    "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "skills/pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
-      "available": false,
-      "issueCount": 0
+      "available": true,
+      "issueCount": 41
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -89,20 +87,7 @@
       "sourceFontPt": 8.5,
       "note": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
     },
-    "newLowSamples": [
-      {
-        "severity": "low",
-        "family": "overlap",
-        "kind": "geometry-overlap",
-        "slideIndex": 0,
-        "target": "S0_EditionBadge",
-        "metrics": {
-          "overlapRatio": 0.95
-        },
-        "identity": "4a62521d2aec1fc44d3b",
-        "fingerprint": "791b917a101c4c8b3876"
-      }
-    ],
+    "newLowSamples": [],
     "changedLowSamples": [],
     "resolvedLowSamples": []
   },

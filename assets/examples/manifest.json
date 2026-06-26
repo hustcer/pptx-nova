@@ -26,8 +26,8 @@
       "files": {
         "deck": {
           "path": "consulting-dark/deck.pptx",
-          "bytes": 34171,
-          "sha256": "c5852094db3cc89f581aebc590755aca6b91e90454b23ff23b48992c9fdf62ca"
+          "bytes": 34446,
+          "sha256": "93f916996ee0437897f2f33c55768592cf0f1489fecaeb71ad41ddd1bf338cdd"
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
@@ -130,8 +130,8 @@
       "files": {
         "deck": {
           "path": "mckinsey-blue/deck.pptx",
-          "bytes": 48389,
-          "sha256": "945c38122c6145441a0ef58a61c373f6a1451a3e7eb6cbb17f6af3783be53ce1"
+          "bytes": 48604,
+          "sha256": "01157063f22a294e83c73cfff94b23e3282a76da03a4d91379c87a660315dc31"
         },
         "contactSheet": {
           "path": "mckinsey-blue/contact-sheet.webp",
@@ -241,8 +241,8 @@
       "files": {
         "deck": {
           "path": "swiss-grid/deck.pptx",
-          "bytes": 51300,
-          "sha256": "3e72a7157349c55fe08824cb5fdacdc1a84293121911b30144d5f0947e3906db"
+          "bytes": 51697,
+          "sha256": "a4f5ed0461df3e2f9360a60141c8baa7e2c2edd122d24578fada26497b62ead7"
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
@@ -328,7 +328,7 @@
       "deckkit": "broadside",
       "caseId": "broadside.golden-html",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "this is the broadside style",
       "bestFor": [
@@ -343,8 +343,8 @@
       "files": {
         "deck": {
           "path": "broadside/deck.pptx",
-          "bytes": 34631,
-          "sha256": "30077891141c89e94a052abfb805911705b54748a988461ee425d198504ba1ea"
+          "bytes": 35035,
+          "sha256": "59125d8cc0b040f152c8b597c441aad756a56bd7b6a23cef3ca645ebd35be7de"
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
@@ -359,13 +359,13 @@
         },
         "brief": {
           "path": "broadside/brief.md",
-          "bytes": 738,
-          "sha256": "db80a101f81c782b43b4a2530dfacb7c1e2e84563ce892613434925a6c29fe20"
+          "bytes": 739,
+          "sha256": "d93f27d27aa321264096ed5fb75c04cad1c7346933ca568675cd09c169c80ad2"
         },
         "summary": {
           "path": "broadside/summary.json",
-          "bytes": 3205,
-          "sha256": "45384b936ee04222d7319a5b7e5542f4ebce6f89a9a3ad19dcb59b0825b92536"
+          "bytes": 2810,
+          "sha256": "8327295659e290fae232ab83147613fc35ade30d4d75fa70a96aad3ead565d93"
         }
       },
       "validation": {
@@ -392,28 +392,26 @@
         "lowBuckets": {
           "total": 82,
           "styleAllowed": 81,
-          "baselineKnown": 0,
-          "new": 1,
+          "baselineKnown": 1,
+          "new": 0,
           "changed": 0,
           "resolved": 0,
-          "reviewable": 1,
-          "baselineUnavailable": true,
+          "reviewable": 0,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {
           "small-font": 81,
           "unexpected-wrap": 1
         },
-        "newLowByFamily": {
-          "unexpected-wrap": 1
-        },
+        "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "skills/pptx-nova/benchmarks/visual/baselines/broadside.golden-html.vision-baseline.json",
-          "available": false,
-          "issueCount": 0
+          "available": true,
+          "issueCount": 82
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -423,23 +421,7 @@
           "sourceFontPt": 9,
           "note": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above."
         },
-        "newLowSamples": [
-          {
-            "severity": "low",
-            "family": "unexpected-wrap",
-            "kind": "text-unexpected-wrap",
-            "slideIndex": 4,
-            "target": "S4_StatLabel1",
-            "metrics": {
-              "availableWidthPt": 266.23,
-              "estLines": 2,
-              "fontPt": 11.5,
-              "textLength": 46
-            },
-            "identity": "dd284499d8bee0af53f4",
-            "fingerprint": "e022c971b11fff908cad"
-          }
-        ],
+        "newLowSamples": [],
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
@@ -449,7 +431,7 @@
       "deckkit": "coral",
       "caseId": "coral.golden-html",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "QUARTERLY STRATEGY SESSION 2026",
       "bestFor": [
@@ -464,8 +446,8 @@
       "files": {
         "deck": {
           "path": "coral/deck.pptx",
-          "bytes": 27491,
-          "sha256": "4c7e4704d07493e29bc2739af68c3de897aee4796ca051b65ebf657964111c48"
+          "bytes": 27737,
+          "sha256": "d7221906bab6f1f50191ed997b726806f2ae5c445c201e1ffb516d230ea428fe"
         },
         "contactSheet": {
           "path": "coral/contact-sheet.webp",
@@ -480,13 +462,13 @@
         },
         "brief": {
           "path": "coral/brief.md",
-          "bytes": 729,
-          "sha256": "0b5c5d5644e5710a17cbfeadda6a6968637e63e80f0ba81a67c4d9cf61909919"
+          "bytes": 730,
+          "sha256": "588d6969edd1ecc443708cf14f381dbbe34a2ace7cc824c8664d3185c1d94ce1"
         },
         "summary": {
           "path": "coral/summary.json",
-          "bytes": 3065,
-          "sha256": "5afd986c671b8c19957c196f9d411565d9e937a27ce7994e50ff18eb49b2d77d"
+          "bytes": 2781,
+          "sha256": "5218008178b0b14e5fc79a095060dacccd774b4d3ec160658f0725a975fc8e38"
         }
       },
       "validation": {
@@ -513,28 +495,26 @@
         "lowBuckets": {
           "total": 31,
           "styleAllowed": 30,
-          "baselineKnown": 0,
-          "new": 1,
+          "baselineKnown": 1,
+          "new": 0,
           "changed": 0,
           "resolved": 0,
-          "reviewable": 1,
-          "baselineUnavailable": true,
+          "reviewable": 0,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {
           "overlap": 1,
           "small-font": 30
         },
-        "newLowByFamily": {
-          "overlap": 1
-        },
+        "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "skills/pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
-          "available": false,
-          "issueCount": 0
+          "available": true,
+          "issueCount": 31
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -544,20 +524,7 @@
           "sourceFontPt": 8.5,
           "note": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
         },
-        "newLowSamples": [
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 0,
-            "target": "S0_Rule",
-            "metrics": {
-              "overlapRatio": 0.64
-            },
-            "identity": "a1253fba0ddcf28bc491",
-            "fingerprint": "ae0df001a2b258513317"
-          }
-        ],
+        "newLowSamples": [],
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
@@ -567,7 +534,7 @@
       "deckkit": "cartesian",
       "caseId": "cartesian.golden-html",
       "kind": "golden",
-      "readiness": "experimental",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Cartesian",
       "bestFor": [
@@ -581,13 +548,13 @@
       "files": {
         "deck": {
           "path": "cartesian/deck.pptx",
-          "bytes": 27220,
-          "sha256": "9bfc05fa4daedbdb411cf7bcca21ed14913a9633382895e031945f3a2613dc16"
+          "bytes": 27472,
+          "sha256": "c84a299229340429819dfed4702ac716043d3d3a215f1d24fb3b9d85d01dd19c"
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 58626,
-          "sha256": "ed51e33088c6c75a9dfd3d8584d52c339ee91a01aba3c28d23a1db8132fd7bdf",
+          "bytes": 58660,
+          "sha256": "b582980394be723a6179ca19882c0fcc45e010d943c7f04dbe0196faf74fc89e",
           "quality": 82
         },
         "content": {
@@ -597,13 +564,13 @@
         },
         "brief": {
           "path": "cartesian/brief.md",
-          "bytes": 711,
-          "sha256": "0c25c79b2739b78fe91cdd49a59b4ffa2f383c4d36af23913ce9163f9917cee7"
+          "bytes": 709,
+          "sha256": "0a89ace46b772add78ccef190a23f61895b8540c8f9beee10d6f799037963472"
         },
         "summary": {
           "path": "cartesian/summary.json",
-          "bytes": 2750,
-          "sha256": "00a0a1ddb057c1e9a51c8f0a4ac120830bbf2a9b892ee532201b9cc87009156d"
+          "bytes": 2810,
+          "sha256": "90147d7bbe50e5209961ce4b04b5ac74dea87a9ad470602de10f77c9bc5802c7"
         }
       },
       "validation": {
@@ -635,7 +602,7 @@
           "changed": 0,
           "resolved": 0,
           "reviewable": 0,
-          "baselineUnavailable": true,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {
@@ -644,11 +611,11 @@
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "skills/pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
-          "available": false,
-          "issueCount": 0
+          "available": true,
+          "issueCount": 24
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -668,7 +635,7 @@
       "deckkit": "long-table",
       "caseId": "long-table.golden-html",
       "kind": "golden",
-      "readiness": "experimental",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Long Table",
       "bestFor": [
@@ -682,8 +649,8 @@
       "files": {
         "deck": {
           "path": "long-table/deck.pptx",
-          "bytes": 22573,
-          "sha256": "f48ac3852ea306b51258e7515888693e3e67348e43dd3cd1bfbe827bc65a79ac"
+          "bytes": 22769,
+          "sha256": "c5f56bf6f3f44df61005de9772825c7e877fa795eabc584fc5f33033380e0907"
         },
         "contactSheet": {
           "path": "long-table/contact-sheet.webp",
@@ -698,13 +665,13 @@
         },
         "brief": {
           "path": "long-table/brief.md",
-          "bytes": 714,
-          "sha256": "8dab1e671b3515873bf9d24ecad4b1062a455c71175b4e60cc4ad306a8182194"
+          "bytes": 712,
+          "sha256": "0fdc3730ff73b07277c7bd3a698805c0421805b31892b5f6c10e09f54572e86d"
         },
         "summary": {
           "path": "long-table/summary.json",
-          "bytes": 3100,
-          "sha256": "a03e0b88ac381b67aaa9b75f96f3f19515536ee5115ecaba3fbe854cc70d243c"
+          "bytes": 2808,
+          "sha256": "818c45dd7fe9af34446bd314269ca6ff8f791f1dfcbba8a170a6b5376aec65a4"
         }
       },
       "validation": {
@@ -731,28 +698,26 @@
         "lowBuckets": {
           "total": 41,
           "styleAllowed": 40,
-          "baselineKnown": 0,
-          "new": 1,
+          "baselineKnown": 1,
+          "new": 0,
           "changed": 0,
           "resolved": 0,
-          "reviewable": 1,
-          "baselineUnavailable": true,
+          "reviewable": 0,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {
           "overlap": 1,
           "small-font": 40
         },
-        "newLowByFamily": {
-          "overlap": 1
-        },
+        "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "skills/pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
-          "available": false,
-          "issueCount": 0
+          "available": true,
+          "issueCount": 41
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -762,20 +727,7 @@
           "sourceFontPt": 8.5,
           "note": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
         },
-        "newLowSamples": [
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 0,
-            "target": "S0_EditionBadge",
-            "metrics": {
-              "overlapRatio": 0.95
-            },
-            "identity": "4a62521d2aec1fc44d3b",
-            "fingerprint": "791b917a101c4c8b3876"
-          }
-        ],
+        "newLowSamples": [],
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
@@ -785,7 +737,7 @@
       "deckkit": "biennale-yellow",
       "caseId": "biennale-yellow.golden-html",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Aurora Programme",
       "bestFor": [
@@ -799,8 +751,8 @@
       "files": {
         "deck": {
           "path": "biennale-yellow/deck.pptx",
-          "bytes": 22897,
-          "sha256": "f220cd7ec11e2e7f65d482c5150d50fee1033684fe004c66e24c696593c791e8"
+          "bytes": 23095,
+          "sha256": "9ef2a0e8db34086976157a9be4feba133443e6c7cdf88768c1dad8af223eb76d"
         },
         "contactSheet": {
           "path": "biennale-yellow/contact-sheet.webp",
@@ -815,13 +767,13 @@
         },
         "brief": {
           "path": "biennale-yellow/brief.md",
-          "bytes": 755,
-          "sha256": "4bea1a334fbb6e6e07d3cddf0039aea4a37160b2a5f854ab5ebb3674edb7a271"
+          "bytes": 756,
+          "sha256": "1f150dcfb57ca8a7345aaae62d3d7ef24eca82521f92aaffa3c800d8a5b878eb"
         },
         "summary": {
           "path": "biennale-yellow/summary.json",
-          "bytes": 4410,
-          "sha256": "359f2a6b498507643e9f70601eb693289673550ceb603bae20b4a9b71e2a94dd"
+          "bytes": 2827,
+          "sha256": "1fc72c6a4c09ce9b2a1a6705f78a6ea4aec58705e72b3b2fe6bbcb92f74ac9f7"
         }
       },
       "validation": {
@@ -848,28 +800,26 @@
         "lowBuckets": {
           "total": 72,
           "styleAllowed": 67,
-          "baselineKnown": 0,
-          "new": 5,
+          "baselineKnown": 5,
+          "new": 0,
           "changed": 0,
           "resolved": 0,
-          "reviewable": 5,
-          "baselineUnavailable": true,
+          "reviewable": 0,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {
           "small-font": 67,
           "overlap": 5
         },
-        "newLowByFamily": {
-          "overlap": 5
-        },
+        "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "skills/pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
-          "available": false,
-          "issueCount": 0
+          "available": true,
+          "issueCount": 72
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -879,68 +829,7 @@
           "sourceFontPt": 9,
           "note": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
         },
-        "newLowSamples": [
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 2,
-            "target": "S2_StrandRule0",
-            "metrics": {
-              "overlapRatio": 0.82
-            },
-            "identity": "b64a1e6b8d105297af57",
-            "fingerprint": "97678b968ca8a233621f"
-          },
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 2,
-            "target": "S2_StrandRule1",
-            "metrics": {
-              "overlapRatio": 0.82
-            },
-            "identity": "6c89dac35b99249609d2",
-            "fingerprint": "083526495303cb386350"
-          },
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 2,
-            "target": "S2_StrandRule2",
-            "metrics": {
-              "overlapRatio": 0.82
-            },
-            "identity": "ab692c40f022c2b610ec",
-            "fingerprint": "0397cb561355a55cf7bb"
-          },
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 2,
-            "target": "S2_StrandRule3",
-            "metrics": {
-              "overlapRatio": 0.82
-            },
-            "identity": "1dbc5dcdd00cf63a8f77",
-            "fingerprint": "8d17a3c95cf4355e3415"
-          },
-          {
-            "severity": "low",
-            "family": "overlap",
-            "kind": "geometry-overlap",
-            "slideIndex": 2,
-            "target": "S2_StrandRule4",
-            "metrics": {
-              "overlapRatio": 0.82
-            },
-            "identity": "c805359acaf46e8c86cc",
-            "fingerprint": "8445ece0b309211f521f"
-          }
-        ],
+        "newLowSamples": [],
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }

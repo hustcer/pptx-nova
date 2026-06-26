@@ -2,7 +2,7 @@
 
 DeckKit: `biennale-yellow`
 Showcase case: `biennale-yellow.golden-html`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 8
 Patch ops: 671
 Title: Aurora Programme

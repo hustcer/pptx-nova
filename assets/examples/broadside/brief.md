@@ -2,7 +2,7 @@
 
 DeckKit: `broadside`
 Showcase case: `broadside.golden-html`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 16
 Patch ops: 888
 Title: this is the broadside style

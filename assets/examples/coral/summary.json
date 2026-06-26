@@ -58,28 +58,26 @@
     "lowBuckets": {
       "total": 31,
       "styleAllowed": 30,
-      "baselineKnown": 0,
-      "new": 1,
+      "baselineKnown": 1,
+      "new": 0,
       "changed": 0,
       "resolved": 0,
-      "reviewable": 1,
-      "baselineUnavailable": true,
+      "reviewable": 0,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {
       "overlap": 1,
       "small-font": 30
     },
-    "newLowByFamily": {
-      "overlap": 1
-    },
+    "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "skills/pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
-      "available": false,
-      "issueCount": 0
+      "available": true,
+      "issueCount": 31
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -89,20 +87,7 @@
       "sourceFontPt": 8.5,
       "note": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
     },
-    "newLowSamples": [
-      {
-        "severity": "low",
-        "family": "overlap",
-        "kind": "geometry-overlap",
-        "slideIndex": 0,
-        "target": "S0_Rule",
-        "metrics": {
-          "overlapRatio": 0.64
-        },
-        "identity": "a1253fba0ddcf28bc491",
-        "fingerprint": "ae0df001a2b258513317"
-      }
-    ],
+    "newLowSamples": [],
     "changedLowSamples": [],
     "resolvedLowSamples": []
   },

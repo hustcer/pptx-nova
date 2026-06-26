@@ -63,7 +63,7 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {
@@ -72,11 +72,11 @@
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "skills/pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
-      "available": false,
-      "issueCount": 0
+      "available": true,
+      "issueCount": 24
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -98,12 +98,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 229674,
-      "sha256": "453bae64da15c97d5776463187f445ed438ee73ac5bbce88497ba917602b5543"
+      "bytes": 229807,
+      "sha256": "47c682d688f7675270cc7a2d8297a1ce6ba3a9e18990be0fecef3dd386ebd2b2"
     },
     "webp": {
-      "bytes": 58626,
-      "sha256": "ed51e33088c6c75a9dfd3d8584d52c339ee91a01aba3c28d23a1db8132fd7bdf"
+      "bytes": 58660,
+      "sha256": "b582980394be723a6179ca19882c0fcc45e010d943c7f04dbe0196faf74fc89e"
     }
   }
 }

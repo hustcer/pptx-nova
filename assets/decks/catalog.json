@@ -43,7 +43,7 @@
         "museum exhibition narrative",
         "arts residency showcase"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "broadside-showcase",
@@ -63,7 +63,7 @@
         "bilingual EN/CN editorial deck",
         "campaign launch"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "cartesian-showcase",
@@ -82,7 +82,7 @@
         "research readout",
         "quiet data presentation"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "consulting-dark-showcase",
@@ -115,7 +115,7 @@
         "lifestyle launch",
         "editorial manifesto"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "long-table-showcase",
@@ -134,7 +134,7 @@
         "cultural supper club",
         "lifestyle launch"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "mckinsey-blue-showcase",

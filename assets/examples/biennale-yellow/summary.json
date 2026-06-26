@@ -58,28 +58,26 @@
     "lowBuckets": {
       "total": 72,
       "styleAllowed": 67,
-      "baselineKnown": 0,
-      "new": 5,
+      "baselineKnown": 5,
+      "new": 0,
       "changed": 0,
       "resolved": 0,
-      "reviewable": 5,
-      "baselineUnavailable": true,
+      "reviewable": 0,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {
       "small-font": 67,
       "overlap": 5
     },
-    "newLowByFamily": {
-      "overlap": 5
-    },
+    "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "skills/pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
-      "available": false,
-      "issueCount": 0
+      "available": true,
+      "issueCount": 72
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -89,68 +87,7 @@
       "sourceFontPt": 9,
       "note": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
     },
-    "newLowSamples": [
-      {
-        "severity": "low",
-        "family": "overlap",
-        "kind": "geometry-overlap",
-        "slideIndex": 2,
-        "target": "S2_StrandRule0",
-        "metrics": {
-          "overlapRatio": 0.82
-        },
-        "identity": "b64a1e6b8d105297af57",
-        "fingerprint": "97678b968ca8a233621f"
-      },
-      {
-        "severity": "low",
-        "family": "overlap",
-        "kind": "geometry-overlap",
-        "slideIndex": 2,
-        "target": "S2_StrandRule1",
-        "metrics": {
-          "overlapRatio": 0.82
-        },
-        "identity": "6c89dac35b99249609d2",
-        "fingerprint": "083526495303cb386350"
-      },
-      {
-        "severity": "low",
-        "family": "overlap",
-        "kind": "geometry-overlap",
-        "slideIndex": 2,
-        "target": "S2_StrandRule2",
-        "metrics": {
-          "overlapRatio": 0.82
-        },
-        "identity": "ab692c40f022c2b610ec",
-        "fingerprint": "0397cb561355a55cf7bb"
-      },
-      {
-        "severity": "low",
-        "family": "overlap",
-        "kind": "geometry-overlap",
-        "slideIndex": 2,
-        "target": "S2_StrandRule3",
-        "metrics": {
-          "overlapRatio": 0.82
-        },
-        "identity": "1dbc5dcdd00cf63a8f77",
-        "fingerprint": "8d17a3c95cf4355e3415"
-      },
-      {
-        "severity": "low",
-        "family": "overlap",
-        "kind": "geometry-overlap",
-        "slideIndex": 2,
-        "target": "S2_StrandRule4",
-        "metrics": {
-          "overlapRatio": 0.82
-        },
-        "identity": "c805359acaf46e8c86cc",
-        "fingerprint": "8445ece0b309211f521f"
-      }
-    ],
+    "newLowSamples": [],
     "changedLowSamples": [],
     "resolvedLowSamples": []
   },

@@ -64,6 +64,24 @@ copy `matches[0].patchSelector` only when `summary.matchCount == 1` and the
 If the selector is ambiguous, stop the micro path and use `edit-mode.md` plus
 `inspect-and-edit.md`.
 
+## Example Matrix
+
+Use `assets/examples/micro-edit-matrix.json` as the quick fixture matrix for
+the common small-edit surface:
+
+| Case                    | Minimal success pattern                                         | Failure trigger                                                         |
+| ----------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Replace text            | `set-text` on one inspect-proven `shape`                        | selector resolves multiple objects or run indexes are unknown           |
+| Speaker notes           | `set-slide-notes` on one slide                                  | rich notes structure or many-slide synchronization is required          |
+| Footer/date/page number | `set-text` on one footer/date/page-number placeholder           | inherited footer source or batch target set is unclear                  |
+| Metadata                | `set-core-prop` only                                            | visible slide text or custom package metadata also needs reconciliation |
+| Replace image           | remove one inspected picture and `add-picture` at the same bbox | crop, mask, aspect ratio, identity, or provenance is unclear            |
+| Single-object color     | `set-shape-fill` or `set-shape-line` on one named object        | request is theme, brand, contrast, or deck-wide style work              |
+| Delete placeholder      | `remove-shape` on one empty/default placeholder                 | placeholder contains user content or is layout/master-owned             |
+
+The matrix examples are minimal patterns. Inspect and dry-run selector evidence
+always outrank the sample selectors.
+
 ## One-Screen Op Recipes
 
 ### Replace text
@@ -76,7 +94,7 @@ Use `set-text` for whole-shape text replacement:
     {
       "op": "set-text",
       "slide": 2,
-      "selector": { "id": "7" },
+      "shape": { "id": 7 },
       "text": "Updated title"
     }
   ]
@@ -115,7 +133,7 @@ run-level edits:
     {
       "op": "set-shape-text-style",
       "slide": 1,
-      "selector": { "name": "Subtitle 2" },
+      "shape": { "name": "Subtitle 2" },
       "fontFace": "Aptos",
       "color": "1F2937"
     }

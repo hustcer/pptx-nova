@@ -36,6 +36,8 @@ Place these in the run directory:
 - `template-frame-map.json`: one mapping entry per output slide.
 - `template-edit-plan.json`: object-level edits, deletes, replacements, and
   intentional insertions.
+- `pptx-diff.json`: optional final `xdoc pptx diff` report when source/candidate
+  semantic changes need audit evidence.
 - `deviation-log.json`: only when a mapped slide intentionally departs from the
   source pattern.
 - `assets_manifest.json`: only when allowed external/reused/generated assets
@@ -116,6 +118,20 @@ Omit optional inputs only when they truly do not exist. For example, pure text
 template filling may have no `assets_manifest.json`, but a deck that replaces or
 keeps logos, screenshots, customer marks, product UI, or photos should include
 one.
+
+When the final mapped candidate is stable, run `xdoc pptx diff` once if the
+template contract needs auditable before/after evidence:
+
+```bash
+xdoc pptx diff --source source.pptx --candidate out.pptx \
+  --detail summary --json > pptx-diff.json
+```
+
+Use reliable entries to confirm that changes match `template-edit-plan.json` and
+`deviation-log.json`. Reliable deletions or style/geometry changes to protected
+template chrome are blockers unless explicitly approved. Treat
+`uncertain`/`unsupported` as review signals and use PNG/contact-sheet or
+template gate evidence to cover them.
 
 ## Layout Affordance Pass
 

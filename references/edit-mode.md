@@ -101,6 +101,22 @@ with `vision.json` before PNG review. It writes `layout-final.json` and
 the scope are recorded as `deckResidualRisk` rather than keeping the finalizer in
 warn. Localized Micro Edit remains on its separate fast path.
 
+For structural edits or when the user needs an auditable before/after report,
+run one semantic diff after the final candidate is stable:
+
+```bash
+xdoc pptx diff --source input.pptx --candidate out.pptx \
+  --detail summary --json > <run-dir>/pptx-diff.json
+```
+
+Check `schemaVersion == "pptx-diff/v1"` and `status == "success"`. Compare
+`agentGate.semanticStatus`, `summary.reliableChanges`, `changeRollup.reliable`,
+and `slides[]` against the intended edit scope. Reliable changes outside the
+requested slides or object categories are blockers until explained or fixed.
+`uncertainChanges` and `unsupportedRegions` trigger targeted review; do not use
+them as proof that nothing changed. Avoid running this in each patch iteration
+because it is slower than inspect/select/dry-run.
+
 ## Micro Edit Flow
 
 Micro edits have a separate one-screen route in `micro-edit-cheatsheet.md`.

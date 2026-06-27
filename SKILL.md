@@ -51,7 +51,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 
 默认保留最小证据包：`xdoc-capabilities.json`、`outline.json`、`deck_lock.json`、
 `content.json`、`patch.json`、sidecar、dry-run/apply/refurbish 报告、`vision.json`、
-`visual_review.json`、`check.json`、`evidence-summary.json`、`layout-final.json`、
+`pptx-diff.json`、`visual_review.json`、`check.json`、`evidence-summary.json`、`layout-final.json`、
 `fidelity-gate.json`、`content-audit-final.json`、最终候选 PPTX、contact sheet 和人工复核
 必需的少量问题页 PNG。实际不存在的项无需补造。
 
@@ -77,6 +77,11 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> select(定位候选) -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
+- **PPTX 语义 diff / 变更审计**：当已有 source/candidate 且需要确认实际变更范围时，在候选稳定后低频运行一次
+  `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json > <run-dir>/pptx-diff.json`。
+  该命令通常耗时约 10 秒，不要放进每轮 patch 迭代；只有需要追查具体证据时再用 `--detail full`。
+  只把 `agentGate`、`summary.reliableChanges`、`changeRollup.reliable` 和 `slides[]` 的可靠变更条目当作机器事实；
+  `uncertain` / `unsupported` 是复核信号，不能当通过证据，仍需配合 preview、vision 或内容 audit。
 - **PPTX PNG 预览 / 截图复核**：优先运行
   `xdoc pptx preview deck.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/contact-sheet.png --json`
   生成逐页 PNG、contact sheet 和 `pptx-preview/v1` stdout manifest；只复核改动页时加
@@ -162,20 +167,20 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 
 先判断任务类型，再读对应文件：
 
-| 用户意图                                 | 必读 reference                                                                                                                                                          | 视情况再读                                                                                                      |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| 简单 prompt / 要快 / 默认生成新 deck     | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-express.md`                                                                           | `references/narrative-quality.md`（6+ 页或需要说服力时）、`references/express-mode.md`、`references/recipes.md` |
-| 投资人 / 客户 / 董事会 / Studio / 要精控 | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-studio.md`、`references/design-lock-and-assets.md`、`references/narrative-quality.md` | `references/visual-qa-and-asset-slots.md`、`references/rich-deck-patterns.md`                                   |
-| 严格跟随已有 PPTX 模板 / 套模板改内容    | `references/common-workflow.md`、`references/template-following.md`、`references/edit-mode.md`                                                                          | `references/design-lock-and-assets.md`、`references/inspect-and-edit.md`                                        |
-| 参考 PPTX + 新大纲生成新 deck            | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                |
-| 美化 / 翻新已有 PPTX，保持原内容但换风格 | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`、`references/export-and-check.md`                                              |
-| 少量文字/备注/页脚/元数据小改            | `references/common-workflow.md`、`references/micro-edit-cheatsheet.md`                                                                                                  | selector 模糊、复杂图片或多对象编辑时再读 `references/edit-mode.md`、`references/inspect-and-edit.md`           |
-| 修改已有 `.pptx`                         | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                            |
-| 数据 + 模板 / JSON 填充                  | `references/common-workflow.md`、`references/data-driven.md`                                                                                                            | `references/tables.md`、`references/charts.md`                                                                  |
-| 品牌改装 / 品牌检查                      | `references/common-workflow.md`、`references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                |
-| 只导出 PDF/PNG/MD/JSON、提取或检查       | `references/common-workflow.md`、`references/export-and-check.md`                                                                                                       | 无需读取创建/编辑文档，除非用户随后要求修复                                                                     |
-| 长任务 split / 继续生成                  | `references/common-workflow.md`、`references/resume-split-mode.md`                                                                                                      | 原任务类型的 reference                                                                                          |
-| 公式、图表、表格、raw XML                | 当前任务 reference + 对应 `formulas.md` / `charts.md` / `tables.md` / `control-flow-and-raw-xml.md`                                                                     | `troubleshooting.md`                                                                                            |
+| 用户意图                                          | 必读 reference                                                                                                                                                          | 视情况再读                                                                                                      |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 简单 prompt / 要快 / 默认生成新 deck              | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-express.md`                                                                           | `references/narrative-quality.md`（6+ 页或需要说服力时）、`references/express-mode.md`、`references/recipes.md` |
+| 投资人 / 客户 / 董事会 / Studio / 要精控          | `references/common-workflow.md`、`references/deckkit-mode.md`、`references/create-studio.md`、`references/design-lock-and-assets.md`、`references/narrative-quality.md` | `references/visual-qa-and-asset-slots.md`、`references/rich-deck-patterns.md`                                   |
+| 严格跟随已有 PPTX 模板 / 套模板改内容             | `references/common-workflow.md`、`references/template-following.md`、`references/edit-mode.md`                                                                          | `references/design-lock-and-assets.md`、`references/inspect-and-edit.md`                                        |
+| 参考 PPTX + 新大纲生成新 deck                     | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                |
+| 美化 / 翻新已有 PPTX，保持原内容但换风格          | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`、`references/export-and-check.md`                                              |
+| 少量文字/备注/页脚/元数据小改                     | `references/common-workflow.md`、`references/micro-edit-cheatsheet.md`                                                                                                  | selector 模糊、复杂图片或多对象编辑时再读 `references/edit-mode.md`、`references/inspect-and-edit.md`           |
+| 修改已有 `.pptx`                                  | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                            |
+| 数据 + 模板 / JSON 填充                           | `references/common-workflow.md`、`references/data-driven.md`                                                                                                            | `references/tables.md`、`references/charts.md`                                                                  |
+| 品牌改装 / 品牌检查                               | `references/common-workflow.md`、`references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                |
+| 只导出 PDF/PNG/MD/JSON、提取、检查或比较两个 PPTX | `references/common-workflow.md`、`references/export-and-check.md`                                                                                                       | 无需读取创建/编辑文档，除非用户随后要求修复                                                                     |
+| 长任务 split / 继续生成                           | `references/common-workflow.md`、`references/resume-split-mode.md`                                                                                                      | 原任务类型的 reference                                                                                          |
+| 公式、图表、表格、raw XML                         | 当前任务 reference + 对应 `formulas.md` / `charts.md` / `tables.md` / `control-flow-and-raw-xml.md`                                                                     | `troubleshooting.md`                                                                                            |
 
 用户给 HTML 文件、网页 URL 或 PDF 作为素材时，先按 `references/common-workflow.md` 的
 Source Ingestion 用 xdoc 归一化为 Markdown/文本，再按真正的任务类型（create / data / edit）
@@ -217,6 +222,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   如果用户认可了某个预览页或小样，后续全量输出必须以该小样作为视觉目标，而不是退回保守保真版本。
   全量候选需要人工视觉复核时，显式运行 `xdoc pptx contact-diff` 和源稿并排复核：大多数页面应有明确的版式、层级、留白、网格或色彩变化；
   若肉眼看起来"基本没变"，视为未完成，即使 check-lock 和 vision-check 通过。
+  候选稳定后运行一次 `xdoc pptx diff` 保存 `pptx-diff.json`，用可靠语义变更核对预期的文本、几何、样式、
+  表格/chart/media 摘要变化；`uncertain` 或 `unsupported` 只能说明需要人工/专项 audit，不能证明保真。
   同时必须运行 `xdoc pptx vision-diff` 做 delta 判断；源稿已有 high/medium 不等于可忽略，
   但候选不得新增 high；由本轮新增 chrome、背景、页码、文字颜色或布局造成的 medium 必须迭代修复到 0。
   只有无法不改变源内容语义时，才可把新增 medium 作为已复核风险列入最终摘要。
@@ -365,7 +372,7 @@ check-lock -> dry-run -> apply -> vision-check -> structure-check when needed ->
 Refurbish Existing Deck 还必须追加：
 
 ```text
-refurbish-skin report gate -> optional contact-diff for manual review -> optional legacy supplemental audit
+refurbish-skin report gate -> one final pptx semantic diff when source/candidate are stable -> optional contact-diff for manual review -> optional legacy supplemental audit
 ```
 
 结构或兼容性高风险任务还必须追加：
@@ -400,6 +407,7 @@ xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,
 xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --json
 xdoc pptx chrome-apply remapped.pptx --deckkit mckinsey-blue --output styled.pptx --json
 xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output out.pptx --json
+xdoc pptx diff --source source.pptx --candidate out.pptx --detail summary --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
@@ -421,7 +429,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 - 产物保留/清理状态：是否保留完整 run、是否按最小证据包瘦身、清理了哪些可重建重型产物
 - xdoc 审计信息：版本、CLI schema 版本、任务必需能力是否 fully disclosed、是否使用
   degraded discovery 或 fallback；不要把 undisclosed 写成 unsupported
-- 验证结果：dry-run、apply、vision-check、`structure-check.json`、PNG/contact-sheet 复核、`visual_review.json`、可选 preflight
+- 验证结果：dry-run、apply、`pptx-diff.json` 语义变更审计、vision-check、`structure-check.json`、PNG/contact-sheet 复核、`visual_review.json`、可选 preflight
 - 高风险任务的结构证据：`evidence-summary.json`、`layout-final.json`；有图表/表格、XML 结构检查或结构化视觉复核时列出 `semantic-audit.json`、`structure-check.json`、`visual_review.json`；翻新/严格套模板还列出 `fidelity-gate.json`、`template-gate.json` 或
   `content-audit-final.json` 中实际存在项
 - PowerPoint clean-open 结果：若运行过，说明是否检测到 `Repair` 对话框；若未运行，说明原因和替代结构校验。出现 Repair 的候选必须作为失败候选记录，不能当最终输出。
@@ -446,7 +454,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 | `references/edit-mode.md`                 | 修改已有 PPTX 的 inspect/dry-run/selector 流程                   |
 | `references/micro-edit-cheatsheet.md`     | 少量文字、备注、页脚、元数据和单对象小改的极速路径               |
 | `references/template-following.md`        | 严格套模板：复制源 slide、编辑 inherited objects、placeholder QA |
-| `references/export-and-check.md`          | PDF/PNG/MD/JSON 导出、extract、check                             |
+| `references/export-and-check.md`          | PDF/PNG/MD/JSON 导出、extract、check、PPTX semantic diff         |
 | `references/express-mode.md`              | Express 模式完整黄金路径                                         |
 | `references/reference-create.md`          | 参考 PPTX + 新大纲生成                                           |
 | `references/inspect-and-edit.md`          | selector、inspect 输出和编辑细节                                 |

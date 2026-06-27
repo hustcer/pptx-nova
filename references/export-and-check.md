@@ -8,6 +8,27 @@ Read `common-workflow.md` before this file. Export/check tasks still write
 artifacts, so use a run directory by default and follow its `--overwrite` safety
 rules.
 
+## Semantic PPTX Diff
+
+When the user only asks to compare two decks or audit before/after changes, use
+the read-only semantic diff path:
+
+```bash
+xdoc pptx diff --source before.pptx --candidate after.pptx \
+  --detail summary --json > <run-dir>/pptx-diff.json
+```
+
+The default `summary` detail is the normal Agent path. It reports
+`pptx-diff/v1`, `agentGate`, `summary`, `changeRollup`, and per-slide rollups.
+Only use `--detail full` when summary identifies a suspicious slide/object and
+field-level evidence is needed. The command can take around 10 seconds, so do
+not use it as a tight retry loop.
+
+Use only `reliable` entries as machine-checkable facts. Treat `uncertain` and
+`unsupported` as review signals, and pair the diff with PNG preview or another
+domain audit before making a final judgment about visual fidelity or unsupported
+objects.
+
 ## Conversion
 
 Use `xdoc convert`:

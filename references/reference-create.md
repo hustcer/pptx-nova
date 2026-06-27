@@ -32,6 +32,8 @@
   生成的最终内容保真门禁报告；用于交付前证明页数、文本、shape type、媒体、备注和外链未经批准减少。
 - `vision-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx vision-diff` 生成的 source/candidate
   视觉问题 delta 报告。
+- `pptx-diff.json`：Refurbish Existing Deck 或需要 before/after 审计时由 `xdoc pptx diff`
+  生成的 `pptx-diff/v1` 语义变更报告，用可靠变更核对源/候选的文本、几何、样式和对象摘要。
 - `fidelity-gate.json`：Refurbish Existing Deck 时由 `pptx-nova-fidelity-gate.mjs`
   汇总 `vision-diff`、最终 `refurbish-audit` 和可用 `reference-map` 的保真门禁报告。
 - `candidate-inspect.json` / `layout-final.json`：Refurbish Existing Deck 时对候选 PPTX
@@ -407,6 +409,12 @@ node <skill-root>/scripts/pptx-nova-refurbish-audit.mjs \
 - 对源 deck 和候选运行 `xdoc pptx vision-diff --source source.pptx --candidate candidate.pptx --json`
   并保存为 `vision-diff.json`。已有源稿问题要和新增问题分开记录；候选不得新增 high severity，
   新增 medium 必须能用 PNG/contact sheet 解释并尽量修掉。
+- 候选稳定后运行一次 `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json`
+  并保存为 `pptx-diff.json`。不要在每次 skin/remap 局部尝试后重复运行；只有 `summary` 指向可疑页或需要
+  字段级证据时才追加 `--detail full`。用 `agentGate.semanticStatus`、`summary.reliableChanges`、
+  `changeRollup.reliable` 和 `slides[]` 检查可靠变更是否符合预期：翻新通常会有可靠的几何/样式变化，
+  但不应出现未经批准的文本删除、slide 删除或对象类别大幅减少。`uncertainChanges` /
+  `unsupportedRegions` 只表示需要人工、`refurbish-audit` 或专项审计补证，不能当作通过。
 - 不要通过把旧 header、footer、页码或标题移到画布外来隐藏它们；这会制造 `shape-out-of-bounds`
   并污染后续自动修复。优先把已经镜像到新 header 的旧标题文本设为空，或在原位置把旧装饰 fill/line
   改成目标背景色并保留在画布内。
@@ -474,6 +482,10 @@ DeckKit 选择注意事项：
 - `vision-check` 默认要求 high/medium 为 0；如果源 deck baseline 已有 high/medium，则候选必须用
   `vision-diff.json` 做 delta 判断：不得新增 high，新增 medium 需要修复或在最终摘要中列为源内容保真导致的已复核风险。
   low 需要人工判断。
+- `pptx-diff.json` 是语义审计，不是视觉判断，也不替代 `refurbish-audit`。可靠 diff 应与
+  `reference-map.json` 和 `content-audit-final.json` 一致；可靠的文本/slide/object 删除必须有
+  `approvedChanges[]` 或用户确认。`uncertain` / `unsupported` 区域要在最终摘要中披露，并说明用
+  哪个人工或专项 gate 覆盖。
 - PNG/contact-sheet 复核要用 `xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx --output contact-diff.png --json`
   生成并排对比后抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。
   对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。

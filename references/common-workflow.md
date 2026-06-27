@@ -242,7 +242,22 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     fields that are merely undisclosed are counted separately and do not make the
     finalizer noisy. The helper does not replace PNG review or expand Micro Edit.
 
-9.  Render visual previews when creating or materially changing a deck:
+9.  For existing-deck edits, template-following, and refurbish tasks, run
+    semantic diff once after the candidate is stable and before final delivery:
+
+    ```bash
+    xdoc pptx diff --source source.pptx --candidate out.pptx \
+      --detail summary --json > <run-dir>/pptx-diff.json
+    ```
+
+    This command is useful but comparatively slow. Do not run it after every
+    patch attempt; run it at the final candidate stage, or only when debugging a
+    suspected unintended change. Use `--detail full` only when summary points to
+    a specific slide/object and field-level evidence is needed. Treat only
+    `reliable` entries as machine facts. `uncertain` and `unsupported` entries
+    require human review or a targeted audit; they are not pass evidence.
+
+10. Render visual previews when creating or materially changing a deck:
 
     ```bash
     xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
@@ -284,25 +299,26 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `refurbish-audit`, then run `pptx-nova-layout-snapshot.mjs` on final inspect
     and keep both reports with the run artifacts.
 
-10. For formal create workflows covered by `narrative-quality.md`, write
+11. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly
     accepts a draft.
-11. For external/customer/public delivery, run:
+12. For external/customer/public delivery, run:
 
 ```bash
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 
-12. Copy or write the validated final deck to the requested final path.
-13. Apply the artifact retention decision. Keep the full run by default; slim
+13. Copy or write the validated final deck to the requested final path.
+14. Apply the artifact retention decision. Keep the full run by default; slim
     only reproducible current-run heavy artifacts when the task succeeded and
     no debug/replay continuation is expected, or when the user explicitly asked
     for cleanup. If files are removed, write `cleanup-manifest.json`.
-14. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
+15. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
     xdoc/schema versions, important intermediate files, validation results,
     high-risk `evidence-summary.json` / `layout-final.json` when applicable,
-    preview/contact sheet path, artifact retention/cleanup status,
+    `pptx-diff.json` semantic audit when run, preview/contact sheet path,
+    artifact retention/cleanup status,
     discovery/fallback warnings, and remaining risks.
 
 ## Source Ingestion (HTML / URL / PDF)
@@ -366,7 +382,7 @@ pixel-level visual quality.
 Use these gates in order:
 
 ```text
-check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
+check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> one final pptx semantic diff for existing-deck audits when useful -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
 ```
 
 For Studio Create, Reference Create, structural Edit, strict Template Following,

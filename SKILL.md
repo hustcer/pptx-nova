@@ -77,6 +77,12 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> select(定位候选) -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
+- **PPTX PNG 预览 / 截图复核**：优先运行
+  `xdoc pptx preview deck.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/contact-sheet.png --json`
+  生成逐页 PNG、contact sheet 和 `pptx-preview/v1` stdout manifest；只复核改动页时加
+  `--slides 2,5-7`。读取 manifest 后确认 `status=success`、`pages[]` 的 path/status/width/height/byteLength/SHA-256
+  hash、`contactSheet` 路径和尺寸，再把 contact sheet 或可疑页 PNG 交给多模态审查。PPTX 视觉预览默认用这条短路径；
+  `xdoc convert --to png --contact-sheet` 仅作为通用转换或调试 fallback。
 - **翻新已有 deck 且保持内容**：默认运行
   `node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source source.pptx --output out.pptx --json`
   一次执行 plan、inspect、native/fallback 路线、机器门禁和 PNG/contact sheet 生成；用户显式指定非
@@ -397,6 +403,8 @@ xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output o
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
+xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/contact-sheet.png --json
+xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --contact-sheet <run-dir>/contact-sheet.png --json
 xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 xdoc convert out.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite

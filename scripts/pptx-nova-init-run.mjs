@@ -111,7 +111,6 @@ try {
   const assetsDir = join(runDir, 'assets')
   const previewsDir = join(runDir, 'previews')
   mkdirSync(assetsDir, { recursive: true })
-  mkdirSync(previewsDir, { recursive: true })
 
   const finalPptx = args.output
     ? resolve(root, args.output)

@@ -556,6 +556,7 @@ function makeReport(args, lock, patch, inspect) {
     summary: {
       charts: 0,
       tables: 0,
+      applicability: 'applicable',
       errors: 0,
       warnings: 0,
     },
@@ -587,12 +588,13 @@ function makeReport(args, lock, patch, inspect) {
   report.summary.charts = report.charts.length
   report.summary.tables = report.tables.length
   if (report.charts.length === 0 && report.tables.length === 0) {
-    issue(
-      report,
-      'warning',
-      'semantic-audit-no-chart-table-ops',
-      'patch has no chart/table data ops to audit',
-    )
+    report.summary.applicability = 'not-applicable'
+    report.notes = [
+      {
+        code: 'semantic-audit-no-chart-table-ops',
+        message: 'patch has no chart/table data ops to audit',
+      },
+    ]
   }
   for (const item of [...report.charts, ...report.tables]) {
     for (const error of item.errors)

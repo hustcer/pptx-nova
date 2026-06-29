@@ -97,6 +97,12 @@ previews, make sure the preview root belongs to the current run, then replace it
 with `--overwrite` or clear that current-run directory so stale PNGs cannot
 be reviewed by mistake.
 
+For `xdoc pptx preview`, write to a preview directory that does not already
+exist, or pass `--overwrite` when the directory is a current-run generated
+preview root. The run initializer intentionally does not pre-create
+`<run-dir>/previews`; this keeps the first preview command from failing on an
+empty existing directory while still making reruns explicit.
+
 For export/check workflows, default output directories should also live under
 the run directory unless the user explicitly requested a final output path.
 Do not use `--overwrite` on user-owned export paths unless the user asked to

@@ -506,9 +506,12 @@ function validateSemanticAudit(args, report) {
   const counts = {
     charts: number(audit?.summary?.charts) ?? 0,
     tables: number(audit?.summary?.tables) ?? 0,
+    applicability: audit?.summary?.applicability ?? null,
     errors: number(audit?.summary?.errors) ?? 0,
     warnings: number(audit?.summary?.warnings) ?? 0,
   }
+  const notApplicable =
+    counts.charts === 0 && counts.tables === 0 && counts.applicability === 'not-applicable'
   const failed =
     audit?.schemaVersion !== SEMANTIC_AUDIT_SCHEMA_VERSION ||
     !validStatus ||
@@ -542,7 +545,13 @@ function validateSemanticAudit(args, report) {
   check(
     report,
     'chart-table-semantic-audit',
-    failed ? 'failed' : audit.status === 'warn' ? 'warning' : 'passed',
+    failed
+      ? 'failed'
+      : notApplicable
+        ? 'not-applicable'
+        : audit.status === 'warn'
+          ? 'warning'
+          : 'passed',
     {
       required: false,
       schemaVersion: audit?.schemaVersion ?? null,

@@ -321,6 +321,11 @@ function makeReport(args) {
   report.summary.errors = report.errors.length
   report.summary.warnings = report.warnings.length
   report.status = report.errors.length > 0 ? 'fail' : report.warnings.length > 0 ? 'warn' : 'pass'
+  report.slidesReviewed = report.summary.slidesReviewed
+  report.checkSummary = report.summary.checks
+  report.issueCount = report.summary.issueCount
+  report.errorCount = report.summary.errors
+  report.warningCount = report.summary.warnings
   return report
 }
 

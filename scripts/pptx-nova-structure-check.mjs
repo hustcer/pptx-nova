@@ -122,7 +122,7 @@ function unique(values) {
 
 function collectLockFonts(lock) {
   const fonts = []
-  const scan = (value) => {
+  const scanFontValue = (value) => {
     if (!value) return
     if (typeof value === 'string') {
       const first = value
@@ -133,16 +133,26 @@ function collectLockFonts(lock) {
       return
     }
     if (Array.isArray(value)) {
-      value.forEach(scan)
+      value.forEach(scanFontValue)
+      return
+    }
+  }
+  const typography = isPlainObject(lock?.typography) ? lock.typography : {}
+  for (const key of ['title', 'body', 'code', 'mathFont', 'caption', 'label']) {
+    scanFontValue(typography[key])
+  }
+  const scanFontObject = (value) => {
+    if (!value) return
+    if (typeof value === 'string' || Array.isArray(value)) {
+      scanFontValue(value)
       return
     }
     if (isPlainObject(value)) {
-      for (const item of Object.values(value)) scan(item)
+      for (const item of Object.values(value)) scanFontObject(item)
     }
   }
-  scan(lock?.typography)
-  scan(lock?.fonts)
-  scan(lock?.themePack?.fonts)
+  scanFontObject(lock?.fonts)
+  scanFontObject(lock?.themePack?.fonts)
   return unique(fonts.map(normalizeFont))
 }
 

@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const SKILL_ROOT = resolve(__dirname, '..')
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-probe.mjs [options]
@@ -19,6 +23,7 @@ Options:
   --require-theme <id>              Require a theme pack disclosure.
   --require-style <id>              Require a style pack disclosure.
   --require-native-deckkit <id>     Require native xdoc skinning disclosure.
+  --require-generator-deckkit <id>  Require bundled DeckKit generator disclosure.
   --strict                          Exit 2 when a required capability is undisclosed.
   --overwrite                       Replace an existing current-run output file.
   --json                            Print the complete JSON report to stdout.
@@ -54,6 +59,7 @@ function parseArgs(argv) {
       themes: [],
       styles: [],
       nativeDeckkits: [],
+      generatorDeckkits: [],
     },
   }
   const requirementFlags = {
@@ -63,6 +69,7 @@ function parseArgs(argv) {
     '--require-theme': 'themes',
     '--require-style': 'styles',
     '--require-native-deckkit': 'nativeDeckkits',
+    '--require-generator-deckkit': 'generatorDeckkits',
   }
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -186,6 +193,31 @@ function nativeDeckkitIndex(value) {
     .sort((a, b) => a.id.localeCompare(b.id))
 }
 
+function readLocalJson(path) {
+  try {
+    return parseJson(readFileSync(path, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+function generatorDeckkitIndex() {
+  const catalog = readLocalJson(join(SKILL_ROOT, 'assets', 'deckkits', 'catalog.json'))
+  const entries = Array.isArray(catalog?.entries) ? catalog.entries : []
+  return entries
+    .filter((entry) => entry && typeof entry.id === 'string')
+    .map((entry) => ({
+      id: entry.id,
+      readiness: entry.readiness ?? null,
+      themePack: entry.themePack ?? entry.nativeSkinning?.themePack ?? null,
+      stylePack: entry.stylePack ?? entry.nativeSkinning?.stylePack ?? null,
+      path: entry.path ?? null,
+      creation: 'deckkit-generator',
+      nativeSkinning: entry.nativeSkinning?.supported === true,
+    }))
+    .sort((a, b) => a.id.localeCompare(b.id))
+}
+
 function requirementResults(requirements, capabilities) {
   const indexes = {
     commands: new Set([
@@ -198,8 +230,18 @@ function requirementResults(requirements, capabilities) {
     themes: new Set(capabilities.themePacks),
     styles: new Set(capabilities.stylePacks),
     nativeDeckkits: new Set(capabilities.nativeDeckkits.map((entry) => entry.id)),
+    generatorDeckkits: new Set(capabilities.generatorDeckkits.map((entry) => entry.id)),
   }
   const results = []
+  const disclosedMeaning = {
+    commands: 'present in the runtime xdoc command index',
+    operations: 'present in the runtime xdoc patch/recipe operation index',
+    enums: 'present in the runtime xdoc enum registry',
+    themes: 'present in the runtime xdoc theme catalog',
+    styles: 'present in the runtime xdoc style catalog',
+    nativeDeckkits: 'present in the runtime xdoc native skinning DeckKit catalog',
+    generatorDeckkits: 'present in the bundled DeckKit generator catalog',
+  }
   for (const [kind, values] of Object.entries(requirements)) {
     for (const value of values) {
       const disclosed = indexes[kind].has(value)
@@ -208,8 +250,8 @@ function requirementResults(requirements, capabilities) {
         value,
         state: disclosed ? 'disclosed' : 'undisclosed',
         meaning: disclosed
-          ? 'present in the runtime xdoc schema index'
-          : 'not present in the runtime schema index; this is not proof of unsupported behavior',
+          ? disclosedMeaning[kind] || 'present in the capability index'
+          : 'not present in the capability index; this is not proof of unsupported behavior',
       })
     }
   }
@@ -259,6 +301,8 @@ function createReport(args) {
     themePacks: idsFromCatalog(catalogs.themes),
     stylePacks: idsFromCatalog(catalogs.styles),
     nativeDeckkits: nativeDeckkitIndex(catalogs.nativeDeckkits),
+    nativeSkinningDeckkits: nativeDeckkitIndex(catalogs.nativeDeckkits),
+    generatorDeckkits: generatorDeckkitIndex(),
     schemaSlicing: {
       available: Boolean(pptx.schemaDisclosure),
       modes: namesFromCollection(pptx.schemaDisclosure?.modes, ['flag']),
@@ -314,6 +358,10 @@ function createReport(args) {
           operationSchema: 'xdoc schema --op <name> --minimal',
           commandHelp: 'xdoc <command...> --help',
           selectorEvidence: 'inspect output -> op schema -> dry-run suggestions',
+          deckkitGeneratorCatalog:
+            'read xdoc-capabilities.json#capabilities.generatorDeckkits for DeckKit-first creation support',
+          nativeSkinningCatalog:
+            'read xdoc-capabilities.json#capabilities.nativeSkinningDeckkits for native refurbish/skin support',
         },
       },
       capabilities,

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -127,18 +126,7 @@ try {
   const patchPath = join(runDir, 'patch.json')
   const qualityPath = join(runDir, 'quality.json')
   const capabilityPath = join(runDir, 'xdoc-capabilities.json')
-
   const probeScript = join(__dirname, 'pptx-nova-probe.mjs')
-  const probeResult = spawnSync(
-    process.execPath,
-    [probeScript, '--xdoc-bin', args.xdocBin, '--output', capabilityPath],
-    { encoding: 'utf8' },
-  )
-  if (probeResult.status !== 0) {
-    throw new Error(
-      `xdoc capability probe failed (${probeResult.status ?? 'spawn error'}): ${probeResult.stderr || probeResult.stdout}`,
-    )
-  }
 
   writeJson(outlinePath, {
     schemaVersion: 'pptx-nova-outline/v1',
@@ -175,7 +163,7 @@ try {
   })
 
   const commands = {
-    probe: `node ${shellQuote(probeScript)} --xdoc-bin ${shellQuote(args.xdocBin)} --output ${shellQuote(capabilityPath)} --overwrite`,
+    probe: `node ${shellQuote(probeScript)} --xdoc-bin ${shellQuote(args.xdocBin)} --output ${shellQuote(capabilityPath)}`,
     build: `node ${shellQuote(join(__dirname, 'pptx-nova-build.mjs'))} --deckkit ${shellQuote(args.deckkit)} ${shellQuote(contentPath)} -o ${shellQuote(patchPath)} --quality-json ${shellQuote(qualityPath)}`,
     validate: `node ${shellQuote(join(skillRoot, 'assets', 'deckkits', 'validate-content.mjs'))} ${shellQuote(contentPath)} --deckkit ${shellQuote(args.deckkit)} --mode delivery`,
   }

@@ -239,12 +239,13 @@ function auditContactSheetArtifact(summary) {
 function auditBenchmarkCases({ index, outDir, deckkit }) {
   const deckkitCases = index.cases.filter((benchCase) => benchCase.deckkit === deckkit)
   const cases = []
-  const benchmarkBlockers = []
+  const evidenceBlockers = []
+  const qualityBlockers = []
   const indexedKinds = uniqueKinds(deckkitCases)
 
   for (const kind of MINIMUM_REQUIRED_KINDS) {
     if (!indexedKinds.includes(kind)) {
-      benchmarkBlockers.push(`missing ${kind} case in visual benchmark index`)
+      evidenceBlockers.push(`missing ${kind} case in visual benchmark index`)
       cases.push({ kind, caseId: '', summaryPath: '', exists: false, passed: false })
     }
   }
@@ -252,7 +253,7 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
   for (const benchCase of orderedBenchmarkCases(deckkitCases)) {
     const summaryPath = summaryPathFor(outDir, benchCase)
     if (!existsSync(summaryPath)) {
-      benchmarkBlockers.push(`missing summary for ${benchCase.id}; run benchmark first`)
+      evidenceBlockers.push(`missing summary for ${benchCase.id}; run benchmark first`)
       cases.push({
         kind: benchCase.kind,
         caseId: benchCase.id,
@@ -274,23 +275,23 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
     const contactSheet = auditContactSheetArtifact(summary)
     const lowBuckets = visionLowBuckets(summary)
 
-    if (!passed) benchmarkBlockers.push(`${benchCase.id} gate did not pass`)
-    if (errors > 0) benchmarkBlockers.push(`${benchCase.id} has ${errors} validation error(s)`)
-    if (fitErrors > 0) benchmarkBlockers.push(`${benchCase.id} has ${fitErrors} fit error(s)`)
+    if (!passed) qualityBlockers.push(`${benchCase.id} gate did not pass`)
+    if (errors > 0) qualityBlockers.push(`${benchCase.id} has ${errors} validation error(s)`)
+    if (fitErrors > 0) qualityBlockers.push(`${benchCase.id} has ${fitErrors} fit error(s)`)
     if (!previews?.enabled) {
-      benchmarkBlockers.push(`${benchCase.id} PNG preview gate is missing or disabled`)
+      qualityBlockers.push(`${benchCase.id} PNG preview gate is missing or disabled`)
     } else {
       if (previews.countEqualsSlides !== true) {
-        benchmarkBlockers.push(`${benchCase.id} PNG preview count does not match slide count`)
+        qualityBlockers.push(`${benchCase.id} PNG preview count does not match slide count`)
       }
       if (previews.artifactFilesNonEmpty !== true) {
-        benchmarkBlockers.push(`${benchCase.id} PNG preview artifact(s) are missing or empty`)
+        qualityBlockers.push(`${benchCase.id} PNG preview artifact(s) are missing or empty`)
       }
     }
     if (!contactSheet?.enabled) {
-      benchmarkBlockers.push(`${benchCase.id} contact-sheet gate is missing or disabled`)
+      qualityBlockers.push(`${benchCase.id} contact-sheet gate is missing or disabled`)
     } else if (contactSheet.artifactNonEmpty !== true) {
-      benchmarkBlockers.push(`${benchCase.id} contact sheet is missing or empty`)
+      qualityBlockers.push(`${benchCase.id} contact sheet is missing or empty`)
     }
 
     cases.push({
@@ -329,7 +330,21 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
     minimumRequiredKinds: MINIMUM_REQUIRED_KINDS,
     gatedKinds: indexedKinds,
     cases,
-    benchmarkBlockers,
+    benchmarkBlockers: [...evidenceBlockers, ...qualityBlockers],
+    evidenceBlockers,
+    qualityBlockers,
+    evidence: {
+      status:
+        evidenceBlockers.length === 0
+          ? qualityBlockers.length === 0
+            ? 'complete'
+            : 'complete-with-failures'
+          : 'missing',
+      missingCount: evidenceBlockers.length,
+      failureCount: qualityBlockers.length,
+      missing: evidenceBlockers,
+      failures: qualityBlockers,
+    },
   }
 }
 
@@ -500,10 +515,16 @@ function buildExplicitSelection({ requested, target, catalogAudit, targetEligibi
 }
 
 function buildEligibility({ catalogAudit, benchmarkAudit }) {
-  const candidateBlockers = [...catalogAudit.blockers, ...benchmarkAudit.benchmarkBlockers]
+  const benchmarkQualityBlockers =
+    benchmarkAudit.qualityBlockers ?? benchmarkAudit.benchmarkBlockers
+  const benchmarkEvidenceAttention = benchmarkAudit.evidenceBlockers ?? []
+  const candidateBlockers = [...catalogAudit.blockers, ...benchmarkQualityBlockers]
+  const candidateAttention = [...benchmarkEvidenceAttention]
 
   const deliveryBlockers = [...candidateBlockers]
+  const deliveryAttention = [...candidateAttention]
   const defaultBlockers = [...candidateBlockers]
+  const defaultAttention = [...candidateAttention]
   const readiness = catalogAudit.readiness
   const quality = catalogAudit.quality
   const knownBlockingLimits = catalogAudit.knownBlockingLimits
@@ -511,6 +532,8 @@ function buildEligibility({ catalogAudit, benchmarkAudit }) {
 
   if (['production', 'default'].includes(readiness)) {
     candidateBlockers.push(...visualGrammarBlockers)
+  } else if (benchmarkEvidenceAttention.length > 0) {
+    candidateBlockers.push(...benchmarkEvidenceAttention)
   }
 
   if (!['production', 'default'].includes(readiness)) {
@@ -592,25 +615,25 @@ function buildEligibility({ catalogAudit, benchmarkAudit }) {
   }
 
   defaultBlockers.push(...deliveryBlockers.filter((item) => !defaultBlockers.includes(item)))
+  defaultAttention.push(...deliveryAttention.filter((item) => !defaultAttention.includes(item)))
   if (readiness !== 'default') {
     defaultBlockers.push(
       `catalog.readiness is "${readiness || 'missing'}"; default requires default`,
     )
   }
 
+  const gate = (blockers, attention = []) => ({
+    ready: blockers.length === 0 && attention.length === 0,
+    usable: blockers.length === 0,
+    status: blockers.length > 0 ? 'fail' : attention.length > 0 ? 'attention' : 'pass',
+    blockers,
+    attention,
+  })
+
   return {
-    candidate: {
-      ready: candidateBlockers.length === 0,
-      blockers: candidateBlockers,
-    },
-    delivery: {
-      ready: deliveryBlockers.length === 0,
-      blockers: deliveryBlockers,
-    },
-    default: {
-      ready: defaultBlockers.length === 0,
-      blockers: defaultBlockers,
-    },
+    candidate: gate(candidateBlockers, candidateAttention),
+    delivery: gate(deliveryBlockers, deliveryAttention),
+    default: gate(defaultBlockers, defaultAttention),
   }
 }
 
@@ -618,9 +641,14 @@ function printHuman(result) {
   process.stdout.write(`DeckKit readiness audit: ${result.deckkit}\n`)
   for (const target of ['candidate', 'delivery', 'default']) {
     const gate = result.eligibility[target]
-    process.stdout.write(`- ${target}: ${gate.ready ? 'PASS' : 'FAIL'}\n`)
+    const label =
+      gate.status === 'pass' ? 'PASS' : gate.status === 'attention' ? 'ATTENTION' : 'FAIL'
+    process.stdout.write(`- ${target}: ${label}\n`)
     for (const blocker of gate.blockers) {
       process.stdout.write(`  - ${blocker}\n`)
+    }
+    for (const item of gate.attention ?? []) {
+      process.stdout.write(`  - attention: ${item}\n`)
     }
   }
   if (result.catalog.warnings.length > 0) {
@@ -653,6 +681,9 @@ function printHuman(result) {
     }
   }
   process.stdout.write('- benchmark cases:\n')
+  if (result.benchmark.evidence?.status) {
+    process.stdout.write(`  evidence: ${result.benchmark.evidence.status}\n`)
+  }
   for (const benchCase of result.benchmark.cases) {
     const status = benchCase.passed ? 'PASS' : 'FAIL'
     const skipped = benchCase.skipped
@@ -701,13 +732,20 @@ function main() {
     catalogAudit,
     targetEligibility: eligibility[args.target],
   })
-  const passed = eligibility[args.target].ready || explicitSelection.passedByExplicitException
+  const targetGate = eligibility[args.target]
+  const usableForDelivery = eligibility.delivery.usable
+  const passed = targetGate.usable || explicitSelection.passedByExplicitException
   const result = {
     schemaVersion: 'pptx-nova-deckkit-readiness-audit/v1',
     deckkit: args.deckkit,
     target: args.target,
     explicit: args.explicit,
     passed,
+    status: targetGate.status,
+    catalogReadiness: catalogAudit.readiness,
+    benchmarkEvidence: benchmarkAudit.evidence,
+    deliveryGate: eligibility.delivery.status,
+    usableForDelivery,
     paths: {
       catalog: relative(SKILL_ROOT, args.catalog),
       visualIndex: relative(SKILL_ROOT, args.visualIndex),

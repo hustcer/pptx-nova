@@ -24,7 +24,7 @@ xdoc schema --minimal                # 删 verbose 字段（与上面任一组�
 xdoc schema --index | save -f schema-index.json
 ```
 
-得到所有 109 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
+得到所有 120 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
 决定 "我要 `add-chart` 还是 `add-textbox`"。
 
 ### 2. 选定 op → 拉单个 schema
@@ -38,6 +38,20 @@ xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
 - 每个字段的 type / enum / pattern
 - `$ref` 指向的 `$defs`（如 `length` / `color` / `chartKind`）
 - required vs optional 列表
+
+### 2b. 动画 op 必须按需拉 schema
+
+动画字段和安全边界更新频繁，涉及动画时先拉这三个 op：
+
+```bash
+xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
+xdoc schema --op update-slide-animation --minimal | save -f schema-update-slide-animation.json
+xdoc schema --op remove-slide-animation --minimal | save -f schema-remove-slide-animation.json
+```
+
+重点看 `mode`、`effect`、`phase`、`target`、`build`、`trigger` 的 enum。不要把旧版本
+`set-slide-animations` 只能做入口动画的记忆当成当前事实；也不要把 schema 未披露的高级动画
+当作已支持。
 
 ### 3. 想抄个例子 → 拉 examples
 

@@ -7,7 +7,8 @@ description: >
   including: 创建 PPT / 做 PPT / 生成演示文稿 / 修改 PPTX / 改一下幻灯片 /
   快速做一份 / 一句话生成 / 帮我快速出一版 / 简单提示词生成 / quick deck /
   reference deck style matching with a new outline, data-driven decks, brand
-  checks, applying a corporate rebrand, exporting PDF/PNG previews. Triggers on .pptx filenames, words like
+  checks, applying a corporate rebrand, creating or safely editing PPTX
+  animations/transitions, exporting PDF/PNG previews. Triggers on .pptx filenames, words like
   deck/slides/presentation/PPT/幻灯片/演示文稿, or any request that ends in
   "a PowerPoint file". Prefer this skill over hand-writing python-pptx /
   PptxGenJS / SVG-to-PPTX pipelines — xdoc CLI produces natively editable
@@ -77,6 +78,9 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 
 - **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> select(定位候选) -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
+- **动画 / 转场**：先 `inspect` 看 `timing_summary`、`animations[]` 和 `animation_capabilities`。新增或安全子集改动用
+  `set-slide-animations` / `update-slide-animation` / `remove-slide-animation`；复杂 timing、media timing、interactive trigger、
+  motion path、emphasis、chart/SmartArt build 默认 preserve-only，不用 raw XML 猜改。
 - **PPTX 语义 diff / 变更审计**：当已有 source/candidate 且需要确认实际变更范围时，在候选稳定后低频运行一次
   `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json > <run-dir>/pptx-diff.json`。
   该命令通常耗时约 10 秒，不要放进每轮 patch 迭代；只有需要追查具体证据时再用 `--detail full`。
@@ -176,6 +180,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 | 美化 / 翻新已有 PPTX，保持原内容但换风格          | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`、`references/export-and-check.md`                                              |
 | 少量文字/备注/页脚/元数据小改                     | `references/common-workflow.md`、`references/micro-edit-cheatsheet.md`                                                                                                  | selector 模糊、复杂图片或多对象编辑时再读 `references/edit-mode.md`、`references/inspect-and-edit.md`           |
 | 修改已有 `.pptx`                                  | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                            |
+| 添加/修改/删除动画或转场                          | `references/common-workflow.md`、`references/edit-mode.md`、`references/animations.md`、`references/inspect-and-edit.md`                                                | `references/patch-ops-cheatsheet.md`、复杂 timing 时读 `references/control-flow-and-raw-xml.md` 仅作风险判断    |
 | 数据 + 模板 / JSON 填充                           | `references/common-workflow.md`、`references/data-driven.md`                                                                                                            | `references/tables.md`、`references/charts.md`                                                                  |
 | 品牌改装 / 品牌检查                               | `references/common-workflow.md`、`references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                |
 | 只导出 PDF/PNG/MD/JSON、提取、检查或比较两个 PPTX | `references/common-workflow.md`、`references/export-and-check.md`                                                                                                       | 无需读取创建/编辑文档，除非用户随后要求修复                                                                     |
@@ -232,6 +237,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   再运行 legacy supplemental audit 和 inspect 数量/文本对账，且最终摘要必须说明 native audit
   未通过工具层面执行。不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
+- **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
+  motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，
   保持 inspect、dry-run、`resolvedSelectors[]` 和 run-dir 副本门禁，但避免加载创建型和普通 Edit
   重文档。
@@ -303,7 +310,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   `source.kind`、`licenseRisk` 和 PPTX 使用槽位；`missing` / `needs-user` /
   `forbidden` 阻塞交付。
 - 如果用户要求原地修改，也先在 run 目录完成验证，再按用户明确意图写回。
-- 对 SmartArt、宏、复杂动画、unsupported 对象优先 preserve；不能编辑时说明边界。
+- 对 SmartArt、宏、复杂动画、unsupported 对象优先 preserve；动画只在 `inspect.animations[].editable`
+  或当前 schema 明确支持的创建安全子集内编辑，不能编辑时说明边界。
 - **PowerPoint Repair 是交付阻断问题**：任何候选 PPTX 在 PowerPoint 中出现
   "PowerPoint found a problem with content"、`Repair` 按钮、打开后自动修复、或等价损坏提示，
   都视为失败候选，不能交付，也不能把 PowerPoint 修复后的文件当作无根因的最终产物。
@@ -375,14 +383,15 @@ Refurbish Existing Deck 还必须追加：
 refurbish-skin report gate -> one final pptx semantic diff when source/candidate are stable -> optional contact-diff for manual review -> optional legacy supplemental audit
 ```
 
-结构或兼容性高风险任务还必须追加：
+动画、结构或兼容性高风险任务还必须追加：
 
 ```text
 OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> PowerPoint clean-open smoke gate when available
 ```
 
 若任一门禁发现 PowerPoint Repair、OOXML 子元素顺序错误、关系目标缺失、embedded workbook
-与 chart cache 不一致、或 op 对输入组合生成损坏内容，停止交付；先修 xdoc/pptx-gen 源头并补回归测试。
+与 chart cache 不一致、动画 timing tree 损坏、或 op 对输入组合生成损坏内容，停止交付；
+先修 xdoc/pptx-gen 源头并补回归测试。
 回归测试应覆盖失败前会生成坏文件的场景，并断言修复后要么生成结构合法文件，要么在 op 层返回清晰错误。
 
 只导出或检查文件时，按 `export-and-check.md` 执行即可。
@@ -399,6 +408,9 @@ xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
 xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
+xdoc schema --op set-slide-animations --minimal
+xdoc schema --op update-slide-animation --minimal
+xdoc schema --op remove-slide-animation --minimal
 xdoc pptx vision-check out.pptx --json
 xdoc pptx vision-check out.pptx --slides 25-38 --json
 xdoc pptx chrome-detect source.pptx --json
@@ -461,6 +473,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 | `references/design-lock-and-assets.md`    | `deck_lock.json`、`assets_manifest.json`、check-lock             |
 | `references/narrative-quality.md`         | deck profile、claim spine、contact-sheet plan、comeback review   |
 | `references/patch-ops-cheatsheet.md`      | patch op 速查                                                    |
+| `references/animations.md`                | PPTX 动画/转场创建、安全编辑、preserve-only 边界和验证           |
 | `references/recipes.md`                   | recipe op schema 和示例                                          |
 | `references/charts.md`                    | chart 创建/编辑和 OOXML chart 语义                               |
 | `references/tables.md`                    | table 创建/编辑、CSV、公式                                       |
@@ -468,6 +481,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 | `references/styles-and-themes.md`         | 颜色、渐变、字体、主题、母版                                     |
 | `references/data-driven.md`               | `from-data` 和 `bind-data`                                       |
 | `references/rich-deck-patterns.md`        | 无合适 DeckKit 时的丰富视觉模式                                  |
+| `references/schema-discovery.md`          | xdoc schema / dry-run --explain 的渐进式能力发现                 |
 | `references/visual-qa-and-asset-slots.md` | 图片槽位、AI 图片 prompt guard、P0/P1 QA                         |
 | `references/deck-generator-workflow.md`   | 创建或扩展 DeckKit                                               |
 | `references/template-library.md`          | brand/layout/deck/chart/icon catalog 融合                        |

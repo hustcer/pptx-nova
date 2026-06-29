@@ -1,6 +1,6 @@
-# Patch Ops Cheatsheet —— 109 个 op 按场景速查
+# Patch Ops Cheatsheet —— 120 个 op 按场景速查
 
-下面把 xdoc schema v1 的 109 个 op 按 **"我想做什么"** 反向归类。每条只列
+下面把 xdoc schema v1 的 120 个 op 按 **"我想做什么"** 反向归类。每条只列
 关键字段；完整 schema 用 `xdoc schema --op <name>` 拉。
 
 > 通用：所有 patch op 都嵌进 `{ "schemaVersion": 1, "ops": [ { "op": "...", ... } ] }`。
@@ -14,15 +14,19 @@
 
 ## 1. 演示文稿与 slide 级
 
-| op                     | 用途                                                           |
-| ---------------------- | -------------------------------------------------------------- |
-| `add-slide`            | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选 |
-| `remove-slide`         | 删除指定 slide                                                 |
-| `move-slide`           | 改 slide 顺序（`from` / `to` 都是 0-based）                    |
-| `duplicate-slide`      | 复制 slide（保留全部内容，包括 notes）                         |
-| `set-slide-size`       | 改 deck 尺寸：`"16:9"` / `"4:3"` / `{ w, h }`                  |
-| `set-slide-background` | 改某页背景：`{ fill: ..., followMaster: false }`               |
-| `set-core-prop`        | core props（`title` / `author` / `subject` / `keywords` 等）   |
+| op                       | 用途                                                           |
+| ------------------------ | -------------------------------------------------------------- |
+| `add-slide`              | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选 |
+| `remove-slide`           | 删除指定 slide                                                 |
+| `move-slide`             | 改 slide 顺序（`from` / `to` 都是 0-based）                    |
+| `duplicate-slide`        | 复制 slide（保留全部内容，包括 notes）                         |
+| `set-slide-size`         | 改 deck 尺寸：`"16:9"` / `"4:3"` / `{ w, h }`                  |
+| `set-slide-background`   | 改某页背景：`{ fill: ..., followMaster: false }`               |
+| `set-slide-transition`   | 设置/清理基础 slide transition 与自动切页                      |
+| `set-slide-animations`   | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear` |
+| `update-slide-animation` | 按 inspect 动画 id 修改安全子集 step                           |
+| `remove-slide-animation` | 按 inspect 动画 id 删除安全子集 step                           |
+| `set-core-prop`          | core props（`title` / `author` / `subject` / `keywords` 等）   |
 
 ### Slide notes
 
@@ -50,6 +54,62 @@
 | `set-presentation-default-text-style` | 整个 deck 的默认文字样式                                  |
 
 详见 `styles-and-themes.md`。
+
+### Animation / Transition 速查
+
+动画编辑先读 `animations.md`。不要在未 inspect 的情况下覆盖 `<p:timing>`。
+
+```json
+{
+  "op": "set-slide-animations",
+  "slide": 0,
+  "mode": "merge-safe",
+  "animations": [
+    {
+      "shape": { "name": "KPI Card" },
+      "effect": "fade",
+      "trigger": "onClick",
+      "duration": 450,
+      "delay": 0
+    }
+  ]
+}
+```
+
+局部编辑既有动画：
+
+```json
+{
+  "op": "update-slide-animation",
+  "slide": 0,
+  "id": "animation-id-from-inspect",
+  "phase": "exit",
+  "effect": "fade",
+  "trigger": "afterPrevious",
+  "duration": 650
+}
+```
+
+逐条 bullet / paragraph：
+
+```json
+{
+  "op": "set-slide-animations",
+  "slide": 1,
+  "mode": "merge-safe",
+  "animations": [
+    {
+      "target": { "shape": { "name": "Body" }, "paragraph": 0 },
+      "build": "by-paragraph",
+      "effect": "appear",
+      "trigger": "onClick"
+    }
+  ]
+}
+```
+
+复杂 timing、motion path、emphasis、media timing、interactive trigger、chart/SmartArt build
+默认 preserve-only；只有用户明确接受 `replace` / `clear` 语义损失时才重建整棵 timing tree。
 
 ---
 

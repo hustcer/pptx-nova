@@ -116,7 +116,11 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 - shape **不直接有** `placeholder` 字段，是否是 placeholder 看 `shapeType` 与 `name`；但**写 patch** 时仍可用 `{ "placeholder": { "type": "title" } }` selector
 - 普通 RGB 颜色在 inspect 中输出为不带 `#` 的 6 位大写十六进制；主题色输出在 `fillSchemeColor` /
   `lineSchemeColor`。复杂渐变、图案、图片填充只保证 `fillType`，必要时仍要 PNG 复核。
-- preserve-only 状态（动画/SmartArt/过渡）通过顶层 `capabilities` 字段报告，不在每页上
+- 动画状态现在也在每页暴露：`timing_summary`、`animations[]`、`animation_capabilities`。
+  只有 `animations[].editable == true` 的安全子集可用 `update-slide-animation` /
+  `remove-slide-animation` 局部改；复杂 timing 仍看 `animation_capabilities.preserve_only`。
+- preserve-only 状态（SmartArt、复杂动画、复杂过渡等）也会通过 capabilities / per-slide
+  summary 报告；不要只看一个布尔字段就决定能不能改。
 - **`geometryOverlaps` / `textOverflowEstimates` 是每页的几何风险**，复用 `vision-check` 的重叠/溢出核心算出来——Edit 模式一次 inspect 就能看到这两类风险，不必单独再跑 `vision-check`；但对比度、装饰是否真盖住文字仍要 PNG 复核。`kind` 取 `both-text`（两个文本框重叠）或 `decoration-over-text`（色块压住文字）
 
 ### 用 nushell 高效消化 inspect
@@ -442,18 +446,22 @@ dry-run 报告里会有：
 }
 ```
 
-## 6. Preserve-only 提示
+## 6. Preserve-only 与动画提示
 
-inspect 报告中下面三个布尔字段如果是 true，说明该页有 xdoc **当前不能编辑**的内容：
+inspect 报告中的这些字段说明该页有需要谨慎处理的内容：
 
-| 字段            | 含义                | 处理                                     |
-| --------------- | ------------------- | ---------------------------------------- |
-| `hasTransition` | 有 slide transition | 不要尝试 `set-transition`，preserve 即可 |
-| `hasTiming`     | 有动画/timing       | 不要尝试改动画                           |
-| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape |
+| 字段            | 含义                | 处理                                                            |
+| --------------- | ------------------- | --------------------------------------------------------------- |
+| `hasTransition` | 有 slide transition | 基础转场可用 `set-slide-transition`，高级/未知转场 preserve     |
+| `hasTiming`     | 有动画/timing       | 读 `timing_summary` / `animations[]` / `animation_capabilities` |
+| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape                        |
 
-遇到时直接告诉用户："这页有 SmartArt / 动画，xdoc 当前只能保留原样不能编辑，
-要改的话需要在 PowerPoint 里手工调整。" 不要假装做了。
+动画不是一概不能改：`animations[].editable == true` 的基础 entrance/exit 和安全文本 build
+可以按稳定 `id` 用 `update-slide-animation` 或 `remove-slide-animation` 修改；新增安全子集可用
+`set-slide-animations`。如果 `animation_capabilities.preserve_only` 包含 `media-timing`、
+`interactive-trigger`、`unsupported-timing`、`motion-path`、`emphasis`、`chart-build` 或
+`smartart-build`，默认 preserve。需要覆盖整棵 timing tree 时必须让用户确认 `mode: "replace"` 或
+`mode: "clear"` 的语义损失，并按 `animations.md` 做结构和 PowerPoint clean-open 验证。
 
 ## 7. Sidecar 时光机
 

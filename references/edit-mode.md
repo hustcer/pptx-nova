@@ -20,8 +20,8 @@ For existing deck edits read:
 3. `inspect-and-edit.md` for selector details and common edit patterns
 4. `patch-ops-cheatsheet.md` only when writing patch ops
 
-Read `charts.md`, `tables.md`, `styles-and-themes.md`, or `data-driven.md` only
-when the requested edit touches those domains.
+Read `charts.md`, `tables.md`, `styles-and-themes.md`, `animations.md`, or
+`data-driven.md` only when the requested edit touches those domains.
 
 ## Standard Edit Flow
 
@@ -138,13 +138,18 @@ template rules, brand/style changes, or full visual QA.
 - Image replacement: remove/add picture at the same bbox, or use crop ops when
   appropriate.
 - Notes: `set-slide-notes`, `set-slide-notes-rich-text`.
+- Animations/transitions: read `animations.md`; use `set-slide-transition`,
+  `set-slide-animations`, `update-slide-animation`, or `remove-slide-animation`
+  only after inspect/dry-run proves the timing is in the supported safe subset.
 
 ## Preserve Constraints
 
 Preserve SmartArt, VBA macros, unsupported animation/timing, and complex objects
 unless the user explicitly asks for a destructive transformation and the tool
-supports it. If inspect reports unsupported objects, say what can be preserved
-and what cannot be edited.
+supports it. Basic editable animation steps are no longer automatically
+preserve-only: inspect `animations[].editable` and `animation_capabilities`
+before deciding. If inspect reports unsupported objects, say what can be
+preserved and what cannot be edited.
 
 ## Template-Sensitive Edits
 

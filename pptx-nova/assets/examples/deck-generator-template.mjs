@@ -116,7 +116,6 @@ const F = {
 }
 
 const MIN_VISIBLE_FONT_PT = 9
-const MIN_BODY_FONT_PT = 10.5
 const MIN_TABLE_TEXT_CONTRAST = 4.5
 
 const parseFontPt = (size) => {

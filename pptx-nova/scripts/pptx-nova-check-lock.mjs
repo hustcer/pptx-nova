@@ -705,7 +705,7 @@ function tableDataRows(op) {
   return []
 }
 
-function checkTableSemantic(op, index, errors, warnings) {
+function checkTableSemantic(op, index, errors, _warnings) {
   const label = `ops[${index}] ${op.op}`
   const rows = tableDataRows(op)
   if (op.op === 'add-table') {

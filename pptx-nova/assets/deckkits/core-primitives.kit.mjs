@@ -939,7 +939,7 @@ function pathValue(root, path) {
   if (!path) return undefined
   return String(path)
     .split('.')
-    .reduce((cur, part) => (cur == null ? undefined : cur[part]), root)
+    .reduce((cur, part) => (cur === null || cur === undefined ? undefined : cur[part]), root)
 }
 
 function hasContractValue(root, path) {

@@ -244,7 +244,7 @@ function makeChrome({ tx, box, fillText }) {
   return { topRule, header, footer, sectionLabel, noteBox, cardCaption }
 }
 
-function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPanel }) {
+function makeComponents({ tx, box, card, icon, fillText, rotate, cardPanel }) {
   const metricCard = (s, base, x, y, w, h, item) => {
     const accent = tone(item.accent ?? C.blue)
     box(s, nm(s, `${base}Bg`), 'rectangle', x, y, w, h, item.bg ?? C.surface)
@@ -310,39 +310,6 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
         color: accentText(accent),
       })
     }
-  }
-
-  const hBar = (s, base, x, y, w, h, value, max, color, label, sub, valueLabel) => {
-    const accent = tone(color)
-    tx(s, nm(s, `${base}Label`), x, y - 0.04, 1.9, 0.18, label, {
-      name: FONT_EN,
-      size: '8.2pt',
-      bold: true,
-      color: C.text,
-    })
-    if (sub) {
-      tx(s, nm(s, `${base}Sub`), x, y + 0.15, 1.9, 0.16, sub, {
-        name: FONT_EN,
-        size: '6.9pt',
-        color: C.slate,
-      })
-    }
-    box(s, nm(s, `${base}Track`), 'rectangle', x + 2.05, y, w, h, C.surface2)
-    const fillW = Math.max(0.05, (w * value) / max)
-    box(s, nm(s, `${base}Bar`), 'rectangle', x + 2.05, y, fillW, h, accent)
-    const valueW = 0.68
-    const valueX = x + 2.05 + Math.max(0, Math.min(fillW - valueW - 0.08, w - valueW - 0.08))
-    tx(
-      s,
-      nm(s, `${base}Val`),
-      valueX,
-      y + 0.08,
-      valueW,
-      0.18,
-      valueLabel ?? `${value}%`,
-      { name: FONT_EN, size: '8pt', bold: true, color: textOnTone(accent) },
-      'right',
-    )
   }
 
   const miniBar = (s, base, x, y, w, label, value, note, color = C.primary) => {
@@ -468,7 +435,7 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
       color: displayInk(item.kpiColor ?? C.amber),
     })
     const kpiRest = kpiLines.slice(1).join('\n')
-    if (kpiRest != '') {
+    if (kpiRest !== '') {
       tx(s, nm(s, `${base}KpiSub`), x + 0.16, y + 5.42, w - 0.32, 0.24, kpiRest, {
         name: FONT_EN,
         size: '7.8pt',
@@ -546,7 +513,6 @@ function makeComponents({ tx, box, card, icon, fillText, setLine, rotate, cardPa
   return {
     metricCard,
     compactMetricCard,
-    hBar,
     miniBar,
     pillarCard,
     smallInfo,
@@ -566,7 +532,6 @@ function makePageTypes(builders, chrome, components, total) {
   const {
     metricCard,
     compactMetricCard,
-    hBar,
     miniBar,
     pillarCard,
     smallInfo,

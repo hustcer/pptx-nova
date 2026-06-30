@@ -15,9 +15,12 @@
 - 套用公司模板，把新内容填进去。
 - 翻新一份旧 PPT，让它更统一、更专业，但保留原本内容。
 - 修改已有 PPT，比如改标题、替换数据、调整页面、换图片、改配色。
-- 把 Excel、表格或其他数据文件做成表格页或图表页。
+- 把 CSV、JSON 或表格数据做成表格页或图表页。
 - 导出 PDF 或图片预览，方便检查和分享。
 - 检查 PPT 是否有文字重叠、内容被截断、页面不整齐等问题。
+
+网页、HTML 和 PDF 可以作为内容素材输入。`pptx-nova` 会先把它们提取成 Markdown 或文本，
+再进入 PPT 生成流程；它不会默认把网页或 PDF 的原始版式、图片和样式完整搬进 PPT。
 
 ## 最简单的用法
 
@@ -48,7 +51,7 @@
 - **受众**：给老板、客户、投资人、同事、学生，还是公开演讲？
 - **页数**：大概几页，或者是否有固定页数。
 - **语言**：中文、英文，还是中英混合。
-- **内容**：大纲、文档、表格、旧 PPT、网页链接、PDF、图片或 logo。
+- **内容**：大纲、文档、CSV/JSON 表格数据、旧 PPT、网页链接、PDF、图片或 logo。
 - **风格**：正式、简洁、咨询风、科技感、品牌规范、课程风等。
 - **限制**：哪些内容不能改，哪些页面必须保留，是否允许重排结构。
 - **输出**：最终文件名，是否需要 PDF 或图片预览。
@@ -141,7 +144,8 @@
 - 一份最终 `.pptx` 文件。
 - 如果你要求，会有 PDF 或图片预览。
 - 简短说明：改了什么、生成了什么、有没有需要你注意的地方。
-- 如果任务复杂，会保留一份工作记录，方便后续继续修改或排查问题。
+- 如果任务复杂，会保留一份可审计的工作记录，例如 `outline.json`、`deck_lock.json`、
+  `content.json`、`patch.json`、检查报告、预览图和 contact sheet，方便后续继续修改或排查问题。
 
 默认不会覆盖你的原始 PPT。除非你明确要求“直接覆盖原文件”，否则会输出到一个新文件。
 
@@ -170,7 +174,9 @@
 - 表格、图表、图片、备注等可见内容。
 - 页面之间的逻辑顺序。
 
-如果旧 PPT 本身内容太密、页面装不下，可能需要你确认是否允许拆页、删减文字或重排结构。
+如果旧 PPT 本身内容太密、页面装不下，通常会先尝试保留原生对象并调整版式；确实需要拆页、
+合页、重排或删减内容时，必须先让你确认。默认不会把源页整页截图塞进新 PPT 来冒充可编辑翻新。
+机器检查通过后，翻新类任务通常仍需要打开 contact sheet 或逐页图片做最终视觉复核。
 
 ## 什么时候需要先确认
 
@@ -203,7 +209,7 @@
 用 pptx-nova 做一份【页数】【语言】PPT，主题是【主题】，
 受众是【受众】，用途是【用途】，
 风格希望【风格】，
-内容来自【大纲/文档/旧 PPT/表格/链接】，
+内容来自【大纲/文档/旧 PPT/CSV 或 JSON 表格/链接】，
 输出文件名是【文件名.pptx】。
 ```
 
@@ -227,9 +233,9 @@
 
 - 脚本从自身位置推导 `<skill-root>`，不要依赖仓库根开发工具、本地环境文件或 agent 私有上下文文件。
 - 项目输入通过显式参数传入，例如 `--root`、`--asset-root`、`--xdoc-bin`、PPTX 路径或
-  documented environment variables。
+  已文档化的环境变量。
 - Deck generation path 使用 bundled assets；不要从网络或本机 checkout 动态读取图标、模板或私有素材。
-- `xdoc` 是主要外部 CLI 依赖。没有 `xdoc` 时，内容验证、DeckKit selection、icon 查询和 patch build
+- `xdoc` 是主要外部 CLI 依赖。没有 `xdoc` 时，内容验证、DeckKit 选择、icon 查询和 patch build
   仍应可跑；真实 apply、convert、vision-check 会失败或被上层跳过。
 
 ### 公开前检查
@@ -254,7 +260,8 @@ content validation、DeckKit patch build、icon pack query、DeckKit selector。
 
 ### Tabler 图标包
 
-运行时查询使用 bundled `assets/icons/tabler-icons.pack.br`。刷新图标包时必须显式提供 Tabler checkout：
+运行时查询使用 bundled `assets/icons/tabler-icons.pack.br`。在 `pptx-nova/` 目录内刷新图标包时，
+必须显式提供 Tabler checkout：
 
 ```bash
 node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>

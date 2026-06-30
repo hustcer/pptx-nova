@@ -57,7 +57,7 @@ You can give a single sentence, but results are usually better when you include:
   teams, or public conference attendees.
 - Length: exact slide count or an approximate range.
 - Language: English, Chinese, bilingual, or another target language.
-- Source material: outline, notes, existing PPTX, PDF, CSV/XLSX, screenshots,
+- Source material: outline, notes, existing PPTX, PDF, CSV/JSON, screenshots,
   links, product copy, brand assets, or a template deck.
 - Style direction: formal, minimal, consulting, technical, editorial, product
   marketing, training-oriented, or strict brand template.

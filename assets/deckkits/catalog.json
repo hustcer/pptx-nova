@@ -1539,7 +1539,7 @@
         }
       },
       "knownLimits": [
-        "Candidate DeckKit based on demos/67-swiss-grid-systems.pptx; run the visual benchmark before delivery promotion",
+        "Candidate DeckKit based on the bundled Swiss grid benchmark; run the visual benchmark before delivery promotion",
         "Designed for white-background 16:9 lecture decks with short Swiss-style titles",
         "swissTableSlide fits up to 11 compact rows and 6 columns; split longer tables",
         "Small footer and marker typography is intentionally sparse; avoid long legal footnotes"

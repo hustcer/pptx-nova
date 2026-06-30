@@ -7,7 +7,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 export const PACK_SCHEMA_VERSION = 'pptx-nova-tabler-icon-pack/v1'
-export const DEFAULT_SOURCE_ROOT = '/Users/hustcer/iWork/refs/tabler-icons'
+export const DEFAULT_SOURCE_ROOT = process.env.TABLER_ICONS_ROOT ?? ''
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 export const DEFAULT_PACK_PATH = join(SKILL_ROOT, 'assets/icons/tabler-icons.pack.br')
@@ -224,6 +224,8 @@ function renderPackText({ rows, version, shells = TABLER_SHELLS }) {
 }
 
 export function buildTablerIconPackText(sourceRoot = DEFAULT_SOURCE_ROOT, options = {}) {
+  if (!sourceRoot)
+    fail('Tabler source root is required. Pass --source-root or set TABLER_ICONS_ROOT.')
   const sourceRootPath = resolve(sourceRoot)
   const rows = readSourceRows(sourceRootPath)
   return renderPackText({
@@ -270,6 +272,8 @@ export function generateTablerIconPack({
   outlineStrokeWidth = DEFAULT_OUTLINE_STROKE_WIDTH,
   check = false,
 } = {}) {
+  if (!sourceRoot)
+    fail('Tabler source root is required. Pass --source-root or set TABLER_ICONS_ROOT.')
   const sourceRootPath = resolve(sourceRoot)
   const outputPath = resolve(output)
   const licenseOutputPath = resolve(licenseOutput)

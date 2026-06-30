@@ -30,9 +30,13 @@ introduced.
   `icons/icon-license`. Refresh both from the local Tabler checkout with:
 
   ```bash
-  node <skill-root>/scripts/pptx-nova-icons.mjs generate
-  node <skill-root>/scripts/pptx-nova-icons.mjs generate --check
+  node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>
+  node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check
   ```
+
+  Maintainers may set `TABLER_ICONS_ROOT=<tabler-icons-checkout>` instead of
+  passing `--source-root`; the published skill must not contain machine-local
+  checkout paths.
 
   During PPTX generation, DeckKit code should consume this pack through
   `assets/deckkits/icon-assets.kit.mjs`; agents should search/get icons through

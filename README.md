@@ -216,3 +216,62 @@
 内容来自 roadmap.md 和 metrics.csv，
 输出文件名是 product-roadmap-2026.pptx。
 ```
+
+## 维护者说明
+
+这一节面向维护和发布 `pptx-nova` skill 的开发者。普通使用者不需要阅读。
+
+### 独立运行契约
+
+`pptx-nova` 发布后应能作为独立 skill 运行，不依赖当前开发 monorepo 的根目录文件。
+
+- 脚本从自身位置推导 `<skill-root>`，不要依赖仓库根开发工具、本地环境文件或 agent 私有上下文文件。
+- 项目输入通过显式参数传入，例如 `--root`、`--asset-root`、`--xdoc-bin`、PPTX 路径或
+  documented environment variables。
+- Deck generation path 使用 bundled assets；不要从网络或本机 checkout 动态读取图标、模板或私有素材。
+- `xdoc` 是主要外部 CLI 依赖。没有 `xdoc` 时，内容验证、DeckKit selection、icon 查询和 patch build
+  仍应可跑；真实 apply、convert、vision-check 会失败或被上层跳过。
+
+### 公开前检查
+
+在独立仓库或发布包中至少跑：
+
+```bash
+node scripts/pptx-nova-smoke-test.mjs
+node scripts/pptx-nova-audit-public.mjs --strict
+```
+
+如果仍在当前 monorepo 中维护，则从仓库根运行：
+
+```bash
+node skills/pptx-nova/scripts/pptx-nova-smoke-test.mjs
+node skills/pptx-nova/scripts/pptx-nova-audit-public.mjs --strict
+```
+
+`pptx-nova-smoke-test.mjs` 只使用 skill 内 bundled files，不调用根 `tools/`。它覆盖：
+content validation、DeckKit patch build、icon pack query、DeckKit selector。
+
+`pptx-nova-audit-public.mjs` 检查：
+
+- 维护者机器上的绝对路径和私有仓库路径。
+- 当前 monorepo 私有上下文泄漏。
+- unexpected binary files。
+- Tabler icon pack license 是否随包携带。
+- examples 是否声明 synthetic / redistributable policy。
+
+### Tabler 图标包
+
+运行时查询使用 bundled `assets/icons/tabler-icons.pack.br`。刷新图标包时必须显式提供 Tabler checkout：
+
+```bash
+node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>
+node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check
+```
+
+也可以设置：
+
+```bash
+TABLER_ICONS_ROOT=<tabler-icons-checkout>
+```
+
+不要在源码、manifest 或文档中保存维护者机器上的 Tabler checkout 绝对路径。

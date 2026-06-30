@@ -7,6 +7,10 @@ the skill directory.
 Use these entry points from skill workflows:
 
 - `pptx-nova-deckkit-select.mjs` - select an eligible DeckKit from the bundled catalog.
+- `pptx-nova-smoke-test.mjs` - run a repository-independent smoke test against
+  bundled content, DeckKit validation/build, icon lookup, and DeckKit selection.
+- `pptx-nova-audit-public.mjs` - scan the skill package for private paths,
+  unexpected binaries, missing license metadata, and public asset policy issues.
 - `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
 - `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
 - `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.

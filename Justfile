@@ -53,6 +53,26 @@ lint:
   oxlint --fix; \
   $'(ansi g)The `lint` task finished!(ansi reset)(char nl)';
 
+# Check/generate pptx-nova themePack source-derived outputs:
+# `just theme` checks, `just theme -g` updates.
+theme flag=(''):
+    #!/usr/bin/env nu
+
+    let flag = '{{ flag }}'
+    match $flag {
+      '' => {
+        nu tools/generate-pptx-theme-catalog.nu --check
+        nu tools/generate-pptx-deckkit-catalog.nu --check
+        node tools/check-pptx-theme-contrast.mjs
+      }
+      '-g' => {
+        nu tools/generate-pptx-theme-catalog.nu
+        nu tools/generate-pptx-deckkit-catalog.nu
+        node tools/check-pptx-theme-contrast.mjs
+      }
+      _ => { error make { msg: 'usage: just theme [-g]' } }
+    }
+
 # Plugins need to be registered only once after nu v0.61
 _setup:
   @register -e json {{ join(NU_DIR, _query_plugin) }}

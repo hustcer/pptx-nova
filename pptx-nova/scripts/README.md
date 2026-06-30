@@ -7,10 +7,6 @@ the skill directory.
 Use these entry points from skill workflows:
 
 - `pptx-nova-deckkit-select.mjs` - select an eligible DeckKit from the bundled catalog.
-- `pptx-nova-smoke-test.mjs` - run a repository-independent smoke test against
-  bundled content, DeckKit validation/build, icon lookup, and DeckKit selection.
-- `pptx-nova-audit-public.mjs` - scan the skill package for private paths,
-  unexpected binaries, missing license metadata, and public asset policy issues.
 - `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
 - `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
 - `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.
@@ -60,5 +56,7 @@ Use these entry points from skill workflows:
   colors, and empty/default-text placeholder residue, then writes
   structure-check.json for the final evidence summary.
 
-Repository-root `tools/` scripts may wrap or test these files during skill
-development, but published skill users should call scripts from this directory.
+Repository-root `tools/` contains maintainer gates for this public repository,
+including `tools/pptx-nova-smoke-test.mjs` and
+`tools/pptx-nova-audit-public.mjs`. Published skill users should call runtime
+scripts from this directory.

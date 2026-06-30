@@ -4,7 +4,8 @@ import { basename, dirname, extname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
-const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
+const REPO_ROOT = resolve(SCRIPT_DIR, '..')
+const SKILL_ROOT = resolve(REPO_ROOT, 'pptx-nova')
 
 const BINARY_EXTENSIONS = new Set([
   '.br',
@@ -111,7 +112,6 @@ function pushIssue(issues, severity, code, path, message, extra = {}) {
 }
 
 function scanTextFile(path, relPath, issues) {
-  if (relPath === 'scripts/pptx-nova-audit-public.mjs') return
   const text = readFileSync(path, 'utf8')
   const lines = text.split(/\r?\n/)
   for (const item of DENY_PATTERNS) {

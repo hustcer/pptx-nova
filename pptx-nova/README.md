@@ -234,24 +234,17 @@
 
 ### 公开前检查
 
-在独立仓库或发布包中至少跑：
+在公开仓库根目录中至少跑：
 
 ```bash
-node scripts/pptx-nova-smoke-test.mjs
-node scripts/pptx-nova-audit-public.mjs --strict
+node tools/pptx-nova-smoke-test.mjs
+node tools/pptx-nova-audit-public.mjs --strict
 ```
 
-如果仍在当前 monorepo 中维护，则从仓库根运行：
-
-```bash
-node skills/pptx-nova/scripts/pptx-nova-smoke-test.mjs
-node skills/pptx-nova/scripts/pptx-nova-audit-public.mjs --strict
-```
-
-`pptx-nova-smoke-test.mjs` 只使用 skill 内 bundled files，不调用根 `tools/`。它覆盖：
+`tools/pptx-nova-smoke-test.mjs` 只使用 `pptx-nova/` 内 bundled files。它覆盖：
 content validation、DeckKit patch build、icon pack query、DeckKit selector。
 
-`pptx-nova-audit-public.mjs` 检查：
+`tools/pptx-nova-audit-public.mjs` 检查：
 
 - 维护者机器上的绝对路径和私有仓库路径。
 - 当前 monorepo 私有上下文泄漏。

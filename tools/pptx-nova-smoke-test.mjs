@@ -6,7 +6,8 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
-const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
+const REPO_ROOT = resolve(SCRIPT_DIR, '..')
+const SKILL_ROOT = resolve(REPO_ROOT, 'pptx-nova')
 const TMP_ROOT = mkdtempSync(join(tmpdir(), 'pptx-nova-smoke-'))
 
 const checks = []
@@ -41,9 +42,9 @@ function runJson(name, command, args) {
 
 const contentPath = join(SKILL_ROOT, 'assets/examples/consulting-dark/content.json')
 const validateScript = join(SKILL_ROOT, 'assets/deckkits/validate-content.mjs')
-const buildScript = join(SCRIPT_DIR, 'pptx-nova-build.mjs')
-const iconsScript = join(SCRIPT_DIR, 'pptx-nova-icons.mjs')
-const selectScript = join(SCRIPT_DIR, 'pptx-nova-deckkit-select.mjs')
+const buildScript = join(SKILL_ROOT, 'scripts/pptx-nova-build.mjs')
+const iconsScript = join(SKILL_ROOT, 'scripts/pptx-nova-icons.mjs')
+const selectScript = join(SKILL_ROOT, 'scripts/pptx-nova-deckkit-select.mjs')
 const patchPath = join(TMP_ROOT, 'patch.json')
 const qualityPath = join(TMP_ROOT, 'quality.json')
 

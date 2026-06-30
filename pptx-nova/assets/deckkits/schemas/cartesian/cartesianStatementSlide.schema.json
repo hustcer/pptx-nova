@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/cartesian/cartesianStatementSlide",
+  "title": "cartesianStatementSlide data schema",
+  "type": "object",
+  "required": ["quote", "attribution"],
+  "properties": {
+    "quoteMark": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 52, "widthIn": 0.6 }
+    },
+    "quote": { "type": "string", "x-slotBudget": { "maxLines": 3, "fontPt": 36, "widthIn": 8.9 } },
+    "attribution": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 2.25 }
+    }
+  },
+  "additionalProperties": false
+}

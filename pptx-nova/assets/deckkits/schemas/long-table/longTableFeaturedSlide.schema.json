@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/long-table/longTableFeaturedSlide",
+  "title": "longTableFeaturedSlide data schema",
+  "type": "object",
+  "required": ["edition", "eyebrow", "title", "body", "pills", "details"],
+  "properties": {
+    "edition": { "type": "string", "maxLength": 3 },
+    "eyebrow": { "type": "string", "maxLength": 54 },
+    "title": {
+      "type": "string",
+      "maxLength": 56,
+      "x-slotBudget": { "maxLines": 2, "fontPt": 51, "widthIn": 5.4 }
+    },
+    "body": {
+      "type": "string",
+      "maxLength": 260,
+      "x-slotBudget": { "maxLines": 5, "fontPt": 14.3, "widthIn": 5.1 }
+    },
+    "pills": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "string", "maxLength": 28 }
+    },
+    "details": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": { "type": "string", "maxLength": 72 }
+      }
+    }
+  },
+  "additionalProperties": false
+}

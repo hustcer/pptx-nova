@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/swiss-grid/swissProgressSlide",
+  "title": "swissProgressSlide data schema",
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.8, "widthIn": 1.5 }
+    },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 30, "widthIn": 6.6 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 11, "widthIn": 6.6 }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "x-slotBudget": { "maxItems": 6 },
+      "items": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "string",
+            "description": "序号下方的红色语义小标签（年份 / 阶段名 / 格式名等）。版式会自动渲染 01/02/… 大号序号，填与序号重复的数字会被去重跳过。",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 8.1, "widthIn": 1.5 }
+          },
+          "title": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 9.2, "widthIn": 1.5 }
+          },
+          "body": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 3, "fontPt": 7.4, "widthIn": 1.5 }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "calloutTitle": {
+      "type": "string",
+      "description": "底部 callout 区的加粗标题；缺省时取 callout 第一行加粗作为标题。",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 2.6 }
+    },
+    "callout": {
+      "type": "string",
+      "description": "底部结论；提供 calloutTitle 时整段作为正文，否则第一行加粗为标题、其余为正文。",
+      "x-slotBudget": { "maxLines": 2, "fontPt": 8.2, "widthIn": 6.3 }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/swiss-grid/swissClosingSlide",
+  "title": "swissClosingSlide data schema",
+  "type": "object",
+  "properties": {
+    "titleA": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 54, "widthIn": 6.0 } },
+    "titleB": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 54, "widthIn": 6.0 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 2, "fontPt": 12, "widthIn": 6.6 }
+    },
+    "footerL": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 3.0 }
+    },
+    "footerR": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.4, "widthIn": 1.7 }
+    },
+    "dots": {
+      "type": "array",
+      "maxItems": 24,
+      "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } }
+    }
+  },
+  "additionalProperties": true
+}

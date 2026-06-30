@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/biennale-yellow/biennaleCoverSlide",
+  "title": "biennaleCoverSlide data schema",
+  "type": "object",
+  "required": ["dateRange", "title", "subline", "footerItems"],
+  "properties": {
+    "dateRange": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 3, "fontPt": 50, "widthIn": 2.6 }
+    },
+    "title": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 3, "fontPt": 132, "widthIn": 6.7 }
+    },
+    "subline": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.7 }
+    },
+    "footerItems": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["label", "text"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 2.2 }
+          },
+          "text": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 3, "fontPt": 9, "widthIn": 3.4 }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "cartesian",
+  "caseId": "cartesian.golden-html",
+  "kind": "golden",
+  "title": "Cartesian",
+  "source": {
+    "content": "skills/pptx-nova/assets/deckkits/examples/cartesian-content.json",
+    "build": "skills/pptx-nova/assets/deckkits/examples/cartesian-build.mjs",
+    "expected": "skills/pptx-nova/benchmarks/visual/cases/cartesian/golden-html/expected.json",
+    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "fitDiagnostics": 0,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": 1,
+    "ops": 383
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 29,
+    "opResults": 383,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 29,
+    "opResults": 383,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 10,
+    "issueCount": 24,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 24
+    },
+    "lowBuckets": {
+      "total": 24,
+      "styleAllowed": 24,
+      "baselineKnown": 0,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": false,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "small-font": 24
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
+      "available": true,
+      "issueCount": 24
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 8.5,
+      "labelFontPt": 7.5,
+      "sourceFontPt": 8.5,
+      "note": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 229807,
+      "sha256": "47c682d688f7675270cc7a2d8297a1ce6ba3a9e18990be0fecef3dd386ebd2b2"
+    },
+    "webp": {
+      "bytes": 58660,
+      "sha256": "b582980394be723a6179ca19882c0fcc45e010d943c7f04dbe0196faf74fc89e"
+    }
+  }
+}

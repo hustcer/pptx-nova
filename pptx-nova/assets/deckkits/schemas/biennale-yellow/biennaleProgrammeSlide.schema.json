@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/biennale-yellow/biennaleProgrammeSlide",
+  "title": "biennaleProgrammeSlide data schema",
+  "type": "object",
+  "required": ["kicker", "word", "description", "headLabel", "strands"],
+  "properties": {
+    "kicker": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.5 }
+    },
+    "word": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 2, "fontPt": 108, "widthIn": 5.8 }
+    },
+    "description": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 3, "fontPt": 10.5, "widthIn": 5.7 }
+    },
+    "headLabel": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 5.6 }
+    },
+    "strands": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["num", "title", "body"],
+        "properties": {
+          "num": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 18, "widthIn": 0.5 }
+          },
+          "title": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 18, "widthIn": 4.6 }
+          },
+          "body": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 4, "fontPt": 10.5, "widthIn": 4.55 }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

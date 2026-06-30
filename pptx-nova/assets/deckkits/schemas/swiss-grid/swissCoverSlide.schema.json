@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/swiss-grid/swissCoverSlide",
+  "title": "swissCoverSlide data schema",
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 10.5, "widthIn": 2.2 }
+    },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 2, "fontPt": 48, "widthIn": 6.6 } },
+    "subtitle": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 24, "widthIn": 5.6 }
+    },
+    "tag": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 4, "fontPt": 10, "widthIn": 4.6, "heightIn": 0.7 }
+    },
+    "footer": {
+      "type": "string",
+      "description": "Optional page-count override; defaults to 01 / <total slides>.",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 1.0 }
+    }
+  },
+  "additionalProperties": true
+}

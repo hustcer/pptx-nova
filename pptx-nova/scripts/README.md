@@ -1,0 +1,64 @@
+# pptx-nova Scripts
+
+Bundled scripts in this directory are part of the published `pptx-nova` skill.
+They must not depend on repository-root `tools/`, `Justfile`, or files outside
+the skill directory.
+
+Use these entry points from skill workflows:
+
+- `pptx-nova-deckkit-select.mjs` - select an eligible DeckKit from the bundled catalog.
+- `pptx-nova-smoke-test.mjs` - run a repository-independent smoke test against
+  bundled content, DeckKit validation/build, icon lookup, and DeckKit selection.
+- `pptx-nova-audit-public.mjs` - scan the skill package for private paths,
+  unexpected binaries, missing license metadata, and public asset policy issues.
+- `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
+- `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
+- `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.
+- `pptx-nova-deckkit-refurbish-profile-fill.mjs` - generate missing
+  `refurbishProfile` catalog entries for delivery DeckKits. It uses
+  DeckKit-specific palette/font overrides where available, preserves true native
+  skinning declarations, defaults to dry-run, and supports `--check` for CI.
+- `pptx-nova-icons.mjs` - query and generate the bundled Tabler icon pack.
+- `pptx-nova-check-lock.mjs` - validate `deck_lock.json`, `assets_manifest.json`,
+  DeckKit content, and patch output before xdoc dry-run.
+- `pptx-nova-refurbish-plan.mjs` - build the preflight route for existing-deck
+  refurbishment: readiness exception, native skinning support, fallback strategy,
+  duplicate chrome policy, and required gates.
+- `pptx-nova-refurbish-run.mjs` - execute the audited existing-deck refurbishment
+  pipeline in a new run directory. It selects the native or fallback route, saves
+  every JSON report, fails closed on machine gates, renders PNG/contact-sheet
+  evidence, and publishes the final output atomically. A successful run still
+  reports `needs-human-review`; it never claims the visual review is complete.
+- `pptx-nova-refurbish-fallback-patch.mjs` - generate generic inspect-driven
+  fallback artifacts (`patch.json`, `deck_lock.json`, baseline
+  `content-audit.json`, and `reference-map.json`) for DeckKits without native
+  skinning. It should use `refurbishProfile.fallback` when present, otherwise
+  derive palette/fonts from `visualGrammar`, and consume `chrome-detect.json`
+  for existing chrome restyling; do not hardcode a single DeckKit id.
+- `pptx-nova-refurbish-audit.mjs` - legacy supplemental Refurbish Existing Deck audit:
+  use native `xdoc pptx refurbish-audit` as the default content-preservation gate;
+  keep this script only for checks not yet native, especially OOXML visible text
+  leaks and forbidden shape-name regex scans.
+- `pptx-nova-template-gate.mjs` - validate strict template-following artifacts:
+  frame-map coverage, empty placeholders, overlay-like additions, and identity
+  asset provenance.
+- `pptx-nova-finalize-evidence.mjs` - finalize existing high-risk routes from
+  final inspect plus their existing vision/fidelity reports. It writes
+  `layout-final.json` and `evidence-summary.json`; it intentionally excludes
+  Micro Edit and does not replace mode-specific gates or PNG review.
+- pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
+  data-driven, Studio, structural edit, template-following, and refurbish runs
+  that contain native chart/table ops. It validates data shape, source/claim
+  disclosure, and final native chart/table object presence without attempting a
+  full OOXML equivalence audit.
+- pptx-nova-visual-review.mjs - structured PNG/contact-sheet review helper. It
+  records required visual QA checks into visual_review.json, validates that
+  visual evidence and reviewed slide counts are present, and leaves actual
+  visual judgment to the human or agent reviewer.
+- pptx-nova-structure-check.mjs - lightweight PPTX OOXML structure check. It
+  scans XML inside the PPTX for expected font declarations, expected sRGB/theme
+  colors, and empty/default-text placeholder residue, then writes
+  structure-check.json for the final evidence summary.
+
+Repository-root `tools/` scripts may wrap or test these files during skill
+development, but published skill users should call scripts from this directory.

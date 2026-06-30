@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/convertFlowSlide",
+  "title": "convertFlowSlide data schema",
+  "type": "object",
+  "required": [
+    "eyebrow",
+    "title",
+    "srcLabel",
+    "srcSub",
+    "engTitle",
+    "engSub",
+    "outputs",
+    "featHeader",
+    "featLeft",
+    "featRight"
+  ],
+  "properties": {
+    "eyebrow": { "type": "string" },
+    "title": { "type": "string" },
+    "srcLabel": { "type": "string" },
+    "srcSub": { "type": "string" },
+    "engTitle": { "type": "string" },
+    "engSub": { "type": "string" },
+    "outputs": {
+      "type": "array",
+      "description": "Tuple: [accent, label, description]",
+      "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": { "type": "string" }
+      }
+    },
+    "featHeader": { "type": "string" },
+    "featLeft": { "type": "array", "items": { "type": "string" } },
+    "featRight": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/cartesian/cartesianTimelineSlide",
+  "title": "cartesianTimelineSlide data schema",
+  "type": "object",
+  "required": ["label", "title", "items"],
+  "properties": {
+    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 12.2 } },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 36, "widthIn": 12.2 } },
+    "items": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["phase", "title", "body"],
+        "properties": {
+          "phase": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 2.65 }
+          },
+          "title": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 1, "fontPt": 14.5, "widthIn": 2.65 }
+          },
+          "body": {
+            "type": "string",
+            "x-slotBudget": { "maxLines": 3, "fontPt": 10.5, "widthIn": 2.65 }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

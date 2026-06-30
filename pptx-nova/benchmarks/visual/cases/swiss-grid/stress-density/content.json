@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "deckkit": "swiss-grid",
+    "style": "swiss-international",
+    "layout": "density-stress"
+  },
+  "slides": [
+    {
+      "type": "swissCoverSlide",
+      "data": {
+        "eyebrow": "DENSITY CHECK · 2026",
+        "title": "网格密度测试",
+        "subtitle": "Swiss Grid Density Stress",
+        "tag": "Long bilingual labels · Modular rules · Candidate benchmark",
+        "footer": "01 / 04"
+      }
+    },
+    {
+      "type": "swissPrinciplesSlide",
+      "data": {
+        "eyebrow": "P · 02",
+        "title": "八条原则在密集内容里的稳定性",
+        "subtitle": "DENSITY STRESS · EIGHT COMPACT PRINCIPLES",
+        "items": [
+          {
+            "num": "01",
+            "title": "客观传达",
+            "subtitle": "OBJECTIVITY",
+            "body": "信息优先\n避免装饰抢占层级"
+          },
+          {
+            "num": "02",
+            "title": "模数统一",
+            "subtitle": "MODULE",
+            "body": "所有距离\n从同一单位派生"
+          },
+          {
+            "num": "03",
+            "title": "非对称重心",
+            "subtitle": "ASYMMETRY",
+            "body": "偏移构图\n建立阅读方向"
+          },
+          {
+            "num": "04",
+            "title": "无衬线系统",
+            "subtitle": "SANS SERIF",
+            "body": "中性字体\n减少风格噪音"
+          },
+          {
+            "num": "05",
+            "title": "齐左排版",
+            "subtitle": "FLUSH LEFT",
+            "body": "保持字距\n让段落自然呼吸"
+          },
+          {
+            "num": "06",
+            "title": "摄影客观",
+            "subtitle": "PHOTO",
+            "body": "图像作为证据\n而非插画装饰"
+          },
+          {
+            "num": "07",
+            "title": "留白结构",
+            "subtitle": "NEGATIVE SPACE",
+            "body": "空白也是内容\n决定视觉秩序",
+            "accent": "E2231A"
+          },
+          {
+            "num": "08",
+            "title": "可复用模板",
+            "subtitle": "SYSTEM",
+            "body": "同一规则\n跨页面保持稳定"
+          }
+        ]
+      }
+    },
+    {
+      "type": "swissBrandGridSlide",
+      "data": {
+        "eyebrow": "P · 03",
+        "title": "品牌网格密度",
+        "subtitle": "SIX COMPACT BRAND CARDS",
+        "brands": [
+          {
+            "name": "Apple",
+            "meta": "CUPERTINO · 1976",
+            "body": "HIG · 极简界面\n产品语言里的瑞士网格",
+            "icon": "device-desktop"
+          },
+          {
+            "name": "Google",
+            "meta": "MOUNTAIN VIEW · 1998",
+            "body": "Material · 8dp\n移动端工程化网格",
+            "icon": "brand-google-analytics"
+          },
+          {
+            "name": "Spotify",
+            "meta": "STOCKHOLM · 2006",
+            "body": "Editorial blocks\n音乐内容的版面系统",
+            "icon": "microphone"
+          },
+          {
+            "name": "Airbnb",
+            "meta": "SAN FRANCISCO · 2008",
+            "body": "DLS · 模数系统\n摄影与识别统一",
+            "icon": "home"
+          },
+          {
+            "name": "IBM",
+            "meta": "ARMONK · 1911",
+            "body": "Rand + JMB\n企业识别直系案例",
+            "icon": "building",
+            "accent": "E2231A"
+          },
+          {
+            "name": "Lufthansa",
+            "meta": "COLOGNE · 1955",
+            "body": "Otl Aicher\n系统化交通品牌",
+            "icon": "world"
+          }
+        ]
+      }
+    },
+    {
+      "type": "swissClosingSlide",
+      "data": {
+        "titleA": "密度不是堆叠",
+        "titleB": "是秩序的压力测试",
+        "subtitle": "Density is not accumulation. It is a pressure test for order.",
+        "dots": [
+          [8.8, 1.2],
+          [9.4, 1.8],
+          [10.3, 2.4],
+          [11.2, 3.0],
+          [9.1, 4.1],
+          [10.7, 5.2]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "deckkit": "mckinsey-blue",
+    "style": "consulting",
+    "layout": "mixed-language"
+  },
+  "slides": [
+    {
+      "type": "mckCoverSlide",
+      "data": {
+        "eyebrow": "A.CO. EUROPE · CUSTOMER STRATEGY PRACTICE",
+        "title": ["A.CO. 客户忠诚度", "增长方案"],
+        "subtitle": "Customer Retention Strategy · European Franchise Network",
+        "details": [
+          ["Client", "A.CO. European Headquarters"],
+          ["Date", "November 2025 | Ref: ACOEU-2025-CL02"],
+          ["Scope", "客户忠诚度计划 — 欧洲经销商网络"],
+          ["Cost model", "50/50 split — Head Office and franchises"]
+        ],
+        "primaryMetric": {
+          "label": "REPEAT PURCHASE RATE",
+          "value": "15%",
+          "sub": "Only 1 in 7 buyers returns",
+          "note": "Target: 30% by Q4 2026",
+          "extra": "78% controllable loss"
+        },
+        "lossMetric": {
+          "label": "LOSS DRIVERS",
+          "value": "52%",
+          "sub": "switched to competitor",
+          "value2": "26%",
+          "sub2": "service failure",
+          "note": "= 78% controllable"
+        },
+        "source": "Source: A.CO. Customer Loyalty Programme Brief"
+      }
+    },
+    {
+      "type": "mckPillarsSlide",
+      "data": {
+        "title": "四个战略支柱把客户行为改变直接映射到可追踪的业务结果",
+        "subtitle": "Each pillar owns one business outcome and KPI target for accountability",
+        "pillars": [
+          {
+            "index": "01",
+            "title": "长期\n关系",
+            "body": "建立品牌与车主\n全生命周期触点\n提升复购心智",
+            "outcome": "Increase customer lifetime\nvalue over 10 years",
+            "kpi": "3-4 vehicles\nper customer / 10 yrs",
+            "icon": "users",
+            "accent": "0C2744"
+          },
+          {
+            "index": "02",
+            "title": "客户\n忠诚",
+            "body": "通过价格激励和\n服务承诺推动\n二次购买",
+            "outcome": "Boost repeat purchase\nrate to target",
+            "kpi": "15% → 30%\nrepeat rate",
+            "icon": "trending-up",
+            "accent": "005587"
+          },
+          {
+            "index": "03",
+            "title": "用户\n画像",
+            "body": "提升问卷回收率\n补齐流失原因\n和需求数据",
+            "outcome": "Enable data-driven\nproduct decisions",
+            "kpi": "40% → 70%\nsurvey return rate",
+            "icon": "chart-bar",
+            "accent": "0076A8"
+          },
+          {
+            "index": "04",
+            "title": "员工\n参与",
+            "body": "让经销商员工\n在每个触点建立\n客户关系",
+            "outcome": "Deliver consistent\nservice excellence",
+            "kpi": "33% → 60%\nGood+ service rating",
+            "icon": "target",
+            "accent": "4A90A4"
+          }
+        ],
+        "source": "Source: A.CO. mixed-language benchmark"
+      }
+    },
+    {
+      "type": "mckRoadmapSlide",
+      "data": {
+        "title": "四阶段交付路线在 12 个月内推动复购率翻倍并改善服务满意度",
+        "subtitle": "Q1 quick wins, Q2 service reform, Q3 incentives, Q4 scale-up",
+        "phases": [
+          {
+            "title": "Q1 2026 — QUICK WINS",
+            "sub": "Months 1-3 · Launch",
+            "items": [
+              ["Customer Magazine", "内容触达启动", "news"],
+              ["Survey Incentive", "问卷激励上线", "circle-check"]
+            ],
+            "cost": "Cost: Low · Momentum-building",
+            "accent": "0C2744"
+          },
+          {
+            "title": "Q2 2026 — SERVICE REFORM",
+            "sub": "Months 4-6 · Core delivery",
+            "items": [
+              ["Free After-Sales", "三年免费服务方案", "settings"],
+              ["Staff Training", "关系型服务培训", "users"]
+            ],
+            "cost": "Cost: Med-High · Highest impact",
+            "accent": "005587"
+          },
+          {
+            "title": "Q3 2026 — INCENTIVES",
+            "sub": "Months 7-9 · Activation",
+            "items": [
+              ["20% Loyalty Discount", "复购折扣激活", "currency-dollar"],
+              ["Enhanced Trade-in", "置换优惠上线", "trending-up"]
+            ],
+            "cost": "Cost: Medium · Direct retention",
+            "accent": "0076A8"
+          },
+          {
+            "title": "Q4 2026 — EVALUATION",
+            "sub": "Months 10-12 · Lock-in",
+            "items": [
+              ["KPI Review", "完整指标复盘", "chart-bar"],
+              ["Programme Optimise", "进入第二年规划", "target"]
+            ],
+            "cost": "Cost: Low · Year-2 planning",
+            "accent": "4A90A4"
+          }
+        ],
+        "metrics": [
+          {
+            "label": "REPEAT PURCHASE RATE",
+            "value": "2×",
+            "target": "15% → 30%\nby Q4 2026",
+            "by": "Primary success metric",
+            "note": "Driven by: init. 01, 02, 03",
+            "accent": "DC2626"
+          },
+          {
+            "label": "SERVICE SATISFACTION",
+            "value": "+82%",
+            "target": "33% → 60% Good+\nby Q3-Q4 2026",
+            "by": "Key retention driver",
+            "note": "Driven by: init. 01 + staff",
+            "accent": "F59E0B"
+          },
+          {
+            "label": "SURVEY RETURN RATE",
+            "value": "+75%",
+            "target": "40% → 70%\nby Q2 2026",
+            "by": "Enables better profiling",
+            "note": "Driven by: init. 05",
+            "accent": "4A90A4"
+          }
+        ],
+        "governance": {
+          "title": "GOVERNANCE · ACCOUNTABILITY · COST STRUCTURE",
+          "items": [
+            ["Accountable party", "Customer Services Dept", "Head Office, Paris"],
+            ["Cost sharing model", "50% Head Office + 50% Franchises", "All European locations"],
+            ["Design principle", "Low incremental cost", "High ROI through retention gains"]
+          ]
+        },
+        "source": "Source: A.CO. mixed-language benchmark"
+      }
+    }
+  ]
+}

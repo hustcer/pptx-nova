@@ -1,0 +1,1752 @@
+{
+  "schemaVersion": "pptx-nova-vision-baseline/v1",
+  "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+  "deckkit": "mckinsey-blue",
+  "caseId": "mckinsey-blue.stress-density",
+  "kind": "stress",
+  "generatedAt": "2026-06-21T01:34:20.283Z",
+  "review": {
+    "status": "accepted",
+    "source": "--update-baseline",
+    "note": "Current low-severity issues are accepted as the DeckKit visual baseline."
+  },
+  "stylePolicy": {
+    "schemaVersion": "pptx-nova-vision-style-policy/v1",
+    "source": "catalog.qualityProfile",
+    "minFontPt": 6,
+    "labelFontPt": 6,
+    "sourceFontPt": 6,
+    "note": ""
+  },
+  "summary": {
+    "low": {
+      "total": 86,
+      "styleAllowed": 81,
+      "reviewed": 5,
+      "byFamily": {
+        "composition": 2,
+        "small-font": 81,
+        "overlap": 3
+      }
+    }
+  },
+  "issues": [
+    {
+      "severity": "low",
+      "family": "composition",
+      "kind": "arrangement-imbalance",
+      "slideIndex": 0,
+      "target": "S0_GapText",
+      "messageKey": "card-is-not-top-aligned-with-its-row",
+      "metrics": {
+        "deltaEmu": 301752,
+        "rowSize": 4
+      },
+      "identity": "1bdc7d9a488f1459ff41",
+      "fingerprint": "36374a4f5e8315b37bff",
+      "source": {
+        "shapeName": "S0_GapText",
+        "shapeId": 159
+      },
+      "disposition": "reviewed-low",
+      "reason": "accepted by benchmark --update-baseline"
+    },
+    {
+      "severity": "low",
+      "family": "composition",
+      "kind": "arrangement-imbalance",
+      "slideIndex": 0,
+      "target": "S0_LeverText",
+      "messageKey": "card-is-not-top-aligned-with-its-row",
+      "metrics": {
+        "deltaEmu": 301752,
+        "rowSize": 4
+      },
+      "identity": "8ac5e5104ec0a5f45bcc",
+      "fingerprint": "3f135e0731be1910693c",
+      "source": {
+        "shapeName": "S0_LeverText",
+        "shapeId": 163
+      },
+      "disposition": "reviewed-low",
+      "reason": "accepted by benchmark --update-baseline"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Subtitle",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8,
+        "minFontPt": 10
+      },
+      "identity": "24755ae9b991fed43541",
+      "fingerprint": "17001ea080b5b6f0aff2",
+      "source": {
+        "shapeName": "S0_Subtitle",
+        "shapeId": 6
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric0Lab",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "01c909ed28b69d904479",
+      "fingerprint": "40a55ef77e5d72686a7a",
+      "source": {
+        "shapeName": "S0_Metric0Lab",
+        "shapeId": 9
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric0Sub",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "f789469504f9c455dc76",
+      "fingerprint": "cf8ba9f8dff76ae9ed8d",
+      "source": {
+        "shapeName": "S0_Metric0Sub",
+        "shapeId": 11
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric0Note",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.2,
+        "minFontPt": 10
+      },
+      "identity": "26c156f6f73cad095977",
+      "fingerprint": "70164fd75fd1d7ba25dc",
+      "source": {
+        "shapeName": "S0_Metric0Note",
+        "shapeId": 12
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.2 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric1Lab",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "38ec67fe7b62f4e46ff2",
+      "fingerprint": "ec778d6772cd2c53b912",
+      "source": {
+        "shapeName": "S0_Metric1Lab",
+        "shapeId": 15
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric1Sub",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "ce8f241d3803b30f769f",
+      "fingerprint": "aee8efef603e465b2ebc",
+      "source": {
+        "shapeName": "S0_Metric1Sub",
+        "shapeId": 17
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric1Note",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.2,
+        "minFontPt": 10
+      },
+      "identity": "bd9318605ea4992fce5f",
+      "fingerprint": "b5c5a2f7293bdac4fdff",
+      "source": {
+        "shapeName": "S0_Metric1Note",
+        "shapeId": 18
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.2 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric2Lab",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "fec443d3dea7cc328774",
+      "fingerprint": "3f6210d85d4bf4ffa167",
+      "source": {
+        "shapeName": "S0_Metric2Lab",
+        "shapeId": 21
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric2Sub",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "c4922067d5e2dc3ab38a",
+      "fingerprint": "c84cf5246d1ead44f363",
+      "source": {
+        "shapeName": "S0_Metric2Sub",
+        "shapeId": 23
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Metric2Note",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.2,
+        "minFontPt": 10
+      },
+      "identity": "56d7b852d40673a8c6e8",
+      "fingerprint": "95393ca9a2319b70dc1f",
+      "source": {
+        "shapeName": "S0_Metric2Note",
+        "shapeId": 24
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.2 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_FateLabel",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.8,
+        "minFontPt": 10
+      },
+      "identity": "6ce8b1ed11abab19c9bd",
+      "fingerprint": "e7beb7b8725c35b870fc",
+      "source": {
+        "shapeName": "S0_FateLabel",
+        "shapeId": 25
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortVal0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8.8,
+        "minFontPt": 10
+      },
+      "identity": "ebeb0182ba9bc1f29414",
+      "fingerprint": "43ebb4cfb6455fd4fcb3",
+      "source": {
+        "shapeName": "S0_CohortVal0",
+        "shapeId": 27
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8.8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortLab0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "4f6138d5396743560fbb",
+      "fingerprint": "8594db529c316e8d1ac3",
+      "source": {
+        "shapeName": "S0_CohortLab0",
+        "shapeId": 28
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortVal1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8.8,
+        "minFontPt": 10
+      },
+      "identity": "fbb29ee13575a69fff72",
+      "fingerprint": "24e70d43d42b88ecc3d4",
+      "source": {
+        "shapeName": "S0_CohortVal1",
+        "shapeId": 30
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8.8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortLab1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "5150528a4f14356fc429",
+      "fingerprint": "c47f342459bc3a7f6316",
+      "source": {
+        "shapeName": "S0_CohortLab1",
+        "shapeId": 31
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortNote1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.5,
+        "minFontPt": 10
+      },
+      "identity": "e52f717333ecacd47d3d",
+      "fingerprint": "cadb07bbe7809b14f163",
+      "source": {
+        "shapeName": "S0_CohortNote1",
+        "shapeId": 32
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortVal2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8.8,
+        "minFontPt": 10
+      },
+      "identity": "59a0de80024cbd59fb3f",
+      "fingerprint": "4dc8aa84969812afea1f",
+      "source": {
+        "shapeName": "S0_CohortVal2",
+        "shapeId": 34
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8.8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortLab2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "8bf4607303ec9bf7c5b1",
+      "fingerprint": "b3ad416c5a6820160cc7",
+      "source": {
+        "shapeName": "S0_CohortLab2",
+        "shapeId": 35
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortNote2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.5,
+        "minFontPt": 10
+      },
+      "identity": "44aad20cbf734ddea342",
+      "fingerprint": "50e9f52846095741d7ef",
+      "source": {
+        "shapeName": "S0_CohortNote2",
+        "shapeId": 36
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortVal3",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8.8,
+        "minFontPt": 10
+      },
+      "identity": "97fd77d36d5ac9959032",
+      "fingerprint": "22d0ab04828fbbd352d4",
+      "source": {
+        "shapeName": "S0_CohortVal3",
+        "shapeId": 38
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8.8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortLab3",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "5000357358fe7162db1a",
+      "fingerprint": "620aeedde209c9ac72fb",
+      "source": {
+        "shapeName": "S0_CohortLab3",
+        "shapeId": 39
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_CohortSum",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.4,
+        "minFontPt": 10
+      },
+      "identity": "ab7ca954c015e8c46c62",
+      "fingerprint": "e23fcbccef6c324511ce",
+      "source": {
+        "shapeName": "S0_CohortSum",
+        "shapeId": 151
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.4 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_ImpT",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8.6,
+        "minFontPt": 10
+      },
+      "identity": "11f6769f7383bc472662",
+      "fingerprint": "49305d7850f80509dcb6",
+      "source": {
+        "shapeName": "S0_ImpT",
+        "shapeId": 154
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_ImpB",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8.19,
+        "minFontPt": 10
+      },
+      "identity": "3814fae65575252c7446",
+      "fingerprint": "b25c25877d34d63e9f19",
+      "source": {
+        "shapeName": "S0_ImpB",
+        "shapeId": 155
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8.19 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_GapTitle",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "4f4d4b9e79ab23153c70",
+      "fingerprint": "e8dcdb43e961f56c45d4",
+      "source": {
+        "shapeName": "S0_GapTitle",
+        "shapeId": 158
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_GapText",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.3,
+        "minFontPt": 10
+      },
+      "identity": "4df8d17d09c36c3a85d8",
+      "fingerprint": "e88c1d032b643357107f",
+      "source": {
+        "shapeName": "S0_GapText",
+        "shapeId": 159
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.3 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_LeverTitle",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.5,
+        "minFontPt": 10
+      },
+      "identity": "5652896d40c452d29412",
+      "fingerprint": "b9bb0955d2416925c681",
+      "source": {
+        "shapeName": "S0_LeverTitle",
+        "shapeId": 162
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.5 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_LeverText",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.3,
+        "minFontPt": 10
+      },
+      "identity": "f8385a4a3e1bdfdae5cf",
+      "fingerprint": "ed77a4520077affaaeaf",
+      "source": {
+        "shapeName": "S0_LeverText",
+        "shapeId": 163
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.3 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Source",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.6,
+        "minFontPt": 10
+      },
+      "identity": "c6b89539bf2147dca04c",
+      "fingerprint": "721d0399cd368abe29d7",
+      "source": {
+        "shapeName": "S0_Source",
+        "shapeId": 166
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_Confidential",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.6,
+        "minFontPt": 10
+      },
+      "identity": "d6ee03acbb81d921caad",
+      "fingerprint": "4d58bfb6e2e3d9567ff7",
+      "source": {
+        "shapeName": "S0_Confidential",
+        "shapeId": 167
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 0,
+      "target": "S0_PageNum",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.6,
+        "minFontPt": 10
+      },
+      "identity": "707bb33659a07c39051c",
+      "fingerprint": "a11f90c936afef633fa2",
+      "source": {
+        "shapeName": "S0_PageNum",
+        "shapeId": 168
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "overlap",
+      "kind": "geometry-overlap",
+      "slideIndex": 1,
+      "target": "S1_Init0Top",
+      "messageKey": "a-shape-overlaps-and-may-hide-text-underneath-over-shape-7",
+      "metrics": {
+        "overlapRatio": 0.63
+      },
+      "identity": "0a4d091e85f1260cd16c",
+      "fingerprint": "476e3a654f6cafee26ba",
+      "source": {
+        "shapeName": "S1_Init0Top",
+        "shapeId": 9
+      },
+      "disposition": "reviewed-low",
+      "reason": "accepted by benchmark --update-baseline"
+    },
+    {
+      "severity": "low",
+      "family": "overlap",
+      "kind": "geometry-overlap",
+      "slideIndex": 1,
+      "target": "S1_Init1Top",
+      "messageKey": "a-shape-overlaps-and-may-hide-text-underneath-over-shape-7",
+      "metrics": {
+        "overlapRatio": 0.63
+      },
+      "identity": "768531c4f8fb16781d1c",
+      "fingerprint": "fad83fce233ffabe5dac",
+      "source": {
+        "shapeName": "S1_Init1Top",
+        "shapeId": 25
+      },
+      "disposition": "reviewed-low",
+      "reason": "accepted by benchmark --update-baseline"
+    },
+    {
+      "severity": "low",
+      "family": "overlap",
+      "kind": "geometry-overlap",
+      "slideIndex": 1,
+      "target": "S1_Init2Top",
+      "messageKey": "a-shape-overlaps-and-may-hide-text-underneath-over-shape-7",
+      "metrics": {
+        "overlapRatio": 0.63
+      },
+      "identity": "3a934e0826a08b99d121",
+      "fingerprint": "b338456ecb4a179ffd13",
+      "source": {
+        "shapeName": "S1_Init2Top",
+        "shapeId": 41
+      },
+      "disposition": "reviewed-low",
+      "reason": "accepted by benchmark --update-baseline"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Subtitle",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 8,
+        "minFontPt": 10
+      },
+      "identity": "81aebf2ec27fb2ae7ec3",
+      "fingerprint": "15e7749b45c5a8469dd6",
+      "source": {
+        "shapeName": "S1_Subtitle",
+        "shapeId": 6
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_InitiativeLabel",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.8,
+        "minFontPt": 10
+      },
+      "identity": "88d5c585ae14fe5c52c8",
+      "fingerprint": "03dc018d43485c9236c1",
+      "source": {
+        "shapeName": "S1_InitiativeLabel",
+        "shapeId": 7
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.8 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Tag",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6,
+        "minFontPt": 10
+      },
+      "identity": "e55325f7a34f48c6a381",
+      "fingerprint": "efaa15653ea1b9a22d04",
+      "source": {
+        "shapeName": "S1_Init0Tag",
+        "shapeId": 11
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Body",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "54ec2fd4ccaa456051b5",
+      "fingerprint": "2ceafcfade0275ed13c2",
+      "source": {
+        "shapeName": "S1_Init0Body",
+        "shapeId": 15
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Lab0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "b568abd48dea1b71c300",
+      "fingerprint": "bec8694837681dca476c",
+      "source": {
+        "shapeName": "S1_Init0Lab0",
+        "shapeId": 16
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Val0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "2a3c4f8661a442d045c3",
+      "fingerprint": "80f9a26dfdbaa2dcb7c0",
+      "source": {
+        "shapeName": "S1_Init0Val0",
+        "shapeId": 17
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Lab1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "1aeb3d06235782e24e3e",
+      "fingerprint": "e174a13012fb08959f43",
+      "source": {
+        "shapeName": "S1_Init0Lab1",
+        "shapeId": 18
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Val1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "805be07717aa0a3a3dd6",
+      "fingerprint": "4cdc2bd3f19ed404ca40",
+      "source": {
+        "shapeName": "S1_Init0Val1",
+        "shapeId": 19
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Lab2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "843ebc556f4e1397f599",
+      "fingerprint": "d163ec3ad073b76b141c",
+      "source": {
+        "shapeName": "S1_Init0Lab2",
+        "shapeId": 20
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Val2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "15fef89083f5884207fe",
+      "fingerprint": "0f8ac2567586d9003568",
+      "source": {
+        "shapeName": "S1_Init0Val2",
+        "shapeId": 21
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init0Foot",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "41de3f851fa75a5d07f1",
+      "fingerprint": "0cbc7d288fc1314a76ac",
+      "source": {
+        "shapeName": "S1_Init0Foot",
+        "shapeId": 23
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Tag",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6,
+        "minFontPt": 10
+      },
+      "identity": "226568b8bacd3274f7b5",
+      "fingerprint": "b7501a94cd24c7cc17b6",
+      "source": {
+        "shapeName": "S1_Init1Tag",
+        "shapeId": 27
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Body",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "77dc6bcd2724c4d12705",
+      "fingerprint": "cf962fab979b7deaed37",
+      "source": {
+        "shapeName": "S1_Init1Body",
+        "shapeId": 31
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Lab0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "c42f8d11907d128f42ff",
+      "fingerprint": "e73a0a1d3b90d53b61bb",
+      "source": {
+        "shapeName": "S1_Init1Lab0",
+        "shapeId": 32
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Val0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "fa4a9541af4a9cb0b9b3",
+      "fingerprint": "748d07925892ba99061e",
+      "source": {
+        "shapeName": "S1_Init1Val0",
+        "shapeId": 33
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Lab1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "f3fbd279779e84090588",
+      "fingerprint": "3038e46ac4cfa0daf78b",
+      "source": {
+        "shapeName": "S1_Init1Lab1",
+        "shapeId": 34
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Val1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "3bf0f9e2b3ed23a07340",
+      "fingerprint": "2f359cd963252a165349",
+      "source": {
+        "shapeName": "S1_Init1Val1",
+        "shapeId": 35
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Lab2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "abcee344c77ed1b3ae6a",
+      "fingerprint": "51bebdb288a29b2e95b9",
+      "source": {
+        "shapeName": "S1_Init1Lab2",
+        "shapeId": 36
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Val2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "c934ba667502508e0919",
+      "fingerprint": "43f4f0051d774a508cce",
+      "source": {
+        "shapeName": "S1_Init1Val2",
+        "shapeId": 37
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init1Foot",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "1e05f7b3b15d34652a23",
+      "fingerprint": "3af1dc68fa2068e1ec55",
+      "source": {
+        "shapeName": "S1_Init1Foot",
+        "shapeId": 39
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Tag",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6,
+        "minFontPt": 10
+      },
+      "identity": "56b73776a2467238898d",
+      "fingerprint": "6359465a1c9bc6ccf227",
+      "source": {
+        "shapeName": "S1_Init2Tag",
+        "shapeId": 43
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Body",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "db8076cfc2588c2bfe57",
+      "fingerprint": "2646b827d8a2c6558593",
+      "source": {
+        "shapeName": "S1_Init2Body",
+        "shapeId": 47
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Lab0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "669a99895928885a5404",
+      "fingerprint": "f418a6769fe4de3a8813",
+      "source": {
+        "shapeName": "S1_Init2Lab0",
+        "shapeId": 48
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Val0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "baa042b06ec3375ecb21",
+      "fingerprint": "83fcbb7d511b18daddfb",
+      "source": {
+        "shapeName": "S1_Init2Val0",
+        "shapeId": 49
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Lab1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "f9cf0d521a5d25b144c9",
+      "fingerprint": "9cc2e138ca7475f5413c",
+      "source": {
+        "shapeName": "S1_Init2Lab1",
+        "shapeId": 50
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Val1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "474e875d68e78806ae72",
+      "fingerprint": "6f677674686a714c9146",
+      "source": {
+        "shapeName": "S1_Init2Val1",
+        "shapeId": 51
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Lab2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "c06c6ea643e740bb2308",
+      "fingerprint": "4ef8989b0975b3401b54",
+      "source": {
+        "shapeName": "S1_Init2Lab2",
+        "shapeId": 52
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Val2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "eb71f1a4e67c6ba5430f",
+      "fingerprint": "6259044349b105b31279",
+      "source": {
+        "shapeName": "S1_Init2Val2",
+        "shapeId": 53
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init2Foot",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "91e02a132f32bf51b5e1",
+      "fingerprint": "99f807846e3f17039b6d",
+      "source": {
+        "shapeName": "S1_Init2Foot",
+        "shapeId": 55
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Tag",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6,
+        "minFontPt": 10
+      },
+      "identity": "e66496e72edac7c600e8",
+      "fingerprint": "e5e7eacd5ab50441fdf4",
+      "source": {
+        "shapeName": "S1_Init3Tag",
+        "shapeId": 59
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Body",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "f8e2de095ce0c146c9fd",
+      "fingerprint": "15f0212e52e7e9a6a6ea",
+      "source": {
+        "shapeName": "S1_Init3Body",
+        "shapeId": 63
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Lab0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "e7f746e49490cd5a7f8e",
+      "fingerprint": "8da7c0e4d98cf0af161b",
+      "source": {
+        "shapeName": "S1_Init3Lab0",
+        "shapeId": 64
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Val0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "23cd7c06f166e8d3060c",
+      "fingerprint": "24548cceabda47855af3",
+      "source": {
+        "shapeName": "S1_Init3Val0",
+        "shapeId": 65
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Lab1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "07c69cecaa4a19be59ed",
+      "fingerprint": "9f0aa5991ac0c4bb71b0",
+      "source": {
+        "shapeName": "S1_Init3Lab1",
+        "shapeId": 66
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Val1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "0abf3983cc89b1131e14",
+      "fingerprint": "64abbedc2f2b99909d94",
+      "source": {
+        "shapeName": "S1_Init3Val1",
+        "shapeId": 67
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Lab2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "19a6a7ff0b8746c6ca8a",
+      "fingerprint": "231b64d98ec8b7425353",
+      "source": {
+        "shapeName": "S1_Init3Lab2",
+        "shapeId": 68
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Val2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "0b720976901d5889383c",
+      "fingerprint": "424e1def5bb3c3fc0aa1",
+      "source": {
+        "shapeName": "S1_Init3Val2",
+        "shapeId": 69
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init3Foot",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "67bd541ba1f7e9056f7d",
+      "fingerprint": "c451ae97edf37c1d2f01",
+      "source": {
+        "shapeName": "S1_Init3Foot",
+        "shapeId": 71
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Tag",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6,
+        "minFontPt": 10
+      },
+      "identity": "b882b209afd9725a2449",
+      "fingerprint": "a3974bd4d0d24ebf5d31",
+      "source": {
+        "shapeName": "S1_Init4Tag",
+        "shapeId": 75
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Body",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "6541330df67ec8628e42",
+      "fingerprint": "2853af7434964cdf0ce2",
+      "source": {
+        "shapeName": "S1_Init4Body",
+        "shapeId": 79
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Lab0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "5fe6268c356c5c983f3c",
+      "fingerprint": "4276908988164a920fdb",
+      "source": {
+        "shapeName": "S1_Init4Lab0",
+        "shapeId": 80
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Val0",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "41be3c803e066f6ce4b4",
+      "fingerprint": "e4e4ff2d6551114ce4c1",
+      "source": {
+        "shapeName": "S1_Init4Val0",
+        "shapeId": 81
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Lab1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "f352a85cef6b44a383d7",
+      "fingerprint": "419752f49d9a95cb2189",
+      "source": {
+        "shapeName": "S1_Init4Lab1",
+        "shapeId": 82
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Val1",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "a47b221ad4bf87c8a5f4",
+      "fingerprint": "97845ad727b3cf923222",
+      "source": {
+        "shapeName": "S1_Init4Val1",
+        "shapeId": 83
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Lab2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.1,
+        "minFontPt": 10
+      },
+      "identity": "37416e0cb15da35311f8",
+      "fingerprint": "f3e98d70c7866618d16b",
+      "source": {
+        "shapeName": "S1_Init4Lab2",
+        "shapeId": 84
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.1 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Val2",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7.6,
+        "minFontPt": 10
+      },
+      "identity": "42ef2a9d8b368ebe0544",
+      "fingerprint": "e9ef17cdca458b846998",
+      "source": {
+        "shapeName": "S1_Init4Val2",
+        "shapeId": 85
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Init4Foot",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 7,
+        "minFontPt": 10
+      },
+      "identity": "fbdd29ec61a923ab12a2",
+      "fingerprint": "337d7bfa25f59db654fb",
+      "source": {
+        "shapeName": "S1_Init4Foot",
+        "shapeId": 87
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 7 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Source",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.6,
+        "minFontPt": 10
+      },
+      "identity": "2c8a33fe85e48f95f313",
+      "fingerprint": "e88e68647aa6fd2383e8",
+      "source": {
+        "shapeName": "S1_Source",
+        "shapeId": 90
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_Confidential",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.6,
+        "minFontPt": 10
+      },
+      "identity": "e718300eb998ee7dacd4",
+      "fingerprint": "0efdbe30875c81ce9c27",
+      "source": {
+        "shapeName": "S1_Confidential",
+        "shapeId": 91
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.6 is within DeckKit qualityProfile floor 6"
+    },
+    {
+      "severity": "low",
+      "family": "small-font",
+      "kind": "font-too-small",
+      "slideIndex": 1,
+      "target": "S1_PageNum",
+      "messageKey": "explicit-font-size-is-below-the-readable-threshold",
+      "metrics": {
+        "fontPt": 6.6,
+        "minFontPt": 10
+      },
+      "identity": "4a1fe38a88f0469e9503",
+      "fingerprint": "b4d52c834e5113f0a53b",
+      "source": {
+        "shapeName": "S1_PageNum",
+        "shapeId": 92
+      },
+      "disposition": "style-allowed",
+      "reason": "fontPt 6.6 is within DeckKit qualityProfile floor 6"
+    }
+  ]
+}

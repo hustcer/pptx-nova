@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/long-table/longTableIndexSlide",
+  "title": "longTableIndexSlide data schema",
+  "type": "object",
+  "required": ["title", "subtitle", "cards"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 60,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 37, "widthIn": 7.7 }
+    },
+    "subtitle": {
+      "type": "string",
+      "maxLength": 54,
+      "x-slotBudget": { "maxLines": 1, "fontPt": 10.5, "widthIn": 2.6 }
+    },
+    "cards": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["no", "city", "title", "text", "meta"],
+        "properties": {
+          "no": { "type": "string", "maxLength": 12 },
+          "city": { "type": "string", "maxLength": 24 },
+          "title": {
+            "type": "string",
+            "maxLength": 44,
+            "x-slotBudget": { "maxLines": 2, "fontPt": 24, "widthIn": 3.2 }
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 220,
+            "x-slotBudget": { "maxLines": 5, "fontPt": 11.1, "widthIn": 3.2 }
+          },
+          "meta": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "string", "maxLength": 22 }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

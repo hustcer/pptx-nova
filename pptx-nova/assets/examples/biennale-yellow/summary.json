@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "biennale-yellow",
+  "caseId": "biennale-yellow.golden-html",
+  "kind": "golden",
+  "title": "Aurora Programme",
+  "source": {
+    "content": "skills/pptx-nova/assets/deckkits/examples/biennale-yellow-content.json",
+    "build": "skills/pptx-nova/assets/deckkits/examples/biennale-yellow-build.mjs",
+    "expected": "skills/pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/expected.json",
+    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "fitDiagnostics": 0,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": 1,
+    "ops": 671
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 19,
+    "opResults": 671,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 19,
+    "opResults": 671,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 8,
+    "issueCount": 72,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 72
+    },
+    "lowBuckets": {
+      "total": 72,
+      "styleAllowed": 67,
+      "baselineKnown": 5,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": false,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "small-font": 67,
+      "overlap": 5
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
+      "available": true,
+      "issueCount": 72
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 9,
+      "labelFontPt": 9,
+      "sourceFontPt": 9,
+      "note": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 270291,
+      "sha256": "f6e661fb83f8f57b01f477b541b0e237513626673f857eeccd257451866680cc"
+    },
+    "webp": {
+      "bytes": 93186,
+      "sha256": "28ab645cc144f2c76462f883a74b634c82eb305a953bbd3d5a460a9a27041448"
+    }
+  }
+}

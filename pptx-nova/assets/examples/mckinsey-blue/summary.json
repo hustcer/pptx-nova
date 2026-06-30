@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "mckinsey-blue",
+  "caseId": "mckinsey-blue.golden-loyalty",
+  "kind": "golden",
+  "title": "A.CO. Customer,Loyalty Programme",
+  "source": {
+    "content": "skills/pptx-nova/assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
+    "build": "skills/pptx-nova/assets/deckkits/examples/mckinsey-blue-build.mjs",
+    "expected": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/expected.json",
+    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "fitDiagnostics": 0,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": 1,
+    "ops": 2471
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 35,
+    "opResults": 2471,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 35,
+    "opResults": 2471,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "total": 0
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 8,
+    "issueCount": 319,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 319
+    },
+    "lowBuckets": {
+      "total": 319,
+      "styleAllowed": 300,
+      "baselineKnown": 19,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": false,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "small-font": 303,
+      "composition": 13,
+      "overlap": 3
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
+      "available": true,
+      "issueCount": 319
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 6,
+      "labelFontPt": 6,
+      "sourceFontPt": 6,
+      "note": ""
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 303234,
+      "sha256": "f1472acfd0b276f8a898d0f206989873ca00387cd40824d0956c473a5099c606"
+    },
+    "webp": {
+      "bytes": 109244,
+      "sha256": "9a78e65d3d7896a751feb435893bd8cc17ddef4de755f6a9c84fd0ce8b9eb57e"
+    }
+  }
+}

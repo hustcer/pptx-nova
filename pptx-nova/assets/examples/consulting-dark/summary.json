@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "consulting-dark",
+  "caseId": "consulting-dark.golden-roadshow",
+  "kind": "golden",
+  "title": "浏览器端高保真 PPTX 渲染 与 AI 原生生成",
+  "source": {
+    "content": "skills/pptx-nova/assets/deckkits/examples/roadshow-content.json",
+    "build": "skills/pptx-nova/assets/deckkits/examples/roadshow-build.mjs",
+    "expected": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/expected.json",
+    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 1,
+    "fitDiagnostics": 1,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": 1,
+    "ops": 1090
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 26,
+    "opResults": 1090,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 1,
+      "total": 1
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 26,
+    "opResults": 1090,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 1,
+      "total": 1
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 10,
+    "issueCount": 8,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 8
+    },
+    "lowBuckets": {
+      "total": 8,
+      "styleAllowed": 0,
+      "baselineKnown": 8,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": false,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {
+      "composition": 8
+    },
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+      "path": "skills/pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
+      "available": true,
+      "issueCount": 8
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 9,
+      "labelFontPt": 9,
+      "sourceFontPt": 8.5,
+      "note": ""
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 318823,
+      "sha256": "e11c4be068b5301b147e4acb08a6cc186f120ae2bfcdb7232d94b0da6a2d6c38"
+    },
+    "webp": {
+      "bytes": 107196,
+      "sha256": "afd9cf98df3cc82e0c01b5db5898cf25ff651db1d761de155b7447fc2dabcd55"
+    }
+  }
+}

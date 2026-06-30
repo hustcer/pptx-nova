@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "deckkit": "consulting-dark",
+    "style": "consulting",
+    "layout": "executive-grid"
+  },
+  "slides": [
+    {
+      "type": "heroSlide",
+      "data": {
+        "eyebrow": "STRESS DENSITY · 2026",
+        "title": "容量压力测试：长标题、多 KPI、多卡片、多时间线与表格行的边界组合验证",
+        "sub": "Purposefully dense content that should trigger soft fit diagnostics without hard failures.",
+        "tag": "目标：验证 DeckKit 能提前提示拆页、删字或切换布局",
+        "infoL": "benchmark · stress-density",
+        "infoR": "SOFT LIMITS · NO HARD ERRORS"
+      }
+    },
+    {
+      "type": "kpiRowSlide",
+      "data": {
+        "eyebrow": "01 · KPI DENSITY",
+        "title": "四个 KPI 同页展示，保持 kpiRowSlide 几何安全",
+        "items": [
+          ["C8583A", "01", "Adoption", "90%+ teams generate weekly decks", "High"],
+          ["3C6FA6", "02", "Latency", "p95 build under 45 seconds", "Target"],
+          ["3E9D6E", "03", "Quality", "zero high or medium vision issues", "Gate"],
+          ["CF9B43", "04", "Reuse", "three content variants per DeckKit", "Scale"]
+        ]
+      }
+    },
+    {
+      "type": "multiCardSlide",
+      "data": {
+        "eyebrow": "02 · CARD DENSITY",
+        "title": "六张卡片与每卡四条 bullet 的压力场景",
+        "intro": "Cards exceed soft density limits but stay below hard limits.",
+        "cards": [
+          [
+            "C8583A",
+            "01",
+            "Strategy",
+            ["tight narrative", "clear owner", "single metric", "risk note"]
+          ],
+          [
+            "3C6FA6",
+            "02",
+            "Execution",
+            ["weekly cadence", "short copy", "stable chrome", "review gate"]
+          ],
+          [
+            "3E9D6E",
+            "03",
+            "Validation",
+            ["schema pass", "fit warning", "dry-run ready", "PNG follow-up"]
+          ],
+          ["CF9B43", "04", "Readiness", ["candidate", "production", "default", "rollback plan"]],
+          ["7B6AAE", "05", "Coverage", ["golden", "stress", "mixed language", "chart heavy"]],
+          [
+            "2E7C8A",
+            "06",
+            "Limits",
+            ["split slide", "switch layout", "shorten text", "remove item"]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "benchmarkSlide",
+      "data": {
+        "eyebrow": "03 · TABLE DENSITY",
+        "title": "八行表格验证 benchmarkSlide 的表格容量软上限",
+        "tableRows": [
+          ["Metric", "Current", "Target", "Gate"],
+          ["Validate errors", "0", "0", "block"],
+          ["Fit errors", "0", "0", "block"],
+          ["Fit warnings", "many", "recorded", "warn"],
+          ["Patch ops", "stable", "tracked", "record"],
+          ["Vision high", "0", "0", "future"],
+          ["Vision medium", "0", "0", "future"],
+          ["Manual defects", "0", "0", "review"]
+        ],
+        "chartTitle": "Stress Gate Snapshot",
+        "chartData": {
+          "categories": ["validate", "fit", "vision"],
+          "series": [
+            {
+              "name": "score",
+              "values": [10, 8, 0]
+            }
+          ]
+        },
+        "calloutNum": "8",
+        "calloutText": "Rows intentionally exceed soft table limit but remain below hard limit."
+      }
+    },
+    {
+      "type": "timelineSlide",
+      "data": {
+        "eyebrow": "04 · TIMELINE DENSITY",
+        "title": "六个里程碑验证 timeline 容量软上限",
+        "steps": [
+          ["C8583A", "01", "Catalog", "metadata ready", "done"],
+          ["3C6FA6", "02", "Validate", "shared validation path", "done"],
+          ["3E9D6E", "03", "Fit", "structured diagnostics", "done"],
+          ["CF9B43", "04", "Golden", "baseline case passes", "done"],
+          ["7B6AAE", "05", "Stress", "soft warnings expected", "active"],
+          ["2E7C8A", "06", "Mixed", "language coverage added", "active"]
+        ]
+      }
+    },
+    {
+      "type": "askSlide",
+      "data": {
+        "eyebrow": "05 · REVIEW",
+        "title": "压力样例需要人工逐页确认",
+        "sub": "The expected state is valid with soft warnings, not silent pass.",
+        "asks": [
+          ["C8583A", "确认 soft warning 是否清晰", "每条 warning 必须给出可执行建议"],
+          ["3C6FA6", "确认 hard error 为 0", "压力样例不能越过 hard limit"],
+          ["3E9D6E", "确认后续 PNG 复核", "视觉门接入后逐页检查"]
+        ],
+        "closing": "stress-density complete",
+        "closingR": "FIT DIAGNOSTICS · BENCHMARK"
+      }
+    }
+  ]
+}

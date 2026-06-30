@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/biennale-yellow/biennaleQuoteSlide",
+  "title": "biennaleQuoteSlide data schema",
+  "type": "object",
+  "required": ["kicker", "quote", "author", "role"],
+  "properties": {
+    "kicker": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 4.0 }
+    },
+    "quote": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 5, "fontPt": 42, "widthIn": 8.1 }
+    },
+    "author": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 1.6 }
+    },
+    "role": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 6.25 }
+    }
+  },
+  "additionalProperties": false
+}

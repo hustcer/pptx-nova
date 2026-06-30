@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "pptx-nova-visual-case/v1",
+  "deckkit": "mckinsey-blue",
+  "case": "stress-density",
+  "contentPath": "content.json",
+  "expected": {
+    "minSlides": 2,
+    "requiredSlideTypes": ["mckCrisisSnapshotSlide", "mckInitiativeRankingSlide"],
+    "validate": { "errors": 0, "blockingWarnings": 0, "minWarnings": 1 },
+    "fitDiagnostics": { "errors": 0, "blockingWarnings": 0, "minWarnings": 1 },
+    "dryRun": {
+      "status": "success",
+      "warnings": 0,
+      "visualRisksHigh": 0,
+      "visualRisksMedium": 0
+    },
+    "apply": {
+      "status": "success",
+      "warnings": 0,
+      "visualRisksHigh": 0,
+      "visualRisksMedium": 0
+    },
+    "vision": { "status": "success", "high": 0, "medium": 0 },
+    "previews": { "enabled": true, "countEqualsSlides": true, "nonEmpty": true },
+    "contactSheet": { "enabled": true, "exists": true, "nonEmpty": true }
+  }
+}

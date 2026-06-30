@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "deckkit": "swiss-grid",
+    "style": "swiss-international",
+    "layout": "mixed-language"
+  },
+  "slides": [
+    {
+      "type": "swissQuoteSlide",
+      "data": {
+        "quote": "A grid is a grammar,\nnot a cage.",
+        "body": "网格提供共同语法，但不替代判断。\nThe system defines rhythm; the designer still decides emphasis.",
+        "author": "SWISS GRID SYSTEMS",
+        "source": "Mixed-language benchmark · 2026"
+      }
+    },
+    {
+      "type": "swissColumnSlide",
+      "data": {
+        "eyebrow": "P · 02",
+        "title": "跨语言版式",
+        "subtitle": "MIXED LANGUAGE · SAME GRID",
+        "items": [
+          {
+            "title": "中文标题",
+            "subtitle": "CHINESE TITLE",
+            "body": "短句需要更强行距\n但仍沿用同一列宽",
+            "examples": "标题 · 正文 · 页码\n全部齐左"
+          },
+          {
+            "title": "English copy",
+            "subtitle": "LATIN TEXT",
+            "body": "Uppercase labels and compact body copy share the same modular baseline.",
+            "examples": "Caption\nKicker\nFooter"
+          },
+          {
+            "title": "数字标签",
+            "subtitle": "NUMERIC SYSTEM",
+            "body": "01 / 14\nP · 02\n16px unit",
+            "examples": "Numbers keep orientation\nwithout decoration"
+          },
+          {
+            "title": "红色强调",
+            "subtitle": "RED ACCENT",
+            "body": "只在需要建立优先级时出现\nNever as decoration.",
+            "examples": "Rule · Dot · Active item",
+            "accent": "E2231A"
+          }
+        ]
+      }
+    },
+    {
+      "type": "swissClosingSlide",
+      "data": {
+        "titleA": "同一套网格",
+        "titleB": "容纳多种语言",
+        "subtitle": "One grid hosts many writing systems without changing grammar.",
+        "dots": [
+          [8.7, 1.6],
+          [9.5, 2.2],
+          [10.6, 2.8],
+          [11.4, 3.9],
+          [9.2, 5.0],
+          [10.1, 5.7]
+        ]
+      }
+    }
+  ]
+}

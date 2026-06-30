@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "broadsideStatementSlide data",
+  "type": "object",
+  "required": ["kicker", "title"],
+  "properties": {
+    "section": { "type": "string" },
+    "page": { "type": "string" },
+    "kicker": { "type": "string", "x-slotBudget": { "fontPt": 9, "maxLines": 1, "widthIn": 3.6 } },
+    "title": { "type": "string", "x-slotBudget": { "fontPt": 52, "maxLines": 3, "widthIn": 8.8 } },
+    "footerLeft": { "type": "string" },
+    "footerRight": { "type": "string" }
+  },
+  "additionalProperties": false
+}

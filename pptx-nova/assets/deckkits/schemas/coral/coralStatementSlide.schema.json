@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/coral/coralStatementSlide",
+  "title": "coralStatementSlide data schema",
+  "type": "object",
+  "required": ["section", "title", "body"],
+  "properties": {
+    "section": {
+      "type": "string",
+      "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 1.6 }
+    },
+    "title": { "type": "string", "x-slotBudget": { "maxLines": 4, "fontPt": 40, "widthIn": 5.8 } },
+    "body": { "type": "string", "x-slotBudget": { "maxLines": 6, "fontPt": 10.8, "widthIn": 4.7 } }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,3641 @@
+{
+  "schemaVersion": "pptx-nova-deckkit-catalog/v1",
+  "entries": [
+    {
+      "id": "consulting-dark",
+      "version": "0.1.0",
+      "path": "consulting-dark.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 9,
+        "labelFontPt": 9,
+        "sourceFontPt": 8.5
+      },
+      "defaultFor": ["roadshow", "executive consulting", "technical roadshow", "技术路演"],
+      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "heroSlide",
+          "profileTableSlide",
+          "kpiRowSlide",
+          "previewProductSlide",
+          "multiCardSlide",
+          "landscapeSlide",
+          "convertFlowSlide",
+          "benchmarkSlide",
+          "timelineSlide",
+          "askSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "heroSlide",
+        "profileTableSlide",
+        "kpiRowSlide",
+        "previewProductSlide",
+        "multiCardSlide",
+        "landscapeSlide",
+        "convertFlowSlide",
+        "benchmarkSlide",
+        "timelineSlide",
+        "askSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Dark executive consulting deck for technical roadshows, investor updates, and dense strategic narratives.",
+        "mood": ["executive", "technical", "high-conviction", "investor-ready"],
+        "layoutPrinciples": [
+          "Use a dark canvas with disciplined top and bottom chrome.",
+          "Anchor each page with one dominant headline or KPI cluster before secondary evidence.",
+          "Keep dense pages structured with panels, tables, and consistent gutters.",
+          "Prefer native PPTX cards, rules, charts, and tables over decorative imagery."
+        ],
+        "signatureElements": [
+          "copper or coral accents on deep navy backgrounds",
+          "KPI row cards with strong numeric hierarchy",
+          "dark evidence panels with thin rules and small source notes",
+          "benchmark tables, conversion flows, roadmap steps, and ask pages"
+        ],
+        "typography": {
+          "display": "large compact sans headline with tight executive hierarchy",
+          "body": "legible consulting sans body text with restrained line lengths",
+          "numeric": "oversized tabular numbers paired with short labels"
+        },
+        "colorSystem": {
+          "background": ["deep navy", "ink blue", "near black panels"],
+          "primary": ["off-white text", "muted blue-gray dividers"],
+          "accent": ["copper", "coral", "warm orange"],
+          "semantic": ["green for positive deltas", "amber for caution", "red only for risk"]
+        },
+        "slideRhythm": {
+          "anchor": ["heroSlide", "askSlide"],
+          "evidence": ["profileTableSlide", "landscapeSlide", "benchmarkSlide"],
+          "breathing": ["previewProductSlide", "convertFlowSlide", "timelineSlide"]
+        },
+        "compositionRules": [
+          "Lead with the decision message, then expose supporting metrics or evidence below.",
+          "Use 2-4 visual zones per page; avoid scattering many unrelated mini-cards.",
+          "Reserve warm accents for emphasis, not broad fills.",
+          "Keep footers and sources quiet but consistently placed."
+        ],
+        "avoid": [
+          "pastel consumer palettes",
+          "marketing hero pages without evidence",
+          "decorative illustrations that do not carry data",
+          "arbitrary customOps outside DeckKit slide data",
+          "long legal copy inside KPI cards"
+        ]
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "manual-fallback",
+        "nativeSkinning": {
+          "supported": false,
+          "themePack": "",
+          "stylePack": "",
+          "commands": []
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "consulting-dark-refurbish-profile",
+          "strategy": "inspect-driven-consulting-dark-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "0E2638",
+            "text": "F5F2EA",
+            "accent": "C8583A",
+            "softAccent": "15334A",
+            "secondary": "AEC0CE",
+            "surface": "13233A",
+            "rule": "20435E"
+          },
+          "fonts": {
+            "heading": "Inter",
+            "body": "Inter",
+            "label": "Inter",
+            "cjk": "PingFang SC"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "preserve-and-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects",
+          "titleZone": {
+            "placement": "top executive header with quiet eyebrow and decision headline",
+            "headingStyle": "Inter semibold, off-white, compact line height",
+            "labelStyle": "Inter uppercase, secondary blue-gray",
+            "accentRule": "thin copper rule or small copper label marker",
+            "avoid": ["oversized poster titles", "bright full-width title bars"]
+          },
+          "tableRemap": {
+            "structure": "dense consulting benchmark table on dark evidence panel",
+            "headerFill": "palette.softAccent",
+            "headerText": "palette.text",
+            "bodyFill": "palette.surface",
+            "borderColor": "palette.rule",
+            "emphasis": "use palette.accent only for winning cells, deltas, or callout rows",
+            "rules": [
+              "Keep table geometry and row count from the source deck.",
+              "Use tight Inter body text and muted secondary labels for sources or units.",
+              "Prefer thin internal rules over heavy boxed cells."
+            ]
+          },
+          "chartRemap": {
+            "structure": "compact data-first chart on dark surface panel",
+            "backgroundFill": "palette.surface",
+            "primarySeries": "palette.accent",
+            "secondarySeries": "palette.secondary",
+            "axisColor": "palette.secondary",
+            "gridColor": "palette.rule",
+            "rules": [
+              "Keep native chart data and chart type unchanged unless the source is non-editable.",
+              "Use warm accent only for the key series or highlighted bar.",
+              "Keep labels concise and put interpretation in the title zone or callout."
+            ]
+          }
+        },
+        "requiredGates": [
+          "fallback-patch-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Generated by pptx-nova-deckkit-refurbish-profile-fill.mjs for consulting-dark.",
+          "Use the DeckKit-specific fallback profile instead of generic visualGrammar derivation.",
+          "Preserve source slides and editable objects; restyle theme colors, fonts, backgrounds, text, shapes, tables, charts, and existing page chrome."
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "heroSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.sub"]
+          },
+          "profileTableSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.rows"]
+          },
+          "kpiRowSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.items"]
+          },
+          "previewProductSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.banner",
+              "data.kpis",
+              "data.capHeader",
+              "data.capLeft",
+              "data.capRight"
+            ]
+          },
+          "multiCardSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.cards"]
+          },
+          "landscapeSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.comps"]
+          },
+          "convertFlowSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.srcLabel",
+              "data.srcSub",
+              "data.engTitle",
+              "data.engSub",
+              "data.outputs",
+              "data.featHeader",
+              "data.featLeft",
+              "data.featRight"
+            ]
+          },
+          "benchmarkSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.tableRows",
+              "data.chartTitle",
+              "data.chartData",
+              "data.calloutNum",
+              "data.calloutText"
+            ]
+          },
+          "timelineSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.steps"]
+          },
+          "askSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.asks"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 2,
+        "groups": {
+          "anchor": ["heroSlide"],
+          "product": ["previewProductSlide", "convertFlowSlide"],
+          "evidence": ["profileTableSlide", "landscapeSlide", "benchmarkSlide"],
+          "cards": ["kpiRowSlide", "multiCardSlide"],
+          "timeline": ["timelineSlide"],
+          "close": ["askSlide"]
+        },
+        "thresholds": [
+          {
+            "minSlides": 5,
+            "minUniqueGroups": 4,
+            "requiredGroups": ["anchor", "close"]
+          },
+          {
+            "minSlides": 8,
+            "minUniqueGroups": 5,
+            "requiredGroups": ["anchor", "evidence", "cards", "close"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 48,
+          "cardsMax": 5,
+          "kpisMax": 4,
+          "bulletsPerCardMax": 3,
+          "timelineStepsMax": 5,
+          "tableRowsMax": 6,
+          "profileRowsMax": 5
+        },
+        "hard": {
+          "titleMaxChars": 120,
+          "cardsMax": 8,
+          "kpisMax": 6,
+          "bulletsPerCardMax": 6,
+          "timelineStepsMax": 8,
+          "tableRowsMax": 10,
+          "profileRowsMax": 8
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "high=0 medium=0",
+        "pngReview": "full"
+      },
+      "quality": {
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 14,
+          "lowBuckets": {
+            "total": 14,
+            "styleAllowed": 0,
+            "baselineKnown": 14,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 3
+          }
+        },
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden", "stress", "mixed-language"],
+          "gatedKinds": ["golden", "stress", "mixed-language"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 14,
+            "lowBuckets": {
+              "total": 14,
+              "styleAllowed": 0,
+              "baselineKnown": 14,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 3
+            }
+          },
+          "cases": [
+            {
+              "caseId": "consulting-dark.golden-roadshow",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/golden-roadshow/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 1,
+                "fitDiagnostics": 1,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 8,
+                "lowBuckets": {
+                  "total": 8,
+                  "styleAllowed": 0,
+                  "baselineKnown": 8,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 318823
+              },
+              "patchOps": 1090,
+              "p50TotalMs": 48.12
+            },
+            {
+              "caseId": "consulting-dark.stress-density",
+              "kind": "stress",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/stress-density/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/stress-density/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 9,
+                "fitDiagnostics": 9,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 3,
+                "lowBuckets": {
+                  "total": 3,
+                  "styleAllowed": 0,
+                  "baselineKnown": 3,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 6,
+                "expectedCount": 6,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 190347
+              },
+              "patchOps": 689,
+              "p50TotalMs": 42.6
+            },
+            {
+              "caseId": "consulting-dark.mixed-language",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/mixed-language/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/mixed-language/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 3,
+                "lowBuckets": {
+                  "total": 3,
+                  "styleAllowed": 0,
+                  "baselineKnown": 3,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 5,
+                "expectedCount": 5,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 136744
+              },
+              "patchOps": 483,
+              "p50TotalMs": 40.45
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "large tables should use benchmarkSlide or split across pages",
+        "custCard number badge fits 2 digits max (width 0.5in)",
+        "heroSlide decorative dots avoid y 6.4-7.0 text band"
+      ],
+      "examples": ["examples/roadshow-content.json"]
+    },
+    {
+      "id": "mckinsey-blue",
+      "version": "0.1.0",
+      "path": "mckinsey-blue.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "nativeSkinning": {
+        "themePack": "corporate-blue",
+        "stylePack": "consulting",
+        "chromeSource": "themePack.generator.colors + stylePack.generator.chrome"
+      },
+      "qualityProfile": {
+        "minFontPt": 6,
+        "labelFontPt": 6,
+        "sourceFontPt": 6
+      },
+      "defaultFor": [
+        "McKinsey-style consulting",
+        "customer loyalty strategy",
+        "management briefing"
+      ],
+      "bestFor": [
+        "customer strategy",
+        "loyalty programme",
+        "executive consulting",
+        "McKinsey-style management deck"
+      ],
+      "coverage": {
+        "languages": ["en", "zh", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "mckCoverSlide",
+          "mckCrisisSnapshotSlide",
+          "mckDemographicProfileSlide",
+          "mckPriorityMatrixSlide",
+          "mckLossDriverSlide",
+          "mckPillarsSlide",
+          "mckInitiativeRankingSlide",
+          "mckRoadmapSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "mckCoverSlide",
+        "mckCrisisSnapshotSlide",
+        "mckDemographicProfileSlide",
+        "mckPriorityMatrixSlide",
+        "mckLossDriverSlide",
+        "mckPillarsSlide",
+        "mckInitiativeRankingSlide",
+        "mckRoadmapSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Blue-and-white boardroom consulting deck for customer strategy, loyalty programs, and management briefings.",
+        "mood": ["analytical", "boardroom", "structured", "consulting"],
+        "layoutPrinciples": [
+          "Use clean white pages with deep blue headers, bars, and analytical rules.",
+          "Treat every page as an argument: title states the implication, body proves it.",
+          "Balance high-density evidence with generous margins and clear section hierarchy.",
+          "Prefer matrices, ranked initiatives, driver charts, and roadmap pages over freeform layouts."
+        ],
+        "signatureElements": [
+          "deep blue title bars and rule systems",
+          "source lines and small consulting-style notes",
+          "crisis snapshot metrics, demographic profiles, and priority matrices",
+          "loss driver analysis, pillar pages, initiative ranking, and implementation roadmap"
+        ],
+        "typography": {
+          "display": "plain executive sans headline with restrained weight contrast",
+          "body": "compact consulting body text optimized for evidence pages",
+          "numeric": "clear metric numerals with concise labels and deltas"
+        },
+        "colorSystem": {
+          "background": ["white", "light blue-gray", "pale analytical panels"],
+          "primary": ["deep consulting blue", "dark navy text"],
+          "accent": ["medium blue", "cyan highlight", "muted green for upside"],
+          "semantic": ["red for loss or risk", "green for opportunity", "gray for neutral baseline"]
+        },
+        "slideRhythm": {
+          "anchor": ["mckCoverSlide"],
+          "evidence": [
+            "mckCrisisSnapshotSlide",
+            "mckDemographicProfileSlide",
+            "mckPriorityMatrixSlide",
+            "mckLossDriverSlide"
+          ],
+          "action": ["mckPillarsSlide", "mckInitiativeRankingSlide", "mckRoadmapSlide"]
+        },
+        "compositionRules": [
+          "Keep titles specific enough to read as a recommendation or finding.",
+          "Use blue structure for hierarchy; keep charts and tables visually quiet.",
+          "Place sources and assumptions consistently near the lower edge.",
+          "Do not let decorative cards compete with analytical content."
+        ],
+        "avoid": [
+          "playful color accents",
+          "loose SaaS-style card grids",
+          "oversized hero-only pages after the cover",
+          "rounded decorative containers without analytical purpose",
+          "image-led pages that hide the key finding"
+        ]
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "native",
+        "nativeSkinning": {
+          "supported": true,
+          "themePack": "corporate-blue",
+          "stylePack": "consulting",
+          "commands": ["refurbish-skin", "chrome-apply", "remap-theme"]
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "mckinsey-blue-refurbish-profile",
+          "strategy": "inspect-driven-mckinsey-blue-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "FFFFFF",
+            "text": "0F172A",
+            "accent": "005587",
+            "softAccent": "EFF6FF",
+            "secondary": "475569",
+            "surface": "F8FAFC",
+            "rule": "CBD5E1"
+          },
+          "fonts": {
+            "heading": "Arial",
+            "body": "Arial",
+            "label": "Arial",
+            "cjk": "Arial"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "replace-or-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects",
+          "titleZone": {
+            "placement": "top boardroom header with blue subtitle bar",
+            "headingStyle": "Arial bold, dark navy, implication-led sentence case",
+            "labelStyle": "Arial uppercase, medium blue or slate",
+            "accentRule": "deep blue title bar with narrow cyan accent when subtitle exists",
+            "avoid": ["poster typography", "playful badges", "decorative image headers"]
+          },
+          "tableRemap": {
+            "structure": "white consulting matrix with blue header and light grid",
+            "headerFill": "palette.accent",
+            "headerText": "palette.background",
+            "bodyFill": "palette.surface",
+            "borderColor": "palette.rule",
+            "emphasis": "use medium blue for priority cells and muted green/red only for semantic deltas",
+            "rules": [
+              "Preserve analytical row and column structure.",
+              "Use compact Arial text and clear source or assumption notes below the table.",
+              "Avoid rounded card-heavy table treatments."
+            ]
+          },
+          "chartRemap": {
+            "structure": "quiet boardroom chart with blue hierarchy",
+            "backgroundFill": "palette.background",
+            "primarySeries": "palette.accent",
+            "secondarySeries": "palette.secondary",
+            "axisColor": "palette.secondary",
+            "gridColor": "palette.rule",
+            "rules": [
+              "Keep chart type and data series stable for auditability.",
+              "Use blue for the main proof series and slate for baselines.",
+              "Keep legends, axes, and notes compact rather than decorative."
+            ]
+          }
+        },
+        "requiredGates": [
+          "refurbish-skin-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Generated by pptx-nova-deckkit-refurbish-profile-fill.mjs for mckinsey-blue.",
+          "Use native skinning first; keep the fallback profile for catalog-driven recovery without switching DeckKits.",
+          "Preserve source slides and editable objects; restyle theme colors, fonts, backgrounds, text, shapes, tables, charts, and existing page chrome."
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "mckCoverSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.primaryMetric",
+              "data.lossMetric"
+            ]
+          },
+          "mckCrisisSnapshotSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.metrics",
+              "data.cohortTitle",
+              "data.cohort",
+              "data.cohortSum",
+              "data.implication",
+              "data.gap",
+              "data.lever"
+            ]
+          },
+          "mckDemographicProfileSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.age",
+              "data.ageNote",
+              "data.income",
+              "data.incomeNote",
+              "data.occupation",
+              "data.occupationNote",
+              "data.interests",
+              "data.interestNote"
+            ]
+          },
+          "mckPriorityMatrixSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.bubbles",
+              "data.legend",
+              "data.finding"
+            ]
+          },
+          "mckLossDriverSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.chartTitle",
+              "data.drivers",
+              "data.controllable",
+              "data.summary",
+              "data.uncontrollable",
+              "data.pareto"
+            ]
+          },
+          "mckPillarsSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.pillars",
+              "data.defaultTimeframe"
+            ]
+          },
+          "mckInitiativeRankingSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.sectionTitle",
+              "data.initiatives"
+            ]
+          },
+          "mckRoadmapSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.phases",
+              "data.metrics",
+              "data.governance"
+            ]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 2,
+        "groups": {
+          "anchor": ["mckCoverSlide"],
+          "situation": ["mckCrisisSnapshotSlide", "mckDemographicProfileSlide"],
+          "analysis": ["mckPriorityMatrixSlide", "mckLossDriverSlide"],
+          "action": ["mckPillarsSlide", "mckInitiativeRankingSlide"],
+          "timeline": ["mckRoadmapSlide"]
+        },
+        "thresholds": [
+          {
+            "minSlides": 5,
+            "minUniqueGroups": 4,
+            "requiredGroups": ["anchor", "action"]
+          },
+          {
+            "minSlides": 8,
+            "minUniqueGroups": 5,
+            "requiredGroups": ["anchor", "analysis", "action", "timeline"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 122,
+          "cardsMax": 5,
+          "kpisMax": 4,
+          "bulletsPerCardMax": 5,
+          "timelineStepsMax": 4,
+          "tableRowsMax": 6,
+          "profileRowsMax": 5
+        },
+        "hard": {
+          "titleMaxChars": 150,
+          "cardsMax": 6,
+          "kpisMax": 5,
+          "bulletsPerCardMax": 7,
+          "timelineStepsMax": 5,
+          "tableRowsMax": 8,
+          "profileRowsMax": 8
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "high=0 medium=0",
+        "pngReview": "contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 514,
+          "lowBuckets": {
+            "total": 514,
+            "styleAllowed": 482,
+            "baselineKnown": 32,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 3
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden", "stress", "mixed-language"],
+          "gatedKinds": ["golden", "stress", "mixed-language"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 514,
+            "lowBuckets": {
+              "total": 514,
+              "styleAllowed": 482,
+              "baselineKnown": 32,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 3
+            }
+          },
+          "cases": [
+            {
+              "caseId": "mckinsey-blue.golden-loyalty",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/mckinsey-blue/golden-loyalty/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 319,
+                "lowBuckets": {
+                  "total": 319,
+                  "styleAllowed": 300,
+                  "baselineKnown": 19,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 303234
+              },
+              "patchOps": 2471,
+              "p50TotalMs": 77.51
+            },
+            {
+              "caseId": "mckinsey-blue.stress-density",
+              "kind": "stress",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/mckinsey-blue/stress-density/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/stress-density/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 1,
+                "fitDiagnostics": 1,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 86,
+                "lowBuckets": {
+                  "total": 86,
+                  "styleAllowed": 81,
+                  "baselineKnown": 5,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 2,
+                "expectedCount": 2,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 69762
+              },
+              "patchOps": 815,
+              "p50TotalMs": 61.8
+            },
+            {
+              "caseId": "mckinsey-blue.mixed-language",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/mckinsey-blue/mixed-language/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/mixed-language/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 1,
+                "fitDiagnostics": 1,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 109,
+                "lowBuckets": {
+                  "total": 109,
+                  "styleAllowed": 101,
+                  "baselineKnown": 8,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 3,
+                "expectedCount": 3,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 127063
+              },
+              "patchOps": 701,
+              "p50TotalMs": 64.82
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Designed for 16:9 dense consulting pages; short executive titles work best",
+        "Initiative ranking fits five compact cards; split if each initiative needs long legal copy",
+        "Priority matrix supports four labelled bubbles in the current layout"
+      ],
+      "examples": ["examples/mckinsey-blue-loyalty-content.json"]
+    },
+    {
+      "id": "swiss-grid",
+      "version": "0.1.0",
+      "path": "swiss-grid.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 6.8,
+        "labelFontPt": 6.8,
+        "sourceFontPt": 6.8,
+        "baseline": "DeckKit golden constants override generic prose readability floors for Swiss typographic labels."
+      },
+      "defaultFor": [
+        "swiss grid systems",
+        "Swiss International Typographic Style",
+        "design lecture",
+        "grid system lecture",
+        "瑞士网格系统",
+        "设计课程"
+      ],
+      "bestFor": [
+        "design education",
+        "typography lecture",
+        "visual design history",
+        "editorial systems",
+        "minimal comparison tables",
+        "Swiss-style presentation"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "swissCoverSlide",
+          "swissQuoteSlide",
+          "swissTimelineSlide",
+          "swissPrinciplesSlide",
+          "swissPeopleGridSlide",
+          "swissProfileSlide",
+          "swissTypefaceSlide",
+          "swissGridTypesSlide",
+          "swissSystemSlide",
+          "swissStatementSlide",
+          "swissColumnSlide",
+          "swissProgressSlide",
+          "swissBrandGridSlide",
+          "swissTableSlide",
+          "swissClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "swissCoverSlide",
+        "swissQuoteSlide",
+        "swissTimelineSlide",
+        "swissPrinciplesSlide",
+        "swissPeopleGridSlide",
+        "swissProfileSlide",
+        "swissTypefaceSlide",
+        "swissGridTypesSlide",
+        "swissSystemSlide",
+        "swissStatementSlide",
+        "swissColumnSlide",
+        "swissProgressSlide",
+        "swissBrandGridSlide",
+        "swissTableSlide",
+        "swissClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Swiss International Typographic Style deck for design lectures, grid systems, and editorial visual education.",
+        "mood": ["typographic", "editorial", "systematic", "modernist"],
+        "layoutPrinciples": [
+          "Use modular grid alignment as the primary visual system.",
+          "Build pages from asymmetry, flush-left type, thin rules, and measured whitespace.",
+          "Let large typography and red-black-white contrast carry emphasis.",
+          "Keep imagery, profiles, and timelines subordinate to the grid."
+        ],
+        "signatureElements": [
+          "red dot, red bar, or red index marker as the recurring accent",
+          "black type on white with sparse gray rule systems",
+          "oversized typographic statements and quote pages",
+          "modular people grids, typeface specimens, column systems, minimalist tables, and progress markers"
+        ],
+        "typography": {
+          "display": "Helvetica-like bold sans, flush-left, often oversized",
+          "body": "neutral sans with short line lengths and strong alignment discipline",
+          "numeric": "small page markers, years, and index numbers used as grid anchors"
+        },
+        "colorSystem": {
+          "background": ["white", "light gray fields"],
+          "primary": ["black text", "charcoal rules"],
+          "accent": ["Swiss red"],
+          "semantic": ["red for emphasis", "gray for secondary structure"]
+        },
+        "slideRhythm": {
+          "anchor": ["swissCoverSlide", "swissClosingSlide"],
+          "statement": ["swissQuoteSlide", "swissStatementSlide", "swissColumnSlide"],
+          "evidence": ["swissTableSlide"],
+          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"]
+        },
+        "compositionRules": [
+          "Use the grid before adding decoration; every element should justify its alignment.",
+          "Prefer one strong typographic gesture per page over many small accents.",
+          "Keep red accents small, deliberate, and repeated.",
+          "Use whitespace as structure, not as empty leftover space."
+        ],
+        "avoid": [
+          "rounded SaaS cards",
+          "drop shadows",
+          "gradients",
+          "centered marketing layouts",
+          "icons used only as decoration",
+          "multi-color palettes outside red, black, white, and gray"
+        ]
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "manual-fallback",
+        "nativeSkinning": {
+          "supported": false,
+          "commands": []
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "swiss-grid-refurbish-profile",
+          "strategy": "inspect-driven-swiss-grid-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "FFFFFF",
+            "text": "111111",
+            "accent": "DC2626",
+            "softAccent": "F3F4F6",
+            "secondary": "6B7280",
+            "surface": "FFFFFF",
+            "rule": "111111"
+          },
+          "fonts": {
+            "heading": "Helvetica",
+            "body": "Aptos",
+            "label": "Aptos",
+            "cjk": "Microsoft YaHei"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "preserve-and-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects"
+        },
+        "requiredGates": [
+          "fallback-patch-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Swiss Grid refurbish uses an explicit red/black/white/gray palette instead of generic visualGrammar color derivation.",
+          "Preserve source slides and editable objects, then restyle backgrounds, theme fonts, text frames, shapes, tables, charts, and existing page chrome into the Swiss grid system."
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slotHints": {
+          "data.eyebrow": "swiss-grid 内页 eyebrow 为顶部排版必填项；页码型 kicker 填 \"P · <两位页码>\"（如 \"P · 04\"，chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案"
+        },
+        "slideTypes": {
+          "swissCoverSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.tag"]
+          },
+          "swissQuoteSlide": {
+            "requiredSlots": ["data.quote", "data.body", "data.author", "data.source"]
+          },
+          "swissTimelineSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.steps",
+              "data.calloutTitle",
+              "data.callout",
+              "data.calloutHighlights"
+            ]
+          },
+          "swissPrinciplesSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"]
+          },
+          "swissPeopleGridSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.people"]
+          },
+          "swissProfileSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.initials",
+              "data.name",
+              "data.bio",
+              "data.meta",
+              "data.events"
+            ]
+          },
+          "swissTypefaceSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.sampleText",
+              "data.cards"
+            ]
+          },
+          "swissGridTypesSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"]
+          },
+          "swissSystemSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.baseLabel",
+              "data.baseValue",
+              "data.baseNote",
+              "data.body",
+              "data.callout",
+              "data.measureLabels",
+              "data.labels"
+            ]
+          },
+          "swissStatementSlide": {
+            "requiredAny": [
+              {
+                "label": "statement or title",
+                "paths": ["data.statement", "data.title"]
+              }
+            ]
+          },
+          "swissColumnSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
+          "swissProgressSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"],
+            "autoIndexSlots": [
+              {
+                "path": "data.steps[].year",
+                "hint": "swissProgressSlide 会自动渲染 01/02/… 大号序号；steps[].year 是序号下方的红色语义小标签（年份 / 阶段名 / 格式名等），填与序号重复的数字会被渲染层去重跳过，等于浪费这个槽位"
+              }
+            ]
+          },
+          "swissBrandGridSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title"]
+          },
+          "swissTableSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.columns", "data.rows"]
+          },
+          "swissClosingSlide": {
+            "requiredAny": [
+              {
+                "label": "title/titleA/titleB",
+                "paths": ["data.title", "data.titleA", "data.titleB"]
+              }
+            ]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": ["swissCoverSlide", "swissClosingSlide"],
+          "statement": ["swissQuoteSlide", "swissStatementSlide", "swissColumnSlide"],
+          "evidence": ["swissTableSlide"],
+          "timeline": ["swissTimelineSlide", "swissProgressSlide"],
+          "principles": ["swissPrinciplesSlide", "swissBrandGridSlide"],
+          "people": ["swissPeopleGridSlide", "swissProfileSlide"],
+          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"]
+        },
+        "thresholds": [
+          {
+            "minSlides": 7,
+            "minUniqueGroups": 5,
+            "requiredGroups": ["anchor", "statement", "system"]
+          },
+          {
+            "minSlides": 10,
+            "minUniqueGroups": 6,
+            "requiredGroups": ["anchor", "statement", "timeline", "system"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 42,
+          "cardsMax": 8,
+          "kpisMax": 4,
+          "bulletsPerCardMax": 4,
+          "timelineStepsMax": 5,
+          "tableRowsMax": 11,
+          "profileRowsMax": 8
+        },
+        "hard": {
+          "titleMaxChars": 72,
+          "cardsMax": 8,
+          "kpisMax": 4,
+          "bulletsPerCardMax": 6,
+          "timelineStepsMax": 7,
+          "tableRowsMax": 11,
+          "profileRowsMax": 10
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "candidate pending full benchmark",
+        "pngReview": "contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 277,
+          "lowBuckets": {
+            "total": 277,
+            "styleAllowed": 277,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 3
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden", "stress", "mixed-language"],
+          "gatedKinds": ["golden", "stress", "mixed-language"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 277,
+            "lowBuckets": {
+              "total": 277,
+              "styleAllowed": 277,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 3
+            }
+          },
+          "cases": [
+            {
+              "caseId": "swiss-grid.golden-lecture",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/golden-lecture/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 208,
+                "lowBuckets": {
+                  "total": 208,
+                  "styleAllowed": 208,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 15,
+                "expectedCount": 15,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 369655
+              },
+              "patchOps": 2248,
+              "p50TotalMs": 58.71
+            },
+            {
+              "caseId": "swiss-grid.stress-density",
+              "kind": "stress",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/stress-density/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/stress-density/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 43,
+                "lowBuckets": {
+                  "total": 43,
+                  "styleAllowed": 43,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 4,
+                "expectedCount": 4,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 104520
+              },
+              "patchOps": 815,
+              "p50TotalMs": 45.05
+            },
+            {
+              "caseId": "swiss-grid.mixed-language",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/mixed-language/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/mixed-language/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 26,
+                "lowBuckets": {
+                  "total": 26,
+                  "styleAllowed": 26,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 3,
+                "expectedCount": 3,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 68350
+              },
+              "patchOps": 608,
+              "p50TotalMs": 42.97
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Candidate DeckKit based on the bundled Swiss grid benchmark; run the visual benchmark before delivery promotion",
+        "Designed for white-background 16:9 lecture decks with short Swiss-style titles",
+        "swissTableSlide fits up to 11 compact rows and 6 columns; split longer tables",
+        "Small footer and marker typography is intentionally sparse; avoid long legal footnotes"
+      ],
+      "examples": ["examples/swiss-grid-content.json"]
+    },
+    {
+      "id": "broadside",
+      "version": "0.1.0",
+      "path": "broadside.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 9,
+        "labelFontPt": 9,
+        "sourceFontPt": 9,
+        "baseline": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "brand manifesto",
+        "founder vision deck",
+        "magazine or cultural pitch",
+        "design talk",
+        "bilingual EN/CN editorial deck",
+        "campaign launch"
+      ],
+      "coverage": {
+        "languages": ["en", "zh", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "broadsideCoverSlide",
+          "broadsideChapterSlide",
+          "broadsideStatementSlide",
+          "broadsideSplitSlide",
+          "broadsideStatsSlide",
+          "broadsideFadeListSlide",
+          "broadsideListSlide",
+          "broadsideQuoteSlide",
+          "broadsideCompareSlide",
+          "broadsideBarChartSlide",
+          "broadsideFlowSlide",
+          "broadsideDonutSlide",
+          "broadsidePyramidSlide",
+          "broadsideTimelineSlide",
+          "broadsideCycleSlide",
+          "broadsideEndSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "broadsideCoverSlide",
+        "broadsideChapterSlide",
+        "broadsideStatementSlide",
+        "broadsideSplitSlide",
+        "broadsideStatsSlide",
+        "broadsideFadeListSlide",
+        "broadsideListSlide",
+        "broadsideQuoteSlide",
+        "broadsideCompareSlide",
+        "broadsideBarChartSlide",
+        "broadsideFlowSlide",
+        "broadsideDonutSlide",
+        "broadsidePyramidSlide",
+        "broadsideTimelineSlide",
+        "broadsideCycleSlide",
+        "broadsideEndSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Protest-poster editorial deck system built from massive lowercase Barlow type, near-black ink fields, and one fire-orange environment color.",
+        "mood": ["editorial", "dramatic", "loud", "newspaper", "manifesto"],
+        "layoutPrinciples": [
+          "Use one enormous typographic gesture per page and let it dominate the composition.",
+          "Choose either dark register or orange register per slide; do not introduce cream paper slides.",
+          "Use 1px rules, mono catalogue labels, and slash bullets as the only structural chrome.",
+          "Keep depth flat: no shadows, no rounded SaaS cards, no gradients."
+        ],
+        "signatureElements": [
+          "fire-orange full-slide declarations",
+          "near-black editorial evidence pages with cream type",
+          "massive lowercase Barlow headlines",
+          "IBM Plex Mono catalogue numbers, labels, sources, and slash bullets",
+          "orange payoff panel in comparison layouts",
+          "fading stacked word list inspired by SPACE10 before/during/after treatments"
+        ],
+        "typography": {
+          "display": "Barlow weight 900, lowercase, poster-scale",
+          "body": "Barlow regular/medium with short editorial paragraphs",
+          "chrome": "IBM Plex Mono uppercase labels and catalogue numbers",
+          "cjk": "Noto Sans SC fallback for Chinese and mixed-language decks"
+        },
+        "colorSystem": {
+          "background": ["near-black #111111", "fire orange #E85D26"],
+          "primary": ["warm cream #F0ECE5 on dark", "ink black #111111 on orange"],
+          "accent": ["fire orange on dark", "muted ink on orange"],
+          "semantic": [
+            "orange signals emphasis or payoff; gray-brown tones are only supporting evidence"
+          ]
+        },
+        "slideRhythm": {
+          "anchor": [
+            "broadsideCoverSlide",
+            "broadsideChapterSlide",
+            "broadsideFadeListSlide",
+            "broadsideEndSlide"
+          ],
+          "statement": ["broadsideStatementSlide", "broadsideQuoteSlide", "broadsideListSlide"],
+          "evidence": [
+            "broadsideStatsSlide",
+            "broadsideBarChartSlide",
+            "broadsideDonutSlide",
+            "broadsidePyramidSlide",
+            "broadsideTimelineSlide"
+          ],
+          "process": [
+            "broadsideSplitSlide",
+            "broadsideCompareSlide",
+            "broadsideFlowSlide",
+            "broadsideCycleSlide"
+          ]
+        },
+        "compositionRules": [
+          "Prefer short, punchy titles; move explanations to lead/body slots.",
+          "Do not uppercase display headlines; Broadside's voice is heavy lowercase.",
+          "Use orange sparingly on dark slides except for full payoff panels and chart highlights.",
+          "Keep bullet lists short; three slash bullets is the default rhythm."
+        ],
+        "avoid": [
+          "web navigation dots or browser counters",
+          "entry animations and scroll mechanics",
+          "multi-color palettes",
+          "beige or paper slides",
+          "decorative icons without meaning",
+          "dense four-column prose pages"
+        ]
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "manual-fallback",
+        "nativeSkinning": {
+          "supported": false,
+          "themePack": "",
+          "stylePack": "",
+          "commands": []
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "broadside-refurbish-profile",
+          "strategy": "inspect-driven-broadside-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "111111",
+            "text": "F0ECE5",
+            "accent": "E85D26",
+            "softAccent": "331D14",
+            "secondary": "B8B8AE",
+            "surface": "1A1A18",
+            "rule": "282826"
+          },
+          "fonts": {
+            "heading": "Barlow",
+            "body": "Barlow",
+            "label": "IBM Plex Mono",
+            "cjk": "Noto Sans SC"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "preserve-and-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects",
+          "titleZone": {
+            "placement": "poster-scale typographic block, usually left or low on the page",
+            "headingStyle": "Barlow 900 lowercase, oversized, tight and flat",
+            "labelStyle": "IBM Plex Mono uppercase catalogue label",
+            "accentRule": "1px rule or slash label, never a glossy title bar",
+            "avoid": ["cream paper slides", "multi-color title badges", "rounded title cards"]
+          },
+          "tableRemap": {
+            "structure": "editorial ledger or manifesto list rather than spreadsheet-like table",
+            "headerFill": "palette.background",
+            "headerText": "palette.accent",
+            "bodyFill": "palette.background",
+            "borderColor": "palette.rule",
+            "emphasis": "use fire orange for payoff cells or one comparison column only",
+            "rules": [
+              "Convert dense tables into flat ledgers with mono labels when possible.",
+              "Use slash bullets and thin rules as table chrome.",
+              "Keep cell backgrounds flat and avoid alternating multicolor bands."
+            ]
+          },
+          "chartRemap": {
+            "structure": "flat editorial chart with one orange proof gesture",
+            "backgroundFill": "palette.background",
+            "primarySeries": "palette.accent",
+            "secondarySeries": "palette.secondary",
+            "axisColor": "palette.secondary",
+            "gridColor": "palette.rule",
+            "rules": [
+              "Use orange for the dominant series or payoff panel only.",
+              "Reduce grid and legend chrome to mono labels and thin rules.",
+              "Prefer large labels and direct annotation over small decorative legends."
+            ]
+          }
+        },
+        "requiredGates": [
+          "fallback-patch-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Generated by pptx-nova-deckkit-refurbish-profile-fill.mjs for broadside.",
+          "Use the DeckKit-specific fallback profile instead of generic visualGrammar derivation.",
+          "Preserve source slides and editable objects; restyle theme colors, fonts, backgrounds, text, shapes, tables, charts, and existing page chrome."
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "broadsideCoverSlide": {
+            "requiredSlots": ["data.title", "data.subtitle"]
+          },
+          "broadsideChapterSlide": {
+            "requiredSlots": ["data.title"]
+          },
+          "broadsideStatementSlide": {
+            "requiredSlots": ["data.kicker", "data.title"]
+          },
+          "broadsideSplitSlide": {
+            "requiredSlots": ["data.kicker", "data.title", "data.lead", "data.bullets"]
+          },
+          "broadsideStatsSlide": {
+            "requiredSlots": ["data.items"]
+          },
+          "broadsideFadeListSlide": {
+            "requiredSlots": ["data.items", "data.title"]
+          },
+          "broadsideListSlide": {
+            "requiredSlots": ["data.kicker", "data.title", "data.items"]
+          },
+          "broadsideQuoteSlide": {
+            "requiredSlots": ["data.kicker", "data.quote", "data.author"]
+          },
+          "broadsideCompareSlide": {
+            "requiredSlots": ["data.left", "data.right"]
+          },
+          "broadsideBarChartSlide": {
+            "requiredSlots": ["data.title", "data.bars"]
+          },
+          "broadsideFlowSlide": {
+            "requiredSlots": ["data.title", "data.steps"]
+          },
+          "broadsideDonutSlide": {
+            "requiredSlots": ["data.title", "data.items"]
+          },
+          "broadsidePyramidSlide": {
+            "requiredSlots": ["data.title", "data.levels"]
+          },
+          "broadsideTimelineSlide": {
+            "requiredSlots": ["data.title", "data.events"]
+          },
+          "broadsideCycleSlide": {
+            "requiredSlots": ["data.title", "data.steps"]
+          },
+          "broadsideEndSlide": {
+            "requiredSlots": ["data.title", "data.contact"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-diversity-gate/v1",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": [
+            "broadsideCoverSlide",
+            "broadsideChapterSlide",
+            "broadsideFadeListSlide",
+            "broadsideEndSlide"
+          ],
+          "statement": ["broadsideStatementSlide", "broadsideQuoteSlide", "broadsideListSlide"],
+          "evidence": [
+            "broadsideStatsSlide",
+            "broadsideBarChartSlide",
+            "broadsideDonutSlide",
+            "broadsidePyramidSlide",
+            "broadsideTimelineSlide"
+          ],
+          "process": [
+            "broadsideSplitSlide",
+            "broadsideCompareSlide",
+            "broadsideFlowSlide",
+            "broadsideCycleSlide"
+          ]
+        }
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 64,
+          "bulletsMax": 3,
+          "statsMax": 3,
+          "barsMax": 4,
+          "timelineEventsMax": 4,
+          "legendItemsMax": 4
+        },
+        "hard": {
+          "titleMaxChars": 92,
+          "bulletsMax": 4,
+          "statsMax": 4,
+          "barsMax": 6,
+          "timelineEventsMax": 5,
+          "legendItemsMax": 5
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "pending benchmark",
+        "pngReview": "pending"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 135,
+          "lowBuckets": {
+            "total": 135,
+            "styleAllowed": 130,
+            "baselineKnown": 5,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 3
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden", "stress", "mixed-language"],
+          "gatedKinds": ["golden", "stress", "mixed-language"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 135,
+            "lowBuckets": {
+              "total": 135,
+              "styleAllowed": 130,
+              "baselineKnown": 5,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 3
+            }
+          },
+          "cases": [
+            {
+              "caseId": "broadside.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/broadside/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/broadside/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 82,
+                "lowBuckets": {
+                  "total": 82,
+                  "styleAllowed": 81,
+                  "baselineKnown": 1,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 16,
+                "expectedCount": 16,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 312848
+              },
+              "patchOps": 888,
+              "p50TotalMs": 51.38
+            },
+            {
+              "caseId": "broadside.stress-density",
+              "kind": "stress",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/broadside/stress-density/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/broadside/stress-density/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 40,
+                "lowBuckets": {
+                  "total": 40,
+                  "styleAllowed": 36,
+                  "baselineKnown": 4,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 4,
+                "expectedCount": 4,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 81829
+              },
+              "patchOps": 338,
+              "p50TotalMs": 38.7
+            },
+            {
+              "caseId": "broadside.mixed-language",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/broadside/mixed-language/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/broadside/mixed-language/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 13,
+                "lowBuckets": {
+                  "total": 13,
+                  "styleAllowed": 13,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 3,
+                "expectedCount": 3,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 64596
+              },
+              "patchOps": 143,
+              "p50TotalMs": 46.78
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Experimental DeckKit based on beautiful-html-templates/templates/broadside/template.html; source was HTML, not PPTX.",
+        "HTML navigation dots, keyboard handlers, slide transitions, and entry animations are intentionally excluded from the PPTX DeckKit.",
+        "Source metadata declares 20 slides, but the HTML DOM and browser capture contain 16 actual slides.",
+        "Donut chart is rendered as native editable shapes rather than a literal CSS conic-gradient.",
+        "Image-bearing split layouts provide a placeholder/asset-slot shell; reference HTML contains no reusable image asset."
+      ],
+      "examples": ["examples/broadside-content.json"]
+    },
+    {
+      "id": "coral",
+      "version": "0.1.0",
+      "path": "coral.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 8.5,
+        "labelFontPt": 8.5,
+        "sourceFontPt": 8.5,
+        "baseline": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "creative agency",
+        "fashion and beauty pitch",
+        "fitness brand",
+        "food and beverage brand deck",
+        "lifestyle launch",
+        "editorial manifesto"
+      ],
+      "coverage": {
+        "languages": ["en", "mixed"],
+        "density": ["normal"],
+        "slideTypes": [
+          "coralCoverSlide",
+          "coralStatementSlide",
+          "coralPillarsSplitSlide",
+          "coralMetricsChartSlide",
+          "coralImpactPosterSlide",
+          "coralObjectiveCardsSlide",
+          "coralQuoteSplitSlide",
+          "coralTimelineSlide",
+          "coralTeamGridSlide",
+          "coralClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "coralCoverSlide",
+        "coralStatementSlide",
+        "coralPillarsSplitSlide",
+        "coralMetricsChartSlide",
+        "coralImpactPosterSlide",
+        "coralObjectiveCardsSlide",
+        "coralQuoteSplitSlide",
+        "coralTimelineSlide",
+        "coralTeamGridSlide",
+        "coralClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Bold magazine-poster DeckKit with coral, ink, and warm cream surfaces for editorial brand and lifestyle presentations.",
+        "mood": ["bold", "warm", "graphic", "magazine", "confident"],
+        "layoutPrinciples": [
+          "Use hard-edged coral, ink, and cream planes instead of soft cards or gradients.",
+          "Let oversized Bebas Neue display type act as architecture.",
+          "Use Inter only for body, labels, and compact metadata.",
+          "Repeat hatch, zigzag, card top rules, and timeline nodes as signature structure."
+        ],
+        "signatureElements": [
+          "coral full-bleed poster panels with darker hatch or stripe texture",
+          "cream paper fields with black Bebas Neue headlines",
+          "ink split panels with white body copy",
+          "white cards with coral top rules",
+          "native bar charts with coral and ink series"
+        ],
+        "typography": {
+          "display": "Bebas Neue condensed all-caps for titles, stats, and meta values",
+          "body": "Inter regular for body copy with generous line height",
+          "label": "Inter uppercase tracked labels, darkened where needed for PPTX contrast gates"
+        },
+        "colorSystem": {
+          "background": ["warm cream", "ink black", "coral"],
+          "primary": ["ink text", "cream paper"],
+          "accent": ["coral", "coral-dark hatch"],
+          "semantic": ["coral for emphasis and progress", "ink for readable small text"]
+        },
+        "slideRhythm": {
+          "anchor": ["coralCoverSlide", "coralClosingSlide"],
+          "statement": ["coralStatementSlide", "coralQuoteSplitSlide", "coralImpactPosterSlide"],
+          "evidence": ["coralMetricsChartSlide"],
+          "structure": [
+            "coralPillarsSplitSlide",
+            "coralObjectiveCardsSlide",
+            "coralTimelineSlide",
+            "coralTeamGridSlide"
+          ]
+        },
+        "compositionRules": [
+          "Keep shapes flat with no shadow and no rounded card language.",
+          "Use one strong poster gesture per page.",
+          "Prefer fixed item counts that match the locked layout over silent slicing.",
+          "Do not preserve browser navigation, counters, transitions, or hover behavior."
+        ],
+        "avoid": [
+          "SaaS gradients",
+          "soft glass cards",
+          "stock imagery",
+          "decorative icons unrelated to content",
+          "low-contrast white text on coral at small sizes"
+        ]
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "manual-fallback",
+        "nativeSkinning": {
+          "supported": false,
+          "themePack": "",
+          "stylePack": "",
+          "commands": []
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "coral-refurbish-profile",
+          "strategy": "inspect-driven-coral-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "F5F0E8",
+            "text": "1A1A1A",
+            "accent": "E85D5D",
+            "softAccent": "E8E0D4",
+            "secondary": "6B6B6B",
+            "surface": "FFFFFF",
+            "rule": "1A1A1A"
+          },
+          "fonts": {
+            "heading": "Bebas Neue",
+            "body": "Inter",
+            "label": "Inter",
+            "cjk": "Noto Sans SC"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "preserve-and-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects",
+          "titleZone": {
+            "placement": "hard-edged poster title block on cream, ink, or coral plane",
+            "headingStyle": "Bebas Neue all-caps, large condensed display",
+            "labelStyle": "Inter uppercase labels with restrained tracking",
+            "accentRule": "coral plane, top rule, hatch edge, or zigzag marker",
+            "avoid": ["soft glass cards", "low-contrast small white text on coral"]
+          },
+          "tableRemap": {
+            "structure": "graphic card stack or objective table with coral top rules",
+            "headerFill": "palette.accent",
+            "headerText": "palette.text",
+            "bodyFill": "palette.surface",
+            "borderColor": "palette.text",
+            "emphasis": "use coral blocks and ink rules, not pastel bands",
+            "rules": [
+              "Keep table shapes hard-edged with no shadow and no rounded SaaS card language.",
+              "Use Bebas Neue only for short headers or large numeric values.",
+              "Use Inter body text for readable table cells."
+            ]
+          },
+          "chartRemap": {
+            "structure": "native bar or KPI chart with coral and ink series",
+            "backgroundFill": "palette.background",
+            "primarySeries": "palette.accent",
+            "secondarySeries": "palette.text",
+            "axisColor": "palette.secondary",
+            "gridColor": "palette.softAccent",
+            "rules": [
+              "Keep charts native and editable.",
+              "Use coral for progress or emphasis and ink for baselines.",
+              "Avoid gradients, shadows, and decorative chart containers."
+            ]
+          }
+        },
+        "requiredGates": [
+          "fallback-patch-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Generated by pptx-nova-deckkit-refurbish-profile-fill.mjs for coral.",
+          "Use the DeckKit-specific fallback profile instead of generic visualGrammar derivation.",
+          "Preserve source slides and editable objects; restyle theme colors, fonts, backgrounds, text, shapes, tables, charts, and existing page chrome."
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slideTypes": {
+          "coralCoverSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.title",
+              "data.locationLabel",
+              "data.location",
+              "data.dateLabel",
+              "data.year"
+            ]
+          },
+          "coralStatementSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.body"]
+          },
+          "coralPillarsSplitSlide": {
+            "requiredSlots": ["data.number", "data.title", "data.items"]
+          },
+          "coralMetricsChartSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.stat",
+              "data.statLabel",
+              "data.chart",
+              "data.metrics"
+            ]
+          },
+          "coralImpactPosterSlide": {
+            "requiredSlots": ["data.word", "data.title", "data.meta"]
+          },
+          "coralObjectiveCardsSlide": {
+            "requiredSlots": ["data.title", "data.subtitle", "data.cards"]
+          },
+          "coralQuoteSplitSlide": {
+            "requiredSlots": ["data.mark", "data.quote", "data.author", "data.role"]
+          },
+          "coralTimelineSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.steps"]
+          },
+          "coralTeamGridSlide": {
+            "requiredSlots": ["data.title", "data.subtitle", "data.people"]
+          },
+          "coralClosingSlide": {
+            "requiredSlots": ["data.title", "data.subtitle", "data.contacts", "data.socials"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": ["coralCoverSlide", "coralClosingSlide"],
+          "statement": ["coralStatementSlide", "coralQuoteSplitSlide", "coralImpactPosterSlide"],
+          "evidence": ["coralMetricsChartSlide"],
+          "structure": [
+            "coralPillarsSplitSlide",
+            "coralObjectiveCardsSlide",
+            "coralTimelineSlide",
+            "coralTeamGridSlide"
+          ]
+        },
+        "thresholds": [
+          {
+            "minSlides": 7,
+            "minUniqueGroups": 4,
+            "requiredGroups": ["anchor", "statement", "structure"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 54,
+          "cardsMax": 3,
+          "timelineStepsMax": 5,
+          "teamMembersMax": 4,
+          "metricsMax": 3
+        },
+        "hard": {
+          "titleMaxChars": 72,
+          "cardsMax": 3,
+          "timelineStepsMax": 5,
+          "teamMembersMax": 4,
+          "metricsMax": 3
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "golden high=0 medium=0; stress/mixed reviewed in .tmp",
+        "pngReview": "golden contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 93,
+          "lowBuckets": {
+            "total": 93,
+            "styleAllowed": 90,
+            "baselineKnown": 3,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 3
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden", "stress", "mixed-language"],
+          "gatedKinds": ["golden", "stress", "mixed-language"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 93,
+            "lowBuckets": {
+              "total": 93,
+              "styleAllowed": 90,
+              "baselineKnown": 3,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 3
+            }
+          },
+          "cases": [
+            {
+              "caseId": "coral.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/coral/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/coral/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 31,
+                "lowBuckets": {
+                  "total": 31,
+                  "styleAllowed": 30,
+                  "baselineKnown": 1,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 261893
+              },
+              "patchOps": 535,
+              "p50TotalMs": 37.11
+            },
+            {
+              "caseId": "coral.stress-density",
+              "kind": "stress",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/coral/stress-density/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/coral/stress-density/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 31,
+                "lowBuckets": {
+                  "total": 31,
+                  "styleAllowed": 30,
+                  "baselineKnown": 1,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 253613
+              },
+              "patchOps": 534,
+              "p50TotalMs": 35.47
+            },
+            {
+              "caseId": "coral.mixed-language",
+              "kind": "mixed-language",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/coral/mixed-language/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/coral/mixed-language/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 31,
+                "lowBuckets": {
+                  "total": 31,
+                  "styleAllowed": 30,
+                  "baselineKnown": 1,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 250928
+              },
+              "patchOps": 534,
+              "p50TotalMs": 40.1
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on an HTML template rather than a PPTX source; browser-only interactions, navigation dots, counters, arrows, transitions, and hover states are excluded.",
+        "CSS hatch, zigzag, and stripe textures are approximated with editable PPTX geometry.",
+        "Bebas Neue and Inter are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
+        "Small coral/white-on-coral treatments from the HTML source were darkened where needed to satisfy PPTX readability gates."
+      ],
+      "examples": [
+        {
+          "name": "coral-html-reference",
+          "contentPath": "examples/coral-content.json"
+        }
+      ]
+    },
+    {
+      "id": "cartesian",
+      "version": "0.1.0",
+      "path": "cartesian.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "nativeSkinning": {
+        "themePack": "cartesian-warm",
+        "stylePack": "cartesian",
+        "chromeSource": "themePack.generator.colors + stylePack.generator.chrome"
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "explicit-only",
+        "nativeSkinning": {
+          "supported": true,
+          "themePack": "cartesian-warm",
+          "stylePack": "cartesian",
+          "commands": ["refurbish-skin", "chrome-apply", "remap-theme"]
+        },
+        "fallback": {
+          "strategy": "apply-brand-and-text-frame-style",
+          "brandProfile": "cartesian-warm",
+          "styleOps": ["set-text-style", "set-shape-text-style"],
+          "chromePolicy": "replace-or-restyle-existing"
+        },
+        "requiredGates": [
+          "readiness-explicit-exception",
+          "refurbish-plan",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Experimental for automatic delivery; allowed when the user explicitly names cartesian.",
+          "Use native skinning first when the generated xdoc catalog includes cartesian; otherwise use the fallback strategy without switching DeckKits."
+        ]
+      },
+      "qualityProfile": {
+        "minFontPt": 8.5,
+        "labelFontPt": 7.5,
+        "sourceFontPt": 8.5,
+        "baseline": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "minimal strategy narrative",
+        "editorial business review",
+        "board discussion",
+        "research readout",
+        "quiet data presentation"
+      ],
+      "coverage": {
+        "languages": ["en", "mixed"],
+        "density": ["normal"],
+        "slideTypes": [
+          "cartesianCoverSlide",
+          "cartesianAgendaSlide",
+          "cartesianStatementSlide",
+          "cartesianBarChartSlide",
+          "cartesianImageStatsSlide",
+          "cartesianCardsSlide",
+          "cartesianLineChartSlide",
+          "cartesianTimelineSlide",
+          "cartesianTeamSlide",
+          "cartesianClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "cartesianCoverSlide",
+        "cartesianAgendaSlide",
+        "cartesianStatementSlide",
+        "cartesianBarChartSlide",
+        "cartesianImageStatsSlide",
+        "cartesianCardsSlide",
+        "cartesianLineChartSlide",
+        "cartesianTimelineSlide",
+        "cartesianTeamSlide",
+        "cartesianClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Minimal warm editorial DeckKit based on Cartesian HTML template geometry, suited to quiet strategy narratives and low-density data readouts.",
+        "mood": ["minimal", "editorial", "precise", "restrained", "warm"],
+        "layoutPrinciples": [
+          "Use sandstone paper backgrounds with sparse taupe rules and large negative space.",
+          "Let Playfair Display headlines carry hierarchy while Inter body text stays compact and readable.",
+          "Keep all components flat, square, and hairline-driven; avoid shadows, rounded SaaS cards, and gradients.",
+          "Use native PPTX charts and editable geometry instead of screenshot or canvas captures."
+        ],
+        "signatureElements": [
+          "solid and dashed concentric geo rings",
+          "uppercase Inter micro labels in muted taupe",
+          "Playfair Display headlines and numerals",
+          "crossed image placeholder shell",
+          "thin agenda, card, stat, and timeline rules",
+          "native column and line charts with softened #555 primary bar series and taupe comparison series"
+        ],
+        "typography": {
+          "display": "Playfair Display regular for titles, quote marks, numerals, and initials",
+          "body": "Inter regular for body copy and compact descriptions",
+          "label": "Inter uppercase micro labels, darkened from the HTML accent for PPTX readability"
+        },
+        "colorSystem": {
+          "background": ["warm sandstone", "stone secondary"],
+          "primary": ["near-black ink", "charcoal body text"],
+          "accent": ["readable taupe", "pale taupe rules"],
+          "semantic": [
+            "soft charcoal primary bar series",
+            "ink line-chart series",
+            "dashed taupe comparison series"
+          ]
+        },
+        "slideRhythm": {
+          "anchor": ["cartesianCoverSlide", "cartesianClosingSlide"],
+          "statement": ["cartesianStatementSlide"],
+          "evidence": [
+            "cartesianBarChartSlide",
+            "cartesianImageStatsSlide",
+            "cartesianLineChartSlide"
+          ],
+          "structure": [
+            "cartesianAgendaSlide",
+            "cartesianCardsSlide",
+            "cartesianTimelineSlide",
+            "cartesianTeamSlide"
+          ]
+        },
+        "compositionRules": [
+          "Prefer one primary content block and one supporting structure per page.",
+          "Keep copy concise; reject overcrowding rather than shrinking body text.",
+          "Use rules, rings, and empty space as chrome instead of icons or illustrations.",
+          "Do not preserve browser navigation, counters, transitions, keyboard handlers, or hover behavior."
+        ],
+        "avoid": [
+          "decorative gradient backgrounds",
+          "image-only slides",
+          "rounded card-heavy SaaS layouts",
+          "saturated accent colors",
+          "dense paragraph pages",
+          "customOps outside the DeckKit content contract"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "cartesianCoverSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.subtitle"]
+          },
+          "cartesianAgendaSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.body", "data.items"]
+          },
+          "cartesianStatementSlide": {
+            "requiredSlots": ["data.quote", "data.attribution"]
+          },
+          "cartesianBarChartSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.body", "data.chart"]
+          },
+          "cartesianImageStatsSlide": {
+            "requiredSlots": [
+              "data.imageLabel",
+              "data.label",
+              "data.title",
+              "data.paragraphs",
+              "data.stats"
+            ]
+          },
+          "cartesianCardsSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.cards"]
+          },
+          "cartesianLineChartSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.body", "data.chart"]
+          },
+          "cartesianTimelineSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.items"]
+          },
+          "cartesianTeamSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.members"]
+          },
+          "cartesianClosingSlide": {
+            "requiredSlots": ["data.label", "data.title", "data.cta", "data.contact"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": ["cartesianCoverSlide", "cartesianClosingSlide"],
+          "statement": ["cartesianStatementSlide"],
+          "evidence": [
+            "cartesianBarChartSlide",
+            "cartesianImageStatsSlide",
+            "cartesianLineChartSlide"
+          ],
+          "structure": [
+            "cartesianAgendaSlide",
+            "cartesianCardsSlide",
+            "cartesianTimelineSlide",
+            "cartesianTeamSlide"
+          ]
+        },
+        "thresholds": [
+          {
+            "minSlides": 7,
+            "minUniqueGroups": 4,
+            "requiredGroups": ["anchor", "evidence", "structure"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 54,
+          "agendaItemsMax": 4,
+          "cardsMax": 3,
+          "timelineStepsMax": 4,
+          "teamMembersMax": 4,
+          "statsMax": 3,
+          "chartCategoriesMax": 6
+        },
+        "hard": {
+          "titleMaxChars": 72,
+          "agendaItemsMax": 5,
+          "cardsMax": 3,
+          "timelineStepsMax": 4,
+          "teamMembersMax": 4,
+          "statsMax": 3,
+          "chartCategoriesMax": 8
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "golden high=0 medium=0; stress/mixed reviewed in .tmp",
+        "pngReview": "golden contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 24,
+          "lowBuckets": {
+            "total": 24,
+            "styleAllowed": 24,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 24,
+            "lowBuckets": {
+              "total": 24,
+              "styleAllowed": 24,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
+            }
+          },
+          "cases": [
+            {
+              "caseId": "cartesian.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/cartesian/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 24,
+                "lowBuckets": {
+                  "total": 24,
+                  "styleAllowed": 24,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 229674
+              },
+              "patchOps": 383,
+              "p50TotalMs": 39.24
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on beautiful-html-templates/templates/cartesian/template.html; source was HTML, not PPTX.",
+        "Browser navigation dots, arrows, slide counter, keyboard handlers, CSS transitions, and hover states are intentionally excluded.",
+        "Chart.js canvas charts are rebuilt as native editable PPTX charts driven by semantic chart data.",
+        "The HTML accent #8A8178 is darkened to #665D56 for readable PPTX micro text on the sandstone background.",
+        "Image-bearing layout exposes an editable placeholder shell; no reference image or remote asset is bundled.",
+        "Playfair Display and Inter are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution."
+      ],
+      "examples": [
+        {
+          "name": "cartesian-html-reference",
+          "contentPath": "examples/cartesian-content.json"
+        }
+      ]
+    },
+    {
+      "id": "long-table",
+      "version": "0.1.0",
+      "path": "long-table.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 8.5,
+        "labelFontPt": 8.5,
+        "sourceFontPt": 8.5,
+        "baseline": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "hospitality brand",
+        "food and beverage editorial deck",
+        "event series showcase",
+        "cultural supper club",
+        "lifestyle launch"
+      ],
+      "coverage": {
+        "languages": ["en"],
+        "density": ["normal"],
+        "slideTypes": [
+          "longTableCoverSlide",
+          "longTableManifestoSlide",
+          "longTableIndexSlide",
+          "longTableFeaturedSlide",
+          "longTableMenuSlide",
+          "longTableQuoteSlide",
+          "longTableCalendarSlide",
+          "longTableClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "longTableCoverSlide",
+        "longTableManifestoSlide",
+        "longTableIndexSlide",
+        "longTableFeaturedSlide",
+        "longTableMenuSlide",
+        "longTableQuoteSlide",
+        "longTableCalendarSlide",
+        "longTableClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Warm editorial dinner-series DeckKit with paper textures implied through flat cream surfaces, rust ink, serif copy, and oversized display typography.",
+        "mood": ["warm", "editorial", "intimate", "culinary", "literary"],
+        "layoutPrinciples": [
+          "Use flat cream paper fields and rust-red rules instead of gradients or soft cards.",
+          "Let oversized display type and generous whitespace define the composition.",
+          "Use thin rules, badges, tags, and table rows as the primary structural chrome.",
+          "Keep the system image-free and fully editable through PPTX text and geometry."
+        ],
+        "signatureElements": [
+          "edition badges",
+          "serif editorial paragraphs",
+          "oversized issue-number typography",
+          "thin rust-red table rules",
+          "menu rows and calendar structure"
+        ],
+        "typography": {
+          "display": "Bricolage Grotesque bold for large titles",
+          "body": "Fraunces italic-style editorial body copy",
+          "label": "Small serif labels and table metadata"
+        },
+        "colorSystem": {
+          "background": ["warm paper #FAF1E2", "aged paper #F2E5CF"],
+          "primary": ["rust ink #B53D2A"],
+          "accent": ["deep rust #8E2D1F", "soft rule #DEC0A5"],
+          "semantic": ["rust red carries all emphasis and structure"]
+        },
+        "avoid": [
+          "stock food photography",
+          "restaurant-menu clip art",
+          "SaaS cards",
+          "soft gradients",
+          "decorative shadows"
+        ],
+        "compositionRules": [
+          "Keep the cover title dominant; the optional edition-number block must never crowd long titles.",
+          "Use one strong editorial structure per slide: poster cover, note, card index, feature ledger, menu rows, quote, calendar, or closing CTA.",
+          "Use rust-red outlines and rules as the primary structure instead of photos, shadows, or multi-color accents.",
+          "Keep body copy short and warm; dense information belongs in menu and calendar page types."
+        ],
+        "slideRhythm": {
+          "anchor": ["longTableCoverSlide", "longTableClosingSlide"],
+          "editorial": ["longTableManifestoSlide", "longTableQuoteSlide"],
+          "catalogue": [
+            "longTableIndexSlide",
+            "longTableFeaturedSlide",
+            "longTableMenuSlide",
+            "longTableCalendarSlide"
+          ]
+        }
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "manual-fallback",
+        "nativeSkinning": {
+          "supported": false,
+          "themePack": "",
+          "stylePack": "",
+          "commands": []
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "long-table-refurbish-profile",
+          "strategy": "inspect-driven-long-table-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "FAF1E2",
+            "text": "B53D2A",
+            "accent": "8E2D1F",
+            "softAccent": "F2E5CF",
+            "secondary": "DEC0A5",
+            "surface": "FAF1E2",
+            "rule": "DEC0A5"
+          },
+          "fonts": {
+            "heading": "Bricolage Grotesque",
+            "body": "Fraunces",
+            "label": "Fraunces",
+            "cjk": "Microsoft YaHei"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "preserve-and-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects",
+          "titleZone": {
+            "placement": "warm editorial title with optional edition badge or small right metadata",
+            "headingStyle": "Bricolage Grotesque bold, oversized, rust ink",
+            "labelStyle": "Fraunces small serif metadata",
+            "accentRule": "thin rust rule, badge outline, or menu divider",
+            "avoid": ["stock food photo headers", "SaaS cards", "blue corporate title bars"]
+          },
+          "tableRemap": {
+            "structure": "menu ledger or calendar row system on warm paper",
+            "headerFill": "palette.softAccent",
+            "headerText": "palette.text",
+            "bodyFill": "palette.background",
+            "borderColor": "palette.secondary",
+            "emphasis": "use deep rust for section labels, prices, or selected row markers",
+            "rules": [
+              "Prefer row ledgers and menu sections over boxed spreadsheet grids.",
+              "Use thin rust dividers and serif metadata for units or dates.",
+              "Keep body copy short and editorial; dense data belongs in menu/calendar rows."
+            ]
+          },
+          "chartRemap": {
+            "structure": "simple editorial bar or count ledger in rust ink",
+            "backgroundFill": "palette.background",
+            "primarySeries": "palette.accent",
+            "secondarySeries": "palette.secondary",
+            "axisColor": "palette.text",
+            "gridColor": "palette.secondary",
+            "rules": [
+              "Use charts sparingly; favor menu-style ledgers when data is categorical.",
+              "Keep all marks flat rust or soft paper tones.",
+              "Avoid multi-color infographic palettes."
+            ]
+          }
+        },
+        "requiredGates": [
+          "fallback-patch-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Generated by pptx-nova-deckkit-refurbish-profile-fill.mjs for long-table.",
+          "Use the DeckKit-specific fallback profile instead of generic visualGrammar derivation.",
+          "Preserve source slides and editable objects; restyle theme colors, fonts, backgrounds, text, shapes, tables, charts, and existing page chrome."
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "slideTypes": {
+          "longTableCoverSlide": {
+            "requiredSlots": ["data.edition", "data.title", "data.description"]
+          },
+          "longTableManifestoSlide": {
+            "requiredSlots": ["data.title", "data.paragraphs"]
+          },
+          "longTableIndexSlide": {
+            "requiredSlots": ["data.title", "data.cards"]
+          },
+          "longTableFeaturedSlide": {
+            "requiredSlots": ["data.title", "data.body", "data.details"]
+          },
+          "longTableMenuSlide": {
+            "requiredSlots": ["data.title", "data.items"]
+          },
+          "longTableQuoteSlide": {
+            "requiredSlots": ["data.quote", "data.author"]
+          },
+          "longTableCalendarSlide": {
+            "requiredSlots": ["data.title", "data.columns", "data.rows"]
+          },
+          "longTableClosingSlide": {
+            "requiredSlots": ["data.title", "data.body", "data.footer"]
+          }
+        }
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 64,
+          "cardsMax": 3,
+          "menuItemsMax": 5,
+          "calendarRowsMax": 6
+        },
+        "hard": {
+          "titleMaxChars": 90,
+          "cardsMax": 3,
+          "menuItemsMax": 5,
+          "calendarRowsMax": 6
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "golden high=0 medium=0",
+        "pngReview": "golden contact-sheet"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 41,
+          "lowBuckets": {
+            "total": 41,
+            "styleAllowed": 40,
+            "baselineKnown": 1,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 41,
+            "lowBuckets": {
+              "total": 41,
+              "styleAllowed": 40,
+              "baselineKnown": 1,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
+            }
+          },
+          "cases": [
+            {
+              "caseId": "long-table.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/long-table/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/long-table/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 41,
+                "lowBuckets": {
+                  "total": 41,
+                  "styleAllowed": 40,
+                  "baselineKnown": 1,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 233573
+              },
+              "patchOps": 632,
+              "p50TotalMs": 36.91
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Bricolage Grotesque and Fraunces are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
+        "Paper texture is represented by flat editable fills rather than bitmap texture assets because full-slide SVG texture pictures render as xdoc demo placeholders.",
+        "The cover edition-number block is optional; omit bigEdition/bigLabel/bigMeta when a deck has no meaningful issue-number content."
+      ],
+      "examples": [
+        {
+          "name": "long-table-editorial",
+          "contentPath": "examples/long-table-content.json"
+        }
+      ]
+    },
+    {
+      "id": "biennale-yellow",
+      "version": "0.1.0",
+      "path": "biennale-yellow.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "production",
+      "qualityProfile": {
+        "minFontPt": 9,
+        "labelFontPt": 9,
+        "sourceFontPt": 9,
+        "baseline": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "cultural institution programme",
+        "festival and biennale deck",
+        "editorial annual report",
+        "museum exhibition narrative",
+        "arts residency showcase"
+      ],
+      "coverage": {
+        "languages": ["en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "biennaleCoverSlide",
+          "biennaleManifestoSlide",
+          "biennaleProgrammeSlide",
+          "biennaleChapterSlide",
+          "biennaleDataSlide",
+          "biennaleQuoteSlide",
+          "biennaleCalendarSlide",
+          "biennaleColophonSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "biennaleCoverSlide",
+        "biennaleManifestoSlide",
+        "biennaleProgrammeSlide",
+        "biennaleChapterSlide",
+        "biennaleDataSlide",
+        "biennaleQuoteSlide",
+        "biennaleCalendarSlide",
+        "biennaleColophonSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Warm editorial biennale DeckKit with paper fields, disciplined ink typography, yellow structural blocks, and atmospheric native PowerPoint bloom shapes.",
+        "mood": ["editorial", "cultural", "solar", "quiet", "institutional"],
+        "layoutPrinciples": [
+          "Use a warm paper canvas with one disciplined ink color for all text and rules.",
+          "Let yellow planes, translucent block tiles, and native soft-edge ovals carry the visual identity.",
+          "Use large serif display type as the primary composition anchor.",
+          "Structure dense pages with hairline rules, ledger rows, numbered strands, and editable native bars."
+        ],
+        "signatureElements": [
+          "solar yellow blocks and soft native oval blooms",
+          "bottom-right mono page number",
+          "oversized editorial serif titles and numerals",
+          "thin ink rules with low-alpha row separators",
+          "four-column metadata footer bands"
+        ],
+        "typography": {
+          "display": "Times New Roman for large editorial titles, quotes, numerals, and poster words",
+          "body": "Arial for compact labels, body copy, footer metadata, and institutional notes",
+          "mono": "Courier New for page numbers, dates, durations, and chart labels"
+        },
+        "colorSystem": {
+          "background": ["warm paper #E9E5DB", "deep paper #DCD6C4"],
+          "primary": ["ink blue #1B2566"],
+          "accent": ["solar yellow #F1EE2E", "soft yellow #F8F39B", "haze #F0DA7C"],
+          "secondary": ["low-opacity ember #E26B4A for atmospheric blooms only"]
+        },
+        "slideRhythm": {
+          "anchor": ["biennaleCoverSlide", "biennaleColophonSlide"],
+          "editorial": ["biennaleManifestoSlide", "biennaleChapterSlide", "biennaleQuoteSlide"],
+          "programme": ["biennaleProgrammeSlide", "biennaleCalendarSlide"],
+          "evidence": ["biennaleDataSlide"]
+        },
+        "compositionRules": [
+          "Keep every slide image-free and editable through native PPTX shapes and text.",
+          "Do not add shadows, rounded cards, icons, or decorative bitmap overlays.",
+          "Use yellow as plane, bloom, tile, or chart emphasis rather than colored text.",
+          "Prefer fixed item counts that match the locked layouts; reject oversized arrays through schema and density gates."
+        ],
+        "avoid": [
+          "browser navigation or transition controls",
+          "full-slide screenshot backgrounds",
+          "multi-color infographic palettes",
+          "SaaS card grids",
+          "decorative photography or stock illustration"
+        ]
+      },
+      "refurbishProfile": {
+        "schemaVersion": "pptx-nova-refurbish-profile/v1",
+        "mode": "manual-fallback",
+        "nativeSkinning": {
+          "supported": false,
+          "themePack": "",
+          "stylePack": "",
+          "commands": []
+        },
+        "fallback": {
+          "schemaVersion": "pptx-nova-refurbish-fallback/v1",
+          "source": "biennale-yellow-refurbish-profile",
+          "strategy": "inspect-driven-biennale-yellow-editable-object-restyle",
+          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "palette": {
+            "background": "E9E5DB",
+            "text": "1B2566",
+            "accent": "F1EE2E",
+            "softAccent": "F8F39B",
+            "secondary": "E26B4A",
+            "surface": "DCD6C4",
+            "rule": "1B2566"
+          },
+          "fonts": {
+            "heading": "Times New Roman",
+            "body": "Arial",
+            "label": "Courier New",
+            "cjk": "Microsoft YaHei"
+          },
+          "styleOps": [
+            "set-theme-color",
+            "set-theme-font",
+            "set-slide-background",
+            "set-text-style",
+            "set-shape-fill",
+            "set-shape-line"
+          ],
+          "chromePolicy": "preserve-and-restyle-existing",
+          "contentPolicy": "preserve-source-slides-and-editable-objects",
+          "titleZone": {
+            "placement": "large editorial serif title on warm paper with mono page chrome",
+            "headingStyle": "Times New Roman large, ink blue, generous line height",
+            "labelStyle": "Courier New mono metadata for dates, page numbers, and strands",
+            "accentRule": "solar yellow block, translucent tile, or thin ink rule",
+            "avoid": ["rounded cards", "decorative icons", "bitmap image headers"]
+          },
+          "tableRemap": {
+            "structure": "institutional ledger with hairline ink rules and yellow markers",
+            "headerFill": "palette.surface",
+            "headerText": "palette.text",
+            "bodyFill": "palette.background",
+            "borderColor": "palette.rule",
+            "emphasis": "use solar yellow as a row marker or header plane, not colored body text",
+            "rules": [
+              "Preserve editable rows and columns while reducing visual noise.",
+              "Use Arial for compact body cells and Courier New for dates or codes.",
+              "Keep separators thin and low-contrast except for structural ink rules."
+            ]
+          },
+          "chartRemap": {
+            "structure": "editable native bar/data block with solar yellow emphasis",
+            "backgroundFill": "palette.background",
+            "primarySeries": "palette.accent",
+            "secondarySeries": "palette.secondary",
+            "axisColor": "palette.text",
+            "gridColor": "palette.surface",
+            "rules": [
+              "Use yellow as plane or bar emphasis and keep labels ink blue.",
+              "Keep atmospheric ember only for soft bloom shapes, not chart series.",
+              "Avoid multi-color infographic palettes and decorative chart frames."
+            ]
+          }
+        },
+        "requiredGates": [
+          "fallback-patch-report",
+          "dry-run",
+          "vision-diff",
+          "refurbish-audit",
+          "fidelity-gate",
+          "png-contact-review"
+        ],
+        "notes": [
+          "Generated by pptx-nova-deckkit-refurbish-profile-fill.mjs for biennale-yellow.",
+          "Use the DeckKit-specific fallback profile instead of generic visualGrammar derivation.",
+          "Preserve source slides and editable objects; restyle theme colors, fonts, backgrounds, text, shapes, tables, charts, and existing page chrome."
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slideTypes": {
+          "biennaleCoverSlide": {
+            "requiredSlots": ["data.dateRange", "data.title", "data.subline", "data.footerItems"]
+          },
+          "biennaleManifestoSlide": {
+            "requiredSlots": ["data.quote", "data.attribution"]
+          },
+          "biennaleProgrammeSlide": {
+            "requiredSlots": [
+              "data.kicker",
+              "data.word",
+              "data.description",
+              "data.headLabel",
+              "data.strands"
+            ]
+          },
+          "biennaleChapterSlide": {
+            "requiredSlots": ["data.rail", "data.number", "data.title", "data.lede"]
+          },
+          "biennaleDataSlide": {
+            "requiredSlots": ["data.title", "data.label", "data.stats", "data.bars"]
+          },
+          "biennaleQuoteSlide": {
+            "requiredSlots": ["data.kicker", "data.quote", "data.author", "data.role"]
+          },
+          "biennaleCalendarSlide": {
+            "requiredSlots": ["data.title", "data.label", "data.columns", "data.rows"]
+          },
+          "biennaleColophonSlide": {
+            "requiredSlots": ["data.kicker", "data.title", "data.footerItems"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 3,
+        "groups": {
+          "anchor": ["biennaleCoverSlide", "biennaleColophonSlide"],
+          "editorial": ["biennaleManifestoSlide", "biennaleChapterSlide", "biennaleQuoteSlide"],
+          "programme": ["biennaleProgrammeSlide", "biennaleCalendarSlide"],
+          "evidence": ["biennaleDataSlide"]
+        },
+        "thresholds": [
+          {
+            "minSlides": 6,
+            "minUniqueGroups": 3,
+            "requiredGroups": ["anchor", "editorial"]
+          }
+        ]
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 78,
+          "footerItemsMax": 4,
+          "strandsMax": 5,
+          "statsMax": 2,
+          "barsMax": 6,
+          "calendarRowsMax": 8
+        },
+        "hard": {
+          "titleMaxChars": 120,
+          "footerItemsMax": 4,
+          "strandsMax": 5,
+          "statsMax": 2,
+          "barsMax": 6,
+          "calendarRowsMax": 8
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "golden pending benchmark",
+        "pngReview": "Phase 1 full rebuild contact-sheet reviewed"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-06-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 72,
+          "lowBuckets": {
+            "total": 72,
+            "styleAllowed": 67,
+            "baselineKnown": 5,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-06-21",
+          "source": {
+            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/pptx-nova-visual"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 72,
+            "lowBuckets": {
+              "total": 72,
+              "styleAllowed": 67,
+              "baselineKnown": 5,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
+            }
+          },
+          "cases": [
+            {
+              "caseId": "biennale-yellow.golden-html",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/pptx-nova-visual/biennale-yellow/golden-html/summary.json",
+              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 72,
+                "lowBuckets": {
+                  "total": 72,
+                  "styleAllowed": 67,
+                  "baselineKnown": 5,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 270291
+              },
+              "patchOps": 671,
+              "p50TotalMs": 43.42
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on the HTML template at beautiful-html-templates/templates/biennale-yellow; browser-only navigation, keyboard/touch interaction, crossfade transitions, and hover states are excluded.",
+        "Typography uses PowerPoint-safe system families (Times New Roman, Arial, and Courier New) so browser viewer output does not depend on remote font loading.",
+        "CSS radial gradients are approximated with editable PowerPoint soft-edge oval shapes and translucent yellow rectangles.",
+        "The chapter rail uses native PPTX vertical text rather than a rasterized CSS rotated label.",
+        "The source template has no reusable image assets; the DeckKit intentionally remains image-free."
+      ],
+      "examples": [
+        {
+          "name": "biennale-yellow-html-reference",
+          "contentPath": "examples/biennale-yellow-content.json"
+        }
+      ]
+    }
+  ]
+}

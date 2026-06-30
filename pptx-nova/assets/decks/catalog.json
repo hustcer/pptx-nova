@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "pptx-deck-catalog/v1",
+  "entries": [
+    {
+      "id": "deck-generator-template",
+      "name": "Deck Generator Template",
+      "type": "generator",
+      "path": "../examples/deck-generator-template.mjs",
+      "bestFor": ["new customer-ready deck", "express mode", "themePack-driven generation"],
+      "inputs": ["outline JSON", "themePack id", "stylePack id"],
+      "status": "available"
+    },
+    {
+      "id": "qbr-outline",
+      "name": "QBR Outline Example",
+      "type": "outline",
+      "path": "../examples/qbr-outline.json",
+      "bestFor": ["quarterly business review", "enterprise reporting"],
+      "status": "available"
+    },
+    {
+      "id": "quarterly-report-patch",
+      "name": "Quarterly Report Patch Example",
+      "type": "patch",
+      "path": "../examples/quarterly-report.patch.json",
+      "bestFor": ["schema-v1 patch reference", "manual apply example"],
+      "status": "available"
+    },
+    {
+      "id": "biennale-yellow-showcase",
+      "name": "biennale-yellow DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "biennale-yellow",
+      "caseId": "biennale-yellow.golden-html",
+      "path": "../examples/biennale-yellow/deck.pptx",
+      "preview": "../examples/biennale-yellow/contact-sheet.webp",
+      "content": "../examples/biennale-yellow/content.json",
+      "summary": "../examples/biennale-yellow/summary.json",
+      "bestFor": [
+        "cultural institution programme",
+        "festival and biennale deck",
+        "editorial annual report",
+        "museum exhibition narrative",
+        "arts residency showcase"
+      ],
+      "status": "available"
+    },
+    {
+      "id": "broadside-showcase",
+      "name": "broadside DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "broadside",
+      "caseId": "broadside.golden-html",
+      "path": "../examples/broadside/deck.pptx",
+      "preview": "../examples/broadside/contact-sheet.webp",
+      "content": "../examples/broadside/content.json",
+      "summary": "../examples/broadside/summary.json",
+      "bestFor": [
+        "brand manifesto",
+        "founder vision deck",
+        "magazine or cultural pitch",
+        "design talk",
+        "bilingual EN/CN editorial deck",
+        "campaign launch"
+      ],
+      "status": "available"
+    },
+    {
+      "id": "cartesian-showcase",
+      "name": "cartesian DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "cartesian",
+      "caseId": "cartesian.golden-html",
+      "path": "../examples/cartesian/deck.pptx",
+      "preview": "../examples/cartesian/contact-sheet.webp",
+      "content": "../examples/cartesian/content.json",
+      "summary": "../examples/cartesian/summary.json",
+      "bestFor": [
+        "minimal strategy narrative",
+        "editorial business review",
+        "board discussion",
+        "research readout",
+        "quiet data presentation"
+      ],
+      "status": "available"
+    },
+    {
+      "id": "consulting-dark-showcase",
+      "name": "consulting-dark DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "consulting-dark",
+      "caseId": "consulting-dark.golden-roadshow",
+      "path": "../examples/consulting-dark/deck.pptx",
+      "preview": "../examples/consulting-dark/contact-sheet.webp",
+      "content": "../examples/consulting-dark/content.json",
+      "summary": "../examples/consulting-dark/summary.json",
+      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "status": "available"
+    },
+    {
+      "id": "coral-showcase",
+      "name": "coral DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "coral",
+      "caseId": "coral.golden-html",
+      "path": "../examples/coral/deck.pptx",
+      "preview": "../examples/coral/contact-sheet.webp",
+      "content": "../examples/coral/content.json",
+      "summary": "../examples/coral/summary.json",
+      "bestFor": [
+        "creative agency",
+        "fashion and beauty pitch",
+        "fitness brand",
+        "food and beverage brand deck",
+        "lifestyle launch",
+        "editorial manifesto"
+      ],
+      "status": "available"
+    },
+    {
+      "id": "long-table-showcase",
+      "name": "long-table DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "long-table",
+      "caseId": "long-table.golden-html",
+      "path": "../examples/long-table/deck.pptx",
+      "preview": "../examples/long-table/contact-sheet.webp",
+      "content": "../examples/long-table/content.json",
+      "summary": "../examples/long-table/summary.json",
+      "bestFor": [
+        "hospitality brand",
+        "food and beverage editorial deck",
+        "event series showcase",
+        "cultural supper club",
+        "lifestyle launch"
+      ],
+      "status": "available"
+    },
+    {
+      "id": "mckinsey-blue-showcase",
+      "name": "mckinsey-blue DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "mckinsey-blue",
+      "caseId": "mckinsey-blue.golden-loyalty",
+      "path": "../examples/mckinsey-blue/deck.pptx",
+      "preview": "../examples/mckinsey-blue/contact-sheet.webp",
+      "content": "../examples/mckinsey-blue/content.json",
+      "summary": "../examples/mckinsey-blue/summary.json",
+      "bestFor": [
+        "customer strategy",
+        "loyalty programme",
+        "executive consulting",
+        "McKinsey-style management deck"
+      ],
+      "status": "available"
+    },
+    {
+      "id": "swiss-grid-showcase",
+      "name": "swiss-grid DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "swiss-grid",
+      "caseId": "swiss-grid.golden-lecture",
+      "path": "../examples/swiss-grid/deck.pptx",
+      "preview": "../examples/swiss-grid/contact-sheet.webp",
+      "content": "../examples/swiss-grid/content.json",
+      "summary": "../examples/swiss-grid/summary.json",
+      "bestFor": [
+        "design education",
+        "typography lecture",
+        "visual design history",
+        "editorial systems",
+        "minimal comparison tables",
+        "Swiss-style presentation"
+      ],
+      "status": "available"
+    }
+  ]
+}

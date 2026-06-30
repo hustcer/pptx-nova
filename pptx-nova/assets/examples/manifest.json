@@ -1,0 +1,838 @@
+{
+  "schemaVersion": "pptx-nova-deckkit-examples/v1",
+  "description": "Committed user-facing DeckKit showcase decks for pptx-nova.",
+  "updateCommand": "just deckkit-examples",
+  "checkCommand": "just deckkit-examples check",
+  "source": {
+    "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
+    "deckkitCatalog": "skills/pptx-nova/assets/deckkits/catalog.json"
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "source": "xdoc contact-sheet.png converted with cwebp or ImageMagick"
+  },
+  "examples": [
+    {
+      "id": "consulting-dark",
+      "deckkit": "consulting-dark",
+      "caseId": "consulting-dark.golden-roadshow",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "浏览器端高保真 PPTX 渲染 与 AI 原生生成",
+      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "defaultFor": ["roadshow", "executive consulting", "technical roadshow", "技术路演"],
+      "files": {
+        "deck": {
+          "path": "consulting-dark/deck.pptx",
+          "bytes": 34446,
+          "sha256": "93f916996ee0437897f2f33c55768592cf0f1489fecaeb71ad41ddd1bf338cdd"
+        },
+        "contactSheet": {
+          "path": "consulting-dark/contact-sheet.webp",
+          "bytes": 107196,
+          "sha256": "afd9cf98df3cc82e0c01b5db5898cf25ff651db1d761de155b7447fc2dabcd55",
+          "quality": 82
+        },
+        "content": {
+          "path": "consulting-dark/content.json",
+          "bytes": 8655,
+          "sha256": "469d1882981f892d21357548847ae55f212f710ebed6b8a52f458b93a099e1e1"
+        },
+        "brief": {
+          "path": "consulting-dark/brief.md",
+          "bytes": 730,
+          "sha256": "9d9c4cbe9c0fa18bfbe115f8e6cfecf2b03e77b1be204f23687e1cc391103c68"
+        },
+        "summary": {
+          "path": "consulting-dark/summary.json",
+          "bytes": 2753,
+          "sha256": "e1d6409481b6ac18e8b5e975e6f94c371bf299cc7173adb8e5025572635b8890"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 1,
+        "fitDiagnostics": 1,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 1090
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 8,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 8
+        },
+        "lowBuckets": {
+          "total": 8,
+          "styleAllowed": 0,
+          "baselineKnown": 8,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "composition": 8
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
+          "available": true,
+          "issueCount": 8
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 9,
+          "labelFontPt": 9,
+          "sourceFontPt": 8.5,
+          "note": ""
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "mckinsey-blue",
+      "deckkit": "mckinsey-blue",
+      "caseId": "mckinsey-blue.golden-loyalty",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "A.CO. Customer,Loyalty Programme",
+      "bestFor": [
+        "customer strategy",
+        "loyalty programme",
+        "executive consulting",
+        "McKinsey-style management deck"
+      ],
+      "defaultFor": [
+        "McKinsey-style consulting",
+        "customer loyalty strategy",
+        "management briefing"
+      ],
+      "files": {
+        "deck": {
+          "path": "mckinsey-blue/deck.pptx",
+          "bytes": 48604,
+          "sha256": "01157063f22a294e83c73cfff94b23e3282a76da03a4d91379c87a660315dc31"
+        },
+        "contactSheet": {
+          "path": "mckinsey-blue/contact-sheet.webp",
+          "bytes": 109244,
+          "sha256": "9a78e65d3d7896a751feb435893bd8cc17ddef4de755f6a9c84fd0ce8b9eb57e",
+          "quality": 82
+        },
+        "content": {
+          "path": "mckinsey-blue/content.json",
+          "bytes": 17933,
+          "sha256": "6b7ddded8e377bb0bf638e66b5406fb9cd456ed2b9a5c0bfc3c9d9fa7fa8ec60"
+        },
+        "brief": {
+          "path": "mckinsey-blue/brief.md",
+          "bytes": 739,
+          "sha256": "d3732cd18fad02e85656b0cec54da3562b332af4b6858a9b6746318b0d8b2422"
+        },
+        "summary": {
+          "path": "mckinsey-blue/summary.json",
+          "bytes": 2793,
+          "sha256": "dfb004881719ac9a4f2da0c421849280d8eb2a95d61bac6050deb944ec080298"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 2471
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 319,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 319
+        },
+        "lowBuckets": {
+          "total": 319,
+          "styleAllowed": 300,
+          "baselineKnown": 19,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 303,
+          "composition": 13,
+          "overlap": 3
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
+          "available": true,
+          "issueCount": 319
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 6,
+          "labelFontPt": 6,
+          "sourceFontPt": 6,
+          "note": ""
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "swiss-grid",
+      "deckkit": "swiss-grid",
+      "caseId": "swiss-grid.golden-lecture",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "网格系统",
+      "bestFor": [
+        "design education",
+        "typography lecture",
+        "visual design history",
+        "editorial systems",
+        "minimal comparison tables",
+        "Swiss-style presentation"
+      ],
+      "defaultFor": [
+        "swiss grid systems",
+        "Swiss International Typographic Style",
+        "design lecture",
+        "grid system lecture",
+        "瑞士网格系统",
+        "设计课程"
+      ],
+      "files": {
+        "deck": {
+          "path": "swiss-grid/deck.pptx",
+          "bytes": 51697,
+          "sha256": "a4f5ed0461df3e2f9360a60141c8baa7e2c2edd122d24578fada26497b62ead7"
+        },
+        "contactSheet": {
+          "path": "swiss-grid/contact-sheet.webp",
+          "bytes": 139238,
+          "sha256": "579417c7fef7907e793650aea8e01b17e2f709388cb20e033a5ea9d620ed919e",
+          "quality": 82
+        },
+        "content": {
+          "path": "swiss-grid/content.json",
+          "bytes": 19121,
+          "sha256": "b295d41ffd91d15f41372c269be59e9d72f666cca1c604e3301a55e21f995d90"
+        },
+        "brief": {
+          "path": "swiss-grid/brief.md",
+          "bytes": 807,
+          "sha256": "4c5a72442f5b0e22182e2ea42e11419bc4ff88ec7ab2a5b8d79d992a4867ce90"
+        },
+        "summary": {
+          "path": "swiss-grid/summary.json",
+          "bytes": 2804,
+          "sha256": "ade8f5bd69cd4d095a78a2a65798aa4eca96a45c58088aaa6b61cfed6ab214b8"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 2248
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 15,
+        "issueCount": 208,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 208
+        },
+        "lowBuckets": {
+          "total": 208,
+          "styleAllowed": 208,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 208
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
+          "available": true,
+          "issueCount": 208
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 6.8,
+          "labelFontPt": 6.8,
+          "sourceFontPt": 6.8,
+          "note": "DeckKit golden constants override generic prose readability floors for Swiss typographic labels."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "broadside",
+      "deckkit": "broadside",
+      "caseId": "broadside.golden-html",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "this is the broadside style",
+      "bestFor": [
+        "brand manifesto",
+        "founder vision deck",
+        "magazine or cultural pitch",
+        "design talk",
+        "bilingual EN/CN editorial deck",
+        "campaign launch"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "broadside/deck.pptx",
+          "bytes": 35035,
+          "sha256": "59125d8cc0b040f152c8b597c441aad756a56bd7b6a23cef3ca645ebd35be7de"
+        },
+        "contactSheet": {
+          "path": "broadside/contact-sheet.webp",
+          "bytes": 99172,
+          "sha256": "5835d7fde62800e52a4ad31ebcf47100c4685f1d001578c6d3bf11506c611275",
+          "quality": 82
+        },
+        "content": {
+          "path": "broadside/content.json",
+          "bytes": 9399,
+          "sha256": "c9c3ac14edf9a67d656f24c1d92afc03573a8a144ca9ef554a22e4495bbb0547"
+        },
+        "brief": {
+          "path": "broadside/brief.md",
+          "bytes": 739,
+          "sha256": "d93f27d27aa321264096ed5fb75c04cad1c7346933ca568675cd09c169c80ad2"
+        },
+        "summary": {
+          "path": "broadside/summary.json",
+          "bytes": 2810,
+          "sha256": "8327295659e290fae232ab83147613fc35ade30d4d75fa70a96aad3ead565d93"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 888
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 16,
+        "issueCount": 82,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 82
+        },
+        "lowBuckets": {
+          "total": 82,
+          "styleAllowed": 81,
+          "baselineKnown": 1,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 81,
+          "unexpected-wrap": 1
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/broadside.golden-html.vision-baseline.json",
+          "available": true,
+          "issueCount": 82
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 9,
+          "labelFontPt": 9,
+          "sourceFontPt": 9,
+          "note": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "coral",
+      "deckkit": "coral",
+      "caseId": "coral.golden-html",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "QUARTERLY STRATEGY SESSION 2026",
+      "bestFor": [
+        "creative agency",
+        "fashion and beauty pitch",
+        "fitness brand",
+        "food and beverage brand deck",
+        "lifestyle launch",
+        "editorial manifesto"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "coral/deck.pptx",
+          "bytes": 27737,
+          "sha256": "d7221906bab6f1f50191ed997b726806f2ae5c445c201e1ffb516d230ea428fe"
+        },
+        "contactSheet": {
+          "path": "coral/contact-sheet.webp",
+          "bytes": 75094,
+          "sha256": "8326395c176f4b0d408d2785815599142a3d18242fe7651cc9dd4e3c35a07218",
+          "quality": 82
+        },
+        "content": {
+          "path": "coral/content.json",
+          "bytes": 5925,
+          "sha256": "aa69b494720234b991ac70a41037608fa7e668208dc71f57abf24300208b35d6"
+        },
+        "brief": {
+          "path": "coral/brief.md",
+          "bytes": 730,
+          "sha256": "588d6969edd1ecc443708cf14f381dbbe34a2ace7cc824c8664d3185c1d94ce1"
+        },
+        "summary": {
+          "path": "coral/summary.json",
+          "bytes": 2781,
+          "sha256": "5218008178b0b14e5fc79a095060dacccd774b4d3ec160658f0725a975fc8e38"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 535
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 31,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 31
+        },
+        "lowBuckets": {
+          "total": 31,
+          "styleAllowed": 30,
+          "baselineKnown": 1,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "overlap": 1,
+          "small-font": 30
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
+          "available": true,
+          "issueCount": 31
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 8.5,
+          "labelFontPt": 8.5,
+          "sourceFontPt": 8.5,
+          "note": "Coral uses 8.5-9pt tracked labels and otherwise keeps body text at or above 10.5pt."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "cartesian",
+      "deckkit": "cartesian",
+      "caseId": "cartesian.golden-html",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "Cartesian",
+      "bestFor": [
+        "minimal strategy narrative",
+        "editorial business review",
+        "board discussion",
+        "research readout",
+        "quiet data presentation"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "cartesian/deck.pptx",
+          "bytes": 27472,
+          "sha256": "c84a299229340429819dfed4702ac716043d3d3a215f1d24fb3b9d85d01dd19c"
+        },
+        "contactSheet": {
+          "path": "cartesian/contact-sheet.webp",
+          "bytes": 58660,
+          "sha256": "b582980394be723a6179ca19882c0fcc45e010d943c7f04dbe0196faf74fc89e",
+          "quality": 82
+        },
+        "content": {
+          "path": "cartesian/content.json",
+          "bytes": 5260,
+          "sha256": "e22acbb6f4b0bfb3db14868dd1ef787c0a9ed611743a49c47eb73159cd457c69"
+        },
+        "brief": {
+          "path": "cartesian/brief.md",
+          "bytes": 709,
+          "sha256": "0a89ace46b772add78ccef190a23f61895b8540c8f9beee10d6f799037963472"
+        },
+        "summary": {
+          "path": "cartesian/summary.json",
+          "bytes": 2810,
+          "sha256": "90147d7bbe50e5209961ce4b04b5ac74dea87a9ad470602de10f77c9bc5802c7"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 383
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 24,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 24
+        },
+        "lowBuckets": {
+          "total": 24,
+          "styleAllowed": 24,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 24
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
+          "available": true,
+          "issueCount": 24
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 8.5,
+          "labelFontPt": 7.5,
+          "sourceFontPt": 8.5,
+          "note": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "long-table",
+      "deckkit": "long-table",
+      "caseId": "long-table.golden-html",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "Long Table",
+      "bestFor": [
+        "hospitality brand",
+        "food and beverage editorial deck",
+        "event series showcase",
+        "cultural supper club",
+        "lifestyle launch"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "long-table/deck.pptx",
+          "bytes": 22769,
+          "sha256": "c5f56bf6f3f44df61005de9772825c7e877fa795eabc584fc5f33033380e0907"
+        },
+        "contactSheet": {
+          "path": "long-table/contact-sheet.webp",
+          "bytes": 89642,
+          "sha256": "81d4f72e45b6579a29b03f63bcd36282bd35455f99d49f7c2f192e87b8f7c8c2",
+          "quality": 82
+        },
+        "content": {
+          "path": "long-table/content.json",
+          "bytes": 6669,
+          "sha256": "eab2c349ca9d5d1e03ee0536ce0d2361f11cff082400f44527fce246bbf62ce7"
+        },
+        "brief": {
+          "path": "long-table/brief.md",
+          "bytes": 712,
+          "sha256": "0fdc3730ff73b07277c7bd3a698805c0421805b31892b5f6c10e09f54572e86d"
+        },
+        "summary": {
+          "path": "long-table/summary.json",
+          "bytes": 2808,
+          "sha256": "818c45dd7fe9af34446bd314269ca6ff8f791f1dfcbba8a170a6b5376aec65a4"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 632
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 41,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 41
+        },
+        "lowBuckets": {
+          "total": 41,
+          "styleAllowed": 40,
+          "baselineKnown": 1,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "overlap": 1,
+          "small-font": 40
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
+          "available": true,
+          "issueCount": 41
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 8.5,
+          "labelFontPt": 8.5,
+          "sourceFontPt": 8.5,
+          "note": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "biennale-yellow",
+      "deckkit": "biennale-yellow",
+      "caseId": "biennale-yellow.golden-html",
+      "kind": "golden",
+      "readiness": "production",
+      "version": "0.1.0",
+      "title": "Aurora Programme",
+      "bestFor": [
+        "cultural institution programme",
+        "festival and biennale deck",
+        "editorial annual report",
+        "museum exhibition narrative",
+        "arts residency showcase"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "biennale-yellow/deck.pptx",
+          "bytes": 23095,
+          "sha256": "9ef2a0e8db34086976157a9be4feba133443e6c7cdf88768c1dad8af223eb76d"
+        },
+        "contactSheet": {
+          "path": "biennale-yellow/contact-sheet.webp",
+          "bytes": 93186,
+          "sha256": "28ab645cc144f2c76462f883a74b634c82eb305a953bbd3d5a460a9a27041448",
+          "quality": 82
+        },
+        "content": {
+          "path": "biennale-yellow/content.json",
+          "bytes": 7579,
+          "sha256": "8f8ae9291575fb4bbf1461f09cb2d5a25e9087c4b3b5e37f12f8c213774e0f05"
+        },
+        "brief": {
+          "path": "biennale-yellow/brief.md",
+          "bytes": 756,
+          "sha256": "1f150dcfb57ca8a7345aaae62d3d7ef24eca82521f92aaffa3c800d8a5b878eb"
+        },
+        "summary": {
+          "path": "biennale-yellow/summary.json",
+          "bytes": 2827,
+          "sha256": "1fc72c6a4c09ce9b2a1a6705f78a6ea4aec58705e72b3b2fe6bbcb92f74ac9f7"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": 1,
+        "ops": 671
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 72,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 72
+        },
+        "lowBuckets": {
+          "total": 72,
+          "styleAllowed": 67,
+          "baselineKnown": 5,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {
+          "small-font": 67,
+          "overlap": 5
+        },
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "skills/pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
+          "available": true,
+          "issueCount": 72
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 9,
+          "labelFontPt": 9,
+          "sourceFontPt": 9,
+          "note": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "pptx-nova-visual-benchmarks/v1",
+  "cases": [
+    {
+      "id": "consulting-dark.golden-roadshow",
+      "deckkit": "consulting-dark",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/roadshow-content.json",
+      "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
+      "expectedPath": "cases/consulting-dark/golden-roadshow/expected.json",
+      "reviewPath": "cases/consulting-dark/golden-roadshow/review.md"
+    },
+    {
+      "id": "consulting-dark.stress-density",
+      "deckkit": "consulting-dark",
+      "kind": "stress",
+      "contentPath": "cases/consulting-dark/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
+      "expectedPath": "cases/consulting-dark/stress-density/expected.json",
+      "reviewPath": "cases/consulting-dark/stress-density/review.md"
+    },
+    {
+      "id": "consulting-dark.mixed-language",
+      "deckkit": "consulting-dark",
+      "kind": "mixed-language",
+      "contentPath": "cases/consulting-dark/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/roadshow-build.mjs",
+      "expectedPath": "cases/consulting-dark/mixed-language/expected.json",
+      "reviewPath": "cases/consulting-dark/mixed-language/review.md"
+    },
+    {
+      "id": "mckinsey-blue.golden-loyalty",
+      "deckkit": "mckinsey-blue",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
+      "buildPath": "../../assets/deckkits/examples/mckinsey-blue-build.mjs",
+      "expectedPath": "cases/mckinsey-blue/golden-loyalty/expected.json",
+      "reviewPath": "cases/mckinsey-blue/golden-loyalty/review.md"
+    },
+    {
+      "id": "mckinsey-blue.stress-density",
+      "deckkit": "mckinsey-blue",
+      "kind": "stress",
+      "contentPath": "cases/mckinsey-blue/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/mckinsey-blue-build.mjs",
+      "expectedPath": "cases/mckinsey-blue/stress-density/expected.json",
+      "reviewPath": "cases/mckinsey-blue/stress-density/review.md"
+    },
+    {
+      "id": "mckinsey-blue.mixed-language",
+      "deckkit": "mckinsey-blue",
+      "kind": "mixed-language",
+      "contentPath": "cases/mckinsey-blue/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/mckinsey-blue-build.mjs",
+      "expectedPath": "cases/mckinsey-blue/mixed-language/expected.json",
+      "reviewPath": "cases/mckinsey-blue/mixed-language/review.md"
+    },
+    {
+      "id": "swiss-grid.golden-lecture",
+      "deckkit": "swiss-grid",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/swiss-grid-content.json",
+      "buildPath": "../../assets/deckkits/examples/swiss-grid-build.mjs",
+      "expectedPath": "cases/swiss-grid/golden-lecture/expected.json",
+      "reviewPath": "cases/swiss-grid/golden-lecture/review.md"
+    },
+    {
+      "id": "swiss-grid.stress-density",
+      "deckkit": "swiss-grid",
+      "kind": "stress",
+      "contentPath": "cases/swiss-grid/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/swiss-grid-build.mjs",
+      "expectedPath": "cases/swiss-grid/stress-density/expected.json",
+      "reviewPath": "cases/swiss-grid/stress-density/review.md"
+    },
+    {
+      "id": "swiss-grid.mixed-language",
+      "deckkit": "swiss-grid",
+      "kind": "mixed-language",
+      "contentPath": "cases/swiss-grid/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/swiss-grid-build.mjs",
+      "expectedPath": "cases/swiss-grid/mixed-language/expected.json",
+      "reviewPath": "cases/swiss-grid/mixed-language/review.md"
+    },
+    {
+      "id": "broadside.golden-html",
+      "deckkit": "broadside",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/broadside-content.json",
+      "buildPath": "../../assets/deckkits/examples/broadside-build.mjs",
+      "expectedPath": "cases/broadside/golden-html/expected.json",
+      "reviewPath": "cases/broadside/golden-html/review.md"
+    },
+    {
+      "id": "broadside.stress-density",
+      "deckkit": "broadside",
+      "kind": "stress",
+      "contentPath": "cases/broadside/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/broadside-build.mjs",
+      "expectedPath": "cases/broadside/stress-density/expected.json",
+      "reviewPath": "cases/broadside/stress-density/review.md"
+    },
+    {
+      "id": "broadside.mixed-language",
+      "deckkit": "broadside",
+      "kind": "mixed-language",
+      "contentPath": "cases/broadside/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/broadside-build.mjs",
+      "expectedPath": "cases/broadside/mixed-language/expected.json",
+      "reviewPath": "cases/broadside/mixed-language/review.md"
+    },
+    {
+      "id": "coral.golden-html",
+      "deckkit": "coral",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/coral-content.json",
+      "buildPath": "../../assets/deckkits/examples/coral-build.mjs",
+      "expectedPath": "cases/coral/golden-html/expected.json",
+      "reviewPath": "cases/coral/golden-html/review.md"
+    },
+    {
+      "id": "cartesian.golden-html",
+      "deckkit": "cartesian",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/cartesian-content.json",
+      "buildPath": "../../assets/deckkits/examples/cartesian-build.mjs",
+      "expectedPath": "cases/cartesian/golden-html/expected.json",
+      "reviewPath": "cases/cartesian/golden-html/review.md"
+    },
+    {
+      "id": "long-table.golden-html",
+      "deckkit": "long-table",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/long-table-content.json",
+      "buildPath": "../../assets/deckkits/examples/long-table-build.mjs",
+      "expectedPath": "cases/long-table/golden-html/expected.json",
+      "reviewPath": "cases/long-table/golden-html/review.md"
+    },
+    {
+      "id": "biennale-yellow.golden-html",
+      "deckkit": "biennale-yellow",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/biennale-yellow-content.json",
+      "buildPath": "../../assets/deckkits/examples/biennale-yellow-build.mjs",
+      "expectedPath": "cases/biennale-yellow/golden-html/expected.json",
+      "reviewPath": "cases/biennale-yellow/golden-html/review.md"
+    },
+    {
+      "id": "coral.stress-density",
+      "deckkit": "coral",
+      "kind": "stress",
+      "contentPath": "cases/coral/stress-density/content.json",
+      "buildPath": "../../assets/deckkits/examples/coral-build.mjs",
+      "expectedPath": "cases/coral/stress-density/expected.json",
+      "reviewPath": "cases/coral/stress-density/review.md"
+    },
+    {
+      "id": "coral.mixed-language",
+      "deckkit": "coral",
+      "kind": "mixed-language",
+      "contentPath": "cases/coral/mixed-language/content.json",
+      "buildPath": "../../assets/deckkits/examples/coral-build.mjs",
+      "expectedPath": "cases/coral/mixed-language/expected.json",
+      "reviewPath": "cases/coral/mixed-language/review.md"
+    }
+  ]
+}

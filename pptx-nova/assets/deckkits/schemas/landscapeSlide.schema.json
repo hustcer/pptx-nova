@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-slide/landscapeSlide",
+  "title": "landscapeSlide data schema",
+  "type": "object",
+  "required": ["eyebrow", "title", "comps"],
+  "properties": {
+    "eyebrow": { "type": "string" },
+    "title": { "type": "string" },
+    "usLabel": { "type": "string" },
+    "usTitle": { "type": "string" },
+    "usSub": { "type": "string" },
+    "comps": {
+      "type": "array",
+      "description": "Tuple: [accent, name, tag, pro, con]",
+      "minItems": 1,
+      "items": {
+        "type": "array",
+        "minItems": 5,
+        "maxItems": 5,
+        "items": { "type": "string" }
+      }
+    },
+    "conclusion": { "type": "string" }
+  },
+  "additionalProperties": false
+}

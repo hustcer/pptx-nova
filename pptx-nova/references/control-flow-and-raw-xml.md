@@ -267,9 +267,9 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 {
   "op": "raw-ooxml-patch",
   "target": "ppt/slides/slide1.xml",
-  "xpath": "//p:sld/p:cSld/p:spTree/p:sp[p:nvSpPr/p:nvPr/p:ph[@type='title']]/p:txBody/a:p[1]/a:r/a:t",
+  "xpath": "//a:hlinkClick/@tooltip",
   "operation": "set",
-  "value": "通过 XPath 直接改的标题"
+  "value": "Open the product demo"
 }
 ```
 
@@ -278,7 +278,7 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 | 字段        | 说明                                                                               |
 | ----------- | ---------------------------------------------------------------------------------- |
 | `target`    | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                          |
-| `xpath`     | XPath，支持递归选择器；命名空间前缀（`p:` / `a:` / `c:` ...）按 OOXML 标准默认绑定 |
+| `xpath`     | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter |
 | `operation` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)     |
 | `value`     | 文本或 raw XML 片段；`remove` 操作可省略                                           |
 
@@ -289,6 +289,23 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 - 写完会同时 emit `semanticChange` 和 `visualRisk`(severity=`medium`,kind=`raw-ooxml`)
 - 不参与 schema-v1 的字段校验,**写错了 dry-run 只能告诉你 XPath 没命中,无法告
   诉你 OOXML 结构错** — 最后必须跑 `xdoc check deck.pptx --checks compat` 兜底
+
+**XPath 能力边界**：
+
+| 写法                         | 支持 | 说明                                                    |
+| ---------------------------- | ---- | ------------------------------------------------------- |
+| `/p:sld/p:cSld/p:spTree`     | ✅   | 绝对元素路径；命名空间前缀会按 local-name 匹配          |
+| `//a:t`                      | ✅   | 递归选择所有同名元素                                    |
+| `//a:hlinkClick/@tooltip`    | ✅   | 最后一段可以是 attribute，用于批量设/删属性             |
+| `//a:hlinkClick[@tooltip=x]` | ❌   | 不支持 predicate 或按属性值筛选                         |
+| `//p:sp[1]`                  | ❌   | 不支持索引筛选                                          |
+| `//*[@id]` / `//a:*`         | ❌   | 不支持 wildcard                                         |
+| `contains(...)` / `text()`   | ❌   | 不支持函数                                              |
+| `//a:t | //p:ph`             | ❌   | 不支持 union                                            |
+
+如果需要"按属性值定位某个节点后再改"，不要在 raw XPath 中反复试 predicate；
+优先使用已有 patch op、先用 inspect 定位稳定 selector，或拆成更具体的常规编辑能力。
+raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可接受的场景。
 
 **何时用**:
 

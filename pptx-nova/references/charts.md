@@ -21,7 +21,7 @@ chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标
   不替代视觉复核。
 
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
-add-chart / replace-chart-data，apply 后保存 final-inspect.json，并运行
+add-chart / replace-chart-data / replace-chart-text，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
 数据维度、数值类型、source/claim 披露和最终原生 chart 对象存在性；它不是完整 OOXML
 chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
@@ -408,6 +408,30 @@ ChartEx 语义要点：
 
 ## 编辑图表
 
+### 只改文本 / 翻译 label
+
+只翻译或替换 chart title、category labels、series names 时，优先用
+`replace-chart-text`。它只改已有 chart 文本缓存和 embedded workbook 中对应标签，不重建
+chart data XML，因此更符合"非文本尽量保持不变"的目标。
+
+```json
+{
+  "op": "replace-chart-text",
+  "slide": 1,
+  "shape": { "name": "Revenue Chart" },
+  "title": "Revenue Trend",
+  "categories": [
+    { "index": 0, "text": "Q1" },
+    { "index": 1, "text": "Q2" }
+  ],
+  "series": [{ "index": 0, "name": "Actual" }]
+}
+```
+
+不要把 `replace-chart-data` 当作 chart 文本翻译工具：它会重建 chart XML / workbook
+数据区域，适合真的替换数据集，但可能丢失或重排既有标题、layout、样式和扩展节点。
+`replace-chart-text` 目前只覆盖经典 chart part；ChartEx 仍按下文 ChartEx 规则处理。
+
 ### 改数据
 
 ```json
@@ -425,7 +449,7 @@ ChartEx 语义要点：
    part；若是 embedded workbook-backed chart，也应看到 workbook part 变化。
 2. 对关键业务语义做轻量审计，例如 stock 的 low/high 不变量、series/category 长度一致、
    legend 系列名不为空。把结果保存到 run 目录（如 `semantic-audit.json`）。
-3. 做视觉复核。若 `xdoc convert --to png` 对某类复杂/长尾 chart 没有渲染完整图体，
+3. 做视觉复核。优先用 `xdoc pptx preview` 生成预览；若某类复杂/长尾 chart 没有渲染完整图体，
    不要把空白预览当作 deck 内容缺失；改用 PowerPoint、LibreOffice、PDF 渲染或用户提供的
    权威预览作为视觉依据，并在 `visual_review.json` 中记录 fallback 原因。
 

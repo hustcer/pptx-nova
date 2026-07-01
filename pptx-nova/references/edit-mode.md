@@ -84,11 +84,15 @@ For targeted visual edits, run scoped machine and PNG gates first:
 
 ```bash
 xdoc pptx vision-check out.pptx --slides 25-38 --json > <run-dir>/vision.json
-xdoc convert out.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
+xdoc pptx preview out.pptx --slides 25-38 \
+  --output-dir <run-dir>/previews \
+  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --overwrite --json > <run-dir>/preview.json
 ```
 
-The `vision.json` still retains full-deck `summary/issues`, but also includes
-`scope`, `scopedSummary`, `scopedIssues`, and `deckResidualRisk`; use
+The `vision.json` top-level `summary/issues` follow the selected changed pages.
+It also includes `scope`, `scopedSummary`, `scopedIssues`, `deckSummary`,
+`deckIssues`, and `deckResidualRisk`; use the top-level summary or
 `scopedSummary` for the changed-slide gate and disclose residual full-deck risk
 separately.
 

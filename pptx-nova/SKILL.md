@@ -87,7 +87,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
   只把 `agentGate`、`summary.reliableChanges`、`changeRollup.reliable` 和 `slides[]` 的可靠变更条目当作机器事实；
   `uncertain` / `unsupported` 是复核信号，不能当通过证据，仍需配合 preview、vision 或内容 audit。
 - **PPTX PNG 预览 / 截图复核**：优先运行
-  `xdoc pptx preview deck.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/contact-sheet.png --overwrite --json`
+  `xdoc pptx preview deck.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json`
   生成逐页 PNG、contact sheet 和 `pptx-preview/v1` stdout manifest；如果输出目录在当前 run
   内且是本轮可重建预览，重跑时加 `--overwrite`。只复核改动页时加 `--slides 2,5-7`。
   读取 manifest 后确认 `status=success`、`pages[]` 的 path/status/width/height/byteLength/SHA-256
@@ -128,7 +128,9 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
   作为 legacy supplemental audit。标准 runner 还会生成 `fidelity-gate.json` 汇总并加严
   `vision-diff`、`refurbish-audit` 和可用 `reference-map` 证据。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
-- **导出 / 检查 / 提取**：创建 run 目录，使用 `xdoc convert` / `xdoc check` / `xdoc pptx inspect`，无需读取创建型文档。
+- **导出 / 检查 / 提取**：创建 run 目录；PPTX PNG/contact-sheet 预览默认用
+  `xdoc pptx preview`，PDF/MD/JSON/text 或非 PPTX 通用转换用 `xdoc convert`，检查用
+  `xdoc check` / `xdoc pptx inspect`。无需读取创建型文档。
 - **小改文字、备注、页脚或元数据**：只读 `common-workflow.md` 和
   `micro-edit-cheatsheet.md`，仍走 inspect、dry-run 和 selector 校验；不读取 DeckKit、设计锁、
   叙事质量或完整 edit 文档，除非 selector 模糊、涉及复杂对象或改动影响版式/品牌。
@@ -424,33 +426,29 @@ xdoc pptx diff --source source.pptx --candidate out.pptx --detail summary --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
-xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/contact-sheet.png --overwrite --json
-xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --contact-sheet <run-dir>/contact-sheet.png --overwrite --json
-xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
-xdoc convert out.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
+xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
+xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
+xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet # fallback/debug only
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 
 ## 完成摘要
 
-成功生成、修改、导出或检查后，最终回复必须简短列出：
+成功生成、修改、导出或检查后，最终回复按 4 块压缩，避免把完整 checklist 倒给用户：
 
-- 最终输出 PPTX 或导出文件的绝对路径
-- run 目录
-- 关键中间产物：`outline.json`、`deck_lock.json`、`content.json`、`patch.json`、sidecar、
-  `xdoc-capabilities.json`、`vision.json`、预览目录、contact sheet、`check.json` 等实际存在项
-- 产物保留/清理状态：是否保留完整 run、是否按最小证据包瘦身、清理了哪些可重建重型产物
-- xdoc 审计信息：版本、CLI schema 版本、任务必需能力是否 fully disclosed、是否使用
-  degraded discovery 或 fallback；不要把 undisclosed 写成 unsupported
-- 验证结果：dry-run、apply、`pptx-diff.json` 语义变更审计、vision-check、`structure-check.json`、PNG/contact-sheet 复核、`visual_review.json`、可选 preflight
-- 高风险任务的结构证据：`evidence-summary.json`、`layout-final.json`；有图表/表格、XML 结构检查或结构化视觉复核时列出 `semantic-audit.json`、`structure-check.json`、`visual_review.json`；翻新/严格套模板还列出 `fidelity-gate.json`、`template-gate.json` 或
-  `content-audit-final.json` 中实际存在项
-- PowerPoint clean-open 结果：若运行过，说明是否检测到 `Repair` 对话框；若未运行，说明原因和替代结构校验。出现 Repair 的候选必须作为失败候选记录，不能当最终输出。
-- 正式说服型 deck 的叙事质量结果：`deckProfile`、最低评分、最弱页、已接受 tradeoff
-- AI 补全的事实性 assumptions：逐条披露，或明确说明没有使用事实性补全
-- 剩余风险，例如字体未嵌入、外链、unsupported 对象、人工未审资源授权
-- 如果触发 Feedback 模式，追加“SKILL 使用反馈”：列出过程问题、针对 `pptx-nova` 的最佳解决方案，
-  以及可选的 Agent 真实使用感受或建议
+1. **输出**：最终 PPTX/导出文件绝对路径 + run 目录。
+2. **验证**：一行列出实际执行的关键 gate 及状态，例如
+   `dry-run pass; apply pass; vision high=0 medium=0; preview reviewed; clean-open not run`。
+3. **证据**：只列最关键 3-6 个 artifact，例如 `patch.json`、`vision.json`、
+   preview manifest/contact sheet、`pptx-diff.json`、`evidence-summary.json`；不存在的不补列。
+4. **风险/后续**：只写仍需用户知道的事项，例如 clean-open 未运行、字体未嵌入、外链、
+   unsupported 对象、人工未审资源授权、AI 事实性 assumptions，或无剩余风险。
+
+条件性补充只在相关时出现：高风险任务列 `evidence-summary.json` / `layout-final.json`；
+图表/表格/XML 风险列专项审计；翻新/严格套模板列 fidelity/template/content audit；
+正式说服型 deck 列叙事质量结论；发生清理时说明保留证据和删除的可重建产物；触发
+Feedback 模式时追加“SKILL 使用反馈”。不要输出 xdoc 版本、CLI schema、能力披露等审计细节，
+除非它影响结果、使用了 fallback，或用户明确要求。
 
 只有平台或工具给出准确 token 统计时才输出 token 信息；不要估算。
 

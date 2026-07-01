@@ -29,18 +29,46 @@ Use only `reliable` entries as machine-checkable facts. Treat `uncertain` and
 domain audit before making a final judgment about visual fidelity or unsupported
 objects.
 
+## PPTX PNG Preview
+
+For PPTX visual review, use `xdoc pptx preview` as the default PNG/contact-sheet
+path:
+
+```bash
+xdoc pptx preview deck.pptx \
+  --output-dir <run-dir>/previews \
+  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --overwrite --json > <run-dir>/preview.json
+
+xdoc pptx preview deck.pptx --slides 25-38 \
+  --output-dir <run-dir>/previews \
+  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --overwrite --json > <run-dir>/preview.json
+```
+
+The stdout manifest is `pptx-preview/v1`; check `status`, `pages[]`, and
+`contactSheet` before reviewing images. PNG filenames preserve original slide
+numbers, so `slide-025.png` still refers to slide 25 even when the contact sheet
+only contains a scoped range.
+
+Read the contact sheet first to detect cross-slide issues such as rhythm, page
+number jumps, inconsistent dark/light pages, and obvious layout problems. Then
+inspect full-size PNGs for suspicious slides.
+
+Use `xdoc convert --to png` only for non-PPTX or generic conversion fallback,
+or when debugging the lower-level convert pipeline.
+
 ## Conversion
 
-Use `xdoc convert`:
+Use `xdoc convert` for PDF/Markdown/JSON/text exports and non-PPTX or fallback
+PNG conversion:
 
 ```bash
 xdoc convert deck.pptx --to pdf -o <run-dir>/out/
-xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite
-xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
-xdoc convert deck.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
 xdoc convert deck.pptx --to md -o <run-dir>/out/
 xdoc convert deck.pptx --to json -o <run-dir>/out/
 xdoc convert deck.pptx --to text -o <run-dir>/out/
+xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet # fallback/debug only
 ```
 
 The command shape is `xdoc convert <pptx> --to <format>`, not
@@ -60,28 +88,16 @@ path that already exists, ask before replacing it.
 
 ## Contact Sheet
 
-For visual review, prefer:
+Generate contact sheets through `xdoc pptx preview` for PPTX decks. If you need
+custom columns, thumbnail size, background, or a legacy contact output path,
+fall back to `xdoc convert --to png --contact-sheet` and record that fallback in
+the final summary:
 
 ```bash
 xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
 ```
 
-For targeted edits, render only the changed slides as a first-class review
-artifact instead of hand-making a montage:
-
-```bash
-xdoc convert deck.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
-```
-
-The PNG filenames and contact-sheet metadata preserve original slide numbers,
-so `slide-025.png` still refers to slide 25 even though the contact sheet starts
-at page 1.
-
-Read the contact sheet first to detect cross-slide issues such as rhythm, page
-number jumps, inconsistent dark/light pages, and obvious layout problems. Then
-inspect full-size PNGs for suspicious slides.
-
-Adjust contact sheet options only when needed:
+Adjust fallback contact sheet options only when needed:
 
 - `--contact-cols 3` or `4` for longer decks
 - `--contact-thumb 960x540` when small text must be readable

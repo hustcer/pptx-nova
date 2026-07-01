@@ -89,19 +89,20 @@ in-place modification, still validate through a run-dir copy before writing back
 Use `--overwrite` only for files created in the current run directory during the
 current iteration.
 
-For PNG previews and multi-format exports, `xdoc convert -o <dir>` uses `<dir>`
-itself as the output root. A trailing separator, `-o <dir>/`, means parent
-directory mode and creates `<dir>/<deck>-img/` or `<dir>/<deck>.xdoc/`. Prefer a
-current-run root such as `<run-dir>/previews` for visual QA. Before regenerating
-previews, make sure the preview root belongs to the current run, then replace it
-with `--overwrite` or clear that current-run directory so stale PNGs cannot
-be reviewed by mistake.
+For PPTX PNG/contact-sheet visual QA, use `xdoc pptx preview` as the canonical
+path. Write to a preview directory that does not already exist, or pass
+`--overwrite` when the directory is a current-run generated preview root. The
+run initializer intentionally does not pre-create `<run-dir>/previews`; this
+keeps the first preview command from failing on an empty existing directory
+while still making reruns explicit.
 
-For `xdoc pptx preview`, write to a preview directory that does not already
-exist, or pass `--overwrite` when the directory is a current-run generated
-preview root. The run initializer intentionally does not pre-create
-`<run-dir>/previews`; this keeps the first preview command from failing on an
-empty existing directory while still making reruns explicit.
+Use `xdoc convert --to png` only for non-PPTX or generic conversion fallback.
+For multi-format exports, `xdoc convert -o <dir>` uses `<dir>` itself as the
+output root. A trailing separator, `-o <dir>/`, means parent directory mode and
+creates `<dir>/<deck>-img/` or `<deck>.xdoc/`. Before regenerating any preview
+or export output, make sure the output root belongs to the current run, then
+replace it with `--overwrite` or clear that current-run directory so stale files
+cannot be reviewed by mistake.
 
 For export/check workflows, default output directories should also live under
 the run directory unless the user explicitly requested a final output path.
@@ -266,7 +267,10 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
 10. Render visual previews when creating or materially changing a deck:
 
     ```bash
-    xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet
+    xdoc pptx preview out.pptx \
+      --output-dir <run-dir>/previews \
+      --contact-sheet <run-dir>/previews/contact-sheet.png \
+      --overwrite --json > <run-dir>/preview.json
     ```
 
     Review the contact sheet for cross-slide rhythm, then inspect suspicious
@@ -469,7 +473,10 @@ Use the same scope for both machine and PNG gates:
 
 ```bash
 xdoc pptx vision-check out.pptx --slides 25-38 --json > <run-dir>/vision.json
-xdoc convert out.pptx --to png --slides 25-38 -o <run-dir>/previews --overwrite --contact-sheet
+xdoc pptx preview out.pptx --slides 25-38 \
+  --output-dir <run-dir>/previews \
+  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --overwrite --json > <run-dir>/preview.json
 node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
   --mode structural-edit \
   --run-dir <run-dir> \
@@ -479,8 +486,9 @@ node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
   --json
 ```
 
-In scoped runs, `summary/issues` remain full-deck evidence while
-`scopedSummary/scopedIssues` gate the changed pages and `deckResidualRisk`
+In scoped runs, top-level `summary/issues` follow the selected changed pages.
+`scopedSummary/scopedIssues` remain as compatibility aliases, while
+`deckSummary/deckIssues` retain full-deck evidence and `deckResidualRisk`
 discloses inherited problems outside the scope.
 
 ## Formula And Asset Handling

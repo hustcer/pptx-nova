@@ -1,7 +1,7 @@
 ---
 name: pptx-nova
 description: >
-  使用本机 xdoc CLI 创建和修改原生可编辑的 .pptx 演示文稿。
+  Create and edit native editable PPTX decks with the local xdoc CLI.
   When the user wants to create, build, generate, modify, edit, refactor,
   rebrand, or fill a PowerPoint deck / slides / presentation / .pptx,
   including: 创建 PPT / 做 PPT / 生成演示文稿 / 修改 PPTX / 改一下幻灯片 /
@@ -54,8 +54,8 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 
 默认保留最小证据包：`xdoc-capabilities.json`、`outline.json`、`deck_lock.json`、
 `content.json`、`patch.json`、sidecar、dry-run/apply/refurbish 报告、`vision.json`、
-`pptx-diff.json`、`visual_review.json`、`check.json`、`evidence-summary.json`、`layout-final.json`、
-`fidelity-gate.json`、`content-audit-final.json`、最终候选 PPTX、contact sheet 和人工复核
+`pptx-diff.json`、`visual_review.json`、`clean-open.json`、`check.json`、`evidence-summary.json`、
+`layout-final.json`、`fidelity-gate.json`、`content-audit-final.json`、最终候选 PPTX、contact sheet 和人工复核
 必需的少量问题页 PNG。实际不存在的项无需补造。
 
 成功交付后可以瘦身当前 run 的可重建重型产物，例如全量逐页 PNG、重复导出目录、临时转换缓存、
@@ -368,11 +368,16 @@ PNG/contact-sheet 复核要按找问题的心态做，而不是确认成功。�
 - 多页 contact sheet 是否出现重复的版式节奏、无意义装饰容器、topic-only 标题或突兀留白。
 - chart/table 页是否通过专项语义检查：数据维度、系列/类目、legend/label、table 行列和
   绑定来源必须与内容一致，再看 PNG 是否遮挡。
-- 对可交付 PPTX，尤其是正式/企业用户、图表/表格/OOXML 高风险变更，若本机有 Microsoft
-  PowerPoint，必须运行 clean-open smoke gate：自动打开候选并检查是否出现 `Repair` / `Cancel`
-  修复对话框或等价 UI。只检查 presentation 对象是否打开不够，因为 PowerPoint 可能同时打开对象并
-  弹出 Repair 对话。没有 PowerPoint 时，最终摘要必须明确说明 clean-open gate 未运行，并列出已执行的
-  替代结构校验。
+- 对可交付 PPTX，尤其是正式/企业用户、图表/表格/OOXML 高风险变更，若当前环境是 macOS
+  且本机有 Microsoft PowerPoint for Mac，必须运行 clean-open smoke gate：
+  `node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json`。
+  live clean-open helper 仅支持 macOS + PowerPoint for Mac + `osascript`/System Events；Windows/Linux
+  不运行等价 PowerPoint clean-open。macOS 没有 PowerPoint、缺 `osascript` 或没有 UI scripting
+  权限时，helper 返回 `status: "skipped"` 且不阻塞交付；最终摘要必须明确说明 clean-open gate
+  未运行，并列出已执行的替代结构校验。该 helper 会把文件暂存到 PowerPoint sandbox、自动打开候选并通过
+  System Events 检查 Repair 类 modal。只检查 presentation 对象是否打开不够，因为 PowerPoint
+  可能同时打开对象并弹出 Repair 对话。普通 `Cancel` 按钮不是失败；只有 Repair 文案、`Repair`/`修复`
+  按钮或等价修复提示才是阻断。`--classify-ui` 只用于离线 UI snapshot 分类测试，可跨平台运行。
 
 ## 必经验证
 
@@ -431,6 +436,7 @@ xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/
 xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
 xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
 xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet # fallback/debug only
+node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 

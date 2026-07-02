@@ -51,6 +51,12 @@ Use these entry points from skill workflows:
   records required visual QA checks into visual_review.json, validates that
   visual evidence and reviewed slide counts are present, and leaves actual
   visual judgment to the human or agent reviewer.
+- pptx-nova-clean-open.mjs - macOS-only live PowerPoint clean-open smoke gate
+  for deliverable PPTX files. It stages the candidate inside PowerPoint's
+  sandbox tmp directory, opens that staged copy, checks System Events UI state
+  for Repair dialogs, distinguishes plain Cancel buttons from repair prompts,
+  and writes clean-open.json. Windows/Linux, macOS without PowerPoint, or
+  missing UI scripting return `skipped` and do not block delivery.
 - pptx-nova-structure-check.mjs - lightweight PPTX OOXML structure check. It
   scans XML inside the PPTX for expected font declarations, expected sRGB/theme
   colors, and empty/default-text placeholder residue, then writes

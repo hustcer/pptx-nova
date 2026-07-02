@@ -43,10 +43,10 @@ review context, or a failure state.
 Keep this minimum evidence set after successful delivery when the files exist:
 `xdoc-capabilities.json`, `outline.json`, `deck_lock.json`, `content.json`,
 `patch.json`, sidecar files, dry-run/apply/refurbish JSON reports,
-`vision.json`, `visual_review.json`, `check.json`, `semantic-audit.json`,
-`structure-check.json`, `evidence-summary.json`, `layout-final.json`,
-`fidelity-gate.json`, `content-audit-final.json`, the final candidate PPTX, the
-contact sheet, and any PNGs needed to explain suspicious or manually
+`vision.json`, `visual_review.json`, `clean-open.json`, `check.json`,
+`semantic-audit.json`, `structure-check.json`, `evidence-summary.json`,
+`layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, the final candidate PPTX,
+the contact sheet, and any PNGs needed to explain suspicious or manually
 reviewed slides.
 
 After a successful task, optional cleanup may remove only current-run artifacts
@@ -319,14 +319,35 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly
     accepts a draft.
-12. For external/customer/public delivery, run:
+12. When running on macOS with Microsoft PowerPoint for Mac available for a
+    deliverable/high-risk PPTX, run the bundled clean-open helper instead of
+    hand-writing AppleScript:
+
+```bash
+node <skill-root>/scripts/pptx-nova-clean-open.mjs \
+  --pptx out.pptx \
+  --output <run-dir>/clean-open.json \
+  --json
+```
+
+    Treat `status: "pass"` as the only passing clean-open evidence. Treat
+    `status: "fail"` as a delivery blocker because a Repair dialog, Repair
+    button, repair text, or PowerPoint open failure was observed. A plain
+    `Cancel` button in a sign-in/update/ordinary dialog is not a repair signal.
+    The live helper supports only macOS + PowerPoint for Mac + `osascript` /
+    System Events. Windows/Linux, macOS without PowerPoint, missing `osascript`,
+    or missing UI scripting authorization return `status: "skipped"` and must
+    not block delivery. Disclose that clean-open was not run and list the
+    structural replacement checks that were run. `--classify-ui` is only for
+    offline saved UI snapshot classification and is platform-independent.
+13. For external/customer/public delivery, run:
 
 ```bash
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 
-13. Copy or write the validated final deck to the requested final path.
-14. Apply the artifact retention decision. Keep the full run by default; slim
+14. Copy or write the validated final deck to the requested final path.
+15. Apply the artifact retention decision. Keep the full run by default; slim
     only reproducible current-run heavy artifacts when the task succeeded and
     no debug/replay continuation is expected, or when the user explicitly asked
     for cleanup. If files are removed, write `cleanup-manifest.json`.

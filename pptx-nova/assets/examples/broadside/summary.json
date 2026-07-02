@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "this is the broadside style",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/broadside-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/broadside-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/broadside/golden-html/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/broadside-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/broadside-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/broadside/golden-html/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -75,7 +75,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/broadside.golden-html.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/broadside.golden-html.vision-baseline.json",
       "available": true,
       "issueCount": 82
     },
@@ -99,12 +99,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 312848,
-      "sha256": "bbe8568a773a62d2f1bc9186b4100b0b725509dd9ee7a5fd239c70f8b0de4873"
+      "bytes": 317710,
+      "sha256": "b3715d7b1017131522e9af5b766f8fd99f11e0a8848945c959ec08b84aef82fd"
     },
     "webp": {
-      "bytes": 99172,
-      "sha256": "5835d7fde62800e52a4ad31ebcf47100c4685f1d001578c6d3bf11506c611275"
+      "bytes": 99896,
+      "sha256": "b4172970239bba9a067f8fdab07bdca588bb2df7a69fa995a08d8645dbaab5e9"
     }
   }
 }

@@ -1,14 +1,9 @@
 # pptx-nova DeckKit Examples
 
-This directory contains committed, user-facing DeckKit showcase assets. These
-examples are synthetic/generated showcase decks, not customer materials.
+This directory contains committed, user-facing DeckKit showcase assets.
 Each subdirectory is named after a DeckKit id and includes a native editable
 `deck.pptx`, a compact `contact-sheet.webp`, the source `content.json`,
 a short `brief.md`, and a stable `summary.json`.
-
-Public release rule: only redistributable examples may live here. Do not commit
-real customer PPTX files, private brand assets, screenshots from internal
-systems, or reference decks copied from non-redistributable sources.
 
 Update the showcase decks with:
 

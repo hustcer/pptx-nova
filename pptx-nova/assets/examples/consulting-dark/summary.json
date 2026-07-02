@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "浏览器端高保真 PPTX 渲染 与 AI 原生生成",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/roadshow-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/roadshow-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/roadshow-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/roadshow-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -74,7 +74,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
       "available": true,
       "issueCount": 8
     },
@@ -98,12 +98,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 318823,
-      "sha256": "e11c4be068b5301b147e4acb08a6cc186f120ae2bfcdb7232d94b0da6a2d6c38"
+      "bytes": 326164,
+      "sha256": "9aebe5b6db0eaa6bf4dbb4c02c853ee339f915a87e6e00107b2c544a9f702fe5"
     },
     "webp": {
-      "bytes": 107196,
-      "sha256": "afd9cf98df3cc82e0c01b5db5898cf25ff651db1d761de155b7447fc2dabcd55"
+      "bytes": 108948,
+      "sha256": "ecfe04bf1bbe8f30633a6025ec9871c1c23f32e5a8e53d9ae1d46b241c18c897"
     }
   }
 }

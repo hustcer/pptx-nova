@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "A.CO. Customer,Loyalty Programme",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/mckinsey-blue-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/mckinsey-blue-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -76,7 +76,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
       "available": true,
       "issueCount": 319
     },
@@ -100,12 +100,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 303234,
-      "sha256": "f1472acfd0b276f8a898d0f206989873ca00387cd40824d0956c473a5099c606"
+      "bytes": 306864,
+      "sha256": "c3572559d6ca45ddbc11f63645fa8aebf26c4b54295152ab0409e802fdcf1a06"
     },
     "webp": {
-      "bytes": 109244,
-      "sha256": "9a78e65d3d7896a751feb435893bd8cc17ddef4de755f6a9c84fd0ce8b9eb57e"
+      "bytes": 110392,
+      "sha256": "33885b0f3cdc069a7dff75b317c52541403509c4733e77a3f832de6377bc3469"
     }
   }
 }

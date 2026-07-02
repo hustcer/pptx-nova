@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "网格系统",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/swiss-grid-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/swiss-grid-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/swiss-grid-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/swiss-grid-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -74,7 +74,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
       "available": true,
       "issueCount": 208
     },
@@ -98,12 +98,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 369655,
-      "sha256": "59cde46fa3dbaa5cb7a701ae1bd38981716fb599174cf4aa55009fa95e248d67"
+      "bytes": 375818,
+      "sha256": "bec1812b3b6c74b713fef21893414b3efaa9af11fd55720647da53abdcc6b862"
     },
     "webp": {
-      "bytes": 139238,
-      "sha256": "579417c7fef7907e793650aea8e01b17e2f709388cb20e033a5ea9d620ed919e"
+      "bytes": 142412,
+      "sha256": "1faf789bd5835ab8f61dac1a05fe610ddf730a5c22f1c49b1063150e05a30ed8"
     }
   }
 }

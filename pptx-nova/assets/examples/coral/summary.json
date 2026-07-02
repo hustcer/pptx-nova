@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "QUARTERLY STRATEGY SESSION 2026",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/coral-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/coral-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/coral/golden-html/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/coral-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/coral-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/coral/golden-html/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -75,7 +75,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
       "available": true,
       "issueCount": 31
     },
@@ -99,12 +99,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 261893,
-      "sha256": "e3cad26c202933ef79101612d38d10622d48ba9bae204fea2180bf3d39f685a1"
+      "bytes": 267574,
+      "sha256": "a9ccf49ad25ccd5c17bd715bddd3f38b5ea35702e5d12978946f89518e9c01d5"
     },
     "webp": {
-      "bytes": 75094,
-      "sha256": "8326395c176f4b0d408d2785815599142a3d18242fe7651cc9dd4e3c35a07218"
+      "bytes": 76048,
+      "sha256": "963a5d6fcbeff7025af4536bfe2fff623a20b5b691e8caa80c7c2f8d2ecccc91"
     }
   }
 }

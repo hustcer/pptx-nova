@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "Aurora Programme",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/biennale-yellow-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/biennale-yellow-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/biennale-yellow-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/biennale-yellow-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -75,7 +75,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
       "available": true,
       "issueCount": 72
     },
@@ -99,12 +99,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 270291,
-      "sha256": "f6e661fb83f8f57b01f477b541b0e237513626673f857eeccd257451866680cc"
+      "bytes": 275960,
+      "sha256": "fdf23c8f9a99cce26b080b06e72f2650f25922927b0cb91f8363c76363a3f4ac"
     },
     "webp": {
-      "bytes": 93186,
-      "sha256": "28ab645cc144f2c76462f883a74b634c82eb305a953bbd3d5a460a9a27041448"
+      "bytes": 94384,
+      "sha256": "a0e7465868d6d7f574c975062e16b3d03b267950d2fe6bcc0e647170d570caa3"
     }
   }
 }

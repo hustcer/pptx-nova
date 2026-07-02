@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "Long Table",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/long-table-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/long-table-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/long-table/golden-html/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/long-table-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/long-table-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/long-table/golden-html/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -75,7 +75,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
       "available": true,
       "issueCount": 41
     },
@@ -99,12 +99,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 233573,
-      "sha256": "0e397a9a1e7b7b6567aeaba9a0a0be518978e18a912d59810d1889ba90d9c0de"
+      "bytes": 245639,
+      "sha256": "38cbd7bb63726c070654a1bd37f47246787cac812dcadaacf3d5668d8ddd53af"
     },
     "webp": {
-      "bytes": 89642,
-      "sha256": "81d4f72e45b6579a29b03f63bcd36282bd35455f99d49f7c2f192e87b8f7c8c2"
+      "bytes": 94250,
+      "sha256": "1348978027b70f2fe8dd8bcf62f6a4541ab92309df67ae5bb869d4711ad7f596"
     }
   }
 }

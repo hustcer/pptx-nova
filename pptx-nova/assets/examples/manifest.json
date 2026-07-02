@@ -4,8 +4,8 @@
   "updateCommand": "just deckkit-examples",
   "checkCommand": "just deckkit-examples check",
   "source": {
-    "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
-    "deckkitCatalog": "skills/pptx-nova/assets/deckkits/catalog.json"
+    "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+    "deckkitCatalog": "pptx-nova/assets/deckkits/catalog.json"
   },
   "contactSheet": {
     "format": "webp",
@@ -31,8 +31,8 @@
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 107196,
-          "sha256": "afd9cf98df3cc82e0c01b5db5898cf25ff651db1d761de155b7447fc2dabcd55",
+          "bytes": 108948,
+          "sha256": "ecfe04bf1bbe8f30633a6025ec9871c1c23f32e5a8e53d9ae1d46b241c18c897",
           "quality": 82
         },
         "content": {
@@ -47,8 +47,8 @@
         },
         "summary": {
           "path": "consulting-dark/summary.json",
-          "bytes": 2753,
-          "sha256": "e1d6409481b6ac18e8b5e975e6f94c371bf299cc7173adb8e5025572635b8890"
+          "bytes": 2718,
+          "sha256": "dca67b35cd2b893448bad445421b4542076e8abcb87ce763cd2f431a077fd802"
         }
       },
       "validation": {
@@ -91,7 +91,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
           "available": true,
           "issueCount": 8
         },
@@ -135,8 +135,8 @@
         },
         "contactSheet": {
           "path": "mckinsey-blue/contact-sheet.webp",
-          "bytes": 109244,
-          "sha256": "9a78e65d3d7896a751feb435893bd8cc17ddef4de755f6a9c84fd0ce8b9eb57e",
+          "bytes": 110392,
+          "sha256": "33885b0f3cdc069a7dff75b317c52541403509c4733e77a3f832de6377bc3469",
           "quality": 82
         },
         "content": {
@@ -151,8 +151,8 @@
         },
         "summary": {
           "path": "mckinsey-blue/summary.json",
-          "bytes": 2793,
-          "sha256": "dfb004881719ac9a4f2da0c421849280d8eb2a95d61bac6050deb944ec080298"
+          "bytes": 2758,
+          "sha256": "2fee5fabd723232d540d18f76cbbe40fd188ffef7cd3f4da721b5c56aea17294"
         }
       },
       "validation": {
@@ -197,7 +197,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
           "available": true,
           "issueCount": 319
         },
@@ -246,8 +246,8 @@
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 139238,
-          "sha256": "579417c7fef7907e793650aea8e01b17e2f709388cb20e033a5ea9d620ed919e",
+          "bytes": 142412,
+          "sha256": "1faf789bd5835ab8f61dac1a05fe610ddf730a5c22f1c49b1063150e05a30ed8",
           "quality": 82
         },
         "content": {
@@ -262,8 +262,8 @@
         },
         "summary": {
           "path": "swiss-grid/summary.json",
-          "bytes": 2804,
-          "sha256": "ade8f5bd69cd4d095a78a2a65798aa4eca96a45c58088aaa6b61cfed6ab214b8"
+          "bytes": 2769,
+          "sha256": "e35a5b89a04c165c56a9c7b31d2cb85e3520fb17beb3f1930700ea2b375b45df"
         }
       },
       "validation": {
@@ -306,7 +306,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
           "available": true,
           "issueCount": 208
         },
@@ -348,8 +348,8 @@
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
-          "bytes": 99172,
-          "sha256": "5835d7fde62800e52a4ad31ebcf47100c4685f1d001578c6d3bf11506c611275",
+          "bytes": 99896,
+          "sha256": "b4172970239bba9a067f8fdab07bdca588bb2df7a69fa995a08d8645dbaab5e9",
           "quality": 82
         },
         "content": {
@@ -364,8 +364,8 @@
         },
         "summary": {
           "path": "broadside/summary.json",
-          "bytes": 2810,
-          "sha256": "8327295659e290fae232ab83147613fc35ade30d4d75fa70a96aad3ead565d93"
+          "bytes": 2775,
+          "sha256": "f8601285a0dc987fe810ad92f9e0df8704f06f862cc87b893aacf2242eecc9a8"
         }
       },
       "validation": {
@@ -409,7 +409,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/broadside.golden-html.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/broadside.golden-html.vision-baseline.json",
           "available": true,
           "issueCount": 82
         },
@@ -451,8 +451,8 @@
         },
         "contactSheet": {
           "path": "coral/contact-sheet.webp",
-          "bytes": 75094,
-          "sha256": "8326395c176f4b0d408d2785815599142a3d18242fe7651cc9dd4e3c35a07218",
+          "bytes": 76048,
+          "sha256": "963a5d6fcbeff7025af4536bfe2fff623a20b5b691e8caa80c7c2f8d2ecccc91",
           "quality": 82
         },
         "content": {
@@ -467,8 +467,8 @@
         },
         "summary": {
           "path": "coral/summary.json",
-          "bytes": 2781,
-          "sha256": "5218008178b0b14e5fc79a095060dacccd774b4d3ec160658f0725a975fc8e38"
+          "bytes": 2746,
+          "sha256": "3d22522c6a5577f7bd9014c34d9dc3af1dd1ebe691ca1111172824bf1105e2b8"
         }
       },
       "validation": {
@@ -512,7 +512,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/coral.golden-html.vision-baseline.json",
           "available": true,
           "issueCount": 31
         },
@@ -553,8 +553,8 @@
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 58660,
-          "sha256": "b582980394be723a6179ca19882c0fcc45e010d943c7f04dbe0196faf74fc89e",
+          "bytes": 59962,
+          "sha256": "d4093147affc6b9c408107810a292701cce11c2abae35e25c9fba5fcb27b071a",
           "quality": 82
         },
         "content": {
@@ -569,8 +569,8 @@
         },
         "summary": {
           "path": "cartesian/summary.json",
-          "bytes": 2810,
-          "sha256": "90147d7bbe50e5209961ce4b04b5ac74dea87a9ad470602de10f77c9bc5802c7"
+          "bytes": 2775,
+          "sha256": "45d70f268eafdd6ac39c727259f0a41e4726b02701b986aed3e308a969711cce"
         }
       },
       "validation": {
@@ -613,7 +613,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
           "available": true,
           "issueCount": 24
         },
@@ -654,8 +654,8 @@
         },
         "contactSheet": {
           "path": "long-table/contact-sheet.webp",
-          "bytes": 89642,
-          "sha256": "81d4f72e45b6579a29b03f63bcd36282bd35455f99d49f7c2f192e87b8f7c8c2",
+          "bytes": 94250,
+          "sha256": "1348978027b70f2fe8dd8bcf62f6a4541ab92309df67ae5bb869d4711ad7f596",
           "quality": 82
         },
         "content": {
@@ -670,8 +670,8 @@
         },
         "summary": {
           "path": "long-table/summary.json",
-          "bytes": 2808,
-          "sha256": "818c45dd7fe9af34446bd314269ca6ff8f791f1dfcbba8a170a6b5376aec65a4"
+          "bytes": 2773,
+          "sha256": "be4fdeb21de9b58880c611971f49c9203178f4ffee5f9d22dac030be0c59a960"
         }
       },
       "validation": {
@@ -715,7 +715,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
           "available": true,
           "issueCount": 41
         },
@@ -756,8 +756,8 @@
         },
         "contactSheet": {
           "path": "biennale-yellow/contact-sheet.webp",
-          "bytes": 93186,
-          "sha256": "28ab645cc144f2c76462f883a74b634c82eb305a953bbd3d5a460a9a27041448",
+          "bytes": 94384,
+          "sha256": "a0e7465868d6d7f574c975062e16b3d03b267950d2fe6bcc0e647170d570caa3",
           "quality": 82
         },
         "content": {
@@ -772,8 +772,8 @@
         },
         "summary": {
           "path": "biennale-yellow/summary.json",
-          "bytes": 2827,
-          "sha256": "1fc72c6a4c09ce9b2a1a6705f78a6ea4aec58705e72b3b2fe6bbcb92f74ac9f7"
+          "bytes": 2792,
+          "sha256": "4cfdde40538c5cd2028f8bbf86652ebb20c02b228974eda8678812ba62861728"
         }
       },
       "validation": {
@@ -817,7 +817,7 @@
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-          "path": "skills/pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
+          "path": "pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
           "available": true,
           "issueCount": 72
         },

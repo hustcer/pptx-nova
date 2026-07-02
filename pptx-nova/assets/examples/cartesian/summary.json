@@ -5,10 +5,10 @@
   "kind": "golden",
   "title": "Cartesian",
   "source": {
-    "content": "skills/pptx-nova/assets/deckkits/examples/cartesian-content.json",
-    "build": "skills/pptx-nova/assets/deckkits/examples/cartesian-build.mjs",
-    "expected": "skills/pptx-nova/benchmarks/visual/cases/cartesian/golden-html/expected.json",
-    "benchmarkIndex": "skills/pptx-nova/benchmarks/visual/index.json"
+    "content": "pptx-nova/assets/deckkits/examples/cartesian-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/cartesian-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/cartesian/golden-html/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },
   "validation": {
     "valid": true,
@@ -74,7 +74,7 @@
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
-      "path": "skills/pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
+      "path": "pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
       "available": true,
       "issueCount": 24
     },
@@ -98,12 +98,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 229807,
-      "sha256": "47c682d688f7675270cc7a2d8297a1ce6ba3a9e18990be0fecef3dd386ebd2b2"
+      "bytes": 232782,
+      "sha256": "5613ca75ade97fb3cc2ec7ad09dfbfdd6245014267f4a273298d3ffd706c747f"
     },
     "webp": {
-      "bytes": 58660,
-      "sha256": "b582980394be723a6179ca19882c0fcc45e010d943c7f04dbe0196faf74fc89e"
+      "bytes": 59962,
+      "sha256": "d4093147affc6b9c408107810a292701cce11c2abae35e25c9fba5fcb27b071a"
     }
   }
 }

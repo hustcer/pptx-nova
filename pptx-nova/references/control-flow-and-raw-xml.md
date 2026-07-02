@@ -275,12 +275,12 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 
 字段：
 
-| 字段        | 说明                                                                               |
-| ----------- | ---------------------------------------------------------------------------------- |
-| `target`    | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                          |
+| 字段        | 说明                                                                                |
+| ----------- | ----------------------------------------------------------------------------------- |
+| `target`    | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                           |
 | `xpath`     | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter |
-| `operation` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)     |
-| `value`     | 文本或 raw XML 片段；`remove` 操作可省略                                           |
+| `operation` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)      |
+| `value`     | 文本或 raw XML 片段；`remove` 操作可省略                                            |
 
 **安全约束**：
 
@@ -292,16 +292,16 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 
 **XPath 能力边界**：
 
-| 写法                         | 支持 | 说明                                                    |
-| ---------------------------- | ---- | ------------------------------------------------------- |
-| `/p:sld/p:cSld/p:spTree`     | ✅   | 绝对元素路径；命名空间前缀会按 local-name 匹配          |
-| `//a:t`                      | ✅   | 递归选择所有同名元素                                    |
-| `//a:hlinkClick/@tooltip`    | ✅   | 最后一段可以是 attribute，用于批量设/删属性             |
-| `//a:hlinkClick[@tooltip=x]` | ❌   | 不支持 predicate 或按属性值筛选                         |
-| `//p:sp[1]`                  | ❌   | 不支持索引筛选                                          |
-| `//*[@id]` / `//a:*`         | ❌   | 不支持 wildcard                                         |
-| `contains(...)` / `text()`   | ❌   | 不支持函数                                              |
-| `//a:t | //p:ph`             | ❌   | 不支持 union                                            |
+| 写法                         | 支持    | 说明                                           |
+| ---------------------------- | ------- | ---------------------------------------------- | ------------ |
+| `/p:sld/p:cSld/p:spTree`     | ✅      | 绝对元素路径；命名空间前缀会按 local-name 匹配 |
+| `//a:t`                      | ✅      | 递归选择所有同名元素                           |
+| `//a:hlinkClick/@tooltip`    | ✅      | 最后一段可以是 attribute，用于批量设/删属性    |
+| `//a:hlinkClick[@tooltip=x]` | ❌      | 不支持 predicate 或按属性值筛选                |
+| `//p:sp[1]`                  | ❌      | 不支持索引筛选                                 |
+| `//*[@id]` / `//a:*`         | ❌      | 不支持 wildcard                                |
+| `contains(...)` / `text()`   | ❌      | 不支持函数                                     |
+| `//a:t                       | //p:ph` | ❌                                             | 不支持 union |
 
 如果需要"按属性值定位某个节点后再改"，不要在 raw XPath 中反复试 predicate；
 优先使用已有 patch op、先用 inspect 定位稳定 selector，或拆成更具体的常规编辑能力。

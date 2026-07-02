@@ -32,7 +32,7 @@ Options:
   --deckkit <id>          Target DeckKit id
   --source <path>         Read-only source PPTX
   --output <path>         Final PPTX published only after machine gates pass
-  --run-dir <path>        New run directory. Defaults to <cwd>/.pptx-nova/refurbish-<deckkit>-<timestamp>
+  --run-dir <path>        New, empty, or pre-probed run directory. Defaults to <cwd>/.pptx-nova/refurbish-<deckkit>-<timestamp>
   --catalog <path>        DeckKit catalog. Defaults to <skill-root>/assets/deckkits/catalog.json
   --route <route>         auto|native|fallback. Defaults to auto
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc
@@ -380,7 +380,21 @@ function validatePaths(args) {
     throw new Error(`final output directory does not exist: ${dirname(args.output)}`)
   }
   if (existsSync(args.runDir)) {
-    throw new Error(`run directory already exists: ${args.runDir}`)
+    if (!statSync(args.runDir).isDirectory()) {
+      throw new Error(`run directory path already exists and is not a directory: ${args.runDir}`)
+    }
+    const entries = readdirSync(args.runDir)
+    const allowedEntries = new Set(['xdoc-capabilities.json'])
+    const unexpectedEntries = entries.filter((name) => !allowedEntries.has(name))
+    if (unexpectedEntries.length > 0) {
+      throw new Error(
+        `run directory already exists and is not empty/pre-probed: ${args.runDir}; unexpected entries: ${unexpectedEntries.join(', ')}`,
+      )
+    }
+    const capabilityPath = join(args.runDir, 'xdoc-capabilities.json')
+    if (existsSync(capabilityPath) && !statSync(capabilityPath).isFile()) {
+      throw new Error(`pre-probed capability artifact is not a file: ${capabilityPath}`)
+    }
   }
   if (existsSync(args.output) && !args.overwrite) {
     throw new Error(
@@ -417,8 +431,9 @@ function artifactPaths(runDir) {
     layoutFinal: join(runDir, 'layout-final.json'),
     candidate: join(runDir, 'candidate.pptx'),
     previews: join(runDir, 'previews'),
+    previewReport: join(runDir, 'preview.json'),
     convertReport: join(runDir, 'convert-report.json'),
-    contactSheet: join(runDir, 'contact-sheet.png'),
+    contactSheet: join(runDir, 'previews', 'contact-sheet.png'),
     contactDiff: join(runDir, 'contact-diff.png'),
     contactDiffReport: join(runDir, 'contact-diff.json'),
     summary: join(runDir, 'refurbish-run-summary.json'),
@@ -827,10 +842,10 @@ function runLayoutSnapshot(summary, args, artifacts) {
   }
 }
 
-function listPngFiles(dir) {
+function listPngFiles(dir, excludedNames = new Set()) {
   if (!existsSync(dir)) return []
   return readdirSync(dir)
-    .filter((name) => /\.png$/i.test(name))
+    .filter((name) => /\.png$/i.test(name) && !excludedNames.has(name))
     .sort((a, b) => a.localeCompare(b, 'en'))
     .map((name) => {
       const path = join(dir, name)
@@ -845,40 +860,76 @@ function expectedSlideCount(inspect) {
 }
 
 function runPreviews(summary, args, artifacts, inspect) {
-  mkdirSync(artifacts.previews, { recursive: true })
-  runPlainPhase(summary, {
-    name: 'preview-render',
-    bin: args.xdocBin,
-    args: [
-      'convert',
-      artifacts.candidate,
-      '--to',
-      'png',
-      '--output',
-      artifacts.previews,
-      '--overwrite',
-      '--quiet',
-      '--report',
-      artifacts.convertReport,
-      '--contact-sheet',
-      '--contact-output',
-      artifacts.contactSheet,
-    ],
-  })
-  const files = listPngFiles(artifacts.previews)
+  let mode = 'pptx-preview'
+  let previewReport = null
+  try {
+    previewReport = runJsonPhase(summary, {
+      name: 'preview-render',
+      bin: args.xdocBin,
+      args: [
+        'pptx',
+        'preview',
+        artifacts.candidate,
+        '--output-dir',
+        artifacts.previews,
+        '--contact-sheet',
+        artifacts.contactSheet,
+        '--overwrite',
+        '--json',
+      ],
+      artifact: artifacts.previewReport,
+    })
+  } catch (error) {
+    const phase = summary.phases.findLast((item) => item.name === 'preview-render')
+    if (phase) {
+      phase.status = 'recovered'
+      phase.recoveredBy = 'preview-render-fallback-convert'
+    }
+    mode = 'convert-fallback'
+    summary.warnings.push(
+      `xdoc pptx preview failed; used xdoc convert PNG fallback for visual review artifacts. ${error.message}`,
+    )
+    mkdirSync(artifacts.previews, { recursive: true })
+    runPlainPhase(summary, {
+      name: 'preview-render-fallback-convert',
+      bin: args.xdocBin,
+      args: [
+        'convert',
+        artifacts.candidate,
+        '--to',
+        'png',
+        '--output',
+        artifacts.previews,
+        '--overwrite',
+        '--quiet',
+        '--report',
+        artifacts.convertReport,
+        '--contact-sheet',
+        '--contact-output',
+        artifacts.contactSheet,
+      ],
+    })
+  }
+  const contactSheetName = basename(artifacts.contactSheet)
+  const files = listPngFiles(artifacts.previews, new Set([contactSheetName]))
   const expectedCount = expectedSlideCount(inspect)
   const contactBytes = existsSync(artifacts.contactSheet)
     ? statSync(artifacts.contactSheet).size
     : 0
+  const manifestPages = Array.isArray(previewReport?.pages) ? previewReport.pages.length : null
   requireGate(
     summary,
     'png-previews',
-    expectedCount !== null &&
+    (mode === 'convert-fallback' || previewReport?.status === 'success') &&
+      expectedCount !== null &&
       files.length === expectedCount &&
       files.length > 0 &&
       files.every((file) => file.bytes > 0) &&
       contactBytes > 0,
     {
+      mode,
+      manifestStatus: previewReport?.status ?? null,
+      manifestPages,
       count: files.length,
       expectedCount,
       allNonEmpty: files.every((file) => file.bytes > 0),

@@ -118,6 +118,12 @@ node <skill-root>/scripts/pptx-nova-probe.mjs \
   --output <run-dir>/xdoc-capabilities.json
 ```
 
+Exception: the standard refurbish runner performs this probe internally. When
+using `scripts/pptx-nova-refurbish-run.mjs`, do not pre-initialize a full run
+directory. A caller-provided `--run-dir` may be new, empty, or contain only
+`xdoc-capabilities.json`; any other existing artifact means that directory is
+not a fresh runner target.
+
 The snapshot records the xdoc version, CLI/capability schema versions, top-level
 commands, PPTX subcommands, patch/recipe op names, enum registry names,
 theme/style ids, and native DeckKit declarations. It intentionally omits full op

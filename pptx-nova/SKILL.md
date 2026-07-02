@@ -33,9 +33,11 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 ## xdoc 渐进式能力发现
 
 每个 run 创建后先运行一次 `<skill-root>/scripts/pptx-nova-probe.mjs`，将结果保存为
-`xdoc-capabilities.json`。版本号只用于审计，命令路由以运行时 schema 和实际 dry-run
-证据为准。能力快照是名称索引，不是 allowlist；未出现的能力表示 `undisclosed`，不能直接
-判定为 `unsupported`。
+`xdoc-capabilities.json`。标准 refurbish runner 会在自己的 run 目录内自动执行该 probe；
+使用 `pptx-nova-refurbish-run.mjs` 时不要先手动初始化完整 run。若显式传 `--run-dir`，
+目录必须是新目录、空目录，或只包含 `xdoc-capabilities.json` 的预探测目录。版本号只用于审计，
+命令路由以运行时 schema 和实际 dry-run 证据为准。能力快照是名称索引，不是 allowlist；
+未出现的能力表示 `undisclosed`，不能直接判定为 `unsupported`。
 
 不确定时按需深入：先查 `xdoc-capabilities.json` 中的 op 索引；快照缺失或需要刷新时才用
 `xdoc schema --index`。再用 `xdoc schema --op <name> --minimal` 查字段和 enum；
@@ -95,7 +97,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
   `xdoc convert --to png --contact-sheet` 仅作为通用转换或调试 fallback。
 - **翻新已有 deck 且保持内容**：默认运行
   `node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source source.pptx --output out.pptx --json`
-  一次执行 plan、inspect、native/fallback 路线、机器门禁和 PNG/contact sheet 生成；用户显式指定非
+  一次执行 probe、plan、inspect、native/fallback 路线、机器门禁和 PNG/contact sheet 生成；用户显式指定非
   production/default DeckKit 时加 `--explicit`。runner 只在机器门禁通过后发布最终输出，成功状态仍是
   `needs-human-review`，必须打开 contact sheet/逐页 PNG 复核后才能交付。只想预检路线或调试低层命令时，
   再单独运行 `pptx-nova-refurbish-plan.mjs`。runner 默认优先运行

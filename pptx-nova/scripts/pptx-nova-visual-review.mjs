@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
 const SCHEMA_VERSION = 'pptx-nova-visual-review/v1'
-const REQUIRED_CHECKS = [
+const BASE_REQUIRED_CHECKS = [
   'titleWrap',
   'bodyReadability',
   'alignment',
@@ -15,6 +15,15 @@ const REQUIRED_CHECKS = [
   'footerPageChrome',
   'assetFit',
 ]
+const MODE_REQUIRED_CHECKS = {
+  refurbish: ['targetDeckkitApplied'],
+}
+const CHECK_ALIASES = new Map([['visualTargetApplied', 'targetDeckkitApplied']])
+const KNOWN_CHECKS = new Set([
+  ...BASE_REQUIRED_CHECKS,
+  ...Object.values(MODE_REQUIRED_CHECKS).flat(),
+  ...CHECK_ALIASES.keys(),
+])
 const ALLOWED_CHECK_STATUSES = new Set(['pass', 'warn', 'fail', 'na'])
 const FAIL_SEVERITIES = new Set(['error', 'high', 'fail'])
 const WARN_SEVERITIES = new Set(['warning', 'warn', 'medium'])
@@ -34,6 +43,7 @@ const usage =
   '  --layout-final <path>   Optional layout-final.json evidence path.\n' +
   '  --semantic-audit <path> Optional semantic-audit.json evidence path.\n' +
   '  --check <name=status>   Repeatable required check status: pass, warn, fail, or na.\n' +
+  '                          In refurbish mode, include targetDeckkitApplied=pass|warn|fail|na.\n' +
   '  --issue <spec>          Repeatable issue: severity:slide:check:message.\n' +
   '  --json                  Print visual_review.json to stdout.\n' +
   '  --help                  Show this help.\n\n' +
@@ -123,8 +133,9 @@ function existingPath(path) {
 function parseCheck(value) {
   const eq = value.indexOf('=')
   if (eq <= 0) return { name: value, status: 'invalid' }
+  const rawName = value.slice(0, eq).trim()
   return {
-    name: value.slice(0, eq).trim(),
+    name: CHECK_ALIASES.get(rawName) ?? rawName,
     status: value.slice(eq + 1).trim(),
   }
 }
@@ -153,11 +164,16 @@ function readStatus(path) {
   }
 }
 
-function buildChecks(rawChecks, report) {
+function requiredChecksFor(mode) {
+  const normalizedMode = String(mode || '').toLowerCase()
+  return [...BASE_REQUIRED_CHECKS, ...(MODE_REQUIRED_CHECKS[normalizedMode] ?? [])]
+}
+
+function buildChecks(rawChecks, report, requiredChecks) {
   const byName = new Map()
   for (const raw of rawChecks) {
     const parsed = parseCheck(raw)
-    if (!REQUIRED_CHECKS.includes(parsed.name)) {
+    if (!KNOWN_CHECKS.has(parsed.name)) {
       issue(
         report,
         'warning',
@@ -184,7 +200,7 @@ function buildChecks(rawChecks, report) {
   }
 
   const checks = []
-  for (const name of REQUIRED_CHECKS) {
+  for (const name of requiredChecks) {
     const status = byName.get(name)
     if (!status) {
       issue(
@@ -202,7 +218,7 @@ function buildChecks(rawChecks, report) {
     }
   }
   for (const [name, status] of byName.entries()) {
-    if (!REQUIRED_CHECKS.includes(name)) checks.push({ name, status })
+    if (!requiredChecks.includes(name)) checks.push({ name, status })
   }
   return checks
 }
@@ -274,7 +290,11 @@ function makeReport(args) {
     }
   }
 
-  report.checks = buildChecks(args.checks, report)
+  const requiredChecks = requiredChecksFor(args.mode)
+  report.policy = {
+    requiredChecks,
+  }
+  report.checks = buildChecks(args.checks, report, requiredChecks)
   for (const check of report.checks) {
     if (check.status === 'pass') report.summary.checks.passed += 1
     else if (check.status === 'warn') {

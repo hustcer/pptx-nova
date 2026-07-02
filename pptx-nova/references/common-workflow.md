@@ -340,6 +340,7 @@ node <skill-root>/scripts/pptx-nova-clean-open.mjs \
     not block delivery. Disclose that clean-open was not run and list the
     structural replacement checks that were run. `--classify-ui` is only for
     offline saved UI snapshot classification and is platform-independent.
+
 13. For external/customer/public delivery, run:
 
 ```bash
@@ -351,7 +352,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
     only reproducible current-run heavy artifacts when the task succeeded and
     no debug/replay continuation is expected, or when the user explicitly asked
     for cleanup. If files are removed, write `cleanup-manifest.json`.
-15. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
+16. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
     xdoc/schema versions, important intermediate files, validation results,
     high-risk `evidence-summary.json` / `layout-final.json` when applicable,
     `pptx-diff.json` semantic audit when run, preview/contact sheet path,

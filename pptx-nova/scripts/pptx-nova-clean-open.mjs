@@ -725,6 +725,19 @@ function runLive(args) {
     const ui = uiSnapshot(args.app, args.timeoutMs)
     report.environment.uiScriptingAuthorized = ui.ok
     if (!ui.ok) {
+      const openClassification = classifyCleanOpen({
+        ...report.observations,
+        windows: [],
+      })
+      if (openClassification.status === 'fail') {
+        report.observations.repairSignals = openClassification.repairSignals
+        report.observations.nonRepairDialogs = openClassification.nonRepairDialogs
+        report.error = {
+          message: ui.error,
+          note: 'UI snapshot failed after PowerPoint reported an open error',
+        }
+        return reportStatus(report, openClassification.status, openClassification.reason)
+      }
       report.error = { message: ui.error }
       return unavailable(report, args, 'ui-scripting-unavailable', {
         environment: { uiScriptingAuthorized: false },

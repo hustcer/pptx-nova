@@ -73,6 +73,24 @@ theme flag=(''):
       _ => { error make { msg: 'usage: just theme [-g]' } }
     }
 
+# Update/check pptx-nova DeckKit user-facing examples:
+# `just deckkit-examples`, `just deckkit-examples -d broadside`, `just deckkit-examples check`, `just deckkit-examples all`
+deckkit-examples action=('update') *args='':
+    #!/usr/bin/env nu
+
+    let action = '{{ action }}'
+    if $action in ['update' 'check' 'all'] {
+      match $action {
+        'update' => { node tools/update-pptx-nova-deckkit-examples.mjs --write {{ args }} }
+        'check' => { node tools/update-pptx-nova-deckkit-examples.mjs --check {{ args }} }
+        'all' => { node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --all --out .tmp/pptx-nova-visual --clean {{ args }} }
+      }
+    } else if ($action | str starts-with '-') {
+      node tools/update-pptx-nova-deckkit-examples.mjs --write $action {{ args }}
+    } else {
+      error make { msg: 'usage: just deckkit-examples [update|check|all] [-d|--deckkit <id>]' }
+    }
+
 # Plugins need to be registered only once after nu v0.61
 _setup:
   @register -e json {{ join(NU_DIR, _query_plugin) }}

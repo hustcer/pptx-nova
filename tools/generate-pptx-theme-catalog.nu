@@ -392,13 +392,13 @@ def main [
   )
   let catalog = (open $catalog_path)
   validate-catalog $catalog
-  let moonbit_content = (format-moonbit-content (render-moonbit-catalog $catalog))
 
   let outputs = if $skip_moonbit {
     [
       {path: $js_output, content: (render-js-catalog $catalog)}
     ]
   } else {
+    let moonbit_content = (format-moonbit-content (render-moonbit-catalog $catalog))
     [
       {path: $resolved_moonbit_output, content: $moonbit_content}
       {path: $js_output, content: (render-js-catalog $catalog)}

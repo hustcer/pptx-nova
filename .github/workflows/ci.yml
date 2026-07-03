@@ -8,6 +8,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      skip_deckkit_examples:
+        description: Skip the slow committed DeckKit examples sync check
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: read
@@ -42,3 +48,17 @@ jobs:
       - name: Run repository checks
         shell: nu {0}
         run: nu tools/ci-check.nu
+
+      - name: Run tool tests
+        run: node --test tools/tests/*.test.mjs
+
+      - name: Check theme catalog outputs
+        shell: nu {0}
+        run: nu tools/generate-pptx-theme-catalog.nu --check --skip-moonbit
+
+      - name: Check theme contrast
+        run: node tools/check-pptx-theme-contrast.mjs
+
+      - name: Check committed DeckKit examples
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.skip_deckkit_examples && matrix.os == 'ubuntu-latest' }}
+        run: node tools/update-pptx-nova-deckkit-examples.mjs --check --json

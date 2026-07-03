@@ -4,6 +4,7 @@ import { chmodSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
+import { pathToFileURL } from 'node:url'
 const exactSwissSubtitle = 'ADJACENT PRODUCTS ARE SPLIT ACROSS VIEW, CONVERT AND GENERATE'
 const repoRoot = resolve('.')
 const skillRoot = join(repoRoot, 'pptx-nova')
@@ -20,6 +21,10 @@ function runNode(args, options = {}) {
 
 function skillPath(path) {
   return join(skillRoot, path)
+}
+
+function skillUrl(path) {
+  return pathToFileURL(skillPath(path)).href
 }
 
 function writeJson(path, value) {
@@ -161,7 +166,7 @@ test('DeckKit slot consistency honors array-level control roles by default', () 
 })
 
 test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {
-  const kit = await import(skillPath('assets/deckkits/mckinsey-blue.kit.mjs'))
+  const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
   const result = kit.createDeck({
     meta: { deckkit: 'mckinsey-blue' },
     slides: [
@@ -190,7 +195,7 @@ test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {
 })
 
 test('mckinsey-blue loss-driver bar keeps finite geometry for missing or invalid value', async () => {
-  const kit = await import(skillPath('assets/deckkits/mckinsey-blue.kit.mjs'))
+  const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
   // Drivers-only data with no value, a "%" string, an over-100 value, and a negative
   // value. Before the fix this threw "Invalid geometry S0_Driver0Fill: ... w=NaN".
   const result = kit.createDeck({

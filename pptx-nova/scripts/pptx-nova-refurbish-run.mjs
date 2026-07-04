@@ -344,6 +344,23 @@ function gateAudit(summary, report) {
   )
 }
 
+function gateSemanticDiff(summary, report) {
+  return requireGate(
+    summary,
+    'pptx-semantic-diff',
+    report?.schemaVersion === 'pptx-diff/v1' && report?.status === 'success',
+    {
+      schemaVersion: report?.schemaVersion ?? '',
+      status: report?.status ?? '',
+      semanticStatus: report?.agentGate?.semanticStatus ?? null,
+      reliableChanges: Number(report?.summary?.reliableChanges ?? 0),
+      uncertainChanges: Number(report?.summary?.uncertainChanges ?? 0),
+      unsupportedRegions: Number(report?.summary?.unsupportedRegions ?? 0),
+      message: 'pptx semantic diff must emit successful pptx-diff/v1 output',
+    },
+  )
+}
+
 function defaultRunDir(args, cwd) {
   const sourceStem = basename(args.source, extname(args.source))
   const slug = safeSlug(`${sourceStem}-${args.deckkit}`)
@@ -427,6 +444,7 @@ function artifactPaths(runDir) {
     visionDiff: join(runDir, 'vision-diff.json'),
     contentAuditFinal: join(runDir, 'content-audit-final.json'),
     fidelityGate: join(runDir, 'fidelity-gate.json'),
+    pptxDiff: join(runDir, 'pptx-diff.json'),
     finalInspect: join(runDir, 'candidate-inspect.json'),
     layoutFinal: join(runDir, 'layout-final.json'),
     candidate: join(runDir, 'candidate.pptx'),
@@ -973,6 +991,26 @@ function runContactDiff(summary, args, artifacts) {
   )
 }
 
+function runSemanticDiff(summary, args, artifacts) {
+  const report = runJsonPhase(summary, {
+    name: 'pptx-semantic-diff',
+    bin: args.xdocBin,
+    args: [
+      'pptx',
+      'diff',
+      '--source',
+      args.source,
+      '--candidate',
+      artifacts.candidate,
+      '--detail',
+      'summary',
+      '--json',
+    ],
+    artifact: artifacts.pptxDiff,
+  })
+  gateSemanticDiff(summary, report)
+}
+
 function publishCandidate(summary, args, artifacts) {
   if (!existsSync(artifacts.candidate) || statSync(artifacts.candidate).size === 0) {
     throw new PhaseFailure('publish', 'candidate PPTX is missing or empty')
@@ -1098,6 +1136,7 @@ function runRefurbish(inputArgs) {
     runLayoutSnapshot(summary, args, artifacts)
     runPreviews(summary, args, artifacts, inspect)
     runContactDiff(summary, args, artifacts)
+    runSemanticDiff(summary, args, artifacts)
     publishCandidate(summary, args, artifacts)
 
     summary.status = 'needs-human-review'

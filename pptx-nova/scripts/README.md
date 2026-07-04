@@ -25,8 +25,9 @@ Use these entry points from skill workflows:
   duplicate chrome policy, and required gates.
 - `pptx-nova-refurbish-run.mjs` - execute the audited existing-deck refurbishment
   pipeline in a new run directory. It selects the native or fallback route, saves
-  every JSON report, fails closed on machine gates, renders PNG/contact-sheet
-  evidence, and publishes the final output atomically. A successful run still
+  every JSON report, writes `pptx-diff.json` as the default final semantic diff,
+  fails closed on machine gates, renders PNG/contact-sheet evidence, and
+  publishes the final output atomically. A successful run still
   reports `needs-human-review`; it never claims the visual review is complete.
 - `pptx-nova-refurbish-fallback-patch.mjs` - generate generic inspect-driven
   fallback artifacts (`patch.json`, `deck_lock.json`, baseline

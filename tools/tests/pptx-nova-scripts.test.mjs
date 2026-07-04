@@ -403,3 +403,159 @@ process.exit(2)
   assert.equal(paths.previewsDir, join(paths.runDir, 'previews'))
   assert.equal(paths.finalPptx, join(root, 'script-test.pptx'))
 })
+
+test('refurbish plan requires semantic diff gate by default', async () => {
+  const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
+  const plan = buildRefurbishPlan({
+    deckkit: 'mckinsey-blue',
+    source: 'source.pptx',
+    output: 'candidate.pptx',
+    catalog: skillPath('assets/deckkits/catalog.json'),
+    explicit: false,
+    json: true,
+  })
+  const semanticIndex = plan.requiredGates.indexOf('semantic-diff')
+
+  assert.equal(plan.status, 'ready')
+  assert.notEqual(semanticIndex, -1)
+  assert.ok(plan.requiredGates.indexOf('fidelity-gate') < semanticIndex)
+  assert.ok(
+    plan.commands.some(
+      (command) =>
+        command.name === 'semantic-diff' &&
+        command.required === true &&
+        command.command.includes('xdoc pptx diff'),
+    ),
+  )
+})
+
+test('refurbish runner writes semantic diff before publishing output', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-run-'))
+  const source = join(root, 'source.pptx')
+  const output = join(root, 'out.pptx')
+  const runDir = join(root, 'run')
+  const fakeXdoc = join(root, 'fake-xdoc.mjs')
+  writeFileSync(source, 'fake pptx')
+  writeFileSync(
+    fakeXdoc,
+    `#!/usr/bin/env node
+import { mkdirSync, writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+const valueAfter = (flag) => {
+  const index = args.indexOf(flag)
+  return index >= 0 ? args[index + 1] : ''
+}
+const inspect = {
+  schemaVersion: 'pptx-inspect/v1',
+  presentation: { slideCount: 1, size: { width: '10in', height: '5.625in' } },
+  slides: [{ index: 0, shapes: [] }]
+}
+const visionDiff = {
+  schemaVersion: 'pptx-vision-diff/v1',
+  status: 'success',
+  summary: {
+    byClass: {
+      new: { high: 0, medium: 0, low: 0 },
+      changed: { high: 0, medium: 0, low: 0 }
+    }
+  }
+}
+const audit = {
+  schemaVersion: 'pptx-refurbish-audit/v1',
+  status: 'passed',
+  summary: {
+    errorCount: 0,
+    warningCount: 0,
+    sourceSlideCount: 1,
+    finalSlideCount: 1,
+    slideCountMatches: true
+  },
+  issues: []
+}
+const print = (value) => process.stdout.write(JSON.stringify(value))
+
+if (args[0] === 'schema') {
+  print({
+    version: '9.9.9 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    capabilities: { schemaVersion: 'capabilities/v1' },
+    commands: {
+      pptx: {
+        subcommands: { inspect: {}, 'refurbish-skin': {}, preview: {}, diff: {} },
+        patchSchema: {},
+        catalogs: {
+          nativeDeckkits: {
+            deckkits: [{ id: 'mckinsey-blue', readiness: 'production' }]
+          }
+        }
+      }
+    }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'inspect') {
+  print(inspect)
+} else if (args[0] === 'pptx' && args[1] === 'refurbish-skin') {
+  writeFileSync(valueAfter('--output'), 'candidate pptx')
+  print({
+    schemaVersion: 'pptx-refurbish-skin/v1',
+    status: 'passed',
+    gate: { passed: true, newHighIssues: 0, newMediumIssues: 0 },
+    reports: { visionDiff, audit }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'preview') {
+  const outputDir = valueAfter('--output-dir')
+  const contactSheet = valueAfter('--contact-sheet')
+  mkdirSync(outputDir, { recursive: true })
+  writeFileSync(outputDir + '/slide-001.png', 'png')
+  writeFileSync(contactSheet, 'contact')
+  print({
+    schemaVersion: 'pptx-preview/v1',
+    status: 'success',
+    pages: [{ path: outputDir + '/slide-001.png', status: 'success', width: 100, height: 56, byteLength: 3 }],
+    contactSheet: { path: contactSheet, width: 100, height: 56, byteLength: 7 }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'diff') {
+  print({
+    schemaVersion: 'pptx-diff/v1',
+    status: 'success',
+    agentGate: { semanticStatus: 'pass' },
+    summary: { reliableChanges: 0, uncertainChanges: 0, unsupportedRegions: 0 },
+    changeRollup: { reliable: { count: 0 } },
+    slides: []
+  })
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`,
+  )
+  chmodSync(fakeXdoc, 0o755)
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+    '--deckkit',
+    'mckinsey-blue',
+    '--source',
+    source,
+    '--output',
+    output,
+    '--run-dir',
+    runDir,
+    '--route',
+    'native',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const summary = JSON.parse(result.stdout)
+  const phaseNames = summary.phases.map((phase) => phase.name)
+  const gateNames = summary.gates.map((gate) => gate.name)
+
+  assert.equal(summary.status, 'needs-human-review')
+  assert.equal(existsSync(output), true)
+  assert.equal(existsSync(join(runDir, 'pptx-diff.json')), true)
+  assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
+  assert.ok(phaseNames.includes('pptx-semantic-diff'))
+  assert.ok(gateNames.includes('pptx-semantic-diff'))
+  assert.ok(phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('publish'))
+})

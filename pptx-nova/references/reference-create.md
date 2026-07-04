@@ -198,7 +198,7 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
 必做步骤：
 
 标准路线优先使用一键 runner；它会把下述 plan、inspect、native/fallback、dry-run/apply、
-vision-diff、refurbish-audit 和 preview 阶段写入同一个 run 目录：
+vision-diff、refurbish-audit、semantic diff 和 preview 阶段写入同一个 run 目录：
 
 ```bash
 node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \

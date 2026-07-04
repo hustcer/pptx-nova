@@ -150,7 +150,14 @@ function profileFor(entry, nativeSkinning) {
 }
 
 function defaultGates(nativeSupported) {
-  const gates = ['dry-run', 'vision-diff', 'refurbish-audit', 'fidelity-gate', 'png-contact-review']
+  const gates = [
+    'dry-run',
+    'vision-diff',
+    'refurbish-audit',
+    'fidelity-gate',
+    'semantic-diff',
+    'png-contact-review',
+  ]
   return nativeSupported ? ['refurbish-skin-report', ...gates] : ['fallback-patch-report', ...gates]
 }
 
@@ -159,6 +166,14 @@ function normalizeRequiredGates(gates) {
   const auditIndex = normalized.indexOf('refurbish-audit')
   if (!normalized.includes('fidelity-gate')) {
     normalized.splice(auditIndex >= 0 ? auditIndex + 1 : normalized.length, 0, 'fidelity-gate')
+  }
+  if (!normalized.includes('semantic-diff')) {
+    const fidelityIndex = normalized.indexOf('fidelity-gate')
+    normalized.splice(
+      fidelityIndex >= 0 ? fidelityIndex + 1 : normalized.length,
+      0,
+      'semantic-diff',
+    )
   }
   return normalized
 }
@@ -170,6 +185,11 @@ function buildCommands(args, entry, nativeSkinning, profile) {
         name: 'native-refurbish-skin',
         required: true,
         command: `xdoc pptx refurbish-skin --source ${shell(args.source)} --deckkit ${shell(entry.id)} --output ${shell(args.output)} --json`,
+      },
+      {
+        name: 'semantic-diff',
+        required: true,
+        command: `xdoc pptx diff --source ${shell(args.source)} --candidate ${shell(args.output)} --detail summary --json > pptx-diff.json`,
       },
       {
         name: 'manual-contact-diff',
@@ -217,6 +237,11 @@ function buildCommands(args, entry, nativeSkinning, profile) {
       name: 'fidelity-gate',
       required: true,
       command: `node ${shell(join(SKILL_ROOT, 'scripts/pptx-nova-fidelity-gate.mjs'))} --mode refurbish --source-inspect reference-inspect.json --reference-map reference-map.json --content-audit content-audit.json --final-audit content-audit-final.json --vision-diff vision-diff.json --json > fidelity-gate.json`,
+    },
+    {
+      name: 'semantic-diff',
+      required: true,
+      command: `xdoc pptx diff --source ${shell(args.source)} --candidate ${shell(args.output)} --detail summary --json > pptx-diff.json`,
     },
   ]
 }

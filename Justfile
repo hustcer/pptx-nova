@@ -53,6 +53,10 @@ lint:
   oxlint --fix; \
   $'(ansi g)The `lint` task finished!(ansi reset)(char nl)';
 
+# Update xdoc schema
+schema:
+  @xdoc schema | from json | save -f docs/xdoc-schema.json; oxfmt docs/xdoc-schema.json
+
 # Check/generate pptx-nova themePack source-derived outputs:
 # `just theme` checks, `just theme -g` updates.
 theme flag=(''):

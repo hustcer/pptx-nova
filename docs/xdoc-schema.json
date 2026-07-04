@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.2.7 (7a98a2a9)",
+  "version": "0.2.7 (b501bbe6)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1202,6 +1202,11 @@
           "description": "Brand profile JSON path for pptx check-brand",
           "required": false
         },
+        "data": {
+          "type": "string",
+          "description": "Translations JSON path for pptx i18n-text-plan",
+          "required": false
+        },
         "to": {
           "type": "string",
           "description": "themePack/stylePack id for pptx swap-theme, swap-style, or remap-theme",
@@ -1229,12 +1234,12 @@
         },
         "source": {
           "type": "string",
-          "description": "Source PPTX path for pptx diff/vision-diff/contact-diff/refurbish-skin",
+          "description": "Source PPTX path for pptx diff/i18n-style-diff/i18n-text-plan/vision-diff/contact-diff/refurbish-skin",
           "required": false
         },
         "candidate": {
           "type": "string",
-          "description": "Candidate PPTX path for pptx diff/vision-diff/contact-diff",
+          "description": "Candidate PPTX path for pptx diff/i18n-style-diff/vision-diff/contact-diff",
           "required": false
         },
         "detail": {
@@ -1265,7 +1270,7 @@
         },
         "slides": {
           "type": "string",
-          "description": "1-based slide selector for pptx vision-check, e.g. 25-38",
+          "description": "1-based slide selector for pptx vision-check/i18n-style-diff/i18n-text-plan, e.g. 25-38",
           "required": false
         },
         "name": {
@@ -1368,7 +1373,7 @@
       },
       "positionals": {
         "action": {
-          "description": "Bridge action: new|apply|inspect|select|preview|vision-check|diff|vision-diff|contact-diff|refurbish-audit|refurbish-skin|chrome-detect|chrome-remove|chrome-apply|remap-theme|from-data|check-brand|apply-brand|copy-from|extract-style|import-template|catalog|list-themes|swap-theme|swap-style|recipe|replay|audit|rollback; inspect/select/preview/vision-check/diff/vision-diff/contact-diff/refurbish-audit/refurbish-skin/chrome-detect/chrome-remove/chrome-apply/remap-theme/from-data/check-brand/apply-brand/copy-from/extract-style/import-template/swap-theme/swap-style may be followed by an input path",
+          "description": "Bridge action: new|apply|inspect|select|preview|vision-check|diff|i18n-style-diff|i18n-text-plan|vision-diff|contact-diff|refurbish-audit|refurbish-skin|chrome-detect|chrome-remove|chrome-apply|remap-theme|from-data|check-brand|apply-brand|copy-from|extract-style|import-template|catalog|list-themes|swap-theme|swap-style|recipe|replay|audit|rollback; inspect/select/preview/vision-check/diff/i18n-style-diff/i18n-text-plan/vision-diff/contact-diff/refurbish-audit/refurbish-skin/chrome-detect/chrome-remove/chrome-apply/remap-theme/from-data/check-brand/apply-brand/copy-from/extract-style/import-template/swap-theme/swap-style may be followed by an input path",
           "required": true
         }
       },
@@ -1381,6 +1386,8 @@
         "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json",
         "xdoc pptx vision-check deck.pptx --json",
         "xdoc pptx diff old.pptx new.pptx --json",
+        "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
+        "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
         "xdoc pptx vision-diff --source old.pptx --candidate new.pptx --json",
         "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png --json",
         "xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json",
@@ -1426,6 +1433,8 @@
         "Use `xdoc pptx vision-check deck.pptx --json` to statically QA an existing deck without rendering: it flags geometry overlaps, off-slide and edge-hugging text, text-overflow estimates, unexpected wraps in single-line text roles, misaligned card rows, and sub-threshold fonts, and each issue may carry an auto-applicable fixPatch.",
         "Use `xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json` to render per-slide PNG previews plus an optional contact sheet and stdout manifest for multimodal review.",
         "Use `xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png --json` to generate a source/candidate side-by-side contact sheet plus changed/unchanged/missing/added slide status; pass `--map reference-map.json` for split/merge/reordered refurbish mapping.",
+        "Use `xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json` before applying translation patches: it emits run-level set-run patchOps and marks mixed-style paragraphs review-required when styled-token anchors are not reliable.",
+        "Use `xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json` as the translation-mode gate: it ignores text node content, blocks non-size run/paragraph/textbox/table/chart style signature changes, and records font-size-only layout repairs.",
         "Use `xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json` after skin-first refurbish to verify source/final preservation gates.",
         "Use `xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json` to copy-preserve an existing deck, replace chrome/background, remap retained objects, and run audit/vision gates; run contact-diff explicitly for manual review.",
         "Use `xdoc pptx chrome-detect deck.pptx --json` to identify candidate headers, footers, page numbers, and rules before removing or replacing old deck chrome.",
@@ -1658,6 +1667,96 @@
             "table cell internals",
             "embedded media binary equality"
           ]
+        },
+        "i18n-style-diff": {
+          "usage": "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json [--slides 1,3-5]",
+          "inputs": ["source PPTX", "candidate translated PPTX"],
+          "outputs": ["pptx-i18n-style-diff/v1 JSON report", "human summary"],
+          "strategy": "Compare textless OOXML style signatures after copying source deck and replacing visible text in place.",
+          "checks": [
+            "run rPr style structure",
+            "paragraph pPr style structure",
+            "textbox bodyPr structure",
+            "table tblPr/tcPr structure",
+            "chart text/style XML structure",
+            "slide relationships and hyperlinks",
+            "animation/timing XML structure",
+            "style-relevant part presence"
+          ],
+          "allowedChanges": {
+            "fontSize": "Only sz attribute changes are allowed, and they are reported under allowedChanges.fontSize for layout repair review."
+          },
+          "scope": {
+            "option": "--slides",
+            "valueSyntax": "N|N-M[,N|N-M...]",
+            "indexBase": 1
+          },
+          "ioContract": {
+            "stdout": {
+              "format": "json when --json is set; human summary otherwise",
+              "schemaVersion": "pptx-i18n-style-diff/v1"
+            },
+            "stderr": {
+              "usage": "errors-only"
+            },
+            "exitStatus": "0 when style gate passes; non-zero when blockers are found or inputs are invalid"
+          },
+          "agentPolicy": {
+            "failWhen": "agentGate.passed is false or blockers[] is non-empty",
+            "repairHint": "Regenerate from a copied source deck and replace text at text-node/run level; never collapse mixed-style runs into one run."
+          }
+        },
+        "i18n-text-plan": {
+          "usage": "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json [--slides 1,3-5]",
+          "inputs": ["source PPTX", "translations JSON with translations[] records"],
+          "outputs": [
+            "pptx-i18n-text-plan/v1 JSON report",
+            "run-level set-run patchOps",
+            "human summary"
+          ],
+          "strategy": "Inspect existing DrawingML text runs and decide whether each translation unit can be safely mapped without rebuilding paragraphs or run properties.",
+          "translationUnit": {
+            "schemaVersion": "pptx-i18n-translations/v1",
+            "required": [
+              "translations[].slide",
+              "translations[].paragraph",
+              "translations[].targetText"
+            ],
+            "optional": [
+              "translations[].shapeId",
+              "translations[].sourceText",
+              "translations[].anchors[]"
+            ],
+            "indexing": "slide is 1-based; paragraph is 0-based; shapeId is the source PPTX cNvPr id."
+          },
+          "strategies": {
+            "uniform": "Single source run receives the full target text.",
+            "preserve-run-boundaries": "Multiple source runs share one style signature; the first run receives the full target and continuation runs are cleared while their style nodes remain.",
+            "preserve-styled-token-boundaries": "Mixed-style runs keep styled token anchors in their original run boundaries and distribute surrounding target text to adjacent plain runs.",
+            "review-required": "The planner could not prove a safe run-level mapping; do not auto-apply the unit."
+          },
+          "ioContract": {
+            "stdout": {
+              "format": "json when --json is set; human summary otherwise",
+              "schemaVersion": "pptx-i18n-text-plan/v1"
+            },
+            "stderr": {
+              "usage": "errors-only"
+            },
+            "filesystem": {
+              "usage": "read-only"
+            },
+            "exitStatus": "0 only when all in-scope units have deterministic patchOps; non-zero when review-required or invalid inputs are found"
+          },
+          "agentPolicy": {
+            "applyOnlyWhen": "agentGate.passed is true and reviewRequiredCount is 0",
+            "blockedWhen": [
+              "strategy == review-required",
+              "sourceText mismatch",
+              "mixed-style paragraph has no reliable target anchor for a styled run"
+            ],
+            "followUpGate": "After applying generated patchOps to a copied deck, run i18n-style-diff and visual parity gates before delivery."
+          }
         },
         "vision-diff": {
           "usage": "xdoc pptx vision-diff --source old.pptx --candidate new.pptx --json",
@@ -31197,6 +31296,8 @@
     "pptx": "xdoc pptx new|apply --patch <patch.json> --output <out.pptx>",
     "pptxRecipe": "xdoc pptx recipe --patch <recipe.json> --compile --json",
     "pptxDiff": "xdoc pptx diff before.pptx after.pptx --json",
+    "pptxI18nStyleDiff": "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
+    "pptxI18nTextPlan": "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
     "pptxContactDiff": "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png [--map reference-map.json] --json",
     "pptxPreview": "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet contact-sheet.png --json",
     "pptxRefurbishAudit": "xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json",

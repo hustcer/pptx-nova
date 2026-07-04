@@ -248,7 +248,7 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - **Translation Mode**：用户要求翻译已有 PPTX 并保持原版式；默认先复制源 deck，再在副本上原位替换
   可见文本。必须保留粗体、斜体、下划线、删除线、对齐、段落属性、文本框属性、表格/chart 样式和动画；
   只有字体大小可作为版式修复调整。必须额外抽取 shape/table/chart 可见文本、生成中英对照和样式签名审计、
-  做源稿/译稿 contact-diff，并以版式一致性作为交付门禁。
+  做源稿/译稿 `vision-diff` 新增问题 gate 和 contact-diff，并以版式一致性作为交付门禁。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，
@@ -443,6 +443,7 @@ xdoc pptx replace-text --source source.pptx --data replacements.json --output up
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --allow-text-attrs tooltip --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
+xdoc pptx vision-diff --source source.pptx --candidate out.pptx --slides 25-38 --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
 xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json

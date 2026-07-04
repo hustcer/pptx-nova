@@ -152,7 +152,22 @@ relevant OOXML style properties.
     unless the user explicitly asks to localize them.
 11. Run scoped and full visual gates:
 
-- `vision-check` on changed slides.
+- `vision-diff` on changed slides, with source as the baseline:
+  ```bash
+  xdoc pptx vision-diff \
+    --source source.pptx \
+    --candidate candidate.pptx \
+    --slides <changed> \
+    --json > <run-dir>/vision-diff.json
+  ```
+  Treat `agentGate.passed=false` as a delivery blocker. Source issues inherited
+  unchanged are allowed; new high/medium issues and inherited issues worsened to
+  high/medium are blockers. `newIssues[]` and `worsenedIssues[]` are the
+  primary machine repair queue. When `--slides` is used, check
+  `deckResidualRisk` before final delivery so outside-scope source noise is
+  disclosed but does not hide candidate regressions.
+- `vision-check` on the candidate changed slides as a diagnostic report, not as
+  the primary pass/fail gate when the source deck is already noisy.
 - Source and candidate PNG/contact sheets for changed slides.
 - `contact-diff` for before/after layout consistency.
 
@@ -309,7 +324,8 @@ Keep these translation-specific artifacts in the run directory when available:
 - source and candidate inspect reports
 - remaining source-language scans
 - dry-run/apply reports
-- `vision-scoped.json`
+- `vision-diff.json`
+- candidate `vision-check` reports when used for diagnostics
 - source/candidate previews and contact sheets
 - `contact-diff.json` and `contact-diff.png`
 - `pptx-diff.json`

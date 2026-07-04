@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { basename, join, resolve } from 'node:path'
 import { test } from 'node:test'
 import { pathToFileURL } from 'node:url'
 const exactSwissSubtitle = 'ADJACENT PRODUCTS ARE SPLIT ACROSS VIEW, CONVERT AND GENERATE'
@@ -87,6 +87,53 @@ function swissColumnLock({ finalPptx, runDir }) {
     ],
     assumptions: [],
   }
+}
+
+function successfulFakeXdocSource() {
+  return `#!/usr/bin/env node
+import { mkdirSync, writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+const valueAfter = (flag) => {
+  const index = args.indexOf(flag)
+  return index >= 0 ? args[index + 1] : ''
+}
+const print = (value) => process.stdout.write(JSON.stringify(value))
+
+if (args[0] === 'schema') {
+  print({
+    version: '9.9.9 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    capabilities: { schemaVersion: 'capabilities/v1' },
+    commands: { pptx: { subcommands: { apply: {}, 'vision-check': {}, preview: {} }, patchSchema: {}, catalogs: {} } }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'apply') {
+  const output = valueAfter('-o')
+  if (args.includes('--dry-run')) {
+    print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], wouldWrite: true, output })
+  } else {
+    writeFileSync(output, 'candidate pptx')
+    print({ schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [], changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], output })
+  }
+} else if (args[0] === 'pptx' && args[1] === 'vision-check') {
+  print({ schemaVersion: 'pptx-vision/v1', status: 'pass', summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } }, issues: [] })
+} else if (args[0] === 'pptx' && args[1] === 'preview') {
+  const outputDir = valueAfter('--output-dir')
+  const contactSheet = valueAfter('--contact-sheet')
+  mkdirSync(outputDir, { recursive: true })
+  writeFileSync(outputDir + '/slide-001.png', 'png')
+  writeFileSync(contactSheet, 'contact')
+  print({
+    schemaVersion: 'pptx-preview/v1',
+    status: 'success',
+    pages: [{ index: 1, slide: 1, path: outputDir + '/slide-001.png', byteLength: 3, file: { path: outputDir + '/slide-001.png', status: 'ok', byteLength: 3, width: 100, height: 56 } }],
+    contactSheet: { path: contactSheet, width: 100, height: 56, byteLength: 7 }
+  })
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`
 }
 
 test('generic DeckKit build driver writes patch and quality sidecars', () => {
@@ -505,53 +552,7 @@ test('create runner executes DeckKit create gates and publishes after preview', 
   mkdirSync(runDir, { recursive: true })
   writeJson(contentPath, swissColumnContent())
   writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
-  const fakeXdoc = writeFakeXdoc(
-    root,
-    `#!/usr/bin/env node
-import { mkdirSync, writeFileSync } from 'node:fs'
-
-const args = process.argv.slice(2)
-const valueAfter = (flag) => {
-  const index = args.indexOf(flag)
-  return index >= 0 ? args[index + 1] : ''
-}
-const print = (value) => process.stdout.write(JSON.stringify(value))
-
-if (args[0] === 'schema') {
-  print({
-    version: '9.9.9 (fake)',
-    schemaVersion: 'cli-agent/v1',
-    capabilities: { schemaVersion: 'capabilities/v1' },
-    commands: { pptx: { subcommands: { apply: {}, 'vision-check': {}, preview: {} }, patchSchema: {}, catalogs: {} } }
-  })
-} else if (args[0] === 'pptx' && args[1] === 'apply') {
-  const output = valueAfter('-o')
-  if (args.includes('--dry-run')) {
-    print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], wouldWrite: true, output })
-  } else {
-    writeFileSync(output, 'candidate pptx')
-    print({ schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [], changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], output })
-  }
-} else if (args[0] === 'pptx' && args[1] === 'vision-check') {
-  print({ schemaVersion: 'pptx-vision/v1', status: 'pass', summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } }, issues: [] })
-} else if (args[0] === 'pptx' && args[1] === 'preview') {
-  const outputDir = valueAfter('--output-dir')
-  const contactSheet = valueAfter('--contact-sheet')
-  mkdirSync(outputDir, { recursive: true })
-  writeFileSync(outputDir + '/slide-001.png', 'png')
-  writeFileSync(contactSheet, 'contact')
-  print({
-    schemaVersion: 'pptx-preview/v1',
-    status: 'success',
-    pages: [{ index: 1, slide: 1, path: outputDir + '/slide-001.png', byteLength: 3, file: { path: outputDir + '/slide-001.png', status: 'ok', byteLength: 3, width: 100, height: 56 } }],
-    contactSheet: { path: contactSheet, width: 100, height: 56, byteLength: 7 }
-  })
-} else {
-  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
-  process.exit(2)
-}
-`,
-  )
+  const fakeXdoc = writeFakeXdoc(root, successfulFakeXdocSource())
 
   const result = runNode([
     skillPath('scripts/pptx-nova-create-run.mjs'),
@@ -595,6 +596,94 @@ if (args[0] === 'schema') {
   ]) {
     assert.ok(gateNames.includes(gate), gate)
   }
+})
+
+test('create runner resolves relative xdoc-bin before changing into run dir', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-relative-xdoc-'))
+  const binDir = join(root, 'bin')
+  const contentPath = join(root, 'content.json')
+  const lockPath = join(root, 'deck_lock.json')
+  const output = join(root, 'out.pptx')
+  const runDir = join(root, 'artifacts', 'run')
+  mkdirSync(binDir, { recursive: true })
+  writeJson(contentPath, swissColumnContent())
+  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+  writeFakeXdoc(binDir, successfulFakeXdocSource())
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-create-run.mjs'),
+      '--deckkit',
+      'swiss-grid',
+      '--content',
+      'content.json',
+      '--lock',
+      'deck_lock.json',
+      '--output',
+      'out.pptx',
+      '--run-dir',
+      'artifacts/run',
+      '--xdoc-bin',
+      './bin/fake-xdoc.mjs',
+      '--json',
+    ],
+    { cwd: root, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 0, result.stderr || result.stdout)
+  const summary = JSON.parse(result.stdout)
+  const dryRun = summary.phases.find((phase) => phase.name === 'dry-run')
+
+  assert.equal(summary.status, 'needs-human-review')
+  assert.equal(summary.runDir.endsWith('/artifacts/run'), true)
+  assert.equal(existsSync(output), true)
+  assert.match(dryRun.command, /[/\\]bin[/\\]fake-xdoc\.mjs/)
+})
+
+test('create runner allocates unique default run dirs instead of reusing evidence', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-unique-'))
+  const contentPath = join(root, 'content.json')
+  const lockPath = join(root, 'deck_lock.json')
+  const fakeXdoc = writeFakeXdoc(root, successfulFakeXdocSource())
+  writeJson(contentPath, swissColumnContent())
+  writeJson(
+    lockPath,
+    swissColumnLock({ finalPptx: join(root, 'out.pptx'), runDir: join(root, '.pptx-nova') }),
+  )
+
+  const run = (outputName) => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        skillPath('scripts/pptx-nova-create-run.mjs'),
+        '--deckkit',
+        'swiss-grid',
+        '--content',
+        'content.json',
+        '--lock',
+        'deck_lock.json',
+        '--output',
+        outputName,
+        '--xdoc-bin',
+        fakeXdoc,
+        '--json',
+      ],
+      { cwd: root, encoding: 'utf8' },
+    )
+    assert.equal(result.status, 0, result.stderr || result.stdout)
+    return JSON.parse(result.stdout)
+  }
+
+  const first = run('out-1.pptx')
+  const second = run('out-2.pptx')
+
+  assert.notEqual(first.runDir, second.runDir)
+  assert.match(basename(first.runDir), /^create-swiss-grid-\d{8}-\d{9}-[0-9a-z]+-[0-9a-z]+$/)
+  assert.match(basename(second.runDir), /^create-swiss-grid-\d{8}-\d{9}-[0-9a-z]+-[0-9a-z]+$/)
+  assert.equal(existsSync(first.artifacts.summary), true)
+  assert.equal(existsSync(second.artifacts.summary), true)
+  assert.equal(existsSync(join(first.runDir, 'candidate.pptx')), true)
+  assert.equal(existsSync(join(second.runDir, 'candidate.pptx')), true)
 })
 
 test('create runner stops after apply failure without validating a stale candidate', () => {

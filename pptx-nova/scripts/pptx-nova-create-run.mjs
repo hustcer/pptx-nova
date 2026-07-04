@@ -105,7 +105,8 @@ function valueAfter(argv, index, flag) {
 
 function timestamp(now = new Date()) {
   const pad = (value) => String(value).padStart(2, '0')
-  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+  const millis = String(now.getMilliseconds()).padStart(3, '0')
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}${millis}`
 }
 
 function safeSlug(value) {
@@ -365,9 +366,26 @@ function previewPageBytes(page) {
   return Number(page?.byteLength ?? page?.file?.byteLength ?? 0)
 }
 
+function hasPathSeparator(value) {
+  const text = String(value ?? '')
+  return text.includes('/') || text.includes('\\')
+}
+
+function normalizeExecutablePath(value, cwd) {
+  return hasPathSeparator(value) ? resolve(cwd, value) : value
+}
+
 function defaultRunDir(args, cwd) {
   const deckkit = args.deckkit || 'deckkit'
-  return join(cwd, '.pptx-nova', `create-${safeSlug(deckkit)}-${timestamp()}`)
+  const root = join(cwd, '.pptx-nova')
+  const slug = safeSlug(deckkit)
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const entropy = `${process.pid.toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+    const suffix = attempt === 0 ? entropy : `${entropy}-${attempt + 1}`
+    const candidate = join(root, `create-${slug}-${timestamp()}-${suffix}`)
+    if (!existsSync(candidate)) return candidate
+  }
+  throw new Error(`could not allocate a unique run directory under ${root}`)
 }
 
 function normalizeArgs(inputArgs) {
@@ -382,6 +400,7 @@ function normalizeArgs(inputArgs) {
     lock: resolve(cwd, inputArgs.lock),
     assets: inputArgs.assets ? resolve(cwd, inputArgs.assets) : '',
     output: resolve(cwd, inputArgs.output),
+    xdocBin: normalizeExecutablePath(inputArgs.xdocBin, cwd),
   }
   args.runDir = inputArgs.runDir ? resolve(cwd, inputArgs.runDir) : defaultRunDir(args, cwd)
   return { args, contentJson }
@@ -717,7 +736,8 @@ function runApply(summary, args, artifacts) {
       ...apply,
       outputExists: outputBytes > 0,
       outputBytes,
-      message: 'apply must succeed, keep high/medium visual risks at zero, and write candidate.pptx',
+      message:
+        'apply must succeed, keep high/medium visual risks at zero, and write candidate.pptx',
     },
   )
 }

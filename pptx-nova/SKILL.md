@@ -442,6 +442,7 @@ xdoc pptx i18n-text-plan --source source.pptx --data translations.json --json
 xdoc pptx i18n-scan --source source.pptx --source-lang zh --mode source --json
 xdoc pptx i18n-scan --source translated.pptx --source-lang zh --mode candidate --json
 xdoc pptx replace-text --source source.pptx --data replacements.json --output updated.pptx --json
+xdoc pptx replace-chart-text --source source.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --allow-text-attrs tooltip,descr,title --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json

@@ -124,10 +124,22 @@ relevant OOXML style properties.
    - Preserve hyperlink runs and field runs. Do not remove `<a:hlinkClick>`,
      `<a:fld>`, footer/date/page number placeholders, or speaker-note
      structure while translating visible labels around them.
-   - Use `replace-chart-text` for chart title, series, and categories only when
-     dry-run proves the chart has a supported data shape and the op preserves
-     chart formatting. Otherwise use a targeted OOXML cache-text fallback and
-     validate with ZIP/XML, preview, and clean-open.
+   - For chart labels, prefer the translation-safe top-level helper instead of
+     a handwritten OOXML fallback:
+     ```bash
+     xdoc pptx replace-chart-text \
+       --source source.pptx \
+       --data <run-dir>/chart-replacements.json \
+       --output <run-dir>/candidate.pptx \
+       --visible-cache-only \
+       --dry-run \
+       --json > <run-dir>/replace-chart-text-dry-run.json
+     ```
+     Then rerun without `--dry-run` only when `agentGate.passed=true`. This
+     helper changes only chart visible cache labels (`title`, `series`,
+     `category`, `dataLabel`) in `ppt/charts/*.xml`; it does not write
+     external workbook paths, relationship targets, embedded workbook data, or
+     `formatCode`.
    - Use `set-text`, `set-table-cell`, or other high-level text ops only for
      uniform-format objects, or when the op has a style-preservation report that
      proves bold/italic/underline/strike/alignment and run formatting survive.
@@ -292,11 +304,17 @@ Charts are a frequent translation blind spot.
 - Always compare `xdoc convert --to text` and an OOXML text-node scan against
   `inspect`; any source-language text found only in chart parts still needs a
   translation plan.
-- Use `replace-chart-text` only when dry-run proves the chart has a supported
-  data shape. If it fails because externalData does not target an embedded
-  workbook, do not ignore the chart. Record the limitation and use a targeted
-  OOXML fallback only for visible cache text, followed by ZIP/XML validation,
-  preview, and clean-open.
+- Use top-level `xdoc pptx replace-chart-text --visible-cache-only` for chart
+  title, series, category, and data-label translations. Its dry-run report
+  lists `changedNodes[]`, `changedParts[]`, and `structureChecks[]`; block on
+  any conflict, ambiguity, `formatCode` change, or failed structure check.
+- Do not use the patch op `replace-chart-text` as the default translation path:
+  that op may synchronize embedded workbook labels and is intended for ordinary
+  chart editing, not visible-cache-only i18n.
+- If the top-level helper cannot identify a unique visible cache node, do not
+  ignore the chart. Add role/index/sourceHash detail to the replacement input,
+  or record the limitation and use a targeted OOXML fallback only for visible
+  cache text, followed by ZIP/XML validation, preview, and clean-open.
 - Do not translate external workbook relationship targets or local filesystem
   paths; changing them can break links.
 

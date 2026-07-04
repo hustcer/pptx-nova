@@ -410,9 +410,45 @@ ChartEx 语义要点：
 
 ### 只改文本 / 翻译 label
 
-只翻译或替换 chart title、category labels、series names 时，优先用
-`replace-chart-text`。它只改已有 chart 文本缓存和 embedded workbook 中对应标签，不重建
-chart data XML，因此更符合"非文本尽量保持不变"的目标。
+翻译 chart title、category labels、series names、data labels 时，优先用 top-level
+安全命令：
+
+```bash
+xdoc pptx replace-chart-text \
+  --source source.pptx \
+  --data chart-replacements.json \
+  --output translated.pptx \
+  --visible-cache-only \
+  --dry-run \
+  --json > replace-chart-text-dry-run.json
+```
+
+输入 JSON 使用 role + sourceText/sourceHash + targetText 定位已有可见 cache
+文本；`index` 是同一 chart part 内该 role 的 0-based 序号：
+
+```json
+{
+  "schemaVersion": "pptx-chart-text-replacements/v1",
+  "replacements": [
+    {
+      "part": "ppt/charts/chart1.xml",
+      "role": "category",
+      "index": 0,
+      "sourceText": "产品",
+      "targetText": "Product"
+    }
+  ]
+}
+```
+
+只有 dry-run 报告满足 `agentGate.passed=true`、`changedNodes[]` 符合预期、
+`structureChecks[]` 全部通过时，才去掉 `--dry-run` 写候选文件。该命令只写
+`ppt/charts/*.xml` 中的可见文本节点；不会修改 external workbook path、chart
+relationship target、embedded workbook 数据/sharedStrings 或 `formatCode`。
+
+普通 chart 编辑仍可用 patch op `replace-chart-text`。它会改已有 chart 文本缓存和
+embedded workbook 中对应标签，不重建 chart data XML，适合需要保持 workbook-backed
+chart 标签同步的非翻译场景。
 
 ```json
 {
@@ -430,7 +466,10 @@ chart data XML，因此更符合"非文本尽量保持不变"的目标。
 
 不要把 `replace-chart-data` 当作 chart 文本翻译工具：它会重建 chart XML / workbook
 数据区域，适合真的替换数据集，但可能丢失或重排既有标题、layout、样式和扩展节点。
-`replace-chart-text` 目前只覆盖经典 chart part；ChartEx 仍按下文 ChartEx 规则处理。
+patch op `replace-chart-text` 目前只覆盖经典 chart part；ChartEx 仍按下文 ChartEx
+规则处理。翻译模式下若只需改 ChartEx 可见 cache 文本，先尝试 top-level
+`xdoc pptx replace-chart-text --visible-cache-only`，失败时再走有报告的定向 OOXML
+fallback。
 
 ### 改数据
 

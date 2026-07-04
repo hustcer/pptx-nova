@@ -134,8 +134,7 @@ relevant OOXML style properties.
 8. Dry-run when using xdoc patch ops. For direct OOXML fallback, write a
    machine-readable replacement report and run ZIP/XML validation immediately
    after packaging.
-9. Run the native translation style gate and block on any non-size style
-   change:
+9. Run the native translation style gate and block on any style blocker:
    ```bash
    xdoc pptx i18n-style-diff \
      --source source.pptx \
@@ -143,21 +142,27 @@ relevant OOXML style properties.
      --json > <run-dir>/i18n-style-diff.json
    ```
    If translation intentionally changes user-visible text attributes such as
-   hyperlink `tooltip`, run the gate with an explicit allowlist:
+   hyperlink `tooltip` or alt text `descr`/`title`, run the gate with an
+   explicit typed allowlist:
    ```bash
    xdoc pptx i18n-style-diff \
      --source source.pptx \
      --candidate candidate.pptx \
-     --allow-text-attrs tooltip \
+     --allow-text-attrs tooltip,descr,title \
      --json > <run-dir>/i18n-style-diff.json
    ```
-   Do not use the allowlist for metadata such as language tags, theme typefaces,
-   relationship paths, or format codes.
+   `--allow-text-attrs` only applies in typed user-visible contexts: hyperlink
+   `tooltip` on `hlinkClick`/`hlinkHover` and alt text `descr`/`title` on
+   `cNvPr`. It does not waive metadata such as language tags, theme typefaces,
+   relationship paths, chart `formatCode`, or shape internal names.
    For scoped repair loops, add `--slides <changed>`, then rerun the full-deck
-   gate before delivery. Treat `agentGate.passed=false` or non-empty
-   `blockers[]` as delivery blockers. Font-size-only differences are allowed
-   only when they appear under `allowedChanges.fontSize[]` and are recorded as
-   layout repair in the bilingual audit.
+   gate before delivery. Treat `agentGate.passed=false`, non-empty
+   `styleBlockers[]`, or non-empty compatibility `blockers[]` as delivery
+   blockers. Font-size-only differences are allowed only when they appear under
+   `allowedChanges.fontSize[]` and are recorded as layout repair in the
+   bilingual audit. User-visible text attribute translations are allowed only
+   when they appear under `textAttrChanges[]` /
+   `allowedChanges.textAttributes[]` and are recorded in the audit.
 10. Scan the candidate for remaining source-language text with the native gate:
     ```bash
     xdoc pptx i18n-scan \
@@ -217,8 +222,12 @@ the signature.
 Required interpretation:
 
 - `status=pass` and `agentGate.passed=true`: style gate passed.
-- `blockers[]` non-empty: stop and repair the candidate before any visual
-  delivery.
+- `styleBlockers[]` non-empty: stop and repair the candidate before any visual
+  delivery. `blockers[]` is the compatibility alias and must be treated the
+  same way.
+- `textAttrChanges[]` non-empty: user-visible text attributes changed under an
+  explicit typed allowlist. Record them in the bilingual audit; they are not
+  style blockers.
 - `allowedChanges.fontSize[]` non-empty: acceptable only for fitting repair;
   record the reason and keep the source meaning unchanged.
 - Missing or added style-relevant parts are blockers.

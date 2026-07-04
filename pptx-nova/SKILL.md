@@ -443,7 +443,7 @@ xdoc pptx i18n-scan --source source.pptx --source-lang zh --mode source --json
 xdoc pptx i18n-scan --source translated.pptx --source-lang zh --mode candidate --json
 xdoc pptx replace-text --source source.pptx --data replacements.json --output updated.pptx --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
-xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --allow-text-attrs tooltip --json
+xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --allow-text-attrs tooltip,descr,title --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --slides 25-38 --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json

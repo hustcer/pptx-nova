@@ -635,7 +635,7 @@ test('create runner resolves relative xdoc-bin before changing into run dir', ()
   const dryRun = summary.phases.find((phase) => phase.name === 'dry-run')
 
   assert.equal(summary.status, 'needs-human-review')
-  assert.equal(summary.runDir.endsWith('/artifacts/run'), true)
+  assert.equal(summary.runDir.endsWith(join('artifacts', 'run')), true)
   assert.equal(existsSync(output), true)
   assert.match(dryRun.command, /[/\\]bin[/\\]fake-xdoc\.mjs/)
 })

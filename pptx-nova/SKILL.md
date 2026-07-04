@@ -184,6 +184,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 | 参考 PPTX + 新大纲生成新 deck                     | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                |
 | 美化 / 翻新已有 PPTX，保持原内容但换风格          | `references/common-workflow.md`、`references/reference-create.md`、`references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`、`references/export-and-check.md`                                              |
 | 少量文字/备注/页脚/元数据小改                     | `references/common-workflow.md`、`references/micro-edit-cheatsheet.md`                                                                                                  | selector 模糊、复杂图片或多对象编辑时再读 `references/edit-mode.md`、`references/inspect-and-edit.md`           |
+| 翻译已有 `.pptx` 并保持原版式                     | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`、`references/translation-mode.md`                                          | 图表/表格较多时读 `references/charts.md`、`references/tables.md`；只做检查时再读 `references/export-and-check.md` |
 | 修改已有 `.pptx`                                  | `references/common-workflow.md`、`references/edit-mode.md`、`references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                            |
 | 添加/修改/删除动画或转场                          | `references/common-workflow.md`、`references/edit-mode.md`、`references/animations.md`、`references/inspect-and-edit.md`                                                | `references/patch-ops-cheatsheet.md`、复杂 timing 时读 `references/control-flow-and-raw-xml.md` 仅作风险判断    |
 | 数据 + 模板 / JSON 填充                           | `references/common-workflow.md`、`references/data-driven.md`                                                                                                            | `references/tables.md`、`references/charts.md`                                                                  |
@@ -242,6 +243,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   再运行 legacy supplemental audit 和 inspect 数量/文本对账，且最终摘要必须说明 native audit
   未通过工具层面执行。不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
+- **Translation Mode**：用户要求翻译已有 PPTX 并保持原版式；按 Edit 流程执行，但必须额外抽取
+  shape/table/chart 可见文本、生成中英对照审计、做源稿/译稿 contact-diff，并以版式一致性作为交付门禁。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，
@@ -473,6 +476,7 @@ Feedback 模式时追加“SKILL 使用反馈”。不要输出 xdoc 版本、CL
 | `references/create-studio.md`             | 高风险/正式/精控 deck 的确认、设计锁和 split                     |
 | `references/edit-mode.md`                 | 修改已有 PPTX 的 inspect/dry-run/selector 流程                   |
 | `references/micro-edit-cheatsheet.md`     | 少量文字、备注、页脚、元数据和单对象小改的极速路径               |
+| `references/translation-mode.md`          | 翻译已有 PPTX、可见文本覆盖、中英对照和版式一致性视觉门禁        |
 | `references/template-following.md`        | 严格套模板：复制源 slide、编辑 inherited objects、placeholder QA |
 | `references/export-and-check.md`          | PDF/PNG/MD/JSON 导出、extract、check、PPTX semantic diff         |
 | `references/express-mode.md`              | Express 模式完整黄金路径                                         |

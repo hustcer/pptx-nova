@@ -243,8 +243,10 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   再运行 legacy supplemental audit 和 inspect 数量/文本对账，且最终摘要必须说明 native audit
   未通过工具层面执行。不要用移出画布、截图 overlay 或清空未重建文本来隐藏旧内容。
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
-- **Translation Mode**：用户要求翻译已有 PPTX 并保持原版式；按 Edit 流程执行，但必须额外抽取
-  shape/table/chart 可见文本、生成中英对照审计、做源稿/译稿 contact-diff，并以版式一致性作为交付门禁。
+- **Translation Mode**：用户要求翻译已有 PPTX 并保持原版式；默认先复制源 deck，再在副本上原位替换
+  可见文本。必须保留粗体、斜体、下划线、删除线、对齐、段落属性、文本框属性、表格/chart 样式和动画；
+  只有字体大小可作为版式修复调整。必须额外抽取 shape/table/chart 可见文本、生成中英对照和样式签名审计、
+  做源稿/译稿 contact-diff，并以版式一致性作为交付门禁。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，

@@ -216,12 +216,12 @@ function buildCommands(args, entry, nativeSkinning, profile) {
     {
       name: 'dry-run',
       required: true,
-      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --dry-run --json > dry-run.json`,
+      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --overwrite --dry-run --json > dry-run.json`,
     },
     {
       name: 'apply',
       required: true,
-      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --json > apply.json`,
+      command: `xdoc pptx apply -p patch.json -i ${shell(args.source)} -o ${shell(args.output)} --overwrite --json > apply.json`,
     },
     {
       name: 'vision-diff',

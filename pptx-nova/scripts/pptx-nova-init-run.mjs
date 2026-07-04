@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { basename, dirname, isAbsolute, join, resolve } from 'node:path'
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -103,6 +103,10 @@ function shellQuote(value) {
   return `'${String(value).replaceAll("'", "'\\''")}'`
 }
 
+function relativeToRun(runDir, path) {
+  return relative(runDir, path) || basename(path)
+}
+
 try {
   const args = parseArgs(process.argv.slice(2))
   const root = resolve(args.root)
@@ -121,10 +125,18 @@ try {
 
   const outlinePath = join(runDir, 'outline.json')
   const lockPath = join(runDir, 'deck_lock.json')
+  const lockTemplatePath = join(runDir, 'deck_lock.template.json')
   const contentPath = join(runDir, 'content.json')
+  const contentTemplatePath = join(runDir, 'content.template.json')
   const patchPath = join(runDir, 'patch.json')
   const qualityPath = join(runDir, 'quality.json')
   const capabilityPath = join(runDir, 'xdoc-capabilities.json')
+  const dryRunPath = join(runDir, 'dry-run.json')
+  const applyPath = join(runDir, 'apply.json')
+  const visionPath = join(runDir, 'vision.json')
+  const previewReportPath = join(runDir, 'preview.json')
+  const candidatePath = join(runDir, 'candidate.pptx')
+  const contactSheetPath = join(previewsDir, 'contact-sheet.png')
   const probeScript = join(__dirname, 'pptx-nova-probe.mjs')
 
   writeJson(outlinePath, {
@@ -132,8 +144,11 @@ try {
     objective: args.objective || args.slug,
     slides: [],
   })
-  writeJson(lockPath, {
+  writeJson(lockTemplatePath, {
     schemaVersion: 'pptx-nova-deck-lock/v1',
+    _template: true,
+    _instructions:
+      'Copy this file to deck_lock.json or write deck_lock.json from scratch, then remove _template and _instructions. Do not append another JSON object to this template.',
     mode: args.mode,
     objective: args.objective || args.slug,
     outlinePath: basename(outlinePath),
@@ -154,7 +169,10 @@ try {
     slides: [],
     assumptions: [],
   })
-  writeJson(contentPath, {
+  writeJson(contentTemplatePath, {
+    _template: true,
+    _instructions:
+      'Copy this file to content.json or write content.json from scratch, then remove _template and _instructions. Replace slides[] with real DeckKit content; do not append another JSON object to this template.',
     meta: {
       deckkit: args.deckkit,
     },
@@ -165,6 +183,11 @@ try {
     probe: `node ${shellQuote(probeScript)} --xdoc-bin ${shellQuote(args.xdocBin)} --output ${shellQuote(capabilityPath)}`,
     build: `node ${shellQuote(join(__dirname, 'pptx-nova-build.mjs'))} --deckkit ${shellQuote(args.deckkit)} ${shellQuote(contentPath)} -o ${shellQuote(patchPath)} --quality-json ${shellQuote(qualityPath)}`,
     validate: `node ${shellQuote(join(skillRoot, 'assets', 'deckkits', 'validate-content.mjs'))} ${shellQuote(contentPath)} --deckkit ${shellQuote(args.deckkit)} --mode delivery`,
+    checkLock: `node ${shellQuote(join(__dirname, 'pptx-nova-check-lock.mjs'))} --lock ${shellQuote(lockPath)} --content ${shellQuote(contentPath)} --patch ${shellQuote(patchPath)} --json`,
+    dryRun: `${shellQuote(args.xdocBin)} pptx apply -p ${shellQuote(patchPath)} -o ${shellQuote(candidatePath)} --overwrite --dry-run --json > ${shellQuote(dryRunPath)}`,
+    apply: `${shellQuote(args.xdocBin)} pptx apply -p ${shellQuote(patchPath)} -o ${shellQuote(candidatePath)} --overwrite --json > ${shellQuote(applyPath)}`,
+    vision: `${shellQuote(args.xdocBin)} pptx vision-check ${shellQuote(candidatePath)} --json > ${shellQuote(visionPath)}`,
+    preview: `${shellQuote(args.xdocBin)} pptx preview ${shellQuote(candidatePath)} --output-dir ${shellQuote(previewsDir)} --contact-sheet ${shellQuote(contactSheetPath)} --overwrite --json > ${shellQuote(previewReportPath)}`,
   }
   writeJson(join(runDir, 'commands.json'), commands)
 
@@ -172,19 +195,34 @@ try {
     runDir,
     outlinePath,
     deckLockPath: lockPath,
+    deckLockTemplatePath: lockTemplatePath,
     contentPath,
+    contentTemplatePath,
     patchPath,
     qualityPath,
     capabilityPath,
+    dryRunPath,
+    applyPath,
+    visionPath,
+    previewReportPath,
     assetsDir,
     previewsDir,
+    candidatePath,
+    contactSheetPath,
     finalPptx,
+    reservedPaths: {
+      deckLockPath: relativeToRun(runDir, lockPath),
+      contentPath: relativeToRun(runDir, contentPath),
+      candidatePath: relativeToRun(runDir, candidatePath),
+    },
   }
   if (args.json) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`)
   else {
     process.stdout.write(`Run directory: ${runDir}\n`)
-    process.stdout.write(`Content: ${contentPath}\n`)
-    process.stdout.write(`Deck lock: ${lockPath}\n`)
+    process.stdout.write(`Content target: ${contentPath}\n`)
+    process.stdout.write(`Content template: ${contentTemplatePath}\n`)
+    process.stdout.write(`Deck lock target: ${lockPath}\n`)
+    process.stdout.write(`Deck lock template: ${lockTemplatePath}\n`)
     process.stdout.write(`Patch: ${patchPath}\n`)
   }
 } catch (error) {

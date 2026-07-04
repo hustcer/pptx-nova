@@ -30,9 +30,9 @@ Create a run directory and capture xdoc capability evidence as required by
 xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 xdoc pptx select input.pptx --query '{"textRegex":"old text"}' --json > <run-dir>/select.json # optional target lookup
 xdoc pptx apply -p <run-dir>/patch.json -i input.pptx -o <run-dir>/candidate.pptx \
-  --daemon --dry-run --json > <run-dir>/dry-run.json
+  --daemon --overwrite --dry-run --json > <run-dir>/dry-run.json
 xdoc pptx apply -p <run-dir>/patch.json -i input.pptx -o <run-dir>/candidate.pptx \
-  --daemon --json > <run-dir>/apply.json
+  --daemon --overwrite --json > <run-dir>/apply.json
 ```
 
 Before apply, verify `dry-run.json`:

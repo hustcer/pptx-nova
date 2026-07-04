@@ -16,7 +16,7 @@ including create, edit, export, extraction, preview, and check workflows:
 ```
 
 For DeckKit-first create workflows, prefer the bundled initializer so path names,
-placeholder files, and output collision checks are consistent:
+template files, and output collision checks are consistent:
 
 ```bash
 node <skill-root>/scripts/pptx-nova-init-run.mjs \
@@ -24,6 +24,10 @@ node <skill-root>/scripts/pptx-nova-init-run.mjs \
   --deckkit <id> \
   --output <final.pptx>
 ```
+
+The initializer writes `deck_lock.template.json` and `content.template.json`.
+Use them as examples, then create or overwrite fresh `deck_lock.json` and
+`content.json`; do not append a second JSON object to a template file.
 
 Keep all temporary files in that run directory, including `outline.json`,
 `deck_lock.json`, `assets_manifest.json`, `content.json`, `patch.json`,

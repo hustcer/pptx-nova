@@ -277,8 +277,8 @@ node <skill-root>/scripts/pptx-nova-refurbish-fallback-patch.mjs \
   --map reference-map.json \
   --json > fallback-patch-report.json
 
-xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --dry-run --json > dry-run.json
-xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --json > apply.json
+xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --overwrite --dry-run --json > dry-run.json
+xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --overwrite --json > apply.json
 ```
 
 该脚本优先读取 `refurbishProfile.fallback`；若 DeckKit 没有专用 fallback，则从

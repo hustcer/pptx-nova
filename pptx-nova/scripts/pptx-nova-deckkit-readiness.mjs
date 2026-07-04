@@ -146,6 +146,21 @@ function visionLowBuckets(summary) {
   return normalizeVisionLowBuckets(summary?.vision?.lowBuckets)
 }
 
+function severityCounts(value) {
+  return {
+    high: Number(value?.high ?? 0),
+    medium: Number(value?.medium ?? 0),
+    low: Number(value?.low ?? 0),
+  }
+}
+
+function visualRiskCounts(value) {
+  return {
+    high: Number(value?.high ?? 0),
+    medium: Number(value?.medium ?? 0),
+  }
+}
+
 function artifactBytes(path) {
   if (!path || typeof path !== 'string') return 0
   const absolutePath = resolve(WORK_ROOT, path)
@@ -333,6 +348,7 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
       vision: summary.vision
         ? {
             ...summary.vision,
+            bySeverity: severityCounts(summary.vision.bySeverity),
             lowBuckets,
           }
         : null,
@@ -406,7 +422,13 @@ function auditCatalogBenchmark({ index, entry, deckkit }) {
       source: 'catalog',
       validation: catalogCase?.validation ?? null,
       dryRun: catalogCase?.dryRun ?? null,
-      vision: catalogCase?.vision ?? null,
+      vision: catalogCase?.vision
+        ? {
+            ...catalogCase.vision,
+            bySeverity: severityCounts(catalogCase.vision.bySeverity),
+            lowBuckets: normalizeVisionLowBuckets(catalogCase.vision.lowBuckets),
+          }
+        : null,
       previews: catalogCase?.previews ?? null,
       contactSheet: catalogCase?.contactSheet ?? null,
       patchOps: catalogCase?.patchOps ?? 0,
@@ -861,10 +883,17 @@ function printHuman(result) {
         ].join(', ')
       : ''
     const dryRun = benchCase.dryRun
-      ? `, dryRun=H${benchCase.dryRun.visualRisks.high}/M${benchCase.dryRun.visualRisks.medium}`
+      ? (() => {
+          const risks = visualRiskCounts(benchCase.dryRun.visualRisks)
+          return `, dryRun=H${risks.high}/M${risks.medium}`
+        })()
       : ''
     const vision = benchCase.vision
-      ? `, vision=H${benchCase.vision.bySeverity.high}/M${benchCase.vision.bySeverity.medium}/L${benchCase.vision.bySeverity.low} new=${benchCase.vision.lowBuckets.new} changed=${benchCase.vision.lowBuckets.changed}`
+      ? (() => {
+          const severity = severityCounts(benchCase.vision.bySeverity)
+          const lowBuckets = normalizeVisionLowBuckets(benchCase.vision.lowBuckets)
+          return `, vision=H${severity.high}/M${severity.medium}/L${severity.low} new=${lowBuckets.new} changed=${lowBuckets.changed}`
+        })()
       : ''
     const previews = benchCase.previews
       ? `, png=${benchCase.previews.count}/${benchCase.previews.expectedCount ?? '?'}`

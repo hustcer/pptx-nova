@@ -264,6 +264,31 @@ test('readiness reports live benchmark attention separately from explicit except
   assert.equal(report.explicitSelection.passedByExplicitException, false)
 })
 
+test('readiness human output tolerates missing vision severity details', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-readiness-human-'))
+  const catalogPath = join(dir, 'catalog.json')
+  const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
+  const entry = catalog.entries.find((candidate) => candidate.id === 'long-table')
+  const benchCase = entry.quality.benchmark.cases.find(
+    (candidate) => candidate.caseId === 'long-table.golden-html',
+  )
+  benchCase.vision = { status: 'passed' }
+  writeJson(catalogPath, catalog)
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
+    '--deckkit',
+    'long-table',
+    '--target',
+    'delivery',
+    '--catalog',
+    catalogPath,
+  ])
+
+  assert.match(result.stdout, /agent gate: CAN CONTINUE/)
+  assert.match(result.stdout, /vision=H0\/M0\/L0 new=0 changed=0/)
+})
+
 test('readiness required-live mode blocks missing live benchmark evidence', () => {
   const outDir = mkdtempSync(join(tmpdir(), 'pptx-nova-required-live-missing-'))
   const result = spawnSync(
@@ -403,16 +428,40 @@ process.exit(2)
   ])
   const paths = JSON.parse(result.stdout)
 
-  for (const path of [paths.outlinePath, paths.deckLockPath, paths.contentPath, paths.assetsDir]) {
+  for (const path of [
+    paths.outlinePath,
+    paths.deckLockTemplatePath,
+    paths.contentTemplatePath,
+    paths.assetsDir,
+  ]) {
     assert.equal(existsSync(path), true, path)
   }
+  assert.equal(existsSync(paths.deckLockPath), false, paths.deckLockPath)
+  assert.equal(existsSync(paths.contentPath), false, paths.contentPath)
   const commands = JSON.parse(readFileSync(join(paths.runDir, 'commands.json'), 'utf8'))
   assert.match(commands.build, /pptx-nova-build\.mjs/)
   assert.match(commands.probe, /pptx-nova-probe\.mjs/)
   assert.match(commands.probe, /xdoc-capabilities\.json/)
   assert.match(commands.validate, /--mode delivery/)
+  assert.match(commands.checkLock, /pptx-nova-check-lock\.mjs/)
+  assert.match(commands.dryRun, /candidate\.pptx/)
+  assert.match(commands.dryRun, /--overwrite/)
+  assert.match(commands.apply, /candidate\.pptx/)
+  assert.match(commands.apply, /--overwrite/)
+  assert.match(commands.vision, /vision-check/)
+  assert.match(commands.preview, /--contact-sheet/)
+  const contentTemplate = JSON.parse(readFileSync(paths.contentTemplatePath, 'utf8'))
+  const deckLockTemplate = JSON.parse(readFileSync(paths.deckLockTemplatePath, 'utf8'))
+  assert.equal(contentTemplate._template, true)
+  assert.equal(deckLockTemplate._template, true)
   assert.equal(paths.capabilityPath, join(paths.runDir, 'xdoc-capabilities.json'))
+  assert.equal(paths.candidatePath, join(paths.runDir, 'candidate.pptx'))
+  assert.equal(paths.dryRunPath, join(paths.runDir, 'dry-run.json'))
+  assert.equal(paths.applyPath, join(paths.runDir, 'apply.json'))
+  assert.equal(paths.visionPath, join(paths.runDir, 'vision.json'))
+  assert.equal(paths.previewReportPath, join(paths.runDir, 'preview.json'))
   assert.equal(paths.previewsDir, join(paths.runDir, 'previews'))
+  assert.equal(paths.contactSheetPath, join(paths.runDir, 'previews', 'contact-sheet.png'))
   assert.equal(paths.finalPptx, join(root, 'script-test.pptx'))
 })
 
@@ -437,6 +486,27 @@ test('refurbish plan requires semantic diff gate by default', async () => {
         command.name === 'semantic-diff' &&
         command.required === true &&
         command.command.includes('xdoc pptx diff'),
+    ),
+  )
+})
+
+test('refurbish fallback plan overwrites current-run candidate commands', async () => {
+  const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
+  const plan = buildRefurbishPlan({
+    deckkit: 'swiss-grid',
+    source: 'source.pptx',
+    output: 'candidate.pptx',
+    catalog: skillPath('assets/deckkits/catalog.json'),
+    explicit: false,
+    json: true,
+  })
+
+  assert.ok(
+    plan.commands.some(
+      (command) =>
+        command.name === 'apply' &&
+        command.command.includes('candidate.pptx') &&
+        command.command.includes('--overwrite'),
     ),
   )
 })

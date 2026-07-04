@@ -56,8 +56,19 @@ relevant OOXML style properties.
 3. Extract visible text from multiple evidence sources:
    - `inspect.slides[].shapes[].textPreview` for editable shape text.
    - `xdoc convert source.pptx --to text` for rendered text order.
-   - OOXML text node scan for `<a:t>`, `<c:v>`, `<cx:pt>`, and chart/title
-     caches that `inspect` may not expose.
+   - Native source-language classification scan:
+     ```bash
+     xdoc pptx i18n-scan \
+       --source source.pptx \
+       --source-lang zh \
+       --mode source \
+       --json > <run-dir>/i18n-scan-source.json
+     ```
+     Use its categories to decide what to translate or preserve:
+     `visibleBody`, `visibleTextAttr`, and `chartVisibleCache` are
+     translatable; `embeddedWorkbook` requires review; `themeFontMetadata`,
+     `relationshipPath`, `shapeInternalName`, and `chartMetadata` are
+     preserve-by-default.
 4. Build `translation-map.json` with one record per translatable unit:
    `slide`, `object kind`, stable selector or OOXML target, source text,
    translated text, length ratio, fitting risk, and style-preservation method.
@@ -147,9 +158,21 @@ relevant OOXML style properties.
    `blockers[]` as delivery blockers. Font-size-only differences are allowed
    only when they appear under `allowedChanges.fontSize[]` and are recorded as
    layout repair in the bilingual audit.
-10. Scan the candidate for remaining visible source-language text. Treat
-    theme font names, language tags, and external relationship paths as metadata
-    unless the user explicitly asks to localize them.
+10. Scan the candidate for remaining source-language text with the native gate:
+    ```bash
+    xdoc pptx i18n-scan \
+      --source candidate.pptx \
+      --source-lang zh \
+      --mode candidate \
+      --json > <run-dir>/i18n-scan-candidate.json
+    ```
+    Treat `agentGate.passed=false` or non-empty `blockers[]` as delivery
+    blockers. `visibleBody`, `visibleTextAttr`, and `chartVisibleCache` are
+    blocker classes in candidate mode. `embeddedWorkbook` appears under
+    `reviewRequired[]` and needs chart/workbook sync review, but is not a
+    default blocker. Preserve `themeFontMetadata`, `relationshipPath`,
+    `shapeInternalName`, and `chartMetadata` unless the user explicitly asks to
+    localize or relink them.
 11. Run scoped and full visual gates:
 
 - `vision-diff` on changed slides, with source as the baseline:
@@ -318,11 +341,12 @@ Keep these translation-specific artifacts in the run directory when available:
 - `translation-map.json`
 - `replace-text.json`
 - `i18n-text-plan.json`
+- `i18n-scan-source.json`
+- `i18n-scan-candidate.json`
 - `bilingual-translation-audit.md`
 - `bilingual-translation-audit.json`
 - `i18n-style-diff.json`
 - source and candidate inspect reports
-- remaining source-language scans
 - dry-run/apply reports
 - `vision-diff.json`
 - candidate `vision-check` reports when used for diagnostics

@@ -171,6 +171,15 @@ function saveStream(runDir, phase, kind, value) {
   return path
 }
 
+function jsonStatusFailure(report) {
+  const status = typeof report?.status === 'string' ? report.status.toLowerCase() : ''
+  return ['error', 'fail', 'failed', 'blocked'].includes(status)
+}
+
+function jsonStatusFailureKind(report) {
+  return report?.error?.kind ?? report?.error?.code ?? report?.status ?? 'JsonStatusFailure'
+}
+
 function runJsonPhase(summary, options) {
   const { name, bin, args, artifact, cwd = summary.runDir } = options
   const start = performance.now()
@@ -209,7 +218,7 @@ function runJsonPhase(summary, options) {
 
   const phase = {
     name,
-    status: result.status === 0 && !parseError ? 'passed' : 'failed',
+    status: result.status === 0 && !parseError && !jsonStatusFailure(report) ? 'passed' : 'failed',
     exitCode: result.status,
     signal: result.signal ?? null,
     durationMs: durationMs(start),
@@ -226,10 +235,18 @@ function runJsonPhase(summary, options) {
     })
   }
   if (result.status !== 0) {
-    const kind = report?.error?.kind ?? report?.error?.code ?? ''
+    const kind = jsonStatusFailureKind(report)
     throw new PhaseFailure(
       name,
       `${name} failed with exit code ${result.status}${kind ? ` (${kind})` : ''}`,
+      { exitCode: result.status, kind, report },
+    )
+  }
+  if (jsonStatusFailure(report)) {
+    const kind = jsonStatusFailureKind(report)
+    throw new PhaseFailure(
+      name,
+      `${name} emitted failure JSON status ${JSON.stringify(report.status)}${kind ? ` (${kind})` : ''}`,
       { exitCode: result.status, kind, report },
     )
   }

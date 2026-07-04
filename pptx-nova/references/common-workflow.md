@@ -552,6 +552,14 @@ present, it is acceptable to continue after an independent verification step
 such as inspect, semantic audit, or PNG/PowerPoint preview. If the JSON status
 is missing, non-success, or the output is absent, stop and fix the command.
 
+When chaining xdoc commands in one shell block, do not rely on the shell block's
+final exit code as proof that every earlier command succeeded. Either run with
+`set -e` / equivalent, or read each generated JSON report immediately and fail
+closed on `status in ["error", "fail", "failed", "blocked"]`. A failed
+current-run `apply.json` can leave an older `candidate.pptx` in place; running
+`vision-check` or `preview` afterward only proves the stale candidate, not the
+current patch.
+
 If a capability is absent from `xdoc-capabilities.json`, query the targeted op or
 command and try a safe dry-run before calling it unsupported. Preserve the
 distinction in logs and summaries: `undisclosed` means the runtime schema did not

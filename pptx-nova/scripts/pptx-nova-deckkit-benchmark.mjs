@@ -256,14 +256,16 @@ function runCommand(bin, commandArgs, label) {
   }
 }
 
+function jsonStatusFailure(report) {
+  const status = typeof report?.status === 'string' ? report.status.toLowerCase() : ''
+  return ['error', 'fail', 'failed', 'blocked'].includes(status)
+}
+
 function runJsonCommand(bin, commandArgs, label) {
   const result = runCommand(bin, commandArgs, label)
+  let json
   try {
-    return {
-      json: JSON.parse(result.stdout),
-      stdout: result.stdout,
-      stderr: result.stderr,
-    }
+    json = JSON.parse(result.stdout)
   } catch (error) {
     throw new Error(
       [
@@ -274,6 +276,15 @@ function runJsonCommand(bin, commandArgs, label) {
         .filter(Boolean)
         .join('\n'),
     )
+  }
+  if (jsonStatusFailure(json)) {
+    const kind = json?.error?.kind ?? json?.error?.code ?? json?.status ?? 'JsonStatusFailure'
+    throw new Error(`${label} emitted failure JSON status ${JSON.stringify(json.status)} (${kind})`)
+  }
+  return {
+    json,
+    stdout: result.stdout,
+    stderr: result.stderr,
   }
 }
 

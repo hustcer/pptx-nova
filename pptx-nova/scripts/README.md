@@ -29,6 +29,8 @@ Use these entry points from skill workflows:
   fails closed on machine gates, renders PNG/contact-sheet evidence, and
   publishes the final output atomically. A successful run still
   reports `needs-human-review`; it never claims the visual review is complete.
+  Read `refurbish-run-summary.json.agentSummary` for the stable agent-facing
+  status, gate counts, and artifact pointers.
 - `pptx-nova-refurbish-fallback-patch.mjs` - generate generic inspect-driven
   fallback artifacts (`patch.json`, `deck_lock.json`, baseline
   `content-audit.json`, and `reference-map.json`) for DeckKits without native
@@ -45,7 +47,8 @@ Use these entry points from skill workflows:
 - `pptx-nova-finalize-evidence.mjs` - finalize existing high-risk routes from
   final inspect plus their existing vision/fidelity reports. It writes
   `layout-final.json` and `evidence-summary.json`; it intentionally excludes
-  Micro Edit and does not replace mode-specific gates or PNG review.
+  Micro Edit and does not replace mode-specific gates or PNG review. Read
+  `evidence-summary.json.agentSummary` for the stable agent-facing summary.
 - pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
   data-driven, Studio, structural edit, template-following, and refurbish runs
   that contain native chart/table ops. It validates data shape, source/claim

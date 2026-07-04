@@ -314,6 +314,10 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
     `refurbish-audit`, then run `pptx-nova-layout-snapshot.mjs` on final inspect
     and keep both reports with the run artifacts.
+    For agent-facing status and final-response facts, read
+    `refurbish-run-summary.json.agentSummary` or
+    `evidence-summary.json.agentSummary` first; open the underlying gate reports
+    only when the short summary points to a warning, failure, or unsupported area.
 
 11. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below

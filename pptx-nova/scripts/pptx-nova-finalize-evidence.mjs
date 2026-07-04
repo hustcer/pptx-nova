@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const SCHEMA_VERSION = 'pptx-nova-finalize-evidence/v1'
+const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 const LAYOUT_SCHEMA_VERSION = 'pptx-nova-layout-snapshot/v1'
 const FIDELITY_SCHEMA_VERSION = 'pptx-nova-fidelity-gate/v1'
 const SEMANTIC_AUDIT_SCHEMA_VERSION = 'pptx-nova-semantic-audit/v1'
@@ -134,6 +135,7 @@ function makeReport(args) {
       visionScope: null,
       changedSlideRisk: null,
       deckResidualRisk: null,
+      fidelityGate: null,
       semanticAudit: null,
       visualReview: null,
       structureCheck: null,
@@ -157,6 +159,91 @@ function issue(report, level, code, message, details = {}) {
 
 function check(report, name, status, details = {}) {
   report.checks.push({ name, status, ...details })
+}
+
+function checkByName(report, name) {
+  return report.checks.find((item) => item.name === name) ?? null
+}
+
+function artifactSet(report, keys) {
+  return Object.fromEntries(keys.map((key) => [key, report.artifacts?.[key] ?? null]))
+}
+
+function buildAgentSummary(report) {
+  const vision = checkByName(report, 'vision-evidence')
+  const layout = checkByName(report, 'layout-snapshot')
+  const fidelity = checkByName(report, 'fidelity-evidence')
+  const semanticAudit = checkByName(report, 'chart-table-semantic-audit')
+  const visualReview = checkByName(report, 'structured-visual-review')
+  const structureCheck = checkByName(report, 'pptx-xml-structure-check')
+  const decision =
+    report.status === 'fail'
+      ? 'stop-and-fix'
+      : report.status === 'warn'
+        ? 'continue-with-disclosed-risk'
+        : 'continue'
+
+  return {
+    schemaVersion: AGENT_SUMMARY_SCHEMA_VERSION,
+    mode: report.mode,
+    status: report.status,
+    machineGatesPassed: report.status !== 'fail',
+    decision,
+    slides: {
+      source: report.summary.fidelityGate?.sourceSlides ?? null,
+      final: report.summary.fidelityGate?.finalSlides ?? report.summary.slideCount ?? null,
+      mapped: report.summary.fidelityGate?.mappedSlides ?? null,
+    },
+    gates: {
+      vision: {
+        gate: vision?.status ?? 'not-run',
+        high: report.summary.vision?.high ?? null,
+        medium: report.summary.vision?.medium ?? null,
+        low: report.summary.vision?.low ?? null,
+      },
+      layout: {
+        gate: layout?.status ?? 'not-run',
+        totalRisks: report.summary.layoutRisks?.total ?? null,
+        actionableRisks: report.summary.layoutRisks?.actionable ?? null,
+      },
+      fidelityGate: {
+        gate: fidelity?.status ?? 'not-run',
+        status: report.summary.fidelityGate?.status ?? null,
+        errors: report.summary.fidelityGate?.errors ?? null,
+        warnings: report.summary.fidelityGate?.warnings ?? null,
+      },
+      semanticAudit: {
+        gate: semanticAudit?.status ?? 'not-run',
+        status: semanticAudit?.auditStatus ?? null,
+        errors: report.summary.semanticAudit?.errors ?? null,
+        warnings: report.summary.semanticAudit?.warnings ?? null,
+      },
+      visualReview: {
+        gate: visualReview?.status ?? 'not-run',
+        status: visualReview?.reviewStatus ?? null,
+        slidesReviewed: report.summary.visualReview?.slidesReviewed ?? null,
+        errors: report.summary.visualReview?.errors ?? null,
+        warnings: report.summary.visualReview?.warnings ?? null,
+      },
+      structureCheck: {
+        gate: structureCheck?.status ?? 'not-run',
+        status: structureCheck?.checkStatus ?? null,
+        errors: report.summary.structureCheck?.errors ?? null,
+        warnings: report.summary.structureCheck?.warnings ?? null,
+      },
+    },
+    artifacts: artifactSet(report, [
+      'finalInspect',
+      'layoutFinal',
+      'vision',
+      'fidelityGate',
+      'semanticAudit',
+      'visualReview',
+      'structureCheck',
+    ]),
+    errors: report.errors.map((item) => ({ code: item.code, message: item.message })),
+    warnings: report.warnings.map((item) => ({ code: item.code, message: item.message })),
+  }
 }
 
 function readJson(report, path, label) {
@@ -493,6 +580,14 @@ function validateFidelity(args, config, report) {
       gateStatus: gate?.status ?? null,
     },
   )
+  report.summary.fidelityGate = {
+    status: gate?.status ?? null,
+    errors: number(gate?.summary?.errors) ?? 0,
+    warnings: number(gate?.summary?.warnings) ?? 0,
+    sourceSlides: number(gate?.summary?.sourceSlides),
+    finalSlides: number(gate?.summary?.finalSlides),
+    mappedSlides: number(gate?.summary?.mappedSlides),
+  }
 }
 
 function validateSemanticAudit(args, report) {
@@ -685,6 +780,7 @@ function finish(args, report) {
   report.summary.errors = report.errors.length
   report.summary.warnings = report.warnings.length
   report.status = report.errors.length > 0 ? 'fail' : report.warnings.length > 0 ? 'warn' : 'pass'
+  report.agentSummary = buildAgentSummary(report)
   const output = join(args.runDir, 'evidence-summary.json')
   writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`)
   if (args.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)

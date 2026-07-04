@@ -24,6 +24,7 @@ const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
 const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
+const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source <source.pptx> --output <output.pptx> [options]
@@ -307,6 +308,105 @@ function requireGate(summary, name, passed, details = {}) {
     throw new PhaseFailure(name, message ?? `${name} gate failed`, { report: details })
   }
   return gate
+}
+
+function gateByName(summary, name) {
+  return summary.gates.find((gate) => gate.name === name) ?? null
+}
+
+function gateStatus(gate) {
+  if (!gate) return 'not-run'
+  return gate.passed ? 'passed' : 'failed'
+}
+
+function artifactSet(summary, keys) {
+  return Object.fromEntries(keys.map((key) => [key, summary.artifacts?.[key] ?? null]))
+}
+
+function buildAgentSummary(summary) {
+  const visionDiff = gateByName(summary, 'vision-diff')
+  const audit = gateByName(summary, 'refurbish-audit')
+  const fidelity = gateByName(summary, 'fidelity-gate')
+  const semanticDiff = gateByName(summary, 'pptx-semantic-diff')
+  const preview = gateByName(summary, 'png-previews')
+  const route = summary.route?.executed || summary.route?.planned || summary.route?.requested || ''
+  const decision = summary.machineGatesPassed
+    ? summary.needsHumanReview
+      ? 'continue-to-human-review'
+      : 'deliver'
+    : 'stop-and-fix'
+
+  return {
+    schemaVersion: AGENT_SUMMARY_SCHEMA_VERSION,
+    mode: 'refurbish',
+    status: summary.status,
+    machineGatesPassed: Boolean(summary.machineGatesPassed),
+    deliveryReady: Boolean(summary.deliveryReady),
+    needsHumanReview: Boolean(summary.needsHumanReview),
+    decision,
+    deckkit: summary.deckkit,
+    route,
+    slides: {
+      source: fidelity?.sourceSlides ?? null,
+      final: fidelity?.finalSlides ?? null,
+      mapped: fidelity?.mappedSlides ?? null,
+    },
+    gates: {
+      visionDiff: {
+        status: visionDiff?.status ?? null,
+        gate: gateStatus(visionDiff),
+        newHigh: visionDiff?.new?.high ?? null,
+        newMedium: visionDiff?.new?.medium ?? null,
+        changedHigh: visionDiff?.changed?.high ?? null,
+      },
+      refurbishAudit: {
+        status: audit?.status ?? null,
+        gate: gateStatus(audit),
+        errors: audit?.errorCount ?? null,
+        warnings: audit?.warningCount ?? null,
+      },
+      fidelityGate: {
+        status: fidelity?.status ?? null,
+        gate: gateStatus(fidelity),
+        errors: fidelity?.errors ?? null,
+        warnings: fidelity?.warnings ?? null,
+      },
+      semanticDiff: {
+        status: semanticDiff?.status ?? null,
+        gate: gateStatus(semanticDiff),
+        semanticStatus: semanticDiff?.semanticStatus ?? null,
+        reliableChanges: semanticDiff?.reliableChanges ?? null,
+        uncertainChanges: semanticDiff?.uncertainChanges ?? null,
+        unsupportedRegions: semanticDiff?.unsupportedRegions ?? null,
+      },
+      preview: {
+        gate: gateStatus(preview),
+        mode: preview?.mode ?? null,
+        pages: preview?.count ?? null,
+        expectedPages: preview?.expectedCount ?? null,
+        contactSheetBytes: preview?.contactSheetBytes ?? null,
+      },
+    },
+    artifacts: artifactSet(summary, [
+      'summary',
+      'visionDiff',
+      'contentAuditFinal',
+      'fidelityGate',
+      'pptxDiff',
+      'previewReport',
+      'contactSheet',
+      'layoutFinal',
+      'finalInspect',
+    ]),
+    warnings: summary.warnings,
+    error: summary.error
+      ? {
+          phase: summary.error.phase,
+          message: summary.error.message,
+          kind: summary.error.kind ?? null,
+        }
+      : null,
+  }
 }
 
 function visionCounts(report, classification) {
@@ -1154,6 +1254,7 @@ function runRefurbish(inputArgs) {
     summary.machineGatesPassed = true
     summary.deliveryReady = false
     finalizeArtifactPaths(summary, artifacts.summary)
+    summary.agentSummary = buildAgentSummary(summary)
     writeJson(artifacts.summary, summary)
     return summary
   } catch (error) {
@@ -1167,6 +1268,7 @@ function runRefurbish(inputArgs) {
       exitCode: error.exitCode ?? null,
     }
     finalizeArtifactPaths(summary, artifacts.summary)
+    summary.agentSummary = buildAgentSummary(summary)
     writeJson(artifacts.summary, summary)
     error.summary = summary
     throw error

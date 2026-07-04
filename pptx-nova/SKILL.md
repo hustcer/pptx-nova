@@ -47,6 +47,17 @@ op schema 和 dry-run suggestions。`xdoc <command...> --help` 仅作补充，�
 只有调用方显式要求 strict gate 且任务必需能力仍未披露时才阻塞；否则继续探索或走已有
 fallback，不得因快照精简而禁用 xdoc 新能力。
 
+### Run 复用与隔离
+
+`.pptx-nova/<run>/` 可以作为历史证据读取，但不能自动成为当前任务的执行上下文。新任务、
+旧反馈审计、工具能力排查、升级后复核，或用户质疑旧结果时，创建新的当前上下文；旧 run
+只读用于解释当时发生了什么。
+
+只有用户明确要求继续同一任务，且 source、输出目标和任务目标未变化时，才复用旧 run 执行。
+即使复用，也先重新 probe 当前 `xdoc`；旧 `xdoc-capabilities.json` 只能说明当时披露了什么，
+不能作为当前能力事实。开发、升级或恢复旧 run 时，凡涉及"能力缺失"判断，必须用当前
+runtime/schema/help 反查后再下结论。
+
 ## 产物保留与清理策略
 
 `.pptx-nova/<slug>-<timestamp>/` 是可审计 run 目录，不是普通缓存。任务完成后不要默认删除
@@ -266,6 +277,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   dry-run/vision 输出难以行动、错误修复提示不足、slots/budget 文档不一致、示例数据缺口等。
 - 对每个问题给出面向 `pptx-nova` SKILL 的最佳解决方案，优先说明应改文档、脚本、DeckKit
   schema、benchmark、catalog 还是最终回复规范。
+- 如果反馈审计旧 run、升级后的行为，或写到"缺少/需要新增某能力"，先重新 probe 当前
+  `xdoc` 并反查当前 reference；把结论分清为"已有能力但本次 Agent 未使用"、"当前工具缺口"、
+  "文档引导不足"或"历史 run 过期"。不要把旧 run 观察混写成当前能力事实。
 - 最后可以从 Agent 角度补充真实使用感受或建议，聚焦流程摩擦、认知负担、验证闭环和可维护性；
   不要把它写成泛泛表扬或用户内容本身的设计点评。
 

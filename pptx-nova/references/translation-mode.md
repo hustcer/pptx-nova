@@ -64,15 +64,35 @@ relevant OOXML style properties.
 5. Copy the source PPTX into the run directory and use that copy as the first
    candidate. Do not reconstruct slides, duplicate objects, or generate new
    text boxes for existing content.
-6. Replace text in place while preserving OOXML structure:
+6. Before replacing DrawingML shape/table text, generate a run-level text plan:
+
+   ```bash
+   xdoc pptx i18n-text-plan \
+     --source source.pptx \
+     --data <run-dir>/translation-map.json \
+     --json > <run-dir>/i18n-text-plan.json
+   ```
+
+   Use a `pptx-i18n-translations/v1` compatible `translations[]` array for the
+   plan input. Each unit should include `slide` (1-based), `shapeId` when
+   available, `paragraph` (0-based), `sourceText`, `targetText`, and optional
+   `anchors[]` for styled tokens that must retain their original run boundary.
+   Treat `agentGate.passed=false`, `reviewRequiredCount>0`, or any
+   `strategy=review-required` as an automation blocker. Do not auto-apply those
+   units; add reliable anchors, provide run-level target text manually, or ask
+   for human review.
+7. Replace text in place while preserving OOXML structure:
    - Prefer run/text-node replacement that changes only `<a:t>`, `<c:v>`,
      `<cx:pt>`, or equivalent visible cache text, leaving neighboring
      `a:rPr`, `a:pPr`, `a:bodyPr`, table cell properties, and chart styling
      untouched.
+   - For DrawingML shape/table paragraphs, apply only the `set-run` patchOps
+     emitted by `i18n-text-plan` when `agentGate.passed=true`.
    - Preserve run boundaries when they encode style. If one source sentence is
-     split across multiple styled runs, either distribute the translation across
-     the existing runs or use the dominant run only after proving the source
-     runs share the same style.
+     split across multiple styled runs, follow the plan strategy:
+     `uniform`, `preserve-run-boundaries`, or
+     `preserve-styled-token-boundaries`. If the plan returns
+     `review-required`, do not collapse the paragraph into one run.
    - Preserve hyperlink runs and field runs. Do not remove `<a:hlinkClick>`,
      `<a:fld>`, footer/date/page number placeholders, or speaker-note
      structure while translating visible labels around them.
@@ -83,10 +103,10 @@ relevant OOXML style properties.
    - Use `set-text`, `set-table-cell`, or other high-level text ops only for
      uniform-format objects, or when the op has a style-preservation report that
      proves bold/italic/underline/strike/alignment and run formatting survive.
-7. Dry-run when using xdoc patch ops. For direct OOXML fallback, write a
+8. Dry-run when using xdoc patch ops. For direct OOXML fallback, write a
    machine-readable replacement report and run ZIP/XML validation immediately
    after packaging.
-8. Run the native translation style gate and block on any non-size style
+9. Run the native translation style gate and block on any non-size style
    change:
    ```bash
    xdoc pptx i18n-style-diff \
@@ -99,26 +119,26 @@ relevant OOXML style properties.
    `blockers[]` as delivery blockers. Font-size-only differences are allowed
    only when they appear under `allowedChanges.fontSize[]` and are recorded as
    layout repair in the bilingual audit.
-9. Scan the candidate for remaining visible source-language text. Treat
+10. Scan the candidate for remaining visible source-language text. Treat
    theme font names, language tags, and external relationship paths as metadata
    unless the user explicitly asks to localize them.
-10. Run scoped and full visual gates:
+11. Run scoped and full visual gates:
 
 - `vision-check` on changed slides.
 - Source and candidate PNG/contact sheets for changed slides.
 - `contact-diff` for before/after layout consistency.
 
-11. Fix visual regressions at the translation source:
+12. Fix visual regressions at the translation source:
 
 - First adjust font size within the original visual hierarchy.
 - If the text still does not fit, preserve meaning with concise wording.
 - Do not move objects, split pages, change font weight/style, or shrink fonts
   below readability thresholds just to avoid editing the translation.
 
-12. Write `bilingual-translation-audit.md` and `.json` with source text,
+13. Write `bilingual-translation-audit.md` and `.json` with source text,
     target text, and notes for any meaning-preserving compression.
-13. Run structure checks, `pptx diff`, preview, and clean-open when available.
-14. Publish the validated candidate to the requested output path.
+14. Run structure checks, `pptx diff`, preview, and clean-open when available.
+15. Publish the validated candidate to the requested output path.
 
 ## Style Signature Gate
 
@@ -142,6 +162,31 @@ Required interpretation:
 This gate does not prove translation completeness or rendered fit. It must be
 paired with bilingual text audit, source-language scan, preview/contact-diff,
 and visual review.
+
+## Text Node Planning Gate
+
+`xdoc pptx i18n-text-plan` is mandatory before applying automated run-level
+translation patches to DrawingML shape/table text. It is a planner, not a
+writer: it reads the source deck and translation units, then emits
+style-preserving `set-run` patchOps.
+
+Required interpretation:
+
+- `status=pass` and `agentGate.passed=true`: generated patchOps may be dry-run
+  and then applied to the copied candidate deck.
+- `strategy=uniform`: a single source run receives the full target text.
+- `strategy=preserve-run-boundaries`: source runs share the same style; the
+  first run receives the target and continuation runs are cleared while style
+  nodes remain.
+- `strategy=preserve-styled-token-boundaries`: styled anchors remain in their
+  original runs and surrounding translated text is assigned to adjacent plain
+  runs.
+- `strategy=review-required`: stop automation for that unit. Add explicit
+  anchors, produce a manual run-level mapping, or request human review.
+
+The text plan does not replace the style diff. After applying the plan, still
+run `i18n-style-diff` to prove bold/italic/underline/strike/alignment and other
+style signatures were not changed.
 
 ## Translation Quality Rules
 
@@ -228,6 +273,7 @@ consistent and list any deliberate text compression.
 Keep these translation-specific artifacts in the run directory when available:
 
 - `translation-map.json`
+- `i18n-text-plan.json`
 - `bilingual-translation-audit.md`
 - `bilingual-translation-audit.json`
 - `i18n-style-diff.json`

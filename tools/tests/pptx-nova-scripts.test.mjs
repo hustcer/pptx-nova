@@ -31,6 +31,19 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
+function writeFakeXdoc(root, source) {
+  const scriptPath = join(root, 'fake-xdoc.mjs')
+  writeFileSync(scriptPath, source)
+  if (process.platform !== 'win32') {
+    chmodSync(scriptPath, 0o755)
+    return scriptPath
+  }
+
+  const cmdPath = join(root, 'fake-xdoc.cmd')
+  writeFileSync(cmdPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`)
+  return cmdPath
+}
+
 function swissColumnContent() {
   return {
     meta: { deckkit: 'swiss-grid' },
@@ -365,9 +378,8 @@ test('mckinsey-blue loss-driver bar keeps finite geometry for missing or invalid
 
 test('run initializer creates standard artifacts and reusable commands', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-init-run-'))
-  const fakeXdoc = join(root, 'fake-xdoc.mjs')
-  writeFileSync(
-    fakeXdoc,
+  const fakeXdoc = writeFakeXdoc(
+    root,
     `#!/usr/bin/env node
 if (process.argv[2] === 'schema') {
   process.stdout.write(JSON.stringify({
@@ -381,7 +393,6 @@ if (process.argv[2] === 'schema') {
 process.exit(2)
 `,
   )
-  chmodSync(fakeXdoc, 0o755)
   const result = runNode([
     skillPath('scripts/pptx-nova-init-run.mjs'),
     '--slug',
@@ -441,10 +452,9 @@ test('refurbish runner writes semantic diff before publishing output', () => {
   const source = join(root, 'source.pptx')
   const output = join(root, 'out.pptx')
   const runDir = join(root, 'run')
-  const fakeXdoc = join(root, 'fake-xdoc.mjs')
   writeFileSync(source, 'fake pptx')
-  writeFileSync(
-    fakeXdoc,
+  const fakeXdoc = writeFakeXdoc(
+    root,
     `#!/usr/bin/env node
 import { mkdirSync, writeFileSync } from 'node:fs'
 
@@ -536,7 +546,6 @@ if (args[0] === 'schema') {
 }
 `,
   )
-  chmodSync(fakeXdoc, 0o755)
 
   const result = runNode([
     skillPath('scripts/pptx-nova-refurbish-run.mjs'),

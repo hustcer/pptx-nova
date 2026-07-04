@@ -151,11 +151,38 @@ test('DeckKit slot reference and consistency cover mckinsey-blue cover tuple slo
   assert.deepEqual(coverConsistency.dynamics, [])
 })
 
-test('DeckKit slot consistency honors array-level control roles by default', () => {
+test('readiness reports agentGate separately from explicit exception and live benchmark evidence', () => {
+  const outDir = mkdtempSync(join(tmpdir(), 'pptx-nova-missing-benchmark-'))
   const result = runNode([
-    skillPath('scripts/pptx-nova-deckkit-slot-consistency.mjs'),
+    skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
+    '--deckkit',
+    'long-table',
+    '--target',
+    'delivery',
+    '--explicit',
+    '--out',
+    outDir,
     '--json',
   ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.passed, true)
+  assert.equal(report.status, 'attention')
+  assert.equal(report.agentGate.canContinue, true)
+  assert.equal(report.agentGate.status, 'attention')
+  assert.equal(report.agentGate.nextAction, 'continue-with-catalog-benchmark-evidence')
+  assert.equal(report.agentGate.decisionBasis.catalogReadiness, 'production')
+  assert.equal(report.agentGate.decisionBasis.catalogBenchmarkPassed, true)
+  assert.equal(report.agentGate.decisionBasis.liveBenchmarkStatus, 'missing')
+  assert.equal(report.explicitSelection.requested, true)
+  assert.equal(report.explicitSelection.applies, false)
+  assert.equal(report.explicitSelection.canUseExplicitException, false)
+  assert.equal(report.explicitSelection.canContinue, true)
+  assert.equal(report.explicitSelection.passedByExplicitException, false)
+})
+
+test('DeckKit slot consistency honors array-level control roles by default', () => {
+  const result = runNode([skillPath('scripts/pptx-nova-deckkit-slot-consistency.mjs'), '--json'])
   const consistency = JSON.parse(result.stdout)
   const swissGrid = consistency.results.find((kit) => kit.deckkit === 'swiss-grid')
   const timeline = swissGrid.slideTypes.find((slide) => slide.slideType === 'swissTimelineSlide')
@@ -265,12 +292,7 @@ process.exit(2)
   ])
   const paths = JSON.parse(result.stdout)
 
-  for (const path of [
-    paths.outlinePath,
-    paths.deckLockPath,
-    paths.contentPath,
-    paths.assetsDir,
-  ]) {
+  for (const path of [paths.outlinePath, paths.deckLockPath, paths.contentPath, paths.assetsDir]) {
     assert.equal(existsSync(path), true, path)
   }
   const commands = JSON.parse(readFileSync(join(paths.runDir, 'commands.json'), 'utf8'))

@@ -492,25 +492,72 @@ function normalizeRequiredGates(gates) {
 function buildExplicitSelection({ requested, target, catalogAudit, targetEligibility }) {
   const readiness = catalogAudit.readiness
   const profile = catalogAudit.refurbishProfile
-  const canUseException =
+  const applies = requested && ['experimental', 'candidate'].includes(readiness)
+  const canUseExplicitException =
     requested &&
     ['experimental', 'candidate'].includes(readiness) &&
     (profile.present ? ['explicit-only', 'explicit-exception'].includes(profile.mode) : true)
   const requiredGates = normalizeRequiredGates(
     profile.requiredGates.length > 0 ? profile.requiredGates : defaultExplicitGates(),
   )
+  const passedByExplicitException = canUseExplicitException && !targetEligibility.ready
+  const canContinue = targetEligibility.usable || passedByExplicitException
   return {
     requested,
-    canContinue: canUseException,
-    passedByExplicitException: canUseException && !targetEligibility.ready,
-    mode: profile.mode || (canUseException ? 'explicit-exception' : ''),
+    applies,
+    canContinue,
+    canUseExplicitException,
+    passedByExplicitException,
+    mode: profile.mode || (canUseExplicitException ? 'explicit-exception' : ''),
     target,
     readiness,
     nativeSkinning: profile.nativeSkinning ?? catalogAudit.nativeSkinning,
     fallback: profile.fallback,
-    requiredGates: canUseException ? requiredGates : [],
+    requiredGates: canUseExplicitException ? requiredGates : [],
     notes: profile.notes ?? [],
     blockers: targetEligibility.blockers,
+  }
+}
+
+function buildAgentGate({
+  target,
+  targetGate,
+  eligibility,
+  explicitSelection,
+  catalogAudit,
+  benchmarkAudit,
+}) {
+  const canContinue = targetGate.usable || explicitSelection.passedByExplicitException
+  const attention = [...(targetGate.attention ?? [])]
+  const blockers = targetGate.usable ? [] : [...targetGate.blockers]
+  const catalogBenchmarkPassed = catalogAudit.quality?.benchmark?.passed ?? null
+  const liveBenchmarkStatus = benchmarkAudit.evidence?.status ?? 'unknown'
+  let nextAction = canContinue ? 'continue' : 'blocked'
+  if (canContinue && attention.length > 0) {
+    nextAction =
+      liveBenchmarkStatus === 'missing' && catalogBenchmarkPassed === true
+        ? 'continue-with-catalog-benchmark-evidence'
+        : 'continue-with-attention'
+  }
+  if (!canContinue && explicitSelection.canUseExplicitException) {
+    nextAction = 'continue-only-with-explicit-exception-gates'
+  }
+  return {
+    canContinue,
+    status: canContinue ? (attention.length > 0 ? 'attention' : 'pass') : 'fail',
+    target,
+    blockers,
+    attention,
+    nextAction,
+    decisionBasis: {
+      catalogReadiness: catalogAudit.readiness,
+      catalogBenchmarkPassed,
+      liveBenchmarkStatus,
+      targetUsable: targetGate.usable,
+      targetReady: targetGate.ready,
+      explicitExceptionApplied: explicitSelection.passedByExplicitException,
+      deliveryUsable: eligibility.delivery.usable,
+    },
   }
 }
 
@@ -639,6 +686,18 @@ function buildEligibility({ catalogAudit, benchmarkAudit }) {
 
 function printHuman(result) {
   process.stdout.write(`DeckKit readiness audit: ${result.deckkit}\n`)
+  if (result.agentGate) {
+    const label =
+      result.agentGate.status === 'pass'
+        ? 'CAN CONTINUE'
+        : result.agentGate.status === 'attention'
+          ? 'CAN CONTINUE WITH ATTENTION'
+          : 'BLOCKED'
+    process.stdout.write(`- agent gate: ${label}\n`)
+    if (result.agentGate.nextAction) {
+      process.stdout.write(`  - next action: ${result.agentGate.nextAction}\n`)
+    }
+  }
   for (const target of ['candidate', 'delivery', 'default']) {
     const gate = result.eligibility[target]
     const label =
@@ -671,8 +730,13 @@ function printHuman(result) {
     }
   }
   if (result.explicitSelection?.requested) {
+    const explicitLabel = result.explicitSelection.applies
+      ? result.explicitSelection.canUseExplicitException
+        ? 'EXCEPTION AVAILABLE'
+        : 'EXCEPTION BLOCKED'
+      : 'NOT NEEDED'
     process.stdout.write(
-      `- explicit selection: ${result.explicitSelection.canContinue ? 'CAN CONTINUE' : 'BLOCKED'} mode=${result.explicitSelection.mode || 'n/a'}\n`,
+      `- explicit selection: ${explicitLabel} mode=${result.explicitSelection.mode || 'n/a'}\n`,
     )
     if (result.explicitSelection.requiredGates.length > 0) {
       process.stdout.write(
@@ -734,14 +798,23 @@ function main() {
   })
   const targetGate = eligibility[args.target]
   const usableForDelivery = eligibility.delivery.usable
-  const passed = targetGate.usable || explicitSelection.passedByExplicitException
+  const agentGate = buildAgentGate({
+    target: args.target,
+    targetGate,
+    eligibility,
+    explicitSelection,
+    catalogAudit,
+    benchmarkAudit,
+  })
+  const passed = agentGate.canContinue
   const result = {
     schemaVersion: 'pptx-nova-deckkit-readiness-audit/v1',
     deckkit: args.deckkit,
     target: args.target,
     explicit: args.explicit,
     passed,
-    status: targetGate.status,
+    status: agentGate.status,
+    agentGate,
     catalogReadiness: catalogAudit.readiness,
     benchmarkEvidence: benchmarkAudit.evidence,
     deliveryGate: eligibility.delivery.status,

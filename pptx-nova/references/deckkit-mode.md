@@ -94,8 +94,12 @@ must have no new high/medium from the agent's restyle, PNG review must confirm
 the target visual grammar is visible, and content audit must prove no source
 content/object semantics were reduced.
 Use `--explicit` with readiness in this case so the JSON reports
-`explicitSelection.passedByExplicitException`, `mode`, native skinning, fallback
+top-level `agentGate.canContinue` / `agentGate.nextAction` as the authoritative
+Agent decision, plus `explicitSelection.passedByExplicitException`,
+`explicitSelection.canUseExplicitException`, `mode`, native skinning, fallback
 profile, and required gates instead of acting like a terminal command failure.
+Do not treat `explicitSelection` as the overall readiness decision: production
+and default DeckKits usually do not need an explicit exception at all.
 
 Do not assume every DeckKit id is supported by every xdoc skinning command.
 `refurbish-skin` and `chrome-apply --deckkit` require native skinning catalog

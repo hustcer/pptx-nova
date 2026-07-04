@@ -154,6 +154,15 @@ function commandText(bin, args) {
     .join(' ')
 }
 
+function commandInvocation(bin, args) {
+  const scriptExts = new Set(['.cjs', '.js', '.mjs'])
+  const ext = extname(bin).toLowerCase()
+  if (scriptExts.has(ext) && (bin.includes('/') || bin.includes('\\') || existsSync(bin))) {
+    return { bin: process.execPath, args: [bin, ...args] }
+  }
+  return { bin, args }
+}
+
 function saveStream(runDir, phase, kind, value) {
   if (!value?.trim()) return null
   const path = join(runDir, `${phase}.${kind}.txt`)
@@ -164,7 +173,8 @@ function saveStream(runDir, phase, kind, value) {
 function runJsonPhase(summary, options) {
   const { name, bin, args, artifact, cwd = summary.runDir } = options
   const start = performance.now()
-  const result = spawnSync(bin, args, {
+  const command = commandInvocation(bin, args)
+  const result = spawnSync(command.bin, command.args, {
     cwd,
     encoding: 'utf8',
     maxBuffer: 128 * 1024 * 1024,
@@ -176,7 +186,7 @@ function runJsonPhase(summary, options) {
       exitCode: null,
       signal: null,
       durationMs: durationMs(start),
-      command: commandText(bin, args),
+      command: commandText(command.bin, command.args),
       artifact: relativeArtifact(summary.runDir, artifact),
       stderr: null,
       spawnError: result.error.message,
@@ -202,7 +212,7 @@ function runJsonPhase(summary, options) {
     exitCode: result.status,
     signal: result.signal ?? null,
     durationMs: durationMs(start),
-    command: commandText(bin, args),
+    command: commandText(command.bin, command.args),
     artifact: relativeArtifact(summary.runDir, artifact),
     stderr: relativeArtifact(summary.runDir, stderrPath),
   }
@@ -228,7 +238,8 @@ function runJsonPhase(summary, options) {
 function runPlainPhase(summary, options) {
   const { name, bin, args, cwd = summary.runDir } = options
   const start = performance.now()
-  const result = spawnSync(bin, args, {
+  const command = commandInvocation(bin, args)
+  const result = spawnSync(command.bin, command.args, {
     cwd,
     encoding: 'utf8',
     maxBuffer: 128 * 1024 * 1024,
@@ -240,7 +251,7 @@ function runPlainPhase(summary, options) {
       exitCode: null,
       signal: null,
       durationMs: durationMs(start),
-      command: commandText(bin, args),
+      command: commandText(command.bin, command.args),
       artifact: null,
       stdout: null,
       stderr: null,
@@ -258,7 +269,7 @@ function runPlainPhase(summary, options) {
     exitCode: result.status,
     signal: result.signal ?? null,
     durationMs: durationMs(start),
-    command: commandText(bin, args),
+    command: commandText(command.bin, command.args),
     artifact: null,
     stdout: relativeArtifact(summary.runDir, stdoutPath),
     stderr: relativeArtifact(summary.runDir, stderrPath),

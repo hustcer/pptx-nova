@@ -34,14 +34,8 @@ function writeJson(path, value) {
 function writeFakeXdoc(root, source) {
   const scriptPath = join(root, 'fake-xdoc.mjs')
   writeFileSync(scriptPath, source)
-  if (process.platform !== 'win32') {
-    chmodSync(scriptPath, 0o755)
-    return scriptPath
-  }
-
-  const cmdPath = join(root, 'fake-xdoc.cmd')
-  writeFileSync(cmdPath, `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`)
-  return cmdPath
+  chmodSync(scriptPath, 0o755)
+  return scriptPath
 }
 
 function swissColumnContent() {
@@ -566,11 +560,14 @@ if (args[0] === 'schema') {
   const summary = JSON.parse(result.stdout)
   const phaseNames = summary.phases.map((phase) => phase.name)
   const gateNames = summary.gates.map((gate) => gate.name)
+  const sourceInspect = summary.phases.find((phase) => phase.name === 'source-inspect')
 
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(existsSync(output), true)
   assert.equal(existsSync(join(runDir, 'pptx-diff.json')), true)
   assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
+  assert.ok(sourceInspect.command.includes(process.execPath), sourceInspect.command)
+  assert.ok(sourceInspect.command.includes('fake-xdoc.mjs'), sourceInspect.command)
   assert.ok(phaseNames.includes('pptx-semantic-diff'))
   assert.ok(gateNames.includes('pptx-semantic-diff'))
   assert.ok(phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('publish'))

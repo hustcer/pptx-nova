@@ -58,7 +58,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 `layout-final.json`、`fidelity-gate.json`、`content-audit-final.json`、`i18n-text-plan.json`、
 `i18n-style-diff.json`、
 最终候选 PPTX、contact sheet 和人工复核
-必需的少量问题页 PNG。实际不存在的项无需补造。
+必需的少量问题页 PNG、`replace-text.json`。实际不存在的项无需补造。
 
 成功交付后可以瘦身当前 run 的可重建重型产物，例如全量逐页 PNG、重复导出目录、临时转换缓存、
 调试日志、失败迭代的中间 PPTX 和不再引用的 scratch 文件；但必须保留 contact sheet、失败或可疑
@@ -439,7 +439,9 @@ xdoc pptx chrome-apply remapped.pptx --deckkit mckinsey-blue --output styled.ppt
 xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output out.pptx --json
 xdoc pptx diff --source source.pptx --candidate out.pptx --detail summary --json
 xdoc pptx i18n-text-plan --source source.pptx --data translations.json --json
+xdoc pptx replace-text --source source.pptx --data replacements.json --output updated.pptx --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
+xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --allow-text-attrs tooltip --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json

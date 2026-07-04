@@ -81,7 +81,24 @@ relevant OOXML style properties.
    `strategy=review-required` as an automation blocker. Do not auto-apply those
    units; add reliable anchors, provide run-level target text manually, or ask
    for human review.
+
 7. Replace text in place while preserving OOXML structure:
+   - Prefer native `xdoc pptx replace-text` for direct OOXML replacements. It
+     copies the source PPTX, changes only existing text-node or text-attribute
+     values, and blocks when `sourceText`/`sourceHash`/`index` cannot identify a
+     unique target:
+     ```bash
+     xdoc pptx replace-text \
+       --source source.pptx \
+       --data <run-dir>/translation-map.json \
+       --output <run-dir>/candidate.pptx \
+       --json > <run-dir>/replace-text.json
+     ```
+     Use `replacements[]` records with `kind: "text-node"` for `<a:t>`,
+     `<c:v>`, `<cx:pt>`, `<cx:v>`, and `<m:t>` values. Use
+     `kind: "text-attr"` only for user-visible attributes such as hyperlink
+     `tooltip`, and include `attrName`, `part`, `sourceText` or `sourceHash`,
+     and a 0-based `index` when the value is not unique.
    - Prefer run/text-node replacement that changes only `<a:t>`, `<c:v>`,
      `<cx:pt>`, or equivalent visible cache text, leaving neighboring
      `a:rPr`, `a:pPr`, `a:bodyPr`, table cell properties, and chart styling
@@ -114,14 +131,25 @@ relevant OOXML style properties.
      --candidate candidate.pptx \
      --json > <run-dir>/i18n-style-diff.json
    ```
+   If translation intentionally changes user-visible text attributes such as
+   hyperlink `tooltip`, run the gate with an explicit allowlist:
+   ```bash
+   xdoc pptx i18n-style-diff \
+     --source source.pptx \
+     --candidate candidate.pptx \
+     --allow-text-attrs tooltip \
+     --json > <run-dir>/i18n-style-diff.json
+   ```
+   Do not use the allowlist for metadata such as language tags, theme typefaces,
+   relationship paths, or format codes.
    For scoped repair loops, add `--slides <changed>`, then rerun the full-deck
    gate before delivery. Treat `agentGate.passed=false` or non-empty
    `blockers[]` as delivery blockers. Font-size-only differences are allowed
    only when they appear under `allowedChanges.fontSize[]` and are recorded as
    layout repair in the bilingual audit.
 10. Scan the candidate for remaining visible source-language text. Treat
-   theme font names, language tags, and external relationship paths as metadata
-   unless the user explicitly asks to localize them.
+    theme font names, language tags, and external relationship paths as metadata
+    unless the user explicitly asks to localize them.
 11. Run scoped and full visual gates:
 
 - `vision-check` on changed slides.
@@ -273,6 +301,7 @@ consistent and list any deliberate text compression.
 Keep these translation-specific artifacts in the run directory when available:
 
 - `translation-map.json`
+- `replace-text.json`
 - `i18n-text-plan.json`
 - `bilingual-translation-audit.md`
 - `bilingual-translation-audit.json`

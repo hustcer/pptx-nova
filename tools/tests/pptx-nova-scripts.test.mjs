@@ -178,6 +178,13 @@ test('readiness defaults to catalog benchmark evidence', () => {
   assert.equal(report.explicitSelection.passedByExplicitException, false)
 })
 
+test('CI readiness checks use catalog benchmark evidence', () => {
+  const ciCheck = readFileSync(join(repoRoot, 'tools/ci-check.nu'), 'utf8')
+
+  assert.match(ciCheck, /--benchmark-mode\s+catalog/)
+  assert.doesNotMatch(ciCheck, /--benchmark-mode\s+required-live/)
+})
+
 test('readiness catalog benchmark requires passing required case evidence', () => {
   const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-catalog-benchmark-'))
   const catalogPath = join(dir, 'catalog.json')

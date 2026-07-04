@@ -73,7 +73,7 @@ def main [] {
             --target
             delivery
             --benchmark-mode
-            required-live
+            catalog
             --json
         ]
     }

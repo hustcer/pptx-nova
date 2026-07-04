@@ -86,27 +86,62 @@ relevant OOXML style properties.
 7. Dry-run when using xdoc patch ops. For direct OOXML fallback, write a
    machine-readable replacement report and run ZIP/XML validation immediately
    after packaging.
-8. Inspect the candidate and compare style signatures against the source for
-   every translated object. Treat changed bold/italic/underline/strike,
-   paragraph alignment, bullet state, table style, chart style, or text box
-   geometry as blockers. Font-size changes are allowed only when recorded as
-   layout repair.
+8. Run the native translation style gate and block on any non-size style
+   change:
+   ```bash
+   xdoc pptx i18n-style-diff \
+     --source source.pptx \
+     --candidate candidate.pptx \
+     --json > <run-dir>/i18n-style-diff.json
+   ```
+   For scoped repair loops, add `--slides <changed>`, then rerun the full-deck
+   gate before delivery. Treat `agentGate.passed=false` or non-empty
+   `blockers[]` as delivery blockers. Font-size-only differences are allowed
+   only when they appear under `allowedChanges.fontSize[]` and are recorded as
+   layout repair in the bilingual audit.
 9. Scan the candidate for remaining visible source-language text. Treat
    theme font names, language tags, and external relationship paths as metadata
    unless the user explicitly asks to localize them.
 10. Run scoped and full visual gates:
-   - `vision-check` on changed slides.
-   - Source and candidate PNG/contact sheets for changed slides.
-   - `contact-diff` for before/after layout consistency.
+
+- `vision-check` on changed slides.
+- Source and candidate PNG/contact sheets for changed slides.
+- `contact-diff` for before/after layout consistency.
+
 11. Fix visual regressions at the translation source:
-   - First adjust font size within the original visual hierarchy.
-   - If the text still does not fit, preserve meaning with concise wording.
-   - Do not move objects, split pages, change font weight/style, or shrink fonts
-     below readability thresholds just to avoid editing the translation.
+
+- First adjust font size within the original visual hierarchy.
+- If the text still does not fit, preserve meaning with concise wording.
+- Do not move objects, split pages, change font weight/style, or shrink fonts
+  below readability thresholds just to avoid editing the translation.
+
 12. Write `bilingual-translation-audit.md` and `.json` with source text,
     target text, and notes for any meaning-preserving compression.
 13. Run structure checks, `pptx diff`, preview, and clean-open when available.
 14. Publish the validated candidate to the requested output path.
+
+## Style Signature Gate
+
+`xdoc pptx i18n-style-diff` is mandatory for translation delivery. It
+compares source and candidate PPTX parts using textless OOXML style signatures:
+visible text-node content is ignored, while run, paragraph, textbox, table,
+chart, relationship, animation, theme, layout, and master structure remains in
+the signature.
+
+Required interpretation:
+
+- `status=pass` and `agentGate.passed=true`: style gate passed.
+- `blockers[]` non-empty: stop and repair the candidate before any visual
+  delivery.
+- `allowedChanges.fontSize[]` non-empty: acceptable only for fitting repair;
+  record the reason and keep the source meaning unchanged.
+- Missing or added style-relevant parts are blockers.
+- A failure in slide/chart relationship parts means possible hyperlink or
+  embedded-object loss; do not waive it based only on PNG appearance.
+
+This gate does not prove translation completeness or rendered fit. It must be
+paired with bilingual text audit, source-language scan, preview/contact-diff,
+and visual review.
 
 ## Translation Quality Rules
 
@@ -195,7 +230,7 @@ Keep these translation-specific artifacts in the run directory when available:
 - `translation-map.json`
 - `bilingual-translation-audit.md`
 - `bilingual-translation-audit.json`
-- style-signature comparison report for translated objects
+- `i18n-style-diff.json`
 - source and candidate inspect reports
 - remaining source-language scans
 - dry-run/apply reports

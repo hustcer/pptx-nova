@@ -85,6 +85,12 @@ node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
   --target delivery
 ```
 
+By default readiness uses the persisted `catalog.quality.benchmark` evidence,
+not a cwd-local `.tmp` benchmark directory. Passing `--out <dir>` requests a live
+benchmark evidence check for that directory; promotion/CI workflows that must
+fail when live benchmark artifacts are missing should use
+`--benchmark-mode required-live`.
+
 Delivery auto-selection only allows `readiness in ["production", "default"]`.
 Use `candidate` only for drafts, migration checks, or explicit human approval.
 When the user explicitly names a candidate DeckKit for an existing-deck

@@ -51,7 +51,7 @@ introduced.
 - Use `xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx`
   when you only need to reuse one slide in another deck.
 - Use `node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
-  plus `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery`
+  plus `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery --benchmark-mode required-live`
   for production visual gates. Store long-lived benchmark inputs under
   `skills/pptx-nova/benchmarks/visual/`, not under `assets/decks/`.
 - Do not commit generated `.pptx`, PNG previews, contact sheets, regenerated

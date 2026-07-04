@@ -101,11 +101,12 @@ After benchmark output exists, run the readiness audit:
 ```bash
 node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
   --deckkit consulting-dark \
-  --target candidate
+  --target candidate \
+  --benchmark-mode required-live
 ```
 
-The audit reads `catalog.json`, `index.json`, and the generated `summary.json`
-files. Golden is required. Any additional case registered for the DeckKit in
+In `required-live` mode the audit reads `catalog.json`, `index.json`, and the
+generated `summary.json` files. Golden is required. Any additional case registered for the DeckKit in
 `index.json` is also gated, so existing stress and mixed-language fixtures keep
 their coverage while new DeckKits can commit only golden. It reports whether the
 DeckKit is ready for candidate, delivery, and default use. Delivery/default

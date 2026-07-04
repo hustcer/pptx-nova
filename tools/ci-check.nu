@@ -72,6 +72,8 @@ def main [] {
             $deckkit
             --target
             delivery
+            --benchmark-mode
+            required-live
             --json
         ]
     }

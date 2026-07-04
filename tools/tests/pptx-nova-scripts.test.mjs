@@ -151,7 +151,73 @@ test('DeckKit slot reference and consistency cover mckinsey-blue cover tuple slo
   assert.deepEqual(coverConsistency.dynamics, [])
 })
 
-test('readiness reports agentGate separately from explicit exception and live benchmark evidence', () => {
+test('readiness defaults to catalog benchmark evidence', () => {
+  const result = runNode([
+    skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
+    '--deckkit',
+    'long-table',
+    '--target',
+    'delivery',
+    '--explicit',
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.passed, true)
+  assert.equal(report.status, 'pass')
+  assert.equal(report.agentGate.canContinue, true)
+  assert.equal(report.agentGate.status, 'pass')
+  assert.equal(report.agentGate.nextAction, 'continue')
+  assert.equal(report.agentGate.decisionBasis.benchmarkMode, 'catalog')
+  assert.equal(report.benchmarkEvidence.mode, 'catalog')
+  assert.equal(report.benchmarkEvidence.live.status, 'not-requested')
+  assert.equal(report.explicitSelection.requested, true)
+  assert.equal(report.explicitSelection.applies, false)
+  assert.equal(report.explicitSelection.canUseExplicitException, false)
+  assert.equal(report.explicitSelection.canContinue, true)
+  assert.equal(report.explicitSelection.passedByExplicitException, false)
+})
+
+test('readiness catalog benchmark requires passing required case evidence', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-catalog-benchmark-'))
+  const catalogPath = join(dir, 'catalog.json')
+  const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
+  const entry = catalog.entries.find((candidate) => candidate.id === 'long-table')
+  entry.quality.benchmark.passed = true
+  entry.quality.benchmark.cases = entry.quality.benchmark.cases.map((benchCase) =>
+    benchCase.caseId === 'long-table.golden-html' ? { ...benchCase, passed: false } : benchCase,
+  )
+  writeJson(catalogPath, catalog)
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
+      '--deckkit',
+      'long-table',
+      '--target',
+      'delivery',
+      '--catalog',
+      catalogPath,
+      '--json',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 1, result.stderr || result.stdout)
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.passed, false)
+  assert.equal(report.status, 'fail')
+  assert.equal(report.agentGate.canContinue, false)
+  assert.equal(report.benchmarkEvidence.mode, 'catalog')
+  assert.ok(
+    report.benchmarkEvidence.failures.includes(
+      'catalog.quality.benchmark golden case evidence did not pass',
+    ),
+  )
+})
+
+test('readiness reports live benchmark attention separately from explicit exception', () => {
   const outDir = mkdtempSync(join(tmpdir(), 'pptx-nova-missing-benchmark-'))
   const result = runNode([
     skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
@@ -171,14 +237,47 @@ test('readiness reports agentGate separately from explicit exception and live be
   assert.equal(report.agentGate.canContinue, true)
   assert.equal(report.agentGate.status, 'attention')
   assert.equal(report.agentGate.nextAction, 'continue-with-catalog-benchmark-evidence')
+  assert.equal(report.agentGate.decisionBasis.benchmarkMode, 'live')
   assert.equal(report.agentGate.decisionBasis.catalogReadiness, 'production')
   assert.equal(report.agentGate.decisionBasis.catalogBenchmarkPassed, true)
   assert.equal(report.agentGate.decisionBasis.liveBenchmarkStatus, 'missing')
+  assert.equal(report.benchmarkEvidence.mode, 'live')
+  assert.equal(report.benchmarkEvidence.live.required, false)
   assert.equal(report.explicitSelection.requested, true)
   assert.equal(report.explicitSelection.applies, false)
   assert.equal(report.explicitSelection.canUseExplicitException, false)
   assert.equal(report.explicitSelection.canContinue, true)
   assert.equal(report.explicitSelection.passedByExplicitException, false)
+})
+
+test('readiness required-live mode blocks missing live benchmark evidence', () => {
+  const outDir = mkdtempSync(join(tmpdir(), 'pptx-nova-required-live-missing-'))
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
+      '--deckkit',
+      'long-table',
+      '--target',
+      'delivery',
+      '--benchmark-mode',
+      'required-live',
+      '--out',
+      outDir,
+      '--json',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 1, result.stderr || result.stdout)
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.passed, false)
+  assert.equal(report.status, 'fail')
+  assert.equal(report.agentGate.canContinue, false)
+  assert.equal(report.agentGate.decisionBasis.benchmarkMode, 'required-live')
+  assert.equal(report.agentGate.decisionBasis.liveBenchmarkStatus, 'missing')
+  assert.equal(report.benchmarkEvidence.mode, 'required-live')
+  assert.equal(report.benchmarkEvidence.live.required, true)
 })
 
 test('DeckKit slot consistency honors array-level control roles by default', () => {

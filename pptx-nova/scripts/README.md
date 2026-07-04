@@ -8,6 +8,9 @@ Use these entry points from skill workflows:
 
 - `pptx-nova-deckkit-select.mjs` - select an eligible DeckKit from the bundled catalog.
 - `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
+  It uses persisted catalog benchmark evidence by default; pass `--out <dir>`
+  for a live benchmark check or `--benchmark-mode required-live` for strict
+  promotion/CI gates.
 - `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
 - `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.
 - `pptx-nova-deckkit-refurbish-profile-fill.mjs` - generate missing

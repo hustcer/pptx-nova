@@ -12,6 +12,7 @@ const DEFAULT_OUT = join(WORK_ROOT, '.tmp/pptx-nova-visual')
 const MINIMUM_REQUIRED_KINDS = ['golden']
 const PREFERRED_KIND_ORDER = ['golden', 'stress', 'mixed-language']
 const READINESS = ['experimental', 'candidate', 'production', 'default']
+const BENCHMARK_MODES = ['catalog', 'live', 'required-live']
 const VISUAL_GRAMMAR_SCHEMA_VERSION = 'pptx-nova-visual-grammar/v1'
 const REQUIRED_VISUAL_GRAMMAR_ARRAYS = [
   'mood',
@@ -27,7 +28,11 @@ const usage = `Usage:
 
 Options:
   --deckkit <id>          DeckKit id to audit
-  --out <dir>             Benchmark output directory. Defaults to <cwd>/.tmp/pptx-nova-visual
+  --out <dir>             Live benchmark output directory. Enables live benchmark mode unless
+                          --benchmark-mode is set. Defaults to <cwd>/.tmp/pptx-nova-visual
+  --benchmark-mode <mode> catalog|live|required-live. Defaults to catalog, or live when --out is used
+  --require-live-benchmark
+                          Alias for --benchmark-mode required-live
   --catalog <path>        Catalog path. Defaults to <skill-root>/assets/deckkits/catalog.json
   --visual-index <path>   Visual benchmark index path. Defaults to <skill-root>/benchmarks/visual/index.json
   --target <level>        candidate|delivery|default. Defaults to candidate
@@ -43,6 +48,8 @@ function parseArgs(argv) {
   const args = {
     deckkit: '',
     out: DEFAULT_OUT,
+    outProvided: false,
+    benchmarkMode: '',
     catalog: CATALOG_PATH,
     visualIndex: join(VISUAL_ROOT, 'index.json'),
     target: 'candidate',
@@ -59,11 +66,17 @@ function parseArgs(argv) {
       args.json = true
     } else if (arg === '--explicit') {
       args.explicit = true
+    } else if (arg === '--require-live-benchmark') {
+      args.benchmarkMode = 'required-live'
     } else if (arg === '--deckkit') {
       args.deckkit = valueAfter(argv, i, arg)
       i += 1
     } else if (arg === '--out') {
       args.out = resolve(valueAfter(argv, i, arg))
+      args.outProvided = true
+      i += 1
+    } else if (arg === '--benchmark-mode') {
+      args.benchmarkMode = valueAfter(argv, i, arg)
       i += 1
     } else if (arg === '--catalog') {
       args.catalog = resolve(valueAfter(argv, i, arg))
@@ -80,6 +93,10 @@ function parseArgs(argv) {
   }
 
   if (!args.deckkit) throw new Error(`--deckkit is required.\n\n${usage}`)
+  if (!args.benchmarkMode) args.benchmarkMode = args.outProvided ? 'live' : 'catalog'
+  if (!BENCHMARK_MODES.includes(args.benchmarkMode)) {
+    throw new Error('--benchmark-mode must be one of catalog|live|required-live')
+  }
   if (!['candidate', 'delivery', 'default'].includes(args.target)) {
     throw new Error('--target must be one of candidate|delivery|default')
   }
@@ -327,6 +344,7 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
   }
 
   return {
+    mode: 'live',
     minimumRequiredKinds: MINIMUM_REQUIRED_KINDS,
     gatedKinds: indexedKinds,
     cases,
@@ -334,6 +352,7 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
     evidenceBlockers,
     qualityBlockers,
     evidence: {
+      mode: 'live',
       status:
         evidenceBlockers.length === 0
           ? qualityBlockers.length === 0
@@ -344,6 +363,79 @@ function auditBenchmarkCases({ index, outDir, deckkit }) {
       failureCount: qualityBlockers.length,
       missing: evidenceBlockers,
       failures: qualityBlockers,
+      live: { status: evidenceBlockers.length === 0 ? 'complete' : 'missing', required: false },
+    },
+  }
+}
+
+function auditCatalogBenchmark({ index, entry, deckkit }) {
+  const deckkitCases = index.cases.filter((benchCase) => benchCase.deckkit === deckkit)
+  const indexedKinds = uniqueKinds(deckkitCases)
+  const catalogBenchmark = entry?.quality?.benchmark
+  const catalogCases = Array.isArray(catalogBenchmark?.cases) ? catalogBenchmark.cases : []
+  const cases = []
+  const evidenceBlockers = []
+  const qualityBlockers = []
+
+  if (!catalogBenchmark || typeof catalogBenchmark !== 'object') {
+    qualityBlockers.push('catalog.quality.benchmark summary is missing')
+  } else if (catalogBenchmark.passed !== true) {
+    qualityBlockers.push('catalog.quality.benchmark.passed must be true')
+  }
+
+  for (const kind of MINIMUM_REQUIRED_KINDS) {
+    const indexedKindCases = deckkitCases.filter((benchCase) => benchCase.kind === kind)
+    const catalogKindCases = indexedKindCases
+      .map((benchCase) => catalogCases.find((catalogCase) => catalogCase.caseId === benchCase.id))
+      .filter(Boolean)
+    if (catalogKindCases.length === 0) {
+      qualityBlockers.push(`catalog.quality.benchmark is missing ${kind} case evidence`)
+    } else if (!catalogKindCases.some((catalogCase) => catalogCase.passed === true)) {
+      qualityBlockers.push(`catalog.quality.benchmark ${kind} case evidence did not pass`)
+    }
+  }
+
+  for (const benchCase of orderedBenchmarkCases(deckkitCases)) {
+    const catalogCase = catalogCases.find((candidate) => candidate.caseId === benchCase.id)
+    cases.push({
+      kind: benchCase.kind,
+      caseId: benchCase.id,
+      summaryPath: catalogCase?.summaryPath ?? '',
+      exists: Boolean(catalogCase),
+      passed: catalogCase?.passed === true,
+      source: 'catalog',
+      validation: catalogCase?.validation ?? null,
+      dryRun: catalogCase?.dryRun ?? null,
+      vision: catalogCase?.vision ?? null,
+      previews: catalogCase?.previews ?? null,
+      contactSheet: catalogCase?.contactSheet ?? null,
+      patchOps: catalogCase?.patchOps ?? 0,
+      p50TotalMs: catalogCase?.p50TotalMs ?? null,
+    })
+  }
+
+  return {
+    mode: 'catalog',
+    minimumRequiredKinds: MINIMUM_REQUIRED_KINDS,
+    gatedKinds: catalogBenchmark?.gatedKinds ?? indexedKinds,
+    cases,
+    benchmarkBlockers: [...evidenceBlockers, ...qualityBlockers],
+    evidenceBlockers,
+    qualityBlockers,
+    evidence: {
+      mode: 'catalog',
+      status:
+        qualityBlockers.length === 0
+          ? 'catalog-complete'
+          : catalogBenchmark
+            ? 'catalog-failed'
+            : 'catalog-missing',
+      missingCount: evidenceBlockers.length,
+      failureCount: qualityBlockers.length,
+      missing: evidenceBlockers,
+      failures: qualityBlockers,
+      catalogDate: entry?.quality?.lastBenchmark ?? null,
+      live: { status: 'not-requested', required: false },
     },
   }
 }
@@ -531,7 +623,8 @@ function buildAgentGate({
   const attention = [...(targetGate.attention ?? [])]
   const blockers = targetGate.usable ? [] : [...targetGate.blockers]
   const catalogBenchmarkPassed = catalogAudit.quality?.benchmark?.passed ?? null
-  const liveBenchmarkStatus = benchmarkAudit.evidence?.status ?? 'unknown'
+  const liveBenchmarkStatus = benchmarkAudit.evidence?.live?.status ?? 'unknown'
+  const benchmarkMode = benchmarkAudit.mode ?? 'unknown'
   let nextAction = canContinue ? 'continue' : 'blocked'
   if (canContinue && attention.length > 0) {
     nextAction =
@@ -552,6 +645,7 @@ function buildAgentGate({
     decisionBasis: {
       catalogReadiness: catalogAudit.readiness,
       catalogBenchmarkPassed,
+      benchmarkMode,
       liveBenchmarkStatus,
       targetUsable: targetGate.usable,
       targetReady: targetGate.ready,
@@ -564,8 +658,15 @@ function buildAgentGate({
 function buildEligibility({ catalogAudit, benchmarkAudit }) {
   const benchmarkQualityBlockers =
     benchmarkAudit.qualityBlockers ?? benchmarkAudit.benchmarkBlockers
-  const benchmarkEvidenceAttention = benchmarkAudit.evidenceBlockers ?? []
-  const candidateBlockers = [...catalogAudit.blockers, ...benchmarkQualityBlockers]
+  const benchmarkEvidenceIssues = benchmarkAudit.evidenceBlockers ?? []
+  const requiresLiveEvidence = benchmarkAudit.mode === 'required-live'
+  const benchmarkEvidenceBlockers = requiresLiveEvidence ? benchmarkEvidenceIssues : []
+  const benchmarkEvidenceAttention = requiresLiveEvidence ? [] : benchmarkEvidenceIssues
+  const candidateBlockers = [
+    ...catalogAudit.blockers,
+    ...benchmarkQualityBlockers,
+    ...benchmarkEvidenceBlockers,
+  ]
   const candidateAttention = [...benchmarkEvidenceAttention]
 
   const deliveryBlockers = [...candidateBlockers]
@@ -784,11 +885,21 @@ function main() {
   const index = readJson(args.visualIndex)
   const entry = catalog.entries.find((candidate) => candidate.id === args.deckkit)
   const catalogAudit = auditCatalog(entry)
-  const benchmarkAudit = auditBenchmarkCases({
-    index,
-    outDir: args.out,
-    deckkit: args.deckkit,
-  })
+  const benchmarkAudit =
+    args.benchmarkMode === 'catalog'
+      ? auditCatalogBenchmark({ index, entry, deckkit: args.deckkit })
+      : {
+          ...auditBenchmarkCases({
+            index,
+            outDir: args.out,
+            deckkit: args.deckkit,
+          }),
+          mode: args.benchmarkMode,
+        }
+  if (args.benchmarkMode === 'required-live' && benchmarkAudit.evidence?.live) {
+    benchmarkAudit.evidence.mode = 'required-live'
+    benchmarkAudit.evidence.live.required = true
+  }
   const eligibility = buildEligibility({ catalogAudit, benchmarkAudit })
   const explicitSelection = buildExplicitSelection({
     requested: args.explicit,
@@ -822,7 +933,7 @@ function main() {
     paths: {
       catalog: relative(SKILL_ROOT, args.catalog),
       visualIndex: relative(SKILL_ROOT, args.visualIndex),
-      benchmarkOut: relative(WORK_ROOT, args.out),
+      benchmarkOut: args.benchmarkMode === 'catalog' ? null : relative(WORK_ROOT, args.out),
     },
     catalog: {
       found: Boolean(entry),

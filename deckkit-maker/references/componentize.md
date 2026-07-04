@@ -153,7 +153,7 @@ slot budget、validation tests 和有针对性的非视觉单测覆盖，避免�
 
 ```bash
 node skills/pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean
-node skills/pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --json
+node skills/pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live --json
 node skills/pptx-nova/scripts/pptx-nova-deckkit-catalog-update.mjs --deckkit <id> --write
 ```
 

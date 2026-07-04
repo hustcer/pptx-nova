@@ -158,16 +158,29 @@ Use this flow for DeckKit-first creation:
 outline.json
   -> deck_lock.json
   -> content.json
-  -> validate-content.mjs
-  -> createDeck(content)
-  -> check-lock
-  -> xdoc pptx apply --dry-run
-  -> apply
-  -> vision-check
+  -> pptx-nova-create-run.mjs
   -> PNG/contact-sheet review
 ```
 
-The important command sequence is:
+The preferred agent-facing command is:
+
+```bash
+node <skill-root>/scripts/pptx-nova-create-run.mjs \
+  --deckkit <id> \
+  --content content.json \
+  --lock deck_lock.json \
+  --output out.pptx \
+  --run-dir <run-dir> \
+  --json
+```
+
+It executes the normal machine chain (`validate-content -> build ->
+check-lock -> dry-run -> apply -> vision-check -> preview/contact-sheet ->
+publish`) and preserves each report in the run directory. Read
+`create-run-summary.json.agentSummary` first for gate status and artifact
+pointers; open low-level reports only when a gate fails or needs diagnosis.
+
+The equivalent manual command sequence for debugging is:
 
 ```bash
 node <skill-root>/assets/deckkits/validate-content.mjs \

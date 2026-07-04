@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
@@ -59,6 +59,33 @@ function swissColumnContent() {
         },
       },
     ],
+  }
+}
+
+function swissColumnLock({ finalPptx, runDir }) {
+  return {
+    schemaVersion: 'pptx-nova-deck-lock/v1',
+    mode: 'express',
+    objective: 'Script test',
+    outlinePath: 'outline.json',
+    contentPath: 'content.json',
+    patchPath: 'patch.json',
+    output: { finalPptx, runDir },
+    canvas: {
+      format: 'ppt169',
+      width: '13.333in',
+      height: '7.5in',
+    },
+    deckkit: { id: 'swiss-grid' },
+    slides: [
+      {
+        type: 'swissColumnSlide',
+        title: 'Product split',
+        purpose: 'Show the split between View, Convert, and Generate',
+        rhythm: 'dense',
+      },
+    ],
+    assumptions: [],
   }
 }
 
@@ -439,6 +466,9 @@ process.exit(2)
   assert.equal(existsSync(paths.deckLockPath), false, paths.deckLockPath)
   assert.equal(existsSync(paths.contentPath), false, paths.contentPath)
   const commands = JSON.parse(readFileSync(join(paths.runDir, 'commands.json'), 'utf8'))
+  assert.match(commands.run, /pptx-nova-create-run\.mjs/)
+  assert.match(commands.run, /--run-dir/)
+  assert.match(commands.run, /--json/)
   assert.match(commands.build, /pptx-nova-build\.mjs/)
   assert.match(commands.probe, /pptx-nova-probe\.mjs/)
   assert.match(commands.probe, /xdoc-capabilities\.json/)
@@ -460,9 +490,183 @@ process.exit(2)
   assert.equal(paths.applyPath, join(paths.runDir, 'apply.json'))
   assert.equal(paths.visionPath, join(paths.runDir, 'vision.json'))
   assert.equal(paths.previewReportPath, join(paths.runDir, 'preview.json'))
+  assert.equal(paths.commandsPath, join(paths.runDir, 'commands.json'))
   assert.equal(paths.previewsDir, join(paths.runDir, 'previews'))
   assert.equal(paths.contactSheetPath, join(paths.runDir, 'previews', 'contact-sheet.png'))
   assert.equal(paths.finalPptx, join(root, 'script-test.pptx'))
+})
+
+test('create runner executes DeckKit create gates and publishes after preview', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-'))
+  const runDir = join(root, 'run')
+  const contentPath = join(runDir, 'content.json')
+  const lockPath = join(runDir, 'deck_lock.json')
+  const output = join(root, 'out.pptx')
+  mkdirSync(runDir, { recursive: true })
+  writeJson(contentPath, swissColumnContent())
+  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+import { mkdirSync, writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+const valueAfter = (flag) => {
+  const index = args.indexOf(flag)
+  return index >= 0 ? args[index + 1] : ''
+}
+const print = (value) => process.stdout.write(JSON.stringify(value))
+
+if (args[0] === 'schema') {
+  print({
+    version: '9.9.9 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    capabilities: { schemaVersion: 'capabilities/v1' },
+    commands: { pptx: { subcommands: { apply: {}, 'vision-check': {}, preview: {} }, patchSchema: {}, catalogs: {} } }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'apply') {
+  const output = valueAfter('-o')
+  if (args.includes('--dry-run')) {
+    print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], wouldWrite: true, output })
+  } else {
+    writeFileSync(output, 'candidate pptx')
+    print({ schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [], changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], output })
+  }
+} else if (args[0] === 'pptx' && args[1] === 'vision-check') {
+  print({ schemaVersion: 'pptx-vision/v1', status: 'pass', summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } }, issues: [] })
+} else if (args[0] === 'pptx' && args[1] === 'preview') {
+  const outputDir = valueAfter('--output-dir')
+  const contactSheet = valueAfter('--contact-sheet')
+  mkdirSync(outputDir, { recursive: true })
+  writeFileSync(outputDir + '/slide-001.png', 'png')
+  writeFileSync(contactSheet, 'contact')
+  print({
+    schemaVersion: 'pptx-preview/v1',
+    status: 'success',
+    pages: [{ index: 1, slide: 1, path: outputDir + '/slide-001.png', byteLength: 3, file: { path: outputDir + '/slide-001.png', status: 'ok', byteLength: 3, width: 100, height: 56 } }],
+    contactSheet: { path: contactSheet, width: 100, height: 56, byteLength: 7 }
+  })
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`,
+  )
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-create-run.mjs'),
+    '--deckkit',
+    'swiss-grid',
+    '--content',
+    contentPath,
+    '--lock',
+    lockPath,
+    '--output',
+    output,
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const summary = JSON.parse(result.stdout)
+  const phaseNames = summary.phases.map((phase) => phase.name)
+  const gateNames = summary.gates.map((gate) => gate.name)
+
+  assert.equal(summary.status, 'needs-human-review')
+  assert.equal(summary.machineGatesPassed, true)
+  assert.equal(summary.agentSummary.decision, 'continue-to-human-review')
+  assert.equal(existsSync(output), true)
+  assert.equal(existsSync(join(runDir, 'candidate.pptx')), true)
+  assert.equal(existsSync(join(runDir, 'preview.json')), true)
+  assert.equal(existsSync(join(runDir, 'previews', 'contact-sheet.png')), true)
+  assert.ok(phaseNames.indexOf('dry-run') < phaseNames.indexOf('apply'))
+  assert.ok(phaseNames.indexOf('apply') < phaseNames.indexOf('vision-check'))
+  assert.ok(phaseNames.indexOf('preview-render') < phaseNames.indexOf('publish'))
+  for (const gate of [
+    'validate-content',
+    'build',
+    'check-lock',
+    'dry-run',
+    'apply',
+    'vision-check',
+    'png-previews',
+    'published-output',
+  ]) {
+    assert.ok(gateNames.includes(gate), gate)
+  }
+})
+
+test('create runner stops after apply failure without validating a stale candidate', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-fail-'))
+  const runDir = join(root, 'run')
+  const contentPath = join(runDir, 'content.json')
+  const lockPath = join(runDir, 'deck_lock.json')
+  const staleCandidate = join(runDir, 'candidate.pptx')
+  const output = join(root, 'out.pptx')
+  mkdirSync(runDir, { recursive: true })
+  writeJson(contentPath, swissColumnContent())
+  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+  writeFileSync(staleCandidate, 'old candidate')
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2)
+const print = (value) => process.stdout.write(JSON.stringify(value))
+
+if (args[0] === 'schema') {
+  print({
+    version: '9.9.9 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    capabilities: { schemaVersion: 'capabilities/v1' },
+    commands: { pptx: { subcommands: { apply: {}, 'vision-check': {}, preview: {} }, patchSchema: {}, catalogs: {} } }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'apply' && args.includes('--dry-run')) {
+  print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], wouldWrite: true })
+} else if (args[0] === 'pptx' && args[1] === 'apply') {
+  print({ schemaVersion: 'pptx-apply/v1', status: 'error', error: { kind: 'OutputExists' }, visualRisks: [] })
+  process.exit(9)
+} else if (args[0] === 'pptx' && (args[1] === 'vision-check' || args[1] === 'preview')) {
+  process.stderr.write('stale candidate validation should not run')
+  process.exit(2)
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`,
+  )
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-create-run.mjs'),
+      '--deckkit',
+      'swiss-grid',
+      '--content',
+      contentPath,
+      '--lock',
+      lockPath,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 1, result.stderr || result.stdout)
+  const summary = JSON.parse(result.stdout)
+  const phaseNames = summary.phases.map((phase) => phase.name)
+
+  assert.equal(summary.status, 'failed')
+  assert.equal(summary.error.phase, 'apply')
+  assert.equal(existsSync(output), false)
+  assert.equal(existsSync(staleCandidate), false)
+  assert.equal(phaseNames.includes('vision-check'), false)
+  assert.equal(phaseNames.includes('preview-render'), false)
+  assert.equal(phaseNames.includes('publish'), false)
 })
 
 test('refurbish plan requires semantic diff gate by default', async () => {

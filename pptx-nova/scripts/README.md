@@ -13,6 +13,13 @@ Use these entry points from skill workflows:
   promotion gates after a benchmark run.
 - `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
 - `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.
+- `pptx-nova-create-run.mjs` - execute the standard DeckKit-first create
+  pipeline from existing `content.json` and `deck_lock.json`. It runs
+  validate-content, build, check-lock, dry-run, apply, vision-check, and
+  PNG/contact-sheet preview, preserves every artifact in the run directory, then
+  atomically publishes the final output after machine gates pass. A successful
+  run reports `needs-human-review`; read `create-run-summary.json.agentSummary`
+  for the stable agent-facing gate and artifact summary.
 - `pptx-nova-deckkit-refurbish-profile-fill.mjs` - generate missing
   `refurbishProfile` catalog entries for delivery DeckKits. It uses
   DeckKit-specific palette/font overrides where available, preserves true native

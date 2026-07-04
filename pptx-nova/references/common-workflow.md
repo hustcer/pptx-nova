@@ -28,6 +28,10 @@ node <skill-root>/scripts/pptx-nova-init-run.mjs \
 The initializer writes `deck_lock.template.json` and `content.template.json`.
 Use them as examples, then create or overwrite fresh `deck_lock.json` and
 `content.json`; do not append a second JSON object to a template file.
+After both files are ready, prefer the generated `commands.json.run` command or
+call `pptx-nova-create-run.mjs` directly. It runs validate/build/check-lock,
+dry-run, apply, vision-check, preview/contact-sheet, and final publish while
+preserving every intermediate artifact.
 
 Keep all temporary files in that run directory, including `outline.json`,
 `deck_lock.json`, `assets_manifest.json`, `content.json`, `patch.json`,
@@ -192,23 +196,40 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
       `layoutIntent` / `macroLayout`, and `visualDensity` against the current
       source content. If they disagree, update the durable source (`deck_lock` or
       `content.json`) first; do not let the patch become a hidden second plan.
-5.  Run design-lock drift check before dry-run when `deck_lock.json` exists:
+5.  For standard DeckKit create workflows, prefer the bundled runner:
+    ```bash
+    node <skill-root>/scripts/pptx-nova-create-run.mjs \
+      --deckkit <id> \
+      --content content.json \
+      --lock deck_lock.json \
+      --output out.pptx \
+      --run-dir <run-dir> \
+      --json
+    ```
+    The runner stores `patch.json`, `quality.json`, `check-lock.json`,
+    `dry-run.json`, `apply.json`, `vision.json`, `preview.json`,
+    `candidate.pptx`, and the contact sheet in the run directory. It fails
+    closed on non-success JSON status or non-zero exit code, only overwrites
+    current-run candidate/preview artifacts, and does not overwrite an existing
+    final output unless `--overwrite` is explicit.
+6.  When manually debugging or running a non-standard route, run design-lock
+    drift check before dry-run when `deck_lock.json` exists:
     ```bash
     node <skill-root>/scripts/pptx-nova-check-lock.mjs \
       --lock deck_lock.json --content content.json --patch patch.json --json
     ```
     Add `--assets assets_manifest.json` when assets exist. For brand-sensitive
     delivery add `--strict-colors --strict-fonts`.
-6.  Run dry-run before any real write:
+7.  Run dry-run before any real write:
     ```bash
     xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
     ```
     Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
-7.  Apply only after dry-run is clean and selectors are correct. Any validation
+8.  Apply only after dry-run is clean and selectors are correct. Any validation
     that consumes the applied output (`vision-check`, `convert`, `check`,
     replay/audit) must run after the apply command has completed; do not launch
     apply-dependent checks in parallel with the write.
-8.  Run static geometry validation:
+9.  Run static geometry validation:
 
     ```bash
     xdoc pptx vision-check out.pptx --json > <run-dir>/vision.json
@@ -259,7 +280,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     fields that are merely undisclosed are counted separately and do not make the
     finalizer noisy. The helper does not replace PNG review or expand Micro Edit.
 
-9.  For existing-deck edits, template-following, and refurbish tasks, run
+10. For existing-deck edits, template-following, and refurbish tasks, run
     semantic diff once after the candidate is stable and before final delivery:
 
     ```bash
@@ -274,7 +295,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `reliable` entries as machine facts. `uncertain` and `unsupported` entries
     require human review or a targeted audit; they are not pass evidence.
 
-10. Render visual previews when creating or materially changing a deck:
+11. Render visual previews when creating or materially changing a deck:
 
     ```bash
     xdoc pptx preview out.pptx \
@@ -323,11 +344,11 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `evidence-summary.json.agentSummary` first; open the underlying gate reports
     only when the short summary points to a warning, failure, or unsupported area.
 
-11. For formal create workflows covered by `narrative-quality.md`, write
+12. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly
     accepts a draft.
-12. When running on macOS with Microsoft PowerPoint for Mac available for a
+13. When running on macOS with Microsoft PowerPoint for Mac available for a
     deliverable/high-risk PPTX, run the bundled clean-open helper instead of
     hand-writing AppleScript:
 
@@ -349,18 +370,18 @@ node <skill-root>/scripts/pptx-nova-clean-open.mjs \
     structural replacement checks that were run. `--classify-ui` is only for
     offline saved UI snapshot classification and is platform-independent.
 
-13. For external/customer/public delivery, run:
+14. For external/customer/public delivery, run:
 
 ```bash
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
 ```
 
-14. Copy or write the validated final deck to the requested final path.
-15. Apply the artifact retention decision. Keep the full run by default; slim
+15. Copy or write the validated final deck to the requested final path.
+16. Apply the artifact retention decision. Keep the full run by default; slim
     only reproducible current-run heavy artifacts when the task succeeded and
     no debug/replay continuation is expected, or when the user explicitly asked
     for cleanup. If files are removed, write `cleanup-manifest.json`.
-16. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
+17. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
     xdoc/schema versions, important intermediate files, validation results,
     high-risk `evidence-summary.json` / `layout-final.json` when applicable,
     `pptx-diff.json` semantic audit when run, preview/contact sheet path,

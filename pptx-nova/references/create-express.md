@@ -46,8 +46,11 @@ main assumptions in the final summary.
 5. Write `content.json`.
 6. Validate content in delivery mode.
 7. Build patch with the selected DeckKit.
-8. Run check-lock, dry-run, apply, vision-check, PNG/contact-sheet review.
-9. Write final output and concise completion summary.
+8. Run `pptx-nova-create-run.mjs` to execute check-lock, dry-run, apply,
+   vision-check, PNG/contact-sheet preview, and final publish in one fail-closed
+   command while keeping the intermediate artifacts.
+9. Review the contact sheet/PNG artifacts and write the concise completion
+   summary.
 
 If no production/default DeckKit fits, do not silently build a huge one-off
 patch. Either ask for approval to use a candidate/draft path, or create/extend a

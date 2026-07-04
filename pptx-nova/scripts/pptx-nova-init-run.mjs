@@ -137,6 +137,7 @@ try {
   const previewReportPath = join(runDir, 'preview.json')
   const candidatePath = join(runDir, 'candidate.pptx')
   const contactSheetPath = join(previewsDir, 'contact-sheet.png')
+  const commandsPath = join(runDir, 'commands.json')
   const probeScript = join(__dirname, 'pptx-nova-probe.mjs')
 
   writeJson(outlinePath, {
@@ -181,6 +182,7 @@ try {
 
   const commands = {
     probe: `node ${shellQuote(probeScript)} --xdoc-bin ${shellQuote(args.xdocBin)} --output ${shellQuote(capabilityPath)}`,
+    run: `node ${shellQuote(join(__dirname, 'pptx-nova-create-run.mjs'))} --deckkit ${shellQuote(args.deckkit)} --content ${shellQuote(contentPath)} --lock ${shellQuote(lockPath)} --output ${shellQuote(finalPptx)} --run-dir ${shellQuote(runDir)} --xdoc-bin ${shellQuote(args.xdocBin)} --json`,
     build: `node ${shellQuote(join(__dirname, 'pptx-nova-build.mjs'))} --deckkit ${shellQuote(args.deckkit)} ${shellQuote(contentPath)} -o ${shellQuote(patchPath)} --quality-json ${shellQuote(qualityPath)}`,
     validate: `node ${shellQuote(join(skillRoot, 'assets', 'deckkits', 'validate-content.mjs'))} ${shellQuote(contentPath)} --deckkit ${shellQuote(args.deckkit)} --mode delivery`,
     checkLock: `node ${shellQuote(join(__dirname, 'pptx-nova-check-lock.mjs'))} --lock ${shellQuote(lockPath)} --content ${shellQuote(contentPath)} --patch ${shellQuote(patchPath)} --json`,
@@ -189,7 +191,7 @@ try {
     vision: `${shellQuote(args.xdocBin)} pptx vision-check ${shellQuote(candidatePath)} --json > ${shellQuote(visionPath)}`,
     preview: `${shellQuote(args.xdocBin)} pptx preview ${shellQuote(candidatePath)} --output-dir ${shellQuote(previewsDir)} --contact-sheet ${shellQuote(contactSheetPath)} --overwrite --json > ${shellQuote(previewReportPath)}`,
   }
-  writeJson(join(runDir, 'commands.json'), commands)
+  writeJson(commandsPath, commands)
 
   const result = {
     runDir,
@@ -205,6 +207,7 @@ try {
     applyPath,
     visionPath,
     previewReportPath,
+    commandsPath,
     assetsDir,
     previewsDir,
     candidatePath,
@@ -223,6 +226,7 @@ try {
     process.stdout.write(`Content template: ${contentTemplatePath}\n`)
     process.stdout.write(`Deck lock target: ${lockPath}\n`)
     process.stdout.write(`Deck lock template: ${lockTemplatePath}\n`)
+    process.stdout.write(`Commands: ${commandsPath}\n`)
     process.stdout.write(`Patch: ${patchPath}\n`)
   }
 } catch (error) {

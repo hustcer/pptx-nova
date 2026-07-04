@@ -78,7 +78,7 @@ fallback，不得因快照精简而禁用 xdoc 新能力。
 先用下面的最短路径定向，再进入任务路由表读取细节。不要把它当成替代流程；它只是防止
 简单任务被过度展开、复杂任务漏掉关键门禁。
 
-- **新建 deck**：`outline.json -> deck_lock.json -> content.json -> DeckKit -> patch -> dry-run -> apply -> vision-check -> PNG/contact-sheet review`。
+- **新建 deck**：`outline.json -> deck_lock.json -> content.json -> pptx-nova-create-run -> PNG/contact-sheet review`。
 - **修改 deck**：`inspect -> select(定位候选) -> patch -> dry-run -> resolvedSelectors -> apply 到 run 目录 -> changed-slide PNG review -> final output`。
 - **动画 / 转场**：先 `inspect` 看 `timing_summary`、`animations[]` 和 `animation_capabilities`。新增或安全子集改动用
   `set-slide-animations` / `update-slide-animation` / `remove-slide-animation`；复杂 timing、media timing、interactive trigger、
@@ -413,6 +413,7 @@ OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> Power
 ```bash
 xdoc html2md page.html -o source_brief.md             # HTML 文件 / URL → Markdown 素材
 xdoc pdf extract-text input.pdf -o source_extract.txt # PDF → 文本素材
+node <skill-root>/scripts/pptx-nova-create-run.mjs --deckkit <id> --content content.json --lock deck_lock.json --output out.pptx --run-dir <run-dir> --json
 xdoc pptx inspect input.pptx --daemon --json
 xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
 xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json

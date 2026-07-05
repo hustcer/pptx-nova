@@ -67,7 +67,7 @@ runtime/schema/help 反查后再下结论。
 `content.json`、`patch.json`、sidecar、dry-run/apply/refurbish 报告、`vision.json`、
 `pptx-diff.json`、`visual_review.json`、`clean-open.json`、`check.json`、`evidence-summary.json`、
 `layout-final.json`、`fidelity-gate.json`、`content-audit-final.json`、`i18n-text-plan.json`、
-`i18n-scan.json`、`i18n-style-diff.json`、
+`i18n-scan.json`、`i18n-plan.json`、`i18n-style-diff.json`、
 最终候选 PPTX、contact sheet 和人工复核
 必需的少量问题页 PNG、`replace-text.json`。实际不存在的项无需补造。
 
@@ -452,6 +452,7 @@ xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,
 xdoc pptx chrome-apply remapped.pptx --deckkit mckinsey-blue --output styled.pptx --json
 xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output out.pptx --json
 xdoc pptx diff --source source.pptx --candidate out.pptx --detail summary --json
+xdoc pptx i18n-plan --source source.pptx --units i18n-scan-source.json --data translations.json --json
 xdoc pptx i18n-text-plan --source source.pptx --data translations.json --json
 xdoc pptx i18n-scan --source source.pptx --source-lang zh --mode source --json
 xdoc pptx i18n-scan --source translated.pptx --source-lang zh --mode candidate --json

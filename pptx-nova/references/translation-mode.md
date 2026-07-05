@@ -64,63 +64,113 @@ relevant OOXML style properties.
        --mode source \
        --json > <run-dir>/i18n-scan-source.json
      ```
-     Use its categories to decide what to translate or preserve:
-     `visibleBody`, `visibleTextAttr`, and `chartVisibleCache` are
-     translatable; `embeddedWorkbook` requires review; `themeFontMetadata`,
-     `relationshipPath`, `shapeInternalName`, and `chartMetadata` are
-     preserve-by-default. For direct OOXML replacements, prefer each hit's
-     `replaceText` template when present: copy it into `replacements[]` and
-     add `targetText`. Treat `location` as scan diagnostics only; do not use
-     `location` as the `replace-text` `index`.
-4. Build `translation-map.json` with one record per translatable unit:
-   `slide`, `object kind`, stable selector or OOXML target, source text,
-   translated text, length ratio, fitting risk, and style-preservation method.
+     Treat `i18nUnits.units[]` as the primary translation inventory. `hits[]`
+     are diagnostic evidence only. Do not derive selectors or replacement
+     indexes from `hits[].location`.
+4. Build `<run-dir>/translations.json` using
+   `pptx-i18n-translations/v1`. Create one record for every
+   `i18nUnits.units[]` item with `action: "translate"`:
+   ```json
+   {
+     "schemaVersion": "pptx-i18n-translations/v1",
+     "sourceLang": "zh",
+     "targetLang": "en",
+     "translations": [
+       {
+         "unitId": "ppt/slides/slide1.xml#shape:12#p:0",
+         "sourceHash": "sha256:...",
+         "sourceText": "源文本",
+         "targetText": "Target text"
+       }
+     ]
+   }
+   ```
+   Translate `visibleBody`, `visibleTextAttr`, and `chartVisibleCache`.
+   Preserve `themeFontMetadata`, `relationshipPath`, `shapeInternalName`, and
+   `chartMetadata` by default. Treat `embeddedWorkbook` and other review units
+   as manual review items unless the user explicitly approves a workbook sync
+   strategy.
 5. Copy the source PPTX into the run directory and use that copy as the first
    candidate. Do not reconstruct slides, duplicate objects, or generate new
    text boxes for existing content.
-6. Before replacing DrawingML shape/table text, generate a run-level text plan:
+6. Generate the native i18n plan:
 
    ```bash
-   xdoc pptx i18n-text-plan \
+   xdoc pptx i18n-plan \
      --source source.pptx \
-     --data <run-dir>/translation-map.json \
-     --json > <run-dir>/i18n-text-plan.json
+     --units <run-dir>/i18n-scan-source.json \
+     --data <run-dir>/translations.json \
+     --json > <run-dir>/i18n-plan.json
    ```
 
-   Use a `pptx-i18n-translations/v1` compatible `translations[]` array for the
-   plan input. Each unit should include `slide` (1-based), `shapeId` when
-   available, `paragraph` (0-based), `sourceText`, `targetText`, and optional
-   `anchors[]` for styled tokens that must retain their original run boundary.
-   Treat `agentGate.passed=false`, `reviewRequiredCount>0`, or any
-   `strategy=review-required` as an automation blocker. Do not auto-apply those
-   units; add reliable anchors, provide run-level target text manually, or ask
-   for human review.
+   `i18n-plan` validates `unitId`, `sourceHash`, and `sourceText`, then routes
+   units to the safest available execution primitive:
+   - `textPlan.translations[]` for DrawingML paragraph/run planning.
+   - `replaceText.replacements[]` for user-visible text attributes.
+   - `replaceChartText.replacements[]` for chart visible cache labels.
+   - `patch.ops[]` for generated run-level `set-run` operations.
+
+   Treat `applyGate.passed=false`, non-empty `conflicts[]`, non-empty
+   `missingTranslations[]`, or apply-blocking `reviewRequired[]` as an
+   automation blocker. Add missing translations, refresh stale source hashes,
+   add reliable styled-token anchors, broaden shared-part scope, or route the
+   item to manual review before applying changes.
 
 7. Replace text in place while preserving OOXML structure:
-   - Prefer native `xdoc pptx replace-text` for direct OOXML replacements. It
-     copies the source PPTX, changes only existing text-node or text-attribute
-     values, and blocks when `sourceText`/`sourceHash`/`index` cannot identify a
-     unique target:
+   - Apply generated artifacts only when `i18n-plan.applyGate.passed=true`.
+     The planner is read-only; it does not write a candidate PPTX.
+   - Apply execution artifacts sequentially. Each command reads the latest
+     candidate and writes a new candidate path; never rerun every helper from
+     `source.pptx` into the same output because that can overwrite earlier
+     replacements.
+   - For chart labels, run the translation-safe top-level helper first instead
+     of a handwritten OOXML fallback:
      ```bash
-     xdoc pptx replace-text \
-       --source source.pptx \
-       --data <run-dir>/translation-map.json \
-       --output <run-dir>/candidate.pptx \
-       --json > <run-dir>/replace-text.json
+     xdoc pptx replace-chart-text \
+       --source <current-candidate-or-source.pptx> \
+       --data <run-dir>/replace-chart-text-input.json \
+       --output <run-dir>/candidate-chart.pptx \
+       --visible-cache-only \
+       --dry-run \
+       --json > <run-dir>/replace-chart-text-dry-run.json
      ```
-     Use `replacements[]` records with `kind: "text-node"` for `<a:t>`,
-     `<c:v>`, `<cx:pt>`, `<cx:v>`, and `<m:t>` values. Use
-     `kind: "text-attr"` only for user-visible attributes such as hyperlink
-     `tooltip`, and include `attrName`, `part`, `sourceText` or `sourceHash`,
-     and a 0-based `index` when the value is not unique. When the source unit
-     came from `i18n-scan`, use `hit.replaceText.index`; never convert
-     `hit.location` such as `attr:727` into a replacement index.
+     Materialize `<run-dir>/replace-chart-text-input.json` from
+     `i18n-plan.replaceChartText`. Then rerun without `--dry-run` only when
+     the dry-run report passes. This helper changes only chart visible cache
+     labels (`title`, `series`, `category`, `dataLabel`) in
+     `ppt/charts/*.xml`; it does not write external workbook paths,
+     relationship targets, embedded workbook data, or `formatCode`.
    - Prefer run/text-node replacement that changes only `<a:t>`, `<c:v>`,
      `<cx:pt>`, or equivalent visible cache text, leaving neighboring
      `a:rPr`, `a:pPr`, `a:bodyPr`, table cell properties, and chart styling
      untouched.
-   - For DrawingML shape/table paragraphs, apply only the `set-run` patchOps
-     emitted by `i18n-text-plan` when `agentGate.passed=true`.
+   - Prefer native `xdoc pptx replace-text` for direct OOXML replacements. It
+     copies the current candidate, changes only existing text-node or
+     text-attribute values, and blocks when `sourceText`/`sourceHash`/`index`
+     cannot identify a unique target:
+     ```bash
+     xdoc pptx replace-text \
+       --source <current-candidate.pptx> \
+       --data <run-dir>/replace-text-input.json \
+       --output <run-dir>/candidate-attrs.pptx \
+       --json > <run-dir>/replace-text.json
+     ```
+     Materialize `<run-dir>/replace-text-input.json` from
+     `i18n-plan.replaceText`. Do not hand-derive `kind`, `part`, `tag`,
+     `attrName`, or `index`.
+   - For DrawingML shape/table paragraphs, apply only the `set-run` patch ops
+     emitted under `i18n-plan.patch.ops[]`. Each paragraph patch op must carry
+     `unitId`, `sourceText`, and `sourceHash` guards.
+     ```bash
+     xdoc pptx apply \
+       --input <current-candidate.pptx> \
+       --patch <run-dir>/patch.json \
+       --output <run-dir>/candidate-text.pptx \
+       --dry-run \
+       --json > <run-dir>/patch-dry-run.json
+     ```
+     Materialize `<run-dir>/patch.json` from `i18n-plan.patch`, then apply
+     without `--dry-run` only after the dry-run report passes.
    - Preserve run boundaries when they encode style. If one source sentence is
      split across multiple styled runs, follow the plan strategy:
      `uniform`, `preserve-run-boundaries`, or
@@ -129,26 +179,10 @@ relevant OOXML style properties.
    - Preserve hyperlink runs and field runs. Do not remove `<a:hlinkClick>`,
      `<a:fld>`, footer/date/page number placeholders, or speaker-note
      structure while translating visible labels around them.
-   - For chart labels, prefer the translation-safe top-level helper instead of
-     a handwritten OOXML fallback:
-     ```bash
-     xdoc pptx replace-chart-text \
-       --source source.pptx \
-       --data <run-dir>/chart-replacements.json \
-       --output <run-dir>/candidate.pptx \
-       --visible-cache-only \
-       --dry-run \
-       --json > <run-dir>/replace-chart-text-dry-run.json
-     ```
-     Then rerun without `--dry-run` only when `agentGate.passed=true`. This
-     helper changes only chart visible cache labels (`title`, `series`,
-     `category`, `dataLabel`) in `ppt/charts/*.xml`; it does not write
-     external workbook paths, relationship targets, embedded workbook data, or
-     `formatCode`.
    - Use `set-text`, `set-table-cell`, or other high-level text ops only for
      uniform-format objects, or when the op has a style-preservation report that
      proves bold/italic/underline/strike/alignment and run formatting survive.
-8. Dry-run when using xdoc patch ops. For direct OOXML fallback, write a
+8. Dry-run generated patch ops before applying them. For direct OOXML fallback, write a
    machine-readable replacement report and run ZIP/XML validation immediately
    after packaging.
 9. Run the native translation style gate and block on any style blocker:
@@ -256,30 +290,43 @@ This gate does not prove translation completeness or rendered fit. It must be
 paired with bilingual text audit, source-language scan, preview/contact-diff,
 and visual review.
 
-## Text Node Planning Gate
+## I18n Plan Gate
 
-`xdoc pptx i18n-text-plan` is mandatory before applying automated run-level
-translation patches to DrawingML shape/table text. It is a planner, not a
-writer: it reads the source deck and translation units, then emits
-style-preserving `set-run` patchOps.
+`xdoc pptx i18n-plan` is mandatory before applying automated translation
+changes. It is a read-only planner: it validates the scan inventory and
+translations, then emits executable sub-artifacts for the lower-level commands.
 
 Required interpretation:
 
-- `status=pass` and `agentGate.passed=true`: generated patchOps may be dry-run
-  and then applied to the copied candidate deck.
-- `strategy=uniform`: a single source run receives the full target text.
-- `strategy=preserve-run-boundaries`: source runs share the same style; the
-  first run receives the target and continuation runs are cleared while style
-  nodes remain.
-- `strategy=preserve-styled-token-boundaries`: styled anchors remain in their
-  original runs and surrounding translated text is assigned to adjacent plain
-  runs.
-- `strategy=review-required`: stop automation for that unit. Add explicit
-  anchors, produce a manual run-level mapping, or request human review.
+- `applyGate.passed=true`: the generated `replaceText`, `replaceChartText`,
+  and `patch.ops` artifacts may be dry-run and applied to the copied candidate
+  deck.
+- `conflicts[]` non-empty: stop automation. Typical causes are unknown
+  `unitId`, stale `sourceHash`, source text mismatch, or a target supplied for a
+  preserve-only unit.
+- `missingTranslations[]` non-empty: translate the missing `action=translate`
+  units before applying.
+- `reviewRequired[]` with `blocksApply=true`: add anchors, broaden shared-part
+  scope, or handle the unit manually before applying.
+- `deliveryGate.passed=false`: this is expected when non-applied review signals
+  remain. It means final delivery still needs candidate scan, style diff,
+  preview/vision review, and text overflow checks.
 
-The text plan does not replace the style diff. After applying the plan, still
-run `i18n-style-diff` to prove bold/italic/underline/strike/alignment and other
-style signatures were not changed.
+The lower-level `xdoc pptx i18n-text-plan` remains an execution primitive and
+debugging fallback for DrawingML shape/table text. Its strategies mean:
+
+- `uniform`: a single source run receives the full target text.
+- `preserve-run-boundaries`: source runs share the same style; the first run
+  receives the target and continuation runs are cleared while style nodes
+  remain.
+- `preserve-styled-token-boundaries`: styled anchors remain in their original
+  runs and surrounding translated text is assigned to adjacent plain runs.
+- `review-required`: stop automation for that unit. Add explicit anchors,
+  produce a manual run-level mapping, or request human review.
+
+The i18n plan does not replace the style diff. After applying generated
+artifacts, still run `i18n-style-diff` to prove bold/italic/underline/strike,
+alignment, chart/table structure, and other style signatures were not changed.
 
 ## Translation Quality Rules
 
@@ -307,27 +354,29 @@ Charts are a frequent translation blind spot.
 
 - `inspect` can report chart objects without exposing chart title, series,
   categories, data labels, or workbook cache text.
-- Always compare `xdoc convert --to text` and an OOXML text-node scan against
+- Always compare `xdoc convert --to text` and `i18n-scan` `i18nUnits` against
   `inspect`; any source-language text found only in chart parts still needs a
-  translation plan.
+  translation unit.
 - Use top-level `xdoc pptx replace-chart-text --visible-cache-only` for chart
-  title, series, category, and data-label translations. Its dry-run report
-  lists `changedNodes[]`, `changedParts[]`, and `structureChecks[]`; block on
-  any conflict, ambiguity, `formatCode` change, or failed structure check.
+  title, series, category, and data-label translations, but feed it from
+  `i18n-plan.replaceChartText` rather than handcrafted selectors. Its dry-run
+  report lists `changedNodes[]`, `changedParts[]`, and `structureChecks[]`;
+  block on any conflict, ambiguity, `formatCode` change, or failed structure
+  check.
 - Do not use the patch op `replace-chart-text` as the default translation path:
   that op may synchronize embedded workbook labels and is intended for ordinary
   chart editing, not visible-cache-only i18n.
-- If the top-level helper cannot identify a unique visible cache node, do not
-  ignore the chart. Add role/index/sourceHash detail to the replacement input,
-  or record the limitation and use a targeted OOXML fallback only for visible
-  cache text, followed by ZIP/XML validation, preview, and clean-open.
+- If the planner or top-level helper cannot identify a unique visible cache
+  node, do not ignore the chart. Refresh the scan, keep the unit in manual
+  review, or use a targeted OOXML fallback only for visible cache text,
+  followed by ZIP/XML validation, preview, and clean-open.
 - Do not translate external workbook relationship targets or local filesystem
   paths; changing them can break links.
 
 Tables require style-preserving cell-level handling:
 
-- `inspect` may summarize a table as one object with no cell text. Use OOXML or
-  text export to build table cell translations.
+- `inspect` may summarize a table as one object with no cell text. Use
+  `i18nUnits` plus text export to build table cell translations.
 - Prefer replacing the cell's existing text nodes while keeping `a:tcPr`,
   paragraph properties, and run properties intact. Use `set-table-cell` only
   when the cell has uniform formatting or the op is proven style-preserving.
@@ -371,8 +420,15 @@ consistent and list any deliberate text compression.
 
 Keep these translation-specific artifacts in the run directory when available:
 
-- `translation-map.json`
+- `translations.json`
+- `i18n-plan.json`
+- `replace-text-input.json`
 - `replace-text.json`
+- `replace-chart-text-input.json`
+- `replace-chart-text-dry-run.json`
+- `replace-chart-text.json`
+- `patch.json`
+- `patch-dry-run.json`
 - `i18n-text-plan.json`
 - `i18n-scan-source.json`
 - `i18n-scan-candidate.json`

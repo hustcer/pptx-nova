@@ -331,8 +331,10 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     review if evidence-summary.json should include this final visual QA result.
     For existing-deck refurbishment, run `xdoc pptx contact-diff` when manual
     side-by-side review is needed; `refurbish-skin` reports the suggested path
-    but skips generation by default. A deck that visually still reads like the
-    source with only light chrome added is not done.
+    but skips generation by default. Use `--slides` for scoped repair review
+    and check `agentGate.passed=true` before relying on the PNG; rerun full-deck
+    when final parity matters. A deck that visually still reads like the source
+    with only light chrome added is not done.
     For existing-deck refurbishment, the standard runner writes
     `fidelity-gate.json`, `candidate-inspect.json`, and `layout-final.json`
     before preview rendering. If running low-level commands manually, run

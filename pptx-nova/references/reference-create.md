@@ -487,7 +487,8 @@ DeckKit 选择注意事项：
   `approvedChanges[]` 或用户确认。`uncertain` / `unsupported` 区域要在最终摘要中披露，并说明用
   哪个人工或专项 gate 覆盖。
 - PNG/contact-sheet 复核要用 `xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx --output contact-diff.png --json`
-  生成并排对比后抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。
+  生成并排对比后抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。局部修复复核可加
+  `--slides`，但必须确认 `agentGate.passed=true` 且最终交付前按需跑全量 contact-diff。
   对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。
   同时检查 proof object 是否过满、圆角/图片/图案示例是否压住标签、空内容区域是否残留无意义横线。
 - 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram

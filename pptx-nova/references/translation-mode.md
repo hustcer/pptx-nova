@@ -400,8 +400,16 @@ xdoc pptx preview candidate.pptx --slides <changed> \
   --overwrite --json > <run-dir>/preview-candidate.json
 
 xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx \
+  --slides <changed> \
   --output <run-dir>/contact-diff.png --json > <run-dir>/contact-diff.json
 ```
+
+Treat `contact-diff.agentGate.passed=false` as a review artifact blocker:
+the PNG did not contain complete source/candidate pairs for the requested
+scope. `agentGate.passed=true` means the scoped contact sheet is safe for
+human visual review, not that visual parity is automatically approved. Before
+final delivery, rerun without `--slides` when full-deck before/after parity is
+required.
 
 Review the changed-slide contact sheets and the full-size PNGs for:
 

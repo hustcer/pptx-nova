@@ -26,7 +26,8 @@ Translation mode is a style-preserving workflow. The translated deck should be a
 copy of the source deck with text content replaced in place.
 
 The following properties must remain unchanged unless the user explicitly asks
-otherwise:
+otherwise or the controlled fitting-repair policy below allows a narrower
+exception:
 
 - text bold / italic / underline / strikethrough
 - paragraph alignment, bullets, indentation, line spacing, tab stops, columns
@@ -34,11 +35,25 @@ otherwise:
 - run color, font face, hyperlinks, speaker notes, animations, transitions
 - table cell style, chart style, shape fills/lines/effects, z-order
 
-Only font size may be adjusted as an automatic layout repair, and only after
-preserving the translation meaning. Record every font-size adjustment in the
-bilingual audit. If a translation still does not fit after reasonable font-size
-adjustment, shorten the wording without changing meaning and record it as
-`meaning-preserving compact wording`.
+Automatic layout repair must use the narrowest change that preserves both
+meaning and layout fidelity:
+
+1. First shorten the translation without changing meaning. Record this as
+   `meaning-preserving compact wording`.
+2. If compact wording still does not fit, make the smallest practical
+   font-size adjustment inside the original visual hierarchy and record it in
+   the bilingual audit.
+3. Only when the slide has clear unused space may you make a minimal geometry
+   adjustment such as increasing a text box width/height. Geometry repair is a
+   last resort, not the default response to `vision-check` `fixPatch` output.
+   It is allowed only when the adjusted shape does not overlap other shapes,
+   does not touch the slide edge, and does not make neighboring spacing look
+   cramped. Record the exact shape, before/after size or position, and reason
+   in the bilingual audit and visual review.
+
+Do not apply a geometry `fixPatch` automatically in translation mode. Inspect
+the slide context first, prefer compact wording, and use geometry only when
+rendered before/after PNGs prove the page still has adequate spacing.
 
 Avoid whole-shape text replacement as the default. Operations such as
 `set-text` or `set-table-cell` can rebuild text bodies or runs and may destroy
@@ -266,10 +281,19 @@ relevant OOXML style properties.
 
 12. Fix visual regressions at the translation source:
 
-- First adjust font size within the original visual hierarchy.
-- If the text still does not fit, preserve meaning with concise wording.
-- Do not move objects, split pages, change font weight/style, or shrink fonts
-  below readability thresholds just to avoid editing the translation.
+- First preserve meaning with concise wording. This is the default repair for
+  translated labels, badges, table headers, legends, and narrow callouts.
+- If concise wording still does not fit, make the smallest acceptable
+  font-size adjustment within the original hierarchy.
+- If the slide has real unused space, a minimal geometry size adjustment is
+  allowed after checking neighboring objects. Do not move objects or resize
+  boxes into other shapes, slide edges, chart labels, legends, footers, page
+  numbers, or decorative chrome.
+- Treat `vision-check` geometry `fixPatch` suggestions as candidates, not
+  instructions. Apply them only after a space check and rerun `vision-diff`,
+  preview/contact sheet review, and any relevant style/semantic diff.
+- Do not split pages, change font weight/style, or shrink fonts below
+  readability thresholds just to avoid editing the translation.
 
 13. Write `bilingual-translation-audit.md` and `.json` with source text,
     target text, and notes for any meaning-preserving compression.
@@ -295,6 +319,10 @@ Required interpretation:
   style blockers.
 - `allowedChanges.fontSize[]` non-empty: acceptable only for fitting repair;
   record the reason and keep the source meaning unchanged.
+- Deliberate geometry repairs must be backed by the repair patch, semantic diff
+  or inspect evidence, and before/after PNG review. Do not waive unrelated
+  style blockers as "geometry"; if a report cannot isolate the change to the
+  intended textbox size/position, stop and repair by wording or font size.
 - Missing or added style-relevant parts are blockers.
 - A failure in slide/chart relationship parts means possible hyperlink or
   embedded-object loss; do not waive it based only on PNG appearance.
@@ -428,6 +456,8 @@ Review the changed-slide contact sheets and the full-size PNGs for:
 
 - text clipped by its shape or table cell
 - translated labels touching neighboring labels
+- any geometry repair causing shape overlap, cramped spacing, edge contact, or
+  collision with chart/table labels, footer, page number, or decorative chrome
 - line breaks that change the intended hierarchy
 - text that lost bold, italic, underline, strikethrough, color, or alignment
 - chart legend/category labels becoming unreadable

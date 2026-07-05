@@ -258,7 +258,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 - **Edit**：用户明确要在已有 PPTX 上改文字、样式、图表、图片、表格、页或备注；先 inspect 再 patch。
 - **Translation Mode**：用户要求翻译已有 PPTX 并保持原版式；默认先复制源 deck，再在副本上原位替换
   可见文本。必须保留粗体、斜体、下划线、删除线、对齐、段落属性、文本框属性、表格/chart 样式和动画；
-  只有字体大小可作为版式修复调整。必须额外抽取 shape/table/chart 可见文本、生成中英对照和样式签名审计、
+  版式修复顺序必须是先压缩译文，再小幅调整字体大小，最后才在确有可用空白时小幅调整几何尺寸。
+  几何调整不得造成 shape 重叠、贴边、节奏拥挤或相邻对象间距异常，且必须通过 `vision-diff`、PNG/contact sheet
+  和审计记录证明。必须额外抽取 shape/table/chart 可见文本、生成中英对照和样式签名审计、
   做源稿/译稿 `vision-diff` 新增问题 gate 和 contact-diff，并以版式一致性作为交付门禁。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。

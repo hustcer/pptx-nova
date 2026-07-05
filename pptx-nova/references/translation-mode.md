@@ -158,6 +158,19 @@ relevant OOXML style properties.
      Materialize `<run-dir>/replace-text-input.json` from
      `i18n-plan.replaceText`. Do not hand-derive `kind`, `part`, `tag`,
      `attrName`, or `index`.
+     `replace-text` currently does not support `--dry-run`; do not pass
+     `--dry-run`, `--compile`, or `--allow-raw-xml`. Its safety comes from
+     writing to a run-directory candidate plus `sourceText`/`sourceHash`/`index`
+     conflict and ambiguity checks. If you need to iterate the same current-run
+     candidate path, overwrite only that run-generated candidate:
+     ```bash
+     xdoc pptx replace-text \
+       --source <current-candidate.pptx> \
+       --data <run-dir>/replace-text-input.json \
+       --output <run-dir>/candidate-attrs.pptx \
+       --overwrite \
+       --json > <run-dir>/replace-text.json
+     ```
    - For DrawingML shape/table paragraphs, apply only the `set-run` patch ops
      emitted under `i18n-plan.patch.ops[]`. Each paragraph patch op must carry
      `unitId`, `sourceText`, and `sourceHash` guards.

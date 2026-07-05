@@ -270,18 +270,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 
 ## Feedback 模式
 
-如果用户 prompt 中包含 `need feedback`、`给反馈`、`需要反馈` 等明确反馈意图，除了完成原本的
-生成、修改或检查任务外，还必须以 SKILL 使用体验官视角记录执行过程中的问题和改进建议：
-
-- 记录实际遇到的 SKILL 使用问题，例如 reference 路由不清、命令链过长、DeckKit 选择不稳、
-  dry-run/vision 输出难以行动、错误修复提示不足、slots/budget 文档不一致、示例数据缺口等。
-- 对每个问题给出面向 `pptx-nova` SKILL 的最佳解决方案，优先说明应改文档、脚本、DeckKit
-  schema、benchmark、catalog 还是最终回复规范。
-- 如果反馈审计旧 run、升级后的行为，或写到"缺少/需要新增某能力"，先重新 probe 当前
-  `xdoc` 并反查当前 reference；把结论分清为"已有能力但本次 Agent 未使用"、"当前工具缺口"、
-  "文档引导不足"或"历史 run 过期"。不要把旧 run 观察混写成当前能力事实。
-- 最后可以从 Agent 角度补充真实使用感受或建议，聚焦流程摩擦、认知负担、验证闭环和可维护性；
-  不要把它写成泛泛表扬或用户内容本身的设计点评。
+如果用户 prompt 中包含 `need feedback`、`给反馈`、`需要反馈`、`有什么使用反馈` 等明确反馈意图，
+读取 `references/feedback-mode.md`。反馈少于或等于 3 条时可直接在当前会话输出；超过 3 条、
+需要证据或需要分优先级时，写入当前 run 目录的 `skill-feedback.md` 并在最终回复中给出路径。
 
 ## 创建型公共红线
 
@@ -487,8 +478,8 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 条件性补充只在相关时出现：高风险任务列 `evidence-summary.json` / `layout-final.json`；
 图表/表格/XML 风险列专项审计；翻新/严格套模板列 fidelity/template/content audit；
 正式说服型 deck 列叙事质量结论；发生清理时说明保留证据和删除的可重建产物；触发
-Feedback 模式时追加“SKILL 使用反馈”。不要输出 xdoc 版本、CLI schema、能力披露等审计细节，
-除非它影响结果、使用了 fallback，或用户明确要求。
+Feedback 模式时按 `references/feedback-mode.md` 输出或保存反馈。不要输出 xdoc 版本、
+CLI schema、能力披露等审计细节，除非它影响结果、使用了 fallback，或用户明确要求。
 
 只有平台或工具给出准确 token 统计时才输出 token 信息；不要估算。
 
@@ -505,6 +496,7 @@ Feedback 模式时追加“SKILL 使用反馈”。不要输出 xdoc 版本、CL
 | `references/edit-mode.md`                 | 修改已有 PPTX 的 inspect/dry-run/selector 流程                   |
 | `references/micro-edit-cheatsheet.md`     | 少量文字、备注、页脚、元数据和单对象小改的极速路径               |
 | `references/translation-mode.md`          | 翻译已有 PPTX、可见文本覆盖、中英对照和版式一致性视觉门禁        |
+| `references/feedback-mode.md`             | SKILL 使用反馈、旧 run 反馈审计和反馈落盘规则                    |
 | `references/template-following.md`        | 严格套模板：复制源 slide、编辑 inherited objects、placeholder QA |
 | `references/export-and-check.md`          | PDF/PNG/MD/JSON 导出、extract、check、PPTX semantic diff         |
 | `references/express-mode.md`              | Express 模式完整黄金路径                                         |

@@ -71,35 +71,45 @@ relevant OOXML style properties.
 3. Extract visible text from multiple evidence sources:
    - `inspect.slides[].shapes[].textPreview` for editable shape text.
    - `xdoc convert source.pptx --to text` for rendered text order.
+   - Choose the native source-language detector deliberately:
+     - Use `multi` for mixed Chinese/English source decks translated into a
+       non-English target such as German.
+     - Use `zh` for Chinese-only source decks, especially when the target is
+       English.
+     - Use `en` for English-only source decks.
    - Native source-language classification scan:
      ```bash
      xdoc pptx i18n-scan \
        --source source.pptx \
-       --source-lang zh \
+       --source-lang <source-lang> \
        --mode source \
        --json > <run-dir>/i18n-scan-source.json
      ```
      Treat `i18nUnits.units[]` as the primary translation inventory. `hits[]`
-     are diagnostic evidence only. Do not derive selectors or replacement
-     indexes from `hits[].location`.
+     are diagnostic evidence only. For `multi`, use `detectedLangs` and
+     `detectedScripts` to audit whether Chinese and English source text were
+     both covered. Do not derive selectors or replacement indexes from
+     `hits[].location`.
 4. Build `<run-dir>/translations.json` using
    `pptx-i18n-translations/v1`. Create one record for every
    `i18nUnits.units[]` item with `action: "translate"`:
    ```json
    {
      "schemaVersion": "pptx-i18n-translations/v1",
-     "sourceLang": "zh",
-     "targetLang": "en",
+     "sourceLang": "multi",
+     "targetLang": "de",
      "translations": [
        {
          "unitId": "ppt/slides/slide1.xml#shape:12#p:0",
          "sourceHash": "sha256:...",
-         "sourceText": "源文本",
-         "targetText": "Target text"
+         "sourceText": "源文本 / Source text",
+         "targetText": "Zieltext"
        }
      ]
    }
    ```
+   Set `sourceLang` to the same normalized value returned by the source
+   `i18n-scan` report; `i18n-plan` rejects mismatches.
    Translate `visibleBody`, `visibleTextAttr`, and `chartVisibleCache`.
    Preserve `themeFontMetadata`, `relationshipPath`, `shapeInternalName`, and
    `chartMetadata` by default. Treat `embeddedWorkbook` and other review units
@@ -247,7 +257,7 @@ relevant OOXML style properties.
     ```bash
     xdoc pptx i18n-scan \
       --source candidate.pptx \
-      --source-lang zh \
+      --source-lang <source-lang> \
       --mode candidate \
       --json > <run-dir>/i18n-scan-candidate.json
     ```

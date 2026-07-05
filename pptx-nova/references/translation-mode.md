@@ -68,7 +68,10 @@ relevant OOXML style properties.
      `visibleBody`, `visibleTextAttr`, and `chartVisibleCache` are
      translatable; `embeddedWorkbook` requires review; `themeFontMetadata`,
      `relationshipPath`, `shapeInternalName`, and `chartMetadata` are
-     preserve-by-default.
+     preserve-by-default. For direct OOXML replacements, prefer each hit's
+     `replaceText` template when present: copy it into `replacements[]` and
+     add `targetText`. Treat `location` as scan diagnostics only; do not use
+     `location` as the `replace-text` `index`.
 4. Build `translation-map.json` with one record per translatable unit:
    `slide`, `object kind`, stable selector or OOXML target, source text,
    translated text, length ratio, fitting risk, and style-preservation method.
@@ -109,7 +112,9 @@ relevant OOXML style properties.
      `<c:v>`, `<cx:pt>`, `<cx:v>`, and `<m:t>` values. Use
      `kind: "text-attr"` only for user-visible attributes such as hyperlink
      `tooltip`, and include `attrName`, `part`, `sourceText` or `sourceHash`,
-     and a 0-based `index` when the value is not unique.
+     and a 0-based `index` when the value is not unique. When the source unit
+     came from `i18n-scan`, use `hit.replaceText.index`; never convert
+     `hit.location` such as `attr:727` into a replacement index.
    - Prefer run/text-node replacement that changes only `<a:t>`, `<c:v>`,
      `<cx:pt>`, or equivalent visible cache text, leaving neighboring
      `a:rPr`, `a:pPr`, `a:bodyPr`, table cell properties, and chart styling
@@ -164,9 +169,10 @@ relevant OOXML style properties.
      --json > <run-dir>/i18n-style-diff.json
    ```
    `--allow-text-attrs` only applies in typed user-visible contexts: hyperlink
-   `tooltip` on `hlinkClick`/`hlinkHover` and alt text `descr`/`title` on
-   `cNvPr`. It does not waive metadata such as language tags, theme typefaces,
-   relationship paths, chart `formatCode`, or shape internal names.
+   `tooltip` on `hlinkClick`/`hlinkHover`/`hlinkMouseOver` and alt text
+   `descr`/`title` on `cNvPr`. It does not waive metadata such as language
+   tags, theme typefaces, relationship paths, chart `formatCode`, or shape
+   internal names.
    For scoped repair loops, add `--slides <changed>`, then rerun the full-deck
    gate before delivery. Treat `agentGate.passed=false`, non-empty
    `styleBlockers[]`, or non-empty compatibility `blockers[]` as delivery

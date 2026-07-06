@@ -131,6 +131,46 @@ function parseJson(text) {
   }
 }
 
+function hasFlag(helpText, flag) {
+  return new RegExp(`(^|\\s)${flag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|,|$)`, 'm').test(
+    helpText,
+  )
+}
+
+function helpFlagIndex(bin) {
+  const convertHelp = run(bin, ['convert', '--help'])
+  const checkHelp = run(bin, ['check', '--help'])
+  const pptxHelp = run(bin, ['pptx', '--help'])
+  const fromHelp = (result, flag) => (result.ok ? hasFlag(result.stdout, flag) : null)
+
+  return {
+    convert: {
+      helpAvailable: convertHelp.ok,
+      jsonStdout: fromHelp(convertHelp, '--json') === true,
+      reportFile: fromHelp(convertHelp, '--report') === true,
+      outputFile:
+        fromHelp(convertHelp, '--output') === true || fromHelp(convertHelp, '-o') === true,
+      notes:
+        'Top-level convert is a generic export fallback. Do not assume JSON stdout unless jsonStdout is true.',
+    },
+    check: {
+      helpAvailable: checkHelp.ok,
+      jsonStdout: fromHelp(checkHelp, '--json') === true,
+      reportFile: fromHelp(checkHelp, '--report') === true,
+      outputFile: fromHelp(checkHelp, '--output') === true || fromHelp(checkHelp, '-o') === true,
+      notes:
+        'For single-file preflight diagnostics, write the structured check result with -o/--output. --report is a batch summary when available.',
+    },
+    pptx: {
+      helpAvailable: pptxHelp.ok,
+      jsonStdout: fromHelp(pptxHelp, '--json') === true,
+      previewManifest: pptxHelp.ok && pptxHelp.stdout.includes('preview'),
+      notes:
+        'PPTX subcommands such as preview/inspect/apply emit machine-readable stdout when --json is disclosed.',
+    },
+  }
+}
+
 function objectKeys(value) {
   return value && typeof value === 'object' && !Array.isArray(value) ? Object.keys(value) : []
 }
@@ -308,6 +348,7 @@ function createReport(args) {
       modes: namesFromCollection(pptx.schemaDisclosure?.modes, ['flag']),
       recommended: pptx.schemaDisclosure?.agentHint ?? null,
     },
+    commandFlags: helpFlagIndex(args.xdocBin),
   }
   const requirements = requirementResults(args.requirements, capabilities)
   const undisclosedRequired = requirements.filter((item) => item.state === 'undisclosed')

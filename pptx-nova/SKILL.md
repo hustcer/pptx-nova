@@ -44,6 +44,10 @@ formulas、raw XML、复杂品牌样式等专项内容时，再读取对应专�
 theme/style/native DeckKit 从快照对应 catalog 索引读取；selector 依次依据 inspect、目标
 op schema 和 dry-run suggestions。`xdoc <command...> --help` 仅作补充，不要假设
 `--help --json` 输出 JSON。
+顶层 `xdoc convert` / `xdoc check` 也不能默认追加 `--json`：PPTX PNG 结构化预览优先用
+`xdoc pptx preview --json`，单文件 preflight 结构化结果优先用 `xdoc check ... -o check.json`。
+若当前 `xdoc-capabilities.json#capabilities.commandFlags` 或 `xdoc <command> --help` 披露
+`--report`，只把它当 report/summary sidecar，不替代 `preview.json` 或单文件 `check.json`。
 只有调用方显式要求 strict gate 且任务必需能力仍未披露时才阻塞；否则继续探索或走已有
 fallback，不得因快照精简而禁用 xdoc 新能力。
 
@@ -278,8 +282,12 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
 ## Feedback 模式
 
 如果用户 prompt 中包含 `need feedback`、`给反馈`、`需要反馈`、`有什么使用反馈` 等明确反馈意图，
-读取 `references/feedback-mode.md`。反馈少于或等于 3 条时可直接在当前会话输出；超过 3 条、
-需要证据或需要分优先级时，写入当前 run 目录的 `skill-feedback.md` 并在最终回复中给出路径。
+读取 `references/feedback-mode.md`。一旦触发 Feedback 模式，必须先写入当前 run 目录的
+`skill-feedback.md`。反馈少于或等于 3 条时，最终回复可以同时给出文件路径并在会话中显示
+反馈详情；超过 3 条、需要证据或需要分优先级时，最终回复只给出反馈文件路径，不重复粘贴全文。
+最终回复前必须运行反馈门禁：若原 prompt 可用，用
+`node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --prompt-file <prompt.txt> --strict --overwrite --json > <run-dir>/feedback-gate.json`；
+若 prompt 未保存但已知用户要求反馈，用 `--require-feedback`。门禁失败时先补真实反馈，不发送最终回复。
 
 ## 创建型公共红线
 
@@ -469,6 +477,7 @@ xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --cont
 xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet # fallback/debug only
 node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
+node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback --strict --overwrite --json > <run-dir>/feedback-gate.json
 ```
 
 ## 完成摘要
@@ -487,7 +496,9 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 条件性补充只在相关时出现：高风险任务列 `evidence-summary.json` / `layout-final.json`；
 图表/表格/XML 风险列专项审计；翻新/严格套模板列 fidelity/template/content audit；
 正式说服型 deck 列叙事质量结论；发生清理时说明保留证据和删除的可重建产物；触发
-Feedback 模式时按 `references/feedback-mode.md` 输出或保存反馈。不要输出 xdoc 版本、
+Feedback 模式时按 `references/feedback-mode.md` 保存反馈，并列出 `skill-feedback.md`
+路径；反馈少于或等于 3 条时可同时展示详情，超过 3 条时只列路径；同时保留
+`feedback-gate.json`。不要输出 xdoc 版本、
 CLI schema、能力披露等审计细节，除非它影响结果、使用了 fallback，或用户明确要求。
 
 只有平台或工具给出准确 token 统计时才输出 token 信息；不要估算。

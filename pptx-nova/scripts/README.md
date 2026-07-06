@@ -56,6 +56,11 @@ Use these entry points from skill workflows:
   `layout-final.json` and `evidence-summary.json`; it intentionally excludes
   Micro Edit and does not replace mode-specific gates or PNG review. Read
   `evidence-summary.json.agentSummary` for the stable agent-facing summary.
+- `pptx-nova-feedback-gate.mjs` - final-response guard for Feedback Mode. It
+  detects feedback trigger phrases from the original prompt or accepts
+  `--require-feedback`, checks that `<run-dir>/skill-feedback.md` exists and is
+  not a TODO template, and writes `feedback-gate.json`. Use `--strict` before
+  the final response when the task requested skill feedback.
 - pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
   data-driven, Studio, structural edit, template-following, and refurbish runs
   that contain native chart/table ops. It validates data shape, source/claim

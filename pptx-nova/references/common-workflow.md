@@ -383,12 +383,18 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
     only reproducible current-run heavy artifacts when the task succeeded and
     no debug/replay continuation is expected, or when the user explicitly asked
     for cleanup. If files are removed, write `cleanup-manifest.json`.
-17. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
+17. If the user requested skill feedback (`need feedback`, `需要反馈`, `给反馈`,
+    or equivalent), write the feedback first and run
+    `pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback --strict`
+    or the same command with `--prompt-file`. Do not send the final response
+    while `feedback-gate.json.status` is `fail`.
+18. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
     xdoc/schema versions, important intermediate files, validation results,
     high-risk `evidence-summary.json` / `layout-final.json` when applicable,
     `pptx-diff.json` semantic audit when run, preview/contact sheet path,
     artifact retention/cleanup status,
-    discovery/fallback warnings, and remaining risks.
+    discovery/fallback warnings, Feedback Mode artifact path when triggered,
+    and remaining risks.
 
 ## Source Ingestion (HTML / URL / PDF)
 

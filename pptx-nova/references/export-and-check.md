@@ -74,6 +74,12 @@ xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-shee
 The command shape is `xdoc convert <pptx> --to <format>`, not
 `xdoc <pptx> -t png`.
 
+Do not add `--json` to top-level `xdoc convert` unless the current
+`xdoc convert --help` explicitly discloses it. The structured JSON result for
+PPTX visual review comes from `xdoc pptx preview --json`; generic convert may
+write a manifest/report file depending on the selected output options, but it
+is not the default Agent path for a machine-readable PNG preview manifest.
+
 For PNG and multi-format outputs, path shape matters:
 
 - `-o <run-dir>/previews` means `<run-dir>/previews` is the output root. It
@@ -118,6 +124,11 @@ xdoc check deck.pptx \
 
 `xdoc check` is not a visual gate. It does not replace `vision-check` or PNG
 review for created/edited decks.
+
+For a single PPTX, use `-o <run-dir>/check.json` as the canonical structured
+preflight artifact. Do not add `--json` unless `xdoc check --help` discloses it.
+If `--report` is available, treat it as a batch summary/report sidecar; it does
+not replace the per-file diagnostic JSON written by `-o`.
 
 For `fonts`, `missingRiskCandidates` excludes common system fonts such as
 Arial, Aptos, Calibri, Times New Roman, Courier New, Helvetica, Verdana, and

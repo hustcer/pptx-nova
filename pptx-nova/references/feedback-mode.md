@@ -8,6 +8,26 @@ Feedback Mode is an add-on to the user's main task. Complete the requested PPTX
 generation, edit, export, or investigation first, then add skill feedback from
 the perspective of a pptx-nova workflow reviewer.
 
+## Final Gate
+
+Feedback Mode must be checked immediately before the final response. If the
+original user prompt is available as text or saved in the run directory, run:
+
+```bash
+node <skill-root>/scripts/pptx-nova-feedback-gate.mjs \
+  --run-dir <run-dir> \
+  --prompt-file <run-dir>/prompt.txt \
+  --strict \
+  --overwrite \
+  --json > <run-dir>/feedback-gate.json
+```
+
+If the prompt was not saved but the agent knows feedback was requested, use
+`--require-feedback` instead of `--prompt-file`. A strict gate failure means
+`skill-feedback.md` is missing or still a scaffold template; write the real feedback
+before sending the final response. `--write-template` may create a scaffold, but
+the template itself does not pass the gate.
+
 ## What To Capture
 
 - Record actual skill usage problems, such as unclear reference routing,
@@ -38,17 +58,23 @@ capability is missing, verify the current state before concluding:
 
 ## Output Location
 
-- If there are 1-3 short feedback points, include them directly in the current
-  conversation under `SKILL 使用反馈`.
+- When Feedback Mode is triggered, always write `<run-dir>/skill-feedback.md`
+  before the final response. The gate exists to prevent feedback from being
+  lost in long PPTX delivery workflows.
+- If there are 1-3 short feedback points, write the file and also include the
+  feedback path plus the feedback details in the current conversation under
+  `SKILL 使用反馈`.
 - If there are more than 3 feedback points, or the feedback needs evidence,
-  categories, priorities, or longer explanations, write it to
-  `<run-dir>/skill-feedback.md` and mention that path in the final response.
+  categories, priorities, or longer explanations, write the file and only
+  mention the feedback path in the final response; do not duplicate the full
+  report in chat.
 - When the task already has a run directory, use that current run directory. If
   the user only asks for standalone feedback and no run exists, create a small
   feedback run directory under `.pptx-nova/<slug>-<timestamp>/` and place
   `skill-feedback.md` there.
 - Do not save feedback outside the run directory unless the user explicitly asks
   for another location.
+- Keep `feedback-gate.json` alongside `skill-feedback.md`.
 
 ## Suggested Report Shape
 

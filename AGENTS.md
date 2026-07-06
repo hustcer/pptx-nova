@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository packages two agent skills. `pptx-nova/` is the main publishable skill for creating, editing, refurbishing, and checking editable PowerPoint decks. Its runtime scripts live in `pptx-nova/scripts/`, reusable assets in `pptx-nova/assets/`, visual benchmark cases in `pptx-nova/benchmarks/visual/`, and workflow references in `pptx-nova/references/`. `deckkit-maker/` is a developer-side helper skill for creating or repairing DeckKits used by `pptx-nova`. Repository-level release checks are in `tools/`.
+This repository packages two agent skills. `pptx-nova/` is the main publishable skill for creating, editing, translating, refurbishing, and checking editable PowerPoint decks. Its runtime scripts live in `pptx-nova/scripts/`, reusable assets in `pptx-nova/assets/`, visual benchmark cases in `pptx-nova/benchmarks/visual/`, and workflow references in `pptx-nova/references/`. `deckkit-maker/` is a developer-side helper skill for creating or repairing DeckKits used by `pptx-nova`. Repository-level release checks are in `tools/`.
 
 ## Build, Test, and Development Commands
 
@@ -34,3 +34,5 @@ Follow Conventional Commit style as used in history: `feat(pptx-nova): ...`, `fi
 ## Agent-Specific Instructions
 
 Do not overwrite or delete user-provided decks, reference files, or generated evidence from unrelated runs. Keep `pptx-nova` as the primary user-facing skill; mention `deckkit-maker` only for DeckKit development workflows.
+
+When updating user-facing documentation, keep capability claims precise. Do not imply direct `.xlsx`/`.xls` spreadsheet or arbitrary `.docx` ingestion unless that support is implemented; describe current source inputs as Markdown/text content, pasted tables, PDFs/web pages as extracted source material, existing PPTX files, and CSV/JSON data. Phrase preservation claims for refurbishment or translation as goals unless the workflow and validation gates actually prove them for the specific task.

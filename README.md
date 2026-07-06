@@ -219,6 +219,12 @@ creation, editing, refurbishment, and QA, use `pptx-nova`. Use `deckkit-maker`
 only when the existing DeckKits are not enough and the reusable visual system
 itself needs to be built or extended.
 
+## Acknowledgments
+
+- [Tabler Icons](https://github.com/tabler/tabler-icons)
+- [PPT Master](https://github.com/hugohe3/ppt-master)
+- [Beautiful HTML Templates](https://github.com/zarazhangrui/beautiful-html-templates)
+
 ## More documentation
 
 - [pptx-nova user guide](pptx-nova/README.md)

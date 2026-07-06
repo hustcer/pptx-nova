@@ -39,6 +39,10 @@ _query_plugin := if os_family() == 'windows' { 'nu_plugin_query.exe' } else { 'n
 default:
   @just --list --list-prefix "··· "
 
+# Run all tests
+t:
+  @node --test ...(glob tools/tests/*.test.mjs)
+
 # Format code
 fmt:
   @$'(ansi g)Start `fmt` task...(ansi reset)'; \
@@ -56,6 +60,10 @@ lint:
 # Update xdoc schema
 schema:
   @xdoc schema | from json | save -f docs/xdoc-schema.json; oxfmt docs/xdoc-schema.json
+
+# Generate or check deterministic Brotli icon pack
+icon *OPTIONS: 
+  @nu tools/generate-pptx-nova-tabler-icons.nu {{OPTIONS}}
 
 # Check/generate pptx-nova themePack source-derived outputs:
 # `just theme` checks, `just theme -g` updates.

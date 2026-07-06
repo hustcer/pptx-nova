@@ -935,3 +935,88 @@ if (args[0] === 'schema') {
   assert.ok(gateNames.includes('pptx-semantic-diff'))
   assert.ok(phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('publish'))
 })
+
+test('translation compare preserves selected slide number from convert manifest', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-compare-'))
+  const source = join(dir, 'source.pptx')
+  const candidate = join(dir, 'candidate.pptx')
+  const runDir = join(dir, 'run')
+  const output = join(runDir, 'translation-compare.png')
+  const reportPath = join(runDir, 'translation-compare.json')
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+
+  const fakeXdoc = writeFakeXdoc(
+    dir,
+    `#!/usr/bin/env node
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+const args = process.argv.slice(2)
+const valueAfter = (flag) => {
+  const index = args.indexOf(flag)
+  return index >= 0 ? args[index + 1] : ''
+}
+
+if (args[0] === 'convert') {
+  const outputDir = valueAfter('-o')
+  const report = valueAfter('--report')
+  const prefix = valueAfter('--prefix')
+  mkdirSync(outputDir, { recursive: true })
+  const file = prefix + '-003.png'
+  writeFileSync(join(outputDir, file), 'png')
+  writeFileSync(join(outputDir, 'manifest.json'), JSON.stringify({
+    version: '1',
+    slidesRequested: valueAfter('--slides'),
+    slidesSelected: [3],
+    outputs: { png: [file] }
+  }))
+  writeFileSync(report, JSON.stringify({ schemaVersion: 'batch/v1', totals: { succeeded: 1 } }))
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`,
+  )
+  const magickDir = join(dir, 'magick')
+  mkdirSync(magickDir, { recursive: true })
+  const fakeMagick = writeFakeXdoc(
+    magickDir,
+    `#!/usr/bin/env node
+import { writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+if (args[0] === 'identify') {
+  process.stdout.write('100 56')
+} else {
+  writeFileSync(args[args.length - 1], 'png')
+}
+`,
+  )
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-translation-compare.mjs'),
+    '--source',
+    source,
+    '--candidate',
+    candidate,
+    '--run-dir',
+    runDir,
+    '--output',
+    output,
+    '--report',
+    reportPath,
+    '--slides',
+    '3',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--magick-bin',
+    fakeMagick,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.pages[0].slide, 3)
+  assert.equal(report.pages[0].source.slide, 3)
+  assert.equal(report.pages[0].candidate.slide, 3)
+  assert.equal(report.previews.sourceManifest, join(runDir, 'translation-compare/source/manifest.json'))
+})

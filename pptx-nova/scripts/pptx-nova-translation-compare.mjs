@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 
 const SCHEMA_VERSION = 'pptx-nova-translation-compare/v1'
@@ -157,10 +157,48 @@ function renderDeck(args, kind, input, outputDir) {
   ]
   if (args.slides) convertArgs.push('--slides', args.slides)
   run(args.xdocBin, convertArgs)
+  const manifest = readJsonIfExists(join(outputDir, 'manifest.json'))
+  const slideByFile = slideNumbersFromManifest(manifest)
   return {
     report,
-    pages: listPngs(outputDir, kind).map((path) => ({ path, ...identify(args.magickBin, path) })),
+    manifest: manifest ? join(outputDir, 'manifest.json') : null,
+    pages: listPngs(outputDir, kind).map((path, index) => ({
+      path,
+      slide: slideByFile.get(basename(path)) ?? slideNumberFromFilename(path, kind) ?? index + 1,
+      ...identify(args.magickBin, path),
+    })),
   }
+}
+
+function readJsonIfExists(path) {
+  if (!existsSync(path)) return null
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+function slideNumbersFromManifest(manifest) {
+  const slideByFile = new Map()
+  const selected = Array.isArray(manifest?.slidesSelected) ? manifest.slidesSelected : []
+  const outputs = Array.isArray(manifest?.outputs?.png) ? manifest.outputs.png : []
+  if (selected.length === 0 || selected.length !== outputs.length) return slideByFile
+  for (let index = 0; index < outputs.length; index += 1) {
+    const slide = Number(selected[index])
+    if (Number.isInteger(slide) && slide > 0) {
+      slideByFile.set(basename(String(outputs[index])), slide)
+    }
+  }
+  return slideByFile
+}
+
+function slideNumberFromFilename(path, prefix) {
+  const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = basename(path).match(new RegExp(`^${escaped}[-_]?(\\d+)`, 'i'))
+  if (!match) return null
+  const slide = Number(match[1])
+  return Number.isInteger(slide) && slide > 0 ? slide : null
 }
 
 function listPngs(dir, prefix) {
@@ -333,6 +371,15 @@ function main() {
       `source/candidate rendered page count mismatch: ${sourceRender.pages.length} vs ${candidateRender.pages.length}`,
     )
   }
+  for (let index = 0; index < sourceRender.pages.length; index += 1) {
+    const sourceSlide = sourceRender.pages[index].slide
+    const candidateSlide = candidateRender.pages[index].slide
+    if (sourceSlide !== candidateSlide) {
+      throw new Error(
+        `source/candidate rendered slide number mismatch at row ${index + 1}: ${sourceSlide} vs ${candidateSlide}`,
+      )
+    }
+  }
 
   const rows = makeRows(args, sourceRender.pages, candidateRender.pages, rowsDir)
   const firstRow = rows[0]
@@ -370,10 +417,12 @@ function main() {
       candidateDir,
       sourceReport: sourceRender.report,
       candidateReport: candidateRender.report,
+      sourceManifest: sourceRender.manifest,
+      candidateManifest: candidateRender.manifest,
       rowsDir,
     },
     pages: rows.map((row, index) => ({
-      slide: index + 1,
+      slide: sourceRender.pages[index].slide,
       source: sourceRender.pages[index],
       candidate: candidateRender.pages[index],
       row,

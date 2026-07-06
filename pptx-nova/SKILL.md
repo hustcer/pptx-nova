@@ -68,6 +68,7 @@ runtime/schema/help 反查后再下结论。
 `pptx-diff.json`、`visual_review.json`、`clean-open.json`、`check.json`、`evidence-summary.json`、
 `layout-final.json`、`fidelity-gate.json`、`content-audit-final.json`、`i18n-text-plan.json`、
 `i18n-scan.json`、`i18n-plan.json`、`i18n-style-diff.json`、
+`translation-compare.png`、`translation-compare.json`、
 最终候选 PPTX、contact sheet 和人工复核
 必需的少量问题页 PNG、`replace-text.json`。实际不存在的项无需补造。
 
@@ -261,7 +262,9 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   版式修复顺序必须是先压缩译文，再小幅调整字体大小，最后才在确有可用空白时小幅调整几何尺寸。
   几何调整不得造成 shape 重叠、贴边、节奏拥挤或相邻对象间距异常，且必须通过 `vision-diff`、PNG/contact sheet
   和审计记录证明。必须额外抽取 shape/table/chart 可见文本、生成中英对照和样式签名审计、
-  做源稿/译稿 `vision-diff` 新增问题 gate 和 contact-diff，并以版式一致性作为交付门禁。
+  做源稿/译稿 `vision-diff` 新增问题 gate、contact-diff 和高 DPI 全量逐页并排对比图，并以版式一致性
+  作为交付门禁。最终翻译交付除译后 PPTX 外，必须额外交付 `translation-compare.png`：单张图片包含
+  全部 slides，左列为翻译前源稿，右列为对应译稿，默认 192dpi 或当前工具链可稳定支持的更高 DPI。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，
@@ -457,6 +460,7 @@ xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --slides 25-38 --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --slides 25-38 --output <run-dir>/contact-diff.png --json
+node <skill-root>/scripts/pptx-nova-translation-compare.mjs --source source.pptx --candidate translated.pptx --run-dir <run-dir> --output <run-dir>/translation-compare.png --report <run-dir>/translation-compare.json --dpi 192 --json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
 xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
 xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
@@ -469,7 +473,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 
 成功生成、修改、导出或检查后，最终回复按 4 块压缩，避免把完整 checklist 倒给用户：
 
-1. **输出**：最终 PPTX/导出文件绝对路径 + run 目录。
+1. **输出**：最终 PPTX/导出文件绝对路径 + run 目录；翻译任务同时列出 `translation-compare.png`。
 2. **验证**：一行列出实际执行的关键 gate 及状态，例如
    `dry-run pass; apply pass; vision high=0 medium=0; preview reviewed; clean-open not run`。
 3. **证据**：只列最关键 3-6 个 artifact，例如 `patch.json`、`vision.json`、

@@ -288,6 +288,10 @@ relevant OOXML style properties.
   the primary pass/fail gate when the source deck is already noisy.
 - Source and candidate PNG/contact sheets for changed slides.
 - `contact-diff` for before/after layout consistency.
+- A high-DPI full-deck translation comparison PNG for delivery. During repair
+  loops you may pass `--slides <changed>` to the helper for local review, but
+  the final delivery artifact must be generated without `--slides` so one image
+  contains every slide in source/candidate order.
 
 12. Fix visual regressions at the translation source:
 
@@ -307,8 +311,10 @@ relevant OOXML style properties.
 
 13. Write `bilingual-translation-audit.md` and `.json` with source text,
     target text, and notes for any meaning-preserving compression.
-14. Run structure checks, `pptx diff`, preview, and clean-open when available.
-15. Publish the validated candidate to the requested output path.
+14. Run structure checks, `pptx diff`, preview, high-DPI full-deck comparison,
+    and clean-open when available.
+15. Publish the validated candidate and `translation-compare.png` to the
+    requested output paths or clearly list both run-directory delivery paths.
 
 ## Style Signature Gate
 
@@ -453,6 +459,15 @@ xdoc pptx preview candidate.pptx --slides <changed> \
 xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx \
   --slides <changed> \
   --output <run-dir>/contact-diff.png --json > <run-dir>/contact-diff.json
+
+node <skill-root>/scripts/pptx-nova-translation-compare.mjs \
+  --source source.pptx \
+  --candidate candidate.pptx \
+  --run-dir <run-dir> \
+  --output <run-dir>/translation-compare.png \
+  --report <run-dir>/translation-compare.json \
+  --dpi 192 \
+  --json
 ```
 
 Treat `contact-diff.agentGate.passed=false` as a review artifact blocker:
@@ -461,6 +476,16 @@ scope. `agentGate.passed=true` means the scoped contact sheet is safe for
 human visual review, not that visual parity is automatically approved. Before
 final delivery, rerun without `--slides` when full-deck before/after parity is
 required.
+
+Treat `translation-compare.png` as a delivery artifact, not merely an internal
+QA image. It must be a single PNG, include all source and candidate slides,
+place the source page on the left and the translated page on the right for
+every row, and be rendered at high enough DPI for zoomed inspection. The helper
+defaults to 192dpi and writes `translation-compare.json`; block delivery if the
+report is missing, `status` is not `success`, `pageCount` does not match the
+source/candidate slide count, `byteLength` is zero, or the image dimensions are
+implausibly small. If a specific run needs higher visual fidelity, increase
+`--dpi` rather than enlarging a low-resolution image after rendering.
 
 Review the changed-slide contact sheets and the full-size PNGs for:
 
@@ -502,5 +527,7 @@ Keep these translation-specific artifacts in the run directory when available:
 - candidate `vision-check` reports when used for diagnostics
 - source/candidate previews and contact sheets
 - `contact-diff.json` and `contact-diff.png`
+- `translation-compare.png`
+- `translation-compare.json`
 - `pptx-diff.json`
 - `clean-open.json`

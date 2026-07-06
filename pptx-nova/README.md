@@ -10,12 +10,15 @@
 你可以用 `pptx-nova` 做这些事情：
 
 - 从一句话或一段说明生成一份新的 PPT。
-- 根据你给的大纲、文档、网页、PDF 或表格资料整理成 PPT。
+- 根据你给的大纲、Markdown/文本材料、网页或 PDF 提取内容整理成 PPT。
 - 参考一份已有 PPT 的风格，做一份内容不同的新 PPT。
 - 套用公司模板，把新内容填进去。
 - 翻新一份旧 PPT，让它更统一、更专业，但保留原本内容。
 - 修改已有 PPT，比如改标题、替换数据、调整页面、换图片、改配色。
 - 把 CSV、JSON 或表格数据做成表格页或图表页。
+- 翻译已有 PPT，并尽量保持原版式、图表、备注、动画和转场。
+- 添加、修改或删除基础动画和转场，例如淡入、逐条出现、自动切页。
+- 做品牌改装或品牌检查，例如统一品牌色、字体、logo 和页眉页脚。
 - 导出 PDF 或图片预览，方便检查和分享。
 - 检查 PPT 是否有文字重叠、内容被截断、页面不整齐等问题。
 
@@ -51,7 +54,7 @@
 - **受众**：给老板、客户、投资人、同事、学生，还是公开演讲？
 - **页数**：大概几页，或者是否有固定页数。
 - **语言**：中文、英文，还是中英混合。
-- **内容**：大纲、文档、CSV/JSON 表格数据、旧 PPT、网页链接、PDF、图片或 logo。
+- **内容**：大纲、Markdown/文本材料、CSV/JSON 表格数据、粘贴表格、旧 PPT、网页链接、PDF、图片或 logo。
 - **风格**：正式、简洁、咨询风、科技感、品牌规范、课程风等。
 - **限制**：哪些内容不能改，哪些页面必须保留，是否允许重排结构。
 - **输出**：最终文件名，是否需要 PDF 或图片预览。
@@ -137,6 +140,37 @@
 
 适合：你已经有 PPT，只需要确认质量或导出材料。
 
+### 8. 翻译已有 PPT
+
+```text
+把 product-deck.pptx 翻译成英文，尽量保持原版式、图表样式、备注和动画。
+输出 product-deck-en.pptx，并给我中英对照预览。
+```
+
+适合：你要把一份现有 PPT 翻成另一种语言，并希望视觉结构基本不变。
+
+### 9. 修改动画或转场
+
+```text
+修改 launch.pptx：第 4 页的要点按点击逐条出现，第 6 页转场改成淡入。
+其他动画不要动，输出 launch-animated.pptx。
+```
+
+适合：你只需要基础进入、退出、逐条出现或页面转场。复杂路径动画、视频 timing、
+点击某个对象触发等高级效果可能需要先确认能否安全编辑。
+
+### 10. 品牌检查或品牌改装
+
+```text
+检查 proposal.pptx 是否符合 brand-profile.json 里的品牌色、字体和 logo 使用要求，不要修改文件。
+```
+
+```text
+把 proposal.pptx 改成 company-template.pptx 的品牌风格，内容不要变，输出 proposal-branded.pptx。
+```
+
+适合：你要统一品牌视觉，或在交付前确认 PPT 是否偏离品牌规范。
+
 ## 交付时你会得到什么
 
 通常会包含：
@@ -146,6 +180,10 @@
 - 简短说明：改了什么、生成了什么、有没有需要你注意的地方。
 - 如果任务复杂，会保留一份可审计的工作记录，例如 `outline.json`、`deck_lock.json`、
   `content.json`、`patch.json`、检查报告、预览图和 contact sheet，方便后续继续修改或排查问题。
+- 对正式交付、翻新、翻译、模板跟随、图表表格或动画任务，还可能包含更细的验证证据，
+  例如 `visual_review.json`、`pptx-diff.json`、`structure-check.json`、`semantic-audit.json`、
+  `clean-open.json`、`translation-compare.png` 或 `translation-compare.json`。这些文件只在相关任务中出现，
+  不会为了凑清单而补造。
 
 默认不会覆盖你的原始 PPT。除非你明确要求“直接覆盖原文件”，否则会输出到一个新文件。
 
@@ -158,7 +196,8 @@
 - 公司标准模板。
 - 产品截图、架构图、人物照片、客户案例图片。
 - 表格数据、图表数据、指标口径说明。
-- 参考文案、官网、白皮书、PDF、会议纪要。
+- Markdown/文本大纲、参考文案、官网、白皮书、PDF、会议纪要。
+- 翻译术语表、品牌规范、品牌 profile、颜色和字体要求。
 
 如果缺少 logo、截图或官方素材，助手不会假装生成“官方素材”。它会用文字、简单图形或占位说明替代，
 并在结果里告诉你。
@@ -186,8 +225,10 @@
 - 公司品牌要求很严格。
 - 页数很多，或资料很多。
 - 你要求“严格套模板”。
+- 你要求保留翻译术语、法律措辞、品牌语气或特定表达。
 - 你不希望助手自行补充事实或改写观点。
 - 旧 PPT 内容很复杂，翻新时可能影响原内容。
+- 你要编辑复杂动画、视频播放顺序、SmartArt、宏或其他 PowerPoint 高级对象。
 
 如果你赶时间，也可以直接说明“先快速出一版”，助手会尽量减少来回确认。
 
@@ -209,7 +250,7 @@
 用 pptx-nova 做一份【页数】【语言】PPT，主题是【主题】，
 受众是【受众】，用途是【用途】，
 风格希望【风格】，
-内容来自【大纲/文档/旧 PPT/CSV 或 JSON 表格/链接】，
+内容来自【大纲/Markdown 或文本材料/旧 PPT/CSV 或 JSON 数据/网页或 PDF 提取内容】，
 输出文件名是【文件名.pptx】。
 ```
 
@@ -240,7 +281,14 @@
 
 ### 公开前检查
 
-在公开仓库根目录中至少跑：
+在公开仓库根目录中优先跑聚合检查：
+
+```bash
+nu tools/ci-check.nu
+```
+
+它会依次运行公开发布所需的 smoke test、public audit、示例内容校验和 delivery DeckKit readiness 检查。
+如果只需要单独检查，也可以分别跑：
 
 ```bash
 node tools/pptx-nova-smoke-test.mjs
@@ -257,6 +305,9 @@ content validation、DeckKit patch build、icon pack query、DeckKit selector。
 - unexpected binary files。
 - Tabler icon pack license 是否随包携带。
 - examples 是否声明 synthetic / redistributable policy。
+
+`tools/ci-check.nu` 还会校验 `pptx-nova/assets/examples/*/content.json`，并对 production/default
+DeckKit 运行 `pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mode catalog`。
 
 ### Tabler 图标包
 

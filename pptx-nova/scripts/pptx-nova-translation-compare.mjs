@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, dirname, extname, join, resolve } from 'node:path'
 
 const SCHEMA_VERSION = 'pptx-nova-translation-compare/v1'
 
@@ -105,18 +105,28 @@ function commandText(bin, args) {
   return [bin, ...args].map((value) => (/\s/.test(value) ? JSON.stringify(value) : value)).join(' ')
 }
 
+function commandInvocation(bin, args) {
+  const scriptExts = new Set(['.cjs', '.js', '.mjs'])
+  const ext = extname(bin).toLowerCase()
+  if (scriptExts.has(ext) && (bin.includes('/') || bin.includes('\\') || existsSync(bin))) {
+    return { bin: process.execPath, args: [bin, ...args] }
+  }
+  return { bin, args }
+}
+
 function run(bin, args, options = {}) {
-  const result = spawnSync(bin, args, {
+  const command = commandInvocation(bin, args)
+  const result = spawnSync(command.bin, command.args, {
     cwd: options.cwd,
     encoding: 'utf8',
     maxBuffer: 20 * 1024 * 1024,
   })
   if (result.error) {
-    throw new Error(`${commandText(bin, args)} failed to start: ${result.error.message}`)
+    throw new Error(`${commandText(command.bin, command.args)} failed to start: ${result.error.message}`)
   }
   if (result.status !== 0) {
     throw new Error(
-      `${commandText(bin, args)} failed with exit ${result.status}\n${result.stderr || result.stdout}`,
+      `${commandText(command.bin, command.args)} failed with exit ${result.status}\n${result.stderr || result.stdout}`,
     )
   }
   return result

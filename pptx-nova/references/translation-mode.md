@@ -313,8 +313,10 @@ relevant OOXML style properties.
     target text, and notes for any meaning-preserving compression.
 14. Run structure checks, `pptx diff`, preview, high-DPI full-deck comparison,
     and clean-open when available.
-15. Publish the validated candidate and `translation-compare.png` to the
-    requested output paths or clearly list both run-directory delivery paths.
+15. Publish the validated candidate and copy `translation-compare.png` next to
+    the final PPTX using `<output-stem>-translation-compare-<MMDDhhmmss>.png`.
+    Keep the run-directory comparison PNG/JSON as audit evidence, and clearly
+    list both the final PPTX and sibling comparison PNG in the final response.
 
 ## Style Signature Gate
 
@@ -486,6 +488,12 @@ report is missing, `status` is not `success`, `pageCount` does not match the
 source/candidate slide count, `byteLength` is zero, or the image dimensions are
 implausibly small. If a specific run needs higher visual fidelity, increase
 `--dpi` rather than enlarging a low-resolution image after rendering.
+After the comparison image passes validation, publish a copy next to the final
+PPTX output so reviewers can find it without opening the run directory. Use the
+final PPTX stem plus a collision-safe timestamp suffix, for example
+`<output-stem>-translation-compare-<MMDDhhmmss>.png`, while still preserving the
+run-directory `translation-compare.png` and `translation-compare.json` as audit
+evidence.
 
 Review the changed-slide contact sheets and the full-size PNGs for:
 

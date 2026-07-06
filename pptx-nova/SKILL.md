@@ -265,6 +265,8 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   做源稿/译稿 `vision-diff` 新增问题 gate、contact-diff 和高 DPI 全量逐页并排对比图，并以版式一致性
   作为交付门禁。最终翻译交付除译后 PPTX 外，必须额外交付 `translation-compare.png`：单张图片包含
   全部 slides，左列为翻译前源稿，右列为对应译稿，默认 192dpi；如需更高视觉保真度应增加 `--dpi` 而非事后放大。
+  通过验证后，除保留 run 目录内的 `translation-compare.png` / `.json` 证据外，还必须把对比图复制到最终
+  PPTX 同目录，命名为 `<output-stem>-translation-compare-<MMDDhhmmss>.png`，方便用户及时发现和检查。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，
@@ -473,7 +475,8 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 
 成功生成、修改、导出或检查后，最终回复按 4 块压缩，避免把完整 checklist 倒给用户：
 
-1. **输出**：最终 PPTX/导出文件绝对路径 + run 目录；翻译任务同时列出 `translation-compare.png`。
+1. **输出**：最终 PPTX/导出文件绝对路径 + run 目录；翻译任务同时列出最终 PPTX 同目录的
+   `<output-stem>-translation-compare-<MMDDhhmmss>.png` 和 run 目录内的 `translation-compare.png`。
 2. **验证**：一行列出实际执行的关键 gate 及状态，例如
    `dry-run pass; apply pass; vision high=0 medium=0; preview reviewed; clean-open not run`。
 3. **证据**：只列最关键 3-6 个 artifact，例如 `patch.json`、`vision.json`、

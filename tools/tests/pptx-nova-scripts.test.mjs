@@ -1018,5 +1018,8 @@ if (args[0] === 'identify') {
   assert.equal(report.pages[0].slide, 3)
   assert.equal(report.pages[0].source.slide, 3)
   assert.equal(report.pages[0].candidate.slide, 3)
-  assert.equal(report.previews.sourceManifest, join(runDir, 'translation-compare/source/manifest.json'))
+  assert.equal(
+    report.previews.sourceManifest,
+    join(runDir, 'translation-compare/source/manifest.json'),
+  )
 })

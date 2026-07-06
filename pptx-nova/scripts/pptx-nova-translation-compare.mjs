@@ -122,7 +122,9 @@ function run(bin, args, options = {}) {
     maxBuffer: 20 * 1024 * 1024,
   })
   if (result.error) {
-    throw new Error(`${commandText(command.bin, command.args)} failed to start: ${result.error.message}`)
+    throw new Error(
+      `${commandText(command.bin, command.args)} failed to start: ${result.error.message}`,
+    )
   }
   if (result.status !== 0) {
     throw new Error(
@@ -253,11 +255,7 @@ function makeHeader(args, path, width, leftWidth, rightWidth, height) {
   const fontSize = Math.max(28, Math.round(height * 0.34))
   const padding = Math.max(24, Math.round(height * 0.2))
   const font = findHeaderFont(args)
-  const command = [
-    '-size',
-    `${width}x${height}`,
-    'xc:white',
-  ]
+  const command = ['-size', `${width}x${height}`, 'xc:white']
   if (font) {
     command.push(
       '-font',
@@ -290,7 +288,15 @@ function makeHeader(args, path, width, leftWidth, rightWidth, height) {
     path,
   )
   run(args.magickBin, command)
-  return { path, width, height, leftWidth, rightWidth, labelRendered: Boolean(font), font: font || null }
+  return {
+    path,
+    width,
+    height,
+    leftWidth,
+    rightWidth,
+    labelRendered: Boolean(font),
+    font: font || null,
+  }
 }
 
 function makeRows(args, sourcePages, candidatePages, rowsDir) {

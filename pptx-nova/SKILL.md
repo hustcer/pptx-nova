@@ -264,7 +264,7 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   和审计记录证明。必须额外抽取 shape/table/chart 可见文本、生成中英对照和样式签名审计、
   做源稿/译稿 `vision-diff` 新增问题 gate、contact-diff 和高 DPI 全量逐页并排对比图，并以版式一致性
   作为交付门禁。最终翻译交付除译后 PPTX 外，必须额外交付 `translation-compare.png`：单张图片包含
-  全部 slides，左列为翻译前源稿，右列为对应译稿，默认 192dpi 或当前工具链可稳定支持的更高 DPI。
+  全部 slides，左列为翻译前源稿，右列为对应译稿，默认 192dpi；如需更高视觉保真度应增加 `--dpi` 而非事后放大。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
 - **Micro Edit**：只改少量文字、备注、页脚或元数据；走 `micro-edit-cheatsheet.md` 的一屏路径，

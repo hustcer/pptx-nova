@@ -88,8 +88,8 @@ function parseArgs(argv) {
   if (!args.source) throw new Error(`--source is required.\n\n${usage}`)
   if (!args.candidate) throw new Error(`--candidate is required.\n\n${usage}`)
   if (!args.runDir) throw new Error(`--run-dir is required.\n\n${usage}`)
-  if (!Number.isInteger(args.dpi) || args.dpi < 72) {
-    throw new Error('--dpi must be an integer >= 72')
+  if (!Number.isInteger(args.dpi) || args.dpi < 72 || args.dpi > 600) {
+    throw new Error('--dpi must be an integer between 72 and 600')
   }
 
   args.source = resolve(args.source)
@@ -195,8 +195,10 @@ function findHeaderFont(args) {
     '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
     '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
     '/usr/share/fonts/opentype/noto/NotoSans-Regular.ttf',
+    'C:\\Windows\\Fonts\\arial.ttf',
+    'C:\\Windows\\Fonts\\calibri.ttf',
   ].filter(Boolean)
-  return candidates.find((path) => existsSync(path)) || ''
+  return candidates.find((path) => existsSync(path) && statSync(path).isFile()) || ''
 }
 
 function makeHeader(args, path, width, leftWidth, rightWidth, height) {

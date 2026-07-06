@@ -4,25 +4,30 @@
 PowerPoint presentations. It is designed to deliver real, editable `.pptx`
 files, not slide screenshots pasted into a deck.
 
-Use it when you want an AI agent to turn a brief, outline, document, table,
-reference deck, or existing presentation into a polished PowerPoint file that
-can still be edited in PowerPoint, Keynote, or compatible office suites.
+Use it when you want an AI agent to turn a brief, outline, Markdown/text
+document, pasted table, CSV/JSON data, reference deck, or existing presentation
+into an editable PowerPoint file. The primary target is PowerPoint; Keynote and
+other compatible office suites can usually open the result, subject to their
+PPTX compatibility.
 
 ## What pptx-nova can do
 
-- Create a new presentation from a short brief, structured outline, document,
-  PDF, web page, table, or spreadsheet.
-- Refurbish an existing deck while preserving the original content and making
-  the visual system cleaner and more consistent.
+- Create a new presentation from a short brief, structured outline,
+  Markdown/text document, PDF, web page, pasted table, or CSV/JSON data.
+- Refurbish an existing deck with the goal of preserving the original content
+  while making the visual system cleaner and more consistent.
+- Translate an existing `.pptx` into another language while aiming to preserve
+  original deck structure, layout, styles, objects, notes, animations, and
+  visual hierarchy.
 - Edit existing decks, including titles, copy, slide order, visuals, colors,
   charts, tables, and selected page elements.
-- Follow a company template or reference deck without copying private or
-  non-redistributable assets.
-- Generate data-driven slides with native tables, charts, diagrams, and
-  editable shapes where the toolchain supports them.
+- Use a company template or reference deck as a guide while avoiding
+  unapproved reuse of private or non-redistributable assets.
+- Generate data-driven slides from CSV/JSON data, using editable tables,
+  charts, diagrams, and shapes where supported.
 - Export PDF or PNG previews for review.
-- Run quality checks for overlap, clipped text, layout drift, template
-  violations, content preservation, and visual defects.
+- Run quality checks that look for overlap, clipped text, layout drift,
+  template violations, content-preservation issues, and visual defects.
 
 ## Typical requests
 
@@ -47,6 +52,14 @@ Update sales-review.pptx: change the title on slide 2, replace the KPI table on
 slide 5 with data from metrics.csv, and write the result to sales-review-v2.pptx.
 ```
 
+Or translate a presentation in place:
+
+```text
+Translate product-launch.pptx from Chinese to English. Preserve the original
+layout, formatting, charts, speaker notes, animations, and slide count. Use
+concise US English terminology and write product-launch-en.pptx.
+```
+
 ## What to provide
 
 You can give a single sentence, but results are usually better when you include:
@@ -57,8 +70,11 @@ You can give a single sentence, but results are usually better when you include:
   teams, or public conference attendees.
 - Length: exact slide count or an approximate range.
 - Language: English, Chinese, bilingual, or another target language.
-- Source material: outline, notes, existing PPTX, PDF, CSV/JSON, screenshots,
-  links, product copy, brand assets, or a template deck.
+- Source material: outline, notes, Markdown/text content, existing PPTX, PDF,
+  CSV/JSON, screenshots, links, product copy, brand assets, or a template deck.
+- Translation target, when translating: source language if mixed or ambiguous,
+  target language and locale, terminology preferences, tone, and whether chart
+  labels, alt text, link text/tooltips, or speaker notes should be localized.
 - Style direction: formal, minimal, consulting, technical, editorial, product
   marketing, training-oriented, or strict brand template.
 - Constraints: content that must not change, slides that must be preserved,
@@ -67,14 +83,22 @@ You can give a single sentence, but results are usually better when you include:
 By default, pptx-nova should not overwrite your original deck. Ask for a new
 output filename unless you intentionally want to replace a file.
 
+HTML, web pages, and PDFs are treated as source material. They are first
+normalized into text or Markdown and then routed through the deck workflow;
+pptx-nova does not promise to copy their original page layout, imagery, or
+styles into PowerPoint one-to-one.
+
 ## Outputs
 
 A normal run can produce:
 
 - A final editable `.pptx` file.
 - Optional PDF and per-slide PNG previews.
-- JSON evidence from validation, dry-run, visual checks, template checks, or
+- Optional validation reports for visual checks, template checks, and
   content-preservation checks.
+- For translation runs, optional bilingual review notes that show what was
+  translated, what was intentionally shortened, and any layout risks that still
+  deserve human review.
 - A short summary of what changed and any remaining review risks.
 
 For high-stakes decks, treat the generated file as a strong draft and still do a
@@ -83,23 +107,56 @@ human review of facts, claims, numbers, brand compliance, and legal language.
 ## How it works
 
 pptx-nova uses a DeckKit-first workflow. A DeckKit is a reusable visual system
-with page types, layout contracts, schemas, typography, color rules, and
-validation gates. The normal production path is:
+with page types, layout rules, typography, color rules, and quality checks. The
+normal production path is:
 
 ```text
 brief / source material
-  -> outline and content model
-  -> DeckKit selection
-  -> validated content.json
-  -> patch operations
-  -> xdoc applies the patch
-  -> visual and structural checks
+  -> outline and slide content
+  -> visual system selection
+  -> editable PowerPoint build
+  -> quality checks and previews
   -> editable .pptx
 ```
 
 This structure keeps the deck generation path repeatable. It also makes it
-easier to catch overloaded slides, missing slots, unsafe custom operations, and
-style mismatches before the final PPTX is delivered.
+easier to catch overloaded slides, missing content, style mismatches, and visual
+defects before the final PPTX is delivered.
+
+## Translating presentations
+
+Translation is handled as a style-preserving edit, not as deck recreation. The
+source deck stays read-only, and the translated file is written to a separate
+output path.
+
+For translation requests, provide at least:
+
+- Source `.pptx` path.
+- Target language, and source language when the deck is mixed-language or
+  ambiguous.
+- Output `.pptx` path.
+- Terminology, locale, tone, or brand wording requirements.
+
+Translation aims to preserve bold, italic, underline, strikethrough, colors,
+fonts, alignment, bullets, indentation, text box geometry, table and chart
+styling, hyperlinks, notes, animations, and transitions unless you explicitly
+ask for a broader redesign.
+
+Because translated text often expands or wraps differently, fitting fixes should
+be conservative: first use shorter wording without changing the meaning, then
+make small font-size adjustments if needed, and only change text box geometry
+when the slide clearly has room.
+
+Translation checks should cover more than ordinary slide text. Chart titles,
+series names, category labels, data labels, table cells, alt text, hyperlink
+tooltips, and speaker notes can also contain user-visible text and may need
+translation.
+
+Do not treat a translated deck as complete just because text replacement
+succeeded. The final review must confirm that the target-language deck still
+looks like the source deck, has no remaining source-language visible text that
+should have been translated, and has no new clipping, overlap, broken chart
+labels, lost formatting, or PowerPoint repair issues.
 
 ## Repository layout
 
@@ -110,7 +167,7 @@ style mismatches before the final PPTX is delivered.
 |   +-- assets/                # DeckKits, examples, themes, icons, schemas
 |   +-- benchmarks/visual/     # Visual benchmark cases and baselines
 |   +-- references/            # Workflow references for agents and maintainers
-|   +-- scripts/               # Runtime and maintainer helper scripts
+|   +-- scripts/               # Skill runtime scripts and helper gates
 |   `-- evals/                 # Skill evaluation metadata
 +-- deckkit-maker/             # Developer-side helper skill for DeckKit creation
 `-- tools/                     # Repository-level smoke and public-release checks
@@ -166,6 +223,7 @@ itself needs to be built or extended.
 
 - [pptx-nova user guide](pptx-nova/README.md)
 - [pptx-nova scripts](pptx-nova/scripts/README.md)
+- [Translation workflow](pptx-nova/references/translation-mode.md)
 - [pptx-nova assets](pptx-nova/assets/README.md)
 - [DeckKits](pptx-nova/assets/deckkits/README.md)
 - [DeckKit examples](pptx-nova/assets/examples/README.md)

@@ -39,6 +39,7 @@ Options:
   --catalog <path>        DeckKit catalog. Defaults to <skill-root>/assets/deckkits/catalog.json
   --route <route>         auto|native|fallback. Defaults to auto
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc
+  --magick-bin <path>     ImageMagick executable for compare evidence. Defaults to magick
   --readiness-out <path>  Optional benchmark output for a full delivery readiness audit
   --explicit              User explicitly named a non-production/default DeckKit
   --contact-diff          Generate source/candidate contact-diff artifacts for manual review
@@ -69,6 +70,7 @@ function parseArgs(argv) {
     catalog: CATALOG_PATH,
     route: 'auto',
     xdocBin: 'xdoc',
+    magickBin: 'magick',
     readinessOut: '',
     explicit: false,
     contactDiff: false,
@@ -114,6 +116,7 @@ const valueFlags = {
   '--catalog': 'catalog',
   '--route': 'route',
   '--xdoc-bin': 'xdocBin',
+  '--magick-bin': 'magickBin',
   '--readiness-out': 'readinessOut',
 }
 
@@ -1176,6 +1179,8 @@ function runRefurbishCompare(summary, args, artifacts) {
       '192',
       '--xdoc-bin',
       args.xdocBin,
+      '--magick-bin',
+      args.magickBin,
       '--overwrite',
       '--json',
     ],

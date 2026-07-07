@@ -919,7 +919,7 @@ if (args[0] === 'schema') {
 }
 `,
   )
-  const fakeMagick = join(fakeBin, 'magick')
+  const fakeMagick = join(fakeBin, 'fake-magick.mjs')
   writeFileSync(
     fakeMagick,
     `#!/usr/bin/env node
@@ -935,25 +935,24 @@ if (args[0] === 'identify') {
   )
   chmodSync(fakeMagick, 0o755)
 
-  const result = runNode(
-    [
-      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
-      '--deckkit',
-      'mckinsey-blue',
-      '--source',
-      source,
-      '--output',
-      output,
-      '--run-dir',
-      runDir,
-      '--route',
-      'native',
-      '--xdoc-bin',
-      fakeXdoc,
-      '--json',
-    ],
-    { env: { ...process.env, PATH: `${fakeBin}:${process.env.PATH}` } },
-  )
+  const result = runNode([
+    skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+    '--deckkit',
+    'mckinsey-blue',
+    '--source',
+    source,
+    '--output',
+    output,
+    '--run-dir',
+    runDir,
+    '--route',
+    'native',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--magick-bin',
+    fakeMagick,
+    '--json',
+  ])
   const summary = JSON.parse(result.stdout)
   const phaseNames = summary.phases.map((phase) => phase.name)
   const gateNames = summary.gates.map((gate) => gate.name)

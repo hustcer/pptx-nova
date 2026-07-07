@@ -1070,7 +1070,7 @@ if (args[0] === 'schema') {
   assert.equal(phaseNames.includes('publish'), false)
 })
 
-test('translation compare preserves selected slide number from convert manifest', () => {
+test('translation compare delegates rendering to xdoc contact-diff', () => {
   const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-compare-'))
   const source = join(dir, 'source.pptx')
   const candidate = join(dir, 'candidate.pptx')
@@ -1092,38 +1092,21 @@ const valueAfter = (flag) => {
   return index >= 0 ? args[index + 1] : ''
 }
 
-if (args[0] === 'convert') {
-  const outputDir = valueAfter('-o')
-  const report = valueAfter('--report')
-  const prefix = valueAfter('--prefix')
-  mkdirSync(outputDir, { recursive: true })
-  const file = prefix + '-003.png'
-  writeFileSync(join(outputDir, file), 'png')
-  writeFileSync(join(outputDir, 'manifest.json'), JSON.stringify({
-    version: '1',
-    slidesRequested: valueAfter('--slides'),
-    slidesSelected: [3],
-    outputs: { png: [file] }
+if (args[0] === 'pptx' && args[1] === 'contact-diff') {
+  const output = valueAfter('--output')
+  const dpi = Number(valueAfter('--dpi'))
+  writeFileSync(output, 'contact diff png')
+  process.stdout.write(JSON.stringify({
+    schemaVersion: 'pptx-contact-diff/v1',
+    status: 'success',
+    outputPath: output,
+    summary: { pairCount: 1, scopeMode: 'scoped', dpi, slides: valueAfter('--slides') },
+    agentGate: { passed: true, status: 'pass', scopeMode: 'scoped', pairCount: 1 },
+    render: { path: output, width: 100, height: 56, dpi }
   }))
-  writeFileSync(report, JSON.stringify({ schemaVersion: 'batch/v1', totals: { succeeded: 1 } }))
 } else {
   process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
   process.exit(2)
-}
-`,
-  )
-  const magickDir = join(dir, 'magick')
-  mkdirSync(magickDir, { recursive: true })
-  const fakeMagick = writeFakeXdoc(
-    magickDir,
-    `#!/usr/bin/env node
-import { writeFileSync } from 'node:fs'
-
-const args = process.argv.slice(2)
-if (args[0] === 'identify') {
-  process.stdout.write('100 56')
-} else {
-  writeFileSync(args[args.length - 1], 'png')
 }
 `,
   )
@@ -1144,18 +1127,16 @@ if (args[0] === 'identify') {
     reportPath,
     '--slides',
     '3',
+    '--dpi',
+    '216',
     '--xdoc-bin',
     fakeXdoc,
-    '--magick-bin',
-    fakeMagick,
     '--json',
   ])
   const report = JSON.parse(result.stdout)
-  assert.equal(report.pages[0].slide, 3)
-  assert.equal(report.pages[0].source.slide, 3)
-  assert.equal(report.pages[0].candidate.slide, 3)
-  assert.equal(
-    report.previews.sourceManifest,
-    join(runDir, 'translation-compare/source/manifest.json'),
-  )
+  assert.equal(report.schemaVersion, 'pptx-contact-diff/v1')
+  assert.equal(report.outputPath, output)
+  assert.equal(report.summary.slides, '3')
+  assert.equal(report.render.dpi, 216)
+  assert.equal(readFileSync(reportPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
 })

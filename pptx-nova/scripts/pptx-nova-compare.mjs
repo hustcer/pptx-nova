@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
-
-const SCHEMA_VERSION = 'pptx-nova-compare/v1'
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-compare.mjs --source <source.pptx> --candidate <candidate.pptx> --run-dir <run-dir> [options]
@@ -11,24 +9,22 @@ const usage = `Usage:
 Options:
   --source <path>           Read-only source PPTX before the workflow.
   --candidate <path>        Candidate/final PPTX after the workflow.
-  --run-dir <path>          Run directory used for preview evidence.
+  --run-dir <path>          Run directory used for compare evidence.
   --kind <name>             Compare kind, e.g. translation or refurbish. Defaults to compare.
   --output <path>           Output PNG. Defaults to run-dir/<kind>-compare.png.
   --report <path>           Output JSON report. Defaults to run-dir/<kind>-compare.json.
   --slides <selector>       Optional 1-based slide selector, e.g. 1,3-5.
   --dpi <number>            PNG render DPI. Defaults to 192.
   --xdoc-bin <path>         xdoc executable. Defaults to xdoc.
-  --magick-bin <path>       ImageMagick executable. Defaults to magick.
-  --font <path>             Optional TrueType/OpenType font path for header labels.
-  --source-label <text>     Left-column label. Defaults by --kind.
-  --candidate-label <text>  Right-column label. Defaults by --kind.
+  --source-label <text>     Deprecated; xdoc contact-diff owns contact sheet labels.
+  --candidate-label <text>  Deprecated; xdoc contact-diff owns contact sheet labels.
   --overwrite               Allow replacing existing output/report files.
-  --json                    Print the report to stdout.
+  --json                    Print the xdoc contact-diff report to stdout.
   --help                    Show this help.
 
-The helper renders source and candidate PPTX pages at high DPI, pairs every
-slide left/right, stacks all pairs into one PNG, and writes a machine-readable
-report for final delivery evidence.
+The helper delegates before/after visual comparison to xdoc pptx contact-diff,
+which renders a side-by-side contact sheet and emits a pptx-contact-diff/v1 JSON
+report used by pptx-nova-compare-gate.mjs.
 `
 
 const valueFlags = {
@@ -41,8 +37,6 @@ const valueFlags = {
   '--slides': 'slides',
   '--dpi': 'dpi',
   '--xdoc-bin': 'xdocBin',
-  '--magick-bin': 'magickBin',
-  '--font': 'font',
   '--source-label': 'sourceLabel',
   '--candidate-label': 'candidateLabel',
 }
@@ -58,8 +52,6 @@ function parseArgs(argv) {
     slides: '',
     dpi: 192,
     xdocBin: 'xdoc',
-    magickBin: 'magick',
-    font: '',
     sourceLabel: '',
     candidateLabel: '',
     overwrite: false,
@@ -102,10 +94,6 @@ function parseArgs(argv) {
   const defaultStem = `${args.kind}-compare`
   args.output = resolve(args.output || join(args.runDir, `${defaultStem}.png`))
   args.report = resolve(args.report || join(args.runDir, `${defaultStem}.json`))
-  const labels = defaultLabels(args.kind)
-  args.sourceLabel ||= labels.source
-  args.candidateLabel ||= labels.candidate
-  if (args.font) args.font = resolve(args.font)
   return args
 }
 
@@ -116,16 +104,6 @@ function normalizeKind(kind) {
     .replace(/[^a-z0-9-]+/g, '-')
     .replace(/^-+|-+$/g, '')
   return normalized || 'compare'
-}
-
-function defaultLabels(kind) {
-  if (kind === 'translation') {
-    return { source: 'Before translation', candidate: 'After translation' }
-  }
-  if (kind === 'refurbish') {
-    return { source: 'Before refurbish', candidate: 'After refurbish' }
-  }
-  return { source: 'Before', candidate: 'After' }
 }
 
 function commandText(bin, args) {
@@ -174,221 +152,48 @@ function ensureWritable(path, overwrite) {
   mkdirSync(dirname(path), { recursive: true })
 }
 
-function renderDeck(args, kind, input, outputDir) {
-  mkdirSync(outputDir, { recursive: true })
-  const report = join(outputDir, `${kind}-convert-report.json`)
-  const convertArgs = [
-    'convert',
-    input,
-    '--to',
-    'png',
-    '-o',
-    outputDir,
-    '--overwrite',
+function parseJsonReport(stdout) {
+  try {
+    return JSON.parse(stdout)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`xdoc contact-diff did not return valid JSON: ${message}`)
+  }
+}
+
+function reportImagePath(report) {
+  return (
+    report.outputPath || report.output || report.render?.path || report.contactSheet?.path || ''
+  )
+}
+
+function runContactDiff(args) {
+  const commandArgs = [
+    'pptx',
+    'contact-diff',
+    '--source',
+    args.source,
+    '--candidate',
+    args.candidate,
+    '--output',
+    args.output,
     '--dpi',
     String(args.dpi),
-    '--prefix',
-    kind,
-    '--manifest',
-    'true',
-    '--report',
-    report,
+    '--json',
   ]
-  if (args.slides) convertArgs.push('--slides', args.slides)
-  run(args.xdocBin, convertArgs)
-  const manifest = readJsonIfExists(join(outputDir, 'manifest.json'))
-  const slideByFile = slideNumbersFromManifest(manifest)
-  return {
-    report,
-    manifest: manifest ? join(outputDir, 'manifest.json') : null,
-    pages: listPngs(outputDir, kind).map((path, index) => ({
-      path,
-      slide: slideByFile.get(basename(path)) ?? slideNumberFromFilename(path, kind) ?? index + 1,
-      ...identify(args.magickBin, path),
-    })),
+  if (args.slides) commandArgs.push('--slides', args.slides)
+  if (args.overwrite) commandArgs.push('--overwrite')
+
+  const result = run(args.xdocBin, commandArgs)
+  const report = parseJsonReport(result.stdout)
+  const outputPath = reportImagePath(report)
+  if (outputPath && resolve(outputPath) !== args.output) {
+    throw new Error(`xdoc contact-diff reported a different output path: ${outputPath}`)
   }
-}
-
-function readJsonIfExists(path) {
-  if (!existsSync(path)) return null
-  try {
-    return JSON.parse(readFileSync(path, 'utf8'))
-  } catch {
-    return null
+  if (!existsSync(args.output) || statSync(args.output).size <= 0) {
+    throw new Error(`xdoc contact-diff did not create a non-empty output PNG: ${args.output}`)
   }
-}
-
-function slideNumbersFromManifest(manifest) {
-  const slideByFile = new Map()
-  const selected = Array.isArray(manifest?.slidesSelected) ? manifest.slidesSelected : []
-  const outputs = Array.isArray(manifest?.outputs?.png) ? manifest.outputs.png : []
-  if (selected.length === 0 || selected.length !== outputs.length) return slideByFile
-  for (let index = 0; index < outputs.length; index += 1) {
-    const slide = Number(selected[index])
-    if (Number.isInteger(slide) && slide > 0) {
-      slideByFile.set(basename(String(outputs[index])), slide)
-    }
-  }
-  return slideByFile
-}
-
-function slideNumberFromFilename(path, prefix) {
-  const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const match = basename(path).match(new RegExp(`^${escaped}[-_]?(\\d+)`, 'i'))
-  if (!match) return null
-  const slide = Number(match[1])
-  return Number.isInteger(slide) && slide > 0 ? slide : null
-}
-
-function listPngs(dir, prefix) {
-  const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const prefixPattern = new RegExp(`^${escaped}[-_]?\\d+.*\\.png$`, 'i')
-  return readdirSync(dir)
-    .filter((name) => prefixPattern.test(name))
-    .sort((a, b) => naturalCompare(a, b))
-    .map((name) => join(dir, name))
-}
-
-function naturalCompare(left, right) {
-  return left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' })
-}
-
-function identify(magickBin, path) {
-  const result = run(magickBin, ['identify', '-format', '%w %h', path])
-  const [width, height] = result.stdout.trim().split(/\s+/).map(Number)
-  if (!Number.isFinite(width) || !Number.isFinite(height)) {
-    throw new Error(`Could not identify PNG dimensions: ${path}`)
-  }
-  return { width, height }
-}
-
-function findHeaderFont(args) {
-  const candidates = [
-    args.font,
-    '/System/Library/Fonts/Supplemental/Arial.ttf',
-    '/System/Library/Fonts/Supplemental/Helvetica.ttf',
-    '/System/Library/Fonts/Helvetica.ttc',
-    '/Library/Fonts/Arial.ttf',
-    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-    '/usr/share/fonts/opentype/noto/NotoSans-Regular.ttf',
-    'C:\\Windows\\Fonts\\arial.ttf',
-    'C:\\Windows\\Fonts\\calibri.ttf',
-  ].filter(Boolean)
-  return candidates.find((path) => existsSync(path) && statSync(path).isFile()) || ''
-}
-
-function makeHeader(args, path, width, leftWidth, rightWidth, height) {
-  const fontSize = Math.max(28, Math.round(height * 0.34))
-  const padding = Math.max(24, Math.round(height * 0.2))
-  const font = findHeaderFont(args)
-  const command = ['-size', `${width}x${height}`, 'xc:white']
-  if (font) {
-    command.push(
-      '-font',
-      font,
-      '-fill',
-      '#111111',
-      '-pointsize',
-      String(fontSize),
-      '-gravity',
-      'northwest',
-      '-annotate',
-      `+${padding}+${Math.round(height * 0.26)}`,
-      args.sourceLabel,
-      '-gravity',
-      'northwest',
-      '-annotate',
-      `+${leftWidth + padding}+${Math.round(height * 0.26)}`,
-      args.candidateLabel,
-    )
-  }
-  command.push(
-    '-fill',
-    '#D0D5DD',
-    '-draw',
-    `rectangle ${leftWidth},0 ${leftWidth + 1},${height}`,
-    '-density',
-    String(args.dpi),
-    '-units',
-    'PixelsPerInch',
-    path,
-  )
-  run(args.magickBin, command)
-  return {
-    path,
-    width,
-    height,
-    leftWidth,
-    rightWidth,
-    labelRendered: Boolean(font),
-    font: font || null,
-  }
-}
-
-function makeRows(args, sourcePages, candidatePages, rowsDir) {
-  mkdirSync(rowsDir, { recursive: true })
-  const gap = Math.max(24, Math.round(args.dpi * 0.12))
-  const rows = []
-
-  for (let index = 0; index < sourcePages.length; index += 1) {
-    const source = sourcePages[index]
-    const candidate = candidatePages[index]
-    const rowHeight = Math.max(source.height, candidate.height)
-    const sourceWidth = Math.round((source.width * rowHeight) / source.height)
-    const candidateWidth = Math.round((candidate.width * rowHeight) / candidate.height)
-    const rowPath = join(rowsDir, `row-${String(index + 1).padStart(3, '0')}.png`)
-    const command = [
-      '(',
-      source.path,
-      '-resize',
-      `${sourceWidth}x${rowHeight}!`,
-      ')',
-      '(',
-      '-size',
-      `${gap}x${rowHeight}`,
-      'xc:white',
-      ')',
-      '(',
-      candidate.path,
-      '-resize',
-      `${candidateWidth}x${rowHeight}!`,
-      ')',
-      '+append',
-      '-density',
-      String(args.dpi),
-      '-units',
-      'PixelsPerInch',
-      rowPath,
-    ]
-    run(args.magickBin, command)
-    rows.push({
-      path: rowPath,
-      sourceWidth,
-      candidateWidth,
-      gap,
-      ...identify(args.magickBin, rowPath),
-    })
-  }
-
-  return rows
-}
-
-function appendRows(args, header, rows, output) {
-  const gap = Math.max(24, Math.round(args.dpi * 0.12))
-  const inputs = [header.path]
-  for (const row of rows) {
-    inputs.push('-size', `${header.width}x${gap}`, 'xc:white', row.path)
-  }
-  run(args.magickBin, [
-    ...inputs,
-    '-append',
-    '-density',
-    String(args.dpi),
-    '-units',
-    'PixelsPerInch',
-    output,
-  ])
+  return report
 }
 
 function main() {
@@ -399,85 +204,13 @@ function main() {
   ensureWritable(args.report, args.overwrite)
   mkdirSync(args.runDir, { recursive: true })
 
-  const workDir = join(args.runDir, `${args.kind}-compare`)
-  const sourceDir = join(workDir, 'source')
-  const candidateDir = join(workDir, 'candidate')
-  const rowsDir = join(workDir, 'rows')
-  const headerPath = join(workDir, 'header.png')
-
-  const sourceRender = renderDeck(args, 'source', args.source, sourceDir)
-  const candidateRender = renderDeck(args, 'candidate', args.candidate, candidateDir)
-  if (sourceRender.pages.length === 0) throw new Error('source render produced no PNG pages')
-  if (candidateRender.pages.length === 0) throw new Error('candidate render produced no PNG pages')
-  if (sourceRender.pages.length !== candidateRender.pages.length) {
-    throw new Error(
-      `source/candidate rendered page count mismatch: ${sourceRender.pages.length} vs ${candidateRender.pages.length}`,
-    )
-  }
-  for (let index = 0; index < sourceRender.pages.length; index += 1) {
-    const sourceSlide = sourceRender.pages[index].slide
-    const candidateSlide = candidateRender.pages[index].slide
-    if (sourceSlide !== candidateSlide) {
-      throw new Error(
-        `source/candidate rendered slide number mismatch at row ${index + 1}: ${sourceSlide} vs ${candidateSlide}`,
-      )
-    }
-  }
-
-  const rows = makeRows(args, sourceRender.pages, candidateRender.pages, rowsDir)
-  const firstRow = rows[0]
-  const headerHeight = Math.max(72, Math.round(firstRow.height * 0.055))
-  const header = makeHeader(
-    args,
-    headerPath,
-    firstRow.width,
-    firstRow.sourceWidth + firstRow.gap,
-    firstRow.candidateWidth,
-    headerHeight,
-  )
-  appendRows(args, header, rows, args.output)
-  const outputStat = statSync(args.output)
-  const outputDimensions = identify(args.magickBin, args.output)
-
-  const report = {
-    schemaVersion: SCHEMA_VERSION,
-    status: 'success',
-    kind: args.kind,
-    source: args.source,
-    candidate: args.candidate,
-    slideSelector: args.slides || null,
-    dpi: args.dpi,
-    sourceLabel: args.sourceLabel,
-    candidateLabel: args.candidateLabel,
-    headerLabelRendered: header.labelRendered,
-    headerFont: header.font,
-    output: args.output,
-    byteLength: outputStat.size,
-    width: outputDimensions.width,
-    height: outputDimensions.height,
-    pageCount: rows.length,
-    previews: {
-      sourceDir,
-      candidateDir,
-      sourceReport: sourceRender.report,
-      candidateReport: candidateRender.report,
-      sourceManifest: sourceRender.manifest,
-      candidateManifest: candidateRender.manifest,
-      rowsDir,
-    },
-    pages: rows.map((row, index) => ({
-      slide: sourceRender.pages[index].slide,
-      source: sourceRender.pages[index],
-      candidate: candidateRender.pages[index],
-      row,
-    })),
-  }
-
+  const report = runContactDiff(args)
   writeFileSync(args.report, `${JSON.stringify(report, null, 2)}\n`)
   if (args.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
   else {
+    const pairCount = report.agentGate?.pairCount ?? report.summary?.pairCount ?? 'unknown'
     process.stdout.write(
-      `${args.kind} compare image written: ${args.output} (${basename(args.source)} vs ${basename(args.candidate)}, ${rows.length} slides, ${args.dpi} dpi)\n`,
+      `${args.kind} compare image written: ${args.output} (${basename(args.source)} vs ${basename(args.candidate)}, ${pairCount} slide pairs, ${args.dpi} dpi)\n`,
     )
   }
 }

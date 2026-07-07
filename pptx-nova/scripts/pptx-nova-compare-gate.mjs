@@ -233,8 +233,11 @@ function reportNumber(...values) {
   return null
 }
 
-function reportImagePath(report) {
-  return report.output || report.outputPath || report.render?.path || ''
+function reportImagePaths(report) {
+  const paths = [report.output, report.outputPath, report.render?.path, report.contactSheet?.path]
+    .filter((path) => typeof path === 'string' && path.trim())
+    .map((path) => path.trim())
+  return [...new Set(paths)]
 }
 
 function validateNativeCompareReport(args, report, compareState, blockers, warnings) {
@@ -274,9 +277,13 @@ function validateXdocContactDiffReport(report, compareState, blockers, warnings)
   if (gate.passed !== true && gate.status !== 'pass') {
     blockers.push('contact-diff agent gate did not pass')
   }
-  const scopeMode = gate.scopeMode ?? report.summary?.scopeMode ?? ''
-  if (scopeMode && scopeMode !== 'all-slides') {
-    blockers.push('contact-diff report was generated with a scoped slide selection')
+  const scopeMode = gate.scopeMode ?? report.summary?.scopeMode
+  if (scopeMode !== 'all-slides') {
+    blockers.push(
+      scopeMode
+        ? 'contact-diff report was generated with a scoped slide selection'
+        : 'contact-diff scopeMode is missing; final delivery requires all-slides contact-diff',
+    )
   }
   const pairCount = reportNumber(gate.pairCount, report.summary?.pairCount)
   if (!Number.isInteger(pairCount) || pairCount <= 0) {
@@ -287,9 +294,14 @@ function validateXdocContactDiffReport(report, compareState, blockers, warnings)
   if (!width || width <= 0 || !height || height <= 0) {
     blockers.push('contact-diff render dimensions are missing or invalid')
   }
-  const outputPath = reportImagePath(report)
-  if (outputPath && resolve(outputPath) !== compareState.path) {
-    warnings.push(`contact-diff output differs from checked compare path: ${outputPath}`)
+  const outputPaths = reportImagePaths(report)
+  if (outputPaths.length === 0) {
+    blockers.push('contact-diff output path is missing')
+  }
+  for (const outputPath of outputPaths) {
+    if (resolve(outputPath) !== compareState.path) {
+      blockers.push(`contact-diff output differs from checked compare path: ${outputPath}`)
+    }
   }
 }
 

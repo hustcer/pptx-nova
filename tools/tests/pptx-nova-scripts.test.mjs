@@ -19,6 +19,16 @@ function runNode(args, options = {}) {
   return result
 }
 
+function runNodeStatus(args, expectedStatus, options = {}) {
+  const result = spawnSync(process.execPath, args, {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    ...options,
+  })
+  assert.equal(result.status, expectedStatus, result.stderr || result.stdout)
+  return result
+}
+
 function skillPath(path) {
   return join(skillRoot, path)
 }
@@ -1139,4 +1149,143 @@ if (args[0] === 'pptx' && args[1] === 'contact-diff') {
   assert.equal(report.summary.slides, '3')
   assert.equal(report.render.dpi, 216)
   assert.equal(readFileSync(reportPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
+})
+
+function writeCompareGateFixture(root, makeReport) {
+  const runDir = join(root, 'run')
+  const finalPptx = join(root, 'final.pptx')
+  const compare = join(runDir, 'translation-compare.png')
+  const reportPath = join(runDir, 'translation-compare.json')
+  const gatePath = join(runDir, 'translation-compare-gate.json')
+
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(finalPptx, 'final pptx')
+  writeFileSync(compare, 'compare png')
+  writeJson(reportPath, makeReport({ compare, runDir }))
+
+  return { runDir, finalPptx, compare, reportPath, gatePath }
+}
+
+function runCompareGateFixture(fixture) {
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      fixture.runDir,
+      '--final-pptx',
+      fixture.finalPptx,
+      '--kind',
+      'translation',
+      '--compare',
+      fixture.compare,
+      '--report',
+      fixture.reportPath,
+      '--output',
+      fixture.gatePath,
+      '--publish',
+      '--overwrite',
+      '--timestamp',
+      '0101000000',
+      '--json',
+    ],
+    2,
+  )
+  return JSON.parse(result.stdout)
+}
+
+function contactDiffReport(options) {
+  const { compare } = options
+  const scopeMode = Object.prototype.hasOwnProperty.call(options, 'scopeMode')
+    ? options.scopeMode
+    : 'all-slides'
+  const outputPath = Object.prototype.hasOwnProperty.call(options, 'outputPath')
+    ? options.outputPath
+    : compare
+  const summary = { pairCount: 1, dpi: 192 }
+  const agentGate = { passed: true, status: 'pass', pairCount: 1 }
+  if (scopeMode !== undefined) {
+    summary.scopeMode = scopeMode
+    agentGate.scopeMode = scopeMode
+  }
+  const report = {
+    schemaVersion: 'pptx-contact-diff/v1',
+    status: 'success',
+    summary,
+    agentGate,
+    render: { path: compare, width: 100, height: 56, dpi: 192 },
+  }
+  if (outputPath !== undefined) report.outputPath = outputPath
+  return report
+}
+
+test('compare gate blocks contact-diff reports without explicit all-slides scopeMode', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-missing-scope-'))
+  const fixture = writeCompareGateFixture(root, ({ compare }) => ({
+    ...contactDiffReport({ compare, scopeMode: undefined }),
+    scope: { requested: '3' },
+  }))
+
+  const report = runCompareGateFixture(fixture)
+
+  assert.equal(report.status, 'fail')
+  assert.ok(
+    report.blockers.includes(
+      'contact-diff scopeMode is missing; final delivery requires all-slides contact-diff',
+    ),
+    report.blockers.join('\n'),
+  )
+})
+
+test('compare gate blocks contact-diff reports whose output path differs from checked PNG', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-path-mismatch-'))
+  const fixture = writeCompareGateFixture(root, ({ compare, runDir }) =>
+    contactDiffReport({ compare, outputPath: join(runDir, 'old-compare.png') }),
+  )
+
+  const report = runCompareGateFixture(fixture)
+
+  assert.equal(report.status, 'fail')
+  assert.ok(
+    report.blockers.some((blocker) =>
+      blocker.includes('contact-diff output differs from checked compare path:'),
+    ),
+    report.blockers.join('\n'),
+  )
+})
+
+test('compare gate blocks contact-diff reports whose render path differs from checked PNG', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-render-path-mismatch-'))
+  const fixture = writeCompareGateFixture(root, ({ compare, runDir }) => {
+    const report = contactDiffReport({ compare })
+    report.render.path = join(runDir, 'old-render.png')
+    return report
+  })
+
+  const report = runCompareGateFixture(fixture)
+
+  assert.equal(report.status, 'fail')
+  assert.ok(
+    report.blockers.some((blocker) =>
+      blocker.includes('contact-diff output differs from checked compare path:'),
+    ),
+    report.blockers.join('\n'),
+  )
+})
+
+test('compare gate blocks contact-diff reports without a reported output path', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-missing-path-'))
+  const fixture = writeCompareGateFixture(root, ({ compare }) => {
+    const report = contactDiffReport({ compare })
+    delete report.outputPath
+    delete report.render.path
+    return report
+  })
+
+  const report = runCompareGateFixture(fixture)
+
+  assert.equal(report.status, 'fail')
+  assert.ok(
+    report.blockers.includes('contact-diff output path is missing'),
+    report.blockers.join('\n'),
+  )
 })

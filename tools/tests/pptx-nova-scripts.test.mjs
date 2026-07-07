@@ -804,16 +804,19 @@ test('refurbish fallback plan overwrites current-run candidate commands', async 
   )
 })
 
-test('refurbish runner writes semantic diff before publishing output', () => {
+test('refurbish runner completes compare delivery gate before publishing output', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-run-'))
   const source = join(root, 'source.pptx')
   const output = join(root, 'out.pptx')
   const runDir = join(root, 'run')
+  const fakeBin = join(root, 'bin')
+  mkdirSync(fakeBin, { recursive: true })
   writeFileSync(source, 'fake pptx')
   const fakeXdoc = writeFakeXdoc(
     root,
     `#!/usr/bin/env node
 import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 const args = process.argv.slice(2)
 const valueAfter = (flag) => {
@@ -897,6 +900,158 @@ if (args[0] === 'schema') {
     changeRollup: { reliable: { count: 0 } },
     slides: []
   })
+} else if (args[0] === 'convert') {
+  const outputDir = valueAfter('-o')
+  const report = valueAfter('--report')
+  const prefix = valueAfter('--prefix')
+  mkdirSync(outputDir, { recursive: true })
+  const file = prefix + '-001.png'
+  writeFileSync(join(outputDir, file), 'png')
+  writeFileSync(join(outputDir, 'manifest.json'), JSON.stringify({
+    version: '1',
+    slidesSelected: [1],
+    outputs: { png: [file] }
+  }))
+  writeFileSync(report, JSON.stringify({ schemaVersion: 'batch/v1', totals: { succeeded: 1 } }))
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`,
+  )
+  const fakeMagick = join(fakeBin, 'magick')
+  writeFileSync(
+    fakeMagick,
+    `#!/usr/bin/env node
+import { writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+if (args[0] === 'identify') {
+  process.stdout.write('100 56')
+} else {
+  writeFileSync(args[args.length - 1], 'png')
+}
+`,
+  )
+  chmodSync(fakeMagick, 0o755)
+
+  const result = runNode(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      source,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--route',
+      'native',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    { env: { ...process.env, PATH: `${fakeBin}:${process.env.PATH}` } },
+  )
+  const summary = JSON.parse(result.stdout)
+  const phaseNames = summary.phases.map((phase) => phase.name)
+  const gateNames = summary.gates.map((gate) => gate.name)
+  const sourceInspect = summary.phases.find((phase) => phase.name === 'source-inspect')
+  const comparePhase = summary.phases.find((phase) => phase.name === 'refurbish-compare')
+
+  assert.equal(summary.status, 'needs-human-review')
+  assert.equal(existsSync(output), true)
+  assert.equal(existsSync(join(runDir, 'pptx-diff.json')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-gate.json')), true)
+  assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
+  assert.ok(sourceInspect.command.includes(process.execPath), sourceInspect.command)
+  assert.ok(sourceInspect.command.includes('fake-xdoc.mjs'), sourceInspect.command)
+  assert.ok(comparePhase.command.includes(join(runDir, 'candidate.pptx')), comparePhase.command)
+  assert.ok(phaseNames.includes('pptx-semantic-diff'))
+  assert.ok(phaseNames.includes('refurbish-compare'))
+  assert.ok(phaseNames.includes('refurbish-compare-delivery'))
+  assert.ok(gateNames.includes('pptx-semantic-diff'))
+  assert.ok(gateNames.includes('refurbish-compare-delivery'))
+  assert.ok(phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('publish'))
+  assert.ok(phaseNames.indexOf('refurbish-compare') < phaseNames.indexOf('publish'))
+  assert.ok(phaseNames.indexOf('refurbish-compare-delivery') < phaseNames.indexOf('publish'))
+})
+
+test('refurbish runner does not publish output when compare delivery gate fails', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-run-compare-fail-'))
+  const source = join(root, 'source.pptx')
+  const output = join(root, 'out.pptx')
+  const runDir = join(root, 'run')
+  writeFileSync(source, 'fake pptx')
+  writeFileSync(output, 'original final pptx')
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+import { mkdirSync, writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+const valueAfter = (flag) => {
+  const index = args.indexOf(flag)
+  return index >= 0 ? args[index + 1] : ''
+}
+const print = (value) => process.stdout.write(JSON.stringify(value))
+
+if (args[0] === 'schema') {
+  print({
+    version: '9.9.9 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    capabilities: { schemaVersion: 'capabilities/v1' },
+    commands: {
+      pptx: {
+        subcommands: { inspect: {}, 'refurbish-skin': {}, preview: {}, diff: {} },
+        patchSchema: {},
+        catalogs: { nativeDeckkits: { deckkits: [{ id: 'mckinsey-blue', readiness: 'production' }] } }
+      }
+    }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'inspect') {
+  print({
+    schemaVersion: 'pptx-inspect/v1',
+    presentation: { slideCount: 1, size: { width: '10in', height: '5.625in' } },
+    slides: [{ index: 0, shapes: [] }]
+  })
+} else if (args[0] === 'pptx' && args[1] === 'refurbish-skin') {
+  writeFileSync(valueAfter('--output'), 'candidate pptx')
+  print({
+    schemaVersion: 'pptx-refurbish-skin/v1',
+    status: 'passed',
+    gate: { passed: true, newHighIssues: 0, newMediumIssues: 0 },
+    reports: {
+      visionDiff: { schemaVersion: 'pptx-vision-diff/v1', status: 'success', summary: { byClass: { new: { high: 0, medium: 0, low: 0 }, changed: { high: 0, medium: 0, low: 0 } } } },
+      audit: { schemaVersion: 'pptx-refurbish-audit/v1', status: 'passed', summary: { errorCount: 0, warningCount: 0, sourceSlideCount: 1, finalSlideCount: 1, slideCountMatches: true }, issues: [] }
+    }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'preview') {
+  const outputDir = valueAfter('--output-dir')
+  const contactSheet = valueAfter('--contact-sheet')
+  mkdirSync(outputDir, { recursive: true })
+  writeFileSync(outputDir + '/slide-001.png', 'png')
+  writeFileSync(contactSheet, 'contact')
+  print({
+    schemaVersion: 'pptx-preview/v1',
+    status: 'success',
+    pages: [{ path: outputDir + '/slide-001.png', status: 'success', width: 100, height: 56, byteLength: 3 }],
+    contactSheet: { path: contactSheet, width: 100, height: 56, byteLength: 7 }
+  })
+} else if (args[0] === 'pptx' && args[1] === 'diff') {
+  print({
+    schemaVersion: 'pptx-diff/v1',
+    status: 'success',
+    agentGate: { semanticStatus: 'pass' },
+    summary: { reliableChanges: 0, uncertainChanges: 0, unsupportedRegions: 0 },
+    changeRollup: { reliable: { count: 0 } },
+    slides: []
+  })
+} else if (args[0] === 'convert') {
+  process.stderr.write('compare render failed')
+  process.exit(7)
 } else {
   process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
   process.exit(2)
@@ -904,36 +1059,37 @@ if (args[0] === 'schema') {
 `,
   )
 
-  const result = runNode([
-    skillPath('scripts/pptx-nova-refurbish-run.mjs'),
-    '--deckkit',
-    'mckinsey-blue',
-    '--source',
-    source,
-    '--output',
-    output,
-    '--run-dir',
-    runDir,
-    '--route',
-    'native',
-    '--xdoc-bin',
-    fakeXdoc,
-    '--json',
-  ])
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      source,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--route',
+      'native',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--overwrite',
+      '--json',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 1, result.stderr || result.stdout)
   const summary = JSON.parse(result.stdout)
   const phaseNames = summary.phases.map((phase) => phase.name)
-  const gateNames = summary.gates.map((gate) => gate.name)
-  const sourceInspect = summary.phases.find((phase) => phase.name === 'source-inspect')
 
-  assert.equal(summary.status, 'needs-human-review')
-  assert.equal(existsSync(output), true)
-  assert.equal(existsSync(join(runDir, 'pptx-diff.json')), true)
-  assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
-  assert.ok(sourceInspect.command.includes(process.execPath), sourceInspect.command)
-  assert.ok(sourceInspect.command.includes('fake-xdoc.mjs'), sourceInspect.command)
-  assert.ok(phaseNames.includes('pptx-semantic-diff'))
-  assert.ok(gateNames.includes('pptx-semantic-diff'))
-  assert.ok(phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('publish'))
+  assert.equal(summary.status, 'failed')
+  assert.equal(summary.error.phase, 'refurbish-compare')
+  assert.equal(readFileSync(output, 'utf8'), 'original final pptx')
+  assert.equal(phaseNames.includes('refurbish-compare'), true)
+  assert.equal(phaseNames.includes('refurbish-compare-delivery'), false)
+  assert.equal(phaseNames.includes('publish'), false)
 })
 
 test('translation compare preserves selected slide number from convert manifest', () => {
@@ -995,13 +1151,15 @@ if (args[0] === 'identify') {
   )
 
   const result = runNode([
-    skillPath('scripts/pptx-nova-translation-compare.mjs'),
+    skillPath('scripts/pptx-nova-compare.mjs'),
     '--source',
     source,
     '--candidate',
     candidate,
     '--run-dir',
     runDir,
+    '--kind',
+    'translation',
     '--output',
     output,
     '--report',

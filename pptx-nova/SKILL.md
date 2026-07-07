@@ -72,7 +72,7 @@ runtime/schema/help 反查后再下结论。
 `pptx-diff.json`、`visual_review.json`、`clean-open.json`、`check.json`、`evidence-summary.json`、
 `layout-final.json`、`fidelity-gate.json`、`content-audit-final.json`、`i18n-text-plan.json`、
 `i18n-scan.json`、`i18n-plan.json`、`i18n-style-diff.json`、
-`translation-compare.png`、`translation-compare.json`、
+`translation-compare.png`、`translation-compare.json`、`refurbish-compare.png`、`refurbish-compare.json`、
 最终候选 PPTX、contact sheet 和人工复核
 必需的少量问题页 PNG、`replace-text.json`。实际不存在的项无需补造。
 
@@ -146,7 +146,12 @@ runtime/schema/help 反查后再下结论。
   自动检查页数、源文本、shape type、媒体、备注、外链和 reference-map 覆盖；仅在还需要 OOXML
   可见文本泄漏扫描或 forbidden shape name regex 时，再运行 `scripts/pptx-nova-refurbish-audit.mjs`
   作为 legacy supplemental audit。标准 runner 还会生成 `fidelity-gate.json` 汇总并加严
-  `vision-diff`、`refurbish-audit` 和可用 `reference-map` 证据。
+  `vision-diff`、`refurbish-audit` 和可用 `reference-map` 证据。最终翻新交付还必须生成
+  `refurbish-compare.png`：单张图片包含全部 slides，左列为翻新前源稿，右列为翻新后交付稿，
+  默认 192dpi；通过验证后必须把对比图复制到最终 PPTX 同目录，命名为
+  `<output-stem>-refurbish-compare-<MMDDhhmmss>.png`。标准 runner 会自动运行
+  `pptx-nova-compare.mjs --kind refurbish` 和 `pptx-nova-compare-gate.mjs --kind refurbish --publish`，
+  并要求 `refurbish-compare-gate.json.status=pass`。
 - **严格套模板**：复制或继承源 slide / placeholder，再编辑原对象；不重画一个"相似"页面。
 - **导出 / 检查 / 提取**：创建 run 目录；PPTX PNG/contact-sheet 预览默认用
   `xdoc pptx preview`，PDF/MD/JSON/text 或非 PPTX 通用转换用 `xdoc convert`，检查用
@@ -271,7 +276,7 @@ Markdown/文本而不生成 deck，按 `references/export-and-check.md` 执行�
   全部 slides，左列为翻译前源稿，右列为对应译稿，默认 192dpi；如需更高视觉保真度应增加 `--dpi` 而非事后放大。
   通过验证后，除保留 run 目录内的 `translation-compare.png` / `.json` 证据外，还必须把对比图复制到最终
   PPTX 同目录，命名为 `<output-stem>-translation-compare-<MMDDhhmmss>.png`，方便用户及时发现和检查；
-  交付前运行 `pptx-nova-translation-compare-gate.mjs --publish` 并要求
+  交付前运行 `pptx-nova-compare-gate.mjs --kind translation --publish` 并要求
   `translation-compare-gate.json.status=pass`。
 - **Animation Edit**：用户要求动画、出现顺序、点击/自动播放、with previous / after previous、逐条 bullet、退出动画、
   motion path、emphasis 或 slide transition；读 `animations.md`，只编辑 xdoc 标记为 editable 的安全子集。
@@ -419,7 +424,7 @@ check-lock -> dry-run -> apply -> vision-check -> structure-check when needed ->
 Refurbish Existing Deck 还必须追加：
 
 ```text
-refurbish-skin report gate -> one final pptx semantic diff when source/candidate are stable -> optional contact-diff for manual review -> optional legacy supplemental audit
+refurbish-skin report gate -> one final pptx semantic diff when source/candidate are stable -> refurbish-compare delivery gate -> optional contact-diff for manual review -> optional legacy supplemental audit
 ```
 
 动画、结构或兼容性高风险任务还必须追加：
@@ -472,8 +477,10 @@ xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --slides 25-38 --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --slides 25-38 --output <run-dir>/contact-diff.png --json
-node <skill-root>/scripts/pptx-nova-translation-compare.mjs --source source.pptx --candidate translated.pptx --run-dir <run-dir> --output <run-dir>/translation-compare.png --report <run-dir>/translation-compare.json --dpi 192 --json
-node <skill-root>/scripts/pptx-nova-translation-compare-gate.mjs --run-dir <run-dir> --final-pptx translated.pptx --publish --overwrite --json > <run-dir>/translation-compare-gate.json
+node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate translated.pptx --run-dir <run-dir> --kind translation --output <run-dir>/translation-compare.png --report <run-dir>/translation-compare.json --dpi 192 --json
+node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx translated.pptx --kind translation --publish --overwrite --json > <run-dir>/translation-compare-gate.json
+node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate refurbished.pptx --run-dir <run-dir> --kind refurbish --output <run-dir>/refurbish-compare.png --report <run-dir>/refurbish-compare.json --dpi 192 --json
+node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx refurbished.pptx --kind refurbish --publish --overwrite --json > <run-dir>/refurbish-compare-gate.json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
 xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
 xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
@@ -489,7 +496,9 @@ node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --requ
 
 1. **输出**：最终 PPTX/导出文件绝对路径 + run 目录；翻译任务同时列出最终 PPTX 同目录的
    `<output-stem>-translation-compare-<MMDDhhmmss>.png` 和 run 目录内的 `translation-compare.png`；
-   同目录 PNG 必须由 `translation-compare-gate.json.status=pass` 证明。
+   翻新任务同时列出最终 PPTX 同目录的
+   `<output-stem>-refurbish-compare-<MMDDhhmmss>.png` 和 run 目录内的 `refurbish-compare.png`；
+   同目录 PNG 必须由对应 `*-compare-gate.json.status=pass` 证明。
 2. **验证**：一行列出实际执行的关键 gate 及状态，例如
    `dry-run pass; apply pass; vision high=0 medium=0; preview reviewed; clean-open not run`。
 3. **证据**：只列最关键 3-6 个 artifact，例如 `patch.json`、`vision.json`、

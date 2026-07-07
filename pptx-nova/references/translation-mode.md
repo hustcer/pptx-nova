@@ -462,18 +462,20 @@ xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx \
   --slides <changed> \
   --output <run-dir>/contact-diff.png --json > <run-dir>/contact-diff.json
 
-node <skill-root>/scripts/pptx-nova-translation-compare.mjs \
+node <skill-root>/scripts/pptx-nova-compare.mjs \
   --source source.pptx \
   --candidate candidate.pptx \
   --run-dir <run-dir> \
+  --kind translation \
   --output <run-dir>/translation-compare.png \
   --report <run-dir>/translation-compare.json \
   --dpi 192 \
   --json
 
-node <skill-root>/scripts/pptx-nova-translation-compare-gate.mjs \
+node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
   --run-dir <run-dir> \
   --final-pptx translated.pptx \
+  --kind translation \
   --publish \
   --overwrite \
   --json > <run-dir>/translation-compare-gate.json
@@ -500,8 +502,8 @@ PPTX output so reviewers can find it without opening the run directory. Use the
 final PPTX stem plus a collision-safe timestamp suffix, for example
 `<output-stem>-translation-compare-<MMDDhhmmss>.png`, while still preserving the
 run-directory `translation-compare.png` and `translation-compare.json` as audit
-evidence. Run `pptx-nova-translation-compare-gate.mjs --publish` after the
-final PPTX path is stable, and block delivery unless
+evidence. Run `pptx-nova-compare-gate.mjs --kind translation --publish` after
+the final PPTX path is stable, and block delivery unless
 `translation-compare-gate.json.status` is `pass`. The gate validates the
 run-directory PNG/JSON, rejects scoped `--slides` comparison reports for final
 delivery, publishes or checks the sibling PNG, and verifies that the sibling

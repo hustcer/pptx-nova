@@ -3,29 +3,30 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 
-const SCHEMA_VERSION = 'pptx-nova-translation-compare/v1'
+const SCHEMA_VERSION = 'pptx-nova-compare/v1'
 
 const usage = `Usage:
-  node <skill-root>/scripts/pptx-nova-translation-compare.mjs --source <source.pptx> --candidate <translated.pptx> --run-dir <run-dir> [options]
+  node <skill-root>/scripts/pptx-nova-compare.mjs --source <source.pptx> --candidate <candidate.pptx> --run-dir <run-dir> [options]
 
 Options:
-  --source <path>           Read-only source PPTX before translation.
-  --candidate <path>        Translated candidate/final PPTX.
+  --source <path>           Read-only source PPTX before the workflow.
+  --candidate <path>        Candidate/final PPTX after the workflow.
   --run-dir <path>          Run directory used for preview evidence.
-  --output <path>           Output PNG. Defaults to run-dir/translation-compare.png.
-  --report <path>           Output JSON report. Defaults to run-dir/translation-compare.json.
+  --kind <name>             Compare kind, e.g. translation or refurbish. Defaults to compare.
+  --output <path>           Output PNG. Defaults to run-dir/<kind>-compare.png.
+  --report <path>           Output JSON report. Defaults to run-dir/<kind>-compare.json.
   --slides <selector>       Optional 1-based slide selector, e.g. 1,3-5.
   --dpi <number>            PNG render DPI. Defaults to 192.
   --xdoc-bin <path>         xdoc executable. Defaults to xdoc.
   --magick-bin <path>       ImageMagick executable. Defaults to magick.
   --font <path>             Optional TrueType/OpenType font path for header labels.
-  --source-label <text>     Left-column label. Defaults to "Before translation".
-  --candidate-label <text>  Right-column label. Defaults to "After translation".
+  --source-label <text>     Left-column label. Defaults by --kind.
+  --candidate-label <text>  Right-column label. Defaults by --kind.
   --overwrite               Allow replacing existing output/report files.
   --json                    Print the report to stdout.
   --help                    Show this help.
 
-The helper renders source and translated PPTX pages at high DPI, pairs every
+The helper renders source and candidate PPTX pages at high DPI, pairs every
 slide left/right, stacks all pairs into one PNG, and writes a machine-readable
 report for final delivery evidence.
 `
@@ -34,6 +35,7 @@ const valueFlags = {
   '--source': 'source',
   '--candidate': 'candidate',
   '--run-dir': 'runDir',
+  '--kind': 'kind',
   '--output': 'output',
   '--report': 'report',
   '--slides': 'slides',
@@ -50,6 +52,7 @@ function parseArgs(argv) {
     source: '',
     candidate: '',
     runDir: '',
+    kind: 'compare',
     output: '',
     report: '',
     slides: '',
@@ -57,8 +60,8 @@ function parseArgs(argv) {
     xdocBin: 'xdoc',
     magickBin: 'magick',
     font: '',
-    sourceLabel: 'Before translation',
-    candidateLabel: 'After translation',
+    sourceLabel: '',
+    candidateLabel: '',
     overwrite: false,
     json: false,
   }
@@ -95,10 +98,34 @@ function parseArgs(argv) {
   args.source = resolve(args.source)
   args.candidate = resolve(args.candidate)
   args.runDir = resolve(args.runDir)
-  args.output = resolve(args.output || join(args.runDir, 'translation-compare.png'))
-  args.report = resolve(args.report || join(args.runDir, 'translation-compare.json'))
+  args.kind = normalizeKind(args.kind)
+  const defaultStem = `${args.kind}-compare`
+  args.output = resolve(args.output || join(args.runDir, `${defaultStem}.png`))
+  args.report = resolve(args.report || join(args.runDir, `${defaultStem}.json`))
+  const labels = defaultLabels(args.kind)
+  args.sourceLabel ||= labels.source
+  args.candidateLabel ||= labels.candidate
   if (args.font) args.font = resolve(args.font)
   return args
+}
+
+function normalizeKind(kind) {
+  const normalized = String(kind || 'compare')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return normalized || 'compare'
+}
+
+function defaultLabels(kind) {
+  if (kind === 'translation') {
+    return { source: 'Before translation', candidate: 'After translation' }
+  }
+  if (kind === 'refurbish') {
+    return { source: 'Before refurbish', candidate: 'After refurbish' }
+  }
+  return { source: 'Before', candidate: 'After' }
 }
 
 function commandText(bin, args) {
@@ -372,7 +399,7 @@ function main() {
   ensureWritable(args.report, args.overwrite)
   mkdirSync(args.runDir, { recursive: true })
 
-  const workDir = join(args.runDir, 'translation-compare')
+  const workDir = join(args.runDir, `${args.kind}-compare`)
   const sourceDir = join(workDir, 'source')
   const candidateDir = join(workDir, 'candidate')
   const rowsDir = join(workDir, 'rows')
@@ -415,6 +442,7 @@ function main() {
   const report = {
     schemaVersion: SCHEMA_VERSION,
     status: 'success',
+    kind: args.kind,
     source: args.source,
     candidate: args.candidate,
     slideSelector: args.slides || null,
@@ -449,7 +477,7 @@ function main() {
   if (args.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
   else {
     process.stdout.write(
-      `translation compare image written: ${args.output} (${basename(args.source)} vs ${basename(args.candidate)}, ${rows.length} slides, ${args.dpi} dpi)\n`,
+      `${args.kind} compare image written: ${args.output} (${basename(args.source)} vs ${basename(args.candidate)}, ${rows.length} slides, ${args.dpi} dpi)\n`,
     )
   }
 }

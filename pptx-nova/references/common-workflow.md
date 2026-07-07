@@ -336,11 +336,14 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     when final parity matters. A deck that visually still reads like the source
     with only light chrome added is not done.
     For existing-deck refurbishment, the standard runner writes
-    `fidelity-gate.json`, `candidate-inspect.json`, and `layout-final.json`
-    before preview rendering. If running low-level commands manually, run
+    `fidelity-gate.json`, `candidate-inspect.json`, `layout-final.json`,
+    `refurbish-compare.png`, and `refurbish-compare-gate.json`
+    before returning. If running low-level commands manually, run
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
-    `refurbish-audit`, then run `pptx-nova-layout-snapshot.mjs` on final inspect
-    and keep both reports with the run artifacts.
+    `refurbish-audit`, run `pptx-nova-layout-snapshot.mjs` on final inspect,
+    then run `pptx-nova-compare.mjs --kind refurbish` and
+    `pptx-nova-compare-gate.mjs --kind refurbish --publish`; keep all reports
+    with the run artifacts and list the sibling compare PNG in the final response.
     For agent-facing status and final-response facts, read
     `refurbish-run-summary.json.agentSummary` or
     `evidence-summary.json.agentSummary` first; open the underlying gate reports

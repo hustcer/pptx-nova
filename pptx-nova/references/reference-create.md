@@ -41,6 +41,11 @@
   placeholder、frame 和 z-order 的结构化布局证据。
 - `contact-diff.png` / `contact-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx contact-diff`
   生成的 source/candidate 并排 contact sheet 和状态报告。
+- `refurbish-compare.png` / `refurbish-compare.json`：Refurbish Existing Deck 时由
+  `pptx-nova-compare.mjs --kind refurbish` 生成的全量逐页翻新前/后对比图和报告。
+- `refurbish-compare-gate.json`：Refurbish Existing Deck 时由
+  `pptx-nova-compare-gate.mjs --kind refurbish --publish` 生成的同目录发布门禁报告；必须证明
+  `<output-stem>-refurbish-compare-<MMDDhhmmss>.png` 已复制到最终 PPTX 同目录。
 - `chrome-detect.json` / `chrome-remove.json` / `chrome-apply.json`：Refurbish Existing Deck
   时由原生 chrome 命令生成的旧 chrome 识别、移除和目标 DeckKit chrome 应用报告。
 - `remap-dry-run.json` / `remap-theme.json`：Refurbish Existing Deck 时由 `remap-theme`
@@ -198,7 +203,7 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
 必做步骤：
 
 标准路线优先使用一键 runner；它会把下述 plan、inspect、native/fallback、dry-run/apply、
-vision-diff、refurbish-audit、semantic diff 和 preview 阶段写入同一个 run 目录：
+vision-diff、refurbish-audit、semantic diff、preview、`refurbish-compare` 和同目录发布门禁阶段写入同一个 run 目录：
 
 ```bash
 node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
@@ -208,7 +213,9 @@ node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
   --json
 ```
 
-机器门禁通过后 runner 返回 `status: "needs-human-review"`，而不是伪造视觉复核通过。
+机器门禁通过后 runner 返回 `status: "needs-human-review"`，而不是伪造视觉复核通过。runner
+会在最终 PPTX 发布后生成 `refurbish-compare.png`，并把同一张 PNG 复制到最终 PPTX 同目录，
+命名为 `<output-stem>-refurbish-compare-<MMDDhhmmss>.png`。
 下面的分步命令仍是 runner 的行为合同，也是局部修复和故障排查入口。
 
 1. 先生成 `refurbish-plan.json`，再执行任何 `xdoc` 换肤命令：
@@ -356,6 +363,8 @@ Fallback 的最小可交付动作是硬规则：
 12. 生成全量候选后按需运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
     contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
     回到 chrome/remap/layout polish 或 DeckKit 页型映射重做，不能只解释为"保真优先"。
+    最终交付前还必须生成全量逐页 `refurbish-compare.png`：源稿在左、最终交付稿在右，
+    默认 192dpi，不能用局部 `--slides` 版本替代交付证据。
 13. 生成后必须刷新 `outline.json`、`reference-map.json`、`content-audit.json`，确保它们反映最终输出页数，
     不能停留在第一次生成的旧映射。
 14. 候选 PPTX apply、inspect 和 PNG 复核后，运行原生最终 refurbish audit；默认不得有 `error`：
@@ -382,6 +391,24 @@ node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
   --inspect candidate-inspect.json \
   --output layout-final.json \
   --json
+
+node <skill-root>/scripts/pptx-nova-compare.mjs \
+  --source source.pptx \
+  --candidate final-output.pptx \
+  --run-dir <run-dir> \
+  --kind refurbish \
+  --output <run-dir>/refurbish-compare.png \
+  --report <run-dir>/refurbish-compare.json \
+  --dpi 192 \
+  --json
+
+node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
+  --run-dir <run-dir> \
+  --final-pptx final-output.pptx \
+  --kind refurbish \
+  --publish \
+  --overwrite \
+  --json > <run-dir>/refurbish-compare-gate.json
 ```
 
 如果没有拆页、合页或重排，可用 `--assume-one-to-one` 省略 `--map`，但仍必须在
@@ -491,6 +518,11 @@ DeckKit 选择注意事项：
   `--slides`，但必须确认 `agentGate.passed=true` 且最终交付前按需跑全量 contact-diff。
   对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。
   同时检查 proof object 是否过满、圆角/图片/图案示例是否压住标签、空内容区域是否残留无意义横线。
+- `refurbish-compare.png` 是交付物，不只是内部 QA 图。它必须覆盖全 deck，报告中的
+  `status` 必须为 `success`，`kind` 必须为 `refurbish`，`slideSelector` 必须为空，
+  `pageCount` 必须匹配源/输出页数，且 `byteLength` 和尺寸必须非零。交付前运行
+  `pptx-nova-compare-gate.mjs --kind refurbish --publish`，并要求
+  `refurbish-compare-gate.json.status=pass`；最终回复列出同目录 PNG 路径。
 - 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram
   数量、图片/媒体数量、备注存在性和 `reference-map.json` 覆盖率。任何减少、缺页、未映射对象或未经批准的
   页数变化都是交付阻塞项。

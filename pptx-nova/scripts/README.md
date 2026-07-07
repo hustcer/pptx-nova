@@ -61,12 +61,15 @@ Use these entry points from skill workflows:
   `--require-feedback`, checks that `<run-dir>/skill-feedback.md` exists and is
   not a TODO template, and writes `feedback-gate.json`. Use `--strict` before
   the final response when the task requested skill feedback.
-- `pptx-nova-translation-compare-gate.mjs` - delivery guard for translated PPTX
-  compare artifacts. It validates run-directory `translation-compare.png` /
-  `.json`, rejects scoped comparison reports for final delivery, and with
-  `--publish` copies the PNG next to the final PPTX as
-  `<output-stem>-translation-compare-<MMDDhhmmss>.png` before writing
-  `translation-compare-gate.json`.
+- `pptx-nova-compare.mjs` - render a high-DPI full-deck before/after compare
+  PNG for workflows such as translation and refurbish. Use `--kind translation`
+  or `--kind refurbish` to get the expected default labels and artifact names.
+- `pptx-nova-compare-gate.mjs` - delivery guard for compare artifacts. It
+  validates run-directory `<kind>-compare.png` / `.json`, rejects scoped
+  comparison reports for final delivery, and with `--publish` copies the PNG
+  next to the final PPTX as
+  `<output-stem>-<kind>-compare-<MMDDhhmmss>.png` before writing
+  `<kind>-compare-gate.json`.
 - pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
   data-driven, Studio, structural edit, template-following, and refurbish runs
   that contain native chart/table ops. It validates data shape, source/claim

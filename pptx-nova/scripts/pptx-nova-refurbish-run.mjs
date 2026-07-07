@@ -24,6 +24,8 @@ const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
 const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
+const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
+const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 
 const usage = `Usage:
@@ -346,6 +348,7 @@ function buildAgentSummary(summary) {
   const fidelity = gateByName(summary, 'fidelity-gate')
   const semanticDiff = gateByName(summary, 'pptx-semantic-diff')
   const preview = gateByName(summary, 'png-previews')
+  const compare = gateByName(summary, 'refurbish-compare-delivery')
   const route = summary.route?.executed || summary.route?.planned || summary.route?.requested || ''
   const decision = summary.machineGatesPassed
     ? summary.needsHumanReview
@@ -403,15 +406,23 @@ function buildAgentSummary(summary) {
         expectedPages: preview?.expectedCount ?? null,
         contactSheetBytes: preview?.contactSheetBytes ?? null,
       },
+      compare: {
+        gate: gateStatus(compare),
+        siblingPath: compare?.siblingPath ?? null,
+      },
     },
     artifacts: artifactSet(summary, [
       'summary',
+      'sourceSnapshot',
       'visionDiff',
       'contentAuditFinal',
       'fidelityGate',
       'pptxDiff',
       'previewReport',
       'contactSheet',
+      'refurbishCompare',
+      'refurbishCompareReport',
+      'refurbishCompareGate',
       'layoutFinal',
       'finalInspect',
     ]),
@@ -555,6 +566,7 @@ function validatePaths(args) {
 
 function artifactPaths(runDir) {
   return {
+    sourceSnapshot: join(runDir, 'source.pptx'),
     capabilities: join(runDir, 'xdoc-capabilities.json'),
     plan: join(runDir, 'refurbish-plan.json'),
     readiness: join(runDir, 'readiness.json'),
@@ -582,6 +594,9 @@ function artifactPaths(runDir) {
     contactSheet: join(runDir, 'previews', 'contact-sheet.png'),
     contactDiff: join(runDir, 'contact-diff.png'),
     contactDiffReport: join(runDir, 'contact-diff.json'),
+    refurbishCompare: join(runDir, 'refurbish-compare.png'),
+    refurbishCompareReport: join(runDir, 'refurbish-compare.json'),
+    refurbishCompareGate: join(runDir, 'refurbish-compare-gate.json'),
     summary: join(runDir, 'refurbish-run-summary.json'),
   }
 }
@@ -611,7 +626,7 @@ function initialSummary(args, artifacts) {
       completed: false,
       contactDiffRequested: args.contactDiff,
       instructions:
-        'Review contact-sheet.png and suspicious full-size PNGs. Confirm the target DeckKit is visibly applied and source content remains intact.',
+        'Review contact-sheet.png, refurbish-compare.png, and suspicious full-size PNGs. Confirm the target DeckKit is visibly applied and source content remains intact.',
     },
     warnings: [],
     error: null,
@@ -1139,6 +1154,62 @@ function runSemanticDiff(summary, args, artifacts) {
   gateSemanticDiff(summary, report)
 }
 
+function runRefurbishCompare(summary, args, artifacts) {
+  return runJsonPhase(summary, {
+    name: 'refurbish-compare',
+    bin: process.execPath,
+    args: [
+      COMPARE_SCRIPT,
+      '--source',
+      artifacts.sourceSnapshot,
+      '--candidate',
+      artifacts.candidate,
+      '--run-dir',
+      args.runDir,
+      '--kind',
+      'refurbish',
+      '--output',
+      artifacts.refurbishCompare,
+      '--report',
+      artifacts.refurbishCompareReport,
+      '--dpi',
+      '192',
+      '--xdoc-bin',
+      args.xdocBin,
+      '--overwrite',
+      '--json',
+    ],
+    artifact: artifacts.refurbishCompareReport,
+  })
+}
+
+function runRefurbishCompareGate(summary, args, artifacts) {
+  const report = runJsonPhase(summary, {
+    name: 'refurbish-compare-delivery',
+    bin: process.execPath,
+    args: [
+      COMPARE_GATE_SCRIPT,
+      '--run-dir',
+      args.runDir,
+      '--final-pptx',
+      args.output,
+      '--final-pptx-source',
+      artifacts.candidate,
+      '--kind',
+      'refurbish',
+      '--publish',
+      '--overwrite',
+      '--json',
+    ],
+    artifact: artifacts.refurbishCompareGate,
+  })
+  requireGate(summary, 'refurbish-compare-delivery', report?.status === 'pass', {
+    status: report?.status ?? '',
+    siblingPath: report?.agentSummary?.siblingPath ?? null,
+    message: 'Refurbish compare PNG must be published next to final PPTX',
+  })
+}
+
 function publishCandidate(summary, args, artifacts) {
   if (!existsSync(artifacts.candidate) || statSync(artifacts.candidate).size === 0) {
     throw new PhaseFailure('publish', 'candidate PPTX is missing or empty')
@@ -1174,6 +1245,12 @@ function runRefurbish(inputArgs) {
   const summary = initialSummary(args, artifacts)
 
   try {
+    copyFileSync(args.source, artifacts.sourceSnapshot)
+    addInternalPhase(summary, 'source-snapshot', 'passed', {
+      artifact: relativeArtifact(args.runDir, artifacts.sourceSnapshot),
+      bytes: statSync(artifacts.sourceSnapshot).size,
+    })
+
     const capabilityReport = runJsonPhase(summary, {
       name: 'xdoc-capability-probe',
       bin: process.execPath,
@@ -1265,6 +1342,8 @@ function runRefurbish(inputArgs) {
     runPreviews(summary, args, artifacts, inspect)
     runContactDiff(summary, args, artifacts)
     runSemanticDiff(summary, args, artifacts)
+    runRefurbishCompare(summary, args, artifacts)
+    runRefurbishCompareGate(summary, args, artifacts)
     publishCandidate(summary, args, artifacts)
 
     summary.status = 'needs-human-review'

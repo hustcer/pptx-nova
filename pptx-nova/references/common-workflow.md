@@ -341,7 +341,8 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     before returning. If running low-level commands manually, run
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
     `refurbish-audit`, run `pptx-nova-layout-snapshot.mjs` on final inspect,
-    then run `pptx-nova-compare.mjs --kind refurbish` and
+    then run `xdoc pptx contact-diff --dpi 192` to write
+    `refurbish-compare.png` / `refurbish-compare.json` and
     `pptx-nova-compare-gate.mjs --kind refurbish --publish`; keep all reports
     with the run artifacts and list the sibling compare PNG in the final response.
     For agent-facing status and final-response facts, read

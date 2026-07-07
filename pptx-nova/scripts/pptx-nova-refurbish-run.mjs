@@ -24,7 +24,6 @@ const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
 const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
-const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
 const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 
@@ -39,7 +38,6 @@ Options:
   --catalog <path>        DeckKit catalog. Defaults to <skill-root>/assets/deckkits/catalog.json
   --route <route>         auto|native|fallback. Defaults to auto
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc
-  --magick-bin <path>     ImageMagick executable for compare evidence. Defaults to magick
   --readiness-out <path>  Optional benchmark output for a full delivery readiness audit
   --explicit              User explicitly named a non-production/default DeckKit
   --contact-diff          Generate source/candidate contact-diff artifacts for manual review
@@ -70,7 +68,6 @@ function parseArgs(argv) {
     catalog: CATALOG_PATH,
     route: 'auto',
     xdocBin: 'xdoc',
-    magickBin: 'magick',
     readinessOut: '',
     explicit: false,
     contactDiff: false,
@@ -116,7 +113,6 @@ const valueFlags = {
   '--catalog': 'catalog',
   '--route': 'route',
   '--xdoc-bin': 'xdocBin',
-  '--magick-bin': 'magickBin',
   '--readiness-out': 'readinessOut',
 }
 
@@ -1160,28 +1156,18 @@ function runSemanticDiff(summary, args, artifacts) {
 function runRefurbishCompare(summary, args, artifacts) {
   return runJsonPhase(summary, {
     name: 'refurbish-compare',
-    bin: process.execPath,
+    bin: args.xdocBin,
     args: [
-      COMPARE_SCRIPT,
+      'pptx',
+      'contact-diff',
       '--source',
       artifacts.sourceSnapshot,
       '--candidate',
       artifacts.candidate,
-      '--run-dir',
-      args.runDir,
-      '--kind',
-      'refurbish',
       '--output',
       artifacts.refurbishCompare,
-      '--report',
-      artifacts.refurbishCompareReport,
       '--dpi',
       '192',
-      '--xdoc-bin',
-      args.xdocBin,
-      '--magick-bin',
-      args.magickBin,
-      '--overwrite',
       '--json',
     ],
     artifact: artifacts.refurbishCompareReport,

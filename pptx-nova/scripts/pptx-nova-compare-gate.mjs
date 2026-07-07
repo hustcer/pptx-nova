@@ -226,11 +226,18 @@ function sameSize(left, right) {
   return left.exists && right.exists && left.byteLength === right.byteLength
 }
 
-function validateReport(args, report, compareState, blockers, warnings) {
-  if (report.__parseError) {
-    blockers.push(`compare report is not valid JSON: ${report.__parseError}`)
-    return
+function reportNumber(...values) {
+  for (const value of values) {
+    if (Number.isFinite(value)) return value
   }
+  return null
+}
+
+function reportImagePath(report) {
+  return report.output || report.outputPath || report.render?.path || ''
+}
+
+function validateNativeCompareReport(args, report, compareState, blockers, warnings) {
   if (report.status !== 'success') blockers.push('compare report status is not success')
   if (report.kind !== args.kind) {
     blockers.push(`compare report kind ${JSON.stringify(report.kind)} does not match ${args.kind}`)
@@ -258,6 +265,78 @@ function validateReport(args, report, compareState, blockers, warnings) {
   }
   if (report.output && resolve(report.output) !== compareState.path) {
     warnings.push(`compare report output differs from checked compare path: ${report.output}`)
+  }
+}
+
+function validateXdocContactDiffReport(report, compareState, blockers, warnings) {
+  if (report.status !== 'success') blockers.push('contact-diff report status is not success')
+  const gate = report.agentGate ?? {}
+  if (gate.passed !== true && gate.status !== 'pass') {
+    blockers.push('contact-diff agent gate did not pass')
+  }
+  const scopeMode = gate.scopeMode ?? report.summary?.scopeMode ?? ''
+  if (scopeMode && scopeMode !== 'all-slides') {
+    blockers.push('contact-diff report was generated with a scoped slide selection')
+  }
+  const pairCount = reportNumber(gate.pairCount, report.summary?.pairCount)
+  if (!Number.isInteger(pairCount) || pairCount <= 0) {
+    blockers.push('contact-diff pairCount is missing or invalid')
+  }
+  const width = reportNumber(report.render?.width)
+  const height = reportNumber(report.render?.height)
+  if (!width || width <= 0 || !height || height <= 0) {
+    blockers.push('contact-diff render dimensions are missing or invalid')
+  }
+  const outputPath = reportImagePath(report)
+  if (outputPath && resolve(outputPath) !== compareState.path) {
+    warnings.push(`contact-diff output differs from checked compare path: ${outputPath}`)
+  }
+}
+
+function validateReport(args, report, compareState, blockers, warnings) {
+  if (report.__parseError) {
+    blockers.push(`compare report is not valid JSON: ${report.__parseError}`)
+    return
+  }
+  if (report.schemaVersion === 'pptx-contact-diff/v1') {
+    validateXdocContactDiffReport(report, compareState, blockers, warnings)
+    return
+  }
+  validateNativeCompareReport(args, report, compareState, blockers, warnings)
+}
+
+function compareReportSummary(report) {
+  if (!report || report.__parseError) {
+    return {
+      schemaVersion: null,
+      status: report?.status ?? null,
+      pageCount: null,
+      slideSelector: null,
+      width: null,
+      height: null,
+      byteLength: null,
+    }
+  }
+  if (report.schemaVersion === 'pptx-contact-diff/v1') {
+    const scopeMode = report.agentGate?.scopeMode ?? report.summary?.scopeMode ?? null
+    return {
+      schemaVersion: report.schemaVersion,
+      status: report.status ?? null,
+      pageCount: reportNumber(report.agentGate?.pairCount, report.summary?.pairCount),
+      slideSelector: scopeMode === 'all-slides' ? null : scopeMode,
+      width: reportNumber(report.render?.width),
+      height: reportNumber(report.render?.height),
+      byteLength: null,
+    }
+  }
+  return {
+    schemaVersion: report.schemaVersion ?? null,
+    status: report.status ?? null,
+    pageCount: report.pageCount ?? null,
+    slideSelector: report.slideSelector ?? null,
+    width: report.width ?? null,
+    height: report.height ?? null,
+    byteLength: report.byteLength ?? null,
   }
 }
 
@@ -292,6 +371,7 @@ function buildReport(args) {
 
   const compareReport = reportState.exists && reportState.isFile ? readJson(args.report) : null
   if (compareReport) validateReport(args, compareReport, compareState, blockers, warnings)
+  const reportSummary = compareReportSummary(compareReport)
 
   let sibling = args.publish ? makeSiblingPath(args) : findSibling(args)
   if (args.publish && blockers.length === 0) {
@@ -347,12 +427,7 @@ function buildReport(args) {
     compareReport: {
       path: args.report,
       exists: reportState.exists,
-      status: compareReport?.status ?? null,
-      pageCount: compareReport?.pageCount ?? null,
-      slideSelector: compareReport?.slideSelector ?? null,
-      width: compareReport?.width ?? null,
-      height: compareReport?.height ?? null,
-      byteLength: compareReport?.byteLength ?? null,
+      ...reportSummary,
     },
     sibling: {
       ...siblingState,

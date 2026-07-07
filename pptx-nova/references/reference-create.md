@@ -42,7 +42,7 @@
 - `contact-diff.png` / `contact-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx contact-diff`
   生成的 source/candidate 并排 contact sheet 和状态报告。
 - `refurbish-compare.png` / `refurbish-compare.json`：Refurbish Existing Deck 时由
-  `pptx-nova-compare.mjs --kind refurbish` 生成的全量逐页翻新前/后对比图和报告。
+  `xdoc pptx contact-diff --dpi 192` 生成的全量翻新前/后并排对比图和报告。
 - `refurbish-compare-gate.json`：Refurbish Existing Deck 时由
   `pptx-nova-compare-gate.mjs --kind refurbish --publish` 生成的同目录发布门禁报告；必须证明
   `<output-stem>-refurbish-compare-<MMDDhhmmss>.png` 已复制到最终 PPTX 同目录。
@@ -392,15 +392,12 @@ node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
   --output layout-final.json \
   --json
 
-node <skill-root>/scripts/pptx-nova-compare.mjs \
+xdoc pptx contact-diff \
   --source source.pptx \
   --candidate final-output.pptx \
-  --run-dir <run-dir> \
-  --kind refurbish \
   --output <run-dir>/refurbish-compare.png \
-  --report <run-dir>/refurbish-compare.json \
   --dpi 192 \
-  --json
+  --json > <run-dir>/refurbish-compare.json
 
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
   --run-dir <run-dir> \
@@ -513,14 +510,14 @@ DeckKit 选择注意事项：
   `reference-map.json` 和 `content-audit-final.json` 一致；可靠的文本/slide/object 删除必须有
   `approvedChanges[]` 或用户确认。`uncertain` / `unsupported` 区域要在最终摘要中披露，并说明用
   哪个人工或专项 gate 覆盖。
-- PNG/contact-sheet 复核要用 `xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx --output contact-diff.png --json`
+- PNG/contact-sheet 复核要用 `xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx --output contact-diff.png --dpi 192 --json`
   生成并排对比后抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。局部修复复核可加
   `--slides`，但必须确认 `agentGate.passed=true` 且最终交付前按需跑全量 contact-diff。
   对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。
   同时检查 proof object 是否过满、圆角/图片/图案示例是否压住标签、空内容区域是否残留无意义横线。
 - `refurbish-compare.png` 是交付物，不只是内部 QA 图。它必须覆盖全 deck，报告中的
-  `status` 必须为 `success`，`kind` 必须为 `refurbish`，`slideSelector` 必须为空，
-  `pageCount` 必须匹配源/输出页数，且 `byteLength` 和尺寸必须非零。交付前运行
+  `status` 必须为 `success`，`agentGate.status` 必须为 `pass`，`summary.scopeMode` 必须为
+  `all-slides`，`summary.pairCount` 必须匹配源/输出页数，且 render 尺寸必须非零。交付前运行
   `pptx-nova-compare-gate.mjs --kind refurbish --publish`，并要求
   `refurbish-compare-gate.json.status=pass`；最终回复列出同目录 PNG 路径。
 - 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram

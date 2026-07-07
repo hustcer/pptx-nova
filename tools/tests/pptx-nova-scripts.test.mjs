@@ -809,8 +809,6 @@ test('refurbish runner completes compare delivery gate before publishing output'
   const source = join(root, 'source.pptx')
   const output = join(root, 'out.pptx')
   const runDir = join(root, 'run')
-  const fakeBin = join(root, 'bin')
-  mkdirSync(fakeBin, { recursive: true })
   writeFileSync(source, 'fake pptx')
   const fakeXdoc = writeFakeXdoc(
     root,
@@ -900,40 +898,22 @@ if (args[0] === 'schema') {
     changeRollup: { reliable: { count: 0 } },
     slides: []
   })
-} else if (args[0] === 'convert') {
-  const outputDir = valueAfter('-o')
-  const report = valueAfter('--report')
-  const prefix = valueAfter('--prefix')
-  mkdirSync(outputDir, { recursive: true })
-  const file = prefix + '-001.png'
-  writeFileSync(join(outputDir, file), 'png')
-  writeFileSync(join(outputDir, 'manifest.json'), JSON.stringify({
-    version: '1',
-    slidesSelected: [1],
-    outputs: { png: [file] }
-  }))
-  writeFileSync(report, JSON.stringify({ schemaVersion: 'batch/v1', totals: { succeeded: 1 } }))
+} else if (args[0] === 'pptx' && args[1] === 'contact-diff') {
+  writeFileSync(valueAfter('--output'), 'contact diff png')
+  print({
+    schemaVersion: 'pptx-contact-diff/v1',
+    status: 'success',
+    outputPath: valueAfter('--output'),
+    summary: { pairCount: 1, scopeMode: 'all-slides', dpi: Number(valueAfter('--dpi')) || 72 },
+    agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 1 },
+    render: { path: valueAfter('--output'), width: 100, height: 56, dpi: Number(valueAfter('--dpi')) || 72 }
+  })
 } else {
   process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
   process.exit(2)
 }
 `,
   )
-  const fakeMagick = join(fakeBin, 'fake-magick.mjs')
-  writeFileSync(
-    fakeMagick,
-    `#!/usr/bin/env node
-import { writeFileSync } from 'node:fs'
-
-const args = process.argv.slice(2)
-if (args[0] === 'identify') {
-  process.stdout.write('100 56')
-} else {
-  writeFileSync(args[args.length - 1], 'png')
-}
-`,
-  )
-  chmodSync(fakeMagick, 0o755)
 
   const result = runNode([
     skillPath('scripts/pptx-nova-refurbish-run.mjs'),
@@ -949,8 +929,6 @@ if (args[0] === 'identify') {
     'native',
     '--xdoc-bin',
     fakeXdoc,
-    '--magick-bin',
-    fakeMagick,
     '--json',
   ])
   const summary = JSON.parse(result.stdout)
@@ -968,6 +946,7 @@ if (args[0] === 'identify') {
   assert.ok(sourceInspect.command.includes(process.execPath), sourceInspect.command)
   assert.ok(sourceInspect.command.includes('fake-xdoc.mjs'), sourceInspect.command)
   assert.ok(comparePhase.command.includes(join(runDir, 'candidate.pptx')), comparePhase.command)
+  assert.ok(comparePhase.command.includes('--dpi 192'), comparePhase.command)
   assert.ok(phaseNames.includes('pptx-semantic-diff'))
   assert.ok(phaseNames.includes('refurbish-compare'))
   assert.ok(phaseNames.includes('refurbish-compare-delivery'))
@@ -1048,7 +1027,7 @@ if (args[0] === 'schema') {
     changeRollup: { reliable: { count: 0 } },
     slides: []
   })
-} else if (args[0] === 'convert') {
+} else if (args[0] === 'pptx' && args[1] === 'contact-diff') {
   process.stderr.write('compare render failed')
   process.exit(7)
 } else {

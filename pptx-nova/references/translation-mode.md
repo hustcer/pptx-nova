@@ -470,6 +470,13 @@ node <skill-root>/scripts/pptx-nova-translation-compare.mjs \
   --report <run-dir>/translation-compare.json \
   --dpi 192 \
   --json
+
+node <skill-root>/scripts/pptx-nova-translation-compare-gate.mjs \
+  --run-dir <run-dir> \
+  --final-pptx translated.pptx \
+  --publish \
+  --overwrite \
+  --json > <run-dir>/translation-compare-gate.json
 ```
 
 Treat `contact-diff.agentGate.passed=false` as a review artifact blocker:
@@ -493,7 +500,12 @@ PPTX output so reviewers can find it without opening the run directory. Use the
 final PPTX stem plus a collision-safe timestamp suffix, for example
 `<output-stem>-translation-compare-<MMDDhhmmss>.png`, while still preserving the
 run-directory `translation-compare.png` and `translation-compare.json` as audit
-evidence.
+evidence. Run `pptx-nova-translation-compare-gate.mjs --publish` after the
+final PPTX path is stable, and block delivery unless
+`translation-compare-gate.json.status` is `pass`. The gate validates the
+run-directory PNG/JSON, rejects scoped `--slides` comparison reports for final
+delivery, publishes or checks the sibling PNG, and verifies that the sibling
+name and byte length match the run evidence.
 
 Review the changed-slide contact sheets and the full-size PNGs for:
 
@@ -537,5 +549,6 @@ Keep these translation-specific artifacts in the run directory when available:
 - `contact-diff.json` and `contact-diff.png`
 - `translation-compare.png`
 - `translation-compare.json`
+- `translation-compare-gate.json`
 - `pptx-diff.json`
 - `clean-open.json`

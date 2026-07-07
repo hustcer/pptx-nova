@@ -5,6 +5,9 @@ Each subdirectory is named after a DeckKit id and includes a native editable
 `deck.pptx`, a compact `contact-sheet.webp`, the source `content.json`,
 a short `brief.md`, and a stable `summary.json`.
 
+Bundled examples are synthetic, generated showcase materials created for this
+skill and are intended to be redistributable with the repository.
+
 Update the showcase decks with:
 
 ```bash

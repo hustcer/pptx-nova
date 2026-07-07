@@ -1,0 +1,31 @@
+[files]
+extend-exclude = [".git", "pptx-nova/benchmarks/visual/baselines"]
+ignore-hidden = false
+
+[default.extend-words]
+ba = "ba"
+ser = "ser"
+ist = "ist"
+Styl = "Styl"
+shft = "shft"
+Frst = "Frst"
+daa = "daa"
+Opf = "Opf"
+loca = "loca"
+Canva = "Canva"
+stong = "stong"
+Flate = "Flate"
+Ovride = "Ovride"
+parms = "parms"
+paeth = "paeth"
+titel = "titel"
+ETO = "ETO"
+trak = "trak"
+yoy = "yoy"
+EDE = "EDE"
+DED = "DED"
+rectangel = "rectangel"
+
+[default.extend-identifiers]
+PNGs = "PNGs"
+PDFs = "PDFs"

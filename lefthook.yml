@@ -1,0 +1,52 @@
+# EXAMPLE USAGE
+# Refer for explanation to following link:
+# https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+#
+# pre-push:
+#   commands:
+#     packages-audit:
+#       tags: frontend security
+#       run: yarn audit
+#     gems-audit:
+#       tags: backend security
+#       run: bundle audit
+#
+min_version: 2.0.5
+no_tty: false
+output:
+  # - meta           # Print lefthook version
+  # - summary        # Print summary block (successful and failed steps)
+  # - empty_summary  # Print summary heading when there are no steps to run
+  # - success        # Print successful steps
+  - failure # Print failed steps printing
+  # - execution        # Print any execution logs
+  - execution_out # Print execution output
+  # - execution_info # Print `EXECUTE > ...` logging
+  # - skips          # Print "skip" (i.e. no files matched)
+
+pre-commit:
+  parallel: true
+  commands:
+    # test:
+    #   run: pnpm test
+    oxlint:
+      skip:
+        - merge
+        - rebase
+      stage_fixed: true
+      glob: '*.{ts,tsx,js,jsx,es,cjs,mjs}'
+      run: oxlint --fix {staged_files}
+    oxfmt:
+      skip:
+        - merge
+        - rebase
+      stage_fixed: true
+      glob: '*.*'
+      run: oxfmt --no-error-on-unmatched-pattern {staged_files}
+    typos:
+      skip:
+        - merge
+        - rebase
+      stage_fixed: true
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs,json,md,toml,yaml,yml,txt,css,html,mbt,mbti,nu}'
+      run: typos --config typos.toml --force-exclude {staged_files}

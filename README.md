@@ -108,20 +108,105 @@ human review of facts, claims, numbers, brand compliance, and legal language.
 
 pptx-nova uses a DeckKit-first workflow. A DeckKit is a reusable visual system
 with page types, layout rules, typography, color rules, and quality checks. The
-normal production path is:
+normal new-deck path is:
 
 ```text
-brief / source material
-  -> outline and slide content
-  -> visual system selection
-  -> editable PowerPoint build
-  -> quality checks and previews
-  -> editable .pptx
++-------------------------+
+| brief / source material |
++-----------+-------------+
+            |
+            v
++-------------------------+       +-------------------------+
+| outline.json            | ----> | deck_lock.json          |
+| slide intent and order  |       | audience, constraints,  |
+|                         |       | assumptions, page plan  |
++-----------+-------------+       +-----------+-------------+
+            |                                 |
+            v                                 v
++-----------------------------------------------------------+
+| content.json                                               |
+| business content mapped to DeckKit page types and slots    |
++-----------------------------+-----------------------------+
+                              |
+                              v
++-----------------------------+-----------------------------+
+| DeckKit build                                                |
+| reusable visual grammar -> native editable PowerPoint ops    |
++-----------------------------+-----------------------------+
+                              |
+                              v
++-----------------------------+-----------------------------+
+| xdoc dry-run -> apply -> sidecar -> vision-check -> preview  |
+| no real write before checks; evidence stays in the run dir   |
++-----------------------------+-----------------------------+
+                              |
+                              v
++-----------------------------+-----------------------------+
+| final editable .pptx + optional PDF/PNG/contact sheet        |
++-------------------------------------------------------------+
 ```
 
-This structure keeps the deck generation path repeatable. It also makes it
-easier to catch overloaded slides, missing content, style mismatches, and visual
-defects before the final PPTX is delivered.
+The typical existing-deck edit path is intentionally different from a one-shot
+"rewrite the file" flow. pptx-nova asks xdoc to inspect the real PPTX structure
+first, selects the exact target objects, and checks the patch before writing:
+
+```text
++-------------------+     +-------------------+     +-------------------+
+| source .pptx      | --> | inspect           | --> | select            |
+| read-only by      |     | slides, shapes,   |     | exact candidates  |
+| default           |     | notes, charts,    |     | by text, name,    |
+|                   |     | tables, geometry  |     | id, bbox, etc.    |
++-------------------+     +---------+---------+     +---------+---------+
+                                      |                         |
+                                      v                         v
+                            +-------------------+     +-------------------+
+                            | patch.json        | --> | dry-run           |
+                            | declarative edits |     | resolvedSelectors |
+                            | not ad hoc code   |     | suggestions, diff |
+                            +---------+---------+     +---------+---------+
+                                      |                         |
+                                      |                         v
+                                      |              +-------------------+
+                                      |              | fix patch if any  |
+                                      |              | target is wrong   |
+                                      |              +---------+---------+
+                                      |                        |
+                                      +<-----------------------+
+                                      |
+                                      v
+                            +-------------------+     +-------------------+
+                            | apply to copy     | --> | verify            |
+                            | original kept     |     | vision-check,     |
+                            | untouched unless  |     | preview, diff,    |
+                            | explicitly asked  |     | clean-open when   |
+                            |                   |     | available         |
+                            +---------+---------+     +---------+---------+
+                                      |                         |
+                                      v                         v
+                            +-------------------------------------------+
+                            | final editable .pptx + audit artifacts    |
+                            +-------------------------------------------+
+```
+
+This is the part that makes pptx-nova different from many generic slide
+generators, screenshot pipelines, or small PowerPoint scripting snippets:
+
+- It aims to produce native editable PPTX objects, not a deck made of flattened
+  slide images.
+- It keeps a durable plan (`outline.json`, `deck_lock.json`, `content.json`, or
+  `patch.json`) so the work can be reviewed, replayed, and continued.
+- It uses xdoc's `inspect`, `select`, `dry-run`, `apply`, `preview`,
+  `vision-check`, `diff`, and sidecar/replay capabilities as guardrails around
+  the actual file write.
+- It treats the original deck as read-only by default and writes validated
+  candidates before publishing a final file.
+- It leaves a small audit trail of reports and previews so users can see what
+  changed, what was checked, and what still deserves human review.
+
+The result is still a document that should be reviewed like any business
+presentation, especially for facts, numbers, legal wording, and brand approval.
+The workflow is designed to make that review easier: the deck stays editable,
+the changes are traceable, and visual defects are looked for before delivery.
 
 ## Translating presentations
 

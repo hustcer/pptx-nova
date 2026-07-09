@@ -1,360 +1,394 @@
-# pptx-nova 使用指南
+# pptx-nova User Guide
 
-`pptx-nova` 可以帮你制作、修改、翻新和检查 PowerPoint 演示文稿。你只需要用日常语言说明想要什么，
-它会尽量交付一份真正可编辑的 `.pptx` 文件，而不是一张张截图。
+`pptx-nova` helps you create, edit, refurbish, translate, and check PowerPoint presentations. Describe
+what you need in everyday language, and it will aim to deliver a real editable `.pptx` file instead of
+a deck made of screenshots.
 
-这份文档写给普通使用者。你不需要了解命令行、配置文件或内部流程。
+This guide is for regular users. You do not need to understand command lines, config files, or the
+internal workflow.
 
-## 为什么它不只是普通 PPT 生成器
+## Why It Is More Than Another PPT Generator
 
-`pptx-nova` 背后使用自研的 `xdoc` PPTX 引擎。`xdoc` 是从 0 到 1 专门面向 Agent 工作流设计的，
-可以让 Agent 先读懂真实 PPTX 结构，再用结构化补丁做 dry-run、应用修改、生成预览、比较前后版本，
-并保留可审计的证据。
+`pptx-nova` is powered by `xdoc`, an in-house PPTX engine. `xdoc` was designed from the ground up for
+Agent workflows: it lets an Agent inspect the real PPTX structure, dry-run structured patches, apply
+changes, generate previews, compare before and after versions, and retain auditable evidence.
 
-这意味着它更接近一套可检查、可回放的 PPTX 构建和编辑流程，而不是把内容渲染成图片后塞进幻灯片。
-在支持的对象和工作流范围内，输出会尽量保持为 PowerPoint 里可继续编辑的文本、形状、表格、图表和页面元素。
+That makes it closer to a checkable, replayable PPTX build and editing pipeline than a workflow that
+renders content into images and inserts those images into slides. Within supported objects and
+workflows, output is meant to remain editable in PowerPoint as text, shapes, tables, charts, and slide
+elements.
 
-## 你可以让它做什么
+## What You Can Ask It To Do
 
-你可以用 `pptx-nova` 做这些事情：
+You can use `pptx-nova` to:
 
-- 从一句话或一段说明生成一份新的 PPT。
-- 根据你给的大纲、Markdown/文本材料、网页或 PDF 提取内容整理成 PPT。
-- 参考一份已有 PPT 的风格，做一份内容不同的新 PPT。
-- 套用公司模板，把新内容填进去。
-- 翻新一份旧 PPT，让它更统一、更专业，但保留原本内容。
-- 修改已有 PPT，比如改标题、替换数据、调整页面、换图片、改配色。
-- 把 CSV、JSON 或表格数据做成表格页或图表页。
-- 翻译已有 PPT，并尽量保持原版式、图表、备注、动画和转场。
-- 添加、修改或删除基础动画和转场，例如淡入、逐条出现、自动切页。
-- 做品牌改装或品牌检查，例如统一品牌色、字体、logo 和页眉页脚。
-- 比较源 PPT 和修改后 PPT，辅助核查改动范围和视觉差异。
-- 导出 PDF、图片预览、Markdown、JSON 或文本，方便检查、分享或后续处理。
-- 处理含公式的技术页：简单公式可保留为普通文本，复杂公式可作为公式资产插入。
-- 检查 PPT 是否有文字重叠、内容被截断、页面不整齐等问题。
-- 在你明确要求时，对一次 `pptx-nova` 使用过程给出工作流反馈。
+- Generate a new PPT from a short prompt or a longer brief.
+- Turn an outline, Markdown/text material, web page, or PDF-extracted content into a PPT.
+- Use the visual style of an existing PPT as a reference while creating a new deck with different content.
+- Fill new content into a company template.
+- Refurbish an old PPT so it is more consistent and professional while preserving the original content.
+- Edit an existing PPT, such as changing titles, replacing data, adjusting layouts, swapping images, or changing colors.
+- Turn CSV, JSON, or table data into table slides or chart slides.
+- Translate an existing PPT while aiming to preserve layout, charts, speaker notes, animations, and transitions.
+- Add, modify, or remove basic animations and transitions, such as fade-in, step-by-step bullet reveal, or automatic slide advance.
+- Perform brand conversion or brand checks, such as aligning brand colors, fonts, logos, headers, and footers.
+- Compare a source PPT with a modified PPT to help review change scope and visual differences.
+- Export PDF, image previews, Markdown, JSON, or text for review, sharing, or downstream processing.
+- Handle technical slides with formulas: simple formulas may stay as plain text, while complex formulas may be inserted as formula assets.
+- Check for text overlap, clipped content, uneven layouts, and similar presentation issues.
+- Provide workflow feedback for a `pptx-nova` run when you explicitly ask for it.
 
-网页、HTML 和 PDF 可以作为内容素材输入。`pptx-nova` 会先把它们提取成 Markdown 或文本，
-再进入 PPT 生成流程；它不会默认把网页或 PDF 的原始版式、图片和样式完整搬进 PPT。
+Web pages, HTML, and PDFs can be used as source material. `pptx-nova` first extracts them into
+Markdown or text, then uses that material in the PPT generation workflow. It does not automatically
+copy a web page or PDF's original layout, images, and styles into PowerPoint one-to-one.
 
-## 最简单的用法
+## Simplest Usage
 
-你可以直接这样说：
+You can say:
 
 ```text
-用 pptx-nova 做一份 8 页中文路演 PPT，主题是 AI 质检平台，受众是制造业 CIO，
-风格要专业、清爽，输出 ai-roadshow.pptx。
+Use pptx-nova to create an 8-slide English pitch deck about an AI quality inspection platform
+for manufacturing CIOs. Make it professional and clean. Output ai-roadshow.pptx.
 ```
 
-也可以这样说：
+You can also say:
 
 ```text
-把 qbr.pptx 翻新一下，内容不要变，视觉更像咨询公司汇报，输出 qbr-new.pptx。
+Refurbish qbr.pptx. Keep the content unchanged, but make the visual style feel more like a
+consulting report. Output qbr-new.pptx.
 ```
 
-或者：
+Or:
 
 ```text
-修改 qbr.pptx，把第 3 页的 KPI 数据换成 data.csv 里的数据，不要覆盖原文件。
+Edit qbr.pptx and replace the KPI data on slide 3 with the data from data.csv. Do not overwrite
+the original file.
 ```
 
-## 你最好提供哪些信息
+## What Information Helps
 
-不需要一次说得很完美，但如果你能提供下面这些信息，结果通常会更好：
+You do not need to provide everything perfectly up front, but results are usually better when you
+include:
 
-- **用途**：这是路演、内部汇报、销售材料、培训课件，还是客户提案？
-- **受众**：给老板、客户、投资人、同事、学生，还是公开演讲？
-- **页数**：大概几页，或者是否有固定页数。
-- **语言**：中文、英文、其他目标语言，还是多语言混合。
-- **内容**：大纲、Markdown/文本材料、CSV/JSON 表格数据、粘贴表格、旧 PPT、网页链接、PDF、图片或 logo。
-- **风格**：正式、简洁、咨询风、科技感、品牌规范、课程风等。
-- **限制**：哪些内容不能改，哪些页面必须保留，是否允许重排结构。
-- **输出**：最终文件名，是否需要 PDF 或图片预览。
+- **Purpose**: Is this a pitch deck, internal report, sales deck, training material, or client proposal?
+- **Audience**: Is it for executives, customers, investors, colleagues, students, or a public talk?
+- **Slide count**: Approximate number of slides, or whether the count is fixed.
+- **Language**: English, Chinese, another target language, or mixed languages.
+- **Content**: Outline, Markdown/text material, CSV/JSON table data, pasted tables, an old PPT, web links, PDFs, images, or logos.
+- **Style**: Formal, minimal, consulting-style, technology-oriented, brand-compliant, course-oriented, and so on.
+- **Constraints**: Which content must not change, which slides must be preserved, and whether restructuring is allowed.
+- **Output**: Final filename, and whether you need PDF or image previews.
 
-你可以只给一句话开始；如果信息不够，助手会根据任务情况继续推进，或在关键地方向你确认。
+You can start with one sentence. If information is missing, the assistant will either proceed based on
+the task or ask for confirmation at critical points.
 
-## 常见需求写法
+## Common Request Patterns
 
-### 1. 快速生成一份新 PPT
+### 1. Quickly Generate A New PPT
 
 ```text
-用 pptx-nova 快速做一份 6 页中文产品介绍 PPT，主题是企业知识库助手。
-受众是销售团队，风格简洁、商务，输出 product-intro.pptx。
+Use pptx-nova to quickly create a 6-slide English product introduction deck about an enterprise
+knowledge-base assistant. The audience is the sales team. Use a clean business style and output
+product-intro.pptx.
 ```
 
-适合：你有一个主题，但还没有完整大纲。
+Best for: you have a topic, but not a complete outline.
 
-### 2. 按大纲生成 PPT
+### 2. Generate From An Outline
 
 ```text
-根据下面大纲生成一份 10 页 PPT，中文，风格正式，用于季度业务复盘。
-1. 封面
-2. 本季度业绩概览
-3. 收入变化
-4. 用户增长
-5. 重点项目进展
-6. 风险与问题
-7. 下季度目标
-8. 资源需求
-9. 行动计划
+Generate a 10-slide English PPT from the outline below. Use a formal style for a quarterly
+business review.
+1. Cover
+2. Quarterly performance overview
+3. Revenue changes
+4. User growth
+5. Key project progress
+6. Risks and issues
+7. Next-quarter goals
+8. Resource needs
+9. Action plan
 10. Q&A
 ```
 
-适合：你已经知道每页要讲什么。
+Best for: you already know what each slide should cover.
 
-### 3. 参考已有 PPT 风格
+### 3. Use An Existing PPT As A Style Reference
 
 ```text
-参考 reference.pptx 的视觉风格，用 new-outline.md 的内容生成一份新 PPT。
-不要复用 reference.pptx 里的旧文案，只参考风格和页面节奏。
+Use reference.pptx as the visual style reference and generate a new PPT from new-outline.md.
+Do not reuse old copy from reference.pptx; only use its style and slide rhythm as a reference.
 ```
 
-适合：你喜欢某份 PPT 的风格，但要做一份新内容。
+Best for: you like the style of one deck but need a new deck with different content.
 
-### 4. 翻新旧 PPT
+### 4. Refurbish An Old PPT
 
 ```text
-翻新 old-report.pptx，页数和内容保持不变，整体更专业、更统一。
-输出 old-report-refined.pptx，并给我图片预览。
+Refurbish old-report.pptx. Keep the slide count and content unchanged, but make the deck more
+professional and consistent. Output old-report-refined.pptx and give me image previews.
 ```
 
-适合：旧 PPT 内容还可以，但视觉过时、不统一或不够正式。
+Best for: the old PPT's content is usable, but the visuals are outdated, inconsistent, or not formal enough.
 
-### 5. 修改已有 PPT
+### 5. Edit An Existing PPT
 
 ```text
-修改 sales.pptx：
-第 2 页标题改成「2026 年销售目标」；
-第 5 页替换成 new-chart-data.csv 的数据；
-输出 sales-updated.pptx。
+Edit sales.pptx:
+Change the title on slide 2 to "2026 Sales Targets";
+Replace the data on slide 5 with the data from new-chart-data.csv;
+Output sales-updated.pptx.
 ```
 
-适合：你只想改现有 PPT 的一部分。
+Best for: you only want to change part of an existing PPT.
 
-### 6. 套公司模板
+### 6. Use A Company Template
 
 ```text
-用 company-template.pptx 的模板和品牌风格，把 outline.md 做成一份新 PPT。
-尽量保留模板的版式和占位符。
+Use the template and brand style from company-template.pptx, and turn outline.md into a new PPT.
+Try to preserve the template layouts and placeholders.
 ```
 
-适合：公司有固定模板，不能随便换风格。
+Best for: your company has a fixed template and the deck should not freely change style.
 
-### 7. 只做检查或导出
-
-```text
-检查 final.pptx 有没有文字重叠、截断或版式问题，不要修改文件。
-```
+### 7. Only Check Or Export
 
 ```text
-把 final.pptx 导出成 PDF 和每页 PNG 预览。
-```
-
-适合：你已经有 PPT，只需要确认质量或导出材料。
-
-### 8. 翻译已有 PPT
-
-```text
-把 product-deck.pptx 翻译成英文，尽量保持原版式、图表样式、备注和动画。
-输出 product-deck-en.pptx，并给我原文和译文对照预览。
-```
-
-适合：你要把一份现有 PPT 翻成另一种语言，并希望视觉结构基本不变。
-
-### 9. 修改动画或转场
-
-```text
-修改 launch.pptx：第 4 页的要点按点击逐条出现，第 6 页转场改成淡入。
-其他动画不要动，输出 launch-animated.pptx。
-```
-
-适合：你只需要基础进入、退出、逐条出现或页面转场。复杂路径动画、视频 timing、
-点击某个对象触发等高级效果可能需要先确认能否安全编辑。
-
-### 10. 品牌检查或品牌改装
-
-```text
-检查 proposal.pptx 是否符合 brand-profile.json 里的品牌色、字体和 logo 使用要求，不要修改文件。
+Check final.pptx for text overlap, clipping, or layout issues. Do not modify the file.
 ```
 
 ```text
-把 proposal.pptx 改成 company-template.pptx 的品牌风格，内容不要变，输出 proposal-branded.pptx。
+Export final.pptx as a PDF and per-slide PNG previews.
 ```
 
-适合：你要统一品牌视觉，或在交付前确认 PPT 是否偏离品牌规范。
+Best for: you already have a PPT and only need quality checks or exports.
 
-### 11. 比较、抽取或给反馈
+### 8. Translate An Existing PPT
 
 ```text
-比较 old.pptx 和 new.pptx，告诉我主要改动和需要人工复核的页面，不要修改文件。
+Translate product-deck.pptx into English. Try to preserve the original layout, chart styling,
+speaker notes, and animations. Output product-deck-en.pptx and give me a source-vs-translation
+preview.
+```
+
+Best for: you need to translate an existing PPT into another language while keeping the visual
+structure largely unchanged.
+
+### 9. Modify Animations Or Transitions
+
+```text
+Edit launch.pptx: on slide 4, make the bullets appear one by one on click; on slide 6, change the
+transition to fade. Do not change other animations. Output launch-animated.pptx.
+```
+
+Best for: you only need basic entrance, exit, step-by-step reveal, or slide transition changes.
+Advanced effects such as complex motion paths, video timing, or object-triggered actions may need
+confirmation before they can be edited safely.
+
+### 10. Brand Check Or Brand Conversion
+
+```text
+Check whether proposal.pptx follows the brand colors, fonts, and logo usage rules in
+brand-profile.json. Do not modify the file.
 ```
 
 ```text
-把 final.pptx 导出成 Markdown 和 JSON，方便我做内容审查。
+Convert proposal.pptx to the brand style from company-template.pptx. Keep the content unchanged
+and output proposal-branded.pptx.
+```
+
+Best for: you need to align brand visuals, or confirm before delivery that a PPT does not deviate
+from brand rules.
+
+### 11. Compare, Extract, Or Give Feedback
+
+```text
+Compare old.pptx and new.pptx. Tell me the main changes and which slides need human review.
+Do not modify any files.
 ```
 
 ```text
-检查这次 pptx-nova 生成流程有什么使用反馈，并写到反馈文件里。
+Export final.pptx as Markdown and JSON so I can review the content.
 ```
-
-适合：你已经有 PPT，只想做只读核查、内容抽取，或希望把一次使用中的工具/流程问题记录下来。
-
-## 交付时你会得到什么
-
-通常会包含：
-
-- 一份最终 `.pptx` 文件。
-- 如果你要求，会有 PDF、图片预览、Markdown、JSON 或文本导出。
-- 简短说明：改了什么、生成了什么、有没有需要你注意的地方。
-- 如果任务复杂，会保留一份可审计的工作记录，例如 `outline.json`、`deck_lock.json`、
-  `content.json`、`patch.json`、检查报告、预览图和 contact sheet，方便后续继续修改或排查问题。
-- 对正式交付、翻新、翻译、模板跟随、图表表格或动画任务，还可能包含更细的验证证据，
-  例如 `visual_review.json`、`pptx-diff.json`、`structure-check.json`、`semantic-audit.json`、
-  `clean-open.json`、`translation-compare.png`、`translation-compare.json`、
-  `refurbish-compare.png` 或 `refurbish-compare.json`。这些文件只在相关任务中出现，
-  不会为了凑清单而补造。
-- 对翻译或翻新任务，正式交付目录通常还会包含一张逐 slide 的源文件/交付文件对比全景图，
-  方便快速核查每页是否漏改、失真或引入新的视觉问题。
-
-默认不会覆盖你的原始 PPT。除非你明确要求“直接覆盖原文件”，否则会输出到一个新文件。
-
-## 哪些材料特别有帮助
-
-如果你有这些材料，可以一起提供：
-
-- 公司 logo、品牌色、字体要求。
-- 以前做过且你喜欢的 PPT。
-- 公司标准模板。
-- 产品截图、架构图、人物照片、客户案例图片。
-- 表格数据、图表数据、指标口径说明。
-- Markdown/文本大纲、参考文案、官网、白皮书、PDF、会议纪要。
-- 翻译术语表、品牌规范、品牌 profile、颜色和字体要求。
-
-如果缺少 logo、截图或官方素材，助手不会假装生成“官方素材”。它会用文字、简单图形或占位说明替代，
-并在结果里告诉你。
-
-## 翻新 PPT 时要知道的事
-
-“翻新”通常表示：内容不变，视觉变好。
-
-所以默认会尽量保留：
-
-- 原来的页数。
-- 原来的文字和主要观点。
-- 表格、图表、图片、备注等可见内容。
-- 页面之间的逻辑顺序。
-
-如果旧 PPT 本身内容太密、页面装不下，通常会先尝试保留原生对象并调整版式；确实需要拆页、
-合页、重排或删减内容时，必须先让你确认。默认不会把源页整页截图塞进新 PPT 来冒充可编辑翻新。
-机器检查通过后，翻新类任务通常仍需要打开 contact sheet、逐页图片和同目录的
-`*-refurbish-compare-<MMDDhhmmss>.png` 做最终视觉复核。
-
-## 什么时候需要先确认
-
-这些情况通常更适合先确认大纲或方向，再生成完整 PPT：
-
-- 投资人路演、董事会材料、客户正式提案。
-- 公司品牌要求很严格。
-- 页数很多，或资料很多。
-- 你要求“严格套模板”。
-- 你要求保留翻译术语、法律措辞、品牌语气或特定表达。
-- 你不希望助手自行补充事实或改写观点。
-- 旧 PPT 内容很复杂，翻新时可能影响原内容。
-- 你要编辑复杂动画、视频播放顺序、SmartArt、宏或其他 PowerPoint 高级对象。
-
-如果你赶时间，也可以直接说明“先快速出一版”，助手会尽量减少来回确认。
-
-## 不适合这样要求
-
-为了保证 PPT 能继续编辑，不建议这样使用：
-
-- “直接把每页截图塞进 PPT 就行。”
-- “旧内容可以随便删，只要看起来高级。”
-- “参考 PPT 里的图片都拿来用”，但没有授权或来源说明。
-- “覆盖原文件”，但没有明确备份或输出路径。
-- “严格按模板”，同时又要求完全不同的页面结构。
-
-## 一句话模板
-
-你可以复制下面这个格式来提需求：
 
 ```text
-用 pptx-nova 做一份【页数】【语言】PPT，主题是【主题】，
-受众是【受众】，用途是【用途】，
-风格希望【风格】，
-内容来自【大纲/Markdown 或文本材料/旧 PPT/CSV 或 JSON 数据/网页或 PDF 提取内容】，
-输出文件名是【文件名.pptx】。
+Check this pptx-nova generation workflow for usage feedback and write it to a feedback file.
 ```
 
-示例：
+Best for: you already have a PPT and only want read-only review, content extraction, or a record of
+tool/workflow issues from a run.
+
+## What You Usually Receive
+
+Usually, delivery includes:
+
+- A final `.pptx` file.
+- PDF, image previews, Markdown, JSON, or text export if you ask for them.
+- A short summary of what changed, what was generated, and anything you should know.
+- For complex tasks, an auditable work record such as `outline.json`, `deck_lock.json`,
+  `content.json`, `patch.json`, check reports, preview images, and a contact sheet to make later
+  edits or troubleshooting easier.
+- For formal delivery, refurbishment, translation, template following, chart/table, or animation
+  tasks, more detailed validation evidence may also be included, such as `visual_review.json`,
+  `pptx-diff.json`, `structure-check.json`, `semantic-audit.json`, `clean-open.json`,
+  `translation-compare.png`, `translation-compare.json`, `refurbish-compare.png`, or
+  `refurbish-compare.json`. These files appear only when relevant; they are not fabricated to fill
+  a checklist.
+- For translation or refurbishment tasks, the formal delivery directory usually also contains one
+  all-slides source-vs-deliverable comparison image, which helps you quickly check whether any slide
+  was missed, distorted, or given new visual issues.
+
+Your original PPT is not overwritten by default. Unless you explicitly ask to overwrite the original
+file, output is written to a new file.
+
+## Especially Helpful Materials
+
+If you have any of these materials, provide them together:
+
+- Company logo, brand colors, and font requirements.
+- Previous PPTs you like.
+- A company standard template.
+- Product screenshots, architecture diagrams, portraits, customer case images.
+- Table data, chart data, and metric definitions.
+- Markdown/text outlines, reference copy, official websites, white papers, PDFs, meeting notes.
+- Translation glossaries, brand guidelines, brand profiles, color requirements, and font requirements.
+
+If logos, screenshots, or official assets are missing, the assistant will not pretend to create
+"official assets." It will use text, simple shapes, or placeholders instead, and tell you in the result.
+
+## What To Know When Refurbishing A PPT
+
+"Refurbish" usually means: keep the content unchanged, improve the visuals.
+
+By default, it will try to preserve:
+
+- Original slide count.
+- Original text and main points.
+- Visible content such as tables, charts, images, and speaker notes.
+- Logical order between slides.
+
+If the old PPT is too dense and content does not fit, the workflow usually first tries to preserve
+native objects and adjust the layout. If pages truly need to be split, merged, rearranged, or shortened,
+you must confirm that first. By default, it will not insert full-slide screenshots from the source into
+the new PPT as a fake editable refurbishment. Even after machine checks pass, refurbishment tasks
+usually still require final visual review of the contact sheet, per-slide images, and the sibling
+`*-refurbish-compare-<MMDDhhmmss>.png` file.
+
+## When Confirmation Is Useful
+
+These cases are usually better handled by confirming the outline or direction before generating the
+complete PPT:
+
+- Investor pitch decks, board materials, and formal client proposals.
+- Strict company brand requirements.
+- Many slides, or a large amount of source material.
+- You require strict template following.
+- You require preservation of translation terminology, legal wording, brand tone, or specific phrasing.
+- You do not want the assistant to add facts or rewrite points on its own.
+- The old PPT is complex and refurbishment may affect original content.
+- You need to edit complex animations, video playback order, SmartArt, macros, or other advanced PowerPoint objects.
+
+If you are in a hurry, you can also say "produce a quick first version." The assistant will minimize
+back-and-forth where possible.
+
+## Requests To Avoid
+
+To keep the PPT editable, these requests are not recommended:
+
+- "Just put screenshots of each slide into a PPT."
+- "Delete old content freely as long as it looks premium."
+- "Use all images from the reference PPT," without authorization or source information.
+- "Overwrite the original file," without a clear backup or output path.
+- "Follow the template strictly," while also requiring a completely different slide structure.
+
+## One-Sentence Template
+
+You can copy this format when making a request:
 
 ```text
-用 pptx-nova 做一份 12 页中文 PPT，主题是 2026 年产品路线图，
-受众是公司管理层，用途是季度战略会，
-风格希望正式、清爽、偏咨询风，
-内容来自 roadmap.md 和 metrics.csv，
-输出文件名是 product-roadmap-2026.pptx。
+Use pptx-nova to create a [slide count] [language] PPT about [topic].
+The audience is [audience], and the purpose is [purpose].
+The desired style is [style].
+The content comes from [outline / Markdown or text material / old PPT / CSV or JSON data / web or PDF-extracted content].
+The output filename is [filename.pptx].
 ```
 
-## 维护者说明
+Example:
 
-这一节面向维护和发布 `pptx-nova` skill 的开发者。普通使用者不需要阅读。
+```text
+Use pptx-nova to create a 12-slide English PPT about the 2026 product roadmap.
+The audience is company leadership, and the purpose is a quarterly strategy meeting.
+The desired style is formal, clean, and consulting-oriented.
+The content comes from roadmap.md and metrics.csv.
+The output filename is product-roadmap-2026.pptx.
+```
 
-### 独立运行契约
+## Maintainer Notes
 
-`pptx-nova` 发布后应能作为独立 skill 运行，不依赖当前开发 monorepo 的根目录文件。
+This section is for developers who maintain and publish the `pptx-nova` skill. Regular users do not
+need to read it.
 
-- 脚本从自身位置推导 `<skill-root>`，不要依赖仓库根开发工具、本地环境文件或 agent 私有上下文文件。
-- 项目输入通过显式参数传入，例如 `--root`、`--asset-root`、`--xdoc-bin`、PPTX 路径或
-  已文档化的环境变量。
-- Deck generation path 使用 bundled assets；不要从网络或本机 checkout 动态读取图标、模板或私有素材。
-- `xdoc` 是主要外部 CLI 依赖。没有 `xdoc` 时，内容验证、DeckKit 选择、icon 查询和 patch build
-  仍应可跑；真实 apply、convert、vision-check 会失败或被上层跳过。
+### Standalone Runtime Contract
 
-### 公开前检查
+After publication, `pptx-nova` should run as a standalone skill and must not depend on root-directory
+files from the current development monorepo.
 
-在公开仓库根目录中优先跑聚合检查：
+- Scripts should derive `<skill-root>` from their own location. Do not depend on repository-root
+  development tools, local environment files, or Agent-private context files.
+- Project inputs should be passed through explicit parameters, such as `--root`, `--asset-root`,
+  `--xdoc-bin`, PPTX paths, or documented environment variables.
+- The deck generation path uses bundled assets. Do not dynamically read icons, templates, or private
+  assets from the network or from a local checkout.
+- `xdoc` is the primary external CLI dependency. Without `xdoc`, content validation, DeckKit selection,
+  icon lookup, and patch build should still run; real apply, convert, and vision-check workflows will
+  fail or be skipped by the caller.
+
+### Pre-Publication Checks
+
+From the public repository root, prefer running the aggregate check:
 
 ```bash
 nu tools/ci-check.nu
 ```
 
-它会依次运行公开发布所需的 smoke test、public audit、示例内容校验和 delivery DeckKit readiness 检查。
-如果只需要单独检查，也可以分别跑：
+It runs the required public-release smoke test, public audit, example content validation, and delivery
+DeckKit readiness checks. If you only need individual checks, run:
 
 ```bash
 node tools/pptx-nova-smoke-test.mjs
 node tools/pptx-nova-audit-public.mjs --strict
 ```
 
-`tools/pptx-nova-smoke-test.mjs` 只使用 `pptx-nova/` 内 bundled files。它覆盖：
-content validation、DeckKit patch build、icon pack query、DeckKit selector。
+`tools/pptx-nova-smoke-test.mjs` uses only bundled files inside `pptx-nova/`. It covers content
+validation, DeckKit patch build, icon pack query, and DeckKit selection.
 
-`tools/pptx-nova-audit-public.mjs` 检查：
+`tools/pptx-nova-audit-public.mjs` checks for:
 
-- 维护者机器上的绝对路径和私有仓库路径。
-- 当前 monorepo 私有上下文泄漏。
-- unexpected binary files。
-- Tabler icon pack license 是否随包携带。
-- examples 是否声明 synthetic / redistributable policy。
+- Absolute paths from the maintainer's machine and private repository paths.
+- Leakage of private context from the current monorepo.
+- Unexpected binary files.
+- Whether the Tabler icon pack license is included with the package.
+- Whether examples declare the synthetic / redistributable policy.
 
-`tools/ci-check.nu` 还会校验 `pptx-nova/assets/examples/*/content.json`，并对 production/default
-DeckKit 运行 `pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mode catalog`。
+`tools/ci-check.nu` also validates `pptx-nova/assets/examples/*/content.json` and runs
+`pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mode catalog` for production/default
+DeckKits.
 
-### Tabler 图标包
+### Tabler Icon Pack
 
-运行时查询使用 bundled `assets/icons/tabler-icons.pack.br`。在 `pptx-nova/` 目录内刷新图标包时，
-必须显式提供 Tabler checkout：
+Runtime icon lookup uses the bundled `assets/icons/tabler-icons.pack.br`. When refreshing the icon
+pack inside `pptx-nova/`, explicitly provide a Tabler checkout:
 
 ```bash
 node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>
 node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check
 ```
 
-也可以设置：
+You can also set:
 
 ```bash
 TABLER_ICONS_ROOT=<tabler-icons-checkout>
 ```
 
-不要在源码、manifest 或文档中保存维护者机器上的 Tabler checkout 绝对路径。
+Do not save absolute paths to the maintainer's Tabler checkout in source code, manifests, or
+documentation.

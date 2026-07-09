@@ -15,10 +15,12 @@ PPTX compatibility.
 - Create a new presentation from a short brief, structured outline,
   Markdown/text document, PDF, web page, pasted table, or CSV/JSON data.
 - Refurbish an existing deck with the goal of preserving the original content
-  while making the visual system cleaner and more consistent.
+  while making the visual system cleaner and more consistent, and deliver a
+  single all-slides source-vs-final comparison image for review.
 - Translate an existing `.pptx` into another language while aiming to preserve
   original deck structure, layout, styles, objects, notes, animations, and
-  visual hierarchy.
+  visual hierarchy, and deliver a single all-slides source-vs-translation
+  comparison image for review.
 - Edit existing decks, including titles, copy, slide order, visuals, colors,
   charts, tables, and selected page elements.
 - Use a company template or reference deck as a guide while avoiding
@@ -96,9 +98,12 @@ A normal run can produce:
 - Optional PDF and per-slide PNG previews.
 - Optional validation reports for visual checks, template checks, and
   content-preservation checks.
-- For translation runs, optional bilingual review notes that show what was
-  translated, what was intentionally shortened, and any layout risks that still
-  deserve human review.
+- For translation or refurbishment runs, a single all-slides side-by-side
+  comparison image that helps review each source slide against the delivered
+  result.
+- For translation runs, optional source-language/target-language review notes
+  that show what was translated, what was intentionally shortened, and any
+  layout risks that still deserve human review.
 - A short summary of what changed and any remaining review risks.
 
 For high-stakes decks, treat the generated file as a strong draft and still do a

@@ -10,6 +10,21 @@ into an editable PowerPoint file. The primary target is PowerPoint; Keynote and
 other compatible office suites can usually open the result, subject to their
 PPTX compatibility.
 
+## Powered by xdoc
+
+Most slide-generation tools either create flattened slide images or rely on
+small, brittle PowerPoint scripting snippets. pptx-nova is built on `xdoc`, an
+in-house PPTX engine designed from the ground up for AI agents. It can inspect
+the real PowerPoint file structure, validate declarative JSON patches with
+dry-runs, apply native editable changes, render previews, compare source and
+candidate decks, and leave replayable sidecar evidence.
+
+That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real
+PPTX objects instead of screenshots, check selectors before writing, preserve
+the original deck by default, and produce review artifacts that make the result
+auditable. It is closer to a structured PPTX build/edit pipeline than a
+one-shot slide generator.
+
 ## What pptx-nova can do
 
 - Create a new presentation from a short brief, structured outline,
@@ -23,13 +38,19 @@ PPTX compatibility.
   comparison image for review.
 - Edit existing decks, including titles, copy, slide order, visuals, colors,
   charts, tables, and selected page elements.
+- Inspect real PPTX structure, select exact target objects, dry-run edits, and
+  apply changes to validated candidates before publishing a final file.
 - Use a company template or reference deck as a guide while avoiding
   unapproved reuse of private or non-redistributable assets.
+- Apply or check brand, theme, and visual-system changes through DeckKit and
+  xdoc workflows where supported.
 - Generate data-driven slides from CSV/JSON data, using editable tables,
   charts, diagrams, and shapes where supported.
+- Create or safely edit supported PPTX animations and transitions.
 - Export PDF or PNG previews for review.
 - Run quality checks that look for overlap, clipped text, layout drift,
-  template violations, content-preservation issues, and visual defects.
+  template violations, content-preservation issues, visual defects, and
+  before/after drift.
 
 ## Typical requests
 
@@ -293,10 +314,12 @@ bundled icon pack, and checks DeckKit selection. The public audit scans for
 machine-local paths, private repository context, unexpected binaries, missing
 license requirements, and other release blockers.
 
-`xdoc` is the primary external CLI used by pptx-nova for PowerPoint inspection,
-patch application, conversion, and visual checks. Some metadata validation and
-DeckKit selection scripts can run without `xdoc`, but real PPTX apply,
-conversion, and vision-check workflows require it.
+`xdoc` is the in-house, agent-oriented PPTX engine behind pptx-nova, exposed to
+the skill through its primary CLI. pptx-nova uses it for PowerPoint inspection,
+declarative patch dry-runs and application, conversion, preview rendering,
+semantic diff, and visual checks. Some metadata validation and DeckKit selection
+scripts can run without `xdoc`, but real PPTX apply, conversion, preview, diff,
+and vision-check workflows require it.
 
 ## About deckkit-maker
 

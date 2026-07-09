@@ -29,6 +29,8 @@ one-shot slide generator.
 
 - Create a new presentation from a short brief, structured outline,
   Markdown/text document, PDF, web page, pasted table, or CSV/JSON data.
+- Rebuild editable PPTX files from structured JSON deck sources, making decks
+  easier to version, review, replay, and regenerate with visual checks.
 - Refurbish an existing deck with the goal of preserving the original content
   while making the visual system cleaner and more consistent, and deliver a
   single all-slides source-vs-final comparison image for review.

@@ -136,83 +136,17 @@ pptx-nova uses a DeckKit-first workflow. A DeckKit is a reusable visual system
 with page types, layout rules, typography, color rules, and quality checks. The
 normal new-deck path is:
 
-```text
-+-------------------------+
-| brief / source material |
-+-----------+-------------+
-            |
-            v
-+-------------------------+       +-------------------------+
-| outline.json            | ----> | deck_lock.json          |
-| slide intent and order  |       | audience, constraints,  |
-|                         |       | assumptions, page plan  |
-+-----------+-------------+       +-----------+-------------+
-            |                                 |
-            v                                 v
-+-----------------------------------------------------------+
-| content.json                                               |
-| business content mapped to DeckKit page types and slots    |
-+-----------------------------+-----------------------------+
-                              |
-                              v
-+-----------------------------+-----------------------------+
-| DeckKit build                                                |
-| reusable visual grammar -> native editable PowerPoint ops    |
-+-----------------------------+-----------------------------+
-                              |
-                              v
-+-----------------------------+-----------------------------+
-| xdoc dry-run -> apply -> sidecar -> vision-check -> preview  |
-| no real write before checks; evidence stays in the run dir   |
-+-----------------------------+-----------------------------+
-                              |
-                              v
-+-----------------------------+-----------------------------+
-| final editable .pptx + optional PDF/PNG/contact sheet        |
-+-------------------------------------------------------------+
-```
+<p align="center">
+  <img src="docs/images/pptx-creating-workflow.webp" alt="pptx-nova new deck creation workflow" />
+</p>
 
 The typical existing-deck edit path is intentionally different from a one-shot
 "rewrite the file" flow. pptx-nova asks xdoc to inspect the real PPTX structure
 first, selects the exact target objects, and checks the patch before writing:
 
-```text
-+-------------------+     +-------------------+     +-------------------+
-| source .pptx      | --> | inspect           | --> | select            |
-| read-only by      |     | slides, shapes,   |     | exact candidates  |
-| default           |     | notes, charts,    |     | by text, name,    |
-|                   |     | tables, geometry  |     | id, bbox, etc.    |
-+-------------------+     +---------+---------+     +---------+---------+
-                                      |                         |
-                                      v                         v
-                            +-------------------+     +-------------------+
-                            | patch.json        | --> | dry-run           |
-                            | declarative edits |     | resolvedSelectors |
-                            | not ad hoc code   |     | suggestions, diff |
-                            +---------+---------+     +---------+---------+
-                                      |                         |
-                                      |                         v
-                                      |              +-------------------+
-                                      |              | fix patch if any  |
-                                      |              | target is wrong   |
-                                      |              +---------+---------+
-                                      |                        |
-                                      +<-----------------------+
-                                      |
-                                      v
-                            +-------------------+     +-------------------+
-                            | apply to copy     | --> | verify            |
-                            | original kept     |     | vision-check,     |
-                            | untouched unless  |     | preview, diff,    |
-                            | explicitly asked  |     | clean-open when   |
-                            |                   |     | available         |
-                            +---------+---------+     +---------+---------+
-                                      |                         |
-                                      v                         v
-                            +-------------------------------------------+
-                            | final editable .pptx + audit artifacts    |
-                            +-------------------------------------------+
-```
+<p align="center">
+  <img src="docs/images/pptx-editing-workflow.webp" alt="pptx-nova existing deck editing workflow" />
+</p>
 
 This is the part that makes pptx-nova different from many generic slide
 generators, screenshot pipelines, or small PowerPoint scripting snippets:

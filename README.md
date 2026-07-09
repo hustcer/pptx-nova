@@ -10,7 +10,7 @@ into an editable PowerPoint file. The primary target is PowerPoint; Keynote and
 other compatible office suites can usually open the result, subject to their
 PPTX compatibility.
 
-## Powered by xdoc
+## Powered by `xdoc`
 
 Most slide-generation tools either create flattened slide images or rely on
 small, brittle PowerPoint scripting snippets. pptx-nova is built on `xdoc`, an
@@ -43,7 +43,7 @@ one-shot slide generator.
 - Use a company template or reference deck as a guide while avoiding
   unapproved reuse of private or non-redistributable assets.
 - Apply or check brand, theme, and visual-system changes through DeckKit and
-  xdoc workflows where supported.
+  `xdoc` workflows where supported.
 - Generate data-driven slides from CSV/JSON data, using editable tables,
   charts, diagrams, and shapes where supported.
 - Create or safely edit supported PPTX animations and transitions.
@@ -141,7 +141,7 @@ normal new-deck path is:
 </p>
 
 The typical existing-deck edit path is intentionally different from a one-shot
-"rewrite the file" flow. pptx-nova asks xdoc to inspect the real PPTX structure
+"rewrite the file" flow. pptx-nova asks `xdoc` to inspect the real PPTX structure
 first, selects the exact target objects, and checks the patch before writing:
 
 <p align="center">
@@ -155,7 +155,7 @@ generators, screenshot pipelines, or small PowerPoint scripting snippets:
   slide images.
 - It keeps a durable plan (`outline.json`, `deck_lock.json`, `content.json`, or
   `patch.json`) so the work can be reviewed, replayed, and continued.
-- It uses xdoc's `inspect`, `select`, `dry-run`, `apply`, `preview`,
+- It uses `xdoc`'s `inspect`, `select`, `dry-run`, `apply`, `preview`,
   `vision-check`, `diff`, and sidecar/replay capabilities as guardrails around
   the actual file write.
 - It treats the original deck as read-only by default and writes validated

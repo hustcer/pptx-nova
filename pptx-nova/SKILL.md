@@ -358,6 +358,7 @@ xdoc pptx i18n-plan --source source.pptx --units i18n-scan-source.json --data tr
 xdoc pptx i18n-text-plan --source source.pptx --data translations.json --json
 xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --json
 xdoc pptx i18n-scan --source translated.pptx --source-lang multi --mode candidate --json
+node <skill-root>/scripts/pptx-nova-i18n-residual-gate.mjs --run-dir <run-dir> --strict --overwrite --json
 xdoc pptx replace-text --source source.pptx --data replacements.json --output updated.pptx --json
 xdoc pptx replace-chart-text --source source.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json

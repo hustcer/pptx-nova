@@ -61,6 +61,12 @@ Use these entry points from skill workflows:
   `--require-feedback`, checks that `<run-dir>/skill-feedback.md` exists and is
   not a TODO template, and writes `feedback-gate.json`. Use `--strict` before
   the final response when the task requested skill feedback.
+- `pptx-nova-i18n-residual-gate.mjs` - target-language-independent translation
+  leakage gate. It compares the mandatory source scan, candidate scan, and
+  translation records by stable unit id plus original text/hash, so valid
+  French or other Latin-script target text does not become a false English
+  blocker. Native candidate language-classification blockers remain in the
+  report as diagnostic evidence.
 - `pptx-nova-compare.mjs` - write a high-DPI full-deck before/after compare
   PNG for workflows such as translation and refurbish by delegating to
   `xdoc pptx contact-diff --dpi`. Use `--kind translation` or

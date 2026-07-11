@@ -261,13 +261,27 @@ relevant OOXML style properties.
       --mode candidate \
       --json > <run-dir>/i18n-scan-candidate.json
     ```
-    Treat `agentGate.passed=false` or non-empty `blockers[]` as delivery
-    blockers. `visibleBody`, `visibleTextAttr`, and `chartVisibleCache` are
-    blocker classes in candidate mode. `embeddedWorkbook` appears under
-    `reviewRequired[]` and needs chart/workbook sync review, but is not a
-    default blocker. Preserve `themeFontMetadata`, `relationshipPath`,
-    `shapeInternalName`, and `chartMetadata` unless the user explicitly asks to
-    localize or relink them.
+    Then run the exact residual gate:
+    ```bash
+    node <skill-root>/scripts/pptx-nova-i18n-residual-gate.mjs \
+      --run-dir <run-dir> \
+      --strict \
+      --overwrite \
+      --json
+    ```
+    Treat `i18n-residual-gate.json.agentGate.passed=false` or non-empty
+    `exactResiduals[]` as delivery blockers. This is the authoritative source
+    leakage gate because it matches candidate units against the original
+    translation `unitId` plus `sourceText/sourceHash`. Keep native candidate
+    `agentGate` and `blockers[]` as diagnostic evidence. In particular, do not
+    block a `multi` source translated to French, German, Spanish, or another
+    Latin-script target merely because the native classifier labels valid
+    target text as English. `embeddedWorkbook` still needs chart/workbook sync
+    review but is not a default blocker. Preserve `themeFontMetadata`,
+    `relationshipPath`, `shapeInternalName`, and `chartMetadata` unless the user
+    explicitly asks to localize or relink them. Translation records with
+    `targetText === sourceText` are explicit approvals to preserve product
+    names, URLs, code tokens, or equivalent text and are not residual blockers.
 11. Run scoped and full visual gates:
 
 - `vision-diff` on changed slides, with source as the baseline:
@@ -540,6 +554,7 @@ Keep these translation-specific artifacts in the run directory when available:
 - `i18n-text-plan.json`
 - `i18n-scan-source.json`
 - `i18n-scan-candidate.json`
+- `i18n-residual-gate.json`
 - `bilingual-translation-audit.md`
 - `bilingual-translation-audit.json`
 - `i18n-style-diff.json`

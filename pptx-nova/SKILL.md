@@ -77,12 +77,13 @@ task, do not delete the entire run directory by default, and do not clean eviden
 reproduction, audit, or continued editing before the final response.
 
 Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline.json`,
-`deck_lock.json`, `content.json`, `patch.json`, sidecars, dry-run/apply/refurbish reports,
+`deck_lock.json`, `content.json`, `edit-contract.json`, `evidence-manifest.json`, `edit-contract-gate.json`,
+`patch.json`, sidecars, dry-run/apply/refurbish reports,
 `vision.json`, `pptx-diff.json`, `visual_review.json`, `clean-open.json`, `check.json`,
 `evidence-summary.json`, `layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`,
 `i18n-text-plan.json`, `i18n-scan.json`, `i18n-plan.json`, `i18n-style-diff.json`,
 `translation-compare.png`, `translation-compare.json`, `refurbish-compare.png`,
-`refurbish-compare.json`, the final candidate PPTX, the contact sheet, the small set of issue-page
+`refurbish-compare.json`, `vision-diff.json`, the final candidate PPTX, the contact sheet, the small set of issue-page
 PNGs required for human review, and `replace-text.json`. Do not invent artifacts that do not actually
 exist.
 
@@ -114,7 +115,7 @@ not treat this as a replacement workflow; it exists to prevent simple tasks from
 complex tasks from missing critical gates.
 
 - **New deck**: `outline.json -> deck_lock.json -> content.json -> pptx-nova-create-run -> PNG/contact-sheet review`.
-- **Edit deck**: `inspect -> select(locator candidates) -> patch -> dry-run -> resolvedSelectors -> apply into run directory -> changed-slide PNG review -> final output`.
+- **Edit deck**: `inspect -> select(locator candidates) -> edit-contract -> patch -> dry-run -> resolvedSelectors -> apply into run directory -> semantic diff/scoped evidence -> edit-contract gate -> changed-slide PNG review -> final output`.
 - **Animations / transitions**: First `inspect` `timing_summary`, `animations[]`, and `animation_capabilities`. For new animations or safe subset edits, use `set-slide-animations` / `update-slide-animation` / `remove-slide-animation`; default complex timing, media timing, interactive triggers, motion paths, emphasis, and chart/SmartArt builds to preserve-only, and do not guess-edit raw XML.
 - **PPTX semantic diff / change audit**: When a source and candidate already exist and actual change scope must be confirmed, run this once at low frequency after the candidate is stable:
   `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json > <run-dir>/pptx-diff.json`.
@@ -145,7 +146,7 @@ complex tasks from missing critical gates.
   Before delivery, run `xdoc pptx refurbish-audit` to generate `content-audit-final.json` and automatically check slide count, source text, shape types, media, notes, external links, and reference-map coverage against the current source/candidate PPTX. Run `scripts/pptx-nova-refurbish-audit.mjs` as a legacy supplemental audit only when OOXML visible text leak scanning or forbidden shape name regex is still needed. The standard runner also generates `fidelity-gate.json`, tightening evidence from `vision-diff`, `refurbish-audit`, and the available `reference-map`. Final refurbish delivery must also generate `refurbish-compare.png`: a single image containing all slides, with the before source deck in the left column and the after deliverable deck in the right column, defaulting to 192 dpi. After validation passes, copy the comparison image to the same directory as the final PPTX using the name `<output-stem>-refurbish-compare-<MMDDhhmmss>.png`. The standard runner automatically runs `pptx-nova-compare.mjs --kind refurbish` and `pptx-nova-compare-gate.mjs --kind refurbish --publish`, and requires `refurbish-compare-gate.json.status=pass`.
 - **Strict template following**: Copy or inherit source slides/placeholders, then edit original objects; do not redraw a "similar" page.
 - **Export / check / extract**: Create a run directory; use `xdoc pptx preview` by default for PPTX PNG/contact-sheet previews, `xdoc convert` for PDF/MD/JSON/text or non-PPTX generic conversion, and `xdoc check` / `xdoc pptx inspect` for checks. No creation-oriented docs need to be read.
-- **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md` and `micro-edit-cheatsheet.md`; still use inspect, dry-run, and selector validation. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
+- **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md`, `edit-contract.md`, and `micro-edit-cheatsheet.md`; still use inspect, a normalized edit contract, dry-run, selector validation, one final semantic diff, and the contract gate. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
 - **Studio / high-risk deck**: Use `deck_lock.json` to lock lightweight confirmation, page-level rhythm, template fusion, asset status, and chart/table semantics. Use `pptx-nova-finalize-evidence.mjs` to freeze final structure evidence; do not introduce SVG-first or page-by-page handwritten flows.
 
 ## Skill Root
@@ -165,7 +166,7 @@ When creating or modifying PPTX files, this skill can directly consume these inp
 - Natural-language briefs, chat content, organized outline text, or Markdown outlines.
 - HTML files, web URLs, PDFs: treat these as source material. First normalize them to Markdown/text with `xdoc html2md` (HTML/URL) or `xdoc pdf extract-text` (PDF), then use them as brief or outline sources for the create / data / edit pipeline. This is not a one-step conversion from web page or PDF to finished deck. Ingested artifacts are equivalent to a user-provided brief and must still go through outline -> content -> DeckKit -> validation. PDF text fidelity depends on the source file; scanned documents or embedded-font anomalies may cause missing characters or incorrect order. Any facts completed from that material must be written to `deck_lock.assumptions[]`. Store the raw ingestion result in the run directory, such as `source_brief.md` / `source_extract.txt`; see Source Ingestion in `references/common-workflow.md` for ingestion details.
 - `.pptx`: reference decks, template decks, `copy-from` sources, `from-data` templates, or inputs to modify.
-- pptx-nova / xdoc workflow JSON: `outline.json`, `deck_lock.json`, `content.json`, `patch.json`, `assets_manifest.json`, brand/template profiles, and similar files. These are proprietary structured inputs generated by this skill, generated by xdoc, or explicitly provided by the user and compliant with the matching schema; do not treat arbitrary `.json` files as directly usable PPTX content/patch inputs.
+- pptx-nova / xdoc workflow JSON: `outline.json`, `deck_lock.json`, `content.json`, `edit-contract.json`, `patch.json`, `assets_manifest.json`, brand/template profiles, and similar files. These are proprietary structured inputs generated by this skill, generated by xdoc, or explicitly provided by the user and compliant with the matching schema; do not treat arbitrary `.json` files as directly usable PPTX content/patch inputs.
 - Data-binding JSON: `data.json` may be used as business data for `from-data` / `bind-data`; `bindings.json` must comply with xdoc's binding structure and declare text/table/chart binding relationships.
 - CSV or JSON tabular data: use for table/chart/content data filling, as data for `import-table-data` or `bind-data`, or normalize into DeckKit `content.json`.
 - Resource files: images, logos, screenshots, SVG formula assets, and similar files. Register them in `assets_manifest.json` and reference them by asset id or `assetSource.path`.
@@ -181,9 +182,9 @@ Determine the task type first, then read the corresponding files:
 | Strictly follow an existing PPTX template / adapt content to a template                  | `references/common-workflow.md`, `references/template-following.md`, `references/edit-mode.md`                                                                          | `references/design-lock-and-assets.md`, `references/inspect-and-edit.md`                                                                           |
 | Reference PPTX + new outline to generate a new deck                                      | `references/common-workflow.md`, `references/reference-create.md`, `references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                                                   |
 | Polish / refurbish an existing PPTX while preserving original content and changing style | `references/common-workflow.md`, `references/reference-create.md`, `references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`, `references/export-and-check.md`                                                                                 |
-| Small text/notes/footer/metadata edit                                                    | `references/common-workflow.md`, `references/micro-edit-cheatsheet.md`                                                                                                  | If selectors are ambiguous or complex image/multi-object edits are involved, then read `references/edit-mode.md`, `references/inspect-and-edit.md` |
+| Small text/notes/footer/metadata edit                                                    | `references/common-workflow.md`, `references/edit-contract.md`, `references/micro-edit-cheatsheet.md`                                                                   | If selectors are ambiguous or complex image/multi-object edits are involved, then read `references/edit-mode.md`, `references/inspect-and-edit.md` |
 | Translate an existing `.pptx` while preserving original layout                           | `references/common-workflow.md`, `references/edit-mode.md`, `references/inspect-and-edit.md`, `references/translation-mode.md`                                          | For many charts/tables, read `references/charts.md`, `references/tables.md`; when only checking, then read `references/export-and-check.md`        |
-| Modify an existing `.pptx`                                                               | `references/common-workflow.md`, `references/edit-mode.md`, `references/inspect-and-edit.md`                                                                            | `references/patch-ops-cheatsheet.md`                                                                                                               |
+| Modify an existing `.pptx`                                                               | `references/common-workflow.md`, `references/edit-contract.md`, `references/edit-mode.md`, `references/inspect-and-edit.md`                                             | `references/patch-ops-cheatsheet.md`                                                                                                               |
 | Add/modify/delete animations or transitions                                              | `references/common-workflow.md`, `references/edit-mode.md`, `references/animations.md`, `references/inspect-and-edit.md`                                                | `references/patch-ops-cheatsheet.md`; for complex timing, read `references/control-flow-and-raw-xml.md` only for risk judgment                     |
 | Data + template / JSON filling                                                           | `references/common-workflow.md`, `references/data-driven.md`                                                                                                            | `references/tables.md`, `references/charts.md`                                                                                                     |
 | Brand conversion / brand check                                                           | `references/common-workflow.md`, `references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                                                   |
@@ -257,6 +258,10 @@ These rules apply to modifying existing PPTX files:
 
 - Treat the input deck as read-only by default. Inspect first, then dry-run, then write intermediate files in the run directory.
 - Do not edit objects by guessing selectors. When the target object is unclear, first narrow candidates with `xdoc pptx select input.pptx --query '{"textRegex":"..."}' --json` or a query file, then write the patch. Check dry-run `resolvedSelectors[]`; if ambiguous, use `suggestions[].fixPatch` and retry.
+- After inspect/select resolves the targets, normalize `edit-contract.json` before patch/apply. Bind each target to its patch `opIndexes[]`, expected categories/values, allowed changes, preserve policy, and required evidence. After the stable candidate is produced, require `edit-contract-gate.json.agentGate.passed=true` before publication. Translation and Refurbish keep their stronger specialized contracts instead of replacing them with this generic gate.
+- After post-apply evidence is stable, generate `evidence-manifest.json` to bind the candidate SHA-256 and exact evidence-file hashes. The gate must reject a missing/stale manifest, including when the candidate is overwritten at the same path.
+- Visible text-only edits that must preserve existing formatting require `style-diff` evidence. Whole-frame `set-text` may erase run styling even when dry-run, semantic diff, and vision-check appear clean; use an inspect-proven run/text-node preserving edit or treat `target-text-style-changed` as a blocker.
+- Visible edits require changed-scope `vision-diff` by default. Block new or worsened high/medium issues, while treating candidate-only `vision-check` as diagnostic evidence so inherited legacy-deck noise does not become a false blocker.
 - For strict template following, edit copied/inherited objects or template placeholders. Do not use new text boxes, translucent rectangles, or whole-page image overlays to hide old content and manufacture a page that "looks right".
 - When copying source slides or filling templates, explicitly fill or delete empty structural placeholders such as title/body/dt/sldNum/ftr. Do not leave empty placeholders in PowerPoint edit state just because they are invisible in PNG output.
 - Identity assets such as logos, client marks, product screenshots, headshots, app icons, and third-party brand graphics must come from user-provided files, source-deck assets whose reuse is allowed, official verifiable sources, or registered authorized sources. When this cannot be confirmed, use text/native shapes instead of generating pseudo-official assets.
@@ -307,6 +312,12 @@ When creating or visually significant modifying a deck, close in this order:
 check-lock -> dry-run -> apply -> vision-check -> structure-check when needed -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> visual_review.json -> clean-open gate when available/high-risk -> narrative quality review when required -> optional xdoc check
 ```
 
+Generic Edit/Micro Edit must additionally close its own contract:
+
+```text
+edit-contract -> dry-run target coverage -> apply -> one final semantic diff -> declared scoped/style/structure evidence including vision-diff when visible -> edit-contract gate -> PNG review when visible -> publish
+```
+
 Refurbish Existing Deck must also append:
 
 ```text
@@ -342,6 +353,11 @@ xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
 xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
+node <skill-root>/scripts/pptx-nova-edit-contract.mjs --draft <run-dir>/edit-contract-draft.json --source input.pptx --output <run-dir>/edit-contract.json --json
+xdoc pptx diff --source input.pptx --candidate out.pptx --detail full --json > <run-dir>/pptx-diff.json
+node <skill-root>/scripts/pptx-nova-edit-evidence-manifest.mjs --candidate out.pptx --evidence semantic-diff=<run-dir>/pptx-diff.json --output <run-dir>/evidence-manifest.json --json
+node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs --contract <run-dir>/edit-contract.json --candidate out.pptx --strict --json
+xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 2,5-7 --json > <run-dir>/vision-diff.json
 xdoc schema --op set-slide-animations --minimal
 xdoc schema --op update-slide-animation --minimal
 xdoc schema --op remove-slide-animation --minimal
@@ -414,6 +430,7 @@ Read the files required by routing first; do not read all references at once.
 | `references/create-express.md`            | Quick deck generation from a simple prompt                                                                                        |
 | `references/create-studio.md`             | Confirmation, design lock, and split for high-risk/formal/precision decks                                                         |
 | `references/edit-mode.md`                 | Inspect/dry-run/selector workflow for modifying existing PPTX files                                                               |
+| `references/edit-contract.md`             | Existing-deck edit scope, source hash, target coverage, locality/style evidence, and final contract gate                          |
 | `references/micro-edit-cheatsheet.md`     | Fast path for small text, notes, footer, metadata, and single-object edits                                                        |
 | `references/translation-mode.md`          | Existing-PPTX translation, visible text coverage, source-language/target-language comparison, and layout-consistency visual gates |
 | `references/feedback-mode.md`             | Skill usage feedback, old-run feedback audit, and feedback persistence rules                                                      |

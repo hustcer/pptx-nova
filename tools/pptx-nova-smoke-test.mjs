@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -47,6 +47,9 @@ const iconsScript = join(SKILL_ROOT, 'scripts/pptx-nova-icons.mjs')
 const selectScript = join(SKILL_ROOT, 'scripts/pptx-nova-deckkit-select.mjs')
 const patchPath = join(TMP_ROOT, 'patch.json')
 const qualityPath = join(TMP_ROOT, 'quality.json')
+const editContractDraftPath = join(TMP_ROOT, 'edit-contract-draft.json')
+const editContractPath = join(TMP_ROOT, 'edit-contract.json')
+const editEvidenceManifestPath = join(TMP_ROOT, 'evidence-manifest.json')
 
 const validation = runJson('validate bundled DeckKit content', 'node', [
   validateScript,
@@ -100,6 +103,59 @@ const selection = runJson('select bundled DeckKit', 'node', [
 ])
 if (!selection.selected?.id) throw new Error('DeckKit selector did not choose a DeckKit')
 
+writeFileSync(
+  editContractDraftPath,
+  `${JSON.stringify(
+    {
+      schemaVersion: 'pptx-nova-edit-contract/v1',
+      request: 'Smoke-test one local title edit',
+      scope: 'single-object',
+      operationKind: 'text-edit',
+      targets: [
+        {
+          id: 'cover-title',
+          slide: 0,
+          opIndexes: [0],
+          selector: { shape: { id: 5 } },
+          expected: { afterText: 'Smoke title', changeCategories: ['text'] },
+        },
+      ],
+      coverage: { required: true, expectedTargetCount: 1 },
+      allowedChanges: ['text'],
+      preserve: ['slide-count', 'non-target-shapes'],
+      requiredEvidence: ['dry-run', 'semantic-diff'],
+    },
+    null,
+    2,
+  )}\n`,
+)
+const contract = runJson('bind edit contract to source PPTX', 'node', [
+  join(SKILL_ROOT, 'scripts/pptx-nova-edit-contract.mjs'),
+  '--draft',
+  editContractDraftPath,
+  '--source',
+  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  '--output',
+  editContractPath,
+  '--json',
+])
+if (!/^[a-f0-9]{64}$/.test(contract.source?.sha256 ?? '')) {
+  throw new Error('edit contract did not bind a source SHA-256')
+}
+const evidenceManifest = runJson('bind edit candidate and evidence hashes', 'node', [
+  join(SKILL_ROOT, 'scripts/pptx-nova-edit-evidence-manifest.mjs'),
+  '--candidate',
+  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  '--evidence',
+  `edit-contract=${editContractPath}`,
+  '--output',
+  editEvidenceManifestPath,
+  '--json',
+])
+if (!/^[a-f0-9]{64}$/.test(evidenceManifest.candidate?.sha256 ?? '')) {
+  throw new Error('edit evidence manifest did not bind candidate bytes')
+}
+
 process.stdout.write(
   `${JSON.stringify(
     {
@@ -110,6 +166,8 @@ process.stdout.write(
       checks: checks.map(({ name, status }) => ({ name, status })),
       patchOps: patch.ops.length,
       selectedDeckkit: selection.selected.id,
+      editContractTargets: contract.targets.length,
+      editEvidenceCount: evidenceManifest.evidence.length,
     },
     null,
     2,

@@ -33,6 +33,9 @@ You can use `pptx-nova` to:
 - Add, modify, or remove basic animations and transitions, such as fade-in, step-by-step bullet reveal, or automatic slide advance.
 - Perform brand conversion or brand checks, such as aligning brand colors, fonts, logos, headers, and footers.
 - Compare a source PPT with a modified PPT to help review change scope and visual differences.
+- Use a scoped edit contract for ordinary existing-deck edits so the Agent can
+  prove that requested targets were covered and unrelated objects were not
+  reliably changed before delivery.
 - Export PDF, image previews, Markdown, JSON, or text for review, sharing, or downstream processing.
 - Handle technical slides with formulas: simple formulas may stay as plain text, while complex formulas may be inserted as formula assets.
 - Check for text overlap, clipped content, uneven layouts, and similar presentation issues.
@@ -141,6 +144,15 @@ Output sales-updated.pptx.
 ```
 
 Best for: you only want to change part of an existing PPT.
+
+For ordinary localized edits, `pptx-nova` does more than check whether the
+PowerPoint command succeeded. It records the allowed edit scope before writing,
+then checks target coverage, unexpected reliable changes, formatting
+preservation when required, and new visual regressions before publishing the
+candidate. If the evidence does not match the current source or candidate, the
+edit is blocked and must be inspected or regenerated instead of being silently
+delivered. Complex or unsupported PPTX objects and final visual judgment can
+still require specialized checks or human review.
 
 ### 6. Use A Company Template
 

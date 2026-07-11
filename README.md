@@ -150,6 +150,19 @@ first, selects the exact target objects, and checks the patch before writing:
   <img src="docs/images/pptx-editing-workflow.webp" alt="pptx-nova existing deck editing workflow" />
 </p>
 
+### Scoped edit safety
+
+For localized edits, pptx-nova records the intended scope before writing and
+publishes the candidate only after a deterministic gate confirms that:
+
+- requested targets were covered without reliable out-of-scope changes;
+- source, candidate, and validation evidence still belong together; and
+- relevant formatting and visual-regression checks passed.
+
+Failures are blocked with a specific next action instead of being silently
+delivered. Complex or uncertain PPTX regions can still require specialized
+checks or human review.
+
 This is the part that makes pptx-nova different from many generic slide
 generators, screenshot pipelines, or small PowerPoint scripting snippets:
 

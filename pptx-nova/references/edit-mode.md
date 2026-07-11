@@ -16,9 +16,10 @@ or the request grows beyond a localized change.
 For existing deck edits read:
 
 1. `common-workflow.md`
-2. This file
-3. `inspect-and-edit.md` for selector details and common edit patterns
-4. `patch-ops-cheatsheet.md` only when writing patch ops
+2. `edit-contract.md`
+3. This file
+4. `inspect-and-edit.md` for selector details and common edit patterns
+5. `patch-ops-cheatsheet.md` only when writing patch ops
 
 Read `charts.md`, `tables.md`, `styles-and-themes.md`, `animations.md`, or
 `data-driven.md` only when the requested edit touches those domains.
@@ -48,6 +49,13 @@ xdoc pptx select input.pptx --query query.json --slides 2-4 --json \
 Use `matches[].patchSelector` only after confirming `summary.matchCount`,
 `text`, `bbox`, and `name` match the user intent.
 
+After target resolution, write `edit-contract-draft.json` and normalize it to
+`edit-contract.json` with `pptx-nova-edit-contract.mjs`. Bind each target to the
+patch `opIndexes[]`, expected change categories, allowed changes, preserve
+rules, and required evidence. Do this before writing/applying the patch so the
+contract remains the source of truth rather than a description of whatever the
+candidate happened to change.
+
 Write a patch using the most specific stable selector available:
 
 1. `id` from inspect
@@ -72,29 +80,34 @@ After dry-run is clean, apply to a run-dir output:
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --daemon --json
 ```
 
-Run `vision-check` and render PNG/contact-sheet previews when the edit changes
+Once the candidate is stable, run one semantic diff and the evidence required
+by `edit-contract.json`, then run `pptx-nova-edit-contract-gate.mjs --strict`.
+Do not publish while `agentGate.passed=false`. For visible text-only edits that
+must preserve formatting, require `style-diff`; whole-frame `set-text` can
+silently replace small styled runs even when dry-run and vision-check pass.
+
+Run changed-scope `vision-diff` and render PNG/contact-sheet previews when the edit changes
 layout, visual style, chart/table contents, images, or anything user-visible
 enough to risk regression. For append or targeted edit workflows, inspect the
 changed slide indexes explicitly and review their PNG images at full size before
-treating the full-deck `vision-check` summary as blocking. Existing decks often
+using candidate-only `vision-check` for diagnosis rather than treating its full-deck summary as blocking. Existing decks often
 have unrelated legacy issues; separate "changed-slide blockers" from
 "pre-existing residual risk" in the final summary.
 
 For targeted visual edits, run scoped machine and PNG gates first:
 
 ```bash
-xdoc pptx vision-check out.pptx --slides 25-38 --json > <run-dir>/vision.json
+xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 25-38 --json > <run-dir>/vision-diff.json
 xdoc pptx preview out.pptx --slides 25-38 \
   --output-dir <run-dir>/previews \
   --contact-sheet <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
 ```
 
-The `vision.json` top-level `summary/issues` follow the selected changed pages.
-It also includes `scope`, `scopedSummary`, `scopedIssues`, `deckSummary`,
-`deckIssues`, and `deckResidualRisk`; use the top-level summary or
-`scopedSummary` for the changed-slide gate and disclose residual full-deck risk
-separately.
+Require `vision-diff.agentGate.passed=true`: inherited source issues may remain,
+but new or worsened high/medium issues block. Use a separate scoped
+`vision-check` only when its diagnostics are needed, and disclose residual
+full-deck risk separately.
 
 For structural edits—slide/object additions or deletion, geometry/layout,
 theme/brand, chart/table, image/crop, or multi-slide visual changes—save
@@ -105,8 +118,9 @@ with `vision.json` before PNG review. It writes `layout-final.json` and
 the scope are recorded as `deckResidualRisk` rather than keeping the finalizer in
 warn. Localized Micro Edit remains on its separate fast path.
 
-For structural edits or when the user needs an auditable before/after report,
-run one semantic diff after the final candidate is stable:
+For every generic Edit Contract, run one semantic diff after the final
+candidate is stable. Structural edits and user-requested change audits already
+need this evidence:
 
 ```bash
 xdoc pptx diff --source input.pptx --candidate out.pptx \

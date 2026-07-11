@@ -171,7 +171,9 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     undisclosed requirements, but do not turn the snapshot into an allowlist.
 3.  Gather mode-specific context: - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`. - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
     per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
-    `visualDensity`. - Edit: `xdoc pptx inspect <input.pptx> --json`. - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
+    `visualDensity`. - Edit: `xdoc pptx inspect <input.pptx> --json`, optional
+    `select.json`, then normalize `edit-contract.json` according to
+    `references/edit-contract.md` before patch/apply. - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
     `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
     `xdoc pptx refurbish-skin` JSON report.
     Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
@@ -229,6 +231,15 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     that consumes the applied output (`vision-check`, `convert`, `check`,
     replay/audit) must run after the apply command has completed; do not launch
     apply-dependent checks in parallel with the write.
+    Generic existing-deck Edit/Micro Edit workflows must finish the stable
+    candidate with one semantic diff and every evidence kind declared in
+    `edit-contract.json`, bind the stable candidate and evidence hashes in
+    `evidence-manifest.json`, then require
+    `pptx-nova-edit-contract-gate.mjs --strict` before publication. Visible
+    text edits that preserve target formatting should require `style-diff` plus
+    scoped preview and `vision-diff` evidence. Use candidate-only
+    `vision-check` as a diagnostic when needed; inherited source issues are not
+    edit regressions.
 9.  Run static geometry validation:
 
     ```bash
@@ -533,15 +544,15 @@ breaks, a bbox fix can expose alignment drift, and a selector fix can change a
 different object than intended.
 
 For edit/append workflows, review changed slides first, then use the full-deck
-report as residual context. A pre-existing deck can contain unrelated
-`vision-check` high/medium issues; do not let old-slide noise hide regressions
-on newly created or edited slides. Save before/after previews when the edit is
-visual so the changed slide rhythm can be compared directly.
+report as residual context. A pre-existing deck can contain unrelated issues;
+use `vision-diff` to block new/worsened high or medium regressions without
+mistaking inherited noise for edit failure. Save before/after previews when the
+edit is visual so the changed slide rhythm can be compared directly.
 
 Use the same scope for both machine and PNG gates:
 
 ```bash
-xdoc pptx vision-check out.pptx --slides 25-38 --json > <run-dir>/vision.json
+xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 25-38 --json > <run-dir>/vision-diff.json
 xdoc pptx preview out.pptx --slides 25-38 \
   --output-dir <run-dir>/previews \
   --contact-sheet <run-dir>/previews/contact-sheet.png \

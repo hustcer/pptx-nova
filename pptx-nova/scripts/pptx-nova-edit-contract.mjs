@@ -30,6 +30,8 @@ Normalize an agent-authored edit contract draft and bind it to the current sourc
 Options:
   --draft <path>     Required JSON draft with request, scope, targets, and evidence policy.
   --source <pptx>    Required source PPTX used for inspect/select and later apply.
+  --session-rules-resolution <path>
+                      Optional passed session-rules-resolution.json to merge and bind.
   --output <path>    Output contract. Defaults to edit-contract.json beside the draft.
   --overwrite        Replace an existing output.
   --json             Print the normalized contract to stdout.
@@ -43,7 +45,14 @@ function valueAfter(argv, index, flag) {
 }
 
 function parseArgs(argv) {
-  const args = { draft: '', source: '', output: '', overwrite: false, json: false }
+  const args = {
+    draft: '',
+    source: '',
+    sessionRulesResolution: '',
+    output: '',
+    overwrite: false,
+    json: false,
+  }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
     if (arg === '--help' || arg === '-h') {
@@ -54,6 +63,9 @@ function parseArgs(argv) {
       index += 1
     } else if (arg === '--source') {
       args.source = valueAfter(argv, index, arg)
+      index += 1
+    } else if (arg === '--session-rules-resolution') {
+      args.sessionRulesResolution = valueAfter(argv, index, arg)
       index += 1
     } else if (arg === '--output' || arg === '-o') {
       args.output = valueAfter(argv, index, arg)
@@ -70,9 +82,15 @@ function parseArgs(argv) {
   if (!args.source) throw new Error(`--source is required\n\n${usage}`)
   args.draft = resolve(args.draft)
   args.source = resolve(args.source)
+  args.sessionRulesResolution = args.sessionRulesResolution
+    ? resolve(args.sessionRulesResolution)
+    : ''
   args.output = resolve(args.output || resolve(dirname(args.draft), 'edit-contract.json'))
   if (!existsSync(args.draft)) throw new Error(`draft does not exist: ${args.draft}`)
   if (!existsSync(args.source)) throw new Error(`source PPTX does not exist: ${args.source}`)
+  if (args.sessionRulesResolution && !existsSync(args.sessionRulesResolution)) {
+    throw new Error(`session rules resolution does not exist: ${args.sessionRulesResolution}`)
+  }
   if (existsSync(args.output) && !args.overwrite) {
     throw new Error(`output already exists: ${args.output}; use --overwrite for the current run`)
   }
@@ -112,6 +130,29 @@ function integerList(value, label) {
     if (!result.includes(item)) result.push(item)
   }
   return result
+}
+
+function normalizeSessionRulePostconditions(value, label) {
+  if (value === undefined) return undefined
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`${label} must be a non-empty array`)
+  }
+  return value.map((item, index) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      throw new Error(`${label}[${index}] must be an object`)
+    }
+    if (!['font-color', 'fill-color'].includes(item.kind)) {
+      throw new Error(`${label}[${index}].kind is unsupported: ${item.kind}`)
+    }
+    const color = String(item.value ?? '')
+      .replace(/^#/, '')
+      .trim()
+      .toUpperCase()
+    if (!/^[0-9A-F]{6}$/.test(color)) {
+      throw new Error(`${label}[${index}].value must be a 6-digit RGB hex color`)
+    }
+    return { kind: item.kind, value: color }
+  })
 }
 
 function stableIdentity(target, index) {
@@ -182,6 +223,14 @@ function normalizeTargets(value) {
           `targets[${index}].expected.changeCategories`,
           { required: true },
         ),
+        ...(target.expected.sessionRulePostconditions !== undefined
+          ? {
+              sessionRulePostconditions: normalizeSessionRulePostconditions(
+                target.expected.sessionRulePostconditions,
+                `targets[${index}].expected.sessionRulePostconditions`,
+              ),
+            }
+          : {}),
       },
     }
   })
@@ -212,6 +261,48 @@ function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
+function mergeUnique(...values) {
+  const result = []
+  for (const value of values.flat()) if (!result.includes(value)) result.push(value)
+  return result
+}
+
+function loadSessionRulesResolution(args, sourceSha256) {
+  if (!args.sessionRulesResolution) return null
+  const resolution = readJson(args.sessionRulesResolution, 'session rules resolution')
+  if (resolution.schemaVersion !== 'pptx-nova-session-rules-resolution/v1') {
+    throw new Error(
+      'session rules resolution schemaVersion must be pptx-nova-session-rules-resolution/v1',
+    )
+  }
+  if (
+    resolution.status !== 'pass' ||
+    resolution.agentGate?.passed !== true ||
+    resolution.agentGate?.canContinue !== true
+  ) {
+    throw new Error('session rules resolution must pass before it can be merged into a contract')
+  }
+  if (resolution.source?.sha256 !== sourceSha256) {
+    throw new Error('session rules resolution source revision does not match the edit source')
+  }
+  const rulesPath = resolve(resolution.sessionRules?.path ?? '')
+  const operationPath = resolve(resolution.operation?.path ?? '')
+  if (!existsSync(rulesPath)) throw new Error(`session rules file does not exist: ${rulesPath}`)
+  if (!existsSync(operationPath))
+    throw new Error(`session operation file does not exist: ${operationPath}`)
+  if (sha256(rulesPath) !== resolution.sessionRules?.sha256) {
+    throw new Error('session rules file changed after resolution')
+  }
+  if (sha256(operationPath) !== resolution.operation?.sha256) {
+    throw new Error('session operation file changed after resolution')
+  }
+  const overlay = resolution.contractOverlay
+  if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) {
+    throw new Error('session rules resolution must contain contractOverlay')
+  }
+  return { resolution, rulesPath, operationPath, overlay }
+}
+
 function normalizeContract(draft, args) {
   if (!draft || typeof draft !== 'object' || Array.isArray(draft)) {
     throw new Error('draft must contain a JSON object')
@@ -225,18 +316,23 @@ function normalizeContract(draft, args) {
   if (!SCOPES.has(scope)) throw new Error(`scope must be one of: ${[...SCOPES].join(', ')}`)
   const operationKind = String(draft.operationKind ?? '').trim()
   if (!operationKind) throw new Error('operationKind is required')
-  const targets = normalizeTargets(draft.targets)
+  const draftTargetCount = Array.isArray(draft.targets) ? draft.targets.length : 0
+  const draftExpectedTargetCount = draft.coverage?.expectedTargetCount ?? draftTargetCount
+  if (draftExpectedTargetCount !== draftTargetCount) {
+    throw new Error(
+      `coverage.expectedTargetCount ${draftExpectedTargetCount} does not match draft targets.length ${draftTargetCount}`,
+    )
+  }
+  const sourceSha256 = sha256(args.source)
+  const sessionResolution = loadSessionRulesResolution(args, sourceSha256)
+  const overlayTargets = sessionResolution?.overlay?.targets ?? []
+  const targets = normalizeTargets([...(draft.targets ?? []), ...overlayTargets])
   if (targets.some((target) => target.kind === 'slide') && scope !== 'structural') {
     throw new Error('slide targets are only valid for structural scope')
   }
-  const expectedTargetCount = draft.coverage?.expectedTargetCount ?? targets.length
+  const expectedTargetCount = targets.length
   if (!Number.isInteger(expectedTargetCount) || expectedTargetCount < 1) {
     throw new Error('coverage.expectedTargetCount must be a positive integer')
-  }
-  if (expectedTargetCount !== targets.length) {
-    throw new Error(
-      `coverage.expectedTargetCount ${expectedTargetCount} does not match targets.length ${targets.length}`,
-    )
   }
   const sourceStat = statSync(args.source)
   if (!sourceStat.isFile() || sourceStat.size === 0)
@@ -260,7 +356,7 @@ function normalizeContract(draft, args) {
     source: {
       ...sourceDraft,
       pptx: args.source,
-      sha256: sha256(args.source),
+      sha256: sourceSha256,
       byteLength: sourceStat.size,
     },
     targets,
@@ -269,9 +365,39 @@ function normalizeContract(draft, args) {
       required: draft.coverage?.required !== false,
       expectedTargetCount,
     },
-    allowedChanges: uniqueStrings(draft.allowedChanges, 'allowedChanges', { required: true }),
-    preserve: uniqueStrings(draft.preserve ?? [], 'preserve'),
-    requiredEvidence,
+    allowedChanges: mergeUnique(
+      uniqueStrings(draft.allowedChanges, 'allowedChanges', { required: true }),
+      uniqueStrings(
+        sessionResolution?.overlay?.allowedChanges ?? [],
+        'session overlay allowedChanges',
+      ),
+    ),
+    preserve: mergeUnique(
+      uniqueStrings(draft.preserve ?? [], 'preserve'),
+      uniqueStrings(sessionResolution?.overlay?.preserve ?? [], 'session overlay preserve'),
+    ),
+    requiredEvidence: mergeUnique(
+      requiredEvidence,
+      uniqueStrings(
+        sessionResolution?.overlay?.requiredEvidence ?? [],
+        'session overlay requiredEvidence',
+        { allowed: EVIDENCE_KINDS },
+      ),
+    ),
+    ...(sessionResolution
+      ? {
+          sessionRules: {
+            rulesPath: sessionResolution.rulesPath,
+            rulesSha256: sha256(sessionResolution.rulesPath),
+            resolutionPath: args.sessionRulesResolution,
+            resolutionSha256: sha256(args.sessionRulesResolution),
+            operationPath: sessionResolution.operationPath,
+            operationSha256: sha256(sessionResolution.operationPath),
+            deckId: sessionResolution.resolution.sessionRules.deckId,
+            applicableRuleIds: sessionResolution.resolution.applicableRules.map((item) => item.id),
+          },
+        }
+      : {}),
     ...(draft.expectedStructure !== undefined || scope === 'structural'
       ? { expectedStructure: normalizeExpectedStructure(draft.expectedStructure, scope) }
       : {}),

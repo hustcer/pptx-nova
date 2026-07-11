@@ -77,7 +77,8 @@ task, do not delete the entire run directory by default, and do not clean eviden
 reproduction, audit, or continued editing before the final response.
 
 Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline.json`,
-`deck_lock.json`, `content.json`, `edit-contract.json`, `evidence-manifest.json`, `edit-contract-gate.json`,
+`deck_lock.json`, `session-rules.json`, `session-operation.json`,
+`session-rules-resolution.json`, `content.json`, `edit-contract.json`, `evidence-manifest.json`, `edit-contract-gate.json`,
 `patch.json`, sidecars, dry-run/apply/refurbish reports,
 `vision.json`, `pptx-diff.json`, `visual_review.json`, `clean-open.json`, `check.json`,
 `evidence-summary.json`, `layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`,
@@ -115,7 +116,7 @@ not treat this as a replacement workflow; it exists to prevent simple tasks from
 complex tasks from missing critical gates.
 
 - **New deck**: `outline.json -> deck_lock.json -> content.json -> pptx-nova-create-run -> PNG/contact-sheet review`.
-- **Edit deck**: `inspect -> select(locator candidates) -> edit-contract -> patch -> dry-run -> resolvedSelectors -> apply into run directory -> semantic diff/scoped evidence -> edit-contract gate -> changed-slide PNG review -> final output`.
+- **Edit deck**: `inspect -> select(locator candidates) -> optional session-rules resolve -> edit-contract -> patch -> dry-run -> resolvedSelectors -> apply into run directory -> semantic diff/scoped evidence -> edit-contract gate -> changed-slide PNG review -> final output`.
 - **Animations / transitions**: First `inspect` `timing_summary`, `animations[]`, and `animation_capabilities`. For new animations or safe subset edits, use `set-slide-animations` / `update-slide-animation` / `remove-slide-animation`; default complex timing, media timing, interactive triggers, motion paths, emphasis, and chart/SmartArt builds to preserve-only, and do not guess-edit raw XML.
 - **PPTX semantic diff / change audit**: When a source and candidate already exist and actual change scope must be confirmed, run this once at low frequency after the candidate is stable:
   `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json > <run-dir>/pptx-diff.json`.
@@ -146,7 +147,7 @@ complex tasks from missing critical gates.
   Before delivery, run `xdoc pptx refurbish-audit` to generate `content-audit-final.json` and automatically check slide count, source text, shape types, media, notes, external links, and reference-map coverage against the current source/candidate PPTX. Run `scripts/pptx-nova-refurbish-audit.mjs` as a legacy supplemental audit only when OOXML visible text leak scanning or forbidden shape name regex is still needed. The standard runner also generates `fidelity-gate.json`, tightening evidence from `vision-diff`, `refurbish-audit`, and the available `reference-map`. Final refurbish delivery must also generate `refurbish-compare.png`: a single image containing all slides, with the before source deck in the left column and the after deliverable deck in the right column, defaulting to 192 dpi. After validation passes, copy the comparison image to the same directory as the final PPTX using the name `<output-stem>-refurbish-compare-<MMDDhhmmss>.png`. The standard runner automatically runs `pptx-nova-compare.mjs --kind refurbish` and `pptx-nova-compare-gate.mjs --kind refurbish --publish`, and requires `refurbish-compare-gate.json.status=pass`.
 - **Strict template following**: Copy or inherit source slides/placeholders, then edit original objects; do not redraw a "similar" page.
 - **Export / check / extract**: Create a run directory; use `xdoc pptx preview` by default for PPTX PNG/contact-sheet previews, `xdoc convert` for PDF/MD/JSON/text or non-PPTX generic conversion, and `xdoc check` / `xdoc pptx inspect` for checks. No creation-oriented docs need to be read.
-- **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md`, `edit-contract.md`, and `micro-edit-cheatsheet.md`; still use inspect, a normalized edit contract, dry-run, selector validation, one final semantic diff, and the contract gate. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
+- **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md`, `edit-contract.md`, and `micro-edit-cheatsheet.md`; additionally read `session-rules.md` only when `sessionRulesPath` exists or the user explicitly states a future/carryover rule. Still use inspect, a normalized edit contract, dry-run, selector validation, one final semantic diff, and the contract gate. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
 - **Studio / high-risk deck**: Use `deck_lock.json` to lock lightweight confirmation, page-level rhythm, template fusion, asset status, and chart/table semantics. Use `pptx-nova-finalize-evidence.mjs` to freeze final structure evidence; do not introduce SVG-first or page-by-page handwritten flows.
 
 ## Skill Root
@@ -183,6 +184,7 @@ Determine the task type first, then read the corresponding files:
 | Reference PPTX + new outline to generate a new deck                                      | `references/common-workflow.md`, `references/reference-create.md`, `references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                                                   |
 | Polish / refurbish an existing PPTX while preserving original content and changing style | `references/common-workflow.md`, `references/reference-create.md`, `references/deckkit-mode.md`                                                                         | `references/inspect-and-edit.md`, `references/export-and-check.md`                                                                                 |
 | Small text/notes/footer/metadata edit                                                    | `references/common-workflow.md`, `references/edit-contract.md`, `references/micro-edit-cheatsheet.md`                                                                   | If selectors are ambiguous or complex image/multi-object edits are involved, then read `references/edit-mode.md`, `references/inspect-and-edit.md` |
+| Continue the same deck with an explicit future/carryover rule                            | `references/common-workflow.md`, `references/session-rules.md`, `references/edit-contract.md`                                                                           | `references/edit-mode.md`, `references/inspect-and-edit.md`                                                                                        |
 | Translate an existing `.pptx` while preserving original layout                           | `references/common-workflow.md`, `references/edit-mode.md`, `references/inspect-and-edit.md`, `references/translation-mode.md`                                          | For many charts/tables, read `references/charts.md`, `references/tables.md`; when only checking, then read `references/export-and-check.md`        |
 | Modify an existing `.pptx`                                                               | `references/common-workflow.md`, `references/edit-contract.md`, `references/edit-mode.md`, `references/inspect-and-edit.md`                                             | `references/patch-ops-cheatsheet.md`                                                                                                               |
 | Add/modify/delete animations or transitions                                              | `references/common-workflow.md`, `references/edit-mode.md`, `references/animations.md`, `references/inspect-and-edit.md`                                                | `references/patch-ops-cheatsheet.md`; for complex timing, read `references/control-flow-and-raw-xml.md` only for risk judgment                     |
@@ -259,6 +261,7 @@ These rules apply to modifying existing PPTX files:
 - Treat the input deck as read-only by default. Inspect first, then dry-run, then write intermediate files in the run directory.
 - Do not edit objects by guessing selectors. When the target object is unclear, first narrow candidates with `xdoc pptx select input.pptx --query '{"textRegex":"..."}' --json` or a query file, then write the patch. Check dry-run `resolvedSelectors[]`; if ambiguous, use `suggestions[].fixPatch` and retry.
 - After inspect/select resolves the targets, normalize `edit-contract.json` before patch/apply. Bind each target to its patch `opIndexes[]`, expected categories/values, allowed changes, preserve policy, and required evidence. After the stable candidate is produced, require `edit-contract-gate.json.agentGate.passed=true` before publication. Translation and Refurbish keep their stronger specialized contracts instead of replacing them with this generic gate.
+- Only create `session-rules.json` from an explicit current-deck future/carryover instruction. Resolve it from a structured `session-operation.json`; never execute free-form `appliesWhen` text. Pass a successful `session-rules-resolution.json` to the Edit Contract normalizer so rule-owned targets and preserve requirements are hash-bound and verified by the final contract gate. If no active rule applies, continue without extra evidence or user confirmation. Advance the rules to a new revision only after the candidate passes and is accepted.
 - After post-apply evidence is stable, generate `evidence-manifest.json` to bind the candidate SHA-256 and exact evidence-file hashes. The gate must reject a missing/stale manifest, including when the candidate is overwritten at the same path.
 - Visible text-only edits that must preserve existing formatting require `style-diff` evidence. Whole-frame `set-text` may erase run styling even when dry-run, semantic diff, and vision-check appear clean; use an inspect-proven run/text-node preserving edit or treat `target-text-style-changed` as a blocker.
 - Visible edits require changed-scope `vision-diff` by default. Block new or worsened high/medium issues, while treating candidate-only `vision-check` as diagnostic evidence so inherited legacy-deck noise does not become a false blocker.
@@ -315,7 +318,7 @@ check-lock -> dry-run -> apply -> vision-check -> structure-check when needed ->
 Generic Edit/Micro Edit must additionally close its own contract:
 
 ```text
-edit-contract -> dry-run target coverage -> apply -> one final semantic diff -> declared scoped/style/structure evidence including vision-diff when visible -> edit-contract gate -> PNG review when visible -> publish
+optional session-rules resolve -> edit-contract -> dry-run target coverage -> apply -> one final semantic diff -> declared scoped/style/structure evidence including vision-diff when visible -> edit-contract gate (including applicable session rules) -> PNG review when visible -> publish
 ```
 
 Refurbish Existing Deck must also append:
@@ -354,6 +357,10 @@ xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
 node <skill-root>/scripts/pptx-nova-edit-contract.mjs --draft <run-dir>/edit-contract-draft.json --source input.pptx --output <run-dir>/edit-contract.json --json
+
+# Only when the current deck has explicit future/carryover rules
+node <skill-root>/scripts/pptx-nova-session-rules-resolve.mjs --rules <run-dir>/session-rules.json --operation <run-dir>/session-operation.json --source input.pptx --strict --json
+node <skill-root>/scripts/pptx-nova-edit-contract.mjs --draft <run-dir>/edit-contract-draft.json --source input.pptx --session-rules-resolution <run-dir>/session-rules-resolution.json --output <run-dir>/edit-contract.json --json
 xdoc pptx diff --source input.pptx --candidate out.pptx --detail full --json > <run-dir>/pptx-diff.json
 node <skill-root>/scripts/pptx-nova-edit-evidence-manifest.mjs --candidate out.pptx --evidence semantic-diff=<run-dir>/pptx-diff.json --output <run-dir>/evidence-manifest.json --json
 node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs --contract <run-dir>/edit-contract.json --candidate out.pptx --strict --json
@@ -431,6 +438,7 @@ Read the files required by routing first; do not read all references at once.
 | `references/create-studio.md`             | Confirmation, design lock, and split for high-risk/formal/precision decks                                                         |
 | `references/edit-mode.md`                 | Inspect/dry-run/selector workflow for modifying existing PPTX files                                                               |
 | `references/edit-contract.md`             | Existing-deck edit scope, source hash, target coverage, locality/style evidence, and final contract gate                          |
+| `references/session-rules.md`             | Explicit current-deck future/carryover rules, revision lifecycle, deterministic resolver, and Edit Contract integration           |
 | `references/micro-edit-cheatsheet.md`     | Fast path for small text, notes, footer, metadata, and single-object edits                                                        |
 | `references/translation-mode.md`          | Existing-PPTX translation, visible text coverage, source-language/target-language comparison, and layout-consistency visual gates |
 | `references/feedback-mode.md`             | Skill usage feedback, old-run feedback audit, and feedback persistence rules                                                      |

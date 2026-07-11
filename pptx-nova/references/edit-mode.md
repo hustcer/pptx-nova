@@ -17,9 +17,11 @@ For existing deck edits read:
 
 1. `common-workflow.md`
 2. `edit-contract.md`
-3. This file
-4. `inspect-and-edit.md` for selector details and common edit patterns
-5. `patch-ops-cheatsheet.md` only when writing patch ops
+3. `session-rules.md` only when `deck_lock.sessionRulesPath` exists or the user
+   explicitly states a future/carryover rule
+4. This file
+5. `inspect-and-edit.md` for selector details and common edit patterns
+6. `patch-ops-cheatsheet.md` only when writing patch ops
 
 Read `charts.md`, `tables.md`, `styles-and-themes.md`, `animations.md`, or
 `data-driven.md` only when the requested edit touches those domains.
@@ -49,12 +51,23 @@ xdoc pptx select input.pptx --query query.json --slides 2-4 --json \
 Use `matches[].patchSelector` only after confirming `summary.matchCount`,
 `text`, `bbox`, and `name` match the user intent.
 
+If current-deck session rules exist, write `session-operation.json` and run
+`pptx-nova-session-rules-resolve.mjs --strict` before the contract. A passed
+resolution contributes rule-owned targets and preserve requirements. If no
+active rule applies, continue normally without additional evidence or user
+confirmation.
+
 After target resolution, write `edit-contract-draft.json` and normalize it to
 `edit-contract.json` with `pptx-nova-edit-contract.mjs`. Bind each target to the
 patch `opIndexes[]`, expected change categories, allowed changes, preserve
 rules, and required evidence. Do this before writing/applying the patch so the
 contract remains the source of truth rather than a description of whatever the
 candidate happened to change.
+
+When the resolver produced an overlay, pass
+`--session-rules-resolution <run-dir>/session-rules-resolution.json`. Do not
+manually copy rule targets into the draft; the normalizer must bind and merge
+the resolution.
 
 Write a patch using the most specific stable selector available:
 

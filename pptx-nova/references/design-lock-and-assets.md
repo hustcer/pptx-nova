@@ -61,6 +61,11 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
 `deck_lock.json` 是 run 级 source of truth，负责锁定“本轮生成为什么样的 deck”。
 它不保存完整正文，也不替代 `content.json`。
 
+当当前 deck 存在用户明确声明的 future/carryover 规则时，可以增加相对路径
+`sessionRulesPath: "session-rules.json"`。`pptx-nova-check-lock.mjs` 会验证该文件存在且符合
+`pptx-nova-session-rules/v1`。规则的生命周期、解析和 Edit Contract 接入见
+`session-rules.md`；不要把规则正文复制进 `deck_lock.json`。
+
 ```json
 {
   "schemaVersion": "pptx-nova-deck-lock/v1",

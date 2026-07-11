@@ -53,6 +53,12 @@
             "items": { "type": "integer", "minimum": 0 }
           },
           "selector": { "type": "object" },
+          "produced": { "type": "boolean" },
+          "sessionRuleIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
           "resolvedIdentity": {
             "type": "object",
             "required": ["slide"],
@@ -74,6 +80,19 @@
                 "type": "array",
                 "minItems": 1,
                 "items": { "type": "string" }
+              },
+              "sessionRulePostconditions": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["kind", "value"],
+                  "properties": {
+                    "kind": { "type": "string", "enum": ["font-color", "fill-color"] },
+                    "value": { "type": "string", "pattern": "^[0-9A-F]{6}$" }
+                  },
+                  "additionalProperties": false
+                }
               }
             },
             "additionalProperties": true
@@ -140,6 +159,34 @@
         "objectTypes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
       },
       "additionalProperties": true
+    },
+    "sessionRules": {
+      "type": "object",
+      "required": [
+        "rulesPath",
+        "rulesSha256",
+        "resolutionPath",
+        "resolutionSha256",
+        "operationPath",
+        "operationSha256",
+        "deckId",
+        "applicableRuleIds"
+      ],
+      "properties": {
+        "rulesPath": { "type": "string", "minLength": 1 },
+        "rulesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "resolutionPath": { "type": "string", "minLength": 1 },
+        "resolutionSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "operationPath": { "type": "string", "minLength": 1 },
+        "operationSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "deckId": { "type": "string", "minLength": 1 },
+        "applicableRuleIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
     }
   },
   "allOf": [

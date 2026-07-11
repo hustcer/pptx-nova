@@ -34,7 +34,8 @@ dry-run, apply, vision-check, preview/contact-sheet, and final publish while
 preserving every intermediate artifact.
 
 Keep all temporary files in that run directory, including `outline.json`,
-`deck_lock.json`, `assets_manifest.json`, `content.json`, `patch.json`,
+`deck_lock.json`, `session-rules.json`, `session-operation.json`,
+`session-rules-resolution.json`, `assets_manifest.json`, `content.json`, `patch.json`,
 intermediate `.pptx`, sidecar files, `vision.json`, `check.json`, previews,
 contact sheets, logs, and generated helper scripts.
 
@@ -172,7 +173,8 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 3.  Gather mode-specific context: - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`. - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
     per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
     `visualDensity`. - Edit: `xdoc pptx inspect <input.pptx> --json`, optional
-    `select.json`, then normalize `edit-contract.json` according to
+    `select.json`; when current-deck session rules exist, resolve the structured
+    `session-operation.json` according to `references/session-rules.md`; then normalize `edit-contract.json` according to
     `references/edit-contract.md` before patch/apply. - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
     `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
     `xdoc pptx refurbish-skin` JSON report.
@@ -240,6 +242,11 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     scoped preview and `vision-diff` evidence. Use candidate-only
     `vision-check` as a diagnostic when needed; inherited source issues are not
     edit regressions.
+    If `session-rules.json` exists, pass the successful
+    `session-rules-resolution.json` to the contract normalizer. The final
+    contract gate must report every applicable rule as satisfied before
+    publication. After successful publication, advance the rules to the accepted
+    candidate revision; never advance them after a failed candidate.
 9.  Run static geometry validation:
 
     ```bash

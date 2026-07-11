@@ -50,6 +50,10 @@ const qualityPath = join(TMP_ROOT, 'quality.json')
 const editContractDraftPath = join(TMP_ROOT, 'edit-contract-draft.json')
 const editContractPath = join(TMP_ROOT, 'edit-contract.json')
 const editEvidenceManifestPath = join(TMP_ROOT, 'evidence-manifest.json')
+const sessionRulesDraftPath = join(TMP_ROOT, 'session-rules-draft.json')
+const sessionRulesPath = join(TMP_ROOT, 'session-rules.json')
+const sessionOperationPath = join(TMP_ROOT, 'session-operation.json')
+const sessionResolutionPath = join(TMP_ROOT, 'session-rules-resolution.json')
 
 const validation = runJson('validate bundled DeckKit content', 'node', [
   validateScript,
@@ -102,6 +106,87 @@ const selection = runJson('select bundled DeckKit', 'node', [
   '--json',
 ])
 if (!selection.selected?.id) throw new Error('DeckKit selector did not choose a DeckKit')
+
+writeFileSync(
+  sessionRulesDraftPath,
+  `${JSON.stringify(
+    {
+      schemaVersion: 'pptx-nova-session-rules/v1',
+      deckIdentity: { deckId: 'smoke-cartesian-deck' },
+      rules: [
+        {
+          id: 'rule-future-title-blue',
+          kind: 'future-element-style',
+          status: 'active',
+          lifetime: 'current-deck',
+          trigger: { event: 'slide-added' },
+          target: { slideScope: 'future', elementKind: 'slide-title' },
+          action: { fontColor: '0076A8' },
+          source: {
+            kind: 'user-feedback',
+            quote: 'Use the same blue title on later added slides',
+          },
+          supersedes: [],
+        },
+      ],
+    },
+    null,
+    2,
+  )}\n`,
+)
+const sessionRules = runJson('normalize current-deck session rules', 'node', [
+  join(SKILL_ROOT, 'scripts/pptx-nova-session-rules.mjs'),
+  '--draft',
+  sessionRulesDraftPath,
+  '--source',
+  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  '--output',
+  sessionRulesPath,
+  '--json',
+])
+writeFileSync(
+  sessionOperationPath,
+  `${JSON.stringify(
+    {
+      schemaVersion: 'pptx-nova-session-operation/v1',
+      event: 'slide-added',
+      slideCountDelta: 1,
+      targets: [
+        {
+          id: 'future-title',
+          kind: 'produced-object',
+          slide: 10,
+          elementKind: 'slide-title',
+          shapeName: 'S10_Title',
+          opIndexes: [1, 2],
+          changeCategories: ['shape', 'text'],
+        },
+      ],
+      explicitOverrides: [],
+    },
+    null,
+    2,
+  )}\n`,
+)
+const sessionResolution = runJson('resolve session rules into contract overlay', 'node', [
+  join(SKILL_ROOT, 'scripts/pptx-nova-session-rules-resolve.mjs'),
+  '--rules',
+  sessionRulesPath,
+  '--operation',
+  sessionOperationPath,
+  '--source',
+  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  '--output',
+  sessionResolutionPath,
+  '--strict',
+  '--json',
+])
+if (!/^[a-f0-9]{64}$/.test(sessionRules.deckIdentity?.currentRevisionSha256 ?? '')) {
+  throw new Error('session rules did not bind the current deck revision')
+}
+if (sessionResolution.contractOverlay?.targets?.length !== 1) {
+  throw new Error('session rules resolver did not create the expected contract target')
+}
 
 writeFileSync(
   editContractDraftPath,
@@ -166,6 +251,7 @@ process.stdout.write(
       checks: checks.map(({ name, status }) => ({ name, status })),
       patchOps: patch.ops.length,
       selectedDeckkit: selection.selected.id,
+      applicableSessionRules: sessionResolution.applicableRules.length,
       editContractTargets: contract.targets.length,
       editEvidenceCount: evidenceManifest.evidence.length,
     },

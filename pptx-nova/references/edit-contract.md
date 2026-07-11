@@ -9,6 +9,10 @@ what may change, what must stay unchanged, which dry-run ops own each target,
 and which evidence must pass before publication. It does not replace inspect,
 patches, xdoc dry-run, semantic diff, visual review, or structural gates.
 
+When the current deck has explicit future/carryover rules, first follow
+`session-rules.md`. A passed `session-rules-resolution.json` is compiled into
+this contract; session rules never form a parallel execution or delivery gate.
+
 ## Workflow
 
 ```text
@@ -78,6 +82,21 @@ node <skill-root>/scripts/pptx-nova-edit-contract.mjs \
   --json
 ```
 
+When a session-rules resolver returned a passed overlay:
+
+```bash
+node <skill-root>/scripts/pptx-nova-edit-contract.mjs \
+  --draft <run-dir>/edit-contract-draft.json \
+  --source source.pptx \
+  --session-rules-resolution <run-dir>/session-rules-resolution.json \
+  --output <run-dir>/edit-contract.json \
+  --json
+```
+
+The normalizer verifies the rules/operation/resolution hashes and source
+revision, merges rule-owned targets and preserve requirements, and expands
+required target coverage. Do not manually copy resolver targets into the draft.
+
 The generator validates target IDs, target count, op indexes, evidence names,
 stable selector identity, and source existence, then writes the absolute source path, SHA-256, and byte
 length. Use `--overwrite` only for the current run after refreshing target
@@ -105,6 +124,11 @@ and allowed object types:
 Use `kind: "slide"` for a newly added/removed whole-slide target that has no
 pre-existing shape identity. Slide targets are valid only for structural scope;
 ordinary object targets still require a stable resolved id or name.
+
+Rule-owned produced objects use `kind: "object"`, `produced: true`, and a stable
+shape name declared by `session-operation.json`. Their
+`expected.sessionRulePostconditions[]` are limited to machine-verifiable
+`font-color` and `fill-color` values.
 
 ## Evidence Policy
 
@@ -207,6 +231,10 @@ The gate checks:
 - optional final inspect/structure reports are successful when required.
 - structural slide delta, changed slides, and object types match
   `expectedStructure` when declared.
+- bound session-rules artifacts are unchanged and still match the contract
+  source revision/deck id;
+- every applicable produced-object rule is present in final inspect and the
+  candidate PPTX bytes contain its required font/fill value.
 
 Derived slide `summaryChanges` are not treated as separate out-of-scope edits:
 legitimate text changes can alter keywords and density summaries. Only reliable
@@ -230,6 +258,8 @@ Read `edit-contract-gate.json.agentGate` first:
 | `review-out-of-scope-changes`           | Reliable changes escaped the contract or changed forbidden categories                       |
 | `verify-changed-scope`                  | Required preview/vision evidence is missing or incomplete                                   |
 | `run-structure-audit`                   | Required package structure evidence failed                                                  |
+| `refresh-session-rules-resolution`      | Bound rules/operation/resolution changed; resolve and regenerate the contract               |
+| `apply-session-rules`                   | Candidate bytes do not satisfy an applicable rule postcondition                             |
 | `block-and-request-user-decision`       | A remaining blocker has no safe automatic repair                                            |
 | `publish`                               | Machine contract passed; finish required PNG review before delivery                         |
 

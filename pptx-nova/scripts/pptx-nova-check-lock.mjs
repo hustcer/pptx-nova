@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { validateSessionRulesDocument } from './pptx-nova-session-rules-core.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const skillRoot = resolve(__dirname, '..')
@@ -941,6 +942,35 @@ function checkLock(lock, errors, warnings) {
   }
 }
 
+function checkSessionRules(lock, lockPath, errors) {
+  if (lock.sessionRulesPath === undefined) return null
+  if (typeof lock.sessionRulesPath !== 'string' || !lock.sessionRulesPath.trim()) {
+    push(
+      errors,
+      'session-rules-path-invalid',
+      'deck_lock.sessionRulesPath must be a non-empty path string',
+    )
+    return null
+  }
+  const path = isAbsolute(lock.sessionRulesPath)
+    ? resolve(lock.sessionRulesPath)
+    : resolve(dirname(lockPath), lock.sessionRulesPath)
+  if (!existsSync(path)) {
+    push(errors, 'session-rules-missing', `session rules artifact does not exist: ${path}`)
+    return null
+  }
+  try {
+    return validateSessionRulesDocument(readJson(path, 'session-rules.json'))
+  } catch (error) {
+    push(
+      errors,
+      'session-rules-invalid',
+      `session rules artifact is invalid: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    return null
+  }
+}
+
 function checkAssets(assets, assetsPath, referenced, errors, warnings) {
   if (!assets) return
   if (assets.schemaVersion !== ASSETS_SCHEMA_VERSION) {
@@ -1303,6 +1333,7 @@ function main() {
   const assets = args.assets ? readJson(args.assets, 'assets_manifest.json') : null
   const content = args.content ? readJson(args.content, 'content.json') : null
   const patch = args.patch ? readJson(args.patch, 'patch.json') : null
+  const sessionRules = checkSessionRules(lock, args.lock, errors)
   const referencedAssets = new Set([
     ...lockAssetReferences(lock),
     ...contentAssetReferences(content),
@@ -1335,6 +1366,7 @@ function main() {
       slides: Array.isArray(lock.slides) ? lock.slides.length : 0,
       assets: assets ? assetEntries(assets).length : 0,
       patchOps: patch?.ops?.length ?? 0,
+      sessionRules: sessionRules?.rules?.length ?? 0,
     },
     errors,
     warnings,

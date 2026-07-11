@@ -10,9 +10,65 @@ const skillRoot = join(repoRoot, 'pptx-nova')
 const contractScript = join(skillRoot, 'scripts/pptx-nova-edit-contract.mjs')
 const gateScript = join(skillRoot, 'scripts/pptx-nova-edit-contract-gate.mjs')
 const manifestScript = join(skillRoot, 'scripts/pptx-nova-edit-evidence-manifest.mjs')
+const sessionRulesScript = join(skillRoot, 'scripts/pptx-nova-session-rules.mjs')
+const sessionResolveScript = join(skillRoot, 'scripts/pptx-nova-session-rules-resolve.mjs')
 
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
+}
+
+function crc32(buffer) {
+  let crc = 0xffffffff
+  for (const byte of buffer) {
+    crc ^= byte
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0)
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0
+}
+
+function writeStoredZip(path, entries) {
+  const locals = []
+  const centrals = []
+  let offset = 0
+  for (const [name, text] of Object.entries(entries)) {
+    const fileName = Buffer.from(name)
+    const data = Buffer.from(text)
+    const checksum = crc32(data)
+    const local = Buffer.alloc(30)
+    local.writeUInt32LE(0x04034b50, 0)
+    local.writeUInt16LE(20, 4)
+    local.writeUInt16LE(0, 6)
+    local.writeUInt16LE(0, 8)
+    local.writeUInt32LE(checksum, 14)
+    local.writeUInt32LE(data.length, 18)
+    local.writeUInt32LE(data.length, 22)
+    local.writeUInt16LE(fileName.length, 26)
+    locals.push(local, fileName, data)
+
+    const central = Buffer.alloc(46)
+    central.writeUInt32LE(0x02014b50, 0)
+    central.writeUInt16LE(20, 4)
+    central.writeUInt16LE(20, 6)
+    central.writeUInt16LE(0, 8)
+    central.writeUInt16LE(0, 10)
+    central.writeUInt32LE(checksum, 16)
+    central.writeUInt32LE(data.length, 20)
+    central.writeUInt32LE(data.length, 24)
+    central.writeUInt16LE(fileName.length, 28)
+    central.writeUInt32LE(offset, 42)
+    centrals.push(central, fileName)
+    offset += local.length + fileName.length + data.length
+  }
+  const centralDirectory = Buffer.concat(centrals)
+  const eocd = Buffer.alloc(22)
+  eocd.writeUInt32LE(0x06054b50, 0)
+  eocd.writeUInt16LE(Object.keys(entries).length, 8)
+  eocd.writeUInt16LE(Object.keys(entries).length, 10)
+  eocd.writeUInt32LE(centralDirectory.length, 12)
+  eocd.writeUInt32LE(offset, 16)
+  writeFileSync(path, Buffer.concat([...locals, centralDirectory, eocd]))
 }
 
 function runNode(args, expectedStatus = 0) {
@@ -296,8 +352,8 @@ function writeFixture({
   }
 }
 
-function generateContract(fixture) {
-  const result = runNode([
+function generateContract(fixture, { sessionResolution = '' } = {}) {
+  const args = [
     contractScript,
     '--draft',
     fixture.draft,
@@ -306,7 +362,10 @@ function generateContract(fixture) {
     '--output',
     fixture.contract,
     '--json',
-  ])
+  ]
+  if (sessionResolution)
+    args.splice(args.length - 1, 0, '--session-rules-resolution', sessionResolution)
+  const result = runNode(args)
   return JSON.parse(result.stdout)
 }
 
@@ -362,6 +421,241 @@ function runGate(fixture, expectedStatus = 0, { refreshManifest = true } = {}) {
     expectedStatus,
   )
   return JSON.parse(result.stdout)
+}
+
+function sessionRuleSlideXml({
+  color = '0076A8',
+  elementKind = 'slide-title',
+  shapeName = 'S8_Title',
+} = {}) {
+  const shapeFill =
+    elementKind === 'summary-box'
+      ? `<a:solidFill><a:srgbClr val="${color}"/></a:solidFill>`
+      : '<a:noFill/>'
+  const runFill =
+    elementKind === 'slide-title' ? `<a:solidFill><a:srgbClr val="${color}"/></a:solidFill>` : ''
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+  <p:cSld><p:spTree><p:sp><p:nvSpPr><p:cNvPr id="2" name="${shapeName}"/></p:nvSpPr>
+  <p:spPr>${shapeFill}</p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r>
+  <a:rPr lang="en-US" sz="1800">${runFill}<a:latin typeface="Arial"/></a:rPr>
+  <a:t>P1 Session Rules</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld>
+</p:sld>`
+}
+
+function writeSessionRuleFixture({
+  color = '0076A8',
+  elementKind = 'slide-title',
+  expectedColor = elementKind === 'summary-box' ? 'F2F2F2' : '0076A8',
+  decoyColor = '',
+} = {}) {
+  const fixture = writeFixture()
+  const shapeName = elementKind === 'summary-box' ? 'S8_SummaryBox' : 'S8_Title'
+  const ruleId =
+    elementKind === 'summary-box' ? 'rule-future-summary-fill' : 'rule-future-title-blue'
+  fixture.sessionRulesDraft = join(fixture.runDir, 'session-rules-draft.json')
+  fixture.sessionRules = join(fixture.runDir, 'session-rules.json')
+  fixture.sessionOperation = join(fixture.runDir, 'session-operation.json')
+  fixture.sessionResolution = join(fixture.runDir, 'session-rules-resolution.json')
+
+  const zipEntries = {}
+  if (decoyColor) {
+    zipEntries['ppt/slides/slide1.xml'] = sessionRuleSlideXml({
+      color: decoyColor,
+      elementKind,
+      shapeName,
+    })
+  }
+  zipEntries['ppt/slides/slide9.xml'] = sessionRuleSlideXml({ color, elementKind, shapeName })
+  writeStoredZip(fixture.candidate, zipEntries)
+  writeJson(fixture.sessionRulesDraft, {
+    schemaVersion: 'pptx-nova-session-rules/v1',
+    deckIdentity: { deckId: 'deck-session-rule-gate' },
+    rules: [
+      {
+        id: ruleId,
+        kind: 'future-element-style',
+        status: 'active',
+        lifetime: 'current-deck',
+        trigger: { event: 'slide-added' },
+        target: { slideScope: 'future', elementKind },
+        action:
+          elementKind === 'summary-box'
+            ? { fillColor: expectedColor }
+            : { fontColor: expectedColor },
+        source: {
+          kind: 'user-feedback',
+          turn: 3,
+          quote:
+            elementKind === 'summary-box'
+              ? '后续新增 summary box 使用浅灰背景'
+              : '后续新增页标题继续使用蓝色',
+        },
+        supersedes: [],
+      },
+    ],
+  })
+  writeJson(fixture.sessionOperation, {
+    schemaVersion: 'pptx-nova-session-operation/v1',
+    event: 'slide-added',
+    slideCountDelta: 1,
+    targets: [
+      {
+        id: elementKind === 'summary-box' ? 'new-summary-box' : 'new-slide-title',
+        kind: 'produced-object',
+        slide: 8,
+        elementKind,
+        shapeName,
+        opIndexes: [1, 2],
+        changeCategories: ['shape', 'text'],
+      },
+    ],
+    explicitOverrides: [],
+  })
+  runNode([
+    sessionRulesScript,
+    '--draft',
+    fixture.sessionRulesDraft,
+    '--source',
+    fixture.source,
+    '--output',
+    fixture.sessionRules,
+    '--json',
+  ])
+  runNode([
+    sessionResolveScript,
+    '--rules',
+    fixture.sessionRules,
+    '--operation',
+    fixture.sessionOperation,
+    '--source',
+    fixture.source,
+    '--output',
+    fixture.sessionResolution,
+    '--strict',
+    '--json',
+  ])
+
+  const draft = contractDraft()
+  draft.request = 'Add a slide and carry the session title color rule forward'
+  draft.scope = 'structural'
+  draft.operationKind = 'add-slide'
+  draft.targets = [
+    {
+      id: 'new-slide-9',
+      kind: 'slide',
+      slide: 8,
+      opIndexes: [0],
+      expected: { changeCategories: ['structure'] },
+    },
+  ]
+  draft.coverage.expectedTargetCount = 1
+  draft.allowedChanges = ['structure']
+  draft.preserve = []
+  draft.requiredEvidence = ['dry-run', 'semantic-diff', 'png-preview', 'vision-diff']
+  draft.expectedStructure = { slideCountDelta: 1, changedSlides: [8], objectTypes: [] }
+  writeJson(fixture.draft, draft)
+
+  writeJson(fixture.dryRun, {
+    schemaVersion: 'pptx-dry-run/v1',
+    status: 'success',
+    input: fixture.source,
+    wouldWrite: fixture.candidate,
+    opResults: [
+      {
+        opIndex: 0,
+        op: 'add-slide',
+        status: 'success',
+        semanticChanges: [],
+        resolvedSelectors: [],
+      },
+      {
+        opIndex: 1,
+        op: 'add-textbox',
+        status: 'success',
+        semanticChanges: [
+          {
+            category: 'shape',
+            action: 'added',
+            target: { kind: 'shape', slide: 8, id: 2, name: shapeName },
+          },
+          {
+            category: 'text',
+            action: 'updated',
+            target: { kind: 'shape', slide: 8, id: 2, name: shapeName },
+            after: 'P1 Session Rules',
+          },
+        ],
+        resolvedSelectors: [],
+      },
+      {
+        opIndex: 2,
+        op: 'set-run',
+        status: 'success',
+        semanticChanges: [
+          {
+            category: 'text',
+            action: 'updated',
+            target: { kind: 'shape', slide: 8, id: 2, name: shapeName },
+          },
+        ],
+        resolvedSelectors: [
+          {
+            field: 'shape',
+            input: { name: shapeName },
+            resolved: { kind: 'shape', slide: 8, id: 2, name: shapeName },
+          },
+        ],
+      },
+    ],
+  })
+  writeJson(fixture.diff, {
+    schemaVersion: 'pptx-diff/v1',
+    status: 'success',
+    source: fixture.source,
+    candidate: fixture.candidate,
+    summary: {
+      sourceSlideCount: 8,
+      candidateSlideCount: 9,
+      slideAdded: 1,
+      slideRemoved: 0,
+      reliableChanges: 0,
+      uncertainChanges: 0,
+      unsupportedRegions: 0,
+    },
+    slides: [{ index: 8, slide: 9, conclusion: 'added', shapeChanges: [], unsupported: [] }],
+  })
+  const preview = previewFixture(fixture.candidate)
+  preview.slidesRequested = '9'
+  preview.slidesSelected = [9]
+  preview.pages = [{ index: 9, slide: 9, file: { status: 'ok', byteLength: 100 } }]
+  writeJson(fixture.preview, preview)
+  const visionDiff = visionDiffFixture({
+    passed: true,
+    source: fixture.source,
+    candidate: fixture.candidate,
+  })
+  visionDiff.scope = { requested: '9', slides: [9] }
+  writeJson(fixture.visionDiff, visionDiff)
+  writeJson(fixture.finalInspect, {
+    schemaVersion: 'pptx-inspect/v1',
+    status: 'success',
+    input: fixture.candidate,
+    slides: [
+      {
+        index: 8,
+        shapes: [
+          {
+            id: 2,
+            name: shapeName,
+            shapeType: 'textBox',
+            textPreview: 'P1 Session Rules',
+          },
+        ],
+      },
+    ],
+  })
+  return fixture
 }
 
 test('edit contract generator binds the draft to the current source bytes', () => {
@@ -614,6 +908,151 @@ test('structural contracts support a newly added slide without a pre-existing sh
 
   assert.equal(contract.targets[0].kind, 'slide')
   assert.equal(report.agentGate.passed, true)
+})
+
+test('edit contract generator merges and binds a deterministic session-rules overlay', () => {
+  const fixture = writeSessionRuleFixture()
+  const contract = generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+
+  assert.equal(contract.targets.length, 2)
+  assert.equal(contract.coverage.expectedTargetCount, 2)
+  assert.deepEqual(contract.allowedChanges, ['structure', 'shape', 'text'])
+  assert.deepEqual(contract.requiredEvidence, [
+    'dry-run',
+    'semantic-diff',
+    'png-preview',
+    'vision-diff',
+    'final-inspect',
+  ])
+  assert.equal(contract.sessionRules.applicableRuleIds[0], 'rule-future-title-blue')
+  assert.match(contract.sessionRules.rulesSha256, /^[a-f0-9]{64}$/)
+  assert.match(contract.sessionRules.resolutionSha256, /^[a-f0-9]{64}$/)
+})
+
+test('edit contract gate proves an applicable session style rule from candidate bytes', () => {
+  const fixture = writeSessionRuleFixture()
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const report = runGate(fixture)
+
+  assert.equal(report.agentGate.passed, true)
+  assert.equal(report.sessionRuleResults.length, 1)
+  assert.equal(report.sessionRuleResults[0].status, 'satisfied')
+  assert.equal(report.sessionRuleResults[0].postconditions[0].actual, '0076A8')
+})
+
+test('edit contract gate blocks a produced title that violates the session color rule', () => {
+  const fixture = writeSessionRuleFixture({ color: 'D62728' })
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(report.agentGate.nextAction, 'apply-session-rules')
+  assert.equal(report.sessionRuleResults[0].status, 'blocked')
+  assert.ok(report.blockers.some((item) => item.code === 'session-rule-postcondition-failed'))
+})
+
+test('edit contract gate does not accept a matching shape name from the wrong slide', () => {
+  const fixture = writeSessionRuleFixture({ color: 'D62728', decoyColor: '0076A8' })
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.nextAction, 'apply-session-rules')
+  assert.equal(report.sessionRuleResults[0].postconditions[0].actual, 'D62728')
+})
+
+test('edit contract gate proves a produced summary-box fill rule from candidate bytes', () => {
+  const fixture = writeSessionRuleFixture({
+    color: 'F2F2F2',
+    elementKind: 'summary-box',
+  })
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const report = runGate(fixture)
+
+  assert.equal(report.agentGate.passed, true)
+  assert.equal(report.sessionRuleResults[0].id, 'rule-future-summary-fill')
+  assert.deepEqual(report.sessionRuleResults[0].postconditions[0], {
+    kind: 'fill-color',
+    value: 'F2F2F2',
+    expected: 'F2F2F2',
+    actual: 'F2F2F2',
+    passed: true,
+  })
+})
+
+test('edit contract gate blocks a session-rules resolution modified after contract generation', () => {
+  const fixture = writeSessionRuleFixture()
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const resolution = JSON.parse(readFileSync(fixture.sessionResolution, 'utf8'))
+  resolution.contractOverlay.targets[0].expected.sessionRulePostconditions[0].value = 'D62728'
+  writeJson(fixture.sessionResolution, resolution)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.nextAction, 'refresh-session-rules-resolution')
+  assert.ok(report.blockers.some((item) => item.code === 'session-rules-binding-stale'))
+})
+
+test('edit contract gate blocks a contract that drops a resolved rule postcondition', () => {
+  const fixture = writeSessionRuleFixture()
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const contract = JSON.parse(readFileSync(fixture.contract, 'utf8'))
+  const ruleTarget = contract.targets.find((target) => target.sessionRuleIds?.length > 0)
+  delete ruleTarget.expected.sessionRulePostconditions
+  writeJson(fixture.contract, contract)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.nextAction, 'refresh-session-rules-resolution')
+  assert.ok(report.blockers.some((item) => item.code === 'session-rules-binding-stale'))
+})
+
+test('edit contract gate retains not-applicable session rules in the final audit report', () => {
+  const fixture = writeSessionRuleFixture()
+  const operation = JSON.parse(readFileSync(fixture.sessionOperation, 'utf8'))
+  operation.event = 'element-added'
+  operation.slideCountDelta = 0
+  operation.targets = []
+  writeJson(fixture.sessionOperation, operation)
+  runNode([
+    sessionResolveScript,
+    '--rules',
+    fixture.sessionRules,
+    '--operation',
+    fixture.sessionOperation,
+    '--source',
+    fixture.source,
+    '--output',
+    fixture.sessionResolution,
+    '--overwrite',
+    '--strict',
+    '--json',
+  ])
+  const draft = JSON.parse(readFileSync(fixture.draft, 'utf8'))
+  draft.targets.push({
+    id: 'new-slide-title',
+    kind: 'object',
+    produced: true,
+    slide: 8,
+    opIndexes: [1, 2],
+    selector: { shape: { name: 'S8_Title' } },
+    resolvedIdentity: { slide: 8, name: 'S8_Title' },
+    expected: { changeCategories: ['shape', 'text'] },
+  })
+  draft.coverage.expectedTargetCount = 2
+  draft.allowedChanges.push('shape', 'text')
+  draft.requiredEvidence.push('final-inspect')
+  writeJson(fixture.draft, draft)
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const report = runGate(fixture)
+
+  assert.equal(report.agentGate.passed, true)
+  assert.deepEqual(report.sessionRuleResults, [
+    {
+      id: 'rule-future-title-blue',
+      status: 'not-applicable',
+      reason: 'event-not-matched',
+      targets: [],
+      postconditions: [],
+    },
+  ])
 })
 
 test('edit contract gate blocks a diff whose target source text no longer matches the contract', () => {

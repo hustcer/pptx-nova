@@ -27,14 +27,23 @@ Use these entry points from skill workflows:
 - `pptx-nova-icons.mjs` - query and generate the bundled Tabler icon pack.
 - `pptx-nova-check-lock.mjs` - validate `deck_lock.json`, `assets_manifest.json`,
   DeckKit content, and patch output before xdoc dry-run.
+- `pptx-nova-session-rules.mjs` - normalize explicit current-deck rules against
+  the current PPTX revision, or advance a verified rule artifact after an
+  accepted candidate. The default artifact name is `session-rules.json`.
+- `pptx-nova-session-rules-resolve.mjs` - resolve active rules against a
+  structured operation plan and emit the deterministic Edit Contract overlay,
+  conflicts, and stable `agentGate.nextAction`.
 - `pptx-nova-edit-contract.mjs` - normalize an agent-authored existing-deck edit
-  contract and bind it to the current source PPTX SHA-256 before patch/apply.
+  contract and bind it to the current source PPTX SHA-256 before patch/apply;
+  optionally merge and hash-bind a passed session-rules resolution.
 - `pptx-nova-edit-evidence-manifest.mjs` - bind the stable candidate SHA-256 to
   the exact post-apply evidence hashes before the final contract gate.
 - `pptx-nova-edit-contract-gate.mjs` - verify source freshness, dry-run target
   coverage, reliable semantic-diff locality, optional text style fidelity, and
   scoped preview/vision-diff/structure evidence before an Edit or Micro Edit is
-  published. Read its stable `agentGate.nextAction` for repair routing.
+  published. When session rules apply, it also verifies produced-object identity
+  and font/fill postconditions directly from candidate PPTX bytes. Read its
+  stable `agentGate.nextAction` for repair routing.
 - `pptx-nova-refurbish-plan.mjs` - build the preflight route for existing-deck
   refurbishment: readiness exception, native skinning support, fallback strategy,
   duplicate chrome policy, and required gates.

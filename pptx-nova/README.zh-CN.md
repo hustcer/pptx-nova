@@ -208,6 +208,9 @@
 - 简短说明：改了什么、生成了什么、有没有需要你注意的地方。
 - 如果任务复杂，会保留一份可审计的工作记录，例如 `outline.json`、`deck_lock.json`、
   `content.json`、`patch.json`、检查报告、预览图和 contact sheet，方便后续继续修改或排查问题。
+- 如果你明确说“后续新增页面/元素继续遵守某项规则”，还可能保存当前 deck 专用的
+  `session-rules.json`。它会记录规则原文、适用事件、冲突和 deck revision，并在后续编辑中通过
+  Edit Contract 验证；不会自动变成跨项目的长期偏好。
 - 对正式交付、翻新、翻译、模板跟随、图表表格或动画任务，还可能包含更细的验证证据，
   例如 `visual_review.json`、`pptx-diff.json`、`structure-check.json`、`semantic-audit.json`、
   `clean-open.json`、`translation-compare.png`、`translation-compare.json`、

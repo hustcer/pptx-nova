@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, join, posix, resolve } from 'node:path'
+import { inflateRawSync } from 'node:zlib'
 
 const SCHEMA_VERSION = 'pptx-nova-edit-contract-gate/v1'
 const CONTRACT_SCHEMA_VERSION = 'pptx-nova-edit-contract/v1'
@@ -126,6 +127,328 @@ function readJson(path, label, { required = true } = {}) {
 
 function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
+function findEndOfCentralDirectory(buffer) {
+  for (let offset = buffer.length - 22; offset >= 0; offset -= 1) {
+    if (buffer.readUInt32LE(offset) === 0x06054b50) return offset
+  }
+  throw new Error('PPTX ZIP end of central directory was not found')
+}
+
+function readZipEntries(path) {
+  const buffer = readFileSync(path)
+  const eocd = findEndOfCentralDirectory(buffer)
+  const entryCount = buffer.readUInt16LE(eocd + 10)
+  const centralOffset = buffer.readUInt32LE(eocd + 16)
+  const entries = []
+  let cursor = centralOffset
+  for (let index = 0; index < entryCount; index += 1) {
+    if (buffer.readUInt32LE(cursor) !== 0x02014b50) {
+      throw new Error(`Invalid ZIP central directory entry at ${cursor}`)
+    }
+    const method = buffer.readUInt16LE(cursor + 10)
+    const compressedSize = buffer.readUInt32LE(cursor + 20)
+    const uncompressedSize = buffer.readUInt32LE(cursor + 24)
+    const fileNameLength = buffer.readUInt16LE(cursor + 28)
+    const extraLength = buffer.readUInt16LE(cursor + 30)
+    const commentLength = buffer.readUInt16LE(cursor + 32)
+    const localOffset = buffer.readUInt32LE(cursor + 42)
+    const name = buffer.toString('utf8', cursor + 46, cursor + 46 + fileNameLength)
+    cursor += 46 + fileNameLength + extraLength + commentLength
+    if (buffer.readUInt32LE(localOffset) !== 0x04034b50) {
+      throw new Error(`Invalid ZIP local file header for ${name}`)
+    }
+    const localNameLength = buffer.readUInt16LE(localOffset + 26)
+    const localExtraLength = buffer.readUInt16LE(localOffset + 28)
+    const dataStart = localOffset + 30 + localNameLength + localExtraLength
+    const compressed = buffer.subarray(dataStart, dataStart + compressedSize)
+    let data
+    if (method === 0) data = compressed
+    else if (method === 8) data = inflateRawSync(compressed)
+    else continue
+    if (uncompressedSize !== 0 && data.length !== uncompressedSize) {
+      throw new Error(`ZIP entry size mismatch for ${name}`)
+    }
+    entries.push({ name, data })
+  }
+  return entries
+}
+
+function normalizeHex(value) {
+  const hex = String(value ?? '')
+    .replace(/^#/, '')
+    .trim()
+    .toUpperCase()
+  return /^[0-9A-F]{6}$/.test(hex) ? hex : null
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function slideXmlEntries(candidate) {
+  const entries = readZipEntries(candidate)
+  const byName = new Map(entries.map((entry) => [entry.name, entry]))
+  const presentation = byName.get('ppt/presentation.xml')?.data.toString('utf8') ?? ''
+  const relationships = byName.get('ppt/_rels/presentation.xml.rels')?.data.toString('utf8') ?? ''
+  const relationshipTargets = new Map()
+  for (const match of relationships.matchAll(/<Relationship\b[^>]*>/g)) {
+    const tag = match[0]
+    const id = tag.match(/\bId="([^"]+)"/)?.[1]
+    const target = tag.match(/\bTarget="([^"]+)"/)?.[1]
+    if (!id || !target) continue
+    const name = target.startsWith('/')
+      ? target.slice(1)
+      : posix.normalize(posix.join('ppt', target))
+    relationshipTargets.set(id, name)
+  }
+  const ordered = []
+  for (const match of presentation.matchAll(/<p:sldId\b[^>]*\br:id="([^"]+)"[^>]*\/?\s*>/g)) {
+    const name = relationshipTargets.get(match[1])
+    const entry = name ? byName.get(name) : null
+    if (entry) ordered.push({ index: ordered.length, name, xml: entry.data.toString('utf8') })
+  }
+  if (ordered.length > 0) return ordered
+  return entries
+    .filter((entry) => /^ppt\/slides\/slide\d+\.xml$/.test(entry.name))
+    .map((entry) => ({
+      index: Number(entry.name.match(/slide(\d+)\.xml$/)?.[1] ?? 0) - 1,
+      name: entry.name,
+      xml: entry.data.toString('utf8'),
+    }))
+    .sort((left, right) => left.index - right.index)
+}
+
+function findShapeXml(slides, slideIndex, shapeName) {
+  const namePattern = new RegExp(`\\bname="${escapeRegExp(shapeName)}"`)
+  const slide = slides.find((item) => item.index === slideIndex)
+  if (!slide) return null
+  const blocks = slide.xml.match(/<p:sp(?:\s[^>]*)?>[\s\S]*?<\/p:sp>/g) ?? []
+  const block = blocks.find((item) => namePattern.test(item))
+  return block ? { part: slide.name, xml: block } : null
+}
+
+function shapeFontColors(shapeXml) {
+  const colors = []
+  for (const match of shapeXml.matchAll(/<a:rPr\b[^>]*>([\s\S]*?)<\/a:rPr>/g)) {
+    const color = match[1].match(/<a:srgbClr\b[^>]*\bval="([0-9A-Fa-f]{6})"/i)?.[1]
+    colors.push(normalizeHex(color))
+  }
+  return colors
+}
+
+function shapeFillColor(shapeXml) {
+  const shapeProperties = shapeXml.match(/<p:spPr\b[^>]*>([\s\S]*?)<\/p:spPr>/)?.[1] ?? ''
+  return normalizeHex(
+    shapeProperties.match(
+      /<a:solidFill\b[^>]*>[\s\S]*?<a:srgbClr\b[^>]*\bval="([0-9A-Fa-f]{6})"/i,
+    )?.[1],
+  )
+}
+
+function sameJson(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function sessionOverlayMatchesContract(contract, resolution) {
+  const overlay = resolution.contractOverlay ?? {}
+  for (const expected of overlay.targets ?? []) {
+    const actual = contract.targets.find((target) => target.id === expected.id)
+    if (!actual) return false
+    if (
+      actual.produced !== expected.produced ||
+      actual.slide !== expected.slide ||
+      !sameJson(actual.opIndexes, expected.opIndexes) ||
+      !sameJson(actual.sessionRuleIds ?? [], expected.sessionRuleIds ?? []) ||
+      actual.resolvedIdentity?.name !== expected.resolvedIdentity?.name ||
+      !sameJson(
+        actual.expected?.sessionRulePostconditions ?? [],
+        expected.expected?.sessionRulePostconditions ?? [],
+      )
+    ) {
+      return false
+    }
+  }
+  for (const value of overlay.preserve ?? []) if (!contract.preserve.includes(value)) return false
+  for (const value of overlay.allowedChanges ?? []) {
+    if (!contract.allowedChanges.includes(value)) return false
+  }
+  for (const value of overlay.requiredEvidence ?? []) {
+    if (!contract.requiredEvidence.includes(value)) return false
+  }
+  return true
+}
+
+function checkSessionRulesBinding(contract, report) {
+  if (!contract.sessionRules) return null
+  const binding = contract.sessionRules
+  const paths = [
+    ['rules', binding.rulesPath, binding.rulesSha256],
+    ['resolution', binding.resolutionPath, binding.resolutionSha256],
+    ['operation', binding.operationPath, binding.operationSha256],
+  ]
+  let stale = false
+  for (const [kind, path, expectedSha256] of paths) {
+    if (!path || !existsSync(path) || sha256(path) !== expectedSha256) {
+      stale = true
+      addIssue(
+        report,
+        'blockers',
+        'session-rules-binding-stale',
+        `${kind} session rules artifact is missing or changed after contract generation`,
+        { kind, path: path ?? null },
+      )
+    }
+  }
+  if (stale) return null
+  const rules = readJson(binding.rulesPath, 'session rules')
+  const resolution = readJson(binding.resolutionPath, 'session rules resolution')
+  if (
+    rules.schemaVersion !== 'pptx-nova-session-rules/v1' ||
+    resolution.schemaVersion !== 'pptx-nova-session-rules-resolution/v1' ||
+    resolution.status !== 'pass' ||
+    resolution.agentGate?.passed !== true ||
+    rules.deckIdentity?.deckId !== binding.deckId ||
+    rules.deckIdentity?.currentRevisionSha256 !== contract.source?.sha256 ||
+    resolution.source?.sha256 !== contract.source?.sha256 ||
+    JSON.stringify(resolution.applicableRules.map((item) => item.id)) !==
+      JSON.stringify(binding.applicableRuleIds) ||
+    !sessionOverlayMatchesContract(contract, resolution)
+  ) {
+    addIssue(
+      report,
+      'blockers',
+      'session-rules-binding-stale',
+      'session rules binding no longer matches the contract source or applicable rule set',
+    )
+    return null
+  }
+  addCheck(report, 'session-rules-binding', 'pass', {
+    deckId: binding.deckId,
+    applicableRuleCount: binding.applicableRuleIds.length,
+  })
+  return resolution
+}
+
+function checkSessionRulePostconditions(contract, args, resolution, finalInspect, report) {
+  if (!contract.sessionRules || !resolution) return
+  const results = (resolution.notApplicableRules ?? []).map((item) => ({
+    id: item.id,
+    status: 'not-applicable',
+    reason: item.reason,
+    ...(item.source ? { source: item.source } : {}),
+    targets: [],
+    postconditions: [],
+  }))
+  if ((resolution.applicableRules ?? []).every((item) => item.kind === 'preserve-invariant')) {
+    for (const applicable of resolution.applicableRules ?? []) {
+      results.push({
+        id: applicable.id,
+        kind: applicable.kind,
+        status: 'satisfied',
+        targets: [],
+        postconditions: [],
+      })
+    }
+    report.sessionRuleResults = results
+    addCheck(report, 'session-rule-postconditions', 'pass', {
+      satisfied: results.filter((item) => item.status === 'satisfied').length,
+      notApplicable: results.filter((item) => item.status === 'not-applicable').length,
+      total: results.length,
+    })
+    return
+  }
+  let slides
+  try {
+    slides = slideXmlEntries(args.candidate)
+  } catch (error) {
+    addIssue(
+      report,
+      'blockers',
+      'session-rule-candidate-inspection-failed',
+      `candidate PPTX could not be inspected for session rule postconditions: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    return
+  }
+  for (const applicable of resolution.applicableRules) {
+    const ruleTargets = contract.targets.filter((target) =>
+      (target.sessionRuleIds ?? []).includes(applicable.id),
+    )
+    if (applicable.kind === 'preserve-invariant') {
+      results.push({ id: applicable.id, kind: applicable.kind, status: 'satisfied', targets: [] })
+      continue
+    }
+    const targetResults = []
+    let rulePassed = ruleTargets.length > 0
+    for (const target of ruleTargets) {
+      const inspected = findInspectedShape(finalInspect, target)
+      const shape = inspected
+        ? findShapeXml(slides, target.slide, target.resolvedIdentity?.name)
+        : null
+      const postconditions = []
+      for (const condition of target.expected?.sessionRulePostconditions ?? []) {
+        let actual = null
+        if (shape && condition.kind === 'font-color') {
+          const colors = shapeFontColors(shape.xml)
+          actual = colors.length === 1 ? colors[0] : colors
+          const passed = colors.length > 0 && colors.every((color) => color === condition.value)
+          postconditions.push({ ...condition, expected: condition.value, actual, passed })
+          rulePassed &&= passed
+        } else if (shape && condition.kind === 'fill-color') {
+          actual = shapeFillColor(shape.xml)
+          const passed = actual === condition.value
+          postconditions.push({ ...condition, expected: condition.value, actual, passed })
+          rulePassed &&= passed
+        } else {
+          postconditions.push({
+            ...condition,
+            expected: condition.value,
+            actual: null,
+            passed: false,
+          })
+          rulePassed = false
+        }
+      }
+      if (!inspected || !shape || postconditions.length === 0) rulePassed = false
+      targetResults.push({
+        targetId: target.id,
+        slide: target.slide,
+        shapeName: target.resolvedIdentity?.name ?? null,
+        inspected: Boolean(inspected),
+        candidatePart: shape?.part ?? null,
+        postconditions,
+      })
+    }
+    const result = {
+      id: applicable.id,
+      kind: applicable.kind,
+      status: rulePassed ? 'satisfied' : 'blocked',
+      targets: targetResults,
+      postconditions: targetResults.flatMap((item) => item.postconditions),
+    }
+    results.push(result)
+    if (!rulePassed) {
+      addIssue(
+        report,
+        'blockers',
+        'session-rule-postcondition-failed',
+        `candidate does not satisfy applicable session rule ${applicable.id}`,
+        { ruleId: applicable.id, targets: targetResults },
+      )
+    }
+  }
+  report.sessionRuleResults = results
+  addCheck(
+    report,
+    'session-rule-postconditions',
+    results.every((item) => item.status !== 'blocked') ? 'pass' : 'fail',
+    {
+      satisfied: results.filter((item) => item.status === 'satisfied').length,
+      notApplicable: results.filter((item) => item.status === 'not-applicable').length,
+      total: results.length,
+    },
+  )
 }
 
 function checkEvidenceManifest(args, loaded, report) {
@@ -809,6 +1132,13 @@ function checkEvidence(contract, args, report) {
 function nextAction(report) {
   const codes = new Set(report.blockers.map((item) => item.code))
   if (codes.has('source-hash-stale') || codes.has('source-missing')) return 'refresh-inspect'
+  if (codes.has('session-rules-binding-stale')) return 'refresh-session-rules-resolution'
+  if (
+    codes.has('session-rule-postcondition-failed') ||
+    codes.has('session-rule-candidate-inspection-failed')
+  ) {
+    return 'apply-session-rules'
+  }
   if (codes.has('expected-before-not-observed')) return 'refresh-inspect'
   if (codes.has('already-compliant-value-not-observed')) return 'complete-missing-coverage'
   if (codes.has('evidence-source-mismatch') || codes.has('evidence-candidate-mismatch')) {
@@ -907,6 +1237,7 @@ function buildReport(args) {
     reliableChanges: [],
     blockers: [],
     attention: [],
+    sessionRuleResults: [],
     summary: {
       targetCount: contract.targets.length,
       expectedTargetCount: contract.coverage?.expectedTargetCount ?? contract.targets.length,
@@ -919,6 +1250,7 @@ function buildReport(args) {
   }
 
   const sourcePath = contract.source?.pptx ? resolve(contract.source.pptx) : ''
+  const sessionResolution = checkSessionRulesBinding(contract, report)
   if (!sourcePath || !existsSync(sourcePath)) {
     addIssue(report, 'blockers', 'source-missing', 'contract source PPTX is missing', {
       path: sourcePath || null,
@@ -944,6 +1276,13 @@ function buildReport(args) {
   const evidence = checkEvidence(contract, args, report)
   checkEvidenceManifest(args, evidence, report)
   checkEvidenceBindings(contract, args, evidence, report)
+  checkSessionRulePostconditions(
+    contract,
+    args,
+    sessionResolution,
+    evidence['final-inspect'],
+    report,
+  )
   const dryRun = evidence['dry-run']
   let coverageResult = { coverage: [], coveredCount: 0, coveredIdentities: [] }
   if (dryRun?.schemaVersion === 'pptx-dry-run/v1' && dryRun.status === 'success') {

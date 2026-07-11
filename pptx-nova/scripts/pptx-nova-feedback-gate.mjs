@@ -23,6 +23,8 @@ Options:
 
 const TRIGGERS = [
   { id: 'need-feedback', pattern: /\bneed\s+feedback\b/i },
+  { id: 'give-feedback', pattern: /\bgive\s+(?:me\s+)?feedback\b/i },
+  { id: 'provide-feedback', pattern: /\bprovide\s+(?:me\s+)?feedback\b/i },
   { id: 'skill-feedback', pattern: /\bskill\s+feedback\b/i },
   { id: 'feedback-requested', pattern: /\bfeedback\s+(requested|required|needed)\b/i },
   { id: 'cn-gei-fankui', pattern: /给反馈/ },

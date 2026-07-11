@@ -48,6 +48,134 @@ function writeFakeXdoc(root, source) {
   return scriptPath
 }
 
+test('layout snapshot separates actionable risks from informational inspect gaps', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-layout-summary-'))
+  const inspectPath = join(root, 'inspect.json')
+  const outputPath = join(root, 'layout-final.json')
+  writeJson(inspectPath, {
+    schemaVersion: 'pptx-inspect/v1',
+    presentation: { slideCount: 1, size: { width: '10in', height: '5.625in' } },
+    slides: [
+      {
+        index: 0,
+        shapes: [
+          {
+            id: 'missing-font-metadata',
+            shapeType: 'text',
+            text: 'Visible text',
+            bbox: { x: 10, y: 10, width: 100, height: 40 },
+          },
+          {
+            id: 'empty-placeholder',
+            shapeType: 'rect',
+            placeholder: { type: 'body' },
+            bbox: { x: 10, y: 60, width: 100, height: 40 },
+          },
+          {
+            id: 'tiny-text',
+            shapeType: 'text',
+            text: 'Tiny',
+            fontFamily: 'Aptos',
+            fontSizePt: 5,
+            bbox: { x: 10, y: 110, width: 100, height: 40 },
+          },
+        ],
+      },
+    ],
+  })
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-layout-snapshot.mjs'),
+    '--inspect',
+    inspectPath,
+    '--output',
+    outputPath,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'warn')
+  assert.equal(report.summary.riskCount, 4)
+  assert.equal(report.summary.actionableRiskCount, 2)
+  assert.equal(report.summary.informationalRiskCount, 2)
+  assert.deepEqual(report.summary.byClassification, { actionable: 2, informational: 2 })
+  assert.deepEqual(report.summary.bySeverity, { error: 0, warning: 2, info: 2 })
+  assert.equal(report.summary.affectedSlideCount, 1)
+  assert.equal(report.summary.actionableSlideCount, 1)
+  assert.equal(report.summary.slideIndexBase, 0)
+  assert.deepEqual(
+    report.summary.topActionable.map(({ code, count }) => ({ code, count })),
+    [
+      { code: 'empty-placeholder', count: 1 },
+      { code: 'font-size-too-small', count: 1 },
+    ],
+  )
+  assert.equal(readFileSync(outputPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
+})
+
+test('layout snapshot treats undisclosed inspect metadata as informational only', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-layout-informational-'))
+  const inspectPath = join(root, 'inspect.json')
+  writeJson(inspectPath, {
+    schemaVersion: 'pptx-inspect/v1',
+    presentation: { slideCount: 1, size: { width: '10in', height: '5.625in' } },
+    slides: [
+      {
+        index: 0,
+        shapes: [
+          {
+            id: 'missing-font-metadata',
+            shapeType: 'text',
+            text: 'Visible text',
+            bbox: { x: 10, y: 10, width: 100, height: 40 },
+          },
+        ],
+      },
+    ],
+  })
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-layout-snapshot.mjs'),
+    '--inspect',
+    inspectPath,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'pass')
+  assert.equal(report.summary.actionableRiskCount, 0)
+  assert.equal(report.summary.informationalRiskCount, 2)
+  assert.deepEqual(report.summary.topActionable, [])
+})
+
+test('feedback gate recognizes give feedback and provide feedback prompts', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-feedback-trigger-'))
+  const runDir = join(root, 'run')
+  const promptPath = join(runDir, 'prompt.txt')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(promptPath, 'Give feedback, and please provide feedback on the workflow.')
+  writeFileSync(
+    join(runDir, 'skill-feedback.md'),
+    '# pptx-nova SKILL 使用反馈\n\n具体反馈已完成。\n',
+  )
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-feedback-gate.mjs'),
+    '--run-dir',
+    runDir,
+    '--prompt-file',
+    promptPath,
+    '--strict',
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'pass')
+  assert.equal(report.requirement.required, true)
+  assert.equal(report.requirement.source, 'prompt-trigger')
+  assert.deepEqual(report.requirement.matchedTriggers, ['give-feedback', 'provide-feedback'])
+})
+
 function swissColumnContent() {
   return {
     meta: { deckkit: 'swiss-grid' },
@@ -953,6 +1081,9 @@ if (args[0] === 'schema') {
   assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-gate.json')), true)
   assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
+  assert.equal(summary.layout.actionableRiskCount, 0)
+  assert.equal(summary.layout.informationalRiskCount, 0)
+  assert.equal(summary.agentSummary.layout.actionableRiskCount, 0)
   assert.ok(sourceInspect.command.includes(process.execPath), sourceInspect.command)
   assert.ok(sourceInspect.command.includes('fake-xdoc.mjs'), sourceInspect.command)
   assert.ok(comparePhase.command.includes(join(runDir, 'candidate.pptx')), comparePhase.command)

@@ -365,6 +365,7 @@ function buildAgentSummary(summary) {
     decision,
     deckkit: summary.deckkit,
     route,
+    layout: summary.layout,
     slides: {
       source: fidelity?.sourceSlides ?? null,
       final: fidelity?.finalSlides ?? null,
@@ -628,6 +629,7 @@ function initialSummary(args, artifacts) {
         'Review contact-sheet.png, refurbish-compare.png, and suspicious full-size PNGs. Confirm the target DeckKit is visibly applied and source content remains intact.',
     },
     warnings: [],
+    layout: null,
     error: null,
   }
 }
@@ -995,9 +997,29 @@ function runLayoutSnapshot(summary, args, artifacts) {
     artifact: artifacts.layoutFinal,
   })
   const riskCount = Number(snapshot?.summary?.riskCount ?? 0)
-  if (riskCount > 0) {
+  const actionableRiskCount = Number(snapshot?.summary?.actionableRiskCount ?? riskCount)
+  const informationalRiskCount = Number(snapshot?.summary?.informationalRiskCount ?? 0)
+  const topActionable = Array.isArray(snapshot?.summary?.topActionable)
+    ? snapshot.summary.topActionable
+    : []
+  summary.layout = {
+    status: snapshot?.status ?? null,
+    riskCount,
+    actionableRiskCount,
+    informationalRiskCount,
+    slideIndexBase: Number(snapshot?.summary?.slideIndexBase ?? 0),
+    affectedSlideCount: Number(snapshot?.summary?.affectedSlideCount ?? 0),
+    actionableSlideCount: Number(snapshot?.summary?.actionableSlideCount ?? 0),
+    topActionable,
+  }
+  if (actionableRiskCount > 0) {
+    const topCodes = topActionable
+      .map((risk) => `${risk.code}=${risk.count}`)
+      .slice(0, 5)
+      .join(', ')
+    const suffix = topCodes ? `; top: ${topCodes}` : ''
     summary.warnings.push(
-      `layout-snapshot: ${riskCount} structural layout risk(s) recorded in layout-final.json`,
+      `layout-snapshot: ${actionableRiskCount} actionable layout risk(s) across ${summary.layout.actionableSlideCount} slide(s)${suffix}; ${informationalRiskCount} informational observation(s) retained in layout-final.json`,
     )
   }
 }

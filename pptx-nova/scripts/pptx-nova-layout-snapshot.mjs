@@ -7,6 +7,12 @@ const EMU_PER_INCH = 914400
 const DEFAULT_PROMPT_TEXT_RE =
   /^(click to add|click to add title|click to add subtitle|title goes here|subtitle goes here|name goes here|单击此处|单击添加|添加标题|添加副标题)$/i
 const STRUCTURAL_PLACEHOLDER_TEXT_RE = /^(date|footer|slide number|页脚|日期|幻灯片编号)$/i
+const INFORMATIONAL_RISK_CODES = new Set([
+  'bbox-missing',
+  'font-family-missing',
+  'font-size-missing',
+])
+const MAX_SUMMARY_SLIDES = 8
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs --inspect final-inspect.json [options]
@@ -85,7 +91,14 @@ function unique(values) {
 }
 
 function pushRisk(list, severity, code, message, details = {}) {
-  list.push({ severity, code, message, ...details })
+  const classification = INFORMATIONAL_RISK_CODES.has(code) ? 'informational' : 'actionable'
+  list.push({
+    severity: classification === 'informational' ? 'info' : severity,
+    classification,
+    code,
+    message,
+    ...details,
+  })
 }
 
 function slideCountOf(inspect) {
@@ -453,14 +466,86 @@ function countBySeverity(risks) {
   return counts
 }
 
+function countByClassification(risks) {
+  const counts = { actionable: 0, informational: 0 }
+  for (const risk of risks) {
+    const classification = risk.classification === 'informational' ? 'informational' : 'actionable'
+    counts[classification] += 1
+  }
+  return counts
+}
+
+function slideNumbers(risks) {
+  return unique(
+    risks
+      .map((risk) => numberOrNull(risk.slide))
+      .filter((slide) => Number.isInteger(slide) && slide >= 0),
+  ).sort((a, b) => a - b)
+}
+
+function summarizeByCode(risks) {
+  const groups = new Map()
+  for (const risk of risks) {
+    const code = risk.code || 'unknown'
+    const classification = risk.classification === 'informational' ? 'informational' : 'actionable'
+    const group = groups.get(code) ?? {
+      code,
+      classification,
+      severity: risk.severity ?? 'warning',
+      count: 0,
+      risks: [],
+    }
+    group.count += 1
+    group.risks.push(risk)
+    groups.set(code, group)
+  }
+  return [...groups.values()]
+    .map((group) => {
+      const slides = slideNumbers(group.risks)
+      return {
+        code: group.code,
+        classification: group.classification,
+        severity: group.severity,
+        count: group.count,
+        affectedSlideCount: slides.length,
+        slides: slides.slice(0, MAX_SUMMARY_SLIDES),
+        slidesTruncated: slides.length > MAX_SUMMARY_SLIDES,
+      }
+    })
+    .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code, 'en'))
+}
+
+function summarizeRisks(risks) {
+  const byCode = summarizeByCode(risks)
+  const actionableRisks = risks.filter((risk) => risk.classification !== 'informational')
+  const informationalRisks = risks.filter((risk) => risk.classification === 'informational')
+  const affectedSlides = slideNumbers(risks)
+  const actionableSlides = slideNumbers(actionableRisks)
+  return {
+    riskCount: risks.length,
+    actionableRiskCount: actionableRisks.length,
+    informationalRiskCount: informationalRisks.length,
+    affectedSlideCount: affectedSlides.length,
+    actionableSlideCount: actionableSlides.length,
+    slideIndexBase: 0,
+    affectedSlides: affectedSlides.slice(0, MAX_SUMMARY_SLIDES),
+    affectedSlidesTruncated: affectedSlides.length > MAX_SUMMARY_SLIDES,
+    bySeverity: countBySeverity(risks),
+    byClassification: countByClassification(risks),
+    byCode,
+    topActionable: byCode.filter((group) => group.classification === 'actionable').slice(0, 5),
+  }
+}
+
 function buildSnapshot(inspect, inspectPath) {
   const size = presentationSize(inspect)
   const slides = asArray(inspect?.slides).map((slide) => normalizeSlide(slide, size))
   const objects = slides.flatMap((slide) => slide.objects)
   const risks = flattenRisks(slides)
+  const riskSummary = summarizeRisks(risks)
   return {
     schemaVersion: SCHEMA_VERSION,
-    status: risks.length > 0 ? 'warn' : 'pass',
+    status: riskSummary.actionableRiskCount > 0 ? 'warn' : 'pass',
     source: inspectPath,
     summary: {
       slideCount: slideCountOf(inspect),
@@ -470,8 +555,7 @@ function buildSnapshot(inspect, inspectPath) {
       chartCount: objects.filter((object) => object.type === 'chart').length,
       tableCount: objects.filter((object) => object.type === 'table').length,
       imageCount: objects.filter((object) => object.type === 'image').length,
-      riskCount: risks.length,
-      bySeverity: countBySeverity(risks),
+      ...riskSummary,
     },
     slides,
     risks,
@@ -483,6 +567,8 @@ function printHuman(snapshot) {
   process.stdout.write(`- slides: ${snapshot.summary.slideCount}\n`)
   process.stdout.write(`- objects: ${snapshot.summary.objectCount}\n`)
   process.stdout.write(`- risks: ${snapshot.summary.riskCount}\n`)
+  process.stdout.write(`- actionable risks: ${snapshot.summary.actionableRiskCount}\n`)
+  process.stdout.write(`- informational risks: ${snapshot.summary.informationalRiskCount}\n`)
 }
 
 let args = null

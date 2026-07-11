@@ -18,6 +18,33 @@ renders content into images and inserts those images into slides. Within support
 workflows, output is meant to remain editable in PowerPoint as text, shapes, tables, charts, and slide
 elements.
 
+## Reliable Rules Across Follow-Up Edits
+
+Most presentation tools treat instructions such as “use this title color on all slides added later”
+as temporary chat context. `pptx-nova` can preserve an explicit future or carryover instruction for
+the current deck and apply it during later edits.
+
+This is designed to be checkable rather than memory-based:
+
+- The original instruction, applicable event, and current deck revision are recorded explicitly.
+- Conflicting rules, stale deck revisions, and explicit one-time overrides are handled before an
+  edit is delivered.
+- For supported rules, the final PPTX is inspected to verify that the required style actually reached
+  the produced slide or element.
+- A rule that does not apply to the current operation adds no extra edit target or delivery evidence.
+
+The current version deliberately stays narrow. It supports explicit current-deck carryover rules that
+can be verified deterministically, such as preserving edit invariants or applying a specified title
+font color or summary-box fill color to newly created elements. It does not infer long-term preferences
+from vague feedback, create a cross-project user profile, or let a session rule bypass template and
+quality checks.
+
+For example, you can say:
+
+```text
+For this deck, keep using the same blue title color on every slide added later.
+```
+
 ## What You Can Ask It To Do
 
 You can use `pptx-nova` to:
@@ -36,6 +63,8 @@ You can use `pptx-nova` to:
 - Use a scoped edit contract for ordinary existing-deck edits so the Agent can
   prove that requested targets were covered and unrelated objects were not
   reliably changed before delivery.
+- Preserve explicit current-deck future or carryover rules, such as keeping the same title color
+  on subsequently added slides, and verify applicable rules during later edits.
 - Export PDF, image previews, Markdown, JSON, or text for review, sharing, or downstream processing.
 - Handle technical slides with formulas: simple formulas may stay as plain text, while complex formulas may be inserted as formula assets.
 - Check for text overlap, clipped content, uneven layouts, and similar presentation issues.
@@ -240,6 +269,11 @@ Usually, delivery includes:
 - For complex tasks, an auditable work record such as `outline.json`, `deck_lock.json`,
   `content.json`, `patch.json`, check reports, preview images, and a contact sheet to make later
   edits or troubleshooting easier.
+- If you explicitly say that subsequently added slides or elements should continue following a
+  rule, the run may also retain a current-deck `session-rules.json`. It records the original rule
+  wording, applicable events, conflicts, and deck revision, then verifies applicable rules through
+  the Edit Contract during later edits. It does not automatically become a cross-project long-term
+  preference.
 - For formal delivery, refurbishment, translation, template following, chart/table, or animation
   tasks, more detailed validation evidence may also be included, such as `visual_review.json`,
   `pptx-diff.json`, `structure-check.json`, `semantic-audit.json`, `clean-open.json`,
@@ -372,7 +406,8 @@ node tools/pptx-nova-audit-public.mjs --strict
 ```
 
 `tools/pptx-nova-smoke-test.mjs` uses only bundled files inside `pptx-nova/`. It covers content
-validation, DeckKit patch build, icon pack query, and DeckKit selection.
+validation, DeckKit patch build, icon pack query, DeckKit selection, current-deck session-rules
+normalization and resolution, Edit Contract source binding, and candidate/evidence hash binding.
 
 `tools/pptx-nova-audit-public.mjs` checks for:
 

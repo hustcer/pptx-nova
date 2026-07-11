@@ -1,6 +1,6 @@
 # pptx-nova
 
-`pptx-nova` is an agent skill for creating, editing, refurbishing, and checking
+`pptx-nova` is an agent skill for creating, editing, refurbishing, translating, and checking
 PowerPoint presentations. It is designed to deliver real, editable `.pptx`
 files, not slide screenshots pasted into a deck.
 
@@ -40,6 +40,8 @@ one-shot slide generator.
   comparison image for review.
 - Edit existing decks, including titles, copy, slide order, visuals, colors,
   charts, tables, and selected page elements.
+- Preserve explicit current-deck follow-up rules, such as applying the same
+  title color to slides added later, and verify supported rules in the final PPTX.
 - Inspect real PPTX structure, select exact target objects, dry-run edits, and
   apply changes to validated candidates before publishing a final file.
 - Use a company template or reference deck as a guide while avoiding
@@ -163,6 +165,19 @@ Failures are blocked with a specific next action instead of being silently
 delivered. Complex or uncertain PPTX regions can still require specialized
 checks or human review.
 
+### Reliable follow-up rules
+
+For multi-turn work on the same deck, pptx-nova can preserve explicit
+future/carryover instructions instead of relying on temporary chat memory. It
+records the rule against the current deck revision, resolves conflicts and
+one-time overrides, and verifies supported style rules in the final PPTX before
+delivery.
+
+The current scope is deliberately narrow and deterministic. It does not infer
+long-term preferences from vague feedback, create a cross-project user profile,
+or allow a session rule to bypass template and quality checks. Rules that do not
+apply to the current edit add no extra edit target or delivery evidence.
+
 This is the part that makes pptx-nova different from many generic slide
 generators, screenshot pipelines, or small PowerPoint scripting snippets:
 
@@ -223,7 +238,8 @@ labels, lost formatting, or PowerPoint repair issues.
 ```text
 .
 +-- pptx-nova/                 # The main publishable pptx-nova skill
-|   +-- README.md              # Chinese user guide
+|   +-- README.md              # English user guide
+|   +-- README.zh-CN.md        # Chinese user guide
 |   +-- assets/                # DeckKits, examples, themes, icons, schemas
 |   +-- benchmarks/visual/     # Visual benchmark cases and baselines
 |   +-- references/            # Workflow references for agents and maintainers
@@ -259,9 +275,11 @@ node tools/pptx-nova-audit-public.mjs --strict
 ```
 
 The smoke test validates bundled DeckKit content, builds a patch, queries the
-bundled icon pack, and checks DeckKit selection. The public audit scans for
-machine-local paths, private repository context, unexpected binaries, missing
-license requirements, and other release blockers.
+bundled icon pack, checks DeckKit selection, exercises session-rules
+normalization/resolution, and verifies Edit Contract source and evidence
+bindings. The public audit scans for machine-local paths, private repository
+context, unexpected binaries, missing license requirements, and other release
+blockers.
 
 `xdoc` is the in-house, agent-oriented PPTX engine behind pptx-nova, exposed to
 the skill through its primary CLI. pptx-nova uses it for PowerPoint inspection,
@@ -290,6 +308,7 @@ itself needs to be built or extended.
 ## More documentation
 
 - [pptx-nova user guide](pptx-nova/README.md)
+- [pptx-nova 中文使用指南](pptx-nova/README.zh-CN.md)
 - [pptx-nova scripts](pptx-nova/scripts/README.md)
 - [Translation workflow](pptx-nova/references/translation-mode.md)
 - [pptx-nova assets](pptx-nova/assets/README.md)

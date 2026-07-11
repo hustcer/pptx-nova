@@ -5,9 +5,12 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
+  rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 
 const SCHEMA_VERSION = 'pptx-nova-compare-gate/v1'
@@ -203,6 +206,70 @@ function makeSiblingPath(args) {
   throw new Error('Could not find a collision-free timestamped sibling path')
 }
 
+function multipartSiblingPattern(finalPptx, compareStem) {
+  return new RegExp(
+    `^${escapeRegex(stem(finalPptx))}-${escapeRegex(compareStem)}-(\\d{10})-(\\d{2,})\\.png$`,
+  )
+}
+
+function makeMultipartSiblingPaths(args, partCount) {
+  let timestamp = args.timestamp || timestampNow()
+  if (!validateTimestamp(timestamp))
+    throw new Error(`--timestamp must use MMDDhhmmss: ${timestamp}`)
+  const width = Math.max(2, String(partCount).length)
+  const dir = dirname(args.finalPptx)
+  const base = stem(args.finalPptx)
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const paths = Array.from({ length: partCount }, (_, index) =>
+      join(
+        dir,
+        `${base}-${args.compareStem}-${timestamp}-${String(index + 1).padStart(width, '0')}.png`,
+      ),
+    )
+    if (args.overwrite || paths.every((path) => !existsSync(path))) return { timestamp, paths }
+    timestamp = addSecond(timestamp)
+  }
+  throw new Error('Could not find a collision-free timestamp for multipart sibling paths')
+}
+
+function findMultipartSiblings(args, partCount) {
+  const dir = dirname(args.finalPptx)
+  if (!existsSync(dir)) return { timestamp: null, paths: [] }
+  const pattern = multipartSiblingPattern(args.finalPptx, args.compareStem)
+  const groups = new Map()
+  for (const name of readdirSync(dir)) {
+    const match = name.match(pattern)
+    if (!match || !validateTimestamp(match[1])) continue
+    const group = groups.get(match[1]) ?? []
+    group.push({ number: Number(match[2]), path: join(dir, name) })
+    groups.set(match[1], group)
+  }
+  const timestamp = [...groups.keys()].sort().at(-1) ?? null
+  if (!timestamp) return { timestamp: null, paths: [] }
+  const paths = groups
+    .get(timestamp)
+    .sort((a, b) => a.number - b.number)
+    .map((item) => item.path)
+  return paths.length === partCount ? { timestamp, paths } : { timestamp, paths: [] }
+}
+
+function publishMultipartParts(partStates, siblingPaths) {
+  const staged = siblingPaths.map(
+    (path, index) => `${path}.pptx-nova-${process.pid}-${Date.now()}-${index + 1}.tmp`,
+  )
+  try {
+    for (let index = 0; index < partStates.length; index += 1) {
+      copyFileSync(partStates[index].path, staged[index])
+    }
+    for (let index = 0; index < staged.length; index += 1) {
+      renameSync(staged[index], siblingPaths[index])
+    }
+  } catch (error) {
+    for (const path of [...staged, ...siblingPaths]) rmSync(path, { force: true })
+    throw error
+  }
+}
+
 function findSibling(args) {
   if (args.sibling) return args.sibling
   const dir = dirname(args.finalPptx)
@@ -224,6 +291,150 @@ function findSibling(args) {
 
 function sameSize(left, right) {
   return left.exists && right.exists && left.byteLength === right.byteLength
+}
+
+function sha256(path) {
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
+function coverageFromParts(parts, slideCount) {
+  const counts = new Map()
+  for (const part of parts) {
+    for (const slide of Array.isArray(part.slides) ? part.slides : []) {
+      counts.set(slide, (counts.get(slide) ?? 0) + 1)
+    }
+  }
+  const expected = Array.from({ length: slideCount }, (_, index) => index + 1)
+  return {
+    missingSlides: expected.filter((slide) => !counts.has(slide)),
+    duplicateSlides: expected.filter((slide) => (counts.get(slide) ?? 0) > 1),
+    outOfRangeSlides: [...counts.keys()].filter((slide) => slide < 1 || slide > slideCount),
+  }
+}
+
+function validateMultipartManifest(report, blockers) {
+  if (report.status !== 'success') blockers.push('multipart compare manifest status is not success')
+  if (!Number.isInteger(report.slideCount) || report.slideCount <= 0) {
+    blockers.push('multipart compare manifest slideCount is missing or invalid')
+  }
+  if (!Array.isArray(report.parts) || report.parts.length < 2) {
+    blockers.push('multipart compare manifest must contain at least two parts')
+    return []
+  }
+  for (const [label, endpoint] of [
+    ['source', report.source],
+    ['candidate', report.candidate],
+  ]) {
+    const path = typeof endpoint?.path === 'string' ? resolve(endpoint.path) : ''
+    const state = fileState(path || join(process.cwd(), '__missing__'))
+    if (!state.exists || !state.isFile) blockers.push(`multipart ${label} file is missing: ${path}`)
+    else if (endpoint.sha256 !== sha256(path)) {
+      blockers.push(`multipart ${label} SHA-256 does not match manifest`)
+    }
+  }
+  const states = report.parts.map((part, index) => {
+    const label = `multipart part ${index + 1}`
+    const path = typeof part.path === 'string' ? resolve(part.path) : ''
+    const state = fileState(path || join(process.cwd(), '__missing__'))
+    if (!path) blockers.push(`${label} path is missing`)
+    else if (!state.exists || !state.isFile || state.byteLength <= 0) {
+      blockers.push(`${label} PNG is missing or empty: ${path}`)
+    }
+    if (state.exists && part.byteLength !== state.byteLength) {
+      blockers.push(`${label} byteLength does not match manifest`)
+    }
+    if (state.exists && part.sha256 !== sha256(path)) {
+      blockers.push(`${label} SHA-256 does not match manifest`)
+    }
+    if (!Array.isArray(part.slides) || part.slides.length === 0) {
+      blockers.push(`${label} slides are missing`)
+    }
+    if (part.pairCount !== part.slides?.length) {
+      blockers.push(`${label} pairCount does not match its slide coverage`)
+    }
+    if (![192, 144].includes(part.dpi)) blockers.push(`${label} DPI must be 192 or 144`)
+    if (part.agentGate?.passed !== true && part.agentGate?.status !== 'pass') {
+      blockers.push(`${label} agent gate did not pass`)
+    }
+    const partReportPath = typeof part.reportPath === 'string' ? resolve(part.reportPath) : ''
+    const partReportState = fileState(partReportPath || join(process.cwd(), '__missing__'))
+    if (!partReportState.exists || !partReportState.isFile) {
+      blockers.push(`${label} JSON report is missing: ${partReportPath || '(unset)'}`)
+    } else {
+      const partReport = readJson(partReportPath)
+      if (partReport.schemaVersion !== 'pptx-contact-diff/v1' || partReport.status !== 'success') {
+        blockers.push(`${label} JSON report is not a successful pptx-contact-diff/v1 report`)
+      }
+      for (const outputPath of reportImagePaths(partReport)) {
+        if (resolve(outputPath) !== path)
+          blockers.push(`${label} JSON output path does not match PNG`)
+      }
+      const reportPairCount = reportNumber(
+        partReport.agentGate?.pairCount,
+        partReport.summary?.pairCount,
+      )
+      if (reportPairCount !== part.pairCount) {
+        blockers.push(`${label} JSON pairCount does not match manifest`)
+      }
+      const reportDpi = reportNumber(partReport.render?.dpi, partReport.summary?.dpi)
+      if (reportDpi !== part.dpi) blockers.push(`${label} JSON DPI does not match manifest`)
+      if (
+        !Array.isArray(partReport.scope?.slides) ||
+        JSON.stringify(partReport.scope.slides) !== JSON.stringify(part.slides)
+      ) {
+        blockers.push(`${label} JSON scope does not match manifest slides`)
+      }
+    }
+    const attempts = Array.isArray(part.attempts) ? part.attempts : []
+    if (
+      part.dpi === 192 &&
+      !(attempts.length === 1 && attempts[0]?.dpi === 192 && attempts[0]?.status === 'success')
+    ) {
+      blockers.push(`${label} attempt history is invalid for a 192 DPI part`)
+    }
+    if (
+      part.dpi === 144 &&
+      !(
+        attempts.length === 2 &&
+        attempts[0]?.dpi === 192 &&
+        attempts[0]?.status === 'failed' &&
+        attempts[0]?.error?.retryable === true &&
+        (attempts[0]?.error?.kind === 'RenderError' ||
+          attempts[0]?.error?.code === 'RenderError') &&
+        attempts[1]?.dpi === 144 &&
+        attempts[1]?.status === 'success'
+      )
+    ) {
+      blockers.push(`${label} attempt history does not prove an allowed 192 to 144 retry`)
+    }
+    return {
+      ...state,
+      partNumber: part.partNumber,
+      selector: part.selector,
+      dpi: part.dpi,
+      sha256: part.sha256,
+    }
+  })
+  if (Number.isInteger(report.slideCount) && report.slideCount > 0) {
+    const coverage = coverageFromParts(report.parts, report.slideCount)
+    if (coverage.missingSlides.length > 0) {
+      blockers.push(`multipart coverage has missing slides: ${coverage.missingSlides.join(',')}`)
+    }
+    if (coverage.duplicateSlides.length > 0) {
+      blockers.push(
+        `multipart coverage has duplicate slides: ${coverage.duplicateSlides.join(',')}`,
+      )
+    }
+    if (coverage.outOfRangeSlides.length > 0) {
+      blockers.push(
+        `multipart coverage has out-of-range slides: ${coverage.outOfRangeSlides.join(',')}`,
+      )
+    }
+  }
+  if (report.agentGate?.passed !== true && report.agentGate?.status !== 'pass') {
+    blockers.push('multipart compare manifest agent gate did not pass')
+  }
+  return states
 }
 
 function reportNumber(...values) {
@@ -271,7 +482,7 @@ function validateNativeCompareReport(args, report, compareState, blockers, warni
   }
 }
 
-function validateXdocContactDiffReport(report, compareState, blockers, warnings) {
+function validateXdocContactDiffReport(report, compareState, blockers) {
   if (report.status !== 'success') blockers.push('contact-diff report status is not success')
   const gate = report.agentGate ?? {}
   if (gate.passed !== true && gate.status !== 'pass') {
@@ -303,6 +514,27 @@ function validateXdocContactDiffReport(report, compareState, blockers, warnings)
       blockers.push(`contact-diff output differs from checked compare path: ${outputPath}`)
     }
   }
+  const dpi = reportNumber(report.render?.dpi, report.summary?.dpi)
+  if (![192, 144].includes(dpi)) blockers.push('contact-diff DPI must be 192 or 144')
+  const attempts = report.pptxNovaCompare?.attempts
+  if (Array.isArray(attempts)) {
+    const valid192 =
+      dpi === 192 &&
+      attempts.length === 1 &&
+      attempts[0]?.dpi === 192 &&
+      attempts[0]?.status === 'success'
+    const valid144 =
+      dpi === 144 &&
+      attempts.length === 2 &&
+      attempts[0]?.dpi === 192 &&
+      attempts[0]?.status === 'failed' &&
+      attempts[0]?.error?.retryable === true &&
+      (attempts[0]?.error?.kind === 'RenderError' || attempts[0]?.error?.code === 'RenderError') &&
+      attempts[1]?.dpi === 144 &&
+      attempts[1]?.status === 'success'
+    if (!valid192 && !valid144)
+      blockers.push('contact-diff attempt history does not prove an allowed DPI policy')
+  }
 }
 
 function validateReport(args, report, compareState, blockers, warnings) {
@@ -311,7 +543,7 @@ function validateReport(args, report, compareState, blockers, warnings) {
     return
   }
   if (report.schemaVersion === 'pptx-contact-diff/v1') {
-    validateXdocContactDiffReport(report, compareState, blockers, warnings)
+    validateXdocContactDiffReport(report, compareState, blockers)
     return
   }
   validateNativeCompareReport(args, report, compareState, blockers, warnings)
@@ -375,54 +607,94 @@ function buildReport(args) {
     if (!finalState.exists) blockers.push(`final PPTX is missing: ${args.finalPptx}`)
     else if (!finalState.isFile) blockers.push(`final PPTX is not a file: ${args.finalPptx}`)
   }
-  if (!compareState.exists) blockers.push(`run-directory compare PNG is missing: ${args.compare}`)
-  else if (!compareState.isFile) blockers.push(`compare PNG is not a file: ${args.compare}`)
-  else if (compareState.byteLength <= 0) blockers.push('compare PNG is empty')
   if (!reportState.exists) blockers.push(`compare report is missing: ${args.report}`)
   else if (!reportState.isFile) blockers.push(`compare report is not a file: ${args.report}`)
 
   const compareReport = reportState.exists && reportState.isFile ? readJson(args.report) : null
-  if (compareReport) validateReport(args, compareReport, compareState, blockers, warnings)
-  const reportSummary = compareReportSummary(compareReport)
-
-  let sibling = args.publish ? makeSiblingPath(args) : findSibling(args)
-  if (args.publish && blockers.length === 0) {
-    if (existsSync(sibling) && !args.overwrite) {
-      blockers.push(`sibling compare PNG already exists: ${sibling}`)
-    } else {
-      mkdirSync(dirname(sibling), { recursive: true })
-      copyFileSync(args.compare, sibling)
+  const multipart = compareReport?.schemaVersion === 'pptx-nova-compare-manifest/v1'
+  let partStates = []
+  let sibling = ''
+  let siblingState = fileState(join(dirname(args.finalPptx), '__missing__'))
+  let siblingPaths = []
+  let siblingStates = []
+  let timestamp = null
+  if (multipart) {
+    partStates = validateMultipartManifest(compareReport, blockers)
+    const selection = args.publish
+      ? makeMultipartSiblingPaths(args, partStates.length)
+      : findMultipartSiblings(args, partStates.length)
+    timestamp = selection.timestamp
+    siblingPaths = selection.paths
+    if (!timestamp || siblingPaths.length !== partStates.length) {
+      blockers.push(
+        `no complete multipart sibling set found matching ${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>-<part>.png`,
+      )
     }
-  }
-
-  const siblingState = sibling
-    ? fileState(sibling)
-    : fileState(join(dirname(args.finalPptx), '__missing__'))
-  const pattern = siblingPattern(args.finalPptx, args.compareStem)
-  const siblingBase = sibling ? basename(sibling) : ''
-  const timestamp = siblingBase.match(pattern)?.[1] || null
-
-  if (!sibling) {
-    blockers.push(
-      `no sibling compare PNG found next to final PPTX matching ${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>.png`,
-    )
+    if (args.publish && blockers.length === 0) {
+      mkdirSync(dirname(args.finalPptx), { recursive: true })
+      publishMultipartParts(partStates, siblingPaths)
+    }
+    siblingStates = siblingPaths.map((path, index) => {
+      const state = fileState(path)
+      if (!state.exists || !state.isFile || state.byteLength <= 0) {
+        blockers.push(`multipart sibling ${index + 1} is missing or empty: ${path}`)
+      } else if (state.byteLength !== partStates[index]?.byteLength) {
+        blockers.push(`multipart sibling ${index + 1} byteLength does not match run evidence`)
+      } else if (sha256(path) !== partStates[index]?.sha256) {
+        blockers.push(`multipart sibling ${index + 1} SHA-256 does not match run evidence`)
+      }
+      return { ...state, partNumber: index + 1, sha256: state.exists ? sha256(path) : null }
+    })
+    sibling = siblingPaths[0] || ''
+    siblingState = siblingStates[0] ?? siblingState
   } else {
-    if (dirname(sibling) !== dirname(args.finalPptx)) {
-      blockers.push('sibling compare PNG is not in the same directory as the final PPTX')
+    if (!compareState.exists) blockers.push(`run-directory compare PNG is missing: ${args.compare}`)
+    else if (!compareState.isFile) blockers.push(`compare PNG is not a file: ${args.compare}`)
+    else if (compareState.byteLength <= 0) blockers.push('compare PNG is empty')
+    if (compareReport) validateReport(args, compareReport, compareState, blockers, warnings)
+    sibling = args.publish ? makeSiblingPath(args) : findSibling(args)
+    if (args.publish && blockers.length === 0) {
+      if (existsSync(sibling) && !args.overwrite) {
+        blockers.push(`sibling compare PNG already exists: ${sibling}`)
+      } else {
+        mkdirSync(dirname(sibling), { recursive: true })
+        copyFileSync(args.compare, sibling)
+      }
     }
-    if (!pattern.test(siblingBase)) {
-      blockers.push(`sibling compare PNG does not match required filename pattern: ${siblingBase}`)
-    }
-    if (timestamp && !validateTimestamp(timestamp)) {
-      blockers.push(`sibling compare PNG timestamp is invalid: ${timestamp}`)
-    }
-    if (!siblingState.exists) blockers.push(`sibling compare PNG is missing: ${sibling}`)
-    else if (!siblingState.isFile) blockers.push(`sibling compare PNG is not a file: ${sibling}`)
-    else if (siblingState.byteLength <= 0) blockers.push('sibling compare PNG is empty')
-    else if (!sameSize(compareState, siblingState)) {
-      blockers.push('sibling compare PNG byteLength does not match run-directory compare PNG')
+    siblingState = sibling
+      ? fileState(sibling)
+      : fileState(join(dirname(args.finalPptx), '__missing__'))
+    const pattern = siblingPattern(args.finalPptx, args.compareStem)
+    const siblingBase = sibling ? basename(sibling) : ''
+    timestamp = siblingBase.match(pattern)?.[1] || null
+    if (!sibling) {
+      blockers.push(
+        `no sibling compare PNG found next to final PPTX matching ${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>.png`,
+      )
+    } else {
+      if (dirname(sibling) !== dirname(args.finalPptx))
+        blockers.push('sibling compare PNG is not next to final PPTX')
+      if (!pattern.test(siblingBase))
+        blockers.push(`sibling compare PNG has invalid name: ${siblingBase}`)
+      if (!siblingState.exists || !siblingState.isFile || siblingState.byteLength <= 0) {
+        blockers.push(`sibling compare PNG is missing or empty: ${sibling}`)
+      } else if (!sameSize(compareState, siblingState)) {
+        blockers.push('sibling compare PNG byteLength does not match run-directory compare PNG')
+      }
     }
   }
+  const reportSummary = multipart
+    ? {
+        schemaVersion: compareReport.schemaVersion,
+        status: compareReport.status,
+        pageCount: compareReport.slideCount,
+        partCount: compareReport.parts?.length ?? 0,
+        slideSelector: null,
+        width: null,
+        height: null,
+        byteLength: null,
+      }
+    : compareReportSummary(compareReport)
 
   const status = blockers.length === 0 ? 'pass' : 'fail'
   return {
@@ -436,6 +708,7 @@ function buildReport(args) {
     finalPptx: finalState,
     finalPptxSource: finalSourceState,
     compare: compareState,
+    parts: partStates,
     compareReport: {
       path: args.report,
       exists: reportState.exists,
@@ -443,17 +716,23 @@ function buildReport(args) {
     },
     sibling: {
       ...siblingState,
-      requiredPattern: `${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>.png`,
+      requiredPattern: multipart
+        ? `${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>-<part>.png`
+        : `${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>.png`,
       timestamp,
     },
+    siblings: siblingStates,
     blockers,
     warnings,
     agentSummary: {
       status,
-      siblingPath: sibling || null,
+      siblingPath: sibling || siblingPaths[0] || null,
+      siblingPaths: siblingPaths.length > 0 ? siblingPaths : sibling ? [sibling] : [],
       message:
         status === 'pass'
-          ? 'Compare PNG is published next to the final PPTX and matches run evidence.'
+          ? multipart
+            ? 'The complete numbered compare PNG set is published next to the final PPTX and matches run evidence.'
+            : 'Compare PNG is published next to the final PPTX and matches run evidence.'
           : `Compare delivery gate failed with ${blockers.length} blocker(s).`,
     },
   }

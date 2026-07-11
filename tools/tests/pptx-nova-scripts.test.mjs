@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
 import { test } from 'node:test'
@@ -46,6 +54,58 @@ function writeFakeXdoc(root, source) {
   writeFileSync(scriptPath, source)
   chmodSync(scriptPath, 0o755)
   return scriptPath
+}
+
+function writeMultipartContactDiffXdoc(root) {
+  return writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+import { appendFileSync, writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+const valueAfter = (flag) => {
+  const index = args.indexOf(flag)
+  return index >= 0 ? args[index + 1] : ''
+}
+const selector = valueAfter('--slides')
+const dpi = Number(valueAfter('--dpi'))
+const output = valueAfter('--output')
+const log = process.env.FAKE_XDOC_LOG
+if (log) appendFileSync(log, JSON.stringify({ selector, dpi, output }) + '\\n')
+const mode = process.env.FAKE_XDOC_MODE || 'success'
+const shouldFail192 = mode === 'retry-part-2' && selector === '21-40' && dpi === 192
+const shouldFailBoth = mode === 'fail-part-2' && selector === '21-40'
+const nonRetryable = mode === 'non-retryable' && selector === '21-40' && dpi === 192
+if (shouldFail192 || shouldFailBoth || nonRetryable) {
+  process.stdout.write(JSON.stringify({
+    schemaVersion: 'pptx-contact-diff/v1',
+    status: 'error',
+    error: {
+      kind: nonRetryable ? 'InputError' : 'RenderError',
+      code: nonRetryable ? 'InputError' : 'RenderError',
+      stage: 'render',
+      retryable: !nonRetryable,
+      requestedDpi: dpi,
+      pairCount: selector === '41-48' ? 8 : 20,
+      reason: nonRetryable ? 'invalid-input' : 'canvas-dimension-limit'
+    }
+  }))
+  process.exit(7)
+}
+const [start, end] = selector.split('-').map(Number)
+const pairCount = end - start + 1
+writeFileSync(output, 'png:' + selector + ':' + dpi)
+process.stdout.write(JSON.stringify({
+  schemaVersion: 'pptx-contact-diff/v1',
+  status: 'success',
+  outputPath: output,
+  summary: { pairCount, scopeMode: 'selected-slides', dpi },
+  scope: { requested: selector, slides: Array.from({ length: pairCount }, (_, index) => start + index), basis: 'source-slides' },
+  agentGate: { passed: true, status: 'pass', scopeMode: 'selected-slides', pairCount },
+  render: { path: output, width: 7043, height: pairCount * 500 + 73, dpi }
+}))
+`,
+  )
 }
 
 test('layout snapshot separates actionable risks from informational inspect gaps', () => {
@@ -1413,6 +1473,359 @@ if (args[0] === 'pptx' && args[1] === 'contact-diff') {
   assert.equal(report.summary.slides, '3')
   assert.equal(report.render.dpi, 216)
   assert.equal(readFileSync(reportPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
+})
+
+test('compare splits 48 slides into complete 20/20/8 high-DPI parts and writes a manifest', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-compare-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const runDir = join(root, 'run')
+  const log = join(root, 'xdoc.log')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+
+  const result = runNode(
+    [
+      skillPath('scripts/pptx-nova-compare.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--run-dir',
+      runDir,
+      '--kind',
+      'refurbish',
+      '--slide-count',
+      '48',
+      '--compare-chunk-size',
+      '20',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    { env: { ...process.env, FAKE_XDOC_LOG: log } },
+  )
+  const manifest = JSON.parse(result.stdout)
+
+  assert.equal(manifest.schemaVersion, 'pptx-nova-compare-manifest/v1')
+  assert.equal(manifest.status, 'success')
+  assert.equal(manifest.slideCount, 48)
+  assert.equal(manifest.chunkSize, 20)
+  assert.deepEqual(
+    manifest.parts.map((part) => [part.selector, part.pairCount, part.dpi]),
+    [
+      ['1-20', 20, 192],
+      ['21-40', 20, 192],
+      ['41-48', 8, 192],
+    ],
+  )
+  assert.deepEqual(manifest.coverage.missingSlides, [])
+  assert.deepEqual(manifest.coverage.duplicateSlides, [])
+  assert.equal(manifest.agentGate.passed, true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-01.png')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-02.png')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-03.png')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare.png')), false)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
+  assert.deepEqual(
+    readFileSync(log, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const entry = JSON.parse(line)
+        return [entry.selector, entry.dpi]
+      }),
+    [
+      ['1-20', 192],
+      ['21-40', 192],
+      ['41-48', 192],
+    ],
+  )
+})
+
+test('compare retries only a retryable RenderError part at 144 DPI', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-retry-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const runDir = join(root, 'run')
+  const log = join(root, 'xdoc.log')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+
+  const result = runNode(
+    [
+      skillPath('scripts/pptx-nova-compare.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--run-dir',
+      runDir,
+      '--kind',
+      'refurbish',
+      '--slide-count',
+      '48',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    {
+      env: {
+        ...process.env,
+        FAKE_XDOC_LOG: log,
+        FAKE_XDOC_MODE: 'retry-part-2',
+      },
+    },
+  )
+  const manifest = JSON.parse(result.stdout)
+  assert.deepEqual(
+    manifest.parts.map((part) => part.dpi),
+    [192, 144, 192],
+  )
+  assert.deepEqual(
+    manifest.parts[1].attempts.map((attempt) => [attempt.dpi, attempt.status]),
+    [
+      [192, 'failed'],
+      [144, 'success'],
+    ],
+  )
+  assert.equal(manifest.parts[1].attempts[0].error.reason, 'canvas-dimension-limit')
+})
+
+test('compare keeps the single-file contract for small decks and may retry it at 144 DPI', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-single-compare-retry-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const runDir = join(root, 'run')
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+import { writeFileSync } from 'node:fs'
+const args = process.argv.slice(2)
+const valueAfter = (flag) => args[args.indexOf(flag) + 1]
+const dpi = Number(valueAfter('--dpi'))
+const output = valueAfter('--output')
+if (dpi === 192) {
+  process.stdout.write(JSON.stringify({
+    schemaVersion: 'pptx-contact-diff/v1', status: 'error',
+    error: { kind: 'RenderError', code: 'RenderError', stage: 'render', retryable: true, requestedDpi: 192, pairCount: 12, reason: 'render-resource-limit' }
+  }))
+  process.exit(7)
+}
+writeFileSync(output, 'single 144 dpi png')
+process.stdout.write(JSON.stringify({
+  schemaVersion: 'pptx-contact-diff/v1', status: 'success', outputPath: output,
+  summary: { pairCount: 12, scopeMode: 'all-slides', dpi },
+  agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 12 },
+  render: { path: output, width: 5000, height: 6000, dpi }
+}))
+`,
+  )
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  const result = runNode([
+    skillPath('scripts/pptx-nova-compare.mjs'),
+    '--source',
+    source,
+    '--candidate',
+    candidate,
+    '--run-dir',
+    runDir,
+    '--kind',
+    'refurbish',
+    '--slide-count',
+    '12',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.schemaVersion, 'pptx-contact-diff/v1')
+  assert.equal(existsSync(join(runDir, 'refurbish-compare.png')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-01.png')), false)
+  assert.deepEqual(
+    report.pptxNovaCompare.attempts.map((attempt) => [attempt.dpi, attempt.status]),
+    [
+      [192, 'failed'],
+      [144, 'success'],
+    ],
+  )
+})
+
+test('compare fails closed and removes every part when 144 DPI also fails', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-fail-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const runDir = join(root, 'run')
+  const log = join(root, 'xdoc.log')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-compare.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--run-dir',
+      runDir,
+      '--kind',
+      'refurbish',
+      '--slide-count',
+      '48',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      env: { ...process.env, FAKE_XDOC_LOG: log, FAKE_XDOC_MODE: 'fail-part-2' },
+    },
+  )
+  assert.equal(result.status, 1)
+  assert.equal(
+    readdirSync(runDir).filter((name) => /refurbish-compare.*\.(png|json)$/.test(name)).length,
+    0,
+  )
+  assert.deepEqual(
+    readFileSync(log, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line).dpi),
+    [192, 192, 144],
+  )
+})
+
+test('compare does not retry a non-RenderError failure', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-non-retryable-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const runDir = join(root, 'run')
+  const log = join(root, 'xdoc.log')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-compare.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--run-dir',
+      runDir,
+      '--kind',
+      'refurbish',
+      '--slide-count',
+      '48',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      env: { ...process.env, FAKE_XDOC_LOG: log, FAKE_XDOC_MODE: 'non-retryable' },
+    },
+  )
+  assert.equal(result.status, 1)
+  assert.deepEqual(
+    readFileSync(log, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line).dpi),
+    [192, 192],
+  )
+})
+
+test('compare gate publishes every multipart sibling and rejects duplicate coverage', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-gate-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const finalPptx = join(root, 'final.pptx')
+  const runDir = join(root, 'run')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  runNode([
+    skillPath('scripts/pptx-nova-compare.mjs'),
+    '--source',
+    source,
+    '--candidate',
+    candidate,
+    '--run-dir',
+    runDir,
+    '--kind',
+    'refurbish',
+    '--slide-count',
+    '48',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+
+  const gateResult = runNode([
+    skillPath('scripts/pptx-nova-compare-gate.mjs'),
+    '--run-dir',
+    runDir,
+    '--final-pptx',
+    finalPptx,
+    '--final-pptx-source',
+    candidate,
+    '--kind',
+    'refurbish',
+    '--publish',
+    '--timestamp',
+    '0711230000',
+    '--overwrite',
+    '--json',
+  ])
+  const gate = JSON.parse(gateResult.stdout)
+  assert.equal(gate.status, 'pass')
+  assert.deepEqual(
+    gate.agentSummary.siblingPaths.map((path) => basename(path)),
+    [
+      'final-refurbish-compare-0711230000-01.png',
+      'final-refurbish-compare-0711230000-02.png',
+      'final-refurbish-compare-0711230000-03.png',
+    ],
+  )
+  assert.equal(
+    gate.siblings.every((sibling) => sibling.exists && sibling.byteLength > 0),
+    true,
+  )
+
+  const manifestPath = join(runDir, 'refurbish-compare.json')
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  manifest.parts[1].slides[0] = 20
+  writeJson(manifestPath, manifest)
+  const invalidGate = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      finalPptx,
+      '--final-pptx-source',
+      candidate,
+      '--kind',
+      'refurbish',
+      '--json',
+      '--overwrite',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(invalidGate.status, 2)
+  assert.match(JSON.parse(invalidGate.stdout).blockers.join('\n'), /duplicate|coverage/i)
 })
 
 function writeCompareGateFixture(root, makeReport) {

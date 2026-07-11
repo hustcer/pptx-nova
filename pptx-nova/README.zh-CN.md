@@ -247,8 +247,8 @@ PPTX 对象以及最终视觉判断，仍可能需要专项检查或人工复核
   `clean-open.json`、`translation-compare.png`、`translation-compare.json`、
   `refurbish-compare.png` 或 `refurbish-compare.json`。这些文件只在相关任务中出现，
   不会为了凑清单而补造。
-- 对翻译或翻新任务，正式交付目录通常还会包含一张逐 slide 的源文件/交付文件对比全景图，
-  方便快速核查每页是否漏改、失真或引入新的视觉问题。
+- 对翻译或翻新任务，正式交付目录通常还会包含完整的逐 slide 源文件/交付文件对比集合。
+  20 页以内保持单图；更大的 deck 使用带编号的多张高 DPI 图片和覆盖 manifest，避免超长画布失败。
 
 默认不会覆盖你的原始 PPT。除非你明确要求“直接覆盖原文件”，否则会输出到一个新文件。
 
@@ -281,7 +281,8 @@ PPTX 对象以及最终视觉判断，仍可能需要专项检查或人工复核
 如果旧 PPT 本身内容太密、页面装不下，通常会先尝试保留原生对象并调整版式；确实需要拆页、
 合页、重排或删减内容时，必须先让你确认。默认不会把源页整页截图塞进新 PPT 来冒充可编辑翻新。
 机器检查通过后，翻新类任务通常仍需要打开 contact sheet、逐页图片和同目录的
-`*-refurbish-compare-<MMDDhhmmss>.png` 做最终视觉复核。
+`*-refurbish-compare-<MMDDhhmmss>.png`，或完整的
+`*-refurbish-compare-<MMDDhhmmss>-01.png`、`-02.png`……编号集合做最终视觉复核。
 
 ## 什么时候需要先确认
 

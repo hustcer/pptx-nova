@@ -355,14 +355,18 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     with only light chrome added is not done.
     For existing-deck refurbishment, the standard runner writes
     `fidelity-gate.json`, `candidate-inspect.json`, `layout-final.json`,
-    `refurbish-compare.png`, and `refurbish-compare-gate.json`
+    the compatible `refurbish-compare.png` or numbered `refurbish-compare-*.png`
+    set, `refurbish-compare.json`, and `refurbish-compare-gate.json`
     before returning. If running low-level commands manually, run
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
     `refurbish-audit`, run `pptx-nova-layout-snapshot.mjs` on final inspect,
-    then run `xdoc pptx contact-diff --dpi 192` to write
-    `refurbish-compare.png` / `refurbish-compare.json` and
-    `pptx-nova-compare-gate.mjs --kind refurbish --publish`; keep all reports
-    with the run artifacts and list the sibling compare PNG in the final response.
+    then run `pptx-nova-compare.mjs --kind refurbish --slide-count <count>
+--compare-chunk-size 20 --dpi 192 --fallback-dpi 144`. Decks larger than
+    20 slides become numbered parts; only an explicit retryable `RenderError`
+    may lower the failed part to 144 DPI. Run
+    `pptx-nova-compare-gate.mjs --kind refurbish --publish`; keep the manifest
+    and all part reports with the run artifacts and list every sibling PNG in
+    the final response.
     For agent-facing status and final-response facts, read
     `refurbish-run-summary.json.agentSummary` or
     `evidence-summary.json.agentSummary` first; open the underlying gate reports

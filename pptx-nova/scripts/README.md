@@ -84,16 +84,16 @@ Use these entry points from skill workflows:
   French or other Latin-script target text does not become a false English
   blocker. Native candidate language-classification blockers remain in the
   report as diagnostic evidence.
-- `pptx-nova-compare.mjs` - write a high-DPI full-deck before/after compare
-  PNG for workflows such as translation and refurbish by delegating to
-  `xdoc pptx contact-diff --dpi`. Use `--kind translation` or
-  `--kind refurbish` to get the expected artifact names.
+- `pptx-nova-compare.mjs` - write a high-DPI full-deck before/after compare by
+  delegating atomic parts to `xdoc pptx contact-diff`. With `--slide-count`,
+  decks over the default 20-slide chunk size produce numbered PNGs and a
+  `pptx-nova-compare-manifest/v1`; a retryable 192 DPI `RenderError` retries
+  only that part once at 144 DPI.
 - `pptx-nova-compare-gate.mjs` - delivery guard for compare artifacts. It
-  validates run-directory `<kind>-compare.png` / `.json`, rejects scoped
-  comparison reports for final delivery, and with `--publish` copies the PNG
-  next to the final PPTX as
-  `<output-stem>-<kind>-compare-<MMDDhhmmss>.png` before writing
-  `<kind>-compare-gate.json`.
+  validates either the compatible single PNG or every multipart path, hash,
+  report, attempt history, and exact slide coverage. With `--publish`, it
+  copies the single PNG or complete numbered set next to the final PPTX before
+  writing `<kind>-compare-gate.json`.
 - pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
   data-driven, Studio, structural edit, template-following, and refurbish runs
   that contain native chart/table ops. It validates data shape, source/claim

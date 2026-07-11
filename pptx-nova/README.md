@@ -280,9 +280,9 @@ Usually, delivery includes:
   `translation-compare.png`, `translation-compare.json`, `refurbish-compare.png`, or
   `refurbish-compare.json`. These files appear only when relevant; they are not fabricated to fill
   a checklist.
-- For translation or refurbishment tasks, the formal delivery directory usually also contains one
-  all-slides source-vs-deliverable comparison image, which helps you quickly check whether any slide
-  was missed, distorted, or given new visual issues.
+- For translation or refurbishment tasks, the formal delivery directory usually also contains a
+  complete source-vs-deliverable comparison set. Decks up to 20 slides use one image; larger decks
+  use numbered images plus a coverage manifest so every slide remains reviewable at high DPI.
 
 Your original PPT is not overwritten by default. Unless you explicitly ask to overwrite the original
 file, output is written to a new file.
@@ -318,7 +318,8 @@ native objects and adjust the layout. If pages truly need to be split, merged, r
 you must confirm that first. By default, it will not insert full-slide screenshots from the source into
 the new PPT as a fake editable refurbishment. Even after machine checks pass, refurbishment tasks
 usually still require final visual review of the contact sheet, per-slide images, and the sibling
-`*-refurbish-compare-<MMDDhhmmss>.png` file.
+`*-refurbish-compare-<MMDDhhmmss>.png` file or complete numbered
+`*-refurbish-compare-<MMDDhhmmss>-01.png`, `-02.png`, ... set.
 
 ## When Confirmation Is Useful
 

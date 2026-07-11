@@ -24,6 +24,7 @@ const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
 const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
+const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
 const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 
@@ -41,6 +42,8 @@ Options:
   --readiness-out <path>  Optional benchmark output for a full delivery readiness audit
   --explicit              User explicitly named a non-production/default DeckKit
   --contact-diff          Generate source/candidate contact-diff artifacts for manual review
+  --compare-chunk-size <n>
+                          Maximum slides per compare PNG. Defaults to 20.
   --overwrite             Allow replacing an existing final output after all machine gates pass
   --json                  Print machine-readable run summary
   --help                  Show this help
@@ -71,6 +74,7 @@ function parseArgs(argv) {
     readinessOut: '',
     explicit: false,
     contactDiff: false,
+    compareChunkSize: 20,
     overwrite: false,
     json: false,
   }
@@ -89,7 +93,9 @@ function parseArgs(argv) {
     } else if (arg === '--json') {
       args.json = true
     } else if (arg in valueFlags) {
-      args[valueFlags[arg]] = valueAfter(argv, i, arg)
+      const key = valueFlags[arg]
+      const value = valueAfter(argv, i, arg)
+      args[key] = key === 'compareChunkSize' ? Number(value) : value
       i += 1
     } else {
       throw new Error(`Unknown option: ${arg}\n\n${usage}`)
@@ -101,6 +107,9 @@ function parseArgs(argv) {
   if (!args.output) throw new Error(`--output is required.\n\n${usage}`)
   if (!['auto', 'native', 'fallback'].includes(args.route)) {
     throw new Error('--route must be one of auto|native|fallback')
+  }
+  if (!Number.isInteger(args.compareChunkSize) || args.compareChunkSize <= 0) {
+    throw new Error('--compare-chunk-size must be a positive integer')
   }
   return args
 }
@@ -114,6 +123,7 @@ const valueFlags = {
   '--route': 'route',
   '--xdoc-bin': 'xdocBin',
   '--readiness-out': 'readinessOut',
+  '--compare-chunk-size': 'compareChunkSize',
 }
 
 function valueAfter(argv, index, flag) {
@@ -409,6 +419,8 @@ function buildAgentSummary(summary) {
       compare: {
         gate: gateStatus(compare),
         siblingPath: compare?.siblingPath ?? null,
+        siblingPaths: compare?.siblingPaths ?? [],
+        partCount: compare?.partCount ?? null,
       },
     },
     artifacts: artifactSet(summary, [
@@ -626,7 +638,7 @@ function initialSummary(args, artifacts) {
       completed: false,
       contactDiffRequested: args.contactDiff,
       instructions:
-        'Review contact-sheet.png, refurbish-compare.png, and suspicious full-size PNGs. Confirm the target DeckKit is visibly applied and source content remains intact.',
+        'Review contact-sheet.png, the complete refurbish-compare PNG set listed by the compare gate, and suspicious full-size PNGs. Confirm the target DeckKit is visibly applied and source content remains intact.',
     },
     warnings: [],
     layout: null,
@@ -1123,33 +1135,50 @@ function runPreviews(summary, args, artifacts, inspect) {
   )
 }
 
-function runContactDiff(summary, args, artifacts) {
+function runContactDiff(summary, args, artifacts, inspect) {
   if (!args.contactDiff) return
   const report = runJsonPhase(summary, {
     name: 'contact-diff',
-    bin: args.xdocBin,
+    bin: process.execPath,
     args: [
-      'pptx',
-      'contact-diff',
+      COMPARE_SCRIPT,
       '--source',
       args.source,
       '--candidate',
       artifacts.candidate,
+      '--run-dir',
+      args.runDir,
+      '--kind',
+      'contact',
       '--output',
       artifacts.contactDiff,
+      '--report',
+      artifacts.contactDiffReport,
+      '--slide-count',
+      String(expectedSlideCount(inspect)),
+      '--compare-chunk-size',
+      String(args.compareChunkSize),
+      '--xdoc-bin',
+      args.xdocBin,
+      '--overwrite',
       '--json',
     ],
     artifact: artifacts.contactDiffReport,
   })
+  const multipart = report?.schemaVersion === 'pptx-nova-compare-manifest/v1'
   requireGate(
     summary,
     'contact-diff-artifact',
-    report?.status !== 'failed' &&
-      existsSync(artifacts.contactDiff) &&
-      statSync(artifacts.contactDiff).size > 0,
+    report?.status === 'success' &&
+      (multipart
+        ? report.agentGate?.passed === true &&
+          report.parts?.every((part) => existsSync(part.path) && statSync(part.path).size > 0)
+        : existsSync(artifacts.contactDiff) && statSync(artifacts.contactDiff).size > 0),
     {
       status: report?.status ?? '',
-      bytes: existsSync(artifacts.contactDiff) ? statSync(artifacts.contactDiff).size : 0,
+      partCount: multipart ? (report.parts?.length ?? 0) : 1,
+      bytes:
+        !multipart && existsSync(artifacts.contactDiff) ? statSync(artifacts.contactDiff).size : 0,
       message: 'Requested contact-diff artifact was not generated',
     },
   )
@@ -1175,21 +1204,35 @@ function runSemanticDiff(summary, args, artifacts) {
   gateSemanticDiff(summary, report)
 }
 
-function runRefurbishCompare(summary, args, artifacts) {
+function runRefurbishCompare(summary, args, artifacts, inspect) {
   return runJsonPhase(summary, {
     name: 'refurbish-compare',
-    bin: args.xdocBin,
+    bin: process.execPath,
     args: [
-      'pptx',
-      'contact-diff',
+      COMPARE_SCRIPT,
       '--source',
       artifacts.sourceSnapshot,
       '--candidate',
       artifacts.candidate,
+      '--run-dir',
+      args.runDir,
+      '--kind',
+      'refurbish',
       '--output',
       artifacts.refurbishCompare,
+      '--report',
+      artifacts.refurbishCompareReport,
+      '--slide-count',
+      String(expectedSlideCount(inspect)),
+      '--compare-chunk-size',
+      String(args.compareChunkSize),
       '--dpi',
       '192',
+      '--fallback-dpi',
+      '144',
+      '--xdoc-bin',
+      args.xdocBin,
+      '--overwrite',
       '--json',
     ],
     artifact: artifacts.refurbishCompareReport,
@@ -1219,7 +1262,9 @@ function runRefurbishCompareGate(summary, args, artifacts) {
   requireGate(summary, 'refurbish-compare-delivery', report?.status === 'pass', {
     status: report?.status ?? '',
     siblingPath: report?.agentSummary?.siblingPath ?? null,
-    message: 'Refurbish compare PNG must be published next to final PPTX',
+    siblingPaths: report?.agentSummary?.siblingPaths ?? [],
+    partCount: report?.parts?.length || 1,
+    message: 'The complete refurbish compare PNG set must be published next to the final PPTX',
   })
 }
 
@@ -1353,9 +1398,9 @@ function runRefurbish(inputArgs) {
     runFidelityGate(summary, artifacts)
     runLayoutSnapshot(summary, args, artifacts)
     runPreviews(summary, args, artifacts, inspect)
-    runContactDiff(summary, args, artifacts)
+    runContactDiff(summary, args, artifacts, inspect)
     runSemanticDiff(summary, args, artifacts)
-    runRefurbishCompare(summary, args, artifacts)
+    runRefurbishCompare(summary, args, artifacts, inspect)
     runRefurbishCompareGate(summary, args, artifacts)
     publishCandidate(summary, args, artifacts)
 

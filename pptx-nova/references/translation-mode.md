@@ -480,6 +480,35 @@ Charts are a frequent translation blind spot.
 - Always compare `xdoc convert --to text` and `i18n-scan` `i18nUnits` against
   `inspect`; any source-language text found only in chart parts still needs a
   translation unit.
+- Audit short chart labels explicitly. xdoc inventories visible chart cache
+  strings from OOXML structure even when language classification is uncertain.
+  Confident source-language units use `action: "translate"`; short words,
+  acronyms, and other ambiguous Latin text use `action: "review"` instead of
+  disappearing from the inventory. Classify every review chart unit using its
+  role, chart type, sibling sequence, source/target language, and terminology
+  policy. Do not use a fixed weekday/OHLC/business-term dictionary as the
+  primary decision rule.
+
+  Save decisions as `pptx-nova-i18n-chart-decisions/v1`, bind them to the scan
+  SHA-256, then materialize a classified scan artifact:
+
+  ```bash
+  node <skill-root>/scripts/pptx-nova-i18n-classify-chart-units.mjs \
+    --scan <run-dir>/i18n-scan-source.json \
+    --decisions <run-dir>/i18n-chart-decisions.json \
+    --output <run-dir>/i18n-scan-classified.json \
+    --report <run-dir>/i18n-chart-classification.json \
+    --overwrite --json
+  ```
+
+  Each decision contains `unitId`, `sourceHash`, `decision` (`translate` or
+  `preserve`), and a non-empty contextual reason. The helper fails closed on
+  stale hashes, missing decisions, duplicates, or decisions targeting anything
+  other than a review-only chart unit. Feed `i18n-scan-classified.json`, not the
+  unclassified scan, into `i18n-plan`. If structurally visible chart text is
+  absent from the inventory entirely, stop and update/rebuild xdoc; do not hide
+  the coverage gap with a run-local XML scanner.
+
 - Use top-level `xdoc pptx replace-chart-text --visible-cache-only` for chart
   title, series, category, and data-label translations, but feed it from
   `i18n-plan.replaceChartText` rather than handcrafted selectors. Its dry-run
@@ -664,6 +693,8 @@ Keep these translation-specific artifacts in the run directory when available:
 - `patch-dry-run.json`
 - `i18n-text-plan.json`
 - `i18n-scan-source.json`
+- `i18n-chart-decisions.json` and `i18n-scan-classified.json` when chart review units exist
+- `i18n-chart-classification.json` when chart review units exist
 - `i18n-scan-candidate.json`
 - `i18n-residual-gate.json`
 - `bilingual-translation-audit.md`

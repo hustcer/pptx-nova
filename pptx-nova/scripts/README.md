@@ -84,6 +84,10 @@ Use these entry points from skill workflows:
   French or other Latin-script target text does not become a false English
   blocker. Native candidate language-classification blockers remain in the
   report as diagnostic evidence.
+- `pptx-nova-i18n-classify-chart-units.mjs` - convert xdoc's structurally
+  inventoried but language-uncertain chart review units into explicit
+  translate/preserve decisions. It binds decisions to the source scan and unit
+  hashes and fails closed unless every review-only chart unit is classified.
 - `pptx-nova-multi-column-review-gate.mjs` - bind final translation candidate,
   final vision-diff, exact multi-column slide/shape findings, and full-size PNG
   human-review evidence. It can close only

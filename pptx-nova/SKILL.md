@@ -83,7 +83,8 @@ Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline
 `vision.json`, `pptx-diff.json`, `visual_review.json`, `clean-open.json`, `check.json`,
 `evidence-summary.json`, `layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`,
 `i18n-text-plan.json`, `i18n-scan.json`, `i18n-plan.json`, `i18n-style-diff.json`,
-`translation-compare.png`, `translation-compare.json`, `refurbish-compare.png`,
+`translation-compare.png` or numbered `translation-compare-*.png` parts,
+`translation-compare.json`, `refurbish-compare.png`,
 `refurbish-compare.json`, `vision-diff.json`, the final candidate PPTX, the contact sheet, the small set of issue-page
 PNGs required for human review, and `replace-text.json`. Do not invent artifacts that do not actually
 exist.
@@ -390,7 +391,7 @@ xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --slides 25-38 --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --slides 25-38 --output <run-dir>/contact-diff.png --json
-node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate translated.pptx --run-dir <run-dir> --kind translation --output <run-dir>/translation-compare.png --report <run-dir>/translation-compare.json --dpi 192 --json
+node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate translated.pptx --run-dir <run-dir> --kind translation --slide-count <count> --compare-chunk-size 20 --output <run-dir>/translation-compare.png --report <run-dir>/translation-compare.json --dpi 192 --fallback-dpi 144 --json
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx translated.pptx --kind translation --publish --overwrite --json > <run-dir>/translation-compare-gate.json
 node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate refurbished.pptx --run-dir <run-dir> --kind refurbish --slide-count <count> --compare-chunk-size 20 --output <run-dir>/refurbish-compare.png --report <run-dir>/refurbish-compare.json --dpi 192 --fallback-dpi 144 --json
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx refurbished.pptx --kind refurbish --publish --overwrite --json > <run-dir>/refurbish-compare-gate.json

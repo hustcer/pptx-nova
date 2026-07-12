@@ -302,10 +302,11 @@ relevant OOXML style properties.
   the primary pass/fail gate when the source deck is already noisy.
 - Source and candidate PNG/contact sheets for changed slides.
 - `contact-diff` for before/after layout consistency.
-- A high-DPI full-deck translation comparison PNG for delivery. During repair
+- A high-DPI full-deck translation comparison artifact set for delivery. During repair
   loops you may pass `--slides <changed>` to the helper for local review, but
-  the final delivery artifact must be generated without `--slides` so one image
-  contains every slide in source/candidate order.
+  the final delivery artifact must be generated without `--slides` so it covers
+  every slide in source/candidate order. Decks up to 20 slides use one PNG;
+  larger decks use the complete numbered multipart set.
 
 12. Fix visual regressions at the translation source:
 
@@ -327,10 +328,14 @@ relevant OOXML style properties.
     target text, and notes for any meaning-preserving compression.
 14. Run structure checks, `pptx diff`, preview, high-DPI full-deck comparison,
     and clean-open when available.
-15. Publish the validated candidate and copy `translation-compare.png` next to
-    the final PPTX using `<output-stem>-translation-compare-<MMDDhhmmss>.png`.
-    Keep the run-directory comparison PNG/JSON as audit evidence, and clearly
-    list both the final PPTX and sibling comparison PNG in the final response.
+15. Publish the validated candidate and comparison artifact set next to the
+    final PPTX. Decks up to 20 slides use
+    `<output-stem>-translation-compare-<MMDDhhmmss>.png`; larger decks use the
+    complete numbered
+    `<output-stem>-translation-compare-<MMDDhhmmss>-01.png`, `-02.png`, ...
+    sibling set. Keep the run-directory comparison manifest, part reports, and
+    PNGs as audit evidence, and list the final PPTX plus every published
+    comparison sibling in the final response.
 
 ## Style Signature Gate
 
@@ -481,9 +486,12 @@ node <skill-root>/scripts/pptx-nova-compare.mjs \
   --candidate candidate.pptx \
   --run-dir <run-dir> \
   --kind translation \
+  --slide-count <count> \
+  --compare-chunk-size 20 \
   --output <run-dir>/translation-compare.png \
   --report <run-dir>/translation-compare.json \
   --dpi 192 \
+  --fallback-dpi 144 \
   --json
 
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
@@ -502,26 +510,25 @@ human visual review, not that visual parity is automatically approved. Before
 final delivery, rerun without `--slides` when full-deck before/after parity is
 required.
 
-Treat `translation-compare.png` as a delivery artifact, not merely an internal
-QA image. It must be a single PNG, include all source and candidate slides,
-place the source page on the left and the translated page on the right for
-every row, and be rendered at high enough DPI for zoomed inspection. The helper
-defaults to 192dpi and writes `translation-compare.json`; block delivery if the
-report is missing, `status` is not `success`, `pageCount` does not match the
-source/candidate slide count, `byteLength` is zero, or the image dimensions are
-implausibly small. If a specific run needs higher visual fidelity, increase
-`--dpi` rather than enlarging a low-resolution image after rendering.
-After the comparison image passes validation, publish a copy next to the final
-PPTX output so reviewers can find it without opening the run directory. Use the
-final PPTX stem plus a collision-safe timestamp suffix, for example
-`<output-stem>-translation-compare-<MMDDhhmmss>.png`, while still preserving the
-run-directory `translation-compare.png` and `translation-compare.json` as audit
-evidence. Run `pptx-nova-compare-gate.mjs --kind translation --publish` after
-the final PPTX path is stable, and block delivery unless
-`translation-compare-gate.json.status` is `pass`. The gate validates the
-run-directory PNG/JSON, rejects scoped `--slides` comparison reports for final
-delivery, publishes or checks the sibling PNG, and verifies that the sibling
-name and byte length match the run evidence.
+Treat the translation comparison as a delivery artifact, not merely internal
+QA. Decks up to 20 slides keep the compatible single `translation-compare.png`.
+Larger decks produce numbered `translation-compare-01.png`, `-02.png`, ...
+parts plus a `pptx-nova-compare-manifest/v1` report. Every part places the
+source page on the left and translated page on the right, starts at 192 DPI,
+and may retry once at 144 DPI only after an explicit retryable `RenderError`.
+Any second or non-retryable failure blocks delivery. Do not upscale a failed
+low-resolution image after rendering.
+
+After the comparison set passes validation, publish the single PNG or complete
+numbered sibling set next to the final PPTX so reviewers can find it without
+opening the run directory. Preserve the run-directory manifest, part reports,
+and PNGs as audit evidence. Run
+`pptx-nova-compare-gate.mjs --kind translation --publish` after the final PPTX
+path is stable, and block delivery unless
+`translation-compare-gate.json.status` is `pass`. The gate rejects scoped final
+reports, requires complete non-duplicated slide coverage, publishes or checks
+every expected sibling, and verifies sibling names and byte lengths against the
+run evidence.
 
 Review the changed-slide contact sheets and the full-size PNGs for:
 
@@ -564,7 +571,7 @@ Keep these translation-specific artifacts in the run directory when available:
 - candidate `vision-check` reports when used for diagnostics
 - source/candidate previews and contact sheets
 - `contact-diff.json` and `contact-diff.png`
-- `translation-compare.png`
+- `translation-compare.png` or numbered `translation-compare-*.png` parts
 - `translation-compare.json`
 - `translation-compare-gate.json`
 - `pptx-diff.json`

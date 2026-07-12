@@ -421,6 +421,62 @@ test('i18n residual gate permits explicitly approved unchanged technical text', 
   assert.deepEqual(report.approvedUnchangedUnitIds, [sourceUnit.unitId])
 })
 
+function markdownShellCommands(markdown) {
+  const commands = []
+  for (const block of markdown.matchAll(/```bash\n([\s\S]*?)```/g)) {
+    let current = []
+    for (const line of block[1].split('\n')) {
+      if (!line.trim()) {
+        if (current.length > 0) commands.push(current.join('\n'))
+        current = []
+        continue
+      }
+      const continuesPrevious = current.at(-1)?.trimEnd().endsWith('\\')
+      if (current.length > 0 && !continuesPrevious && !/^\s/.test(line)) {
+        commands.push(current.join('\n'))
+        current = []
+      }
+      current.push(line)
+    }
+    if (current.length > 0) commands.push(current.join('\n'))
+  }
+  return commands
+}
+
+test('published translation compare commands enable multipart output for long decks', () => {
+  const documents = [
+    {
+      name: 'SKILL.md',
+      text: readFileSync(skillPath('SKILL.md'), 'utf8'),
+    },
+    {
+      name: 'translation-mode.md',
+      text: readFileSync(skillPath('references/translation-mode.md'), 'utf8'),
+    },
+  ]
+
+  for (const document of documents) {
+    const command = markdownShellCommands(document.text).find(
+      (candidate) =>
+        candidate.includes('pptx-nova-compare.mjs') && candidate.includes('--kind translation'),
+    )
+    assert.ok(command, `${document.name} must publish a translation compare command`)
+    assert.match(command, /--slide-count <count>/, document.name)
+    assert.match(command, /--compare-chunk-size 20/, document.name)
+    assert.match(command, /--fallback-dpi 144/, document.name)
+  }
+
+  const translationMode = documents[1].text
+  assert.doesNotMatch(translationMode, /must be a single PNG/)
+  assert.doesNotMatch(translationMode, /one image\s+contains every slide/)
+  assert.match(translationMode, /numbered .*translation-compare/i)
+  assert.match(translationMode, /<output-stem>-translation-compare-<MMDDhhmmss>-01\.png/)
+  assert.match(
+    documents[0].text,
+    /`translation-compare\.png` or numbered `translation-compare-\*\.png` parts/,
+  )
+})
+
 function swissColumnContent() {
   return {
     meta: { deckkit: 'swiss-grid' },

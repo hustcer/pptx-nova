@@ -433,6 +433,7 @@ function buildAgentSummary(summary) {
       'previewReport',
       'contactSheet',
       'refurbishCompare',
+      'refurbishCompareParts',
       'refurbishCompareReport',
       'refurbishCompareGate',
       'layoutFinal',
@@ -607,6 +608,7 @@ function artifactPaths(runDir) {
     contactDiff: join(runDir, 'contact-diff.png'),
     contactDiffReport: join(runDir, 'contact-diff.json'),
     refurbishCompare: join(runDir, 'refurbish-compare.png'),
+    refurbishCompareParts: [],
     refurbishCompareReport: join(runDir, 'refurbish-compare.json'),
     refurbishCompareGate: join(runDir, 'refurbish-compare-gate.json'),
     summary: join(runDir, 'refurbish-run-summary.json'),
@@ -648,10 +650,12 @@ function initialSummary(args, artifacts) {
 
 function finalizeArtifactPaths(summary, summaryPath) {
   summary.artifacts = Object.fromEntries(
-    Object.entries(summary.artifacts).map(([key, path]) => [
-      key,
-      key === 'summary' || existsSync(path) ? path : null,
-    ]),
+    Object.entries(summary.artifacts).map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return [key, value.filter((path) => typeof path === 'string' && existsSync(path))]
+      }
+      return [key, key === 'summary' || existsSync(value) ? value : null]
+    }),
   )
   summary.artifacts.summary = summaryPath
 }
@@ -1259,10 +1263,12 @@ function runRefurbishCompareGate(summary, args, artifacts) {
     ],
     artifact: artifacts.refurbishCompareGate,
   })
+  const siblingPaths = report?.agentSummary?.siblingPaths ?? []
+  summary.artifacts.refurbishCompareParts = siblingPaths.length > 1 ? siblingPaths : []
   requireGate(summary, 'refurbish-compare-delivery', report?.status === 'pass', {
     status: report?.status ?? '',
     siblingPath: report?.agentSummary?.siblingPath ?? null,
-    siblingPaths: report?.agentSummary?.siblingPaths ?? [],
+    siblingPaths,
     partCount: report?.parts?.length || 1,
     message: 'The complete refurbish compare PNG set must be published next to the final PPTX',
   })

@@ -308,6 +308,11 @@ function normalizeShape(shape, slideIndex, shapeIndex, size) {
 }
 
 function validateObject({ risks, bbox, size, type, textPreview, font, placeholder, slideIndex }) {
+  const invalidSize = bbox
+    ? type === 'connector'
+      ? bbox.wEmu < 0 || bbox.hEmu < 0 || (bbox.wEmu === 0 && bbox.hEmu === 0)
+      : bbox.wEmu <= 0 || bbox.hEmu <= 0
+    : false
   if (!bbox) {
     pushRisk(risks, 'warning', 'bbox-missing', 'Object is missing bbox in final inspect', {
       slide: slideIndex,
@@ -317,8 +322,7 @@ function validateObject({ risks, bbox, size, type, textPreview, font, placeholde
     bbox.yEmu === null ||
     bbox.wEmu === null ||
     bbox.hEmu === null ||
-    bbox.wEmu <= 0 ||
-    bbox.hEmu <= 0
+    invalidSize
   ) {
     pushRisk(
       risks,

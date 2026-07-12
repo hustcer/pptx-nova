@@ -208,6 +208,58 @@ test('layout snapshot treats undisclosed inspect metadata as informational only'
   assert.deepEqual(report.summary.topActionable, [])
 })
 
+test('layout snapshot accepts axis-aligned connectors but rejects zero-length geometry', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-layout-connectors-'))
+  const inspectPath = join(root, 'inspect.json')
+  writeJson(inspectPath, {
+    schemaVersion: 'pptx-inspect/v1',
+    presentation: { slideCount: 1, size: { width: '10in', height: '5.625in' } },
+    slides: [
+      {
+        index: 0,
+        shapes: [
+          {
+            id: 'horizontal-connector',
+            shapeType: 'connector',
+            bbox: { x: 10, y: 10, width: 100, height: 0 },
+          },
+          {
+            id: 'vertical-connector',
+            shapeType: 'connector',
+            bbox: { x: 10, y: 20, width: 0, height: 100 },
+          },
+          {
+            id: 'zero-length-connector',
+            shapeType: 'connector',
+            bbox: { x: 10, y: 30, width: 0, height: 0 },
+          },
+          {
+            id: 'zero-width-shape',
+            shapeType: 'rect',
+            bbox: { x: 10, y: 40, width: 0, height: 100 },
+          },
+        ],
+      },
+    ],
+  })
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-layout-snapshot.mjs'),
+    '--inspect',
+    inspectPath,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+  const bboxRisks = report.risks.filter((risk) => risk.code === 'bbox-invalid')
+
+  assert.equal(report.status, 'warn')
+  assert.equal(bboxRisks.length, 2)
+  assert.deepEqual(
+    bboxRisks.map((risk) => risk.objectId),
+    ['zero-length-connector', 'zero-width-shape'],
+  )
+})
+
 test('feedback gate recognizes give feedback and provide feedback prompts', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-feedback-trigger-'))
   const runDir = join(root, 'run')
@@ -1135,7 +1187,7 @@ test('refurbish fallback plan overwrites current-run candidate commands', async 
   )
 })
 
-test('refurbish runner completes compare delivery gate before publishing output', () => {
+test('refurbish runner exposes every multipart compare artifact before publishing output', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-run-'))
   const source = join(root, 'source.pptx')
   const output = join(root, 'out.pptx')
@@ -1152,10 +1204,11 @@ const valueAfter = (flag) => {
   const index = args.indexOf(flag)
   return index >= 0 ? args[index + 1] : ''
 }
+const slideCount = Number(process.env.FAKE_SLIDE_COUNT || 48)
 const inspect = {
   schemaVersion: 'pptx-inspect/v1',
-  presentation: { slideCount: 1, size: { width: '10in', height: '5.625in' } },
-  slides: [{ index: 0, shapes: [] }]
+  presentation: { slideCount, size: { width: '10in', height: '5.625in' } },
+  slides: Array.from({ length: slideCount }, (_, index) => ({ index, shapes: [] }))
 }
 const visionDiff = {
   schemaVersion: 'pptx-vision-diff/v1',
@@ -1173,8 +1226,8 @@ const audit = {
   summary: {
     errorCount: 0,
     warningCount: 0,
-    sourceSlideCount: 1,
-    finalSlideCount: 1,
+    sourceSlideCount: slideCount,
+    finalSlideCount: slideCount,
     slideCountMatches: true
   },
   issues: []
@@ -1212,12 +1265,16 @@ if (args[0] === 'schema') {
   const outputDir = valueAfter('--output-dir')
   const contactSheet = valueAfter('--contact-sheet')
   mkdirSync(outputDir, { recursive: true })
-  writeFileSync(outputDir + '/slide-001.png', 'png')
+  const pages = Array.from({ length: slideCount }, (_, index) => {
+    const path = outputDir + '/slide-' + String(index + 1).padStart(3, '0') + '.png'
+    writeFileSync(path, 'png')
+    return { path, status: 'success', width: 100, height: 56, byteLength: 3 }
+  })
   writeFileSync(contactSheet, 'contact')
   print({
     schemaVersion: 'pptx-preview/v1',
     status: 'success',
-    pages: [{ path: outputDir + '/slide-001.png', status: 'success', width: 100, height: 56, byteLength: 3 }],
+    pages,
     contactSheet: { path: contactSheet, width: 100, height: 56, byteLength: 7 }
   })
 } else if (args[0] === 'pptx' && args[1] === 'diff') {
@@ -1230,13 +1287,22 @@ if (args[0] === 'schema') {
     slides: []
   })
 } else if (args[0] === 'pptx' && args[1] === 'contact-diff') {
+  const selector = valueAfter('--slides')
+  const selectedSlides = selector
+    ? (() => {
+        const [start, end] = selector.split('-').map(Number)
+        return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+      })()
+    : Array.from({ length: slideCount }, (_, index) => index + 1)
+  const scopeMode = selector ? 'selected-slides' : 'all-slides'
   writeFileSync(valueAfter('--output'), 'contact diff png')
   print({
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
     outputPath: valueAfter('--output'),
-    summary: { pairCount: 1, scopeMode: 'all-slides', dpi: Number(valueAfter('--dpi')) || 72 },
-    agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 1 },
+    summary: { pairCount: selectedSlides.length, scopeMode, dpi: Number(valueAfter('--dpi')) || 72 },
+    scope: { requested: selector || null, slides: selectedSlides, basis: 'source-slides' },
+    agentGate: { passed: true, status: 'pass', scopeMode, pairCount: selectedSlides.length },
     render: { path: valueAfter('--output'), width: 100, height: 56, dpi: Number(valueAfter('--dpi')) || 72 }
   })
 } else {
@@ -1274,6 +1340,16 @@ if (args[0] === 'schema') {
   assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-gate.json')), true)
   assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
+  assert.equal(summary.artifacts.refurbishCompare, null)
+  assert.deepEqual(
+    summary.artifacts.refurbishCompareParts,
+    summary.agentSummary.gates.compare.siblingPaths,
+  )
+  assert.equal(summary.artifacts.refurbishCompareParts.length, 3)
+  assert.equal(
+    summary.artifacts.refurbishCompareParts.every((path) => existsSync(path)),
+    true,
+  )
   assert.equal(summary.layout.actionableRiskCount, 0)
   assert.equal(summary.layout.informationalRiskCount, 0)
   assert.equal(summary.agentSummary.layout.actionableRiskCount, 0)
@@ -1289,6 +1365,38 @@ if (args[0] === 'schema') {
   assert.ok(phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('publish'))
   assert.ok(phaseNames.indexOf('refurbish-compare') < phaseNames.indexOf('publish'))
   assert.ok(phaseNames.indexOf('refurbish-compare-delivery') < phaseNames.indexOf('publish'))
+
+  const singleSource = join(root, 'single-source.pptx')
+  const singleOutput = join(root, 'single-out.pptx')
+  const singleRunDir = join(root, 'single-run')
+  writeFileSync(singleSource, 'single fake pptx')
+  const singleResult = runNode(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      singleSource,
+      '--output',
+      singleOutput,
+      '--run-dir',
+      singleRunDir,
+      '--route',
+      'native',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    { env: { ...process.env, FAKE_SLIDE_COUNT: '1' } },
+  )
+  const singleSummary = JSON.parse(singleResult.stdout)
+
+  assert.equal(
+    singleSummary.artifacts.refurbishCompare,
+    join(singleRunDir, 'refurbish-compare.png'),
+  )
+  assert.deepEqual(singleSummary.artifacts.refurbishCompareParts, [])
+  assert.equal(existsSync(singleSummary.artifacts.refurbishCompare), true)
 })
 
 test('refurbish runner does not publish output when compare delivery gate fails', () => {

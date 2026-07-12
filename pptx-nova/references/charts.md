@@ -466,10 +466,11 @@ chart 标签同步的非翻译场景。
 
 不要把 `replace-chart-data` 当作 chart 文本翻译工具：它会重建 chart XML / workbook
 数据区域，适合真的替换数据集，但可能丢失或重排既有标题、layout、样式和扩展节点。
-patch op `replace-chart-text` 目前只覆盖经典 chart part；ChartEx 仍按下文 ChartEx
-规则处理。翻译模式下若只需改 ChartEx 可见 cache 文本，先尝试 top-level
-`xdoc pptx replace-chart-text --visible-cache-only`，失败时再走有报告的定向 OOXML
-fallback。
+patch op `replace-chart-text` 目前只覆盖经典 chart part。翻译模式下，top-level
+`xdoc pptx replace-chart-text --visible-cache-only` 已原生支持经典 chart 与 ChartEx，
+并通过 namespace-aware 定位处理 ChartEx direct/nested point text。ChartEx 翻译应优先
+使用该 helper；未知扩展结构默认 preserve-only。只有 helper 明确报告不支持、且确实
+需要修改时，才使用带完整报告、ZIP/XML 校验与 clean-open 验证的定向 OOXML fallback。
 
 ### 改数据
 

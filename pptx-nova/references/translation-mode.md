@@ -103,7 +103,17 @@ relevant OOXML style properties.
          "unitId": "ppt/slides/slide1.xml#shape:12#p:0",
          "sourceHash": "sha256:...",
          "sourceText": "源文本 / Source text",
-         "targetText": "Zieltext"
+         "targetText": "Zieltext",
+         "targetSegments": [
+           {
+             "sourceRunGroupId": "group-0",
+             "text": "Ziel"
+           },
+           {
+             "sourceRunGroupId": "group-1",
+             "text": "text"
+           }
+         ]
        }
      ]
    }
@@ -131,9 +141,19 @@ relevant OOXML style properties.
    `i18n-plan` validates `unitId`, `sourceHash`, and `sourceText`, then routes
    units to the safest available execution primitive:
    - `textPlan.translations[]` for DrawingML paragraph/run planning.
-   - `replaceText.replacements[]` for user-visible text attributes.
+   - `replaceTextSegments[]` selectors for the `replace-text-segments` route
+     used by multi-run table paragraphs;
+     the planner materializes these as guarded lexical entries under
+     `replaceText.replacements[]`.
+   - `replaceText.replacements[]` for user-visible text attributes and planned
+     table paragraph text-node replacements.
    - `replaceChartText.replacements[]` for chart visible cache labels.
-   - `patch.ops[]` for generated run-level `set-run` operations.
+   - `patch.ops[]` for generated run-level `set-run` operations on shape text.
+
+   Use the planner-emitted semantic `nodePath` as the primary locator and copy
+   it unchanged into execution inputs. `sourceText`, `sourceHash`, and `index`
+   are guards; they do not replace semantic location. Do not derive `nodePath`
+   from XML array positions or reconstruct it from the unit id.
 
    Treat `applyGate.passed=false`, non-empty `conflicts[]`, non-empty
    `missingTranslations[]`, or apply-blocking `reviewRequired[]` as an
@@ -182,7 +202,8 @@ relevant OOXML style properties.
      ```
      Materialize `<run-dir>/replace-text-input.json` from
      `i18n-plan.replaceText`. Do not hand-derive `kind`, `part`, `tag`,
-     `attrName`, or `index`.
+     `attrName`, `index`, or `nodePath`. Preserve planner-emitted semantic
+     `nodePath` values exactly.
      `replace-text` currently does not support `--dry-run`; do not pass
      `--dry-run`, `--compile`, or `--allow-raw-xml`. Its safety comes from
      writing to a run-directory candidate plus `sourceText`/`sourceHash`/`index`
@@ -196,9 +217,9 @@ relevant OOXML style properties.
        --overwrite \
        --json > <run-dir>/replace-text.json
      ```
-   - For DrawingML shape/table paragraphs, apply only the `set-run` patch ops
-     emitted under `i18n-plan.patch.ops[]`. Each paragraph patch op must carry
-     `unitId`, `sourceText`, and `sourceHash` guards.
+   - For DrawingML shape paragraphs, apply only the `set-run` patch ops emitted
+     under `i18n-plan.patch.ops[]`. Each paragraph patch op must carry `unitId`,
+     `sourceText`, and `sourceHash` guards.
      ```bash
      xdoc pptx apply \
        --input <current-candidate.pptx> \
@@ -209,6 +230,13 @@ relevant OOXML style properties.
      ```
      Materialize `<run-dir>/patch.json` from `i18n-plan.patch`, then apply
      without `--dry-run` only after the dry-run report passes.
+   - For table paragraphs, use the planner's `replace-text-segments` route and
+     its `replaceTextSegments[]` selectors rather than shape `set-run` ops.
+     Multi-run table units must provide a complete
+     `targetSegments[]` mapping. Every `sourceRunGroupId` must come verbatim
+     from the scan/planner inventory; never guess ids or infer them from run
+     order. Missing, duplicated, unknown, or out-of-order segments must fail
+     closed instead of collapsing the cell paragraph into one style.
    - Preserve run boundaries when they encode style. If one source sentence is
      split across multiple styled runs, follow the plan strategy:
      `uniform`, `preserve-run-boundaries`, or
@@ -377,8 +405,9 @@ translations, then emits executable sub-artifacts for the lower-level commands.
 Required interpretation:
 
 - `applyGate.passed=true`: the generated `replaceText`, `replaceChartText`,
-  and `patch.ops` artifacts may be dry-run and applied to the copied candidate
-  deck.
+  `replaceTextSegments`, and `patch.ops` artifacts may be dry-run and applied
+  to the copied candidate deck. `replaceTextSegments` is a planner route that
+  is materialized into guarded `replaceText.replacements[]` for execution.
 - `conflicts[]` non-empty: stop automation. Typical causes are unknown
   `unitId`, stale `sourceHash`, source text mismatch, or a target supplied for a
   preserve-only unit.
@@ -402,6 +431,11 @@ debugging fallback for DrawingML shape/table text. Its strategies mean:
 - `review-required`: stop automation for that unit. Add explicit anchors,
   produce a manual run-level mapping, or request human review.
 
+For table paragraphs, these strategies are expressed through
+`targetSegments[]` and `sourceRunGroupId` rather than handwritten `set-run`
+queues. The mapping must cover the complete planner inventory in planner order;
+partial, duplicated, unknown, or reordered mappings are blockers.
+
 The i18n plan does not replace the style diff. After applying generated
 artifacts, still run `i18n-style-diff` to prove bold/italic/underline/strike,
 alignment, chart/table structure, and other style signatures were not changed.
@@ -420,6 +454,13 @@ alignment, chart/table structure, and other style signatures were not changed.
 - For Chinese to English, expect English labels to become wider even when the
   character count is lower. Mark narrow cards, legend entries, rotated axis
   labels, and multi-column text as high fitting risk before applying.
+- Any changed multi-column text is subject to the fail-closed
+  `multi-column-text-layout-review` gate, even when no ordinary overflow is
+  detected or the translation has the same character count. `vision-diff`
+  uses changed-text fingerprints to prevent equal-length translations from
+  bypassing this review. Inspect the affected slide at full-size PNG resolution,
+  repair wording/font/layout if needed, and rerun `vision-diff`; do not treat
+  this gate as an automatically fixable overflow warning.
 - Do not normalize styled mixed text into a single style. If the source has
   mixed bold/italic/underline/strikethrough runs, the target must keep the same
   style pattern unless a human approves a simplification.
@@ -441,6 +482,10 @@ Charts are a frequent translation blind spot.
   report lists `changedNodes[]`, `changedParts[]`, and `structureChecks[]`;
   block on any conflict, ambiguity, `formatCode` change, or failed structure
   check.
+- The top-level helper natively handles classic charts and namespace-aware
+  ChartEx direct/nested point text. Prefer that route for ChartEx translations;
+  unknown extension structures remain preserve-only unless a targeted,
+  validated fallback is explicitly required.
 - Do not use the patch op `replace-chart-text` as the default translation path:
   that op may synchronize embedded workbook labels and is intended for ordinary
   chart editing, not visible-cache-only i18n.

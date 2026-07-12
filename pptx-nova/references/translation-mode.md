@@ -103,17 +103,7 @@ relevant OOXML style properties.
          "unitId": "ppt/slides/slide1.xml#shape:12#p:0",
          "sourceHash": "sha256:...",
          "sourceText": "源文本 / Source text",
-         "targetText": "Zieltext",
-         "targetSegments": [
-           {
-             "sourceRunGroupId": "group-0",
-             "text": "Ziel"
-           },
-           {
-             "sourceRunGroupId": "group-1",
-             "text": "text"
-           }
-         ]
+         "targetText": "Zieltext"
        }
      ]
    }
@@ -140,13 +130,9 @@ relevant OOXML style properties.
 
    `i18n-plan` validates `unitId`, `sourceHash`, and `sourceText`, then routes
    units to the safest available execution primitive:
-   - `textPlan.translations[]` for DrawingML paragraph/run planning.
-   - `replaceTextSegments[]` selectors for the `replace-text-segments` route
-     used by multi-run table paragraphs;
-     the planner materializes these as guarded lexical entries under
-     `replaceText.replacements[]`.
-   - `replaceText.replacements[]` for user-visible text attributes and planned
-     table paragraph text-node replacements.
+   - `textPlan.translations[]` for DrawingML shape and table paragraph/run planning.
+   - `replaceText.replacements[]` for user-visible text attributes and table
+     paragraph text-node replacements materialized by the shared text-plan route.
    - `replaceChartText.replacements[]` for chart visible cache labels.
    - `patch.ops[]` for generated run-level `set-run` operations on shape text.
 
@@ -230,13 +216,18 @@ relevant OOXML style properties.
      ```
      Materialize `<run-dir>/patch.json` from `i18n-plan.patch`, then apply
      without `--dry-run` only after the dry-run report passes.
-   - For table paragraphs, use the planner's `replace-text-segments` route and
-     its `replaceTextSegments[]` selectors rather than shape `set-run` ops.
-     Multi-run table units must provide a complete
-     `targetSegments[]` mapping. Every `sourceRunGroupId` must come verbatim
-     from the scan/planner inventory; never guess ids or infer them from run
-     order. Missing, duplicated, unknown, or out-of-order segments must fail
-     closed instead of collapsing the cell paragraph into one style.
+   - Table paragraphs use the same text-plan strategies as shape paragraphs.
+     Same-style multi-run paragraphs normally need only `targetText`; the first
+     run receives the target and continuation runs are cleared while their
+     properties remain intact. The planner materializes the result as guarded
+     `replaceText.replacements[]` because table cells are addressed through
+     semantic text-node paths rather than shape `set-run` ops.
+   - Use optional `targetSegments[]` only when hyperlink boundaries or mixed
+     styles cannot be mapped safely from `targetText` and `anchors[]`. Fields,
+     tabs, and breaks remain review-only. Every
+     `sourceRunGroupId` must come verbatim from the text-plan inventory; never
+     guess ids or infer them from run order. Missing, duplicated, unknown, or
+     out-of-order segments must fail closed.
    - Preserve run boundaries when they encode style. If one source sentence is
      split across multiple styled runs, follow the plan strategy:
      `uniform`, `preserve-run-boundaries`, or
@@ -404,10 +395,10 @@ translations, then emits executable sub-artifacts for the lower-level commands.
 
 Required interpretation:
 
-- `applyGate.passed=true`: the generated `replaceText`, `replaceChartText`,
-  `replaceTextSegments`, and `patch.ops` artifacts may be dry-run and applied
-  to the copied candidate deck. `replaceTextSegments` is a planner route that
-  is materialized into guarded `replaceText.replacements[]` for execution.
+- `applyGate.passed=true`: the generated `replaceText`, `replaceChartText`, and
+  `patch.ops` artifacts may be dry-run and applied to the copied candidate
+  deck. Shape and table paragraphs share the text-plan route; only their final
+  execution artifact differs.
 - `conflicts[]` non-empty: stop automation. Typical causes are unknown
   `unitId`, stale `sourceHash`, source text mismatch, or a target supplied for a
   preserve-only unit.
@@ -420,7 +411,8 @@ Required interpretation:
   preview/vision review, and text overflow checks.
 
 The lower-level `xdoc pptx i18n-text-plan` remains an execution primitive and
-debugging fallback for DrawingML shape/table text. Its strategies mean:
+debugging fallback for directly addressed DrawingML shape text. `i18n-plan`
+reuses the same strategies for table paragraphs. The strategies mean:
 
 - `uniform`: a single source run receives the full target text.
 - `preserve-run-boundaries`: source runs share the same style; the first run
@@ -431,10 +423,11 @@ debugging fallback for DrawingML shape/table text. Its strategies mean:
 - `review-required`: stop automation for that unit. Add explicit anchors,
   produce a manual run-level mapping, or request human review.
 
-For table paragraphs, these strategies are expressed through
-`targetSegments[]` and `sourceRunGroupId` rather than handwritten `set-run`
-queues. The mapping must cover the complete planner inventory in planner order;
-partial, duplicated, unknown, or reordered mappings are blockers.
+For table paragraphs, the planner normally derives the target run mapping from
+`targetText` and optional anchors, then emits guarded text-node replacements.
+When explicit `targetSegments[]` are necessary, the mapping must cover the
+complete `sourceRunGroupId` inventory in planner order; partial, duplicated,
+unknown, or reordered mappings are blockers.
 
 The i18n plan does not replace the style diff. After applying generated
 artifacts, still run `i18n-style-diff` to prove bold/italic/underline/strike,

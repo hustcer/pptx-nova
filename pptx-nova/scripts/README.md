@@ -84,6 +84,11 @@ Use these entry points from skill workflows:
   French or other Latin-script target text does not become a false English
   blocker. Native candidate language-classification blockers remain in the
   report as diagnostic evidence.
+- `pptx-nova-multi-column-review-gate.mjs` - bind final translation candidate,
+  final vision-diff, exact multi-column slide/shape findings, and full-size PNG
+  human-review evidence. It can close only
+  `multi-column-text-layout-review`; all other new or worsened high/medium
+  vision findings remain fail-closed blockers.
 - `pptx-nova-compare.mjs` - write a high-DPI full-deck before/after compare by
   delegating atomic parts to `xdoc pptx contact-diff`. With `--slide-count`,
   decks over the default 20-slide chunk size produce numbered PNGs and a

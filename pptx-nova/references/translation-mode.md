@@ -460,7 +460,11 @@ alignment, chart/table structure, and other style signatures were not changed.
   uses changed-text fingerprints to prevent equal-length translations from
   bypassing this review. Inspect the affected slide at full-size PNG resolution,
   repair wording/font/layout if needed, and rerun `vision-diff`; do not treat
-  this gate as an automatically fixable overflow warning.
+  this gate as an automatically fixable overflow warning. Once the final PNG is
+  acceptable, record the review with the candidate, final `vision-diff`, exact
+  `slideIndex` / `shapeId`, PNG SHA-256 and dimensions, reviewer, conclusion,
+  and all required checks, then run the multi-column review gate described
+  below.
 - Do not normalize styled mixed text into a single style. If the source has
   mixed bold/italic/underline/strikethrough runs, the target must keep the same
   style pattern unless a human approves a simplification.
@@ -526,6 +530,13 @@ xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx \
   --slides <changed> \
   --output <run-dir>/contact-diff.png --json > <run-dir>/contact-diff.json
 
+node <skill-root>/scripts/pptx-nova-multi-column-review-gate.mjs \
+  --candidate candidate.pptx \
+  --vision-diff <run-dir>/vision-diff.json \
+  --review <run-dir>/multi-column-review.json \
+  --output <run-dir>/multi-column-review-gate.json \
+  --overwrite --json
+
 node <skill-root>/scripts/pptx-nova-compare.mjs \
   --source source.pptx \
   --candidate candidate.pptx \
@@ -547,6 +558,54 @@ node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
   --overwrite \
   --json > <run-dir>/translation-compare-gate.json
 ```
+
+Use `pptx-nova-multi-column-review/v1` for the manual record:
+
+```json
+{
+  "schemaVersion": "pptx-nova-multi-column-review/v1",
+  "candidate": {
+    "path": "/absolute/run/candidate.pptx",
+    "sha256": "sha256:..."
+  },
+  "visionDiff": {
+    "path": "/absolute/run/vision-diff.json",
+    "sha256": "sha256:..."
+  },
+  "reviews": [
+    {
+      "slideIndex": 8,
+      "shapeId": 9,
+      "reviewer": "human",
+      "decision": "pass",
+      "png": {
+        "path": "/absolute/run/previews-candidate/slide-009.png",
+        "sha256": "sha256:...",
+        "width": 1920,
+        "height": 1080
+      },
+      "checks": {
+        "noClipping": true,
+        "columnFlowReadable": true,
+        "noOverlap": true,
+        "marginsAcceptable": true
+      },
+      "note": "Reviewed at full PNG resolution; translated copy fits both columns."
+    }
+  ]
+}
+```
+
+This is a narrow combined gate. A final `vision-diff.agentGate.passed=false`
+may be closed only when every new or worsened high/medium blocker is exactly
+`multi-column-text-layout-review` and
+`multi-column-review-gate.json.agentGate.passed=true`. The helper fails closed
+when candidate, `vision-diff`, or PNG hashes are stale; when PNG dimensions or
+slide/shape coverage do not match; or when any required manual check is not
+true. It never exempts `multi-column-text-overflow`, `text-overflow-estimate`,
+`geometry-overlap`, `text-edge-margin`, or any other new/worsened high or medium
+issue. If no multi-column review finding exists, use the ordinary
+`vision-diff.agentGate` result and do not create a speculative review record.
 
 Treat `contact-diff.agentGate.passed=false` as a review artifact blocker:
 the PNG did not contain complete source/candidate pairs for the requested
@@ -613,6 +672,8 @@ Keep these translation-specific artifacts in the run directory when available:
 - source and candidate inspect reports
 - dry-run/apply reports
 - `vision-diff.json`
+- `multi-column-review.json` when final `vision-diff` reports changed multi-column text
+- `multi-column-review-gate.json` when a multi-column review record is required
 - candidate `vision-check` reports when used for diagnostics
 - source/candidate previews and contact sheets
 - `contact-diff.json` and `contact-diff.png`

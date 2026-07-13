@@ -17,7 +17,8 @@ small, brittle PowerPoint scripting snippets. pptx-nova is built on `xdoc`, an
 in-house PPTX engine designed from the ground up for AI agents. It can inspect
 the real PowerPoint file structure, validate declarative JSON patches with
 dry-runs, apply native editable changes, render previews, compare source and
-candidate decks, and leave replayable sidecar evidence.
+candidate decks, export existing or generated presentations to high-fidelity
+PDF, and leave replayable sidecar evidence.
 
 That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real
 PPTX objects instead of screenshots, check selectors before writing, preserve
@@ -51,7 +52,8 @@ one-shot slide generator.
 - Generate data-driven slides from CSV/JSON data, using editable tables,
   charts, diagrams, and shapes where supported.
 - Create or safely edit supported PPTX animations and transitions.
-- Export PDF or PNG previews for review.
+- Convert existing or generated PPTX decks to high-fidelity PDF, and render PNG
+  previews for visual review.
 - Run quality checks that look for overlap, clipped text, layout drift,
   template violations, content-preservation issues, visual defects, and
   before/after drift.
@@ -87,6 +89,12 @@ layout, formatting, charts, speaker notes, animations, and slide count. Use
 concise US English terminology and write product-launch-en.pptx.
 ```
 
+Or export an existing presentation:
+
+```text
+Convert proposal.pptx to a high-fidelity PDF and save it as proposal.pdf.
+```
+
 ## What to provide
 
 You can give a single sentence, but results are usually better when you include:
@@ -120,7 +128,7 @@ styles into PowerPoint one-to-one.
 A normal run can produce:
 
 - A final editable `.pptx` file.
-- Optional PDF and per-slide PNG previews.
+- A high-fidelity PDF export and optional per-slide PNG previews.
 - Optional validation reports for visual checks, template checks, and
   content-preservation checks.
 - For translation or refurbishment runs, a single all-slides side-by-side

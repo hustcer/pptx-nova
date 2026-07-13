@@ -11,12 +11,23 @@ internal workflow.
 
 `pptx-nova` is powered by `xdoc`, an in-house PPTX engine. `xdoc` was designed from the ground up for
 Agent workflows: it lets an Agent inspect the real PPTX structure, dry-run structured patches, apply
-changes, generate previews, compare before and after versions, and retain auditable evidence.
+changes, generate previews, export decks as high-fidelity PDF files, compare before and after
+versions, and retain auditable evidence.
 
 That makes it closer to a checkable, replayable PPTX build and editing pipeline than a workflow that
 renders content into images and inserts those images into slides. Within supported objects and
 workflows, output is meant to remain editable in PowerPoint as text, shapes, tables, charts, and slide
 elements.
+
+## High-Fidelity PDF Export
+
+In addition to creating and editing PowerPoint files, `pptx-nova` can convert an existing or newly
+generated PPTX deck to a high-fidelity PDF. This is useful for sharing, printing, archiving, formal
+delivery, or reviewing a presentation on a device that does not have PowerPoint.
+
+`xdoc` renders the deck's static slide appearance into PDF. PDF does not retain animations,
+transitions, video playback, or other interactive behavior, and decks that depend on unavailable
+fonts or unusual PPTX features may still need a visual review after export.
 
 ## Reliable Rules Across Follow-Up Edits
 
@@ -65,7 +76,9 @@ You can use `pptx-nova` to:
   reliably changed before delivery.
 - Preserve explicit current-deck future or carryover rules, such as keeping the same title color
   on subsequently added slides, and verify applicable rules during later edits.
-- Export PDF, image previews, Markdown, JSON, or text for review, sharing, or downstream processing.
+- Convert existing or generated PPTX decks to high-fidelity PDF for sharing, printing, archiving,
+  formal delivery, or review without PowerPoint.
+- Export image previews, Markdown, JSON, or text for review or downstream processing.
 - Handle technical slides with formulas: simple formulas may stay as plain text, while complex formulas may be inserted as formula assets.
 - Check for text overlap, clipped content, uneven layouts, and similar presentation issues.
 - Provide workflow feedback for a `pptx-nova` run when you explicitly ask for it.
@@ -109,7 +122,7 @@ include:
 - **Content**: Outline, Markdown/text material, CSV/JSON table data, pasted tables, an old PPT, web links, PDFs, images, or logos.
 - **Style**: Formal, minimal, consulting-style, technology-oriented, brand-compliant, course-oriented, and so on.
 - **Constraints**: Which content must not change, which slides must be preserved, and whether restructuring is allowed.
-- **Output**: Final filename, and whether you need PDF or image previews.
+- **Output**: Final filename, and whether you need a high-fidelity PDF export or image previews.
 
 You can start with one sentence. If information is missing, the assistant will either proceed based on
 the task or ask for confirmation at critical points.
@@ -199,10 +212,12 @@ Check final.pptx for text overlap, clipping, or layout issues. Do not modify the
 ```
 
 ```text
-Export final.pptx as a PDF and per-slide PNG previews.
+Convert final.pptx to a high-fidelity PDF named final.pdf, and also export per-slide PNG previews.
 ```
 
-Best for: you already have a PPT and only need quality checks or exports.
+Best for: you already have a PPT and need a shareable, printable, or archival PDF, quality checks,
+or visual preview images. The PDF preserves the static rendered appearance; animations, transitions,
+video playback, and other interactive behavior remain PPTX-only.
 
 ### 8. Translate An Existing PPT
 

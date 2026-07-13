@@ -88,6 +88,10 @@ Use these entry points from skill workflows:
   inventoried but language-uncertain chart review units into explicit
   translate/preserve decisions. It binds decisions to the source scan and unit
   hashes and fails closed unless every review-only chart unit is classified.
+- `pptx-nova-i18n-classify-review-units.mjs` - preferred classifier for all
+  language-uncertain `visibleBody`, `visibleTextAttr`, and `chartVisibleCache`
+  review units. It binds decisions to the source scan and unit hashes and fails
+  closed before `i18n-plan` unless every such review unit is classified.
 - `pptx-nova-multi-column-review-gate.mjs` - bind final translation candidate,
   final vision-diff, exact multi-column slide/shape findings, and full-size PNG
   human-review evidence. It can close only

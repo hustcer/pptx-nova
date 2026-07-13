@@ -163,6 +163,13 @@ test('layout snapshot separates actionable risks from informational inspect gaps
   assert.equal(report.summary.affectedSlideCount, 1)
   assert.equal(report.summary.actionableSlideCount, 1)
   assert.equal(report.summary.slideIndexBase, 0)
+  assert.equal(report.summary.slideNumberBase, 1)
+  assert.deepEqual(report.summary.affectedSlideIndexes, [0])
+  assert.deepEqual(report.summary.affectedSlideNumbers, [1])
+  assert.deepEqual(report.summary.affectedPreviewFiles, ['slide-001.png'])
+  assert.deepEqual(report.summary.actionableSlideIndexes, [0])
+  assert.deepEqual(report.summary.actionableSlideNumbers, [1])
+  assert.deepEqual(report.summary.actionablePreviewFiles, ['slide-001.png'])
   assert.deepEqual(
     report.summary.topActionable.map(({ code, count }) => ({ code, count })),
     [
@@ -170,7 +177,64 @@ test('layout snapshot separates actionable risks from informational inspect gaps
       { code: 'font-size-too-small', count: 1 },
     ],
   )
+  assert.deepEqual(report.summary.topActionable[0].slideIndexes, [0])
+  assert.deepEqual(report.summary.topActionable[0].slideNumbers, [1])
+  assert.deepEqual(report.summary.topActionable[0].previewFiles, ['slide-001.png'])
+  assert.equal(
+    report.risks.every((risk) => risk.slideIndex === 0),
+    true,
+  )
+  assert.equal(
+    report.risks.every((risk) => risk.slideNumber === 1),
+    true,
+  )
+  assert.equal(
+    report.risks.every((risk) => risk.previewFile === 'slide-001.png'),
+    true,
+  )
   assert.equal(readFileSync(outputPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
+})
+
+test('layout snapshot keeps explicit slide references beyond summary truncation', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-layout-slide-references-'))
+  const inspectPath = join(root, 'inspect.json')
+  writeJson(inspectPath, {
+    schemaVersion: 'pptx-inspect/v1',
+    presentation: { slideCount: 10, size: { width: '10in', height: '5.625in' } },
+    slides: Array.from({ length: 10 }, (_, index) => ({
+      index,
+      shapes: [
+        {
+          id: `empty-placeholder-${index}`,
+          shapeType: 'rect',
+          placeholder: { type: 'body' },
+          bbox: { x: 10, y: 10, width: 100, height: 40 },
+        },
+      ],
+    })),
+  })
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-layout-snapshot.mjs'),
+    '--inspect',
+    inspectPath,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+  const placeholderRisks = report.risks.filter((risk) => risk.code === 'empty-placeholder')
+
+  assert.equal(report.summary.affectedSlidesTruncated, true)
+  assert.equal(report.summary.topActionable[0].slidesTruncated, true)
+  assert.equal(report.summary.topActionable[0].slideNumbers.length, 8)
+  assert.equal(placeholderRisks.length, 10)
+  assert.deepEqual(
+    placeholderRisks.map((risk) => [risk.slideIndex, risk.slideNumber, risk.previewFile]),
+    Array.from({ length: 10 }, (_, index) => [
+      index,
+      index + 1,
+      `slide-${String(index + 1).padStart(3, '0')}.png`,
+    ]),
+  )
 })
 
 test('layout snapshot treats undisclosed inspect metadata as informational only', () => {
@@ -1243,6 +1307,99 @@ test('refurbish fallback plan overwrites current-run candidate commands', async 
   )
 })
 
+test('refurbish runner persists catalog readiness before a blocked plan exits', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-blocked-readiness-'))
+  const source = join(root, 'source.pptx')
+  const output = join(root, 'out.pptx')
+  const runDir = join(root, 'run')
+  writeFileSync(source, 'fake pptx')
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2)
+if (args[0] === 'schema') {
+  process.stdout.write(JSON.stringify({
+    version: '9.9.9 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    capabilities: { schemaVersion: 'capabilities/v1' },
+    commands: { pptx: { subcommands: {}, patchSchema: {}, catalogs: { nativeDeckkits: { deckkits: [] } } } }
+  }))
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`,
+  )
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'missing-deckkit',
+      '--source',
+      source,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    1,
+  )
+  const summary = JSON.parse(result.stdout)
+  const readinessPath = join(runDir, 'catalog-readiness.json')
+  const readiness = JSON.parse(readFileSync(readinessPath, 'utf8'))
+
+  assert.equal(summary.status, 'failed')
+  assert.equal(summary.error.phase, 'refurbish-plan')
+  assert.equal(summary.artifacts.readiness, readinessPath)
+  assert.equal(readiness.schemaVersion, 'pptx-nova-catalog-readiness/v1')
+  assert.equal(readiness.status, 'fail')
+  assert.equal(readiness.agentGate.passed, false)
+  assert.equal(existsSync(output), false)
+})
+
+test('refurbish runner persists catalog readiness before any xdoc command starts', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-readiness-before-xdoc-'))
+  const source = join(root, 'source.pptx')
+  const output = join(root, 'out.pptx')
+  const runDir = join(root, 'run')
+  writeFileSync(source, 'fake pptx')
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      source,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      join(root, 'missing-xdoc'),
+      '--json',
+    ],
+    1,
+  )
+  const summary = JSON.parse(result.stdout)
+  const readinessPath = join(runDir, 'catalog-readiness.json')
+  const phaseNames = summary.phases.map((phase) => phase.name)
+
+  assert.equal(summary.status, 'failed')
+  assert.equal(summary.artifacts.readiness, readinessPath)
+  assert.equal(JSON.parse(readFileSync(readinessPath, 'utf8')).status, 'pass')
+  assert.ok(phaseNames.includes('catalog-readiness-evidence'))
+  assert.ok(phaseNames.includes('xdoc-capability-probe'))
+  assert.ok(
+    phaseNames.indexOf('catalog-readiness-evidence') < phaseNames.indexOf('xdoc-capability-probe'),
+  )
+  assert.equal(existsSync(output), false)
+})
+
 test('refurbish runner exposes every multipart compare artifact before publishing output', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-run-'))
   const source = join(root, 'source.pptx')
@@ -1393,9 +1550,12 @@ if (args[0] === 'schema') {
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(existsSync(output), true)
   assert.equal(existsSync(join(runDir, 'pptx-diff.json')), true)
+  assert.equal(existsSync(join(runDir, 'catalog-readiness.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-gate.json')), true)
   assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
+  assert.equal(summary.artifacts.readiness, join(runDir, 'catalog-readiness.json'))
+  assert.equal(summary.artifacts.deliveryReadiness, null)
   assert.equal(summary.artifacts.refurbishCompare, null)
   assert.deepEqual(
     summary.artifacts.refurbishCompareParts,
@@ -1409,6 +1569,32 @@ if (args[0] === 'schema') {
   assert.equal(summary.layout.actionableRiskCount, 0)
   assert.equal(summary.layout.informationalRiskCount, 0)
   assert.equal(summary.agentSummary.layout.actionableRiskCount, 0)
+  const catalogReadiness = JSON.parse(readFileSync(summary.artifacts.readiness, 'utf8'))
+  assert.equal(catalogReadiness.schemaVersion, 'pptx-nova-catalog-readiness/v1')
+  assert.equal(catalogReadiness.status, 'pass')
+  assert.equal(catalogReadiness.readiness, 'production')
+  assert.equal(catalogReadiness.agentGate.passed, true)
+  assert.equal(catalogReadiness.agentGate.benchmarkAvailable, true)
+  assert.equal(catalogReadiness.agentGate.benchmarkEvidencePassed, true)
+  assert.equal(catalogReadiness.agentGate.benchmarkGatePassed, true)
+  const progressEvents = result.stderr
+    .trim()
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => JSON.parse(line))
+  assert.ok(
+    progressEvents.some(
+      (event) => event.event === 'phase-start' && event.phase === 'source-inspect',
+    ),
+  )
+  assert.ok(
+    progressEvents.some((event) => event.event === 'compare-part-start' && event.partNumber === 1),
+  )
+  assert.ok(
+    progressEvents.some(
+      (event) => event.event === 'compare-part-complete' && event.partNumber === 3,
+    ),
+  )
   assert.ok(sourceInspect.command.includes(process.execPath), sourceInspect.command)
   assert.ok(sourceInspect.command.includes('fake-xdoc.mjs'), sourceInspect.command)
   assert.ok(comparePhase.command.includes(join(runDir, 'candidate.pptx')), comparePhase.command)
@@ -1708,6 +1894,73 @@ test('compare splits 48 slides into complete 20/20/8 high-DPI parts and writes a
   )
 })
 
+test('compare streams heartbeat progress without corrupting JSON stdout', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-progress-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const runDir = join(root, 'run')
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+import { writeFileSync } from 'node:fs'
+
+const args = process.argv.slice(2)
+const valueAfter = (flag) => args[args.indexOf(flag) + 1]
+await new Promise((resolve) => setTimeout(resolve, 80))
+const output = valueAfter('--output')
+writeFileSync(output, 'contact diff png')
+process.stdout.write(JSON.stringify({
+  schemaVersion: 'pptx-contact-diff/v1',
+  status: 'success',
+  outputPath: output,
+  summary: { pairCount: 1, scopeMode: 'all-slides', dpi: Number(valueAfter('--dpi')) },
+  agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 1 },
+  render: { path: output, width: 100, height: 56, dpi: Number(valueAfter('--dpi')) }
+}))
+`,
+  )
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+
+  const result = runNode(
+    [
+      skillPath('scripts/pptx-nova-compare.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--run-dir',
+      runDir,
+      '--kind',
+      'refurbish',
+      '--slide-count',
+      '1',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    {
+      env: {
+        ...process.env,
+        PPTX_NOVA_PROGRESS_FD: '1',
+        PPTX_NOVA_PROGRESS_HEARTBEAT_MS: '20',
+      },
+    },
+  )
+  const report = JSON.parse(result.stdout)
+  const progressEvents = result.stderr
+    .trim()
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => JSON.parse(line))
+
+  assert.equal(report.status, 'success')
+  assert.ok(progressEvents.some((event) => event.event === 'compare-start'))
+  assert.ok(progressEvents.some((event) => event.event === 'command-heartbeat'))
+  assert.ok(progressEvents.some((event) => event.event === 'compare-part-complete'))
+  assert.ok(progressEvents.some((event) => event.event === 'compare-complete'))
+})
+
 test('compare retries only a retryable RenderError part at 144 DPI', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-retry-'))
   const source = join(root, 'source.pptx')
@@ -1853,6 +2106,15 @@ test('compare fails closed and removes every part when 144 DPI also fails', () =
     },
   )
   assert.equal(result.status, 1)
+  const failure = JSON.parse(result.stdout)
+  const progressEvents = result.stderr
+    .trim()
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => JSON.parse(line))
+  assert.equal(failure.schemaVersion, 'pptx-nova-compare-error/v1')
+  assert.equal(failure.status, 'error')
+  assert.ok(progressEvents.some((event) => event.event === 'compare-failed'))
   assert.equal(
     readdirSync(runDir).filter((name) => /refurbish-compare.*\.(png|json)$/.test(name)).length,
     0,

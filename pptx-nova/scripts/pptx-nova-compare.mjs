@@ -1,8 +1,12 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
+import { performance } from 'node:perf_hooks'
+import { createProgressReporter, progressHeartbeatMs } from './pptx-nova-progress.mjs'
+
+const MAX_COMMAND_BUFFER = 20 * 1024 * 1024
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-compare.mjs --source <source.pptx> --candidate <candidate.pptx> --run-dir <run-dir> [options]
@@ -23,6 +27,7 @@ Options:
   --source-label <text>     Deprecated; xdoc contact-diff owns contact sheet labels.
   --candidate-label <text>  Deprecated; xdoc contact-diff owns contact sheet labels.
   --overwrite               Allow replacing existing output/report files.
+  --progress <mode>         Progress stream: auto|jsonl|text|off. Defaults to auto.
   --json                    Print the xdoc contact-diff report to stdout.
   --help                    Show this help.
 
@@ -47,6 +52,7 @@ const valueFlags = {
   '--xdoc-bin': 'xdocBin',
   '--source-label': 'sourceLabel',
   '--candidate-label': 'candidateLabel',
+  '--progress': 'progress',
 }
 
 function parseArgs(argv) {
@@ -66,6 +72,7 @@ function parseArgs(argv) {
     sourceLabel: '',
     candidateLabel: '',
     overwrite: false,
+    progress: 'auto',
     json: false,
   }
 
@@ -146,17 +153,60 @@ function commandInvocation(bin, args) {
 
 function run(bin, args, options = {}) {
   const command = commandInvocation(bin, args)
-  const result = spawnSync(command.bin, command.args, {
-    cwd: options.cwd,
-    encoding: 'utf8',
-    maxBuffer: 20 * 1024 * 1024,
+  const commandLabel = commandText(command.bin, command.args)
+  const reporter = options.reporter
+  const started = performance.now()
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(command.bin, command.args, {
+      cwd: options.cwd,
+      env: options.env ?? process.env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    let stdoutBytes = 0
+    let stderrBytes = 0
+    let bufferError = null
+    child.stdout.setEncoding('utf8')
+    child.stderr.setEncoding('utf8')
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk
+      stdoutBytes += Buffer.byteLength(chunk)
+      if (!bufferError && stdoutBytes > MAX_COMMAND_BUFFER) {
+        bufferError = new Error(`${commandLabel} exceeded the stdout buffer limit`)
+        child.kill('SIGTERM')
+      }
+    })
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk
+      stderrBytes += Buffer.byteLength(chunk)
+      if (!bufferError && stderrBytes > MAX_COMMAND_BUFFER) {
+        bufferError = new Error(`${commandLabel} exceeded the stderr buffer limit`)
+        child.kill('SIGTERM')
+      }
+    })
+    const heartbeat = reporter?.enabled
+      ? setInterval(() => {
+          reporter.emit('command-heartbeat', {
+            command: commandLabel,
+            elapsedMs: Math.round(performance.now() - started),
+            ...options.progressDetails,
+          })
+        }, progressHeartbeatMs())
+      : null
+    child.once('error', (error) => {
+      if (heartbeat) clearInterval(heartbeat)
+      reject(new Error(`${commandLabel} failed to start: ${error.message}`))
+    })
+    child.once('close', (status, signal) => {
+      if (heartbeat) clearInterval(heartbeat)
+      if (bufferError) {
+        reject(bufferError)
+        return
+      }
+      resolvePromise({ status, signal, stdout, stderr, command: commandLabel })
+    })
   })
-  if (result.error) {
-    throw new Error(
-      `${commandText(command.bin, command.args)} failed to start: ${result.error.message}`,
-    )
-  }
-  return { ...result, command: commandText(command.bin, command.args) }
 }
 
 function ensureInputFile(path, label) {
@@ -237,7 +287,17 @@ function reportImagePath(report) {
   )
 }
 
-function runContactDiff(args, { output = args.output, slides = args.slides, dpi = args.dpi } = {}) {
+async function runContactDiff(
+  args,
+  {
+    output = args.output,
+    slides = args.slides,
+    dpi = args.dpi,
+    reporter,
+    partNumber,
+    partCount,
+  } = {},
+) {
   const commandArgs = [
     'pptx',
     'contact-diff',
@@ -254,7 +314,10 @@ function runContactDiff(args, { output = args.output, slides = args.slides, dpi 
   if (slides) commandArgs.push('--slides', slides)
   if (args.overwrite || existsSync(output)) commandArgs.push('--overwrite')
 
-  const result = run(args.xdocBin, commandArgs)
+  const result = await run(args.xdocBin, commandArgs, {
+    reporter,
+    progressDetails: { partNumber, partCount, slides, dpi },
+  })
   const report = parseJsonReportSafe(result.stdout)
   if (result.status !== 0 || report?.status === 'error') {
     return { status: 'failed', result, report, error: failureDetails(report, result) }
@@ -270,14 +333,31 @@ function runContactDiff(args, { output = args.output, slides = args.slides, dpi 
   return { status: 'success', result, report }
 }
 
-function runSingleCompare(args) {
+async function runSingleCompare(args, reporter) {
   const attempts = []
-  let attempt = runContactDiff(args)
+  reporter.emit('compare-part-start', {
+    partNumber: 1,
+    partCount: 1,
+    slides: args.slides || (args.slideCount > 0 ? `1-${args.slideCount}` : 'all'),
+    dpi: args.dpi,
+  })
+  let attempt = await runContactDiff(args, { reporter, partNumber: 1, partCount: 1 })
   if (attempt.status === 'failed') {
     attempts.push({ dpi: args.dpi, status: 'failed', error: attempt.error })
     rmSync(args.output, { force: true })
     if (!args.slides && args.slideCount > 0 && isRetryableRenderError(attempt.error)) {
-      attempt = runContactDiff(args, { dpi: args.fallbackDpi })
+      reporter.emit('compare-part-retry', {
+        partNumber: 1,
+        partCount: 1,
+        dpi: args.fallbackDpi,
+        reason: attempt.error.reason ?? attempt.error.kind,
+      })
+      attempt = await runContactDiff(args, {
+        dpi: args.fallbackDpi,
+        reporter,
+        partNumber: 1,
+        partCount: 1,
+      })
     }
   }
   if (attempt.status !== 'success') {
@@ -299,6 +379,13 @@ function runSingleCompare(args) {
     },
   }
   writeFileSync(args.report, `${JSON.stringify(report, null, 2)}\n`)
+  reporter.emit('compare-part-complete', {
+    partNumber: 1,
+    partCount: 1,
+    pairCount: Number(report?.agentGate?.pairCount ?? report?.summary?.pairCount),
+    dpi: effectiveDpi,
+    output: args.output,
+  })
   return report
 }
 
@@ -323,7 +410,7 @@ function coverageFor(parts, slideCount) {
   }
 }
 
-function runMultipartCompare(args) {
+async function runMultipartCompare(args, reporter) {
   const chunks = slideChunks(args.slideCount, args.chunkSize)
   const numberWidth = Math.max(2, String(chunks.length).length)
   const cleanupPaths = [args.report]
@@ -336,16 +423,39 @@ function runMultipartCompare(args) {
       cleanupPaths.push(output, partReportPath)
       const attempts = []
       let attemptedDpi = args.dpi
-      let attempt = runContactDiff(args, { output, slides: chunk.selector, dpi: args.dpi })
+      reporter.emit('compare-part-start', {
+        partNumber: index + 1,
+        partCount: chunks.length,
+        slides: chunk.selector,
+        dpi: args.dpi,
+      })
+      let attempt = await runContactDiff(args, {
+        output,
+        slides: chunk.selector,
+        dpi: args.dpi,
+        reporter,
+        partNumber: index + 1,
+        partCount: chunks.length,
+      })
       if (attempt.status === 'failed') {
         attempts.push({ dpi: args.dpi, status: 'failed', error: attempt.error })
         rmSync(output, { force: true })
         if (isRetryableRenderError(attempt.error)) {
           attemptedDpi = args.fallbackDpi
-          attempt = runContactDiff(args, {
+          reporter.emit('compare-part-retry', {
+            partNumber: index + 1,
+            partCount: chunks.length,
+            slides: chunk.selector,
+            dpi: args.fallbackDpi,
+            reason: attempt.error.reason ?? attempt.error.kind,
+          })
+          attempt = await runContactDiff(args, {
             output,
             slides: chunk.selector,
             dpi: args.fallbackDpi,
+            reporter,
+            partNumber: index + 1,
+            partCount: chunks.length,
           })
         }
       }
@@ -381,6 +491,14 @@ function runMultipartCompare(args) {
         sha256: sha256(output),
         agentGate: attempt.report?.agentGate ?? null,
         attempts,
+      })
+      reporter.emit('compare-part-complete', {
+        partNumber: index + 1,
+        partCount: chunks.length,
+        slides: chunk.selector,
+        pairCount: parts.at(-1).pairCount,
+        dpi: effectiveDpi,
+        output,
       })
     }
     const coverage = coverageFor(parts, args.slideCount)
@@ -422,8 +540,7 @@ function runMultipartCompare(args) {
   }
 }
 
-function main() {
-  const args = parseArgs(process.argv.slice(2))
+async function main(args, reporter) {
   ensureInputFile(args.source, 'source PPTX')
   ensureInputFile(args.candidate, 'candidate PPTX')
   ensureWritable(args.report, args.overwrite)
@@ -431,7 +548,21 @@ function main() {
 
   const multipart = !args.slides && args.slideCount > args.chunkSize
   if (!multipart) ensureWritable(args.output, args.overwrite)
-  const report = multipart ? runMultipartCompare(args) : runSingleCompare(args)
+  reporter.emit('compare-start', {
+    source: args.source,
+    candidate: args.candidate,
+    slideCount: args.slideCount || null,
+    chunkSize: args.chunkSize,
+    dpi: args.dpi,
+  })
+  const report = multipart
+    ? await runMultipartCompare(args, reporter)
+    : await runSingleCompare(args, reporter)
+  reporter.emit('compare-complete', {
+    partCount: multipart ? report.parts.length : 1,
+    pairCount: report.agentGate?.pairCount ?? report.summary?.pairCount ?? null,
+    report: args.report,
+  })
   if (args.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
   else {
     const pairCount = report.agentGate?.pairCount ?? report.summary?.pairCount ?? 'unknown'
@@ -442,10 +573,29 @@ function main() {
   }
 }
 
+let parsedArgs = null
+let reporter = createProgressReporter({ mode: 'off' })
 try {
-  main()
+  parsedArgs = parseArgs(process.argv.slice(2))
+  reporter = createProgressReporter({
+    mode: parsedArgs.progress,
+    jsonOutput: parsedArgs.json,
+    context: { tool: 'pptx-nova-compare', kind: parsedArgs.kind },
+  })
+  await main(parsedArgs, reporter)
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error)
-  process.stderr.write(`${message}\n`)
-  process.exit(1)
+  const errorReport = {
+    schemaVersion: 'pptx-nova-compare-error/v1',
+    status: 'error',
+    kind: error?.kind ?? error?.name ?? 'Error',
+    message,
+  }
+  reporter.emit('compare-failed', { kind: errorReport.kind, message })
+  if (parsedArgs?.json || process.argv.includes('--json')) {
+    process.stdout.write(`${JSON.stringify(errorReport, null, 2)}\n`)
+  } else if (!reporter.enabled) {
+    process.stderr.write(`${message}\n`)
+  }
+  process.exitCode = 1
 }

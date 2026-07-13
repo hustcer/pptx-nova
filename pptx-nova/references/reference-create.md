@@ -39,6 +39,8 @@
 - `candidate-inspect.json` / `layout-final.json`：Refurbish Existing Deck 时对候选 PPTX
   做最终 inspect，并由 `pptx-nova-layout-snapshot.mjs` 生成对象 bbox、文本、字体、颜色、
   placeholder、frame 和 z-order 的结构化布局证据。
+- `catalog-readiness.json`：每次 refurbish runner 都会持久化的 DeckKit catalog readiness
+  与 benchmark 摘要；如显式请求 live benchmark readiness，则另存为 `delivery-readiness.json`。
 - `contact-diff.png` / `contact-diff.json`：Refurbish Existing Deck 时由 `xdoc pptx contact-diff`
   生成的 source/candidate 并排 contact sheet 和状态报告。
 - `refurbish-compare.png` / `refurbish-compare.json`：Refurbish Existing Deck 时由

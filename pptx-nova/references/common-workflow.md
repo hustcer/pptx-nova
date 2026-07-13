@@ -54,7 +54,8 @@ Keep this minimum evidence set after successful delivery when the files exist:
 `patch.json`, sidecar files, dry-run/apply/refurbish JSON reports,
 `vision.json`, `visual_review.json`, `clean-open.json`, `check.json`,
 `semantic-audit.json`, `structure-check.json`, `evidence-summary.json`,
-`layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, the final candidate PPTX,
+`layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, `catalog-readiness.json`,
+optional `delivery-readiness.json`, the final candidate PPTX,
 the contact sheet, and any PNGs needed to explain suspicious or manually
 reviewed slides.
 
@@ -182,6 +183,19 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     artifacts, phase failures, previews, and final publication use one run-dir
     contract. Use the lower-level commands directly only for diagnosis or
     selective page repair.
+    In JSON mode the runner keeps stdout as one final JSON report and streams
+    `pptx-nova-progress/v1` JSONL events to stderr. Agents should surface phase,
+    compare-part, retry, and heartbeat events instead of polling a silent process.
+    The runner always writes `catalog-readiness.json`; a requested live benchmark
+    audit is written separately as `delivery-readiness.json`.
+    Progress mode defaults to `jsonl` with `--json` and `text` otherwise; callers
+    can override it with `--progress jsonl|text|off`. JSONL events use schema
+    `pptx-nova-progress/v1` and include `phase-start`, `phase-complete`,
+    `compare-part-start`, `compare-part-retry`, `compare-part-complete`, and
+    `command-heartbeat`. Keep stdout and stderr separate: parse stdout only after
+    process completion, while using stderr events for status updates and stall detection.
+    JSON-mode compare failures still return one `pptx-nova-compare-error/v1`
+    document on stdout and emit `compare-failed` as JSONL on stderr.
     Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
 text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     or page-level repair. - Data/template: template, data, bindings, and asset paths. - If the source outline only gives a slide title or leaves factual content

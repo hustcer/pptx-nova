@@ -13,6 +13,7 @@ import {
 import { basename, dirname, extname, join, relative, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
+import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { buildRefurbishPlan } from './pptx-nova-refurbish-plan.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
@@ -27,6 +28,7 @@ const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
 const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
 const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
+let progressReporter = createProgressReporter({ mode: 'off' })
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source <source.pptx> --output <output.pptx> [options]
@@ -45,6 +47,7 @@ Options:
   --compare-chunk-size <n>
                           Maximum slides per compare PNG. Defaults to 20.
   --overwrite             Allow replacing an existing final output after all machine gates pass
+  --progress <mode>       Progress stream: auto|jsonl|text|off. Defaults to auto.
   --json                  Print machine-readable run summary
   --help                  Show this help
 
@@ -76,6 +79,7 @@ function parseArgs(argv) {
     contactDiff: false,
     compareChunkSize: 20,
     overwrite: false,
+    progress: 'auto',
     json: false,
   }
 
@@ -124,6 +128,7 @@ const valueFlags = {
   '--xdoc-bin': 'xdocBin',
   '--readiness-out': 'readinessOut',
   '--compare-chunk-size': 'compareChunkSize',
+  '--progress': 'progress',
 }
 
 function valueAfter(argv, index, flag) {
@@ -195,10 +200,18 @@ function runJsonPhase(summary, options) {
   const { name, bin, args, artifact, cwd = summary.runDir } = options
   const start = performance.now()
   const command = commandInvocation(bin, args)
+  progressReporter.emit('phase-start', {
+    phase: name,
+    command: commandText(command.bin, command.args),
+  })
   const result = spawnSync(command.bin, command.args, {
     cwd,
     encoding: 'utf8',
     maxBuffer: 128 * 1024 * 1024,
+    env: options.forwardProgress ? { ...process.env, PPTX_NOVA_PROGRESS_FD: '3' } : process.env,
+    stdio: options.forwardProgress
+      ? ['ignore', 'pipe', 'pipe', process.stderr]
+      : ['ignore', 'pipe', 'pipe'],
   })
   if (result.error) {
     summary.phases.push({
@@ -211,6 +224,12 @@ function runJsonPhase(summary, options) {
       artifact: relativeArtifact(summary.runDir, artifact),
       stderr: null,
       spawnError: result.error.message,
+    })
+    progressReporter.emit('phase-complete', {
+      phase: name,
+      status: 'failed',
+      durationMs: durationMs(start),
+      error: result.error.message,
     })
     throw new PhaseFailure(name, `${name} could not start: ${result.error.message}`, {
       kind: result.error.code ?? 'SpawnError',
@@ -238,6 +257,13 @@ function runJsonPhase(summary, options) {
     stderr: relativeArtifact(summary.runDir, stderrPath),
   }
   summary.phases.push(phase)
+  progressReporter.emit('phase-complete', {
+    phase: name,
+    status: phase.status,
+    durationMs: phase.durationMs,
+    exitCode: phase.exitCode,
+    artifact: phase.artifact,
+  })
 
   if (parseError) {
     throw new PhaseFailure(name, `${name} did not emit valid JSON: ${parseError.message}`, {
@@ -268,6 +294,10 @@ function runPlainPhase(summary, options) {
   const { name, bin, args, cwd = summary.runDir } = options
   const start = performance.now()
   const command = commandInvocation(bin, args)
+  progressReporter.emit('phase-start', {
+    phase: name,
+    command: commandText(command.bin, command.args),
+  })
   const result = spawnSync(command.bin, command.args, {
     cwd,
     encoding: 'utf8',
@@ -286,13 +316,19 @@ function runPlainPhase(summary, options) {
       stderr: null,
       spawnError: result.error.message,
     })
+    progressReporter.emit('phase-complete', {
+      phase: name,
+      status: 'failed',
+      durationMs: durationMs(start),
+      error: result.error.message,
+    })
     throw new PhaseFailure(name, `${name} could not start: ${result.error.message}`, {
       kind: result.error.code ?? 'SpawnError',
     })
   }
   const stdoutPath = saveStream(summary.runDir, name, 'stdout', result.stdout ?? '')
   const stderrPath = saveStream(summary.runDir, name, 'stderr', result.stderr ?? '')
-  summary.phases.push({
+  const phase = {
     name,
     status: result.status === 0 ? 'passed' : 'failed',
     exitCode: result.status,
@@ -302,6 +338,13 @@ function runPlainPhase(summary, options) {
     artifact: null,
     stdout: relativeArtifact(summary.runDir, stdoutPath),
     stderr: relativeArtifact(summary.runDir, stderrPath),
+  }
+  summary.phases.push(phase)
+  progressReporter.emit('phase-complete', {
+    phase: name,
+    status: phase.status,
+    durationMs: phase.durationMs,
+    exitCode: phase.exitCode,
   })
   if (result.status !== 0) {
     throw new PhaseFailure(name, `${name} failed with exit code ${result.status}`, {
@@ -321,6 +364,7 @@ function addInternalPhase(summary, name, status, details = {}) {
     artifact: details.artifact ?? null,
     details,
   })
+  progressReporter.emit('phase-complete', { phase: name, status, ...details })
 }
 
 function requireGate(summary, name, passed, details = {}) {
@@ -426,6 +470,8 @@ function buildAgentSummary(summary) {
     artifacts: artifactSet(summary, [
       'summary',
       'sourceSnapshot',
+      'readiness',
+      'deliveryReadiness',
       'visionDiff',
       'contentAuditFinal',
       'fidelityGate',
@@ -582,7 +628,8 @@ function artifactPaths(runDir) {
     sourceSnapshot: join(runDir, 'source.pptx'),
     capabilities: join(runDir, 'xdoc-capabilities.json'),
     plan: join(runDir, 'refurbish-plan.json'),
-    readiness: join(runDir, 'readiness.json'),
+    readiness: join(runDir, 'catalog-readiness.json'),
+    deliveryReadiness: join(runDir, 'delivery-readiness.json'),
     inspect: join(runDir, 'reference-inspect.json'),
     nativeReport: join(runDir, 'refurbish-skin.json'),
     chromeDetect: join(runDir, 'chrome-detect.json'),
@@ -660,6 +707,51 @@ function finalizeArtifactPaths(summary, summaryPath) {
   summary.artifacts.summary = summaryPath
 }
 
+function persistCatalogReadiness(summary, plan, args, artifacts) {
+  const standardReadiness = ['production', 'default'].includes(plan.readiness)
+  const explicitException = ['experimental', 'candidate'].includes(plan.readiness) && args.explicit
+  const benchmarkPassed = plan.catalog?.benchmarkPassed
+  const readinessPassed = standardReadiness || explicitException
+  const benchmarkGatePassed = benchmarkPassed !== false
+  const report = {
+    schemaVersion: 'pptx-nova-catalog-readiness/v1',
+    status: readinessPassed && benchmarkGatePassed ? 'pass' : 'fail',
+    deckkit: args.deckkit,
+    catalogPath: args.catalog,
+    readiness: plan.readiness,
+    explicit: args.explicit,
+    explicitException,
+    catalog: {
+      found: plan.catalog?.found === true,
+      id: plan.catalog?.id ?? args.deckkit,
+      kitPath: plan.catalog?.path ?? '',
+      benchmarkPassed,
+    },
+    agentGate: {
+      passed: readinessPassed && benchmarkGatePassed,
+      readinessPassed,
+      benchmarkAvailable: benchmarkPassed !== null,
+      benchmarkEvidencePassed: benchmarkPassed,
+      benchmarkGatePassed,
+      nextAction:
+        readinessPassed && benchmarkGatePassed
+          ? 'continue'
+          : 'fix DeckKit readiness or use an allowed explicit selection before continuing',
+    },
+  }
+  writeJson(artifacts.readiness, report)
+  addInternalPhase(
+    summary,
+    'catalog-readiness-evidence',
+    report.status === 'pass' ? 'passed' : 'failed',
+    {
+      artifact: relativeArtifact(summary.runDir, artifacts.readiness),
+      readiness: plan.readiness,
+      benchmarkPassed,
+    },
+  )
+}
+
 function runCatalogGate(summary, plan, args) {
   const standardReadiness = ['production', 'default'].includes(plan.readiness)
   const explicitException = ['experimental', 'candidate'].includes(plan.readiness) && args.explicit
@@ -701,7 +793,7 @@ function runOptionalReadiness(summary, args, artifacts) {
     name: 'delivery-readiness',
     bin: process.execPath,
     args: readinessArgs,
-    artifact: artifacts.readiness,
+    artifact: artifacts.deliveryReadiness,
   })
   requireGate(summary, 'delivery-readiness', report?.passed === true, {
     readiness: report?.catalog?.readiness ?? '',
@@ -1024,8 +1116,12 @@ function runLayoutSnapshot(summary, args, artifacts) {
     actionableRiskCount,
     informationalRiskCount,
     slideIndexBase: Number(snapshot?.summary?.slideIndexBase ?? 0),
+    slideNumberBase: Number(snapshot?.summary?.slideNumberBase ?? 1),
     affectedSlideCount: Number(snapshot?.summary?.affectedSlideCount ?? 0),
     actionableSlideCount: Number(snapshot?.summary?.actionableSlideCount ?? 0),
+    actionableSlideIndexes: snapshot?.summary?.actionableSlideIndexes ?? [],
+    actionableSlideNumbers: snapshot?.summary?.actionableSlideNumbers ?? [],
+    actionablePreviewFiles: snapshot?.summary?.actionablePreviewFiles ?? [],
     topActionable,
   }
   if (actionableRiskCount > 0) {
@@ -1236,10 +1332,13 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
       '144',
       '--xdoc-bin',
       args.xdocBin,
+      '--progress',
+      args.progress,
       '--overwrite',
       '--json',
     ],
     artifact: artifacts.refurbishCompareReport,
+    forwardProgress: true,
   })
 }
 
@@ -1315,6 +1414,27 @@ function runRefurbish(inputArgs) {
       bytes: statSync(artifacts.sourceSnapshot).size,
     })
 
+    const plan = buildRefurbishPlan({
+      deckkit: args.deckkit,
+      source: args.source,
+      output: artifacts.candidate,
+      catalog: args.catalog,
+      explicit: args.explicit,
+    })
+    writeJson(artifacts.plan, plan)
+    addInternalPhase(summary, 'refurbish-plan', plan.status === 'blocked' ? 'failed' : 'passed', {
+      artifact: relativeArtifact(args.runDir, artifacts.plan),
+      status: plan.status,
+      route: plan.route ?? '',
+    })
+    persistCatalogReadiness(summary, plan, args, artifacts)
+    if (plan.status === 'blocked') {
+      throw new PhaseFailure('refurbish-plan', plan.blockers.join('; ') || 'refurbish plan blocked')
+    }
+    summary.route.planned = plan.route
+    runCatalogGate(summary, plan, args)
+    runOptionalReadiness(summary, args, artifacts)
+
     const capabilityReport = runJsonPhase(summary, {
       name: 'xdoc-capability-probe',
       bin: process.execPath,
@@ -1341,25 +1461,6 @@ function runRefurbish(inputArgs) {
       )
     }
 
-    const plan = buildRefurbishPlan({
-      deckkit: args.deckkit,
-      source: args.source,
-      output: artifacts.candidate,
-      catalog: args.catalog,
-      explicit: args.explicit,
-    })
-    writeJson(artifacts.plan, plan)
-    addInternalPhase(summary, 'refurbish-plan', plan.status === 'blocked' ? 'failed' : 'passed', {
-      artifact: relativeArtifact(args.runDir, artifacts.plan),
-      status: plan.status,
-      route: plan.route ?? '',
-    })
-    if (plan.status === 'blocked') {
-      throw new PhaseFailure('refurbish-plan', plan.blockers.join('; ') || 'refurbish plan blocked')
-    }
-    summary.route.planned = plan.route
-    runCatalogGate(summary, plan, args)
-    runOptionalReadiness(summary, args, artifacts)
     const inspect = runInspect(summary, args, artifacts)
 
     const nativeSupported = plan.nativeSkinning?.supported === true
@@ -1451,6 +1552,11 @@ function printHuman(summary) {
 let parsedArgs = null
 try {
   parsedArgs = parseArgs(process.argv.slice(2))
+  progressReporter = createProgressReporter({
+    mode: parsedArgs.progress,
+    jsonOutput: parsedArgs.json,
+    context: { tool: 'pptx-nova-refurbish-run', deckkit: parsedArgs.deckkit },
+  })
   const summary = runRefurbish(parsedArgs)
   if (parsedArgs.json) process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
   else printHuman(summary)

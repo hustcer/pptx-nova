@@ -446,19 +446,44 @@ function normalizeSlide(slide, fallbackSize) {
 function flattenRisks(slides) {
   const risks = []
   for (const slide of slides) {
-    for (const risk of slide.risks) risks.push(risk)
+    for (const risk of slide.risks) risks.push(withSlideReference(risk, slide.index))
     for (const object of slide.objects) {
       for (const risk of object.risks) {
-        risks.push({
-          ...risk,
-          objectId: object.id,
-          objectName: object.name,
-          objectType: object.type,
-        })
+        risks.push(
+          withSlideReference(
+            {
+              ...risk,
+              objectId: object.id,
+              objectName: object.name,
+              objectType: object.type,
+            },
+            slide.index,
+          ),
+        )
       }
     }
   }
   return risks
+}
+
+function withSlideReference(risk, fallbackIndex) {
+  const slideIndex = numberOrNull(risk.slideIndex ?? risk.slide ?? fallbackIndex)
+  if (!Number.isInteger(slideIndex) || slideIndex < 0) return risk
+  const reference = slideReference(slideIndex)
+  return {
+    ...risk,
+    slide: reference.slideIndex,
+    ...reference,
+  }
+}
+
+function slideReference(slideIndex) {
+  const slideNumber = slideIndex + 1
+  return {
+    slideIndex,
+    slideNumber,
+    previewFile: `slide-${String(slideNumber).padStart(3, '0')}.png`,
+  }
 }
 
 function countBySeverity(risks) {
@@ -479,12 +504,23 @@ function countByClassification(risks) {
   return counts
 }
 
-function slideNumbers(risks) {
+function slideIndexes(risks) {
   return unique(
     risks
       .map((risk) => numberOrNull(risk.slide))
       .filter((slide) => Number.isInteger(slide) && slide >= 0),
   ).sort((a, b) => a - b)
+}
+
+function slideReferences(risks) {
+  const indexes = slideIndexes(risks)
+  const references = indexes.map((index) => slideReference(index))
+  return {
+    slides: indexes,
+    slideIndexes: indexes,
+    slideNumbers: references.map((reference) => reference.slideNumber),
+    previewFiles: references.map((reference) => reference.previewFile),
+  }
 }
 
 function summarizeByCode(risks) {
@@ -505,15 +541,18 @@ function summarizeByCode(risks) {
   }
   return [...groups.values()]
     .map((group) => {
-      const slides = slideNumbers(group.risks)
+      const references = slideReferences(group.risks)
       return {
         code: group.code,
         classification: group.classification,
         severity: group.severity,
         count: group.count,
-        affectedSlideCount: slides.length,
-        slides: slides.slice(0, MAX_SUMMARY_SLIDES),
-        slidesTruncated: slides.length > MAX_SUMMARY_SLIDES,
+        affectedSlideCount: references.slideIndexes.length,
+        slides: references.slides.slice(0, MAX_SUMMARY_SLIDES),
+        slideIndexes: references.slideIndexes.slice(0, MAX_SUMMARY_SLIDES),
+        slideNumbers: references.slideNumbers.slice(0, MAX_SUMMARY_SLIDES),
+        previewFiles: references.previewFiles.slice(0, MAX_SUMMARY_SLIDES),
+        slidesTruncated: references.slideIndexes.length > MAX_SUMMARY_SLIDES,
       }
     })
     .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code, 'en'))
@@ -523,17 +562,25 @@ function summarizeRisks(risks) {
   const byCode = summarizeByCode(risks)
   const actionableRisks = risks.filter((risk) => risk.classification !== 'informational')
   const informationalRisks = risks.filter((risk) => risk.classification === 'informational')
-  const affectedSlides = slideNumbers(risks)
-  const actionableSlides = slideNumbers(actionableRisks)
+  const affectedSlides = slideReferences(risks)
+  const actionableSlides = slideReferences(actionableRisks)
   return {
     riskCount: risks.length,
     actionableRiskCount: actionableRisks.length,
     informationalRiskCount: informationalRisks.length,
-    affectedSlideCount: affectedSlides.length,
-    actionableSlideCount: actionableSlides.length,
+    affectedSlideCount: affectedSlides.slideIndexes.length,
+    actionableSlideCount: actionableSlides.slideIndexes.length,
     slideIndexBase: 0,
-    affectedSlides: affectedSlides.slice(0, MAX_SUMMARY_SLIDES),
-    affectedSlidesTruncated: affectedSlides.length > MAX_SUMMARY_SLIDES,
+    slideNumberBase: 1,
+    affectedSlides: affectedSlides.slides.slice(0, MAX_SUMMARY_SLIDES),
+    affectedSlideIndexes: affectedSlides.slideIndexes.slice(0, MAX_SUMMARY_SLIDES),
+    affectedSlideNumbers: affectedSlides.slideNumbers.slice(0, MAX_SUMMARY_SLIDES),
+    affectedPreviewFiles: affectedSlides.previewFiles.slice(0, MAX_SUMMARY_SLIDES),
+    affectedSlidesTruncated: affectedSlides.slideIndexes.length > MAX_SUMMARY_SLIDES,
+    actionableSlideIndexes: actionableSlides.slideIndexes.slice(0, MAX_SUMMARY_SLIDES),
+    actionableSlideNumbers: actionableSlides.slideNumbers.slice(0, MAX_SUMMARY_SLIDES),
+    actionablePreviewFiles: actionableSlides.previewFiles.slice(0, MAX_SUMMARY_SLIDES),
+    actionableSlidesTruncated: actionableSlides.slideIndexes.length > MAX_SUMMARY_SLIDES,
     bySeverity: countBySeverity(risks),
     byClassification: countByClassification(risks),
     byCode,

@@ -134,7 +134,8 @@ relevant OOXML style properties.
    - `replaceText.replacements[]` for user-visible text attributes and table
      paragraph text-node replacements materialized by the shared text-plan route.
    - `replaceChartText.replacements[]` for chart visible cache labels.
-   - `patch.ops[]` for generated run-level `set-run` operations on shape text.
+   - `patch.ops[]` for generated run-level `set-run` operations and atomic
+     `replace-structured-paragraph-text` operations on shape text.
 
    Use the planner-emitted semantic `nodePath` as the primary locator and copy
    it unchanged into execution inputs. `sourceText`, `sourceHash`, and `index`
@@ -203,9 +204,12 @@ relevant OOXML style properties.
        --overwrite \
        --json > <run-dir>/replace-text.json
      ```
-   - For DrawingML shape paragraphs, apply only the `set-run` patch ops emitted
-     under `i18n-plan.patch.ops[]`. Each paragraph patch op must carry `unitId`,
-     `sourceText`, and `sourceHash` guards.
+   - For DrawingML shape paragraphs, apply only the `set-run` and
+     `replace-structured-paragraph-text` patch ops emitted under
+     `i18n-plan.patch.ops[]`. Each paragraph patch op must carry `unitId`,
+     `sourceText`, and `sourceHash` guards. The structured operation additionally
+     carries `expectedNodes[]` and applies all ordinary-run replacements as one
+     guarded operation; never hand-edit or weaken those fields.
      ```bash
      xdoc pptx apply \
        --input <current-candidate.pptx> \
@@ -223,11 +227,25 @@ relevant OOXML style properties.
      `replaceText.replacements[]` because table cells are addressed through
      semantic text-node paths rather than shape `set-run` ops.
    - Use optional `targetSegments[]` only when hyperlink boundaries or mixed
-     styles cannot be mapped safely from `targetText` and `anchors[]`. Fields,
-     tabs, and breaks remain review-only. Every
+     styles cannot be mapped safely from `targetText` and `anchors[]`. Every
      `sourceRunGroupId` must come verbatim from the text-plan inventory; never
      guess ids or infer them from run order. Missing, duplicated, unknown, or
      out-of-order segments must fail closed.
+   - Break and tab nodes are structural delimiters. Preserve the corresponding
+     `\n` and `\t` delimiters in `targetText`; the planner partitions translated
+     text around them and keeps the original OOXML nodes unchanged. A missing,
+     added, or reordered delimiter is `review-required`, not permission to
+     collapse the paragraph.
+   - Fields are immutable structural placeholders by default. When a translated
+     paragraph contains fields, represent them as `{{field:0}}`,
+     `{{field:1}}`, ... in source order. Do not translate field cached text or
+     modify field `id`, `type`, run properties, or position. Never infer a field
+     placeholder from a cached value such as `1` or a date; regenerate the
+     translation record with explicit placeholders instead.
+   - If the planner reports `source-text-mismatch` after a current xdoc upgrade,
+     regenerate `i18n-scan` units and `translations.json` from the current source
+     deck. In particular, never copy paragraph tab-stop definitions from
+     `<a:pPr>/<a:tabLst>` into visible text as leading `\t` characters.
    - Preserve run boundaries when they encode style. If one source sentence is
      split across multiple styled runs, follow the plan strategy:
      `uniform`, `preserve-run-boundaries`, or
@@ -420,6 +438,10 @@ reuses the same strategies for table paragraphs. The strategies mean:
   remain.
 - `preserve-styled-token-boundaries`: styled anchors remain in their original
   runs and surrounding translated text is assigned to adjacent plain runs.
+- `preserve-structural-boundaries`: break/tab/field nodes partition the
+  paragraph into ordinary-run segments. The planner emits one atomic operation
+  that validates the complete typed node sequence and field identity before
+  changing text.
 - `review-required`: stop automation for that unit. Add explicit anchors,
   produce a manual run-level mapping, or request human review.
 

@@ -92,6 +92,11 @@ Use these entry points from skill workflows:
   language-uncertain `visibleBody`, `visibleTextAttr`, and `chartVisibleCache`
   review units. It binds decisions to the source scan and unit hashes and fails
   closed before `i18n-plan` unless every such review unit is classified.
+- `pptx-nova-multi-column-review-scaffold.mjs` - generate the structured manual
+  review record from the final candidate, final `vision-diff`, and final xdoc
+  preview manifest. It resolves each zero-based vision slide to the one-based
+  preview page, verifies actual PNG hashes and dimensions against the manifest,
+  and leaves only reviewer, decision, checks, and note for manual completion.
 - `pptx-nova-multi-column-review-gate.mjs` - bind final translation candidate,
   final vision-diff, exact multi-column slide/shape findings, and full-size PNG
   human-review evidence. It can close only

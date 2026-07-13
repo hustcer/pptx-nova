@@ -607,7 +607,26 @@ node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
   --json > <run-dir>/translation-compare-gate.json
 ```
 
-Use `pptx-nova-multi-column-review/v1` for the manual record:
+Generate the review record instead of copying evidence metadata by hand:
+
+```bash
+node <skill-root>/scripts/pptx-nova-multi-column-review-scaffold.mjs \
+  --candidate translated.pptx \
+  --vision-diff <run-dir>/vision-diff.json \
+  --preview <run-dir>/preview-candidate.json \
+  --output <run-dir>/multi-column-review.json \
+  --overwrite --json
+```
+
+The scaffold helper verifies that candidate, vision-diff, and preview all refer
+to the same final PPTX. It maps zero-based `vision-diff.slideIndex` values to
+one-based preview slides, checks the manifest hash and dimensions against each
+actual PNG, and creates one entry per required slide/shape pair. It deliberately
+sets `decision: "pending"`, all checks to `false`, and leaves reviewer/note empty;
+inspect the full-size PNG and fill those judgment fields before running the gate.
+Do not edit the generated candidate, vision-diff, or PNG binding fields.
+
+The generated file uses `pptx-nova-multi-column-review/v1`:
 
 ```json
 {

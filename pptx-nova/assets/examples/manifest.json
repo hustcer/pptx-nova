@@ -31,8 +31,8 @@
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 108948,
-          "sha256": "ecfe04bf1bbe8f30633a6025ec9871c1c23f32e5a8e53d9ae1d46b241c18c897",
+          "bytes": 108858,
+          "sha256": "717950020c568261df427ff3de1049a1533021992a2c943c0c72720671cee847",
           "quality": 82
         },
         "content": {
@@ -48,7 +48,7 @@
         "summary": {
           "path": "consulting-dark/summary.json",
           "bytes": 2718,
-          "sha256": "dca67b35cd2b893448bad445421b4542076e8abcb87ce763cd2f431a077fd802"
+          "sha256": "8481757c3c03f2d70738e270b9779b954dda7b1921bf886c133223151e08d998"
         }
       },
       "validation": {
@@ -135,8 +135,8 @@
         },
         "contactSheet": {
           "path": "mckinsey-blue/contact-sheet.webp",
-          "bytes": 110392,
-          "sha256": "33885b0f3cdc069a7dff75b317c52541403509c4733e77a3f832de6377bc3469",
+          "bytes": 110446,
+          "sha256": "af36b85a065e44ad16ad59e8e49e5a7ba09c84e25b057433190580f6610b887b",
           "quality": 82
         },
         "content": {
@@ -152,7 +152,7 @@
         "summary": {
           "path": "mckinsey-blue/summary.json",
           "bytes": 2758,
-          "sha256": "2fee5fabd723232d540d18f76cbbe40fd188ffef7cd3f4da721b5c56aea17294"
+          "sha256": "c030b3975d81557b71175a06f86e538028d84838eea8ad33b5d65b8690658e2b"
         }
       },
       "validation": {
@@ -246,8 +246,8 @@
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 142412,
-          "sha256": "1faf789bd5835ab8f61dac1a05fe610ddf730a5c22f1c49b1063150e05a30ed8",
+          "bytes": 139620,
+          "sha256": "d945b2626f3acc1090da8839b7154fac826d07be0621e2bd83ff24b96c2924d9",
           "quality": 82
         },
         "content": {
@@ -263,7 +263,7 @@
         "summary": {
           "path": "swiss-grid/summary.json",
           "bytes": 2769,
-          "sha256": "e35a5b89a04c165c56a9c7b31d2cb85e3520fb17beb3f1930700ea2b375b45df"
+          "sha256": "4d53e7ecb5f05a9c99e7128c5a6f4294677820c72637db6d0dc3c456d3c1a103"
         }
       },
       "validation": {
@@ -348,8 +348,8 @@
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
-          "bytes": 99896,
-          "sha256": "b4172970239bba9a067f8fdab07bdca588bb2df7a69fa995a08d8645dbaab5e9",
+          "bytes": 100066,
+          "sha256": "0d68775affa4b0566b88b68fdc526f4b3c39ed9bc7767fb3fe3d0b6946557fd5",
           "quality": 82
         },
         "content": {
@@ -364,8 +364,8 @@
         },
         "summary": {
           "path": "broadside/summary.json",
-          "bytes": 2775,
-          "sha256": "f8601285a0dc987fe810ad92f9e0df8704f06f862cc87b893aacf2242eecc9a8"
+          "bytes": 2776,
+          "sha256": "342272b3b37b6254b61cfd2649e2aa4e1ba8be9f278704bfae13bab544a49c8c"
         }
       },
       "validation": {
@@ -451,8 +451,8 @@
         },
         "contactSheet": {
           "path": "coral/contact-sheet.webp",
-          "bytes": 76048,
-          "sha256": "963a5d6fcbeff7025af4536bfe2fff623a20b5b691e8caa80c7c2f8d2ecccc91",
+          "bytes": 76178,
+          "sha256": "191aa98be23fb754cbe72c87ef2f3d6c1d80f47063ddc6f5202bde13e01ed8d9",
           "quality": 82
         },
         "content": {
@@ -468,7 +468,7 @@
         "summary": {
           "path": "coral/summary.json",
           "bytes": 2746,
-          "sha256": "3d22522c6a5577f7bd9014c34d9dc3af1dd1ebe691ca1111172824bf1105e2b8"
+          "sha256": "19cc62fc0ef08fab207a2f63eb6ed457bf3dd456a7a1b91054f73e5a7e606238"
         }
       },
       "validation": {
@@ -553,8 +553,8 @@
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 59962,
-          "sha256": "d4093147affc6b9c408107810a292701cce11c2abae35e25c9fba5fcb27b071a",
+          "bytes": 61560,
+          "sha256": "d0fbd068bd914cacd6b244e3f9970c8a49e225b60e1e54ad85cb8415664a8bb9",
           "quality": 82
         },
         "content": {
@@ -570,7 +570,7 @@
         "summary": {
           "path": "cartesian/summary.json",
           "bytes": 2775,
-          "sha256": "45d70f268eafdd6ac39c727259f0a41e4726b02701b986aed3e308a969711cce"
+          "sha256": "923578122d5f446d51e73aa3300feed6f7762b2ce92364c39d04955c77adec81"
         }
       },
       "validation": {
@@ -654,8 +654,8 @@
         },
         "contactSheet": {
           "path": "long-table/contact-sheet.webp",
-          "bytes": 94250,
-          "sha256": "1348978027b70f2fe8dd8bcf62f6a4541ab92309df67ae5bb869d4711ad7f596",
+          "bytes": 94384,
+          "sha256": "df08c5712372ca8aa66093978bcc4fdd25b53628204a85a9427d0bc773e1d053",
           "quality": 82
         },
         "content": {
@@ -671,7 +671,7 @@
         "summary": {
           "path": "long-table/summary.json",
           "bytes": 2773,
-          "sha256": "be4fdeb21de9b58880c611971f49c9203178f4ffee5f9d22dac030be0c59a960"
+          "sha256": "282415c049f9ac4b22a103e5ada28cafe6cb6791afd489a00e9415f5ca4dadc1"
         }
       },
       "validation": {
@@ -756,8 +756,8 @@
         },
         "contactSheet": {
           "path": "biennale-yellow/contact-sheet.webp",
-          "bytes": 94384,
-          "sha256": "a0e7465868d6d7f574c975062e16b3d03b267950d2fe6bcc0e647170d570caa3",
+          "bytes": 94416,
+          "sha256": "9af653a89dc06ab864ddac299634f0a8e99e0c2bce8324ddfe71ef77b8cbcfbd",
           "quality": 82
         },
         "content": {
@@ -773,7 +773,7 @@
         "summary": {
           "path": "biennale-yellow/summary.json",
           "bytes": 2792,
-          "sha256": "4cfdde40538c5cd2028f8bbf86652ebb20c02b228974eda8678812ba62861728"
+          "sha256": "fb88542863489ae435c001868f0dac3dfcb8d8b6e176fe1636b07668495b02ce"
         }
       },
       "validation": {

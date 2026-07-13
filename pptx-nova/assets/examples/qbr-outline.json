@@ -29,10 +29,26 @@
       "kind": "kpi",
       "title": "Q2 关键指标",
       "items": [
-        { "label": "营收", "value": "$42M", "delta": "+12% YoY" },
-        { "label": "毛利率", "value": "58%", "delta": "+1.2pp" },
-        { "label": "NPS", "value": "62", "delta": "+4" },
-        { "label": "用户", "value": "1.2M", "delta": "+18%" }
+        {
+          "label": "营收",
+          "value": "$42M",
+          "delta": "+12% YoY"
+        },
+        {
+          "label": "毛利率",
+          "value": "58%",
+          "delta": "+1.2pp"
+        },
+        {
+          "label": "NPS",
+          "value": "62",
+          "delta": "+4"
+        },
+        {
+          "label": "用户",
+          "value": "1.2M",
+          "delta": "+18%"
+        }
       ]
     },
     {

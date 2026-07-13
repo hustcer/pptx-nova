@@ -26,13 +26,13 @@
       "files": {
         "deck": {
           "path": "consulting-dark/deck.pptx",
-          "bytes": 34446,
-          "sha256": "93f916996ee0437897f2f33c55768592cf0f1489fecaeb71ad41ddd1bf338cdd"
+          "bytes": 34104,
+          "sha256": "1273ee10466385d1a913b7fe8ec8f99428e0ff9a302896861c3cd67dec04d009"
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 108858,
-          "sha256": "717950020c568261df427ff3de1049a1533021992a2c943c0c72720671cee847",
+          "bytes": 108576,
+          "sha256": "16f138dbe2758a098bce63b89d127017dbbc463a771c9c614da097e19a815413",
           "quality": 82
         },
         "content": {
@@ -43,12 +43,12 @@
         "brief": {
           "path": "consulting-dark/brief.md",
           "bytes": 730,
-          "sha256": "9d9c4cbe9c0fa18bfbe115f8e6cfecf2b03e77b1be204f23687e1cc391103c68"
+          "sha256": "964bb7fd70183f291355f98412b660a94c218673619312ddbe2fe34b98876306"
         },
         "summary": {
           "path": "consulting-dark/summary.json",
           "bytes": 2718,
-          "sha256": "8481757c3c03f2d70738e270b9779b954dda7b1921bf886c133223151e08d998"
+          "sha256": "d2a26d3b326e5119be92f7c691820b7881114e9ec338b3d4a75230b210fef3d7"
         }
       },
       "validation": {
@@ -60,7 +60,7 @@
       },
       "patch": {
         "schemaVersion": 1,
-        "ops": 1090
+        "ops": 1047
       },
       "vision": {
         "status": "success",
@@ -468,7 +468,7 @@
         "summary": {
           "path": "coral/summary.json",
           "bytes": 2746,
-          "sha256": "19cc62fc0ef08fab207a2f63eb6ed457bf3dd456a7a1b91054f73e5a7e606238"
+          "sha256": "9acb2ab53cb6035a6c4509676694ae629a7ae392469011ec172ad5f369a93751"
         }
       },
       "validation": {
@@ -549,12 +549,12 @@
         "deck": {
           "path": "cartesian/deck.pptx",
           "bytes": 27472,
-          "sha256": "c84a299229340429819dfed4702ac716043d3d3a215f1d24fb3b9d85d01dd19c"
+          "sha256": "270acd19d265b41fec490aefb99e30f072f6b30457efd744bd32ddf35c40f7bc"
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 61560,
-          "sha256": "d0fbd068bd914cacd6b244e3f9970c8a49e225b60e1e54ad85cb8415664a8bb9",
+          "bytes": 60370,
+          "sha256": "9b3aea3ff8845e312ec46271ad2a796be8f75b1829f705919296332ebdf4a984",
           "quality": 82
         },
         "content": {
@@ -569,8 +569,8 @@
         },
         "summary": {
           "path": "cartesian/summary.json",
-          "bytes": 2775,
-          "sha256": "923578122d5f446d51e73aa3300feed6f7762b2ce92364c39d04955c77adec81"
+          "bytes": 2779,
+          "sha256": "549599ddc68754c6a89ca01d3ce6e81fb3ca713d5616055f371dd4f84ff707de"
         }
       },
       "validation": {

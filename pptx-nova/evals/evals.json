@@ -54,7 +54,7 @@
       "id": 8,
       "name": "edit-chart-data",
       "prompt": "演示一下在已有 deck 上更新图表数据的正确做法：先建一份带柱状图的 deck（类目只有 Q1/Q2，数值 32/41），然后把这张图的数据扩展成全年 Q1–Q4（32 / 41 / 38 / 55，单位百万），只改数据、不重建图、不动其它样式。最终输出到 ~/Downloads/chart-data-update.pptx。",
-      "expected_output": "第一步用 add-chart 建带 chart 的 deck；第二步先 inspect 找到 chart shape，再用 replace-chart-data 把数据更新为四个季度（不重建、不改样式）；dry-run 命中正确的 chart；最终图含四个类目。",
+      "expected_output": "第一步用 add-chart 建带 chart 的 deck；第二步先 inspect 找到 chart shape，再用 set-chart-data 把数据更新为四个季度（不重建、不改样式）；dry-run 命中正确的 chart；最终图含四个类目。",
       "files": []
     },
     {
@@ -89,7 +89,7 @@
       "id": 13,
       "name": "create-formula-heavy-training-deck",
       "prompt": "帮我做一份 6 页技术培训 PPT，主题「线性回归损失函数与梯度下降」。必须包含：1) 封面；2) 一页展示损失函数 LaTeX：L(\\theta)=\\sum_{i=1}^{n}(y_i-f_\\theta(x_i))^2；3) 一页展示梯度公式：\\frac{\\partial L}{\\partial \\theta_j}= -2\\sum_i x_{ij}(y_i-\\hat{y}_i)；4) 一页用普通文本解释 learning rate α；5) 一页流程图展示初始化、计算梯度、更新参数、收敛；6) 结尾。输出到 ~/Downloads/linear-regression-formulas.pptx。",
-      "expected_output": "走公式策略：在 deck_lock.json 记录 typography.formulaPolicy（默认 mixed），复杂 LaTeX 进入 assets_manifest.json 的 kind=formula 条目并设置 noCrop；最终 PPTX 中公式不被裁剪、颜色对比足够，完成摘要说明公式是 rendered/native/text-only 哪种形态。复杂公式优先使用 add-formula；高保真排版时先渲染为 run 目录内 SVG，并通过 add-formula.assetSource 插入，仍保留公式 manifest 元数据。",
+      "expected_output": "走公式策略：在 deck_lock.json 记录 typography.formulaPolicy（默认 mixed），复杂 LaTeX 进入 assets_manifest.json 的 kind=formula 条目并设置 noCrop；最终 PPTX 中公式不被裁剪、颜色对比足够，完成摘要说明公式是 rendered/native/text-only 哪种形态。复杂公式优先使用 add-equation；高保真排版时先渲染为 run 目录内 SVG，并通过 add-equation.assetSource 插入，仍保留公式 manifest 元数据。",
       "files": []
     },
     {

@@ -33,7 +33,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 
 ## Fill（填充）
 
-`set-shape-fill` / `set-slide-background` / `set-master-bg` 都接受同一种 fill 对象：
+`set-shape` / `set-slide-background` / `set-master-bg` 都接受同一种 fill 对象：
 
 ### Solid
 
@@ -75,7 +75,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ```
 
 `fillToRect` 控制焦点/扩散区域；不确定当前 xdoc 版本的字段时先跑
-`xdoc schema --op set-shape-fill --minimal`。
+`xdoc schema --op set-shape --minimal`。
 
 ### Preset Gradient（24 个内置）
 
@@ -278,7 +278,7 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 如果只想改某些 shape 不动 theme：
 
 ```json
-{ "op": "set-shape-fill", "slide": 0, "shape": {...}, "fill": { "kind": "solid", "color": "1A73E8" } }
+{ "op": "set-shape", "slide": 0, "shape": {...}, "fill": { "kind": "solid", "color": "1A73E8" } }
 ```
 
 ## 整 deck 换肤：remap-theme
@@ -419,6 +419,6 @@ set-master-placeholder-style / set-presentation-default-text-style` 底层 op。
 ## 不要做的事
 
 - ❌ 不要在 `set-theme-color` 上加 `slide` 字段（主题色是 deck 级，不属于某页）
-- ❌ 不要给同一个 shape 同时写 `set-shape-fill` 和 `set-shape-effect` 期望叠加 — 它们独立
+- ❌ 不要给同一个 shape 同时写 `set-shape` 和 `set-shape-effect` 期望叠加 — 它们独立
 - ❌ 不要假定 deck 的 master 名是固定的 — 用 `inspect` 查一下
 - ❌ 不要用 `set-theme-font` 改单个 run 字体 — 那是 `set-run.font.name`

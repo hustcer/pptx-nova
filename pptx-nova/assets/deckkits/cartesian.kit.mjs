@@ -48,7 +48,7 @@ function makeCartesianOps() {
     p.ops.push({
       op: 'add-shape',
       slide: s,
-      shape,
+      kind: shape,
       name,
       x: `${x}in`,
       y: `${y}in`,
@@ -58,19 +58,19 @@ function makeCartesianOps() {
     return name
   }
   const fillOp = (s, name, color) => ({
-    op: 'set-shape-fill',
+    op: 'set-shape',
     slide: s,
     shape: { name },
     fill: { kind: 'solid', color },
   })
   const noFillOp = (s, name) => ({
-    op: 'set-shape-fill',
+    op: 'set-shape',
     slide: s,
     shape: { name },
     fill: { kind: 'none' },
   })
   const lineOp = (s, name, color = C.line, width = '0.75pt', dash) => ({
-    op: 'set-shape-line',
+    op: 'set-shape',
     slide: s,
     shape: { name },
     line: { width, color, ...(dash ? { dash } : {}) },
@@ -120,10 +120,8 @@ function drawImageShell(ctx, s, x, y, w, h, label) {
     op: 'add-connector',
     slide: s,
     kind: 'straight',
-    beginX: `${x}in`,
-    beginY: `${y}in`,
-    endX: `${x + w}in`,
-    endY: `${y + h}in`,
+    begin: { x: `${x}in`, y: `${y}in` },
+    end: { x: `${x + w}in`, y: `${y + h}in` },
     name: nm(s, 'ImageDiagA'),
   })
   p.ops.push(lineOp(s, nm(s, 'ImageDiagA'), C.line, '0.75pt'))
@@ -131,10 +129,8 @@ function drawImageShell(ctx, s, x, y, w, h, label) {
     op: 'add-connector',
     slide: s,
     kind: 'straight',
-    beginX: `${x}in`,
-    beginY: `${y + h}in`,
-    endX: `${x + w}in`,
-    endY: `${y}in`,
+    begin: { x: `${x}in`, y: `${y + h}in` },
+    end: { x: `${x + w}in`, y: `${y}in` },
     name: nm(s, 'ImageDiagB'),
   })
   p.ops.push(lineOp(s, nm(s, 'ImageDiagB'), C.line, '0.75pt'))
@@ -157,32 +153,32 @@ function chartBase(ctx, s, name, data, x, y, w, h, kind) {
     data,
   })
   p.ops.push({
-    op: 'set-chart-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: nm(s, name) },
     style: 4,
   })
   p.ops.push({
-    op: 'set-chart-legend-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: nm(s, name) },
-    position: 'bottom',
-    includeInLayout: false,
-    font: f(8.5, C.body),
+    legend: {
+      position: 'bottom',
+      includeInLayout: false,
+      font: f(8.5, C.body),
+    },
   })
   p.ops.push({
-    op: 'set-chart-axis-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: nm(s, name) },
-    axis: 'value',
-    style: { color: C.bg2, width: '0.5pt' },
+    axes: [{ axis: 'value', line: { color: C.bg2, width: '0.5pt' } }],
   })
   p.ops.push({
-    op: 'set-chart-gridline-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: nm(s, name) },
-    axis: 'value',
-    style: { color: C.bg2, width: '0.5pt' },
+    axes: [{ axis: 'value', gridlines: { color: C.bg2, width: '0.5pt' } }],
   })
 }
 
@@ -238,20 +234,28 @@ function renderSlide(ctx, s, slide) {
     tx(s, 'Body', MX, 3.88, 4.5, 0.85, data.body, f(13, C.body))
     chartBase(ctx, s, 'Chart', data.chart, 5.84, 1.68, 6.96, 4.15, 'column')
     p.ops.push({
-      op: 'set-chart-series-style',
+      op: 'set-chart',
       slide: s,
       shape: { name: nm(s, 'Chart') },
-      series: 0,
-      fill: { kind: 'solid', color: C.chartPrimary },
-      line: { width: '0.5pt', color: C.chartPrimary },
+      series: [
+        {
+          series: 0,
+          fill: { kind: 'solid', color: C.chartPrimary },
+          line: { width: '0.5pt', color: C.chartPrimary },
+        },
+      ],
     })
     p.ops.push({
-      op: 'set-chart-series-style',
+      op: 'set-chart',
       slide: s,
       shape: { name: nm(s, 'Chart') },
-      series: 1,
-      fill: { kind: 'none' },
-      line: { width: '1pt', color: C.line, dash: 'dash' },
+      series: [
+        {
+          series: 1,
+          fill: { kind: 'none' },
+          line: { width: '1pt', color: C.line, dash: 'dash' },
+        },
+      ],
     })
     return
   }
@@ -310,41 +314,55 @@ function renderSlide(ctx, s, slide) {
     tx(s, 'Body', 9.45, 0.55, 3.35, 0.78, data.body, f(13, C.body), 'right')
     chartBase(ctx, s, 'Chart', data.chart, MX, 1.62, CW, 5.58, 'line')
     p.ops.push({
-      op: 'set-chart-axis-scale',
+      op: 'set-chart',
       slide: s,
       shape: { name: nm(s, 'Chart') },
-      axis: 'value',
-      min: 0,
-      max: data.valueAxis?.max ?? 60,
-      majorUnit: data.valueAxis?.majorUnit ?? 10,
+      axes: [
+        {
+          axis: 'value',
+          scale: {
+            min: 0,
+            max: data.valueAxis?.max ?? 60,
+            majorUnit: data.valueAxis?.majorUnit ?? 10,
+          },
+        },
+      ],
     })
     p.ops.push({
-      op: 'set-chart-series-style',
+      op: 'set-chart',
       slide: s,
       shape: { name: nm(s, 'Chart') },
-      series: 0,
-      line: { width: '1.5pt', color: C.ink },
-      marker: {
-        symbol: 'circle',
-        size: 5,
-        fill: { kind: 'solid', color: C.ink },
-        line: { width: '1pt', color: C.bg },
-      },
-      smooth: true,
+      series: [
+        {
+          series: 0,
+          line: { width: '1.5pt', color: C.ink },
+          marker: {
+            symbol: 'circle',
+            size: 5,
+            fill: { kind: 'solid', color: C.ink },
+            line: { width: '1pt', color: C.bg },
+          },
+          smooth: true,
+        },
+      ],
     })
     p.ops.push({
-      op: 'set-chart-series-style',
+      op: 'set-chart',
       slide: s,
       shape: { name: nm(s, 'Chart') },
-      series: 1,
-      line: { width: '1.2pt', color: C.line, dash: 'dash' },
-      marker: {
-        symbol: 'circle',
-        size: 4,
-        fill: { kind: 'solid', color: C.line },
-        line: { width: '0.5pt', color: C.line },
-      },
-      smooth: true,
+      series: [
+        {
+          series: 1,
+          line: { width: '1.2pt', color: C.line, dash: 'dash' },
+          marker: {
+            symbol: 'circle',
+            size: 4,
+            fill: { kind: 'solid', color: C.line },
+            line: { width: '0.5pt', color: C.line },
+          },
+          smooth: true,
+        },
+      ],
     })
     return
   }

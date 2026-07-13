@@ -1278,10 +1278,10 @@ function checkPatch(patch, lock, content, assets, args, errors, warnings) {
   patch.ops.forEach((op, index) => {
     if (!isPlainObject(op)) return
     if (
-      ['add-chart', 'replace-chart-data'].includes(op.op) ||
+      ['add-chart', 'set-chart-data'].includes(op.op) ||
       String(op.op ?? '').startsWith('set-chart-')
     ) {
-      if (['add-chart', 'replace-chart-data'].includes(op.op)) {
+      if (['add-chart', 'set-chart-data'].includes(op.op)) {
         checkChartSemantic(op, index, errors, warnings)
       }
     }

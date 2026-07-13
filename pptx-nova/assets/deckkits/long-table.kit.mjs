@@ -33,11 +33,11 @@ function makeOps() {
     p.tx(s, nm(s, base), x, y, w, h, String(text ?? ''), font, align)
   const paragraph = (s, base, format, paragraphIndex = 0) =>
     p.ops.push({
-      op: 'set-paragraph-format',
+      op: 'set-paragraph',
       slide: s,
       shape: { name: nm(s, base) },
       paragraph: paragraphIndex,
-      ...format,
+      format,
     })
   const rect = (s, base, x, y, w, h, fill = C.paper, line = C.ink, width = '1pt') => {
     p.shape(s, nm(s, base), 'rectangle', x, y, w, h)

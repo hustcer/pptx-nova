@@ -380,7 +380,7 @@ function appendChromeRestyleOps(ops, slideIndex, shape, candidate, fallback, bac
   const selector = candidate.patchSelector?.shape ?? { id: shape.id }
   if (shape.hasText || (shape.textPreview ?? '').trim()) {
     ops.push({
-      op: 'set-text-style',
+      op: 'set-text-frame',
       slide: slideIndex,
       shape: selector,
       font: chromeFontFor(candidate.role, fallback, backgroundColor),
@@ -388,11 +388,10 @@ function appendChromeRestyleOps(ops, slideIndex, shape, candidate, fallback, bac
   }
   if (candidate.role === 'rule') {
     ops.push({
-      op: 'set-shape-line',
+      op: 'set-shape',
       slide: slideIndex,
       shape: selector,
-      width: '0.5pt',
-      color: fallback.palette.rule,
+      line: { width: '0.5pt', color: fallback.palette.rule },
     })
   }
 }
@@ -522,7 +521,7 @@ function buildArtifacts(args) {
       }
       if (shape.hasText && (shape.textPreview ?? '').trim()) {
         ops.push({
-          op: 'set-text-style',
+          op: 'set-text-frame',
           slide: slideIndex,
           shape: selector,
           font: fontForShape(shape, fallback, textBackground),
@@ -532,7 +531,7 @@ function buildArtifacts(args) {
         const color = targetFill
         if (color) {
           ops.push({
-            op: 'set-shape-fill',
+            op: 'set-shape',
             slide: slideIndex,
             shape: selector,
             fill: { kind: 'solid', color },
@@ -540,11 +539,10 @@ function buildArtifacts(args) {
         }
         if (!shape.lineNoFill) {
           ops.push({
-            op: 'set-shape-line',
+            op: 'set-shape',
             slide: slideIndex,
             shape: selector,
-            width: '0.5pt',
-            color: palette.rule,
+            line: { width: '0.5pt', color: palette.rule },
           })
         }
       }

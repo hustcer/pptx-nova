@@ -248,14 +248,14 @@ function makeSwissOps() {
   }
   const dot = (s, name, x, y, d, color = C.red) => p.box(s, name, 'oval', x, y, d, d, color)
   const rotate = (s, name, degrees) =>
-    p.ops.push({ op: 'set-shape-rotation', slide: s, shape: { name }, degrees })
+    p.ops.push({ op: 'set-shape', slide: s, shape: { name }, rotation: degrees })
   const brandLogo = (s, name, key, x, y, color = C.black) => {
     const logo = BRAND_LOGOS[key]
     if (!logo) return false
     const fill = normalizeHex(color) ?? C.black
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#${fill}" d="${logo.path}"/></svg>`
     p.ops.push({
-      op: 'add-picture',
+      op: 'add-image',
       slide: s,
       name,
       x: `${x}in`,

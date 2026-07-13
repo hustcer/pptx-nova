@@ -29,8 +29,8 @@
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 2,
+      "total": 2
     }
   },
   "apply": {
@@ -41,8 +41,8 @@
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 2,
+      "total": 2
     }
   },
   "vision": {

@@ -65,7 +65,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 ```
 
 改视觉表格分割线颜色时，优先用这些 line/rule shape 的 `id` 或唯一 `name` 写
-`set-shape-fill` / `set-shape-line`，再 dry-run 检查 `resolvedSelectors[]`。若分割线是
+`set-shape` / `set-shape-line`，再 dry-run 检查 `resolvedSelectors[]`。若分割线是
 细矩形，通常要改 `fill`；若是 connector/freeform 线，通常要改 `line`。
 
 ## 创建

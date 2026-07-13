@@ -7,7 +7,7 @@
 ```
 assets/deckkits/
 ├── core-primitives.kit.mjs     # 几何安全 + op 生成（所有 DeckKit 共用）
-├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-picture helper
+├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
 ├── consulting-dark.kit.mjs     # 深墨蓝咨询风格 + 页型函数
 ├── catalog.json                # DeckKit 注册表、版本、density 限制、验证记录
 ├── schemas/                    # content 和各页型 JSON Schema（渐进覆盖）
@@ -95,7 +95,7 @@ node <skill-root>/scripts/pptx-nova-build.mjs \
 
 DeckKit 需要 Tabler 图标时，使用 `createOps()` 返回的 `icon()` 或直接使用
 `icon-assets.kit.mjs`。它只读取 `../icons/tabler-icons.pack.br`，并把 SVG
-内联为 `add-picture` 的 `bytesBase64 + mime`，不依赖网络、临时 SVG 文件或 Tabler
+内联为 `add-image` 的 `bytesBase64 + mime`，不依赖网络、临时 SVG 文件或 Tabler
 源码目录：
 
 ```js

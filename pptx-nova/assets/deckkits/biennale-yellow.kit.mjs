@@ -49,19 +49,21 @@ function makeOps() {
     const paragraphs = str(value).split(/\r\n|\r|\n/).length
     for (let i = 0; i < paragraphs; i += 1) {
       p.runFont(s, name, textFont, i)
-      const paragraph = { op: 'set-paragraph-format', slide: s, shape: { name }, paragraph: i }
-      if (options.align) paragraph.alignment = options.align
-      if (options.lineSpacing) paragraph.lineSpacing = options.lineSpacing
-      if (options.spaceAfter !== undefined) paragraph.spaceAfter = options.spaceAfter
-      if (options.spaceBefore !== undefined) paragraph.spaceBefore = options.spaceBefore
+      const paragraph = { op: 'set-paragraph', slide: s, shape: { name }, paragraph: i }
+      const format = {}
+      if (options.align) format.alignment = options.align
+      if (options.lineSpacing) format.lineSpacing = options.lineSpacing
+      if (options.spaceAfter !== undefined) format.spaceAfter = options.spaceAfter
+      if (options.spaceBefore !== undefined) format.spaceBefore = options.spaceBefore
+      if (Object.keys(format).length > 0) paragraph.format = format
       if (Object.keys(paragraph).length > 4) p.ops.push(paragraph)
     }
     if (options.autoSize) {
       p.ops.push({
-        op: 'set-text-frame-auto-size',
+        op: 'set-text-frame',
         slide: s,
         shape: { name },
-        autoSize: options.autoSize,
+        frame: { autofit: { mode: options.autoSize } },
       })
     }
     return name
@@ -69,10 +71,10 @@ function makeOps() {
 
   const alphaFill = (s, name, color, alpha) =>
     p.ops.push({
-      op: 'set-shape-fill',
+      op: 'set-shape',
       slide: s,
       shape: { name },
-      fill: { type: 'solid', color, alpha },
+      fill: { kind: 'solid', color, alpha },
     })
 
   const alphaBox = (s, base, x, y, w, h, color, alpha) => {
@@ -104,7 +106,7 @@ function makeOps() {
     p.box(s, name, 'oval', nx, ny, nw, nh, color)
     alphaFill(s, name, color, alpha)
     p.ops.push({
-      op: 'set-shape-effect',
+      op: 'set-shape',
       slide: s,
       shape: { name },
       effect: { softEdge: { radius } },
@@ -115,11 +117,11 @@ function makeOps() {
     const name = nm(s, base)
     p.shape(s, name, 'oval', cx - w / 2, cy - h / 2, w, h)
     p.ops.push({
-      op: 'set-shape-fill',
+      op: 'set-shape',
       slide: s,
       shape: { name },
       fill: {
-        type: 'radialGradient',
+        kind: 'radialGradient',
         fillToRect: { l: 0.5, t: 0.5, r: 0.5, b: 0.5 },
         stops: [
           { pos: 0, color: { rgb: C.sun, alpha: alpha * 0.95 } },
@@ -130,7 +132,7 @@ function makeOps() {
       },
     })
     p.ops.push({
-      op: 'set-shape-line',
+      op: 'set-shape',
       slide: s,
       shape: { name },
       line: { noLine: true },

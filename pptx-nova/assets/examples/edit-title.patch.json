@@ -5,15 +5,23 @@
   "schemaVersion": 1,
   "ops": [
     {
-      "op": "set-text",
+      "op": "set-text-frame",
       "slide": 0,
-      "shape": { "query": { "nameRegex": "^.*-title$" } },
+      "shape": {
+        "query": {
+          "nameRegex": "^.*-title$"
+        }
+      },
       "text": "新标题：Q3 2026 增长计划"
     },
     {
       "op": "set-run",
       "slide": 0,
-      "shape": { "query": { "nameRegex": "^.*-title$" } },
+      "shape": {
+        "query": {
+          "nameRegex": "^.*-title$"
+        }
+      },
       "paragraph": 0,
       "run": 0,
       "font": {

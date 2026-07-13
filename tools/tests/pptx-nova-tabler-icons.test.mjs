@@ -66,7 +66,7 @@ test('Tabler icon pack metadata and license are present', () => {
   assert.ok(packBytes.length < 450_000)
 })
 
-test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add-picture payloads', () => {
+test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add-image payloads', () => {
   assert.ok(listTablerIconNames().includes('presentation'))
   assert.equal(resolveTablerIconName('discount-2'), 'rosette-discount')
 
@@ -92,7 +92,7 @@ test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add
   const op = p.icon(0, 'S0_StatusIcon', 'chart-line', 1, 2, 0.3, 0.3, { color: 'FFFFFF' })
   assert.equal(p.ops.length, 1)
   assert.equal(p.ops[0], op)
-  assert.equal(op.op, 'add-picture')
+  assert.equal(op.op, 'add-image')
   assert.equal(op.name, 'S0_StatusIcon')
   assert.equal(op.x, '1in')
   assert.equal(op.y, '2in')

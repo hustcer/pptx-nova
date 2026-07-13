@@ -12,7 +12,7 @@ const COMMON_STYLE_OPS = [
   'set-theme-font',
   'set-slide-background',
   'set-text-style',
-  'set-shape-fill',
+  'set-shape',
   'set-shape-line',
 ]
 const MANUAL_GATES = [

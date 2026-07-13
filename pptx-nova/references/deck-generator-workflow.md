@@ -198,7 +198,7 @@ const nm = (slide, base) => `S${slide}_${base}`
 ```js
 shape(s, name, kind, x, y, w, h) // add-shape
 box(s, name, kind, x, y, w, h, color) // add-shape + fill + noLine
-textbox(s, name, x, y, w, h) // add-textbox
+textbox(s, name, x, y, w, h) // add-text-box
 tx(s, name, x, y, w, h, text, font) // textbox + setText + setRun
 grid(cols, gap, startX, contentW) // 自动算 N 列等距网格 → [{x, w}, ...]
 txH(sizePt, (lines = 1)) // 自动算 textbox 高度,防 text-overflow-estimate
@@ -431,7 +431,7 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 
 | 现象                                                    | 根因                                                                                                                             |
 | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 第一发 dry-run 报 `set-paragraph requires text`         | `pAlign` helper 误用 `op: 'set-paragraph'`,改成 `set-paragraph-format`(模板已修,自己写新 helper 时别再踩)                        |
+| 第一发 dry-run 报 `set-paragraph requires text`         | `pAlign` helper 误用 `op: 'set-paragraph'`,改成 `set-paragraph`(模板已修,自己写新 helper 时别再踩)                               |
 | fill / line op 命不中（resolvedSelectors 报 not-found） | shape name 引用裸名，应用 `nm(s, "...")`                                                                                         |
 | 主题色没换干净（部分 shape 还是旧色）                   | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                                             |
 | KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                                       |
@@ -471,7 +471,7 @@ slideKPI2(TOTAL)
 
 ## 与 recipe 的关系
 
-模板**几乎全用 patch op**（`add-shape` / `add-textbox` / `add-chart` /
+模板**几乎全用 patch op**（`add-shape` / `add-text-box` / `add-chart` /
 `add-table`），不用 recipe。原因：
 
 - recipe 给的是默认排版，不可拆解（封面就一个 title + subtitle，加不了

@@ -374,7 +374,7 @@ const nm = (slide, base) => `S${slide}_${base}`
 
 const addThemedSlide = (slide, background = PAGE_BG) => {
   ops.push({ op: 'add-slide', layout: 'blank' })
-  ops.push({ op: 'set-slide-background', slide, fill: { type: 'solid', color: background } })
+  ops.push({ op: 'set-slide-background', slide, fill: { kind: 'solid', color: background } })
 }
 
 const assertWithinSlide = (slide, name, x, y, w, h) => {
@@ -409,21 +409,21 @@ const shape = (slide, name, kind, x, y, w, h) => {
 }
 
 const fill = (slide, name, color) => {
-  ops.push({ op: 'set-shape-fill', slide, shape: { name }, fill: { kind: 'solid', color } })
+  ops.push({ op: 'set-shape', slide, shape: { name }, fill: { kind: 'solid', color } })
 }
 
 const noLine = (slide, name) => {
-  ops.push({ op: 'set-shape-line', slide, shape: { name }, line: { noLine: true } })
+  ops.push({ op: 'set-shape', slide, shape: { name }, line: { noLine: true } })
 }
 
 const thinLine = (slide, name, color, width = '0.75pt') => {
-  ops.push({ op: 'set-shape-line', slide, shape: { name }, line: { width, color } })
+  ops.push({ op: 'set-shape', slide, shape: { name }, line: { width, color } })
 }
 
 const applyShapeEffect = (slide, name, effect) => {
   if (!effect) return
   ops.push({
-    op: 'set-shape-effect',
+    op: 'set-shape',
     slide,
     shape: { name },
     effect: effect.shadow ? effect : { shadow: effect },
@@ -432,23 +432,21 @@ const applyShapeEffect = (slide, name, effect) => {
 
 const textbox = (slide, name, x, y, w, h) => {
   assertWithinSlide(slide, name, x, y, w, h)
-  ops.push({ op: 'add-textbox', slide, name, x: `${x}in`, y: `${y}in`, w: `${w}in`, h: `${h}in` })
+  ops.push({ op: 'add-text-box', slide, name, x: `${x}in`, y: `${y}in`, w: `${w}in`, h: `${h}in` })
   return name
 }
 
 const setText = (slide, name, text) => {
-  ops.push({ op: 'set-text', slide, shape: { name }, text })
+  ops.push({ op: 'set-text-frame', slide, shape: { name }, text })
 }
 
 const runFont = (slide, name, font, paragraph = 0, run = 0) => {
   ops.push({ op: 'set-run', slide, shape: { name }, paragraph, run, font: withFontFloor(font) })
 }
 
-// ⚠️ 这里用 set-paragraph-format,不是 set-paragraph。set-paragraph 的 schema 要 text,
-// 不接受 alignment;真正用来设对齐的是 set-paragraph-format。混用会让所有用到对齐的
-// 页(封面/KPI delta pill/结论 banner/页码)第一发 dry-run 必败。
+// Paragraph formatting is carried by the canonical set-paragraph.format object.
 const pAlign = (slide, name, align, paragraph = 0) => {
-  ops.push({ op: 'set-paragraph-format', slide, shape: { name }, paragraph, alignment: align })
+  ops.push({ op: 'set-paragraph', slide, shape: { name }, paragraph, format: { alignment: align } })
 }
 
 // 组合 helper：一次完成 textbox + setText + runFont
@@ -551,7 +549,7 @@ const panelBox = (slide, name, x, y, w, h, color = SURFACE_BG) => {
 
 const tableCellStyle = (slide, tableName, row, col, style) => {
   ops.push({
-    op: 'set-table-cell-style',
+    op: 'set-table',
     slide,
     shape: { name: tableName },
     row,
@@ -565,7 +563,7 @@ const tableCellStyle = (slide, tableName, row, col, style) => {
 
 const styleComparisonTable = (slide, tableName, rows, cols) => {
   ops.push({
-    op: 'set-table-style',
+    op: 'set-table',
     slide,
     shape: { name: tableName },
     firstRow: true,
@@ -578,7 +576,7 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
 
   for (let row = 0; row < rows; row += 1) {
     ops.push({
-      op: 'set-table-row-height',
+      op: 'set-table',
       slide,
       shape: { name: tableName },
       row,
@@ -602,7 +600,7 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
             ? TABLE_BAND_TEXT
             : TABLE_BODY_TEXT
       tableCellStyle(slide, tableName, row, col, {
-        fill: { type: 'solid', color: fillColor },
+        fill: { kind: 'solid', color: fillColor },
         font: {
           name: FONT_LATIN,
           size: isHeader ? '12pt' : '13pt',
@@ -618,7 +616,7 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
   }
 
   ops.push({
-    op: 'set-table-range-borders',
+    op: 'set-table',
     slide,
     shape: { name: tableName },
     startRow: 0,
@@ -1196,21 +1194,21 @@ function slideChart(total) {
     },
   })
   ops.push({
-    op: 'set-chart-series-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
     series: 0,
     fill: { kind: 'solid', color: CHART_PALETTE[1] ?? C.divider },
   })
   ops.push({
-    op: 'set-chart-series-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
     series: 1,
     fill: { kind: 'solid', color: CHART_PALETTE[0] ?? C.primary },
   })
   ops.push({
-    op: 'set-chart-data-labels',
+    op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
     scope: { series: 1 },
@@ -1218,21 +1216,21 @@ function slideChart(total) {
     position: 'outsideEnd',
   })
   ops.push({
-    op: 'set-chart-axis-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
     axis: 'category',
     style: { color: CHART_AXIS, width: '0.75pt' },
   })
   ops.push({
-    op: 'set-chart-axis-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
     axis: 'value',
     style: { color: CHART_AXIS, width: '0.75pt' },
   })
   ops.push({
-    op: 'set-chart-gridline-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
     axis: 'value',
@@ -2017,7 +2015,7 @@ function slideDataRoomDashboard(total) {
     },
   })
   ops.push({
-    op: 'set-chart-series-style',
+    op: 'set-chart',
     slide: s,
     shape: { name: 'DataDriverChart' },
     series: 0,

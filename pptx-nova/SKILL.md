@@ -120,7 +120,7 @@ complex tasks from missing critical gates.
 
 - **New deck**: `outline.json -> deck_lock.json -> content.json -> pptx-nova-create-run -> PNG/contact-sheet review`.
 - **Edit deck**: `inspect -> select(locator candidates) -> optional session-rules resolve -> edit-contract -> patch -> dry-run -> resolvedSelectors -> apply into run directory -> semantic diff/scoped evidence -> edit-contract gate -> changed-slide PNG review -> final output`.
-- **Animations / transitions**: First `inspect` `timing_summary`, `animations[]`, and `animation_capabilities`. For new animations or safe subset edits, use `set-slide-animations` / `update-slide-animation` / `remove-slide-animation`; default complex timing, media timing, interactive triggers, motion paths, emphasis, and chart/SmartArt builds to preserve-only, and do not guess-edit raw XML.
+- **Animations / transitions**: First `inspect` `timing_summary`, `animations[]`, and `animation_capabilities`. For new animations or safe subset edits, use `set-slide-animations` / `set-slide-animations` / `set-slide-animations`; default complex timing, media timing, interactive triggers, motion paths, emphasis, and chart/SmartArt builds to preserve-only, and do not guess-edit raw XML.
 - **PPTX semantic diff / change audit**: When a source and candidate already exist and actual change scope must be confirmed, run this once at low frequency after the candidate is stable:
   `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json > <run-dir>/pptx-diff.json`.
   This command usually takes about 10 seconds, so do not put it into every patch iteration; use `--detail full` only when specific evidence must be investigated. Treat only `agentGate`, `summary.reliableChanges`, `changeRollup.reliable`, and reliable change entries in `slides[]` as machine facts. `uncertain` / `unsupported` are review signals, not pass evidence, and must still be paired with preview, vision, or content audits.
@@ -370,8 +370,8 @@ node <skill-root>/scripts/pptx-nova-edit-evidence-manifest.mjs --candidate out.p
 node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs --contract <run-dir>/edit-contract.json --candidate out.pptx --strict --json
 xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 2,5-7 --json > <run-dir>/vision-diff.json
 xdoc schema --op set-slide-animations --minimal
-xdoc schema --op update-slide-animation --minimal
-xdoc schema --op remove-slide-animation --minimal
+xdoc schema --op set-slide-animations --minimal
+xdoc schema --op set-slide-animations --minimal
 xdoc pptx vision-check out.pptx --json
 xdoc pptx vision-check out.pptx --slides 25-38 --json
 xdoc pptx chrome-detect source.pptx --json

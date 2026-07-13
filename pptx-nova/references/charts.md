@@ -21,7 +21,7 @@ chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标
   不替代视觉复核。
 
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
-add-chart / replace-chart-data / replace-chart-text，apply 后保存 final-inspect.json，并运行
+add-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
 数据维度、数值类型、source/claim 披露和最终原生 chart 对象存在性；它不是完整 OOXML
 chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
@@ -299,7 +299,7 @@ Stock 数据必须先做语义不变量检查，再写入或交付：
   `low[i] <= min(open[i], close[i], high[i])` 且
   `high[i] >= max(open[i], close[i], low[i])`。
 - 修复单个异常点时，优先做最小数据改动，保持趋势、类别、系列名称和图表样式不变。
-- 用 `replace-chart-data` 修改既有 stock chart 时，xdoc 会同步 chart XML 和 embedded
+- 用 `set-chart-data` 修改既有 stock chart 时，xdoc 会同步 chart XML 和 embedded
   workbook；不要用 raw XML 只改 `ppt/charts/chartN.xml`，否则 PowerPoint 刷新图表时
   可能从 workbook 恢复旧数据。
 
@@ -446,13 +446,13 @@ xdoc pptx replace-chart-text \
 `ppt/charts/*.xml` 中的可见文本节点；不会修改 external workbook path、chart
 relationship target、embedded workbook 数据/sharedStrings 或 `formatCode`。
 
-普通 chart 编辑仍可用 patch op `replace-chart-text`。它会改已有 chart 文本缓存和
+普通 chart 编辑仍可用 patch op `set-chart-text`。它会改已有 chart 文本缓存和
 embedded workbook 中对应标签，不重建 chart data XML，适合需要保持 workbook-backed
 chart 标签同步的非翻译场景。
 
 ```json
 {
-  "op": "replace-chart-text",
+  "op": "set-chart-text",
   "slide": 1,
   "shape": { "name": "Revenue Chart" },
   "title": "Revenue Trend",
@@ -464,9 +464,9 @@ chart 标签同步的非翻译场景。
 }
 ```
 
-不要把 `replace-chart-data` 当作 chart 文本翻译工具：它会重建 chart XML / workbook
+不要把 `set-chart-data` 当作 chart 文本翻译工具：它会重建 chart XML / workbook
 数据区域，适合真的替换数据集，但可能丢失或重排既有标题、layout、样式和扩展节点。
-patch op `replace-chart-text` 目前只覆盖经典 chart part。翻译模式下，top-level
+patch op `set-chart-text` 目前只覆盖经典 chart part。翻译模式下，top-level
 `xdoc pptx replace-chart-text --visible-cache-only` 已原生支持经典 chart 与 ChartEx，
 并通过 namespace-aware 定位处理 ChartEx direct/nested point text。ChartEx 翻译应优先
 使用该 helper；未知扩展结构默认 preserve-only。只有 helper 明确报告不支持、且确实
@@ -476,7 +476,7 @@ patch op `replace-chart-text` 目前只覆盖经典 chart part。翻译模式下
 
 ```json
 {
-  "op": "replace-chart-data",
+  "op": "set-chart-data",
   "slide": 1,
   "shape": { "name": "Revenue Chart" },
   "data": { "categories": [...], "series": [...] }
@@ -556,7 +556,7 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
 > `date` **不在** enum 内。这些 axis-style op 当前只能针对**主轴**；combo 图的
 > 次坐标轴(通过 `data.series[i].secondaryAxis: true` 创建,见 §数据结构 → Combo)
 > 暂不能用 `set-chart-axis-style` 等 op 单独设样式 — 需要时只能用
-> `raw-ooxml-patch`(`--allow-raw-xml`)直改 `c:secondaryValAx` 节点。
+> `patch-ooxml`(`--allow-raw-xml`)直改 `c:secondaryValAx` 节点。
 
 ### 改轴线 / 网格线 / 刻度标签
 

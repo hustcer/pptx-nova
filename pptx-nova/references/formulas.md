@@ -8,12 +8,12 @@ while choosing the most reliable PowerPoint representation for the task.
 
 Record the formula policy in `deck_lock.json.typography.formulaPolicy`:
 
-| policy        | Use when                                                                                            | Output behavior                                                                                                           |
-| ------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `mixed`       | Default for technical, academic, and training decks                                                 | Keep simple inline math as editable text/Unicode; render complex formulas as formula assets.                              |
-| `text-only`   | Business decks or user explicitly values editability over typesetting                               | Use ordinary text boxes and Unicode symbols; no rendered formula assets.                                                  |
-| `rendered`    | Formula-heavy decks where visual fidelity matters                                                   | Render every formula-worthy expression as SVG formula assets and insert with `add-formula.assetSource`.                   |
-| `native-omml` | User explicitly requests editable PowerPoint equations and the expression fits the supported subset | Use `add-formula` with `mode: "native-omml"`; fall back to rendered SVG for unsupported or typography-sensitive formulas. |
+| policy        | Use when                                                                                            | Output behavior                                                                                                            |
+| ------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `mixed`       | Default for technical, academic, and training decks                                                 | Keep simple inline math as editable text/Unicode; render complex formulas as formula assets.                               |
+| `text-only`   | Business decks or user explicitly values editability over typesetting                               | Use ordinary text boxes and Unicode symbols; no rendered formula assets.                                                   |
+| `rendered`    | Formula-heavy decks where visual fidelity matters                                                   | Render every formula-worthy expression as SVG formula assets and insert with `add-equation.assetSource`.                   |
+| `native-omml` | User explicitly requests editable PowerPoint equations and the expression fits the supported subset | Use `add-equation` with `mode: "native-omml"`; fall back to rendered SVG for unsupported or typography-sensitive formulas. |
 
 Default to `mixed` when the prompt contains LaTeX, `$...$`, `$$...$$`, equation-heavy
 source text, or terms like formula / equation / 数学公式 / LaTeX / OMML. In Studio
@@ -95,7 +95,7 @@ Preferred patch op for a built-in SVG fallback:
 
 ```json
 {
-  "op": "add-formula",
+  "op": "add-equation",
   "slide": 2,
   "x": "1.2in",
   "y": "2.0in",
@@ -111,7 +111,7 @@ Preferred patch op for production typography after rendering an SVG asset:
 
 ```json
 {
-  "op": "add-formula",
+  "op": "add-equation",
   "slide": 2,
   "x": "1.2in",
   "y": "2.0in",
@@ -132,7 +132,7 @@ native subset:
 
 ```json
 {
-  "op": "add-formula",
+  "op": "add-equation",
   "slide": 2,
   "x": "1.2in",
   "y": "2.0in",
@@ -148,7 +148,7 @@ In `mode: "native-omml"`, `display` is ignored. It only affects rendered SVG
 fallback sizing (`display: false` uses the inline SVG fallback box).
 
 Use the built-in fallback for quick drafts. For final formula-heavy decks, render the
-formula asset into the run directory and insert it with `add-formula.assetSource`;
+formula asset into the run directory and insert it with `add-equation.assetSource`;
 still keep the formula metadata in `assets_manifest.json`.
 
 ## Render manifest

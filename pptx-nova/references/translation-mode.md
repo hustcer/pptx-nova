@@ -538,7 +538,7 @@ Charts are a frequent translation blind spot.
   ChartEx direct/nested point text. Prefer that route for ChartEx translations;
   unknown extension structures remain preserve-only unless a targeted,
   validated fallback is explicitly required.
-- Do not use the patch op `replace-chart-text` as the default translation path:
+- Do not use the patch op `set-chart-text` as the default translation path:
   that op may synchronize embedded workbook labels and is intended for ordinary
   chart editing, not visible-cache-only i18n.
 - If the planner or top-level helper cannot identify a unique visible cache

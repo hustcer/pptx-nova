@@ -114,7 +114,7 @@ export function createOps(options = {}) {
     ops.push({
       op: 'add-shape',
       slide: s,
-      shape: kind,
+      kind: kind,
       name,
       x: `${x}in`,
       y: `${y}in`,
@@ -124,11 +124,11 @@ export function createOps(options = {}) {
     return name
   }
   const fill = (s, name, color) =>
-    ops.push({ op: 'set-shape-fill', slide: s, shape: { name }, fill: { kind: 'solid', color } })
+    ops.push({ op: 'set-shape', slide: s, shape: { name }, fill: { kind: 'solid', color } })
   const noLine = (s, name) =>
-    ops.push({ op: 'set-shape-line', slide: s, shape: { name }, line: { noLine: true } })
+    ops.push({ op: 'set-shape', slide: s, shape: { name }, line: { noLine: true } })
   const setLine = (s, name, color, width = '0.75pt') =>
-    ops.push({ op: 'set-shape-line', slide: s, shape: { name }, line: { width, color } })
+    ops.push({ op: 'set-shape', slide: s, shape: { name }, line: { width, color } })
 
   const box = (s, name, kind, x, y, w, h, color) => {
     shape(s, name, kind, x, y, w, h)
@@ -148,7 +148,7 @@ export function createOps(options = {}) {
   const textbox = (s, name, x, y, w, h) => {
     assertWithinSlide(name, x, y, w, h)
     ops.push({
-      op: 'add-textbox',
+      op: 'add-text-box',
       slide: s,
       name,
       x: `${x}in`,
@@ -160,7 +160,8 @@ export function createOps(options = {}) {
     return name
   }
 
-  const setText = (s, name, text) => ops.push({ op: 'set-text', slide: s, shape: { name }, text })
+  const setText = (s, name, text) =>
+    ops.push({ op: 'set-text-frame', slide: s, shape: { name }, text })
 
   const runFont = (s, name, font, paragraph = 0, run = 0) =>
     ops.push({
@@ -183,7 +184,7 @@ export function createOps(options = {}) {
     })
 
   const pAlign = (s, name, alignment, paragraph = 0) =>
-    ops.push({ op: 'set-paragraph-format', slide: s, shape: { name }, paragraph, alignment })
+    ops.push({ op: 'set-paragraph', slide: s, shape: { name }, paragraph, format: { alignment } })
 
   const textParagraphCount = (text) => {
     const value = String(text ?? '')
@@ -208,7 +209,7 @@ export function createOps(options = {}) {
 
   const addSlide = (s, bg) => {
     ops.push({ op: 'add-slide', layout: 'blank' })
-    if (bg) ops.push({ op: 'set-slide-background', slide: s, fill: { type: 'solid', color: bg } })
+    if (bg) ops.push({ op: 'set-slide-background', slide: s, fill: { kind: 'solid', color: bg } })
   }
 
   const icon = (s, name, iconName, x, y, w, h, options) =>
@@ -1596,7 +1597,7 @@ function collectPatchQualityFacts(patch) {
       if (color) ensureSlide(op.slide).background = color
       continue
     }
-    if (op.op === 'add-textbox' || op.op === 'add-shape') {
+    if (op.op === 'add-text-box' || op.op === 'add-shape') {
       const x = parseInches(op.x)
       const y = parseInches(op.y)
       const w = parseInches(op.w)
@@ -1640,7 +1641,7 @@ function collectPatchQualityFacts(patch) {
       if (shape && op.font) shape.fonts.push(op.font)
       continue
     }
-    if (op.op === 'set-shape-fill') {
+    if (op.op === 'set-shape') {
       const shape = selectShape(op.slide, op.shape)
       const color = normalizePatchFillColor(op.fill)
       if (shape && color) shape.fillColor = color

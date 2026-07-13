@@ -158,19 +158,19 @@ template rules, brand/style changes, or full visual QA.
 ## Common Edit Operations
 
 - Text replacement: `set-text`, `set-paragraph`, `set-run`.
-- Paragraph formatting: `set-paragraph-format`; do not use `set-paragraph` for
+- Paragraph formatting: `set-paragraph`; do not use `set-paragraph` for
   alignment.
 - Theme/font changes: `set-theme-color`, `set-theme-font`, or brand helpers.
 - Slide duplication: `duplicate-slide`.
 - Cross-deck whole-slide copy: `xdoc pptx copy-from`.
-- Chart data: `replace-chart-data`; read `charts.md` for chart semantics.
+- Chart data: `set-chart-data`; read `charts.md` for chart semantics.
 - Table edits: `set-table-cell`, `set-table-data`, `import-table-data`; read
   `tables.md` for formulas and CSV imports.
 - Image replacement: remove/add picture at the same bbox, or use crop ops when
   appropriate.
 - Notes: `set-slide-notes`, `set-slide-notes-rich-text`.
 - Animations/transitions: read `animations.md`; use `set-slide-transition`,
-  `set-slide-animations`, `update-slide-animation`, or `remove-slide-animation`
+  `set-slide-animations`, `set-slide-animations`, or `set-slide-animations`
   only after inspect/dry-run proves the timing is in the supported safe subset.
 
 ## Preserve Constraints

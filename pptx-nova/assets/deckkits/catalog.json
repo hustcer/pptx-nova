@@ -122,7 +122,7 @@
             "set-theme-font",
             "set-slide-background",
             "set-text-style",
-            "set-shape-fill",
+            "set-shape",
             "set-shape-line"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
@@ -628,7 +628,7 @@
             "set-theme-font",
             "set-slide-background",
             "set-text-style",
-            "set-shape-fill",
+            "set-shape",
             "set-shape-line"
           ],
           "chromePolicy": "replace-or-restyle-existing",
@@ -1168,7 +1168,7 @@
             "set-theme-font",
             "set-slide-background",
             "set-text-style",
-            "set-shape-fill",
+            "set-shape",
             "set-shape-line"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
@@ -1710,7 +1710,7 @@
             "set-theme-font",
             "set-slide-background",
             "set-text-style",
-            "set-shape-fill",
+            "set-shape",
             "set-shape-line"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
@@ -2207,7 +2207,7 @@
             "set-theme-font",
             "set-slide-background",
             "set-text-style",
-            "set-shape-fill",
+            "set-shape",
             "set-shape-line"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
@@ -3051,7 +3051,7 @@
             "set-theme-font",
             "set-slide-background",
             "set-text-style",
-            "set-shape-fill",
+            "set-shape",
             "set-shape-line"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
@@ -3389,7 +3389,7 @@
             "set-theme-font",
             "set-slide-background",
             "set-text-style",
-            "set-shape-fill",
+            "set-shape",
             "set-shape-line"
           ],
           "chromePolicy": "preserve-and-restyle-existing",

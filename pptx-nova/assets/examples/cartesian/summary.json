@@ -29,8 +29,8 @@
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 13,
+      "total": 13
     }
   },
   "apply": {
@@ -41,8 +41,8 @@
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 13,
+      "total": 13
     }
   },
   "vision": {
@@ -98,12 +98,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 234575,
-      "sha256": "40843b2e3fa3769db6e34b47131371d60b3d5609dd2354d420873b10dad08393"
+      "bytes": 231991,
+      "sha256": "ba6c4799e0c112a420e6d0d755dcabfa3beff16ba8ae6f5ea0cf47bbd097d299"
     },
     "webp": {
-      "bytes": 61560,
-      "sha256": "d0fbd068bd914cacd6b244e3f9970c8a49e225b60e1e54ad85cb8415664a8bb9"
+      "bytes": 60370,
+      "sha256": "9b3aea3ff8845e312ec46271ad2a796be8f75b1829f705919296332ebdf4a984"
     }
   }
 }

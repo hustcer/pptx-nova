@@ -1,6 +1,6 @@
 # Recipes —— 高层意图 → 自动 patch
 
-Recipe 是 xdoc 暴露的 **19 个高层意图 op**，相比手堆 `add-textbox`/`add-shape`，
+Recipe 是 xdoc 暴露的 **19 个高层意图 op**，相比手堆 `add-text-box`/`add-shape`，
 recipe 已经把字体、间距、坐标、placeholder 类型预设好；模型选错坐标的概率几乎
 为 0，是创建 deck 的首选。
 
@@ -128,7 +128,7 @@ mix 与底层 patch op 自由：可以一份 patch 里同时有 `add-title-slide
 }
 ```
 
-`image` 接受与 `add-picture` 相同的两种形态：
+`image` 接受与 `add-image` 相同的两种形态：
 
 - `{ "assetSource": { "path": "<rel>", "mime": "<type>" } }` —— 推荐，配合
   `--asset-root` 限定本地资产根

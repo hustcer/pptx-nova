@@ -117,8 +117,8 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 - 普通 RGB 颜色在 inspect 中输出为不带 `#` 的 6 位大写十六进制；主题色输出在 `fillSchemeColor` /
   `lineSchemeColor`。复杂渐变、图案、图片填充只保证 `fillType`，必要时仍要 PNG 复核。
 - 动画状态现在也在每页暴露：`timing_summary`、`animations[]`、`animation_capabilities`。
-  只有 `animations[].editable == true` 的安全子集可用 `update-slide-animation` /
-  `remove-slide-animation` 局部改；复杂 timing 仍看 `animation_capabilities.preserve_only`。
+  只有 `animations[].editable == true` 的安全子集可用 `set-slide-animations` /
+  `set-slide-animations` 局部改；复杂 timing 仍看 `animation_capabilities.preserve_only`。
 - preserve-only 状态（SmartArt、复杂动画、复杂过渡等）也会通过 capabilities / per-slide
   summary 报告；不要只看一个布尔字段就决定能不能改。
 - **`geometryOverlaps` / `textOverflowEstimates` 是每页的几何风险**，复用 `vision-check` 的重叠/溢出核心算出来——Edit 模式一次 inspect 就能看到这两类风险，不必单独再跑 `vision-check`；但对比度、装饰是否真盖住文字仍要 PNG 复核。`kind` 取 `both-text`（两个文本框重叠）或 `decoration-over-text`（色块压住文字）
@@ -387,7 +387,7 @@ dry-run 报告里会有：
       "shape": { "name": "Hero Image" }
     },
     {
-      "op": "add-picture",
+      "op": "add-image",
       "slide": 0,
       "x": "1in",
       "y": "1in",
@@ -436,7 +436,7 @@ dry-run 报告里会有：
 
 ```json
 {
-  "op": "replace-chart-data",
+  "op": "set-chart-data",
   "slide": 1,
   "shape": { "name": "Revenue Chart" },
   "data": {
@@ -457,7 +457,7 @@ inspect 报告中的这些字段说明该页有需要谨慎处理的内容：
 | `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape                        |
 
 动画不是一概不能改：`animations[].editable == true` 的基础 entrance/exit 和安全文本 build
-可以按稳定 `id` 用 `update-slide-animation` 或 `remove-slide-animation` 修改；新增安全子集可用
+可以按稳定 `id` 用 `set-slide-animations` 或 `set-slide-animations` 修改；新增安全子集可用
 `set-slide-animations`。如果 `animation_capabilities.preserve_only` 包含 `media-timing`、
 `interactive-trigger`、`unsupported-timing`、`motion-path`、`emphasis`、`chart-build` 或
 `smartart-build`，默认 preserve。需要覆盖整棵 timing tree 时必须让用户确认 `mode: "replace"` 或

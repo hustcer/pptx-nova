@@ -107,15 +107,15 @@ function createMckOps() {
     })
   const applyAlign = (slide, name, alignment, paragraph = 0) =>
     builders.ops.push({
-      op: 'set-paragraph-format',
+      op: 'set-paragraph',
       slide,
       shape: { name },
       paragraph,
-      alignment,
+      format: { alignment },
     })
   const applyCardShadow = (slide, name) =>
     builders.ops.push({
-      op: 'set-shape-effect',
+      op: 'set-shape',
       slide,
       shape: { name },
       effect: { shadow: { ...CARD_SHADOW } },
@@ -137,7 +137,7 @@ function createMckOps() {
       if (align) for (let p = 0; p < paragraphCount; p += 1) applyAlign(slide, name, align, p)
     },
     rotate(slide, name, degrees) {
-      builders.ops.push({ op: 'set-shape-rotation', slide, shape: { name }, degrees })
+      builders.ops.push({ op: 'set-shape', slide, shape: { name }, rotation: degrees })
     },
     applyCardShadow,
     cardPanel(slide, name, x, y, w, h, fill = C.white) {
@@ -543,11 +543,11 @@ function makePageTypes(builders, chrome, components, total) {
     addSlide(s)
     box(s, nm(s, 'HeroBg'), 'rectangle', 0, 0, SLIDE_W, 3.04, C.primary)
     ops.push({
-      op: 'set-shape-fill',
+      op: 'set-shape',
       slide: s,
       shape: { name: nm(s, 'HeroBg') },
       fill: {
-        type: 'gradient',
+        kind: 'gradient',
         angle: 0,
         stops: [
           { pos: 0, color: '001B35' },
@@ -558,10 +558,10 @@ function makePageTypes(builders, chrome, components, total) {
     })
     box(s, nm(s, 'HeroCut'), 'right-triangle', 0, 2.625, SLIDE_W, 0.417, C.white)
     ops.push({
-      op: 'set-shape-flip',
+      op: 'set-shape',
       slide: s,
       shape: { name: nm(s, 'HeroCut') },
-      horizontal: true,
+      flip: { horizontal: true },
     })
     ;[
       [8.48, 0.0, 4.74, 0.022],
@@ -571,10 +571,10 @@ function makePageTypes(builders, chrome, components, total) {
     ].forEach(([x, y, d, alpha], i) => {
       box(s, nm(s, `Ring${i}`), 'oval', x, y, d, d, C.white)
       ops.push({
-        op: 'set-shape-fill',
+        op: 'set-shape',
         slide: s,
         shape: { name: nm(s, `Ring${i}`) },
-        fill: { type: 'solid', color: C.white, alpha },
+        fill: { kind: 'solid', color: C.white, alpha },
       })
     })
     ;[
@@ -587,10 +587,10 @@ function makePageTypes(builders, chrome, components, total) {
     ].forEach(([x, y, alpha], i) => {
       box(s, nm(s, `HeroDot${i}`), 'oval', x, y, 0.045, 0.045, C.white)
       ops.push({
-        op: 'set-shape-fill',
+        op: 'set-shape',
         slide: s,
         shape: { name: nm(s, `HeroDot${i}`) },
-        fill: { type: 'solid', color: C.white, alpha },
+        fill: { kind: 'solid', color: C.white, alpha },
       })
     })
     tx(s, nm(s, 'Eyebrow'), 0.82, 0.44, 3.9, 0.18, data.eyebrow, {
@@ -600,10 +600,10 @@ function makePageTypes(builders, chrome, components, total) {
     })
     box(s, nm(s, 'EyebrowRule'), 'rectangle', 0.83, 0.66, 4.95, 0.012, C.white)
     ops.push({
-      op: 'set-shape-fill',
+      op: 'set-shape',
       slide: s,
       shape: { name: nm(s, 'EyebrowRule') },
-      fill: { type: 'solid', color: C.white, alpha: 0.2 },
+      fill: { kind: 'solid', color: C.white, alpha: 0.2 },
     })
     tx(s, nm(s, 'Title1'), 0.78, 1.1, 5.85, 0.58, data.title[0], {
       name: FONT_EN,

@@ -16,7 +16,7 @@
 - chart 旁的 highlight callout 卡片
 - 全色 hero 收尾
 
-这些视觉元素必须用 `add-shape` + `add-textbox` 手堆。**这不是 over-engineering
+这些视觉元素必须用 `add-shape` + `add-text-box` 手堆。**这不是 over-engineering
 —— 这是"客户演示级 deck"的基线**。
 
 ## op 量级参考
@@ -91,12 +91,12 @@
   { "op": "add-shape", "slide": N, "shape": "rectangle",
     "x": "0in", "y": "0in", "w": "13.333in", "h": "0.08in",
     "name": "TopBrandBar" },
-  { "op": "set-shape-fill", "slide": N, "shape": { "name": "TopBrandBar" },
+  { "op": "set-shape", "slide": N, "shape": { "name": "TopBrandBar" },
     "fill": { "kind": "solid", "color": "1A73E8" } },
   { "op": "set-shape-line", "slide": N, "shape": { "name": "TopBrandBar" },
     "line": { "noLine": true } },
 
-  { "op": "add-textbox", "slide": N,
+  { "op": "add-text-box", "slide": N,
     "x": "0.6in", "y": "7.05in", "w": "6in", "h": "0.3in",
     "name": "PageFooter" },
   { "op": "set-text", "slide": N, "shape": { "name": "PageFooter" },
@@ -105,7 +105,7 @@
     "paragraph": 0, "run": 0,
     "font": { "name": "Inter", "size": "9pt", "color": "9AA0A6" } },
 
-  { "op": "add-textbox", "slide": N,
+  { "op": "add-text-box", "slide": N,
     "x": "11.5in", "y": "0.2in", "w": "1.7in", "h": "0.3in",
     "name": "Watermark" },
   { "op": "set-text", "slide": N, "shape": { "name": "Watermark" },
@@ -139,7 +139,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "CoverTopBar"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 0,
     "shape": { "name": "CoverTopBar" },
     "fill": { "kind": "solid", "color": "1A73E8" }
@@ -162,7 +162,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "CoverAccentBar"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 0,
     "shape": { "name": "CoverAccentBar" },
     "fill": { "kind": "solid", "color": "1A73E8" }
@@ -175,7 +175,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   },
 
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 0,
     "x": "1in",
     "y": "2.4in",
@@ -199,7 +199,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   },
 
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 0,
     "x": "1in",
     "y": "2.9in",
@@ -218,7 +218,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   },
 
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 0,
     "x": "1in",
     "y": "4.4in",
@@ -264,7 +264,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "AgendaCard1"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 1,
     "shape": { "name": "AgendaCard1" },
     "fill": { "kind": "solid", "color": "F8F9FA" }
@@ -277,7 +277,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   },
 
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 1,
     "x": "0.9in",
     "y": "2.2in",
@@ -296,7 +296,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   },
 
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 1,
     "x": "1.8in",
     "y": "2.3in",
@@ -338,7 +338,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "KpiCard1"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiCard1" },
     "fill": { "kind": "solid", "color": "FFFFFF" }
@@ -362,7 +362,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "KpiTopBar1"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiTopBar1" },
     "fill": { "kind": "solid", "color": "1A73E8" }
@@ -376,7 +376,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
 
   // Label
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 2,
     "x": "0.85in",
     "y": "3.1in",
@@ -396,7 +396,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
 
   // 大数字（44pt）
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 2,
     "x": "0.85in",
     "y": "3.5in",
@@ -426,7 +426,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "KpiDelta1"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiDelta1" },
     "fill": { "kind": "solid", "color": "E6F4EA" }
@@ -449,7 +449,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
 
   // 注脚
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 2,
     "x": "0.85in",
     "y": "4.9in",
@@ -585,7 +585,7 @@ callout 卡片（3 个，纵向排列）：
     "name": "Callout1"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 3,
     "shape": { "name": "Callout1" },
     "fill": { "kind": "solid", "color": "E8F0FE" }
@@ -597,7 +597,7 @@ callout 卡片（3 个，纵向排列）：
     "line": { "noLine": true }
   },
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 3,
     "x": "9.7in",
     "y": "2.55in",
@@ -615,7 +615,7 @@ callout 卡片（3 个，纵向排列）：
     "font": { "name": "Inter", "size": "12pt", "bold": true, "color": "1F1F1F" }
   },
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 3,
     "x": "9.7in",
     "y": "2.95in",
@@ -689,7 +689,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "name": "ConclusionBanner"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 4,
     "shape": { "name": "ConclusionBanner" },
     "fill": { "kind": "solid", "color": "1A73E8" }
@@ -740,7 +740,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "name": "Pillar1"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 5,
     "shape": { "name": "Pillar1" },
     "fill": { "kind": "solid", "color": "F8F9FA" }
@@ -763,7 +763,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "name": "Pillar1Bar"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 5,
     "shape": { "name": "Pillar1Bar" },
     "fill": { "kind": "solid", "color": "1A73E8" }
@@ -805,7 +805,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "name": "HeroAccentBar"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 6,
     "shape": { "name": "HeroAccentBar" },
     "fill": { "kind": "solid", "color": "FBBC04" }
@@ -819,7 +819,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 
   // Eyebrow
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 6,
     "x": "0.9in",
     "y": "2in",
@@ -844,7 +844,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 
   // 54pt 大标题
   {
-    "op": "add-textbox",
+    "op": "add-text-box",
     "slide": 6,
     "x": "0.9in",
     "y": "2.5in",
@@ -874,7 +874,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "name": "Takeaway1"
   },
   {
-    "op": "set-shape-fill",
+    "op": "set-shape",
     "slide": 6,
     "shape": { "name": "Takeaway1" },
     "fill": { "kind": "solid", "color": "FFFFFF" }
@@ -968,7 +968,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 2. **装饰宁可小一点** —— 1.4in × 1.4in 圆角矩形比 2.3in × 2.3in 更难碰撞，
    也更精致。
 3. **装饰 z-order 默认在 textbox 之下** —— 但 PPTX 顺序按 op 顺序决定，
-   先 `add-shape` 再 `add-textbox` 文字在上；若反了用 `set-shape-z-order`。
+   先 `add-shape` 再 `add-text-box` 文字在上；若反了用 `set-shape-z-order`。
 4. **不要用纯白装饰在白底页** —— 看不见的装饰等于浪费 op。卡片底用浅色调
    （`C.cardBg` / `C.pale`），与背景拉开 ≥10% 亮度差。
 5. **hero 页装饰用主色变体** —— 深底 (`primaryDk`) + 中色装饰 (`primary`)

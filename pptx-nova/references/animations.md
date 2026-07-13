@@ -9,15 +9,15 @@
 
 ```bash
 xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
-xdoc schema --op update-slide-animation --minimal > <run-dir>/schema-update-slide-animation.json
-xdoc schema --op remove-slide-animation --minimal > <run-dir>/schema-remove-slide-animation.json
+xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
+xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
 ```
 
 当前 xdoc 0.2.5 暴露的安全子集包括：
 
 - 创建/替换/清理：`set-slide-animations`，字段 `mode: "merge-safe" | "replace" | "clear"`。
-- 局部安全编辑：`update-slide-animation`，用 `inspect.animations[].id` 定位。
-- 局部安全删除：`remove-slide-animation`，用 `inspect.animations[].id` 定位。
+- 局部安全编辑：`set-slide-animations`，用 `inspect.animations[].id` 定位。
+- 局部安全删除：`set-slide-animations`，用 `inspect.animations[].id` 定位。
 - 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fadeOut/wipeOut/flyOut`
   或 `phase: "exit"`。
 - 支持的 trigger：`onClick`、`withPrevious`、`afterPrevious`。
@@ -43,7 +43,7 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
   `editable` 和 preserve-only reason。
 - `animation_capabilities`: `editable`、`preserve_only`、`unsupported_create`。
 
-只有 `editable: true` 的既有 step 可以用 `update-slide-animation` 或 `remove-slide-animation`
+只有 `editable: true` 的既有 step 可以用 `set-slide-animations` 或 `set-slide-animations`
 局部编辑。`preserve_only` 命中的 timing 不要 raw XML 猜改；需要重建时必须让用户确认
 `mode: "replace"` 或 `mode: "clear"` 会改变原动画语义。
 
@@ -79,37 +79,27 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 motion path、emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
 接受丢弃/重建既有动画树。
 
-## 安全编辑既有动画
+## 安全合并既有动画
 
-先从 inspect 复制动画 `id`，再 patch：
-
-```json
-{
-  "schemaVersion": 1,
-  "ops": [
-    {
-      "op": "update-slide-animation",
-      "slide": 0,
-      "id": "animation-id-from-inspect",
-      "effect": "fade",
-      "trigger": "afterPrevious",
-      "duration": 650,
-      "delay": 120
-    }
-  ]
-}
-```
-
-删除：
+使用 `set-slide-animations` 的 `merge-safe` 模式提交局部更新；复杂 timing 会拒绝覆盖：
 
 ```json
 {
   "schemaVersion": 1,
   "ops": [
     {
-      "op": "remove-slide-animation",
+      "op": "set-slide-animations",
       "slide": 0,
-      "id": "animation-id-from-inspect"
+      "mode": "merge-safe",
+      "animations": [
+        {
+          "shape": { "name": "KPI Card" },
+          "effect": "fade",
+          "trigger": "after-previous",
+          "duration": 650,
+          "delay": 120
+        }
+      ]
     }
   ]
 }

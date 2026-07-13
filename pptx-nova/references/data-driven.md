@@ -129,7 +129,7 @@ xdoc pptx from-data data.json \
   "ops": [
     { "op": "add-slide" },
     {
-      "op": "add-textbox",
+      "op": "add-text-box",
       "slide": 0,
       "x": "0.5in",
       "y": "0.5in",

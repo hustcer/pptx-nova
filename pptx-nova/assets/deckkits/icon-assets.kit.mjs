@@ -22,7 +22,7 @@ export function addTablerIconPicture(ops, slide, shapeName, iconName, x, y, w, h
     throw new Error('addTablerIconPicture requires an ops array')
   }
   const op = {
-    op: 'add-picture',
+    op: 'add-image',
     slide,
     name: shapeName,
     x: unit(x),

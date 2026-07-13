@@ -700,26 +700,28 @@ function makePageTypes(
       data: data.chartData,
     })
     ops.push({
-      op: 'set-chart-series-style',
+      op: 'set-chart',
       slide: s,
       shape: { name: chartName },
-      series: 0,
-      fill: { kind: 'solid', color: C.primary },
-    })
-    ops.push({
-      op: 'set-chart-data-labels',
-      slide: s,
-      shape: { name: chartName },
-      scope: { series: 0 },
-      showValue: true,
-      position: 'outsideEnd',
-    })
-    ops.push({
-      op: 'set-chart-axis-style',
-      slide: s,
-      shape: { name: chartName },
-      axis: 'category',
-      style: { color: C.textSec, width: '0.75pt' },
+      series: [
+        {
+          series: 0,
+          fill: { kind: 'solid', color: C.primary },
+        },
+      ],
+      dataLabels: [
+        {
+          scope: { series: 0 },
+          showValue: true,
+          position: 'outside-end',
+        },
+      ],
+      axes: [
+        {
+          axis: 'category',
+          line: { color: C.textSec, width: '0.75pt' },
+        },
+      ],
     })
     card(s, nm(s, 'Take'), chX, 4.95, chW, 1.6, C.heroBg, null)
     tx(s, nm(s, 'TakeNum'), chX + 0.28, 5.18, chW - 0.56, 0.7, data.calloutNum ?? data.takeNum, {
@@ -736,25 +738,23 @@ function makePageTypes(
   }
 
   function styleBenchTable(s, name, rows, cols) {
+    const cells = []
+    const rowSpecs = []
     ops.push({
-      op: 'set-table-style',
+      op: 'set-table',
       slide: s,
       shape: { name },
-      firstRow: true,
-      lastRow: false,
-      firstCol: true,
-      lastCol: false,
-      horzBanding: true,
-      vertBanding: false,
+      style: {
+        firstRow: true,
+        lastRow: false,
+        horizontalBanding: true,
+        verticalBanding: false,
+      },
+      rows: rowSpecs,
+      cells,
     })
     for (let r = 0; r < rows; r++) {
-      ops.push({
-        op: 'set-table-row-height',
-        slide: s,
-        shape: { name },
-        row: r,
-        height: r === 0 ? '0.5in' : '0.55in',
-      })
+      rowSpecs.push({ row: r, height: r === 0 ? '0.5in' : '0.55in' })
       for (let c = 0; c < cols; c++) {
         const isHeader = r === 0,
           isFirst = c === 0,
@@ -769,44 +769,22 @@ function makePageTypes(
                 ? C.surface
                 : C.white
         const fontColor = isHeader ? C.white : isUs ? C.primaryDk : isFirst ? C.textPri : C.textSec
-        ops.push({
-          op: 'set-table-cell-style',
-          slide: s,
-          shape: { name },
+        cells.push({
           row: r,
           col: c,
-          verticalAnchor: 'middle',
-          marginLeft: '0.12in',
-          marginRight: '0.1in',
-          fill: { type: 'solid', color: fillColor },
-          font: {
-            name: c === 0 ? FONT_CN : FONT_EN,
-            size: isHeader ? '12pt' : '12.5pt',
-            bold: isHeader || isFirst || isUs,
-            color: fontColor,
+          style: {
+            fill: { kind: 'solid', color: fillColor },
+            font: {
+              name: c === 0 ? FONT_CN : FONT_EN,
+              size: isHeader ? '12pt' : '12.5pt',
+              bold: isHeader || isFirst || isUs,
+              color: fontColor,
+            },
+            alignment: c === 0 ? 'left' : 'center',
           },
-          alignment: c === 0 ? 'left' : 'center',
-          borders: { bottom: { color: C.divider, width: '0.75pt' } },
         })
       }
     }
-    ops.push({
-      op: 'set-table-range-borders',
-      slide: s,
-      shape: { name },
-      startRow: 0,
-      startCol: 0,
-      endRow: rows - 1,
-      endCol: cols - 1,
-      borders: {
-        top: { color: C.divider, width: '0.75pt' },
-        bottom: { color: C.divider, width: '0.75pt' },
-        left: { color: C.divider, width: '0.75pt' },
-        right: { color: C.divider, width: '0.75pt' },
-        insideH: { color: C.divider, width: '0.5pt' },
-        insideV: { color: C.divider, width: '0.5pt' },
-      },
-    })
   }
 
   // slide 10: roadmap (horizontal timeline, alternating up/down)

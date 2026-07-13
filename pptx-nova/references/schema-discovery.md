@@ -8,7 +8,7 @@ xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema
 ```bash
 xdoc schema                          # 完整 schema（贵）
 xdoc schema --index                  # 只 op 名 + level + required/optional 字段
-xdoc schema --op add-textbox         # 单个 op 完整 jsonSchema
+xdoc schema --op add-text-box         # 单个 op 完整 jsonSchema
 xdoc schema --ops add-slide,add-chart   # 多个 op
 xdoc schema --examples               # 内置 12 个 patch 示例
 xdoc schema --minimal                # 删 verbose 字段（与上面任一组合用）
@@ -25,7 +25,7 @@ xdoc schema --index | save -f schema-index.json
 ```
 
 得到所有 120 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
-决定 "我要 `add-chart` 还是 `add-textbox`"。
+决定 "我要 `add-chart` 还是 `add-text-box`"。
 
 ### 2. 选定 op → 拉单个 schema
 
@@ -45,8 +45,8 @@ xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
 
 ```bash
 xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
-xdoc schema --op update-slide-animation --minimal | save -f schema-update-slide-animation.json
-xdoc schema --op remove-slide-animation --minimal | save -f schema-remove-slide-animation.json
+xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
+xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
 ```
 
 重点看 `mode`、`effect`、`phase`、`target`、`build`、`trigger` 的 enum。不要把旧版本
@@ -223,11 +223,11 @@ xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.j
 ```json
 {
   "opIndex": 1,
-  "op": "add-textbox",
+  "op": "add-text-box",
   "status": "success",
   "summary": "Create a text box shape on a slide.",
   "reason": "Create a text box shape on a slide. Its arguments are validated against the published patch schema metadata before the bridge applies the concrete operation.",
-  "expandedOps": ["add-textbox"],
+  "expandedOps": ["add-text-box"],
   "schema": {
     "level": "patch",
     "requiredFields": ["slide", "x", "y", "w", "h"],

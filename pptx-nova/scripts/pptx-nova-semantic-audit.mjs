@@ -3,7 +3,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const SCHEMA_VERSION = 'pptx-nova-semantic-audit/v1'
-const CHART_OPS_WITH_DATA = new Set(['add-chart', 'replace-chart-data'])
+const CHART_OPS_WITH_DATA = new Set(['add-chart', 'set-chart-data'])
 const TABLE_OPS_WITH_DATA = new Set(['add-table', 'set-table-data', 'import-table-data'])
 const CHART_SHAPE_TYPES = new Set(['chart', 'graphicFrameChart'])
 const TABLE_SHAPE_TYPES = new Set(['table', 'graphicFrameTable'])

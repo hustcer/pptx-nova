@@ -4,7 +4,7 @@ DeckKit: `consulting-dark`
 Showcase case: `consulting-dark.golden-roadshow`
 Readiness: `production`
 Slides: 10
-Patch ops: 1090
+Patch ops: 1047
 Title: 浏览器端高保真 PPTX 渲染 与 AI 原生生成
 
 ## Best For

@@ -17,28 +17,56 @@
       "background": "FFFFFF"
     },
     {
-      "op": "add-title-slide",
-      "title": "Q2 2026 业务回顾",
-      "subtitle": "Aug 2026 · 业务部"
-    },
-    {
-      "op": "add-kpi-grid",
-      "title": "Q2 关键指标",
-      "items": [
-        { "label": "营收", "value": "$42M", "delta": "+12% YoY" },
-        { "label": "毛利率", "value": "58%", "delta": "+1.2pp" },
-        { "label": "NPS", "value": "62", "delta": "+4" },
-        { "label": "用户", "value": "1.2M", "delta": "+18%" }
-      ]
+      "op": "add-slide",
+      "recipe": {
+        "kind": "title",
+        "title": "Q2 2026 业务回顾",
+        "subtitle": "Aug 2026 · 业务部"
+      }
     },
     {
       "op": "add-slide",
-      "layout": { "type": "title" }
+      "recipe": {
+        "kind": "kpi-grid",
+        "title": "Q2 关键指标",
+        "items": [
+          {
+            "label": "营收",
+            "value": "$42M",
+            "delta": "+12% YoY"
+          },
+          {
+            "label": "毛利率",
+            "value": "58%",
+            "delta": "+1.2pp"
+          },
+          {
+            "label": "NPS",
+            "value": "62",
+            "delta": "+4"
+          },
+          {
+            "label": "用户",
+            "value": "1.2M",
+            "delta": "+18%"
+          }
+        ]
+      }
     },
     {
-      "op": "set-text",
+      "op": "add-slide",
+      "layout": {
+        "type": "title"
+      }
+    },
+    {
+      "op": "set-text-frame",
       "slide": 2,
-      "shape": { "placeholder": { "type": "title" } },
+      "shape": {
+        "placeholder": {
+          "type": "title"
+        }
+      },
       "text": "营收趋势"
     },
     {
@@ -56,35 +84,48 @@
       "data": {
         "categories": ["Q1", "Q2", "Q3", "Q4"],
         "series": [
-          { "name": "2025", "values": [1000, 1200, 1400, 1600] },
-          { "name": "2026", "values": [1500, 1800, 2100, 2400] }
+          {
+            "name": "2025",
+            "values": [1000, 1200, 1400, 1600]
+          },
+          {
+            "name": "2026",
+            "values": [1500, 1800, 2100, 2400]
+          }
         ]
       }
     },
     {
-      "op": "set-chart-style",
+      "op": "set-chart",
       "slide": 2,
-      "shape": { "name": "Revenue" },
+      "shape": {
+        "name": "Revenue"
+      },
       "style": 6
     },
     {
       "op": "set-chart-data-labels",
       "slide": 2,
-      "shape": { "name": "Revenue" },
+      "shape": {
+        "name": "Revenue"
+      },
       "scope": "all",
       "showValue": true,
       "position": "outEnd",
       "numberFormat": "#,##0"
     },
     {
-      "op": "add-comparison-table",
-      "title": "新旧方案对比",
-      "headers": ["维度", "旧方案", "新方案"],
-      "rows": [
-        ["速度", "慢", "快"],
-        ["可审计", "❌", "✅"],
-        ["错误处理", "exception", "结构化 + fixPatch"]
-      ]
+      "op": "add-slide",
+      "recipe": {
+        "kind": "comparison-table",
+        "title": "新旧方案对比",
+        "headers": ["维度", "旧方案", "新方案"],
+        "rows": [
+          ["速度", "慢", "快"],
+          ["可审计", "❌", "✅"],
+          ["错误处理", "exception", "结构化 + fixPatch"]
+        ]
+      }
     }
   ]
 }

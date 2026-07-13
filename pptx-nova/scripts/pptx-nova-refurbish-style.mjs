@@ -217,7 +217,7 @@ export function genericFallbackFor(entry) {
       'set-theme-font',
       'set-slide-background',
       'set-text-style',
-      'set-shape-fill',
+      'set-shape',
       'set-shape-line',
     ],
     chromePolicy: 'preserve-and-restyle-existing',

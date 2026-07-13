@@ -14,19 +14,19 @@
 
 ## 1. 演示文稿与 slide 级
 
-| op                       | 用途                                                           |
-| ------------------------ | -------------------------------------------------------------- |
-| `add-slide`              | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选 |
-| `remove-slide`           | 删除指定 slide                                                 |
-| `move-slide`             | 改 slide 顺序（`from` / `to` 都是 0-based）                    |
-| `duplicate-slide`        | 复制 slide（保留全部内容，包括 notes）                         |
-| `set-slide-size`         | 改 deck 尺寸：`"16:9"` / `"4:3"` / `{ w, h }`                  |
-| `set-slide-background`   | 改某页背景：`{ fill: ..., followMaster: false }`               |
-| `set-slide-transition`   | 设置/清理基础 slide transition 与自动切页                      |
-| `set-slide-animations`   | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear` |
-| `update-slide-animation` | 按 inspect 动画 id 修改安全子集 step                           |
-| `remove-slide-animation` | 按 inspect 动画 id 删除安全子集 step                           |
-| `set-core-prop`          | core props（`title` / `author` / `subject` / `keywords` 等）   |
+| op                     | 用途                                                           |
+| ---------------------- | -------------------------------------------------------------- |
+| `add-slide`            | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选 |
+| `remove-slide`         | 删除指定 slide                                                 |
+| `move-slide`           | 改 slide 顺序（`from` / `to` 都是 0-based）                    |
+| `duplicate-slide`      | 复制 slide（保留全部内容，包括 notes）                         |
+| `set-slide-size`       | 改 deck 尺寸：`"16:9"` / `"4:3"` / `{ w, h }`                  |
+| `set-slide-background` | 改某页背景：`{ fill: ..., followMaster: false }`               |
+| `set-slide-transition` | 设置/清理基础 slide transition 与自动切页                      |
+| `set-slide-animations` | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear` |
+| `set-slide-animations` | 按 inspect 动画 id 修改安全子集 step                           |
+| `set-slide-animations` | 按 inspect 动画 id 删除安全子集 step                           |
+| `set-core-prop`        | core props（`title` / `author` / `subject` / `keywords` 等）   |
 
 ### Slide notes
 
@@ -76,17 +76,22 @@
 }
 ```
 
-局部编辑既有动画：
+局部合并既有动画：
 
 ```json
 {
-  "op": "update-slide-animation",
+  "op": "set-slide-animations",
   "slide": 0,
-  "id": "animation-id-from-inspect",
-  "phase": "exit",
-  "effect": "fade",
-  "trigger": "afterPrevious",
-  "duration": 650
+  "mode": "merge-safe",
+  "animations": [
+    {
+      "shape": { "name": "KPI Card" },
+      "phase": "exit",
+      "effect": "fade",
+      "trigger": "after-previous",
+      "duration": 650
+    }
+  ]
 }
 ```
 
@@ -118,11 +123,11 @@
 | op                | 用途                                                                              |
 | ----------------- | --------------------------------------------------------------------------------- |
 | `add-shape`       | 加预设形状（182 个 catalog，`shape: "rounded-rectangle"` 或 `prst: "roundRect"`） |
-| `add-textbox`     | 纯文本框                                                                          |
+| `add-text-box`    | 纯文本框                                                                          |
 | `add-placeholder` | 加 placeholder shape（type=title/body/content/...）                               |
-| `add-picture`     | 加图片（`assetSource.path` 或 `bytesBase64`）                                     |
-| `add-formula`     | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                 |
-| `add-movie`       | 加视频，含 poster frame                                                           |
+| `add-image`       | 加图片（`assetSource.path` 或 `bytesBase64`）                                     |
+| `add-equation`    | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                 |
+| `add-video`       | 加视频，含 poster frame                                                           |
 | `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                             |
 | `add-group`       | 创建空 group shape，可后续填子 shape                                              |
 | `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                      |
@@ -196,7 +201,7 @@ cloud-callout`。
 | `set-shape-rotation`     | 旋转（`degrees`）                                    |
 | `set-shape-flip`         | 水平/垂直翻转                                        |
 | `set-shape-name`         | 改 shape name（修改时定位用）                        |
-| `set-shape-fill`         | 改 fill：solid / gradient / pattern / none           |
+| `set-shape`              | 改 fill：solid / gradient / pattern / none           |
 | `set-shape-line`         | 改边框（width, color, dash, noLine）                 |
 | `set-shape-outline`      | 同 line，但带完整 `line` 对象                        |
 | `set-shape-effect`       | 阴影 / 发光 / 反射 / 柔化（`effect: { kind, ... }`） |
@@ -207,7 +212,7 @@ cloud-callout`。
 
 ```json
 {
-  "op": "set-shape-fill",
+  "op": "set-shape",
   "slide": 0,
   "shape": { "name": "KPI Card" },
   "fill": { "kind": "solid", "color": "1A73E8" }
@@ -235,11 +240,11 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 ## 4. 文本编辑
 
 文本写入有两条路径：**简单文本** 用 `set-text`；**段落 / 段落格式 / run 字体**
-用 `set-paragraph` / `set-paragraph-format` / `set-run` / `add-paragraph` / `add-run`。
+用 `set-paragraph` / `set-paragraph` / `set-run` / `add-paragraph` / `add-run`。
 
 `set-text` 写入含 `\n` 的字符串时会生成多个 paragraph。后续 `set-run` 只会修改指定
 `paragraph/run`，不会自动把第 0 段的字体复制到其它段。凡是卡片、badge、diagram
-节点、说明框里使用多行文本，都要逐段设置 `set-run` 和 `set-paragraph-format`，或把
+节点、说明框里使用多行文本，都要逐段设置 `set-run` 和 `set-paragraph`，或把
 标题/正文拆成独立 text box。否则 PNG 渲染时常见问题是第二行以后回到默认大字号，
 导致文本越界、卡片拥挤或版式失衡。
 
@@ -248,18 +253,18 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 | `set-text`             | 整个 text frame 覆盖 plain text               |
 | `add-paragraph`        | 在 text frame 末尾加段（可带 `text`）         |
 | `set-paragraph`        | 改某段的文字                                  |
-| `set-paragraph-format` | 改对齐 / 缩进 / 行距 / 段前段后 / RTL / level |
+| `set-paragraph`        | 改对齐 / 缩进 / 行距 / 段前段后 / RTL / level |
 | `set-paragraph-bullet` | 改 bullet（none / dot / number / image）      |
 | `add-run`              | 给段加 run                                    |
 | `set-run`              | 改某 run 文字与字体                           |
 | `set-run-hyperlink`    | run 加超链接                                  |
 | `clear-run-hyperlink`  | run 清超链接                                  |
 
-### set-paragraph-format 关键字段
+### set-paragraph 关键字段
 
 ```json
 {
-  "op": "set-paragraph-format",
+  "op": "set-paragraph",
   "slide": 0,
   "shape": { "name": "Title 1" },
   "paragraph": 0,
@@ -334,7 +339,7 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 | op                         | 用途                                                |
 | -------------------------- | --------------------------------------------------- |
 | `add-chart`                | 创建（19 个 kind, 详见 `charts.md`）                |
-| `replace-chart-data`       | 替换数据                                            |
+| `set-chart-data`           | 替换数据                                            |
 | `set-chart-style`          | PowerPoint 内置 chartStyle 1-48                     |
 | `set-chart-title-style`    | 标题                                                |
 | `set-chart-legend-style`   | 图例                                                |
@@ -356,16 +361,16 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 | op                 | 用途                                                 |
 | ------------------ | ---------------------------------------------------- |
-| `add-picture`      | 加图片                                               |
+| `add-image`        | 加图片                                               |
 | `set-picture-crop` | 裁剪（left/right/top/bottom 比例，或 `clear: true`） |
-| `add-movie`        | 加视频                                               |
+| `add-video`        | 加视频                                               |
 | `add-ole-object`   | 嵌入 OLE 对象（如 Excel）                            |
 
 资产推荐用 `assetSource.path` + `--asset-root`：
 
 ```json
 {
-  "op": "add-picture",
+  "op": "add-image",
   "slide": 0,
   "x": "1in",
   "y": "1in",
@@ -414,7 +419,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 | `try`                     | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支              |
 | `define`                  | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）            |
 | `use`                     | patch  | 宏：展开已 `define` 的命名宏，用 `with` 传参             |
-| `raw-ooxml-patch`         | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）      |
+| `patch-ooxml`             | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）      |
 
 详见 `recipes.md` / `data-driven.md` / `control-flow-and-raw-xml.md`。
 
@@ -464,7 +469,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
   "schemaVersion": 1,
   "ops": [
     {
-      "op": "replace-chart-data",
+      "op": "set-chart-data",
       "slide": 1,
       "shape": { "name": "Revenue Chart" },
       "data": {
@@ -496,7 +501,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
       "name": "Watermark"
     },
     {
-      "op": "set-shape-fill",
+      "op": "set-shape",
       "slide": 0,
       "shape": { "name": "Watermark" },
       "fill": { "kind": "solid", "color": "1A73E8" }

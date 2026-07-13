@@ -14,9 +14,11 @@
         "schemaVersion": 1,
         "ops": [
           {
-            "op": "set-text",
+            "op": "set-text-frame",
             "slide": 0,
-            "shape": { "id": 7 },
+            "shape": {
+              "id": 7
+            },
             "text": "Updated title"
           }
         ]
@@ -67,9 +69,11 @@
         "schemaVersion": 1,
         "ops": [
           {
-            "op": "set-text",
+            "op": "set-text-frame",
             "slide": 4,
-            "shape": { "placeholder": "ftr" },
+            "shape": {
+              "placeholder": "ftr"
+            },
             "text": "Confidential - June 2026"
           }
         ]
@@ -128,16 +132,20 @@
           {
             "op": "remove-shape",
             "slide": 1,
-            "shape": { "name": "Customer logo" }
+            "shape": {
+              "name": "Customer logo"
+            }
           },
           {
-            "op": "add-picture",
+            "op": "add-image",
             "slide": 1,
             "x": "8.25in",
             "y": "0.35in",
             "w": "1.1in",
             "h": "0.45in",
-            "assetSource": { "path": "assets/replacement-logo.png" },
+            "assetSource": {
+              "path": "assets/replacement-logo.png"
+            },
             "name": "Customer logo"
           }
         ]
@@ -164,9 +172,11 @@
         "schemaVersion": 1,
         "ops": [
           {
-            "op": "set-shape-fill",
+            "op": "set-shape",
             "slide": 0,
-            "shape": { "name": "Status pill" },
+            "shape": {
+              "name": "Status pill"
+            },
             "fill": "1F77B4"
           }
         ]
@@ -194,7 +204,9 @@
           {
             "op": "remove-shape",
             "slide": 3,
-            "shape": { "placeholder": "body" }
+            "shape": {
+              "placeholder": "body"
+            }
           }
         ]
       },

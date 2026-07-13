@@ -36,7 +36,7 @@ function makeCoralOps() {
   const outline = (s, base, color = C.ink, width = '1pt') => p.setLine(s, nm(s, base), color, width)
   const svg = (s, base, x, y, w, h, markup) =>
     p.ops.push({
-      op: 'add-picture',
+      op: 'add-image',
       slide: s,
       name: nm(s, base),
       x: `${x}in`,
@@ -182,18 +182,16 @@ function renderSlide(ctx, s, slide) {
       data: data.chart,
     })
     p.ops.push({
-      op: 'set-chart-series-style',
+      op: 'set-chart',
       slide: s,
       shape: { name: nm(s, 'Chart') },
-      series: 0,
-      fill: { kind: 'solid', color: C.coral },
+      series: [{ series: 0, fill: { kind: 'solid', color: C.coral } }],
     })
     p.ops.push({
-      op: 'set-chart-series-style',
+      op: 'set-chart',
       slide: s,
       shape: { name: nm(s, 'Chart') },
-      series: 1,
-      fill: { kind: 'solid', color: C.ink },
+      series: [{ series: 1, fill: { kind: 'solid', color: C.ink } }],
     })
     ;(data.metrics ?? []).forEach((metric, i) => {
       const y = 2.7 + i * 0.75
@@ -290,7 +288,7 @@ function renderSlide(ctx, s, slide) {
   }
 
   if (slide.type === 'coralTeamGridSlide') {
-    p.ops.push({ op: 'set-slide-background', slide: s, fill: { type: 'solid', color: C.ink } })
+    p.ops.push({ op: 'set-slide-background', slide: s, fill: { kind: 'solid', color: C.ink } })
     tx(s, 'Title', 0.92, 0.5, 6.4, 1.28, data.title, d(56, C.cream))
     tx(s, 'Subtitle', 0.92, 1.86, 3.9, 0.26, data.subtitle, f(10.5, C.lightGray))
     grid(4, 0.28, 0.92, 11.5).forEach((cell, i) => {

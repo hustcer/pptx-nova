@@ -1,4 +1,4 @@
-# 控制流、宏与 Raw OOXML —— `if` / `foreach` / `try` / `define` / `use` / `raw-ooxml-patch`
+# 控制流、宏与 Raw OOXML —— `if` / `foreach` / `try` / `define` / `use` / `patch-ooxml`
 
 > 这五个控制/宏 op + 一个 raw OOXML 逃生口都是 patch envelope 内的"元 op"：
 > 在 dry-run 的 **expand 阶段** 展开成具体 patch op 序列后再进入正常校验。
@@ -79,7 +79,7 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
   "as": "kpi",
   "do": [
     {
-      "op": "add-textbox",
+      "op": "add-text-box",
       "slide": 0,
       "name": "{{$kpi.name}}",
       "x": "0.5in",
@@ -102,11 +102,11 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
 
 **典型用法**：
 
-- 用单个 foreach 生成 4-across KPI 卡(代替手写 4 份重复的 add-shape/add-textbox)
+- 用单个 foreach 生成 4-across KPI 卡(代替手写 4 份重复的 add-shape/add-text-box)
 - 时间线节点 / 议程编号卡 / 章节扉页批量化
 - 把 CSV / JSON 数据源转成 deck 内容,**不必落地一个 template.pptx**(对比 `from-data`)
 
-> ⚠️ `foreach` 仍然不能脱离 patch op 自身的字段约束 — `add-textbox` 必须有
+> ⚠️ `foreach` 仍然不能脱离 patch op 自身的字段约束 — `add-text-box` 必须有
 > `slide` / `x` / `y` / `w` / `h`,变量替换只是文本插值。复杂坐标计算应该用
 > JS 生成器(`assets/examples/deck-generator-template.mjs`)在生成 items 时
 > 算好,再交给 foreach 展开。
@@ -127,7 +127,7 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
   "recoverable": ["missing-shape", "ambiguous-selector"],
   "catch": [
     {
-      "op": "add-textbox",
+      "op": "add-text-box",
       "slide": 0,
       "x": "0.5in",
       "y": "6in",
@@ -147,17 +147,17 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
 **典型用法**：
 
 - 给同一份 patch 在"修改已有 deck"和"从零创建"两种场景共用：先 try set-text，
-  catch 内 add-textbox
+  catch 内 add-text-box
 - 渐进迁移老版 deck 的 placeholder 名字（先按新名 set，catch 内按旧名 set）
 
 > ⚠️ **try 块内的 `define` 在失败时会被丢弃**：try 主分支失败、走 catch 分支
 > 时，try 内部 `define` 的宏会被清理（避免半成品宏污染后续 op）。如果你需要
 > "尝试 + 失败回退" 同时定义一个宏，把 `define` 放到 try 外面或 catch 外面。
 
-## §5 `define` / `use` —— 命名宏 / 参数化 op 块
+## §5 `define-macro` / `use-macro` —— 命名宏 / 参数化 op 块
 
-`define` / `use` 让你把"反复写"的一组 ops 抽出来命名复用，参数通过
-`with` 注入、模板里用 `{{args.<field>}}` 引用，dry-run 报告里 `use` 的
+`define-macro` / `use-macro` 让你把"反复写"的一组 ops 抽出来命名复用，参数通过
+`args` 注入、模板里用 `{{args.<field>}}` 引用，dry-run 报告里 `use-macro` 的
 `expandedOps[]` 会列出展开成的底层 op。
 
 ```json
@@ -165,11 +165,11 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
   "schemaVersion": 1,
   "ops": [
     {
-      "op": "define",
+      "op": "define-macro",
       "name": "metricBox",
-      "ops": [
+      "body": [
         {
-          "op": "add-textbox",
+          "op": "add-text-box",
           "slide": "{{args.slide}}",
           "x": "{{args.x}}",
           "y": "{{args.y}}",
@@ -184,9 +184,9 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
     { "op": "add-slide" },
 
     {
-      "op": "use",
+      "op": "use-macro",
       "name": "metricBox",
-      "with": {
+      "args": {
         "slide": 0,
         "x": "0.5in",
         "y": "3.2in",
@@ -196,9 +196,9 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
       }
     },
     {
-      "op": "use",
+      "op": "use-macro",
       "name": "metricBox",
-      "with": {
+      "args": {
         "slide": 0,
         "x": "3.5in",
         "y": "3.2in",
@@ -226,7 +226,7 @@ op 才进入 schema 校验，所以**坐标/枚举字段**最终仍然必须是�
 
 ### 5.2 嵌套与递归
 
-- `use` 之间可以串调用：宏 A 内部可以 `{ "op": "use", "name": "B" }`
+- `use` 之间可以串调用：宏 A 内部可以 `{ "op": "use-macro", "name": "B" }`
 - **递归深度上限 16 层**：超过会报 `macro expansion exceeded depth limit 16`，
   自递归 / 互相递归两种死循环都会被这个限制兜住
 - 宏注册表是 **全局共享** 的：从第一次 `define` 开始一直存活到 patch 结束；
@@ -257,7 +257,7 @@ op 才进入 schema 校验，所以**坐标/枚举字段**最终仍然必须是�
 | `macro expansion exceeded depth limit 16` | 宏自递归或互相递归                      | 拆开递归边界，或在宏体内用 `if` 加终止条件 |
 | `try recovered from ...`（warnings 里）   | try 内 `define` 被 catch 接住，宏被丢弃 | 把 `define` 移出 try 块                    |
 
-## §6 `raw-ooxml-patch` —— 逃生口（默认禁用）
+## §6 `patch-ooxml` —— 逃生口（默认禁用）
 
 ```bash
 xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
@@ -265,10 +265,10 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 
 ```json
 {
-  "op": "raw-ooxml-patch",
+  "op": "patch-ooxml",
   "target": "ppt/slides/slide1.xml",
   "xpath": "//a:hlinkClick/@tooltip",
-  "operation": "set",
+  "action": "set",
   "value": "Open the product demo"
 }
 ```
@@ -343,7 +343,7 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
 
 ## §9 不要做的事
 
-- 不要用 `raw-ooxml-patch` 修改 `[Content_Types].xml` 或 `.rels` 关系图谱以外
+- 不要用 `patch-ooxml` 修改 `[Content_Types].xml` 或 `.rels` 关系图谱以外
   的元数据 — 几乎一定会破坏 OPC 包结构
 - 不要在 `if.condition.kind: count` 里依赖具体数字 — `count` 是 expand 阶段的
   累加器,与你想检验的 deck 状态(slide 数 / shape 数)是两码事

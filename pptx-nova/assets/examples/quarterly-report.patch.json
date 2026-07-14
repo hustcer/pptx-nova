@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "ops": [
     {
-      "op": "apply-corporate-rebrand",
+      "op": "set-theme",
       "colors": {
         "accent1": "1A73E8",
         "accent2": "34A853",
@@ -11,10 +11,20 @@
         "lt1": "FFFFFF"
       },
       "fonts": {
-        "major": "Inter",
-        "minor": "Inter"
-      },
-      "background": "FFFFFF"
+        "major": {
+          "typeface": "Inter"
+        },
+        "minor": {
+          "typeface": "Inter"
+        }
+      }
+    },
+    {
+      "op": "set-master",
+      "background": {
+        "type": "solid",
+        "color": "FFFFFF"
+      }
     },
     {
       "op": "add-slide",
@@ -54,20 +64,31 @@
       }
     },
     {
-      "op": "add-slide",
-      "layout": {
-        "type": "title"
-      }
+      "op": "add-slide"
     },
     {
-      "op": "set-text-frame",
+      "op": "add-text-box",
+      "slide": 2,
+      "x": "1in",
+      "y": "0.6in",
+      "w": "11in",
+      "h": "0.8in",
+      "name": "RevenueSlideTitle",
+      "text": "营收趋势"
+    },
+    {
+      "op": "set-run",
       "slide": 2,
       "shape": {
-        "placeholder": {
-          "type": "title"
-        }
+        "name": "RevenueSlideTitle"
       },
-      "text": "营收趋势"
+      "paragraph": 0,
+      "run": 0,
+      "font": {
+        "bold": true,
+        "color": "1F1F1F",
+        "size": "28pt"
+      }
     },
     {
       "op": "add-chart",
@@ -101,18 +122,14 @@
       "shape": {
         "name": "Revenue"
       },
-      "style": 6
-    },
-    {
-      "op": "set-chart-data-labels",
-      "slide": 2,
-      "shape": {
-        "name": "Revenue"
-      },
-      "scope": "all",
-      "showValue": true,
-      "position": "outEnd",
-      "numberFormat": "#,##0"
+      "style": 6,
+      "dataLabels": [
+        {
+          "showValue": true,
+          "position": "outside-end",
+          "numberFormat": "#,##0"
+        }
+      ]
     },
     {
       "op": "add-slide",

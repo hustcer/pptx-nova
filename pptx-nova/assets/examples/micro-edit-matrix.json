@@ -98,14 +98,11 @@
         "schemaVersion": 1,
         "ops": [
           {
-            "op": "set-core-prop",
-            "name": "title",
-            "value": "Q3 Operating Review"
-          },
-          {
-            "op": "set-core-prop",
-            "name": "author",
-            "value": "Strategy Team"
+            "op": "set-document-properties",
+            "properties": {
+              "title": "Q3 Operating Review",
+              "author": "Strategy Team"
+            }
           }
         ]
       },
@@ -177,7 +174,10 @@
             "shape": {
               "name": "Status pill"
             },
-            "fill": "1F77B4"
+            "fill": {
+              "kind": "solid",
+              "color": "1F77B4"
+            }
           }
         ]
       },

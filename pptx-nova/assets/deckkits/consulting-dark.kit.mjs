@@ -696,7 +696,6 @@ function makePageTypes(
       w: `${chW - 0.4}in`,
       h: '2.0in',
       name: chartName,
-      legend: 'none',
       data: data.chartData,
     })
     ops.push({

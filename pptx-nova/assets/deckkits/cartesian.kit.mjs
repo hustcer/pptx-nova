@@ -339,8 +339,8 @@ function renderSlide(ctx, s, slide) {
           marker: {
             symbol: 'circle',
             size: 5,
-            fill: { kind: 'solid', color: C.ink },
-            line: { width: '1pt', color: C.bg },
+            fill: C.ink,
+            line: C.bg,
           },
           smooth: true,
         },
@@ -357,8 +357,8 @@ function renderSlide(ctx, s, slide) {
           marker: {
             symbol: 'circle',
             size: 4,
-            fill: { kind: 'solid', color: C.line },
-            line: { width: '0.5pt', color: C.line },
+            fill: C.line,
+            line: C.line,
           },
           smooth: true,
         },

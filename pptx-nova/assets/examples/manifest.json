@@ -548,13 +548,13 @@
       "files": {
         "deck": {
           "path": "cartesian/deck.pptx",
-          "bytes": 27472,
-          "sha256": "270acd19d265b41fec490aefb99e30f072f6b30457efd744bd32ddf35c40f7bc"
+          "bytes": 27503,
+          "sha256": "5e7144e0bd961f63836615a0641301d2203e3d2cb52014fe4558927938e67f3d"
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 60370,
-          "sha256": "9b3aea3ff8845e312ec46271ad2a796be8f75b1829f705919296332ebdf4a984",
+          "bytes": 60308,
+          "sha256": "7cb59fa6eb4c2e3e6a02254b447becaa7bda1af1ae282cce258993201eedf492",
           "quality": 82
         },
         "content": {
@@ -570,7 +570,7 @@
         "summary": {
           "path": "cartesian/summary.json",
           "bytes": 2779,
-          "sha256": "549599ddc68754c6a89ca01d3ce6e81fb3ca713d5616055f371dd4f84ff707de"
+          "sha256": "cd3b0c35fd8931eed39e53e1020d32c899241afa3907ee7f5ad5f8e5e7ca839d"
         }
       },
       "validation": {

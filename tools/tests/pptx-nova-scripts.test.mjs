@@ -907,6 +907,73 @@ test('DeckKit slot consistency honors array-level control roles by default', () 
   assert.deepEqual(timeline.ghosts, [])
 })
 
+test('cartesian line chart emits xdoc-compatible marker colors', async () => {
+  const kit = await import(skillUrl('assets/deckkits/cartesian.kit.mjs'))
+  const result = kit.createDeck({
+    meta: { deckkit: 'cartesian' },
+    slides: [
+      {
+        type: 'cartesianLineChartSlide',
+        data: {
+          label: 'Trend Analysis',
+          title: 'Growth Projection',
+          body: 'Marker payloads must follow the current xdoc chart contract.',
+          chart: {
+            categories: ['2024', '2025'],
+            series: [
+              { name: 'Market Share', values: [42, 51] },
+              { name: 'Industry Average', values: [30, 36] },
+            ],
+          },
+        },
+      },
+    ],
+  })
+  const markers = result.patch.ops.flatMap((op) =>
+    op.op === 'set-chart' ? (op.series ?? []).map((series) => series.marker).filter(Boolean) : [],
+  )
+
+  assert.equal(markers.length, 2)
+  assert.deepEqual(
+    markers.map((marker) => [marker.fill, marker.line]),
+    [
+      ['1A1A1A', 'EDE8E0'],
+      ['B8B0A4', 'B8B0A4'],
+    ],
+  )
+})
+
+test('consulting-dark benchmark chart omits the unsupported none legend value', async () => {
+  const kit = await import(skillUrl('assets/deckkits/consulting-dark.kit.mjs'))
+  const result = kit.createDeck({
+    meta: { deckkit: 'consulting-dark' },
+    slides: [
+      {
+        type: 'benchmarkSlide',
+        data: {
+          eyebrow: 'Benchmark',
+          title: 'Comparison',
+          tableRows: [
+            ['Metric', 'Product'],
+            ['Score', '9.8'],
+          ],
+          chartTitle: 'Scores',
+          chartData: {
+            categories: ['Product'],
+            series: [{ name: 'Score', values: [9.8] }],
+          },
+          calloutNum: '9.8',
+          calloutText: 'Leading score',
+        },
+      },
+    ],
+  })
+  const chart = result.patch.ops.find((op) => op.op === 'add-chart')
+
+  assert.ok(chart, 'benchmark slide should emit an add-chart operation')
+  assert.equal('legend' in chart, false)
+})
+
 test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {
   const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
   const result = kit.createDeck({

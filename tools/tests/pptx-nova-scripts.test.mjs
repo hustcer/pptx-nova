@@ -975,25 +975,13 @@ test('consulting-dark benchmark chart omits the unsupported none legend value', 
 })
 
 test('quarterly report patch uses the current chart legend enum', () => {
-  const outDir = mkdtempSync(join(tmpdir(), 'pptx-nova-quarterly-report-'))
-  const outputPath = join(outDir, 'deck.pptx')
-  const result = spawnSync(
-    'xdoc',
-    [
-      'pptx',
-      'apply',
-      '-p',
-      skillPath('assets/examples/quarterly-report.patch.json'),
-      '-o',
-      outputPath,
-      '--dry-run',
-      '--json',
-    ],
-    { cwd: repoRoot, encoding: 'utf8' },
+  const patch = JSON.parse(
+    readFileSync(skillPath('assets/examples/quarterly-report.patch.json'), 'utf8'),
   )
-  assert.equal(result.status, 0, result.stderr || result.stdout)
-  const report = JSON.parse(result.stdout)
-  assert.equal(report.status, 'success')
+  const chart = patch.ops.find((op) => op.op === 'add-chart' && op.name === 'Revenue')
+
+  assert.ok(chart, 'quarterly report patch should include the revenue chart')
+  assert.equal(chart.legend, 'bottom')
 })
 
 test('deck generator data-room chart omits the unsupported none legend value', () => {

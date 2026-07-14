@@ -1,28 +1,29 @@
-# 控制流、宏与 Raw OOXML —— `if` / `foreach` / `try` / `define` / `use` / `patch-ooxml`
+# 控制流、宏与 Raw OOXML —— `if` / `foreach` / `try` / `define-macro` / `use-macro` / `patch-ooxml`
 
-> 这五个控制/宏 op + 一个 raw OOXML 逃生口都是 patch envelope 内的"元 op"：
-> 在 dry-run 的 **expand 阶段** 展开成具体 patch op 序列后再进入正常校验。
+> 这五个控制/宏 op + 一个 raw OOXML 逃生口都是 patch envelope 内的"元 op"。
+> `foreach` 和宏负责结构展开；`if` 与 `try` 保留在顺序解释器中，在执行到该位置时
+> 观察当前 candidate state。
 > 它们让单份 patch.json 能表达"按状态分支"、"对一组数据循环"、"局部 try-catch"、
 > "命名宏复用"，以及在极少数边角场景下走 OOXML 直改逃生口。
 
 ## §1 控制流 / 宏 op 总览
 
-| op        | 必填                | 可选                               | 何时用                                           |
-| --------- | ------------------- | ---------------------------------- | ------------------------------------------------ |
-| `if`      | `condition`, `then` | `else`, `thenOps`, `elseOps`       | 按 deck 当前状态（页数、是否含某 shape）决定分支 |
-| `foreach` | `items`, `do`       | `as`(默认 `"item"`), `ops`         | 对 JSON 数组循环展开（KPI 卡 / 表格行 / 时间线） |
-| `try`     | `ops`               | `catch`, `catchOps`, `recoverable` | 想"尝试一个高风险 op，失败时退回 safe path"      |
-| `define`  | `name`, `ops`       | （无）                             | 注册一个命名宏 — 把可复用的 op 块抽出来          |
-| `use`     | `name`              | `with`                             | 展开一个命名宏，用 `with` 传 `{{args.*}}` 参数   |
+| op             | 必填                | 可选                   | 何时用                                           |
+| -------------- | ------------------- | ---------------------- | ------------------------------------------------ |
+| `if`           | `condition`, `then` | `else`                 | 按 candidate 当前状态决定分支                    |
+| `foreach`      | `items`, `do`       | `as`(默认 `"item"`)    | 对 JSON 数组循环展开（KPI 卡 / 表格行 / 时间线） |
+| `try`          | `body`              | `catch`, `recoverable` | 事务式尝试；失败时丢弃 body candidate 后回退     |
+| `define-macro` | `name`, `body`      | （无）                 | 注册一个命名宏 — 把可复用的 op 块抽出来          |
+| `use-macro`    | `name`              | `args`                 | 展开命名宏，用 `args` 传 `{{args.*}}` 参数       |
 
-**展开顺序**：递归优先 — 嵌套的 `foreach` 里嵌 `if`、`if` 的 `then` 里嵌 recipe
-op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再统一执行。
-展开结果会反映在 `dry-run` 报告的 `opResults[]` 里（含 `expandedOps[]` /
+**解释顺序**：patch 按数组顺序执行。宏与 `foreach` 可递归产生子 op；执行器到达
+`if` 时才求值条件，到达 `try` 时在 branch-local candidate 上执行 `body`。结果会反映在
+`dry-run` 报告的 `opResults[]` 里（含 `expandedOps[]` /
 `controlExpansion` 元数据），方便你审计。带 `--explain` 还会在
 `explanations[<i>].expandedOps` 里给出"该元 op 展开成哪些底层 op"。
 
-> 字段同义：`then` / `thenOps`、`else` / `elseOps`、`do` / `ops`、`catch` /
-> `catchOps` — schema 二者都接受，挑一个写就行。
+> canonical v1 schema 只接受上表字段；不要使用 `thenOps`、`elseOps`、`ops`、
+> `catchOps`、`with` 等旧别名。
 
 ## §2 `if` —— 按状态分支
 
@@ -34,7 +35,12 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
     "op": "==",
     "value": 0
   },
-  "then": [{ "op": "add-slide" }, { "op": "add-title-slide", "title": "新建 deck" }],
+  "then": [
+    {
+      "op": "add-slide",
+      "recipe": { "kind": "title", "title": "新建 deck" }
+    }
+  ],
   "else": [
     {
       "op": "set-text",
@@ -48,12 +54,12 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
 
 `condition.kind` 取值：
 
-| kind               | 含义                                                                       |
-| ------------------ | -------------------------------------------------------------------------- |
-| `slide-count`      | 已展开的 op 累计触发的 slide 数（注：是 expand 时刻的快照，不是输入 deck） |
-| `count`            | 已展开的 op 总数（用来做 "前 N 步之后再做某事"）                           |
-| `selector-match`   | 配合 `shape` 字段，判断某 selector 是否能命中（输入 deck 状态）            |
-| `property-compare` | 配合 `slide` + `shape` + `property`，比对该属性的当前值                    |
+| kind               | 含义                                                          |
+| ------------------ | ------------------------------------------------------------- |
+| `slide-count`      | 当前 candidate state 的 slide 数                              |
+| `count`            | `slide-count` 的兼容 condition kind，同样读取当前 slide 数    |
+| `selector-match`   | 配合 `shape` 字段，判断 selector 是否命中当前 candidate state |
+| `property-compare` | 配合 `slide` + `shape` + `property`，比对该属性的当前值       |
 
 `condition.op` 全集（**用全名**，schema strict）：
 `== != > >= < <=` / `eq ne gt gte lt lte` / `equals notEquals` /
@@ -116,7 +122,7 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
 ```json
 {
   "op": "try",
-  "ops": [
+  "body": [
     {
       "op": "set-text",
       "slide": 0,
@@ -143,6 +149,8 @@ op、`use` 展开后又含 `foreach` 都会一路 expand 到底层 patch op 再�
 - `recoverable` 列出可被 catch 接住的错误 `kind`（参考 `references/troubleshooting.md`
   的 errorCatalog），其它错误仍然冒出
 - 不给 `recoverable` 时所有错误都会被 catch（强烈不建议 — 容易掩盖 bug）
+- `body` 在独立 candidate 上顺序执行；其中任一可恢复执行错误都会丢弃整个 body 的
+  修改，再从进入 `try` 前的 candidate 执行 `catch`
 
 **典型用法**：
 

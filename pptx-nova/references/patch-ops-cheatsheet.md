@@ -384,42 +384,42 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 ## 8. 高层 / Recipe / 数据驱动 / 控制流
 
-Recipe diagram ops（`add-process-flow` / `add-cycle` / `add-hub-spoke` /
-`add-funnel` / `add-pyramid` / `add-roadmap` 等）生成的是原生可编辑形状、文本框和
-连接线，适合做 SmartArt 等价表达。当前没有通用 `add-smartart` op；已有真实
+`add-slide.recipe` 的 diagram kinds（`process-flow` / `cycle` / `hub-spoke` /
+`funnel` / `pyramid` / `roadmap` 等）生成的是原生可编辑形状、文本框和连接线，
+适合做 SmartArt 等价表达。当前没有通用 `add-smartart` op；已有真实
 SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成 SmartArt
 风格内容时，优先使用这些 recipe diagram ops 或显式 shape/connector patch；不要假设
 可以直接创建或编辑 OOXML SmartArt。
 
-| op                        | 等级   | 用途                                                     |
-| ------------------------- | ------ | -------------------------------------------------------- |
-| `add-title-slide`         | recipe | 封面                                                     |
-| `add-section-slide`       | recipe | 章节扉页                                                 |
-| `add-two-column-slide`    | recipe | 左右对照                                                 |
-| `add-image-with-caption`  | recipe | 大图 + 说明                                              |
-| `add-kpi-grid`            | recipe | KPI 网格                                                 |
-| `add-comparison-table`    | recipe | 对比表                                                   |
-| `add-timeline`            | recipe | 时间线 / 里程碑                                          |
-| `add-roadmap`             | recipe | 产品路线图 / 阶段计划                                    |
-| `add-matrix-2x2`          | recipe | 2x2 矩阵                                                 |
-| `add-process-flow`        | recipe | 流程图                                                   |
-| `add-funnel`              | recipe | 漏斗 / pipeline                                          |
-| `add-swot`                | recipe | SWOT 四象限                                              |
-| `add-pyramid`             | recipe | 金字塔 / 层级模型                                        |
-| `add-hub-spoke`           | recipe | 中心辐射 / 能力地图                                      |
-| `add-cycle`               | recipe | 闭环 / 复盘循环                                          |
-| `add-gantt`               | recipe | 甘特 / 项目排期                                          |
-| `add-scorecard-table`     | recipe | 评分卡表格                                               |
-| `add-comparison-cards`    | recipe | 方案比较卡片                                             |
-| `apply-corporate-rebrand` | recipe | 一键品牌改装                                             |
-| `fill-layout`             | patch  | 填 layout 契约（title-and-content/two-column/...）       |
-| `bind-data`               | patch  | JSON 数据绑定 text / table / chart                       |
-| `if`                      | patch  | 控制流：按状态分支（slide-count / selector-match / ...） |
-| `foreach`                 | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops          |
-| `try`                     | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支              |
-| `define`                  | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）            |
-| `use`                     | patch  | 宏：展开已 `define` 的命名宏，用 `with` 传参             |
-| `patch-ooxml`             | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）      |
+| op / kind                                  | 等级   | 用途                                                     |
+| ------------------------------------------ | ------ | -------------------------------------------------------- |
+| `add-slide.recipe.kind="title"`            | recipe | 封面                                                     |
+| `add-slide.recipe.kind="section"`          | recipe | 章节扉页                                                 |
+| `add-slide.recipe.kind="two-column"`       | recipe | 左右对照                                                 |
+| `add-slide.recipe.kind="image-caption"`    | recipe | 大图 + 说明                                              |
+| `add-slide.recipe.kind="kpi-grid"`         | recipe | KPI 网格                                                 |
+| `add-slide.recipe.kind="comparison-table"` | recipe | 对比表                                                   |
+| `add-slide.recipe.kind="timeline"`         | recipe | 时间线 / 里程碑                                          |
+| `add-slide.recipe.kind="roadmap"`          | recipe | 产品路线图 / 阶段计划                                    |
+| `add-slide.recipe.kind="matrix-2x2"`       | recipe | 2x2 矩阵                                                 |
+| `add-slide.recipe.kind="process-flow"`     | recipe | 流程图                                                   |
+| `add-slide.recipe.kind="funnel"`           | recipe | 漏斗 / pipeline                                          |
+| `add-slide.recipe.kind="swot"`             | recipe | SWOT 四象限                                              |
+| `add-slide.recipe.kind="pyramid"`          | recipe | 金字塔 / 层级模型                                        |
+| `add-slide.recipe.kind="hub-spoke"`        | recipe | 中心辐射 / 能力地图                                      |
+| `add-slide.recipe.kind="cycle"`            | recipe | 闭环 / 复盘循环                                          |
+| `add-slide.recipe.kind="gantt"`            | recipe | 甘特 / 项目排期                                          |
+| `add-slide.recipe.kind="scorecard-table"`  | recipe | 评分卡表格                                               |
+| `add-slide.recipe.kind="comparison-cards"` | recipe | 方案比较卡片                                             |
+| `set-theme` / `remap-theme`                | patch  | 品牌改装                                                 |
+| `fill-layout`                              | patch  | 填 layout 契约（title-and-content/two-column/...）       |
+| `bind-data`                                | patch  | JSON 数据绑定 text / table / chart                       |
+| `if`                                       | patch  | 控制流：按状态分支（slide-count / selector-match / ...） |
+| `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops          |
+| `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支              |
+| `define`                                   | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）            |
+| `use`                                      | patch  | 宏：展开已 `define` 的命名宏，用 `with` 传参             |
+| `patch-ooxml`                              | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）      |
 
 详见 `recipes.md` / `data-driven.md` / `control-flow-and-raw-xml.md`。
 
@@ -434,11 +434,17 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
   "schemaVersion": 1,
   "ops": [
     { "op": "set-theme-color", "scheme": "accent1", "value": "1A73E8" },
-    { "op": "add-title-slide", "title": "Q2 2026 Review", "subtitle": "Aug 2026" },
     {
-      "op": "add-kpi-grid",
-      "title": "Key Metrics",
-      "items": [{ "label": "Revenue", "value": "$42M", "delta": "+12%" }]
+      "op": "add-slide",
+      "recipe": { "kind": "title", "title": "Q2 2026 Review", "subtitle": "Aug 2026" }
+    },
+    {
+      "op": "add-slide",
+      "recipe": {
+        "kind": "kpi-grid",
+        "title": "Key Metrics",
+        "items": [{ "label": "Revenue", "value": "$42M", "delta": "+12%" }]
+      }
     }
   ]
 }

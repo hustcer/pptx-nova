@@ -14,7 +14,7 @@ xdoc pptx apply-brand deck.pptx --brand brand-profile.json -o out.pptx
 xdoc pptx extract-style reference.pptx --output style.json --json
 ```
 
-`swap-theme` compiles the selected themePack into `apply-corporate-rebrand`, then reuses the normal
+`swap-theme` compiles the selected themePack into canonical theme/master patch operations, then reuses the normal
 apply/dry-run/sidecar path. `swap-style` uses the same bottom layer for master placeholder and
 presentation default text style; its density/radius/shadow/image-ratio fields are also consumed by
 the JS generator template. `apply-brand` uses the same compiler for one-off brand profiles when the

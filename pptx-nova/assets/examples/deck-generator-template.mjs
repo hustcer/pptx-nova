@@ -1032,7 +1032,7 @@ function slideAgenda(total) {
   })
 }
 
-// slide 2：KPI 4-across（手堆，不用 add-kpi-grid recipe）
+// slide 2：KPI 4-across（手堆，不用 add-slide 的 kpi-grid recipe）
 function slideKPI(total) {
   const s = 2
   addThemedSlide(s)

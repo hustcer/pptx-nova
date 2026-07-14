@@ -5,7 +5,8 @@
       "id": "kpi-grid",
       "name": "KPI Grid",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-kpi-grid"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "kpi-grid",
       "bestFor": ["executive metrics", "QBR snapshot", "scorecard"],
       "themePackAware": true,
       "status": "seed"
@@ -14,7 +15,8 @@
       "id": "comparison-table",
       "name": "Comparison Table",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-comparison-table"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "comparison-table",
       "bestFor": ["before after", "vendor comparison", "option tradeoff"],
       "themePackAware": true,
       "status": "seed"
@@ -32,7 +34,8 @@
       "id": "timeline",
       "name": "Timeline",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-timeline"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "timeline",
       "bestFor": ["milestones", "launch schedule", "project history"],
       "themePackAware": true,
       "status": "implemented"
@@ -41,7 +44,8 @@
       "id": "roadmap",
       "name": "Roadmap",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-roadmap"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "roadmap",
       "bestFor": ["product planning", "quarterly phases", "execution plan"],
       "themePackAware": true,
       "status": "implemented"
@@ -50,7 +54,8 @@
       "id": "matrix-2x2",
       "name": "2x2 Matrix",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-matrix-2x2"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "matrix-2x2",
       "bestFor": ["prioritization", "positioning", "risk reward"],
       "themePackAware": true,
       "status": "implemented"
@@ -59,7 +64,8 @@
       "id": "process-flow",
       "name": "Process Flow",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-process-flow"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "process-flow",
       "bestFor": ["workflow", "sales stages", "operating model"],
       "themePackAware": true,
       "status": "implemented"
@@ -68,7 +74,8 @@
       "id": "funnel",
       "name": "Funnel",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-funnel"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "funnel",
       "bestFor": ["conversion", "pipeline", "stage drop-off"],
       "themePackAware": true,
       "status": "implemented"
@@ -77,7 +84,8 @@
       "id": "swot",
       "name": "SWOT Matrix",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-swot"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "swot",
       "bestFor": ["strategy assessment", "market analysis", "planning workshop"],
       "themePackAware": true,
       "status": "implemented"
@@ -86,7 +94,8 @@
       "id": "pyramid",
       "name": "Pyramid",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-pyramid"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "pyramid",
       "bestFor": ["hierarchy", "maturity model", "operating model"],
       "themePackAware": true,
       "status": "implemented"
@@ -95,7 +104,8 @@
       "id": "hub-spoke",
       "name": "Hub Spoke",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-hub-spoke"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "hub-spoke",
       "bestFor": ["platform ecosystem", "capability map", "stakeholder model"],
       "themePackAware": true,
       "status": "implemented"
@@ -104,7 +114,8 @@
       "id": "cycle",
       "name": "Cycle",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-cycle"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "cycle",
       "bestFor": ["feedback loop", "operating cadence", "continuous improvement"],
       "themePackAware": true,
       "status": "implemented"
@@ -113,7 +124,8 @@
       "id": "gantt",
       "name": "Gantt",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-gantt"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "gantt",
       "bestFor": ["delivery plan", "project schedule", "implementation timeline"],
       "themePackAware": true,
       "status": "implemented"
@@ -122,7 +134,8 @@
       "id": "scorecard-table",
       "name": "Scorecard Table",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-scorecard-table"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "scorecard-table",
       "bestFor": ["vendor scorecard", "criteria scoring", "readiness tracking"],
       "themePackAware": true,
       "status": "implemented"
@@ -131,7 +144,8 @@
       "id": "comparison-cards",
       "name": "Comparison Cards",
       "type": "recipePreset",
-      "nativeEntryPoints": ["add-comparison-cards"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKind": "comparison-cards",
       "bestFor": ["option comparison", "feature grouping", "scenario tradeoff"],
       "themePackAware": true,
       "status": "implemented"

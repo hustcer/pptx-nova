@@ -24,13 +24,13 @@
 
 ## 1. 何时用 Express（vs Studio / Edit）
 
-| 信号                                                   | 走哪个模式           | 去向                                                             |
-| ------------------------------------------------------ | -------------------- | ---------------------------------------------------------------- |
-| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express**          | 本文档                                                           |
-| 提供参考 PPTX + 新大纲 / 新主题                        | **Reference Create** | `reference-create.md`                                            |
-| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**           | 先选 DeckKit；无匹配时见 `deck-generator-workflow.md`            |
-| 指定品牌 profile / 要做品牌合规检查                    | **Studio**           | `styles-and-themes.md` + `recipes.md`（apply-corporate-rebrand） |
-| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**             | `edit-mode.md` + `inspect-and-edit.md`                           |
+| 信号                                                   | 走哪个模式           | 去向                                                  |
+| ------------------------------------------------------ | -------------------- | ----------------------------------------------------- |
+| 简单 prompt、要快、没给细节（"做一份 Q2 业务回顾"）    | **Express**          | 本文档                                                |
+| 提供参考 PPTX + 新大纲 / 新主题                        | **Reference Create** | `reference-create.md`                                 |
+| 要像素级控制 / 自定义形状 / 复杂 chart 样式 / 投资人级 | **Studio**           | 先选 DeckKit；无匹配时见 `deck-generator-workflow.md` |
+| 指定品牌 profile / 要做品牌合规检查                    | **Studio**           | `styles-and-themes.md`（`set-theme` / `remap-theme`） |
+| 改已有 `.pptx`（增删改某页/某对象/换数据）             | **Edit**             | `edit-mode.md` + `inspect-and-edit.md`                |
 
 Express 和 Studio 共用同一套 DeckKit / generator / op 基础设施，区别只在
 **ceremony**：express 自动选默认、最小确认、自动闭环；studio 让你逐项控制。
@@ -166,7 +166,7 @@ DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称
 
 outline 顶层还带 `out`（输出路径）和 `themePack` / `stylePack`（如 `corporate-blue` /
 `consulting`）。主题色、字体、底色、字号节奏先从 themePack/stylePack 派生；用户给了
-`rebrand.{colors,fonts,background}` 时再覆盖并走 `apply-corporate-rebrand`。`kind` 是页型意图、不强制枚举——
+`rebrand.{colors,fonts,background}` 时再覆盖并走 `set-theme` / `remap-theme`。`kind` 是页型意图、不强制枚举——
 每页写一个 slide 函数即可；模板已含 8 个同型示例可改：`slideCover` / `slideAgenda` / `slideKPI` /
 `slideChart` / `slideTable` / `slidePillars`（多列支柱）/ `slideWorkflow` / `slideHero`（全色收尾），
 挑最接近的页型改内容。
@@ -206,7 +206,7 @@ helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `page
 当前 express 的"选风格"= 选一个 themePack + 一个 stylePack：
 
 - 用户**明确指定**色/品牌 → 遵守，优先映射到已有 themePack；没有命中就临时写外部
-  themePack JSON，并在生成后用 `apply-corporate-rebrand` / `swap-theme` 保持 deck 主题一致。
+  themePack JSON，并在生成后用 `remap-theme` / `swap-theme` 保持 deck 主题一致。
 - 用户**没指定** → 按内容领域推断一个安全牌，并在产出说明里记录理由（避免自嗨）。
   默认安全牌是 `corporate-blue` + `consulting`，字体 `Inter` + `Source Han Sans SC`。
 - 可用 catalog：`xdoc pptx list-themes --json`，或查看

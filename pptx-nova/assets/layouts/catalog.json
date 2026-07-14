@@ -6,7 +6,8 @@
       "name": "Title and Subtitle",
       "type": "layoutPattern",
       "bestFor": ["cover", "section divider", "executive summary opener"],
-      "nativeEntryPoints": ["add-title-slide", "add-section-slide"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKinds": ["title", "section"],
       "layoutContractHints": ["title", "subtitle"],
       "status": "seed"
     },
@@ -15,7 +16,8 @@
       "name": "Two Column Content",
       "type": "layoutPattern",
       "bestFor": ["comparison", "narrative plus evidence", "image plus bullets"],
-      "nativeEntryPoints": ["add-two-column-slide"],
+      "nativeEntryPoints": ["add-slide"],
+      "recipeKinds": ["two-column"],
       "layoutContractHints": ["title", "body", "picture"],
       "status": "seed"
     },

@@ -385,11 +385,12 @@ shape 可以选择继承 master/layout effect：
 
 ## 一键品牌改装（推荐组合）
 
-参见 `recipes.md` 的 `apply-corporate-rebrand`：
+主题色与字体使用 canonical `set-theme`；需要按 theme pack 重映射现有对象时使用
+`remap-theme`：
 
 ```json
 {
-  "op": "apply-corporate-rebrand",
+  "op": "set-theme",
   "colors": {
     "accent1": "1A73E8",
     "accent2": "34A853",
@@ -398,15 +399,12 @@ shape 可以选择继承 master/layout effect：
     "dk1": "1F1F1F",
     "lt1": "FFFFFF"
   },
-  "fonts": { "major": "Inter", "minor": "Inter", "heading": "Inter" },
-  "background": "FFFFFF",
-  "titleStyle": { "size": "32pt", "bold": true, "color": "1F1F1F" },
-  "bodyStyle": { "size": "16pt", "color": "1F1F1F" }
+  "fonts": { "major": "Inter", "minor": "Inter", "heading": "Inter" }
 }
 ```
 
-这一条 recipe op 会展开成多个 `set-theme-color / set-theme-font / set-master-bg /
-set-master-placeholder-style / set-presentation-default-text-style` 底层 op。
+背景、母版 placeholder 与 presentation 默认文本样式继续使用当前 schema 披露的
+`set-master` / `set-slide-background` / 文本样式 op；不要再生成已删除的 rebrand alias。
 
 ## 检查改对了
 

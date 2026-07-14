@@ -29,36 +29,39 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ## Native diagram/table presets
 
-常见商务图示优先用 recipe preset，而不是手算几十个 `add-shape` 坐标。这些 preset
-会编译成原生可编辑 PPTX 对象，支持 `theme` 字段随 themePack 改色：
+常见商务图示优先用 `add-slide.recipe` preset，而不是手算几十个 `add-shape` 坐标。
+这些 preset 会编译成原生可编辑 PPTX 对象，支持 `theme` 字段随 themePack 改色：
 
-| preset           | op                     | 输入字段                       | 适用场景                     |
-| ---------------- | ---------------------- | ------------------------------ | ---------------------------- |
-| Timeline         | `add-timeline`         | `title`, `items[]`             | 里程碑、发布节奏、历史演进   |
-| Roadmap          | `add-roadmap`          | `title`, `phases[]`            | 产品规划、季度计划、阶段目标 |
-| 2x2 Matrix       | `add-matrix-2x2`       | `title`, `quadrants[4]`        | 优先级、定位、风险收益       |
-| Process Flow     | `add-process-flow`     | `title`, `steps[]`             | 流程、操作步骤、转化前段     |
-| Funnel           | `add-funnel`           | `title`, `stages[]`            | 销售漏斗、转化分析、pipeline |
-| SWOT Matrix      | `add-swot`             | `title`, 四个象限列表          | 战略评估、市场分析、工作坊   |
-| Pyramid          | `add-pyramid`          | `title`, `levels[]`            | 层级、成熟度、运营模型       |
-| Hub Spoke        | `add-hub-spoke`        | `title`, `hub`, `spokes[]`     | 平台生态、能力地图、干系人   |
-| Cycle            | `add-cycle`            | `title`, `steps[]`             | 反馈闭环、运营节奏、复盘流程 |
-| Gantt            | `add-gantt`            | `title`, `tasks[]`             | 交付计划、项目排期、里程碑   |
-| Scorecard Table  | `add-scorecard-table`  | `title`, `headers[]`, `rows[]` | 评分卡、供应商评估、就绪度   |
-| Comparison Cards | `add-comparison-cards` | `title`, `cards[]`             | 方案比较、功能分组、场景权衡 |
+| preset           | `recipe.kind`      | 输入字段                       | 适用场景                     |
+| ---------------- | ------------------ | ------------------------------ | ---------------------------- |
+| Timeline         | `timeline`         | `title`, `items[]`             | 里程碑、发布节奏、历史演进   |
+| Roadmap          | `roadmap`          | `title`, `phases[]`            | 产品规划、季度计划、阶段目标 |
+| 2x2 Matrix       | `matrix-2x2`       | `title`, `quadrants[4]`        | 优先级、定位、风险收益       |
+| Process Flow     | `process-flow`     | `title`, `steps[]`             | 流程、操作步骤、转化前段     |
+| Funnel           | `funnel`           | `title`, `stages[]`            | 销售漏斗、转化分析、pipeline |
+| SWOT Matrix      | `swot`             | `title`, 四个象限列表          | 战略评估、市场分析、工作坊   |
+| Pyramid          | `pyramid`          | `title`, `levels[]`            | 层级、成熟度、运营模型       |
+| Hub Spoke        | `hub-spoke`        | `title`, `hub`, `spokes[]`     | 平台生态、能力地图、干系人   |
+| Cycle            | `cycle`            | `title`, `steps[]`             | 反馈闭环、运营节奏、复盘流程 |
+| Gantt            | `gantt`            | `title`, `tasks[]`             | 交付计划、项目排期、里程碑   |
+| Scorecard Table  | `scorecard-table`  | `title`, `headers[]`, `rows[]` | 评分卡、供应商评估、就绪度   |
+| Comparison Cards | `comparison-cards` | `title`, `cards[]`             | 方案比较、功能分组、场景权衡 |
 
 ### Timeline
 
 ```json
 {
-  "op": "add-timeline",
-  "title": "Launch timeline",
-  "items": [
-    { "date": "Q1", "label": "Design", "text": "Prototype" },
-    { "date": "Q2", "label": "Beta", "text": "Pilot customers" },
-    { "date": "Q3", "label": "GA", "text": "Launch" }
-  ],
-  "theme": { "accent": "0A6BFF", "text": "111827", "muted": "667085", "background": "FFFFFF" }
+  "op": "add-slide",
+  "recipe": {
+    "kind": "timeline",
+    "title": "Launch timeline",
+    "items": [
+      { "date": "Q1", "label": "Design", "text": "Prototype" },
+      { "date": "Q2", "label": "Beta", "text": "Pilot customers" },
+      { "date": "Q3", "label": "GA", "text": "Launch" }
+    ],
+    "theme": { "accent": "0A6BFF", "text": "111827", "muted": "667085", "background": "FFFFFF" }
+  }
 }
 ```
 
@@ -66,13 +69,16 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-roadmap",
-  "title": "Product roadmap",
-  "phases": [
-    { "label": "Now", "period": "Q1", "items": ["Stabilize core", "Instrument usage"] },
-    { "label": "Next", "period": "Q2", "items": ["Self-serve onboarding", "Partner API"] },
-    { "label": "Later", "period": "Q3", "items": ["Enterprise controls"] }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "roadmap",
+    "title": "Product roadmap",
+    "phases": [
+      { "label": "Now", "period": "Q1", "items": ["Stabilize core", "Instrument usage"] },
+      { "label": "Next", "period": "Q2", "items": ["Self-serve onboarding", "Partner API"] },
+      { "label": "Later", "period": "Q3", "items": ["Enterprise controls"] }
+    ]
+  }
 }
 ```
 
@@ -82,16 +88,19 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-matrix-2x2",
-  "title": "Prioritization matrix",
-  "xAxis": "Impact",
-  "yAxis": "Effort",
-  "quadrants": [
-    { "label": "Quick wins", "text": "Ship now" },
-    { "label": "Big bets", "text": "Sequence carefully" },
-    { "label": "Fill-ins", "text": "Batch work" },
-    { "label": "Avoid", "text": "Revisit later" }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "matrix-2x2",
+    "title": "Prioritization matrix",
+    "xAxis": "Impact",
+    "yAxis": "Effort",
+    "quadrants": [
+      { "label": "Quick wins", "text": "Ship now" },
+      { "label": "Big bets", "text": "Sequence carefully" },
+      { "label": "Fill-ins", "text": "Batch work" },
+      { "label": "Avoid", "text": "Revisit later" }
+    ]
+  }
 }
 ```
 
@@ -99,13 +108,16 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-process-flow",
-  "title": "Sales process",
-  "steps": [
-    { "label": "Lead", "text": "Inbound capture" },
-    { "label": "Qualify", "text": "Score fit" },
-    { "label": "Close", "text": "Contract" }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "process-flow",
+    "title": "Sales process",
+    "steps": [
+      { "label": "Lead", "text": "Inbound capture" },
+      { "label": "Qualify", "text": "Score fit" },
+      { "label": "Close", "text": "Contract" }
+    ]
+  }
 }
 ```
 
@@ -113,13 +125,16 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-funnel",
-  "title": "Conversion funnel",
-  "stages": [
-    { "label": "Visitors", "value": "120k" },
-    { "label": "Trials", "value": "18k" },
-    { "label": "Paid", "value": "3.2k" }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "funnel",
+    "title": "Conversion funnel",
+    "stages": [
+      { "label": "Visitors", "value": "120k" },
+      { "label": "Trials", "value": "18k" },
+      { "label": "Paid", "value": "3.2k" }
+    ]
+  }
 }
 ```
 
@@ -127,12 +142,15 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-swot",
-  "title": "Market view",
-  "strengths": ["Brand", "Retention"],
-  "weaknesses": ["Long sales cycle"],
-  "opportunities": ["New segment"],
-  "threats": ["Price pressure"]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "swot",
+    "title": "Market view",
+    "strengths": ["Brand", "Retention"],
+    "weaknesses": ["Long sales cycle"],
+    "opportunities": ["New segment"],
+    "threats": ["Price pressure"]
+  }
 }
 ```
 
@@ -140,13 +158,16 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-pyramid",
-  "title": "Operating model",
-  "levels": [
-    { "label": "Strategy" },
-    { "label": "Programs", "text": "Cross-functional bets" },
-    { "label": "Execution" }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "pyramid",
+    "title": "Operating model",
+    "levels": [
+      { "label": "Strategy" },
+      { "label": "Programs", "text": "Cross-functional bets" },
+      { "label": "Execution" }
+    ]
+  }
 }
 ```
 
@@ -154,15 +175,18 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-hub-spoke",
-  "title": "Platform ecosystem",
-  "hub": "Core API",
-  "spokes": [
-    { "label": "Partners" },
-    { "label": "Apps" },
-    { "label": "Data" },
-    { "label": "Automation" }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "hub-spoke",
+    "title": "Platform ecosystem",
+    "hub": "Core API",
+    "spokes": [
+      { "label": "Partners" },
+      { "label": "Apps" },
+      { "label": "Data" },
+      { "label": "Automation" }
+    ]
+  }
 }
 ```
 
@@ -170,9 +194,17 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-cycle",
-  "title": "Learning loop",
-  "steps": [{ "label": "Plan" }, { "label": "Build" }, { "label": "Measure" }, { "label": "Learn" }]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "cycle",
+    "title": "Learning loop",
+    "steps": [
+      { "label": "Plan" },
+      { "label": "Build" },
+      { "label": "Measure" },
+      { "label": "Learn" }
+    ]
+  }
 }
 ```
 
@@ -182,13 +214,16 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-gantt",
-  "title": "Delivery plan",
-  "tasks": [
-    { "label": "Design", "date": "Jan", "value": "Feb" },
-    { "label": "Build", "date": "Feb", "value": "Apr" },
-    { "label": "Launch", "date": "May", "value": "Jun" }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "gantt",
+    "title": "Delivery plan",
+    "tasks": [
+      { "label": "Design", "date": "Jan", "value": "Feb" },
+      { "label": "Build", "date": "Feb", "value": "Apr" },
+      { "label": "Launch", "date": "May", "value": "Jun" }
+    ]
+  }
 }
 ```
 
@@ -196,13 +231,16 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-scorecard-table",
-  "title": "Vendor scorecard",
-  "headers": ["Vendor", "Score", "Risk"],
-  "rows": [
-    ["A", "92", "Low"],
-    ["B", "84", "Medium"]
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "scorecard-table",
+    "title": "Vendor scorecard",
+    "headers": ["Vendor", "Score", "Risk"],
+    "rows": [
+      ["A", "92", "Low"],
+      ["B", "84", "Medium"]
+    ]
+  }
 }
 ```
 
@@ -210,13 +248,16 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ```json
 {
-  "op": "add-comparison-cards",
-  "title": "Options",
-  "cards": [
-    { "label": "Fast", "text": "Ship now" },
-    { "label": "Balanced", "text": "Stage rollout" },
-    { "label": "Deep", "text": "Invest more" }
-  ]
+  "op": "add-slide",
+  "recipe": {
+    "kind": "comparison-cards",
+    "title": "Options",
+    "cards": [
+      { "label": "Fast", "text": "Ship now" },
+      { "label": "Balanced", "text": "Stage rollout" },
+      { "label": "Deep", "text": "Invest more" }
+    ]
+  }
 }
 ```
 

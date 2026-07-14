@@ -322,7 +322,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
 
 ## §4 KPI 网格（slide 2）：4-across 卡片（最常踩坑）
 
-**不要用 `add-kpi-grid` recipe**，它出来是 3+1 不是 4-across。手堆：
+**不要用 `add-slide` 的 `recipe.kind: "kpi-grid"`**，它出来是 3+1 不是 4-across。手堆：
 
 ```json
 [
@@ -916,7 +916,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 
 | 现象                            | 根因                                                                |
 | ------------------------------- | ------------------------------------------------------------------- |
-| KPI 渲染成 3+1 不是 4-across    | 用了 `add-kpi-grid` recipe — 手堆 4 个卡片即可                      |
+| KPI 渲染成 3+1 不是 4-across    | 用了 `add-slide.recipe.kind="kpi-grid"` — 手堆 4 个卡片即可         |
 | 表格紧贴左上角看起来很小        | `add-table` 没显式给 `w` / `h`                                      |
 | chart Q3/Q4 是 0 看起来塌方     | 时间序列别留 0 占位 — 填预测值并标 "(预测)"                         |
 | 第二次 apply `OutputExists`     | 加 `--overwrite`，或先 `pptx rollback --from-sidecar`               |

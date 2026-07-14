@@ -53,7 +53,7 @@ has passed the relevant checks.
 After apply, run one final semantic diff plus the evidence declared in
 `edit-contract.json`, then require `edit-contract-gate.json.agentGate.passed`.
 For visible text replacement, preserve `target-text-style` and run style diff;
-use `set-run` or another inspect-proven run/text-node edit when `set-text` would
+use `set-run` or another inspect-proven run/text-node edit when `set-text-frame` would
 replace meaningful run formatting.
 
 ## Selector Preference
@@ -80,12 +80,12 @@ the common small-edit surface:
 
 | Case                    | Minimal success pattern                                       | Failure trigger                                                         |
 | ----------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Replace text            | `set-text` on one inspect-proven `shape`                      | selector resolves multiple objects or run indexes are unknown           |
+| Replace text            | `set-text-frame` on one inspect-proven `shape`                | selector resolves multiple objects or run indexes are unknown           |
 | Speaker notes           | `set-slide-notes` on one slide                                | rich notes structure or many-slide synchronization is required          |
-| Footer/date/page number | `set-text` on one footer/date/page-number placeholder         | inherited footer source or batch target set is unclear                  |
-| Metadata                | `set-core-prop` only                                          | visible slide text or custom package metadata also needs reconciliation |
+| Footer/date/page number | `set-text-frame` on one footer/date/page-number placeholder   | inherited footer source or batch target set is unclear                  |
+| Metadata                | `set-document-properties` only                                | visible slide text or custom package metadata also needs reconciliation |
 | Replace image           | remove one inspected picture and `add-image` at the same bbox | crop, mask, aspect ratio, identity, or provenance is unclear            |
-| Single-object color     | `set-shape` or `set-shape-line` on one named object           | request is theme, brand, contrast, or deck-wide style work              |
+| Single-object color     | `set-shape` on one named object                               | request is theme, brand, contrast, or deck-wide style work              |
 | Delete placeholder      | `remove-shape` on one empty/default placeholder               | placeholder contains user content or is layout/master-owned             |
 
 The matrix examples are minimal patterns. Inspect and dry-run selector evidence
@@ -95,13 +95,13 @@ always outrank the sample selectors.
 
 ### Replace text
 
-Use `set-text` for whole-shape text replacement:
+Use `set-text-frame` for whole-shape text replacement:
 
 ```json
 {
   "ops": [
     {
-      "op": "set-text",
+      "op": "set-text-frame",
       "slide": 2,
       "shape": { "id": 7 },
       "text": "Updated title"
@@ -116,7 +116,7 @@ unknown, inspect more deeply or escalate.
 
 ### Edit notes
 
-Use `set-slide-notes` or `set-slide-notes-rich-text`. Notes-only edits usually do
+Use `set-slide-notes` (plain `text` or rich `paragraphs`). Notes-only edits usually do
 not need PNG rendering.
 
 ```json
@@ -127,24 +127,23 @@ not need PNG rendering.
 
 ### Footer, date, or page number
 
-Inspect the target slide/object and use `set-text`. Do not blanket-clear footer
+Inspect the target slide/object and use `set-text-frame`. Do not blanket-clear footer
 or page-number placeholders across the deck unless the user explicitly asked for
 a batch edit and dry-run proves the target set.
 
 ### Color or font tweak
 
-For a single text frame, prefer `set-text-style` or `set-shape-text-style` over
+For a single text frame, prefer `set-text-frame` over
 run-level edits:
 
 ```json
 {
   "ops": [
     {
-      "op": "set-shape-text-style",
+      "op": "set-text-frame",
       "slide": 1,
       "shape": { "name": "Subtitle 2" },
-      "fontFace": "Aptos",
-      "color": "1F2937"
+      "font": { "name": "Aptos", "color": "1F2937" }
     }
   ]
 }

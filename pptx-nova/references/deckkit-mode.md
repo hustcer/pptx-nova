@@ -137,8 +137,8 @@ Fallback minimums are mandatory, not suggestions:
 - Run and save `fallback-patch-report.json` from
   `pptx-nova-refurbish-fallback-patch.mjs` when route is `manual-fallback` or
   `explicit-manual-fallback`.
-- For whole text-frame restyling, use `set-text-style` or
-  `set-shape-text-style`; use indexed `set-run` only after inspect exposes the
+- For whole text-frame restyling, use `set-text-frame` with a `font` object;
+  use indexed `set-run` only after inspect exposes the
   actual paragraph/run target or a minimal smoke proves the index exists.
 - Duplicate page chrome must resolve by `replace`, `restyle-existing`,
   `skip-duplicate`, or `add`; do not nudge overlapping duplicate header/footer,

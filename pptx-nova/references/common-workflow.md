@@ -152,7 +152,7 @@ For a task-specific check, add repeatable requirements such as:
 ```bash
 node <skill-root>/scripts/pptx-nova-probe.mjs \
   --require-command pptx.apply \
-  --require-op set-text \
+  --require-op set-text-frame \
   --require-theme corporate-blue \
   --json
 ```

@@ -156,7 +156,7 @@ xdoc pptx i18n-style-diff \
 The command name is translation-oriented, but its textless OOXML signature is
 also the strongest available evidence that an ordinary text replacement kept
 neighboring `a:rPr`, `a:pPr`, and `a:bodyPr` structure. A whole-frame
-`set-text` can pass dry-run, semantic diff, and vision-check while destroying
+`set-text-frame` can pass dry-run, semantic diff, and vision-check while destroying
 small footer/run styling. When style fidelity matters, prefer inspect-proven
 `set-run`/run-level edits or another text-node preserving path.
 

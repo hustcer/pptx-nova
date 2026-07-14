@@ -56,7 +56,7 @@ the slide context first, prefer compact wording, and use geometry only when
 rendered before/after PNGs prove the page still has adequate spacing.
 
 Avoid whole-shape text replacement as the default. Operations such as
-`set-text` or `set-table-cell` can rebuild text bodies or runs and may destroy
+`set-text-frame` or `set-table` cell text can rebuild text bodies or runs and may destroy
 mixed formatting. Use them only when dry-run plus rendered before/after review
 proves the target object has uniform formatting or the operation preserves the
 relevant OOXML style properties.
@@ -135,7 +135,7 @@ relevant OOXML style properties.
      paragraph text-node replacements materialized by the shared text-plan route.
    - `replaceChartText.replacements[]` for chart visible cache labels.
    - `patch.ops[]` for generated run-level `set-run` operations and atomic
-     `replace-structured-paragraph-text` operations on shape text.
+     `replace-paragraph-text` operations on shape text.
 
    Use the planner-emitted semantic `nodePath` as the primary locator and copy
    it unchanged into execution inputs. `sourceText`, `sourceHash`, and `index`
@@ -205,7 +205,7 @@ relevant OOXML style properties.
        --json > <run-dir>/replace-text.json
      ```
    - For DrawingML shape paragraphs, apply only the `set-run` and
-     `replace-structured-paragraph-text` patch ops emitted under
+     `replace-paragraph-text` patch ops emitted under
      `i18n-plan.patch.ops[]`. Each paragraph patch op must carry `unitId`,
      `sourceText`, and `sourceHash` guards. The structured operation additionally
      carries `expectedNodes[]` and applies all ordinary-run replacements as one
@@ -254,7 +254,7 @@ relevant OOXML style properties.
    - Preserve hyperlink runs and field runs. Do not remove `<a:hlinkClick>`,
      `<a:fld>`, footer/date/page number placeholders, or speaker-note
      structure while translating visible labels around them.
-   - Use `set-text`, `set-table-cell`, or other high-level text ops only for
+   - Use `set-text-frame`, `set-table` cell text, or other high-level text ops only for
      uniform-format objects, or when the op has a style-preservation report that
      proves bold/italic/underline/strike/alignment and run formatting survive.
 8. Dry-run generated patch ops before applying them. For direct OOXML fallback, write a
@@ -553,7 +553,7 @@ Tables require style-preserving cell-level handling:
 - `inspect` may summarize a table as one object with no cell text. Use
   `i18nUnits` plus text export to build table cell translations.
 - Prefer replacing the cell's existing text nodes while keeping `a:tcPr`,
-  paragraph properties, and run properties intact. Use `set-table-cell` only
+  paragraph properties, and run properties intact. Use `set-table` cell text only
   when the cell has uniform formatting or the op is proven style-preserving.
 - After translating table text, review PNGs because small header cells and
   formatted emphasis runs often overflow before `vision-check` catches the

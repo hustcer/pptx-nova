@@ -1,7 +1,9 @@
-# Patch Ops Cheatsheet —— 120 个 op 按场景速查
+# Patch Ops Cheatsheet —— 58 个 op 按场景速查
 
-下面把 xdoc schema v1 的 120 个 op 按 **"我想做什么"** 反向归类。每条只列
-关键字段；完整 schema 用 `xdoc schema --op <name>` 拉。
+下面把 xdoc schema v1 的 58 个 op 按 **"我想做什么"** 反向归类。每条只列
+关键字段；完整 schema 用 `xdoc schema --op <name>` 拉。旧版 `set-shape-*` /
+`set-chart-*-style` / `set-table-cell` 等细粒度 op 已全部并入对应的聚合 op
+（`set-shape` / `set-chart` / `set-table` ...），本表只列 canonical 名字。
 
 > 通用：所有 patch op 都嵌进 `{ "schemaVersion": 1, "ops": [ { "op": "...", ... } ] }`。
 >
@@ -14,44 +16,44 @@
 
 ## 1. 演示文稿与 slide 级
 
-| op                     | 用途                                                           |
-| ---------------------- | -------------------------------------------------------------- |
-| `add-slide`            | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选 |
-| `remove-slide`         | 删除指定 slide                                                 |
-| `move-slide`           | 改 slide 顺序（`from` / `to` 都是 0-based）                    |
-| `duplicate-slide`      | 复制 slide（保留全部内容，包括 notes）                         |
-| `set-slide-size`       | 改 deck 尺寸：`"16:9"` / `"4:3"` / `{ w, h }`                  |
-| `set-slide-background` | 改某页背景：`{ fill: ..., followMaster: false }`               |
-| `set-slide-transition` | 设置/清理基础 slide transition 与自动切页                      |
-| `set-slide-animations` | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear` |
-| `set-slide-animations` | 按 inspect 动画 id 修改安全子集 step                           |
-| `set-slide-animations` | 按 inspect 动画 id 删除安全子集 step                           |
-| `set-core-prop`        | core props（`title` / `author` / `subject` / `keywords` 等）   |
+| op                        | 用途                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `add-slide`               | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选                   |
+| `remove-slide`            | 删除指定 slide                                                                   |
+| `move-slide`              | 改 slide 顺序（`from` / `to` 都是 0-based）                                      |
+| `duplicate-slide`         | 复制 slide（保留全部内容，包括 notes）                                           |
+| `set-slide-size`          | 改 deck 尺寸：`"16:9"` / `"4:3"` / `{ w, h }`                                    |
+| `set-slide-background`    | 改某页背景：`{ fill: ..., followMaster: false }`                                 |
+| `set-slide-transition`    | 设置/清理基础 slide transition 与自动切页                                        |
+| `set-slide-animations`    | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear`                   |
+| `set-slide-animations`    | 按 inspect 动画 id 修改安全子集 step（`animations: [{ id, ... }]`）              |
+| `set-slide-animations`    | 按 inspect 动画 id 删除安全子集 step（`remove: ["<id>"]`）                       |
+| `set-document-properties` | core props（`properties` map，键如 `title` / `author` / `subject` / `keywords`） |
 
 ### Slide notes
 
-| op                          | 用途                                   |
-| --------------------------- | -------------------------------------- |
-| `set-slide-notes`           | plain text 备注（覆盖）                |
-| `append-slide-notes`        | 追加 plain text                        |
-| `set-slide-notes-rich-text` | rich notes（paragraphs + runs + font） |
-| `clear-slide-notes`         | 清空 notes 文本但保留 notes slide      |
-| `remove-slide-notes`        | 整页 notes 删除（包括 part）           |
+| op                                | 用途                                   |
+| --------------------------------- | -------------------------------------- |
+| `set-slide-notes`（`text`）       | plain text 备注（覆盖）                |
+| `append-slide-notes`              | 追加 plain text                        |
+| `set-slide-notes`（`paragraphs`） | rich notes（paragraphs + runs + font） |
+| `set-slide-notes` + `text: ""`    | 清空 notes 文本但保留 notes slide      |
+| `remove-slide-notes`              | 整页 notes 删除（包括 part）           |
 
 ### Layout / Master / Theme
 
-| op                                    | 用途                                                      |
-| ------------------------------------- | --------------------------------------------------------- |
-| `add-slide-layout`                    | 新建 layout（`type` 可选 `title` / `obj` / `secHead` 等） |
-| `copy-slide-layout`                   | 复制 layout 到新 layout part                              |
-| `rename-slide-layout`                 | 重命名 layout                                             |
-| `set-slide-layout-type`               | 改 layout type                                            |
-| `add-slide-layout-placeholder`        | 给 layout 加 placeholder（type + idx）                    |
-| `set-theme-color`                     | 改主题色（`scheme: accent1` / `dk1` / ...）               |
-| `set-theme-font`                      | 改主题字体（`kind: majorFont` / `minorFont`）             |
-| `set-master-bg`                       | 改 master 背景 fill                                       |
-| `set-master-placeholder-style`        | 改 master 占位符默认（font/color/size/align）             |
-| `set-presentation-default-text-style` | 整个 deck 的默认文字样式                                  |
+| op                             | 用途                                                              |
+| ------------------------------ | ----------------------------------------------------------------- |
+| `add-layout`                   | 新建 layout（`type` 可选 `title` / `obj` / `secHead` 等）         |
+| `add-layout`（`source`）       | 复制既有 layout 到新 layout part（`source` 选源 layout）          |
+| `set-layout`（`name`）         | 重命名 layout                                                     |
+| `set-layout`（`type`）         | 改 layout type                                                    |
+| `add-layout-placeholder`       | 给 layout 加 placeholder（type + idx）                            |
+| `set-theme`（`colors`）        | 改主题色（`colors: { accent1: "1A73E8", ... }`）                  |
+| `set-theme`（`fonts`）         | 改主题字体（`fonts: { major / minor: { typeface, eastAsian } }`） |
+| `set-master`（`background`）   | 改 master 背景（`background: <fill>`）                            |
+| `set-master`（`placeholders`） | 改 master 占位符默认（`placeholders: [{ type, font, ... }]`）     |
+| `set-default-text-style`       | 整个 deck 的默认文字样式（`levels: [{ level, font, ... }]`）      |
 
 详见 `styles-and-themes.md`。
 
@@ -68,7 +70,7 @@
     {
       "shape": { "name": "KPI Card" },
       "effect": "fade",
-      "trigger": "onClick",
+      "trigger": "on-click",
       "duration": 450,
       "delay": 0
     }
@@ -107,7 +109,7 @@
       "target": { "shape": { "name": "Body" }, "paragraph": 0 },
       "build": "by-paragraph",
       "effect": "appear",
-      "trigger": "onClick"
+      "trigger": "on-click"
     }
   ]
 }
@@ -120,20 +122,20 @@
 
 ## 2. Shape 创建
 
-| op                | 用途                                                                              |
-| ----------------- | --------------------------------------------------------------------------------- |
-| `add-shape`       | 加预设形状（182 个 catalog，`shape: "rounded-rectangle"` 或 `prst: "roundRect"`） |
-| `add-text-box`    | 纯文本框                                                                          |
-| `add-placeholder` | 加 placeholder shape（type=title/body/content/...）                               |
-| `add-image`       | 加图片（`assetSource.path` 或 `bytesBase64`）                                     |
-| `add-equation`    | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                 |
-| `add-video`       | 加视频，含 poster frame                                                           |
-| `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                             |
-| `add-group`       | 创建空 group shape，可后续填子 shape                                              |
-| `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                      |
-| `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                              |
-| `add-table`       | 加表 `rows x cols`，可选 `data: [[...]]` 初始化                                   |
-| `add-chart`       | 加图表，详见 `charts.md`                                                          |
+| op                | 用途                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| `add-shape`       | 加预设形状（182 个 catalog，`kind: "rounded-rectangle"` 或 `preset: "roundRect"`） |
+| `add-text-box`    | 纯文本框                                                                           |
+| `add-placeholder` | 加 placeholder shape（type=title/body/content/...）                                |
+| `add-image`       | 加图片（`assetSource.path` 或 `bytesBase64`）                                      |
+| `add-equation`    | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                  |
+| `add-video`       | 加视频，含 poster frame                                                            |
+| `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                              |
+| `add-group`       | 创建空 group shape，可后续填子 shape                                               |
+| `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                       |
+| `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                               |
+| `add-table`       | 加表 `rows x cols`，可选 `data: [[...]]` 初始化                                    |
+| `add-chart`       | 加图表，详见 `charts.md`                                                           |
 
 ### add-freeform 可见性
 
@@ -177,7 +179,7 @@ PNG；若图形看不见，再解包 slide XML 查对应 shape 的 `<a:ext cx=".
 {
   "op": "add-shape",
   "slide": 0,
-  "shape": "rounded-rectangle",
+  "kind": "rounded-rectangle",
   "x": "1in",
   "y": "1in",
   "w": "3in",
@@ -194,19 +196,20 @@ cloud-callout`。
 
 ## 3. Shape 几何 / 样式
 
-| op                       | 用途                                                 |
-| ------------------------ | ---------------------------------------------------- |
-| `set-shape-position`     | 移动（`x`, `y`）                                     |
-| `set-shape-size`         | 缩放（`w`, `h`）                                     |
-| `set-shape-rotation`     | 旋转（`degrees`）                                    |
-| `set-shape-flip`         | 水平/垂直翻转                                        |
-| `set-shape-name`         | 改 shape name（修改时定位用）                        |
-| `set-shape`              | 改 fill：solid / gradient / pattern / none           |
-| `set-shape-line`         | 改边框（width, color, dash, noLine）                 |
-| `set-shape-outline`      | 同 line，但带完整 `line` 对象                        |
-| `set-shape-effect`       | 阴影 / 发光 / 反射 / 柔化（`effect: { kind, ... }`） |
-| `set-shape-click-action` | 点击跳转（链接 / 跳页 / 运行宏）                     |
-| `remove-shape`           | 删除                                                 |
+| op                           | 用途                                                                        |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| `set-shape`（`position`）    | 移动（`position: { x, y }`）                                                |
+| `set-shape`（`size`）        | 缩放（`size: { w, h }`）                                                    |
+| `set-shape`（`rotation`）    | 旋转（`rotation: <度数>`）                                                  |
+| `set-shape`（`flip`）        | 水平/垂直翻转（`flip: { horizontal, vertical }`）                           |
+| `set-shape`（`name`）        | 改 shape name（修改时定位用）                                               |
+| `set-shape`（`fill`）        | 改 fill：solid / gradient / pattern / none                                  |
+| `set-shape`（`line`）        | 改边框（`line: { width, color, dash }`；`line: { noLine: true }` = 无边框） |
+| `set-shape`（`effect`）      | 阴影 / 发光 / 反射 / 柔化（`effect: { shadow / glow / ... }`）              |
+| `set-shape`（`clickAction`） | 点击跳转（链接 / 跳页 / 运行宏）                                            |
+| `remove-shape`               | 删除                                                                        |
+
+同一个 `set-shape` 可同时给多个字段（如 `position` + `size` + `fill` 一次改完）。
 
 ### Fill 示例
 
@@ -226,41 +229,49 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 ```json
 {
-  "op": "set-shape-effect",
+  "op": "set-shape",
   "slide": 0,
   "shape": { "id": "shape-abc" },
-  "effect": { "kind": "outerShadow", "blur": "6pt", "distance": "4pt", "color": "00000040" }
+  "effect": {
+    "shadow": { "blur": "6pt", "distance": "4pt", "angle": 90, "color": "000000", "alpha": 0.25 }
+  }
 }
 ```
 
-可选 `kind`: `outerShadow` / `innerShadow` / `glow` / `reflection` / `softEdge`。
+`effect` 的子对象：`shadow`（`inner: true` = 内阴影，默认外阴影）/ `glow`
+（`color` + `radius`）/ `reflection`（`alpha` / `blur` / `distance` / `size`）/
+`softEdge`（`radius`）。`alpha` 是 0-1 小数；`color` 可用 hex 字符串或
+`{ "scheme": "accent1" }` 引用主题色。
 
 ---
 
 ## 4. 文本编辑
 
-文本写入有两条路径：**简单文本** 用 `set-text`；**段落 / 段落格式 / run 字体**
-用 `set-paragraph` / `set-paragraph` / `set-run` / `add-paragraph` / `add-run`。
+文本写入有两条路径：**简单文本** 用 `set-text-frame`；**段落 / 段落格式 / run 字体**
+用 `set-paragraph` / `set-run` / `add-paragraph` / `add-run`。
 
-`set-text` 写入含 `\n` 的字符串时会生成多个 paragraph。后续 `set-run` 只会修改指定
+`set-text-frame` 写入含 `\n` 的字符串时会生成多个 paragraph。后续 `set-run` 只会修改指定
 `paragraph/run`，不会自动把第 0 段的字体复制到其它段。凡是卡片、badge、diagram
 节点、说明框里使用多行文本，都要逐段设置 `set-run` 和 `set-paragraph`，或把
 标题/正文拆成独立 text box。否则 PNG 渲染时常见问题是第二行以后回到默认大字号，
 导致文本越界、卡片拥挤或版式失衡。
 
-| op                     | 用途                                          |
-| ---------------------- | --------------------------------------------- |
-| `set-text`             | 整个 text frame 覆盖 plain text               |
-| `add-paragraph`        | 在 text frame 末尾加段（可带 `text`）         |
-| `set-paragraph`        | 改某段的文字                                  |
-| `set-paragraph`        | 改对齐 / 缩进 / 行距 / 段前段后 / RTL / level |
-| `set-paragraph-bullet` | 改 bullet（none / dot / number / image）      |
-| `add-run`              | 给段加 run                                    |
-| `set-run`              | 改某 run 文字与字体                           |
-| `set-run-hyperlink`    | run 加超链接                                  |
-| `clear-run-hyperlink`  | run 清超链接                                  |
+| op                             | 用途                                                        |
+| ------------------------------ | ----------------------------------------------------------- |
+| `set-text-frame`               | 整个 text frame 覆盖 plain text                             |
+| `add-paragraph`                | 在 text frame 末尾加段（可带 `text`）                       |
+| `set-paragraph`（`text`）      | 改某段的文字                                                |
+| `set-paragraph`（`format`）    | 改对齐 / 缩进 / 行距 / 段前段后 / RTL / level               |
+| `set-paragraph`（`bullet`）    | 改 bullet（`type: none / character / auto-number / image`） |
+| `add-run`                      | 给段加 run                                                  |
+| `set-run`                      | 改某 run 文字与字体                                         |
+| `set-run`（`hyperlink`）       | run 加超链接                                                |
+| `set-run`（`hyperlink: null`） | run 清超链接                                                |
 
 ### set-paragraph 关键字段
+
+格式字段全部包在 `format` 对象里（顶层只有 `op` / `slide` / `shape` /
+`paragraph` / `text` / `format` / `bullet`）：
 
 ```json
 {
@@ -268,18 +279,20 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
   "slide": 0,
   "shape": { "name": "Title 1" },
   "paragraph": 0,
-  "level": 0,
-  "alignment": "center",
-  "lineSpacing": 1.2,
-  "spaceBefore": "6pt",
-  "spaceAfter": "6pt",
-  "indent": "0.25in"
+  "format": {
+    "level": 0,
+    "alignment": "center",
+    "lineSpacing": 1.2,
+    "spaceBefore": "6pt",
+    "spaceAfter": "6pt",
+    "indent": "0.25in"
+  }
 }
 ```
 
-`alignment`: `left / center / right / justify / distributed / thaiDistribute`。
+`alignment`: `left / center / right / justify / distribute / thai-distribute`。
 `lineSpacing`: 数字 = 倍数；字符串 `"24pt"` = 固定行高。
-任意字段可加 `clearXxx: true` 清掉该属性。
+把 `format` 中的字段设为 `null` 可清掉该属性（如 `"indent": null`）。
 
 ### Run 字体
 
@@ -305,30 +318,35 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 ### Text frame 行为
 
-| op                             | 用途                                                                                                 |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `set-text-frame-auto-size`     | 文本框自适应（`autoSize: true`, `mode: "shape" / "text" / "off"`）                                   |
-| `set-text-frame-vertical-text` | 竖排 / RTL 文本方向                                                                                  |
-| `fit-text`                     | 给 text frame 算合适字号（`maxSize` / `minSize`，可选 `strategy: "deterministic" / "font-metrics"`） |
-| `autofit-text`                 | 同 PowerPoint 的 normal autofit（`mode: "normal" / "shape"`）                                        |
+| op                                    | 用途                                                                                                                    |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `set-text-frame`（`frame.autofit`）   | PowerPoint autofit 属性（`frame: { autofit: { mode: "none" / "shape" / "text" } }`；`text` 模式可加 `fontScale` 1-100） |
+| `set-text-frame`（`frame.direction`） | 竖排文本方向（`"vertical"` / `"vertical-270"` / `"east-asian-vertical"` 等；`"horizontal"` 或 `null` 恢复横排）         |
+| `fit-text`                            | 给 text frame 算合适字号（`maxSize` / `minSize`，可选 `strategy: "deterministic" / "font-metrics"`）                    |
+
+`fit-text` 是直接计算并写死字号；要 PowerPoint 自己缩放文字的 autofit 行为，
+用 `set-text-frame` 的 `frame.autofit`。
 
 ---
 
 ## 5. 表格
 
-| op                        | 用途                                                  |
-| ------------------------- | ----------------------------------------------------- |
-| `add-table`               | 加表（详见 `tables.md`）                              |
-| `set-table-cell`          | 改单元格文字                                          |
-| `set-table-cell-style`    | 单元格 fill/font/border/margin/对齐                   |
-| `set-table-data`          | 整表数据覆盖，`resize: true` 自动改行列数             |
-| `import-table-data`       | 从 CSV / JSON 字符串导入                              |
-| `set-table-column-width`  | 改列宽                                                |
-| `set-table-row-height`    | 改行高                                                |
-| `set-table-style`         | 表格 banding / first-row / styleId                    |
-| `set-table-range-borders` | 区域批量加边框（outline / insideH / insideV / cross） |
-| `merge-table-cells`       | 合并                                                  |
-| `set-cell-formula`        | 静态公式（SUM/AVG/COUNT/MIN/MAX）                     |
+| op                                | 用途                                                                                               |
+| --------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `add-table`                       | 加表（详见 `tables.md`）                                                                           |
+| `set-table`（`cells[].text`）     | 改单元格文字（`cells: [{ row, col, text }]`）                                                      |
+| `set-table`（`cells[].style`）    | 单元格 fill/font/border/margin/对齐（`cells: [{ row, col, style: {...} }]`）                       |
+| `set-table`（`cells[].formula`）  | 静态公式 SUM/AVG/COUNT/MIN/MAX（`cells: [{ row, col, formula: "SUM(B2:B4)" }]`）                   |
+| `set-table`（`rows` / `columns`） | 改行高 / 列宽（`rows: [{ row, height }]`，`columns: [{ col, width }]`）                            |
+| `set-table`（`style`）            | 表格 `firstRow` / `horizontalBanding` / `verticalBanding` / `styleId`                              |
+| `set-table`（`borders`）          | 区域批量加边框（`borders: [{ range: {...}, value: {...} }]`，outline / insideH / insideV / cross） |
+| `set-table-data`                  | 整表数据覆盖，`resize: true` 自动改行列数                                                          |
+| `set-table-data`（`format`）      | 从 CSV / JSON 导入：`data: { format: "csv", text }` 或 `{ format: "json", values / text }`         |
+| `merge-table-cells`               | 合并                                                                                               |
+
+`set-table-data` 的 `data` 是严格 union：`{ format: "matrix", values: [[...]] }` /
+`{ format: "csv", text: "..." }` / `{ format: "json", values: [[...]] 或 text }`。
+同一个 `set-table` 可同时带 `style` / `rows` / `columns` / `cells` / `borders`。
 
 完整示例见 `tables.md`。
 
@@ -336,22 +354,26 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 ## 6. 图表
 
-| op                         | 用途                                                |
-| -------------------------- | --------------------------------------------------- |
-| `add-chart`                | 创建（19 个 kind, 详见 `charts.md`）                |
-| `set-chart-data`           | 替换数据                                            |
-| `set-chart-style`          | PowerPoint 内置 chartStyle 1-48                     |
-| `set-chart-title-style`    | 标题                                                |
-| `set-chart-legend-style`   | 图例                                                |
-| `set-chart-axis-scale`     | 轴刻度 min/max/unit/crosses                         |
-| `set-chart-axis-style`     | 轴线样式                                            |
-| `set-chart-axis-ticks`     | 刻度 / 标签位置 / number format                     |
-| `set-chart-gridline-style` | 网格线                                              |
-| `set-chart-plot-style`     | gapWidth / overlap / varyByCategories / bubbleScale |
-| `set-chart-marker-style`   | 系列 marker                                         |
-| `set-chart-series-style`   | 系列 fill/line/marker/smooth/invert                 |
-| `set-chart-point-style`    | 单点样式                                            |
-| `set-chart-data-labels`    | 数据标签                                            |
+| op                                | 用途                                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `add-chart`                       | 创建（19 个 kind, 详见 `charts.md`）                                                              |
+| `set-chart-data`                  | 替换数据                                                                                          |
+| `set-chart-text`                  | 改标题 / 系列名 / 分类名等文本                                                                    |
+| `set-chart`（`style`）            | PowerPoint 内置 chartStyle 1-48                                                                   |
+| `set-chart`（`title`）            | 标题样式 font/fill/line（改标题文本用 `set-chart-text`）                                          |
+| `set-chart`（`legend`）           | 图例（`position` / `includeInLayout` / `horizontalOffset` / `font`）                              |
+| `set-chart`（`axes[].scale`）     | 轴刻度 min/max/unit/crosses（`axes: [{ axis: "category" / "value" / "x" / "y", scale: {...} }]`） |
+| `set-chart`（`axes[].line`）      | 轴线样式                                                                                          |
+| `set-chart`（`axes[].ticks`）     | 刻度 / 标签位置 / number format                                                                   |
+| `set-chart`（`axes[].gridlines`） | 网格线                                                                                            |
+| `set-chart`（`plot`）             | gapWidth / overlap / varyByCategories / bubbleScale                                               |
+| `set-chart`（`series[]`）         | 系列 fill/line/marker/smooth/invertIfNegative（`series: [{ series: N, ... }]`）                   |
+| `set-chart`（`series[].marker`）  | 系列 marker                                                                                       |
+| `set-chart`（`series[].points`）  | 单点样式（`series: [{ series: N, points: [{ point: M, ... }] }]`）                                |
+| `set-chart`（`dataLabels`）       | 数据标签（`scope` / `showValue` / `position` / `numberFormat`）                                   |
+
+同一个 `set-chart` 可同时带 `style` / `plot` / `title` / `legend` / `axes` /
+`series` / `dataLabels`。
 
 详见 `charts.md`。
 
@@ -359,12 +381,12 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 ## 7. 图片 / 媒体
 
-| op                 | 用途                                                 |
-| ------------------ | ---------------------------------------------------- |
-| `add-image`        | 加图片                                               |
-| `set-picture-crop` | 裁剪（left/right/top/bottom 比例，或 `clear: true`） |
-| `add-video`        | 加视频                                               |
-| `add-ole-object`   | 嵌入 OLE 对象（如 Excel）                            |
+| op               | 用途                                                                |
+| ---------------- | ------------------------------------------------------------------- |
+| `add-image`      | 加图片                                                              |
+| `crop-image`     | 裁剪（`crop: { left/right/top/bottom }` 比例，清除用 `crop: null`） |
+| `add-video`      | 加视频                                                              |
+| `add-ole-object` | 嵌入 OLE 对象（如 Excel）                                           |
 
 资产推荐用 `assetSource.path` + `--asset-root`：
 
@@ -391,35 +413,35 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 风格内容时，优先使用这些 recipe diagram ops 或显式 shape/connector patch；不要假设
 可以直接创建或编辑 OOXML SmartArt。
 
-| op / kind                                  | 等级   | 用途                                                     |
-| ------------------------------------------ | ------ | -------------------------------------------------------- |
-| `add-slide.recipe.kind="title"`            | recipe | 封面                                                     |
-| `add-slide.recipe.kind="section"`          | recipe | 章节扉页                                                 |
-| `add-slide.recipe.kind="two-column"`       | recipe | 左右对照                                                 |
-| `add-slide.recipe.kind="image-caption"`    | recipe | 大图 + 说明                                              |
-| `add-slide.recipe.kind="kpi-grid"`         | recipe | KPI 网格                                                 |
-| `add-slide.recipe.kind="comparison-table"` | recipe | 对比表                                                   |
-| `add-slide.recipe.kind="timeline"`         | recipe | 时间线 / 里程碑                                          |
-| `add-slide.recipe.kind="roadmap"`          | recipe | 产品路线图 / 阶段计划                                    |
-| `add-slide.recipe.kind="matrix-2x2"`       | recipe | 2x2 矩阵                                                 |
-| `add-slide.recipe.kind="process-flow"`     | recipe | 流程图                                                   |
-| `add-slide.recipe.kind="funnel"`           | recipe | 漏斗 / pipeline                                          |
-| `add-slide.recipe.kind="swot"`             | recipe | SWOT 四象限                                              |
-| `add-slide.recipe.kind="pyramid"`          | recipe | 金字塔 / 层级模型                                        |
-| `add-slide.recipe.kind="hub-spoke"`        | recipe | 中心辐射 / 能力地图                                      |
-| `add-slide.recipe.kind="cycle"`            | recipe | 闭环 / 复盘循环                                          |
-| `add-slide.recipe.kind="gantt"`            | recipe | 甘特 / 项目排期                                          |
-| `add-slide.recipe.kind="scorecard-table"`  | recipe | 评分卡表格                                               |
-| `add-slide.recipe.kind="comparison-cards"` | recipe | 方案比较卡片                                             |
-| `set-theme` / `remap-theme`                | patch  | 品牌改装                                                 |
-| `fill-layout`                              | patch  | 填 layout 契约（title-and-content/two-column/...）       |
-| `bind-data`                                | patch  | JSON 数据绑定 text / table / chart                       |
-| `if`                                       | patch  | 控制流：按状态分支（slide-count / selector-match / ...） |
-| `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops          |
-| `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支              |
-| `define`                                   | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）            |
-| `use`                                      | patch  | 宏：展开已 `define` 的命名宏，用 `with` 传参             |
-| `patch-ooxml`                              | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）      |
+| op / kind                                  | 等级   | 用途                                                                           |
+| ------------------------------------------ | ------ | ------------------------------------------------------------------------------ |
+| `add-slide.recipe.kind="title"`            | recipe | 封面                                                                           |
+| `add-slide.recipe.kind="section"`          | recipe | 章节扉页                                                                       |
+| `add-slide.recipe.kind="two-column"`       | recipe | 左右对照                                                                       |
+| `add-slide.recipe.kind="image-caption"`    | recipe | 大图 + 说明                                                                    |
+| `add-slide.recipe.kind="kpi-grid"`         | recipe | KPI 网格                                                                       |
+| `add-slide.recipe.kind="comparison-table"` | recipe | 对比表                                                                         |
+| `add-slide.recipe.kind="timeline"`         | recipe | 时间线 / 里程碑                                                                |
+| `add-slide.recipe.kind="roadmap"`          | recipe | 产品路线图 / 阶段计划                                                          |
+| `add-slide.recipe.kind="matrix-2x2"`       | recipe | 2x2 矩阵                                                                       |
+| `add-slide.recipe.kind="process-flow"`     | recipe | 流程图                                                                         |
+| `add-slide.recipe.kind="funnel"`           | recipe | 漏斗 / pipeline                                                                |
+| `add-slide.recipe.kind="swot"`             | recipe | SWOT 四象限                                                                    |
+| `add-slide.recipe.kind="pyramid"`          | recipe | 金字塔 / 层级模型                                                              |
+| `add-slide.recipe.kind="hub-spoke"`        | recipe | 中心辐射 / 能力地图                                                            |
+| `add-slide.recipe.kind="cycle"`            | recipe | 闭环 / 复盘循环                                                                |
+| `add-slide.recipe.kind="gantt"`            | recipe | 甘特 / 项目排期                                                                |
+| `add-slide.recipe.kind="scorecard-table"`  | recipe | 评分卡表格                                                                     |
+| `add-slide.recipe.kind="comparison-cards"` | recipe | 方案比较卡片                                                                   |
+| `set-theme` / `remap-theme`                | patch  | 品牌改装                                                                       |
+| `populate-slide`                           | patch  | 填 layout 契约（title-and-content/two-column/...），`mode: "strict" / "loose"` |
+| `bind-data`                                | patch  | JSON 数据绑定 text / table / chart                                             |
+| `if`                                       | patch  | 控制流：按状态分支（slide-count / selector-match / ...）                       |
+| `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops                                |
+| `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支                                    |
+| `define-macro`                             | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）                                  |
+| `use-macro`                                | patch  | 宏：展开已 `define-macro` 的命名宏，用 `with` 传参                             |
+| `patch-ooxml`                              | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）                            |
 
 详见 `recipes.md` / `data-driven.md` / `control-flow-and-raw-xml.md`。
 
@@ -433,7 +455,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 {
   "schemaVersion": 1,
   "ops": [
-    { "op": "set-theme-color", "scheme": "accent1", "value": "1A73E8" },
+    { "op": "set-theme", "colors": { "accent1": "1A73E8" } },
     {
       "op": "add-slide",
       "recipe": { "kind": "title", "title": "Q2 2026 Review", "subtitle": "Aug 2026" }
@@ -499,7 +521,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
     {
       "op": "add-shape",
       "slide": 0,
-      "shape": "rectangle",
+      "kind": "rectangle",
       "x": "0in",
       "y": "7in",
       "w": "13.333in",
@@ -513,7 +535,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
       "fill": { "kind": "solid", "color": "1A73E8" }
     },
     {
-      "op": "set-text",
+      "op": "set-text-frame",
       "slide": 0,
       "shape": { "name": "Watermark" },
       "text": "CONFIDENTIAL · 内部资料"

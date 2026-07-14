@@ -59,7 +59,7 @@ xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-anima
 xdoc schema --examples | save -f examples.json
 ```
 
-里面 12 个示例覆盖 fill-layout / bind-data / rich notes / charts / tables /
+里面 12 个示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
 shape effects / hyperlinks 等。对照修改最快。
 
 ## Schema 关键 `$defs` 速记

@@ -6,7 +6,7 @@ xdoc 的表格支持完整的对象模型：创建、改单元格、改样式、
 ## 专项语义验证
 
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
-add-table / set-table-data / import-table-data，apply 后保存 final-inspect.json，并运行
+add-table / set-table-data，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
 行列维度、header/source/unit 或时间范围披露，以及最终原生 table 对象存在性；它不是完整
 table XML 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
@@ -45,7 +45,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 ## 先分辨：真表格还是视觉表格
 
 编辑已有 deck 前先看 inspect。只有 `shapeType == "table"` 的对象才使用
-`set-table-cell`、`set-table-data`、`set-table-range-borders` 等 table ops。
+`set-table`、`set-table-data`、`merge-table-cells` 等 table ops。
 
 很多高设计感 deck 会用文本框 + 细矩形/连接线模拟表格。这类对象在 inspect 中通常表现为：
 
@@ -65,7 +65,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 ```
 
 改视觉表格分割线颜色时，优先用这些 line/rule shape 的 `id` 或唯一 `name` 写
-`set-shape` / `set-shape-line`，再 dry-run 检查 `resolvedSelectors[]`。若分割线是
+`set-shape`（线条属性放在嵌套的 `line` 对象里），再 dry-run 检查 `resolvedSelectors[]`。若分割线是
 细矩形，通常要改 `fill`；若是 connector/freeform 线，通常要改 `line`。
 
 ## 创建
@@ -90,7 +90,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 }
 ```
 
-`data` 可选 — 不写就是空表，后续用 `set-table-cell` 一格一格填，或 `set-table-data`
+`data` 可选 — 不写就是空表，后续用 `set-table` 的 `cells` 一格一格填，或 `set-table-data`
 整表覆盖。
 
 ## 写数据
@@ -99,16 +99,15 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 
 ```json
 {
-  "op": "set-table-cell",
+  "op": "set-table",
   "slide": 0,
   "shape": { "name": "Metrics Table" },
-  "row": 1,
-  "col": 1,
-  "text": "$12M"
+  "cells": [{ "row": 1, "col": 1, "text": "$12M" }]
 }
 ```
 
-`row` / `col` 都是 0-based。
+`row` / `col` 都是 0-based。`cells` 数组一次可以写多格；同一格的 `text` 与
+`formula` 互斥，同一 op 里同一格只能出现一次。
 
 ### 整表覆盖
 
@@ -117,14 +116,15 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
   "op": "set-table-data",
   "slide": 0,
   "shape": { "name": "Metrics Table" },
-  "data": [["..."], ["..."]],
+  "data": { "format": "matrix", "values": [["..."], ["..."]] },
   "resize": true
 }
 ```
 
-`resize: true` 会按 `data` 行列数**自动加减行列**（保留 grid widths / row heights /
-style flags / 合并属性）；`resize: false`（默认）则数据维度必须与现有表一致，
-否则报错。
+`data` 是对象，`format` 取值 `matrix / csv / json`；`matrix` 的 `values` 必须是
+字符串二维数组。`resize: true` 会按 `data` 解析出的行列数**自动加减行列**（保留
+grid widths / row heights / style flags / 合并属性）；`resize: false`（默认）则
+数据维度必须与现有表一致，否则报错。
 
 > 注意：`resize: true` 不会"打断"已有 merge —— 如果新尺寸会切到 merge 中间，
 > 会结构化拒绝（不会强行截断）。
@@ -133,11 +133,13 @@ style flags / 合并属性）；`resize: false`（默认）则数据维度必须
 
 ```json
 {
-  "op": "import-table-data",
+  "op": "set-table-data",
   "slide": 0,
   "shape": { "name": "Metrics Table" },
-  "format": "csv",
-  "csv": "指标,Q1,Q2\n营收,$10M,$12M\n毛利,$5M,$6M\n",
+  "data": {
+    "format": "csv",
+    "text": "指标,Q1,Q2\n营收,$10M,$12M\n毛利,$5M,$6M\n"
+  },
   "resize": true
 }
 ```
@@ -146,19 +148,24 @@ JSON 形式：
 
 ```json
 {
-  "op": "import-table-data",
+  "op": "set-table-data",
   "slide": 0,
   "shape": {...},
-  "format": "json",
-  "json": [
-    { "指标": "营收", "Q1": "$10M", "Q2": "$12M" },
-    { "指标": "毛利", "Q1": "$5M",  "Q2": "$6M" }
-  ],
+  "data": {
+    "format": "json",
+    "values": [
+      ["指标", "Q1", "Q2"],
+      ["营收", "$10M", "$12M"],
+      ["毛利", "$5M", "$6M"]
+    ]
+  },
   "resize": true
 }
 ```
 
-JSON 模式会自动从对象的 keys 推首行 header。
+`json` 格式的 `values` / `text` 二选一：`values` 直接给标量二维数组（数字、布尔、
+null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是标量二维数组）。header
+不会自动推导，需要显式写成第一行。
 
 ## 样式
 
@@ -166,64 +173,84 @@ JSON 模式会自动从对象的 keys 推首行 header。
 
 ```json
 {
-  "op": "set-table-cell-style",
+  "op": "set-table",
   "slide": 0,
   "shape": {...},
-  "row": 0,
-  "col": 0,
-  "fill": { "kind": "solid", "color": "1A73E8" },
-  "font": { "name": "Inter", "size": "14pt", "bold": true, "color": "FFFFFF" },
-  "alignment": "center",
-  "verticalAnchor": "ctr",
-  "marginLeft": "6pt",
-  "marginRight": "6pt",
-  "marginTop": "4pt",
-  "marginBottom": "4pt"
+  "cells": [
+    {
+      "row": 0,
+      "col": 0,
+      "style": {
+        "fill": { "kind": "solid", "color": "1A73E8" },
+        "font": { "name": "Inter", "size": "14pt", "bold": true, "color": "FFFFFF" },
+        "alignment": "center",
+        "verticalAnchor": "middle",
+        "marginLeft": "6pt",
+        "marginRight": "6pt",
+        "marginTop": "4pt",
+        "marginBottom": "4pt"
+      }
+    }
+  ]
 }
 ```
 
-`alignment` 取值与段落对齐相同；`verticalAnchor` = `t / ctr / b`。
+`alignment` 取值与段落对齐相同；`verticalAnchor` = `top / middle / bottom`。
 
 ### 边框（单格）
 
 ```json
 {
-  "op": "set-table-cell-style",
+  "op": "set-table",
   "slide": 0,
   "shape": {...},
-  "row": 0,
-  "col": 0,
-  "line": "1pt",
-  "borders": {
-    "top":    { "line": "1pt", "color": "1A73E8" },
-    "bottom": { "line": "1pt", "color": "1A73E8" },
-    "left":   { "line": "1pt", "color": "BFBFBF" },
-    "right":  { "line": "1pt", "color": "BFBFBF" }
-  }
+  "cells": [
+    {
+      "row": 0,
+      "col": 0,
+      "style": {
+        "borders": {
+          "top":    { "width": "1pt", "color": "1A73E8" },
+          "bottom": { "width": "1pt", "color": "1A73E8" },
+          "left":   { "width": "1pt", "color": "BFBFBF" },
+          "right":  { "width": "1pt", "color": "BFBFBF" }
+        }
+      }
+    }
+  ]
 }
 ```
+
+每条边是 line 对象（`width` / `color` / `dash`，`"none"` 字符串 = 去线）。单格
+`borders` 只支持 `top / right / bottom / left / cross`；`insideH` / `insideV`
+属于区域边框（见下节）。style 里也可以写 `line` 一次性给四边同样式。
 
 ### 区域边框（批量加边框）
 
 ```json
 {
-  "op": "set-table-range-borders",
+  "op": "set-table",
   "slide": 0,
   "shape": {...},
-  "startRow": 0,
-  "startCol": 0,
-  "endRow": 3,
-  "endCol": 2,
-  "borders": {
-    "outline":  { "line": "1.5pt", "color": "1F1F1F" },
-    "insideH":  { "line": "0.5pt", "color": "BFBFBF" },
-    "insideV":  { "line": "0.5pt", "color": "BFBFBF" },
-    "cross":    { "line": "1pt",   "color": "1A73E8" }
-  }
+  "borders": [
+    {
+      "range": { "startRow": 0, "startCol": 0, "endRow": 3, "endCol": 2 },
+      "value": {
+        "top":     { "width": "1.5pt", "color": "1F1F1F" },
+        "bottom":  { "width": "1.5pt", "color": "1F1F1F" },
+        "left":    { "width": "1.5pt", "color": "1F1F1F" },
+        "right":   { "width": "1.5pt", "color": "1F1F1F" },
+        "insideH": { "width": "0.5pt", "color": "BFBFBF" },
+        "insideV": { "width": "0.5pt", "color": "BFBFBF" },
+        "cross":   { "width": "1pt",   "color": "1A73E8" }
+      }
+    }
+  ]
 }
 ```
 
-- `outline` 外框
+- `top / bottom / left / right` 只作用于区域外缘（首行的上边、末行的下边、
+  首列的左边、末列的右边），四条合起来就是外框
 - `insideH` 内部横线
 - `insideV` 内部竖线
 - `cross` 对角线（不常用）
@@ -232,16 +259,18 @@ JSON 模式会自动从对象的 keys 推首行 header。
 
 ```json
 {
-  "op": "set-table-style",
+  "op": "set-table",
   "slide": 0,
   "shape": {...},
-  "firstRow": true,
-  "lastRow": false,
-  "firstCol": false,
-  "lastCol": false,
-  "horzBanding": true,
-  "vertBanding": false,
-  "styleId": "{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}"
+  "style": {
+    "firstRow": true,
+    "lastRow": false,
+    "firstColumn": false,
+    "lastColumn": false,
+    "horizontalBanding": true,
+    "verticalBanding": false,
+    "styleId": "{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}"
+  }
 }
 ```
 
@@ -251,8 +280,13 @@ JSON 模式会自动从对象的 keys 推首行 header。
 ## 列宽 / 行高
 
 ```json
-{ "op": "set-table-column-width", "slide": 0, "shape": {...}, "col": 0, "width": "2in" }
-{ "op": "set-table-row-height",   "slide": 0, "shape": {...}, "row": 0, "height": "0.5in" }
+{
+  "op": "set-table",
+  "slide": 0,
+  "shape": {...},
+  "columns": [{ "col": 0, "width": "2in" }],
+  "rows": [{ "row": 0, "height": "0.5in" }]
+}
 ```
 
 ## 合并
@@ -275,12 +309,10 @@ JSON 模式会自动从对象的 keys 推首行 header。
 
 ```json
 {
-  "op": "set-cell-formula",
+  "op": "set-table",
   "slide": 0,
   "shape": {...},
-  "row": 4,
-  "col": 1,
-  "formula": "SUM(B2:B4)"
+  "cells": [{ "row": 4, "col": 1, "formula": "SUM(B2:B4)" }]
 }
 ```
 
@@ -340,7 +372,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
   "ops": [
     { "op": "add-slide", "layout": { "type": "title" } },
     {
-      "op": "set-text",
+      "op": "set-text-frame",
       "slide": 0,
       "shape": { "placeholder": { "type": "title" } },
       "text": "关键指标"
@@ -363,33 +395,32 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
       ]
     },
     {
-      "op": "set-table-style",
+      "op": "set-table",
       "slide": 0,
       "shape": { "name": "KPI" },
-      "firstRow": true,
-      "horzBanding": true
-    },
-    {
-      "op": "set-table-range-borders",
-      "slide": 0,
-      "shape": { "name": "KPI" },
-      "startRow": 0,
-      "startCol": 0,
-      "endRow": 3,
-      "endCol": 2,
-      "borders": {
-        "outline": { "line": "1pt", "color": "1F1F1F" },
-        "insideH": { "line": "0.5pt", "color": "BFBFBF" }
-      }
-    },
-    {
-      "op": "set-table-cell-style",
-      "slide": 0,
-      "shape": { "name": "KPI" },
-      "row": 0,
-      "col": 0,
-      "fill": { "kind": "solid", "color": "1A73E8" },
-      "font": { "color": "FFFFFF", "bold": true }
+      "style": { "firstRow": true, "horizontalBanding": true },
+      "borders": [
+        {
+          "range": { "startRow": 0, "startCol": 0, "endRow": 3, "endCol": 2 },
+          "value": {
+            "top": { "width": "1pt", "color": "1F1F1F" },
+            "bottom": { "width": "1pt", "color": "1F1F1F" },
+            "left": { "width": "1pt", "color": "1F1F1F" },
+            "right": { "width": "1pt", "color": "1F1F1F" },
+            "insideH": { "width": "0.5pt", "color": "BFBFBF" }
+          }
+        }
+      ],
+      "cells": [
+        {
+          "row": 0,
+          "col": 0,
+          "style": {
+            "fill": { "kind": "solid", "color": "1A73E8" },
+            "font": { "color": "FFFFFF", "bold": true }
+          }
+        }
+      ]
     }
   ]
 }
@@ -399,7 +430,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
 
 - ❌ 不要在 `set-table-data` 时假定 `resize: false` 会自动加减行列 — 不写 `resize: true`
   时维度必须严格匹配
-- ❌ 不要用 `set-table-cell` 配合 newline (`\n`) 期望换行 — 单元格内换行用
+- ❌ 不要用 `set-table` 的 `cells[].text` 配合 newline (`\n`) 期望换行 — 单元格内换行用
   `set-paragraph` / `add-paragraph` 多段写入
 - ❌ 不要给已合并区域再次 merge（会冲突）
-- ❌ 不要忘了 `set-cell-formula` 是**静态**的 — 改基础数据后公式不会自动重算
+- ❌ 不要忘了 `set-table` 的 `cells[].formula` 是**静态**的 — 改基础数据后公式不会自动重算

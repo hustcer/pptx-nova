@@ -118,12 +118,12 @@
             "cjk": "PingFang SC"
           },
           "styleOps": [
-            "set-theme-color",
-            "set-theme-font",
+            "set-theme",
+            "set-master",
+            "set-default-text-style",
             "set-slide-background",
-            "set-text-style",
-            "set-shape",
-            "set-shape-line"
+            "set-text-frame",
+            "set-shape"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
           "contentPolicy": "preserve-source-slides-and-editable-objects",
@@ -624,12 +624,12 @@
             "cjk": "Arial"
           },
           "styleOps": [
-            "set-theme-color",
-            "set-theme-font",
+            "set-theme",
+            "set-master",
+            "set-default-text-style",
             "set-slide-background",
-            "set-text-style",
-            "set-shape",
-            "set-shape-line"
+            "set-text-frame",
+            "set-shape"
           ],
           "chromePolicy": "replace-or-restyle-existing",
           "contentPolicy": "preserve-source-slides-and-editable-objects",
@@ -1164,12 +1164,12 @@
             "cjk": "Microsoft YaHei"
           },
           "styleOps": [
-            "set-theme-color",
-            "set-theme-font",
+            "set-theme",
+            "set-master",
+            "set-default-text-style",
             "set-slide-background",
-            "set-text-style",
-            "set-shape",
-            "set-shape-line"
+            "set-text-frame",
+            "set-shape"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
           "contentPolicy": "preserve-source-slides-and-editable-objects"
@@ -1706,12 +1706,12 @@
             "cjk": "Noto Sans SC"
           },
           "styleOps": [
-            "set-theme-color",
-            "set-theme-font",
+            "set-theme",
+            "set-master",
+            "set-default-text-style",
             "set-slide-background",
-            "set-text-style",
-            "set-shape",
-            "set-shape-line"
+            "set-text-frame",
+            "set-shape"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
           "contentPolicy": "preserve-source-slides-and-editable-objects",
@@ -2203,12 +2203,12 @@
             "cjk": "Noto Sans SC"
           },
           "styleOps": [
-            "set-theme-color",
-            "set-theme-font",
+            "set-theme",
+            "set-master",
+            "set-default-text-style",
             "set-slide-background",
-            "set-text-style",
-            "set-shape",
-            "set-shape-line"
+            "set-text-frame",
+            "set-shape"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
           "contentPolicy": "preserve-source-slides-and-editable-objects",
@@ -2586,7 +2586,7 @@
         "fallback": {
           "strategy": "apply-brand-and-text-frame-style",
           "brandProfile": "cartesian-warm",
-          "styleOps": ["set-text-style", "set-shape-text-style"],
+          "styleOps": ["set-text-frame"],
           "chromePolicy": "replace-or-restyle-existing"
         },
         "requiredGates": [
@@ -3047,12 +3047,12 @@
             "cjk": "Microsoft YaHei"
           },
           "styleOps": [
-            "set-theme-color",
-            "set-theme-font",
+            "set-theme",
+            "set-master",
+            "set-default-text-style",
             "set-slide-background",
-            "set-text-style",
-            "set-shape",
-            "set-shape-line"
+            "set-text-frame",
+            "set-shape"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
           "contentPolicy": "preserve-source-slides-and-editable-objects",
@@ -3385,12 +3385,12 @@
             "cjk": "Microsoft YaHei"
           },
           "styleOps": [
-            "set-theme-color",
-            "set-theme-font",
+            "set-theme",
+            "set-master",
+            "set-default-text-style",
             "set-slide-background",
-            "set-text-style",
-            "set-shape",
-            "set-shape-line"
+            "set-text-frame",
+            "set-shape"
           ],
           "chromePolicy": "preserve-and-restyle-existing",
           "contentPolicy": "preserve-source-slides-and-editable-objects",

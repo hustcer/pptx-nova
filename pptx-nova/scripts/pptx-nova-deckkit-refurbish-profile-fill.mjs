@@ -8,12 +8,12 @@ const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const DELIVERY_READINESS = new Set(['production', 'default'])
 const COMMON_STYLE_OPS = [
-  'set-theme-color',
-  'set-theme-font',
+  'set-theme',
+  'set-master',
+  'set-default-text-style',
   'set-slide-background',
-  'set-text-style',
+  'set-text-frame',
   'set-shape',
-  'set-shape-line',
 ]
 const MANUAL_GATES = [
   'fallback-patch-report',

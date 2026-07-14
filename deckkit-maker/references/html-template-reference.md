@@ -68,7 +68,7 @@ Do not transfer:
 - entry/hover animations, JS transition timing, click-only affordances
 - HTML-only responsive behavior that has no PPTX editing equivalent
 - one-off remote images, screenshots, CSS background images, or decorative media
-- full-slide SVG/bitmap texture backgrounds as direct `add-picture` layers unless a minimal xdoc render experiment
+- full-slide SVG/bitmap texture backgrounds as direct `add-image` layers unless a minimal xdoc render experiment
   proves they do not create placeholder overlays or cover editable content
 
 For paper grain, hatch, noise, SVG pattern, or CSS texture effects, prefer editable PPTX approximations: flat fills,

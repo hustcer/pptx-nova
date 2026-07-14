@@ -327,18 +327,18 @@ dry-run 报告里会有：
 
 ```json
 {
-  "op": "set-text",
+  "op": "set-text-frame",
   "slide": 2,
   "shape": { "placeholder": { "type": "title" } },
   "text": "新标题"
 }
 ```
 
-> `set-text` 会清掉原 text frame 里所有 run 与 paragraph。如果要保留多 run / 多段
+> `set-text-frame` 会清掉原 text frame 里所有 run 与 paragraph。如果要保留多 run / 多段
 > 结构，改用 `set-paragraph` + `set-run`。
 > `textPreview` 只是 inspect 的摘要字段，不是可回写的内容真源；它可能被截断、合并 run，
 > 或无法表达 tab stops、paragraph properties、table cell rich text 等结构。翻新已有 deck
-> 时不要把 `textPreview` 原样喂给 `set-text`，尤其不要用它重写 tab stop、富文本、多段落或表格文本。
+> 时不要把 `textPreview` 原样喂给 `set-text-frame`，尤其不要用它重写 tab stop、富文本、多段落或表格文本。
 > 这类页面优先用 `set-run` / 样式局部修改；完成后检查候选可见文本中没有 `<a:`、`<p:`、`xmlns`
 > 等 OOXML 片段泄漏。
 
@@ -405,10 +405,7 @@ dry-run 报告里会有：
 ```json
 {
   "schemaVersion": 1,
-  "ops": [
-    { "op": "set-theme-color", "scheme": "accent1", "value": "1A73E8" },
-    { "op": "set-theme-color", "scheme": "accent2", "value": "34A853" }
-  ]
+  "ops": [{ "op": "set-theme", "colors": { "accent1": "1A73E8", "accent2": "34A853" } }]
 }
 ```
 
@@ -419,18 +416,16 @@ dry-run 报告里会有：
   "schemaVersion": 1,
   "ops": [
     {
-      "op": "set-table-cell-style",
+      "op": "set-table",
       "slide": 1,
       "shape": { "name": "Metrics Table" },
-      "row": 0,
-      "col": 2,
-      "fill": { "kind": "solid", "color": "EAF1FF" }
+      "cells": [{ "row": 0, "col": 2, "style": { "fill": { "kind": "solid", "color": "EAF1FF" } } }]
     }
   ]
 }
 ```
 
-或者整列循环：在 patch 数组里展开多个 row。
+或者整列循环：在 `cells` 数组里展开多个 row。
 
 ### 5.7 替换 chart 数据
 

@@ -571,7 +571,7 @@ function writeSessionRuleFixture({
       },
       {
         opIndex: 1,
-        op: 'add-textbox',
+        op: 'add-text-box',
         status: 'success',
         semanticChanges: [
           {

@@ -120,7 +120,7 @@ schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 imp
 
 - **最小合法 content build 测试**：每个页型构造最小 delivery content，
   validation 通过则 `createDeck` 必须不崩。
-- **content leak regression**：收集 patch 全部 `add-textbox`/`set-text`/`add-run`
+- **content leak regression**：收集 patch 全部 `add-text-box`/`set-text-frame`/`add-run`
   文本，断言不出现参考 deck 的主题词、产品名、示例指标、示例年份；
   rich text 页型断言 `data.calloutHighlights` 等字段能驱动 emphasis run。
 - **参数化测试**：每个页型至少一个非参考主题的输入被正确渲染。

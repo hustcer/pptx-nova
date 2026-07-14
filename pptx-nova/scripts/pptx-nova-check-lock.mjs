@@ -1286,11 +1286,11 @@ function checkPatch(patch, lock, content, assets, args, errors, warnings) {
       }
     }
     if (
-      ['add-table', 'set-table-data', 'import-table-data'].includes(op.op) ||
+      ['add-table', 'set-table-data'].includes(op.op) ||
       String(op.op ?? '').startsWith('set-table-') ||
       op.op === 'merge-table-cells'
     ) {
-      if (['add-table', 'set-table-data', 'import-table-data'].includes(op.op)) {
+      if (['add-table', 'set-table-data'].includes(op.op)) {
         checkTableSemantic(op, index, errors, warnings)
       }
     }

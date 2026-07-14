@@ -327,7 +327,7 @@ Fallback 的最小可交付动作是硬规则：
   `replace`、`restyle-existing`、`skip-duplicate` 或 `add`，并在报告或 patch 备注中体现；发现重复
   chrome 时优先移除新增重复项或复用源对象，不能只移动到别处。
 - 主题/字体/颜色 fallback 必须用目标 DeckKit 的 theme/style/profile 驱动。整 text frame
-  换字体、字号、颜色时用 `set-text-style` / `set-shape-text-style`；只有 inspect 或 smoke test
+  换字体、字号、颜色时用 `set-text-frame`（字体字段放 `font` 对象）；只有 inspect 或 smoke test
   证明段落/run 索引存在时才使用 `set-run`。
 - 必须有 dry-run/apply、`vision-diff.json`、`fidelity-gate.json`、PNG/contact-sheet
   复核和最终 `refurbish-audit`/supplemental audit。缺任一项就不能交付。

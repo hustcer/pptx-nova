@@ -33,7 +33,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 
 ## Fill（填充）
 
-`set-shape` / `set-slide-background` / `set-master-bg` 都接受同一种 fill 对象：
+`set-shape` / `set-slide-background` 的 `fill` 与 `set-master` 的 `background` 都接受同一种 fill 对象：
 
 ### Solid
 
@@ -109,12 +109,14 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 
 ```json
 {
-  "op": "set-shape-line",
+  "op": "set-shape",
   "slide": 0,
   "shape": { "id": "..." },
-  "line": "1pt",
-  "color": "1A73E8",
-  "dash": "dash"
+  "line": {
+    "width": "1pt",
+    "color": "1A73E8",
+    "dash": "dash"
+  }
 }
 ```
 
@@ -123,7 +125,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 清掉边框：
 
 ```json
-{ "op": "set-shape-line", "slide": 0, "shape": {...}, "noLine": true }
+{ "op": "set-shape", "slide": 0, "shape": {...}, "line": { "noLine": true } }
 ```
 
 ## 字体
@@ -166,28 +168,33 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ### Theme 字体（一改全改）
 
 ```json
-{ "op": "set-theme-font", "kind": "majorFont", "typeface": "Inter" }
-{ "op": "set-theme-font", "kind": "minorFont", "typeface": "Source Han Sans SC", "ea": "Source Han Sans SC" }
-```
-
-- `majorFont` = 主题大标题字体（默认绑定到 placeholder type=title）
-- `minorFont` = 主题正文字体（默认绑定到所有 body / content）
-- `ea` / `cs` / `latin` 分别指定东亚 / 复杂书写系统 / 拉丁字符的字体（让中文/英文分别用不同字体）
-
-### CJK 字体注意
-
-PowerPoint 在中英混排时会根据字符类型选择 `latin` 或 `ea` 字体。若你想中英都用一种字体：
-
-```json
 {
-  "op": "set-theme-font",
-  "kind": "minorFont",
-  "typeface": "Inter",
-  "ea": "Source Han Sans SC"
+  "op": "set-theme",
+  "fonts": {
+    "major": { "typeface": "Inter" },
+    "minor": { "typeface": "Source Han Sans SC", "eastAsian": "Source Han Sans SC" }
+  }
 }
 ```
 
-某些字体（如 `Inter`）只覆盖拉丁字符，中文会 fallback；显式设 `ea` 才能保证中文也用指定字体。
+- `fonts.major` = 主题大标题字体（默认绑定到 placeholder type=title）
+- `fonts.minor` = 主题正文字体（默认绑定到所有 body / content）
+- `typeface` 指定拉丁字符字体，`eastAsian` / `complexScript` 分别指定东亚 / 复杂书写系统字符的字体（让中文/英文分别用不同字体）
+
+### CJK 字体注意
+
+PowerPoint 在中英混排时会根据字符类型选择拉丁（`typeface`）或东亚（`eastAsian`）字体。若你想中英都用一种字体：
+
+```json
+{
+  "op": "set-theme",
+  "fonts": {
+    "minor": { "typeface": "Inter", "eastAsian": "Source Han Sans SC" }
+  }
+}
+```
+
+某些字体（如 `Inter`）只覆盖拉丁字符，中文会 fallback；显式设 `eastAsian` 才能保证中文也用指定字体。
 
 ### 字体栈质量策略
 
@@ -205,7 +212,7 @@ PowerPoint 在中英混排时会根据字符类型选择 `latin` 或 `ea` 字体
   出现在同一个 fallback 栈中，而不是分任两个视觉角色。
 - 品牌字体、Google Fonts 或本机未必安装的字体可以放在栈首，但必须写 fallback；如果客户要求
   严格品牌字体，最终摘要要说明字体安装/嵌入风险。
-- 不要把字体选择藏在零散 `set-run` 里。优先用 `set-theme-font`、master placeholder style 或
+- 不要把字体选择藏在零散 `set-run` 里。优先用 `set-theme`、master placeholder style 或
   DeckKit token 统一角色字体；单个 run 只处理局部强调。
 
 ### 权重后缀字体名（`Inter Black` / `Barlow Light` / `Roboto Medium`...）
@@ -270,7 +277,7 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 ## Theme color（主题色一键改）
 
 ```json
-{ "op": "set-theme-color", "scheme": "accent1", "value": "1A73E8" }
+{ "op": "set-theme", "colors": { "accent1": "1A73E8" } }
 ```
 
 所有引用 `accent1` 的 shape / chart / placeholder 都会跟着变。**最便宜的改色方式**。
@@ -320,8 +327,8 @@ xdoc pptx remap-theme clean.pptx \
 
 ```json
 {
-  "op": "set-master-bg",
-  "fill": { "kind": "gradient", "preset": "topSpotlight1" }
+  "op": "set-master",
+  "background": { "kind": "gradient", "preset": "topSpotlight1" }
 }
 ```
 
@@ -331,23 +338,27 @@ xdoc pptx remap-theme clean.pptx \
 
 ```json
 {
-  "op": "set-master-placeholder-style",
-  "type": "title",
-  "font": { "name": "Inter", "size": "32pt", "bold": true },
-  "color": "1F1F1F",
-  "spacing": { "before": "6pt", "after": "12pt", "line": 1.15 },
-  "alignment": "left"
+  "op": "set-master",
+  "placeholders": [
+    {
+      "type": "title",
+      "font": { "name": "Inter", "size": "32pt", "bold": true },
+      "color": "1F1F1F",
+      "spacing": { "before": "6pt", "after": "12pt", "line": 1.15 },
+      "alignment": "left"
+    }
+  ]
 }
 ```
 
-`type` 取值与 placeholder 的 type 一致（`title` / `body` / `ctrTitle` / `subTitle` /
-`obj` / `chart` / ...）。
+`type` 取值与 placeholder 的 type 一致（`title` / `body` / `center-title` / `subtitle` /
+`object` / `chart` / ...）。
 
 ## Shape effect（阴影、发光、反射、柔化）
 
 ```json
 {
-  "op": "set-shape-effect",
+  "op": "set-shape",
   "slide": 0,
   "shape": { "id": "..." },
   "effect": {
@@ -377,7 +388,7 @@ xdoc pptx remap-theme clean.pptx \
 shape 可以选择继承 master/layout effect：
 
 ```json
-{ "op": "set-shape-effect", "slide": 0, "shape": {...}, "effect": { "inherit": true } }
+{ "op": "set-shape", "slide": 0, "shape": {...}, "effect": { "inherit": true } }
 ```
 
 `inherit: true` 让 shape 走 master/layout `<a:effectLst>` 继承链；不写或 `inherit: false`
@@ -399,7 +410,10 @@ shape 可以选择继承 master/layout effect：
     "dk1": "1F1F1F",
     "lt1": "FFFFFF"
   },
-  "fonts": { "major": "Inter", "minor": "Inter", "heading": "Inter" }
+  "fonts": {
+    "major": { "typeface": "Inter" },
+    "minor": { "typeface": "Inter" }
+  }
 }
 ```
 
@@ -416,7 +430,7 @@ shape 可以选择继承 master/layout effect：
 
 ## 不要做的事
 
-- ❌ 不要在 `set-theme-color` 上加 `slide` 字段（主题色是 deck 级，不属于某页）
-- ❌ 不要给同一个 shape 同时写 `set-shape` 和 `set-shape-effect` 期望叠加 — 它们独立
+- ❌ 不要在 `set-theme` 的 `colors` 上加 `slide` 字段（主题色是 deck 级，不属于某页）
+- ❌ 不要拆成多个 op 改同一个 shape 的 fill/line/effect — 一个 `set-shape` 里可同时设置且原子生效
 - ❌ 不要假定 deck 的 master 名是固定的 — 用 `inspect` 查一下
-- ❌ 不要用 `set-theme-font` 改单个 run 字体 — 那是 `set-run.font.name`
+- ❌ 不要用 `set-theme` 的 `fonts` 改单个 run 字体 — 那是 `set-run.font.name`

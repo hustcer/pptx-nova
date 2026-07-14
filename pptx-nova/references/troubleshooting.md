@@ -52,13 +52,13 @@ xdoc 的错误是**结构化的**，每个错误带：
 `xdoc schema` 的 `errorCatalog.scenarioCoverage` 给出当前覆盖最完整的 5 个修复场景。
 拿到错误时先按 `id` 匹配,直接抄 `typicalFixPatch`:
 
-| id                          | 触发                                                                  | 修复策略                                                       |
-| --------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `missing-shape`             | selector 一个都没匹配到                                               | 移除该 op 当 fallback,先 `inspect` 拿到真实 shape id 再重试    |
-| `ambiguous-selector`        | selector 匹配多个 shape,报告里有候选 id                               | 改写 selector 为 `{ "shape": { "id": <候选 id> } }`            |
-| `invalid-chart-kind`        | `add-chart.kind` / `variant` 拼错                                     | 用 `enumRegistry.chartKind` / `chartVariant` 的 fuzzy 候选改写 |
-| `font-color-shape-spelling` | 字体名 / 颜色 / 主题色拼错,或 RGB 不是 6 位大写 hex                   | 用 `enumRegistry` 的 fuzzy 候选;或 `1A73E8`(不带 `#`,全大写)   |
-| `layout-contract`           | `fill-layout.content` 缺必填字段,或在 strict 模式下出现了非法额外字段 | 补上 placeholder 或删除非法字段;严格模式见 `recipes.md`        |
+| id                          | 触发                                                                     | 修复策略                                                       |
+| --------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `missing-shape`             | selector 一个都没匹配到                                                  | 移除该 op 当 fallback,先 `inspect` 拿到真实 shape id 再重试    |
+| `ambiguous-selector`        | selector 匹配多个 shape,报告里有候选 id                                  | 改写 selector 为 `{ "shape": { "id": <候选 id> } }`            |
+| `invalid-chart-kind`        | `add-chart.kind` / `variant` 拼错                                        | 用 `enumRegistry.chartKind` / `chartVariant` 的 fuzzy 候选改写 |
+| `font-color-shape-spelling` | 字体名 / 颜色 / 主题色拼错,或 RGB 不是 6 位大写 hex                      | 用 `enumRegistry` 的 fuzzy 候选;或 `1A73E8`(不带 `#`,全大写)   |
+| `layout-contract`           | `populate-slide.content` 缺必填字段,或在 strict 模式下出现了非法额外字段 | 补上 placeholder 或删除非法字段;严格模式见 `recipes.md`        |
 
 完整 schema(含 docsRef 与 typicalFixPatch JSON 例子):
 
@@ -284,15 +284,15 @@ chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案�
 
 常见 risk code：
 
-| code                           | 含义                    | 处理                                       |
-| ------------------------------ | ----------------------- | ------------------------------------------ |
-| `text-overflow-estimate`       | 文字可能超出 shape 边界 | 加大 shape / 用 `fit-text` / 缩短文本      |
-| `text-unexpected-wrap`         | 预期单行文本出现孤行    | 缩短 subtitle/label / 加宽 / 换布局        |
-| `chart-label-density-possible` | chart 标签太密          | 改 `set-chart-data-labels.position` 或缩放 |
-| `table-data-outside-grid`      | 表格数据超出 grid       | 加行列 / 调整数据                          |
-| `table-cell-text-long`         | 表格单元格文本过长      | 加列宽 / 缩字号 / 拆行                     |
-| `picture-missing-dimension`    | 加图片没指定 w/h        | 加 `w` / `h` 字段                          |
-| `ole-icon-missing-or-unsized`  | OLE icon 未显式定尺寸   | 加 `iconW` / `iconH` 或确认默认 icon       |
+| code                           | 含义                    | 处理                                        |
+| ------------------------------ | ----------------------- | ------------------------------------------- |
+| `text-overflow-estimate`       | 文字可能超出 shape 边界 | 加大 shape / 用 `fit-text` / 缩短文本       |
+| `text-unexpected-wrap`         | 预期单行文本出现孤行    | 缩短 subtitle/label / 加宽 / 换布局         |
+| `chart-label-density-possible` | chart 标签太密          | 改 `set-chart.dataLabels[].position` 或缩放 |
+| `table-data-outside-grid`      | 表格数据超出 grid       | 加行列 / 调整数据                           |
+| `table-cell-text-long`         | 表格单元格文本过长      | 加列宽 / 缩字号 / 拆行                      |
+| `picture-missing-dimension`    | 加图片没指定 w/h        | 加 `w` / `h` 字段                           |
+| `ole-icon-missing-or-unsized`  | OLE icon 未显式定尺寸   | 加 `iconW` / `iconH` 或确认默认 icon        |
 
 不一定每条 risk 都要处理 —— **轻量警告可以让用户决定**。但 PPT 给老板看的话，
 至少把 `text-overflow-estimate`、`text-unexpected-wrap` 和 chart/table 相关风险处理掉。

@@ -6,8 +6,9 @@ function usage() {
   process.stderr.write(`Usage:
   node scripts/content-leak-audit.mjs --patch patch.json --denylist terms.txt [--json]
 
-Checks visible text emitted by set-text, add-run, and add-textbox ops for forbidden
-reference-deck business terms. The denylist is one term per line; blank lines and
+Checks visible text emitted by set-text-frame, add-text-box, add-paragraph,
+set-paragraph, add-run, and set-run ops for forbidden reference-deck business
+terms. The denylist is one term per line; blank lines and
 lines starting with # are ignored.
 
 Denylist entry modes:
@@ -63,7 +64,17 @@ function collectVisibleText(patch) {
   const ops = Array.isArray(patch?.ops) ? patch.ops : []
   const texts = []
   for (const [index, op] of ops.entries()) {
-    if (!['set-text', 'add-run', 'add-textbox'].includes(op?.op)) continue
+    if (
+      ![
+        'set-text-frame',
+        'add-text-box',
+        'add-paragraph',
+        'set-paragraph',
+        'add-run',
+        'set-run',
+      ].includes(op?.op)
+    )
+      continue
     if (typeof op.text !== 'string' || op.text.length === 0) continue
     texts.push({
       index,

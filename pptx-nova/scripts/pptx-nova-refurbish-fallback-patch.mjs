@@ -422,30 +422,25 @@ function buildArtifacts(args) {
     hlink: palette.text,
     folHlink: palette.secondary,
   }
-  for (const [scheme, value] of Object.entries(themeColors)) {
-    ops.push({ op: 'set-theme-color', scheme, value })
-  }
   ops.push({
-    op: 'set-theme-font',
-    kind: 'majorFont',
-    typeface: fallback.fonts.heading,
-    ea: fallback.fonts.cjk,
-    latin: fallback.fonts.heading,
+    op: 'set-theme',
+    colors: themeColors,
+    fonts: {
+      major: { typeface: fallback.fonts.heading, eastAsian: fallback.fonts.cjk },
+      minor: { typeface: fallback.fonts.body, eastAsian: fallback.fonts.cjk },
+    },
   })
+  ops.push({ op: 'set-master', background: { kind: 'solid', color: palette.background } })
   ops.push({
-    op: 'set-theme-font',
-    kind: 'minorFont',
-    typeface: fallback.fonts.body,
-    ea: fallback.fonts.cjk,
-    latin: fallback.fonts.body,
-  })
-  ops.push({ op: 'set-master-bg', fill: { kind: 'solid', color: palette.background } })
-  ops.push({
-    op: 'set-presentation-default-text-style',
-    level: 0,
-    font: { name: fallback.fonts.body },
-    color: palette.text,
-    alignment: 'left',
+    op: 'set-default-text-style',
+    levels: [
+      {
+        level: 0,
+        font: { name: fallback.fonts.body },
+        color: palette.text,
+        alignment: 'left',
+      },
+    ],
   })
 
   const slides = Array.isArray(inspect.slides) ? inspect.slides : []

@@ -56,7 +56,7 @@ Phase 1 的高保真目标不包括复刻一次性图片素材。优先重建图
   的 `assetSource` 提供。
 - 照片、插画、背景位图、嵌入对象预览：默认 scope out 或用中性占位，不为单一 deck 下沉 primitive。
 - HTML/CSS texture、SVG pattern、全页背景图：默认用可编辑 flat fill、线条、重复 shape 或
-  hatch 近似，不直接作为整页 `add-picture` 背景。整页 SVG/bitmap 在 xdoc demo/render 中可能
+  hatch 近似，不直接作为整页 `add-image` 背景。整页 SVG/bitmap 在 xdoc demo/render 中可能
   生成占位覆盖层并遮住内容；确需使用时先做最小实验，验证 layer order、PNG 渲染和 PowerPoint
   打开效果，并在 `compare-notes.md` / catalog `knownLimits` 披露。
 - 替代元素必须语义相关：例如流程图可用箭头/节点，指标看板可用表格/图表，人物照片 quote 可用

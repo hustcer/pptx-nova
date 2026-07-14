@@ -88,18 +88,18 @@
 
 ```json
 [
-  { "op": "add-shape", "slide": N, "shape": "rectangle",
+  { "op": "add-shape", "slide": N, "kind": "rectangle",
     "x": "0in", "y": "0in", "w": "13.333in", "h": "0.08in",
     "name": "TopBrandBar" },
   { "op": "set-shape", "slide": N, "shape": { "name": "TopBrandBar" },
     "fill": { "kind": "solid", "color": "1A73E8" } },
-  { "op": "set-shape-line", "slide": N, "shape": { "name": "TopBrandBar" },
+  { "op": "set-shape", "slide": N, "shape": { "name": "TopBrandBar" },
     "line": { "noLine": true } },
 
   { "op": "add-text-box", "slide": N,
     "x": "0.6in", "y": "7.05in", "w": "6in", "h": "0.3in",
     "name": "PageFooter" },
-  { "op": "set-text", "slide": N, "shape": { "name": "PageFooter" },
+  { "op": "set-text-frame", "slide": N, "shape": { "name": "PageFooter" },
     "text": "Q2 2026 业务回顾  ·  0N / 07" },
   { "op": "set-run", "slide": N, "shape": { "name": "PageFooter" },
     "paragraph": 0, "run": 0,
@@ -108,7 +108,7 @@
   { "op": "add-text-box", "slide": N,
     "x": "11.5in", "y": "0.2in", "w": "1.7in", "h": "0.3in",
     "name": "Watermark" },
-  { "op": "set-text", "slide": N, "shape": { "name": "Watermark" },
+  { "op": "set-text-frame", "slide": N, "shape": { "name": "Watermark" },
     "text": "XDOC DEMO" },
   { "op": "set-run", "slide": N, "shape": { "name": "Watermark" },
     "paragraph": 0, "run": 0,
@@ -131,7 +131,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   {
     "op": "add-shape",
     "slide": 0,
-    "shape": "rectangle",
+    "kind": "rectangle",
     "x": "0in",
     "y": "0in",
     "w": "13.333in",
@@ -145,7 +145,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "fill": { "kind": "solid", "color": "1A73E8" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 0,
     "shape": { "name": "CoverTopBar" },
     "line": { "noLine": true }
@@ -154,7 +154,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   {
     "op": "add-shape",
     "slide": 0,
-    "shape": "rectangle",
+    "kind": "rectangle",
     "x": "0.6in",
     "y": "2.4in",
     "w": "0.12in",
@@ -168,7 +168,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "fill": { "kind": "solid", "color": "1A73E8" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 0,
     "shape": { "name": "CoverAccentBar" },
     "line": { "noLine": true }
@@ -184,7 +184,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "CoverEyebrow"
   },
   {
-    "op": "set-text",
+    "op": "set-text-frame",
     "slide": 0,
     "shape": { "name": "CoverEyebrow" },
     "text": "QUARTERLY BUSINESS REVIEW"
@@ -207,7 +207,12 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "h": "1.4in",
     "name": "CoverTitle"
   },
-  { "op": "set-text", "slide": 0, "shape": { "name": "CoverTitle" }, "text": "Q2 2026 业务回顾" },
+  {
+    "op": "set-text-frame",
+    "slide": 0,
+    "shape": { "name": "CoverTitle" },
+    "text": "Q2 2026 业务回顾"
+  },
   {
     "op": "set-run",
     "slide": 0,
@@ -227,7 +232,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "name": "CoverSubtitle"
   },
   {
-    "op": "set-text",
+    "op": "set-text-frame",
     "slide": 0,
     "shape": { "name": "CoverSubtitle" },
     "text": "Aug 2026  ·  业务部"
@@ -256,7 +261,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   {
     "op": "add-shape",
     "slide": 1,
-    "shape": "rounded-rectangle",
+    "kind": "rounded-rectangle",
     "x": "0.6in",
     "y": "2in",
     "w": "5.6in",
@@ -270,7 +275,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "fill": { "kind": "solid", "color": "F8F9FA" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 1,
     "shape": { "name": "AgendaCard1" },
     "line": { "noLine": true }
@@ -285,7 +290,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "h": "0.5in",
     "name": "AgendaNum1"
   },
-  { "op": "set-text", "slide": 1, "shape": { "name": "AgendaNum1" }, "text": "01" },
+  { "op": "set-text-frame", "slide": 1, "shape": { "name": "AgendaNum1" }, "text": "01" },
   {
     "op": "set-run",
     "slide": 1,
@@ -304,7 +309,12 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "h": "0.8in",
     "name": "AgendaLabel1"
   },
-  { "op": "set-text", "slide": 1, "shape": { "name": "AgendaLabel1" }, "text": "Q2 核心指标" },
+  {
+    "op": "set-text-frame",
+    "slide": 1,
+    "shape": { "name": "AgendaLabel1" },
+    "text": "Q2 核心指标"
+  },
   {
     "op": "set-run",
     "slide": 1,
@@ -330,7 +340,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   {
     "op": "add-shape",
     "slide": 2,
-    "shape": "rounded-rectangle",
+    "kind": "rounded-rectangle",
     "x": "0.6in",
     "y": "2.8in",
     "w": "2.6in",
@@ -344,7 +354,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "fill": { "kind": "solid", "color": "FFFFFF" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiCard1" },
     "line": { "width": "0.75pt", "color": "E8EAED" }
@@ -354,7 +364,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   {
     "op": "add-shape",
     "slide": 2,
-    "shape": "rectangle",
+    "kind": "rectangle",
     "x": "0.6in",
     "y": "2.8in",
     "w": "2.6in",
@@ -368,7 +378,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "fill": { "kind": "solid", "color": "1A73E8" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiTopBar1" },
     "line": { "noLine": true }
@@ -384,7 +394,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "h": "0.4in",
     "name": "KpiLabel1"
   },
-  { "op": "set-text", "slide": 2, "shape": { "name": "KpiLabel1" }, "text": "营收" },
+  { "op": "set-text-frame", "slide": 2, "shape": { "name": "KpiLabel1" }, "text": "营收" },
   {
     "op": "set-run",
     "slide": 2,
@@ -404,7 +414,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "h": "1in",
     "name": "KpiValue1"
   },
-  { "op": "set-text", "slide": 2, "shape": { "name": "KpiValue1" }, "text": "$42M" },
+  { "op": "set-text-frame", "slide": 2, "shape": { "name": "KpiValue1" }, "text": "$42M" },
   {
     "op": "set-run",
     "slide": 2,
@@ -418,7 +428,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
   {
     "op": "add-shape",
     "slide": 2,
-    "shape": "rounded-rectangle",
+    "kind": "rounded-rectangle",
     "x": "0.85in",
     "y": "4.55in",
     "w": "1.3in",
@@ -432,12 +442,12 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "fill": { "kind": "solid", "color": "E6F4EA" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiDelta1" },
     "line": { "noLine": true }
   },
-  { "op": "set-text", "slide": 2, "shape": { "name": "KpiDelta1" }, "text": "▲ +12% YoY" },
+  { "op": "set-text-frame", "slide": 2, "shape": { "name": "KpiDelta1" }, "text": "▲ +12% YoY" },
   {
     "op": "set-run",
     "slide": 2,
@@ -457,7 +467,12 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "h": "0.3in",
     "name": "KpiNote1"
   },
-  { "op": "set-text", "slide": 2, "shape": { "name": "KpiNote1" }, "text": "GAAP 口径,含订阅收入" },
+  {
+    "op": "set-text-frame",
+    "slide": 2,
+    "shape": { "name": "KpiNote1" },
+    "text": "GAAP 口径,含订阅收入"
+  },
   {
     "op": "set-run",
     "slide": 2,
@@ -532,40 +547,21 @@ chart：
 ```json
 [
   {
-    "op": "set-chart-series-style",
+    "op": "set-chart",
     "slide": 3,
     "shape": { "name": "RevChart" },
-    "series": 0,
-    "fill": { "kind": "solid", "color": "BDC1C6" }
-  },
-  {
-    "op": "set-chart-series-style",
-    "slide": 3,
-    "shape": { "name": "RevChart" },
-    "series": 1,
-    "fill": { "kind": "solid", "color": "1A73E8" }
-  },
-  {
-    "op": "set-chart-data-labels",
-    "slide": 3,
-    "shape": { "name": "RevChart" },
-    "scope": { "series": 1 },
-    "showValue": true,
-    "position": "outsideEnd"
-  },
-  {
-    "op": "set-chart-axis-style",
-    "slide": 3,
-    "shape": { "name": "RevChart" },
-    "axis": "value",
-    "style": { "color": "9AA0A6" }
-  },
-  {
-    "op": "set-chart-gridline-style",
-    "slide": 3,
-    "shape": { "name": "RevChart" },
-    "axis": "value",
-    "style": { "color": "EEEEEE", "dash": "dash" }
+    "series": [
+      { "series": 0, "fill": { "kind": "solid", "color": "BDC1C6" } },
+      { "series": 1, "fill": { "kind": "solid", "color": "1A73E8" } }
+    ],
+    "dataLabels": [{ "scope": { "series": 1 }, "showValue": true, "position": "outside-end" }],
+    "axes": [
+      {
+        "axis": "value",
+        "line": { "color": "9AA0A6" },
+        "gridlines": { "color": "EEEEEE" }
+      }
+    ]
   }
 ]
 ```
@@ -577,7 +573,7 @@ callout 卡片（3 个，纵向排列）：
   {
     "op": "add-shape",
     "slide": 3,
-    "shape": "rounded-rectangle",
+    "kind": "rounded-rectangle",
     "x": "9.5in",
     "y": "2.4in",
     "w": "3.2in",
@@ -591,7 +587,7 @@ callout 卡片（3 个，纵向排列）：
     "fill": { "kind": "solid", "color": "E8F0FE" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 3,
     "shape": { "name": "Callout1" },
     "line": { "noLine": true }
@@ -605,7 +601,7 @@ callout 卡片（3 个，纵向排列）：
     "h": "0.4in",
     "name": "CalloutLabel1"
   },
-  { "op": "set-text", "slide": 3, "shape": { "name": "CalloutLabel1" }, "text": "H1 同比" },
+  { "op": "set-text-frame", "slide": 3, "shape": { "name": "CalloutLabel1" }, "text": "H1 同比" },
   {
     "op": "set-run",
     "slide": 3,
@@ -623,7 +619,7 @@ callout 卡片（3 个，纵向排列）：
     "h": "0.7in",
     "name": "CalloutValue1"
   },
-  { "op": "set-text", "slide": 3, "shape": { "name": "CalloutValue1" }, "text": "+21.9%" },
+  { "op": "set-text-frame", "slide": 3, "shape": { "name": "CalloutValue1" }, "text": "+21.9%" },
   {
     "op": "set-run",
     "slide": 3,
@@ -667,21 +663,27 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
   },
 
   {
-    "op": "set-table-cell-style",
+    "op": "set-table",
     "slide": 4,
     "shape": { "name": "CompareTable" },
-    "row": 0,
-    "col": 0,
-    "fill": { "type": "solid", "color": "1A73E8" },
-    "font": { "bold": true, "color": "FFFFFF" }
+    "cells": [
+      {
+        "row": 0,
+        "col": 0,
+        "style": {
+          "fill": { "type": "solid", "color": "1A73E8" },
+          "font": { "bold": true, "color": "FFFFFF" }
+        }
+      }
+    ]
   },
-  // ... 其他表头列同样设置
+  // ... 其他表头列同样设置（追加到 cells 数组即可）
 
   // 结论 banner（蓝底白字）
   {
     "op": "add-shape",
     "slide": 4,
-    "shape": "rounded-rectangle",
+    "kind": "rounded-rectangle",
     "x": "0.8in",
     "y": "6.2in",
     "w": "11.7in",
@@ -695,13 +697,13 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "fill": { "kind": "solid", "color": "1A73E8" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 4,
     "shape": { "name": "ConclusionBanner" },
     "line": { "noLine": true }
   },
   {
-    "op": "set-text",
+    "op": "set-text-frame",
     "slide": 4,
     "shape": { "name": "ConclusionBanner" },
     "text": "结论:Q2 完成切换后,deck 生产链路提速约 5-7 倍,人/人 错误下降 80%+"
@@ -732,7 +734,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
   {
     "op": "add-shape",
     "slide": 5,
-    "shape": "rounded-rectangle",
+    "kind": "rounded-rectangle",
     "x": "0.6in",
     "y": "2.4in",
     "w": "4in",
@@ -746,7 +748,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "fill": { "kind": "solid", "color": "F8F9FA" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 5,
     "shape": { "name": "Pillar1" },
     "line": { "noLine": true }
@@ -755,7 +757,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
   {
     "op": "add-shape",
     "slide": 5,
-    "shape": "rectangle",
+    "kind": "rectangle",
     "x": "0.6in",
     "y": "2.4in",
     "w": "4in",
@@ -769,7 +771,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "fill": { "kind": "solid", "color": "1A73E8" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 5,
     "shape": { "name": "Pillar1Bar" },
     "line": { "noLine": true }
@@ -797,7 +799,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
   {
     "op": "add-shape",
     "slide": 6,
-    "shape": "rectangle",
+    "kind": "rectangle",
     "x": "0.5in",
     "y": "2in",
     "w": "0.12in",
@@ -811,7 +813,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "fill": { "kind": "solid", "color": "FBBC04" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 6,
     "shape": { "name": "HeroAccentBar" },
     "line": { "noLine": true }
@@ -828,7 +830,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "name": "HeroEyebrow"
   },
   {
-    "op": "set-text",
+    "op": "set-text-frame",
     "slide": 6,
     "shape": { "name": "HeroEyebrow" },
     "text": "PART 05  ·  结语与展望"
@@ -852,7 +854,12 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "h": "1.5in",
     "name": "HeroTitle"
   },
-  { "op": "set-text", "slide": 6, "shape": { "name": "HeroTitle" }, "text": "稳健增长,持续投入" },
+  {
+    "op": "set-text-frame",
+    "slide": 6,
+    "shape": { "name": "HeroTitle" },
+    "text": "稳健增长,持续投入"
+  },
   {
     "op": "set-run",
     "slide": 6,
@@ -866,7 +873,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
   {
     "op": "add-shape",
     "slide": 6,
-    "shape": "rounded-rectangle",
+    "kind": "rounded-rectangle",
     "x": "0.6in",
     "y": "5.6in",
     "w": "4in",
@@ -880,7 +887,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "fill": { "kind": "solid", "color": "FFFFFF" }
   },
   {
-    "op": "set-shape-line",
+    "op": "set-shape",
     "slide": 6,
     "shape": { "name": "Takeaway1" },
     "line": { "noLine": true }
@@ -890,7 +897,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 ```
 
 > 提示：纯白卡片在深蓝背景上对比度强，可直接放黑色文字；要"透明白色"效果可以用
-> 浅色 fill 比如 `FFFFFF` + 后续 `set-shape-effect` 调整。
+> 浅色 fill 比如 `FFFFFF` + 后续 `set-shape` 的 `effect` 字段调整。
 
 ---
 
@@ -914,17 +921,17 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 
 ## §10 常见返工原因
 
-| 现象                            | 根因                                                                |
-| ------------------------------- | ------------------------------------------------------------------- |
-| KPI 渲染成 3+1 不是 4-across    | 用了 `add-slide.recipe.kind="kpi-grid"` — 手堆 4 个卡片即可         |
-| 表格紧贴左上角看起来很小        | `add-table` 没显式给 `w` / `h`                                      |
-| chart Q3/Q4 是 0 看起来塌方     | 时间序列别留 0 占位 — 填预测值并标 "(预测)"                         |
-| 第二次 apply `OutputExists`     | 加 `--overwrite`，或先 `pptx rollback --from-sidecar`               |
-| `titleStyle.bold` 报错          | 移到 `font: { bold: true }` 子对象，顶层不接受                      |
-| `legend: "b"` 被拒              | 用全名 `"bottom"`，shorthand 不接受                                 |
-| `data-labels scope: "all"` 被拒 | scope 是对象，省略 = all；要某系列写 `{ series: 0 }`                |
-| 文字遮挡 watermark / 页脚       | 文本 textbox 区域和 watermark 重叠 — 缩 textbox 的 `w`              |
-| 装饰元素挡住主标题              | 装饰放右上 (10+, 2-4)，与 11in 主标题碰撞 — 改放右下 (10+, 5.4-6.8) |
+| 现象                                | 根因                                                                |
+| ----------------------------------- | ------------------------------------------------------------------- |
+| KPI 渲染成 3+1 不是 4-across        | 用了 `add-slide.recipe.kind="kpi-grid"` — 手堆 4 个卡片即可         |
+| 表格紧贴左上角看起来很小            | `add-table` 没显式给 `w` / `h`                                      |
+| chart Q3/Q4 是 0 看起来塌方         | 时间序列别留 0 占位 — 填预测值并标 "(预测)"                         |
+| 第二次 apply `OutputExists`         | 加 `--overwrite`，或先 `pptx rollback --from-sidecar`               |
+| `titleStyle.bold` 报错              | 移到 `font: { bold: true }` 子对象，顶层不接受                      |
+| `legend: "b"` 被拒                  | 用全名 `"bottom"`，shorthand 不接受                                 |
+| `dataLabels` 的 `scope: "all"` 被拒 | scope 是对象，省略 = all；要某系列写 `{ "scope": { "series": 0 } }` |
+| 文字遮挡 watermark / 页脚           | 文本 textbox 区域和 watermark 重叠 — 缩 textbox 的 `w`              |
+| 装饰元素挡住主标题                  | 装饰放右上 (10+, 2-4)，与 11in 主标题碰撞 — 改放右下 (10+, 5.4-6.8) |
 
 ---
 
@@ -968,7 +975,8 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 2. **装饰宁可小一点** —— 1.4in × 1.4in 圆角矩形比 2.3in × 2.3in 更难碰撞，
    也更精致。
 3. **装饰 z-order 默认在 textbox 之下** —— 但 PPTX 顺序按 op 顺序决定，
-   先 `add-shape` 再 `add-text-box` 文字在上；若反了用 `set-shape-z-order`。
+   先 `add-shape` 再 `add-text-box` 文字在上；若反了，用 `remove-shape`
+   删掉后按正确顺序重新添加。
 4. **不要用纯白装饰在白底页** —— 看不见的装饰等于浪费 op。卡片底用浅色调
    （`C.cardBg` / `C.pale`），与背景拉开 ≥10% 亮度差。
 5. **hero 页装饰用主色变体** —— 深底 (`primaryDk`) + 中色装饰 (`primary`)

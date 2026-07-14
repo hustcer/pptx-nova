@@ -154,7 +154,7 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
    和可复用 chart/diagram 结构。
 6. 图片/截图区域默认转为 asset slot 或占位框；不把 HTML 模板中的一次性位图、远程图、CSS
    背景图直接写入 kit。
-7. CSS texture、SVG pattern、全页背景 SVG/bitmap 默认不要直接迁移为整页 `add-picture`。
+7. CSS texture、SVG pattern、全页背景 SVG/bitmap 默认不要直接迁移为整页 `add-image`。
    这类资源在 xdoc demo/render 路径中可能变成图片占位覆盖层，遮住后续可编辑内容；优先用
    flat fill、线条、重复 shape 或低密度 hatch 表达纹理语气。若必须用图片背景，先在 run
    目录做最小实验并确认 PNG、PowerPoint 打开效果和 layer order，再写入 knownLimits。

@@ -43,7 +43,7 @@
   ],
   "else": [
     {
-      "op": "set-text",
+      "op": "set-text-frame",
       "slide": 0,
       "shape": { "placeholder": { "type": "title" } },
       "text": "已存在的 deck"
@@ -69,7 +69,7 @@
 
 - "如果输入 deck 没标题占位符,就先 add-placeholder"
 - "已有 ≥ 10 页,就跳过封面页直接进内容"
-- "shape 名包含 'Logo' 才走 set-picture-crop"
+- "shape 名包含 'Logo' 才走 crop-image"
 
 ## §3 `foreach` —— 数据驱动的循环展开
 
@@ -124,7 +124,7 @@
   "op": "try",
   "body": [
     {
-      "op": "set-text",
+      "op": "set-text-frame",
       "slide": 0,
       "shape": { "query": { "nameRegex": ".*-callout$" } },
       "text": "替换文字"
@@ -154,7 +154,7 @@
 
 **典型用法**：
 
-- 给同一份 patch 在"修改已有 deck"和"从零创建"两种场景共用：先 try set-text，
+- 给同一份 patch 在"修改已有 deck"和"从零创建"两种场景共用：先 try set-text-frame，
   catch 内 add-text-box
 - 渐进迁移老版 deck 的 placeholder 名字（先按新名 set，catch 内按旧名 set）
 
@@ -319,7 +319,7 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
 
 - 标准 patch op 表达不了的 OOXML 边角场景(e.g. 直接调字符级 `<a:rPr lang="zh-CN">`,
   改 `<p:transition>` 子节点的高级属性等)
-- 给已有 deck 做"批量正则替换" — 比常规 `set-text` 更直接但风险更高
+- 给已有 deck 做"批量正则替换" — 比常规 `set-text-frame` 更直接但风险更高
 - **不要用来做** recipe / patch op 已经覆盖的事(字体颜色、对齐、placeholder 等);
   那等于自废 schema 校验、走老路。
 

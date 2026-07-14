@@ -263,23 +263,23 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ## chart kind × variant 速记
 
-| kind                                                | 推荐 variant                                                          | 备注                                             |
-| --------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------ |
-| `column` / `bar`                                    | `clustered` / `stacked` / `percentStacked`                            | 最常用                                           |
-| `column3D` / `bar3D`                                | `clustered` / `stacked` / `percentStacked`                            | 3D 版本                                          |
-| `line`                                              | `standard` / `markers` / `stacked` / `percentStacked`                 | 加 marker 用 `markers`                           |
-| `line3D`                                            | `standard`                                                            | 仅一种                                           |
-| `area` / `area3D`                                   | `standard` / `stacked` / `percentStacked`                             |                                                  |
-| `pie` / `pie3D`                                     | `standard` / `exploded`                                               | exploded 拉开扇区                                |
-| `doughnut`                                          | `standard` / `exploded`                                               | 圈饼图                                           |
-| `radar`                                             | `standard`                                                            | 雷达                                             |
-| `scatter`                                           | `markers` / `lines` / `linesNoMarkers` / `smooth` / `smoothNoMarkers` | XY 散点                                          |
-| `bubble` / `bubble3D`                               | `standard`                                                            | 气泡（含 size 维度）                             |
-| `stock`                                             | `standard`                                                            | HLC/OHLC K 线                                    |
-| `surface` / `surface3D`                             | `standard` / `wireframe`                                              | 曲面                                             |
-| `combo`                                             | `standard`                                                            | 组合图；支持每个 series 加 `secondaryAxis: true` |
-| `waterfall` / `funnel` / `histogram` / `pareto`     | `standard`                                                            | chartEx 系列（写到 `ppt/charts/chartExN.xml`）   |
-| `treemap` / `sunburst` / `boxWhisker` / `regionMap` | `standard`                                                            | chartEx 系列；数据结构同直角坐标系               |
+| kind                                                | 推荐 variant                                                              | 备注                                             |
+| --------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------ |
+| `column` / `bar`                                    | `clustered` / `stacked` / `percent-stacked`                               | 最常用                                           |
+| `column3D` / `bar3D`                                | `clustered` / `stacked` / `percent-stacked`                               | 3D 版本                                          |
+| `line`                                              | `standard` / `markers` / `stacked` / `percent-stacked`                    | 加 marker 用 `markers`                           |
+| `line3D`                                            | `standard`                                                                | 仅一种                                           |
+| `area` / `area3D`                                   | `standard` / `stacked` / `percent-stacked`                                |                                                  |
+| `pie` / `pie3D`                                     | `standard` / `exploded`                                                   | exploded 拉开扇区                                |
+| `doughnut`                                          | `standard` / `exploded`                                                   | 圈饼图                                           |
+| `radar`                                             | `standard`                                                                | 雷达                                             |
+| `scatter`                                           | `markers` / `lines` / `lines-no-markers` / `smooth` / `smooth-no-markers` | XY 散点                                          |
+| `bubble` / `bubble3D`                               | `standard`                                                                | 气泡（含 size 维度）                             |
+| `stock`                                             | `standard`                                                                | HLC/OHLC K 线                                    |
+| `surface` / `surface3D`                             | `standard` / `wireframe`                                                  | 曲面                                             |
+| `combo`                                             | `standard`                                                                | 组合图；支持每个 series 加 `secondaryAxis: true` |
+| `waterfall` / `funnel` / `histogram` / `pareto`     | `standard`                                                                | chartEx 系列（写到 `ppt/charts/chartExN.xml`）   |
+| `treemap` / `sunburst` / `boxWhisker` / `regionMap` | `standard`                                                                | chartEx 系列；数据结构同直角坐标系               |
 
 不合法的 kind/variant 组合在写之前就会被 schema 拒绝；apply 前用 `--dry-run` 兜底。
 
@@ -537,26 +537,29 @@ patch op `set-chart-text` 目前只覆盖经典 chart part。翻译模式下，t
 ### 一键换 PowerPoint 内置 style（1-48）
 
 ```json
-{ "op": "set-chart-style", "slide": 1, "shape": {...}, "style": 6 }
+{ "op": "set-chart", "slide": 1, "shape": {...}, "style": 6 }
 ```
 
 清掉：
 
 ```json
-{ "op": "set-chart-style", "slide": 1, "shape": {...}, "style": null }
+{ "op": "set-chart", "slide": 1, "shape": {...}, "style": null }
 ```
 
 PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动调色快。
 
 ### 改标题
 
+标题文本和标题样式是两个 op：`set-chart-text` 改文字，`set-chart` 改样式：
+
 ```json
+{ "op": "set-chart-text", "slide": 1, "shape": {...}, "title": "2026 vs 2025 营收" }
+
 {
-  "op": "set-chart-title-style",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "text": "2026 vs 2025 营收",
-  "font": { "name": "Inter", "size": "16pt", "bold": true, "color": "1F1F1F" }
+  "title": { "font": { "name": "Inter", "size": "16pt", "bold": true, "color": "1F1F1F" } }
 }
 ```
 
@@ -564,93 +567,108 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
 
 ```json
 {
-  "op": "set-chart-legend-style",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "position": "bottom",
-  "includeInLayout": false,
-  "font": { "name": "Inter", "size": "10pt" }
+  "legend": {
+    "position": "bottom",
+    "includeInLayout": false,
+    "font": { "name": "Inter", "size": "10pt" }
+  }
 }
 ```
+
+`legend` 还支持 `horizontalOffset`（数值，水平偏移）。
 
 ### 改坐标轴
 
 ```json
 {
-  "op": "set-chart-axis-scale",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "axis": "val",
-  "min": 0,
-  "max": 30,
-  "majorUnit": 5,
-  "minorUnit": 1
+  "axes": [
+    {
+      "axis": "value",
+      "scale": { "min": 0, "max": 30, "majorUnit": 5, "minorUnit": 1 }
+    }
+  ]
 }
 ```
 
-`axis` 取值（schema 同时接受新旧两套；推荐用全名）：
+`axes[].axis` 是严格 enum，只收 canonical 全名：`category` / `value` / `x` / `y`
+（直角坐标图用 category/value；scatter / bubble 用 x/y）。`scale` 还支持
+`reverseOrder` / `crosses`（`auto / custom / max / min`）/ `crossesAt`。
 
-- 全名：`category` / `value` / `x` / `y` / `valueX` / `valueY` / `xAxis` / `yAxis`
-- shorthand 兼容：`cat` / `val` / `categoryAxis` / `valueAxis`
-
-> ⚠️ schema 同时收 `cat` 和 `category`、`val` 和 `value`；但 `ser`、`secondaryVal`、
-> `date` **不在** enum 内。这些 axis-style op 当前只能针对**主轴**；combo 图的
-> 次坐标轴(通过 `data.series[i].secondaryAxis: true` 创建,见 §数据结构 → Combo)
-> 暂不能用 `set-chart-axis-style` 等 op 单独设样式 — 需要时只能用
-> `patch-ooxml`(`--allow-raw-xml`)直改 `c:secondaryValAx` 节点。
+> ⚠️ `cat` / `val` / `categoryAxis` / `valueAxis` / `valueX` / `xAxis` 之类的旧简写，
+> 以及 `ser`、`secondaryVal`、`date`，**都不在** enum 内。axis 定位当前只能针对
+> **主轴**；combo 图的次坐标轴(通过 `data.series[i].secondaryAxis: true` 创建,
+> 见 §数据结构 → Combo)暂不能用 `set-chart` 的 `axes` 条目单独设样式 — 需要时
+> 只能用 `patch-ooxml`(`--allow-raw-xml`)直改 `c:secondaryValAx` 节点。
 
 ### 改轴线 / 网格线 / 刻度标签
 
 ```json
-{ "op": "set-chart-axis-style", "slide": 1, "shape": {...}, "axis": "value",
-  "style": { "line": "0.75pt", "color": "BFBFBF" } }
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "axes": [{ "axis": "value", "line": { "width": "0.75pt", "color": "BFBFBF" } }] }
 
-{ "op": "set-chart-gridline-style", "slide": 1, "shape": {...}, "axis": "value",
-  "style": { "line": "0.5pt", "color": "EEEEEE", "dash": "dot" } }
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "axes": [{ "axis": "value", "gridlines": { "width": "0.5pt", "color": "EEEEEE" } }] }
 
-{ "op": "set-chart-axis-ticks", "slide": 1, "shape": {...}, "axis": "value",
-  "majorTick": "outside", "minorTick": "none", "tickLabelPosition": "nextToAxis",
-  "numberFormat": "0.0%" }
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "axes": [{ "axis": "value",
+             "ticks": { "major": "outside", "minor": "none",
+                        "labelPosition": "next-to-axis", "numberFormat": "0.0%" } }] }
 ```
 
-`majorTick` / `minorTick` 取值：`cross / inside / none / outside`（**不接受**
-`out` / `in` 等简写）。`tickLabelPosition` 取值：`high / low / nextToAxis / none`。
+`ticks.major` / `ticks.minor` 取值：`cross / inside / none / outside`（**不接受**
+`out` / `in` 等简写）。`ticks.labelPosition` 取值：`high / low / next-to-axis / none`。
 
 ### 改某系列样式
 
 ```json
 {
-  "op": "set-chart-series-style",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "series": 0,
-  "fill": { "kind": "solid", "color": "1A73E8" },
-  "line": { "width": "2pt", "color": "1A73E8" },
-  "marker": { "symbol": "circle", "size": 6, "fill": {...} },
-  "smooth": false,
-  "invertIfNegative": true
+  "series": [
+    {
+      "series": 0,
+      "fill": { "kind": "solid", "color": "1A73E8" },
+      "line": { "width": "2pt", "color": "1A73E8" },
+      "marker": { "symbol": "circle", "size": 6, "fill": "FFFFFF" },
+      "smooth": false,
+      "invertIfNegative": true
+    }
+  ]
 }
 ```
 
-`series` 是 0-based 索引；可以多 op 设置不同系列。
+`series` 是 0-based 索引；同一个 `series` 数组里可以给不同系列各写一条（同一系列
+重复出现且字段冲突会被拒绝）。
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：常用值 `circle / square / diamond /
-triangle / x / star / dash / dot / plus / none / auto`。
+triangle / x / star / dash / dot / plus / none / auto`。marker 的 `fill` /
+> `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 数据标签
 
 ```json
 {
-  "op": "set-chart-data-labels",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "scope": { "series": 0 },
-  "showValue": true,
-  "showPercentage": false,
-  "showCategoryName": false,
-  "showSeriesName": false,
-  "position": "outsideEnd",
-  "numberFormat": "#,##0"
+  "dataLabels": [
+    {
+      "scope": { "series": 0 },
+      "showValue": true,
+      "showPercentage": false,
+      "showCategoryName": false,
+      "showSeriesName": false,
+      "position": "outside-end",
+      "numberFormat": "#,##0"
+    }
+  ]
 }
 ```
 
@@ -662,7 +680,7 @@ triangle / x / star / dash / dot / plus / none / auto`。
 - 想同时给 plot 显式指定：`{ "plot": 0 }`
 
 `position` 必须用全名（**shorthand 不接受**）：
-`above / below / bestFit / center / insideBase / insideEnd / left / outsideEnd / right`。
+`above / below / best-fit / center / inside-base / inside-end / left / outside-end / right`。
 
 > ⚠️ 老版本里见过的 `"all"` / `"ctr"` / `"l"` / `"r"` / `"t"` / `"b"` / `"inBase"` /
 > `"inEnd"` / `"outEnd"` 全部被 schema 拒绝。
@@ -671,16 +689,19 @@ triangle / x / star / dash / dot / plus / none / auto`。
 
 ```json
 {
-  "op": "set-chart-plot-style",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "gapWidth": 150,
-  "overlap": -10,
-  "varyByCategories": true,
-  "bubbleScale": 100
+  "plot": {
+    "gapWidth": 150,
+    "overlap": -10,
+    "varyByCategories": true,
+    "bubbleScale": 100
+  }
 }
 ```
 
+- `index` 多 plot 图表用来选 plot（非负整数，默认 0）
 - `gapWidth` 0-500（柱间距百分比）
 - `overlap` -100 to 100（柱重叠）
 - `varyByCategories` 单系列时每类目不同颜色
@@ -690,29 +711,39 @@ triangle / x / star / dash / dot / plus / none / auto`。
 
 ```json
 {
-  "op": "set-chart-point-style",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "series": 0,
-  "point": 2,
-  "fill": { "kind": "solid", "color": "EA4335" },
-  "marker": { "kind": "diamond", "size": 10 }
+  "series": [
+    {
+      "series": 0,
+      "points": [
+        {
+          "point": 2,
+          "fill": { "kind": "solid", "color": "EA4335" },
+          "marker": { "symbol": "diamond", "size": 10 }
+        }
+      ]
+    }
+  ]
 }
 ```
 
 适合"高亮某个数据点"。
 
-### 标记线/虚线
+### 只改 marker（标记符号）
 
 ```json
 {
-  "op": "set-chart-marker-style",
+  "op": "set-chart",
   "slide": 1,
   "shape": {...},
-  "series": 0,
-  "style": { "symbol": "square", "size": 6,
-             "fill": { "kind": "solid", "color": "FFFFFF" },
-             "line": { "width": "1pt", "color": "1A73E8" } }
+  "series": [
+    {
+      "series": 0,
+      "marker": { "symbol": "square", "size": 6, "fill": "FFFFFF", "line": "1A73E8" }
+    }
+  ]
 }
 ```
 
@@ -724,7 +755,7 @@ triangle / x / star / dash / dot / plus / none / auto`。
   "ops": [
     { "op": "add-slide", "layout": { "type": "title" } },
     {
-      "op": "set-text",
+      "op": "set-text-frame",
       "slide": 0,
       "shape": { "placeholder": { "type": "title" } },
       "text": "营收分析"
@@ -749,20 +780,18 @@ triangle / x / star / dash / dot / plus / none / auto`。
         ]
       }
     },
-    { "op": "set-chart-style", "slide": 0, "shape": { "name": "Revenue" }, "style": 6 },
     {
-      "op": "set-chart-data-labels",
+      "op": "set-chart",
       "slide": 0,
       "shape": { "name": "Revenue" },
-      "showValue": true,
-      "position": "outsideEnd",
-      "numberFormat": "#,##0"
+      "style": 6,
+      "dataLabels": [{ "showValue": true, "position": "outside-end", "numberFormat": "#,##0" }]
     }
   ]
 }
 ```
 
-> ⚠️ 上例最后一个 op 省略了 `scope` —— 这等价于 plot 0（覆盖所有系列）。要只标
+> ⚠️ 上例 `dataLabels` 条目省略了 `scope` —— 这等价于 plot 0（覆盖所有系列）。要只标
 > 某一个系列，加 `"scope": { "series": 1 }`。
 
 ## 时间序列 / 预测的视觉陷阱
@@ -772,7 +801,7 @@ triangle / x / star / dash / dot / plus / none / auto`。
 
 1. **补预测值**：把 Q3 / Q4 用估算值填上，类目轴标注 `"Q3 (预测)"` / `"Q4 (预测)"`
 2. **改用部分类目**：只展示已有数据的 `Q1 / Q2`，下半年单独做 callout
-3. **添加 highlight 区**：用 `set-chart-point-style` 把预测点改成虚线/不同色
+3. **添加 highlight 区**：用 `set-chart` 的 `series[].points` 把预测点改成虚线/不同色
 
 不要把"暂无数据"和"业务断崖"留给观众自己分辨。
 
@@ -797,7 +826,7 @@ triangle / x / star / dash / dot / plus / none / auto`。
 - ❌ 不要把 `categories` 当成 `series`（categories 是 X 轴标签，series 才是数据线）
 - ❌ scatter / bubble 用了 `categories + values` 会失败 — 用 `points: [{x,y}]`
 - ❌ stock 的 high/low/close 数组长度必须等于 categories
-- ❌ 不要假定 chart 内部坐标系跟 slide 一样 — `set-chart-axis-scale` 是 chart-local
+- ❌ 不要假定 chart 内部坐标系跟 slide 一样 — `set-chart` 的 `axes[].scale` 是 chart-local
 
 ## ChartEx creation and verification notes
 

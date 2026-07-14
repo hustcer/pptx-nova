@@ -96,7 +96,7 @@ xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --daemon --json
 Once the candidate is stable, run one semantic diff and the evidence required
 by `edit-contract.json`, then run `pptx-nova-edit-contract-gate.mjs --strict`.
 Do not publish while `agentGate.passed=false`. For visible text-only edits that
-must preserve formatting, require `style-diff`; whole-frame `set-text` can
+must preserve formatting, require `style-diff`; whole-frame `set-text-frame` can
 silently replace small styled runs even when dry-run and vision-check pass.
 
 Run changed-scope `vision-diff` and render PNG/contact-sheet previews when the edit changes
@@ -157,18 +157,18 @@ template rules, brand/style changes, or full visual QA.
 
 ## Common Edit Operations
 
-- Text replacement: `set-text`, `set-paragraph`, `set-run`.
+- Text replacement: `set-text-frame`, `set-paragraph`, `set-run`.
 - Paragraph formatting: `set-paragraph`; do not use `set-paragraph` for
   alignment.
-- Theme/font changes: `set-theme-color`, `set-theme-font`, or brand helpers.
+- Theme/font changes: `set-theme` (`colors` / `fonts`), or brand helpers.
 - Slide duplication: `duplicate-slide`.
 - Cross-deck whole-slide copy: `xdoc pptx copy-from`.
 - Chart data: `set-chart-data`; read `charts.md` for chart semantics.
-- Table edits: `set-table-cell`, `set-table-data`, `import-table-data`; read
-  `tables.md` for formulas and CSV imports.
+- Table edits: `set-table` (cells/style/dimensions/borders), `set-table-data`
+  (matrix/CSV/JSON bulk replacement); read `tables.md` for formulas and CSV imports.
 - Image replacement: remove/add picture at the same bbox, or use crop ops when
   appropriate.
-- Notes: `set-slide-notes`, `set-slide-notes-rich-text`.
+- Notes: `set-slide-notes` (plain `text` or rich `paragraphs`).
 - Animations/transitions: read `animations.md`; use `set-slide-transition`,
   `set-slide-animations`, `set-slide-animations`, or `set-slide-animations`
   only after inspect/dry-run proves the timing is in the supported safe subset.

@@ -974,6 +974,42 @@ test('consulting-dark benchmark chart omits the unsupported none legend value', 
   assert.equal('legend' in chart, false)
 })
 
+test('quarterly report patch uses the current chart legend enum', () => {
+  const outDir = mkdtempSync(join(tmpdir(), 'pptx-nova-quarterly-report-'))
+  const outputPath = join(outDir, 'deck.pptx')
+  const result = spawnSync(
+    'xdoc',
+    [
+      'pptx',
+      'apply',
+      '-p',
+      skillPath('assets/examples/quarterly-report.patch.json'),
+      '-o',
+      outputPath,
+      '--dry-run',
+      '--json',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 0, result.stderr || result.stdout)
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.status, 'success')
+})
+
+test('deck generator data-room chart omits the unsupported none legend value', () => {
+  const result = spawnSync(
+    process.execPath,
+    [skillPath('assets/examples/deck-generator-template.mjs'), '--layout', 'data-room'],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 0, result.stderr || result.stdout)
+  const patch = JSON.parse(result.stdout)
+  const chart = patch.ops.find((op) => op.op === 'add-chart' && op.name === 'DataDriverChart')
+
+  assert.ok(chart, 'data-room layout should emit the loss-driver chart')
+  assert.equal('legend' in chart, false)
+})
+
 test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {
   const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
   const result = kit.createDeck({

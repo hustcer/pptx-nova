@@ -2002,7 +2002,6 @@ function slideDataRoomDashboard(total) {
     w: '7.25in',
     h: '2.22in',
     name: 'DataDriverChart',
-    legend: 'none',
     data: {
       categories: [
         'Competitor switch',

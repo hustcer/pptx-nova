@@ -101,7 +101,7 @@
       "h": "4.5in",
       "name": "Revenue",
       "title": "季度营收（万元）",
-      "legend": "b",
+      "legend": "bottom",
       "data": {
         "categories": ["Q1", "Q2", "Q3", "Q4"],
         "series": [

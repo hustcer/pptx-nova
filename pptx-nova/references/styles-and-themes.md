@@ -21,7 +21,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 
 ```json
 "fill": {
-  "kind": "solid",
+  "type": "solid",
   "schemeClr": "accent1",
   "lumMod": 0.8,
   "lumOff": 0.2
@@ -285,7 +285,7 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 如果只想改某些 shape 不动 theme：
 
 ```json
-{ "op": "set-shape", "slide": 0, "shape": {...}, "fill": { "kind": "solid", "color": "1A73E8" } }
+{ "op": "set-shape", "slide": 0, "shape": {...}, "fill": { "type": "solid", "color": "1A73E8" } }
 ```
 
 ## 整 deck 换肤：remap-theme
@@ -316,7 +316,7 @@ xdoc pptx remap-theme clean.pptx \
 {
   "op": "set-slide-background",
   "slide": 0,
-  "fill": { "kind": "solid", "color": "F5F7FA" },
+  "fill": { "type": "solid", "color": "F5F7FA" },
   "followMaster": false
 }
 ```
@@ -328,7 +328,7 @@ xdoc pptx remap-theme clean.pptx \
 ```json
 {
   "op": "set-master",
-  "background": { "kind": "gradient", "preset": "topSpotlight1" }
+  "background": { "type": "gradient", "preset": "topSpotlight1" }
 }
 ```
 

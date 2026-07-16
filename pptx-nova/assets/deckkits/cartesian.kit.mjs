@@ -61,13 +61,13 @@ function makeCartesianOps() {
     op: 'set-shape',
     slide: s,
     shape: { name },
-    fill: { kind: 'solid', color },
+    fill: { type: 'solid', color },
   })
   const noFillOp = (s, name) => ({
     op: 'set-shape',
     slide: s,
     shape: { name },
-    fill: { kind: 'none' },
+    fill: { type: 'none' },
   })
   const lineOp = (s, name, color = C.line, width = '0.75pt', dash) => ({
     op: 'set-shape',
@@ -240,7 +240,7 @@ function renderSlide(ctx, s, slide) {
       series: [
         {
           series: 0,
-          fill: { kind: 'solid', color: C.chartPrimary },
+          fill: { type: 'solid', color: C.chartPrimary },
           line: { width: '0.5pt', color: C.chartPrimary },
         },
       ],
@@ -252,7 +252,7 @@ function renderSlide(ctx, s, slide) {
       series: [
         {
           series: 1,
-          fill: { kind: 'none' },
+          fill: { type: 'none' },
           line: { width: '1pt', color: C.line, dash: 'dash' },
         },
       ],

@@ -218,7 +218,7 @@ cloud-callout`。
   "op": "set-shape",
   "slide": 0,
   "shape": { "name": "KPI Card" },
-  "fill": { "kind": "solid", "color": "1A73E8" }
+  "fill": { "type": "solid", "color": "1A73E8" }
 }
 ```
 
@@ -311,7 +311,7 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
     "italic": false,
     "underline": "single",
     "color": "1F1F1F",
-    "fill": { "kind": "solid", "color": "1F1F1F" }
+    "fill": { "type": "solid", "color": "1F1F1F" }
   }
 }
 ```
@@ -440,7 +440,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 | `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops                                |
 | `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支                                    |
 | `define-macro`                             | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）                                  |
-| `use-macro`                                | patch  | 宏：展开已 `define-macro` 的命名宏，用 `with` 传参                             |
+| `use-macro`                                | patch  | 宏：展开已 `define-macro` 的命名宏，用 `args` 传参                             |
 | `patch-ooxml`                              | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）                            |
 
 详见 `recipes.md` / `data-driven.md` / `control-flow-and-raw-xml.md`。
@@ -532,7 +532,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
       "op": "set-shape",
       "slide": 0,
       "shape": { "name": "Watermark" },
-      "fill": { "kind": "solid", "color": "1A73E8" }
+      "fill": { "type": "solid", "color": "1A73E8" }
     },
     {
       "op": "set-text-frame",

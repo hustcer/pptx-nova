@@ -547,7 +547,7 @@ function makePageTypes(builders, chrome, components, total) {
       slide: s,
       shape: { name: nm(s, 'HeroBg') },
       fill: {
-        kind: 'gradient',
+        type: 'gradient',
         angle: 0,
         stops: [
           { pos: 0, color: '001B35' },
@@ -574,7 +574,7 @@ function makePageTypes(builders, chrome, components, total) {
         op: 'set-shape',
         slide: s,
         shape: { name: nm(s, `Ring${i}`) },
-        fill: { kind: 'solid', color: C.white, alpha },
+        fill: { type: 'solid', color: C.white, alpha },
       })
     })
     ;[
@@ -590,7 +590,7 @@ function makePageTypes(builders, chrome, components, total) {
         op: 'set-shape',
         slide: s,
         shape: { name: nm(s, `HeroDot${i}`) },
-        fill: { kind: 'solid', color: C.white, alpha },
+        fill: { type: 'solid', color: C.white, alpha },
       })
     })
     tx(s, nm(s, 'Eyebrow'), 0.82, 0.44, 3.9, 0.18, data.eyebrow, {
@@ -603,7 +603,7 @@ function makePageTypes(builders, chrome, components, total) {
       op: 'set-shape',
       slide: s,
       shape: { name: nm(s, 'EyebrowRule') },
-      fill: { kind: 'solid', color: C.white, alpha: 0.2 },
+      fill: { type: 'solid', color: C.white, alpha: 0.2 },
     })
     tx(s, nm(s, 'Title1'), 0.78, 1.1, 5.85, 0.58, data.title[0], {
       name: FONT_EN,

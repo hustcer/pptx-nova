@@ -181,7 +181,7 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
       "row": 0,
       "col": 0,
       "style": {
-        "fill": { "kind": "solid", "color": "1A73E8" },
+        "fill": { "type": "solid", "color": "1A73E8" },
         "font": { "name": "Inter", "size": "14pt", "bold": true, "color": "FFFFFF" },
         "alignment": "center",
         "verticalAnchor": "middle",
@@ -416,7 +416,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
           "row": 0,
           "col": 0,
           "style": {
-            "fill": { "kind": "solid", "color": "1A73E8" },
+            "fill": { "type": "solid", "color": "1A73E8" },
             "font": { "color": "FFFFFF", "bold": true }
           }
         }

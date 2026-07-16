@@ -634,7 +634,7 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
   "series": [
     {
       "series": 0,
-      "fill": { "kind": "solid", "color": "1A73E8" },
+      "fill": { "type": "solid", "color": "1A73E8" },
       "line": { "width": "2pt", "color": "1A73E8" },
       "marker": { "symbol": "circle", "size": 6, "fill": "FFFFFF" },
       "smooth": false,
@@ -720,7 +720,7 @@ triangle / x / star / dash / dot / plus / none / auto`。marker 的 `fill` /
       "points": [
         {
           "point": 2,
-          "fill": { "kind": "solid", "color": "EA4335" },
+          "fill": { "type": "solid", "color": "EA4335" },
           "marker": { "symbol": "diamond", "size": 10 }
         }
       ]

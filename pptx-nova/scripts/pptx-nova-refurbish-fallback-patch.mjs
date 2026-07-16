@@ -430,7 +430,7 @@ function buildArtifacts(args) {
       minor: { typeface: fallback.fonts.body, eastAsian: fallback.fonts.cjk },
     },
   })
-  ops.push({ op: 'set-master', background: { kind: 'solid', color: palette.background } })
+  ops.push({ op: 'set-master', background: { type: 'solid', color: palette.background } })
   ops.push({
     op: 'set-default-text-style',
     levels: [
@@ -462,7 +462,7 @@ function buildArtifacts(args) {
     ops.push({
       op: 'set-slide-background',
       slide: slideIndex,
-      fill: { kind: 'solid', color: palette.background },
+      fill: { type: 'solid', color: palette.background },
       followMaster: false,
     })
     mapSlides.push({
@@ -529,7 +529,7 @@ function buildArtifacts(args) {
             op: 'set-shape',
             slide: slideIndex,
             shape: selector,
-            fill: { kind: 'solid', color },
+            fill: { type: 'solid', color },
           })
         }
         if (!shape.lineNoFill) {

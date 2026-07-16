@@ -175,7 +175,7 @@
               "name": "Status pill"
             },
             "fill": {
-              "kind": "solid",
+              "type": "solid",
               "color": "1F77B4"
             }
           }

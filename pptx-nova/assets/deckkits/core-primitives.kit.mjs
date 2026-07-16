@@ -124,7 +124,7 @@ export function createOps(options = {}) {
     return name
   }
   const fill = (s, name, color) =>
-    ops.push({ op: 'set-shape', slide: s, shape: { name }, fill: { kind: 'solid', color } })
+    ops.push({ op: 'set-shape', slide: s, shape: { name }, fill: { type: 'solid', color } })
   const noLine = (s, name) =>
     ops.push({ op: 'set-shape', slide: s, shape: { name }, line: { noLine: true } })
   const setLine = (s, name, color, width = '0.75pt') =>
@@ -209,7 +209,7 @@ export function createOps(options = {}) {
 
   const addSlide = (s, bg) => {
     ops.push({ op: 'add-slide', layout: 'blank' })
-    if (bg) ops.push({ op: 'set-slide-background', slide: s, fill: { kind: 'solid', color: bg } })
+    if (bg) ops.push({ op: 'set-slide-background', slide: s, fill: { type: 'solid', color: bg } })
   }
 
   const icon = (s, name, iconName, x, y, w, h, options) =>

@@ -22,8 +22,7 @@
 `controlExpansion` 元数据），方便你审计。带 `--explain` 还会在
 `explanations[<i>].expandedOps` 里给出"该元 op 展开成哪些底层 op"。
 
-> canonical v1 schema 只接受上表字段；不要使用 `thenOps`、`elseOps`、`ops`、
-> `catchOps`、`with` 等旧别名。
+> canonical v1 schema 只接受上表字段；不要使用旧版控制流或宏字段别名。
 
 ## §2 `if` —— 按状态分支
 

@@ -74,7 +74,7 @@ function makeOps() {
       op: 'set-shape',
       slide: s,
       shape: { name },
-      fill: { kind: 'solid', color, alpha },
+      fill: { type: 'solid', color, alpha },
     })
 
   const alphaBox = (s, base, x, y, w, h, color, alpha) => {
@@ -121,7 +121,8 @@ function makeOps() {
       slide: s,
       shape: { name },
       fill: {
-        kind: 'radialGradient',
+        type: 'gradient',
+        path: 'circle',
         fillToRect: { l: 0.5, t: 0.5, r: 0.5, b: 0.5 },
         stops: [
           { pos: 0, color: { rgb: C.sun, alpha: alpha * 0.95 } },

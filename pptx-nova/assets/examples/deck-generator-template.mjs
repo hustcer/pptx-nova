@@ -374,7 +374,7 @@ const nm = (slide, base) => `S${slide}_${base}`
 
 const addThemedSlide = (slide, background = PAGE_BG) => {
   ops.push({ op: 'add-slide', layout: 'blank' })
-  ops.push({ op: 'set-slide-background', slide, fill: { kind: 'solid', color: background } })
+  ops.push({ op: 'set-slide-background', slide, fill: { type: 'solid', color: background } })
 }
 
 const assertWithinSlide = (slide, name, x, y, w, h) => {
@@ -409,7 +409,7 @@ const shape = (slide, name, kind, x, y, w, h) => {
 }
 
 const fill = (slide, name, color) => {
-  ops.push({ op: 'set-shape', slide, shape: { name }, fill: { kind: 'solid', color } })
+  ops.push({ op: 'set-shape', slide, shape: { name }, fill: { type: 'solid', color } })
 }
 
 const noLine = (slide, name) => {
@@ -600,7 +600,7 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
             ? TABLE_BAND_TEXT
             : TABLE_BODY_TEXT
       tableCellStyle(slide, tableName, row, col, {
-        fill: { kind: 'solid', color: fillColor },
+        fill: { type: 'solid', color: fillColor },
         font: {
           name: FONT_LATIN,
           size: isHeader ? '12pt' : '13pt',
@@ -1198,14 +1198,14 @@ function slideChart(total) {
     slide: s,
     shape: { name: 'RevChart' },
     series: 0,
-    fill: { kind: 'solid', color: CHART_PALETTE[1] ?? C.divider },
+    fill: { type: 'solid', color: CHART_PALETTE[1] ?? C.divider },
   })
   ops.push({
     op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
     series: 1,
-    fill: { kind: 'solid', color: CHART_PALETTE[0] ?? C.primary },
+    fill: { type: 'solid', color: CHART_PALETTE[0] ?? C.primary },
   })
   ops.push({
     op: 'set-chart',
@@ -2018,7 +2018,7 @@ function slideDataRoomDashboard(total) {
     slide: s,
     shape: { name: 'DataDriverChart' },
     series: 0,
-    fill: { kind: 'solid', color: C.warn },
+    fill: { type: 'solid', color: C.warn },
   })
   cardBox(s, nm(s, 'DataDecision'), 8.85, 3.85, 3.7, 2.65, C.primaryDp)
   tx(s, nm(s, 'DataDecisionNum'), 9.25, 4.35, 2.9, 0.72, '78%', {

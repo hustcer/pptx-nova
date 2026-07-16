@@ -250,7 +250,7 @@ xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.j
 - **Agent 不读源码也能用**：拿到 dry-run 错误时，比 grep schema 更直接 —
   `explanations[opIndex].schema.{required,optional,fieldNotes}` 直接告诉你这条
   op 还缺什么字段、字段类型是什么 `$ref`
-- **元 op 展开审计**：对 `if` / `foreach` / `try` / `use` / recipe 等会展开的
+- **元 op 展开审计**：对 `if` / `foreach` / `try` / `use-macro` / recipe 等会展开的
   元 op，`explanations[i].expandedOps[]` 列出展开后实际执行的底层 op 名，比
   自己读 `opResults[].controlExpansion` 更直观
 - **token 友好**：与 `xdoc schema` 一次性几万 token 不同，`--explain` 只在

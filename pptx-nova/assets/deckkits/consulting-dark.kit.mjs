@@ -705,7 +705,7 @@ function makePageTypes(
       series: [
         {
           series: 0,
-          fill: { kind: 'solid', color: C.primary },
+          fill: { type: 'solid', color: C.primary },
         },
       ],
       dataLabels: [
@@ -772,7 +772,7 @@ function makePageTypes(
           row: r,
           col: c,
           style: {
-            fill: { kind: 'solid', color: fillColor },
+            fill: { type: 'solid', color: fillColor },
             font: {
               name: c === 0 ? FONT_CN : FONT_EN,
               size: isHeader ? '12pt' : '12.5pt',

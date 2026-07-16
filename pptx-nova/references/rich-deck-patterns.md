@@ -92,7 +92,7 @@
     "x": "0in", "y": "0in", "w": "13.333in", "h": "0.08in",
     "name": "TopBrandBar" },
   { "op": "set-shape", "slide": N, "shape": { "name": "TopBrandBar" },
-    "fill": { "kind": "solid", "color": "1A73E8" } },
+    "fill": { "type": "solid", "color": "1A73E8" } },
   { "op": "set-shape", "slide": N, "shape": { "name": "TopBrandBar" },
     "line": { "noLine": true } },
 
@@ -142,7 +142,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "op": "set-shape",
     "slide": 0,
     "shape": { "name": "CoverTopBar" },
-    "fill": { "kind": "solid", "color": "1A73E8" }
+    "fill": { "type": "solid", "color": "1A73E8" }
   },
   {
     "op": "set-shape",
@@ -165,7 +165,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "op": "set-shape",
     "slide": 0,
     "shape": { "name": "CoverAccentBar" },
-    "fill": { "kind": "solid", "color": "1A73E8" }
+    "fill": { "type": "solid", "color": "1A73E8" }
   },
   {
     "op": "set-shape",
@@ -272,7 +272,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "op": "set-shape",
     "slide": 1,
     "shape": { "name": "AgendaCard1" },
-    "fill": { "kind": "solid", "color": "F8F9FA" }
+    "fill": { "type": "solid", "color": "F8F9FA" }
   },
   {
     "op": "set-shape",
@@ -351,7 +351,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiCard1" },
-    "fill": { "kind": "solid", "color": "FFFFFF" }
+    "fill": { "type": "solid", "color": "FFFFFF" }
   },
   {
     "op": "set-shape",
@@ -375,7 +375,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiTopBar1" },
-    "fill": { "kind": "solid", "color": "1A73E8" }
+    "fill": { "type": "solid", "color": "1A73E8" }
   },
   {
     "op": "set-shape",
@@ -439,7 +439,7 @@ shape name 用 `TopBrandBar_S{N}` 等区分，避免跨 slide selector 歧义。
     "op": "set-shape",
     "slide": 2,
     "shape": { "name": "KpiDelta1" },
-    "fill": { "kind": "solid", "color": "E6F4EA" }
+    "fill": { "type": "solid", "color": "E6F4EA" }
   },
   {
     "op": "set-shape",
@@ -551,8 +551,8 @@ chart：
     "slide": 3,
     "shape": { "name": "RevChart" },
     "series": [
-      { "series": 0, "fill": { "kind": "solid", "color": "BDC1C6" } },
-      { "series": 1, "fill": { "kind": "solid", "color": "1A73E8" } }
+      { "series": 0, "fill": { "type": "solid", "color": "BDC1C6" } },
+      { "series": 1, "fill": { "type": "solid", "color": "1A73E8" } }
     ],
     "dataLabels": [{ "scope": { "series": 1 }, "showValue": true, "position": "outside-end" }],
     "axes": [
@@ -584,7 +584,7 @@ callout 卡片（3 个，纵向排列）：
     "op": "set-shape",
     "slide": 3,
     "shape": { "name": "Callout1" },
-    "fill": { "kind": "solid", "color": "E8F0FE" }
+    "fill": { "type": "solid", "color": "E8F0FE" }
   },
   {
     "op": "set-shape",
@@ -694,7 +694,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "op": "set-shape",
     "slide": 4,
     "shape": { "name": "ConclusionBanner" },
-    "fill": { "kind": "solid", "color": "1A73E8" }
+    "fill": { "type": "solid", "color": "1A73E8" }
   },
   {
     "op": "set-shape",
@@ -745,7 +745,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "op": "set-shape",
     "slide": 5,
     "shape": { "name": "Pillar1" },
-    "fill": { "kind": "solid", "color": "F8F9FA" }
+    "fill": { "type": "solid", "color": "F8F9FA" }
   },
   {
     "op": "set-shape",
@@ -768,7 +768,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "op": "set-shape",
     "slide": 5,
     "shape": { "name": "Pillar1Bar" },
-    "fill": { "kind": "solid", "color": "1A73E8" }
+    "fill": { "type": "solid", "color": "1A73E8" }
   },
   {
     "op": "set-shape",
@@ -810,7 +810,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "op": "set-shape",
     "slide": 6,
     "shape": { "name": "HeroAccentBar" },
-    "fill": { "kind": "solid", "color": "FBBC04" }
+    "fill": { "type": "solid", "color": "FBBC04" }
   },
   {
     "op": "set-shape",
@@ -884,7 +884,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "op": "set-shape",
     "slide": 6,
     "shape": { "name": "Takeaway1" },
-    "fill": { "kind": "solid", "color": "FFFFFF" }
+    "fill": { "type": "solid", "color": "FFFFFF" }
   },
   {
     "op": "set-shape",

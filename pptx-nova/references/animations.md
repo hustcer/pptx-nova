@@ -20,7 +20,7 @@ xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-ani
 - 局部安全删除：`set-slide-animations`，用 `inspect.animations[].id` 定位。
 - 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fadeOut/wipeOut/flyOut`
   或 `phase: "exit"`。
-- 支持的 trigger：`onClick`、`withPrevious`、`afterPrevious`。
+- 支持的 trigger：`on-click`、`with-previous`、`after-previous`。
 - 支持的文本 build：`target: { shape, paragraph?, level? }` 配合
   `build: "all-at-once" | "by-paragraph" | "by-level"`。
 
@@ -65,7 +65,7 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
         {
           "shape": { "name": "KPI Card" },
           "effect": "fade",
-          "trigger": "onClick",
+          "trigger": "on-click",
           "duration": 450,
           "delay": 0
         }
@@ -128,7 +128,7 @@ dry-run 重点看：
       },
       "build": "by-paragraph",
       "effect": "appear",
-      "trigger": "onClick"
+      "trigger": "on-click"
     }
   ]
 }
@@ -146,7 +146,7 @@ dry-run 重点看：
   "op": "set-slide-transition",
   "slide": 0,
   "type": "fade",
-  "speed": "med",
+  "speed": "medium",
   "advanceOnClick": true,
   "advanceAfter": 5000
 }
@@ -189,7 +189,7 @@ PowerPoint clean-open -> 播放/点击复核(可用时) -> final summary
 
 - PNG/contact sheet 只能证明静态最终态可读，不能证明动画顺序正确。
 - 若用户关心播放，必须用 PowerPoint 或 viewer 播放复核点击次数、触发顺序、delay/duration 和自动切页。
-- 有 `withPrevious` / `afterPrevious` 时，检查 dry-run/diff 是否报告 timing 改动符合预期，不要把 delay 累加成意外长等待。
+- 有 `with-previous` / `after-previous` 时，检查 dry-run/diff 是否报告 timing 改动符合预期，不要把 delay 累加成意外长等待。
 
 最终摘要列出动画能力审计：xdoc 版本、相关 op schema 是否披露、涉及的动画 id、哪些 step 被编辑/删除、
 哪些 preserve-only 风险保留，以及 clean-open / 播放复核是否完成。

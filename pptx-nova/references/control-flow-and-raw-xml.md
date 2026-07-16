@@ -44,7 +44,7 @@
     {
       "op": "set-text-frame",
       "slide": 0,
-      "shape": { "placeholder": { "type": "title" } },
+      "shape": { "placeholder": "title" },
       "text": "已存在的 deck"
     }
   ]

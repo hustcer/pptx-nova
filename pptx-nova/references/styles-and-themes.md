@@ -111,7 +111,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 {
   "op": "set-shape",
   "slide": 0,
-  "shape": { "id": "..." },
+  "shape": { "id": 2 },
   "line": {
     "width": "1pt",
     "color": "1A73E8",
@@ -136,7 +136,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 {
   "op": "set-run",
   "slide": 0,
-  "shape": { "id": "..." },
+  "shape": { "id": 2 },
   "paragraph": 0,
   "run": 0,
   "font": {
@@ -145,9 +145,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
     "bold": true,
     "italic": false,
     "underline": "single",
-    "color": "1F1F1F",
-    "highlight": "FFFF00",
-    "strike": "single"
+    "color": "1F1F1F"
   }
 }
 ```
@@ -157,12 +155,10 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 | 字段              | 含义                                                              |
 | ----------------- | ----------------------------------------------------------------- |
 | `name`            | 字体族名（如 `Inter` / `Microsoft YaHei` / `Source Han Sans SC`） |
-| `size`            | `"<n>pt"` 或裸数字（=半磅）                                       |
+| `size`            | 优先使用 `"<n>pt"`；裸数字按通用 length 规则解释                  |
 | `bold` / `italic` | 布尔                                                              |
 | `underline`       | `none / single / double / wavy / heavy / ...`                     |
-| `strike`          | `none / single / double`                                          |
-| `color`           | 字体颜色（hex 或 schemeClr）                                      |
-| `highlight`       | 高亮色                                                            |
+| `color`           | 字体颜色（6 位 hex）                                              |
 | `fill`            | 用 fill 对象（gradient/pattern）填字符                            |
 
 ### Theme 字体（一改全改）
@@ -237,7 +233,7 @@ Fonts 权重子集:
 {
   "op": "set-run",
   "slide": 0,
-  "shape": { "id": "title-1" },
+  "shape": { "id": 2 },
   "paragraph": 0,
   "run": 0,
   "font": { "name": "Barlow Black", "size": "54pt" }
@@ -260,7 +256,7 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 {
   "op": "set-run",
   "slide": 0,
-  "shape": { "id": "..." },
+  "shape": { "id": 2 },
   "paragraph": 0,
   "run": 0,
   "font": { "name": "Inter", "bold": true, "italic": true }
@@ -328,7 +324,7 @@ xdoc pptx remap-theme clean.pptx \
 ```json
 {
   "op": "set-master",
-  "background": { "type": "gradient", "preset": "topSpotlight1" }
+  "background": { "type": "gradient", "preset": "daybreak" }
 }
 ```
 
@@ -344,14 +340,14 @@ xdoc pptx remap-theme clean.pptx \
       "type": "title",
       "font": { "name": "Inter", "size": "32pt", "bold": true },
       "color": "1F1F1F",
-      "spacing": { "before": "6pt", "after": "12pt", "line": 1.15 },
+      "spacing": 1.15,
       "alignment": "left"
     }
   ]
 }
 ```
 
-`type` 取值与 placeholder 的 type 一致（`title` / `body` / `center-title` / `subtitle` /
+`type` 取值与 placeholder 的 type 一致（`title` / `body` / `ctrTitle` / `subTitle` /
 `object` / `chart` / ...）。
 
 ## Shape effect（阴影、发光、反射、柔化）
@@ -360,28 +356,30 @@ xdoc pptx remap-theme clean.pptx \
 {
   "op": "set-shape",
   "slide": 0,
-  "shape": { "id": "..." },
+  "shape": { "id": 2 },
   "effect": {
-    "kind": "outerShadow",
-    "blur": "6pt",
-    "distance": "4pt",
-    "direction": 45,
-    "color": "00000040"
+    "shadow": {
+      "blur": "6pt",
+      "distance": "4pt",
+      "angle": 45,
+      "color": "000000",
+      "alpha": 0.25
+    }
   }
 }
 ```
 
-`kind` 可选 `outerShadow / innerShadow / glow / reflection / softEdge`。每种 effect
-有自己的参数：
+在 `effect` 中使用 `shadow` / `glow` / `reflection` / `softEdge` 子对象。
+每种 effect 有自己的参数：
 
-| kind                      | 关键参数                                                      |
-| ------------------------- | ------------------------------------------------------------- |
-| outerShadow / innerShadow | `blur`, `distance`, `direction`, `color`, `alpha`             |
-| glow                      | `radius`, `color`                                             |
-| reflection                | `blur`, `distance`, `startAlpha`, `endAlpha`, `fadeDirection` |
-| softEdge                  | `radius`                                                      |
+| effect     | 关键参数                                               |
+| ---------- | ------------------------------------------------------ |
+| shadow     | `blur`, `distance`, `angle`, `color`, `alpha`, `inner` |
+| glow       | `radius`, `color`, `alpha`                             |
+| reflection | `blur`, `distance`, `alpha`, `size`                    |
+| softEdge   | `radius`                                               |
 
-颜色支持 8 位 hex 带 alpha：`"00000040"` = 黑色 25% 不透明。
+颜色使用 6 位 hex；透明度单独用 `alpha` 的 0-1 数值。
 
 ## Effect 继承开关
 

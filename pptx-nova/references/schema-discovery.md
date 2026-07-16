@@ -147,7 +147,7 @@ none / r / l / t / b / tr
 ### `alignment`
 
 ```
-left / center / right / justify / distributed / thaiDistribute
+left / center / right / justify / distribute / thai-distribute
 ```
 
 ### `effect.kind`

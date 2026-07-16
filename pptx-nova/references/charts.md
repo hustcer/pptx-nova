@@ -757,7 +757,7 @@ triangle / x / star / dash / dot / plus / none / auto`。marker 的 `fill` /
     {
       "op": "set-text-frame",
       "slide": 0,
-      "shape": { "placeholder": { "type": "title" } },
+      "shape": { "placeholder": "title" },
       "text": "营收分析"
     },
     {

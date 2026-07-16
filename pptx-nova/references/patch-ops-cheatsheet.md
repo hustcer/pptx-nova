@@ -231,7 +231,7 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 {
   "op": "set-shape",
   "slide": 0,
-  "shape": { "id": "shape-abc" },
+  "shape": { "id": 2 },
   "effect": {
     "shadow": { "blur": "6pt", "distance": "4pt", "angle": 90, "color": "000000", "alpha": 0.25 }
   }
@@ -300,7 +300,7 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 {
   "op": "set-run",
   "slide": 0,
-  "shape": { "id": "title-1" },
+  "shape": { "id": 2 },
   "paragraph": 0,
   "run": 0,
   "text": "Q2 2026",
@@ -481,7 +481,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
     {
       "op": "set-run",
       "slide": 2,
-      "shape": { "placeholder": { "type": "title" } },
+      "shape": { "placeholder": "title" },
       "paragraph": 0,
       "run": 0,
       "font": { "bold": true, "color": "1A73E8" }

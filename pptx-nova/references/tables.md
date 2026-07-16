@@ -374,7 +374,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
     {
       "op": "set-text-frame",
       "slide": 0,
-      "shape": { "placeholder": { "type": "title" } },
+      "shape": { "placeholder": "title" },
       "text": "关键指标"
     },
     {

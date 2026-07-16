@@ -441,7 +441,7 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 | 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                         |
 | 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                                                   |
 | `xdoc -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                                                     |
-| `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须全名 `"bottom"` / `"outsideEnd"`，shorthand 拒                                                                          |
+| `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须使用 canonical 值 `"bottom"` / `"outside-end"`，shorthand 拒                                                            |
 | `titleStyle.bold` 被拒                                  | 放进 `font: { bold: true }` 子对象                                                                                               |
 
 ---

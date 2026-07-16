@@ -113,7 +113,7 @@ visual element。若发现新增形态，回到 Phase 0 扩大 rebuild set。
 - `pAlign` 类 helper 应使用 canonical `set-paragraph` 的 `format` 字段；
   不要再生成已移除的细粒度 paragraph-format op。
 - shape 引用必须双向走 `nm(s, base)`；裸名 selector 命不中。
-- enum 必须全名：`"bottom"` 不是 `"b"`，`"outsideEnd"` 不是 `"outEnd"`；
+- enum 必须使用 canonical 值：`"bottom"` 不是 `"b"`，`"outside-end"` 不是 `"outEnd"`；
   `titleStyle.bold` 被拒 → 放进 `font: { bold: true }`。
 - 居中短文本框宽度 ≥ 文本实际宽 + ~0.2in（默认 inset），否则静默折行；
   vision-check 抓不到这类折行，只能 PNG 人工抓。

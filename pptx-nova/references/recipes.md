@@ -208,9 +208,8 @@ canonical v1 的 `image-caption.image` 严格接受 `bytesBase64`、`mime` 和�
     "lt1": "#FFFFFF"
   },
   "fonts": {
-    "major": "Inter",
-    "minor": "Inter",
-    "heading": "Inter"
+    "major": { "typeface": "Inter" },
+    "minor": { "typeface": "Inter" }
   }
 }
 ```
@@ -233,7 +232,10 @@ theme pack 时使用 `remap-theme`。背景、母版 placeholder 和默认文本
     {
       "op": "set-theme",
       "colors": { "accent1": "#1A73E8" },
-      "fonts": { "major": "Inter", "minor": "Inter" }
+      "fonts": {
+        "major": { "typeface": "Inter" },
+        "minor": { "typeface": "Inter" }
+      }
     },
     {
       "op": "add-slide",

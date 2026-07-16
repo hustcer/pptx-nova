@@ -1041,6 +1041,42 @@ test('deck generator layouts emit canonical aggregate patch payloads', () => {
   }
 })
 
+test('copyable reference examples avoid removed xdoc payload aliases', () => {
+  const referencesDir = skillPath('references')
+  const markdown = readdirSync(referencesDir)
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => readFileSync(join(referencesDir, name), 'utf8'))
+    .join('\n')
+
+  for (const legacyTrigger of ['onClick', 'withPrevious', 'afterPrevious']) {
+    assert.equal(
+      markdown.includes(legacyTrigger),
+      false,
+      `legacy animation trigger: ${legacyTrigger}`,
+    )
+  }
+  assert.equal(
+    /"shape"\s*:\s*\{\s*"id"\s*:\s*"/.test(markdown),
+    false,
+    'shape selector ids must be numeric',
+  )
+  assert.equal(
+    /"shape"\s*:\s*\{\s*"placeholder"\s*:\s*\{\s*"type"/.test(markdown),
+    false,
+    'direct shape placeholder selectors must use a string value',
+  )
+  assert.equal(
+    /"fonts"\s*:\s*\{\s*"major"\s*:\s*"/.test(markdown),
+    false,
+    'theme font patches must use typeface objects',
+  )
+  assert.equal(
+    /"effect"\s*:\s*\{\s*"kind"/.test(markdown),
+    false,
+    'shape effects must use shadow/glow/reflection/softEdge objects',
+  )
+})
+
 test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {
   const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
   const result = kit.createDeck({

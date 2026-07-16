@@ -56,7 +56,7 @@ Minimum `template-frame-map.json`:
       "narrativeRole": "opening thesis",
       "layoutAffordance": "hero statement with subtitle",
       "fitReason": "large title slot and protected brand chrome match the opening claim",
-      "editTargets": [{ "shape": { "placeholder": { "type": "title" } }, "action": "rewrite" }]
+      "editTargets": [{ "shape": { "placeholder": "title" }, "action": "rewrite" }]
     }
   ],
   "omittedSourceSlides": [{ "sourceSlide": 4, "reason": "appendix pattern not needed" }]

@@ -232,8 +232,8 @@ shape 在 PowerPoint Selection Pane 里能看到 name；设计师常给关键 sh
 ### 2.3 `{ "placeholder": { ... } }` —— layout 驱动 deck 的首选
 
 ```json
-"shape": { "placeholder": { "type": "title" } }
-"shape": { "placeholder": { "type": "body", "idx": 1 } }
+"shape": { "placeholder": "title" }
+"shape": { "placeholder": "body", "idx": 1 }
 ```
 
 `type` 取值：`title / ctrTitle / body / subTitle / dt / sldNum / ftr / hdr /
@@ -329,7 +329,7 @@ dry-run 报告里会有：
 {
   "op": "set-text-frame",
   "slide": 2,
-  "shape": { "placeholder": { "type": "title" } },
+  "shape": { "placeholder": "title" },
   "text": "新标题"
 }
 ```
@@ -348,7 +348,7 @@ dry-run 报告里会有：
 {
   "op": "set-run",
   "slide": 2,
-  "shape": { "placeholder": { "type": "title" } },
+  "shape": { "placeholder": "title" },
   "paragraph": 0,
   "run": 0,
   "font": { "color": "1A73E8" }

@@ -207,7 +207,7 @@ xdoc pptx apply -p patch.json -o out.pptx
 ```json
 {
   "op": "bind-data",
-  "source": { "assetSource": { "path": "data/q2.json", "mime": "application/json" } },
+  "source": { "path": "data/q2.json" },
   "bindings": [...]
 }
 ```

@@ -1075,6 +1075,35 @@ test('copyable reference examples avoid removed xdoc payload aliases', () => {
     false,
     'shape effects must use shadow/glow/reflection/softEdge objects',
   )
+  assert.equal(
+    /"source"\s*:\s*\{\s*"assetSource"/.test(markdown),
+    false,
+    'bind-data sources must use a direct path instead of an assetSource wrapper',
+  )
+})
+
+test('tracked literal patch op values stay within the current xdoc schema', () => {
+  const schema = JSON.parse(readFileSync(join(repoRoot, 'docs/xdoc-schema.json'), 'utf8'))
+  const canonicalOps = new Set(schema.commands.pptx.patchSchema.supportedOps)
+  const tracked = spawnSync('git', ['ls-files', '-z'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  })
+  assert.equal(tracked.status, 0, tracked.stderr || tracked.stdout)
+
+  const invalid = []
+  const literalOp = /(?:["']op["']|(?<![\w.])op)\s*:\s*(["'])([^"']+)\1/g
+  for (const relativePath of tracked.stdout.split('\0').filter(Boolean)) {
+    if (relativePath === 'docs/xdoc-schema.json') continue
+    const source = readFileSync(join(repoRoot, relativePath), 'utf8')
+    if (source.includes('\0')) continue
+    for (const match of source.matchAll(literalOp)) {
+      if (canonicalOps.has(match[2]) || ['==', '...'].includes(match[2])) continue
+      invalid.push(`${relativePath}: ${match[2]}`)
+    }
+  }
+
+  assert.deepEqual(invalid, [])
 })
 
 test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {

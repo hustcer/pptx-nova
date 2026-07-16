@@ -398,7 +398,7 @@ const shape = (slide, name, kind, x, y, w, h) => {
   ops.push({
     op: 'add-shape',
     slide,
-    shape: kind,
+    kind,
     name,
     x: `${x}in`,
     y: `${y}in`,
@@ -552,12 +552,18 @@ const tableCellStyle = (slide, tableName, row, col, style) => {
     op: 'set-table',
     slide,
     shape: { name: tableName },
-    row,
-    col,
-    verticalAnchor: 'middle',
-    marginLeft: '0.1in',
-    marginRight: '0.1in',
-    ...style,
+    cells: [
+      {
+        row,
+        col,
+        style: {
+          verticalAnchor: 'middle',
+          marginLeft: '0.1in',
+          marginRight: '0.1in',
+          ...style,
+        },
+      },
+    ],
   })
 }
 
@@ -566,12 +572,14 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
     op: 'set-table',
     slide,
     shape: { name: tableName },
-    firstRow: true,
-    lastRow: false,
-    firstCol: true,
-    lastCol: false,
-    horzBanding: true,
-    vertBanding: false,
+    style: {
+      firstRow: true,
+      lastRow: false,
+      firstColumn: true,
+      lastColumn: false,
+      horizontalBanding: true,
+      verticalBanding: false,
+    },
   })
 
   for (let row = 0; row < rows; row += 1) {
@@ -579,8 +587,7 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
       op: 'set-table',
       slide,
       shape: { name: tableName },
-      row,
-      height: row === 0 ? '0.52in' : '0.66in',
+      rows: [{ row, height: row === 0 ? '0.52in' : '0.66in' }],
     })
     for (let col = 0; col < cols; col += 1) {
       const isHeader = row === 0
@@ -619,18 +626,19 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
     op: 'set-table',
     slide,
     shape: { name: tableName },
-    startRow: 0,
-    startCol: 0,
-    endRow: rows - 1,
-    endCol: cols - 1,
-    borders: {
-      top: { color: TABLE_BORDER, width: '0.75pt' },
-      bottom: { color: TABLE_BORDER, width: '0.75pt' },
-      left: { color: TABLE_BORDER, width: '0.75pt' },
-      right: { color: TABLE_BORDER, width: '0.75pt' },
-      insideH: { color: TABLE_BORDER, width: '0.5pt' },
-      insideV: { color: TABLE_BORDER, width: '0.5pt' },
-    },
+    borders: [
+      {
+        range: { startRow: 0, startCol: 0, endRow: rows - 1, endCol: cols - 1 },
+        value: {
+          top: { color: TABLE_BORDER, width: '0.75pt' },
+          bottom: { color: TABLE_BORDER, width: '0.75pt' },
+          left: { color: TABLE_BORDER, width: '0.75pt' },
+          right: { color: TABLE_BORDER, width: '0.75pt' },
+          insideH: { color: TABLE_BORDER, width: '0.5pt' },
+          insideV: { color: TABLE_BORDER, width: '0.5pt' },
+        },
+      },
+    ],
   })
 }
 
@@ -1197,44 +1205,19 @@ function slideChart(total) {
     op: 'set-chart',
     slide: s,
     shape: { name: 'RevChart' },
-    series: 0,
-    fill: { type: 'solid', color: CHART_PALETTE[1] ?? C.divider },
-  })
-  ops.push({
-    op: 'set-chart',
-    slide: s,
-    shape: { name: 'RevChart' },
-    series: 1,
-    fill: { type: 'solid', color: CHART_PALETTE[0] ?? C.primary },
-  })
-  ops.push({
-    op: 'set-chart',
-    slide: s,
-    shape: { name: 'RevChart' },
-    scope: { series: 1 },
-    showValue: true,
-    position: 'outsideEnd',
-  })
-  ops.push({
-    op: 'set-chart',
-    slide: s,
-    shape: { name: 'RevChart' },
-    axis: 'category',
-    style: { color: CHART_AXIS, width: '0.75pt' },
-  })
-  ops.push({
-    op: 'set-chart',
-    slide: s,
-    shape: { name: 'RevChart' },
-    axis: 'value',
-    style: { color: CHART_AXIS, width: '0.75pt' },
-  })
-  ops.push({
-    op: 'set-chart',
-    slide: s,
-    shape: { name: 'RevChart' },
-    axis: 'value',
-    style: { color: CHART_GRID, width: '0.5pt' },
+    series: [
+      { series: 0, fill: { type: 'solid', color: CHART_PALETTE[1] ?? C.divider } },
+      { series: 1, fill: { type: 'solid', color: CHART_PALETTE[0] ?? C.primary } },
+    ],
+    dataLabels: [{ scope: { series: 1 }, showValue: true, position: 'outside-end' }],
+    axes: [
+      { axis: 'category', line: { color: CHART_AXIS, width: '0.75pt' } },
+      {
+        axis: 'value',
+        line: { color: CHART_AXIS, width: '0.75pt' },
+        gridlines: { color: CHART_GRID, width: '0.5pt' },
+      },
+    ],
   })
 
   // 右侧 3 个 callout 卡片
@@ -2017,8 +2000,7 @@ function slideDataRoomDashboard(total) {
     op: 'set-chart',
     slide: s,
     shape: { name: 'DataDriverChart' },
-    series: 0,
-    fill: { type: 'solid', color: C.warn },
+    series: [{ series: 0, fill: { type: 'solid', color: C.warn } }],
   })
   cardBox(s, nm(s, 'DataDecision'), 8.85, 3.85, 3.7, 2.65, C.primaryDp)
   tx(s, nm(s, 'DataDecisionNum'), 9.25, 4.35, 2.9, 0.72, '78%', {

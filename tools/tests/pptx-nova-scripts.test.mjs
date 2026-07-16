@@ -998,6 +998,49 @@ test('deck generator data-room chart omits the unsupported none legend value', (
   assert.equal('legend' in chart, false)
 })
 
+test('deck generator layouts emit canonical aggregate patch payloads', () => {
+  for (const layout of ['executive-grid', 'narrative-split', 'data-room']) {
+    const result = spawnSync(
+      process.execPath,
+      [skillPath('assets/examples/deck-generator-template.mjs'), '--layout', layout],
+      { cwd: repoRoot, encoding: 'utf8' },
+    )
+    assert.equal(result.status, 0, result.stderr || result.stdout)
+    const patch = JSON.parse(result.stdout)
+
+    for (const op of patch.ops) {
+      if (op.op === 'add-shape') {
+        assert.equal('shape' in op, false, `${layout}: add-shape must use kind or preset`)
+        assert.equal('kind' in op || 'preset' in op, true, `${layout}: add-shape type missing`)
+      }
+      if (op.op === 'set-chart') {
+        for (const legacyField of ['axis', 'scope', 'showValue', 'position', 'fill']) {
+          assert.equal(legacyField in op, false, `${layout}: legacy set-chart.${legacyField}`)
+        }
+        if ('series' in op) assert.equal(Array.isArray(op.series), true)
+        if ('axes' in op) assert.equal(Array.isArray(op.axes), true)
+        if ('dataLabels' in op) assert.equal(Array.isArray(op.dataLabels), true)
+      }
+      if (op.op === 'set-table') {
+        for (const legacyField of [
+          'row',
+          'col',
+          'height',
+          'firstRow',
+          'firstCol',
+          'horzBanding',
+          'startRow',
+          'startCol',
+          'endRow',
+          'endCol',
+        ]) {
+          assert.equal(legacyField in op, false, `${layout}: legacy set-table.${legacyField}`)
+        }
+      }
+    }
+  }
+})
+
 test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {
   const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
   const result = kit.createDeck({

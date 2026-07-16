@@ -121,7 +121,7 @@ function dryRunFixture({ covered = true, source = '', candidate = '' } = {}) {
       ? [
           {
             opIndex: 0,
-            op: 'set-text',
+            op: 'set-text-frame',
             status: 'success',
             semanticChanges: [
               {
@@ -812,7 +812,7 @@ test('edit contract gate blocks dry-run operations not owned by a target', () =>
   const fixture = writeFixture()
   generateContract(fixture)
   const dryRun = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
-  dryRun.opResults.push({ opIndex: 1, op: 'set-text', status: 'success' })
+  dryRun.opResults.push({ opIndex: 1, op: 'set-text-frame', status: 'success' })
   writeJson(fixture.dryRun, dryRun)
   const report = runGate(fixture, 2)
 

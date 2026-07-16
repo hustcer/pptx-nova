@@ -1,8 +1,8 @@
 # Patch Ops Cheatsheet —— 58 个 op 按场景速查
 
 下面把 xdoc schema v1 的 58 个 op 按 **"我想做什么"** 反向归类。每条只列
-关键字段；完整 schema 用 `xdoc schema --op <name>` 拉。旧版 `set-shape-*` /
-`set-chart-*-style` / `set-table-cell` 等细粒度 op 已全部并入对应的聚合 op
+关键字段；完整 schema 用 `xdoc schema --op <name>` 拉。旧版细粒度 shape / chart /
+table setter 已全部并入对应的聚合 op
 （`set-shape` / `set-chart` / `set-table` ...），本表只列 canonical 名字。
 
 > 通用：所有 patch op 都嵌进 `{ "schemaVersion": 1, "ops": [ { "op": "...", ... } ] }`。

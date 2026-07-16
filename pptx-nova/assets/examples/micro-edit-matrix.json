@@ -255,7 +255,7 @@
     {
       "id": "unknown-run-or-paragraph-indexing",
       "intent": "The user asks for partial text styling but paragraph/run boundaries are unknown.",
-      "failureSignal": "whole-shape set-text would destroy formatting and inspect has not proven indexes.",
+      "failureSignal": "whole-frame text replacement would destroy formatting and inspect has not proven indexes.",
       "microEditAction": "Inspect more deeply or escalate; do not guess run indexes."
     },
     {

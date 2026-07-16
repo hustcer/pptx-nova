@@ -158,9 +158,9 @@
   catch 内 add-text-box
 - 渐进迁移老版 deck 的 placeholder 名字（先按新名 set，catch 内按旧名 set）
 
-> ⚠️ **try 块内的 `define` 在失败时会被丢弃**：try 主分支失败、走 catch 分支
-> 时，try 内部 `define` 的宏会被清理（避免半成品宏污染后续 op）。如果你需要
-> "尝试 + 失败回退" 同时定义一个宏，把 `define` 放到 try 外面或 catch 外面。
+> ⚠️ **try 块内的 `define-macro` 在失败时会被丢弃**：try 主分支失败、走 catch 分支
+> 时，try 内部 `define-macro` 的宏会被清理（避免半成品宏污染后续 op）。如果你需要
+> "尝试 + 失败回退" 同时定义一个宏，把 `define-macro` 放到 try 外面或 catch 外面。
 
 ## §5 `define-macro` / `use-macro` —— 命名宏 / 参数化 op 块
 
@@ -221,33 +221,33 @@
 
 ### 5.1 字段约束
 
-| op       | 字段   | 类型             | 说明                                                        |
-| -------- | ------ | ---------------- | ----------------------------------------------------------- |
-| `define` | `name` | 非空字符串       | 宏名；同一份 patch 内**不能重复定义**（重定义直接报错）     |
-| `define` | `ops`  | array            | 任意 patch op；可以嵌 `if` / `foreach` / `try` / 甚至 `use` |
-| `use`    | `name` | 非空字符串       | 要引用的宏；**必须先 `define`** 后才能 `use`                |
-| `use`    | `with` | object（可省略） | 暴露给宏体内的 `{{args.*}}` 占位符；省略 = 空对象           |
+| op             | 字段   | 类型             | 说明                                                              |
+| -------------- | ------ | ---------------- | ----------------------------------------------------------------- |
+| `define-macro` | `name` | 非空字符串       | 宏名；同一份 patch 内**不能重复定义**（重定义直接报错）           |
+| `define-macro` | `body` | array            | 任意 patch op；可以嵌 `if` / `foreach` / `try` / 甚至 `use-macro` |
+| `use-macro`    | `name` | 非空字符串       | 要引用的宏；**必须先 `define-macro`** 后才能 `use-macro`          |
+| `use-macro`    | `args` | object（可省略） | 暴露给宏体内的 `{{args.*}}` 占位符；省略 = 空对象                 |
 
-`{{args.field}}` 在 `use` 展开时做**字符串插值**（与 `foreach` 的 `{{$item.x}}`
+`{{args.field}}` 在 `use-macro` 展开时做**字符串插值**（与 `foreach` 的 `{{$item.x}}`
 同机制），支持任意层级 `.path` 路径（如 `{{args.theme.accent1}}`）；插值后的
 op 才进入 schema 校验，所以**坐标/枚举字段**最终仍然必须是合法值。
 
 ### 5.2 嵌套与递归
 
-- `use` 之间可以串调用：宏 A 内部可以 `{ "op": "use-macro", "name": "B" }`
+- `use-macro` 之间可以串调用：宏 A 内部可以 `{ "op": "use-macro", "name": "B" }`
 - **递归深度上限 16 层**：超过会报 `macro expansion exceeded depth limit 16`，
   自递归 / 互相递归两种死循环都会被这个限制兜住
-- 宏注册表是 **全局共享** 的：从第一次 `define` 开始一直存活到 patch 结束；
-  顺序上 `define` 必须排在它的 `use` 前面
+- 宏注册表是 **全局共享** 的：从第一次 `define-macro` 开始一直存活到 patch 结束；
+  顺序上 `define-macro` 必须排在它的 `use-macro` 前面
 
 ### 5.3 何时用宏 vs. `foreach` vs. JS 生成器
 
-| 你想做                          | 选什么                                 |
-| ------------------------------- | -------------------------------------- |
-| 4 张相同形状 KPI 卡（数据不同） | `foreach` —— 一份 items + 一份 do      |
-| 同一页里 2-3 处样式一致的小组件 | `define` + 2-3 次 `use`（更可读）      |
-| 多页都要用的"标准 callout 卡片" | `define` 一次，每页 `use`              |
-| 100+ ops、跨页/复杂坐标计算     | JS 生成器（`define` 解决不了坐标计算） |
+| 你想做                          | 选什么                                        |
+| ------------------------------- | --------------------------------------------- |
+| 4 张相同形状 KPI 卡（数据不同） | `foreach` —— 一份 items + 一份 do             |
+| 同一页里 2-3 处样式一致的小组件 | `define-macro` + 2-3 次 `use-macro`（更可读） |
+| 多页都要用的"标准 callout 卡片" | `define-macro` 一次，每页 `use-macro`         |
+| 100+ ops、跨页/复杂坐标计算     | JS 生成器（`define-macro` 解决不了坐标计算）  |
 
 **宏的边界**：
 
@@ -258,12 +258,12 @@ op 才进入 schema 校验，所以**坐标/枚举字段**最终仍然必须是�
 
 ### 5.4 常见错误
 
-| 错误                                      | 原因                                    | 修复                                       |
-| ----------------------------------------- | --------------------------------------- | ------------------------------------------ |
-| `use references undefined macro 'foo'`    | `use` 在 `define` 之前出现，或宏名拼错  | 把 `define` 移到 `use` 前面 / 校对名字     |
-| `define macro 'foo' already exists`       | 同一份 patch 里 `define` 了两次同名宏   | 用唯一名字，或拆成不同 patch               |
-| `macro expansion exceeded depth limit 16` | 宏自递归或互相递归                      | 拆开递归边界，或在宏体内用 `if` 加终止条件 |
-| `try recovered from ...`（warnings 里）   | try 内 `define` 被 catch 接住，宏被丢弃 | 把 `define` 移出 try 块                    |
+| 错误                                         | 原因                                               | 修复                                               |
+| -------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
+| `use-macro references undefined macro 'foo'` | `use-macro` 在 `define-macro` 之前出现，或宏名拼错 | 把 `define-macro` 移到 `use-macro` 前面 / 校对名字 |
+| `define-macro macro 'foo' already exists`    | 同一份 patch 里 `define-macro` 了两次同名宏        | 用唯一名字，或拆成不同 patch                       |
+| `macro expansion exceeded depth limit 16`    | 宏自递归或互相递归                                 | 拆开递归边界，或在宏体内用 `if` 加终止条件         |
+| `try recovered from ...`（warnings 里）      | try 内 `define-macro` 被 catch 接住，宏被丢弃      | 把 `define-macro` 移出 try 块                      |
 
 ## §6 `patch-ooxml` —— 逃生口（默认禁用）
 
@@ -283,12 +283,12 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 
 字段：
 
-| 字段        | 说明                                                                                |
-| ----------- | ----------------------------------------------------------------------------------- |
-| `target`    | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                           |
-| `xpath`     | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter |
-| `operation` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)      |
-| `value`     | 文本或 raw XML 片段；`remove` 操作可省略                                            |
+| 字段     | 说明                                                                                |
+| -------- | ----------------------------------------------------------------------------------- |
+| `target` | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                           |
+| `xpath`  | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter |
+| `action` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)      |
+| `value`  | 文本或 raw XML 片段；`remove` 操作可省略                                            |
 
 **安全约束**：
 
@@ -343,11 +343,11 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
   enum,再对照 `references/troubleshooting.md` 的错误名
 - `foreach` 模板里 `{{$item.x}}` 漏写 `$` 不会报错 — schema 把它当成普通字面量
   字符串。看 dry-run `semanticChanges[]` 里的 text 字段确认是否被替换
-- `use` 模板里 `{{args.x}}` **不带 `$`**(与 `foreach` 的 `{{$item}}` 区分),
+- `use-macro` 模板里 `{{args.x}}` **不带 `$`**(与 `foreach` 的 `{{$item}}` 区分),
   漏写或拼错同样不会报错 — 看 `semanticChanges[]` / `--explain` 的 `expandedOps`
   确认占位符是否被替换
 - 排查宏展开:`xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json`
-  会在 `explanations[<i>].expandedOps` 列出每个 `use` 展开成哪些底层 op
+  会在 `explanations[<i>].expandedOps` 列出每个 `use-macro` 展开成哪些底层 op
 
 ## §9 不要做的事
 
@@ -359,7 +359,7 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
   JS 生成器里预处理 `items` 数组
 - 不要把所有错误都丢进 `try.catch[]` —— 没有 `recoverable` 列表时,真正的字段
   错误也会被 catch 掉,debug 极痛苦
-- 不要把 `define` 放进 `try.ops` 期望失败时还能 `use` —— catch 分支会清掉 try
-  里注册的宏,后续 `use` 直接报 `undefined macro`
+- 不要把 `define-macro` 放进 `try.body` 期望失败时还能 `use-macro` —— catch 分支会清掉 try
+  里注册的宏,后续 `use-macro` 直接报 `undefined macro`
 - 不要在 `{{args.*}}` 里塞表达式(`{{args.x + 1in}}` 不工作);坐标算式放到 JS
-  生成器里算好,再用计算结果调 `use`
+  生成器里算好,再用计算结果调 `use-macro`

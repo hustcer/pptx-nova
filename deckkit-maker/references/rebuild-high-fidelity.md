@@ -110,8 +110,8 @@ visual element。若发现新增形态，回到 Phase 0 扩大 rebuild set。
 
 ## 5. 已知坑（历史返工教训，先读再写）
 
-- `pAlign` 类 helper 误用 `op: 'set-paragraph'` → 应为 `set-paragraph-format`；
-  模板已修，但自己新写 helper 时别再踩。
+- `pAlign` 类 helper 应使用 canonical `set-paragraph` 的 `format` 字段；
+  不要再生成已移除的细粒度 paragraph-format op。
 - shape 引用必须双向走 `nm(s, base)`；裸名 selector 命不中。
 - enum 必须全名：`"bottom"` 不是 `"b"`，`"outsideEnd"` 不是 `"outEnd"`；
   `titleStyle.bold` 被拒 → 放进 `font: { bold: true }`。

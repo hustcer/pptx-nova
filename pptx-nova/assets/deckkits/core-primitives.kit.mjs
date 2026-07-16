@@ -1623,7 +1623,7 @@ function collectPatchQualityFacts(patch) {
       })
       continue
     }
-    if (op.op === 'set-text') {
+    if (op.op === 'set-text-frame') {
       const shape = selectShape(op.slide, op.shape)
       if (shape) shape.text = String(op.text ?? '')
       continue

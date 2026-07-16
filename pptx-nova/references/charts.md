@@ -263,23 +263,23 @@ chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary �
 
 ## chart kind × variant 速记
 
-| kind                                                | 推荐 variant                                                              | 备注                                             |
-| --------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------ |
-| `column` / `bar`                                    | `clustered` / `stacked` / `percent-stacked`                               | 最常用                                           |
-| `column3D` / `bar3D`                                | `clustered` / `stacked` / `percent-stacked`                               | 3D 版本                                          |
-| `line`                                              | `standard` / `markers` / `stacked` / `percent-stacked`                    | 加 marker 用 `markers`                           |
-| `line3D`                                            | `standard`                                                                | 仅一种                                           |
-| `area` / `area3D`                                   | `standard` / `stacked` / `percent-stacked`                                |                                                  |
-| `pie` / `pie3D`                                     | `standard` / `exploded`                                                   | exploded 拉开扇区                                |
-| `doughnut`                                          | `standard` / `exploded`                                                   | 圈饼图                                           |
-| `radar`                                             | `standard`                                                                | 雷达                                             |
-| `scatter`                                           | `markers` / `lines` / `lines-no-markers` / `smooth` / `smooth-no-markers` | XY 散点                                          |
-| `bubble` / `bubble3D`                               | `standard`                                                                | 气泡（含 size 维度）                             |
-| `stock`                                             | `standard`                                                                | HLC/OHLC K 线                                    |
-| `surface` / `surface3D`                             | `standard` / `wireframe`                                                  | 曲面                                             |
-| `combo`                                             | `standard`                                                                | 组合图；支持每个 series 加 `secondaryAxis: true` |
-| `waterfall` / `funnel` / `histogram` / `pareto`     | `standard`                                                                | chartEx 系列（写到 `ppt/charts/chartExN.xml`）   |
-| `treemap` / `sunburst` / `boxWhisker` / `regionMap` | `standard`                                                                | chartEx 系列；数据结构同直角坐标系               |
+| kind                                                  | 推荐 variant                                                              | 备注                                             |
+| ----------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------ |
+| `column` / `bar`                                      | `clustered` / `stacked` / `percent-stacked`                               | 最常用                                           |
+| `column-3d` / `bar-3d`                                | `clustered` / `stacked` / `percent-stacked`                               | 3D 版本                                          |
+| `line`                                                | `standard` / `markers` / `stacked` / `percent-stacked`                    | 加 marker 用 `markers`                           |
+| `line-3d`                                             | `standard`                                                                | 仅一种                                           |
+| `area` / `area-3d`                                    | `standard` / `stacked` / `percent-stacked`                                |                                                  |
+| `pie` / `pie-3d`                                      | `standard` / `exploded`                                                   | exploded 拉开扇区                                |
+| `doughnut`                                            | `standard` / `exploded`                                                   | 圈饼图                                           |
+| `radar`                                               | `standard`                                                                | 雷达                                             |
+| `scatter`                                             | `markers` / `lines` / `lines-no-markers` / `smooth` / `smooth-no-markers` | XY 散点                                          |
+| `bubble` / `bubble-3d`                                | `standard`                                                                | 气泡（含 size 维度）                             |
+| `stock`                                               | `standard`                                                                | HLC/OHLC K 线                                    |
+| `surface` / `surface-3d`                              | `standard` / `wireframe`                                                  | 曲面                                             |
+| `combo`                                               | `standard`                                                                | 组合图；支持每个 series 加 `secondaryAxis: true` |
+| `waterfall` / `funnel` / `histogram` / `pareto`       | `standard`                                                                | chartEx 系列（写到 `ppt/charts/chartExN.xml`）   |
+| `treemap` / `sunburst` / `box-whisker` / `region-map` | `standard`                                                                | chartEx 系列；数据结构同直角坐标系               |
 
 不合法的 kind/variant 组合在写之前就会被 schema 拒绝；apply 前用 `--dry-run` 兜底。
 
@@ -366,7 +366,7 @@ Stock 数据必须先做语义不变量检查，再写入或交付：
 **要么** 至少有一个 `secondaryAxis: true` 的系列;两者满足其一即可通过。换句话说,
 单 plot kind + 二轴(经典"柱+折线但都是 column"的伪二轴)现在合法。
 
-### ChartEx（waterfall / funnel / histogram / pareto / treemap / sunburst / boxWhisker / regionMap）
+### ChartEx（waterfall / funnel / histogram / pareto / treemap / sunburst / box-whisker / region-map）
 
 走同样的 `add-chart`,kind 选对即可;内部会写入 `ppt/charts/chartExN.xml`(modern
 chart 部件),并自动建立 `chartEx` 关系类型。`variant` 必须是 `standard`。
@@ -408,7 +408,7 @@ ChartEx 语义要点：
 - `sunburst` / `treemap`：层级输入可用 `nodes[]`，但写入 ChartEx 时通常只输出叶子行；
   多级 category cache 按 PowerPoint 的 leaf-to-root 层级顺序写入，不能把中间节点也当成
   独立 data point。
-- `boxWhisker`：每个 series 可带 `categories[]`，长度必须等于 `values[]`；重复的
+- `box-whisker`：每个 series 可带 `categories[]`，长度必须等于 `values[]`；重复的
   `Day1` / `Day2` / `Day3` 等 category label 用来形成分组轴，不能退化成单一 category。
 - 参考 deck 复刻时，优先复用同类型既有 ChartEx 的 `chartStyle` / `chartColorStyle`
   关系，并补 parser/generator 回归测试固定上述语义。
@@ -831,7 +831,7 @@ triangle / x / star / dash / dot / plus / none / auto`。marker 的 `fill` /
 ## ChartEx creation and verification notes
 
 For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
-`histogram`, `boxWhisker`, and `funnel`, do not assume that a successful
+`histogram`, `box-whisker`, and `funnel`, do not assume that a successful
 `xdoc pptx apply --dry-run` means the object will render in PowerPoint.
 
 - Use the ChartEx-specific `dataEx` payload shape. Do not pass the ordinary

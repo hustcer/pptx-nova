@@ -452,8 +452,8 @@ inspect 报告中的这些字段说明该页有需要谨慎处理的内容：
 | `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape                        |
 
 动画不是一概不能改：`animations[].editable == true` 的基础 entrance/exit 和安全文本 build
-可以按稳定 `id` 用 `set-slide-animations` 或 `set-slide-animations` 修改；新增安全子集可用
-`set-slide-animations`。如果 `animation_capabilities.preserve_only` 包含 `media-timing`、
+可以按稳定 `id` 用 `set-slide-animations` 修改或删除；新增安全子集也使用同一个 op。
+如果 `animation_capabilities.preserve_only` 包含 `media-timing`、
 `interactive-trigger`、`unsupported-timing`、`motion-path`、`emphasis`、`chart-build` 或
 `smartart-build`，默认 preserve。需要覆盖整棵 timing tree 时必须让用户确认 `mode: "replace"` 或
 `mode: "clear"` 的语义损失，并按 `animations.md` 做结构和 PowerPoint clean-open 验证。

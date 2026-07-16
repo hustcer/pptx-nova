@@ -45,8 +45,6 @@ xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
 
 ```bash
 xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
-xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
-xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
 ```
 
 重点看 `mode`、`effect`、`phase`、`target`、`build`、`trigger` 的 enum。不要把旧版本
@@ -86,25 +84,26 @@ number | "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)?$"
 lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink
 ```
 
-### `themeFontKind`
+### Theme fonts
 
-```
-majorFont / minorFont / major / minor / heading / body
-```
+`set-theme.fonts` 使用 `major` / `minor` 两个槽位；每个槽位是字体对象，例如
+`{ "typeface": "Inter", "eastAsian": "Source Han Sans SC" }`。不要使用已删除的
+`themeFontKind` / `majorFont` / `minorFont` 别名。
 
 ### `chartKind`
 
 ```
-column / column3D / bar / bar3D / line / line3D / area / area3D /
-pie / pie3D / surface / surface3D / stock / doughnut /
-radar / scatter / bubble / bubble3D / combo
+column / column-3d / bar / bar-3d / line / line-3d / area / area-3d /
+pie / pie-3d / doughnut / radar / surface / surface-3d / stock /
+scatter / bubble / bubble-3d / combo / waterfall / funnel / histogram /
+pareto / treemap / sunburst / box-whisker / region-map
 ```
 
 ### `chartVariant`
 
 ```
-standard / clustered / stacked / percentStacked / markers /
-lines / linesNoMarkers / smooth / smoothNoMarkers / exploded / wireframe
+standard / clustered / stacked / percent-stacked / markers /
+lines / lines-no-markers / smooth / smooth-no-markers / exploded / wireframe
 ```
 
 （kind/variant 合法组合详见 `charts.md`）
@@ -115,7 +114,11 @@ lines / linesNoMarkers / smooth / smoothNoMarkers / exploded / wireframe
   ```json
   { "categories": ["Q1", "Q2"], "series": [{ "name": "Sales", "values": [10, 20] }] }
   ```
-- scatter / bubble：
+- scatter：
+  ```json
+  { "series": [{ "name": "A", "points": [{ "x": 1, "y": 2 }] }] }
+  ```
+- bubble：
   ```json
   { "series": [{ "name": "A", "points": [{ "x": 1, "y": 2, "size": 0.5 }] }] }
   ```
@@ -132,16 +135,17 @@ lines / linesNoMarkers / smooth / smoothNoMarkers / exploded / wireframe
 
 ### `fill`
 
-- solid: `{ "kind": "solid", "color": "RRGGBB" }`
-- gradient: `{ "kind": "gradient", "stops": [{ "pos": 0, "color": "..." }, ...], "angle": 45 }`
-- pattern: `{ "kind": "pattern", "preset": "wdDnDiag", "fg": "...", "bg": "..." }`
-- preset gradient: `{ "kind": "gradient", "preset": "topSpotlight1" }`
-- none: `{ "kind": "none" }`
+- solid: `{ "type": "solid", "color": "RRGGBB" }`
+- gradient: `{ "type": "gradient", "stops": [{ "pos": 0, "color": "..." }, ...], "angle": 45 }`
+- radial gradient: `{ "type": "gradient", "path": "circle", "stops": [...] }`
+- pattern: `{ "type": "pattern", "pattern": "wdDnDiag", "foregroundColor": "...", "backgroundColor": "..." }`
+- preset gradient: `{ "type": "gradient", "preset": "daybreak" }`
+- none: `{ "type": "none" }`
 
 ### `legendPosition`
 
 ```
-none / r / l / t / b / tr
+right / left / top / bottom / top-right
 ```
 
 ### `alignment`
@@ -150,11 +154,10 @@ none / r / l / t / b / tr
 left / center / right / justify / distribute / thai-distribute
 ```
 
-### `effect.kind`
+### `effect`
 
-```
-outerShadow / innerShadow / glow / reflection / softEdge
-```
+`set-shape.effect` 使用 `shadow` / `glow` / `reflection` / `softEdge` 子对象；不要使用
+`effect.kind`。具体字段以 `xdoc schema --op set-shape --minimal` 为准。
 
 ## Catalog 命令
 

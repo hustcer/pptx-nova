@@ -158,8 +158,8 @@ template rules, brand/style changes, or full visual QA.
 ## Common Edit Operations
 
 - Text replacement: `set-text-frame`, `set-paragraph`, `set-run`.
-- Paragraph formatting: `set-paragraph`; do not use `set-paragraph` for
-  alignment.
+- Paragraph formatting: `set-paragraph` with a nested `format` object; do not put
+  `alignment` at the op top level.
 - Theme/font changes: `set-theme` (`colors` / `fonts`), or brand helpers.
 - Slide duplication: `duplicate-slide`.
 - Cross-deck whole-slide copy: `xdoc pptx copy-from`.
@@ -169,9 +169,9 @@ template rules, brand/style changes, or full visual QA.
 - Image replacement: remove/add picture at the same bbox, or use crop ops when
   appropriate.
 - Notes: `set-slide-notes` (plain `text` or rich `paragraphs`).
-- Animations/transitions: read `animations.md`; use `set-slide-transition`,
-  `set-slide-animations`, `set-slide-animations`, or `set-slide-animations`
-  only after inspect/dry-run proves the timing is in the supported safe subset.
+- Animations/transitions: read `animations.md`; use `set-slide-transition` or
+  `set-slide-animations` only after inspect/dry-run proves the timing is in the
+  supported safe subset.
 
 ## Preserve Constraints
 

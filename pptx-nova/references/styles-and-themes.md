@@ -38,14 +38,14 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ### Solid
 
 ```json
-{ "kind": "solid", "color": "1A73E8" }
+{ "type": "solid", "color": "1A73E8" }
 ```
 
 ### Gradient
 
 ```json
 {
-  "kind": "gradient",
+  "type": "gradient",
   "angle": 45,
   "stops": [
     { "pos": 0, "color": "1A73E8" },
@@ -60,11 +60,12 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ### Radial gradient
 
 需要径向光晕或 spotlight 时，优先用原生 radial gradient fill，而不是嵌入 SVG 或整页位图。
-当前 patch 层支持 `type: "radialGradient"`，会写入 DrawingML path gradient，仍保持可编辑：
+当前 patch 层用普通 gradient fill 加 `path: "circle"` 表达径向渐变，会写入 DrawingML path gradient，仍保持可编辑：
 
 ```json
 {
-  "type": "radialGradient",
+  "type": "gradient",
+  "path": "circle",
   "fillToRect": { "l": 0.5, "t": 0.5, "r": 0.5, "b": 0.5 },
   "stops": [
     { "pos": 0, "color": "F1EE2E" },
@@ -80,20 +81,20 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ### Preset Gradient（24 个内置）
 
 ```json
-{ "kind": "gradient", "preset": "topSpotlight1" }
+{ "type": "gradient", "preset": "daybreak" }
 ```
 
 预设清单跑 `xdoc schema | jq '.commands.pptx.catalogs.presetGradients'` 取。常用：
-`topSpotlight1 / centerSpotlight / horizon / shadowDark / chrome`。
+`early-sunset / daybreak / horizon / ocean / chrome / silver / sapphire`。
 
 ### Pattern
 
 ```json
 {
-  "kind": "pattern",
-  "preset": "wdDnDiag",
-  "fg": "1A73E8",
-  "bg": "FFFFFF"
+  "type": "pattern",
+  "pattern": "wdDnDiag",
+  "foregroundColor": "1A73E8",
+  "backgroundColor": "FFFFFF"
 }
 ```
 
@@ -102,7 +103,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ### No fill
 
 ```json
-{ "kind": "none" }
+{ "type": "none" }
 ```
 
 ## Line（边框）

@@ -9,16 +9,14 @@
 
 ```bash
 xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
-xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
-xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
 ```
 
-当前 xdoc 0.2.5 暴露的安全子集包括：
+当前运行时 schema 暴露的安全子集包括：
 
 - 创建/替换/清理：`set-slide-animations`，字段 `mode: "merge-safe" | "replace" | "clear"`。
 - 局部安全编辑：`set-slide-animations`，用 `inspect.animations[].id` 定位。
 - 局部安全删除：`set-slide-animations`，用 `inspect.animations[].id` 定位。
-- 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fadeOut/wipeOut/flyOut`
+- 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fade-out/wipe-out/fly-out`
   或 `phase: "exit"`。
 - 支持的 trigger：`on-click`、`with-previous`、`after-previous`。
 - 支持的文本 build：`target: { shape, paragraph?, level? }` 配合
@@ -43,8 +41,8 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
   `editable` 和 preserve-only reason。
 - `animation_capabilities`: `editable`、`preserve_only`、`unsupported_create`。
 
-只有 `editable: true` 的既有 step 可以用 `set-slide-animations` 或 `set-slide-animations`
-局部编辑。`preserve_only` 命中的 timing 不要 raw XML 猜改；需要重建时必须让用户确认
+只有 `editable: true` 的既有 step 才能用 `set-slide-animations` 局部编辑或删除。
+`preserve_only` 命中的 timing 不要 raw XML 猜改；需要重建时必须让用户确认
 `mode: "replace"` 或 `mode: "clear"` 会改变原动画语义。
 
 ## 新增动画

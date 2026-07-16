@@ -1136,7 +1136,7 @@ test('tracked literal patch op values stay within the current xdoc schema', () =
   assert.deepEqual(invalid, [])
 })
 
-test('tracked skill sources do not retain removed legacy xdoc op names', () => {
+test('tracked repository sources do not retain removed legacy xdoc op names', () => {
   const removedOps = [
     'add-picture',
     'add-slide-layout',
@@ -1146,6 +1146,7 @@ test('tracked skill sources do not retain removed legacy xdoc op names', () => {
     'clear-slide-notes',
     'fill-layout',
     'import-table-data',
+    'raw-ooxml-patch',
     'replace-structured-paragraph-text',
     'set-cell-formula',
     'set-chart-axis-scale',
@@ -1194,7 +1195,7 @@ test('tracked skill sources do not retain removed legacy xdoc op names', () => {
     'set-theme-color',
     'set-theme-font',
   ]
-  const tracked = spawnSync('git', ['ls-files', '-z', 'pptx-nova', 'deckkit-maker'], {
+  const tracked = spawnSync('git', ['ls-files', '-z'], {
     cwd: repoRoot,
     encoding: 'utf8',
   })
@@ -1202,6 +1203,12 @@ test('tracked skill sources do not retain removed legacy xdoc op names', () => {
 
   const residuals = []
   for (const relativePath of tracked.stdout.split('\0').filter(Boolean)) {
+    if (
+      relativePath === 'docs/xdoc-schema.json' ||
+      relativePath === 'tools/tests/pptx-nova-scripts.test.mjs'
+    ) {
+      continue
+    }
     const source = readFileSync(join(repoRoot, relativePath), 'utf8')
     if (source.includes('\0')) continue
     for (const op of removedOps) {

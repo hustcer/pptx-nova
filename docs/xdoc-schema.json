@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.2.9 (1f3ee899)",
+  "version": "0.2.9 (6da3d330)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1385,7 +1385,7 @@
         },
         "allow-raw-xml": {
           "type": "bool",
-          "description": "Enable raw-ooxml-patch. Disabled by default because raw XML bypasses schema-v1 guarantees.",
+          "description": "Enable patch-ooxml. Disabled by default because raw XML bypasses schema-v1 guarantees.",
           "required": false,
           "style": "flag"
         },
@@ -9066,7 +9066,8 @@
             "properties": {
               "kind": {
                 "type": "string",
-                "enum": ["text", "break", "tab", "field"]
+                "enum": ["text", "break", "tab", "field"],
+                "strict": true
               },
               "fieldId": {
                 "type": "string"
@@ -9074,7 +9075,13 @@
               "fieldType": {
                 "type": "string"
               },
+              "styleKey": {
+                "type": "string"
+              },
               "structureSignature": {
+                "type": "string"
+              },
+              "boundarySemanticsKey": {
                 "type": "string"
               }
             }
@@ -9146,7 +9153,8 @@
                       "byParagraph",
                       "by-level",
                       "byLevel"
-                    ]
+                    ],
+                    "strict": true
                   },
                   "effect": {
                     "type": "string",
@@ -9159,19 +9167,23 @@
                       "fade-out",
                       "wipe-out",
                       "fly-out"
-                    ]
+                    ],
+                    "strict": true
                   },
                   "direction": {
                     "type": "string",
-                    "enum": ["from-left", "from-right", "from-top", "from-bottom"]
+                    "enum": ["from-left", "from-right", "from-top", "from-bottom"],
+                    "strict": true
                   },
                   "phase": {
                     "type": "string",
-                    "enum": ["entrance", "exit"]
+                    "enum": ["entrance", "exit"],
+                    "strict": true
                   },
                   "trigger": {
                     "type": "string",
-                    "enum": ["on-click", "with-previous", "after-previous"]
+                    "enum": ["on-click", "with-previous", "after-previous"],
+                    "strict": true
                   },
                   "duration": {
                     "type": "integer",
@@ -9216,19 +9228,23 @@
                       "fade-out",
                       "wipe-out",
                       "fly-out"
-                    ]
+                    ],
+                    "strict": true
                   },
                   "direction": {
                     "type": "string",
-                    "enum": ["from-left", "from-right", "from-top", "from-bottom"]
+                    "enum": ["from-left", "from-right", "from-top", "from-bottom"],
+                    "strict": true
                   },
                   "phase": {
                     "type": "string",
-                    "enum": ["entrance", "exit"]
+                    "enum": ["entrance", "exit"],
+                    "strict": true
                   },
                   "trigger": {
                     "type": "string",
-                    "enum": ["on-click", "with-previous", "after-previous"]
+                    "enum": ["on-click", "with-previous", "after-previous"],
+                    "strict": true
                   },
                   "duration": {
                     "type": "integer",
@@ -9282,10 +9298,15 @@
                 "minItems": 1,
                 "items": {
                   "type": "string",
-                  "enum": ["text", "shapes", "tables", "charts"]
+                  "enum": ["text", "shapes", "tables", "charts"],
+                  "strict": true
                 }
               }
             ]
+          },
+          "remapThemePreserveSemanticColors": {
+            "type": "boolean",
+            "default": true
           },
           "remapThemeFontValue": {
             "oneOf": [
@@ -10816,6 +10837,11 @@
             ],
             "description": "Built-in layout content contract selector from commands.pptx.catalogs.layouts."
           },
+          "populateSlideMode": {
+            "type": "string",
+            "enum": ["strict", "loose"],
+            "strict": true
+          },
           "layoutContractContent": {
             "oneOf": [
               {
@@ -11138,7 +11164,8 @@
                 "properties": {
                   "mode": {
                     "type": "string",
-                    "enum": ["none", "shape", "text"]
+                    "enum": ["none", "shape", "text"],
+                    "strict": true
                   },
                   "fontScale": {
                     "type": "integer",
@@ -16152,7 +16179,7 @@
                         "$ref": "#/$defs/layoutContractSelector"
                       },
                       "mode": {
-                        "type": "string"
+                        "$ref": "#/$defs/populateSlideMode"
                       },
                       "slide": {
                         "type": "integer"
@@ -16168,7 +16195,7 @@
                         "const": "remap-theme"
                       },
                       "preserveSemanticColors": {
-                        "type": "boolean"
+                        "$ref": "#/$defs/remapThemePreserveSemanticColors"
                       },
                       "scope": {
                         "$ref": "#/$defs/remapThemeScope"
@@ -17097,7 +17124,8 @@
               "properties": {
                 "kind": {
                   "type": "string",
-                  "enum": ["text", "break", "tab", "field"]
+                  "enum": ["text", "break", "tab", "field"],
+                  "strict": true
                 },
                 "fieldId": {
                   "type": "string"
@@ -17105,7 +17133,13 @@
                 "fieldType": {
                   "type": "string"
                 },
+                "styleKey": {
+                  "type": "string"
+                },
                 "structureSignature": {
+                  "type": "string"
+                },
+                "boundarySemanticsKey": {
                   "type": "string"
                 }
               }
@@ -17177,7 +17211,8 @@
                         "byParagraph",
                         "by-level",
                         "byLevel"
-                      ]
+                      ],
+                      "strict": true
                     },
                     "effect": {
                       "type": "string",
@@ -17190,19 +17225,23 @@
                         "fade-out",
                         "wipe-out",
                         "fly-out"
-                      ]
+                      ],
+                      "strict": true
                     },
                     "direction": {
                       "type": "string",
-                      "enum": ["from-left", "from-right", "from-top", "from-bottom"]
+                      "enum": ["from-left", "from-right", "from-top", "from-bottom"],
+                      "strict": true
                     },
                     "phase": {
                       "type": "string",
-                      "enum": ["entrance", "exit"]
+                      "enum": ["entrance", "exit"],
+                      "strict": true
                     },
                     "trigger": {
                       "type": "string",
-                      "enum": ["on-click", "with-previous", "after-previous"]
+                      "enum": ["on-click", "with-previous", "after-previous"],
+                      "strict": true
                     },
                     "duration": {
                       "type": "integer",
@@ -17247,19 +17286,23 @@
                         "fade-out",
                         "wipe-out",
                         "fly-out"
-                      ]
+                      ],
+                      "strict": true
                     },
                     "direction": {
                       "type": "string",
-                      "enum": ["from-left", "from-right", "from-top", "from-bottom"]
+                      "enum": ["from-left", "from-right", "from-top", "from-bottom"],
+                      "strict": true
                     },
                     "phase": {
                       "type": "string",
-                      "enum": ["entrance", "exit"]
+                      "enum": ["entrance", "exit"],
+                      "strict": true
                     },
                     "trigger": {
                       "type": "string",
-                      "enum": ["on-click", "with-previous", "after-previous"]
+                      "enum": ["on-click", "with-previous", "after-previous"],
+                      "strict": true
                     },
                     "duration": {
                       "type": "integer",
@@ -17313,10 +17356,15 @@
                   "minItems": 1,
                   "items": {
                     "type": "string",
-                    "enum": ["text", "shapes", "tables", "charts"]
+                    "enum": ["text", "shapes", "tables", "charts"],
+                    "strict": true
                   }
                 }
               ]
+            },
+            "remapThemePreserveSemanticColors": {
+              "type": "boolean",
+              "default": true
             },
             "remapThemeFontValue": {
               "oneOf": [
@@ -18847,6 +18895,11 @@
               ],
               "description": "Built-in layout content contract selector from commands.pptx.catalogs.layouts."
             },
+            "populateSlideMode": {
+              "type": "string",
+              "enum": ["strict", "loose"],
+              "strict": true
+            },
             "layoutContractContent": {
               "oneOf": [
                 {
@@ -19169,7 +19222,8 @@
                   "properties": {
                     "mode": {
                       "type": "string",
-                      "enum": ["none", "shape", "text"]
+                      "enum": ["none", "shape", "text"],
+                      "strict": true
                     },
                     "fontScale": {
                       "type": "integer",

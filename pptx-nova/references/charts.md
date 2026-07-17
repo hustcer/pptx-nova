@@ -482,6 +482,18 @@ xdoc pptx replace-chart-text \
 }
 ```
 
+经典 Chart 和 ChartEx 的应用默认标题 `Chart Title` 可能不是普通可见文本节点。
+翻译模式下不要搜索这个字面量，也不要手工构造标题 selector；应直接使用
+`i18n-scan` inventory 经 `i18n-plan.replaceChartText` 生成的 replacement。此类
+replacement 会额外携带 `sourceState=generated-default-title`、`chartDialect` 和
+`structureSignature`，三个守卫字段必须原样保留。`replace-chart-text` 会在写入前
+重新验证状态，并只物化对应 dialect 的最小标题文本子树，保留已有 layout、overlay、
+shape properties 和 text properties。
+
+该 generated-title 路径只适用于标题容器中完全没有对应 dialect `tx` 子节点的情况。
+只要已经存在任何 `tx`（包括空的 rich-text 容器），就必须 preserve/manual-review；
+不要自动补文本，也不要用临时 OOXML fallback 绕过这个安全边界。
+
 只有 dry-run 报告满足 `agentGate.passed=true`、`changedNodes[]` 符合预期、
 `structureChecks[]` 全部通过时，才去掉 `--dry-run` 写候选文件。该命令只写
 `ppt/charts/*.xml` 中的可见文本节点；不会修改 external workbook path、chart
@@ -509,9 +521,11 @@ chart 标签同步的非翻译场景。
 数据区域，适合真的替换数据集，但可能丢失或重排既有标题、layout、样式和扩展节点。
 patch op `set-chart-text` 目前只覆盖经典 chart part。翻译模式下，top-level
 `xdoc pptx replace-chart-text --visible-cache-only` 已原生支持经典 chart 与 ChartEx，
-并通过 namespace-aware 定位处理 ChartEx direct/nested point text。ChartEx 翻译应优先
-使用该 helper；未知扩展结构默认 preserve-only。只有 helper 明确报告不支持、且确实
-需要修改时，才使用带完整报告、ZIP/XML 校验与 clean-open 验证的定向 OOXML fallback。
+并通过 namespace-aware 定位处理 ChartEx direct/nested point text，以及两种 dialect
+的 generated default title。ChartEx 翻译应优先使用该 helper；未知扩展结构和任何
+已有 `tx` 的标题默认 preserve-only。只有不涉及上述安全边界、helper 明确报告不支持、
+且确实需要修改时，才使用带完整报告、ZIP/XML 校验与 clean-open 验证的定向 OOXML
+fallback。
 
 ### 改数据
 

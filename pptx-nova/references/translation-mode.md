@@ -172,6 +172,18 @@ relevant OOXML style properties.
      labels (`title`, `series`, `category`, `dataLabel`) in
      `ppt/charts/*.xml`; it does not write external workbook paths,
      relationship targets, embedded workbook data, or `formatCode`.
+     Classic Chart and ChartEx may expose the application-generated default
+     title `Chart Title` without storing it as an ordinary visible text node.
+     `i18n-scan` inventories that semantic default with
+     `sourceState=generated-default-title`, `chartDialect`, and
+     `structureSignature`; preserve all three fields verbatim through
+     `i18n-plan.replaceChartText`. The helper revalidates those guards and
+     materializes only the dialect-appropriate title text subtree while
+     preserving layout, overlay, shape, and text-style children.
+     This generated-title route is intentionally limited to title containers
+     with no existing dialect `tx` child. If any `tx` child already exists,
+     even an empty rich-text container, keep the unit preserve/manual-review
+     rather than synthesizing text or using a run-local OOXML fallback.
    - Prefer run/text-node replacement that changes only `<a:t>`, `<c:v>`,
      `<cx:pt>`, or equivalent visible cache text, leaving neighboring
      `a:rPr`, `a:pPr`, `a:bodyPr`, table cell properties, and chart styling
@@ -543,9 +555,12 @@ Charts are a frequent translation blind spot.
   block on any conflict, ambiguity, `formatCode` change, or failed structure
   check.
 - The top-level helper natively handles classic charts and namespace-aware
-  ChartEx direct/nested point text. Prefer that route for ChartEx translations;
-  unknown extension structures remain preserve-only unless a targeted,
-  validated fallback is explicitly required.
+  ChartEx direct/nested point text, plus generated default titles in both
+  dialects. Never search the package for the literal `Chart Title` or hand-build
+  a replacement for a generated title: consume the inventory selector and keep
+  its `sourceState`, `chartDialect`, and `structureSignature` guards. Unknown
+  extension structures and titles with any existing `tx` child remain
+  preserve-only; do not bypass that boundary with a targeted OOXML fallback.
 - Do not use the patch op `set-chart-text` as the default translation path:
   that op may synchronize embedded workbook labels and is intended for ordinary
   chart editing, not visible-cache-only i18n.

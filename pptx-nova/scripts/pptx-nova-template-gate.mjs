@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { execFileSync } from 'node:child_process'
+import { inflateRawSync } from 'node:zlib'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from './pptx-nova-review-policy.mjs'
@@ -174,6 +174,52 @@ function isPlainObject(value) {
 
 function asArray(value) {
   return Array.isArray(value) ? value : []
+}
+
+function findEndOfCentralDirectory(buffer) {
+  for (let offset = buffer.length - 22; offset >= 0; offset -= 1) {
+    if (buffer.readUInt32LE(offset) === 0x06054b50) return offset
+  }
+  throw new Error('PPTX ZIP end of central directory was not found')
+}
+
+function readZipEntries(path) {
+  const buffer = readFileSync(path)
+  const eocd = findEndOfCentralDirectory(buffer)
+  const entryCount = buffer.readUInt16LE(eocd + 10)
+  const centralOffset = buffer.readUInt32LE(eocd + 16)
+  const entries = []
+  let cursor = centralOffset
+  for (let index = 0; index < entryCount; index += 1) {
+    if (buffer.readUInt32LE(cursor) !== 0x02014b50) {
+      throw new Error(`Invalid ZIP central directory entry at ${cursor}`)
+    }
+    const method = buffer.readUInt16LE(cursor + 10)
+    const compressedSize = buffer.readUInt32LE(cursor + 20)
+    const uncompressedSize = buffer.readUInt32LE(cursor + 24)
+    const fileNameLength = buffer.readUInt16LE(cursor + 28)
+    const extraLength = buffer.readUInt16LE(cursor + 30)
+    const commentLength = buffer.readUInt16LE(cursor + 32)
+    const localOffset = buffer.readUInt32LE(cursor + 42)
+    const name = buffer.toString('utf8', cursor + 46, cursor + 46 + fileNameLength)
+    cursor += 46 + fileNameLength + extraLength + commentLength
+    if (buffer.readUInt32LE(localOffset) !== 0x04034b50) {
+      throw new Error(`Invalid ZIP local file header for ${name}`)
+    }
+    const localNameLength = buffer.readUInt16LE(localOffset + 26)
+    const localExtraLength = buffer.readUInt16LE(localOffset + 28)
+    const dataStart = localOffset + 30 + localNameLength + localExtraLength
+    const compressed = buffer.subarray(dataStart, dataStart + compressedSize)
+    let data
+    if (method === 0) data = compressed
+    else if (method === 8) data = inflateRawSync(compressed)
+    else continue
+    if (uncompressedSize !== 0 && data.length !== uncompressedSize) {
+      throw new Error(`ZIP entry size mismatch for ${name}`)
+    }
+    entries.push({ name, data })
+  }
+  return entries
 }
 
 function slideCountOf(inspect) {
@@ -575,39 +621,25 @@ function collectFinalPptxPlaceholderFindings({ finalPptx, errors, warnings }) {
     push(errors, 'error', 'final-pptx-missing', `final PPTX does not exist: ${finalPptx}`)
     return findings
   }
-  let slideNames = []
+  let slideEntries = []
   try {
-    slideNames = execFileSync('unzip', ['-Z1', finalPptx], { encoding: 'utf8' })
-      .split(/\r?\n/)
-      .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
-      .sort((a, b) => slideNumber(a) - slideNumber(b))
+    slideEntries = readZipEntries(finalPptx)
+      .filter((entry) => /^ppt\/slides\/slide\d+\.xml$/.test(entry.name))
+      .sort((a, b) => slideNumber(a.name) - slideNumber(b.name))
   } catch (error) {
     push(
       warnings,
       'warning',
       'final-pptx-placeholder-scan-skipped',
-      `could not list PPTX zip entries with unzip: ${error.message}`,
+      `could not read PPTX ZIP entries: ${error.message}`,
     )
     return findings
   }
 
-  for (const slideName of slideNames) {
+  for (const entry of slideEntries) {
+    const slideName = entry.name
     const slide = slideNumber(slideName) - 1
-    let xml = ''
-    try {
-      xml = execFileSync('unzip', ['-p', finalPptx, slideName], {
-        encoding: 'utf8',
-        maxBuffer: 16 * 1024 * 1024,
-      })
-    } catch (error) {
-      push(
-        warnings,
-        'warning',
-        'final-pptx-slide-read-failed',
-        `could not read ${slideName}: ${error.message}`,
-      )
-      continue
-    }
+    const xml = entry.data.toString('utf8')
     for (const shapeXml of xml.match(/<p:sp\b[\s\S]*?<\/p:sp>/g) ?? []) {
       if (!/<p:ph\b/.test(shapeXml)) continue
       const ph = placeholderInfo(shapeXml)

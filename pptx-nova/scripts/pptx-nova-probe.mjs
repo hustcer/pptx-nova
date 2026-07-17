@@ -2,7 +2,7 @@
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -104,7 +104,11 @@ function parseArgs(argv) {
 }
 
 function run(bin, args) {
-  const result = spawnSync(bin, args, {
+  const javascriptPath =
+    ['.js', '.mjs', '.cjs'].includes(extname(bin).toLowerCase()) && existsSync(bin)
+  const executable = javascriptPath ? process.execPath : bin
+  const executableArgs = javascriptPath ? [bin, ...args] : args
+  const result = spawnSync(executable, executableArgs, {
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,
   })

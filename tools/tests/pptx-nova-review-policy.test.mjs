@@ -18,13 +18,77 @@ function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
-function runNode(args, expectedStatus = 0) {
+function runNode(args, expectedStatus = 0, options = {}) {
   const result = spawnSync(process.execPath, args, {
     cwd: repoRoot,
     encoding: 'utf8',
+    ...options,
   })
   assert.equal(result.status, expectedStatus, result.stderr || result.stdout)
   return result
+}
+
+function crc32(buffer) {
+  let crc = 0xffffffff
+  for (const byte of buffer) {
+    crc ^= byte
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0)
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0
+}
+
+function writeStoredZip(path, entries) {
+  const locals = []
+  const centrals = []
+  let offset = 0
+  for (const [name, text] of Object.entries(entries)) {
+    const fileName = Buffer.from(name)
+    const data = Buffer.from(text)
+    const checksum = crc32(data)
+    const local = Buffer.alloc(30)
+    local.writeUInt32LE(0x04034b50, 0)
+    local.writeUInt16LE(20, 4)
+    local.writeUInt16LE(0, 6)
+    local.writeUInt16LE(0, 8)
+    local.writeUInt32LE(checksum, 14)
+    local.writeUInt32LE(data.length, 18)
+    local.writeUInt32LE(data.length, 22)
+    local.writeUInt16LE(fileName.length, 26)
+    locals.push(local, fileName, data)
+
+    const central = Buffer.alloc(46)
+    central.writeUInt32LE(0x02014b50, 0)
+    central.writeUInt16LE(20, 4)
+    central.writeUInt16LE(20, 6)
+    central.writeUInt16LE(0, 8)
+    central.writeUInt16LE(0, 10)
+    central.writeUInt32LE(checksum, 16)
+    central.writeUInt32LE(data.length, 20)
+    central.writeUInt32LE(data.length, 24)
+    central.writeUInt16LE(fileName.length, 28)
+    central.writeUInt32LE(offset, 42)
+    centrals.push(central, fileName)
+    offset += local.length + fileName.length + data.length
+  }
+  const centralDirectory = Buffer.concat(centrals)
+  const eocd = Buffer.alloc(22)
+  eocd.writeUInt32LE(0x06054b50, 0)
+  eocd.writeUInt16LE(Object.keys(entries).length, 8)
+  eocd.writeUInt16LE(Object.keys(entries).length, 10)
+  eocd.writeUInt32LE(centralDirectory.length, 12)
+  eocd.writeUInt32LE(offset, 16)
+  writeFileSync(path, Buffer.concat([...locals, centralDirectory, eocd]))
+}
+
+function envWithoutPath() {
+  const env = { ...process.env }
+  for (const key of Object.keys(env)) {
+    if (key.toLowerCase() === 'path') delete env[key]
+  }
+  env.PATH = ''
+  return env
 }
 
 function layoutFinding(overrides = {}) {
@@ -448,20 +512,15 @@ test('template gate uses the same exact review policy and rejects the legacy boo
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-template-review-'))
   const source = join(root, 'source.pptx')
   const candidate = join(root, 'candidate.pptx')
-  const zipRoot = join(root, 'zip')
-  const slideDir = join(zipRoot, 'ppt', 'slides')
   const frameMap = join(root, 'frame-map.json')
   const sourceInspect = join(root, 'source-inspect.json')
   const reviewPolicy = join(root, 'review-policy.json')
   const legacyPlan = join(root, 'legacy-plan.json')
-  mkdirSync(slideDir, { recursive: true })
   writeFileSync(source, 'source pptx')
-  writeFileSync(
-    join(slideDir, 'slide1.xml'),
-    '<p:sld xmlns:p="p" xmlns:a="a"><p:sp><p:nvSpPr><p:cNvPr id="101" name="Slide Number Placeholder"/><p:nvPr><p:ph type="sldNum" idx="12"/></p:nvPr></p:nvSpPr><p:txBody><a:p><a:r><a:t></a:t></a:r></a:p></p:txBody></p:sp></p:sld>',
-  )
-  const zip = spawnSync('zip', ['-qr', candidate, '.'], { cwd: zipRoot, encoding: 'utf8' })
-  assert.equal(zip.status, 0, zip.stderr)
+  writeStoredZip(candidate, {
+    'ppt/slides/slide1.xml':
+      '<p:sld xmlns:p="p" xmlns:a="a"><p:sp><p:nvSpPr><p:cNvPr id="101" name="Slide Number Placeholder"/><p:nvPr><p:ph type="sldNum" idx="12"/></p:nvPr></p:nvSpPr><p:txBody><a:p><a:r><a:t></a:t></a:r></a:p></p:txBody></p:sp></p:sld>',
+  })
   writeJson(frameMap, {
     schemaVersion: 'pptx-nova-template-frame-map/v1',
     outputSlides: [{ outputSlide: 0, sourceSlide: 0, reuseMode: 'preserve', editTargets: [] }],
@@ -485,20 +544,24 @@ test('template gate uses the same exact review policy and rejects the legacy boo
     ],
   })
 
-  const reviewedResult = runNode([
-    join(skillRoot, 'scripts/pptx-nova-template-gate.mjs'),
-    '--frame-map',
-    frameMap,
-    '--source-inspect',
-    sourceInspect,
-    '--source-pptx',
-    source,
-    '--final-pptx',
-    candidate,
-    '--review-policy',
-    reviewPolicy,
-    '--json',
-  ])
+  const reviewedResult = runNode(
+    [
+      join(skillRoot, 'scripts/pptx-nova-template-gate.mjs'),
+      '--frame-map',
+      frameMap,
+      '--source-inspect',
+      sourceInspect,
+      '--source-pptx',
+      source,
+      '--final-pptx',
+      candidate,
+      '--review-policy',
+      reviewPolicy,
+      '--json',
+    ],
+    0,
+    { env: envWithoutPath() },
+  )
   const reviewedReport = JSON.parse(reviewedResult.stdout)
   assert.notEqual(reviewedReport.status, 'error')
   assert.equal(reviewedReport.summary.reviewedFindings, 1)
@@ -529,6 +592,7 @@ test('template gate uses the same exact review policy and rejects the legacy boo
       '--json',
     ],
     1,
+    { env: envWithoutPath() },
   )
   const legacyReport = JSON.parse(legacyResult.stdout)
   assert.ok(legacyReport.errors.some((item) => item.code === 'legacy-empty-placeholder-exception'))

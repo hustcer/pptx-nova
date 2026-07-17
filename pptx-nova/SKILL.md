@@ -43,10 +43,13 @@ allowlists; a missing capability means `undisclosed`, not automatically `unsuppo
 
 When unsure, go deeper only as needed: first check the op index in `xdoc-capabilities.json`; use
 `xdoc schema --index` only when the snapshot is missing or must be refreshed. Then use
-`xdoc schema --op <name> --minimal` to inspect fields and enums. Read theme/style/native DeckKit
-information from the matching catalog indexes in the snapshot. Derive selectors in order from inspect,
-the target op schema, and dry-run suggestions. Treat `xdoc <command...> --help` as supplemental only;
-do not assume `--help --json` emits JSON.
+`xdoc schema --op <name> --fields <needed-fields> --minimal` when the snapshot discloses `--fields`
+and only a focused contract surface is needed; otherwise use `xdoc schema --op <name> --minimal`.
+Field projections are disclosure views, not complete validation schemas: retain their required fields,
+but omit `--fields` or use `apply --dry-run` before treating a patch as valid. Read
+theme/style/native DeckKit information from the matching catalog indexes in the snapshot. Derive
+selectors in order from inspect, the target op schema, and dry-run suggestions. Treat
+`xdoc <command...> --help` as supplemental only; do not assume `--help --json` emits JSON.
 
 Do not append `--json` to top-level `xdoc convert` or `xdoc check` by default. For structured PPTX PNG
 previews, prefer `xdoc pptx preview --json`; for structured single-file preflight results, prefer

@@ -329,6 +329,8 @@ function createReport(args) {
   const pptx = schema?.commands?.pptx ?? {}
   const patchSchema = pptx.patchSchema ?? {}
   const catalogs = pptx.catalogs ?? {}
+  const schemaSlicingModes = namesFromCollection(pptx.schemaDisclosure?.modes, ['flag'])
+  const fieldsAvailable = schemaSlicingModes.some((mode) => mode.startsWith('--fields'))
   const capabilities = {
     commands: objectKeys(schema?.commands).sort(),
     pptxSubcommands: objectKeys(pptx.subcommands).sort(),
@@ -345,7 +347,8 @@ function createReport(args) {
     generatorDeckkits: generatorDeckkitIndex(),
     schemaSlicing: {
       available: Boolean(pptx.schemaDisclosure),
-      modes: namesFromCollection(pptx.schemaDisclosure?.modes, ['flag']),
+      modes: schemaSlicingModes,
+      fieldsAvailable,
       recommended: pptx.schemaDisclosure?.agentHint ?? null,
     },
     commandFlags: helpFlagIndex(args.xdocBin),
@@ -396,7 +399,9 @@ function createReport(args) {
         targetedLookup: {
           operationIndex:
             'read xdoc-capabilities.json#capabilities.patchOperations; refresh with xdoc schema --index only when needed',
-          operationSchema: 'xdoc schema --op <name> --minimal',
+          operationSchema: fieldsAvailable
+            ? 'xdoc schema --op <name> --fields <needed-fields> --minimal; omit --fields or use apply --dry-run for complete validation'
+            : 'xdoc schema --op <name> --minimal',
           commandHelp: 'xdoc <command...> --help',
           selectorEvidence: 'inspect output -> op schema -> dry-run suggestions',
           deckkitGeneratorCatalog:

@@ -127,6 +127,103 @@ process.stdout.write(JSON.stringify({
   )
 }
 
+test('capability probe advertises field-scoped schema lookup when disclosed', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-probe-fields-'))
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2)
+if (args[0] === 'schema') {
+  process.stdout.write(JSON.stringify({
+    version: '9.9.9 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    capabilities: { schemaVersion: 'capabilities/v1' },
+    commands: {
+      pptx: {
+        subcommands: { apply: {} },
+        schemaDisclosure: {
+          modes: [
+            { flag: '--op <name>' },
+            { flag: '--fields a,b,c' },
+            { flag: '--minimal' }
+          ],
+          agentHint: 'Use --op with --fields for focused discovery.'
+        },
+        patchSchema: {
+          supportedOps: ['set-shape', 'set-shape'],
+          operations: [{ op: 'set-shape' }]
+        },
+        catalogs: {}
+      }
+    }
+  }))
+  process.exit(0)
+}
+if (args.at(-1) === '--help') {
+  process.stdout.write('--json --report --output preview')
+  process.exit(0)
+}
+process.exit(2)
+`,
+  )
+  const result = runNode([
+    skillPath('scripts/pptx-nova-probe.mjs'),
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.capabilities.schemaSlicing.available, true)
+  assert.equal(report.capabilities.schemaSlicing.fieldsAvailable, true)
+  assert.ok(report.capabilities.schemaSlicing.modes.includes('--fields a,b,c'))
+  assert.match(report.disclosure.targetedLookup.operationSchema, /--fields <needed-fields>/)
+  assert.match(report.disclosure.targetedLookup.operationSchema, /complete validation/)
+  assert.deepEqual(report.capabilities.patchOperations, ['set-shape'])
+})
+
+test('capability probe keeps the unprojected lookup for older xdoc schemas', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-probe-legacy-schema-'))
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2)
+if (args[0] === 'schema') {
+  process.stdout.write(JSON.stringify({
+    version: '8.8.8 (fake)',
+    schemaVersion: 'cli-agent/v1',
+    commands: {
+      pptx: {
+        subcommands: {},
+        schemaDisclosure: {
+          modes: [{ flag: '--op <name>' }, { flag: '--minimal' }]
+        },
+        patchSchema: {},
+        catalogs: {}
+      }
+    }
+  }))
+  process.exit(0)
+}
+if (args.at(-1) === '--help') process.exit(0)
+process.exit(2)
+`,
+  )
+  const result = runNode([
+    skillPath('scripts/pptx-nova-probe.mjs'),
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.capabilities.schemaSlicing.fieldsAvailable, false)
+  assert.equal(
+    report.disclosure.targetedLookup.operationSchema,
+    'xdoc schema --op <name> --minimal',
+  )
+})
+
 test('layout snapshot separates actionable risks from informational inspect gaps', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-layout-summary-'))
   const inspectPath = join(root, 'inspect.json')

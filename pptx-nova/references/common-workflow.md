@@ -137,7 +137,11 @@ not a fresh runner target.
 The snapshot records the xdoc version, CLI/capability schema versions, top-level
 commands, PPTX subcommands, patch/recipe op names, enum registry names,
 theme/style ids, and native DeckKit declarations. It intentionally omits full op
-schemas; fetch those only when needed with `xdoc schema --op <name> --minimal`.
+schemas. When `capabilities.schemaSlicing.fieldsAvailable` is true, fetch only the
+needed surface with `xdoc schema --op <name> --fields <needed-fields> --minimal`;
+otherwise use `xdoc schema --op <name> --minimal`. A field projection is
+disclosure-only (`completeValidation=false`), so omit `--fields` or rely on
+`apply --dry-run` for complete validation.
 Consult this snapshot before running `xdoc schema --index`; refresh the index only
 when the snapshot is missing, stale, or does not disclose a capability you need.
 

@@ -10,11 +10,13 @@ xdoc schema                          # 完整 schema（贵）
 xdoc schema --index                  # 只 op 名 + level + required/optional 字段
 xdoc schema --op add-text-box         # 单个 op 完整 jsonSchema
 xdoc schema --ops add-slide,add-chart   # 多个 op
+xdoc schema --op set-shape --fields name,shape,slide --minimal # 只取所需字段
 xdoc schema --examples               # 内置 12 个 patch 示例
 xdoc schema --minimal                # 删 verbose 字段（与上面任一组合用）
 ```
 
 约束：`--examples` 和 `--op/--ops` 互斥（要看示例就单独跑一次）。
+`--fields` 必须与 `--op/--ops` 组合；required 字段会自动保留，未知字段直接报错。
 
 ## 典型 Agent 用法
 
@@ -27,7 +29,18 @@ xdoc schema --index | save -f schema-index.json
 得到所有 120 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
 决定 "我要 `add-chart` 还是 `add-text-box`"。
 
-### 2. 选定 op → 拉单个 schema
+### 2. 选定 op → 先拉所需字段
+
+只确认 selector、name 等少量字段时，优先使用字段投影：
+
+```bash
+xdoc schema --op set-shape --fields name,shape,slide --minimal \
+  | save -f schema-set-shape-name.json
+```
+
+投影会保留选中字段、全部 required 字段，以及这些字段传递引用的 `$defs`。输出中的
+`disclosure.completeValidation=false` 表示它只用于发现和构造 patch，不能当作完整校验合同；
+需要检查所有可选字段或离线验证时，省略 `--fields`：
 
 ```bash
 xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
@@ -157,7 +170,8 @@ left / center / right / justify / distribute / thai-distribute
 ### `effect`
 
 `set-shape.effect` 使用 `shadow` / `glow` / `reflection` / `softEdge` 子对象；不要使用
-`effect.kind`。具体字段以 `xdoc schema --op set-shape --minimal` 为准。
+`effect.kind`。只查询 effect 时优先使用
+`xdoc schema --op set-shape --fields effect,shape,slide --minimal`；完整合同再省略 `--fields`。
 
 ## Catalog 命令
 
@@ -258,6 +272,8 @@ xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.j
   自己读 `opResults[].controlExpansion` 更直观
 - **token 友好**：与 `xdoc schema` 一次性几万 token 不同，`--explain` 只在
   dry-run 时按需附带、且只覆盖当前 patch 里**真正用到**的 op
+- **rename 可自证**：对 `set-shape` rename，检查对应 `semanticChanges[]` 的
+  `before` / `after`；`explanations[].reason` 会明确说明名称从旧值变为新值。
 
 ### 约束
 

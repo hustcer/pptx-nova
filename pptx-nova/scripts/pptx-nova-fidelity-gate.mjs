@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { evaluateReviewPolicy } from './pptx-nova-review-policy.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-fidelity-gate/v1'
 const TEMPLATE_GATE_SCHEMA_VERSION = 'pptx-nova-template-gate/v1'
@@ -17,13 +18,17 @@ Modes:
 Options:
   --mode <mode>             Required. template-following|template|refurbish.
   --source-inspect <path>   xdoc inspect JSON for the source/template deck.
+  --source-pptx <path>      Source PPTX used for hash-bound reviewed findings.
   --final-inspect <path>    xdoc inspect JSON for the final deck.
+  --candidate-pptx <path>   Candidate PPTX recorded in the final review receipt.
   --frame-map <path>        template-frame-map.json for Template Following.
   --template-gate <path>    template-gate.json from pptx-nova-template-gate.mjs.
   --reference-map <path>    reference-map.json for Refurbish Existing Deck.
   --content-audit <path>    Optional baseline content-audit.json.
   --final-audit <path>      content-audit-final.json from xdoc pptx refurbish-audit.
   --vision-diff <path>      vision-diff.json from xdoc pptx vision-diff.
+  --layout-snapshot <path>  layout-final.json with raw layout findings.
+  --review-policy <path>    Optional pptx-nova-review-policy/v1 document.
   --json                    Print machine-readable report.
   --help                    Show this help.
 `
@@ -32,13 +37,17 @@ function parseArgs(argv) {
   const args = {
     mode: '',
     sourceInspect: '',
+    sourcePptx: '',
     finalInspect: '',
+    candidatePptx: '',
     frameMap: '',
     templateGate: '',
     referenceMap: '',
     contentAudit: '',
     finalAudit: '',
     visionDiff: '',
+    layoutSnapshot: '',
+    reviewPolicy: '',
     json: false,
   }
   for (let i = 0; i < argv.length; i += 1) {
@@ -64,13 +73,17 @@ function parseArgs(argv) {
 const valueFlags = {
   '--mode': 'mode',
   '--source-inspect': 'sourceInspect',
+  '--source-pptx': 'sourcePptx',
   '--final-inspect': 'finalInspect',
+  '--candidate-pptx': 'candidatePptx',
   '--frame-map': 'frameMap',
   '--template-gate': 'templateGate',
   '--reference-map': 'referenceMap',
   '--content-audit': 'contentAudit',
   '--final-audit': 'finalAudit',
   '--vision-diff': 'visionDiff',
+  '--layout-snapshot': 'layoutSnapshot',
+  '--review-policy': 'reviewPolicy',
 }
 
 function valueAfter(argv, index, flag) {
@@ -98,6 +111,21 @@ function readJson(path, label) {
 function readOptionalJson(path, label) {
   if (!path) return null
   return readJson(path, label)
+}
+
+function containsReviewPolicy(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  if ('reviewedFindings' in value) {
+    return !Array.isArray(value.reviewedFindings) || value.reviewedFindings.length > 0
+  }
+  if ('reviewPolicy' in value) {
+    const policy = value.reviewPolicy
+    if (!policy || typeof policy !== 'object' || Array.isArray(policy)) return true
+    if ('reviewedFindings' in policy) {
+      return !Array.isArray(policy.reviewedFindings) || policy.reviewedFindings.length > 0
+    }
+  }
+  return false
 }
 
 function push(list, severity, code, message, details = {}) {
@@ -323,9 +351,11 @@ function validateTemplateFollowing(args, report) {
 function validateRefurbish(args, report) {
   const sourceInspect = readJson(args.sourceInspect, 'source inspect')
   const referenceMap = readOptionalJson(args.referenceMap, 'reference map')
+  const explicitReviewPolicy = readOptionalJson(args.reviewPolicy, 'review policy')
   const contentAudit = readOptionalJson(args.contentAudit, 'content audit')
   const finalAudit = readJson(args.finalAudit, 'final audit')
   const visionDiff = readJson(args.visionDiff, 'vision diff')
+  const layoutSnapshot = readOptionalJson(args.layoutSnapshot, 'layout snapshot')
 
   const inspectSourceCount = slideCountOf(sourceInspect)
   const auditSourceCount = numeric(finalAudit?.summary?.sourceSlideCount)
@@ -336,6 +366,13 @@ function validateRefurbish(args, report) {
   validateFinalAudit(report, finalAudit, sourceCount, finalCount)
   validateVisionDiff(report, visionDiff)
   validateReferenceMap(report, referenceMap, sourceCount, finalCount)
+  validateReviewedFindings({
+    args,
+    report,
+    referenceMap,
+    explicitReviewPolicy,
+    layoutSnapshot,
+  })
 
   if (contentAudit && contentAudit.schemaVersion !== 'pptx-nova-content-audit/v1') {
     push(
@@ -349,6 +386,90 @@ function validateRefurbish(args, report) {
 
   report.summary.sourceSlides = sourceCount
   report.summary.finalSlides = finalCount
+}
+
+function validateReviewedFindings({
+  args,
+  report,
+  referenceMap,
+  explicitReviewPolicy,
+  layoutSnapshot,
+}) {
+  const embeddedPolicy = containsReviewPolicy(referenceMap) ? referenceMap : null
+  if (explicitReviewPolicy && embeddedPolicy) {
+    push(
+      report.errors,
+      'error',
+      'review-policy-source-ambiguous',
+      'reviewed findings must come from either --review-policy or reference-map.json, not both',
+    )
+  }
+  if (layoutSnapshot && layoutSnapshot.schemaVersion !== 'pptx-nova-layout-snapshot/v1') {
+    push(
+      report.errors,
+      'error',
+      'layout-snapshot-schema-version',
+      'layout snapshot schemaVersion must be pptx-nova-layout-snapshot/v1',
+      { schemaVersion: layoutSnapshot.schemaVersion ?? '' },
+    )
+  }
+
+  const policyDocument = explicitReviewPolicy ?? embeddedPolicy
+  const policyDocumentPath = explicitReviewPolicy
+    ? args.reviewPolicy
+    : embeddedPolicy
+      ? args.referenceMap
+      : ''
+  const evaluation = evaluateReviewPolicy({
+    policyDocument,
+    policyDocumentPath,
+    allowEmbeddedPolicy: Boolean(!explicitReviewPolicy && embeddedPolicy),
+    sourcePptx: args.sourcePptx,
+    candidatePptx: args.candidatePptx,
+    findings: asArray(layoutSnapshot?.risks),
+    evidencePaths: {
+      layoutSnapshot: args.layoutSnapshot,
+      finalAudit: args.finalAudit,
+      visionDiff: args.visionDiff,
+      referenceMap: args.referenceMap,
+    },
+  })
+  report.reviewPolicy = evaluation
+  report.summary.declaredReviews = evaluation.summary.declaredReviewCount
+  report.summary.appliedReviews = evaluation.summary.appliedReviewCount
+  report.summary.reviewedFindings = evaluation.summary.reviewedFindingCount
+  report.summary.remainingActionableFindings = evaluation.summary.remainingActionableCount
+
+  for (const item of evaluation.errors) {
+    push(report.errors, 'error', item.code, item.message, {
+      source: 'review-policy',
+      details: item,
+    })
+  }
+  if (evaluation.summary.remainingActionableCount > 0) {
+    const counts = new Map()
+    for (const finding of evaluation.remainingActionable) {
+      const code = String(finding?.code ?? 'layout-finding')
+      counts.set(code, (counts.get(code) ?? 0) + 1)
+    }
+    push(
+      report.warnings,
+      'warning',
+      'layout-actionable-findings',
+      'layout snapshot retains actionable findings that were not covered by reviewed exceptions',
+      {
+        count: evaluation.summary.remainingActionableCount,
+        byCode: Object.fromEntries(counts),
+      },
+    )
+  }
+  addCheck(report.checks, 'review-policy', evaluation.status === 'pass' ? 'passed' : 'failed', {
+    declaredReviews: evaluation.summary.declaredReviewCount,
+    appliedReviews: evaluation.summary.appliedReviewCount,
+    reviewedFindings: evaluation.summary.reviewedFindingCount,
+    remainingActionableFindings: evaluation.summary.remainingActionableCount,
+    errors: evaluation.summary.errorCount,
+  })
 }
 
 function validateFinalAudit(report, finalAudit, sourceCount, finalCount) {

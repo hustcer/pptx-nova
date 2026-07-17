@@ -358,6 +358,7 @@ function validateObject({ risks, bbox, size, type, textPreview, font, placeholde
     pushRisk(risks, 'warning', 'empty-placeholder', 'Placeholder object is empty in final layout', {
       slide: slideIndex,
       placeholder,
+      observed: { textEmpty: true },
     })
   }
   if (
@@ -404,6 +405,7 @@ function validateObject({ risks, bbox, size, type, textPreview, font, placeholde
 
 function normalizeSlide(slide, fallbackSize) {
   const index = numberOrNull(slide?.index ?? slide?.slide) ?? 0
+  const partName = String(slide?.partName ?? slide?.part_name ?? slide?.part ?? '')
   const size = slideSize(slide, fallbackSize)
   const rawObjects = asArray(slide?.shapes ?? slide?.objects ?? slide?.elements)
   const objects = rawObjects.map((shape, shapeIndex) =>
@@ -436,6 +438,7 @@ function normalizeSlide(slide, fallbackSize) {
   }
   return {
     index,
+    partName,
     size,
     objectCount: objects.length,
     objects: objects.sort((a, b) => Number(a.zOrder ?? 0) - Number(b.zOrder ?? 0)),
@@ -446,13 +449,16 @@ function normalizeSlide(slide, fallbackSize) {
 function flattenRisks(slides) {
   const risks = []
   for (const slide of slides) {
-    for (const risk of slide.risks) risks.push(withSlideReference(risk, slide.index))
+    for (const risk of slide.risks) {
+      risks.push(withSlideReference({ ...risk, slidePart: slide.partName }, slide.index))
+    }
     for (const object of slide.objects) {
       for (const risk of object.risks) {
         risks.push(
           withSlideReference(
             {
               ...risk,
+              slidePart: slide.partName,
               objectId: object.id,
               objectName: object.name,
               objectType: object.type,

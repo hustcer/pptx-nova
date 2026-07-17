@@ -26,6 +26,10 @@
 - `reference-inspect.json`：`inspect` 输出，用来判断页面尺寸、layout、shape、文本密度和复杂对象。
 - `reference-style.json`：`extract-style` 输出，包含主题色、字体、layout/slide 语义和 draft pack。
 - `reference-map.json`：新大纲每页到参考页型/参考 slide 的映射。
+- `review-policy.json`：仅在需要保留已确认的原始 finding 时创建；使用
+  `pptx-nova-review-policy/v1`，绑定源 PPTX SHA-256，并精确记录 finding code、slide part、shape id、
+  placeholder type/idx、预期状态和原因。也可以把同样的 `bindings` / `reviewedFindings` 放入
+  `reference-map.json`；不要同时使用两个 policy 来源。
 - `content-audit.json`：Refurbish Existing Deck 时逐页对账文本、表格、chart、SmartArt、图片/媒体、
   shape/group 和 notes 的保留状态。
 - `content-audit-final.json`：Refurbish Existing Deck 时由 `xdoc pptx refurbish-audit`
@@ -250,6 +254,37 @@ node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
 5. 写 `reference-map.json`，记录每个源 slide 映射到哪些输出 slide。默认 `1:1` 保持页数；
    任何 `1:N` 拆页、`N:1` 合页、重排序或 appendix 化都必须先让用户确认，并写入 `approvedChanges[]`。
    不要为了保持原页数而让文字小到不可读或触发 text overflow；但也不能擅自改变页数。
+   `approvedChanges[]` 描述真实内容/结构变化，不能用于忽略诊断。如果源 deck 有意保留空 placeholder，
+   应保持该对象不变，并写 hash-bound reviewed finding；不得删除对象来消除 layout warning，也不得使用
+   `allowEmptyPlaceholder` 或全局 ignore。
+
+   最小 reviewed finding 结构如下，可作为独立 `review-policy.json`，也可把 `bindings` 和
+   `reviewedFindings` 嵌入 `reference-map.json`：
+
+```json
+{
+  "schemaVersion": "pptx-nova-review-policy/v1",
+  "bindings": {
+    "sourceSha256": "<64-hex-source-sha256>"
+  },
+  "reviewedFindings": [
+    {
+      "id": "slide-8-intentional-empty-sldnum",
+      "code": "empty-placeholder",
+      "disposition": "accepted",
+      "target": {
+        "slideIndex": 7,
+        "part": "ppt/slides/slide8.xml",
+        "shapeId": 101,
+        "placeholder": { "type": "sldNum", "idx": 12 }
+      },
+      "expected": { "textEmpty": true },
+      "reason": "该页用于验证 viewer 未自动填充页码占位符的行为"
+    }
+  ]
+}
+```
+
 6. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。默认先运行一等编排命令：
 
 ```bash
@@ -379,21 +414,24 @@ xdoc pptx refurbish-audit \
   --map reference-map.json \
   --json > content-audit-final.json
 
-node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
-  --mode refurbish \
-  --source-inspect reference-inspect.json \
-  --reference-map reference-map.json \
-  --content-audit content-audit.json \
-  --final-audit content-audit-final.json \
-  --vision-diff vision-diff.json \
-  --json > fidelity-gate.json
-
 xdoc pptx inspect candidate.pptx --json > candidate-inspect.json
 
 node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
   --inspect candidate-inspect.json \
   --output layout-final.json \
   --json
+
+node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
+  --mode refurbish \
+  --source-inspect reference-inspect.json \
+  --source-pptx source.pptx \
+  --candidate-pptx candidate.pptx \
+  --reference-map reference-map.json \
+  --content-audit content-audit.json \
+  --final-audit content-audit-final.json \
+  --vision-diff vision-diff.json \
+  --layout-snapshot layout-final.json \
+  --json > fidelity-gate.json
 
 xdoc pptx contact-diff \
   --source source.pptx \
@@ -411,6 +449,9 @@ node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
   --overwrite \
   --json > <run-dir>/refurbish-compare-gate.json
 ```
+
+如果 reviewed findings 位于独立 `review-policy.json`，给 fidelity gate 和标准 refurbish runner
+增加 `--review-policy review-policy.json`；如果它们已嵌入 `reference-map.json`，不要重复传入独立 policy。
 
 如果没有拆页、合页或重排，可用 `--assume-one-to-one` 省略 `--map`，但仍必须在
 `reference-map.json` 或最终摘要中说明采用默认 1:1 映射。

@@ -1,11 +1,16 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fallbackFor, hexFrom, luminance } from './pptx-nova-refurbish-style.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
+
+function sha256File(path) {
+  return existsSync(path) ? createHash('sha256').update(readFileSync(path)).digest('hex') : null
+}
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-refurbish-fallback-patch.mjs --deckkit <id> --inspect reference-inspect.json [options]
@@ -632,8 +637,12 @@ function buildArtifacts(args) {
   const referenceMap = {
     schemaVersion: 'pptx-nova-reference-map/v1',
     source: args.source,
+    bindings: {
+      sourceSha256: sha256File(args.source),
+    },
     strategy: 'one-to-one editable-object restyle fallback',
     approvedChanges: [],
+    reviewedFindings: [],
     slides: mapSlides,
   }
   return {

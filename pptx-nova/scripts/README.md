@@ -55,6 +55,12 @@ Use these entry points from skill workflows:
   reports `needs-human-review`; it never claims the visual review is complete.
   Read `refurbish-run-summary.json.agentSummary` for the stable agent-facing
   status, gate counts, and artifact pointers.
+- `pptx-nova-review-policy.mjs` - shared pure policy evaluator for hash-bound
+  reviewed findings. It never deletes detector output: exact source SHA-256,
+  slide part, shape id, placeholder type/idx, and expected state are required
+  before an actionable finding can be reclassified as `reviewed`. Stale,
+  duplicate, ambiguous, and unused rules fail closed. Fidelity and strict
+  template gates use this same module instead of local boolean allowlists.
 - `pptx-nova-refurbish-fallback-patch.mjs` - generate generic inspect-driven
   fallback artifacts (`patch.json`, `deck_lock.json`, baseline
   `content-audit.json`, and `reference-map.json`) for DeckKits without native

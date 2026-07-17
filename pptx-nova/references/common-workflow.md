@@ -54,7 +54,7 @@ Keep this minimum evidence set after successful delivery when the files exist:
 `patch.json`, sidecar files, dry-run/apply/refurbish JSON reports,
 `vision.json`, `visual_review.json`, `clean-open.json`, `check.json`,
 `semantic-audit.json`, `structure-check.json`, `evidence-summary.json`,
-`layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, `catalog-readiness.json`,
+`layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`, `catalog-readiness.json`,
 optional `delivery-readiness.json`, the final candidate PPTX,
 the contact sheet, and any PNGs needed to explain suspicious or manually
 reviewed slides.
@@ -368,12 +368,13 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     when final parity matters. A deck that visually still reads like the source
     with only light chrome added is not done.
     For existing-deck refurbishment, the standard runner writes
-    `fidelity-gate.json`, `candidate-inspect.json`, `layout-final.json`,
+    `candidate-inspect.json`, `layout-final.json`, then `fidelity-gate.json`,
     the compatible `refurbish-compare.png` or numbered `refurbish-compare-*.png`
     set, `refurbish-compare.json`, and `refurbish-compare-gate.json`
     before returning. If running low-level commands manually, run
+    `pptx-nova-layout-snapshot.mjs` on final inspect, then run
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
-    `refurbish-audit`, run `pptx-nova-layout-snapshot.mjs` on final inspect,
+    `refurbish-audit` so the final policy receipt can consume the raw layout findings,
     then run `pptx-nova-compare.mjs --kind refurbish --slide-count <count>
 --compare-chunk-size 20 --dpi 192 --fallback-dpi 144`. Decks larger than
     20 slides become numbered parts; only an explicit retryable `RenderError`

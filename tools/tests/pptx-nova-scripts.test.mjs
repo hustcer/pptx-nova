@@ -1757,10 +1757,24 @@ const identity = (path) => {
   return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
 }
 const slideCount = Number(process.env.FAKE_SLIDE_COUNT || 48)
+const intentionalEmpty = process.env.FAKE_INTENTIONAL_EMPTY === '1'
 const inspect = {
   schemaVersion: 'pptx-inspect/v1',
   presentation: { slideCount, size: { width: '10in', height: '5.625in' } },
-  slides: Array.from({ length: slideCount }, (_, index) => ({ index, shapes: [] }))
+  slides: Array.from({ length: slideCount }, (_, index) => ({
+    index,
+    partName: 'ppt/slides/slide' + (index + 1) + '.xml',
+    shapes: intentionalEmpty && index === 0
+      ? [{
+          id: 101,
+          name: 'Slide Number Placeholder',
+          shapeType: 'placeholder',
+          textPreview: '',
+          bbox: { xEmu: '100', yEmu: '100', wEmu: '1000', hEmu: '500' },
+          placeholder: { type: 'sldNum', idx: 12 }
+        }]
+      : []
+  }))
 }
 const visionDiff = {
   schemaVersion: 'pptx-vision-diff/v1',
@@ -1991,6 +2005,74 @@ if (args[0] === 'schema') {
   )
   assert.deepEqual(singleSummary.artifacts.refurbishCompareParts, [])
   assert.equal(existsSync(singleSummary.artifacts.refurbishCompare), true)
+
+  const reviewedSource = join(root, 'reviewed-source.pptx')
+  const reviewedOutput = join(root, 'reviewed-out.pptx')
+  const reviewedRunDir = join(root, 'reviewed-run')
+  const reviewPolicy = join(root, 'review-policy.json')
+  writeFileSync(reviewedSource, 'reviewed fake pptx')
+  writeJson(reviewPolicy, {
+    schemaVersion: 'pptx-nova-review-policy/v1',
+    bindings: { sourceSha256: fileIdentity(reviewedSource).sha256 },
+    reviewedFindings: [
+      {
+        id: 'slide-1-intentional-empty-sldnum',
+        code: 'empty-placeholder',
+        disposition: 'accepted',
+        target: {
+          slideIndex: 0,
+          part: 'ppt/slides/slide1.xml',
+          shapeId: 101,
+          placeholder: { type: 'sldNum', idx: 12 },
+        },
+        expected: { textEmpty: true },
+        reason: 'This fixture intentionally preserves an empty page-number placeholder.',
+      },
+    ],
+  })
+  const reviewedResult = runNode(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      reviewedSource,
+      '--output',
+      reviewedOutput,
+      '--run-dir',
+      reviewedRunDir,
+      '--route',
+      'native',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--review-policy',
+      reviewPolicy,
+      '--json',
+    ],
+    {
+      env: {
+        ...process.env,
+        FAKE_SLIDE_COUNT: '1',
+        FAKE_INTENTIONAL_EMPTY: '1',
+      },
+    },
+  )
+  const reviewedSummary = JSON.parse(reviewedResult.stdout)
+  const reviewedPhases = reviewedSummary.phases.map((phase) => phase.name)
+  const reviewedFidelity = reviewedSummary.gates.find((gate) => gate.name === 'fidelity-gate')
+
+  assert.equal(reviewedSummary.layout.rawActionableRiskCount, 1)
+  assert.equal(reviewedSummary.layout.reviewedRiskCount, 1)
+  assert.equal(reviewedSummary.layout.actionableRiskCount, 0)
+  assert.equal(reviewedSummary.layout.actionableSlideCount, 0)
+  assert.equal(reviewedSummary.layout.reviewPolicyStatus, 'pass')
+  assert.equal(
+    reviewedSummary.layout.appliedReviews[0].reviewId,
+    'slide-1-intentional-empty-sldnum',
+  )
+  assert.equal(reviewedFidelity.appliedReviews, 1)
+  assert.equal(existsSync(reviewedSummary.artifacts.reviewPolicy), true)
+  assert.ok(reviewedPhases.indexOf('layout-snapshot') < reviewedPhases.indexOf('fidelity-gate'))
 })
 
 test('refurbish runner does not publish output when compare delivery gate fails', () => {

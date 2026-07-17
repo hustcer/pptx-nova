@@ -2,6 +2,7 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { evaluateReviewPolicy } from './pptx-nova-review-policy.mjs'
 
 const FRAME_SCHEMA_VERSION = 'pptx-nova-template-frame-map/v1'
 const GATE_SCHEMA_VERSION = 'pptx-nova-template-gate/v1'
@@ -67,6 +68,7 @@ const usage = `Usage:
 Options:
   --frame-map <path>       Required template-frame-map.json.
   --source-inspect <path>  Required xdoc inspect JSON for the source/template deck.
+  --source-pptx <path>     Source/template PPTX used for hash-bound reviewed findings.
   --edit-plan <path>       Optional template-edit-plan.json.
   --template-audit <path>  Optional template-audit.json.
   --assets <path>          Optional assets_manifest.json.
@@ -74,6 +76,7 @@ Options:
   --dry-run <path>         Optional xdoc dry-run JSON for selector/error checks.
   --final-inspect <path>   Optional xdoc inspect JSON for final deck.
   --final-pptx <path>      Optional final/starter PPTX for OOXML placeholder scan.
+  --review-policy <path>   Optional pptx-nova-review-policy/v1 document.
   --json                   Print machine-readable report.
   --help                   Show this help.
 
@@ -85,6 +88,7 @@ function parseArgs(argv) {
   const args = {
     frameMap: '',
     sourceInspect: '',
+    sourcePptx: '',
     editPlan: '',
     templateAudit: '',
     assets: '',
@@ -92,6 +96,7 @@ function parseArgs(argv) {
     dryRun: '',
     finalInspect: '',
     finalPptx: '',
+    reviewPolicy: '',
     json: false,
   }
 
@@ -107,6 +112,9 @@ function parseArgs(argv) {
       i += 1
     } else if (arg === '--source-inspect') {
       args.sourceInspect = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else if (arg === '--source-pptx') {
+      args.sourcePptx = resolve(valueAfter(argv, i, arg))
       i += 1
     } else if (arg === '--edit-plan') {
       args.editPlan = resolve(valueAfter(argv, i, arg))
@@ -128,6 +136,9 @@ function parseArgs(argv) {
       i += 1
     } else if (arg === '--final-pptx') {
       args.finalPptx = resolve(valueAfter(argv, i, arg))
+      i += 1
+    } else if (arg === '--review-policy') {
+      args.reviewPolicy = resolve(valueAfter(argv, i, arg))
       i += 1
     } else {
       throw new Error(`Unknown option: ${arg}\n\n${usage}`)
@@ -557,11 +568,12 @@ function validateFinalInspect({ finalInspect, errors }) {
   }
 }
 
-function validateFinalPptxPlaceholders({ finalPptx, editPlan, errors, warnings }) {
-  if (!finalPptx) return
+function collectFinalPptxPlaceholderFindings({ finalPptx, errors, warnings }) {
+  const findings = []
+  if (!finalPptx) return findings
   if (!existsSync(finalPptx)) {
     push(errors, 'error', 'final-pptx-missing', `final PPTX does not exist: ${finalPptx}`)
-    return
+    return findings
   }
   let slideNames = []
   try {
@@ -576,10 +588,9 @@ function validateFinalPptxPlaceholders({ finalPptx, editPlan, errors, warnings }
       'final-pptx-placeholder-scan-skipped',
       `could not list PPTX zip entries with unzip: ${error.message}`,
     )
-    return
+    return findings
   }
 
-  const allowedEmpty = allowedEmptyPlaceholderKeys(editPlan)
   for (const slideName of slideNames) {
     const slide = slideNumber(slideName) - 1
     let xml = ''
@@ -602,16 +613,22 @@ function validateFinalPptxPlaceholders({ finalPptx, editPlan, errors, warnings }
       const ph = placeholderInfo(shapeXml)
       const text = normalizeText(extractText(shapeXml))
       const name = shapeName(shapeXml)
-      const key = `slide:${slide}:placeholder:${ph.type ?? ''}:${ph.idx ?? ''}`
-      if (!text && !allowedEmpty.has(key)) {
-        push(
-          errors,
-          'error',
-          'template-empty-structural-placeholder',
-          `final slide ${slide} has empty structural placeholder ${ph.type || '(unknown)'}`,
-          { slide, placeholder: ph, name },
-        )
-      } else if (text && DEFAULT_TEXT_RE.test(text)) {
+      const id = shapeId(shapeXml)
+      if (!text) {
+        findings.push({
+          severity: 'error',
+          classification: 'actionable',
+          code: 'empty-placeholder',
+          message: `final slide ${slide} has empty structural placeholder ${ph.type || '(unknown)'}`,
+          slide,
+          slideIndex: slide,
+          slidePart: slideName,
+          objectId: id,
+          objectName: name,
+          placeholder: ph,
+          observed: { textEmpty: true },
+        })
+      } else if (DEFAULT_TEXT_RE.test(text)) {
         push(
           errors,
           'error',
@@ -622,14 +639,15 @@ function validateFinalPptxPlaceholders({ finalPptx, editPlan, errors, warnings }
       }
     }
   }
+  return findings
 }
 
 function slideNumber(path) {
   return Number(path.match(/slide(\d+)\.xml$/)?.[1] ?? 0)
 }
 
-function allowedEmptyPlaceholderKeys(editPlan) {
-  const keys = new Set()
+function legacyEmptyPlaceholderDeclarations(editPlan) {
+  const declarations = []
   const visit = (value, slideHint) => {
     if (Array.isArray(value)) {
       for (const item of value) visit(item, slideHint)
@@ -643,13 +661,13 @@ function allowedEmptyPlaceholderKeys(editPlan) {
       Number.isFinite(slide)
     ) {
       const ph = value.placeholder ?? value.shape?.placeholder ?? {}
-      keys.add(`slide:${slide}:placeholder:${ph.type ?? ''}:${ph.idx ?? ''}`)
+      declarations.push({ slide, placeholder: ph })
     }
     for (const child of Object.values(value))
       visit(child, Number.isFinite(slide) ? slide : slideHint)
   }
   visit(editPlan, undefined)
-  return keys
+  return declarations
 }
 
 function placeholderInfo(xml) {
@@ -663,6 +681,11 @@ function placeholderInfo(xml) {
 function shapeName(xml) {
   const tag = xml.match(/<p:cNvPr\b[^>]*>/)?.[0] ?? ''
   return attr(tag, 'name') ?? ''
+}
+
+function shapeId(xml) {
+  const tag = xml.match(/<p:cNvPr\b[^>]*>/)?.[0] ?? ''
+  return attr(tag, 'id') ?? ''
 }
 
 function attr(tag, name) {
@@ -782,7 +805,74 @@ function validateAssetProvenance({ assets, audit, errors, warnings }) {
   }
 }
 
-function buildReport({ args, errors, warnings }) {
+function containsReviewFindings(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  if ('reviewedFindings' in value) {
+    return !Array.isArray(value.reviewedFindings) || value.reviewedFindings.length > 0
+  }
+  if ('reviewPolicy' in value) {
+    const policy = value.reviewPolicy
+    if (!policy || typeof policy !== 'object' || Array.isArray(policy)) return true
+    if ('reviewedFindings' in policy) {
+      return !Array.isArray(policy.reviewedFindings) || policy.reviewedFindings.length > 0
+    }
+  }
+  return false
+}
+
+function evaluateTemplateReviewPolicy({ args, editPlan, explicitReviewPolicy, findings, errors }) {
+  const legacyDeclarations = legacyEmptyPlaceholderDeclarations(editPlan)
+  if (legacyDeclarations.length > 0) {
+    push(
+      errors,
+      'error',
+      'legacy-empty-placeholder-exception',
+      'allowEmptyPlaceholder/allow-empty-placeholder is no longer an auditable exception; migrate it to pptx-nova-review-policy/v1',
+      { declarations: legacyDeclarations },
+    )
+  }
+
+  const embeddedPolicy = containsReviewFindings(editPlan) ? editPlan : null
+  if (explicitReviewPolicy && embeddedPolicy) {
+    push(
+      errors,
+      'error',
+      'review-policy-source-ambiguous',
+      'reviewed findings must come from either --review-policy or the edit plan, not both',
+    )
+  }
+  const policyDocument = explicitReviewPolicy ?? embeddedPolicy
+  const policyDocumentPath = explicitReviewPolicy
+    ? args.reviewPolicy
+    : embeddedPolicy
+      ? args.editPlan
+      : ''
+  const evaluation = evaluateReviewPolicy({
+    policyDocument,
+    policyDocumentPath,
+    allowEmbeddedPolicy: Boolean(!explicitReviewPolicy && embeddedPolicy),
+    sourcePptx: args.sourcePptx,
+    candidatePptx: args.finalPptx,
+    findings,
+  })
+  for (const item of evaluation.errors) {
+    push(errors, 'error', item.code, item.message, {
+      source: 'review-policy',
+      details: item,
+    })
+  }
+  for (const finding of evaluation.remainingActionable) {
+    push(errors, 'error', 'template-empty-structural-placeholder', finding.message, {
+      slide: finding.slideIndex,
+      part: finding.slidePart,
+      shapeId: finding.objectId,
+      placeholder: finding.placeholder,
+    })
+  }
+  return evaluation
+}
+
+function buildReport({ args, errors, warnings, reviewPolicy }) {
   const bySeverity = {}
   for (const item of [...errors, ...warnings])
     bySeverity[item.severity] = (bySeverity[item.severity] ?? 0) + 1
@@ -796,7 +886,12 @@ function buildReport({ args, errors, warnings }) {
       errors: errors.length,
       warnings: warnings.length,
       bySeverity,
+      declaredReviews: reviewPolicy?.summary?.declaredReviewCount ?? 0,
+      appliedReviews: reviewPolicy?.summary?.appliedReviewCount ?? 0,
+      reviewedFindings: reviewPolicy?.summary?.reviewedFindingCount ?? 0,
+      remainingActionableFindings: reviewPolicy?.summary?.remainingActionableCount ?? 0,
     },
+    reviewPolicy,
     errors,
     warnings,
   }
@@ -820,6 +915,9 @@ try {
   const frameMap = readJson(args.frameMap, 'template-frame-map')
   const sourceInspect = readJson(args.sourceInspect, 'source inspect')
   const editPlan = args.editPlan ? readJson(args.editPlan, 'template edit plan') : null
+  const explicitReviewPolicy = args.reviewPolicy
+    ? readJson(args.reviewPolicy, 'review policy')
+    : null
   const audit = args.templateAudit ? readJson(args.templateAudit, 'template audit') : null
   const assets = args.assets ? readJson(args.assets, 'assets manifest') : null
   const patch = args.patch ? readJson(args.patch, 'patch') : null
@@ -833,10 +931,21 @@ try {
   validateDryRun({ dryRun, errors, warnings })
   validatePatchAdditions({ patch, frameMap, sourceInspect, editPlan, errors, warnings })
   validateFinalInspect({ finalInspect, errors })
-  validateFinalPptxPlaceholders({ finalPptx: args.finalPptx, editPlan, errors, warnings })
+  const placeholderFindings = collectFinalPptxPlaceholderFindings({
+    finalPptx: args.finalPptx,
+    errors,
+    warnings,
+  })
+  const reviewPolicy = evaluateTemplateReviewPolicy({
+    args,
+    editPlan,
+    explicitReviewPolicy,
+    findings: placeholderFindings,
+    errors,
+  })
   validateAssetProvenance({ assets, audit, errors, warnings })
 
-  const report = buildReport({ args, errors, warnings })
+  const report = buildReport({ args, errors, warnings, reviewPolicy })
   printReport(report, args.json)
   process.exit(report.status === 'error' ? 1 : 0)
 } catch (error) {

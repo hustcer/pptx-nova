@@ -47,6 +47,7 @@ Options:
   --route <route>         auto|native|fallback. Defaults to auto
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc
   --readiness-out <path>  Optional benchmark output for a full delivery readiness audit
+  --review-policy <path>  Optional hash-bound pptx-nova-review-policy/v1 document
   --explicit              User explicitly named a non-production/default DeckKit
   --contact-diff          Generate source/candidate contact-diff artifacts for manual review
   --compare-chunk-size <n>
@@ -80,6 +81,7 @@ function parseArgs(argv) {
     route: 'auto',
     xdocBin: 'xdoc',
     readinessOut: '',
+    reviewPolicy: '',
     explicit: false,
     contactDiff: false,
     compareChunkSize: 20,
@@ -132,6 +134,7 @@ const valueFlags = {
   '--route': 'route',
   '--xdoc-bin': 'xdocBin',
   '--readiness-out': 'readinessOut',
+  '--review-policy': 'reviewPolicy',
   '--compare-chunk-size': 'compareChunkSize',
   '--progress': 'progress',
 }
@@ -449,6 +452,10 @@ function buildAgentSummary(summary) {
         gate: gateStatus(fidelity),
         errors: fidelity?.errors ?? null,
         warnings: fidelity?.warnings ?? null,
+        declaredReviews: fidelity?.declaredReviews ?? null,
+        appliedReviews: fidelity?.appliedReviews ?? null,
+        reviewedFindings: fidelity?.reviewedFindings ?? null,
+        remainingActionableFindings: fidelity?.remainingActionableFindings ?? null,
       },
       semanticDiff: {
         status: semanticDiff?.status ?? null,
@@ -479,6 +486,7 @@ function buildAgentSummary(summary) {
       'deliveryReadiness',
       'visionDiff',
       'contentAuditFinal',
+      'reviewPolicy',
       'fidelityGate',
       'pptxDiff',
       'previewReport',
@@ -578,6 +586,7 @@ function normalizeArgs(args) {
     output: resolve(cwd, args.output),
     catalog: resolve(cwd, args.catalog),
     readinessOut: args.readinessOut ? resolve(cwd, args.readinessOut) : '',
+    reviewPolicy: args.reviewPolicy ? resolve(cwd, args.reviewPolicy) : '',
   }
   normalized.runDir = args.runDir ? resolve(cwd, args.runDir) : defaultRunDir(normalized, cwd)
   return normalized
@@ -595,6 +604,12 @@ function validatePaths(args) {
   }
   if (!existsSync(args.catalog) || !statSync(args.catalog).isFile()) {
     throw new Error(`DeckKit catalog does not exist: ${args.catalog}`)
+  }
+  if (
+    args.reviewPolicy &&
+    (!existsSync(args.reviewPolicy) || !statSync(args.reviewPolicy).isFile())
+  ) {
+    throw new Error(`review policy does not exist or is not a file: ${args.reviewPolicy}`)
   }
   if (!existsSync(dirname(args.output))) {
     throw new Error(`final output directory does not exist: ${dirname(args.output)}`)
@@ -648,6 +663,7 @@ function artifactPaths(runDir) {
     apply: join(runDir, 'apply.json'),
     visionDiff: join(runDir, 'vision-diff.json'),
     contentAuditFinal: join(runDir, 'content-audit-final.json'),
+    reviewPolicy: join(runDir, 'review-policy.json'),
     fidelityGate: join(runDir, 'fidelity-gate.json'),
     pptxDiff: join(runDir, 'pptx-diff.json'),
     finalInspect: join(runDir, 'candidate-inspect.json'),
@@ -1055,16 +1071,25 @@ function runFidelityGate(summary, artifacts) {
     'refurbish',
     '--source-inspect',
     artifacts.inspect,
+    '--source-pptx',
+    artifacts.sourceSnapshot,
+    '--candidate-pptx',
+    artifacts.candidate,
     '--final-audit',
     artifacts.contentAuditFinal,
     '--vision-diff',
     artifacts.visionDiff,
+    '--layout-snapshot',
+    artifacts.layoutFinal,
   ]
   if (existsSync(artifacts.referenceMap)) {
     gateArgs.push('--reference-map', artifacts.referenceMap)
   }
   if (existsSync(artifacts.contentAuditBaseline)) {
     gateArgs.push('--content-audit', artifacts.contentAuditBaseline)
+  }
+  if (existsSync(artifacts.reviewPolicy)) {
+    gateArgs.push('--review-policy', artifacts.reviewPolicy)
   }
   gateArgs.push('--json')
 
@@ -1081,9 +1106,52 @@ function runFidelityGate(summary, artifacts) {
     sourceSlides: report?.summary?.sourceSlides ?? null,
     finalSlides: report?.summary?.finalSlides ?? null,
     mappedSlides: report?.summary?.mappedSlides ?? null,
+    declaredReviews: Number(report?.summary?.declaredReviews ?? 0),
+    appliedReviews: Number(report?.summary?.appliedReviews ?? 0),
+    reviewedFindings: Number(report?.summary?.reviewedFindings ?? 0),
+    remainingActionableFindings: Number(report?.summary?.remainingActionableFindings ?? 0),
     message:
       'fidelity-gate must pass or warn using final audit, vision diff, and available reference-map evidence',
   })
+  if (summary.layout) {
+    const remaining = Array.isArray(report?.reviewPolicy?.remainingActionable)
+      ? report.reviewPolicy.remainingActionable
+      : []
+    const remainingSlideIndexes = [
+      ...new Set(
+        remaining
+          .map((finding) => Number(finding?.slideIndex ?? finding?.slide))
+          .filter((value) => Number.isInteger(value) && value >= 0),
+      ),
+    ].sort((a, b) => a - b)
+    const remainingByCode = new Map()
+    for (const finding of remaining) {
+      const code = String(finding?.code ?? 'layout-finding')
+      remainingByCode.set(code, (remainingByCode.get(code) ?? 0) + 1)
+    }
+    summary.layout.rawActionableRiskCount = summary.layout.actionableRiskCount
+    summary.layout.rawActionableSlideCount = summary.layout.actionableSlideCount
+    summary.layout.rawActionableSlideIndexes = summary.layout.actionableSlideIndexes
+    summary.layout.rawActionableSlideNumbers = summary.layout.actionableSlideNumbers
+    summary.layout.rawActionablePreviewFiles = summary.layout.actionablePreviewFiles
+    summary.layout.rawTopActionable = summary.layout.topActionable
+    summary.layout.reviewedRiskCount = Number(report?.summary?.reviewedFindings ?? 0)
+    summary.layout.actionableRiskCount = Number(
+      report?.summary?.remainingActionableFindings ?? summary.layout.actionableRiskCount,
+    )
+    summary.layout.actionableSlideCount = remainingSlideIndexes.length
+    summary.layout.actionableSlideIndexes = remainingSlideIndexes
+    summary.layout.actionableSlideNumbers = remainingSlideIndexes.map((index) => index + 1)
+    summary.layout.actionablePreviewFiles = remainingSlideIndexes.map(
+      (index) => `slide-${String(index + 1).padStart(3, '0')}.png`,
+    )
+    summary.layout.topActionable = [...remainingByCode.entries()]
+      .map(([code, count]) => ({ code, classification: 'actionable', count }))
+      .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code))
+      .slice(0, 5)
+    summary.layout.reviewPolicyStatus = report?.reviewPolicy?.status ?? null
+    summary.layout.appliedReviews = report?.reviewPolicy?.applied ?? []
+  }
   for (const warning of report?.warnings ?? []) {
     summary.warnings.push(`fidelity-gate ${warning.code ?? 'warning'}: ${warning.message ?? ''}`)
   }
@@ -1128,16 +1196,6 @@ function runLayoutSnapshot(summary, args, artifacts) {
     actionableSlideNumbers: snapshot?.summary?.actionableSlideNumbers ?? [],
     actionablePreviewFiles: snapshot?.summary?.actionablePreviewFiles ?? [],
     topActionable,
-  }
-  if (actionableRiskCount > 0) {
-    const topCodes = topActionable
-      .map((risk) => `${risk.code}=${risk.count}`)
-      .slice(0, 5)
-      .join(', ')
-    const suffix = topCodes ? `; top: ${topCodes}` : ''
-    summary.warnings.push(
-      `layout-snapshot: ${actionableRiskCount} actionable layout risk(s) across ${summary.layout.actionableSlideCount} slide(s)${suffix}; ${informationalRiskCount} informational observation(s) retained in layout-final.json`,
-    )
   }
 }
 
@@ -1409,6 +1467,14 @@ function runRefurbish(inputArgs) {
       artifact: relativeArtifact(args.runDir, artifacts.sourceSnapshot),
       bytes: statSync(artifacts.sourceSnapshot).size,
     })
+    if (args.reviewPolicy) {
+      copyFileSync(args.reviewPolicy, artifacts.reviewPolicy)
+      addInternalPhase(summary, 'review-policy-snapshot', 'passed', {
+        artifact: relativeArtifact(args.runDir, artifacts.reviewPolicy),
+        bytes: statSync(artifacts.reviewPolicy).size,
+        sha256: sha256(artifacts.reviewPolicy),
+      })
+    }
 
     const plan = buildRefurbishPlan({
       deckkit: args.deckkit,
@@ -1498,8 +1564,8 @@ function runRefurbish(inputArgs) {
       summary.route.executed = 'fallback-patch'
     }
 
-    runFidelityGate(summary, artifacts)
     runLayoutSnapshot(summary, args, artifacts)
+    runFidelityGate(summary, artifacts)
     runPreviews(summary, args, artifacts, inspect)
     runContactDiff(summary, args, artifacts, inspect)
     runSemanticDiff(summary, args, artifacts)

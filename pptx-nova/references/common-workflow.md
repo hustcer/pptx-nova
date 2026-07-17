@@ -432,9 +432,13 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
     for cleanup. If files are removed, write `cleanup-manifest.json`.
 17. If the user requested skill feedback (`need feedback`, `需要反馈`, `给反馈`,
     or equivalent), write the feedback first and run
-    `pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback --strict`
-    or the same command with `--prompt-file`. Do not send the final response
-    while `feedback-gate.json.status` is `fail`.
+    `pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback
+--workflow <create|refurbish|translation|other> --strict` or the same
+    command with `--prompt-file`. Create, Refurbish, and Translation feedback
+    must contain the exact seven-dimension process scorecard and a matching
+    weighted overall score. Do not send the final response while
+    `feedback-gate.json.status` is `fail`; when it passes, print
+    `processScorecard.rows` and the weighted score in the terminal response.
 18. Summarize final output path, run directory, `xdoc-capabilities.json`, observed
     xdoc/schema versions, important intermediate files, validation results,
     high-risk `evidence-summary.json` / `layout-final.json` when applicable,

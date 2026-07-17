@@ -241,8 +241,8 @@ follow `references/export-and-check.md`.
 
 ## Feedback Mode
 
-If the user prompt contains explicit feedback intent such as `need feedback`, English feedback phrases, or equivalent Chinese phrases meaning "give feedback", "needs feedback", or "any usage feedback", read `references/feedback-mode.md`. Once Feedback Mode is triggered, first write `skill-feedback.md` in the current run directory. When there are 3 or fewer feedback items, the final response may both provide the file path and show feedback details in the conversation. When there are more than 3 items, evidence is needed, or prioritization is needed, the final response should only provide the feedback file path instead of pasting the full text. Before the final response, run the feedback gate: if the original prompt is available, use
-`node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --prompt-file <prompt.txt> --strict --overwrite --json > <run-dir>/feedback-gate.json`; if the prompt was not saved but the user feedback request is known, use `--require-feedback`. If the gate fails, add real feedback before sending the final response.
+If the user prompt contains explicit feedback intent such as `need feedback`, English feedback phrases, or equivalent Chinese phrases meaning "give feedback", "needs feedback", or "any usage feedback", read `references/feedback-mode.md`. Once Feedback Mode is triggered, first write `skill-feedback.md` in the current run directory. Create, Refurbish, and Translation feedback must include the workflow's exact seven-dimension 0-10 process scorecard and a correctly weighted overall score. Always print that complete scorecard and overall score in the final terminal/conversation response, even when the detailed issue report is file-only because it has more than three items. Before the final response, run the feedback gate with `--workflow create|refurbish|translation|other`: if the original prompt is available, use
+`node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --prompt-file <prompt.txt> --workflow <workflow> --strict --overwrite --json > <run-dir>/feedback-gate.json`; if the prompt was not saved but the user feedback request is known, use `--require-feedback`. If the gate fails, add real feedback or correct the scorecard before sending the final response.
 
 ## Common Creation Hard Rules
 
@@ -411,7 +411,7 @@ xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --cont
 xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet # fallback/debug only
 node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json
 xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
-node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback --strict --overwrite --json > <run-dir>/feedback-gate.json
+node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback --workflow <create|refurbish|translation|other> --strict --overwrite --json > <run-dir>/feedback-gate.json
 ```
 
 ## Completion Summary
@@ -429,8 +429,10 @@ Add conditional material only when relevant: for high-risk tasks, list `evidence
 following, list fidelity/template/content audits; for formal persuasive decks, list the narrative-quality
 conclusion; when cleanup occurs, state retained evidence and deleted rebuildable artifacts. When
 Feedback Mode triggers, save feedback according to `references/feedback-mode.md` and list the
-`skill-feedback.md` path. Show details too only when there are 3 or fewer feedback items; when there are
-more than 3, list only the path. Retain `feedback-gate.json` as well. Do not output xdoc version, CLI
+`skill-feedback.md` path. Show detailed issues too only when there are 3 or fewer feedback items; when there are
+more than 3, list only the detailed-report path. For Create, Refurbish, and Translation, always print the
+validated seven-row execution scorecard and weighted overall score regardless of issue count. Retain
+`feedback-gate.json` as well. Do not output xdoc version, CLI
 schema, or capability-disclosure audit details unless they affect the result, a fallback was used, or
 the user explicitly asks.
 

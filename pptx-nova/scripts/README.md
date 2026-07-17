@@ -82,8 +82,12 @@ Use these entry points from skill workflows:
 - `pptx-nova-feedback-gate.mjs` - final-response guard for Feedback Mode. It
   detects feedback trigger phrases from the original prompt or accepts
   `--require-feedback`, checks that `<run-dir>/skill-feedback.md` exists and is
-  not a TODO template, and writes `feedback-gate.json`. Use `--strict` before
-  the final response when the task requested skill feedback.
+  not a TODO template, and writes `feedback-gate.json`. For `create`,
+  `refurbish`, and `translation`, pass `--workflow`; the gate also validates the
+  workflow's exact seven-row 0-10 process scorecard, fixed weights, evaluations,
+  and weighted overall score. Use `--strict` before the final response when the
+  task requested skill feedback, then print the validated scorecard in the
+  terminal response.
 - `pptx-nova-i18n-residual-gate.mjs` - target-language-independent translation
   leakage gate. It compares the mandatory source scan, candidate scan, and
   translation records by stable unit id plus original text/hash, so valid

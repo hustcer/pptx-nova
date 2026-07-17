@@ -148,6 +148,26 @@ relevant OOXML style properties.
    add reliable styled-token anchors, broaden shared-part scope, or route the
    item to manual review before applying changes.
 
+   When an apply-blocking review contains `reviewRequired[].repair` with
+   `kind=target-segments`, use that object as the authoritative repair material:
+   - Read `sourceRunGroups[]` and `sourceSequence[]`; do not run a local XML
+     scanner or guess `sourceRunGroupId` from run positions.
+   - Copy `translationPatchTemplate` and merge it into the existing
+     `translations[]` record matched by `unitId`. Do not append a second record.
+   - Replace every `targetSegments[].text: null` with the translated text for
+     that exact group. Empty string is valid when the target intentionally
+     clears a group; `null` or a missing field is not.
+   - Preserve `targetSegmentsContractId`. It binds the mapping to the current
+     hyperlink/style/field/break/tab topology even when the concatenated source
+     text did not change.
+   - Rerun `i18n-plan`. Never apply a template with `ready=false`; only the new
+     plan with `applyGate.passed=true` authorizes execution.
+
+   A unique ordered `anchors[]` mapping may allow `i18n-plan` to resolve simple
+   hyperlink groups automatically. Repeated, missing, reordered, or otherwise
+   ambiguous anchors remain review-required and must use the explicit repair
+   template.
+
 7. Replace text in place while preserving OOXML structure:
    - Apply generated artifacts only when `i18n-plan.applyGate.passed=true`.
      The planner is read-only; it does not write a candidate PPTX.
@@ -240,9 +260,12 @@ relevant OOXML style properties.
      semantic text-node paths rather than shape `set-run` ops.
    - Use optional `targetSegments[]` only when hyperlink boundaries or mixed
      styles cannot be mapped safely from `targetText` and `anchors[]`. Every
-     `sourceRunGroupId` must come verbatim from the text-plan inventory; never
-     guess ids or infer them from run order. Missing, duplicated, unknown, or
-     out-of-order segments must fail closed.
+     `sourceRunGroupId` must come verbatim from
+     `i18n-plan.reviewRequired[].repair.sourceRunGroups[]`; never guess ids or
+     infer them from run order. Preserve the repair's
+     `targetSegmentsContractId`. Missing, duplicated, unknown, out-of-order,
+     stale-contract, or targetText-reconstruction-mismatched segments must fail
+     closed.
    - Break and tab nodes are structural delimiters. Preserve the corresponding
      `\n` and `\t` delimiters in `targetText`; the planner partitions translated
      text around them and keeps the original OOXML nodes unchanged. A missing,
@@ -443,7 +466,9 @@ Required interpretation:
 - `missingTranslations[]` non-empty: translate the missing `action=translate`
   units before applying.
 - `reviewRequired[]` with `blocksApply=true`: add anchors, broaden shared-part
-  scope, or handle the unit manually before applying.
+  scope, consume `reviewRequired[].repair` when present, or handle the unit
+  manually before applying. A target-segments repair is a fillable template,
+  not an executable patch.
 - `deliveryGate.passed=false`: this is expected when non-applied review signals
   remain. It means final delivery still needs candidate scan, style diff,
   preview/vision review, and text overflow checks.
@@ -469,7 +494,12 @@ For table paragraphs, the planner normally derives the target run mapping from
 `targetText` and optional anchors, then emits guarded text-node replacements.
 When explicit `targetSegments[]` are necessary, the mapping must cover the
 complete `sourceRunGroupId` inventory in planner order; partial, duplicated,
-unknown, or reordered mappings are blockers.
+unknown, or reordered mappings are blockers. Prefer the self-contained
+`reviewRequired[].repair.translationPatchTemplate` over invoking the lower-level
+planner merely to discover group ids. Fill every null segment, merge by
+`unitId`, preserve `targetSegmentsContractId`, and rerun `i18n-plan`; the shared
+validator also requires the completed segments to reconstruct `targetText`
+exactly.
 
 The i18n plan does not replace the style diff. After applying generated
 artifacts, still run `i18n-style-diff` to prove bold/italic/underline/strike,

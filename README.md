@@ -26,6 +26,12 @@ the original deck by default, and produce review artifacts that make the result
 auditable. It is closer to a structured PPTX build/edit pipeline than a
 one-shot slide generator.
 
+New-deck creation and existing-deck editing use different models. New decks are
+generated from structured content, while existing decks are edited through
+source-preserving patches to their native PPTX objects rather than being
+reconstructed slide by slide. The source remains read-only by default, and the
+result is published as a separately validated candidate.
+
 ## What pptx-nova can do
 
 - Create a new presentation from a short brief, structured outline,

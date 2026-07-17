@@ -19,6 +19,43 @@ renders content into images and inserts those images into slides. Within support
 workflows, output is meant to remain editable in PowerPoint as text, shapes, tables, charts, and slide
 elements.
 
+### New-Deck Generation And Existing-Deck Editing Use Different Models
+
+Creating a new presentation and editing an existing presentation may both produce a new `.pptx` file,
+but they are not the same operation. The important distinction is not whether new file bytes are
+written. It is which artifact remains the source of truth and whether the existing presentation is
+reconstructed or inherited.
+
+|                     | Generation-oriented creation                                   | Source-preserving patch editing                                                                      |
+| ------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Source of truth     | A brief, outline, structured content model, or generation code | The existing PPTX, including its slides and native object identities                                 |
+| Main operation      | Compose the presentation from the generation model             | Inspect the source deck, select existing objects, and apply declared changes                         |
+| Unrequested content | Recreated according to what the generation model describes     | Preserved by default, with reliable out-of-scope changes treated as validation failures              |
+| Output              | A newly generated presentation                                 | A separately validated candidate derived from the source deck by default                             |
+| Validation focus    | Overall content, design, layout, and rendering quality         | Target coverage, selector accuracy, formatting preservation, change locality, and visual regressions |
+
+For an ordinary existing-deck edit, `pptx-nova` uses the second model. It first inspects the real PPTX
+structure, identifies the original objects that correspond to the request, applies structured patches
+to a working copy, and compares the candidate with the source before publication. This is
+**source-preserving, object-level editing**, rather than recreating the deck slide by slide from a new
+generation model.
+
+“Scoped” does not necessarily mean “small.” The declared scope may be one text run, one chart, several
+slides, or a deck-wide theme change. It means the intended boundary is recorded before writing, and
+reliable changes outside that boundary must be explained, corrected, or explicitly approved rather
+than silently delivered.
+
+This is also not a claim that the PPTX ZIP package is modified byte-for-byte in place. The original
+file is read-only by default, and the result is normally written as a separate candidate. The promise
+is about editing semantics: the existing deck remains the source of truth, supported native objects
+are inherited and targeted directly, and the resulting change scope is validated.
+
+Some requests intentionally use a different route. Using an old deck only as a visual reference while
+supplying new content is new-deck generation. Refurbishment is usually a broader source-preserving
+transformation that retains the source content and objects while changing the visual system. A full
+re-layout or reconstruction is used only when the request requires it, preservation is not safely
+possible, or the user explicitly approves that tradeoff.
+
 ## High-Fidelity PDF Export
 
 In addition to creating and editing PowerPoint files, `pptx-nova` can convert an existing or newly
@@ -65,7 +102,8 @@ You can use `pptx-nova` to:
 - Use the visual style of an existing PPT as a reference while creating a new deck with different content.
 - Fill new content into a company template.
 - Refurbish an old PPT so it is more consistent and professional while preserving the original content.
-- Edit an existing PPT, such as changing titles, replacing data, adjusting layouts, swapping images, or changing colors.
+- Apply source-preserving patches to an existing PPT, such as changing titles, replacing data,
+  adjusting layouts, swapping images, or changing colors, without recreating the deck slide by slide.
 - Turn CSV, JSON, or table data into table slides or chart slides.
 - Translate an existing PPT while aiming to preserve layout, charts, speaker notes, animations, and transitions.
 - Add, modify, or remove basic animations and transitions, such as fade-in, step-by-step bullet reveal, or automatic slide advance.
@@ -185,16 +223,22 @@ Replace the data on slide 5 with the data from new-chart-data.csv;
 Output sales-updated.pptx.
 ```
 
-Best for: you only want to change part of an existing PPT.
+Best for: you want the existing PPT to remain the source of truth while changing a declared set of
+objects or properties. The scope may be local or deck-wide; what matters is that it is explicit and
+validated.
 
-For ordinary localized edits, `pptx-nova` does more than check whether the
-PowerPoint command succeeded. It records the allowed edit scope before writing,
-then checks target coverage, unexpected reliable changes, formatting
-preservation when required, and new visual regressions before publishing the
-candidate. If the evidence does not match the current source or candidate, the
-edit is blocked and must be inspected or regenerated instead of being silently
-delivered. Complex or unsupported PPTX objects and final visual judgment can
-still require specialized checks or human review.
+For ordinary existing-deck edits, `pptx-nova` does more than check whether the PowerPoint command
+succeeded. It treats the source presentation as read-only, inspects and selects the existing native
+objects, records the allowed edit scope before writing, and applies the requested patch to a working
+copy. Before publishing the candidate, it checks target coverage, unexpected reliable changes,
+formatting preservation when required, and new visual regressions.
+
+This differs from generation-oriented reconstruction: `pptx-nova` does not normally rebuild every
+slide from an intermediate presentation model merely because one title, chart, image, or style must
+change. If the evidence belongs to another source or candidate, a selector resolves ambiguously, or a
+reliable change escapes the declared scope, delivery is blocked and the edit must be inspected or
+regenerated. Complex or unsupported PPTX objects and final visual judgment can still require
+specialized checks or human review.
 
 ### 6. Use A Company Template
 

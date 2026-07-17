@@ -2,7 +2,7 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { evaluateReviewPolicy } from './pptx-nova-review-policy.mjs'
+import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from './pptx-nova-review-policy.mjs'
 
 const FRAME_SCHEMA_VERSION = 'pptx-nova-template-frame-map/v1'
 const GATE_SCHEMA_VERSION = 'pptx-nova-template-gate/v1'
@@ -805,21 +805,6 @@ function validateAssetProvenance({ assets, audit, errors, warnings }) {
   }
 }
 
-function containsReviewFindings(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
-  if ('reviewedFindings' in value) {
-    return !Array.isArray(value.reviewedFindings) || value.reviewedFindings.length > 0
-  }
-  if ('reviewPolicy' in value) {
-    const policy = value.reviewPolicy
-    if (!policy || typeof policy !== 'object' || Array.isArray(policy)) return true
-    if ('reviewedFindings' in policy) {
-      return !Array.isArray(policy.reviewedFindings) || policy.reviewedFindings.length > 0
-    }
-  }
-  return false
-}
-
 function evaluateTemplateReviewPolicy({ args, editPlan, explicitReviewPolicy, findings, errors }) {
   const legacyDeclarations = legacyEmptyPlaceholderDeclarations(editPlan)
   if (legacyDeclarations.length > 0) {
@@ -832,7 +817,7 @@ function evaluateTemplateReviewPolicy({ args, editPlan, explicitReviewPolicy, fi
     )
   }
 
-  const embeddedPolicy = containsReviewFindings(editPlan) ? editPlan : null
+  const embeddedPolicy = hasEmbeddedReviewedFindings(editPlan) ? editPlan : null
   if (explicitReviewPolicy && embeddedPolicy) {
     push(
       errors,

@@ -16,6 +16,21 @@ function isPlainObject(value) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }
 
+export function hasEmbeddedReviewedFindings(value) {
+  if (!isPlainObject(value)) return false
+  if ('reviewedFindings' in value) {
+    return !Array.isArray(value.reviewedFindings) || value.reviewedFindings.length > 0
+  }
+  if ('reviewPolicy' in value) {
+    const policy = value.reviewPolicy
+    if (!isPlainObject(policy)) return true
+    if ('reviewedFindings' in policy) {
+      return !Array.isArray(policy.reviewedFindings) || policy.reviewedFindings.length > 0
+    }
+  }
+  return false
+}
+
 function canonicalScalar(value) {
   return value === null || value === undefined ? '' : String(value)
 }
@@ -329,11 +344,11 @@ export function evaluateReviewPolicy({
   const rules = normalizeRules(policy, errors)
   const expectedSourceSha256 = canonicalSha256(policy?.bindings?.sourceSha256)
   let bindingValid = errors.length === 0
-  if (rules.length > 0) {
+  if (policy) {
     if (!expectedSourceSha256) {
       errors.push({
         code: 'review-policy-source-binding-missing',
-        message: 'a review policy with reviewed findings must bind bindings.sourceSha256',
+        message: 'review policy must bind bindings.sourceSha256',
       })
       bindingValid = false
     } else if (!source || source.missing) {
@@ -352,6 +367,8 @@ export function evaluateReviewPolicy({
       })
       bindingValid = false
     }
+  }
+  if (rules.length > 0) {
     if (!candidate || candidate.missing) {
       errors.push({
         code: 'review-policy-candidate-missing',

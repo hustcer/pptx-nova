@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { evaluateReviewPolicy } from './pptx-nova-review-policy.mjs'
+import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from './pptx-nova-review-policy.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-fidelity-gate/v1'
 const TEMPLATE_GATE_SCHEMA_VERSION = 'pptx-nova-template-gate/v1'
@@ -111,21 +111,6 @@ function readJson(path, label) {
 function readOptionalJson(path, label) {
   if (!path) return null
   return readJson(path, label)
-}
-
-function containsReviewPolicy(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
-  if ('reviewedFindings' in value) {
-    return !Array.isArray(value.reviewedFindings) || value.reviewedFindings.length > 0
-  }
-  if ('reviewPolicy' in value) {
-    const policy = value.reviewPolicy
-    if (!policy || typeof policy !== 'object' || Array.isArray(policy)) return true
-    if ('reviewedFindings' in policy) {
-      return !Array.isArray(policy.reviewedFindings) || policy.reviewedFindings.length > 0
-    }
-  }
-  return false
 }
 
 function push(list, severity, code, message, details = {}) {
@@ -395,7 +380,7 @@ function validateReviewedFindings({
   explicitReviewPolicy,
   layoutSnapshot,
 }) {
-  const embeddedPolicy = containsReviewPolicy(referenceMap) ? referenceMap : null
+  const embeddedPolicy = hasEmbeddedReviewedFindings(referenceMap) ? referenceMap : null
   if (explicitReviewPolicy && embeddedPolicy) {
     push(
       report.errors,

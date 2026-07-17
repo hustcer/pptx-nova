@@ -225,6 +225,21 @@ test('review policy rejects unknown documents, schema versions, and properties',
   })
   assert.equal(unknownProperty.status, 'fail')
   assert.ok(unknownProperty.errors.some((item) => item.code === 'review-policy-unknown-properties'))
+
+  const unboundEmptyPolicy = evaluateReviewPolicy({
+    policyDocument: {
+      schemaVersion: 'pptx-nova-review-policy/v1',
+      bindings: {},
+      reviewedFindings: [],
+    },
+    sourcePptx: source,
+    candidatePptx: candidate,
+    findings: [],
+  })
+  assert.equal(unboundEmptyPolicy.status, 'fail')
+  assert.ok(
+    unboundEmptyPolicy.errors.some((item) => item.code === 'review-policy-source-binding-missing'),
+  )
 })
 
 test('review policy matches omitted OOXML placeholder attributes by their semantic defaults', async () => {

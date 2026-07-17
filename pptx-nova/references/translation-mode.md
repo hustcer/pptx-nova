@@ -601,6 +601,7 @@ node <skill-root>/scripts/pptx-nova-compare.mjs \
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
   --run-dir <run-dir> \
   --final-pptx translated.pptx \
+  --final-pptx-source candidate.pptx \
   --kind translation \
   --publish \
   --overwrite \
@@ -690,16 +691,17 @@ and may retry once at 144 DPI only after an explicit retryable `RenderError`.
 Any second or non-retryable failure blocks delivery. Do not upscale a failed
 low-resolution image after rendering.
 
-After the comparison set passes validation, publish the single PNG or complete
-numbered sibling set next to the final PPTX so reviewers can find it without
-opening the run directory. Preserve the run-directory manifest, part reports,
-and PNGs as audit evidence. Run
-`pptx-nova-compare-gate.mjs --kind translation --publish` after the final PPTX
-path is stable, and block delivery unless
-`translation-compare-gate.json.status` is `pass`. The gate rejects scoped final
-reports, requires complete non-duplicated slide coverage, publishes or checks
-every expected sibling, and verifies sibling names and byte lengths against the
-run evidence.
+After the comparison set passes validation, publish the final PPTX and the
+single PNG or complete numbered sibling set as one delivery bundle so reviewers
+can find it without opening the run directory. Preserve the run-directory
+manifest, part reports, and PNGs as audit evidence. Run
+`pptx-nova-compare-gate.mjs --kind translation --publish --final-pptx-source
+<candidate>` after the candidate is stable, and block delivery unless
+`translation-compare-gate.json.status` is `pass` and
+`finalBinding.status=bound`. The gate rejects scoped final reports, requires
+complete non-duplicated slide coverage, verifies xdoc's candidate SHA-256,
+publishes compare siblings before the final PPTX, and re-hashes every
+destination. Do not copy or overwrite the final PPTX after the gate passes.
 
 Review the changed-slide contact sheets and the full-size PNGs for:
 

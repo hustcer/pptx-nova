@@ -47,7 +47,8 @@
   `xdoc pptx contact-diff --dpi 192` 生成的全量翻新前/后并排对比图和报告。
 - `refurbish-compare-gate.json`：Refurbish Existing Deck 时由
   `pptx-nova-compare-gate.mjs --kind refurbish --publish` 生成的同目录发布门禁报告；必须证明
-  `<output-stem>-refurbish-compare-<MMDDhhmmss>.png` 已复制到最终 PPTX 同目录。
+  `status=pass`、`finalBinding.status=bound`，且最终 PPTX 与
+  `<output-stem>-refurbish-compare-<MMDDhhmmss>.png` 已作为同一交付 bundle 发布。
 - `chrome-detect.json` / `chrome-remove.json` / `chrome-apply.json`：Refurbish Existing Deck
   时由原生 chrome 命令生成的旧 chrome 识别、移除和目标 DeckKit chrome 应用报告。
 - `remap-dry-run.json` / `remap-theme.json`：Refurbish Existing Deck 时由 `remap-theme`
@@ -396,7 +397,7 @@ node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
 
 xdoc pptx contact-diff \
   --source source.pptx \
-  --candidate final-output.pptx \
+  --candidate <run-dir>/candidate.pptx \
   --output <run-dir>/refurbish-compare.png \
   --dpi 192 \
   --json > <run-dir>/refurbish-compare.json
@@ -404,6 +405,7 @@ xdoc pptx contact-diff \
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
   --run-dir <run-dir> \
   --final-pptx final-output.pptx \
+  --final-pptx-source <run-dir>/candidate.pptx \
   --kind refurbish \
   --publish \
   --overwrite \
@@ -521,7 +523,8 @@ DeckKit 选择注意事项：
   `status` 必须为 `success`，`agentGate.status` 必须为 `pass`，`summary.scopeMode` 必须为
   `all-slides`，`summary.pairCount` 必须匹配源/输出页数，且 render 尺寸必须非零。交付前运行
   `pptx-nova-compare-gate.mjs --kind refurbish --publish`，并要求
-  `refurbish-compare-gate.json.status=pass`；最终回复列出同目录 PNG 路径。
+  `refurbish-compare-gate.json.status=pass` 且 `finalBinding.status=bound`；gate
+  是唯一最终 PPTX 发布者，之后不得再次复制候选文件；最终回复列出同目录 PNG 路径。
 - 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram
   数量、图片/媒体数量、备注存在性和 `reference-map.json` 覆盖率。任何减少、缺页、未映射对象或未经批准的
   页数变化都是交付阻塞项。

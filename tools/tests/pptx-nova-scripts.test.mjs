@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import {
   chmodSync,
   existsSync,
@@ -49,6 +50,15 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
+function fileIdentity(path) {
+  const bytes = readFileSync(path)
+  return {
+    path,
+    byteLength: bytes.length,
+    sha256: createHash('sha256').update(bytes).digest('hex'),
+  }
+}
+
 function writeFakeXdoc(root, source) {
   const scriptPath = join(root, 'fake-xdoc.mjs')
   writeFileSync(scriptPath, source)
@@ -60,7 +70,8 @@ function writeMultipartContactDiffXdoc(root) {
   return writeFakeXdoc(
     root,
     `#!/usr/bin/env node
-import { appendFileSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { appendFileSync, readFileSync, writeFileSync } from 'node:fs'
 
 const args = process.argv.slice(2)
 const valueAfter = (flag) => {
@@ -70,6 +81,10 @@ const valueAfter = (flag) => {
 const selector = valueAfter('--slides')
 const dpi = Number(valueAfter('--dpi'))
 const output = valueAfter('--output')
+const identity = (path) => {
+  const bytes = readFileSync(path)
+  return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
+}
 const log = process.env.FAKE_XDOC_LOG
 if (log) appendFileSync(log, JSON.stringify({ selector, dpi, output }) + '\\n')
 const mode = process.env.FAKE_XDOC_MODE || 'success'
@@ -98,6 +113,10 @@ writeFileSync(output, 'png:' + selector + ':' + dpi)
 process.stdout.write(JSON.stringify({
   schemaVersion: 'pptx-contact-diff/v1',
   status: 'success',
+  source: identity(valueAfter('--source')),
+  candidate: identity(valueAfter('--candidate')),
+  sourcePath: valueAfter('--source'),
+  candidatePath: valueAfter('--candidate'),
   outputPath: output,
   summary: { pairCount, scopeMode: 'selected-slides', dpi },
   scope: { requested: selector, slides: Array.from({ length: pairCount }, (_, index) => start + index), basis: 'source-slides' },
@@ -1715,7 +1734,7 @@ test('refurbish runner persists catalog readiness before any xdoc command starts
   assert.equal(existsSync(output), false)
 })
 
-test('refurbish runner exposes every multipart compare artifact before publishing output', () => {
+test('refurbish runner publishes one SHA-256-bound multipart delivery bundle', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-run-'))
   const source = join(root, 'source.pptx')
   const output = join(root, 'out.pptx')
@@ -1724,13 +1743,18 @@ test('refurbish runner exposes every multipart compare artifact before publishin
   const fakeXdoc = writeFakeXdoc(
     root,
     `#!/usr/bin/env node
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const args = process.argv.slice(2)
 const valueAfter = (flag) => {
   const index = args.indexOf(flag)
   return index >= 0 ? args[index + 1] : ''
+}
+const identity = (path) => {
+  const bytes = readFileSync(path)
+  return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
 }
 const slideCount = Number(process.env.FAKE_SLIDE_COUNT || 48)
 const inspect = {
@@ -1827,6 +1851,10 @@ if (args[0] === 'schema') {
   print({
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
+    source: identity(valueAfter('--source')),
+    candidate: identity(valueAfter('--candidate')),
+    sourcePath: valueAfter('--source'),
+    candidatePath: valueAfter('--candidate'),
     outputPath: valueAfter('--output'),
     summary: { pairCount: selectedSlides.length, scopeMode, dpi: Number(valueAfter('--dpi')) || 72 },
     scope: { requested: selector || null, slides: selectedSlides, basis: 'source-slides' },
@@ -1868,6 +1896,10 @@ if (args[0] === 'schema') {
   assert.equal(existsSync(join(runDir, 'catalog-readiness.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-gate.json')), true)
+  const compareGate = JSON.parse(readFileSync(join(runDir, 'refurbish-compare-gate.json'), 'utf8'))
+  assert.equal(compareGate.finalBinding.status, 'bound')
+  assert.equal(compareGate.finalBinding.publishedFinal.path, output)
+  assert.equal(compareGate.finalBinding.publishedFinal.sha256, fileIdentity(output).sha256)
   assert.equal(summary.artifacts.pptxDiff, join(runDir, 'pptx-diff.json'))
   assert.equal(summary.artifacts.readiness, join(runDir, 'catalog-readiness.json'))
   assert.equal(summary.artifacts.deliveryReadiness, null)
@@ -1919,9 +1951,14 @@ if (args[0] === 'schema') {
   assert.ok(phaseNames.includes('refurbish-compare-delivery'))
   assert.ok(gateNames.includes('pptx-semantic-diff'))
   assert.ok(gateNames.includes('refurbish-compare-delivery'))
-  assert.ok(phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('publish'))
-  assert.ok(phaseNames.indexOf('refurbish-compare') < phaseNames.indexOf('publish'))
-  assert.ok(phaseNames.indexOf('refurbish-compare-delivery') < phaseNames.indexOf('publish'))
+  assert.ok(gateNames.includes('published-output-binding'))
+  assert.equal(phaseNames.includes('publish'), false)
+  assert.ok(
+    phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('refurbish-compare-delivery'),
+  )
+  assert.ok(
+    phaseNames.indexOf('refurbish-compare') < phaseNames.indexOf('refurbish-compare-delivery'),
+  )
 
   const singleSource = join(root, 'single-source.pptx')
   const singleOutput = join(root, 'single-out.pptx')
@@ -1966,12 +2003,17 @@ test('refurbish runner does not publish output when compare delivery gate fails'
   const fakeXdoc = writeFakeXdoc(
     root,
     `#!/usr/bin/env node
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
 const args = process.argv.slice(2)
 const valueAfter = (flag) => {
   const index = args.indexOf(flag)
   return index >= 0 ? args[index + 1] : ''
+}
+const identity = (path) => {
+  const bytes = readFileSync(path)
+  return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
 }
 const print = (value) => process.stdout.write(JSON.stringify(value))
 
@@ -2082,13 +2124,18 @@ test('translation compare delegates rendering to xdoc contact-diff', () => {
   const fakeXdoc = writeFakeXdoc(
     dir,
     `#!/usr/bin/env node
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const args = process.argv.slice(2)
 const valueAfter = (flag) => {
   const index = args.indexOf(flag)
   return index >= 0 ? args[index + 1] : ''
+}
+const identity = (path) => {
+  const bytes = readFileSync(path)
+  return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
 }
 
 if (args[0] === 'pptx' && args[1] === 'contact-diff') {
@@ -2098,6 +2145,10 @@ if (args[0] === 'pptx' && args[1] === 'contact-diff') {
   process.stdout.write(JSON.stringify({
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
+    source: identity(valueAfter('--source')),
+    candidate: identity(valueAfter('--candidate')),
+    sourcePath: valueAfter('--source'),
+    candidatePath: valueAfter('--candidate'),
     outputPath: output,
     summary: { pairCount: 1, scopeMode: 'scoped', dpi, slides: valueAfter('--slides') },
     agentGate: { passed: true, status: 'pass', scopeMode: 'scoped', pairCount: 1 },
@@ -2217,16 +2268,25 @@ test('compare streams heartbeat progress without corrupting JSON stdout', () => 
   const fakeXdoc = writeFakeXdoc(
     root,
     `#!/usr/bin/env node
-import { writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { readFileSync, writeFileSync } from 'node:fs'
 
 const args = process.argv.slice(2)
 const valueAfter = (flag) => args[args.indexOf(flag) + 1]
+const identity = (path) => {
+  const bytes = readFileSync(path)
+  return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
+}
 await new Promise((resolve) => setTimeout(resolve, 80))
 const output = valueAfter('--output')
 writeFileSync(output, 'contact diff png')
 process.stdout.write(JSON.stringify({
   schemaVersion: 'pptx-contact-diff/v1',
   status: 'success',
+  source: identity(valueAfter('--source')),
+  candidate: identity(valueAfter('--candidate')),
+  sourcePath: valueAfter('--source'),
+  candidatePath: valueAfter('--candidate'),
   outputPath: output,
   summary: { pairCount: 1, scopeMode: 'all-slides', dpi: Number(valueAfter('--dpi')) },
   agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 1 },
@@ -2334,9 +2394,14 @@ test('compare keeps the single-file contract for small decks and may retry it at
   const fakeXdoc = writeFakeXdoc(
     root,
     `#!/usr/bin/env node
-import { writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { readFileSync, writeFileSync } from 'node:fs'
 const args = process.argv.slice(2)
 const valueAfter = (flag) => args[args.indexOf(flag) + 1]
+const identity = (path) => {
+  const bytes = readFileSync(path)
+  return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
+}
 const dpi = Number(valueAfter('--dpi'))
 const output = valueAfter('--output')
 if (dpi === 192) {
@@ -2349,6 +2414,10 @@ if (dpi === 192) {
 writeFileSync(output, 'single 144 dpi png')
 process.stdout.write(JSON.stringify({
   schemaVersion: 'pptx-contact-diff/v1', status: 'success', outputPath: output,
+  source: identity(valueAfter('--source')),
+  candidate: identity(valueAfter('--candidate')),
+  sourcePath: valueAfter('--source'),
+  candidatePath: valueAfter('--candidate'),
   summary: { pairCount: 12, scopeMode: 'all-slides', dpi },
   agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 12 },
   render: { path: output, width: 5000, height: 6000, dpi }
@@ -2531,6 +2600,11 @@ test('compare gate publishes every multipart sibling and rejects duplicate cover
   ])
   const gate = JSON.parse(gateResult.stdout)
   assert.equal(gate.status, 'pass')
+  assert.equal(gate.finalBinding.status, 'bound')
+  assert.equal(readFileSync(finalPptx, 'utf8'), 'candidate pptx')
+  assert.equal(gate.finalBinding.comparedCandidate.sha256, fileIdentity(candidate).sha256)
+  assert.equal(gate.finalBinding.stagedFinal.sha256, fileIdentity(candidate).sha256)
+  assert.equal(gate.finalBinding.publishedFinal.sha256, fileIdentity(finalPptx).sha256)
   assert.deepEqual(
     gate.agentSummary.siblingPaths.map((path) => basename(path)),
     [
@@ -2569,19 +2643,271 @@ test('compare gate publishes every multipart sibling and rejects duplicate cover
   assert.match(JSON.parse(invalidGate.stdout).blockers.join('\n'), /duplicate|coverage/i)
 })
 
+test('compare gate publishes the exact single-file candidate bytes and records a bound receipt', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-single-binding-'))
+  const runDir = join(root, 'run')
+  const source = join(root, 'source.pptx')
+  const candidate = join(runDir, 'candidate.pptx')
+  const finalPptx = join(root, 'delivery.pptx')
+  const compare = join(runDir, 'translation-compare.png')
+  const reportPath = join(runDir, 'translation-compare.json')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(source, 'source bytes')
+  writeFileSync(candidate, 'compared candidate bytes')
+  writeFileSync(finalPptx, 'old delivery bytes')
+  writeFileSync(compare, 'compare png')
+  writeJson(reportPath, contactDiffReport({ compare, sourcePptx: source, finalPptx: candidate }))
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-compare-gate.mjs'),
+    '--run-dir',
+    runDir,
+    '--final-pptx',
+    finalPptx,
+    '--final-pptx-source',
+    candidate,
+    '--kind',
+    'translation',
+    '--publish',
+    '--overwrite',
+    '--timestamp',
+    '0711230001',
+    '--json',
+  ])
+  const gate = JSON.parse(result.stdout)
+
+  assert.equal(gate.status, 'pass')
+  assert.equal(gate.finalBinding.status, 'bound')
+  assert.equal(readFileSync(finalPptx, 'utf8'), 'compared candidate bytes')
+  assert.equal(gate.finalBinding.comparedCandidate.sha256, fileIdentity(candidate).sha256)
+  assert.equal(gate.finalBinding.publishedFinal.sha256, fileIdentity(finalPptx).sha256)
+  assert.equal(gate.published.at(-1).label, 'final PPTX')
+})
+
+test('compare gate check-only mode binds an existing final without a staged source', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-check-binding-'))
+  const runDir = join(root, 'run')
+  const source = join(root, 'source.pptx')
+  const candidate = join(runDir, 'candidate.pptx')
+  const finalPptx = join(root, 'delivery.pptx')
+  const compare = join(runDir, 'translation-compare.png')
+  const reportPath = join(runDir, 'translation-compare.json')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(source, 'source bytes')
+  writeFileSync(candidate, 'candidate bytes')
+  writeFileSync(compare, 'compare png')
+  writeJson(reportPath, contactDiffReport({ compare, sourcePptx: source, finalPptx: candidate }))
+
+  runNode([
+    skillPath('scripts/pptx-nova-compare-gate.mjs'),
+    '--run-dir',
+    runDir,
+    '--final-pptx',
+    finalPptx,
+    '--final-pptx-source',
+    candidate,
+    '--kind',
+    'translation',
+    '--publish',
+    '--overwrite',
+    '--timestamp',
+    '0711230004',
+    '--json',
+  ])
+
+  const checked = JSON.parse(
+    runNode([
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      finalPptx,
+      '--kind',
+      'translation',
+      '--overwrite',
+      '--json',
+    ]).stdout,
+  )
+
+  assert.equal(checked.status, 'pass')
+  assert.equal(checked.mode, 'check-binding')
+  assert.equal(checked.finalBinding.status, 'bound')
+  assert.equal(checked.finalBinding.stagedFinal, null)
+  assert.equal(checked.finalBinding.publishedFinal.sha256, fileIdentity(finalPptx).sha256)
+  assert.deepEqual(checked.published, [])
+})
+
+test('compare gate rejects a different staged final and preserves the existing delivery', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-binding-mismatch-'))
+  const runDir = join(root, 'run')
+  const source = join(root, 'source.pptx')
+  const comparedCandidate = join(runDir, 'compared.pptx')
+  const wrongCandidate = join(runDir, 'wrong.pptx')
+  const finalPptx = join(root, 'delivery.pptx')
+  const compare = join(runDir, 'translation-compare.png')
+  const reportPath = join(runDir, 'translation-compare.json')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(source, 'source bytes')
+  writeFileSync(comparedCandidate, 'compared candidate bytes')
+  writeFileSync(wrongCandidate, 'different staged bytes')
+  writeFileSync(finalPptx, 'existing delivery bytes')
+  writeFileSync(compare, 'compare png')
+  writeJson(
+    reportPath,
+    contactDiffReport({ compare, sourcePptx: source, finalPptx: comparedCandidate }),
+  )
+  const gatePath = join(runDir, 'translation-compare-gate.json')
+  writeJson(gatePath, { status: 'pass', stale: true })
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      finalPptx,
+      '--final-pptx-source',
+      wrongCandidate,
+      '--kind',
+      'translation',
+      '--publish',
+      '--overwrite',
+      '--timestamp',
+      '0711230002',
+      '--json',
+    ],
+    2,
+  )
+  const gate = JSON.parse(result.stdout)
+
+  assert.equal(gate.status, 'fail')
+  assert.equal(gate.finalBinding.status, 'mismatch')
+  assert.match(gate.blockers.join('\n'), /staged final PPTX SHA-256/i)
+  assert.equal(readFileSync(finalPptx, 'utf8'), 'existing delivery bytes')
+  assert.equal(gate.agentSummary.siblingPaths.length, 1)
+  assert.equal(existsSync(gate.agentSummary.siblingPaths[0]), false)
+  assert.equal(JSON.parse(readFileSync(gatePath, 'utf8')).status, 'fail')
+})
+
+test('compare gate rejects a candidate overwritten after compare evidence was created', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-stale-candidate-'))
+  const runDir = join(root, 'run')
+  const source = join(root, 'source.pptx')
+  const candidate = join(runDir, 'candidate.pptx')
+  const finalPptx = join(root, 'delivery.pptx')
+  const compare = join(runDir, 'translation-compare.png')
+  const reportPath = join(runDir, 'translation-compare.json')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(source, 'source bytes')
+  writeFileSync(candidate, 'compared bytes')
+  writeFileSync(finalPptx, 'existing delivery')
+  writeFileSync(compare, 'compare png')
+  writeJson(reportPath, contactDiffReport({ compare, sourcePptx: source, finalPptx: candidate }))
+  writeFileSync(candidate, 'overwritten after compare')
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      finalPptx,
+      '--final-pptx-source',
+      candidate,
+      '--kind',
+      'translation',
+      '--publish',
+      '--overwrite',
+      '--timestamp',
+      '0711230003',
+      '--json',
+    ],
+    2,
+  )
+  const gate = JSON.parse(result.stdout)
+
+  assert.equal(gate.status, 'fail')
+  assert.match(gate.blockers.join('\n'), /compare candidate (byteLength|SHA-256)/i)
+  assert.equal(readFileSync(finalPptx, 'utf8'), 'existing delivery')
+})
+
+test('compare gate rejects a multipart part report with a different input identity', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-identity-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const finalPptx = join(root, 'final.pptx')
+  const runDir = join(root, 'run')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  runNode([
+    skillPath('scripts/pptx-nova-compare.mjs'),
+    '--source',
+    source,
+    '--candidate',
+    candidate,
+    '--run-dir',
+    runDir,
+    '--kind',
+    'refurbish',
+    '--slide-count',
+    '48',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+
+  const manifest = JSON.parse(readFileSync(join(runDir, 'refurbish-compare.json'), 'utf8'))
+  const partReportPath = manifest.parts[1].reportPath
+  const partReport = JSON.parse(readFileSync(partReportPath, 'utf8'))
+  partReport.candidate.sha256 = '0'.repeat(64)
+  writeJson(partReportPath, partReport)
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      finalPptx,
+      '--final-pptx-source',
+      candidate,
+      '--kind',
+      'refurbish',
+      '--publish',
+      '--overwrite',
+      '--timestamp',
+      '0711230005',
+      '--json',
+    ],
+    2,
+  )
+  const gate = JSON.parse(result.stdout)
+
+  assert.equal(gate.status, 'fail')
+  assert.match(gate.blockers.join('\n'), /part 2 candidate identity/i)
+  assert.equal(existsSync(finalPptx), false)
+  assert.equal(
+    gate.agentSummary.siblingPaths.every((path) => !existsSync(path)),
+    true,
+  )
+})
+
 function writeCompareGateFixture(root, makeReport) {
   const runDir = join(root, 'run')
+  const sourcePptx = join(root, 'source.pptx')
   const finalPptx = join(root, 'final.pptx')
   const compare = join(runDir, 'translation-compare.png')
   const reportPath = join(runDir, 'translation-compare.json')
   const gatePath = join(runDir, 'translation-compare-gate.json')
 
   mkdirSync(runDir, { recursive: true })
+  writeFileSync(sourcePptx, 'source pptx')
   writeFileSync(finalPptx, 'final pptx')
   writeFileSync(compare, 'compare png')
-  writeJson(reportPath, makeReport({ compare, runDir }))
+  writeJson(reportPath, makeReport({ compare, runDir, sourcePptx, finalPptx }))
 
-  return { runDir, finalPptx, compare, reportPath, gatePath }
+  return { runDir, sourcePptx, finalPptx, compare, reportPath, gatePath }
 }
 
 function runCompareGateFixture(fixture) {
@@ -2591,6 +2917,8 @@ function runCompareGateFixture(fixture) {
       '--run-dir',
       fixture.runDir,
       '--final-pptx',
+      fixture.finalPptx,
+      '--final-pptx-source',
       fixture.finalPptx,
       '--kind',
       'translation',
@@ -2612,7 +2940,7 @@ function runCompareGateFixture(fixture) {
 }
 
 function contactDiffReport(options) {
-  const { compare } = options
+  const { compare, sourcePptx, finalPptx } = options
   const scopeMode = Object.prototype.hasOwnProperty.call(options, 'scopeMode')
     ? options.scopeMode
     : 'all-slides'
@@ -2628,6 +2956,10 @@ function contactDiffReport(options) {
   const report = {
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
+    source: fileIdentity(sourcePptx),
+    candidate: fileIdentity(finalPptx),
+    sourcePath: sourcePptx,
+    candidatePath: finalPptx,
     summary,
     agentGate,
     render: { path: compare, width: 100, height: 56, dpi: 192 },
@@ -2638,8 +2970,8 @@ function contactDiffReport(options) {
 
 test('compare gate blocks contact-diff reports without explicit all-slides scopeMode', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-missing-scope-'))
-  const fixture = writeCompareGateFixture(root, ({ compare }) => ({
-    ...contactDiffReport({ compare, scopeMode: undefined }),
+  const fixture = writeCompareGateFixture(root, (context) => ({
+    ...contactDiffReport({ ...context, scopeMode: undefined }),
     scope: { requested: '3' },
   }))
 
@@ -2656,8 +2988,8 @@ test('compare gate blocks contact-diff reports without explicit all-slides scope
 
 test('compare gate blocks contact-diff reports whose output path differs from checked PNG', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-path-mismatch-'))
-  const fixture = writeCompareGateFixture(root, ({ compare, runDir }) =>
-    contactDiffReport({ compare, outputPath: join(runDir, 'old-compare.png') }),
+  const fixture = writeCompareGateFixture(root, (context) =>
+    contactDiffReport({ ...context, outputPath: join(context.runDir, 'old-compare.png') }),
   )
 
   const report = runCompareGateFixture(fixture)
@@ -2673,9 +3005,9 @@ test('compare gate blocks contact-diff reports whose output path differs from ch
 
 test('compare gate blocks contact-diff reports whose render path differs from checked PNG', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-render-path-mismatch-'))
-  const fixture = writeCompareGateFixture(root, ({ compare, runDir }) => {
-    const report = contactDiffReport({ compare })
-    report.render.path = join(runDir, 'old-render.png')
+  const fixture = writeCompareGateFixture(root, (context) => {
+    const report = contactDiffReport(context)
+    report.render.path = join(context.runDir, 'old-render.png')
     return report
   })
 
@@ -2692,8 +3024,8 @@ test('compare gate blocks contact-diff reports whose render path differs from ch
 
 test('compare gate blocks contact-diff reports without a reported output path', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-missing-path-'))
-  const fixture = writeCompareGateFixture(root, ({ compare }) => {
-    const report = contactDiffReport({ compare })
+  const fixture = writeCompareGateFixture(root, (context) => {
+    const report = contactDiffReport(context)
     delete report.outputPath
     delete report.render.path
     return report

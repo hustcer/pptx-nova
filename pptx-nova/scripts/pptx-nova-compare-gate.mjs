@@ -18,20 +18,20 @@ const SCHEMA_VERSION = 'pptx-nova-compare-gate/v1'
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <dir> --final-pptx <path> [options]
 
-Validate and optionally publish the final before/after compare PNG next to the
-delivered PPTX.
+Validate and optionally publish one SHA-256-bound delivery bundle containing
+the final PPTX and its before/after compare PNG sibling(s).
 
 Options:
   --run-dir <dir>          Required current pptx-nova run directory.
   --final-pptx <path>      Required final PPTX path.
   --final-pptx-source <path>
-                           Optional staged PPTX to validate when final path is pending.
+                           Staged final PPTX. Required with --publish; otherwise optional.
   --kind <name>            Compare kind, e.g. translation or refurbish. Defaults to compare.
   --compare-stem <stem>    Artifact/published stem. Defaults to <kind>-compare.
   --compare <path>         Run-directory compare PNG. Defaults to <run-dir>/<compare-stem>.png.
   --report <path>          Run-directory compare JSON. Defaults to <run-dir>/<compare-stem>.json.
   --sibling <path>         Expected/published sibling PNG path.
-  --publish                Copy --compare next to --final-pptx before checking.
+  --publish                Atomically publish compare sibling(s), then the bound final PPTX.
   --timestamp <MMDDhhmmss> Timestamp suffix to use with --publish.
   --output <path>          Write gate JSON. Defaults to <run-dir>/<compare-stem>-gate.json.
   --overwrite              Allow replacing --output and, with --publish, --sibling.
@@ -110,6 +110,9 @@ function parseArgs(argv) {
 
   if (!args.runDir) throw new Error(`--run-dir is required\n\n${usage}`)
   if (!args.finalPptx) throw new Error(`--final-pptx is required\n\n${usage}`)
+  if (args.publish && !args.finalPptxSource) {
+    throw new Error(`--final-pptx-source is required with --publish\n\n${usage}`)
+  }
 
   args.runDir = resolve(args.runDir)
   args.finalPptx = resolve(args.finalPptx)
@@ -253,23 +256,6 @@ function findMultipartSiblings(args, partCount) {
   return paths.length === partCount ? { timestamp, paths } : { timestamp, paths: [] }
 }
 
-function publishMultipartParts(partStates, siblingPaths) {
-  const staged = siblingPaths.map(
-    (path, index) => `${path}.pptx-nova-${process.pid}-${Date.now()}-${index + 1}.tmp`,
-  )
-  try {
-    for (let index = 0; index < partStates.length; index += 1) {
-      copyFileSync(partStates[index].path, staged[index])
-    }
-    for (let index = 0; index < staged.length; index += 1) {
-      renameSync(staged[index], siblingPaths[index])
-    }
-  } catch (error) {
-    for (const path of [...staged, ...siblingPaths]) rmSync(path, { force: true })
-    throw error
-  }
-}
-
 function findSibling(args) {
   if (args.sibling) return args.sibling
   const dir = dirname(args.finalPptx)
@@ -297,6 +283,153 @@ function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
+const SHA256_PATTERN = /^[0-9a-f]{64}$/
+
+function validatedIdentity(endpoint, label, blockers) {
+  const path = typeof endpoint?.path === 'string' ? resolve(endpoint.path) : ''
+  const state = fileState(path || join(process.cwd(), '__missing__'))
+  const expectedSha256 = typeof endpoint?.sha256 === 'string' ? endpoint.sha256 : ''
+  const expectedByteLength = endpoint?.byteLength
+  if (!path) blockers.push(`${label} path is missing from compare evidence`)
+  else if (!state.exists || !state.isFile || state.byteLength <= 0) {
+    blockers.push(`${label} file is missing or empty: ${path}`)
+  }
+  if (!SHA256_PATTERN.test(expectedSha256)) {
+    blockers.push(`${label} SHA-256 is missing or invalid`)
+  }
+  if (!Number.isInteger(expectedByteLength) || expectedByteLength <= 0) {
+    blockers.push(`${label} byteLength is missing or invalid`)
+  } else if (state.exists && state.byteLength !== expectedByteLength) {
+    blockers.push(`${label} byteLength does not match compare evidence`)
+  }
+  const actualSha256 = state.exists && state.isFile ? sha256(path) : null
+  if (actualSha256 && expectedSha256 && actualSha256 !== expectedSha256) {
+    blockers.push(`${label} SHA-256 does not match compare evidence`)
+  }
+  return {
+    path: path || null,
+    exists: state.exists,
+    byteLength: state.byteLength,
+    sha256: actualSha256,
+    expectedByteLength: Number.isInteger(expectedByteLength) ? expectedByteLength : null,
+    expectedSha256: expectedSha256 || null,
+  }
+}
+
+function sameIdentity(left, right) {
+  return (
+    left?.path === right?.path &&
+    left?.byteLength === right?.byteLength &&
+    left?.sha256 === right?.sha256
+  )
+}
+
+function evidenceIdentity(endpoint) {
+  return {
+    path: typeof endpoint?.path === 'string' ? resolve(endpoint.path) : null,
+    byteLength: Number.isInteger(endpoint?.byteLength) ? endpoint.byteLength : null,
+    sha256: typeof endpoint?.sha256 === 'string' ? endpoint.sha256 : null,
+  }
+}
+
+function preparedPath(destination, index, suffix) {
+  return join(
+    dirname(destination),
+    `.${basename(destination)}.pptx-nova-${process.pid}-${Date.now()}-${index + 1}.${suffix}`,
+  )
+}
+
+function publishBundle(items, overwrite) {
+  const destinations = new Set()
+  for (const item of items) {
+    if (destinations.has(item.destination)) {
+      throw new Error(`duplicate publish destination: ${item.destination}`)
+    }
+    destinations.add(item.destination)
+    const destinationState = fileState(item.destination)
+    if (destinationState.exists && !destinationState.isFile) {
+      throw new Error(`${item.label} destination is not a file: ${item.destination}`)
+    }
+    if (destinationState.exists && !overwrite) {
+      throw new Error(`${item.label} destination already exists: ${item.destination}`)
+    }
+  }
+
+  const prepared = []
+  const committed = []
+  try {
+    for (const [index, item] of items.entries()) {
+      mkdirSync(dirname(item.destination), { recursive: true })
+      const temp = preparedPath(item.destination, index, 'tmp')
+      copyFileSync(item.source, temp)
+      const state = fileState(temp)
+      const digest = sha256(temp)
+      if (state.byteLength !== item.expectedByteLength) {
+        throw new Error(`${item.label} staged byteLength does not match compare evidence`)
+      }
+      if (digest !== item.expectedSha256) {
+        throw new Error(`${item.label} staged SHA-256 does not match compare evidence`)
+      }
+      prepared.push({ ...item, temp, backup: '', byteLength: state.byteLength, sha256: digest })
+    }
+
+    for (const [index, item] of prepared.entries()) {
+      let backup = ''
+      if (existsSync(item.destination)) {
+        backup = preparedPath(item.destination, index, 'backup')
+        renameSync(item.destination, backup)
+      }
+      item.backup = backup
+      renameSync(item.temp, item.destination)
+      committed.push(item)
+    }
+
+    for (const item of committed) {
+      const state = fileState(item.destination)
+      if (!state.exists || !state.isFile || state.byteLength !== item.expectedByteLength) {
+        throw new Error(`${item.label} published byteLength does not match compare evidence`)
+      }
+      if (sha256(item.destination) !== item.expectedSha256) {
+        throw new Error(`${item.label} published SHA-256 does not match compare evidence`)
+      }
+    }
+  } catch (error) {
+    for (const item of [...prepared].reverse()) {
+      if (committed.includes(item)) rmSync(item.destination, { force: true })
+      if (item.backup && existsSync(item.backup)) {
+        rmSync(item.destination, { force: true })
+        renameSync(item.backup, item.destination)
+      }
+      rmSync(item.temp, { force: true })
+    }
+    throw error
+  }
+
+  const cleanupWarnings = []
+  for (const item of committed) {
+    if (!item.backup) continue
+    try {
+      rmSync(item.backup, { force: true })
+    } catch (error) {
+      cleanupWarnings.push(
+        `${item.label} backup cleanup failed after publish commit: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      )
+    }
+  }
+  return {
+    published: committed.map(({ label, source, destination, byteLength, sha256: digest }) => ({
+      label,
+      source,
+      destination,
+      byteLength,
+      sha256: digest,
+    })),
+    cleanupWarnings,
+  }
+}
+
 function coverageFromParts(parts, slideCount) {
   const counts = new Map()
   for (const part of parts) {
@@ -321,17 +454,8 @@ function validateMultipartManifest(report, blockers) {
     blockers.push('multipart compare manifest must contain at least two parts')
     return []
   }
-  for (const [label, endpoint] of [
-    ['source', report.source],
-    ['candidate', report.candidate],
-  ]) {
-    const path = typeof endpoint?.path === 'string' ? resolve(endpoint.path) : ''
-    const state = fileState(path || join(process.cwd(), '__missing__'))
-    if (!state.exists || !state.isFile) blockers.push(`multipart ${label} file is missing: ${path}`)
-    else if (endpoint.sha256 !== sha256(path)) {
-      blockers.push(`multipart ${label} SHA-256 does not match manifest`)
-    }
-  }
+  const manifestSource = evidenceIdentity(report.source)
+  const manifestCandidate = evidenceIdentity(report.candidate)
   const states = report.parts.map((part, index) => {
     const label = `multipart part ${index + 1}`
     const path = typeof part.path === 'string' ? resolve(part.path) : ''
@@ -364,6 +488,12 @@ function validateMultipartManifest(report, blockers) {
       const partReport = readJson(partReportPath)
       if (partReport.schemaVersion !== 'pptx-contact-diff/v1' || partReport.status !== 'success') {
         blockers.push(`${label} JSON report is not a successful pptx-contact-diff/v1 report`)
+      }
+      if (!sameIdentity(evidenceIdentity(partReport.source), manifestSource)) {
+        blockers.push(`${label} source identity does not match multipart manifest`)
+      }
+      if (!sameIdentity(evidenceIdentity(partReport.candidate), manifestCandidate)) {
+        blockers.push(`${label} candidate identity does not match multipart manifest`)
       }
       for (const outputPath of reportImagePaths(partReport)) {
         if (resolve(outputPath) !== path)
@@ -587,8 +717,8 @@ function compareReportSummary(report) {
 function buildReport(args) {
   const blockers = []
   const warnings = []
-  const finalState = fileState(args.finalPptx)
-  const finalSourceState = args.finalPptxSource ? fileState(args.finalPptxSource) : null
+  let finalState = fileState(args.finalPptx)
+  let finalSourceState = args.finalPptxSource ? fileState(args.finalPptxSource) : null
   const compareState = fileState(args.compare)
   const reportState = fileState(args.report)
 
@@ -600,24 +730,62 @@ function buildReport(args) {
     } else if (finalSourceState.byteLength <= 0) {
       blockers.push('staged final PPTX source is empty')
     }
-    if (finalState.exists && !finalState.isFile) {
-      blockers.push(`final PPTX path is not a file: ${args.finalPptx}`)
-    }
-  } else {
+  } else if (!args.publish) {
     if (!finalState.exists) blockers.push(`final PPTX is missing: ${args.finalPptx}`)
     else if (!finalState.isFile) blockers.push(`final PPTX is not a file: ${args.finalPptx}`)
+  }
+  if (finalState.exists && !finalState.isFile) {
+    blockers.push(`final PPTX path is not a file: ${args.finalPptx}`)
   }
   if (!reportState.exists) blockers.push(`compare report is missing: ${args.report}`)
   else if (!reportState.isFile) blockers.push(`compare report is not a file: ${args.report}`)
 
   const compareReport = reportState.exists && reportState.isFile ? readJson(args.report) : null
   const multipart = compareReport?.schemaVersion === 'pptx-nova-compare-manifest/v1'
+  const sourceIdentity = validatedIdentity(compareReport?.source, 'compare source', blockers)
+  const candidateIdentity = validatedIdentity(
+    compareReport?.candidate,
+    'compare candidate',
+    blockers,
+  )
+  if (
+    compareReport?.sourcePath &&
+    sourceIdentity.path &&
+    resolve(compareReport.sourcePath) !== sourceIdentity.path
+  ) {
+    blockers.push('compare report sourcePath does not match source identity')
+  }
+  if (
+    compareReport?.candidatePath &&
+    candidateIdentity.path &&
+    resolve(compareReport.candidatePath) !== candidateIdentity.path
+  ) {
+    blockers.push('compare report candidatePath does not match candidate identity')
+  }
+
+  const expectedCandidateSha256 = candidateIdentity.expectedSha256
+  const expectedCandidateByteLength = candidateIdentity.expectedByteLength
+  let stagedFinalSha256 = null
+  if (finalSourceState?.exists && finalSourceState.isFile) {
+    stagedFinalSha256 = sha256(args.finalPptxSource)
+    if (
+      expectedCandidateByteLength &&
+      finalSourceState.byteLength !== expectedCandidateByteLength
+    ) {
+      blockers.push('staged final PPTX byteLength does not match compared candidate')
+    }
+    if (expectedCandidateSha256 && stagedFinalSha256 !== expectedCandidateSha256) {
+      blockers.push('staged final PPTX SHA-256 does not match compared candidate')
+    }
+  }
+
   let partStates = []
   let sibling = ''
   let siblingState = fileState(join(dirname(args.finalPptx), '__missing__'))
   let siblingPaths = []
   let siblingStates = []
   let timestamp = null
+  let publishItems = []
   if (multipart) {
     partStates = validateMultipartManifest(compareReport, blockers)
     const selection = args.publish
@@ -625,15 +793,108 @@ function buildReport(args) {
       : findMultipartSiblings(args, partStates.length)
     timestamp = selection.timestamp
     siblingPaths = selection.paths
-    if (!timestamp || siblingPaths.length !== partStates.length) {
+    if (!args.publish && (!timestamp || siblingPaths.length !== partStates.length)) {
       blockers.push(
         `no complete multipart sibling set found matching ${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>-<part>.png`,
       )
     }
-    if (args.publish && blockers.length === 0) {
-      mkdirSync(dirname(args.finalPptx), { recursive: true })
-      publishMultipartParts(partStates, siblingPaths)
+    publishItems = siblingPaths.map((path, index) => ({
+      label: `multipart compare sibling ${index + 1}`,
+      source: partStates[index]?.path,
+      destination: path,
+      expectedByteLength: partStates[index]?.byteLength,
+      expectedSha256: partStates[index]?.sha256,
+    }))
+  } else {
+    if (!compareState.exists) blockers.push(`run-directory compare PNG is missing: ${args.compare}`)
+    else if (!compareState.isFile) blockers.push(`compare PNG is not a file: ${args.compare}`)
+    else if (compareState.byteLength <= 0) blockers.push('compare PNG is empty')
+    if (compareReport) validateReport(args, compareReport, compareState, blockers, warnings)
+    sibling = args.publish ? makeSiblingPath(args) : findSibling(args)
+    const pattern = siblingPattern(args.finalPptx, args.compareStem)
+    const siblingBase = sibling ? basename(sibling) : ''
+    timestamp = siblingBase.match(pattern)?.[1] || null
+    if (!sibling) {
+      blockers.push(
+        `no sibling compare PNG found next to final PPTX matching ${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>.png`,
+      )
+    } else {
+      if (dirname(sibling) !== dirname(args.finalPptx)) {
+        blockers.push('sibling compare PNG is not next to final PPTX')
+      }
+      if (!pattern.test(siblingBase)) {
+        blockers.push(`sibling compare PNG has invalid name: ${siblingBase}`)
+      }
     }
+    if (sibling && compareState.exists && compareState.isFile) {
+      publishItems = [
+        {
+          label: 'compare sibling',
+          source: args.compare,
+          destination: sibling,
+          expectedByteLength: compareState.byteLength,
+          expectedSha256: sha256(args.compare),
+        },
+      ]
+      siblingPaths = [sibling]
+    }
+  }
+
+  if (
+    args.publish &&
+    args.finalPptxSource !== args.finalPptx &&
+    finalSourceState?.exists &&
+    finalSourceState.isFile &&
+    expectedCandidateByteLength &&
+    expectedCandidateSha256
+  ) {
+    publishItems.push({
+      label: 'final PPTX',
+      source: args.finalPptxSource,
+      destination: args.finalPptx,
+      expectedByteLength: expectedCandidateByteLength,
+      expectedSha256: expectedCandidateSha256,
+    })
+  }
+
+  let published = []
+  if (args.publish && blockers.length === 0) {
+    try {
+      const publishResult = publishBundle(publishItems, args.overwrite)
+      published = publishResult.published
+      warnings.push(...publishResult.cleanupWarnings)
+    } catch (error) {
+      blockers.push(
+        `delivery bundle publish failed: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+  }
+
+  finalState = fileState(args.finalPptx)
+  finalSourceState = args.finalPptxSource ? fileState(args.finalPptxSource) : null
+  const publishedFinalSha256 =
+    finalState.exists && finalState.isFile && finalState.byteLength > 0
+      ? sha256(args.finalPptx)
+      : null
+  if (!finalState.exists) blockers.push(`final PPTX is missing: ${args.finalPptx}`)
+  else if (!finalState.isFile) blockers.push(`final PPTX is not a file: ${args.finalPptx}`)
+  else if (finalState.byteLength <= 0) blockers.push('final PPTX is empty')
+  if (
+    finalState.exists &&
+    expectedCandidateByteLength &&
+    expectedCandidateByteLength !== finalState.byteLength
+  ) {
+    blockers.push('published final PPTX byteLength does not match compared candidate')
+  }
+  if (
+    publishedFinalSha256 &&
+    expectedCandidateSha256 &&
+    expectedCandidateSha256 !== publishedFinalSha256
+  ) {
+    blockers.push('published final PPTX SHA-256 does not match compared candidate')
+  }
+
+  if (multipart) {
     siblingStates = siblingPaths.map((path, index) => {
       const state = fileState(path)
       if (!state.exists || !state.isFile || state.byteLength <= 0) {
@@ -648,39 +909,15 @@ function buildReport(args) {
     sibling = siblingPaths[0] || ''
     siblingState = siblingStates[0] ?? siblingState
   } else {
-    if (!compareState.exists) blockers.push(`run-directory compare PNG is missing: ${args.compare}`)
-    else if (!compareState.isFile) blockers.push(`compare PNG is not a file: ${args.compare}`)
-    else if (compareState.byteLength <= 0) blockers.push('compare PNG is empty')
-    if (compareReport) validateReport(args, compareReport, compareState, blockers, warnings)
-    sibling = args.publish ? makeSiblingPath(args) : findSibling(args)
-    if (args.publish && blockers.length === 0) {
-      if (existsSync(sibling) && !args.overwrite) {
-        blockers.push(`sibling compare PNG already exists: ${sibling}`)
-      } else {
-        mkdirSync(dirname(sibling), { recursive: true })
-        copyFileSync(args.compare, sibling)
-      }
-    }
     siblingState = sibling
       ? fileState(sibling)
       : fileState(join(dirname(args.finalPptx), '__missing__'))
-    const pattern = siblingPattern(args.finalPptx, args.compareStem)
-    const siblingBase = sibling ? basename(sibling) : ''
-    timestamp = siblingBase.match(pattern)?.[1] || null
-    if (!sibling) {
-      blockers.push(
-        `no sibling compare PNG found next to final PPTX matching ${stem(args.finalPptx)}-${args.compareStem}-<MMDDhhmmss>.png`,
-      )
-    } else {
-      if (dirname(sibling) !== dirname(args.finalPptx))
-        blockers.push('sibling compare PNG is not next to final PPTX')
-      if (!pattern.test(siblingBase))
-        blockers.push(`sibling compare PNG has invalid name: ${siblingBase}`)
-      if (!siblingState.exists || !siblingState.isFile || siblingState.byteLength <= 0) {
-        blockers.push(`sibling compare PNG is missing or empty: ${sibling}`)
-      } else if (!sameSize(compareState, siblingState)) {
-        blockers.push('sibling compare PNG byteLength does not match run-directory compare PNG')
-      }
+    if (!siblingState.exists || !siblingState.isFile || siblingState.byteLength <= 0) {
+      blockers.push(`sibling compare PNG is missing or empty: ${sibling}`)
+    } else if (!sameSize(compareState, siblingState)) {
+      blockers.push('sibling compare PNG byteLength does not match run-directory compare PNG')
+    } else if (sha256(args.compare) !== sha256(sibling)) {
+      blockers.push('sibling compare PNG SHA-256 does not match run-directory compare PNG')
     }
   }
   const reportSummary = multipart
@@ -696,17 +933,49 @@ function buildReport(args) {
       }
     : compareReportSummary(compareReport)
 
+  const finalBindingStatus =
+    expectedCandidateSha256 &&
+    (!finalSourceState || stagedFinalSha256 === expectedCandidateSha256) &&
+    publishedFinalSha256 === expectedCandidateSha256
+      ? 'bound'
+      : finalState.exists
+        ? 'mismatch'
+        : 'pending'
+  if (finalBindingStatus !== 'bound') {
+    blockers.push(`final PPTX binding status is ${finalBindingStatus}`)
+  }
   const status = blockers.length === 0 ? 'pass' : 'fail'
   return {
     schemaVersion: SCHEMA_VERSION,
     observedAt: new Date().toISOString(),
     status,
-    mode: args.publish ? 'publish-and-check' : 'check',
+    mode: args.publish ? 'publish-and-bind' : 'check-binding',
     kind: args.kind,
     compareStem: args.compareStem,
     runDir: args.runDir,
     finalPptx: finalState,
-    finalPptxSource: finalSourceState,
+    finalPptxSource: finalSourceState ? { ...finalSourceState, sha256: stagedFinalSha256 } : null,
+    finalBinding: {
+      algorithm: 'sha256',
+      status: finalBindingStatus,
+      comparedCandidate: {
+        path: candidateIdentity.path,
+        byteLength: expectedCandidateByteLength,
+        sha256: expectedCandidateSha256,
+      },
+      stagedFinal: finalSourceState
+        ? {
+            path: args.finalPptxSource,
+            byteLength: finalSourceState.byteLength,
+            sha256: stagedFinalSha256,
+          }
+        : null,
+      publishedFinal: {
+        path: args.finalPptx,
+        byteLength: finalState.byteLength,
+        sha256: publishedFinalSha256,
+      },
+    },
     compare: compareState,
     parts: partStates,
     compareReport: {
@@ -722,6 +991,7 @@ function buildReport(args) {
       timestamp,
     },
     siblings: siblingStates,
+    published,
     blockers,
     warnings,
     agentSummary: {
@@ -731,8 +1001,8 @@ function buildReport(args) {
       message:
         status === 'pass'
           ? multipart
-            ? 'The complete numbered compare PNG set is published next to the final PPTX and matches run evidence.'
-            : 'Compare PNG is published next to the final PPTX and matches run evidence.'
+            ? 'The final PPTX and complete numbered compare PNG set are SHA-256-bound to the compared candidate.'
+            : 'The final PPTX and compare PNG are SHA-256-bound to the compared candidate.'
           : `Compare delivery gate failed with ${blockers.length} blocker(s).`,
     },
   }
@@ -746,7 +1016,13 @@ function writeReport(args, report) {
   }
   mkdirSync(dirname(args.output), { recursive: true })
   const text = `${JSON.stringify(report, null, 2)}\n`
-  writeFileSync(args.output, text)
+  const temp = `${args.output}.pptx-nova-${process.pid}-${Date.now()}.tmp`
+  try {
+    writeFileSync(temp, text)
+    renameSync(temp, args.output)
+  } finally {
+    rmSync(temp, { force: true })
+  }
   if (args.json) process.stdout.write(text)
   else {
     process.stdout.write(`${report.compareStem} gate: ${report.status}\n`)
@@ -757,6 +1033,14 @@ function writeReport(args, report) {
 
 try {
   const args = parseArgs(process.argv.slice(2))
+  if (existsSync(args.output)) {
+    if (!args.overwrite) {
+      throw new Error(
+        `output already exists: ${args.output}; use --overwrite for a current-run gate artifact`,
+      )
+    }
+    if (args.publish) rmSync(args.output, { force: true })
+  }
   const report = buildReport(args)
   writeReport(args, report)
   if (report.status === 'fail') process.exit(2)

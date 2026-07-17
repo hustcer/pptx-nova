@@ -33,8 +33,9 @@ Options:
 
 The helper delegates before/after visual comparison to xdoc pptx contact-diff,
 which renders a side-by-side contact sheet and emits a pptx-contact-diff/v1 JSON
-report used by pptx-nova-compare-gate.mjs. Full-deck compares larger than the
-chunk size are emitted as numbered PNGs plus a pptx-nova-compare-manifest/v1.
+report whose source/candidate SHA-256 identities are used by
+pptx-nova-compare-gate.mjs. Full-deck compares larger than the chunk size are
+emitted as numbered PNGs plus a pptx-nova-compare-manifest/v1.
 `
 
 const valueFlags = {
@@ -243,6 +244,51 @@ function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
+const SHA256_PATTERN = /^[0-9a-f]{64}$/
+
+function validateContactDiffInputIdentity(identity, expectedPath, label) {
+  if (!identity || typeof identity !== 'object') {
+    throw new Error(`xdoc contact-diff ${label} identity is missing`)
+  }
+  const reportedPath = typeof identity.path === 'string' ? resolve(identity.path) : ''
+  if (reportedPath !== expectedPath) {
+    throw new Error(`xdoc contact-diff ${label} path does not match the requested input`)
+  }
+  if (!Number.isInteger(identity.byteLength) || identity.byteLength <= 0) {
+    throw new Error(`xdoc contact-diff ${label} byteLength is missing or invalid`)
+  }
+  if (typeof identity.sha256 !== 'string' || !SHA256_PATTERN.test(identity.sha256)) {
+    throw new Error(`xdoc contact-diff ${label} SHA-256 is missing or invalid`)
+  }
+  const state = statSync(expectedPath)
+  if (state.size !== identity.byteLength) {
+    throw new Error(`xdoc contact-diff ${label} byteLength no longer matches the input file`)
+  }
+  if (sha256(expectedPath) !== identity.sha256) {
+    throw new Error(`xdoc contact-diff ${label} SHA-256 no longer matches the input file`)
+  }
+  return {
+    path: expectedPath,
+    byteLength: identity.byteLength,
+    sha256: identity.sha256,
+  }
+}
+
+function validateContactDiffInputIdentities(report, args) {
+  return {
+    source: validateContactDiffInputIdentity(report.source, args.source, 'source'),
+    candidate: validateContactDiffInputIdentity(report.candidate, args.candidate, 'candidate'),
+  }
+}
+
+function sameInputIdentity(left, right) {
+  return (
+    left?.path === right?.path &&
+    left?.byteLength === right?.byteLength &&
+    left?.sha256 === right?.sha256
+  )
+}
+
 function numberedPath(path, partNumber, width) {
   const extension = extname(path)
   const base = path.slice(0, -extension.length)
@@ -330,7 +376,8 @@ async function runContactDiff(
   if (!existsSync(output) || statSync(output).size <= 0) {
     throw new Error(`xdoc contact-diff did not create a non-empty output PNG: ${output}`)
   }
-  return { status: 'success', result, report }
+  const identities = validateContactDiffInputIdentities(report, args)
+  return { status: 'success', result, report, identities }
 }
 
 async function runSingleCompare(args, reporter) {
@@ -415,6 +462,8 @@ async function runMultipartCompare(args, reporter) {
   const numberWidth = Math.max(2, String(chunks.length).length)
   const cleanupPaths = [args.report]
   const parts = []
+  let sourceIdentity = null
+  let candidateIdentity = null
   try {
     for (let index = 0; index < chunks.length; index += 1) {
       const chunk = chunks[index]
@@ -472,6 +521,15 @@ async function runMultipartCompare(args, reporter) {
         )
       }
       const effectiveDpi = Number(attempt.report?.render?.dpi ?? attempt.report?.summary?.dpi)
+      if (!sourceIdentity) {
+        sourceIdentity = attempt.identities.source
+        candidateIdentity = attempt.identities.candidate
+      } else if (
+        !sameInputIdentity(sourceIdentity, attempt.identities.source) ||
+        !sameInputIdentity(candidateIdentity, attempt.identities.candidate)
+      ) {
+        throw new Error('multipart contact-diff parts were rendered from different PPTX bytes')
+      }
       attempts.push({ dpi: effectiveDpi, status: 'success' })
       writeFileSync(partReportPath, `${JSON.stringify(attempt.report, null, 2)}\n`)
       const imageStat = statSync(output)
@@ -516,8 +574,8 @@ async function runMultipartCompare(args, reporter) {
       schemaVersion: 'pptx-nova-compare-manifest/v1',
       status: 'success',
       kind: args.kind,
-      source: { path: args.source, sha256: sha256(args.source) },
-      candidate: { path: args.candidate, sha256: sha256(args.candidate) },
+      source: sourceIdentity,
+      candidate: candidateIdentity,
       slideCount: args.slideCount,
       chunkSize: args.chunkSize,
       requestedDpi: args.dpi,

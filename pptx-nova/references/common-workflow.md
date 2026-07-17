@@ -378,9 +378,11 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
 --compare-chunk-size 20 --dpi 192 --fallback-dpi 144`. Decks larger than
     20 slides become numbered parts; only an explicit retryable `RenderError`
     may lower the failed part to 144 DPI. Run
-    `pptx-nova-compare-gate.mjs --kind refurbish --publish`; keep the manifest
-    and all part reports with the run artifacts and list every sibling PNG in
-    the final response.
+    `pptx-nova-compare-gate.mjs --kind refurbish --publish --final-pptx-source
+<candidate>`; the gate must be the only final PPTX publisher. Require both
+    `status=pass` and `finalBinding.status=bound`, keep the manifest and all
+    part reports with the run artifacts, and list every sibling PNG in the
+    final response.
     For agent-facing status and final-response facts, read
     `refurbish-run-summary.json.agentSummary` or
     `evidence-summary.json.agentSummary` first; open the underlying gate reports

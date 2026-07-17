@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import {
   copyFileSync,
   existsSync,
   mkdirSync,
+  readFileSync,
   readdirSync,
-  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -29,6 +30,10 @@ const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
 const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 let progressReporter = createProgressReporter({ mode: 'off' })
+
+function sha256(path) {
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-refurbish-run.mjs --deckkit <id> --source <source.pptx> --output <output.pptx> [options]
@@ -1366,38 +1371,29 @@ function runRefurbishCompareGate(summary, args, artifacts) {
   summary.artifacts.refurbishCompareParts = siblingPaths.length > 1 ? siblingPaths : []
   requireGate(summary, 'refurbish-compare-delivery', report?.status === 'pass', {
     status: report?.status ?? '',
+    finalBinding: report?.finalBinding?.status ?? null,
+    finalSha256: report?.finalBinding?.publishedFinal?.sha256 ?? null,
     siblingPath: report?.agentSummary?.siblingPath ?? null,
     siblingPaths,
     partCount: report?.parts?.length || 1,
-    message: 'The complete refurbish compare PNG set must be published next to the final PPTX',
+    message:
+      'The final PPTX and complete refurbish compare PNG set must be SHA-256-bound to the compared candidate',
   })
-}
-
-function publishCandidate(summary, args, artifacts) {
-  if (!existsSync(artifacts.candidate) || statSync(artifacts.candidate).size === 0) {
-    throw new PhaseFailure('publish', 'candidate PPTX is missing or empty')
-  }
-  const tempOutput = join(
-    dirname(args.output),
-    `.${basename(args.output)}.pptx-nova-${process.pid}-${Date.now()}.tmp`,
+  requireGate(
+    summary,
+    'published-output-binding',
+    report?.finalBinding?.status === 'bound' &&
+      report?.finalBinding?.publishedFinal?.path === args.output &&
+      existsSync(args.output) &&
+      statSync(args.output).size === report?.finalBinding?.publishedFinal?.byteLength &&
+      sha256(args.output) === report?.finalBinding?.publishedFinal?.sha256,
+    {
+      output: args.output,
+      bytes: existsSync(args.output) ? statSync(args.output).size : 0,
+      sha256: report?.finalBinding?.publishedFinal?.sha256 ?? null,
+      message: 'Published output is not bound to the compared candidate',
+    },
   )
-  const start = performance.now()
-  try {
-    copyFileSync(artifacts.candidate, tempOutput)
-    renameSync(tempOutput, args.output)
-  } finally {
-    rmSync(tempOutput, { force: true })
-  }
-  addInternalPhase(summary, 'publish', 'passed', {
-    durationMs: durationMs(start),
-    output: args.output,
-    bytes: statSync(args.output).size,
-  })
-  requireGate(summary, 'published-output', statSync(args.output).size > 0, {
-    output: args.output,
-    bytes: statSync(args.output).size,
-    message: 'Published output is empty',
-  })
 }
 
 function runRefurbish(inputArgs) {
@@ -1509,7 +1505,6 @@ function runRefurbish(inputArgs) {
     runSemanticDiff(summary, args, artifacts)
     runRefurbishCompare(summary, args, artifacts, inspect)
     runRefurbishCompareGate(summary, args, artifacts)
-    publishCandidate(summary, args, artifacts)
 
     summary.status = 'needs-human-review'
     summary.machineGatesPassed = true

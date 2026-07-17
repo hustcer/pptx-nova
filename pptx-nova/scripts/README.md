@@ -109,9 +109,12 @@ Use these entry points from skill workflows:
   only that part once at 144 DPI.
 - `pptx-nova-compare-gate.mjs` - delivery guard for compare artifacts. It
   validates either the compatible single PNG or every multipart path, hash,
-  report, attempt history, and exact slide coverage. With `--publish`, it
-  copies the single PNG or complete numbered set next to the final PPTX before
-  writing `<kind>-compare-gate.json`.
+  report, attempt history, and exact slide coverage. It also requires the
+  xdoc-reported candidate identity, staged final PPTX, and published final PPTX
+  to share one SHA-256. With `--publish`, it stages the complete delivery
+  bundle, publishes compare siblings first and the final PPTX last, verifies
+  every destination, and writes `<kind>-compare-gate.json` only after
+  `finalBinding.status=bound`.
 - pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
   data-driven, Studio, structural edit, template-following, and refurbish runs
   that contain native chart/table ops. It validates data shape, source/claim

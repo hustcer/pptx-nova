@@ -335,6 +335,14 @@ relevant OOXML style properties.
   primary machine repair queue. When `--slides` is used, check
   `deckResidualRisk` before final delivery so outside-scope source noise is
   disclosed but does not hide candidate regressions.
+  Current xdoc evaluates this as a rendered gate: renderer-visible text regions
+  provide chart-title collision evidence, while PDFium checks final glyph/page
+  bounds. New or worsened `chart-title-external-text-collision`,
+  `rendered-text-outside-page-horizontal`, and
+  `rendered-text-outside-page-vertical` high/medium issues require repair and
+  are not eligible for the multi-column human-review exception. Do not treat
+  text extending beyond an authored shape box as clipping when its final glyphs
+  remain visible.
 - `vision-check` on the candidate changed slides as a diagnostic report, not as
   the primary pass/fail gate when the source deck is already noisy.
 - Source and candidate PNG/contact sheets for changed slides.

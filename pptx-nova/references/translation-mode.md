@@ -131,6 +131,10 @@ relevant OOXML style properties.
    `i18n-plan` validates `unitId`, `sourceHash`, and `sourceText`, then routes
    units to the safest available execution primitive:
    - `textPlan.translations[]` for DrawingML shape and table paragraph/run planning.
+     This sub-artifact is labelled `pptx-i18n-text-plan-input/v1` and is the only
+     valid `--data` input for `xdoc pptx i18n-text-plan`; the top-level
+     unitId-based `pptx-i18n-translations/v1` document is rejected there with a
+     targeted error.
    - `replaceText.replacements[]` for user-visible text attributes and table
      paragraph text-node replacements materialized by the shared text-plan route.
    - `replaceChartText.replacements[]` for chart visible cache labels.
@@ -386,14 +390,24 @@ relevant OOXML style properties.
   primary machine repair queue. When `--slides` is used, check
   `deckResidualRisk` before final delivery so outside-scope source noise is
   disclosed but does not hide candidate regressions.
-  Current xdoc evaluates this as a rendered gate: renderer-visible text regions
-  provide chart-title collision evidence, while PDFium checks final glyph/page
-  bounds. New or worsened `chart-title-external-text-collision`,
-  `rendered-text-outside-page-horizontal`, and
-  `rendered-text-outside-page-vertical` high/medium issues require repair and
-  are not eligible for the multi-column human-review exception. Do not treat
-  text extending beyond an authored shape box as clipping when its final glyphs
-  remain visible.
+  The two repair-queue arrays have different shapes; do not parse them with one
+  shared record type:
+  - `newIssues[]` entries are flat issue objects. The category lives in `kind`
+    (not `code`), alongside `severity`, `slideIndex` (0-based), `message`,
+    `metrics{}`, and optional `shapeId`/`shapeName`/`fix`.
+  - `worsenedIssues[]` entries are nested change objects:
+    `{ "sourceIssue": <issue>, "candidateIssue": <issue>, "changedFields": [...] }`,
+    where both inner issues use the same flat shape as `newIssues[]`. Read the
+    candidate severity from `candidateIssue.severity` and the baseline from
+    `sourceIssue.severity`.
+    Current xdoc evaluates this as a rendered gate: renderer-visible text regions
+    provide chart-title collision evidence, while PDFium checks final glyph/page
+    bounds. New or worsened `chart-title-external-text-collision`,
+    `rendered-text-outside-page-horizontal`, and
+    `rendered-text-outside-page-vertical` high/medium issues require repair and
+    are not eligible for the multi-column human-review exception. Do not treat
+    text extending beyond an authored shape box as clipping when its final glyphs
+    remain visible.
 - `vision-check` on the candidate changed slides as a diagnostic report, not as
   the primary pass/fail gate when the source deck is already noisy.
 - Source and candidate PNG/contact sheets for changed slides.
@@ -490,7 +504,10 @@ Required interpretation:
   preview/vision review, and text overflow checks.
 
 The lower-level `xdoc pptx i18n-text-plan` remains an execution primitive and
-debugging fallback for directly addressed DrawingML shape text. `i18n-plan`
+debugging fallback for directly addressed DrawingML shape text. Its `--data`
+input must be the `pptx-i18n-text-plan-input/v1` textPlan sub-artifact from
+`i18n-plan` (slide/paragraph/shapeId records), never the top-level unitId-based
+`translations.json`. `i18n-plan`
 reuses the same strategies for table paragraphs. The strategies mean:
 
 - `uniform`: a single source run receives the full target text.
@@ -759,6 +776,48 @@ source page on the left and translated page on the right, starts at 192 DPI,
 and may retry once at 144 DPI only after an explicit retryable `RenderError`.
 Any second or non-retryable failure blocks delivery. Do not upscale a failed
 low-resolution image after rendering.
+
+With `--json`, `pptx-nova-compare.mjs` writes the same report to stdout that it
+writes to `--report`. For multipart runs (deck larger than the chunk size) this
+is the `pptx-nova-compare-manifest/v1` manifest; single-PNG runs emit the
+underlying contact-diff report instead and have no `parts[]`. Manifest
+`parts[]` entries use these keys (there is no `part` or per-part `status`
+field; part success is implied by presence plus `agentGate`):
+
+```json
+{
+  "schemaVersion": "pptx-nova-compare-manifest/v1",
+  "status": "success",
+  "parts": [
+    {
+      "partNumber": 1,
+      "selector": "1-20",
+      "slides": [1, 2, "... up to 20 slide numbers"],
+      "pairCount": 20,
+      "dpi": 192,
+      "width": 7680,
+      "height": 43200,
+      "path": "<run-dir>/translation-compare-01.png",
+      "reportPath": "<run-dir>/translation-compare-01.json",
+      "byteLength": 12345678,
+      "sha256": "sha256:...",
+      "agentGate": { "passed": true },
+      "attempts": [{ "dpi": 192, "status": "success" }]
+    }
+  ],
+  "coverage": { "missingSlides": [], "duplicateSlides": [], "outOfRangeSlides": [] },
+  "agentGate": {
+    "passed": true,
+    "status": "pass",
+    "pairCount": 48,
+    "partCount": 3,
+    "requiresHumanReview": true
+  }
+}
+```
+
+JSONL progress events (`compare-part-complete`) use the same `partNumber` /
+`partCount` naming as the final manifest.
 
 After the comparison set passes validation, publish the final PPTX and the
 single PNG or complete numbered sibling set as one delivery bundle so reviewers

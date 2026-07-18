@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { reviewFindingIdentity } from './pptx-nova-review-policy.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-layout-snapshot/v1'
 const EMU_PER_INCH = 914400
@@ -450,21 +451,29 @@ function flattenRisks(slides) {
   const risks = []
   for (const slide of slides) {
     for (const risk of slide.risks) {
-      risks.push(withSlideReference({ ...risk, slidePart: slide.partName }, slide.index))
+      const finding = withSlideReference({ ...risk, slidePart: slide.partName }, slide.index)
+      risks.push(
+        finding.classification === 'actionable'
+          ? { ...finding, reviewIdentity: reviewFindingIdentity(finding) }
+          : finding,
+      )
     }
     for (const object of slide.objects) {
       for (const risk of object.risks) {
+        const finding = withSlideReference(
+          {
+            ...risk,
+            slidePart: slide.partName,
+            objectId: object.id,
+            objectName: object.name,
+            objectType: object.type,
+          },
+          slide.index,
+        )
         risks.push(
-          withSlideReference(
-            {
-              ...risk,
-              slidePart: slide.partName,
-              objectId: object.id,
-              objectName: object.name,
-              objectType: object.type,
-            },
-            slide.index,
-          ),
+          finding.classification === 'actionable'
+            ? { ...finding, reviewIdentity: reviewFindingIdentity(finding) }
+            : finding,
         )
       }
     }

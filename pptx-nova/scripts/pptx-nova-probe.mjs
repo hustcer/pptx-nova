@@ -302,6 +302,21 @@ function requirementResults(requirements, capabilities) {
   return results
 }
 
+function disclosedFlagValues(flags, prefix) {
+  const flag = flags.find((value) => value.startsWith(prefix))
+  if (!flag) return []
+  const raw = flag
+    .slice(prefix.length)
+    .trim()
+    .replace(/[<>[\]]/g, '')
+  return raw.includes('|')
+    ? raw
+        .split('|')
+        .map((value) => value.trim())
+        .filter(Boolean)
+    : []
+}
+
 function compactFailure(result) {
   return {
     exitCode: result.status,
@@ -335,6 +350,9 @@ function createReport(args) {
   const catalogs = pptx.catalogs ?? {}
   const schemaSlicingModes = namesFromCollection(pptx.schemaDisclosure?.modes, ['flag'])
   const fieldsAvailable = schemaSlicingModes.some((mode) => mode.startsWith('--fields'))
+  const defsAvailable = schemaSlicingModes.some((mode) => mode.startsWith('--defs'))
+  const defsModes = disclosedFlagValues(schemaSlicingModes, '--defs')
+  const summaryDefsAvailable = defsModes.includes('summary')
   const capabilities = {
     commands: objectKeys(schema?.commands).sort(),
     pptxSubcommands: objectKeys(pptx.subcommands).sort(),
@@ -353,6 +371,9 @@ function createReport(args) {
       available: Boolean(pptx.schemaDisclosure),
       modes: schemaSlicingModes,
       fieldsAvailable,
+      defsAvailable,
+      defsModes,
+      summaryDefsAvailable,
       recommended: pptx.schemaDisclosure?.agentHint ?? null,
     },
     commandFlags: helpFlagIndex(args.xdocBin),
@@ -403,9 +424,12 @@ function createReport(args) {
         targetedLookup: {
           operationIndex:
             'read xdoc-capabilities.json#capabilities.patchOperations; refresh with xdoc schema --index only when needed',
-          operationSchema: fieldsAvailable
-            ? 'xdoc schema --op <name> --fields <needed-fields> --minimal; omit --fields or use apply --dry-run for complete validation'
-            : 'xdoc schema --op <name> --minimal',
+          operationSchema:
+            fieldsAvailable && summaryDefsAvailable
+              ? 'xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal; use --defs full before constructing nested values; omit --fields or apply --dry-run for complete operation validation'
+              : fieldsAvailable
+                ? 'xdoc schema --op <name> --fields <needed-fields> --minimal; omit --fields or use apply --dry-run for complete validation'
+                : 'xdoc schema --op <name> --minimal',
           commandHelp: 'xdoc <command...> --help',
           selectorEvidence: 'inspect output -> op schema -> dry-run suggestions',
           deckkitGeneratorCatalog:

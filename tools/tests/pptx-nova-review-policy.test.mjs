@@ -165,6 +165,99 @@ test('review policy accepts one exact hash-bound intentional empty placeholder',
   assert.equal(report.bindings.policyDocument.sha256, sha256(policyPath))
 })
 
+test('review policy accepts a new actionable code only through an exact finding fingerprint', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-review-policy-fingerprint-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  writeFileSync(source, 'source bytes')
+  writeFileSync(candidate, 'candidate bytes')
+  const finding = layoutFinding({
+    code: 'font-size-too-small',
+    message: 'Text object discloses a font size below 6pt',
+    placeholder: undefined,
+    observed: undefined,
+    sizePt: 5,
+  })
+  const { evaluateReviewPolicy, reviewFindingSha256 } = await loadReviewPolicyModule()
+  const findingSha256 = reviewFindingSha256(finding)
+  assert.equal(
+    reviewFindingSha256(Object.fromEntries(Object.entries(finding).reverse())),
+    findingSha256,
+  )
+  assert.equal(
+    reviewFindingSha256({ ...finding, objectType: 'shape' }),
+    findingSha256,
+    'producer-specific object metadata must not change a stable shape-id fingerprint',
+  )
+  assert.equal(
+    reviewFindingSha256({ ...finding, severity: 'error', message: 'wording changed' }),
+    findingSha256,
+  )
+  assert.notEqual(reviewFindingSha256({ ...finding, sizePt: 4.5 }), findingSha256)
+  const policy = {
+    schemaVersion: 'pptx-nova-review-policy/v1',
+    bindings: { sourceSha256: sha256(source) },
+    reviewedFindings: [
+      {
+        id: 'slide-8-intentional-micro-label',
+        code: 'font-size-too-small',
+        disposition: 'accepted',
+        findingSha256,
+        reason: 'This non-content registration mark intentionally renders at 5pt.',
+      },
+    ],
+  }
+
+  const accepted = evaluateReviewPolicy({
+    policyDocument: policy,
+    sourcePptx: source,
+    candidatePptx: candidate,
+    findings: [finding],
+  })
+  assert.equal(accepted.status, 'pass')
+  assert.equal(accepted.summary.appliedReviewCount, 1)
+  assert.equal(accepted.reviewedFindings[0].classification, 'reviewed')
+  assert.equal(accepted.reviewedFindings[0].review.matchMode, 'fingerprint')
+  assert.equal(accepted.reviewedFindings[0].review.findingSha256, findingSha256)
+
+  const stale = evaluateReviewPolicy({
+    policyDocument: policy,
+    sourcePptx: source,
+    candidatePptx: candidate,
+    findings: [{ ...finding, sizePt: 4.5 }],
+  })
+  assert.equal(stale.status, 'fail')
+  assert.ok(stale.errors.some((item) => item.code === 'review-rule-unmatched'))
+  assert.equal(stale.summary.appliedReviewCount, 0)
+
+  const unboundPolicy = {
+    ...policy,
+    reviewedFindings: policy.reviewedFindings.map(({ id, code, disposition, reason }) => ({
+      id,
+      code,
+      disposition,
+      reason,
+    })),
+  }
+  const unbound = evaluateReviewPolicy({
+    policyDocument: unboundPolicy,
+    sourcePptx: source,
+    candidatePptx: candidate,
+    findings: [finding],
+  })
+  assert.equal(unbound.status, 'fail')
+  assert.ok(unbound.errors.some((item) => item.code === 'review-rule-fingerprint-required'))
+
+  const informational = evaluateReviewPolicy({
+    policyDocument: policy,
+    sourcePptx: source,
+    candidatePptx: candidate,
+    findings: [{ ...finding, classification: 'informational' }],
+  })
+  assert.equal(informational.status, 'fail')
+  assert.ok(informational.errors.some((item) => item.code === 'review-rule-unmatched'))
+})
+
 test('review policy fails closed for stale, unmatched, and duplicate exceptions', async () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-review-policy-fail-'))
   const source = join(root, 'source.pptx')
@@ -392,22 +485,32 @@ function writeFidelityFixture(root, reviewedFindings) {
         slideIndex: 0,
         slideNumber: 1,
         slidePart: 'ppt/slides/slide1.xml',
+        objectType: 'shape',
       }),
     ],
   })
   return { source, candidate, sourceInspect, referenceMap, finalAudit, visionDiff, layout }
 }
 
-test('fidelity gate applies reviewed findings embedded in reference-map and binds evidence hashes', () => {
+test('fidelity gate applies fingerprint-reviewed findings and binds evidence hashes', async () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-fidelity-review-'))
+  const { reviewFindingSha256 } = await loadReviewPolicyModule()
   const files = writeFidelityFixture(root, [
-    reviewRule({
-      target: {
-        ...reviewRule().target,
-        slideIndex: 0,
-        part: 'ppt/slides/slide1.xml',
-      },
-    }),
+    {
+      id: 'slide-1-intentional-empty-sldnum',
+      code: 'empty-placeholder',
+      disposition: 'accepted',
+      findingSha256: reviewFindingSha256(
+        layoutFinding({
+          slide: 0,
+          slideIndex: 0,
+          slideNumber: 1,
+          slidePart: 'ppt/slides/slide1.xml',
+          objectType: 'shape',
+        }),
+      ),
+      reason: 'This placeholder intentionally remains empty.',
+    },
   ])
   const result = runNode([
     join(skillRoot, 'scripts/pptx-nova-fidelity-gate.mjs'),
@@ -508,8 +611,9 @@ test('fidelity gate keeps an unreviewed empty placeholder actionable and rejects
   assert.ok(staleReport.errors.some((item) => item.code === 'review-rule-unmatched'))
 })
 
-test('template gate uses the same exact review policy and rejects the legacy boolean exception', () => {
+test('template gate accepts a layout fingerprint and rejects the legacy boolean exception', async () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-template-review-'))
+  const { reviewFindingSha256 } = await loadReviewPolicyModule()
   const source = join(root, 'source.pptx')
   const candidate = join(root, 'candidate.pptx')
   const frameMap = join(root, 'frame-map.json')
@@ -534,13 +638,21 @@ test('template gate uses the same exact review policy and rejects the legacy boo
     schemaVersion: 'pptx-nova-review-policy/v1',
     bindings: { sourceSha256: sha256(source) },
     reviewedFindings: [
-      reviewRule({
-        target: {
-          ...reviewRule().target,
-          slideIndex: 0,
-          part: 'ppt/slides/slide1.xml',
-        },
-      }),
+      {
+        id: 'slide-1-intentional-empty-sldnum',
+        code: 'empty-placeholder',
+        disposition: 'accepted',
+        findingSha256: reviewFindingSha256(
+          layoutFinding({
+            slide: 0,
+            slideIndex: 0,
+            slideNumber: 1,
+            slidePart: 'ppt/slides/slide1.xml',
+            objectType: 'shape',
+          }),
+        ),
+        reason: 'This placeholder intentionally remains empty.',
+      },
     ],
   })
 

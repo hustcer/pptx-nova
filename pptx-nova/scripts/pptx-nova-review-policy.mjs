@@ -4,9 +4,11 @@ import { resolve } from 'node:path'
 
 export const REVIEW_POLICY_SCHEMA_VERSION = 'pptx-nova-review-policy/v1'
 export const REVIEW_POLICY_EVALUATION_SCHEMA_VERSION = 'pptx-nova-review-policy-evaluation/v1'
+export const REVIEW_FINDING_SCHEMA_VERSION = 'pptx-nova-review-finding/v1'
 
-const SUPPORTED_REVIEW_CODES = new Set(['empty-placeholder'])
+const LEGACY_TARGET_REVIEW_CODES = new Set(['empty-placeholder'])
 const SUPPORTED_DISPOSITIONS = new Set(['accepted'])
+const REVIEW_CODE_PATTERN = /^[a-z][a-z0-9-]*$/
 
 function asArray(value) {
   return Array.isArray(value) ? value : []
@@ -100,6 +102,80 @@ function findingLocation(finding) {
   }
 }
 
+function canonicalJson(value) {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return value
+  if (typeof value === 'number') return Number.isFinite(value) ? value : String(value)
+  if (Array.isArray(value)) return value.map((item) => canonicalJson(item ?? null))
+  if (!isPlainObject(value)) return String(value ?? '')
+  const result = {}
+  for (const key of Object.keys(value).sort()) {
+    if (value[key] !== undefined) result[key] = canonicalJson(value[key])
+  }
+  return result
+}
+
+const FINDING_ENVELOPE_KEYS = new Set([
+  'classification',
+  'code',
+  'message',
+  'objectId',
+  'objectName',
+  'objectType',
+  'part',
+  'placeholder',
+  'previewFile',
+  'review',
+  'reviewIdentity',
+  'severity',
+  'shapeId',
+  'slide',
+  'slideIndex',
+  'slideNumber',
+  'slidePart',
+])
+
+function reviewFindingContract(finding) {
+  const location = findingLocation(finding)
+  const target = {
+    slideIndex: Number.isFinite(location.slideIndex) ? location.slideIndex : null,
+    part: location.part,
+  }
+  if (location.shapeId) {
+    target.shapeId = location.shapeId
+  } else {
+    const objectName = canonicalScalar(finding?.objectName)
+    const objectType = canonicalScalar(finding?.objectType)
+    if (objectName) target.objectName = objectName
+    if (objectType) target.objectType = objectType
+  }
+  if (isPlainObject(finding?.placeholder)) target.placeholder = location.placeholder
+
+  const evidence = {}
+  for (const [key, value] of Object.entries(finding ?? {})) {
+    if (!FINDING_ENVELOPE_KEYS.has(key) && value !== undefined) evidence[key] = value
+  }
+  return canonicalJson({
+    schemaVersion: REVIEW_FINDING_SCHEMA_VERSION,
+    code: String(finding?.code ?? ''),
+    target,
+    evidence,
+  })
+}
+
+export function reviewFindingSha256(finding) {
+  return createHash('sha256')
+    .update(JSON.stringify(reviewFindingContract(finding)))
+    .digest('hex')
+}
+
+export function reviewFindingIdentity(finding) {
+  return {
+    schemaVersion: REVIEW_FINDING_SCHEMA_VERSION,
+    algorithm: 'sha256',
+    sha256: reviewFindingSha256(finding),
+  }
+}
+
 function ruleTarget(rule) {
   const target = isPlainObject(rule?.target) ? rule.target : {}
   return {
@@ -126,6 +202,10 @@ function targetKey(code, target) {
 
 function findingMatchesRule(finding, rule) {
   if (finding?.code !== rule.code) return false
+  if (finding?.classification !== 'actionable') return false
+  if (rule.matchMode === 'fingerprint') {
+    return reviewFindingSha256(finding) === rule.findingSha256
+  }
   const actual = findingLocation(finding)
   const expected = rule.target
   return (
@@ -156,13 +236,15 @@ function normalizeRules(policy, errors) {
     const code = String(value.code ?? '').trim()
     const disposition = String(value.disposition ?? '').trim()
     const reason = String(value.reason ?? '').trim()
+    const findingSha256 = canonicalSha256(value.findingSha256)
+    const fingerprintMode = value.findingSha256 !== undefined
     const target = ruleTarget(value)
     const expected = isPlainObject(value.expected) ? value.expected : {}
     let valid = true
 
     rejectUnknownKeys(
       value,
-      new Set(['id', 'code', 'disposition', 'target', 'expected', 'reason']),
+      new Set(['id', 'code', 'disposition', 'findingSha256', 'target', 'expected', 'reason']),
       errors,
       `reviewedFindings[${index}]`,
     )
@@ -203,10 +285,10 @@ function normalizeRules(policy, errors) {
     } else {
       seenIds.add(id)
     }
-    if (!SUPPORTED_REVIEW_CODES.has(code)) {
+    if (!REVIEW_CODE_PATTERN.test(code)) {
       errors.push({
-        code: 'review-rule-code-unsupported',
-        message: `reviewed finding ${JSON.stringify(id || index)} uses unsupported code ${JSON.stringify(code)}`,
+        code: 'review-rule-code-invalid',
+        message: `reviewed finding ${JSON.stringify(id || index)} has an invalid finding code ${JSON.stringify(code)}`,
         ruleIndex: index,
         reviewId: id || null,
       })
@@ -230,35 +312,65 @@ function normalizeRules(policy, errors) {
       })
       valid = false
     }
-    if (!Number.isInteger(target.slideIndex) || target.slideIndex < 0) {
-      errors.push({
-        code: 'review-rule-slide-invalid',
-        message: `reviewed finding ${JSON.stringify(id || index)} has an invalid zero-based slideIndex`,
-        ruleIndex: index,
-        reviewId: id || null,
-      })
-      valid = false
-    }
-    if (!target.part || !target.shapeId || !target.placeholder.type || !target.placeholder.idx) {
-      errors.push({
-        code: 'review-rule-target-incomplete',
-        message: `reviewed finding ${JSON.stringify(id || index)} must identify part, shapeId, placeholder type, and placeholder idx`,
-        ruleIndex: index,
-        reviewId: id || null,
-      })
-      valid = false
-    }
-    if (expected.textEmpty !== true) {
-      errors.push({
-        code: 'review-rule-expectation-invalid',
-        message: `reviewed finding ${JSON.stringify(id || index)} must explicitly require expected.textEmpty=true`,
-        ruleIndex: index,
-        reviewId: id || null,
-      })
-      valid = false
+    if (fingerprintMode) {
+      if (!findingSha256) {
+        errors.push({
+          code: 'review-rule-fingerprint-invalid',
+          message: `reviewed finding ${JSON.stringify(id || index)} must declare a valid findingSha256`,
+          ruleIndex: index,
+          reviewId: id || null,
+        })
+        valid = false
+      }
+      if (value.target !== undefined || value.expected !== undefined) {
+        errors.push({
+          code: 'review-rule-match-mode-conflict',
+          message: `reviewed finding ${JSON.stringify(id || index)} must use either findingSha256 or legacy target/expected matching, not both`,
+          ruleIndex: index,
+          reviewId: id || null,
+        })
+        valid = false
+      }
+    } else {
+      if (!LEGACY_TARGET_REVIEW_CODES.has(code)) {
+        errors.push({
+          code: 'review-rule-fingerprint-required',
+          message: `reviewed finding ${JSON.stringify(id || index)} with code ${JSON.stringify(code)} must bind findingSha256`,
+          ruleIndex: index,
+          reviewId: id || null,
+        })
+        valid = false
+      }
+      if (!Number.isInteger(target.slideIndex) || target.slideIndex < 0) {
+        errors.push({
+          code: 'review-rule-slide-invalid',
+          message: `reviewed finding ${JSON.stringify(id || index)} has an invalid zero-based slideIndex`,
+          ruleIndex: index,
+          reviewId: id || null,
+        })
+        valid = false
+      }
+      if (!target.part || !target.shapeId || !target.placeholder.type || !target.placeholder.idx) {
+        errors.push({
+          code: 'review-rule-target-incomplete',
+          message: `reviewed finding ${JSON.stringify(id || index)} must identify part, shapeId, placeholder type, and placeholder idx`,
+          ruleIndex: index,
+          reviewId: id || null,
+        })
+        valid = false
+      }
+      if (expected.textEmpty !== true) {
+        errors.push({
+          code: 'review-rule-expectation-invalid',
+          message: `reviewed finding ${JSON.stringify(id || index)} must explicitly require expected.textEmpty=true`,
+          ruleIndex: index,
+          reviewId: id || null,
+        })
+        valid = false
+      }
     }
 
-    const key = targetKey(code, target)
+    const key = fingerprintMode ? `${code}|sha256|${findingSha256}` : targetKey(code, target)
     if (seenTargets.has(key)) {
       errors.push({
         code: 'review-rule-target-duplicate',
@@ -272,7 +384,26 @@ function normalizeRules(policy, errors) {
     }
 
     if (valid) {
-      rules.push({ id, code, disposition, reason, target, expected: { textEmpty: true } })
+      rules.push(
+        fingerprintMode
+          ? {
+              id,
+              code,
+              disposition,
+              reason,
+              matchMode: 'fingerprint',
+              findingSha256,
+            }
+          : {
+              id,
+              code,
+              disposition,
+              reason,
+              matchMode: 'legacy-target',
+              target,
+              expected: { textEmpty: true },
+            },
+      )
     }
   }
   return rules
@@ -393,7 +524,10 @@ export function evaluateReviewPolicy({
           code: 'review-rule-unmatched',
           message: `reviewed finding ${JSON.stringify(rule.id)} did not match any current raw finding`,
           reviewId: rule.id,
-          target: rule.target,
+          match:
+            rule.matchMode === 'fingerprint'
+              ? { findingSha256: rule.findingSha256 }
+              : { target: rule.target },
         })
       } else if (matches.length > 1) {
         errors.push({
@@ -401,7 +535,10 @@ export function evaluateReviewPolicy({
           message: `reviewed finding ${JSON.stringify(rule.id)} matched multiple raw findings`,
           reviewId: rule.id,
           matchCount: matches.length,
-          target: rule.target,
+          match:
+            rule.matchMode === 'fingerprint'
+              ? { findingSha256: rule.findingSha256 }
+              : { target: rule.target },
         })
       } else {
         const findingIndex = matches[0]
@@ -421,6 +558,11 @@ export function evaluateReviewPolicy({
           reason: rule.reason,
           findingIndex,
           finding: rawFindings[findingIndex],
+          matchMode: rule.matchMode,
+          findingSha256:
+            rule.matchMode === 'fingerprint'
+              ? rule.findingSha256
+              : reviewFindingSha256(rawFindings[findingIndex]),
         })
       }
     }
@@ -443,6 +585,8 @@ export function evaluateReviewPolicy({
           id: appliedReview.reviewId,
           disposition: appliedReview.disposition,
           reason: appliedReview.reason,
+          matchMode: appliedReview.matchMode,
+          findingSha256: appliedReview.findingSha256,
         },
       })
     } else if (finding?.classification === 'informational') {

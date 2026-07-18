@@ -10,13 +10,15 @@ xdoc schema                          # 完整 schema（贵）
 xdoc schema --index                  # 只 op 名 + level + required/optional 字段
 xdoc schema --op add-text-box         # 单个 op 完整 jsonSchema
 xdoc schema --ops add-slide,add-chart   # 多个 op
-xdoc schema --op set-shape --fields name,shape,slide --minimal # 只取所需字段
+xdoc schema --op set-shape --fields name,shape,slide --defs summary --minimal # 字段 + 紧凑定义摘要
+xdoc schema --op set-shape --fields name,shape,slide --defs full --minimal # 字段 + 完整定义闭包
 xdoc schema --examples               # 内置 12 个 patch 示例
 xdoc schema --minimal                # 删 verbose 字段（与上面任一组合用）
 ```
 
 约束：`--examples` 和 `--op/--ops` 互斥（要看示例就单独跑一次）。
 `--fields` 必须与 `--op/--ops` 组合；required 字段会自动保留，未知字段直接报错。
+`--defs` 只用于字段投影，因此也要求 `--fields`；默认值为 `full`，兼容旧调用。
 
 ## 典型 Agent 用法
 
@@ -34,17 +36,23 @@ xdoc schema --index | save -f schema-index.json
 只确认 selector、name 等少量字段时，优先使用字段投影：
 
 ```bash
-xdoc schema --op set-shape --fields name,shape,slide --minimal \
+xdoc schema --op set-shape --fields name,shape,slide --defs summary --minimal \
   | save -f schema-set-shape-name.json
 ```
 
-投影会保留选中字段、全部 required 字段，以及这些字段传递引用的 `$defs`。输出中的
-`disclosure.completeValidation=false` 表示它只用于发现和构造 patch，不能当作完整校验合同；
-需要检查所有可选字段或离线验证时，省略 `--fields`：
+`--defs summary` 只保留投影字段直接引用的定义，并在 `$defs.*.x-xdoc-summary` 中披露类型、
+属性名、required 组合、引用和顶层枚举/分支数量；它用于低 token 成本的字段与定义发现。
+输出中的 `disclosure.completeValidation=false` 表示它不是完整校验合同。开始构造嵌套 selector、
+需要传递引用时，应改用 `--defs full`。即使如此，字段投影仍不是完整校验合同；需要检查全部
+可选字段或执行完整离线验证时，应省略 `--fields`（也可用 `apply --dry-run` 校验最终 patch）：
 
 ```bash
+xdoc schema --op set-shape --fields name,shape,slide --defs full --minimal \
+  | save -f schema-set-shape-name-full.json
 xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
 ```
+
+`--defs full` 保留投影字段可达的完整 `$defs` 闭包；省略 `--defs` 与显式 `full` 等价。
 
 拿到完整 jsonSchema，里面有：
 
@@ -171,7 +179,8 @@ left / center / right / justify / distribute / thai-distribute
 
 `set-shape.effect` 使用 `shadow` / `glow` / `reflection` / `softEdge` 子对象；不要使用
 `effect.kind`。只查询 effect 时优先使用
-`xdoc schema --op set-shape --fields effect,shape,slide --minimal`；完整合同再省略 `--fields`。
+`xdoc schema --op set-shape --fields effect,shape,slide --defs summary --minimal`；构造 effect
+对象时切换到 `--defs full`，完整合同再省略 `--fields`。
 
 ## Catalog 命令
 

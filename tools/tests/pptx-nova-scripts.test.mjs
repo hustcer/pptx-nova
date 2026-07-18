@@ -8,6 +8,7 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
+  rmSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -145,6 +146,7 @@ if (args[0] === 'schema') {
           modes: [
             { flag: '--op <name>' },
             { flag: '--fields a,b,c' },
+            { flag: '--defs summary|full' },
             { flag: '--minimal' }
           ],
           agentHint: 'Use --op with --fields for focused discovery.'
@@ -176,9 +178,15 @@ process.exit(2)
 
   assert.equal(report.capabilities.schemaSlicing.available, true)
   assert.equal(report.capabilities.schemaSlicing.fieldsAvailable, true)
+  assert.equal(report.capabilities.schemaSlicing.defsAvailable, true)
+  assert.deepEqual(report.capabilities.schemaSlicing.defsModes, ['summary', 'full'])
   assert.ok(report.capabilities.schemaSlicing.modes.includes('--fields a,b,c'))
-  assert.match(report.disclosure.targetedLookup.operationSchema, /--fields <needed-fields>/)
-  assert.match(report.disclosure.targetedLookup.operationSchema, /complete validation/)
+  assert.match(
+    report.disclosure.targetedLookup.operationSchema,
+    /--fields <needed-fields> --defs summary/,
+  )
+  assert.match(report.disclosure.targetedLookup.operationSchema, /--defs full before constructing/)
+  assert.match(report.disclosure.targetedLookup.operationSchema, /complete operation validation/)
   assert.deepEqual(report.capabilities.patchOperations, ['set-shape'])
 })
 
@@ -218,6 +226,8 @@ process.exit(2)
   const report = JSON.parse(result.stdout)
 
   assert.equal(report.capabilities.schemaSlicing.fieldsAvailable, false)
+  assert.equal(report.capabilities.schemaSlicing.defsAvailable, false)
+  assert.deepEqual(report.capabilities.schemaSlicing.defsModes, [])
   assert.equal(
     report.disclosure.targetedLookup.operationSchema,
     'xdoc schema --op <name> --minimal',
@@ -308,6 +318,22 @@ test('layout snapshot separates actionable risks from informational inspect gaps
     report.risks.every((risk) => risk.previewFile === 'slide-001.png'),
     true,
   )
+  const actionable = report.risks.filter((risk) => risk.classification === 'actionable')
+  const informational = report.risks.filter((risk) => risk.classification === 'informational')
+  assert.equal(
+    actionable.every(
+      (risk) =>
+        risk.reviewIdentity?.schemaVersion === 'pptx-nova-review-finding/v1' &&
+        risk.reviewIdentity?.algorithm === 'sha256' &&
+        /^[0-9a-f]{64}$/.test(risk.reviewIdentity?.sha256 ?? ''),
+    ),
+    true,
+  )
+  assert.equal(
+    informational.every((risk) => risk.reviewIdentity === undefined),
+    true,
+  )
+  assert.notEqual(actionable[0].reviewIdentity.sha256, actionable[1].reviewIdentity.sha256)
   assert.equal(readFileSync(outputPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
 })
 
@@ -3206,6 +3232,84 @@ function contactDiffReport(options) {
   if (outputPath !== undefined) report.outputPath = outputPath
   return report
 }
+
+test('compare gate fails closed for a legacy multipart manifest without identities', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-legacy-manifest-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const finalPptx = join(root, 'final.pptx')
+  const runDir = join(root, 'run')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  writeFileSync(finalPptx, 'existing delivery')
+  runNode([
+    skillPath('scripts/pptx-nova-compare.mjs'),
+    '--source',
+    source,
+    '--candidate',
+    candidate,
+    '--run-dir',
+    runDir,
+    '--kind',
+    'refurbish',
+    '--slide-count',
+    '48',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const manifestPath = join(runDir, 'refurbish-compare.json')
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  delete manifest.source
+  delete manifest.candidate
+  writeJson(manifestPath, manifest)
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      finalPptx,
+      '--final-pptx-source',
+      candidate,
+      '--kind',
+      'refurbish',
+      '--publish',
+      '--overwrite',
+      '--timestamp',
+      '0711230010',
+      '--json',
+    ],
+    2,
+  )
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'fail')
+  assert.equal(report.finalBinding.status, 'mismatch')
+  assert.ok(report.blockers.some((blocker) => /compare source path is missing/i.test(blocker)))
+  assert.ok(
+    report.blockers.some((blocker) => /compare candidate SHA-256 is missing/i.test(blocker)),
+  )
+  assert.equal(readFileSync(finalPptx, 'utf8'), 'existing delivery')
+  assert.equal(
+    report.agentSummary.siblingPaths.every((path) => !existsSync(path)),
+    true,
+  )
+})
+
+test('compare gate fails closed when the published final PPTX is missing', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-missing-final-'))
+  const fixture = writeCompareGateFixture(root, (context) => contactDiffReport(context))
+  rmSync(fixture.finalPptx)
+
+  const report = runCompareGateFixture(fixture)
+
+  assert.equal(report.status, 'fail')
+  assert.equal(report.finalBinding.status, 'pending')
+  assert.ok(report.blockers.some((blocker) => /final PPTX is missing/i.test(blocker)))
+})
 
 test('compare gate blocks contact-diff reports without explicit all-slides scopeMode', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-compare-gate-missing-scope-'))

@@ -31,17 +31,23 @@
     "reviewedFinding": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "code", "disposition", "target", "expected", "reason"],
+      "required": ["id", "code", "disposition", "reason"],
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
         },
         "code": {
-          "const": "empty-placeholder"
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
         },
         "disposition": {
           "const": "accepted"
+        },
+        "findingSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{64}$",
+          "description": "Exact fingerprint copied from layout-final.json risks[].reviewIdentity.sha256."
         },
         "target": {
           "type": "object",
@@ -95,7 +101,24 @@
           "type": "string",
           "minLength": 1
         }
-      }
+      },
+      "oneOf": [
+        {
+          "title": "Generic exact finding fingerprint",
+          "required": ["findingSha256"],
+          "not": {
+            "anyOf": [{ "required": ["target"] }, { "required": ["expected"] }]
+          }
+        },
+        {
+          "title": "Legacy exact empty-placeholder target",
+          "properties": {
+            "code": { "const": "empty-placeholder" }
+          },
+          "required": ["target", "expected"],
+          "not": { "required": ["findingSha256"] }
+        }
+      ]
     }
   }
 }

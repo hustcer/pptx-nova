@@ -27,9 +27,9 @@
 - `reference-style.json`：`extract-style` 输出，包含主题色、字体、layout/slide 语义和 draft pack。
 - `reference-map.json`：新大纲每页到参考页型/参考 slide 的映射。
 - `review-policy.json`：仅在需要保留已确认的原始 finding 时创建；使用
-  `pptx-nova-review-policy/v1`，绑定源 PPTX SHA-256，并精确记录 finding code、slide part、shape id、
-  placeholder type/idx、预期状态和原因。也可以把同样的 `bindings` / `reviewedFindings` 放入
-  `reference-map.json`；不要同时使用两个 policy 来源。
+  `pptx-nova-review-policy/v1`，绑定源 PPTX SHA-256，并从 `layout-final.json` 精确复制 actionable
+  finding 的 `code` 与 `reviewIdentity.sha256`，同时记录原因。也可以把同样的 `bindings` /
+  `reviewedFindings` 放入 `reference-map.json`；不要同时使用两个 policy 来源。
 - `content-audit.json`：Refurbish Existing Deck 时逐页对账文本、表格、chart、SmartArt、图片/媒体、
   shape/group 和 notes 的保留状态。
 - `content-audit-final.json`：Refurbish Existing Deck 时由 `xdoc pptx refurbish-audit`
@@ -258,6 +258,7 @@ node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
    应保持该对象不变，并写 hash-bound reviewed finding；不得删除对象来消除 layout warning，也不得使用
    `allowEmptyPlaceholder` 或全局 ignore。
 
+   `layout-final.json.risks[]` 中每个 actionable finding 都带稳定的 `reviewIdentity.sha256`。
    最小 reviewed finding 结构如下，可作为独立 `review-policy.json`，也可把 `bindings` 和
    `reviewedFindings` 嵌入 `reference-map.json`：
 
@@ -272,18 +273,16 @@ node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
       "id": "slide-8-intentional-empty-sldnum",
       "code": "empty-placeholder",
       "disposition": "accepted",
-      "target": {
-        "slideIndex": 7,
-        "part": "ppt/slides/slide8.xml",
-        "shapeId": 101,
-        "placeholder": { "type": "sldNum", "idx": 12 }
-      },
-      "expected": { "textEmpty": true },
+      "findingSha256": "<layout-final-risk-review-identity-sha256>",
       "reason": "该页用于验证 viewer 未自动填充页码占位符的行为"
     }
   ]
 }
 ```
+
+`findingSha256` 绑定 finding 的语义证据，不绑定提示文案或 severity；证据变化会使规则失配并
+fail closed。已有 `empty-placeholder` policy 的 `target` + `expected.textEmpty=true` 精确匹配格式
+仍兼容，但新规则应使用 fingerprint 模式，且任意 policy 都不得匹配 informational finding。
 
 6. 复制源 deck 到 run 目录作为 skin-first 工作文件；输入 deck 保持只读。默认先运行一等编排命令：
 

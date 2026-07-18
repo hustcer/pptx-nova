@@ -432,7 +432,8 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
     only reproducible current-run heavy artifacts when the task succeeded and
     no debug/replay continuation is expected, or when the user explicitly asked
     for cleanup. If files are removed, write `cleanup-manifest.json`.
-17. If the user requested skill feedback (`need feedback`, `需要反馈`, `给反馈`,
+17. If the user requested skill feedback (`need feedback`, `needs feedback`,
+    `feedback wanted`, `需要反馈`, `给反馈`,
     or equivalent), write the feedback first and run
     `pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback
 --workflow <create|refurbish|translation|other> --strict` or the same

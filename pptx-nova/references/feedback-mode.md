@@ -1,7 +1,8 @@
 # Feedback Mode
 
 Use Feedback Mode when the user explicitly asks for skill feedback, such as
-`need feedback`, `give feedback`, `provide feedback`, `给反馈`, `需要反馈`,
+`need feedback`, `needs feedback`, `give feedback`, `provide feedback`,
+`feedback wanted`, `feedback expected`, `给反馈`, `需要反馈`,
 `有什么使用反馈`, or asks to audit a previous
 pptx-nova run for workflow friction.
 

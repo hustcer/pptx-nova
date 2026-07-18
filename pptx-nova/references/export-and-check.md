@@ -46,10 +46,31 @@ xdoc pptx preview deck.pptx --slides 25-38 \
   --overwrite --json > <run-dir>/preview.json
 ```
 
-The stdout manifest is `pptx-preview/v1`; check `status`, `pages[]`, and
-`contactSheet` before reviewing images. PNG filenames preserve original slide
-numbers, so `slide-025.png` still refers to slide 25 even when the contact sheet
-only contains a scoped range.
+The stdout manifest is `pptx-preview/v1`. Its status fields are two-level by
+design, and the two levels use different enums on purpose:
+
+- Top-level `status` is the **command result**: `success` | `error`.
+- Each `pages[].file.status` and `contactSheet.status` is a **per-artifact file
+  check** (PNG written and readable): `ok` | `error`.
+
+The top-level `status` does **not** aggregate file-level failures, so
+`status=="success"` alone does not prove every page rendered. A correct
+readiness gate must assert both levels:
+
+```bash
+jq -e '.status=="success"
+  and (.pages | length > 0)
+  and all(.pages[]; .file.status == "ok")' <run-dir>/preview.json
+```
+
+Do not gate on `pages[].status`; the per-page status lives at
+`pages[].file.status`. Field semantics are authoritative from the
+`pptx-preview/v1` schema — inspect it with `xdoc pptx schema` (the
+`previewReportSchema` entry) rather than assuming a single shared enum.
+
+After the gate passes, PNG filenames preserve original slide numbers, so
+`slide-025.png` still refers to slide 25 even when the contact sheet only
+contains a scoped range.
 
 Read the contact sheet first to detect cross-slide issues such as rhythm, page
 number jumps, inconsistent dark/light pages, and obvious layout problems. Then

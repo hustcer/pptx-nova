@@ -132,9 +132,13 @@ complex tasks from missing critical gates.
   `xdoc pptx preview deck.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json`
   to generate per-slide PNGs, a contact sheet, and a `pptx-preview/v1` stdout manifest. If the output
   directory is inside the current run and is a rebuildable preview for this pass, add `--overwrite` on
-  reruns. To review only changed slides, add `--slides 2,5-7`. After reading the manifest, confirm
-  `status=success`, each `pages[]` path/status/width/height/byteLength/SHA-256 hash, and the contact
-  sheet path and dimensions, then send the contact sheet or suspicious page PNGs to multimodal review.
+  reruns. To review only changed slides, add `--slides 2,5-7`. The manifest is two-level by design:
+  the top-level `status` is the command result (`success` | `error`), while each `pages[].file.status`
+  and `contactSheet.status` is a per-artifact check (`ok` | `error`). The top level does not aggregate
+  file-level failures, so a ready gate must assert both: `jq -e '.status=="success" and (.pages|length>0)
+and all(.pages[]; .file.status=="ok")' <run-dir>/preview.json`. After that gate passes, confirm each
+  `pages[]` path/width/height/byteLength/SHA-256 hash and the contact sheet path and dimensions, then
+  send the contact sheet or suspicious page PNGs to multimodal review.
   This is the default short path for PPTX visual previews; use `xdoc convert --to png --contact-sheet`
   only as a generic conversion or debugging fallback.
 - **Refurbish an existing deck while preserving content**: By default run

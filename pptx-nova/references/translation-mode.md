@@ -325,35 +325,51 @@ relevant OOXML style properties.
    bilingual audit. User-visible text attribute translations are allowed only
    when they appear under `textAttrChanges[]` /
    `allowedChanges.textAttributes[]` and are recorded in the audit.
-10. Scan the candidate for remaining source-language text with the native gate:
+10. Run the authoritative candidate target-consistency gate. It consumes the
+    source units and translations and verifies that every translated unit's
+    current candidate text exactly equals its `targetText`:
+
     ```bash
     xdoc pptx i18n-scan \
       --source candidate.pptx \
-      --source-lang <source-lang> \
       --mode candidate \
+      --units <run-dir>/i18n-scan-classified.json \
+      --data <run-dir>/translations.json \
       --json > <run-dir>/i18n-scan-candidate.json
     ```
-    Then run the exact residual gate:
-    ```bash
-    node <skill-root>/scripts/pptx-nova-i18n-residual-gate.mjs \
-      --run-dir <run-dir> \
-      --strict \
-      --overwrite \
-      --json
-    ```
-    Treat `i18n-residual-gate.json.agentGate.passed=false` or non-empty
-    `exactResiduals[]` as delivery blockers. This is the authoritative source
-    leakage gate because it matches candidate units against the original
-    translation `unitId` plus `sourceText/sourceHash`. Keep native candidate
-    `agentGate` and `blockers[]` as diagnostic evidence. In particular, do not
-    block a `multi` source translated to French, German, Spanish, or another
-    Latin-script target merely because the native classifier labels valid
-    target text as English. `embeddedWorkbook` still needs chart/workbook sync
-    review but is not a default blocker. Preserve `themeFontMetadata`,
+
+    Candidate mode takes the source language and scope from `--units`; it rejects
+    `--source-lang` and `--slides` so the command line cannot disagree with the
+    contract files. Use the same `--units` file you fed to `i18n-plan` (the
+    classified scan when review units exist, otherwise `i18n-scan-source.json`)
+    and the same `translations.json`.
+
+    This is the single authoritative source-leakage gate. It replaces the old
+    external residual matcher: it does not run the heuristic language classifier,
+    so a `multi` source translated to French, German, Spanish, or another
+    Latin-script target is never blocked merely because valid target text looks
+    like English. Treat `agentGate.passed=false` or any non-empty `blockers[]` as
+    a delivery blocker.
+
+    Each blocker carries a stable `kind`:
+    - `source-residual`: the candidate still contains the original source text;
+      re-apply the translation for that unit.
+    - `target-mismatch`: the current text is neither source nor target; fix the
+      candidate or refresh the contract from the current source deck.
+    - `selector-missing` / `selector-ambiguous` / `part-missing` /
+      `part-unreadable` / `unsupported-selector`: the source selector could not
+      resolve a unique candidate value; repair the selector or re-apply so it
+      resolves exactly once. Never fall back to the candidate inventory or a
+      language heuristic to hide the gap.
+
+    Translation records with `targetText === sourceText` are explicit approvals
+    to preserve product names, URLs, code tokens, or equivalent text; the gate
+    still requires the candidate to keep that exact text (`approvedUnchangedCount`
+    in the summary). `embeddedWorkbook` still needs chart/workbook sync review
+    but stays out of the automatic translation set. Preserve `themeFontMetadata`,
     `relationshipPath`, `shapeInternalName`, and `chartMetadata` unless the user
-    explicitly asks to localize or relink them. Translation records with
-    `targetText === sourceText` are explicit approvals to preserve product
-    names, URLs, code tokens, or equivalent text and are not residual blockers.
+    explicitly asks to localize or relink them.
+
 11. Run scoped and full visual gates:
 
 - `vision-diff` on changed slides, with source as the baseline:
@@ -789,7 +805,6 @@ Keep these translation-specific artifacts in the run directory when available:
 - `i18n-chart-decisions.json` and `i18n-scan-classified.json` when chart review units exist
 - `i18n-chart-classification.json` when chart review units exist
 - `i18n-scan-candidate.json`
-- `i18n-residual-gate.json`
 - `bilingual-translation-audit.md`
 - `bilingual-translation-audit.json`
 - `i18n-style-diff.json`

@@ -88,12 +88,6 @@ Use these entry points from skill workflows:
   and weighted overall score. Use `--strict` before the final response when the
   task requested skill feedback, then print the validated scorecard in the
   terminal response.
-- `pptx-nova-i18n-residual-gate.mjs` - target-language-independent translation
-  leakage gate. It compares the mandatory source scan, candidate scan, and
-  translation records by stable unit id plus original text/hash, so valid
-  French or other Latin-script target text does not become a false English
-  blocker. Native candidate language-classification blockers remain in the
-  report as diagnostic evidence.
 - `pptx-nova-i18n-classify-chart-units.mjs` - convert xdoc's structurally
   inventoried but language-uncertain chart review units into explicit
   translate/preserve decisions. It binds decisions to the source scan and unit

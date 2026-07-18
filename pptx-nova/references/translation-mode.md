@@ -148,7 +148,13 @@ relevant OOXML style properties.
 
    Treat `applyGate.passed=false`, non-empty `conflicts[]`, non-empty
    `missingTranslations[]`, or apply-blocking `reviewRequired[]` as an
-   automation blocker. Add missing translations, refresh stale source hashes,
+   automation blocker. Triage from the gate's aggregated fields first:
+   `applyGate.blockingReviewCount`, `applyGate.conflictCount`,
+   `applyGate.missingTranslationCount`, and `applyGate.blockersByCategory`
+   name what actually holds the gate closed, and `reviewRequired[]` lists
+   apply-blocking items first — repair top-down instead of filtering the full
+   array (non-blocking reviews never block this gate). Add missing
+   translations, refresh stale source hashes,
    add reliable styled-token anchors, broaden shared-part scope, or route the
    item to manual review before applying changes.
 
@@ -402,7 +408,20 @@ relevant OOXML style properties.
     `sourceIssue.severity`.
     Current xdoc evaluates this as a rendered gate: renderer-visible text regions
     provide chart-title collision evidence, while PDFium checks final glyph/page
-    bounds. New or worsened `chart-title-external-text-collision`,
+    bounds. Every issue carries an `evidenceClass`
+    (`rendered` / `review-only` / `estimator` / `static-geometry`) and
+    `agentGate.blockersByEvidenceClass` counts the blocking issues per class —
+    read it first so estimator noise cannot hide rendered hard blockers:
+  - `rendered` blockers are proven on final output and are never eligible for
+    the multi-column human-review exception.
+  - `review-only` blockers resolve through the bound multi-column review
+    record.
+  - `estimator` blockers (`text-overflow-estimate`,
+    `multi-column-text-overflow`) are static text-fit estimates; confirm
+    against rendered evidence and the final PNG before rewording text.
+  - `static-geometry` blockers come from authored-geometry heuristics
+    evaluated without rendering.
+    New or worsened `chart-title-external-text-collision`,
     `rendered-text-outside-page-horizontal`, and
     `rendered-text-outside-page-vertical` high/medium issues require repair and
     are not eligible for the multi-column human-review exception. Do not treat
@@ -610,6 +629,18 @@ Charts are a frequent translation blind spot.
 
   The older `pptx-nova-i18n-classify-chart-units.mjs` remains available only
   for replaying historical runs whose review inventory is chart-only.
+
+  Review units outside the language-classification scaffold — typically
+  slideLayout/slideMaster shared visible text that the scan keeps as
+  `action: "review"` — do not need run-local glue either. After reviewing such
+  a unit, add its record to `translations[]` with
+  `reviewDecision: "translate"` plus the unit's `sourceHash`; `i18n-plan`
+  routes the reviewed target through the same guarded replaceText/patch
+  artifacts and counts it under `summary.reviewedTranslationCount`. A review
+  unit given `targetText` without `reviewDecision` stays a `review-target`
+  conflict, and `reviewDecision` without `sourceHash` is rejected as
+  `review-decision-unbound`. Do not hand-build replace-text inputs for
+  reviewed units.
 
 - Use top-level `xdoc pptx replace-chart-text --visible-cache-only` for chart
   title, series, category, and data-label translations, but feed it from

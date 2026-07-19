@@ -51,11 +51,19 @@ Use these entry points from skill workflows:
 - `pptx-nova-refurbish-run.mjs` - execute the audited existing-deck refurbishment
   pipeline in a new run directory. It selects the native or fallback route, saves
   every JSON report, writes `pptx-diff.json` as the default final semantic diff,
+  generates source/candidate layout snapshots, one shared
+  `review-policy-evaluation.json`, and a non-governing `finding-analysis.json`
+  shadow report before fidelity,
   fails closed on machine gates, renders PNG/contact-sheet evidence, and
   publishes the final output atomically. A successful run still
   reports `needs-human-review`; it never claims the visual review is complete.
   Read compact stdout first, then `refurbish-run-summary.json.agentSummary` only when deeper phase
   evidence is needed.
+- `pptx-nova-finding-analysis.mjs` - replay source/candidate layout, semantic diff,
+  optional operation evidence, and a complete review evaluation through the draft
+  Finding Analysis contract. Standalone replay is always `advisory-replay`; only
+  the refurbish runner emits `runner-observed` shadow evidence. Full analysis is
+  written to disk while stdout stays compact.
 - `pptx-nova-translation-run.mjs` - finalize an already stable translated candidate. It snapshots
   source/candidate/translation contracts, runs style, target-consistency, vision, preview, semantic,
   full-deck comparison, and publication-binding gates, and can materialize `contact-diff` aliases
@@ -68,6 +76,9 @@ Use these entry points from skill workflows:
   before an actionable finding can be reclassified as `reviewed`. Stale,
   duplicate, ambiguous, and unused rules fail closed. Fidelity and strict
   template gates use this same module instead of local boolean allowlists.
+- `lib/layout-snapshot.mjs` - pure layout detector shared by the layout CLI and
+  refurbish source/candidate adapters. `lib/finding-analysis.mjs` is the pure FA
+  decision seam; neither module reads files, launches commands, or renders.
 - `pptx-nova-refurbish-fallback-patch.mjs` - generate generic inspect-driven
   fallback artifacts (`patch.json`, `deck_lock.json`, baseline
   `content-audit.json`, and `reference-map.json`) for DeckKits without native

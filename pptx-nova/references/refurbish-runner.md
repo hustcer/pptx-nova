@@ -40,7 +40,10 @@ evidence without another render.
 
 - status, run directory, output path, and human-review requirement;
 - `agentSummary` with gate results and artifact pointers;
-- `performance` with total time, render share, top phases, compare render count, and reuse status;
+- `agentSummary.findingAnalysis` with the shadow proposed status, compact findings, and
+  `effectiveStatus=not-applied`;
+- `performance` with total time, render share, top phases, compare render count, reuse status,
+  and Finding Analysis time/additional inspect/render counts;
 - the terminal error when the run fails.
 
 After path preflight succeeds, the complete `pptx-nova-refurbish-run/v1` report is saved as
@@ -75,9 +78,12 @@ plan and readiness
   -> capability probe and source inspect
   -> native skin or generated fallback patch
   -> vision-diff and refurbish-audit
-  -> layout snapshot and fidelity gate
-  -> candidate preview
+  -> source/candidate layout snapshots
   -> one semantic diff
+  -> one review-policy evaluation
+  -> Finding Analysis shadow (never changes the current gate)
+  -> fidelity gate consuming that same review evaluation
+  -> candidate preview
   -> one high-DPI refurbish comparison
   -> optional contact-diff aliases from the same comparison
   -> compare publication gate
@@ -85,6 +91,10 @@ plan and readiness
 
 The single high-DPI comparison is the visual source of truth. Do not independently rerender the same
 source/candidate/slide range/DPI merely to create a differently named contact artifact.
+
+`finding-analysis.json` is calibration evidence in this release. Read its proposed status and top
+findings, but never treat `effectiveStatus=not-applied` as a pass or use it to weaken fidelity,
+comparison, publication, or human-review requirements.
 
 ## Review and delivery
 

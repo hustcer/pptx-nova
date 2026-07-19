@@ -154,27 +154,22 @@ function defaultGates(nativeSupported) {
     'dry-run',
     'vision-diff',
     'refurbish-audit',
-    'fidelity-gate',
     'semantic-diff',
+    'fidelity-gate',
     'png-contact-review',
   ]
   return nativeSupported ? ['refurbish-skin-report', ...gates] : ['fallback-patch-report', ...gates]
 }
 
 function normalizeRequiredGates(gates) {
-  const normalized = [...gates]
+  const normalized = gates.filter((gate) => gate !== 'semantic-diff' && gate !== 'fidelity-gate')
   const auditIndex = normalized.indexOf('refurbish-audit')
-  if (!normalized.includes('fidelity-gate')) {
-    normalized.splice(auditIndex >= 0 ? auditIndex + 1 : normalized.length, 0, 'fidelity-gate')
-  }
-  if (!normalized.includes('semantic-diff')) {
-    const fidelityIndex = normalized.indexOf('fidelity-gate')
-    normalized.splice(
-      fidelityIndex >= 0 ? fidelityIndex + 1 : normalized.length,
-      0,
-      'semantic-diff',
-    )
-  }
+  normalized.splice(
+    auditIndex >= 0 ? auditIndex + 1 : normalized.length,
+    0,
+    'semantic-diff',
+    'fidelity-gate',
+  )
   return normalized
 }
 
@@ -229,14 +224,17 @@ function buildCommands(args, entry, nativeSkinning, profile) {
       command: `xdoc pptx refurbish-audit --source ${shell(args.source)} --final ${shell(args.output)} --map reference-map.json --json > content-audit-final.json`,
     },
     {
-      name: 'fidelity-gate',
-      required: true,
-      command: `node ${shell(join(SKILL_ROOT, 'scripts/pptx-nova-fidelity-gate.mjs'))} --mode refurbish --source-inspect reference-inspect.json --reference-map reference-map.json --content-audit content-audit.json --final-audit content-audit-final.json --vision-diff vision-diff.json --json > fidelity-gate.json`,
-    },
-    {
       name: 'semantic-diff',
       required: true,
       command: `xdoc pptx diff --source ${shell(args.source)} --candidate ${shell(args.output)} --detail summary --json > pptx-diff.json`,
+    },
+    {
+      name: 'fidelity-gate',
+      required: true,
+      command: `node ${shell(join(SKILL_ROOT, 'scripts/pptx-nova-fidelity-gate.mjs'))} --mode refurbish --source-inspect reference-inspect.json --source-pptx ${shell(args.source)} --candidate-pptx ${shell(args.output)} --reference-map reference-map.json --content-audit content-audit.json --final-audit content-audit-final.json --vision-diff vision-diff.json --layout-snapshot layout-final.json --review-evaluation review-policy-evaluation.json --json > fidelity-gate.json`,
+      notes: [
+        'The refurbish runner generates source/candidate layout, one review-policy evaluation, and shadow finding-analysis before this gate.',
+      ],
     },
   ]
 }

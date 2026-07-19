@@ -1833,7 +1833,7 @@ test('refurbish plan requires semantic diff gate by default', async () => {
   assert.equal(plan.status, 'ready')
   assert.deepEqual(plan.requiredReferences, [])
   assert.notEqual(semanticIndex, -1)
-  assert.ok(plan.requiredGates.indexOf('fidelity-gate') < semanticIndex)
+  assert.ok(semanticIndex < plan.requiredGates.indexOf('fidelity-gate'))
   assert.ok(
     plan.commands.some(
       (command) =>
@@ -2068,7 +2068,10 @@ if (args[0] === 'schema') {
     capabilities: { schemaVersion: 'capabilities/v1' },
     commands: {
       pptx: {
-        subcommands: { inspect: {}, 'refurbish-skin': {}, preview: {}, diff: {} },
+        subcommands: {
+          inspect: {}, apply: {}, 'refurbish-skin': {}, 'chrome-detect': {},
+          'vision-diff': {}, 'refurbish-audit': {}, preview: {}, diff: {}
+        },
         patchSchema: {},
         catalogs: {
           nativeDeckkits: {
@@ -2088,6 +2091,26 @@ if (args[0] === 'schema') {
     gate: { passed: true, newHighIssues: 0, newMediumIssues: 0 },
     reports: { visionDiff, audit }
   })
+} else if (args[0] === 'pptx' && args[1] === 'chrome-detect') {
+  print({ schemaVersion: 'pptx-chrome-detect/v1', status: 'success', slides: [] })
+} else if (args[0] === 'pptx' && args[1] === 'apply') {
+  const output = valueAfter('-o')
+  if (args.includes('--dry-run')) {
+    print({
+      schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [],
+      changedParts: [], opResults: [], visualRisks: [], wouldWrite: true, output
+    })
+  } else {
+    writeFileSync(output, 'fallback candidate pptx')
+    print({
+      schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [],
+      changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], output
+    })
+  }
+} else if (args[0] === 'pptx' && args[1] === 'vision-diff') {
+  print(visionDiff)
+} else if (args[0] === 'pptx' && args[1] === 'refurbish-audit') {
+  print(audit)
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
   const outputDir = valueAfter('--output-dir')
   const contactSheet = valueAfter('--contact-sheet')
@@ -2105,6 +2128,9 @@ if (args[0] === 'schema') {
     contactSheet: { path: contactSheet, width: 100, height: 56, byteLength: 7 }
   })
 } else if (args[0] === 'pptx' && args[1] === 'diff') {
+  if (process.env.FAKE_CORRUPT_DRY_RUN_PATH) {
+    writeFileSync(process.env.FAKE_CORRUPT_DRY_RUN_PATH, '{ invalid json')
+  }
   print({
     schemaVersion: 'pptx-diff/v1',
     status: 'success',
@@ -2188,7 +2214,10 @@ if (args[0] === 'schema') {
   const phaseNames = summary.phases.map((phase) => phase.name)
   const gateNames = summary.gates.map((gate) => gate.name)
   const sourceInspect = summary.phases.find((phase) => phase.name === 'source-inspect')
+  const nativePhase = summary.phases.find((phase) => phase.name === 'native-refurbish-skin')
+  const semanticDiffPhase = summary.phases.find((phase) => phase.name === 'pptx-semantic-diff')
   const comparePhase = summary.phases.find((phase) => phase.name === 'refurbish-compare')
+  const stableSourceSnapshot = join(runDir, 'source.pptx')
 
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(compactResult.status, 'needs-human-review')
@@ -2212,6 +2241,9 @@ if (args[0] === 'schema') {
   assert.ok(result.stdout.length < readFileSync(summary.artifacts.summary, 'utf8').length)
   assert.equal(existsSync(output), true)
   assert.equal(existsSync(join(runDir, 'pptx-diff.json')), true)
+  assert.equal(existsSync(join(runDir, 'layout-source.json')), true)
+  assert.equal(existsSync(join(runDir, 'review-policy-evaluation.json')), true)
+  assert.equal(existsSync(join(runDir, 'finding-analysis.json')), true)
   assert.equal(existsSync(join(runDir, 'catalog-readiness.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-gate.json')), true)
@@ -2275,6 +2307,16 @@ if (args[0] === 'schema') {
   assert.equal(summary.layout.actionableRiskCount, 0)
   assert.equal(summary.layout.informationalRiskCount, 0)
   assert.equal(summary.agentSummary.layout.actionableRiskCount, 0)
+  const findingAnalysis = JSON.parse(readFileSync(join(runDir, 'finding-analysis.json'), 'utf8'))
+  assert.equal(findingAnalysis.schemaVersion, 'pptx-nova-finding-analysis/v1-draft')
+  assert.equal(findingAnalysis.evaluation.status, 'complete')
+  assert.equal(findingAnalysis.agentGate.proposedStatus, 'pass')
+  assert.equal(findingAnalysis.agentGate.effectiveStatus, 'not-applied')
+  assert.equal(summary.findingAnalysis.effectiveStatus, 'not-applied')
+  assert.equal(summary.agentSummary.findingAnalysis.effectiveStatus, 'not-applied')
+  assert.equal(summary.performance.findingAnalysisAdditionalInspectCount, 0)
+  assert.equal(summary.performance.findingAnalysisAdditionalRenderCount, 0)
+  assert.ok(summary.performance.findingAnalysisMs >= 0)
   const catalogReadiness = JSON.parse(readFileSync(summary.artifacts.readiness, 'utf8'))
   assert.equal(catalogReadiness.schemaVersion, 'pptx-nova-catalog-readiness/v1')
   assert.equal(catalogReadiness.status, 'pass')
@@ -2308,9 +2350,14 @@ if (args[0] === 'schema') {
   )
   assert.ok(sourceInspect.command.includes(process.execPath), sourceInspect.command)
   assert.ok(sourceInspect.command.includes('fake-xdoc.mjs'), sourceInspect.command)
+  assert.ok(sourceInspect.command.includes(stableSourceSnapshot), sourceInspect.command)
+  assert.ok(nativePhase.command.includes(stableSourceSnapshot), nativePhase.command)
+  assert.ok(semanticDiffPhase.command.includes(stableSourceSnapshot), semanticDiffPhase.command)
   assert.ok(comparePhase.command.includes(join(runDir, 'candidate.pptx')), comparePhase.command)
   assert.ok(comparePhase.command.includes('--dpi 192'), comparePhase.command)
   assert.ok(phaseNames.includes('pptx-semantic-diff'))
+  assert.ok(phaseNames.includes('review-policy-evaluation'))
+  assert.ok(phaseNames.includes('finding-analysis-shadow'))
   assert.ok(phaseNames.includes('refurbish-compare'))
   assert.ok(phaseNames.includes('contact-diff-reuse'))
   assert.equal(phaseNames.includes('contact-diff'), false)
@@ -2323,8 +2370,120 @@ if (args[0] === 'schema') {
     phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('refurbish-compare-delivery'),
   )
   assert.ok(
+    phaseNames.indexOf('pptx-semantic-diff') < phaseNames.indexOf('review-policy-evaluation'),
+  )
+  assert.ok(
+    phaseNames.indexOf('review-policy-evaluation') < phaseNames.indexOf('finding-analysis-shadow'),
+  )
+  assert.ok(phaseNames.indexOf('finding-analysis-shadow') < phaseNames.indexOf('fidelity-gate'))
+  assert.equal(
+    phaseNames.filter((name) => name === 'source-inspect' || name === 'final-inspect').length,
+    2,
+  )
+  assert.ok(
     phaseNames.indexOf('refurbish-compare') < phaseNames.indexOf('refurbish-compare-delivery'),
   )
+
+  const fallbackSource = join(root, 'fallback-source.pptx')
+  const fallbackOutput = join(root, 'fallback-out.pptx')
+  const fallbackRunDir = join(root, 'fallback-run')
+  writeFileSync(fallbackSource, 'fallback fake pptx')
+  const fallbackResult = runNode([
+    skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+    '--deckkit',
+    'mckinsey-blue',
+    '--source',
+    fallbackSource,
+    '--output',
+    fallbackOutput,
+    '--run-dir',
+    fallbackRunDir,
+    '--route',
+    'fallback',
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const fallbackSummary = readRefurbishSummary(fallbackResult)
+  const fallbackPhases = fallbackSummary.phases.map((phase) => phase.name)
+  const fallbackAnalysis = JSON.parse(
+    readFileSync(fallbackSummary.artifacts.findingAnalysis, 'utf8'),
+  )
+  assert.equal(fallbackSummary.route.executed, 'fallback-patch')
+  assert.ok(fallbackPhases.includes('dry-run'))
+  assert.ok(fallbackPhases.includes('apply'))
+  assert.equal(fallbackAnalysis.evaluation.status, 'complete')
+  assert.equal(fallbackAnalysis.agentGate.effectiveStatus, 'not-applied')
+  assert.equal(
+    fallbackAnalysis.evaluation.diagnostics.some(
+      (item) => item.code === 'finding-analysis-operation-evidence-missing',
+    ),
+    false,
+  )
+  assert.ok(
+    fallbackPhases.indexOf('pptx-semantic-diff') <
+      fallbackPhases.indexOf('review-policy-evaluation'),
+  )
+  assert.ok(
+    fallbackPhases.indexOf('finding-analysis-shadow') < fallbackPhases.indexOf('fidelity-gate'),
+  )
+  assert.equal(existsSync(fallbackOutput), true)
+  const fallbackSourceSnapshot = join(fallbackRunDir, 'source.pptx')
+  for (const phaseName of [
+    'source-inspect',
+    'chrome-detect',
+    'fallback-patch',
+    'dry-run',
+    'apply',
+    'vision-diff-command',
+    'refurbish-audit-command',
+    'pptx-semantic-diff',
+  ]) {
+    const phase = fallbackSummary.phases.find((item) => item.name === phaseName)
+    assert.ok(phase.command.includes(fallbackSourceSnapshot), `${phaseName}: ${phase.command}`)
+  }
+
+  const shadowFailureSource = join(root, 'shadow-failure-source.pptx')
+  const shadowFailureOutput = join(root, 'shadow-failure-out.pptx')
+  const shadowFailureRunDir = join(root, 'shadow-failure-run')
+  writeFileSync(shadowFailureSource, 'shadow failure fake pptx')
+  const shadowFailureResult = runNode(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      shadowFailureSource,
+      '--output',
+      shadowFailureOutput,
+      '--run-dir',
+      shadowFailureRunDir,
+      '--route',
+      'fallback',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    {
+      env: {
+        ...process.env,
+        FAKE_CORRUPT_DRY_RUN_PATH: join(shadowFailureRunDir, 'dry-run.json'),
+      },
+    },
+  )
+  const shadowFailureSummary = readRefurbishSummary(shadowFailureResult)
+  const shadowFailureAnalysis = JSON.parse(
+    readFileSync(shadowFailureSummary.artifacts.findingAnalysis, 'utf8'),
+  )
+  assert.equal(shadowFailureSummary.status, 'needs-human-review')
+  assert.equal(shadowFailureSummary.machineGatesPassed, true)
+  assert.equal(shadowFailureAnalysis.evaluation.status, 'failed')
+  assert.equal(shadowFailureAnalysis.agentGate.effectiveStatus, 'not-applied')
+  assert.equal(
+    shadowFailureAnalysis.evaluation.errors[0].code,
+    'finding-analysis-artifact-unreadable',
+  )
+  assert.equal(existsSync(shadowFailureOutput), true)
 
   const singleSource = join(root, 'single-source.pptx')
   const singleOutput = join(root, 'single-out.pptx')
@@ -2378,6 +2537,40 @@ if (args[0] === 'schema') {
     ),
     true,
   )
+
+  const unreviewedSource = join(root, 'unreviewed-source.pptx')
+  const unreviewedOutput = join(root, 'unreviewed-out.pptx')
+  const unreviewedRunDir = join(root, 'unreviewed-run')
+  writeFileSync(unreviewedSource, 'unreviewed fake pptx')
+  const unreviewedResult = runNode(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      unreviewedSource,
+      '--output',
+      unreviewedOutput,
+      '--run-dir',
+      unreviewedRunDir,
+      '--route',
+      'native',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    { env: { ...process.env, FAKE_SLIDE_COUNT: '1', FAKE_INTENTIONAL_EMPTY: '1' } },
+  )
+  const unreviewedSummary = readRefurbishSummary(unreviewedResult)
+  const unreviewedAnalysis = JSON.parse(
+    readFileSync(unreviewedSummary.artifacts.findingAnalysis, 'utf8'),
+  )
+  assert.equal(unreviewedSummary.status, 'needs-human-review')
+  assert.equal(unreviewedSummary.machineGatesPassed, true)
+  assert.equal(unreviewedSummary.layout.actionableRiskCount, 1)
+  assert.equal(unreviewedAnalysis.agentGate.proposedStatus, 'warn')
+  assert.equal(unreviewedAnalysis.agentGate.effectiveStatus, 'not-applied')
+  assert.equal(existsSync(unreviewedOutput), true)
 
   const reviewedSource = join(root, 'reviewed-source.pptx')
   const reviewedOutput = join(root, 'reviewed-out.pptx')
@@ -2445,7 +2638,32 @@ if (args[0] === 'schema') {
   )
   assert.equal(reviewedFidelity.appliedReviews, 1)
   assert.equal(existsSync(reviewedSummary.artifacts.reviewPolicy), true)
-  assert.ok(reviewedPhases.indexOf('layout-snapshot') < reviewedPhases.indexOf('fidelity-gate'))
+  const reviewedAnalysis = JSON.parse(
+    readFileSync(reviewedSummary.artifacts.findingAnalysis, 'utf8'),
+  )
+  const reviewedEvaluation = JSON.parse(
+    readFileSync(reviewedSummary.artifacts.reviewPolicyEvaluation, 'utf8'),
+  )
+  const reviewedFidelityReport = JSON.parse(
+    readFileSync(reviewedSummary.artifacts.fidelityGate, 'utf8'),
+  )
+  assert.deepEqual(reviewedFidelityReport.reviewPolicy, reviewedEvaluation)
+  assert.equal(reviewedAnalysis.findings[0].rawFinding.code, 'empty-placeholder')
+  assert.equal(reviewedAnalysis.findings[0].decision.disposition, 'review')
+  assert.equal(reviewedAnalysis.findings[0].review.status, 'accepted')
+  assert.equal(reviewedAnalysis.agentGate.proposedStatus, 'pass')
+  assert.equal(reviewedAnalysis.agentGate.effectiveStatus, 'not-applied')
+  assert.ok(
+    reviewedPhases.indexOf('pptx-semantic-diff') <
+      reviewedPhases.indexOf('review-policy-evaluation'),
+  )
+  assert.ok(
+    reviewedPhases.indexOf('review-policy-evaluation') <
+      reviewedPhases.indexOf('finding-analysis-shadow'),
+  )
+  assert.ok(
+    reviewedPhases.indexOf('finding-analysis-shadow') < reviewedPhases.indexOf('fidelity-gate'),
+  )
 })
 
 test('refurbish runner does not publish output when compare delivery gate fails', () => {

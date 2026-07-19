@@ -86,8 +86,9 @@ Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline
 `session-rules-resolution.json`, `content.json`, `edit-contract.json`, `evidence-manifest.json`, `edit-contract-gate.json`,
 `patch.json`, sidecars, dry-run/apply/refurbish reports,
 `vision.json`, `pptx-diff.json`, `visual_review.json`, `clean-open.json`, `check.json`,
-`evidence-summary.json`, `layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`,
-`review-policy.json`,
+`evidence-summary.json`, `layout-source.json`, `layout-final.json`, `finding-analysis.json`,
+`fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`,
+`review-policy-evaluation.json`,
 `i18n-text-plan.json`, `i18n-scan.json`, `i18n-plan.json`, `i18n-style-diff.json`,
 `replace-text-input.json`,
 `multi-column-review.json`, `multi-column-review-gate.json`,
@@ -321,7 +322,7 @@ optional session-rules resolve -> edit-contract -> dry-run target coverage -> ap
 Refurbish Existing Deck must also append:
 
 ```text
-refurbish-skin report gate -> one final pptx semantic diff when source/candidate are stable -> one full refurbish-compare render -> refurbish-compare delivery gate -> optional contact-diff aliases from that same compare evidence -> optional legacy supplemental audit
+refurbish-skin report gate -> source/candidate layout snapshots -> one final pptx semantic diff when source/candidate are stable -> one review-policy evaluation -> non-governing Finding Analysis shadow -> fidelity gate -> one full refurbish-compare render -> refurbish-compare delivery gate -> optional contact-diff aliases from that same compare evidence -> optional legacy supplemental audit
 ```
 
 Animation, structural, or compatibility high-risk tasks must also append:

@@ -1,7 +1,12 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from './pptx-nova-review-policy.mjs'
+import {
+  REVIEW_POLICY_EVALUATION_SCHEMA_VERSION,
+  evaluateReviewPolicy,
+  hasEmbeddedReviewedFindings,
+} from './pptx-nova-review-policy.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-fidelity-gate/v1'
 const TEMPLATE_GATE_SCHEMA_VERSION = 'pptx-nova-template-gate/v1'
@@ -29,6 +34,9 @@ Options:
   --vision-diff <path>      vision-diff.json from xdoc pptx vision-diff.
   --layout-snapshot <path>  layout-final.json with raw layout findings.
   --review-policy <path>    Optional pptx-nova-review-policy/v1 document.
+  --review-evaluation <path>
+                            Optional precomputed review-policy evaluation; when present,
+                            fidelity consumes it instead of evaluating the policy again.
   --json                    Print machine-readable report.
   --help                    Show this help.
 `
@@ -48,6 +56,7 @@ function parseArgs(argv) {
     visionDiff: '',
     layoutSnapshot: '',
     reviewPolicy: '',
+    reviewEvaluation: '',
     json: false,
   }
   for (let i = 0; i < argv.length; i += 1) {
@@ -84,6 +93,7 @@ const valueFlags = {
   '--vision-diff': 'visionDiff',
   '--layout-snapshot': 'layoutSnapshot',
   '--review-policy': 'reviewPolicy',
+  '--review-evaluation': 'reviewEvaluation',
 }
 
 function valueAfter(argv, index, flag) {
@@ -113,12 +123,21 @@ function readOptionalJson(path, label) {
   return readJson(path, label)
 }
 
+function fileSha256(path) {
+  if (!path || !existsSync(path)) return null
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
 function push(list, severity, code, message, details = {}) {
   list.push({ severity, code, message, ...details })
 }
 
 function asArray(value) {
   return Array.isArray(value) ? value : []
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }
 
 function numeric(value) {
@@ -341,6 +360,7 @@ function validateRefurbish(args, report) {
   const finalAudit = readJson(args.finalAudit, 'final audit')
   const visionDiff = readJson(args.visionDiff, 'vision diff')
   const layoutSnapshot = readOptionalJson(args.layoutSnapshot, 'layout snapshot')
+  const reviewEvaluation = readOptionalJson(args.reviewEvaluation, 'review evaluation')
 
   const inspectSourceCount = slideCountOf(sourceInspect)
   const auditSourceCount = numeric(finalAudit?.summary?.sourceSlideCount)
@@ -357,6 +377,7 @@ function validateRefurbish(args, report) {
     referenceMap,
     explicitReviewPolicy,
     layoutSnapshot,
+    reviewEvaluation,
   })
 
   if (contentAudit && contentAudit.schemaVersion !== 'pptx-nova-content-audit/v1') {
@@ -379,9 +400,13 @@ function validateReviewedFindings({
   referenceMap,
   explicitReviewPolicy,
   layoutSnapshot,
+  reviewEvaluation,
 }) {
   const embeddedPolicy = hasEmbeddedReviewedFindings(referenceMap) ? referenceMap : null
-  if (explicitReviewPolicy && embeddedPolicy) {
+  const precomputedReportsAmbiguity = asArray(reviewEvaluation?.errors).some(
+    (item) => item?.code === 'review-policy-source-ambiguous',
+  )
+  if (explicitReviewPolicy && embeddedPolicy && !precomputedReportsAmbiguity) {
     push(
       report.errors,
       'error',
@@ -405,20 +430,161 @@ function validateReviewedFindings({
     : embeddedPolicy
       ? args.referenceMap
       : ''
-  const evaluation = evaluateReviewPolicy({
-    policyDocument,
-    policyDocumentPath,
-    allowEmbeddedPolicy: Boolean(!explicitReviewPolicy && embeddedPolicy),
-    sourcePptx: args.sourcePptx,
-    candidatePptx: args.candidatePptx,
-    findings: asArray(layoutSnapshot?.risks),
-    evidencePaths: {
-      layoutSnapshot: args.layoutSnapshot,
-      finalAudit: args.finalAudit,
-      visionDiff: args.visionDiff,
-      referenceMap: args.referenceMap,
-    },
-  })
+  let evaluation = reviewEvaluation
+    ? reviewEvaluation
+    : evaluateReviewPolicy({
+        policyDocument,
+        policyDocumentPath,
+        allowEmbeddedPolicy: Boolean(!explicitReviewPolicy && embeddedPolicy),
+        sourcePptx: args.sourcePptx,
+        candidatePptx: args.candidatePptx,
+        findings: asArray(layoutSnapshot?.risks),
+        evidencePaths: {
+          layoutSnapshot: args.layoutSnapshot,
+          finalAudit: args.finalAudit,
+          visionDiff: args.visionDiff,
+          referenceMap: args.referenceMap,
+        },
+      })
+  if (reviewEvaluation) {
+    const bindingErrors = []
+    if (
+      !isPlainObject(evaluation) ||
+      !isPlainObject(evaluation.summary) ||
+      !Array.isArray(evaluation.applied) ||
+      !Array.isArray(evaluation.reviewedFindings) ||
+      !Array.isArray(evaluation.remainingActionable) ||
+      !Array.isArray(evaluation.informational) ||
+      !Array.isArray(evaluation.errors)
+    ) {
+      const raw = isPlainObject(evaluation) ? evaluation : {}
+      const rawSummary = isPlainObject(raw.summary) ? raw.summary : {}
+      evaluation = {
+        schemaVersion: raw.schemaVersion ?? null,
+        status: 'fail',
+        bindings: isPlainObject(raw.bindings) ? raw.bindings : {},
+        summary: {
+          declaredReviewCount: Number(rawSummary.declaredReviewCount ?? 0),
+          validReviewCount: Number(rawSummary.validReviewCount ?? 0),
+          appliedReviewCount: 0,
+          reviewedFindingCount: 0,
+          remainingActionableCount: Number(rawSummary.remainingActionableCount ?? 0),
+          informationalCount: Number(rawSummary.informationalCount ?? 0),
+          errorCount: asArray(raw.errors).length + 1,
+        },
+        applied: [],
+        reviewedFindings: [],
+        remainingActionable: asArray(raw.remainingActionable),
+        informational: asArray(raw.informational),
+        errors: [
+          ...asArray(raw.errors),
+          {
+            code: 'review-evaluation-structure-invalid',
+            message: 'precomputed review evaluation is missing required fields',
+          },
+        ],
+      }
+    }
+    if (evaluation?.schemaVersion !== REVIEW_POLICY_EVALUATION_SCHEMA_VERSION) {
+      bindingErrors.push({
+        code: 'review-evaluation-schema-version',
+        message: `review evaluation schemaVersion must be ${REVIEW_POLICY_EVALUATION_SCHEMA_VERSION}`,
+      })
+    }
+    const expectedBindings = [
+      ['source', evaluation?.bindings?.source?.sha256, fileSha256(args.sourcePptx)],
+      ['candidate', evaluation?.bindings?.candidate?.sha256, fileSha256(args.candidatePptx)],
+      [
+        'layoutSnapshot',
+        evaluation?.bindings?.evidence?.layoutSnapshot?.sha256,
+        fileSha256(args.layoutSnapshot),
+      ],
+      [
+        'finalAudit',
+        evaluation?.bindings?.evidence?.finalAudit?.sha256,
+        fileSha256(args.finalAudit),
+      ],
+      [
+        'visionDiff',
+        evaluation?.bindings?.evidence?.visionDiff?.sha256,
+        fileSha256(args.visionDiff),
+      ],
+    ]
+    const referenceMapExpected = evaluation?.bindings?.evidence?.referenceMap?.sha256 ?? null
+    const referenceMapActual = fileSha256(args.referenceMap)
+    if (referenceMapExpected || referenceMapActual) {
+      expectedBindings.push(['referenceMap', referenceMapExpected, referenceMapActual])
+    }
+    const policyPath = explicitReviewPolicy
+      ? args.reviewPolicy
+      : embeddedPolicy
+        ? args.referenceMap
+        : ''
+    const policyExpected = evaluation?.bindings?.policyDocument?.sha256 ?? null
+    const policyActual = fileSha256(policyPath)
+    if (policyExpected || policyActual) {
+      expectedBindings.push(['policyDocument', policyExpected, policyActual])
+    }
+    const semanticErrors = []
+    if (!['pass', 'fail'].includes(evaluation.status)) {
+      semanticErrors.push('status must be pass or fail')
+    }
+    if (evaluation.status === 'pass' && evaluation.errors.length > 0) {
+      semanticErrors.push('pass evaluation must not contain errors')
+    }
+    if (evaluation.status === 'fail' && evaluation.errors.length === 0) {
+      semanticErrors.push('fail evaluation must contain at least one error')
+    }
+    const summaryCounts = [
+      ['declaredReviewCount', null],
+      ['validReviewCount', null],
+      ['appliedReviewCount', evaluation.applied.length],
+      ['reviewedFindingCount', evaluation.reviewedFindings.length],
+      ['remainingActionableCount', evaluation.remainingActionable.length],
+      ['informationalCount', evaluation.informational.length],
+      ['errorCount', evaluation.errors.length],
+    ]
+    for (const [field, expectedCount] of summaryCounts) {
+      const actualCount = evaluation.summary[field]
+      if (!Number.isInteger(actualCount) || actualCount < 0) {
+        semanticErrors.push(`summary.${field} must be a non-negative integer`)
+      } else if (expectedCount !== null && actualCount !== expectedCount) {
+        semanticErrors.push(`summary.${field} does not match its evidence array`)
+      }
+    }
+    if (semanticErrors.length > 0) {
+      bindingErrors.push({
+        code: 'review-evaluation-semantic-invalid',
+        message: 'precomputed review evaluation has inconsistent status, arrays, or summary',
+        reasons: semanticErrors,
+      })
+    }
+    for (const [name, expected, actual] of expectedBindings) {
+      if (!actual || expected !== actual) {
+        bindingErrors.push({
+          code: 'review-evaluation-binding-stale',
+          message: `precomputed review evaluation ${name} binding is stale`,
+          evidence: name,
+          expectedSha256: expected ?? null,
+          actualSha256: actual,
+        })
+      }
+    }
+    if (bindingErrors.length > 0) {
+      evaluation.status = 'fail'
+      evaluation.applied = []
+      evaluation.reviewedFindings = []
+      evaluation.errors = [...asArray(evaluation.errors), ...bindingErrors]
+      evaluation.summary = {
+        ...evaluation.summary,
+        appliedReviewCount: 0,
+        reviewedFindingCount: 0,
+        remainingActionableCount: evaluation.remainingActionable.length,
+        informationalCount: evaluation.informational.length,
+        errorCount: evaluation.errors.length,
+      }
+    }
+  }
   report.reviewPolicy = evaluation
   report.summary.declaredReviews = evaluation.summary.declaredReviewCount
   report.summary.appliedReviews = evaluation.summary.appliedReviewCount

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "pptx-nova-finding-analysis-fixture/v1",
+  "description": "Redacted refurbish shadow regression: 574 objects, 572 named objects, and two actionable layout findings.",
+  "expected": {
+    "objectCount": 574,
+    "namedObjectCount": 572,
+    "actionableFindingCount": 2,
+    "findingCodes": ["duplicate-object-name", "empty-placeholder"]
+  },
+  "generator": {
+    "fillerObjectCount": 571,
+    "namelessFillerCount": 2
+  },
+  "focusedShapes": [
+    {
+      "id": 797,
+      "name": "Connector straightConnector1",
+      "shapeType": "connector",
+      "bbox": {
+        "xEmu": 4572000,
+        "yEmu": 1463040,
+        "wEmu": 1645920,
+        "hEmu": 274320
+      }
+    },
+    {
+      "id": 900,
+      "name": "Connector straightConnector1",
+      "shapeType": "connector",
+      "bbox": {
+        "xEmu": 1828800,
+        "yEmu": 1463040,
+        "wEmu": 1645920,
+        "hEmu": 274320
+      }
+    },
+    {
+      "id": 101,
+      "name": "Slide Number Placeholder",
+      "shapeType": "placeholder",
+      "textPreview": "",
+      "bbox": {
+        "xEmu": 8500000,
+        "yEmu": 4800000,
+        "wEmu": 300000,
+        "hEmu": 200000
+      },
+      "placeholder": {
+        "type": "sldNum",
+        "idx": 12
+      }
+    }
+  ]
+}

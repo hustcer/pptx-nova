@@ -25,8 +25,11 @@ import {
   relativeArtifact,
 } from './lib/runner-runtime.mjs'
 import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual-evidence.mjs'
+import { evaluateFindings } from './lib/finding-analysis.mjs'
+import { buildLayoutSnapshot, layoutSemanticSha256 } from './lib/layout-snapshot.mjs'
 import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { buildRefurbishPlan } from './pptx-nova-refurbish-plan.mjs'
+import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from './pptx-nova-review-policy.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
@@ -36,7 +39,6 @@ const FALLBACK_PATCH_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-refurbish-fallback-pat
 const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
-const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
 const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
 const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
@@ -48,6 +50,15 @@ const { runJsonPhase, runPlainPhase, addInternalPhase, requireGate } = createRun
 
 function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
+function readJson(path, label) {
+  if (!path || !existsSync(path)) throw new Error(`${label} does not exist: ${path}`)
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'))
+  } catch (error) {
+    throw new Error(`Failed to read ${label} at ${path}: ${error.message}`)
+  }
 }
 
 const usage = `Usage:
@@ -221,6 +232,18 @@ function buildAgentSummary(summary) {
     deckkit: summary.deckkit,
     route,
     layout: buildAgentLayoutSummary(summary.layout),
+    findingAnalysis: summary.findingAnalysis
+      ? {
+          status: summary.findingAnalysis.status,
+          proposedStatus: summary.findingAnalysis.proposedStatus,
+          effectiveStatus: summary.findingAnalysis.effectiveStatus,
+          findingCount: summary.findingAnalysis.findingCount,
+          unresolvedFindingCount: summary.findingAnalysis.unresolvedFindingCount,
+          resolvedFindingCount: summary.findingAnalysis.resolvedFindingCount,
+          nextAction: summary.findingAnalysis.nextAction,
+          topFindings: summary.findingAnalysis.topFindings,
+        }
+      : null,
     slides: {
       source: fidelity?.sourceSlides ?? null,
       final: fidelity?.finalSlides ?? null,
@@ -281,7 +304,10 @@ function buildAgentSummary(summary) {
       'refurbishCompare',
       'refurbishCompareParts',
       'refurbishCompareGate',
+      'layoutSource',
       'layoutFinal',
+      'reviewPolicyEvaluation',
+      'findingAnalysis',
     ]),
     warnings: summary.warnings,
     error: summary.error
@@ -304,7 +330,7 @@ function buildPerformanceSummary(summary, totalMs) {
   )
   const estimatedRenderedPixels = Number(comparePhase?.estimatedRenderedPixels ?? 0)
   const baselineEstimatedPixels = Number(comparePhase?.baselineEstimatedPixels ?? 0)
-  return buildRuntimePerformanceSummary(summary, totalMs, {
+  const performanceSummary = buildRuntimePerformanceSummary(summary, totalMs, {
     renderPhaseNames: [
       'preview-render',
       'preview-render-fallback-convert',
@@ -335,6 +361,17 @@ function buildPerformanceSummary(summary, totalMs) {
         estimatedRenderedPixels <= Math.round(baselineEstimatedPixels * 1.5625),
     },
   })
+  const findingAnalysisPhase = summary.phases.find(
+    (phase) => phase.name === 'finding-analysis-shadow',
+  )
+  return {
+    ...performanceSummary,
+    findingAnalysisMs: Number(findingAnalysisPhase?.durationMs ?? 0),
+    findingAnalysisObjectCount: Number(findingAnalysisPhase?.details?.objectCount ?? 0),
+    findingAnalysisFindingCount: Number(findingAnalysisPhase?.details?.findingCount ?? 0),
+    findingAnalysisAdditionalInspectCount: 0,
+    findingAnalysisAdditionalRenderCount: 0,
+  }
 }
 
 function visionCounts(report, classification) {
@@ -492,10 +529,13 @@ function artifactPaths(runDir) {
     visionDiff: join(runDir, 'vision-diff.json'),
     contentAuditFinal: join(runDir, 'content-audit-final.json'),
     reviewPolicy: join(runDir, 'review-policy.json'),
+    reviewPolicyEvaluation: join(runDir, 'review-policy-evaluation.json'),
     fidelityGate: join(runDir, 'fidelity-gate.json'),
     pptxDiff: join(runDir, 'pptx-diff.json'),
     finalInspect: join(runDir, 'candidate-inspect.json'),
+    layoutSource: join(runDir, 'layout-source.json'),
     layoutFinal: join(runDir, 'layout-final.json'),
+    findingAnalysis: join(runDir, 'finding-analysis.json'),
     candidate: join(runDir, 'candidate.pptx'),
     previews: join(runDir, 'previews'),
     previewReport: join(runDir, 'preview.json'),
@@ -542,6 +582,7 @@ function initialSummary(args, artifacts) {
     },
     warnings: [],
     layout: null,
+    findingAnalysis: null,
     error: null,
   }
 }
@@ -656,7 +697,7 @@ function runInspect(summary, args, artifacts) {
   const report = runJsonPhase(summary, {
     name: 'source-inspect',
     bin: args.xdocBin,
-    args: ['pptx', 'inspect', args.source, '--json'],
+    args: ['pptx', 'inspect', artifacts.sourceSnapshot, '--json'],
     artifact: artifacts.inspect,
   })
   requireGate(
@@ -708,7 +749,7 @@ function runNative(summary, args, artifacts) {
       'pptx',
       'refurbish-skin',
       '--source',
-      args.source,
+      artifacts.sourceSnapshot,
       '--deckkit',
       args.deckkit,
       '--output',
@@ -725,7 +766,7 @@ function runFallback(summary, args, artifacts) {
   const chromeDetect = runJsonPhase(summary, {
     name: 'chrome-detect',
     bin: args.xdocBin,
-    args: ['pptx', 'chrome-detect', args.source, '--json'],
+    args: ['pptx', 'chrome-detect', artifacts.sourceSnapshot, '--json'],
     artifact: artifacts.chromeDetect,
   })
   requireGate(
@@ -747,7 +788,7 @@ function runFallback(summary, args, artifacts) {
       '--deckkit',
       args.deckkit,
       '--source',
-      args.source,
+      artifacts.sourceSnapshot,
       '--inspect',
       artifacts.inspect,
       '--chrome-detect',
@@ -809,7 +850,7 @@ function runFallback(summary, args, artifacts) {
       '-p',
       artifacts.patch,
       '-i',
-      args.source,
+      artifacts.sourceSnapshot,
       '-o',
       artifacts.candidate,
       '--dry-run',
@@ -837,7 +878,7 @@ function runFallback(summary, args, artifacts) {
       '-p',
       artifacts.patch,
       '-i',
-      args.source,
+      artifacts.sourceSnapshot,
       '-o',
       artifacts.candidate,
       '--overwrite',
@@ -866,7 +907,7 @@ function runFallback(summary, args, artifacts) {
       'pptx',
       'vision-diff',
       '--source',
-      args.source,
+      artifacts.sourceSnapshot,
       '--candidate',
       artifacts.candidate,
       '--json',
@@ -882,7 +923,7 @@ function runFallback(summary, args, artifacts) {
       'pptx',
       'refurbish-audit',
       '--source',
-      args.source,
+      artifacts.sourceSnapshot,
       '--final',
       artifacts.candidate,
       '--map',
@@ -892,6 +933,261 @@ function runFallback(summary, args, artifacts) {
     artifact: artifacts.contentAuditFinal,
   })
   gateAudit(summary, audit)
+}
+
+function runReviewPolicyEvaluation(summary, artifacts, candidateSnapshot) {
+  const explicitPolicy = existsSync(artifacts.reviewPolicy)
+    ? readJson(artifacts.reviewPolicy, 'review policy')
+    : null
+  const referenceMap = existsSync(artifacts.referenceMap)
+    ? readJson(artifacts.referenceMap, 'reference map')
+    : null
+  const embeddedPolicy = hasEmbeddedReviewedFindings(referenceMap) ? referenceMap : null
+  const policyDocument = explicitPolicy ?? embeddedPolicy
+  const policyDocumentPath = explicitPolicy
+    ? artifacts.reviewPolicy
+    : embeddedPolicy
+      ? artifacts.referenceMap
+      : ''
+  const evaluation = evaluateReviewPolicy({
+    policyDocument,
+    policyDocumentPath,
+    allowEmbeddedPolicy: Boolean(!explicitPolicy && embeddedPolicy),
+    sourcePptx: artifacts.sourceSnapshot,
+    candidatePptx: artifacts.candidate,
+    findings: Array.isArray(candidateSnapshot?.risks) ? candidateSnapshot.risks : [],
+    evidencePaths: {
+      layoutSnapshot: artifacts.layoutFinal,
+      finalAudit: artifacts.contentAuditFinal,
+      visionDiff: artifacts.visionDiff,
+      referenceMap: existsSync(artifacts.referenceMap) ? artifacts.referenceMap : '',
+    },
+  })
+  if (explicitPolicy && embeddedPolicy) {
+    const ambiguity = {
+      code: 'review-policy-source-ambiguous',
+      message:
+        'reviewed findings must come from either --review-policy or reference-map.json, not both',
+    }
+    evaluation.status = 'fail'
+    evaluation.applied = []
+    evaluation.reviewedFindings = []
+    evaluation.remainingActionable = candidateSnapshot.risks.filter(
+      (finding) => finding?.classification !== 'informational',
+    )
+    evaluation.informational = candidateSnapshot.risks.filter(
+      (finding) => finding?.classification === 'informational',
+    )
+    evaluation.errors = [...evaluation.errors, ambiguity]
+    evaluation.summary = {
+      ...evaluation.summary,
+      appliedReviewCount: 0,
+      reviewedFindingCount: 0,
+      remainingActionableCount: evaluation.remainingActionable.length,
+      informationalCount: evaluation.informational.length,
+      errorCount: evaluation.errors.length,
+    }
+  }
+  writeJson(artifacts.reviewPolicyEvaluation, evaluation)
+  addInternalPhase(
+    summary,
+    'review-policy-evaluation',
+    evaluation.status === 'pass' ? 'passed' : 'warning',
+    {
+      artifact: relativeArtifact(summary.runDir, artifacts.reviewPolicyEvaluation),
+      status: evaluation.status,
+      declaredReviews: Number(evaluation.summary?.declaredReviewCount ?? 0),
+      appliedReviews: Number(evaluation.summary?.appliedReviewCount ?? 0),
+      errors: Number(evaluation.summary?.errorCount ?? 0),
+    },
+  )
+  return evaluation
+}
+
+function operationEnvelope(path, report, binding) {
+  if (!report || !path || !existsSync(path)) return null
+  return { report, artifactSha256: sha256(path), binding }
+}
+
+function buildFindingAnalysisInput({
+  artifacts,
+  sourceSnapshot,
+  candidateSnapshot,
+  semanticDiff,
+  reviewEvaluation,
+}) {
+  const sourcePptxSha256 = sha256(artifacts.sourceSnapshot)
+  const candidatePptxSha256 = sha256(artifacts.candidate)
+  const patchSha256 = existsSync(artifacts.patch) ? sha256(artifacts.patch) : null
+  const dryRun = existsSync(artifacts.dryRun)
+    ? readJson(artifacts.dryRun, 'dry-run evidence')
+    : null
+  const apply = existsSync(artifacts.apply) ? readJson(artifacts.apply, 'apply evidence') : null
+  return {
+    workflowProfile: {
+      profileId: 'refurbish-shadow/v1-draft',
+      kind: 'refurbish',
+      mode: 'standard',
+      mutationIntent: 'style',
+      deliveryStage: 'final',
+    },
+    bindingContext: { assurance: 'runner-observed', schemaDeclaredInputs: [] },
+    sourceLayout: {
+      report: sourceSnapshot,
+      binding: {
+        pptxSha256: sourcePptxSha256,
+        layoutArtifactSha256: sha256(artifacts.layoutSource),
+        layoutSemanticSha256: layoutSemanticSha256(sourceSnapshot),
+      },
+    },
+    candidateLayout: {
+      report: candidateSnapshot,
+      binding: {
+        pptxSha256: candidatePptxSha256,
+        layoutArtifactSha256: sha256(artifacts.layoutFinal),
+        layoutSemanticSha256: layoutSemanticSha256(candidateSnapshot),
+      },
+    },
+    changedScope: {
+      mode: 'full-deck',
+      slideIndexes: [],
+      objectIds: [],
+      origin: 'workflow-profile',
+      binding: {
+        sourcePptxSha256,
+        candidatePptxSha256,
+        evidenceArtifactSha256: null,
+      },
+    },
+    mutationEvidence: {
+      dryRun: operationEnvelope(artifacts.dryRun, dryRun, {
+        sourcePptxSha256,
+        patchSha256,
+      }),
+      apply: operationEnvelope(artifacts.apply, apply, {
+        sourcePptxSha256,
+        candidatePptxSha256,
+        patchSha256,
+      }),
+      semanticDiff: {
+        report: semanticDiff,
+        artifactSha256: sha256(artifacts.pptxDiff),
+        binding: { sourcePptxSha256, candidatePptxSha256 },
+      },
+    },
+    reviewEvaluation: {
+      report: reviewEvaluation,
+      artifactSha256: sha256(artifacts.reviewPolicyEvaluation),
+    },
+    executionPolicy: { automation: 'human-in-loop', enforcement: 'shadow' },
+  }
+}
+
+function findingAnalysisShadowFailure(error) {
+  const message = error instanceof Error ? error.message : String(error)
+  const artifactFailure = /does not exist|failed to read|ENOENT|valid JSON/i.test(message)
+  const code = artifactFailure
+    ? 'finding-analysis-artifact-unreadable'
+    : 'finding-analysis-internal-error'
+  return {
+    schemaVersion: 'pptx-nova-finding-analysis/v1-draft',
+    evaluation: {
+      status: 'failed',
+      errors: [{ code, message }],
+      diagnostics: [],
+    },
+    workflowProfile: {
+      profileId: 'refurbish-shadow/v1-draft',
+      kind: 'refurbish',
+      mode: 'standard',
+      mutationIntent: 'style',
+      deliveryStage: 'final',
+    },
+    bindings: {
+      assurance: 'runner-observed',
+      schemaDeclaredInputs: [],
+      source: null,
+      candidate: null,
+      changedScope: null,
+      mutationEvidence: {},
+      reviewEvaluation: null,
+    },
+    policy: { ruleSetVersion: 'pptx-nova-finding-rules/v1-shadow.1' },
+    analysisIdentity: null,
+    findings: [],
+    resolvedFindings: [],
+    summary: { countsComplete: false, errorCount: 1 },
+    agentGate: {
+      enforcement: 'shadow',
+      proposedStatus: 'fail',
+      effectiveStatus: 'not-applied',
+      governingFindingKeys: [],
+      nextAction: artifactFailure
+        ? 'regenerate-bound-evidence'
+        : 'diagnose-analysis-internal-error',
+    },
+  }
+}
+
+function runFindingAnalysis({
+  summary,
+  artifacts,
+  sourceSnapshot,
+  candidateSnapshot,
+  semanticDiff,
+  reviewEvaluation,
+}) {
+  const started = performance.now()
+  let report
+  try {
+    report = evaluateFindings(
+      buildFindingAnalysisInput({
+        artifacts,
+        sourceSnapshot,
+        candidateSnapshot,
+        semanticDiff,
+        reviewEvaluation,
+      }),
+    )
+  } catch (error) {
+    report = findingAnalysisShadowFailure(error)
+  }
+  const elapsedMs = durationMs(started)
+  writeJson(artifacts.findingAnalysis, report)
+  addInternalPhase(
+    summary,
+    'finding-analysis-shadow',
+    report.evaluation.status === 'complete' ? 'passed' : 'warning',
+    {
+      artifact: relativeArtifact(summary.runDir, artifacts.findingAnalysis),
+      durationMs: elapsedMs,
+      evaluationStatus: report.evaluation.status,
+      proposedStatus: report.agentGate.proposedStatus,
+      effectiveStatus: report.agentGate.effectiveStatus,
+      findingCount: Number(report.summary?.findingCount ?? 0),
+      objectCount: Number(candidateSnapshot.summary?.objectCount ?? 0),
+      additionalInspectCount: 0,
+      additionalRenderCount: 0,
+    },
+  )
+  summary.findingAnalysis = {
+    status: report.evaluation.status,
+    proposedStatus: report.agentGate.proposedStatus,
+    effectiveStatus: report.agentGate.effectiveStatus,
+    findingCount: Number(report.summary?.findingCount ?? 0),
+    unresolvedFindingCount: Number(report.summary?.unresolvedFindingCount ?? 0),
+    resolvedFindingCount: Number(report.summary?.resolvedFindingCount ?? 0),
+    nextAction: report.agentGate.nextAction,
+    topFindings: report.summary?.topFindings ?? [],
+    errors: report.evaluation.errors,
+    diagnostics: report.evaluation.diagnostics,
+  }
+  if (report.evaluation.status === 'failed') {
+    summary.warnings.push(
+      `finding-analysis shadow failed: ${report.evaluation.errors.map((item) => item.code).join(', ')}`,
+    )
+  }
+  return report
 }
 
 function runFidelityGate(summary, artifacts) {
@@ -911,6 +1207,8 @@ function runFidelityGate(summary, artifacts) {
     artifacts.visionDiff,
     '--layout-snapshot',
     artifacts.layoutFinal,
+    '--review-evaluation',
+    artifacts.reviewPolicyEvaluation,
   ]
   if (existsSync(artifacts.referenceMap)) {
     gateArgs.push('--reference-map', artifacts.referenceMap)
@@ -987,46 +1285,60 @@ function runFidelityGate(summary, artifacts) {
   }
 }
 
-function runLayoutSnapshot(summary, args, artifacts) {
-  runJsonPhase(summary, {
+function runLayoutSnapshots(summary, args, artifacts, sourceInspect) {
+  const candidateInspect = runJsonPhase(summary, {
     name: 'final-inspect',
     bin: args.xdocBin,
     args: ['pptx', 'inspect', artifacts.candidate, '--json'],
     artifact: artifacts.finalInspect,
   })
-  const snapshot = runJsonPhase(summary, {
-    name: 'layout-snapshot',
-    bin: process.execPath,
-    args: [
-      LAYOUT_SNAPSHOT_SCRIPT,
-      '--inspect',
-      artifacts.finalInspect,
-      '--output',
-      artifacts.layoutFinal,
-      '--json',
-    ],
-    artifact: artifacts.layoutFinal,
+  const sourceStarted = performance.now()
+  const sourceSnapshot = buildLayoutSnapshot(sourceInspect, {
+    sourceLabel: artifacts.inspect,
   })
-  const riskCount = Number(snapshot?.summary?.riskCount ?? 0)
-  const actionableRiskCount = Number(snapshot?.summary?.actionableRiskCount ?? riskCount)
-  const informationalRiskCount = Number(snapshot?.summary?.informationalRiskCount ?? 0)
-  const topActionable = Array.isArray(snapshot?.summary?.topActionable)
-    ? snapshot.summary.topActionable
+  writeJson(artifacts.layoutSource, sourceSnapshot)
+  addInternalPhase(summary, 'source-layout-snapshot', 'passed', {
+    artifact: relativeArtifact(summary.runDir, artifacts.layoutSource),
+    durationMs: durationMs(sourceStarted),
+    objectCount: Number(sourceSnapshot.summary?.objectCount ?? 0),
+    findingCount: Number(sourceSnapshot.summary?.riskCount ?? 0),
+    layoutSemanticSha256: layoutSemanticSha256(sourceSnapshot),
+  })
+
+  const candidateStarted = performance.now()
+  const candidateSnapshot = buildLayoutSnapshot(candidateInspect, {
+    sourceLabel: artifacts.finalInspect,
+  })
+  writeJson(artifacts.layoutFinal, candidateSnapshot)
+  addInternalPhase(summary, 'layout-snapshot', 'passed', {
+    artifact: relativeArtifact(summary.runDir, artifacts.layoutFinal),
+    durationMs: durationMs(candidateStarted),
+    objectCount: Number(candidateSnapshot.summary?.objectCount ?? 0),
+    findingCount: Number(candidateSnapshot.summary?.riskCount ?? 0),
+    layoutSemanticSha256: layoutSemanticSha256(candidateSnapshot),
+  })
+
+  const riskCount = Number(candidateSnapshot?.summary?.riskCount ?? 0)
+  const actionableRiskCount = Number(candidateSnapshot?.summary?.actionableRiskCount ?? riskCount)
+  const informationalRiskCount = Number(candidateSnapshot?.summary?.informationalRiskCount ?? 0)
+  const topActionable = Array.isArray(candidateSnapshot?.summary?.topActionable)
+    ? candidateSnapshot.summary.topActionable
     : []
   summary.layout = {
-    status: snapshot?.status ?? null,
+    status: candidateSnapshot?.status ?? null,
     riskCount,
     actionableRiskCount,
     informationalRiskCount,
-    slideIndexBase: Number(snapshot?.summary?.slideIndexBase ?? 0),
-    slideNumberBase: Number(snapshot?.summary?.slideNumberBase ?? 1),
-    affectedSlideCount: Number(snapshot?.summary?.affectedSlideCount ?? 0),
-    actionableSlideCount: Number(snapshot?.summary?.actionableSlideCount ?? 0),
-    actionableSlideIndexes: snapshot?.summary?.actionableSlideIndexes ?? [],
-    actionableSlideNumbers: snapshot?.summary?.actionableSlideNumbers ?? [],
-    actionablePreviewFiles: snapshot?.summary?.actionablePreviewFiles ?? [],
+    slideIndexBase: Number(candidateSnapshot?.summary?.slideIndexBase ?? 0),
+    slideNumberBase: Number(candidateSnapshot?.summary?.slideNumberBase ?? 1),
+    affectedSlideCount: Number(candidateSnapshot?.summary?.affectedSlideCount ?? 0),
+    actionableSlideCount: Number(candidateSnapshot?.summary?.actionableSlideCount ?? 0),
+    actionableSlideIndexes: candidateSnapshot?.summary?.actionableSlideIndexes ?? [],
+    actionableSlideNumbers: candidateSnapshot?.summary?.actionableSlideNumbers ?? [],
+    actionablePreviewFiles: candidateSnapshot?.summary?.actionablePreviewFiles ?? [],
     topActionable,
   }
+  return { sourceSnapshot, candidateSnapshot, candidateInspect }
 }
 
 function listPngFiles(dir, excludedNames = new Set()) {
@@ -1164,7 +1476,7 @@ function runSemanticDiff(summary, args, artifacts) {
       'pptx',
       'diff',
       '--source',
-      args.source,
+      artifacts.sourceSnapshot,
       '--candidate',
       artifacts.candidate,
       '--detail',
@@ -1174,6 +1486,7 @@ function runSemanticDiff(summary, args, artifacts) {
     artifact: artifacts.pptxDiff,
   })
   gateSemanticDiff(summary, report)
+  return report
 }
 
 function runRefurbishCompare(summary, args, artifacts, inspect) {
@@ -1297,7 +1610,7 @@ function runRefurbish(inputArgs) {
 
     const plan = buildRefurbishPlan({
       deckkit: args.deckkit,
-      source: args.source,
+      source: artifacts.sourceSnapshot,
       output: artifacts.candidate,
       catalog: args.catalog,
       explicit: args.explicit,
@@ -1393,10 +1706,24 @@ function runRefurbish(inputArgs) {
       summary.route.executed = 'fallback-patch'
     }
 
-    runLayoutSnapshot(summary, args, artifacts)
+    const { sourceSnapshot, candidateSnapshot } = runLayoutSnapshots(
+      summary,
+      args,
+      artifacts,
+      inspect,
+    )
+    const semanticDiff = runSemanticDiff(summary, args, artifacts)
+    const reviewEvaluation = runReviewPolicyEvaluation(summary, artifacts, candidateSnapshot)
+    runFindingAnalysis({
+      summary,
+      artifacts,
+      sourceSnapshot,
+      candidateSnapshot,
+      semanticDiff,
+      reviewEvaluation,
+    })
     runFidelityGate(summary, artifacts)
     runPreviews(summary, args, artifacts, inspect)
-    runSemanticDiff(summary, args, artifacts)
     const compareReport = runRefurbishCompare(summary, args, artifacts, inspect)
     materializeContactDiff(summary, args, artifacts, compareReport)
     runRefurbishCompareGate(summary, args, artifacts)

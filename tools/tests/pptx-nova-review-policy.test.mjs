@@ -544,6 +544,147 @@ test('fidelity gate applies fingerprint-reviewed findings and binds evidence has
   assert.equal(report.reviewPolicy.bindings.evidence.finalAudit.sha256, sha256(files.finalAudit))
 })
 
+test('fidelity gate rejects precomputed review evaluation when any bound evidence changes', async () => {
+  const { evaluateReviewPolicy } = await loadReviewPolicyModule()
+  for (const evidenceName of ['layout', 'finalAudit', 'visionDiff', 'referenceMap']) {
+    const root = mkdtempSync(join(tmpdir(), `pptx-nova-fidelity-precomputed-${evidenceName}-`))
+    const files = writeFidelityFixture(root, [])
+    const evaluationPath = join(root, 'review-policy-evaluation.json')
+    const layout = JSON.parse(readFileSync(files.layout, 'utf8'))
+    const evaluation = evaluateReviewPolicy({
+      policyDocument: null,
+      policyDocumentPath: '',
+      allowEmbeddedPolicy: false,
+      sourcePptx: files.source,
+      candidatePptx: files.candidate,
+      findings: layout.risks,
+      evidencePaths: {
+        layoutSnapshot: files.layout,
+        finalAudit: files.finalAudit,
+        visionDiff: files.visionDiff,
+        referenceMap: files.referenceMap,
+      },
+    })
+    assert.equal(evaluation.status, 'pass')
+    writeJson(evaluationPath, evaluation)
+    writeFileSync(files[evidenceName], `${readFileSync(files[evidenceName], 'utf8')}\n`)
+
+    const result = runNode(
+      [
+        join(skillRoot, 'scripts/pptx-nova-fidelity-gate.mjs'),
+        '--mode',
+        'refurbish',
+        '--source-inspect',
+        files.sourceInspect,
+        '--source-pptx',
+        files.source,
+        '--candidate-pptx',
+        files.candidate,
+        '--reference-map',
+        files.referenceMap,
+        '--final-audit',
+        files.finalAudit,
+        '--vision-diff',
+        files.visionDiff,
+        '--layout-snapshot',
+        files.layout,
+        '--review-evaluation',
+        evaluationPath,
+        '--json',
+      ],
+      1,
+    )
+    const report = JSON.parse(result.stdout)
+    assert.equal(report.status, 'fail')
+    assert.ok(
+      report.errors.some(
+        (item) =>
+          item.code === 'review-evaluation-binding-stale' &&
+          item.details?.evidence ===
+            {
+              layout: 'layoutSnapshot',
+              finalAudit: 'finalAudit',
+              visionDiff: 'visionDiff',
+              referenceMap: 'referenceMap',
+            }[evidenceName],
+      ),
+    )
+  }
+})
+
+test('fidelity gate rejects semantically inconsistent precomputed review evaluations', async () => {
+  const { evaluateReviewPolicy } = await loadReviewPolicyModule()
+  const variants = [
+    {
+      name: 'fail-without-errors',
+      mutate(evaluation) {
+        evaluation.status = 'fail'
+        evaluation.errors = []
+        evaluation.summary.errorCount = 0
+      },
+    },
+    {
+      name: 'array-count-mismatch',
+      mutate(evaluation) {
+        evaluation.summary.remainingActionableCount = evaluation.remainingActionable.length + 1
+      },
+    },
+  ]
+
+  for (const variant of variants) {
+    const root = mkdtempSync(join(tmpdir(), `pptx-nova-fidelity-semantic-${variant.name}-`))
+    const files = writeFidelityFixture(root, [])
+    const evaluationPath = join(root, 'review-policy-evaluation.json')
+    const layout = JSON.parse(readFileSync(files.layout, 'utf8'))
+    const evaluation = evaluateReviewPolicy({
+      policyDocument: null,
+      policyDocumentPath: '',
+      allowEmbeddedPolicy: false,
+      sourcePptx: files.source,
+      candidatePptx: files.candidate,
+      findings: layout.risks,
+      evidencePaths: {
+        layoutSnapshot: files.layout,
+        finalAudit: files.finalAudit,
+        visionDiff: files.visionDiff,
+        referenceMap: files.referenceMap,
+      },
+    })
+    assert.equal(evaluation.status, 'pass')
+    variant.mutate(evaluation)
+    writeJson(evaluationPath, evaluation)
+
+    const result = runNode(
+      [
+        join(skillRoot, 'scripts/pptx-nova-fidelity-gate.mjs'),
+        '--mode',
+        'refurbish',
+        '--source-inspect',
+        files.sourceInspect,
+        '--source-pptx',
+        files.source,
+        '--candidate-pptx',
+        files.candidate,
+        '--reference-map',
+        files.referenceMap,
+        '--final-audit',
+        files.finalAudit,
+        '--vision-diff',
+        files.visionDiff,
+        '--layout-snapshot',
+        files.layout,
+        '--review-evaluation',
+        evaluationPath,
+        '--json',
+      ],
+      1,
+    )
+    const report = JSON.parse(result.stdout)
+    assert.equal(report.status, 'fail')
+    assert.ok(report.errors.some((item) => item.code === 'review-evaluation-semantic-invalid'))
+  }
+})
+
 test('fidelity gate keeps an unreviewed empty placeholder actionable and rejects a stale rule', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-fidelity-review-fail-'))
   const unreviewed = writeFidelityFixture(join(root, 'unreviewed'), [])

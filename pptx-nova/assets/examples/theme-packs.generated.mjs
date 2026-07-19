@@ -893,6 +893,108 @@ export const BUILTIN_THEME_PACKS = {
       "2C2C2C"
     ],
     "iconStyle": "hairline"
+  },
+  "swiss-red": {
+    "id": "swiss-red",
+    "name": "Swiss Red",
+    "type": "themePack",
+    "description": "Swiss International Typographic Style palette: paper-white ground, Swiss red accents, near-black ink, and neutral hairline greys.",
+    "useCases": [
+      "design system",
+      "brand guidelines",
+      "typography showcase",
+      "product briefing"
+    ],
+    "colors": {
+      "accent1": "E2231A",
+      "accent2": "111111",
+      "accent3": "666666",
+      "accent4": "B45309",
+      "accent5": "15803D",
+      "accent6": "3A3A3A",
+      "dk1": "171717",
+      "lt1": "FFFFFF",
+      "dk2": "3A3A3A",
+      "lt2": "F4F4F4",
+      "hlink": "E2231A",
+      "folHlink": "8F150F"
+    },
+    "fonts": {
+      "heading": "Arial",
+      "body": "Arial"
+    },
+    "background": "FFFFFF",
+    "titleStyle": {
+      "font": {
+        "name": "Arial",
+        "bold": true
+      },
+      "color": "171717",
+      "size": "30pt",
+      "alignment": "left"
+    },
+    "bodyStyle": {
+      "font": "Arial",
+      "color": "3A3A3A",
+      "size": "12pt"
+    },
+    "generator": {
+      "colors": {
+        "primary": "E2231A",
+        "primaryDk": "B71C14",
+        "primaryDp": "8F150F",
+        "secondary": "111111",
+        "light": "D8D8D8",
+        "amber": "B45309",
+        "warn": "B71C14",
+        "textPri": "171717",
+        "textSec": "3A3A3A",
+        "textMut": "666666",
+        "pageBg": "FFFFFF",
+        "surfaceBg": "F4F4F4",
+        "surfaceAlt": "E7E7E7",
+        "heroBg": "111111",
+        "accentTextBg": "111111",
+        "accentText": "E2231A",
+        "onHero": "FFFFFF",
+        "onAccent": "FFFFFF",
+        "chartBg": "FFFFFF",
+        "chartAxis": "171717",
+        "chartGrid": "E7E7E7",
+        "tableHeaderBg": "E2231A",
+        "tableHeaderText": "FFFFFF",
+        "tableFirstColBg": "F4F4F4",
+        "tableBodyBg": "FFFFFF",
+        "tableBandBg": "F4F4F4",
+        "tableBorder": "C9C9C9",
+        "cardBg": "F4F4F4",
+        "cream": "FFFFFF",
+        "pale": "E7E7E7",
+        "divider": "C9C9C9",
+        "chromeColor": "111111",
+        "headerAccent": "E2231A",
+        "posBg": "EAF4EE",
+        "posTxt": "15803D",
+        "negBg": "FCEAE9",
+        "negTxt": "B71C14",
+        "white": "FFFFFF"
+      },
+      "sizes": {
+        "cover": "44pt",
+        "pageH1": "30pt",
+        "body": "12pt",
+        "eyebrow": "8pt",
+        "foot": "8pt"
+      }
+    },
+    "chartPalette": [
+      "E2231A",
+      "111111",
+      "666666",
+      "B45309",
+      "15803D"
+    ],
+    "iconStyle": "hairline"
   }
 }
 
@@ -1156,6 +1258,70 @@ export const BUILTIN_STYLE_PACKS = {
       "chart": {
         "panelW": 8.45,
         "calloutW": 3.2
+      }
+    }
+  },
+  "swiss": {
+    "id": "swiss",
+    "name": "Swiss Grid",
+    "type": "stylePack",
+    "description": "Swiss grid style: strict rectangular geometry, hairline grid rules, generous white space, black top rule with a red eyebrow accent, and micro chrome.",
+    "density": "medium",
+    "radius": "none",
+    "stroke": "hairline",
+    "shadow": "none",
+    "imageRatio": "grid-first",
+    "headerFooter": "micro",
+    "titleStyle": {
+      "font": {
+        "bold": true
+      },
+      "size": "30pt",
+      "alignment": "left"
+    },
+    "bodyStyle": {
+      "size": "12pt"
+    },
+    "generator": {
+      "sizes": {
+        "cover": "44pt",
+        "pageH1": "30pt",
+        "body": "12pt",
+        "eyebrow": "8pt",
+        "foot": "8pt"
+      },
+      "layout": {
+        "marginX": 0.65,
+        "gridGap": 0.25,
+        "rowGap": 0.3,
+        "cardPadX": 0.22,
+        "cardPadY": 0.18,
+        "agendaRowH": 1.0,
+        "kpiCardH": 3.2,
+        "pillarCardH": 3.5,
+        "workflowCardH": 3.15
+      },
+      "surface": {
+        "cardShape": "rectangle",
+        "panelShape": "rectangle",
+        "cardLine": true,
+        "cardLineWidth": "0.35pt",
+        "accentBarH": 0.04
+      },
+      "effects": {
+        "cardShadow": null,
+        "panelShadow": null
+      },
+      "chrome": {
+        "topBarH": 0.03,
+        "headerAccentW": 0.06,
+        "headerAccentH": 0.42,
+        "footerY": 7.05,
+        "watermark": false
+      },
+      "chart": {
+        "panelW": 8.2,
+        "calloutW": 3.0
       }
     }
   }

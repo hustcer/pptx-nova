@@ -1028,6 +1028,11 @@
       "path": "swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
+      "nativeSkinning": {
+        "themePack": "swiss-red",
+        "stylePack": "swiss",
+        "chromeSource": "themePack.generator.colors + stylePack.generator.chrome"
+      },
       "qualityProfile": {
         "minFontPt": 6.8,
         "labelFontPt": 6.8,
@@ -1138,10 +1143,12 @@
       },
       "refurbishProfile": {
         "schemaVersion": "pptx-nova-refurbish-profile/v1",
-        "mode": "manual-fallback",
+        "mode": "native",
         "nativeSkinning": {
-          "supported": false,
-          "commands": []
+          "supported": true,
+          "themePack": "swiss-red",
+          "stylePack": "swiss",
+          "commands": ["refurbish-skin", "chrome-apply", "remap-theme"]
         },
         "fallback": {
           "schemaVersion": "pptx-nova-refurbish-fallback/v1",
@@ -1175,7 +1182,7 @@
           "contentPolicy": "preserve-source-slides-and-editable-objects"
         },
         "requiredGates": [
-          "fallback-patch-report",
+          "refurbish-skin-report",
           "dry-run",
           "vision-diff",
           "refurbish-audit",
@@ -1183,8 +1190,8 @@
           "png-contact-review"
         ],
         "notes": [
-          "Swiss Grid refurbish uses an explicit red/black/white/gray palette instead of generic visualGrammar color derivation.",
-          "Preserve source slides and editable objects, then restyle backgrounds, theme fonts, text frames, shapes, tables, charts, and existing page chrome into the Swiss grid system."
+          "Use native skinning first via the swiss-red themePack and swiss stylePack; keep the fallback profile for catalog-driven recovery without switching DeckKits.",
+          "Preserve source slides and editable objects; restyle theme colors, fonts, backgrounds, text, shapes, tables, charts, and existing page chrome into the Swiss grid system."
         ]
       },
       "layoutContract": {

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process'
 import {
   copyFileSync,
   existsSync,
@@ -9,11 +8,21 @@ import {
   renameSync,
   rmSync,
   statSync,
-  writeFileSync,
 } from 'node:fs'
-import { basename, dirname, extname, join, relative, resolve } from 'node:path'
+import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
+import {
+  PhaseFailure,
+  buildAgentResult as buildRuntimeAgentResult,
+  buildPerformanceSummary as buildRuntimePerformanceSummary,
+  createRunnerRuntime,
+  durationMs,
+  finalizeRunnerSummary,
+  gateByName,
+  gateStatus,
+} from './lib/runner-runtime.mjs'
+import { createProgressReporter } from './pptx-nova-progress.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
@@ -22,6 +31,11 @@ const BUILD_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-build.mjs')
 const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
+const AGENT_RESULT_SCHEMA_VERSION = 'pptx-nova-create-result/v1'
+let progressReporter = createProgressReporter({ mode: 'off' })
+const { runJsonPhase, runPlainPhase, addInternalPhase, requireGate } = createRunnerRuntime({
+  getProgressReporter: () => progressReporter,
+})
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-create-run.mjs --deckkit <id> --content <content.json> --lock <deck_lock.json> --output <output.pptx> [options]
@@ -35,7 +49,9 @@ Options:
   --run-dir <path>        Run artifact directory. Defaults to <cwd>/.pptx-nova/create-<deckkit>-<timestamp>.
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc.
   --overwrite             Allow replacing an existing final output after all machine gates pass.
-  --json                  Print machine-readable run summary.
+  --progress <mode>       Progress stream: auto|jsonl|text|off. Defaults to auto.
+  --json                  Print the compact Agent result; the full summary is saved in the run directory.
+  --json-full             Print the complete run summary for debugging.
   --help                  Show this help.
 
 The runner executes validate-content, build, check-lock, dry-run, apply, vision-check,
@@ -43,15 +59,6 @@ and PNG/contact-sheet preview. It keeps all intermediate artifacts in the run di
 overwrites only current-run candidate artifacts, and still requires human/Agent visual
 review of the contact sheet before final delivery confidence.
 `
-
-class PhaseFailure extends Error {
-  constructor(phase, message, details = {}) {
-    super(message)
-    this.name = 'PhaseFailure'
-    this.phase = phase
-    Object.assign(this, details)
-  }
-}
 
 function parseArgs(argv) {
   const args = {
@@ -63,7 +70,9 @@ function parseArgs(argv) {
     runDir: '',
     xdocBin: 'xdoc',
     overwrite: false,
+    progress: 'auto',
     json: false,
+    jsonFull: false,
   }
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
@@ -74,6 +83,9 @@ function parseArgs(argv) {
       args.overwrite = true
     } else if (arg === '--json') {
       args.json = true
+    } else if (arg === '--json-full') {
+      args.json = true
+      args.jsonFull = true
     } else if (arg in valueFlags) {
       args[valueFlags[arg]] = valueAfter(argv, i, arg)
       i += 1
@@ -95,6 +107,7 @@ const valueFlags = {
   '--output': 'output',
   '--run-dir': 'runDir',
   '--xdoc-bin': 'xdocBin',
+  '--progress': 'progress',
 }
 
 function valueAfter(argv, index, flag) {
@@ -122,189 +135,6 @@ function safeSlug(value) {
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'))
-}
-
-function writeJson(path, value) {
-  mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
-}
-
-function durationMs(start) {
-  return Number((performance.now() - start).toFixed(2))
-}
-
-function relativeArtifact(runDir, path) {
-  return path ? relative(runDir, path) || '.' : null
-}
-
-function commandText(bin, args) {
-  return [bin, ...args]
-    .map((value) => (/[\s"']/.test(value) ? JSON.stringify(value) : value))
-    .join(' ')
-}
-
-function commandInvocation(bin, args) {
-  const ext = extname(bin).toLowerCase()
-  if (['.cjs', '.js', '.mjs'].includes(ext) && (bin.includes('/') || existsSync(bin))) {
-    return { bin: process.execPath, args: [bin, ...args] }
-  }
-  return { bin, args }
-}
-
-function saveStream(runDir, phase, kind, value) {
-  if (!value?.trim()) return null
-  const path = join(runDir, `${phase}.${kind}.txt`)
-  writeFileSync(path, value)
-  return path
-}
-
-function jsonStatusFailure(report) {
-  const status = typeof report?.status === 'string' ? report.status.toLowerCase() : ''
-  return ['error', 'fail', 'failed', 'blocked'].includes(status)
-}
-
-function jsonStatusFailureKind(report) {
-  return report?.error?.kind ?? report?.error?.code ?? report?.status ?? 'JsonStatusFailure'
-}
-
-function runJsonPhase(summary, { name, bin, args, artifact, cwd = summary.runDir }) {
-  const start = performance.now()
-  const command = commandInvocation(bin, args)
-  const result = spawnSync(command.bin, command.args, {
-    cwd,
-    encoding: 'utf8',
-    maxBuffer: 128 * 1024 * 1024,
-  })
-  if (result.error) {
-    summary.phases.push({
-      name,
-      status: 'failed',
-      exitCode: null,
-      durationMs: durationMs(start),
-      command: commandText(command.bin, command.args),
-      artifact: relativeArtifact(summary.runDir, artifact),
-      spawnError: result.error.message,
-    })
-    throw new PhaseFailure(name, `${name} could not start: ${result.error.message}`, {
-      kind: result.error.code ?? 'SpawnError',
-    })
-  }
-
-  const stderrPath = saveStream(summary.runDir, name, 'stderr', result.stderr ?? '')
-  let report = null
-  let parseError = null
-  try {
-    report = JSON.parse(result.stdout || '')
-    if (artifact) writeJson(artifact, report)
-  } catch (error) {
-    parseError = error
-    saveStream(summary.runDir, name, 'stdout', result.stdout ?? '')
-  }
-
-  const passed = result.status === 0 && !parseError && !jsonStatusFailure(report)
-  summary.phases.push({
-    name,
-    status: passed ? 'passed' : 'failed',
-    exitCode: result.status,
-    signal: result.signal ?? null,
-    durationMs: durationMs(start),
-    command: commandText(command.bin, command.args),
-    artifact: relativeArtifact(summary.runDir, artifact),
-    stderr: relativeArtifact(summary.runDir, stderrPath),
-  })
-
-  if (parseError) {
-    throw new PhaseFailure(name, `${name} did not emit valid JSON: ${parseError.message}`, {
-      exitCode: result.status,
-    })
-  }
-  if (result.status !== 0) {
-    const kind = jsonStatusFailureKind(report)
-    throw new PhaseFailure(
-      name,
-      `${name} failed with exit code ${result.status}${kind ? ` (${kind})` : ''}`,
-      { exitCode: result.status, kind, report },
-    )
-  }
-  if (jsonStatusFailure(report)) {
-    const kind = jsonStatusFailureKind(report)
-    throw new PhaseFailure(
-      name,
-      `${name} emitted failure JSON status ${JSON.stringify(report.status)}${kind ? ` (${kind})` : ''}`,
-      { exitCode: result.status, kind, report },
-    )
-  }
-  return report
-}
-
-function runPlainPhase(summary, { name, bin, args, cwd = summary.runDir }) {
-  const start = performance.now()
-  const command = commandInvocation(bin, args)
-  const result = spawnSync(command.bin, command.args, {
-    cwd,
-    encoding: 'utf8',
-    maxBuffer: 128 * 1024 * 1024,
-  })
-  const stdoutPath = saveStream(summary.runDir, name, 'stdout', result.stdout ?? '')
-  const stderrPath = saveStream(summary.runDir, name, 'stderr', result.stderr ?? '')
-  summary.phases.push({
-    name,
-    status: result.status === 0 && !result.error ? 'passed' : 'failed',
-    exitCode: result.status,
-    signal: result.signal ?? null,
-    durationMs: durationMs(start),
-    command: commandText(command.bin, command.args),
-    stdout: relativeArtifact(summary.runDir, stdoutPath),
-    stderr: relativeArtifact(summary.runDir, stderrPath),
-    spawnError: result.error?.message ?? null,
-  })
-  if (result.error) {
-    throw new PhaseFailure(name, `${name} could not start: ${result.error.message}`, {
-      kind: result.error.code ?? 'SpawnError',
-    })
-  }
-  if (result.status !== 0) {
-    throw new PhaseFailure(name, `${name} failed with exit code ${result.status}`, {
-      exitCode: result.status,
-    })
-  }
-}
-
-function addInternalPhase(summary, name, status, details = {}) {
-  summary.phases.push({
-    name,
-    status,
-    exitCode: null,
-    signal: null,
-    durationMs: details.durationMs ?? 0,
-    command: null,
-    artifact: details.artifact ?? null,
-    details,
-  })
-}
-
-function requireGate(summary, name, passed, details = {}) {
-  const { message, ...publicDetails } = details
-  const gate = {
-    name,
-    passed: Boolean(passed),
-    ...publicDetails,
-    ...(message ? { policy: message } : {}),
-  }
-  summary.gates.push(gate)
-  if (!gate.passed) {
-    throw new PhaseFailure(name, message ?? `${name} gate failed`, { report: details })
-  }
-  return gate
-}
-
-function gateByName(summary, name) {
-  return summary.gates.find((gate) => gate.name === name) ?? null
-}
-
-function gateStatus(gate) {
-  if (!gate) return 'not-run'
-  return gate.passed ? 'passed' : 'failed'
 }
 
 function countArray(value) {
@@ -364,6 +194,12 @@ function listPngFiles(dir, excludedNames = new Set()) {
 
 function previewPageBytes(page) {
   return Number(page?.byteLength ?? page?.file?.byteLength ?? 0)
+}
+
+function previewPagePixels(page) {
+  const width = Number(page?.width ?? page?.file?.width ?? 0)
+  const height = Number(page?.height ?? page?.file?.height ?? 0)
+  return width > 0 && height > 0 ? width * height : 0
 }
 
 function hasPathSeparator(value) {
@@ -472,6 +308,17 @@ function initialSummary(args, content, artifacts) {
       instructions:
         'Review contact-sheet.png and suspicious full-size PNGs before treating the deck as visually delivered.',
     },
+    requiredReferences:
+      Array.isArray(content?.slides) && content.slides.length >= 6
+        ? [
+            {
+              path: 'references/narrative-quality.md',
+              section: 'Narrative Gate',
+              reason:
+                'The generated deck contains at least six slides and requires narrative review.',
+            },
+          ]
+        : [],
     warnings: [],
     error: null,
   }
@@ -557,6 +404,29 @@ function buildAgentSummary(summary) {
         }
       : null,
   }
+}
+
+function buildPerformanceSummary(summary, totalMs) {
+  const previewPhase = summary.phases.find((phase) => phase.name === 'preview-render')
+  const previewRenderInvocations = previewPhase ? 1 : 0
+  const previewSlideCount = Number(previewPhase?.slideCount ?? 0)
+  const estimatedRenderedPixels = Number(previewPhase?.estimatedRenderedPixels ?? 0)
+  return buildRuntimePerformanceSummary(summary, totalMs, {
+    renderPhaseNames: ['preview-render'],
+    render: {
+      previewRenderInvocations,
+      previewSlideCount,
+      estimatedRenderedPixels,
+    },
+    budget: {
+      baselineInvocations: previewRenderInvocations ? 1 : 0,
+      actualInvocations: previewRenderInvocations,
+      withinBaseline: previewRenderInvocations <= 1,
+      baselineEstimatedPixels: estimatedRenderedPixels,
+      actualEstimatedPixels: estimatedRenderedPixels,
+      withinPixelBaseline: true,
+    },
+  })
 }
 
 function runCapabilityProbe(summary, args, artifacts) {
@@ -790,6 +660,14 @@ function runPreview(summary, args, artifacts) {
   const manifestPages = Array.isArray(report?.pages) ? report.pages.length : 0
   const manifestPagesNonEmpty =
     !Array.isArray(report?.pages) || report.pages.every((page) => previewPageBytes(page) > 0)
+  const phase = summary.phases.findLast((item) => item.name === 'preview-render')
+  if (phase) {
+    phase.slideCount = manifestPages
+    phase.estimatedRenderedPixels = (report?.pages ?? []).reduce(
+      (pixels, page) => pixels + previewPagePixels(page),
+      0,
+    )
+  }
   requireGate(
     summary,
     'png-previews',
@@ -846,6 +724,7 @@ function publishCandidate(summary, args, artifacts) {
 }
 
 function runCreate(inputArgs) {
+  const runStarted = performance.now()
   const { args, contentJson } = normalizeArgs(inputArgs)
   validatePaths(args)
   mkdirSync(args.runDir, { recursive: true })
@@ -866,10 +745,13 @@ function runCreate(inputArgs) {
     summary.status = 'needs-human-review'
     summary.machineGatesPassed = true
     summary.deliveryReady = false
-    finalizeArtifactPaths(summary, artifacts.summary)
-    summary.agentSummary = buildAgentSummary(summary)
-    writeJson(artifacts.summary, summary)
-    return summary
+    return finalizeRunnerSummary(summary, {
+      summaryPath: artifacts.summary,
+      totalMs: durationMs(runStarted),
+      finalizeArtifacts: finalizeArtifactPaths,
+      buildPerformance: buildPerformanceSummary,
+      buildAgentSummary,
+    })
   } catch (error) {
     summary.status = 'failed'
     summary.machineGatesPassed = false
@@ -880,9 +762,13 @@ function runCreate(inputArgs) {
       message: error.message,
       exitCode: error.exitCode ?? null,
     }
-    finalizeArtifactPaths(summary, artifacts.summary)
-    summary.agentSummary = buildAgentSummary(summary)
-    writeJson(artifacts.summary, summary)
+    finalizeRunnerSummary(summary, {
+      summaryPath: artifacts.summary,
+      totalMs: durationMs(runStarted),
+      finalizeArtifacts: finalizeArtifactPaths,
+      buildPerformance: buildPerformanceSummary,
+      buildAgentSummary,
+    })
     error.summary = summary
     throw error
   }
@@ -902,12 +788,22 @@ function printHuman(summary) {
 let parsedArgs = null
 try {
   parsedArgs = parseArgs(process.argv.slice(2))
+  progressReporter = createProgressReporter({
+    mode: parsedArgs.progress,
+    jsonOutput: parsedArgs.json,
+    context: { tool: 'pptx-nova-create-run', deckkit: parsedArgs.deckkit || 'from-content' },
+  })
   const summary = runCreate(parsedArgs)
-  if (parsedArgs.json) process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
-  else printHuman(summary)
+  if (parsedArgs.json) {
+    const output = parsedArgs.jsonFull
+      ? summary
+      : buildRuntimeAgentResult(summary, { schemaVersion: AGENT_RESULT_SCHEMA_VERSION })
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
+  } else printHuman(summary)
 } catch (error) {
   const summary = error.summary ?? {
     schemaVersion: 'pptx-nova-create-run/v1',
+    mode: 'create',
     status: 'failed',
     error: {
       phase: error.phase ?? 'preflight',
@@ -916,8 +812,12 @@ try {
       exitCode: error.exitCode ?? null,
     },
   }
-  if (parsedArgs?.json) process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
-  else if (summary.runDir) printHuman(summary)
+  if (parsedArgs?.json) {
+    const output = parsedArgs.jsonFull
+      ? summary
+      : buildRuntimeAgentResult(summary, { schemaVersion: AGENT_RESULT_SCHEMA_VERSION })
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
+  } else if (summary.runDir) printHuman(summary)
   else process.stderr.write(`[error] ${summary.error.phase}: ${summary.error.message}\n`)
   process.exitCode = 1
 }

@@ -63,6 +63,7 @@ function fileIdentity(path) {
 function readRefurbishResult(result) {
   const output = JSON.parse(result.stdout)
   assert.equal(output.schemaVersion, 'pptx-nova-refurbish-result/v1')
+  assert.equal(output.mode, 'refurbish')
   assert.equal('phases' in output, false)
   assert.ok(output.agentSummary)
   return output
@@ -71,6 +72,20 @@ function readRefurbishResult(result) {
 function readRefurbishSummary(result) {
   const output = readRefurbishResult(result)
   return JSON.parse(readFileSync(join(output.runDir, 'refurbish-run-summary.json'), 'utf8'))
+}
+
+function readCreateResult(result) {
+  const output = JSON.parse(result.stdout)
+  assert.equal(output.schemaVersion, 'pptx-nova-create-result/v1')
+  assert.equal(output.mode, 'create')
+  assert.equal('phases' in output, false)
+  assert.ok(output.agentSummary)
+  return output
+}
+
+function readCreateSummary(result) {
+  const output = readCreateResult(result)
+  return JSON.parse(readFileSync(join(output.runDir, 'create-run-summary.json'), 'utf8'))
 }
 
 function writeFakeXdoc(root, source) {
@@ -1603,12 +1618,18 @@ test('create runner executes DeckKit create gates and publishes after preview', 
     fakeXdoc,
     '--json',
   ])
-  const summary = JSON.parse(result.stdout)
+  const compactResult = readCreateResult(result)
+  const summary = readCreateSummary(result)
   const phaseNames = summary.phases.map((phase) => phase.name)
   const gateNames = summary.gates.map((gate) => gate.name)
 
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(summary.machineGatesPassed, true)
+  assert.equal(compactResult.performance.previewRenderInvocations, 1)
+  assert.equal(compactResult.performance.previewSlideCount, summary.slideCount)
+  assert.ok(compactResult.performance.estimatedRenderedPixels > 0)
+  assert.equal(compactResult.performance.renderBudget.withinBaseline, true)
+  assert.ok(result.stdout.length < readFileSync(summary.artifacts.summary, 'utf8').length)
   assert.equal(summary.agentSummary.decision, 'continue-to-human-review')
   assert.equal(existsSync(output), true)
   assert.equal(existsSync(join(runDir, 'candidate.pptx')), true)
@@ -1664,7 +1685,10 @@ test('create runner resolves relative xdoc-bin before changing into run dir', ()
     { cwd: root, encoding: 'utf8' },
   )
   assert.equal(result.status, 0, result.stderr || result.stdout)
-  const summary = JSON.parse(result.stdout)
+  const compactResult = readCreateResult(result)
+  const summary = JSON.parse(
+    readFileSync(join(compactResult.runDir, 'create-run-summary.json'), 'utf8'),
+  )
   const dryRun = summary.phases.find((phase) => phase.name === 'dry-run')
 
   assert.equal(summary.status, 'needs-human-review')
@@ -1704,7 +1728,7 @@ test('create runner allocates unique default run dirs instead of reusing evidenc
       { cwd: root, encoding: 'utf8' },
     )
     assert.equal(result.status, 0, result.stderr || result.stdout)
-    return JSON.parse(result.stdout)
+    return readCreateResult(result)
   }
 
   const first = run('out-1.pptx')
@@ -1713,8 +1737,8 @@ test('create runner allocates unique default run dirs instead of reusing evidenc
   assert.notEqual(first.runDir, second.runDir)
   assert.match(basename(first.runDir), /^create-swiss-grid-\d{8}-\d{9}-[0-9a-z]+-[0-9a-z]+$/)
   assert.match(basename(second.runDir), /^create-swiss-grid-\d{8}-\d{9}-[0-9a-z]+-[0-9a-z]+$/)
-  assert.equal(existsSync(first.artifacts.summary), true)
-  assert.equal(existsSync(second.artifacts.summary), true)
+  assert.equal(existsSync(join(first.runDir, 'create-run-summary.json')), true)
+  assert.equal(existsSync(join(second.runDir, 'create-run-summary.json')), true)
   assert.equal(existsSync(join(first.runDir, 'candidate.pptx')), true)
   assert.equal(existsSync(join(second.runDir, 'candidate.pptx')), true)
 })
@@ -1779,7 +1803,10 @@ if (args[0] === 'schema') {
     { cwd: repoRoot, encoding: 'utf8' },
   )
   assert.equal(result.status, 1, result.stderr || result.stdout)
-  const summary = JSON.parse(result.stdout)
+  const compactResult = readCreateResult(result)
+  const summary = JSON.parse(
+    readFileSync(join(compactResult.runDir, 'create-run-summary.json'), 'utf8'),
+  )
   const phaseNames = summary.phases.map((phase) => phase.name)
 
   assert.equal(summary.status, 'failed')
@@ -1828,6 +1855,21 @@ test('skill routes standard refurbishment through one compact reference', () => 
   assert.doesNotMatch(routingRow, /common-workflow|reference-create|deckkit-mode/)
   assert.match(reference, /Do not add `--contact-diff` for ordinary full-deck review/)
   assert.match(reference, /refurbish-plan\.json\.requiredReferences/)
+  assert.ok(reference.split('\n').length < 150)
+})
+
+test('skill routes standard translation finalization through one compact reference', () => {
+  const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
+  const reference = readFileSync(skillPath('references/translation-runner.md'), 'utf8')
+  const routingRow = skill
+    .split('\n')
+    .find((line) => line.includes('Translate an existing `.pptx`'))
+
+  assert.match(routingRow, /references\/translation-runner\.md/)
+  assert.doesNotMatch(routingRow, /common-workflow|edit-mode|inspect-and-edit/)
+  assert.match(reference, /stable translated candidate/i)
+  assert.match(reference, /requiredReferences\[\]/)
+  assert.match(reference, /must not trigger another full-deck render/)
   assert.ok(reference.split('\n').length < 150)
 })
 
@@ -2522,6 +2564,452 @@ if (args[0] === 'schema') {
   assert.equal(phaseNames.includes('refurbish-compare'), true)
   assert.equal(phaseNames.includes('refurbish-compare-delivery'), false)
   assert.equal(phaseNames.includes('publish'), false)
+})
+
+test('translation runner finalizes once and reuses compare evidence for contact aliases', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-run-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const units = join(root, 'units.json')
+  const translations = join(root, 'translations.json')
+  const output = join(root, 'out.pptx')
+  const runDir = join(root, 'run')
+  const log = join(root, 'render.log')
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  writeJson(units, { schemaVersion: 'pptx-i18n-scan/v1', status: 'pass' })
+  writeJson(translations, {
+    schemaVersion: 'pptx-i18n-translations/v1',
+    sourceLang: 'en',
+    targetLang: 'de',
+    translations: [],
+  })
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+import { createHash } from 'node:crypto'
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+const args = process.argv.slice(2)
+const after = (flag) => args[args.indexOf(flag) + 1]
+const identity = (path) => {
+  const bytes = readFileSync(path)
+  return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
+}
+const print = (value) => process.stdout.write(JSON.stringify(value))
+if (args[0] === 'pptx' && args[1] === 'inspect') {
+  print({ schemaVersion: 'pptx-inspect/v1', status: 'success', presentation: { slideCount: 21 }, slides: [] })
+} else if (args[0] === 'pptx' && args[1] === 'i18n-style-diff') {
+  print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true, blockerCount: 0 }, blockers: [] })
+} else if (args[0] === 'pptx' && args[1] === 'i18n-scan') {
+  print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true, blockerCount: 0 }, summary: { verifiedCount: 1 } })
+} else if (args[0] === 'pptx' && args[1] === 'vision-diff') {
+  print({ schemaVersion: 'pptx-vision-diff/v1', status: 'success', agentGate: { passed: true, blockerCount: 0, blockersByEvidenceClass: {} } })
+} else if (args[0] === 'pptx' && args[1] === 'preview') {
+  const dir = after('--output-dir')
+  const contact = after('--contact-sheet')
+  mkdirSync(dir, { recursive: true })
+  const pages = Array.from({ length: 21 }, (_, index) => {
+    const path = dir + '/slide-' + String(index + 1).padStart(3, '0') + '.png'
+    writeFileSync(path, 'png')
+    return { path, byteLength: 3, file: { path, status: 'ok', byteLength: 3, width: 100, height: 56 } }
+  })
+  writeFileSync(contact, 'contact')
+  print({ schemaVersion: 'pptx-preview/v1', status: 'success', pages, contactSheet: { path: contact, byteLength: 7, width: 100, height: 56 } })
+} else if (args[0] === 'pptx' && args[1] === 'diff') {
+  print({ schemaVersion: 'pptx-diff/v1', status: 'success', agentGate: { semanticStatus: 'pass' }, summary: { reliableChanges: 1 } })
+} else if (args[0] === 'pptx' && args[1] === 'contact-diff') {
+  const selector = after('--slides')
+  const [start, end] = selector.split('-').map(Number)
+  const slides = Array.from({ length: end - start + 1 }, (_, index) => start + index)
+  const output = after('--output')
+  const dpi = Number(after('--dpi'))
+  appendFileSync(process.env.FAKE_RENDER_LOG, JSON.stringify({ selector, dpi }) + '\\n')
+  writeFileSync(output, 'compare:' + selector)
+  print({
+    schemaVersion: 'pptx-contact-diff/v1', status: 'success',
+    source: identity(after('--source')), candidate: identity(after('--candidate')),
+    sourcePath: after('--source'), candidatePath: after('--candidate'), outputPath: output,
+    summary: { sourceSlideCount: 21, candidateSlideCount: 21, pairCount: slides.length, scopeMode: 'selected-slides', dpi },
+    scope: { requested: selector, slides, basis: 'source-slides' },
+    agentGate: { passed: true, status: 'pass', scopeMode: 'selected-slides', pairCount: slides.length },
+    render: { path: output, width: 100, height: 56 * slides.length, dpi }
+  })
+} else {
+  process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
+  process.exit(2)
+}
+`,
+  )
+
+  const result = runNode(
+    [
+      skillPath('scripts/pptx-nova-translation-run.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--units',
+      units,
+      '--translations',
+      translations,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc,
+      '--contact-diff',
+      '--json',
+    ],
+    { env: { ...process.env, FAKE_RENDER_LOG: log } },
+  )
+  const compact = JSON.parse(result.stdout)
+  const summary = JSON.parse(readFileSync(join(runDir, 'translation-run-summary.json'), 'utf8'))
+  assert.equal(compact.schemaVersion, 'pptx-nova-translation-result/v1')
+  assert.equal(compact.mode, 'translation')
+  assert.equal('phases' in compact, false)
+  assert.equal(compact.status, 'needs-human-review')
+  assert.equal(compact.performance.comparePartCount, 2)
+  assert.equal(compact.performance.compareRenderInvocations, 2)
+  assert.equal(compact.performance.renderInvocationsSaved, 2)
+  assert.equal(compact.performance.contactDiffReused, true)
+  assert.equal(existsSync(output), true)
+  assert.equal(
+    summary.phases.some((phase) => phase.name === 'contact-diff'),
+    false,
+  )
+  assert.equal(
+    summary.phases.some((phase) => phase.name === 'contact-diff-reuse'),
+    true,
+  )
+  assert.deepEqual(
+    readFileSync(log, 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line)),
+    [
+      { selector: '1-20', dpi: 192 },
+      { selector: '21-21', dpi: 192 },
+    ],
+  )
+  const aliases = JSON.parse(readFileSync(join(runDir, 'contact-diff.json'), 'utf8'))
+  assert.equal(aliases.parts.length, 2)
+  assert.equal(
+    aliases.parts.every((part) => existsSync(part.path)),
+    true,
+  )
+  assert.ok(
+    result.stdout.length < readFileSync(join(runDir, 'translation-run-summary.json')).length,
+  )
+
+  const fullRunDir = join(root, 'run-full')
+  const fullOutput = join(root, 'out-full.pptx')
+  const fullResult = runNode(
+    [
+      skillPath('scripts/pptx-nova-translation-run.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--units',
+      units,
+      '--translations',
+      translations,
+      '--output',
+      fullOutput,
+      '--run-dir',
+      fullRunDir,
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json-full',
+    ],
+    { env: { ...process.env, FAKE_RENDER_LOG: log } },
+  )
+  const full = JSON.parse(fullResult.stdout)
+  assert.equal(full.schemaVersion, 'pptx-nova-translation-run/v1')
+  assert.equal(Array.isArray(full.phases), true)
+  assert.equal(full.artifacts.summary, join(fullRunDir, 'translation-run-summary.json'))
+})
+
+test('translation runner routes unreviewed vision blockers to the precise reference', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-failure-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const units = join(root, 'units.json')
+  const translations = join(root, 'translations.json')
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  writeJson(units, { schemaVersion: 'pptx-i18n-scan/v1', status: 'pass' })
+  writeJson(translations, { schemaVersion: 'pptx-i18n-translations/v1', translations: [] })
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2)
+const print = (value) => process.stdout.write(JSON.stringify(value))
+if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'vision-diff') print({ schemaVersion: 'pptx-vision-diff/v1', status: 'success', agentGate: { passed: false, blockerCount: 1, blockersByEvidenceClass: { 'review-only': 1 } } })
+else process.exit(2)
+`,
+  )
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-translation-run.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--units',
+      units,
+      '--translations',
+      translations,
+      '--output',
+      join(root, 'out.pptx'),
+      '--run-dir',
+      join(root, 'run'),
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    1,
+  )
+  const compact = JSON.parse(result.stdout)
+  assert.equal(compact.status, 'failed')
+  assert.deepEqual(compact.requiredReferences, [
+    {
+      path: 'references/translation-mode.md',
+      section: 'Visual Parity Gate',
+      reason: 'Vision blockers require translation repair or a bound multi-column review.',
+    },
+  ])
+  assert.equal(existsSync(join(root, 'out.pptx')), false)
+})
+
+test('translation runner rejects preview manifests whose slide PNGs are missing', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-preview-failure-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const units = join(root, 'units.json')
+  const translations = join(root, 'translations.json')
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  writeJson(units, { schemaVersion: 'pptx-i18n-scan/v1', status: 'pass' })
+  writeJson(translations, { schemaVersion: 'pptx-i18n-translations/v1', translations: [] })
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+import { mkdirSync, writeFileSync } from 'node:fs'
+const args = process.argv.slice(2)
+const after = (flag) => args[args.indexOf(flag) + 1]
+const print = (value) => process.stdout.write(JSON.stringify(value))
+if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'vision-diff') print({ schemaVersion: 'pptx-vision-diff/v1', status: 'success', agentGate: { passed: true, blockersByEvidenceClass: {} } })
+else if (args[1] === 'preview') {
+  const dir = after('--output-dir')
+  const contact = after('--contact-sheet')
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(contact, 'contact')
+  print({ schemaVersion: 'pptx-preview/v1', status: 'success', pages: [{ path: dir + '/missing.png', byteLength: 3, file: { path: dir + '/missing.png', status: 'ok', byteLength: 3, width: 100, height: 56 } }], contactSheet: { path: contact, byteLength: 7 } })
+} else process.exit(2)
+`,
+  )
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-translation-run.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--units',
+      units,
+      '--translations',
+      translations,
+      '--output',
+      join(root, 'out.pptx'),
+      '--run-dir',
+      join(root, 'run'),
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    1,
+  )
+  const compact = JSON.parse(result.stdout)
+  assert.equal(compact.error.phase, 'translation-preview')
+  assert.equal(compact.requiredReferences[0].section, 'Visual evidence and performance')
+})
+
+test('translation runner requires the reviewed vision report to match the current finalizer evidence', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-review-stale-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const units = join(root, 'units.json')
+  const translations = join(root, 'translations.json')
+  const visionDiff = join(root, 'reviewed-vision-diff.json')
+  const review = join(root, 'multi-column-review.json')
+  const gate = join(root, 'multi-column-review-gate.json')
+  const pngPath = join(root, 'slide-001.png')
+  const png = Buffer.alloc(24)
+  Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(png, 0)
+  png.writeUInt32BE(13, 8)
+  png.write('IHDR', 12, 'ascii')
+  png.writeUInt32BE(100, 16)
+  png.writeUInt32BE(56, 20)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+  writeFileSync(pngPath, png)
+  writeJson(units, { schemaVersion: 'pptx-i18n-scan/v1', status: 'pass' })
+  writeJson(translations, { schemaVersion: 'pptx-i18n-translations/v1', translations: [] })
+  const issue = {
+    kind: 'multi-column-text-layout-review',
+    severity: 'medium',
+    evidenceClass: 'review-only',
+    slideIndex: 0,
+    shapeId: 9,
+  }
+  const vision = {
+    schemaVersion: 'pptx-vision-diff/v1',
+    status: 'success',
+    source,
+    candidate,
+    newIssues: [issue],
+    worsenedIssues: [],
+    agentGate: {
+      passed: false,
+      blockerCount: 1,
+      blockersByEvidenceClass: { 'review-only': 1 },
+    },
+  }
+  writeJson(visionDiff, vision)
+  const withPrefix = (path) => `sha256:${fileIdentity(path).sha256}`
+  writeJson(review, {
+    schemaVersion: 'pptx-nova-multi-column-review/v1',
+    candidate: { path: candidate, sha256: withPrefix(candidate) },
+    visionDiff: { path: visionDiff, sha256: withPrefix(visionDiff) },
+    reviews: [
+      {
+        slideIndex: 0,
+        shapeId: 9,
+        reviewer: 'human',
+        decision: 'pass',
+        png: { path: pngPath, sha256: withPrefix(pngPath), width: 100, height: 56 },
+        checks: {
+          noClipping: true,
+          columnFlowReadable: true,
+          noOverlap: true,
+          marginsAcceptable: true,
+        },
+        note: 'Reviewed at full size.',
+      },
+    ],
+  })
+  runNode([
+    skillPath('scripts/pptx-nova-multi-column-review-gate.mjs'),
+    '--candidate',
+    candidate,
+    '--vision-diff',
+    visionDiff,
+    '--review',
+    review,
+    '--output',
+    gate,
+    '--json',
+  ])
+  const pathOnlyVision = {
+    ...vision,
+    source: '/different/source.pptx',
+    candidate: '/different/candidate.pptx',
+  }
+  const positiveXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2)
+const print = (value) => process.stdout.write(JSON.stringify(value))
+if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'vision-diff') process.stdout.write(${JSON.stringify(JSON.stringify(pathOnlyVision))})
+else process.exit(2)
+`,
+  )
+  const positiveRunDir = join(root, 'run-path-normalized')
+  const positive = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-translation-run.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--units',
+      units,
+      '--translations',
+      translations,
+      '--output',
+      join(root, 'out-path-normalized.pptx'),
+      '--run-dir',
+      positiveRunDir,
+      '--xdoc-bin',
+      positiveXdoc,
+      '--multi-column-review-gate',
+      gate,
+      '--json',
+    ],
+    1,
+  )
+  assert.equal(JSON.parse(positive.stdout).error.phase, 'preview-render')
+  const positiveSummary = JSON.parse(
+    readFileSync(join(positiveRunDir, 'translation-run-summary.json'), 'utf8'),
+  )
+  assert.equal(
+    positiveSummary.gates.find((item) => item.name === 'multi-column-review-binding')?.passed,
+    true,
+  )
+  const currentVision = {
+    ...vision,
+    agentGate: { ...vision.agentGate, reviewRequiredCount: 1 },
+  }
+
+  const fakeXdoc = writeFakeXdoc(
+    root,
+    `#!/usr/bin/env node
+const args = process.argv.slice(2)
+const print = (value) => process.stdout.write(JSON.stringify(value))
+if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'vision-diff') process.stdout.write(${JSON.stringify(JSON.stringify(currentVision))})
+else process.exit(2)
+`,
+  )
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-translation-run.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--units',
+      units,
+      '--translations',
+      translations,
+      '--output',
+      join(root, 'out.pptx'),
+      '--run-dir',
+      join(root, 'run'),
+      '--xdoc-bin',
+      fakeXdoc,
+      '--multi-column-review-gate',
+      gate,
+      '--json',
+    ],
+    1,
+  )
+  const compact = JSON.parse(result.stdout)
+  assert.equal(compact.error.phase, 'multi-column-review-binding')
+  assert.equal(compact.requiredReferences[0].section, 'Visual Parity Gate')
 })
 
 test('translation compare delegates rendering to xdoc contact-diff', () => {
@@ -3537,4 +4025,128 @@ test('compare gate blocks contact-diff reports without a reported output path', 
     report.blockers.includes('contact-diff output path is missing'),
     report.blockers.join('\n'),
   )
+})
+
+test('shared runner runtime fails closed on invalid JSON and spawn errors without leaking commands to progress', async () => {
+  const { createRunnerRuntime, PhaseFailure } = await import(
+    skillUrl('scripts/lib/runner-runtime.mjs')
+  )
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-runtime-'))
+  const events = []
+  const runtime = createRunnerRuntime({
+    getProgressReporter: () => ({ emit: (event, details) => events.push({ event, ...details }) }),
+  })
+  const invalidSummary = { runDir: root, phases: [], gates: [] }
+  assert.throws(
+    () =>
+      runtime.runJsonPhase(invalidSummary, {
+        name: 'invalid-json',
+        bin: process.execPath,
+        args: ['-e', "process.stdout.write('not json')"],
+        artifact: join(root, 'invalid.json'),
+      }),
+    (error) => error instanceof PhaseFailure && error.phase === 'invalid-json',
+  )
+  assert.equal(existsSync(join(root, 'invalid-json.stdout.txt')), true)
+  assert.equal(invalidSummary.phases[0].status, 'failed')
+
+  const spawnSummary = { runDir: root, phases: [], gates: [] }
+  assert.throws(
+    () =>
+      runtime.runPlainPhase(spawnSummary, {
+        name: 'spawn-failure',
+        bin: join(root, 'missing-executable'),
+        args: ['secret-argument'],
+      }),
+    (error) => error instanceof PhaseFailure && error.phase === 'spawn-failure',
+  )
+  assert.equal(spawnSummary.phases[0].status, 'failed')
+  assert.equal(
+    events.some((event) => 'command' in event || JSON.stringify(event).includes('secret-argument')),
+    false,
+  )
+})
+
+test('shared visual evidence rejects empty manifests and stale declared hashes', async () => {
+  const { materializeCompareAliases, VisualEvidenceError } = await import(
+    skillUrl('scripts/lib/visual-evidence.mjs')
+  )
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-visual-evidence-'))
+  assert.throws(
+    () =>
+      materializeCompareAliases({
+        compareReport: { schemaVersion: 'pptx-nova-compare-manifest/v1', parts: [] },
+        compareReportPath: join(root, 'compare.json'),
+        compareOutputPath: join(root, 'compare.png'),
+        aliasOutputPath: join(root, 'alias.png'),
+        aliasReportPath: join(root, 'alias.json'),
+      }),
+    VisualEvidenceError,
+  )
+
+  const part = join(root, 'compare-01.png')
+  const partReport = join(root, 'compare-01.json')
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  writeFileSync(source, 'source')
+  writeFileSync(candidate, 'candidate')
+  writeFileSync(part, 'actual bytes')
+  writeJson(partReport, {
+    status: 'success',
+    source: fileIdentity(source),
+    candidate: fileIdentity(candidate),
+    outputPath: part,
+    render: { path: part },
+    scope: { slides: [1] },
+  })
+  assert.throws(
+    () =>
+      materializeCompareAliases({
+        compareReport: {
+          schemaVersion: 'pptx-nova-compare-manifest/v1',
+          status: 'success',
+          source: fileIdentity(source),
+          candidate: fileIdentity(candidate),
+          slideCount: 1,
+          coverage: { expectedSlides: [1], coveredSlides: [1] },
+          parts: [
+            {
+              partNumber: 1,
+              path: part,
+              reportPath: partReport,
+              slides: [1],
+              pairCount: 1,
+              byteLength: 12,
+              sha256: 'stale',
+            },
+          ],
+        },
+        compareReportPath: join(root, 'compare.json'),
+        compareOutputPath: join(root, 'compare.png'),
+        aliasOutputPath: join(root, 'alias.png'),
+        aliasReportPath: join(root, 'alias.json'),
+      }),
+    (error) => error instanceof VisualEvidenceError && /SHA-256/.test(error.message),
+  )
+
+  const single = join(root, 'single.png')
+  const singleAlias = join(root, 'single-alias.png')
+  const singleAliasReport = join(root, 'single-alias.json')
+  writeFileSync(single, 'single compare')
+  const singleResult = materializeCompareAliases({
+    compareReport: {
+      schemaVersion: 'pptx-contact-diff/v1',
+      status: 'success',
+      source: fileIdentity(source),
+      candidate: fileIdentity(candidate),
+      outputPath: single,
+      render: { path: single },
+    },
+    compareReportPath: join(root, 'single.json'),
+    compareOutputPath: single,
+    aliasOutputPath: singleAlias,
+    aliasReportPath: singleAliasReport,
+    sourceKind: 'refurbish',
+  })
+  assert.equal(singleResult.report.reuse.sourceKind, 'refurbish')
 })

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import {
   copyFileSync,
@@ -11,9 +10,21 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs'
-import { basename, dirname, extname, join, relative, resolve } from 'node:path'
+import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
+import {
+  PhaseFailure,
+  buildAgentResult as buildRuntimeAgentResult,
+  buildPerformanceSummary as buildRuntimePerformanceSummary,
+  createRunnerRuntime,
+  durationMs,
+  finalizeRunnerSummary,
+  gateByName,
+  gateStatus,
+  relativeArtifact,
+} from './lib/runner-runtime.mjs'
+import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual-evidence.mjs'
 import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { buildRefurbishPlan } from './pptx-nova-refurbish-plan.mjs'
 
@@ -31,6 +42,9 @@ const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 const AGENT_RESULT_SCHEMA_VERSION = 'pptx-nova-refurbish-result/v1'
 let progressReporter = createProgressReporter({ mode: 'off' })
+const { runJsonPhase, runPlainPhase, addInternalPhase, requireGate } = createRunnerRuntime({
+  getProgressReporter: () => progressReporter,
+})
 
 function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
@@ -63,15 +77,6 @@ The runner never marks manual PNG/contact review complete. A successful run exit
 status "needs-human-review", publishes the machine-validated candidate, and records all
 artifacts in the run directory.
 `
-
-class PhaseFailure extends Error {
-  constructor(phase, message, details = {}) {
-    super(message)
-    this.name = 'PhaseFailure'
-    this.phase = phase
-    Object.assign(this, details)
-  }
-}
 
 function parseArgs(argv) {
   const args = {
@@ -169,242 +174,6 @@ function safeSlug(value) {
 
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
-}
-
-function relativeArtifact(runDir, path) {
-  return path ? relative(runDir, path) || '.' : null
-}
-
-function durationMs(start) {
-  return Number((performance.now() - start).toFixed(2))
-}
-
-function commandText(bin, args) {
-  return [bin, ...args]
-    .map((value) => (/[\s"']/.test(value) ? JSON.stringify(value) : value))
-    .join(' ')
-}
-
-function commandInvocation(bin, args) {
-  const scriptExts = new Set(['.cjs', '.js', '.mjs'])
-  const ext = extname(bin).toLowerCase()
-  if (scriptExts.has(ext) && (bin.includes('/') || bin.includes('\\') || existsSync(bin))) {
-    return { bin: process.execPath, args: [bin, ...args] }
-  }
-  return { bin, args }
-}
-
-function saveStream(runDir, phase, kind, value) {
-  if (!value?.trim()) return null
-  const path = join(runDir, `${phase}.${kind}.txt`)
-  writeFileSync(path, value)
-  return path
-}
-
-function jsonStatusFailure(report) {
-  const status = typeof report?.status === 'string' ? report.status.toLowerCase() : ''
-  return ['error', 'fail', 'failed', 'blocked'].includes(status)
-}
-
-function jsonStatusFailureKind(report) {
-  return report?.error?.kind ?? report?.error?.code ?? report?.status ?? 'JsonStatusFailure'
-}
-
-function runJsonPhase(summary, options) {
-  const { name, bin, args, artifact, cwd = summary.runDir } = options
-  const start = performance.now()
-  const command = commandInvocation(bin, args)
-  progressReporter.emit('phase-start', {
-    phase: name,
-    executable: basename(command.bin),
-    argumentCount: command.args.length,
-  })
-  const result = spawnSync(command.bin, command.args, {
-    cwd,
-    encoding: 'utf8',
-    maxBuffer: 128 * 1024 * 1024,
-    env: options.forwardProgress ? { ...process.env, PPTX_NOVA_PROGRESS_FD: '3' } : process.env,
-    stdio: options.forwardProgress
-      ? ['ignore', 'pipe', 'pipe', process.stderr]
-      : ['ignore', 'pipe', 'pipe'],
-  })
-  if (result.error) {
-    summary.phases.push({
-      name,
-      status: 'failed',
-      exitCode: null,
-      signal: null,
-      durationMs: durationMs(start),
-      command: commandText(command.bin, command.args),
-      artifact: relativeArtifact(summary.runDir, artifact),
-      stderr: null,
-      spawnError: result.error.message,
-    })
-    progressReporter.emit('phase-complete', {
-      phase: name,
-      status: 'failed',
-      durationMs: durationMs(start),
-      error: result.error.message,
-    })
-    throw new PhaseFailure(name, `${name} could not start: ${result.error.message}`, {
-      kind: result.error.code ?? 'SpawnError',
-    })
-  }
-  const stderrPath = saveStream(summary.runDir, name, 'stderr', result.stderr ?? '')
-  let report = null
-  let parseError = null
-  try {
-    report = JSON.parse(result.stdout || '')
-    if (artifact) writeJson(artifact, report)
-  } catch (error) {
-    parseError = error
-    saveStream(summary.runDir, name, 'stdout', result.stdout ?? '')
-  }
-
-  const phase = {
-    name,
-    status: result.status === 0 && !parseError && !jsonStatusFailure(report) ? 'passed' : 'failed',
-    exitCode: result.status,
-    signal: result.signal ?? null,
-    durationMs: durationMs(start),
-    command: commandText(command.bin, command.args),
-    artifact: relativeArtifact(summary.runDir, artifact),
-    stderr: relativeArtifact(summary.runDir, stderrPath),
-  }
-  summary.phases.push(phase)
-  progressReporter.emit('phase-complete', {
-    phase: name,
-    status: phase.status,
-    durationMs: phase.durationMs,
-    exitCode: phase.exitCode,
-    artifact: phase.artifact,
-  })
-
-  if (parseError) {
-    throw new PhaseFailure(name, `${name} did not emit valid JSON: ${parseError.message}`, {
-      exitCode: result.status,
-      report,
-    })
-  }
-  if (result.status !== 0) {
-    const kind = jsonStatusFailureKind(report)
-    throw new PhaseFailure(
-      name,
-      `${name} failed with exit code ${result.status}${kind ? ` (${kind})` : ''}`,
-      { exitCode: result.status, kind, report },
-    )
-  }
-  if (jsonStatusFailure(report)) {
-    const kind = jsonStatusFailureKind(report)
-    throw new PhaseFailure(
-      name,
-      `${name} emitted failure JSON status ${JSON.stringify(report.status)}${kind ? ` (${kind})` : ''}`,
-      { exitCode: result.status, kind, report },
-    )
-  }
-  return report
-}
-
-function runPlainPhase(summary, options) {
-  const { name, bin, args, cwd = summary.runDir } = options
-  const start = performance.now()
-  const command = commandInvocation(bin, args)
-  progressReporter.emit('phase-start', {
-    phase: name,
-    executable: basename(command.bin),
-    argumentCount: command.args.length,
-  })
-  const result = spawnSync(command.bin, command.args, {
-    cwd,
-    encoding: 'utf8',
-    maxBuffer: 128 * 1024 * 1024,
-  })
-  if (result.error) {
-    summary.phases.push({
-      name,
-      status: 'failed',
-      exitCode: null,
-      signal: null,
-      durationMs: durationMs(start),
-      command: commandText(command.bin, command.args),
-      artifact: null,
-      stdout: null,
-      stderr: null,
-      spawnError: result.error.message,
-    })
-    progressReporter.emit('phase-complete', {
-      phase: name,
-      status: 'failed',
-      durationMs: durationMs(start),
-      error: result.error.message,
-    })
-    throw new PhaseFailure(name, `${name} could not start: ${result.error.message}`, {
-      kind: result.error.code ?? 'SpawnError',
-    })
-  }
-  const stdoutPath = saveStream(summary.runDir, name, 'stdout', result.stdout ?? '')
-  const stderrPath = saveStream(summary.runDir, name, 'stderr', result.stderr ?? '')
-  const phase = {
-    name,
-    status: result.status === 0 ? 'passed' : 'failed',
-    exitCode: result.status,
-    signal: result.signal ?? null,
-    durationMs: durationMs(start),
-    command: commandText(command.bin, command.args),
-    artifact: null,
-    stdout: relativeArtifact(summary.runDir, stdoutPath),
-    stderr: relativeArtifact(summary.runDir, stderrPath),
-  }
-  summary.phases.push(phase)
-  progressReporter.emit('phase-complete', {
-    phase: name,
-    status: phase.status,
-    durationMs: phase.durationMs,
-    exitCode: phase.exitCode,
-  })
-  if (result.status !== 0) {
-    throw new PhaseFailure(name, `${name} failed with exit code ${result.status}`, {
-      exitCode: result.status,
-    })
-  }
-}
-
-function addInternalPhase(summary, name, status, details = {}) {
-  summary.phases.push({
-    name,
-    status,
-    exitCode: null,
-    signal: null,
-    durationMs: 0,
-    command: null,
-    artifact: details.artifact ?? null,
-    details,
-  })
-  progressReporter.emit('phase-complete', { phase: name, status, ...details })
-}
-
-function requireGate(summary, name, passed, details = {}) {
-  const { message, ...publicDetails } = details
-  const gate = {
-    name,
-    passed: Boolean(passed),
-    ...publicDetails,
-    ...(message ? { policy: message } : {}),
-  }
-  summary.gates.push(gate)
-  if (!gate.passed) {
-    throw new PhaseFailure(name, message ?? `${name} gate failed`, { report: details })
-  }
-  return gate
-}
-
-function gateByName(summary, name) {
-  return summary.gates.find((gate) => gate.name === name) ?? null
-}
-
-function gateStatus(gate) {
-  if (!gate) return 'not-run'
-  return gate.passed ? 'passed' : 'failed'
 }
 
 function artifactSet(summary, keys) {
@@ -526,18 +295,6 @@ function buildAgentSummary(summary) {
 }
 
 function buildPerformanceSummary(summary, totalMs) {
-  const measured = summary.phases
-    .filter((phase) => Number.isFinite(phase.durationMs) && phase.durationMs > 0)
-    .map((phase) => ({ name: phase.name, durationMs: phase.durationMs }))
-  const renderNames = new Set([
-    'preview-render',
-    'preview-render-fallback-convert',
-    'contact-diff',
-    'refurbish-compare',
-  ])
-  const renderMs = measured
-    .filter((phase) => renderNames.has(phase.name))
-    .reduce((sum, phase) => sum + phase.durationMs, 0)
   const comparePhase = summary.phases.find((phase) => phase.name === 'refurbish-compare')
   const compareRenderInvocations = Number(comparePhase?.renderInvocations ?? 0)
   const comparePartCount = Number(comparePhase?.partCount ?? 0)
@@ -547,18 +304,23 @@ function buildPerformanceSummary(summary, totalMs) {
   )
   const estimatedRenderedPixels = Number(comparePhase?.estimatedRenderedPixels ?? 0)
   const baselineEstimatedPixels = Number(comparePhase?.baselineEstimatedPixels ?? 0)
-  return {
-    schemaVersion: 'pptx-nova-performance/v1',
-    totalMs,
-    measuredPhaseMs: Number(measured.reduce((sum, phase) => sum + phase.durationMs, 0).toFixed(2)),
-    renderMs: Number(renderMs.toFixed(2)),
-    renderShare: totalMs > 0 ? Number((renderMs / totalMs).toFixed(4)) : 0,
-    compareRenderInvocations,
-    comparePartCount,
-    compareRetryInvocations,
-    estimatedRenderedPixels,
-    renderInvocationsSaved,
-    renderBudget: {
+  return buildRuntimePerformanceSummary(summary, totalMs, {
+    renderPhaseNames: [
+      'preview-render',
+      'preview-render-fallback-convert',
+      'contact-diff',
+      'refurbish-compare',
+    ],
+    render: {
+      compareRenderInvocations,
+      comparePartCount,
+      compareRetryInvocations,
+      estimatedRenderedPixels,
+      renderInvocationsSaved,
+      contactDiffRequested: Boolean(summary.review?.contactDiffRequested),
+      contactDiffReused: summary.review?.contactDiffReuse?.status === 'reused',
+    },
+    budget: {
       baselineInvocations: comparePartCount,
       actualInvocations: compareRenderInvocations,
       withinBaseline: compareRenderInvocations <= comparePartCount,
@@ -572,25 +334,7 @@ function buildPerformanceSummary(summary, totalMs) {
       withinPixelRetryBudget:
         estimatedRenderedPixels <= Math.round(baselineEstimatedPixels * 1.5625),
     },
-    contactDiffRequested: Boolean(summary.review?.contactDiffRequested),
-    contactDiffReused: summary.review?.contactDiffReuse?.status === 'reused',
-    topPhases: [...measured].sort((left, right) => right.durationMs - left.durationMs).slice(0, 5),
-  }
-}
-
-function buildAgentResult(summary) {
-  return {
-    schemaVersion: AGENT_RESULT_SCHEMA_VERSION,
-    status: summary.status,
-    machineGatesPassed: Boolean(summary.machineGatesPassed),
-    deliveryReady: Boolean(summary.deliveryReady),
-    needsHumanReview: Boolean(summary.needsHumanReview),
-    runDir: summary.runDir ?? null,
-    output: summary.output ?? null,
-    performance: summary.performance ?? null,
-    agentSummary: summary.agentSummary ?? null,
-    error: summary.error ?? null,
-  }
+  })
 }
 
 function visionCounts(report, classification) {
@@ -771,6 +515,7 @@ function artifactPaths(runDir) {
 function initialSummary(args, artifacts) {
   return {
     schemaVersion: 'pptx-nova-refurbish-run/v1',
+    mode: 'refurbish',
     status: 'running',
     machineGatesPassed: false,
     deliveryReady: false,
@@ -1383,120 +1128,31 @@ function runPreviews(summary, args, artifacts, inspect) {
   )
 }
 
-function numberedArtifactPath(path, partNumber, partCount) {
-  const extension = extname(path)
-  const stem = path.slice(0, -extension.length)
-  const width = Math.max(2, String(partCount).length)
-  return `${stem}-${String(partNumber).padStart(width, '0')}${extension}`
-}
-
 function materializeContactDiff(summary, args, artifacts, compareReport) {
   if (!args.contactDiff) return
-  const multipart = compareReport?.schemaVersion === 'pptx-nova-compare-manifest/v1'
-  let report
-  let partCount = 1
-  if (multipart) {
-    partCount = compareReport.parts?.length ?? 0
-    const parts = compareReport.parts.map((part, index) => {
-      const partNumber = index + 1
-      const path = numberedArtifactPath(artifacts.contactDiff, partNumber, partCount)
-      const reportPath = numberedArtifactPath(artifacts.contactDiffReport, partNumber, partCount)
-      copyFileSync(part.path, path)
-      const sourcePartReport = JSON.parse(readFileSync(part.reportPath, 'utf8'))
-      writeJson(reportPath, {
-        ...sourcePartReport,
-        outputPath: path,
-        output: path,
-        render: sourcePartReport?.render
-          ? { ...sourcePartReport.render, path }
-          : sourcePartReport?.render,
-        reuse: {
-          status: 'reused',
-          sourceReport: part.reportPath,
-          sourcePath: part.path,
-        },
-      })
-      return {
-        ...part,
-        path,
-        reportPath,
-        byteLength: statSync(path).size,
-        sha256: sha256(path),
-        reusedFrom: { path: part.path, reportPath: part.reportPath },
-      }
-    })
-    report = {
-      ...compareReport,
-      kind: 'contact',
-      parts,
-      reuse: {
-        status: 'reused',
-        sourceKind: compareReport.kind,
-        sourceReport: artifacts.refurbishCompareReport,
-        renderInvocationsSaved: partCount,
-      },
-    }
-    summary.artifacts.contactDiffParts = parts.map((part) => part.path)
-  } else {
-    copyFileSync(artifacts.refurbishCompare, artifacts.contactDiff)
-    report = {
-      ...compareReport,
-      outputPath: artifacts.contactDiff,
-      output: artifacts.contactDiff,
-      render: compareReport?.render
-        ? { ...compareReport.render, path: artifacts.contactDiff }
-        : compareReport?.render,
-      reuse: {
-        status: 'reused',
-        sourceKind: 'refurbish',
-        sourceReport: artifacts.refurbishCompareReport,
-        sourcePath: artifacts.refurbishCompare,
-        renderInvocationsSaved: 1,
-      },
-    }
-  }
-  writeJson(artifacts.contactDiffReport, report)
-  const aliasEvidenceValid = multipart
-    ? partCount > 0 &&
-      report.parts.every((part) => {
-        if (
-          !existsSync(part.path) ||
-          statSync(part.path).size <= 0 ||
-          !existsSync(part.reportPath)
-        ) {
-          return false
-        }
-        const partReport = JSON.parse(readFileSync(part.reportPath, 'utf8'))
-        return (
-          part.sha256 === sha256(part.path) &&
-          part.byteLength === statSync(part.path).size &&
-          partReport.outputPath === part.path &&
-          partReport.render?.path === part.path
-        )
-      })
-    : existsSync(artifacts.contactDiff) &&
-      statSync(artifacts.contactDiff).size > 0 &&
-      existsSync(artifacts.contactDiffReport) &&
-      sha256(artifacts.contactDiff) === sha256(artifacts.refurbishCompare) &&
-      report.outputPath === artifacts.contactDiff &&
-      report.render?.path === artifacts.contactDiff
+  const materialized = materializeCompareAliases({
+    compareReport,
+    compareReportPath: artifacts.refurbishCompareReport,
+    compareOutputPath: artifacts.refurbishCompare,
+    aliasOutputPath: artifacts.contactDiff,
+    aliasReportPath: artifacts.contactDiffReport,
+    aliasKind: 'contact',
+    sourceKind: 'refurbish',
+  })
+  const { report, partCount, renderInvocationsSaved } = materialized
+  summary.artifacts.contactDiffParts = materialized.partPaths
   summary.review.contactDiffReuse = report.reuse
-  requireGate(
-    summary,
-    'contact-diff-artifact',
-    report?.status === 'success' && aliasEvidenceValid,
-    {
-      status: report?.status ?? '',
-      partCount,
-      reused: true,
-      renderInvocationsSaved: report.reuse.renderInvocationsSaved,
-      message: 'Requested contact-diff aliases were not materialized from final compare evidence',
-    },
-  )
+  requireGate(summary, 'contact-diff-artifact', report?.status === 'success', {
+    status: report?.status ?? '',
+    partCount,
+    reused: true,
+    renderInvocationsSaved,
+    message: 'Requested contact-diff aliases were not materialized from final compare evidence',
+  })
   addInternalPhase(summary, 'contact-diff-reuse', 'passed', {
     artifact: relativeArtifact(args.runDir, artifacts.contactDiffReport),
     partCount,
-    renderInvocationsSaved: report.reuse.renderInvocationsSaved,
+    renderInvocationsSaved,
   })
 }
 
@@ -1556,38 +1212,10 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
     artifact: artifacts.refurbishCompareReport,
     forwardProgress: true,
   })
-  const parts =
-    report?.schemaVersion === 'pptx-nova-compare-manifest/v1' ? (report.parts ?? []) : [report]
-  const renderMetrics = parts.reduce(
-    (metrics, part) => {
-      const partReport = part?.reportPath ? JSON.parse(readFileSync(part.reportPath, 'utf8')) : part
-      const attemptReports = Array.isArray(part?.attempts)
-        ? part.attempts
-        : Array.isArray(partReport?.pptxNovaCompare?.attempts)
-          ? partReport.pptxNovaCompare.attempts
-          : []
-      const attempts = Math.max(1, attemptReports.length)
-      const width = Number(partReport?.render?.width ?? 0)
-      const height = Number(partReport?.render?.height ?? 0)
-      const finalDpi = Number(partReport?.render?.dpi ?? 0)
-      metrics.renderInvocations += attempts
-      if (width > 0 && height > 0) {
-        const pixelsAtDpi = (dpi) => {
-          const scale = finalDpi > 0 && dpi > 0 ? dpi / finalDpi : 1
-          return Math.round(width * height * scale * scale)
-        }
-        metrics.baselineEstimatedPixels += pixelsAtDpi(192)
-        metrics.estimatedRenderedPixels += (
-          attemptReports.length ? attemptReports : [{ dpi: finalDpi }]
-        ).reduce((pixels, attempt) => pixels + pixelsAtDpi(Number(attempt?.dpi ?? finalDpi)), 0)
-      }
-      return metrics
-    },
-    { renderInvocations: 0, estimatedRenderedPixels: 0, baselineEstimatedPixels: 0 },
-  )
+  const renderMetrics = analyzeCompareRendering(report)
   const phase = summary.phases.findLast((item) => item.name === 'refurbish-compare')
   if (phase) {
-    phase.partCount = parts.length
+    phase.partCount = renderMetrics.partCount
     phase.renderInvocations = renderMetrics.renderInvocations
     phase.estimatedRenderedPixels = renderMetrics.estimatedRenderedPixels
     phase.baselineEstimatedPixels = renderMetrics.baselineEstimatedPixels
@@ -1776,11 +1404,13 @@ function runRefurbish(inputArgs) {
     summary.status = 'needs-human-review'
     summary.machineGatesPassed = true
     summary.deliveryReady = false
-    finalizeArtifactPaths(summary, artifacts.summary)
-    summary.performance = buildPerformanceSummary(summary, durationMs(runStarted))
-    summary.agentSummary = buildAgentSummary(summary)
-    writeJson(artifacts.summary, summary)
-    return summary
+    return finalizeRunnerSummary(summary, {
+      summaryPath: artifacts.summary,
+      totalMs: durationMs(runStarted),
+      finalizeArtifacts: finalizeArtifactPaths,
+      buildPerformance: buildPerformanceSummary,
+      buildAgentSummary,
+    })
   } catch (error) {
     summary.status = 'failed'
     summary.machineGatesPassed = false
@@ -1791,10 +1421,13 @@ function runRefurbish(inputArgs) {
       message: error.message,
       exitCode: error.exitCode ?? null,
     }
-    finalizeArtifactPaths(summary, artifacts.summary)
-    summary.performance = buildPerformanceSummary(summary, durationMs(runStarted))
-    summary.agentSummary = buildAgentSummary(summary)
-    writeJson(artifacts.summary, summary)
+    finalizeRunnerSummary(summary, {
+      summaryPath: artifacts.summary,
+      totalMs: durationMs(runStarted),
+      finalizeArtifacts: finalizeArtifactPaths,
+      buildPerformance: buildPerformanceSummary,
+      buildAgentSummary,
+    })
     error.summary = summary
     throw error
   }
@@ -1823,12 +1456,15 @@ try {
   })
   const summary = runRefurbish(parsedArgs)
   if (parsedArgs.json) {
-    const output = parsedArgs.jsonFull ? summary : buildAgentResult(summary)
+    const output = parsedArgs.jsonFull
+      ? summary
+      : buildRuntimeAgentResult(summary, { schemaVersion: AGENT_RESULT_SCHEMA_VERSION })
     process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
   } else printHuman(summary)
 } catch (error) {
   const summary = error.summary ?? {
     schemaVersion: 'pptx-nova-refurbish-run/v1',
+    mode: 'refurbish',
     status: 'failed',
     error: {
       phase: error.phase ?? 'preflight',
@@ -1838,7 +1474,9 @@ try {
     },
   }
   if (parsedArgs?.json) {
-    const output = parsedArgs.jsonFull ? summary : buildAgentResult(summary)
+    const output = parsedArgs.jsonFull
+      ? summary
+      : buildRuntimeAgentResult(summary, { schemaVersion: AGENT_RESULT_SCHEMA_VERSION })
     process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
   } else if (summary.runDir) printHuman(summary)
   else process.stderr.write(`[error] ${summary.error.phase}: ${summary.error.message}\n`)

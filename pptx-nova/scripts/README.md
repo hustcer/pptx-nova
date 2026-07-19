@@ -16,10 +16,11 @@ Use these entry points from skill workflows:
 - `pptx-nova-create-run.mjs` - execute the standard DeckKit-first create
   pipeline from existing `content.json` and `deck_lock.json`. It runs
   validate-content, build, check-lock, dry-run, apply, vision-check, and
-  PNG/contact-sheet preview, preserves every artifact in the run directory, then
-  atomically publishes the final output after machine gates pass. A successful
-  run reports `needs-human-review`; read `create-run-summary.json.agentSummary`
-  for the stable agent-facing gate and artifact summary.
+  PNG/contact-sheet preview through the shared runner runtime, preserves every
+  artifact in the run directory, then atomically publishes the final output
+  after machine gates pass. `--json` emits a compact Agent result with
+  performance evidence; use `--json-full` or the persisted
+  `create-run-summary.json` only for full diagnostics.
 - `pptx-nova-deckkit-refurbish-profile-fill.mjs` - generate missing
   `refurbishProfile` catalog entries for delivery DeckKits. It uses
   DeckKit-specific palette/font overrides where available, preserves true native
@@ -55,6 +56,12 @@ Use these entry points from skill workflows:
   reports `needs-human-review`; it never claims the visual review is complete.
   Read compact stdout first, then `refurbish-run-summary.json.agentSummary` only when deeper phase
   evidence is needed.
+- `pptx-nova-translation-run.mjs` - finalize an already stable translated candidate. It snapshots
+  source/candidate/translation contracts, runs style, target-consistency, vision, preview, semantic,
+  full-deck comparison, and publication-binding gates, and can materialize `contact-diff` aliases
+  from the same compare evidence without another render. `--json` emits a compact Agent result;
+  `--json-full` or `translation-run-summary.json` provides complete diagnostics. Machine success
+  remains `needs-human-review`.
 - `pptx-nova-review-policy.mjs` - shared pure policy evaluator for hash-bound
   reviewed findings. It never deletes detector output: exact source SHA-256,
   slide part, shape id, placeholder type/idx, and expected state are required

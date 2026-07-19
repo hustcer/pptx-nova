@@ -482,10 +482,11 @@ function validateMultipartManifest(report, blockers) {
     }
     const partReportPath = typeof part.reportPath === 'string' ? resolve(part.reportPath) : ''
     const partReportState = fileState(partReportPath || join(process.cwd(), '__missing__'))
+    let partReport = null
     if (!partReportState.exists || !partReportState.isFile) {
       blockers.push(`${label} JSON report is missing: ${partReportPath || '(unset)'}`)
     } else {
-      const partReport = readJson(partReportPath)
+      partReport = readJson(partReportPath)
       if (partReport.schemaVersion !== 'pptx-contact-diff/v1' || partReport.status !== 'success') {
         blockers.push(`${label} JSON report is not a successful pptx-contact-diff/v1 report`)
       }
@@ -516,9 +517,14 @@ function validateMultipartManifest(report, blockers) {
       }
     }
     const attempts = Array.isArray(part.attempts) ? part.attempts : []
+    const cacheHit = validCacheHit(part.cache, partReport?.pptxNovaCompare?.cache, part.sha256)
     if (
       part.dpi === 192 &&
-      !(attempts.length === 1 && attempts[0]?.dpi === 192 && attempts[0]?.status === 'success')
+      !(
+        attempts.length === 1 &&
+        attempts[0]?.dpi === 192 &&
+        (attempts[0]?.status === 'success' || (attempts[0]?.status === 'cache-hit' && cacheHit))
+      )
     ) {
       blockers.push(`${label} attempt history is invalid for a 192 DPI part`)
     }
@@ -532,7 +538,7 @@ function validateMultipartManifest(report, blockers) {
         (attempts[0]?.error?.kind === 'RenderError' ||
           attempts[0]?.error?.code === 'RenderError') &&
         attempts[1]?.dpi === 144 &&
-        attempts[1]?.status === 'success'
+        (attempts[1]?.status === 'success' || (attempts[1]?.status === 'cache-hit' && cacheHit))
       )
     ) {
       blockers.push(`${label} attempt history does not prove an allowed 192 to 144 retry`)
@@ -579,6 +585,18 @@ function reportImagePaths(report) {
     .filter((path) => typeof path === 'string' && path.trim())
     .map((path) => path.trim())
   return [...new Set(paths)]
+}
+
+function validCacheHit(cache, reportCache, imageSha256) {
+  return (
+    cache?.status === 'hit' &&
+    reportCache?.status === 'hit' &&
+    typeof cache.key === 'string' &&
+    /^[0-9a-f]{64}$/.test(cache.key) &&
+    cache.key === reportCache.key &&
+    cache.imageSha256 === imageSha256 &&
+    reportCache.imageSha256 === imageSha256
+  )
 }
 
 function validateNativeCompareReport(args, report, compareState, blockers, warnings) {
@@ -648,11 +666,14 @@ function validateXdocContactDiffReport(report, compareState, blockers) {
   if (![192, 144].includes(dpi)) blockers.push('contact-diff DPI must be 192 or 144')
   const attempts = report.pptxNovaCompare?.attempts
   if (Array.isArray(attempts)) {
+    const cache = report.pptxNovaCompare?.cache
+    const checkedSha256 = compareState.exists ? sha256(compareState.path) : null
+    const cacheHit = validCacheHit(cache, cache, checkedSha256)
     const valid192 =
       dpi === 192 &&
       attempts.length === 1 &&
       attempts[0]?.dpi === 192 &&
-      attempts[0]?.status === 'success'
+      (attempts[0]?.status === 'success' || (attempts[0]?.status === 'cache-hit' && cacheHit))
     const valid144 =
       dpi === 144 &&
       attempts.length === 2 &&
@@ -661,7 +682,7 @@ function validateXdocContactDiffReport(report, compareState, blockers) {
       attempts[0]?.error?.retryable === true &&
       (attempts[0]?.error?.kind === 'RenderError' || attempts[0]?.error?.code === 'RenderError') &&
       attempts[1]?.dpi === 144 &&
-      attempts[1]?.status === 'success'
+      (attempts[1]?.status === 'success' || (attempts[1]?.status === 'cache-hit' && cacheHit))
     if (!valid192 && !valid144)
       blockers.push('contact-diff attempt history does not prove an allowed DPI policy')
   }

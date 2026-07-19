@@ -63,6 +63,44 @@ relevant OOXML style properties.
 
 ## Standard Flow
 
+The preferred preparation entry point owns scan, bound language review,
+deduplicated translation memory, plan materialization, guarded dry-runs, and
+sequential apply:
+
+```bash
+node <skill-root>/scripts/pptx-nova-translation-prepare.mjs \
+  --source source.pptx \
+  --source-lang <multi|zh|en> \
+  --target-lang <target-lang> \
+  --run-dir <run-dir> \
+  --json
+```
+
+If it returns `needs-review-decisions`, fill the emitted hash-bound decision
+template and resume the same run with `--review-decisions <path>`. If it returns
+`needs-translations`, fill each unique `translation-memory.json` entry once.
+Exact repeated source strings share one target; use `unitOverrides[]` only when
+a context needs different wording, target segments, anchors, or an explicit
+review choice. A reviewed executable unit must use
+`reviewDecision: "translate"`; use `reviewDecision: "preserve"` to omit it.
+Then resume with `--apply`. The runner revalidates source bytes, classified-unit
+bytes, languages, and every source hash before producing a stable prepared
+candidate. Feed that candidate, the emitted classified scan, and
+`translations.json` to the finalizer in `references/translation-runner.md`.
+If the planner emits target-segment repairs, preparation stops with
+`needs-target-segments` and writes `translation-memory.repair.json`, merging
+each fillable template into the existing `unitOverrides[]` by `unitId`. Fill
+every null segment, preserve the contract id, and resume with
+`--memory <repair-file> --apply --overwrite`.
+
+The memory exposes only counts for `languageUncertain`, `shared`,
+`embeddedWorkbook`, and `other` review partitions. Add
+`--expand-review embeddedWorkbook` (or `languageUncertain`, `shared`, `other`)
+only for the partition currently being decided; the runner persists a bound
+`review-inventory-<name>.json` without expanding the others. Do not paste the
+entire inventory into agent context. The manual commands below remain the
+authoritative lower-level contract and debugging path.
+
 1. Create a run directory and capture `xdoc-capabilities.json`.
 2. Inspect the source deck:
    ```bash
@@ -83,7 +121,8 @@ relevant OOXML style properties.
        --source source.pptx \
        --source-lang <source-lang> \
        --mode source \
-       --json > <run-dir>/i18n-scan-source.json
+       --output <run-dir>/i18n-scan-source.json \
+       --json
      ```
      Treat `i18nUnits.units[]` as the primary translation inventory. `hits[]`
      are diagnostic evidence only. For `multi`, use `detectedLangs` and
@@ -125,7 +164,8 @@ relevant OOXML style properties.
      --source source.pptx \
      --units <run-dir>/i18n-scan-source.json \
      --data <run-dir>/translations.json \
-     --json > <run-dir>/i18n-plan.json
+     --output <run-dir>/i18n-plan.json \
+     --json
    ```
 
    `i18n-plan` validates `unitId`, `sourceHash`, and `sourceText`, then routes
@@ -345,7 +385,8 @@ relevant OOXML style properties.
       --mode candidate \
       --units <run-dir>/i18n-scan-classified.json \
       --data <run-dir>/translations.json \
-      --json > <run-dir>/i18n-scan-candidate.json
+      --output <run-dir>/i18n-scan-candidate.json \
+      --json
     ```
 
     Candidate mode takes the source language and scope from `--units`; it rejects
@@ -502,6 +543,9 @@ and visual review.
 `xdoc pptx i18n-plan` is mandatory before applying automated translation
 changes. It is a read-only planner: it validates the scan inventory and
 translations, then emits executable sub-artifacts for the lower-level commands.
+Use `--output <run-dir>/i18n-plan.json --json`: stdout is the compact gate and
+next-action result, while the persisted report contains executable arrays.
+`--json-full` is for small-report debugging, not the normal agent path.
 
 Required interpretation:
 
@@ -635,8 +679,10 @@ Charts are a frequent translation blind spot.
   `action: "review"` — do not need run-local glue either. After reviewing such
   a unit, add its record to `translations[]` with
   `reviewDecision: "translate"` plus the unit's `sourceHash`; `i18n-plan`
-  routes the reviewed target through the same guarded replaceText/patch
-  artifacts and counts it under `summary.reviewedTranslationCount`. A review
+  selects the unit's existing executable selector and routes the reviewed
+  target through the same guarded textPlan, replaceText, or replaceChartText
+  artifacts. This applies equally to slide, slideLayout, and slideMaster
+  review units and is counted under `summary.reviewedTranslationCount`. A review
   unit given `targetText` without `reviewDecision` stays a `review-target`
   conflict, and `reviewDecision` without `sourceHash` is rejected as
   `review-decision-unbound`. Do not hand-build replace-text inputs for
@@ -713,6 +759,7 @@ node <skill-root>/scripts/pptx-nova-compare.mjs \
   --report <run-dir>/translation-compare.json \
   --dpi 192 \
   --fallback-dpi 144 \
+  --cache-dir <run-parent>/.render-cache \
   --json
 
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
@@ -735,6 +782,12 @@ node <skill-root>/scripts/pptx-nova-multi-column-review-scaffold.mjs \
   --output <run-dir>/multi-column-review.json \
   --overwrite --json
 ```
+
+When regenerating only evidence paths, add
+`--carry-review-from <old-review.json>`. Judgments are copied as an all-or-nothing
+operation only when candidate bytes, every PNG hash/dimension, the complete
+slide/shape finding set, and the normalized path-independent vision identity all
+match. Any mismatch leaves every entry pending and records the rejection reasons.
 
 The scaffold helper verifies that candidate, vision-diff, and preview all refer
 to the same final PPTX. It maps zero-based `vision-diff.slideIndex` values to
@@ -807,6 +860,22 @@ source page on the left and translated page on the right, starts at 192 DPI,
 and may retry once at 144 DPI only after an explicit retryable `RenderError`.
 Any second or non-retryable failure blocks delivery. Do not upscale a failed
 low-resolution image after rendering.
+
+The compare helper uses a shared content-addressed cache by default at
+`<run-parent>/.render-cache`. Its key binds source bytes, candidate bytes,
+slide selector, DPI, and the xdoc executable bytes. A valid hit copies the
+already validated PNG, rebinds report paths to the current run, and records
+`cache.status="hit"`; corrupt, partial, or mismatched entries are ignored and
+rendered again. Use `--cache-dir` to choose a stable shared location or
+`--no-cache` for diagnostic rerenders. Cache hits count as zero render
+invocations in performance summaries.
+
+The same cache root also contains `page-bitmap-v1` entries keyed by
+`(pptxSha256, slide, dpi, rendererVersion)`. The 192 DPI candidate preview
+populates these entries; multipart compare reuses those candidate pages and
+populates each source page once. Both the page cache and the validated pair-level
+cache survive a failed finalize run. Corrupt page entries are ignored and repaired;
+144 DPI retries use a separate key space.
 
 With `--json`, `pptx-nova-compare.mjs` writes the same report to stdout that it
 writes to `--report`. For multipart runs (deck larger than the chunk size) this

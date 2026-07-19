@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { resolve } from 'node:path'
+import { canonicalEvidencePath } from './lib/evidence-paths.mjs'
 
 const REVIEW_SCHEMA_VERSION = 'pptx-nova-multi-column-review/v1'
 const VISION_SCHEMA_VERSION = 'pptx-vision-diff/v1'
@@ -15,6 +16,9 @@ Options:
   --candidate <path>    Final candidate PPTX to review.
   --vision-diff <path>  Final xdoc pptx vision-diff JSON for that candidate.
   --preview <path>      Final xdoc pptx preview JSON for that candidate.
+  --carry-review-from <path>
+                        Copy judgments only when candidate, PNGs, finding set,
+                        and normalized vision identity are unchanged.
   --output <path>       Write the review scaffold to this path.
   --overwrite           Allow replacing an existing output scaffold.
   --json                Print the scaffold as JSON.
@@ -30,6 +34,7 @@ function parseArgs(argv) {
     candidate: '',
     visionDiff: '',
     preview: '',
+    carryReviewFrom: '',
     output: '',
     overwrite: false,
     json: false,
@@ -38,6 +43,7 @@ function parseArgs(argv) {
     '--candidate': 'candidate',
     '--vision-diff': 'visionDiff',
     '--preview': 'preview',
+    '--carry-review-from': 'carryReviewFrom',
     '--output': 'output',
   }
   for (let index = 0; index < argv.length; index += 1) {
@@ -112,9 +118,71 @@ function collectReviewFindings(visionDiff) {
   )
 }
 
+function stableValue(value) {
+  if (Array.isArray(value)) return value.map(stableValue)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .map((key) => [key, stableValue(value[key])]),
+  )
+}
+
+function normalizedVisionIdentity(visionDiff, findings) {
+  const normalized = {
+    schemaVersion: visionDiff.schemaVersion,
+    status: visionDiff.status,
+    findings: findings.map((finding) => stableValue(finding)),
+  }
+  return `sha256:${createHash('sha256').update(JSON.stringify(normalized)).digest('hex')}`
+}
+
+function reviewKey(review) {
+  return `${review?.slideIndex}:${String(review?.shapeId)}`
+}
+
+function samePngEvidence(left, right) {
+  return (
+    left?.sha256 === right?.sha256 && left?.width === right?.width && left?.height === right?.height
+  )
+}
+
+function carryReviewJudgments(scaffold, oldReview) {
+  const reasons = []
+  if (oldReview?.schemaVersion !== REVIEW_SCHEMA_VERSION) reasons.push('schema-mismatch')
+  if (oldReview?.candidate?.sha256 !== scaffold.candidate.sha256) {
+    reasons.push('candidate-mismatch')
+  }
+  if (oldReview?.visionDiff?.normalizedIdentity !== scaffold.visionDiff.normalizedIdentity) {
+    reasons.push('vision-identity-mismatch')
+  }
+  const previous = new Map(asArray(oldReview?.reviews).map((review) => [reviewKey(review), review]))
+  const currentKeys = scaffold.reviews.map(reviewKey)
+  if (previous.size !== currentKeys.length || currentKeys.some((key) => !previous.has(key))) {
+    reasons.push('finding-set-mismatch')
+  }
+  if (
+    reasons.length === 0 &&
+    scaffold.reviews.some(
+      (review) => !samePngEvidence(review.png, previous.get(reviewKey(review))?.png),
+    )
+  ) {
+    reasons.push('png-mismatch')
+  }
+  if (reasons.length > 0) return { status: 'not-carried', count: 0, reasons }
+  for (const review of scaffold.reviews) {
+    const prior = previous.get(reviewKey(review))
+    review.reviewer = prior.reviewer ?? ''
+    review.decision = prior.decision ?? 'pending'
+    review.checks = stableValue(prior.checks ?? review.checks)
+    review.note = prior.note ?? ''
+  }
+  return { status: 'carried', count: scaffold.reviews.length, reasons: [] }
+}
+
 function manifestPath(value, manifestPath) {
   if (!value) return ''
-  return resolve(dirname(manifestPath), value)
+  return canonicalEvidencePath(value, { artifactPath: manifestPath })
 }
 
 function readPngDimensions(path) {
@@ -170,7 +238,9 @@ function main() {
     throw new Error(`preview must be successful ${PREVIEW_SCHEMA_VERSION} output`)
   }
 
-  const visionCandidate = visionDiff?.candidate ? resolve(visionDiff.candidate) : ''
+  const visionCandidate = visionDiff?.candidate
+    ? canonicalEvidencePath(visionDiff.candidate, { artifactPath: args.visionDiff })
+    : ''
   if (visionCandidate !== args.candidate) {
     throw new Error('vision-diff candidate path does not match --candidate')
   }
@@ -222,8 +292,19 @@ function main() {
   const scaffold = {
     schemaVersion: REVIEW_SCHEMA_VERSION,
     candidate: { path: args.candidate, sha256: sha256(args.candidate) },
-    visionDiff: { path: args.visionDiff, sha256: sha256(args.visionDiff) },
+    visionDiff: {
+      path: args.visionDiff,
+      sha256: sha256(args.visionDiff),
+      normalizedIdentity: normalizedVisionIdentity(visionDiff, findings),
+    },
     reviews,
+  }
+  if (args.carryReviewFrom) {
+    const previous = readJson(args.carryReviewFrom, 'carry review')
+    scaffold.carryReview = {
+      from: args.carryReviewFrom,
+      ...carryReviewJudgments(scaffold, previous),
+    }
   }
   const output = `${JSON.stringify(scaffold, null, 2)}\n`
   writeFileSync(args.output, output)

@@ -1,0 +1,240 @@
+import { createHash } from 'node:crypto'
+
+const MEMORY_SCHEMA = 'pptx-nova-translation-memory/v1'
+const TRANSLATIONS_SCHEMA = 'pptx-i18n-translations/v1'
+
+function memoryId(sourceText) {
+  return `sha256:${createHash('sha256').update(sourceText).digest('hex')}`
+}
+
+function unitsFrom(scan) {
+  const units = scan?.i18nUnits?.units
+  if (scan?.schemaVersion !== 'pptx-i18n-scan/v1' || !Array.isArray(units)) {
+    throw new Error('scan must be pptx-i18n-scan/v1 with i18nUnits.units[]')
+  }
+  return units
+}
+
+function hasExecutableSelector(unit) {
+  const selectors = unit?.selectors
+  return Boolean(selectors?.textPlan || selectors?.replaceText || selectors?.replaceChartText)
+}
+
+function reviewPartition(unit) {
+  if (unit?.category === 'embeddedWorkbook') return 'embeddedWorkbook'
+  if (unit?.notes?.includes?.('language-classification-uncertain')) return 'languageUncertain'
+  if (
+    String(unit?.part ?? '').startsWith('ppt/slideLayouts/') ||
+    String(unit?.part ?? '').startsWith('ppt/slideMasters/')
+  )
+    return 'shared'
+  return 'other'
+}
+
+export function expandReviewInventory(scan, partition) {
+  const allowed = new Set(['languageUncertain', 'shared', 'embeddedWorkbook', 'other'])
+  if (!allowed.has(partition)) throw new Error(`unsupported review partition: ${partition}`)
+  const units = unitsFrom(scan).filter(
+    (unit) => unit.action === 'review' && reviewPartition(unit) === partition,
+  )
+  return {
+    schemaVersion: 'pptx-nova-i18n-review-inventory/v1',
+    partition,
+    count: units.length,
+    units,
+  }
+}
+
+function partitionSummary(units, name) {
+  const members = units.filter((unit) => unit.action === 'review' && reviewPartition(unit) === name)
+  return {
+    count: members.length,
+    categories: [...new Set(members.map((unit) => unit.category).filter(Boolean))].sort(),
+    parts: [...new Set(members.map((unit) => unit.part).filter(Boolean))].length,
+    expansion:
+      'Read matching units from the bound full scan only when this partition is actionable.',
+  }
+}
+
+export function buildTranslationMemory(scan, { sourceSha256, unitsSha256, targetLang }) {
+  if (!sourceSha256 || !unitsSha256 || !targetLang) {
+    throw new Error('sourceSha256, unitsSha256, and targetLang are required')
+  }
+  const units = unitsFrom(scan)
+  const eligible = units.filter(
+    (unit) =>
+      unit.action === 'translate' ||
+      (unit.action === 'review' &&
+        unit.category !== 'embeddedWorkbook' &&
+        hasExecutableSelector(unit)),
+  )
+  const grouped = new Map()
+  for (const unit of eligible) {
+    const id = memoryId(unit.sourceText)
+    const entry = grouped.get(id) ?? {
+      memoryId: id,
+      sourceText: unit.sourceText,
+      targetText: null,
+      contexts: [],
+    }
+    entry.contexts.push({
+      unitId: unit.unitId,
+      sourceHash: unit.sourceHash,
+      action: unit.action,
+      category: unit.category,
+      part: unit.part ?? null,
+      slide: unit.slide ?? null,
+      recommendedMethod: unit.recommendedMethod ?? null,
+      requiresReview: unit.requiresReview === true,
+    })
+    grouped.set(id, entry)
+  }
+  const entries = [...grouped.values()].sort((left, right) => {
+    const leftOrder = units.findIndex((unit) => unit.unitId === left.contexts[0]?.unitId)
+    const rightOrder = units.findIndex((unit) => unit.unitId === right.contexts[0]?.unitId)
+    return leftOrder - rightOrder
+  })
+  return {
+    schemaVersion: MEMORY_SCHEMA,
+    source: { sha256: sourceSha256 },
+    units: { sha256: unitsSha256 },
+    sourceLang: scan.sourceLang ?? scan?.i18nUnits?.sourceLang ?? null,
+    targetLang,
+    summary: {
+      eligibleUnitCount: eligible.length,
+      uniqueSourceTextCount: entries.length,
+      savedTranslationRecordCount: eligible.length - entries.length,
+      reductionRatio:
+        eligible.length === 0
+          ? 0
+          : Number(((eligible.length - entries.length) / eligible.length).toFixed(4)),
+    },
+    reviewPartitions: {
+      languageUncertain: partitionSummary(units, 'languageUncertain'),
+      shared: partitionSummary(units, 'shared'),
+      embeddedWorkbook: partitionSummary(units, 'embeddedWorkbook'),
+      other: partitionSummary(units, 'other'),
+    },
+    entries,
+    unitOverrides: [],
+  }
+}
+
+export function materializeTranslations(scan, memory) {
+  if (memory?.schemaVersion !== MEMORY_SCHEMA) {
+    throw new Error(`translation memory must use ${MEMORY_SCHEMA}`)
+  }
+  const units = unitsFrom(scan)
+  const entriesByUnit = new Map()
+  for (const entry of memory.entries ?? []) {
+    if (!entry?.memoryId || typeof entry.sourceText !== 'string') {
+      throw new Error('translation memory contains an invalid entry')
+    }
+    for (const context of entry.contexts ?? []) {
+      if (!context?.unitId || entriesByUnit.has(context.unitId)) {
+        throw new Error(
+          `translation memory contains a missing or duplicate unit context: ${context?.unitId}`,
+        )
+      }
+      entriesByUnit.set(context.unitId, entry)
+    }
+  }
+  const overrides = new Map()
+  for (const override of memory.unitOverrides ?? []) {
+    if (!override?.unitId || overrides.has(override.unitId)) {
+      throw new Error('unitOverrides contain a missing or duplicate unitId')
+    }
+    overrides.set(override.unitId, override)
+  }
+
+  const translations = []
+  for (const unit of units) {
+    if (unit.action !== 'translate' && unit.action !== 'review') continue
+    const entry = entriesByUnit.get(unit.unitId)
+    const override = overrides.get(unit.unitId)
+    if (unit.action === 'review' && override?.reviewDecision === 'preserve') continue
+    if (!entry) continue
+    if (entry.sourceText !== unit.sourceText) {
+      throw new Error(`translation memory sourceText is stale for ${unit.unitId}`)
+    }
+    const targetText = override?.targetText ?? entry.targetText
+    if (typeof targetText !== 'string') {
+      throw new Error(`targetText is required for ${unit.unitId}`)
+    }
+    const record = {
+      unitId: unit.unitId,
+      sourceHash: unit.sourceHash,
+      sourceText: unit.sourceText,
+      targetText,
+    }
+    if (unit.action === 'review') {
+      if (override?.reviewDecision !== 'translate') {
+        throw new Error(`reviewDecision:"translate" is required for ${unit.unitId}`)
+      }
+      record.reviewDecision = 'translate'
+    }
+    for (const key of ['anchors', 'targetSegments', 'targetSegmentsContractId']) {
+      if (override?.[key] !== undefined) record[key] = override[key]
+    }
+    translations.push(record)
+  }
+  for (const unitId of overrides.keys()) {
+    if (!units.some((unit) => unit.unitId === unitId)) {
+      throw new Error(`unitOverrides reference unknown unitId: ${unitId}`)
+    }
+  }
+  return {
+    schemaVersion: TRANSLATIONS_SCHEMA,
+    sourceLang: memory.sourceLang,
+    targetLang: memory.targetLang,
+    translations,
+  }
+}
+
+export function mergeTranslationMemoryRepairs(memory, plan) {
+  if (memory?.schemaVersion !== MEMORY_SCHEMA) {
+    throw new Error(`translation memory must use ${MEMORY_SCHEMA}`)
+  }
+  const merged = structuredClone(memory)
+  const overrides = new Map((merged.unitOverrides ?? []).map((item) => [item.unitId, item]))
+  const repairedUnitIds = []
+  for (const review of plan?.reviewRequired ?? []) {
+    const repair = review?.repair
+    const template = repair?.translationPatchTemplate
+    if (
+      repair?.schemaVersion !== 'pptx-i18n-target-segments-repair/v1' ||
+      repair?.kind !== 'target-segments' ||
+      !template?.unitId ||
+      !Array.isArray(template.targetSegments)
+    ) {
+      continue
+    }
+    const prior = overrides.get(template.unitId) ?? { unitId: template.unitId }
+    const next = { ...prior }
+    for (const key of [
+      'targetText',
+      'targetSegments',
+      'targetSegmentsContractId',
+      'anchors',
+      'reviewDecision',
+    ]) {
+      if (template[key] !== undefined) next[key] = structuredClone(template[key])
+    }
+    overrides.set(template.unitId, next)
+    repairedUnitIds.push(template.unitId)
+  }
+  merged.unitOverrides = [...overrides.values()]
+  merged.repairScaffold = {
+    schemaVersion: 'pptx-nova-translation-memory-repair/v1',
+    unitCount: repairedUnitIds.length,
+    unitIds: repairedUnitIds,
+    ready: repairedUnitIds.every((unitId) =>
+      (overrides.get(unitId)?.targetSegments ?? []).every(
+        (segment) => typeof segment?.text === 'string',
+      ),
+    ),
+    instructions:
+      'Fill every targetSegments[].text value, keep targetSegmentsContractId unchanged, then pass this file back with --memory and --apply --overwrite.',
+  }
+  return merged
+}

@@ -89,7 +89,8 @@ Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline
 `evidence-summary.json`, `layout-source.json`, `layout-final.json`, `finding-analysis.json`,
 `fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`,
 `review-policy-evaluation.json`,
-`i18n-text-plan.json`, `i18n-scan.json`, `i18n-plan.json`, `i18n-style-diff.json`,
+`i18n-text-plan.json`, `i18n-scan.json`, `i18n-plan.json`, `translation-memory.json`,
+`translation-prepare-summary.json`, `translations.json`, `i18n-style-diff.json`,
 `replace-text-input.json`,
 `multi-column-review.json`, `multi-column-review-gate.json`,
 `translation-compare.png` or numbered `translation-compare-*.png` parts,
@@ -373,10 +374,11 @@ xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,
 xdoc pptx chrome-apply remapped.pptx --deckkit mckinsey-blue --output styled.pptx --json
 xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output out.pptx --json
 xdoc pptx diff --source source.pptx --candidate out.pptx --detail summary --json
-xdoc pptx i18n-plan --source source.pptx --units i18n-scan-source.json --data translations.json --json
+node <skill-root>/scripts/pptx-nova-translation-prepare.mjs --source source.pptx --source-lang multi --target-lang de --run-dir <run-dir> --json
+xdoc pptx i18n-plan --source source.pptx --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-plan.json --json
 xdoc pptx i18n-text-plan --source source.pptx --data translations.json --json
-xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --json
-xdoc pptx i18n-scan --source translated.pptx --mode candidate --units i18n-scan-source.json --data translations.json --json
+xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --output <run-dir>/i18n-scan-source.json --json
+xdoc pptx i18n-scan --source translated.pptx --mode candidate --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-scan-candidate.json --json
 node <skill-root>/scripts/pptx-nova-i18n-classify-review-units.mjs --scan <run-dir>/i18n-scan-source.json --decisions <run-dir>/i18n-review-decisions.json --output <run-dir>/i18n-scan-classified.json --report <run-dir>/i18n-review-classification.json --overwrite --json
 xdoc pptx replace-text --source source.pptx --data replacements.json --output updated.pptx --json
 xdoc pptx replace-chart-text --source source.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json
@@ -384,7 +386,7 @@ xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --jso
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --allow-text-attrs tooltip,descr,title --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
 xdoc pptx vision-diff --source source.pptx --candidate out.pptx --slides 25-38 --json
-node <skill-root>/scripts/pptx-nova-multi-column-review-scaffold.mjs --candidate out.pptx --vision-diff <run-dir>/vision-diff.json --preview <run-dir>/preview-candidate.json --output <run-dir>/multi-column-review.json --overwrite --json
+node <skill-root>/scripts/pptx-nova-multi-column-review-scaffold.mjs --candidate out.pptx --vision-diff <run-dir>/vision-diff.json --preview <run-dir>/preview-candidate.json --output <run-dir>/multi-column-review.json [--carry-review-from <old-review.json>] --overwrite --json
 node <skill-root>/scripts/pptx-nova-multi-column-review-gate.mjs --candidate out.pptx --vision-diff <run-dir>/vision-diff.json --review <run-dir>/multi-column-review.json --output <run-dir>/multi-column-review-gate.json --overwrite --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --slides 25-38 --output <run-dir>/contact-diff.png --json

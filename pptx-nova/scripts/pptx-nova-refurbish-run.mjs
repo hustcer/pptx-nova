@@ -27,6 +27,11 @@ import {
 import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual-evidence.mjs'
 import { evaluateFindings } from './lib/finding-analysis.mjs'
 import { buildLayoutSnapshot, layoutSemanticSha256 } from './lib/layout-snapshot.mjs'
+import {
+  createPageBitmapCacheBinding,
+  pageBitmapCacheMetrics,
+  snapshotPageBitmapCache,
+} from './lib/page-bitmap-cache.mjs'
 import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { buildRefurbishPlan } from './pptx-nova-refurbish-plan.mjs'
 import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from './pptx-nova-review-policy.mjs'
@@ -324,7 +329,11 @@ function buildPerformanceSummary(summary, totalMs) {
   const comparePhase = summary.phases.find((phase) => phase.name === 'refurbish-compare')
   const compareRenderInvocations = Number(comparePhase?.renderInvocations ?? 0)
   const comparePartCount = Number(comparePhase?.partCount ?? 0)
-  const compareRetryInvocations = Math.max(0, compareRenderInvocations - comparePartCount)
+  const compareRetryInvocations = Number(comparePhase?.retryInvocations ?? 0)
+  const compareCacheHitCount = Number(comparePhase?.cacheHitCount ?? 0)
+  const compareCacheRenderInvocationsSaved = Number(
+    comparePhase?.renderInvocationsSaved ?? compareCacheHitCount,
+  )
   const renderInvocationsSaved = Number(
     summary.review?.contactDiffReuse?.renderInvocationsSaved ?? 0,
   )
@@ -341,8 +350,16 @@ function buildPerformanceSummary(summary, totalMs) {
       compareRenderInvocations,
       comparePartCount,
       compareRetryInvocations,
+      compareCacheHitCount,
+      compareCacheRenderInvocationsSaved,
+      previewPageBitmapCache:
+        summary.phases.find((phase) =>
+          ['preview-render', 'preview-render-fallback-convert'].includes(phase.name),
+        )?.pageBitmapCache ?? null,
+      comparePageBitmapCache: comparePhase?.pageBitmapCache ?? null,
       estimatedRenderedPixels,
-      renderInvocationsSaved,
+      renderInvocationsSaved: renderInvocationsSaved + compareCacheRenderInvocationsSaved,
+      contactAliasRenderInvocationsSaved: renderInvocationsSaved,
       contactDiffRequested: Boolean(summary.review?.contactDiffRequested),
       contactDiffReused: summary.review?.contactDiffReuse?.status === 'reused',
     },
@@ -1361,6 +1378,15 @@ function expectedSlideCount(inspect) {
 function runPreviews(summary, args, artifacts, inspect) {
   let mode = 'pptx-preview'
   let previewReport = null
+  const expectedCount = expectedSlideCount(inspect)
+  const slides = Array.from({ length: expectedCount ?? 0 }, (_, index) => index + 1)
+  const cache = createPageBitmapCacheBinding({
+    cacheDir: join(dirname(args.runDir), '.render-cache'),
+    pptxPath: artifacts.candidate,
+    dpi: 192,
+    xdocBin: args.xdocBin,
+  })
+  const cacheBefore = snapshotPageBitmapCache(cache, slides)
   try {
     previewReport = runJsonPhase(summary, {
       name: 'preview-render',
@@ -1373,10 +1399,13 @@ function runPreviews(summary, args, artifacts, inspect) {
         artifacts.previews,
         '--contact-sheet',
         artifacts.contactSheet,
+        '--dpi',
+        '192',
         '--overwrite',
         '--json',
       ],
       artifact: artifacts.previewReport,
+      env: { XDOC_PAGE_CACHE_PREFIX: cache.prefix },
     })
   } catch (error) {
     const phase = summary.phases.findLast((item) => item.name === 'preview-render')
@@ -1399,6 +1428,8 @@ function runPreviews(summary, args, artifacts, inspect) {
         'png',
         '--output',
         artifacts.previews,
+        '--dpi',
+        '192',
         '--overwrite',
         '--quiet',
         '--report',
@@ -1407,11 +1438,18 @@ function runPreviews(summary, args, artifacts, inspect) {
         '--contact-output',
         artifacts.contactSheet,
       ],
+      env: { XDOC_PAGE_CACHE_PREFIX: cache.prefix },
     })
+  }
+  const cacheAfter = snapshotPageBitmapCache(cache, slides)
+  const previewPhase = summary.phases.findLast((item) =>
+    ['preview-render', 'preview-render-fallback-convert'].includes(item.name),
+  )
+  if (previewPhase) {
+    previewPhase.pageBitmapCache = pageBitmapCacheMetrics(cache, cacheBefore, cacheAfter)
   }
   const contactSheetName = basename(artifacts.contactSheet)
   const files = listPngFiles(artifacts.previews, new Set([contactSheetName]))
-  const expectedCount = expectedSlideCount(inspect)
   const contactBytes = existsSync(artifacts.contactSheet)
     ? statSync(artifacts.contactSheet).size
     : 0
@@ -1527,12 +1565,7 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
   })
   const renderMetrics = analyzeCompareRendering(report)
   const phase = summary.phases.findLast((item) => item.name === 'refurbish-compare')
-  if (phase) {
-    phase.partCount = renderMetrics.partCount
-    phase.renderInvocations = renderMetrics.renderInvocations
-    phase.estimatedRenderedPixels = renderMetrics.estimatedRenderedPixels
-    phase.baselineEstimatedPixels = renderMetrics.baselineEstimatedPixels
-  }
+  if (phase) Object.assign(phase, renderMetrics)
   return report
 }
 

@@ -86,7 +86,7 @@ function fixture(options = {}) {
   return { root, candidate, visionDiff, previewJson, previewPng, output }
 }
 
-function run(item) {
+function run(item, extra = []) {
   return spawnSync(
     process.execPath,
     [
@@ -100,6 +100,7 @@ function run(item) {
       '--output',
       item.output,
       '--json',
+      ...extra,
     ],
     { cwd: repoRoot, encoding: 'utf8' },
   )
@@ -197,4 +198,74 @@ test('generated scaffold becomes gate-valid only after explicit review decisions
   )
   assert.equal(approved.status, 0, approved.stderr || approved.stdout)
   assert.equal(JSON.parse(approved.stdout).summary.reviewedIssueCount, 2)
+})
+
+test('multi-column scaffold carries judgments only across identical bound evidence', () => {
+  const item = fixture()
+  assert.equal(run(item).status, 0)
+  const reviewed = JSON.parse(readFileSync(item.output, 'utf8'))
+  for (const review of reviewed.reviews) {
+    review.reviewer = 'human'
+    review.decision = 'pass'
+    review.checks = {
+      noClipping: true,
+      columnFlowReadable: true,
+      noOverlap: true,
+      marginsAcceptable: true,
+    }
+    review.note = 'Bound evidence is readable.'
+  }
+  writeJson(item.output, reviewed)
+
+  const carriedOutput = join(item.root, 'carried-review.json')
+  const carried = run({ ...item, output: carriedOutput }, ['--carry-review-from', item.output])
+  assert.equal(carried.status, 0, carried.stderr || carried.stdout)
+  const carriedReview = JSON.parse(readFileSync(carriedOutput, 'utf8'))
+  assert.equal(carriedReview.carryReview.status, 'carried')
+  assert.equal(carriedReview.carryReview.count, 2)
+  assert.equal(carriedReview.reviews[0].decision, 'pass')
+  assert.equal(carriedReview.reviews[0].reviewer, 'human')
+
+  const mismatchCases = [
+    [
+      'png-mismatch',
+      (value) => {
+        value.reviews[0].png.sha256 = `sha256:${'0'.repeat(64)}`
+      },
+    ],
+    [
+      'finding-set-mismatch',
+      (value) => {
+        value.reviews.pop()
+      },
+    ],
+    [
+      'vision-identity-mismatch',
+      (value) => {
+        value.visionDiff.normalizedIdentity = `sha256:${'f'.repeat(64)}`
+      },
+    ],
+  ]
+  for (const [reason, mutate] of mismatchCases) {
+    const prior = structuredClone(reviewed)
+    mutate(prior)
+    const priorPath = join(item.root, `prior-${reason}.json`)
+    const output = join(item.root, `rejected-${reason}.json`)
+    writeJson(priorPath, prior)
+    const result = run({ ...item, output }, ['--carry-review-from', priorPath])
+    assert.equal(result.status, 0, result.stderr || result.stdout)
+    const next = JSON.parse(readFileSync(output, 'utf8'))
+    assert.equal(next.carryReview.status, 'not-carried')
+    assert.ok(next.carryReview.reasons.includes(reason))
+    assert.equal(next.reviews[0].decision, 'pending')
+  }
+
+  writeFileSync(item.candidate, 'candidate-pptx-v2')
+  const rejectedOutput = join(item.root, 'rejected-review.json')
+  const rejected = run({ ...item, output: rejectedOutput }, ['--carry-review-from', item.output])
+  assert.equal(rejected.status, 0, rejected.stderr || rejected.stdout)
+  const rejectedReview = JSON.parse(readFileSync(rejectedOutput, 'utf8'))
+  assert.equal(rejectedReview.carryReview.status, 'not-carried')
+  assert.ok(rejectedReview.carryReview.reasons.includes('candidate-mismatch'))
+  assert.equal(rejectedReview.reviews[0].decision, 'pending')
 })

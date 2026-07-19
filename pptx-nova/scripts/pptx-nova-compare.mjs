@@ -1,10 +1,24 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
-import { basename, dirname, extname, join, resolve } from 'node:path'
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
+import { basename, delimiter, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { createProgressReporter, progressHeartbeatMs } from './pptx-nova-progress.mjs'
+import {
+  createPageBitmapCacheBinding,
+  pageBitmapCacheMetrics,
+  snapshotPageBitmapCache,
+} from './lib/page-bitmap-cache.mjs'
 
 const MAX_COMMAND_BUFFER = 20 * 1024 * 1024
 
@@ -24,6 +38,8 @@ Options:
   --dpi <number>            PNG render DPI. Defaults to 192.
   --fallback-dpi <number>   Retry DPI for a retryable RenderError. Defaults to 144.
   --xdoc-bin <path>         xdoc executable. Defaults to xdoc.
+  --cache-dir <path>        Shared content-addressed render cache. Defaults beside run-dir.
+  --no-cache                Disable render cache reads and writes.
   --source-label <text>     Deprecated; xdoc contact-diff owns contact sheet labels.
   --candidate-label <text>  Deprecated; xdoc contact-diff owns contact sheet labels.
   --overwrite               Allow replacing existing output/report files.
@@ -51,6 +67,7 @@ const valueFlags = {
   '--dpi': 'dpi',
   '--fallback-dpi': 'fallbackDpi',
   '--xdoc-bin': 'xdocBin',
+  '--cache-dir': 'cacheDir',
   '--source-label': 'sourceLabel',
   '--candidate-label': 'candidateLabel',
   '--progress': 'progress',
@@ -70,6 +87,8 @@ function parseArgs(argv) {
     dpi: 192,
     fallbackDpi: 144,
     xdocBin: 'xdoc',
+    cacheDir: '',
+    cache: true,
     sourceLabel: '',
     candidateLabel: '',
     overwrite: false,
@@ -89,6 +108,10 @@ function parseArgs(argv) {
     }
     if (arg === '--json') {
       args.json = true
+      continue
+    }
+    if (arg === '--no-cache') {
+      args.cache = false
       continue
     }
     const key = valueFlags[arg]
@@ -123,6 +146,7 @@ function parseArgs(argv) {
   args.source = resolve(args.source)
   args.candidate = resolve(args.candidate)
   args.runDir = resolve(args.runDir)
+  args.cacheDir = resolve(args.cacheDir || join(dirname(args.runDir), '.render-cache'))
   args.kind = normalizeKind(args.kind)
   const defaultStem = `${args.kind}-compare`
   args.output = resolve(args.output || join(args.runDir, `${defaultStem}.png`))
@@ -245,6 +269,176 @@ function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
+function fileIdentity(path) {
+  return {
+    path,
+    byteLength: statSync(path).size,
+    sha256: sha256(path),
+  }
+}
+
+function resolveExecutable(bin) {
+  if (bin.includes('/') || bin.includes('\\')) return resolve(bin)
+  for (const directory of String(process.env.PATH ?? '').split(delimiter)) {
+    if (!directory) continue
+    const candidate = join(directory, bin)
+    if (existsSync(candidate) && statSync(candidate).isFile()) return resolve(candidate)
+  }
+  return bin
+}
+
+function xdocIdentity(bin) {
+  const path = resolveExecutable(bin)
+  if (!existsSync(path) || !statSync(path).isFile()) return { path, sha256: null, byteLength: null }
+  return fileIdentity(path)
+}
+
+function cacheDescriptor(args, { slides, dpi }) {
+  const source = fileIdentity(args.source)
+  const candidate = fileIdentity(args.candidate)
+  const xdoc = xdocIdentity(args.xdocBin)
+  const descriptor = {
+    schemaVersion: 'pptx-nova-contact-diff-cache-key/v1',
+    source,
+    candidate,
+    slides: slides || 'all',
+    dpi,
+    xdoc,
+  }
+  const keyMaterial = {
+    ...descriptor,
+    source: { byteLength: source.byteLength, sha256: source.sha256 },
+    candidate: { byteLength: candidate.byteLength, sha256: candidate.sha256 },
+    xdoc: {
+      byteLength: xdoc.byteLength,
+      sha256: xdoc.sha256,
+      fallback: xdoc.sha256 ? null : xdoc.path,
+    },
+  }
+  const key = createHash('sha256').update(JSON.stringify(keyMaterial)).digest('hex')
+  return { key, descriptor }
+}
+
+function cacheEntryPaths(args, key) {
+  const directory = join(args.cacheDir, 'contact-diff-v1', key.slice(0, 2), key)
+  return {
+    directory,
+    image: join(directory, 'contact-diff.png'),
+    report: join(directory, 'contact-diff.json'),
+    metadata: join(directory, 'metadata.json'),
+  }
+}
+
+function sameCacheDescriptor(left, right) {
+  const projection = (value) => ({
+    schemaVersion: value?.schemaVersion ?? null,
+    slides: value?.slides ?? null,
+    dpi: value?.dpi ?? null,
+    source: {
+      byteLength: value?.source?.byteLength ?? null,
+      sha256: value?.source?.sha256 ?? null,
+    },
+    candidate: {
+      byteLength: value?.candidate?.byteLength ?? null,
+      sha256: value?.candidate?.sha256 ?? null,
+    },
+    xdoc: {
+      byteLength: value?.xdoc?.byteLength ?? null,
+      sha256: value?.xdoc?.sha256 ?? null,
+      fallback: value?.xdoc?.sha256 ? null : (value?.xdoc?.path ?? null),
+    },
+  })
+  return JSON.stringify(projection(left)) === JSON.stringify(projection(right))
+}
+
+function writeJsonAtomic(path, value) {
+  const temporary = `${path}.${process.pid}.tmp`
+  writeFileSync(temporary, `${JSON.stringify(value, null, 2)}\n`)
+  renameSync(temporary, path)
+}
+
+function retargetContactDiffReport(report, args, output, descriptor) {
+  return {
+    ...report,
+    source: { ...report.source, ...descriptor.source, path: args.source },
+    candidate: { ...report.candidate, ...descriptor.candidate, path: args.candidate },
+    outputPath: output,
+    output,
+    render: report?.render ? { ...report.render, path: output } : report?.render,
+    contactSheet: report?.contactSheet
+      ? { ...report.contactSheet, path: output }
+      : report?.contactSheet,
+  }
+}
+
+function readCachedContactDiff(args, output, cache) {
+  const paths = cacheEntryPaths(args, cache.key)
+  if (!existsSync(paths.metadata) || !existsSync(paths.report) || !existsSync(paths.image)) {
+    return null
+  }
+  try {
+    const metadata = JSON.parse(readFileSync(paths.metadata, 'utf8'))
+    if (
+      metadata?.schemaVersion !== 'pptx-nova-contact-diff-cache-entry/v1' ||
+      metadata?.key !== cache.key ||
+      !sameCacheDescriptor(metadata?.descriptor, cache.descriptor) ||
+      metadata?.image?.byteLength !== statSync(paths.image).size ||
+      metadata?.image?.sha256 !== sha256(paths.image)
+    ) {
+      return null
+    }
+    const cachedReport = JSON.parse(readFileSync(paths.report, 'utf8'))
+    if (
+      cachedReport?.schemaVersion !== 'pptx-contact-diff/v1' ||
+      cachedReport?.status !== 'success' ||
+      cachedReport?.scope?.requested !== cache.descriptor.slides ||
+      Number(cachedReport?.render?.dpi ?? cachedReport?.summary?.dpi) !== cache.descriptor.dpi ||
+      cachedReport?.source?.sha256 !== cache.descriptor.source.sha256 ||
+      cachedReport?.candidate?.sha256 !== cache.descriptor.candidate.sha256
+    ) {
+      return null
+    }
+    mkdirSync(dirname(output), { recursive: true })
+    copyFileSync(paths.image, output)
+    const report = retargetContactDiffReport(cachedReport, args, output, cache.descriptor)
+    const identities = validateContactDiffInputIdentities(report, args)
+    return {
+      status: 'success',
+      result: { status: 0, stdout: '', stderr: '', command: 'render-cache' },
+      report,
+      identities,
+      cache: {
+        status: 'hit',
+        key: cache.key,
+        directory: paths.directory,
+        imageSha256: metadata.image.sha256,
+      },
+    }
+  } catch {
+    return null
+  }
+}
+
+function writeCachedContactDiff(args, output, report, cache) {
+  const paths = cacheEntryPaths(args, cache.key)
+  mkdirSync(paths.directory, { recursive: true })
+  copyFileSync(output, paths.image)
+  writeJsonAtomic(paths.report, report)
+  const image = fileIdentity(paths.image)
+  writeJsonAtomic(paths.metadata, {
+    schemaVersion: 'pptx-nova-contact-diff-cache-entry/v1',
+    key: cache.key,
+    descriptor: cache.descriptor,
+    image: { byteLength: image.byteLength, sha256: image.sha256 },
+  })
+  return {
+    status: 'miss',
+    key: cache.key,
+    directory: paths.directory,
+    imageSha256: image.sha256,
+  }
+}
+
 const SHA256_PATTERN = /^[0-9a-f]{64}$/
 
 function validateContactDiffInputIdentity(identity, expectedPath, label) {
@@ -310,6 +504,56 @@ function slideChunks(slideCount, chunkSize) {
   return chunks
 }
 
+function selectedSlides(selector, slideCount) {
+  if (!selector) {
+    return slideCount > 0 ? Array.from({ length: slideCount }, (_, index) => index + 1) : []
+  }
+  const slides = new Set()
+  for (const token of selector.split(',')) {
+    const match = token.trim().match(/^(\d+)(?:-(\d+))?$/)
+    if (!match) continue
+    const start = Number(match[1])
+    const end = Number(match[2] ?? match[1])
+    for (let slide = start; slide <= end; slide += 1) slides.add(slide)
+  }
+  return [...slides].sort((left, right) => left - right)
+}
+
+function pageCacheAttempt(args, { slides, dpi }) {
+  if (!args.cache) return null
+  const requestedSlides = selectedSlides(slides, args.slideCount)
+  const source = createPageBitmapCacheBinding({
+    cacheDir: args.cacheDir,
+    pptxPath: args.source,
+    dpi,
+    xdocBin: args.xdocBin,
+  })
+  const candidate = createPageBitmapCacheBinding({
+    cacheDir: args.cacheDir,
+    pptxPath: args.candidate,
+    dpi,
+    xdocBin: args.xdocBin,
+  })
+  return {
+    source,
+    candidate,
+    requestedSlides,
+    sourceBefore: snapshotPageBitmapCache(source, requestedSlides),
+    candidateBefore: snapshotPageBitmapCache(candidate, requestedSlides),
+  }
+}
+
+function finishPageCacheAttempt(attempt) {
+  if (!attempt) return null
+  const sourceAfter = snapshotPageBitmapCache(attempt.source, attempt.requestedSlides)
+  const candidateAfter = snapshotPageBitmapCache(attempt.candidate, attempt.requestedSlides)
+  return {
+    schemaVersion: 'pptx-nova-page-bitmap-cache-attempt/v1',
+    source: pageBitmapCacheMetrics(attempt.source, attempt.sourceBefore, sourceAfter),
+    candidate: pageBitmapCacheMetrics(attempt.candidate, attempt.candidateBefore, candidateAfter),
+  }
+}
+
 function failureDetails(report, result) {
   const error = report?.error ?? {}
   return {
@@ -345,6 +589,12 @@ async function runContactDiff(
     partCount,
   } = {},
 ) {
+  const pageCache = pageCacheAttempt(args, { slides, dpi })
+  const cache = args.cache ? cacheDescriptor(args, { slides, dpi }) : null
+  if (cache) {
+    const hit = readCachedContactDiff(args, output, cache)
+    if (hit) return { ...hit, pageCache: finishPageCacheAttempt(pageCache) }
+  }
   const commandArgs = [
     'pptx',
     'contact-diff',
@@ -364,10 +614,23 @@ async function runContactDiff(
   const result = await run(args.xdocBin, commandArgs, {
     reporter,
     progressDetails: { partNumber, partCount, slides, dpi },
+    env: pageCache
+      ? {
+          ...process.env,
+          XDOC_SOURCE_PAGE_CACHE_PREFIX: pageCache.source.prefix,
+          XDOC_CANDIDATE_PAGE_CACHE_PREFIX: pageCache.candidate.prefix,
+        }
+      : process.env,
   })
   const report = parseJsonReportSafe(result.stdout)
   if (result.status !== 0 || report?.status === 'error') {
-    return { status: 'failed', result, report, error: failureDetails(report, result) }
+    return {
+      status: 'failed',
+      result,
+      report,
+      error: failureDetails(report, result),
+      pageCache: finishPageCacheAttempt(pageCache),
+    }
   }
   if (!report) parseJsonReport(result.stdout)
   const outputPath = reportImagePath(report)
@@ -378,7 +641,17 @@ async function runContactDiff(
     throw new Error(`xdoc contact-diff did not create a non-empty output PNG: ${output}`)
   }
   const identities = validateContactDiffInputIdentities(report, args)
-  return { status: 'success', result, report, identities }
+  const cacheState = cache
+    ? writeCachedContactDiff(args, output, report, cache)
+    : { status: 'disabled', key: null, directory: null, imageSha256: sha256(output) }
+  return {
+    status: 'success',
+    result,
+    report,
+    identities,
+    cache: cacheState,
+    pageCache: finishPageCacheAttempt(pageCache),
+  }
 }
 
 async function runSingleCompare(args, reporter) {
@@ -391,7 +664,12 @@ async function runSingleCompare(args, reporter) {
   })
   let attempt = await runContactDiff(args, { reporter, partNumber: 1, partCount: 1 })
   if (attempt.status === 'failed') {
-    attempts.push({ dpi: args.dpi, status: 'failed', error: attempt.error })
+    attempts.push({
+      dpi: args.dpi,
+      status: 'failed',
+      error: attempt.error,
+      pageBitmapCache: attempt.pageCache,
+    })
     rmSync(args.output, { force: true })
     if (!args.slides && args.slideCount > 0 && isRetryableRenderError(attempt.error)) {
       reporter.emit('compare-part-retry', {
@@ -416,7 +694,11 @@ async function runSingleCompare(args, reporter) {
     )
   }
   const effectiveDpi = Number(attempt.report?.render?.dpi ?? attempt.report?.summary?.dpi)
-  attempts.push({ dpi: effectiveDpi, status: 'success' })
+  attempts.push({
+    dpi: effectiveDpi,
+    status: attempt.cache?.status === 'hit' ? 'cache-hit' : 'success',
+    pageBitmapCache: attempt.pageCache,
+  })
   const report = {
     ...attempt.report,
     pptxNovaCompare: {
@@ -424,6 +706,13 @@ async function runSingleCompare(args, reporter) {
       requestedDpi: args.dpi,
       fallbackDpi: args.fallbackDpi,
       attempts,
+      cache: attempt.cache,
+      pageBitmapCache: attempt.pageCache,
+      pageBitmapCacheAttempts: attempts.map(({ dpi, status, pageBitmapCache }) => ({
+        dpi,
+        status,
+        pageBitmapCache: pageBitmapCache ?? null,
+      })),
     },
   }
   writeFileSync(args.report, `${JSON.stringify(report, null, 2)}\n`)
@@ -488,7 +777,12 @@ async function runMultipartCompare(args, reporter) {
         partCount: chunks.length,
       })
       if (attempt.status === 'failed') {
-        attempts.push({ dpi: args.dpi, status: 'failed', error: attempt.error })
+        attempts.push({
+          dpi: args.dpi,
+          status: 'failed',
+          error: attempt.error,
+          pageBitmapCache: attempt.pageCache,
+        })
         rmSync(output, { force: true })
         if (isRetryableRenderError(attempt.error)) {
           attemptedDpi = args.fallbackDpi
@@ -515,6 +809,7 @@ async function runMultipartCompare(args, reporter) {
             dpi: attemptedDpi,
             status: 'failed',
             error: attempt.error,
+            pageBitmapCache: attempt.pageCache,
           })
         }
         throw new Error(
@@ -531,8 +826,28 @@ async function runMultipartCompare(args, reporter) {
       ) {
         throw new Error('multipart contact-diff parts were rendered from different PPTX bytes')
       }
-      attempts.push({ dpi: effectiveDpi, status: 'success' })
-      writeFileSync(partReportPath, `${JSON.stringify(attempt.report, null, 2)}\n`)
+      attempts.push({
+        dpi: effectiveDpi,
+        status: attempt.cache?.status === 'hit' ? 'cache-hit' : 'success',
+        pageBitmapCache: attempt.pageCache,
+      })
+      const partReport = {
+        ...attempt.report,
+        pptxNovaCompare: {
+          mode: 'multipart-part',
+          requestedDpi: args.dpi,
+          fallbackDpi: args.fallbackDpi,
+          attempts,
+          cache: attempt.cache,
+          pageBitmapCache: attempt.pageCache,
+          pageBitmapCacheAttempts: attempts.map(({ dpi, status, pageBitmapCache }) => ({
+            dpi,
+            status,
+            pageBitmapCache: pageBitmapCache ?? null,
+          })),
+        },
+      }
+      writeFileSync(partReportPath, `${JSON.stringify(partReport, null, 2)}\n`)
       const imageStat = statSync(output)
       parts.push({
         partNumber: index + 1,
@@ -550,6 +865,13 @@ async function runMultipartCompare(args, reporter) {
         sha256: sha256(output),
         agentGate: attempt.report?.agentGate ?? null,
         attempts,
+        cache: attempt.cache,
+        pageBitmapCache: attempt.pageCache,
+        pageBitmapCacheAttempts: attempts.map(({ dpi, status, pageBitmapCache }) => ({
+          dpi,
+          status,
+          pageBitmapCache: pageBitmapCache ?? null,
+        })),
       })
       reporter.emit('compare-part-complete', {
         partNumber: index + 1,
@@ -613,6 +935,7 @@ async function main(args, reporter) {
     slideCount: args.slideCount || null,
     chunkSize: args.chunkSize,
     dpi: args.dpi,
+    cache: args.cache ? args.cacheDir : null,
   })
   const report = multipart
     ? await runMultipartCompare(args, reporter)

@@ -8,7 +8,15 @@ const DECISIONS_SCHEMA = 'pptx-nova-i18n-review-decisions/v1'
 const REVIEWABLE_CATEGORIES = new Set(['visibleBody', 'visibleTextAttr', 'chartVisibleCache'])
 
 function parseArgs(argv) {
-  const args = { scan: '', decisions: '', output: '', report: '', overwrite: false, json: false }
+  const args = {
+    scan: '',
+    decisions: '',
+    output: '',
+    report: '',
+    overwrite: false,
+    json: false,
+    jsonFull: false,
+  }
   const values = {
     '--scan': 'scan',
     '--decisions': 'decisions',
@@ -19,9 +27,12 @@ function parseArgs(argv) {
     const arg = argv[index]
     if (arg === '--overwrite') args.overwrite = true
     else if (arg === '--json') args.json = true
-    else if (arg === '--help' || arg === '-h') {
+    else if (arg === '--json-full') {
+      args.json = true
+      args.jsonFull = true
+    } else if (arg === '--help' || arg === '-h') {
       process.stdout.write(
-        'Usage: node pptx-nova-i18n-classify-review-units.mjs --scan scan.json --decisions decisions.json --output classified-scan.json [--report report.json] [--overwrite] [--json]\n',
+        'Usage: node pptx-nova-i18n-classify-review-units.mjs --scan scan.json --decisions decisions.json --output classified-scan.json [--report report.json] [--overwrite] [--json|--json-full]\n',
       )
       process.exit(0)
     } else if (values[arg]) {
@@ -133,7 +144,21 @@ function main() {
     agentGate: { passed: true, status: 'pass', unclassifiedCount: 0 },
   }
   if (args.report) write(args.report, report, args.overwrite)
-  if (args.json || !args.report) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
+  const compact = {
+    schemaVersion: 'pptx-nova-i18n-review-classification-result/v1',
+    status: report.status,
+    report: args.report || null,
+    output: args.output,
+    summary: report.summary,
+    agentGate: report.agentGate,
+  }
+  if (args.json) {
+    process.stdout.write(`${JSON.stringify(args.jsonFull ? report : compact, null, 2)}\n`)
+  } else if (!args.report) {
+    process.stdout.write(
+      `Classified ${report.summary.reviewUnitCount} review units (${report.summary.translateCount} translate, ${report.summary.preserveCount} preserve)\n`,
+    )
+  }
 }
 
 try {

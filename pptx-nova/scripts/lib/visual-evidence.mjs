@@ -132,6 +132,14 @@ function attemptsForPart(part, report) {
   return []
 }
 
+function cacheForPart(part, report) {
+  return part?.cache ?? report?.pptxNovaCompare?.cache ?? null
+}
+
+function pageBitmapCacheForPart(part, report) {
+  return part?.pageBitmapCache ?? report?.pptxNovaCompare?.pageBitmapCache ?? null
+}
+
 export function analyzeCompareRendering(compareReport, { primaryDpi = 192 } = {}) {
   const parts =
     compareReport?.schemaVersion === 'pptx-nova-compare-manifest/v1'
@@ -141,20 +149,47 @@ export function analyzeCompareRendering(compareReport, { primaryDpi = 192 } = {}
     (result, part) => {
       const report = reportForPart(part)
       const attemptReports = attemptsForPart(part, report)
-      const attemptCount = Math.max(1, attemptReports.length)
+      const cache = cacheForPart(part, report)
+      const pageBitmapCache = pageBitmapCacheForPart(part, report)
+      const cacheHit = cache?.status === 'hit'
+      const effectiveAttempts = attemptReports.length
+        ? attemptReports
+        : cacheHit
+          ? []
+          : [{ dpi: Number(report?.render?.dpi ?? 0), status: 'success' }]
+      const renderedAttempts = effectiveAttempts.filter(
+        (attempt) => attempt?.status !== 'cache-hit',
+      )
       const width = Number(report?.render?.width ?? 0)
       const height = Number(report?.render?.height ?? 0)
       const finalDpi = Number(report?.render?.dpi ?? 0)
-      result.renderInvocations += attemptCount
+      result.renderInvocations += renderedAttempts.length
+      result.retryInvocations += effectiveAttempts.filter(
+        (attempt, index) => index > 0 && attempt?.status !== 'cache-hit',
+      ).length
+      if (cacheHit) result.cacheHitCount += 1
+      for (const side of ['source', 'candidate']) {
+        const page = pageBitmapCache?.[side]
+        if (!page) continue
+        result.pageBitmapCache[side].requestedPageCount += Number(page.requestedPageCount ?? 0)
+        result.pageBitmapCache[side].hitCount += Number(page.hitCount ?? 0)
+        result.pageBitmapCache[side].missCount += Number(page.missCount ?? 0)
+        result.pageBitmapCache[side].populatedCount += Number(page.populatedCount ?? 0)
+        result.pageBitmapCache[side].complete = result.pageBitmapCache[side].observed
+          ? result.pageBitmapCache[side].complete && page.complete === true
+          : page.complete === true
+        result.pageBitmapCache[side].observed = true
+      }
       if (width > 0 && height > 0) {
         const pixelsAtDpi = (dpi) => {
           const scale = finalDpi > 0 && dpi > 0 ? dpi / finalDpi : 1
           return Math.round(width * height * scale * scale)
         }
         result.baselineEstimatedPixels += pixelsAtDpi(primaryDpi)
-        result.estimatedRenderedPixels += (
-          attemptReports.length ? attemptReports : [{ dpi: finalDpi }]
-        ).reduce((pixels, attempt) => pixels + pixelsAtDpi(Number(attempt?.dpi ?? finalDpi)), 0)
+        result.estimatedRenderedPixels += renderedAttempts.reduce(
+          (pixels, attempt) => pixels + pixelsAtDpi(Number(attempt?.dpi ?? finalDpi)),
+          0,
+        )
       }
       return result
     },
@@ -163,11 +198,33 @@ export function analyzeCompareRendering(compareReport, { primaryDpi = 192 } = {}
       renderInvocations: 0,
       estimatedRenderedPixels: 0,
       baselineEstimatedPixels: 0,
+      cacheHitCount: 0,
+      retryInvocations: 0,
+      pageBitmapCache: {
+        source: {
+          requestedPageCount: 0,
+          hitCount: 0,
+          missCount: 0,
+          populatedCount: 0,
+          observed: false,
+          complete: false,
+        },
+        candidate: {
+          requestedPageCount: 0,
+          hitCount: 0,
+          missCount: 0,
+          populatedCount: 0,
+          observed: false,
+          complete: false,
+        },
+      },
     },
   )
+  const uncachedPartCount = metrics.partCount - metrics.cacheHitCount
   return {
     ...metrics,
-    retryInvocations: Math.max(0, metrics.renderInvocations - metrics.partCount),
+    cacheMissCount: uncachedPartCount,
+    renderInvocationsSaved: metrics.cacheHitCount,
   }
 }
 

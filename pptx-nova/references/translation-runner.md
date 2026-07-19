@@ -18,6 +18,13 @@ Before these inputs exist, read `references/translation-mode.md` for scan, class
 apply, repair, chart/table coverage, and multi-column review preparation. Do not invoke the finalizer
 with an intermediate candidate.
 
+For a new translation, prefer `pptx-nova-translation-prepare.mjs`. It creates a hash-bound,
+content-deduplicated translation memory, resumes bound review classification, and sequentially applies
+the planner artifacts. This finalizer begins only after that preparation result is `prepared`.
+Preparation keeps review partitions count-only by default; use
+`--expand-review <languageUncertain|shared|embeddedWorkbook|other>` to persist
+one bound partition when its individual units are actually needed.
+
 ## Standard command
 
 ```bash
@@ -79,9 +86,14 @@ The candidate preview and translation compare serve different policies:
 - optional `contact-diff` files are compatibility aliases of compare evidence, not a second render.
 
 Performance records preview invocations, compare parts, actual retry attempts, estimated pixels,
-saved alias invocations, render share, and invocation/pixel budgets. Multipart compare must cover
+pair-cache hits, page-bitmap hits/misses/population, saved render invocations, saved alias invocations,
+render share, and invocation/pixel budgets. Multipart compare must cover
 every slide without overlap or gaps. A 192 DPI part may retry once at 144 DPI; every retry remains
-visible in the report.
+visible in the report. Compare evidence is content-addressed by source/candidate bytes, selector, DPI,
+and xdoc executable bytes. Below that pair-level cache, preview and compare share page bitmaps keyed by
+PPTX SHA-256, one-based slide, DPI, and the xdoc renderer binary SHA-256. The default cache is shared
+beside the run directory and survives failed finalize runs. A validated pair-cache hit is rebound to the
+current artifact paths and counts as zero actual render invocations.
 
 ## Failure routing
 

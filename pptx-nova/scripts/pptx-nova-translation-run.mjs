@@ -16,6 +16,12 @@ import {
   relativeArtifact,
 } from './lib/runner-runtime.mjs'
 import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual-evidence.mjs'
+import { canonicalEvidencePath } from './lib/evidence-paths.mjs'
+import {
+  createPageBitmapCacheBinding,
+  pageBitmapCacheMetrics,
+  snapshotPageBitmapCache,
+} from './lib/page-bitmap-cache.mjs'
 import { createProgressReporter } from './pptx-nova-progress.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
@@ -199,7 +205,7 @@ function normalizedSha256(value) {
 }
 
 function resolveEvidencePath(basePath, value) {
-  return value ? resolve(dirname(basePath), value) : ''
+  return value ? canonicalEvidencePath(value, { artifactPath: basePath }) : ''
 }
 
 function reviewOnlyFindingKeys(report) {
@@ -510,6 +516,14 @@ function runVisionDiff(summary, args, artifacts) {
 }
 
 function runPreview(summary, args, artifacts, slideCount) {
+  const slides = Array.from({ length: slideCount }, (_, index) => index + 1)
+  const cache = createPageBitmapCacheBinding({
+    cacheDir: join(dirname(args.runDir), '.render-cache'),
+    pptxPath: artifacts.candidate,
+    dpi: 192,
+    xdocBin: args.xdocBin,
+  })
+  const cacheBefore = snapshotPageBitmapCache(cache, slides)
   const report = runJsonPhase(summary, {
     name: 'preview-render',
     bin: args.xdocBin,
@@ -521,16 +535,21 @@ function runPreview(summary, args, artifacts, slideCount) {
       artifacts.previews,
       '--contact-sheet',
       artifacts.contactSheet,
+      '--dpi',
+      '192',
       '--overwrite',
       '--json',
     ],
     artifact: artifacts.previewReport,
+    env: { XDOC_PAGE_CACHE_PREFIX: cache.prefix },
   })
+  const cacheAfter = snapshotPageBitmapCache(cache, slides)
   const pages = report?.pages ?? []
   const phase = summary.phases.findLast((item) => item.name === 'preview-render')
   if (phase) {
     phase.slideCount = pages.length
     phase.estimatedRenderedPixels = pages.reduce((sum, page) => sum + previewPixels(page), 0)
+    phase.pageBitmapCache = pageBitmapCacheMetrics(cache, cacheBefore, cacheAfter)
   }
   requireGate(
     summary,
@@ -716,6 +735,8 @@ function buildPerformanceSummary(summary, totalMs) {
   const baselinePixels =
     Number(preview?.estimatedRenderedPixels ?? 0) + Number(compare?.baselineEstimatedPixels ?? 0)
   const saved = Number(summary.review?.contactDiffReuse?.renderInvocationsSaved ?? 0)
+  const cacheHits = Number(compare?.cacheHitCount ?? 0)
+  const cacheSaved = Number(compare?.renderInvocationsSaved ?? cacheHits)
   return buildRuntimePerformanceSummary(summary, totalMs, {
     renderPhaseNames: ['preview-render', 'translation-compare'],
     render: {
@@ -723,8 +744,13 @@ function buildPerformanceSummary(summary, totalMs) {
       comparePartCount: partCount,
       compareRenderInvocations: invocations,
       compareRetryInvocations: retryInvocations,
+      compareCacheHitCount: cacheHits,
+      compareCacheRenderInvocationsSaved: cacheSaved,
+      previewPageBitmapCache: preview?.pageBitmapCache ?? null,
+      comparePageBitmapCache: compare?.pageBitmapCache ?? null,
       estimatedRenderedPixels: estimatedPixels,
-      renderInvocationsSaved: saved,
+      renderInvocationsSaved: saved + cacheSaved,
+      contactAliasRenderInvocationsSaved: saved,
       contactDiffRequested: Boolean(summary.review?.contactDiffRequested),
       contactDiffReused: summary.review?.contactDiffReuse?.status === 'reused',
     },

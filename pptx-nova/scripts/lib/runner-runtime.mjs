@@ -79,7 +79,11 @@ export function createRunnerRuntime({ getProgressReporter, maxBuffer = DEFAULT_M
       cwd,
       encoding: 'utf8',
       maxBuffer,
-      env: options.forwardProgress ? { ...process.env, PPTX_NOVA_PROGRESS_FD: '3' } : process.env,
+      env: {
+        ...process.env,
+        ...(options.env ?? {}),
+        ...(options.forwardProgress ? { PPTX_NOVA_PROGRESS_FD: '3' } : {}),
+      },
       stdio: options.forwardProgress
         ? ['ignore', 'pipe', 'pipe', process.stderr]
         : ['ignore', 'pipe', 'pipe'],
@@ -178,6 +182,7 @@ export function createRunnerRuntime({ getProgressReporter, maxBuffer = DEFAULT_M
       cwd,
       encoding: 'utf8',
       maxBuffer,
+      env: { ...process.env, ...(options.env ?? {}) },
     })
     if (result.error) {
       const phase = {

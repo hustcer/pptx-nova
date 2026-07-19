@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { canonicalEvidencePath } from './lib/evidence-paths.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-multi-column-review-gate/v1'
 const REVIEW_SCHEMA_VERSION = 'pptx-nova-multi-column-review/v1'
@@ -132,12 +133,18 @@ function readPngDimensions(path) {
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
 }
 
-function validateBinding(report, label, actualPath, claimed) {
+function validateBinding(report, label, actualPath, claimed, claimArtifactPath) {
   if (!existsSync(actualPath)) {
     issue(report, `${label}-missing`, `${label} evidence does not exist`, { path: actualPath })
     return
   }
-  if (resolve(claimed?.path ?? '') !== actualPath) {
+  let claimedPath = ''
+  try {
+    claimedPath = canonicalEvidencePath(claimed?.path, { artifactPath: claimArtifactPath })
+  } catch (error) {
+    issue(report, `${label}-path-invalid`, error.message, { actual: claimed?.path ?? null })
+  }
+  if (claimedPath !== actualPath) {
     issue(report, `${label}-path-mismatch`, `${label} path does not match the reviewed artifact`, {
       expected: actualPath,
       actual: claimed?.path ?? null,
@@ -157,7 +164,7 @@ function validateBinding(report, label, actualPath, claimed) {
   }
 }
 
-function validateReviewItem(report, finding, review) {
+function validateReviewItem(report, finding, review, reviewArtifactPath) {
   const key = issueKey(finding)
   if (!review) {
     issue(report, 'review-missing', 'multi-column review is missing for a slide/shape finding', {
@@ -184,7 +191,12 @@ function validateReviewItem(report, finding, review) {
       block('review-check-failed', `required manual check ${check} must be true`, { check })
     }
   }
-  const pngPath = resolve(review?.png?.path ?? '')
+  let pngPath = ''
+  try {
+    pngPath = canonicalEvidencePath(review?.png?.path, { artifactPath: reviewArtifactPath })
+  } catch (error) {
+    block('png-path-invalid', error.message, { path: review?.png?.path ?? null })
+  }
   if (!review?.png?.path || !existsSync(pngPath)) {
     block('png-missing', 'full-size PNG evidence does not exist', {
       path: review?.png?.path ?? null,
@@ -241,10 +253,19 @@ function main() {
   if (reviewRecord?.schemaVersion !== REVIEW_SCHEMA_VERSION) {
     issue(report, 'review-schema-invalid', `review record must use ${REVIEW_SCHEMA_VERSION}`)
   }
-  validateBinding(report, 'candidate', args.candidate, reviewRecord?.candidate)
-  validateBinding(report, 'vision-diff', args.visionDiff, reviewRecord?.visionDiff)
+  validateBinding(report, 'candidate', args.candidate, reviewRecord?.candidate, args.review)
+  validateBinding(report, 'vision-diff', args.visionDiff, reviewRecord?.visionDiff, args.review)
 
-  const visionCandidate = visionDiff?.candidate ? resolve(visionDiff.candidate) : ''
+  let visionCandidate = ''
+  try {
+    visionCandidate = visionDiff?.candidate
+      ? canonicalEvidencePath(visionDiff.candidate, { artifactPath: args.visionDiff })
+      : ''
+  } catch (error) {
+    issue(report, 'vision-candidate-path-invalid', error.message, {
+      actual: visionDiff?.candidate ?? null,
+    })
+  }
   if (visionCandidate && visionCandidate !== args.candidate) {
     issue(
       report,
@@ -289,7 +310,7 @@ function main() {
     issue(report, 'review-duplicate', 'review record contains duplicate slide/shape pairs')
   }
   for (const finding of findings.reviewOnly)
-    validateReviewItem(report, finding, reviews.get(issueKey(finding)))
+    validateReviewItem(report, finding, reviews.get(issueKey(finding)), args.review)
   for (const [key, review] of reviews) {
     if (!findings.reviewOnly.some((finding) => issueKey(finding) === key)) {
       issue(

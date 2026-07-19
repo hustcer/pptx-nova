@@ -2832,6 +2832,7 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
     return { path, byteLength: 3, file: { path, status: 'ok', byteLength: 3, width: 100, height: 56 } }
   })
   writeFileSync(contact, 'contact')
+  appendFileSync(process.env.FAKE_RENDER_LOG, JSON.stringify({ kind: 'preview', dpi: Number(after('--dpi')), candidatePrefix: process.env.XDOC_PAGE_CACHE_PREFIX }) + '\\n')
   print({ schemaVersion: 'pptx-preview/v1', status: 'success', pages, contactSheet: { path: contact, byteLength: 7, width: 100, height: 56 } })
 } else if (args[0] === 'pptx' && args[1] === 'diff') {
   print({ schemaVersion: 'pptx-diff/v1', status: 'success', agentGate: { semanticStatus: 'pass' }, summary: { reliableChanges: 1 } })
@@ -2841,7 +2842,7 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
   const slides = Array.from({ length: end - start + 1 }, (_, index) => start + index)
   const output = after('--output')
   const dpi = Number(after('--dpi'))
-  appendFileSync(process.env.FAKE_RENDER_LOG, JSON.stringify({ selector, dpi }) + '\\n')
+  appendFileSync(process.env.FAKE_RENDER_LOG, JSON.stringify({ kind: 'compare', selector, dpi, sourcePrefix: process.env.XDOC_SOURCE_PAGE_CACHE_PREFIX, candidatePrefix: process.env.XDOC_CANDIDATE_PAGE_CACHE_PREFIX }) + '\\n')
   writeFileSync(output, 'compare:' + selector)
   print({
     schemaVersion: 'pptx-contact-diff/v1', status: 'success',
@@ -2900,16 +2901,23 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
     summary.phases.some((phase) => phase.name === 'contact-diff-reuse'),
     true,
   )
+  const renderLog = readFileSync(log, 'utf8')
+    .trim()
+    .split('\n')
+    .map((line) => JSON.parse(line))
+  assert.equal(renderLog[0].kind, 'preview')
+  assert.equal(renderLog[0].dpi, 192)
   assert.deepEqual(
-    readFileSync(log, 'utf8')
-      .trim()
-      .split('\n')
-      .map((line) => JSON.parse(line)),
+    renderLog.slice(1).map(({ kind, selector, dpi }) => ({ kind, selector, dpi })),
     [
-      { selector: '1-20', dpi: 192 },
-      { selector: '21-21', dpi: 192 },
+      { kind: 'compare', selector: '1-20', dpi: 192 },
+      { kind: 'compare', selector: '21-21', dpi: 192 },
     ],
   )
+  assert.ok(renderLog[0].candidatePrefix)
+  assert.equal(renderLog[1].candidatePrefix, renderLog[0].candidatePrefix)
+  assert.equal(renderLog[2].candidatePrefix, renderLog[0].candidatePrefix)
+  assert.notEqual(renderLog[1].sourcePrefix, renderLog[0].candidatePrefix)
   const aliases = JSON.parse(readFileSync(join(runDir, 'contact-diff.json'), 'utf8'))
   assert.equal(aliases.parts.length, 2)
   assert.equal(
@@ -3809,6 +3817,46 @@ test('compare gate publishes the exact single-file candidate bytes and records a
   assert.equal(gate.finalBinding.comparedCandidate.sha256, fileIdentity(candidate).sha256)
   assert.equal(gate.finalBinding.publishedFinal.sha256, fileIdentity(finalPptx).sha256)
   assert.equal(gate.published.at(-1).label, 'final PPTX')
+})
+
+test('compare gate rejects an unbound cache-hit attempt', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-cache-hit-binding-'))
+  const runDir = join(root, 'run')
+  const source = join(root, 'source.pptx')
+  const candidate = join(runDir, 'candidate.pptx')
+  const finalPptx = join(root, 'delivery.pptx')
+  const compare = join(runDir, 'translation-compare.png')
+  const reportPath = join(runDir, 'translation-compare.json')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(source, 'source bytes')
+  writeFileSync(candidate, 'candidate bytes')
+  writeFileSync(compare, 'compare png')
+  const report = contactDiffReport({ compare, sourcePptx: source, finalPptx: candidate })
+  report.pptxNovaCompare = {
+    attempts: [{ dpi: 192, status: 'cache-hit' }],
+    cache: { status: 'hit', key: '0'.repeat(64), imageSha256: 'unbound' },
+  }
+  writeJson(reportPath, report)
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      finalPptx,
+      '--final-pptx-source',
+      candidate,
+      '--kind',
+      'translation',
+      '--publish',
+      '--overwrite',
+      '--json',
+    ],
+    2,
+  )
+  assert.match(JSON.parse(result.stdout).blockers.join('\n'), /attempt history/i)
+  assert.equal(existsSync(finalPptx), false)
 })
 
 test('compare gate check-only mode binds an existing final without a staged source', () => {

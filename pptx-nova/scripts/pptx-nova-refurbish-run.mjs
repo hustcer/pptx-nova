@@ -25,7 +25,7 @@ import {
   relativeArtifact,
 } from './lib/runner-runtime.mjs'
 import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual-evidence.mjs'
-import { evaluateFindings } from './lib/finding-analysis.mjs'
+import { annotateTopActionable, evaluateFindings } from './lib/finding-analysis.mjs'
 import { buildLayoutSnapshot, layoutSemanticSha256 } from './lib/layout-snapshot.mjs'
 import {
   createPageBitmapCacheBinding,
@@ -83,8 +83,16 @@ Options:
   --contact-diff          Materialize contact-diff aliases from the final refurbish comparison
   --compare-chunk-size <n>
                           Maximum slides per compare PNG. Defaults to 20.
+  --compare-concurrency <n>
+                          Concurrent compare part renders. Defaults to 3.
   --overwrite             Allow replacing an existing final output after all machine gates pass
   --progress <mode>       Progress stream: auto|jsonl|text|off. Defaults to auto.
+  --progress-file <path>  Progress JSONL archive. Defaults to <run-dir>/progress.jsonl; pass
+                          "none" to disable. While active, stderr only carries single-line
+                          phase-boundary summaries.
+  --prompt-text <text>    Original user prompt; archived to <run-dir>/prompt.txt for the
+                          feedback gate.
+  --prompt-file <path>    Read the original user prompt from a file instead of --prompt-text.
   --json                  Print the compact Agent result; the full summary is always saved in the run directory
   --json-full             Print the complete run summary for debugging
   --help                  Show this help
@@ -108,8 +116,12 @@ function parseArgs(argv) {
     explicit: false,
     contactDiff: false,
     compareChunkSize: 20,
+    compareConcurrency: 3,
     overwrite: false,
     progress: 'auto',
+    progressFile: '',
+    promptText: '',
+    promptFile: '',
     json: false,
     jsonFull: false,
   }
@@ -133,7 +145,7 @@ function parseArgs(argv) {
     } else if (arg in valueFlags) {
       const key = valueFlags[arg]
       const value = valueAfter(argv, i, arg)
-      args[key] = key === 'compareChunkSize' ? Number(value) : value
+      args[key] = ['compareChunkSize', 'compareConcurrency'].includes(key) ? Number(value) : value
       i += 1
     } else {
       throw new Error(`Unknown option: ${arg}\n\n${usage}`)
@@ -149,6 +161,16 @@ function parseArgs(argv) {
   if (!Number.isInteger(args.compareChunkSize) || args.compareChunkSize <= 0) {
     throw new Error('--compare-chunk-size must be a positive integer')
   }
+  if (
+    !Number.isInteger(args.compareConcurrency) ||
+    args.compareConcurrency <= 0 ||
+    args.compareConcurrency > 16
+  ) {
+    throw new Error('--compare-concurrency must be an integer between 1 and 16')
+  }
+  if (args.promptText && args.promptFile) {
+    throw new Error('--prompt-text and --prompt-file are mutually exclusive')
+  }
   return args
 }
 
@@ -163,7 +185,11 @@ const valueFlags = {
   '--readiness-out': 'readinessOut',
   '--review-policy': 'reviewPolicy',
   '--compare-chunk-size': 'compareChunkSize',
+  '--compare-concurrency': 'compareConcurrency',
   '--progress': 'progress',
+  '--progress-file': 'progressFile',
+  '--prompt-text': 'promptText',
+  '--prompt-file': 'promptFile',
 }
 
 function valueAfter(argv, index, flag) {
@@ -565,6 +591,8 @@ function artifactPaths(runDir) {
     refurbishCompareParts: [],
     refurbishCompareReport: join(runDir, 'refurbish-compare.json'),
     refurbishCompareGate: join(runDir, 'refurbish-compare-gate.json'),
+    progressLog: join(runDir, 'progress.jsonl'),
+    prompt: join(runDir, 'prompt.txt'),
     summary: join(runDir, 'refurbish-run-summary.json'),
   }
 }
@@ -617,6 +645,7 @@ function finalizeArtifactPaths(summary, summaryPath) {
 }
 
 function persistCatalogReadiness(summary, plan, args, artifacts) {
+  const started = performance.now()
   const standardReadiness = ['production', 'default'].includes(plan.readiness)
   const explicitException = ['experimental', 'candidate'].includes(plan.readiness) && args.explicit
   const benchmarkPassed = plan.catalog?.benchmarkPassed
@@ -655,6 +684,7 @@ function persistCatalogReadiness(summary, plan, args, artifacts) {
     report.status === 'pass' ? 'passed' : 'failed',
     {
       artifact: relativeArtifact(summary.runDir, artifacts.readiness),
+      durationMs: durationMs(started),
       readiness: plan.readiness,
       benchmarkPassed,
     },
@@ -953,6 +983,7 @@ function runFallback(summary, args, artifacts) {
 }
 
 function runReviewPolicyEvaluation(summary, artifacts, candidateSnapshot) {
+  const started = performance.now()
   const explicitPolicy = existsSync(artifacts.reviewPolicy)
     ? readJson(artifacts.reviewPolicy, 'review policy')
     : null
@@ -1012,6 +1043,7 @@ function runReviewPolicyEvaluation(summary, artifacts, candidateSnapshot) {
     evaluation.status === 'pass' ? 'passed' : 'warning',
     {
       artifact: relativeArtifact(summary.runDir, artifacts.reviewPolicyEvaluation),
+      durationMs: durationMs(started),
       status: evaluation.status,
       declaredReviews: Number(evaluation.summary?.declaredReviewCount ?? 0),
       appliedReviews: Number(evaluation.summary?.appliedReviewCount ?? 0),
@@ -1207,7 +1239,7 @@ function runFindingAnalysis({
   return report
 }
 
-function runFidelityGate(summary, artifacts) {
+function runFidelityGate(summary, artifacts, findingAnalysisReport = null) {
   const gateArgs = [
     FIDELITY_GATE_SCRIPT,
     '--mode',
@@ -1290,10 +1322,13 @@ function runFidelityGate(summary, artifacts) {
     summary.layout.actionablePreviewFiles = remainingSlideIndexes.map(
       (index) => `slide-${String(index + 1).padStart(3, '0')}.png`,
     )
-    summary.layout.topActionable = [...remainingByCode.entries()]
-      .map(([code, count]) => ({ code, classification: 'actionable', count }))
-      .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code))
-      .slice(0, 5)
+    summary.layout.topActionable = annotateTopActionable(
+      [...remainingByCode.entries()]
+        .map(([code, count]) => ({ code, classification: 'actionable', count }))
+        .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code))
+        .slice(0, 5),
+      findingAnalysisReport,
+    )
     summary.layout.reviewPolicyStatus = report?.reviewPolicy?.status ?? null
     summary.layout.appliedReviews = report?.reviewPolicy?.applied ?? []
   }
@@ -1549,6 +1584,8 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
       String(expectedSlideCount(inspect)),
       '--compare-chunk-size',
       String(args.compareChunkSize),
+      '--compare-concurrency',
+      String(args.compareConcurrency),
       '--dpi',
       '192',
       '--fallback-dpi',
@@ -1556,7 +1593,7 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
       '--xdoc-bin',
       args.xdocBin,
       '--progress',
-      args.progress,
+      progressReporter.forwardFd !== null ? 'jsonl' : args.progress,
       '--overwrite',
       '--json',
     ],
@@ -1618,6 +1655,28 @@ function runRefurbishCompareGate(summary, args, artifacts) {
   )
 }
 
+function attachProgressArchive(args, artifacts) {
+  const target = args.progressFile === 'none' ? '' : args.progressFile || artifacts.progressLog
+  if (!target) return
+  progressReporter.attachFile?.(target)
+}
+
+function archivePrompt(summary, args, artifacts) {
+  if (args.promptFile && !existsSync(args.promptFile)) {
+    throw new Error(`--prompt-file does not exist: ${args.promptFile}`)
+  }
+  const text = args.promptFile ? readFileSync(args.promptFile, 'utf8') : args.promptText
+  if (!text) return
+  const started = performance.now()
+  writeFileSync(artifacts.prompt, text.endsWith('\n') ? text : `${text}\n`)
+  addInternalPhase(summary, 'prompt-archive', 'passed', {
+    artifact: relativeArtifact(args.runDir, artifacts.prompt),
+    durationMs: durationMs(started),
+    bytes: statSync(artifacts.prompt).size,
+    source: args.promptFile ? 'file' : 'text',
+  })
+}
+
 function runRefurbish(inputArgs) {
   const runStarted = performance.now()
   const args = normalizeArgs(inputArgs)
@@ -1625,11 +1684,15 @@ function runRefurbish(inputArgs) {
   mkdirSync(args.runDir, { recursive: true })
   const artifacts = artifactPaths(args.runDir)
   const summary = initialSummary(args, artifacts)
+  attachProgressArchive(args, artifacts)
 
   try {
+    archivePrompt(summary, args, artifacts)
+    const sourceSnapshotStarted = performance.now()
     copyFileSync(args.source, artifacts.sourceSnapshot)
     addInternalPhase(summary, 'source-snapshot', 'passed', {
       artifact: relativeArtifact(args.runDir, artifacts.sourceSnapshot),
+      durationMs: durationMs(sourceSnapshotStarted),
       bytes: statSync(artifacts.sourceSnapshot).size,
     })
     if (args.reviewPolicy) {
@@ -1641,6 +1704,7 @@ function runRefurbish(inputArgs) {
       })
     }
 
+    const planStarted = performance.now()
     const plan = buildRefurbishPlan({
       deckkit: args.deckkit,
       source: artifacts.sourceSnapshot,
@@ -1651,6 +1715,7 @@ function runRefurbish(inputArgs) {
     writeJson(artifacts.plan, plan)
     addInternalPhase(summary, 'refurbish-plan', plan.status === 'blocked' ? 'failed' : 'passed', {
       artifact: relativeArtifact(args.runDir, artifacts.plan),
+      durationMs: durationMs(planStarted),
       status: plan.status,
       route: plan.route ?? '',
     })
@@ -1747,7 +1812,7 @@ function runRefurbish(inputArgs) {
     )
     const semanticDiff = runSemanticDiff(summary, args, artifacts)
     const reviewEvaluation = runReviewPolicyEvaluation(summary, artifacts, candidateSnapshot)
-    runFindingAnalysis({
+    const findingAnalysisReport = runFindingAnalysis({
       summary,
       artifacts,
       sourceSnapshot,
@@ -1755,7 +1820,13 @@ function runRefurbish(inputArgs) {
       semanticDiff,
       reviewEvaluation,
     })
-    runFidelityGate(summary, artifacts)
+    if (summary.layout) {
+      summary.layout.topActionable = annotateTopActionable(
+        summary.layout.topActionable,
+        findingAnalysisReport,
+      )
+    }
+    runFidelityGate(summary, artifacts, findingAnalysisReport)
     runPreviews(summary, args, artifacts, inspect)
     const compareReport = runRefurbishCompare(summary, args, artifacts, inspect)
     materializeContactDiff(summary, args, artifacts, compareReport)
@@ -1790,6 +1861,8 @@ function runRefurbish(inputArgs) {
     })
     error.summary = summary
     throw error
+  } finally {
+    progressReporter.detachFile?.()
   }
 }
 

@@ -9,7 +9,10 @@ import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 
 import { canonicalJsonV1, canonicalSha256V1 } from '../../pptx-nova/scripts/lib/canonical-json.mjs'
-import { evaluateFindings } from '../../pptx-nova/scripts/lib/finding-analysis.mjs'
+import {
+  annotateTopActionable,
+  evaluateFindings,
+} from '../../pptx-nova/scripts/lib/finding-analysis.mjs'
 import {
   buildLayoutSnapshot,
   layoutSemanticProjectionV1,
@@ -1053,6 +1056,83 @@ test('standalone CLI writes full advisory evidence and keeps stdout compact', ()
   const requiredReport = JSON.parse(readFileSync(requiredOutput, 'utf8'))
   assert.equal(requiredReport.evaluation.status, 'failed')
   assert.equal(requiredReport.agentGate.effectiveStatus, 'fail')
+})
+
+test('topFindings aggregates same-code informational findings into one representative entry', () => {
+  const shapes = [
+    ...Array.from({ length: 4 }, (_, index) => ({
+      id: 20 + index,
+      name: `Caption ${index + 1}`,
+      shapeType: 'text',
+      textPreview: `Caption text ${index + 1}`,
+      fontSizePt: 12,
+      bbox: { x: 10 + index * 120, y: 10, width: 100, height: 30 },
+    })),
+    {
+      id: 101,
+      name: 'Slide Number Placeholder',
+      shapeType: 'placeholder',
+      textPreview: '',
+      placeholder: { type: 'sldNum', idx: 12 },
+      bbox: { x: 850, y: 480, width: 30, height: 20 },
+    },
+  ]
+  const report = evaluateFindings(buildInput({ sourceInspect: simpleInspect(shapes) }))
+
+  assert.equal(report.evaluation.status, 'complete')
+  assert.equal(report.summary.findingCount, 5)
+  const topFindings = report.summary.topFindings
+  assert.equal(topFindings.length, 2)
+  assert.equal(topFindings[0].code, 'empty-placeholder')
+  assert.equal(topFindings[0].aggregated, undefined)
+  const informational = topFindings[1]
+  assert.equal(informational.code, 'font-family-missing')
+  assert.equal(informational.disposition, 'informational')
+  assert.equal(informational.aggregated, true)
+  assert.equal(informational.aggregatedCount, 4)
+  assert.deepEqual(informational.aggregatedSlideNumbers, [1])
+})
+
+test('annotateTopActionable marks inherited, introduced, and mixed code groups', () => {
+  const findingReport = {
+    findings: [
+      { rawFinding: { code: 'bbox-off-canvas' }, delta: { status: 'unchanged' } },
+      { rawFinding: { code: 'bbox-off-canvas' }, delta: { status: 'unchanged' } },
+      { rawFinding: { code: 'font-size-too-small' }, delta: { status: 'introduced' } },
+      { rawFinding: { code: 'duplicate-object-name' }, delta: { status: 'unchanged' } },
+      { rawFinding: { code: 'duplicate-object-name' }, delta: { status: 'introduced' } },
+    ],
+  }
+  const annotated = annotateTopActionable(
+    [
+      { code: 'bbox-off-canvas', classification: 'actionable', count: 2 },
+      { code: 'font-size-too-small', classification: 'actionable', count: 1 },
+      { code: 'duplicate-object-name', classification: 'actionable', count: 2 },
+      { code: 'not-analyzed-code', classification: 'actionable', count: 1 },
+    ],
+    findingReport,
+  )
+  assert.deepEqual(annotated[0], {
+    code: 'bbox-off-canvas',
+    classification: 'actionable',
+    count: 2,
+    deltaStatus: 'unchanged',
+    inherited: true,
+    inheritedCount: 2,
+    introducedCount: 0,
+  })
+  assert.equal(annotated[1].deltaStatus, 'introduced')
+  assert.equal(annotated[1].inherited, false)
+  assert.equal(annotated[2].deltaStatus, 'mixed')
+  assert.equal(annotated[2].inherited, false)
+  assert.deepEqual(annotated[3], {
+    code: 'not-analyzed-code',
+    classification: 'actionable',
+    count: 1,
+  })
+  assert.deepEqual(annotateTopActionable([], findingReport), [])
+  const untouched = [{ code: 'bbox-off-canvas', classification: 'actionable', count: 2 }]
+  assert.equal(annotateTopActionable(untouched, { findings: [] }), untouched)
 })
 
 function cloneJson(value) {

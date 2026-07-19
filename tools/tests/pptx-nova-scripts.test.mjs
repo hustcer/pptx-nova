@@ -116,6 +116,9 @@ const identity = (path) => {
 }
 const log = process.env.FAKE_XDOC_LOG
 if (log) appendFileSync(log, JSON.stringify({ selector, dpi, output }) + '\\n')
+const delayMap = JSON.parse(process.env.FAKE_XDOC_DELAY_MAP || '{}')
+const delayMs = Number(delayMap[selector] ?? 0)
+if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs))
 const mode = process.env.FAKE_XDOC_MODE || 'success'
 const shouldFail192 = mode === 'retry-part-2' && selector === '21-40' && dpi === 192
 const shouldFailBoth = mode === 'fail-part-2' && selector === '21-40'
@@ -1876,7 +1879,7 @@ test('skill routes standard translation finalization through one compact referen
 test('refurbish fallback plan overwrites current-run candidate commands', async () => {
   const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
   const plan = buildRefurbishPlan({
-    deckkit: 'swiss-grid',
+    deckkit: 'broadside',
     source: 'source.pptx',
     output: 'candidate.pptx',
     catalog: skillPath('assets/deckkits/catalog.json'),
@@ -2280,7 +2283,8 @@ if (args[0] === 'schema') {
     readFileSync(join(root, 'contact-diff.log'), 'utf8')
       .trim()
       .split('\n')
-      .map((line) => JSON.parse(line)),
+      .map((line) => JSON.parse(line))
+      .sort((a, b) => a.selector.localeCompare(b.selector, 'en', { numeric: true })),
     [
       { selector: '1-20', dpi: 192 },
       { selector: '21-40', dpi: 192 },
@@ -2325,11 +2329,19 @@ if (args[0] === 'schema') {
   assert.equal(catalogReadiness.agentGate.benchmarkAvailable, true)
   assert.equal(catalogReadiness.agentGate.benchmarkEvidencePassed, true)
   assert.equal(catalogReadiness.agentGate.benchmarkGatePassed, true)
-  const progressEvents = result.stderr
+  const progressEvents = readFileSync(join(runDir, 'progress.jsonl'), 'utf8')
     .trim()
     .split('\n')
     .filter(Boolean)
     .map((line) => JSON.parse(line))
+  const stderrLines = result.stderr.trim().split('\n').filter(Boolean)
+  assert.ok(stderrLines.length > 0)
+  assert.ok(stderrLines.every((line) => line.startsWith('[pptx-nova] ')))
+  assert.ok(
+    progressEvents
+      .filter((event) => event.event === 'phase-complete')
+      .every((event) => Number.isFinite(event.durationMs)),
+  )
   assert.ok(
     progressEvents.some(
       (event) =>
@@ -2908,7 +2920,10 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
   assert.equal(renderLog[0].kind, 'preview')
   assert.equal(renderLog[0].dpi, 192)
   assert.deepEqual(
-    renderLog.slice(1).map(({ kind, selector, dpi }) => ({ kind, selector, dpi })),
+    renderLog
+      .slice(1)
+      .map(({ kind, selector, dpi }) => ({ kind, selector, dpi }))
+      .sort((a, b) => a.selector.localeCompare(b.selector, 'en', { numeric: true })),
     [
       { kind: 'compare', selector: '1-20', dpi: 192 },
       { kind: 'compare', selector: '21-21', dpi: 192 },
@@ -3378,13 +3393,78 @@ test('compare splits 48 slides into complete 20/20/8 high-DPI parts and writes a
       .map((line) => {
         const entry = JSON.parse(line)
         return [entry.selector, entry.dpi]
-      }),
+      })
+      .sort((a, b) => a[0].localeCompare(b[0], 'en', { numeric: true })),
     [
       ['1-20', 192],
       ['21-40', 192],
       ['41-48', 192],
     ],
   )
+})
+
+test('compare renders parts concurrently and keeps the manifest ordered by part number', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-concurrent-'))
+  const source = join(root, 'source.pptx')
+  const candidate = join(root, 'candidate.pptx')
+  const runDir = join(root, 'run')
+  const log = join(root, 'xdoc.log')
+  const fakeXdoc = writeMultipartContactDiffXdoc(root)
+  writeFileSync(source, 'source pptx')
+  writeFileSync(candidate, 'candidate pptx')
+
+  const startedAt = Date.now()
+  const result = runNode(
+    [
+      skillPath('scripts/pptx-nova-compare.mjs'),
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--run-dir',
+      runDir,
+      '--kind',
+      'refurbish',
+      '--slide-count',
+      '48',
+      '--compare-chunk-size',
+      '20',
+      '--compare-concurrency',
+      '3',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    {
+      env: {
+        ...process.env,
+        FAKE_XDOC_LOG: log,
+        // The first part finishes last so completion order is 3, 2, 1.
+        FAKE_XDOC_DELAY_MAP: JSON.stringify({ '1-20': 450, '21-40': 250, '41-48': 50 }),
+      },
+    },
+  )
+  const elapsedMs = Date.now() - startedAt
+  const manifest = JSON.parse(result.stdout)
+
+  assert.equal(manifest.status, 'success')
+  assert.equal(manifest.concurrency, 3)
+  assert.deepEqual(
+    manifest.parts.map((part) => [part.partNumber, part.selector, part.pairCount]),
+    [
+      [1, '1-20', 20],
+      [2, '21-40', 20],
+      [3, '41-48', 8],
+    ],
+  )
+  assert.deepEqual(manifest.coverage.missingSlides, [])
+  assert.equal(manifest.agentGate.passed, true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-01.png')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-02.png')), true)
+  assert.equal(existsSync(join(runDir, 'refurbish-compare-03.png')), true)
+  // Serial execution would need >= 750ms of fake render time; concurrency
+  // bounds the render wall-clock by the slowest part instead of the sum.
+  assert.ok(elapsedMs < 700, `expected concurrent parts to overlap, elapsed ${elapsedMs}ms`)
 })
 
 test('compare streams heartbeat progress without corrupting JSON stdout', () => {
@@ -3614,6 +3694,8 @@ test('compare fails closed and removes every part when 144 DPI also fails', () =
       'refurbish',
       '--slide-count',
       '48',
+      '--compare-concurrency',
+      '1',
       '--xdoc-bin',
       fakeXdoc,
       '--json',
@@ -3671,6 +3753,8 @@ test('compare does not retry a non-RenderError failure', () => {
       'refurbish',
       '--slide-count',
       '48',
+      '--compare-concurrency',
+      '1',
       '--xdoc-bin',
       fakeXdoc,
       '--json',

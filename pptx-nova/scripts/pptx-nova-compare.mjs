@@ -35,6 +35,7 @@ Options:
   --slides <selector>       Optional 1-based slide selector, e.g. 1,3-5.
   --slide-count <number>    Full source slide count. Enables automatic multipart output.
   --compare-chunk-size <n>  Slides per multipart PNG. Defaults to 20.
+  --compare-concurrency <n> Concurrent multipart part renders. Defaults to 3.
   --dpi <number>            PNG render DPI. Defaults to 192.
   --fallback-dpi <number>   Retry DPI for a retryable RenderError. Defaults to 144.
   --xdoc-bin <path>         xdoc executable. Defaults to xdoc.
@@ -64,6 +65,7 @@ const valueFlags = {
   '--slides': 'slides',
   '--slide-count': 'slideCount',
   '--compare-chunk-size': 'chunkSize',
+  '--compare-concurrency': 'concurrency',
   '--dpi': 'dpi',
   '--fallback-dpi': 'fallbackDpi',
   '--xdoc-bin': 'xdocBin',
@@ -84,6 +86,7 @@ function parseArgs(argv) {
     slides: '',
     slideCount: 0,
     chunkSize: 20,
+    concurrency: 3,
     dpi: 192,
     fallbackDpi: 144,
     xdocBin: 'xdoc',
@@ -118,7 +121,7 @@ function parseArgs(argv) {
     if (!key) throw new Error(`Unknown option: ${arg}\n\n${usage}`)
     const value = argv[index + 1]
     if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
-    args[key] = ['dpi', 'fallbackDpi', 'slideCount', 'chunkSize'].includes(key)
+    args[key] = ['dpi', 'fallbackDpi', 'slideCount', 'chunkSize', 'concurrency'].includes(key)
       ? Number(value)
       : value
     index += 1
@@ -141,6 +144,9 @@ function parseArgs(argv) {
   }
   if (!Number.isInteger(args.chunkSize) || args.chunkSize <= 0) {
     throw new Error('--compare-chunk-size must be a positive integer')
+  }
+  if (!Number.isInteger(args.concurrency) || args.concurrency <= 0 || args.concurrency > 16) {
+    throw new Error('--compare-concurrency must be an integer between 1 and 16')
   }
 
   args.source = resolve(args.source)
@@ -747,140 +753,166 @@ function coverageFor(parts, slideCount) {
   }
 }
 
+async function runMultipartPart(args, reporter, { chunk, index, partCount, numberWidth }) {
+  const output = numberedPath(args.output, index + 1, numberWidth)
+  const partReportPath = numberedPath(args.report, index + 1, numberWidth)
+  const attempts = []
+  let attemptedDpi = args.dpi
+  reporter.emit('compare-part-start', {
+    partNumber: index + 1,
+    partCount,
+    slides: chunk.selector,
+    dpi: args.dpi,
+  })
+  let attempt = await runContactDiff(args, {
+    output,
+    slides: chunk.selector,
+    dpi: args.dpi,
+    reporter,
+    partNumber: index + 1,
+    partCount,
+  })
+  if (attempt.status === 'failed') {
+    attempts.push({
+      dpi: args.dpi,
+      status: 'failed',
+      error: attempt.error,
+      pageBitmapCache: attempt.pageCache,
+    })
+    rmSync(output, { force: true })
+    if (isRetryableRenderError(attempt.error)) {
+      attemptedDpi = args.fallbackDpi
+      reporter.emit('compare-part-retry', {
+        partNumber: index + 1,
+        partCount,
+        slides: chunk.selector,
+        dpi: args.fallbackDpi,
+        reason: attempt.error.reason ?? attempt.error.kind,
+      })
+      attempt = await runContactDiff(args, {
+        output,
+        slides: chunk.selector,
+        dpi: args.fallbackDpi,
+        reporter,
+        partNumber: index + 1,
+        partCount,
+      })
+    }
+  }
+  if (attempt.status === 'failed') {
+    if (attempts.length === 0 || attempts.at(-1)?.dpi !== attemptedDpi) {
+      attempts.push({
+        dpi: attemptedDpi,
+        status: 'failed',
+        error: attempt.error,
+        pageBitmapCache: attempt.pageCache,
+      })
+    }
+    throw new Error(
+      `contact-diff part ${index + 1}/${partCount} (${chunk.selector}) failed: ${attempt.error.message}`,
+    )
+  }
+  const effectiveDpi = Number(attempt.report?.render?.dpi ?? attempt.report?.summary?.dpi)
+  attempts.push({
+    dpi: effectiveDpi,
+    status: attempt.cache?.status === 'hit' ? 'cache-hit' : 'success',
+    pageBitmapCache: attempt.pageCache,
+  })
+  const partReport = {
+    ...attempt.report,
+    pptxNovaCompare: {
+      mode: 'multipart-part',
+      requestedDpi: args.dpi,
+      fallbackDpi: args.fallbackDpi,
+      attempts,
+      cache: attempt.cache,
+      pageBitmapCache: attempt.pageCache,
+      pageBitmapCacheAttempts: attempts.map(({ dpi, status, pageBitmapCache }) => ({
+        dpi,
+        status,
+        pageBitmapCache: pageBitmapCache ?? null,
+      })),
+    },
+  }
+  writeFileSync(partReportPath, `${JSON.stringify(partReport, null, 2)}\n`)
+  const imageStat = statSync(output)
+  const part = {
+    partNumber: index + 1,
+    selector: chunk.selector,
+    slides: chunk.slides,
+    pairCount: Number(attempt.report?.agentGate?.pairCount ?? attempt.report?.summary?.pairCount),
+    dpi: effectiveDpi,
+    width: Number(attempt.report?.render?.width),
+    height: Number(attempt.report?.render?.height),
+    path: output,
+    reportPath: partReportPath,
+    byteLength: imageStat.size,
+    sha256: sha256(output),
+    agentGate: attempt.report?.agentGate ?? null,
+    attempts,
+    cache: attempt.cache,
+    pageBitmapCache: attempt.pageCache,
+    pageBitmapCacheAttempts: attempts.map(({ dpi, status, pageBitmapCache }) => ({
+      dpi,
+      status,
+      pageBitmapCache: pageBitmapCache ?? null,
+    })),
+  }
+  reporter.emit('compare-part-complete', {
+    partNumber: index + 1,
+    partCount,
+    slides: chunk.selector,
+    pairCount: part.pairCount,
+    dpi: effectiveDpi,
+    output,
+  })
+  return { part, identities: attempt.identities }
+}
+
 async function runMultipartCompare(args, reporter) {
   const chunks = slideChunks(args.slideCount, args.chunkSize)
   const numberWidth = Math.max(2, String(chunks.length).length)
   const cleanupPaths = [args.report]
-  const parts = []
-  let sourceIdentity = null
-  let candidateIdentity = null
+  for (let index = 0; index < chunks.length; index += 1) {
+    cleanupPaths.push(
+      numberedPath(args.output, index + 1, numberWidth),
+      numberedPath(args.report, index + 1, numberWidth),
+    )
+  }
+  const concurrency = Math.max(1, Math.min(args.concurrency, chunks.length))
+  const results = new Array(chunks.length)
+  let nextIndex = 0
+  let failed = false
+  const workers = Array.from({ length: concurrency }, async () => {
+    while (!failed) {
+      const index = nextIndex
+      if (index >= chunks.length) return
+      nextIndex += 1
+      results[index] = await runMultipartPart(args, reporter, {
+        chunk: chunks[index],
+        index,
+        partCount: chunks.length,
+        numberWidth,
+      }).catch((error) => {
+        failed = true
+        return { error }
+      })
+    }
+  })
   try {
-    for (let index = 0; index < chunks.length; index += 1) {
-      const chunk = chunks[index]
-      const output = numberedPath(args.output, index + 1, numberWidth)
-      const partReportPath = numberedPath(args.report, index + 1, numberWidth)
-      cleanupPaths.push(output, partReportPath)
-      const attempts = []
-      let attemptedDpi = args.dpi
-      reporter.emit('compare-part-start', {
-        partNumber: index + 1,
-        partCount: chunks.length,
-        slides: chunk.selector,
-        dpi: args.dpi,
-      })
-      let attempt = await runContactDiff(args, {
-        output,
-        slides: chunk.selector,
-        dpi: args.dpi,
-        reporter,
-        partNumber: index + 1,
-        partCount: chunks.length,
-      })
-      if (attempt.status === 'failed') {
-        attempts.push({
-          dpi: args.dpi,
-          status: 'failed',
-          error: attempt.error,
-          pageBitmapCache: attempt.pageCache,
-        })
-        rmSync(output, { force: true })
-        if (isRetryableRenderError(attempt.error)) {
-          attemptedDpi = args.fallbackDpi
-          reporter.emit('compare-part-retry', {
-            partNumber: index + 1,
-            partCount: chunks.length,
-            slides: chunk.selector,
-            dpi: args.fallbackDpi,
-            reason: attempt.error.reason ?? attempt.error.kind,
-          })
-          attempt = await runContactDiff(args, {
-            output,
-            slides: chunk.selector,
-            dpi: args.fallbackDpi,
-            reporter,
-            partNumber: index + 1,
-            partCount: chunks.length,
-          })
-        }
-      }
-      if (attempt.status === 'failed') {
-        if (attempts.length === 0 || attempts.at(-1)?.dpi !== attemptedDpi) {
-          attempts.push({
-            dpi: attemptedDpi,
-            status: 'failed',
-            error: attempt.error,
-            pageBitmapCache: attempt.pageCache,
-          })
-        }
-        throw new Error(
-          `contact-diff part ${index + 1}/${chunks.length} (${chunk.selector}) failed: ${attempt.error.message}`,
-        )
-      }
-      const effectiveDpi = Number(attempt.report?.render?.dpi ?? attempt.report?.summary?.dpi)
-      if (!sourceIdentity) {
-        sourceIdentity = attempt.identities.source
-        candidateIdentity = attempt.identities.candidate
-      } else if (
-        !sameInputIdentity(sourceIdentity, attempt.identities.source) ||
-        !sameInputIdentity(candidateIdentity, attempt.identities.candidate)
+    await Promise.all(workers)
+    const firstError = results.find((result) => result?.error)?.error
+    if (firstError) throw firstError
+    const parts = results.map((result) => result.part)
+    const sourceIdentity = results[0].identities.source
+    const candidateIdentity = results[0].identities.candidate
+    for (const result of results) {
+      if (
+        !sameInputIdentity(sourceIdentity, result.identities.source) ||
+        !sameInputIdentity(candidateIdentity, result.identities.candidate)
       ) {
         throw new Error('multipart contact-diff parts were rendered from different PPTX bytes')
       }
-      attempts.push({
-        dpi: effectiveDpi,
-        status: attempt.cache?.status === 'hit' ? 'cache-hit' : 'success',
-        pageBitmapCache: attempt.pageCache,
-      })
-      const partReport = {
-        ...attempt.report,
-        pptxNovaCompare: {
-          mode: 'multipart-part',
-          requestedDpi: args.dpi,
-          fallbackDpi: args.fallbackDpi,
-          attempts,
-          cache: attempt.cache,
-          pageBitmapCache: attempt.pageCache,
-          pageBitmapCacheAttempts: attempts.map(({ dpi, status, pageBitmapCache }) => ({
-            dpi,
-            status,
-            pageBitmapCache: pageBitmapCache ?? null,
-          })),
-        },
-      }
-      writeFileSync(partReportPath, `${JSON.stringify(partReport, null, 2)}\n`)
-      const imageStat = statSync(output)
-      parts.push({
-        partNumber: index + 1,
-        selector: chunk.selector,
-        slides: chunk.slides,
-        pairCount: Number(
-          attempt.report?.agentGate?.pairCount ?? attempt.report?.summary?.pairCount,
-        ),
-        dpi: effectiveDpi,
-        width: Number(attempt.report?.render?.width),
-        height: Number(attempt.report?.render?.height),
-        path: output,
-        reportPath: partReportPath,
-        byteLength: imageStat.size,
-        sha256: sha256(output),
-        agentGate: attempt.report?.agentGate ?? null,
-        attempts,
-        cache: attempt.cache,
-        pageBitmapCache: attempt.pageCache,
-        pageBitmapCacheAttempts: attempts.map(({ dpi, status, pageBitmapCache }) => ({
-          dpi,
-          status,
-          pageBitmapCache: pageBitmapCache ?? null,
-        })),
-      })
-      reporter.emit('compare-part-complete', {
-        partNumber: index + 1,
-        partCount: chunks.length,
-        slides: chunk.selector,
-        pairCount: parts.at(-1).pairCount,
-        dpi: effectiveDpi,
-        output,
-      })
     }
     const coverage = coverageFor(parts, args.slideCount)
     const passed =
@@ -901,6 +933,7 @@ async function runMultipartCompare(args, reporter) {
       candidate: candidateIdentity,
       slideCount: args.slideCount,
       chunkSize: args.chunkSize,
+      concurrency,
       requestedDpi: args.dpi,
       fallbackDpi: args.fallbackDpi,
       parts,

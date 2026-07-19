@@ -1,7 +1,13 @@
-import { writeSync } from 'node:fs'
+import { closeSync, openSync, writeSync } from 'node:fs'
 
 const SCHEMA_VERSION = 'pptx-nova-progress/v1'
 const VALID_MODES = new Set(['auto', 'jsonl', 'text', 'off'])
+const PHASE_BOUNDARY_EVENTS = new Set([
+  'runner-start',
+  'runner-complete',
+  'phase-start',
+  'phase-complete',
+])
 
 function normalizeMode(mode, jsonOutput) {
   const normalized = String(mode || 'auto')
@@ -35,9 +41,29 @@ function textLine(event, payload) {
 export function createProgressReporter({ mode = 'auto', jsonOutput = false, context = {} } = {}) {
   const resolvedMode = normalizeMode(mode, jsonOutput)
   const fd = progressFd()
+  let fileFd = null
+  let filePath = null
+
+  function attachFile(path) {
+    if (!path || path === 'none') return
+    detachFile()
+    fileFd = openSync(path, 'a')
+    filePath = path
+  }
+
+  function detachFile() {
+    if (fileFd === null) return
+    try {
+      closeSync(fileFd)
+    } catch {
+      // fd may already be closed by the OS on process teardown
+    }
+    fileFd = null
+    filePath = null
+  }
 
   function emit(event, details = {}) {
-    if (resolvedMode === 'off') return
+    if (resolvedMode === 'off' && fileFd === null) return
     const payload = {
       schemaVersion: SCHEMA_VERSION,
       event,
@@ -45,7 +71,21 @@ export function createProgressReporter({ mode = 'auto', jsonOutput = false, cont
       ...context,
       ...details,
     }
-    const line = resolvedMode === 'jsonl' ? JSON.stringify(payload) : textLine(event, payload)
+    if (fileFd !== null) {
+      try {
+        writeSync(fileFd, `${JSON.stringify(payload)}\n`)
+      } catch {
+        // progress archive failures must never break the run
+      }
+    }
+    if (resolvedMode === 'off') return
+    // With an attached archive, stderr carries only single-line phase-boundary
+    // summaries; the full event stream lives in the file.
+    if (fileFd !== null && !PHASE_BOUNDARY_EVENTS.has(event)) return
+    const line =
+      fileFd === null && resolvedMode === 'jsonl'
+        ? JSON.stringify(payload)
+        : textLine(event, payload)
     try {
       writeSync(fd, `${line}\n`)
     } catch {
@@ -53,7 +93,19 @@ export function createProgressReporter({ mode = 'auto', jsonOutput = false, cont
     }
   }
 
-  return { emit, mode: resolvedMode, enabled: resolvedMode !== 'off' }
+  return {
+    emit,
+    mode: resolvedMode,
+    enabled: resolvedMode !== 'off',
+    attachFile,
+    detachFile,
+    get forwardFd() {
+      return fileFd
+    },
+    get filePath() {
+      return filePath
+    },
+  }
 }
 
 export function progressHeartbeatMs() {

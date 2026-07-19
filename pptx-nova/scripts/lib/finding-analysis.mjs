@@ -1205,21 +1205,48 @@ function summarize(findings, resolvedFindings, agentGate) {
     byDeltaStatus[finding.delta.status] = (byDeltaStatus[finding.delta.status] ?? 0) + 1
   }
   const governing = new Set(agentGate.governingFindingKeys)
-  const topFindings = [
+  const shapeTopFinding = (finding) => ({
+    findingKey: finding.findingKey.sha256,
+    code: finding.rawFinding.code,
+    slideNumber: finding.target.slideNumber,
+    disposition: finding.decision.disposition,
+    action: finding.decision.action,
+    reviewStatus: finding.review.status,
+    deltaStatus: finding.delta.status,
+    basisCodes: finding.impact.basisCodes,
+  })
+  const prioritized = [
     ...findings.filter((finding) => governing.has(finding.findingKey.sha256)),
-    ...findings.filter((finding) => !governing.has(finding.findingKey.sha256)),
-  ]
-    .slice(0, 5)
-    .map((finding) => ({
-      findingKey: finding.findingKey.sha256,
-      code: finding.rawFinding.code,
-      slideNumber: finding.target.slideNumber,
-      disposition: finding.decision.disposition,
-      action: finding.decision.action,
-      reviewStatus: finding.review.status,
-      deltaStatus: finding.delta.status,
-      basisCodes: finding.impact.basisCodes,
-    }))
+    ...findings.filter(
+      (finding) =>
+        !governing.has(finding.findingKey.sha256) &&
+        finding.decision.disposition !== 'informational',
+    ),
+  ].map(shapeTopFinding)
+  const aggregatedInformational = new Map()
+  for (const finding of findings) {
+    if (governing.has(finding.findingKey.sha256)) continue
+    if (finding.decision.disposition !== 'informational') continue
+    const code = finding.rawFinding.code
+    const entry = aggregatedInformational.get(code)
+    if (entry) {
+      entry.aggregatedCount += 1
+      if (
+        entry.aggregatedSlideNumbers.length < 8 &&
+        !entry.aggregatedSlideNumbers.includes(finding.target.slideNumber)
+      ) {
+        entry.aggregatedSlideNumbers.push(finding.target.slideNumber)
+      }
+    } else {
+      aggregatedInformational.set(code, {
+        ...shapeTopFinding(finding),
+        aggregated: true,
+        aggregatedCount: 1,
+        aggregatedSlideNumbers: [finding.target.slideNumber],
+      })
+    }
+  }
+  const topFindings = [...prioritized, ...aggregatedInformational.values()].slice(0, 5)
   return {
     countsComplete: true,
     findingCount: findings.length,
@@ -1495,6 +1522,42 @@ function buildCompleteReport(input, findings, resolvedFindings, diagnostics) {
     summary,
     agentGate,
   }
+}
+
+export function annotateTopActionable(topActionable, findingReport) {
+  const findings = Array.isArray(findingReport?.findings) ? findingReport.findings : []
+  if (!Array.isArray(topActionable) || topActionable.length === 0 || findings.length === 0) {
+    return topActionable
+  }
+  const byCode = new Map()
+  for (const finding of findings) {
+    const code = String(finding?.rawFinding?.code ?? '')
+    if (!code) continue
+    const delta = String(finding?.delta?.status ?? 'unknown')
+    const entry = byCode.get(code) ?? { inheritedCount: 0, introducedCount: 0, otherCount: 0 }
+    if (delta === 'unchanged') entry.inheritedCount += 1
+    else if (delta === 'introduced') entry.introducedCount += 1
+    else entry.otherCount += 1
+    byCode.set(code, entry)
+  }
+  return topActionable.map((group) => {
+    const counts = byCode.get(String(group?.code ?? ''))
+    if (!counts) return group
+    const { inheritedCount, introducedCount, otherCount } = counts
+    const deltaStatus =
+      inheritedCount > 0 && introducedCount === 0 && otherCount === 0
+        ? 'unchanged'
+        : introducedCount > 0 && inheritedCount === 0 && otherCount === 0
+          ? 'introduced'
+          : 'mixed'
+    return {
+      ...group,
+      deltaStatus,
+      inherited: deltaStatus === 'unchanged',
+      inheritedCount,
+      introducedCount,
+    }
+  })
 }
 
 export function evaluateFindings(input) {

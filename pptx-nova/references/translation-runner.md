@@ -44,6 +44,11 @@ Add `--multi-column-review-gate <path>` only when the final `vision-diff` contai
 `--contact-diff` when compatibility aliases are needed; aliases are copied from the final compare and
 must not trigger another full-deck render.
 
+Compare parts render concurrently (`--compare-concurrency`, default 3). `--prompt-text`/`--prompt-file`
+archive the original user request to `<run-dir>/prompt.txt` for the feedback gate. The full progress
+event stream is archived to `<run-dir>/progress.jsonl` by default (`--progress-file none` disables);
+while active, stderr carries only single-line phase-boundary summaries.
+
 The finalizer re-runs the bundled multi-column gate before accepting it. Candidate bytes, the bound
 vision report, exact slide/shape finding set, reviewed PNG hashes/dimensions, and decisions must all
 remain valid; a previously passing but stale gate fails closed. Current and reviewed vision reports

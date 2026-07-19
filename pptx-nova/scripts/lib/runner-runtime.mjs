@@ -85,7 +85,7 @@ export function createRunnerRuntime({ getProgressReporter, maxBuffer = DEFAULT_M
         ...(options.forwardProgress ? { PPTX_NOVA_PROGRESS_FD: '3' } : {}),
       },
       stdio: options.forwardProgress
-        ? ['ignore', 'pipe', 'pipe', process.stderr]
+        ? ['ignore', 'pipe', 'pipe', progress.forwardFd ?? process.stderr]
         : ['ignore', 'pipe', 'pipe'],
     })
     if (result.error) {
@@ -249,7 +249,12 @@ export function createRunnerRuntime({ getProgressReporter, maxBuffer = DEFAULT_M
       details,
     }
     summary.phases.push(phase)
-    reporter().emit('phase-complete', { phase: name, status, ...details })
+    reporter().emit('phase-complete', {
+      phase: name,
+      status,
+      durationMs: phase.durationMs,
+      ...details,
+    })
     return phase
   }
 

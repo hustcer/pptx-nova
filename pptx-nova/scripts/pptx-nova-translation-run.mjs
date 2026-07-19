@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto'
-import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
@@ -50,8 +58,14 @@ Options:
   --multi-column-review-gate <path>  Optional passing bound review gate for review-only vision blockers
   --contact-diff                     Materialize contact-diff aliases from translation-compare evidence
   --compare-chunk-size <n>           Maximum slides per compare PNG. Defaults to 20
+  --compare-concurrency <n>          Concurrent compare part renders. Defaults to 3
   --overwrite                        Allow replacing an existing final output after machine gates pass
   --progress <mode>                  Progress stream: auto|jsonl|text|off. Defaults to auto
+  --progress-file <path>             Progress JSONL archive. Defaults to <run-dir>/progress.jsonl;
+                                     pass "none" to disable. While active, stderr only carries
+                                     single-line phase-boundary summaries
+  --prompt-text <text>               Original user prompt; archived to <run-dir>/prompt.txt
+  --prompt-file <path>               Read the original user prompt from a file
   --json                             Print compact Agent result
   --json-full                        Print complete run summary for debugging
   --help                             Show this help
@@ -73,8 +87,12 @@ function parseArgs(argv) {
     multiColumnReviewGate: '',
     contactDiff: false,
     compareChunkSize: 20,
+    compareConcurrency: 3,
     overwrite: false,
     progress: 'auto',
+    progressFile: '',
+    promptText: '',
+    promptFile: '',
     json: false,
     jsonFull: false,
   }
@@ -93,7 +111,7 @@ function parseArgs(argv) {
       const key = valueFlags[arg]
       const value = argv[index + 1]
       if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
-      args[key] = key === 'compareChunkSize' ? Number(value) : value
+      args[key] = ['compareChunkSize', 'compareConcurrency'].includes(key) ? Number(value) : value
       index += 1
     } else throw new Error(`Unknown option: ${arg}\n\n${usage}`)
   }
@@ -102,6 +120,16 @@ function parseArgs(argv) {
   }
   if (!Number.isInteger(args.compareChunkSize) || args.compareChunkSize <= 0) {
     throw new Error('--compare-chunk-size must be a positive integer')
+  }
+  if (
+    !Number.isInteger(args.compareConcurrency) ||
+    args.compareConcurrency <= 0 ||
+    args.compareConcurrency > 16
+  ) {
+    throw new Error('--compare-concurrency must be an integer between 1 and 16')
+  }
+  if (args.promptText && args.promptFile) {
+    throw new Error('--prompt-text and --prompt-file are mutually exclusive')
   }
   return args
 }
@@ -117,7 +145,11 @@ const valueFlags = {
   '--allow-text-attrs': 'allowTextAttrs',
   '--multi-column-review-gate': 'multiColumnReviewGate',
   '--compare-chunk-size': 'compareChunkSize',
+  '--compare-concurrency': 'compareConcurrency',
   '--progress': 'progress',
+  '--progress-file': 'progressFile',
+  '--prompt-text': 'promptText',
+  '--prompt-file': 'promptFile',
 }
 
 function timestamp(now = new Date()) {
@@ -259,6 +291,8 @@ function artifactPaths(runDir) {
     compareGate: join(runDir, 'translation-compare-gate.json'),
     contactDiff: join(runDir, 'contact-diff.png'),
     contactDiffReport: join(runDir, 'contact-diff.json'),
+    progressLog: join(runDir, 'progress.jsonl'),
+    prompt: join(runDir, 'prompt.txt'),
     summary: join(runDir, 'translation-run-summary.json'),
   }
 }
@@ -618,6 +652,8 @@ function runCompare(summary, args, artifacts, slideCount) {
       String(slideCount),
       '--compare-chunk-size',
       String(args.compareChunkSize),
+      '--compare-concurrency',
+      String(args.compareConcurrency),
       '--dpi',
       '192',
       '--fallback-dpi',
@@ -625,7 +661,7 @@ function runCompare(summary, args, artifacts, slideCount) {
       '--xdoc-bin',
       args.xdocBin,
       '--progress',
-      args.progress,
+      progressReporter.forwardFd !== null ? 'jsonl' : args.progress,
       '--overwrite',
       '--json',
     ],
@@ -910,6 +946,28 @@ function failureReferences(error) {
   return route ? [route] : []
 }
 
+function attachProgressArchive(args, artifacts) {
+  const target = args.progressFile === 'none' ? '' : args.progressFile || artifacts.progressLog
+  if (!target) return
+  progressReporter.attachFile?.(target)
+}
+
+function archivePrompt(summary, args, artifacts) {
+  if (args.promptFile && !existsSync(args.promptFile)) {
+    throw new Error(`--prompt-file does not exist: ${args.promptFile}`)
+  }
+  const text = args.promptFile ? readFileSync(args.promptFile, 'utf8') : args.promptText
+  if (!text) return
+  const promptStarted = performance.now()
+  writeFileSync(artifacts.prompt, text.endsWith('\n') ? text : `${text}\n`)
+  addInternalPhase(summary, 'prompt-archive', 'passed', {
+    artifact: relativeArtifact(args.runDir, artifacts.prompt),
+    durationMs: durationMs(promptStarted),
+    bytes: statSync(artifacts.prompt).size,
+    source: args.promptFile ? 'file' : 'text',
+  })
+}
+
 function runTranslation(input) {
   const started = performance.now()
   const args = normalizeArgs(input)
@@ -917,7 +975,9 @@ function runTranslation(input) {
   mkdirSync(args.runDir, { recursive: true })
   const artifacts = artifactPaths(args.runDir)
   const summary = initialSummary(args, artifacts)
+  attachProgressArchive(args, artifacts)
   try {
+    archivePrompt(summary, args, artifacts)
     copyFileSync(args.source, artifacts.source)
     copyFileSync(args.candidate, artifacts.candidate)
     copyFileSync(args.units, artifacts.units)
@@ -968,6 +1028,8 @@ function runTranslation(input) {
     })
     error.summary = summary
     throw error
+  } finally {
+    progressReporter.detachFile?.()
   }
 }
 

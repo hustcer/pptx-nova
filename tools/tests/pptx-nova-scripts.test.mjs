@@ -60,6 +60,19 @@ function fileIdentity(path) {
   }
 }
 
+function readRefurbishResult(result) {
+  const output = JSON.parse(result.stdout)
+  assert.equal(output.schemaVersion, 'pptx-nova-refurbish-result/v1')
+  assert.equal('phases' in output, false)
+  assert.ok(output.agentSummary)
+  return output
+}
+
+function readRefurbishSummary(result) {
+  const output = readRefurbishResult(result)
+  return JSON.parse(readFileSync(join(output.runDir, 'refurbish-run-summary.json'), 'utf8'))
+}
+
 function writeFakeXdoc(root, source) {
   const scriptPath = join(root, 'fake-xdoc.mjs')
   writeFileSync(scriptPath, source)
@@ -1791,6 +1804,7 @@ test('refurbish plan requires semantic diff gate by default', async () => {
   const semanticIndex = plan.requiredGates.indexOf('semantic-diff')
 
   assert.equal(plan.status, 'ready')
+  assert.deepEqual(plan.requiredReferences, [])
   assert.notEqual(semanticIndex, -1)
   assert.ok(plan.requiredGates.indexOf('fidelity-gate') < semanticIndex)
   assert.ok(
@@ -1801,6 +1815,20 @@ test('refurbish plan requires semantic diff gate by default', async () => {
         command.command.includes('xdoc pptx diff'),
     ),
   )
+})
+
+test('skill routes standard refurbishment through one compact reference', () => {
+  const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
+  const reference = readFileSync(skillPath('references/refurbish-runner.md'), 'utf8')
+  const routingRow = skill
+    .split('\n')
+    .find((line) => line.includes('Polish / refurbish an existing PPTX'))
+
+  assert.match(routingRow, /references\/refurbish-runner\.md/)
+  assert.doesNotMatch(routingRow, /common-workflow|reference-create|deckkit-mode/)
+  assert.match(reference, /Do not add `--contact-diff` for ordinary full-deck review/)
+  assert.match(reference, /refurbish-plan\.json\.requiredReferences/)
+  assert.ok(reference.split('\n').length < 150)
 })
 
 test('refurbish fallback plan overwrites current-run candidate commands', async () => {
@@ -1822,6 +1850,13 @@ test('refurbish fallback plan overwrites current-run candidate commands', async 
         command.command.includes('--overwrite'),
     ),
   )
+  assert.deepEqual(plan.requiredReferences, [
+    {
+      path: 'references/reference-create.md',
+      section: '6. Refurbish Existing Deck',
+      reason: 'The selected route requires the catalog-driven fallback contract.',
+    },
+  ])
 })
 
 test('refurbish runner persists catalog readiness before a blocked plan exits', () => {
@@ -1865,7 +1900,7 @@ if (args[0] === 'schema') {
     ],
     1,
   )
-  const summary = JSON.parse(result.stdout)
+  const summary = readRefurbishSummary(result)
   const readinessPath = join(runDir, 'catalog-readiness.json')
   const readiness = JSON.parse(readFileSync(readinessPath, 'utf8'))
 
@@ -1898,11 +1933,12 @@ test('refurbish runner persists catalog readiness before any xdoc command starts
       runDir,
       '--xdoc-bin',
       join(root, 'missing-xdoc'),
-      '--json',
+      '--json-full',
     ],
     1,
   )
   const summary = JSON.parse(result.stdout)
+  assert.equal(summary.schemaVersion, 'pptx-nova-refurbish-run/v1')
   const readinessPath = join(runDir, 'catalog-readiness.json')
   const phaseNames = summary.phases.map((phase) => phase.name)
 
@@ -1927,7 +1963,7 @@ test('refurbish runner publishes one SHA-256-bound multipart delivery bundle', (
     root,
     `#!/usr/bin/env node
 import { createHash } from 'node:crypto'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const args = process.argv.slice(2)
@@ -2036,7 +2072,25 @@ if (args[0] === 'schema') {
     slides: []
   })
 } else if (args[0] === 'pptx' && args[1] === 'contact-diff') {
+  if (process.env.FAKE_XDOC_LOG) {
+    appendFileSync(process.env.FAKE_XDOC_LOG, JSON.stringify({
+      selector: valueAfter('--slides'),
+      dpi: Number(valueAfter('--dpi'))
+    }) + '\\n')
+  }
   const selector = valueAfter('--slides')
+  const dpi = Number(valueAfter('--dpi')) || 72
+  if (process.env.FAKE_RETRY_COMPARE === '1' && dpi === 192) {
+    print({
+      schemaVersion: 'pptx-contact-diff/v1',
+      status: 'error',
+      error: {
+        kind: 'RenderError', code: 'RenderError', stage: 'render', retryable: true,
+        requestedDpi: 192, pairCount: slideCount, reason: 'render-resource-limit'
+      }
+    })
+    process.exit(2)
+  }
   const selectedSlides = selector
     ? (() => {
         const [start, end] = selector.split('-').map(Number)
@@ -2053,10 +2107,10 @@ if (args[0] === 'schema') {
     sourcePath: valueAfter('--source'),
     candidatePath: valueAfter('--candidate'),
     outputPath: valueAfter('--output'),
-    summary: { pairCount: selectedSlides.length, scopeMode, dpi: Number(valueAfter('--dpi')) || 72 },
+    summary: { pairCount: selectedSlides.length, scopeMode, dpi },
     scope: { requested: selector || null, slides: selectedSlides, basis: 'source-slides' },
     agentGate: { passed: true, status: 'pass', scopeMode, pairCount: selectedSlides.length },
-    render: { path: valueAfter('--output'), width: 100, height: 56, dpi: Number(valueAfter('--dpi')) || 72 }
+    render: { path: valueAfter('--output'), width: 100, height: 56, dpi }
   })
 } else {
   process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
@@ -2065,34 +2119,100 @@ if (args[0] === 'schema') {
 `,
   )
 
-  const result = runNode([
-    skillPath('scripts/pptx-nova-refurbish-run.mjs'),
-    '--deckkit',
-    'mckinsey-blue',
-    '--source',
-    source,
-    '--output',
-    output,
-    '--run-dir',
-    runDir,
-    '--route',
-    'native',
-    '--xdoc-bin',
-    fakeXdoc,
-    '--json',
-  ])
-  const summary = JSON.parse(result.stdout)
+  const result = runNode(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      source,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--route',
+      'native',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--contact-diff',
+      '--json',
+    ],
+    { env: { ...process.env, FAKE_XDOC_LOG: join(root, 'contact-diff.log') } },
+  )
+  const compactResult = readRefurbishResult(result)
+  const summary = JSON.parse(
+    readFileSync(join(compactResult.runDir, 'refurbish-run-summary.json'), 'utf8'),
+  )
   const phaseNames = summary.phases.map((phase) => phase.name)
   const gateNames = summary.gates.map((gate) => gate.name)
   const sourceInspect = summary.phases.find((phase) => phase.name === 'source-inspect')
   const comparePhase = summary.phases.find((phase) => phase.name === 'refurbish-compare')
 
   assert.equal(summary.status, 'needs-human-review')
+  assert.equal(compactResult.status, 'needs-human-review')
+  assert.equal(compactResult.performance.compareRenderInvocations, 3)
+  assert.equal(compactResult.performance.comparePartCount, 3)
+  assert.equal(compactResult.performance.compareRetryInvocations, 0)
+  assert.equal(compactResult.performance.renderInvocationsSaved, 3)
+  assert.equal(compactResult.performance.renderBudget.withinBaseline, true)
+  assert.equal(compactResult.performance.renderBudget.withinRetryBudget, true)
+  assert.ok(compactResult.performance.estimatedRenderedPixels > 0)
+  assert.equal(compactResult.performance.renderBudget.maximumRetryInvocations, 3)
+  assert.equal(compactResult.performance.renderBudget.maximumTotalInvocations, 6)
+  assert.equal(compactResult.performance.renderBudget.withinPixelBaseline, true)
+  assert.equal(compactResult.performance.renderBudget.withinPixelRetryBudget, true)
+  assert.equal(compactResult.performance.contactDiffReused, true)
+  assert.equal('performance' in compactResult.agentSummary, false)
+  assert.ok(compactResult.performance.totalMs > 0)
+  assert.ok(compactResult.performance.renderMs > 0)
+  assert.ok(compactResult.performance.renderShare > 0)
+  assert.ok(compactResult.performance.topPhases.length > 0)
+  assert.ok(result.stdout.length < readFileSync(summary.artifacts.summary, 'utf8').length)
   assert.equal(existsSync(output), true)
   assert.equal(existsSync(join(runDir, 'pptx-diff.json')), true)
   assert.equal(existsSync(join(runDir, 'catalog-readiness.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare.json')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-gate.json')), true)
+  assert.equal(existsSync(join(runDir, 'contact-diff.json')), true)
+  const contactDiff = JSON.parse(readFileSync(join(runDir, 'contact-diff.json'), 'utf8'))
+  assert.equal(contactDiff.reuse.status, 'reused')
+  assert.equal(contactDiff.reuse.renderInvocationsSaved, 3)
+  assert.deepEqual(
+    contactDiff.parts.map((part) => basename(part.path)),
+    ['contact-diff-01.png', 'contact-diff-02.png', 'contact-diff-03.png'],
+  )
+  assert.equal(
+    contactDiff.parts.every((part) => existsSync(part.path)),
+    true,
+  )
+  assert.equal(
+    contactDiff.parts.every((part) =>
+      readFileSync(part.path).equals(readFileSync(part.reusedFrom.path)),
+    ),
+    true,
+  )
+  assert.deepEqual(
+    summary.artifacts.contactDiffParts,
+    contactDiff.parts.map((part) => part.path),
+  )
+  assert.equal(
+    contactDiff.parts.every((part) => {
+      const partReport = JSON.parse(readFileSync(part.reportPath, 'utf8'))
+      return partReport.outputPath === part.path && partReport.render.path === part.path
+    }),
+    true,
+  )
+  assert.deepEqual(
+    readFileSync(join(root, 'contact-diff.log'), 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line)),
+    [
+      { selector: '1-20', dpi: 192 },
+      { selector: '21-40', dpi: 192 },
+      { selector: '41-48', dpi: 192 },
+    ],
+  )
   const compareGate = JSON.parse(readFileSync(join(runDir, 'refurbish-compare-gate.json'), 'utf8'))
   assert.equal(compareGate.finalBinding.status, 'bound')
   assert.equal(compareGate.finalBinding.publishedFinal.path, output)
@@ -2103,7 +2223,7 @@ if (args[0] === 'schema') {
   assert.equal(summary.artifacts.refurbishCompare, null)
   assert.deepEqual(
     summary.artifacts.refurbishCompareParts,
-    summary.agentSummary.gates.compare.siblingPaths,
+    summary.agentSummary.artifacts.refurbishCompareParts,
   )
   assert.equal(summary.artifacts.refurbishCompareParts.length, 3)
   assert.equal(
@@ -2128,7 +2248,12 @@ if (args[0] === 'schema') {
     .map((line) => JSON.parse(line))
   assert.ok(
     progressEvents.some(
-      (event) => event.event === 'phase-start' && event.phase === 'source-inspect',
+      (event) =>
+        event.event === 'phase-start' &&
+        event.phase === 'source-inspect' &&
+        event.executable &&
+        Number.isInteger(event.argumentCount) &&
+        !('command' in event),
     ),
   )
   assert.ok(
@@ -2145,6 +2270,8 @@ if (args[0] === 'schema') {
   assert.ok(comparePhase.command.includes('--dpi 192'), comparePhase.command)
   assert.ok(phaseNames.includes('pptx-semantic-diff'))
   assert.ok(phaseNames.includes('refurbish-compare'))
+  assert.ok(phaseNames.includes('contact-diff-reuse'))
+  assert.equal(phaseNames.includes('contact-diff'), false)
   assert.ok(phaseNames.includes('refurbish-compare-delivery'))
   assert.ok(gateNames.includes('pptx-semantic-diff'))
   assert.ok(gateNames.includes('refurbish-compare-delivery'))
@@ -2176,11 +2303,12 @@ if (args[0] === 'schema') {
       'native',
       '--xdoc-bin',
       fakeXdoc,
+      '--contact-diff',
       '--json',
     ],
-    { env: { ...process.env, FAKE_SLIDE_COUNT: '1' } },
+    { env: { ...process.env, FAKE_SLIDE_COUNT: '1', FAKE_RETRY_COMPARE: '1' } },
   )
-  const singleSummary = JSON.parse(singleResult.stdout)
+  const singleSummary = readRefurbishSummary(singleResult)
 
   assert.equal(
     singleSummary.artifacts.refurbishCompare,
@@ -2188,6 +2316,26 @@ if (args[0] === 'schema') {
   )
   assert.deepEqual(singleSummary.artifacts.refurbishCompareParts, [])
   assert.equal(existsSync(singleSummary.artifacts.refurbishCompare), true)
+  assert.equal(existsSync(singleSummary.artifacts.contactDiff), true)
+  const singleContactDiff = JSON.parse(
+    readFileSync(singleSummary.artifacts.contactDiffReport, 'utf8'),
+  )
+  assert.equal(singleContactDiff.reuse.status, 'reused')
+  assert.equal(singleContactDiff.outputPath, singleSummary.artifacts.contactDiff)
+  assert.equal(singleSummary.performance.compareRenderInvocations, 2)
+  assert.equal(singleSummary.performance.comparePartCount, 1)
+  assert.equal(singleSummary.performance.compareRetryInvocations, 1)
+  assert.equal(singleSummary.performance.renderBudget.withinBaseline, false)
+  assert.equal(singleSummary.performance.renderBudget.withinRetryBudget, true)
+  assert.equal(singleSummary.performance.renderBudget.withinPixelBaseline, false)
+  assert.equal(singleSummary.performance.renderBudget.withinPixelRetryBudget, true)
+  assert.equal(singleSummary.performance.renderInvocationsSaved, 1)
+  assert.equal(
+    readFileSync(singleSummary.artifacts.contactDiff).equals(
+      readFileSync(singleSummary.artifacts.refurbishCompare),
+    ),
+    true,
+  )
 
   const reviewedSource = join(root, 'reviewed-source.pptx')
   const reviewedOutput = join(root, 'reviewed-out.pptx')
@@ -2240,7 +2388,7 @@ if (args[0] === 'schema') {
       },
     },
   )
-  const reviewedSummary = JSON.parse(reviewedResult.stdout)
+  const reviewedSummary = readRefurbishSummary(reviewedResult)
   const reviewedPhases = reviewedSummary.phases.map((phase) => phase.name)
   const reviewedFidelity = reviewedSummary.gates.find((gate) => gate.name === 'fidelity-gate')
 
@@ -2365,7 +2513,7 @@ if (args[0] === 'schema') {
     { cwd: repoRoot, encoding: 'utf8' },
   )
   assert.equal(result.status, 1, result.stderr || result.stdout)
-  const summary = JSON.parse(result.stdout)
+  const summary = readRefurbishSummary(result)
   const phaseNames = summary.phases.map((phase) => phase.name)
 
   assert.equal(summary.status, 'failed')
@@ -2596,7 +2744,15 @@ process.stdout.write(JSON.stringify({
 
   assert.equal(report.status, 'success')
   assert.ok(progressEvents.some((event) => event.event === 'compare-start'))
-  assert.ok(progressEvents.some((event) => event.event === 'command-heartbeat'))
+  assert.ok(
+    progressEvents.some(
+      (event) =>
+        event.event === 'command-heartbeat' &&
+        event.executable &&
+        Number.isInteger(event.argumentCount) &&
+        !('command' in event),
+    ),
+  )
   assert.ok(progressEvents.some((event) => event.event === 'compare-part-complete'))
   assert.ok(progressEvents.some((event) => event.event === 'compare-complete'))
 })

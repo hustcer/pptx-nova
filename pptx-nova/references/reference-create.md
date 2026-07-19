@@ -298,7 +298,8 @@ xdoc pptx refurbish-skin \
 对 text/shapes/tables/charts 做批量 remap，并运行 `vision-diff` 与原生 `refurbish-audit` gate。
 读取 `refurbish-skin.json`：`status` 必须为 `passed`，`gate.passed` 必须为 `true`，且
 `gate.newHighIssues` / `gate.newMediumIssues` 必须为 0。`artifacts.contactDiff.status` 默认为
-`skipped`；需要人工视觉复核时，再按报告里的建议路径显式运行 `xdoc pptx contact-diff`。
+`skipped`；标准 runner 最终会生成完整 `refurbish-compare`，不要为全量人工复核额外运行一次
+`xdoc pptx contact-diff`。只有局部修复预览才单独使用带 `--slides` 的 contact-diff。
 
 如果 `refurbish-skin` 返回 `UnsupportedComplexity`，不要重试同一条命令，也不要让用户等待长流程；
 改用下方低层命令对 deck 分段处理，或先做 inspect/audit 后向用户说明当前 MVP 的大 deck 限制。
@@ -397,8 +398,8 @@ Fallback 的最小可交付动作是硬规则：
     不得先把源内容裁剪成现有页型能容纳的形状。
 11. `deck_lock.assumptions[]` 只能披露事实性不确定性和用户已接受的 tradeoff；不能记录未经确认的内容损失。
     如果图片、图表、SmartArt、媒体、备注或复杂对象不能复制或可编辑重建，状态必须是 `blocked`，先询问用户。
-12. 生成全量候选后按需运行视觉差异复核：用 `xdoc pptx contact-diff` 生成源稿和候选的并排
-    contact sheet；必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
+12. 生成全量候选后使用标准 runner 的最终 `refurbish-compare` 做视觉差异复核；局部修复阶段才按需
+    运行带 `--slides` 的 contact-diff。必要时再对照已认可预览 contact sheet。若候选的多数页面不像已认可预览方向，或用户一眼会觉得"基本没变"，
     回到 chrome/remap/layout polish 或 DeckKit 页型映射重做，不能只解释为"保真优先"。
     最终交付前还必须生成全量逐页 `refurbish-compare.png`：源稿在左、最终交付稿在右，
     默认 192dpi，不能用局部 `--slides` 版本替代交付证据。
@@ -554,9 +555,9 @@ DeckKit 选择注意事项：
   `reference-map.json` 和 `content-audit-final.json` 一致；可靠的文本/slide/object 删除必须有
   `approvedChanges[]` 或用户确认。`uncertain` / `unsupported` 区域要在最终摘要中披露，并说明用
   哪个人工或专项 gate 覆盖。
-- PNG/contact-sheet 复核要用 `xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx --output contact-diff.png --dpi 192 --json`
-  生成并排对比后抽查：封面、密集文本拆分页、表格页、SmartArt/无文本补齐页、最后一页。局部修复复核可加
-  `--slides`，但必须确认 `agentGate.passed=true` 且最终交付前按需跑全量 contact-diff。
+- PNG/contact-sheet 复核使用最终 `refurbish-compare` 抽查封面、密集文本拆分页、表格页、
+  SmartArt/无文本补齐页和最后一页。局部修复复核可运行带 `--slides` 的 contact-diff，但不要在
+  最终全量 compare 之外再次渲染同一组 source/candidate/slide range/DPI。
   对翻新任务还必须做视觉差异判断：候选是否明显沿用了目标风格，是否避免了"原稿基本不变"。
   同时检查 proof object 是否过满、圆角/图片/图案示例是否压住标签、空内容区域是否残留无意义横线。
 - `refurbish-compare.png` 是交付物，不只是内部 QA 图。它必须覆盖全 deck，报告中的

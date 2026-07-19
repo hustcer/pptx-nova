@@ -53,8 +53,8 @@ Use these entry points from skill workflows:
   fails closed on machine gates, renders PNG/contact-sheet evidence, and
   publishes the final output atomically. A successful run still
   reports `needs-human-review`; it never claims the visual review is complete.
-  Read `refurbish-run-summary.json.agentSummary` for the stable agent-facing
-  status, gate counts, and artifact pointers.
+  Read compact stdout first, then `refurbish-run-summary.json.agentSummary` only when deeper phase
+  evidence is needed.
 - `pptx-nova-review-policy.mjs` - shared pure policy evaluator for hash-bound
   reviewed findings. It never deletes detector output: exact source SHA-256,
   slide part, shape id, placeholder type/idx, and expected state are required

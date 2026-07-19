@@ -191,11 +191,6 @@ function buildCommands(args, entry, nativeSkinning, profile) {
         required: true,
         command: `xdoc pptx diff --source ${shell(args.source)} --candidate ${shell(args.output)} --detail summary --json > pptx-diff.json`,
       },
-      {
-        name: 'manual-contact-diff',
-        required: false,
-        command: `xdoc pptx contact-diff --source ${shell(args.source)} --candidate ${shell(args.output)} --output contact-diff.png --json`,
-      },
     ]
   }
 
@@ -291,6 +286,26 @@ export function buildRefurbishPlan(args) {
     chromePolicy:
       profile.fallback?.chromePolicy ??
       (nativeSkinning.supported ? 'replace-or-restyle-existing' : 'detect-and-restyle-existing'),
+    requiredReferences: [
+      ...(usesFallback
+        ? [
+            {
+              path: 'references/reference-create.md',
+              section: '6. Refurbish Existing Deck',
+              reason: 'The selected route requires the catalog-driven fallback contract.',
+            },
+          ]
+        : []),
+      ...(explicitOnly
+        ? [
+            {
+              path: 'references/deckkit-mode.md',
+              section: 'Selection',
+              reason: 'The explicitly selected DeckKit uses a readiness exception.',
+            },
+          ]
+        : []),
+    ],
     requiredGates: profile.requiredGates,
     commands: buildCommands(args, entry, nativeSkinning, profile),
   }
@@ -311,6 +326,15 @@ function planResult(args, entry, blockers) {
       path: entry?.path ?? '',
       benchmarkPassed: entry?.quality?.benchmark?.passed ?? null,
     },
+    requiredReferences: entry
+      ? []
+      : [
+          {
+            path: 'references/deckkit-mode.md',
+            section: 'Selection',
+            reason: 'The requested DeckKit is missing from the catalog.',
+          },
+        ],
     blockers,
     status: blockers.length ? 'blocked' : 'ready',
   }

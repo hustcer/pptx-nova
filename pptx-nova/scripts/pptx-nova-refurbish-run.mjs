@@ -29,6 +29,7 @@ const LAYOUT_SNAPSHOT_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-layout-snapshot.mjs')
 const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
 const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
+const AGENT_RESULT_SCHEMA_VERSION = 'pptx-nova-refurbish-result/v1'
 let progressReporter = createProgressReporter({ mode: 'off' })
 
 function sha256(path) {
@@ -49,12 +50,13 @@ Options:
   --readiness-out <path>  Optional benchmark output for a full delivery readiness audit
   --review-policy <path>  Optional hash-bound pptx-nova-review-policy/v1 document
   --explicit              User explicitly named a non-production/default DeckKit
-  --contact-diff          Generate source/candidate contact-diff artifacts for manual review
+  --contact-diff          Materialize contact-diff aliases from the final refurbish comparison
   --compare-chunk-size <n>
                           Maximum slides per compare PNG. Defaults to 20.
   --overwrite             Allow replacing an existing final output after all machine gates pass
   --progress <mode>       Progress stream: auto|jsonl|text|off. Defaults to auto.
-  --json                  Print machine-readable run summary
+  --json                  Print the compact Agent result; the full summary is always saved in the run directory
+  --json-full             Print the complete run summary for debugging
   --help                  Show this help
 
 The runner never marks manual PNG/contact review complete. A successful run exits 0 with
@@ -88,6 +90,7 @@ function parseArgs(argv) {
     overwrite: false,
     progress: 'auto',
     json: false,
+    jsonFull: false,
   }
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -103,6 +106,9 @@ function parseArgs(argv) {
       args.overwrite = true
     } else if (arg === '--json') {
       args.json = true
+    } else if (arg === '--json-full') {
+      args.json = true
+      args.jsonFull = true
     } else if (arg in valueFlags) {
       const key = valueFlags[arg]
       const value = valueAfter(argv, i, arg)
@@ -210,7 +216,8 @@ function runJsonPhase(summary, options) {
   const command = commandInvocation(bin, args)
   progressReporter.emit('phase-start', {
     phase: name,
-    command: commandText(command.bin, command.args),
+    executable: basename(command.bin),
+    argumentCount: command.args.length,
   })
   const result = spawnSync(command.bin, command.args, {
     cwd,
@@ -304,7 +311,8 @@ function runPlainPhase(summary, options) {
   const command = commandInvocation(bin, args)
   progressReporter.emit('phase-start', {
     phase: name,
-    command: commandText(command.bin, command.args),
+    executable: basename(command.bin),
+    argumentCount: command.args.length,
   })
   const result = spawnSync(command.bin, command.args, {
     cwd,
@@ -403,6 +411,22 @@ function artifactSet(summary, keys) {
   return Object.fromEntries(keys.map((key) => [key, summary.artifacts?.[key] ?? null]))
 }
 
+function buildAgentLayoutSummary(layout) {
+  if (!layout) return null
+  return {
+    status: layout.status ?? null,
+    riskCount: layout.riskCount ?? 0,
+    actionableRiskCount: layout.actionableRiskCount ?? 0,
+    informationalRiskCount: layout.informationalRiskCount ?? 0,
+    actionableSlideCount: layout.actionableSlideCount ?? 0,
+    actionableSlideNumbers: layout.actionableSlideNumbers ?? [],
+    actionablePreviewFiles: layout.actionablePreviewFiles ?? [],
+    topActionable: layout.topActionable ?? [],
+    reviewedRiskCount: layout.reviewedRiskCount ?? 0,
+    reviewPolicyStatus: layout.reviewPolicyStatus ?? null,
+  }
+}
+
 function buildAgentSummary(summary) {
   const visionDiff = gateByName(summary, 'vision-diff')
   const audit = gateByName(summary, 'refurbish-audit')
@@ -427,7 +451,7 @@ function buildAgentSummary(summary) {
     decision,
     deckkit: summary.deckkit,
     route,
-    layout: summary.layout,
+    layout: buildAgentLayoutSummary(summary.layout),
     slides: {
       source: fidelity?.sourceSlides ?? null,
       final: fidelity?.finalSlides ?? null,
@@ -474,29 +498,21 @@ function buildAgentSummary(summary) {
       },
       compare: {
         gate: gateStatus(compare),
-        siblingPath: compare?.siblingPath ?? null,
-        siblingPaths: compare?.siblingPaths ?? [],
         partCount: compare?.partCount ?? null,
       },
     },
     artifacts: artifactSet(summary, [
       'summary',
-      'sourceSnapshot',
-      'readiness',
-      'deliveryReadiness',
       'visionDiff',
       'contentAuditFinal',
-      'reviewPolicy',
       'fidelityGate',
       'pptxDiff',
-      'previewReport',
       'contactSheet',
+      'contactDiffParts',
       'refurbishCompare',
       'refurbishCompareParts',
-      'refurbishCompareReport',
       'refurbishCompareGate',
       'layoutFinal',
-      'finalInspect',
     ]),
     warnings: summary.warnings,
     error: summary.error
@@ -506,6 +522,74 @@ function buildAgentSummary(summary) {
           kind: summary.error.kind ?? null,
         }
       : null,
+  }
+}
+
+function buildPerformanceSummary(summary, totalMs) {
+  const measured = summary.phases
+    .filter((phase) => Number.isFinite(phase.durationMs) && phase.durationMs > 0)
+    .map((phase) => ({ name: phase.name, durationMs: phase.durationMs }))
+  const renderNames = new Set([
+    'preview-render',
+    'preview-render-fallback-convert',
+    'contact-diff',
+    'refurbish-compare',
+  ])
+  const renderMs = measured
+    .filter((phase) => renderNames.has(phase.name))
+    .reduce((sum, phase) => sum + phase.durationMs, 0)
+  const comparePhase = summary.phases.find((phase) => phase.name === 'refurbish-compare')
+  const compareRenderInvocations = Number(comparePhase?.renderInvocations ?? 0)
+  const comparePartCount = Number(comparePhase?.partCount ?? 0)
+  const compareRetryInvocations = Math.max(0, compareRenderInvocations - comparePartCount)
+  const renderInvocationsSaved = Number(
+    summary.review?.contactDiffReuse?.renderInvocationsSaved ?? 0,
+  )
+  const estimatedRenderedPixels = Number(comparePhase?.estimatedRenderedPixels ?? 0)
+  const baselineEstimatedPixels = Number(comparePhase?.baselineEstimatedPixels ?? 0)
+  return {
+    schemaVersion: 'pptx-nova-performance/v1',
+    totalMs,
+    measuredPhaseMs: Number(measured.reduce((sum, phase) => sum + phase.durationMs, 0).toFixed(2)),
+    renderMs: Number(renderMs.toFixed(2)),
+    renderShare: totalMs > 0 ? Number((renderMs / totalMs).toFixed(4)) : 0,
+    compareRenderInvocations,
+    comparePartCount,
+    compareRetryInvocations,
+    estimatedRenderedPixels,
+    renderInvocationsSaved,
+    renderBudget: {
+      baselineInvocations: comparePartCount,
+      actualInvocations: compareRenderInvocations,
+      withinBaseline: compareRenderInvocations <= comparePartCount,
+      maximumRetryInvocations: comparePartCount,
+      maximumTotalInvocations: comparePartCount * 2,
+      withinRetryBudget: compareRetryInvocations <= comparePartCount,
+      baselineEstimatedPixels,
+      actualEstimatedPixels: estimatedRenderedPixels,
+      withinPixelBaseline: estimatedRenderedPixels <= baselineEstimatedPixels,
+      maximumRetryEstimatedPixels: Math.round(baselineEstimatedPixels * 1.5625),
+      withinPixelRetryBudget:
+        estimatedRenderedPixels <= Math.round(baselineEstimatedPixels * 1.5625),
+    },
+    contactDiffRequested: Boolean(summary.review?.contactDiffRequested),
+    contactDiffReused: summary.review?.contactDiffReuse?.status === 'reused',
+    topPhases: [...measured].sort((left, right) => right.durationMs - left.durationMs).slice(0, 5),
+  }
+}
+
+function buildAgentResult(summary) {
+  return {
+    schemaVersion: AGENT_RESULT_SCHEMA_VERSION,
+    status: summary.status,
+    machineGatesPassed: Boolean(summary.machineGatesPassed),
+    deliveryReady: Boolean(summary.deliveryReady),
+    needsHumanReview: Boolean(summary.needsHumanReview),
+    runDir: summary.runDir ?? null,
+    output: summary.output ?? null,
+    performance: summary.performance ?? null,
+    agentSummary: summary.agentSummary ?? null,
+    error: summary.error ?? null,
   }
 }
 
@@ -674,6 +758,7 @@ function artifactPaths(runDir) {
     convertReport: join(runDir, 'convert-report.json'),
     contactSheet: join(runDir, 'previews', 'contact-sheet.png'),
     contactDiff: join(runDir, 'contact-diff.png'),
+    contactDiffParts: [],
     contactDiffReport: join(runDir, 'contact-diff.json'),
     refurbishCompare: join(runDir, 'refurbish-compare.png'),
     refurbishCompareParts: [],
@@ -1298,53 +1383,121 @@ function runPreviews(summary, args, artifacts, inspect) {
   )
 }
 
-function runContactDiff(summary, args, artifacts, inspect) {
+function numberedArtifactPath(path, partNumber, partCount) {
+  const extension = extname(path)
+  const stem = path.slice(0, -extension.length)
+  const width = Math.max(2, String(partCount).length)
+  return `${stem}-${String(partNumber).padStart(width, '0')}${extension}`
+}
+
+function materializeContactDiff(summary, args, artifacts, compareReport) {
   if (!args.contactDiff) return
-  const report = runJsonPhase(summary, {
-    name: 'contact-diff',
-    bin: process.execPath,
-    args: [
-      COMPARE_SCRIPT,
-      '--source',
-      args.source,
-      '--candidate',
-      artifacts.candidate,
-      '--run-dir',
-      args.runDir,
-      '--kind',
-      'contact',
-      '--output',
-      artifacts.contactDiff,
-      '--report',
-      artifacts.contactDiffReport,
-      '--slide-count',
-      String(expectedSlideCount(inspect)),
-      '--compare-chunk-size',
-      String(args.compareChunkSize),
-      '--xdoc-bin',
-      args.xdocBin,
-      '--overwrite',
-      '--json',
-    ],
-    artifact: artifacts.contactDiffReport,
-  })
-  const multipart = report?.schemaVersion === 'pptx-nova-compare-manifest/v1'
+  const multipart = compareReport?.schemaVersion === 'pptx-nova-compare-manifest/v1'
+  let report
+  let partCount = 1
+  if (multipart) {
+    partCount = compareReport.parts?.length ?? 0
+    const parts = compareReport.parts.map((part, index) => {
+      const partNumber = index + 1
+      const path = numberedArtifactPath(artifacts.contactDiff, partNumber, partCount)
+      const reportPath = numberedArtifactPath(artifacts.contactDiffReport, partNumber, partCount)
+      copyFileSync(part.path, path)
+      const sourcePartReport = JSON.parse(readFileSync(part.reportPath, 'utf8'))
+      writeJson(reportPath, {
+        ...sourcePartReport,
+        outputPath: path,
+        output: path,
+        render: sourcePartReport?.render
+          ? { ...sourcePartReport.render, path }
+          : sourcePartReport?.render,
+        reuse: {
+          status: 'reused',
+          sourceReport: part.reportPath,
+          sourcePath: part.path,
+        },
+      })
+      return {
+        ...part,
+        path,
+        reportPath,
+        byteLength: statSync(path).size,
+        sha256: sha256(path),
+        reusedFrom: { path: part.path, reportPath: part.reportPath },
+      }
+    })
+    report = {
+      ...compareReport,
+      kind: 'contact',
+      parts,
+      reuse: {
+        status: 'reused',
+        sourceKind: compareReport.kind,
+        sourceReport: artifacts.refurbishCompareReport,
+        renderInvocationsSaved: partCount,
+      },
+    }
+    summary.artifacts.contactDiffParts = parts.map((part) => part.path)
+  } else {
+    copyFileSync(artifacts.refurbishCompare, artifacts.contactDiff)
+    report = {
+      ...compareReport,
+      outputPath: artifacts.contactDiff,
+      output: artifacts.contactDiff,
+      render: compareReport?.render
+        ? { ...compareReport.render, path: artifacts.contactDiff }
+        : compareReport?.render,
+      reuse: {
+        status: 'reused',
+        sourceKind: 'refurbish',
+        sourceReport: artifacts.refurbishCompareReport,
+        sourcePath: artifacts.refurbishCompare,
+        renderInvocationsSaved: 1,
+      },
+    }
+  }
+  writeJson(artifacts.contactDiffReport, report)
+  const aliasEvidenceValid = multipart
+    ? partCount > 0 &&
+      report.parts.every((part) => {
+        if (
+          !existsSync(part.path) ||
+          statSync(part.path).size <= 0 ||
+          !existsSync(part.reportPath)
+        ) {
+          return false
+        }
+        const partReport = JSON.parse(readFileSync(part.reportPath, 'utf8'))
+        return (
+          part.sha256 === sha256(part.path) &&
+          part.byteLength === statSync(part.path).size &&
+          partReport.outputPath === part.path &&
+          partReport.render?.path === part.path
+        )
+      })
+    : existsSync(artifacts.contactDiff) &&
+      statSync(artifacts.contactDiff).size > 0 &&
+      existsSync(artifacts.contactDiffReport) &&
+      sha256(artifacts.contactDiff) === sha256(artifacts.refurbishCompare) &&
+      report.outputPath === artifacts.contactDiff &&
+      report.render?.path === artifacts.contactDiff
+  summary.review.contactDiffReuse = report.reuse
   requireGate(
     summary,
     'contact-diff-artifact',
-    report?.status === 'success' &&
-      (multipart
-        ? report.agentGate?.passed === true &&
-          report.parts?.every((part) => existsSync(part.path) && statSync(part.path).size > 0)
-        : existsSync(artifacts.contactDiff) && statSync(artifacts.contactDiff).size > 0),
+    report?.status === 'success' && aliasEvidenceValid,
     {
       status: report?.status ?? '',
-      partCount: multipart ? (report.parts?.length ?? 0) : 1,
-      bytes:
-        !multipart && existsSync(artifacts.contactDiff) ? statSync(artifacts.contactDiff).size : 0,
-      message: 'Requested contact-diff artifact was not generated',
+      partCount,
+      reused: true,
+      renderInvocationsSaved: report.reuse.renderInvocationsSaved,
+      message: 'Requested contact-diff aliases were not materialized from final compare evidence',
     },
   )
+  addInternalPhase(summary, 'contact-diff-reuse', 'passed', {
+    artifact: relativeArtifact(args.runDir, artifacts.contactDiffReport),
+    partCount,
+    renderInvocationsSaved: report.reuse.renderInvocationsSaved,
+  })
 }
 
 function runSemanticDiff(summary, args, artifacts) {
@@ -1368,7 +1521,7 @@ function runSemanticDiff(summary, args, artifacts) {
 }
 
 function runRefurbishCompare(summary, args, artifacts, inspect) {
-  return runJsonPhase(summary, {
+  const report = runJsonPhase(summary, {
     name: 'refurbish-compare',
     bin: process.execPath,
     args: [
@@ -1403,6 +1556,43 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
     artifact: artifacts.refurbishCompareReport,
     forwardProgress: true,
   })
+  const parts =
+    report?.schemaVersion === 'pptx-nova-compare-manifest/v1' ? (report.parts ?? []) : [report]
+  const renderMetrics = parts.reduce(
+    (metrics, part) => {
+      const partReport = part?.reportPath ? JSON.parse(readFileSync(part.reportPath, 'utf8')) : part
+      const attemptReports = Array.isArray(part?.attempts)
+        ? part.attempts
+        : Array.isArray(partReport?.pptxNovaCompare?.attempts)
+          ? partReport.pptxNovaCompare.attempts
+          : []
+      const attempts = Math.max(1, attemptReports.length)
+      const width = Number(partReport?.render?.width ?? 0)
+      const height = Number(partReport?.render?.height ?? 0)
+      const finalDpi = Number(partReport?.render?.dpi ?? 0)
+      metrics.renderInvocations += attempts
+      if (width > 0 && height > 0) {
+        const pixelsAtDpi = (dpi) => {
+          const scale = finalDpi > 0 && dpi > 0 ? dpi / finalDpi : 1
+          return Math.round(width * height * scale * scale)
+        }
+        metrics.baselineEstimatedPixels += pixelsAtDpi(192)
+        metrics.estimatedRenderedPixels += (
+          attemptReports.length ? attemptReports : [{ dpi: finalDpi }]
+        ).reduce((pixels, attempt) => pixels + pixelsAtDpi(Number(attempt?.dpi ?? finalDpi)), 0)
+      }
+      return metrics
+    },
+    { renderInvocations: 0, estimatedRenderedPixels: 0, baselineEstimatedPixels: 0 },
+  )
+  const phase = summary.phases.findLast((item) => item.name === 'refurbish-compare')
+  if (phase) {
+    phase.partCount = parts.length
+    phase.renderInvocations = renderMetrics.renderInvocations
+    phase.estimatedRenderedPixels = renderMetrics.estimatedRenderedPixels
+    phase.baselineEstimatedPixels = renderMetrics.baselineEstimatedPixels
+  }
+  return report
 }
 
 function runRefurbishCompareGate(summary, args, artifacts) {
@@ -1455,6 +1645,7 @@ function runRefurbishCompareGate(summary, args, artifacts) {
 }
 
 function runRefurbish(inputArgs) {
+  const runStarted = performance.now()
   const args = normalizeArgs(inputArgs)
   validatePaths(args)
   mkdirSync(args.runDir, { recursive: true })
@@ -1552,6 +1743,16 @@ function runRefurbish(inputArgs) {
           summary.warnings.push(
             'Native refurbish-skin exceeded its current complexity limit; runner continued with the catalog-driven fallback patch route.',
           )
+          plan.requiredReferences = [
+            ...(plan.requiredReferences ?? []),
+            {
+              path: 'references/reference-create.md',
+              section: '6. Refurbish Existing Deck',
+              reason:
+                'Native skinning returned UnsupportedComplexity; the runner selected the catalog-driven fallback contract.',
+            },
+          ]
+          writeJson(artifacts.plan, plan)
           useFallback = true
         } else {
           throw error
@@ -1567,15 +1768,16 @@ function runRefurbish(inputArgs) {
     runLayoutSnapshot(summary, args, artifacts)
     runFidelityGate(summary, artifacts)
     runPreviews(summary, args, artifacts, inspect)
-    runContactDiff(summary, args, artifacts, inspect)
     runSemanticDiff(summary, args, artifacts)
-    runRefurbishCompare(summary, args, artifacts, inspect)
+    const compareReport = runRefurbishCompare(summary, args, artifacts, inspect)
+    materializeContactDiff(summary, args, artifacts, compareReport)
     runRefurbishCompareGate(summary, args, artifacts)
 
     summary.status = 'needs-human-review'
     summary.machineGatesPassed = true
     summary.deliveryReady = false
     finalizeArtifactPaths(summary, artifacts.summary)
+    summary.performance = buildPerformanceSummary(summary, durationMs(runStarted))
     summary.agentSummary = buildAgentSummary(summary)
     writeJson(artifacts.summary, summary)
     return summary
@@ -1590,6 +1792,7 @@ function runRefurbish(inputArgs) {
       exitCode: error.exitCode ?? null,
     }
     finalizeArtifactPaths(summary, artifacts.summary)
+    summary.performance = buildPerformanceSummary(summary, durationMs(runStarted))
     summary.agentSummary = buildAgentSummary(summary)
     writeJson(artifacts.summary, summary)
     error.summary = summary
@@ -1619,8 +1822,10 @@ try {
     context: { tool: 'pptx-nova-refurbish-run', deckkit: parsedArgs.deckkit },
   })
   const summary = runRefurbish(parsedArgs)
-  if (parsedArgs.json) process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
-  else printHuman(summary)
+  if (parsedArgs.json) {
+    const output = parsedArgs.jsonFull ? summary : buildAgentResult(summary)
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
+  } else printHuman(summary)
 } catch (error) {
   const summary = error.summary ?? {
     schemaVersion: 'pptx-nova-refurbish-run/v1',
@@ -1632,8 +1837,10 @@ try {
       exitCode: error.exitCode ?? null,
     },
   }
-  if (parsedArgs?.json) process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
-  else if (summary.runDir) printHuman(summary)
+  if (parsedArgs?.json) {
+    const output = parsedArgs.jsonFull ? summary : buildAgentResult(summary)
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
+  } else if (summary.runDir) printHuman(summary)
   else process.stderr.write(`[error] ${summary.error.phase}: ${summary.error.message}\n`)
   process.exitCode = 1
 }

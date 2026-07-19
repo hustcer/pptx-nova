@@ -50,8 +50,8 @@ artifacts, and publishes the requested output only after those gates pass. Exit 
 means the machine pipeline completed; `status: "needs-human-review"` remains until
 the contact sheet and suspicious full-size PNGs are reviewed.
 
-For Agent callers, `--json` keeps stdout reserved for the final run summary and
-streams structured `pptx-nova-progress/v1` JSONL on stderr. Compare parts and
+For Agent callers, `--json` keeps stdout reserved for the compact Agent result and saves the complete
+summary in the run directory. It streams structured `pptx-nova-progress/v1` JSONL on stderr. Compare parts and
 heartbeats make long high-DPI renders observable. Each run persists the catalog
 readiness decision in `catalog-readiness.json`; optional live benchmark readiness
 uses the separate `delivery-readiness.json` artifact.

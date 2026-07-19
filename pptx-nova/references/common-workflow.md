@@ -189,7 +189,8 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     artifacts, phase failures, previews, and final publication use one run-dir
     contract. Use the lower-level commands directly only for diagnosis or
     selective page repair.
-    In JSON mode the runner keeps stdout as one final JSON report and streams
+    In JSON mode the runner keeps stdout as one compact `pptx-nova-refurbish-result/v1` Agent result,
+    saves the full report as `refurbish-run-summary.json`, and streams
     `pptx-nova-progress/v1` JSONL events to stderr. Agents should surface phase,
     compare-part, retry, and heartbeat events instead of polling a silent process.
     The runner always writes `catalog-readiness.json`; a requested live benchmark
@@ -198,8 +199,9 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     can override it with `--progress jsonl|text|off`. JSONL events use schema
     `pptx-nova-progress/v1` and include `phase-start`, `phase-complete`,
     `compare-part-start`, `compare-part-retry`, `compare-part-complete`, and
-    `command-heartbeat`. Keep stdout and stderr separate: parse stdout only after
-    process completion, while using stderr events for status updates and stall detection.
+    `command-heartbeat`. Keep stdout and stderr separate: parse compact stdout only after process
+    completion, use stderr for status and stall detection, and open the full report only when the
+    compact result identifies a warning or failure.
     JSON-mode compare failures still return one `pptx-nova-compare-error/v1`
     document on stdout and emit `compare-failed` as JSONL on stderr.
     Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
@@ -391,7 +393,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     part reports with the run artifacts, and list every sibling PNG in the
     final response.
     For agent-facing status and final-response facts, read
-    `refurbish-run-summary.json.agentSummary` or
+    compact runner stdout `agentSummary`, then `refurbish-run-summary.json.agentSummary` or
     `evidence-summary.json.agentSummary` first; open the underlying gate reports
     only when the short summary points to a warning, failure, or unsupported area.
 

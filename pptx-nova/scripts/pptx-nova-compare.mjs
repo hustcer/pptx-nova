@@ -189,7 +189,8 @@ function run(bin, args, options = {}) {
     const heartbeat = reporter?.enabled
       ? setInterval(() => {
           reporter.emit('command-heartbeat', {
-            command: commandLabel,
+            executable: basename(command.bin),
+            argumentCount: command.args.length,
             elapsedMs: Math.round(performance.now() - started),
             ...options.progressDetails,
           })

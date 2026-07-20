@@ -114,11 +114,12 @@ const identity = (path) => {
   const bytes = readFileSync(path)
   return { path, byteLength: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
 }
-const log = process.env.FAKE_XDOC_LOG
-if (log) appendFileSync(log, JSON.stringify({ selector, dpi, output }) + '\\n')
+const startedAt = Date.now()
 const delayMap = JSON.parse(process.env.FAKE_XDOC_DELAY_MAP || '{}')
 const delayMs = Number(delayMap[selector] ?? 0)
 if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs))
+const log = process.env.FAKE_XDOC_LOG
+if (log) appendFileSync(log, JSON.stringify({ selector, dpi, output, startedAt, endedAt: Date.now() }) + '\\n')
 const mode = process.env.FAKE_XDOC_MODE || 'success'
 const shouldFail192 = mode === 'retry-part-2' && selector === '21-40' && dpi === 192
 const shouldFailBoth = mode === 'fail-part-2' && selector === '21-40'
@@ -3440,7 +3441,6 @@ test('compare renders parts concurrently and keeps the manifest ordered by part 
   writeFileSync(source, 'source pptx')
   writeFileSync(candidate, 'candidate pptx')
 
-  const startedAt = Date.now()
   const result = runNode(
     [
       skillPath('scripts/pptx-nova-compare.mjs'),
@@ -3471,7 +3471,6 @@ test('compare renders parts concurrently and keeps the manifest ordered by part 
       },
     },
   )
-  const elapsedMs = Date.now() - startedAt
   const manifest = JSON.parse(result.stdout)
 
   assert.equal(manifest.status, 'success')
@@ -3489,9 +3488,23 @@ test('compare renders parts concurrently and keeps the manifest ordered by part 
   assert.equal(existsSync(join(runDir, 'refurbish-compare-01.png')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-02.png')), true)
   assert.equal(existsSync(join(runDir, 'refurbish-compare-03.png')), true)
-  // Serial execution would need >= 750ms of fake render time; concurrency
-  // bounds the render wall-clock by the slowest part instead of the sum.
-  assert.ok(elapsedMs < 700, `expected concurrent parts to overlap, elapsed ${elapsedMs}ms`)
+  // Serial execution can never interleave: each fake xdoc process exits (and
+  // logs its window) before the next one boots, so serial [startedAt, endedAt]
+  // windows are pairwise disjoint. Concurrent parts must overlap somewhere.
+  // Asserting on the logged windows instead of total wall-clock keeps the test
+  // independent of process-spawn overhead on slow CI runners.
+  const windows = readFileSync(log, 'utf8')
+    .trim()
+    .split('\n')
+    .map((line) => {
+      const { selector, startedAt, endedAt } = JSON.parse(line)
+      return { selector, startedAt, endedAt }
+    })
+  assert.equal(windows.length, 3)
+  const overlaps = windows.some((a, i) =>
+    windows.some((b, j) => i < j && a.startedAt < b.endedAt && b.startedAt < a.endedAt),
+  )
+  assert.ok(overlaps, `expected concurrent parts to overlap, windows ${JSON.stringify(windows)}`)
 })
 
 test('compare streams heartbeat progress without corrupting JSON stdout', () => {

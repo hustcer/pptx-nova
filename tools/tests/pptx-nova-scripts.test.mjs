@@ -1847,6 +1847,33 @@ test('refurbish plan requires semantic diff gate by default', async () => {
   )
 })
 
+test('swiss-grid refurbishment stays on the reviewed manual fallback route', async () => {
+  const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
+  const plan = buildRefurbishPlan({
+    deckkit: 'swiss-grid',
+    source: 'source.pptx',
+    output: 'candidate.pptx',
+    catalog: skillPath('assets/deckkits/catalog.json'),
+    explicit: false,
+    json: true,
+  })
+
+  assert.equal(plan.status, 'manual-fallback')
+  assert.equal(plan.route, 'fallback-patch')
+  assert.equal(plan.nativeSkinning.supported, false)
+  assert.equal(
+    plan.commands.some((command) => command.name === 'refurbish-skin'),
+    false,
+  )
+  assert.deepEqual(plan.requiredReferences, [
+    {
+      path: 'references/reference-create.md',
+      section: '6. Refurbish Existing Deck',
+      reason: 'The selected route requires the catalog-driven fallback contract.',
+    },
+  ])
+})
+
 test('skill routes standard refurbishment through one compact reference', () => {
   const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
   const reference = readFileSync(skillPath('references/refurbish-runner.md'), 'utf8')

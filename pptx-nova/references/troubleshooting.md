@@ -80,8 +80,18 @@ set-paragraph.format.lineSpacing must be at most 132
   (line spacing multiple written as a:spcPct val (1.0 = 100000) — OOXML a:spcPct@val 0..13200000)
 ```
 
-处理原则：**按 message 里的边界改值后重试，不要原值重试，也不要换字段绕过**。
-写 patch 前就用对范围能省一轮 dry-run：
+**优先走 fixPatch**：这类错误的 `suggestions[]` 现在自带一条
+`autoRetry: true`（confidence 0.8）的 clamp/wrap 修复——把越界值收回边界
+（角度按 360 取模而非截断），且引擎已验证修复后的 op 能通过契约校验，
+直接拿 `fixPatch` 重 dry-run 即可，无需手改：
+
+```
+"reason": "Clamp /ops/1 out-of-range values to the OOXML bounds: plot.gapWidth: 501 -> 500 (…)"
+```
+
+没有 clamp suggestion 的情况（如 `majorUnit <= 0` 这类无确定替代值的
+exclusive 边界）才需要按 message 里的范围手改。写 patch 前就用对范围
+仍能省一轮 dry-run：
 
 | 字段（wire 单位）                    | 允许范围  | 易错点                     |
 | ------------------------------------ | --------- | -------------------------- |

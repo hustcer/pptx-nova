@@ -96,6 +96,18 @@ set-paragraph.format.lineSpacing must be at most 132
 | `alpha` / gradient `pos`             | 0..1      | 小数分数，**不是 0..100**  |
 | autofit `fontScale`                  | 1..100    | 且要求 `mode: "text"`      |
 
+## `child-order:` warnings —— xdoc 写出侧的 schema 自检，不是你的错
+
+apply / dry-run 报告的 `warnings[]` 里若出现 `child-order:` 前缀条目（形如
+`child-order: ppt/slides/slide1.xml: <a:pPr> child <a:spcAft> must come before
+<a:buChar> (schema order: …)`），含义是 **xdoc 自身的 XML writer 把子元素写到了
+OOXML 规范顺序之外**（写时自检抓到的内部 bug），不是 patch 内容问题：
+
+- **不要**为绕过它改写 patch 或重试原 op——告警来自生成器，不来自你的输入。
+- 产物通常仍可打开（PowerPoint 可能提示"修复"）；如可接受可继续，但应把完整
+  warning 文本上报给维护者（它精确指出了元素与期望顺序）。
+- 干净构建下该告警恒为空；出现即值得记录。
+
 ## 错误分类速查（24 类 errorCatalog）
 
 | code                       | 含义                                            | 处理                                                                     |

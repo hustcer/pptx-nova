@@ -94,14 +94,43 @@ function main() {
       throw new Error(`decision reason is required for ${decision.unitId}`)
     decisions.set(decision.unitId, decision)
   }
+  const byTextInput = decisionsDoc.byText ?? []
+  if (!Array.isArray(byTextInput)) throw new Error('byText must be an array of grouped decisions')
+  const byText = new Map()
+  for (const rule of byTextInput) {
+    if (typeof rule?.sourceText !== 'string' || rule.sourceText.length === 0)
+      throw new Error('byText rules require a non-empty sourceText')
+    if (byText.has(rule.sourceText))
+      throw new Error(
+        `byText rules contain a duplicate sourceText: ${JSON.stringify(rule.sourceText)}`,
+      )
+    if (!['translate', 'preserve'].includes(rule.decision))
+      throw new Error(`invalid byText decision for ${JSON.stringify(rule.sourceText)}`)
+    if (!String(rule.reason ?? '').trim())
+      throw new Error(`byText decision reason is required for ${JSON.stringify(rule.sourceText)}`)
+    byText.set(rule.sourceText, rule)
+  }
+  const reviewTexts = new Set(reviewUnits.map((unit) => unit.sourceText))
+  const unmatchedByText = [...byText.keys()]
+    .filter((sourceText) => !reviewTexts.has(sourceText))
+    .map((sourceText) => JSON.stringify(sourceText))
+  if (unmatchedByText.length > 0)
+    throw new Error(`byText rules match no language-review units: ${unmatchedByText.join(', ')}`)
   const classified = structuredClone(scan)
   const applied = []
   for (let index = 0; index < units.length; index += 1) {
     const unit = units[index]
     if (!isLanguageReviewUnit(unit)) continue
-    const decision = decisions.get(unit.unitId)
+    const rule = byText.get(unit.sourceText)
+    const ruleHash = rule?.sourceHash ?? null
+    if (rule && ruleHash !== null && ruleHash !== unit.sourceHash)
+      throw new Error(
+        `byText sourceHash mismatch for ${JSON.stringify(unit.sourceText)} at ${unit.unitId}`,
+      )
+    const unitDecision = decisions.get(unit.unitId)
+    const decision = unitDecision ?? rule
     if (!decision) throw new Error(`missing language classification for ${unit.unitId}`)
-    if (decision.sourceHash !== unit.sourceHash)
+    if (unitDecision && unitDecision.sourceHash !== unit.sourceHash)
       throw new Error(`sourceHash mismatch for ${unit.unitId}`)
     const target = classified.i18nUnits.units[index]
     target.action = decision.decision
@@ -114,6 +143,7 @@ function main() {
       sourceText: unit.sourceText,
       decision: decision.decision,
       reason: decision.reason,
+      decisionSource: unitDecision ? 'unit' : 'byText',
     })
     decisions.delete(unit.unitId)
   }
@@ -133,6 +163,9 @@ function main() {
       reviewUnitCount: reviewUnits.length,
       translateCount: applied.filter((item) => item.decision === 'translate').length,
       preserveCount: applied.filter((item) => item.decision === 'preserve').length,
+      byTextRuleCount: byText.size,
+      byTextDecidedCount: applied.filter((item) => item.decisionSource === 'byText').length,
+      unitDecidedCount: applied.filter((item) => item.decisionSource === 'unit').length,
       byCategory: Object.fromEntries(
         [...REVIEWABLE_CATEGORIES].map((category) => [
           category,

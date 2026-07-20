@@ -77,7 +77,12 @@ node <skill-root>/scripts/pptx-nova-translation-prepare.mjs \
 ```
 
 If it returns `needs-review-decisions`, fill the emitted hash-bound decision
-template and resume the same run with `--review-decisions <path>`. If it returns
+template and resume the same run with `--review-decisions <path>`. The template
+groups language-review units by exact source text: fill each `byText[]` entry
+once (`decision` plus `reason` cover every unit carrying that text; `context`
+reports the covered unit count, categories, and slides), and add `decisions[]`
+entries only when one specific unit needs a different decision — a per-unit
+entry overrides the matching `byText[]` rule for that unit alone. If it returns
 `needs-translations`, fill each unique `translation-memory.json` entry once.
 Exact repeated source strings share one target; use `unitOverrides[]` only when
 a context needs different wording, target segments, anchors, or an explicit
@@ -615,6 +620,15 @@ alignment, chart/table structure, and other style signatures were not changed.
 - For Chinese to English, expect English labels to become wider even when the
   character count is lower. Mark narrow cards, legend entries, rotated axis
   labels, and multi-column text as high fitting risk before applying.
+- When translating into typically longer target languages (German, French,
+  Spanish, Italian, Portuguese, Russian, Dutch, Polish), budget a 20-25%
+  average length expansion over English source (more over Chinese) before the
+  first apply. Build the dictionary with compact wording up front — for tight
+  containers keep the target within roughly 1.25x the source length, prefer
+  established abbreviations (`Jan.`, `Nr.`, `z. B.`), and reserve full phrasing
+  for body paragraphs with real whitespace. Overflow surfaces only in the
+  post-apply estimator and `vision-diff` gates, and every dictionary rework at
+  that stage repeats the whole plan/apply/gate chain.
 - Any changed multi-column text is subject to the fail-closed
   `multi-column-text-layout-review` gate, even when no ordinary overflow is
   detected or the translation has the same character count. `vision-diff`
@@ -662,10 +676,19 @@ Charts are a frequent translation blind spot.
     --overwrite --json
   ```
 
-  Each decision contains `unitId`, `sourceHash`, `decision` (`translate` or
-  `preserve`), and a non-empty contextual reason. The helper fails closed on
-  stale hashes, missing decisions, duplicates, or decisions targeting anything
-  other than a language-uncertain visible-text review unit. Feed
+  The decisions document supports two channels. `byText[]` entries carry
+  `sourceText`, `decision` (`translate` or `preserve`), a non-empty contextual
+  reason, and optionally `sourceHash`; one entry classifies every
+  language-review unit whose source text matches exactly, so patterned tokens
+  (months, weekdays, `Day N`, series labels) need one rule instead of one
+  record per unit. `decisions[]` entries carry `unitId`, `sourceHash`,
+  `decision`, and a non-empty reason; they remain the per-unit channel and
+  override the matching `byText[]` rule for that unit alone. The helper fails
+  closed on stale hashes, missing decisions, duplicate unitIds, duplicate
+  `byText[]` source texts, `byText[]` rules matching zero language-review
+  units, or decisions targeting anything other than a language-uncertain
+  visible-text review unit. The classification report records each unit's
+  `decisionSource` (`byText` or `unit`) for audit. Feed
   `i18n-scan-classified.json`, not the
   unclassified scan, into `i18n-plan`. If structurally visible chart text is
   absent from the inventory entirely, stop and update/rebuild xdoc; do not hide

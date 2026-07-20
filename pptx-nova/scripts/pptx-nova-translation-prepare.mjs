@@ -30,6 +30,9 @@ const PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const CLASSIFY_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-i18n-classify-review-units.mjs')
 const SUMMARY_SCHEMA = 'pptx-nova-translation-prepare/v1'
 const RESULT_SCHEMA = 'pptx-nova-translation-prepare-result/v1'
+// Targets that typically render 20-25% longer than English source text; used
+// only to surface a compact-wording prior before the first apply round.
+const LONGER_TARGET_LANGS = new Set(['de', 'fr', 'es', 'it', 'pt', 'ru', 'nl', 'pl'])
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-translation-prepare.mjs --source <source.pptx> --source-lang <multi|zh|en> --target-lang <lang> --run-dir <run-dir> [options]
@@ -286,17 +289,33 @@ function languageReviewUnits(scan) {
 }
 
 function writeReviewDecisionTemplate(scanPath, scan, output, overwrite) {
-  const decisions = languageReviewUnits(scan).map((unit) => ({
-    unitId: unit.unitId,
-    sourceHash: unit.sourceHash,
-    sourceText: unit.sourceText,
-    decision: null,
-    reason: '',
+  const grouped = new Map()
+  for (const unit of languageReviewUnits(scan)) {
+    const entry = grouped.get(unit.sourceText) ?? {
+      sourceText: unit.sourceText,
+      sourceHash: unit.sourceHash,
+      decision: null,
+      reason: '',
+      context: { unitCount: 0, categories: new Set(), slides: new Set(), detectedLangs: new Set() },
+    }
+    if (entry.sourceHash !== unit.sourceHash) {
+      throw new Error(
+        `scan units with identical sourceText carry different sourceHash values: ${unit.unitId}`,
+      )
+    }
+    entry.context.unitCount += 1
+    if (unit.category) entry.context.categories.add(unit.category)
+    if ((unit.slide ?? null) !== null) entry.context.slides.add(unit.slide)
+    for (const lang of unit.detectedLangs ?? []) entry.context.detectedLangs.add(lang)
+    grouped.set(unit.sourceText, entry)
+  }
+  const byText = [...grouped.values()].map((entry) => ({
+    ...entry,
     context: {
-      category: unit.category,
-      part: unit.part ?? null,
-      slide: unit.slide ?? null,
-      detectedLangs: unit.detectedLangs ?? [],
+      unitCount: entry.context.unitCount,
+      categories: [...entry.context.categories].sort(),
+      slides: [...entry.context.slides].sort((left, right) => left - right),
+      detectedLangs: [...entry.context.detectedLangs].sort(),
     },
   }))
   writeJson(
@@ -304,11 +323,12 @@ function writeReviewDecisionTemplate(scanPath, scan, output, overwrite) {
     {
       schemaVersion: 'pptx-nova-i18n-review-decisions/v1',
       scanSha256: sha256(scanPath),
-      decisions,
+      byText,
+      decisions: [],
     },
     overwrite,
   )
-  return decisions.length
+  return byText.length
 }
 
 function classifyIfNeeded(args, artifacts, scan, summary, reporter) {
@@ -424,7 +444,7 @@ function prepareInventory(args, artifacts, summary, reporter) {
     summary.resumeStage = 'review-decisions'
     summary.inventory = scanResult.compact?.inventory ?? null
     summary.nextAction =
-      'Fill the bound review decisions template, then rerun this command with --review-decisions.'
+      'Fill each byText entry once (decision plus reason cover every unit with that source text), add decisions[] entries only for per-unit exceptions, then rerun this command with --review-decisions.'
     summary.requiredReferences = [
       requiredReference(
         'references/translation-mode.md',
@@ -451,6 +471,9 @@ function buildMemory(args, artifacts, summary, classified, reporter) {
   summary.status = 'needs-translations'
   summary.nextAction =
     'Fill entries[].targetText and required unitOverrides, then rerun the same command with --apply.'
+  if (LONGER_TARGET_LANGS.has(args.targetLang.toLowerCase().split('-')[0])) {
+    summary.nextAction += ` Target ${args.targetLang} text typically runs 20-25% longer; prefer compact wording for labels, legends, badges, and table headers up front to avoid a post-apply overflow rework round.`
+  }
   summary.requiredReferences = [
     requiredReference(
       'references/translation-mode.md',

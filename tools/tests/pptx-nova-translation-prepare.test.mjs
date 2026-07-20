@@ -44,11 +44,12 @@ if (args[0] === 'schema') {
       { unitId: 'u1', action: 'translate', category: 'visibleBody', sourceText: 'Revenue', sourceHash: 'sha256:a', part: 'ppt/slides/slide1.xml', slide: 1, selectors: { replaceText: { kind: 'text-node', part: 'ppt/slides/slide1.xml' } } },
       { unitId: 'u2', action: 'translate', category: 'visibleBody', sourceText: 'Revenue', sourceHash: 'sha256:a', part: 'ppt/slides/slide2.xml', slide: 2, selectors: { replaceText: { kind: 'text-node', part: 'ppt/slides/slide2.xml' } } },
       { unitId: 'u3', action: 'review', category: 'visibleBody', sourceText: 'Master title', sourceHash: 'sha256:b', part: 'ppt/slideLayouts/slideLayout1.xml', slide: null, selectors: { replaceText: { kind: 'text-node', part: 'ppt/slideLayouts/slideLayout1.xml' } } },
-      { unitId: 'u4', action: 'review', category: 'visibleBody', sourceText: 'Forecast', sourceHash: 'sha256:c', part: 'ppt/slides/slide3.xml', slide: 3, requiresReview: true, notes: ['language-classification-uncertain'], selectors: { replaceText: { kind: 'text-node', part: 'ppt/slides/slide3.xml' } } }
+      { unitId: 'u4', action: 'review', category: 'visibleBody', sourceText: 'Forecast', sourceHash: 'sha256:c', part: 'ppt/slides/slide3.xml', slide: 3, requiresReview: true, notes: ['language-classification-uncertain'], selectors: { replaceText: { kind: 'text-node', part: 'ppt/slides/slide3.xml' } } },
+      { unitId: 'u5', action: 'review', category: 'chartVisibleCache', sourceText: 'Forecast', sourceHash: 'sha256:c', part: 'ppt/charts/chart1.xml', slide: 4, requiresReview: true, notes: ['language-classification-uncertain'], selectors: { replaceChartText: { kind: 'chart-cache', part: 'ppt/charts/chart1.xml' } } }
     ] }
   }
   writeFileSync(output, JSON.stringify(report))
-  print({ schemaVersion: 'pptx-i18n-scan-result/v1', status: 'pass', report: output, inventory: { unitCount: 4 }, agentGate: { passed: true } })
+  print({ schemaVersion: 'pptx-i18n-scan-result/v1', status: 'pass', report: output, inventory: { unitCount: 5 }, agentGate: { passed: true } })
 } else if (args[0] === 'pptx' && args[1] === 'i18n-plan') {
   if (process.env.FAKE_PLAN_FAIL === '1') {
     process.stderr.write('intentional plan failure without a current report')
@@ -136,8 +137,13 @@ test('translation preparation deduplicates memory and resumes through guarded ap
   assert.equal(inventory.requiredReferences[0].file, undefined)
   const decisionsPath = inventory.artifacts.reviewDecisionsTemplate
   const decisions = JSON.parse(readFileSync(decisionsPath, 'utf8'))
-  decisions.decisions[0].decision = 'invalid'
-  decisions.decisions[0].reason = 'Intentional invalid decision for resume testing.'
+  assert.equal(decisions.byText.length, 1)
+  assert.equal(decisions.byText[0].sourceText, 'Forecast')
+  assert.equal(decisions.byText[0].context.unitCount, 2)
+  assert.deepEqual(decisions.byText[0].context.slides, [3, 4])
+  assert.deepEqual(decisions.decisions, [])
+  decisions.byText[0].decision = 'invalid'
+  decisions.byText[0].reason = 'Intentional invalid decision for resume testing.'
   writeFileSync(decisionsPath, JSON.stringify(decisions, null, 2))
 
   const failedClassification = run(
@@ -162,8 +168,8 @@ test('translation preparation deduplicates memory and resumes through guarded ap
   )
   assert.equal(failedClassification.status, 'error')
 
-  decisions.decisions[0].decision = 'translate'
-  decisions.decisions[0].reason = 'Visible slide copy in the source language.'
+  decisions.byText[0].decision = 'translate'
+  decisions.byText[0].reason = 'Visible slide copy in the source language.'
   writeFileSync(decisionsPath, JSON.stringify(decisions, null, 2))
 
   const decisionsCollision = join(runDir, 'i18n-review-classification.json')
@@ -208,8 +214,12 @@ test('translation preparation deduplicates memory and resumes through guarded ap
     '--json',
   ])
   assert.equal(resumed.status, 'needs-translations')
-  assert.equal(resumed.summary.memory.eligibleUnitCount, 4)
+  assert.equal(resumed.summary.memory.eligibleUnitCount, 5)
   assert.equal(resumed.summary.memory.uniqueSourceTextCount, 3)
+  const classifiedScan = JSON.parse(readFileSync(join(runDir, 'i18n-scan-classified.json'), 'utf8'))
+  const classifiedUnits = new Map(classifiedScan.i18nUnits.units.map((unit) => [unit.unitId, unit]))
+  assert.equal(classifiedUnits.get('u4').action, 'translate')
+  assert.equal(classifiedUnits.get('u5').action, 'translate')
 
   const memoryPath = join(runDir, 'translation-memory.json')
   const memory = JSON.parse(readFileSync(memoryPath, 'utf8'))
@@ -304,7 +314,7 @@ test('translation preparation deduplicates memory and resumes through guarded ap
     '--json',
   ])
   assert.equal(applied.status, 'prepared')
-  assert.equal(applied.summary.translationCount, 4)
+  assert.equal(applied.summary.translationCount, 5)
   assert.equal(readFileSync(applied.artifacts.candidate, 'utf8'), 'source bytes')
   assert.equal(readFileSync(join(root, 'probe-count.txt'), 'utf8'), '5')
 })

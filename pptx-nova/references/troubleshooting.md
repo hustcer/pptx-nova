@@ -69,6 +69,33 @@ xdoc schema | jq '.errorCatalog.scenarioCoverage'
 > Agent 流程建议:dry-run 报错 → grep `code` → 按 `scenarioCoverage[].code` 匹配 →
 > 直接抄 `typicalFixPatch` → 重试。比读 `suggestions[]` 里的自由文本更快。
 
+## OOXML 数值范围拦截 —— 报错自带允许范围与出处，改值即可
+
+dry-run / apply 现在按 **OOXML 权威范围**拦截数值字段（约束抽取自
+Open-XML-SDK schema，ajv 与 dry-run 双侧同判）。报错 message 直接给出
+字段路径、边界值和 OOXML 出处，例如：
+
+```
+set-paragraph.format.lineSpacing must be at most 132
+  (line spacing multiple written as a:spcPct val (1.0 = 100000) — OOXML a:spcPct@val 0..13200000)
+```
+
+处理原则：**按 message 里的边界改值后重试，不要原值重试，也不要换字段绕过**。
+写 patch 前就用对范围能省一轮 dry-run：
+
+| 字段（wire 单位）                    | 允许范围  | 易错点                     |
+| ------------------------------------ | --------- | -------------------------- |
+| `plot.gapWidth`                      | 0..500    | 柱间距百分比               |
+| `plot.overlap`                       | -100..100 | 柱重叠百分比               |
+| `plot.bubbleScale`                   | 0..300    | 气泡缩放百分比             |
+| `marker.size` / line 系列 `size`     | 2..72     | **最小值是 2 不是 1**      |
+| chart `style`                        | 1..48     | c:style 内置样式号         |
+| `format.lineSpacing`（数字＝倍数）   | >0..132   | 1.0＝单倍行距；上限 132    |
+| `fill.angle` / shadow `angle`（度）  | 0..<360   | **360 本身非法**，整圈用 0 |
+| `axes.*.scale.majorUnit`/`minorUnit` | >0        | 0 或负数非法               |
+| `alpha` / gradient `pos`             | 0..1      | 小数分数，**不是 0..100**  |
+| autofit `fontScale`                  | 1..100    | 且要求 `mode: "text"`      |
+
 ## 错误分类速查（24 类 errorCatalog）
 
 | code                       | 含义                                            | 处理                                                                     |

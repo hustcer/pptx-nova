@@ -955,7 +955,7 @@ export const BUILTIN_THEME_PACKS = {
         "surfaceAlt": "E7E7E7",
         "heroBg": "111111",
         "accentTextBg": "111111",
-        "accentText": "E2231A",
+        "accentText": "B71C14",
         "onHero": "FFFFFF",
         "onAccent": "FFFFFF",
         "chartBg": "FFFFFF",

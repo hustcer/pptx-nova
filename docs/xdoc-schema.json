@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.2.9 (6da3d330)",
+  "version": "0.3.0 (f5b0c170)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1301,7 +1301,7 @@
         },
         "dpi": {
           "type": "int",
-          "description": "PNG render DPI for pptx contact-diff. Defaults to 72",
+          "description": "PNG render DPI for pptx preview/contact-diff. Preview defaults to 144; contact-diff defaults to 72",
           "required": false
         },
         "name": {
@@ -1367,7 +1367,13 @@
         },
         "json": {
           "type": "bool",
-          "description": "Emit machine-readable dry-run/apply/recipe report JSON on stdout",
+          "description": "Emit a compact machine-readable result on stdout for i18n scan/plan; other commands keep their documented JSON report",
+          "required": false,
+          "style": "flag"
+        },
+        "json-full": {
+          "type": "bool",
+          "description": "Emit the complete i18n scan/plan report on stdout; prefer --output with compact --json for agents",
           "required": false,
           "style": "flag"
         },
@@ -1417,9 +1423,9 @@
         "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json",
         "xdoc pptx vision-check deck.pptx --json",
         "xdoc pptx diff old.pptx new.pptx --json",
-        "xdoc pptx i18n-scan --source old.pptx --source-lang multi --mode source --json",
+        "xdoc pptx i18n-scan --source old.pptx --source-lang multi --mode source --output i18n-scan.json --json",
         "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
-        "xdoc pptx i18n-plan --source old.pptx --units scan.json --data translations.json --json",
+        "xdoc pptx i18n-plan --source old.pptx --units scan.json --data translations.json --output i18n-plan.json --json",
         "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
         "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
         "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
@@ -1466,13 +1472,13 @@
         "Use action new to create a minimal deck, apply to patch an existing or new deck, or inspect to summarize an existing deck.",
         "For inspect, pass either `xdoc pptx inspect deck.pptx --json` or `xdoc pptx inspect --input deck.pptx --json`.",
         "Use `xdoc pptx vision-check deck.pptx --json` to statically QA an existing deck without rendering: it flags geometry overlaps, off-slide and edge-hugging text, text-overflow estimates, unexpected wraps in single-line text roles, misaligned card rows, and sub-threshold fonts, and each issue may carry an auto-applicable fixPatch.",
-        "Use `xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json` to render per-slide PNG previews plus an optional contact sheet and stdout manifest for multimodal review.",
+        "Use `xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --dpi 192 --json` to render per-slide PNG previews plus an optional contact sheet and stdout manifest for multimodal review.",
         "Use `xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png --dpi 192 --json` to generate a source/candidate side-by-side contact sheet plus changed/unchanged/missing/added slide status; pass `--map reference-map.json` for split/merge/reordered refurbish mapping, pass `--slides 1,3-5` for scoped source-slide review, and treat `agentGate.passed` as pair-integrity readiness for human visual review.",
-        "Use `xdoc pptx i18n-scan --source deck.pptx --source-lang multi|zh|en --mode source|candidate --json` to classify source-language hits and emit a stable i18nUnits document for translation planning.",
-        "Use `xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --json` as the translation planner: agents provide unitId/sourceHash/targetText translations, and the planner routes them to textPlan, replaceText, replaceChartText, and patch.ops with apply/delivery gates.",
+        "Use `xdoc pptx i18n-scan --source source.pptx --source-lang multi|zh|en --mode source --output i18n-scan.json --json` to persist the full stable i18nUnits inventory while returning only a compact result on stdout; use candidate mode with --output as the authoritative target-consistency gate. Reserve --json-full for interactive debugging of small reports.",
+        "Use `xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-plan.json --json` as the translation planner: agents receive a compact stdout result and read the persisted full plan only when materializing its execution artifacts. Reviewed slide/layout/master units with reviewDecision:\"translate\" route through the same guarded textPlan, replaceText, or replaceChartText primitives.",
         "Use `xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json` as a lower-level text-only fallback or execution primitive: it emits run-level set-run patchOps and marks mixed-style paragraphs review-required when styled-token anchors are not reliable.",
         "Use `xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json` to copy the source PPTX and replace only existing OOXML text node or text attribute values, with sourceText/sourceHash/index checks and no paragraph/run rebuild.",
-        "Use `xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json` for translation-safe chart label updates: it changes chart visible text nodes or materializes a guarded empty ChartEx default title, and never writes workbook, relationship, external path, embedded workbook, or formatCode parts.",
+        "Use `xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json` for translation-safe chart label updates: it changes chart visible text nodes or materializes a guarded generated classic Chart or ChartEx default title, and never writes workbook, relationship, external path, embedded workbook, or formatCode parts.",
         "Use `xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json` as the translation-mode gate: it ignores known visible text node content, blocks run/paragraph/textbox/table/chart/style metadata changes, records font-size layout repairs, and separates typed user-visible text attribute changes from style blockers.",
         "Use `xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json` after skin-first refurbish to verify source/final preservation gates.",
         "Use `xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json` to copy-preserve an existing deck, replace chrome/background, remap retained objects, and run audit/vision gates; run contact-diff explicitly for manual review.",
@@ -1591,7 +1597,7 @@
           }
         },
         "preview": {
-          "usage": "xdoc pptx preview <deck.pptx> --output-dir shots/ [--contact-sheet out.png] --json",
+          "usage": "xdoc pptx preview <deck.pptx> --output-dir shots/ [--contact-sheet out.png] [--dpi 192] --json",
           "inputs": ["input PPTX"],
           "outputs": [
             "per-slide PNG files",
@@ -1741,7 +1747,11 @@
             "stderr": {
               "usage": "errors-only"
             },
-            "exitStatus": "0 when style gate passes; non-zero when blockers are found or inputs are invalid"
+            "exitCodePolicy": {
+              "0": "Style gate passes: no styleBlockers[] and no compatibility blockers[].",
+              "2": "CLI argument parsing or validation failed.",
+              "3": "Invalid source/candidate input, or a completed diff with styleBlockers[]. When the report was produced, --json stdout is still one complete parseable pptx-i18n-style-diff/v1 report and stderr stays empty."
+            }
           },
           "agentPolicy": {
             "failWhen": "agentGate.passed is false, styleBlockers[] is non-empty, or compatibility blockers[] is non-empty",
@@ -1749,10 +1759,17 @@
           }
         },
         "i18n-scan": {
-          "usage": "xdoc pptx i18n-scan --source deck.pptx --source-lang multi|zh|en --mode source|candidate --json [--slides 1,3-5]",
-          "inputs": ["source or candidate PPTX"],
-          "outputs": ["pptx-i18n-scan/v1 JSON report", "human summary"],
-          "strategy": "Open the PPTX as an OPC package, discover structurally visible text independently from language confidence, classify confident source text for translation and ambiguous Latin text for review, include semantic defaults such as empty ChartEx titles, and emit i18nUnits as the stable agent-facing translation inventory. hits[] are diagnostic evidence; agents should not build selectors from hits[].location.",
+          "usage": "Source inventory: xdoc pptx i18n-scan --source deck.pptx --source-lang multi|zh|en --mode source --output i18n-scan.json --json [--slides 1,3-5]. Candidate gate: xdoc pptx i18n-scan --source candidate.pptx --mode candidate --units i18n-scan-source.json --data translations.json --output i18n-candidate.json --json",
+          "inputs": [
+            "source PPTX (source mode)",
+            "candidate PPTX plus source i18nUnits and pptx-i18n-translations/v1 (candidate mode)"
+          ],
+          "outputs": [
+            "pptx-i18n-scan-result/v1 or pptx-i18n-candidate-result/v1 compact stdout result",
+            "pptx-i18n-scan/v1 full report persisted by --output",
+            "human summary"
+          ],
+          "strategy": "Source mode opens the PPTX as an OPC package, discovers structurally visible text independently from language confidence, classifies confident source text for translation and ambiguous Latin text for review, includes semantic defaults such as generated classic Chart and ChartEx titles, and emits i18nUnits as the stable agent-facing translation inventory. Candidate mode is the authoritative target-consistency gate: it consumes the source units and translations, locates each translated unit inside the candidate with the source unit selector, and proves currentText equals targetText. hits[] are diagnostic evidence in source mode; agents should not build selectors from hits[].location.",
           "detectors": {
             "zh": "CJK unified ideograph ranges; no model-based language guessing",
             "en": "Conservative Latin natural-language detection for visible text; standalone URLs, paths, versions, OOXML/code tokens, and known product/tool terms are preserved, while structurally visible ambiguous Latin text is inventoried with action=review instead of disappearing.",
@@ -1761,7 +1778,7 @@
           "classes": {
             "visibleBody": "Slide, notes, table, layout/master, or diagram body text; translate; candidate blocker.",
             "visibleTextAttr": "User-visible attributes such as tooltip, descr, and title; translate under controlled replacement; candidate blocker.",
-            "chartVisibleCache": "Chart title, series, category, and label visible text, including the generated default of an empty ChartEx title; translate through guarded chart replacements; candidate blocker.",
+            "chartVisibleCache": "Chart title, series, category, and label visible text, including generated classic Chart and ChartEx default titles; translate through guarded chart replacements; candidate blocker.",
             "embeddedWorkbook": "Embedded workbook shared strings/sheet text; review required, not a default candidate blocker.",
             "themeFontMetadata": "Theme/font/language metadata; preserve by default.",
             "relationshipPath": "Relationship Target or external path; preserve by default.",
@@ -1777,7 +1794,7 @@
           "i18nUnits": {
             "field": "i18nUnits",
             "schemaVersion": "pptx-i18n-units/v1",
-            "usage": "Primary planner input for xdoc pptx i18n-plan. Translate only units with action=translate; preserve action=preserve; route action=review to manual review.",
+            "usage": "Primary planner input for xdoc pptx i18n-plan. Translate action=translate units; preserve action=preserve; classify action=review lazily, then authorize reviewed executable units with reviewDecision:\"translate\" plus sourceHash.",
             "stableKeys": [
               "unitId",
               "sourceText",
@@ -1794,25 +1811,57 @@
             "option": "--slides",
             "valueSyntax": "N|N-M[,N|N-M...]",
             "indexBase": 1,
-            "chartScope": "When scoped, chart XML is scanned only when referenced by selected slide relationship parts."
+            "chartScope": "When scoped, chart XML is scanned only when referenced by selected slide relationship parts.",
+            "candidate": "Candidate mode takes source language and scope from --units and rejects --source-lang and --slides so the command line and the contract files cannot disagree."
           },
           "ioContract": {
             "stdout": {
-              "format": "json when --json is set; human summary otherwise",
-              "schemaVersion": "pptx-i18n-scan/v1"
+              "format": "compact JSON when --json is set; complete JSON only with --json-full; human summary otherwise",
+              "schemaVersion": "pptx-i18n-scan-result/v1 in source mode or pptx-i18n-candidate-result/v1 in candidate mode; pptx-i18n-scan/v1 with --json-full"
             },
             "stderr": {
               "usage": "errors-only"
             },
             "filesystem": {
-              "usage": "read-only"
+              "usage": "PPTX inputs are read-only; --output persists the complete pptx-i18n-scan/v1 report and --overwrite is required to replace it"
             },
-            "exitStatus": "0 when candidate has no visible source-language blockers; non-zero when blockers exist or inputs are invalid"
+            "exitCodePolicy": {
+              "0": "Source mode: no blocker hits. Candidate mode: every translated unit's currentText equals its targetText.",
+              "2": "CLI argument parsing or validation failed.",
+              "3": "Invalid source/units/translations input, or a completed report with blocker hits (source mode) or target-consistency blockers (candidate mode). A completed --json request still emits one compact result and --output, when supplied, contains the complete report."
+            }
+          },
+          "candidateReport": {
+            "schemaVersion": "pptx-i18n-scan/v1",
+            "mode": "candidate",
+            "invariant": "verified requires currentText == targetText. sourceText/targetText/currentText are compared as canonical raw text with no trim, case folding, whitespace collapsing, or Unicode normalization.",
+            "blockerKinds": [
+              "source-residual",
+              "target-mismatch",
+              "selector-missing",
+              "selector-ambiguous",
+              "part-missing",
+              "part-unreadable",
+              "unsupported-selector"
+            ],
+            "summaryKeys": [
+              "sourceUnitCount",
+              "translationCount",
+              "verificationUnitCount",
+              "approvedUnchangedCount",
+              "verifiedCount",
+              "sourceResidualCount",
+              "targetMismatchCount",
+              "resolutionBlockerCount"
+            ],
+            "derivation": "status, agentGate.passed, blockers[], and the exit code are all derived from one blocker set. blockers.length == agentGate.blockerCount == sourceResidualCount + targetMismatchCount + resolutionBlockerCount, and verificationUnitCount == verifiedCount + blockers.length == translationCount.",
+            "locator": "Candidate current text is located with the source unit selector, never the candidate inventory. A generated classic Chart or ChartEx default title that was materialized during apply reads its explicit title text; sourceState/structureSignature are apply-time guards and do not block the candidate read.",
+            "reviewedUnits": "A review unit participates in candidate verification only when its translation carries reviewDecision:\"translate\" and a matching sourceHash. The candidate gate selects the same executable selector used by i18n-plan, including slideLayout and slideMaster text."
           },
           "agentPolicy": {
             "sourceMode": "Use --mode source before translation to build a categorized inventory; hits are not blockers.",
-            "candidateMode": "Use --mode candidate after translation; fail delivery when blockers[] is non-empty.",
-            "translationInput": "Build pptx-i18n-translations/v1 from i18nUnits.units[].unitId and sourceHash; do not infer selectors from hits[].location.",
+            "candidateMode": "Use --mode candidate after translation as the authoritative target-consistency gate. It consumes the source units and translations and fails delivery when blockers[] is non-empty. It does not run the heuristic language classifier, so valid target-language Latin text is never a blocker.",
+            "translationInput": "Build pptx-i18n-translations/v1 from i18nUnits.units[].unitId and sourceHash; include reviewDecision:\"translate\" for explicitly approved review units; do not infer selectors from hits[].location.",
             "reviewRequiredWhen": "embeddedWorkbook hits remain; inspect chart/workbook sync before editing workbook text.",
             "preserveByDefault": [
               "themeFontMetadata",
@@ -1823,18 +1872,20 @@
           }
         },
         "i18n-plan": {
-          "usage": "xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --json [--slides 1,3-5]",
+          "usage": "xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-plan.json --json [--slides 1,3-5]",
           "inputs": [
             "source PPTX",
             "pptx-i18n-units/v1 JSON or full i18n-scan report",
             "pptx-i18n-translations/v1 JSON"
           ],
           "outputs": [
-            "pptx-i18n-plan/v1 JSON report",
+            "pptx-i18n-plan-result/v1 compact stdout result",
+            "pptx-i18n-plan/v1 full report persisted by --output",
             "textPlan translations",
             "replaceText replacements",
             "replaceChartText replacements",
             "run-level patch.ops",
+            "reviewRequired[].repair targetSegments templates",
             "applyGate and deliveryGate"
           ],
           "strategy": "Validate unitId/sourceText/sourceHash guarded translations against the current source inventory, then route each unit to the safest available execution primitive without requiring agents to construct low-level selectors.",
@@ -1842,30 +1893,48 @@
             "schemaVersion": "pptx-i18n-translations/v1",
             "required": ["translations[].unitId", "translations[].targetText", "targetLang"],
             "recommended": ["sourceLang", "translations[].sourceHash", "translations[].sourceText"],
-            "optional": ["translations[].anchors[]", "translations[].targetSegments[]"],
-            "guard": "sourceHash and sourceText, when present, must match the i18nUnits source unit before any execution plan is emitted."
+            "optional": [
+              "translations[].anchors[]",
+              "translations[].targetSegments[]",
+              "translations[].targetSegmentsContractId",
+              "translations[].reviewDecision"
+            ],
+            "guard": "sourceHash and sourceText, when present, must match the i18nUnits source unit before any execution plan is emitted. targetSegmentsContractId, when present, must match the current run structure.",
+            "reviewDecision": "Set reviewDecision:\"translate\" together with the unit's sourceHash to apply a reviewed unit's targetText through the standard execution primitives; without it, a review unit carrying targetText stays a review-target conflict. Applied reviewed units are counted in summary.reviewedTranslationCount."
           },
           "routes": {
-            "textPlan": "DrawingML shape and table paragraphs share the i18n-text-plan run-mapping strategies. Shape targets materialize as guarded set-run patch.ops; table targets materialize as guarded replaceText replacements for existing a:t nodes.",
+            "textPlan": "DrawingML shape and table paragraphs share the i18n-text-plan run-mapping strategies. Shape targets materialize as guarded set-run patch.ops; table targets materialize as guarded replaceText replacements for existing a:t nodes. The report.textPlan sub-artifact is labelled pptx-i18n-text-plan-input/v1 and is the only valid --data input for i18n-text-plan.",
             "replaceText": "User-visible text attributes become replace-text replacements with stable part/tag/attr/index selectors copied from i18nUnits.",
-            "replaceChartText": "Chart visible text units become replace-chart-text replacements with part/role/nodePath/index selectors copied from i18nUnits. Empty ChartEx title units additionally carry sourceState=empty-title and are materialized only while that guarded state still matches."
+            "replaceChartText": "Chart visible text units become replace-chart-text replacements with part/role/nodePath/index selectors copied from i18nUnits. Generated classic Chart and ChartEx title units additionally carry sourceState=generated-default-title, chartDialect, and structureSignature and are materialized only while all guarded state still matches.",
+            "reviewedSharedText": "A slideLayout or slideMaster unit remains manual-review until translations[].reviewDecision is translate and sourceHash matches. Authorization selects the executable selector already carried by the unit, so shared text uses guarded textPlan/replaceText/replaceChartText instead of remaining permanently review-only."
           },
           "gates": {
             "applyGate": "Passed only when the plan has no conflicts, no missing translations, and no apply-blocking review items. Apply generated replacement files and patch.ops only when true.",
             "deliveryGate": "Planner deliveryGate is intentionally conservative; final delivery still requires applying to a candidate and passing candidate i18n-scan, i18n-style-diff, preview/visual checks, and text overflow review."
           },
+          "targetSegmentsRepair": {
+            "schemaVersion": "pptx-i18n-target-segments-repair/v1",
+            "location": "reviewRequired[].repair",
+            "eligibility": "Emitted only when a text-plan review can be repaired by a complete targetSegments mapping; selector/source/unsupported-method reviews do not receive it.",
+            "mergePolicy": "Copy translationPatchTemplate into the existing translations[] item matched by unitId, fill every null text, and rerun i18n-plan. Do not append a duplicate translation record.",
+            "failClosed": "Templates use text=null and ready=false. The translations parser rejects an unfilled template; completed segments must match group ids/order, targetText reconstruction, sourceHash, and targetSegmentsContractId."
+          },
           "ioContract": {
             "stdout": {
-              "format": "json when --json is set; human summary otherwise",
-              "schemaVersion": "pptx-i18n-plan/v1"
+              "format": "compact JSON when --json is set; complete JSON only with --json-full; human summary otherwise",
+              "schemaVersion": "pptx-i18n-plan-result/v1 with --json; pptx-i18n-plan/v1 with --json-full"
             },
             "stderr": {
               "usage": "errors-only"
             },
             "filesystem": {
-              "usage": "read-only"
+              "usage": "PPTX and contract inputs are read-only; --output persists the complete pptx-i18n-plan/v1 report and --overwrite is required to replace it"
             },
-            "exitStatus": "0 only when applyGate can pass; non-zero when translations are missing, conflicted, or require apply-blocking review"
+            "exitCodePolicy": {
+              "0": "Plan status is pass and applyGate can pass.",
+              "2": "CLI argument parsing or validation failed.",
+              "3": "Invalid source/units/translations input, or a completed plan whose status is not pass: blocked (conflicts), review-required (apply-blocking reviews), or incomplete (missing translations). A completed --json request still emits one compact result and --output, when supplied, contains the complete plan."
+            }
           },
           "agentPolicy": {
             "preferredFlow": "i18n-scan source -> fill pptx-i18n-translations/v1 by unitId -> i18n-plan -> apply generated replaceChartText/replaceText/patch artifacts -> final delivery gates.",
@@ -1876,7 +1945,10 @@
               "missing translation for action=translate unit",
               "crossScopeImpact without full shared-scope review"
             ],
-            "fallback": "Use i18n-text-plan, replace-text, or replace-chart-text directly only when debugging or manually handling a planner output; do not hand-derive selectors from scan diagnostics."
+            "fallback": "Use i18n-text-plan, replace-text, or replace-chart-text directly only when debugging or manually handling a planner output; do not hand-derive selectors from scan diagnostics.",
+            "repairFlow": "When reviewRequired[].repair is present, consume its sourceRunGroups/sourceSequence and merge the filled translationPatchTemplate by unitId before rerunning i18n-plan; never guess sourceRunGroupId values.",
+            "reviewFlow": "For action=review units, decide translate/preserve from context, then supply reviewDecision:\"translate\" plus the unit's sourceHash in translations[] instead of hand-building replace-text inputs; the planner materializes the reviewed target through the same guarded artifacts.",
+            "triage": "Start from applyGate.blockingReviewCount, applyGate.conflictCount, and applyGate.blockersByCategory; reviewRequired[] lists apply-blocking items first, so repair top-down instead of filtering the whole array."
           }
         },
         "replace-text": {
@@ -1939,7 +2011,7 @@
             "pptx-replace-chart-text/v1 JSON report",
             "human summary"
           ],
-          "strategy": "Open the source PPTX as an OPC package and replace chart visible text nodes in ppt/charts/*.xml. A selector bound to an empty ChartEx title may materialize the standard cx:title/cx:tx/cx:txData/cx:v structure; all other structural changes remain blocked. The command does not sync or rewrite embedded workbook cells.",
+          "strategy": "Open the source PPTX as an OPC package and replace chart visible text nodes in ppt/charts/*.xml. A selector bound to a generated classic Chart or ChartEx title with no existing tx child may materialize the dialect-appropriate minimal title text structure; a title with any existing tx child is preserve-only and does not enter generated-title inventory. All other structural changes remain blocked. The command does not sync or rewrite embedded workbook cells.",
           "requiredFlag": "--visible-cache-only",
           "replacementUnit": {
             "schemaVersion": "pptx-chart-text-replacements/v1",
@@ -1956,6 +2028,12 @@
               "replacements[].nodePath",
               "replacements[].chartPart alias for part"
             ],
+            "generatedTitleRequired": [
+              "replacements[].sourceState=generated-default-title",
+              "replacements[].chartDialect=classic|chartex",
+              "replacements[].structureSignature copied from i18n inventory"
+            ],
+            "generatedTitleBoundary": "Only a title container with no dialect tx child is eligible. Existing tx content, including an empty tx/rich container, is preserve-only and must not be materialized by this helper.",
             "indexing": "index/nodeIndex/occurrence are 0-based within the selected role stream for the chart part."
           },
           "dryRun": {
@@ -1963,7 +2041,8 @@
             "effect": "reports changedNodes[], structureChecks[], and changedParts[] without writing output; --output is optional in dry-run mode."
           },
           "structureChecks": [
-            "chart XML textless signature unchanged",
+            "chart XML textless signature unchanged except guarded generated-title text materialization",
+            "generated title non-text structure signature unchanged",
             "formatCode values unchanged",
             "changed parts limited to ppt/charts/*.xml"
           ],
@@ -1994,6 +2073,8 @@
               "missing --visible-cache-only",
               "sourceText/sourceHash mismatch",
               "multiple role matches without index",
+              "generated title selector missing sourceState/chartDialect/structureSignature",
+              "title already contains a tx child",
               "part outside ppt/charts/*.xml",
               "formatCode or XML structure drift"
             ],
@@ -2010,7 +2091,8 @@
           ],
           "strategy": "Inspect existing DrawingML text and structural nodes, map ordinary runs without rebuilding paragraphs, and preserve break/tab/field identity through one guarded atomic structured-paragraph operation.",
           "translationUnit": {
-            "schemaVersion": "pptx-i18n-translations/v1",
+            "schemaVersion": "pptx-i18n-text-plan-input/v1",
+            "note": "Use the report.textPlan sub-artifact emitted by `xdoc pptx i18n-plan`. The top-level unitId-based pptx-i18n-translations/v1 document is not valid input here and is rejected with a targeted error.",
             "required": [
               "translations[].slide",
               "translations[].paragraph",
@@ -2020,7 +2102,8 @@
               "translations[].shapeId",
               "translations[].sourceText",
               "translations[].anchors[]",
-              "translations[].targetSegments[]"
+              "translations[].targetSegments[]",
+              "translations[].targetSegmentsContractId"
             ],
             "indexing": "slide is 1-based; paragraph is 0-based; shapeId is the source PPTX cNvPr id."
           },
@@ -2028,6 +2111,7 @@
             "uniform": "Single source run receives the full target text.",
             "preserve-run-boundaries": "Multiple source runs share one style signature; the first run receives the full target and continuation runs are cleared while their style nodes remain.",
             "preserve-styled-token-boundaries": "Mixed-style runs keep styled token anchors in their original run boundaries and distribute surrounding target text to adjacent plain runs.",
+            "preserve-anchor-boundaries": "Uniquely ordered anchors map protected hyperlink groups to target text, then pass the same exact segment reconstruction validator before patch ops are emitted.",
             "structured-target-segments": "Explicit targetSegments map translated text to every sourceRunGroupId when hyperlink boundaries or mixed styles cannot be inferred safely.",
             "preserve-structural-boundaries": "Break and tab delimiters partition target text into editable segments; fields stay immutable and are represented as {{field:N}} placeholders. One atomic patch validates the typed node sequence before replacing ordinary runs.",
             "review-required": "The planner could not prove a safe run-level mapping; do not auto-apply the unit."
@@ -2043,7 +2127,11 @@
             "filesystem": {
               "usage": "read-only"
             },
-            "exitStatus": "0 only when all in-scope units have deterministic patchOps; non-zero when review-required or invalid inputs are found"
+            "exitCodePolicy": {
+              "0": "All in-scope units have deterministic patchOps.",
+              "2": "CLI argument parsing or validation failed.",
+              "3": "Invalid source/translations input, or a completed report with status error or review-required. When the report was produced, --json stdout is still one complete parseable pptx-i18n-text-plan/v1 report and stderr stays empty."
+            }
           },
           "agentPolicy": {
             "applyOnlyWhen": "agentGate.passed is true and reviewRequiredCount is 0",
@@ -2074,6 +2162,12 @@
             },
             "stderr": {
               "usage": "errors-only"
+            },
+            "exitCodePolicy": {
+              "0": "The diff completed, even when agentGate.passed is false; the gate verdict lives only in the JSON report, never in the exit code.",
+              "2": "CLI argument parsing or validation failed.",
+              "3": "Source or candidate input is invalid or unreadable.",
+              "7": "Rendering a deck for comparison failed."
             }
           },
           "matching": {
@@ -2091,7 +2185,14 @@
               "source issues inherited unchanged",
               "new low issues as reviewRequiredCount rather than blockers",
               "same-severity metric changes as changedIssues for review"
-            ]
+            ],
+            "evidenceClasses": {
+              "rendered": "chart-title-external-text-collision and rendered-text-outside-page-* are proven on final PDFium/renderer output; never eligible for the human-review exception.",
+              "review-only": "multi-column-text-layout-review resolves through the bound multi-column human review record.",
+              "estimator": "text-overflow-estimate and multi-column-text-overflow are static text-fit estimates; confirm against rendered evidence and the final PNG before rewording text.",
+              "static-geometry": "remaining kinds come from authored-geometry heuristics evaluated without rendering.",
+              "usage": "Every issue carries evidenceClass; agentGate.blockersByEvidenceClass counts the blocking issues per class so estimator noise cannot hide rendered hard blockers."
+            }
           }
         },
         "contact-diff": {
@@ -2111,7 +2212,8 @@
             },
             "stdout": {
               "format": "json when --json is set; human summary otherwise",
-              "schemaVersion": "pptx-contact-diff/v1"
+              "schemaVersion": "pptx-contact-diff/v1",
+              "inputIdentity": "source and candidate contain the original path, byteLength, and SHA-256 of the exact snapshotted PPTX bytes used for rendering"
             },
             "stderr": {
               "usage": "errors-only"
@@ -2207,8 +2309,8 @@
           "defaultRoles": ["header", "footer", "page-number", "rule"],
           "defaultLimits": {
             "maxBytes": 2500000,
-            "maxSlides": 30,
-            "maxShapes": 400,
+            "maxSlides": 120,
+            "maxShapes": 1200,
             "reason": "large-deck support is gated until the refurbish-skin pipeline avoids repeated full-deck passes"
           },
           "gates": [
@@ -7389,7 +7491,10 @@
               "chart",
               "tbl",
               "clipArt",
-              "media"
+              "media",
+              "hdr",
+              "dgm",
+              "sldImg"
             ],
             "aliases": [
               {
@@ -7428,7 +7533,15 @@
               "requiresExactValue": true,
               "aliasPolicy": "Use aliases only to produce canonical repair candidates; validate the final value against values before retry."
             },
-            "values": ["left", "center", "right", "justify", "distribute", "thai-distribute"],
+            "values": [
+              "left",
+              "center",
+              "right",
+              "justify",
+              "justify-low",
+              "distribute",
+              "thai-distribute"
+            ],
             "aliases": [],
             "fuzzySuggest": {
               "tool": "fuzzy_suggest",
@@ -10113,7 +10226,9 @@
                 "$ref": "#/$defs/length"
               },
               "angle": {
-                "type": "number"
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 360
               },
               "inner": {
                 "type": "boolean"
@@ -11149,7 +11264,15 @@
           },
           "paragraphAlignment": {
             "type": "string",
-            "enum": ["left", "center", "right", "justify", "distribute", "thai-distribute"],
+            "enum": [
+              "left",
+              "center",
+              "right",
+              "justify",
+              "justify-low",
+              "distribute",
+              "thai-distribute"
+            ],
             "strict": true
           },
           "textFrameAutofitPatch": {
@@ -11215,7 +11338,8 @@
               {
                 "type": "number",
                 "exclusiveMinimum": 0,
-                "description": "Line multiple; PowerPoint single line = 1.0 and serializes as spcPct val=100000"
+                "description": "Line multiple; PowerPoint single line = 1.0 and serializes as spcPct val=100000",
+                "maximum": 132
               },
               {
                 "type": "string",
@@ -11500,7 +11624,10 @@
               "chart",
               "tbl",
               "clipArt",
-              "media"
+              "media",
+              "hdr",
+              "dgm",
+              "sldImg"
             ],
             "strict": true
           },
@@ -11523,11 +11650,12 @@
                 "type": "string"
               },
               "symbol": {
-                "type": "string"
+                "$ref": "#/$defs/chartMarkerSymbol"
               },
               "size": {
                 "type": "integer",
-                "minimum": 1
+                "minimum": 2,
+                "maximum": 72
               },
               "fill": {
                 "$ref": "#/$defs/color"
@@ -11556,11 +11684,12 @@
             "additionalProperties": false,
             "properties": {
               "symbol": {
-                "type": "string"
+                "$ref": "#/$defs/chartMarkerSymbol"
               },
               "size": {
                 "type": "integer",
-                "minimum": 1
+                "minimum": 2,
+                "maximum": 72
               },
               "fill": {
                 "$ref": "#/$defs/color"
@@ -11636,16 +11765,37 @@
                 "minimum": 0
               },
               "gapWidth": {
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 500
               },
               "overlap": {
-                "type": "integer"
+                "type": "integer",
+                "minimum": -100,
+                "maximum": 100
               },
               "varyByCategories": {
                 "type": "boolean"
               },
               "bubbleScale": {
-                "type": "integer"
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "firstSliceAngle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360,
+                "description": "Pie/doughnut first slice angle in degrees (c:firstSliceAng)."
+              },
+              "holeSize": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 90,
+                "description": "Doughnut hole size percent (c:holeSize)."
+              },
+              "sizeRepresents": {
+                "$ref": "#/$defs/chartSizeRepresents"
               }
             }
           },
@@ -11693,10 +11843,12 @@
                 "type": "number"
               },
               "majorUnit": {
-                "type": "number"
+                "type": "number",
+                "exclusiveMinimum": 0
               },
               "minorUnit": {
-                "type": "number"
+                "type": "number",
+                "exclusiveMinimum": 0
               },
               "reverseOrder": {
                 "type": "boolean"
@@ -11706,6 +11858,14 @@
               },
               "crossesAt": {
                 "type": "number"
+              },
+              "logBase": {
+                "type": "number",
+                "minimum": 2,
+                "maximum": 1000
+              },
+              "crossBetween": {
+                "$ref": "#/$defs/chartCrossBetween"
               }
             }
           },
@@ -11730,6 +11890,32 @@
               },
               "visible": {
                 "type": "boolean"
+              },
+              "labelSkip": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "markSkip": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "labelOffset": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000,
+                "description": "Category-axis label distance from the axis in percent (100 = default)."
+              },
+              "labelAlignment": {
+                "$ref": "#/$defs/chartTickLabelAlignment"
+              },
+              "font": {
+                "$ref": "#/$defs/font"
+              },
+              "rotation": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90,
+                "description": "Tick label rotation in degrees, written as a:bodyPr rot (1 deg = 60000)."
               }
             }
           },
@@ -11745,13 +11931,22 @@
                 "$ref": "#/$defs/chartLineStyle"
               },
               "gridlines": {
-                "$ref": "#/$defs/chartLineStyle"
+                "$ref": "#/$defs/chartGridlinesPatch"
               },
               "scale": {
                 "$ref": "#/$defs/chartAxisScalePatch"
               },
               "ticks": {
                 "$ref": "#/$defs/chartAxisTicksPatch"
+              },
+              "title": {
+                "$ref": "#/$defs/chartAxisTitlePatch"
+              },
+              "minorGridlines": {
+                "$ref": "#/$defs/chartGridlinesPatch"
+              },
+              "displayUnits": {
+                "$ref": "#/$defs/chartDisplayUnitsPatch"
               }
             }
           },
@@ -11815,6 +12010,12 @@
               },
               "points": {
                 "$ref": "#/$defs/chartPointsPatch"
+              },
+              "trendline": {
+                "$ref": "#/$defs/chartTrendlinePatch"
+              },
+              "errorBars": {
+                "$ref": "#/$defs/chartErrorBarsPatch"
               }
             }
           },
@@ -11852,6 +12053,12 @@
               },
               "numberFormat": {
                 "type": "string"
+              },
+              "separator": {
+                "type": "string"
+              },
+              "font": {
+                "$ref": "#/$defs/font"
               }
             }
           },
@@ -12996,7 +13203,9 @@
                 "$ref": "#/$defs/presetGradient"
               },
               "angle": {
-                "type": "number"
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 360
               },
               "path": {
                 "$ref": "#/$defs/gradientPath"
@@ -13467,6 +13676,304 @@
                 }
               }
             }
+          },
+          "chartCrossBetween": {
+            "type": "string",
+            "enum": ["between", "mid-category"],
+            "strict": true
+          },
+          "chartDisplayBlanksAs": {
+            "type": "string",
+            "enum": ["gap", "span", "zero"],
+            "strict": true
+          },
+          "chartDisplayUnit": {
+            "type": "string",
+            "enum": [
+              "hundreds",
+              "thousands",
+              "ten-thousands",
+              "hundred-thousands",
+              "millions",
+              "ten-millions",
+              "hundred-millions",
+              "billions",
+              "trillions"
+            ],
+            "strict": true
+          },
+          "chartErrorBarDirection": {
+            "type": "string",
+            "enum": ["x", "y"],
+            "strict": true
+          },
+          "chartErrorBarType": {
+            "type": "string",
+            "enum": ["both", "minus", "plus"],
+            "strict": true
+          },
+          "chartErrorBarValueType": {
+            "type": "string",
+            "enum": ["custom", "fixed", "percentage", "std-dev", "std-err"],
+            "strict": true
+          },
+          "chartMarkerSymbol": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "circle",
+              "dash",
+              "diamond",
+              "dot",
+              "none",
+              "picture",
+              "plus",
+              "square",
+              "star",
+              "triangle",
+              "x"
+            ],
+            "strict": true
+          },
+          "chartSizeRepresents": {
+            "type": "string",
+            "enum": ["area", "width"],
+            "strict": true
+          },
+          "chartTickLabelAlignment": {
+            "type": "string",
+            "enum": ["center", "left", "right"],
+            "strict": true
+          },
+          "chartTrendlineType": {
+            "type": "string",
+            "enum": [
+              "exponential",
+              "linear",
+              "logarithmic",
+              "moving-average",
+              "polynomial",
+              "power"
+            ],
+            "strict": true
+          },
+          "chartAxisTitlePatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove the axis title."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "minProperties": 1,
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "font": {
+                    "$ref": "#/$defs/font"
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90,
+                    "description": "Title text rotation in degrees, written as a:bodyPr rot (1 deg = 60000)."
+                  }
+                }
+              }
+            ]
+          },
+          "chartGridlinesPatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove these gridlines."
+              },
+              {
+                "$ref": "#/$defs/chartLineStyle"
+              }
+            ]
+          },
+          "chartDisplayUnitsPatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove value-axis display units."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["unit"],
+                "properties": {
+                  "unit": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/$defs/chartDisplayUnit"
+                      },
+                      {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "description": "Custom display-unit divisor written as c:custUnit."
+                      }
+                    ]
+                  },
+                  "showLabel": {
+                    "type": "boolean",
+                    "description": "Show the display-units label next to the axis (c:dispUnitsLbl)."
+                  }
+                }
+              }
+            ]
+          },
+          "chartTrendlinePatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove all trendlines from the series."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type"],
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/chartTrendlineType"
+                  },
+                  "order": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 6,
+                    "description": "Polynomial order; only valid with type polynomial."
+                  },
+                  "period": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 255,
+                    "description": "Moving-average period; only valid with type moving-average."
+                  },
+                  "forward": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "backward": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "intercept": {
+                    "type": "number"
+                  },
+                  "displayEquation": {
+                    "type": "boolean"
+                  },
+                  "displayRSquared": {
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "line": {
+                    "$ref": "#/$defs/chartLineStyle"
+                  }
+                }
+              }
+            ]
+          },
+          "chartErrorBarsPatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove error bars from the series."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["valueType"],
+                "properties": {
+                  "valueType": {
+                    "$ref": "#/$defs/chartErrorBarValueType"
+                  },
+                  "type": {
+                    "$ref": "#/$defs/chartErrorBarType"
+                  },
+                  "direction": {
+                    "$ref": "#/$defs/chartErrorBarDirection"
+                  },
+                  "value": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Error amount for fixed / percentage / std-dev value types."
+                  },
+                  "plus": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "minus": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "noEndCap": {
+                    "type": "boolean"
+                  },
+                  "line": {
+                    "$ref": "#/$defs/chartLineStyle"
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "required": ["plus"]
+                    },
+                    "then": {
+                      "required": ["minus"]
+                    }
+                  },
+                  {
+                    "if": {
+                      "required": ["minus"]
+                    },
+                    "then": {
+                      "required": ["plus"]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "chartDataTablePatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove the data table."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "minProperties": 1,
+                "properties": {
+                  "showHorizontalBorder": {
+                    "type": "boolean"
+                  },
+                  "showVerticalBorder": {
+                    "type": "boolean"
+                  },
+                  "showOutline": {
+                    "type": "boolean"
+                  },
+                  "showKeys": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            ]
           }
         },
         "properties": {
@@ -16303,11 +16810,20 @@
                       "dataLabels": {
                         "$ref": "#/$defs/chartDataLabelsPatches"
                       },
+                      "dataTable": {
+                        "$ref": "#/$defs/chartDataTablePatch"
+                      },
+                      "displayBlanksAs": {
+                        "$ref": "#/$defs/chartDisplayBlanksAs"
+                      },
                       "legend": {
                         "$ref": "#/$defs/chartLegendPatch"
                       },
                       "plot": {
                         "$ref": "#/$defs/chartPlotPatch"
+                      },
+                      "roundedCorners": {
+                        "type": "boolean"
                       },
                       "series": {
                         "$ref": "#/$defs/chartSeriesPatches"
@@ -16350,6 +16866,15 @@
                           },
                           {
                             "required": ["dataLabels"]
+                          },
+                          {
+                            "required": ["dataTable"]
+                          },
+                          {
+                            "required": ["displayBlanksAs"]
+                          },
+                          {
+                            "required": ["roundedCorners"]
                           }
                         ]
                       }
@@ -18171,7 +18696,9 @@
                   "$ref": "#/$defs/length"
                 },
                 "angle": {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 360
                 },
                 "inner": {
                   "type": "boolean"
@@ -19207,7 +19734,15 @@
             },
             "paragraphAlignment": {
               "type": "string",
-              "enum": ["left", "center", "right", "justify", "distribute", "thai-distribute"],
+              "enum": [
+                "left",
+                "center",
+                "right",
+                "justify",
+                "justify-low",
+                "distribute",
+                "thai-distribute"
+              ],
               "strict": true
             },
             "textFrameAutofitPatch": {
@@ -19273,7 +19808,8 @@
                 {
                   "type": "number",
                   "exclusiveMinimum": 0,
-                  "description": "Line multiple; PowerPoint single line = 1.0 and serializes as spcPct val=100000"
+                  "description": "Line multiple; PowerPoint single line = 1.0 and serializes as spcPct val=100000",
+                  "maximum": 132
                 },
                 {
                   "type": "string",
@@ -19558,7 +20094,10 @@
                 "chart",
                 "tbl",
                 "clipArt",
-                "media"
+                "media",
+                "hdr",
+                "dgm",
+                "sldImg"
               ],
               "strict": true
             },
@@ -19581,11 +20120,12 @@
                   "type": "string"
                 },
                 "symbol": {
-                  "type": "string"
+                  "$ref": "#/$defs/chartMarkerSymbol"
                 },
                 "size": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 2,
+                  "maximum": 72
                 },
                 "fill": {
                   "$ref": "#/$defs/color"
@@ -19614,11 +20154,12 @@
               "additionalProperties": false,
               "properties": {
                 "symbol": {
-                  "type": "string"
+                  "$ref": "#/$defs/chartMarkerSymbol"
                 },
                 "size": {
                   "type": "integer",
-                  "minimum": 1
+                  "minimum": 2,
+                  "maximum": 72
                 },
                 "fill": {
                   "$ref": "#/$defs/color"
@@ -19694,16 +20235,37 @@
                   "minimum": 0
                 },
                 "gapWidth": {
-                  "type": "integer"
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 500
                 },
                 "overlap": {
-                  "type": "integer"
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
                 },
                 "varyByCategories": {
                   "type": "boolean"
                 },
                 "bubbleScale": {
-                  "type": "integer"
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 300
+                },
+                "firstSliceAngle": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 360,
+                  "description": "Pie/doughnut first slice angle in degrees (c:firstSliceAng)."
+                },
+                "holeSize": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 90,
+                  "description": "Doughnut hole size percent (c:holeSize)."
+                },
+                "sizeRepresents": {
+                  "$ref": "#/$defs/chartSizeRepresents"
                 }
               }
             },
@@ -19751,10 +20313,12 @@
                   "type": "number"
                 },
                 "majorUnit": {
-                  "type": "number"
+                  "type": "number",
+                  "exclusiveMinimum": 0
                 },
                 "minorUnit": {
-                  "type": "number"
+                  "type": "number",
+                  "exclusiveMinimum": 0
                 },
                 "reverseOrder": {
                   "type": "boolean"
@@ -19764,6 +20328,14 @@
                 },
                 "crossesAt": {
                   "type": "number"
+                },
+                "logBase": {
+                  "type": "number",
+                  "minimum": 2,
+                  "maximum": 1000
+                },
+                "crossBetween": {
+                  "$ref": "#/$defs/chartCrossBetween"
                 }
               }
             },
@@ -19788,6 +20360,32 @@
                 },
                 "visible": {
                   "type": "boolean"
+                },
+                "labelSkip": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "markSkip": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "labelOffset": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000,
+                  "description": "Category-axis label distance from the axis in percent (100 = default)."
+                },
+                "labelAlignment": {
+                  "$ref": "#/$defs/chartTickLabelAlignment"
+                },
+                "font": {
+                  "$ref": "#/$defs/font"
+                },
+                "rotation": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90,
+                  "description": "Tick label rotation in degrees, written as a:bodyPr rot (1 deg = 60000)."
                 }
               }
             },
@@ -19803,13 +20401,22 @@
                   "$ref": "#/$defs/chartLineStyle"
                 },
                 "gridlines": {
-                  "$ref": "#/$defs/chartLineStyle"
+                  "$ref": "#/$defs/chartGridlinesPatch"
                 },
                 "scale": {
                   "$ref": "#/$defs/chartAxisScalePatch"
                 },
                 "ticks": {
                   "$ref": "#/$defs/chartAxisTicksPatch"
+                },
+                "title": {
+                  "$ref": "#/$defs/chartAxisTitlePatch"
+                },
+                "minorGridlines": {
+                  "$ref": "#/$defs/chartGridlinesPatch"
+                },
+                "displayUnits": {
+                  "$ref": "#/$defs/chartDisplayUnitsPatch"
                 }
               }
             },
@@ -19873,6 +20480,12 @@
                 },
                 "points": {
                   "$ref": "#/$defs/chartPointsPatch"
+                },
+                "trendline": {
+                  "$ref": "#/$defs/chartTrendlinePatch"
+                },
+                "errorBars": {
+                  "$ref": "#/$defs/chartErrorBarsPatch"
                 }
               }
             },
@@ -19910,6 +20523,12 @@
                 },
                 "numberFormat": {
                   "type": "string"
+                },
+                "separator": {
+                  "type": "string"
+                },
+                "font": {
+                  "$ref": "#/$defs/font"
                 }
               }
             },
@@ -21054,7 +21673,9 @@
                   "$ref": "#/$defs/presetGradient"
                 },
                 "angle": {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 360
                 },
                 "path": {
                   "$ref": "#/$defs/gradientPath"
@@ -21525,6 +22146,304 @@
                   }
                 }
               }
+            },
+            "chartCrossBetween": {
+              "type": "string",
+              "enum": ["between", "mid-category"],
+              "strict": true
+            },
+            "chartDisplayBlanksAs": {
+              "type": "string",
+              "enum": ["gap", "span", "zero"],
+              "strict": true
+            },
+            "chartDisplayUnit": {
+              "type": "string",
+              "enum": [
+                "hundreds",
+                "thousands",
+                "ten-thousands",
+                "hundred-thousands",
+                "millions",
+                "ten-millions",
+                "hundred-millions",
+                "billions",
+                "trillions"
+              ],
+              "strict": true
+            },
+            "chartErrorBarDirection": {
+              "type": "string",
+              "enum": ["x", "y"],
+              "strict": true
+            },
+            "chartErrorBarType": {
+              "type": "string",
+              "enum": ["both", "minus", "plus"],
+              "strict": true
+            },
+            "chartErrorBarValueType": {
+              "type": "string",
+              "enum": ["custom", "fixed", "percentage", "std-dev", "std-err"],
+              "strict": true
+            },
+            "chartMarkerSymbol": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "circle",
+                "dash",
+                "diamond",
+                "dot",
+                "none",
+                "picture",
+                "plus",
+                "square",
+                "star",
+                "triangle",
+                "x"
+              ],
+              "strict": true
+            },
+            "chartSizeRepresents": {
+              "type": "string",
+              "enum": ["area", "width"],
+              "strict": true
+            },
+            "chartTickLabelAlignment": {
+              "type": "string",
+              "enum": ["center", "left", "right"],
+              "strict": true
+            },
+            "chartTrendlineType": {
+              "type": "string",
+              "enum": [
+                "exponential",
+                "linear",
+                "logarithmic",
+                "moving-average",
+                "polynomial",
+                "power"
+              ],
+              "strict": true
+            },
+            "chartAxisTitlePatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove the axis title."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "minProperties": 1,
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "font": {
+                      "$ref": "#/$defs/font"
+                    },
+                    "rotation": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90,
+                      "description": "Title text rotation in degrees, written as a:bodyPr rot (1 deg = 60000)."
+                    }
+                  }
+                }
+              ]
+            },
+            "chartGridlinesPatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove these gridlines."
+                },
+                {
+                  "$ref": "#/$defs/chartLineStyle"
+                }
+              ]
+            },
+            "chartDisplayUnitsPatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove value-axis display units."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["unit"],
+                  "properties": {
+                    "unit": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/$defs/chartDisplayUnit"
+                        },
+                        {
+                          "type": "number",
+                          "exclusiveMinimum": 0,
+                          "description": "Custom display-unit divisor written as c:custUnit."
+                        }
+                      ]
+                    },
+                    "showLabel": {
+                      "type": "boolean",
+                      "description": "Show the display-units label next to the axis (c:dispUnitsLbl)."
+                    }
+                  }
+                }
+              ]
+            },
+            "chartTrendlinePatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove all trendlines from the series."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type"],
+                  "properties": {
+                    "type": {
+                      "$ref": "#/$defs/chartTrendlineType"
+                    },
+                    "order": {
+                      "type": "integer",
+                      "minimum": 2,
+                      "maximum": 6,
+                      "description": "Polynomial order; only valid with type polynomial."
+                    },
+                    "period": {
+                      "type": "integer",
+                      "minimum": 2,
+                      "maximum": 255,
+                      "description": "Moving-average period; only valid with type moving-average."
+                    },
+                    "forward": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "backward": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "intercept": {
+                      "type": "number"
+                    },
+                    "displayEquation": {
+                      "type": "boolean"
+                    },
+                    "displayRSquared": {
+                      "type": "boolean"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "line": {
+                      "$ref": "#/$defs/chartLineStyle"
+                    }
+                  }
+                }
+              ]
+            },
+            "chartErrorBarsPatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove error bars from the series."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["valueType"],
+                  "properties": {
+                    "valueType": {
+                      "$ref": "#/$defs/chartErrorBarValueType"
+                    },
+                    "type": {
+                      "$ref": "#/$defs/chartErrorBarType"
+                    },
+                    "direction": {
+                      "$ref": "#/$defs/chartErrorBarDirection"
+                    },
+                    "value": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "description": "Error amount for fixed / percentage / std-dev value types."
+                    },
+                    "plus": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "minus": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "noEndCap": {
+                      "type": "boolean"
+                    },
+                    "line": {
+                      "$ref": "#/$defs/chartLineStyle"
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "required": ["plus"]
+                      },
+                      "then": {
+                        "required": ["minus"]
+                      }
+                    },
+                    {
+                      "if": {
+                        "required": ["minus"]
+                      },
+                      "then": {
+                        "required": ["plus"]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            "chartDataTablePatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove the data table."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "minProperties": 1,
+                  "properties": {
+                    "showHorizontalBorder": {
+                      "type": "boolean"
+                    },
+                    "showVerticalBorder": {
+                      "type": "boolean"
+                    },
+                    "showOutline": {
+                      "type": "boolean"
+                    },
+                    "showKeys": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              ]
             }
           }
         },
@@ -22695,6 +23614,7 @@
                     "name": "Chart"
                   },
                   "style": 22,
+                  "displayBlanksAs": "gap",
                   "plot": {
                     "index": 0,
                     "gapWidth": 175
@@ -22704,12 +23624,23 @@
                       "axis": "category",
                       "line": {
                         "color": "333333"
+                      },
+                      "ticks": {
+                        "labelSkip": 2,
+                        "rotation": -45
                       }
                     },
                     {
                       "axis": "value",
                       "gridlines": {
                         "color": "DDDDDD"
+                      },
+                      "title": {
+                        "text": "Revenue (USD)"
+                      },
+                      "displayUnits": {
+                        "unit": "thousands",
+                        "showLabel": true
                       },
                       "scale": {
                         "min": 0,
@@ -22728,9 +23659,9 @@
                         "type": "solid",
                         "color": "3366CC"
                       },
-                      "marker": {
-                        "symbol": "circle",
-                        "size": 6
+                      "trendline": {
+                        "type": "linear",
+                        "displayRSquared": true
                       },
                       "points": [
                         {
@@ -23701,11 +24632,33 @@
             "constraints": [
               {
                 "kind": "at-least-one",
-                "fields": ["style", "plot", "title", "legend", "axes", "series", "dataLabels"],
+                "fields": [
+                  "style",
+                  "plot",
+                  "title",
+                  "legend",
+                  "axes",
+                  "series",
+                  "dataLabels",
+                  "dataTable",
+                  "displayBlanksAs",
+                  "roundedCorners"
+                ],
                 "summary": "At least one chart mutation is required."
               }
             ],
-            "optional": ["axes", "dataLabels", "legend", "plot", "series", "style", "title"],
+            "optional": [
+              "axes",
+              "dataLabels",
+              "dataTable",
+              "displayBlanksAs",
+              "legend",
+              "plot",
+              "roundedCorners",
+              "series",
+              "style",
+              "title"
+            ],
             "level": "patch"
           },
           {
@@ -23986,6 +24939,14 @@
             "description": "Multiple op slices in one response (comma-separated)."
           },
           {
+            "flag": "--fields a,b,c",
+            "description": "Composable with --op/--ops: retain selected fields and all required fields; --defs controls referenced definition disclosure, and the unprojected op slice remains the complete validation contract."
+          },
+          {
+            "flag": "--defs summary|full",
+            "description": "Composable with --fields: summary emits direct machine-readable definition summaries; full keeps the transitive definition closure."
+          },
+          {
             "flag": "--examples",
             "description": "Only the patch examples block."
           },
@@ -23995,7 +24956,7 @@
           }
         ],
         "precedence": ["--index", "--examples", "--op|--ops", "default-full"],
-        "agentHint": "Most agents should reach for --index first, then --op for the specific op they need."
+        "agentHint": "Most agents should reach for --index first, then --op with --fields and --defs summary for field discovery; request --defs full before nested selector construction, then omit --fields or use apply --dry-run for complete operation validation."
       },
       "errorCatalog": {
         "schemaVersion": "pptx-error-catalog/v1",
@@ -28217,7 +29178,10 @@
                       "chart",
                       "tbl",
                       "clipArt",
-                      "media"
+                      "media",
+                      "hdr",
+                      "dgm",
+                      "sldImg"
                     ],
                     "strict": true
                   },
@@ -28240,7 +29204,10 @@
                           "chart",
                           "tbl",
                           "clipArt",
-                          "media"
+                          "media",
+                          "hdr",
+                          "dgm",
+                          "sldImg"
                         ],
                         "strict": true
                       },
@@ -29346,6 +30313,8 @@
           "candidatePath",
           "outputPath",
           "summary",
+          "source",
+          "candidate",
           "agentGate",
           "render",
           "pairs"
@@ -29364,6 +30333,40 @@
           },
           "candidatePath": {
             "type": "string"
+          },
+          "source": {
+            "type": "object",
+            "required": ["path", "byteLength", "sha256"],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "byteLength": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "candidate": {
+            "type": "object",
+            "required": ["path", "byteLength", "sha256"],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "byteLength": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
           },
           "outputPath": {
             "type": "string"
@@ -30546,7 +31549,7 @@
                 },
                 "action": {
                   "type": "string",
-                  "enum": ["replace", "restyle-existing", "skip-duplicate", "add"],
+                  "enum": ["replace", "restyle-existing", "skip-duplicate", "skip-occupied", "add"],
                   "strict": true
                 },
                 "reason": {
@@ -32018,6 +33021,16 @@
           "description": "Comma-separated patch op names to slice (e.g. add-shape,add-table)",
           "required": false
         },
+        "fields": {
+          "type": "string",
+          "description": "Comma-separated fields to retain in --op/--ops schema slices; required op fields are always included",
+          "required": false
+        },
+        "defs": {
+          "type": "string",
+          "description": "Definition disclosure for --fields projections: summary|full (default: full)",
+          "required": false
+        },
         "minimal": {
           "type": "bool",
           "description": "Drop descriptions/examples/sharedFieldShapes to minimise token usage",
@@ -32041,6 +33054,7 @@
         "xdoc schema",
         "xdoc schema --index",
         "xdoc schema --op add-text-box",
+        "xdoc schema --op set-shape --fields name,shape,slide --defs summary --minimal",
         "xdoc schema --ops add-shape,add-table --minimal",
         "xdoc schema --examples"
       ],
@@ -32075,6 +33089,14 @@
             "description": "Multiple op slices in one response (comma-separated)."
           },
           {
+            "flag": "--fields a,b,c",
+            "description": "Composable with --op/--ops: retain selected fields and all required fields; --defs controls referenced definition disclosure, and the unprojected op slice remains the complete validation contract."
+          },
+          {
+            "flag": "--defs summary|full",
+            "description": "Composable with --fields: summary emits direct machine-readable definition summaries; full keeps the transitive definition closure."
+          },
+          {
             "flag": "--examples",
             "description": "Only the patch examples block."
           },
@@ -32084,7 +33106,7 @@
           }
         ],
         "precedence": ["--index", "--examples", "--op|--ops", "default-full"],
-        "agentHint": "Most agents should reach for --index first, then --op for the specific op they need."
+        "agentHint": "Most agents should reach for --index first, then --op with --fields and --defs summary for field discovery; request --defs full before nested selector construction, then omit --fields or use apply --dry-run for complete operation validation."
       }
     }
   },
@@ -32098,14 +33120,14 @@
     "pptx": "xdoc pptx new|apply --patch <patch.json> --output <out.pptx>",
     "pptxRecipe": "xdoc pptx recipe --patch <recipe.json> --compile --json",
     "pptxDiff": "xdoc pptx diff before.pptx after.pptx --json",
-    "pptxI18nScan": "xdoc pptx i18n-scan --source translated.pptx --source-lang multi --mode candidate --json",
+    "pptxI18nScan": "xdoc pptx i18n-scan --source candidate.pptx --mode candidate --units i18n-scan-source.json --data translations.json --output i18n-candidate.json --json",
     "pptxI18nStyleDiff": "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
-    "pptxI18nPlan": "xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --json",
+    "pptxI18nPlan": "xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-plan.json --json",
     "pptxI18nTextPlan": "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
     "pptxReplaceText": "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
     "pptxReplaceChartText": "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
     "pptxContactDiff": "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png [--map reference-map.json] [--slides 1,3-5] [--dpi 192] --json",
-    "pptxPreview": "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet contact-sheet.png --json",
+    "pptxPreview": "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet contact-sheet.png [--dpi 192] --json",
     "pptxRefurbishAudit": "xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json",
     "pptxRefurbishSkin": "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json",
     "pptxChromeDetect": "xdoc pptx chrome-detect deck.pptx --json",
@@ -32326,7 +33348,7 @@
     "3": {
       "stage": "input",
       "status": "error",
-      "summary": "Input file is missing or unreadable",
+      "summary": "Invalid or unreadable input, or a structured gate/planner report completed with a non-pass status (review-required, diagnostic or style blockers); see each subcommand's ioContract.exitCodePolicy. With --json, stdout still carries the complete parseable report whenever it was produced",
       "usedByCommands": ["convert", "pptx"]
     },
     "5": {

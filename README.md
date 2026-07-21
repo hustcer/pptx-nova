@@ -318,6 +318,7 @@ itself needs to be built or extended.
 - [Tabler Icons](https://github.com/tabler/tabler-icons)
 - [PPT Master](https://github.com/hugohe3/ppt-master)
 - [Beautiful HTML Templates](https://github.com/zarazhangrui/beautiful-html-templates)
+- [PPTAgent: Generating and Evaluating Presentations Beyond Text-to-Slides](https://arxiv.org/abs/2501.03936)
 
 ## More documentation
 

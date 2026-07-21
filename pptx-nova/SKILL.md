@@ -354,8 +354,8 @@ node <skill-root>/scripts/pptx-nova-create-run.mjs --deckkit <id> --content cont
 xdoc pptx inspect input.pptx --daemon --json
 xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
 xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
-xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
-xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --json
+xdoc pptx apply -p patch.json -i input.pptx -o <run-dir>/candidate.pptx --overwrite --dry-run --json
+xdoc pptx apply -p patch.json -i input.pptx -o <run-dir>/candidate.pptx --overwrite --json
 node <skill-root>/scripts/pptx-nova-edit-contract.mjs --draft <run-dir>/edit-contract-draft.json --source input.pptx --output <run-dir>/edit-contract.json --json
 
 # Only when the current deck has explicit future/carryover rules

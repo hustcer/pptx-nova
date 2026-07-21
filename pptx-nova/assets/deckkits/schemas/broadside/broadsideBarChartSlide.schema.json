@@ -10,6 +10,7 @@
     "caption": { "type": "string" },
     "bars": {
       "type": "array",
+      "description": "If any bar sets accent=true, only explicitly marked bars are accented; otherwise the final bar is accented by default.",
       "minItems": 3,
       "maxItems": 6,
       "items": {
@@ -19,7 +20,10 @@
           "label": { "type": "string" },
           "value": { "type": "number" },
           "display": { "type": "string" },
-          "accent": { "type": "boolean" }
+          "accent": {
+            "type": "boolean",
+            "description": "Explicitly accent this bar; explicit accents disable the default final-bar accent."
+          }
         },
         "additionalProperties": false
       }

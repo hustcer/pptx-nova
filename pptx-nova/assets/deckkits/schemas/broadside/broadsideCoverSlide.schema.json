@@ -6,7 +6,17 @@
   "properties": {
     "number": { "type": "string" },
     "label": { "type": "string" },
-    "title": { "type": "string", "x-slotBudget": { "fontPt": 76, "maxLines": 3, "widthIn": 11.6 } },
+    "title": {
+      "type": "string",
+      "description": "Single-line poster title; shorten the display title or choose another slide type when it wraps.",
+      "x-slotBudget": {
+        "fontPt": 76,
+        "maxLines": 1,
+        "widthIn": 11.6,
+        "heightIn": 2.45,
+        "deliverySeverity": "error"
+      }
+    },
     "subtitle": {
       "type": "string",
       "x-slotBudget": { "fontPt": 15, "maxLines": 2, "widthIn": 6.3 }

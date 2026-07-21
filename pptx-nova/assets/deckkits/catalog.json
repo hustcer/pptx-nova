@@ -1556,7 +1556,27 @@
         "minFontPt": 9,
         "labelFontPt": 9,
         "sourceFontPt": 9,
-        "baseline": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above."
+        "baseline": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above.",
+        "contrastExemptions": [
+          {
+            "textColor": "743119",
+            "backgroundColor": "E85D26",
+            "shapePattern": "^S\\d+_Item1$",
+            "reason": "Intentional middle fade-list display text"
+          },
+          {
+            "textColor": "9B4020",
+            "backgroundColor": "E85D26",
+            "shapePattern": "^S\\d+_Item2$",
+            "reason": "Intentional trailing fade-list display text"
+          },
+          {
+            "textColor": "923F1E",
+            "backgroundColor": "E85D26",
+            "shapePattern": "^S\\d+_StepNum\\d+$",
+            "reason": "Intentional ghost step numbers on flow slides"
+          }
+        ]
       },
       "defaultFor": [],
       "bestFor": [

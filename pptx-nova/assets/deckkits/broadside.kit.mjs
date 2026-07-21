@@ -482,6 +482,7 @@ function makePageTypes(api, total) {
       'right',
     )
     const items = objectList(data.bars, 6, 'bars')
+    const hasExplicitAccent = items.some((item) => item.accent === true)
     const max = Math.max(...items.map((item) => Number(item.value) || 0), 1)
     const cells = grid(items.length || 4, 0.35, 3.25, 6.4)
     hRule(s, nm(s, 'Baseline'), 3.15, 5.38, 7.5, C.border)
@@ -490,7 +491,7 @@ function makePageTypes(api, total) {
       const c = cells[i]
       const h = 0.45 + ((Number(item.value) || 0) / max) * 1.8
       const y = 5.38 - h
-      const accent = item.accent === true || i === items.length - 1
+      const accent = item.accent === true || (!hasExplicitAccent && i === items.length - 1)
       tx(
         s,
         nm(s, `BarVal${i}`),

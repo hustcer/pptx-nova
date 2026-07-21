@@ -1450,6 +1450,8 @@ export function validateContent(
 const QUALITY_MIN_FONT_PT = 10
 const DEFAULT_TEXT_INSET_X_IN = 0.1
 const DEFAULT_TEXT_INSET_Y_IN = 0.05
+const QUALITY_GEOMETRY_EPSILON_IN = 0.000001
+const QUALITY_PANEL_SHAPE_KINDS = new Set(['rectangle', 'rect'])
 
 function parseInches(value) {
   if (typeof value === 'number' && Number.isFinite(value)) return value
@@ -1586,7 +1588,7 @@ function collectPatchQualityFacts(patch) {
   }
 
   let nextSlideIndex = 0
-  for (const op of patch?.ops ?? []) {
+  for (const [order, op] of (patch?.ops ?? []).entries()) {
     if (op.op === 'add-slide') {
       ensureSlide(nextSlideIndex)
       nextSlideIndex += 1
@@ -1608,7 +1610,8 @@ function collectPatchQualityFacts(patch) {
         id: op.id,
         name: op.name ?? '',
         kind: op.op,
-        shape: op.shape,
+        shapeKind: op.kind,
+        order,
         x,
         y,
         w,
@@ -1650,6 +1653,49 @@ function collectPatchQualityFacts(patch) {
   return [...slides.entries()].map(([slideIndex, slide]) => ({ slideIndex, ...slide }))
 }
 
+function qualityShapeContains(container, target) {
+  return (
+    container.x <= target.x + QUALITY_GEOMETRY_EPSILON_IN &&
+    container.y <= target.y + QUALITY_GEOMETRY_EPSILON_IN &&
+    container.x + container.w + QUALITY_GEOMETRY_EPSILON_IN >= target.x + target.w &&
+    container.y + container.h + QUALITY_GEOMETRY_EPSILON_IN >= target.y + target.h
+  )
+}
+
+function qualityEffectiveBackground(shape, slide) {
+  const ownFill = normalizeHex(shape.fillColor)
+  if (ownFill) return ownFill
+  const panel = slide.shapes
+    .filter(
+      (candidate) =>
+        candidate.kind === 'add-shape' &&
+        QUALITY_PANEL_SHAPE_KINDS.has(candidate.shapeKind) &&
+        candidate.order < shape.order &&
+        normalizeHex(candidate.fillColor) &&
+        qualityShapeContains(candidate, shape),
+    )
+    .at(-1)
+  return normalizeHex(panel?.fillColor) ?? normalizeHex(slide.background)
+}
+
+function qualityShapePatternMatches(shapeName, pattern) {
+  if (!pattern) return true
+  try {
+    return new RegExp(pattern).test(shapeName)
+  } catch {
+    return false
+  }
+}
+
+function qualityContrastIsExempt(shape, textColor, backgroundColor, qualityProfile) {
+  return (qualityProfile?.contrastExemptions ?? []).some(
+    (exemption) =>
+      (!exemption.textColor || normalizeHex(exemption.textColor) === textColor) &&
+      (!exemption.backgroundColor || normalizeHex(exemption.backgroundColor) === backgroundColor) &&
+      qualityShapePatternMatches(shape.name ?? '', exemption.shapePattern),
+  )
+}
+
 function assessTextOverflowQuality(shape, issues) {
   if (!/subtitle/i.test(shape.name ?? '')) return
   const text = String(shape.text ?? '').trim()
@@ -1679,15 +1725,16 @@ function assessTextOverflowQuality(shape, issues) {
   }
 }
 
-function assessContrastQuality(shape, slide, issues) {
+function assessContrastQuality(shape, slide, issues, qualityProfile) {
   if (!String(shape.text ?? '').trim()) return
   const colors = qualityExplicitFontColors(shape)
   if (colors.length === 0) return
-  const bg = normalizeHex(shape.fillColor) ?? normalizeHex(slide.background)
+  const bg = qualityEffectiveBackground(shape, slide)
   if (!bg) return
   const fontPt = qualityShapeFontPt(shape)
   const minContrast = fontPt >= 18 ? 3 : 4.5
   for (const color of colors) {
+    if (qualityContrastIsExempt(shape, color, bg, qualityProfile)) continue
     const ratio = contrastRatio(color, bg)
     if (ratio > 0 && ratio < minContrast) {
       issues.push(
@@ -1740,7 +1787,7 @@ export function assessDeckQuality({ patch, deckkit = null } = {}) {
   for (const slide of slides) {
     for (const shape of slide.shapes) {
       assessTextOverflowQuality(shape, issues)
-      assessContrastQuality(shape, slide, issues)
+      assessContrastQuality(shape, slide, issues, qualityProfile)
       assessFontSizeQuality(shape, issues, minFontPt)
     }
   }

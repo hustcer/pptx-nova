@@ -206,10 +206,15 @@ node <skill-root>/scripts/pptx-nova-build.mjs \
   --quality-json quality.json
 node <skill-root>/scripts/pptx-nova-check-lock.mjs \
   --lock deck_lock.json --content content.json --patch patch.json --json
-xdoc pptx apply -p patch.json -o out.pptx --dry-run --json
-xdoc pptx apply -p patch.json -o out.pptx --json
-xdoc pptx vision-check out.pptx --json
+xdoc pptx apply -p patch.json -o <run-dir>/candidate.pptx --overwrite --dry-run --json
+xdoc pptx apply -p patch.json -o <run-dir>/candidate.pptx --overwrite --json
+xdoc pptx vision-check <run-dir>/candidate.pptx --json
 ```
+
+`--overwrite` is safe here only because `candidate.pptx` is a rebuildable artifact inside the current
+run directory; never use this pattern to replace a pre-existing user final output. If either apply
+command exits non-zero, stop immediately and do not run vision-check on a stale candidate. After a
+successful retry, confirm the candidate modification time or SHA-256 changed before continuing.
 
 Use the generic build driver by default. Only write a run-dir `build.mjs` when
 developing a new DeckKit or debugging the generator itself. Keep the content

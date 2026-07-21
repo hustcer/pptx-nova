@@ -251,6 +251,8 @@ function buildAgentSummary(summary) {
       ? 'continue-to-human-review'
       : 'deliver'
     : 'stop-and-fix'
+  const focusedSlides = summary.layout?.actionableSlideNumbers ?? []
+  const focusedSelector = focusedSlides.join(',')
 
   return {
     schemaVersion: AGENT_SUMMARY_SCHEMA_VERSION,
@@ -334,12 +336,23 @@ function buildAgentSummary(summary) {
       'contactDiffParts',
       'refurbishCompare',
       'refurbishCompareParts',
+      'refurbishAgentReviewParts',
       'refurbishCompareGate',
       'layoutSource',
       'layoutFinal',
       'reviewPolicyEvaluation',
       'findingAnalysis',
     ]),
+    nextSteps: {
+      cwd: summary.runDir,
+      overview:
+        'Open artifacts.refurbishAgentReviewParts for the full-deck Agent overview; retain the published high-DPI compare parts as delivery evidence.',
+      focusedReviewCommand:
+        focusedSlides.length > 0
+          ? `node ${COMPARE_SCRIPT} --source source.pptx --candidate candidate.pptx --run-dir . --kind refurbish --slides ${focusedSelector} --output focused-review.png --report focused-review.json --overwrite --json`
+          : null,
+      focusedSlides,
+    },
     warnings: summary.warnings,
     error: summary.error
       ? {
@@ -589,6 +602,7 @@ function artifactPaths(runDir) {
     contactDiffReport: join(runDir, 'contact-diff.json'),
     refurbishCompare: join(runDir, 'refurbish-compare.png'),
     refurbishCompareParts: [],
+    refurbishAgentReviewParts: [],
     refurbishCompareReport: join(runDir, 'refurbish-compare.json'),
     refurbishCompareGate: join(runDir, 'refurbish-compare-gate.json'),
     progressLog: join(runDir, 'progress.jsonl'),
@@ -1590,6 +1604,8 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
       '192',
       '--fallback-dpi',
       '144',
+      '--agent-review-dpi',
+      '96',
       '--xdoc-bin',
       args.xdocBin,
       '--progress',
@@ -1601,6 +1617,14 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
     forwardProgress: true,
   })
   const renderMetrics = analyzeCompareRendering(report)
+  const agentReviewParts = Array.isArray(report?.agentReviewParts)
+    ? report.agentReviewParts
+    : report?.pptxNovaCompare?.agentReview
+      ? [report.pptxNovaCompare.agentReview]
+      : []
+  summary.artifacts.refurbishAgentReviewParts = agentReviewParts
+    .map((part) => part?.path)
+    .filter(Boolean)
   const phase = summary.phases.findLast((item) => item.name === 'refurbish-compare')
   if (phase) Object.assign(phase, renderMetrics)
   return report
@@ -1727,19 +1751,20 @@ function runRefurbish(inputArgs) {
     runCatalogGate(summary, plan, args)
     runOptionalReadiness(summary, args, artifacts)
 
-    const capabilityReport = runJsonPhase(summary, {
-      name: 'xdoc-capability-probe',
-      bin: process.execPath,
-      args: [
-        CAPABILITY_PROBE_SCRIPT,
-        '--xdoc-bin',
-        args.xdocBin,
+    const capabilityProbeArgs = [CAPABILITY_PROBE_SCRIPT, '--xdoc-bin', args.xdocBin]
+    if (plan.nativeSkinning?.supported === true && args.route !== 'fallback') {
+      capabilityProbeArgs.push(
         '--require-command',
         'pptx.refurbish-skin',
         '--require-native-deckkit',
         args.deckkit,
-        '--json',
-      ],
+      )
+    }
+    capabilityProbeArgs.push('--json')
+    const capabilityReport = runJsonPhase(summary, {
+      name: 'xdoc-capability-probe',
+      bin: process.execPath,
+      args: capabilityProbeArgs,
       artifact: artifacts.capabilities,
     })
     if (capabilityReport.status !== 'ready') {
@@ -1748,8 +1773,11 @@ function runRefurbish(inputArgs) {
       )
     }
     if (capabilityReport.requirements?.status === 'attention') {
+      const undisclosed = (capabilityReport.requirements?.undisclosedRequired ?? [])
+        .map((item) => `${item.kind}=${item.value}`)
+        .join(', ')
       summary.warnings.push(
-        'One or more refurbish capabilities are undisclosed by the runtime schema. This is audit evidence only and does not disable native or fallback execution.',
+        `Undisclosed refurbish capabilities: ${undisclosed || 'unknown'}. This is audit evidence only and does not disable native or fallback execution.`,
       )
     }
 

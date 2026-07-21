@@ -1629,10 +1629,10 @@ test('create runner executes DeckKit create gates and publishes after preview', 
 
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(summary.machineGatesPassed, true)
-  assert.equal(compactResult.performance.previewRenderInvocations, 1)
-  assert.equal(compactResult.performance.previewSlideCount, summary.slideCount)
-  assert.ok(compactResult.performance.estimatedRenderedPixels > 0)
-  assert.equal(compactResult.performance.renderBudget.withinBaseline, true)
+  assert.equal(compactResult.performance.render.previewRenderInvocations, 1)
+  assert.equal(compactResult.performance.render.previewSlideCount, summary.slideCount)
+  assert.ok(compactResult.performance.render.estimatedRenderedPixels > 0)
+  assert.equal(compactResult.performance.budget.withinBaseline, true)
   assert.ok(result.stdout.length < readFileSync(summary.artifacts.summary, 'utf8').length)
   assert.equal(summary.agentSummary.decision, 'continue-to-human-review')
   assert.equal(existsSync(output), true)
@@ -2197,7 +2197,10 @@ if (args[0] === 'schema') {
       })()
     : Array.from({ length: slideCount }, (_, index) => index + 1)
   const scopeMode = selector ? 'selected-slides' : 'all-slides'
+  const agentReviewOutput = process.env.XDOC_CONTACT_DIFF_AGENT_REVIEW_OUTPUT || ''
+  const agentReviewDpi = Number(process.env.XDOC_CONTACT_DIFF_AGENT_REVIEW_LAYOUT_DPI || 0)
   writeFileSync(valueAfter('--output'), 'contact diff png')
+  if (agentReviewOutput) writeFileSync(agentReviewOutput, 'agent review png')
   print({
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
@@ -2209,7 +2212,11 @@ if (args[0] === 'schema') {
     summary: { pairCount: selectedSlides.length, scopeMode, dpi },
     scope: { requested: selector || null, slides: selectedSlides, basis: 'source-slides' },
     agentGate: { passed: true, status: 'pass', scopeMode, pairCount: selectedSlides.length },
-    render: { path: valueAfter('--output'), width: 100, height: 56, dpi }
+    render: { path: valueAfter('--output'), width: 100, height: 56, dpi },
+    agentReview: agentReviewOutput ? {
+      status: 'success', path: agentReviewOutput, renderDpi: dpi, layoutDpi: agentReviewDpi,
+      width: 50, height: 28, cacheReuse: 'same-render-dpi-page-cache'
+    } : undefined
   })
 } else {
   process.stderr.write('unexpected fake xdoc command: ' + args.join(' '))
@@ -2252,18 +2259,29 @@ if (args[0] === 'schema') {
 
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(compactResult.status, 'needs-human-review')
-  assert.equal(compactResult.performance.compareRenderInvocations, 3)
-  assert.equal(compactResult.performance.comparePartCount, 3)
-  assert.equal(compactResult.performance.compareRetryInvocations, 0)
-  assert.equal(compactResult.performance.renderInvocationsSaved, 3)
-  assert.equal(compactResult.performance.renderBudget.withinBaseline, true)
-  assert.equal(compactResult.performance.renderBudget.withinRetryBudget, true)
-  assert.ok(compactResult.performance.estimatedRenderedPixels > 0)
-  assert.equal(compactResult.performance.renderBudget.maximumRetryInvocations, 3)
-  assert.equal(compactResult.performance.renderBudget.maximumTotalInvocations, 6)
-  assert.equal(compactResult.performance.renderBudget.withinPixelBaseline, true)
-  assert.equal(compactResult.performance.renderBudget.withinPixelRetryBudget, true)
-  assert.equal(compactResult.performance.contactDiffReused, true)
+  assert.equal(compactResult.performance.render.compareRenderInvocations, 3)
+  assert.equal(compactResult.performance.render.comparePartCount, 3)
+  assert.equal(compactResult.performance.render.compareRetryInvocations, 0)
+  assert.equal(compactResult.performance.render.renderInvocationsSaved, 3)
+  assert.equal(compactResult.performance.budget.withinBaseline, true)
+  assert.equal(compactResult.performance.budget.withinRetryBudget, true)
+  assert.ok(compactResult.performance.render.estimatedRenderedPixels > 0)
+  assert.equal(compactResult.performance.budget.maximumRetryInvocations, 3)
+  assert.equal(compactResult.performance.budget.maximumTotalInvocations, 6)
+  assert.equal(compactResult.performance.budget.withinPixelBaseline, true)
+  assert.equal(compactResult.performance.budget.withinPixelRetryBudget, true)
+  assert.equal(compactResult.performance.render.contactDiffReused, true)
+  for (const duplicate of [
+    'compareRenderInvocations',
+    'comparePartCount',
+    'compareRetryInvocations',
+    'renderInvocationsSaved',
+    'estimatedRenderedPixels',
+    'contactDiffReused',
+    'renderBudget',
+  ]) {
+    assert.equal(duplicate in compactResult.performance, false, duplicate)
+  }
   assert.equal('performance' in compactResult.agentSummary, false)
   assert.ok(compactResult.performance.totalMs > 0)
   assert.ok(compactResult.performance.renderMs > 0)
@@ -2336,6 +2354,25 @@ if (args[0] === 'schema') {
     summary.artifacts.refurbishCompareParts.every((path) => existsSync(path)),
     true,
   )
+  assert.deepEqual(compactResult.agentSummary.artifacts.refurbishAgentReviewParts, [
+    'refurbish-agent-review-01.png',
+    'refurbish-agent-review-02.png',
+    'refurbish-agent-review-03.png',
+  ])
+  assert.equal(
+    compactResult.agentSummary.artifacts.refurbishAgentReviewParts.every((path) =>
+      existsSync(join(runDir, path)),
+    ),
+    true,
+  )
+  assert.deepEqual(
+    summary.artifacts.refurbishAgentReviewParts,
+    compactResult.agentSummary.artifacts.refurbishAgentReviewParts.map((path) =>
+      join(runDir, path),
+    ),
+  )
+  assert.equal(compactResult.agentSummary.nextSteps.cwd, runDir)
+  assert.equal(compactResult.agentSummary.nextSteps.focusedReviewCommand, null)
   assert.equal(summary.layout.actionableRiskCount, 0)
   assert.equal(summary.layout.informationalRiskCount, 0)
   assert.equal(summary.agentSummary.layout.actionableRiskCount, 0)
@@ -2450,6 +2487,17 @@ if (args[0] === 'schema') {
     readFileSync(fallbackSummary.artifacts.findingAnalysis, 'utf8'),
   )
   assert.equal(fallbackSummary.route.executed, 'fallback-patch')
+  const fallbackCapabilityPhase = fallbackSummary.phases.find(
+    (phase) => phase.name === 'xdoc-capability-probe',
+  )
+  assert.equal(fallbackCapabilityPhase.command.includes('--require-command'), false)
+  assert.equal(fallbackCapabilityPhase.command.includes('--require-native-deckkit'), false)
+  assert.equal(
+    fallbackSummary.warnings.some((warning) =>
+      warning.startsWith('Undisclosed refurbish capabilities:'),
+    ),
+    false,
+  )
   assert.ok(fallbackPhases.includes('dry-run'))
   assert.ok(fallbackPhases.includes('apply'))
   assert.equal(fallbackAnalysis.evaluation.status, 'complete')
@@ -2563,14 +2611,14 @@ if (args[0] === 'schema') {
   )
   assert.equal(singleContactDiff.reuse.status, 'reused')
   assert.equal(singleContactDiff.outputPath, singleSummary.artifacts.contactDiff)
-  assert.equal(singleSummary.performance.compareRenderInvocations, 2)
+  assert.equal(singleSummary.performance.render.compareRenderInvocations, 2)
   assert.equal(singleSummary.performance.comparePartCount, 1)
   assert.equal(singleSummary.performance.compareRetryInvocations, 1)
-  assert.equal(singleSummary.performance.renderBudget.withinBaseline, false)
-  assert.equal(singleSummary.performance.renderBudget.withinRetryBudget, true)
-  assert.equal(singleSummary.performance.renderBudget.withinPixelBaseline, false)
-  assert.equal(singleSummary.performance.renderBudget.withinPixelRetryBudget, true)
-  assert.equal(singleSummary.performance.renderInvocationsSaved, 1)
+  assert.equal(singleSummary.performance.budget.withinBaseline, false)
+  assert.equal(singleSummary.performance.budget.withinRetryBudget, true)
+  assert.equal(singleSummary.performance.budget.withinPixelBaseline, false)
+  assert.equal(singleSummary.performance.budget.withinPixelRetryBudget, true)
+  assert.equal(singleSummary.performance.render.renderInvocationsSaved, 1)
   assert.equal(
     readFileSync(singleSummary.artifacts.contactDiff).equals(
       readFileSync(singleSummary.artifacts.refurbishCompare),
@@ -2928,10 +2976,10 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
   assert.equal(compact.mode, 'translation')
   assert.equal('phases' in compact, false)
   assert.equal(compact.status, 'needs-human-review')
-  assert.equal(compact.performance.comparePartCount, 2)
-  assert.equal(compact.performance.compareRenderInvocations, 2)
-  assert.equal(compact.performance.renderInvocationsSaved, 2)
-  assert.equal(compact.performance.contactDiffReused, true)
+  assert.equal(compact.performance.render.comparePartCount, 2)
+  assert.equal(compact.performance.render.compareRenderInvocations, 2)
+  assert.equal(compact.performance.render.renderInvocationsSaved, 2)
+  assert.equal(compact.performance.render.contactDiffReused, true)
   assert.equal(existsSync(output), true)
   assert.equal(
     summary.phases.some((phase) => phase.name === 'contact-diff'),

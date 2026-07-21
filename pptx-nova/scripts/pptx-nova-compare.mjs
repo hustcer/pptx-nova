@@ -38,6 +38,7 @@ Options:
   --compare-concurrency <n> Concurrent multipart part renders. Defaults to 3.
   --dpi <number>            PNG render DPI. Defaults to 192.
   --fallback-dpi <number>   Retry DPI for a retryable RenderError. Defaults to 144.
+  --agent-review-dpi <n>    Also assemble low-resolution Agent review PNGs from the same render cache.
   --xdoc-bin <path>         xdoc executable. Defaults to xdoc.
   --cache-dir <path>        Shared content-addressed render cache. Defaults beside run-dir.
   --no-cache                Disable render cache reads and writes.
@@ -68,6 +69,7 @@ const valueFlags = {
   '--compare-concurrency': 'concurrency',
   '--dpi': 'dpi',
   '--fallback-dpi': 'fallbackDpi',
+  '--agent-review-dpi': 'agentReviewDpi',
   '--xdoc-bin': 'xdocBin',
   '--cache-dir': 'cacheDir',
   '--source-label': 'sourceLabel',
@@ -89,6 +91,7 @@ function parseArgs(argv) {
     concurrency: 3,
     dpi: 192,
     fallbackDpi: 144,
+    agentReviewDpi: 0,
     xdocBin: 'xdoc',
     cacheDir: '',
     cache: true,
@@ -121,7 +124,14 @@ function parseArgs(argv) {
     if (!key) throw new Error(`Unknown option: ${arg}\n\n${usage}`)
     const value = argv[index + 1]
     if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
-    args[key] = ['dpi', 'fallbackDpi', 'slideCount', 'chunkSize', 'concurrency'].includes(key)
+    args[key] = [
+      'dpi',
+      'fallbackDpi',
+      'agentReviewDpi',
+      'slideCount',
+      'chunkSize',
+      'concurrency',
+    ].includes(key)
       ? Number(value)
       : value
     index += 1
@@ -136,8 +146,21 @@ function parseArgs(argv) {
   if (!Number.isInteger(args.fallbackDpi) || args.fallbackDpi < 72 || args.fallbackDpi > 600) {
     throw new Error('--fallback-dpi must be an integer between 72 and 600')
   }
+  if (
+    !Number.isInteger(args.agentReviewDpi) ||
+    args.agentReviewDpi < 0 ||
+    args.agentReviewDpi > 600
+  ) {
+    throw new Error('--agent-review-dpi must be zero or an integer between 72 and 600')
+  }
+  if (args.agentReviewDpi > 0 && args.agentReviewDpi < 72) {
+    throw new Error('--agent-review-dpi must be zero or an integer between 72 and 600')
+  }
   if (!args.slides && args.slideCount > 0 && args.fallbackDpi >= args.dpi) {
     throw new Error('--fallback-dpi must be lower than --dpi')
+  }
+  if (args.agentReviewDpi > 0 && args.agentReviewDpi >= args.fallbackDpi) {
+    throw new Error('--agent-review-dpi must be lower than --fallback-dpi')
   }
   if (!Number.isInteger(args.slideCount) || args.slideCount < 0) {
     throw new Error('--slide-count must be a non-negative integer')
@@ -309,6 +332,7 @@ function cacheDescriptor(args, { slides, dpi }) {
     candidate,
     slides: slides || 'all',
     dpi,
+    agentReviewDpi: args.agentReviewDpi,
     xdoc,
   }
   const keyMaterial = {
@@ -330,6 +354,7 @@ function cacheEntryPaths(args, key) {
   return {
     directory,
     image: join(directory, 'contact-diff.png'),
+    agentReviewImage: join(directory, 'agent-review.png'),
     report: join(directory, 'contact-diff.json'),
     metadata: join(directory, 'metadata.json'),
   }
@@ -340,6 +365,7 @@ function sameCacheDescriptor(left, right) {
     schemaVersion: value?.schemaVersion ?? null,
     slides: value?.slides ?? null,
     dpi: value?.dpi ?? null,
+    agentReviewDpi: value?.agentReviewDpi ?? 0,
     source: {
       byteLength: value?.source?.byteLength ?? null,
       sha256: value?.source?.sha256 ?? null,
@@ -363,7 +389,7 @@ function writeJsonAtomic(path, value) {
   renameSync(temporary, path)
 }
 
-function retargetContactDiffReport(report, args, output, descriptor) {
+function retargetContactDiffReport(report, args, output, agentReviewOutput, descriptor) {
   return {
     ...report,
     source: { ...report.source, ...descriptor.source, path: args.source },
@@ -374,10 +400,13 @@ function retargetContactDiffReport(report, args, output, descriptor) {
     contactSheet: report?.contactSheet
       ? { ...report.contactSheet, path: output }
       : report?.contactSheet,
+    agentReview: report?.agentReview
+      ? { ...report.agentReview, path: agentReviewOutput }
+      : report?.agentReview,
   }
 }
 
-function readCachedContactDiff(args, output, cache) {
+function readCachedContactDiff(args, output, agentReviewOutput, cache) {
   const paths = cacheEntryPaths(args, cache.key)
   if (!existsSync(paths.metadata) || !existsSync(paths.report) || !existsSync(paths.image)) {
     return null
@@ -389,7 +418,12 @@ function readCachedContactDiff(args, output, cache) {
       metadata?.key !== cache.key ||
       !sameCacheDescriptor(metadata?.descriptor, cache.descriptor) ||
       metadata?.image?.byteLength !== statSync(paths.image).size ||
-      metadata?.image?.sha256 !== sha256(paths.image)
+      metadata?.image?.sha256 !== sha256(paths.image) ||
+      (cache.descriptor.agentReviewDpi > 0 &&
+        (!agentReviewOutput ||
+          !existsSync(paths.agentReviewImage) ||
+          metadata?.agentReviewImage?.byteLength !== statSync(paths.agentReviewImage).size ||
+          metadata?.agentReviewImage?.sha256 !== sha256(paths.agentReviewImage)))
     ) {
       return null
     }
@@ -399,6 +433,7 @@ function readCachedContactDiff(args, output, cache) {
       cachedReport?.status !== 'success' ||
       cachedReport?.scope?.requested !== cache.descriptor.slides ||
       Number(cachedReport?.render?.dpi ?? cachedReport?.summary?.dpi) !== cache.descriptor.dpi ||
+      Number(cachedReport?.agentReview?.layoutDpi ?? 0) !== cache.descriptor.agentReviewDpi ||
       cachedReport?.source?.sha256 !== cache.descriptor.source.sha256 ||
       cachedReport?.candidate?.sha256 !== cache.descriptor.candidate.sha256
     ) {
@@ -406,7 +441,17 @@ function readCachedContactDiff(args, output, cache) {
     }
     mkdirSync(dirname(output), { recursive: true })
     copyFileSync(paths.image, output)
-    const report = retargetContactDiffReport(cachedReport, args, output, cache.descriptor)
+    if (agentReviewOutput) {
+      mkdirSync(dirname(agentReviewOutput), { recursive: true })
+      copyFileSync(paths.agentReviewImage, agentReviewOutput)
+    }
+    const report = retargetContactDiffReport(
+      cachedReport,
+      args,
+      output,
+      agentReviewOutput,
+      cache.descriptor,
+    )
     const identities = validateContactDiffInputIdentities(report, args)
     return {
       status: 'success',
@@ -419,23 +464,29 @@ function readCachedContactDiff(args, output, cache) {
         directory: paths.directory,
         imageSha256: metadata.image.sha256,
       },
+      agentReviewOutput: agentReviewOutput || null,
     }
   } catch {
     return null
   }
 }
 
-function writeCachedContactDiff(args, output, report, cache) {
+function writeCachedContactDiff(args, output, agentReviewOutput, report, cache) {
   const paths = cacheEntryPaths(args, cache.key)
   mkdirSync(paths.directory, { recursive: true })
   copyFileSync(output, paths.image)
+  if (agentReviewOutput) copyFileSync(agentReviewOutput, paths.agentReviewImage)
   writeJsonAtomic(paths.report, report)
   const image = fileIdentity(paths.image)
+  const agentReviewImage = agentReviewOutput ? fileIdentity(paths.agentReviewImage) : null
   writeJsonAtomic(paths.metadata, {
     schemaVersion: 'pptx-nova-contact-diff-cache-entry/v1',
     key: cache.key,
     descriptor: cache.descriptor,
     image: { byteLength: image.byteLength, sha256: image.sha256 },
+    agentReviewImage: agentReviewImage
+      ? { byteLength: agentReviewImage.byteLength, sha256: agentReviewImage.sha256 }
+      : null,
   })
   return {
     status: 'miss',
@@ -494,6 +545,10 @@ function numberedPath(path, partNumber, width) {
   const extension = extname(path)
   const base = path.slice(0, -extension.length)
   return `${base}-${String(partNumber).padStart(width, '0')}${extension}`
+}
+
+function agentReviewBasePath(args) {
+  return join(args.runDir, `${args.kind}-agent-review.png`)
 }
 
 function slideChunks(slideCount, chunkSize) {
@@ -584,12 +639,28 @@ function reportImagePath(report) {
   )
 }
 
+function agentReviewArtifact(report, path) {
+  if (!path) return null
+  const state = statSync(path)
+  return {
+    path,
+    layoutDpi: Number(report?.agentReview?.layoutDpi),
+    renderDpi: Number(report?.agentReview?.renderDpi),
+    width: Number(report?.agentReview?.width),
+    height: Number(report?.agentReview?.height),
+    byteLength: state.size,
+    sha256: sha256(path),
+    cacheReuse: report?.agentReview?.cacheReuse ?? null,
+  }
+}
+
 async function runContactDiff(
   args,
   {
     output = args.output,
     slides = args.slides,
     dpi = args.dpi,
+    agentReviewOutput = args.agentReviewDpi > 0 ? agentReviewBasePath(args) : '',
     reporter,
     partNumber,
     partCount,
@@ -598,7 +669,7 @@ async function runContactDiff(
   const pageCache = pageCacheAttempt(args, { slides, dpi })
   const cache = args.cache ? cacheDescriptor(args, { slides, dpi }) : null
   if (cache) {
-    const hit = readCachedContactDiff(args, output, cache)
+    const hit = readCachedContactDiff(args, output, agentReviewOutput, cache)
     if (hit) return { ...hit, pageCache: finishPageCacheAttempt(pageCache) }
   }
   const commandArgs = [
@@ -625,8 +696,22 @@ async function runContactDiff(
           ...process.env,
           XDOC_SOURCE_PAGE_CACHE_PREFIX: pageCache.source.prefix,
           XDOC_CANDIDATE_PAGE_CACHE_PREFIX: pageCache.candidate.prefix,
+          ...(agentReviewOutput
+            ? {
+                XDOC_CONTACT_DIFF_AGENT_REVIEW_OUTPUT: agentReviewOutput,
+                XDOC_CONTACT_DIFF_AGENT_REVIEW_LAYOUT_DPI: String(args.agentReviewDpi),
+              }
+            : {}),
         }
-      : process.env,
+      : {
+          ...process.env,
+          ...(agentReviewOutput
+            ? {
+                XDOC_CONTACT_DIFF_AGENT_REVIEW_OUTPUT: agentReviewOutput,
+                XDOC_CONTACT_DIFF_AGENT_REVIEW_LAYOUT_DPI: String(args.agentReviewDpi),
+              }
+            : {}),
+        },
   })
   const report = parseJsonReportSafe(result.stdout)
   if (result.status !== 0 || report?.status === 'error') {
@@ -646,9 +731,22 @@ async function runContactDiff(
   if (!existsSync(output) || statSync(output).size <= 0) {
     throw new Error(`xdoc contact-diff did not create a non-empty output PNG: ${output}`)
   }
+  if (agentReviewOutput) {
+    if (resolve(report?.agentReview?.path ?? '') !== agentReviewOutput) {
+      throw new Error('xdoc contact-diff reported a different Agent review output path')
+    }
+    if (Number(report?.agentReview?.layoutDpi) !== args.agentReviewDpi) {
+      throw new Error('xdoc contact-diff reported a different Agent review layout DPI')
+    }
+    if (!existsSync(agentReviewOutput) || statSync(agentReviewOutput).size <= 0) {
+      throw new Error(
+        `xdoc contact-diff did not create a non-empty Agent review PNG: ${agentReviewOutput}`,
+      )
+    }
+  }
   const identities = validateContactDiffInputIdentities(report, args)
   const cacheState = cache
-    ? writeCachedContactDiff(args, output, report, cache)
+    ? writeCachedContactDiff(args, output, agentReviewOutput, report, cache)
     : { status: 'disabled', key: null, directory: null, imageSha256: sha256(output) }
   return {
     status: 'success',
@@ -657,6 +755,7 @@ async function runContactDiff(
     identities,
     cache: cacheState,
     pageCache: finishPageCacheAttempt(pageCache),
+    agentReviewOutput: agentReviewOutput || null,
   }
 }
 
@@ -677,6 +776,7 @@ async function runSingleCompare(args, reporter) {
       pageBitmapCache: attempt.pageCache,
     })
     rmSync(args.output, { force: true })
+    if (args.agentReviewDpi > 0) rmSync(agentReviewBasePath(args), { force: true })
     if (!args.slides && args.slideCount > 0 && isRetryableRenderError(attempt.error)) {
       reporter.emit('compare-part-retry', {
         partNumber: 1,
@@ -694,12 +794,14 @@ async function runSingleCompare(args, reporter) {
   }
   if (attempt.status !== 'success') {
     rmSync(args.output, { force: true })
+    if (args.agentReviewDpi > 0) rmSync(agentReviewBasePath(args), { force: true })
     rmSync(args.report, { force: true })
     throw new Error(
       `${attempt.result.command} failed with exit ${attempt.result.status}: ${attempt.error.message}`,
     )
   }
   const effectiveDpi = Number(attempt.report?.render?.dpi ?? attempt.report?.summary?.dpi)
+  const agentReview = agentReviewArtifact(attempt.report, attempt.agentReviewOutput)
   attempts.push({
     dpi: effectiveDpi,
     status: attempt.cache?.status === 'hit' ? 'cache-hit' : 'success',
@@ -711,6 +813,7 @@ async function runSingleCompare(args, reporter) {
       mode: 'single',
       requestedDpi: args.dpi,
       fallbackDpi: args.fallbackDpi,
+      agentReviewDpi: args.agentReviewDpi || null,
       attempts,
       cache: attempt.cache,
       pageBitmapCache: attempt.pageCache,
@@ -719,6 +822,7 @@ async function runSingleCompare(args, reporter) {
         status,
         pageBitmapCache: pageBitmapCache ?? null,
       })),
+      agentReview,
     },
   }
   writeFileSync(args.report, `${JSON.stringify(report, null, 2)}\n`)
@@ -755,6 +859,8 @@ function coverageFor(parts, slideCount) {
 
 async function runMultipartPart(args, reporter, { chunk, index, partCount, numberWidth }) {
   const output = numberedPath(args.output, index + 1, numberWidth)
+  const agentReviewOutput =
+    args.agentReviewDpi > 0 ? numberedPath(agentReviewBasePath(args), index + 1, numberWidth) : ''
   const partReportPath = numberedPath(args.report, index + 1, numberWidth)
   const attempts = []
   let attemptedDpi = args.dpi
@@ -766,6 +872,7 @@ async function runMultipartPart(args, reporter, { chunk, index, partCount, numbe
   })
   let attempt = await runContactDiff(args, {
     output,
+    agentReviewOutput,
     slides: chunk.selector,
     dpi: args.dpi,
     reporter,
@@ -780,6 +887,7 @@ async function runMultipartPart(args, reporter, { chunk, index, partCount, numbe
       pageBitmapCache: attempt.pageCache,
     })
     rmSync(output, { force: true })
+    if (agentReviewOutput) rmSync(agentReviewOutput, { force: true })
     if (isRetryableRenderError(attempt.error)) {
       attemptedDpi = args.fallbackDpi
       reporter.emit('compare-part-retry', {
@@ -791,6 +899,7 @@ async function runMultipartPart(args, reporter, { chunk, index, partCount, numbe
       })
       attempt = await runContactDiff(args, {
         output,
+        agentReviewOutput,
         slides: chunk.selector,
         dpi: args.fallbackDpi,
         reporter,
@@ -813,6 +922,7 @@ async function runMultipartPart(args, reporter, { chunk, index, partCount, numbe
     )
   }
   const effectiveDpi = Number(attempt.report?.render?.dpi ?? attempt.report?.summary?.dpi)
+  const agentReview = agentReviewArtifact(attempt.report, attempt.agentReviewOutput)
   attempts.push({
     dpi: effectiveDpi,
     status: attempt.cache?.status === 'hit' ? 'cache-hit' : 'success',
@@ -832,6 +942,7 @@ async function runMultipartPart(args, reporter, { chunk, index, partCount, numbe
         status,
         pageBitmapCache: pageBitmapCache ?? null,
       })),
+      agentReview,
     },
   }
   writeFileSync(partReportPath, `${JSON.stringify(partReport, null, 2)}\n`)
@@ -857,6 +968,7 @@ async function runMultipartPart(args, reporter, { chunk, index, partCount, numbe
       status,
       pageBitmapCache: pageBitmapCache ?? null,
     })),
+    agentReview,
   }
   reporter.emit('compare-part-complete', {
     partNumber: index + 1,
@@ -878,6 +990,9 @@ async function runMultipartCompare(args, reporter) {
       numberedPath(args.output, index + 1, numberWidth),
       numberedPath(args.report, index + 1, numberWidth),
     )
+    if (args.agentReviewDpi > 0) {
+      cleanupPaths.push(numberedPath(agentReviewBasePath(args), index + 1, numberWidth))
+    }
   }
   const concurrency = Math.max(1, Math.min(args.concurrency, chunks.length))
   const results = new Array(chunks.length)
@@ -936,7 +1051,9 @@ async function runMultipartCompare(args, reporter) {
       concurrency,
       requestedDpi: args.dpi,
       fallbackDpi: args.fallbackDpi,
+      agentReviewDpi: args.agentReviewDpi || null,
       parts,
+      agentReviewParts: parts.map((part) => part.agentReview).filter(Boolean),
       coverage,
       agentGate: {
         passed,
@@ -961,7 +1078,10 @@ async function main(args, reporter) {
   mkdirSync(args.runDir, { recursive: true })
 
   const multipart = !args.slides && args.slideCount > args.chunkSize
-  if (!multipart) ensureWritable(args.output, args.overwrite)
+  if (!multipart) {
+    ensureWritable(args.output, args.overwrite)
+    if (args.agentReviewDpi > 0) ensureWritable(agentReviewBasePath(args), args.overwrite)
+  }
   reporter.emit('compare-start', {
     source: args.source,
     candidate: args.candidate,

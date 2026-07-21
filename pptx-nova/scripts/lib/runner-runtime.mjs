@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { basename, dirname, extname, relative } from 'node:path'
+import { basename, dirname, extname, isAbsolute, relative, sep } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { createProgressReporter } from '../pptx-nova-progress.mjs'
 
@@ -295,10 +295,43 @@ export function buildAgentResult(summary, { schemaVersion, requiredReferences } 
     needsHumanReview: Boolean(summary.needsHumanReview),
     runDir: summary.runDir ?? null,
     output: summary.output ?? null,
-    performance: summary.performance ?? null,
-    agentSummary: summary.agentSummary ?? null,
+    performance: compactPerformanceSummary(summary.performance),
+    agentSummary: compactAgentSummary(summary.agentSummary, summary.runDir),
     requiredReferences: requiredReferences ?? summary.requiredReferences ?? [],
     error: summary.error ?? null,
+  }
+}
+
+function compactPerformanceSummary(performanceSummary) {
+  if (!performanceSummary) return null
+  const compact = { ...performanceSummary }
+  for (const key of Object.keys(performanceSummary.render ?? {})) delete compact[key]
+  delete compact.renderBudget
+  return compact
+}
+
+function compactArtifactPath(runDir, path) {
+  if (!runDir || typeof path !== 'string' || !path) return path
+  if (!isAbsolute(path)) return path
+  const local = relative(runDir, path)
+  const outside = local === '..' || local.startsWith(`..${sep}`) || isAbsolute(local)
+  return outside ? path : local || '.'
+}
+
+function compactAgentSummary(agentSummary, runDir) {
+  if (!agentSummary) return null
+  const artifacts = agentSummary.artifacts
+  if (!artifacts || typeof artifacts !== 'object') return agentSummary
+  return {
+    ...agentSummary,
+    artifacts: Object.fromEntries(
+      Object.entries(artifacts).map(([key, value]) => [
+        key,
+        Array.isArray(value)
+          ? value.map((path) => compactArtifactPath(runDir, path))
+          : compactArtifactPath(runDir, value),
+      ]),
+    ),
   }
 }
 

@@ -95,7 +95,8 @@ Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline
 `multi-column-review.json`, `multi-column-review-gate.json`,
 `translation-compare.png` or numbered `translation-compare-*.png` parts,
 `translation-compare.json`, `refurbish-compare.png`,
-`refurbish-compare.json`, `vision-diff.json`, the final candidate PPTX, the contact sheet, the small set of issue-page
+`refurbish-compare.json`, `refurbish-agent-review.png` or numbered Agent review parts,
+`vision-diff.json`, the final candidate PPTX, the contact sheet, the small set of issue-page
 PNGs required for human review, and `replace-text.json`. Do not invent artifacts that do not actually
 exist.
 
@@ -323,7 +324,7 @@ optional session-rules resolve -> edit-contract -> dry-run target coverage -> ap
 Refurbish Existing Deck must also append:
 
 ```text
-refurbish-skin report gate -> source/candidate layout snapshots -> one final pptx semantic diff when source/candidate are stable -> one review-policy evaluation -> non-governing Finding Analysis shadow -> fidelity gate -> one full refurbish-compare render -> refurbish-compare delivery gate -> optional contact-diff aliases from that same compare evidence -> optional legacy supplemental audit
+refurbish-skin report gate -> source/candidate layout snapshots -> one final pptx semantic diff when source/candidate are stable -> one review-policy evaluation -> non-governing Finding Analysis shadow -> fidelity gate -> one full refurbish-compare render plus lower-layout-DPI Agent review assembly from the same page cache -> refurbish-compare delivery gate -> optional contact-diff aliases from that same compare evidence -> optional legacy supplemental audit
 ```
 
 Animation, structural, or compatibility high-risk tasks must also append:
@@ -392,7 +393,7 @@ xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-d
 xdoc pptx contact-diff --source source.pptx --candidate out.pptx --slides 25-38 --output <run-dir>/contact-diff.png --json
 node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate translated.pptx --run-dir <run-dir> --kind translation --slide-count <count> --compare-chunk-size 20 --output <run-dir>/translation-compare.png --report <run-dir>/translation-compare.json --dpi 192 --fallback-dpi 144 --json
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx translated.pptx --final-pptx-source <run-dir>/translated-candidate.pptx --kind translation --publish --overwrite --json > <run-dir>/translation-compare-gate.json
-node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate refurbished.pptx --run-dir <run-dir> --kind refurbish --slide-count <count> --compare-chunk-size 20 --output <run-dir>/refurbish-compare.png --report <run-dir>/refurbish-compare.json --dpi 192 --fallback-dpi 144 --json
+node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate refurbished.pptx --run-dir <run-dir> --kind refurbish --slide-count <count> --compare-chunk-size 20 --output <run-dir>/refurbish-compare.png --report <run-dir>/refurbish-compare.json --dpi 192 --fallback-dpi 144 --agent-review-dpi 96 --json
 node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx refurbished.pptx --final-pptx-source <run-dir>/refurbished-candidate.pptx --kind refurbish --publish --overwrite --json > <run-dir>/refurbish-compare-gate.json
 xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
 xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -23,11 +23,14 @@ const count = existsSync(counter) ? Number(readFileSync(counter, 'utf8')) : 0
 writeFileSync(counter, String(count + 1))
 const source = value('--source'); const candidate = value('--candidate'); const output = value('--output')
 writeFileSync(output, 'cached png bytes')
+const agentReviewOutput = process.env.XDOC_CONTACT_DIFF_AGENT_REVIEW_OUTPUT || ''
+const agentReviewDpi = Number(process.env.XDOC_CONTACT_DIFF_AGENT_REVIEW_LAYOUT_DPI || 0)
+if (agentReviewOutput) writeFileSync(agentReviewOutput, 'cached Agent review bytes')
 const identity = (path) => ({ path, byteLength: statSync(path).size, sha256: createHash('sha256').update(readFileSync(path)).digest('hex') })
 const selector = value('--slides') || 'all'
 const slides = selector === 'all' ? [1] : selector.split('-').map(Number)
 const dpi = Number(value('--dpi'))
-process.stdout.write(JSON.stringify({ schemaVersion: 'pptx-contact-diff/v1', status: 'success', source: identity(source), candidate: identity(candidate), outputPath: output, output, scope: { requested: selector, slides, basis: 'source-slides' }, render: { path: output, dpi, width: 100, height: 56 }, summary: { pairCount: slides.length, dpi, scopeMode: selector === 'all' ? 'all-slides' : 'selected-slides' }, agentGate: { passed: true, status: 'pass', pairCount: slides.length } }))
+process.stdout.write(JSON.stringify({ schemaVersion: 'pptx-contact-diff/v1', status: 'success', source: identity(source), candidate: identity(candidate), outputPath: output, output, scope: { requested: selector, slides, basis: 'source-slides' }, render: { path: output, dpi, width: 100, height: 56 }, agentReview: agentReviewOutput ? { status: 'success', path: agentReviewOutput, renderDpi: dpi, layoutDpi: agentReviewDpi, width: 50, height: 28, cacheReuse: 'same-render-dpi-page-cache' } : undefined, summary: { pairCount: slides.length, dpi, scopeMode: selector === 'all' ? 'all-slides' : 'selected-slides' }, agentGate: { passed: true, status: 'pass', pairCount: slides.length } }))
 `,
   )
   chmodSync(path, 0o755)
@@ -60,6 +63,8 @@ test('compare reuses content-addressed render evidence across run directories', 
     xdoc,
     '--cache-dir',
     cacheDir,
+    '--agent-review-dpi',
+    '96',
     '--progress',
     'off',
     '--json',
@@ -81,6 +86,8 @@ test('compare reuses content-addressed render evidence across run directories', 
     xdoc,
     '--cache-dir',
     cacheDir,
+    '--agent-review-dpi',
+    '96',
     '--progress',
     'off',
     '--json',
@@ -92,6 +99,18 @@ test('compare reuses content-addressed render evidence across run directories', 
   assert.equal(second.pptxNovaCompare.cache.status, 'hit')
   assert.equal(second.source.path, source)
   assert.equal(second.candidate.path, candidate)
+  assert.equal(second.pptxNovaCompare.agentReview.cacheReuse, 'same-render-dpi-page-cache')
+  assert.equal(second.pptxNovaCompare.agentReview.layoutDpi, 96)
+  assert.equal(second.pptxNovaCompare.agentReview.renderDpi, 192)
+  assert.equal(
+    second.pptxNovaCompare.agentReview.path,
+    join(root, 'run-2', 'compare-agent-review.png'),
+  )
+  assert.equal(existsSync(second.pptxNovaCompare.agentReview.path), true)
+  assert.equal(
+    readFileSync(second.pptxNovaCompare.agentReview.path, 'utf8'),
+    'cached Agent review bytes',
+  )
   assert.equal(third.pptxNovaCompare.cache.status, 'hit')
   assert.equal(third.source.path, copiedSource)
   assert.equal(third.candidate.path, copiedCandidate)

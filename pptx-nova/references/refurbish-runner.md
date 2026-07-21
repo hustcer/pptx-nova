@@ -46,9 +46,12 @@ evidence without another render.
 - `agentSummary` with gate results and artifact pointers;
 - `agentSummary.findingAnalysis` with the shadow proposed status, compact findings, and
   `effectiveStatus=not-applied`;
-- `performance` with total time, render share, top phases, compare render count, reuse status,
-  and Finding Analysis time/additional inspect/render counts;
+- `performance` with total time, render share, top phases, a single nested `render` object, a single
+  nested `budget` object, and Finding Analysis time/additional inspect/render counts;
 - the terminal error when the run fails.
+
+Compact Agent artifact paths are relative to `runDir`; published files outside it remain absolute. The
+full report and `--json-full` retain compatibility fields and absolute paths.
 
 After path preflight succeeds, the complete `pptx-nova-refurbish-run/v1` report is saved as
 `<run-dir>/refurbish-run-summary.json`. A preflight error that prevents run-directory initialization is
@@ -56,11 +59,8 @@ returned directly and cannot create that file. Read the full report only when th
 a warning, failure, unsupported region, or a fact needed for diagnosis. Use `--json-full` only for debugging or a
 consumer that explicitly requires the complete phase history.
 
-The full progress event stream is archived as JSONL to `<run-dir>/progress.jsonl` by default
-(`--progress-file` overrides the path; `--progress-file none` disables it). While the archive is
-active, stderr carries only single-line phase-boundary summaries, so no redirection tricks are
-needed to keep Agent context clean. Surface phase boundaries to the user; read the JSONL archive
-only when a phase fails or for performance attribution.
+Progress is archived to `<run-dir>/progress.jsonl` by default; `--progress-file` overrides it and
+`none` disables it. Stderr carries only phase summaries. Read JSONL on failure or for performance.
 
 ## Progressive failure routing
 
@@ -91,13 +91,14 @@ plan and readiness
   -> Finding Analysis shadow (never changes the current gate)
   -> fidelity gate consuming that same review evaluation
   -> candidate preview
-  -> one high-DPI refurbish comparison
+  -> one high-DPI refurbish comparison plus a low-layout-DPI Agent review assembled from its page cache
   -> optional contact-diff aliases from the same comparison
   -> compare publication gate
 ```
 
-The single high-DPI comparison is the visual source of truth. Do not independently rerender the same
-source/candidate/slide range/DPI merely to create a differently named contact artifact.
+The high-DPI comparison is the visual source of truth. In the same xdoc invocation, the runner
+assembles lower-layout-DPI `refurbish-agent-review*.png` from the same page bitmap cache, without
+another PDF conversion or page render. Do not rerender merely to create another artifact name.
 
 `finding-analysis.json` is calibration evidence in this release. Read its proposed status and top
 findings, but never treat `effectiveStatus=not-applied` as a pass or use it to weaken fidelity,
@@ -108,27 +109,31 @@ comparison, publication, or human-review requirements.
 A successful machine run returns `needs-human-review`. Scale the visual review to the deck size
 instead of always opening every published byte:
 
-- Always open the candidate contact sheet end to end; it is the full-coverage overview.
+- Always open the candidate contact sheet end to end; it is the candidate-only full-coverage overview.
+- Open every path in `agentSummary.artifacts.refurbishAgentReviewParts` for the full source/candidate
+  overview. These lower-resolution files are inspection proxies; the published high-DPI compare parts
+  remain the delivery evidence.
 - Always open the full-size previews named by actionable layout findings
   (`layout.actionablePreviewFiles`), plus any page that looks wrong on the contact sheet.
   `layout.topActionable[].deltaStatus` distinguishes inherited source findings
   (`unchanged`) from refurbish-introduced ones (`introduced`/`mixed`); inherited findings
   still need eyes but are not refurbish regressions.
-- Compare parts: when three or fewer parts were published, open every part. For larger decks,
-  open the first and last parts plus every part containing an actionable or suspicious slide,
-  and spot-check at least one of the remaining parts.
+- Open full high-DPI parts for actionable/suspicious slides, then spot-check the first and last parts.
+  Do not load every high-DPI part after all Agent review parts have been inspected.
 - When a part's thumbnails are too small to judge a suspicious page, render a focused
   high-resolution excerpt instead of enlarging the whole part:
 
   ```bash
   node <skill-root>/scripts/pptx-nova-compare.mjs \
-    --source <run-dir>/source.pptx --candidate <run-dir>/candidate.pptx \
-    --run-dir <run-dir> --kind refurbish --slides <n>[,<n>...] \
-    --output <run-dir>/review-slice.png --report <run-dir>/review-slice.json --overwrite
+    --source source.pptx --candidate candidate.pptx \
+    --run-dir . --kind refurbish --slides <n>[,<n>...] \
+    --output focused-review.png --report focused-review.json --overwrite --json
   ```
 
-  The excerpt reuses the run's page bitmap cache, so it costs assembly time only, not a
-  re-render. Do not substitute it for the published compare parts in delivery evidence.
+  Run this from the run directory. When actionable slides are known, the compact result exposes the
+  copyable command as `agentSummary.nextSteps.focusedReviewCommand`. The excerpt reuses the run's page
+  bitmap cache, so it costs assembly time only, not a re-render. Do not substitute it for the published
+  compare parts in delivery evidence.
 
 Confirm:
 
@@ -140,6 +145,4 @@ Confirm:
 Write `visual_review.json`. When macOS PowerPoint is available for a deliverable, run the bundled
 clean-open helper. Feedback requests additionally require `skill-feedback.md` and the feedback gate.
 
-Deliver only after the compare gate reports `status=pass` and `finalBinding.status=bound`. In the final
-response, use the compact Agent result and list only the final PPTX, compare siblings, key gate status,
-3–6 evidence files, and remaining risks.
+Deliver only after compare and binding pass; list only key outputs, gates, evidence, and risks.

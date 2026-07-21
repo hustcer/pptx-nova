@@ -612,7 +612,28 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
 
 `axes[].axis` 是严格 enum，只收 canonical 全名：`category` / `value` / `x` / `y`
 （直角坐标图用 category/value；scatter / bubble 用 x/y）。`scale` 还支持
-`reverseOrder` / `crosses`（`auto / custom / max / min`）/ `crossesAt`。
+`reverseOrder` / `crosses`（`auto / custom / max / min`）/ `crossesAt`，以及
+`logBase`（2..1000，仅 value 轴，对数刻度）和 `crossBetween`
+（`between / mid-category`，仅 value 轴）。
+
+轴条目还支持（xdoc ≥0.3.1，方案 7 长尾补齐）：
+
+```json
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "axes": [
+    { "axis": "value",
+      "title": { "text": "USD (thousands)", "font": { "bold": true }, "rotation": -90 },
+      "displayUnits": { "unit": "thousands", "showLabel": true } },
+    { "axis": "category", "title": null }
+  ] }
+```
+
+- `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
+- `displayUnits`：仅 value 轴。`unit` 取内置档位
+  `hundreds / thousands / ten-thousands / hundred-thousands / millions /
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+  除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
+  金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
 > ⚠️ `cat` / `val` / `categoryAxis` / `valueAxis` / `valueX` / `xAxis` 之类的旧简写，
 > 以及 `ser`、`secondaryVal`、`date`，**都不在** enum 内。axis 定位当前只能针对
@@ -627,16 +648,33 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
   "axes": [{ "axis": "value", "line": { "width": "0.75pt", "color": "BFBFBF" } }] }
 
 { "op": "set-chart", "slide": 1, "shape": {...},
-  "axes": [{ "axis": "value", "gridlines": { "width": "0.5pt", "color": "EEEEEE" } }] }
+  "axes": [{ "axis": "value", "gridlines": { "width": "0.5pt", "color": "EEEEEE" },
+             "minorGridlines": { "width": "0.25pt", "color": "F5F5F5" } }] }
+
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "axes": [{ "axis": "value", "gridlines": null }] }
 
 { "op": "set-chart", "slide": 1, "shape": {...},
   "axes": [{ "axis": "value",
              "ticks": { "major": "outside", "minor": "none",
                         "labelPosition": "next-to-axis", "numberFormat": "0.0%" } }] }
+
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "axes": [{ "axis": "category",
+             "ticks": { "rotation": -45, "labelSkip": 2, "font": { "size": "9pt" } } }] }
 ```
 
 `ticks.major` / `ticks.minor` 取值：`cross / inside / none / outside`（**不接受**
 `out` / `in` 等简写）。`ticks.labelPosition` 取值：`high / low / next-to-axis / none`。
+`gridlines` / `minorGridlines` 都接受 `null` 表示删除该组网格线。
+
+`ticks` 还支持刻度标签排版（拥挤类目轴的首选修复手段，优先于缩字号）：
+
+- `rotation`：-90..90 度，写入轴 `txPr` 的 bodyPr rot（**PNG 预览可见**）；
+- `font`：刻度标签字体（同通用 font 对象）；
+- `labelSkip` / `markSkip`：每 N 个类目显示一个标签 / 刻度线（≥1，仅类目轴）；
+- `labelOffset`：0..1000，标签与轴的距离百分比（100 = 默认，仅类目轴）；
+- `labelAlignment`：`center / left / right`（仅类目轴）。
 
 ### 改某系列样式
 
@@ -661,9 +699,39 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
 `series` 是 0-based 索引；同一个 `series` 数组里可以给不同系列各写一条（同一系列
 重复出现且字段冲突会被拒绝）。
 
-> ⚠️ marker 用 `symbol`（不是 `kind`）：常用值 `circle / square / diamond /
-triangle / x / star / dash / dot / plus / none / auto`。marker 的 `fill` /
+> ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
+> `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
+
+### 趋势线 / 误差线（系列级分析装饰）
+
+```json
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "series": [
+    { "series": 0,
+      "trendline": { "type": "linear", "forward": 2,
+                     "displayEquation": true, "displayRSquared": true } },
+    { "series": 1,
+      "errorBars": { "valueType": "percentage", "value": 5 } }
+  ] }
+```
+
+- `trendline.type`：`exponential / linear / logarithmic / moving-average /
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+  moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
+  dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
+  `line`（线样式）。`trendline: null` 删除该系列全部趋势线。
+- `errorBars.valueType`：`fixed / percentage / std-dev`（需配 `value`）、
+  `std-err`（不带 value）、`custom`（需 `plus` + `minus` 两个数值数组，长度=
+  点数）；可选 `type`（`both / minus / plus`，默认 both）、`direction`
+  （`x / y`，scatter/bubble 用）、`noEndCap`、`line`。`errorBars: null` 删除。
+
+> ⚠️ **预览边界**：trendline / errorBars / dataTable / displayUnits / 轴标题 /
+> minorGridlines 写出的 OOXML 正确、PowerPoint 会完整渲染，但 xdoc 自家的
+> PNG/PDF 预览链暂不渲染这些装饰元素——**预览里看不到 ≠ 没写进去**，用
+> `unzip -p out.pptx ppt/charts/chart1.xml | grep trendline` 或 officecli
+> validate 复核，不要因预览缺失而反复重试。刻度标签 `rotation` 预览可见。
 
 ### 数据标签
 
@@ -699,6 +767,10 @@ triangle / x / star / dash / dot / plus / none / auto`。marker 的 `fill` /
 > ⚠️ 老版本里见过的 `"all"` / `"ctr"` / `"l"` / `"r"` / `"t"` / `"b"` / `"inBase"` /
 > `"inEnd"` / `"outEnd"` 全部被 schema 拒绝。
 
+`dataLabels[]` 还支持 `separator`（多字段标签的分隔符字符串，如 `"; "`）与
+`font`（标签字体对象）；两者仅 plot / series 作用域，point 作用域目前只收
+`position`。
+
 ### Plot 区域（gap / overlap / vary）
 
 ```json
@@ -720,6 +792,25 @@ triangle / x / star / dash / dot / plus / none / auto`。marker 的 `fill` /
 - `overlap` -100 to 100（柱重叠）
 - `varyByCategories` 单系列时每类目不同颜色
 - `bubbleScale` bubble 缩放
+- `firstSliceAngle` 0-360（pie / doughnut 首片起始角，**预览可见**）
+- `holeSize` 1-90（仅 doughnut 环孔大小百分比，**预览可见**；数值越小环越粗）
+- `sizeRepresents` `area / width`（仅 bubble：气泡大小映射面积还是直径）
+
+### 图表级选项（displayBlanksAs / roundedCorners / dataTable）
+
+```json
+{ "op": "set-chart", "slide": 1, "shape": {...},
+  "displayBlanksAs": "span",
+  "roundedCorners": false,
+  "dataTable": { "showHorizontalBorder": true, "showVerticalBorder": true,
+                 "showOutline": true, "showKeys": true } }
+```
+
+- `displayBlanksAs`：`gap / span / zero` — 折线图有缺失数据时的语义选择
+  （`span` 连线跨过空值，`zero` 按 0 画；创建时默认 `gap`）。
+- `roundedCorners`：图表外框圆角开关。
+- `dataTable`：图下数据表（四个 show* 开关至少给一个；`null` 移除整个数据表）。
+  预览链暂不渲染数据表，见上方预览边界说明。
 
 ### 单点样式
 

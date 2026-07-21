@@ -43,10 +43,10 @@ function writeJson(path, value) {
 test('Tabler icon pack metadata and license are present', () => {
   const info = getTablerIconPackInfo()
   assert.equal(info.schemaVersion, 'pptx-nova-tabler-icon-pack/v1')
-  assert.equal(info.version, '3.44.0')
-  assert.equal(info.counts.outline, 5093)
-  assert.equal(info.counts.filled, 1053)
-  assert.equal(info.iconCount, 6146)
+  assert.equal(info.version, '3.45.0')
+  assert.equal(info.counts.outline, 5112)
+  assert.equal(info.counts.filled, 1054)
+  assert.equal(info.iconCount, 6166)
   assert.match(getTablerIconSvg('presentation', { color: null }), /stroke-width="1"/)
 
   const catalog = JSON.parse(readFileSync(CATALOG_PATH, 'utf8'))

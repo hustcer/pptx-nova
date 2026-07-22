@@ -1,10 +1,25 @@
 # xdoc: A Native-First, Agent-Oriented Document and PPTX Execution Layer
 
-> **Latest verified release:** `0.3.0 (91f7b66b)`
+> **Runtime build verified for this document:** `0.3.0 (cbcab15e)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-07-22
+> **Verification date:** 2026-07-23
+>
+> **Implementation source reviewed:** `cbcab15e`
+>
+> **Evidence policy:** A capability is described as runtime-supported only when
+> the executable exposes it through its versioned schema/help surface and the
+> source-owned bridge or contract tests provide the corresponding behavior.
+> The counts below are discovery metadata from the verified build; they are not
+> a claim of universal PPTX feature parity.
+>
+> **Checked-in contract snapshot:** [xdoc-schema.json](./xdoc-schema.json)
+
+The installed runtime is the authority for executable behavior. At this
+verification point, the checked-in snapshot still carries the previous root
+build identity (`91f7b66b`), while its normalized contract body matches the
+runtime schema; refresh the snapshot before publishing a new binary identity.
 
 xdoc is a native-first command-line runtime for turning document files into
 structured, reviewable artifacts and for creating or editing native, editable
@@ -55,6 +70,23 @@ a copied candidate, reported, previewed, compared, and replayed. Selected bridge
 APIs are also available below the CLI for native library, JavaScript, and
 WebAssembly callers where the chosen backend supports them.
 
+### A three-level control plane
+
+xdoc separates intent, mutation, and proof so an agent can choose the smallest
+level that still preserves a complete audit trail:
+
+| Level    | What an agent supplies                                                                  | What xdoc returns                                                                              |
+| -------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Intent   | A recipe, data binding, brand profile, translation plan, or refurbishment request       | An expanded, inspectable plan that can be reviewed before mutation                             |
+| Patch    | A versioned JSON envelope with deterministic selectors and ordered operations           | Schema validation, selector resolution, dry-run deltas, operation traces, and a candidate PPTX |
+| Evidence | A request for inspection, semantic checks, rendered previews, diffs, or a sidecar audit | Versioned reports with report-specific hashes, findings, gates, and replay/rollback metadata   |
+
+The three levels are deliberately composable. Many high-level requests compile
+to ordinary patch operations; translation and refurbishment paths may also emit
+guarded specialized artifacts or commands. All of them feed the same
+candidate-and-evidence lifecycle, but not every intent is represented by one
+ordinary patch or supports the same dry-run surface.
+
 ### A declarative delivery lifecycle
 
 xdoc is best understood as a declarative delivery protocol for a native
@@ -62,37 +94,45 @@ document, not only as a file-writing command. A production job can make each
 state explicit:
 
 ```text
-plan   = source identity + schema version + patch/recipe + policy
+plan    = source identity + schema version + patch/recipe + policy
 dry-run = resolve + simulate + report predicted changes and gates
-apply  = commit one candidate atomically and emit operation evidence
-audit  = re-open the candidate, verify package semantics, and retain a sidecar
+apply   = adopt one candidate only after all patch operations succeed
+deliver = write the candidate and evidence artifacts as separate filesystem operations
+verify  = re-open the candidate and run structural, semantic, and rendered gates
+audit   = parse/project the recorded sidecar and retain the evidence bundle
 publish = hand off only after static, rendered, and human-review gates pass
 ```
 
 The plan is durable input, the candidate is a separately addressable artifact,
-and the audit is a first-class output. This lets an orchestrator retry or reject
-one stage without guessing what an earlier stage changed. It also joins three
-forms of truth at one boundary: native object truth, declarative control, and
-rendered evidence. That separation is what makes supervision measurable instead
-of dependent on screenshots or log interpretation alone.
+and verification plus history audit are first-class outputs. Patch execution is
+all-or-nothing at the presentation-state boundary, but candidate delivery and
+sidecar delivery are separate filesystem writes; they are not one atomic
+evidence transaction. This lets an orchestrator retry or reject one stage
+without guessing what an earlier stage changed, while making the remaining
+delivery boundary explicit. It also joins three forms of truth at one
+boundary: native object truth, declarative control, and rendered evidence. That
+separation is what makes supervision measurable instead of dependent on
+screenshots or log interpretation alone.
 
 ### Current release surface
 
-| Area                         | Runtime contract in 0.3.0                                                   |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| Top-level CLI                | `convert`, `html2md`, `extract`, `check`, `pptx`, `pdf`, `daemon`, `schema` |
-| PPTX CLI subcommands         | 35 discoverable subcommands                                                 |
-| Patch operations             | 58 canonical operations                                                     |
-| High-level recipes           | 18 recipe kinds                                                             |
-| Shape catalog                | 182 preset shapes                                                           |
-| Layout contracts             | 6 built-in content contracts                                                |
-| Theme/style assets           | 9 theme packs and 4 style packs                                             |
-| Gradients and chart styles   | 24 preset gradients and 48 chart styles                                     |
-| Chart type catalog           | 103 `XlChartType` entries with supported/partial/unsupported status         |
-| Enum families                | 20 controlled vocabularies                                                  |
-| Structured errors            | 24 error codes                                                              |
-| Embedded PPTX report schemas | 20 report schemas                                                           |
-| Patch schema definitions     | 179 `$defs` in the current runtime schema                                   |
+| Area                           | Runtime contract in 0.3.0                                                    |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `pdf`, `daemon`, `schema`  |
+| PPTX CLI subcommands           | 35 discoverable subcommands                                                  |
+| Patch operations               | 58 canonical operations                                                      |
+| High-level recipes             | 18 recipe kinds                                                              |
+| Shape catalog                  | 182 preset shapes                                                            |
+| Layout contracts               | 6 built-in content contracts                                                 |
+| Theme/style assets             | 9 theme packs and 4 style packs                                              |
+| Gradients and chart styles     | 24 preset gradients and 48 chart styles                                      |
+| Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status          |
+| Enum families                  | 20 controlled vocabularies                                                   |
+| Published bridge error catalog | 24 error codes                                                               |
+| Embedded PPTX report schemas   | 20 report schemas                                                            |
+| Patch schema definitions       | 179 `$defs` in the current runtime schema                                    |
+| Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples               |
+| Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog |
 
 Counts are discovery aids, not promises that every long-tail PPTX feature is
 fully editable. Each operation and capability carries its own support or
@@ -105,8 +145,10 @@ command:
 
 - **The runtime explains itself.** Operation schemas, examples, catalogs,
   reports, errors, and capability status are emitted by the executing binary.
-- **Editing is transactional and reviewable.** The patch is a durable plan,
-  dry-run is non-writing, and apply produces operation-level evidence.
+- **Patch evaluation is transactional and reviewable.** The patch is a durable
+  plan, dry-run is non-writing, and apply adopts the candidate only after the
+  operation set succeeds. Candidate and sidecar delivery remain separate
+  filesystem steps.
 - **Native structure and rendered evidence stay connected.** Inspect/select
   reason about editable objects, while preview and diff expose the delivered
   visual result.
@@ -114,8 +156,13 @@ command:
   where possible, while preserve-only and unsupported regions are reported.
 - **Repair is a protocol.** Structured findings can carry a machine-executable
   fix patch, confidence, and retry policy instead of only human prose.
-- **History is portable.** Sidecars materialize the patch and its evidence so a
-  later process can replay, audit, or recover the revision.
+- **History is materialized with declared dependencies.** Sidecars store the
+  patch and evidence so a later process can inspect or audit the record and,
+  when the currently resolved input remains available, replay or recover the
+  revision. They are not cryptographic commits or deck-byte archives.
+- **The contract is language-neutral.** JSON schemas, exit codes, report ids,
+  and artifact identities let a planner, worker, queue, or review service be
+  implemented in any host language while keeping the document boundary fixed.
 
 That combination makes xdoc suitable as infrastructure: it supplies the
 execution contract, the mutation engine, and the evidence boundary in one
@@ -169,6 +216,13 @@ The full runtime schema currently includes 36 PPTX CLI examples, 18 patch
 examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
+Cache the complete `xdoc schema` response for CLI discovery. In 0.3.0,
+`discovery.commands` is summary metadata (it omits `html2md`), while
+`xdoc schema --index` is specifically a patch-operation index rather than a
+complete CLI inventory. Neither surface should be treated as an exhaustive
+replacement for the full `.commands` map or command help. The PDF command has
+one additional discovery exception documented in the PDF section below.
+
 ### Deterministic targeting
 
 Selectors can use an object id, a shape name, a placeholder, or a structured
@@ -195,7 +249,7 @@ unsupported rather than silently reconstructed.
 A successful write is only one artifact. xdoc can also produce:
 
 - a structured apply report;
-- a portable `.xdoc.json` sidecar;
+- a materialized `.xdoc.json` sidecar with declared path dependencies;
 - a static vision report;
 - rendered PNGs and a contact sheet;
 - semantic or visual diffs; and
@@ -253,6 +307,12 @@ Keep the render manifest, backend identity, and font inventory with the output.
 They explain why two otherwise identical jobs might differ in rasterized text or
 pagination and give a platform a reproducible provenance record.
 
+As a build-specific deployment reference, the verified macOS arm64 artifact was
+12,673,272 bytes for `xdoc` and 7,169,376 bytes for its colocated
+`libpdfium.dylib`. These numbers are measurements of one build, not a universal
+package-size promise; they show why the backend manifest belongs in deployment
+metadata.
+
 ### Runtime and embedding boundaries
 
 xdoc is distributed as a native-first executable. Its stable external contract
@@ -266,6 +326,20 @@ integration paths, while the complete xdoc CLI remains native-first. Those
 embedding paths should not be read as a claim that every CLI command is
 browser-runnable.
 
+The source-owned facades are intentionally small and explicit:
+
+| Facade                         | Representative public entry points                                                                            | Boundary                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Root `xdoc` package            | `convert`, `convert_result`, `run_pipeline`, `html_to_markdown`, `render_pdf_to_pngs`, `inspect_capabilities` | Document sources, options, artifact bundles, and capability snapshots |
+| PPTX facade `hustcer/pptx_gen` | `apply_patch_json`, `pptx_gen_new`, `inspect_pptx`, `vision_check_pptx`, `pptx_gen_apply`                     | PPTX bytes, versioned wire JSON, and structured bridge results        |
+
+The root xdoc facade includes path-oriented conversion and artifact delivery;
+the PPTX facade is the bytes-first, filesystem-independent boundary. CLI
+argument parsing, patch asset-root enforcement, and process exit-code mapping
+remain above those library entry points. Embedders should depend on the root
+facades and pin their generated interface (`.mbti`) or schema snapshot;
+internal `src/*` packages are not a stable integration boundary.
+
 ### Why the architecture matters
 
 The design keeps three concerns separate:
@@ -278,6 +352,51 @@ The design keeps three concerns separate:
 A platform can scale each concern independently while keeping the same patch and
 report contracts at the orchestration boundary.
 
+### A standard path for agent execution
+
+For the document kinds implemented by the current release, xdoc can be wrapped
+as one repeatable execution protocol instead of a collection of bespoke shell
+integrations:
+
+```text
+discover contract and capabilities
+  → validate a typed request
+  → execute against read-only inputs or a separate candidate
+  → evaluate the versioned report and command-specific exit policy
+  → retain artifacts, hashes, reports, and sidecars before publish
+```
+
+PPTX mutation uses the full intent/patch/evidence stack. Conversion, extraction,
+PDF diagnostics, and preflight use the same discovery and artifact boundaries
+without pretending that every command is a patch operation. Reserved document
+kinds remain outside this path until their capability entries become
+implemented rather than `reserved`.
+
+### A path toward an ecosystem contract
+
+xdoc is an implementation and a public contract surface, not a formal industry
+standard today. Its route toward becoming a shared execution layer is concrete:
+freeze the boundaries that different planners, workers, and host languages need
+to agree on, then grow capability coverage without changing the meaning of a
+successful report.
+
+| Boundary         | Already observable in xdoc                                                                           | What an ecosystem profile would freeze                                              |
+| ---------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Discovery        | `cli-agent/v1`, progressive `xdoc schema`, catalogs, examples, and capability status                 | How a worker negotiates supported, partial, preserve-only, and unsupported features |
+| Mutation         | `pptx-patch/v1`, numeric patch envelope, selectors, ordered ops, recipe expansion                    | Selector determinism, atomicity, idempotency expectations, and extension rules      |
+| Evidence         | Versioned report ids, report-specific hashes or gates, changed parts, operation traces, and sidecars | Minimum proof required before a candidate can be published or retried               |
+| Safety           | Asset roots, size and ZIP limits, raw-XML opt-in, signature/encryption policy, and exit codes        | Policy profiles that a sandbox, queue, or regulated worker can enforce consistently |
+| Conformance      | Contracted examples, fixture probes, semantic-rule summaries, and replayable artifacts               | Cross-implementation test vectors and compatibility/deprecation policy              |
+| Host integration | CLI, root library facade, bytes-first PPTX facade, daemon, and a separate HTTP service package       | Stable adapters for native, JavaScript, WebAssembly, and service deployments        |
+
+The important design choice is that a new host does not need to reproduce xdoc's
+internal object model. It needs to preserve the wire contract, capability
+negotiation, evidence semantics, and declared safety policy. The current release
+does not yet ship a bundled MCP/IDE onboarding layer or an external governance
+process; those are ecosystem work, not hidden capabilities. Keeping that gap
+explicit makes the standardization path more credible than claiming a standard
+already exists.
+
 ## First run: verify the runtime
 
 Use the installed binary or your approved distribution artifact. Do not infer
@@ -287,12 +406,13 @@ binary that will execute the job.
 ```bash
 xdoc --version
 xdoc schema --index
+xdoc schema > runtime-schema.json
 ```
 
-The expected release identity for this document is:
+The expected runtime identity for this document is:
 
 ```text
-0.3.0 (91f7b66b)
+0.3.0 (cbcab15e)
 ```
 
 The top-level schema response identifies itself as:
@@ -300,12 +420,17 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.3.0 (91f7b66b)"
+  "version": "0.3.0 (cbcab15e)"
 }
 ```
 
 The numeric `schemaVersion` inside a patch envelope is a different contract: it
 is currently `1`. Keep the two version fields distinct in agent code.
+
+For a pinned integration, compare the captured `runtime-schema.json` with the
+checked-in snapshot only after normalizing JSON ordering. A matching build id is
+necessary but not sufficient: operation fields, report schemas, capability
+entries, and backend requirements are the parts an agent must actually cache.
 
 ## Quick-start command set
 
@@ -390,13 +515,23 @@ actual rendered evidence, and the diff for deterministic structural comparison.
 
 ### Keep a daemon session for multi-step work
 
+`xdoc daemon start` runs in the foreground. Leave it running in one terminal:
+
 ```bash
 xdoc daemon start
+```
+
+Then use and stop it from another terminal:
+
+```bash
 xdoc daemon status --json
 xdoc pptx inspect deck.pptx --daemon --json
 xdoc pptx apply --patch patch.json --input deck.pptx --output updated.pptx --daemon
 xdoc daemon stop
 ```
+
+Alternatively, omit the explicit `start` command and let the first `--daemon`
+request use the documented auto-spawn path.
 
 `--daemon` falls back to one-shot mode when the daemon is unavailable.
 `--daemon-strict` turns that fallback into a hard failure.
@@ -434,6 +569,11 @@ The top-level capability registry is itself machine-readable:
 ```bash
 xdoc schema | jq '.capabilities'
 ```
+
+In that registry, `status: "enabled"` means that the build exposes the code
+path; it is not a live probe of every required backend, font, or host
+dependency. Combine schema discovery with deployment-time readiness checks and
+representative conversion probes for the formats a worker will serve.
 
 ### Output path derivation
 
@@ -491,6 +631,13 @@ prefixes, page usage, text-object counts, and Unicode-map diagnostics.
 `extract-text` emits plain text or `pdf-text/v1`; its extraction modes are
 `natural` and `layout`. The native `auto` engine resolves to PDFium in the
 current build.
+
+There is one known 0.3.0 discovery inconsistency: `xdoc pdf --help`, the
+published PDF examples, and the executable all expose `pdf render`, but the
+`commands.pdf.subcommands` map in `cli-agent/v1` currently lists only
+`inspect` and `extract-text`. Treat this as a contract defect to be fixed, and
+pin the executable build instead of inferring that `render` is absent from that
+single map.
 
 ## The PPTX patch model
 
@@ -579,6 +726,13 @@ execution surface. `define-macro` and `use-macro` reuse operation templates;
 fallback. Expansion is reported in `expandedOps` and is subject to recursion and
 validation limits.
 
+Control flow is state-aware but bounded. `if.condition` is evaluated at
+execution time against the current candidate, so it can observe earlier
+mutations. `foreach` substitutes each declared item and executes the resulting
+operations in order. A `try.body` runs on a branch-local clone and is adopted
+only after complete success; a recoverable failure discards that branch before
+the declared fallback runs on the unchanged outer state.
+
 ### High-level recipes
 
 Recipes compile to ordinary patch operations. They are useful when an agent
@@ -635,6 +789,12 @@ entries as supported, partial, or unsupported so a planner can choose a safe
 representation before generating a patch. The current catalog registers two
 production-ready native DeckKits without making DeckKit internals part of the
 patch schema.
+
+In the verified build, all 58 canonical operation names appear in
+`patchSchema.supportedOps` and `patchSchema.experimentalOps` is empty. This is
+about the availability of operation entry points, not universal OOXML parity:
+individual chart variants, extension parts, and long-tail objects still carry
+their own supported, partial, preserve-only, or unsupported status.
 
 ### Schema discovery workflow for agents
 
@@ -816,9 +976,10 @@ unversioned field assumptions in a long-lived agent.
 
 ### Fields that matter to an agent
 
-Depending on the command, reports expose:
+Depending on the command, reports may expose:
 
-- input and output identity;
+- input/output paths and command-specific metadata (not a universal content
+  identity or hash);
 - `status` and machine-readable schema version;
 - `changedParts`;
 - `semanticChanges`;
@@ -831,13 +992,19 @@ Depending on the command, reports expose:
 - analysis objects for text fitting, layout impact, or theme remapping; and
 - capability summaries showing supported, preserve-only, or unsupported areas.
 
+Evidence fields are report-specific. Some reports expose `agentGate`, some
+expose issue severity or hashes, and others expose only command-specific status
+and findings. Read the concrete versioned report schema before applying a gate;
+a preview hash identifies the rendered artifact but does not prove OCR,
+font-fallback, or pixel-level correctness.
+
 At operation level, `opResults[]` can include `opIndex`, `op`, `status`,
 `changedParts`, `semanticChanges`, `visualRisks`, `warnings`, `created`,
 `createdIds`, `resolvedSelectors`, `expandedOps`, `analysis`, and `durationMs`.
 
 ### Structured error behavior
 
-The current error catalog has 24 codes, including:
+The published bridge error catalog has 24 codes, including:
 
 `InvalidJson`, `InvalidArgument`, `InvalidArguments`, `UnsupportedFeature`,
 `InvalidOperation`, `InvalidPackage`, `InvalidXml`, `MissingPart`,
@@ -846,10 +1013,21 @@ The current error catalog has 24 codes, including:
 `InvalidSidecar`, `DaemonUnavailable`, `InvalidRequest`, `ProtocolError`,
 `UnknownMethod`, `InternalError`, and `UnknownError`.
 
-Errors carry a stable kind and message; operation failures can include an
-`opIndex`. This allows an orchestrator to distinguish a malformed request from
-an invalid deck, a policy rejection, an unavailable backend, or an internal
-failure.
+Structured error payloads carry a machine-readable kind and message; operation
+failures can include an `opIndex`. Where a repair is meaningful, the payload can
+also include a field `path`, `expected`, `actual`, a documentation reference, and
+`suggestions[]` entries with `fixPatch`, `reason`, `confidence`, and `autoRetry`.
+This allows an orchestrator to distinguish a malformed request from an invalid
+deck, a policy rejection, an unavailable backend, or an internal failure while
+still receiving a bounded next action.
+
+The catalog is a published bridge contract, not a guarantee that every
+implementation path has already normalized its internal kind into one of those
+24 names. A worker should preserve an unknown kind as opaque data, use the
+report and exit code for routing, and avoid branching on undocumented strings.
+Specialized failures may also carry a command-specific `schemaVersion` that is
+newer or broader than the shared error-schema enum, so error ingestion should
+preserve unknown version strings instead of rejecting the diagnostic itself.
 
 ### Process exit codes
 
@@ -883,9 +1061,28 @@ Semantic audit findings can include a fix object with:
 - an `autoRetry` decision; and
 - a `requiresRawXml` flag.
 
+The current deterministic semantic fix generators are intentionally narrow:
+they cover a dangling animation reference and a uniquely resolvable orphan
+relationship. They do not make arbitrary package repair safe, and the
+relationship repair may still require the raw-XML boundary.
+
 Some visual issues also expose applicable fixes. An agent may apply a fix only
 when the confidence and policy thresholds allow it, then rerun the same gate.
 The fix is a proposal, not a license to bypass review.
+
+Treat alternative candidate fixes as mutually exclusive choices even when a
+top-level payload advertises `autoRetry`. If an ambiguity report contains more
+than one candidate-specific suggestion, require a refined selector or an
+explicit human choice; never apply the first suggestion by array order. A
+semantic relationship repair may be retried automatically only when the target
+is unique, and any `requiresRawXml` flag still requires the explicit raw-XML
+policy boundary.
+
+The default visual-repair policy is intentionally asymmetric: unambiguous
+on-slide clamping and edge-margin nudges may be marked `autoRetry: true`, while
+overlap, overflow, and alignment repairs remain review-first proposals. A
+closed loop therefore means “repair, re-run, and re-measure”, not “accept the
+first suggested patch”.
 
 ## Static and rendered visual validation
 
@@ -900,6 +1097,8 @@ The fix is a proposal, not a license to bypass review.
 - unexpected wrapping in single-line roles;
 - geometry overlap;
 - arrangement imbalance;
+- low-contrast explicit text colors on solid backgrounds;
+- decoration bleed across rounded-card boundaries;
 - fonts below a configured threshold;
 - dangling relationships or references;
 - duplicate ids; and
@@ -908,6 +1107,11 @@ The fix is a proposal, not a license to bypass review.
 The report explicitly separates authored-geometry and semantic findings from
 renderer-dependent observations. It is a static gate, not a substitute for a PNG
 review.
+
+The report also includes a semantic summary with the current rule-corpus counts
+(`sourceRuleCount` and `normalizedRuleCount`). These numbers make it possible
+to detect an unexpectedly older or thinner validator at worker start-up without
+pretending that a rule count alone proves visual correctness.
 
 ### `preview`
 
@@ -952,6 +1156,14 @@ The runtime examples demonstrate a single patch that:
 This keeps the data source separate from the presentation structure and makes
 regeneration deterministic.
 
+The template language is deliberately small and data-only. In addition to
+scalar paths such as `{{kpi.revenue}}`, the current bridge supports `{{#each
+items}}...{{/each}}` for repeated text and `{{#if path}}...{{/if}}` for
+conditional content. Missing paths are reported as invalid input instead of
+silently becoming empty presentation content. The patch-level `foreach`, `if`,
+and `try` operations provide a separate, schema-defined control-flow layer for
+choosing operations; neither layer executes arbitrary host code.
+
 ### `from-data`
 
 For a template-driven workflow, use:
@@ -976,20 +1188,50 @@ Translation is handled as a source-preserving edit. The source deck remains
 read-only, and the candidate is checked for both target text correctness and
 style/layout stability.
 
+`--source-lang` is a controlled detector mode, not a general language-identification
+service: the current contract normalizes `zh`, `en`, and `multi` (with the CLI's
+`cjk` alias), using structural
+CJK and conservative Latin heuristics. Decks dominated by other scripts should
+be classified through reviewed units or an upstream localization system rather
+than treated as automatically understood by the scanner.
+
 ### Recommended sequence
 
 ```bash
 xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --output i18n-source.json --json
 xdoc pptx i18n-plan --source source.pptx --units i18n-source.json --data translations.json --output i18n-plan.json --json
+# Use the planner's textPlan artifact only when that lower-level route is selected.
+xdoc pptx i18n-text-plan --source source.pptx --data i18n-text-plan-input.json --output i18n-text-plan.json --json
 xdoc pptx replace-text --source source.pptx --data replacements.json --output translated.pptx --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
 xdoc pptx i18n-scan --source translated.pptx --mode candidate --units i18n-source.json --data translations.json --output i18n-candidate.json --json
 ```
 
-The planner uses stable unit ids and source hashes. It blocks unknown ids,
-source mismatches, missing translations, conflicting scopes, and preserve units
-that unexpectedly receive target text. It can materialize guarded `replaceText`,
-`replaceChartText`, or run-level patch artifacts.
+The source scan emits `i18nUnits` as the stable inventory. Its `hits[]` entries
+are diagnostic evidence; do not derive replacement indexes or selectors from
+`hits[].location`. The planner consumes unit ids and source hashes, then blocks
+unknown ids, source mismatches, missing translations, conflicting scopes, and
+preserve units that unexpectedly receive target text. Its `applyGate` is the
+permission to materialize guarded `replaceText`, `replaceChartText`, or
+run-level patch artifacts; a planner `pass` is not by itself final delivery
+approval.
+
+Planner status is deliberately explicit: `blocked` means conflicts exist,
+`review-required` means an apply-blocking review remains, `incomplete` means a
+required translation is missing, and `pass` is the only state that can open the
+apply gate. Final delivery still requires the candidate, style, visual, and text
+overflow gates.
+
+For a lower-level text-only route, `i18n-text-plan` emits run-level `set-run`
+operations from the planner's `pptx-i18n-text-plan-input/v1` artifact. Mixed-style
+paragraphs whose anchors cannot be mapped safely remain review-required instead
+of being flattened heuristically.
+
+Review-classified units are fail-closed. A reviewed unit enters the normal
+execution primitives only when its translation carries
+`reviewDecision: "translate"` and a matching `sourceHash`; otherwise a supplied
+target remains a review conflict. This is also how shared slide-layout and
+slide-master text is explicitly authorized.
 
 Use the full plan persisted by `--output` to materialize those artifacts; the
 compact stdout result is intentionally a routing summary. `replace-text`
@@ -1014,6 +1256,15 @@ workbook findings remain review signals.
 and paragraph styles, text-box structure, tables, chart XML, relationships,
 hyperlinks, animation/timing parts, and style-relevant part presence. Font-size
 repairs made solely to fit translated text are reported separately.
+
+After applying a translation, run candidate mode as the authoritative
+target-consistency gate. It verifies the translated units supplied in the
+`translations[]` input using the source unit selectors; it does not silently
+authorize omitted review units. For every unit it verifies,
+`currentText == targetText` must hold as canonical raw text: no trimming, case
+folding, whitespace collapsing, or Unicode normalization is performed. A
+selector-missing, selector-ambiguous, source-residual, or target-mismatch
+blocker therefore remains a delivery failure even when the file opens.
 
 ## Brand, theme, chrome, and refurbishment
 
@@ -1078,6 +1329,22 @@ The audit checks slide count and preservation of source text, shapes, pictures,
 tables, charts, media, notes, hyperlinks, and mapped source slides. A contact
 diff is still required for human visual review.
 
+Without `--map`, the default comparison is a zero-based one-to-one slide
+mapping. Split, merge, reorder, or intentional slide-count changes require an
+explicit reference map; approved changes belong in that map rather than being
+inferred from a visual diff. This keeps preservation claims tied to an explicit
+source-to-output identity relation.
+
+The current skin-first orchestration profile is deliberately bounded: the
+default guard is 2,500,000 input bytes, 120 slides, and 1,200 shapes. The limits
+are a release-specific safety gate while the pipeline avoids repeated full-deck
+passes; they are not a universal maximum for PPTX files or a promise that a
+larger deck cannot be handled by another workflow. The command's default gates
+also reject new high or medium visual issues and require the preservation audit
+to pass. `refurbish-skin` reports a suggested contact-diff path but does not
+render that contact sheet by default, so run `contact-diff` explicitly before
+human approval.
+
 ### Template and style reuse
 
 The bridge also supports explicit reuse workflows:
@@ -1123,13 +1390,34 @@ re-audit the resulting package. The checks cover:
 - OPC content-type declarations, relationship parts, and part truth; and
 - required attributes, legal comparisons, and attribute/value range constraints.
 
-The current source audit corpus contains hundreds of generated child-order and
-attribute rules plus more than one hundred unambiguous part-truth mappings.
-Those tables are implementation data, not a versioned promise that every OOXML
+For the generated audit corpus examined in the `cbcab15e` source snapshot and
+the runtime-facing `cbcab15e` contract, the current counts are measurable:
+
+| Corpus                           |                  Current count | What it protects                                      |
+| -------------------------------- | -----------------------------: | ----------------------------------------------------- |
+| Child-order source elements      |                            486 | Namespace-aware OOXML child placement                 |
+| Writer-order rules               | 416 (plus 71 contextual rules) | Safe serialization after a mutation                   |
+| Child cardinality / choice rules |                    1,608 / 207 | Required, repeatable, and mutually exclusive children |
+| Semantic rules                   |      82 source / 81 normalized | Cross-part and value-level semantic checks            |
+| Attribute constraint entries     |                             27 | Numeric ranges and legal comparisons                  |
+| OPC part-truth mappings          |                            107 | Content types and relationship types                  |
+
+These tables are implementation data, not a versioned promise that every OOXML
 feature is editable; they can grow as the pinned format facts are refreshed.
 Findings retain their part, element, attribute, and rule context in
 `semanticIssues[]`; a bounded `fixPatch` is only a proposal and must be
 reapplied and revalidated before it can clear a gate.
+
+### Regression evidence is part of the product
+
+At the `cbcab15e` source snapshot reviewed for this document, a repository
+inventory found 58 MoonBit test-bearing files and 763 test declarations under
+the native PPTX bridge, plus 27 test-bearing files and 655 declarations under
+the xdoc CLI/conversion runtime. These are test-corpus counts, not a claim that
+every declaration passed in this exact environment; release evidence should pair
+the source test run with the CLI smoke probe, schema snapshot, and representative
+PPTX fixtures. The point is operational: an execution layer earns trust through
+repeatable regression assets, not only through a long operation list.
 
 ### Macro, signature, and encryption policy
 
@@ -1186,10 +1474,15 @@ part of the document boundary, not an afterthought in the caller.
 
 ### Atomicity
 
-One-shot apply writes a candidate only after the patch succeeds. In daemon mode,
-apply works on a serialized or cloned candidate snapshot and commits the session
-only after successful serialization. A failed operation does not leave the
-in-memory session partially mutated.
+Patch execution is all-or-nothing at the presentation-state boundary: the
+operation set runs against an isolated candidate, and the original presentation
+adopts it only after every operation succeeds. In one-shot mode, PPTX delivery
+and sidecar delivery are separate filesystem writes rather than one atomic
+evidence transaction. In daemon mode, a failed patch does not replace the prior
+presentation, but the session can advance before output-path validation,
+serialization, PPTX writing, or sidecar writing completes. A later delivery
+failure can therefore leave the in-memory session advanced; inspect or restart
+that session before retrying.
 
 ## Sidecars, replay, audit, and rollback
 
@@ -1202,19 +1495,33 @@ Successful `new` and `apply` operations write a sidecar by default:
 The sidecar schema is `pptx-apply-sidecar/v1` and records:
 
 - the materialized patch, with path-based assets inlined;
-- input and output identity;
+- input and output paths plus command metadata;
 - patch source and asset-root metadata;
 - the xdoc build id; and
 - the apply report and operation traces.
 
-This is deliberately portable: an agent can replay or audit a prior change
-without re-deriving selectors from the binary deck.
+Treat this as one revision's materialized plan-and-evidence record, not a
+cryptographic commit or a self-contained deck archive. Path-based patch assets
+are inlined, but the source and output PPTX bytes are not; the record does not
+carry input/output deck hashes, patch hashes, parent links, or a branch chain,
+and path metadata can retain absolute paths. An agent can inspect the recorded
+patch and report without re-deriving selectors, while replay or rollback of an
+existing-deck edit still requires the currently resolved input to remain
+accessible or to be remapped by the surrounding system. Replay does not verify
+that the resolved input still matches the original source, so blob retention,
+source/output hashes, and revision history remain orchestrator
+responsibilities.
 
 ```bash
 xdoc pptx audit --from-sidecar updated.pptx.xdoc.json --json
 xdoc pptx replay --from-sidecar updated.pptx.xdoc.json --output recovered.pptx
 xdoc pptx rollback --from-sidecar updated.pptx.xdoc.json --output recovered.pptx
 ```
+
+`audit --from-sidecar` parses and projects the sidecar's recorded history; it
+does not reopen the candidate or rerun a fresh semantic audit. Use `inspect`,
+`vision-check`, `diff`, and rendered evidence when current candidate bytes must
+be revalidated.
 
 Use `--no-sidecar` only when the evidence record is intentionally stored
 elsewhere.
@@ -1259,9 +1566,59 @@ The foreground server currently processes connections serially, which keeps deck
 mutation deterministic. A higher-throughput host should add explicit per-session
 locking before introducing concurrent handlers.
 
+The daemon defaults to a loopback-only local RPC boundary and authenticates
+requests with a 256-bit bearer token stored in its state file. State replacement
+uses a temporary file and rename, with mode `0600` where supported; keep both the
+state and auto-spawn log private. Do not broaden `XDOC_DAEMON_ADDR` beyond a
+trusted local boundary. A cached session is authoritative for its keyed path
+until eviction and is not re-stat'ed or hash-checked on every cache hit, so use
+one-shot mode or exclusive path ownership when another process may replace an
+input file.
+
+The verified runtime emits `xdoc-daemon-status/v1` for status reports. The
+generated CLI schema currently advertises `daemon-status/v1`, and the internal
+newline-delimited `xdoc-daemon-rpc/v1` framing is not a published compatibility
+boundary. Integrate through `xdoc daemon` and preserve the raw report until
+those identifiers and the RPC policy are reconciled.
+
 Use `--daemon-strict` in a workflow where a lost session would invalidate the
 run's assumptions. Use plain `--daemon` when a safe one-shot fallback is
 acceptable.
+
+### Optional HTTP service boundary
+
+The source tree also contains a separate `xdoc-server` service package. It is
+not a subcommand of the top-level `xdoc` binary and should not be confused with
+the local PPTX daemon. Its current HTTP surface is deliberately conversion- and
+extraction-oriented:
+
+- public `/healthz` and `/readyz` probes, plus optionally authenticated
+  versioned routes for capabilities and metrics;
+- synchronous and queued `/v1/pptx/convert` requests;
+- `/v1/pptx/parse`, `/md`, `/text`, `/map`, `/resources`, `/notes`, `/links`,
+  `/fonts`, and `/check`, plus `/v1/html/md`; and
+- `/v1/jobs` submission, status, deletion, and result retrieval with
+  `job/v1`, `artifact-bundle/v1`, and `artifact-zip/v1` response envelopes.
+
+The service defaults to `0.0.0.0:8080`; API-key enforcement is off unless
+configured, and the source package does not provide built-in TLS termination.
+Production deployments should explicitly enable authentication or isolate the
+listener behind a trusted ingress that terminates TLS. `/readyz` proves process
+and workspace readiness, not that every optional conversion backend is
+available; inspect `checks.pdfBackend` and run representative format probes.
+The service also has explicit body, connection, handler, queue, job-retention,
+concurrency, rate-limit, API-key, CORS, and remote-URL controls. Queued jobs can
+be cancelled before they start, while running jobs are not currently safely
+cancelled; retention is bounded by TTL and capacity. Upload workspaces are
+private and cleaned up. Remote HTML fetching is disabled by default; if enabled,
+review its SSRF and egress policy because private, loopback, and link-local
+targets remain blocked unless a separate override is set.
+
+The current service surface does not expose the PPTX patch/apply, i18n, vision,
+or refurbishment editing actions; use the CLI, daemon, or library facades for
+those operations. This separation is useful for platform architects: a
+read/convert plane can be deployed independently while the mutation plane
+retains the stronger candidate and evidence workflow.
 
 ## Runtime and embedding guidance
 
@@ -1272,11 +1629,29 @@ machine callers:
 
 1. pin the executable version;
 2. capture `xdoc schema` at startup or cache it by version;
-3. send JSON on stdout and treat stderr as diagnostics;
+3. request the documented machine result and keep stdout and stderr separate;
 4. preserve the report and sidecar with the output;
-5. enforce an output policy using `status`, `agentGate`, and selected issue
-   severities; and
+5. enforce an output policy using the report-specific status, gates, hashes,
+   and issue severities when present; and
 6. re-run the relevant gate after every automatic repair.
+
+The process boundary is command-specific and is published in a command- or
+family-level `ioContract` when one is available. Coverage is not yet uniform
+across every top-level command and PPTX action; for commands without a
+fine-grained contract, pin the runtime and validate the observed report and
+exit behavior before integrating it.
+
+| Channel     | Integration rule                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| stdout      | Parse only the documented machine result. With `--json`, both successful and structured failure reports may be emitted on stdout; large i18n planner/scan commands use compact JSON by default and reserve `--json-full` for the complete report. Conversion, extraction, and preflight primarily write filesystem artifacts and may leave stdout unused.                                                                         |
+| stderr      | Treat it as diagnostics or logs. Without JSON mode, human-readable errors are written here; in JSON mode, stderr may remain empty even when the command exits non-zero.                                                                                                                                                                                                                                                           |
+| exit status | Interpret it together with the command report. Exit 0 means the command-level success condition passed, but exit 3 can still accompany a complete planner or gate report that explains why publication is blocked. Some comparison commands keep their gate verdict solely in `agentGate` while returning 0 after a completed comparison. A stopped `xdoc daemon status --json` query can also return 0 with `status: "stopped"`. |
+| filesystem  | Resolve output identity from the schema, retain the produced manifest/report, and never infer success merely from the existence of a file. Existing paths normally require an explicit overwrite policy.                                                                                                                                                                                                                          |
+
+This distinction matters in a queue worker: capture stdout, stderr, exit status,
+and declared artifacts independently, then route the job from the versioned
+report. Do not discard stdout simply because the process returned non-zero, and
+do not treat exit 0 as a universal publish decision.
 
 ### Library integration
 
@@ -1289,12 +1664,36 @@ compatibility adapter rather than importing internal package paths.
 
 The native-first executable avoids a requirement for a full office desktop
 installation. It still needs the runtime backends and fonts required by the
-requested conversion. PDF authorization may also require a signed license JSON
-provided through `--license`, depending on the build and deployment policy.
+requested conversion. Runtime PDF authorization and source-code licensing are
+separate boundaries. In the verified development build, a missing or inactive
+PDF license can impose a 2 MiB PPTX input limit and add an `XDOC DEMO`
+watermark, rather than uniformly rejecting conversion; exact behavior is
+edition- and policy-specific. A signed license JSON may be supplied through
+`--license`, depending on the build and deployment policy.
 
-The current source module declares `PolyForm-Noncommercial-1.0.0`. Verify the
-license of the exact binary and any bundled backend before shipping a commercial
-service; this document is a technical description, not legal advice.
+The repository is source-available under `PolyForm-Noncommercial-1.0.0` by
+default, while individual bridge components can carry different terms (for
+example, the PPTX bridge module declares Apache-2.0). Verify the distribution
+terms of the exact binary and every bundled backend before shipping a
+commercial service; this document is a technical description, not legal advice.
+
+### Font and cold-start determinism
+
+Rendering provenance includes more than the PDF/PNG backend. Font lookup can
+change pagination, glyph fallback, and wall-clock cost, so a worker should make
+font policy explicit:
+
+- set `XDOC_FONT_CACHE` to a controlled, persisted cache location when repeated
+  jobs should share resolved fonts;
+- set `XDOC_DISABLE_REMOTE_FONTS=1` or `true` for an offline-only worker; and
+- when an offline cache has been fully provisioned, place the resolver's
+  `.xdoc-font-cache-ready` marker in that cache so missing families do not cause
+  remote probing.
+
+Keep the cache policy, font inventory, backend identity, and render manifest with
+the job record. Benchmark cold-cache, warm-cache, and daemon-reused runs
+separately; `durationMs` and conversion timing fields are evidence for one build,
+not a cross-machine latency SLA.
 
 ## Command reference
 
@@ -1308,7 +1707,7 @@ service; this document is a technical description, not legal advice.
 | `check`   | Run fonts, links, compatibility, assets, and policy checks                    | `preflight/v1` JSON                        |
 | `pptx`    | Create, patch, inspect, render, compare, translate, brand, or refurbish decks | PPTX plus versioned reports                |
 | `pdf`     | Inspect, extract text from, or render PDFs                                    | PDF diagnostics, text, or PNG              |
-| `daemon`  | Start, inspect, or stop the local session service                             | `daemon-status/v1` or diagnostics          |
+| `daemon`  | Start, inspect, or stop the local session service                             | `xdoc-daemon-status/v1` or diagnostics     |
 | `schema`  | Print the machine-readable CLI and patch contract                             | `cli-agent/v1` JSON                        |
 
 ### PPTX action families
@@ -1338,25 +1737,43 @@ When in doubt, ask the command-specific schema instead of guessing.
 
 The following identifiers are useful when validating an integration:
 
-| Contract                                                     | Meaning                                                  |
-| ------------------------------------------------------------ | -------------------------------------------------------- |
-| `cli-agent/v1`                                               | Top-level CLI discovery response                         |
-| `capabilities/v1`                                            | Document kinds, output formats, and backend requirements |
-| `pptx-patch/v1`                                              | Patch operation registry and JSON schema                 |
-| `pptx-inspect/v1`                                            | Read-only deck inspection                                |
-| `pptx-select/v1`                                             | Deterministic selector resolution                        |
-| `pptx-preview/v1`                                            | Rendered PNG manifest                                    |
-| `pptx-vision/v1`                                             | Static and semantic visual-risk report                   |
-| `pptx-diff/v1`                                               | Deterministic structural source/candidate diff           |
-| `pptx-vision-diff/v1`                                        | Source/candidate visual issue diff                       |
-| `pptx-apply/v1`                                              | Apply result                                             |
-| `pptx-dry-run/v1`                                            | Non-writing apply result                                 |
-| `pptx-apply-sidecar/v1`                                      | Portable patch and evidence record                       |
-| `pptx-contact-diff/v1`                                       | Source/candidate contact sheet evidence                  |
-| `batch/v1`                                                   | Multi-input conversion summary                           |
-| `map/v1`, `resources/v1`, `notes/v1`, `links/v1`, `fonts/v1` | Structured extraction artifacts                          |
-| `preflight/v1`                                               | Input diagnostics and risk summary                       |
-| `pdf-inspect/v1`, `pdf-text/v1`                              | PDF diagnostics and extraction                           |
+| Contract                                                                                | Meaning                                                     |
+| --------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `cli-agent/v1`                                                                          | Top-level CLI discovery response                            |
+| `capabilities/v1`                                                                       | Document kinds, output formats, and backend requirements    |
+| `pptx-patch/v1`                                                                         | Patch operation registry and JSON schema                    |
+| `pptx-inspect/v1`                                                                       | Read-only deck inspection                                   |
+| `pptx-select/v1`                                                                        | Deterministic selector resolution                           |
+| `pptx-preview/v1`                                                                       | Rendered PNG manifest                                       |
+| `pptx-vision/v1`                                                                        | Static and semantic visual-risk report                      |
+| `pptx-diff/v1`                                                                          | Deterministic structural source/candidate diff              |
+| `pptx-vision-diff/v1`                                                                   | Source/candidate visual issue diff                          |
+| `pptx-apply/v1`                                                                         | Apply result                                                |
+| `pptx-dry-run/v1`                                                                       | Non-writing apply result                                    |
+| `pptx-apply-sidecar/v1`                                                                 | Materialized patch and evidence record (not a deck archive) |
+| `pptx-audit/v1`, `pptx-rollback/v1`                                                     | Sidecar history projection and bounded recovery             |
+| `pptx-contact-diff/v1`                                                                  | Source/candidate contact sheet evidence                     |
+| `pptx-recipe/v1`, `pptx-recipe-compile/v1`                                              | High-level recipe input and compiled operation report       |
+| `pptx-i18n-units/v1`, `pptx-i18n-translations/v1`                                       | Stable translation inventory and guarded translation input  |
+| `pptx-i18n-scan-result/v1`, `pptx-i18n-candidate-result/v1`, `pptx-i18n-plan-result/v1` | Compact scan, candidate-gate, and planner results           |
+| `pptx-i18n-scan/v1`, `pptx-i18n-plan/v1`                                                | Persisted translation inventory/gate and execution plan     |
+| `pptx-i18n-text-plan-input/v1`, `pptx-i18n-text-plan/v1`                                | Lower-level run-mapping input and text plan                 |
+| `pptx-replace-text/v1`, `pptx-replace-chart-text/v1`                                    | Guarded visible-text replacement reports                    |
+| `pptx-i18n-style-diff/v1`                                                               | Translation-specific style and structure gate               |
+| `pptx-refurbish-skin/v1`, `pptx-refurbish-audit/v1`                                     | Skin-first orchestration and preservation audit             |
+| `pptx-chrome-detect/v1`, `pptx-chrome-remove/v1`, `pptx-chrome-apply/v1`                | Structural chrome discovery and mutation reports            |
+| `pptx-brand-check/v1`, `pptx-theme-remap/v1`                                            | Brand compliance and native theme-remap reports             |
+| `pptx-shape-catalog/v1`, `pptx-theme-catalog/v1`                                        | Discoverable shape and theme catalogs                       |
+| `pptx-enum-registry/v1`, `pptx-error-catalog/v1`                                        | Controlled vocabularies and published bridge errors         |
+| `pptx-xl-chart-type-map/v1`, `pptx-chart-style-catalog/v1`                              | Chart support-status map and style catalog                  |
+| `batch/v1`                                                                              | Multi-input conversion summary                              |
+| `map/v1`, `resources/v1`, `notes/v1`, `links/v1`, `fonts/v1`                            | Structured extraction artifacts                             |
+| `preflight/v1`                                                                          | Input diagnostics and risk summary                          |
+| `pdf-inspect/v1`, `pdf-text/v1`                                                         | PDF diagnostics and extraction                              |
+| `xdoc-daemon-status/v1`                                                                 | Runtime daemon state and endpoint diagnostics               |
+| `daemon-status/v1`                                                                      | Stale generated-schema label; do not use as the runtime id  |
+| `readyz/v1`, `job/v1`                                                                   | Optional HTTP service readiness and queued-job records      |
+| `artifact-bundle/v1`, `artifact-zip/v1`, `error/v1`                                     | Optional HTTP artifact and error envelopes                  |
 
 Treat a schema version as a compatibility boundary. If a worker sees an unknown
 version, it should preserve the raw report and stop at the integration boundary
@@ -1438,7 +1855,7 @@ The defensible technical value is the combination of:
 2. an agent-readable operation and error contract;
 3. source-preserving edits;
 4. deterministic static and rendered evidence; and
-5. a portable history record.
+5. a declared-dependency history record.
 
 Those pieces reduce the cost of supervising AI-generated documents. They do not
 eliminate human review or guarantee universal PPTX compatibility, so product
@@ -1465,6 +1882,31 @@ claims should stay tied to the measured contract and its declared limitations.
    parity.
 10. A successful command is not evidence that the content's facts, numbers,
     legal language, or brand approvals are correct.
+11. The optional HTTP service package currently covers conversion, extraction,
+    preflight, and job orchestration; it does not expose the PPTX patch/i18n/
+    vision/refurbishment mutation surface.
+12. The supported external onboarding boundary is the CLI and its schema. A
+    bundled MCP server or IDE installer is not part of the current release
+    contract.
+13. The 0.3.0 PDF discovery map omits the executable `pdf render` action even
+    though CLI help and schema examples expose it. Integrations should pin the
+    build and retain this exception until the discovery contract is corrected.
+14. `discovery.commands`, `schema --index`, capability `enabled` status, and
+    command `ioContract` fields are useful but not exhaustive or live host
+    readiness proofs. Cache the full schema and run representative probes.
+15. The runtime daemon status id is `xdoc-daemon-status/v1`, while the generated
+    schema still advertises `daemon-status/v1`; the internal RPC framing is not
+    a published compatibility contract.
+16. Patch operations are transactional at the presentation-state boundary,
+    but PPTX and sidecar writes are separate, and a daemon delivery failure can
+    leave its in-memory session advanced. Sidecars do not carry deck hashes or
+    cryptographic revision links.
+17. The standalone HTTP service defaults to `0.0.0.0:8080` with API-key
+    enforcement disabled unless configured and no built-in TLS; `/readyz` is
+    process/workspace readiness, not proof that every backend is available.
+18. Source licensing and runtime PDF authorization are separate. In the
+    verified development build, an inactive PDF license can impose the 2 MiB
+    PPTX limit and `XDOC DEMO` watermark; verify the exact artifact and terms.
 
 ## Evidence and release discipline
 
@@ -1486,9 +1928,62 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.3.0 (91f7b66b). Re-run the discovery
+This document is anchored to xdoc 0.3.0 (cbcab15e). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
+
+### Minimal release acceptance probe
+
+A release candidate should prove more than `--help`. Use a deterministic patch
+such as:
+
+```json
+{
+  "schemaVersion": 1,
+  "ops": [
+    { "op": "add-slide" },
+    {
+      "op": "add-text-box",
+      "slide": 0,
+      "x": "0.8in",
+      "y": "1.4in",
+      "w": "8in",
+      "h": "0.8in",
+      "name": "ProbeTitle",
+      "text": "xdoc release probe"
+    }
+  ]
+}
+```
+
+Save it as `probe.patch.json`, then run the smallest end-to-end gate in a
+temporary directory:
+
+```bash
+xdoc schema > runtime-schema.json
+xdoc pptx apply --patch probe.patch.json --output probe.pptx --dry-run --json > dry-run.json
+xdoc pptx apply --patch probe.patch.json --output probe.pptx --json > apply.json
+xdoc pptx inspect probe.pptx --json > inspect.json
+xdoc pptx vision-check probe.pptx --json > vision.json
+xdoc pptx preview probe.pptx --output-dir preview --contact-sheet contact.png --json > preview.json
+xdoc pptx audit --from-sidecar probe.pptx.xdoc.json --json > audit.json
+```
+
+The acceptance conditions are intentionally small and exact:
+
+- the schema identifies `cli-agent/v1` and the expected build;
+- dry-run returns `pptx-dry-run/v1` and does not create `probe.pptx`;
+- apply returns `pptx-apply/v1` and writes both the candidate and sidecar;
+- inspect returns `pptx-inspect/v1` and resolves one slide plus `ProbeTitle`;
+- vision returns `pptx-vision/v1` with no issues for this fixture;
+- preview returns `pptx-preview/v1` and writes one slide PNG plus the contact
+  sheet; and
+- sidecar audit returns `pptx-audit/v1` with `status: "success"`.
+
+Run broader conversion, chart, translation, and refurbishment probes when those
+surfaces are part of the release. This compact check is only the minimum proof
+that schema discovery, dry-run isolation, mutation, reopening, static evidence,
+rendering, and history verification still connect end to end.
 
 ## Appendix A: complete canonical patch operation list
 

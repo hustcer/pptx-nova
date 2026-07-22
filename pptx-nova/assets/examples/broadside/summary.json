@@ -3,7 +3,7 @@
   "deckkit": "broadside",
   "caseId": "broadside.golden-html",
   "kind": "golden",
-  "title": "this is the broadside style",
+  "title": "the broadside style",
   "source": {
     "content": "pptx-nova/assets/deckkits/examples/broadside-content.json",
     "build": "pptx-nova/assets/deckkits/examples/broadside-build.mjs",
@@ -99,12 +99,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 317834,
-      "sha256": "d39267e60b85e21ce45200ada56df99c314a877537abd1b9d6c9c8f0e4e2b698"
+      "bytes": 250123,
+      "sha256": "d04636d2c5fe2a29fd730a0ae44118caaaa60a5e2fdddd8063d9981cc8f60480"
     },
     "webp": {
-      "bytes": 100066,
-      "sha256": "0d68775affa4b0566b88b68fdc526f4b3c39ed9bc7767fb3fe3d0b6946557fd5"
+      "bytes": 110098,
+      "sha256": "c95f77af095931b4b9602ef50d4d4e875ce92e52fe04f200dfadd04fa98b784c"
     }
   }
 }

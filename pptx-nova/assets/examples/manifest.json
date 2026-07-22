@@ -330,7 +330,7 @@
       "kind": "golden",
       "readiness": "production",
       "version": "0.1.0",
-      "title": "this is the broadside style",
+      "title": "the broadside style",
       "bestFor": [
         "brand manifesto",
         "founder vision deck",
@@ -343,29 +343,29 @@
       "files": {
         "deck": {
           "path": "broadside/deck.pptx",
-          "bytes": 35035,
-          "sha256": "59125d8cc0b040f152c8b597c441aad756a56bd7b6a23cef3ca645ebd35be7de"
+          "bytes": 35029,
+          "sha256": "36c858d6463f0cb643448dc8dc6acebf2fb3a75cd243758ebd540531caa3e4db"
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
-          "bytes": 100066,
-          "sha256": "0d68775affa4b0566b88b68fdc526f4b3c39ed9bc7767fb3fe3d0b6946557fd5",
+          "bytes": 110098,
+          "sha256": "c95f77af095931b4b9602ef50d4d4e875ce92e52fe04f200dfadd04fa98b784c",
           "quality": 82
         },
         "content": {
           "path": "broadside/content.json",
-          "bytes": 9399,
-          "sha256": "c9c3ac14edf9a67d656f24c1d92afc03573a8a144ca9ef554a22e4495bbb0547"
+          "bytes": 9391,
+          "sha256": "4bbebd904db08a03cc9129bc8826121a60c17c21d0fdb312da1503ee403a9969"
         },
         "brief": {
           "path": "broadside/brief.md",
-          "bytes": 739,
-          "sha256": "d93f27d27aa321264096ed5fb75c04cad1c7346933ca568675cd09c169c80ad2"
+          "bytes": 731,
+          "sha256": "2d6be5fd06db17e7b886ccfd1ab991805c767ed7367d3f4796417d82d84a1064"
         },
         "summary": {
           "path": "broadside/summary.json",
-          "bytes": 2776,
-          "sha256": "342272b3b37b6254b61cfd2649e2aa4e1ba8be9f278704bfae13bab544a49c8c"
+          "bytes": 2768,
+          "sha256": "e6277dfdf0f534867977e1d95e5931ced2afd1459147a92479fa8bc4dfa1f214"
         }
       },
       "validation": {

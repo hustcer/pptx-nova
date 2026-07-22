@@ -5,7 +5,7 @@ Showcase case: `broadside.golden-html`
 Readiness: `production`
 Slides: 16
 Patch ops: 888
-Title: this is the broadside style
+Title: the broadside style
 
 ## Best For
 

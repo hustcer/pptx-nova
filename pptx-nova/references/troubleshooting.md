@@ -106,26 +106,59 @@ exclusive 边界）才需要按 message 里的范围手改。写 patch 前就用
 | `alpha` / gradient `pos`             | 0..1      | 小数分数，**不是 0..100**  |
 | autofit `fontScale`                  | 1..100    | 且要求 `mode: "text"`      |
 
-## 写出侧自检 warnings —— xdoc 内部 bug 信号，不是你的错
+## 写出侧自检 warnings 与 semanticIssues[] —— 语义审计信号
 
-apply / dry-run 报告的 `warnings[]` 里有四类**写出侧自检**前缀（按 OOXML 规范
+apply / dry-run 报告的 `warnings[]` 里有五类**写出侧自检**前缀（按 OOXML 规范
 对 xdoc 本次生成/改写的 part 做的检查）：
 
 | 前缀            | 含义                                                               |
 | --------------- | ------------------------------------------------------------------ |
 | `child-order:`  | 子元素被写到 OOXML 规范顺序之外（含期望顺序全文）                  |
 | `dangling-rel:` | r:id / r:embed / r:link 引用在所属 `.rels` 里不存在                |
+| `dangling-ref:` | 动画/build 的 `spid` 引用了 part 内不存在的形状 id（cNvPr）        |
 | `duplicate-id:` | cNvPr / sldId 等 id 在 part 内重复（PowerPoint 会提示"修复"）      |
 | `part-truth:`   | relationship 指向缺失 part / 类型错配 / part 缺 Content-Types 声明 |
 
 例：`child-order: ppt/slides/slide1.xml: <a:pPr> child <a:spcAft> must come
-before <a:buChar> (schema order: …)`。这些都指向 **xdoc 自身 writer 的内部
-bug**，不是 patch 内容问题：
+before <a:buChar> (schema order: …)`。
 
-- **不要**为绕过它改写 patch 或重试原 op——告警来自生成器，不来自你的输入。
-- 产物通常仍可打开（PowerPoint 可能提示"修复"）；如可接受可继续，但应把完整
-  warning 文本上报给维护者（它精确指出了位置与期望值）。
-- 干净构建下这些告警恒为空；出现即值得记录。
+**来源判断**：从零由 xdoc 生成的 deck 上出现这些告警 = xdoc writer 内部 bug，
+不要为绕过它改写 patch，应把完整 warning 上报维护者。**编辑既有 deck** 时它们
+更多是原文件里预存的缺陷（外部工具删了形状却留下动画引用等）——这时走下面的
+`semanticIssues[]` 修复循环。
+
+### `semanticIssues[]` —— 结构化语义问题 + 确定性 fixPatch
+
+同一批发现还会以结构化形式出现在 apply / dry-run 报告顶层 `semanticIssues[]`：
+
+```jsonc
+{
+  "code": "dangling-ref", // dangling-rel | dangling-ref | duplicate-id | part-truth
+  "part": "ppt/slides/slide1.xml",
+  "message": "<p:spTgt> spid=\"2\" references no <cNvPr> with id=\"2\" in the part",
+  "fix": {
+    // 仅确定性修复才附带
+    "fixPatch": [{ "op": "set-slide-animations", "slide": 0, "remove": ["5"] }],
+    "reason": "remove the 1 animation entries targeting missing shape id 2 …",
+    "confidence": 0.9,
+    "autoRetry": true,
+    "requiresRawXml": false,
+  },
+}
+```
+
+处理规则：
+
+- `fix.autoRetry: true` → 直接把 `fixPatch` 合并进 ops 数组（或单独 apply 一次）
+  重跑即可，无需问用户；修完再 dry-run 一次确认 `semanticIssues` 清零。
+- `fix.requiresRawXml: true` → `fixPatch` 含 `patch-ooxml` op，apply 时必须加
+  `--allow-raw-xml`（如"补建缺失 rId"：唯一孤儿 image/media part 会被确定性
+  重新挂回缺失的 relationship）。
+- 没有 `fix` 的 issue = 修复不确定（多个候选孤儿 part、preserve-only 动画等），
+  保持现状并把 message 原文上报，不要自造修复。
+- `remove-shape` 已自动清理被删形状（含组内子形状）的动画与 build 引用，删除
+  带动画的形状**不需要**先手动清动画；出现 `dangling-ref` 通常来自 deck 预存
+  缺陷而非本次操作。
 
 ## 错误分类速查（24 类 errorCatalog）
 

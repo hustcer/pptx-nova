@@ -2,6 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 import {
+  applyMemoryFill,
+  buildMemoryFillView,
   buildTranslationMemory,
   expandReviewInventory,
   materializeTranslations,
@@ -139,4 +141,73 @@ test('translation memory merges planner target-segment repair templates by unitI
   assert.equal(repaired.unitOverrides[0].unitId, 'slide-1')
   assert.equal(repaired.unitOverrides[0].targetSegmentsContractId, 'sha256:contract')
   assert.equal(repaired.unitOverrides[0].targetSegments.length, 2)
+})
+
+test('the memory fill view carries only memoryId, sourceText, and targetText per line', () => {
+  const memory = buildTranslationMemory(scan, {
+    sourceSha256: 'sha256:source',
+    unitsSha256: 'sha256:units',
+    targetLang: 'de',
+  })
+  const view = buildMemoryFillView(memory)
+  const lines = view
+    .trim()
+    .split('\n')
+    .map((line) => JSON.parse(line))
+  assert.equal(lines.length, memory.entries.length)
+  for (const [index, line] of lines.entries()) {
+    assert.deepEqual(Object.keys(line).sort(), ['memoryId', 'sourceText', 'targetText'])
+    assert.equal(line.memoryId, memory.entries[index].memoryId)
+    assert.equal(line.sourceText, memory.entries[index].sourceText)
+    assert.equal(line.targetText, null)
+  }
+})
+
+test('a partial JSONL fill merges by memoryId without touching other entries', () => {
+  const memory = buildTranslationMemory(scan, {
+    sourceSha256: 'sha256:source',
+    unitsSha256: 'sha256:units',
+    targetLang: 'de',
+  })
+  const revenue = memory.entries.find((entry) => entry.sourceText === 'Revenue')
+  const { memory: merged, filledCount } = applyMemoryFill(
+    memory,
+    `${JSON.stringify({ memoryId: revenue.memoryId, sourceText: 'Revenue', targetText: 'Umsatz' })}\n`,
+  )
+  assert.equal(filledCount, 1)
+  assert.equal(merged.entries.find((entry) => entry.sourceText === 'Revenue').targetText, 'Umsatz')
+  assert.equal(merged.entries.find((entry) => entry.sourceText === 'Master title').targetText, null)
+  // The input memory object stays untouched.
+  assert.equal(memory.entries.find((entry) => entry.sourceText === 'Revenue').targetText, null)
+})
+
+test('a fill with unknown ids, stale sourceText, or unfilled targetText fails closed', () => {
+  const memory = buildTranslationMemory(scan, {
+    sourceSha256: 'sha256:source',
+    unitsSha256: 'sha256:units',
+    targetLang: 'de',
+  })
+  const revenue = memory.entries.find((entry) => entry.sourceText === 'Revenue')
+  assert.throws(
+    () =>
+      applyMemoryFill(memory, `${JSON.stringify({ memoryId: 'sha256:nope', targetText: 'x' })}\n`),
+    /unknown memoryId/,
+  )
+  assert.throws(
+    () =>
+      applyMemoryFill(
+        memory,
+        `${JSON.stringify({ memoryId: revenue.memoryId, sourceText: 'Stale', targetText: 'x' })}\n`,
+      ),
+    /sourceText is stale/,
+  )
+  assert.throws(
+    () =>
+      applyMemoryFill(
+        memory,
+        `${JSON.stringify({ memoryId: revenue.memoryId, targetText: null })}\n`,
+      ),
+    /targetText must be filled/,
+  )
+  assert.throws(() => applyMemoryFill(memory, '\n\n'), /contains no entries/)
 })

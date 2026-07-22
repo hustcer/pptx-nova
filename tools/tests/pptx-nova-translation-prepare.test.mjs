@@ -1,6 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { chmodSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs'
+import {
+  chmodSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -57,6 +64,31 @@ if (args[0] === 'schema') {
   }
   const translations = JSON.parse(readFileSync(value('--data'), 'utf8')).translations
   const output = value('--output')
+  const segmentUnits = (process.env.FAKE_PLAN_SEGMENTS ?? '').split(',').filter(Boolean)
+  const missingSegments = segmentUnits.filter((unitId) => {
+    const entry = translations.find((item) => item.unitId === unitId)
+    return !Array.isArray(entry?.targetSegments) || entry.targetSegments.some((segment) => typeof segment?.text !== 'string')
+  })
+  if (missingSegments.length > 0) {
+    const report = {
+      schemaVersion: 'pptx-i18n-plan/v1', status: 'blocked',
+      summary: { translationCount: translations.length },
+      reviewRequired: missingSegments.map((unitId) => ({
+        unitId,
+        repair: {
+          schemaVersion: 'pptx-i18n-target-segments-repair/v1', kind: 'target-segments',
+          translationPatchTemplate: {
+            unitId,
+            targetSegments: [{ segmentId: unitId + '-s1', text: null }],
+            targetSegmentsContractId: 'contract-' + unitId,
+          },
+        },
+      })),
+      conflicts: [], missingTranslations: [], applyGate: { passed: false }, deliveryGate: { passed: false }
+    }
+    writeFileSync(output, JSON.stringify(report))
+    print({ schemaVersion: 'pptx-i18n-plan-result/v1', status: 'blocked', report: output, applyGate: { passed: false }, nextAction: 'fill-target-segments' })
+  } else {
   const report = {
     schemaVersion: 'pptx-i18n-plan/v1', status: 'pass',
     summary: { translationCount: translations.length, replaceTextCount: translations.length },
@@ -68,6 +100,7 @@ if (args[0] === 'schema') {
   }
   writeFileSync(output, JSON.stringify(report))
   print({ schemaVersion: 'pptx-i18n-plan-result/v1', status: 'pass', report: output, summary: report.summary, applyGate: report.applyGate, nextAction: 'apply-generated-artifacts' })
+  }
 } else if (args[0] === 'pptx' && args[1] === 'replace-text') {
   copyFileSync(value('--source'), value('--output'))
   print({ schemaVersion: 'pptx-replace-text/v1', status: 'success', agentGate: { passed: true } })
@@ -317,4 +350,214 @@ test('translation preparation deduplicates memory and resumes through guarded ap
   assert.equal(applied.summary.translationCount, 5)
   assert.equal(readFileSync(applied.artifacts.candidate, 'utf8'), 'source bytes')
   assert.equal(readFileSync(join(root, 'probe-count.txt'), 'utf8'), '5')
+})
+
+test('translation preparation accepts a pre-probed run directory holding only xdoc-capabilities.json', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-preprobe-'))
+  const source = join(root, 'source.pptx')
+  const runDir = join(root, 'run')
+  writeFileSync(source, 'source bytes')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(
+    join(runDir, 'xdoc-capabilities.json'),
+    JSON.stringify({ schemaVersion: 'cli-agent/v1', version: 'pre-probe' }),
+  )
+  const inventory = run([
+    '--source',
+    source,
+    '--source-lang',
+    'multi',
+    '--target-lang',
+    'de',
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    fakeXdoc(root),
+    '--progress',
+    'off',
+    '--json',
+  ])
+  assert.equal(inventory.status, 'needs-review-decisions')
+})
+
+test('translation preparation still rejects a reused run directory with real artifacts', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-reuse-'))
+  const source = join(root, 'source.pptx')
+  const runDir = join(root, 'run')
+  writeFileSync(source, 'source bytes')
+  mkdirSync(runDir, { recursive: true })
+  writeFileSync(join(runDir, 'xdoc-capabilities.json'), '{}')
+  writeFileSync(join(runDir, 'leftover.json'), '{}')
+  const rejected = run(
+    [
+      '--source',
+      source,
+      '--source-lang',
+      'multi',
+      '--target-lang',
+      'de',
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc(root),
+      '--progress',
+      'off',
+      '--json',
+    ],
+    1,
+  )
+  assert.match(rejected.error.message, /must be new, pre-probed/)
+})
+
+test('target-segment repair rounds write sequenced scaffolds and accept the filled file via --memory', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-repair-'))
+  const source = join(root, 'source.pptx')
+  const runDir = join(root, 'run')
+  const xdoc = fakeXdoc(root)
+  writeFileSync(source, 'source bytes')
+  const base = [
+    '--source',
+    source,
+    '--source-lang',
+    'multi',
+    '--target-lang',
+    'de',
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    xdoc,
+    '--progress',
+    'off',
+    '--json',
+  ]
+
+  const inventory = run(base)
+  assert.equal(inventory.status, 'needs-review-decisions')
+  const decisionsPath = inventory.artifacts.reviewDecisionsTemplate
+  const decisions = JSON.parse(readFileSync(decisionsPath, 'utf8'))
+  decisions.byText[0].decision = 'translate'
+  decisions.byText[0].reason = 'Visible slide copy in the source language.'
+  writeFileSync(decisionsPath, JSON.stringify(decisions, null, 2))
+  const resumed = run([...base, '--review-decisions', decisionsPath])
+  assert.equal(resumed.status, 'needs-translations')
+
+  const memoryPath = join(runDir, 'translation-memory.json')
+  const memory = JSON.parse(readFileSync(memoryPath, 'utf8'))
+  memory.entries.find((entry) => entry.sourceText === 'Revenue').targetText = 'Umsatz'
+  memory.entries.find((entry) => entry.sourceText === 'Master title').targetText = 'Mastertitel'
+  memory.entries.find((entry) => entry.sourceText === 'Forecast').targetText = 'Prognose'
+  memory.unitOverrides.push({
+    unitId: 'u3',
+    reviewDecision: 'translate',
+    reason: 'Visible shared layout text.',
+  })
+  writeFileSync(memoryPath, JSON.stringify(memory, null, 2))
+
+  const segmentsEnv = { FAKE_PLAN_SEGMENTS: 'u1,u2' }
+  const firstRound = run([...base, '--apply', '--overwrite'], 0, segmentsEnv)
+  assert.equal(firstRound.status, 'needs-target-segments')
+  const firstRepairPath = join(runDir, 'translation-memory.repair.json')
+  assert.equal(firstRound.artifacts.memoryRepair, firstRepairPath)
+
+  // Fill only u1 and pass the repair file back through --memory: before the
+  // sequenced scaffold fix this failed with "memoryRepair output must not
+  // resolve to the read-only memory input".
+  const firstRepair = JSON.parse(readFileSync(firstRepairPath, 'utf8'))
+  firstRepair.unitOverrides.find((item) => item.unitId === 'u1').targetSegments[0].text = 'Umsatz'
+  writeFileSync(firstRepairPath, JSON.stringify(firstRepair, null, 2))
+  const firstRepairBytes = readFileSync(firstRepairPath, 'utf8')
+
+  const secondRound = run(
+    [...base, '--memory', firstRepairPath, '--apply', '--overwrite'],
+    0,
+    segmentsEnv,
+  )
+  assert.equal(secondRound.status, 'needs-target-segments')
+  const secondRepairPath = join(runDir, 'translation-memory.repair-2.json')
+  assert.equal(secondRound.artifacts.memoryRepair, secondRepairPath)
+  assert.equal(readFileSync(firstRepairPath, 'utf8'), firstRepairBytes)
+
+  const secondRepair = JSON.parse(readFileSync(secondRepairPath, 'utf8'))
+  secondRepair.unitOverrides.find((item) => item.unitId === 'u1').targetSegments[0].text = 'Umsatz'
+  secondRepair.unitOverrides.find((item) => item.unitId === 'u2').targetSegments[0].text = 'Umsatz'
+  writeFileSync(secondRepairPath, JSON.stringify(secondRepair, null, 2))
+
+  const finalRound = run(
+    [...base, '--memory', secondRepairPath, '--apply', '--overwrite'],
+    0,
+    segmentsEnv,
+  )
+  assert.equal(finalRound.status, 'prepared')
+})
+
+test('the compact fill view feeds --apply --fill without touching the full memory JSON', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-fill-'))
+  const source = join(root, 'source.pptx')
+  const runDir = join(root, 'run')
+  const xdoc = fakeXdoc(root)
+  writeFileSync(source, 'source bytes')
+  const base = [
+    '--source',
+    source,
+    '--source-lang',
+    'multi',
+    '--target-lang',
+    'de',
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    xdoc,
+    '--progress',
+    'off',
+    '--json',
+  ]
+
+  const inventory = run(base)
+  assert.equal(inventory.status, 'needs-review-decisions')
+  const decisionsPath = inventory.artifacts.reviewDecisionsTemplate
+  const decisions = JSON.parse(readFileSync(decisionsPath, 'utf8'))
+  decisions.byText[0].decision = 'translate'
+  decisions.byText[0].reason = 'Visible slide copy in the source language.'
+  writeFileSync(decisionsPath, JSON.stringify(decisions, null, 2))
+  const resumed = run([...base, '--review-decisions', decisionsPath])
+  assert.equal(resumed.status, 'needs-translations')
+  assert.match(resumed.nextAction, /translation-memory\.fill\.jsonl/)
+
+  const fillPath = resumed.artifacts.memoryFill
+  assert.equal(fillPath, join(runDir, 'translation-memory.fill.jsonl'))
+  const fillLines = readFileSync(fillPath, 'utf8')
+    .trim()
+    .split('\n')
+    .map((line) => JSON.parse(line))
+  assert.equal(fillLines.length, 3)
+  for (const line of fillLines) {
+    assert.deepEqual(Object.keys(line).sort(), ['memoryId', 'sourceText', 'targetText'])
+  }
+  const targets = { Revenue: 'Umsatz', 'Master title': 'Mastertitel', Forecast: 'Prognose' }
+  const filled = fillLines
+    .map((line) => JSON.stringify({ ...line, targetText: targets[line.sourceText] }))
+    .join('\n')
+  const filledPath = join(root, 'filled.jsonl')
+  writeFileSync(filledPath, `${filled}\n`)
+
+  const memoryPath = join(runDir, 'translation-memory.json')
+  const memory = JSON.parse(readFileSync(memoryPath, 'utf8'))
+  memory.unitOverrides.push({
+    unitId: 'u3',
+    reviewDecision: 'translate',
+    reason: 'Visible shared layout text.',
+  })
+  writeFileSync(memoryPath, JSON.stringify(memory, null, 2))
+  const memoryBytes = readFileSync(memoryPath, 'utf8')
+
+  const applied = run([...base, '--apply', '--overwrite', '--fill', filledPath])
+  assert.equal(applied.status, 'prepared')
+  assert.equal(applied.summary.translationCount, 5)
+  // The big memory JSON stays byte-identical; the merged effective memory is
+  // persisted separately for audit.
+  assert.equal(readFileSync(memoryPath, 'utf8'), memoryBytes)
+  const mergedPath = applied.artifacts.memoryFilled
+  assert.equal(mergedPath, join(runDir, 'translation-memory.filled.json'))
+  const merged = JSON.parse(readFileSync(mergedPath, 'utf8'))
+  assert.equal(merged.entries.find((entry) => entry.sourceText === 'Revenue').targetText, 'Umsatz')
 })

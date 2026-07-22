@@ -1,14 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto'
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
@@ -25,6 +17,7 @@ import {
 } from './lib/runner-runtime.mjs'
 import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual-evidence.mjs'
 import { canonicalEvidencePath } from './lib/evidence-paths.mjs'
+import { assertNewOrPreProbedRunDir } from './lib/run-dir.mjs'
 import {
   createPageBitmapCacheBinding,
   pageBitmapCacheMetrics,
@@ -38,6 +31,11 @@ const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
 const MULTI_COLUMN_REVIEW_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-multi-column-review-gate.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 const AGENT_RESULT_SCHEMA_VERSION = 'pptx-nova-translation-result/v1'
+// xdoc `i18n-scan --mode candidate --json` emits the compact candidate-result
+// schema on stdout; the full scan schema only appears with --json-full or in
+// the report persisted via --output. Accept both so the gate binds to the
+// contract, not to one projection of it.
+const CANDIDATE_SCAN_SCHEMAS = ['pptx-i18n-candidate-result/v1', 'pptx-i18n-scan/v1']
 let progressReporter = createProgressReporter({ mode: 'off' })
 const { runJsonPhase, addInternalPhase, requireGate } = createRunnerRuntime({
   getProgressReporter: () => progressReporter,
@@ -52,7 +50,7 @@ Options:
   --units <path>                     Classified/source i18n scan consumed by i18n-plan
   --translations <path>              pptx-i18n-translations/v1 contract
   --output <path>                    Final PPTX published only after machine gates pass
-  --run-dir <path>                   New or empty finalization run directory
+  --run-dir <path>                   New, empty, or pre-probed (only xdoc-capabilities.json) finalization run directory
   --xdoc-bin <path>                  xdoc executable. Defaults to xdoc
   --allow-text-attrs <csv>           Explicit typed i18n-style-diff allowlist
   --multi-column-review-gate <path>  Optional passing bound review gate for review-only vision blockers
@@ -223,8 +221,7 @@ function validatePaths(args) {
     )
   }
   if (existsSync(args.runDir)) {
-    const entries = readdirSync(args.runDir)
-    if (entries.length > 0) throw new Error(`run directory must be new or empty: ${args.runDir}`)
+    assertNewOrPreProbedRunDir(args.runDir)
   }
 }
 
@@ -427,13 +424,24 @@ function runCandidateConsistency(summary, args, artifacts) {
     ],
     artifact: artifacts.candidateScan,
   })
+  const schemaVersion = typeof report?.schemaVersion === 'string' ? report.schemaVersion : null
+  requireGate(
+    summary,
+    'i18n-candidate-consistency-contract',
+    CANDIDATE_SCAN_SCHEMAS.includes(schemaVersion),
+    {
+      schemaVersion,
+      acceptedSchemaVersions: CANDIDATE_SCAN_SCHEMAS,
+      status: report?.status ?? null,
+      message: `The candidate scan must emit a known schema; got ${schemaVersion ?? 'no schemaVersion'} while accepting ${CANDIDATE_SCAN_SCHEMAS.join(' or ')} — the runner and the installed xdoc disagree on the i18n-scan contract`,
+    },
+  )
   requireGate(
     summary,
     'i18n-candidate-consistency',
-    report?.schemaVersion === 'pptx-i18n-scan/v1' &&
-      report?.status === 'pass' &&
-      report?.agentGate?.passed === true,
+    report?.status === 'pass' && report?.agentGate?.passed === true,
     {
+      schemaVersion,
       status: report?.status ?? null,
       blockerCount: Number(report?.agentGate?.blockerCount ?? report?.blockers?.length ?? 0),
       verifiedCount: Number(report?.summary?.verifiedCount ?? 0),
@@ -880,6 +888,12 @@ function failureReferences(error) {
       path: 'references/translation-mode.md',
       section: 'Style Signature Gate',
       reason: 'The stable candidate changed translation-protected style signatures.',
+    },
+    'i18n-candidate-consistency-contract': {
+      path: 'references/translation-runner.md',
+      section: 'Failure routing',
+      reason:
+        'The installed xdoc emitted an i18n-scan schema this runner does not recognize; align the skill and xdoc versions instead of debugging translations.',
     },
     'i18n-candidate-consistency': {
       path: 'references/translation-mode.md',

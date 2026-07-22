@@ -27,6 +27,7 @@ import {
 import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual-evidence.mjs'
 import { annotateTopActionable, evaluateFindings } from './lib/finding-analysis.mjs'
 import { buildLayoutSnapshot, layoutSemanticSha256 } from './lib/layout-snapshot.mjs'
+import { assertNewOrPreProbedRunDir } from './lib/run-dir.mjs'
 import {
   createPageBitmapCacheBinding,
   pageBitmapCacheMetrics,
@@ -536,21 +537,7 @@ function validatePaths(args) {
     throw new Error(`final output directory does not exist: ${dirname(args.output)}`)
   }
   if (existsSync(args.runDir)) {
-    if (!statSync(args.runDir).isDirectory()) {
-      throw new Error(`run directory path already exists and is not a directory: ${args.runDir}`)
-    }
-    const entries = readdirSync(args.runDir)
-    const allowedEntries = new Set(['xdoc-capabilities.json'])
-    const unexpectedEntries = entries.filter((name) => !allowedEntries.has(name))
-    if (unexpectedEntries.length > 0) {
-      throw new Error(
-        `run directory already exists and is not empty/pre-probed: ${args.runDir}; unexpected entries: ${unexpectedEntries.join(', ')}`,
-      )
-    }
-    const capabilityPath = join(args.runDir, 'xdoc-capabilities.json')
-    if (existsSync(capabilityPath) && !statSync(capabilityPath).isFile()) {
-      throw new Error(`pre-probed capability artifact is not a file: ${capabilityPath}`)
-    }
+    assertNewOrPreProbedRunDir(args.runDir)
   }
   if (existsSync(args.output) && !args.overwrite) {
     throw new Error(

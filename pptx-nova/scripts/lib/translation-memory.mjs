@@ -120,6 +120,73 @@ export function buildTranslationMemory(scan, { sourceSha256, unitsSha256, target
   }
 }
 
+// The fill view exposes exactly what an agent needs to translate — memoryId,
+// sourceText, and a targetText slot — as JSONL. The full memory keeps
+// contexts[] and hashes on disk; the agent never has to load them.
+export function buildMemoryFillView(memory) {
+  if (memory?.schemaVersion !== MEMORY_SCHEMA) {
+    throw new Error(`translation memory must use ${MEMORY_SCHEMA}`)
+  }
+  return `${(memory.entries ?? [])
+    .map((entry) =>
+      JSON.stringify({
+        memoryId: entry.memoryId,
+        sourceText: entry.sourceText,
+        targetText: entry.targetText ?? null,
+      }),
+    )
+    .join('\n')}\n`
+}
+
+// Merge a (possibly partial) JSONL fill back into the memory. Lines carry
+// {memoryId, sourceText?, targetText}; unknown ids, stale sourceText, and
+// unfilled targetText fail closed so a truncated or hand-edited fill cannot
+// silently drop translations.
+export function applyMemoryFill(memory, fillText) {
+  if (memory?.schemaVersion !== MEMORY_SCHEMA) {
+    throw new Error(`translation memory must use ${MEMORY_SCHEMA}`)
+  }
+  const merged = structuredClone(memory)
+  const byId = new Map((merged.entries ?? []).map((entry) => [entry.memoryId, entry]))
+  const problems = []
+  let filledCount = 0
+  const lines = String(fillText ?? '')
+    .split('\n')
+    .map((line, index) => ({ line: line.trim(), lineNumber: index + 1 }))
+    .filter(({ line }) => line.length > 0)
+  if (lines.length === 0) throw new Error('memory fill contains no entries')
+  for (const { line, lineNumber } of lines) {
+    let record = null
+    try {
+      record = JSON.parse(line)
+    } catch (error) {
+      problems.push(`line ${lineNumber}: invalid JSON (${error.message})`)
+      continue
+    }
+    const entry = byId.get(record?.memoryId)
+    if (!entry) {
+      problems.push(`line ${lineNumber}: unknown memoryId ${record?.memoryId ?? '(missing)'}`)
+      continue
+    }
+    if (typeof record.sourceText === 'string' && record.sourceText !== entry.sourceText) {
+      problems.push(`line ${lineNumber}: sourceText is stale for ${record.memoryId}`)
+      continue
+    }
+    if (typeof record.targetText !== 'string') {
+      problems.push(`line ${lineNumber}: targetText must be filled for ${record.memoryId}`)
+      continue
+    }
+    entry.targetText = record.targetText
+    filledCount += 1
+  }
+  if (problems.length > 0) {
+    const shown = problems.slice(0, 10).join('; ')
+    const suffix = problems.length > 10 ? ` (+${problems.length - 10} more)` : ''
+    throw new Error(`memory fill rejected: ${shown}${suffix}`)
+  }
+  return { memory: merged, filledCount }
+}
+
 export function materializeTranslations(scan, memory) {
   if (memory?.schemaVersion !== MEMORY_SCHEMA) {
     throw new Error(`translation memory must use ${MEMORY_SCHEMA}`)
@@ -234,7 +301,7 @@ export function mergeTranslationMemoryRepairs(memory, plan) {
       ),
     ),
     instructions:
-      'Fill every targetSegments[].text value, keep targetSegmentsContractId unchanged, then pass this file back with --memory and --apply --overwrite.',
+      'Fill every targetSegments[].text value, keep targetSegmentsContractId unchanged, then rerun with --apply --overwrite passing this repair file via --memory. Any further scaffold is written to a new translation-memory.repair-N.json, so the file you pass back stays read-only. Segments must keep the source run-group order: when the natural target word order would move text across a group boundary (German/Japanese/Korean verb placement around a hyperlink), rewrite into an order-preserving equivalent such as the German imperative instead of reordering groups.',
   }
   return merged
 }

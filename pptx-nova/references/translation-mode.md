@@ -83,20 +83,28 @@ once (`decision` plus `reason` cover every unit carrying that text; `context`
 reports the covered unit count, categories, and slides), and add `decisions[]`
 entries only when one specific unit needs a different decision — a per-unit
 entry overrides the matching `byText[]` rule for that unit alone. If it returns
-`needs-translations`, fill each unique `translation-memory.json` entry once.
-Exact repeated source strings share one target; use `unitOverrides[]` only when
-a context needs different wording, target segments, anchors, or an explicit
-review choice. A reviewed executable unit must use
+`needs-translations`, fill the compact `translation-memory.fill.jsonl` view —
+one `{memoryId, sourceText, targetText}` line per unique text — and resume with
+`--apply --fill <fill.jsonl>`; do not load the full `translation-memory.json`
+into context (its `contexts[]` bookkeeping is only needed on disk). Later
+wording revisions may pass a partial fill (only the changed memoryId lines).
+Editing `entries[].targetText` in the memory JSON directly and rerunning with
+`--apply` remains supported.
+Exact repeated source strings share one target; use `unitOverrides[]` (in the
+memory JSON) only when a context needs different wording, target segments,
+anchors, or an explicit review choice. A reviewed executable unit must use
 `reviewDecision: "translate"`; use `reviewDecision: "preserve"` to omit it.
 Then resume with `--apply`. The runner revalidates source bytes, classified-unit
 bytes, languages, and every source hash before producing a stable prepared
 candidate. Feed that candidate, the emitted classified scan, and
 `translations.json` to the finalizer in `references/translation-runner.md`.
 If the planner emits target-segment repairs, preparation stops with
-`needs-target-segments` and writes `translation-memory.repair.json`, merging
-each fillable template into the existing `unitOverrides[]` by `unitId`. Fill
-every null segment, preserve the contract id, and resume with
-`--memory <repair-file> --apply --overwrite`.
+`needs-target-segments` and writes a repair scaffold (first round:
+`translation-memory.repair.json`; later rounds: `translation-memory.repair-N.json`
+so the file you pass back stays read-only — read the actual path from
+`summary.artifacts.memoryRepair`), merging each fillable template into the
+existing `unitOverrides[]` by `unitId`. Fill every null segment, preserve the
+contract id, and resume with `--memory <repair-file> --apply --overwrite`.
 
 The memory exposes only counts for `languageUncertain`, `shared`,
 `embeddedWorkbook`, and `other` review partitions. Add
@@ -215,6 +223,13 @@ authoritative lower-level contract and debugging path.
    - Preserve `targetSegmentsContractId`. It binds the mapping to the current
      hyperlink/style/field/break/tab topology even when the concatenated source
      text did not change.
+   - Target segments must follow the source run-group order. When the natural
+     target word order cannot keep that order — verb-final or verb-second
+     languages such as German, Japanese, or Korean moving a verb behind a
+     hyperlinked name ("Visit Anthropic" → "Anthropic besuchen") — do not
+     reorder the groups; rewrite the translation into an order-preserving
+     equivalent instead (for example the German imperative
+     "Besuchen Sie Anthropic").
    - Rerun `i18n-plan`. Never apply a template with `ready=false`; only the new
      plan with `applyGate.passed=true` authorizes execution.
 
@@ -391,8 +406,13 @@ authoritative lower-level contract and debugging path.
       --units <run-dir>/i18n-scan-classified.json \
       --data <run-dir>/translations.json \
       --output <run-dir>/i18n-scan-candidate.json \
+      --overwrite \
       --json
     ```
+
+    Keep `--overwrite` in reruns: without it a rerun exits with an OutputExists
+    error (`outputUntouched: true` in the error JSON) and the previous report
+    stays on disk — never read that stale file as this run's evidence.
 
     Candidate mode takes the source language and scope from `--units`; it rejects
     `--source-lang` and `--slides` so the command line cannot disagree with the
@@ -463,8 +483,13 @@ authoritative lower-level contract and debugging path.
   - `review-only` blockers resolve through the bound multi-column review
     record.
   - `estimator` blockers (`text-overflow-estimate`,
-    `multi-column-text-overflow`) are static text-fit estimates; confirm
-    against rendered evidence and the final PNG before rewording text.
+    `multi-column-text-overflow`) are static text-fit estimates. When the
+    rendered frame-fit measurement proves the same shape's text fits, xdoc
+    downgrades the finding to `low` automatically — the message ends with
+    "rendered layout proves the text fits its frame" and metrics carry
+    `renderedFitOverflowYPt` — so it no longer blocks and needs no rewording
+    round. Only reword text when the estimator finding survives arbitration;
+    confirm against rendered evidence and the final PNG first.
   - `static-geometry` blockers come from authored-geometry heuristics
     evaluated without rendering.
     New or worsened `chart-title-external-text-collision`,

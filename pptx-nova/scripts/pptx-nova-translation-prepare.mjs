@@ -7,7 +7,6 @@ import {
   mkdirSync,
   readFileSync,
   realpathSync,
-  readdirSync,
   renameSync,
   rmSync,
   statSync,
@@ -17,7 +16,10 @@ import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
 
+import { isNewOrPreProbedRunDir } from './lib/run-dir.mjs'
 import {
+  applyMemoryFill,
+  buildMemoryFillView,
   buildTranslationMemory,
   expandReviewInventory,
   materializeTranslations,
@@ -40,6 +42,9 @@ const usage = `Usage:
 Options:
   --review-decisions <path>  Optional bound language-review decisions.
   --memory <path>            Translation memory to consume; defaults to run-dir/translation-memory.json.
+  --fill <path>              Apply-time JSONL overlay ({memoryId, sourceText?, targetText} per line)
+                             merged into the memory; supports partial/incremental wording revisions
+                             without touching the full memory JSON. Requires --apply.
   --expand-review <name>     Persist one lazy review partition: languageUncertain,
                              shared, embeddedWorkbook, or other.
   --output-candidate <path>  Prepared stable candidate; defaults to run-dir/candidate-prepared.pptx.
@@ -51,8 +56,10 @@ Options:
   --json-full                Print the complete persisted run summary.
   --help                     Show this help.
 
-Without --apply the runner scans/classifies and creates a deduplicated translation-memory template.
-After filling targetText and required per-unit review overrides, rerun the same run directory with --apply.
+Without --apply the runner scans/classifies and creates a deduplicated translation-memory template
+plus a compact translation-memory.fill.jsonl view. Fill targetText in the fill view (or directly in
+the memory JSON) and required per-unit review overrides, then rerun the same run directory with
+--apply [--fill <fill.jsonl>].
 `
 
 const valueFlags = {
@@ -62,6 +69,7 @@ const valueFlags = {
   '--run-dir': 'runDir',
   '--review-decisions': 'reviewDecisions',
   '--memory': 'memory',
+  '--fill': 'fill',
   '--expand-review': 'expandReview',
   '--output-candidate': 'outputCandidate',
   '--xdoc-bin': 'xdocBin',
@@ -76,6 +84,7 @@ function parseArgs(argv) {
     runDir: '',
     reviewDecisions: '',
     memory: '',
+    fill: '',
     expandReview: '',
     outputCandidate: '',
     xdocBin: 'xdoc',
@@ -123,6 +132,10 @@ function parseArgs(argv) {
   args.source = resolve(cwd, args.source)
   args.runDir = resolve(cwd, args.runDir)
   args.reviewDecisions = args.reviewDecisions ? resolve(cwd, args.reviewDecisions) : ''
+  args.fill = args.fill ? resolve(cwd, args.fill) : ''
+  if (args.fill && !args.apply) {
+    throw new Error('--fill requires --apply; the fill overlay is merged at apply time')
+  }
   args.memory = args.memory
     ? resolve(cwd, args.memory)
     : join(args.runDir, 'translation-memory.json')
@@ -141,10 +154,12 @@ function artifactsFor(args) {
     classifiedScan: join(args.runDir, 'i18n-scan-classified.json'),
     classificationReport: join(args.runDir, 'i18n-review-classification.json'),
     memory: args.memory,
+    memoryFill: join(args.runDir, 'translation-memory.fill.jsonl'),
+    memoryFilled: join(args.runDir, 'translation-memory.filled.json'),
     reviewInventory: args.expandReview
       ? join(args.runDir, `review-inventory-${args.expandReview}.json`)
       : null,
-    memoryRepair: join(args.runDir, 'translation-memory.repair.json'),
+    memoryRepair: nextRepairArtifactPath(args),
     translations: join(args.runDir, 'translations.json'),
     plan: join(args.runDir, 'i18n-plan.json'),
     textPlan: join(args.runDir, 'i18n-text-plan-input.json'),
@@ -163,6 +178,41 @@ function artifactsFor(args) {
 
 function sha256(path) {
   return `sha256:${createHash('sha256').update(readFileSync(path)).digest('hex')}`
+}
+
+function pathIdentity(path) {
+  const resolved = resolve(path)
+  if (!existsSync(resolved)) return { path: resolved, device: null, inode: null }
+  const state = statSync(resolved)
+  return { path: realpathSync(resolved), device: state.dev, inode: state.ino }
+}
+
+function sameIdentity(left, right) {
+  return (
+    left.path === right.path ||
+    (left.device !== null &&
+      right.device !== null &&
+      left.device === right.device &&
+      left.inode === right.inode)
+  )
+}
+
+// Each targetSegments repair round writes a fresh scaffold file: the file the
+// agent filled and passed back via --memory is a read-only input, so the next
+// scaffold must never resolve to it or to any earlier round's file.
+function nextRepairArtifactPath(args) {
+  const memoryIdentity = pathIdentity(args.memory)
+  for (let round = 1; round <= 20; round += 1) {
+    const name =
+      round === 1 ? 'translation-memory.repair.json' : `translation-memory.repair-${round}.json`
+    const candidate = join(args.runDir, name)
+    if (existsSync(candidate)) continue
+    if (sameIdentity(pathIdentity(candidate), memoryIdentity)) continue
+    return candidate
+  }
+  throw new Error(
+    'too many translation-memory repair rounds in this run directory; start a fresh preparation run',
+  )
 }
 
 function readJson(path, label) {
@@ -466,11 +516,18 @@ function buildMemory(args, artifacts, summary, classified, reporter) {
   phase(summary, reporter, 'translation-memory', () =>
     writeJson(artifacts.memory, memory, args.overwrite),
   )
+  phase(summary, reporter, 'translation-memory-fill-view', () => {
+    if (existsSync(artifacts.memoryFill) && !args.overwrite) {
+      throw new Error(`Output already exists: ${artifacts.memoryFill}`)
+    }
+    mkdirSync(dirname(artifacts.memoryFill), { recursive: true })
+    writeFileSync(artifacts.memoryFill, buildMemoryFillView(memory))
+  })
   summary.memory = memory.summary
   summary.inventory = memory.reviewPartitions
   summary.status = 'needs-translations'
   summary.nextAction =
-    'Fill entries[].targetText and required unitOverrides, then rerun the same command with --apply.'
+    'Fill targetText in translation-memory.fill.jsonl (one {memoryId, sourceText, targetText} line per unique text; much smaller than the full memory JSON) and add required unitOverrides in the memory JSON, then rerun the same command with --apply --fill <fill.jsonl>. Editing entries[].targetText in the memory JSON directly and rerunning with --apply also works.'
   if (LONGER_TARGET_LANGS.has(args.targetLang.toLowerCase().split('-')[0])) {
     summary.nextAction += ` Target ${args.targetLang} text typically runs 20-25% longer; prefer compact wording for labels, legends, badges, and table headers up front to avoid a post-apply overflow rework round.`
   }
@@ -755,6 +812,14 @@ function compactResult(summary) {
         existsSync(summary.artifacts.memory)
           ? summary.artifacts.memory
           : null,
+      memoryFill:
+        phasePassed('translation-memory-fill-view') && existsSync(summary.artifacts.memoryFill)
+          ? summary.artifacts.memoryFill
+          : null,
+      memoryFilled:
+        phasePassed('memory-fill-merge') && existsSync(summary.artifacts.memoryFilled)
+          ? summary.artifacts.memoryFilled
+          : null,
       memoryRepair:
         phasePassed('target-segments-repair-scaffold') && existsSync(summary.artifacts.memoryRepair)
           ? summary.artifacts.memoryRepair
@@ -791,18 +856,9 @@ function validateRun(args, artifacts) {
   if (extname(args.memory).toLowerCase() !== '.json') {
     throw new Error('--memory must be .json')
   }
-  const pathIdentity = (path) => {
-    const resolved = resolve(path)
-    if (!existsSync(resolved)) return { path: resolved, device: null, inode: null }
-    const state = statSync(resolved)
-    return { path: realpathSync(resolved), device: state.dev, inode: state.ino }
+  if (args.fill && extname(args.fill).toLowerCase() !== '.jsonl') {
+    throw new Error('--fill must be .jsonl')
   }
-  const sameIdentity = (left, right) =>
-    left.path === right.path ||
-    (left.device !== null &&
-      right.device !== null &&
-      left.device === right.device &&
-      left.inode === right.inode)
   if (args.apply) {
     if (!existsSync(args.runDir) || !statSync(args.runDir).isDirectory()) {
       throw new Error('--apply requires the existing preparation run directory')
@@ -827,6 +883,7 @@ function validateRun(args, artifacts) {
     ['source', args.source],
     ...(args.reviewDecisions ? [['reviewDecisions', args.reviewDecisions]] : []),
     ...(args.apply ? [['memory', args.memory]] : []),
+    ...(args.fill ? [['fill', args.fill]] : []),
   ]
   const writableArtifacts = Object.entries(artifacts).filter(
     ([label, path]) =>
@@ -852,9 +909,11 @@ function validateRun(args, artifacts) {
       }
     }
   }
-  if (!args.apply && existsSync(args.runDir) && readdirSync(args.runDir).length > 0) {
+  if (!args.apply && !isNewOrPreProbedRunDir(args.runDir)) {
     if (!args.reviewDecisions || !existsSync(artifacts.summary)) {
-      throw new Error('inventory run directory must be new or a bound review-decision resume')
+      throw new Error(
+        'inventory run directory must be new, pre-probed (only xdoc-capabilities.json), or a bound review-decision resume',
+      )
     }
     const prior = readJson(artifacts.summary, 'prior preparation summary')
     if (
@@ -880,7 +939,22 @@ async function main(args, reporter) {
     const classified = prepareInventory(args, artifacts, summary, reporter)
     if (classified) {
       if (args.apply) {
-        const memory = readJson(artifacts.memory, 'translation memory')
+        let memory = readJson(artifacts.memory, 'translation memory')
+        if (args.fill) {
+          memory = phase(summary, reporter, 'memory-fill-merge', () => {
+            if (!existsSync(args.fill) || !statSync(args.fill).isFile()) {
+              throw new Error(`--fill does not exist or is not a file: ${args.fill}`)
+            }
+            const filled = applyMemoryFill(memory, readFileSync(args.fill, 'utf8'))
+            writeJson(artifacts.memoryFilled, filled.memory, args.overwrite)
+            summary.memoryFill = {
+              path: args.fill,
+              filledCount: filled.filledCount,
+              mergedMemory: artifacts.memoryFilled,
+            }
+            return filled.memory
+          })
+        }
         summary.memory = memory.summary ?? null
         summary.inventory = memory.reviewPartitions ?? null
         applyPlan(args, artifacts, summary, classified, memory, reporter)

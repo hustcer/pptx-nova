@@ -25,6 +25,7 @@ yoy = "yoy"
 EDE = "EDE"
 DED = "DED"
 rectangel = "rectangel"
+Sie = "Sie"
 
 [default.extend-identifiers]
 PNGs = "PNGs"

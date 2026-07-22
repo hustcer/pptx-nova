@@ -324,6 +324,11 @@ itself needs to be built or extended.
 
 - [pptx-nova user guide](pptx-nova/README.md)
 - [pptx-nova 中文使用指南](pptx-nova/README.zh-CN.md)
+- [xdoc introduction and architecture](docs/xdoc-introducution.md)
+- [Install the xdoc CLI](docs/xdoc-installation.md)
+- [Integrate xdoc with a PPTX Agent](docs/xdoc-integration.md)
+- [xdoc conformance profile](docs/xdoc-conformance.md)
+- [xdoc runtime schema snapshot](docs/xdoc-schema.json)
 - [pptx-nova scripts](pptx-nova/scripts/README.md)
 - [Translation workflow](pptx-nova/references/translation-mode.md)
 - [pptx-nova assets](pptx-nova/assets/README.md)

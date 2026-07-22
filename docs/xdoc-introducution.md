@@ -10,16 +10,17 @@
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
-> source-owned bridge or contract tests provide the corresponding behavior.
-> The counts below are discovery metadata from the verified build; they are not
-> a claim of universal PPTX feature parity.
+> source-owned bridge or contract tests provide the corresponding behavior. The
+> counts below are discovery metadata from the verified build; they are not a
+> claim of universal PPTX feature parity.
 >
 > **Checked-in contract snapshot:** [xdoc-schema.json](./xdoc-schema.json)
 
 The installed runtime is the authority for executable behavior. At this
-verification point, the checked-in snapshot still carries the previous root
-build identity (`91f7b66b`), while its normalized contract body matches the
-runtime schema; refresh the snapshot before publishing a new binary identity.
+verification point, the checked-in snapshot is semantically equivalent to the
+runtime response for `0.3.0 (cbcab15e)`; JSON formatting may differ between the
+checked-in file and the CLI output. Refresh the snapshot whenever the published
+binary identity changes.
 
 xdoc is a native-first command-line runtime for turning document files into
 structured, reviewable artifacts and for creating or editing native, editable

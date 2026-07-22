@@ -330,8 +330,18 @@ refurbish-skin report gate -> source/candidate layout snapshots -> one final ppt
 Animation, structural, or compatibility high-risk tasks must also append:
 
 ```text
-OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> PowerPoint clean-open smoke gate when available
+OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> target-Office compatibility gate -> PowerPoint clean-open smoke gate when available
 ```
+
+When the user, template, publishing channel, or deployment policy names a target Office release, run
+`xdoc check <candidate> --checks compat --target-office <release> -o <run-dir>/office-compat.json --overwrite`.
+The candidate is compatible only when `checks.compat.details.agentGate.passed=true`; a top-level
+`warning`, `mc:Ignorable`, an `extLst/ext` extension container, or `AlternateContent` fallback does not prove full-fidelity compatibility.
+Read `minimumOfficeVersion`, `unprotectedIssueCount`, `gracefulDegradationIssueCount`, stable `ruleId`,
+and `sampleParts` to decide whether to remove the feature, add a fallback, or explicitly change the
+target policy. Retain `office-compat.json` as delivery evidence. If no target is specified, do not
+invent an older corporate baseline; the xdoc default is Microsoft 365 and still reports the deck's
+derived `minimumOfficeVersion`.
 
 If any gate finds PowerPoint Repair, incorrect OOXML child element order, missing relationship targets,
 embedded workbook/chart cache mismatch, damaged animation timing tree, or an op that generates

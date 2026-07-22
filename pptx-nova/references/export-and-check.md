@@ -138,6 +138,7 @@ For fonts, links, and compatibility:
 ```bash
 xdoc check deck.pptx \
   --checks fonts,links,compat \
+  --target-office 2016 \
   -o <run-dir>/check.json \
   --pretty \
   --overwrite
@@ -145,6 +146,23 @@ xdoc check deck.pptx \
 
 `xdoc check` is not a visual gate. It does not replace `vision-check` or PNG
 review for created/edited decks.
+
+`--target-office` accepts `2007|2010|2013|2016|2019|2021|365` and defaults to
+`365`. For Agent decisions, inspect `checks.compat.details.agentGate`, not only
+the command status:
+
+- `agentGate.passed=true` means every detected OOXML feature is available in
+  the requested target release.
+- `unprotectedIssueCount>0` means newer markup has no recognized compatibility
+  protection and is a structural interoperability risk.
+- `gracefulDegradationIssueCount>0` means `mc:Ignorable`, an OOXML
+  `extLst/ext` extension container, or an `AlternateContent` fallback should
+  let older Office open the deck, but the
+  newer feature may disappear or be replaced; this still fails exact-fidelity
+  delivery to that target.
+- `minimumOfficeVersion` is the derived minimum release for full semantics.
+  Each issue includes a stable `ruleId`, occurrence count, and sample OOXML
+  parts so an Agent can produce a focused repair or policy decision.
 
 For a single PPTX, use `-o <run-dir>/check.json` as the canonical structured
 preflight artifact. Do not add `--json` unless `xdoc check --help` discloses it.

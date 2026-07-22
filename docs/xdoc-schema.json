@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.0 (913a0c99)",
+  "version": "0.3.0 (91f7b66b)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -932,6 +932,19 @@
             "onOmitted": "all"
           }
         },
+        "target-office": {
+          "type": "string",
+          "description": "Target release for compat: 2007|2010|2013|2016|2019|2021|365",
+          "required": false,
+          "default": "365",
+          "enum": ["2007", "2010", "2013", "2016", "2019", "2021", "365"],
+          "strict": true,
+          "valueSyntax": "2007|2010|2013|2016|2019|2021|365",
+          "semanticEffect": {
+            "officeCompatibilityTarget": true,
+            "appliesToChecks": ["compat"]
+          }
+        },
         "rules": {
           "type": "string",
           "description": "Deprecated: custom rule files are no longer accepted; use --checks fonts,links,compat,assets,policy",
@@ -1118,7 +1131,7 @@
       },
       "examples": [
         "xdoc check ./deck.pptx",
-        "xdoc check ./deck.pptx --checks fonts,links,compat --pretty",
+        "xdoc check ./deck.pptx --checks compat --target-office 2016 --pretty",
         "xdoc check ./decks --recursive --out-dir ./out --report ./run.json"
       ],
       "inputMode": "multi-input",
@@ -1159,6 +1172,7 @@
       "usageNotes": [
         "check emits preflight/v1 JSON reports.",
         "Default --checks all currently expands to fonts,links,compat,assets,policy.",
+        "compat compares the full OOXML package against --target-office (default 365), reports minimumOfficeVersion, and distinguishes unprotected features from mc:Ignorable or AlternateContent fallback.",
         "policy currently runs fixed MVP publishing rules."
       ]
     },
@@ -1642,7 +1656,17 @@
             "text-unexpected-wrap",
             "geometry-overlap",
             "arrangement-imbalance",
-            "font-too-small"
+            "font-too-small",
+            "dangling-rel",
+            "dangling-ref",
+            "duplicate-id",
+            "part-truth",
+            "value-out-of-range",
+            "invalid-attribute-value",
+            "missing-required-attribute",
+            "invalid-attribute-comparison",
+            "invalid-xml",
+            "invalid-relationships"
           ],
           "ioContract": {
             "stdout": {
@@ -1661,6 +1685,11 @@
           "fix": {
             "shape": "each issue may carry fix.fixPatch (set-shape position/size) plus fix.reason, fix.confidence, fix.autoRetry",
             "loop": "merge autoRetry:true fixPatch entries into a patch, re-apply, then re-run vision-check; PNG review still covers contrast and decoration-over-title"
+          },
+          "semantic": {
+            "scope": "semanticIssues always covers the full package, even when --slides scopes visual issues",
+            "rules": "82 PowerPoint semantic source rules from the pinned Open-XML-SDK schematron dataset, normalized to 81 runtime rules plus xdoc package/timing safety extensions",
+            "identity": "each issue carries stable ruleId plus part/element/attribute/version context for deterministic Agent handling"
           }
         },
         "diff": {
@@ -2189,7 +2218,7 @@
             "evidenceClasses": {
               "rendered": "chart-title-external-text-collision and rendered-text-outside-page-* are proven on final PDFium/renderer output; never eligible for the human-review exception.",
               "review-only": "multi-column-text-layout-review resolves through the bound multi-column human review record.",
-              "estimator": "text-overflow-estimate and multi-column-text-overflow are static text-fit estimates; confirm against rendered evidence and the final PNG before rewording text.",
+              "estimator": "text-overflow-estimate and multi-column-text-overflow are static text-fit estimates; when the rendered frame-fit measurement proves the same shape's text fits, vision-diff downgrades the finding to low (message notes the downgrade, metrics carry renderedFitOverflowYPt); otherwise confirm against rendered evidence and the final PNG before rewording text.",
               "static-geometry": "remaining kinds come from authored-geometry heuristics evaluated without rendering.",
               "usage": "Every issue carries evidenceClass; agentGate.blockersByEvidenceClass counts the blocking issues per class so estimator noise cannot hide rendered hard blockers."
             }
@@ -27344,6 +27373,7 @@
           "changedParts",
           "semanticChanges",
           "visualRisks",
+          "semanticIssues",
           "warnings",
           "opResults",
           "traces",
@@ -27422,6 +27452,70 @@
                 },
                 "detail": {
                   "type": "string"
+                }
+              }
+            }
+          },
+          "semanticIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["code", "ruleId", "part", "message"],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "dangling-rel",
+                    "dangling-ref",
+                    "duplicate-id",
+                    "part-truth",
+                    "value-out-of-range",
+                    "invalid-attribute-value",
+                    "missing-required-attribute",
+                    "invalid-attribute-comparison",
+                    "invalid-xml",
+                    "invalid-relationships"
+                  ],
+                  "strict": true
+                },
+                "ruleId": {
+                  "type": "string"
+                },
+                "part": {
+                  "type": "string"
+                },
+                "element": {
+                  "type": "string"
+                },
+                "attribute": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "fix": {
+                  "type": "object",
+                  "required": ["fixPatch", "reason", "confidence", "autoRetry", "requiresRawXml"],
+                  "properties": {
+                    "fixPatch": {
+                      "type": "array"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "confidence": {
+                      "type": "number"
+                    },
+                    "autoRetry": {
+                      "type": "boolean"
+                    },
+                    "requiresRawXml": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -27679,6 +27773,7 @@
           "changedParts",
           "semanticChanges",
           "visualRisks",
+          "semanticIssues",
           "warnings",
           "opResults",
           "traces",
@@ -27757,6 +27852,70 @@
                 },
                 "detail": {
                   "type": "string"
+                }
+              }
+            }
+          },
+          "semanticIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["code", "ruleId", "part", "message"],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "dangling-rel",
+                    "dangling-ref",
+                    "duplicate-id",
+                    "part-truth",
+                    "value-out-of-range",
+                    "invalid-attribute-value",
+                    "missing-required-attribute",
+                    "invalid-attribute-comparison",
+                    "invalid-xml",
+                    "invalid-relationships"
+                  ],
+                  "strict": true
+                },
+                "ruleId": {
+                  "type": "string"
+                },
+                "part": {
+                  "type": "string"
+                },
+                "element": {
+                  "type": "string"
+                },
+                "attribute": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "fix": {
+                  "type": "object",
+                  "required": ["fixPatch", "reason", "confidence", "autoRetry", "requiresRawXml"],
+                  "properties": {
+                    "fixPatch": {
+                      "type": "array"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "confidence": {
+                      "type": "number"
+                    },
+                    "autoRetry": {
+                      "type": "boolean"
+                    },
+                    "requiresRawXml": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -28014,6 +28173,7 @@
           "changedParts",
           "semanticChanges",
           "visualRisks",
+          "semanticIssues",
           "warnings",
           "opResults",
           "traces",
@@ -28092,6 +28252,70 @@
                 },
                 "detail": {
                   "type": "string"
+                }
+              }
+            }
+          },
+          "semanticIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["code", "ruleId", "part", "message"],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "dangling-rel",
+                    "dangling-ref",
+                    "duplicate-id",
+                    "part-truth",
+                    "value-out-of-range",
+                    "invalid-attribute-value",
+                    "missing-required-attribute",
+                    "invalid-attribute-comparison",
+                    "invalid-xml",
+                    "invalid-relationships"
+                  ],
+                  "strict": true
+                },
+                "ruleId": {
+                  "type": "string"
+                },
+                "part": {
+                  "type": "string"
+                },
+                "element": {
+                  "type": "string"
+                },
+                "attribute": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "fix": {
+                  "type": "object",
+                  "required": ["fixPatch", "reason", "confidence", "autoRetry", "requiresRawXml"],
+                  "properties": {
+                    "fixPatch": {
+                      "type": "array"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "confidence": {
+                      "type": "number"
+                    },
+                    "autoRetry": {
+                      "type": "boolean"
+                    },
+                    "requiresRawXml": {
+                      "type": "boolean"
+                    }
+                  }
                 }
               }
             }
@@ -29648,6 +29872,127 @@
               },
               "suggestion": {
                 "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "visionReportSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://structurify.io/schemas/pptx-vision.v1.schema.json",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "status",
+          "slideCount",
+          "summary",
+          "issues",
+          "semanticSummary",
+          "semanticIssues"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "type": "string",
+            "enum": ["pptx-vision/v1"],
+            "strict": true
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success"],
+            "strict": true
+          },
+          "slideCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "summary": {
+            "type": "object"
+          },
+          "issues": {
+            "type": "array"
+          },
+          "semanticSummary": {
+            "type": "object",
+            "required": ["passed", "issueCount", "sourceRuleCount", "normalizedRuleCount"],
+            "properties": {
+              "passed": {
+                "type": "boolean"
+              },
+              "issueCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sourceRuleCount": {
+                "type": "integer",
+                "minimum": 82
+              },
+              "normalizedRuleCount": {
+                "type": "integer",
+                "minimum": 81
+              }
+            }
+          },
+          "semanticIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["code", "ruleId", "part", "message"],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "dangling-rel",
+                    "dangling-ref",
+                    "duplicate-id",
+                    "part-truth",
+                    "value-out-of-range",
+                    "invalid-attribute-value",
+                    "missing-required-attribute",
+                    "invalid-attribute-comparison",
+                    "invalid-xml",
+                    "invalid-relationships"
+                  ],
+                  "strict": true
+                },
+                "ruleId": {
+                  "type": "string"
+                },
+                "part": {
+                  "type": "string"
+                },
+                "element": {
+                  "type": "string"
+                },
+                "attribute": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "fix": {
+                  "type": "object",
+                  "required": ["fixPatch", "reason", "confidence", "autoRetry", "requiresRawXml"],
+                  "properties": {
+                    "fixPatch": {
+                      "type": "array"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "confidence": {
+                      "type": "number"
+                    },
+                    "autoRetry": {
+                      "type": "boolean"
+                    },
+                    "requiresRawXml": {
+                      "type": "boolean"
+                    }
+                  }
+                }
               }
             }
           }
@@ -33185,7 +33530,7 @@
     "canonical": "xdoc convert <inputs...> [options]",
     "shorthand": "xdoc <inputs...> [options]",
     "extract": "xdoc extract <inputs...> --parts <parts>",
-    "check": "xdoc check <inputs...> --checks <checks>",
+    "check": "xdoc check <inputs...> --checks <checks> [--target-office 2007|2010|2013|2016|2019|2021|365]",
     "pptx": "xdoc pptx new|apply --patch <patch.json> --output <out.pptx>",
     "pptxRecipe": "xdoc pptx recipe --patch <recipe.json> --compile --json",
     "pptxDiff": "xdoc pptx diff before.pptx after.pptx --json",

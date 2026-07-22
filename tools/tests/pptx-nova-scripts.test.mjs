@@ -51,6 +51,41 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
+function writeFinalizeSemanticFixtures(root, semanticPassed) {
+  const inspectPath = join(root, 'inspect.json')
+  const visionPath = join(root, 'vision.json')
+  const semanticIssues = semanticPassed
+    ? []
+    : [
+        {
+          code: 'duplicate-id',
+          ruleId: 'sdk/unique/p:cNvPr/id/part',
+          part: 'ppt/slides/slide1.xml',
+          message: 'duplicate non-visual property id',
+        },
+      ]
+  writeJson(inspectPath, {
+    schemaVersion: 'pptx-inspect/v1',
+    status: 'success',
+    presentation: { slideCount: 1, size: { width: '13.333in', height: '7.5in' } },
+    slides: [{ index: 0, shapes: [] }],
+  })
+  writeJson(visionPath, {
+    schemaVersion: 'pptx-vision/v1',
+    status: 'success',
+    summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } },
+    issues: [],
+    semanticSummary: {
+      passed: semanticPassed,
+      issueCount: semanticIssues.length,
+      sourceRuleCount: 82,
+      normalizedRuleCount: 81,
+    },
+    semanticIssues,
+  })
+  return { inspectPath, visionPath }
+}
+
 function fileIdentity(path) {
   const bytes = readFileSync(path)
   return {
@@ -367,6 +402,162 @@ test('layout snapshot separates actionable risks from informational inspect gaps
   )
   assert.notEqual(actionable[0].reviewIdentity.sha256, actionable[1].reviewIdentity.sha256)
   assert.equal(readFileSync(outputPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
+})
+
+test('finalize evidence requires a passing semantic vision gate for new decks', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-finalize-semantic-create-'))
+  const { inspectPath, visionPath } = writeFinalizeSemanticFixtures(root, true)
+  const result = runNode([
+    skillPath('scripts/pptx-nova-finalize-evidence.mjs'),
+    '--mode',
+    'studio-create',
+    '--run-dir',
+    root,
+    '--final-inspect',
+    inspectPath,
+    '--vision',
+    visionPath,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'pass')
+  assert.equal(report.summary.semanticValidation.valid, true)
+  assert.equal(report.summary.semanticValidation.passed, true)
+  assert.equal(report.agentSummary.gates.vision.semanticPassed, true)
+  assert.equal(report.agentSummary.gates.vision.semanticSourceRules, 82)
+})
+
+test('finalize evidence blocks new decks with full-package semantic issues', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-finalize-semantic-block-'))
+  const { inspectPath, visionPath } = writeFinalizeSemanticFixtures(root, false)
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-finalize-evidence.mjs'),
+      '--mode',
+      'studio-create',
+      '--run-dir',
+      root,
+      '--final-inspect',
+      inspectPath,
+      '--vision',
+      visionPath,
+      '--json',
+    ],
+    1,
+  )
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'fail')
+  assert.equal(report.agentSummary.decision, 'stop-and-fix')
+  assert.equal(report.agentSummary.gates.vision.semanticPassed, false)
+  assert.ok(report.errors.some((item) => item.code === 'vision-semantic-create-blocker'))
+})
+
+test('finalize evidence rejects non-numeric semantic summary counts', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-finalize-semantic-types-'))
+  const { inspectPath, visionPath } = writeFinalizeSemanticFixtures(root, true)
+  const vision = JSON.parse(readFileSync(visionPath, 'utf8'))
+  vision.semanticSummary.issueCount = null
+  writeJson(visionPath, vision)
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-finalize-evidence.mjs'),
+      '--mode',
+      'studio-create',
+      '--run-dir',
+      root,
+      '--final-inspect',
+      inspectPath,
+      '--vision',
+      visionPath,
+      '--json',
+    ],
+    1,
+  )
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'fail')
+  assert.equal(report.summary.semanticValidation.valid, false)
+  assert.ok(report.errors.some((item) => item.code === 'vision-semantic-evidence-invalid'))
+})
+
+test('finalize evidence rejects incomplete V2 rule coverage', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-finalize-semantic-coverage-'))
+  const { inspectPath, visionPath } = writeFinalizeSemanticFixtures(root, true)
+  const vision = JSON.parse(readFileSync(visionPath, 'utf8'))
+  vision.semanticSummary.sourceRuleCount = 1
+  vision.semanticSummary.normalizedRuleCount = 1
+  writeJson(visionPath, vision)
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-finalize-evidence.mjs'),
+      '--mode',
+      'studio-create',
+      '--run-dir',
+      root,
+      '--final-inspect',
+      inspectPath,
+      '--vision',
+      visionPath,
+      '--json',
+    ],
+    1,
+  )
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.summary.semanticValidation.valid, false)
+  assert.ok(report.errors.some((item) => item.code === 'vision-semantic-evidence-invalid'))
+})
+
+test('finalize evidence rejects malformed residual semantic issue items', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-finalize-semantic-items-'))
+  const { inspectPath, visionPath } = writeFinalizeSemanticFixtures(root, false)
+  const vision = JSON.parse(readFileSync(visionPath, 'utf8'))
+  vision.semanticIssues = [null]
+  writeJson(visionPath, vision)
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-finalize-evidence.mjs'),
+      '--mode',
+      'structural-edit',
+      '--run-dir',
+      root,
+      '--final-inspect',
+      inspectPath,
+      '--vision',
+      visionPath,
+      '--json',
+    ],
+    1,
+  )
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.summary.semanticValidation.valid, false)
+  assert.ok(report.errors.some((item) => item.code === 'vision-semantic-evidence-invalid'))
+})
+
+test('finalize evidence discloses inherited full-deck semantic issues on edits', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-finalize-semantic-edit-'))
+  const { inspectPath, visionPath } = writeFinalizeSemanticFixtures(root, false)
+  const result = runNode([
+    skillPath('scripts/pptx-nova-finalize-evidence.mjs'),
+    '--mode',
+    'structural-edit',
+    '--run-dir',
+    root,
+    '--final-inspect',
+    inspectPath,
+    '--vision',
+    visionPath,
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.status, 'warn')
+  assert.equal(report.agentSummary.decision, 'continue-with-disclosed-risk')
+  assert.equal(report.agentSummary.gates.vision.semanticPassed, false)
+  assert.ok(report.warnings.some((item) => item.code === 'vision-semantic-residual-risk'))
 })
 
 test('layout snapshot keeps explicit slide references beyond summary truncation', () => {
@@ -847,13 +1038,13 @@ if (args[0] === 'schema') {
 } else if (args[0] === 'pptx' && args[1] === 'apply') {
   const output = valueAfter('-o')
   if (args.includes('--dry-run')) {
-    print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], wouldWrite: true, output })
+    print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], semanticIssues: [], wouldWrite: true, output })
   } else {
     writeFileSync(output, 'candidate pptx')
-    print({ schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [], changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], output })
+    print({ schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [], changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], semanticIssues: [], output })
   }
 } else if (args[0] === 'pptx' && args[1] === 'vision-check') {
-  print({ schemaVersion: 'pptx-vision/v1', status: 'pass', summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } }, issues: [] })
+  print({ schemaVersion: 'pptx-vision/v1', status: 'pass', summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } }, issues: [], semanticSummary: { passed: true, issueCount: 0, sourceRuleCount: 82, normalizedRuleCount: 81 }, semanticIssues: [] })
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
   const outputDir = valueAfter('--output-dir')
   const contactSheet = valueAfter('--contact-sheet')
@@ -1831,6 +2022,16 @@ test('create runner executes DeckKit create gates and publishes after preview', 
   assert.equal(compactResult.performance.budget.withinBaseline, true)
   assert.ok(result.stdout.length < readFileSync(summary.artifacts.summary, 'utf8').length)
   assert.equal(summary.agentSummary.decision, 'continue-to-human-review')
+  assert.equal(summary.agentSummary.gates.dryRun.semanticEvidence, true)
+  assert.equal(summary.agentSummary.gates.dryRun.semanticIssues, 0)
+  assert.equal(summary.agentSummary.gates.apply.semanticEvidence, true)
+  assert.equal(summary.agentSummary.gates.apply.semanticIssues, 0)
+  assert.equal(summary.agentSummary.gates.vision.semanticEvidence, true)
+  assert.equal(summary.agentSummary.gates.vision.semanticConsistent, true)
+  assert.equal(summary.agentSummary.gates.vision.semanticPassed, true)
+  assert.equal(summary.agentSummary.gates.vision.semanticIssues, 0)
+  assert.equal(summary.agentSummary.gates.vision.semanticSourceRules, 82)
+  assert.equal(summary.agentSummary.gates.vision.semanticNormalizedRules, 81)
   assert.equal(existsSync(output), true)
   assert.equal(existsSync(join(runDir, 'candidate.pptx')), true)
   assert.equal(existsSync(join(runDir, 'preview.json')), true)
@@ -1850,6 +2051,132 @@ test('create runner executes DeckKit create gates and publishes after preview', 
   ]) {
     assert.ok(gateNames.includes(gate), gate)
   }
+})
+
+test('create runner stops when dry-run reports semantic issues', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-semantic-dry-run-'))
+  const runDir = join(root, 'run')
+  const contentPath = join(runDir, 'content.json')
+  const lockPath = join(runDir, 'deck_lock.json')
+  const output = join(root, 'out.pptx')
+  mkdirSync(runDir, { recursive: true })
+  writeJson(contentPath, swissColumnContent())
+  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+  const source = successfulFakeXdocSource().replace(
+    'visualRisks: [], semanticIssues: [], wouldWrite: true',
+    "visualRisks: [], semanticIssues: [{ code: 'duplicate-id', ruleId: 'sdk/unique/p:cNvPr/id/part', part: 'ppt/slides/slide1.xml', message: 'duplicate id' }], wouldWrite: true",
+  )
+  const fakeXdoc = writeFakeXdoc(root, source)
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-create-run.mjs'),
+      '--deckkit',
+      'swiss-grid',
+      '--content',
+      contentPath,
+      '--lock',
+      lockPath,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    1,
+  )
+  const summary = readCreateSummary(result)
+  assert.equal(summary.status, 'failed')
+  assert.equal(summary.error.phase, 'dry-run')
+  assert.equal(summary.agentSummary.decision, 'stop-and-fix')
+  assert.equal(summary.agentSummary.gates.dryRun.semanticIssues, 1)
+  assert.equal(existsSync(output), false)
+})
+
+test('create runner stops when full-package semantic vision gate fails', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-semantic-vision-'))
+  const runDir = join(root, 'run')
+  const contentPath = join(runDir, 'content.json')
+  const lockPath = join(runDir, 'deck_lock.json')
+  const output = join(root, 'out.pptx')
+  mkdirSync(runDir, { recursive: true })
+  writeJson(contentPath, swissColumnContent())
+  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+  const source = successfulFakeXdocSource().replace(
+    'semanticSummary: { passed: true, issueCount: 0, sourceRuleCount: 82, normalizedRuleCount: 81 }, semanticIssues: []',
+    "semanticSummary: { passed: false, issueCount: 1, sourceRuleCount: 82, normalizedRuleCount: 81 }, semanticIssues: [{ code: 'invalid-attribute-comparison', ruleId: 'sdk/attribute-compare/p:sldRg/st/<=/end', part: 'ppt/slides/slide1.xml', message: 'start exceeds end' }]",
+  )
+  const fakeXdoc = writeFakeXdoc(root, source)
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-create-run.mjs'),
+      '--deckkit',
+      'swiss-grid',
+      '--content',
+      contentPath,
+      '--lock',
+      lockPath,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    1,
+  )
+  const summary = readCreateSummary(result)
+  assert.equal(summary.status, 'failed')
+  assert.equal(summary.error.phase, 'vision-check')
+  assert.equal(summary.agentSummary.decision, 'stop-and-fix')
+  assert.equal(summary.agentSummary.gates.vision.semanticPassed, false)
+  assert.equal(summary.agentSummary.gates.vision.semanticIssues, 1)
+  assert.equal(existsSync(output), false)
+})
+
+test('create runner rejects incomplete V2 semantic rule coverage', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-semantic-coverage-'))
+  const runDir = join(root, 'run')
+  const contentPath = join(runDir, 'content.json')
+  const lockPath = join(runDir, 'deck_lock.json')
+  const output = join(root, 'out.pptx')
+  mkdirSync(runDir, { recursive: true })
+  writeJson(contentPath, swissColumnContent())
+  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+  const source = successfulFakeXdocSource().replace(
+    'semanticSummary: { passed: true, issueCount: 0, sourceRuleCount: 82, normalizedRuleCount: 81 }, semanticIssues: []',
+    'semanticSummary: { passed: true, issueCount: 0, sourceRuleCount: 1, normalizedRuleCount: 1 }, semanticIssues: []',
+  )
+  const fakeXdoc = writeFakeXdoc(root, source)
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-create-run.mjs'),
+      '--deckkit',
+      'swiss-grid',
+      '--content',
+      contentPath,
+      '--lock',
+      lockPath,
+      '--output',
+      output,
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    1,
+  )
+  const summary = readCreateSummary(result)
+  assert.equal(summary.status, 'failed')
+  assert.equal(summary.error.phase, 'vision-check')
+  assert.equal(summary.agentSummary.gates.vision.semanticEvidence, false)
+  assert.equal(existsSync(output), false)
 })
 
 test('create runner resolves relative xdoc-bin before changing into run dir', () => {
@@ -1968,7 +2295,7 @@ if (args[0] === 'schema') {
     commands: { pptx: { subcommands: { apply: {}, 'vision-check': {}, preview: {} }, patchSchema: {}, catalogs: {} } }
   })
 } else if (args[0] === 'pptx' && args[1] === 'apply' && args.includes('--dry-run')) {
-  print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], wouldWrite: true })
+  print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], semanticIssues: [], wouldWrite: true })
 } else if (args[0] === 'pptx' && args[1] === 'apply') {
   print({ schemaVersion: 'pptx-apply/v1', status: 'error', error: { kind: 'OutputExists' }, visualRisks: [] })
   process.exit(9)

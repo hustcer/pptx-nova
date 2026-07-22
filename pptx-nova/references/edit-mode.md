@@ -85,13 +85,19 @@ xdoc pptx apply -p patch.json -i input.pptx -o out.pptx \
 
 Check `resolvedSelectors[]` for every op. If a selector is ambiguous, use the
 reported `suggestions[].fixPatch` and dry-run again. Do not ignore ambiguous or
-unexpected selector resolution.
+unexpected selector resolution. Require an explicit empty `semanticIssues[]`;
+it is the full-package before/after semantic regression gate for the proposed
+edit, including indirect relationship and content-type effects.
 
 After dry-run is clean, apply to a run-dir output:
 
 ```bash
 xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --daemon --json
 ```
+
+Apply must also return `semanticIssues: []`. Stop and repair the patch when it
+reports a semantic issue; do not rely on a later full-deck scan to distinguish
+the edit from inherited debt.
 
 Once the candidate is stable, run one semantic diff and the evidence required
 by `edit-contract.json`, then run `pptx-nova-edit-contract-gate.mjs --strict`.
@@ -106,6 +112,9 @@ changed slide indexes explicitly and review their PNG images at full size before
 using candidate-only `vision-check` for diagnosis rather than treating its full-deck summary as blocking. Existing decks often
 have unrelated legacy issues; separate "changed-slide blockers" from
 "pre-existing residual risk" in the final summary.
+`vision-check.semanticIssues[]` is always full-package evidence, including when
+`--slides` is present. Disclose unresolved entries and compare them with the
+source/edit evidence; do not reinterpret them as slide-scoped findings.
 
 For targeted visual edits, run scoped machine and PNG gates first:
 

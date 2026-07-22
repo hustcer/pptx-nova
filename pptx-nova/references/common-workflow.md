@@ -251,6 +251,11 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
     ```
     Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
+    Require an explicit `semanticIssues: []`. For existing-deck edits this is
+    the full-package before/after issue delta proving that the current patch did
+    not introduce a detected OOXML semantic violation, including indirect
+    `.rels` / Content Types regressions. A missing field is an incompatible xdoc
+    signal, not an implicit pass.
 8.  Apply only after dry-run is clean and selectors are correct. Any validation
     that consumes the applied output (`vision-check`, `convert`, `check`,
     replay/audit) must run after the apply command has completed; do not launch
@@ -264,6 +269,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     scoped preview and `vision-diff` evidence. Use candidate-only
     `vision-check` as a diagnostic when needed; inherited source issues are not
     edit regressions.
+    Require apply to return `semanticIssues: []` before consuming its candidate.
     If `session-rules.json` exists, pass the successful
     `session-rules-resolution.json` to the contract normalizer. The final
     contract gate must report every applicable rule as satisfied before
@@ -276,7 +282,11 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     ```
 
     For create workflows, `summary.bySeverity.high` and
-    `summary.bySeverity.medium` must both be 0.
+    `summary.bySeverity.medium` must both be 0. Also require a consistent
+    full-package semantic result: `semanticSummary.passed=true`,
+    `semanticSummary.issueCount=0`, at least 82 source / 81 normalized rules, and
+    `semanticIssues=[]`. `--slides` scopes visual findings only; semantic issues
+    remain full-package evidence.
     For Studio Create, Reference Create, structural Edit, and manual Template
     Following, save a final inspect report after apply and run the bundled
     high-risk evidence finalizer before preview rendering. If the patch contains
@@ -526,7 +536,8 @@ reports do not decide visual taste, pixel-level layout quality, or whether a
 refurbished deck visibly adopted the requested DeckKit. Micro Edit stays on its
 separate lightweight path.
 
-`vision-check` high/medium issues are blockers for create workflows. Low issues
+`vision-check` high/medium issues and any failed/missing/inconsistent semantic
+gate are blockers for create workflows. Low visual issues
 still deserve judgment, especially small fonts, unexpected subtitle/label wraps,
 dense text, and alignment.
 

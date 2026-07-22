@@ -251,7 +251,7 @@ These rules apply to all new decks, including Express and Studio:
 - When referencing templates, brands, or layouts, write `deck_lock.templateFusion` in semantic layers: `brand` / `layout` / `deck`. Do not guess conflicts and overrides temporarily inside the generator.
 - If the source outline contains only titles or blanks, factual content completed by AI must be written to `deck_lock.assumptions[]`; do not disguise unverified competitors, metrics, cases, or market facts as user-provided content.
 - If the final creation output path already existed before the task began, ask the user to rename, delete, or choose a different path first. Do not overwrite the final path with `--overwrite`.
-- For creation tasks, `vision-check` `summary.bySeverity.high` and `summary.bySeverity.medium` must both be 0.
+- For creation tasks, `vision-check` `summary.bySeverity.high` and `summary.bySeverity.medium` must both be 0, and the full-package semantic evidence must be internally consistent with `semanticSummary.passed=true`, `semanticSummary.issueCount=0`, at least 82 source rules / 81 normalized rules, and `semanticIssues=[]`. Dry-run and apply must each disclose `semanticIssues=[]`; a missing semantic field is not proof of safety.
 - PNG/contact sheet visual review cannot be skipped. It catches real line breaks, character overlap, contrast, decorative occlusion, page-number rhythm, and composition issues that dry-run and `vision-check` cannot see.
 
 ## Common Edit Hard Rules
@@ -264,7 +264,7 @@ These rules apply to modifying existing PPTX files:
 - Only create `session-rules.json` from an explicit current-deck future/carryover instruction. Resolve it from a structured `session-operation.json`; never execute free-form `appliesWhen` text. Pass a successful `session-rules-resolution.json` to the Edit Contract normalizer so rule-owned targets and preserve requirements are hash-bound and verified by the final contract gate. If no active rule applies, continue without extra evidence or user confirmation. Advance the rules to a new revision only after the candidate passes and is accepted.
 - After post-apply evidence is stable, generate `evidence-manifest.json` to bind the candidate SHA-256 and exact evidence-file hashes. The gate must reject a missing/stale manifest, including when the candidate is overwritten at the same path.
 - Visible text-only edits that must preserve existing formatting require `style-diff` evidence. Whole-frame `set-text-frame` may erase run styling even when dry-run, semantic diff, and vision-check appear clean; use an inspect-proven run/text-node preserving edit or treat `target-text-style-changed` as a blocker.
-- Visible edits require changed-scope `vision-diff` by default. Block new or worsened high/medium issues, while treating candidate-only `vision-check` as diagnostic evidence so inherited legacy-deck noise does not become a false blocker.
+- Visible edits require changed-scope `vision-diff` by default. Block new or worsened high/medium issues. Dry-run/apply `semanticIssues[]` are a full-package before/after issue delta and must contain no regression introduced by the edit; the edit-contract gate fails closed when that evidence is missing or non-empty. Candidate-only `vision-check.semanticIssues[]` scans the full package—even with `--slides`—so treat it as diagnostic evidence and disclose inherited legacy-deck semantic debt instead of turning it into a false edit blocker.
 - For strict template following, edit copied/inherited objects or template placeholders. Do not use new text boxes, translucent rectangles, or whole-page image overlays to hide old content and manufacture a page that "looks right".
 - When copying source slides or filling templates, explicitly fill or delete empty structural placeholders such as title/body/dt/sldNum/ftr. Do not leave empty placeholders in PowerPoint edit state just because they are invisible in PNG output. If an actionable finding is intentionally required by the deck's semantics, preserve it only through a source-hash-bound `pptx-nova-review-policy/v1` rule using the exact `reviewIdentity.sha256` from `layout-final.json`; never use a global boolean exception.
 - Identity assets such as logos, client marks, product screenshots, headshots, app icons, and third-party brand graphics must come from user-provided files, source-deck assets whose reuse is allowed, official verifiable sources, or registered authorized sources. When this cannot be confirmed, use text/native shapes instead of generating pseudo-official assets.
@@ -312,7 +312,7 @@ Machine gates cannot see every pixel-level defect. In particular, check:
 When creating or visually significant modifying a deck, close in this order:
 
 ```text
-check-lock -> dry-run -> apply -> vision-check -> structure-check when needed -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> visual_review.json -> clean-open gate when available/high-risk -> narrative quality review when required -> optional xdoc check
+check-lock -> dry-run semanticIssues=0 -> apply semanticIssues=0 -> vision-check visual high/medium=0 + semanticSummary.passed=true for create -> structure-check when needed -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> visual_review.json -> clean-open gate when available/high-risk -> narrative quality review when required -> optional xdoc check
 ```
 
 Generic Edit/Micro Edit must additionally close its own contract:
@@ -410,7 +410,7 @@ After successfully generating, modifying, exporting, or checking, compress the f
 blocks and avoid dumping the full checklist on the user:
 
 1. **Output**: Absolute path to final PPTX/export file + run directory. For translation/refurbish tasks, list every published compare sibling and its run-directory source. Use the compatible unnumbered PNG for decks up to 20 slides; otherwise list the complete numbered `*-01.png`, `*-02.png`, ... set and manifest. The delivery bundle must be proven by the corresponding `*-compare-gate.json.status=pass` and `finalBinding.status=bound`.
-2. **Validation**: One line listing the key gates actually run and their statuses, for example `dry-run pass; apply pass; vision high=0 medium=0; preview reviewed; clean-open not run`.
+2. **Validation**: One line listing the key gates actually run and their statuses, for example `dry-run semantic=0; apply semantic=0; vision high=0 medium=0 semantic=pass; preview reviewed; clean-open not run`.
 3. **Evidence**: List only the 3-6 most important artifacts, such as `patch.json`, `vision.json`, preview manifest/contact sheet, `pptx-diff.json`, and `evidence-summary.json`; do not list artifacts that do not exist.
 4. **Risks/next steps**: Include only items the user still needs to know, such as clean-open not run, fonts not embedded, external links, unsupported objects, manually unreviewed asset licensing, AI factual assumptions, or no remaining risk.
 

@@ -47,12 +47,18 @@ capability probe
 -> check lock
 -> dry-run
 -> apply candidate
--> vision check
+-> full-package visual + semantic vision check
 -> one full preview/contact sheet
 -> atomic publish
 ```
 
 It never marks manual visual review complete.
+
+The runner fails closed on semantic evidence: dry-run and apply must each
+return an explicit empty `semanticIssues[]`; vision must return a consistent
+`semanticSummary`/`semanticIssues[]` pair with `passed=true`, zero issues, and
+at least 82 source rules / 81 normalized rules. Missing fields indicate an
+incompatible xdoc build and stop publication rather than silently degrading the gate.
 
 ## Agent-facing output
 
@@ -60,6 +66,8 @@ It never marks manual visual review complete.
 
 - status, run directory, output path, and review requirement;
 - compact gate and artifact pointers in `agentSummary`;
+- explicit dry-run/apply semantic issue counts plus vision semantic evidence,
+  consistency, pass state, and SDK rule inventory in `agentSummary.gates`;
 - phase and preview performance in `performance`;
 - exact conditional documentation routes in `requiredReferences[]`;
 - the terminal error when execution stops.

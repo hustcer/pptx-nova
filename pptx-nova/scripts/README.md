@@ -18,7 +18,9 @@ Use these entry points from skill workflows:
   validate-content, build, check-lock, dry-run, apply, vision-check, and
   PNG/contact-sheet preview through the shared runner runtime, preserves every
   artifact in the run directory, then atomically publishes the final output
-  after machine gates pass. `--json` emits a compact Agent result with
+  after machine gates pass. Dry-run/apply require explicit zero semantic issues;
+  vision requires a consistent, passing full-package semantic summary. `--json`
+  emits a compact Agent result with
   performance evidence; use `--json-full` or the persisted
   `create-run-summary.json` only for full diagnostics.
 - `pptx-nova-deckkit-refurbish-profile-fill.mjs` - generate missing
@@ -95,7 +97,10 @@ Use these entry points from skill workflows:
 - `pptx-nova-finalize-evidence.mjs` - finalize existing high-risk routes from
   final inspect plus their existing vision/fidelity reports. It writes
   `layout-final.json` and `evidence-summary.json`; it intentionally excludes
-  Micro Edit and does not replace mode-specific gates or PNG review. Read
+  Micro Edit and does not replace mode-specific gates or PNG review. New-deck
+  modes fail on missing/failed semantic vision evidence; existing-deck modes
+  disclose full-package semantic residuals without incorrectly scoping them to changed
+  slides. Read
   `evidence-summary.json.agentSummary` for the stable agent-facing summary.
 - `pptx-nova-feedback-gate.mjs` - final-response guard for Feedback Mode. It
   detects feedback trigger phrases from the original prompt or accepts

@@ -983,6 +983,21 @@ function checkEvidence(contract, args, report) {
   const dryRun = loaded['dry-run']
   if (dryRun && (dryRun.schemaVersion !== 'pptx-dry-run/v1' || dryRun.status !== 'success')) {
     addIssue(report, 'blockers', 'dry-run-not-successful', 'dry-run evidence is not successful')
+  } else if (dryRun && !Array.isArray(dryRun.semanticIssues)) {
+    addIssue(
+      report,
+      'blockers',
+      'dry-run-semantic-evidence-missing',
+      'dry-run semanticIssues evidence is missing or malformed',
+    )
+  } else if (dryRun && dryRun.semanticIssues.length > 0) {
+    addIssue(
+      report,
+      'blockers',
+      'dry-run-semantic-regression',
+      'dry-run introduced semantic regressions',
+      { semanticIssueCount: dryRun.semanticIssues.length },
+    )
   }
   const diff = loaded['semantic-diff']
   if (diff && (diff.schemaVersion !== 'pptx-diff/v1' || diff.status !== 'success')) {

@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { semanticValidationEvidence } from './lib/semantic-evidence.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-finalize-evidence/v1'
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
@@ -132,6 +133,7 @@ function makeReport(args) {
       objectCount: null,
       layoutRisks: { total: null, actionable: null, disclosureOnly: null },
       vision: null,
+      semanticValidation: null,
       visionScope: null,
       changedSlideRisk: null,
       deckResidualRisk: null,
@@ -200,6 +202,11 @@ function buildAgentSummary(report) {
         high: report.summary.vision?.high ?? null,
         medium: report.summary.vision?.medium ?? null,
         low: report.summary.vision?.low ?? null,
+        semanticEvidence: report.summary.semanticValidation?.valid ?? null,
+        semanticPassed: report.summary.semanticValidation?.passed ?? null,
+        semanticIssues: report.summary.semanticValidation?.issueCount ?? null,
+        semanticSourceRules: report.summary.semanticValidation?.sourceRuleCount ?? null,
+        semanticNormalizedRules: report.summary.semanticValidation?.normalizedRuleCount ?? null,
       },
       layout: {
         gate: layout?.status ?? 'not-run',
@@ -464,6 +471,7 @@ function validateVision(args, config, report) {
   const vision = readJson(report, args.vision, 'vision-evidence')
   if (!vision) return
   const counts = severityCountsFromSummary(vision?.summary)
+  const semantic = semanticValidationEvidence(vision)
   const scoped = scopedVisionEvidence(args, vision)
   const gateCounts = !config.clearVision && scoped ? scoped.counts : counts
   let status = 'passed'
@@ -484,6 +492,24 @@ function validateVision(args, config, report) {
     issue(report, 'error', 'vision-report-failed', 'vision report did not succeed', {
       status: vision?.status ?? null,
     })
+  } else if (!semantic.valid && (config.clearVision || semantic.present)) {
+    status = 'failed'
+    issue(
+      report,
+      'error',
+      'vision-semantic-evidence-invalid',
+      'vision semantic evidence must disclose a consistent summary, rule inventory, and issue list',
+      semantic,
+    )
+  } else if (config.clearVision && !semantic.passed) {
+    status = 'failed'
+    issue(
+      report,
+      'error',
+      'vision-semantic-create-blocker',
+      'new-deck workflows require the full-package semantic validation gate to pass',
+      semantic,
+    )
   } else if (config.clearVision && (counts.high > 0 || counts.medium > 0)) {
     status = 'failed'
     issue(
@@ -493,24 +519,44 @@ function validateVision(args, config, report) {
       'new-deck workflows require zero high and medium vision issues',
       counts,
     )
-  } else if (gateCounts.high > 0 || gateCounts.medium > 0) {
-    status = 'warning'
-    if (scoped) {
+  } else {
+    if (!semantic.present) {
+      status = 'warning'
       issue(
         report,
         'warning',
-        'vision-changed-slide-risk',
-        'high/medium issues remain on changed slides',
-        { slides: scoped.slides, ...gateCounts },
+        'vision-semantic-evidence-missing',
+        'semantic evidence is missing; existing-deck workflows must disclose this validation gap',
       )
-    } else {
+    } else if (!semantic.passed) {
+      status = 'warning'
       issue(
         report,
         'warning',
-        'vision-residual-risk',
-        'high/medium issues require changed-slide or inherited-risk review',
-        counts,
+        'vision-semantic-residual-risk',
+        'full-deck semantic issues remain and require inherited-versus-new risk review',
+        semantic,
       )
+    }
+    if (gateCounts.high > 0 || gateCounts.medium > 0) {
+      status = 'warning'
+      if (scoped) {
+        issue(
+          report,
+          'warning',
+          'vision-changed-slide-risk',
+          'high/medium issues remain on changed slides',
+          { slides: scoped.slides, ...gateCounts },
+        )
+      } else {
+        issue(
+          report,
+          'warning',
+          'vision-residual-risk',
+          'high/medium issues require changed-slide or inherited-risk review',
+          counts,
+        )
+      }
     }
   }
   if (vision?.schemaVersion !== 'pptx-vision/v1') {
@@ -529,8 +575,10 @@ function validateVision(args, config, report) {
     scope: scoped ? { slides: scoped.slides, source: scoped.source } : null,
     changedSlideRisk: scoped?.counts ?? null,
     deckResidualRisk: scoped?.residual ?? null,
+    semantic,
   })
   report.summary.vision = counts
+  report.summary.semanticValidation = semantic
   if (scoped) {
     report.summary.visionScope = { slides: scoped.slides, source: scoped.source }
     report.summary.changedSlideRisk = scoped.counts

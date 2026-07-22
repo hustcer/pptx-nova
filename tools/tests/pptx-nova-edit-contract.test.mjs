@@ -117,6 +117,7 @@ function dryRunFixture({ covered = true, source = '', candidate = '' } = {}) {
     input: source,
     wouldWrite: candidate,
     changedParts: ['ppt/slides/slide1.xml'],
+    semanticIssues: [],
     opResults: covered
       ? [
           {
@@ -561,6 +562,7 @@ function writeSessionRuleFixture({
     status: 'success',
     input: fixture.source,
     wouldWrite: fixture.candidate,
+    semanticIssues: [],
     opResults: [
       {
         opIndex: 0,
@@ -759,6 +761,37 @@ test('edit contract gate blocks required targets missing from dry-run coverage',
   assert.equal(report.agentGate.nextAction, 'complete-missing-coverage')
   assert.equal(report.summary.coveredTargetCount, 0)
   assert.ok(report.blockers.some((item) => item.code === 'target-coverage-incomplete'))
+})
+
+test('edit contract gate fails closed when dry-run semantic evidence is missing', () => {
+  const fixture = writeFixture()
+  generateContract(fixture)
+  const dryRun = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  delete dryRun.semanticIssues
+  writeJson(fixture.dryRun, dryRun)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.status, 'fail')
+  assert.ok(report.blockers.some((item) => item.code === 'dry-run-semantic-evidence-missing'))
+})
+
+test('edit contract gate blocks semantic regressions introduced by the edit', () => {
+  const fixture = writeFixture()
+  generateContract(fixture)
+  const dryRun = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  dryRun.semanticIssues = [
+    {
+      code: 'dangling-rel',
+      ruleId: 'sdk/relationship-exists/a:blip/embed',
+      part: 'ppt/slides/slide1.xml',
+      message: 'new image relationship is missing',
+    },
+  ]
+  writeJson(fixture.dryRun, dryRun)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.status, 'fail')
+  assert.ok(report.blockers.some((item) => item.code === 'dry-run-semantic-regression'))
 })
 
 test('edit contract gate blocks reliable changes to non-target shapes', () => {

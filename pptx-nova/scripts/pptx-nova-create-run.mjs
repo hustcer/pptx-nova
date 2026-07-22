@@ -23,6 +23,7 @@ import {
   gateStatus,
 } from './lib/runner-runtime.mjs'
 import { createProgressReporter } from './pptx-nova-progress.mjs'
+import { semanticIssueValid, semanticValidationEvidence } from './lib/semantic-evidence.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
@@ -155,11 +156,14 @@ function severityCounts(value) {
 
 function summarizeApplyReport(report) {
   const visualRisks = report?.visualRisks ?? []
+  const semanticIssues = report?.semanticIssues
   return {
     status: report?.status ?? '',
     warnings: countArray(report?.warnings),
     changedParts: countArray(report?.changedParts),
     opResults: countArray(report?.opResults),
+    semanticEvidence: Array.isArray(semanticIssues) && semanticIssues.every(semanticIssueValid),
+    semanticIssueCount: countArray(semanticIssues),
     visualRisks: {
       high: countSeverity(visualRisks, 'high'),
       medium: countSeverity(visualRisks, 'medium'),
@@ -174,10 +178,19 @@ function summarizeApplyReport(report) {
 
 function summarizeVisionReport(report) {
   const bySeverity = severityCounts(report?.summary?.bySeverity ?? report?.bySeverity)
+  const semanticEvidence = semanticValidationEvidence(report)
   return {
     status: report?.status ?? '',
     issueCount: Number(report?.summary?.issueCount ?? report?.issues?.length ?? 0),
     bySeverity,
+    semantic: {
+      evidence: semanticEvidence.evidence,
+      consistent: semanticEvidence.consistent,
+      passed: semanticEvidence.passed === true,
+      issueCount: semanticEvidence.issueCount,
+      sourceRuleCount: semanticEvidence.sourceRuleCount,
+      normalizedRuleCount: semanticEvidence.normalizedRuleCount,
+    },
   }
 }
 
@@ -365,17 +378,27 @@ function buildAgentSummary(summary) {
         status: dryRun?.status ?? null,
         high: dryRun?.visualRisks?.high ?? null,
         medium: dryRun?.visualRisks?.medium ?? null,
+        semanticEvidence: dryRun?.semanticEvidence ?? null,
+        semanticIssues: dryRun?.semanticIssueCount ?? null,
       },
       apply: {
         gate: gateStatus(apply),
         status: apply?.status ?? null,
         outputExists: apply?.outputExists ?? null,
+        semanticEvidence: apply?.semanticEvidence ?? null,
+        semanticIssues: apply?.semanticIssueCount ?? null,
       },
       vision: {
         gate: gateStatus(vision),
         status: vision?.status ?? null,
         high: vision?.bySeverity?.high ?? null,
         medium: vision?.bySeverity?.medium ?? null,
+        semanticEvidence: vision?.semantic?.evidence ?? null,
+        semanticConsistent: vision?.semantic?.consistent ?? null,
+        semanticPassed: vision?.semantic?.passed ?? null,
+        semanticIssues: vision?.semantic?.issueCount ?? null,
+        semanticSourceRules: vision?.semantic?.sourceRuleCount ?? null,
+        semanticNormalizedRules: vision?.semantic?.normalizedRuleCount ?? null,
       },
       preview: {
         gate: gateStatus(preview),
@@ -565,11 +588,14 @@ function runDryRun(summary, args, artifacts) {
     report?.schemaVersion === 'pptx-dry-run/v1' &&
       dryRun.status === 'success' &&
       dryRun.visualRisks.high === 0 &&
-      dryRun.visualRisks.medium === 0,
+      dryRun.visualRisks.medium === 0 &&
+      dryRun.semanticEvidence &&
+      dryRun.semanticIssueCount === 0,
     {
       schemaVersion: report?.schemaVersion ?? '',
       ...dryRun,
-      message: 'dry-run must succeed with no high/medium visual risks',
+      message:
+        'dry-run must succeed with no high/medium visual risks and explicit zero semantic issues',
     },
   )
 }
@@ -600,6 +626,8 @@ function runApply(summary, args, artifacts) {
       apply.status === 'success' &&
       apply.visualRisks.high === 0 &&
       apply.visualRisks.medium === 0 &&
+      apply.semanticEvidence &&
+      apply.semanticIssueCount === 0 &&
       outputBytes > 0,
     {
       schemaVersion: report?.schemaVersion ?? '',
@@ -607,7 +635,7 @@ function runApply(summary, args, artifacts) {
       outputExists: outputBytes > 0,
       outputBytes,
       message:
-        'apply must succeed, keep high/medium visual risks at zero, and write candidate.pptx',
+        'apply must succeed, keep high/medium visual risks and semantic issues at zero, and write candidate.pptx',
     },
   )
 }
@@ -626,11 +654,15 @@ function runVision(summary, args, artifacts) {
     report?.schemaVersion === 'pptx-vision/v1' &&
       (vision.status === 'pass' || vision.status === 'success') &&
       vision.bySeverity.high === 0 &&
-      vision.bySeverity.medium === 0,
+      vision.bySeverity.medium === 0 &&
+      vision.semantic.evidence &&
+      vision.semantic.consistent &&
+      vision.semantic.passed,
     {
       schemaVersion: report?.schemaVersion ?? '',
       ...vision,
-      message: 'vision-check must pass with high=0 and medium=0',
+      message:
+        'vision-check must pass with high=0, medium=0, and a consistent passing semantic summary',
     },
   )
 }

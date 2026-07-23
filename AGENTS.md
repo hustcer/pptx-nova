@@ -36,3 +36,7 @@ Follow Conventional Commit style as used in history: `feat(pptx-nova): ...`, `fi
 Do not overwrite or delete user-provided decks, reference files, or generated evidence from unrelated runs. Keep `pptx-nova` as the primary user-facing skill; mention `deckkit-maker` only for DeckKit development workflows.
 
 When updating user-facing documentation, keep capability claims precise. Do not imply direct `.xlsx`/`.xls` spreadsheet or arbitrary `.docx` ingestion unless that support is implemented; describe current source inputs as Markdown/text content, pasted tables, PDFs/web pages as extracted source material, existing PPTX files, and CSV/JSON data. Phrase preservation claims for refurbishment or translation as goals unless the workflow and validation gates actually prove them for the specific task.
+
+Public xdoc documentation is executable-first. Describe only published binary distribution channels and behavior verified through the exact runtime's `xdoc --version`, `xdoc schema`, reports, and release evidence. Do not publish private build commands, MoonBit path dependencies, internal package names, unpublished artifacts, or in-process library facades as installation or integration paths.
+
+Maintainer-generated xdoc documents may be used as trusted inputs only after their machine facts have been normalized and checked against an approved runtime contract. Copy the contract facts, not private-repository prose. Do not hand-edit generated blocks or refresh `docs/xdoc-schema.json` unless the task explicitly includes that snapshot.

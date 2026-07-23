@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.0 (cbcab15e)",
+  "version": "0.3.0 (900a83b9)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1525,6 +1525,116 @@
           "errorKind": "AssetTooLarge"
         }
       },
+      "bridgeCapabilities": {
+        "schemaVersion": "pptx-bridge-capabilities/v1",
+        "supported": [
+          "new",
+          "add-slide",
+          "add-layout",
+          "set-layout",
+          "add-layout-placeholder",
+          "populate-slide",
+          "bind-data",
+          "remap-theme",
+          "set-theme",
+          "set-master",
+          "set-default-text-style",
+          "remove-slide",
+          "move-slide",
+          "duplicate-slide",
+          "set-slide-notes",
+          "append-slide-notes",
+          "remove-slide-notes",
+          "set-slide-size",
+          "set-document-properties",
+          "add-text-box",
+          "add-placeholder",
+          "set-text-frame",
+          "add-image",
+          "add-equation",
+          "add-ole-object",
+          "add-table",
+          "add-chart",
+          "set-chart-text",
+          "set-chart-data",
+          "set-chart",
+          "set-table",
+          "merge-table-cells",
+          "set-table-data",
+          "add-shape",
+          "add-group",
+          "add-connector",
+          "add-freeform",
+          "add-video",
+          "set-slide-background",
+          "set-slide-transition",
+          "set-slide-animations",
+          "set-shape",
+          "set-connector",
+          "crop-image",
+          "fit-text",
+          "duplicate-shape",
+          "ungroup-shapes",
+          "remove-shape",
+          "add-paragraph",
+          "set-paragraph",
+          "add-run",
+          "set-run",
+          "replace-paragraph-text",
+          "placeholder-lookup",
+          "placeholder-geometry-inheritance",
+          "layout-driven-placeholder-insertion",
+          "chart-embedded-workbook",
+          "if",
+          "foreach",
+          "try",
+          "define-macro",
+          "use-macro",
+          "patch-ooxml"
+        ],
+        "preservedOnly": [
+          "unknown-ooxml",
+          "existing-media",
+          "theme-master-layout-parts",
+          "existing-chart-style-details",
+          "complex-animations",
+          "slide-transitions",
+          "smartart-diagrams",
+          "vba-macro-projects"
+        ],
+        "unsupported": [
+          "create-complex-animations",
+          "edit-complex-animations",
+          "create-transitions",
+          "edit-transitions",
+          "create-smartart",
+          "edit-smartart",
+          "edit-vba-macros"
+        ]
+      },
+      "documentationContract": {
+        "schemaVersion": "xdoc-documentation-contract/v1",
+        "authority": [
+          "running xdoc schema output",
+          "compiled pptx-gen bridge capability snapshot",
+          "compiled pptx-gen OLE compatibility matrix",
+          "compiled pptx-gen vision issue registry"
+        ],
+        "sourceSymbols": {
+          "bridgeCapabilities": "compiled.pptx-bridge-capabilities",
+          "oleCompatibility": "compiled.ole-compatibility-matrix",
+          "visionIssueKinds": "compiled.vision-issue-registry",
+          "runtimeDefaults": "compiled.xdoc-contract-defaults"
+        },
+        "generatedBlocks": [
+          "xdoc-contract-summary",
+          "xdoc-ole-compatibility",
+          "xdoc-vision-issue-kinds",
+          "xdoc-chart-variants",
+          "xdoc-pptx-ops"
+        ],
+        "generator": "maintainer-side xdoc contract generator"
+      },
       "subcommands": {
         "new": {
           "usage": "xdoc pptx new --output out.pptx",
@@ -1666,7 +1776,10 @@
             "missing-required-attribute",
             "invalid-attribute-comparison",
             "invalid-xml",
-            "invalid-relationships"
+            "invalid-relationships",
+            "child-order",
+            "child-cardinality",
+            "child-choice"
           ],
           "ioContract": {
             "stdout": {
@@ -2766,6 +2879,7 @@
         "shapes": {
           "command": "xdoc pptx catalog shapes --json",
           "schemaVersion": "pptx-shape-catalog/v1",
+          "count": 182,
           "description": "Discover preset shape names, aliases, categories, and OOXML prst keys for add-shape."
         },
         "layouts": {
@@ -3023,6 +3137,78 @@
             }
           ]
         },
+        "oleCompatibility": [
+          {
+            "family": "excel",
+            "progIds": ["Excel.Sheet.12", "Excel.Sheet.8", "Excel.Sheet"],
+            "canCreate": true,
+            "canOpenMetadata": true,
+            "canFallbackRender": true,
+            "canPreserve": true,
+            "canActivateOrEdit": false,
+            "notes": "Display-as-icon Excel OLE packages are created from caller-provided bytes; workbook calculation and object-model editing require an external Office host."
+          },
+          {
+            "family": "word",
+            "progIds": ["Word.Document.12", "Word.Document.8", "Word.Document"],
+            "canCreate": true,
+            "canOpenMetadata": true,
+            "canFallbackRender": true,
+            "canPreserve": true,
+            "canActivateOrEdit": false,
+            "notes": "Word document OLE packages can be embedded and preserved; editing or activation is delegated to the host application."
+          },
+          {
+            "family": "powerpoint",
+            "progIds": ["PowerPoint.Show.12", "PowerPoint.Show.8", "PowerPoint.Show"],
+            "canCreate": true,
+            "canOpenMetadata": true,
+            "canFallbackRender": true,
+            "canPreserve": true,
+            "canActivateOrEdit": false,
+            "notes": "PowerPoint show OLE packages can be embedded and preserved as opaque payloads; editing or activation is delegated to the host application."
+          },
+          {
+            "family": "pdf",
+            "progIds": ["AcroExch.Document.DC", "AcroExch.Document.11", "AcroExch.Document"],
+            "canCreate": true,
+            "canOpenMetadata": true,
+            "canFallbackRender": true,
+            "canPreserve": true,
+            "canActivateOrEdit": false,
+            "notes": "PDF OLE packages use the PDF icon fallback; PDF rendering/editing is not performed through the OLE object."
+          },
+          {
+            "family": "equation",
+            "progIds": ["Equation.3", "Equation.DSMT4"],
+            "canCreate": true,
+            "canOpenMetadata": true,
+            "canFallbackRender": true,
+            "canPreserve": true,
+            "canActivateOrEdit": false,
+            "notes": "Equation OLE packages are treated as embedded OLE objects with an equation icon fallback; equation editing is host-only."
+          },
+          {
+            "family": "package",
+            "progIds": ["Package", "Package.1"],
+            "canCreate": true,
+            "canOpenMetadata": true,
+            "canFallbackRender": true,
+            "canPreserve": true,
+            "canActivateOrEdit": false,
+            "notes": "Generic Package OLE objects are embedded and preserved as opaque payloads with the package icon fallback."
+          },
+          {
+            "family": "generic",
+            "progIds": ["<custom ProgID>"],
+            "canCreate": true,
+            "canOpenMetadata": true,
+            "canFallbackRender": true,
+            "canPreserve": true,
+            "canActivateOrEdit": false,
+            "notes": "Unknown ProgIDs are accepted as opaque OLE packages and use the generic OLE icon fallback."
+          }
+        ],
         "presetGradients": {
           "schemaVersion": "pptx-preset-gradient-catalog/v1",
           "description": "The 24 Office MsoPresetGradientType names expanded to explicit OOXML gradient stop data for fill.type=gradient preset usage.",
@@ -9082,6 +9268,53 @@
           "rawJsonArray": {
             "type": "array",
             "description": "Explicit Raw JSON array escape hatch for foreach iteration values."
+          },
+          "patchOoxmlAction": {
+            "type": "string",
+            "enum": ["set", "add", "remove", "replace", "repair-child-order"],
+            "strict": true,
+            "description": "Supported raw OOXML mutations plus the guarded generated child-order repair action."
+          },
+          "sha256Hex": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "Lowercase SHA-256 hex digest."
+          },
+          "childOrderRepairs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/childOrderRepair"
+            },
+            "description": "Exact element paths and generated-rule identities for one atomic child-order repair."
+          },
+          "childOrderRepair": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["elementPath", "element", "ruleId", "expectedRuleSha256"],
+            "properties": {
+              "elementPath": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                }
+              },
+              "element": {
+                "type": "string",
+                "minLength": 1
+              },
+              "ruleId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "expectedRuleSha256": {
+                "$ref": "#/$defs/sha256Hex"
+              }
+            }
           },
           "addGroupShapes": {
             "type": "array",
@@ -16687,7 +16920,13 @@
                         "const": "patch-ooxml"
                       },
                       "action": {
-                        "type": "string"
+                        "$ref": "#/$defs/patchOoxmlAction"
+                      },
+                      "expectedPartSha256": {
+                        "$ref": "#/$defs/sha256Hex"
+                      },
+                      "repairs": {
+                        "$ref": "#/$defs/childOrderRepairs"
                       },
                       "target": {
                         "type": "string"
@@ -16700,7 +16939,105 @@
                       }
                     },
                     "required": ["op", "target", "xpath", "action"],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "allOf": [
+                      {
+                        "oneOf": [
+                          {
+                            "properties": {
+                              "action": {
+                                "const": "set"
+                              }
+                            },
+                            "required": ["value"],
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": ["expectedPartSha256"]
+                                },
+                                {
+                                  "required": ["repairs"]
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "properties": {
+                              "action": {
+                                "const": "add"
+                              }
+                            },
+                            "required": ["value"],
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": ["expectedPartSha256"]
+                                },
+                                {
+                                  "required": ["repairs"]
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "properties": {
+                              "action": {
+                                "const": "remove"
+                              }
+                            },
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": ["value"]
+                                },
+                                {
+                                  "required": ["expectedPartSha256"]
+                                },
+                                {
+                                  "required": ["repairs"]
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "properties": {
+                              "action": {
+                                "const": "replace"
+                              }
+                            },
+                            "required": ["value"],
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": ["expectedPartSha256"]
+                                },
+                                {
+                                  "required": ["repairs"]
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "properties": {
+                              "action": {
+                                "const": "repair-child-order"
+                              },
+                              "xpath": {
+                                "const": "/"
+                              }
+                            },
+                            "required": ["expectedPartSha256", "repairs"],
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": ["value"]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
                   },
                   {
                     "type": "object",
@@ -17552,6 +17889,53 @@
             "rawJsonArray": {
               "type": "array",
               "description": "Explicit Raw JSON array escape hatch for foreach iteration values."
+            },
+            "patchOoxmlAction": {
+              "type": "string",
+              "enum": ["set", "add", "remove", "replace", "repair-child-order"],
+              "strict": true,
+              "description": "Supported raw OOXML mutations plus the guarded generated child-order repair action."
+            },
+            "sha256Hex": {
+              "type": "string",
+              "minLength": 64,
+              "maxLength": 64,
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "Lowercase SHA-256 hex digest."
+            },
+            "childOrderRepairs": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/childOrderRepair"
+              },
+              "description": "Exact element paths and generated-rule identities for one atomic child-order repair."
+            },
+            "childOrderRepair": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["elementPath", "element", "ruleId", "expectedRuleSha256"],
+              "properties": {
+                "elementPath": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483647
+                  }
+                },
+                "element": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ruleId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "expectedRuleSha256": {
+                  "$ref": "#/$defs/sha256Hex"
+                }
+              }
             },
             "addGroupShapes": {
               "type": "array",
@@ -24585,10 +24969,45 @@
           {
             "op": "patch-ooxml",
             "category": "advanced",
-            "summary": "Apply guarded low-level OOXML part edits.",
+            "summary": "Apply guarded low-level OOXML part edits or stale-safe generated child-order repairs.",
             "required": ["op", "target", "xpath", "action"],
-            "constraints": [],
-            "optional": ["value"],
+            "constraints": [
+              {
+                "kind": "action-variants",
+                "field": "action",
+                "variants": [
+                  {
+                    "value": "set",
+                    "required": ["value"],
+                    "forbidden": ["expectedPartSha256", "repairs"]
+                  },
+                  {
+                    "value": "add",
+                    "required": ["value"],
+                    "forbidden": ["expectedPartSha256", "repairs"]
+                  },
+                  {
+                    "value": "remove",
+                    "forbidden": ["value", "expectedPartSha256", "repairs"]
+                  },
+                  {
+                    "value": "replace",
+                    "required": ["value"],
+                    "forbidden": ["expectedPartSha256", "repairs"]
+                  },
+                  {
+                    "value": "repair-child-order",
+                    "required": ["expectedPartSha256", "repairs"],
+                    "forbidden": ["value"],
+                    "const": {
+                      "xpath": "/"
+                    }
+                  }
+                ],
+                "summary": "OOXML action selects the exact value, precondition, and repair fields it accepts."
+              }
+            ],
+            "optional": ["expectedPartSha256", "repairs", "value"],
             "level": "patch"
           },
           {
@@ -27474,7 +27893,10 @@
                     "missing-required-attribute",
                     "invalid-attribute-comparison",
                     "invalid-xml",
-                    "invalid-relationships"
+                    "invalid-relationships",
+                    "child-order",
+                    "child-cardinality",
+                    "child-choice"
                   ],
                   "strict": true
                 },
@@ -27874,7 +28296,10 @@
                     "missing-required-attribute",
                     "invalid-attribute-comparison",
                     "invalid-xml",
-                    "invalid-relationships"
+                    "invalid-relationships",
+                    "child-order",
+                    "child-cardinality",
+                    "child-choice"
                   ],
                   "strict": true
                 },
@@ -28274,7 +28699,10 @@
                     "missing-required-attribute",
                     "invalid-attribute-comparison",
                     "invalid-xml",
-                    "invalid-relationships"
+                    "invalid-relationships",
+                    "child-order",
+                    "child-cardinality",
+                    "child-choice"
                   ],
                   "strict": true
                 },
@@ -29909,7 +30337,76 @@
             "type": "object"
           },
           "issues": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "evidenceClass", "severity", "slideIndex", "message", "metrics"],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "multi-column-text-layout-review",
+                    "shape-out-of-bounds",
+                    "text-edge-margin",
+                    "text-overflow-estimate",
+                    "multi-column-text-overflow",
+                    "text-unexpected-wrap",
+                    "low-contrast-text",
+                    "geometry-overlap",
+                    "rounded-card-decoration-bleed",
+                    "arrangement-imbalance",
+                    "font-too-small"
+                  ],
+                  "strict": true
+                },
+                "evidenceClass": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": ["high", "medium", "low"],
+                  "strict": true
+                },
+                "slideIndex": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "shapeId": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "shapeName": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "metrics": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number"
+                  }
+                },
+                "fix": {
+                  "type": "object",
+                  "required": ["fixPatch", "reason", "confidence", "autoRetry"],
+                  "properties": {
+                    "fixPatch": {
+                      "type": "array"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "confidence": {
+                      "type": "number"
+                    },
+                    "autoRetry": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
           },
           "semanticSummary": {
             "type": "object",
@@ -29950,7 +30447,10 @@
                     "missing-required-attribute",
                     "invalid-attribute-comparison",
                     "invalid-xml",
-                    "invalid-relationships"
+                    "invalid-relationships",
+                    "child-order",
+                    "child-cardinality",
+                    "child-choice"
                   ],
                   "strict": true
                 },
@@ -29998,6 +30498,19 @@
           }
         }
       },
+      "visionIssueKinds": [
+        "multi-column-text-layout-review",
+        "shape-out-of-bounds",
+        "text-edge-margin",
+        "text-overflow-estimate",
+        "multi-column-text-overflow",
+        "text-unexpected-wrap",
+        "low-contrast-text",
+        "geometry-overlap",
+        "rounded-card-decoration-bleed",
+        "arrangement-imbalance",
+        "font-too-small"
+      ],
       "diffReportSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://structurify.io/schemas/pptx-diff.v1.schema.json",
@@ -33406,6 +33919,11 @@
         "XDOC_DAEMON_AUTO_SPAWN": "Set to 0 or false to disable pptx --daemon auto-spawn.",
         "XDOC_DAEMON_SPAWN_TIMEOUT_MS": "Override auto-spawn readiness timeout, default 5000.",
         "XDOC_DAEMON_LOG": "Override auto-spawn daemon stdout/stderr log path, default $TMPDIR/xdoc-daemon.log."
+      },
+      "defaults": {
+        "idleMs": "300000",
+        "maxSessions": 64,
+        "spawnTimeoutMs": 5000
       },
       "subcommands": {
         "start": {

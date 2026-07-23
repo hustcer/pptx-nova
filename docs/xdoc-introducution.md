@@ -6,15 +6,18 @@
 >
 > **Verification date:** 2026-07-23
 >
-> **Implementation source reviewed:** `cbcab15e`
->
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
-> source-owned bridge or contract tests provide the corresponding behavior. The
-> counts below are discovery metadata from the verified build; they are not a
-> claim of universal PPTX feature parity.
+> release validation evidence provides the corresponding behavior. The counts
+> below are discovery metadata from the verified binary; they are not a claim of
+> universal PPTX feature parity.
 >
 > **Checked-in contract snapshot:** [xdoc-schema.json](./xdoc-schema.json)
+
+The public integration boundary documented here is the distributed `xdoc`
+executable, its runtime schema, and its versioned reports and artifacts. This
+repository does not define a public source-build path or an in-process xdoc
+library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot is semantically equivalent to the
@@ -68,8 +71,8 @@ than as optional application code.
 The primary editing unit is a JSON patch, not an opaque sequence of imperative
 object mutations. A patch can be inspected, schema-checked, dry-run, applied to
 a copied candidate, reported, previewed, compared, and replayed. Selected bridge
-APIs are also available below the CLI for native library, JavaScript, and
-WebAssembly callers where the chosen backend supports them.
+capabilities may also be released through separate products or runtimes, but
+those surfaces have their own contracts and are not implied by this CLI guide.
 
 ### A three-level control plane
 
@@ -317,29 +320,16 @@ metadata.
 ### Runtime and embedding boundaries
 
 xdoc is distributed as a native-first executable. Its stable external contract
-is the CLI, its versioned schema, and the documented library facade; internal
-component boundaries are not a public API promise. The runtime layers cover
-collection, conversion, delivery, document models, PDF text, server/daemon
-support, and shared diagnostics.
+is the CLI, its versioned schema, and its documented reports and artifacts.
+Internal component and library boundaries are implementation details, not a
+public API promise. The runtime layers cover collection, conversion, delivery,
+document models, PDF text, daemon support, and shared diagnostics.
 
-Selected PPTX, parser, and PDF capabilities also have JavaScript or WebAssembly
-integration paths, while the complete xdoc CLI remains native-first. Those
-embedding paths should not be read as a claim that every CLI command is
-browser-runnable.
-
-The source-owned facades are intentionally small and explicit:
-
-| Facade                         | Representative public entry points                                                                            | Boundary                                                              |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Root `xdoc` package            | `convert`, `convert_result`, `run_pipeline`, `html_to_markdown`, `render_pdf_to_pngs`, `inspect_capabilities` | Document sources, options, artifact bundles, and capability snapshots |
-| PPTX facade `hustcer/pptx_gen` | `apply_patch_json`, `pptx_gen_new`, `inspect_pptx`, `vision_check_pptx`, `pptx_gen_apply`                     | PPTX bytes, versioned wire JSON, and structured bridge results        |
-
-The root xdoc facade includes path-oriented conversion and artifact delivery;
-the PPTX facade is the bytes-first, filesystem-independent boundary. CLI
-argument parsing, patch asset-root enforcement, and process exit-code mapping
-remain above those library entry points. Embedders should depend on the root
-facades and pin their generated interface (`.mbti`) or schema snapshot;
-internal `src/*` packages are not a stable integration boundary.
+Host applications should invoke the executable directly, keep stdout, stderr,
+exit status, and filesystem artifacts separate, and pin adapters to the probed
+CLI contract. A separately released JavaScript, WebAssembly, service, or
+in-process surface must be evaluated against its own documentation; it does not
+make the complete native CLI browser-runnable or library-embeddable.
 
 ### Why the architecture matters
 
@@ -388,7 +378,7 @@ successful report.
 | Evidence         | Versioned report ids, report-specific hashes or gates, changed parts, operation traces, and sidecars | Minimum proof required before a candidate can be published or retried               |
 | Safety           | Asset roots, size and ZIP limits, raw-XML opt-in, signature/encryption policy, and exit codes        | Policy profiles that a sandbox, queue, or regulated worker can enforce consistently |
 | Conformance      | Contracted examples, fixture probes, semantic-rule summaries, and replayable artifacts               | Cross-implementation test vectors and compatibility/deprecation policy              |
-| Host integration | CLI, root library facade, bytes-first PPTX facade, daemon, and a separate HTTP service package       | Stable adapters for native, JavaScript, WebAssembly, and service deployments        |
+| Host integration | CLI, runtime schema, daemon, and any separately published service contract                           | Stable process adapters for workers, queues, containers, and service deployments    |
 
 The important design choice is that a new host does not need to reproduce xdoc's
 internal object model. It needs to preserve the wire contract, capability
@@ -1391,8 +1381,8 @@ re-audit the resulting package. The checks cover:
 - OPC content-type declarations, relationship parts, and part truth; and
 - required attributes, legal comparisons, and attribute/value range constraints.
 
-For the generated audit corpus examined in the `cbcab15e` source snapshot and
-the runtime-facing `cbcab15e` contract, the current counts are measurable:
+For the maintainer validation corpus associated with the verified runtime
+contract, the current counts are measurable:
 
 | Corpus                           |                  Current count | What it protects                                      |
 | -------------------------------- | -----------------------------: | ----------------------------------------------------- |
@@ -1411,14 +1401,15 @@ reapplied and revalidated before it can clear a gate.
 
 ### Regression evidence is part of the product
 
-At the `cbcab15e` source snapshot reviewed for this document, a repository
-inventory found 58 MoonBit test-bearing files and 763 test declarations under
-the native PPTX bridge, plus 27 test-bearing files and 655 declarations under
-the xdoc CLI/conversion runtime. These are test-corpus counts, not a claim that
-every declaration passed in this exact environment; release evidence should pair
-the source test run with the CLI smoke probe, schema snapshot, and representative
-PPTX fixtures. The point is operational: an execution layer earns trust through
-repeatable regression assets, not only through a long operation list.
+The maintainer validation inventory for this document recorded 58 test-bearing
+files and 763 test declarations for the native PPTX bridge, plus 27
+test-bearing files and 655 declarations for the xdoc CLI/conversion runtime.
+These are maintainer-side test-corpus counts, not part of the public wire
+contract and not proof that every declaration passed in every release
+environment. Release evidence should pair the binary smoke probe, schema
+snapshot, and representative PPTX fixtures. The point is operational: an
+execution layer earns trust through repeatable regression assets, not only
+through a long operation list.
 
 ### Macro, signature, and encryption policy
 
@@ -1428,7 +1419,7 @@ The current native defaults are conservative:
 - digitally signed packages are rejected on save unless signatures are
   explicitly removed through the supported policy;
 - macro/VBA parts are preserved by default, with explicit preserve, strip, or
-  reject policies at the library layer; and
+  reject policies where the relevant runtime command supports them; and
 - preserve-only observations identify complex animations, transitions,
   SmartArt-like structures, VBA, and other long-tail content that was not
   edited.
@@ -1588,10 +1579,10 @@ acceptable.
 
 ### Optional HTTP service boundary
 
-The source tree also contains a separate `xdoc-server` service package. It is
+A separately deployed xdoc HTTP service may provide a narrower contract. It is
 not a subcommand of the top-level `xdoc` binary and should not be confused with
-the local PPTX daemon. Its current HTTP surface is deliberately conversion- and
-extraction-oriented:
+the local PPTX daemon. The currently documented HTTP surface is deliberately
+conversion- and extraction-oriented:
 
 - public `/healthz` and `/readyz` probes, plus optionally authenticated
   versioned routes for capabilities and metrics;
@@ -1602,7 +1593,7 @@ extraction-oriented:
   `job/v1`, `artifact-bundle/v1`, and `artifact-zip/v1` response envelopes.
 
 The service defaults to `0.0.0.0:8080`; API-key enforcement is off unless
-configured, and the source package does not provide built-in TLS termination.
+configured, and the deployment does not provide built-in TLS termination.
 Production deployments should explicitly enable authentication or isolate the
 listener behind a trusted ingress that terminates TLS. `/readyz` proves process
 and workspace readiness, not that every optional conversion backend is
@@ -1616,8 +1607,8 @@ review its SSRF and egress policy because private, loopback, and link-local
 targets remain blocked unless a separate override is set.
 
 The current service surface does not expose the PPTX patch/apply, i18n, vision,
-or refurbishment editing actions; use the CLI, daemon, or library facades for
-those operations. This separation is useful for platform architects: a
+or refurbishment editing actions; use the CLI or daemon for those operations.
+This separation is useful for platform architects: a
 read/convert plane can be deployed independently while the mutation plane
 retains the stronger candidate and evidence workflow.
 
@@ -1654,29 +1645,28 @@ and declared artifacts independently, then route the job from the versioned
 report. Do not discard stdout simply because the process returned non-zero, and
 do not treat exit 0 as a universal publish decision.
 
-### Library integration
+### Process integration
 
-The stable root xdoc facade exposes conversion functions, while the native PPTX
-bridge exposes creation and patch APIs. Internal source packages are not stable
-integration points. An embedding team should wrap the root facade with its own
-compatibility adapter rather than importing internal package paths.
+Public integrations should wrap the `xdoc` process or its documented daemon
+commands and parse versioned machine reports. No in-process library API is
+implied by this repository. If another API is published separately, give it an
+independent compatibility adapter and version policy.
 
 ### Deployment
 
 The native-first executable avoids a requirement for a full office desktop
 installation. It still needs the runtime backends and fonts required by the
-requested conversion. Runtime PDF authorization and source-code licensing are
+requested conversion. Runtime PDF authorization and distribution licensing are
 separate boundaries. In the verified development build, a missing or inactive
 PDF license can impose a 2 MiB PPTX input limit and add an `XDOC DEMO`
 watermark, rather than uniformly rejecting conversion; exact behavior is
 edition- and policy-specific. A signed license JSON may be supplied through
 `--license`, depending on the build and deployment policy.
 
-The repository is source-available under `PolyForm-Noncommercial-1.0.0` by
-default, while individual bridge components can carry different terms (for
-example, the PPTX bridge module declares Apache-2.0). Verify the distribution
-terms of the exact binary and every bundled backend before shipping a
-commercial service; this document is a technical description, not legal advice.
+Verify the `LICENSE` file and bundled third-party notices in the exact binary
+archive before redistribution or commercial deployment. Different bundled
+components may carry different terms; this document is a technical description,
+not legal advice.
 
 ### Font and cold-start determinism
 
@@ -1877,8 +1867,8 @@ claims should stay tied to the measured contract and its declared limitations.
    policy.
 7. Raw OOXML is an explicit escape hatch and is outside schema-v1 safety
    guarantees.
-8. The current stable library facade is intentionally small; internal package
-   paths are not a public API promise.
+8. The public integration contract is the CLI and runtime schema; no in-process
+   library API is promised by this repository.
 9. Capability counts describe discoverable surfaces, not universal feature
    parity.
 10. A successful command is not evidence that the content's facts, numbers,

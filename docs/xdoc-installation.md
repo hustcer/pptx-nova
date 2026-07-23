@@ -22,22 +22,24 @@ you do need the fonts and backends required by the requested operation.
 
 > **npm availability:** the package name `@s8fy/xdoc` is reserved for this
 > distribution path, but the package is not yet published. Until
-> `npm view @s8fy/xdoc version` succeeds, install an approved GitHub Release or
-> internal artifact instead. The commands below become the supported npm path
-> when the first package is published.
+> `npm view @s8fy/xdoc version` succeeds, use a versioned GitHub Release archive.
+> The commands below become the supported npm path when the first package is
+> published.
 
 ## Choose an installation path
 
-| Use case                                         | Recommended path                             | Why                                                                       |
-| ------------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------- |
-| Interactive installation after npm publication   | `npm i -g @s8fy/xdoc`                        | Installs the `xdoc` command through a familiar cross-platform CLI channel |
-| A pinned worker or air-gapped promotion pipeline | Download a versioned GitHub Release archive  | The exact binary, native renderer, notices, and digest move together      |
-| CI or a container image                          | Pin either the npm version or archive digest | The runtime can be verified once and promoted as an immutable image layer |
-| xdoc development or a source change              | Build from the xdoc source repository        | The build includes generated contracts and native backends                |
-| An in-process integration                        | Use the documented library facades           | The CLI remains the compatibility boundary for command execution          |
+| Use case                                         | Recommended path                              | Why                                                                       |
+| ------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------- |
+| Interactive installation after npm publication   | `npm i -g @s8fy/xdoc`                         | Installs the `xdoc` command through a familiar cross-platform CLI channel |
+| A pinned worker or air-gapped promotion pipeline | Download a versioned GitHub Release archive   | The exact binary, native renderer, notices, and digest move together      |
+| CI, a container image, or a managed worker       | Promote an approved binary archive as a layer | The runtime can be verified once and deployed as an immutable image layer |
 
 Do not install a nightly artifact when the job needs a reproducible result. Pin
 the release tag, archive digest, and the `xdoc schema` snapshot together.
+
+This public installation contract is executable-only. Treat the `xdoc` process,
+its versioned schema, and its machine-readable reports as the integration
+boundary.
 
 ## Install from npm
 
@@ -162,6 +164,17 @@ The archive also contains `LICENSE` and a `licenses-pdfium/` directory. Keep
 those files with the binary when redistributing the archive or building a
 container image.
 
+## Install in CI, a container, or a managed worker
+
+Create the worker layer from the exact approved release archive. Keep `xdoc`,
+its colocated PDFium library, and all license notices together; record the
+archive digest and image digest; and run the same `xdoc --version` plus
+`xdoc schema` probe during image creation and again when the worker starts.
+
+Do not make the worker depend on a mutable branch artifact or an undeclared
+binary copied from a developer machine. Promotion should move the already
+verified archive unchanged between environments.
+
 ## Install on Windows
 
 Extract the ZIP without separating `xdoc.exe` from `pdfium.dll`, then add the
@@ -253,13 +266,13 @@ static check does not prove that two machines rasterize the same glyphs.
 
 ### Licensing and PDF authorization
 
-The source repository and a downloaded binary can have different license terms.
-Read the `LICENSE` file in the exact archive and the notices under
-`licenses-pdfium/` before redistributing it. Runtime PDF authorization is also
-separate from source licensing. Depending on the edition and license policy, a
+The CLI archive and its bundled native components can have different license
+terms. Read the `LICENSE` file in the exact archive and the notices under
+`licenses-pdfium/` before redistributing it. Runtime PDF authorization is a
+separate policy boundary. Depending on the edition and license policy, a
 development or unlicensed runtime may impose an input-size limit or add an
 `XDOC DEMO` watermark. Verify the exact artifact instead of assuming that all
-builds behave alike.
+distributions behave alike.
 
 ### Filesystem and security
 
@@ -268,22 +281,6 @@ The native package reader rejects unsafe ZIP paths and applies package-size and
 part-count limits. Keep daemon state files private, keep release libraries
 colocated, and never pass user-controlled strings through an interpolated shell
 command.
-
-## Source builds for maintainers
-
-Source builds are useful for xdoc development and for platforms not covered by
-the release matrix. They are not a replacement for a pinned public artifact. Use
-the build instructions in the xdoc source repository and record:
-
-- source revision and MoonBit toolchain version;
-- target and release/strip flags;
-- PDFium version and native library;
-- `xdoc --version` and the generated `xdoc schema`; and
-- the clean-machine probe results.
-
-Do not copy a locally built binary into a public release without rebuilding the
-archive, preserving the license notices, and running the release conformance
-checks in [xdoc-conformance.md](./xdoc-conformance.md).
 
 ## Troubleshooting
 

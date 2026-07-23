@@ -28,15 +28,16 @@ xdoc schema --index > runtime-patch-index.json
 
 Installation is a deployment concern, not an Agent-protocol branch. A worker may
 obtain the CLI from `npm i -g @s8fy/xdoc`, a GitHub Release archive, a container
-layer, or an approved internal build. In every case, resolve the executable
-through an explicit `XDOC_BIN` path or `PATH`, then trust only the probed
-version and schema. Do not import the npm distribution package as a JavaScript
-API unless a separately documented library surface is published.
+or managed-worker layer created from an approved binary archive. In every case,
+resolve the executable through an explicit `XDOC_BIN` path or `PATH`, then trust
+only the probed version and schema. The npm package is a CLI distribution; do
+not import it as a JavaScript API unless a separate public API is explicitly
+released and documented.
 
-Record the installation channel and npm version or archive digest as provenance.
-Do not change patch construction, report parsing, or gate policy based on that
-channel: equivalent distributions of the same xdoc release must present the same
-CLI contract.
+Record the installation channel and the npm version, archive digest, or worker
+image digest as provenance. Do not change patch construction, report parsing,
+or gate policy based on that channel: equivalent distributions of the same xdoc
+release must present the same CLI contract.
 
 The top-level discovery contract is `cli-agent/v1`. The patch envelope uses a
 numeric `schemaVersion` (currently `1`), which is a different field from the CLI
@@ -338,10 +339,10 @@ PPTX bridge.
 Keep the default preserve-first package policy. Encrypted packages are rejected
 by default; signed packages cannot be safely modified without an explicit
 signature-removal policy; macro/VBA parts are preserved by default, while the
-library layer can expose preserve/strip/reject policy; and `patch-ooxml` is
-disabled unless `--allow-raw-xml` is supplied. Treat complex animations,
-SmartArt-like structures, and other preserve-only regions as review boundaries,
-not as silently editable objects.
+runtime exposes preserve/strip/reject policy where the relevant command supports
+it; and `patch-ooxml` is disabled unless `--allow-raw-xml` is supplied. Treat
+complex animations, SmartArt-like structures, and other preserve-only regions
+as review boundaries, not as silently editable objects.
 
 ## 10. Use the daemon only through its public boundary
 
@@ -374,20 +375,19 @@ reports. Do not depend on the internal newline-delimited daemon RPC framing. The
 runtime status report is `xdoc-daemon-status/v1`; an older generated schema
 label may say `daemon-status/v1`.
 
-## 11. Library and service boundaries
+## 11. CLI and service boundaries
 
-The CLI is the most stable cross-language boundary. When an in-process adapter
-is justified:
+The supported cross-language boundary is the `xdoc` process: command arguments,
+the runtime-discovered schema, versioned JSON reports, exit status, and declared
+filesystem artifacts. This repository does not promise an in-process xdoc
+library API. Wrap the executable in a small host-language adapter and version
+that adapter against the probed CLI contract.
 
-- use the root xdoc facade for conversion and artifact bundles;
-- use the bytes-first `hustcer/pptx_gen` facade for native PPTX patching;
-- pin the generated interface or schema snapshot; and
-- do not import internal `src/*` packages as if they were public APIs.
-
-The optional HTTP service is a separate package. Its current public routes are
-conversion, extraction, preflight, and job orchestration; it does not expose the
-full PPTX patch, translation, vision, or refurbishment mutation surface. Deploy
-the service only when that narrower boundary is what the platform needs.
+If a separately distributed HTTP service is used, treat it as an independent,
+narrower contract. Its documented routes may cover conversion, extraction,
+preflight, and job orchestration without exposing the full PPTX patch,
+translation, vision, or refurbishment mutation surface. Deploy it only when its
+own published contract matches the platform's needs.
 
 ## 12. A practical worker record
 
@@ -410,10 +410,10 @@ actually changed.
 
 ## Integration checklist
 
-- [ ] Pin the executable, npm version or release archive digest, and schema
-      snapshot.
-- [ ] Resolve the CLI through `XDOC_BIN` or `PATH`, independent of whether it
-      came from npm or a release archive.
+- [ ] Pin the executable, npm version, release archive digest, or worker image
+      digest, together with the schema snapshot.
+- [ ] Resolve the CLI through `XDOC_BIN` or `PATH`, independent of whether the
+      worker layer came from npm or an approved binary archive.
 - [ ] Probe `xdoc --version` and `xdoc schema` at worker startup.
 - [ ] Keep stdout, stderr, exit code, and filesystem artifacts separate.
 - [ ] Inspect and select before constructing an existing-deck patch.

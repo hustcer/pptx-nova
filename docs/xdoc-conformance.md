@@ -32,7 +32,7 @@ parts as proposals.
 | Safety                     | Asset roots, byte limits, preserve-only/unsupported states, raw-XML opt-in   | Required                                                                            |
 | Native distribution        | Versioned platform archives with PDFium and notices; npm CLI channel planned | Required for a binary profile; cross-channel and signature rules are still proposed |
 | Governance                 | Repository-owned schemas and tests                                           | Proposed ecosystem process                                                          |
-| Cross-implementation suite | Release probes and source tests                                              | Not yet a separately published certification suite                                  |
+| Cross-implementation suite | Release probes and public conformance fixtures                               | Not yet a separately published certification suite                                  |
 
 The profile covers PPTX execution. `docx` and `xlsx` may appear in a capability
 registry as `reserved`; that does not make them conforming implementations of

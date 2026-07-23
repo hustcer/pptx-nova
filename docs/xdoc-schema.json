@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.0 (900a83b9)",
+  "version": "0.3.0 (331dbce8)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -359,7 +359,7 @@
         },
         "license": {
           "type": "path",
-          "description": "Signed XDOC license JSON for PDF authorization",
+          "description": "Signed XDOC license JSON for PPTX conversion authorization",
           "required": false,
           "valueSyntax": "<path>",
           "kind": "file",
@@ -367,7 +367,7 @@
             "onOmitted": "XDOC_LICENSE_FILE-or-.xdoc/licenses/xdoc-license.json"
           },
           "applicability": {
-            "formatIncludesAny": ["pdf"]
+            "inputKind": "pptx"
           },
           "semanticEffect": {
             "licenseLookupPriority": [
@@ -521,6 +521,26 @@
           "summary": "quiet suppresses non-error logs even when verbose is also set"
         }
       ],
+      "licensePolicy": {
+        "scope": {
+          "inputLimit": "all PPTX inputs accepted by convert",
+          "demoWatermarkFormats": ["pdf", "png"]
+        },
+        "authorizationLookup": [
+          "--license",
+          "XDOC_LICENSE_FILE",
+          ".xdoc/licenses/xdoc-license.json"
+        ],
+        "missingOrInactive": {
+          "maxPptxInputBytes": 2097152,
+          "oversizeFailureKind": "file_too_large",
+          "renderedOutput": "includes a visible demo watermark"
+        },
+        "active": {
+          "maxPptxInputBytes": null,
+          "renderedOutput": "does not add the demo watermark"
+        }
+      },
       "usageNotes": [
         "Accepts files, glob patterns (?/*/**), and directories.",
         "Use --recursive to descend into subdirectories.",
@@ -1177,7 +1197,7 @@
       ]
     },
     "pptx": {
-      "description": "Create, patch, or inspect PPTX decks through the native pptx_gen bridge.",
+      "description": "Create, patch, or inspect PPTX decks through the native xdoc PPTX engine.",
       "options": {
         "input": {
           "type": "string",
@@ -1405,7 +1425,7 @@
         },
         "allow-raw-xml": {
           "type": "bool",
-          "description": "Enable patch-ooxml. Disabled by default because raw XML bypasses schema-v1 guarantees.",
+          "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order action does not require this flag.",
           "required": false,
           "style": "flag"
         },
@@ -1482,7 +1502,7 @@
         ]
       },
       "usageNotes": [
-        "Calls hustcer/pptx_gen bridge APIs directly; does not shell out to cmd/pptx-gen.",
+        "PPTX actions execute inside the xdoc runtime and share its versioned schema and report contract.",
         "Use action new to create a minimal deck, apply to patch an existing or new deck, or inspect to summarize an existing deck.",
         "For inspect, pass either `xdoc pptx inspect deck.pptx --json` or `xdoc pptx inspect --input deck.pptx --json`.",
         "Use `xdoc pptx vision-check deck.pptx --json` to statically QA an existing deck without rendering: it flags geometry overlaps, off-slide and edge-hugging text, text-overflow estimates, unexpected wraps in single-line text roles, misaligned card rows, and sub-threshold fonts, and each issue may carry an auto-applicable fixPatch.",
@@ -1612,29 +1632,6 @@
           "edit-vba-macros"
         ]
       },
-      "documentationContract": {
-        "schemaVersion": "xdoc-documentation-contract/v1",
-        "authority": [
-          "running xdoc schema output",
-          "compiled pptx-gen bridge capability snapshot",
-          "compiled pptx-gen OLE compatibility matrix",
-          "compiled pptx-gen vision issue registry"
-        ],
-        "sourceSymbols": {
-          "bridgeCapabilities": "compiled.pptx-bridge-capabilities",
-          "oleCompatibility": "compiled.ole-compatibility-matrix",
-          "visionIssueKinds": "compiled.vision-issue-registry",
-          "runtimeDefaults": "compiled.xdoc-contract-defaults"
-        },
-        "generatedBlocks": [
-          "xdoc-contract-summary",
-          "xdoc-ole-compatibility",
-          "xdoc-vision-issue-kinds",
-          "xdoc-chart-variants",
-          "xdoc-pptx-ops"
-        ],
-        "generator": "maintainer-side xdoc contract generator"
-      },
       "subcommands": {
         "new": {
           "usage": "xdoc pptx new --output out.pptx",
@@ -1758,13 +1755,15 @@
           "inputs": ["input PPTX"],
           "outputs": ["pptx-vision/v1 JSON report", "human summary"],
           "detects": [
+            "multi-column-text-layout-review",
             "shape-out-of-bounds",
             "text-edge-margin",
             "text-overflow-estimate",
             "multi-column-text-overflow",
-            "multi-column-text-layout-review",
             "text-unexpected-wrap",
+            "low-contrast-text",
             "geometry-overlap",
+            "rounded-card-decoration-bleed",
             "arrangement-imbalance",
             "font-too-small",
             "dangling-rel",
@@ -9313,6 +9312,10 @@
               },
               "expectedRuleSha256": {
                 "$ref": "#/$defs/sha256Hex"
+              },
+              "expectedElementSha256": {
+                "$ref": "#/$defs/sha256Hex",
+                "description": "Optional target-element precondition used when unrelated edits changed the enclosing part."
               }
             }
           },
@@ -17934,6 +17937,10 @@
                 },
                 "expectedRuleSha256": {
                   "$ref": "#/$defs/sha256Hex"
+                },
+                "expectedElementSha256": {
+                  "$ref": "#/$defs/sha256Hex",
+                  "description": "Optional target-element precondition used when unrelated edits changed the enclosing part."
                 }
               }
             },
@@ -33921,7 +33928,7 @@
         "XDOC_DAEMON_LOG": "Override auto-spawn daemon stdout/stderr log path, default $TMPDIR/xdoc-daemon.log."
       },
       "defaults": {
-        "idleMs": "300000",
+        "idleMs": 300000,
         "maxSessions": 64,
         "spawnTimeoutMs": 5000
       },

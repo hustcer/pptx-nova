@@ -101,7 +101,7 @@ The current `pptx-error-catalog/v1` contains 24 codes:
 | `MissingPart`         | fatal    |               false | Treat the package as structurally incomplete.                                                            |
 | `MissingRelationship` | fatal    |               false | Inspect package relationships and route to a repair workflow.                                            |
 | `EncryptedPackage`    | fatal    |               false | Obtain an approved unencrypted input; xdoc has no decryption path.                                       |
-| `SignedPackage`       | fatal    |               false | Do not save over a signed package without an authorized signature-removal policy.                        |
+| `SignedPackage`       | fatal    |               false | Obtain an authorized unsigned copy before mutation; the current CLI exposes no signature-removal switch. |
 | `ZipError`            | fatal    |               false | Quarantine the archive and investigate package or resource limits.                                       |
 | `PatchTooLarge`       | error    |               false | Reduce the patch or change the size policy intentionally.                                                |
 | `AssetTooLarge`       | error    |               false | Reduce the asset or change the asset limit intentionally.                                                |

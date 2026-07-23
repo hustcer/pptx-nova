@@ -1,6 +1,6 @@
 # xdoc: A Native-First, Agent-Oriented Document and PPTX Execution Layer
 
-> **Runtime build verified for this document:** `0.3.0 (cbcab15e)`
+> **Runtime build verified for this document:** `0.3.0 (331dbce8)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
@@ -21,7 +21,7 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot is semantically equivalent to the
-runtime response for `0.3.0 (cbcab15e)`; JSON formatting may differ between the
+runtime response for `0.3.0 (331dbce8)`; JSON formatting may differ between the
 checked-in file and the CLI output. Refresh the snapshot whenever the published
 binary identity changes.
 
@@ -134,7 +134,7 @@ screenshots or log interpretation alone.
 | Enum families                  | 20 controlled vocabularies                                                   |
 | Published bridge error catalog | 24 error codes                                                               |
 | Embedded PPTX report schemas   | 20 report schemas                                                            |
-| Patch schema definitions       | 179 `$defs` in the current runtime schema                                    |
+| Patch schema definitions       | 183 `$defs` in the current runtime schema                                    |
 | Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples               |
 | Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog |
 
@@ -311,11 +311,10 @@ Keep the render manifest, backend identity, and font inventory with the output.
 They explain why two otherwise identical jobs might differ in rasterized text or
 pagination and give a platform a reproducible provenance record.
 
-As a build-specific deployment reference, the verified macOS arm64 artifact was
-12,673,272 bytes for `xdoc` and 7,169,376 bytes for its colocated
-`libpdfium.dylib`. These numbers are measurements of one build, not a universal
-package-size promise; they show why the backend manifest belongs in deployment
-metadata.
+Record the exact `xdoc` and colocated backend sizes in the release manifest for
+each platform artifact. Binary size is build-specific evidence, not a stable
+runtime capability, so it should not be copied forward when only the schema
+snapshot changes.
 
 ### Runtime and embedding boundaries
 
@@ -403,7 +402,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.3.0 (cbcab15e)
+0.3.0 (331dbce8)
 ```
 
 The top-level schema response identifies itself as:
@@ -411,7 +410,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.3.0 (cbcab15e)"
+  "version": "0.3.0 (331dbce8)"
 }
 ```
 
@@ -1381,45 +1380,29 @@ re-audit the resulting package. The checks cover:
 - OPC content-type declarations, relationship parts, and part truth; and
 - required attributes, legal comparisons, and attribute/value range constraints.
 
-For the maintainer validation corpus associated with the verified runtime
-contract, the current counts are measurable:
-
-| Corpus                           |                  Current count | What it protects                                      |
-| -------------------------------- | -----------------------------: | ----------------------------------------------------- |
-| Child-order source elements      |                            486 | Namespace-aware OOXML child placement                 |
-| Writer-order rules               | 416 (plus 71 contextual rules) | Safe serialization after a mutation                   |
-| Child cardinality / choice rules |                    1,608 / 207 | Required, repeatable, and mutually exclusive children |
-| Semantic rules                   |      82 source / 81 normalized | Cross-part and value-level semantic checks            |
-| Attribute constraint entries     |                             27 | Numeric ranges and legal comparisons                  |
-| OPC part-truth mappings          |                            107 | Content types and relationship types                  |
-
-These tables are implementation data, not a versioned promise that every OOXML
-feature is editable; they can grow as the pinned format facts are refreshed.
-Findings retain their part, element, attribute, and rule context in
-`semanticIssues[]`; a bounded `fixPatch` is only a proposal and must be
-reapplied and revalidated before it can clear a gate.
+Exact source-rule inventory counts are maintainer evidence, not part of the
+public runtime contract, and are therefore not duplicated here. Public findings
+retain their part, element, attribute, and rule context in `semanticIssues[]`;
+a bounded `fixPatch` is only a proposal and must be reapplied and revalidated
+before it can clear a gate.
 
 ### Regression evidence is part of the product
 
-The maintainer validation inventory for this document recorded 58 test-bearing
-files and 763 test declarations for the native PPTX bridge, plus 27
-test-bearing files and 655 declarations for the xdoc CLI/conversion runtime.
-These are maintainer-side test-corpus counts, not part of the public wire
-contract and not proof that every declaration passed in every release
-environment. Release evidence should pair the binary smoke probe, schema
-snapshot, and representative PPTX fixtures. The point is operational: an
-execution layer earns trust through repeatable regression assets, not only
-through a long operation list.
+Every published build should pair its binary smoke probe and schema snapshot
+with representative PPTX fixtures and machine-readable conformance results.
+Private source-file or test-declaration inventories are not release evidence.
+The operational point is unchanged: an execution layer earns trust through
+repeatable public probes and artifacts, not only through a long operation list.
 
 ### Macro, signature, and encryption policy
 
 The current native defaults are conservative:
 
 - encrypted packages are rejected;
-- digitally signed packages are rejected on save unless signatures are
-  explicitly removed through the supported policy;
-- macro/VBA parts are preserved by default, with explicit preserve, strip, or
-  reject policies where the relevant runtime command supports them; and
+- digitally signed packages are rejected on save; the current CLI schema does
+  not expose a signature-removal switch;
+- macro/VBA parts are preserved by default, and the current CLI schema does not
+  expose public strip or reject switches; and
 - preserve-only observations identify complex animations, transitions,
   SmartArt-like structures, VBA, and other long-tail content that was not
   edited.
@@ -1577,40 +1560,13 @@ Use `--daemon-strict` in a workflow where a lost session would invalidate the
 run's assumptions. Use plain `--daemon` when a safe one-shot fallback is
 acceptable.
 
-### Optional HTTP service boundary
+### Separately published service adapters
 
-A separately deployed xdoc HTTP service may provide a narrower contract. It is
-not a subcommand of the top-level `xdoc` binary and should not be confused with
-the local PPTX daemon. The currently documented HTTP surface is deliberately
-conversion- and extraction-oriented:
-
-- public `/healthz` and `/readyz` probes, plus optionally authenticated
-  versioned routes for capabilities and metrics;
-- synchronous and queued `/v1/pptx/convert` requests;
-- `/v1/pptx/parse`, `/md`, `/text`, `/map`, `/resources`, `/notes`, `/links`,
-  `/fonts`, and `/check`, plus `/v1/html/md`; and
-- `/v1/jobs` submission, status, deletion, and result retrieval with
-  `job/v1`, `artifact-bundle/v1`, and `artifact-zip/v1` response envelopes.
-
-The service defaults to `0.0.0.0:8080`; API-key enforcement is off unless
-configured, and the deployment does not provide built-in TLS termination.
-Production deployments should explicitly enable authentication or isolate the
-listener behind a trusted ingress that terminates TLS. `/readyz` proves process
-and workspace readiness, not that every optional conversion backend is
-available; inspect `checks.pdfBackend` and run representative format probes.
-The service also has explicit body, connection, handler, queue, job-retention,
-concurrency, rate-limit, API-key, CORS, and remote-URL controls. Queued jobs can
-be cancelled before they start, while running jobs are not currently safely
-cancelled; retention is bounded by TTL and capacity. Upload workspaces are
-private and cleaned up. Remote HTML fetching is disabled by default; if enabled,
-review its SSRF and egress policy because private, loopback, and link-local
-targets remain blocked unless a separate override is set.
-
-The current service surface does not expose the PPTX patch/apply, i18n, vision,
-or refurbishment editing actions; use the CLI or daemon for those operations.
-This separation is useful for platform architects: a
-read/convert plane can be deployed independently while the mutation plane
-retains the stronger candidate and evidence workflow.
+This repository does not currently define a public HTTP route contract. Do not
+infer service endpoints, authentication defaults, queue behavior, or mutation
+coverage from private deployments or source layouts. If a service adapter is
+published later, version and validate it independently from the CLI contract;
+the local `xdoc daemon` remains the only service-like boundary described here.
 
 ## Runtime and embedding guidance
 
@@ -1656,12 +1612,13 @@ independent compatibility adapter and version policy.
 
 The native-first executable avoids a requirement for a full office desktop
 installation. It still needs the runtime backends and fonts required by the
-requested conversion. Runtime PDF authorization and distribution licensing are
-separate boundaries. In the verified development build, a missing or inactive
-PDF license can impose a 2 MiB PPTX input limit and add an `XDOC DEMO`
-watermark, rather than uniformly rejecting conversion; exact behavior is
-edition- and policy-specific. A signed license JSON may be supplied through
-`--license`, depending on the build and deployment policy.
+requested conversion. Runtime conversion authorization and distribution
+licensing are separate boundaries. The verified runtime publishes this behavior
+under `commands.convert.licensePolicy`: missing or inactive authorization limits
+every PPTX input handled by `convert` to 2 MiB, while PDF/PNG output also carries
+a visible demo watermark. A signed license JSON may be supplied through
+`--license` or the documented lookup locations. Probe the exact binary because a
+later release can revise the policy contract.
 
 Verify the `LICENSE` file and bundled third-party notices in the exact binary
 archive before redistribution or commercial deployment. Different bundled
@@ -1763,8 +1720,6 @@ The following identifiers are useful when validating an integration:
 | `pdf-inspect/v1`, `pdf-text/v1`                                                         | PDF diagnostics and extraction                              |
 | `xdoc-daemon-status/v1`                                                                 | Runtime daemon state and endpoint diagnostics               |
 | `daemon-status/v1`                                                                      | Stale generated-schema label; do not use as the runtime id  |
-| `readyz/v1`, `job/v1`                                                                   | Optional HTTP service readiness and queued-job records      |
-| `artifact-bundle/v1`, `artifact-zip/v1`, `error/v1`                                     | Optional HTTP artifact and error envelopes                  |
 
 Treat a schema version as a compatibility boundary. If a worker sees an unknown
 version, it should preserve the raw report and stop at the integration boundary
@@ -1873,9 +1828,8 @@ claims should stay tied to the measured contract and its declared limitations.
    parity.
 10. A successful command is not evidence that the content's facts, numbers,
     legal language, or brand approvals are correct.
-11. The optional HTTP service package currently covers conversion, extraction,
-    preflight, and job orchestration; it does not expose the PPTX patch/i18n/
-    vision/refurbishment mutation surface.
+11. This repository does not currently publish an HTTP service contract; do not
+    infer routes or security defaults from the CLI or local daemon.
 12. The supported external onboarding boundary is the CLI and its schema. A
     bundled MCP server or IDE installer is not part of the current release
     contract.
@@ -1892,12 +1846,11 @@ claims should stay tied to the measured contract and its declared limitations.
     but PPTX and sidecar writes are separate, and a daemon delivery failure can
     leave its in-memory session advanced. Sidecars do not carry deck hashes or
     cryptographic revision links.
-17. The standalone HTTP service defaults to `0.0.0.0:8080` with API-key
-    enforcement disabled unless configured and no built-in TLS; `/readyz` is
-    process/workspace readiness, not proof that every backend is available.
-18. Source licensing and runtime PDF authorization are separate. In the
-    verified development build, an inactive PDF license can impose the 2 MiB
-    PPTX limit and `XDOC DEMO` watermark; verify the exact artifact and terms.
+17. Distribution licensing and runtime conversion authorization are separate.
+    The current `commands.convert.licensePolicy` contract limits every PPTX
+    input handled by `convert` to 2 MiB when authorization is missing or
+    inactive, and PDF/PNG output also carries a visible demo watermark; verify
+    the exact artifact and terms.
 
 ## Evidence and release discipline
 
@@ -1919,7 +1872,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.3.0 (cbcab15e). Re-run the discovery
+This document is anchored to xdoc 0.3.0 (331dbce8). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

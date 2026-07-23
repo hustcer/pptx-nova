@@ -337,12 +337,12 @@ CLI enforces `XDOC_PPTX_MAX_PATCH_BYTES` (default 32 MiB) and
 PPTX bridge.
 
 Keep the default preserve-first package policy. Encrypted packages are rejected
-by default; signed packages cannot be safely modified without an explicit
-signature-removal policy; macro/VBA parts are preserved by default, while the
-runtime exposes preserve/strip/reject policy where the relevant command supports
-it; and `patch-ooxml` is disabled unless `--allow-raw-xml` is supplied. Treat
-complex animations, SmartArt-like structures, and other preserve-only regions
-as review boundaries, not as silently editable objects.
+by default; signed packages are rejected on save; and macro/VBA parts are
+preserved by default. The current CLI schema does not expose public
+signature-removal or VBA strip/reject switches. `patch-ooxml` is disabled unless
+`--allow-raw-xml` is supplied. Treat complex animations, SmartArt-like
+structures, and other preserve-only regions as review boundaries, not as
+silently editable objects.
 
 ## 10. Use the daemon only through its public boundary
 
@@ -383,11 +383,10 @@ filesystem artifacts. This repository does not promise an in-process xdoc
 library API. Wrap the executable in a small host-language adapter and version
 that adapter against the probed CLI contract.
 
-If a separately distributed HTTP service is used, treat it as an independent,
-narrower contract. Its documented routes may cover conversion, extraction,
-preflight, and job orchestration without exposing the full PPTX patch,
-translation, vision, or refurbishment mutation surface. Deploy it only when its
-own published contract matches the platform's needs.
+This repository does not currently publish an HTTP service contract. If a
+service adapter is released separately in the future, treat its routes,
+authentication, reports, and mutation coverage as an independent versioned
+surface; do not infer them from the CLI or local daemon.
 
 ## 12. A practical worker record
 

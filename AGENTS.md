@@ -40,3 +40,7 @@ When updating user-facing documentation, keep capability claims precise. Do not 
 Public xdoc documentation is executable-first. Describe only published binary distribution channels and behavior verified through the exact runtime's `xdoc --version`, `xdoc schema`, reports, and release evidence. Do not publish private build commands, MoonBit path dependencies, internal package names, unpublished artifacts, or in-process library facades as installation or integration paths.
 
 Maintainer-generated xdoc documents may be used as trusted inputs only after their machine facts have been normalized and checked against an approved runtime contract. Copy the contract facts, not private-repository prose. Do not hand-edit generated blocks or refresh `docs/xdoc-schema.json` unless the task explicitly includes that snapshot.
+
+For an explicit xdoc release-documentation refresh, capture `xdoc schema` from a clean approved binary and run `nu tools/update-xdoc-public-docs.nu --schema-file <captured-schema>`. The updater synchronizes build identity and schema counts, rejects `-dirty` builds, and blocks maintainer-only package names, source symbols, development-build claims, and unpublished service routes from public docs. Finish with `nu tools/update-xdoc-public-docs.nu --check` against the checked-in snapshot.
+
+Keep all human-facing Nushell output in English, including stdout, stderr, `error make` messages, command help comments, warnings, and generated prose. Stable JSON keys and machine status codes remain unchanged for compatibility.

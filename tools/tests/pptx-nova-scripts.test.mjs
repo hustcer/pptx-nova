@@ -1757,6 +1757,84 @@ test('tracked literal patch op values stay within the current xdoc schema', () =
   assert.deepEqual(invalid, [])
 })
 
+test('public xdoc docs match the clean checked-in runtime schema', () => {
+  const result = spawnSync('nu', ['tools/update-xdoc-public-docs.nu', '--check'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  })
+  assert.equal(result.status, 0, result.stderr || result.stdout)
+})
+
+test('public xdoc docs updater replaces literal $defs text and keeps checks deterministic', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'xdoc-public-docs-'))
+  const docsDir = join(root, 'docs')
+  const schemaPath = join(root, 'runtime-schema.json')
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  mkdirSync(docsDir, { recursive: true })
+  writeJson(schemaPath, {
+    schemaVersion: 'cli-agent/v1',
+    version: '1.2.3 (deadbeef)',
+    commands: {
+      pptx: {
+        patchSchema: {
+          jsonSchema: {
+            $defs: { first: {}, second: {} },
+          },
+        },
+      },
+    },
+  })
+  writeJson(join(docsDir, 'xdoc-schema.json'), {
+    schemaVersion: 'cli-agent/v1',
+    version: '1.2.2 (cafebabe)',
+    commands: {
+      pptx: {
+        patchSchema: {
+          jsonSchema: { $defs: { first: {} } },
+        },
+      },
+    },
+  })
+  writeFileSync(
+    join(docsDir, 'xdoc-introducution.md'),
+    [
+      '> **Runtime build verified for this document:** `1.2.2 (cafebabe)`',
+      '',
+      '> **Verification date:** 2025-01-02',
+      '',
+      '| Patch schema definitions | 1 `$defs` in the current runtime schema |',
+      '',
+      'This document is anchored to xdoc 1.2.2 (cafebabe).',
+      '',
+    ].join('\n'),
+  )
+
+  const update = spawnSync(
+    'nu',
+    [
+      join(repoRoot, 'tools/update-xdoc-public-docs.nu'),
+      '--schema-file',
+      schemaPath,
+      '--verification-date',
+      '2026-07-23',
+    ],
+    { cwd: root, encoding: 'utf8' },
+  )
+  assert.equal(update.status, 0, update.stderr || update.stdout)
+  assert.doesNotMatch(`${update.stdout}${update.stderr}`, /[\u3400-\u9fff]/u)
+  const introduction = readFileSync(join(docsDir, 'xdoc-introducution.md'), 'utf8')
+  assert.match(introduction, /2 `\$defs` in the current runtime schema/)
+  assert.match(introduction, /1\.2\.3 \(deadbeef\)/)
+  assert.match(introduction, /Verification date:\*\* 2026-07-23/)
+
+  const check = spawnSync('nu', [join(repoRoot, 'tools/update-xdoc-public-docs.nu'), '--check'], {
+    cwd: root,
+    encoding: 'utf8',
+  })
+  assert.equal(check.status, 0, check.stderr || check.stdout)
+  assert.doesNotMatch(`${check.stdout}${check.stderr}`, /[\u3400-\u9fff]/u)
+})
+
 test('tracked repository sources do not retain removed legacy xdoc op names', () => {
   const removedOps = [
     'add-picture',

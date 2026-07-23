@@ -264,15 +264,16 @@ repeatable deployment:
 Retain the font inventory and render manifest with visual evidence. A passing
 static check does not prove that two machines rasterize the same glyphs.
 
-### Licensing and PDF authorization
+### Licensing and conversion authorization
 
 The CLI archive and its bundled native components can have different license
 terms. Read the `LICENSE` file in the exact archive and the notices under
-`licenses-pdfium/` before redistributing it. Runtime PDF authorization is a
-separate policy boundary. Depending on the edition and license policy, a
-development or unlicensed runtime may impose an input-size limit or add an
-`XDOC DEMO` watermark. Verify the exact artifact instead of assuming that all
-distributions behave alike.
+`licenses-pdfium/` before redistributing it. Runtime conversion authorization is
+a separate policy boundary. The verified runtime exposes its current behavior
+in `commands.convert.licensePolicy`: missing or inactive authorization limits
+every PPTX input handled by `convert` to 2 MiB, while PDF/PNG output also carries
+a visible demo watermark. Verify the exact artifact and schema instead of
+assuming that later distributions behave identically.
 
 ### Filesystem and security
 
@@ -291,7 +292,7 @@ command.
 | macOS reports an incompatible system version         | The artifact was built with a newer deployment target than the worker    | Publish and select an archive whose documented minimum macOS version includes the worker; do not promise compatibility from the runner name alone |
 | Text wraps differently across workers                | Fonts or font cache differ                                               | Compare `xdoc extract ... --parts fonts`, provision the same fonts, and retain render provenance                                                  |
 | A file exists but the Agent marks the job successful | The caller checked filesystem existence instead of the report            | Parse the command's versioned report and exit policy; a file alone is not a gate                                                                  |
-| `XDOC DEMO` appears in PDF/PNG output                | The runtime's PDF authorization policy is inactive or restricted         | Check the exact edition/license and document the watermark policy for the deployment                                                              |
+| `XDOC DEMO` appears in PDF/PNG output                | The runtime's conversion authorization policy is inactive or restricted  | Check the exact edition/license and document the watermark policy for the deployment                                                              |
 
 ## Related documentation
 

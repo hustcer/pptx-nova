@@ -327,6 +327,8 @@ itself needs to be built or extended.
 - [xdoc introduction and architecture](docs/xdoc-introducution.md)
 - [Install the xdoc CLI](docs/xdoc-installation.md)
 - [Integrate xdoc with a PPTX Agent](docs/xdoc-integration.md)
+- [xdoc compatibility reference](docs/xdoc-compatibility.md)
+- [xdoc errors and reports](docs/xdoc-errors-and-reports.md)
 - [xdoc conformance profile](docs/xdoc-conformance.md)
 - [xdoc runtime schema snapshot](docs/xdoc-schema.json)
 - [pptx-nova scripts](pptx-nova/scripts/README.md)

@@ -64,6 +64,17 @@ function hasRequired(contract, path) {
   return new Set(contract?.requiredSlots ?? []).has(path)
 }
 
+function normalizeAssetSlots(contract) {
+  const slots = contract?.assetSlots
+  if (!slots || typeof slots !== 'object' || Array.isArray(slots)) return []
+  return Object.entries(slots).map(([id, details]) => ({
+    ...(details && typeof details === 'object' && !Array.isArray(details)
+      ? details
+      : { note: String(details ?? '') }),
+    id,
+  }))
+}
+
 function budgetSummary(schema = {}) {
   const budget = schema['x-slotBudget'] ?? {}
   const parts = []
@@ -168,6 +179,7 @@ function buildReference(deckkit) {
         slideType,
         hasSchema: Boolean(schema),
         requiredSlots: contract.requiredSlots ?? [],
+        assetSlots: normalizeAssetSlots(contract),
         rows: rows.map((row) => ({
           ...row,
           required: hasRequired(contract, row.path),
@@ -211,6 +223,25 @@ function renderMarkdown(ref) {
       }
     }
     lines.push('')
+    if (slide.assetSlots.length > 0) {
+      lines.push('### Asset slots')
+      lines.push('')
+      lines.push(
+        '| asset slot | kind | accepts asset | placeholder behavior | label/caption slots | notes |',
+      )
+      lines.push('| --- | --- | --- | --- | --- | --- |')
+      for (const slot of slide.assetSlots) {
+        const labelSlots = [slot.labelSlot, slot.captionSlot].filter(Boolean).join('<br>')
+        lines.push(
+          `| \`${escapeCell(slot.id)}\` | ${escapeCell(slot.kind ?? '')} | ${
+            slot.acceptsAsset === true ? 'yes' : 'no'
+          } | ${escapeCell(slot.placeholderBehavior ?? '')} | ${escapeCell(labelSlots)} | ${escapeCell(
+            slot.note ?? slot.description ?? '',
+          )} |`,
+        )
+      }
+      lines.push('')
+    }
   }
   return `${lines.join('\n').trimEnd()}\n`
 }

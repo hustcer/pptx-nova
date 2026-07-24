@@ -278,6 +278,7 @@ const makeFitDiagnostic = ({
   message,
   suggestedActions,
   blocking,
+  details = {},
 }) => ({
   slideIndex,
   slideType,
@@ -289,6 +290,7 @@ const makeFitDiagnostic = ({
   message,
   suggestedActions,
   blocking: blocking ?? severity === 'error',
+  ...(details && typeof details === 'object' && !Array.isArray(details) ? details : {}),
 })
 
 const countText = (value) => (typeof value === 'string' ? value.length : 0)
@@ -988,6 +990,7 @@ function pushValidationGateIssue({
   limit = null,
   message,
   suggestedActions = [],
+  details = {},
 }) {
   const diagnostic = makeFitDiagnostic({
     slideIndex,
@@ -999,11 +1002,65 @@ function pushValidationGateIssue({
     limit,
     message,
     suggestedActions,
+    details,
   })
   fitDiagnostics.push(diagnostic)
   const issue = makeIssue(type, message, { path, diagnostic })
   if (severity === 'error') errors.push(issue)
   else warnings.push(issue)
+}
+
+function diversityContext(gate, content, groups) {
+  const configuredGroups =
+    gate?.groups && typeof gate.groups === 'object' && !Array.isArray(gate.groups)
+      ? gate.groups
+      : {}
+  const groupMembers = Object.fromEntries(
+    Object.entries(configuredGroups).map(([group, members]) => [
+      group,
+      Array.isArray(members) ? [...members] : [],
+    ]),
+  )
+  const slideGroups = (content?.slides ?? []).map((slide, index) => ({
+    index,
+    slideType: slide?.type ?? null,
+    group: groups[index] ?? '(unmapped)',
+  }))
+  for (const item of slideGroups) {
+    const members = groupMembers[item.group] ?? []
+    if (item.slideType && !members.includes(item.slideType)) members.push(item.slideType)
+    groupMembers[item.group] = members
+  }
+
+  const configuredNames = Object.keys(configuredGroups)
+  const usedSet = new Set(slideGroups.map((item) => item.group))
+  const usedGroups = [
+    ...configuredNames.filter((group) => usedSet.has(group)),
+    ...[...usedSet].filter((group) => !configuredNames.includes(group)),
+  ]
+  const missingGroups = configuredNames.filter((group) => !usedSet.has(group))
+  const excludedGroups = Array.isArray(gate?.excludeGroupsFromUnique)
+    ? [...gate.excludeGroupsFromUnique]
+    : []
+  const countedGroups = usedGroups.filter((group) => !excludedGroups.includes(group))
+
+  return {
+    usedGroups,
+    missingGroups,
+    groupMembers,
+    slideGroups,
+    excludedGroups,
+    countedGroups,
+  }
+}
+
+function diversityContextSummary(context) {
+  const used = context.usedGroups.length > 0 ? context.usedGroups.join(', ') : '(none)'
+  const missing = context.missingGroups.length > 0 ? context.missingGroups.join(', ') : '(none)'
+  const members = Object.entries(context.groupMembers)
+    .map(([group, slideTypes]) => `${group}=[${slideTypes.join(', ') || '(none)'}]`)
+    .join('; ')
+  return `used groups: ${used}; missing groups: ${missing}; group members: ${members || '(none)'}`
 }
 
 function validationSeverity(config = {}, mode = 'draft') {
@@ -1174,6 +1231,63 @@ function checkSlideLayoutContract({
   }
 }
 
+function checkSlideAssetSlots({
+  entry,
+  slide,
+  slideIndex,
+  mode,
+  errors,
+  warnings,
+  fitDiagnostics,
+}) {
+  const contract = entry?.layoutContract
+  const slideContract = contract?.slideTypes?.[slide.type]
+  const assetSlots = slideContract?.assetSlots
+  if (
+    !assetSlots ||
+    typeof assetSlots !== 'object' ||
+    Array.isArray(assetSlots) ||
+    !slide?.imageSlots ||
+    typeof slide.imageSlots !== 'object' ||
+    Array.isArray(slide.imageSlots)
+  ) {
+    return
+  }
+
+  const basePath = `slides[${slideIndex}]`
+  for (const [slotId, assetId] of Object.entries(slide.imageSlots)) {
+    const slot = assetSlots[slotId]
+    if (!slot || slot.acceptsAsset !== false) continue
+    const severity = validationSeverity({ ...contract, ...slot }, mode)
+    const placeholderBehavior = slot.placeholderBehavior ?? 'placeholder shell'
+    pushValidationGateIssue({
+      errors,
+      warnings,
+      fitDiagnostics,
+      severity,
+      type: 'layout-contract',
+      slideIndex,
+      slideType: slide.type,
+      code: 'layout.assetSlot.unsupported',
+      path: `${basePath}.imageSlots.${slotId}`,
+      value: assetId,
+      limit: 'placeholder-only',
+      message: `${basePath}: asset slot "${slotId}" is placeholder-only and does not accept asset "${assetId}"; it renders a ${placeholderBehavior}. Remove the imageSlots entry, choose another slide type, or extend the DeckKit contract.`,
+      suggestedActions: [
+        'remove-unsupported-image-slot',
+        'switch-slide-type',
+        'extend-deckkit-asset-contract',
+      ],
+      details: {
+        assetSlot: {
+          id: slotId,
+          ...slot,
+        },
+      },
+    })
+  }
+}
+
 function slideGroupFor(type, diversityGate) {
   for (const [group, types] of Object.entries(diversityGate?.groups ?? {})) {
     if (Array.isArray(types) && types.includes(type)) return group
@@ -1191,6 +1305,8 @@ function checkDeckDiversity({ entry, content, mode, errors, warnings, fitDiagnos
   const gate = entry?.diversityGate
   if (!gate || !Array.isArray(content?.slides)) return
   const groups = content.slides.map((slide) => slideGroupFor(slide?.type, gate))
+  const context = diversityContext(gate, content, groups)
+  const contextSummary = diversityContextSummary(context)
   const slideCount = groups.length
   const threshold = matchingThreshold(gate.thresholds, slideCount)
   const severity = validationSeverity(gate, mode)
@@ -1209,12 +1325,13 @@ function checkDeckDiversity({ entry, content, mode, errors, warnings, fitDiagnos
         path: 'slides',
         value: unique.size,
         limit: threshold.minUniqueGroups,
-        message: `deck uses ${unique.size} layout group(s); ${threshold.minUniqueGroups} required for ${slideCount} slides`,
+        message: `deck uses ${unique.size} counted layout group(s); ${threshold.minUniqueGroups} required for ${slideCount} slides (${contextSummary})`,
         suggestedActions: [
           'vary-slide-types',
           'insert-data-or-compare-slide',
           'split-repeated-card-pages',
         ],
+        details: context,
       })
     }
   }
@@ -1231,8 +1348,9 @@ function checkDeckDiversity({ entry, content, mode, errors, warnings, fitDiagnos
         path: 'slides',
         value: groups,
         limit: required,
-        message: `deck is missing required layout group "${required}" for ${slideCount} slides`,
+        message: `deck is missing required layout group "${required}" for ${slideCount} slides (${contextSummary})`,
         suggestedActions: ['add-required-slide-group', 'remap-outline-to-supported-slide-type'],
+        details: context,
       })
     }
   }
@@ -1256,12 +1374,13 @@ function checkDeckDiversity({ entry, content, mode, errors, warnings, fitDiagnos
           path: `slides[${start}..${i - 1}]`,
           value: runLength,
           limit: maxRun,
-          message: `slides ${start + 1}-${i} repeat layout group "${groups[start]}" ${runLength} times`,
+          message: `slides ${start + 1}-${i} repeat layout group "${groups[start]}" ${runLength} times (${contextSummary})`,
           suggestedActions: [
             'alternate-layout-group',
             'merge-or-split-repeated-pages',
             'insert-breathing-slide',
           ],
+          details: context,
         })
       }
       start = i
@@ -1411,6 +1530,15 @@ export function validateContent(
         mode,
       })
       checkSlideLayoutContract({
+        entry,
+        slide,
+        slideIndex: i,
+        mode,
+        errors,
+        warnings,
+        fitDiagnostics,
+      })
+      checkSlideAssetSlots({
         entry,
         slide,
         slideIndex: i,

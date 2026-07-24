@@ -51,10 +51,12 @@ assets/deckkits/
 `catalog.json` 可声明两类交付 gate：
 
 - `layoutContract`：按 DeckKit / 页型声明必填数据槽位、任一满足槽位组、允许的
-  `layoutId` 和 `customOps` 策略。draft 默认给 warning，delivery 可通过
+  `layoutId`、`customOps` 策略和 `assetSlots`。draft 默认给 warning，delivery 可通过
   `deliverySeverity` 升级为 error。
 - `diversityGate`：按页型分组检查长 deck 的版式多样性、必需叙事组和连续重复组上限，
-  避免整套 deck 退化成同一种卡片页。
+  避免整套 deck 退化成同一种卡片页。触发时的 `fitDiagnostics` 会同时给出
+  `usedGroups`、`missingGroups`、`groupMembers` 和 `slideGroups`，因此 Agent 可以直接
+  选择替代页型，不必另查 catalog。
 - `visualGrammar`：声明 DeckKit 的视觉语言合同，包含定位、气质、布局原则、
   signature elements、字体/色彩节奏、composition rules 和 avoid 清单。它让 Agent 在
   选择 DeckKit 后知道"这套页面应该长什么样"，并在 readiness audit 中阻止缺少风格合同的
@@ -63,6 +65,13 @@ assets/deckkits/
 这些 gate 属于 DeckKit 元数据，不属于单个 deck 的临时 patch。新增或调整规则时优先修改
 `catalog.json` 和 `core-primitives.kit.mjs`，让 `validate-content.mjs`、build 胶水和 benchmark
 共享同一套判断。
+
+`layoutContract.slideTypes.<slideType>.assetSlots` 是页型的图片槽位合同。它是一个以语义
+slot id 为键的对象，每项至少说明 `kind`、`acceptsAsset` 和
+`placeholderBehavior`，还可以给出 `labelSlot` / `captionSlot` 与 `note`。槽位参考会把
+这些信息输出为单独的 Asset slots 表；当 `acceptsAsset` 为 `false` 时，该页型只会渲染
+占位框，`content.json` 的 `imageSlots` 不能注入真实图片，校验器会在 delivery 模式阻止
+这种误用。
 
 `visualGrammar` 不是运行时代码，也不替代页型函数、schema、layout contract 或 diversity gate。
 它只约束 DeckKit 使用方式和内容创作方向：选中 DeckKit 后，把 `positioning` 用作风格判断，

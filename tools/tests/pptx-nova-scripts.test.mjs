@@ -1284,6 +1284,71 @@ test('manual DeckKit retry commands overwrite only the current-run candidate', (
   assert.match(deckkitMode, /stop immediately and do not run vision-check on a stale candidate/i)
 })
 
+test('DeckKit diversity diagnostics disclose current, missing, and available groups', async () => {
+  const { validateContent } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
+  const content = {
+    meta: { deckkit: 'cartesian' },
+    slides: Array.from({ length: 7 }, () => ({
+      type: 'cartesianCardsSlide',
+      data: {
+        label: 'Structure',
+        title: 'Repeated structure',
+        cards: [
+          { title: 'A', body: 'One' },
+          { title: 'B', body: 'Two' },
+          { title: 'C', body: 'Three' },
+        ],
+      },
+    })),
+  }
+  const validation = validateContent(content, { deckkit: 'cartesian', mode: 'delivery' })
+  const diagnostic = validation.fitDiagnostics.find(
+    (item) => item.code === 'diversity.uniqueGroups.tooLow',
+  )
+
+  assert.equal(validation.valid, false)
+  assert.deepEqual(diagnostic.usedGroups, ['structure'])
+  assert.deepEqual(diagnostic.missingGroups, ['anchor', 'statement', 'evidence'])
+  assert.deepEqual(diagnostic.groupMembers.statement, ['cartesianStatementSlide'])
+  assert.deepEqual(diagnostic.groupMembers.evidence, [
+    'cartesianBarChartSlide',
+    'cartesianImageStatsSlide',
+    'cartesianLineChartSlide',
+  ])
+  assert.equal(diagnostic.slideGroups.length, 7)
+  assert.deepEqual(diagnostic.slideGroups[0], {
+    index: 0,
+    slideType: 'cartesianCardsSlide',
+    group: 'structure',
+  })
+  assert.match(diagnostic.message, /used groups: structure/)
+  assert.match(diagnostic.message, /missing groups: anchor, statement, evidence/)
+  assert.match(diagnostic.message, /statement=\[cartesianStatementSlide\]/)
+})
+
+test('placeholder-only DeckKit asset slots reject image injection in delivery mode', async () => {
+  const { validateContent } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
+  const content = JSON.parse(
+    readFileSync(skillPath('assets/deckkits/examples/cartesian-content.json'), 'utf8'),
+  )
+  const imageSlide = content.slides.find((slide) => slide.type === 'cartesianImageStatsSlide')
+  imageSlide.imageSlots = { 'image.editorial': 'product_screenshot' }
+
+  const validation = validateContent(content, { deckkit: 'cartesian', mode: 'delivery' })
+  const diagnostic = validation.fitDiagnostics.find(
+    (item) => item.code === 'layout.assetSlot.unsupported',
+  )
+
+  assert.equal(validation.valid, false)
+  assert.equal(diagnostic.path, 'slides[4].imageSlots.image.editorial')
+  assert.equal(diagnostic.value, 'product_screenshot')
+  assert.equal(diagnostic.assetSlot.id, 'image.editorial')
+  assert.equal(diagnostic.assetSlot.acceptsAsset, false)
+  assert.equal(diagnostic.assetSlot.placeholderBehavior, 'crossed image shell')
+  assert.match(diagnostic.message, /placeholder-only/)
+  assert.match(diagnostic.message, /does not accept asset "product_screenshot"/)
+})
+
 test('DeckKit slot reference covers every swiss-grid slide type', () => {
   const result = runNode([
     skillPath('scripts/pptx-nova-deckkit-slots.mjs'),
@@ -1316,6 +1381,55 @@ test('DeckKit slot reference covers every swiss-grid slide type', () => {
           row.budget.includes('10pt @ 4.6in x 0.7in') &&
           row.budget.includes('CJK ~33 chars x 4 line(s)'),
       ),
+  )
+})
+
+test('DeckKit slot reference discloses placeholder-only asset behavior', () => {
+  const jsonResult = runNode([
+    skillPath('scripts/pptx-nova-deckkit-slots.mjs'),
+    '--deckkit',
+    'cartesian',
+    '--format',
+    'json',
+  ])
+  const reference = JSON.parse(jsonResult.stdout)
+  const imageStats = reference.slideTypes.find(
+    (slide) => slide.slideType === 'cartesianImageStatsSlide',
+  )
+
+  assert.deepEqual(imageStats.assetSlots, [
+    {
+      id: 'image.editorial',
+      kind: 'image',
+      acceptsAsset: false,
+      placeholderBehavior: 'crossed image shell',
+      labelSlot: 'data.imageLabel',
+      note: 'This slide type renders an editable crossed placeholder shell. No image asset can be injected through content.json.',
+    },
+  ])
+
+  const markdownResult = runNode([
+    skillPath('scripts/pptx-nova-deckkit-slots.mjs'),
+    '--deckkit',
+    'cartesian',
+  ])
+  assert.match(
+    markdownResult.stdout,
+    /## cartesianImageStatsSlide[\s\S]*### Asset slots[\s\S]*`image\.editorial`[\s\S]*\| no \| crossed image shell \|/,
+  )
+
+  const broadsideResult = runNode([
+    skillPath('scripts/pptx-nova-deckkit-slots.mjs'),
+    '--deckkit',
+    'broadside',
+    '--format',
+    'json',
+  ])
+  const broadside = JSON.parse(broadsideResult.stdout)
+  assert.equal(
+    broadside.slideTypes.find((slide) => slide.slideType === 'broadsideSplitSlide').assetSlots[0]
+      .acceptsAsset,
+    false,
   )
 })
 

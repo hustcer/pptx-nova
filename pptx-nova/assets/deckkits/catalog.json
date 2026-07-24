@@ -1803,7 +1803,17 @@
             "requiredSlots": ["data.kicker", "data.title"]
           },
           "broadsideSplitSlide": {
-            "requiredSlots": ["data.kicker", "data.title", "data.lead", "data.bullets"]
+            "requiredSlots": ["data.kicker", "data.title", "data.lead", "data.bullets"],
+            "assetSlots": {
+              "image.split": {
+                "kind": "image",
+                "acceptsAsset": false,
+                "placeholderBehavior": "solid image shell",
+                "labelSlot": "data.imageLabel",
+                "captionSlot": "data.caption",
+                "note": "This split layout renders an editable placeholder shell. No image asset can be injected through content.json."
+              }
+            }
           },
           "broadsideStatsSlide": {
             "requiredSlots": ["data.items"]
@@ -2756,7 +2766,16 @@
               "data.title",
               "data.paragraphs",
               "data.stats"
-            ]
+            ],
+            "assetSlots": {
+              "image.editorial": {
+                "kind": "image",
+                "acceptsAsset": false,
+                "placeholderBehavior": "crossed image shell",
+                "labelSlot": "data.imageLabel",
+                "note": "This slide type renders an editable crossed placeholder shell. No image asset can be injected through content.json."
+              }
+            }
           },
           "cartesianCardsSlide": {
             "requiredSlots": ["data.label", "data.title", "data.cards"]

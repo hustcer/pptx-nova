@@ -83,3 +83,9 @@ P1 不一定阻塞草稿，但客户演示级 / 投资人级 / 董事会 deck �
 `noSlideChrome`；`missing` / `needs-user` / `forbidden` 会阻塞，`placeholder` /
 `needs-review` 会提示复核；`validate-content.mjs` 会检查 DeckKit 的 layout contract 与
 diversity gate。
+
+DeckKit 的页型槽位参考还会列出 `layoutContract.slideTypes[*].assetSlots`。其中
+`acceptsAsset: false` 表示该页型只有可编辑的占位框：`imageLabel` / `caption` 等字段只
+负责显示说明文字，不能通过 `content.json.imageSlots` 绑定图片。若需要真实图片，应改用
+声明了可注入资产的页型，或先扩展 DeckKit 的资产合同；不要把资产 id 填入
+placeholder-only 槽位后继续生成。

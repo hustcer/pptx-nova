@@ -190,6 +190,13 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
 - 所有创建型 deck：每页至少写 `rhythm`、`layoutIntent` 或 `macroLayout`。建议写
   `visualDensity`，取值 `low` / `medium` / `high`。这些字段只描述页面节奏和结构意图，
   不替代 DeckKit 的具体坐标。
+- `deck_lock.slides[].rhythm` 的合法值是：
+  - `anchor`：开场、结论或需要停顿强调的主张页；
+  - `dense`：信息密度较高的证据、指标或对比页；
+  - `breathing`：刻意留白、转场或视觉缓冲页；
+  - `appendix`：附录/来源页，可免除正式叙事页的 claim/proof 检查。
+    `appendix` 是设计锁的节奏值；若具体 DeckKit 的 `content.json` schema 没有声明它，
+    不要把它写入内容页的 `rhythm` 字段。
 - 正式说服型 deck：写 `deckProfile`，并在每个非 appendix slide 写 `claimTitle`、
   `proofObject`、`rhythm`、`layoutIntent`、`visualDensity`；详情见
   `references/narrative-quality.md`。

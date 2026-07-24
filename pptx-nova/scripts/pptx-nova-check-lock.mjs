@@ -21,7 +21,8 @@ const IDENTITY_ASSET_RE =
   /(logo|brand|mark|app-icon|product-ui|product-screenshot|customer|client|portrait|person|headshot)/i
 const IMAGE_SLOT_RATIOS = new Set(['21:9', '16:10', '16:9', '4:3', '3:2', '3:4', '1:1'])
 const IMAGE_FIT_POLICIES = new Set(['cover', 'contain', 'no-crop', 'crop-safe'])
-const SLIDE_RHYTHMS = new Set(['anchor', 'dense', 'breathing', 'appendix'])
+const SLIDE_RHYTHM_VALUES = ['anchor', 'dense', 'breathing', 'appendix']
+const SLIDE_RHYTHMS = new Set(SLIDE_RHYTHM_VALUES)
 const VISUAL_DENSITIES = new Set(['low', 'medium', 'high'])
 const CHART_LEGENDS = new Set(['right', 'left', 'top', 'bottom', 'corner', 'none'])
 const CHART_LABEL_POSITIONS = new Set([
@@ -884,13 +885,14 @@ function checkLock(lock, errors, warnings) {
         push(
           warnings,
           'lock-slide-rhythm-missing',
-          `slides[${index}] should declare rhythm anchor/dense/breathing/appendix`,
+          `slides[${index}] should declare rhythm ${SLIDE_RHYTHM_VALUES.join('/')}`,
         )
       } else if (!SLIDE_RHYTHMS.has(String(slide.rhythm))) {
         push(
           warnings,
           'lock-slide-rhythm-unknown',
-          `slides[${index}] uses unknown rhythm "${slide.rhythm}"`,
+          `slides[${index}] uses unknown rhythm "${slide.rhythm}"; allowed values: ${SLIDE_RHYTHM_VALUES.join(', ')}`,
+          { allowedValues: SLIDE_RHYTHM_VALUES },
         )
       }
       if (!layoutIntentOf(slide)) {

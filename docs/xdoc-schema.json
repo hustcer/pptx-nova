@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.0 (9069dbc7)",
+  "version": "0.3.1 (92cfa7b6)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1425,7 +1425,7 @@
         },
         "allow-raw-xml": {
           "type": "bool",
-          "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order action does not require this flag.",
+          "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
           "required": false,
           "style": "flag"
         },
@@ -2383,6 +2383,13 @@
             "gateMeaning": "agentGate.passed means the contact sheet rendered complete source/candidate pairs and is safe to hand to human visual review; changed pairs are expected and do not fail the gate.",
             "failWhen": "agentGate.passed=false, missingPairCount>0, addedPairCount>0, or pairCount=0; fix slide scope, slide count, or reference map before relying on the PNG.",
             "scopedReview": "When --slides is used, summary/pairs/rendered PNG are scoped to selected source slides; run an all-slides contact-diff before final delivery when full-deck parity matters."
+          },
+          "environment": {
+            "XDOC_CONTACT_DIFF_AGENT_REVIEW_OUTPUT": "Optional path for a second contact sheet laid out for Agent review; it must differ from --output.",
+            "XDOC_CONTACT_DIFF_AGENT_REVIEW_LAYOUT_DPI": "Layout DPI for the Agent review sheet; default 96, and must be positive and lower than --dpi."
+          },
+          "defaults": {
+            "agentReviewLayoutDpi": 96
           }
         },
         "refurbish-audit": {
@@ -9275,9 +9282,16 @@
           },
           "patchOoxmlAction": {
             "type": "string",
-            "enum": ["set", "add", "remove", "replace", "repair-child-order"],
+            "enum": [
+              "set",
+              "add",
+              "remove",
+              "replace",
+              "repair-child-order",
+              "repair-relationships"
+            ],
             "strict": true,
-            "description": "Supported raw OOXML mutations plus the guarded generated child-order repair action."
+            "description": "Supported raw OOXML mutations plus the guarded generated child-order and relationship repair actions."
           },
           "sha256Hex": {
             "type": "string",
@@ -9293,6 +9307,58 @@
               "$ref": "#/$defs/childOrderRepair"
             },
             "description": "Exact element paths and generated-rule identities for one atomic child-order repair."
+          },
+          "relationshipRepair": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "id", "type", "target"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["add", "retarget"],
+                "strict": true,
+                "description": "add rebuilds a missing relationship; retarget rewrites only the Target of an existing relationship whose current target part is missing."
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Relationship Type to write (add) or the exact Type the existing relationship must still carry (retarget)."
+              },
+              "target": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Relative Target to write; the resolved part must exist when the repair is applied."
+              },
+              "expectedTarget": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Exact current Target attribute value the retargeted relationship must still carry; the repair fails closed when it changed."
+              }
+            },
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "retarget"
+                }
+              },
+              "required": ["kind"]
+            },
+            "then": {
+              "required": ["expectedTarget"]
+            },
+            "description": "One guarded relationship repair; every declared precondition is re-verified at apply time and any mismatch fails closed without mutating the package."
+          },
+          "relationshipRepairs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/relationshipRepair"
+            },
+            "description": "Guarded relationship repairs applied atomically to one .rels part."
           },
           "childOrderRepair": {
             "type": "object",
@@ -14196,25 +14262,7 @@
                   "line": {
                     "$ref": "#/$defs/chartLineStyle"
                   }
-                },
-                "allOf": [
-                  {
-                    "if": {
-                      "required": ["plus"]
-                    },
-                    "then": {
-                      "required": ["minus"]
-                    }
-                  },
-                  {
-                    "if": {
-                      "required": ["minus"]
-                    },
-                    "then": {
-                      "required": ["plus"]
-                    }
-                  }
-                ]
+                }
               }
             ]
           },
@@ -16933,6 +16981,9 @@
                       "expectedPartSha256": {
                         "$ref": "#/$defs/sha256Hex"
                       },
+                      "relationshipRepairs": {
+                        "$ref": "#/$defs/relationshipRepairs"
+                      },
                       "repairs": {
                         "$ref": "#/$defs/childOrderRepairs"
                       },
@@ -16965,6 +17016,9 @@
                                 },
                                 {
                                   "required": ["repairs"]
+                                },
+                                {
+                                  "required": ["relationshipRepairs"]
                                 }
                               ]
                             }
@@ -16983,6 +17037,9 @@
                                 },
                                 {
                                   "required": ["repairs"]
+                                },
+                                {
+                                  "required": ["relationshipRepairs"]
                                 }
                               ]
                             }
@@ -17003,6 +17060,9 @@
                                 },
                                 {
                                   "required": ["repairs"]
+                                },
+                                {
+                                  "required": ["relationshipRepairs"]
                                 }
                               ]
                             }
@@ -17021,6 +17081,9 @@
                                 },
                                 {
                                   "required": ["repairs"]
+                                },
+                                {
+                                  "required": ["relationshipRepairs"]
                                 }
                               ]
                             }
@@ -17039,6 +17102,30 @@
                               "anyOf": [
                                 {
                                   "required": ["value"]
+                                },
+                                {
+                                  "required": ["relationshipRepairs"]
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "properties": {
+                              "action": {
+                                "const": "repair-relationships"
+                              },
+                              "xpath": {
+                                "const": "/"
+                              }
+                            },
+                            "required": ["relationshipRepairs"],
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": ["value"]
+                                },
+                                {
+                                  "required": ["repairs"]
                                 }
                               ]
                             }
@@ -17905,9 +17992,16 @@
             },
             "patchOoxmlAction": {
               "type": "string",
-              "enum": ["set", "add", "remove", "replace", "repair-child-order"],
+              "enum": [
+                "set",
+                "add",
+                "remove",
+                "replace",
+                "repair-child-order",
+                "repair-relationships"
+              ],
               "strict": true,
-              "description": "Supported raw OOXML mutations plus the guarded generated child-order repair action."
+              "description": "Supported raw OOXML mutations plus the guarded generated child-order and relationship repair actions."
             },
             "sha256Hex": {
               "type": "string",
@@ -17923,6 +18017,58 @@
                 "$ref": "#/$defs/childOrderRepair"
               },
               "description": "Exact element paths and generated-rule identities for one atomic child-order repair."
+            },
+            "relationshipRepair": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "id", "type", "target"],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": ["add", "retarget"],
+                  "strict": true,
+                  "description": "add rebuilds a missing relationship; retarget rewrites only the Target of an existing relationship whose current target part is missing."
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Relationship Type to write (add) or the exact Type the existing relationship must still carry (retarget)."
+                },
+                "target": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Relative Target to write; the resolved part must exist when the repair is applied."
+                },
+                "expectedTarget": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Exact current Target attribute value the retargeted relationship must still carry; the repair fails closed when it changed."
+                }
+              },
+              "if": {
+                "properties": {
+                  "kind": {
+                    "const": "retarget"
+                  }
+                },
+                "required": ["kind"]
+              },
+              "then": {
+                "required": ["expectedTarget"]
+              },
+              "description": "One guarded relationship repair; every declared precondition is re-verified at apply time and any mismatch fails closed without mutating the package."
+            },
+            "relationshipRepairs": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/relationshipRepair"
+              },
+              "description": "Guarded relationship repairs applied atomically to one .rels part."
             },
             "childOrderRepair": {
               "type": "object",
@@ -22826,25 +22972,7 @@
                     "line": {
                       "$ref": "#/$defs/chartLineStyle"
                     }
-                  },
-                  "allOf": [
-                    {
-                      "if": {
-                        "required": ["plus"]
-                      },
-                      "then": {
-                        "required": ["minus"]
-                      }
-                    },
-                    {
-                      "if": {
-                        "required": ["minus"]
-                      },
-                      "then": {
-                        "required": ["plus"]
-                      }
-                    }
-                  ]
+                  }
                 }
               ]
             },
@@ -24996,26 +25124,34 @@
                   {
                     "value": "set",
                     "required": ["value"],
-                    "forbidden": ["expectedPartSha256", "repairs"]
+                    "forbidden": ["expectedPartSha256", "repairs", "relationshipRepairs"]
                   },
                   {
                     "value": "add",
                     "required": ["value"],
-                    "forbidden": ["expectedPartSha256", "repairs"]
+                    "forbidden": ["expectedPartSha256", "repairs", "relationshipRepairs"]
                   },
                   {
                     "value": "remove",
-                    "forbidden": ["value", "expectedPartSha256", "repairs"]
+                    "forbidden": ["value", "expectedPartSha256", "repairs", "relationshipRepairs"]
                   },
                   {
                     "value": "replace",
                     "required": ["value"],
-                    "forbidden": ["expectedPartSha256", "repairs"]
+                    "forbidden": ["expectedPartSha256", "repairs", "relationshipRepairs"]
                   },
                   {
                     "value": "repair-child-order",
                     "required": ["expectedPartSha256", "repairs"],
-                    "forbidden": ["value"],
+                    "forbidden": ["value", "relationshipRepairs"],
+                    "const": {
+                      "xpath": "/"
+                    }
+                  },
+                  {
+                    "value": "repair-relationships",
+                    "required": ["relationshipRepairs"],
+                    "forbidden": ["value", "repairs"],
                     "const": {
                       "xpath": "/"
                     }
@@ -25024,7 +25160,7 @@
                 "summary": "OOXML action selects the exact value, precondition, and repair fields it accepts."
               }
             ],
-            "optional": ["expectedPartSha256", "repairs", "value"],
+            "optional": ["expectedPartSha256", "relationshipRepairs", "repairs", "value"],
             "level": "patch"
           },
           {
@@ -27924,10 +28060,12 @@
                   "type": "string"
                 },
                 "element": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an element; omission means part scope."
                 },
                 "attribute": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an attribute; omission means element or part scope."
                 },
                 "version": {
                   "type": "string"
@@ -28337,10 +28475,12 @@
                   "type": "string"
                 },
                 "element": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an element; omission means part scope."
                 },
                 "attribute": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an attribute; omission means element or part scope."
                 },
                 "version": {
                   "type": "string"
@@ -28750,10 +28890,12 @@
                   "type": "string"
                 },
                 "element": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an element; omission means part scope."
                 },
                 "attribute": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an attribute; omission means element or part scope."
                 },
                 "version": {
                   "type": "string"
@@ -29142,6 +29284,41 @@
                     },
                     "detail": {
                       "type": "string"
+                    },
+                    "diagram": {
+                      "type": "object",
+                      "description": "Semantic summary of one SmartArt/diagram instance: stable layout id, point/node/connection counts, capped text preview, and the hosting graphicFrame id/name for joining with shapes[]. SmartArt stays preserve-only.",
+                      "required": ["pointCount", "nodeCount", "connectionCount"],
+                      "properties": {
+                        "layoutId": {
+                          "type": "string"
+                        },
+                        "layoutPartName": {
+                          "type": "string"
+                        },
+                        "pointCount": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "nodeCount": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "connectionCount": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "textPreview": {
+                          "type": "string"
+                        },
+                        "shapeId": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "shapeName": {
+                          "type": "string"
+                        }
+                      }
                     }
                   }
                 }
@@ -29711,6 +29888,41 @@
                       },
                       "detail": {
                         "type": "string"
+                      },
+                      "diagram": {
+                        "type": "object",
+                        "description": "Semantic summary of one SmartArt/diagram instance: stable layout id, point/node/connection counts, capped text preview, and the hosting graphicFrame id/name for joining with shapes[]. SmartArt stays preserve-only.",
+                        "required": ["pointCount", "nodeCount", "connectionCount"],
+                        "properties": {
+                          "layoutId": {
+                            "type": "string"
+                          },
+                          "layoutPartName": {
+                            "type": "string"
+                          },
+                          "pointCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "nodeCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "connectionCount": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "textPreview": {
+                            "type": "string"
+                          },
+                          "shapeId": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "shapeName": {
+                            "type": "string"
+                          }
+                        }
                       }
                     }
                   }
@@ -30508,10 +30720,12 @@
                   "type": "string"
                 },
                 "element": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an element; omission means part scope."
                 },
                 "attribute": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Present only when the issue identifies an attribute; omission means element or part scope."
                 },
                 "version": {
                   "type": "string"
@@ -34091,6 +34305,11 @@
   },
   "schemaVersion": "cli-agent/v1",
   "defaultCommand": "convert",
+  "artifactSchemaEvolution": {
+    "sameVersionRequiredFieldAdditions": "compatible-extension",
+    "liveReports": "Consumers should discover the current executable schema before validating newly emitted reports.",
+    "historicalSidecars": "audit and replay preserve embedded historical report objects verbatim and do not revalidate them against the current live-report schema."
+  },
   "invocation": {
     "canonical": "xdoc convert <inputs...> [options]",
     "shorthand": "xdoc <inputs...> [options]",

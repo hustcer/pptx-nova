@@ -449,7 +449,17 @@ inspect 报告中的这些字段说明该页有需要谨慎处理的内容：
 | --------------- | ------------------- | --------------------------------------------------------------- |
 | `hasTransition` | 有 slide transition | 基础转场可用 `set-slide-transition`，高级/未知转场 preserve     |
 | `hasTiming`     | 有动画/timing       | 读 `timing_summary` / `animations[]` / `animation_capabilities` |
-| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape                        |
+| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape；语义摘要见下          |
+
+SmartArt 虽不可编辑，但不再是黑盒：`preserveOnly[]` 中 `category == "smartArt"` 且
+relationship 为 `diagramData` 的条目带只读 `diagram` 摘要 —— `layoutId`（如
+`urn:microsoft.com/office/officeart/2005/8/layout/orgChart1`）、`nodeCount`（语义节点数，
+不是 `pointCount` 原始点数，后者常是前者的 5-6 倍）、`connectionCount`、`textPreview`
+（截断的节点文本）、`shapeId`/`shapeName`（与 `shapes[]` join，SmartArt graphicFrame 的
+`contentKind` 为 `"diagram"`）。用途：向用户描述 diagram 内容；判断"保留 vs 用原生
+shape 重建"（节点少且用户要可编辑时建议重建）；翻译/替换前识别哪些文本在 SmartArt 里 ——
+`replace-text` / i18n ops **触达不了** SmartArt 文本，`textPreview` 里出现的词若需要改，
+只能整体重建或明确告知用户此文本保持原样。
 
 动画不是一概不能改：`animations[].editable == true` 的基础 entrance/exit 和安全文本 build
 可以按稳定 `id` 用 `set-slide-animations` 修改或删除；新增安全子集也使用同一个 op。

@@ -186,7 +186,11 @@ template rules, brand/style changes, or full visual QA.
 
 Preserve SmartArt, VBA macros, unsupported animation/timing, and complex objects
 unless the user explicitly asks for a destructive transformation and the tool
-supports it. Basic editable animation steps are no longer automatically
+supports it. SmartArt stays read-only, but inspect's `preserveOnly[]` now embeds
+a `diagram` summary on `diagramData` entries (layoutId, node/connection counts,
+textPreview, hosting shape id/name) — use it to describe the diagram, decide
+preserve vs native-shape rebuild, and flag SmartArt text that `replace-text`
+and i18n ops cannot reach. Basic editable animation steps are no longer automatically
 preserve-only: inspect `animations[].editable` and `animation_capabilities`
 before deciding. If inspect reports unsupported objects, say what can be
 preserved and what cannot be edited.

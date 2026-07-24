@@ -160,6 +160,26 @@ before <a:buChar> (schema order: …)`。
   带动画的形状**不需要**先手动清动画；出现 `dangling-ref` 通常来自 deck 预存
   缺陷而非本次操作。
 
+### `[Content_Types].xml` 的 shell 审计
+
+PPTX 本质上是 ZIP。`unzip` 会自行按 pattern 匹配条目，因此单纯给文件名加 shell
+引号仍会把方括号当作 pattern；`[Content_Types].xml` 必须写成
+`'[[]Content_Types].xml'`，其中 `[[]` 才表示一个字面量左方括号。建议把 ZIP 完整性、
+Content Types XML，以及图表关键节点放在同一段可复现审计中：
+
+```bash
+set -o pipefail
+unzip -t out.pptx
+unzip -p out.pptx '[[]Content_Types].xml' | xmllint --noout -
+unzip -p out.pptx 'ppt/charts/chart1.xml' |
+  rg '<c:(trendline|errBars|dTable|dispUnits|minorGridlines|title)'
+```
+
+`chart1.xml` 这里只是示例；先用 `unzip -Z1 out.pptx` 或
+`xdoc pptx inspect out.pptx` 找到实际的 chart part，再替换命令中的路径。
+`set -o pipefail` 可确保上游 `unzip` 读取或匹配失败时整段审计返回失败，而不是被
+下游命令的成功状态掩盖。
+
 ## 错误分类速查（24 类 errorCatalog）
 
 | code                       | 含义                                            | 处理                                                                     |

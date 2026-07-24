@@ -727,11 +727,12 @@ polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   点数）；可选 `type`（`both / minus / plus`，默认 both）、`direction`
   （`x / y`，scatter/bubble 用）、`noEndCap`、`line`。`errorBars: null` 删除。
 
-> ⚠️ **预览边界**：trendline / errorBars / dataTable / displayUnits / 轴标题 /
-> minorGridlines 写出的 OOXML 正确、PowerPoint 会完整渲染，但 xdoc 自家的
-> PNG/PDF 预览链暂不渲染这些装饰元素——**预览里看不到 ≠ 没写进去**，用
-> `unzip -p out.pptx ppt/charts/chart1.xml | grep trendline` 或 officecli
-> validate 复核，不要因预览缺失而反复重试。刻度标签 `rotation` 预览可见。
+> ✅ **当前预览支持（xdoc ≥0.3.1）**：PNG/PDF 预览链会渲染
+> `trendline` / `errorBars` / `dataTable` / `displayUnits` / 轴标题 /
+> `minorGridlines`，包括趋势线方程与 R²、单位标签以及图下数据表布局。
+> 刻度标签 `rotation` 也可见。若 capability probe 显示当前 runtime 不支持某项，
+> 再按 [故障排查](troubleshooting.md) 中的 XML/Office fallback 复核；不要把旧
+> runtime 的能力差异误判为写出失败。
 
 ### 数据标签
 
@@ -810,7 +811,7 @@ polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   （`span` 连线跨过空值，`zero` 按 0 画；创建时默认 `gap`）。
 - `roundedCorners`：图表外框圆角开关。
 - `dataTable`：图下数据表（四个 show* 开关至少给一个；`null` 移除整个数据表）。
-  预览链暂不渲染数据表，见上方预览边界说明。
+  xdoc ≥0.3.1 的 PNG/PDF 预览会显示数据表布局。
 
 ### 单点样式
 

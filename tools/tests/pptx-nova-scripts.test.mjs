@@ -1284,6 +1284,30 @@ test('manual DeckKit retry commands overwrite only the current-run candidate', (
   assert.match(deckkitMode, /stop immediately and do not run vision-check on a stale candidate/i)
 })
 
+test('chart preview and Content_Types audit guidance stay current', () => {
+  const charts = readFileSync(skillPath('references/charts.md'), 'utf8')
+  const troubleshooting = readFileSync(skillPath('references/troubleshooting.md'), 'utf8')
+
+  assert.match(charts, /当前预览支持/)
+  assert.match(charts, /xdoc ≥0\.3\.1/)
+  for (const feature of [
+    'trendline',
+    'errorBars',
+    'dataTable',
+    'displayUnits',
+    '轴标题',
+    'minorGridlines',
+  ]) {
+    assert.ok(charts.includes(feature))
+  }
+  assert.doesNotMatch(charts, /PNG\/PDF 预览链暂不渲染/)
+  assert.doesNotMatch(charts, /预览链暂不渲染数据表/)
+  assert.ok(troubleshooting.includes("'[[]Content_Types].xml'"))
+  assert.match(troubleshooting, /set -o pipefail/)
+  assert.match(troubleshooting, /unzip -p out\.pptx/)
+  assert.match(troubleshooting, /xmllint --noout -/)
+})
+
 test('DeckKit diversity diagnostics disclose current, missing, and available groups', async () => {
   const { validateContent } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
   const content = {

@@ -10,7 +10,7 @@ into an editable PowerPoint file. The primary target is PowerPoint; Keynote and
 other compatible office suites can usually open the result, subject to their
 PPTX compatibility.
 
-## Powered by `xdoc`
+## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
 Most slide-generation tools either create flattened slide images or rely on
 small, brittle PowerPoint scripting snippets. pptx-nova is built on `xdoc`, an
@@ -19,6 +19,11 @@ the real PowerPoint file structure, validate declarative JSON patches with
 dry-runs, apply native editable changes, render previews, compare source and
 candidate decks, export existing or generated presentations to high-fidelity
 PDF, and leave replayable sidecar evidence.
+
+All of this runs through a single lightweight native CLI that ships with its
+own rendering backends: previews, PDF export, and visual checks require no
+PowerPoint, office suite, or headless browser, which keeps the whole pipeline
+practical in CI, containers, and unattended agent environments.
 
 That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real
 PPTX objects instead of screenshots, check selectors before writing, preserve

@@ -99,6 +99,18 @@ Apply must also return `semanticIssues: []`. Stop and repair the patch when it
 reports a semantic issue; do not rely on a later full-deck scan to distinguish
 the edit from inherited debt.
 
+Semantic issues may carry a `fix` with `autoRetry: true` — a guarded
+`repair-child-order` or `repair-relationships` fixPatch (stale-safe, hash
+guarded, **no `--allow-raw-xml` needed**). Merge the `fixPatch` ops into your
+patch and re-apply; a second application of the same fix fails closed by
+design, so never replay one. On legacy decks, `vision-check.semanticIssues[]`
+is where inherited relationship debt (dangling references, relationships to
+missing parts, a missing `.rels` part) surfaces with these repair fixPatches:
+when the user asks to fix a broken deck, apply those `autoRetry` fixes and
+re-run `vision-check` to confirm the issues clear instead of hand-writing raw
+OOXML. Issues without a `fix` are ambiguous on purpose — report them, do not
+guess a repair.
+
 Once the candidate is stable, run one semantic diff and the evidence required
 by `edit-contract.json`, then run `pptx-nova-edit-contract-gate.mjs --strict`.
 Do not publish while `agentGate.passed=false`. For visible text-only edits that

@@ -329,6 +329,10 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `evidence-summary.json`. Actionable layout risks remain warnings; inspect
     fields that are merely undisclosed are counted separately and do not make the
     finalizer noisy. The helper does not replace PNG review or expand Micro Edit.
+    When a source, lock, patch, or candidate revision requires rerunning these
+    evidence helpers in the same current run, pass `--overwrite` to semantic
+    audit, structure check, and the finalizer. Without it, existing evidence is
+    preserved and the command fails with the exact conflicting path.
 
 10. For existing-deck edits, template-following, and refurbish tasks, run
     semantic diff once after the candidate is stable and before final delivery:

@@ -404,6 +404,95 @@ test('layout snapshot separates actionable risks from informational inspect gaps
   assert.equal(readFileSync(outputPath, 'utf8'), `${JSON.stringify(report, null, 2)}\n`)
 })
 
+test('evidence writers require explicit overwrite for current-run artifacts', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-evidence-overwrite-'))
+
+  const patchPath = join(root, 'patch.json')
+  const semanticOutput = join(root, 'semantic-audit.json')
+  writeJson(patchPath, { schemaVersion: 1, ops: [] })
+  const semanticArgs = [
+    skillPath('scripts/pptx-nova-semantic-audit.mjs'),
+    '--patch',
+    patchPath,
+    '--output',
+    semanticOutput,
+    '--json',
+  ]
+  runNode(semanticArgs)
+  const semanticIdentity = fileIdentity(semanticOutput)
+  const semanticRefusal = runNodeStatus(semanticArgs, 1)
+  assert.match(semanticRefusal.stderr, /semantic audit output already exists/)
+  assert.deepEqual(fileIdentity(semanticOutput), semanticIdentity)
+  runNode([...semanticArgs, '--overwrite'])
+
+  const structureOutput = join(root, 'structure-check.json')
+  const structureArgs = [
+    skillPath('scripts/pptx-nova-structure-check.mjs'),
+    '--pptx',
+    skillPath('assets/examples/cartesian/deck.pptx'),
+    '--output',
+    structureOutput,
+    '--json',
+  ]
+  runNode(structureArgs)
+  const structureIdentity = fileIdentity(structureOutput)
+  const structureRefusal = runNodeStatus(structureArgs, 1)
+  assert.match(structureRefusal.stderr, /structure check output already exists/)
+  assert.deepEqual(fileIdentity(structureOutput), structureIdentity)
+  runNode([...structureArgs, '--overwrite'])
+
+  const inspectPath = join(root, 'layout-inspect.json')
+  const layoutOutput = join(root, 'standalone-layout.json')
+  writeJson(inspectPath, {
+    schemaVersion: 'pptx-inspect/v1',
+    presentation: { slideCount: 1, size: { width: '13.333in', height: '7.5in' } },
+    slides: [{ index: 0, shapes: [] }],
+  })
+  const layoutArgs = [
+    skillPath('scripts/pptx-nova-layout-snapshot.mjs'),
+    '--inspect',
+    inspectPath,
+    '--output',
+    layoutOutput,
+    '--json',
+  ]
+  runNode(layoutArgs)
+  const layoutIdentity = fileIdentity(layoutOutput)
+  const layoutRefusal = runNodeStatus(layoutArgs, 1)
+  assert.match(layoutRefusal.stdout, /layout snapshot output already exists/)
+  assert.deepEqual(fileIdentity(layoutOutput), layoutIdentity)
+  runNode([...layoutArgs, '--overwrite'])
+
+  const finalizerRoot = join(root, 'finalizer')
+  mkdirSync(finalizerRoot, { recursive: true })
+  const { inspectPath: finalInspect, visionPath } = writeFinalizeSemanticFixtures(
+    finalizerRoot,
+    true,
+  )
+  const finalizerArgs = [
+    skillPath('scripts/pptx-nova-finalize-evidence.mjs'),
+    '--mode',
+    'studio-create',
+    '--run-dir',
+    finalizerRoot,
+    '--final-inspect',
+    finalInspect,
+    '--vision',
+    visionPath,
+    '--json',
+  ]
+  runNode(finalizerArgs)
+  const finalLayout = join(finalizerRoot, 'layout-final.json')
+  const finalSummary = join(finalizerRoot, 'evidence-summary.json')
+  const finalLayoutIdentity = fileIdentity(finalLayout)
+  const finalSummaryIdentity = fileIdentity(finalSummary)
+  const finalizerRefusal = runNodeStatus(finalizerArgs, 1)
+  assert.match(finalizerRefusal.stderr, /current-run outputs already exist/)
+  assert.deepEqual(fileIdentity(finalLayout), finalLayoutIdentity)
+  assert.deepEqual(fileIdentity(finalSummary), finalSummaryIdentity)
+  runNode([...finalizerArgs, '--overwrite'])
+})
+
 test('finalize evidence requires a passing semantic vision gate for new decks', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-finalize-semantic-create-'))
   const { inspectPath, visionPath } = writeFinalizeSemanticFixtures(root, true)

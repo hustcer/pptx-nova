@@ -106,6 +106,8 @@ Use these entry points from skill workflows:
   disclose full-package semantic residuals without incorrectly scoping them to changed
   slides. Read
   `evidence-summary.json.agentSummary` for the stable agent-facing summary.
+  It refuses to replace `layout-final.json` or `evidence-summary.json` unless
+  `--overwrite` is passed for the current run.
 - `pptx-nova-feedback-gate.mjs` - final-response guard for Feedback Mode. It
   detects feedback trigger phrases from the original prompt or accepts
   `--require-feedback`, checks that `<run-dir>/skill-feedback.md` exists and is
@@ -150,7 +152,8 @@ Use these entry points from skill workflows:
   data-driven, Studio, structural edit, template-following, and refurbish runs
   that contain native chart/table ops. It validates data shape, source/claim
   disclosure, and final native chart/table object presence without attempting a
-  full OOXML equivalence audit.
+  full OOXML equivalence audit. Existing reports require an explicit
+  current-run `--overwrite`.
 - pptx-nova-visual-review.mjs - structured PNG/contact-sheet review helper. It
   records required visual QA checks into visual_review.json, validates that
   visual evidence and reviewed slide counts are present, and leaves actual
@@ -164,7 +167,8 @@ Use these entry points from skill workflows:
 - pptx-nova-structure-check.mjs - lightweight PPTX OOXML structure check. It
   scans XML inside the PPTX for expected font declarations, expected sRGB/theme
   colors, and empty/default-text placeholder residue, then writes
-  structure-check.json for the final evidence summary.
+  structure-check.json for the final evidence summary. Existing reports require
+  an explicit current-run `--overwrite`.
 
 Repository-root `tools/` contains maintainer gates for this public repository,
 including `tools/pptx-nova-smoke-test.mjs` and

@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { semanticValidationEvidence } from './lib/semantic-evidence.mjs'
+import { ensureWritableOutputs, writeJsonOutput } from './lib/output-files.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-finalize-evidence/v1'
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
@@ -42,6 +43,8 @@ Options:
                             Structural edit/template gates use this scoped
                             vision risk while preserving full-deck residuals.
   --slides <expr>           Alias for --changed-slides.
+  --overwrite              Replace layout-final.json and evidence-summary.json
+                           only when they belong to this current run.
   --json                    Print evidence-summary.json to stdout.
   --help                    Show this help.
 
@@ -61,6 +64,7 @@ function parseArgs(argv) {
     visualReview: '',
     structureCheck: '',
     changedSlides: '',
+    overwrite: false,
     json: false,
   }
   const flags = {
@@ -83,6 +87,10 @@ function parseArgs(argv) {
     }
     if (arg === '--json') {
       args.json = true
+      continue
+    }
+    if (arg === '--overwrite') {
+      args.overwrite = true
       continue
     }
     const key = flags[arg]
@@ -406,11 +414,12 @@ function validateInspect(args, report) {
 
 function generateLayout(args, report) {
   const output = report.artifacts.layoutFinal
-  const result = spawnSync(
-    process.execPath,
-    [LAYOUT_SCRIPT, '--inspect', args.finalInspect, '--output', output, '--json'],
-    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
-  )
+  const layoutArgs = [LAYOUT_SCRIPT, '--inspect', args.finalInspect, '--output', output, '--json']
+  if (args.overwrite) layoutArgs.push('--overwrite')
+  const result = spawnSync(process.execPath, layoutArgs, {
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
   let layout = null
   try {
     layout = JSON.parse(result.stdout)
@@ -830,7 +839,10 @@ function finish(args, report) {
   report.status = report.errors.length > 0 ? 'fail' : report.warnings.length > 0 ? 'warn' : 'pass'
   report.agentSummary = buildAgentSummary(report)
   const output = join(args.runDir, 'evidence-summary.json')
-  writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`)
+  writeJsonOutput(output, report, {
+    overwrite: args.overwrite,
+    label: 'evidence summary output',
+  })
   if (args.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`)
   else {
     process.stdout.write(`pptx-nova final evidence: ${report.status}\n`)
@@ -844,6 +856,10 @@ function finish(args, report) {
 
 try {
   const args = parseArgs(process.argv.slice(2))
+  ensureWritableOutputs(
+    [join(args.runDir, 'layout-final.json'), join(args.runDir, 'evidence-summary.json')],
+    args.overwrite,
+  )
   const report = makeReport(args)
   if (validateInspect(args, report)) generateLayout(args, report)
   validateVision(args, MODES[args.mode], report)

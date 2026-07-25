@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { buildLayoutSnapshot, buildLayoutSnapshotFailure } from './lib/layout-snapshot.mjs'
+import { ensureWritableOutput, writeJsonOutput } from './lib/output-files.mjs'
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs --inspect final-inspect.json [options]
@@ -9,6 +10,7 @@ const usage = `Usage:
 Options:
   --inspect <path>  Required xdoc pptx inspect JSON for the final deck.
   --output <path>   Optional output path. Defaults to stdout only.
+  --overwrite       Replace an existing current-run output.
   --json            Print machine-readable layout snapshot.
   --help            Show this help.
 
@@ -23,7 +25,7 @@ function valueAfter(argv, index, flag) {
 }
 
 function parseArgs(argv) {
-  const args = { inspect: '', output: '', json: false }
+  const args = { inspect: '', output: '', overwrite: false, json: false }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
     if (arg === '--help' || arg === '-h') {
@@ -31,6 +33,8 @@ function parseArgs(argv) {
       process.exit(0)
     } else if (arg === '--json') {
       args.json = true
+    } else if (arg === '--overwrite') {
+      args.overwrite = true
     } else if (arg === '--inspect' || arg === '--output') {
       const key = arg === '--inspect' ? 'inspect' : 'output'
       args[key] = resolve(valueAfter(argv, index, arg))
@@ -64,13 +68,24 @@ function printHuman(snapshot) {
 let args = null
 try {
   args = parseArgs(process.argv.slice(2))
+  if (args.output) ensureWritableOutput(args.output, args.overwrite, 'layout snapshot output')
   const snapshot = buildLayoutSnapshot(readJson(args.inspect), { sourceLabel: args.inspect })
-  if (args.output) writeFileSync(args.output, `${JSON.stringify(snapshot, null, 2)}\n`)
+  if (args.output) {
+    writeJsonOutput(args.output, snapshot, {
+      overwrite: args.overwrite,
+      label: 'layout snapshot output',
+    })
+  }
   if (args.json) process.stdout.write(`${JSON.stringify(snapshot, null, 2)}\n`)
   else printHuman(snapshot)
 } catch (error) {
   const failure = buildLayoutSnapshotFailure(args?.inspect ?? '', error)
-  if (args?.output) writeFileSync(args.output, `${JSON.stringify(failure, null, 2)}\n`)
+  if (args?.output && (args.overwrite || !existsSync(args.output))) {
+    writeJsonOutput(args.output, failure, {
+      overwrite: args.overwrite,
+      label: 'layout snapshot output',
+    })
+  }
   if (args?.json) process.stdout.write(`${JSON.stringify(failure, null, 2)}\n`)
   else printHuman(failure)
   process.exitCode = 1

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { writeJsonOutput } from './lib/output-files.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-semantic-audit/v1'
 const CHART_OPS_WITH_DATA = new Set(['add-chart', 'set-chart-data'])
@@ -21,6 +22,7 @@ const usage =
   '  --final-inspect <path>  Optional final xdoc pptx inspect JSON.\n' +
   '  --inspect <path>        Alias for --final-inspect.\n' +
   '  --output <path>         Optional output path. Defaults to semantic-audit.json in cwd.\n' +
+  '  --overwrite             Replace an existing current-run report.\n' +
   '  --json                  Print the report to stdout.\n' +
   '  --help                  Show this help.\n\n' +
   'This lightweight audit validates common chart/table data-shape mistakes,\n' +
@@ -33,6 +35,7 @@ function parseArgs(argv) {
     patch: '',
     finalInspect: '',
     output: resolve('semantic-audit.json'),
+    overwrite: false,
     json: false,
   }
   const flags = {
@@ -51,6 +54,10 @@ function parseArgs(argv) {
     }
     if (arg === '--json') {
       args.json = true
+      continue
+    }
+    if (arg === '--overwrite') {
+      args.overwrite = true
       continue
     }
     const key = flags[arg]
@@ -613,7 +620,10 @@ try {
   const patch = readJson(args.patch, 'patch.json')
   const inspect = args.finalInspect ? readJson(args.finalInspect, 'final inspect') : null
   const report = makeReport(args, lock, patch, inspect)
-  writeFileSync(args.output, JSON.stringify(report, null, 2) + '\n')
+  writeJsonOutput(args.output, report, {
+    overwrite: args.overwrite,
+    label: 'semantic audit output',
+  })
   if (args.json) process.stdout.write(JSON.stringify(report, null, 2) + '\n')
   else {
     process.stdout.write('pptx-nova semantic audit: ' + report.status + '\n')

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { inflateRawSync } from 'node:zlib'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { writeJsonOutput } from './lib/output-files.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-structure-check/v1'
 
@@ -17,6 +18,7 @@ const usage =
   '  --strict-colors         Missing expected colors are errors instead of warnings.\n' +
   '  --strict-placeholders   Empty placeholder residue is an error instead of a warning.\n' +
   '  --output <path>         Output path. Defaults to structure-check.json in cwd.\n' +
+  '  --overwrite             Replace an existing current-run report.\n' +
   '  --json                  Print structure-check.json to stdout.\n' +
   '  --help                  Show this help.\n\n' +
   'This helper performs lightweight OOXML structure checks for generated PPTX files.\n' +
@@ -33,6 +35,7 @@ function parseArgs(argv) {
     strictColors: false,
     strictPlaceholders: false,
     output: resolve('structure-check.json'),
+    overwrite: false,
     json: false,
   }
   const flags = {
@@ -48,6 +51,10 @@ function parseArgs(argv) {
     }
     if (arg === '--json') {
       args.json = true
+      continue
+    }
+    if (arg === '--overwrite') {
+      args.overwrite = true
       continue
     }
     if (arg === '--strict-fonts') {
@@ -423,8 +430,10 @@ try {
   const args = parseArgs(process.argv.slice(2))
   if (!existsSync(args.pptx)) throw new Error('PPTX does not exist: ' + args.pptx)
   const report = makeReport(args)
-  mkdirSync(dirname(args.output), { recursive: true })
-  writeFileSync(args.output, JSON.stringify(report, null, 2) + '\n')
+  writeJsonOutput(args.output, report, {
+    overwrite: args.overwrite,
+    label: 'structure check output',
+  })
   if (args.json) process.stdout.write(JSON.stringify(report, null, 2) + '\n')
   else {
     process.stdout.write('pptx-nova structure check: ' + report.status + '\n')

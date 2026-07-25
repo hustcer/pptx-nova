@@ -233,7 +233,12 @@ debugging path.
    Preserve `themeFontMetadata`, `relationshipPath`, `shapeInternalName`, and
    `chartMetadata` by default. Treat `embeddedWorkbook` and other review units
    as manual review items unless the user explicitly approves a workbook sync
-   strategy.
+   strategy. When a workbook strategy is approved, follow each hit's
+   `workbookReview` recommendation: `recommendedAction` is `translate`,
+   `translate-with-constraints` (obey `constraints[]`), `needs-confirmation`,
+   or `preserve` (sheet names and workbook theme names must keep the source
+   value), and `replacementTemplate` / `selectors.embeddedWorkbookText` is a
+   manual replacement plan only — no automated xdoc apply path consumes it.
 5. Copy the source PPTX into the run directory and use that copy as the first
    candidate. Do not reconstruct slides, duplicate objects, or generate new
    text boxes for existing content.
@@ -509,7 +514,9 @@ debugging path.
     to preserve product names, URLs, code tokens, or equivalent text; the gate
     still requires the candidate to keep that exact text (`approvedUnchangedCount`
     in the summary). `embeddedWorkbook` still needs chart/workbook sync review
-    but stays out of the automatic translation set. Preserve `themeFontMetadata`,
+    but stays out of the automatic translation set; each hit's `workbookReview`
+    (risk, `recommendedAction`, `constraints[]`, `replacementTemplate`) is the
+    per-node decision input for that review. Preserve `themeFontMetadata`,
     `relationshipPath`, `shapeInternalName`, and `chartMetadata` unless the user
     explicitly asks to localize or relink them.
 
@@ -628,6 +635,14 @@ Required interpretation:
   style blockers as "geometry"; if a report cannot isolate the change to the
   intended textbox size/position, stop and repair by wording or font size.
 - Missing or added style-relevant parts are blockers.
+- `coverage.embeddedWorkbook` is `outer-package-only`: embedded workbook parts
+  are byte-compared for change detection only, and workbook-internal `xl/*`
+  XML never enters the style signature. Embedded-workbook `warnings[]` entries
+  (with `embeddedWorkbooks.parts[].status` of `changed`/`added`/`removed`) do
+  not fail the gate but mark unaudited workbook edits: validate the embedded
+  `.xlsx` ZIP/XML separately, keep the chart visible cache in sync, rerun
+  `i18n-scan --mode candidate`, and clean-open the deck before delivery. Never
+  present `status=pass` as proof that workbook-internal edits were audited.
 - A failure in slide/chart relationship parts means possible hyperlink or
   embedded-object loss; do not waive it based only on PNG appearance.
 

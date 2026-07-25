@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -45,7 +45,13 @@ function runFinalizer(root, candidateSchema, { preProbeRunDir = false } = {}) {
     )
   }
   for (const name of ['source.pptx', 'candidate.pptx']) writeFileSync(join(root, name), name)
-  writeFileSync(join(root, 'units.json'), JSON.stringify({ schemaVersion: 'pptx-i18n-scan/v1' }))
+  writeFileSync(
+    join(root, 'units.json'),
+    JSON.stringify({
+      schemaVersion: 'pptx-i18n-scan/v1',
+      i18nUnits: { units: [] },
+    }),
+  )
   writeFileSync(
     join(root, 'translations.json'),
     JSON.stringify({ schemaVersion: 'pptx-i18n-translations/v1', translations: [] }),
@@ -125,5 +131,149 @@ test('the finalizer accepts a pre-probed run directory holding only xdoc-capabil
   const { summary } = runFinalizer(root, 'pptx-i18n-candidate-result/v1', { preProbeRunDir: true })
   // validatePaths accepted the pre-probed directory and the run advanced to
   // the phase where the fake xdoc stops on purpose.
+  assert.equal(summary.error?.phase, 'translation-vision-diff')
+})
+
+test('typed text attribute changes fail before xdoc and suggest the complete allowlist', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-run-text-attrs-'))
+  const runDir = join(root, 'run')
+  for (const name of ['source.pptx', 'candidate.pptx']) writeFileSync(join(root, name), name)
+  writeFileSync(
+    join(root, 'units.json'),
+    JSON.stringify({
+      schemaVersion: 'pptx-i18n-scan/v1',
+      i18nUnits: {
+        units: [
+          {
+            unitId: 'tooltip-1',
+            category: 'visibleTextAttr',
+            sourceText: 'Open GitHub',
+            origin: { attrName: 'tooltip' },
+          },
+          {
+            unitId: 'tooltip-2',
+            category: 'visibleTextAttr',
+            sourceText: 'Next slide',
+            selectors: { replaceText: { attrName: 'tooltip' } },
+          },
+          {
+            unitId: 'descr-1',
+            category: 'visibleTextAttr',
+            sourceText: 'Product mark',
+            origin: { attrName: 'descr' },
+          },
+        ],
+      },
+    }),
+  )
+  writeFileSync(
+    join(root, 'translations.json'),
+    JSON.stringify({
+      schemaVersion: 'pptx-i18n-translations/v1',
+      translations: [
+        { unitId: 'tooltip-1', sourceText: 'Open GitHub', targetText: 'GitHub öffnen' },
+        { unitId: 'tooltip-2', sourceText: 'Next slide', targetText: 'Nächste Folie' },
+        // Explicitly unchanged typed text does not require an allowlist entry.
+        { unitId: 'descr-1', sourceText: 'Product mark', targetText: 'Product mark' },
+      ],
+    }),
+  )
+  const result = spawnSync(
+    process.execPath,
+    [
+      runner,
+      '--source',
+      join(root, 'source.pptx'),
+      '--candidate',
+      join(root, 'candidate.pptx'),
+      '--units',
+      join(root, 'units.json'),
+      '--translations',
+      join(root, 'translations.json'),
+      '--output',
+      join(root, 'final.pptx'),
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      join(root, 'must-not-run'),
+      '--allow-text-attrs',
+      'descr',
+      '--progress',
+      'off',
+      '--json',
+    ],
+    { encoding: 'utf8' },
+  )
+  assert.equal(result.status, 1)
+  const output = JSON.parse(result.stdout)
+  assert.match(
+    output.error?.message ?? '',
+    /tooltip \(2 changed units\).*--allow-text-attrs descr,tooltip/,
+  )
+  assert.match(output.error?.message ?? '', /never added automatically/)
+  assert.equal(existsSync(runDir), false)
+})
+
+test('typed text attribute preflight records the explicit authorization before xdoc phases', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-run-text-attrs-'))
+  const runDir = join(root, 'run')
+  for (const name of ['source.pptx', 'candidate.pptx']) writeFileSync(join(root, name), name)
+  writeFileSync(
+    join(root, 'units.json'),
+    JSON.stringify({
+      schemaVersion: 'pptx-i18n-scan/v1',
+      i18nUnits: {
+        units: [
+          {
+            unitId: 'tooltip-1',
+            category: 'visibleTextAttr',
+            sourceText: 'Open GitHub',
+            origin: { attrName: 'tooltip' },
+          },
+        ],
+      },
+    }),
+  )
+  writeFileSync(
+    join(root, 'translations.json'),
+    JSON.stringify({
+      schemaVersion: 'pptx-i18n-translations/v1',
+      translations: [
+        { unitId: 'tooltip-1', sourceText: 'Open GitHub', targetText: 'GitHub öffnen' },
+      ],
+    }),
+  )
+  const result = spawnSync(
+    process.execPath,
+    [
+      runner,
+      '--source',
+      join(root, 'source.pptx'),
+      '--candidate',
+      join(root, 'candidate.pptx'),
+      '--units',
+      join(root, 'units.json'),
+      '--translations',
+      join(root, 'translations.json'),
+      '--output',
+      join(root, 'final.pptx'),
+      '--run-dir',
+      runDir,
+      '--xdoc-bin',
+      fakeXdoc(root, { candidateSchema: 'pptx-i18n-candidate-result/v1' }),
+      '--allow-text-attrs',
+      'tooltip',
+      '--progress',
+      'off',
+      '--json',
+    ],
+    { encoding: 'utf8' },
+  )
+  assert.equal(result.status, 1)
+  const summary = JSON.parse(readFileSync(join(runDir, 'translation-run-summary.json'), 'utf8'))
+  const preflight = summary.phases.find((entry) => entry.name === 'typed-text-attribute-preflight')
+  assert.equal(preflight?.status, 'passed')
+  assert.deepEqual(preflight?.details?.required, [{ attrName: 'tooltip', unitCount: 1 }])
+  assert.deepEqual(preflight?.details?.allowed, ['tooltip'])
   assert.equal(summary.error?.phase, 'translation-vision-diff')
 })

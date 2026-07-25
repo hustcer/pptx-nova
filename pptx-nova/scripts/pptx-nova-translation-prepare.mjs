@@ -16,7 +16,12 @@ import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
 
-import { isNewOrPreProbedRunDir } from './lib/run-dir.mjs'
+import { assertNewOrPreProbedRunDir, isNewOrPreProbedRunDir } from './lib/run-dir.mjs'
+import {
+  buildTranslationConstraints,
+  normalizeTranslationGlossary,
+  validateTranslationConstraints,
+} from './lib/translation-constraints.mjs'
 import {
   applyMemoryFill,
   buildMemoryFillView,
@@ -42,11 +47,18 @@ const usage = `Usage:
 Options:
   --review-decisions <path>  Optional bound language-review decisions.
   --memory <path>            Translation memory to consume; defaults to run-dir/translation-memory.json.
+  --glossary <path>          Optional pptx-nova-translation-glossary/v1 project glossary.
+                             It is normalized and snapshotted into the run before translation.
+  --prompt-file <path>       Read the original user prompt from outside the run directory and
+                             archive it as run-dir/prompt.txt after the fresh-run guard passes.
   --fill <path>              Apply-time JSONL overlay ({memoryId, sourceText?, targetText} per line)
                              merged into the memory; supports partial/incremental wording revisions
                              without touching the full memory JSON. Requires --apply.
   --expand-review <name>     Persist one lazy review partition: languageUncertain,
                              shared, embeddedWorkbook, or other.
+  --resume-stage review      Reuse the bound source scan to expand one review partition after
+                             needs-translations; requires --expand-review and does not rescan or
+                             modify translation memory.
   --output-candidate <path>  Prepared stable candidate; defaults to run-dir/candidate-prepared.pptx.
   --apply                    Materialize translations, plan, dry-run, and apply all generated artifacts.
   --xdoc-bin <path>          xdoc executable. Defaults to xdoc.
@@ -69,8 +81,11 @@ const valueFlags = {
   '--run-dir': 'runDir',
   '--review-decisions': 'reviewDecisions',
   '--memory': 'memory',
+  '--glossary': 'glossary',
+  '--prompt-file': 'promptFile',
   '--fill': 'fill',
   '--expand-review': 'expandReview',
+  '--resume-stage': 'resumeStage',
   '--output-candidate': 'outputCandidate',
   '--xdoc-bin': 'xdocBin',
   '--progress': 'progress',
@@ -84,8 +99,12 @@ function parseArgs(argv) {
     runDir: '',
     reviewDecisions: '',
     memory: '',
+    memoryExplicit: false,
+    glossary: '',
+    promptFile: '',
     fill: '',
     expandReview: '',
+    resumeStage: '',
     outputCandidate: '',
     xdocBin: 'xdoc',
     apply: false,
@@ -112,6 +131,7 @@ function parseArgs(argv) {
       const value = argv[index + 1]
       if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
       args[key] = value
+      if (key === 'memory') args.memoryExplicit = true
       index += 1
     }
   }
@@ -128,10 +148,31 @@ function parseArgs(argv) {
   ) {
     throw new Error('--expand-review must be languageUncertain, shared, embeddedWorkbook, or other')
   }
+  if (args.resumeStage && args.resumeStage !== 'review') {
+    throw new Error('--resume-stage currently supports only review')
+  }
+  if (args.resumeStage === 'review' && !args.expandReview) {
+    throw new Error('--resume-stage review requires --expand-review <partition>')
+  }
+  if (
+    args.resumeStage === 'review' &&
+    (args.apply ||
+      args.reviewDecisions ||
+      args.fill ||
+      args.glossary ||
+      args.promptFile ||
+      args.memoryExplicit)
+  ) {
+    throw new Error(
+      '--resume-stage review cannot be combined with --apply, --review-decisions, --fill, --memory, --glossary, or --prompt-file',
+    )
+  }
   const cwd = process.cwd()
   args.source = resolve(cwd, args.source)
   args.runDir = resolve(cwd, args.runDir)
   args.reviewDecisions = args.reviewDecisions ? resolve(cwd, args.reviewDecisions) : ''
+  args.glossary = args.glossary ? resolve(cwd, args.glossary) : ''
+  args.promptFile = args.promptFile ? resolve(cwd, args.promptFile) : ''
   args.fill = args.fill ? resolve(cwd, args.fill) : ''
   if (args.fill && !args.apply) {
     throw new Error('--fill requires --apply; the fill overlay is merged at apply time')
@@ -149,6 +190,7 @@ function parseArgs(argv) {
 function artifactsFor(args) {
   return {
     capabilities: join(args.runDir, 'xdoc-capabilities.json'),
+    prompt: join(args.runDir, 'prompt.txt'),
     scan: join(args.runDir, 'i18n-scan-source.json'),
     reviewDecisionsTemplate: join(args.runDir, 'i18n-review-decisions.template.json'),
     classifiedScan: join(args.runDir, 'i18n-scan-classified.json'),
@@ -156,8 +198,14 @@ function artifactsFor(args) {
     memory: args.memory,
     memoryFill: join(args.runDir, 'translation-memory.fill.jsonl'),
     memoryFilled: join(args.runDir, 'translation-memory.filled.json'),
+    glossary: join(args.runDir, 'translation-glossary.json'),
+    constraints: join(args.runDir, 'translation-constraints.json'),
+    constraintsCheck: join(args.runDir, 'translation-constraints-check.json'),
     reviewInventory: args.expandReview
       ? join(args.runDir, `review-inventory-${args.expandReview}.json`)
+      : null,
+    reviewExpansionSummary: args.expandReview
+      ? join(args.runDir, `review-expansion-${args.expandReview}-summary.json`)
       : null,
     memoryRepair: nextRepairArtifactPath(args),
     translations: join(args.runDir, 'translations.json'),
@@ -224,6 +272,66 @@ function writeJson(path, value, overwrite = false) {
   if (existsSync(path) && !overwrite) throw new Error(`Output already exists: ${path}`)
   mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
+}
+
+function sameJson(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function archivePrompt(args, artifacts, summary, reporter) {
+  if (!args.promptFile) return
+  phase(summary, reporter, 'prompt-archive', () => {
+    const prompt = readFileSync(args.promptFile)
+    if (existsSync(artifacts.prompt)) {
+      const archived = readFileSync(artifacts.prompt)
+      if (!archived.equals(prompt)) {
+        throw new Error(
+          `archived prompt differs from --prompt-file; keep ${artifacts.prompt} unchanged and start a fresh run to bind a different prompt`,
+        )
+      }
+      return
+    }
+    writeFileSync(artifacts.prompt, prompt)
+  })
+}
+
+function bindGlossary(args, artifacts, summary, reporter) {
+  const supplied = args.glossary
+    ? normalizeTranslationGlossary(readJson(args.glossary, 'translation glossary'), {
+        targetLang: args.targetLang,
+      })
+    : null
+  let bound = null
+  phase(summary, reporter, 'translation-glossary-bind', () => {
+    if (existsSync(artifacts.glossary)) {
+      bound = normalizeTranslationGlossary(
+        readJson(artifacts.glossary, 'bound translation glossary'),
+        { targetLang: args.targetLang },
+      )
+      if (supplied && !sameJson(bound, supplied)) {
+        throw new Error(
+          'the supplied glossary differs from the glossary already bound to this run; keep the existing run unchanged and start a fresh run for a different glossary',
+        )
+      }
+      return
+    }
+    if (!supplied) return
+    if (args.apply) {
+      throw new Error(
+        '--apply cannot introduce a new glossary after translation memory was created; start a fresh preparation run with --glossary',
+      )
+    }
+    writeJson(artifacts.glossary, supplied)
+    bound = supplied
+  })
+  summary.glossary = bound
+    ? {
+        path: artifacts.glossary,
+        sha256: sha256(artifacts.glossary),
+        entryCount: bound.entries.length,
+      }
+    : null
+  return bound
 }
 
 function executable(bin, args) {
@@ -447,6 +555,8 @@ function initialSummary(args, artifacts) {
     phases: [],
     inventory: null,
     memory: null,
+    glossary: null,
+    constraints: null,
     plan: null,
     candidate: null,
     nextAction: null,
@@ -507,7 +617,7 @@ function prepareInventory(args, artifacts, summary, reporter) {
   return classified
 }
 
-function buildMemory(args, artifacts, summary, classified, reporter) {
+function buildMemory(args, artifacts, summary, classified, glossary, reporter) {
   const memory = buildTranslationMemory(classified.scan, {
     sourceSha256: summary.source.sha256,
     unitsSha256: sha256(classified.path),
@@ -523,11 +633,20 @@ function buildMemory(args, artifacts, summary, classified, reporter) {
     mkdirSync(dirname(artifacts.memoryFill), { recursive: true })
     writeFileSync(artifacts.memoryFill, buildMemoryFillView(memory))
   })
+  const constraints = buildTranslationConstraints(memory, {
+    glossary,
+    sourceSha256: summary.source.sha256,
+    unitsSha256: sha256(classified.path),
+  })
+  phase(summary, reporter, 'translation-constraints', () =>
+    writeJson(artifacts.constraints, constraints, args.overwrite),
+  )
   summary.memory = memory.summary
+  summary.constraints = constraints.summary
   summary.inventory = memory.reviewPartitions
   summary.status = 'needs-translations'
   summary.nextAction =
-    'Fill targetText in translation-memory.fill.jsonl (one {memoryId, sourceText, targetText} line per unique text; much smaller than the full memory JSON) and add required unitOverrides in the memory JSON, then rerun the same command with --apply --fill <fill.jsonl>. Editing entries[].targetText in the memory JSON directly and rerunning with --apply also works.'
+    'Review translation-constraints.json first, including protected tokens, glossary rules, and non-blocking highRiskShortWords. Fill targetText in translation-memory.fill.jsonl (one {memoryId, sourceText, targetText} line per unique text; much smaller than the full memory JSON) and add required unitOverrides in the memory JSON, then rerun the same command with --apply --fill <fill.jsonl>. Editing entries[].targetText in the memory JSON directly and rerunning with --apply also works.'
   if (LONGER_TARGET_LANGS.has(args.targetLang.toLowerCase().split('-')[0])) {
     summary.nextAction += ` Target ${args.targetLang} text typically runs 20-25% longer; prefer compact wording for labels, legends, badges, and table headers up front to avoid a post-apply overflow rework round.`
   }
@@ -554,6 +673,42 @@ function validateMemoryBinding(args, classified, memory, summary) {
   }
 }
 
+function resolveTranslationConstraints(
+  args,
+  artifacts,
+  summary,
+  classified,
+  memory,
+  glossary,
+  reporter,
+) {
+  let constraints = null
+  if (existsSync(artifacts.constraints)) {
+    constraints = readJson(artifacts.constraints, 'translation constraints')
+  } else {
+    constraints = buildTranslationConstraints(memory, {
+      glossary,
+      sourceSha256: summary.source.sha256,
+      unitsSha256: sha256(classified.path),
+    })
+    phase(summary, reporter, 'translation-constraints-backfill', () =>
+      writeJson(artifacts.constraints, constraints),
+    )
+  }
+  if (
+    constraints?.source?.sha256 !== summary.source.sha256 ||
+    constraints?.units?.sha256 !== sha256(classified.path) ||
+    constraints?.sourceLang !== memory.sourceLang ||
+    constraints?.targetLang !== memory.targetLang ||
+    !sameJson(constraints?.glossary?.entries ?? null, glossary?.entries ?? null)
+  ) {
+    throw new Error(
+      'translation constraints do not match the bound source, classified units, or language contract',
+    )
+  }
+  return constraints
+}
+
 function materializePlanArtifacts(plan, artifacts, overwrite) {
   writeJson(artifacts.textPlan, plan.textPlan, overwrite)
   writeJson(artifacts.replaceText, plan.replaceText, overwrite)
@@ -572,13 +727,40 @@ function runJsonArtifact(bin, commandArgs, artifact, overwrite) {
   return result.json
 }
 
-function applyPlan(args, artifacts, summary, classified, memory, reporter) {
+function applyPlan(args, artifacts, summary, classified, memory, glossary, reporter) {
   validateMemoryBinding(args, classified, memory, summary)
   const translations = phase(summary, reporter, 'materialize-translations', () => {
     const value = materializeTranslations(classified.scan, memory)
     writeJson(artifacts.translations, value, args.overwrite)
     return value
   })
+  const constraints = resolveTranslationConstraints(
+    args,
+    artifacts,
+    summary,
+    classified,
+    memory,
+    glossary,
+    reporter,
+  )
+  const constraintsCheck = phase(summary, reporter, 'translation-constraints-check', () => {
+    const value = validateTranslationConstraints(translations, constraints)
+    writeJson(artifacts.constraintsCheck, value, args.overwrite)
+    return value
+  })
+  summary.constraints = constraintsCheck.summary
+  if (constraintsCheck.agentGate?.passed !== true) {
+    summary.status = 'needs-translation-constraints'
+    summary.nextAction = constraintsCheck.nextAction
+    summary.requiredReferences = [
+      requiredReference(
+        'references/translation-mode.md',
+        'Protected Tokens And Project Glossary',
+        'Repair only the protected-token or glossary violations in the bound constraints report.',
+      ),
+    ]
+    return
+  }
   const planResult = phase(summary, reporter, 'i18n-plan', () =>
     runXdocReport(
       args,
@@ -782,12 +964,18 @@ function compactResult(summary) {
     source: summary.source,
     summary: {
       memory: summary.memory,
+      glossary: summary.glossary,
+      constraints: summary.constraints,
       inventory: summary.inventory,
       plan: summary.plan,
       translationCount: summary.translationCount ?? null,
     },
     artifacts: {
       summary: summary.artifacts.summary,
+      prompt:
+        summary.artifacts.prompt && existsSync(summary.artifacts.prompt)
+          ? summary.artifacts.prompt
+          : null,
       scan:
         phasePassed('i18n-scan-source') && existsSync(summary.artifacts.scan)
           ? summary.artifacts.scan
@@ -820,6 +1008,19 @@ function compactResult(summary) {
         phasePassed('memory-fill-merge') && existsSync(summary.artifacts.memoryFilled)
           ? summary.artifacts.memoryFilled
           : null,
+      glossary:
+        summary.artifacts.glossary && existsSync(summary.artifacts.glossary)
+          ? summary.artifacts.glossary
+          : null,
+      constraints:
+        summary.artifacts.constraints && existsSync(summary.artifacts.constraints)
+          ? summary.artifacts.constraints
+          : null,
+      constraintsCheck:
+        phasePassed('translation-constraints-check') &&
+        existsSync(summary.artifacts.constraintsCheck)
+          ? summary.artifacts.constraintsCheck
+          : null,
       memoryRepair:
         phasePassed('target-segments-repair-scaffold') && existsSync(summary.artifacts.memoryRepair)
           ? summary.artifacts.memoryRepair
@@ -845,9 +1046,176 @@ function compactResult(summary) {
   }
 }
 
+function reviewExpansionResumeHint(args) {
+  return `rerun the same preparation command with --resume-stage review --expand-review ${args.expandReview} and without --apply/--review-decisions/--fill; the runner will reuse ${join(args.runDir, 'i18n-scan-source.json')} without rescanning or modifying translation memory`
+}
+
+function validateReviewExpansionRun(args, artifacts) {
+  if (!existsSync(args.source) || !statSync(args.source).isFile()) {
+    throw new Error(`source does not exist or is not a file: ${args.source}`)
+  }
+  if (!existsSync(args.runDir) || !statSync(args.runDir).isDirectory()) {
+    throw new Error('--resume-stage review requires the existing preparation run directory')
+  }
+  if (!existsSync(artifacts.summary)) {
+    throw new Error('--resume-stage review requires the prior preparation summary')
+  }
+  const prior = readJson(artifacts.summary, 'prior preparation summary')
+  if (
+    prior.schemaVersion !== SUMMARY_SCHEMA ||
+    prior.status !== 'needs-translations' ||
+    prior.source?.sha256 !== sha256(args.source) ||
+    prior.sourceLang !== args.sourceLang ||
+    prior.targetLang !== args.targetLang ||
+    resolve(prior.runDir ?? '') !== args.runDir ||
+    resolve(prior.artifacts?.scan ?? '') !== artifacts.scan
+  ) {
+    throw new Error(
+      `review expansion must match a bound needs-translations preparation run; ${reviewExpansionResumeHint(args)}`,
+    )
+  }
+  for (const [label, path] of [
+    ['bound source scan', artifacts.scan],
+    ['translation memory', artifacts.memory],
+  ]) {
+    if (!existsSync(path) || !statSync(path).isFile()) {
+      throw new Error(`${label} does not exist or is not a file: ${path}`)
+    }
+  }
+  const scan = readJson(artifacts.scan, 'bound source scan')
+  if (
+    scan.schemaVersion !== 'pptx-i18n-scan/v1' ||
+    (scan.sourceLang && scan.sourceLang !== args.sourceLang)
+  ) {
+    throw new Error('bound source scan does not match the preparation language contract')
+  }
+  for (const [label, output] of [
+    ['review inventory', artifacts.reviewInventory],
+    ['review expansion summary', artifacts.reviewExpansionSummary],
+  ]) {
+    if (existsSync(output) && !args.overwrite) {
+      throw new Error(
+        `${label} already exists; pass --overwrite only for this current-run artifact: ${output}`,
+      )
+    }
+    for (const [inputLabel, input] of [
+      ['source', args.source],
+      ['bound source scan', artifacts.scan],
+      ['translation memory', artifacts.memory],
+      ['preparation summary', artifacts.summary],
+    ]) {
+      if (sameIdentity(pathIdentity(input), pathIdentity(output))) {
+        throw new Error(`${label} must not resolve to the read-only ${inputLabel} input`)
+      }
+    }
+  }
+  return { prior, scan }
+}
+
+function compactReviewExpansionResult(summary) {
+  return {
+    schemaVersion: RESULT_SCHEMA,
+    status: summary.status,
+    runDir: summary.runDir,
+    source: summary.source,
+    summary: {
+      partition: summary.partition,
+      count: summary.inventory?.count ?? null,
+      scanUnchanged: summary.integrity?.scanUnchanged ?? null,
+      memoryUnchanged: summary.integrity?.memoryUnchanged ?? null,
+    },
+    artifacts: {
+      summary: summary.artifacts.summary,
+      reviewInventory:
+        summary.artifacts.reviewInventory && existsSync(summary.artifacts.reviewInventory)
+          ? summary.artifacts.reviewInventory
+          : null,
+      scan: summary.scan.path,
+      memory: summary.memory.path,
+    },
+    nextAction: summary.nextAction,
+    requiredReferences: summary.requiredReferences,
+    error: summary.error,
+  }
+}
+
+function runReviewExpansion(args, artifacts, binding, reporter) {
+  const scanBefore = sha256(artifacts.scan)
+  const memoryBefore = sha256(artifacts.memory)
+  const summary = {
+    schemaVersion: 'pptx-nova-translation-review-expansion/v1',
+    status: 'running',
+    source: binding.prior.source,
+    sourceLang: args.sourceLang,
+    targetLang: args.targetLang,
+    runDir: args.runDir,
+    partition: args.expandReview,
+    scan: { path: artifacts.scan, sha256: scanBefore },
+    memory: { path: artifacts.memory, sha256: memoryBefore },
+    inventory: null,
+    artifacts: {
+      reviewInventory: artifacts.reviewInventory,
+      summary: artifacts.reviewExpansionSummary,
+    },
+    phases: [],
+    integrity: null,
+    nextAction: null,
+    requiredReferences: [],
+    error: null,
+  }
+  try {
+    summary.inventory = phase(summary, reporter, 'expand-bound-review-inventory', () => {
+      const inventory = {
+        ...expandReviewInventory(binding.scan, args.expandReview),
+        source: summary.source,
+        scan: summary.scan,
+      }
+      writeJson(artifacts.reviewInventory, inventory, args.overwrite)
+      return { partition: inventory.partition, count: inventory.count }
+    })
+    summary.integrity = {
+      scanUnchanged: sha256(artifacts.scan) === scanBefore,
+      memoryUnchanged: sha256(artifacts.memory) === memoryBefore,
+    }
+    if (!summary.integrity.scanUnchanged || !summary.integrity.memoryUnchanged) {
+      throw new Error('bound source scan or translation memory changed during review expansion')
+    }
+    summary.status = 'review-expanded'
+    summary.nextAction =
+      'Review only the persisted partition, then continue filling the existing translation memory; this expansion does not change preparation state.'
+    summary.requiredReferences = [
+      requiredReference(
+        'references/translation-mode.md',
+        'Review Partition Recovery',
+        'Use the expanded bound partition without restarting translation preparation.',
+      ),
+    ]
+  } catch (error) {
+    summary.status = 'error'
+    summary.error = { phase: error.phase ?? null, message: error.message }
+    summary.nextAction = reviewExpansionResumeHint(args)
+  }
+  writeJson(artifacts.reviewExpansionSummary, summary, args.overwrite)
+  const output = args.jsonFull ? summary : compactReviewExpansionResult(summary)
+  if (args.json) process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
+  else
+    process.stdout.write(
+      `Translation review expansion ${summary.status}: ${artifacts.reviewExpansionSummary}\n`,
+    )
+  if (summary.status === 'error') process.exitCode = 1
+}
+
 function validateRun(args, artifacts) {
   if (!existsSync(args.source) || !statSync(args.source).isFile()) {
     throw new Error(`source does not exist or is not a file: ${args.source}`)
+  }
+  for (const [flag, path] of [
+    ['--prompt-file', args.promptFile],
+    ['--glossary', args.glossary],
+  ]) {
+    if (path && (!existsSync(path) || !statSync(path).isFile())) {
+      throw new Error(`${flag} does not exist or is not a file: ${path}`)
+    }
   }
   if (extname(args.source).toLowerCase() !== '.pptx') throw new Error('--source must be .pptx')
   if (extname(args.outputCandidate).toLowerCase() !== '.pptx') {
@@ -858,6 +1226,9 @@ function validateRun(args, artifacts) {
   }
   if (args.fill && extname(args.fill).toLowerCase() !== '.jsonl') {
     throw new Error('--fill must be .jsonl')
+  }
+  if (args.glossary && extname(args.glossary).toLowerCase() !== '.json') {
+    throw new Error('--glossary must be .json')
   }
   if (args.apply) {
     if (!existsSync(args.runDir) || !statSync(args.runDir).isDirectory()) {
@@ -884,6 +1255,8 @@ function validateRun(args, artifacts) {
     ...(args.reviewDecisions ? [['reviewDecisions', args.reviewDecisions]] : []),
     ...(args.apply ? [['memory', args.memory]] : []),
     ...(args.fill ? [['fill', args.fill]] : []),
+    ...(args.glossary ? [['glossary', args.glossary]] : []),
+    ...(args.promptFile ? [['promptFile', args.promptFile]] : []),
   ]
   const writableArtifacts = Object.entries(artifacts).filter(
     ([label, path]) =>
@@ -910,10 +1283,16 @@ function validateRun(args, artifacts) {
     }
   }
   if (!args.apply && !isNewOrPreProbedRunDir(args.runDir)) {
+    if (args.expandReview && existsSync(artifacts.summary)) {
+      const prior = readJson(artifacts.summary, 'prior preparation summary')
+      if (prior.status === 'needs-translations') {
+        throw new Error(
+          `review partition expansion after needs-translations requires an explicit resume stage; ${reviewExpansionResumeHint(args)}`,
+        )
+      }
+    }
     if (!args.reviewDecisions || !existsSync(artifacts.summary)) {
-      throw new Error(
-        'inventory run directory must be new, pre-probed (only xdoc-capabilities.json), or a bound review-decision resume',
-      )
+      assertNewOrPreProbedRunDir(args.runDir)
     }
     const prior = readJson(artifacts.summary, 'prior preparation summary')
     if (
@@ -931,10 +1310,17 @@ function validateRun(args, artifacts) {
 
 async function main(args, reporter) {
   const artifacts = artifactsFor(args)
+  if (args.resumeStage === 'review') {
+    const binding = validateReviewExpansionRun(args, artifacts)
+    runReviewExpansion(args, artifacts, binding, reporter)
+    return
+  }
   validateRun(args, artifacts)
   const summary = initialSummary(args, artifacts)
   const started = performance.now()
   try {
+    archivePrompt(args, artifacts, summary, reporter)
+    const glossary = bindGlossary(args, artifacts, summary, reporter)
     runProbe(args, artifacts, summary, reporter)
     const classified = prepareInventory(args, artifacts, summary, reporter)
     if (classified) {
@@ -957,9 +1343,9 @@ async function main(args, reporter) {
         }
         summary.memory = memory.summary ?? null
         summary.inventory = memory.reviewPartitions ?? null
-        applyPlan(args, artifacts, summary, classified, memory, reporter)
+        applyPlan(args, artifacts, summary, classified, memory, glossary, reporter)
       } else {
-        buildMemory(args, artifacts, summary, classified, reporter)
+        buildMemory(args, artifacts, summary, classified, glossary, reporter)
       }
     }
   } catch (error) {

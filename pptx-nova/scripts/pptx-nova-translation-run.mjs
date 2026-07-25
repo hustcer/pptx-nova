@@ -19,6 +19,10 @@ import { analyzeCompareRendering, materializeCompareAliases } from './lib/visual
 import { canonicalEvidencePath } from './lib/evidence-paths.mjs'
 import { assertNewOrPreProbedRunDir } from './lib/run-dir.mjs'
 import {
+  analyzeTypedTextAttributeAllowlist,
+  parseTextAttributeAllowlist,
+} from './lib/translation-contract.mjs'
+import {
   createPageBitmapCacheBinding,
   pageBitmapCacheMetrics,
   snapshotPageBitmapCache,
@@ -180,9 +184,11 @@ function normalizeArgs(input) {
     translations: resolve(cwd, input.translations),
     output: resolve(cwd, input.output),
     xdocBin: normalizeExecutable(input.xdocBin, cwd),
+    allowTextAttrs: parseTextAttributeAllowlist(input.allowTextAttrs).join(','),
     multiColumnReviewGate: input.multiColumnReviewGate
       ? resolve(cwd, input.multiColumnReviewGate)
       : '',
+    promptFile: input.promptFile ? resolve(cwd, input.promptFile) : '',
   }
   args.runDir = input.runDir
     ? resolve(cwd, input.runDir)
@@ -223,6 +229,26 @@ function validatePaths(args) {
   if (existsSync(args.runDir)) {
     assertNewOrPreProbedRunDir(args.runDir)
   }
+  if (args.promptFile && (!existsSync(args.promptFile) || !statSync(args.promptFile).isFile())) {
+    throw new Error(`--prompt-file does not exist or is not a file: ${args.promptFile}`)
+  }
+  const typedTextAttrs = analyzeTypedTextAttributeAllowlist(
+    JSON.parse(readFileSync(args.units, 'utf8')),
+    JSON.parse(readFileSync(args.translations, 'utf8')),
+    args.allowTextAttrs,
+  )
+  if (typedTextAttrs.missing.length > 0) {
+    const details = typedTextAttrs.missing
+      .map(
+        (entry) =>
+          `${entry.attrName} (${entry.unitCount} changed unit${entry.unitCount === 1 ? '' : 's'})`,
+      )
+      .join(', ')
+    throw new Error(
+      `typed text attribute allowlist is incomplete: ${details}; retry with --allow-text-attrs ${typedTextAttrs.suggestedAllowlist.join(',')}; authorization is never added automatically`,
+    )
+  }
+  return typedTextAttrs
 }
 
 function sha256(path) {
@@ -985,12 +1011,20 @@ function archivePrompt(summary, args, artifacts) {
 function runTranslation(input) {
   const started = performance.now()
   const args = normalizeArgs(input)
-  validatePaths(args)
+  const typedTextAttrs = validatePaths(args)
   mkdirSync(args.runDir, { recursive: true })
   const artifacts = artifactPaths(args.runDir)
   const summary = initialSummary(args, artifacts)
   attachProgressArchive(args, artifacts)
   try {
+    addInternalPhase(summary, 'typed-text-attribute-preflight', 'passed', {
+      unitsContractComplete: typedTextAttrs.complete,
+      required: typedTextAttrs.required.map((entry) => ({
+        attrName: entry.attrName,
+        unitCount: entry.unitCount,
+      })),
+      allowed: typedTextAttrs.allowed,
+    })
     archivePrompt(summary, args, artifacts)
     copyFileSync(args.source, artifacts.source)
     copyFileSync(args.candidate, artifacts.candidate)

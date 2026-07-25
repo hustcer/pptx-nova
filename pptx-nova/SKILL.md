@@ -40,6 +40,9 @@ first. If `--run-dir` is passed explicitly, the directory must be new, empty, or
 that contains only `xdoc-capabilities.json`. Version numbers are for audit only; route commands based
 on the runtime schema and actual dry-run evidence. Capability snapshots are name indexes, not
 allowlists; a missing capability means `undisclosed`, not automatically `unsupported`.
+If a caller-provided run directory is rejected, the guard reports the allowed
+initial entries, every detected entry, and a safe recovery hint; preserve that
+directory as evidence and retry with a new run directory.
 
 When unsure, go deeper only as needed: first check the op index in `xdoc-capabilities.json`; use
 `xdoc schema --index` only when the snapshot is missing or must be refreshed. Then use
@@ -90,6 +93,7 @@ Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline
 `fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`,
 `review-policy-evaluation.json`,
 `i18n-text-plan.json`, `i18n-scan.json`, `i18n-plan.json`, `translation-memory.json`,
+`translation-glossary.json`, `translation-constraints.json`, `translation-constraints-check.json`,
 `translation-prepare-summary.json`, `translations.json`, `i18n-style-diff.json`,
 `replace-text-input.json`,
 `multi-column-review.json`, `multi-column-review-gate.json`,

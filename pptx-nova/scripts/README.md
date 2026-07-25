@@ -66,6 +66,10 @@ Use these entry points from skill workflows:
   Finding Analysis contract. Standalone replay is always `advisory-replay`; only
   the refurbish runner emits `runner-observed` shadow evidence. Full analysis is
   written to disk while stdout stays compact.
+- `pptx-nova-translation-prepare.mjs` - scan and classify translation units,
+  bind an optional external prompt and project glossary, create the compact
+  translation memory plus protected-token constraints, and resume a bound review
+  partition without rescanning. Constraint violations stop before `i18n-plan`.
 - `pptx-nova-translation-run.mjs` - finalize an already stable translated candidate. It snapshots
   source/candidate/translation contracts, runs style, target-consistency, vision, preview, semantic,
   full-deck comparison, and publication-binding gates, and can materialize `contact-diff` aliases

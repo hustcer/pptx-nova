@@ -73,8 +73,16 @@ node <skill-root>/scripts/pptx-nova-translation-prepare.mjs \
   --source-lang <multi|zh|en> \
   --target-lang <target-lang> \
   --run-dir <run-dir> \
+  [--prompt-file <external-prompt.txt>] \
+  [--glossary <translation-glossary.json>] \
   --json
 ```
+
+`--prompt-file` must point outside the run directory. After the fresh-run guard
+passes, the file is archived as `<run-dir>/prompt.txt`; the runner never moves
+or deletes unexpected files from an existing run. If the guard reports
+unexpected entries, keep that directory as evidence and retry with a new
+`--run-dir`.
 
 If it returns `needs-review-decisions`, fill the emitted hash-bound decision
 template and resume the same run with `--review-decisions <path>`. The template
@@ -94,10 +102,75 @@ Exact repeated source strings share one target; use `unitOverrides[]` (in the
 memory JSON) only when a context needs different wording, target segments,
 anchors, or an explicit review choice. A reviewed executable unit must use
 `reviewDecision: "translate"`; use `reviewDecision: "preserve"` to omit it.
+
+The memory exposes only counts for `languageUncertain`, `shared`,
+`embeddedWorkbook`, and `other` review partitions. If a partition is needed
+after the run has reached `needs-translations`, use the explicit recovery stage
+below; do not append `--expand-review` to an ordinary apply command:
+
+```bash
+node <skill-root>/scripts/pptx-nova-translation-prepare.mjs \
+  --source source.pptx \
+  --source-lang <multi|zh|en> \
+  --target-lang <target-lang> \
+  --run-dir <run-dir> \
+  --resume-stage review \
+  --expand-review shared \
+  --json
+```
+
+This writes the independent
+`review-expansion-shared-summary.json` and
+`review-inventory-shared.json`, reuses the hash-bound
+`i18n-scan-source.json`, and leaves both that scan and
+`translation-memory.json` byte-identical. Replace `shared` with
+`languageUncertain`, `embeddedWorkbook`, or `other` as needed. The command is
+read-only with respect to translation state; continue filling the existing
+memory afterwards.
+
+### Protected Tokens And Project Glossary
+
+When `--glossary` is supplied, it must use this small, auditable contract:
+
+```json
+{
+  "schemaVersion": "pptx-nova-translation-glossary/v1",
+  "targetLang": "de",
+  "entries": [
+    {
+      "id": "bug-term",
+      "source": "bug",
+      "target": "Fehler",
+      "match": "term",
+      "caseSensitive": false
+    }
+  ]
+}
+```
+
+The preparation runner normalizes and snapshots the glossary as
+`translation-glossary.json`. It also writes
+`translation-constraints.json`, which extracts high-confidence technical
+tokens (URLs, QName/OOXML names, API and CSS acronyms, CLI flags, filenames,
+contract ids, inline-code identifiers, and camel/snake-case identifiers).
+The token list is independent of the three-field JSONL fill view, so the fill
+view remains exactly `{memoryId, sourceText, targetText}`. Before `i18n-plan`,
+`translation-constraints-check.json` compares every effective per-unit target
+against those tokens and glossary terms. Missing or changed protected tokens
+and glossary mismatches stop preparation with
+`needs-translation-constraints`; repair only the named target text and rerun
+with `--apply --overwrite`.
+
+Standalone two-to-four-letter source labels such as `bug` or `Mar` are emitted
+as `highRiskShortWords` warnings, not as a built-in business dictionary and
+not as automatic translation decisions. Review those warnings manually even
+when the machine gate passes.
+
 Then resume with `--apply`. The runner revalidates source bytes, classified-unit
-bytes, languages, and every source hash before producing a stable prepared
-candidate. Feed that candidate, the emitted classified scan, and
-`translations.json` to the finalizer in `references/translation-runner.md`.
+bytes, languages, every source hash, and the translation constraints before
+producing a stable prepared candidate. Feed that candidate, the emitted
+classified scan, and `translations.json` to the finalizer in
+`references/translation-runner.md`.
 If the planner emits target-segment repairs, preparation stops with
 `needs-target-segments` and writes a repair scaffold (first round:
 `translation-memory.repair.json`; later rounds: `translation-memory.repair-N.json`
@@ -105,14 +178,8 @@ so the file you pass back stays read-only — read the actual path from
 `summary.artifacts.memoryRepair`), merging each fillable template into the
 existing `unitOverrides[]` by `unitId`. Fill every null segment, preserve the
 contract id, and resume with `--memory <repair-file> --apply --overwrite`.
-
-The memory exposes only counts for `languageUncertain`, `shared`,
-`embeddedWorkbook`, and `other` review partitions. Add
-`--expand-review embeddedWorkbook` (or `languageUncertain`, `shared`, `other`)
-only for the partition currently being decided; the runner persists a bound
-`review-inventory-<name>.json` without expanding the others. Do not paste the
-entire inventory into agent context. The manual commands below remain the
-authoritative lower-level contract and debugging path.
+The manual commands below remain the authoritative lower-level contract and
+debugging path.
 
 1. Create a run directory and capture `xdoc-capabilities.json`.
 2. Inspect the source deck:

@@ -44,6 +44,13 @@ Add `--multi-column-review-gate <path>` only when the final `vision-diff` contai
 `--contact-diff` when compatibility aliases are needed; aliases are copied from the final compare and
 must not trigger another full-deck render.
 
+Before creating the run directory or starting xdoc, the finalizer reads the
+bound units and translations and derives the exact changed
+`visibleTextAttr` attribute names. If the explicit `--allow-text-attrs` list
+does not cover them, it fails with the changed attribute names, unit counts,
+and a copyable retry flag. It never grants the authorization automatically;
+this avoids a full finalizer rerun caused by a late style-gate failure.
+
 Compare parts render concurrently (`--compare-concurrency`, default 3). `--prompt-text`/`--prompt-file`
 archive the original user request to `<run-dir>/prompt.txt` for the feedback gate. The full progress
 event stream is archived to `<run-dir>/progress.jsonl` by default (`--progress-file none` disables);

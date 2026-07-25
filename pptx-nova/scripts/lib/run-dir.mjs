@@ -8,30 +8,69 @@ import { join } from 'node:path'
 // else is run reuse and must fail closed.
 const PRE_PROBE_ALLOWED_ENTRIES = new Set(['xdoc-capabilities.json'])
 
-export function isNewOrPreProbedRunDir(runDir) {
-  if (!existsSync(runDir)) return true
-  if (!statSync(runDir).isDirectory()) return false
-  const unexpected = readdirSync(runDir).filter((name) => !PRE_PROBE_ALLOWED_ENTRIES.has(name))
-  if (unexpected.length > 0) return false
+function inspectRunDir(runDir) {
+  const allowedEntries = [...PRE_PROBE_ALLOWED_ENTRIES].sort()
+  if (!existsSync(runDir)) {
+    return {
+      status: 'missing',
+      allowedEntries,
+      detectedEntries: [],
+      unexpectedEntries: [],
+      capabilityPath: join(runDir, 'xdoc-capabilities.json'),
+    }
+  }
+  if (!statSync(runDir).isDirectory()) {
+    return {
+      status: 'not-directory',
+      allowedEntries,
+      detectedEntries: [],
+      unexpectedEntries: [],
+      capabilityPath: join(runDir, 'xdoc-capabilities.json'),
+    }
+  }
+  const detectedEntries = readdirSync(runDir).sort()
+  const unexpectedEntries = detectedEntries.filter((name) => !PRE_PROBE_ALLOWED_ENTRIES.has(name))
   const capabilityPath = join(runDir, 'xdoc-capabilities.json')
-  return !existsSync(capabilityPath) || statSync(capabilityPath).isFile()
+  const capabilityIsInvalid = existsSync(capabilityPath) && !statSync(capabilityPath).isFile()
+  return {
+    status:
+      unexpectedEntries.length > 0
+        ? 'unexpected-entries'
+        : capabilityIsInvalid
+          ? 'invalid-capability-artifact'
+          : 'fresh',
+    allowedEntries,
+    detectedEntries,
+    unexpectedEntries,
+    capabilityPath,
+  }
+}
+
+function formatEntries(entries) {
+  return entries.length > 0 ? entries.join(', ') : '(none)'
+}
+
+function runDirRecoveryMessage(runDir, inspection) {
+  return [
+    `run directory is not a fresh runner target: ${runDir}`,
+    `allowed initial entries: ${formatEntries(inspection.allowedEntries)} (the directory may also be absent or empty)`,
+    `detected entries: ${formatEntries(inspection.detectedEntries)}`,
+    'safe recovery: keep this directory unchanged as audit evidence and retry with a new --run-dir; keep prompt text and probe stdout outside the run directory, then pass them through supported input flags such as --prompt-file',
+  ].join('; ')
+}
+
+export function isNewOrPreProbedRunDir(runDir) {
+  return ['missing', 'fresh'].includes(inspectRunDir(runDir).status)
 }
 
 export function assertNewOrPreProbedRunDir(runDir) {
-  if (!existsSync(runDir)) return
-  if (!statSync(runDir).isDirectory()) {
-    throw new Error(`run directory path already exists and is not a directory: ${runDir}`)
-  }
-  const unexpectedEntries = readdirSync(runDir).filter(
-    (name) => !PRE_PROBE_ALLOWED_ENTRIES.has(name),
-  )
-  if (unexpectedEntries.length > 0) {
-    throw new Error(
-      `run directory already exists and is not empty/pre-probed: ${runDir}; unexpected entries: ${unexpectedEntries.join(', ')}`,
-    )
-  }
-  const capabilityPath = join(runDir, 'xdoc-capabilities.json')
-  if (existsSync(capabilityPath) && !statSync(capabilityPath).isFile()) {
-    throw new Error(`pre-probed capability artifact is not a file: ${capabilityPath}`)
-  }
+  const inspection = inspectRunDir(runDir)
+  if (['missing', 'fresh'].includes(inspection.status)) return
+  const detail =
+    inspection.status === 'not-directory'
+      ? 'the path exists but is not a directory'
+      : inspection.status === 'invalid-capability-artifact'
+        ? `the allowed capability artifact is not a file: ${inspection.capabilityPath}`
+        : `unexpected entries: ${formatEntries(inspection.unexpectedEntries)}`
+  throw new Error(`${runDirRecoveryMessage(runDir, inspection)}; detail: ${detail}`)
 }

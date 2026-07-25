@@ -616,6 +616,15 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
 `logBase`（2..1000，仅 value 轴，对数刻度）和 `crossBetween`
 （`between / mid-category`，仅 value 轴）。
 
+日期轴时间单位（仅当 deck 里已有 `c:dateAx` 时可用，通常来自 PowerPoint 原生
+时间序列图表）：`scale` 支持 `baseTimeUnit` / `majorTimeUnit` / `minorTimeUnit`
+（`days / months / years`，`null` 恢复自动），用 `axis: "category"` 定位日期轴；
+`majorUnit`/`minorUnit` 此时是"每 N 个时间单位"的计数（如 `majorUnit: 2` +
+`majorTimeUnit: "months"` = 每 2 个月一个主刻度）。典型场景：日粒度数据的
+X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。注意：新建 chart 一律是
+分类轴（catAx），对它写时间单位会被 fail-closed 拒绝（含 `null` 清除）；
+xdoc 不会自动把分类轴转成日期轴。
+
 轴条目还支持（xdoc ≥0.3.1，方案 7 长尾补齐）：
 
 ```json

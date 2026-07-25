@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.1 (92cfa7b6)",
+  "version": "0.3.1 (0aeed3ff)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -9262,6 +9262,11 @@
               }
             ]
           },
+          "chartTrendlineLabelFontSize": {
+            "type": "string",
+            "pattern": "^(?:[1-9][0-9]{0,2}(?:\\.[0-9]{1,4})?|[1-3][0-9]{3}(?:\\.[0-9]{1,4})?|4000(?:\\.0{1,4})?)pt$",
+            "description": "DrawingML trendline-label font size from 1pt through 4000pt; the explicit pt suffix is required and at most four fractional digits are accepted."
+          },
           "color": {
             "type": "string",
             "pattern": "^#?[0-9A-Fa-f]{6}$"
@@ -12350,10 +12355,20 @@
               "trendline": {
                 "$ref": "#/$defs/chartTrendlinePatch"
               },
+              "trendlines": {
+                "$ref": "#/$defs/chartTrendlinesPatch"
+              },
               "errorBars": {
                 "$ref": "#/$defs/chartErrorBarsPatch"
               }
-            }
+            },
+            "allOf": [
+              {
+                "not": {
+                  "required": ["trendline", "trendlines"]
+                }
+              }
+            ]
           },
           "chartSeriesPatches": {
             "type": "array",
@@ -14093,6 +14108,164 @@
             ],
             "strict": true
           },
+          "chartTrendlineLabelFont": {
+            "type": "object",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "size": {
+                "$ref": "#/$defs/chartTrendlineLabelFontSize"
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "color": {
+                "$ref": "#/$defs/color"
+              }
+            }
+          },
+          "chartTrendlineLabelPatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove the generated equation/R-squared label formatting container."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "minProperties": 1,
+                "properties": {
+                  "numberFormat": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "\\S"
+                  },
+                  "font": {
+                    "$ref": "#/$defs/chartTrendlineLabelFont"
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90,
+                    "description": "Generated label rotation in degrees, written as a:bodyPr rot (1 degree = 60000)."
+                  }
+                }
+              }
+            ]
+          },
+          "chartTrendlineSpec": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "$ref": "#/$defs/chartTrendlineType"
+              },
+              "order": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 6,
+                "description": "Polynomial order; only valid with type polynomial."
+              },
+              "period": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 255,
+                "description": "Moving-average period; only valid with type moving-average."
+              },
+              "forward": {
+                "type": "number",
+                "minimum": 0
+              },
+              "backward": {
+                "type": "number",
+                "minimum": 0
+              },
+              "intercept": {
+                "type": "number"
+              },
+              "displayEquation": {
+                "type": "boolean"
+              },
+              "displayRSquared": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "line": {
+                "$ref": "#/$defs/chartLineStyle"
+              },
+              "label": {
+                "$ref": "#/$defs/chartTrendlineLabelPatch"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "label": {
+                      "type": "object"
+                    }
+                  },
+                  "required": ["label"]
+                },
+                "then": {
+                  "anyOf": [
+                    {
+                      "required": ["displayEquation"],
+                      "properties": {
+                        "displayEquation": {
+                          "const": true
+                        }
+                      }
+                    },
+                    {
+                      "required": ["displayRSquared"],
+                      "properties": {
+                        "displayRSquared": {
+                          "const": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "chartTrendlinePatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove all trendlines from the series."
+              },
+              {
+                "$ref": "#/$defs/chartTrendlineSpec"
+              }
+            ]
+          },
+          "chartTrendlinesPatch": {
+            "oneOf": [
+              {
+                "type": "null",
+                "description": "Remove all trendlines from the series."
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/chartTrendlineSpec"
+                },
+                "description": "Replace the complete ordered trendline collection; [] removes all entries."
+              }
+            ]
+          },
           "chartAxisTitlePatch": {
             "oneOf": [
               {
@@ -14158,60 +14331,6 @@
                   "showLabel": {
                     "type": "boolean",
                     "description": "Show the display-units label next to the axis (c:dispUnitsLbl)."
-                  }
-                }
-              }
-            ]
-          },
-          "chartTrendlinePatch": {
-            "oneOf": [
-              {
-                "type": "null",
-                "description": "Remove all trendlines from the series."
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["type"],
-                "properties": {
-                  "type": {
-                    "$ref": "#/$defs/chartTrendlineType"
-                  },
-                  "order": {
-                    "type": "integer",
-                    "minimum": 2,
-                    "maximum": 6,
-                    "description": "Polynomial order; only valid with type polynomial."
-                  },
-                  "period": {
-                    "type": "integer",
-                    "minimum": 2,
-                    "maximum": 255,
-                    "description": "Moving-average period; only valid with type moving-average."
-                  },
-                  "forward": {
-                    "type": "number",
-                    "minimum": 0
-                  },
-                  "backward": {
-                    "type": "number",
-                    "minimum": 0
-                  },
-                  "intercept": {
-                    "type": "number"
-                  },
-                  "displayEquation": {
-                    "type": "boolean"
-                  },
-                  "displayRSquared": {
-                    "type": "boolean"
-                  },
-                  "name": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "line": {
-                    "$ref": "#/$defs/chartLineStyle"
                   }
                 }
               }
@@ -17972,6 +18091,11 @@
                 }
               ]
             },
+            "chartTrendlineLabelFontSize": {
+              "type": "string",
+              "pattern": "^(?:[1-9][0-9]{0,2}(?:\\.[0-9]{1,4})?|[1-3][0-9]{3}(?:\\.[0-9]{1,4})?|4000(?:\\.0{1,4})?)pt$",
+              "description": "DrawingML trendline-label font size from 1pt through 4000pt; the explicit pt suffix is required and at most four fractional digits are accepted."
+            },
             "color": {
               "type": "string",
               "pattern": "^#?[0-9A-Fa-f]{6}$"
@@ -21060,10 +21184,20 @@
                 "trendline": {
                   "$ref": "#/$defs/chartTrendlinePatch"
                 },
+                "trendlines": {
+                  "$ref": "#/$defs/chartTrendlinesPatch"
+                },
                 "errorBars": {
                   "$ref": "#/$defs/chartErrorBarsPatch"
                 }
-              }
+              },
+              "allOf": [
+                {
+                  "not": {
+                    "required": ["trendline", "trendlines"]
+                  }
+                }
+              ]
             },
             "chartSeriesPatches": {
               "type": "array",
@@ -22803,6 +22937,164 @@
               ],
               "strict": true
             },
+            "chartTrendlineLabelFont": {
+              "type": "object",
+              "additionalProperties": false,
+              "minProperties": 1,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "size": {
+                  "$ref": "#/$defs/chartTrendlineLabelFontSize"
+                },
+                "bold": {
+                  "type": "boolean"
+                },
+                "color": {
+                  "$ref": "#/$defs/color"
+                }
+              }
+            },
+            "chartTrendlineLabelPatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove the generated equation/R-squared label formatting container."
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "minProperties": 1,
+                  "properties": {
+                    "numberFormat": {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    "font": {
+                      "$ref": "#/$defs/chartTrendlineLabelFont"
+                    },
+                    "rotation": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90,
+                      "description": "Generated label rotation in degrees, written as a:bodyPr rot (1 degree = 60000)."
+                    }
+                  }
+                }
+              ]
+            },
+            "chartTrendlineSpec": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "$ref": "#/$defs/chartTrendlineType"
+                },
+                "order": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 6,
+                  "description": "Polynomial order; only valid with type polynomial."
+                },
+                "period": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 255,
+                  "description": "Moving-average period; only valid with type moving-average."
+                },
+                "forward": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "backward": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "intercept": {
+                  "type": "number"
+                },
+                "displayEquation": {
+                  "type": "boolean"
+                },
+                "displayRSquared": {
+                  "type": "boolean"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "line": {
+                  "$ref": "#/$defs/chartLineStyle"
+                },
+                "label": {
+                  "$ref": "#/$defs/chartTrendlineLabelPatch"
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "label": {
+                        "type": "object"
+                      }
+                    },
+                    "required": ["label"]
+                  },
+                  "then": {
+                    "anyOf": [
+                      {
+                        "required": ["displayEquation"],
+                        "properties": {
+                          "displayEquation": {
+                            "const": true
+                          }
+                        }
+                      },
+                      {
+                        "required": ["displayRSquared"],
+                        "properties": {
+                          "displayRSquared": {
+                            "const": true
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "chartTrendlinePatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove all trendlines from the series."
+                },
+                {
+                  "$ref": "#/$defs/chartTrendlineSpec"
+                }
+              ]
+            },
+            "chartTrendlinesPatch": {
+              "oneOf": [
+                {
+                  "type": "null",
+                  "description": "Remove all trendlines from the series."
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/chartTrendlineSpec"
+                  },
+                  "description": "Replace the complete ordered trendline collection; [] removes all entries."
+                }
+              ]
+            },
             "chartAxisTitlePatch": {
               "oneOf": [
                 {
@@ -22868,60 +23160,6 @@
                     "showLabel": {
                       "type": "boolean",
                       "description": "Show the display-units label next to the axis (c:dispUnitsLbl)."
-                    }
-                  }
-                }
-              ]
-            },
-            "chartTrendlinePatch": {
-              "oneOf": [
-                {
-                  "type": "null",
-                  "description": "Remove all trendlines from the series."
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["type"],
-                  "properties": {
-                    "type": {
-                      "$ref": "#/$defs/chartTrendlineType"
-                    },
-                    "order": {
-                      "type": "integer",
-                      "minimum": 2,
-                      "maximum": 6,
-                      "description": "Polynomial order; only valid with type polynomial."
-                    },
-                    "period": {
-                      "type": "integer",
-                      "minimum": 2,
-                      "maximum": 255,
-                      "description": "Moving-average period; only valid with type moving-average."
-                    },
-                    "forward": {
-                      "type": "number",
-                      "minimum": 0
-                    },
-                    "backward": {
-                      "type": "number",
-                      "minimum": 0
-                    },
-                    "intercept": {
-                      "type": "number"
-                    },
-                    "displayEquation": {
-                      "type": "boolean"
-                    },
-                    "displayRSquared": {
-                      "type": "boolean"
-                    },
-                    "name": {
-                      "type": "string",
-                      "minLength": 1
-                    },
-                    "line": {
-                      "$ref": "#/$defs/chartLineStyle"
                     }
                   }
                 }
@@ -24217,10 +24455,26 @@
                         "type": "solid",
                         "color": "3366CC"
                       },
-                      "trendline": {
-                        "type": "linear",
-                        "displayRSquared": true
-                      },
+                      "trendlines": [
+                        {
+                          "type": "linear",
+                          "displayEquation": true,
+                          "displayRSquared": true,
+                          "label": {
+                            "numberFormat": "0.00",
+                            "font": {
+                              "size": "9pt",
+                              "bold": false,
+                              "color": "336699"
+                            },
+                            "rotation": -15
+                          }
+                        },
+                        {
+                          "type": "moving-average",
+                          "period": 3
+                        }
+                      ],
                       "points": [
                         {
                           "point": 0,

@@ -504,19 +504,13 @@ function runValidation(summary, args, artifacts) {
 }
 
 function runBuild(summary, args, artifacts) {
+  const buildArgs = [BUILD_SCRIPT, '--deckkit', args.deckkit]
+  if (args.assets) buildArgs.push('--assets', args.assets)
+  buildArgs.push(args.content, '-o', artifacts.patch, '--quality-json', artifacts.quality)
   runPlainPhase(summary, {
     name: 'build',
     bin: process.execPath,
-    args: [
-      BUILD_SCRIPT,
-      '--deckkit',
-      args.deckkit,
-      args.content,
-      '-o',
-      artifacts.patch,
-      '--quality-json',
-      artifacts.quality,
-    ],
+    args: buildArgs,
   })
   const patch = readJson(artifacts.patch)
   const quality = readJson(artifacts.quality)
@@ -565,20 +559,21 @@ function runCheckLock(summary, args, artifacts) {
 }
 
 function runDryRun(summary, args, artifacts) {
+  const applyArgs = [
+    'pptx',
+    'apply',
+    '-p',
+    artifacts.patch,
+    '-o',
+    artifacts.candidate,
+    '--overwrite',
+  ]
+  if (args.assets) applyArgs.push('--asset-root', dirname(args.assets))
+  applyArgs.push('--dry-run', '--json')
   const report = runJsonPhase(summary, {
     name: 'dry-run',
     bin: args.xdocBin,
-    args: [
-      'pptx',
-      'apply',
-      '-p',
-      artifacts.patch,
-      '-o',
-      artifacts.candidate,
-      '--overwrite',
-      '--dry-run',
-      '--json',
-    ],
+    args: applyArgs,
     artifact: artifacts.dryRun,
   })
   const dryRun = summarizeApplyReport(report)
@@ -602,19 +597,21 @@ function runDryRun(summary, args, artifacts) {
 
 function runApply(summary, args, artifacts) {
   rmSync(artifacts.candidate, { force: true })
+  const applyArgs = [
+    'pptx',
+    'apply',
+    '-p',
+    artifacts.patch,
+    '-o',
+    artifacts.candidate,
+    '--overwrite',
+  ]
+  if (args.assets) applyArgs.push('--asset-root', dirname(args.assets))
+  applyArgs.push('--json')
   const report = runJsonPhase(summary, {
     name: 'apply',
     bin: args.xdocBin,
-    args: [
-      'pptx',
-      'apply',
-      '-p',
-      artifacts.patch,
-      '-o',
-      artifacts.candidate,
-      '--overwrite',
-      '--json',
-    ],
+    args: applyArgs,
     artifact: artifacts.apply,
   })
   const apply = summarizeApplyReport(report)

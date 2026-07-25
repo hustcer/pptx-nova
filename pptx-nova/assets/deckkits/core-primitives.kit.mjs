@@ -104,6 +104,62 @@ export const txH = (sizePt, lines = 1) => {
   return Number(inches.toFixed(2))
 }
 
+export const parseImageRatio = (value) => {
+  const match = String(value ?? '')
+    .trim()
+    .match(/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/)
+  if (!match) return null
+  const width = Number(match[1])
+  const height = Number(match[2])
+  return width > 0 && height > 0 ? width / height : null
+}
+
+const roundImageMetric = (value) => Number(Number(value).toFixed(6))
+
+const roundedImageRect = (x, y, w, h) => ({
+  x: roundImageMetric(x),
+  y: roundImageMetric(y),
+  w: roundImageMetric(w),
+  h: roundImageMetric(h),
+})
+
+const roundedCrop = (crop) => {
+  if (!crop) return undefined
+  const normalized = Object.fromEntries(
+    Object.entries(crop).map(([key, value]) => [key, roundImageMetric(value)]),
+  )
+  return Object.values(normalized).some((value) => value > 0) ? normalized : undefined
+}
+
+export function fitImageRect(x, y, w, h, ratio, fitPolicy = 'contain') {
+  assertWithinSlide('image-slot', x, y, w, h)
+  const sourceRatio = parseImageRatio(ratio)
+  if (!sourceRatio) {
+    throw new Error(`image slot requires a valid source ratio, got "${ratio ?? ''}"`)
+  }
+  const policy = String(fitPolicy || 'contain')
+  const boxRatio = w / h
+  if (policy === 'cover' || policy === 'crop-safe') {
+    if (sourceRatio > boxRatio) {
+      const visible = boxRatio / sourceRatio
+      const side = (1 - visible) / 2
+      return { ...roundedImageRect(x, y, w, h), crop: roundedCrop({ left: side, right: side }) }
+    }
+    const visible = sourceRatio / boxRatio
+    const side = (1 - visible) / 2
+    return { ...roundedImageRect(x, y, w, h), crop: roundedCrop({ top: side, bottom: side }) }
+  }
+  if (policy !== 'contain' && policy !== 'no-crop') {
+    throw new Error(`unsupported image fitPolicy "${policy}"`)
+  }
+  if (sourceRatio > boxRatio) {
+    const fittedH = w / sourceRatio
+    return roundedImageRect(x, y + (h - fittedH) / 2, w, fittedH)
+  }
+  const fittedW = h * sourceRatio
+  return roundedImageRect(x + (w - fittedW) / 2, y, fittedW, h)
+}
+
 // --- Op builders ---
 export function createOps(options = {}) {
   const ops = []
@@ -212,6 +268,29 @@ export function createOps(options = {}) {
     if (bg) ops.push({ op: 'set-slide-background', slide: s, fill: { type: 'solid', color: bg } })
   }
 
+  const addImage = (s, name, x, y, w, h, assetSource) => {
+    assertWithinSlide(name, x, y, w, h)
+    if (!assetSource || typeof assetSource !== 'object') {
+      throw new Error(`Image ${name} requires an asset source`)
+    }
+    ops.push({
+      op: 'add-image',
+      slide: s,
+      name,
+      x: `${x}in`,
+      y: `${y}in`,
+      w: `${w}in`,
+      h: `${h}in`,
+      assetSource,
+    })
+    return name
+  }
+
+  const cropImage = (s, name, crop) => {
+    if (!crop) return
+    ops.push({ op: 'crop-image', slide: s, shape: { name }, crop })
+  }
+
   const icon = (s, name, iconName, x, y, w, h, options) =>
     addTablerIconPicture(ops, s, name, iconName, x, y, w, h, options)
 
@@ -231,6 +310,8 @@ export function createOps(options = {}) {
     tx,
     fillText,
     addSlide,
+    addImage,
+    cropImage,
     icon,
   }
 }

@@ -1442,22 +1442,22 @@ test('DeckKit diversity diagnostics disclose current, missing, and available gro
 test('placeholder-only DeckKit asset slots reject image injection in delivery mode', async () => {
   const { validateContent } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
   const content = JSON.parse(
-    readFileSync(skillPath('assets/deckkits/examples/cartesian-content.json'), 'utf8'),
+    readFileSync(skillPath('assets/deckkits/examples/broadside-content.json'), 'utf8'),
   )
-  const imageSlide = content.slides.find((slide) => slide.type === 'cartesianImageStatsSlide')
-  imageSlide.imageSlots = { 'image.editorial': 'product_screenshot' }
+  const imageSlide = content.slides.find((slide) => slide.type === 'broadsideSplitSlide')
+  imageSlide.imageSlots = { 'image.split': 'product_screenshot' }
 
-  const validation = validateContent(content, { deckkit: 'cartesian', mode: 'delivery' })
+  const validation = validateContent(content, { deckkit: 'broadside', mode: 'delivery' })
   const diagnostic = validation.fitDiagnostics.find(
     (item) => item.code === 'layout.assetSlot.unsupported',
   )
 
   assert.equal(validation.valid, false)
-  assert.equal(diagnostic.path, 'slides[4].imageSlots.image.editorial')
+  assert.equal(diagnostic.path, 'slides[3].imageSlots.image.split')
   assert.equal(diagnostic.value, 'product_screenshot')
-  assert.equal(diagnostic.assetSlot.id, 'image.editorial')
+  assert.equal(diagnostic.assetSlot.id, 'image.split')
   assert.equal(diagnostic.assetSlot.acceptsAsset, false)
-  assert.equal(diagnostic.assetSlot.placeholderBehavior, 'crossed image shell')
+  assert.equal(diagnostic.assetSlot.placeholderBehavior, 'solid image shell')
   assert.match(diagnostic.message, /placeholder-only/)
   assert.match(diagnostic.message, /does not accept asset "product_screenshot"/)
 })
@@ -1497,7 +1497,7 @@ test('DeckKit slot reference covers every swiss-grid slide type', () => {
   )
 })
 
-test('DeckKit slot reference discloses placeholder-only asset behavior', () => {
+test('DeckKit slot reference discloses injectable and placeholder-only asset behavior', () => {
   const jsonResult = runNode([
     skillPath('scripts/pptx-nova-deckkit-slots.mjs'),
     '--deckkit',
@@ -1514,10 +1514,11 @@ test('DeckKit slot reference discloses placeholder-only asset behavior', () => {
     {
       id: 'image.editorial',
       kind: 'image',
-      acceptsAsset: false,
-      placeholderBehavior: 'crossed image shell',
+      acceptsAsset: true,
+      fitPolicy: 'contain',
+      placeholderBehavior: 'crossed image shell fallback',
       labelSlot: 'data.imageLabel',
-      note: 'This slide type renders an editable crossed placeholder shell. No image asset can be injected through content.json.',
+      note: 'Bind a registered local image through content.json imageSlots and assets_manifest.json. The image is contained inside the editorial frame; omitting the binding preserves the editable crossed placeholder shell.',
     },
   ])
 
@@ -1528,7 +1529,7 @@ test('DeckKit slot reference discloses placeholder-only asset behavior', () => {
   ])
   assert.match(
     markdownResult.stdout,
-    /## cartesianImageStatsSlide[\s\S]*### Asset slots[\s\S]*`image\.editorial`[\s\S]*\| no \| crossed image shell \|/,
+    /## cartesianImageStatsSlide[\s\S]*### Asset slots[\s\S]*`image\.editorial`[\s\S]*\| yes \| crossed image shell fallback \|/,
   )
 
   const broadsideResult = runNode([
@@ -1543,6 +1544,174 @@ test('DeckKit slot reference discloses placeholder-only asset behavior', () => {
     broadside.slideTypes.find((slide) => slide.slideType === 'broadsideSplitSlide').assetSlots[0]
       .acceptsAsset,
     false,
+  )
+})
+
+function cartesianImageContent(imageSlots) {
+  return {
+    meta: { deckkit: 'cartesian' },
+    slides: [
+      {
+        type: 'cartesianImageStatsSlide',
+        ...(imageSlots ? { imageSlots } : {}),
+        data: {
+          imageLabel: 'Editorial Reference',
+          label: 'Case Study',
+          title: 'Structural overview',
+          paragraphs: ['A concise description of the visual evidence and its strategic role.'],
+          stats: [
+            { value: '47%', label: 'Efficiency gain' },
+            { value: '12x', label: 'Scale factor' },
+          ],
+        },
+      },
+    ],
+  }
+}
+
+test('cartesian image stats keeps the crossed shell when no asset is bound', async () => {
+  const { createDeck } = await import(skillUrl('assets/deckkits/cartesian.kit.mjs'))
+  const result = createDeck(cartesianImageContent())
+  const connectors = result.patch.ops.filter((op) => op.op === 'add-connector')
+  const images = result.patch.ops.filter((op) => op.op === 'add-image')
+
+  assert.equal(connectors.length, 2)
+  assert.equal(images.length, 0)
+})
+
+test('cartesian image stats injects a manifest-relative image with contain geometry', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-cartesian-assets-'))
+  const assetsDir = join(root, 'assets')
+  const contentPath = join(root, 'content.json')
+  const manifestPath = join(root, 'assets_manifest.json')
+  const patchPath = join(root, 'patch.json')
+  const qualityPath = join(root, 'quality.json')
+  mkdirSync(assetsDir, { recursive: true })
+  writeFileSync(
+    join(assetsDir, 'editorial.svg'),
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#665D56"/></svg>',
+  )
+  writeJson(contentPath, cartesianImageContent({ 'image.editorial': 'editorial_reference' }))
+  writeJson(manifestPath, {
+    schemaVersion: 'pptx-nova-assets-manifest/v1',
+    assetRoot: 'assets',
+    entries: [
+      {
+        id: 'editorial_reference',
+        kind: 'image',
+        status: 'generated',
+        path: 'editorial.svg',
+        pptxUse: {
+          slotId: 'image.editorial',
+          ratio: '16:9',
+          fitPolicy: 'contain',
+        },
+      },
+    ],
+  })
+
+  runNode([
+    skillPath('scripts/pptx-nova-build.mjs'),
+    '--deckkit',
+    'cartesian',
+    '--assets',
+    manifestPath,
+    contentPath,
+    '-o',
+    patchPath,
+    '--quality-json',
+    qualityPath,
+  ])
+  const patch = JSON.parse(readFileSync(patchPath, 'utf8'))
+  const image = patch.ops.find((op) => op.op === 'add-image')
+  const crop = patch.ops.find((op) => op.op === 'crop-image')
+  const connectors = patch.ops.filter((op) => op.op === 'add-connector')
+
+  assert.ok(image)
+  assert.deepEqual(image.assetSource, {
+    path: 'assets/editorial.svg',
+    mime: 'image/svg+xml',
+  })
+  assert.deepEqual(
+    { x: image.x, y: image.y, w: image.w, h: image.h },
+    { x: '0.613in', y: '2.16375in', w: '5.64in', h: '3.1725in' },
+  )
+  assert.equal(crop, undefined)
+  assert.equal(connectors.length, 0)
+})
+
+test('cartesian image stats gives a self-repairing error when assets are omitted', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-cartesian-assets-missing-'))
+  const contentPath = join(root, 'content.json')
+  const patchPath = join(root, 'patch.json')
+  writeJson(contentPath, cartesianImageContent({ 'image.editorial': 'editorial_reference' }))
+
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-build.mjs'),
+      '--deckkit',
+      'cartesian',
+      contentPath,
+      '-o',
+      patchPath,
+    ],
+    1,
+  )
+  assert.match(
+    result.stderr,
+    /no assets manifest was provided; pass --assets assets_manifest\.json/,
+  )
+})
+
+test('asset manifest ignores unrelated non-image entries and blocks paths outside assetRoot', async () => {
+  const { createAssetContext } = await import(skillUrl('scripts/lib/asset-manifest.mjs'))
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-assets-manifest-'))
+  const assetsDir = join(root, 'assets')
+  const outsidePath = join(root, 'outside.svg')
+  const manifestPath = join(root, 'assets_manifest.json')
+  mkdirSync(assetsDir, { recursive: true })
+  writeFileSync(join(assetsDir, 'editorial.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>')
+  writeFileSync(outsidePath, '<svg xmlns="http://www.w3.org/2000/svg"/>')
+  const context = createAssetContext(
+    {
+      schemaVersion: 'pptx-nova-assets-manifest/v1',
+      assetRoot: 'assets',
+      entries: [
+        { id: 'formula-1', kind: 'formula', status: 'rendered', path: 'formula.svg' },
+        {
+          id: 'editorial',
+          kind: 'image',
+          path: 'editorial.svg',
+          pptxUse: { ratio: '16:9', fitPolicy: 'contain' },
+        },
+      ],
+    },
+    manifestPath,
+  )
+  assert.equal(
+    context.resolveImageSlot({ imageSlots: { 'image.editorial': 'editorial' } }, 'image.editorial')
+      .path,
+    'assets/editorial.svg',
+  )
+
+  assert.throws(
+    () =>
+      createAssetContext(
+        {
+          schemaVersion: 'pptx-nova-assets-manifest/v1',
+          assetRoot: 'assets',
+          entries: [
+            {
+              id: 'escape',
+              kind: 'image',
+              path: '../outside.svg',
+              pptxUse: { ratio: '16:9', fitPolicy: 'contain' },
+            },
+          ],
+        },
+        manifestPath,
+      ).resolveImageSlot({ imageSlots: { 'image.editorial': 'escape' } }, 'image.editorial'),
+    /outside the manifest assetRoot/,
   )
 })
 
@@ -2356,6 +2525,101 @@ test('create runner executes DeckKit create gates and publishes after preview', 
   ]) {
     assert.ok(gateNames.includes(gate), gate)
   }
+})
+
+test('create runner propagates assets to build, lock check, dry-run, and apply', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-assets-'))
+  const runDir = join(root, 'run')
+  const assetsDir = join(runDir, 'assets')
+  const contentPath = join(runDir, 'content.json')
+  const lockPath = join(runDir, 'deck_lock.json')
+  const manifestPath = join(runDir, 'assets_manifest.json')
+  const output = join(root, 'out.pptx')
+  mkdirSync(assetsDir, { recursive: true })
+  writeFileSync(
+    join(assetsDir, 'editorial.svg'),
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#665D56"/></svg>',
+  )
+  writeJson(contentPath, cartesianImageContent({ 'image.editorial': 'editorial_reference' }))
+  writeJson(manifestPath, {
+    schemaVersion: 'pptx-nova-assets-manifest/v1',
+    assetRoot: 'assets',
+    entries: [
+      {
+        id: 'editorial_reference',
+        kind: 'image',
+        status: 'generated',
+        path: 'editorial.svg',
+        pptxUse: {
+          slotId: 'image.editorial',
+          ratio: '16:9',
+          fitPolicy: 'contain',
+        },
+      },
+    ],
+  })
+  writeJson(lockPath, {
+    schemaVersion: 'pptx-nova-deck-lock/v1',
+    mode: 'express',
+    objective: 'Verify cartesian image asset propagation',
+    outlinePath: 'outline.json',
+    contentPath: 'content.json',
+    patchPath: 'patch.json',
+    assetsManifestPath: 'assets_manifest.json',
+    output: { finalPptx: output, runDir },
+    canvas: { format: 'ppt169', width: '13.333in', height: '7.5in' },
+    deckkit: { id: 'cartesian' },
+    slides: [
+      {
+        type: 'cartesianImageStatsSlide',
+        title: 'Structural overview',
+        purpose: 'Show editorial evidence with supporting metrics',
+        rhythm: 'dense',
+        imageSlots: { 'image.editorial': 'editorial_reference' },
+      },
+    ],
+    assumptions: [],
+  })
+  const fakeXdoc = writeFakeXdoc(root, successfulFakeXdocSource())
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-create-run.mjs'),
+    '--deckkit',
+    'cartesian',
+    '--content',
+    contentPath,
+    '--lock',
+    lockPath,
+    '--assets',
+    manifestPath,
+    '--output',
+    output,
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    fakeXdoc,
+    '--json',
+  ])
+  const summary = readCreateSummary(result)
+  const phaseByName = new Map(summary.phases.map((phase) => [phase.name, phase]))
+  const buildCommand = phaseByName.get('build').command
+  const lockCommand = phaseByName.get('check-lock').command
+  const dryRunCommand = phaseByName.get('dry-run').command
+  const applyCommand = phaseByName.get('apply').command
+
+  assert.equal(summary.assetsManifest, manifestPath)
+  assert.ok(buildCommand.includes(`--assets ${manifestPath}`))
+  assert.ok(lockCommand.includes(`--assets ${manifestPath}`))
+  assert.ok(dryRunCommand.includes(`--asset-root ${runDir}`))
+  assert.ok(applyCommand.includes(`--asset-root ${runDir}`))
+  assert.ok(dryRunCommand.indexOf('--asset-root') < dryRunCommand.indexOf('--dry-run'))
+  assert.ok(dryRunCommand.indexOf('--dry-run') < dryRunCommand.indexOf('--json'))
+  assert.ok(applyCommand.indexOf('--asset-root') < applyCommand.indexOf('--json'))
+  const patch = JSON.parse(readFileSync(join(runDir, 'patch.json'), 'utf8'))
+  assert.deepEqual(patch.ops.find((op) => op.op === 'add-image').assetSource, {
+    path: 'assets/editorial.svg',
+    mime: 'image/svg+xml',
+  })
 })
 
 test('create runner stops when dry-run reports semantic issues', () => {

@@ -89,3 +89,9 @@ DeckKit 的页型槽位参考还会列出 `layoutContract.slideTypes[*].assetSlo
 负责显示说明文字，不能通过 `content.json.imageSlots` 绑定图片。若需要真实图片，应改用
 声明了可注入资产的页型，或先扩展 DeckKit 的资产合同；不要把资产 id 填入
 placeholder-only 槽位后继续生成。
+
+`acceptsAsset: true` 表示 build 会从 `assets_manifest.json` 解析对应 asset id。运行
+`pptx-nova-build.mjs` 或标准 create runner 时必须同时传 `--assets`；runner 会把 manifest
+所在目录作为 xdoc 的 `--asset-root`，patch 中只保留受限的相对路径。Cartesian 的
+`image.editorial` 默认使用 `contain`，没有 `imageSlots` 绑定时继续渲染 crossed shell，
+因此无合法图片的任务不会被迫使用伪造素材。

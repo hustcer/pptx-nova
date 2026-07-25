@@ -1,6 +1,6 @@
 // cartesian.kit.mjs - Minimal editorial geometry DeckKit
-// version: 0.1.0
-import { createOps, nm } from './core-primitives.kit.mjs'
+// version: 0.2.0
+import { createOps, fitImageRect, nm } from './core-primitives.kit.mjs'
 
 export const C = {
   bg: 'EDE8E0',
@@ -21,6 +21,8 @@ export const FONT_BODY = 'Inter'
 const SLIDE_W = 13.333
 const MX = 0.533
 const CW = SLIDE_W - MX * 2
+const EDITORIAL_IMAGE_SLOT = 'image.editorial'
+const IMAGE_FRAME_PADDING = 0.08
 
 const f = (size, color = C.body, extra = {}) => ({
   name: extra.name ?? FONT_BODY,
@@ -33,7 +35,7 @@ const labelFont = (size = 9) => f(size, C.accent, { bold: true })
 const upper = (value) => String(value ?? '').toUpperCase()
 const roman = ['I', 'II', 'III', 'IV']
 
-function makeCartesianOps() {
+function makeCartesianOps(options = {}) {
   const p = createOps({
     textbox: {
       marginTop: '0in',
@@ -106,13 +108,31 @@ function makeCartesianOps() {
     tx(s, base, x, y, w, 0.2, upper(text), labelFont(), align)
   const slideBase = (s) => p.addSlide(s, C.bg)
 
-  return { p, rawShape, rect, tx, rule, outline, ring, label, slideBase, fillOp, lineOp }
+  return {
+    p,
+    rawShape,
+    rect,
+    tx,
+    rule,
+    outline,
+    ring,
+    label,
+    slideBase,
+    fillOp,
+    lineOp,
+    assets: options.assets ?? null,
+  }
 }
 
-function drawImageShell(ctx, s, x, y, w, h, label) {
+function drawImageFrame(ctx, s, x, y, w, h) {
   const { p, rawShape, fillOp, lineOp } = ctx
   const shell = rawShape(s, 'ImageShell', 'rectangle', x, y, w, h)
   p.ops.push(fillOp(s, shell, C.bg2), lineOp(s, shell, C.line, '0.75pt'))
+}
+
+function drawImageShell(ctx, s, x, y, w, h, label) {
+  const { p, lineOp } = ctx
+  drawImageFrame(ctx, s, x, y, w, h)
 
   const cx = x + w / 2
   const cy = y + h / 2
@@ -135,6 +155,44 @@ function drawImageShell(ctx, s, x, y, w, h, label) {
   })
   p.ops.push(lineOp(s, nm(s, 'ImageDiagB'), C.line, '0.75pt'))
   ctx.tx(s, 'ImageLabel', cx - 0.95, cy - 0.08, 1.9, 0.18, upper(label), f(9.5, C.accent), 'center')
+}
+
+function drawImageAsset(ctx, s, x, y, w, h, label, asset) {
+  drawImageFrame(ctx, s, x, y, w, h)
+  const fitted = fitImageRect(
+    x + IMAGE_FRAME_PADDING,
+    y + IMAGE_FRAME_PADDING,
+    w - IMAGE_FRAME_PADDING * 2,
+    h - IMAGE_FRAME_PADDING * 2,
+    asset.ratio,
+    asset.fitPolicy,
+  )
+  const imageName = nm(s, 'ImageAsset')
+  ctx.p.addImage(s, imageName, fitted.x, fitted.y, fitted.w, fitted.h, {
+    path: asset.path,
+    mime: asset.mime,
+  })
+  ctx.p.cropImage(s, imageName, fitted.crop)
+  ctx.tx(s, 'ImageLabel', x, y - 0.27, w, 0.18, upper(label), f(8.5, C.accent))
+}
+
+function resolveEditorialImage(ctx, slide) {
+  const slots = slide?.imageSlots
+  if (!slots || typeof slots !== 'object' || Array.isArray(slots)) return null
+  const slotIds = Object.keys(slots)
+  const unsupported = slotIds.filter((slotId) => slotId !== EDITORIAL_IMAGE_SLOT)
+  if (unsupported.length > 0) {
+    throw new Error(
+      `cartesianImageStatsSlide supports only image slot "${EDITORIAL_IMAGE_SLOT}", got ${unsupported.join(', ')}`,
+    )
+  }
+  if (!(EDITORIAL_IMAGE_SLOT in slots)) return null
+  if (!ctx.assets) {
+    throw new Error(
+      `cartesianImageStatsSlide references "${EDITORIAL_IMAGE_SLOT}" but no assets manifest was provided; pass --assets assets_manifest.json`,
+    )
+  }
+  return ctx.assets.resolveImageSlot(slide, EDITORIAL_IMAGE_SLOT)
 }
 
 function chartBase(ctx, s, name, data, x, y, w, h, kind) {
@@ -261,7 +319,9 @@ function renderSlide(ctx, s, slide) {
   }
 
   if (slide.type === 'cartesianImageStatsSlide') {
-    drawImageShell(ctx, s, MX, 1.5, 5.8, 4.5, data.imageLabel)
+    const imageAsset = resolveEditorialImage(ctx, slide)
+    if (imageAsset) drawImageAsset(ctx, s, MX, 1.5, 5.8, 4.5, data.imageLabel, imageAsset)
+    else drawImageShell(ctx, s, MX, 1.5, 5.8, 4.5, data.imageLabel)
     label(s, 'Label', 7.0, 2.07, 4.2, data.label)
     tx(s, 'Title', 7.0, 2.34, 5.8, 0.55, data.title, d(36, C.ink))
     ;(data.paragraphs ?? []).forEach((para, i) => {
@@ -413,8 +473,8 @@ function renderSlide(ctx, s, slide) {
   }
 }
 
-export function createDeck(content) {
-  const ctx = makeCartesianOps()
+export function createDeck(content, options = {}) {
+  const ctx = makeCartesianOps(options)
   const warnings = []
   ;(content.slides ?? []).forEach((slide, index) => {
     if (!slide.type?.startsWith('cartesian')) {

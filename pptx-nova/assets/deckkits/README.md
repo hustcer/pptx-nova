@@ -71,7 +71,9 @@ slot id 为键的对象，每项至少说明 `kind`、`acceptsAsset` 和
 `placeholderBehavior`，还可以给出 `labelSlot` / `captionSlot` 与 `note`。槽位参考会把
 这些信息输出为单独的 Asset slots 表；当 `acceptsAsset` 为 `false` 时，该页型只会渲染
 占位框，`content.json` 的 `imageSlots` 不能注入真实图片，校验器会在 delivery 模式阻止
-这种误用。
+这种误用。`acceptsAsset: true` 的页型通过 `assets_manifest.json` 解析 asset id；build
+生成短的 `assetSource.path`，runner 再把 manifest 所在目录作为 `--asset-root` 传给 xdoc。
+没有绑定时是否保留占位框由该页型自己的 `placeholderBehavior` 决定。
 
 `visualGrammar` 不是运行时代码，也不替代页型函数、schema、layout contract 或 diversity gate。
 它只约束 DeckKit 使用方式和内容创作方向：选中 DeckKit 后，把 `positioning` 用作风格判断，

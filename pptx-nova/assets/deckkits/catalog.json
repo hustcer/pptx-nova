@@ -2595,7 +2595,7 @@
     },
     {
       "id": "cartesian",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -2688,7 +2688,7 @@
           "solid and dashed concentric geo rings",
           "uppercase Inter micro labels in muted taupe",
           "Playfair Display headlines and numerals",
-          "crossed image placeholder shell",
+          "registered editorial image slot with a crossed-shell fallback",
           "thin agenda, card, stat, and timeline rules",
           "native column and line charts with softened #555 primary bar series and taupe comparison series"
         ],
@@ -2770,10 +2770,11 @@
             "assetSlots": {
               "image.editorial": {
                 "kind": "image",
-                "acceptsAsset": false,
-                "placeholderBehavior": "crossed image shell",
+                "acceptsAsset": true,
+                "fitPolicy": "contain",
+                "placeholderBehavior": "crossed image shell fallback",
                 "labelSlot": "data.imageLabel",
-                "note": "This slide type renders an editable crossed placeholder shell. No image asset can be injected through content.json."
+                "note": "Bind a registered local image through content.json imageSlots and assets_manifest.json. The image is contained inside the editorial frame; omitting the binding preserves the editable crossed placeholder shell."
               }
             }
           },
@@ -2950,7 +2951,7 @@
         "Browser navigation dots, arrows, slide counter, keyboard handlers, CSS transitions, and hover states are intentionally excluded.",
         "Chart.js canvas charts are rebuilt as native editable PPTX charts driven by semantic chart data.",
         "The HTML accent #8A8178 is darkened to #665D56 for readable PPTX micro text on the sandstone background.",
-        "Image-bearing layout exposes an editable placeholder shell; no reference image or remote asset is bundled.",
+        "Image-bearing layout accepts a registered local asset with contain fitting; without a binding it preserves the editable crossed placeholder shell.",
         "Playfair Display and Inter are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution."
       ],
       "examples": [

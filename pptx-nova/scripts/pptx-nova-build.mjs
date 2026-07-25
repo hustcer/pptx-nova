@@ -7,6 +7,7 @@ import {
   loadCatalog,
   validateContent,
 } from '../assets/deckkits/core-primitives.kit.mjs'
+import { createAssetContext, readAssetManifest } from './lib/asset-manifest.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const skillRoot = resolve(__dirname, '..')
@@ -17,6 +18,7 @@ const usage = `Usage:
 
 Options:
   --deckkit <id>             DeckKit id from assets/deckkits/catalog.json.
+  --assets <path>            Optional assets_manifest.json for imageSlots/assets.
   -o, --output <path>        Write patch JSON to this file. Defaults to stdout.
   --quality-json <path>      Write assessDeckQuality output to this file.
   --mode <draft|delivery>    Validation mode. Defaults to delivery.
@@ -30,6 +32,7 @@ Options:
 function parseArgs(argv) {
   const args = {
     deckkit: '',
+    assets: '',
     content: '',
     output: '',
     qualityJson: '',
@@ -45,6 +48,9 @@ function parseArgs(argv) {
       process.exit(0)
     } else if (arg === '--deckkit') {
       args.deckkit = valueAfter(argv, i, arg)
+      i += 1
+    } else if (arg === '--assets') {
+      args.assets = resolve(valueAfter(argv, i, arg))
       i += 1
     } else if (arg === '-o' || arg === '--output') {
       args.output = resolve(valueAfter(argv, i, arg))
@@ -134,7 +140,10 @@ try {
   }
 
   const deckkitModule = await loadDeckkit(deckkit)
-  const result = deckkitModule.createDeck(content)
+  const assets = args.assets
+    ? createAssetContext(readAssetManifest(args.assets), args.assets)
+    : null
+  const result = deckkitModule.createDeck(content, { assets })
   const patch = result.patch ?? result
   const quality = assessDeckQuality({ patch, deckkit })
   if (args.qualityJson) writeJson(args.qualityJson, quality)

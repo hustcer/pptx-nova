@@ -710,25 +710,54 @@ triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 { "op": "set-chart", "slide": 1, "shape": {...},
   "series": [
     { "series": 0,
-      "trendline": { "type": "linear", "forward": 2,
-                     "displayEquation": true, "displayRSquared": true } },
+      "trendlines": [
+        { "type": "linear", "forward": 2,
+          "displayEquation": true, "displayRSquared": true,
+          "label": {
+            "numberFormat": "0.0000",
+            "font": { "name": "Aptos", "size": "9pt", "bold": false,
+                      "color": "336699" },
+            "rotation": -15
+          } },
+        { "type": "moving-average", "period": 3 }
+      ] },
     { "series": 1,
       "errorBars": { "valueType": "percentage", "value": 5 } }
   ] }
 ```
 
-- `trendline.type`：`exponential / linear / logarithmic / moving-average /
+- 推荐使用 `trendlines`，它按数组顺序**完整替换**同一系列的趋势线集合；数组顺序是
+  唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 或
+  `trendlines: null` 都会清空全部趋势线。
+- 兼容入口 `trendline` 仍可用：对象表示完整替换为单条，`null` 表示清空。一个 series
+  entry 同时出现 `trendline` 与 `trendlines` 会 fail-closed；不要混用。
+- 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
 polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
-  `line`（线样式）。`trendline: null` 删除该系列全部趋势线。
+  `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
+  但仍允许清空。
+- `label` 只负责 PowerPoint 自动生成的方程/R² 标签格式，首版安全字段为
+  `numberFormat`、`font.name/size/bold/color` 和 `rotation`（-90..90）。只要提供
+  `label`，同一趋势线必须显式设置 `displayEquation: true` 或
+  `displayRSquared: true`；`label: null` 表示不写格式容器。当前不承诺自定义
+  `<c:tx>` 文本或 manual layout，不能用 `label` 替换 PowerPoint 生成的公式内容。
+- `label.font.size` 对齐 DrawingML `a:defRPr/@sz` 的 100..400000 centipoint
+  边界，只接受带显式 `pt` 后缀的 1pt..4000pt 字符串，小数最多 4 位。其他
+  单位、数字裸值和越界值会 fail-closed。
 - `errorBars.valueType`：`fixed / percentage / std-dev`（需配 `value`）、
   `std-err`（不带 value）、`custom`（需 `plus` + `minus` 两个数值数组，长度=
   点数）；可选 `type`（`both / minus / plus`，默认 both）、`direction`
   （`x / y`，scatter/bubble 用）、`noEndCap`、`line`。`errorBars: null` 删除。
 
+趋势线集合与标签属于高风险 chart XML 改动：先 dry-run 确认 selector、changedParts、
+semantic/structure gate，再 apply；随后用 inspect/parse 回读确认趋势线数量、顺序、类型、
+方程/R² 开关和 label 格式，最后执行 ZIP/XML 校验、预览复核，并在可用时跑 PowerPoint
+clean-open。只看到 patch 成功不足以证明数组顺序和 `bold: false` 等显式值被保留。
+
 > ✅ **当前预览支持（xdoc ≥0.3.1）**：PNG/PDF 预览链会渲染
-> `trendline` / `errorBars` / `dataTable` / `displayUnits` / 轴标题 /
+> `trendlines`（以及兼容入口 `trendline`）/ `errorBars` / `dataTable` /
+> `displayUnits` / 轴标题 /
 > `minorGridlines`，包括趋势线方程与 R²、单位标签以及图下数据表布局。
 > 刻度标签 `rotation` 也可见。若 capability probe 显示当前 runtime 不支持某项，
 > 再按 [故障排查](troubleshooting.md) 中的 XML/Office fallback 复核；不要把旧

@@ -1,10 +1,10 @@
 # xdoc: A Native-First, Agent-Oriented Document and PPTX Execution Layer
 
-> **Runtime build verified for this document:** `0.3.1 (0aeed3ff)`
+> **Runtime build verified for this document:** `0.3.1 (5958a719)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-07-25
+> **Verification date:** 2026-07-26
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
@@ -21,7 +21,7 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot is semantically equivalent to the
-runtime response for `0.3.1 (0aeed3ff)`; JSON formatting may differ between the
+runtime response for `0.3.1 (5958a719)`; JSON formatting may differ between the
 checked-in file and the CLI output. Refresh the snapshot whenever the published
 binary identity changes.
 
@@ -134,7 +134,7 @@ screenshots or log interpretation alone.
 | Enum families                  | 20 controlled vocabularies                                                   |
 | Published bridge error catalog | 24 error codes                                                               |
 | Embedded PPTX report schemas   | 20 report schemas                                                            |
-| Patch schema definitions       | 191 `$defs` in the current runtime schema                                    |
+| Patch schema definitions       | 192 `$defs` in the current runtime schema                                    |
 | Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples               |
 | Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog |
 
@@ -402,7 +402,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.3.1 (0aeed3ff)
+0.3.1 (5958a719)
 ```
 
 The top-level schema response identifies itself as:
@@ -410,7 +410,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.3.1 (0aeed3ff)"
+  "version": "0.3.1 (5958a719)"
 }
 ```
 
@@ -1872,7 +1872,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.3.1 (0aeed3ff). Re-run the discovery
+This document is anchored to xdoc 0.3.1 (5958a719). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

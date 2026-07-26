@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.1 (0aeed3ff)",
+  "version": "0.3.1 (5958a719)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1767,6 +1767,7 @@
             "arrangement-imbalance",
             "font-too-small",
             "dangling-rel",
+            "rel-type-mismatch",
             "dangling-ref",
             "duplicate-id",
             "part-truth",
@@ -1800,7 +1801,7 @@
           },
           "semantic": {
             "scope": "semanticIssues always covers the full package, even when --slides scopes visual issues",
-            "rules": "82 PowerPoint semantic source rules from the pinned Open-XML-SDK schematron dataset, normalized to 81 runtime rules plus xdoc package/timing safety extensions",
+            "rules": "107 PowerPoint semantic source rules from the pinned Open-XML-SDK (schematron rules plus 25 PowerPoint-reachable C#-only constraint registrations covering diagram, chartDrawing, compatibility, a14, and p15 namespaces), normalized to 106 runtime rules plus xdoc package/timing safety extensions",
             "identity": "each issue carries stable ruleId plus part/element/attribute/version context for deterministic Agent handling"
           }
         },
@@ -1875,6 +1876,20 @@
             "fontSize": "Only sz attribute changes are allowed, and they are reported under allowedChanges.fontSize for layout repair review.",
             "textAttributes": "Only explicitly named user-visible attributes in typed contexts are reported under textAttrChanges[]/allowedChanges.textAttributes: hyperlink tooltip on hlinkClick/hlinkHover/hlinkMouseOver and alt text descr/title on cNvPr. Metadata, relationship targets, formatCode, and shape internal names still block even if listed."
           },
+          "embeddedWorkbook": {
+            "coverage": "outer-package-only",
+            "meaning": "ppt/embeddings/* workbook parts are byte-compared for change detection only; workbook-internal xl/* XML never enters the textless style signature. status=pass therefore never proves that workbook-internal edits are safe.",
+            "reportFields": [
+              "coverage.embeddedWorkbook",
+              "embeddedWorkbooks.comparison",
+              "embeddedWorkbooks.parts[].path",
+              "embeddedWorkbooks.parts[].status (unchanged|changed|added|removed)",
+              "summary.embeddedWorkbookParts",
+              "summary.embeddedWorkbookChanges"
+            ],
+            "warnings": "Every changed/added/removed workbook part emits a warnings[] entry (category embedded-workbook) and increments agentGate.warningCount without failing the gate.",
+            "followUp": "Treat workbook warnings as unaudited changes: validate the embedded .xlsx ZIP/XML separately, keep the chart visible cache in sync via replace-chart-text, rerun i18n-scan --mode candidate, and clean-open the deck in PowerPoint."
+          },
           "scope": {
             "option": "--slides",
             "valueSyntax": "N|N-M[,N|N-M...]",
@@ -1920,7 +1935,7 @@
             "visibleBody": "Slide, notes, table, layout/master, or diagram body text; translate; candidate blocker.",
             "visibleTextAttr": "User-visible attributes such as tooltip, descr, and title; translate under controlled replacement; candidate blocker.",
             "chartVisibleCache": "Chart title, series, category, and label visible text, including generated classic Chart and ChartEx default titles; translate through guarded chart replacements; candidate blocker.",
-            "embeddedWorkbook": "Embedded workbook shared strings/sheet text; review required, not a default candidate blocker.",
+            "embeddedWorkbook": "Embedded workbook text found inside ppt/embeddings/*.xlsx parts (composite part path workbook.xlsx!xl/...); review required, not a default candidate blocker. Every hit carries an advisory workbookReview with risk, recommendedAction, reason, constraints, and a manual replacementTemplate when the action is not preserve.",
             "themeFontMetadata": "Theme/font/language metadata; preserve by default.",
             "relationshipPath": "Relationship Target or external path; preserve by default.",
             "shapeInternalName": "cNvPr@name authoring identifier; preserve by default.",
@@ -1931,6 +1946,21 @@
             "usage": "Use i18nUnits as the stable inventory and let i18n-plan emit replaceText replacements. If manually building replace-text input, copy selectors.replaceText from the unit and add targetText.",
             "indexing": "selectors.replaceText.index is the 0-based index expected by replace-text for the given part/tag/attrName stream. hits[].location is a scan diagnostic location and must not be used as replace-text index.",
             "hash": "selectors.replaceText.sourceHash includes the sha256: prefix accepted by replace-text."
+          },
+          "embeddedWorkbookReview": {
+            "fields": [
+              "hits[].workbookReview",
+              "reviewRequired[].workbookReview",
+              "i18nUnits.units[].selectors.embeddedWorkbookText"
+            ],
+            "recommendedAction": {
+              "translate": "Shared string or inline worksheet cell text; translation candidate. Keep item count/order stable and keep chart-backed values in sync with the chart visible cache.",
+              "translate-with-constraints": "Table/list-object names; translatable only while the listed identifier constraints hold (uniqueness, no spaces in displayName).",
+              "needs-confirmation": "Cell style names, cached <v> values, and unclassified text; decide explicitly per target-locale policy before editing.",
+              "preserve": "Sheet/defined names and workbook theme names; chart cache formulas and authoring metadata reference them, so keep the source value."
+            },
+            "replacementTemplate": "A self-contained manual replacement plan (kind embedded-workbook-text-node|embedded-workbook-text-attr, workbookPart, internalPart, tag/attrName, 0-based same-tag occurrence index, sourceText, sourceHash). No automated xdoc apply path consumes it: replace-text and i18n-plan reject workbook-internal targets. preserve-recommended hits carry replacementTemplate: null.",
+            "gate": "The recommendation is advisory and never changes gate semantics: every embeddedWorkbook hit stays action=review / recommendedMethod=manual-review. After any manual workbook edit, validate the embedded .xlsx ZIP/XML, keep the chart visible cache in sync, rerun i18n-scan --mode candidate, and check the i18n-style-diff embedded-workbook warnings."
           },
           "i18nUnits": {
             "field": "i18nUnits",
@@ -2003,7 +2033,7 @@
             "sourceMode": "Use --mode source before translation to build a categorized inventory; hits are not blockers.",
             "candidateMode": "Use --mode candidate after translation as the authoritative target-consistency gate. It consumes the source units and translations and fails delivery when blockers[] is non-empty. It does not run the heuristic language classifier, so valid target-language Latin text is never a blocker.",
             "translationInput": "Build pptx-i18n-translations/v1 from i18nUnits.units[].unitId and sourceHash; include reviewDecision:\"translate\" for explicitly approved review units; do not infer selectors from hits[].location.",
-            "reviewRequiredWhen": "embeddedWorkbook hits remain; inspect chart/workbook sync before editing workbook text.",
+            "reviewRequiredWhen": "embeddedWorkbook hits remain; follow each hit's workbookReview.recommendedAction and inspect chart/workbook sync before editing workbook text.",
             "preserveByDefault": [
               "themeFontMetadata",
               "relationshipPath",
@@ -9260,7 +9290,8 @@
                 "type": "string",
                 "pattern": "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)?$"
               }
-            ]
+            ],
+            "description": "Length value: bare numbers are raw EMU (914400 per inch), so human-scale values should use unit strings such as '1in', '18pt', '2.54cm', '96px'."
           },
           "chartTrendlineLabelFontSize": {
             "type": "string",
@@ -9269,7 +9300,8 @@
           },
           "color": {
             "type": "string",
-            "pattern": "^#?[0-9A-Fa-f]{6}$"
+            "pattern": "^#?[0-9A-Fa-f]{6}$",
+            "description": "Six-digit hex RGB, with or without the leading '#' (e.g. '1F6FEB')."
           },
           "patchOpArray": {
             "type": "array",
@@ -10192,7 +10224,8 @@
               {
                 "required": ["bboxNear"]
               }
-            ]
+            ],
+            "description": "All given predicates must match the same shape; add more keys to disambiguate when several shapes qualify."
           },
           "bboxNearQuery": {
             "type": "object",
@@ -10228,7 +10261,8 @@
               {
                 "$ref": "#/$defs/fillNone"
               }
-            ]
+            ],
+            "description": "Exactly one fill kind: solid, gradient, pattern, or none."
           },
           "fillColorChoice": {
             "oneOf": [
@@ -10458,7 +10492,8 @@
               {
                 "required": ["themeColor"]
               }
-            ]
+            ],
+            "description": "pos/position is a 0..1 fraction along the gradient axis (serialized as a:gs pos 0..100000)."
           },
           "line": {
             "type": "object",
@@ -10479,7 +10514,8 @@
               "noLine": {
                 "type": "boolean"
               }
-            }
+            },
+            "description": "Sparse outline override; width follows the length rules ('1pt'). noLine removes the outline; clearDash resets an inherited dash."
           },
           "shapeEffect": {
             "type": "object",
@@ -10574,7 +10610,8 @@
               "inner": {
                 "type": "boolean"
               }
-            }
+            },
+            "description": "angle is degrees clockwise from the positive x-axis (0..<360); distance and blur follow the length rules; alpha is 0..1 opacity."
           },
           "glowEffect": {
             "type": "object",
@@ -10655,7 +10692,8 @@
               "lang": {
                 "type": "string"
               }
-            }
+            },
+            "description": "Sparse font override; omitted keys inherit. size follows the length rules — write '18pt', never a bare number (bare numbers are EMU)."
           },
           "slideNotesParagraphs": {
             "type": "array",
@@ -11186,7 +11224,8 @@
           "verticalAnchor": {
             "type": "string",
             "enum": ["top", "middle", "bottom"],
-            "strict": true
+            "strict": true,
+            "description": "Vertical anchoring of text inside its frame; serialized as bodyPr anchor t/ctr/b."
           },
           "layoutSelector": {
             "oneOf": [
@@ -11614,7 +11653,8 @@
               "distribute",
               "thai-distribute"
             ],
-            "strict": true
+            "strict": true,
+            "description": "Serialized as a:pPr algn; 'justify-low' and 'thai-distribute' are the East-Asian justification variants."
           },
           "textFrameAutofitPatch": {
             "oneOf": [
@@ -11652,7 +11692,8 @@
                   }
                 ]
               }
-            ]
+            ],
+            "description": "'none' keeps the frame fixed, 'shape' grows the shape to fit the text, 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the autofit setting."
           },
           "textFramePatch": {
             "type": "object",
@@ -11835,7 +11876,8 @@
                   }
                 }
               }
-            ]
+            ],
+            "description": "Discriminated by type; 'none' removes the bullet and 'character' requires char."
           },
           "slideSize": {
             "oneOf": [
@@ -11857,7 +11899,8 @@
                   }
                 }
               }
-            ]
+            ],
+            "description": "'standard' is 4:3 and 'wide' is 16:9; explicit w/h follow the length rules."
           },
           "chartKind": {
             "type": "string",
@@ -12038,11 +12081,24 @@
               "line": {
                 "$ref": "#/$defs/color"
               }
-            }
+            },
+            "description": "size is in points (2..72); fill and line take hex colors."
           },
           "chartLabelScope": {
             "type": "object",
             "additionalProperties": false,
+            "allOf": [
+              {
+                "not": {
+                  "required": ["plot", "series"]
+                }
+              },
+              {
+                "not": {
+                  "required": ["plot", "point"]
+                }
+              }
+            ],
             "dependentRequired": {
               "point": ["series"]
             },
@@ -12060,7 +12116,7 @@
                 "minimum": 0
               }
             },
-            "description": "Data label scope. Omit for plot 0; use {series} for a series or {series, point} for a single point."
+            "description": "Data label scope. Omit (or use an empty object) for plot 0; use {plot} for a plot, {series} for a series, or {series, point} for a single point. plot cannot be combined with series or point."
           },
           "chartDataLabelPosition": {
             "type": "string",
@@ -12075,7 +12131,8 @@
               "outside-end",
               "right"
             ],
-            "strict": true
+            "strict": true,
+            "description": "'above'/'below' are the line/scatter spellings serialized as OOXML t/b; legal positions depend on the chart kind (bars use inside/outside-end, pie uses best-fit)."
           },
           "chartTickMark": {
             "type": "string",
@@ -12095,7 +12152,8 @@
           "legendPosition": {
             "type": "string",
             "enum": ["right", "left", "top", "bottom", "top-right"],
-            "strict": true
+            "strict": true,
+            "description": "Serialized as c:legendPos (top-right = 'tr'); setting a position implies the legend is shown."
           },
           "chartPlotPatch": {
             "type": "object",
@@ -12207,8 +12265,45 @@
               },
               "crossBetween": {
                 "$ref": "#/$defs/chartCrossBetween"
+              },
+              "baseTimeUnit": {
+                "oneOf": [
+                  {
+                    "type": "null",
+                    "description": "Restore the automatic base time unit (removes c:baseTimeUnit)."
+                  },
+                  {
+                    "$ref": "#/$defs/chartTimeUnit"
+                  }
+                ],
+                "description": "Date-axis category grouping unit (c:baseTimeUnit). Only an existing date axis (c:dateAx) accepts it; category/value axes reject the op."
+              },
+              "majorTimeUnit": {
+                "oneOf": [
+                  {
+                    "type": "null",
+                    "description": "Restore the automatic major time unit (removes c:majorTimeUnit)."
+                  },
+                  {
+                    "$ref": "#/$defs/chartTimeUnit"
+                  }
+                ],
+                "description": "Date-axis major tick interval unit (c:majorTimeUnit); majorUnit gives the count. Only an existing date axis (c:dateAx) accepts it."
+              },
+              "minorTimeUnit": {
+                "oneOf": [
+                  {
+                    "type": "null",
+                    "description": "Restore the automatic minor time unit (removes c:minorTimeUnit)."
+                  },
+                  {
+                    "$ref": "#/$defs/chartTimeUnit"
+                  }
+                ],
+                "description": "Date-axis minor tick interval unit (c:minorTimeUnit); minorUnit gives the count. Only an existing date axis (c:dateAx) accepts it."
               }
-            }
+            },
+            "description": "min/max/majorUnit/minorUnit are in axis value units; base/major/minorTimeUnit apply only to an existing date axis, and null restores the automatic setting."
           },
           "chartAxisTicksPatch": {
             "type": "object",
@@ -12380,6 +12475,7 @@
           "chartDataLabelsPatch": {
             "type": "object",
             "additionalProperties": false,
+            "description": "Data-label mutation shared by classic and ChartEx charts. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator/font fields instead of silently dropping them.",
             "properties": {
               "scope": {
                 "$ref": "#/$defs/chartLabelScope"
@@ -12410,6 +12506,23 @@
               },
               "font": {
                 "$ref": "#/$defs/font"
+              },
+              "hiddenPoints": {
+                "oneOf": [
+                  {
+                    "type": "null",
+                    "description": "Show every label again (removes all cx:dataLabelHidden entries)."
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 4294967295
+                    }
+                  }
+                ],
+                "description": "ChartEx only: complete replacement list of zero-based UInt32 data-point indexes (0..4294967295) whose labels are hidden (cx:dataLabelHidden@idx). The list replaces all existing entries; duplicates are deduplicated and output is written in ascending order. [] or null removes every existing hidden entry; when cx:dataLabels is absent, clearing is a preserve-first no-op and does not create an empty container. Classic (c:) charts reject this field."
               }
             }
           },
@@ -13645,7 +13758,8 @@
                 "type": "integer",
                 "minimum": 0
               }
-            }
+            },
+            "description": "targetSlide is a zero-based slide index."
           },
           "noneTarget": {
             "type": "object",
@@ -14096,6 +14210,11 @@
             "enum": ["center", "left", "right"],
             "strict": true
           },
+          "chartTimeUnit": {
+            "type": "string",
+            "enum": ["days", "months", "years"],
+            "strict": true
+          },
           "chartTrendlineType": {
             "type": "string",
             "enum": [
@@ -14238,7 +14357,8 @@
                   ]
                 }
               }
-            ]
+            ],
+            "description": "order applies only to polynomial (2..6) and period only to moving-average (>= 2); label requires displayEquation or displayRSquared to be true."
           },
           "chartTrendlinePatch": {
             "oneOf": [
@@ -14383,7 +14503,8 @@
                   }
                 }
               }
-            ]
+            ],
+            "description": "valueType 'custom' requires the plus/minus value arrays; null removes the error bars."
           },
           "chartDataTablePatch": {
             "oneOf": [
@@ -18089,7 +18210,8 @@
                   "type": "string",
                   "pattern": "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)?$"
                 }
-              ]
+              ],
+              "description": "Length value: bare numbers are raw EMU (914400 per inch), so human-scale values should use unit strings such as '1in', '18pt', '2.54cm', '96px'."
             },
             "chartTrendlineLabelFontSize": {
               "type": "string",
@@ -18098,7 +18220,8 @@
             },
             "color": {
               "type": "string",
-              "pattern": "^#?[0-9A-Fa-f]{6}$"
+              "pattern": "^#?[0-9A-Fa-f]{6}$",
+              "description": "Six-digit hex RGB, with or without the leading '#' (e.g. '1F6FEB')."
             },
             "patchOpArray": {
               "type": "array",
@@ -19021,7 +19144,8 @@
                 {
                   "required": ["bboxNear"]
                 }
-              ]
+              ],
+              "description": "All given predicates must match the same shape; add more keys to disambiguate when several shapes qualify."
             },
             "bboxNearQuery": {
               "type": "object",
@@ -19057,7 +19181,8 @@
                 {
                   "$ref": "#/$defs/fillNone"
                 }
-              ]
+              ],
+              "description": "Exactly one fill kind: solid, gradient, pattern, or none."
             },
             "fillColorChoice": {
               "oneOf": [
@@ -19287,7 +19412,8 @@
                 {
                   "required": ["themeColor"]
                 }
-              ]
+              ],
+              "description": "pos/position is a 0..1 fraction along the gradient axis (serialized as a:gs pos 0..100000)."
             },
             "line": {
               "type": "object",
@@ -19308,7 +19434,8 @@
                 "noLine": {
                   "type": "boolean"
                 }
-              }
+              },
+              "description": "Sparse outline override; width follows the length rules ('1pt'). noLine removes the outline; clearDash resets an inherited dash."
             },
             "shapeEffect": {
               "type": "object",
@@ -19403,7 +19530,8 @@
                 "inner": {
                   "type": "boolean"
                 }
-              }
+              },
+              "description": "angle is degrees clockwise from the positive x-axis (0..<360); distance and blur follow the length rules; alpha is 0..1 opacity."
             },
             "glowEffect": {
               "type": "object",
@@ -19484,7 +19612,8 @@
                 "lang": {
                   "type": "string"
                 }
-              }
+              },
+              "description": "Sparse font override; omitted keys inherit. size follows the length rules — write '18pt', never a bare number (bare numbers are EMU)."
             },
             "slideNotesParagraphs": {
               "type": "array",
@@ -20015,7 +20144,8 @@
             "verticalAnchor": {
               "type": "string",
               "enum": ["top", "middle", "bottom"],
-              "strict": true
+              "strict": true,
+              "description": "Vertical anchoring of text inside its frame; serialized as bodyPr anchor t/ctr/b."
             },
             "layoutSelector": {
               "oneOf": [
@@ -20443,7 +20573,8 @@
                 "distribute",
                 "thai-distribute"
               ],
-              "strict": true
+              "strict": true,
+              "description": "Serialized as a:pPr algn; 'justify-low' and 'thai-distribute' are the East-Asian justification variants."
             },
             "textFrameAutofitPatch": {
               "oneOf": [
@@ -20481,7 +20612,8 @@
                     }
                   ]
                 }
-              ]
+              ],
+              "description": "'none' keeps the frame fixed, 'shape' grows the shape to fit the text, 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the autofit setting."
             },
             "textFramePatch": {
               "type": "object",
@@ -20664,7 +20796,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "description": "Discriminated by type; 'none' removes the bullet and 'character' requires char."
             },
             "slideSize": {
               "oneOf": [
@@ -20686,7 +20819,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "description": "'standard' is 4:3 and 'wide' is 16:9; explicit w/h follow the length rules."
             },
             "chartKind": {
               "type": "string",
@@ -20867,11 +21001,24 @@
                 "line": {
                   "$ref": "#/$defs/color"
                 }
-              }
+              },
+              "description": "size is in points (2..72); fill and line take hex colors."
             },
             "chartLabelScope": {
               "type": "object",
               "additionalProperties": false,
+              "allOf": [
+                {
+                  "not": {
+                    "required": ["plot", "series"]
+                  }
+                },
+                {
+                  "not": {
+                    "required": ["plot", "point"]
+                  }
+                }
+              ],
               "dependentRequired": {
                 "point": ["series"]
               },
@@ -20889,7 +21036,7 @@
                   "minimum": 0
                 }
               },
-              "description": "Data label scope. Omit for plot 0; use {series} for a series or {series, point} for a single point."
+              "description": "Data label scope. Omit (or use an empty object) for plot 0; use {plot} for a plot, {series} for a series, or {series, point} for a single point. plot cannot be combined with series or point."
             },
             "chartDataLabelPosition": {
               "type": "string",
@@ -20904,7 +21051,8 @@
                 "outside-end",
                 "right"
               ],
-              "strict": true
+              "strict": true,
+              "description": "'above'/'below' are the line/scatter spellings serialized as OOXML t/b; legal positions depend on the chart kind (bars use inside/outside-end, pie uses best-fit)."
             },
             "chartTickMark": {
               "type": "string",
@@ -20924,7 +21072,8 @@
             "legendPosition": {
               "type": "string",
               "enum": ["right", "left", "top", "bottom", "top-right"],
-              "strict": true
+              "strict": true,
+              "description": "Serialized as c:legendPos (top-right = 'tr'); setting a position implies the legend is shown."
             },
             "chartPlotPatch": {
               "type": "object",
@@ -21036,8 +21185,45 @@
                 },
                 "crossBetween": {
                   "$ref": "#/$defs/chartCrossBetween"
+                },
+                "baseTimeUnit": {
+                  "oneOf": [
+                    {
+                      "type": "null",
+                      "description": "Restore the automatic base time unit (removes c:baseTimeUnit)."
+                    },
+                    {
+                      "$ref": "#/$defs/chartTimeUnit"
+                    }
+                  ],
+                  "description": "Date-axis category grouping unit (c:baseTimeUnit). Only an existing date axis (c:dateAx) accepts it; category/value axes reject the op."
+                },
+                "majorTimeUnit": {
+                  "oneOf": [
+                    {
+                      "type": "null",
+                      "description": "Restore the automatic major time unit (removes c:majorTimeUnit)."
+                    },
+                    {
+                      "$ref": "#/$defs/chartTimeUnit"
+                    }
+                  ],
+                  "description": "Date-axis major tick interval unit (c:majorTimeUnit); majorUnit gives the count. Only an existing date axis (c:dateAx) accepts it."
+                },
+                "minorTimeUnit": {
+                  "oneOf": [
+                    {
+                      "type": "null",
+                      "description": "Restore the automatic minor time unit (removes c:minorTimeUnit)."
+                    },
+                    {
+                      "$ref": "#/$defs/chartTimeUnit"
+                    }
+                  ],
+                  "description": "Date-axis minor tick interval unit (c:minorTimeUnit); minorUnit gives the count. Only an existing date axis (c:dateAx) accepts it."
                 }
-              }
+              },
+              "description": "min/max/majorUnit/minorUnit are in axis value units; base/major/minorTimeUnit apply only to an existing date axis, and null restores the automatic setting."
             },
             "chartAxisTicksPatch": {
               "type": "object",
@@ -21209,6 +21395,7 @@
             "chartDataLabelsPatch": {
               "type": "object",
               "additionalProperties": false,
+              "description": "Data-label mutation shared by classic and ChartEx charts. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator/font fields instead of silently dropping them.",
               "properties": {
                 "scope": {
                   "$ref": "#/$defs/chartLabelScope"
@@ -21239,6 +21426,23 @@
                 },
                 "font": {
                   "$ref": "#/$defs/font"
+                },
+                "hiddenPoints": {
+                  "oneOf": [
+                    {
+                      "type": "null",
+                      "description": "Show every label again (removes all cx:dataLabelHidden entries)."
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4294967295
+                      }
+                    }
+                  ],
+                  "description": "ChartEx only: complete replacement list of zero-based UInt32 data-point indexes (0..4294967295) whose labels are hidden (cx:dataLabelHidden@idx). The list replaces all existing entries; duplicates are deduplicated and output is written in ascending order. [] or null removes every existing hidden entry; when cx:dataLabels is absent, clearing is a preserve-first no-op and does not create an empty container. Classic (c:) charts reject this field."
                 }
               }
             },
@@ -22474,7 +22678,8 @@
                   "type": "integer",
                   "minimum": 0
                 }
-              }
+              },
+              "description": "targetSlide is a zero-based slide index."
             },
             "noneTarget": {
               "type": "object",
@@ -22925,6 +23130,11 @@
               "enum": ["center", "left", "right"],
               "strict": true
             },
+            "chartTimeUnit": {
+              "type": "string",
+              "enum": ["days", "months", "years"],
+              "strict": true
+            },
             "chartTrendlineType": {
               "type": "string",
               "enum": [
@@ -23067,7 +23277,8 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "description": "order applies only to polynomial (2..6) and period only to moving-average (>= 2); label requires displayEquation or displayRSquared to be true."
             },
             "chartTrendlinePatch": {
               "oneOf": [
@@ -23212,7 +23423,8 @@
                     }
                   }
                 }
-              ]
+              ],
+              "description": "valueType 'custom' requires the plus/minus value arrays; null removes the error bars."
             },
             "chartDataTablePatch": {
               "oneOf": [
@@ -24504,6 +24716,59 @@
                       "bold": true
                     }
                   },
+                  "op": "set-chart"
+                },
+                {
+                  "slide": 0,
+                  "kind": "waterfall",
+                  "x": "8.5in",
+                  "y": "0.5in",
+                  "w": "4in",
+                  "h": "3in",
+                  "name": "Waterfall",
+                  "dataEx": {
+                    "points": [
+                      {
+                        "label": "Start",
+                        "value": 100,
+                        "kind": "total"
+                      },
+                      {
+                        "label": "Revenue",
+                        "value": 40,
+                        "kind": "increase"
+                      },
+                      {
+                        "label": "Cost",
+                        "value": -25,
+                        "kind": "decrease"
+                      },
+                      {
+                        "label": "End",
+                        "value": 115,
+                        "kind": "total"
+                      }
+                    ]
+                  },
+                  "op": "add-chart"
+                },
+                {
+                  "slide": 0,
+                  "shape": {
+                    "name": "Waterfall"
+                  },
+                  "dataLabels": [
+                    {
+                      "scope": {
+                        "series": 0
+                      },
+                      "position": "center",
+                      "showValue": true,
+                      "showCategoryName": true,
+                      "showSeriesName": false,
+                      "hiddenPoints": [1, 3]
+                    }
+                  ],
                   "op": "set-chart"
                 }
               ]
@@ -28292,6 +28557,7 @@
                   "type": "string",
                   "enum": [
                     "dangling-rel",
+                    "rel-type-mismatch",
                     "dangling-ref",
                     "duplicate-id",
                     "part-truth",
@@ -28707,6 +28973,7 @@
                   "type": "string",
                   "enum": [
                     "dangling-rel",
+                    "rel-type-mismatch",
                     "dangling-ref",
                     "duplicate-id",
                     "part-truth",
@@ -29122,6 +29389,7 @@
                   "type": "string",
                   "enum": [
                     "dangling-rel",
+                    "rel-type-mismatch",
                     "dangling-ref",
                     "duplicate-id",
                     "part-truth",
@@ -30934,11 +31202,11 @@
               },
               "sourceRuleCount": {
                 "type": "integer",
-                "minimum": 82
+                "minimum": 107
               },
               "normalizedRuleCount": {
                 "type": "integer",
-                "minimum": 81
+                "minimum": 106
               }
             }
           },
@@ -30952,6 +31220,7 @@
                   "type": "string",
                   "enum": [
                     "dangling-rel",
+                    "rel-type-mismatch",
                     "dangling-ref",
                     "duplicate-id",
                     "part-truth",

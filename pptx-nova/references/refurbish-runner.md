@@ -1,9 +1,8 @@
 # Refurbish Runner
 
-Use this compact route when the user wants to restyle an existing PPTX while preserving its content.
-The standard runner is the execution boundary: it chooses native or catalog-driven fallback, validates
-content fidelity, creates one canonical high-DPI comparison, binds publication, and leaves human visual
-judgment explicit.
+Use this compact route to restyle an existing PPTX while preserving its content. The standard runner
+is the execution boundary: it chooses native or catalog-driven fallback, validates content fidelity,
+creates one canonical high-DPI comparison, binds publication, and leaves human visual judgment explicit.
 
 ## Non-skippable contract
 
@@ -27,11 +26,10 @@ node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
   --json
 ```
 
-Add `--explicit` only when the user explicitly selected a non-production/non-default DeckKit. Add
-`--review-policy` only for an exact source-hash-bound reviewed finding. `--prompt-text` (or
-`--prompt-file`) archives the original request to `<run-dir>/prompt.txt` so the feedback gate can
-consume it directly. Compare parts render concurrently (`--compare-concurrency`, default 3); lower
-it to 1 only when diagnosing render issues on a constrained machine.
+Add `--explicit` only when the user explicitly selected a non-production/non-default DeckKit, and
+`--review-policy` only for an exact source-hash-bound reviewed finding. `--prompt-text` (or `--prompt-file`)
+archives the original request to `<run-dir>/prompt.txt` for the feedback gate. Compare parts render
+concurrently (`--compare-concurrency`, default 3); lower it to 1 only when diagnosing render issues.
 
 Do not add `--contact-diff` for ordinary full-deck review. The mandatory `refurbish-compare` already
 contains the complete source/candidate comparison. `--contact-diff` exists for compatibility or when a
@@ -81,12 +79,9 @@ capability probing, audit gates, comparison coverage, and publication binding.
 ## Canonical evidence flow
 
 ```text
-plan and readiness
-  -> capability probe and source inspect
-  -> native skin or generated fallback patch
-  -> vision-diff and refurbish-audit
-  -> source/candidate layout snapshots
-  -> one semantic diff
+plan and readiness -> capability probe and source inspect
+  -> native skin or generated fallback patch -> vision-diff and refurbish-audit
+  -> source/candidate layout snapshots -> one semantic diff
   -> one review-policy evaluation
   -> Finding Analysis shadow (never changes the current gate)
   -> fidelity gate consuming that same review evaluation
@@ -115,9 +110,8 @@ instead of always opening every published byte:
   remain the delivery evidence.
 - Always open the full-size previews named by actionable layout findings
   (`layout.actionablePreviewFiles`), plus any page that looks wrong on the contact sheet.
-  `layout.topActionable[].deltaStatus` distinguishes inherited source findings
-  (`unchanged`) from refurbish-introduced ones (`introduced`/`mixed`); inherited findings
-  still need eyes but are not refurbish regressions.
+  `layout.topActionable[].deltaStatus` distinguishes inherited source findings (`unchanged`) from
+  refurbish-introduced (`introduced`/`mixed`); inherited findings need eyes but are not regressions.
 - Open full high-DPI parts for actionable/suspicious slides, then spot-check the first and last parts.
   Do not load every high-DPI part after all Agent review parts have been inspected.
 - When a part's thumbnails are too small to judge a suspicious page, render a focused
@@ -130,10 +124,9 @@ instead of always opening every published byte:
     --output focused-review.png --report focused-review.json --overwrite --json
   ```
 
-  Run this from the run directory. When actionable slides are known, the compact result exposes the
-  copyable command as `agentSummary.nextSteps.focusedReviewCommand`. The excerpt reuses the run's page
-  bitmap cache, so it costs assembly time only, not a re-render. Do not substitute it for the published
-  compare parts in delivery evidence.
+  Run this from the run directory; when actionable slides are known, the compact result exposes it as
+  `agentSummary.nextSteps.focusedReviewCommand`. The excerpt reuses the run's page bitmap cache (assembly
+  time only, no re-render); do not substitute it for the published compare parts in delivery evidence.
 
 Confirm:
 
@@ -145,12 +138,9 @@ Confirm:
 Write `visual_review.json`. When macOS PowerPoint is available for a deliverable, run the bundled
 clean-open helper. Feedback requests additionally require `skill-feedback.md` and the feedback gate.
 
-If extra repair passes ran after the standard runner (for example chart color fixes on a new
-candidate), the canonical evidence files still describe the earlier candidate. Before delivering,
-rebind them to the published final: regenerate `final-inspect.json` from the published PPTX, then
-re-run `pptx-nova-finalize-evidence.mjs --mode refurbish` so `evidence-summary.json`,
-`layout-final.json`, and the agentSummary reference the published bytes (verify by SHA-256), and
-refresh `visual_review.json` / content-audit paths that still point at superseded candidates.
-Do not hand-edit evidence JSON to swap paths.
+If extra repair passes ran after the standard runner, the canonical evidence still describes the earlier
+candidate. Rebind it to the published final before delivering: regenerate `final-inspect.json` from the
+published PPTX, re-run `pptx-nova-finalize-evidence.mjs --mode refurbish` (verify by SHA-256), and refresh
+stale `visual_review.json`/content-audit paths. Do not hand-edit evidence JSON to swap paths.
 
 Deliver only after compare and binding pass; list only key outputs, gates, evidence, and risks.

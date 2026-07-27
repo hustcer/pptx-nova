@@ -412,6 +412,51 @@ ChartEx 语义要点：
   `Day1` / `Day2` / `Day3` 等 category label 用来形成分组轴，不能退化成单一 category。
 - 参考 deck 复刻时，优先复用同类型既有 ChartEx 的 `chartStyle` / `chartColorStyle`
   关系，并补 parser/generator 回归测试固定上述语义。
+- 修改既有 chart（经典或 ChartEx）的系列配色时，优先用 `set-chart.colorStyle`
+  重写 colorStyle part（见下节），不要对 `colors*.xml` 写 raw OOXML。
+
+### 系列配色：`set-chart.colorStyle`（经典 + ChartEx 通用）
+
+chart 的系列默认颜色来自 chart part 关联的 colorStyle part（`ppt/charts/colors*.xml`，
+`cs:colorStyle` 颜色循环）：系列 i 在无内联 fill override 时取 `colors[i % n]`。
+`set-chart.colorStyle` 是编辑该循环的高层 op，经典 `c:` 与 ChartEx `cx:` 图表通用：
+
+```json
+{
+  "op": "set-chart",
+  "slide": 42,
+  "shape": { "id": 22 },
+  "colorStyle": { "method": "cycle", "colors": ["1B2566", "C9563B", { "scheme": "accent3" }] }
+}
+```
+
+- `colors` 是完整替换的颜色循环（hex 字符串或 `{"scheme": ...}` 主题色）；
+  既有 `cs:variation` 与 style-family `id` 保留。
+- `method` 映射 `meth` 属性（`cycle` / `withinLinear` / `acrossLinear` /
+  `withinLinearReversed` / `acrossLinearReversed`），省略时保留原值。
+- chart 没有 colorStyle part 时会自动创建并注册 rels / Content-Types。
+- dry-run 的 `semanticChanges` 会输出 `before -> after` 颜色 token diff，
+  可在 apply 前确认改动命中的 part 与颜色。
+- 一个 colors part 可能被多个同类 ChartEx 共享（创建时按 kind 复用关系）；
+  共享时 apply 会报 `chart-color-style:` warning 并给出引用数——确认是否
+  有意让全部引用图表同步换色。
+- ChartEx 数据标签文字颜色走 `set-chart.dataLabels[].font`（写
+  `cx:dataLabels/cx:txPr`），不再需要 raw XML；`numberFormat` / `separator` /
+  `showPercentage` / `showLegendKey` 在 ChartEx 上仍会明确拒绝。
+- xdoc 预览对 colorStyle 的还原不保证与 PowerPoint 一致；最终视觉仍按下文
+  ChartEx PowerPoint baseline 规则复核。
+
+### 系列配色对比度指引
+
+选择 `colorStyle.colors` / 系列色时，按以下通用规则减少人工试色与返工：
+
+- 浅色背景（paper/白）配深色系列（如 navy/deep coral/teal 系），保证
+  柱/线与背景对比度 ≥ 3:1；数据标签文字与其所在填充色对比度 ≥ 4.5:1。
+- 数据标签压在系列填充上时，标签颜色相对填充色取深色（深底白字/浅底深字），
+  不要沿用主题 accent 亮色（亮黄标签压珊瑚填充是本条的反例）。
+- 系列数超过调色板长度时颜色会循环；相邻系列避免只靠亮度区分，
+  优先给出 ≥ 系列数的颜色数组而不是依赖 `withinLinear` 自动变体。
+- 色盲可区分性：避免仅红/绿对比，优先蓝-橙、蓝-棕等组合。
 
 > ⚠️ chartEx 部件在 PowerPoint 2016+ 才完整支持;部分老旧渲染器(WPS 旧版、
 > LibreOffice <7.4) 会忽略 chartEx 节点回退到 fallback 图。要 100% 兼容时优先

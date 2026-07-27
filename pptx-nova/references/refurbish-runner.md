@@ -145,4 +145,12 @@ Confirm:
 Write `visual_review.json`. When macOS PowerPoint is available for a deliverable, run the bundled
 clean-open helper. Feedback requests additionally require `skill-feedback.md` and the feedback gate.
 
+If extra repair passes ran after the standard runner (for example chart color fixes on a new
+candidate), the canonical evidence files still describe the earlier candidate. Before delivering,
+rebind them to the published final: regenerate `final-inspect.json` from the published PPTX, then
+re-run `pptx-nova-finalize-evidence.mjs --mode refurbish` so `evidence-summary.json`,
+`layout-final.json`, and the agentSummary reference the published bytes (verify by SHA-256), and
+refresh `visual_review.json` / content-audit paths that still point at superseded candidates.
+Do not hand-edit evidence JSON to swap paths.
+
 Deliver only after compare and binding pass; list only key outputs, gates, evidence, and risks.

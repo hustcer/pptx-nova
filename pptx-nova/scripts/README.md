@@ -158,7 +158,9 @@ Use these entry points from skill workflows:
   records required visual QA checks into visual_review.json, validates that
   visual evidence and reviewed slide counts are present, and leaves actual
   visual judgment to the human or agent reviewer.
-- pptx-nova-clean-open.mjs - macOS-only live PowerPoint clean-open smoke gate
+- pptx-nova-clean-open.mjs - macOS-only live PowerPoint clean-open smoke gate;
+  launches through macOS document routing and waits eight seconds by default
+  so delayed chart/ChartEx Repair prompts are observable
   for deliverable PPTX files. It stages the candidate inside PowerPoint's
   sandbox tmp directory, opens that staged copy, checks System Events UI state
   for Repair dialogs, distinguishes plain Cancel buttons from repair prompts,

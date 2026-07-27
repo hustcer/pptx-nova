@@ -17,7 +17,8 @@ import { basename, dirname, extname, join, resolve } from 'node:path'
 const SCHEMA_VERSION = 'pptx-nova-clean-open/v1'
 const DEFAULT_APP = 'Microsoft PowerPoint'
 const DEFAULT_TIMEOUT_MS = 30000
-const DEFAULT_OPEN_DELAY_MS = 2500
+const DEFAULT_OPEN_DELAY_MS = 8000
+const OPEN_RETRY_DELAY_MS = 4000
 const LOCK_DIR = join(tmpdir(), 'pptx-nova-clean-open.lock')
 
 const usage = `Usage:
@@ -29,7 +30,7 @@ Options:
   --output <path>          Optional JSON report path, usually <run-dir>/clean-open.json.
   --app <name>             PowerPoint application name. Defaults to "${DEFAULT_APP}".
   --timeout-ms <ms>        osascript timeout per phase. Defaults to ${DEFAULT_TIMEOUT_MS}.
-  --open-delay-ms <ms>     Delay after opening before UI inspection. Defaults to ${DEFAULT_OPEN_DELAY_MS}.
+  --open-delay-ms <ms>     Settle time after opening before UI inspection. Defaults to ${DEFAULT_OPEN_DELAY_MS}.
   --required               Deprecated compatibility flag; unavailable environments still skip.
   --keep-open              Leave the staged presentation open for debugging.
   --classify-ui <path>     Test classifier against a saved UI snapshot JSON.
@@ -278,31 +279,38 @@ function checkPowerPoint(appName, timeoutMs) {
   })
 }
 
-function openPresentation(stagedPath, appName, openDelayMs, timeoutMs) {
-  const openDelaySeconds = (openDelayMs / 1000).toFixed(3)
+function waitMs(delayMs) {
+  if (delayMs <= 0) return
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs)
+}
+
+function launchPresentation(stagedPath, appName, timeoutMs) {
+  const result = spawnSync('open', ['-a', appName, stagedPath], {
+    encoding: 'utf8',
+    timeout: timeoutMs,
+  })
+  return {
+    ok: result.status === 0,
+    status: result.status,
+    signal: result.signal ?? null,
+    stdout: (result.stdout ?? '').trim(),
+    stderr: (result.stderr ?? '').trim(),
+    error: result.error?.message ?? null,
+  }
+}
+
+function presentationState(stagedPath, appName, timeoutMs) {
   const timeoutSeconds = Math.max(5, Math.ceil(timeoutMs / 1000))
   const script = `
 on run argv
   set ppt_path to item 1 of argv
   set app_name to item 2 of argv
-  set open_delay to (item 3 of argv) as real
   set tab_char to ASCII character 9
   using terms from application "Microsoft PowerPoint"
     with timeout of ${timeoutSeconds} seconds
       tell application app_name
-        launch
-        activate
         set matched to false
         set pres_name to ""
-        set open_error to ""
-        set open_error_number to ""
-        try
-          open POSIX file ppt_path
-        on error errMsg number errNum
-          set open_error to errMsg
-          set open_error_number to errNum as string
-        end try
-        delay open_delay
         set pres_count to count of presentations
         repeat with i from 1 to pres_count
           try
@@ -313,13 +321,13 @@ on run argv
             end if
           end try
         end repeat
-        return (matched as string) & tab_char & pres_name & tab_char & open_error_number & tab_char & open_error
+        return (matched as string) & tab_char & pres_name
       end tell
     end timeout
   end using terms from
 end run
 `
-  const result = osascript(['-', stagedPath, appName, openDelaySeconds], script, timeoutMs + 5000)
+  const result = osascript(['-', stagedPath, appName], script, timeoutMs)
   if (!result.ok) {
     return {
       ok: false,
@@ -337,12 +345,7 @@ end run
     ok: true,
     openedDocument: fields[0] === 'true',
     presentationName: fields[1] || null,
-    openError: fields[3]
-      ? {
-          number: fields[2] || null,
-          message: fields[3],
-        }
-      : null,
+    openError: null,
   }
 }
 
@@ -717,12 +720,35 @@ function runLive(args) {
     staged = stagePptx(args.pptx)
     report.cleanup.tmpDir = staged.tmpDir
     report.cleanup.stagedPath = staged.stagedPath
-    const open = openPresentation(staged.stagedPath, args.app, args.openDelayMs, args.timeoutMs)
+    const launch = launchPresentation(staged.stagedPath, args.app, args.timeoutMs)
+    if (!launch.ok) {
+      report.observations.openError = {
+        message: launch.stderr || launch.error || 'macOS open command failed',
+        number: launch.status,
+        stdout: launch.stdout,
+      }
+      return reportStatus(report, 'fail', 'powerpoint-open-error')
+    }
+    waitMs(args.openDelayMs)
+    let open = presentationState(staged.stagedPath, args.app, args.timeoutMs)
     report.observations.openedDocument = open.openedDocument
     report.observations.presentationName = open.presentationName
     report.observations.openError = open.openError
 
-    const ui = uiSnapshot(args.app, args.timeoutMs)
+    let ui = uiSnapshot(args.app, args.timeoutMs)
+    if (
+      !report.observations.openedDocument &&
+      !report.observations.openError &&
+      ui.ok &&
+      ui.windows.length === 0
+    ) {
+      waitMs(OPEN_RETRY_DELAY_MS)
+      open = presentationState(staged.stagedPath, args.app, args.timeoutMs)
+      report.observations.openedDocument = open.openedDocument
+      report.observations.presentationName = open.presentationName
+      report.observations.openError = open.openError
+      ui = uiSnapshot(args.app, args.timeoutMs)
+    }
     report.environment.uiScriptingAuthorized = ui.ok
     if (!ui.ok) {
       const openClassification = classifyCleanOpen({

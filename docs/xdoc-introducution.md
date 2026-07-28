@@ -1,4 +1,7 @@
-# xdoc: A Native-First, Agent-Oriented Document and PPTX Execution Layer
+# xdoc: The Agent-Native Runtime for Editable PPTX
+
+> A compact native runtime for document conversion, editable PPTX execution,
+> rendering, validation, and auditable delivery.
 
 > **Runtime build verified for this document:** `0.3.2 (7fd8a05e)`
 >

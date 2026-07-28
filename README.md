@@ -14,6 +14,17 @@ PPTX compatibility.
 
 xdoc is an agent-native document execution runtime for native, editable PPTX work.
 
+> **xdoc is the best PPTX runtime under 50MB.**
+
+That is a deliberately bold positioning statement, backed by a July 2026
+Agent-oriented comparison of current PPTX creation and editing tools. Within
+the evaluated set, xdoc ranked highest overall for the combined workflow of
+runtime discoverability, native editable creation and modification, dry-run
+safety, preservation, rendering, validation, and auditable evidence, while the
+current `v0.3.2` native packages remain roughly 20MB each. The claim is scoped
+to that evaluated set and workflow; it is not a claim of complete PowerPoint
+feature parity or superiority over every tool that may exist.
+
 Most slide-generation tools either create flattened slide images or rely on
 small, brittle PowerPoint scripting snippets. pptx-nova is built on `xdoc`, an
 in-house PPTX engine designed from the ground up for AI agents. It can inspect

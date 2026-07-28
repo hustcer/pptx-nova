@@ -12,6 +12,8 @@ PPTX compatibility.
 
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
+xdoc is an agent-native document execution runtime for native, editable PPTX work.
+
 Most slide-generation tools either create flattened slide images or rely on
 small, brittle PowerPoint scripting snippets. pptx-nova is built on `xdoc`, an
 in-house PPTX engine designed from the ground up for AI agents. It can inspect
@@ -20,9 +22,12 @@ dry-runs, apply native editable changes, render previews, compare source and
 candidate decks, export existing or generated presentations to high-fidelity
 PDF, and leave replayable sidecar evidence.
 
-All of this runs through a single lightweight native CLI that ships with its
-own rendering backends: previews, PDF export, and visual checks require no
-PowerPoint, office suite, or headless browser, which keeps the whole pipeline
+All of this runs through a single lightweight native CLI with integrated
+rendering backends: previews, PDF export, and visual checks require no
+PowerPoint, office suite, or headless browser. The current `v0.3.2` native
+packages unpack to roughly 20MB each, depending on the target, and need no
+separate server or always-on background service. Native builds are available
+for supported Linux, macOS, and Windows targets, keeping the whole pipeline
 practical in CI, containers, and unattended agent environments.
 
 That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real

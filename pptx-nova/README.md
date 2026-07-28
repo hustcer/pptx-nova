@@ -9,15 +9,66 @@ internal workflow.
 
 ## Why It Is More Than Another PPT Generator
 
-`pptx-nova` is powered by `xdoc`, an in-house PPTX engine. `xdoc` was designed from the ground up for
-Agent workflows: it lets an Agent inspect the real PPTX structure, dry-run structured patches, apply
-changes, generate previews, export decks as high-fidelity PDF files, compare before and after
-versions, and retain auditable evidence.
+`pptx-nova` is powered by `xdoc`, an **agent-native document execution runtime for native, editable
+PPTX work**. That wording is deliberate. The native PPTX engine is its core, the CLI is its public
+distribution and integration surface, and the execution layer is the architectural role it plays
+between an Agent and the document. “Runtime” describes the complete product: document parsing and
+conversion, structured mutation, rendering, validation, reports, evidence artifacts, and an optional
+local session daemon under one versioned contract.
 
-That makes it closer to a checkable, replayable PPTX build and editing pipeline than a workflow that
-renders content into images and inserts those images into slides. Within supported objects and
-workflows, output is meant to remain editable in PowerPoint as text, shapes, tables, charts, and slide
-elements.
+`xdoc` is not the Agent itself. The Agent and `pptx-nova` interpret the request, plan the content and
+design, choose a workflow, review the evidence, and decide whether a result is ready to publish.
+`xdoc` supplies the deterministic document boundary where that plan can be checked, executed, and
+verified with evidence. In practice, the two layers work together:
+
+| Layer               | Primary responsibility                                                                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Agent / `pptx-nova` | Understand intent, plan content and design, construct the smallest safe change, review evidence, and decide what to publish                                  |
+| `xdoc` runtime      | Expose supported operations, inspect native objects, resolve selectors, validate and apply declared changes, render the result, and emit structured evidence |
+
+This distinction is what makes the workflow stronger than a one-shot generator or an opaque
+PowerPoint script. A production edit can follow an explicit lifecycle:
+
+```text
+discover capabilities → inspect the real deck → select exact objects
+  → build a typed plan or patch → dry-run without writing
+  → apply to a separate candidate → inspect, render, and compare
+  → retain reports and evidence → publish only after review
+```
+
+Its power comes from several properties that reinforce each other, not from any single command:
+
+- **Self-describing for Agents.** The running binary exposes a versioned schema, operation details,
+  examples, catalogs, capability status, report contracts, and structured errors. An Agent can ask
+  the installed runtime what it supports instead of guessing field names or relying on stale prompt
+  knowledge.
+- **Native and editable.** Within supported objects and workflows, `xdoc` works with real PPTX
+  package parts and slide objects so text, shapes, tables, charts, and other supported elements remain
+  editable instead of becoming a deck of flattened screenshots.
+- **Plan before mutation.** Deterministic selectors and non-writing dry-runs make target ambiguity,
+  unsupported operations, predicted changes, and visual risks reviewable before a candidate is
+  delivered.
+- **Preserve first.** Existing-deck edits inherit the source presentation and preserve unknown or
+  untouched package data where possible. Preserve-only and unsupported regions are reported rather
+  than silently advertised as fully editable.
+- **Evidence is part of the output.** Structural inspection, semantic checks, rendered previews,
+  source-vs-candidate diffs, operation traces, and sidecars make a revision reviewable and replayable
+  instead of reducing success to “the file exists.”
+- **Local, lightweight, and automation-friendly.** Preview rendering, PDF export, and visual checks do
+  not require PowerPoint, a full office suite, or a headless browser. The verified `v0.3.2` native
+  packages unpack to roughly 20MB each depending on the supported target, require no separate server
+  or always-on
+  background service, and are practical for CI, containers, offline workers, and unattended Agent
+  environments. Multi-step jobs may optionally use the loopback-only local daemon.
+
+The small distribution size is release-specific evidence, not a permanent compatibility guarantee;
+platform support, rendering backends, fonts, and exact binary size should be checked for the selected
+release. The current public native targets cover supported Linux, macOS, and Windows builds. Rendering
+still depends on the required backend and fonts, and unusual or unsupported PPTX features still need
+explicit review.
+
+Taken together, this makes `pptx-nova` closer to a checkable, replayable PPTX build and editing
+pipeline than a workflow that renders content into images and inserts those images into slides.
 
 ### New-Deck Generation And Existing-Deck Editing Use Different Models
 
@@ -445,9 +496,9 @@ files from the current development monorepo.
   `--xdoc-bin`, PPTX paths, or documented environment variables.
 - The deck generation path uses bundled assets. Do not dynamically read icons, templates, or private
   assets from the network or from a local checkout.
-- `xdoc` is the primary external CLI dependency. Without `xdoc`, content validation, DeckKit selection,
-  icon lookup, and patch build should still run; real apply, convert, and vision-check workflows will
-  fail or be skipped by the caller.
+- `xdoc` is the primary external document execution runtime, invoked through its public CLI. Without
+  `xdoc`, content validation, DeckKit selection, icon lookup, and patch build should still run; real
+  apply, convert, and vision-check workflows will fail or be skipped by the caller.
 
 ### Pre-Publication Checks
 

@@ -48,6 +48,121 @@ The facts below are separated into two layers:
    boundaries. They explain the design and constraints, but do not replace the
    runtime contract.
 
+## Positioning xdoc precisely
+
+### Recommended definition
+
+The most complete short definition is:
+
+> **xdoc is an agent-native document execution runtime for turning document
+> inputs into structured, reviewable artifacts and for creating or editing
+> native, editable PPTX decks.**
+
+For a shorter product line:
+
+> **The agent-native document runtime.**
+
+For an architecture discussion:
+
+> **The document execution and evidence layer between an Agent and the delivered
+> presentation.**
+
+These descriptions are complementary rather than competing. “Runtime” says
+what the complete product is. “Execution layer” says where it sits in a larger
+system. “Engine” names the native document machinery at its core. “CLI” names
+the distributed public interface through which the current product is invoked
+and discovered.
+
+### Why “Runtime” is the primary category
+
+Calling xdoc only a CLI is accurate at the packaging boundary but incomplete as
+a product description. The command-line executable is the public entry point;
+behind that entry point, one versioned system coordinates document collection,
+conversion, native PPTX reading and writing, declarative mutation, rendering,
+validation, report generation, artifact delivery, and optional local session
+reuse.
+
+Calling xdoc only an engine is also accurate but too narrow. The native PPTX
+engine reads and writes the package and its editable objects, but a production
+Agent workflow also needs capability discovery, deterministic selectors,
+non-writing dry-runs, structured failures, visual evidence, sidecars, and
+publish gates. Those surrounding contracts are part of xdoc rather than an
+exercise left independently to every caller.
+
+The terminology can therefore be used consistently:
+
+| Term                | How it applies to xdoc                                                                                                           | Why it is or is not the primary definition                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Runtime**         | The executable plus its document engines, rendering path, schema, reports, artifacts, safety policies, and optional local daemon | Best overall product category because it covers execution behavior and the public contract                         |
+| **Engine**          | The native parsing, package, OOXML/PPTX mutation, conversion, and rendering machinery                                            | Correct for the technical core, but it understates discovery, safety, evidence, and delivery                       |
+| **CLI**             | The designated distribution and process-integration surface for the current public release                                       | Correct for how callers invoke xdoc, but it describes the interface rather than the whole system                   |
+| **Execution layer** | The boundary that turns an Agent's declared plan into document artifacts and machine-readable proof                              | Best description of xdoc's architectural role inside an Agent platform                                             |
+| **Protocol**        | The discover → inspect → plan → dry-run → apply → verify → audit lifecycle and its versioned wire artifacts                      | Describes the repeatable behavior that lets different hosts integrate safely                                       |
+| **Harness**         | A workflow wrapper may use xdoc as the system under execution                                                                    | Not the right definition for xdoc itself; an Agent skill or CI workflow is closer to the harness/orchestrator role |
+| **Agent**           | An Agent discovers xdoc, constructs plans, evaluates evidence, and decides whether to continue                                   | xdoc is Agent-oriented, not an autonomous planner or content-deciding Agent                                        |
+
+### “Agent-native” is a contract property
+
+Agent-native does not mean that a language model is embedded in the executable,
+or that xdoc independently decides what a presentation should say. It means the
+runtime exposes the information and control surfaces an Agent needs to operate
+without guessing:
+
+- the binary identifies its exact version and build;
+- `xdoc schema` progressively discloses operations, fields, definitions,
+  examples, catalogs, capability status, error contracts, and report shapes;
+- inspect and select expose native object identity instead of requiring visual
+  coordinate guesses;
+- declarative recipes and patches make the requested change durable and
+  reviewable;
+- dry-run separates target resolution and predicted effects from filesystem
+  mutation;
+- apply writes a separate candidate by default and records operation results;
+- structural, semantic, and rendered checks expose different forms of truth;
+  and
+- versioned reports, hashes, gates, sidecars, and artifacts give an
+  orchestrator data it can retain, compare, retry, quarantine, or publish.
+
+The Agent remains responsible for understanding intent, authoring or selecting
+the plan, judging content and design, and applying the publication policy. xdoc
+is responsible for making the document operation deterministic, observable,
+and reviewable at the format boundary.
+
+### One compact runtime, five connected responsibilities
+
+The power of xdoc is the combination of responsibilities behind one contract:
+
+| Responsibility | Representative public surface                                                              | Value to an Agent workflow                                                     |
+| -------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| **Discover**   | `xdoc --version`, help, `xdoc schema`, catalogs, examples, capability status               | Negotiate the installed runtime instead of assuming support                    |
+| **Understand** | conversion, extraction, `pptx inspect`, `pptx select`, preflight diagnostics               | Build a structured view of the source and identify exact targets               |
+| **Plan**       | recipes, versioned JSON patches, selectors, dry-run reports                                | Review intent, resolution, predicted changes, and risks before writing         |
+| **Execute**    | native PPTX apply, conversion, PDF export, candidate delivery, optional daemon reuse       | Produce real artifacts through one local process boundary                      |
+| **Prove**      | re-inspection, semantic checks, preview, vision checks, diffs, sidecars, versioned reports | Decide whether the candidate is safe to publish and retain replayable evidence |
+
+This is why xdoc is better described as a document execution runtime than as a
+file converter or a collection of PowerPoint utilities. Conversion, mutation,
+rendering, and validation share the same discovery, reporting, safety, and
+artifact boundaries.
+
+### Native-first deployment and release footprint
+
+The verified `v0.3.2` native packages unpack to roughly 20MB each, with exact
+size varying by target. That footprint includes the executable distribution
+and applicable notices for the selected target. It is small enough to promote
+as a pinned CI, container, managed-worker, or offline-job layer without
+requiring PowerPoint, a full office installation, a headless browser, a
+separate server, or an always-on background service for ordinary one-shot
+execution. Multi-step sessions may optionally use the loopback-only local
+daemon while retaining the documented CLI and report boundary.
+
+The size statement is release evidence, not a stable API or compatibility
+promise. Record exact bytes, archive digest, target, runtime build, rendering
+backend identity, and font inventory for each promoted artifact. Current public
+native builds cover supported Linux, macOS, and Windows targets rather than
+every OS/architecture combination. Rendered fidelity still depends on the
+declared backend and available fonts.
+
 ## Executive overview
 
 ### The problem xdoc solves

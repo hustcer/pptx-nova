@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.1 (78c0f5ba)",
+  "version": "0.3.2 (7fd8a05e)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -137,11 +137,30 @@
         },
         "report": {
           "type": "path",
-          "description": "Write a batch/v1 JSON summary to the given path",
+          "description": "Write a batch/v1 JSON summary with PDFium provenance to the given path",
           "required": false,
           "valueSyntax": "<path>",
           "kind": "file",
           "schemaVersion": "batch/v1",
+          "outputContract": {
+            "requiredTopLevelFields": [
+              "schemaVersion",
+              "pdfium",
+              "startedAt",
+              "finishedAt",
+              "startedAtMs",
+              "finishedAtMs",
+              "totals",
+              "requested",
+              "items"
+            ],
+            "pdfium": {
+              "requiredFields": ["provider", "version", "commit", "sha256", "linkMode"],
+              "linkModeEnum": ["shared", "static"],
+              "unknownMetadataValue": "unknown",
+              "sensitivity": "non-sensitive-build-provenance"
+            }
+          },
           "defaulting": {
             "onOmitted": "no-report"
           },
@@ -547,7 +566,7 @@
         "Use --out-dir to collect every source's outputs under a single root.",
         "--output is only valid with a single input file; --out-dir is always available.",
         "--fail-fast is batch-only; --report also works for single-file convert runs.",
-        "Use --report to write a stable batch/v1 JSON summary for scripts and agents."
+        "Use --report to write a stable batch/v1 JSON summary, including PDFium provenance, for scripts and agents."
       ]
     },
     "html2md": {
@@ -572,7 +591,7 @@
         },
         "report": {
           "type": "string",
-          "description": "Write a batch/v1 JSON summary to the given path",
+          "description": "Write a batch/v1 JSON summary with PDFium provenance to the given path",
           "required": false
         },
         "fail-fast": {
@@ -732,11 +751,30 @@
         },
         "report": {
           "type": "path",
-          "description": "Write a batch/v1 JSON summary to the given path",
+          "description": "Write a batch/v1 JSON summary with PDFium provenance to the given path",
           "required": false,
           "valueSyntax": "<path>",
           "kind": "file",
           "schemaVersion": "batch/v1",
+          "outputContract": {
+            "requiredTopLevelFields": [
+              "schemaVersion",
+              "pdfium",
+              "startedAt",
+              "finishedAt",
+              "startedAtMs",
+              "finishedAtMs",
+              "totals",
+              "requested",
+              "items"
+            ],
+            "pdfium": {
+              "requiredFields": ["provider", "version", "commit", "sha256", "linkMode"],
+              "linkModeEnum": ["shared", "static"],
+              "unknownMetadataValue": "unknown",
+              "sensitivity": "non-sensitive-build-provenance"
+            }
+          },
           "defaulting": {
             "onOmitted": "no-report"
           },
@@ -1058,11 +1096,30 @@
         },
         "report": {
           "type": "path",
-          "description": "Write a batch/v1 JSON summary to the given path",
+          "description": "Write a batch/v1 JSON summary with PDFium provenance to the given path",
           "required": false,
           "valueSyntax": "<path>",
           "kind": "file",
           "schemaVersion": "batch/v1",
+          "outputContract": {
+            "requiredTopLevelFields": [
+              "schemaVersion",
+              "pdfium",
+              "startedAt",
+              "finishedAt",
+              "startedAtMs",
+              "finishedAtMs",
+              "totals",
+              "requested",
+              "items"
+            ],
+            "pdfium": {
+              "requiredFields": ["provider", "version", "commit", "sha256", "linkMode"],
+              "linkModeEnum": ["shared", "static"],
+              "unknownMetadataValue": "unknown",
+              "sensitivity": "non-sensitive-build-provenance"
+            }
+          },
           "defaulting": {
             "onOmitted": "no-report"
           },

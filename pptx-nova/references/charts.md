@@ -27,6 +27,12 @@ pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量�
 chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
 可以披露后继续视觉复核。
 
+`pptx-nova-semantic-audit.mjs` 与 `pptx-nova-check-lock.mjs` 共用同一个 chart
+semantic normalizer：经典 Chart 读取 `data`，ChartEx 读取 `dataEx`，并按 chart kind
+检查 points/stages/values/nodes/series 等最小语义。数据来源优先读取 op 自身，再读取
+`deck_lock.slides[].chart.semanticSource` / `source` / `dataSource`；不要为了消除假警告而
+给 `add-chart` 伪造 schema 不存在的 `source` 字段。
+
 ## Native diagram/table presets
 
 常见商务图示优先用 `add-slide.recipe` preset，而不是手算几十个 `add-shape` 坐标。
@@ -385,6 +391,7 @@ lowering。对照参考 deck 时，以 PowerPoint 生成的 `chartEx*.xml` 语�
   "y": "1.5in",
   "w": "10in",
   "h": "5in",
+  "title": "现金流桥接",
   "dataEx": {
     "points": [
       { "label": "起始", "value": 100, "kind": "total" },
@@ -399,6 +406,12 @@ lowering。对照参考 deck 时，以 PowerPoint 生成的 `chartEx*.xml` 语�
 
 ChartEx 语义要点：
 
+- 非空 `title` 会写入原生 `cx:title/cx:tx/cx:txData/cx:v`。省略或传空白标题时
+  不写空 `cx:title`，避免 PowerPoint 合成 “Chart Title”；后续
+  `set-chart-data.dataEx` 会保留既有标题。
+- ChartEx 目前不支持用 `add-chart.legend` 显式控制 legend 位置。显式传入会
+  fail closed，而不是被静默忽略；需要自定义 legend 时省略该字段并使用独立的
+  可编辑文本/形状，或保留当前 PowerPoint 默认 legend 语义。
 - `waterfall`：`points[].kind` 使用 `increase` / `decrease` / `subtotal` / `total`；
   subtotal/total 应映射到 `<cx:subtotals>`，不要凭空写 `<cx:aggregation/>`。
 - `funnel`：`stages[]` 的数值维度应是 `numDim type="val"`，不是 `size`；通常需要
@@ -492,6 +505,48 @@ chart 的系列默认颜色来自 chart part 关联的 colorStyle part（`ppt/ch
 
 > ⚠️ schema 严格匹配 — `"b"` / `"r"` / `"tr"` 之类的简写都会被拒绝。
 
+### 创建原生日期轴（`c:dateAx`）
+
+日期轴创建必须显式写 `categoryAxis.type: "date"`；xdoc 不会根据
+`data.categories` 的字符串外观猜测日期语义。类别必须是严格 Gregorian
+`YYYY-MM-DD`，范围 `1900-01-01..9999-12-31`。写出时 chart cache 和 embedded
+workbook 都使用 Excel 1900 日期系统数值，并显式写入 `c:date1904 val="0"` 与
+`workbookPr date1904="0"`，避免 PowerPoint for Mac 按 1904 系统偏移 1462 天；`1900-02-29`
+是 Excel 的虚构日期，输入会被拒绝，而 `1900-02-28` / `1900-03-01` 分别写为 59 / 61。
+
+```json
+{
+  "op": "add-chart",
+  "slide": 0,
+  "kind": "line",
+  "variant": "markers",
+  "x": "1in",
+  "y": "1.5in",
+  "w": "10in",
+  "h": "5in",
+  "name": "Monthly Revenue",
+  "categoryAxis": {
+    "type": "date",
+    "formatCode": "mmm yyyy",
+    "baseTimeUnit": "days",
+    "majorUnit": 1,
+    "majorTimeUnit": "months",
+    "minorUnit": 7,
+    "minorTimeUnit": "days"
+  },
+  "data": {
+    "categories": ["2026-01-01", "2026-02-01", "2026-03-01"],
+    "series": [{ "name": "Revenue", "values": [10, 14, 18] }]
+  }
+}
+```
+
+支持 column/bar/line/area/radar/surface 及其 3D 对应类型。pie/doughnut、
+scatter/bubble、stock/combo 和所有 ChartEx `dataEx` kind 都会 fail closed。
+`formatCode` 默认 `yyyy-mm-dd`；时间单位只接受 `days / months / years`，
+`majorUnit` / `minorUnit` 必须为正数。生成器会保留正确的 axId、position、scaling、
+delete 和 crossAx 配对，并把 series category cache 写成带格式码的 `c:numRef/c:numCache`。
+
 ## 编辑图表
 
 ### 只改文本 / 翻译 label
@@ -583,6 +638,24 @@ fallback。
 }
 ```
 
+ChartEx 使用同一个 `set-chart-data` op，但载荷仍是 `dataEx`。它只替换 ChartEx
+数据维度并保留已有 native title；不要把普通 `data` 当作 ChartEx 的等价输入：
+
+```json
+{
+  "op": "set-chart-data",
+  "slide": 1,
+  "shape": { "name": "Conversion Funnel" },
+  "dataEx": {
+    "stages": [
+      { "label": "Visitors", "value": 120000 },
+      { "label": "Trials", "value": 18000 },
+      { "label": "Paid", "value": 3200 }
+    ]
+  }
+}
+```
+
 改完 chart 数据后，至少做三步验证：
 
 1. dry-run 中确认 `resolvedSelectors[]` 命中目标 chart，`changedParts[]` 包含 chart
@@ -661,14 +734,15 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
 `logBase`（2..1000，仅 value 轴，对数刻度）和 `crossBetween`
 （`between / mid-category`，仅 value 轴）。
 
-日期轴时间单位（仅当 deck 里已有 `c:dateAx` 时可用，通常来自 PowerPoint 原生
-时间序列图表）：`scale` 支持 `baseTimeUnit` / `majorTimeUnit` / `minorTimeUnit`
+日期轴时间单位（仅当 deck 里已有 `c:dateAx` 时可用；它可以来自 PowerPoint，或由
+上面的 `add-chart.categoryAxis.type=date` 创建）：`scale` 支持
+`baseTimeUnit` / `majorTimeUnit` / `minorTimeUnit`
 （`days / months / years`，`null` 恢复自动），用 `axis: "category"` 定位日期轴；
 `majorUnit`/`minorUnit` 此时是"每 N 个时间单位"的计数（如 `majorUnit: 2` +
 `majorTimeUnit: "months"` = 每 2 个月一个主刻度）。典型场景：日粒度数据的
-X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。注意：新建 chart 一律是
-分类轴（catAx），对它写时间单位会被 fail-closed 拒绝（含 `null` 清除）；
-xdoc 不会自动把分类轴转成日期轴。
+X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对这些时间单位
+仍会 fail closed（含 `null` 清除）；需要日期语义时必须在创建阶段显式选择日期轴，
+不能用 `set-chart` 猜测或转换既有分类轴。
 
 轴条目还支持（xdoc ≥0.3.1，方案 7 长尾补齐）：
 
@@ -998,7 +1072,8 @@ clean-open。只看到 patch 成功不足以证明数组顺序和 `bold: false` 
 
 下列 Office `XlChartType` / 高级特性当前 xdoc 标为 unsupported：
 
-- 3D series-axis / 高级 date-axis
+- 3D series-axis，以及日期轴的高级手工 layout/多轴变体（显式单 category
+  `c:dateAx` 创建和时间单位已支持）
 - volume stock（含 volume 维度的 K 线）
 - 极少数 chartEx 子类型（`paretoLine` 等非主线变体）
 
@@ -1026,18 +1101,30 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
 - Use the ChartEx-specific `dataEx` payload shape. Do not pass the ordinary
   chart `data.categories` / `data.series` shape for these kinds unless the
   current xdoc schema explicitly documents that mapping.
-- Avoid ordinary chart mutators on ChartEx parts. In particular, do not write
-  normal `<c:title>` or `<c:legend>` nodes into `ppt/charts/chartEx*.xml`.
-  Put page titles, legends, and explanatory labels in separate editable
-  textboxes when needed.
+- `add-chart.title` is ChartEx-aware: non-empty text writes native `cx:title`,
+  blank text omits the container, and `set-chart-data.dataEx` preserves it.
+  Never write classic `<c:title>` into `chartEx*.xml`. Explicit
+  `add-chart.legend` control remains unsupported and is rejected instead of
+  ignored; use the default ChartEx legend semantics or separate editable
+  labels when a custom legend is required.
 - `xdoc convert` is not sufficient evidence for ChartEx rendering. Always
   verify these chart types with a non-interactive PowerPoint baseline render:
-  `nu tools/pptx-snapshot.nu deck.pptx --slides N-M --out out/slide-%d.png --method pdf-render --json`.
+  `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
+  Then run the high-risk finalizer with `--candidate deck.pptx
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+  the final ZIP, maps every `chartEx*.xml` relationship back to its 1-based
+  slide, and requires candidate/hash/image-bound coverage for all such slides.
+  When PowerPoint is available, absence or staleness is a hard failure. When it
+  is unavailable, the result remains an explicit unverified risk rather than a
+  pass.
   Treat user phrases such as "PowerPoint 截图" or "用 PowerPoint 显示效果对比" as
   PowerPoint render verification, not as permission to use window-mode screenshots.
   Use `--method window` only if `pdf-render` fails; keep the failed pdf-render
-  report and record the fallback reason. Window capture is slow and can
-  interfere with the user's desktop, so scope it to the minimum suspect slides.
+  report and record the fallback reason. Window mode now fails closed unless
+  the frontmost process, staged presentation path/name, window title, current
+  slide, canvas rectangle, and PNG/Retina scale remain consistent before and
+  after capture. It is still a fallback and does not satisfy the ChartEx
+  `pdf-render` gate. Scope it to the minimum suspect slides.
 - If PowerPoint displays `This chart isn't available in your version.`, the
   candidate is not shippable as a ChartEx object even if the OOXML is
   well-formed and xdoc inspect succeeds.

@@ -161,9 +161,19 @@ and all(.pages[]; .file.status=="ok")' <run-dir>/preview.json`. After that gate 
   `references/translation-mode.md`. The finalizer owns the last machine gates, one full comparison,
   optional alias reuse, publication binding, compact output, and performance evidence.
 - **Strict template following**: Copy or inherit source slides/placeholders, then edit original objects; do not redraw a "similar" page.
+- **Cross-deck slide copy**: Prefer one transactional `xdoc pptx copy-from`
+  call. `--slide N` is the compatible 0-based single-slide entry;
+  `--slides 1,3,5-8` and `--all` are the 1-based multi-slide/all-slide
+  entries, and the three selectors are mutually exclusive. Keep the native
+  `pptx-copy-from/v1` report as structural Edit Contract evidence; never
+  fabricate patch `opResults` for it.
 - **Export / check / extract**: Create a run directory; use `xdoc pptx preview` by default for PPTX PNG/contact-sheet previews, `xdoc convert` for PDF/MD/JSON/text or non-PPTX generic conversion, and `xdoc check` / `xdoc pptx inspect` for checks. No creation-oriented docs need to be read.
 - **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md`, `edit-contract.md`, and `micro-edit-cheatsheet.md`; additionally read `session-rules.md` only when `sessionRulesPath` exists or the user explicitly states a future/carryover rule. Still use inspect, a normalized edit contract, dry-run, selector validation, one final semantic diff, and the contract gate. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
 - **Studio / high-risk deck**: Use `deck_lock.json` to lock lightweight confirmation, page-level rhythm, template fusion, asset status, and chart/table semantics. Use `pptx-nova-finalize-evidence.mjs` to freeze final structure evidence; do not introduce SVG-first or page-by-page handwritten flows.
+  Pass the final candidate explicitly. If it contains ChartEx, also bind the
+  `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method pdf-render`
+  JSON; installed PowerPoint makes that evidence mandatory, while unavailable
+  PowerPoint remains a disclosed risk.
 
 ## Skill Root
 
@@ -294,7 +304,7 @@ For client-facing, investor-facing, or formal-report decks, all visible text suc
 - Expected single-line text such as `subtitle`, `eyebrow`, `kicker`, `badge`, and `label` must not have a stranded trailing word. Handle `vision-check` `text-unexpected-wrap` by shortening copy, widening the container, or changing layout.
 - Main titles and subtitles should not break layout in order to express complete sentences. Remove terminal periods by default and move overlong content to subtitle, callout, body, or notes.
 - When converting PPTX to PNG/PDF or checking generated PPTX, tool watermarks such as `XDOC DEMO` may appear. These watermarks usually appear only in the top-right corner of a slide, may be ignored during human visual review, and should not be treated as DeckKit composition, occlusion, or content defects.
-- Whenever PowerPoint rendering must be the source of truth for screenshots, previews, side-by-side comparisons, or visual validation, prefer `nu tools/pptx-snapshot.nu ... --method pdf-render`. Fall back to `--method window` only after `pdf-render` fails and failure JSON/stderr evidence is retained. Do not interpret the user's phrase "PowerPoint screenshot" as defaulting to window-mode screenshot capture.
+- Whenever PowerPoint rendering must be the source of truth for screenshots, previews, side-by-side comparisons, or visual validation, prefer `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu ... --method pdf-render`. Fall back to `--method window` only after `pdf-render` fails and failure JSON/stderr evidence is retained. Do not interpret the user's phrase "PowerPoint screenshot" as defaulting to window-mode screenshot capture.
 
 PNG/contact-sheet review should be done with a problem-finding mindset, not as a confirmation ritual.
 Machine gates cannot see every pixel-level defect. In particular, check:
@@ -368,6 +378,7 @@ node <skill-root>/scripts/pptx-nova-create-run.mjs --deckkit <id> --content cont
 xdoc pptx inspect input.pptx --daemon --json
 xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
 xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
+xdoc pptx copy-from target.pptx --from donor.pptx --slides 1,3,5-8 --output <run-dir>/candidate.pptx --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o <run-dir>/candidate.pptx --overwrite --dry-run --json
 xdoc pptx apply -p patch.json -i input.pptx -o <run-dir>/candidate.pptx --overwrite --json
 node <skill-root>/scripts/pptx-nova-edit-contract.mjs --draft <run-dir>/edit-contract-draft.json --source input.pptx --output <run-dir>/edit-contract.json --json

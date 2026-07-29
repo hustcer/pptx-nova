@@ -130,6 +130,71 @@ shape name declared by `session-operation.json`. Their
 `expected.sessionRulePostconditions[]` are limited to machine-verifiable
 `font-color` and `fill-color` values.
 
+### Native `copy-from` structural evidence
+
+`xdoc pptx copy-from` is a first-class structural command, not a patch op. Its
+dry-run/apply report is `pptx-copy-from/v1` and intentionally has no
+`opResults[]`. Never fabricate a `pptx-dry-run/v1` wrapper merely to satisfy the
+Edit Contract.
+
+For multiple donor slides, prefer one transactional command:
+
+```bash
+xdoc pptx copy-from target.pptx --from donor.pptx \
+  --slides 1,3 --output <run-dir>/candidate.pptx \
+  --dry-run --json > <run-dir>/dry-run.json
+```
+
+CLI `--slides` is 1-based. The report and contract use 0-based
+`sourceSlide`/`targetSlide` indexes. `--slide N` is the compatible 0-based
+single-slide selector (default 0), `--all` selects all donor slides, and the
+three selectors are mutually exclusive.
+
+Bind each produced slide target to its donor identity:
+
+```json
+{
+  "scope": "structural",
+  "operationKind": "copy-from",
+  "targets": [
+    {
+      "id": "copied-donor-slide-1",
+      "kind": "slide",
+      "slide": 10,
+      "opIndexes": [0],
+      "expected": {
+        "changeCategories": ["structure"],
+        "copyFrom": { "sourceSlide": 0, "sourcePptx": "/abs/path/donor.pptx" }
+      }
+    },
+    {
+      "id": "copied-donor-slide-3",
+      "kind": "slide",
+      "slide": 11,
+      "opIndexes": [1],
+      "expected": {
+        "changeCategories": ["structure"],
+        "copyFrom": { "sourceSlide": 2, "sourcePptx": "/abs/path/donor.pptx" }
+      }
+    }
+  ],
+  "coverage": { "required": true, "expectedTargetCount": 2 },
+  "allowedChanges": ["structure"],
+  "expectedStructure": {
+    "slideCountDelta": 2,
+    "changedSlides": [10, 11],
+    "objectTypes": []
+  }
+}
+```
+
+The gate requires one valid `copied[]` entry for each target, verifies optional
+`expected.copyFrom.sourceSlide/sourcePptx`, checks slide and relationship part
+names plus every dependency target against aggregate `changedParts[]`, and
+rejects copied target slides outside the contract. Flattened
+`dependencyMappings[]` remains aggregate audit evidence; it is not converted
+into synthetic patch operations.
+
 ## Evidence Policy
 
 Choose the smallest policy that can prove the requested edit:
@@ -217,9 +282,13 @@ The gate checks:
 - the candidate exists and every loaded report names the same source/candidate;
 - the evidence manifest binds current candidate bytes and every post-apply
   report hash; mtime freshness is a supplemental stale-candidate signal;
-- every required target owns successful dry-run `opResults[]`;
+- every required patch target owns successful dry-run `opResults[]`, or every
+  native `copy-from` slide target owns a complete `pptx-copy-from/v1`
+  slide/relationship/dependency mapping;
 - every dry-run op index is owned by a contract target;
-- dry-run `resolvedSelectors[]` and semantic targets match the contract;
+- patch dry-run `resolvedSelectors[]` and semantic targets match the contract;
+  native `copy-from` evidence instead matches the declared donor and produced
+  slide identities without inventing selectors;
 - semantic diff source text still matches declared `beforeText` and the final
   candidate matches declared `afterText` when those guards are present;
 - dry-run and reliable diff change categories stay inside `allowedChanges`;

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { normalizeChartSemantics, validateChartSemantics } from './lib/chart-semantics.mjs'
 import { writeJsonOutput } from './lib/output-files.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-semantic-audit/v1'
@@ -8,9 +9,6 @@ const CHART_OPS_WITH_DATA = new Set(['add-chart', 'set-chart-data'])
 const TABLE_OPS_WITH_DATA = new Set(['add-table', 'set-table-data'])
 const CHART_SHAPE_TYPES = new Set(['chart', 'graphicFrameChart'])
 const TABLE_SHAPE_TYPES = new Set(['table', 'graphicFrameTable'])
-const SCATTER_KINDS = new Set(['scatter', 'bubble', 'bubble3d'])
-const PIE_KINDS = new Set(['pie', 'pie3d', 'doughnut'])
-const STOCK_KINDS = new Set(['stock'])
 
 const usage =
   'Usage:\n' +
@@ -110,6 +108,7 @@ function sourceOf(intent, kind, op) {
     op?.source ??
     op?.dataSource ??
     op?.data?.source ??
+    scoped?.semanticSource ??
     scoped?.source ??
     scoped?.dataSource ??
     intent?.source ??
@@ -133,10 +132,6 @@ function sourceStatus(source) {
   return 'missing'
 }
 
-function chartDataOf(op) {
-  return op?.data ?? op?.chart?.data ?? null
-}
-
 function tableRowsOf(op) {
   if (Array.isArray(op.data)) return op.data
   if (Array.isArray(op.json)) {
@@ -147,24 +142,6 @@ function tableRowsOf(op) {
     return op.json
   }
   return []
-}
-
-function dataSeriesValues(series) {
-  if (!isPlainObject(series)) return []
-  if (Array.isArray(series.values)) return series.values
-  if (Array.isArray(series.points)) return series.points
-  return []
-}
-
-function numericLike(value) {
-  if (typeof value === 'number') return Number.isFinite(value)
-  if (typeof value === 'string') return value.trim() !== '' && Number.isFinite(Number(value))
-  return false
-}
-
-function pointNumeric(point, fields) {
-  if (!isPlainObject(point)) return false
-  return fields.every((field) => numericLike(point[field]))
 }
 
 function shapeNameOf(op) {
@@ -213,148 +190,33 @@ function finalizeItem(item) {
 function auditChartOp(op, index, lock, inspect) {
   const slideIndex = slideIndexOf(op)
   const intent = slideIntent(lock, slideIndex)
-  const source = sourceOf(intent, 'chart', op)
+  const semantics = normalizeChartSemantics(op, intent)
+  const source = semantics.source
   const item = {
     opIndex: index,
     op: op.op,
     slide: slideIndex,
     shape: shapeNameOf(op) || null,
-    kind: op.kind ?? intent?.chart?.kind ?? null,
+    kind: semantics.kind || null,
     source: source ?? null,
     status: 'pass',
     checks: {},
     errors: [],
     warnings: [],
   }
-  const kind = String(item.kind ?? '').toLowerCase()
-  const data = chartDataOf(op)
-  const series = Array.isArray(data?.series) ? data.series : []
-  const categories = Array.isArray(data?.categories) ? data.categories : null
-
-  if (!data) {
-    issue(item, 'warning', 'chart-data-missing', 'chart op has no disclosed data object')
-    addCheck(item, 'dataShape', 'warning')
-  } else {
-    let dataShape = 'passed'
-    if (series.length === 0 && !STOCK_KINDS.has(kind)) {
-      issue(item, 'error', 'chart-series-missing', 'chart must disclose at least one data series')
-      dataShape = 'failed'
-    }
-    if (categories && series.length > 0) {
-      for (const [seriesIndex, seriesItem] of series.entries()) {
-        if (Array.isArray(seriesItem?.values) && seriesItem.values.length !== categories.length) {
-          issue(
-            item,
-            'error',
-            'chart-series-category-mismatch',
-            'series[' +
-              seriesIndex +
-              '] has ' +
-              seriesItem.values.length +
-              ' value(s), categories has ' +
-              categories.length,
-          )
-          dataShape = 'failed'
-        }
-      }
-    }
-    if (SCATTER_KINDS.has(kind)) {
-      for (const [seriesIndex, seriesItem] of series.entries()) {
-        if (!Array.isArray(seriesItem?.points)) {
-          issue(
-            item,
-            'error',
-            'chart-points-required',
-            kind + ' series[' + seriesIndex + '] must use points[] instead of categories/values',
-          )
-          dataShape = 'failed'
-        } else {
-          const fields = kind.startsWith('bubble') ? ['x', 'y', 'size'] : ['x', 'y']
-          seriesItem.points.forEach((point, pointIndex) => {
-            if (!pointNumeric(point, fields)) {
-              issue(
-                item,
-                'error',
-                'chart-point-nonnumeric',
-                kind +
-                  ' series[' +
-                  seriesIndex +
-                  '].points[' +
-                  pointIndex +
-                  '] must disclose numeric ' +
-                  fields.join('/'),
-              )
-              dataShape = 'failed'
-            }
-          })
-        }
-      }
-    }
-    if (PIE_KINDS.has(kind) && series.length > 1) {
-      issue(item, 'warning', 'chart-pie-multi-series', kind + ' usually expects one series')
-      if (dataShape === 'passed') dataShape = 'warning'
-    }
-    if (STOCK_KINDS.has(kind)) {
-      const length = Array.isArray(data?.categories) ? data.categories.length : null
-      for (const field of ['open', 'high', 'low', 'close']) {
-        if (field === 'open' && !Array.isArray(data?.open)) continue
-        if (!Array.isArray(data?.[field])) {
-          issue(
-            item,
-            'error',
-            'chart-stock-field-missing',
-            'stock chart must disclose ' + field + '[]',
-          )
-          dataShape = 'failed'
-        } else if (Number.isInteger(length) && data[field].length !== length) {
-          issue(
-            item,
-            'error',
-            'chart-stock-field-length-mismatch',
-            'stock ' +
-              field +
-              '[] has ' +
-              data[field].length +
-              ' value(s), categories has ' +
-              length,
-          )
-          dataShape = 'failed'
-        }
-      }
-    }
-    for (const [seriesIndex, seriesItem] of series.entries()) {
-      if (!hasText(seriesItem?.name)) {
-        issue(
-          item,
-          'warning',
-          'chart-series-name-missing',
-          'series[' + seriesIndex + '] has no readable name',
-        )
-        if (dataShape === 'passed') dataShape = 'warning'
-      }
-      for (const [valueIndex, value] of dataSeriesValues(seriesItem).entries()) {
-        if (isPlainObject(value)) continue
-        if (typeof value === 'string' && value.includes('%')) {
-          issue(
-            item,
-            'warning',
-            'chart-percent-string-value',
-            'series[' + seriesIndex + '] value[' + valueIndex + '] is a percent string',
-          )
-          if (dataShape === 'passed') dataShape = 'warning'
-        } else if (!numericLike(value)) {
-          issue(
-            item,
-            'error',
-            'chart-value-nonnumeric',
-            'series[' + seriesIndex + '] value[' + valueIndex + '] is not numeric',
-          )
-          dataShape = 'failed'
-        }
-      }
-    }
-    addCheck(item, 'dataShape', dataShape)
+  const validation = validateChartSemantics(semantics)
+  for (const error of validation.errors) {
+    issue(item, 'error', error.code, error.message, error)
   }
+  for (const warning of validation.warnings) {
+    issue(item, 'warning', warning.code, warning.message, warning)
+  }
+  addCheck(
+    item,
+    'dataShape',
+    validation.errors.length > 0 ? 'failed' : validation.warnings.length > 0 ? 'warning' : 'passed',
+    { dialect: semantics.dialect },
+  )
 
   const sourceDeclared = sourceStatus(source) === 'declared'
   if (!sourceDeclared) {

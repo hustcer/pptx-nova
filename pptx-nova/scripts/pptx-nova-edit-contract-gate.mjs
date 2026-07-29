@@ -16,7 +16,8 @@ and required scoped evidence for an existing-deck edit.
 Options:
   --contract <path>        Required normalized edit-contract.json.
   --candidate <pptx>       Required stable run-directory candidate PPTX.
-  --dry-run <path>         Defaults to dry-run.json beside the contract.
+  --dry-run <path>         Defaults to dry-run.json beside the contract; accepts
+                           pptx-dry-run/v1 or pptx-copy-from/v1 structural evidence.
   --diff <path>            Defaults to pptx-diff.json beside the contract.
   --style-diff <path>      Defaults to style-diff.json beside the contract.
   --preview <path>         Defaults to preview.json beside the contract.
@@ -656,6 +657,159 @@ function targetCoverage(contract, dryRun, report) {
   return { coverage, coveredCount, coveredIdentities }
 }
 
+function copyFromEntryValid(entry, changedParts) {
+  if (
+    !Number.isInteger(entry?.sourceSlide) ||
+    !Number.isInteger(entry?.targetSlide) ||
+    typeof entry?.sourceSlidePartName !== 'string' ||
+    typeof entry?.sourceSlideRelsPartName !== 'string' ||
+    typeof entry?.targetSlidePartName !== 'string' ||
+    typeof entry?.targetSlideRelsPartName !== 'string' ||
+    !Array.isArray(entry?.dependencies)
+  ) {
+    return false
+  }
+  const requiredParts = [entry.targetSlidePartName, entry.targetSlideRelsPartName]
+  for (const dependency of entry.dependencies) {
+    if (
+      typeof dependency?.sourcePartName !== 'string' ||
+      typeof dependency?.targetPartName !== 'string'
+    ) {
+      return false
+    }
+    requiredParts.push(dependency.targetPartName)
+  }
+  return requiredParts.every((part) => changedParts.has(part))
+}
+
+function copyFromExpectation(target) {
+  const expected = target?.expected?.copyFrom ?? target?.copyFrom ?? {}
+  return {
+    sourceSlide: expected.sourceSlide ?? target?.expected?.sourceSlide ?? null,
+    sourcePptx: expected.sourcePptx ?? target?.expected?.sourcePptx ?? null,
+  }
+}
+
+function copyFromCoverage(contract, copyReport, report) {
+  const copied = Array.isArray(copyReport?.copied) ? copyReport.copied : []
+  const changedParts = new Set(copyReport?.changedParts ?? [])
+  const coverage = []
+  const coveredIdentities = []
+  const targetSlides = new Set(contract.targets.map((target) => target.slide))
+  const outOfScope = copied.filter((entry) => !targetSlides.has(entry?.targetSlide))
+  if (outOfScope.length > 0) {
+    addIssue(
+      report,
+      'blockers',
+      'copy-from-slide-outside-contract',
+      'copy-from evidence contains target slides not owned by the structural contract',
+      { targetSlides: outOfScope.map((entry) => entry?.targetSlide ?? null) },
+    )
+  }
+
+  for (const target of contract.targets) {
+    const entry = copied.find((item) => item?.targetSlide === target.slide) ?? null
+    const expectation = copyFromExpectation(target)
+    const sourceSlideMatches =
+      !Number.isInteger(expectation.sourceSlide) || entry?.sourceSlide === expectation.sourceSlide
+    const sourcePptxMatches =
+      !expectation.sourcePptx ||
+      reportedPath(copyReport?.source?.path, contract.workspace || '.') ===
+        resolve(contract.workspace || '.', expectation.sourcePptx)
+    const structuralEvidenceValid = entry ? copyFromEntryValid(entry, changedParts) : false
+    const categories = ['structure']
+    const unexpectedCategories = categories.filter(
+      (category) =>
+        !contract.allowedChanges.includes(category) ||
+        !(target.expected?.changeCategories ?? []).includes(category),
+    )
+    const covered =
+      Boolean(entry) &&
+      sourceSlideMatches &&
+      sourcePptxMatches &&
+      structuralEvidenceValid &&
+      unexpectedCategories.length === 0
+    if (entry) coveredIdentities.push({ kind: 'slide', slide: target.slide })
+    coverage.push({
+      id: target.id,
+      slide: target.slide,
+      opIndexes: target.opIndexes,
+      covered,
+      missingOps: [],
+      failedOps: [],
+      selectorMatchCount: entry ? 1 : 0,
+      expectedAfterObserved: Boolean(entry),
+      alreadyCompliant: false,
+      changeCategories: categories,
+      unexpectedCategories,
+      resolvedIdentities: entry ? [{ kind: 'slide', slide: target.slide }] : [],
+      copyFrom: entry
+        ? {
+            sourceSlide: entry.sourceSlide,
+            targetSlide: entry.targetSlide,
+            sourceSlidePartName: entry.sourceSlidePartName,
+            sourceSlideRelsPartName: entry.sourceSlideRelsPartName,
+            targetSlidePartName: entry.targetSlidePartName,
+            targetSlideRelsPartName: entry.targetSlideRelsPartName,
+            dependencyCount: entry.dependencies.length,
+          }
+        : null,
+    })
+    if (entry && !sourceSlideMatches) {
+      addIssue(
+        report,
+        'blockers',
+        'copy-from-source-slide-mismatch',
+        `copy-from source slide does not match contract target ${target.id}`,
+        {
+          targetId: target.id,
+          expected: expectation.sourceSlide,
+          actual: entry.sourceSlide,
+        },
+      )
+    }
+    if (entry && !sourcePptxMatches) {
+      addIssue(
+        report,
+        'blockers',
+        'copy-from-source-pptx-mismatch',
+        `copy-from donor PPTX does not match contract target ${target.id}`,
+      )
+    }
+    if (entry && !structuralEvidenceValid) {
+      addIssue(
+        report,
+        'blockers',
+        'copy-from-structural-evidence-invalid',
+        `copy-from part/dependency mapping is incomplete for contract target ${target.id}`,
+      )
+    }
+  }
+
+  const coveredCount = coverage.filter((item) => item.covered).length
+  if (
+    contract.coverage?.required !== false &&
+    coveredCount !== contract.coverage.expectedTargetCount
+  ) {
+    addIssue(
+      report,
+      'blockers',
+      'target-coverage-incomplete',
+      `copy-from evidence covered ${coveredCount} of ${contract.coverage.expectedTargetCount} required target(s)`,
+      { coverage },
+    )
+  }
+  if (coverage.some((item) => item.unexpectedCategories.length > 0)) {
+    addIssue(
+      report,
+      'blockers',
+      'dry-run-change-category-outside-contract',
+      'copy-from reported a structural change not allowed by the contract',
+    )
+  }
+  return { coverage, coveredCount, coveredIdentities }
+}
+
 function reliableShapeChanges(diff) {
   const changes = []
   for (const slide of diff?.slides ?? []) {
@@ -890,7 +1044,15 @@ function reportedPath(value, workspace) {
 }
 
 function evidenceBindings(kind, evidence) {
-  if (kind === 'dry-run') return { source: evidence?.input, candidate: evidence?.wouldWrite }
+  if (kind === 'dry-run') {
+    if (evidence?.schemaVersion === 'pptx-copy-from/v1') {
+      return {
+        source: evidence?.input,
+        candidate: evidence?.candidate ?? evidence?.output ?? evidence?.wouldWrite,
+      }
+    }
+    return { source: evidence?.input, candidate: evidence?.wouldWrite }
+  }
   if (kind === 'semantic-diff' || kind === 'style-diff' || kind === 'vision-diff') {
     return { source: evidence?.source, candidate: evidence?.candidate }
   }
@@ -981,16 +1143,18 @@ function checkEvidence(contract, args, report) {
   }
 
   const dryRun = loaded['dry-run']
-  if (dryRun && (dryRun.schemaVersion !== 'pptx-dry-run/v1' || dryRun.status !== 'success')) {
+  if (dryRun && !['pptx-dry-run/v1', 'pptx-copy-from/v1'].includes(dryRun.schemaVersion)) {
     addIssue(report, 'blockers', 'dry-run-not-successful', 'dry-run evidence is not successful')
-  } else if (dryRun && !Array.isArray(dryRun.semanticIssues)) {
+  } else if (dryRun?.status !== undefined && dryRun.status !== 'success') {
+    addIssue(report, 'blockers', 'dry-run-not-successful', 'dry-run evidence is not successful')
+  } else if (dryRun?.schemaVersion === 'pptx-dry-run/v1' && !Array.isArray(dryRun.semanticIssues)) {
     addIssue(
       report,
       'blockers',
       'dry-run-semantic-evidence-missing',
       'dry-run semanticIssues evidence is missing or malformed',
     )
-  } else if (dryRun && dryRun.semanticIssues.length > 0) {
+  } else if (dryRun?.schemaVersion === 'pptx-dry-run/v1' && dryRun.semanticIssues.length > 0) {
     addIssue(
       report,
       'blockers',
@@ -998,6 +1162,25 @@ function checkEvidence(contract, args, report) {
       'dry-run introduced semantic regressions',
       { semanticIssueCount: dryRun.semanticIssues.length },
     )
+  } else if (dryRun?.schemaVersion === 'pptx-copy-from/v1') {
+    const structurallyComplete =
+      Array.isArray(dryRun.copied) &&
+      dryRun.copied.length > 0 &&
+      Array.isArray(dryRun.changedParts) &&
+      Array.isArray(dryRun.dependencyMappings)
+    if (!structurallyComplete) {
+      addIssue(
+        report,
+        'blockers',
+        'copy-from-structural-evidence-invalid',
+        'copy-from evidence is missing copied[], changedParts[], or dependencyMappings[]',
+      )
+    } else {
+      addCheck(report, 'copy-from-structural-evidence', 'pass', {
+        copiedSlides: dryRun.copied.length,
+        dependencyMappings: dryRun.dependencyMappings.length,
+      })
+    }
   }
   const diff = loaded['semantic-diff']
   if (diff && (diff.schemaVersion !== 'pptx-diff/v1' || diff.status !== 'success')) {
@@ -1309,6 +1492,19 @@ function buildReport(args) {
       'target-coverage',
       coverageResult.coveredCount === report.summary.expectedTargetCount ? 'pass' : 'fail',
       { covered: coverageResult.coveredCount, expected: report.summary.expectedTargetCount },
+    )
+  } else if (dryRun?.schemaVersion === 'pptx-copy-from/v1' && dryRun.status === 'success') {
+    coverageResult = copyFromCoverage(contract, dryRun, report)
+    report.targetCoverage = coverageResult.coverage
+    addCheck(
+      report,
+      'target-coverage',
+      coverageResult.coveredCount === report.summary.expectedTargetCount ? 'pass' : 'fail',
+      {
+        evidence: 'pptx-copy-from/v1',
+        covered: coverageResult.coveredCount,
+        expected: report.summary.expectedTargetCount,
+      },
     )
   }
 

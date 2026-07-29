@@ -44,9 +44,12 @@ Use these entry points from skill workflows:
 - `pptx-nova-edit-contract-gate.mjs` - verify source freshness, dry-run target
   coverage, reliable semantic-diff locality, optional text style fidelity, and
   scoped preview/vision-diff/structure evidence before an Edit or Micro Edit is
-  published. When session rules apply, it also verifies produced-object identity
-  and font/fill postconditions directly from candidate PPTX bytes. Read its
-  stable `agentGate.nextAction` for repair routing.
+  published. Structural copy workflows may supply native `pptx-copy-from/v1`
+  evidence; the gate validates donor/target slide identities, part/dependency
+  mappings, and aggregate changed parts without requiring or fabricating patch
+  `opResults`. When session rules apply, it also verifies produced-object
+  identity and font/fill postconditions directly from candidate PPTX bytes.
+  Read its stable `agentGate.nextAction` for repair routing.
 - `pptx-nova-refurbish-plan.mjs` - build the preflight route for existing-deck
   refurbishment: readiness exception, native skinning support, fallback strategy,
   duplicate chrome policy, and required gates.
@@ -85,6 +88,10 @@ Use these entry points from skill workflows:
 - `lib/layout-snapshot.mjs` - pure layout detector shared by the layout CLI and
   refurbish source/candidate adapters. `lib/finding-analysis.mjs` is the pure FA
   decision seam; neither module reads files, launches commands, or renders.
+- `lib/chart-semantics.mjs` - shared classic Chart/ChartEx semantic normalizer
+  used by lock checking and semantic audit. It resolves `data` versus `dataEx`,
+  slide-level semantic sources, and kind-specific dimensions from one contract
+  instead of duplicating divergent validation logic.
 - `pptx-nova-refurbish-fallback-patch.mjs` - generate generic inspect-driven
   fallback artifacts (`patch.json`, `deck_lock.json`, baseline
   `content-audit.json`, and `reference-map.json`) for DeckKits without native
@@ -99,7 +106,11 @@ Use these entry points from skill workflows:
   frame-map coverage, empty placeholders, overlay-like additions, and identity
   asset provenance.
 - `pptx-nova-finalize-evidence.mjs` - finalize existing high-risk routes from
-  final inspect plus their existing vision/fidelity reports. It writes
+  the final candidate/inspect plus their existing vision/fidelity reports. It
+  detects ChartEx package parts and conditionally consumes a candidate-bound
+  `pptx-nova-powerpoint-snapshot.nu --method pdf-render` report; when
+  PowerPoint is available, missing/stale/incomplete ChartEx evidence blocks,
+  while unavailable PowerPoint is preserved as an explicit warning. It writes
   `layout-final.json` and `evidence-summary.json`; it intentionally excludes
   Micro Edit and does not replace mode-specific gates or PNG review. New-deck
   modes fail on missing/failed semantic vision evidence; existing-deck modes
@@ -148,12 +159,13 @@ Use these entry points from skill workflows:
   bundle, publishes compare siblings first and the final PPTX last, verifies
   every destination, and writes `<kind>-compare-gate.json` only after
   `finalBinding.status=bound`.
-- pptx-nova-semantic-audit.mjs - lightweight chart/table semantic audit for
+- `pptx-nova-semantic-audit.mjs` - lightweight chart/table semantic audit for
   data-driven, Studio, structural edit, template-following, and refurbish runs
-  that contain native chart/table ops. It validates data shape, source/claim
-  disclosure, and final native chart/table object presence without attempting a
-  full OOXML equivalence audit. Existing reports require an explicit
-  current-run `--overwrite`.
+  that contain native chart/table ops. Through the shared chart normalizer it
+  validates classic `data`, ChartEx `dataEx`, source/claim disclosure, and final
+  native chart/table object presence without attempting a full OOXML
+  equivalence audit. Existing reports require an explicit current-run
+  `--overwrite`.
 - pptx-nova-visual-review.mjs - structured PNG/contact-sheet review helper. It
   records required visual QA checks into visual_review.json, validates that
   visual evidence and reviewed slide counts are present, and leaves actual
@@ -171,6 +183,11 @@ Use these entry points from skill workflows:
   colors, and empty/default-text placeholder residue, then writes
   structure-check.json for the final evidence summary. Existing reports require
   an explicit current-run `--overwrite`.
+- `pptx-nova-powerpoint-snapshot.nu` - stage the exact candidate in
+  PowerPoint's sandbox, render requested slides through PowerPoint PDF export,
+  and emit candidate/hash/image-bound `pptx-snapshot/v1` evidence. `window`
+  mode additionally fails closed unless the foreground process, presentation,
+  slide, canvas, and screenshot scale remain stable before and after capture.
 
 Repository-root `tools/` contains maintainer gates for this public repository,
 including `tools/pptx-nova-smoke-test.mjs` and

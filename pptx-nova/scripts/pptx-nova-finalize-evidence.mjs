@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { semanticValidationEvidence } from './lib/semantic-evidence.mjs'
 import { ensureWritableOutputs, writeJsonOutput } from './lib/output-files.mjs'
+import { evaluateChartExNativeRender } from './lib/powerpoint-native-render-evidence.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-finalize-evidence/v1'
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
@@ -30,6 +31,7 @@ Options:
   --mode <mode>             Required: studio-create, reference-create,
                             structural-edit, template-following, or refurbish.
   --run-dir <path>          Required existing current-run directory.
+  --candidate <path>        Optional final PPTX. Defaults to final inspect input.
   --final-inspect <path>    Required final xdoc pptx inspect JSON.
   --vision <path>           vision.json. Required except for refurbish.
   --fidelity-gate <path>    Required for template-following and refurbish.
@@ -39,6 +41,11 @@ Options:
                             run-dir/visual_review.json is consumed when present.
   --structure-check <path>  Optional structure-check.json. If omitted,
                             run-dir/structure-check.json is consumed when present.
+  --powerpoint-native-render <path>
+                            Optional pptx-snapshot JSON. Defaults to
+                            run-dir/powerpoint-native-render.json when present.
+                            Required for ChartEx when PowerPoint is available.
+  --native-render <path>    Alias for --powerpoint-native-render.
   --changed-slides <expr>   Optional 1-based changed-slide scope, e.g. 25-38.
                             Structural edit/template gates use this scoped
                             vision risk while preserving full-deck residuals.
@@ -57,12 +64,14 @@ function parseArgs(argv) {
   const args = {
     mode: '',
     runDir: '',
+    candidate: '',
     finalInspect: '',
     vision: '',
     fidelityGate: '',
     semanticAudit: '',
     visualReview: '',
     structureCheck: '',
+    powerpointNativeRender: '',
     changedSlides: '',
     overwrite: false,
     json: false,
@@ -70,12 +79,15 @@ function parseArgs(argv) {
   const flags = {
     '--mode': 'mode',
     '--run-dir': 'runDir',
+    '--candidate': 'candidate',
     '--final-inspect': 'finalInspect',
     '--vision': 'vision',
     '--fidelity-gate': 'fidelityGate',
     '--semantic-audit': 'semanticAudit',
     '--visual-review': 'visualReview',
     '--structure-check': 'structureCheck',
+    '--powerpoint-native-render': 'powerpointNativeRender',
+    '--native-render': 'powerpointNativeRender',
     '--changed-slides': 'changedSlides',
     '--slides': 'changedSlides',
   }
@@ -118,6 +130,10 @@ function parseArgs(argv) {
     const defaultStructureCheck = join(args.runDir, 'structure-check.json')
     if (existsSync(defaultStructureCheck)) args.structureCheck = defaultStructureCheck
   }
+  if (!args.powerpointNativeRender) {
+    const defaultNativeRender = join(args.runDir, 'powerpoint-native-render.json')
+    if (existsSync(defaultNativeRender)) args.powerpointNativeRender = defaultNativeRender
+  }
   return args
 }
 
@@ -128,6 +144,7 @@ function makeReport(args) {
     risk: 'high',
     status: 'pass',
     artifacts: {
+      candidate: args.candidate || null,
       finalInspect: args.finalInspect,
       layoutFinal: join(args.runDir, 'layout-final.json'),
       vision: args.vision || null,
@@ -135,6 +152,7 @@ function makeReport(args) {
       semanticAudit: args.semanticAudit || null,
       visualReview: args.visualReview || null,
       structureCheck: args.structureCheck || null,
+      powerpointNativeRender: args.powerpointNativeRender || null,
     },
     summary: {
       slideCount: null,
@@ -149,6 +167,7 @@ function makeReport(args) {
       semanticAudit: null,
       visualReview: null,
       structureCheck: null,
+      powerpointNativeRender: null,
       errors: 0,
       warnings: 0,
     },
@@ -186,6 +205,7 @@ function buildAgentSummary(report) {
   const semanticAudit = checkByName(report, 'chart-table-semantic-audit')
   const visualReview = checkByName(report, 'structured-visual-review')
   const structureCheck = checkByName(report, 'pptx-xml-structure-check')
+  const nativeRender = checkByName(report, 'chartex-powerpoint-native-render')
   const decision =
     report.status === 'fail'
       ? 'stop-and-fix'
@@ -246,6 +266,13 @@ function buildAgentSummary(report) {
         errors: report.summary.structureCheck?.errors ?? null,
         warnings: report.summary.structureCheck?.warnings ?? null,
       },
+      powerpointNativeRender: {
+        gate: nativeRender?.status ?? 'not-run',
+        applicable: nativeRender?.applicable ?? null,
+        reason: nativeRender?.reason ?? null,
+        chartExSlides: report.summary.powerpointNativeRender?.chartExSlides ?? null,
+        images: report.summary.powerpointNativeRender?.images ?? null,
+      },
     },
     artifacts: artifactSet(report, [
       'finalInspect',
@@ -255,6 +282,7 @@ function buildAgentSummary(report) {
       'semanticAudit',
       'visualReview',
       'structureCheck',
+      'powerpointNativeRender',
     ]),
     errors: report.errors.map((item) => ({ code: item.code, message: item.message })),
     warnings: report.warnings.map((item) => ({ code: item.code, message: item.message })),
@@ -409,7 +437,56 @@ function validateInspect(args, report) {
     slideCount,
   })
   report.summary.slideCount = slideCount
-  return !failed
+  if (!args.candidate && typeof inspect?.input === 'string' && inspect.input.trim()) {
+    const candidates = [resolve(inspect.input), resolve(dirname(args.finalInspect), inspect.input)]
+    args.candidate = candidates.find((path) => existsSync(path)) ?? candidates[0]
+  }
+  report.artifacts.candidate = args.candidate || null
+  return failed ? null : inspect
+}
+
+function validatePowerPointNativeRender(args, report) {
+  const result = evaluateChartExNativeRender({
+    candidatePath: args.candidate || null,
+    runDir: args.runDir,
+    artifactPath: args.powerpointNativeRender || null,
+  })
+  const details = {
+    applicable: result.applicable,
+    reason: result.reason,
+    candidate: result.candidatePath ?? null,
+    artifact: result.artifactPath ?? null,
+    chartExParts: result.packageInfo?.chartExParts ?? [],
+    chartExSlides: result.packageInfo?.chartExSlides ?? [],
+    unmappedParts: result.packageInfo?.unmappedParts ?? [],
+    powerpointAvailable: result.availability?.available ?? false,
+    powerpointAvailabilityReason: result.availability?.reason ?? null,
+    images: result.validation?.images ?? [],
+    validationErrors: result.validation?.errors ?? [],
+  }
+  if (result.status === 'failed') {
+    issue(
+      report,
+      'error',
+      result.reason === 'native-render-required'
+        ? 'chartex-native-render-missing'
+        : 'chartex-native-render-invalid',
+      result.reason === 'native-render-required'
+        ? 'ChartEx requires candidate-bound PowerPoint pdf-render evidence on this machine'
+        : 'ChartEx PowerPoint-native render evidence is missing, stale, incomplete, or invalid',
+      details,
+    )
+  } else if (result.status === 'warning') {
+    issue(
+      report,
+      'warning',
+      'chartex-native-render-unverified',
+      'ChartEx rendering remains unverified because PowerPoint-native rendering is unavailable',
+      details,
+    )
+  }
+  check(report, 'chartex-powerpoint-native-render', result.status, details)
+  report.summary.powerpointNativeRender = details
 }
 
 function generateLayout(args, report) {
@@ -867,6 +944,7 @@ try {
   validateSemanticAudit(args, report)
   validateVisualReview(args, report)
   validateStructureCheck(args, report)
+  validatePowerPointNativeRender(args, report)
   finish(args, report)
 } catch (error) {
   process.stderr.write(`${error.message}\n`)

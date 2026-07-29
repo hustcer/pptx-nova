@@ -247,15 +247,36 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     Add `--assets assets_manifest.json` when assets exist. For brand-sensitive
     delivery add `--strict-colors --strict-fonts`.
 7.  Run dry-run before any real write:
+
     ```bash
     xdoc pptx apply -p patch.json -i input.pptx -o out.pptx --dry-run --json
     ```
+
     Omit `-i` only for new decks. Use `--explain` when an op schema is unclear.
     Require an explicit `semanticIssues: []`. For existing-deck edits this is
     the full-package before/after issue delta proving that the current patch did
     not introduce a detected OOXML semantic violation, including indirect
     `.rels` / Content Types regressions. A missing field is an incompatible xdoc
     signal, not an implicit pass.
+    For cross-deck whole-slide structural edits, use the native command instead
+    of manufacturing an equivalent patch report:
+
+    ```bash
+    xdoc pptx copy-from target.pptx --from donor.pptx \
+      --slides 1,3,5-8 --output <run-dir>/candidate.pptx \
+      --dry-run --json > <run-dir>/dry-run.json
+    ```
+
+    `--slide N` is the compatible 0-based single-slide selector (default 0),
+    while `--slides` is 1-based and `--all` selects the whole donor; the three
+    selectors are mutually exclusive. Prefer one multi-slide transaction over
+    repeated single-slide invocations and intermediate PPTX files. The command
+    opens each deck once, validates the full requested selection before target
+    mutation, serializes once, and reports `copied[]`, flattened
+    `dependencyMappings[]`, and aggregate `changedParts[]`. The Edit Contract
+    gate consumes this native `pptx-copy-from/v1` evidence directly; do not
+    invent `pptx-dry-run/v1` or `opResults[]`.
+
 8.  Apply only after dry-run is clean and selectors are correct. Any validation
     that consumes the applied output (`vision-check`, `convert`, `check`,
     replay/audit) must run after the apply command has completed; do not launch
@@ -316,6 +337,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
       --mode <studio-create|reference-create|structural-edit|template-following> \
       --run-dir <run-dir> \
+      --candidate out.pptx \
       --final-inspect <run-dir>/final-inspect.json \
       --vision <run-dir>/vision.json \
       --json
@@ -548,8 +570,19 @@ dense text, and alignment.
 PowerPoint display-effect screenshots and comparisons:
 
 - When a visual gate must reflect PowerPoint's display/export result, render
-  with `pptx-snapshot.nu --method pdf-render` first:
-  `nu tools/pptx-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json`.
+  with `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method
+pdf-render` first:
+  `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
+- When the candidate contains `ppt/charts/chartEx*.xml`, pass that report to
+  `pptx-nova-finalize-evidence.mjs --candidate deck.pptx
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
+  verifies the candidate SHA-256, exact ChartEx slide coverage, and every PNG's
+  dimensions, byte length, and SHA-256. A same-path report from older candidate
+  bytes is rejected.
+- If PowerPoint is installed and scriptable, missing or invalid ChartEx native
+  evidence blocks the high-risk finalizer. If PowerPoint is unavailable, the
+  finalizer emits `chartex-native-render-unverified` and returns a warning; do
+  not summarize that candidate as PowerPoint-verified.
 - Treat phrases such as "PowerPoint 截图", "PowerPoint 显示效果", "PowerPoint
   preview", and "PowerPoint 对比" as this non-interactive PowerPoint render
   verification path, not as a request for window capture.
@@ -616,6 +649,7 @@ xdoc pptx preview out.pptx --slides 25-38 \
 node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
   --mode structural-edit \
   --run-dir <run-dir> \
+  --candidate out.pptx \
   --final-inspect <run-dir>/final-inspect.json \
   --vision <run-dir>/vision.json \
   --changed-slides 25-38 \

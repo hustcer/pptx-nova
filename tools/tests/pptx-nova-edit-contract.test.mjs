@@ -943,6 +943,147 @@ test('structural contracts support a newly added slide without a pre-existing sh
   assert.equal(report.agentGate.passed, true)
 })
 
+function writeCopyFromContractFixture() {
+  const fixture = writeFixture()
+  fixture.donor = join(fixture.root, 'donor.pptx')
+  writeFileSync(fixture.donor, 'donor pptx fixture bytes')
+  const draft = JSON.parse(readFileSync(fixture.draft, 'utf8'))
+  draft.request = 'Append donor slide 3 to the target deck'
+  draft.scope = 'structural'
+  draft.operationKind = 'copy-from'
+  draft.targets = [
+    {
+      id: 'copied-slide-11',
+      kind: 'slide',
+      slide: 10,
+      opIndexes: [0],
+      expected: {
+        changeCategories: ['structure'],
+        copyFrom: { sourceSlide: 2, sourcePptx: fixture.donor },
+      },
+    },
+  ]
+  draft.coverage.expectedTargetCount = 1
+  draft.allowedChanges = ['structure']
+  draft.preserve = ['non-target-slides']
+  draft.requiredEvidence = [
+    'dry-run',
+    'semantic-diff',
+    'png-preview',
+    'vision-check',
+    'vision-diff',
+  ]
+  draft.expectedStructure = { slideCountDelta: 1, changedSlides: [10], objectTypes: [] }
+  writeJson(fixture.draft, draft)
+  writeJson(fixture.dryRun, {
+    schemaVersion: 'pptx-copy-from/v1',
+    status: 'success',
+    input: fixture.source,
+    source: { path: fixture.donor, slides: [2] },
+    selection: { mode: 'slides', sourceSlides: [2], sourceSlides1Based: [3] },
+    dryRun: false,
+    output: fixture.candidate,
+    candidate: fixture.candidate,
+    copied: [
+      {
+        sourceSlide: 2,
+        targetSlide: 10,
+        sourceSlidePartName: 'ppt/slides/slide3.xml',
+        sourceSlideRelsPartName: 'ppt/slides/_rels/slide3.xml.rels',
+        targetSlidePartName: 'ppt/slides/slide11.xml',
+        targetSlideRelsPartName: 'ppt/slides/_rels/slide11.xml.rels',
+        dependencies: [
+          {
+            sourcePartName: 'ppt/media/image1.png',
+            targetPartName: 'ppt/media/image2.png',
+          },
+        ],
+      },
+    ],
+    dependencyMappings: [
+      {
+        sourceSlide: 2,
+        targetSlide: 10,
+        sourcePartName: 'ppt/media/image1.png',
+        targetPartName: 'ppt/media/image2.png',
+      },
+    ],
+    changedParts: [
+      'ppt/presentation.xml',
+      'ppt/_rels/presentation.xml.rels',
+      '[Content_Types].xml',
+      'ppt/slides/slide11.xml',
+      'ppt/slides/_rels/slide11.xml.rels',
+      'ppt/media/image2.png',
+    ],
+  })
+  writeJson(fixture.diff, {
+    schemaVersion: 'pptx-diff/v1',
+    status: 'success',
+    source: fixture.source,
+    candidate: fixture.candidate,
+    summary: {
+      sourceSlideCount: 10,
+      candidateSlideCount: 11,
+      slideAdded: 1,
+      slideRemoved: 0,
+      reliableChanges: 0,
+      uncertainChanges: 0,
+      unsupportedRegions: 0,
+    },
+    slides: [{ index: 10, slide: 11, conclusion: 'added', shapeChanges: [], unsupported: [] }],
+  })
+  const preview = previewFixture(fixture.candidate)
+  preview.slidesRequested = '11'
+  preview.slidesSelected = [11]
+  preview.pages = [{ index: 11, slide: 11, file: { status: 'ok', byteLength: 100 } }]
+  writeJson(fixture.preview, preview)
+  const vision = visionFixture(fixture.candidate)
+  vision.scope = { requested: '11', slides: [11] }
+  writeJson(fixture.vision, vision)
+  const visionDiff = visionDiffFixture({
+    passed: true,
+    source: fixture.source,
+    candidate: fixture.candidate,
+  })
+  visionDiff.scope = { requested: '11', slides: [11] }
+  writeJson(fixture.visionDiff, visionDiff)
+  return fixture
+}
+
+test('edit contract gate accepts pptx-copy-from structural evidence without patch opResults', () => {
+  const fixture = writeCopyFromContractFixture()
+  generateContract(fixture)
+  const report = runGate(fixture)
+
+  assert.equal(report.agentGate.passed, true)
+  assert.equal(report.summary.coveredTargetCount, 1)
+  assert.equal(report.targetCoverage[0].copyFrom.sourceSlide, 2)
+  assert.equal(report.targetCoverage[0].copyFrom.targetSlidePartName, 'ppt/slides/slide11.xml')
+  assert.equal(
+    report.checks.some(
+      (item) => item.name === 'copy-from-structural-evidence' && item.status === 'pass',
+    ),
+    true,
+  )
+  assert.equal('opResults' in JSON.parse(readFileSync(fixture.dryRun, 'utf8')), false)
+})
+
+test('edit contract gate rejects copy-from evidence bound to the wrong donor slide', () => {
+  const fixture = writeCopyFromContractFixture()
+  const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  evidence.copied[0].sourceSlide = 1
+  writeJson(fixture.dryRun, evidence)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(
+    report.blockers.some((item) => item.code === 'copy-from-source-slide-mismatch'),
+    true,
+  )
+})
+
 test('edit contract generator merges and binds a deterministic session-rules overlay', () => {
   const fixture = writeSessionRuleFixture()
   const contract = generateContract(fixture, { sessionResolution: fixture.sessionResolution })

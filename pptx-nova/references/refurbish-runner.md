@@ -135,12 +135,14 @@ Confirm:
 - no source content disappeared or became a screenshot substitute;
 - no new overlap, clipping, weak contrast, placeholder residue, or broken page chrome is visible.
 
-Write `visual_review.json`. When macOS PowerPoint is available for a deliverable, run the bundled
-clean-open helper. Feedback requests additionally require `skill-feedback.md` and the feedback gate.
+Write `visual_review.json`; when macOS PowerPoint is available for a deliverable, run the bundled clean-open helper. Feedback requests additionally require `skill-feedback.md` and the feedback gate.
+
+If the final candidate contains ChartEx parts, xdoc preview/compare is not PowerPoint-native proof. Generate a candidate-bound `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method pdf-render` report covering every ChartEx slide and pass it to
+`pptx-nova-finalize-evidence.mjs --mode refurbish --candidate <candidate> --powerpoint-native-render <report>`. Installed/scriptable PowerPoint makes missing, stale, or incomplete coverage a blocker; unavailable PowerPoint remains an explicit unverified risk.
+Window capture is retained only after pdf-render failure and does not satisfy the ChartEx gate.
 
 If extra repair passes ran after the standard runner, the canonical evidence still describes the earlier
-candidate. Rebind it to the published final before delivering: regenerate `final-inspect.json` from the
-published PPTX, re-run `pptx-nova-finalize-evidence.mjs --mode refurbish` (verify by SHA-256), and refresh
-stale `visual_review.json`/content-audit paths. Do not hand-edit evidence JSON to swap paths.
+candidate. Before delivery, regenerate `final-inspect.json`, re-run `pptx-nova-finalize-evidence.mjs --mode refurbish --candidate <published-pptx>` with bound PowerPoint-native evidence when ChartEx exists, and verify SHA-256.
+Refresh stale `visual_review.json`/content-audit paths; never hand-edit evidence JSON to swap paths.
 
 Deliver only after compare and binding pass; list only key outputs, gates, evidence, and risks.

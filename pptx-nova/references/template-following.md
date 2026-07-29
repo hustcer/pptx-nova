@@ -77,7 +77,21 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
 3. Write `template-audit.json` and `template-affordances.json`, then use those
    affordances to write `template-frame-map.json`.
 4. Build the starter deck by duplicating or copying mapped source slides into a
-   run-dir PPTX. Do not create blank mapped slides.
+   run-dir PPTX. Do not create blank mapped slides. When several source slides
+   are needed, copy them in one transaction:
+
+   ```bash
+   xdoc pptx copy-from <run-dir>/starter.pptx --from source.pptx \
+     --slides 1,3,5-8 --output <run-dir>/mapped.pptx \
+     --dry-run --json > <run-dir>/dry-run.json
+   ```
+
+   `--slides` is 1-based; `--slide` remains the 0-based single-slide
+   compatibility entry and `--all` copies the complete source. These selectors
+   are mutually exclusive. Reuse the native `pptx-copy-from/v1` report as the
+   structural Edit Contract evidence, including per-slide/dependency mappings;
+   do not loop through one slide at a time or synthesize patch `opResults`.
+
 5. Write `template-edit-plan.json` from inspect IDs, names, placeholders, and
    bbox evidence. Default every inherited object to `keep`.
 6. Apply edits to the copied objects. Use new objects only for explicit allowed
@@ -108,6 +122,7 @@ node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
 node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
   --mode template-following \
   --run-dir <run-dir> \
+  --candidate out.pptx \
   --final-inspect final-inspect.json \
   --vision vision.json \
   --fidelity-gate fidelity-gate.json \

@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { normalizeChartSemantics, validateChartSemantics } from './lib/chart-semantics.mjs'
 import { validateSessionRulesDocument } from './pptx-nova-session-rules-core.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -631,47 +632,15 @@ function assetSlot(entry) {
   }
 }
 
-function dataSeriesValues(series) {
-  if (!isPlainObject(series)) return []
-  if (Array.isArray(series.values)) return series.values
-  if (Array.isArray(series.points)) return series.points
-  return []
-}
-
-function chartDataOf(op) {
-  return op?.data ?? op?.chart?.data ?? null
-}
-
-function checkChartSemantic(op, index, errors, warnings) {
-  const data = chartDataOf(op)
+function checkChartSemantic(op, index, intent, errors, warnings) {
+  const semantics = normalizeChartSemantics(op, intent)
   const label = `ops[${index}] ${op.op}`
-  if (!data) {
-    push(warnings, 'chart-data-missing', `${label} has no data object to validate`)
-    return
+  const validation = validateChartSemantics(semantics)
+  for (const error of validation.errors) {
+    push(errors, error.code, `${label}: ${error.message}`)
   }
-
-  const categories = Array.isArray(data.categories) ? data.categories : null
-  const series = Array.isArray(data.series) ? data.series : []
-  if (series.length === 0 && !['stock'].includes(String(op.kind ?? '').toLowerCase())) {
-    push(errors, 'chart-series-missing', `${label} must provide at least one data series`)
-  }
-  if (categories && series.length > 0) {
-    series.forEach((item, seriesIndex) => {
-      const values = dataSeriesValues(item)
-      if (Array.isArray(item.values) && item.values.length !== categories.length) {
-        push(
-          errors,
-          'chart-series-category-mismatch',
-          `${label} series[${seriesIndex}] has ${item.values.length} value(s), but categories has ${categories.length}`,
-        )
-      }
-      if (values.length === 0) {
-        push(warnings, 'chart-series-empty', `${label} series[${seriesIndex}] has no values`)
-      }
-      if (!item.name) {
-        push(warnings, 'chart-series-name-missing', `${label} series[${seriesIndex}] has no name`)
-      }
-    })
+  for (const warning of validation.warnings) {
+    push(warnings, warning.code, `${label}: ${warning.message}`)
   }
 
   if (op.legend && !CHART_LEGENDS.has(String(op.legend))) {
@@ -687,17 +656,6 @@ function checkChartSemantic(op, index, errors, warnings) {
       'chart-label-position-suspicious',
       `${label} uses chart label position "${op.position}"; verify schema spelling`,
     )
-  }
-  if (String(op.kind ?? '').toLowerCase() === 'combo') {
-    const kinds = new Set(series.map((item) => item.kind).filter(Boolean))
-    const hasSecondaryAxis = series.some((item) => item.secondaryAxis === true)
-    if (kinds.size < 2 && !hasSecondaryAxis) {
-      push(
-        errors,
-        'chart-combo-not-combo',
-        `${label} combo chart needs either multiple series kinds or secondaryAxis=true`,
-      )
-    }
   }
 }
 
@@ -1284,7 +1242,9 @@ function checkPatch(patch, lock, content, assets, args, errors, warnings) {
       String(op.op ?? '').startsWith('set-chart-')
     ) {
       if (['add-chart', 'set-chart-data'].includes(op.op)) {
-        checkChartSemantic(op, index, errors, warnings)
+        const slideIndex = Number.isInteger(op.slide) ? op.slide : op.slideIndex
+        const intent = Number.isInteger(slideIndex) ? (lock.slides?.[slideIndex] ?? null) : null
+        checkChartSemantic(op, index, intent, errors, warnings)
       }
     }
     if (

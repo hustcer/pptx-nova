@@ -38,8 +38,15 @@ brand/layout/deck profile JSON, theme/style pack JSON, and updates
 4. For whole-slide reuse, use:
 
 ```bash
-xdoc pptx copy-from target.pptx --from reference.pptx --slide 0 --output out.pptx
+xdoc pptx copy-from target.pptx --from reference.pptx \
+  --slides 1,3,5-8 --output out.pptx --json
 ```
+
+`--slides` is 1-based and copies the requested set in one transaction.
+`--slide N` remains the 0-based single-slide compatibility entry; `--all`
+selects every source slide, and the selectors are mutually exclusive. Retain
+the native `pptx-copy-from/v1` report when this copy participates in an Edit
+Contract.
 
 5. For generated decks, start from `assets/examples/deck-generator-template.mjs`
    and pass selected theme/style IDs.

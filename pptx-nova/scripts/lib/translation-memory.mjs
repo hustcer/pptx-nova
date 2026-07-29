@@ -297,24 +297,33 @@ export function mergeTranslationMemoryAnchorDrafts(memory, draft) {
   if (
     draft?.summary?.draftCount !== draftItems.length ||
     draft?.summary?.blockedCount !== blockedItems.length ||
-    draft?.summary?.mergeableTranslationCount !== translations.length
+    draftItems.length !== translations.length
   ) {
     throw new Error('anchor draft summary counts do not match the report arrays')
   }
-  if (
-    translations.length > 0 &&
-    (draft?.agentGate?.draftsMergeable !== true || draft?.agentGate?.plannerRerunRequired !== true)
-  ) {
-    throw new Error('anchor draft merge requires draftsMergeable and plannerRerunRequired')
+  if (draft?.agentGate?.plannerRerunRequired !== translations.length > 0) {
+    throw new Error('anchor draft plannerRerunRequired does not match its draft count')
   }
 
   const merged = structuredClone(memory)
-  const highConfidenceIds = new Set()
+  const highConfidenceDrafts = new Map()
   for (const item of draftItems) {
-    if (!item?.unitId || item.confidence !== 'high' || highConfidenceIds.has(item.unitId)) {
+    if (
+      !item?.unitId ||
+      item.confidence !== 'high' ||
+      highConfidenceDrafts.has(item.unitId) ||
+      typeof item.sourceHash !== 'string' ||
+      typeof item.sourceText !== 'string' ||
+      typeof item.targetText !== 'string' ||
+      !Array.isArray(item.candidateAnchors) ||
+      item.candidateAnchors.length === 0 ||
+      item.candidateAnchors.some(
+        (candidate) => typeof candidate?.targetText !== 'string' || !candidate.targetText.trim(),
+      )
+    ) {
       throw new Error('anchor draft drafts[] must contain unique high-confidence unitIds')
     }
-    highConfidenceIds.add(item.unitId)
+    highConfidenceDrafts.set(item.unitId, item)
   }
   const blockedIds = new Set(
     blockedItems.map((item) => item?.unitId).filter((unitId) => typeof unitId === 'string'),
@@ -338,7 +347,8 @@ export function mergeTranslationMemoryAnchorDrafts(memory, draft) {
       throw new Error(`anchor drafts contain a missing or duplicate unitId: ${unitId}`)
     }
     seen.add(unitId)
-    if (!highConfidenceIds.has(unitId) || blockedIds.has(unitId)) {
+    const evidence = highConfidenceDrafts.get(unitId)
+    if (!evidence || blockedIds.has(unitId)) {
       throw new Error(`anchor draft merge projection is not high-confidence for ${unitId}`)
     }
     const unit = units.get(unitId)
@@ -360,6 +370,15 @@ export function mergeTranslationMemoryAnchorDrafts(memory, draft) {
       translation.anchors.some((anchor) => typeof anchor !== 'string' || !anchor.trim())
     ) {
       throw new Error(`anchor draft anchors are invalid for ${unitId}`)
+    }
+    const evidenceAnchors = evidence.candidateAnchors.map((candidate) => candidate.targetText)
+    if (
+      evidence.sourceHash !== translation.sourceHash ||
+      evidence.sourceText !== translation.sourceText ||
+      evidence.targetText !== translation.targetText ||
+      JSON.stringify(evidenceAnchors) !== JSON.stringify(translation.anchors)
+    ) {
+      throw new Error(`anchor draft merge projection does not match draft evidence for ${unitId}`)
     }
     let cursor = 0
     for (const anchor of translation.anchors) {

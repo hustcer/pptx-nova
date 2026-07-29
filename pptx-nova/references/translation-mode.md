@@ -175,10 +175,12 @@ If the current xdoc capability index discloses `pptx.i18n-anchor-draft` and the
 first plan is blocked, the runner invokes that read-only helper before asking
 for manual target segments. It persists `i18n-anchor-draft.json`, accepts only
 `translationsDraft` entries guarded by `agentGate.applyAuthorized=false`, merges
-their unique ordered anchors into
+their evidence-bound, one-to-one ordered anchors into
 `translation-memory.anchor-draft.json`, snapshots the pre-draft translations
-and plan, rematerializes `translations.json`, and reruns `i18n-plan`. It
-continues automatically only when the new plan passes. Partial drafts remain
+and plan, rematerializes `translations.json`, and reruns `i18n-plan`. The merge
+helper verifies every projected anchor against the matching
+`drafts[].candidateAnchors` evidence. It continues automatically only when the
+new plan passes. Partial drafts remain
 bound to the anchor memory and any subsequent target-segment scaffold is
 derived from that memory, so accepted anchors are not lost.
 If the planner emits target-segment repairs, preparation stops with
@@ -308,12 +310,17 @@ debugging path.
    Merge only `translationsDraft.translations[]` into the existing
    translations by `unitId`; never replace the full document with that partial
    projection and never merge `blocked[].candidateAnchors`.
-   `agentGate.applyAuthorized` is always false. Rerun `i18n-plan` using the
+   `agentGate.applyAuthorized` is always false. `summary.draftCount` must equal
+   both `drafts.length` and `translationsDraft.translations.length`, and
+   `agentGate.plannerRerunRequired` must be true exactly when that count is
+   non-zero. Rerun `i18n-plan` using the
    report's `rerunArgs[]` / `rerunCommand`; only the new plan's
    `applyGate.passed=true` authorizes execution. Repeated tokens, reordered
-   runs, CJK paraphrases, punctuation-only tokens, short ordinary words, and
+   runs, CJK paraphrases, punctuation-only tokens, context-inferred short ordinary words, and
    stale source/segment contracts remain blocked and fall through to the
-   target-segments repair below.
+   target-segments repair below. A short styled source token preserved exactly
+   and uniquely in the target is structurally safe (`Git`, `Vue`, short technical
+   identifiers); do not reject it only because of length.
 
    When an apply-blocking review contains `reviewRequired[].repair` with
    `kind=target-segments`, use that object as the authoritative repair material:
@@ -337,10 +344,12 @@ debugging path.
    - Rerun `i18n-plan`. Never apply a template with `ready=false`; only the new
      plan with `applyGate.passed=true` authorizes execution.
 
-   A unique ordered `anchors[]` mapping may allow `i18n-plan` to resolve simple
-   hyperlink groups automatically. Repeated, missing, reordered, or otherwise
-   ambiguous anchors remain review-required and must use the explicit repair
-   template.
+   An explicit `anchors[]` mapping may allow `i18n-plan` to resolve simple
+   hyperlink groups automatically only when it contains exactly one non-empty
+   target anchor per non-empty styled/protected source run, in source order,
+   and every anchor occurs exactly once in `targetText` (including overlapping
+   matches). Repeated, missing, reordered, or otherwise ambiguous anchors remain
+   review-required and must use the explicit repair template.
 
 7. Replace text in place while preserving OOXML structure:
    - Apply generated artifacts only when `i18n-plan.applyGate.passed=true`.

@@ -128,13 +128,19 @@ if (args[0] === 'schema') {
   const report = {
     schemaVersion: 'pptx-i18n-anchor-draft/v1',
     status: drafts.length > 0 ? 'pass' : 'no-op',
-    summary: { draftCount: drafts.length, blockedCount: 0, mergeableTranslationCount: drafts.length },
+    summary: { draftCount: drafts.length, blockedCount: 0 },
     agentGate: {
-      draftsMergeable: drafts.length > 0,
       applyAuthorized: false,
       plannerRerunRequired: drafts.length > 0,
     },
-    drafts: drafts.map((item) => ({ unitId: item.unitId, confidence: 'high' })),
+    drafts: drafts.map((item) => ({
+      unitId: item.unitId,
+      sourceHash: item.sourceHash,
+      sourceText: item.sourceText,
+      targetText: item.targetText,
+      confidence: 'high',
+      candidateAnchors: item.anchors.map((targetText) => ({ targetText })),
+    })),
     translationsDraft: {
       schemaVersion: 'pptx-i18n-anchor-merge/v1',
       targetSchemaVersion: 'pptx-i18n-translations/v1',

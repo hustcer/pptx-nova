@@ -56,6 +56,23 @@ const scan = {
   },
 }
 
+function anchorDraftEvidence({
+  confidence = 'high',
+  sourceHash = 'sha256:a',
+  sourceText = 'Revenue',
+  targetText = 'Umsatz',
+  anchor = targetText,
+} = {}) {
+  return {
+    unitId: 'slide-1',
+    sourceHash,
+    sourceText,
+    targetText,
+    confidence,
+    candidateAnchors: [{ targetText: anchor }],
+  }
+}
+
 test('translation memory groups exact source text and keeps review inventory lazy', () => {
   const memory = buildTranslationMemory(scan, {
     sourceSha256: 'sha256:source',
@@ -151,15 +168,14 @@ test('translation memory merges only guarded high-confidence anchor drafts by un
     targetLang: 'de',
   })
   memory.entries.find((entry) => entry.sourceText === 'Revenue').targetText = 'Umsatz'
-  const merged = mergeTranslationMemoryAnchorDrafts(memory, {
+  const validDraft = {
     schemaVersion: 'pptx-i18n-anchor-draft/v1',
     agentGate: {
-      draftsMergeable: true,
       applyAuthorized: false,
       plannerRerunRequired: true,
     },
-    summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
-    drafts: [{ unitId: 'slide-1', confidence: 'high' }],
+    summary: { draftCount: 1, blockedCount: 0 },
+    drafts: [anchorDraftEvidence()],
     blocked: [],
     translationsDraft: {
       schemaVersion: 'pptx-i18n-anchor-merge/v1',
@@ -175,7 +191,8 @@ test('translation memory merges only guarded high-confidence anchor drafts by un
         },
       ],
     },
-  })
+  }
+  const merged = mergeTranslationMemoryAnchorDrafts(memory, validDraft)
   assert.equal(merged.anchorDraftMerge.unitCount, 1)
   assert.deepEqual(merged.memory.unitOverrides, [{ unitId: 'slide-1', anchors: ['Umsatz'] }])
   const slideOnlyScan = {
@@ -189,6 +206,13 @@ test('translation memory merges only guarded high-confidence anchor drafts by un
     ['Umsatz'],
   )
 
+  const tamperedProjection = structuredClone(validDraft)
+  tamperedProjection.drafts[0].candidateAnchors[0].targetText = 'Erlös'
+  assert.throws(
+    () => mergeTranslationMemoryAnchorDrafts(memory, tamperedProjection),
+    /does not match draft evidence/,
+  )
+
   const overlappingMemory = structuredClone(memory)
   overlappingMemory.entries.find((entry) => entry.sourceText === 'Revenue').targetText = 'AAAAA'
   assert.throws(
@@ -196,12 +220,11 @@ test('translation memory merges only guarded high-confidence anchor drafts by un
       mergeTranslationMemoryAnchorDrafts(overlappingMemory, {
         schemaVersion: 'pptx-i18n-anchor-draft/v1',
         agentGate: {
-          draftsMergeable: true,
           applyAuthorized: false,
           plannerRerunRequired: true,
         },
-        summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
-        drafts: [{ unitId: 'slide-1', confidence: 'high' }],
+        summary: { draftCount: 1, blockedCount: 0 },
+        drafts: [anchorDraftEvidence({ targetText: 'AAAAA', anchor: 'AAAA' })],
         blocked: [],
         translationsDraft: {
           schemaVersion: 'pptx-i18n-anchor-merge/v1',
@@ -226,11 +249,10 @@ test('translation memory merges only guarded high-confidence anchor drafts by un
       mergeTranslationMemoryAnchorDrafts(memory, {
         schemaVersion: 'pptx-i18n-anchor-draft/v1',
         agentGate: {
-          draftsMergeable: true,
           applyAuthorized: true,
           plannerRerunRequired: false,
         },
-        summary: { draftCount: 0, blockedCount: 0, mergeableTranslationCount: 0 },
+        summary: { draftCount: 0, blockedCount: 0 },
         drafts: [],
         blocked: [],
         translationsDraft: {
@@ -247,12 +269,11 @@ test('translation memory merges only guarded high-confidence anchor drafts by un
       mergeTranslationMemoryAnchorDrafts(memory, {
         schemaVersion: 'pptx-i18n-anchor-draft/v1',
         agentGate: {
-          draftsMergeable: true,
           applyAuthorized: false,
           plannerRerunRequired: true,
         },
-        summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
-        drafts: [{ unitId: 'slide-1', confidence: 'high' }],
+        summary: { draftCount: 1, blockedCount: 0 },
+        drafts: [anchorDraftEvidence()],
         blocked: [],
         translationsDraft: {
           schemaVersion: 'pptx-i18n-anchor-merge/v1',
@@ -276,12 +297,11 @@ test('translation memory merges only guarded high-confidence anchor drafts by un
       mergeTranslationMemoryAnchorDrafts(memory, {
         schemaVersion: 'pptx-i18n-anchor-draft/v1',
         agentGate: {
-          draftsMergeable: true,
           applyAuthorized: false,
           plannerRerunRequired: true,
         },
-        summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
-        drafts: [{ unitId: 'slide-1', confidence: 'blocked' }],
+        summary: { draftCount: 1, blockedCount: 0 },
+        drafts: [anchorDraftEvidence({ confidence: 'blocked' })],
         blocked: [],
         translationsDraft: {
           schemaVersion: 'pptx-i18n-anchor-merge/v1',

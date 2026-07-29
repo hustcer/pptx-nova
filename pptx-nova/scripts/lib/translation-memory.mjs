@@ -258,6 +258,138 @@ export function materializeTranslations(scan, memory) {
   }
 }
 
+function countOccurrences(text, needle) {
+  if (!needle) return 0
+  let count = 0
+  let cursor = 0
+  while (cursor <= text.length - needle.length) {
+    const found = text.indexOf(needle, cursor)
+    if (found < 0) break
+    count += 1
+    cursor = found + 1
+  }
+  return count
+}
+
+export function mergeTranslationMemoryAnchorDrafts(memory, draft) {
+  if (memory?.schemaVersion !== MEMORY_SCHEMA) {
+    throw new Error(`translation memory must use ${MEMORY_SCHEMA}`)
+  }
+  if (draft?.schemaVersion !== 'pptx-i18n-anchor-draft/v1') {
+    throw new Error('anchor draft must use pptx-i18n-anchor-draft/v1')
+  }
+  if (draft?.agentGate?.applyAuthorized !== false) {
+    throw new Error('an anchor draft must never authorize apply')
+  }
+  const translations = draft?.translationsDraft?.translations
+  const draftItems = draft?.drafts
+  const blockedItems = draft?.blocked
+  if (
+    draft?.translationsDraft?.schemaVersion !== 'pptx-i18n-anchor-merge/v1' ||
+    draft?.translationsDraft?.targetSchemaVersion !== TRANSLATIONS_SCHEMA ||
+    draft?.translationsDraft?.mergeBy !== 'unitId' ||
+    !Array.isArray(translations) ||
+    !Array.isArray(draftItems) ||
+    !Array.isArray(blockedItems)
+  ) {
+    throw new Error('anchor draft report arrays or translationsDraft contract are invalid')
+  }
+  if (
+    draft?.summary?.draftCount !== draftItems.length ||
+    draft?.summary?.blockedCount !== blockedItems.length ||
+    draft?.summary?.mergeableTranslationCount !== translations.length
+  ) {
+    throw new Error('anchor draft summary counts do not match the report arrays')
+  }
+  if (
+    translations.length > 0 &&
+    (draft?.agentGate?.draftsMergeable !== true || draft?.agentGate?.plannerRerunRequired !== true)
+  ) {
+    throw new Error('anchor draft merge requires draftsMergeable and plannerRerunRequired')
+  }
+
+  const merged = structuredClone(memory)
+  const highConfidenceIds = new Set()
+  for (const item of draftItems) {
+    if (!item?.unitId || item.confidence !== 'high' || highConfidenceIds.has(item.unitId)) {
+      throw new Error('anchor draft drafts[] must contain unique high-confidence unitIds')
+    }
+    highConfidenceIds.add(item.unitId)
+  }
+  const blockedIds = new Set(
+    blockedItems.map((item) => item?.unitId).filter((unitId) => typeof unitId === 'string'),
+  )
+  const units = new Map()
+  for (const entry of merged.entries ?? []) {
+    for (const context of entry.contexts ?? []) {
+      if (!context?.unitId || units.has(context.unitId)) {
+        throw new Error(
+          `translation memory contains a missing or duplicate unit context: ${context?.unitId}`,
+        )
+      }
+      units.set(context.unitId, { context, entry })
+    }
+  }
+  const overrides = new Map((merged.unitOverrides ?? []).map((item) => [item.unitId, item]))
+  const seen = new Set()
+  for (const translation of translations) {
+    const unitId = translation?.unitId
+    if (!unitId || seen.has(unitId)) {
+      throw new Error(`anchor drafts contain a missing or duplicate unitId: ${unitId}`)
+    }
+    seen.add(unitId)
+    if (!highConfidenceIds.has(unitId) || blockedIds.has(unitId)) {
+      throw new Error(`anchor draft merge projection is not high-confidence for ${unitId}`)
+    }
+    const unit = units.get(unitId)
+    if (!unit) throw new Error(`anchor draft references unknown unitId: ${unitId}`)
+    if (translation.sourceHash !== unit.context.sourceHash) {
+      throw new Error(`anchor draft sourceHash is stale for ${unitId}`)
+    }
+    if (translation.sourceText !== unit.entry.sourceText) {
+      throw new Error(`anchor draft sourceText is stale for ${unitId}`)
+    }
+    const prior = overrides.get(unitId) ?? { unitId }
+    const expectedTarget = prior.targetText ?? unit.entry.targetText
+    if (typeof expectedTarget !== 'string' || translation.targetText !== expectedTarget) {
+      throw new Error(`anchor draft targetText is stale for ${unitId}`)
+    }
+    if (
+      !Array.isArray(translation.anchors) ||
+      translation.anchors.length === 0 ||
+      translation.anchors.some((anchor) => typeof anchor !== 'string' || !anchor.trim())
+    ) {
+      throw new Error(`anchor draft anchors are invalid for ${unitId}`)
+    }
+    let cursor = 0
+    for (const anchor of translation.anchors) {
+      if (countOccurrences(expectedTarget, anchor) !== 1) {
+        throw new Error(`anchor draft anchor is not unique for ${unitId}`)
+      }
+      const found = expectedTarget.indexOf(anchor, cursor)
+      if (found < cursor) throw new Error(`anchor draft anchors are out of order for ${unitId}`)
+      cursor = found + anchor.length
+    }
+    if (
+      prior.anchors !== undefined &&
+      JSON.stringify(prior.anchors) !== JSON.stringify(translation.anchors)
+    ) {
+      throw new Error(`anchor draft conflicts with existing anchors for ${unitId}`)
+    }
+    overrides.set(unitId, { ...prior, anchors: structuredClone(translation.anchors) })
+  }
+  merged.unitOverrides = [...overrides.values()]
+  return {
+    memory: merged,
+    anchorDraftMerge: {
+      schemaVersion: 'pptx-nova-translation-anchor-draft-merge/v1',
+      unitCount: translations.length,
+      unitIds: [...seen],
+      plannerRerunRequired: translations.length > 0,
+    },
+  }
+}
+
 export function mergeTranslationMemoryRepairs(memory, plan) {
   if (memory?.schemaVersion !== MEMORY_SCHEMA) {
     throw new Error(`translation memory must use ${MEMORY_SCHEMA}`)

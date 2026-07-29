@@ -28,6 +28,7 @@ import {
   buildTranslationMemory,
   expandReviewInventory,
   materializeTranslations,
+  mergeTranslationMemoryAnchorDrafts,
   mergeTranslationMemoryRepairs,
 } from './lib/translation-memory.mjs'
 import { createProgressReporter } from './pptx-nova-progress.mjs'
@@ -198,6 +199,7 @@ function artifactsFor(args) {
     memory: args.memory,
     memoryFill: join(args.runDir, 'translation-memory.fill.jsonl'),
     memoryFilled: join(args.runDir, 'translation-memory.filled.json'),
+    anchorDraftMemory: join(args.runDir, 'translation-memory.anchor-draft.json'),
     glossary: join(args.runDir, 'translation-glossary.json'),
     constraints: join(args.runDir, 'translation-constraints.json'),
     constraintsCheck: join(args.runDir, 'translation-constraints-check.json'),
@@ -209,7 +211,10 @@ function artifactsFor(args) {
       : null,
     memoryRepair: nextRepairArtifactPath(args),
     translations: join(args.runDir, 'translations.json'),
+    translationsBeforeAnchorDraft: join(args.runDir, 'translations.before-anchor-draft.json'),
+    anchorDraft: join(args.runDir, 'i18n-anchor-draft.json'),
     plan: join(args.runDir, 'i18n-plan.json'),
+    planBeforeAnchorDraft: join(args.runDir, 'i18n-plan.before-anchor-draft.json'),
     textPlan: join(args.runDir, 'i18n-text-plan-input.json'),
     replaceText: join(args.runDir, 'replace-text-input.json'),
     replaceChartText: join(args.runDir, 'replace-chart-text-input.json'),
@@ -266,6 +271,12 @@ function nextRepairArtifactPath(args) {
 function readJson(path, label) {
   if (!existsSync(path)) throw new Error(`${label} does not exist: ${path}`)
   return JSON.parse(readFileSync(path, 'utf8'))
+}
+
+function supportsPptxSubcommand(artifacts, name) {
+  if (!existsSync(artifacts.capabilities)) return false
+  const capabilities = readJson(artifacts.capabilities, 'xdoc capabilities')
+  return capabilities?.capabilities?.pptxSubcommands?.includes(name) === true
 }
 
 function writeJson(path, value, overwrite = false) {
@@ -558,6 +569,7 @@ function initialSummary(args, artifacts) {
     glossary: null,
     constraints: null,
     plan: null,
+    anchorDraft: null,
     candidate: null,
     nextAction: null,
     resumeStage: null,
@@ -761,7 +773,7 @@ function applyPlan(args, artifacts, summary, classified, memory, glossary, repor
     ]
     return
   }
-  const planResult = phase(summary, reporter, 'i18n-plan', () =>
+  let planResult = phase(summary, reporter, 'i18n-plan', () =>
     runXdocReport(
       args,
       artifacts.plan,
@@ -778,13 +790,81 @@ function applyPlan(args, artifacts, summary, classified, memory, glossary, repor
       { allowFailure: true, expectedSchema: 'pptx-i18n-plan/v1' },
     ),
   )
+  let planningMemory = memory
+  if (
+    planResult.full?.applyGate?.passed !== true &&
+    supportsPptxSubcommand(artifacts, 'i18n-anchor-draft')
+  ) {
+    const draftResult = phase(summary, reporter, 'i18n-anchor-draft', () =>
+      runXdocReport(
+        args,
+        artifacts.anchorDraft,
+        [
+          'pptx',
+          'i18n-anchor-draft',
+          '--source',
+          args.source,
+          '--units',
+          classified.path,
+          '--data',
+          artifacts.translations,
+        ],
+        { expectedSchema: 'pptx-i18n-anchor-draft/v1' },
+      ),
+    )
+    const merged = mergeTranslationMemoryAnchorDrafts(memory, draftResult.full)
+    summary.anchorDraft = {
+      status: draftResult.full.status,
+      summary: draftResult.full.summary,
+      agentGate: draftResult.full.agentGate,
+      mergedUnitCount: merged.anchorDraftMerge.unitCount,
+    }
+    if (merged.anchorDraftMerge.unitCount > 0) {
+      phase(summary, reporter, 'anchor-draft-plan-snapshot', () =>
+        writeJson(artifacts.planBeforeAnchorDraft, planResult.full, args.overwrite),
+      )
+      phase(summary, reporter, 'anchor-draft-translations-snapshot', () =>
+        writeJson(artifacts.translationsBeforeAnchorDraft, translations, args.overwrite),
+      )
+      phase(summary, reporter, 'anchor-draft-memory', () =>
+        writeJson(artifacts.anchorDraftMemory, merged.memory, args.overwrite),
+      )
+      const anchorDraftTranslations = phase(summary, reporter, 'anchor-draft-translations', () => {
+        const value = materializeTranslations(classified.scan, merged.memory)
+        // translations.json is generated earlier in this same run. Replace
+        // it only after preserving the pre-draft snapshot so downstream
+        // finalization consumes the exact planner-authorized contract.
+        writeJson(artifacts.translations, value, true)
+        return value
+      })
+      planResult = phase(summary, reporter, 'i18n-plan-after-anchor-draft', () =>
+        runXdocReport(
+          args,
+          artifacts.plan,
+          [
+            'pptx',
+            'i18n-plan',
+            '--source',
+            args.source,
+            '--units',
+            classified.path,
+            '--data',
+            artifacts.translations,
+          ],
+          { allowFailure: true, expectedSchema: 'pptx-i18n-plan/v1' },
+        ),
+      )
+      planningMemory = merged.memory
+      summary.anchorDraft.translationCount = anchorDraftTranslations.translations.length
+    }
+  }
   summary.plan = {
     status: planResult.full.status,
     summary: planResult.full.summary,
     applyGate: planResult.full.applyGate,
   }
   if (planResult.full?.applyGate?.passed !== true) {
-    const repairedMemory = mergeTranslationMemoryRepairs(memory, planResult.full)
+    const repairedMemory = mergeTranslationMemoryRepairs(planningMemory, planResult.full)
     if (repairedMemory.repairScaffold.unitCount > 0) {
       phase(summary, reporter, 'target-segments-repair-scaffold', () =>
         writeJson(artifacts.memoryRepair, repairedMemory, args.overwrite),
@@ -795,6 +875,9 @@ function applyPlan(args, artifacts, summary, classified, memory, glossary, repor
       summary.status = 'needs-plan-repair'
       summary.nextAction =
         planResult.compact?.nextAction ?? 'Repair the blocking plan items and rerun.'
+      if (summary.anchorDraft?.mergedUnitCount > 0) {
+        summary.nextAction += ` Continue from the guarded anchor memory with --memory ${artifacts.anchorDraftMemory} so accepted anchors are not lost.`
+      }
     }
     summary.requiredReferences = [
       requiredReference(
@@ -968,6 +1051,7 @@ function compactResult(summary) {
       constraints: summary.constraints,
       inventory: summary.inventory,
       plan: summary.plan,
+      anchorDraft: summary.anchorDraft,
       translationCount: summary.translationCount ?? null,
     },
     artifacts: {
@@ -1008,6 +1092,10 @@ function compactResult(summary) {
         phasePassed('memory-fill-merge') && existsSync(summary.artifacts.memoryFilled)
           ? summary.artifacts.memoryFilled
           : null,
+      anchorDraftMemory:
+        phasePassed('anchor-draft-memory') && existsSync(summary.artifacts.anchorDraftMemory)
+          ? summary.artifacts.anchorDraftMemory
+          : null,
       glossary:
         summary.artifacts.glossary && existsSync(summary.artifacts.glossary)
           ? summary.artifacts.glossary
@@ -1029,9 +1117,23 @@ function compactResult(summary) {
         phasePassed('materialize-translations') && existsSync(summary.artifacts.translations)
           ? summary.artifacts.translations
           : null,
+      translationsBeforeAnchorDraft:
+        phasePassed('anchor-draft-translations-snapshot') &&
+        existsSync(summary.artifacts.translationsBeforeAnchorDraft)
+          ? summary.artifacts.translationsBeforeAnchorDraft
+          : null,
+      anchorDraft:
+        phasePassed('i18n-anchor-draft') && existsSync(summary.artifacts.anchorDraft)
+          ? summary.artifacts.anchorDraft
+          : null,
       plan:
         phasePassed('i18n-plan') && summary.plan && existsSync(summary.artifacts.plan)
           ? summary.artifacts.plan
+          : null,
+      planBeforeAnchorDraft:
+        phasePassed('anchor-draft-plan-snapshot') &&
+        existsSync(summary.artifacts.planBeforeAnchorDraft)
+          ? summary.artifacts.planBeforeAnchorDraft
           : null,
       candidate:
         summary.status === 'prepared' &&

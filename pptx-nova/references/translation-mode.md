@@ -171,6 +171,16 @@ bytes, languages, every source hash, and the translation constraints before
 producing a stable prepared candidate. Feed that candidate, the emitted
 classified scan, and `translations.json` to the finalizer in
 `references/translation-runner.md`.
+If the current xdoc capability index discloses `pptx.i18n-anchor-draft` and the
+first plan is blocked, the runner invokes that read-only helper before asking
+for manual target segments. It persists `i18n-anchor-draft.json`, accepts only
+`translationsDraft` entries guarded by `agentGate.applyAuthorized=false`, merges
+their unique ordered anchors into
+`translation-memory.anchor-draft.json`, snapshots the pre-draft translations
+and plan, rematerializes `translations.json`, and reruns `i18n-plan`. It
+continues automatically only when the new plan passes. Partial drafts remain
+bound to the anchor memory and any subsequent target-segment scaffold is
+derived from that memory, so accepted anchors are not lost.
 If the planner emits target-segment repairs, preparation stops with
 `needs-target-segments` and writes a repair scaffold (first round:
 `translation-memory.repair.json`; later rounds: `translation-memory.repair-N.json`
@@ -282,6 +292,28 @@ debugging path.
    translations, refresh stale source hashes,
    add reliable styled-token anchors, broaden shared-part scope, or route the
    item to manual review before applying changes.
+
+   For `mixed-style-no-anchor`, prefer the review item's unit-specific
+   `draftCommand` / `suggestedCommand`, or triage the current scope directly:
+
+   ```bash
+   xdoc pptx i18n-anchor-draft \
+     --source source.pptx \
+     --units <run-dir>/i18n-scan-source.json \
+     --data <run-dir>/translations.json \
+     --output <run-dir>/i18n-anchor-draft.json \
+     --json
+   ```
+
+   Merge only `translationsDraft.translations[]` into the existing
+   translations by `unitId`; never replace the full document with that partial
+   projection and never merge `blocked[].candidateAnchors`.
+   `agentGate.applyAuthorized` is always false. Rerun `i18n-plan` using the
+   report's `rerunArgs[]` / `rerunCommand`; only the new plan's
+   `applyGate.passed=true` authorizes execution. Repeated tokens, reordered
+   runs, CJK paraphrases, punctuation-only tokens, short ordinary words, and
+   stale source/segment contracts remain blocked and fall through to the
+   target-segments repair below.
 
    When an apply-blocking review contains `reviewRequired[].repair` with
    `kind=target-segments`, use that object as the authoritative repair material:
@@ -674,6 +706,10 @@ Required interpretation:
   scope, consume `reviewRequired[].repair` when present, or handle the unit
   manually before applying. A target-segments repair is a fillable template,
   not an executable patch.
+- `reviewRequired[].category=mixed-style-no-anchor`: run its `draftCommand`
+  first. Merge only high-confidence `translationsDraft` entries by `unitId`,
+  then rerun the planner. The anchor report never authorizes apply; blocked
+  candidates continue through `reviewRequired[].repair`.
 - `deliveryGate.passed=false`: this is expected when non-applied review signals
   remain. It means final delivery still needs candidate scan, style diff,
   preview/vision review, and text overflow checks.

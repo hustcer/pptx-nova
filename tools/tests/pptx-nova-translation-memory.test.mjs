@@ -7,6 +7,7 @@ import {
   buildTranslationMemory,
   expandReviewInventory,
   materializeTranslations,
+  mergeTranslationMemoryAnchorDrafts,
   mergeTranslationMemoryRepairs,
 } from '../../pptx-nova/scripts/lib/translation-memory.mjs'
 
@@ -141,6 +142,164 @@ test('translation memory merges planner target-segment repair templates by unitI
   assert.equal(repaired.unitOverrides[0].unitId, 'slide-1')
   assert.equal(repaired.unitOverrides[0].targetSegmentsContractId, 'sha256:contract')
   assert.equal(repaired.unitOverrides[0].targetSegments.length, 2)
+})
+
+test('translation memory merges only guarded high-confidence anchor drafts by unitId', () => {
+  const memory = buildTranslationMemory(scan, {
+    sourceSha256: 'sha256:source',
+    unitsSha256: 'sha256:units',
+    targetLang: 'de',
+  })
+  memory.entries.find((entry) => entry.sourceText === 'Revenue').targetText = 'Umsatz'
+  const merged = mergeTranslationMemoryAnchorDrafts(memory, {
+    schemaVersion: 'pptx-i18n-anchor-draft/v1',
+    agentGate: {
+      draftsMergeable: true,
+      applyAuthorized: false,
+      plannerRerunRequired: true,
+    },
+    summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
+    drafts: [{ unitId: 'slide-1', confidence: 'high' }],
+    blocked: [],
+    translationsDraft: {
+      schemaVersion: 'pptx-i18n-anchor-merge/v1',
+      targetSchemaVersion: 'pptx-i18n-translations/v1',
+      mergeBy: 'unitId',
+      translations: [
+        {
+          unitId: 'slide-1',
+          sourceHash: 'sha256:a',
+          sourceText: 'Revenue',
+          targetText: 'Umsatz',
+          anchors: ['Umsatz'],
+        },
+      ],
+    },
+  })
+  assert.equal(merged.anchorDraftMerge.unitCount, 1)
+  assert.deepEqual(merged.memory.unitOverrides, [{ unitId: 'slide-1', anchors: ['Umsatz'] }])
+  const slideOnlyScan = {
+    ...scan,
+    i18nUnits: { units: [scan.i18nUnits.units[0]] },
+  }
+  assert.deepEqual(
+    materializeTranslations(slideOnlyScan, merged.memory).translations.find(
+      (item) => item.unitId === 'slide-1',
+    ).anchors,
+    ['Umsatz'],
+  )
+
+  const overlappingMemory = structuredClone(memory)
+  overlappingMemory.entries.find((entry) => entry.sourceText === 'Revenue').targetText = 'AAAAA'
+  assert.throws(
+    () =>
+      mergeTranslationMemoryAnchorDrafts(overlappingMemory, {
+        schemaVersion: 'pptx-i18n-anchor-draft/v1',
+        agentGate: {
+          draftsMergeable: true,
+          applyAuthorized: false,
+          plannerRerunRequired: true,
+        },
+        summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
+        drafts: [{ unitId: 'slide-1', confidence: 'high' }],
+        blocked: [],
+        translationsDraft: {
+          schemaVersion: 'pptx-i18n-anchor-merge/v1',
+          targetSchemaVersion: 'pptx-i18n-translations/v1',
+          mergeBy: 'unitId',
+          translations: [
+            {
+              unitId: 'slide-1',
+              sourceHash: 'sha256:a',
+              sourceText: 'Revenue',
+              targetText: 'AAAAA',
+              anchors: ['AAAA'],
+            },
+          ],
+        },
+      }),
+    /anchor is not unique/,
+  )
+
+  assert.throws(
+    () =>
+      mergeTranslationMemoryAnchorDrafts(memory, {
+        schemaVersion: 'pptx-i18n-anchor-draft/v1',
+        agentGate: {
+          draftsMergeable: true,
+          applyAuthorized: true,
+          plannerRerunRequired: false,
+        },
+        summary: { draftCount: 0, blockedCount: 0, mergeableTranslationCount: 0 },
+        drafts: [],
+        blocked: [],
+        translationsDraft: {
+          schemaVersion: 'pptx-i18n-anchor-merge/v1',
+          targetSchemaVersion: 'pptx-i18n-translations/v1',
+          mergeBy: 'unitId',
+          translations: [],
+        },
+      }),
+    /must never authorize apply/,
+  )
+  assert.throws(
+    () =>
+      mergeTranslationMemoryAnchorDrafts(memory, {
+        schemaVersion: 'pptx-i18n-anchor-draft/v1',
+        agentGate: {
+          draftsMergeable: true,
+          applyAuthorized: false,
+          plannerRerunRequired: true,
+        },
+        summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
+        drafts: [{ unitId: 'slide-1', confidence: 'high' }],
+        blocked: [],
+        translationsDraft: {
+          schemaVersion: 'pptx-i18n-anchor-merge/v1',
+          targetSchemaVersion: 'pptx-i18n-translations/v1',
+          mergeBy: 'unitId',
+          translations: [
+            {
+              unitId: 'slide-1',
+              sourceHash: 'sha256:stale',
+              sourceText: 'Revenue',
+              targetText: 'Umsatz',
+              anchors: ['Umsatz'],
+            },
+          ],
+        },
+      }),
+    /sourceHash is stale/,
+  )
+  assert.throws(
+    () =>
+      mergeTranslationMemoryAnchorDrafts(memory, {
+        schemaVersion: 'pptx-i18n-anchor-draft/v1',
+        agentGate: {
+          draftsMergeable: true,
+          applyAuthorized: false,
+          plannerRerunRequired: true,
+        },
+        summary: { draftCount: 1, blockedCount: 0, mergeableTranslationCount: 1 },
+        drafts: [{ unitId: 'slide-1', confidence: 'blocked' }],
+        blocked: [],
+        translationsDraft: {
+          schemaVersion: 'pptx-i18n-anchor-merge/v1',
+          targetSchemaVersion: 'pptx-i18n-translations/v1',
+          mergeBy: 'unitId',
+          translations: [
+            {
+              unitId: 'slide-1',
+              sourceHash: 'sha256:a',
+              sourceText: 'Revenue',
+              targetText: 'Umsatz',
+              anchors: ['Umsatz'],
+            },
+          ],
+        },
+      }),
+    /unique high-confidence unitIds/,
+  )
 })
 
 test('the memory fill view carries only memoryId, sourceText, and targetText per line', () => {

@@ -38,9 +38,9 @@ if (args[0] === 'schema') {
   const counter = ${JSON.stringify(join(root, 'probe-count.txt'))}
   const count = existsSync(counter) ? Number(readFileSync(counter, 'utf8')) : 0
   writeFileSync(counter, String(count + 1))
-  print({ schemaVersion: 'cli-agent/v1', version: 'test', commands: { pptx: { subcommands: { 'i18n-scan': {}, 'i18n-plan': {} } } } })
+  print({ schemaVersion: 'cli-agent/v1', version: 'test', commands: { pptx: { subcommands: { 'i18n-scan': {}, 'i18n-plan': {}, 'i18n-anchor-draft': {} } } } })
 } else if (args.includes('--help')) {
-  process.stdout.write('--json --json-full --output --overwrite preview i18n-scan i18n-plan')
+  process.stdout.write('--json --json-full --output --overwrite preview i18n-scan i18n-plan i18n-anchor-draft')
 } else if (args[0] === '--version') {
   process.stdout.write('test')
 } else if (args[0] === 'pptx' && args[1] === 'i18n-scan') {
@@ -66,25 +66,38 @@ if (args[0] === 'schema') {
   const translations = JSON.parse(readFileSync(value('--data'), 'utf8')).translations
   const output = value('--output')
   const segmentUnits = (process.env.FAKE_PLAN_SEGMENTS ?? '').split(',').filter(Boolean)
+  const anchorUnits = (process.env.FAKE_PLAN_ANCHORS ?? '').split(',').filter(Boolean)
   const missingSegments = segmentUnits.filter((unitId) => {
     const entry = translations.find((item) => item.unitId === unitId)
     return !Array.isArray(entry?.targetSegments) || entry.targetSegments.some((segment) => typeof segment?.text !== 'string')
   })
-  if (missingSegments.length > 0) {
+  const missingAnchors = anchorUnits.filter((unitId) => {
+    const entry = translations.find((item) => item.unitId === unitId)
+    return !Array.isArray(entry?.anchors) || entry.anchors.length === 0
+  })
+  if (missingSegments.length > 0 || missingAnchors.length > 0) {
     const report = {
       schemaVersion: 'pptx-i18n-plan/v1', status: 'blocked',
       summary: { translationCount: translations.length },
-      reviewRequired: missingSegments.map((unitId) => ({
-        unitId,
-        repair: {
-          schemaVersion: 'pptx-i18n-target-segments-repair/v1', kind: 'target-segments',
-          translationPatchTemplate: {
-            unitId,
-            targetSegments: [{ segmentId: unitId + '-s1', text: null }],
-            targetSegmentsContractId: 'contract-' + unitId,
+      reviewRequired: [
+        ...missingSegments.map((unitId) => ({
+          unitId,
+          category: 'mixed-style-no-anchor',
+          repair: {
+            schemaVersion: 'pptx-i18n-target-segments-repair/v1', kind: 'target-segments',
+            translationPatchTemplate: {
+              unitId,
+              targetSegments: [{ segmentId: unitId + '-s1', text: null }],
+              targetSegmentsContractId: 'contract-' + unitId,
+            },
           },
-        },
-      })),
+        })),
+        ...missingAnchors.map((unitId) => ({
+          unitId,
+          category: 'mixed-style-no-anchor',
+          draftCommand: 'xdoc pptx i18n-anchor-draft --unit ' + unitId,
+        })),
+      ],
       conflicts: [], missingTranslations: [], applyGate: { passed: false }, deliveryGate: { passed: false }
     }
     writeFileSync(output, JSON.stringify(report))
@@ -102,6 +115,38 @@ if (args[0] === 'schema') {
   writeFileSync(output, JSON.stringify(report))
   print({ schemaVersion: 'pptx-i18n-plan-result/v1', status: 'pass', report: output, summary: report.summary, applyGate: report.applyGate, nextAction: 'apply-generated-artifacts' })
   }
+} else if (args[0] === 'pptx' && args[1] === 'i18n-anchor-draft') {
+  const output = value('--output')
+  const translations = JSON.parse(readFileSync(value('--data'), 'utf8')).translations
+  const unitIds = (process.env.FAKE_PLAN_ANCHORS ?? '').split(',').filter(Boolean)
+  const drafts = translations
+    .filter((item) => unitIds.includes(item.unitId))
+    .map((item) => ({
+      ...item,
+      anchors: [item.targetText],
+    }))
+  const report = {
+    schemaVersion: 'pptx-i18n-anchor-draft/v1',
+    status: drafts.length > 0 ? 'pass' : 'no-op',
+    summary: { draftCount: drafts.length, blockedCount: 0, mergeableTranslationCount: drafts.length },
+    agentGate: {
+      draftsMergeable: drafts.length > 0,
+      applyAuthorized: false,
+      plannerRerunRequired: drafts.length > 0,
+    },
+    drafts: drafts.map((item) => ({ unitId: item.unitId, confidence: 'high' })),
+    translationsDraft: {
+      schemaVersion: 'pptx-i18n-anchor-merge/v1',
+      targetSchemaVersion: 'pptx-i18n-translations/v1',
+      mergeBy: 'unitId',
+      translations: drafts,
+    },
+    blocked: [],
+    rerunArgs: [],
+    rerunCommand: 'xdoc pptx i18n-plan',
+  }
+  writeFileSync(output, JSON.stringify(report))
+  print(report)
 } else if (args[0] === 'pptx' && args[1] === 'replace-text') {
   copyFileSync(value('--source'), value('--output'))
   print({ schemaVersion: 'pptx-replace-text/v1', status: 'success', agentGate: { passed: true } })
@@ -589,6 +634,79 @@ test('target-segment repair rounds write sequenced scaffolds and accept the fill
     segmentsEnv,
   )
   assert.equal(finalRound.status, 'prepared')
+})
+
+test('translation preparation merges high-confidence anchor drafts and reruns the planner', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-anchor-draft-'))
+  const source = join(root, 'source.pptx')
+  const runDir = join(root, 'run')
+  const xdoc = fakeXdoc(root)
+  writeFileSync(source, 'source bytes')
+  const base = [
+    '--source',
+    source,
+    '--source-lang',
+    'multi',
+    '--target-lang',
+    'de',
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    xdoc,
+    '--progress',
+    'off',
+    '--json',
+  ]
+
+  const inventory = run(base)
+  const decisionsPath = inventory.artifacts.reviewDecisionsTemplate
+  const decisions = JSON.parse(readFileSync(decisionsPath, 'utf8'))
+  decisions.byText[0].decision = 'translate'
+  decisions.byText[0].reason = 'Visible slide copy in the source language.'
+  writeFileSync(decisionsPath, JSON.stringify(decisions, null, 2))
+  const resumed = run([...base, '--review-decisions', decisionsPath])
+  assert.equal(resumed.status, 'needs-translations')
+
+  const memoryPath = join(runDir, 'translation-memory.json')
+  const memory = JSON.parse(readFileSync(memoryPath, 'utf8'))
+  memory.entries.find((entry) => entry.sourceText === 'Revenue').targetText = 'Umsatz'
+  memory.entries.find((entry) => entry.sourceText === 'Master title').targetText = 'Mastertitel'
+  memory.entries.find((entry) => entry.sourceText === 'Forecast').targetText = 'Prognose'
+  memory.unitOverrides.push({
+    unitId: 'u3',
+    reviewDecision: 'translate',
+    reason: 'Visible shared layout text.',
+  })
+  writeFileSync(memoryPath, JSON.stringify(memory, null, 2))
+
+  const applied = run([...base, '--apply', '--overwrite'], 0, { FAKE_PLAN_ANCHORS: 'u1' })
+  assert.equal(applied.status, 'prepared')
+  assert.equal(applied.summary.plan.applyGate.passed, true)
+  assert.equal(applied.summary.anchorDraft.mergedUnitCount, 1)
+  assert.equal(applied.artifacts.anchorDraft, join(runDir, 'i18n-anchor-draft.json'))
+  assert.equal(
+    applied.artifacts.anchorDraftMemory,
+    join(runDir, 'translation-memory.anchor-draft.json'),
+  )
+  const anchorMemory = JSON.parse(readFileSync(applied.artifacts.anchorDraftMemory, 'utf8'))
+  assert.deepEqual(anchorMemory.unitOverrides.find((item) => item.unitId === 'u1').anchors, [
+    'Umsatz',
+  ])
+  const finalTranslations = JSON.parse(readFileSync(applied.artifacts.translations, 'utf8'))
+  const initialTranslations = JSON.parse(
+    readFileSync(applied.artifacts.translationsBeforeAnchorDraft, 'utf8'),
+  )
+  assert.deepEqual(finalTranslations.translations.find((item) => item.unitId === 'u1').anchors, [
+    'Umsatz',
+  ])
+  assert.equal(
+    initialTranslations.translations.find((item) => item.unitId === 'u1').anchors,
+    undefined,
+  )
+  const finalPlan = JSON.parse(readFileSync(applied.artifacts.plan, 'utf8'))
+  const initialPlan = JSON.parse(readFileSync(applied.artifacts.planBeforeAnchorDraft, 'utf8'))
+  assert.equal(initialPlan.applyGate.passed, false)
+  assert.equal(finalPlan.applyGate.passed, true)
 })
 
 test('the compact fill view feeds --apply --fill without touching the full memory JSON', () => {

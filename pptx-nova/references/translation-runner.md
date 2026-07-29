@@ -20,7 +20,9 @@ with an intermediate candidate.
 
 For a new translation, prefer `pptx-nova-translation-prepare.mjs`. It creates a hash-bound,
 content-deduplicated translation memory, resumes bound review classification, and sequentially applies
-the planner artifacts. This finalizer begins only after that preparation result is `prepared`.
+the planner artifacts. When supported by the current xdoc contract, preparation also consumes
+high-confidence `i18n-anchor-draft` merge material and reruns `i18n-plan`; it never treats the draft
+as apply authorization. This finalizer begins only after that preparation result is `prepared`.
 Preparation keeps review partitions count-only by default; use
 `--expand-review <languageUncertain|shared|embeddedWorkbook|other>` to persist
 one bound partition when its individual units are actually needed.

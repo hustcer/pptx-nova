@@ -402,6 +402,7 @@ xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output o
 xdoc pptx diff --source source.pptx --candidate out.pptx --detail summary --json
 node <skill-root>/scripts/pptx-nova-translation-prepare.mjs --source source.pptx --source-lang multi --target-lang de --run-dir <run-dir> --json
 xdoc pptx i18n-plan --source source.pptx --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-plan.json --json
+xdoc pptx i18n-anchor-draft --source source.pptx --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-anchor-draft.json --json
 xdoc pptx i18n-text-plan --source source.pptx --data translations.json --json
 xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --output <run-dir>/i18n-scan-source.json --json
 xdoc pptx i18n-scan --source translated.pptx --mode candidate --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-scan-candidate.json --json

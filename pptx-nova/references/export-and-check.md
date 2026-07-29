@@ -25,16 +25,16 @@ field-level evidence is needed. The command can take around 10 seconds, so do
 not use it as a tight retry loop.
 
 Use only `reliable` entries as machine-checkable facts. Treat `uncertain` and
-`unsupported` as review signals, and pair the diff with PNG preview or another
-domain audit before making a final judgment about visual fidelity or unsupported
-objects.
+`unsupported` as review signals. The report's `visualEvidence` block identifies
+the canonical handoff; semantic diff and PNG preview remain advisory and never
+authorize delivery.
 
-## Unified Visual Evidence (Escalation Only)
+## Unified Visual Evidence (Canonical Agent Gate)
 
-`xdoc pptx visual-verify` is an opt-in evidence and diagnosis path, not the
-default PPTX visual gate. It has net value when the task specifically needs one
-or more facts that `preview`, `vision-check`, and `vision-diff` do not package
-together:
+`xdoc pptx visual-verify` is the only xdoc report whose `decision` is consumed
+as the final Agent visual action. Run it once after the candidate is stable;
+`preview`, `diff`, `vision-diff`, and `contact-diff` remain specialized
+observation/review reports. The canonical transaction packages:
 
 - final PDF text-frame fit and rendered page-bound findings;
 - the actual selected-slide typeface/style resolution, attributed back to the
@@ -44,12 +44,11 @@ together:
 - one atomically published, hash-bound manifest with the exact PDF and PNG
   artifacts used by those checks.
 
-Do not run it merely because a deck was created or edited. Routine visual review
-still uses `preview`; ordinary existing-deck regression gating still uses
-`vision-diff`; the standard Create, Translation, and Refurbish runners retain
-their existing single-render/compare policies. `visual-verify` performs another
-render, does not create a contact sheet, and v1 implements neither OCR overflow
-nor an independent PowerPoint/Office renderer.
+Routine visual review still uses `preview`, and existing-deck diagnosis still
+uses `vision-diff` or `contact-diff`; those reports explain the result but do
+not create a second delivery verdict. `visual-verify` performs the governing
+render transaction, does not create a contact sheet, and v1 implements neither
+OCR overflow nor an independent PowerPoint/Office renderer.
 
 Confirm the current runtime disclosed the command:
 
@@ -100,6 +99,20 @@ Interpret the result in this order:
    checks under the same xdoc renderer. It does not prove PowerPoint parity or
    visual intent.
 
+Consume the persisted manifest fail-closed:
+
+```bash
+node <skill-root>/scripts/pptx-nova-visual-evidence-gate.mjs \
+  --manifest <run-dir>/visual-evidence/manifest.json \
+  --output <run-dir>/visual-evidence-gate.json \
+  --json
+```
+
+Only exit status `0` and `deliveryAuthorized=true` authorize an automated
+delivery. Exit `4` is a content blocker. Exit `5` requires actual human
+confirmation; an Agent must not reinterpret it as success. Invalid or
+internally inconsistent manifests exit `3`.
+
 `ocr-overflow=skipped` and `independent-reference=skipped` are expected v1
 limitations, not passing evidence. Keep manual PNG/contact-sheet review and
 PowerPoint snapshot/clean-open evidence when those policies apply. Never replace
@@ -123,8 +136,9 @@ xdoc pptx preview deck.pptx --slides 25-38 \
   --overwrite --json > <run-dir>/preview.json
 ```
 
-The stdout manifest is `pptx-preview/v1`. Its status fields are two-level by
-design, and the two levels use different enums on purpose:
+The stdout manifest is `pptx-preview/v1`. It is observation-only and carries a
+`visualEvidence` handoff to the canonical decision. Its status fields are
+two-level by design, and the two levels use different enums on purpose:
 
 - Top-level `status` is the **command result**: `success` | `error`.
 - Each `pages[].file.status` and `contactSheet.status` is a **per-artifact file

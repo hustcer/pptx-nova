@@ -555,18 +555,17 @@ pixel-level visual quality.
 Use these gates in order:
 
 ```text
-check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> one final pptx semantic diff for existing-deck audits when useful -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
+check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> one final pptx semantic diff for existing-deck audits when useful -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> visual-verify -> visual-evidence manifest consumer -> optional xdoc check
 ```
 
-Do not add `xdoc pptx visual-verify` to this shared pipeline by default. Use it
-once on stable inputs only when the user explicitly requests a typed
-final-render/font/pixel evidence bundle, or when a static finding must be
-arbitrated against final PDF layout. Follow `export-and-check.md`. It adds a
-separate render, has no contact sheet or independent Office renderer in v1, and
-audits both reference and candidate; therefore an inherited reference problem
-can produce `decision.action=stop` without proving a new edit regression. It
-does not replace `vision-diff`, PNG review, Translation/Refurbish comparison,
-or PowerPoint-native evidence.
+Run `xdoc pptx visual-verify` once on the stable final candidate and consume
+`visual-evidence/manifest.json` with
+`pptx-nova-visual-evidence-gate.mjs`. Follow `export-and-check.md`. Preview,
+semantic diff, `vision-diff`, contact sheets, Translation/Refurbish comparison,
+and PowerPoint-native evidence remain specialized observations; none creates a
+competing final Agent action. A reference problem can still produce
+`decision.action=stop`, so inspect subject ownership before calling it a new
+regression, but do not bypass the canonical decision.
 
 For Studio Create, Reference Create, structural Edit, strict Template Following,
 and Refurbish Existing Deck, keep `layout-final.json` before PNG/contact-sheet

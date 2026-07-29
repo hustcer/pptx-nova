@@ -240,13 +240,12 @@ worsened high/medium issues. A candidate-only `vision-check` remains useful for
 diagnosis, but it cannot reliably distinguish a regression from pre-existing
 noise in a dense legacy deck.
 
-Do not add `visual-verify` to `requiredEvidence` for ordinary edits. Its fixed
-pipeline audits static layout, final PDF layout, and font resolution on both the
-reference and candidate, so a pre-existing reference problem may correctly
-produce `decision.action=stop` but still does not prove an edit regression. Use
-`vision-diff` as the differential gate. Run `visual-verify` only as the
-diagnostic escalation described in `export-and-check.md`, and retain its
-manifest separately from the Edit Contract evidence manifest.
+Keep `visual-verify` outside the Edit Contract's semantic `requiredEvidence`
+list because it is the separate final visual decision, not another edit-kind
+fact. Its fixed pipeline audits both reference and candidate, so a pre-existing
+reference problem may correctly produce `decision.action=stop` without proving
+a new edit regression. Use `vision-diff` to explain differential risk, then
+consume the canonical visual manifest as described in `export-and-check.md`.
 
 ## Final Gate
 

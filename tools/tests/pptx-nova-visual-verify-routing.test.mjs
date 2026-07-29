@@ -10,35 +10,21 @@ function readSkill(path) {
   return readFileSync(join(skillRoot, path), 'utf8')
 }
 
-test('visual-verify is routed as an evidence escalation instead of a default runner gate', () => {
+test('visual-verify is routed as the canonical final Agent decision', () => {
   const skill = readSkill('SKILL.md')
   const common = readSkill('references/common-workflow.md')
-  const editContract = readSkill('references/edit-contract.md')
   const exportAndCheck = readSkill('references/export-and-check.md')
 
-  assert.match(skill, /explicit visual evidence/)
-  assert.match(skill, /never merely because a PPTX exists/)
-  assert.match(common, /Do not add `xdoc pptx visual-verify` to this shared pipeline by default/)
-  assert.match(editContract, /Do not add `visual-verify` to `requiredEvidence` for ordinary edits/)
+  assert.match(skill, /canonical final visual decision/)
+  assert.match(common, /Run `xdoc pptx visual-verify` once on the stable final candidate/)
 
-  assert.match(exportAndCheck, /## Unified Visual Evidence \(Escalation Only\)/)
+  assert.match(exportAndCheck, /## Unified Visual Evidence \(Canonical Agent Gate\)/)
   assert.match(exportAndCheck, /--require-command pptx\.visual-verify --strict --json/)
   assert.match(exportAndCheck, /process exit code of `0` means only that the evidence transaction/)
   assert.match(exportAndCheck, /then read `decision\.action`/)
   assert.match(exportAndCheck, /does not prove PowerPoint parity or\n\s+visual intent/)
   assert.match(exportAndCheck, /both reference and\n\s+candidate receive static-layout/)
-
-  for (const path of [
-    'scripts/pptx-nova-create-run.mjs',
-    'scripts/pptx-nova-refurbish-run.mjs',
-    'scripts/pptx-nova-translation-run.mjs',
-  ]) {
-    assert.doesNotMatch(
-      readSkill(path),
-      /visual-verify/,
-      `${path} must not add another default render`,
-    )
-  }
+  assert.match(readSkill('scripts/pptx-nova-init-run.mjs'), /pptx-nova-visual-evidence-gate\.mjs/)
 
   assert.ok(skill.split('\n').length <= 501, 'SKILL.md must stay within the 500-line guidance')
 })

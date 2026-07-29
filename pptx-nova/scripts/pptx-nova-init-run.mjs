@@ -135,6 +135,9 @@ try {
   const applyPath = join(runDir, 'apply.json')
   const visionPath = join(runDir, 'vision.json')
   const previewReportPath = join(runDir, 'preview.json')
+  const visualEvidenceDir = join(runDir, 'visual-evidence')
+  const visualEvidenceManifestPath = join(visualEvidenceDir, 'manifest.json')
+  const visualEvidenceGatePath = join(runDir, 'visual-evidence-gate.json')
   const candidatePath = join(runDir, 'candidate.pptx')
   const contactSheetPath = join(previewsDir, 'contact-sheet.png')
   const commandsPath = join(runDir, 'commands.json')
@@ -190,6 +193,8 @@ try {
     apply: `${shellQuote(args.xdocBin)} pptx apply -p ${shellQuote(patchPath)} -o ${shellQuote(candidatePath)} --overwrite --json > ${shellQuote(applyPath)}`,
     vision: `${shellQuote(args.xdocBin)} pptx vision-check ${shellQuote(candidatePath)} --json > ${shellQuote(visionPath)}`,
     preview: `${shellQuote(args.xdocBin)} pptx preview ${shellQuote(candidatePath)} --output-dir ${shellQuote(previewsDir)} --contact-sheet ${shellQuote(contactSheetPath)} --overwrite --json > ${shellQuote(previewReportPath)}`,
+    visualVerify: `${shellQuote(args.xdocBin)} pptx visual-verify --candidate ${shellQuote(candidatePath)} --output-dir ${shellQuote(visualEvidenceDir)} --overwrite --json`,
+    visualEvidenceGate: `node ${shellQuote(join(__dirname, 'pptx-nova-visual-evidence-gate.mjs'))} --manifest ${shellQuote(visualEvidenceManifestPath)} --output ${shellQuote(visualEvidenceGatePath)} --json`,
   }
   writeJson(commandsPath, commands)
 
@@ -207,6 +212,9 @@ try {
     applyPath,
     visionPath,
     previewReportPath,
+    visualEvidenceDir,
+    visualEvidenceManifestPath,
+    visualEvidenceGatePath,
     commandsPath,
     assetsDir,
     previewsDir,

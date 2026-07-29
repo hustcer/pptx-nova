@@ -165,8 +165,8 @@ and all(.pages[]; .file.status=="ok")' <run-dir>/preview.json`. After that gate 
   entries, and the three selectors are mutually exclusive. Keep the native
   `pptx-copy-from/v1` report as structural Edit Contract evidence; never
   fabricate patch `opResults` for it.
-- **Export / check / extract / explicit visual evidence**: Read `references/export-and-check.md`. Keep `preview`
-  as the default; use `visual-verify` once on stable files only for requested final-PDF/font/pixel evidence or static-vs-render diagnosis, never merely because a PPTX exists.
+- **Export / check / extract / canonical visual evidence**: Read `references/export-and-check.md`. Use `preview`
+  for human-readable PNG/contact sheets, then use `visual-verify` once on stable files as the canonical final visual decision. Consume its manifest with `pptx-nova-visual-evidence-gate.mjs`; preview/diff success never authorizes delivery.
 - **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md`, `edit-contract.md`, and `micro-edit-cheatsheet.md`; additionally read `session-rules.md` only when `sessionRulesPath` exists or the user explicitly states a future/carryover rule. Still use inspect, a normalized edit contract, dry-run, selector validation, one final semantic diff, and the contract gate. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
 - **Studio / high-risk deck**: Use `deck_lock.json` to lock lightweight confirmation, page-level rhythm, template fusion, asset status, and chart/table semantics. Use `pptx-nova-finalize-evidence.mjs` to freeze final structure evidence; do not introduce SVG-first or page-by-page handwritten flows.
   Pass the final candidate explicitly. If it contains ChartEx, also bind the
@@ -475,7 +475,7 @@ Read the files required by routing first; do not read all references at once.
 | `references/feedback-mode.md`             | Skill usage feedback, old-run feedback audit, and feedback persistence rules                                                      |
 | `references/refurbish-runner.md`          | Compact standard refurbish route, Agent output, comparison reuse, failure-driven disclosure, and review boundary                  |
 | `references/template-following.md`        | Strict template following: copy source slides, edit inherited objects, placeholder QA                                             |
-| `references/export-and-check.md`          | Export, extract, checks, semantic diff, and opt-in unified visual evidence                                                        |
+| `references/export-and-check.md`          | Export, extract, checks, semantic diff, and canonical unified visual evidence                                                     |
 | `references/express-mode.md`              | Full golden path for Express mode                                                                                                 |
 | `references/reference-create.md`          | Reference PPTX + new outline generation                                                                                           |
 | `references/inspect-and-edit.md`          | Selectors, inspect output, and edit details                                                                                       |

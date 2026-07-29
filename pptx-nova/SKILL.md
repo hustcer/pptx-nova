@@ -40,21 +40,19 @@ first. If `--run-dir` is passed explicitly, the directory must be new, empty, or
 that contains only `xdoc-capabilities.json`. Version numbers are for audit only; route commands based
 on the runtime schema and actual dry-run evidence. Capability snapshots are name indexes, not
 allowlists; a missing capability means `undisclosed`, not automatically `unsupported`.
-If a caller-provided run directory is rejected, the guard reports the allowed
-initial entries, every detected entry, and a safe recovery hint; preserve that
-directory as evidence and retry with a new run directory.
+If a caller-provided run directory is rejected, the guard reports the allowed initial entries, every
+detected entry, and a safe recovery hint; preserve that directory as evidence and retry with a new run directory.
 
-When unsure, go deeper only as needed: first check the op index in `xdoc-capabilities.json`; use
-`xdoc schema --index` only when the snapshot is missing or must be refreshed. Then use
+When unsure, go deeper only as needed: first check the op index in `xdoc-capabilities.json`; use `xdoc
+schema --index` only when the snapshot is missing or must be refreshed. Then use
 `xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal` when the snapshot discloses
 both `--fields` and `--defs summary` and only a focused contract surface is needed; otherwise omit
 `--defs` for the compatible full-definition projection. Summary projections are discovery views, not
 complete validation schemas: switch to `--defs full` before constructing nested selectors. Even a
 full-definition field projection remains incomplete; omit `--fields` or use `apply --dry-run` before
 treating a patch as valid. Read
-theme/style/native DeckKit information from the matching catalog indexes in the snapshot. Derive
-selectors in order from inspect, the target op schema, and dry-run suggestions. Treat
-`xdoc <command...> --help` as supplemental only; do not assume `--help --json` emits JSON.
+theme/style/native DeckKit information from the matching catalog indexes in the snapshot. Derive selectors in
+order from inspect, the target op schema, and dry-run suggestions. Treat `xdoc <command...> --help` as supplemental only; do not assume `--help --json` emits JSON.
 
 Do not append `--json` to top-level `xdoc convert` or `xdoc check` by default. For structured PPTX PNG
 previews, prefer `xdoc pptx preview --json`; for structured single-file preflight results, prefer
@@ -88,7 +86,7 @@ Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline
 `deck_lock.json`, `session-rules.json`, `session-operation.json`,
 `session-rules-resolution.json`, `content.json`, `edit-contract.json`, `evidence-manifest.json`, `edit-contract-gate.json`,
 `patch.json`, sidecars, dry-run/apply/refurbish reports,
-`vision.json`, `pptx-diff.json`, `visual_review.json`, `clean-open.json`, `check.json`,
+`vision.json`, `pptx-diff.json`, `visual-evidence/manifest.json`, `visual_review.json`, `clean-open.json`, `check.json`,
 `evidence-summary.json`, `layout-source.json`, `layout-final.json`, `finding-analysis.json`,
 `fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`,
 `review-policy-evaluation.json`,
@@ -167,7 +165,8 @@ and all(.pages[]; .file.status=="ok")' <run-dir>/preview.json`. After that gate 
   entries, and the three selectors are mutually exclusive. Keep the native
   `pptx-copy-from/v1` report as structural Edit Contract evidence; never
   fabricate patch `opResults` for it.
-- **Export / check / extract**: Create a run directory; use `xdoc pptx preview` by default for PPTX PNG/contact-sheet previews, `xdoc convert` for PDF/MD/JSON/text or non-PPTX generic conversion, and `xdoc check` / `xdoc pptx inspect` for checks. No creation-oriented docs need to be read.
+- **Export / check / extract / explicit visual evidence**: Read `references/export-and-check.md`. Keep `preview`
+  as the default; use `visual-verify` once on stable files only for requested final-PDF/font/pixel evidence or static-vs-render diagnosis, never merely because a PPTX exists.
 - **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md`, `edit-contract.md`, and `micro-edit-cheatsheet.md`; additionally read `session-rules.md` only when `sessionRulesPath` exists or the user explicitly states a future/carryover rule. Still use inspect, a normalized edit contract, dry-run, selector validation, one final semantic diff, and the contract gate. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
 - **Studio / high-risk deck**: Use `deck_lock.json` to lock lightweight confirmation, page-level rhythm, template fusion, asset status, and chart/table semantics. Use `pptx-nova-finalize-evidence.mjs` to freeze final structure evidence; do not introduce SVG-first or page-by-page handwritten flows.
   Pass the final candidate explicitly. If it contains ChartEx, also bind the
@@ -393,6 +392,7 @@ xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 2,5-7 --
 xdoc schema --op set-slide-animations --minimal
 xdoc pptx vision-check out.pptx --json
 xdoc pptx vision-check out.pptx --slides 25-38 --json
+xdoc pptx visual-verify --candidate out.pptx --reference input.pptx --output-dir <run-dir>/visual-evidence --json
 xdoc pptx chrome-detect source.pptx --json
 xdoc pptx chrome-remove source.pptx --roles header,footer,page-number,rule --output clean.pptx --json
 xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --dry-run --json
@@ -475,7 +475,7 @@ Read the files required by routing first; do not read all references at once.
 | `references/feedback-mode.md`             | Skill usage feedback, old-run feedback audit, and feedback persistence rules                                                      |
 | `references/refurbish-runner.md`          | Compact standard refurbish route, Agent output, comparison reuse, failure-driven disclosure, and review boundary                  |
 | `references/template-following.md`        | Strict template following: copy source slides, edit inherited objects, placeholder QA                                             |
-| `references/export-and-check.md`          | PDF/PNG/MD/JSON export, extract, check, PPTX semantic diff                                                                        |
+| `references/export-and-check.md`          | Export, extract, checks, semantic diff, and opt-in unified visual evidence                                                        |
 | `references/express-mode.md`              | Full golden path for Express mode                                                                                                 |
 | `references/reference-create.md`          | Reference PPTX + new outline generation                                                                                           |
 | `references/inspect-and-edit.md`          | Selectors, inspect output, and edit details                                                                                       |

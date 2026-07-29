@@ -29,6 +29,83 @@ Use only `reliable` entries as machine-checkable facts. Treat `uncertain` and
 domain audit before making a final judgment about visual fidelity or unsupported
 objects.
 
+## Unified Visual Evidence (Escalation Only)
+
+`xdoc pptx visual-verify` is an opt-in evidence and diagnosis path, not the
+default PPTX visual gate. It has net value when the task specifically needs one
+or more facts that `preview`, `vision-check`, and `vision-diff` do not package
+together:
+
+- final PDF text-frame fit and rendered page-bound findings;
+- the actual selected-slide typeface/style resolution, attributed back to the
+  PPTX objects that requested it;
+- normalized same-renderer pixel changes between a reference and candidate,
+  with changed regions mapped to every overlapping object candidate;
+- one atomically published, hash-bound manifest with the exact PDF and PNG
+  artifacts used by those checks.
+
+Do not run it merely because a deck was created or edited. Routine visual review
+still uses `preview`; ordinary existing-deck regression gating still uses
+`vision-diff`; the standard Create, Translation, and Refurbish runners retain
+their existing single-render/compare policies. `visual-verify` performs another
+render, does not create a contact sheet, and v1 implements neither OCR overflow
+nor an independent PowerPoint/Office renderer.
+
+Confirm the current runtime disclosed the command:
+
+```bash
+node <skill-root>/scripts/pptx-nova-probe.mjs \
+  --require-command pptx.visual-verify --strict --json
+```
+
+For candidate-only final-render/font diagnosis:
+
+```bash
+xdoc pptx visual-verify \
+  --candidate deck.pptx \
+  --output-dir <run-dir>/visual-evidence \
+  --json > <run-dir>/visual-verify.json
+```
+
+For a stable before/after same-renderer comparison, use the same 1-based scope
+as the edit review:
+
+```bash
+xdoc pptx visual-verify \
+  --reference before.pptx \
+  --candidate after.pptx \
+  --slides 2,5-7 \
+  --output-dir <run-dir>/visual-evidence \
+  --json > <run-dir>/visual-verify.json
+```
+
+The command atomically publishes `<run-dir>/visual-evidence/manifest.json` and
+its referenced PDF/PNG files. An existing output directory requires
+`--overwrite`; use it only for this current-run generated evidence directory.
+The stdout JSON is the same canonical manifest and should remain outside the
+output directory so shell redirection does not fail before xdoc creates it.
+
+Interpret the result in this order:
+
+1. A process exit code of `0` means only that the evidence transaction
+   completed. First require `schemaVersion="pptx-visual-evidence/v1"` and
+   `status="success"`, then read `decision.action`.
+2. `stop` means a required check found a hard content problem. Inspect which
+   subject owns the finding before calling it a regression: both reference and
+   candidate receive static-layout, final-layout, raster, and font checks.
+3. `require-human-confirmation` means review the referenced PNGs and findings;
+   candidate-only runs reach this action even when all required candidate
+   checks pass because regression equivalence is unavailable.
+4. `proceed` proves only unchanged normalized pixels plus passing required v1
+   checks under the same xdoc renderer. It does not prove PowerPoint parity or
+   visual intent.
+
+`ocr-overflow=skipped` and `independent-reference=skipped` are expected v1
+limitations, not passing evidence. Keep manual PNG/contact-sheet review and
+PowerPoint snapshot/clean-open evidence when those policies apply. Never replace
+a specialized semantic, Edit Contract, Translation, Refurbish, or Office gate
+with this manifest.
+
 ## PPTX PNG Preview
 
 For PPTX visual review, use `xdoc pptx preview` as the default PNG/contact-sheet

@@ -56,6 +56,7 @@ Keep this minimum evidence set after successful delivery when the files exist:
 `semantic-audit.json`, `structure-check.json`, `evidence-summary.json`,
 `layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`, `catalog-readiness.json`,
 optional `delivery-readiness.json`, the final candidate PPTX,
+`visual-evidence/manifest.json` when unified visual evidence was requested,
 the contact sheet, and any PNGs needed to explain suspicious or manually
 reviewed slides.
 
@@ -551,6 +552,16 @@ Use these gates in order:
 ```text
 check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> one final pptx semantic diff for existing-deck audits when useful -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> optional xdoc check
 ```
+
+Do not add `xdoc pptx visual-verify` to this shared pipeline by default. Use it
+once on stable inputs only when the user explicitly requests a typed
+final-render/font/pixel evidence bundle, or when a static finding must be
+arbitrated against final PDF layout. Follow `export-and-check.md`. It adds a
+separate render, has no contact sheet or independent Office renderer in v1, and
+audits both reference and candidate; therefore an inherited reference problem
+can produce `decision.action=stop` without proving a new edit regression. It
+does not replace `vision-diff`, PNG review, Translation/Refurbish comparison,
+or PowerPoint-native evidence.
 
 For Studio Create, Reference Create, structural Edit, strict Template Following,
 and Refurbish Existing Deck, keep `layout-final.json` before PNG/contact-sheet

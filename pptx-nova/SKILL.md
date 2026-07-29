@@ -33,18 +33,18 @@ specialized reference.
 
 ## Progressive xdoc Capability Discovery
 
-After creating each run, first run `<skill-root>/scripts/pptx-nova-probe.mjs` once and save the result
-as `xdoc-capabilities.json`. The standard refurbish runner automatically runs this probe inside its
-own run directory; when using `pptx-nova-refurbish-run.mjs`, do not manually initialize a full run
-first. If `--run-dir` is passed explicitly, the directory must be new, empty, or a pre-probed directory
-that contains only `xdoc-capabilities.json`. Version numbers are for audit only; route commands based
-on the runtime schema and actual dry-run evidence. Capability snapshots are name indexes, not
-allowlists; a missing capability means `undisclosed`, not automatically `unsupported`.
+After creating each run, run `<skill-root>/scripts/pptx-nova-probe.mjs` once and save the result as
+`xdoc-capabilities.json`. The standard refurbish runner does this inside its own run directory; do not
+manually initialize a full run first. An explicit `--run-dir` must be new, empty, or contain only
+`xdoc-capabilities.json`. Route from runtime schema and dry-run evidence, never version numbers.
+Operation/catalog indexes are not allowlists; missing means `undisclosed`. For semantic routing, read
+the exact `capabilities.capabilityTruth.entries[]` feature/subset: `supported` may use its operations,
+`partial` requires verification, `preserve-only` stays untouched, and `unsupported` follows its alternative; operation presence never upgrades feature status.
 If a caller-provided run directory is rejected, the guard reports the allowed initial entries, every
 detected entry, and a safe recovery hint; preserve that directory as evidence and retry with a new run directory.
 
-When unsure, go deeper only as needed: first check the op index in `xdoc-capabilities.json`; use `xdoc
-schema --index` only when the snapshot is missing or must be refreshed. Then use
+When unsure, first check exact capability truth, then the op index in `xdoc-capabilities.json`; use
+`xdoc schema --index` only when the snapshot is missing or stale. Then use
 `xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal` when the snapshot discloses
 both `--fields` and `--defs summary` and only a focused contract surface is needed; otherwise omit
 `--defs` for the compatible full-definition projection. Summary projections are discovery views, not

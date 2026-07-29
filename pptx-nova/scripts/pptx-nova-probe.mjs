@@ -19,12 +19,13 @@ Options:
   --output <path>                   Write the capability snapshot to this path.
   --require-command <name>          Require a top-level or pptx.<subcommand> disclosure.
   --require-op <name>               Require a patch or recipe op disclosure.
+  --require-feature <feature/subset> Require a fully supported capability-truth entry.
   --require-enum <name>             Require an enum registry disclosure.
   --require-theme <id>              Require a theme pack disclosure.
   --require-style <id>              Require a style pack disclosure.
   --require-native-deckkit <id>     Require native xdoc skinning disclosure.
   --require-generator-deckkit <id>  Require bundled DeckKit generator disclosure.
-  --strict                          Exit 2 when a required capability is undisclosed.
+  --strict                          Exit 2 when any requirement is not satisfied.
   --overwrite                       Replace an existing current-run output file.
   --json                            Print the complete JSON report to stdout.
   --help                            Show this help.
@@ -55,6 +56,7 @@ function parseArgs(argv) {
     requirements: {
       commands: [],
       operations: [],
+      features: [],
       enums: [],
       themes: [],
       styles: [],
@@ -65,6 +67,7 @@ function parseArgs(argv) {
   const requirementFlags = {
     '--require-command': 'commands',
     '--require-op': 'operations',
+    '--require-feature': 'features',
     '--require-enum': 'enums',
     '--require-theme': 'themes',
     '--require-style': 'styles',
@@ -99,6 +102,11 @@ function parseArgs(argv) {
 
   for (const values of Object.values(args.requirements)) {
     values.splice(0, values.length, ...[...new Set(values)])
+  }
+  for (const feature of args.requirements.features) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(feature)) {
+      throw new Error(`--require-feature expects feature/subset, got: ${feature}`)
+    }
   }
   return args
 }
@@ -262,7 +270,49 @@ function generatorDeckkitIndex() {
     .sort((a, b) => a.id.localeCompare(b.id))
 }
 
+function capabilityTruthIndex(value) {
+  const schemaVersion = value?.schemaVersion ?? null
+  const trusted = schemaVersion === 'pptx-capability-truth/v2'
+  const entries =
+    trusted && Array.isArray(value?.entries)
+      ? value.entries
+          .filter(
+            (entry) =>
+              entry &&
+              typeof entry.feature === 'string' &&
+              typeof entry.subset === 'string' &&
+              typeof entry.status === 'string',
+          )
+          .map((entry) => ({
+            feature: entry.feature,
+            subset: entry.subset,
+            status: entry.status,
+            summary: entry.summary ?? null,
+            operations: uniqueSorted(Array.isArray(entry.operations) ? entry.operations : []),
+            limits: Array.isArray(entry.limits) ? entry.limits : [],
+            evidence: Array.isArray(entry.evidence) ? entry.evidence : [],
+            recommendation: entry.recommendation ?? null,
+          }))
+      : []
+  return {
+    schemaVersion,
+    coverage: trusted ? (value?.coverage ?? null) : null,
+    missingMeans: trusted ? (value?.missingMeans ?? 'undisclosed') : 'undisclosed',
+    entries,
+    operationIndex:
+      trusted && value?.operationIndex && typeof value.operationIndex === 'object'
+        ? value.operationIndex
+        : {},
+  }
+}
+
 function requirementResults(requirements, capabilities) {
+  const featureEntries = new Map(
+    capabilities.capabilityTruth.entries.map((entry) => [
+      `${entry.feature}/${entry.subset}`,
+      entry,
+    ]),
+  )
   const indexes = {
     commands: new Set([
       ...capabilities.commands,
@@ -270,6 +320,7 @@ function requirementResults(requirements, capabilities) {
       ...capabilities.pptxSubcommands.map((name) => `pptx.${name}`),
     ]),
     operations: new Set([...capabilities.patchOperations, ...capabilities.recipeOperations]),
+    features: new Set(featureEntries.keys()),
     enums: new Set(capabilities.enums.map((entry) => entry.name)),
     themes: new Set(capabilities.themePacks),
     styles: new Set(capabilities.stylePacks),
@@ -280,6 +331,7 @@ function requirementResults(requirements, capabilities) {
   const disclosedMeaning = {
     commands: 'present in the runtime xdoc command index',
     operations: 'present in the runtime xdoc patch/recipe operation index',
+    features: 'declared by the runtime xdoc capability truth',
     enums: 'present in the runtime xdoc enum registry',
     themes: 'present in the runtime xdoc theme catalog',
     styles: 'present in the runtime xdoc style catalog',
@@ -288,11 +340,38 @@ function requirementResults(requirements, capabilities) {
   }
   for (const [kind, values] of Object.entries(requirements)) {
     for (const value of values) {
+      if (kind === 'features') {
+        const entry = featureEntries.get(value)
+        if (!entry) {
+          results.push({
+            kind,
+            value,
+            state: 'undisclosed',
+            satisfied: false,
+            meaning: 'not declared by capability truth; this is not proof of unsupported behavior',
+          })
+          continue
+        }
+        results.push({
+          kind,
+          value,
+          state: entry.status,
+          satisfied: entry.status === 'supported',
+          meaning:
+            entry.status === 'supported'
+              ? 'the exact feature/subset is supported within its declared limits'
+              : `the exact feature/subset is ${entry.status}; follow its recommendation instead of inferring support from operation presence`,
+          limits: entry.limits,
+          recommendation: entry.recommendation,
+        })
+        continue
+      }
       const disclosed = indexes[kind].has(value)
       results.push({
         kind,
         value,
         state: disclosed ? 'disclosed' : 'undisclosed',
+        satisfied: disclosed,
         meaning: disclosed
           ? disclosedMeaning[kind] || 'present in the capability index'
           : 'not present in the capability index; this is not proof of unsupported behavior',
@@ -347,6 +426,7 @@ function createReport(args) {
     fallbackHelp?.error?.code === 'ENOENT'
   const pptx = schema?.commands?.pptx ?? {}
   const patchSchema = pptx.patchSchema ?? {}
+  const capabilityTruth = capabilityTruthIndex(pptx.capabilityTruth)
   const catalogs = pptx.catalogs ?? {}
   const schemaSlicingModes = namesFromCollection(pptx.schemaDisclosure?.modes, ['flag'])
   const fieldsAvailable = schemaSlicingModes.some((mode) => mode.startsWith('--fields'))
@@ -361,6 +441,7 @@ function createReport(args) {
       ...namesFromCollection(patchSchema.operations),
     ]),
     recipeOperations: namesFromCollection(pptx.recipeOps),
+    capabilityTruth,
     enums: enumIndex(pptx.enumRegistry?.enums),
     themePacks: idsFromCatalog(catalogs.themes),
     stylePacks: idsFromCatalog(catalogs.styles),
@@ -379,7 +460,8 @@ function createReport(args) {
     commandFlags: helpFlagIndex(args.xdocBin),
   }
   const requirements = requirementResults(args.requirements, capabilities)
-  const undisclosedRequired = requirements.filter((item) => item.state === 'undisclosed')
+  const attentionRequired = requirements.filter((item) => item.satisfied !== true)
+  const undisclosedRequired = attentionRequired.filter((item) => item.state === 'undisclosed')
   const warnings = []
   if (!schema) {
     warnings.push({
@@ -395,6 +477,13 @@ function createReport(args) {
       message: `Observed ${schema.schemaVersion ?? 'an unversioned schema'}; retain discovery data and review schema changes before high-risk writes.`,
     })
   }
+  if (schema && capabilityTruth.schemaVersion !== 'pptx-capability-truth/v2') {
+    warnings.push({
+      code: 'capability-truth-unavailable',
+      message:
+        'The runtime does not disclose pptx-capability-truth/v2; feature requirements remain undisclosed and operation presence must not be interpreted as full feature support.',
+    })
+  }
   if (undisclosedRequired.length > 0) {
     warnings.push({
       code: 'required-capability-undisclosed',
@@ -402,10 +491,18 @@ function createReport(args) {
         'One or more task requirements were not disclosed. Explore targeted help/schema or choose a documented fallback; do not classify them as unsupported from this snapshot alone.',
     })
   }
+  const constrainedRequired = attentionRequired.filter((item) => item.state !== 'undisclosed')
+  if (constrainedRequired.length > 0) {
+    warnings.push({
+      code: 'required-feature-not-fully-supported',
+      message:
+        'One or more required feature/subset entries are partial, preserve-only, or unsupported. Follow their limits and recommended alternative; operation disclosure does not override capability truth.',
+    })
+  }
 
   return {
     report: {
-      schemaVersion: 'pptx-nova-xdoc-capabilities/v1',
+      schemaVersion: 'pptx-nova-xdoc-capabilities/v2',
       observedAt: new Date().toISOString(),
       status: executableMissing ? 'dependency-missing' : schema ? 'ready' : 'degraded',
       xdoc: {
@@ -414,6 +511,7 @@ function createReport(args) {
         cliSchemaVersion: schema?.schemaVersion ?? null,
         capabilitySchemaVersion: schema?.capabilities?.schemaVersion ?? null,
         patchCapabilityVersion: patchSchema.capabilityVersion ?? null,
+        capabilityTruthVersion: capabilityTruth.schemaVersion,
         schemaSha256: schema ? createHash('sha256').update(schemaRun.stdout).digest('hex') : null,
       },
       disclosure: {
@@ -430,6 +528,8 @@ function createReport(args) {
               : fieldsAvailable
                 ? 'xdoc schema --op <name> --fields <needed-fields> --minimal; omit --fields or use apply --dry-run for complete validation'
                 : 'xdoc schema --op <name> --minimal',
+          featureTruth:
+            'read xdoc-capabilities.json#capabilities.capabilityTruth.entries by exact feature/subset; follow status, limits, and recommendation before selecting an operation',
           commandHelp: 'xdoc <command...> --help',
           selectorEvidence: 'inspect output -> op schema -> dry-run suggestions',
           deckkitGeneratorCatalog:
@@ -441,9 +541,14 @@ function createReport(args) {
       capabilities,
       requirements: {
         strict: args.strict,
-        status: undisclosedRequired.length === 0 ? 'satisfied' : 'attention',
+        status: attentionRequired.length === 0 ? 'satisfied' : 'attention',
         results: requirements,
         undisclosedRequired: undisclosedRequired.map(({ kind, value }) => ({ kind, value })),
+        attentionRequired: attentionRequired.map(({ kind, value, state }) => ({
+          kind,
+          value,
+          state,
+        })),
       },
       fallback: schema
         ? null
@@ -461,7 +566,7 @@ function createReport(args) {
         : null,
     },
     executableMissing,
-    strictFailure: args.strict && undisclosedRequired.length > 0,
+    strictFailure: args.strict && attentionRequired.length > 0,
   }
 }
 

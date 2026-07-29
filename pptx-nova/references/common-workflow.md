@@ -136,7 +136,7 @@ directory. A caller-provided `--run-dir` may be new, empty, or contain only
 not a fresh runner target.
 
 The snapshot records the xdoc version, CLI/capability schema versions, top-level
-commands, PPTX subcommands, patch/recipe op names, enum registry names,
+commands, PPTX subcommands, the structured PPTX capability truth, patch/recipe op names, enum registry names,
 theme/style ids, and native DeckKit declarations. It intentionally omits full op
 schemas. When `capabilities.schemaSlicing.fieldsAvailable` is true, fetch only the
 needed surface with `xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal`
@@ -148,8 +148,12 @@ before claiming complete validation.
 Consult this snapshot before running `xdoc schema --index`; refresh the index only
 when the snapshot is missing, stale, or does not disclose a capability you need.
 
-Treat the snapshot as runtime discovery evidence, not an allowlist. A capability
-missing from the schema index is `undisclosed`, not proven `unsupported`. Continue
+Treat the snapshot as runtime discovery evidence, not an allowlist. Query
+`capabilities.capabilityTruth.entries[]` by exact `feature/subset` before using an op for a semantic
+task. `supported` permits the declared route, `partial` requires its limits and verification,
+`preserve-only` must remain untouched, and `unsupported` must follow the recommended alternative.
+An operation name proves syntax availability only. A capability missing from the truth is
+`undisclosed`, not proven `unsupported`. Continue
 with targeted command help, dry-run, or a documented fallback unless the current
 task explicitly requires a strict gate. Version strings are audit metadata and
 must not be used to infer feature support.
@@ -160,14 +164,15 @@ For a task-specific check, add repeatable requirements such as:
 node <skill-root>/scripts/pptx-nova-probe.mjs \
   --require-command pptx.apply \
   --require-op set-text-frame \
+  --require-feature text/native-authoring \
   --require-theme corporate-blue \
   --json
 ```
 
-By default undisclosed requirements produce `status: attention` and exit 0 so
-new or partially disclosed xdoc features remain explorable. Use `--strict` only
-when the caller has already decided that an undisclosed requirement must block
-this workflow. Do not assume `xdoc --help --json` is structured JSON; use
+By default undisclosed, partial, preserve-only, or unsupported feature requirements produce
+`requirements.status: attention` and exit 0 so the Agent can follow the disclosed alternative. Use `--strict` only
+when the caller has already decided that a requirement must be fully supported for this workflow.
+Do not assume `xdoc --help --json` is structured JSON; use
 `xdoc schema` for machine-readable discovery and plain `--help` only as a
 human-readable fallback.
 

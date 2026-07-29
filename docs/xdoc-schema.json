@@ -1,7 +1,7 @@
 {
   "name": "xdoc",
-  "version": "0.3.2 (7fd8a05e)",
-  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
+  "version": "0.3.2 (913c3ff8)",
+  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
       "description": "Convert document file(s) to one or more output formats.",
@@ -1295,12 +1295,17 @@
         },
         "data": {
           "type": "string",
-          "description": "Translations/replacements JSON path for pptx i18n-plan/i18n-text-plan/replace-text/replace-chart-text",
+          "description": "Translations/replacements JSON path for pptx i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text",
           "required": false
         },
         "units": {
           "type": "string",
-          "description": "i18n-scan report or pptx-i18n-units/v1 JSON path for pptx i18n-plan",
+          "description": "i18n-scan report or pptx-i18n-units/v1 JSON path for pptx i18n-plan/i18n-anchor-draft",
+          "required": false
+        },
+        "unit": {
+          "type": "string",
+          "description": "Exact unitId filter for pptx i18n-anchor-draft",
           "required": false
         },
         "visible-cache-only": {
@@ -1351,12 +1356,17 @@
         },
         "source": {
           "type": "string",
-          "description": "Source PPTX path for pptx diff/i18n-style-diff/i18n-plan/i18n-text-plan/replace-text/replace-chart-text/vision-diff/contact-diff/refurbish-skin",
+          "description": "Source PPTX path for pptx diff/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text/vision-diff/contact-diff/refurbish-skin",
+          "required": false
+        },
+        "reference": {
+          "type": "string",
+          "description": "Approved or pre-change reference PPTX for pptx visual-verify",
           "required": false
         },
         "candidate": {
           "type": "string",
-          "description": "Candidate PPTX path for pptx diff/i18n-style-diff/vision-diff/contact-diff",
+          "description": "Candidate PPTX path for pptx diff/i18n-style-diff/vision-diff/contact-diff/visual-verify",
           "required": false
         },
         "detail": {
@@ -1382,17 +1392,28 @@
         },
         "slide": {
           "type": "string",
-          "description": "0-based source slide index for pptx copy-from",
+          "description": "0-based single-source-slide compatibility selector for pptx copy-from; defaults to 0 when no selector is provided",
           "required": false
         },
         "slides": {
           "type": "string",
-          "description": "1-based slide selector for pptx vision-check/vision-diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-text-plan/replace-text/replace-chart-text, e.g. 25-38",
+          "description": "1-based slide selector for pptx copy-from/vision-check/vision-diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text, e.g. 1,3,5-8; mutually exclusive with copy-from --slide/--all",
           "required": false
+        },
+        "all": {
+          "type": "bool",
+          "description": "Select all source slides for pptx copy-from; mutually exclusive with --slide/--slides",
+          "required": false,
+          "style": "flag"
         },
         "dpi": {
           "type": "int",
-          "description": "PNG render DPI for pptx preview/contact-diff. Preview defaults to 144; contact-diff defaults to 72",
+          "description": "PNG render DPI for pptx preview/contact-diff/visual-verify. Preview and visual-verify default to 144; contact-diff defaults to 72",
+          "required": false
+        },
+        "channel-threshold": {
+          "type": "int",
+          "description": "Maximum per-channel pixel delta ignored by pptx visual-verify; defaults to 26",
           "required": false
         },
         "name": {
@@ -1408,7 +1429,7 @@
         },
         "output-dir": {
           "type": "string",
-          "description": "Output directory for pptx preview PNG previews",
+          "description": "Output directory for pptx preview PNGs or visual-verify evidence",
           "required": false
         },
         "contact-sheet": {
@@ -1501,7 +1522,7 @@
       },
       "positionals": {
         "action": {
-          "description": "Bridge action: new|apply|inspect|select|preview|vision-check|diff|i18n-scan|i18n-style-diff|i18n-plan|i18n-text-plan|replace-text|replace-chart-text|vision-diff|contact-diff|refurbish-audit|refurbish-skin|chrome-detect|chrome-remove|chrome-apply|remap-theme|from-data|check-brand|apply-brand|copy-from|extract-style|import-template|catalog|list-themes|swap-theme|swap-style|recipe|replay|audit|rollback; inspect/select/preview/vision-check/diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-text-plan/replace-text/replace-chart-text/vision-diff/contact-diff/refurbish-audit/refurbish-skin/chrome-detect/chrome-remove/chrome-apply/remap-theme/from-data/check-brand/apply-brand/copy-from/extract-style/import-template/swap-theme/swap-style may be followed by an input path",
+          "description": "Bridge action: new|apply|inspect|select|preview|visual-verify|vision-check|diff|i18n-scan|i18n-style-diff|i18n-plan|i18n-anchor-draft|i18n-text-plan|replace-text|replace-chart-text|vision-diff|contact-diff|refurbish-audit|refurbish-skin|chrome-detect|chrome-remove|chrome-apply|remap-theme|from-data|check-brand|apply-brand|copy-from|extract-style|import-template|catalog|list-themes|swap-theme|swap-style|recipe|replay|audit|rollback; inspect/select/preview/vision-check/diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text/vision-diff/contact-diff/refurbish-audit/refurbish-skin/chrome-detect/chrome-remove/chrome-apply/remap-theme/from-data/check-brand/apply-brand/copy-from/extract-style/import-template/swap-theme/swap-style may be followed by an input path",
           "required": true
         }
       },
@@ -1512,11 +1533,13 @@
         "xdoc pptx inspect deck.pptx --json",
         "xdoc pptx select deck.pptx --query '{\"textRegex\":\"Revenue\"}' --json",
         "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json",
+        "xdoc pptx visual-verify --candidate new.pptx --reference old.pptx --output-dir evidence --json",
         "xdoc pptx vision-check deck.pptx --json",
         "xdoc pptx diff old.pptx new.pptx --json",
         "xdoc pptx i18n-scan --source old.pptx --source-lang multi --mode source --output i18n-scan.json --json",
         "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
         "xdoc pptx i18n-plan --source old.pptx --units scan.json --data translations.json --output i18n-plan.json --json",
+        "xdoc pptx i18n-anchor-draft --source old.pptx --units scan.json --data translations.json --unit unit-id --json",
         "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
         "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
         "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
@@ -1531,7 +1554,7 @@
         "xdoc pptx from-data data.json --template template.pptx --bindings bindings.json --output out.pptx",
         "xdoc pptx check-brand deck.pptx --brand brand.json --json",
         "xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx",
-        "xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx",
+        "xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx",
         "xdoc pptx extract-style deck.pptx --output style.json --json",
         "xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json",
         "xdoc pptx catalog shapes --json",
@@ -1564,9 +1587,11 @@
         "For inspect, pass either `xdoc pptx inspect deck.pptx --json` or `xdoc pptx inspect --input deck.pptx --json`.",
         "Use `xdoc pptx vision-check deck.pptx --json` to statically QA an existing deck without rendering: it flags geometry overlaps, off-slide and edge-hugging text, text-overflow estimates, unexpected wraps in single-line text roles, misaligned card rows, and sub-threshold fonts, and each issue may carry an auto-applicable fixPatch.",
         "Use `xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --dpi 192 --json` to render per-slide PNG previews plus an optional contact sheet and stdout manifest for multimodal review.",
+        "Use `xdoc pptx visual-verify --candidate new.pptx --reference approved.pptx --output-dir evidence --json` for the canonical Agent visual gate: it atomically writes one typed evidence manifest plus exact PDF/PNG artifacts, separates transport status from check outcomes and Agent action, and limits same-renderer pixel evidence to regression claims rather than PowerPoint parity.",
         "Use `xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png --dpi 192 --json` to generate a source/candidate side-by-side contact sheet plus changed/unchanged/missing/added slide status; pass `--map reference-map.json` for split/merge/reordered refurbish mapping, pass `--slides 1,3-5` for scoped source-slide review, and treat `agentGate.passed` as pair-integrity readiness for human visual review.",
         "Use `xdoc pptx i18n-scan --source source.pptx --source-lang multi|zh|en --mode source --output i18n-scan.json --json` to persist the full stable i18nUnits inventory while returning only a compact result on stdout; use candidate mode with --output as the authoritative target-consistency gate. Reserve --json-full for interactive debugging of small reports.",
         "Use `xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-plan.json --json` as the translation planner: agents receive a compact stdout result and read the persisted full plan only when materializing its execution artifacts. Reviewed slide/layout/master units with reviewDecision:\"translate\" route through the same guarded textPlan, replaceText, or replaceChartText primitives.",
+        "When i18n-plan returns mixed-style-no-anchor, use its unit-specific draftCommand or run `xdoc pptx i18n-anchor-draft --source old.pptx --units i18n-scan-source.json --data translations.json --json`: merge only high-confidence translationsDraft anchors by unitId, then rerun i18n-plan. Drafts are never executable patches.",
         "Use `xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json` as a lower-level text-only fallback or execution primitive: it emits run-level set-run patchOps and marks mixed-style paragraphs review-required when styled-token anchors are not reliable.",
         "Use `xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json` to copy the source PPTX and replace only existing OOXML text node or text attribute values, with sourceText/sourceHash/index checks and no paragraph/run rebuild.",
         "Use `xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json` for translation-safe chart label updates: it changes chart visible text nodes or materializes a guarded generated classic Chart or ChartEx default title, and never writes workbook, relationship, external path, embedded workbook, or formatCode parts.",
@@ -1602,92 +1627,1418 @@
           "errorKind": "AssetTooLarge"
         }
       },
-      "bridgeCapabilities": {
-        "schemaVersion": "pptx-bridge-capabilities/v1",
-        "supported": [
-          "new",
-          "add-slide",
-          "add-layout",
-          "set-layout",
-          "add-layout-placeholder",
-          "populate-slide",
-          "bind-data",
-          "remap-theme",
-          "set-theme",
-          "set-master",
-          "set-default-text-style",
-          "remove-slide",
-          "move-slide",
-          "duplicate-slide",
-          "set-slide-notes",
-          "append-slide-notes",
-          "remove-slide-notes",
-          "set-slide-size",
-          "set-document-properties",
-          "add-text-box",
-          "add-placeholder",
-          "set-text-frame",
-          "add-image",
-          "add-equation",
-          "add-ole-object",
-          "add-table",
-          "add-chart",
-          "set-chart-text",
-          "set-chart-data",
-          "set-chart",
-          "set-table",
-          "merge-table-cells",
-          "set-table-data",
-          "add-shape",
-          "add-group",
-          "add-connector",
-          "add-freeform",
-          "add-video",
-          "set-slide-background",
-          "set-slide-transition",
-          "set-slide-animations",
-          "set-shape",
-          "set-connector",
-          "crop-image",
-          "fit-text",
-          "duplicate-shape",
-          "ungroup-shapes",
-          "remove-shape",
-          "add-paragraph",
-          "set-paragraph",
-          "add-run",
-          "set-run",
-          "replace-paragraph-text",
-          "placeholder-lookup",
-          "placeholder-geometry-inheritance",
-          "layout-driven-placeholder-insertion",
-          "chart-embedded-workbook",
-          "if",
-          "foreach",
-          "try",
-          "define-macro",
-          "use-macro",
-          "patch-ooxml"
+      "capabilityTruth": {
+        "schemaVersion": "pptx-capability-truth/v2",
+        "identity": ["feature", "subset"],
+        "coverage": {
+          "operations": "closed-world",
+          "features": "declared-only"
+        },
+        "missingMeans": "undisclosed",
+        "entries": [
+          {
+            "feature": "advanced-ooxml",
+            "subset": "guarded-low-level-editing",
+            "status": "partial",
+            "summary": "Apply explicitly guarded OOXML edits when no high-level operation exists.",
+            "operations": ["patch-ooxml"],
+            "limits": [
+              {
+                "code": "stale-and-structure-guards-required",
+                "description": "Raw edits require explicit part, selector, expected source state, and child-order validation; semantic safety is not inferred."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:patch-ooxml",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "guarded-ooxml-edit-contract",
+                "kind": "behavior",
+                "claim": "Guarded raw edits reject stale or structurally invalid mutations and report affected parts."
+              }
+            ],
+            "recommendation": {
+              "action": "use-raw-ooxml-with-review",
+              "operations": ["patch-ooxml"],
+              "note": "Prefer a high-level operation; otherwise dry-run the guarded edit and require semantic plus visual review."
+            }
+          },
+          {
+            "feature": "chart",
+            "subset": "native-authoring",
+            "status": "supported",
+            "summary": "Create and update schema-published native charts, data, visible text, styles, and embedded workbook data.",
+            "operations": ["add-chart", "set-chart", "set-chart-data", "set-chart-text"],
+            "limits": [
+              {
+                "code": "chart-contract-bounded",
+                "description": "Chart kinds, variants, data shapes, and style fields are limited to the published operation and catalog contracts."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:add-chart",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-chart",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-chart-data",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-chart-text",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "chart-native-roundtrip",
+                "kind": "behavior",
+                "claim": "Native chart creation and updates reopen with chart XML and embedded workbook data intact."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["add-chart", "set-chart", "set-chart-data", "set-chart-text"],
+              "note": "Query the chart kind and variant catalogs, dry-run the patch, then inspect and visually verify the result."
+            }
+          },
+          {
+            "feature": "chart-3d",
+            "subset": "ooxml-authoring",
+            "status": "supported",
+            "summary": "Author and reopen the schema-published 3D chart kinds and variants as native chart OOXML.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "published-3d-chart-kinds-only",
+                "description": "Authoring is limited to 3D kinds and variants disclosed by the chart contracts; it does not promise renderer parity."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "chart-3d-ooxml-roundtrip",
+                "kind": "behavior",
+                "claim": "Column, bar, area, line, pie, bubble, and surface 3D chart semantics are written and reopened."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["add-chart", "set-chart", "set-chart-data"],
+              "note": "Use the native chart operations, then inspect the reopened chart kind and variant.",
+              "target": {
+                "feature": "chart",
+                "subset": "native-authoring"
+              }
+            }
+          },
+          {
+            "feature": "chart-3d",
+            "subset": "viewer-pdf-rendering",
+            "status": "partial",
+            "summary": "Render 3D charts with known 2D degradation or placeholder behavior in some chart families.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "not-powerpoint-3d-parity",
+                "description": "Viewer and PDF output do not reproduce the full PowerPoint 3D scene; surface charts and other families may degrade differently."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "chart-3d-rendering-boundary",
+                "kind": "policy",
+                "claim": "Rendering support is tracked separately from native OOXML authoring and never inferred from operation availability."
+              }
+            ],
+            "recommendation": {
+              "action": "run-visual-verification",
+              "operations": [],
+              "note": "Use visual-verify and an independent Office reference before accepting 3D rendering fidelity."
+            }
+          },
+          {
+            "feature": "control-flow",
+            "subset": "declarative-programming",
+            "status": "supported",
+            "summary": "Compose conditional, iterative, transactional, and reusable patch programs.",
+            "operations": ["define-macro", "foreach", "if", "try", "use-macro"],
+            "limits": [
+              {
+                "code": "nested-operations-validated",
+                "description": "Expanded operations remain subject to the same patch schema, selector, and transaction rules as top-level operations."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:define-macro",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:foreach",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:if",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:try",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:use-macro",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "control-flow-transaction-semantics",
+                "kind": "behavior",
+                "claim": "Branch evaluation, iteration, macro expansion, rollback, and fallback behavior are regression-tested."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["define-macro", "foreach", "if", "try", "use-macro"],
+              "note": "Dry-run expanded programs and inspect per-operation results before commit."
+            }
+          },
+          {
+            "feature": "data-binding",
+            "subset": "json-to-content",
+            "status": "supported",
+            "summary": "Bind JSON data into declared deck content targets.",
+            "operations": ["bind-data"],
+            "limits": [
+              {
+                "code": "binding-contract-required",
+                "description": "Bindings must use the published target and data-shape contract; undeclared layout inference is not performed."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:bind-data",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "data-binding-native-output",
+                "kind": "behavior",
+                "claim": "Binding expands into validated native patch operations and reports the resulting changes."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["bind-data"],
+              "note": "Validate bindings and run a dry-run before writing the deck."
+            }
+          },
+          {
+            "feature": "document",
+            "subset": "metadata-and-slide-size",
+            "status": "supported",
+            "summary": "Update core presentation metadata and authored slide dimensions.",
+            "operations": ["set-document-properties", "set-slide-size"],
+            "limits": [
+              {
+                "code": "document-fields-schema-bounded",
+                "description": "Only metadata fields and dimensions exposed by the operation schemas are mutated."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:set-document-properties",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-slide-size",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "document-properties-and-size-roundtrip",
+                "kind": "behavior",
+                "claim": "Document properties and presentation dimensions are written and reopened through the public model."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["set-document-properties", "set-slide-size"],
+              "note": "Use the high-level operations and inspect presentation metadata after the patch."
+            }
+          },
+          {
+            "feature": "layout",
+            "subset": "native-layout-authoring",
+            "status": "supported",
+            "summary": "Create and update layouts, masters, placeholders, and declared layout content contracts.",
+            "operations": [
+              "add-layout",
+              "add-layout-placeholder",
+              "populate-slide",
+              "set-layout",
+              "set-master"
+            ],
+            "limits": [
+              {
+                "code": "published-layout-contracts-only",
+                "description": "Population and placeholder inheritance follow the published layout catalog and selector contracts."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:add-layout",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-layout-placeholder",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:populate-slide",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-layout",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-master",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "layout-placeholder-inheritance",
+                "kind": "behavior",
+                "claim": "Layout creation, placeholder lookup, geometry inheritance, and layout-driven insertion are regression-tested."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": [
+                "add-layout",
+                "add-layout-placeholder",
+                "populate-slide",
+                "set-layout",
+                "set-master"
+              ],
+              "note": "Query the layout catalog and inspect placeholder resolution before applying content."
+            }
+          },
+          {
+            "feature": "media",
+            "subset": "native-authoring",
+            "status": "supported",
+            "summary": "Create and update images, equations, OLE packages, video references, and image crops.",
+            "operations": [
+              "add-equation",
+              "add-image",
+              "add-ole-object",
+              "add-video",
+              "crop-image"
+            ],
+            "limits": [
+              {
+                "code": "asset-policy-and-host-boundaries",
+                "description": "Assets must satisfy the published size and source policy; OLE activation and host application editing are separate capabilities."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:add-equation",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-image",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-ole-object",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-video",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:crop-image",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "media-native-package-roundtrip",
+                "kind": "behavior",
+                "claim": "Media parts, relationships, fallback representations, and image crop semantics are validated in package roundtrips."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": [
+                "add-equation",
+                "add-image",
+                "add-ole-object",
+                "add-video",
+                "crop-image"
+              ],
+              "note": "Use declared assets and inspect package relationships plus visual output."
+            }
+          },
+          {
+            "feature": "model-3d",
+            "subset": "existing-object-preservation",
+            "status": "preserve-only",
+            "summary": "Retain existing 3D model package content when it is not touched by an edit.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-semantic-model-editing",
+                "description": "The model scene, materials, animation, and host rendering semantics are not exposed as editable high-level fields."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "model-3d-preservation-policy",
+                "kind": "preservation",
+                "claim": "Unknown package parts remain copy-preserved unless an explicitly targeted mutation replaces them."
+              }
+            ],
+            "recommendation": {
+              "action": "inspect-and-preserve",
+              "operations": [],
+              "note": "Keep the reviewed source object untouched and verify package preservation after other edits."
+            }
+          },
+          {
+            "feature": "model-3d",
+            "subset": "create-edit",
+            "status": "unsupported",
+            "summary": "Create or semantically edit a PowerPoint 3D model object.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-high-level-3d-model-contract",
+                "description": "No canonical operation models 3D scene creation or semantic mutation."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "model-3d-authoring-policy",
+                "kind": "policy",
+                "claim": "The canonical operation contract intentionally exposes no 3D model authoring operation."
+              }
+            ],
+            "recommendation": {
+              "action": "copy-known-good-content",
+              "operations": [],
+              "note": "Copy and preserve a reviewed native object instead of synthesizing or editing the model scene.",
+              "target": {
+                "feature": "model-3d",
+                "subset": "existing-object-preservation"
+              }
+            }
+          },
+          {
+            "feature": "notes",
+            "subset": "plain-and-structured-text",
+            "status": "supported",
+            "summary": "Create, append, replace, and remove slide notes text.",
+            "operations": ["append-slide-notes", "remove-slide-notes", "set-slide-notes"],
+            "limits": [
+              {
+                "code": "notes-text-contract-bounded",
+                "description": "The bridge edits note text and published paragraph fields, not arbitrary notes-master content."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:append-slide-notes",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:remove-slide-notes",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-slide-notes",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "slide-notes-roundtrip",
+                "kind": "behavior",
+                "claim": "Notes creation, append, replacement, and removal are exercised through package roundtrips."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["append-slide-notes", "remove-slide-notes", "set-slide-notes"],
+              "note": "Use the notes operations and inspect the resulting notes part."
+            }
+          },
+          {
+            "feature": "shape",
+            "subset": "native-authoring",
+            "status": "supported",
+            "summary": "Create, duplicate, update, connect, ungroup, and remove native shapes.",
+            "operations": [
+              "add-connector",
+              "add-freeform",
+              "add-group",
+              "add-placeholder",
+              "add-shape",
+              "duplicate-shape",
+              "remove-shape",
+              "set-connector",
+              "set-shape",
+              "ungroup-shapes"
+            ],
+            "limits": [
+              {
+                "code": "shape-catalog-and-selector-bounded",
+                "description": "Preset geometry, freeform paths, connector endpoints, and selected shape fields follow the published catalogs and selectors."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:add-connector",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-freeform",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-group",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-placeholder",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-shape",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:duplicate-shape",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:remove-shape",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-connector",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-shape",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:ungroup-shapes",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "shape-native-roundtrip",
+                "kind": "behavior",
+                "claim": "Native shape creation, grouping, connection, duplication, mutation, and removal are covered by model and bridge tests."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": [
+                "add-connector",
+                "add-freeform",
+                "add-group",
+                "add-placeholder",
+                "add-shape",
+                "duplicate-shape",
+                "remove-shape",
+                "set-connector",
+                "set-shape",
+                "ungroup-shapes"
+              ],
+              "note": "Use stable selectors, dry-run geometry changes, and inspect the resolved shape references."
+            }
+          },
+          {
+            "feature": "slide",
+            "subset": "lifecycle-and-background",
+            "status": "supported",
+            "summary": "Create, duplicate, move, remove, and restyle slide backgrounds.",
+            "operations": [
+              "add-slide",
+              "duplicate-slide",
+              "move-slide",
+              "remove-slide",
+              "set-slide-background"
+            ],
+            "limits": [
+              {
+                "code": "slide-relationships-transactional",
+                "description": "Slide mutations run transactionally and remain subject to layout and relationship integrity checks."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:add-slide",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:duplicate-slide",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:move-slide",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:remove-slide",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-slide-background",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "slide-lifecycle-transaction-roundtrip",
+                "kind": "behavior",
+                "claim": "Slide lifecycle and background edits preserve ordering and package relationship integrity."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": [
+                "add-slide",
+                "duplicate-slide",
+                "move-slide",
+                "remove-slide",
+                "set-slide-background"
+              ],
+              "note": "Dry-run structural slide changes and inspect changed parts before commit."
+            }
+          },
+          {
+            "feature": "slide-animation",
+            "subset": "basic-shape-and-text-builds",
+            "status": "supported",
+            "summary": "Create, replace, and clear the published basic entrance, exit, and text-build animation subset.",
+            "operations": ["set-slide-animations"],
+            "limits": [
+              {
+                "code": "merge-safe-animation-subset",
+                "description": "Editable effects and triggers are limited to the published merge-safe subset; stable ids are required for targeted update or removal."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:set-slide-animations",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "slide-animation-basic-roundtrip",
+                "kind": "behavior",
+                "claim": "Basic entrance, exit, paragraph build, timing, trigger, stable-id update, and clear behavior are regression-tested."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["set-slide-animations"],
+              "note": "Inspect the slide animation capability matrix and use only editable entries before applying the high-level operation."
+            }
+          },
+          {
+            "feature": "slide-animation",
+            "subset": "complex-existing-timing",
+            "status": "preserve-only",
+            "summary": "Retain media timing, interactive triggers, motion paths, and unknown timing structures when untouched.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "merge-unsafe-timing",
+                "description": "Editing a slide with merge-unsafe timing is rejected rather than rewriting unknown animation semantics."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-animation-complex-preservation",
+                "kind": "preservation",
+                "claim": "Animation inspection marks complex timing as preserve-only and merge safety rejects destructive edits."
+              }
+            ],
+            "recommendation": {
+              "action": "inspect-and-preserve",
+              "operations": [],
+              "note": "Inspect the timing tree and leave preserve-only entries untouched."
+            }
+          },
+          {
+            "feature": "slide-animation",
+            "subset": "complex-create-edit",
+            "status": "unsupported",
+            "summary": "Create or semantically edit motion paths, media timing, interactive triggers, emphasis, or unknown timing structures.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-complex-timing-writer",
+                "description": "The high-level animation writer does not model the full PowerPoint timing graph."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-animation-complex-authoring-policy",
+                "kind": "policy",
+                "claim": "Complex animation types are explicitly classified outside the editable merge-safe subset."
+              }
+            ],
+            "recommendation": {
+              "action": "do-not-attempt",
+              "operations": [],
+              "note": "Do not synthesize or rewrite complex timing; preserve a reviewed native source instead.",
+              "target": {
+                "feature": "slide-animation",
+                "subset": "complex-existing-timing"
+              }
+            }
+          },
+          {
+            "feature": "slide-transition",
+            "subset": "basic-editing",
+            "status": "supported",
+            "summary": "Create, replace, and clear the published basic transition effects and timing fields.",
+            "operations": ["set-slide-transition"],
+            "limits": [
+              {
+                "code": "published-transition-types-only",
+                "description": "Effects, direction, speed, click timing, after timing, and duration are limited to the operation schema and supported transition model."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:set-slide-transition",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "slide-transition-basic-roundtrip",
+                "kind": "behavior",
+                "claim": "Basic effects and timing fields are written, replaced, cleared, and reopened through the public model."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["set-slide-transition"],
+              "note": "Query the operation schema, dry-run the transition, and inspect the reopened slide."
+            }
+          },
+          {
+            "feature": "slide-transition",
+            "subset": "extended-existing-effects",
+            "status": "preserve-only",
+            "summary": "Retain unmodeled PowerPoint extension transition effects when the transition is untouched.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-extended-effect-mutation",
+                "description": "Changing the transition may replace extension-only effect data that the high-level model does not represent."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-transition-extension-preservation",
+                "kind": "preservation",
+                "claim": "Untouched extension OOXML follows package preservation policy while inspection exposes the modeled transition surface."
+              }
+            ],
+            "recommendation": {
+              "action": "inspect-and-preserve",
+              "operations": [],
+              "note": "Keep the existing transition untouched or copy a reviewed source slide that already contains the effect."
+            }
+          },
+          {
+            "feature": "slide-transition",
+            "subset": "extended-create-edit",
+            "status": "unsupported",
+            "summary": "Create or semantically edit extension-only transition effects outside the published model.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-extended-transition-writer",
+                "description": "No canonical operation models the complete extension transition vocabulary."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-transition-extension-authoring-policy",
+                "kind": "policy",
+                "claim": "Extension-only effects are intentionally excluded from the editable transition contract."
+              }
+            ],
+            "recommendation": {
+              "action": "copy-known-good-content",
+              "operations": [],
+              "note": "Copy and preserve a reviewed source slide instead of synthesizing the extension effect.",
+              "target": {
+                "feature": "slide-transition",
+                "subset": "extended-existing-effects"
+              }
+            }
+          },
+          {
+            "feature": "smartart",
+            "subset": "existing-diagram",
+            "status": "preserve-only",
+            "summary": "Inspect and retain existing SmartArt diagram parts and relationships when untouched.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-smartart-semantic-mutation",
+                "description": "Diagram data, layout constraints, style, and color transforms are not exposed as editable high-level fields."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "smartart-existing-preservation",
+                "kind": "preservation",
+                "claim": "SmartArt parts are inspected and retained through unrelated package edits."
+              }
+            ],
+            "recommendation": {
+              "action": "inspect-and-preserve",
+              "operations": [],
+              "note": "Inspect the existing diagram and leave its diagram parts untouched."
+            }
+          },
+          {
+            "feature": "smartart",
+            "subset": "create-edit",
+            "status": "unsupported",
+            "summary": "Create or semantically edit SmartArt diagrams through a high-level operation.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-smartart-writer",
+                "description": "No canonical operation models the SmartArt data, layout, style, and relationship graph."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "smartart-authoring-policy",
+                "kind": "policy",
+                "claim": "The canonical operation contract intentionally exposes no SmartArt authoring operation."
+              }
+            ],
+            "recommendation": {
+              "action": "use-native-primitives",
+              "operations": ["add-connector", "add-shape", "add-text-box"],
+              "note": "Build an explicitly editable diagram from native shapes and connectors, or preserve reviewed SmartArt source content."
+            }
+          },
+          {
+            "feature": "table",
+            "subset": "native-authoring",
+            "status": "supported",
+            "summary": "Create tables, replace data, edit cells and style, and merge cell ranges.",
+            "operations": ["add-table", "merge-table-cells", "set-table", "set-table-data"],
+            "limits": [
+              {
+                "code": "table-contract-bounded",
+                "description": "Table structure, merge ranges, cell content, and style fields are limited to the published operation schema."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:add-table",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:merge-table-cells",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-table",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-table-data",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "table-native-roundtrip",
+                "kind": "behavior",
+                "claim": "Table creation, data replacement, cell/style mutation, and merges are regression-tested."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["add-table", "merge-table-cells", "set-table", "set-table-data"],
+              "note": "Use table selectors and inspect merged ranges plus rendered layout after changes."
+            }
+          },
+          {
+            "feature": "text",
+            "subset": "native-authoring",
+            "status": "supported",
+            "summary": "Create and update text frames, paragraphs, runs, fitting, and default text styles.",
+            "operations": [
+              "add-paragraph",
+              "add-run",
+              "add-text-box",
+              "fit-text",
+              "replace-paragraph-text",
+              "set-default-text-style",
+              "set-paragraph",
+              "set-run",
+              "set-text-frame"
+            ],
+            "limits": [
+              {
+                "code": "text-contract-and-layout-gates",
+                "description": "Text mutation follows selector, style, fit, and layout-risk contracts; visual fit is not inferred from successful serialization alone."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:add-paragraph",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-run",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:add-text-box",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:fit-text",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:replace-paragraph-text",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-default-text-style",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-paragraph",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-run",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-text-frame",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "text-native-roundtrip-and-fit",
+                "kind": "behavior",
+                "claim": "Text frame, paragraph, run, replacement, style, and fit operations are covered by semantic and layout tests."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": [
+                "add-paragraph",
+                "add-run",
+                "add-text-box",
+                "fit-text",
+                "replace-paragraph-text",
+                "set-default-text-style",
+                "set-paragraph",
+                "set-run",
+                "set-text-frame"
+              ],
+              "note": "Use stable selectors, preserve intended styling, and run visual verification for layout-sensitive edits."
+            }
+          },
+          {
+            "feature": "theme",
+            "subset": "native-authoring",
+            "status": "supported",
+            "summary": "Update canonical theme fields and remap retained native content to a target theme.",
+            "operations": ["remap-theme", "set-theme"],
+            "limits": [
+              {
+                "code": "canonical-theme-fields-only",
+                "description": "Only published theme colors, fonts, palettes, and remap scopes are authored; unmodeled theme or master details remain preservation concerns."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:remap-theme",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "patch-op:set-theme",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "theme-native-remap-roundtrip",
+                "kind": "behavior",
+                "claim": "Theme creation and semantic color/font remapping are regression-tested with explicit preservation reports."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["remap-theme", "set-theme"],
+              "note": "Dry-run remapping, inspect preserved and unsupported objects, then visually verify the deck."
+            }
+          },
+          {
+            "feature": "unknown-ooxml",
+            "subset": "untouched-roundtrip",
+            "status": "preserve-only",
+            "summary": "Retain unmodeled OOXML parts and nodes when unrelated high-level edits do not target them.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "targeted-rewrite-may-replace-unknown-details",
+                "description": "Preservation applies to untouched package content, not to unknown details inside a structure replaced by a targeted high-level operation."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "unknown-ooxml-copy-preservation",
+                "kind": "preservation",
+                "claim": "The package mutation model copies untouched parts and rejects unsafe targeted rewrites when preservation cannot be guaranteed."
+              }
+            ],
+            "recommendation": {
+              "action": "inspect-and-preserve",
+              "operations": [],
+              "note": "Inspect changed parts and preserve unmodeled content; use guarded raw editing only with explicit stale and structure checks."
+            }
+          },
+          {
+            "feature": "vba-project",
+            "subset": "existing-project-policy",
+            "status": "preserve-only",
+            "summary": "Preserve, reject, or strip an existing VBA project according to explicit package policy.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "binary-project-not-inspected-or-edited",
+                "description": "The VBA binary is handled as a package payload; macro code and signatures are not semantically validated."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "vba-preserve-reject-strip-policy",
+                "kind": "policy",
+                "claim": "Macro-enabled packages follow explicit preserve, reject, or strip behavior instead of silent mutation."
+              }
+            ],
+            "recommendation": {
+              "action": "inspect-and-preserve",
+              "operations": [],
+              "note": "Choose the explicit macro policy and verify the resulting package type and VBA payload handling."
+            }
+          },
+          {
+            "feature": "vba-project",
+            "subset": "code-editing",
+            "status": "unsupported",
+            "summary": "Read, create, or edit VBA source code, signatures, or project metadata.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-vba-semantic-editor",
+                "description": "No canonical operation parses or mutates the VBA project binary."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "vba-editing-policy",
+                "kind": "policy",
+                "claim": "VBA editing is explicitly outside the patch operation contract."
+              }
+            ],
+            "recommendation": {
+              "action": "do-not-attempt",
+              "operations": [],
+              "note": "Preserve or strip the project by policy; use a trusted Office-specific tool for authorized macro editing.",
+              "target": {
+                "feature": "vba-project",
+                "subset": "existing-project-policy"
+              }
+            }
+          }
         ],
-        "preservedOnly": [
-          "unknown-ooxml",
-          "existing-media",
-          "theme-master-layout-parts",
-          "existing-chart-style-details",
-          "complex-animations",
-          "slide-transitions",
-          "smartart-diagrams",
-          "vba-macro-projects"
-        ],
-        "unsupported": [
-          "create-complex-animations",
-          "edit-complex-animations",
-          "create-transitions",
-          "edit-transitions",
-          "create-smartart",
-          "edit-smartart",
-          "edit-vba-macros"
-        ]
+        "operationIndex": {
+          "patch-ooxml": {
+            "feature": "advanced-ooxml",
+            "subset": "guarded-low-level-editing"
+          },
+          "add-chart": {
+            "feature": "chart",
+            "subset": "native-authoring"
+          },
+          "set-chart": {
+            "feature": "chart",
+            "subset": "native-authoring"
+          },
+          "set-chart-data": {
+            "feature": "chart",
+            "subset": "native-authoring"
+          },
+          "set-chart-text": {
+            "feature": "chart",
+            "subset": "native-authoring"
+          },
+          "define-macro": {
+            "feature": "control-flow",
+            "subset": "declarative-programming"
+          },
+          "foreach": {
+            "feature": "control-flow",
+            "subset": "declarative-programming"
+          },
+          "if": {
+            "feature": "control-flow",
+            "subset": "declarative-programming"
+          },
+          "try": {
+            "feature": "control-flow",
+            "subset": "declarative-programming"
+          },
+          "use-macro": {
+            "feature": "control-flow",
+            "subset": "declarative-programming"
+          },
+          "bind-data": {
+            "feature": "data-binding",
+            "subset": "json-to-content"
+          },
+          "set-document-properties": {
+            "feature": "document",
+            "subset": "metadata-and-slide-size"
+          },
+          "set-slide-size": {
+            "feature": "document",
+            "subset": "metadata-and-slide-size"
+          },
+          "add-layout": {
+            "feature": "layout",
+            "subset": "native-layout-authoring"
+          },
+          "add-layout-placeholder": {
+            "feature": "layout",
+            "subset": "native-layout-authoring"
+          },
+          "populate-slide": {
+            "feature": "layout",
+            "subset": "native-layout-authoring"
+          },
+          "set-layout": {
+            "feature": "layout",
+            "subset": "native-layout-authoring"
+          },
+          "set-master": {
+            "feature": "layout",
+            "subset": "native-layout-authoring"
+          },
+          "add-equation": {
+            "feature": "media",
+            "subset": "native-authoring"
+          },
+          "add-image": {
+            "feature": "media",
+            "subset": "native-authoring"
+          },
+          "add-ole-object": {
+            "feature": "media",
+            "subset": "native-authoring"
+          },
+          "add-video": {
+            "feature": "media",
+            "subset": "native-authoring"
+          },
+          "crop-image": {
+            "feature": "media",
+            "subset": "native-authoring"
+          },
+          "append-slide-notes": {
+            "feature": "notes",
+            "subset": "plain-and-structured-text"
+          },
+          "remove-slide-notes": {
+            "feature": "notes",
+            "subset": "plain-and-structured-text"
+          },
+          "set-slide-notes": {
+            "feature": "notes",
+            "subset": "plain-and-structured-text"
+          },
+          "add-connector": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "add-freeform": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "add-group": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "add-placeholder": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "add-shape": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "duplicate-shape": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "remove-shape": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "set-connector": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "set-shape": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "ungroup-shapes": {
+            "feature": "shape",
+            "subset": "native-authoring"
+          },
+          "add-slide": {
+            "feature": "slide",
+            "subset": "lifecycle-and-background"
+          },
+          "duplicate-slide": {
+            "feature": "slide",
+            "subset": "lifecycle-and-background"
+          },
+          "move-slide": {
+            "feature": "slide",
+            "subset": "lifecycle-and-background"
+          },
+          "remove-slide": {
+            "feature": "slide",
+            "subset": "lifecycle-and-background"
+          },
+          "set-slide-background": {
+            "feature": "slide",
+            "subset": "lifecycle-and-background"
+          },
+          "set-slide-animations": {
+            "feature": "slide-animation",
+            "subset": "basic-shape-and-text-builds"
+          },
+          "set-slide-transition": {
+            "feature": "slide-transition",
+            "subset": "basic-editing"
+          },
+          "add-table": {
+            "feature": "table",
+            "subset": "native-authoring"
+          },
+          "merge-table-cells": {
+            "feature": "table",
+            "subset": "native-authoring"
+          },
+          "set-table": {
+            "feature": "table",
+            "subset": "native-authoring"
+          },
+          "set-table-data": {
+            "feature": "table",
+            "subset": "native-authoring"
+          },
+          "add-paragraph": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "add-run": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "add-text-box": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "fit-text": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "replace-paragraph-text": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "set-default-text-style": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "set-paragraph": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "set-run": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "set-text-frame": {
+            "feature": "text",
+            "subset": "native-authoring"
+          },
+          "remap-theme": {
+            "feature": "theme",
+            "subset": "native-authoring"
+          },
+          "set-theme": {
+            "feature": "theme",
+            "subset": "native-authoring"
+          }
+        },
+        "legacyProjection": {
+          "schemaVersion": "pptx-capability-legacy-projection/v1",
+          "lossy": true,
+          "partialStatus": "not-represented",
+          "supported": [
+            "add-chart",
+            "add-connector",
+            "add-equation",
+            "add-freeform",
+            "add-group",
+            "add-image",
+            "add-layout",
+            "add-layout-placeholder",
+            "add-ole-object",
+            "add-paragraph",
+            "add-placeholder",
+            "add-run",
+            "add-shape",
+            "add-slide",
+            "add-table",
+            "add-text-box",
+            "add-video",
+            "append-slide-notes",
+            "bind-data",
+            "crop-image",
+            "define-macro",
+            "duplicate-shape",
+            "duplicate-slide",
+            "fit-text",
+            "foreach",
+            "if",
+            "merge-table-cells",
+            "move-slide",
+            "patch-ooxml",
+            "populate-slide",
+            "remap-theme",
+            "remove-shape",
+            "remove-slide",
+            "remove-slide-notes",
+            "replace-paragraph-text",
+            "set-chart",
+            "set-chart-data",
+            "set-chart-text",
+            "set-connector",
+            "set-default-text-style",
+            "set-document-properties",
+            "set-layout",
+            "set-master",
+            "set-paragraph",
+            "set-run",
+            "set-shape",
+            "set-slide-animations",
+            "set-slide-background",
+            "set-slide-notes",
+            "set-slide-size",
+            "set-slide-transition",
+            "set-table",
+            "set-table-data",
+            "set-text-frame",
+            "set-theme",
+            "try",
+            "ungroup-shapes",
+            "use-macro"
+          ],
+          "preservedOnly": [
+            "model-3d/existing-object-preservation",
+            "slide-animation/complex-existing-timing",
+            "slide-transition/extended-existing-effects",
+            "smartart/existing-diagram",
+            "unknown-ooxml/untouched-roundtrip",
+            "vba-project/existing-project-policy"
+          ],
+          "unsupported": [
+            "model-3d/create-edit",
+            "slide-animation/complex-create-edit",
+            "slide-transition/extended-create-edit",
+            "smartart/create-edit",
+            "vba-project/code-editing"
+          ]
+        }
       },
       "subcommands": {
         "new": {
@@ -1805,6 +3156,66 @@
           "manifest": {
             "pages": ["path", "slide", "file.width", "file.height", "file.byteLength", "file.hash"],
             "contactSheet": ["path", "width", "height", "byteLength", "hash"]
+          }
+        },
+        "visual-verify": {
+          "usage": "xdoc pptx visual-verify --candidate new.pptx [--reference approved.pptx] --output-dir evidence [--slides 1,3-5] [--dpi 144] [--channel-threshold 26] --json",
+          "inputs": ["required candidate PPTX", "optional approved or pre-change reference PPTX"],
+          "outputs": [
+            "manifest.json using pptx-visual-evidence/v1",
+            "exact rendered PDF artifacts",
+            "per-slide PNG artifacts",
+            "full manifest on stdout with --json",
+            "human decision summary"
+          ],
+          "scope": {
+            "option": "--slides",
+            "valueSyntax": "N|N-M[,N|N-M...]",
+            "indexBase": 1
+          },
+          "checks": [
+            "input-integrity",
+            "static-layout",
+            "pdf-final-layout",
+            "pdfium-raster",
+            "pixel-diff",
+            "ocr-overflow",
+            "font-resolution",
+            "region-attribution",
+            "independent-reference",
+            "policy"
+          ],
+          "outcomes": ["pass", "fail", "skipped", "inconclusive"],
+          "agentActions": ["proceed", "require-human-confirmation", "stop"],
+          "evidencePolicy": {
+            "sameRenderer": "Normalized PDFium pixel comparison supports same-renderer regression only and never establishes PowerPoint parity.",
+            "independentRenderer": "PowerPoint parity requires a separately produced Office/PowerPoint render; v1 reports independent-reference as skipped when unavailable.",
+            "staticArbitration": "Static estimator facts retain their original severity and message; a matching final rendered frame fit changes only the finding disposition to contradicted-by-rendered-layout.",
+            "attribution": "Changed regions retain all overlapping PPTX object candidates ranked by coverage; no unique owner is invented."
+          },
+          "ioContract": {
+            "filesystem": {
+              "outputDirOption": "--output-dir",
+              "manifest": "<output-dir>/manifest.json",
+              "atomicPublish": "The complete staged directory replaces the destination only after all evidence and the manifest are written; existing output requires --overwrite."
+            },
+            "stdout": {
+              "format": "complete canonical manifest with --json; human decision summary otherwise",
+              "schemaVersion": "pptx-visual-evidence/v1"
+            },
+            "stderr": {
+              "usage": "transport and argument errors only"
+            },
+            "exitCodePolicy": {
+              "0": "The evidence transaction completed; content disposition is manifest.decision.action, not the process exit code.",
+              "2": "CLI arguments are invalid.",
+              "3": "A PPTX input is unreadable or invalid.",
+              "5": "The requested slide scope is outside the PPTX slide range.",
+              "7": "Font ownership or the final PDF observation could not be produced.",
+              "8": "PDFium rasterization or normalized pixel comparison failed.",
+              "9": "The output directory could not be published safely.",
+              "11": "An unexpected visual-oracle stage failed."
+            }
           }
         },
         "vision-check": {
@@ -2099,6 +3510,82 @@
             ]
           }
         },
+        "i18n-anchor-draft": {
+          "usage": "xdoc pptx i18n-anchor-draft --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-anchor-draft.json --json [--slides 1,3-5] [--unit <unitId>]",
+          "inputs": [
+            "source PPTX",
+            "pptx-i18n-units/v1 JSON or full i18n-scan report",
+            "pptx-i18n-translations/v1 JSON"
+          ],
+          "outputs": [
+            "pptx-i18n-anchor-draft/v1",
+            "high-confidence drafts[] with sourceRuns/styledRuns/candidateAnchors",
+            "translationsDraft merge projection",
+            "blocked[] safety decisions",
+            "agentGate",
+            "rerunArgs[] and rerunCommand"
+          ],
+          "strategy": "Reuse i18n-plan review/repair material and the current text-plan mapper. The command never rescans XML independently, translates text, mutates a PPTX, or emits executable patch operations.",
+          "statuses": ["pass", "partial", "blocked", "no-op"],
+          "derivations": [
+            "unique-exact-source-token",
+            "unique-unchanged-run-context",
+            "unique-adjacent-run-context"
+          ],
+          "highConfidence": {
+            "targetUniqueness": "Every candidate anchor occurs exactly once in targetText.",
+            "sourceOrder": "Multiple candidate anchors occur in the same order as their styled source runs.",
+            "usefulToken": "Context-inferred candidates are non-empty, not punctuation-only, not repeated significant words, and not short ordinary words. A uniquely preserved exact styled source token is structurally bound and remains eligible regardless of length, including Git and Vue.",
+            "contextIsolation": "A changed target token is eligible only when unique unchanged neighboring run text isolates exactly one unresolved styled run. Changed CJK wording is never auto-aligned.",
+            "plannerValidation": "The ordered anchors must be accepted by the existing planner's adjacent plain-run assignment before entering translationsDraft."
+          },
+          "blockerCategories": {
+            "draftNative": [
+              "duplicate-token",
+              "cjk-paraphrase",
+              "run-order-ambiguity",
+              "short-common-word",
+              "punctuation-only",
+              "no-usable-anchor",
+              "non-deterministic-gap",
+              "missing-repair-contract",
+              "no-styled-runs",
+              "missing-translation"
+            ],
+            "plannerPassthrough": "Any i18n-plan conflict category or non-mixed-style review category may also appear verbatim in blocked[].category. Agents must treat unfamiliar categories as fail-closed blockers and follow nextAction."
+          },
+          "translationsDraft": {
+            "schemaVersion": "pptx-i18n-anchor-merge/v1",
+            "targetSchemaVersion": "pptx-i18n-translations/v1",
+            "mergeBy": "unitId",
+            "fields": ["unitId", "sourceHash", "sourceText", "targetText", "anchors[]"]
+          },
+          "ioContract": {
+            "stdout": {
+              "format": "complete JSON when --json is set; human summary otherwise",
+              "schemaVersion": "pptx-i18n-anchor-draft/v1"
+            },
+            "stderr": {
+              "usage": "errors-only"
+            },
+            "filesystem": {
+              "usage": "PPTX and contract inputs are read-only; optional --output persists the report and --overwrite is required to replace it"
+            },
+            "exitCodePolicy": {
+              "0": "Draft evaluation completed. status may be pass, partial, blocked, or no-op; inspect blocked[] and merge only translationsDraft entries.",
+              "2": "CLI argument parsing or validation failed.",
+              "3": "Source/units/translations input is invalid, --unit is unknown, or an input contract cannot be parsed. No draft report is trusted.",
+              "9": "The optional report output could not be created or replaced; the input PPTX and contract files remain untouched."
+            }
+          },
+          "agentPolicy": {
+            "entryPoint": "Use reviewRequired[].draftCommand/suggestedCommand for a mixed-style-no-anchor unit, or omit --unit to triage all scoped units.",
+            "mergePolicy": "Merge translationsDraft.translations[] into the existing translations[] array by unitId. Never replace the full translation document with this partial projection and never merge blocked candidates.",
+            "gate": "summary.draftCount and translationsDraft.translations.length identify merge material; agentGate.applyAuthorized is always false and plannerRerunRequired is true exactly when draftCount is non-zero.",
+            "applyAuthorization": "After merging anchors, rerun i18n-plan using rerunArgs[] or rerunCommand. Only the new plan's applyGate.passed=true authorizes patch/replacement execution.",
+            "fallback": "For blocked units, fill the planner's targetSegments repair or obtain manual review. Do not reinterpret candidateAnchors conversationally as high confidence."
+          }
+        },
         "i18n-plan": {
           "usage": "xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-plan.json --json [--slides 1,3-5]",
           "inputs": [
@@ -2114,9 +3601,11 @@
             "replaceChartText replacements",
             "run-level patch.ops",
             "reviewRequired[].repair targetSegments templates",
+            "reviewRequired[].draftCommand/suggestedCommand for mixed-style-no-anchor",
             "applyGate and deliveryGate"
           ],
           "strategy": "Validate unitId/sourceText/sourceHash guarded translations against the current source inventory, then route each unit to the safest available execution primitive without requiring agents to construct low-level selectors.",
+          "statuses": ["pass", "blocked", "review-required", "incomplete"],
           "translationUnit": {
             "schemaVersion": "pptx-i18n-translations/v1",
             "required": ["translations[].unitId", "translations[].targetText", "targetLang"],
@@ -2128,6 +3617,7 @@
               "translations[].reviewDecision"
             ],
             "guard": "sourceHash and sourceText, when present, must match the i18nUnits source unit before any execution plan is emitted. targetSegmentsContractId, when present, must match the current run structure.",
+            "anchorsContract": "When anchors[] is present, it must contain exactly one non-empty target anchor for every non-empty styled/protected source run, in source-run order. Every anchor must occur exactly once in targetText, counting overlapping matches. When anchors[] is omitted, the planner may only infer a uniquely preserved exact source token for every styled run.",
             "reviewDecision": "Set reviewDecision:\"translate\" together with the unit's sourceHash to apply a reviewed unit's targetText through the standard execution primitives; without it, a review unit carrying targetText stays a review-target conflict. Applied reviewed units are counted in summary.reviewedTranslationCount."
           },
           "routes": {
@@ -2147,6 +3637,11 @@
             "mergePolicy": "Copy translationPatchTemplate into the existing translations[] item matched by unitId, fill every null text, and rerun i18n-plan. Do not append a duplicate translation record.",
             "failClosed": "Templates use text=null and ready=false. The translations parser rejects an unfilled template; completed segments must match group ids/order, targetText reconstruction, sourceHash, and targetSegmentsContractId."
           },
+          "anchorDraftRepair": {
+            "eligibility": "A mixed-style-no-anchor review emits unit-specific draftCommand and suggestedCommand. Other review categories do not advertise the anchor helper.",
+            "flow": "Run the command, merge only translationsDraft.translations[] by unitId, then rerun this planner. A draft report never changes applyGate and never authorizes execution.",
+            "fallback": "If anchor drafting remains blocked, fill reviewRequired[].repair.translationPatchTemplate targetSegments instead."
+          },
           "ioContract": {
             "stdout": {
               "format": "compact JSON when --json is set; complete JSON only with --json-full; human summary otherwise",
@@ -2161,7 +3656,8 @@
             "exitCodePolicy": {
               "0": "Plan status is pass and applyGate can pass.",
               "2": "CLI argument parsing or validation failed.",
-              "3": "Invalid source/units/translations input, or a completed plan whose status is not pass: blocked (conflicts), review-required (apply-blocking reviews), or incomplete (missing translations). A completed --json request still emits one compact result and --output, when supplied, contains the complete plan."
+              "3": "Invalid source/units/translations input, or a completed plan whose status is not pass: blocked (conflicts), review-required (apply-blocking reviews), or incomplete (missing translations). A completed --json request still emits one compact result and --output, when supplied, contains the complete plan.",
+              "9": "The complete plan could not be persisted to --output; no execution artifact is trusted from that invocation."
             }
           },
           "agentPolicy": {
@@ -2758,12 +4254,26 @@
           "recommendedFollowUp": "Run xdoc pptx check-brand out.pptx --brand brand.json --json to report remaining slide-level brand risks such as missing logos or footer text."
         },
         "copy-from": {
-          "usage": "xdoc pptx copy-from target.pptx --from source.pptx --slide 0 --output out.pptx",
-          "inputs": ["target PPTX", "source PPTX", "0-based source slide index"],
+          "usage": "xdoc pptx copy-from target.pptx --from source.pptx [--slide 0 | --slides 1,3,5-8 | --all] --output out.pptx [--dry-run] [--json]",
+          "inputs": [
+            "target PPTX",
+            "source PPTX",
+            "one optional source-slide selector; omitting all selectors preserves the compatible --slide 0 behavior"
+          ],
           "outputs": ["output PPTX", "pptx-copy-from/v1 JSON report"],
-          "notes": "Copies one source slide into the target deck, preserving slide XML and internal related parts such as media/charts while rebinding slide-layout relationships to an existing target layout when possible.",
+          "selection": {
+            "slide": "--slide N selects one 0-based source slide; this is the compatibility entry and defaults to 0 when no selector is supplied",
+            "slides": "--slides N|N-M[,N|N-M...] selects one or more 1-based source slides in caller order",
+            "all": "--all selects every source slide in source order",
+            "mutualExclusion": "--slide, --slides, and --all are mutually exclusive"
+          },
+          "notes": "Opens the target and source once, validates the complete requested slide selection before the first target mutation, copies all selected slides in one in-memory transaction, and writes the candidate only after every copy plus one serialization succeeds. Slide XML and internal related parts such as media/charts are preserved while slide-layout relationships are rebound to an existing target layout when possible.",
+          "report": {
+            "copied": "per-slide 0-based source/target indexes, slide part mappings, and dependency mappings",
+            "dependencyMappings": "flattened aggregate dependency mappings with owning sourceSlide and targetSlide",
+            "changedParts": "deduplicated aggregate target part names across the whole transaction"
+          },
           "mvpLimits": [
-            "Copies one slide per invocation",
             "Does not write apply sidecars because it is not a replayable patch op",
             "Imported slide uses the target deck layout graph when a matching source layout is unavailable"
           ]
@@ -10777,6 +12287,42 @@
               }
             ]
           },
+          "chartDateAxis": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["date"],
+                "strict": true
+              },
+              "formatCode": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S",
+                "default": "yyyy-mm-dd"
+              },
+              "baseTimeUnit": {
+                "$ref": "#/$defs/chartTimeUnit"
+              },
+              "majorUnit": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "majorTimeUnit": {
+                "$ref": "#/$defs/chartTimeUnit"
+              },
+              "minorUnit": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minorTimeUnit": {
+                "$ref": "#/$defs/chartTimeUnit"
+              }
+            },
+            "description": "Explicit native c:dateAx creation for add-chart. When type=date is present, data.categories must contain strict Gregorian ISO YYYY-MM-DD dates in the 1900-01-01..9999-12-31 range; the runtime writes Excel 1900-system serials to the chart cache and embedded workbook. Omission never infers date semantics. Only classic category-axis chart kinds accept this object; chartEx/dataEx, pie/doughnut, scatter/bubble, stock, and combo charts reject it."
+          },
           "chartExData": {
             "anyOf": [
               {
@@ -16476,6 +18022,9 @@
                       "op": {
                         "const": "add-chart"
                       },
+                      "categoryAxis": {
+                        "$ref": "#/$defs/chartDateAxis"
+                      },
                       "data": {
                         "$ref": "#/$defs/chartData"
                       },
@@ -19732,6 +21281,42 @@
                   "$ref": "#/$defs/stockChartData"
                 }
               ]
+            },
+            "chartDateAxis": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["date"],
+                  "strict": true
+                },
+                "formatCode": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S",
+                  "default": "yyyy-mm-dd"
+                },
+                "baseTimeUnit": {
+                  "$ref": "#/$defs/chartTimeUnit"
+                },
+                "majorUnit": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "majorTimeUnit": {
+                  "$ref": "#/$defs/chartTimeUnit"
+                },
+                "minorUnit": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "minorTimeUnit": {
+                  "$ref": "#/$defs/chartTimeUnit"
+                }
+              },
+              "description": "Explicit native c:dateAx creation for add-chart. When type=date is present, data.categories must contain strict Gregorian ISO YYYY-MM-DD dates in the 1900-01-01..9999-12-31 range; the runtime writes Excel 1900-system serials to the chart cache and embedded workbook. Omission never infers date semantics. Only classic category-axis chart kinds accept this object; chartEx/dataEx, pie/doughnut, scatter/bubble, stock, and combo charts reject it."
             },
             "chartExData": {
               "anyOf": [
@@ -24912,6 +26497,43 @@
             }
           },
           {
+            "title": "Create a native date-axis chart",
+            "patch": {
+              "schemaVersion": 1,
+              "ops": [
+                {
+                  "op": "add-slide"
+                },
+                {
+                  "slide": 0,
+                  "kind": "line",
+                  "x": "1in",
+                  "y": "1in",
+                  "w": "6in",
+                  "h": "4in",
+                  "name": "Monthly Revenue",
+                  "categoryAxis": {
+                    "type": "date",
+                    "formatCode": "yyyy-mm-dd",
+                    "baseTimeUnit": "days",
+                    "majorUnit": 1,
+                    "majorTimeUnit": "months"
+                  },
+                  "data": {
+                    "categories": ["2026-01-01", "2026-02-01", "2026-03-01"],
+                    "series": [
+                      {
+                        "name": "Revenue",
+                        "values": [10, 20, 30]
+                      }
+                    ]
+                  },
+                  "op": "add-chart"
+                }
+              ]
+            }
+          },
+          {
             "title": "High-level recipe slides",
             "patch": {
               "schemaVersion": 1,
@@ -25479,10 +27101,10 @@
           {
             "op": "add-chart",
             "category": "chart",
-            "summary": "Add a chart with data.",
+            "summary": "Add a chart with data and an optional explicit date category axis.",
             "required": ["op", "slide", "kind", "x", "y", "w", "h"],
             "constraints": [],
-            "optional": ["data", "dataEx", "legend", "name", "title", "variant"],
+            "optional": ["categoryAxis", "data", "dataEx", "legend", "name", "title", "variant"],
             "level": "patch"
           },
           {
@@ -29005,7 +30627,45 @@
             }
           },
           "capabilities": {
-            "type": "object"
+            "type": "object",
+            "required": [
+              "schemaVersion",
+              "lossy",
+              "partialStatus",
+              "supported",
+              "preservedOnly",
+              "unsupported"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "pptx-capability-legacy-projection/v1"
+              },
+              "lossy": {
+                "const": true
+              },
+              "partialStatus": {
+                "const": "not-represented"
+              },
+              "supported": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "preservedOnly": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unsupported": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
           }
         }
       },
@@ -29421,7 +31081,45 @@
             }
           },
           "capabilities": {
-            "type": "object"
+            "type": "object",
+            "required": [
+              "schemaVersion",
+              "lossy",
+              "partialStatus",
+              "supported",
+              "preservedOnly",
+              "unsupported"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "pptx-capability-legacy-projection/v1"
+              },
+              "lossy": {
+                "const": true
+              },
+              "partialStatus": {
+                "const": "not-represented"
+              },
+              "supported": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "preservedOnly": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unsupported": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
           }
         }
       },
@@ -29837,7 +31535,45 @@
             }
           },
           "capabilities": {
-            "type": "object"
+            "type": "object",
+            "required": [
+              "schemaVersion",
+              "lossy",
+              "partialStatus",
+              "supported",
+              "preservedOnly",
+              "unsupported"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "pptx-capability-legacy-projection/v1"
+              },
+              "lossy": {
+                "const": true
+              },
+              "partialStatus": {
+                "const": "not-represented"
+              },
+              "supported": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "preservedOnly": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unsupported": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
           }
         }
       },
@@ -31219,6 +32955,522 @@
                 }
               },
               "suggestion": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "visualEvidenceReportSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://structurify.io/schemas/pptx-visual-evidence.v1.schema.json",
+        "type": "object",
+        "required": ["schemaVersion", "status"],
+        "oneOf": [
+          {
+            "properties": {
+              "status": {
+                "const": "success"
+              }
+            },
+            "required": [
+              "policyId",
+              "subjects",
+              "checks",
+              "evidence",
+              "findings",
+              "provenance",
+              "nextChecks",
+              "decision",
+              "artifacts"
+            ]
+          },
+          {
+            "properties": {
+              "status": {
+                "const": "error"
+              }
+            },
+            "required": ["error"]
+          }
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": "pptx-visual-evidence/v1"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "error"],
+            "strict": true
+          },
+          "policyId": {
+            "const": "pptx-visual-oracle-default/v1"
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "sha256", "byteLength", "slideCount", "selectedSlides"],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "byteLength": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "slideCount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "selectedSlides": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "required", "outcome", "reason", "evidenceIds", "findingIds"],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "outcome": {
+                  "type": "string",
+                  "enum": ["pass", "fail", "skipped", "inconclusive"],
+                  "strict": true
+                },
+                "reason": {
+                  "type": ["string", "null"]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "findingIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "checkId",
+                "class",
+                "relation",
+                "claim",
+                "subjectId",
+                "referenceId",
+                "slide",
+                "region",
+                "confidence",
+                "provenanceIds",
+                "metrics"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "checkId": {
+                  "type": "string"
+                },
+                "class": {
+                  "type": "string"
+                },
+                "relation": {
+                  "type": "string"
+                },
+                "claim": {
+                  "type": "string"
+                },
+                "subjectId": {
+                  "type": ["string", "null"]
+                },
+                "referenceId": {
+                  "type": ["string", "null"]
+                },
+                "slide": {
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "region": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": ["x", "y", "width", "height"],
+                      "properties": {
+                        "x": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "y": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "width": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "height": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "provenanceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "metrics": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "checkId",
+                "kind",
+                "severity",
+                "message",
+                "disposition",
+                "subjectId",
+                "slide",
+                "region",
+                "evidenceIds",
+                "candidates"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "checkId": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "disposition": {
+                  "type": "string",
+                  "enum": ["observed", "contradicted-by-rendered-layout"],
+                  "strict": true
+                },
+                "subjectId": {
+                  "type": ["string", "null"]
+                },
+                "slide": {
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "region": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": ["x", "y", "width", "height"],
+                      "properties": {
+                        "x": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "y": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "width": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "height": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "evidenceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "candidates": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "subjectId",
+                      "slide",
+                      "kind",
+                      "shapeId",
+                      "shapeName",
+                      "elementKey",
+                      "region",
+                      "confidence",
+                      "basis"
+                    ],
+                    "properties": {
+                      "subjectId": {
+                        "type": "string"
+                      },
+                      "slide": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "shapeId": {
+                        "type": ["string", "null"]
+                      },
+                      "shapeName": {
+                        "type": ["string", "null"]
+                      },
+                      "elementKey": {
+                        "oneOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "region": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "required": ["x", "y", "width", "height"],
+                            "properties": {
+                              "x": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "y": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "height": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              }
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "confidence": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "basis": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "provenance": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "stage", "implementation", "relation", "parameters"],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "stage": {
+                  "type": "string"
+                },
+                "implementation": {
+                  "type": "string"
+                },
+                "relation": {
+                  "type": "string"
+                },
+                "parameters": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "nextChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "kind", "automatic", "reason", "commandHint"],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "automatic": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "commandHint": {
+                  "type": ["string", "null"]
+                }
+              }
+            }
+          },
+          "decision": {
+            "type": "object",
+            "required": ["action", "assurance", "reasons"],
+            "properties": {
+              "action": {
+                "type": "string",
+                "enum": ["proceed", "require-human-confirmation", "stop"],
+                "strict": true
+              },
+              "assurance": {
+                "type": "string"
+              },
+              "reasons": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "path", "mediaType", "subjectId", "slide", "sha256", "byteLength"],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "mediaType": {
+                  "type": "string",
+                  "enum": ["application/pdf", "image/png"],
+                  "strict": true
+                },
+                "subjectId": {
+                  "type": "string"
+                },
+                "slide": {
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "byteLength": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "error": {
+            "type": "object",
+            "required": ["stage", "message"],
+            "properties": {
+              "stage": {
+                "type": "string"
+              },
+              "message": {
                 "type": "string"
               }
             }
@@ -33873,6 +36125,9 @@
               "message": {
                 "type": "string"
               },
+              "stage": {
+                "type": "string"
+              },
               "opIndex": {
                 "type": "integer",
                 "minimum": 0
@@ -34983,16 +37238,19 @@
     "pptxI18nScan": "xdoc pptx i18n-scan --source candidate.pptx --mode candidate --units i18n-scan-source.json --data translations.json --output i18n-candidate.json --json",
     "pptxI18nStyleDiff": "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
     "pptxI18nPlan": "xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-plan.json --json",
+    "pptxI18nAnchorDraft": "xdoc pptx i18n-anchor-draft --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-anchor-draft.json --json [--unit <unitId>]",
     "pptxI18nTextPlan": "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
     "pptxReplaceText": "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
     "pptxReplaceChartText": "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
     "pptxContactDiff": "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png [--map reference-map.json] [--slides 1,3-5] [--dpi 192] --json",
     "pptxPreview": "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet contact-sheet.png [--dpi 192] --json",
+    "pptxVisualVerify": "xdoc pptx visual-verify --candidate new.pptx [--reference approved.pptx] --output-dir evidence [--slides 1,3-5] [--dpi 144] [--channel-threshold 26] --json",
     "pptxRefurbishAudit": "xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json",
     "pptxRefurbishSkin": "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json",
     "pptxChromeDetect": "xdoc pptx chrome-detect deck.pptx --json",
     "pptxChromeRemove": "xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx",
     "pptxChromeApply": "xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx",
+    "pptxCopyFrom": "xdoc pptx copy-from target.pptx --from source.pptx [--slide 0 | --slides 1,3,5-8 | --all] --output out.pptx --json",
     "pptxReplay": "xdoc pptx replay --from-sidecar <out.pptx.xdoc.json> --output <recovered.pptx>",
     "pptxAudit": "xdoc pptx audit --from-sidecar <out.pptx.xdoc.json> --json",
     "pptxRollback": "xdoc pptx rollback --from-sidecar <out.pptx.xdoc.json> --output <recovered.pptx>",

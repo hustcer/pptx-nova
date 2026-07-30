@@ -15,7 +15,10 @@ test('visual-verify is routed as the canonical final Agent decision', () => {
   const common = readSkill('references/common-workflow.md')
   const exportAndCheck = readSkill('references/export-and-check.md')
 
-  assert.match(skill, /canonical final visual decision/)
+  assert.match(
+    skill,
+    /Preview is for inspection, while the canonical\s+visual-evidence decision remains the delivery authority/,
+  )
   assert.match(common, /Run `xdoc pptx visual-verify` once on the stable final candidate/)
 
   assert.match(exportAndCheck, /## Unified Visual Evidence \(Canonical Agent Gate\)/)

@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.2 (913c3ff8)",
+  "version": "0.3.3 (91f7086a)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -3155,7 +3155,8 @@
           },
           "manifest": {
             "pages": ["path", "slide", "file.width", "file.height", "file.byteLength", "file.hash"],
-            "contactSheet": ["path", "width", "height", "byteLength", "hash"]
+            "contactSheet": ["path", "width", "height", "byteLength", "hash"],
+            "visualEvidence": "Observation-only handoff to pptx-visual-evidence/v1; preview status never authorizes Agent delivery."
           }
         },
         "visual-verify": {
@@ -3191,7 +3192,8 @@
             "sameRenderer": "Normalized PDFium pixel comparison supports same-renderer regression only and never establishes PowerPoint parity.",
             "independentRenderer": "PowerPoint parity requires a separately produced Office/PowerPoint render; v1 reports independent-reference as skipped when unavailable.",
             "staticArbitration": "Static estimator facts retain their original severity and message; a matching final rendered frame fit changes only the finding disposition to contradicted-by-rendered-layout.",
-            "attribution": "Changed regions retain all overlapping PPTX object candidates ranked by coverage; no unique owner is invented."
+            "attribution": "Changed regions retain all overlapping PPTX object candidates ranked by coverage; no unique owner is invented.",
+            "decisionAuthority": "This is the only xdoc visual report that authorizes an Agent action. preview, diff, vision-diff, and contact-diff expose observation-only visualEvidence handoffs."
           },
           "ioContract": {
             "filesystem": {
@@ -3900,7 +3902,7 @@
             "changed": "same logicalKey with changed severity or metrics"
           },
           "agentPolicy": {
-            "passWhen": "agentGate.passed is true",
+            "passWhen": "agentGate.passed means the diagnostic regression classification passed; it does not authorize delivery. Execute visualEvidence.command and consume the canonical manifest.decision.",
             "blocksOn": [
               "candidate introduces any new high/medium issue",
               "candidate worsens an inherited issue to high/medium severity"
@@ -3965,7 +3967,8 @@
           "agentPolicy": {
             "gateMeaning": "agentGate.passed means the contact sheet rendered complete source/candidate pairs and is safe to hand to human visual review; changed pairs are expected and do not fail the gate.",
             "failWhen": "agentGate.passed=false, missingPairCount>0, addedPairCount>0, or pairCount=0; fix slide scope, slide count, or reference map before relying on the PNG.",
-            "scopedReview": "When --slides is used, summary/pairs/rendered PNG are scoped to selected source slides; run an all-slides contact-diff before final delivery when full-deck parity matters."
+            "scopedReview": "When --slides is used, summary/pairs/rendered PNG are scoped to selected source slides; run an all-slides contact-diff before final delivery when full-deck parity matters.",
+            "decisionAuthority": "This report is observation-only. Execute visualEvidence.command and consume pptx-visual-evidence/v1 manifest.decision for the final Agent action."
           },
           "environment": {
             "XDOC_CONTACT_DIFF_AGENT_REVIEW_OUTPUT": "Optional path for a second contact sheet laid out for Agent review; it must differ from --output.",
@@ -32927,6 +32930,36 @@
           "engine": {
             "type": "string"
           },
+          "visualEvidence": {
+            "type": "object",
+            "required": [
+              "reportRole",
+              "authorizesDelivery",
+              "decisionSchemaVersion",
+              "decisionField",
+              "command"
+            ],
+            "properties": {
+              "reportRole": {
+                "const": "observation-only"
+              },
+              "authorizesDelivery": {
+                "const": false
+              },
+              "decisionSchemaVersion": {
+                "const": "pptx-visual-evidence/v1"
+              },
+              "decisionField": {
+                "const": "manifest.decision"
+              },
+              "command": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "error": {
             "type": "object",
             "properties": {
@@ -33210,7 +33243,7 @@
                 },
                 "disposition": {
                   "type": "string",
-                  "enum": ["observed", "contradicted-by-rendered-layout"],
+                  "enum": ["observed", "contradicted-by-rendered-layout", "dependency-unavailable"],
                   "strict": true
                 },
                 "subjectId": {
@@ -33412,7 +33445,15 @@
                 "strict": true
               },
               "assurance": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "content-blocked",
+                  "environment-dependent",
+                  "same-renderer-change-detected",
+                  "candidate-only",
+                  "same-renderer-regression"
+                ],
+                "strict": true
               },
               "reasons": {
                 "type": "array",
@@ -33743,7 +33784,8 @@
               "reviewPolicy",
               "ciUsableSignals",
               "reviewSignals",
-              "previewCommand"
+              "previewCommand",
+              "visualEvidence"
             ],
             "properties": {
               "semanticStatus": {
@@ -33791,6 +33833,36 @@
                 "type": "array",
                 "items": {
                   "type": "string"
+                }
+              },
+              "visualEvidence": {
+                "type": "object",
+                "required": [
+                  "reportRole",
+                  "authorizesDelivery",
+                  "decisionSchemaVersion",
+                  "decisionField",
+                  "command"
+                ],
+                "properties": {
+                  "reportRole": {
+                    "const": "observation-only"
+                  },
+                  "authorizesDelivery": {
+                    "const": false
+                  },
+                  "decisionSchemaVersion": {
+                    "const": "pptx-visual-evidence/v1"
+                  },
+                  "decisionField": {
+                    "const": "manifest.decision"
+                  },
+                  "command": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -34350,7 +34422,8 @@
           "candidate",
           "agentGate",
           "render",
-          "pairs"
+          "pairs",
+          "visualEvidence"
         ],
         "properties": {
           "schemaVersion": {
@@ -34534,6 +34607,36 @@
               },
               "reason": {
                 "type": "string"
+              }
+            }
+          },
+          "visualEvidence": {
+            "type": "object",
+            "required": [
+              "reportRole",
+              "authorizesDelivery",
+              "decisionSchemaVersion",
+              "decisionField",
+              "command"
+            ],
+            "properties": {
+              "reportRole": {
+                "const": "observation-only"
+              },
+              "authorizesDelivery": {
+                "const": false
+              },
+              "decisionSchemaVersion": {
+                "const": "pptx-visual-evidence/v1"
+              },
+              "decisionField": {
+                "const": "manifest.decision"
+              },
+              "command": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           },

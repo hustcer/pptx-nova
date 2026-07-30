@@ -211,6 +211,12 @@ cloud-callout`。
 
 同一个 `set-shape` 可同时给多个字段（如 `position` + `size` + `fill` 一次改完）。
 
+Group target 是明确例外：只支持 `name`、`position`、`size`、`rotation`、`flip`
+和 `effect`。`fill`、`line`、`clickAction` 会在任何 mutation 前返回
+`InvalidOperation`；先 inspect/select 组内子形状，再分别对这些子形状设置对应字段。以当前
+`xdoc schema --op set-shape --minimal` 中的 `target-field-compatibility` constraint
+和 dry-run 结果为准。
+
 ### Fill 示例
 
 ```json

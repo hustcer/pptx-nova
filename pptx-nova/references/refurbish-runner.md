@@ -1,14 +1,12 @@
 # Refurbish Runner
 
-Use this compact route to restyle an existing PPTX while preserving its content. The standard runner
-is the execution boundary: it chooses native or catalog-driven fallback, validates content fidelity,
-creates one canonical high-DPI comparison, binds publication, and leaves human visual judgment explicit.
+Use this compact route to restyle an existing PPTX while preserving its content. The standard runner is
+the execution boundary: it chooses a route, validates fidelity, binds publication, and leaves visual judgment explicit.
 
 ## Non-skippable contract
 
 - Treat the source PPTX as read-only content truth.
-- Preserve slide ownership, visible text, tables, charts, diagrams, media, notes, links, and editable
-  object semantics unless the user approves a specific change.
+- Preserve slide ownership, visible content, notes, links, and editable semantics unless explicitly approved.
 - Apply the requested DeckKit visibly. A light chrome-only change is not a completed refurbishment.
 - Never preserve content by inserting source-slide screenshots or opaque page overlays.
 - Let the compare gate publish the final PPTX. Do not copy or overwrite it afterward.
@@ -26,15 +24,14 @@ node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
   --json
 ```
 
-Add `--explicit` only when the user explicitly selected a non-production/non-default DeckKit, and
-`--review-policy` only for an exact source-hash-bound reviewed finding. `--prompt-text` (or `--prompt-file`)
-archives the original request to `<run-dir>/prompt.txt` for the feedback gate. Compare parts render
-concurrently (`--compare-concurrency`, default 3); lower it to 1 only when diagnosing render issues.
+Add `--explicit` only for a user-selected non-production/non-default DeckKit, and `--review-policy` only
+for an exact source-hash-bound finding. `--prompt-text` (or `--prompt-file`) archives the request for the
+feedback gate. Compare parts render concurrently (`--compare-concurrency`, default 3). `--route fallback`
+makes the saved plan, commands, gates, and references consistently describe fallback execution. `auto`
+normally tries declared native support first; `native` never recovers through fallback.
 
-Do not add `--contact-diff` for ordinary full-deck review. The mandatory `refurbish-compare` already
-contains the complete source/candidate comparison. `--contact-diff` exists for compatibility or when a
-caller explicitly requires that artifact name; the runner materializes it from the same final compare
-evidence without another render.
+Do not add `--contact-diff` for ordinary full-deck review. The mandatory compare is complete; the
+compatibility alias is materialized from the same final evidence without another render.
 
 ## Agent-facing output
 
@@ -42,20 +39,18 @@ evidence without another render.
 
 - status, run directory, output path, and human-review requirement;
 - `agentSummary` with gate results and artifact pointers;
-- `agentSummary.findingAnalysis` with the shadow proposed status, compact findings, and
-  `effectiveStatus=not-applied`;
-- `performance` with total time, render share, top phases, a single nested `render` object, a single
-  nested `budget` object, and Finding Analysis time/additional inspect/render counts;
+- `agentSummary.routeDecision`, `operationAudit`, and executable review/feedback/recovery commands;
+- shadow Finding Analysis with `effectiveStatus=not-applied`;
+- `artifactBytesByRole` and `agentContextRisk` for JSON files at least 128 KiB; tokens are not estimated;
+- `performance` with total time, render share, top phases, budget, and Finding Analysis overhead;
 - the terminal error when the run fails.
 
 Compact Agent artifact paths are relative to `runDir`; published files outside it remain absolute. The
 full report and `--json-full` retain compatibility fields and absolute paths.
 
-After path preflight succeeds, the complete `pptx-nova-refurbish-run/v1` report is saved as
-`<run-dir>/refurbish-run-summary.json`. A preflight error that prevents run-directory initialization is
-returned directly and cannot create that file. Read the full report only when the compact result reports
-a warning, failure, unsupported region, or a fact needed for diagnosis. Use `--json-full` only for debugging or a
-consumer that explicitly requires the complete phase history.
+After path preflight, the full report is saved as `<run-dir>/refurbish-run-summary.json`; an earlier error
+cannot create it. Read it only for warnings, failures, unsupported regions, or diagnosis. Use
+`--json-full` only when a consumer explicitly needs complete phase history.
 
 Progress is archived to `<run-dir>/progress.jsonl` by default; `--progress-file` overrides it and
 `none` disables it. Stderr carries only phase summaries. Read JSONL on failure or for performance.
@@ -66,38 +61,33 @@ Read `refurbish-plan.json.requiredReferences[]` after route selection. Those ref
 additional workflow documents required for the current route:
 
 - Native route with production/default readiness normally requires no deeper reference.
-- `manual-fallback` or `explicit-manual-fallback` loads the named Refurbish section from
-  `reference-create.md` before inspecting or repairing fallback artifacts.
+- Fallback loads the named Refurbish section from `reference-create.md`.
 - A readiness exception or missing DeckKit loads the named selection section from `deckkit-mode.md`.
 - Load `inspect-and-edit.md` only for a page-local repair with ambiguous selectors.
 - Load `export-and-check.md` only for a nonstandard export or compatibility investigation.
 
-Do not preload `common-workflow.md`, all of `reference-create.md`, and all of `deckkit-mode.md` for a
-standard runner invocation. The runner already enforces run isolation, output collision safety,
-capability probing, audit gates, comparison coverage, and publication binding.
+Do not preload broad references for a standard run; the runner already enforces isolation, collision
+safety, capability probing, audit gates, comparison coverage, and publication binding.
+
+`auto` retains the failed native report and recovers only for `UnsupportedComplexity`, or a valid failed
+native report with passed audit/remap, no new high or worsened blocker, and only consistently counted new
+`low-contrast-text` medium issues. Other failures stop; inspect `agentSummary.recovery.checks`.
 
 ## Canonical evidence flow
 
 ```text
 plan and readiness -> capability probe and source inspect
   -> native skin or generated fallback patch -> vision-diff and refurbish-audit
-  -> source/candidate layout snapshots -> one semantic diff
-  -> one review-policy evaluation
-  -> Finding Analysis shadow (never changes the current gate)
-  -> fidelity gate consuming that same review evaluation
-  -> candidate preview
-  -> one high-DPI refurbish comparison plus a low-layout-DPI Agent review assembled from its page cache
-  -> optional contact-diff aliases from the same comparison
-  -> compare publication gate
+  -> layout snapshots -> semantic diff -> one review-policy evaluation
+  -> Finding Analysis shadow -> fidelity gate -> candidate preview
+  -> one cached high-DPI comparison plus low-DPI Agent review -> publication gate
 ```
 
-The high-DPI comparison is the visual source of truth. In the same xdoc invocation, the runner
-assembles lower-layout-DPI `refurbish-agent-review*.png` from the same page bitmap cache, without
-another PDF conversion or page render. Do not rerender merely to create another artifact name.
+The high-DPI comparison is visual truth. Lower-DPI `refurbish-agent-review*.png` files reuse its page
+cache without another conversion/render; do not rerender for aliases.
 
-`finding-analysis.json` is calibration evidence in this release. Read its proposed status and top
-findings, but never treat `effectiveStatus=not-applied` as a pass or use it to weaken fidelity,
-comparison, publication, or human-review requirements.
+`finding-analysis.json` is calibration evidence. Never treat `effectiveStatus=not-applied` as a pass or
+use it to weaken fidelity, comparison, publication, or human-review requirements.
 
 ## Review and delivery
 
@@ -105,17 +95,12 @@ A successful machine run returns `needs-human-review`. Scale the visual review t
 instead of always opening every published byte:
 
 - Always open the candidate contact sheet end to end; it is the candidate-only full-coverage overview.
-- Open every path in `agentSummary.artifacts.refurbishAgentReviewParts` for the full source/candidate
-  overview. These lower-resolution files are inspection proxies; the published high-DPI compare parts
-  remain the delivery evidence.
-- Always open the full-size previews named by actionable layout findings
-  (`layout.actionablePreviewFiles`), plus any page that looks wrong on the contact sheet.
-  `layout.topActionable[].deltaStatus` distinguishes inherited source findings (`unchanged`) from
-  refurbish-introduced (`introduced`/`mixed`); inherited findings need eyes but are not regressions.
+- Open every Agent review part for the full overview; published high-DPI parts remain delivery evidence.
+- Open actionable full-size previews and suspicious pages. `deltaStatus` distinguishes inherited
+  (`unchanged`) from introduced/mixed findings; inherited findings need review but are not regressions.
 - Open full high-DPI parts for actionable/suspicious slides, then spot-check the first and last parts.
   Do not load every high-DPI part after all Agent review parts have been inspected.
-- When a part's thumbnails are too small to judge a suspicious page, render a focused
-  high-resolution excerpt instead of enlarging the whole part:
+- When thumbnails are too small, render a focused high-resolution excerpt:
 
   ```bash
   node <skill-root>/scripts/pptx-nova-compare.mjs \
@@ -124,9 +109,8 @@ instead of always opening every published byte:
     --output focused-review.png --report focused-review.json --overwrite --json
   ```
 
-  Run this from the run directory; when actionable slides are known, the compact result exposes it as
-  `agentSummary.nextSteps.focusedReviewCommand`. The excerpt reuses the run's page bitmap cache (assembly
-  time only, no re-render); do not substitute it for the published compare parts in delivery evidence.
+  Run it from the run directory or use `focusedReviewCommand`; it reuses cached pages and does not
+  replace published comparison evidence.
 
 Confirm:
 
@@ -135,7 +119,9 @@ Confirm:
 - no source content disappeared or became a screenshot substitute;
 - no new overlap, clipping, weak contrast, placeholder residue, or broken page chrome is visible.
 
-Write `visual_review.json`; when macOS PowerPoint is available for a deliverable, run the bundled clean-open helper. Feedback requests additionally require `skill-feedback.md` and the feedback gate.
+Run `visualReviewCommand`; it supplies all 11 checks including `targetDeckkitApplied`. A captured prompt
+also exposes `feedbackGateCommand`; write `skill-feedback.md` first. On failure use `recoveryCommand`,
+which points at `<new-empty-run-dir>`; never retry in a failed/historical run.
 
 If the final candidate contains ChartEx parts, xdoc preview/compare is not PowerPoint-native proof. Generate a candidate-bound `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method pdf-render` report covering every ChartEx slide and pass it to
 `pptx-nova-finalize-evidence.mjs --mode refurbish --candidate <candidate> --powerpoint-native-render <report>`. Installed/scriptable PowerPoint makes missing, stale, or incomplete coverage a blocker; unavailable PowerPoint remains an explicit unverified risk.

@@ -78,101 +78,37 @@ drawing a conclusion.
 
 ## Artifact Retention and Cleanup Strategy
 
-`.pptx-nova/<slug>-<timestamp>/` is an auditable run directory, not an ordinary cache. After finishing a
-task, do not delete the entire run directory by default, and do not clean evidence that affects
-reproduction, audit, or continued editing before the final response.
+`.pptx-nova/<slug>-<timestamp>/` is auditable evidence, not an ordinary cache. Keep the current run's
+capability snapshot, planning/contract inputs, patch and sidecars, machine-gate reports, final
+candidate, comparison/contact overview, visual review, and issue-page evidence. Do not invent missing
+artifacts. The workflow-specific exact retention set is defined in `references/common-workflow.md`.
 
-Retain a minimal evidence package by default: `xdoc-capabilities.json`, `outline.json`,
-`deck_lock.json`, `session-rules.json`, `session-operation.json`,
-`session-rules-resolution.json`, `content.json`, `edit-contract.json`, `evidence-manifest.json`, `edit-contract-gate.json`,
-`patch.json`, sidecars, dry-run/apply/refurbish reports,
-`vision.json`, `pptx-diff.json`, `visual-evidence/manifest.json`, `visual_review.json`, `clean-open.json`, `check.json`,
-`evidence-summary.json`, `layout-source.json`, `layout-final.json`, `finding-analysis.json`,
-`fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`,
-`review-policy-evaluation.json`,
-`i18n-text-plan.json`, `i18n-scan.json`, `i18n-plan.json`, `translation-memory.json`,
-`translation-glossary.json`, `translation-constraints.json`, `translation-constraints-check.json`,
-`translation-prepare-summary.json`, `translations.json`, `i18n-style-diff.json`,
-`replace-text-input.json`,
-`multi-column-review.json`, `multi-column-review-gate.json`,
-`translation-compare.png` or numbered `translation-compare-*.png` parts,
-`translation-compare.json`, `refurbish-compare.png`,
-`refurbish-compare.json`, `refurbish-agent-review.png` or numbered Agent review parts,
-`vision-diff.json`, the final candidate PPTX, the contact sheet, the small set of issue-page
-PNGs required for human review, and `replace-text.json`. Do not invent artifacts that do not actually
-exist.
-
-After a successful delivery, it is acceptable to slim the current run by removing rebuildable heavy
-artifacts such as all per-slide PNGs, duplicate export directories, temporary conversion caches, debug
-logs, failed-iteration intermediate PPTX files, and unreferenced scratch files. You must retain the
-contact sheet, PNGs for failed or suspicious pages, the final candidate, key JSON reports, and sidecars.
-If the task failed, was interrupted, did not pass validation, or the user may continue debugging, retain
-the full scene and do not auto-slim.
-
-Cleanup may affect only rebuildable artifacts from the current run. Never delete the user's source
-PPTX, final output, user-provided resource files, reference templates, paths outside the workspace, the
-entire `.pptx-nova` directory, or anything not created by this skill in the current run. Cross-run
-cleanup requires an explicit user request; first list candidate runs, cleanup scope, and retained
-evidence. Recommend cleaning only rebuildable heavy artifacts in successful runs older than 14 days,
-while retaining each run's minimal evidence package.
-
-If the user explicitly asks for `--cleanup`, "clean intermediate artifacts", or equivalent, apply the
-minimal evidence package retention strategy instead of deleting all evidence. If the user asks for
-`--keep-all` or needs debugging, reproduction, or continued editing, retain all artifacts. When cleanup
-occurs, write `cleanup-manifest.json` that records retained evidence and deleted rebuildable artifact
-types. The final summary must state whether the run directory was slimmed, which key evidence remains,
-and which rebuildable artifact types were deleted; if no cleanup was performed, say that as well.
+Only a successful current run may be slimmed, and only by removing rebuildable heavy previews, caches,
+logs, failed intermediate candidates, or unreferenced scratch files. Failed, interrupted, unvalidated,
+or resumable runs stay intact. Never delete user inputs/finals, reference resources, another run,
+anything outside the workspace, or the whole `.pptx-nova` directory. Cross-run cleanup needs an
+explicit request and a reviewed candidate list. `--cleanup` still retains the minimal evidence package
+and writes `cleanup-manifest.json`; `--keep-all` preserves everything. State cleanup status in the final
+summary.
 
 ## Quick Paths
 
-Use the shortest path below for orientation first, then enter the task routing table for details. Do
-not treat this as a replacement workflow; it exists to prevent simple tasks from expanding too much and
-complex tasks from missing critical gates.
+Use these only to choose the entry reference; the routing table owns details.
 
-- **New deck**: Read `references/create-runner.md`, then follow
-  `outline.json -> deck_lock.json -> content.json -> pptx-nova-create-run -> PNG/contact-sheet review`.
-- **Edit deck**: `inspect -> select(locator candidates) -> optional session-rules resolve -> edit-contract -> patch -> dry-run -> resolvedSelectors -> apply into run directory -> semantic diff/scoped evidence -> edit-contract gate -> changed-slide PNG review -> final output`.
-- **Animations / transitions**: First `inspect` `timing_summary`, `animations[]`, and `animation_capabilities`. Use `set-slide-animations` for creation, safe subset edits, and removal; default complex timing, media timing, interactive triggers, motion paths, emphasis, and chart/SmartArt builds to preserve-only, and do not guess-edit raw XML.
-- **PPTX semantic diff / change audit**: When a source and candidate already exist and actual change scope must be confirmed, run this once at low frequency after the candidate is stable:
-  `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json > <run-dir>/pptx-diff.json`.
-  This command usually takes about 10 seconds, so do not put it into every patch iteration; use `--detail full` only when specific evidence must be investigated. Treat only `agentGate`, `summary.reliableChanges`, `changeRollup.reliable`, and reliable change entries in `slides[]` as machine facts. `uncertain` / `unsupported` are review signals, not pass evidence, and must still be paired with preview, vision, or content audits.
-- **PPTX PNG preview / screenshot review**: Prefer
-  `xdoc pptx preview deck.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json`
-  to generate per-slide PNGs, a contact sheet, and a `pptx-preview/v1` stdout manifest. If the output
-  directory is inside the current run and is a rebuildable preview for this pass, add `--overwrite` on
-  reruns. To review only changed slides, add `--slides 2,5-7`. The manifest is two-level by design:
-  the top-level `status` is the command result (`success` | `error`), while each `pages[].file.status`
-  and `contactSheet.status` is a per-artifact check (`ok` | `error`). The top level does not aggregate
-  file-level failures, so a ready gate must assert both: `jq -e '.status=="success" and (.pages|length>0)
-and all(.pages[]; .file.status=="ok")' <run-dir>/preview.json`. After that gate passes, confirm each
-  `pages[]` path/width/height/byteLength/SHA-256 hash and the contact sheet path and dimensions, then
-  send the contact sheet or suspicious page PNGs to multimodal review.
-  This is the default short path for PPTX visual previews; use `xdoc convert --to png --contact-sheet`
-  only as a generic conversion or debugging fallback.
-- **Refurbish an existing deck while preserving content**: Read
-  `references/refurbish-runner.md`, then use the standard runner. It owns route selection, content and
-  visual gates, the single high-DPI comparison render, publication binding, compact Agent output, and
-  performance evidence. Read the deeper fallback or DeckKit references only when the plan names them.
-- **Translate an existing deck while preserving layout**: Read `references/translation-runner.md` as
-  the standard finalization contract. If the classified units, translations, or stable candidate do
-  not exist yet, follow only the preparation and repair sections named there from
-  `references/translation-mode.md`. The finalizer owns the last machine gates, one full comparison,
-  optional alias reuse, publication binding, compact output, and performance evidence.
-- **Strict template following**: Copy or inherit source slides/placeholders, then edit original objects; do not redraw a "similar" page.
-- **Cross-deck slide copy**: Prefer one transactional `xdoc pptx copy-from`
-  call. `--slide N` is the compatible 0-based single-slide entry;
-  `--slides 1,3,5-8` and `--all` are the 1-based multi-slide/all-slide
-  entries, and the three selectors are mutually exclusive. Keep the native
-  `pptx-copy-from/v1` report as structural Edit Contract evidence; never
-  fabricate patch `opResults` for it.
-- **Export / check / extract / canonical visual evidence**: Read `references/export-and-check.md`. Use `preview`
-  for human-readable PNG/contact sheets, then use `visual-verify` once on stable files as the canonical final visual decision. Consume its manifest with `pptx-nova-visual-evidence-gate.mjs`; preview/diff success never authorizes delivery.
-- **Small text, notes, footer, or metadata edit**: Read only `common-workflow.md`, `edit-contract.md`, and `micro-edit-cheatsheet.md`; additionally read `session-rules.md` only when `sessionRulesPath` exists or the user explicitly states a future/carryover rule. Still use inspect, a normalized edit contract, dry-run, selector validation, one final semantic diff, and the contract gate. Do not read DeckKit, design lock, narrative quality, or full edit docs unless selectors are ambiguous, complex objects are involved, or the change affects layout/brand.
-- **Studio / high-risk deck**: Use `deck_lock.json` to lock lightweight confirmation, page-level rhythm, template fusion, asset status, and chart/table semantics. Use `pptx-nova-finalize-evidence.mjs` to freeze final structure evidence; do not introduce SVG-first or page-by-page handwritten flows.
-  Pass the final candidate explicitly. If it contains ChartEx, also bind the
-  `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method pdf-render`
-  JSON; installed PowerPoint makes that evidence mandatory, while unavailable
-  PowerPoint remains a disclosed risk.
+- **Create**: `create-runner.md`; formal/high-risk work also follows the Studio/design-lock references.
+- **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
+  collect scoped evidence, run the contract gate, then review changed slides.
+- **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
+  complex or unsupported timing.
+- **Refurbish / translate**: use `refurbish-runner.md` / `translation-runner.md`. The runner owns route,
+  evidence, one canonical comparison, and publication; read only references it names on failure.
+- **Template / cross-deck copy**: edit inherited objects or use one transactional `copy-from`; keep the
+  native report as evidence and never fabricate `opResults`.
+- **Export / diff / preview / check**: use `export-and-check.md`. Run semantic diff once on a stable
+  candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
+  visual-evidence decision remains the delivery authority.
+- **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
+  required; unavailable PowerPoint is a disclosed risk, not invented proof.
 
 ## Skill Root
 
@@ -226,21 +162,21 @@ follow `references/export-and-check.md`.
 
 ## Mode Detection
 
-- **Express**: The user wants speed, gives only one sentence, and does not emphasize precise control. Default to a DeckKit-first automatic loop and continue with reasonable assumptions.
-- **Studio**: Formal report, client/investor/board context, brand-sensitive, many assets, many pages, or needs confirmation. Confirm the outline and design lock first.
-- **Template Following**: The user asks to "use this template", "strictly follow this PPT", or "preserve template layout/placeholders/brand chrome" while replacing content. Copy source slides or use template placeholders, edit inherited objects, and do not redraw a version that only "looks similar".
-- **Reference Create**: The user provides a reference PPTX but wants a new deck from a new outline or new content. The reference deck is read-only by default.
-- **Refurbish Existing Deck**: Preserve the source as read-only content truth while applying a visibly
-  different target DeckKit to editable objects. Use the standard route in
-  `references/refurbish-runner.md`; it contains the fidelity contract, review boundary, failure routing,
-  and publication rules. Do not downgrade content, rasterize source pages, or silently switch DeckKits.
-- **Edit**: The user explicitly wants to change text, styles, charts, images, tables, pages, or notes in an existing PPTX. Inspect first, then patch.
-- **Translation Mode**: The user asks to translate an existing PPTX while preserving the original layout. By default, copy the source deck first, then replace visible text in place on the copy. Preserve bold, italic, underline, strikethrough, alignment, paragraph properties, text box properties, table/chart styles, and animations. The layout-repair order must be: compress translated text first, then slightly reduce font size, and only then slightly adjust geometry when there is real available whitespace. Geometry adjustments must not create shape overlap, edge hugging, crowded rhythm, or abnormal spacing between adjacent objects, and must be proven by `vision-diff`, PNG/contact sheet, and audit records. Any changed multi-column text must pass the fail-closed `multi-column-text-layout-review` through full-size PNG inspection. Generate `multi-column-review.json` with `pptx-nova-multi-column-review-scaffold.mjs` so the final candidate, final `vision-diff`, exact slide/shape, and PNG hash/dimensions are bound automatically; fill only the human judgment fields, then require `pptx-nova-multi-column-review-gate.mjs` to pass. A failed raw `vision-diff.agentGate` may be combined into a pass only when every new/worsened high or medium blocker is that review-only kind; real overflow, overlap, edge, and all other high/medium regressions remain blockers. Additionally extract visible text from shapes/tables/charts. xdoc must inventory structurally visible body, attribute, and chart text even when language classification is uncertain; classify every language-uncertain review unit as translate or preserve from slide/chart role, sibling sequence, languages, and terminology, then use `pptx-nova-i18n-classify-review-units.mjs` to create the hash-bound classified units artifact consumed by `i18n-plan`; group repeated tokens with one `byText[]` decision per unique source text and keep per-unit `decisions[]` entries for exceptions only. Do not encode business vocabularies in xdoc or use a run-local XML scanner. Generate source-language/target-language comparison and style-signature audits, run a source/translation `vision-diff` new-issue gate, contact-diff, and a high-DPI full-slide side-by-side comparison set. Treat layout consistency as a delivery gate. Use the same 20-slide multipart, 192-to-144 retry, manifest coverage, and numbered sibling publication policy as refurbish comparisons; decks up to 20 slides retain the compatible single `translation-compare.png`. Before delivery, run `pptx-nova-compare-gate.mjs --kind translation --publish --final-pptx-source <candidate>` and require both `translation-compare-gate.json.status=pass` and `finalBinding.status=bound`.
-  The final `vision-diff` must use the current xdoc rendered audit, which combines renderer-visible text regions for chart-title collision evidence with PDFium final glyph/page bounds. New or worsened `chart-title-external-text-collision`, `rendered-text-outside-page-horizontal`, and `rendered-text-outside-page-vertical` high/medium findings are hard blockers; they are never eligible for a human-review override. Text merely extending beyond an authored shape box is not clipping when the final glyphs remain visible.
-- **Animation Edit**: The user asks for animation, entrance order, click/auto playback, with previous / after previous, per-bullet animation, exit animation, motion path, emphasis, or slide transition. Read `animations.md`, and edit only the safe subset that xdoc marks editable.
-- **Micro Edit**: Only a small amount of text, notes, footer, or metadata changes. Use the one-screen path in `micro-edit-cheatsheet.md`, keep inspect, dry-run, `resolvedSelectors[]`, and run-dir copy gates, but avoid loading creation-oriented docs and heavy ordinary Edit docs.
-- **Data-driven**: The user has a template and JSON/CSV/tabular data, and wants batch filling or data binding.
-- **Export/Check**: Only convert, preview, extract, or check; do not modify the PPTX.
+- **Express / Studio**: Speed and a short brief select Express; formal, brand-sensitive, asset-heavy,
+  long, or confirmation-sensitive work selects Studio and locks outline/design first.
+- **Template / Reference Create**: Template following edits copied/inherited objects; Reference Create
+  treats the reference as read-only style/layout evidence for new content.
+- **Refurbish**: Preserve the source as read-only content truth, apply the selected DeckKit visibly to
+  editable objects, and never rasterize, downgrade content, or silently switch DeckKits.
+- **Edit / Micro Edit / Animation**: Inspect before patching. Micro edits use the short contract path;
+  animation changes stay inside the capability-declared safe subset.
+- **Translation**: Copy, replace visible text in place, and preserve styling/layout semantics. Repair by
+  compressing text, then minimally reducing font, then geometry only with proven whitespace. Changed
+  multi-column text requires its bound human-review gate; real overflow/overlap/edge findings and
+  rendered chart-title/page-bound collisions never receive a review override. The translation runner
+  owns coverage, style/vision audits, comparison parts, and SHA-256 publication binding.
+- **Data-driven / Export-Check**: Data plus template selects `data-driven.md`; conversion, preview,
+  extraction, or checking alone must not mutate the PPTX.
 
 ## Feedback Mode
 
@@ -367,68 +303,11 @@ When only exporting or checking files, follow `export-and-check.md`.
 
 ## Common Command Entry Points
 
-Read required references first, then use specific commands as needed. The following commands are only
-entry reminders:
-
-```bash
-xdoc html2md page.html -o source_brief.md             # HTML file / URL -> Markdown material
-xdoc pdf extract-text input.pdf -o source_extract.txt # PDF -> text material
-node <skill-root>/scripts/pptx-nova-create-run.mjs --deckkit <id> --content content.json --lock deck_lock.json --output out.pptx --run-dir <run-dir> --json
-xdoc pptx inspect input.pptx --daemon --json
-xdoc pptx select input.pptx --query '{"textRegex":"Revenue"}' --json
-xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
-xdoc pptx copy-from target.pptx --from donor.pptx --slides 1,3,5-8 --output <run-dir>/candidate.pptx --dry-run --json
-xdoc pptx apply -p patch.json -i input.pptx -o <run-dir>/candidate.pptx --overwrite --dry-run --json
-xdoc pptx apply -p patch.json -i input.pptx -o <run-dir>/candidate.pptx --overwrite --json
-node <skill-root>/scripts/pptx-nova-edit-contract.mjs --draft <run-dir>/edit-contract-draft.json --source input.pptx --output <run-dir>/edit-contract.json --json
-
-# Only when the current deck has explicit future/carryover rules
-node <skill-root>/scripts/pptx-nova-session-rules-resolve.mjs --rules <run-dir>/session-rules.json --operation <run-dir>/session-operation.json --source input.pptx --strict --json
-node <skill-root>/scripts/pptx-nova-edit-contract.mjs --draft <run-dir>/edit-contract-draft.json --source input.pptx --session-rules-resolution <run-dir>/session-rules-resolution.json --output <run-dir>/edit-contract.json --json
-xdoc pptx diff --source input.pptx --candidate out.pptx --detail full --json > <run-dir>/pptx-diff.json
-node <skill-root>/scripts/pptx-nova-edit-evidence-manifest.mjs --candidate out.pptx --evidence semantic-diff=<run-dir>/pptx-diff.json --output <run-dir>/evidence-manifest.json --json
-node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs --contract <run-dir>/edit-contract.json --candidate out.pptx --strict --json
-xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 2,5-7 --json > <run-dir>/vision-diff.json
-xdoc schema --op set-slide-animations --minimal
-xdoc pptx vision-check out.pptx --json
-xdoc pptx vision-check out.pptx --slides 25-38 --json
-xdoc pptx visual-verify --candidate out.pptx --reference input.pptx --output-dir <run-dir>/visual-evidence --json
-xdoc pptx chrome-detect source.pptx --json
-xdoc pptx chrome-remove source.pptx --roles header,footer,page-number,rule --output clean.pptx --json
-xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --dry-run --json
-xdoc pptx remap-theme clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output remapped.pptx --json
-xdoc pptx chrome-apply remapped.pptx --deckkit mckinsey-blue --output styled.pptx --json
-xdoc pptx refurbish-skin --source source.pptx --deckkit mckinsey-blue --output out.pptx --json
-xdoc pptx diff --source source.pptx --candidate out.pptx --detail summary --json
-node <skill-root>/scripts/pptx-nova-translation-prepare.mjs --source source.pptx --source-lang multi --target-lang de --run-dir <run-dir> --json
-xdoc pptx i18n-plan --source source.pptx --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-plan.json --json
-xdoc pptx i18n-anchor-draft --source source.pptx --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-anchor-draft.json --json
-xdoc pptx i18n-text-plan --source source.pptx --data translations.json --json
-xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --output <run-dir>/i18n-scan-source.json --json
-xdoc pptx i18n-scan --source translated.pptx --mode candidate --units i18n-scan-source.json --data translations.json --output <run-dir>/i18n-scan-candidate.json --json
-node <skill-root>/scripts/pptx-nova-i18n-classify-review-units.mjs --scan <run-dir>/i18n-scan-source.json --decisions <run-dir>/i18n-review-decisions.json --output <run-dir>/i18n-scan-classified.json --report <run-dir>/i18n-review-classification.json --overwrite --json
-xdoc pptx replace-text --source source.pptx --data replacements.json --output updated.pptx --json
-xdoc pptx replace-chart-text --source source.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json
-xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
-xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --allow-text-attrs tooltip,descr,title --json
-xdoc pptx vision-diff --source source.pptx --candidate out.pptx --json
-xdoc pptx vision-diff --source source.pptx --candidate out.pptx --slides 25-38 --json
-node <skill-root>/scripts/pptx-nova-multi-column-review-scaffold.mjs --candidate out.pptx --vision-diff <run-dir>/vision-diff.json --preview <run-dir>/preview-candidate.json --output <run-dir>/multi-column-review.json [--carry-review-from <old-review.json>] --overwrite --json
-node <skill-root>/scripts/pptx-nova-multi-column-review-gate.mjs --candidate out.pptx --vision-diff <run-dir>/vision-diff.json --review <run-dir>/multi-column-review.json --output <run-dir>/multi-column-review-gate.json --overwrite --json
-xdoc pptx contact-diff --source source.pptx --candidate out.pptx --output <run-dir>/contact-diff.png --json
-xdoc pptx contact-diff --source source.pptx --candidate out.pptx --slides 25-38 --output <run-dir>/contact-diff.png --json
-node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate translated.pptx --run-dir <run-dir> --kind translation --slide-count <count> --compare-chunk-size 20 --output <run-dir>/translation-compare.png --report <run-dir>/translation-compare.json --dpi 192 --fallback-dpi 144 --json
-node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx translated.pptx --final-pptx-source <run-dir>/translated-candidate.pptx --kind translation --publish --overwrite --json > <run-dir>/translation-compare-gate.json
-node <skill-root>/scripts/pptx-nova-compare.mjs --source source.pptx --candidate refurbished.pptx --run-dir <run-dir> --kind refurbish --slide-count <count> --compare-chunk-size 20 --output <run-dir>/refurbish-compare.png --report <run-dir>/refurbish-compare.json --dpi 192 --fallback-dpi 144 --agent-review-dpi 96 --json
-node <skill-root>/scripts/pptx-nova-compare-gate.mjs --run-dir <run-dir> --final-pptx refurbished.pptx --final-pptx-source <run-dir>/refurbished-candidate.pptx --kind refurbish --publish --overwrite --json > <run-dir>/refurbish-compare-gate.json
-xdoc pptx refurbish-audit --source source.pptx --final out.pptx --map <run-dir>/reference-map.json --json
-xdoc pptx preview out.pptx --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
-xdoc pptx preview out.pptx --slides 25-38 --output-dir <run-dir>/previews --contact-sheet <run-dir>/previews/contact-sheet.png --overwrite --json
-xdoc convert out.pptx --to png -o <run-dir>/previews --overwrite --contact-sheet # fallback/debug only
-node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json
-xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwrite
-node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback --workflow <create|refurbish|translation|other> --strict --overwrite --json > <run-dir>/feedback-gate.json
-```
+Read the routed reference first and use its canonical runner or command sequence. Creation,
+refurbishment, and translation entry commands live in `create-runner.md`, `refurbish-runner.md`, and
+`translation-runner.md`; inspect/apply, export/check, specialized content, visual review, and feedback
+commands live in their matching references. Do not preload a command encyclopedia or reconstruct a
+runner from individual commands when a standard runner owns the workflow.
 
 ## Completion Summary
 

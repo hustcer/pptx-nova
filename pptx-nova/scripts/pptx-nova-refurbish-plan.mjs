@@ -19,6 +19,7 @@ Options:
   --source <path>      Source PPTX path used in suggested commands
   --output <path>      Candidate PPTX path used in suggested commands
   --catalog <path>     DeckKit catalog path. Defaults to <skill-root>/assets/deckkits/catalog.json
+  --route <route>      auto|native|fallback. Defaults to auto
   --explicit           User explicitly named this DeckKit
   --json               Print machine-readable plan
   --help               Show this help
@@ -30,6 +31,7 @@ function parseArgs(argv) {
     source: 'source.pptx',
     output: 'candidate.pptx',
     catalog: CATALOG_PATH,
+    route: 'auto',
     explicit: false,
     json: false,
   }
@@ -55,12 +57,18 @@ function parseArgs(argv) {
     } else if (arg === '--catalog') {
       args.catalog = resolve(valueAfter(argv, i, arg))
       i += 1
+    } else if (arg === '--route') {
+      args.route = valueAfter(argv, i, arg)
+      i += 1
     } else {
       throw new Error(`Unknown option: ${arg}\n\n${usage}`)
     }
   }
 
   if (!args.deckkit) throw new Error(`--deckkit is required.\n\n${usage}`)
+  if (!['auto', 'native', 'fallback'].includes(args.route)) {
+    throw new Error('--route must be one of auto|native|fallback')
+  }
   return args
 }
 
@@ -173,8 +181,16 @@ function normalizeRequiredGates(gates) {
   return normalized
 }
 
-function buildCommands(args, entry, nativeSkinning, profile) {
-  if (nativeSkinning.supported) {
+function requiredGatesForRoute(gates, usesFallback) {
+  const routeGate = usesFallback ? 'fallback-patch-report' : 'refurbish-skin-report'
+  const withoutRouteGate = gates.filter(
+    (gate) => gate !== 'fallback-patch-report' && gate !== 'refurbish-skin-report',
+  )
+  return normalizeRequiredGates([routeGate, ...withoutRouteGate])
+}
+
+function buildCommands(args, entry, profile, usesFallback) {
+  if (!usesFallback) {
     return [
       {
         name: 'native-refurbish-skin',
@@ -248,8 +264,28 @@ export function buildRefurbishPlan(args) {
     return planResult(args, null, blockers)
   }
 
+  const requestedRoute = args.route ?? 'auto'
+  if (!['auto', 'native', 'fallback'].includes(requestedRoute)) {
+    throw new Error('route must be one of auto|native|fallback')
+  }
   const nativeSkinning = nativeSkinningFor(entry)
-  const profile = profileFor(entry, nativeSkinning)
+  const catalogProfile = profileFor(entry, nativeSkinning)
+  const selectedRoute =
+    requestedRoute === 'fallback'
+      ? 'fallback-patch'
+      : requestedRoute === 'native'
+        ? 'native-skin-first'
+        : nativeSkinning.supported
+          ? 'native-skin-first'
+          : 'fallback-patch'
+  const usesFallback = selectedRoute === 'fallback-patch'
+  const selectedFallback =
+    catalogProfile.fallback ?? (usesFallback ? genericFallbackFor(entry) : null)
+  const profile = {
+    ...catalogProfile,
+    fallback: selectedFallback,
+    requiredGates: requiredGatesForRoute(catalogProfile.requiredGates, usesFallback),
+  }
   const readiness = entry.readiness ?? ''
   const explicitOnly = ['experimental', 'candidate'].includes(readiness)
   if (explicitOnly && !args.explicit) {
@@ -257,7 +293,12 @@ export function buildRefurbishPlan(args) {
       `DeckKit "${entry.id}" readiness is "${readiness}"; pass --explicit only when the user named it`,
     )
   }
-  const usesFallback = !nativeSkinning.supported && Boolean(profile.fallback)
+  if (selectedRoute === 'native-skin-first' && !nativeSkinning.supported) {
+    blockers.push(`DeckKit "${entry.id}" does not declare native skinning support`)
+  }
+  if (usesFallback && !profile.fallback) {
+    blockers.push(`DeckKit "${entry.id}" does not provide a refurbish fallback profile`)
+  }
 
   const status = blockers.length
     ? 'blocked'
@@ -268,11 +309,16 @@ export function buildRefurbishPlan(args) {
         : usesFallback
           ? 'manual-fallback'
           : 'ready'
-  const route = nativeSkinning.supported ? 'native-skin-first' : 'fallback-patch'
   return {
     ...planResult(args, entry, blockers),
     status,
-    route,
+    route: selectedRoute,
+    routeSelection: {
+      requested: requestedRoute,
+      selected: selectedRoute,
+      nativeAvailable: nativeSkinning.supported,
+      fallbackAvailable: Boolean(profile.fallback),
+    },
     explicitSelection: {
       requested: args.explicit,
       required: explicitOnly,
@@ -305,7 +351,7 @@ export function buildRefurbishPlan(args) {
         : []),
     ],
     requiredGates: profile.requiredGates,
-    commands: buildCommands(args, entry, nativeSkinning, profile),
+    commands: buildCommands(args, entry, profile, usesFallback),
   }
 }
 

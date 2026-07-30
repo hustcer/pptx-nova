@@ -381,10 +381,111 @@ function chromeFontFor(role, fallback, backgroundColor) {
   }
 }
 
-function appendChromeRestyleOps(ops, slideIndex, shape, candidate, fallback, backgroundColor) {
+function targetStyleFingerprint(inspect, themeColors, fonts) {
+  const themes = Array.isArray(inspect?.presentation?.themes) ? inspect.presentation.themes : []
+  const relatedThemes = themes.filter(
+    (theme) =>
+      (Array.isArray(theme?.usedBySlides) && theme.usedBySlides.length > 0) ||
+      (Array.isArray(theme?.usedByMasters) && theme.usedByMasters.length > 0),
+  )
+  const relevantThemes = relatedThemes.length > 0 ? relatedThemes : themes
+  const target = {
+    colors: themeColors,
+    fonts: {
+      major: {
+        latin: fonts.major.typeface,
+        eastAsian: fonts.major.eastAsian,
+      },
+      minor: {
+        latin: fonts.minor.typeface,
+        eastAsian: fonts.minor.eastAsian,
+      },
+    },
+  }
+  const targetSha256 = createHash('sha256').update(JSON.stringify(target)).digest('hex')
+  if (relevantThemes.length !== 1) {
+    return {
+      relevantThemeCount: relevantThemes.length,
+      themeColorsMatchTarget: null,
+      fontMatchesTarget: null,
+      themeMatchesTarget: null,
+      target: { ...target, sha256: targetSha256 },
+    }
+  }
+  const theme = relevantThemes[0]
+  const currentColors = Object.fromEntries(
+    (Array.isArray(theme?.colors) ? theme.colors : [])
+      .map((entry) => [entry?.scheme, hexFrom(entry?.value)])
+      .filter(([scheme, color]) => scheme && color),
+  )
+  const themeColorsMatchTarget = Object.entries(themeColors).every(
+    ([scheme, color]) => currentColors[scheme] === hexFrom(color),
+  )
+  const fontMatchesTarget =
+    theme?.majorFont?.latin === fonts.major.typeface &&
+    theme?.majorFont?.ea === fonts.major.eastAsian &&
+    theme?.minorFont?.latin === fonts.minor.typeface &&
+    theme?.minorFont?.ea === fonts.minor.eastAsian
+  return {
+    relevantThemeCount: 1,
+    themePartName: theme?.partName ?? null,
+    themeColorsMatchTarget,
+    fontMatchesTarget,
+    themeMatchesTarget: themeColorsMatchTarget && fontMatchesTarget,
+    target: { ...target, sha256: targetSha256 },
+  }
+}
+
+function createOperationEmitter(ops, styleFingerprint) {
+  const audit = {
+    plannedOps: 0,
+    emittedOps: 0,
+    knownNoOpOps: 0,
+    effectiveOps: null,
+    knownChangingOps: 0,
+    unknownEffectOps: 0,
+    byOp: {},
+    pruningReasons: {},
+    styleFingerprint,
+    evidenceNote:
+      'knownNoOpOps contains only inspect-proven exact no-ops. effectiveOps remains null because deck-level diff cannot attribute effects to individual operations.',
+  }
+  const emit = (op, effect = 'unknown-effect', reason = '') => {
+    const opType = op.op
+    const byOp = audit.byOp[opType] ?? {
+      planned: 0,
+      emitted: 0,
+      knownNoOp: 0,
+      knownChanging: 0,
+      unknownEffect: 0,
+    }
+    byOp.planned += 1
+    audit.plannedOps += 1
+    if (effect === 'known-no-op') {
+      byOp.knownNoOp += 1
+      audit.knownNoOpOps += 1
+      if (reason) audit.pruningReasons[reason] = (audit.pruningReasons[reason] ?? 0) + 1
+    } else {
+      ops.push(op)
+      byOp.emitted += 1
+      audit.emittedOps += 1
+      if (effect === 'known-changing') {
+        byOp.knownChanging += 1
+        audit.knownChangingOps += 1
+      } else {
+        byOp.unknownEffect += 1
+        audit.unknownEffectOps += 1
+      }
+    }
+    audit.byOp[opType] = byOp
+  }
+  return { emit, audit }
+}
+
+function appendChromeRestyleOps(emit, slideIndex, shape, candidate, fallback, backgroundColor) {
   const selector = candidate.patchSelector?.shape ?? { id: shape.id }
   if (shape.hasText || (shape.textPreview ?? '').trim()) {
-    ops.push({
+    emit({
       op: 'set-text-frame',
       slide: slideIndex,
       shape: selector,
@@ -392,7 +493,7 @@ function appendChromeRestyleOps(ops, slideIndex, shape, candidate, fallback, bac
     })
   }
   if (candidate.role === 'rule') {
-    ops.push({
+    emit({
       op: 'set-shape',
       slide: slideIndex,
       shape: selector,
@@ -427,16 +528,27 @@ function buildArtifacts(args) {
     hlink: palette.text,
     folHlink: palette.secondary,
   }
-  ops.push({
-    op: 'set-theme',
-    colors: themeColors,
-    fonts: {
-      major: { typeface: fallback.fonts.heading, eastAsian: fallback.fonts.cjk },
-      minor: { typeface: fallback.fonts.body, eastAsian: fallback.fonts.cjk },
+  const themeFonts = {
+    major: { typeface: fallback.fonts.heading, eastAsian: fallback.fonts.cjk },
+    minor: { typeface: fallback.fonts.body, eastAsian: fallback.fonts.cjk },
+  }
+  const styleFingerprint = targetStyleFingerprint(inspect, themeColors, themeFonts)
+  const { emit, audit: operationAudit } = createOperationEmitter(ops, styleFingerprint)
+  emit(
+    {
+      op: 'set-theme',
+      colors: themeColors,
+      fonts: themeFonts,
     },
-  })
-  ops.push({ op: 'set-master', background: { type: 'solid', color: palette.background } })
-  ops.push({
+    styleFingerprint.themeMatchesTarget === true
+      ? 'known-no-op'
+      : styleFingerprint.themeMatchesTarget === false
+        ? 'known-changing'
+        : 'unknown-effect',
+    styleFingerprint.themeMatchesTarget === true ? 'theme-and-fonts-exact-match' : '',
+  )
+  emit({ op: 'set-master', background: { type: 'solid', color: palette.background } })
+  emit({
     op: 'set-default-text-style',
     levels: [
       {
@@ -464,7 +576,7 @@ function buildArtifacts(args) {
   for (const slide of slides) {
     const slideIndex = slide.index
     const stats = slide.semantic?.elementStats ?? {}
-    ops.push({
+    emit({
       op: 'set-slide-background',
       slide: slideIndex,
       fill: { type: 'solid', color: palette.background },
@@ -516,11 +628,11 @@ function buildArtifacts(args) {
       const textBackground = textBackgroundForShape(shape, slideShapes, targetFills, fallback)
       const chromeCandidate = chromeCandidateForShape(chrome, slideIndex, shape)
       if (chromeCandidate) {
-        appendChromeRestyleOps(ops, slideIndex, shape, chromeCandidate, fallback, textBackground)
+        appendChromeRestyleOps(emit, slideIndex, shape, chromeCandidate, fallback, textBackground)
         continue
       }
       if (shape.hasText && (shape.textPreview ?? '').trim()) {
-        ops.push({
+        emit({
           op: 'set-text-frame',
           slide: slideIndex,
           shape: selector,
@@ -530,15 +642,21 @@ function buildArtifacts(args) {
       if (shape.shapeType === 'autoShape' && shape.fillColor) {
         const color = targetFill
         if (color) {
-          ops.push({
-            op: 'set-shape',
-            slide: slideIndex,
-            shape: selector,
-            fill: { type: 'solid', color },
-          })
+          const fillIsExact =
+            shape.fillType === 'solid' && hexFrom(shape.fillColor) === hexFrom(color)
+          emit(
+            {
+              op: 'set-shape',
+              slide: slideIndex,
+              shape: selector,
+              fill: { type: 'solid', color },
+            },
+            fillIsExact ? 'known-no-op' : 'known-changing',
+            fillIsExact ? 'shape-solid-fill-exact-match' : '',
+          )
         }
         if (!shape.lineNoFill) {
-          ops.push({
+          emit({
             op: 'set-shape',
             slide: slideIndex,
             shape: selector,
@@ -656,7 +774,8 @@ function buildArtifacts(args) {
       chromeDetection: chromeOutput(chrome),
       warnings,
       slideCount: slides.length,
-      ops: ops.length,
+      ops: operationAudit.emittedOps,
+      operationAudit,
     },
   }
 }

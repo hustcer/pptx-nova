@@ -1152,12 +1152,8 @@ function markdownShellCommands(markdown) {
   return commands
 }
 
-test('published translation compare commands enable multipart output for long decks', () => {
+test('published translation compare reference enables multipart output for long decks', () => {
   const documents = [
-    {
-      name: 'SKILL.md',
-      text: readFileSync(skillPath('SKILL.md'), 'utf8'),
-    },
     {
       name: 'translation-mode.md',
       text: readFileSync(skillPath('references/translation-mode.md'), 'utf8'),
@@ -1175,13 +1171,13 @@ test('published translation compare commands enable multipart output for long de
     assert.match(command, /--fallback-dpi 144/, document.name)
   }
 
-  const translationMode = documents[1].text
+  const translationMode = documents[0].text
   assert.doesNotMatch(translationMode, /must be a single PNG/)
   assert.doesNotMatch(translationMode, /one image\s+contains every slide/)
   assert.match(translationMode, /numbered .*translation-compare/i)
   assert.match(translationMode, /<output-stem>-translation-compare-<MMDDhhmmss>-01\.png/)
   assert.match(
-    documents[0].text,
+    translationMode,
     /`translation-compare\.png` or numbered `translation-compare-\*\.png` parts/,
   )
 })
@@ -1491,16 +1487,15 @@ test('manual DeckKit retry commands overwrite only the current-run candidate', (
   const deckkitMode = readFileSync(skillPath('references/deckkit-mode.md'), 'utf8')
   const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
 
-  for (const text of [deckkitMode, skill]) {
-    assert.match(
-      text,
-      /xdoc pptx apply -p patch\.json(?: -i input\.pptx)? -o <run-dir>\/candidate\.pptx --overwrite --dry-run --json/,
-    )
-    assert.match(
-      text,
-      /xdoc pptx apply -p patch\.json(?: -i input\.pptx)? -o <run-dir>\/candidate\.pptx --overwrite --json/,
-    )
-  }
+  assert.match(
+    deckkitMode,
+    /xdoc pptx apply -p patch\.json(?: -i input\.pptx)? -o <run-dir>\/candidate\.pptx --overwrite --dry-run --json/,
+  )
+  assert.match(
+    deckkitMode,
+    /xdoc pptx apply -p patch\.json(?: -i input\.pptx)? -o <run-dir>\/candidate\.pptx --overwrite --json/,
+  )
+  assert.doesNotMatch(skill, /xdoc pptx apply -p patch\.json .*<run-dir>\/candidate\.pptx/)
   assert.match(deckkitMode, /stop immediately and do not run vision-check on a stale candidate/i)
 })
 
@@ -3098,6 +3093,157 @@ test('swiss-grid refurbishment stays on the reviewed manual fallback route', asy
   ])
 })
 
+test('explicit fallback keeps refurbish plan route commands gates and references consistent', async () => {
+  const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
+  const plan = buildRefurbishPlan({
+    deckkit: 'mckinsey-blue',
+    source: 'source.pptx',
+    output: 'candidate.pptx',
+    catalog: skillPath('assets/deckkits/catalog.json'),
+    route: 'fallback',
+    explicit: false,
+    json: true,
+  })
+
+  assert.equal(plan.route, 'fallback-patch')
+  assert.equal(plan.routeSelection.requested, 'fallback')
+  assert.equal(plan.routeSelection.selected, 'fallback-patch')
+  assert.equal(plan.status, 'manual-fallback')
+  assert.equal(plan.requiredGates.includes('fallback-patch-report'), true)
+  assert.equal(plan.requiredGates.includes('refurbish-skin-report'), false)
+  assert.equal(
+    plan.commands.some((command) => command.name === 'native-refurbish-skin'),
+    false,
+  )
+  assert.equal(
+    plan.commands.some((command) => command.name === 'generate-fallback-patch'),
+    true,
+  )
+  assert.deepEqual(plan.requiredReferences, [
+    {
+      path: 'references/reference-create.md',
+      section: '6. Refurbish Existing Deck',
+      reason: 'The selected route requires the catalog-driven fallback contract.',
+    },
+  ])
+})
+
+test('refurbish fallback prunes only inspect-proven exact theme and solid-fill no-ops', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-refurbish-pruning-'))
+  const source = join(root, 'source.pptx')
+  const inspectPath = join(root, 'inspect.json')
+  const patchPath = join(root, 'patch.json')
+  writeFileSync(source, 'fake pptx')
+  writeJson(inspectPath, {
+    schemaVersion: 'pptx-inspect/v1',
+    presentation: {
+      slideCount: 1,
+      size: { width: '10in', height: '5.625in' },
+      themes: [
+        {
+          partName: 'ppt/theme/theme1.xml',
+          usedBySlides: [0],
+          usedByMasters: ['ppt/slideMasters/slideMaster1.xml'],
+          colors: Object.entries({
+            dk1: '111111',
+            lt1: 'F7F3E8',
+            dk2: '111111',
+            lt2: 'FFFFFF',
+            accent1: 'D9B44A',
+            accent2: '111111',
+            accent3: 'EFE2B7',
+            accent4: '6B7280',
+            accent5: '111111',
+            accent6: 'FFFFFF',
+            hlink: '111111',
+            folHlink: '6B7280',
+          }).map(([scheme, value]) => ({ scheme, value })),
+          majorFont: { latin: 'Playfair Display', ea: 'Microsoft YaHei' },
+          minorFont: { latin: 'Inter', ea: 'Microsoft YaHei' },
+        },
+      ],
+    },
+    slides: [
+      {
+        index: 0,
+        semantic: { elementStats: { total: 3, text: 1 } },
+        shapes: [
+          {
+            id: 1,
+            name: 'Existing Surface',
+            shapeType: 'autoShape',
+            fillType: 'solid',
+            fillColor: 'FFFFFF',
+            lineNoFill: true,
+            hasText: false,
+          },
+          {
+            id: 2,
+            name: 'Changing Accent',
+            shapeType: 'autoShape',
+            fillType: 'solid',
+            fillColor: 'D9B44A',
+            lineNoFill: true,
+            hasText: false,
+          },
+          {
+            id: 3,
+            name: 'Body Copy',
+            shapeType: 'textBox',
+            fillType: 'none',
+            fillColor: null,
+            hasText: true,
+            textPreview: 'Keep editable text',
+          },
+        ],
+      },
+    ],
+  })
+
+  const result = runNode([
+    skillPath('scripts/pptx-nova-refurbish-fallback-patch.mjs'),
+    '--deckkit',
+    'cartesian',
+    '--source',
+    source,
+    '--inspect',
+    inspectPath,
+    '--output',
+    join(root, 'candidate.pptx'),
+    '--patch',
+    patchPath,
+    '--lock',
+    join(root, 'deck_lock.json'),
+    '--audit',
+    join(root, 'content-audit.json'),
+    '--map',
+    join(root, 'reference-map.json'),
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+  const patch = JSON.parse(readFileSync(patchPath, 'utf8'))
+  const audit = report.summary.operationAudit
+
+  assert.equal(audit.plannedOps, 7)
+  assert.equal(audit.emittedOps, 5)
+  assert.equal(audit.knownNoOpOps, 2)
+  assert.equal(audit.knownChangingOps, 1)
+  assert.equal(audit.unknownEffectOps, 4)
+  assert.equal(audit.effectiveOps, null)
+  assert.equal(audit.styleFingerprint.themeMatchesTarget, true)
+  assert.equal(audit.styleFingerprint.fontMatchesTarget, true)
+  assert.equal(audit.pruningReasons['theme-and-fonts-exact-match'], 1)
+  assert.equal(audit.pruningReasons['shape-solid-fill-exact-match'], 1)
+  assert.equal(
+    patch.ops.some((op) => op.op === 'set-theme'),
+    false,
+  )
+  assert.deepEqual(
+    patch.ops.filter((op) => op.op === 'set-shape').map((op) => op.fill?.color),
+    ['EFE2B7'],
+  )
+})
+
 test('skill routes standard refurbishment through one compact reference', () => {
   const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
   const reference = readFileSync(skillPath('references/refurbish-runner.md'), 'utf8')
@@ -3110,6 +3256,18 @@ test('skill routes standard refurbishment through one compact reference', () => 
   assert.match(reference, /Do not add `--contact-diff` for ordinary full-deck review/)
   assert.match(reference, /refurbish-plan\.json\.requiredReferences/)
   assert.ok(reference.split('\n').length < 150)
+})
+
+test('skill stays within the progressive-disclosure byte budget', () => {
+  const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
+  assert.ok(
+    Buffer.byteLength(skill, 'utf8') < 48 * 1024,
+    `SKILL.md is ${Buffer.byteLength(skill, 'utf8')} bytes`,
+  )
+  const commandEntry = skill
+    .split('## Common Command Entry Points')[1]
+    ?.split('## Completion Summary')[0]
+  assert.doesNotMatch(commandEntry ?? '', /xdoc pptx (apply|refurbish-skin|i18n-scan)/)
 })
 
 test('skill routes standard translation finalization through one compact reference', () => {
@@ -3313,6 +3471,33 @@ const audit = {
   },
   issues: []
 }
+const nativeFailureKind = process.env.FAKE_NATIVE_FAILURE_KIND || ''
+const nativeFailureIssues = nativeFailureKind
+  ? Array.from({ length: 2 }, (_, index) => ({
+      kind: nativeFailureKind,
+      severity: 'medium',
+      slideIndex: 0,
+      shapeId: index + 1,
+      shapeName: 'Shape ' + (index + 1),
+      message: 'native failure fixture'
+    }))
+  : []
+const nativeFailureVisionDiff = nativeFailureKind
+  ? {
+      schemaVersion: 'pptx-vision-diff/v1',
+      status: 'success',
+      summary: {
+        byClass: {
+          new: { high: 0, medium: nativeFailureIssues.length, low: 0 },
+          changed: { high: 0, medium: 0, low: 0 },
+          worsened: { high: 0, medium: 0, low: 0 }
+        }
+      },
+      newIssues: nativeFailureIssues,
+      changedIssues: [],
+      worsenedIssues: []
+    }
+  : null
 const print = (value) => process.stdout.write(JSON.stringify(value))
 
 if (args[0] === 'schema') {
@@ -3339,6 +3524,26 @@ if (args[0] === 'schema') {
   print(inspect)
 } else if (args[0] === 'pptx' && args[1] === 'refurbish-skin') {
   writeFileSync(valueAfter('--output'), 'candidate pptx')
+  if (nativeFailureVisionDiff) {
+    print({
+      schemaVersion: 'pptx-refurbish-skin/v1',
+      status: 'failed',
+      gate: {
+        passed: false,
+        auditStatus: 'passed',
+        newHighIssues: 0,
+        newMediumIssues: nativeFailureIssues.length
+      },
+      steps: [
+        { name: 'chrome-remove', status: 'success' },
+        { name: 'skin-background', status: 'success' },
+        { name: 'chrome-apply', status: 'success' },
+        { name: 'remap-theme', status: 'success' }
+      ],
+      reports: { visionDiff: nativeFailureVisionDiff, audit }
+    })
+    process.exit(2)
+  }
   print({
     schemaVersion: 'pptx-refurbish-skin/v1',
     status: 'passed',
@@ -3349,16 +3554,21 @@ if (args[0] === 'schema') {
   print({ schemaVersion: 'pptx-chrome-detect/v1', status: 'success', slides: [] })
 } else if (args[0] === 'pptx' && args[1] === 'apply') {
   const output = valueAfter('-o')
+  const patchPath = valueAfter('-p')
+  const patchOps = patchPath ? JSON.parse(readFileSync(patchPath, 'utf8')).ops : []
+  const opResults = patchOps.map((op, opIndex) => ({
+    opIndex, op: op.op, status: 'success', changedParts: []
+  }))
   if (args.includes('--dry-run')) {
     print({
       schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [],
-      changedParts: [], opResults: [], visualRisks: [], wouldWrite: true, output
+      changedParts: [], opResults, visualRisks: [], wouldWrite: true, output
     })
   } else {
     writeFileSync(output, 'fallback candidate pptx')
     print({
       schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [],
-      changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], output
+      changedParts: ['ppt/presentation.xml'], opResults, visualRisks: [], output
     })
   }
 } else if (args[0] === 'pptx' && args[1] === 'vision-diff') {
@@ -3753,6 +3963,161 @@ if (args[0] === 'schema') {
     const phase = fallbackSummary.phases.find((item) => item.name === phaseName)
     assert.ok(phase.command.includes(fallbackSourceSnapshot), `${phaseName}: ${phase.command}`)
   }
+  const fallbackPlan = JSON.parse(readFileSync(fallbackSummary.artifacts.plan, 'utf8'))
+  assert.equal(fallbackPlan.route, 'fallback-patch')
+  assert.equal(fallbackPlan.routeSelection.requested, 'fallback')
+  assert.equal(
+    fallbackPlan.commands.some((command) => command.name === 'native-refurbish-skin'),
+    false,
+  )
+  assert.equal(fallbackPlan.requiredGates.includes('fallback-patch-report'), true)
+
+  const recoverableSource = join(root, 'recoverable-source.pptx')
+  const recoverableOutput = join(root, 'recoverable-out.pptx')
+  const recoverableRunDir = join(root, 'recoverable-run')
+  writeFileSync(recoverableSource, 'recoverable fake pptx')
+  const recoverableResult = runNode(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      recoverableSource,
+      '--output',
+      recoverableOutput,
+      '--run-dir',
+      recoverableRunDir,
+      '--route',
+      'auto',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--prompt-text',
+      'Refurbish this deck and provide feedback',
+      '--json',
+    ],
+    {
+      env: {
+        ...process.env,
+        FAKE_SLIDE_COUNT: '1',
+        FAKE_NATIVE_FAILURE_KIND: 'low-contrast-text',
+      },
+    },
+  )
+  const recoverableCompact = readRefurbishResult(recoverableResult)
+  const recoverableSummary = readRefurbishSummary(recoverableResult)
+  const recoverablePlan = JSON.parse(readFileSync(recoverableSummary.artifacts.plan, 'utf8'))
+  const recoverableNativePhase = recoverableSummary.phases.find(
+    (phase) => phase.name === 'native-refurbish-skin',
+  )
+
+  assert.equal(recoverableSummary.route.initialPlan, 'native-skin-first')
+  assert.equal(recoverableSummary.route.planned, 'fallback-patch')
+  assert.equal(recoverableSummary.route.executed, 'fallback-patch')
+  assert.equal(recoverableSummary.recovery.status, 'recovered')
+  assert.equal(recoverableSummary.recovery.reasonCode, 'native-theme-contrast-only')
+  assert.deepEqual(recoverableSummary.recovery.findings.byKind, {
+    'low-contrast-text': 2,
+  })
+  assert.equal(recoverableNativePhase.status, 'recovered')
+  assert.equal(recoverableNativePhase.recoveredBy, 'fallback-patch')
+  assert.equal(existsSync(recoverableSummary.artifacts.nativeReport), true)
+  assert.equal(recoverablePlan.route, 'fallback-patch')
+  assert.equal(recoverablePlan.routeSelection.requested, 'auto')
+  assert.equal(recoverablePlan.routeSelection.initialSelected, 'native-skin-first')
+  assert.equal(
+    recoverablePlan.commands.some((command) => command.name === 'generate-fallback-patch'),
+    true,
+  )
+  assert.deepEqual(recoverableCompact.requiredReferences, recoverablePlan.requiredReferences)
+  assert.equal(recoverableCompact.agentSummary.routeDecision.initialPlan, 'native-skin-first')
+  assert.equal(recoverableCompact.agentSummary.routeDecision.planned, 'fallback-patch')
+  assert.equal(recoverableCompact.agentSummary.operationAudit.plannedOps, 4)
+  assert.equal(recoverableCompact.agentSummary.operationAudit.emittedOps, 4)
+  assert.equal(recoverableCompact.agentSummary.operationAudit.execution.apply.reportedOps, 4)
+  assert.equal(recoverableCompact.agentSummary.operationAudit.semanticDiff.reliableChanges, 0)
+  assert.match(
+    recoverableCompact.agentSummary.nextSteps.visualReviewCommand,
+    /pptx-nova-visual-review\.mjs/,
+  )
+  for (const check of [
+    'titleWrap',
+    'bodyReadability',
+    'alignment',
+    'spacing',
+    'contrast',
+    'chartTableLegibility',
+    'repeatedLayoutRhythm',
+    'placeholderResidue',
+    'footerPageChrome',
+    'assetFit',
+    'targetDeckkitApplied',
+  ]) {
+    assert.match(
+      recoverableCompact.agentSummary.nextSteps.visualReviewCommand,
+      new RegExp(`${check}=pass`),
+    )
+  }
+  assert.match(
+    recoverableCompact.agentSummary.nextSteps.feedbackGateCommand,
+    /pptx-nova-feedback-gate\.mjs/,
+  )
+  assert.ok(recoverableCompact.performance.artifactBytesByRole.json.bytes > 0)
+  assert.match(
+    recoverableCompact.agentSummary.agentContextRisk.guidance.join(' '),
+    /do not expand full opResults arrays/,
+  )
+
+  const nonRecoverableSource = join(root, 'non-recoverable-source.pptx')
+  const nonRecoverableOutput = join(root, 'non-recoverable-out.pptx')
+  const nonRecoverableRunDir = join(root, 'non-recoverable-run')
+  writeFileSync(nonRecoverableSource, 'non-recoverable fake pptx')
+  const nonRecoverableResult = runNodeStatus(
+    [
+      skillPath('scripts/pptx-nova-refurbish-run.mjs'),
+      '--deckkit',
+      'mckinsey-blue',
+      '--source',
+      nonRecoverableSource,
+      '--output',
+      nonRecoverableOutput,
+      '--run-dir',
+      nonRecoverableRunDir,
+      '--route',
+      'auto',
+      '--xdoc-bin',
+      fakeXdoc,
+      '--json',
+    ],
+    1,
+    {
+      env: {
+        ...process.env,
+        FAKE_SLIDE_COUNT: '1',
+        FAKE_NATIVE_FAILURE_KIND: 'geometry-overlap',
+      },
+    },
+  )
+  const nonRecoverableCompact = readRefurbishResult(nonRecoverableResult)
+  const nonRecoverableSummary = readRefurbishSummary(nonRecoverableResult)
+  assert.equal(nonRecoverableSummary.recovery.status, 'not-eligible')
+  assert.equal(nonRecoverableSummary.recovery.reasonCode, 'native-failure-not-fallback-eligible')
+  assert.equal(
+    nonRecoverableSummary.phases.some((phase) => phase.name === 'fallback-patch'),
+    false,
+  )
+  assert.equal(existsSync(nonRecoverableOutput), false)
+  assert.match(
+    nonRecoverableCompact.agentSummary.nextSteps.recoveryCommand,
+    /"--run-dir" "<new-empty-run-dir>"/,
+  )
+  assert.doesNotMatch(
+    nonRecoverableCompact.agentSummary.nextSteps.recoveryCommand,
+    new RegExp(nonRecoverableRunDir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+  )
+  assert.match(
+    nonRecoverableCompact.agentSummary.nextSteps.recoveryRules.join(' '),
+    /never reuse the failed run directory/,
+  )
 
   const shadowFailureSource = join(root, 'shadow-failure-source.pptx')
   const shadowFailureOutput = join(root, 'shadow-failure-out.pptx')

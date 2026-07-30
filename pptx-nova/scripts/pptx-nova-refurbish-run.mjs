@@ -47,6 +47,9 @@ const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const FIDELITY_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-fidelity-gate.mjs')
 const COMPARE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare.mjs')
 const COMPARE_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-compare-gate.mjs')
+const VISUAL_REVIEW_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-visual-review.mjs')
+const FEEDBACK_GATE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-feedback-gate.mjs')
+const REFURBISH_RUN_SCRIPT = fileURLToPath(import.meta.url)
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
 const AGENT_RESULT_SCHEMA_VERSION = 'pptx-nova-refurbish-result/v1'
 let progressReporter = createProgressReporter({ mode: 'off' })
@@ -219,6 +222,111 @@ function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
 }
 
+function commandArg(value) {
+  return JSON.stringify(String(value))
+}
+
+function countBy(items, keyFor) {
+  const counts = {}
+  for (const item of items) {
+    const key = String(keyFor(item) || 'unknown')
+    counts[key] = (counts[key] ?? 0) + 1
+  }
+  return counts
+}
+
+function summarizeOpResults(report) {
+  const opResults = Array.isArray(report?.opResults) ? report.opResults : []
+  return {
+    reportedOps: opResults.length,
+    byStatus: countBy(opResults, (item) => item?.status),
+    byOp: countBy(opResults, (item) => item?.op),
+    changedPartCount: new Set(
+      opResults.flatMap((item) => (Array.isArray(item?.changedParts) ? item.changedParts : [])),
+    ).size,
+  }
+}
+
+function walkFiles(root) {
+  const files = []
+  if (!root || !existsSync(root)) return files
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const path = join(root, entry.name)
+    if (entry.isDirectory()) files.push(...walkFiles(path))
+    else if (entry.isFile()) files.push(path)
+  }
+  return files
+}
+
+function artifactRole(path) {
+  const extension = extname(path).toLowerCase()
+  if (extension === '.pptx') return 'pptx'
+  if (extension === '.json') return 'json'
+  if (extension === '.jsonl' || extension === '.log') return 'logs'
+  if (['.png', '.jpg', '.jpeg', '.webp'].includes(extension)) return 'images'
+  if (['.txt', '.md'].includes(extension)) return 'text'
+  return 'other'
+}
+
+function aggregateGuidanceFor(path) {
+  const name = basename(path)
+  if (['dry-run.json', 'apply.json'].includes(name)) {
+    return [
+      'schemaVersion',
+      'status',
+      'semanticIssues | length',
+      'opResults grouped by op and status',
+      'changedParts | length',
+    ]
+  }
+  if (name.includes('inspect')) {
+    return ['presentation.slideCount', 'presentation.themes', 'slides[].semantic']
+  }
+  if (name.startsWith('layout-')) {
+    return ['status', 'summary', 'risks grouped by code and classification']
+  }
+  if (name === 'finding-analysis.json') {
+    return ['evaluation.status', 'summary', 'agentGate', 'summary.topFindings']
+  }
+  if (name === 'pptx-diff.json') {
+    return ['agentGate', 'summary', 'changeRollup.reliable']
+  }
+  return ['top-level status and summary fields']
+}
+
+function collectArtifactContextEvidence(runDir) {
+  const files = walkFiles(runDir)
+  const byRole = {}
+  for (const path of files) {
+    const role = artifactRole(path)
+    const current = byRole[role] ?? { files: 0, bytes: 0 }
+    current.files += 1
+    current.bytes += statSync(path).size
+    byRole[role] = current
+  }
+  const largeJsonArtifacts = files
+    .filter((path) => extname(path).toLowerCase() === '.json')
+    .map((path) => ({
+      path: relativeArtifact(runDir, path),
+      bytes: statSync(path).size,
+      readInstead: aggregateGuidanceFor(path),
+    }))
+    .filter((item) => item.bytes >= 128 * 1024)
+    .sort((left, right) => right.bytes - left.bytes)
+  return {
+    artifactBytesByRole: byRole,
+    agentContextRisk: {
+      level: largeJsonArtifacts.length > 0 ? 'high' : 'low',
+      largeJsonArtifacts,
+      guidance: [
+        'Read agentSummary and operationAudit before opening full JSON artifacts.',
+        'Project large JSON with jq and group opResults; do not expand full opResults arrays into Agent context.',
+        'Token usage must come from platform telemetry; this runner does not estimate it.',
+      ],
+    },
+  }
+}
+
 function artifactSet(summary, keys) {
   return Object.fromEntries(keys.map((key) => [key, summary.artifacts?.[key] ?? null]))
 }
@@ -237,6 +345,162 @@ function buildAgentLayoutSummary(layout) {
     reviewedRiskCount: layout.reviewedRiskCount ?? 0,
     reviewPolicyStatus: layout.reviewPolicyStatus ?? null,
   }
+}
+
+function classifyNativeContrastRecovery(report) {
+  const visionDiff = report?.reports?.visionDiff
+  const audit = report?.reports?.audit
+  const newCounts = visionCounts(visionDiff, 'new')
+  const worsenedCounts = visionCounts(visionDiff, 'worsened')
+  const newIssues = Array.isArray(visionDiff?.newIssues) ? visionDiff.newIssues : []
+  const blockingNewIssues = newIssues.filter((issue) =>
+    ['high', 'medium'].includes(String(issue?.severity ?? '').toLowerCase()),
+  )
+  const mediumIssues = blockingNewIssues.filter(
+    (issue) => String(issue?.severity ?? '').toLowerCase() === 'medium',
+  )
+  const highIssues = blockingNewIssues.filter(
+    (issue) => String(issue?.severity ?? '').toLowerCase() === 'high',
+  )
+  const remapTheme = (Array.isArray(report?.steps) ? report.steps : []).find(
+    (step) => step?.name === 'remap-theme',
+  )
+  const checks = {
+    reportSchema: report?.schemaVersion === 'pptx-refurbish-skin/v1' && report?.status === 'failed',
+    auditPassed:
+      audit?.schemaVersion === 'pptx-refurbish-audit/v1' &&
+      audit?.status === 'passed' &&
+      Number(audit?.summary?.errorCount ?? 0) === 0 &&
+      report?.gate?.auditStatus === 'passed',
+    visionDiffValid:
+      visionDiff?.schemaVersion === 'pptx-vision-diff/v1' && visionDiff?.status === 'success',
+    gateCountsMatch:
+      Number(report?.gate?.newHighIssues ?? -1) === newCounts.high &&
+      Number(report?.gate?.newMediumIssues ?? -1) === newCounts.medium &&
+      highIssues.length === newCounts.high &&
+      mediumIssues.length === newCounts.medium,
+    noNewHigh: newCounts.high === 0,
+    contrastOnlyNewMedium:
+      newCounts.medium > 0 && mediumIssues.every((issue) => issue?.kind === 'low-contrast-text'),
+    noWorsenedBlockers: worsenedCounts.high === 0 && worsenedCounts.medium === 0,
+    remapThemeSucceeded: remapTheme?.status === 'success',
+  }
+  const eligible = Object.values(checks).every(Boolean)
+  return {
+    schemaVersion: 'pptx-nova-native-recovery/v1',
+    eligible,
+    reasonCode: eligible ? 'native-theme-contrast-only' : 'native-failure-not-fallback-eligible',
+    checks,
+    findings: {
+      blockingNew: blockingNewIssues.length,
+      newHigh: newCounts.high,
+      newMedium: newCounts.medium,
+      worsenedHigh: worsenedCounts.high,
+      worsenedMedium: worsenedCounts.medium,
+      byKind: countBy(blockingNewIssues, (issue) => issue?.kind),
+      affectedSlides: [
+        ...new Set(
+          blockingNewIssues
+            .map((issue) => Number(issue?.slideIndex))
+            .filter((value) => Number.isInteger(value) && value >= 0)
+            .map((value) => value + 1),
+        ),
+      ].sort((left, right) => left - right),
+    },
+  }
+}
+
+function visualReviewCommand(summary) {
+  const contactSheet = summary.artifacts?.contactSheet
+  const previews = summary.artifacts?.previews
+  if (!contactSheet || !previews || !existsSync(contactSheet) || !existsSync(previews)) return null
+  const preview = gateByName(summary, 'png-previews')
+  const slideCount = Number(preview?.expectedCount ?? preview?.count ?? 0)
+  const args = [
+    process.execPath,
+    VISUAL_REVIEW_SCRIPT,
+    '--run-dir',
+    summary.runDir,
+    '--mode',
+    'refurbish',
+    '--reviewer',
+    'agent',
+    '--slides-reviewed',
+    slideCount > 0 ? String(slideCount) : '<slide-count>',
+    '--contact-sheet',
+    contactSheet,
+    '--previews',
+    previews,
+  ]
+  if (summary.artifacts?.visionDiff) args.push('--vision', summary.artifacts.visionDiff)
+  if (summary.artifacts?.layoutFinal) args.push('--layout-final', summary.artifacts.layoutFinal)
+  if (summary.artifacts?.contentAuditFinal) {
+    args.push('--semantic-audit', summary.artifacts.contentAuditFinal)
+  }
+  for (const check of [
+    'titleWrap',
+    'bodyReadability',
+    'alignment',
+    'spacing',
+    'contrast',
+    'chartTableLegibility',
+    'repeatedLayoutRhythm',
+    'placeholderResidue',
+    'footerPageChrome',
+    'assetFit',
+    'targetDeckkitApplied',
+  ]) {
+    args.push('--check', `${check}=pass`)
+  }
+  args.push('--json')
+  return args.map(commandArg).join(' ')
+}
+
+function recoveryCommand(summary) {
+  if (!summary.error || !summary.runDir) return null
+  const selectedRoute =
+    summary.route?.planned === 'fallback-patch' || summary.route?.executed === 'fallback-patch'
+      ? 'fallback'
+      : summary.route?.requested || 'auto'
+  return [
+    process.execPath,
+    REFURBISH_RUN_SCRIPT,
+    '--deckkit',
+    summary.deckkit,
+    '--source',
+    summary.source,
+    '--output',
+    summary.output,
+    '--run-dir',
+    '<new-empty-run-dir>',
+    '--route',
+    selectedRoute,
+    '--json',
+  ]
+    .map(commandArg)
+    .join(' ')
+}
+
+function feedbackGateCommand(summary) {
+  const prompt = summary.artifacts?.prompt
+  if (!prompt || !existsSync(prompt)) return null
+  return [
+    process.execPath,
+    FEEDBACK_GATE_SCRIPT,
+    '--run-dir',
+    summary.runDir,
+    '--prompt-file',
+    prompt,
+    '--workflow',
+    'refurbish',
+    '--strict',
+    '--overwrite',
+    '--json',
+    '>',
+    join(summary.runDir, 'feedback-gate.json'),
+  ]
+    .map((value) => (value === '>' ? value : commandArg(value)))
+    .join(' ')
 }
 
 function buildAgentSummary(summary) {
@@ -265,6 +529,11 @@ function buildAgentSummary(summary) {
     decision,
     deckkit: summary.deckkit,
     route,
+    routeDecision: summary.route,
+    requiredReferences: summary.requiredReferences ?? [],
+    recovery: summary.recovery,
+    operationAudit: summary.operationAudit,
+    agentContextRisk: summary.agentContextRisk ?? null,
     layout: buildAgentLayoutSummary(summary.layout),
     findingAnalysis: summary.findingAnalysis
       ? {
@@ -329,6 +598,13 @@ function buildAgentSummary(summary) {
     },
     artifacts: artifactSet(summary, [
       'summary',
+      'plan',
+      'capabilities',
+      'nativeReport',
+      'fallbackReport',
+      'patch',
+      'dryRun',
+      'apply',
       'visionDiff',
       'contentAuditFinal',
       'fidelityGate',
@@ -352,6 +628,15 @@ function buildAgentSummary(summary) {
         focusedSlides.length > 0
           ? `node ${COMPARE_SCRIPT} --source source.pptx --candidate candidate.pptx --run-dir . --kind refurbish --slides ${focusedSelector} --output focused-review.png --report focused-review.json --overwrite --json`
           : null,
+      visualReviewCommand: visualReviewCommand(summary),
+      feedbackGateCommand: feedbackGateCommand(summary),
+      recoveryCommand: recoveryCommand(summary),
+      recoveryRules: summary.error
+        ? [
+            `Keep ${summary.runDir} read-only as failure evidence.`,
+            'Retry only with a new, empty --run-dir; never reuse the failed run directory.',
+          ]
+        : [],
       focusedSlides,
     },
     warnings: summary.warnings,
@@ -366,6 +651,8 @@ function buildAgentSummary(summary) {
 }
 
 function buildPerformanceSummary(summary, totalMs) {
+  const contextEvidence = collectArtifactContextEvidence(summary.runDir)
+  summary.agentContextRisk = contextEvidence.agentContextRisk
   const comparePhase = summary.phases.find((phase) => phase.name === 'refurbish-compare')
   const compareRenderInvocations = Number(comparePhase?.renderInvocations ?? 0)
   const comparePartCount = Number(comparePhase?.partCount ?? 0)
@@ -423,6 +710,7 @@ function buildPerformanceSummary(summary, totalMs) {
   )
   return {
     ...performanceSummary,
+    artifactBytesByRole: contextEvidence.artifactBytesByRole,
     findingAnalysisMs: Number(findingAnalysisPhase?.durationMs ?? 0),
     findingAnalysisObjectCount: Number(findingAnalysisPhase?.details?.objectCount ?? 0),
     findingAnalysisFindingCount: Number(findingAnalysisPhase?.details?.findingCount ?? 0),
@@ -612,10 +900,14 @@ function initialSummary(args, artifacts) {
     runDir: args.runDir,
     route: {
       requested: args.route,
+      initialPlan: '',
       planned: '',
       executed: '',
       fallbackReason: '',
     },
+    requiredReferences: [],
+    recovery: null,
+    operationAudit: null,
     artifacts: Object.fromEntries(Object.entries(artifacts).map(([key, path]) => [key, path])),
     phases: [],
     gates: [],
@@ -873,6 +1165,18 @@ function runFallback(summary, args, artifacts) {
   for (const warning of fallbackReport?.summary?.warnings ?? []) {
     summary.warnings.push(`fallback-patch: ${warning}`)
   }
+  summary.operationAudit = fallbackReport?.summary?.operationAudit
+    ? structuredClone(fallbackReport.summary.operationAudit)
+    : {
+        plannedOps: Number(fallbackReport?.summary?.ops ?? 0),
+        emittedOps: Number(fallbackReport?.summary?.ops ?? 0),
+        knownNoOpOps: 0,
+        effectiveOps: null,
+        knownChangingOps: 0,
+        unknownEffectOps: Number(fallbackReport?.summary?.ops ?? 0),
+        evidenceNote:
+          'The fallback report predates operation classification; emitted operations are not evidence of effective changes.',
+      }
 
   const lockCheck = runJsonPhase(summary, {
     name: 'check-lock',
@@ -947,6 +1251,12 @@ function runFallback(summary, args, artifacts) {
       message: 'xdoc apply did not produce a successful pptx-apply/v1 candidate',
     },
   )
+  summary.operationAudit.execution = {
+    dryRun: summarizeOpResults(dryRun),
+    apply: summarizeOpResults(apply),
+  }
+  fallbackReport.summary.operationAudit = summary.operationAudit
+  writeJson(artifacts.fallbackReport, fallbackReport)
 
   const visionDiff = runJsonPhase(summary, {
     name: 'vision-diff-command',
@@ -1560,6 +1870,24 @@ function runSemanticDiff(summary, args, artifacts) {
     artifact: artifacts.pptxDiff,
   })
   gateSemanticDiff(summary, report)
+  if (summary.operationAudit) {
+    const emittedOps = Number(summary.operationAudit.emittedOps ?? 0)
+    const reliableChanges = Number(report?.summary?.reliableChanges ?? 0)
+    summary.operationAudit.semanticDiff = {
+      reliableChanges,
+      shapeChanged: Number(report?.summary?.shapeChanged ?? 0),
+      slideChanged: Number(report?.summary?.slideChanged ?? 0),
+      reliableChangesPerEmittedOp:
+        emittedOps > 0 ? Number((reliableChanges / emittedOps).toFixed(4)) : null,
+      attribution:
+        'Deck-level semantic diff cannot attribute reliable changes to individual patch operations.',
+    }
+    if (existsSync(artifacts.fallbackReport)) {
+      const fallbackReport = readJson(artifacts.fallbackReport, 'fallback patch report')
+      fallbackReport.summary.operationAudit = summary.operationAudit
+      writeJson(artifacts.fallbackReport, fallbackReport)
+    }
+  }
   return report
 }
 
@@ -1688,6 +2016,21 @@ function archivePrompt(summary, args, artifacts) {
   })
 }
 
+function buildRecoveredFallbackPlan(args, artifacts, initialPlan, recovery) {
+  const fallbackPlan = buildRefurbishPlan({
+    deckkit: args.deckkit,
+    source: artifacts.sourceSnapshot,
+    output: artifacts.candidate,
+    catalog: args.catalog,
+    explicit: args.explicit,
+    route: 'fallback',
+  })
+  fallbackPlan.routeSelection.requested = args.route
+  fallbackPlan.routeSelection.initialSelected = initialPlan.route
+  fallbackPlan.recovery = recovery
+  return fallbackPlan
+}
+
 function runRefurbish(inputArgs) {
   const runStarted = performance.now()
   const args = normalizeArgs(inputArgs)
@@ -1716,12 +2059,13 @@ function runRefurbish(inputArgs) {
     }
 
     const planStarted = performance.now()
-    const plan = buildRefurbishPlan({
+    let plan = buildRefurbishPlan({
       deckkit: args.deckkit,
       source: artifacts.sourceSnapshot,
       output: artifacts.candidate,
       catalog: args.catalog,
       explicit: args.explicit,
+      route: args.route,
     })
     writeJson(artifacts.plan, plan)
     addInternalPhase(summary, 'refurbish-plan', plan.status === 'blocked' ? 'failed' : 'passed', {
@@ -1730,11 +2074,13 @@ function runRefurbish(inputArgs) {
       status: plan.status,
       route: plan.route ?? '',
     })
+    summary.route.initialPlan = plan.route
+    summary.route.planned = plan.route
+    summary.requiredReferences = plan.requiredReferences ?? []
     persistCatalogReadiness(summary, plan, args, artifacts)
     if (plan.status === 'blocked') {
       throw new PhaseFailure('refurbish-plan', plan.blockers.join('; ') || 'refurbish plan blocked')
     }
-    summary.route.planned = plan.route
     runCatalogGate(summary, plan, args)
     runOptionalReadiness(summary, args, artifacts)
 
@@ -1787,25 +2133,56 @@ function runRefurbish(inputArgs) {
       } catch (error) {
         const unsupportedComplexity =
           error instanceof PhaseFailure && error.kind === 'UnsupportedComplexity'
-        if (args.route === 'auto' && unsupportedComplexity) {
+        const contrastRecovery = classifyNativeContrastRecovery(error?.report)
+        const contrastRecoverable = args.route === 'auto' && contrastRecovery.eligible
+        summary.recovery = {
+          ...contrastRecovery,
+          status: contrastRecoverable
+            ? 'recovered'
+            : contrastRecovery.eligible
+              ? 'eligible-but-disabled'
+              : 'not-eligible',
+          automaticFallbackAllowed: args.route === 'auto',
+          nativeReport: relativeArtifact(args.runDir, artifacts.nativeReport),
+        }
+        if (contrastRecoverable) {
+          const phase = summary.phases.findLast((item) => item.name === 'native-refurbish-skin')
+          if (phase) {
+            phase.status = 'recovered'
+            phase.recoveredBy = 'fallback-patch'
+          }
+          summary.route.fallbackReason =
+            'native refurbish-skin failed only on attributable new low-contrast-text findings'
+          summary.warnings.push(
+            `Native refurbish-skin introduced only low-contrast-text blockers (${contrastRecovery.findings.newMedium} medium across ${contrastRecovery.findings.affectedSlides.length} slide(s)); runner retained the failed native report and continued with the same DeckKit fallback patch.`,
+          )
+          plan = buildRecoveredFallbackPlan(args, artifacts, plan, summary.recovery)
+          summary.route.planned = plan.route
+          summary.requiredReferences = plan.requiredReferences ?? []
+          writeJson(artifacts.plan, plan)
+          useFallback = true
+        } else if (args.route === 'auto' && unsupportedComplexity) {
           const phase = summary.phases.findLast((item) => item.name === 'native-refurbish-skin')
           if (phase) {
             phase.status = 'recovered'
             phase.recoveredBy = 'fallback-patch'
           }
           summary.route.fallbackReason = 'native refurbish-skin returned UnsupportedComplexity'
+          summary.recovery = {
+            schemaVersion: 'pptx-nova-native-recovery/v1',
+            status: 'recovered',
+            eligible: true,
+            reasonCode: 'native-unsupported-complexity',
+            automaticFallbackAllowed: true,
+            nativeReport: relativeArtifact(args.runDir, artifacts.nativeReport),
+            findings: null,
+          }
           summary.warnings.push(
             'Native refurbish-skin exceeded its current complexity limit; runner continued with the catalog-driven fallback patch route.',
           )
-          plan.requiredReferences = [
-            ...(plan.requiredReferences ?? []),
-            {
-              path: 'references/reference-create.md',
-              section: '6. Refurbish Existing Deck',
-              reason:
-                'Native skinning returned UnsupportedComplexity; the runner selected the catalog-driven fallback contract.',
-            },
-          ]
+          plan = buildRecoveredFallbackPlan(args, artifacts, plan, summary.recovery)
+          summary.route.planned = plan.route
+          summary.requiredReferences = plan.requiredReferences ?? []
           writeJson(artifacts.plan, plan)
           useFallback = true
         } else {

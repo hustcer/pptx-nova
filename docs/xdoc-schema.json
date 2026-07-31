@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.3 (91f7086a)",
+  "version": "0.3.3 (91967e3c)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -2119,6 +2119,10 @@
               {
                 "code": "shape-catalog-and-selector-bounded",
                 "description": "Preset geometry, freeform paths, connector endpoints, and selected shape fields follow the published catalogs and selectors."
+              },
+              {
+                "code": "group-shape-formatting-bounded",
+                "description": "Group targets support name, geometry, transform, and effects; fill, line, and clickAction fail before mutation and must be applied to selected child shapes."
               }
             ],
             "evidence": [
@@ -27649,7 +27653,17 @@
             "category": "shape",
             "summary": "Update shape content and styles.",
             "required": ["op", "slide", "shape"],
-            "constraints": [],
+            "constraints": [
+              {
+                "kind": "target-field-compatibility",
+                "selectorField": "shape",
+                "targetType": "group",
+                "forbiddenFields": ["fill", "line", "clickAction"],
+                "supportedFields": ["name", "position", "size", "rotation", "flip", "effect"],
+                "enforcement": "runtime",
+                "summary": "Group targets reject fill, line, and clickAction before mutation; select and update child shapes individually for those fields."
+              }
+            ],
             "optional": [
               "clickAction",
               "effect",

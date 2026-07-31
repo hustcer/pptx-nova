@@ -14,7 +14,7 @@ PPTX compatibility.
 
 xdoc is an agent-native document execution runtime for native, editable PPTX work.
 
-> **xdoc is the best PPTX runtime under 50MB.**
+> **xdoc is the best agent-first, headless PPTX runtime for high-fidelity creation and editing.**
 
 That is a deliberately bold positioning statement, backed by a July 2026
 Agent-oriented comparison of current PPTX creation and editing tools. Within

@@ -1,7 +1,7 @@
 {
   "name": "xdoc",
-  "version": "0.3.3 (91967e3c)",
-  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nMachine-readable schema:\n  xdoc schema",
+  "version": "0.3.3 (1f2c8ad2)",
+  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocol:\n  xdoc json-rpc\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
       "description": "Convert document file(s) to one or more output formats.",
@@ -972,22 +972,25 @@
       "options": {
         "checks": {
           "type": "string",
-          "description": "Checks (comma-separated): fonts,links,compat,assets,policy",
+          "description": "Checks (comma-separated): fonts,links,compat,assets,policy,a11y; all expands to everything except the opt-in a11y",
           "required": false,
           "default": "all",
-          "enum": ["fonts", "links", "compat", "compatibility", "assets", "policy", "all"],
+          "enum": ["fonts", "links", "compat", "compatibility", "assets", "policy", "a11y", "all"],
           "strict": true,
           "aliases": {
             "all": ["fonts", "links", "compat", "assets", "policy"],
             "compatibility": "compat"
           },
           "separator": ",",
-          "valueSyntax": "fonts|links|compat|assets|policy[,fonts|links|compat|assets|policy...]",
+          "valueSyntax": "fonts|links|compat|assets|policy|a11y[,fonts|links|compat|assets|policy|a11y...]",
           "collection": "set",
           "duplicates": "ignored",
           "orderSensitive": false,
           "defaulting": {
             "onOmitted": "all"
+          },
+          "optIn": {
+            "a11y": "Not included in all; combine it explicitly, for example --checks all,a11y."
           }
         },
         "target-office": {
@@ -1000,12 +1003,12 @@
           "valueSyntax": "2007|2010|2013|2016|2019|2021|365",
           "semanticEffect": {
             "officeCompatibilityTarget": true,
-            "appliesToChecks": ["compat"]
+            "appliesToChecks": ["compat", "a11y"]
           }
         },
         "rules": {
           "type": "string",
-          "description": "Deprecated: custom rule files are no longer accepted; use --checks fonts,links,compat,assets,policy",
+          "description": "Deprecated: custom rule files are no longer accepted; use --checks fonts,links,compat,assets,policy,a11y",
           "required": false
         },
         "from": {
@@ -1209,10 +1212,11 @@
       "examples": [
         "xdoc check ./deck.pptx",
         "xdoc check ./deck.pptx --checks compat --target-office 2016 --pretty",
+        "xdoc check ./deck.pptx --checks a11y --pretty",
         "xdoc check ./decks --recursive --out-dir ./out --report ./run.json"
       ],
       "inputMode": "multi-input",
-      "supportedChecks": ["fonts", "links", "compat", "assets", "policy"],
+      "supportedChecks": ["fonts", "links", "compat", "assets", "policy", "a11y"],
       "defaultChecks": ["fonts", "links", "compat", "assets", "policy"],
       "defaultOutputRules": {
         "optionRefs": {
@@ -1248,10 +1252,86 @@
       },
       "usageNotes": [
         "check emits preflight/v1 JSON reports.",
-        "Default --checks all currently expands to fonts,links,compat,assets,policy.",
+        "Default --checks all currently expands to fonts,links,compat,assets,policy; a11y is opt-in and must be named explicitly.",
         "compat compares the full OOXML package against --target-office (default 365), reports minimumOfficeVersion, and distinguishes unprotected features from mc:Ignorable or AlternateContent fallback.",
-        "policy currently runs fixed MVP publishing rules."
-      ]
+        "policy currently runs fixed MVP publishing rules.",
+        "a11y runs render-free accessibility rules; see checks.a11y for the rule catalog, the outcome vocabulary, and the declared non-goals."
+      ],
+      "checkContracts": {
+        "a11y": {
+          "optIn": true,
+          "reason": "The accessibility rules are newer than the publishing diagnostics; they stay out of --checks all until the false-positive rate is proven on real decks.",
+          "usage": "xdoc check deck.pptx --checks a11y --pretty",
+          "reportSchemaVersion": "pptx-a11y/v1",
+          "rules": [
+            {
+              "code": "a11y_slide_missing_title",
+              "severity": "warning",
+              "outcomes": ["violation"],
+              "scope": "slide",
+              "summary": "Slide has no non-empty title or centered-title placeholder. A visually prominent text box is not accepted as a substitute."
+            },
+            {
+              "code": "a11y_visual_missing_description",
+              "severity": "warning",
+              "outcomes": ["violation"],
+              "scope": "shape",
+              "summary": "Picture, chart, OLE object, or SmartArt diagram carries neither an accessibility description nor explicit decorative metadata."
+            },
+            {
+              "code": "a11y_decorative_not_supported",
+              "severity": "warning",
+              "outcomes": ["violation"],
+              "scope": "shape",
+              "summary": "A visual relies on the Office 2019 decorative extension, but the requested target Office release predates it and no description fallback exists."
+            },
+            {
+              "code": "a11y_text_low_contrast",
+              "severity": "warning",
+              "outcomes": ["violation"],
+              "scope": "shape",
+              "summary": "Explicit text color falls below the WCAG-derived minimum contrast ratio against its statically resolved background."
+            },
+            {
+              "code": "a11y_text_contrast_inconclusive",
+              "severity": "info",
+              "outcomes": ["inconclusive"],
+              "scope": "shape",
+              "summary": "Text has an explicit color but no statically resolvable background color; contrast must be confirmed against a render."
+            }
+          ],
+          "outcomes": {
+            "violation": "The rule was decided and the deck violates it.",
+            "inconclusive": "The rule could not be decided from static package facts; this is never a pass."
+          },
+          "checkStatus": {
+            "passed": "Every rule ran and no in-scope finding was produced.",
+            "warning": "At least one in-scope violation was produced.",
+            "inconclusive": "No violation, but at least one rule could not be decided.",
+            "failed": "The scan itself could not run; this is not evidence that the deck is accessible."
+          },
+          "findingFields": {
+            "slideNumber": "One-based, matching --slide.",
+            "patchSelector": "Ready-to-paste patch selector; its slide field is the zero-based patch index and its shape field uses the numeric cNvPr id.",
+            "patchTemplate": "Present only for the description rules. It contains a placeholder and is deliberately not named fixPatch: autoApplicable is always false and merging it unchanged would write the placeholder text into the deck.",
+            "evidence": "Only the facts the rule actually produced; an omitted field means the rule does not produce it, not that it was checked and empty."
+          },
+          "scoping": {
+            "findings": "Scoped to --slide.",
+            "deckCoverage": "Always deck-wide, so a scoped run cannot be mistaken for a full audit.",
+            "residual": "details.scope.outOfScopeFindingCount discloses findings suppressed by --slide."
+          },
+          "targetOfficeInteraction": "decorative metadata only exempts a visual from Office 2019 onward; an older --target-office turns it into an explicit a11y_decorative_not_supported finding instead of a silent pass.",
+          "exitCodePolicy": "Findings never change the process exit code. A completed scan exits 0 and the verdict is carried by checks.a11y.status, summary.riskLevel, and the report status; only transport, input, and output failures use non-zero exits.",
+          "nonGoals": [
+            "Reading order and tab order are not evaluated.",
+            "Table header semantics, merged-cell structure, and complex table navigation are not evaluated.",
+            "This is not a full WCAG audit and does not predict screen-reader behavior.",
+            "Contrast is derived from statically resolved colors only; gradients, pictures, and pattern fills behind text stay inconclusive rather than passing.",
+            "Description quality is not judged; a non-empty description satisfies the rule."
+          ]
+        }
+      }
     },
     "pptx": {
       "description": "Create, patch, or inspect PPTX decks through the native xdoc PPTX engine.",
@@ -1676,6 +1756,10 @@
               {
                 "code": "chart-contract-bounded",
                 "description": "Chart kinds, variants, data shapes, and style fields are limited to the published operation and catalog contracts."
+              },
+              {
+                "code": "chart-ex-styling-unsupported",
+                "description": "On chartEx kinds (waterfall, funnel, histogram, treemap, sunburst, box-whisker) set-chart accepts only dataLabels and colorStyle; the classic-only style fields fail closed instead of writing c: markup a cx: chart cannot carry."
               }
             ],
             "evidence": [
@@ -1715,12 +1799,16 @@
             "feature": "chart-3d",
             "subset": "ooxml-authoring",
             "status": "supported",
-            "summary": "Author and reopen the schema-published 3D chart kinds and variants as native chart OOXML.",
+            "summary": "Author and reopen the schema-published 3D chart kinds and variants as native chart OOXML, including the c:view3D scene.",
             "operations": [],
             "limits": [
               {
                 "code": "published-3d-chart-kinds-only",
-                "description": "Authoring is limited to 3D kinds and variants disclosed by the chart contracts; it does not promise renderer parity."
+                "description": "Authoring is limited to 3D kinds and variants disclosed by the chart contracts. Rendering fidelity is tracked separately: see chart-3d/pdf-rendering and chart-3d/viewer-rendering; neither promises Office parity."
+              },
+              {
+                "code": "view3d-requires-3d-chart-group",
+                "description": "set-chart view3D covers rotX, rotY, rightAngleAxes, perspective, depthPercent and heightPercent within their ECMA-376 ranges, and fails closed on charts whose plot area holds no 3D chart group."
               }
             ],
             "evidence": [
@@ -1728,6 +1816,16 @@
                 "id": "chart-3d-ooxml-roundtrip",
                 "kind": "behavior",
                 "claim": "Column, bar, area, line, pie, bubble, and surface 3D chart semantics are written and reopened."
+              },
+              {
+                "id": "chart-3d-view-roundtrip",
+                "kind": "behavior",
+                "claim": "The c:view3D scene round-trips through set-chart and inspect with per-field clearing, whole-scene removal, ECMA-376 range rejection, and a fail-closed 2D chart target."
+              },
+              {
+                "id": "chart-surface-top-view-authoring",
+                "kind": "behavior",
+                "claim": "A newly authored c:surfaceChart retains three unique category/value/series axis identities with a complete crossAx topology, hides the value axis, and writes an orthographic rotX=90, rotY=0, rAngAx=false, perspective=0 contour scene. Local PowerPoint clean-open/rendering was used as a reference, not as an Office-parity guarantee."
               }
             ],
             "recommendation": {
@@ -1742,14 +1840,26 @@
           },
           {
             "feature": "chart-3d",
-            "subset": "viewer-pdf-rendering",
+            "subset": "pdf-rendering",
             "status": "partial",
-            "summary": "Render 3D charts with known 2D degradation or placeholder behavior in some chart families.",
+            "summary": "Render 3D charts to PDF and preview PNG with explicit fidelity limits.",
             "operations": [],
             "limits": [
               {
                 "code": "not-powerpoint-3d-parity",
-                "description": "Viewer and PDF output do not reproduce the full PowerPoint 3D scene; surface charts and other families may degrade differently."
+                "description": "PDF output reproduces PowerPoint's projection, occlusion and default face shading, but not bevel, material or a custom lightRig. c:shape is parsed at both levels but every shape renders as a box, a line3DChart ribbon is drawn as a surface without PowerPoint's ribbon thickness, and a pie3DChart disc has a square edge where PowerPoint bevels it, which shows most at a shallow rotX."
+              },
+              {
+                "code": "view3d-projection-coverage",
+                "description": "The PDF renderer projects c:bar3DChart, c:line3DChart, c:area3DChart, c:pie3DChart and c:surface3DChart. rotX, rotY, depthPercent, hPercent, gapDepth and perspective drive the projection, walls and depth axis; a pie reads rotX and rotY differently, as its own pitch and slice rotation, and ignores depthPercent as PowerPoint does. c:surfaceChart renders separately as its top-down contour/band view. rAngAx=true is the oblique projection and rAngAx=false a rotated perspective camera, both measured against Microsoft PowerPoint renders; c:perspective maps to a field of view of half its value in degrees, and a pie ignores it."
+              },
+              {
+                "code": "surface3d-band-palette-and-shading",
+                "description": "A surface is coloured by value band and shaded by facet against a measured light rig. Both halves are measured against PowerPoint: the band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. Rendered meshes agree with PowerPoint to within seven channel steps across that range; the residual tracks the plot rectangle each renderer fits its cube into rather than the light rig. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied, but gradient fills degrade to their first stop in native PDF."
+              },
+              {
+                "code": "surface-legend-and-contour-shading",
+                "description": "Two measured differences remain outside the mesh itself. A c:surface3DChart legend lists the series rather than the value bands PowerPoint lists there, so a 3D surface with a legend shows the wrong entries; the c:surfaceChart top view does list bands. And PowerPoint shades a top-view contour cell by its facet the same way it shades a 3D one, which this renderer does not: flat cells come out right and steep ones render brighter than PowerPoint's."
               }
             ],
             "evidence": [
@@ -1757,6 +1867,92 @@
                 "id": "chart-3d-rendering-boundary",
                 "kind": "policy",
                 "claim": "Rendering support is tracked separately from native OOXML authoring and never inferred from operation availability."
+              },
+              {
+                "id": "chart-3d-scene-parsed",
+                "kind": "behavior",
+                "claim": "c:view3D, the three CT_Surface walls, c:gapDepth, both c:shape levels and c:serAx round-trip through both parser engines with matching values."
+              },
+              {
+                "id": "chart-3d-oblique-projection",
+                "kind": "behavior",
+                "claim": "Both projections are measured against Microsoft PowerPoint renders of a generated calibration corpus: rAngAx=true keeps the category axis horizontal and the value axis vertical while skewing only the depth axis, and rAngAx=false is a rotated camera whose eye distance follows the plot height and c:perspective."
+              },
+              {
+                "id": "chart-3d-ribbon-families",
+                "kind": "behavior",
+                "claim": "line3DChart and area3DChart render as depth-swept surfaces and solids: a line series is a bare ribbon, an area series the same sweep closed with a cross-section and end caps, and grouping decides whether series occupy their own depth plane."
+              },
+              {
+                "id": "chart-3d-pie-extrusion",
+                "kind": "behavior",
+                "claim": "pie3DChart renders as an extruded disc: rotX sets the ellipse aspect and rim depth, rotY turns the slices, hPercent scales the rim, depthPercent has no effect, and the rim carries the measured cylindrical shading gradient."
+              },
+              {
+                "id": "chart-3d-surface-mesh",
+                "kind": "behavior",
+                "claim": "surface3DChart renders as a banded height field over the category and series grid: the value axis ticks cut it into bands whose colours follow the accent ladder measured off PowerPoint's legend swatches, each mesh cell is one polygon per band shaded by its own normal, and c:wireframe strokes the same band outlines instead of filling them. The cube's auto height follows a band law measured across twenty-one grids rather than stretching to the plot rectangle."
+              },
+              {
+                "id": "chart-surface-2d-pdf",
+                "kind": "behavior",
+                "claim": "surfaceChart renders as a top-down category-by-series grid whose values select complete major-tick bands; sparse c:bandFmts, wireframe, axis orientation and missing cells are preserved."
+              }
+            ],
+            "recommendation": {
+              "action": "run-visual-verification",
+              "operations": [],
+              "note": "Use visual-verify and an independent Office reference before accepting 3D rendering fidelity."
+            }
+          },
+          {
+            "feature": "chart-3d",
+            "subset": "viewer-rendering",
+            "status": "partial",
+            "summary": "Render 3D charts in the browser viewer with explicit fidelity limits.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "not-powerpoint-3d-parity-viewer",
+                "description": "Viewer output reproduces PowerPoint's projection, occlusion and default face shading, but not bevel, material or a custom lightRig. c:shape is parsed at both levels but every shape renders as a box, a line3DChart ribbon is drawn as a surface without PowerPoint's ribbon thickness, and a pie3DChart disc has a square edge where PowerPoint bevels it, which shows most at a shallow rotX."
+              },
+              {
+                "code": "view3d-projection-coverage-viewer",
+                "description": "The SVG renderer projects c:bar3DChart, c:line3DChart, c:area3DChart, c:pie3DChart and c:surface3DChart. rotX, rotY, depthPercent, hPercent, gapDepth and perspective drive the projection, walls and depth axis; a pie reads rotX and rotY differently, as its own pitch and slice rotation, and ignores depthPercent as PowerPoint does. c:surfaceChart renders separately as its top-down contour/band view. rAngAx=true is the oblique projection and rAngAx=false a rotated perspective camera, both measured against Microsoft PowerPoint renders; c:perspective maps to a field of view of half its value in degrees, and a pie ignores it."
+              },
+              {
+                "code": "surface3d-band-palette-and-shading-viewer",
+                "description": "A surface is coloured by value band and shaded by facet against a measured light rig, from the same modules the PDF renderer uses. The band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied; the 2D contour keeps SVG gradients, while the shaded 3D surface degrades them to the first stop."
+              },
+              {
+                "code": "surface-legend-and-contour-shading-viewer",
+                "description": "Two measured differences remain outside the mesh itself. A c:surface3DChart legend lists the series rather than the value bands PowerPoint lists there, so a 3D surface with a legend shows the wrong entries; the c:surfaceChart top view does list bands. And PowerPoint shades a top-view contour cell by its facet the same way it shades a 3D one, which this renderer does not: flat cells come out right and steep ones render brighter than PowerPoint's."
+              },
+              {
+                "code": "viewer-tracks-pdf-geometry",
+                "description": "The viewer's fidelity target for 3D charts is this toolchain's own PDF output rather than PowerPoint directly, so that preview stays a trustworthy proxy for the PDF. Both renderers evaluate the same measured geometry, held together by checked-in vertex vectors; text placement still follows each renderer's own font metrics, which is a pre-existing 2D difference rather than one 3D introduces."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "chart-3d-viewer-rendering-boundary",
+                "kind": "policy",
+                "claim": "Viewer rendering support is tracked separately from PDF rendering and from native OOXML authoring, and is never inferred from operation availability."
+              },
+              {
+                "id": "chart-3d-viewer-geometry-vectors",
+                "kind": "behavior",
+                "claim": "The viewer's projection, camera, wall, axis, gridline, draw-order, pie and surface geometry are asserted against vectors generated from the same MoonBit modules the PDF renderer uses, so the two implementations cannot drift apart without a failing test."
+              },
+              {
+                "id": "chart-3d-viewer-families",
+                "kind": "behavior",
+                "claim": "bar3DChart, line3DChart, area3DChart, pie3DChart and surface3DChart each render through the SVG path, keyed on the raw chart group so a 3D group without a c:view3D still draws in 3D from the schema defaults."
+              },
+              {
+                "id": "chart-surface-2d-viewer",
+                "kind": "behavior",
+                "claim": "surfaceChart renders through a distinct SVG top-view path with complete value bands and range legend, sparse styles, gradients, wireframe, authored axes and missing-cell holes."
               }
             ],
             "recommendation": {
@@ -1946,14 +2142,8 @@
             "feature": "media",
             "subset": "native-authoring",
             "status": "supported",
-            "summary": "Create and update images, equations, OLE packages, video references, and image crops.",
-            "operations": [
-              "add-equation",
-              "add-image",
-              "add-ole-object",
-              "add-video",
-              "crop-image"
-            ],
+            "summary": "Create and update images, equations, OLE packages, video references, image crops, and preset picture masks.",
+            "operations": ["add-equation", "add-image", "add-ole-object", "add-video", "set-image"],
             "limits": [
               {
                 "code": "asset-policy-and-host-boundaries",
@@ -1982,14 +2172,14 @@
                 "claim": "The executable operation is declared by the canonical patch contract."
               },
               {
-                "id": "patch-op:crop-image",
+                "id": "patch-op:set-image",
                 "kind": "operation-contract",
                 "claim": "The executable operation is declared by the canonical patch contract."
               },
               {
                 "id": "media-native-package-roundtrip",
                 "kind": "behavior",
-                "claim": "Media parts, relationships, fallback representations, and image crop semantics are validated in package roundtrips."
+                "claim": "Media parts, relationships, fallback representations, image crops, and preset picture masks are validated in package roundtrips."
               }
             ],
             "recommendation": {
@@ -1999,7 +2189,7 @@
                 "add-image",
                 "add-ole-object",
                 "add-video",
-                "crop-image"
+                "set-image"
               ],
               "note": "Use declared assets and inspect package relationships plus visual output."
             }
@@ -2102,7 +2292,7 @@
             "feature": "shape",
             "subset": "native-authoring",
             "status": "supported",
-            "summary": "Create, duplicate, update, connect, ungroup, and remove native shapes.",
+            "summary": "Create, duplicate, update, connect, ungroup, and remove native shapes, including accessibility title, description, and Office 2019 decorative metadata.",
             "operations": [
               "add-connector",
               "add-freeform",
@@ -2122,7 +2312,11 @@
               },
               {
                 "code": "group-shape-formatting-bounded",
-                "description": "Group targets support name, geometry, transform, and effects; fill, line, and clickAction fail before mutation and must be applied to selected child shapes."
+                "description": "Group targets support name, accessibility metadata, geometry, transform, and effects; fill, line, and clickAction fail before mutation and must be applied to selected child shapes."
+              },
+              {
+                "code": "shape-picture-fill-bounded",
+                "description": "Shape picture fill covers stretch, tile, srcRect crop, image transparency, and rotate-with-shape; DrawingML recolor effects such as duotone and external linked images are not authored, and picture fill is rejected on group and picture targets."
               }
             ],
             "evidence": [
@@ -2180,6 +2374,16 @@
                 "id": "shape-native-roundtrip",
                 "kind": "behavior",
                 "claim": "Native shape creation, grouping, connection, duplication, mutation, and removal are covered by model and bridge tests."
+              },
+              {
+                "id": "shape-accessibility-roundtrip",
+                "kind": "behavior",
+                "claim": "Title, description, and decorative set/false/clear/inspect semantics plus cNvPr extension preservation are covered across text, picture, group, chart, and table shapes; compatibility tests pin decorative to Office 2019."
+              },
+              {
+                "id": "shape-picture-fill-relationship-lifecycle",
+                "kind": "behavior",
+                "claim": "Picture fill roundtrips stretch/tile geometry and inspect facts, shares one media part and relationship for identical bytes, and reclaims the relationship plus the media part it strands on replacement or clearing."
               }
             ],
             "recommendation": {
@@ -2196,7 +2400,32 @@
                 "set-shape",
                 "ungroup-shapes"
               ],
-              "note": "Use stable selectors, dry-run geometry changes, and inspect the resolved shape references."
+              "note": "Use stable selectors, dry-run changes, and inspect resolved shape references plus accessibility metadata."
+            }
+          },
+          {
+            "feature": "shape",
+            "subset": "picture-fill-rendering",
+            "status": "partial",
+            "summary": "Render shape picture fills with stretch geometry only; crop and tile parameters are authored but not reproduced by the bundled renderer.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "picture-fill-render-subset",
+                "description": "The Viewer and PDF renderers draw a shape picture fill stretched to the shape bounds and honor image transparency; a:srcRect crop and a:tile scale, offset, alignment and flip are ignored, so preview output can differ from PowerPoint."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "shape-picture-fill-rendering-boundary",
+                "kind": "policy",
+                "claim": "Picture fill rendering is tracked separately from OOXML authoring; PowerPoint is the authority for cropped and tiled fills."
+              }
+            ],
+            "recommendation": {
+              "action": "run-visual-verification",
+              "operations": [],
+              "note": "Author crop and tile through set-shape, then confirm the result in PowerPoint rather than in xdoc preview output."
             }
           },
           {
@@ -2528,7 +2757,7 @@
             "feature": "text",
             "subset": "native-authoring",
             "status": "supported",
-            "summary": "Create and update text frames, paragraphs, runs, fitting, and default text styles.",
+            "summary": "Create and update text frames, margins, anchoring, wrapping, paragraphs, runs, fitting, and default text styles.",
             "operations": [
               "add-paragraph",
               "add-run",
@@ -2595,7 +2824,7 @@
               {
                 "id": "text-native-roundtrip-and-fit",
                 "kind": "behavior",
-                "claim": "Text frame, paragraph, run, replacement, style, and fit operations are covered by semantic and layout tests."
+                "claim": "Text frame margins, anchoring, wrapping, paragraph, run, replacement, style, and fit operations are covered by semantic and layout tests."
               }
             ],
             "recommendation": {
@@ -2818,7 +3047,7 @@
             "feature": "media",
             "subset": "native-authoring"
           },
-          "crop-image": {
+          "set-image": {
             "feature": "media",
             "subset": "native-authoring"
           },
@@ -2987,7 +3216,7 @@
             "add-video",
             "append-slide-notes",
             "bind-data",
-            "crop-image",
+            "set-image",
             "define-macro",
             "duplicate-shape",
             "duplicate-slide",
@@ -3062,6 +3291,21 @@
             "pptx-apply/v1 report",
             "optional pptx-apply-sidecar/v1 sidecar JSON"
           ],
+          "dryRun": {
+            "scope": "complete-candidate-package",
+            "validates": [
+              "changed-part-xml",
+              "generated-child-order-and-particles",
+              "relationships",
+              "full-package-semantic-audit"
+            ],
+            "reports": "The pptx-dry-run/v1 report records validation results for the complete candidate package without writing the requested output file.",
+            "doesNotProve": [
+              "powerpoint-clean-open",
+              "powerpoint-resave-stability",
+              "cross-office-rendering-parity"
+            ]
+          },
           "daemon": {
             "option": "--daemon",
             "strictOption": "--daemon-strict",
@@ -4267,22 +4511,24 @@
             "source PPTX",
             "one optional source-slide selector; omitting all selectors preserves the compatible --slide 0 behavior"
           ],
-          "outputs": ["output PPTX", "pptx-copy-from/v1 JSON report"],
+          "outputs": ["output PPTX", "pptx-copy-from/v2 JSON report"],
           "selection": {
             "slide": "--slide N selects one 0-based source slide; this is the compatibility entry and defaults to 0 when no selector is supplied",
             "slides": "--slides N|N-M[,N|N-M...] selects one or more 1-based source slides in caller order",
             "all": "--all selects every source slide in source order",
             "mutualExclusion": "--slide, --slides, and --all are mutually exclusive"
           },
-          "notes": "Opens the target and source once, validates the complete requested slide selection before the first target mutation, copies all selected slides in one in-memory transaction, and writes the candidate only after every copy plus one serialization succeeds. Slide XML and internal related parts such as media/charts are preserved while slide-layout relationships are rebound to an existing target layout when possible.",
+          "notes": "Opens the target and source once, computes a read-only dependency plan without serializing or mutating either deck, and applies that exact fingerprint-bound plan on an in-memory candidate only when no blocker exists. Slide XML and internal related parts such as media/charts are preserved while slide-layout relationships are explicitly reused or rebound to a registered target layout.",
           "report": {
-            "copied": "per-slide 0-based source/target indexes, slide part mappings, and dependency mappings",
+            "status": "ready for an approved dry-run plan, blocked when dependencies are unsafe, and success only after output is written",
+            "copied": "per-slide 0-based source/target indexes, planned slide part mappings, and dependency mappings",
             "dependencyMappings": "flattened aggregate dependency mappings with owning sourceSlide and targetSlide",
-            "changedParts": "deduplicated aggregate target part names across the whole transaction"
+            "changedParts": "deduplicated target part names the approved plan will mutate",
+            "preflight": "read-only source/target package fingerprints, target slide counts, SHA-256 identified parts, normalized relationship edges, add/reuse/rename/rebind/inspect decisions, blockers, fidelity risks, and action counts"
           },
           "mvpLimits": [
             "Does not write apply sidecars because it is not a replayable patch op",
-            "Imported slide uses the target deck layout graph when a matching source layout is unavailable"
+            "Imported slides use the target deck layout graph; source layout/master/theme dependencies are inspected and reported but not yet registered into the target deck"
           ]
         },
         "extract-style": {
@@ -9443,8 +9689,8 @@
               "aliasAware": true
             }
           },
-          "fillType": {
-            "name": "fillType",
+          "fillInputType": {
+            "name": "fillInputType",
             "strict": true,
             "availability": "strict",
             "strictness": {
@@ -9452,13 +9698,53 @@
               "requiresExactValue": true,
               "aliasPolicy": "Use aliases only to produce canonical repair candidates; validate the final value against values before retry."
             },
-            "values": ["solid", "none"],
+            "values": ["solid", "gradient", "pattern", "none"],
             "aliases": [],
             "fuzzySuggest": {
               "tool": "fuzzy_suggest",
-              "candidateSource": "fillType",
+              "candidateSource": "fillInputType",
               "aliasAware": true
-            }
+            },
+            "source": "commands.pptx.patchSchema.jsonSchema.$defs.fill",
+            "description": "Discriminator values accepted by canonical fill input objects. This write union is distinct from inspect classification."
+          },
+          "shapeFillInputType": {
+            "name": "shapeFillInputType",
+            "strict": true,
+            "availability": "strict",
+            "strictness": {
+              "strict": true,
+              "requiresExactValue": true,
+              "aliasPolicy": "Use aliases only to produce canonical repair candidates; validate the final value against values before retry."
+            },
+            "values": ["solid", "gradient", "pattern", "none", "picture"],
+            "aliases": [],
+            "fuzzySuggest": {
+              "tool": "fuzzy_suggest",
+              "candidateSource": "shapeFillInputType",
+              "aliasAware": true
+            },
+            "source": "commands.pptx.patchSchema.jsonSchema.$defs.shapeFill",
+            "description": "Discriminator values accepted by set-shape.fill. Picture fill is shape-only; slide background, table cell, chart and master fills use fillInputType."
+          },
+          "fillInspectType": {
+            "name": "fillInspectType",
+            "strict": true,
+            "availability": "strict",
+            "strictness": {
+              "strict": true,
+              "requiresExactValue": true,
+              "aliasPolicy": "Use aliases only to produce canonical repair candidates; validate the final value against values before retry."
+            },
+            "values": ["none", "solid", "gradient", "pattern", "picture", "group", "other"],
+            "aliases": [],
+            "fuzzySuggest": {
+              "tool": "fuzzy_suggest",
+              "candidateSource": "fillInspectType",
+              "aliasAware": true
+            },
+            "source": "commands.pptx.inspectReportSchema.properties.slides.items.properties.shapes.items.properties.fillType",
+            "description": "Classification values emitted by inspect shapes[].fillType. Picture, group, and other are observations, not canonical fill input values."
           },
           "hyperlinkActionType": {
             "name": "hyperlinkActionType",
@@ -10867,6 +11153,20 @@
             ],
             "description": "Length value: bare numbers are raw EMU (914400 per inch), so human-scale values should use unit strings such as '1in', '18pt', '2.54cm', '96px'."
           },
+          "fontSpacingLength": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": -50800000,
+                "maximum": 50800000
+              },
+              {
+                "type": "string",
+                "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$"
+              }
+            ],
+            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string or a numeric raw-EMU value; percentages and other unit strings are rejected."
+          },
           "chartTrendlineLabelFontSize": {
             "type": "string",
             "pattern": "^(?:[1-9][0-9]{0,2}(?:\\.[0-9]{1,4})?|[1-3][0-9]{3}(?:\\.[0-9]{1,4})?|4000(?:\\.0{1,4})?)pt$",
@@ -11819,7 +12119,8 @@
           },
           "shapeCatalogName": {
             "type": "string",
-            "description": "Preset shape catalog name or alias from `xdoc pptx catalog shapes --json`; use prst for raw OOXML escape hatch."
+            "minLength": 1,
+            "description": "Preset shape catalog name, alias, or canonical OOXML prst from `xdoc pptx catalog shapes --json`; used by add-shape.kind and set-image.maskPreset."
           },
           "fill": {
             "oneOf": [
@@ -11837,6 +12138,26 @@
               }
             ],
             "description": "Exactly one fill kind: solid, gradient, pattern, or none."
+          },
+          "shapeFill": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/fillSolid"
+              },
+              {
+                "$ref": "#/$defs/fillGradient"
+              },
+              {
+                "$ref": "#/$defs/fillPattern"
+              },
+              {
+                "$ref": "#/$defs/fillNone"
+              },
+              {
+                "$ref": "#/$defs/fillPicture"
+              }
+            ],
+            "description": "Exactly one fill kind for a shape: solid, gradient, pattern, none, or picture. Picture is shape-only; slide background, table cell, chart and master fills use the fill definition."
           },
           "fillColorChoice": {
             "oneOf": [
@@ -12125,6 +12446,61 @@
               }
             }
           },
+          "shapeAccessibilityPatch": {
+            "type": "object",
+            "description": "Local accessibility metadata stored on the selected shape's cNvPr. Omit a field to preserve it and use null to clear it. title and description accept non-blank strings; description maps to OOXML descr. decorative accepts an explicit boolean and maps to the Office 2019 adec:decorative extension without changing title or description.",
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "description": "Optional short accessibility title. Omit to preserve, null to clear, or provide a non-blank string to set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "\\S"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "description": {
+                "description": "Optional accessibility description, serialized as cNvPr@descr. Omit to preserve, null to clear, or provide a non-blank string to set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "\\S"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "decorative": {
+                "description": "Optional Office 2019 decorative flag. Omit to preserve, null to remove the recognised extension, or provide true/false to retain that explicit Boolean value.",
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "anyOf": [
+              {
+                "required": ["title"]
+              },
+              {
+                "required": ["description"]
+              },
+              {
+                "required": ["decorative"]
+              }
+            ]
+          },
           "shapeSizePatch": {
             "type": "object",
             "additionalProperties": false,
@@ -12240,7 +12616,44 @@
             "additionalProperties": false,
             "properties": {
               "name": {
-                "type": "string"
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "eastAsian": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "complexScript": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "spacing": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/fontSpacingLength"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "size": {
                 "$ref": "#/$defs/length"
@@ -12267,7 +12680,7 @@
                 "type": "string"
               }
             },
-            "description": "Sparse font override; omitted keys inherit. size follows the length rules — write '18pt', never a bare number (bare numbers are EMU)."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/spacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and spacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. spacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected."
           },
           "slideNotesParagraphs": {
             "type": "array",
@@ -13314,6 +13727,59 @@
               },
               "direction": {
                 "$ref": "#/$defs/textFrameVerticalText"
+              },
+              "marginLeft": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/length"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "marginRight": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/length"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "marginTop": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/length"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "marginBottom": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/length"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "verticalAnchor": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/verticalAnchor"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "wordWrap": {
+                "type": ["boolean", "null"]
               }
             },
             "anyOf": [
@@ -13322,8 +13788,27 @@
               },
               {
                 "required": ["direction"]
+              },
+              {
+                "required": ["marginLeft"]
+              },
+              {
+                "required": ["marginRight"]
+              },
+              {
+                "required": ["marginTop"]
+              },
+              {
+                "required": ["marginBottom"]
+              },
+              {
+                "required": ["verticalAnchor"]
+              },
+              {
+                "required": ["wordWrap"]
               }
-            ]
+            ],
+            "description": "Text-frame layout patch. Omitted fields preserve the current OOXML value; null removes the explicit bodyPr attribute or child so defaults apply again. Margins use signed Length values and are not silently clamped to the shape bounds."
           },
           "paragraphLineSpacing": {
             "oneOf": [
@@ -14085,7 +14570,7 @@
           "chartDataLabelsPatch": {
             "type": "object",
             "additionalProperties": false,
-            "description": "Data-label mutation shared by classic and ChartEx charts. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
+            "description": "Data-label mutation shared by classic and ChartEx charts. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
             "properties": {
               "scope": {
                 "$ref": "#/$defs/chartLabelScope"
@@ -14184,49 +14669,42 @@
             }
           },
           "imageCropPatch": {
-            "oneOf": [
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "left": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 1
+              },
+              "right": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 1
+              },
+              "top": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 1
+              },
+              "bottom": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMaximum": 1
+              }
+            },
+            "anyOf": [
               {
-                "type": "null"
+                "required": ["left"]
               },
               {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "left": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1
-                  },
-                  "right": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1
-                  },
-                  "top": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1
-                  },
-                  "bottom": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 1
-                  }
-                },
-                "anyOf": [
-                  {
-                    "required": ["left"]
-                  },
-                  {
-                    "required": ["right"]
-                  },
-                  {
-                    "required": ["top"]
-                  },
-                  {
-                    "required": ["bottom"]
-                  }
-                ]
+                "required": ["right"]
+              },
+              {
+                "required": ["top"]
+              },
+              {
+                "required": ["bottom"]
               }
             ]
           },
@@ -15343,6 +15821,110 @@
               }
             }
           },
+          "fillPicture": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "const": "picture"
+              },
+              "assetSource": {
+                "$ref": "#/$defs/assetSource"
+              },
+              "bytesBase64": {
+                "type": "string",
+                "contentEncoding": "base64"
+              },
+              "mime": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "string",
+                "enum": ["stretch", "tile"],
+                "strict": true,
+                "description": "stretch scales one copy of the image to the fill rectangle; tile repeats it."
+              },
+              "crop": {
+                "$ref": "#/$defs/imageCropPatch"
+              },
+              "alpha": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "rotateWithShape": {
+                "type": "boolean"
+              },
+              "tile": {
+                "$ref": "#/$defs/pictureFillTile"
+              }
+            },
+            "oneOf": [
+              {
+                "required": ["assetSource"]
+              },
+              {
+                "required": ["bytesBase64", "mime"]
+              }
+            ],
+            "description": "Image fill (a:blipFill) for a shape. assetSource is resolved to bytesBase64 + mime by xdoc before apply. mode defaults to stretch and tile requires mode=tile. Recolor effects such as duotone are not part of this payload."
+          },
+          "pictureFillTile": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "scaleX": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              },
+              "scaleY": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              },
+              "offsetX": {
+                "$ref": "#/$defs/length"
+              },
+              "offsetY": {
+                "$ref": "#/$defs/length"
+              },
+              "align": {
+                "type": "string",
+                "enum": ["tl", "t", "tr", "l", "ctr", "r", "bl", "b", "br"],
+                "strict": true,
+                "description": "a:tile@algn anchor for the first tile."
+              },
+              "flip": {
+                "type": "string",
+                "enum": ["none", "x", "y", "xy"],
+                "strict": true,
+                "description": "a:tile@flip mirror mode for alternating tiles."
+              }
+            },
+            "anyOf": [
+              {
+                "required": ["scaleX"]
+              },
+              {
+                "required": ["scaleY"]
+              },
+              {
+                "required": ["offsetX"]
+              },
+              {
+                "required": ["offsetY"]
+              },
+              {
+                "required": ["align"]
+              },
+              {
+                "required": ["flip"]
+              }
+            ],
+            "description": "a:tile parameters for a tiled picture fill. scaleX/scaleY are fractions of the natural image size (1 = 100%); omitted fields keep the DrawingML default."
+          },
           "hyperlinkTarget": {
             "type": "object",
             "additionalProperties": false,
@@ -16142,6 +16724,67 @@
                 }
               }
             ]
+          },
+          "chartView3DPatch": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "rotX": {
+                "type": ["integer", "null"],
+                "minimum": -90,
+                "maximum": 90,
+                "description": "c:rotX rotation around the X axis in degrees; null removes the element."
+              },
+              "rotY": {
+                "type": ["integer", "null"],
+                "minimum": 0,
+                "maximum": 360,
+                "description": "c:rotY rotation around the Y axis in degrees; null removes the element."
+              },
+              "rightAngleAxes": {
+                "type": ["boolean", "null"],
+                "description": "c:rAngAx right-angle-axes flag. True keeps the two data axes at right angles and skews only the depth axis, and perspective then has no effect; false is a rotated perspective camera. An omitted element renders as true."
+              },
+              "perspective": {
+                "type": ["integer", "null"],
+                "minimum": 0,
+                "maximum": 240,
+                "description": "c:perspective viewing angle: the vertical field of view is half this value in degrees, so 0 is orthographic. Only applies while rightAngleAxes is false. Null removes the element."
+              },
+              "depthPercent": {
+                "type": ["integer", "null"],
+                "minimum": 20,
+                "maximum": 2000,
+                "description": "c:depthPercent chart depth as a percentage of the chart base, which PowerPoint measures as one category band rather than the whole plot width; null removes the element."
+              },
+              "heightPercent": {
+                "type": ["integer", "null"],
+                "minimum": 5,
+                "maximum": 500,
+                "description": "c:hPercent chart height as a percentage of chart width. Omitting the element is not the same as 100: with no c:hPercent the plot cube stretches to fill the plot area, while an explicit value fixes its aspect. Null removes the element."
+              }
+            },
+            "anyOf": [
+              {
+                "required": ["rotX"]
+              },
+              {
+                "required": ["rotY"]
+              },
+              {
+                "required": ["rightAngleAxes"]
+              },
+              {
+                "required": ["perspective"]
+              },
+              {
+                "required": ["depthPercent"]
+              },
+              {
+                "required": ["heightPercent"]
+              }
+            ],
+            "description": "c:view3D scene of a 3D chart. Requires a 3D chart group (bar3DChart, line3DChart, area3DChart, pie3DChart, surface3DChart, surfaceChart) and fails closed otherwise. Both the PDF renderer and the bundled Viewer project bar3DChart, line3DChart, area3DChart, pie3DChart and surface3DChart from the same measured geometry, held together by checked-in vertex vectors; surfaceChart renders separately as the top-down contour/band view of the same data. A pie reads the scene differently: rotX is its pitch, rotY turns its slices, hPercent scales its rim, and depthPercent and perspective do nothing, as in PowerPoint. A surface differs again: with no hPercent its cube is sized from the mesh rather than stretched to the plot area."
           },
           "chartColorStyleMethod": {
             "type": "string",
@@ -18668,10 +19311,27 @@
                     "type": "object",
                     "properties": {
                       "op": {
-                        "const": "crop-image"
+                        "const": "set-image"
                       },
                       "crop": {
-                        "$ref": "#/$defs/imageCropPatch"
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/imageCropPatch"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "maskPreset": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/shapeCatalogName"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       },
                       "shape": {
                         "$ref": "#/$defs/shapeSelector"
@@ -18681,7 +19341,19 @@
                       }
                     },
                     "required": ["op", "slide", "shape"],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "required": ["crop"]
+                          },
+                          {
+                            "required": ["maskPreset"]
+                          }
+                        ]
+                      }
+                    ]
                   },
                   {
                     "type": "object",
@@ -19186,6 +19858,16 @@
                       },
                       "title": {
                         "$ref": "#/$defs/chartTitlePatch"
+                      },
+                      "view3D": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/$defs/chartView3DPatch"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": ["op", "slide", "shape"],
@@ -19225,6 +19907,9 @@
                           },
                           {
                             "required": ["roundedCorners"]
+                          },
+                          {
+                            "required": ["view3D"]
                           }
                         ]
                       }
@@ -19483,6 +20168,9 @@
                       "op": {
                         "const": "set-shape"
                       },
+                      "accessibility": {
+                        "$ref": "#/$defs/shapeAccessibilityPatch"
+                      },
                       "clickAction": {
                         "$ref": "#/$defs/clickAction"
                       },
@@ -19490,7 +20178,7 @@
                         "$ref": "#/$defs/shapeEffect"
                       },
                       "fill": {
-                        "$ref": "#/$defs/fill"
+                        "$ref": "#/$defs/shapeFill"
                       },
                       "flip": {
                         "$ref": "#/$defs/shapeFlipPatch"
@@ -19861,6 +20549,20 @@
                 }
               ],
               "description": "Length value: bare numbers are raw EMU (914400 per inch), so human-scale values should use unit strings such as '1in', '18pt', '2.54cm', '96px'."
+            },
+            "fontSpacingLength": {
+              "oneOf": [
+                {
+                  "type": "number",
+                  "minimum": -50800000,
+                  "maximum": 50800000
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$"
+                }
+              ],
+              "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string or a numeric raw-EMU value; percentages and other unit strings are rejected."
             },
             "chartTrendlineLabelFontSize": {
               "type": "string",
@@ -20814,7 +21516,8 @@
             },
             "shapeCatalogName": {
               "type": "string",
-              "description": "Preset shape catalog name or alias from `xdoc pptx catalog shapes --json`; use prst for raw OOXML escape hatch."
+              "minLength": 1,
+              "description": "Preset shape catalog name, alias, or canonical OOXML prst from `xdoc pptx catalog shapes --json`; used by add-shape.kind and set-image.maskPreset."
             },
             "fill": {
               "oneOf": [
@@ -20832,6 +21535,26 @@
                 }
               ],
               "description": "Exactly one fill kind: solid, gradient, pattern, or none."
+            },
+            "shapeFill": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/fillSolid"
+                },
+                {
+                  "$ref": "#/$defs/fillGradient"
+                },
+                {
+                  "$ref": "#/$defs/fillPattern"
+                },
+                {
+                  "$ref": "#/$defs/fillNone"
+                },
+                {
+                  "$ref": "#/$defs/fillPicture"
+                }
+              ],
+              "description": "Exactly one fill kind for a shape: solid, gradient, pattern, none, or picture. Picture is shape-only; slide background, table cell, chart and master fills use the fill definition."
             },
             "fillColorChoice": {
               "oneOf": [
@@ -21120,6 +21843,61 @@
                 }
               }
             },
+            "shapeAccessibilityPatch": {
+              "type": "object",
+              "description": "Local accessibility metadata stored on the selected shape's cNvPr. Omit a field to preserve it and use null to clear it. title and description accept non-blank strings; description maps to OOXML descr. decorative accepts an explicit boolean and maps to the Office 2019 adec:decorative extension without changing title or description.",
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "description": "Optional short accessibility title. Omit to preserve, null to clear, or provide a non-blank string to set.",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "description": {
+                  "description": "Optional accessibility description, serialized as cNvPr@descr. Omit to preserve, null to clear, or provide a non-blank string to set.",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "pattern": "\\S"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "decorative": {
+                  "description": "Optional Office 2019 decorative flag. Omit to preserve, null to remove the recognised extension, or provide true/false to retain that explicit Boolean value.",
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "anyOf": [
+                {
+                  "required": ["title"]
+                },
+                {
+                  "required": ["description"]
+                },
+                {
+                  "required": ["decorative"]
+                }
+              ]
+            },
             "shapeSizePatch": {
               "type": "object",
               "additionalProperties": false,
@@ -21235,7 +22013,44 @@
               "additionalProperties": false,
               "properties": {
                 "name": {
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "eastAsian": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "complexScript": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "spacing": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/fontSpacingLength"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "size": {
                   "$ref": "#/$defs/length"
@@ -21262,7 +22077,7 @@
                   "type": "string"
                 }
               },
-              "description": "Sparse font override; omitted keys inherit. size follows the length rules — write '18pt', never a bare number (bare numbers are EMU)."
+              "description": "Sparse font override. Omitted name/eastAsian/complexScript/spacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and spacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. spacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected."
             },
             "slideNotesParagraphs": {
               "type": "array",
@@ -22309,6 +23124,59 @@
                 },
                 "direction": {
                   "$ref": "#/$defs/textFrameVerticalText"
+                },
+                "marginLeft": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/length"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "marginRight": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/length"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "marginTop": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/length"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "marginBottom": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/length"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "verticalAnchor": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/verticalAnchor"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "wordWrap": {
+                  "type": ["boolean", "null"]
                 }
               },
               "anyOf": [
@@ -22317,8 +23185,27 @@
                 },
                 {
                   "required": ["direction"]
+                },
+                {
+                  "required": ["marginLeft"]
+                },
+                {
+                  "required": ["marginRight"]
+                },
+                {
+                  "required": ["marginTop"]
+                },
+                {
+                  "required": ["marginBottom"]
+                },
+                {
+                  "required": ["verticalAnchor"]
+                },
+                {
+                  "required": ["wordWrap"]
                 }
-              ]
+              ],
+              "description": "Text-frame layout patch. Omitted fields preserve the current OOXML value; null removes the explicit bodyPr attribute or child so defaults apply again. Margins use signed Length values and are not silently clamped to the shape bounds."
             },
             "paragraphLineSpacing": {
               "oneOf": [
@@ -23080,7 +23967,7 @@
             "chartDataLabelsPatch": {
               "type": "object",
               "additionalProperties": false,
-              "description": "Data-label mutation shared by classic and ChartEx charts. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
+              "description": "Data-label mutation shared by classic and ChartEx charts. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
               "properties": {
                 "scope": {
                   "$ref": "#/$defs/chartLabelScope"
@@ -23179,49 +24066,42 @@
               }
             },
             "imageCropPatch": {
-              "oneOf": [
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "left": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 1
+                },
+                "right": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 1
+                },
+                "top": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 1
+                },
+                "bottom": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 1
+                }
+              },
+              "anyOf": [
                 {
-                  "type": "null"
+                  "required": ["left"]
                 },
                 {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "left": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    },
-                    "right": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    },
-                    "top": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    },
-                    "bottom": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    }
-                  },
-                  "anyOf": [
-                    {
-                      "required": ["left"]
-                    },
-                    {
-                      "required": ["right"]
-                    },
-                    {
-                      "required": ["top"]
-                    },
-                    {
-                      "required": ["bottom"]
-                    }
-                  ]
+                  "required": ["right"]
+                },
+                {
+                  "required": ["top"]
+                },
+                {
+                  "required": ["bottom"]
                 }
               ]
             },
@@ -24338,6 +25218,110 @@
                 }
               }
             },
+            "fillPicture": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type"],
+              "properties": {
+                "type": {
+                  "const": "picture"
+                },
+                "assetSource": {
+                  "$ref": "#/$defs/assetSource"
+                },
+                "bytesBase64": {
+                  "type": "string",
+                  "contentEncoding": "base64"
+                },
+                "mime": {
+                  "type": "string"
+                },
+                "mode": {
+                  "type": "string",
+                  "enum": ["stretch", "tile"],
+                  "strict": true,
+                  "description": "stretch scales one copy of the image to the fill rectangle; tile repeats it."
+                },
+                "crop": {
+                  "$ref": "#/$defs/imageCropPatch"
+                },
+                "alpha": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "rotateWithShape": {
+                  "type": "boolean"
+                },
+                "tile": {
+                  "$ref": "#/$defs/pictureFillTile"
+                }
+              },
+              "oneOf": [
+                {
+                  "required": ["assetSource"]
+                },
+                {
+                  "required": ["bytesBase64", "mime"]
+                }
+              ],
+              "description": "Image fill (a:blipFill) for a shape. assetSource is resolved to bytesBase64 + mime by xdoc before apply. mode defaults to stretch and tile requires mode=tile. Recolor effects such as duotone are not part of this payload."
+            },
+            "pictureFillTile": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "scaleX": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 100
+                },
+                "scaleY": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 100
+                },
+                "offsetX": {
+                  "$ref": "#/$defs/length"
+                },
+                "offsetY": {
+                  "$ref": "#/$defs/length"
+                },
+                "align": {
+                  "type": "string",
+                  "enum": ["tl", "t", "tr", "l", "ctr", "r", "bl", "b", "br"],
+                  "strict": true,
+                  "description": "a:tile@algn anchor for the first tile."
+                },
+                "flip": {
+                  "type": "string",
+                  "enum": ["none", "x", "y", "xy"],
+                  "strict": true,
+                  "description": "a:tile@flip mirror mode for alternating tiles."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": ["scaleX"]
+                },
+                {
+                  "required": ["scaleY"]
+                },
+                {
+                  "required": ["offsetX"]
+                },
+                {
+                  "required": ["offsetY"]
+                },
+                {
+                  "required": ["align"]
+                },
+                {
+                  "required": ["flip"]
+                }
+              ],
+              "description": "a:tile parameters for a tiled picture fill. scaleX/scaleY are fractions of the natural image size (1 = 100%); omitted fields keep the DrawingML default."
+            },
             "hyperlinkTarget": {
               "type": "object",
               "additionalProperties": false,
@@ -25138,6 +26122,67 @@
                 }
               ]
             },
+            "chartView3DPatch": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "rotX": {
+                  "type": ["integer", "null"],
+                  "minimum": -90,
+                  "maximum": 90,
+                  "description": "c:rotX rotation around the X axis in degrees; null removes the element."
+                },
+                "rotY": {
+                  "type": ["integer", "null"],
+                  "minimum": 0,
+                  "maximum": 360,
+                  "description": "c:rotY rotation around the Y axis in degrees; null removes the element."
+                },
+                "rightAngleAxes": {
+                  "type": ["boolean", "null"],
+                  "description": "c:rAngAx right-angle-axes flag. True keeps the two data axes at right angles and skews only the depth axis, and perspective then has no effect; false is a rotated perspective camera. An omitted element renders as true."
+                },
+                "perspective": {
+                  "type": ["integer", "null"],
+                  "minimum": 0,
+                  "maximum": 240,
+                  "description": "c:perspective viewing angle: the vertical field of view is half this value in degrees, so 0 is orthographic. Only applies while rightAngleAxes is false. Null removes the element."
+                },
+                "depthPercent": {
+                  "type": ["integer", "null"],
+                  "minimum": 20,
+                  "maximum": 2000,
+                  "description": "c:depthPercent chart depth as a percentage of the chart base, which PowerPoint measures as one category band rather than the whole plot width; null removes the element."
+                },
+                "heightPercent": {
+                  "type": ["integer", "null"],
+                  "minimum": 5,
+                  "maximum": 500,
+                  "description": "c:hPercent chart height as a percentage of chart width. Omitting the element is not the same as 100: with no c:hPercent the plot cube stretches to fill the plot area, while an explicit value fixes its aspect. Null removes the element."
+                }
+              },
+              "anyOf": [
+                {
+                  "required": ["rotX"]
+                },
+                {
+                  "required": ["rotY"]
+                },
+                {
+                  "required": ["rightAngleAxes"]
+                },
+                {
+                  "required": ["perspective"]
+                },
+                {
+                  "required": ["depthPercent"]
+                },
+                {
+                  "required": ["heightPercent"]
+                }
+              ],
+              "description": "c:view3D scene of a 3D chart. Requires a 3D chart group (bar3DChart, line3DChart, area3DChart, pie3DChart, surface3DChart, surfaceChart) and fails closed otherwise. Both the PDF renderer and the bundled Viewer project bar3DChart, line3DChart, area3DChart, pie3DChart and surface3DChart from the same measured geometry, held together by checked-in vertex vectors; surfaceChart renders separately as the top-down contour/band view of the same data. A pie reads the scene differently: rotX is its pitch, rotY turns its slices, hPercent scales its rim, and depthPercent and perspective do nothing, as in PowerPoint. A surface differs again: with no hPercent its cube is sized from the mesh rather than stretched to the plot area."
+            },
             "chartColorStyleMethod": {
               "type": "string",
               "enum": [
@@ -25190,7 +26235,7 @@
           "add-video",
           "append-slide-notes",
           "bind-data",
-          "crop-image",
+          "set-image",
           "define-macro",
           "duplicate-shape",
           "duplicate-slide",
@@ -25629,6 +26674,9 @@
                   "name": "Layout Title",
                   "font": {
                     "name": "Aptos Display",
+                    "eastAsian": "DengXian",
+                    "complexScript": "Arial",
+                    "spacing": "0.2pt",
                     "bold": true
                   },
                   "color": "1F4E79",
@@ -25689,7 +26737,12 @@
                   "levels": [
                     {
                       "level": 0,
-                      "font": "Aptos",
+                      "font": {
+                        "name": "Aptos",
+                        "eastAsian": "Microsoft YaHei",
+                        "complexScript": "Arial",
+                        "spacing": "0.1pt"
+                      },
                       "color": "222222",
                       "size": "18pt",
                       "alignment": "left"
@@ -25931,7 +26984,8 @@
                     "top": 0,
                     "bottom": 0
                   },
-                  "op": "crop-image"
+                  "maskPreset": "ellipse",
+                  "op": "set-image"
                 },
                 {
                   "slide": 0,
@@ -26028,6 +27082,44 @@
                   "h": "0.5in",
                   "name": "Target",
                   "op": "add-shape"
+                },
+                {
+                  "slide": 0,
+                  "shape": {
+                    "name": "Source"
+                  },
+                  "fill": {
+                    "type": "picture",
+                    "bytesBase64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
+                    "mime": "image/png",
+                    "mode": "stretch",
+                    "crop": {
+                      "left": 0.05,
+                      "right": 0.05
+                    },
+                    "alpha": 0.85,
+                    "rotateWithShape": true
+                  },
+                  "op": "set-shape"
+                },
+                {
+                  "slide": 0,
+                  "shape": {
+                    "name": "Target"
+                  },
+                  "fill": {
+                    "type": "picture",
+                    "bytesBase64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
+                    "mime": "image/png",
+                    "mode": "tile",
+                    "tile": {
+                      "scaleX": 0.5,
+                      "scaleY": 0.5,
+                      "align": "tl",
+                      "flip": "none"
+                    }
+                  },
+                  "op": "set-shape"
                 },
                 {
                   "slide": 0,
@@ -26498,6 +27590,62 @@
                       "hiddenPoints": [1, 3]
                     }
                   ],
+                  "op": "set-chart"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Parameterize a 3D chart view",
+            "patch": {
+              "schemaVersion": 1,
+              "ops": [
+                {
+                  "op": "add-slide"
+                },
+                {
+                  "slide": 0,
+                  "kind": "column-3d",
+                  "data": {
+                    "categories": ["A", "B"],
+                    "series": [
+                      {
+                        "name": "Series 1",
+                        "values": [1, 2]
+                      }
+                    ]
+                  },
+                  "x": "1in",
+                  "y": "1in",
+                  "w": "6in",
+                  "h": "4in",
+                  "name": "Scene",
+                  "op": "add-chart"
+                },
+                {
+                  "slide": 0,
+                  "shape": {
+                    "name": "Scene"
+                  },
+                  "view3D": {
+                    "rotX": 25,
+                    "rotY": 40,
+                    "rightAngleAxes": false,
+                    "perspective": 30,
+                    "depthPercent": 120,
+                    "heightPercent": 100
+                  },
+                  "op": "set-chart"
+                },
+                {
+                  "slide": 0,
+                  "shape": {
+                    "name": "Scene"
+                  },
+                  "view3D": {
+                    "perspective": null,
+                    "rightAngleAxes": true
+                  },
                   "op": "set-chart"
                 }
               ]
@@ -27316,12 +28464,18 @@
             "level": "patch"
           },
           {
-            "op": "crop-image",
+            "op": "set-image",
             "category": "media",
-            "summary": "Set image crop offsets on a picture shape.",
+            "summary": "Update picture crop offsets and preset mask geometry; null crop clears all crop offsets and null maskPreset restores rect.",
             "required": ["op", "slide", "shape"],
-            "constraints": [],
-            "optional": ["crop"],
+            "constraints": [
+              {
+                "kind": "at-least-one",
+                "fields": ["crop", "maskPreset"],
+                "summary": "At least one image mutation is required."
+              }
+            ],
+            "optional": ["crop", "maskPreset"],
             "level": "patch"
           },
           {
@@ -27399,7 +28553,7 @@
           {
             "op": "patch-ooxml",
             "category": "advanced",
-            "summary": "Apply guarded low-level OOXML part edits or stale-safe generated child-order repairs.",
+            "summary": "Apply guarded low-level OOXML part edits or stale-safe generated repairs; normal apply and dry-run still validate changed XML, relationships, generated particles, and the complete candidate package.",
             "required": ["op", "target", "xpath", "action"],
             "constraints": [
               {
@@ -27529,7 +28683,8 @@
                   "dataLabels",
                   "dataTable",
                   "displayBlanksAs",
-                  "roundedCorners"
+                  "roundedCorners",
+                  "view3D"
                 ],
                 "summary": "At least one chart mutation is required."
               }
@@ -27545,7 +28700,8 @@
               "roundedCorners",
               "series",
               "style",
-              "title"
+              "title",
+              "view3D"
             ],
             "level": "patch"
           },
@@ -27651,7 +28807,7 @@
           {
             "op": "set-shape",
             "category": "shape",
-            "summary": "Update shape content and styles.",
+            "summary": "Update shape content, styles, and accessibility metadata.",
             "required": ["op", "slide", "shape"],
             "constraints": [
               {
@@ -27659,12 +28815,21 @@
                 "selectorField": "shape",
                 "targetType": "group",
                 "forbiddenFields": ["fill", "line", "clickAction"],
-                "supportedFields": ["name", "position", "size", "rotation", "flip", "effect"],
+                "supportedFields": [
+                  "name",
+                  "accessibility",
+                  "position",
+                  "size",
+                  "rotation",
+                  "flip",
+                  "effect"
+                ],
                 "enforcement": "runtime",
-                "summary": "Group targets reject fill, line, and clickAction before mutation; select and update child shapes individually for those fields."
+                "summary": "Group targets reject fill, line, and clickAction before mutation; accessibility metadata remains writable on the group itself, while child visual fields must be updated individually."
               }
             ],
             "optional": [
+              "accessibility",
               "clickAction",
               "effect",
               "fill",
@@ -27765,7 +28930,7 @@
           {
             "op": "set-text-frame",
             "category": "text",
-            "summary": "Update text frame content and layout.",
+            "summary": "Update text content, font, autofit, direction, margins, vertical anchor, and word wrapping.",
             "required": ["op", "slide", "shape"],
             "constraints": [
               {
@@ -29758,7 +30923,7 @@
           {
             "code": "InvalidRequest",
             "severity": "error",
-            "description": "A daemon RPC request is missing required fields.",
+            "description": "An Agent RPC request is missing required fields.",
             "docsRef": "https://structurify.io/docs/errors/InvalidRequest",
             "autoRetry": false,
             "schema": {
@@ -29853,7 +31018,7 @@
           {
             "code": "ProtocolError",
             "severity": "error",
-            "description": "A daemon RPC frame could not be read or decoded.",
+            "description": "An Agent RPC frame could not be read or decoded.",
             "docsRef": "https://structurify.io/docs/errors/ProtocolError",
             "autoRetry": false,
             "schema": {
@@ -29948,7 +31113,7 @@
           {
             "code": "UnknownMethod",
             "severity": "error",
-            "description": "A daemon RPC method name is not supported.",
+            "description": "An Agent RPC method name is not supported.",
             "docsRef": "https://structurify.io/docs/errors/UnknownMethod",
             "autoRetry": false,
             "schema": {
@@ -30034,7 +31199,7 @@
             "typicalFixes": [
               {
                 "fixPatch": [],
-                "reason": "Use a supported daemon method from commands.daemon.",
+                "reason": "Use a supported method from commands.json-rpc.protocolContract or commands.daemon.",
                 "confidence": 0.35,
                 "autoRetry": false
               }
@@ -32352,8 +33517,10 @@
                       "shapeType",
                       "resolvedFrom",
                       "localOverrides",
+                      "accessibility",
                       "bbox",
-                      "hasText"
+                      "hasText",
+                      "fontFacts"
                     ],
                     "properties": {
                       "id": {
@@ -32417,6 +33584,240 @@
                       "lineNoFill": {
                         "type": "boolean"
                       },
+                      "accessibility": {
+                        "type": "object",
+                        "description": "Local non-inherited accessibility metadata from cNvPr. Null title/description means the explicit attribute is absent. Null decorative means the recognised Office 2019 adec:decorative extension is absent; false remains an explicit authored value.",
+                        "additionalProperties": false,
+                        "required": ["title", "description", "decorative"],
+                        "properties": {
+                          "title": {
+                            "type": ["string", "null"]
+                          },
+                          "description": {
+                            "type": ["string", "null"]
+                          },
+                          "decorative": {
+                            "type": ["boolean", "null"]
+                          }
+                        }
+                      },
+                      "image": {
+                        "type": "object",
+                        "description": "Picture-only crop and preset mask state; this is p:pic geometry, not a fill or blipFill contract.",
+                        "additionalProperties": false,
+                        "required": ["crop", "maskPreset"],
+                        "properties": {
+                          "crop": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["left", "right", "top", "bottom"],
+                            "properties": {
+                              "left": {
+                                "type": "number"
+                              },
+                              "right": {
+                                "type": "number"
+                              },
+                              "top": {
+                                "type": "number"
+                              },
+                              "bottom": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "maskPreset": {
+                            "type": ["string", "null"],
+                            "description": "Canonical OOXML preset geometry key, or null when the existing picture uses custom geometry."
+                          }
+                        }
+                      },
+                      "chart": {
+                        "type": "object",
+                        "description": "Chart kind plus the explicit c:view3D scene. Authoring a 3D view does not imply the bundled Viewer/PDF renderers reproduce the projection; see capabilityTruth chart-3d/pdf-rendering and chart-3d/viewer-rendering.",
+                        "additionalProperties": false,
+                        "required": ["supportsView3D"],
+                        "properties": {
+                          "kind": {
+                            "type": "string"
+                          },
+                          "supportsView3D": {
+                            "type": "boolean"
+                          },
+                          "view3D": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "rotX": {
+                                "type": "integer",
+                                "minimum": -90,
+                                "maximum": 90
+                              },
+                              "rotY": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 360
+                              },
+                              "rightAngleAxes": {
+                                "type": "boolean"
+                              },
+                              "perspective": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 240
+                              },
+                              "depthPercent": {
+                                "type": "integer",
+                                "minimum": 20,
+                                "maximum": 2000
+                              },
+                              "heightPercent": {
+                                "type": "integer",
+                                "minimum": 5,
+                                "maximum": 500
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "fillPicture": {
+                        "type": "object",
+                        "description": "Shape picture fill state read from p:spPr/a:blipFill. mediaPartName and mediaContentType are absent for external or unresolvable image relationships.",
+                        "additionalProperties": false,
+                        "required": ["relationshipId", "mode"],
+                        "properties": {
+                          "relationshipId": {
+                            "type": "string"
+                          },
+                          "mediaPartName": {
+                            "type": "string"
+                          },
+                          "mediaContentType": {
+                            "type": "string"
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": ["stretch", "tile"],
+                            "strict": true
+                          },
+                          "crop": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["left", "right", "top", "bottom"],
+                            "properties": {
+                              "left": {
+                                "type": "number"
+                              },
+                              "right": {
+                                "type": "number"
+                              },
+                              "top": {
+                                "type": "number"
+                              },
+                              "bottom": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "alpha": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "rotateWithShape": {
+                            "type": "boolean"
+                          },
+                          "tile": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "scaleX": {
+                                "type": "number"
+                              },
+                              "scaleY": {
+                                "type": "number"
+                              },
+                              "offsetXEmu": {
+                                "type": ["integer", "string"],
+                                "pattern": "^-?[0-9]+$"
+                              },
+                              "offsetYEmu": {
+                                "type": ["integer", "string"],
+                                "pattern": "^-?[0-9]+$"
+                              },
+                              "align": {
+                                "type": "string",
+                                "enum": ["tl", "t", "tr", "l", "ctr", "r", "bl", "b", "br"],
+                                "strict": true
+                              },
+                              "flip": {
+                                "type": "string",
+                                "enum": ["none", "x", "y", "xy"],
+                                "strict": true
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "textFrame": {
+                        "type": "object",
+                        "description": "Text-frame layout state. Nullable margin fields are explicit bodyPr attributes; effective margins include DrawingML defaults and are shared with fit-text and vision-check.",
+                        "additionalProperties": false,
+                        "required": [
+                          "marginLeftEmu",
+                          "marginRightEmu",
+                          "marginTopEmu",
+                          "marginBottomEmu",
+                          "effectiveMarginLeftEmu",
+                          "effectiveMarginRightEmu",
+                          "effectiveMarginTopEmu",
+                          "effectiveMarginBottomEmu",
+                          "verticalAnchor",
+                          "wordWrap"
+                        ],
+                        "properties": {
+                          "marginLeftEmu": {
+                            "type": ["integer", "string", "null"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "marginRightEmu": {
+                            "type": ["integer", "string", "null"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "marginTopEmu": {
+                            "type": ["integer", "string", "null"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "marginBottomEmu": {
+                            "type": ["integer", "string", "null"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "effectiveMarginLeftEmu": {
+                            "type": ["integer", "string"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "effectiveMarginRightEmu": {
+                            "type": ["integer", "string"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "effectiveMarginTopEmu": {
+                            "type": ["integer", "string"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "effectiveMarginBottomEmu": {
+                            "type": ["integer", "string"],
+                            "pattern": "^-?[0-9]+$"
+                          },
+                          "verticalAnchor": {
+                            "type": ["string", "null"],
+                            "enum": ["top", "middle", "bottom", null],
+                            "strict": true
+                          },
+                          "wordWrap": {
+                            "type": ["boolean", "null"]
+                          }
+                        }
+                      },
                       "placeholder": {
                         "type": "object"
                       },
@@ -32461,6 +33862,96 @@
                       },
                       "textPreview": {
                         "type": "string"
+                      },
+                      "fontFacts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["scope", "font"],
+                          "properties": {
+                            "scope": {
+                              "type": "string",
+                              "enum": [
+                                "textRun",
+                                "tableCell",
+                                "chartDefault",
+                                "chartTitle",
+                                "chartLegend",
+                                "chartCategoryAxisTitle",
+                                "chartValueAxisTitle",
+                                "chartCategoryTickLabels",
+                                "chartValueTickLabels",
+                                "chartPlotDataLabels",
+                                "chartSeriesDataLabels",
+                                "chartPointDataLabel"
+                              ],
+                              "strict": true
+                            },
+                            "paragraph": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "run": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "row": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "column": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "plot": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "series": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "point": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "font": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "Persisted direct and effective FontPatch v2 facts. Missing direct fields mean no local override; effective fields include the complete text inheritance chain for ordinary runs.",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "eastAsian": {
+                                  "type": "string"
+                                },
+                                "complexScript": {
+                                  "type": "string"
+                                },
+                                "spacingPt": {
+                                  "type": "number"
+                                },
+                                "effectiveName": {
+                                  "type": "string"
+                                },
+                                "effectiveEastAsian": {
+                                  "type": "string"
+                                },
+                                "effectiveComplexScript": {
+                                  "type": "string"
+                                },
+                                "effectiveSpacingPt": {
+                                  "type": "number"
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -37235,6 +38726,172 @@
         }
       }
     },
+    "json-rpc": {
+      "description": "Serve newline-delimited JSON-RPC 2.0 over stdin/stdout for AI Agents.",
+      "examples": [
+        "printf '%s\\n' '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"xdoc.ping\",\"params\":{}}' | xdoc json-rpc"
+      ],
+      "inputMode": "stream",
+      "ioContract": {
+        "stdin": {
+          "format": "ndjson",
+          "protocol": "JSON-RPC 2.0",
+          "maxFrameBytes": 8388608
+        },
+        "stdout": {
+          "format": "ndjson",
+          "usage": "protocol-frames-only"
+        },
+        "stderr": {
+          "usage": "logs-and-process-diagnostics-only"
+        }
+      },
+      "protocolContract": {
+        "schemaVersion": "xdoc-json-rpc-contract/v1",
+        "protocol": "JSON-RPC 2.0",
+        "transport": "stdio",
+        "framing": {
+          "format": "newline-delimited UTF-8 JSON",
+          "requestPerLine": true,
+          "maxFrameBytes": 8388608,
+          "readChunkBytes": 65536,
+          "maxIdBytes": 256,
+          "idRule": "String ids are bounded by maxIdBytes; numeric ids must be safe integers; null is accepted but discouraged by JSON-RPC 2.0.",
+          "batch": "A non-empty JSON array is one frame; batch items execute serially and responses are returned as one array after progress notifications.",
+          "stdout": "Protocol frames only; logs and diagnostics use stderr.",
+          "eof": "Clean shutdown with exit code 0."
+        },
+        "ordering": {
+          "mode": "serial",
+          "scope": "one process and one shared PPTX session runtime",
+          "backpressure": "The server reads the next frame only after the current frame is fully handled and flushed."
+        },
+        "lifecycle": {
+          "start": "Launch `xdoc json-rpc`; no initialize handshake is required.",
+          "shutdown": "Send xdoc.shutdown as a request with an id; the process exits after flushing that frame's response.",
+          "abruptEnd": "Closing stdin ends the process cleanly after the active synchronous request returns."
+        },
+        "notifications": {
+          "responseRule": "A frame with no id member never receives a response, including when it is malformed.",
+          "malformedRule": "A malformed notification is reported on stderr and produces no protocol frame, because JSON-RPC 2.0 forbids answering one and silence alone would hide the mistake.",
+          "requestOnlyMethods": ["pptx.apply", "xdoc.shutdown"],
+          "requestOnlyBehavior": "A request-only method sent as a notification is ignored without mutation and reported on stderr."
+        },
+        "progress": {
+          "optInParam": "progressToken",
+          "notificationMethod": "$/progress",
+          "events": ["begin", "end"],
+          "semantics": "Best-effort operation-boundary progress; no fractional progress is promised."
+        },
+        "cancellation": {
+          "notificationMethod": "$/cancelRequest",
+          "params": {
+            "id": "target request id"
+          },
+          "semantics": "Cooperative queued cancellation only. The serial native MVP cannot interrupt an already-dispatched method; cancellation can suppress a later request in the same batch or a subsequently received request with that id.",
+          "resultRule": "Sent as a request it answers with the standard result envelope, whose value carries the accepted flag.",
+          "cancelledCode": -32800,
+          "maxPending": 1024
+        },
+        "methods": {
+          "xdoc.ping": {
+            "kind": "read-only",
+            "params": "{} plus optional progressToken",
+            "resultSchemaVersion": "xdoc-agent-ping/v1"
+          },
+          "xdoc.discover": {
+            "kind": "read-only",
+            "params": "{} plus optional progressToken",
+            "resultSchemaVersion": "xdoc-json-rpc-contract/v1"
+          },
+          "pptx.inspect": {
+            "kind": "read-only",
+            "requiredParams": ["inputPath"],
+            "optionalParams": ["progressToken"],
+            "reportSchemaRef": "commands.pptx.inspectReportSchema"
+          },
+          "pptx.apply": {
+            "kind": "mutating",
+            "requiredParams": ["patch"],
+            "conditionalRequirement": "outputPath is required unless dryRun is true",
+            "optionalParams": [
+              "inputPath",
+              "outputPath",
+              "assetRoot",
+              "sidecarPath",
+              "noSidecar",
+              "overwrite",
+              "dryRun",
+              "explain",
+              "allowRawXml",
+              "progressToken"
+            ],
+            "patchSchemaRef": "commands.pptx.patchSchema.jsonSchema",
+            "reportSchemaRef": "commands.pptx.applyReportSchema",
+            "assetRule": "patch is an object; assetSource paths are materialized relative to assetRoot before dispatch and are bounded by the same CLI asset policy."
+          },
+          "xdoc.shutdown": {
+            "kind": "lifecycle",
+            "params": "{}",
+            "requiresId": true
+          }
+        },
+        "resultEnvelope": {
+          "schemaVersion": "xdoc-json-rpc-result/v1",
+          "fields": ["schemaVersion", "method", "exitCode", "value", "artifacts"],
+          "value": "The exact structured report produced by the shared xdoc business handler.",
+          "artifacts": "Explicit file references; binary payloads are never written to protocol stdout."
+        },
+        "artifactRef": {
+          "fields": ["kind", "role", "path", "mediaType", "state"],
+          "states": ["written", "planned"]
+        },
+        "errors": [
+          {
+            "code": -32700,
+            "message": "Parse error"
+          },
+          {
+            "code": -32600,
+            "message": "Invalid Request"
+          },
+          {
+            "code": -32601,
+            "message": "Method not found"
+          },
+          {
+            "code": -32602,
+            "message": "Invalid params"
+          },
+          {
+            "code": -32603,
+            "message": "Internal error"
+          },
+          {
+            "code": -32001,
+            "message": "Frame too large"
+          },
+          {
+            "code": -32002,
+            "message": "Server shutting down"
+          },
+          {
+            "code": -32010,
+            "message": "xdoc operation failed"
+          },
+          {
+            "code": -32800,
+            "message": "Request cancelled"
+          }
+        ]
+      },
+      "usageNotes": [
+        "Keep one process alive to reuse parsed PPTX sessions across requests.",
+        "Send xdoc.discover to retrieve the same protocol contract without invoking `xdoc schema`.",
+        "Treat stdout as a protocol channel; never parse stderr as JSON-RPC.",
+        "Use pptx.apply with an id so mutation failures cannot be discarded as notification errors."
+      ]
+    },
     "schema": {
       "description": "Print a machine-readable JSON schema for AI agents and tooling.",
       "options": {
@@ -37373,6 +39030,7 @@
     "pptxRollback": "xdoc pptx rollback --from-sidecar <out.pptx.xdoc.json> --output <recovered.pptx>",
     "pdfInspect": "xdoc pdf inspect <file.pdf> --json --pretty",
     "daemon": "xdoc daemon start|status|stop",
+    "jsonRpc": "xdoc json-rpc",
     "help": "xdoc --help",
     "schema": "xdoc schema"
   },
@@ -37380,7 +39038,7 @@
     "help": "xdoc --help",
     "schemaCommand": "xdoc schema",
     "defaultCommand": "convert",
-    "commands": ["convert", "extract", "check", "pptx", "pdf", "daemon", "schema"]
+    "commands": ["convert", "extract", "check", "pptx", "pdf", "daemon", "json-rpc", "schema"]
   },
   "capabilities": {
     "schemaVersion": "capabilities/v1",

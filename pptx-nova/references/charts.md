@@ -833,6 +833,27 @@ ten-millions / hundred-millions / billions / trillions`，或直接给正数作�
 - `labelOffset`：0..1000，标签与轴的距离百分比（100 = 默认，仅类目轴）；
 - `labelAlignment`：`center / left / right`（仅类目轴）。
 
+> ⚠️ **刻度线默认是画出来的（xdoc ≥0.3.4）**：`c:majorTickMark` /
+> `c:minorTickMark` 元素**缺失**时按 OOXML 默认值 `cross` 渲染 —— 轴线两侧
+> 各伸出一小段，PowerPoint 也是这样。`add-chart` 不写这两个元素，所以**新建
+> 图表默认两条轴都带 cross 刻度线**。要走极简风格（多数咨询版式的做法），必须
+> 显式关掉：
+>
+> ```json
+> { "op": "set-chart", "slide": 1, "shape": {...},
+>   "axes": [{ "axis": "category", "ticks": { "major": "none", "minor": "none" } },
+>            { "axis": "value",    "ticks": { "major": "none", "minor": "none" } }] }
+> ```
+>
+> 另外三条相关事实，做视觉复核时会用到：
+>
+> - 刻度线用**轴线本身**的颜色与线宽；把轴线设成无线条（`line` 删除/无填充）
+>   会连刻度线一起去掉，这与 PowerPoint 一致。
+> - 长度按**轴标签字号**成比例（major ≈ 0.32 字号，minor ≈ 0.24 字号），
+>   所以缩小刻度标签字号也会让刻度线变短；不存在单独调长度的开关。
+> - 类目轴的 major 落在**类目带边界**（N 个类目 = N+1 条），minor 落在中点；
+>   数值轴 major 落在主刻度、minor 落在次刻度。雷达图与饼图不画刻度线。
+
 ### 改某系列样式
 
 ```json

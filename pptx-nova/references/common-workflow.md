@@ -136,8 +136,9 @@ directory. A caller-provided `--run-dir` may be new, empty, or contain only
 not a fresh runner target.
 
 The snapshot records the xdoc version, CLI/capability schema versions, top-level
-commands, PPTX subcommands, the structured PPTX capability truth, patch/recipe op names, enum registry names,
-theme/style ids, and native DeckKit declarations. It intentionally omits full op
+commands, PPTX subcommands, the structured PPTX capability truth, exact Agent
+transport contracts, patch/recipe op names, enum registry names, theme/style ids,
+and native DeckKit declarations. It intentionally omits full op
 schemas. When `capabilities.schemaSlicing.fieldsAvailable` is true, fetch only the
 needed surface with `xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal`
 when `capabilities.schemaSlicing.summaryDefsAvailable` is also true; otherwise omit `--defs` for the
@@ -163,6 +164,7 @@ For a task-specific check, add repeatable requirements such as:
 ```bash
 node <skill-root>/scripts/pptx-nova-probe.mjs \
   --require-command pptx.apply \
+  --require-command json-rpc \
   --require-op set-text-frame \
   --require-feature text/native-authoring \
   --require-theme corporate-blue \
@@ -268,10 +270,13 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     of manufacturing an equivalent patch report:
 
     ```bash
-    xdoc pptx copy-from target.pptx --from donor.pptx \
-      --slides 1,3,5-8 --output <run-dir>/candidate.pptx \
-      --dry-run --json > <run-dir>/dry-run.json
+
     ```
+
+xdoc pptx copy-from -i target.pptx --from donor.pptx \
+--slides 1,3,5-8 --output <run-dir>/candidate.pptx \
+--dry-run --json > <run-dir>/dry-run.json
+```
 
     `--slide N` is the compatible 0-based single-slide selector (default 0),
     while `--slides` is 1-based and `--all` selects the whole donor; the three
@@ -279,30 +284,32 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     repeated single-slide invocations and intermediate PPTX files. The command
     opens each deck once, validates the full requested selection before target
     mutation, serializes once, and reports `copied[]`, flattened
-    `dependencyMappings[]`, and aggregate `changedParts[]`. The Edit Contract
-    gate consumes this native `pptx-copy-from/v1` evidence directly; do not
+    `dependencyMappings[]`, aggregate `changedParts[]`, and a read-only preflight
+    with input fingerprints, planned parts/relationships, blockers, and risks.
+    Require `status: "ready"`, current target/donor fingerprints, and no blockers
+    before apply. The Edit Contract gate consumes this native
+    `pptx-copy-from/v2` evidence directly; do not
     invent `pptx-dry-run/v1` or `opResults[]`.
 
-8.  Apply only after dry-run is clean and selectors are correct. Any validation
-    that consumes the applied output (`vision-check`, `convert`, `check`,
-    replay/audit) must run after the apply command has completed; do not launch
-    apply-dependent checks in parallel with the write.
-    Generic existing-deck Edit/Micro Edit workflows must finish the stable
-    candidate with one semantic diff and every evidence kind declared in
-    `edit-contract.json`, bind the stable candidate and evidence hashes in
-    `evidence-manifest.json`, then require
-    `pptx-nova-edit-contract-gate.mjs --strict` before publication. Visible
-    text edits that preserve target formatting should require `style-diff` plus
-    scoped preview and `vision-diff` evidence. Use candidate-only
-    `vision-check` as a diagnostic when needed; inherited source issues are not
-    edit regressions.
-    Require apply to return `semanticIssues: []` before consuming its candidate.
-    If `session-rules.json` exists, pass the successful
-    `session-rules-resolution.json` to the contract normalizer. The final
-    contract gate must report every applicable rule as satisfied before
-    publication. After successful publication, advance the rules to the accepted
-    candidate revision; never advance them after a failed candidate.
-9.  Run static geometry validation:
+8. Apply only after dry-run is clean and selectors are correct. Any validation
+that consumes the applied output (`vision-check`, `convert`, `check`,
+replay/audit) must run after the apply command has completed; do not launch
+apply-dependent checks in parallel with the write.
+Generic existing-deck Edit/Micro Edit workflows must finish the stable
+candidate with one semantic diff and every evidence kind declared in
+`edit-contract.json`, bind the stable candidate and evidence hashes in
+`evidence-manifest.json`, then require
+`pptx-nova-edit-contract-gate.mjs --strict` before publication. Visible
+text edits that preserve target formatting should require `style-diff` plus
+scoped preview and `vision-diff` evidence. Use candidate-only
+`vision-check` as a diagnostic when needed; inherited source issues are not
+edit regressions.
+Require apply to return `semanticIssues: []` before consuming its candidate.
+If `session-rules.json` exists, pass the successful
+`session-rules-resolution.json` to the contract normalizer. The final
+contract gate must report every applicable rule as satisfied before
+publication. After successful publication, advance the rules to the accepted
+candidate revision; never advance them after a failed candidate. 9. Run static geometry validation:
 
     ```bash
     xdoc pptx vision-check out.pptx --json > <run-dir>/vision.json
@@ -363,7 +370,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     preserved and the command fails with the exact conflicting path.
 
 10. For existing-deck edits, template-following, and refurbish tasks, run
-    semantic diff once after the candidate is stable and before final delivery:
+semantic diff once after the candidate is stable and before final delivery:
 
     ```bash
     xdoc pptx diff --source source.pptx --candidate out.pptx \
@@ -426,18 +433,18 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
     `refurbish-audit` so the final policy receipt can consume the raw layout findings,
     then run `pptx-nova-compare.mjs --kind refurbish --slide-count <count>
+
 --compare-chunk-size 20 --dpi 192 --fallback-dpi 144`. Decks larger than
-    20 slides become numbered parts; only an explicit retryable `RenderError`
-    may lower the failed part to 144 DPI. Run
+    20 slides become numbered parts; only an explicit retryable `RenderError`     may lower the failed part to 144 DPI. Run
     `pptx-nova-compare-gate.mjs --kind refurbish --publish --final-pptx-source
 <candidate>`; the gate must be the only final PPTX publisher. Require both
-    `status=pass` and `finalBinding.status=bound`, keep the manifest and all
+    `status=pass`and`finalBinding.status=bound`, keep the manifest and all
     part reports with the run artifacts, and list every sibling PNG in the
     final response.
     For agent-facing status and final-response facts, read
-    compact runner stdout `agentSummary`, then `refurbish-run-summary.json.agentSummary` or
-    `evidence-summary.json.agentSummary` first; open the underlying gate reports
-    only when the short summary points to a warning, failure, or unsupported area.
+    compact runner stdout `agentSummary`, then `refurbish-run-summary.json.agentSummary`or
+   `evidence-summary.json.agentSummary` first; open the underlying gate reports
+only when the short summary points to a warning, failure, or unsupported area.
 
 12. For formal create workflows covered by `narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
@@ -685,9 +692,13 @@ asset slots read `visual-qa-and-asset-slots.md`.
 
 ## Daemon
 
-For multi-step inspect/apply loops, pass `--daemon` to `xdoc pptx inspect` and
-`xdoc pptx apply`. v10 auto-spawns the daemon on first use. Read
-`daemon-sessions.md` only when tuning daemon behavior or debugging daemon errors.
+For shell-driven multi-step inspect/apply loops, pass `--daemon` to
+`xdoc pptx inspect` and `xdoc pptx apply`; it auto-spawns on first use. An Agent
+host that owns a long-lived child process may instead use the published stdio
+`json-rpc` adapter. The capability probe preserves the exact runtime contract in
+`capabilities.agentTransports`; do not infer transport semantics from command
+presence alone. Read `daemon-sessions.md` when choosing or debugging a session
+transport.
 
 ## Error Handling
 

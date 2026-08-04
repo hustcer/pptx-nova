@@ -1,7 +1,8 @@
 # 图表（Chart）创建与编辑
 
-xdoc 支持 **19 种 chart kind**，每种支持若干 variant。背后映射 Office 标准
-`XlChartType` 103 项 catalog；当前 45 项 supported / 32 项 partial / 26 项 unsupported。
+当前 `add-chart` schema 发布 **27 种 chart kind**，每种支持若干 variant。把
+`xdoc schema --op add-chart` 当作当前可写契约；操作名存在不等于内置 PDF/Viewer
+拥有 PowerPoint 渲染等价性，尤其是 3D 和 ChartEx。
 
 ## 专项语义验证
 
@@ -21,7 +22,7 @@ chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标
   不替代视觉复核。
 
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
-add-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
+add-chart / set-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
 数据维度、数值类型、source/claim 披露和最终原生 chart 对象存在性；它不是完整 OOXML
 chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
@@ -679,6 +680,34 @@ ChartEx 使用同一个 `set-chart-data` op，但载荷仍是 `dataEx`。它只�
 ```
 
 PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动调色快。
+
+### 修改 3D 视角
+
+```json
+{
+  "op": "set-chart",
+  "slide": 1,
+  "shape": { "name": "Revenue 3D" },
+  "view3D": {
+    "rotX": 20,
+    "rotY": 35,
+    "rightAngleAxes": false,
+    "perspective": 60,
+    "depthPercent": 120,
+    "heightPercent": 90
+  }
+}
+```
+
+`view3D` 仅能写入含原生 3D chart group 的图表；对 2D 或 ChartEx 目标会在 mutation
+前 fail closed。每个字段设 `null` 会移除对应 OOXML 元素，省略则保留。
+`rightAngleAxes: true` 时 perspective 不生效。apply 后通过 inspect 的
+`chart.supportsView3D`、`chart.kind`、`chart.view3D` 回读场景值。
+
+原生 OOXML authoring 是 supported，但 PDF 和 bundled Viewer 的 3D rendering 分别是
+partial：投影、遮挡和默认着色有覆盖，不保证 bevel、material、custom lightRig 或所有
+surface/legend 细节与 PowerPoint 相同。3D 图表的最终视觉证据必须包含 PowerPoint
+原生渲染或 clean-open 复核，不能用 xdoc PNG/PDF 单独证明 Office parity。
 
 ### 改标题
 

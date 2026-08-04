@@ -228,6 +228,25 @@ modified by the dry-run. If the report contains an unsupported operation,
 selector ambiguity, or a policy error, repair the plan and run the dry-run
 again. Do not turn a partial operation list into a successful job.
 
+For cross-deck whole-slide reuse, `copy-from` is a separate structural command,
+not a patch op:
+
+```bash
+xdoc pptx copy-from \
+  --input target.pptx \
+  --from donor.pptx \
+  --slides 1,3 \
+  --output candidate.pptx \
+  --dry-run --json > copy-preflight.json
+```
+
+The executable currently requires `--input`/`-i` for the target deck. Its
+`pptx-copy-from/v2` dry-run is a read-only execution plan rather than
+`pptx-dry-run/v1`: require `status: "ready"`, `preflight.readOnly: true`, current
+target/donor SHA-256 fingerprints, and no `preflight.blockers`. Review
+`preflight.risks`, planned parts/relationships, and dependency reuse before
+apply. Do not synthesize patch `opResults` for this command.
+
 ## 6. Apply to a separate candidate and retain the sidecar
 
 After the dry-run gate passes, apply to a new path:
@@ -297,6 +316,12 @@ Static geometry checks do not prove rendered pixels. A human or visual-review
 worker must inspect the contact sheet for clipping, contrast, overlap, broken
 chart labels, and unintended layout drift.
 
+Accessibility checks are opt-in and are not included in `--checks all`. When
+the job requires them, add `a11y` explicitly and gate on
+`checks.a11y.status` plus `summary.riskLevel`, not the exit code. A completed
+scan exits 0 even with findings; `inconclusive` is review-required, not a pass.
+An a11y `patchTemplate` contains placeholder text and is never auto-applicable.
+
 ## 8. Handle errors and repair suggestions as data
 
 Structured failures can include an error kind, message, operation index,
@@ -344,7 +369,23 @@ signature-removal or VBA strip/reject switches. `patch-ooxml` is disabled unless
 structures, and other preserve-only regions as review boundaries, not as
 silently editable objects.
 
-## 10. Use the daemon only through its public boundary
+For the shared PNG environment contract, CLI options override process
+environment values, which override defaults. Values are trimmed.
+`XDOC_PNG_OUTPUT_DIR` is optional, so an unset or blank value means no requested
+PNG output; a blank `XDOC_PNG_DPI`, `XDOC_PNG_PREFIX`, or
+`XDOC_PNG_START_INDEX` is invalid rather than silently defaulted. Relative paths
+are resolved against the xdoc process working directory, and `~` is not
+expanded. Normalize paths before changing `cwd` and pass an explicit working
+directory from workers.
+
+## 10. Choose a published session adapter
+
+Use one-shot CLI for isolated phases. Shell-driven inspect/apply loops may use
+the local daemon; an Agent host that already owns a long-lived child process may
+use the published stdio JSON-RPC adapter. Both route to the same PPTX handlers;
+the host must keep workflow validation and evidence gates above the adapter.
+
+### Daemon
 
 For several operations on the same deck, a local daemon can keep a parsed
 session in memory:
@@ -375,13 +416,38 @@ reports. Do not depend on the internal newline-delimited daemon RPC framing. The
 runtime status report is `xdoc-daemon-status/v1`; an older generated schema
 label may say `daemon-status/v1`.
 
+Daemon state is revision-bound. If `status --json` reports stale or a build
+mismatch, use `xdoc daemon stop` to retire it and let the current executable
+auto-spawn a new daemon. Do not manually delete or rewrite the state file.
+
+### Stdio JSON-RPC
+
+Launch `xdoc json-rpc` and keep the child process alive. The published
+`xdoc-json-rpc-contract/v1` uses newline-delimited UTF-8 JSON-RPC 2.0 with one
+frame per line, an 8 MiB frame limit, serial execution, and protocol-only
+stdout; diagnostics belong to stderr. No initialize handshake is required.
+
+The methods are `xdoc.ping`, `xdoc.discover`, `pptx.inspect`, `pptx.apply`, and
+`xdoc.shutdown`. Mutation and shutdown require a request id; sending them as a
+notification is ignored without mutation. `pptx.apply` requires a patch object
+and, unless `dryRun` is true, `outputPath`. Results use
+`xdoc-json-rpc-result/v1` and refer to binary outputs through artifact records.
+
+Hosts may opt into begin/end `$/progress` notifications with `progressToken`.
+`$/cancelRequest` is queued cooperative cancellation only: it can suppress a
+request not yet dispatched, but cannot interrupt the current synchronous
+method. Batches execute serially. Send `xdoc.shutdown` with an id or close stdin
+after the active request; never mix logs into stdout. Use `xdoc.discover` to
+retrieve the exact protocol contract from the running process.
+
 ## 11. CLI and service boundaries
 
-The supported cross-language boundary is the `xdoc` process: command arguments,
-the runtime-discovered schema, versioned JSON reports, exit status, and declared
-filesystem artifacts. This repository does not promise an in-process xdoc
-library API. Wrap the executable in a small host-language adapter and version
-that adapter against the probed CLI contract.
+The supported cross-language boundary is the `xdoc` process: command arguments
+or the published stdio JSON-RPC frames, the runtime-discovered schema, versioned
+JSON reports, exit status/lifecycle, and declared filesystem artifacts. This
+repository does not promise an in-process xdoc library API. Wrap the executable
+in a small host-language adapter and version that adapter against its probed
+CLI or JSON-RPC contract.
 
 This repository does not currently publish an HTTP service contract. If a
 service adapter is released separately in the future, treat its routes,
@@ -414,6 +480,8 @@ actually changed.
 - [ ] Resolve the CLI through `XDOC_BIN` or `PATH`, independent of whether the
       worker layer came from npm or an approved binary archive.
 - [ ] Probe `xdoc --version` and `xdoc schema` at worker startup.
+- [ ] If using stdio JSON-RPC, pin `xdoc-json-rpc-contract/v1`, keep stdout
+      protocol-only, and require ids for mutation/shutdown.
 - [ ] Keep stdout, stderr, exit code, and filesystem artifacts separate.
 - [ ] Inspect and select before constructing an existing-deck patch.
 - [ ] Reject ambiguous selectors and unsupported capabilities.
@@ -423,6 +491,8 @@ actually changed.
 - [ ] Run structural, semantic, rendered, and human visual gates.
 - [ ] Fail closed on unknown report versions and stale input ownership.
 - [ ] Keep asset roots, daemon state, fonts, and license policy explicit.
+- [ ] Run `a11y` explicitly when accessibility is in scope; never infer it from
+      `--checks all` or process exit 0.
 
 ## Related documentation
 

@@ -68,7 +68,7 @@
 
 - "如果输入 deck 没标题占位符,就先 add-placeholder"
 - "已有 ≥ 10 页,就跳过封面页直接进内容"
-- "shape 名包含 'Logo' 才走 crop-image"
+- "shape 名包含 'Logo' 才走 set-image"
 
 ## §3 `foreach` —— 数据驱动的循环展开
 

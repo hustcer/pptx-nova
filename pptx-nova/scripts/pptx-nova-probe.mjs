@@ -245,6 +245,53 @@ function nativeDeckkitIndex(value) {
     .sort((a, b) => a.id.localeCompare(b.id))
 }
 
+function agentTransportIndex(commands) {
+  const jsonRpcCommand = commands?.['json-rpc']
+  const protocol = jsonRpcCommand?.protocolContract
+  const daemonCommand = commands?.daemon
+  const jsonRpcDisclosed =
+    protocol &&
+    typeof protocol === 'object' &&
+    !Array.isArray(protocol) &&
+    protocol.transport === 'stdio'
+  const daemonDisclosed =
+    daemonCommand && typeof daemonCommand === 'object' && !Array.isArray(daemonCommand)
+  return {
+    jsonRpc: jsonRpcDisclosed
+      ? {
+          status: 'disclosed',
+          schemaVersion: protocol.schemaVersion ?? null,
+          protocol: protocol.protocol ?? null,
+          transport: protocol.transport,
+          framing: protocol.framing ?? null,
+          ordering: protocol.ordering ?? null,
+          lifecycle: protocol.lifecycle ?? null,
+          notifications: protocol.notifications ?? null,
+          progress: protocol.progress ?? null,
+          cancellation: protocol.cancellation ?? null,
+          methods: Object.entries(protocol.methods ?? {})
+            .map(([name, contract]) => ({ name, ...contract }))
+            .sort((a, b) => a.name.localeCompare(b.name)),
+          resultEnvelope: protocol.resultEnvelope ?? null,
+          artifactRef: protocol.artifactRef ?? null,
+          errors: Array.isArray(protocol.errors) ? protocol.errors : [],
+        }
+      : {
+          status: 'undisclosed',
+          schemaVersion: protocol?.schemaVersion ?? null,
+        },
+    daemon: daemonDisclosed
+      ? {
+          status: 'disclosed',
+          inputMode: daemonCommand.inputMode ?? null,
+          environment: daemonCommand.environment ?? {},
+          defaults: daemonCommand.defaults ?? {},
+          subcommands: objectKeys(daemonCommand.subcommands).sort(),
+        }
+      : { status: 'undisclosed' },
+  }
+}
+
 function readLocalJson(path) {
   try {
     return parseJson(readFileSync(path, 'utf8'))
@@ -448,6 +495,7 @@ function createReport(args) {
     nativeDeckkits: nativeDeckkitIndex(catalogs.nativeDeckkits),
     nativeSkinningDeckkits: nativeDeckkitIndex(catalogs.nativeDeckkits),
     generatorDeckkits: generatorDeckkitIndex(),
+    agentTransports: agentTransportIndex(schema?.commands),
     schemaSlicing: {
       available: Boolean(pptx.schemaDisclosure),
       modes: schemaSlicingModes,
@@ -531,6 +579,8 @@ function createReport(args) {
           featureTruth:
             'read xdoc-capabilities.json#capabilities.capabilityTruth.entries by exact feature/subset; follow status, limits, and recommendation before selecting an operation',
           commandHelp: 'xdoc <command...> --help',
+          agentTransport:
+            'read xdoc-capabilities.json#capabilities.agentTransports; use the disclosed method and framing contract rather than inferring JSON-RPC behavior from command presence',
           selectorEvidence: 'inspect output -> op schema -> dry-run suggestions',
           deckkitGeneratorCatalog:
             'read xdoc-capabilities.json#capabilities.generatorDeckkits for DeckKit-first creation support',

@@ -133,14 +133,14 @@ shape name declared by `session-operation.json`. Their
 ### Native `copy-from` structural evidence
 
 `xdoc pptx copy-from` is a first-class structural command, not a patch op. Its
-dry-run/apply report is `pptx-copy-from/v1` and intentionally has no
+dry-run/apply report is `pptx-copy-from/v2` and intentionally has no
 `opResults[]`. Never fabricate a `pptx-dry-run/v1` wrapper merely to satisfy the
 Edit Contract.
 
 For multiple donor slides, prefer one transactional command:
 
 ```bash
-xdoc pptx copy-from target.pptx --from donor.pptx \
+xdoc pptx copy-from -i target.pptx --from donor.pptx \
   --slides 1,3 --output <run-dir>/candidate.pptx \
   --dry-run --json > <run-dir>/dry-run.json
 ```
@@ -149,6 +149,13 @@ CLI `--slides` is 1-based. The report and contract use 0-based
 `sourceSlide`/`targetSlide` indexes. `--slide N` is the compatible 0-based
 single-slide selector (default 0), `--all` selects all donor slides, and the
 three selectors are mutually exclusive.
+
+Treat the v2 dry-run as a fingerprint-bound execution plan. Require
+`status: "ready"`, `preflight.readOnly: true`, no `preflight.blockers`, and
+target/donor SHA-256 fingerprints that still match the files immediately before
+apply. Review every `preflight.risks` item instead of silently accepting it.
+`preflight.parts[]` and `preflight.relationships[]` describe the exact planned
+package mutation, including dependencies that will be reused rather than added.
 
 Bind each produced slide target to its donor identity:
 
@@ -290,7 +297,8 @@ The gate checks:
 - the evidence manifest binds current candidate bytes and every post-apply
   report hash; mtime freshness is a supplemental stale-candidate signal;
 - every required patch target owns successful dry-run `opResults[]`, or every
-  native `copy-from` slide target owns a complete `pptx-copy-from/v1`
+  native `copy-from` slide target owns a complete, fingerprint-current
+  `pptx-copy-from/v2`
   slide/relationship/dependency mapping;
 - every dry-run op index is owned by a contract target;
 - patch dry-run `resolvedSelectors[]` and semantic targets match the contract;

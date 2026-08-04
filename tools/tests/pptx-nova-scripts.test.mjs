@@ -1705,6 +1705,21 @@ test('cartesian image stats keeps the crossed shell when no asset is bound', asy
   assert.equal(images.length, 0)
 })
 
+test('core image crop builder emits the canonical set-image operation', async () => {
+  const { createOps } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
+  const builder = createOps()
+  builder.setImageCrop(2, 'Hero', { left: 0.08, right: 0.12, top: 0.03 })
+
+  assert.deepEqual(builder.ops, [
+    {
+      op: 'set-image',
+      slide: 2,
+      shape: { name: 'Hero' },
+      crop: { left: 0.08, right: 0.12, top: 0.03 },
+    },
+  ])
+})
+
 test('cartesian image stats injects a manifest-relative image with contain geometry', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-cartesian-assets-'))
   const assetsDir = join(root, 'assets')
@@ -1750,7 +1765,7 @@ test('cartesian image stats injects a manifest-relative image with contain geome
   ])
   const patch = JSON.parse(readFileSync(patchPath, 'utf8'))
   const image = patch.ops.find((op) => op.op === 'add-image')
-  const crop = patch.ops.find((op) => op.op === 'crop-image')
+  const crop = patch.ops.find((op) => op.op === 'set-image')
   const connectors = patch.ops.filter((op) => op.op === 'add-connector')
 
   assert.ok(image)

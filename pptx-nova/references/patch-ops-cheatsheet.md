@@ -196,23 +196,24 @@ cloud-callout`。
 
 ## 3. Shape 几何 / 样式
 
-| op                           | 用途                                                                        |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| `set-shape`（`position`）    | 移动（`position: { x, y }`）                                                |
-| `set-shape`（`size`）        | 缩放（`size: { w, h }`）                                                    |
-| `set-shape`（`rotation`）    | 旋转（`rotation: <度数>`）                                                  |
-| `set-shape`（`flip`）        | 水平/垂直翻转（`flip: { horizontal, vertical }`）                           |
-| `set-shape`（`name`）        | 改 shape name（修改时定位用）                                               |
-| `set-shape`（`fill`）        | 改 fill：solid / gradient / pattern / none                                  |
-| `set-shape`（`line`）        | 改边框（`line: { width, color, dash }`；`line: { noLine: true }` = 无边框） |
-| `set-shape`（`effect`）      | 阴影 / 发光 / 反射 / 柔化（`effect: { shadow / glow / ... }`）              |
-| `set-shape`（`clickAction`） | 点击跳转（链接 / 跳页 / 运行宏）                                            |
-| `remove-shape`               | 删除                                                                        |
+| op                             | 用途                                                                        |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `set-shape`（`position`）      | 移动（`position: { x, y }`）                                                |
+| `set-shape`（`size`）          | 缩放（`size: { w, h }`）                                                    |
+| `set-shape`（`rotation`）      | 旋转（`rotation: <度数>`）                                                  |
+| `set-shape`（`flip`）          | 水平/垂直翻转（`flip: { horizontal, vertical }`）                           |
+| `set-shape`（`name`）          | 改 shape name（修改时定位用）                                               |
+| `set-shape`（`fill`）          | 改 fill：solid / gradient / pattern / picture / none                        |
+| `set-shape`（`line`）          | 改边框（`line: { width, color, dash }`；`line: { noLine: true }` = 无边框） |
+| `set-shape`（`effect`）        | 阴影 / 发光 / 反射 / 柔化（`effect: { shadow / glow / ... }`）              |
+| `set-shape`（`clickAction`）   | 点击跳转（链接 / 跳页 / 运行宏）                                            |
+| `set-shape`（`accessibility`） | 写标题、描述、装饰性标记                                                    |
+| `remove-shape`                 | 删除                                                                        |
 
 同一个 `set-shape` 可同时给多个字段（如 `position` + `size` + `fill` 一次改完）。
 
-Group target 是明确例外：只支持 `name`、`position`、`size`、`rotation`、`flip`
-和 `effect`。`fill`、`line`、`clickAction` 会在任何 mutation 前返回
+Group target 是明确例外：只支持 `name`、`accessibility`、`position`、`size`、
+`rotation`、`flip` 和 `effect`。`fill`、`line`、`clickAction` 会在任何 mutation 前返回
 `InvalidOperation`；先 inspect/select 组内子形状，再分别对这些子形状设置对应字段。以当前
 `xdoc schema --op set-shape --minimal` 中的 `target-field-compatibility` constraint
 和 dry-run 结果为准。
@@ -228,8 +229,30 @@ Group target 是明确例外：只支持 `name`、`position`、`size`、`rotatio
 }
 ```
 
-支持 `solid` / `gradient` / `pattern` / `none`；24 个 preset gradients；
-gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`。
+支持 `solid` / `gradient` / `pattern` / `picture` / `none`；24 个 preset gradients；
+gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fill，可用
+`assetSource`（或 `bytesBase64` + `mime`）、`mode: "stretch" | "tile"`、`crop`、
+`alpha`、`rotateWithShape` 和 tile 参数。内置 preview/PDF 对 picture fill 目前只
+可靠呈现 stretch 与 alpha，crop/tile 交付以 PowerPoint 复核为准。详见
+`styles-and-themes.md`。
+
+### Accessibility 示例
+
+```json
+{
+  "op": "set-shape",
+  "slide": 0,
+  "shape": { "name": "Revenue chart" },
+  "accessibility": {
+    "title": "Quarterly revenue",
+    "description": "Columns compare actual and target revenue for four quarters.",
+    "decorative": false
+  }
+}
+```
+
+省略字段表示保留，`null` 表示清除。纯装饰对象设 `decorative: true`；不要同时
+用误导性的描述把它当作信息对象。
 
 ### Effect 示例
 
@@ -312,6 +335,9 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
   "text": "Q2 2026",
   "font": {
     "name": "Inter",
+    "eastAsian": "Noto Sans CJK SC",
+    "complexScript": "Noto Sans Arabic",
+    "spacing": "0.2pt",
     "size": "32pt",
     "bold": true,
     "italic": false,
@@ -324,11 +350,14 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 ### Text frame 行为
 
-| op                                    | 用途                                                                                                                    |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `set-text-frame`（`frame.autofit`）   | PowerPoint autofit 属性（`frame: { autofit: { mode: "none" / "shape" / "text" } }`；`text` 模式可加 `fontScale` 1-100） |
-| `set-text-frame`（`frame.direction`） | 竖排文本方向（`"vertical"` / `"vertical-270"` / `"east-asian-vertical"` 等；`"horizontal"` 或 `null` 恢复横排）         |
-| `fit-text`                            | 给 text frame 算合适字号（`maxSize` / `minSize`，可选 `strategy: "deterministic" / "font-metrics"`）                    |
+| op                                         | 用途                                                                                                                    |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `set-text-frame`（`frame.autofit`）        | PowerPoint autofit 属性（`frame: { autofit: { mode: "none" / "shape" / "text" } }`；`text` 模式可加 `fontScale` 1-100） |
+| `set-text-frame`（`frame.direction`）      | 竖排文本方向（`"vertical"` / `"vertical-270"` / `"east-asian-vertical"` 等；`"horizontal"` 或 `null` 恢复横排）         |
+| `set-text-frame`（`frame.margin*`）        | 设置四边内边距；单位值或 `null`（清掉显式属性，恢复继承/默认）                                                          |
+| `set-text-frame`（`frame.verticalAnchor`） | `top` / `middle` / `bottom`；`null` 清除                                                                                |
+| `set-text-frame`（`frame.wordWrap`）       | 布尔值控制换行；`null` 清除                                                                                             |
+| `fit-text`                                 | 给 text frame 算合适字号（`maxSize` / `minSize`，可选 `strategy: "deterministic" / "font-metrics"`）                    |
 
 `fit-text` 是直接计算并写死字号；要 PowerPoint 自己缩放文字的 autofit 行为，
 用 `set-text-frame` 的 `frame.autofit`。
@@ -377,9 +406,12 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 | `set-chart`（`series[].marker`）  | 系列 marker                                                                                       |
 | `set-chart`（`series[].points`）  | 单点样式（`series: [{ series: N, points: [{ point: M, ... }] }]`）                                |
 | `set-chart`（`dataLabels`）       | 数据标签（`scope` / `showValue` / `position` / `numberFormat`）                                   |
+| `set-chart`（`view3D`）           | 3D 视角（`rotX` / `rotY` / `rightAngleAxes` / `perspective` / `depthPercent` / `heightPercent`）  |
 
 同一个 `set-chart` 可同时带 `style` / `plot` / `title` / `legend` / `axes` /
-`series` / `dataLabels`。
+`series` / `dataLabels` / `view3D`。`view3D` 只接受原生 3D chart group，普通
+2D 图表会在写入前 fail closed；PDF/Viewer 的 3D 投影仍是 partial，交付时以
+PowerPoint 原生渲染复核为准。
 
 详见 `charts.md`。
 
@@ -387,12 +419,12 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
 
 ## 7. 图片 / 媒体
 
-| op               | 用途                                                                |
-| ---------------- | ------------------------------------------------------------------- |
-| `add-image`      | 加图片                                                              |
-| `crop-image`     | 裁剪（`crop: { left/right/top/bottom }` 比例，清除用 `crop: null`） |
-| `add-video`      | 加视频                                                              |
-| `add-ole-object` | 嵌入 OLE 对象（如 Excel）                                           |
+| op               | 用途                                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------- |
+| `add-image`      | 加图片                                                                                         |
+| `set-image`      | 更新已有图片的 `crop` 和/或 `maskPreset`；各裁剪边为 `[0,1)`，`null` 清裁剪/把 mask 恢复为矩形 |
+| `add-video`      | 加视频                                                                                         |
+| `add-ole-object` | 嵌入 OLE 对象（如 Excel）                                                                      |
 
 资产推荐用 `assetSource.path` + `--asset-root`：
 
@@ -405,6 +437,16 @@ gradient stop 可用 `schemeClr` 引用主题色。详见 `styles-and-themes.md`
   "w": "4in",
   "h": "3in",
   "assetSource": { "path": "images/hero.png", "mime": "image/png" }
+}
+```
+
+```json
+{
+  "op": "set-image",
+  "slide": 0,
+  "shape": { "name": "Hero" },
+  "crop": { "left": 0.08, "right": 0.08 },
+  "maskPreset": "round-rect"
 }
 ```
 

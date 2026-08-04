@@ -267,6 +267,45 @@ internal decks, but still a cross-machine consistency risk for strict external
 delivery. Non-system `font_not_embedded` warnings should be fixed by embedding
 the font or switching to an approved system/DeckKit font.
 
+### Accessibility is opt-in
+
+`a11y` is deliberately excluded from both the default check set and
+`--checks all`. Name it explicitly:
+
+```bash
+xdoc check deck.pptx \
+  --checks fonts,links,compat,assets,policy,a11y \
+  --target-office 365 \
+  -o <run-dir>/check.json \
+  --pretty --overwrite
+```
+
+The outer report remains `preflight/v1`; the accessibility details identify
+`pptx-a11y/v1`. A completed scan with findings still exits 0, so never gate on
+the process status alone. Read `checks.a11y.status` and `summary.riskLevel`:
+
+- `passed`: every rule ran and produced no in-scope finding;
+- `warning`: at least one decided violation;
+- `inconclusive`: no decided violation, but static package facts could not
+  resolve at least one rule; this is not a pass and requires rendered/manual
+  review;
+- `failed`: the scan did not run and provides no accessibility evidence.
+
+The current render-free rules cover structured slide titles, descriptions or
+decorative metadata for visual objects, Office-version support for the
+decorative extension, and statically resolvable text contrast. They do not
+audit reading/tab order, table navigation, full WCAG conformance, screen-reader
+behavior, or description quality. Gradients, pictures, and pattern backgrounds
+may make contrast inconclusive.
+
+Findings may include `patchSelector` and `patchTemplate`. The template contains
+placeholder prose, has `autoApplicable: false`, and is deliberately not a
+`fixPatch`; replace it with a truthful description and dry-run it, never merge
+the placeholder unchanged. With `--target-office` earlier than 2019, a visual
+marked only as decorative still needs a description fallback or produces
+`a11y_decorative_not_supported`. Scoped `--slide` findings do not prove a
+deck-wide pass; verify `details.scope.outOfScopeFindingCount` and deck coverage.
+
 ## Extract
 
 Use extract for notes, resources, links, and fonts:

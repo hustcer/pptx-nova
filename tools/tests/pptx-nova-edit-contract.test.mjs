@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { mkdtempSync, mkdirSync, readFileSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -15,6 +16,10 @@ const sessionResolveScript = join(skillRoot, 'scripts/pptx-nova-session-rules-re
 
 function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`)
+}
+
+function sha256(path) {
+  return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
 function crc32(buffer) {
@@ -976,13 +981,13 @@ function writeCopyFromContractFixture() {
   draft.expectedStructure = { slideCountDelta: 1, changedSlides: [10], objectTypes: [] }
   writeJson(fixture.draft, draft)
   writeJson(fixture.dryRun, {
-    schemaVersion: 'pptx-copy-from/v1',
-    status: 'success',
+    schemaVersion: 'pptx-copy-from/v2',
+    status: 'ready',
     input: fixture.source,
     source: { path: fixture.donor, slides: [2] },
     selection: { mode: 'slides', sourceSlides: [2], sourceSlides1Based: [3] },
-    dryRun: false,
-    output: fixture.candidate,
+    dryRun: true,
+    wouldWrite: fixture.candidate,
     candidate: fixture.candidate,
     copied: [
       {
@@ -994,8 +999,8 @@ function writeCopyFromContractFixture() {
         targetSlideRelsPartName: 'ppt/slides/_rels/slide11.xml.rels',
         dependencies: [
           {
-            sourcePartName: 'ppt/media/image1.png',
-            targetPartName: 'ppt/media/image2.png',
+            sourcePartName: 'ppt/slideLayouts/slideLayout1.xml',
+            targetPartName: 'ppt/slideLayouts/slideLayout1.xml',
           },
         ],
       },
@@ -1004,8 +1009,8 @@ function writeCopyFromContractFixture() {
       {
         sourceSlide: 2,
         targetSlide: 10,
-        sourcePartName: 'ppt/media/image1.png',
-        targetPartName: 'ppt/media/image2.png',
+        sourcePartName: 'ppt/slideLayouts/slideLayout1.xml',
+        targetPartName: 'ppt/slideLayouts/slideLayout1.xml',
       },
     ],
     changedParts: [
@@ -1014,8 +1019,74 @@ function writeCopyFromContractFixture() {
       '[Content_Types].xml',
       'ppt/slides/slide11.xml',
       'ppt/slides/_rels/slide11.xml.rels',
-      'ppt/media/image2.png',
     ],
+    preflight: {
+      ready: true,
+      readOnly: true,
+      sourceFingerprint: sha256(fixture.donor),
+      targetFingerprint: sha256(fixture.source),
+      targetSlideCountBefore: 10,
+      targetSlideCountAfter: 11,
+      summary: {
+        partCount: 3,
+        relationshipCount: 1,
+        blockerCount: 0,
+        riskCount: 0,
+        actions: { add: 2, reuse: 1 },
+      },
+      parts: [
+        {
+          sourceSlide: 2,
+          sourcePartName: 'ppt/slides/slide3.xml',
+          targetPartName: 'ppt/slides/slide11.xml',
+          role: 'slide',
+          action: 'add',
+          depth: 0,
+          sourceSha256: 'a'.repeat(64),
+          targetSha256: null,
+          conflictingTargetSha256: null,
+        },
+        {
+          sourceSlide: 2,
+          sourcePartName: 'ppt/slides/_rels/slide3.xml.rels',
+          targetPartName: 'ppt/slides/_rels/slide11.xml.rels',
+          role: 'relationship',
+          action: 'add',
+          depth: 1,
+          sourceSha256: 'b'.repeat(64),
+          targetSha256: null,
+          conflictingTargetSha256: null,
+        },
+        {
+          sourceSlide: 2,
+          sourcePartName: 'ppt/slideLayouts/slideLayout1.xml',
+          targetPartName: 'ppt/slideLayouts/slideLayout1.xml',
+          role: 'layout',
+          action: 'reuse',
+          depth: 1,
+          sourceSha256: 'c'.repeat(64),
+          targetSha256: 'c'.repeat(64),
+          conflictingTargetSha256: null,
+        },
+      ],
+      relationships: [
+        {
+          sourceSlide: 2,
+          sourceOwnerPartName: 'ppt/slides/slide3.xml',
+          targetOwnerPartName: 'ppt/slides/slide11.xml',
+          relationshipId: 'rId1',
+          relationshipType:
+            'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout',
+          targetMode: 'internal',
+          sourceTarget: 'ppt/slideLayouts/slideLayout1.xml',
+          targetPartName: 'ppt/slideLayouts/slideLayout1.xml',
+          action: 'reuse',
+          depth: 1,
+        },
+      ],
+      blockers: [],
+      risks: [],
+    },
   })
   writeJson(fixture.diff, {
     schemaVersion: 'pptx-diff/v1',
@@ -1051,7 +1122,7 @@ function writeCopyFromContractFixture() {
   return fixture
 }
 
-test('edit contract gate accepts pptx-copy-from structural evidence without patch opResults', () => {
+test('edit contract gate accepts fingerprint-bound pptx-copy-from/v2 preflight evidence', () => {
   const fixture = writeCopyFromContractFixture()
   generateContract(fixture)
   const report = runGate(fixture)
@@ -1061,9 +1132,7 @@ test('edit contract gate accepts pptx-copy-from structural evidence without patc
   assert.equal(report.targetCoverage[0].copyFrom.sourceSlide, 2)
   assert.equal(report.targetCoverage[0].copyFrom.targetSlidePartName, 'ppt/slides/slide11.xml')
   assert.equal(
-    report.checks.some(
-      (item) => item.name === 'copy-from-structural-evidence' && item.status === 'pass',
-    ),
+    report.checks.some((item) => item.name === 'copy-from-preflight' && item.status === 'pass'),
     true,
   )
   assert.equal('opResults' in JSON.parse(readFileSync(fixture.dryRun, 'utf8')), false)
@@ -1080,6 +1149,53 @@ test('edit contract gate rejects copy-from evidence bound to the wrong donor sli
   assert.equal(report.agentGate.passed, false)
   assert.equal(
     report.blockers.some((item) => item.code === 'copy-from-source-slide-mismatch'),
+    true,
+  )
+})
+
+test('edit contract gate rejects a stale copy-from donor fingerprint', () => {
+  const fixture = writeCopyFromContractFixture()
+  const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  evidence.preflight.sourceFingerprint = '0'.repeat(64)
+  writeJson(fixture.dryRun, evidence)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(
+    report.blockers.some((item) => item.code === 'copy-from-source-fingerprint-mismatch'),
+    true,
+  )
+})
+
+test('edit contract gate rejects copy-from evidence missing the planned slide part', () => {
+  const fixture = writeCopyFromContractFixture()
+  const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  evidence.preflight.parts = evidence.preflight.parts.filter((item) => item.role !== 'slide')
+  evidence.preflight.summary.partCount = evidence.preflight.parts.length
+  writeJson(fixture.dryRun, evidence)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(report.targetCoverage[0].covered, false)
+  assert.equal(
+    report.blockers.some((item) => item.code === 'copy-from-structural-evidence-invalid'),
+    true,
+  )
+})
+
+test('edit contract gate rejects inconsistent copy-from preflight summary counts', () => {
+  const fixture = writeCopyFromContractFixture()
+  const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  evidence.preflight.summary.relationshipCount += 1
+  writeJson(fixture.dryRun, evidence)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(
+    report.blockers.some((item) => item.code === 'copy-from-preflight-summary-mismatch'),
     true,
   )
 })

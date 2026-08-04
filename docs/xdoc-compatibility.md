@@ -29,7 +29,7 @@ verdict.
 
 ## Runtime capability matrix
 
-The current 0.3.0 discovery contract is `cli-agent/v1`, with a capability
+The current 0.3.3 discovery contract is `cli-agent/v1`, with a capability
 registry at `capabilities/v1`. The registry currently reports:
 
 | Input kind | Output                                                                       | Status     | Delivery    | Required backend               |
@@ -44,7 +44,7 @@ registry at `capabilities/v1`. The registry currently reports:
 | `xlsx`     | `*`                                                                          | `reserved` | undisclosed | none                           |
 
 `reserved` means a future name is present in discovery. It is not a supported
-conversion path. In particular, do not advertise xdoc 0.3.0 as a generic DOCX or
+conversion path. In particular, do not advertise xdoc 0.3.3 as a generic DOCX or
 XLSX ingestion layer.
 
 The registry is a capability matrix, not a live health check. A worker must also

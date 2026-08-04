@@ -1,14 +1,29 @@
-# Daemon Sessions —— `xdoc daemon` 多步 Agent 工作流加速
+# Agent Sessions —— daemon 与 stdio JSON-RPC
 
 > 一次 `xdoc pptx apply` 要做完整四件事：起进程 → 读 PPTX zip → 解 OOXML 模型 →
 > 应用 patch + 序列化输出。多步 Agent 工作流（典型："inspect 看现状 → apply 改
 > 标题 → inspect 验证 → apply 改颜色 → ..."）反复重复前三步是浪费。daemon 把
 > 模型留在内存里，让后续调用按 session 复用。
 >
-> **v10 起 daemon 默认自动拉起（auto-spawn）**：不再需要手动 `xdoc daemon start`，
+> 当前 runtime 的 daemon 默认自动拉起（auto-spawn）：不再需要手动 `xdoc daemon start`，
 > 任何带 `--daemon` 的 `pptx apply|inspect` 调用在检测到 daemon 未运行时会
 > 自动 fork 一个 detached daemon 进程并等其就绪。下面所有命令直接加 `--daemon`
 > 就行。
+
+## §0 先选 transport
+
+CLI、daemon 和 JSON-RPC 是同一 PPTX 业务能力的不同 adapter，不应各自复制 patch
+语义或验证规则：
+
+| 场景                                | 推荐边界        | 原因                                                   |
+| ----------------------------------- | --------------- | ------------------------------------------------------ |
+| 单命令、CI phase、普通 skill runner | 一次性 CLI      | 进程/文件边界清楚，失败隔离最好                        |
+| shell 驱动的多轮 inspect/apply      | CLI `--daemon`  | 保留现有命令形态并复用 deck session                    |
+| Agent host 已持有长生命周期子进程   | `xdoc json-rpc` | stdio NDJSON，免端口/state-file 协调，直接复用 session |
+
+不要仅凭 `json-rpc` 命令存在就实现 host。先从 `xdoc schema` 或
+`pptx-nova-probe.mjs` 的 `capabilities.agentTransports.jsonRpc` 读取完整
+`xdoc-json-rpc-contract/v1`；协议版本未知时保留原始内容并 fail closed。
 
 ## §1 起手最短路径
 
@@ -59,15 +74,15 @@ session 按 `canonical(input_path)` 键化：同一个 input deck 多次调用�
 
 ## §3 关键环境变量
 
-| 变量                           | 默认                             | 含义                                                        |
-| ------------------------------ | -------------------------------- | ----------------------------------------------------------- |
-| `XDOC_DAEMON_AUTO_SPAWN`       | `1`                              | v10 新：`0` / `false` 关闭 auto-spawn；CI/sandbox 隔离用    |
-| `XDOC_DAEMON_SPAWN_TIMEOUT_MS` | `5000`                           | v10 新：auto-spawn 后等 daemon 就绪的最长时间（毫秒）       |
-| `XDOC_DAEMON_LOG`              | `$TMPDIR/xdoc-daemon.log`        | v10 新：auto-spawn 出来的 daemon stdout/stderr 合并日志路径 |
-| `XDOC_DAEMON_ADDR`             | `127.0.0.1:0`（随机端口）        | 监听地址；端口 0 = 自动分配                                 |
-| `XDOC_DAEMON_STATE`            | `$TMPDIR/xdoc-daemon-state.json` | 状态文件路径（含地址 + token）；lock 文件自动加 `.lock`     |
-| `XDOC_DAEMON_IDLE_MS`          | `300000`（5 分钟）               | 单个 session 空闲多久后淘汰                                 |
-| `XDOC_DAEMON_MAX_SESSIONS`     | `64`                             | 同时常驻的 session 上限（LRU 淘汰）                         |
+| 变量                           | 默认                             | 含义                                                    |
+| ------------------------------ | -------------------------------- | ------------------------------------------------------- |
+| `XDOC_DAEMON_AUTO_SPAWN`       | `1`                              | `0` / `false` 关闭 auto-spawn；CI/sandbox 隔离用        |
+| `XDOC_DAEMON_SPAWN_TIMEOUT_MS` | `5000`                           | auto-spawn 后等 daemon 就绪的最长时间（毫秒）           |
+| `XDOC_DAEMON_LOG`              | `$TMPDIR/xdoc-daemon.log`        | auto-spawn 出来的 daemon stdout/stderr 合并日志路径     |
+| `XDOC_DAEMON_ADDR`             | `127.0.0.1:0`（随机端口）        | 监听地址；端口 0 = 自动分配                             |
+| `XDOC_DAEMON_STATE`            | `$TMPDIR/xdoc-daemon-state.json` | 状态文件路径（含地址 + token）；lock 文件自动加 `.lock` |
+| `XDOC_DAEMON_IDLE_MS`          | `300000`（5 分钟）               | 单个 session 空闲多久后淘汰                             |
+| `XDOC_DAEMON_MAX_SESSIONS`     | `64`                             | 同时常驻的 session 上限（LRU 淘汰）                     |
 
 跨平台 temp 目录探测顺序：`TMPDIR` → `TEMP` → `TMP` → `LOCALAPPDATA`（Windows）。
 
@@ -167,15 +182,46 @@ export XDOC_DAEMON_AUTO_SPAWN=0
   `TMP` / `LOCALAPPDATA` fallback，但 CI 覆盖还不全。生产 CI 用 Windows 时建议
   先用一次性模式跑通，再切 daemon
 
-## §7 故障排查
+## §7 stdio JSON-RPC host contract
 
-| 现象                                       | 排查                                                                                         |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| `--daemon` 看着没加速（每次还是慢）        | `xdoc daemon status --json` 看 `status: running` 与 `sessionCount`；session 是否被复用       |
-| auto-spawn 超时 `daemon spawn timeout`     | 磁盘慢或父目录权限问题？看 `$TMPDIR/xdoc-daemon.log`；调大 `XDOC_DAEMON_SPAWN_TIMEOUT_MS`    |
-| `--daemon-strict` 报 "no daemon reachable" | auto-spawn 被关了？检查 `XDOC_DAEMON_AUTO_SPAWN`；或子进程 fork 被沙箱拒绝                   |
-| inspect 返回旧数据                         | 上次 apply 没成功导致 session 没更新；`xdoc daemon stop` + 再 inspect 触发重载               |
-| token 不匹配 / 权限拒绝                    | state 文件被旧 daemon 残留；`rm $XDOC_DAEMON_STATE` 后让下次 `--daemon` 自动重拉             |
-| lock 文件残留（`<state>.lock`）            | auto-spawn 进程崩了；下次 `--daemon` 会自动判 stale（deadline 过 OR pid 死）并重抢           |
-| 内存占用涨                                 | 检查 session 数（`status --json`）；把 `XDOC_DAEMON_MAX_SESSIONS` 调小，或主动 `daemon stop` |
-| daemon stdout/stderr 看不到                | auto-spawn 出来的 daemon 输出在 `XDOC_DAEMON_LOG`（默认 `$TMPDIR/xdoc-daemon.log`）          |
+启动 `xdoc json-rpc` 后，stdin/stdout 都是逐行 UTF-8 JSON-RPC 2.0；每 frame 最大
+8 MiB，stdout 只能出现 protocol frame，日志和进程诊断只读 stderr。无 initialize
+握手，EOF 会在当前同步请求返回后干净退出。当前 server 串行执行并提供 backpressure，
+不要在 host 侧假设并行 mutation。
+
+最小会话：
+
+```text
+{"jsonrpc":"2.0","id":1,"method":"xdoc.ping","params":{}}
+{"jsonrpc":"2.0","id":2,"method":"xdoc.discover","params":{}}
+{"jsonrpc":"2.0","id":3,"method":"pptx.inspect","params":{"inputPath":"/abs/deck.pptx"}}
+{"jsonrpc":"2.0","id":4,"method":"xdoc.shutdown","params":{}}
+```
+
+公开方法只有 `xdoc.ping`、`xdoc.discover`、`pptx.inspect`、`pptx.apply` 和
+`xdoc.shutdown`。`pptx.apply` 的 `patch` 是对象；非 dry-run 时必须给
+`outputPath`。mutation 与 shutdown 必须带 request id，发送成 notification 会被
+忽略且不修改 deck。普通 notification 永远没有 response。
+
+返回 value 包在 `xdoc-json-rpc-result/v1`（`method` / `exitCode` / `value` /
+`artifacts`）中；二进制不会进入 stdout，产物通过 artifact ref 报告。传
+`progressToken` 可收到 `$/progress` 的 begin/end notification，但没有百分比保证。
+`$/cancelRequest` 只会取消队列中尚未 dispatch 的同 id 请求，不能中断当前同步方法。
+batch 也按顺序执行，并在 progress notification 之后返回一个 response array。
+
+这是 Agent transport，不是替代 skill 的验证阶段。普通 runner 仍应保持 dry-run、
+apply、post-apply inspect 与证据 gate 的因果顺序；host 只替换调用 adapter。
+
+## §8 故障排查
+
+| 现象                                       | 排查                                                                                                             |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `--daemon` 看着没加速（每次还是慢）        | `xdoc daemon status --json` 看 `status: running` 与 `sessionCount`；session 是否被复用                           |
+| auto-spawn 超时 `daemon spawn timeout`     | 磁盘慢或父目录权限问题？看 `$TMPDIR/xdoc-daemon.log`；调大 `XDOC_DAEMON_SPAWN_TIMEOUT_MS`                        |
+| `--daemon-strict` 报 "no daemon reachable" | auto-spawn 被关了？检查 `XDOC_DAEMON_AUTO_SPAWN`；或子进程 fork 被沙箱拒绝                                       |
+| inspect 返回旧数据                         | 上次 apply 没成功导致 session 没更新；`xdoc daemon stop` + 再 inspect 触发重载                                   |
+| `status: stale` / revision 不匹配          | 用 `xdoc daemon stop` 让 runtime 安全退役旧 state/daemon，再由下一次 `--daemon` 自动拉起；不要手删 state 文件    |
+| token 不匹配 / 权限拒绝                    | 先保留 `status --json` 与日志证据，再执行 `xdoc daemon stop`；若仍失败，切一次性 CLI 并报告，不要手删 state 文件 |
+| lock 文件残留（`<state>.lock`）            | auto-spawn 进程崩了；下次 `--daemon` 会自动判 stale（deadline 过 OR pid 死）并重抢                               |
+| 内存占用涨                                 | 检查 session 数（`status --json`）；把 `XDOC_DAEMON_MAX_SESSIONS` 调小，或主动 `daemon stop`                     |
+| daemon stdout/stderr 看不到                | auto-spawn 出来的 daemon 输出在 `XDOC_DAEMON_LOG`（默认 `$TMPDIR/xdoc-daemon.log`）                              |

@@ -18,7 +18,7 @@ inspect → 写 patch → dry-run ──┤
 ## 1. Inspect 拿基础结构
 
 ```bash
-# 多步流程默认加 --daemon（v10 auto-spawn，按需自动起 daemon）；
+# shell 驱动的多步流程默认加 --daemon（当前 runtime 会按需 auto-spawn）；
 # 单次一次性 inspect 不加也行。
 xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 ```
@@ -68,7 +68,8 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
       },
       "shapes": [
         {
-          "id": "2",
+          "id": 2,
+          "patchSelector": { "id": 2 },
           "name": "Title 1",
           "shapeType": "textBox",
           "resolvedFrom": "element",
@@ -78,8 +79,26 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
           "lineColor": "D0D5DD",
           "lineWidthEmu": 12700,
           "hasText": true,
+          "accessibility": {
+            "title": null,
+            "description": null,
+            "decorative": null
+          },
           "contentKind": "text",
           "textPreview": "Q2 2026 Review",
+          "fontFacts": [],
+          "textFrame": {
+            "marginLeftEmu": null,
+            "marginRightEmu": null,
+            "marginTopEmu": null,
+            "marginBottomEmu": null,
+            "effectiveMarginLeftEmu": "91440",
+            "effectiveMarginRightEmu": "91440",
+            "effectiveMarginTopEmu": "45720",
+            "effectiveMarginBottomEmu": "45720",
+            "verticalAnchor": "middle",
+            "wordWrap": true
+          },
           "bbox": { "xEmu": "1016000", "yEmu": "1920240", "wEmu": "10160000", "hEmu": "1097280" }
         }
       ],
@@ -92,30 +111,42 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 
 ### 关键字段速记
 
-| 取什么                      | 路径                                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------------------- |
-| Slide 数                    | `.presentation.slideCount`                                                                        |
-| Deck 尺寸 (EMU)             | `.presentation.slideSize.{wEmu, hEmu}`（除以 914400 = 英寸）                                      |
-| Layout 列表                 | `.presentation.layouts`                                                                           |
-| 每页类型                    | `.slides[N].semantic.pageType`（`title / section / content / data / quote / ...`）                |
-| 每页 layout 名              | `.slides[N].layout.name`                                                                          |
-| 每页 shape                  | `.slides[N].shapes[]`                                                                             |
-| Shape id（写 patch 用）     | `.slides[N].shapes[M].id`（按 inspect 原样使用；常见为数字，也可能是字符串）                      |
-| Shape name                  | `.slides[N].shapes[M].name`（写 patch 时优先用这个）                                              |
-| Shape 类型                  | `.slides[N].shapes[M].shapeType`（`textBox / autoShape / picture / table / chart / group / ...`） |
-| Shape 文字预览              | `.slides[N].shapes[M].textPreview`                                                                |
-| Shape bbox (EMU)            | `.slides[N].shapes[M].bbox.{xEmu, yEmu, wEmu, hEmu}`                                              |
-| Shape 填充                  | `.slides[N].shapes[M].fillType / fillColor / fillSchemeColor`                                     |
-| Shape 线条                  | `.slides[N].shapes[M].lineColor / lineSchemeColor / lineWidthEmu / lineDash / lineNoFill`         |
-| 几何重叠（同 vision-check） | `.slides[N].geometryOverlaps[]`（`{topShapeId, bottomShapeId, overlapRatio, kind, severity}`）    |
-| 文字溢出估计                | `.slides[N].textOverflowEstimates[]`（`{shapeId, estLines, fontPt}`）                             |
+| 取什么                        | 路径                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| Slide 数                      | `.presentation.slideCount`                                                                        |
+| Deck 尺寸 (EMU)               | `.presentation.slideSize.{wEmu, hEmu}`（除以 914400 = 英寸）                                      |
+| Layout 列表                   | `.presentation.layouts`                                                                           |
+| 每页类型                      | `.slides[N].semantic.pageType`（`title / section / content / data / quote / ...`）                |
+| 每页 layout 名                | `.slides[N].layout.name`                                                                          |
+| 每页 shape                    | `.slides[N].shapes[]`                                                                             |
+| Shape selector（写 patch 用） | `.slides[N].shapes[M].patchSelector`；当前 id 是非负整数，禁止转成字符串                          |
+| Shape name                    | `.slides[N].shapes[M].name`（写 patch 时优先用这个）                                              |
+| Shape 类型                    | `.slides[N].shapes[M].shapeType`（`textBox / autoShape / picture / table / chart / group / ...`） |
+| Shape 文字预览                | `.slides[N].shapes[M].textPreview`                                                                |
+| Shape bbox (EMU)              | `.slides[N].shapes[M].bbox.{xEmu, yEmu, wEmu, hEmu}`                                              |
+| Shape 填充                    | `.slides[N].shapes[M].fillType / fillColor / fillSchemeColor`                                     |
+| 图片内容 / shape 图片填充     | `.slides[N].shapes[M].image`（picture crop/mask）/ `.fillPicture`（shape picture fill）           |
+| 文本框布局                    | `.slides[N].shapes[M].textFrame`（显式/有效 margin、verticalAnchor、wordWrap）                    |
+| 字体事实                      | `.slides[N].shapes[M].fontFacts[]`（scope 与脚本字体等）                                          |
+| 图表 3D                       | `.slides[N].shapes[M].chart.{supportsView3D, kind, view3D}`                                       |
+| 无障碍元数据                  | `.slides[N].shapes[M].accessibility.{title, description, decorative}`                             |
+| Shape 线条                    | `.slides[N].shapes[M].lineColor / lineSchemeColor / lineWidthEmu / lineDash / lineNoFill`         |
+| 几何重叠（同 vision-check）   | `.slides[N].geometryOverlaps[]`（`{topShapeId, bottomShapeId, overlapRatio, kind, severity}`）    |
+| 文字溢出估计                  | `.slides[N].textOverflowEstimates[]`（`{shapeId, estLines, fontPt}`）                             |
 
 注意：
 
 - `bbox` 用 `xEmu / yEmu / wEmu / hEmu`（字符串，单位 EMU；1 in = 914400 EMU）
-- shape **不直接有** `placeholder` 字段，是否是 placeholder 看 `shapeType` 与 `name`；但**写 patch** 时仍可用 `{ "placeholder": { "type": "title" } }` selector
+- shape **不直接有** `placeholder` 字段，是否是 placeholder 看 `shapeType` 与 `name`；但**写 patch** 时仍可用 `{ "placeholder": "title" }` selector
 - 普通 RGB 颜色在 inspect 中输出为不带 `#` 的 6 位大写十六进制；主题色输出在 `fillSchemeColor` /
-  `lineSchemeColor`。复杂渐变、图案、图片填充只保证 `fillType`，必要时仍要 PNG 复核。
+  `lineSchemeColor`。shape 图片填充还会给出 `fillPicture` 的关系、mode、媒体类型、alpha 等
+  事实，但内置 preview/PDF 对 crop/tile 仍是 partial；以 PowerPoint 原生渲染复核。
+- picture shape 的 `image.crop` / `image.maskPreset` 对应 `set-image`；普通 shape 的
+  `fillPicture` 对应 `set-shape.fill.type: "picture"`，不要混用两类契约。
+- `textFrame` 同时区分显式 margin 与 effective margin。写入时省略字段表示保留，`null`
+  清掉显式 `bodyPr` 值使继承/默认重新生效；不要把 effective 值误写成“原始显式值”。
+- `fontFacts[]` 是按 text/chart scope 报出的字体事实。拉丁、东亚、复杂文字脚本分别对应
+  patch font 的 `name`、`eastAsian`、`complexScript`；`spacing` 是独立字符间距字段。
 - 动画状态现在也在每页暴露：`timing_summary`、`animations[]`、`animation_capabilities`。
   只有 `animations[].editable == true` 的安全子集可用 `set-slide-animations` /
   `set-slide-animations` 局部改；复杂 timing 仍看 `animation_capabilities.preserve_only`。
@@ -229,7 +260,7 @@ shape 在 PowerPoint Selection Pane 里能看到 name；设计师常给关键 sh
 "shape": { "name": "KPI Card 1" }
 ```
 
-### 2.3 `{ "placeholder": { ... } }` —— layout 驱动 deck 的首选
+### 2.3 `{ "placeholder": "...", "idx": ... }` —— layout 驱动 deck 的首选
 
 ```json
 "shape": { "placeholder": "title" }

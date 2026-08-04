@@ -183,17 +183,18 @@ template rules, brand/style changes, or full visual QA.
   `alignment` at the op top level.
 - Theme/font changes: `set-theme` (`colors` / `fonts`), or brand helpers.
 - Slide duplication: `duplicate-slide`.
-- Cross-deck whole-slide copy: `xdoc pptx copy-from`. Use `--slide N` for the
+- Cross-deck whole-slide copy: `xdoc pptx copy-from -i target.pptx`. Use `--slide N` for the
   compatible 0-based single slide, `--slides 1,3,5-8` for a 1-based selector,
   or `--all`; the selectors are mutually exclusive. Copy multiple slides in
-  one transaction and retain the native `pptx-copy-from/v1` report for the
-  structural Edit Contract instead of creating intermediate decks or fake
-  patch `opResults`.
+  one transaction and retain the native `pptx-copy-from/v2` report for the
+  structural Edit Contract. Require its read-only `ready` preflight, current
+  target/donor fingerprints, and no blockers instead of creating intermediate
+  decks or fake patch `opResults`.
 - Chart data: `set-chart-data`; read `charts.md` for chart semantics.
 - Table edits: `set-table` (cells/style/dimensions/borders), `set-table-data`
   (matrix/CSV/JSON bulk replacement); read `tables.md` for formulas and CSV imports.
-- Image replacement: remove/add picture at the same bbox, or use crop ops when
-  appropriate.
+- Image replacement and crop/mask changes: use `set-image` for an existing
+  picture (`crop` / `maskPreset`) or remove/add a picture when replacing media.
 - Notes: `set-slide-notes` (plain `text` or rich `paragraphs`).
 - Animations/transitions: read `animations.md`; use `set-slide-transition` or
   `set-slide-animations` only after inspect/dry-run proves the timing is in the

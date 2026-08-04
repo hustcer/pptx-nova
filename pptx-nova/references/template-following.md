@@ -81,15 +81,16 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    are needed, copy them in one transaction:
 
    ```bash
-   xdoc pptx copy-from <run-dir>/starter.pptx --from source.pptx \
+   xdoc pptx copy-from -i <run-dir>/starter.pptx --from source.pptx \
      --slides 1,3,5-8 --output <run-dir>/mapped.pptx \
      --dry-run --json > <run-dir>/dry-run.json
    ```
 
    `--slides` is 1-based; `--slide` remains the 0-based single-slide
    compatibility entry and `--all` copies the complete source. These selectors
-   are mutually exclusive. Reuse the native `pptx-copy-from/v1` report as the
-   structural Edit Contract evidence, including per-slide/dependency mappings;
+   are mutually exclusive. Reuse the native `pptx-copy-from/v2` report as the
+   structural Edit Contract evidence, including its read-only `ready` preflight,
+   current target/donor fingerprints, and per-slide/dependency mappings;
    do not loop through one slide at a time or synthesize patch `opResults`.
 
 5. Write `template-edit-plan.json` from inspect IDs, names, placeholders, and

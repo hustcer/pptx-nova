@@ -45,7 +45,7 @@ cp skills/pptx-nova/assets/examples/deck-generator-template.mjs ./generate.mjs
 # 3. 生成探索 patch + 丰富度自检 + dry-run gate + 落盘
 node generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
 jq '.ops | length' patch.json   # ← 客户演示级 ≥ 200,低于这条线视觉一定空,回去加装饰
-# 多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：v10 起 daemon
+# shell 驱动的多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：当前 runtime
 # 自动按需拉起，首次 ~200ms、之后调用 ~5ms 走 RPC。CI 用 --daemon-strict。
 xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json
 # 检查 dry-run.json 里没有阻塞性 visualRisks，并在 apply 后用 vision-check 清零 high/medium
@@ -95,7 +95,7 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 chart / table 不低于 `9pt`，页脚 / 来源才允许 `8.5-9pt`。如果文字放不下，删字、
 换布局、扩容器；不要降到 `7pt` / `8pt` 让 deck 变成必须凑近看的图片。
 
-> **v10 之后再用 `--daemon`**：dry-run + apply 两步会复用同一份 in-memory deck，
+> **当前 runtime 可用 `--daemon`**：dry-run + apply 两步会复用同一份 in-memory deck，
 > 把"dry-run gate + 修 schema bug"和"apply + PNG"这两阶段里"重新解 PPTX zip"
 > 的开销（每次 ~80–150ms）压成一次，对 200+ ops 的大 patch 累积可节省 ~0.5s 量级。
 > 反复修 schema bug 时（同一 patch.json 改 5 次重 dry-run），daemon 的省时更明显。

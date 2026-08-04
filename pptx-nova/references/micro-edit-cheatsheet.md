@@ -62,7 +62,7 @@ Use the most stable selector inspect exposes:
 
 1. `id` from `<run-dir>/inspect.json`
 2. shape `name`
-3. placeholder selector such as `{ "placeholder": { "type": "title" } }`
+3. placeholder selector such as `{ "placeholder": "title" }`
 4. query selector only when the previous selectors are not available
 
 If the exact target text/name is known but buried in a large deck, run

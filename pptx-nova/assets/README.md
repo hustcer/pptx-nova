@@ -48,7 +48,7 @@ introduced.
 - Use `xdoc pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json`
   to copy a reference PPTX into `decks/<id>/`, write brand/layout/theme/style
   profiles, and register the imported entries in the local catalogs.
-- Use `xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx`
+- Use `xdoc pptx copy-from -i target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx`
   for transactional whole-slide reuse. `--slides` is 1-based; `--slide N` is
   the compatible 0-based single-slide selector and `--all` selects the whole
   source. The three selectors are mutually exclusive.

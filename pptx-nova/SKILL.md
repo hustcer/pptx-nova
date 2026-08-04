@@ -103,7 +103,8 @@ Use these only to choose the entry reference; the routing table owns details.
 - **Refurbish / translate**: use `refurbish-runner.md` / `translation-runner.md`. The runner owns route,
   evidence, one canonical comparison, and publication; read only references it names on failure.
 - **Template / cross-deck copy**: edit inherited objects or use one transactional `copy-from`; keep the
-  native report as evidence and never fabricate `opResults`.
+  native `pptx-copy-from/v2` report as evidence, require a read-only `ready` preflight with current
+  target/donor fingerprints and no blockers, and never fabricate `opResults`.
 - **Export / diff / preview / check**: use `export-and-check.md`. Run semantic diff once on a stable
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual-evidence decision remains the delivery authority.
@@ -214,6 +215,7 @@ These rules apply to modifying existing PPTX files:
 - After post-apply evidence is stable, generate `evidence-manifest.json` to bind the candidate SHA-256 and exact evidence-file hashes. The gate must reject a missing/stale manifest, including when the candidate is overwritten at the same path.
 - Visible text-only edits that must preserve existing formatting require `style-diff` evidence. Whole-frame `set-text-frame` may erase run styling even when dry-run, semantic diff, and vision-check appear clean; use an inspect-proven run/text-node preserving edit or treat `target-text-style-changed` as a blocker.
 - Visible edits require changed-scope `vision-diff` by default. Block new or worsened high/medium issues. Dry-run/apply `semanticIssues[]` are a full-package before/after issue delta and must contain no regression introduced by the edit; the edit-contract gate fails closed when that evidence is missing or non-empty. Candidate-only `vision-check.semanticIssues[]` scans the full package—even with `--slides`—so treat it as diagnostic evidence and disclose inherited legacy-deck semantic debt instead of turning it into a false edit blocker.
+- When the user requests accessibility, inclusive-design, screen-reader, or alt-text validation, run `xdoc check` with `a11y` named explicitly; `--checks all` does not include it. Gate on `checks.a11y.status` and `summary.riskLevel`, not exit code. A violation blocks the requested accessibility claim; `inconclusive` requires rendered/manual review and remains unproven. Never apply an a11y `patchTemplate` unchanged: it is a non-auto-applicable placeholder, not `fixPatch`.
 - For strict template following, edit copied/inherited objects or template placeholders. Do not use new text boxes, translucent rectangles, or whole-page image overlays to hide old content and manufacture a page that "looks right".
 - When copying source slides or filling templates, explicitly fill or delete empty structural placeholders such as title/body/dt/sldNum/ftr. Do not leave empty placeholders in PowerPoint edit state just because they are invisible in PNG output. If an actionable finding is intentionally required by the deck's semantics, preserve it only through a source-hash-bound `pptx-nova-review-policy/v1` rule using the exact `reviewIdentity.sha256` from `layout-final.json`; never use a global boolean exception.
 - Identity assets such as logos, client marks, product screenshots, headshots, app icons, and third-party brand graphics must come from user-provided files, source-deck assets whose reuse is allowed, official verifiable sources, or registered authorized sources. When this cannot be confirmed, use text/native shapes instead of generating pseudo-official assets.
@@ -375,5 +377,5 @@ Read the files required by routing first; do not read all references at once.
 | `references/template-library.md`          | Brand/layout/deck/chart/icon catalog fusion                                                                                       |
 | `references/resume-split-mode.md`         | Split handoff and resume generation                                                                                               |
 | `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` / raw OOXML                                                                                              |
-| `references/daemon-sessions.md`           | Daemon tuning and troubleshooting                                                                                                 |
+| `references/daemon-sessions.md`           | Daemon/stdio JSON-RPC selection, tuning, and troubleshooting                                                                      |
 | `references/troubleshooting.md`           | Common errors and automatic repair suggestions                                                                                    |

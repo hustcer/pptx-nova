@@ -6,6 +6,11 @@ the skill directory.
 
 Use these entry points from skill workflows:
 
+- `pptx-nova-probe.mjs` - capture a compact runtime capability snapshot,
+  including capability truth, schema-slicing support, patch operations, bundled
+  resources, and the exact published daemon/stdio JSON-RPC Agent transport
+  contracts. Use repeatable `--require-*` flags for task-specific attention or
+  strict gates instead of inferring features from version strings.
 - `pptx-nova-deckkit-select.mjs` - select an eligible DeckKit from the bundled catalog.
 - `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
   It uses persisted catalog benchmark evidence by default; pass `--out <dir>`
@@ -44,10 +49,11 @@ Use these entry points from skill workflows:
 - `pptx-nova-edit-contract-gate.mjs` - verify source freshness, dry-run target
   coverage, reliable semantic-diff locality, optional text style fidelity, and
   scoped preview/vision-diff/structure evidence before an Edit or Micro Edit is
-  published. Structural copy workflows may supply native `pptx-copy-from/v1`
-  evidence; the gate validates donor/target slide identities, part/dependency
-  mappings, and aggregate changed parts without requiring or fabricating patch
-  `opResults`. When session rules apply, it also verifies produced-object
+  published. Structural copy workflows may supply native `pptx-copy-from/v2`
+  evidence; the gate requires a read-only `ready` preflight whose target/donor
+  fingerprints still match the current files, then validates donor/target slide
+  identities, part/dependency mappings, and aggregate changed parts without
+  requiring or fabricating patch `opResults`. When session rules apply, it also verifies produced-object
   identity and font/fill postconditions directly from candidate PPTX bytes.
   Read its stable `agentGate.nextAction` for repair routing.
 - `pptx-nova-refurbish-plan.mjs` - build the preflight route for existing-deck

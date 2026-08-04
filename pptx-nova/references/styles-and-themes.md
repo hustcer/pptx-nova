@@ -33,7 +33,9 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 
 ## Fill（填充）
 
-`set-shape` / `set-slide-background` 的 `fill` 与 `set-master` 的 `background` 都接受同一种 fill 对象：
+`set-shape` / `set-slide-background` 的 `fill` 与 `set-master` 的 `background`
+共享 solid / gradient / pattern / none 基础定义。只有普通 shape 的 `set-shape.fill`
+另外接受 picture fill；不要把它用于 slide background、table cell、chart 或 master。
 
 ### Solid
 
@@ -106,6 +108,29 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 { "type": "none" }
 ```
 
+### Picture fill（仅普通 shape）
+
+```json
+{
+  "op": "set-shape",
+  "slide": 0,
+  "shape": { "name": "Photo panel" },
+  "fill": {
+    "type": "picture",
+    "assetSource": { "path": "images/texture.png", "mime": "image/png" },
+    "mode": "stretch",
+    "crop": { "left": 0.05, "right": 0.05 },
+    "alpha": 0.9,
+    "rotateWithShape": true
+  }
+}
+```
+
+`mode` 是 `stretch` 或 `tile`，tile 模式可另给 `tile` 参数。内置 preview/PDF
+目前对 picture fill 可靠支持 stretch 与 alpha，crop/tile 属于 partial；最终视觉
+以 PowerPoint 为准。已有 picture shape 的裁剪或 preset mask 则用 `set-image`，不是
+picture fill。
+
 ## Line（边框）
 
 ```json
@@ -142,6 +167,9 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
   "run": 0,
   "font": {
     "name": "Inter",
+    "eastAsian": "Source Han Sans SC",
+    "complexScript": "Noto Sans Arabic",
+    "spacing": "0.1pt",
     "size": "16pt",
     "bold": true,
     "italic": false,
@@ -156,11 +184,18 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 | 字段              | 含义                                                              |
 | ----------------- | ----------------------------------------------------------------- |
 | `name`            | 字体族名（如 `Inter` / `Microsoft YaHei` / `Source Han Sans SC`） |
+| `eastAsian`       | 东亚脚本字体；省略保留，`null` 清除并恢复继承                     |
+| `complexScript`   | 阿拉伯文等复杂脚本字体；省略保留，`null` 清除并恢复继承           |
+| `spacing`         | 字符间距；显式 `pt` 字符串或等价 raw EMU，`null` 清除             |
 | `size`            | 优先使用 `"<n>pt"`；裸数字按通用 length 规则解释                  |
 | `bold` / `italic` | 布尔                                                              |
 | `underline`       | `none / single / double / wavy / heavy / ...`                     |
 | `color`           | 字体颜色（6 位 hex）                                              |
 | `fill`            | 用 fill 对象（gradient/pattern）填字符                            |
+
+`name` / `eastAsian` / `complexScript` / `spacing` 都是 sparse patch：省略不改，
+`null` 清掉本地值使继承继续。不要只改 Latin `name` 就声称多语言字体已经统一；先从
+inspect 的 `fontFacts[]` 检查各脚本 scope。
 
 ### Theme 字体（一改全改）
 

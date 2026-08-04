@@ -286,9 +286,9 @@ export function createOps(options = {}) {
     return name
   }
 
-  const cropImage = (s, name, crop) => {
+  const setImageCrop = (s, name, crop) => {
     if (!crop) return
-    ops.push({ op: 'crop-image', slide: s, shape: { name }, crop })
+    ops.push({ op: 'set-image', slide: s, shape: { name }, crop })
   }
 
   const icon = (s, name, iconName, x, y, w, h, options) =>
@@ -311,7 +311,7 @@ export function createOps(options = {}) {
     fillText,
     addSlide,
     addImage,
-    cropImage,
+    setImageCrop,
     icon,
   }
 }

@@ -26,6 +26,35 @@ if (args[0] === 'schema') {
     commands: {
       convert: {},
       schema: {},
+      'json-rpc': {
+        protocolContract: {
+          schemaVersion: 'xdoc-json-rpc-contract/v1',
+          protocol: 'JSON-RPC 2.0',
+          transport: 'stdio',
+          framing: { format: 'newline-delimited UTF-8 JSON', maxFrameBytes: 8388608 },
+          ordering: { mode: 'serial' },
+          lifecycle: { shutdown: 'xdoc.shutdown' },
+          notifications: { requestOnlyMethods: ['pptx.apply', 'xdoc.shutdown'] },
+          progress: { optInParam: 'progressToken' },
+          cancellation: { notificationMethod: '$/cancelRequest', cancelledCode: -32800 },
+          methods: {
+            'xdoc.ping': { kind: 'read-only' },
+            'xdoc.discover': { kind: 'read-only' },
+            'pptx.inspect': { kind: 'read-only', requiredParams: ['inputPath'] },
+            'pptx.apply': { kind: 'mutating', requiredParams: ['patch'] },
+            'xdoc.shutdown': { kind: 'lifecycle', requiresId: true }
+          },
+          resultEnvelope: { schemaVersion: 'xdoc-json-rpc-result/v1' },
+          artifactRef: { states: ['written', 'planned'] },
+          errors: [{ code: -32600, message: 'Invalid Request' }]
+        }
+      },
+      daemon: {
+        inputMode: 'control',
+        environment: { XDOC_DAEMON_STATE: 'Override state path.' },
+        defaults: { idleMs: 300000, maxSessions: 64, spawnTimeoutMs: 5000 },
+        subcommands: { start: {}, status: {}, stop: {} }
+      },
       pptx: {
         subcommands: { apply: {}, inspect: {} },
         capabilityTruth: {
@@ -48,10 +77,17 @@ if (args[0] === 'schema') {
               recommendation: { action: 'inspect-and-preserve', operations: [], note: 'Keep it untouched.' }
             },
             {
-              feature: 'chart-3d', subset: 'viewer-pdf-rendering', status: 'partial',
-              summary: 'Rendering is degraded.', operations: [],
-              limits: [{ code: 'no-parity', description: 'No PowerPoint parity.' }],
-              evidence: [{ id: '3d-render-boundary', kind: 'policy', claim: 'Tracked separately.' }],
+              feature: 'chart-3d', subset: 'pdf-rendering', status: 'partial',
+              summary: 'PDF rendering has explicit fidelity limits.', operations: [],
+              limits: [{ code: 'no-pdf-parity', description: 'No PowerPoint parity.' }],
+              evidence: [{ id: '3d-pdf-boundary', kind: 'policy', claim: 'Tracked separately.' }],
+              recommendation: { action: 'run-visual-verification', operations: [], note: 'Verify visually.' }
+            },
+            {
+              feature: 'chart-3d', subset: 'viewer-rendering', status: 'partial',
+              summary: 'Viewer rendering has explicit fidelity limits.', operations: [],
+              limits: [{ code: 'no-viewer-parity', description: 'No PowerPoint parity.' }],
+              evidence: [{ id: '3d-viewer-boundary', kind: 'policy', claim: 'Tracked separately.' }],
               recommendation: { action: 'run-visual-verification', operations: [], note: 'Verify visually.' }
             }
           ],
@@ -91,14 +127,47 @@ test('capability probe captures truth and satisfies an exact supported feature',
   const report = JSON.parse(result.stdout)
   assert.equal(report.schemaVersion, 'pptx-nova-xdoc-capabilities/v2')
   assert.equal(report.xdoc.capabilityTruthVersion, 'pptx-capability-truth/v2')
-  assert.equal(report.capabilities.capabilityTruth.entries.length, 3)
+  assert.equal(report.capabilities.capabilityTruth.entries.length, 4)
   assert.equal(report.requirements.results[0].state, 'supported')
   assert.equal(report.requirements.results[0].satisfied, true)
 })
 
+test('capability probe preserves the exact Agent transport contracts', () => {
+  const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+  const result = runProbe(xdoc, ['--require-command', 'json-rpc', '--strict'])
+  assert.equal(result.status, 0, result.stderr)
+  const report = JSON.parse(result.stdout)
+
+  assert.equal(report.capabilities.agentTransports.jsonRpc.status, 'disclosed')
+  assert.equal(
+    report.capabilities.agentTransports.jsonRpc.schemaVersion,
+    'xdoc-json-rpc-contract/v1',
+  )
+  assert.deepEqual(
+    report.capabilities.agentTransports.jsonRpc.methods.map(({ name, kind }) => ({
+      name,
+      kind,
+    })),
+    [
+      { name: 'pptx.apply', kind: 'mutating' },
+      { name: 'pptx.inspect', kind: 'read-only' },
+      { name: 'xdoc.discover', kind: 'read-only' },
+      { name: 'xdoc.ping', kind: 'read-only' },
+      { name: 'xdoc.shutdown', kind: 'lifecycle' },
+    ],
+  )
+  assert.equal(report.capabilities.agentTransports.daemon.status, 'disclosed')
+  assert.deepEqual(report.capabilities.agentTransports.daemon.subcommands, [
+    'start',
+    'status',
+    'stop',
+  ])
+})
+
 for (const [feature, state, action] of [
   ['slide-transition/extended-existing-effects', 'preserve-only', 'inspect-and-preserve'],
-  ['chart-3d/viewer-pdf-rendering', 'partial', 'run-visual-verification'],
+  ['chart-3d/pdf-rendering', 'partial', 'run-visual-verification'],
+  ['chart-3d/viewer-rendering', 'partial', 'run-visual-verification'],
 ]) {
   test(`probe exposes ${state} limits and recommendation for ${feature}`, () => {
     const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))

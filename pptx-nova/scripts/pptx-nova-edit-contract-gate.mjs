@@ -6,6 +6,7 @@ import { inflateRawSync } from 'node:zlib'
 
 const SCHEMA_VERSION = 'pptx-nova-edit-contract-gate/v1'
 const CONTRACT_SCHEMA_VERSION = 'pptx-nova-edit-contract/v1'
+const COPY_FROM_SCHEMA_VERSION = 'pptx-copy-from/v2'
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs --contract <path> [options]
@@ -17,7 +18,7 @@ Options:
   --contract <path>        Required normalized edit-contract.json.
   --candidate <pptx>       Required stable run-directory candidate PPTX.
   --dry-run <path>         Defaults to dry-run.json beside the contract; accepts
-                           pptx-dry-run/v1 or pptx-copy-from/v1 structural evidence.
+                           pptx-dry-run/v1 or pptx-copy-from/v2 preflight evidence.
   --diff <path>            Defaults to pptx-diff.json beside the contract.
   --style-diff <path>      Defaults to style-diff.json beside the contract.
   --preview <path>         Defaults to preview.json beside the contract.
@@ -657,7 +658,8 @@ function targetCoverage(contract, dryRun, report) {
   return { coverage, coveredCount, coveredIdentities }
 }
 
-function copyFromEntryValid(entry, changedParts) {
+function copyFromEntryValid(entry, copyReport) {
+  const changedParts = new Set(copyReport?.changedParts ?? [])
   if (
     !Number.isInteger(entry?.sourceSlide) ||
     !Number.isInteger(entry?.targetSlide) ||
@@ -669,7 +671,28 @@ function copyFromEntryValid(entry, changedParts) {
   ) {
     return false
   }
-  const requiredParts = [entry.targetSlidePartName, entry.targetSlideRelsPartName]
+  const plannedParts = Array.isArray(copyReport?.preflight?.parts) ? copyReport.preflight.parts : []
+  const requiredMutations = [entry.targetSlidePartName, entry.targetSlideRelsPartName]
+  const slidePlan = plannedParts.find(
+    (item) =>
+      item?.sourceSlide === entry.sourceSlide &&
+      item?.sourcePartName === entry.sourceSlidePartName &&
+      item?.targetPartName === entry.targetSlidePartName &&
+      item?.role === 'slide' &&
+      item?.action === 'add',
+  )
+  const slideRelsPlan = plannedParts.find(
+    (item) =>
+      item?.sourceSlide === entry.sourceSlide &&
+      item?.sourcePartName === entry.sourceSlideRelsPartName &&
+      item?.targetPartName === entry.targetSlideRelsPartName &&
+      item?.role === 'relationship' &&
+      item?.action === 'add',
+  )
+  if (!slidePlan || !slideRelsPlan) return false
+  const dependencyMappings = Array.isArray(copyReport?.dependencyMappings)
+    ? copyReport.dependencyMappings
+    : []
   for (const dependency of entry.dependencies) {
     if (
       typeof dependency?.sourcePartName !== 'string' ||
@@ -677,9 +700,141 @@ function copyFromEntryValid(entry, changedParts) {
     ) {
       return false
     }
-    requiredParts.push(dependency.targetPartName)
+    const mapped = dependencyMappings.some(
+      (item) =>
+        item?.sourceSlide === entry.sourceSlide &&
+        item?.targetSlide === entry.targetSlide &&
+        item?.sourcePartName === dependency.sourcePartName &&
+        item?.targetPartName === dependency.targetPartName,
+    )
+    const planned = plannedParts.find(
+      (item) =>
+        item?.sourceSlide === entry.sourceSlide &&
+        item?.sourcePartName === dependency.sourcePartName &&
+        item?.targetPartName === dependency.targetPartName,
+    )
+    if (!mapped || !planned || !['add', 'reuse', 'rename', 'rebind'].includes(planned.action)) {
+      return false
+    }
+    if (planned.action !== 'reuse') requiredMutations.push(dependency.targetPartName)
   }
-  return requiredParts.every((part) => changedParts.has(part))
+  return requiredMutations.every((part) => changedParts.has(part))
+}
+
+function sha256LooksValid(value) {
+  return typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
+}
+
+function checkCopyFromPreflight(contract, copyReport, report) {
+  const preflight = copyReport?.preflight
+  const workspace = contract.workspace || '.'
+  let valid = true
+  const fail = (code, message, details = {}) => {
+    valid = false
+    addIssue(report, 'blockers', code, message, details)
+  }
+  if (!preflight || typeof preflight !== 'object') {
+    fail(
+      'copy-from-preflight-missing',
+      'copy-from/v2 evidence is missing its read-only preflight plan',
+    )
+    return false
+  }
+  if (
+    preflight.ready !== true ||
+    preflight.readOnly !== true ||
+    !Array.isArray(preflight.parts) ||
+    !Array.isArray(preflight.relationships) ||
+    !Array.isArray(preflight.blockers) ||
+    !Array.isArray(preflight.risks)
+  ) {
+    fail(
+      'copy-from-preflight-invalid',
+      'copy-from preflight must be ready, read-only, and include parts, relationships, blockers, and risks arrays',
+    )
+  }
+  if (
+    !preflight.summary ||
+    preflight.summary.partCount !== preflight.parts?.length ||
+    preflight.summary.relationshipCount !== preflight.relationships?.length ||
+    preflight.summary.blockerCount !== preflight.blockers?.length ||
+    preflight.summary.riskCount !== preflight.risks?.length
+  ) {
+    fail(
+      'copy-from-preflight-summary-mismatch',
+      'copy-from preflight summary counts must exactly match the disclosed plan arrays',
+    )
+  }
+  if (preflight.blockers?.length > 0 || Number(preflight.summary?.blockerCount ?? 0) > 0) {
+    fail(
+      'copy-from-preflight-blocked',
+      'copy-from preflight contains blockers and cannot authorize a structural mutation',
+      { blockers: preflight.blockers },
+    )
+  }
+  if (
+    !Number.isInteger(preflight.targetSlideCountBefore) ||
+    !Number.isInteger(preflight.targetSlideCountAfter) ||
+    preflight.targetSlideCountAfter - preflight.targetSlideCountBefore !==
+      (copyReport.copied?.length ?? 0)
+  ) {
+    fail(
+      'copy-from-preflight-slide-count-invalid',
+      'copy-from preflight slide counts do not match the planned copied slide count',
+    )
+  }
+
+  const targetPath = reportedPath(copyReport?.input, workspace)
+  const donorPath = reportedPath(copyReport?.source?.path, workspace)
+  const targetFingerprint =
+    targetPath && existsSync(targetPath) ? sha256(targetPath) : contract.source?.sha256
+  const donorFingerprint = donorPath && existsSync(donorPath) ? sha256(donorPath) : null
+  if (
+    !sha256LooksValid(preflight.targetFingerprint) ||
+    preflight.targetFingerprint !== targetFingerprint ||
+    preflight.targetFingerprint !== contract.source?.sha256
+  ) {
+    fail(
+      'copy-from-target-fingerprint-mismatch',
+      'copy-from preflight is not bound to the current target PPTX bytes',
+      {
+        expected: contract.source?.sha256 ?? null,
+        actual: preflight.targetFingerprint ?? null,
+      },
+    )
+  }
+  if (
+    !sha256LooksValid(preflight.sourceFingerprint) ||
+    !donorFingerprint ||
+    preflight.sourceFingerprint !== donorFingerprint
+  ) {
+    fail(
+      'copy-from-source-fingerprint-mismatch',
+      'copy-from preflight is not bound to the declared donor PPTX bytes',
+      {
+        expected: donorFingerprint,
+        actual: preflight.sourceFingerprint ?? null,
+      },
+    )
+  }
+  if (preflight.risks?.length > 0) {
+    addIssue(
+      report,
+      'attention',
+      'copy-from-preflight-risks',
+      'copy-from preflight reported fidelity risks that require Agent review',
+      { risks: preflight.risks },
+    )
+  }
+  addCheck(report, 'copy-from-preflight', valid ? 'pass' : 'fail', {
+    readOnly: preflight.readOnly === true,
+    ready: preflight.ready === true,
+    parts: preflight.parts?.length ?? 0,
+    relationships: preflight.relationships?.length ?? 0,
+    blockers: preflight.blockers?.length ?? 0,
+    risks: preflight.risks?.length ?? 0,
+  })
+  return valid
 }
 
 function copyFromExpectation(target) {
@@ -692,7 +847,6 @@ function copyFromExpectation(target) {
 
 function copyFromCoverage(contract, copyReport, report) {
   const copied = Array.isArray(copyReport?.copied) ? copyReport.copied : []
-  const changedParts = new Set(copyReport?.changedParts ?? [])
   const coverage = []
   const coveredIdentities = []
   const targetSlides = new Set(contract.targets.map((target) => target.slide))
@@ -716,7 +870,7 @@ function copyFromCoverage(contract, copyReport, report) {
       !expectation.sourcePptx ||
       reportedPath(copyReport?.source?.path, contract.workspace || '.') ===
         resolve(contract.workspace || '.', expectation.sourcePptx)
-    const structuralEvidenceValid = entry ? copyFromEntryValid(entry, changedParts) : false
+    const structuralEvidenceValid = entry ? copyFromEntryValid(entry, copyReport) : false
     const categories = ['structure']
     const unexpectedCategories = categories.filter(
       (category) =>
@@ -1045,7 +1199,7 @@ function reportedPath(value, workspace) {
 
 function evidenceBindings(kind, evidence) {
   if (kind === 'dry-run') {
-    if (evidence?.schemaVersion === 'pptx-copy-from/v1') {
+    if (evidence?.schemaVersion === COPY_FROM_SCHEMA_VERSION) {
       return {
         source: evidence?.input,
         candidate: evidence?.candidate ?? evidence?.output ?? evidence?.wouldWrite,
@@ -1143,9 +1297,12 @@ function checkEvidence(contract, args, report) {
   }
 
   const dryRun = loaded['dry-run']
-  if (dryRun && !['pptx-dry-run/v1', 'pptx-copy-from/v1'].includes(dryRun.schemaVersion)) {
+  if (dryRun && !['pptx-dry-run/v1', COPY_FROM_SCHEMA_VERSION].includes(dryRun.schemaVersion)) {
     addIssue(report, 'blockers', 'dry-run-not-successful', 'dry-run evidence is not successful')
-  } else if (dryRun?.status !== undefined && dryRun.status !== 'success') {
+  } else if (
+    dryRun?.status !== undefined &&
+    dryRun.status !== (dryRun.schemaVersion === COPY_FROM_SCHEMA_VERSION ? 'ready' : 'success')
+  ) {
     addIssue(report, 'blockers', 'dry-run-not-successful', 'dry-run evidence is not successful')
   } else if (dryRun?.schemaVersion === 'pptx-dry-run/v1' && !Array.isArray(dryRun.semanticIssues)) {
     addIssue(
@@ -1162,12 +1319,13 @@ function checkEvidence(contract, args, report) {
       'dry-run introduced semantic regressions',
       { semanticIssueCount: dryRun.semanticIssues.length },
     )
-  } else if (dryRun?.schemaVersion === 'pptx-copy-from/v1') {
+  } else if (dryRun?.schemaVersion === COPY_FROM_SCHEMA_VERSION) {
     const structurallyComplete =
       Array.isArray(dryRun.copied) &&
       dryRun.copied.length > 0 &&
       Array.isArray(dryRun.changedParts) &&
-      Array.isArray(dryRun.dependencyMappings)
+      Array.isArray(dryRun.dependencyMappings) &&
+      dryRun.dryRun === true
     if (!structurallyComplete) {
       addIssue(
         report,
@@ -1176,6 +1334,7 @@ function checkEvidence(contract, args, report) {
         'copy-from evidence is missing copied[], changedParts[], or dependencyMappings[]',
       )
     } else {
+      checkCopyFromPreflight(contract, dryRun, report)
       addCheck(report, 'copy-from-structural-evidence', 'pass', {
         copiedSlides: dryRun.copied.length,
         dependencyMappings: dryRun.dependencyMappings.length,
@@ -1493,7 +1652,7 @@ function buildReport(args) {
       coverageResult.coveredCount === report.summary.expectedTargetCount ? 'pass' : 'fail',
       { covered: coverageResult.coveredCount, expected: report.summary.expectedTargetCount },
     )
-  } else if (dryRun?.schemaVersion === 'pptx-copy-from/v1' && dryRun.status === 'success') {
+  } else if (dryRun?.schemaVersion === COPY_FROM_SCHEMA_VERSION && dryRun.status === 'ready') {
     coverageResult = copyFromCoverage(contract, dryRun, report)
     report.targetCoverage = coverageResult.coverage
     addCheck(
@@ -1501,7 +1660,7 @@ function buildReport(args) {
       'target-coverage',
       coverageResult.coveredCount === report.summary.expectedTargetCount ? 'pass' : 'fail',
       {
-        evidence: 'pptx-copy-from/v1',
+        evidence: COPY_FROM_SCHEMA_VERSION,
         covered: coverageResult.coveredCount,
         expected: report.summary.expectedTargetCount,
       },

@@ -3,11 +3,11 @@
 > A compact native runtime for document conversion, editable PPTX execution,
 > rendering, validation, and auditable delivery.
 
-> **Runtime build verified for this document:** `0.3.3 (1f2c8ad2)`
+> **Runtime build verified for this document:** `v0.3.5 (91c52d1a)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-08-04
+> **Verification date:** 2026-08-05
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
@@ -24,7 +24,7 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot is semantically equivalent to the
-runtime response for `0.3.3 (1f2c8ad2)`; JSON formatting may differ between the
+runtime response for `v0.3.5 (91c52d1a)`; JSON formatting may differ between the
 checked-in file and the CLI output. Refresh the snapshot whenever the published
 binary identity changes.
 
@@ -151,7 +151,7 @@ artifact boundaries.
 
 ### Native-first deployment and release footprint
 
-The verified `v0.3.3` native packages unpack to roughly 20MB each, with exact
+The verified `v0.3.5` native packages unpack to roughly 20MB each, with exact
 size varying by target. That footprint includes the executable distribution
 and applicable notices for the selected target. It is small enough to promote
 as a pinned CI, container, managed-worker, or offline-job layer without
@@ -239,7 +239,7 @@ screenshots or log interpretation alone.
 
 ### Current release surface
 
-| Area                           | Runtime contract in 0.3.3                                                               |
+| Area                           | Runtime contract in v0.3.5                                                              |
 | ------------------------------ | --------------------------------------------------------------------------------------- |
 | Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `pdf`, `daemon`, `json-rpc`, `schema` |
 | PPTX CLI subcommands           | 37 discoverable subcommands                                                             |
@@ -314,7 +314,7 @@ versioned system.
 - an implicit claim that reserved document kinds are already supported.
 
 The current capability registry marks `docx` and `xlsx` as `reserved`. They may
-be recognized as document kinds, but the 0.3.3 CLI must not be described as an
+be recognized as document kinds, but the v0.3.5 CLI must not be described as an
 implemented general-purpose converter for them.
 
 ## Design principles
@@ -339,7 +339,7 @@ The full runtime schema currently includes 36 PPTX CLI examples, 18 patch
 examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
-Cache the complete `xdoc schema` response for CLI discovery. In 0.3.3,
+Cache the complete `xdoc schema` response for CLI discovery. In v0.3.5,
 `discovery.commands` is summary metadata (it omits `html2md`), while
 `xdoc schema --index` is specifically a patch-operation index rather than a
 complete CLI inventory. Neither surface should be treated as an exhaustive
@@ -521,7 +521,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.3.3 (1f2c8ad2)
+0.3.5 (91c52d1a)
 ```
 
 The top-level schema response identifies itself as:
@@ -529,7 +529,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.3.3 (1f2c8ad2)"
+  "version": "0.3.5 (91c52d1a)"
 }
 ```
 
@@ -677,7 +677,7 @@ The conversion command supports:
 | PPTX      | text     | enabled  | Plain extracted text                                                                |
 | PDF       | PNG/PDF  | enabled  | Render or inspect through the PDF command family                                    |
 | HTML      | Markdown | enabled  | Local HTML file, glob, or directory input                                           |
-| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in 0.3.3                 |
+| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in v0.3.5                |
 
 The top-level capability registry is itself machine-readable:
 
@@ -747,7 +747,7 @@ prefixes, page usage, text-object counts, and Unicode-map diagnostics.
 `natural` and `layout`. The native `auto` engine resolves to PDFium in the
 current build.
 
-There is one known 0.3.3 discovery inconsistency: `xdoc pdf --help`, the
+There is one known v0.3.5 discovery inconsistency: `xdoc pdf --help`, the
 published PDF examples, and the executable all expose `pdf render`, but the
 `commands.pdf.subcommands` map in `cli-agent/v1` currently lists only
 `inspect` and `extract-text`. Treat this as a contract defect to be fixed, and
@@ -1648,7 +1648,7 @@ xdoc daemon start
   → in-memory deck sessions
 ```
 
-Defaults in 0.3.3:
+Defaults in v0.3.5:
 
 - loopback TCP address: `127.0.0.1:0`;
 - idle session timeout: 300000 ms;
@@ -1973,7 +1973,7 @@ claims should stay tied to the measured contract and its declared limitations.
 
 ## Explicit limitations and non-claims
 
-1. `docx` and `xlsx` are reserved in the 0.3.3 capability registry.
+1. `docx` and `xlsx` are reserved in the v0.3.5 capability registry.
 2. The full CLI is native-first; parser/PDF WebAssembly paths do not imply a
    browser implementation of every command.
 3. Complex animations, transitions, SmartArt-like content, VBA, and other
@@ -1997,7 +1997,7 @@ claims should stay tied to the measured contract and its declared limitations.
 12. The supported external onboarding boundary is the CLI and its schema. A
     bundled MCP server or IDE installer is not part of the current release
     contract.
-13. The 0.3.3 PDF discovery map omits the executable `pdf render` action even
+13. The v0.3.5 PDF discovery map omits the executable `pdf render` action even
     though CLI help and schema examples expose it. Integrations should pin the
     build and retain this exception until the discovery contract is corrected.
 14. `discovery.commands`, `schema --index`, capability `enabled` status, and
@@ -2037,7 +2037,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.3.3 (1f2c8ad2). Re-run the discovery
+This document is anchored to xdoc 0.3.5 (91c52d1a). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

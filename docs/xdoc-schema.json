@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.3 (1f2c8ad2)",
+  "version": "0.3.5 (91c52d1a)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocol:\n  xdoc json-rpc\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1855,7 +1855,7 @@
               },
               {
                 "code": "surface3d-band-palette-and-shading",
-                "description": "A surface is coloured by value band and shaded by facet against a measured light rig. Both halves are measured against PowerPoint: the band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. Rendered meshes agree with PowerPoint to within seven channel steps across that range; the residual tracks the plot rectangle each renderer fits its cube into rather than the light rig. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied, but gradient fills degrade to their first stop in native PDF."
+                "description": "A surface is coloured by value band and shaded by facet against a measured light rig. Both halves are measured against PowerPoint: the band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. Rendered meshes agree with PowerPoint to within seven channel steps across that range; the residual tracks the plot rectangle each renderer fits its cube into rather than the light rig. A value axis carrying four bands or fewer uses the accents unmodulated, and there the brightest facet the light rig can produce passes full scale, so a channel already near full — the red of a yellow accent, for instance — clips at full scale instead of carrying the last few percent of its highlight; 8-bit sRGB cannot express that difference and PowerPoint has the same ceiling. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied, but gradient fills degrade to their first stop in native PDF."
               },
               {
                 "code": "surface-legend-and-contour-shading",
@@ -1897,6 +1897,11 @@
                 "id": "chart-surface-2d-pdf",
                 "kind": "behavior",
                 "claim": "surfaceChart renders as a top-down category-by-series grid whose values select complete major-tick bands; sparse c:bandFmts, wireframe, axis orientation and missing cells are preserved."
+              },
+              {
+                "id": "chart-axis-tick-marks",
+                "kind": "behavior",
+                "claim": "c:majorTickMark and c:minorTickMark are drawn on the category, value and series axes, at the lengths measured off PowerPoint as a fraction of the axis label font. They keep the screen orientation PowerPoint gives them on a projected axis: horizontal on a value axis and vertical on a category axis, even under a perspective camera where the axis itself leans. The same marks are drawn for the 2D chart families."
               }
             ],
             "recommendation": {
@@ -1922,7 +1927,7 @@
               },
               {
                 "code": "surface3d-band-palette-and-shading-viewer",
-                "description": "A surface is coloured by value band and shaded by facet against a measured light rig, from the same modules the PDF renderer uses. The band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied; the 2D contour keeps SVG gradients, while the shaded 3D surface degrades them to the first stop."
+                "description": "A surface is coloured by value band and shaded by facet against a measured light rig, from the same modules the PDF renderer uses. The band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. A value axis carrying four bands or fewer uses the accents unmodulated, and there the brightest facet the light rig can produce passes full scale, so a channel already near full — the red of a yellow accent, for instance — clips at full scale instead of carrying the last few percent of its highlight; 8-bit sRGB cannot express that difference and PowerPoint has the same ceiling. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied; the 2D contour keeps SVG gradients, while the shaded 3D surface degrades them to the first stop."
               },
               {
                 "code": "surface-legend-and-contour-shading-viewer",
@@ -1953,6 +1958,11 @@
                 "id": "chart-surface-2d-viewer",
                 "kind": "behavior",
                 "claim": "surfaceChart renders through a distinct SVG top-view path with complete value bands and range legend, sparse styles, gradients, wireframe, authored axes and missing-cell holes."
+              },
+              {
+                "id": "chart-axis-tick-marks-viewer",
+                "kind": "behavior",
+                "claim": "c:majorTickMark and c:minorTickMark are drawn on the category, value and series axes from the same measured lengths and placements the PDF renderer uses, ported rather than re-derived, and keep PowerPoint's screen orientation on a projected 3D axis. The same marks are drawn for the 2D chart families."
               }
             ],
             "recommendation": {
@@ -14232,7 +14242,8 @@
           "chartTickMark": {
             "type": "string",
             "enum": ["cross", "inside", "none", "outside"],
-            "strict": true
+            "strict": true,
+            "description": "Serialized as OOXML c:majorTickMark / c:minorTickMark cross|in|none|out. An axis that omits the element renders as 'cross', the schema default. The PDF, preview and viewer renderers draw the marks in the axis line's colour and width, and draw none when that line is set to no fill."
           },
           "chartTickLabelPosition": {
             "type": "string",
@@ -23629,7 +23640,8 @@
             "chartTickMark": {
               "type": "string",
               "enum": ["cross", "inside", "none", "outside"],
-              "strict": true
+              "strict": true,
+              "description": "Serialized as OOXML c:majorTickMark / c:minorTickMark cross|in|none|out. An axis that omits the element renders as 'cross', the schema default. The PDF, preview and viewer renderers draw the marks in the axis line's colour and width, and draw none when that line is set to no fill."
             },
             "chartTickLabelPosition": {
               "type": "string",

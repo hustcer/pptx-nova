@@ -44,11 +44,45 @@ process.stdout.write(JSON.stringify({
   writeJson(copyReport, {
     schemaVersion: 'pptx-copy-from/v2',
     status: 'ready',
+    transaction: {
+      rollbackBoundary: 'entire-copy-batch',
+      sourceSlides: [2],
+      targetSlideCountBefore: 10,
+      targetSlideCountAfter: 11,
+    },
     preflight: {
       ready: true,
       readOnly: true,
+      strategy: { template: 'register-source', slideSize: 'require-match' },
+      templates: [
+        {
+          sourceSlides: [2],
+          outcome: 'reused-source',
+          layout: {
+            sourcePartName: 'ppt/slideLayouts/slideLayout1.xml',
+            targetPartName: 'ppt/slideLayouts/slideLayout1.xml',
+            fingerprint: 'c'.repeat(64),
+            registrationId: null,
+            relationshipId: null,
+          },
+          master: {
+            sourcePartName: 'ppt/slideMasters/slideMaster1.xml',
+            targetPartName: 'ppt/slideMasters/slideMaster1.xml',
+            fingerprint: 'd'.repeat(64),
+            registrationId: null,
+            relationshipId: null,
+          },
+          theme: {
+            sourcePartName: 'ppt/theme/theme1.xml',
+            targetPartName: 'ppt/theme/theme1.xml',
+            fingerprint: 'e'.repeat(64),
+          },
+          rollbackBoundary: 'entire-copy-batch',
+        },
+      ],
       blockers: [],
       risks: [],
+      preserveOnlyRisks: [],
       sourceFileSha256: stale ? '0'.repeat(64) : sha256(donor),
       targetFileSha256: sha256(target),
       sourceFingerprint: 'a'.repeat(64),
@@ -86,6 +120,9 @@ test('copy size gate passes current same-size inputs', () => {
   assert.equal(report.agentGate.passed, true)
   assert.equal(report.agentGate.nextAction, 'continue-copy-from')
   assert.equal(report.slideSizeComparison.matches, true)
+  assert.equal(report.copyReport.templateStrategy, 'register-source')
+  assert.equal(report.copyReport.slideSizeStrategy, 'require-match')
+  assert.equal(report.copyReport.templatePlanCount, 1)
 })
 
 test('copy size gate blocks different slide sizes without an explicit strategy', () => {
@@ -106,6 +143,21 @@ test('copy size gate rejects a dry-run report bound to stale donor bytes', () =>
   assert.equal(report.agentGate.nextAction, 'refresh-copy-from-preflight')
   assert.equal(
     report.agentGate.failures.some((failure) => failure.code === 'donor-file-sha256-mismatch'),
+    true,
+  )
+})
+
+test('copy size gate rejects an incomplete template closure mapping', () => {
+  const input = fixture()
+  const report = JSON.parse(readFileSync(input.copyReport, 'utf8'))
+  delete report.preflight.templates[0].master.targetPartName
+  writeJson(input.copyReport, report)
+
+  const result = runGate(input, 3)
+
+  assert.equal(result.status, 'fail')
+  assert.equal(
+    result.agentGate.failures.some((failure) => failure.code === 'copy-template-plan-invalid'),
     true,
   )
 })

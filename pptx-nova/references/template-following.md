@@ -82,7 +82,9 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
 
    ```bash
    xdoc pptx copy-from -i <run-dir>/starter.pptx --from source.pptx \
-     --slides 1,3,5-8 --output <run-dir>/mapped.pptx \
+     --slides 1,3,5-8 \
+     --template-strategy register-source --size-strategy require-match \
+     --output <run-dir>/mapped.pptx \
      --dry-run --json > <run-dir>/dry-run.json
    ```
 
@@ -91,7 +93,10 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    are mutually exclusive. Reuse the native `pptx-copy-from/v2` report as the
    structural Edit Contract evidence, including its read-only `ready` preflight,
    current target/donor whole-file SHA-256 values, normalized OPC package
-   fingerprints, and per-slide/dependency mappings;
+   fingerprints, per-slide/dependency mappings, and `templates[]` closure
+   outcomes. Strict template following accepts `registered-source` or
+   `reused-source`; a `rebound-target` outcome means the requested faithful
+   template route was not preserved and must stop;
    do not loop through one slide at a time or synthesize patch `opResults`.
 
    A `ready` preflight is not sufficient when the decks use different slide
@@ -106,9 +111,10 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
      --json
    ```
 
-   Require `agentGate.passed=true`. Until `copy-from` exposes an explicit page
-   size strategy, a mismatch is a stop condition; do not silently scale the
-   donor slide or compensate in Viewer/PDF rendering.
+   Require `agentGate.passed=true` in addition to native
+   `preflight.strategy.slideSize: "require-match"` and no size blocker. A
+   mismatch remains a stop condition; do not silently scale the donor slide or
+   compensate in Viewer/PDF rendering.
 
 5. Write `template-edit-plan.json` from inspect IDs, names, placeholders, and
    bbox evidence. Default every inherited object to `keep`.

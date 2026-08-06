@@ -141,7 +141,7 @@ function compareSizes(target, donor) {
       x: Number((Number(target.slideSize.wEmu) / Number(donor.slideSize.wEmu)).toFixed(8)),
       y: Number((Number(target.slideSize.hEmu) / Number(donor.slideSize.hEmu)).toFixed(8)),
     },
-    policy: 'identical-required-until-copy-from-declares-an-explicit-size-strategy',
+    policy: 'native-require-match-plus-sha-bound-verification',
   }
 }
 
@@ -178,6 +178,52 @@ function validateCopyReport(copyReport, target, donor) {
     failures.push({
       code: 'copy-preflight-has-blockers',
       message: 'copy-from preflight contains blockers',
+    })
+  }
+  const templateStrategy = copyReport?.preflight?.strategy?.template
+  const slideSizeStrategy = copyReport?.preflight?.strategy?.slideSize
+  if (!['register-source', 'rebind-target'].includes(templateStrategy)) {
+    failures.push({
+      code: 'copy-template-strategy-invalid',
+      message: 'copy-from preflight must declare register-source or rebind-target',
+    })
+  }
+  if (slideSizeStrategy !== 'require-match') {
+    failures.push({
+      code: 'copy-size-strategy-invalid',
+      message: 'copy-from preflight must declare slideSize strategy require-match',
+    })
+  }
+  if (!Array.isArray(copyReport?.preflight?.templates)) {
+    failures.push({
+      code: 'copy-template-plan-missing',
+      message: 'copy-from preflight must disclose templates[] closure mappings',
+    })
+  } else {
+    const allowedOutcomes =
+      templateStrategy === 'register-source'
+        ? new Set(['registered-source', 'reused-source'])
+        : new Set(['rebound-target', 'reused-source'])
+    for (const template of copyReport.preflight.templates) {
+      if (
+        !allowedOutcomes.has(template?.outcome) ||
+        !template?.layout?.sourcePartName ||
+        !template?.layout?.targetPartName ||
+        !template?.master?.sourcePartName ||
+        !template?.master?.targetPartName
+      ) {
+        failures.push({
+          code: 'copy-template-plan-invalid',
+          message: 'copy-from templates[] contains an invalid outcome or incomplete mapping',
+        })
+        break
+      }
+    }
+  }
+  if (copyReport?.transaction?.rollbackBoundary !== 'entire-copy-batch') {
+    failures.push({
+      code: 'copy-rollback-boundary-invalid',
+      message: 'copy-from report must declare the entire-copy-batch rollback boundary',
     })
   }
   if (!sha256LooksValid(copyReport?.preflight?.targetFingerprint)) {
@@ -222,7 +268,7 @@ function buildReport(args) {
       message:
         `donor slide size ${donor.slideSize.wEmu}x${donor.slideSize.hEmu} EMU differs from ` +
         `target ${target.slideSize.wEmu}x${target.slideSize.hEmu} EMU; raw copied geometry ` +
-        'must not be treated as target-local without an explicit copy/import size strategy',
+        'is blocked by native require-match and must not be scaled implicitly',
     })
   }
   const nextAction = failures.some((failure) => failure.code === 'slide-size-mismatch')
@@ -246,6 +292,9 @@ function buildReport(args) {
       targetFileSha256: copyReport?.preflight?.targetFileSha256 ?? null,
       sourcePackageFingerprint: copyReport?.preflight?.sourceFingerprint ?? null,
       targetPackageFingerprint: copyReport?.preflight?.targetFingerprint ?? null,
+      templateStrategy: copyReport?.preflight?.strategy?.template ?? null,
+      slideSizeStrategy: copyReport?.preflight?.strategy?.slideSize ?? null,
+      templatePlanCount: copyReport?.preflight?.templates?.length ?? null,
       riskCount: copyReport?.preflight?.risks?.length ?? null,
       blockerCount: copyReport?.preflight?.blockers?.length ?? null,
     },

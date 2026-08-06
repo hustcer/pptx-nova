@@ -271,7 +271,9 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
 
     ```bash
     xdoc pptx copy-from -i target.pptx --from donor.pptx \
-      --slides 1,3,5-8 --output <run-dir>/candidate.pptx \
+      --slides 1,3,5-8 \
+      --template-strategy register-source --size-strategy require-match \
+      --output <run-dir>/candidate.pptx \
       --dry-run --json > <run-dir>/dry-run.json
 
     node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
@@ -289,17 +291,23 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     opens each deck once, validates the full requested selection before target
     mutation, serializes once, and reports `copied[]`, flattened
     `dependencyMappings[]`, aggregate `changedParts[]`, and a read-only preflight
-    with input fingerprints, planned parts/relationships, blockers, and risks.
+    with input fingerprints, explicit strategies, template closure mappings and
+    `registered-source` / `reused-source` / `rebound-target` outcomes, planned
+    parts/relationships, blockers, preserve-only risks, and the whole-batch
+    rollback boundary. `register-source` is the faithful default; use
+    `rebind-target` only when target layout inheritance is deliberate.
     Require `status: "ready"`, current target/donor `*FileSha256` values,
     normalized OPC package fingerprints, no blockers, and
     `copy-size-gate.json.agentGate.passed=true` before apply. Package
     fingerprints and whole-file SHA-256 values are distinct contracts; do not
     compare one as though it were the other. A ready dependency plan does not
     authorize copying raw donor geometry into a differently sized target page.
-    Until `copy-from` declares and implements an explicit size strategy, the
-    size gate requires identical slide dimensions and returns
-    `choose-explicit-slide-size-strategy` otherwise. Stop there; do not apply,
-    silently fit the slide, or hide the mismatch in Viewer/PDF rendering. The
+    Native `require-match` now blocks that mismatch in core preflight; the
+    independent size gate must agree and remains required as file-bound
+    evidence. Its legacy `choose-explicit-slide-size-strategy` next action means
+    stop or change deck dimensions until a future audited transform policy
+    exists. Do not silently fit the slide or hide the mismatch in Viewer/PDF
+    rendering. The
     Edit Contract gate consumes both native `pptx-copy-from/v2` and
     `pptx-nova-copy-size-gate/v1` evidence; do not invent `pptx-dry-run/v1` or
     `opResults[]`.
@@ -317,9 +325,12 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     scoped preview and `vision-diff` evidence. Use candidate-only
     `vision-check` as a diagnostic when needed; inherited source issues are not
     edit regressions.
-    For native `copy-from`, require the copy-size gate to pass before launching the
-    apply command. Require patch apply to return `semanticIssues: []` before
-    consuming its candidate.
+    For native `copy-from`, require both `preflight.strategy.slideSize` to be
+    `require-match` with no blocker and the copy-size gate to pass before
+    launching apply. Review every `templates[]` outcome: faithful workflows may
+    contain only `registered-source` / `reused-source`; `rebound-target` requires
+    an explicit rebind decision. Require patch apply to return
+    `semanticIssues: []` before consuming its candidate.
     If `session-rules.json` exists, pass the successful
     `session-rules-resolution.json` to the contract normalizer. The final
     contract gate must report every applicable rule as satisfied before

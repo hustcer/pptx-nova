@@ -752,11 +752,13 @@ function checkCopyFromPreflight(contract, copyReport, report) {
     !Array.isArray(preflight.parts) ||
     !Array.isArray(preflight.relationships) ||
     !Array.isArray(preflight.blockers) ||
-    !Array.isArray(preflight.risks)
+    !Array.isArray(preflight.risks) ||
+    !Array.isArray(preflight.preserveOnlyRisks) ||
+    !Array.isArray(preflight.templates)
   ) {
     fail(
       'copy-from-preflight-invalid',
-      'copy-from preflight must be ready, read-only, and include parts, relationships, blockers, and risks arrays',
+      'copy-from preflight must be ready, read-only, and include template, part, relationship, blocker, preserve-only risk, and risk arrays',
     )
   }
   if (
@@ -832,6 +834,47 @@ function checkCopyFromPreflight(contract, copyReport, report) {
       'copy-from preflight must include normalized OPC source/target package fingerprints',
     )
   }
+  const templateStrategy = preflight.strategy?.template
+  const slideSizeStrategy = preflight.strategy?.slideSize
+  if (!['register-source', 'rebind-target'].includes(templateStrategy)) {
+    fail(
+      'copy-from-template-strategy-invalid',
+      'copy-from preflight must declare register-source or rebind-target',
+    )
+  }
+  if (slideSizeStrategy !== 'require-match') {
+    fail(
+      'copy-from-size-strategy-invalid',
+      'copy-from preflight must declare slideSize strategy require-match',
+    )
+  }
+  const allowedTemplateOutcomes =
+    templateStrategy === 'register-source'
+      ? new Set(['registered-source', 'reused-source'])
+      : new Set(['rebound-target', 'reused-source'])
+  for (const template of preflight.templates ?? []) {
+    if (
+      !allowedTemplateOutcomes.has(template?.outcome) ||
+      !template?.layout?.sourcePartName ||
+      !template?.layout?.targetPartName ||
+      !template?.master?.sourcePartName ||
+      !template?.master?.targetPartName ||
+      template?.rollbackBoundary !== 'entire-copy-batch'
+    ) {
+      fail(
+        'copy-from-template-plan-invalid',
+        'copy-from templates[] contains an invalid outcome, mapping, or rollback boundary',
+        { template },
+      )
+      break
+    }
+  }
+  if (copyReport?.transaction?.rollbackBoundary !== 'entire-copy-batch') {
+    fail(
+      'copy-from-rollback-boundary-invalid',
+      'copy-from report must declare the entire-copy-batch rollback boundary',
+    )
+  }
   if (preflight.risks?.length > 0) {
     addIssue(
       report,
@@ -880,7 +923,7 @@ function checkCopySizeGate(contract, copyReport, sizeGate, report) {
       'blockers',
       mismatch ? 'copy-size-gate-failed' : 'copy-size-gate-stale',
       mismatch
-        ? 'donor and target slide sizes differ and copy-from has no explicit size strategy'
+        ? 'donor and target slide sizes differ under native require-match'
         : 'copy size gate is missing, failed, or not bound to the current copy-from preflight',
       { sizeGate: sizeGate?.agentGate ?? null },
     )

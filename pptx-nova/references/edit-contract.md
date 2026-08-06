@@ -141,7 +141,9 @@ For multiple donor slides, prefer one transactional command:
 
 ```bash
 xdoc pptx copy-from -i target.pptx --from donor.pptx \
-  --slides 1,3 --output <run-dir>/candidate.pptx \
+  --slides 1,3 \
+  --template-strategy register-source --size-strategy require-match \
+  --output <run-dir>/candidate.pptx \
   --dry-run --json > <run-dir>/dry-run.json
 ```
 
@@ -159,6 +161,12 @@ contracts without comparing them to each other. Review every `preflight.risks`
 item instead of silently accepting it.
 `preflight.parts[]` and `preflight.relationships[]` describe the exact planned
 package mutation, including dependencies that will be reused rather than added.
+Require `preflight.strategy.template` / `slideSize`, inspect every
+`preflight.templates[]` source→target layout/master/theme mapping, and retain
+its normalized fingerprints, outcome, target-side registration ids/rIds,
+affected source slides, and `entire-copy-batch` rollback boundary. Under
+`register-source`, `rebound-target` is invalid evidence; under `rebind-target`,
+it is an explicit fidelity decision rather than a hidden fallback.
 
 Before apply, bind the report to the donor/target page-size policy:
 
@@ -174,9 +182,11 @@ node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
 The normalizer automatically adds `copy-size-gate` to `requiredEvidence` for
 `operationKind: "copy-from"`. The final gate requires its SHA-bound report and
 rejects mismatched dimensions with
-`nextAction: "choose-explicit-slide-size-strategy"`. Current xdoc has no such
-explicit strategy, so use a matching target size or stop for a user decision;
-do not silently scale donor geometry or compensate in a renderer.
+`nextAction: "choose-explicit-slide-size-strategy"` for compatibility. Native
+xdoc now declares `require-match` and blocks the same mismatch in core
+preflight; therefore use matching dimensions or stop for a user decision until
+a future audited transform strategy exists. Do not silently scale donor
+geometry or compensate in a renderer.
 
 Bind each produced slide target to its donor identity:
 

@@ -105,9 +105,11 @@ Use these only to choose the entry reference; the routing table owns details.
   evidence, one canonical comparison, and publication; read only references it names on failure.
 - **Template / cross-deck copy**: edit inherited objects or use one transactional `copy-from`; keep the
   native `pptx-copy-from/v2` report as evidence, require a read-only `ready` preflight with current
-  target/donor file SHA-256 values, normalized package fingerprints, and no blockers. Before apply,
-  run `pptx-nova-copy-size-gate.mjs`; `ready` alone never authorizes copying between different slide
-  sizes, and the workflow must not invent `opResults` or silently fit donor geometry in a renderer.
+  target/donor file SHA-256 values, normalized package fingerprints, explicit `template` / `slideSize`
+  strategy, auditable `templates[]` outcomes, and no blockers. Default to `register-source`; choose
+  `rebind-target` only when target inheritance is intentional. Before apply, run
+  `pptx-nova-copy-size-gate.mjs` as an independent SHA-bound defense; `require-match` never authorizes
+  different slide sizes, and the workflow must not invent `opResults` or silently fit donor geometry.
 - **Export / diff / preview / check**: use `export-and-check.md`. Run semantic diff once on a stable
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual-evidence decision remains the delivery authority.
@@ -221,7 +223,7 @@ These rules apply to modifying existing PPTX files:
 - When the user requests accessibility, inclusive-design, screen-reader, or alt-text validation, run `xdoc check` with `a11y` named explicitly; `--checks all` does not include it. Gate on `checks.a11y.status` and `summary.riskLevel`, not exit code. A violation blocks the requested accessibility claim; `inconclusive` requires rendered/manual review and remains unproven. Never apply an a11y `patchTemplate` unchanged: it is a non-auto-applicable placeholder, not `fixPatch`.
 - For strict template following, edit copied/inherited objects or template placeholders. Do not use new text boxes, translucent rectangles, or whole-page image overlays to hide old content and manufacture a page that "looks right".
 - When copying source slides or filling templates, explicitly fill or delete empty structural placeholders such as title/body/dt/sldNum/ftr. Do not leave empty placeholders in PowerPoint edit state just because they are invisible in PNG output. If an actionable finding is intentionally required by the deck's semantics, preserve it only through a source-hash-bound `pptx-nova-review-policy/v1` rule using the exact `reviewIdentity.sha256` from `layout-final.json`; never use a global boolean exception.
-- A native `copy-from/v2` preflight can be `ready` while donor and target slide sizes differ. Run the bundled copy-size gate before apply and retain it in the Edit Contract evidence. Until xdoc exposes an explicit copy/import size strategy, only identical slide sizes may proceed; do not scale implicitly or move this policy into Viewer/PDF rendering.
+- Native `copy-from/v2` must disclose `preflight.strategy.slideSize: "require-match"`; mismatched donor/target dimensions are a core blocker, not a renderer concern. Retain the bundled copy-size gate as independent file-bound evidence, and stop if either native preflight or the gate reports a mismatch. Do not scale implicitly or move this policy into Viewer/PDF rendering.
 - Identity assets such as logos, client marks, product screenshots, headshots, app icons, and third-party brand graphics must come from user-provided files, source-deck assets whose reuse is allowed, official verifiable sources, or registered authorized sources. When this cannot be confirmed, use text/native shapes instead of generating pseudo-official assets.
 - When using external, reused, generated, or formula assets, `assets_manifest.json` must record `status`, `source.kind`, `licenseRisk`, and PPTX usage slots. `missing` / `needs-user` / `forbidden` blocks delivery.
 - If the user asks for in-place modification, still complete validation in the run directory first, then write back only according to the user's explicit intent.

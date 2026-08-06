@@ -134,7 +134,21 @@ xdoc pptx preview deck.pptx --slides 25-38 \
   --output-dir <run-dir>/previews \
   --contact-sheet <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
+
+xdoc pptx preview deck.pptx --layout 0 \
+  --output-dir <run-dir>/layout-preview \
+  --overwrite --json > <run-dir>/layout-preview.json
 ```
+
+`--layout N` is a 0-based registered-layout preview and is mutually exclusive
+with `--slides`. xdoc builds a one-slide candidate from that layout and its
+master/theme inheritance chain, persists
+`layout-preview-N-candidate.pptx` inside the requested output directory, and
+does not mutate the input deck. Require `previewTarget.kind: "layout"`, the
+requested `layoutIndex`, `candidatePersisted: true`, a readable
+`candidate.status: "ok"`, and `inputMutated: false` before treating the PNG as
+layout-level evidence. The manifest's `visualEvidence.command` must reference
+that persisted candidate, never an already-deleted temporary path.
 
 The stdout manifest is `pptx-preview/v1`. It is observation-only and carries a
 `visualEvidence` handoff to the canonical decision. Its status fields are

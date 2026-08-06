@@ -994,6 +994,12 @@ function writeCopyFromContractFixture() {
     dryRun: true,
     wouldWrite: fixture.candidate,
     candidate: fixture.candidate,
+    transaction: {
+      rollbackBoundary: 'entire-copy-batch',
+      sourceSlides: [2],
+      targetSlideCountBefore: 10,
+      targetSlideCountAfter: 11,
+    },
     copied: [
       {
         sourceSlide: 2,
@@ -1028,6 +1034,7 @@ function writeCopyFromContractFixture() {
     preflight: {
       ready: true,
       readOnly: true,
+      strategy: { template: 'register-source', slideSize: 'require-match' },
       sourceFileSha256: sha256(fixture.donor),
       targetFileSha256: sha256(fixture.source),
       sourceFingerprint: 'd'.repeat(64),
@@ -1040,7 +1047,34 @@ function writeCopyFromContractFixture() {
         blockerCount: 0,
         riskCount: 0,
         actions: { add: 2, reuse: 1 },
+        templateOutcomes: { 'reused-source': 1 },
       },
+      templates: [
+        {
+          sourceSlides: [2],
+          outcome: 'reused-source',
+          layout: {
+            sourcePartName: 'ppt/slideLayouts/slideLayout1.xml',
+            targetPartName: 'ppt/slideLayouts/slideLayout1.xml',
+            fingerprint: 'f'.repeat(64),
+            registrationId: null,
+            relationshipId: null,
+          },
+          master: {
+            sourcePartName: 'ppt/slideMasters/slideMaster1.xml',
+            targetPartName: 'ppt/slideMasters/slideMaster1.xml',
+            fingerprint: '1'.repeat(64),
+            registrationId: null,
+            relationshipId: null,
+          },
+          theme: {
+            sourcePartName: 'ppt/theme/theme1.xml',
+            targetPartName: 'ppt/theme/theme1.xml',
+            fingerprint: '2'.repeat(64),
+          },
+          rollbackBoundary: 'entire-copy-batch',
+        },
+      ],
       parts: [
         {
           sourceSlide: 2,
@@ -1093,6 +1127,7 @@ function writeCopyFromContractFixture() {
       ],
       blockers: [],
       risks: [],
+      preserveOnlyRisks: [],
     },
   })
   writeJson(fixture.copySizeGate, {
@@ -1155,6 +1190,7 @@ test('edit contract gate accepts file-bound and package-fingerprinted copy-from/
   assert.equal(report.summary.coveredTargetCount, 1)
   assert.equal(report.targetCoverage[0].copyFrom.sourceSlide, 2)
   assert.equal(report.targetCoverage[0].copyFrom.targetSlidePartName, 'ppt/slides/slide11.xml')
+  assert.equal(JSON.parse(readFileSync(fixture.dryRun, 'utf8')).preflight.templates.length, 1)
   assert.equal(
     report.checks.some((item) => item.name === 'copy-from-preflight' && item.status === 'pass'),
     true,
@@ -1258,6 +1294,21 @@ test('edit contract gate rejects inconsistent copy-from preflight summary counts
   assert.equal(report.agentGate.passed, false)
   assert.equal(
     report.blockers.some((item) => item.code === 'copy-from-preflight-summary-mismatch'),
+    true,
+  )
+})
+
+test('edit contract gate rejects a template outcome incompatible with register-source', () => {
+  const fixture = writeCopyFromContractFixture()
+  const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  evidence.preflight.templates[0].outcome = 'rebound-target'
+  writeJson(fixture.dryRun, evidence)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(
+    report.blockers.some((item) => item.code === 'copy-from-template-plan-invalid'),
     true,
   )
 })

@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.5 (91c52d1a)",
+  "version": "0.3.5 (960ab70d)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocol:\n  xdoc json-rpc\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -383,7 +383,7 @@
           "valueSyntax": "<path>",
           "kind": "file",
           "defaulting": {
-            "onOmitted": "XDOC_LICENSE_FILE-or-.xdoc/licenses/xdoc-license.json"
+            "onOmitted": "XDOC_CONFIG_PATH-or-platform-user-config"
           },
           "applicability": {
             "inputKind": "pptx"
@@ -391,9 +391,12 @@
           "semanticEffect": {
             "licenseLookupPriority": [
               "--license",
-              "XDOC_LICENSE_FILE",
-              ".xdoc/licenses/xdoc-license.json"
-            ]
+              "XDOC_CONFIG_PATH/xdoc-license.json",
+              "platform-user-config/xdoc-license.json"
+            ],
+            "selectedSourceFailure": "final-without-fallback",
+            "configPathRequirement": "absolute-directory",
+            "explicitRelativePathBase": "process-working-directory"
           }
         },
         "quiet": {
@@ -547,8 +550,8 @@
         },
         "authorizationLookup": [
           "--license",
-          "XDOC_LICENSE_FILE",
-          ".xdoc/licenses/xdoc-license.json"
+          "XDOC_CONFIG_PATH/xdoc-license.json",
+          "platform-user-config/xdoc-license.json"
         ],
         "missingOrInactive": {
           "maxPptxInputBytes": 2097152,
@@ -1480,6 +1483,16 @@
           "description": "1-based slide selector for pptx copy-from/vision-check/vision-diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text, e.g. 1,3,5-8; mutually exclusive with copy-from --slide/--all",
           "required": false
         },
+        "from-slide": {
+          "type": "int",
+          "description": "0-based source slide index for pptx morph-check; must be used with --to-slide",
+          "required": false
+        },
+        "to-slide": {
+          "type": "int",
+          "description": "0-based adjacent destination slide index for pptx morph-check; must equal --from-slide + 1",
+          "required": false
+        },
         "all": {
           "type": "bool",
           "description": "Select all source slides for pptx copy-from; mutually exclusive with --slide/--slides",
@@ -1602,7 +1615,7 @@
       },
       "positionals": {
         "action": {
-          "description": "Bridge action: new|apply|inspect|select|preview|visual-verify|vision-check|diff|i18n-scan|i18n-style-diff|i18n-plan|i18n-anchor-draft|i18n-text-plan|replace-text|replace-chart-text|vision-diff|contact-diff|refurbish-audit|refurbish-skin|chrome-detect|chrome-remove|chrome-apply|remap-theme|from-data|check-brand|apply-brand|copy-from|extract-style|import-template|catalog|list-themes|swap-theme|swap-style|recipe|replay|audit|rollback; inspect/select/preview/vision-check/diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text/vision-diff/contact-diff/refurbish-audit/refurbish-skin/chrome-detect/chrome-remove/chrome-apply/remap-theme/from-data/check-brand/apply-brand/copy-from/extract-style/import-template/swap-theme/swap-style may be followed by an input path",
+          "description": "Bridge action: new|apply|inspect|select|preview|visual-verify|vision-check|morph-check|diff|i18n-scan|i18n-style-diff|i18n-plan|i18n-anchor-draft|i18n-text-plan|replace-text|replace-chart-text|vision-diff|contact-diff|refurbish-audit|refurbish-skin|chrome-detect|chrome-remove|chrome-apply|remap-theme|from-data|check-brand|apply-brand|copy-from|extract-style|import-template|catalog|list-themes|swap-theme|swap-style|recipe|replay|audit|rollback; inspect/select/preview/vision-check/morph-check/diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text/vision-diff/contact-diff/refurbish-audit/refurbish-skin/chrome-detect/chrome-remove/chrome-apply/remap-theme/from-data/check-brand/apply-brand/copy-from/extract-style/import-template/swap-theme/swap-style may be followed by an input path",
           "required": true
         }
       },
@@ -1616,6 +1629,7 @@
         "xdoc pptx visual-verify --candidate new.pptx --reference old.pptx --output-dir evidence --json",
         "xdoc pptx vision-check deck.pptx --json",
         "xdoc pptx diff old.pptx new.pptx --json",
+        "xdoc pptx morph-check deck.pptx --from-slide 0 --to-slide 1 --json",
         "xdoc pptx i18n-scan --source old.pptx --source-lang multi --mode source --output i18n-scan.json --json",
         "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
         "xdoc pptx i18n-plan --source old.pptx --units scan.json --data translations.json --output i18n-plan.json --json",
@@ -1665,6 +1679,7 @@
         "PPTX actions execute inside the xdoc runtime and share its versioned schema and report contract.",
         "Use action new to create a minimal deck, apply to patch an existing or new deck, or inspect to summarize an existing deck.",
         "For inspect, pass either `xdoc pptx inspect deck.pptx --json` or `xdoc pptx inspect --input deck.pptx --json`.",
+        "Use `xdoc pptx morph-check deck.pptx --from-slide 0 --to-slide 1 --json` before authoring Morph, or omit the pair flags to audit every Morph-carrying adjacent pair. The report covers exact case-sensitive `!!` names only and never claims PowerPoint implicit matching or playback parity.",
         "Use `xdoc pptx vision-check deck.pptx --json` to statically QA an existing deck without rendering: it flags geometry overlaps, off-slide and edge-hugging text, text-overflow estimates, unexpected wraps in single-line text roles, misaligned card rows, and sub-threshold fonts, and each issue may carry an auto-applicable fixPatch.",
         "Use `xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --dpi 192 --json` to render per-slide PNG previews plus an optional contact sheet and stdout manifest for multimodal review.",
         "Use `xdoc pptx visual-verify --candidate new.pptx --reference approved.pptx --output-dir evidence --json` for the canonical Agent visual gate: it atomically writes one typed evidence manifest plus exact PDF/PNG artifacts, separates transport status from check outcomes and Agent action, and limits same-renderer pixel evidence to regression claims rather than PowerPoint parity.",
@@ -2616,6 +2631,53 @@
           },
           {
             "feature": "slide-transition",
+            "subset": "morph-authoring",
+            "status": "partial",
+            "summary": "Create, replace, inspect, and clear PowerPoint Morph transitions in by-object, by-word, or by-char mode, with explicit object-pair diagnostics; Windows PowerPoint verification remains pending.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "office-2016-or-newer",
+                "description": "Morph uses the PowerPoint 2015/09 extension namespace. Older or extension-unaware consumers receive the authored fade fallback instead of Morph."
+              },
+              {
+                "code": "explicit-pairing-only",
+                "description": "morph-check evaluates exact case-sensitive non-empty !! names; it does not reproduce PowerPoint's undocumented implicit object matching."
+              },
+              {
+                "code": "playback-separate-from-authoring",
+                "description": "A structurally valid and reopened Morph transition is not itself proof of PowerPoint playback or rendering parity; use the designated PowerPoint evidence workflow."
+              },
+              {
+                "code": "windows-powerpoint-evidence-pending",
+                "description": "All three modes passed macOS PowerPoint clean-open and semantic playback, but controlled Windows PowerPoint clean-open/resave/playback evidence has not been collected; Windows compatibility remains inconclusive."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-transition-morph-ooxml-roundtrip",
+                "kind": "behavior",
+                "claim": "All three Morph modes write an MCE-guarded p159:morph choice plus fade fallback, survive save/reopen, replace basic transitions in both directions, and clear without a stale carrier."
+              },
+              {
+                "id": "slide-transition-morph-explicit-pair-check",
+                "kind": "diagnostic",
+                "claim": "The typed pptx-morph-check/v1 report covers exact matches, one-sided names, duplicates, type mismatches, slide-space geometry and text deltas, nested groups, and no-visible-change cases."
+              },
+              {
+                "id": "slide-transition-morph-powerpoint-playback",
+                "kind": "interoperability",
+                "claim": "Checked-in macOS PowerPoint 16.111.2 evidence records clean-open and semantic playback for all three Morph modes, authored durations, explicit-pair diagnostics, and a by-object resave round-trip without claiming Windows or visual frame parity."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["set-slide-transition"],
+              "note": "Run morph-check on the adjacent pair, fix warning findings, author Morph on the destination slide, then inspect and obtain PowerPoint playback evidence."
+            }
+          },
+          {
+            "feature": "slide-transition",
             "subset": "extended-existing-effects",
             "status": "preserve-only",
             "summary": "Retain unmodeled PowerPoint extension transition effects when the transition is untouched.",
@@ -2666,6 +2728,40 @@
                 "feature": "slide-transition",
                 "subset": "extended-existing-effects"
               }
+            }
+          },
+          {
+            "feature": "slide-transition",
+            "subset": "morph-rendering",
+            "status": "unsupported",
+            "summary": "Animate or emulate PowerPoint Morph in the xdoc Viewer, PDF, PNG, or static preview renderers.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "no-in-house-morph-renderer",
+                "description": "Repository renderers expose static slide states and do not implement object interpolation, word/character Morph, or PowerPoint's matching heuristics."
+              },
+              {
+                "code": "mce-fallback-only",
+                "description": "Both parser engines select the authored fade fallback when they encounter p159:morph. The Viewer may therefore show a fade instead of silently dropping the transition; PDF and PNG output remain static."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-transition-morph-rendering-policy",
+                "kind": "policy",
+                "claim": "Morph rendering is explicitly excluded from the MVP; static preview output cannot be used as playback evidence."
+              },
+              {
+                "id": "slide-transition-morph-parser-fallback",
+                "kind": "behavior",
+                "claim": "Inline MCE regressions in both parser engines prove that an unsupported Morph Choice no longer masks its supported fade Fallback."
+              }
+            ],
+            "recommendation": {
+              "action": "do-not-attempt",
+              "operations": [],
+              "note": "Use Microsoft PowerPoint to review playback; use xdoc preview only to compare the static source and destination slide states."
             }
           },
           {
@@ -3278,6 +3374,7 @@
             "model-3d/create-edit",
             "slide-animation/complex-create-edit",
             "slide-transition/extended-create-edit",
+            "slide-transition/morph-rendering",
             "smartart/create-edit",
             "vba-project/code-editing"
           ]
@@ -3343,6 +3440,50 @@
             "strictOption": "--daemon-strict",
             "sessionKey": "canonical input path",
             "fallback": "--daemon falls back to one-shot inspect when the daemon is unavailable; --daemon-strict does not"
+          }
+        },
+        "morph-check": {
+          "usage": "xdoc pptx morph-check <deck.pptx> [--from-slide 0 --to-slide 1] [--output report.json --overwrite] --json",
+          "inputs": ["input PPTX"],
+          "outputs": [
+            "pptx-morph-check/v1 JSON report",
+            "human summary",
+            "optional persisted JSON report"
+          ],
+          "scope": {
+            "default": "Audit each adjacent pair whose destination slide carries modeled Morph.",
+            "explicitPair": "--from-slide and --to-slide are 0-based, required together, and to-slide must equal from-slide + 1."
+          },
+          "matching": {
+            "identity": "Exact, case-sensitive, non-empty shape names beginning with !!; nested group descendants are included.",
+            "diagnostics": [
+              "matched",
+              "missing-in-from",
+              "missing-in-to",
+              "duplicate-name",
+              "type-changed",
+              "geometry-changed",
+              "text-changed",
+              "no-visible-change"
+            ],
+            "nonGoals": [
+              "PowerPoint implicit matching heuristics",
+              "PowerPoint playback verification",
+              "viewer/PDF Morph rendering",
+              "a global Morph-compatible verdict"
+            ]
+          },
+          "ioContract": {
+            "stdout": {
+              "format": "complete JSON when --json is set; human summary otherwise",
+              "schemaVersion": "pptx-morph-check/v1"
+            },
+            "stderr": {
+              "usage": "errors-only"
+            },
+            "filesystem": {
+              "usage": "The PPTX is read-only; optional --output persists the report and --overwrite is required to replace it."
+            }
           }
         },
         "select": {
@@ -11813,6 +11954,30 @@
               "folHlink"
             ],
             "strict": true
+          },
+          "transitionType": {
+            "type": "string",
+            "enum": [
+              "none",
+              "fade",
+              "cut",
+              "push",
+              "wipe",
+              "cover",
+              "split",
+              "zoom",
+              "dissolve",
+              "random",
+              "morph"
+            ],
+            "strict": true,
+            "description": "Canonical slide transition kind. morph writes an Office 2016+ p159:morph inside mc:AlternateContent with a p:fade fallback; legacy p:zoom remains a distinct transition kind."
+          },
+          "morphMode": {
+            "type": "string",
+            "enum": ["by-object", "by-word", "by-char"],
+            "strict": true,
+            "description": "Morph granularity. This field is valid only when type is morph; omission defaults to by-object."
           },
           "slideMasterSelector": {
             "oneOf": [
@@ -20325,6 +20490,9 @@
                       "duration": {
                         "$ref": "#/$defs/nonNegativeInteger"
                       },
+                      "morphMode": {
+                        "$ref": "#/$defs/morphMode"
+                      },
                       "orient": {
                         "type": "string"
                       },
@@ -20338,7 +20506,7 @@
                         "type": "boolean"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/$defs/transitionType"
                       }
                     },
                     "required": ["op", "slide"],
@@ -21211,6 +21379,30 @@
                 "folHlink"
               ],
               "strict": true
+            },
+            "transitionType": {
+              "type": "string",
+              "enum": [
+                "none",
+                "fade",
+                "cut",
+                "push",
+                "wipe",
+                "cover",
+                "split",
+                "zoom",
+                "dissolve",
+                "random",
+                "morph"
+              ],
+              "strict": true,
+              "description": "Canonical slide transition kind. morph writes an Office 2016+ p159:morph inside mc:AlternateContent with a p:fade fallback; legacy p:zoom remains a distinct transition kind."
+            },
+            "morphMode": {
+              "type": "string",
+              "enum": ["by-object", "by-word", "by-char"],
+              "strict": true,
+              "description": "Morph granularity. This field is valid only when type is morph; omission defaults to by-object."
             },
             "slideMasterSelector": {
               "oneOf": [
@@ -28908,6 +29100,7 @@
               "clear",
               "dir",
               "duration",
+              "morphMode",
               "orient",
               "speed",
               "throughBlack",
@@ -33127,6 +33320,7 @@
                 "semantic",
                 "hasNotes",
                 "hasTransition",
+                "transition",
                 "hasTiming",
                 "hasSmartArt",
                 "preserveOnly",
@@ -33432,6 +33626,83 @@
                 },
                 "hasTransition": {
                   "type": "boolean"
+                },
+                "transition": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "kind",
+                        "speed",
+                        "advanceOnClick",
+                        "extensionWrapped",
+                        "editable"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "fade",
+                            "cut",
+                            "push",
+                            "wipe",
+                            "cover",
+                            "split",
+                            "zoom",
+                            "dissolve",
+                            "random",
+                            "morph",
+                            "unknown"
+                          ],
+                          "strict": true
+                        },
+                        "morphMode": {
+                          "type": "string",
+                          "enum": ["by-object", "by-word", "by-char"],
+                          "strict": true
+                        },
+                        "direction": {
+                          "type": "string"
+                        },
+                        "orientation": {
+                          "type": "string"
+                        },
+                        "throughBlack": {
+                          "type": "boolean"
+                        },
+                        "speed": {
+                          "type": "string"
+                        },
+                        "durationMs": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "advanceOnClick": {
+                          "type": "boolean"
+                        },
+                        "advanceAfterMs": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "extensionWrapped": {
+                          "type": "boolean"
+                        },
+                        "fallbackKind": {
+                          "type": "string"
+                        },
+                        "effectElement": {
+                          "type": "string"
+                        },
+                        "editable": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "hasTiming": {
                   "type": "boolean"
@@ -33969,6 +34240,436 @@
                   }
                 }
               }
+            }
+          }
+        }
+      },
+      "morphCheckReportSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://structurify.io/schemas/pptx-morph-check.v1.schema.json",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "status",
+          "input",
+          "scope",
+          "slideCount",
+          "pairCount",
+          "matchedCount",
+          "findingCount",
+          "pairs",
+          "nonGoals"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": "pptx-morph-check/v1"
+          },
+          "status": {
+            "const": "success"
+          },
+          "input": {
+            "type": ["string", "null"]
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["morph-transitions", "explicit-pair"],
+            "strict": true
+          },
+          "slideCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pairCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "matchedCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "findingCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "pairs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "fromSlide",
+                "toSlide",
+                "transition",
+                "explicitNameCount",
+                "matched",
+                "findings"
+              ],
+              "properties": {
+                "fromSlide": {
+                  "type": "object",
+                  "required": ["slideIndex", "slideNumber"],
+                  "properties": {
+                    "slideIndex": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "slideNumber": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                },
+                "toSlide": {
+                  "type": "object",
+                  "required": ["slideIndex", "slideNumber"],
+                  "properties": {
+                    "slideIndex": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "slideNumber": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                },
+                "transition": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "kind",
+                        "speed",
+                        "advanceOnClick",
+                        "extensionWrapped",
+                        "editable"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "fade",
+                            "cut",
+                            "push",
+                            "wipe",
+                            "cover",
+                            "split",
+                            "zoom",
+                            "dissolve",
+                            "random",
+                            "morph",
+                            "unknown"
+                          ],
+                          "strict": true
+                        },
+                        "morphMode": {
+                          "type": "string",
+                          "enum": ["by-object", "by-word", "by-char"],
+                          "strict": true
+                        },
+                        "direction": {
+                          "type": "string"
+                        },
+                        "orientation": {
+                          "type": "string"
+                        },
+                        "throughBlack": {
+                          "type": "boolean"
+                        },
+                        "speed": {
+                          "type": "string"
+                        },
+                        "durationMs": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "advanceOnClick": {
+                          "type": "boolean"
+                        },
+                        "advanceAfterMs": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "extensionWrapped": {
+                          "type": "boolean"
+                        },
+                        "fallbackKind": {
+                          "type": "string"
+                        },
+                        "effectElement": {
+                          "type": "string"
+                        },
+                        "editable": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "explicitNameCount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "matched": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "fromShape",
+                      "toShape",
+                      "fromGeometry",
+                      "toGeometry",
+                      "typeChanged",
+                      "geometryChanged",
+                      "textChanged"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "fromShape": {
+                        "type": "object",
+                        "required": ["slideIndex", "slideNumber", "shapeId", "name", "shapeType"],
+                        "properties": {
+                          "slideIndex": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "slideNumber": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "shapeId": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "shapeType": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "toShape": {
+                        "type": "object",
+                        "required": ["slideIndex", "slideNumber", "shapeId", "name", "shapeType"],
+                        "properties": {
+                          "slideIndex": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "slideNumber": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "shapeId": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "shapeType": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "fromGeometry": {
+                        "type": ["object", "null"],
+                        "required": [
+                          "xEmu",
+                          "yEmu",
+                          "widthEmu",
+                          "heightEmu",
+                          "rotationDegrees",
+                          "flipHorizontal",
+                          "flipVertical"
+                        ],
+                        "properties": {
+                          "xEmu": {
+                            "type": "integer"
+                          },
+                          "yEmu": {
+                            "type": "integer"
+                          },
+                          "widthEmu": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "heightEmu": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "rotationDegrees": {
+                            "type": "number"
+                          },
+                          "flipHorizontal": {
+                            "type": "boolean"
+                          },
+                          "flipVertical": {
+                            "type": "boolean"
+                          }
+                        }
+                      },
+                      "toGeometry": {
+                        "type": ["object", "null"],
+                        "required": [
+                          "xEmu",
+                          "yEmu",
+                          "widthEmu",
+                          "heightEmu",
+                          "rotationDegrees",
+                          "flipHorizontal",
+                          "flipVertical"
+                        ],
+                        "properties": {
+                          "xEmu": {
+                            "type": "integer"
+                          },
+                          "yEmu": {
+                            "type": "integer"
+                          },
+                          "widthEmu": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "heightEmu": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "rotationDegrees": {
+                            "type": "number"
+                          },
+                          "flipHorizontal": {
+                            "type": "boolean"
+                          },
+                          "flipVertical": {
+                            "type": "boolean"
+                          }
+                        }
+                      },
+                      "typeChanged": {
+                        "type": "boolean"
+                      },
+                      "geometryChanged": {
+                        "type": ["boolean", "null"]
+                      },
+                      "textChanged": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "findings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "code",
+                      "severity",
+                      "name",
+                      "fromShapes",
+                      "toShapes",
+                      "message",
+                      "suggestedAction"
+                    ],
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "enum": [
+                          "morph_pair_name_missing_in_to",
+                          "morph_pair_name_missing_in_from",
+                          "morph_pair_name_duplicate",
+                          "morph_pair_type_mismatch",
+                          "morph_pair_no_visible_change",
+                          "morph_pair_no_explicit_names",
+                          "morph_transition_missing"
+                        ],
+                        "strict": true
+                      },
+                      "severity": {
+                        "type": "string",
+                        "enum": ["warning", "info"],
+                        "strict": true
+                      },
+                      "name": {
+                        "type": ["string", "null"]
+                      },
+                      "fromShapes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["slideIndex", "slideNumber", "shapeId", "name", "shapeType"],
+                          "properties": {
+                            "slideIndex": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "slideNumber": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "shapeId": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "shapeType": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "toShapes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["slideIndex", "slideNumber", "shapeId", "name", "shapeType"],
+                          "properties": {
+                            "slideIndex": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "slideNumber": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "shapeId": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "shapeType": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "suggestedAction": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "nonGoals": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         }
@@ -39021,6 +39722,7 @@
     "pptx": "xdoc pptx new|apply --patch <patch.json> --output <out.pptx>",
     "pptxRecipe": "xdoc pptx recipe --patch <recipe.json> --compile --json",
     "pptxDiff": "xdoc pptx diff before.pptx after.pptx --json",
+    "pptxMorphCheck": "xdoc pptx morph-check deck.pptx [--from-slide 0 --to-slide 1] --json",
     "pptxI18nScan": "xdoc pptx i18n-scan --source candidate.pptx --mode candidate --units i18n-scan-source.json --data translations.json --output i18n-candidate.json --json",
     "pptxI18nStyleDiff": "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
     "pptxI18nPlan": "xdoc pptx i18n-plan --source old.pptx --units i18n-scan-source.json --data translations.json --output i18n-plan.json --json",

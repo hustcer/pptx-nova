@@ -51,11 +51,19 @@ Use these entry points from skill workflows:
   scoped preview/vision-diff/structure evidence before an Edit or Micro Edit is
   published. Structural copy workflows may supply native `pptx-copy-from/v2`
   evidence; the gate requires a read-only `ready` preflight whose target/donor
-  fingerprints still match the current files, then validates donor/target slide
+  whole-file SHA-256 values still match the current files, validates normalized
+  package fingerprints, then validates donor/target slide
   identities, part/dependency mappings, and aggregate changed parts without
-  requiring or fabricating patch `opResults`. When session rules apply, it also verifies produced-object
+  requiring or fabricating patch `opResults`. Native copy evidence also requires
+  a manifest-bound passing copy-size gate. When session rules apply, it verifies produced-object
   identity and font/fill postconditions directly from candidate PPTX bytes.
   Read its stable `agentGate.nextAction` for repair routing.
+- `pptx-nova-copy-size-gate.mjs` - inspect donor and target slide dimensions,
+  verify the current `pptx-copy-from/v2` whole-file SHA-256 bindings separately
+  from its normalized OPC package fingerprints, and fail closed before apply
+  when the dimensions differ. Current policy is identical-size-only until xdoc
+  exposes an explicit copy/import size strategy; the script never asks a
+  renderer to hide the mismatch.
 - `pptx-nova-refurbish-plan.mjs` - build the preflight route for existing-deck
   refurbishment: readiness exception, native skinning support, fallback strategy,
   duplicate chrome policy, and required gates.

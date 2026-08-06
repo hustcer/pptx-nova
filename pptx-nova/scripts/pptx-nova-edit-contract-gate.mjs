@@ -7,6 +7,7 @@ import { inflateRawSync } from 'node:zlib'
 const SCHEMA_VERSION = 'pptx-nova-edit-contract-gate/v1'
 const CONTRACT_SCHEMA_VERSION = 'pptx-nova-edit-contract/v1'
 const COPY_FROM_SCHEMA_VERSION = 'pptx-copy-from/v2'
+const COPY_SIZE_GATE_SCHEMA_VERSION = 'pptx-nova-copy-size-gate/v1'
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs --contract <path> [options]
@@ -19,6 +20,8 @@ Options:
   --candidate <pptx>       Required stable run-directory candidate PPTX.
   --dry-run <path>         Defaults to dry-run.json beside the contract; accepts
                            pptx-dry-run/v1 or pptx-copy-from/v2 preflight evidence.
+  --copy-size-gate <path>  Defaults to copy-size-gate.json beside the contract;
+                           required for native copy-from structural evidence.
   --diff <path>            Defaults to pptx-diff.json beside the contract.
   --style-diff <path>      Defaults to style-diff.json beside the contract.
   --preview <path>         Defaults to preview.json beside the contract.
@@ -45,6 +48,7 @@ function parseArgs(argv) {
     contract: '',
     candidate: '',
     dryRun: '',
+    copySizeGate: '',
     diff: '',
     styleDiff: '',
     preview: '',
@@ -62,6 +66,7 @@ function parseArgs(argv) {
     '--contract': 'contract',
     '--candidate': 'candidate',
     '--dry-run': 'dryRun',
+    '--copy-size-gate': 'copySizeGate',
     '--diff': 'diff',
     '--style-diff': 'styleDiff',
     '--preview': 'preview',
@@ -99,6 +104,7 @@ function parseArgs(argv) {
   if (!existsSync(args.candidate)) throw new Error(`candidate does not exist: ${args.candidate}`)
   const runDir = dirname(args.contract)
   args.dryRun = resolve(args.dryRun || join(runDir, 'dry-run.json'))
+  args.copySizeGate = resolve(args.copySizeGate || join(runDir, 'copy-size-gate.json'))
   args.diff = resolve(args.diff || join(runDir, 'pptx-diff.json'))
   args.styleDiff = resolve(args.styleDiff || join(runDir, 'style-diff.json'))
   args.preview = resolve(args.preview || join(runDir, 'preview.json'))
@@ -786,35 +792,44 @@ function checkCopyFromPreflight(contract, copyReport, report) {
 
   const targetPath = reportedPath(copyReport?.input, workspace)
   const donorPath = reportedPath(copyReport?.source?.path, workspace)
-  const targetFingerprint =
+  const targetFileSha256 =
     targetPath && existsSync(targetPath) ? sha256(targetPath) : contract.source?.sha256
-  const donorFingerprint = donorPath && existsSync(donorPath) ? sha256(donorPath) : null
+  const donorFileSha256 = donorPath && existsSync(donorPath) ? sha256(donorPath) : null
   if (
-    !sha256LooksValid(preflight.targetFingerprint) ||
-    preflight.targetFingerprint !== targetFingerprint ||
-    preflight.targetFingerprint !== contract.source?.sha256
+    !sha256LooksValid(preflight.targetFileSha256) ||
+    preflight.targetFileSha256 !== targetFileSha256 ||
+    preflight.targetFileSha256 !== contract.source?.sha256
   ) {
     fail(
-      'copy-from-target-fingerprint-mismatch',
-      'copy-from preflight is not bound to the current target PPTX bytes',
+      'copy-from-target-file-sha256-mismatch',
+      'copy-from preflight targetFileSha256 is not bound to the current target PPTX bytes',
       {
         expected: contract.source?.sha256 ?? null,
-        actual: preflight.targetFingerprint ?? null,
+        actual: preflight.targetFileSha256 ?? null,
       },
     )
   }
   if (
-    !sha256LooksValid(preflight.sourceFingerprint) ||
-    !donorFingerprint ||
-    preflight.sourceFingerprint !== donorFingerprint
+    !sha256LooksValid(preflight.sourceFileSha256) ||
+    !donorFileSha256 ||
+    preflight.sourceFileSha256 !== donorFileSha256
   ) {
     fail(
-      'copy-from-source-fingerprint-mismatch',
-      'copy-from preflight is not bound to the declared donor PPTX bytes',
+      'copy-from-source-file-sha256-mismatch',
+      'copy-from preflight sourceFileSha256 is not bound to the declared donor PPTX bytes',
       {
-        expected: donorFingerprint,
-        actual: preflight.sourceFingerprint ?? null,
+        expected: donorFileSha256,
+        actual: preflight.sourceFileSha256 ?? null,
       },
+    )
+  }
+  if (
+    !sha256LooksValid(preflight.targetFingerprint) ||
+    !sha256LooksValid(preflight.sourceFingerprint)
+  ) {
+    fail(
+      'copy-from-package-fingerprint-invalid',
+      'copy-from preflight must include normalized OPC source/target package fingerprints',
     )
   }
   if (preflight.risks?.length > 0) {
@@ -835,6 +850,41 @@ function checkCopyFromPreflight(contract, copyReport, report) {
     risks: preflight.risks?.length ?? 0,
   })
   return valid
+}
+
+function checkCopySizeGate(contract, copyReport, sizeGate, report) {
+  const workspace = contract.workspace || '.'
+  const targetPath = reportedPath(sizeGate?.target?.path, workspace)
+  const donorPath = reportedPath(sizeGate?.donor?.path, workspace)
+  const expectedTargetPath = resolve(contract.source?.pptx ?? '')
+  const expectedDonorPath = reportedPath(copyReport?.source?.path, workspace)
+  const valid =
+    sizeGate?.schemaVersion === COPY_SIZE_GATE_SCHEMA_VERSION &&
+    sizeGate?.status === 'pass' &&
+    sizeGate?.agentGate?.passed === true &&
+    sizeGate?.slideSizeComparison?.matches === true &&
+    targetPath === expectedTargetPath &&
+    donorPath === expectedDonorPath &&
+    sizeGate?.target?.fileSha256 === copyReport?.preflight?.targetFileSha256 &&
+    sizeGate?.donor?.fileSha256 === copyReport?.preflight?.sourceFileSha256
+  addCheck(report, 'copy-size-gate', valid ? 'pass' : 'fail', {
+    matches: sizeGate?.slideSizeComparison?.matches === true,
+    nextAction: sizeGate?.agentGate?.nextAction ?? null,
+    targetPath: targetPath || null,
+    donorPath: donorPath || null,
+  })
+  if (!valid) {
+    const mismatch = sizeGate?.slideSizeComparison?.matches === false
+    addIssue(
+      report,
+      'blockers',
+      mismatch ? 'copy-size-gate-failed' : 'copy-size-gate-stale',
+      mismatch
+        ? 'donor and target slide sizes differ and copy-from has no explicit size strategy'
+        : 'copy size gate is missing, failed, or not bound to the current copy-from preflight',
+      { sizeGate: sizeGate?.agentGate ?? null },
+    )
+  }
 }
 
 function copyFromExpectation(target) {
@@ -1218,6 +1268,7 @@ function evidenceBindings(kind, evidence) {
 function evidencePath(args, kind) {
   return {
     'dry-run': args.dryRun,
+    'copy-size-gate': args.copySizeGate,
     'semantic-diff': args.diff,
     'style-diff': args.styleDiff,
     'png-preview': args.preview,
@@ -1261,6 +1312,7 @@ function checkEvidenceBindings(contract, args, loaded, report) {
     const artifactPath = evidencePath(args, kind)
     if (
       kind !== 'dry-run' &&
+      kind !== 'copy-size-gate' &&
       artifactPath &&
       statSync(artifactPath).mtimeMs < statSync(candidate).mtimeMs
     ) {
@@ -1284,7 +1336,7 @@ function checkEvidence(contract, args, report) {
       addIssue(
         report,
         'blockers',
-        'required-evidence-missing',
+        kind === 'copy-size-gate' ? 'copy-size-gate-missing' : 'required-evidence-missing',
         `required ${kind} evidence is missing`,
         {
           kind,
@@ -1335,6 +1387,8 @@ function checkEvidence(contract, args, report) {
       )
     } else {
       checkCopyFromPreflight(contract, dryRun, report)
+      const sizeGate = loaded['copy-size-gate']
+      if (sizeGate) checkCopySizeGate(contract, dryRun, sizeGate, report)
       addCheck(report, 'copy-from-structural-evidence', 'pass', {
         copiedSlides: dryRun.copied.length,
         dependencyMappings: dryRun.dependencyMappings.length,
@@ -1510,6 +1564,9 @@ function nextAction(report) {
   }
   if (codes.has('evidence-candidate-stale')) return 'regenerate-current-candidate-evidence'
   if (codes.has('dry-run-not-successful')) return 'retry-dry-run-with-fix-patch'
+  if (codes.has('copy-size-gate-missing')) return 'run-copy-size-gate'
+  if (codes.has('copy-size-gate-failed')) return 'choose-explicit-slide-size-strategy'
+  if (codes.has('copy-size-gate-stale')) return 'refresh-copy-from-preflight'
   if (codes.has('target-text-style-changed')) return 'retry-with-style-preserving-text-edit'
   if (codes.has('vision-diff-new-regression')) return 'repair-new-visual-regressions'
   if (codes.has('selector-resolution-missing')) return 'rebind-selectors'
@@ -1580,6 +1637,7 @@ function buildReport(args) {
     source: contract.source ?? null,
     artifacts: {
       dryRun: args.dryRun,
+      copySizeGate: args.copySizeGate,
       semanticDiff: args.diff,
       styleDiff: args.styleDiff,
       preview: args.preview,

@@ -270,13 +270,17 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     of manufacturing an equivalent patch report:
 
     ```bash
+    xdoc pptx copy-from -i target.pptx --from donor.pptx \
+      --slides 1,3,5-8 --output <run-dir>/candidate.pptx \
+      --dry-run --json > <run-dir>/dry-run.json
 
+    node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
+      --target target.pptx \
+      --donor donor.pptx \
+      --copy-report <run-dir>/dry-run.json \
+      --output <run-dir>/copy-size-gate.json \
+      --json
     ```
-
-xdoc pptx copy-from -i target.pptx --from donor.pptx \
---slides 1,3,5-8 --output <run-dir>/candidate.pptx \
---dry-run --json > <run-dir>/dry-run.json
-```
 
     `--slide N` is the compatible 0-based single-slide selector (default 0),
     while `--slides` is 1-based and `--all` selects the whole donor; the three
@@ -286,30 +290,43 @@ xdoc pptx copy-from -i target.pptx --from donor.pptx \
     mutation, serializes once, and reports `copied[]`, flattened
     `dependencyMappings[]`, aggregate `changedParts[]`, and a read-only preflight
     with input fingerprints, planned parts/relationships, blockers, and risks.
-    Require `status: "ready"`, current target/donor fingerprints, and no blockers
-    before apply. The Edit Contract gate consumes this native
-    `pptx-copy-from/v2` evidence directly; do not
-    invent `pptx-dry-run/v1` or `opResults[]`.
+    Require `status: "ready"`, current target/donor `*FileSha256` values,
+    normalized OPC package fingerprints, no blockers, and
+    `copy-size-gate.json.agentGate.passed=true` before apply. Package
+    fingerprints and whole-file SHA-256 values are distinct contracts; do not
+    compare one as though it were the other. A ready dependency plan does not
+    authorize copying raw donor geometry into a differently sized target page.
+    Until `copy-from` declares and implements an explicit size strategy, the
+    size gate requires identical slide dimensions and returns
+    `choose-explicit-slide-size-strategy` otherwise. Stop there; do not apply,
+    silently fit the slide, or hide the mismatch in Viewer/PDF rendering. The
+    Edit Contract gate consumes both native `pptx-copy-from/v2` and
+    `pptx-nova-copy-size-gate/v1` evidence; do not invent `pptx-dry-run/v1` or
+    `opResults[]`.
 
-8. Apply only after dry-run is clean and selectors are correct. Any validation
-that consumes the applied output (`vision-check`, `convert`, `check`,
-replay/audit) must run after the apply command has completed; do not launch
-apply-dependent checks in parallel with the write.
-Generic existing-deck Edit/Micro Edit workflows must finish the stable
-candidate with one semantic diff and every evidence kind declared in
-`edit-contract.json`, bind the stable candidate and evidence hashes in
-`evidence-manifest.json`, then require
-`pptx-nova-edit-contract-gate.mjs --strict` before publication. Visible
-text edits that preserve target formatting should require `style-diff` plus
-scoped preview and `vision-diff` evidence. Use candidate-only
-`vision-check` as a diagnostic when needed; inherited source issues are not
-edit regressions.
-Require apply to return `semanticIssues: []` before consuming its candidate.
-If `session-rules.json` exists, pass the successful
-`session-rules-resolution.json` to the contract normalizer. The final
-contract gate must report every applicable rule as satisfied before
-publication. After successful publication, advance the rules to the accepted
-candidate revision; never advance them after a failed candidate. 9. Run static geometry validation:
+8.  Apply only after dry-run is clean and selectors are correct. Any validation
+    that consumes the applied output (`vision-check`, `convert`, `check`,
+    replay/audit) must run after the apply command has completed; do not launch
+    apply-dependent checks in parallel with the write.
+    Generic existing-deck Edit/Micro Edit workflows must finish the stable
+    candidate with one semantic diff and every evidence kind declared in
+    `edit-contract.json`, bind the stable candidate and evidence hashes in
+    `evidence-manifest.json`, then require
+    `pptx-nova-edit-contract-gate.mjs --strict` before publication. Visible
+    text edits that preserve target formatting should require `style-diff` plus
+    scoped preview and `vision-diff` evidence. Use candidate-only
+    `vision-check` as a diagnostic when needed; inherited source issues are not
+    edit regressions.
+    For native `copy-from`, require the copy-size gate to pass before launching the
+    apply command. Require patch apply to return `semanticIssues: []` before
+    consuming its candidate.
+    If `session-rules.json` exists, pass the successful
+    `session-rules-resolution.json` to the contract normalizer. The final
+    contract gate must report every applicable rule as satisfied before
+    publication. After successful publication, advance the rules to the accepted
+    candidate revision; never advance them after a failed candidate.
+
+9.  Run static geometry validation:
 
     ```bash
     xdoc pptx vision-check out.pptx --json > <run-dir>/vision.json
@@ -327,23 +344,23 @@ candidate revision; never advance them after a failed candidate. 9. Run static g
     native chart/table data ops, run the lightweight semantic audit first so the
     finalizer can consume semantic-audit.json from the run directory:
 
-        node <skill-root>/scripts/pptx-nova-semantic-audit.mjs \
-          --deck-lock deck_lock.json \
-          --patch patch.json \
-          --final-inspect <run-dir>/final-inspect.json \
-          --output <run-dir>/semantic-audit.json \
-          --json
+         node <skill-root>/scripts/pptx-nova-semantic-audit.mjs \
+           --deck-lock deck_lock.json \
+           --patch patch.json \
+           --final-inspect <run-dir>/final-inspect.json \
+           --output <run-dir>/semantic-audit.json \
+           --json
 
     For brand-sensitive or template-derived output, run the lightweight XML
     structure check before the finalizer so it can prove target fonts/colors are
     written into the PPTX and catch empty placeholder residue:
 
-        node <skill-root>/scripts/pptx-nova-structure-check.mjs \
-          --pptx out.pptx \
-          --deck-lock deck_lock.json \
-          --strict-placeholders \
-          --output <run-dir>/structure-check.json \
-          --json
+         node <skill-root>/scripts/pptx-nova-structure-check.mjs \
+           --pptx out.pptx \
+           --deck-lock deck_lock.json \
+           --strict-placeholders \
+           --output <run-dir>/structure-check.json \
+           --json
 
     ```bash
     xdoc pptx inspect out.pptx --daemon --json > <run-dir>/final-inspect.json
@@ -370,7 +387,7 @@ candidate revision; never advance them after a failed candidate. 9. Run static g
     preserved and the command fails with the exact conflicting path.
 
 10. For existing-deck edits, template-following, and refurbish tasks, run
-semantic diff once after the candidate is stable and before final delivery:
+    semantic diff once after the candidate is stable and before final delivery:
 
     ```bash
     xdoc pptx diff --source source.pptx --candidate out.pptx \

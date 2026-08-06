@@ -321,6 +321,7 @@ function writeFixture({
   const draft = join(runDir, 'edit-contract-draft.json')
   const contract = join(runDir, 'edit-contract.json')
   const dryRun = join(runDir, 'dry-run.json')
+  const copySizeGate = join(runDir, 'copy-size-gate.json')
   const diff = join(runDir, 'pptx-diff.json')
   const preview = join(runDir, 'preview.json')
   const vision = join(runDir, 'vision.json')
@@ -347,6 +348,7 @@ function writeFixture({
     draft,
     contract,
     dryRun,
+    copySizeGate,
     diff,
     preview,
     vision,
@@ -379,6 +381,7 @@ function writeManifest(fixture) {
   const contract = JSON.parse(readFileSync(fixture.contract, 'utf8'))
   const paths = {
     'semantic-diff': fixture.diff,
+    'copy-size-gate': fixture.copySizeGate,
     'style-diff': fixture.styleDiff,
     'png-preview': fixture.preview,
     'vision-check': fixture.vision,
@@ -404,6 +407,8 @@ function runGate(fixture, expectedStatus = 0, { refreshManifest = true } = {}) {
       fixture.candidate,
       '--dry-run',
       fixture.dryRun,
+      '--copy-size-gate',
+      fixture.copySizeGate,
       '--diff',
       fixture.diff,
       '--preview',
@@ -1023,8 +1028,10 @@ function writeCopyFromContractFixture() {
     preflight: {
       ready: true,
       readOnly: true,
-      sourceFingerprint: sha256(fixture.donor),
-      targetFingerprint: sha256(fixture.source),
+      sourceFileSha256: sha256(fixture.donor),
+      targetFileSha256: sha256(fixture.source),
+      sourceFingerprint: 'd'.repeat(64),
+      targetFingerprint: 'e'.repeat(64),
       targetSlideCountBefore: 10,
       targetSlideCountAfter: 11,
       summary: {
@@ -1088,6 +1095,22 @@ function writeCopyFromContractFixture() {
       risks: [],
     },
   })
+  writeJson(fixture.copySizeGate, {
+    schemaVersion: 'pptx-nova-copy-size-gate/v1',
+    status: 'pass',
+    target: {
+      path: fixture.source,
+      fileSha256: sha256(fixture.source),
+      slideSize: { wEmu: '12192000', hEmu: '6858000' },
+    },
+    donor: {
+      path: fixture.donor,
+      fileSha256: sha256(fixture.donor),
+      slideSize: { wEmu: '12192000', hEmu: '6858000' },
+    },
+    slideSizeComparison: { matches: true },
+    agentGate: { passed: true, nextAction: 'continue-copy-from', failures: [] },
+  })
   writeJson(fixture.diff, {
     schemaVersion: 'pptx-diff/v1',
     status: 'success',
@@ -1122,11 +1145,12 @@ function writeCopyFromContractFixture() {
   return fixture
 }
 
-test('edit contract gate accepts fingerprint-bound pptx-copy-from/v2 preflight evidence', () => {
+test('edit contract gate accepts file-bound and package-fingerprinted copy-from/v2 evidence', () => {
   const fixture = writeCopyFromContractFixture()
-  generateContract(fixture)
+  const contract = generateContract(fixture)
   const report = runGate(fixture)
 
+  assert.equal(contract.requiredEvidence.includes('copy-size-gate'), true)
   assert.equal(report.agentGate.passed, true)
   assert.equal(report.summary.coveredTargetCount, 1)
   assert.equal(report.targetCoverage[0].copyFrom.sourceSlide, 2)
@@ -1136,6 +1160,29 @@ test('edit contract gate accepts fingerprint-bound pptx-copy-from/v2 preflight e
     true,
   )
   assert.equal('opResults' in JSON.parse(readFileSync(fixture.dryRun, 'utf8')), false)
+})
+
+test('edit contract gate blocks copy-from when donor and target slide sizes differ', () => {
+  const fixture = writeCopyFromContractFixture()
+  const sizeGate = JSON.parse(readFileSync(fixture.copySizeGate, 'utf8'))
+  sizeGate.status = 'fail'
+  sizeGate.donor.slideSize = { wEmu: '13439775', hEmu: '7559675' }
+  sizeGate.slideSizeComparison.matches = false
+  sizeGate.agentGate = {
+    passed: false,
+    nextAction: 'choose-explicit-slide-size-strategy',
+    failures: [{ code: 'slide-size-mismatch' }],
+  }
+  writeJson(fixture.copySizeGate, sizeGate)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(report.agentGate.nextAction, 'choose-explicit-slide-size-strategy')
+  assert.equal(
+    report.blockers.some((item) => item.code === 'copy-size-gate-failed'),
+    true,
+  )
 })
 
 test('edit contract gate rejects copy-from evidence bound to the wrong donor slide', () => {
@@ -1153,17 +1200,32 @@ test('edit contract gate rejects copy-from evidence bound to the wrong donor sli
   )
 })
 
-test('edit contract gate rejects a stale copy-from donor fingerprint', () => {
+test('edit contract gate rejects a stale copy-from donor file SHA-256', () => {
   const fixture = writeCopyFromContractFixture()
   const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
-  evidence.preflight.sourceFingerprint = '0'.repeat(64)
+  evidence.preflight.sourceFileSha256 = '0'.repeat(64)
   writeJson(fixture.dryRun, evidence)
   generateContract(fixture)
   const report = runGate(fixture, 2)
 
   assert.equal(report.agentGate.passed, false)
   assert.equal(
-    report.blockers.some((item) => item.code === 'copy-from-source-fingerprint-mismatch'),
+    report.blockers.some((item) => item.code === 'copy-from-source-file-sha256-mismatch'),
+    true,
+  )
+})
+
+test('edit contract gate rejects an invalid normalized package fingerprint', () => {
+  const fixture = writeCopyFromContractFixture()
+  const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  evidence.preflight.sourceFingerprint = 'not-a-sha256'
+  writeJson(fixture.dryRun, evidence)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(
+    report.blockers.some((item) => item.code === 'copy-from-package-fingerprint-invalid'),
     true,
   )
 })

@@ -152,10 +152,31 @@ three selectors are mutually exclusive.
 
 Treat the v2 dry-run as a fingerprint-bound execution plan. Require
 `status: "ready"`, `preflight.readOnly: true`, no `preflight.blockers`, and
-target/donor SHA-256 fingerprints that still match the files immediately before
-apply. Review every `preflight.risks` item instead of silently accepting it.
+target/donor `targetFileSha256` / `sourceFileSha256` values that still match the
+files immediately before apply. `targetFingerprint` / `sourceFingerprint` are
+normalized OPC package fingerprints, not whole-file hashes; require both
+contracts without comparing them to each other. Review every `preflight.risks`
+item instead of silently accepting it.
 `preflight.parts[]` and `preflight.relationships[]` describe the exact planned
 package mutation, including dependencies that will be reused rather than added.
+
+Before apply, bind the report to the donor/target page-size policy:
+
+```bash
+node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
+  --target target.pptx \
+  --donor donor.pptx \
+  --copy-report <run-dir>/dry-run.json \
+  --output <run-dir>/copy-size-gate.json \
+  --json
+```
+
+The normalizer automatically adds `copy-size-gate` to `requiredEvidence` for
+`operationKind: "copy-from"`. The final gate requires its SHA-bound report and
+rejects mismatched dimensions with
+`nextAction: "choose-explicit-slide-size-strategy"`. Current xdoc has no such
+explicit strategy, so use a matching target size or stop for a user decision;
+do not silently scale donor geometry or compensate in a renderer.
 
 Bind each produced slide target to its donor identity:
 
@@ -206,14 +227,14 @@ into synthetic patch operations.
 
 Choose the smallest policy that can prove the requested edit:
 
-| Edit kind                          | Required evidence                                                                                       |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Notes/core metadata only           | `dry-run`, `semantic-diff`                                                                              |
-| Visible single-object text         | `dry-run`, `semantic-diff`, `style-diff`, `png-preview`, `vision-diff`                                  |
-| Visible multi-target/batch text    | Same as visible text, covering every target slide                                                       |
-| Single-object fill/line/font style | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`                                                |
-| Geometry/image/layout              | Above plus `final-inspect`; add `structure-check` when package risk warrants it                         |
-| Structural edit                    | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`, `final-inspect`, and normal structural audits |
+| Edit kind                          | Required evidence                                                                                                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Notes/core metadata only           | `dry-run`, `semantic-diff`                                                                                                                                 |
+| Visible single-object text         | `dry-run`, `semantic-diff`, `style-diff`, `png-preview`, `vision-diff`                                                                                     |
+| Visible multi-target/batch text    | Same as visible text, covering every target slide                                                                                                          |
+| Single-object fill/line/font style | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`                                                                                                   |
+| Geometry/image/layout              | Above plus `final-inspect`; add `structure-check` when package risk warrants it                                                                            |
+| Structural edit                    | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`, `final-inspect`, and normal structural audits; native `copy-from` also requires `copy-size-gate` |
 
 For text-only edits that must preserve formatting, include
 `preserve: ["target-text-style"]` and require `style-diff`:
@@ -278,6 +299,7 @@ node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs \
   --contract <run-dir>/edit-contract.json \
   --candidate <run-dir>/candidate.pptx \
   --dry-run <run-dir>/dry-run.json \
+  --copy-size-gate <run-dir>/copy-size-gate.json \
   --diff <run-dir>/pptx-diff.json \
   --style-diff <run-dir>/style-diff.json \
   --preview <run-dir>/preview.json \
@@ -300,6 +322,8 @@ The gate checks:
   native `copy-from` slide target owns a complete, fingerprint-current
   `pptx-copy-from/v2`
   slide/relationship/dependency mapping;
+- native `copy-from` has a passing, target/donor file-bound
+  `pptx-nova-copy-size-gate/v1` report with identical slide dimensions;
 - every dry-run op index is owned by a contract target;
 - patch dry-run `resolvedSelectors[]` and semantic targets match the contract;
   native `copy-from` evidence instead matches the declared donor and produced
@@ -330,22 +354,25 @@ paired with scoped visual review; they are not proof of pass or failure.
 
 Read `edit-contract-gate.json.agentGate` first:
 
-| `nextAction`                            | Meaning                                                                                     |
-| --------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `refresh-inspect`                       | Source hash changed or source is missing; rebuild target evidence and contract              |
-| `regenerate-current-candidate-evidence` | A report belongs to another source/candidate; regenerate evidence from the stable candidate |
-| `retry-dry-run-with-fix-patch`          | Dry-run itself did not succeed                                                              |
-| `rebind-selectors`                      | Target op exists but did not resolve to the contract selector                               |
-| `complete-missing-coverage`             | One or more required targets/expected values were not covered                               |
-| `retry-with-style-preserving-text-edit` | Text changed non-text OOXML style structure                                                 |
-| `repair-new-visual-regressions`         | Changed slides contain new/worsened high or medium visual issues                            |
-| `review-out-of-scope-changes`           | Reliable changes escaped the contract or changed forbidden categories                       |
-| `verify-changed-scope`                  | Required preview/vision evidence is missing or incomplete                                   |
-| `run-structure-audit`                   | Required package structure evidence failed                                                  |
-| `refresh-session-rules-resolution`      | Bound rules/operation/resolution changed; resolve and regenerate the contract               |
-| `apply-session-rules`                   | Candidate bytes do not satisfy an applicable rule postcondition                             |
-| `block-and-request-user-decision`       | A remaining blocker has no safe automatic repair                                            |
-| `publish`                               | Machine contract passed; finish required PNG review before delivery                         |
+| `nextAction`                            | Meaning                                                                                               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `refresh-inspect`                       | Source hash changed or source is missing; rebuild target evidence and contract                        |
+| `run-copy-size-gate`                    | Native copy evidence lacks the required page-size gate; run it before apply                           |
+| `refresh-copy-from-preflight`           | Copy preflight or size evidence is stale; regenerate both from current target/donor files             |
+| `choose-explicit-slide-size-strategy`   | Donor/target dimensions differ; stop until an explicit runtime strategy exists or target size changes |
+| `regenerate-current-candidate-evidence` | A report belongs to another source/candidate; regenerate evidence from the stable candidate           |
+| `retry-dry-run-with-fix-patch`          | Dry-run itself did not succeed                                                                        |
+| `rebind-selectors`                      | Target op exists but did not resolve to the contract selector                                         |
+| `complete-missing-coverage`             | One or more required targets/expected values were not covered                                         |
+| `retry-with-style-preserving-text-edit` | Text changed non-text OOXML style structure                                                           |
+| `repair-new-visual-regressions`         | Changed slides contain new/worsened high or medium visual issues                                      |
+| `review-out-of-scope-changes`           | Reliable changes escaped the contract or changed forbidden categories                                 |
+| `verify-changed-scope`                  | Required preview/vision evidence is missing or incomplete                                             |
+| `run-structure-audit`                   | Required package structure evidence failed                                                            |
+| `refresh-session-rules-resolution`      | Bound rules/operation/resolution changed; resolve and regenerate the contract                         |
+| `apply-session-rules`                   | Candidate bytes do not satisfy an applicable rule postcondition                                       |
+| `block-and-request-user-decision`       | A remaining blocker has no safe automatic repair                                                      |
+| `publish`                               | Machine contract passed; finish required PNG review before delivery                                   |
 
 `publish` does not waive manual PNG/contact-sheet review. It means the machine
 contract, target coverage, locality, and declared evidence passed.

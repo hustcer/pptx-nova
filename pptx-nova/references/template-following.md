@@ -90,8 +90,25 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    compatibility entry and `--all` copies the complete source. These selectors
    are mutually exclusive. Reuse the native `pptx-copy-from/v2` report as the
    structural Edit Contract evidence, including its read-only `ready` preflight,
-   current target/donor fingerprints, and per-slide/dependency mappings;
+   current target/donor whole-file SHA-256 values, normalized OPC package
+   fingerprints, and per-slide/dependency mappings;
    do not loop through one slide at a time or synthesize patch `opResults`.
+
+   A `ready` preflight is not sufficient when the decks use different slide
+   dimensions. Before apply, run:
+
+   ```bash
+   node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
+     --target <run-dir>/starter.pptx \
+     --donor source.pptx \
+     --copy-report <run-dir>/dry-run.json \
+     --output <run-dir>/copy-size-gate.json \
+     --json
+   ```
+
+   Require `agentGate.passed=true`. Until `copy-from` exposes an explicit page
+   size strategy, a mismatch is a stop condition; do not silently scale the
+   donor slide or compensate in Viewer/PDF rendering.
 
 5. Write `template-edit-plan.json` from inspect IDs, names, placeholders, and
    bbox evidence. Default every inherited object to `keep`.

@@ -13,6 +13,7 @@ const SCOPES = new Set([
 ])
 const EVIDENCE_KINDS = new Set([
   'dry-run',
+  'copy-size-gate',
   'semantic-diff',
   'style-diff',
   'png-preview',
@@ -342,6 +343,9 @@ function normalizeContract(draft, args) {
     required: true,
     allowed: EVIDENCE_KINDS,
   })
+  if (operationKind === 'copy-from' && !requiredEvidence.includes('copy-size-gate')) {
+    requiredEvidence.push('copy-size-gate')
+  }
   if (targets.some((target) => target.expected?.alreadyCompliant === true)) {
     if (!requiredEvidence.includes('final-inspect')) requiredEvidence.push('final-inspect')
   }

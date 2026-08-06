@@ -99,7 +99,8 @@ Use these only to choose the entry reference; the routing table owns details.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
   collect scoped evidence, run the contract gate, then review changed slides.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
-  complex or unsupported timing.
+  complex or unsupported timing. For Morph, use exact `!!` object names, run `morph-check`, and bind
+  delivery evidence to the bundled PowerPoint playback probe when that probe is available.
 - **Refurbish / translate**: use `refurbish-runner.md` / `translation-runner.md`. The runner owns route,
   evidence, one canonical comparison, and publication; read only references it names on failure.
 - **Template / cross-deck copy**: edit inherited objects or use one transactional `copy-from`; keep the
@@ -283,6 +284,10 @@ Animation, structural, or compatibility high-risk tasks must also append:
 ```text
 OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> target-Office compatibility gate -> PowerPoint clean-open smoke gate when available
 ```
+
+Morph authoring must additionally run the exact adjacent-pair `xdoc pptx morph-check` report and,
+on macOS with PowerPoint, `<skill-root>/scripts/pptx-nova-morph-playback.nu`. A static PNG/PDF preview
+or the viewer's fallback transition does not prove Morph interpolation.
 
 When the user, template, publishing channel, or deployment policy names a target Office release, run
 `xdoc check <candidate> --checks compat --target-office <release> -o <run-dir>/office-compat.json --overwrite`.

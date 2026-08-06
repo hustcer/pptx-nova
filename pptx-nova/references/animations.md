@@ -150,8 +150,108 @@ dry-run 重点看：
 }
 ```
 
-如果 inspect 已有 p14/p15 扩展转场、声音、复杂 timing 或用户要求 Morph/Zoom 等高级转场，默认 preserve-only。
-只有 schema 明确支持并通过 PowerPoint clean-open 与播放验证时才创建。
+如果 inspect 已有未披露的 p14/p15 扩展转场、声音或复杂 timing，默认 preserve-only。Zoom 等未被
+能力事实列为可创建的高级转场也保持 preserve-only。Morph 使用下面的专用流程，不要把它归入普通转场
+或 shape animation。
+
+## Morph 专用流程
+
+先从当前运行时确认 Morph 契约，不能仅凭 xdoc 版本号推断：
+
+```bash
+xdoc schema --op set-slide-transition --minimal > <run-dir>/schema-set-slide-transition.json
+xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect-before.json
+```
+
+只有 schema 同时披露 `type: "morph"`、`morphMode` 和需要的 mode 时才创建。Morph 目标是相邻的
+source/destination slide pair；`set-slide-transition.slide` 是 **0-based destination slide index**。
+对象配对是显式契约：在两页上给对应 shape 设置完全相同、区分大小写的 `!!` 前缀名称，例如
+`!!Hero`。不要宣称 xdoc 会按文本、位置或普通 shape name 自动推断配对。
+
+最小 patch：
+
+```json
+{
+  "schemaVersion": 1,
+  "ops": [
+    {
+      "op": "set-slide-transition",
+      "slide": 1,
+      "type": "morph",
+      "morphMode": "by-object",
+      "duration": 900
+    }
+  ]
+}
+```
+
+`morphMode` 只使用 schema 披露的严格枚举：`by-object`、`by-word`、`by-char`。在 apply 前后都对
+确切相邻页运行诊断，并保存 `pptx-morph-check/v1` 报告：
+
+```bash
+xdoc pptx morph-check input.pptx --from-slide 0 --to-slide 1 --json \
+  > <run-dir>/morph-check-before.json
+xdoc pptx apply -i input.pptx --patch <run-dir>/patch.json --dry-run --json \
+  > <run-dir>/dry-run.json
+xdoc pptx apply -i input.pptx --patch <run-dir>/patch.json -o <run-dir>/candidate.pptx --json \
+  > <run-dir>/apply.json
+xdoc pptx inspect <run-dir>/candidate.pptx --daemon --json \
+  > <run-dir>/inspect-after.json
+xdoc pptx morph-check <run-dir>/candidate.pptx --from-slide 0 --to-slide 1 --json \
+  > <run-dir>/morph-check-after.json
+```
+
+交付前要求 `morph-check-after.json` 中预期显式配对成功且没有 blocking finding，并确认 inspect 回读
+到 `type: morph`、正确的 mode/duration、extension wrapper 以及 fade fallback。若两页本来没有 `!!`
+名称，先通过普通 inspect/select 和受支持的重命名操作建立显式配对；不要通过 raw XML 绕过诊断。
+
+在 macOS + PowerPoint 环境还要运行 clean-open 和技能内播放探针：
+
+```bash
+node <skill-root>/scripts/pptx-nova-clean-open.mjs \
+  --pptx <run-dir>/candidate.pptx --output <run-dir>/clean-open.json --json
+nu <skill-root>/scripts/pptx-nova-morph-playback.nu <run-dir>/candidate.pptx \
+  --from-slide 0 --to-slide 1 --mode by-object --duration-ms 900 \
+  --output <run-dir>/morph-playback.json --json
+```
+
+`--duration-ms` 是通过门禁的必填预期值，必须来自 patch 或 inspect，不能省略后仍宣称时长已验证。
+需要验证 PowerPoint 保存往返时，再加 `--resave-output <run-dir>/powerpoint-resaved.pptx`，随后对该文件
+重复 inspect 和 morph-check，并对 destination slide 的关键 XML 做可归因 diff。下面以 destination index
+1 对应 `slide2.xml` 为例；其他页按实际 part 调整：
+
+```bash
+unzip -p <run-dir>/candidate.pptx ppt/slides/slide2.xml \
+  | xmllint --format - > <run-dir>/slide2-before.xml
+unzip -p <run-dir>/powerpoint-resaved.pptx ppt/slides/slide2.xml \
+  | xmllint --format - > <run-dir>/slide2-after.xml
+diff -u <run-dir>/slide2-before.xml <run-dir>/slide2-after.xml \
+  > <run-dir>/slide2-powerpoint.diff || true
+```
+
+逐项归因 namespace/attribute order 等 PowerPoint 规范化；`p159:morph` mode/duration、
+`mc:AlternateContent` Choice 和 fade Fallback 的删除或语义变化必须阻断。播放探针证明 PowerPoint 识别
+目标 Morph mode、启用动画并从 source 前进到 destination；它不捕获中间帧，也不证明视觉插值像素一致。
+该技能脚本只提供 macOS PowerPoint 证据；不可用时输出结构化 `skipped`。如果交付目标明确要求 Windows
+PowerPoint，必须在 Windows fixture 补证，否则该维度保持 `inconclusive`。
+
+清除 Morph 时使用同一 canonical operation，不直接删 XML：
+
+```json
+{
+  "op": "set-slide-transition",
+  "slide": 1,
+  "clear": true
+}
+```
+
+若调用方要求保留兼容转场，则用同一 operation 将 `type` 明确设为 `fade`（或 schema 披露的其他基础
+转场），不要把它与 `clear: true` 混用。apply 后 inspect 必须回读为无 transition 或指定基础转场，且
+目标 slide 不得残留 Morph namespace、extension wrapper 或失效 Choice。
+
+当前 xdoc viewer/parser 只消费 OOXML `mc:Fallback` 的 fade 语义；PDF/PNG 是静态结果。因此 viewer
+播放、PNG、PDF 和普通语义 diff 都不能作为 Morph 插值已实现或视觉等价的证据。PowerPoint 播放与
+保存往返是当前兼容性权威；若 PowerPoint 不可用，必须明确写成未验证风险，不能把 fallback 当作通过。
 
 ## Preserve-only 边界
 
@@ -173,7 +273,7 @@ clean-open 与播放验证时，才读 `control-flow-and-raw-xml.md` 评估风�
 
 ```text
 inspect -> patch -> dry-run --json -> apply -> inspect回读 -> pptx diff -> preview/contact sheet ->
-PowerPoint clean-open -> 播放/点击复核(可用时) -> final summary
+PowerPoint clean-open -> 播放/点击复核(可用时) -> Morph 时运行 morph-check + PowerPoint 播放探针 -> final summary
 ```
 
 结构证据：

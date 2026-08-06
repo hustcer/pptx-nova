@@ -184,6 +184,11 @@ Use these entry points from skill workflows:
   for Repair dialogs, distinguishes plain Cancel buttons from repair prompts,
   and writes clean-open.json. Windows/Linux, macOS without PowerPoint, or
   missing UI scripting return `skipped` and do not block delivery.
+- `pptx-nova-morph-playback.nu` - macOS-only PowerPoint-native Morph semantic
+  playback probe. It verifies the recognized by-object/by-word/by-char entry
+  effect, exact adjacent slide navigation, animation-enabled slide show, and
+  required expected duration plus optional resave evidence. It does not capture
+  interpolation frames and therefore does not establish visual rendering parity.
 - pptx-nova-structure-check.mjs - lightweight PPTX OOXML structure check. It
   scans XML inside the PPTX for expected font declarations, expected sRGB/theme
   colors, and empty/default-text placeholder residue, then writes

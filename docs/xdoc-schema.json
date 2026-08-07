@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.5 (960ab70d)",
+  "version": "0.3.5 (952c095f)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx list-themes --json\n\n  xdoc pptx swap-theme deck.pptx --to corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --to consulting --output out.pptx\n\n  xdoc pptx recipe --patch recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocol:\n  xdoc json-rpc\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1437,6 +1437,16 @@
           "description": "Source PPTX path for pptx copy-from",
           "required": false
         },
+        "template-strategy": {
+          "type": "string",
+          "description": "Template policy for pptx copy-from: register-source (default) or rebind-target",
+          "required": false
+        },
+        "size-strategy": {
+          "type": "string",
+          "description": "Slide-size policy for pptx copy-from: require-match (default; no implicit scaling)",
+          "required": false
+        },
         "source": {
           "type": "string",
           "description": "Source PPTX path for pptx diff/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text/vision-diff/contact-diff/refurbish-skin",
@@ -1481,6 +1491,11 @@
         "slides": {
           "type": "string",
           "description": "1-based slide selector for pptx copy-from/vision-check/vision-diff/i18n-scan/i18n-style-diff/i18n-plan/i18n-anchor-draft/i18n-text-plan/replace-text/replace-chart-text, e.g. 1,3,5-8; mutually exclusive with copy-from --slide/--all",
+          "required": false
+        },
+        "layout": {
+          "type": "int",
+          "description": "0-based registered layout index for pptx preview; mutually exclusive with --slides",
           "required": false
         },
         "from-slide": {
@@ -1699,6 +1714,8 @@
         "Use `xdoc pptx remap-theme deck.pptx --to corporate-blue --scope text,shapes --output out.pptx` to batch remap retained native objects toward a target themePack.",
         "Use `xdoc pptx from-data data.json --template template.pptx --bindings bindings.json --output out.pptx` to run a bind-data patch without writing the wrapper patch JSON yourself.",
         "Use `xdoc pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json` to extract a reusable template profile and register it in the pptx-nova asset catalogs.",
+        "Use `xdoc pptx copy-from target.pptx --from source.pptx --slides 1,3 --template-strategy register-source --size-strategy require-match --dry-run --json` to inspect the exact fingerprint-bound layout/master/theme registration plan before writing; choose `rebind-target` only when target inheritance is intentional.",
+        "Use `xdoc pptx preview deck.pptx --layout 0 --output-dir layout-preview --json` for a real registered-layout preview backed by a temporary one-slide candidate; the input deck remains read-only.",
         "Use `xdoc pptx recipe --patch recipe.json --compile --json` to compile high-level recipe ops into ordinary patch JSON before apply.",
         "Use `--asset-root <dir>` with apply to resolve schema-v1 assetSource.path values; omitted asset roots default to the patch file directory.",
         "Use `--daemon` on apply/inspect to reuse an existing daemon session when available; inspect reuses the parsed deck directly, while apply patches a serialized candidate snapshot before commit for atomic failure handling.",
@@ -3525,18 +3542,28 @@
           }
         },
         "preview": {
-          "usage": "xdoc pptx preview <deck.pptx> --output-dir shots/ [--contact-sheet out.png] [--dpi 192] --json",
+          "usage": "xdoc pptx preview <deck.pptx> --output-dir shots/ [--slides 1,3-5 | --layout 0] [--contact-sheet out.png] [--dpi 192] --json",
           "inputs": ["input PPTX"],
           "outputs": [
             "per-slide PNG files",
             "optional contact sheet PNG",
+            "persisted one-slide candidate PPTX for --layout",
             "pptx-preview/v1 JSON manifest",
             "human summary"
           ],
           "scope": {
-            "option": "--slides",
-            "valueSyntax": "N|N-M[,N|N-M...]",
-            "indexBase": 1
+            "slides": {
+              "option": "--slides",
+              "valueSyntax": "N|N-M[,N|N-M...]",
+              "indexBase": 1
+            },
+            "layout": {
+              "option": "--layout",
+              "valueSyntax": "N",
+              "indexBase": 0,
+              "semantics": "Builds a one-slide candidate from the selected registered layout and its master/theme inheritance chain, persists it in the output directory for visual-verify replay, and never mutates the input PPTX."
+            },
+            "mutualExclusion": "--slides and --layout are mutually exclusive"
           },
           "ioContract": {
             "filesystem": {
@@ -3553,6 +3580,10 @@
             }
           },
           "manifest": {
+            "previewTarget": [
+              "kind=slides with the requested expression",
+              "kind=layout with layoutIndex, candidatePersisted=true, candidate file evidence, and inputMutated=false"
+            ],
             "pages": ["path", "slide", "file.width", "file.height", "file.byteLength", "file.hash"],
             "contactSheet": ["path", "width", "height", "byteLength", "hash"],
             "visualEvidence": "Observation-only handoff to pptx-visual-evidence/v1; preview status never authorizes Agent delivery."
@@ -4656,7 +4687,7 @@
           "recommendedFollowUp": "Run xdoc pptx check-brand out.pptx --brand brand.json --json to report remaining slide-level brand risks such as missing logos or footer text."
         },
         "copy-from": {
-          "usage": "xdoc pptx copy-from target.pptx --from source.pptx [--slide 0 | --slides 1,3,5-8 | --all] --output out.pptx [--dry-run] [--json]",
+          "usage": "xdoc pptx copy-from target.pptx --from source.pptx [--slide 0 | --slides 1,3,5-8 | --all] [--template-strategy register-source|rebind-target] [--size-strategy require-match] --output out.pptx [--dry-run] [--json]",
           "inputs": [
             "target PPTX",
             "source PPTX",
@@ -4669,17 +4700,35 @@
             "all": "--all selects every source slide in source order",
             "mutualExclusion": "--slide, --slides, and --all are mutually exclusive"
           },
-          "notes": "Opens the target and source once, computes a read-only dependency plan without serializing or mutating either deck, and applies that exact fingerprint-bound plan on an in-memory candidate only when no blocker exists. Slide XML and internal related parts such as media/charts are preserved while slide-layout relationships are explicitly reused or rebound to a registered target layout.",
+          "strategies": {
+            "template": {
+              "option": "--template-strategy",
+              "default": "register-source",
+              "enum": ["register-source", "rebind-target"],
+              "strict": true,
+              "register-source": "Faithfully registers the selected source layout/master/theme closure, reusing a normalized registered closure when equivalent and copying only selected layouts rather than every sibling layout.",
+              "rebind-target": "Explicitly points copied slides at an existing registered target layout and reports inherited-style fidelity risk when the closures differ."
+            },
+            "slideSize": {
+              "option": "--size-strategy",
+              "default": "require-match",
+              "enum": ["require-match"],
+              "strict": true,
+              "require-match": "Blocks preflight when source and target p:sldSz differ; no renderer or geometry layer performs implicit scaling."
+            }
+          },
+          "notes": "Opens the target and source once, computes a read-only dependency and registration plan without serializing or mutating either deck, and applies that exact fingerprint-bound plan on an in-memory candidate only when no blocker exists. Registration allocates target-side master/layout ids and relationship ids, deterministically merges content types and part names, and rebuilds only the selected layout registry.",
           "report": {
             "status": "ready for an approved dry-run plan, blocked when dependencies are unsafe, and success only after output is written",
             "copied": "per-slide 0-based source/target indexes, planned slide part mappings, and dependency mappings",
             "dependencyMappings": "flattened aggregate dependency mappings with owning sourceSlide and targetSlide",
             "changedParts": "deduplicated target part names the approved plan will mutate",
-            "preflight": "read-only source/target package fingerprints, target slide counts, SHA-256 identified parts, normalized relationship edges, add/reuse/rename/rebind/inspect decisions, blockers, fidelity risks, and action counts"
+            "transaction": "entire-copy-batch rollback boundary plus affected source slides and target slide-count range",
+            "preflight": "read-only source/target file SHA-256 values plus normalized OPC package fingerprints, explicit strategies, template source-to-target mappings/fingerprints/outcomes/registration ids, target slide counts, SHA-256 identified parts, normalized relationship edges, add/reuse/rename/rebind/inspect decisions, blockers, preserve-only/fidelity risks, and action counts"
           },
           "mvpLimits": [
             "Does not write apply sidecars because it is not a replayable patch op",
-            "Imported slides use the target deck layout graph; source layout/master/theme dependencies are inspected and reported but not yet registered into the target deck"
+            "The only slide-size strategy is require-match; mismatched decks fail closed until an explicit audited geometry policy is implemented"
           ]
         },
         "extract-style": {
@@ -34947,6 +34996,479 @@
           }
         }
       },
+      "copyFromReportSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://structurify.io/schemas/pptx-copy-from.v2.schema.json",
+        "type": "object",
+        "required": ["schemaVersion", "status"],
+        "oneOf": [
+          {
+            "required": ["selection", "transaction", "preflight"],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["ready", "blocked", "success"],
+                "strict": true
+              }
+            }
+          },
+          {
+            "required": ["error", "opResults", "traces"],
+            "properties": {
+              "status": {
+                "const": "error"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": "pptx-copy-from/v2"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["ready", "blocked", "success", "error"],
+            "strict": true
+          },
+          "input": {
+            "type": ["string", "null"]
+          },
+          "wouldWrite": {
+            "type": ["string", "null"]
+          },
+          "selection": {
+            "type": "object"
+          },
+          "changedParts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "transaction": {
+            "type": "object",
+            "required": [
+              "rollbackBoundary",
+              "sourceSlides",
+              "targetSlideCountBefore",
+              "targetSlideCountAfter"
+            ],
+            "properties": {
+              "rollbackBoundary": {
+                "const": "entire-copy-batch"
+              },
+              "sourceSlides": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "targetSlideCountBefore": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "targetSlideCountAfter": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "preflight": {
+            "type": "object",
+            "required": [
+              "ready",
+              "readOnly",
+              "strategy",
+              "templates",
+              "parts",
+              "relationships",
+              "blockers",
+              "risks",
+              "preserveOnlyRisks"
+            ],
+            "properties": {
+              "ready": {
+                "type": "boolean"
+              },
+              "readOnly": {
+                "const": true
+              },
+              "strategy": {
+                "type": "object",
+                "required": ["template", "slideSize"],
+                "properties": {
+                  "template": {
+                    "type": "string",
+                    "enum": ["register-source", "rebind-target"],
+                    "strict": true
+                  },
+                  "slideSize": {
+                    "type": "string",
+                    "enum": ["require-match"],
+                    "strict": true
+                  }
+                }
+              },
+              "templates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "sourceSlides",
+                    "outcome",
+                    "layout",
+                    "master",
+                    "theme",
+                    "rollbackBoundary"
+                  ],
+                  "properties": {
+                    "sourceSlides": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["registered-source", "reused-source", "rebound-target"],
+                      "strict": true
+                    },
+                    "layout": {
+                      "type": "object",
+                      "required": ["sourcePartName", "targetPartName", "fingerprint"],
+                      "properties": {
+                        "sourcePartName": {
+                          "type": "string"
+                        },
+                        "targetPartName": {
+                          "type": "string"
+                        },
+                        "fingerprint": {
+                          "type": "string"
+                        },
+                        "registrationId": {
+                          "type": ["integer", "null"]
+                        },
+                        "relationshipId": {
+                          "type": ["string", "null"]
+                        }
+                      }
+                    },
+                    "master": {
+                      "type": "object",
+                      "required": ["sourcePartName", "targetPartName", "fingerprint"],
+                      "properties": {
+                        "sourcePartName": {
+                          "type": "string"
+                        },
+                        "targetPartName": {
+                          "type": "string"
+                        },
+                        "fingerprint": {
+                          "type": "string"
+                        },
+                        "registrationId": {
+                          "type": ["integer", "null"]
+                        },
+                        "relationshipId": {
+                          "type": ["string", "null"]
+                        }
+                      }
+                    },
+                    "theme": {
+                      "type": "object"
+                    },
+                    "rollbackBoundary": {
+                      "const": "entire-copy-batch"
+                    }
+                  }
+                }
+              },
+              "parts": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "relationships": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "blockers": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "risks": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "preserveOnlyRisks": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "kind",
+              "code",
+              "severity",
+              "message",
+              "suggestions",
+              "docsRef",
+              "autoRetry"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["fatal", "error", "warning", "info"],
+                "strict": true
+              },
+              "message": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "string"
+              },
+              "opIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "path": {
+                "type": "string"
+              },
+              "expected": {},
+              "actual": {},
+              "replacement": {
+                "type": "string"
+              },
+              "suggestion": {
+                "type": "string"
+              },
+              "suggestions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["fixPatch", "reason", "confidence", "autoRetry"],
+                  "properties": {
+                    "fixPatch": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "confidence": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "expected": {},
+                    "actual": {},
+                    "replacement": {
+                      "type": "string"
+                    },
+                    "autoRetry": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "docsRef": {
+                "type": "string",
+                "format": "uri"
+              },
+              "autoRetry": {
+                "type": "boolean"
+              },
+              "candidates": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "opResults": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "opIndex",
+                "op",
+                "status",
+                "durationMs",
+                "changedParts",
+                "semanticChanges",
+                "visualRisks",
+                "warnings",
+                "created",
+                "createdIds",
+                "resolvedSelectors",
+                "expandedOps"
+              ],
+              "properties": {
+                "opIndex": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "op": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "durationMs": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "changedParts": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "semanticChanges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["category", "action"],
+                    "properties": {
+                      "category": {
+                        "type": "string"
+                      },
+                      "action": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "type": "object"
+                      },
+                      "detail": {
+                        "type": "string"
+                      },
+                      "before": {
+                        "type": "string"
+                      },
+                      "after": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "visualRisks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["code", "severity", "message"],
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "severity": {
+                        "type": "string",
+                        "enum": ["low", "medium", "high"],
+                        "strict": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "type": "object"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "warnings": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "created": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "createdIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "resolvedSelectors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "expandedOps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "analysis": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "traces": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "name", "status", "durationMs"],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": ["op"],
+                  "strict": true
+                },
+                "name": {
+                  "type": "string"
+                },
+                "opIndex": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "status": {
+                  "type": "string"
+                },
+                "durationMs": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
       "previewReportSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://structurify.io/schemas/pptx-preview.v1.schema.json",
@@ -34982,6 +35504,77 @@
           },
           "outputDir": {
             "type": ["string", "null"]
+          },
+          "previewTarget": {
+            "type": "object",
+            "required": ["kind"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["slides", "layout"],
+                "strict": true
+              },
+              "expression": {
+                "type": ["string", "null"]
+              },
+              "layoutIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "temporaryCandidate": {
+                "type": "boolean"
+              },
+              "candidatePersisted": {
+                "type": "boolean"
+              },
+              "candidate": {
+                "type": "object",
+                "required": ["path", "status"],
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["ok", "error"],
+                    "strict": true
+                  },
+                  "byteLength": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "width": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "hash": {
+                    "type": "object",
+                    "required": ["algorithm", "value"],
+                    "properties": {
+                      "algorithm": {
+                        "const": "sha256"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "warning": {
+                    "type": "string"
+                  },
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              },
+              "inputMutated": {
+                "const": false
+              }
+            }
           },
           "slideCount": {
             "type": "integer",
@@ -39731,14 +40324,14 @@
     "pptxReplaceText": "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
     "pptxReplaceChartText": "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
     "pptxContactDiff": "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png [--map reference-map.json] [--slides 1,3-5] [--dpi 192] --json",
-    "pptxPreview": "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet contact-sheet.png [--dpi 192] --json",
+    "pptxPreview": "xdoc pptx preview deck.pptx --output-dir shots/ [--slides 1,3-5 | --layout 0] [--contact-sheet contact-sheet.png] [--dpi 192] --json",
     "pptxVisualVerify": "xdoc pptx visual-verify --candidate new.pptx [--reference approved.pptx] --output-dir evidence [--slides 1,3-5] [--dpi 144] [--channel-threshold 26] --json",
     "pptxRefurbishAudit": "xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json",
     "pptxRefurbishSkin": "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json",
     "pptxChromeDetect": "xdoc pptx chrome-detect deck.pptx --json",
     "pptxChromeRemove": "xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx",
     "pptxChromeApply": "xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx",
-    "pptxCopyFrom": "xdoc pptx copy-from target.pptx --from source.pptx [--slide 0 | --slides 1,3,5-8 | --all] --output out.pptx --json",
+    "pptxCopyFrom": "xdoc pptx copy-from target.pptx --from source.pptx [--slide 0 | --slides 1,3,5-8 | --all] [--template-strategy register-source|rebind-target] [--size-strategy require-match] --output out.pptx --json",
     "pptxReplay": "xdoc pptx replay --from-sidecar <out.pptx.xdoc.json> --output <recovered.pptx>",
     "pptxAudit": "xdoc pptx audit --from-sidecar <out.pptx.xdoc.json> --json",
     "pptxRollback": "xdoc pptx rollback --from-sidecar <out.pptx.xdoc.json> --output <recovered.pptx>",

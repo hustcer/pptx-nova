@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
@@ -40,7 +40,6 @@ process.stdout.write(JSON.stringify({
 }))
 `,
   )
-  chmodSync(fakeXdoc, 0o755)
   writeJson(copyReport, {
     schemaVersion: 'pptx-copy-from/v2',
     status: 'ready',

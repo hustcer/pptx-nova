@@ -13,7 +13,7 @@ Options:
   --target <path>       Target PPTX that will receive copied slides.
   --donor <path>        Donor PPTX passed to xdoc copy-from --from.
   --copy-report <path>  Current pptx-copy-from/v2 dry-run report.
-  --xdoc-bin <path>     xdoc executable. Defaults to xdoc.
+  --xdoc-bin <path>     xdoc executable or JavaScript wrapper. Defaults to xdoc.
   --output <path>       Optional persisted gate report.
   --overwrite           Replace an existing output report.
   --json                Print the gate report as JSON.
@@ -97,8 +97,17 @@ function readJson(path, label) {
   }
 }
 
+function resolveXdocCommand(xdocBin, args) {
+  const javascriptPath =
+    ['.js', '.mjs', '.cjs'].includes(extname(xdocBin).toLowerCase()) && existsSync(xdocBin)
+  return javascriptPath
+    ? { executable: process.execPath, args: [xdocBin, ...args] }
+    : { executable: xdocBin, args }
+}
+
 function inspectDeck(xdocBin, path, label) {
-  const result = spawnSync(xdocBin, ['pptx', 'inspect', path, '--json'], {
+  const command = resolveXdocCommand(xdocBin, ['pptx', 'inspect', path, '--json'])
+  const result = spawnSync(command.executable, command.args, {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
   })

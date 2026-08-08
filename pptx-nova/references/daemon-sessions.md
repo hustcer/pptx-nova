@@ -15,11 +15,12 @@
 CLI、daemon 和 JSON-RPC 是同一 PPTX 业务能力的不同 adapter，不应各自复制 patch
 语义或验证规则：
 
-| 场景                                | 推荐边界        | 原因                                                   |
-| ----------------------------------- | --------------- | ------------------------------------------------------ |
-| 单命令、CI phase、普通 skill runner | 一次性 CLI      | 进程/文件边界清楚，失败隔离最好                        |
-| shell 驱动的多轮 inspect/apply      | CLI `--daemon`  | 保留现有命令形态并复用 deck session                    |
-| Agent host 已持有长生命周期子进程   | `xdoc json-rpc` | stdio NDJSON，免端口/state-file 协调，直接复用 session |
+| 场景                                           | 推荐边界        | 原因                                                   |
+| ---------------------------------------------- | --------------- | ------------------------------------------------------ |
+| 单命令、CI phase、普通 skill runner            | 一次性 CLI      | 进程/文件边界清楚，失败隔离最好                        |
+| shell 驱动的多轮 inspect/apply                 | CLI `--daemon`  | 保留现有命令形态并复用 deck session                    |
+| Agent host 已持有长生命周期子进程              | `xdoc json-rpc` | stdio NDJSON，免端口/state-file 协调，直接复用 session |
+| MCP client（Claude Code / Cursor / Inspector） | `xdoc mcp`      | 标准 MCP over stdio，客户端已有 tool 发现与调用机制    |
 
 不要仅凭 `json-rpc` 命令存在就实现 host。先从 `xdoc schema` 或
 `pptx-nova-probe.mjs` 的 `capabilities.agentTransports.jsonRpc` 读取完整
@@ -212,7 +213,39 @@ batch 也按顺序执行，并在 progress notification 之后返回一个 respo
 这是 Agent transport，不是替代 skill 的验证阶段。普通 runner 仍应保持 dry-run、
 apply、post-apply inspect 与证据 gate 的因果顺序；host 只替换调用 adapter。
 
-## §8 故障排查
+## §8 MCP client（`xdoc mcp`）
+
+如果宿主本身就是 MCP client（Claude Code、Cursor、MCP Inspector），不需要自己写
+JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状固定，没有选项：
+
+```json
+{ "mcpServers": { "xdoc": { "command": "xdoc", "args": ["mcp"] } } }
+```
+
+只暴露三个 tool，细粒度操作仍在 `pptx_apply.patch.ops[]` 里：
+
+| tool            | 用途                                                                |
+| --------------- | ------------------------------------------------------------------- |
+| `xdoc_discover` | 渐进获取 patch operation schema（等价 `xdoc schema` 的 disclosure） |
+| `pptx_inspect`  | 只读结构化 report（`pptx-inspect/v1`）                              |
+| `pptx_apply`    | 创建/编辑 deck，支持 `dryRun` 与 `overwrite`                        |
+
+用它时有五条必须记住：
+
+- `xdoc_discover` 默认 `mode=index`（约 21 KB）。`mode=full` 约 1.5 MB、贵约 71 倍，
+  只在确实需要时请求；通常 `mode=ops` + `ops:[...]` 才是正确选择。
+- **传绝对路径**。相对路径是相对 `xdoc` 子进程的工作目录，不是 client 的。
+- `isError: true` 是**业务失败**，`structuredContent.value` 里有完整 xdoc report 和
+  `suggestions[].fixPatch`。改 patch，不要改 transport。
+- 产物通过 artifact ref 返回（`path` / `state`）；deck 字节永不进协议通道。
+  `dryRun` 的 artifact 是 `planned`，文件并不存在。
+- `overwrite` 默认 false，已存在的输出会得到 `OutputExists`。annotations 只是 hint，
+  真正的防护是服务端检查。
+
+与 §7 同理：这是 transport，不替代 skill 的验证阶段。dry-run → apply →
+post-apply inspect → 证据 gate 的因果顺序不变。
+
+## §9 故障排查
 
 | 现象                                       | 排查                                                                                                             |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |

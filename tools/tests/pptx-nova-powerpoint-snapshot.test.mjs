@@ -76,7 +76,9 @@ test('pptx snapshot cleanup removes only its validated direct child', () => {
   mkdirSync(sibling)
 
   try {
-    const expandedOwned = realpathSync(owned)
+    // `path expand` in Nushell canonicalizes like realpathSync.native; the JS realpathSync keeps
+    // Windows 8.3 short names such as `C:\Users\RUNNER~1` instead of resolving them.
+    const expandedOwned = realpathSync.native(owned)
     assert.deepEqual(cleanupOwnedTempDir(root, owned), { removed: [expandedOwned], failed: [] })
     assert.equal(existsSync(owned), false)
     assert.equal(existsSync(sibling), true)

@@ -40,6 +40,9 @@ manually initialize a full run first. An explicit `--run-dir` must be new, empty
 Operation/catalog indexes are not allowlists; missing means `undisclosed`. For semantic routing, read
 the exact `capabilities.capabilityTruth.entries[]` feature/subset: `supported` may use its operations,
 `partial` requires verification, `preserve-only` stays untouched, and `unsupported` follows its alternative; operation presence never upgrades feature status.
+When an entry has non-null `axes`, route `create` / `edit` / `inspect` / `preserve` / `render` /
+`verify` independently. The entry-level status does not upgrade a weaker axis, and static PDF/PNG or
+Viewer fallback evidence never upgrades `verify` to PowerPoint playback support.
 If a caller-provided run directory is rejected, the guard reports the allowed initial entries, every
 detected entry, and a safe recovery hint; preserve that directory as evidence and retry with a new run directory.
 
@@ -99,8 +102,10 @@ Use these only to choose the entry reference; the routing table owns details.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
   collect scoped evidence, run the contract gate, then review changed slides.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
-  complex or unsupported timing. For Morph, use exact `!!` object names, run `morph-check`, and bind
-  delivery evidence to the bundled PowerPoint playback probe when that probe is available.
+  complex or unsupported timing. For basic effects, follow the disclosed repeat/autoReverse/restart/
+  easing contract and its omitted/null/value update semantics. For Morph, use exact `!!` object names,
+  run `morph-check`, and bind delivery evidence to the bundled PowerPoint playback probe when that
+  probe is available.
 - **Refurbish / translate**: use `refurbish-runner.md` / `translation-runner.md`. The runner owns route,
   evidence, one canonical comparison, and publication; read only references it names on failure.
 - **Template / cross-deck copy**: edit inherited objects or use one transactional `copy-from`; keep the

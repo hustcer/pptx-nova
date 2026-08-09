@@ -15,6 +15,64 @@ function createFakeXdoc(dir) {
     `#!/usr/bin/env node
 const args = process.argv.slice(2)
 const mode = process.env.FAKE_XDOC_MODE || 'ready'
+const axis = (status) => ({
+  status,
+  summary: 'Explicit ' + status + ' axis.',
+  limits: [{ code: status + '-boundary', description: 'Declared boundary.' }],
+  officeTarget: {
+    application: 'powerpoint',
+    minimumVersion: '2016',
+    platforms: ['windows', 'macos']
+  },
+  evidenceIds: ['patch-op:set-text-frame']
+})
+const axes = {
+  create: axis('supported'),
+  edit: axis('supported'),
+  inspect: axis('supported'),
+  preserve: axis('partial'),
+  render: axis('unsupported'),
+  verify: axis('inconclusive')
+}
+if (mode === 'malformed-axis-platform-type') {
+  axes.create.officeTarget.platforms = ['windows', 'macos', 42]
+}
+if (mode === 'duplicate-axis-evidence') {
+  axes.create.evidenceIds = ['patch-op:set-text-frame', 'patch-op:set-text-frame']
+}
+if (mode === 'duplicate-axis-limit-code') {
+  axes.create.limits = [
+    { code: 'supported-boundary', description: 'Declared boundary.' },
+    { code: 'supported-boundary', description: 'Duplicate boundary.' }
+  ]
+}
+if (mode === 'unknown-axis-evidence') {
+  axes.create.evidenceIds = ['missing-evidence']
+}
+const axisContract = {
+  schemaVersion: 'pptx-capability-axis-contract/v1',
+  names: ['create', 'edit', 'inspect', 'preserve', 'render', 'verify'],
+  statuses: ['supported', 'partial', 'preserve-only', 'unsupported', 'inconclusive', 'skipped'],
+  definitions: {
+    create: 'Create.', edit: 'Edit.', inspect: 'Inspect.',
+    preserve: 'Preserve.', render: 'Render.', verify: 'Verify.'
+  },
+  statusDefinitions: {
+    supported: 'Supported.', partial: 'Partial.', 'preserve-only': 'Preserve only.',
+    unsupported: 'Unsupported.', inconclusive: 'Inconclusive.', skipped: 'Skipped.'
+  },
+  requiredFor: [
+    { feature: 'slide-animation', subset: 'basic-shape-and-text-builds' },
+    { feature: 'slide-transition', subset: 'morph-authoring' }
+  ]
+}
+if (mode === 'invalid-axis-contract') axisContract.names = axisContract.names.slice(0, -1)
+if (mode === 'invalid-required-for') axisContract.requiredFor = axisContract.requiredFor.slice(0, -1)
+const animationAxes = mode === 'missing-required-axes'
+  ? undefined
+  : mode === 'malformed-required-axes'
+    ? { ...axes, verify: { ...axes.verify, status: 'unknown' } }
+    : axes
 if (args[0] === 'schema') {
   if (mode === 'degraded') {
     process.stderr.write('schema unavailable\\n')
@@ -58,9 +116,10 @@ if (args[0] === 'schema') {
       pptx: {
         subcommands: { apply: {}, inspect: {} },
         capabilityTruth: {
-          schemaVersion: mode === 'future-truth' ? 'pptx-capability-truth/vNext' : 'pptx-capability-truth/v2',
+          schemaVersion: mode === 'future-truth' ? 'pptx-capability-truth/vNext' : 'pptx-capability-truth/v3',
           coverage: { operations: 'closed-world', features: 'declared-only' },
           missingMeans: 'undisclosed',
+          axisContract,
           entries: [
             {
               feature: 'text', subset: 'native-authoring', status: 'supported',
@@ -68,6 +127,22 @@ if (args[0] === 'schema') {
               limits: [{ code: 'schema-bounded', description: 'Use the schema.' }],
               evidence: [{ id: 'patch-op:set-text-frame', kind: 'operation-contract', claim: 'Declared.' }],
               recommendation: { action: 'use-operations', operations: ['set-text-frame'], note: 'Use the op.' }
+            },
+            {
+              feature: 'slide-animation', subset: 'basic-shape-and-text-builds', status: 'supported',
+              summary: 'Basic animation authoring.', operations: ['set-slide-animations'],
+              limits: [{ code: 'basic-effects', description: 'Use the safe basic subset.' }],
+              evidence: [{ id: 'animation-contract', kind: 'operation-contract', claim: 'Declared.' }],
+              recommendation: { action: 'use-operations', operations: ['set-slide-animations'], note: 'Use the op.' },
+              ...(animationAxes ? { axes: animationAxes } : {})
+            },
+            {
+              feature: 'slide-transition', subset: 'morph-authoring', status: 'supported',
+              summary: 'Morph authoring.', operations: ['set-slide-transition'],
+              limits: [{ code: 'morph-modes', description: 'Use disclosed Morph modes.' }],
+              evidence: [{ id: 'morph-contract', kind: 'operation-contract', claim: 'Declared.' }],
+              recommendation: { action: 'use-operations', operations: ['set-slide-transition'], note: 'Use the op.' },
+              axes
             },
             {
               feature: 'slide-transition', subset: 'extended-existing-effects', status: 'preserve-only',
@@ -122,14 +197,38 @@ function runProbe(xdoc, args = [], env = {}) {
 
 test('capability probe captures truth and satisfies an exact supported feature', () => {
   const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
-  const result = runProbe(xdoc, ['--require-feature', 'text/native-authoring', '--strict'])
+  const result = runProbe(xdoc, [
+    '--require-feature',
+    'slide-animation/basic-shape-and-text-builds',
+    '--strict',
+  ])
   assert.equal(result.status, 0, result.stderr)
   const report = JSON.parse(result.stdout)
-  assert.equal(report.schemaVersion, 'pptx-nova-xdoc-capabilities/v2')
-  assert.equal(report.xdoc.capabilityTruthVersion, 'pptx-capability-truth/v2')
-  assert.equal(report.capabilities.capabilityTruth.entries.length, 4)
+  assert.equal(report.schemaVersion, 'pptx-nova-xdoc-capabilities/v3')
+  assert.equal(report.xdoc.capabilityTruthVersion, 'pptx-capability-truth/v3')
+  assert.equal(report.capabilities.capabilityTruth.entries.length, 6)
+  assert.equal(
+    report.capabilities.capabilityTruth.axisContract.schemaVersion,
+    'pptx-capability-axis-contract/v1',
+  )
+  const animation = report.capabilities.capabilityTruth.entries.find(
+    (entry) =>
+      entry.feature === 'slide-animation' && entry.subset === 'basic-shape-and-text-builds',
+  )
+  assert.deepEqual(animation.axes.render, {
+    status: 'unsupported',
+    summary: 'Explicit unsupported axis.',
+    limits: [{ code: 'unsupported-boundary', description: 'Declared boundary.' }],
+    officeTarget: {
+      application: 'powerpoint',
+      minimumVersion: '2016',
+      platforms: ['macos', 'windows'],
+    },
+    evidenceIds: ['patch-op:set-text-frame'],
+  })
   assert.equal(report.requirements.results[0].state, 'supported')
   assert.equal(report.requirements.results[0].satisfied, true)
+  assert.equal(report.requirements.results[0].axes.verify.status, 'inconclusive')
 })
 
 test('capability probe preserves the exact Agent transport contracts', () => {
@@ -243,3 +342,46 @@ test('unknown capability truth versions fail closed for strict feature requireme
   assert.equal(report.requirements.results[0].state, 'undisclosed')
   assert.ok(report.warnings.some((warning) => warning.code === 'capability-truth-unavailable'))
 })
+
+for (const mode of ['invalid-axis-contract', 'invalid-required-for']) {
+  test(`${mode} makes the complete capability truth unavailable`, () => {
+    const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+    const result = runProbe(xdoc, ['--require-feature', 'text/native-authoring', '--strict'], {
+      FAKE_XDOC_MODE: mode,
+    })
+    assert.equal(result.status, 2, result.stderr)
+    const report = JSON.parse(result.stdout)
+    assert.equal(report.capabilities.capabilityTruth.available, false)
+    assert.equal(report.capabilities.capabilityTruth.entries.length, 0)
+    assert.equal(report.requirements.results[0].state, 'undisclosed')
+    assert.ok(report.warnings.some((warning) => warning.code === 'capability-truth-unavailable'))
+  })
+}
+
+for (const mode of [
+  'missing-required-axes',
+  'malformed-required-axes',
+  'malformed-axis-platform-type',
+  'duplicate-axis-evidence',
+  'duplicate-axis-limit-code',
+  'unknown-axis-evidence',
+]) {
+  test(`${mode} keeps the required feature undisclosed`, () => {
+    const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+    const result = runProbe(
+      xdoc,
+      ['--require-feature', 'slide-animation/basic-shape-and-text-builds', '--strict'],
+      { FAKE_XDOC_MODE: mode },
+    )
+    assert.equal(result.status, 2, result.stderr)
+    const report = JSON.parse(result.stdout)
+    assert.equal(report.capabilities.capabilityTruth.available, true)
+    assert.equal(report.requirements.results[0].state, 'undisclosed')
+    assert.ok(
+      !report.capabilities.capabilityTruth.entries.some(
+        (entry) =>
+          entry.feature === 'slide-animation' && entry.subset === 'basic-shape-and-text-builds',
+      ),
+    )
+  })
+}

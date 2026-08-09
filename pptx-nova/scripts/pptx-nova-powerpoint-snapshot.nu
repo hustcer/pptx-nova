@@ -3,11 +3,11 @@
 # AI-friendly Microsoft PowerPoint slide snapshot tool for macOS.
 #
 # Behavior:
-# 1. Copy the PPTX file into PowerPoint's sandbox container tmp directory
-# 2. Open that staged copy in Microsoft PowerPoint via AppleScript
+# 1. For PDF rendering, stage the PPTX inside PowerPoint's sandbox container
+# 2. For window capture, create a byte-identical tool-owned copy in the system temp directory
 # 3. Switch to the requested slide
 # 4. Default to exporting PDF inside PowerPoint's sandbox container and rendering the slide with `mutool`
-# 5. If `--method auto` is used, fall back to a best-effort window screenshot with `screencapture`
+# 5. If `--method auto` is used, fall back to a candidate-bound window screenshot with `screencapture`
 #
 # Examples:
 #   nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu demos/06-couple.pptx 3
@@ -21,6 +21,8 @@
 # - `window` mode also needs macOS Accessibility permission to query the slide-show canvas rect
 # - `window` mode captures the slide-show canvas instead of the full editing window
 # - `pdf-render` mode requires `mutool`
+# - `pdf-render` mode also requires App Data access to PowerPoint's sandbox container; use `auto` or
+#   `window` when the terminal/host app does not have that macOS privacy permission
 
 def command-exists [name: string]: nothing -> bool {
   not (which $name | is-empty)
@@ -157,114 +159,144 @@ def powerpoint-container-tmp-root []: nothing -> string {
   $env.HOME | path join 'Library' 'Containers' 'com.microsoft.Powerpoint' 'Data' 'tmp'
 }
 
-def list-powerpoint-temp-items []: nothing -> list<string> {
-  let tmp_root = (powerpoint-container-tmp-root)
-
-  if not ($tmp_root | path exists) {
-    return []
-  }
-
-  ls $tmp_root | get name
-}
-
-def cleanup-powerpoint-temp-items [
-  before_items: list<string>
+def cleanup-owned-temp-dir [
+  tmp_root: string
+  tmp_dir: string
 ]: nothing -> record {
-  let after_items = (list-powerpoint-temp-items)
-  let new_items = (
-    $after_items
-      | where {|item| $item not-in $before_items }
+  let root = ($tmp_root | path expand)
+  let target = ($tmp_dir | path expand)
+  let basename = ($target | path basename)
+  let relative = (
+    try {
+      $target | path relative-to $root
+    } catch {
+      null
+    }
+  )
+  let is_owned_child = (
+    $relative != null and
+    $relative == $basename and
+    ($basename =~ '^pptx-snapshot\.[A-Za-z0-9]+$') and
+    $target != '/' and
+    $target != $nu.home-dir and
+    $target != $root
   )
 
-  mut removed = []
-  mut failed = []
-
-  for item in $new_items {
-    let result = (^rm -rf $item | complete)
-    if $result.exit_code == 0 {
-      $removed = ($removed | append $item)
-    } else {
-      $failed = ($failed | append {
-        path: $item
-        stderr: ($result.stderr | str trim)
-      })
+  if not $is_owned_child {
+    return {
+      removed: []
+      failed: [{
+        path: $target
+        message: 'Refusing to remove a temporary directory not owned by pptx-snapshot'
+      }]
     }
   }
 
-  {
-    removed: $removed
-    failed: $failed
-  }
-}
-
-def cleanup-powerpoint-snapshot-temp-dirs []: nothing -> record {
-  let tmp_root = (powerpoint-container-tmp-root)
-
-  if not ($tmp_root | path exists) {
+  if not ($target | path exists) {
     return {removed: [] failed: []}
   }
 
-  let snapshot_dirs = (
-    ls $tmp_root
-      | where {|item| ($item.name | path basename) | str starts-with 'pptx-snapshot.' }
-      | get name
-  )
-
-  mut removed = []
-  mut failed = []
-
-  for item in $snapshot_dirs {
-    let result = (^rm -rf $item | complete)
-    if $result.exit_code == 0 {
-      $removed = ($removed | append $item)
-    } else {
-      $failed = ($failed | append {
-        path: $item
-        stderr: ($result.stderr | str trim)
-      })
+  try {
+    rm --recursive --force -- $target
+    {removed: [$target] failed: []}
+  } catch {|err|
+    {
+      removed: []
+      failed: [{
+        path: $target
+        message: ($err.msg? | default 'Failed to remove the owned temporary directory')
+      }]
     }
-  }
-
-  {
-    removed: $removed
-    failed: $failed
   }
 }
 
-def make-temp-export-dir []: nothing -> record {
-  let candidate_roots = [
-    (powerpoint-container-tmp-root)
-    ($env.TMPDIR? | default '/tmp')
-    '/tmp'
-  ]
+def make-temp-dir-with-timeout [template: string]: nothing -> record {
+  let tag = (random int 1..2147483647)
+  let job_id = (job spawn --description 'pptx-snapshot mktemp' {
+    let result = (^mktemp -d $template | complete)
+    $result | job send 0 --tag $tag
+  })
+  let result = (
+    try {
+      job recv --tag $tag --timeout 3sec
+    } catch {
+      null
+    }
+  )
 
+  if $result == null {
+    do -i { job kill $job_id } | ignore
+    return {
+      exit_code: 124
+      stdout: ''
+      stderr: 'Timed out while creating a temporary directory'
+      timed_out: true
+    }
+  }
+
+  $result | merge {timed_out: false}
+}
+
+def make-window-staging-dir []: nothing -> record {
+  let candidate_roots = [($env.TMPDIR? | default '/tmp') '/tmp'] | uniq
   for root in $candidate_roots {
     if not ($root | path exists) {
-      let create_root = (^mkdir -p $root | complete)
-      if $create_root.exit_code != 0 {
-        continue
-      }
+      continue
     }
-
     let template = ($root | path join 'pptx-snapshot.XXXXXX')
-    let result = (^mktemp -d $template | complete)
-
+    let result = (make-temp-dir-with-timeout $template)
     if $result.exit_code == 0 {
       return {
         ok: true
         tmp_dir: ($result.stdout | str trim)
         root: $root
-        uses_powerpoint_container: ($root == (powerpoint-container-tmp-root))
+        uses_powerpoint_container: false
       }
     }
   }
 
   {
     ok: false
-    message: 'Failed to create a temporary export directory'
+    message: 'Failed to create a temporary directory for window capture'
     details: {
       candidates: $candidate_roots
-      hint: 'Ensure the PowerPoint container or system temporary directory is writable'
+      hint: 'Ensure the system temporary directory is writable'
+    }
+  }
+}
+
+def make-temp-export-dir []: nothing -> record {
+  let root = (powerpoint-container-tmp-root)
+  if not ($root | path exists) {
+    return {
+      ok: false
+      message: 'The PowerPoint sandbox temporary directory is unavailable'
+      details: {
+        root: $root
+        hint: 'Launch PowerPoint once, or use --method window when sandbox staging is unavailable'
+      }
+    }
+  }
+
+  let template = ($root | path join 'pptx-snapshot.XXXXXX')
+  let result = (make-temp-dir-with-timeout $template)
+  if $result.exit_code == 0 {
+    return {
+      ok: true
+      tmp_dir: ($result.stdout | str trim)
+      root: $root
+      uses_powerpoint_container: true
+    }
+  }
+
+  {
+    ok: false
+    message: 'Failed to create a PowerPoint sandbox temporary directory'
+    details: {
+      root: $root
+      timed_out: $result.timed_out
+      stderr: ($result.stderr | str trim)
+      hint: 'Grant App Data access to the terminal/host app, or use --method auto/window'
     }
   }
 }
@@ -282,7 +314,7 @@ def stage-pptx-for-powerpoint [
   }
 
   if not $tmp_dir_result.uses_powerpoint_container {
-    rm --recursive --force $tmp_dir_result.tmp_dir
+    cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir_result.tmp_dir | ignore
     return {
       ok: false
       message: 'Failed to stage the PPTX inside the PowerPoint sandbox container'
@@ -307,7 +339,7 @@ def stage-pptx-for-powerpoint [
   let copy_result = (^cp $pptx_path $staged_path | complete)
 
   if ($copy_result.exit_code != 0 or not ($staged_path | path exists)) {
-    rm --recursive --force $tmp_dir_result.tmp_dir
+    cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir_result.tmp_dir | ignore
     return {
       ok: false
       message: 'Failed to stage the PPTX inside the PowerPoint container'
@@ -321,7 +353,7 @@ def stage-pptx-for-powerpoint [
 
   let staged_sha256 = (file-sha256 $staged_path)
   if $staged_sha256 != $source_sha256 {
-    rm --recursive --force $tmp_dir_result.tmp_dir
+    cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir_result.tmp_dir | ignore
     return {
       ok: false
       message: 'The staged PPTX does not match the source bytes'
@@ -479,7 +511,27 @@ def fit-slide-into-box [
 def ensure-powerpoint-presentation [
   pptx_path: string
   open_delay: float
+  --locate-only
 ]: nothing -> record {
+  let open_lines = (
+    if $locate_only {
+      []
+    } else {
+      [
+        '      if target_presentation is missing value then'
+        '        open POSIX file ppt_path'
+        '        delay open_delay'
+        '        set pres_count to count of presentations'
+        '        repeat with i from 1 to pres_count'
+        '          if ((full name of presentation i) as string) is equal to ppt_path then'
+        '            set target_presentation to presentation i'
+        '            exit repeat'
+        '          end if'
+        '        end repeat'
+        '      end if'
+      ]
+    }
+  )
   let applescript = ([
     'on run argv'
     '  set ppt_path to item 1 of argv'
@@ -495,17 +547,7 @@ def ensure-powerpoint-presentation [
     '          exit repeat'
     '        end if'
     '      end repeat'
-    '      if target_presentation is missing value then'
-    '        open POSIX file ppt_path'
-    '        delay open_delay'
-    '        set pres_count to count of presentations'
-    '        repeat with i from 1 to pres_count'
-    '          if ((full name of presentation i) as string) is equal to ppt_path then'
-    '            set target_presentation to presentation i'
-    '            exit repeat'
-    '          end if'
-    '        end repeat'
-    '      end if'
+    ...$open_lines
     '      if target_presentation is missing value then'
     '        error "PowerPoint opened no presentation matching " & ppt_path'
     '      end if'
@@ -535,6 +577,107 @@ def ensure-powerpoint-presentation [
   {
     ok: true
     presentation_name: ($result.stdout | str trim)
+  }
+}
+
+def open-powerpoint-via-launch-services [
+  pptx_path: string
+  open_delay: float
+]: nothing -> record {
+  let launch = (^open -a 'Microsoft PowerPoint' $pptx_path | complete)
+  if $launch.exit_code != 0 {
+    return {
+      ok: false
+      message: 'Failed to open the target presentation through LaunchServices'
+      details: {
+        stderr: ($launch.stderr | str trim)
+        stdout: ($launch.stdout | str trim)
+      }
+    }
+  }
+
+  sleep ($open_delay * 1sec)
+  let located = (ensure-powerpoint-presentation $pptx_path 0.0 --locate-only)
+  if not $located.ok {
+    return {
+      ok: false
+      message: 'LaunchServices did not open the target presentation in PowerPoint'
+      details: $located.details
+    }
+  }
+
+  $located
+}
+
+def stage-pptx-for-window-capture [
+  pptx_path: string
+  open_delay: float
+]: nothing -> record {
+  let tmp_dir_result = (make-window-staging-dir)
+  if not $tmp_dir_result.ok {
+    return $tmp_dir_result
+  }
+
+  let source_name = ($pptx_path | path basename)
+  let staged_name = (
+    if ($source_name | str ends-with '.pptx') {
+      $source_name
+    } else {
+      'deck.pptx'
+    }
+  )
+  let staged_path = ($tmp_dir_result.tmp_dir | path join $staged_name)
+  let source_sha256 = (file-sha256 $pptx_path)
+  let copy_result = (^cp $pptx_path $staged_path | complete)
+  if ($copy_result.exit_code != 0 or not ($staged_path | path exists)) {
+    let cleanup = (cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir_result.tmp_dir)
+    return {
+      ok: false
+      message: 'Failed to stage the PPTX for window capture'
+      details: {
+        stderr: ($copy_result.stderr | str trim)
+        stdout: ($copy_result.stdout | str trim)
+        cleanup: $cleanup
+      }
+    }
+  }
+
+  let staged_sha256 = (file-sha256 $staged_path)
+  if $staged_sha256 != $source_sha256 {
+    let cleanup = (cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir_result.tmp_dir)
+    return {
+      ok: false
+      message: 'The window-capture PPTX copy does not match the source bytes'
+      details: {
+        source_sha256: $source_sha256
+        staged_sha256: $staged_sha256
+        cleanup: $cleanup
+      }
+    }
+  }
+
+  let opened = (open-powerpoint-via-launch-services $staged_path $open_delay)
+  if not $opened.ok {
+    let close_staged = (close-powerpoint-presentation $staged_path)
+    let cleanup = (cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir_result.tmp_dir)
+    return {
+      ok: false
+      message: $opened.message
+      details: ($opened.details | merge {
+        close_staged: $close_staged
+        cleanup: $cleanup
+      })
+    }
+  }
+
+  {
+    ok: true
+    original_path: $pptx_path
+    staged_path: $staged_path
+    tmp_dir: $tmp_dir_result.tmp_dir
+    root: $tmp_dir_result.root
+    uses_powerpoint_container: false
+    sha256: $source_sha256
   }
 }
 
@@ -1164,13 +1307,13 @@ def render-via-pdf [
   let open_result = (ensure-powerpoint-presentation $pptx_path $open_delay)
 
   if not $open_result.ok {
-    rm --recursive --force $tmp_dir
+    cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir | ignore
     return $open_result
   }
 
   let export_result = (export-presentation-to-pdf $pptx_path $tmp_pdf $tmp_dir_result)
   if not $export_result.ok {
-    rm --recursive --force $tmp_dir
+    cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir | ignore
     return $export_result
   }
 
@@ -1193,7 +1336,7 @@ def render-via-pdf [
       $slide_selection.spec
       | complete
   )
-  rm --recursive --force $tmp_dir
+  cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir | ignore
 
   let outputs = (
     if $slide_selection.multi {
@@ -1607,7 +1750,7 @@ def main [
     } --json=$json
   }
 
-  let pptx_path = ($pptx_file | path expand)
+  let pptx_path = ($pptx_file | path expand --no-symlink)
   if not ($pptx_path | path exists) {
     emit-error 'PPTX file not found' {pptx_path: $pptx_path} --json=$json
   }
@@ -1628,19 +1771,54 @@ def main [
     emit-error $lock.message $lock.details --json=$json
   }
 
-  let stale_tmp_cleanup = (cleanup-powerpoint-snapshot-temp-dirs)
-  let powerpoint_tmp_before = (list-powerpoint-temp-items)
-  let staged = (stage-pptx-for-powerpoint $pptx_path)
-  if not $staged.ok {
+  let prepared = (
+    if $normalized_method == 'window' {
+      let staged = (stage-pptx-for-window-capture $pptx_path $open_delay)
+      if not $staged.ok {
+        $staged
+      } else {
+        $staged | merge {
+          capture_method: 'window'
+          preparation_fallback: null
+        }
+      }
+    } else {
+      let staged = (stage-pptx-for-powerpoint $pptx_path)
+      if $staged.ok {
+        $staged | merge {
+          capture_method: $normalized_method
+          preparation_fallback: null
+        }
+      } else if ($normalized_method == 'auto' and not $slide_selection.multi) {
+        let window_staged = (stage-pptx-for-window-capture $pptx_path $open_delay)
+        if not $window_staged.ok {
+          $staged
+        } else {
+          $window_staged | merge {
+            capture_method: 'window'
+            preparation_fallback: {
+              from: 'pdf-render'
+              to: 'window'
+              reason: $staged.message
+              details: $staged.details
+            }
+          }
+        }
+      } else {
+        $staged
+      }
+    }
+  )
+  if not $prepared.ok {
     release-lock $lock_dir
-    emit-error $staged.message $staged.details --json=$json
+    emit-error $prepared.message $prepared.details --json=$json
   }
 
   let result = (do {
-    let powerpoint_pptx_path = $staged.staged_path
+    let powerpoint_pptx_path = $prepared.staged_path
     let capture = (
       capture-by-method
-        $normalized_method
+        $prepared.capture_method
         $powerpoint_pptx_path
         $output_target
         $slide_selection
@@ -1652,27 +1830,38 @@ def main [
         $focus_delay
         $dpi
     )
+    let capture_with_fallback = (
+      if (
+        $prepared.preparation_fallback != null and
+        ($capture.status? | default null) != 'error'
+      ) {
+        $capture | merge {fallback: $prepared.preparation_fallback}
+      } else {
+        $capture
+      }
+    )
 
-    snapshot-result $pptx_path $staged.sha256 $output_target $slide_selection $capture
+    snapshot-result $pptx_path $prepared.sha256 $output_target $slide_selection $capture_with_fallback
   })
-  let close_staged = (close-powerpoint-presentation $staged.staged_path)
-  if ($staged.tmp_dir | path exists) {
-    rm --recursive --force $staged.tmp_dir
-  }
-  let powerpoint_tmp_cleanup = (cleanup-powerpoint-temp-items $powerpoint_tmp_before)
+  let close_staged = (close-powerpoint-presentation $prepared.staged_path)
+  let staged_tmp_cleanup = (
+    if $prepared.tmp_dir == null {
+      {removed: [] failed: []}
+    } else {
+      cleanup-owned-temp-dir $prepared.root $prepared.tmp_dir
+    }
+  )
 
   release-lock $lock_dir
 
   if $result.status == 'ok' {
     emit-success ($result | merge {
-      stale_tmp_cleanup: $stale_tmp_cleanup
-      powerpoint_tmp_cleanup: $powerpoint_tmp_cleanup
+      staged_tmp_cleanup: $staged_tmp_cleanup
       close_staged: $close_staged
     }) --json=$json
   } else {
     emit-error $result.message ($result.details | merge {
-      stale_tmp_cleanup: $stale_tmp_cleanup
-      powerpoint_tmp_cleanup: $powerpoint_tmp_cleanup
+      staged_tmp_cleanup: $staged_tmp_cleanup
       close_staged: $close_staged
     }) --json=$json
   }

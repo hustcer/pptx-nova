@@ -7,6 +7,20 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(__dirname, '..')
+const CAPABILITY_AXIS_NAMES = ['create', 'edit', 'inspect', 'preserve', 'render', 'verify']
+const CAPABILITY_AXIS_STATUSES = [
+  'supported',
+  'partial',
+  'preserve-only',
+  'unsupported',
+  'inconclusive',
+  'skipped',
+]
+const CAPABILITY_AXIS_REQUIRED_IDENTITIES = [
+  'slide-animation/basic-shape-and-text-builds',
+  'slide-transition/morph-authoring',
+]
+const CAPABILITY_ENTRY_STATUSES = ['supported', 'partial', 'preserve-only', 'unsupported']
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-probe.mjs [options]
@@ -317,18 +331,153 @@ function generatorDeckkitIndex() {
     .sort((a, b) => a.id.localeCompare(b.id))
 }
 
+function hasExactKeys(value, expected) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const actual = Object.keys(value).sort()
+  const wanted = [...expected].sort()
+  return actual.length === wanted.length && actual.every((key, index) => key === wanted[index])
+}
+
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function isCapabilityIdentityPart(value) {
+  return typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)
+}
+
+function capabilityAxisContract(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const names = Array.isArray(value.names) ? value.names : []
+  const statuses = Array.isArray(value.statuses) ? value.statuses : []
+  const requiredFor = Array.isArray(value.requiredFor) ? value.requiredFor : null
+  if (
+    value.schemaVersion !== 'pptx-capability-axis-contract/v1' ||
+    names.length !== CAPABILITY_AXIS_NAMES.length ||
+    !names.every((name, index) => name === CAPABILITY_AXIS_NAMES[index]) ||
+    statuses.length !== CAPABILITY_AXIS_STATUSES.length ||
+    !statuses.every((status, index) => status === CAPABILITY_AXIS_STATUSES[index]) ||
+    !hasExactKeys(value.definitions, CAPABILITY_AXIS_NAMES) ||
+    !CAPABILITY_AXIS_NAMES.every((name) => isNonEmptyString(value.definitions[name])) ||
+    !hasExactKeys(value.statusDefinitions, CAPABILITY_AXIS_STATUSES) ||
+    !CAPABILITY_AXIS_STATUSES.every((status) =>
+      isNonEmptyString(value.statusDefinitions[status]),
+    ) ||
+    !requiredFor ||
+    !requiredFor.every(
+      (target) =>
+        target &&
+        typeof target === 'object' &&
+        !Array.isArray(target) &&
+        isCapabilityIdentityPart(target.feature) &&
+        isCapabilityIdentityPart(target.subset),
+    )
+  ) {
+    return null
+  }
+  const requiredIdentities = requiredFor.map(({ feature, subset }) => `${feature}/${subset}`)
+  if (
+    requiredIdentities.length !== CAPABILITY_AXIS_REQUIRED_IDENTITIES.length ||
+    !requiredIdentities.every(
+      (identity, index) => identity === CAPABILITY_AXIS_REQUIRED_IDENTITIES[index],
+    )
+  ) {
+    return null
+  }
+  return {
+    schemaVersion: value.schemaVersion,
+    names,
+    statuses,
+    definitions: value.definitions,
+    statusDefinitions: value.statusDefinitions,
+    requiredFor: requiredFor.map(({ feature, subset }) => ({ feature, subset })),
+  }
+}
+
+function capabilityAxes(value, contract, truthEvidenceIds) {
+  if (!contract || !hasExactKeys(value, contract.names)) return null
+  const normalized = {}
+  for (const name of contract.names) {
+    const axis = value[name]
+    const limits = Array.isArray(axis?.limits) ? axis.limits : []
+    const limitCodes = limits.map((limit) => limit?.code)
+    const platforms = Array.isArray(axis?.officeTarget?.platforms)
+      ? axis.officeTarget.platforms
+      : []
+    const evidenceIds = Array.isArray(axis?.evidenceIds) ? axis.evidenceIds : []
+    if (
+      !axis ||
+      typeof axis !== 'object' ||
+      Array.isArray(axis) ||
+      !contract.statuses.includes(axis.status) ||
+      !isNonEmptyString(axis.summary) ||
+      limits.length === 0 ||
+      !limits.every(
+        (limit) =>
+          limit &&
+          typeof limit === 'object' &&
+          !Array.isArray(limit) &&
+          isNonEmptyString(limit.code) &&
+          isNonEmptyString(limit.description),
+      ) ||
+      new Set(limitCodes).size !== limitCodes.length ||
+      !axis.officeTarget ||
+      typeof axis.officeTarget !== 'object' ||
+      Array.isArray(axis.officeTarget) ||
+      axis.officeTarget.application !== 'powerpoint' ||
+      !isNonEmptyString(axis.officeTarget.minimumVersion) ||
+      platforms.length !== 2 ||
+      !platforms.every(isNonEmptyString) ||
+      new Set(platforms).size !== platforms.length ||
+      [...platforms].sort().join(',') !== 'macos,windows' ||
+      evidenceIds.length === 0 ||
+      !evidenceIds.every(isNonEmptyString) ||
+      new Set(evidenceIds).size !== evidenceIds.length ||
+      !evidenceIds.every((id) => truthEvidenceIds.has(id))
+    ) {
+      return null
+    }
+    normalized[name] = {
+      status: axis.status,
+      summary: axis.summary,
+      limits,
+      officeTarget: {
+        application: axis.officeTarget.application ?? null,
+        minimumVersion: axis.officeTarget.minimumVersion ?? null,
+        platforms: [...platforms].sort(),
+      },
+      evidenceIds: [...evidenceIds].sort(),
+    }
+  }
+  return normalized
+}
+
 function capabilityTruthIndex(value) {
   const schemaVersion = value?.schemaVersion ?? null
-  const trusted = schemaVersion === 'pptx-capability-truth/v2'
+  const schemaTrusted = schemaVersion === 'pptx-capability-truth/v3'
+  const axisContract = schemaTrusted ? capabilityAxisContract(value?.axisContract) : null
+  const trusted = schemaTrusted && axisContract !== null
+  const axesRequiredFor = new Set(
+    (axisContract?.requiredFor ?? []).map(({ feature, subset }) => `${feature}/${subset}`),
+  )
+  const truthEvidenceIds = new Set(
+    trusted && Array.isArray(value?.entries)
+      ? value.entries.flatMap((entry) =>
+          Array.isArray(entry?.evidence)
+            ? entry.evidence.map((evidence) => evidence?.id).filter(isNonEmptyString)
+            : [],
+        )
+      : [],
+  )
   const entries =
     trusted && Array.isArray(value?.entries)
       ? value.entries
           .filter(
             (entry) =>
               entry &&
-              typeof entry.feature === 'string' &&
-              typeof entry.subset === 'string' &&
-              typeof entry.status === 'string',
+              isCapabilityIdentityPart(entry.feature) &&
+              isCapabilityIdentityPart(entry.subset) &&
+              CAPABILITY_ENTRY_STATUSES.includes(entry.status),
           )
           .map((entry) => ({
             feature: entry.feature,
@@ -339,12 +488,19 @@ function capabilityTruthIndex(value) {
             limits: Array.isArray(entry.limits) ? entry.limits : [],
             evidence: Array.isArray(entry.evidence) ? entry.evidence : [],
             recommendation: entry.recommendation ?? null,
+            axes: capabilityAxes(entry.axes, axisContract, truthEvidenceIds),
           }))
+          .filter(
+            (entry) =>
+              !axesRequiredFor.has(`${entry.feature}/${entry.subset}`) || entry.axes !== null,
+          )
       : []
   return {
     schemaVersion,
+    available: trusted,
     coverage: trusted ? (value?.coverage ?? null) : null,
     missingMeans: trusted ? (value?.missingMeans ?? 'undisclosed') : 'undisclosed',
+    axisContract,
     entries,
     operationIndex:
       trusted && value?.operationIndex && typeof value.operationIndex === 'object'
@@ -410,6 +566,7 @@ function requirementResults(requirements, capabilities) {
               : `the exact feature/subset is ${entry.status}; follow its recommendation instead of inferring support from operation presence`,
           limits: entry.limits,
           recommendation: entry.recommendation,
+          axes: entry.axes,
         })
         continue
       }
@@ -525,11 +682,13 @@ function createReport(args) {
       message: `Observed ${schema.schemaVersion ?? 'an unversioned schema'}; retain discovery data and review schema changes before high-risk writes.`,
     })
   }
-  if (schema && capabilityTruth.schemaVersion !== 'pptx-capability-truth/v2') {
+  if (schema && !capabilityTruth.available) {
     warnings.push({
       code: 'capability-truth-unavailable',
       message:
-        'The runtime does not disclose pptx-capability-truth/v2; feature requirements remain undisclosed and operation presence must not be interpreted as full feature support.',
+        capabilityTruth.schemaVersion !== 'pptx-capability-truth/v3'
+          ? 'The runtime does not disclose pptx-capability-truth/v3; feature requirements remain undisclosed and operation presence must not be interpreted as full feature support.'
+          : 'The runtime discloses pptx-capability-truth/v3 with an invalid six-axis contract; the entire truth is unavailable, feature requirements remain undisclosed, and operation presence must not be interpreted as full feature support.',
     })
   }
   if (undisclosedRequired.length > 0) {
@@ -550,7 +709,7 @@ function createReport(args) {
 
   return {
     report: {
-      schemaVersion: 'pptx-nova-xdoc-capabilities/v2',
+      schemaVersion: 'pptx-nova-xdoc-capabilities/v3',
       observedAt: new Date().toISOString(),
       status: executableMissing ? 'dependency-missing' : schema ? 'ready' : 'degraded',
       xdoc: {
@@ -577,7 +736,7 @@ function createReport(args) {
                 ? 'xdoc schema --op <name> --fields <needed-fields> --minimal; omit --fields or use apply --dry-run for complete validation'
                 : 'xdoc schema --op <name> --minimal',
           featureTruth:
-            'read xdoc-capabilities.json#capabilities.capabilityTruth.entries by exact feature/subset; follow status, limits, and recommendation before selecting an operation',
+            'read xdoc-capabilities.json#capabilities.capabilityTruth.entries by exact feature/subset; when axes is non-null, route create/edit/inspect/preserve/render/verify independently and follow each axis status, limits, Office target, and evidence ids',
           commandHelp: 'xdoc <command...> --help',
           agentTransport:
             'read xdoc-capabilities.json#capabilities.agentTransports; use the disclosed method and framing contract rather than inferring JSON-RPC behavior from command presence',

@@ -19,6 +19,8 @@ xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-ani
 - 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fade-out/wipe-out/fly-out`
   或 `phase: "exit"`。
 - 支持的 trigger：`on-click`、`with-previous`、`after-previous`。
+- 支持的 timing modifier：`repeat`、`autoReverse`、`restart`、
+  `easing.accelerate/decelerate`。
 - 支持的文本 build：`target: { shape, paragraph?, level? }` 配合
   `build: "all-at-once" | "by-paragraph" | "by-level"`。
 
@@ -35,14 +37,14 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 
 看每页：
 
-- `timing_summary`: `has_timing`、`has_media_timing`、`has_interactive_trigger`、
-  `has_unsupported_timing`、`editable_animation_count`、`preserve_only_animation_count`。
-- `animations[]`: 稳定 `id`、`target`、`effect`、`phase`、`trigger`、`duration_ms`、`delay_ms`、
-  `editable` 和 preserve-only reason。
-- `animation_capabilities`: `editable`、`preserve_only`、`unsupported_create`。
+- `timingSummary`: timing 是否存在、media/interactive/unsupported timing、editable 与
+  preserve-only 数量。
+- `animations[]`: 稳定 `id`、`target`、`effect`、`phase`、`trigger`、`durationMs`、`delayMs`、
+  `repeat`、`autoReverse`、`restart`、`easing`、`editable` 和 preserve-only reason。
+- `animationCapabilities`: `editable`、`preserveOnly`、`unsupportedCreate`。
 
 只有 `editable: true` 的既有 step 才能用 `set-slide-animations` 局部编辑或删除。
-`preserve_only` 命中的 timing 不要 raw XML 猜改；需要重建时必须让用户确认
+`preserveOnly` 命中的 timing 不要 raw XML 猜改；需要重建时必须让用户确认
 `mode: "replace"` 或 `mode: "clear"` 会改变原动画语义。
 
 ## 新增动画
@@ -76,6 +78,92 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 `merge-safe` 是默认思路：如果现有 timing 含 media timing、interactive trigger、unsupported timing、
 motion path、emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
 接受丢弃/重建既有动画树。
+
+## 基础动画 timing modifier
+
+四个 modifier 只适用于当前 schema 披露的 8 个基础 entrance/exit effect，不会解锁 motion path、
+emphasis、sequence/parallel、chart build、media timing 或 shape-trigger：
+
+```json
+{
+  "op": "set-slide-animations",
+  "slide": 0,
+  "mode": "merge-safe",
+  "animations": [
+    {
+      "shape": { "name": "KPI Card" },
+      "effect": "fade",
+      "duration": 400,
+      "repeat": 2,
+      "autoReverse": true,
+      "restart": "when-not-active",
+      "easing": {
+        "accelerate": 0.25,
+        "decelerate": 0.5
+      }
+    }
+  ]
+}
+```
+
+严格语义：
+
+- `repeat` 是非负整数或字符串 `"indefinite"`。有限整数表示总播放次数；显式 `0` 会被保留，
+  不会偷偷归一成 `1`。xdoc 会按 OOXML 要求将次数编码为千分之一单位，Agent 不应直接传 wire 值。
+- `autoReverse` 是 boolean，对应每个有限循环先正向、再反向播放；因此 `repeat: 1` 也包含一正一反
+  两段。它不会让 Viewer 获得完整 PowerPoint restart 激活状态机。
+- `restart` 只接受 `always`、`when-not-active`、`never`。
+- `easing.accelerate` / `easing.decelerate` 都是闭区间 `[0, 1]` 的比例；对象至少提供一侧。
+- 有限 repeat 会扩展 `after-previous` 的调度总时长；启用 autoReverse 时每个循环按两倍基础 duration
+  计时。Viewer 支持有限 repeat、autoReverse 和 easing；
+  `repeat: 0`、`repeat: "indefinite"` 当前不播放，`restart` 只作为结构化 metadata 保留。
+- 同一个 direct timing group 若混入 preserve-only 节点，或存在无法完成的 indefinite 前驱，整组按
+  preserve-only 处理；不要尝试按稳定 ID 局部改写或删除其中某个 leaf。创建/更新形成同 click group 的
+  `indefinite -> after-previous` 会被拒绝，应改成新的 on-click group 或移除 indefinite。
+- `ext:repeatCount`、`ext:childTnLst` 等带扩展 namespace 的同名 QName 不属于标准 timing 字段；inspect
+  会保留并把相关 leaf 降为 preserve-only，Agent 不应通过 raw XML 把它们改写为无前缀属性。
+- PDF/PNG 仍是静态结果，不能用来证明 modifier 的播放语义。
+
+按 inspect 返回的稳定 `id` 更新时使用三态契约：字段省略表示保留，`null` 表示清除，合法值表示写入。
+`easing` 对象是完整替换：只提供 `accelerate` 会清除旧的 `decelerate`，反之亦然；`easing: null`
+清除两侧。创建新 step 时不要传 modifier `null`，因为没有既有值可清除。
+
+```json
+{
+  "op": "set-slide-animations",
+  "slide": 0,
+  "animations": [
+    {
+      "id": "animation-id-from-inspect",
+      "repeat": null,
+      "autoReverse": false,
+      "restart": null,
+      "easing": { "accelerate": 0 }
+    }
+  ]
+}
+```
+
+apply 后必须重新 inspect，确认 omitted/null/value 语义、stable id 和目标对象都保持预期；不要只看
+patch 成功状态。
+
+## 六轴 capability truth
+
+probe snapshot 中若 capability entry 的 `axes` 非 null，不能只看 entry-level `status`。逐轴读取
+`status`、`limits`、`officeTarget` 和 `evidenceIds`：
+
+- `pptx-capability-truth/v3` 的六轴 contract 无效时，整份 truth 不可用；不能退回 entry-level status。
+- contract 的 `requiredFor` 条目若缺失完整 axes 或任一轴畸形，该 feature/subset 视为
+  `undisclosed`，不能因为 operation 已披露就推断为 supported。
+
+- `slide-animation/basic-shape-and-text-builds`：create/edit/inspect 为 `supported`，preserve/render
+  为 `partial`，verify 为 `inconclusive`。
+- `slide-transition/morph-authoring`：create/edit/inspect/preserve 为 `supported`，render 为
+  `unsupported`，verify 为 `inconclusive`，直到引用到受控 Windows PowerPoint evidence。
+
+`verify` 的 `supported` 必须来自该轴引用的目标 Office evidence。结构 round-trip、Viewer 测试、
+静态 PDF/PNG 和 Morph fade fallback 都不能替代 PowerPoint clean-open/resave/playback 证据；环境不可用时
+保持 `skipped` 或 `inconclusive`。
 
 ## 安全合并既有动画
 

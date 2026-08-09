@@ -109,8 +109,45 @@ if (args[0] === 'schema') {
       },
       daemon: {
         inputMode: 'control',
-        environment: { XDOC_DAEMON_STATE: 'Override state path.' },
-        defaults: { idleMs: 300000, maxSessions: 64, spawnTimeoutMs: 5000 },
+        endpoints: {
+          data: {
+            stateField: 'port',
+            methods: ['xdoc.ping', 'pptx.inspect', 'pptx.apply'],
+            admission: 'Bounded by maxConnections.',
+            maxFrameBytes: 67174400
+          },
+          control: {
+            stateField: 'controlPort',
+            methods: ['xdoc.status', 'xdoc.shutdown'],
+            admission: 'Dedicated sequential listener.',
+            maxFrameBytes: 65536,
+            frameTimeoutMs: 1000
+          }
+        },
+        observability: {
+          statusSchema: 'xdoc-daemon-status/v2',
+          activeConnections: 'Accepted data-plane handlers.',
+          activeMutations: 'Protected mutations in flight.',
+          mutationStartedCount: 'Cumulative protected mutations entered.',
+          mutationCompletedCount: 'Cumulative protected mutations released.'
+        },
+        usageNotes: [
+          'Inspect and apply are FIFO-serialized per filesystem-identity deck session.',
+          'Shutdown drains accepted handlers without preempting mutations.'
+        ],
+        environment: {
+          XDOC_DAEMON_STATE: 'Override state path.',
+          XDOC_DAEMON_MAX_CONNECTIONS: 'Override active data-plane connections.'
+        },
+        defaults: {
+          idleMs: 300000,
+          maxSessions: 64,
+          maxConnections: 64,
+          maxFrameBytes: 67174400,
+          controlMaxFrameBytes: 65536,
+          controlFrameTimeoutMs: 1000,
+          spawnTimeoutMs: 5000
+        },
         subcommands: { start: {}, status: {}, stop: {} }
       },
       pptx: {
@@ -261,6 +298,19 @@ test('capability probe preserves the exact Agent transport contracts', () => {
     'status',
     'stop',
   ])
+  assert.equal(
+    report.capabilities.agentTransports.daemon.contract.endpoints.control.stateField,
+    'controlPort',
+  )
+  assert.equal(
+    report.capabilities.agentTransports.daemon.contract.observability.statusSchema,
+    'xdoc-daemon-status/v2',
+  )
+  assert.equal(report.capabilities.agentTransports.daemon.contract.defaults.maxConnections, 64)
+  assert.match(
+    report.capabilities.agentTransports.daemon.contract.usageNotes[0],
+    /FIFO-serialized per filesystem-identity deck session/,
+  )
 })
 
 for (const [feature, state, action] of [

@@ -723,10 +723,11 @@ asset slots read `visual-qa-and-asset-slots.md`.
 For shell-driven multi-step inspect/apply loops, pass `--daemon` to
 `xdoc pptx inspect` and `xdoc pptx apply`; it auto-spawns on first use. An Agent
 host that owns a long-lived child process may instead use the published stdio
-`json-rpc` adapter. The capability probe preserves the exact runtime contract in
-`capabilities.agentTransports`; do not infer transport semantics from command
-presence alone. Read `daemon-sessions.md` when choosing or debugging a session
-transport.
+`json-rpc` adapter. The capability probe preserves the exact daemon command
+contract at `capabilities.agentTransports.daemon.contract` and the stdio contract
+under `capabilities.agentTransports.jsonRpc`; do not infer transport semantics
+from command presence or the daemon compatibility indexes alone. Read
+`daemon-sessions.md` when choosing or debugging a session transport.
 
 ## Error Handling
 

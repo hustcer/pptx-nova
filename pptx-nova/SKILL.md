@@ -65,6 +65,10 @@ replacement for `preview.json` or single-file `check.json`. Block only when the 
 requires a strict gate and a task-critical capability is still undisclosed; otherwise keep exploring or
 use an existing fallback, and never disable new xdoc capabilities only because the snapshot is minimal.
 
+For daemon routing or troubleshooting, read the complete runtime disclosure at
+`capabilities.agentTransports.daemon.contract`. The sibling `defaults`, `environment`, and
+`subcommands` fields are compatibility indexes, not the full concurrency or lifecycle contract.
+
 ### Run Reuse and Isolation
 
 `.pptx-nova/<run>/` may be read as historical evidence, but it must not automatically become the

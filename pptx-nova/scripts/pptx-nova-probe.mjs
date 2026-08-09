@@ -297,6 +297,7 @@ function agentTransportIndex(commands) {
     daemon: daemonDisclosed
       ? {
           status: 'disclosed',
+          contract: daemonCommand,
           inputMode: daemonCommand.inputMode ?? null,
           environment: daemonCommand.environment ?? {},
           defaults: daemonCommand.defaults ?? {},

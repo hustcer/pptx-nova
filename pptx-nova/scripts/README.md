@@ -8,9 +8,11 @@ Use these entry points from skill workflows:
 
 - `pptx-nova-probe.mjs` - capture a compact runtime capability snapshot,
   including capability truth, schema-slicing support, patch operations, bundled
-  resources, and the exact published daemon/stdio JSON-RPC Agent transport
-  contracts. Use repeatable `--require-*` flags for task-specific attention or
-  strict gates instead of inferring features from version strings.
+  resources, compact compatibility indexes, and the exact published daemon/
+  stdio JSON-RPC Agent transport contracts. The daemon's complete command
+  contract is retained at `capabilities.agentTransports.daemon.contract`. Use
+  repeatable `--require-*` flags for task-specific attention or strict gates
+  instead of inferring features from version strings.
 - `pptx-nova-deckkit-select.mjs` - select an eligible DeckKit from the bundled catalog.
 - `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
   It uses persisted catalog benchmark evidence by default; pass `--out <dir>`

@@ -9,10 +9,12 @@ Use these entry points from skill workflows:
 - `pptx-nova-probe.mjs` - capture a compact runtime capability snapshot,
   including capability truth, schema-slicing support, patch operations, bundled
   resources, compact compatibility indexes, and the exact published daemon/
-  stdio JSON-RPC Agent transport contracts. The daemon's complete command
-  contract is retained at `capabilities.agentTransports.daemon.contract`. Use
-  repeatable `--require-*` flags for task-specific attention or strict gates
-  instead of inferring features from version strings.
+  stdio JSON-RPC/MCP Agent transport contracts. Complete contracts are retained
+  at `capabilities.agentTransports.daemon.contract`,
+  `capabilities.agentTransports.jsonRpc.contract`, and
+  `capabilities.agentTransports.mcp.contract`. Use repeatable `--require-*`
+  flags for task-specific attention or strict gates instead of inferring
+  features from version strings or command presence.
 - `pptx-nova-deckkit-select.mjs` - select an eligible DeckKit from the bundled catalog.
 - `pptx-nova-deckkit-readiness.mjs` - audit catalog and visual benchmark readiness.
   It uses persisted catalog benchmark evidence by default; pass `--out <dir>`
@@ -124,9 +126,10 @@ Use these entry points from skill workflows:
 - `pptx-nova-finalize-evidence.mjs` - finalize existing high-risk routes from
   the final candidate/inspect plus their existing vision/fidelity reports. It
   detects ChartEx package parts and conditionally consumes a candidate-bound
-  `pptx-nova-powerpoint-snapshot.nu --method pdf-render` report; when
-  PowerPoint is available, missing/stale/incomplete ChartEx evidence blocks,
-  while unavailable PowerPoint is preserved as an explicit warning. It writes
+  `pptx-nova-powerpoint-snapshot.nu --method pdf-render` report. When the optional
+  macOS + PowerPoint + Nushell + `mutool` route is available,
+  missing/stale/incomplete ChartEx evidence blocks; otherwise the baseline
+  continues with an explicit unverified warning. It writes
   `layout-final.json` and `evidence-summary.json`; it intentionally excludes
   Micro Edit and does not replace mode-specific gates or PNG review. New-deck
   modes fail on missing/failed semantic vision evidence; existing-deck modes
@@ -194,7 +197,7 @@ Use these entry points from skill workflows:
   for Repair dialogs, distinguishes plain Cancel buttons from repair prompts,
   and writes clean-open.json. Windows/Linux, macOS without PowerPoint, or
   missing UI scripting return `skipped` and do not block delivery.
-- `pptx-nova-morph-playback.nu` - macOS-only PowerPoint-native Morph semantic
+- `pptx-nova-morph-playback.nu` - optional macOS-only PowerPoint-native Morph semantic
   playback probe. It verifies the recognized by-object/by-word/by-char entry
   effect, exact adjacent slide navigation, animation-enabled slide show, and
   required expected duration plus optional resave evidence. It does not capture
@@ -204,11 +207,14 @@ Use these entry points from skill workflows:
   colors, and empty/default-text placeholder residue, then writes
   structure-check.json for the final evidence summary. Existing reports require
   an explicit current-run `--overwrite`.
-- `pptx-nova-powerpoint-snapshot.nu` - stage the exact candidate in
+- `pptx-nova-powerpoint-snapshot.nu` - optional macOS-only evidence helper that stages the exact candidate in
   PowerPoint's sandbox, render requested slides through PowerPoint PDF export,
   and emit candidate/hash/image-bound `pptx-snapshot/v1` evidence. `window`
   mode additionally fails closed unless the foreground process, presentation,
   slide, canvas, and screenshot scale remain stable before and after capture.
+  It requires Nushell and, for the preferred `pdf-render` route, `mutool`; when
+  unavailable, the baseline Node/xdoc workflow continues with explicit
+  unverified evidence and must not claim PowerPoint-native verification.
 
 Repository-root `tools/` contains maintainer gates for this public repository,
 including `tools/pptx-nova-smoke-test.mjs` and

@@ -619,7 +619,10 @@ dense text, and alignment.
 
 PowerPoint display-effect screenshots and comparisons:
 
-- When a visual gate must reflect PowerPoint's display/export result, render
+- This is an optional, capability-gated evidence route. It is available only when
+  macOS, scriptable PowerPoint, Nushell, and `mutool` are present; otherwise record
+  `chartex-native-render-unverified` and do not claim PowerPoint-native proof.
+- When a visual gate must reflect PowerPoint's display/export result and the optional route is available, render
   with `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method
 pdf-render` first:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
@@ -629,10 +632,12 @@ pdf-render` first:
   verifies the candidate SHA-256, exact ChartEx slide coverage, and every PNG's
   dimensions, byte length, and SHA-256. A same-path report from older candidate
   bytes is rejected.
-- If PowerPoint is installed and scriptable, missing or invalid ChartEx native
-  evidence blocks the high-risk finalizer. If PowerPoint is unavailable, the
-  finalizer emits `chartex-native-render-unverified` and returns a warning; do
-  not summarize that candidate as PowerPoint-verified.
+- If all optional native-render prerequisites are available, missing or invalid
+  ChartEx native evidence blocks the high-risk finalizer. If any prerequisite is
+  unavailable, the finalizer emits `chartex-native-render-unverified` and returns
+  a warning; the baseline route remains usable, but do not summarize that
+  candidate as PowerPoint-verified. A user or policy that explicitly requires
+  native proof must still stop at that proof gate.
 - Treat phrases such as "PowerPoint 截图", "PowerPoint 显示效果", "PowerPoint
   preview", and "PowerPoint 对比" as this non-interactive PowerPoint render
   verification path, not as a request for window capture.
@@ -718,16 +723,19 @@ logos, or third-party images, record the policy in `deck_lock.json` and use
 `assets_manifest.json`. For formula-heavy work read `formulas.md`; for image and
 asset slots read `visual-qa-and-asset-slots.md`.
 
-## Daemon
+## Agent Transports
 
 For shell-driven multi-step inspect/apply loops, pass `--daemon` to
 `xdoc pptx inspect` and `xdoc pptx apply`; it auto-spawns on first use. An Agent
 host that owns a long-lived child process may instead use the published stdio
-`json-rpc` adapter. The capability probe preserves the exact daemon command
-contract at `capabilities.agentTransports.daemon.contract` and the stdio contract
-under `capabilities.agentTransports.jsonRpc`; do not infer transport semantics
-from command presence or the daemon compatibility indexes alone. Read
-`daemon-sessions.md` when choosing or debugging a session transport.
+`json-rpc` adapter. An MCP client may use `xdoc mcp`, but only for tools disclosed
+by `capabilities.agentTransports.mcp.contract`; keep one-shot CLI for commands
+that MCP does not expose. The capability probe preserves the exact daemon,
+JSON-RPC, and MCP contracts under `capabilities.agentTransports`; do not infer
+transport semantics from command presence or compatibility indexes alone. No
+transport choice removes dry-run, apply, post-apply inspection, visual review,
+or evidence gates. Read `daemon-sessions.md` when choosing or debugging a
+session transport.
 
 ## Error Handling
 

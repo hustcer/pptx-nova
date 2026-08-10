@@ -65,9 +65,9 @@ replacement for `preview.json` or single-file `check.json`. Block only when the 
 requires a strict gate and a task-critical capability is still undisclosed; otherwise keep exploring or
 use an existing fallback, and never disable new xdoc capabilities only because the snapshot is minimal.
 
-For daemon routing or troubleshooting, read the complete runtime disclosure at
-`capabilities.agentTransports.daemon.contract`. The sibling `defaults`, `environment`, and
-`subcommands` fields are compatibility indexes, not the full concurrency or lifecycle contract.
+For Agent transport routing, read the exact contracts under `capabilities.agentTransports`, including
+`mcp.contract`; command presence alone is insufficient and unknown contracts fail closed. MCP replaces
+only disclosed adapter calls, never workflow gates. Read `references/daemon-sessions.md` for details.
 
 ### Run Reuse and Isolation
 
@@ -122,7 +122,7 @@ Use these only to choose the entry reference; the routing table owns details.
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual-evidence decision remains the delivery authority.
 - **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
-  required; unavailable PowerPoint is a disclosed risk, not invented proof.
+  required; an unavailable optional evidence route is disclosed risk, not invented proof.
 
 ## Skill Root
 
@@ -255,7 +255,7 @@ For client-facing, investor-facing, or formal-report decks, all visible text suc
 - Expected single-line text such as `subtitle`, `eyebrow`, `kicker`, `badge`, and `label` must not have a stranded trailing word. Handle `vision-check` `text-unexpected-wrap` by shortening copy, widening the container, or changing layout.
 - Main titles and subtitles should not break layout in order to express complete sentences. Remove terminal periods by default and move overlong content to subtitle, callout, body, or notes.
 - When converting PPTX to PNG/PDF or checking generated PPTX, tool watermarks such as `XDOC DEMO` may appear. These watermarks usually appear only in the top-right corner of a slide, may be ignored during human visual review, and should not be treated as DeckKit composition, occlusion, or content defects.
-- Whenever PowerPoint rendering must be the source of truth for screenshots, previews, side-by-side comparisons, or visual validation, prefer `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu ... --method pdf-render`. Fall back to `--method window` only after `pdf-render` fails and failure JSON/stderr evidence is retained. Do not read the user's phrase "PowerPoint screenshot" as a default to window-mode capture.
+- Bundled `.nu` PowerPoint helpers are optional, capability-gated evidence integrations, never baseline dependencies. Missing prerequisites remain explicitly unverified and do not block the baseline unless PowerPoint-native proof was explicitly required; never claim missing evidence. Read the routed animation/chart reference for exact use.
 
 PNG/contact-sheet review should be done with a problem-finding mindset, not as a confirmation ritual.
 Machine gates cannot see every pixel-level defect. In particular, check:
@@ -298,9 +298,9 @@ Animation, structural, or compatibility high-risk tasks must also append:
 OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> target-Office compatibility gate -> PowerPoint clean-open smoke gate when available
 ```
 
-Morph authoring must additionally run the exact adjacent-pair `xdoc pptx morph-check` report and,
-on macOS with PowerPoint, `<skill-root>/scripts/pptx-nova-morph-playback.nu`. A static PNG/PDF preview
-or the viewer's fallback transition does not prove Morph interpolation.
+Morph authoring requires the exact adjacent-pair `morph-check`. The `.nu` playback probe is optional;
+without it the baseline continues but PowerPoint playback stays unverified. An explicit native-proof
+requirement blocks that proof gate. Static PNG/PDF or viewer fallback does not prove interpolation.
 
 When the user, template, publishing channel, or deployment policy names a target Office release, run
 `xdoc check <candidate> --checks compat --target-office <release> -o <run-dir>/office-compat.json --overwrite`.
@@ -394,5 +394,5 @@ Read the files required by routing first; do not read all references at once.
 | `references/template-library.md`          | Brand/layout/deck/chart/icon catalog fusion                                                                                       |
 | `references/resume-split-mode.md`         | Split handoff and resume generation                                                                                               |
 | `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` / raw OOXML                                                                                              |
-| `references/daemon-sessions.md`           | Daemon/stdio JSON-RPC selection, tuning, and troubleshooting                                                                      |
+| `references/daemon-sessions.md`           | Daemon/stdio JSON-RPC/MCP selection, exact contracts, tuning, and troubleshooting                                                 |
 | `references/troubleshooting.md`           | Common errors and automatic repair suggestions                                                                                    |

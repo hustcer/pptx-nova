@@ -382,8 +382,9 @@ directory from workers.
 
 Use one-shot CLI for isolated phases. Shell-driven inspect/apply loops may use
 the local daemon; an Agent host that already owns a long-lived child process may
-use the published stdio JSON-RPC adapter. Both route to the same PPTX handlers;
-the host must keep workflow validation and evidence gates above the adapter.
+use the published stdio JSON-RPC adapter, while an MCP client may use the
+published tools-only MCP stdio adapter. All route to the same PPTX handlers; the
+host must keep workflow validation and evidence gates above the adapter.
 
 ### Daemon
 
@@ -413,8 +414,9 @@ one-shot mode when another process may replace the file.
 
 Integrate through `xdoc daemon start|status|stop` and the documented CLI
 reports. Do not depend on the internal newline-delimited daemon RPC framing. The
-runtime status report is `xdoc-daemon-status/v1`; an older generated schema
-label may say `daemon-status/v1`.
+runtime status report is `xdoc-daemon-status/v2`; read the full
+`commands.daemon` disclosure for the data/control endpoints, limits, lifecycle,
+and observability contract.
 
 Daemon state is revision-bound. If `status --json` reports stale or a build
 mismatch, use `xdoc daemon stop` to retire it and let the current executable
@@ -440,14 +442,36 @@ method. Batches execute serially. Send `xdoc.shutdown` with an id or close stdin
 after the active request; never mix logs into stdout. Use `xdoc.discover` to
 retrieve the exact protocol contract from the running process.
 
+### MCP over stdio
+
+Configure an MCP client with command `xdoc` and arguments `["mcp"]`. Before
+enabling the adapter, read the full `commands.mcp.protocolContract` disclosure
+and recognize its `xdoc-mcp-contract/v1` schema; command presence alone is not a
+protocol contract. The verified runtime currently exposes `xdoc_discover`,
+`pptx_inspect`, and `pptx_apply`.
+
+Use an MCP SDK for protocol negotiation when possible. A custom host must obey
+the disclosed protocol eras, initialization sequence, methods, framing, result
+encoding, and one-connection/one-era rule. Result envelopes use
+`xdoc-mcp-tool-result/v1`; `isError: true` carries a business failure and its
+xdoc report rather than a JSON-RPC protocol error. Read the envelope from the
+location declared by `resultEncoding`, including the content-only compatibility
+era.
+
+Pass absolute paths and keep `overwrite` false unless replacement is explicitly
+intended. MCP is not a sandbox and remote exposure is outside the published
+contract. It can replace only the three disclosed discover/inspect/apply calls;
+conversion, visual checks, and every dry-run, post-apply inspection, evidence,
+and publication gate remain separate workflow steps.
+
 ## 11. CLI and service boundaries
 
 The supported cross-language boundary is the `xdoc` process: command arguments
-or the published stdio JSON-RPC frames, the runtime-discovered schema, versioned
-JSON reports, exit status/lifecycle, and declared filesystem artifacts. This
-repository does not promise an in-process xdoc library API. Wrap the executable
-in a small host-language adapter and version that adapter against its probed
-CLI or JSON-RPC contract.
+or the published stdio JSON-RPC/MCP frames, the runtime-discovered schema,
+versioned JSON reports, exit status/lifecycle, and declared filesystem
+artifacts. This repository does not promise an in-process xdoc library API.
+Wrap the executable in a small host-language adapter and version that adapter
+against its probed CLI, JSON-RPC, or MCP contract.
 
 This repository does not currently publish an HTTP service contract. If a
 service adapter is released separately in the future, treat its routes,
@@ -482,6 +506,8 @@ actually changed.
 - [ ] Probe `xdoc --version` and `xdoc schema` at worker startup.
 - [ ] If using stdio JSON-RPC, pin `xdoc-json-rpc-contract/v1`, keep stdout
       protocol-only, and require ids for mutation/shutdown.
+- [ ] If using MCP, pin a recognized `xdoc-mcp-contract/v1`, pass absolute
+      paths, follow `resultEncoding`, and keep CLI-only workflow gates.
 - [ ] Keep stdout, stderr, exit code, and filesystem artifacts separate.
 - [ ] Inspect and select before constructing an existing-deck patch.
 - [ ] Reject ambiguous selectors and unsupported capabilities.

@@ -1,4 +1,4 @@
-# Agent Sessions —— daemon 与 stdio JSON-RPC
+# Agent Sessions —— daemon、stdio JSON-RPC 与 MCP
 
 > 一次 `xdoc pptx apply` 要做完整四件事：起进程 → 读 PPTX zip → 解 OOXML 模型 →
 > 应用 patch + 序列化输出。多步 Agent 工作流（典型："inspect 看现状 → apply 改
@@ -12,8 +12,8 @@
 
 ## §0 先选 transport
 
-CLI、daemon 和 JSON-RPC 是同一 PPTX 业务能力的不同 adapter，不应各自复制 patch
-语义或验证规则：
+CLI、daemon、JSON-RPC 和 MCP 是同一 PPTX 业务能力的不同 adapter，不应各自复制
+patch 语义或验证规则：
 
 | 场景                                           | 推荐边界        | 原因                                                   |
 | ---------------------------------------------- | --------------- | ------------------------------------------------------ |
@@ -28,6 +28,9 @@ CLI、daemon 和 JSON-RPC 是同一 PPTX 业务能力的不同 adapter，不应�
 daemon 也遵循同一原则：从
 `capabilities.agentTransports.daemon.contract` 读取当前 runtime 的完整公开契约，
 不要只看兼容索引里的 `defaults` / `environment` / `subcommands`。
+MCP host 必须先确认 `capabilities.agentTransports.mcp.status == "disclosed"`，再读取
+`capabilities.agentTransports.mcp.contract` 的完整协议版本、方法、结果编码与安全边界；
+未知 `schemaVersion` 时保留原始合同并 fail closed，不要只凭 `mcp` 命令存在就启用。
 
 ## §1 起手最短路径
 
@@ -269,7 +272,15 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
 { "mcpServers": { "xdoc": { "command": "xdoc", "args": ["mcp"] } } }
 ```
 
-只暴露三个 tool，细粒度操作仍在 `pptx_apply.patch.ops[]` 里：
+启动前用本次运行生成的 capability snapshot 确认 MCP 已公开，并按完整
+`capabilities.agentTransports.mcp.contract` 配置 client。成熟 MCP SDK 会处理协议
+协商；自定义 host 必须遵守合同中的 `protocolVersions`、`methods`、`framing`、
+`resultEncoding` 和 `security`：现代 era 无 initialize 且每请求携带其要求的 `_meta`；
+2025 era 先 `initialize` 再发 `notifications/initialized`，初始化完成前仅允许 `ping`；
+一条连接只能进入一个 era，2024 revision 不受支持。不要把这些规则从版本号猜出来。
+
+只使用当前 `contract.tools[]` 公开的 tool。已批准的 runtime 当前公开以下三个，细粒度
+操作仍在 `pptx_apply.patch.ops[]` 里：
 
 | tool            | 用途                                                                |
 | --------------- | ------------------------------------------------------------------- |
@@ -282,8 +293,11 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
 - `xdoc_discover` 默认 `mode=index`（约 21 KB）。`mode=full` 约 1.5 MB、贵约 71 倍，
   只在确实需要时请求；通常 `mode=ops` + `ops:[...]` 才是正确选择。
 - **传绝对路径**。相对路径是相对 `xdoc` 子进程的工作目录，不是 client 的。
-- `isError: true` 是**业务失败**，`structuredContent.value` 里有完整 xdoc report 和
-  `suggestions[].fixPatch`。改 patch，不要改 transport。
+- `isError: true` 是**业务失败**，不是 JSON-RPC transport error。完整
+  `xdoc-mcp-tool-result/v1` envelope 的位置由 `contract.resultEncoding` 决定：支持的 era
+  放在 `structuredContent`，`2025-03-26` 则放在 `content` 的紧凑 JSON 中；从 envelope
+  的 `value` 读取完整 xdoc report。只有 report 实际给出 `suggestions[].fixPatch` 时才可
+  使用，不能假设每次失败都有自动修复 patch。
 - 产物通过 artifact ref 返回（`path` / `state`）；deck 字节永不进协议通道。
   `dryRun` 的 artifact 是 `planned`，文件并不存在。
 - `overwrite` 默认 false，已存在的输出会得到 `OutputExists`。annotations 只是 hint，

@@ -56,6 +56,10 @@ inspect 用于快速定位 shape、文本、图片、关系和页型分布。
 xdoc pptx inspect <ref.pptx> --daemon --json > .tmp/deckkit-<id>/ref-inspect.json
 ```
 
+若宿主已按 `deckkit-maker/SKILL.md` 的 xdoc transport 边界验证 MCP 合同，可用
+`pptx_inspect` 替换这一条 inspect 调用；必须传绝对路径。MCP 未公开或合同不兼容时继续
+使用上述 CLI，不影响本流程；XML 解包、PNG 基准和后续证据门禁均不变。
+
 使用方式：
 
 - 先从 `ref-inspect.json` 获取 slide count、shape count、文本清单、图片/媒体关系和可能的

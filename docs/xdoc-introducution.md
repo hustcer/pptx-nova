@@ -32,8 +32,8 @@ xdoc is a native-first command-line runtime for turning document files into
 structured, reviewable artifacts and for creating or editing native, editable
 PPTX decks. It combines conversion, extraction, preflight diagnostics, a
 declarative PPTX patch bridge, static and rendered visual checks, replayable
-evidence, and two published session adapters (local daemon and stdio JSON-RPC)
-under one versioned contract.
+evidence, and three published Agent process adapters (local daemon, stdio
+JSON-RPC, and MCP over stdio) under versioned contracts.
 
 This document serves three audiences:
 
@@ -136,13 +136,13 @@ and reviewable at the format boundary.
 
 The power of xdoc is the combination of responsibilities behind one contract:
 
-| Responsibility | Representative public surface                                                                 | Value to an Agent workflow                                                     |
-| -------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| **Discover**   | `xdoc --version`, help, `xdoc schema`, catalogs, examples, capability status                  | Negotiate the installed runtime instead of assuming support                    |
-| **Understand** | conversion, extraction, `pptx inspect`, `pptx select`, preflight diagnostics                  | Build a structured view of the source and identify exact targets               |
-| **Plan**       | recipes, versioned JSON patches, selectors, dry-run reports                                   | Review intent, resolution, predicted changes, and risks before writing         |
-| **Execute**    | native PPTX apply, conversion, PDF export, candidate delivery, optional daemon/JSON-RPC reuse | Produce real artifacts through one local process boundary                      |
-| **Prove**      | re-inspection, semantic checks, preview, vision checks, diffs, sidecars, versioned reports    | Decide whether the candidate is safe to publish and retain replayable evidence |
+| Responsibility | Representative public surface                                                                     | Value to an Agent workflow                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Discover**   | `xdoc --version`, help, `xdoc schema`, catalogs, examples, capability status                      | Negotiate the installed runtime instead of assuming support                    |
+| **Understand** | conversion, extraction, `pptx inspect`, `pptx select`, preflight diagnostics                      | Build a structured view of the source and identify exact targets               |
+| **Plan**       | recipes, versioned JSON patches, selectors, dry-run reports                                       | Review intent, resolution, predicted changes, and risks before writing         |
+| **Execute**    | native PPTX apply, conversion, PDF export, candidate delivery, optional daemon/JSON-RPC/MCP reuse | Produce real artifacts through one local process boundary                      |
+| **Prove**      | re-inspection, semantic checks, preview, vision checks, diffs, sidecars, versioned reports        | Decide whether the candidate is safe to publish and retain replayable evidence |
 
 This is why xdoc is better described as a document execution runtime than as a
 file converter or a collection of PowerPoint utilities. Conversion, mutation,
@@ -239,23 +239,23 @@ screenshots or log interpretation alone.
 
 ### Current release surface
 
-| Area                           | Runtime contract in v0.3.5                                                              |
-| ------------------------------ | --------------------------------------------------------------------------------------- |
-| Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `pdf`, `daemon`, `json-rpc`, `schema` |
-| PPTX CLI subcommands           | 37 discoverable subcommands                                                             |
-| Patch operations               | 58 canonical operations                                                                 |
-| High-level recipes             | 18 recipe kinds                                                                         |
-| Shape catalog                  | 182 preset shapes                                                                       |
-| Layout contracts               | 6 built-in content contracts                                                            |
-| Theme/style assets             | 9 theme packs and 4 style packs                                                         |
-| Gradients and chart styles     | 24 preset gradients and 48 chart styles                                                 |
-| Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status                     |
-| Enum families                  | 20 controlled vocabularies                                                              |
-| Published bridge error catalog | 24 error codes                                                                          |
-| Embedded PPTX report schemas   | 20 report schemas                                                                       |
-| Patch schema definitions       | 206 `$defs` in the current runtime schema                                               |
-| Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples                          |
-| Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog            |
+| Area                           | Runtime contract in v0.3.5                                                                     |
+| ------------------------------ | ---------------------------------------------------------------------------------------------- |
+| Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `pdf`, `daemon`, `json-rpc`, `mcp`, `schema` |
+| PPTX CLI subcommands           | 37 discoverable subcommands                                                                    |
+| Patch operations               | 58 canonical operations                                                                        |
+| High-level recipes             | 18 recipe kinds                                                                                |
+| Shape catalog                  | 182 preset shapes                                                                              |
+| Layout contracts               | 6 built-in content contracts                                                                   |
+| Theme/style assets             | 9 theme packs and 4 style packs                                                                |
+| Gradients and chart styles     | 24 preset gradients and 48 chart styles                                                        |
+| Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status                            |
+| Enum families                  | 20 controlled vocabularies                                                                     |
+| Published bridge error catalog | 24 error codes                                                                                 |
+| Embedded PPTX report schemas   | 20 report schemas                                                                              |
+| Patch schema definitions       | 206 `$defs` in the current runtime schema                                                      |
+| Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples                                 |
+| Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                   |
 
 Counts are discovery aids, not promises that every long-tail PPTX feature is
 fully editable. Each operation and capability carries its own support or
@@ -489,22 +489,22 @@ freeze the boundaries that different planners, workers, and host languages need
 to agree on, then grow capability coverage without changing the meaning of a
 successful report.
 
-| Boundary         | Already observable in xdoc                                                                           | What an ecosystem profile would freeze                                              |
-| ---------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Discovery        | `cli-agent/v1`, progressive `xdoc schema`, catalogs, examples, and capability status                 | How a worker negotiates supported, partial, preserve-only, and unsupported features |
-| Mutation         | `pptx-patch/v1`, numeric patch envelope, selectors, ordered ops, recipe expansion                    | Selector determinism, atomicity, idempotency expectations, and extension rules      |
-| Evidence         | Versioned report ids, report-specific hashes or gates, changed parts, operation traces, and sidecars | Minimum proof required before a candidate can be published or retried               |
-| Safety           | Asset roots, size and ZIP limits, raw-XML opt-in, signature/encryption policy, and exit codes        | Policy profiles that a sandbox, queue, or regulated worker can enforce consistently |
-| Conformance      | Contracted examples, fixture probes, semantic-rule summaries, and replayable artifacts               | Cross-implementation test vectors and compatibility/deprecation policy              |
-| Host integration | CLI, runtime schema, daemon, and any separately published service contract                           | Stable process adapters for workers, queues, containers, and service deployments    |
+| Boundary         | Already observable in xdoc                                                                            | What an ecosystem profile would freeze                                              |
+| ---------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Discovery        | `cli-agent/v1`, progressive `xdoc schema`, catalogs, examples, and capability status                  | How a worker negotiates supported, partial, preserve-only, and unsupported features |
+| Mutation         | `pptx-patch/v1`, numeric patch envelope, selectors, ordered ops, recipe expansion                     | Selector determinism, atomicity, idempotency expectations, and extension rules      |
+| Evidence         | Versioned report ids, report-specific hashes or gates, changed parts, operation traces, and sidecars  | Minimum proof required before a candidate can be published or retried               |
+| Safety           | Asset roots, size and ZIP limits, raw-XML opt-in, signature/encryption policy, and exit codes         | Policy profiles that a sandbox, queue, or regulated worker can enforce consistently |
+| Conformance      | Contracted examples, fixture probes, semantic-rule summaries, and replayable artifacts                | Cross-implementation test vectors and compatibility/deprecation policy              |
+| Host integration | CLI, runtime schema, daemon, stdio JSON-RPC, MCP stdio, and any separately published service contract | Stable process adapters for workers, queues, containers, and service deployments    |
 
 The important design choice is that a new host does not need to reproduce xdoc's
 internal object model. It needs to preserve the wire contract, capability
 negotiation, evidence semantics, and declared safety policy. The current release
-does not yet ship a bundled MCP/IDE onboarding layer or an external governance
-process; those are ecosystem work, not hidden capabilities. Keeping that gap
-explicit makes the standardization path more credible than claiming a standard
-already exists.
+ships a bundled local MCP stdio server, but it does not ship IDE-specific
+installers, remote MCP exposure, or an external governance process; those remain
+ecosystem work. Keeping that boundary explicit makes the standardization path
+more credible than claiming a standard already exists.
 
 ## First run: verify the runtime
 
@@ -1652,7 +1652,8 @@ Defaults in v0.3.5:
 
 - loopback TCP address: `127.0.0.1:0`;
 - idle session timeout: 300000 ms;
-- maximum sessions: 64; and
+- maximum sessions: 64;
+- maximum active data-plane connections: 64; and
 - auto-spawn readiness timeout: 5000 ms.
 
 Relevant environment variables are:
@@ -1668,9 +1669,9 @@ Relevant environment variables are:
 | `XDOC_DAEMON_LOG`              | Override the auto-spawn log path            |
 
 Sessions are keyed by canonical input paths and, after save, by output paths.
-The foreground server currently processes connections serially, which keeps deck
-mutation deterministic. A higher-throughput host should add explicit per-session
-locking before introducing concurrent handlers.
+Requests for the same filesystem-identity deck session are FIFO-serialized, so
+symlink, hard-link, and host case/separator aliases share one history. Different
+deck sessions may execute concurrently within the disclosed connection limit.
 
 The daemon defaults to a loopback-only local RPC boundary and authenticates
 requests with a 256-bit bearer token stored in its state file. State replacement
@@ -1681,11 +1682,11 @@ until eviction and is not re-stat'ed or hash-checked on every cache hit, so use
 one-shot mode or exclusive path ownership when another process may replace an
 input file.
 
-The verified runtime emits `xdoc-daemon-status/v1` for status reports. The
-generated CLI schema currently advertises `daemon-status/v1`, and the internal
-newline-delimited `xdoc-daemon-rpc/v1` framing is not a published compatibility
-boundary. Integrate through `xdoc daemon` and preserve the raw report until
-those identifiers and the RPC policy are reconciled.
+The verified runtime emits `xdoc-daemon-status/v2` for status reports. It
+includes separate data and control endpoints plus active-connection and
+mutation counters. The internal newline-delimited daemon framing is not a
+published compatibility boundary; integrate through `xdoc daemon` and the
+complete `commands.daemon` schema disclosure.
 
 Use `--daemon-strict` in a workflow where a lost session would invalidate the
 run's assumptions. Use plain `--daemon` when a safe one-shot fallback is
@@ -1716,9 +1717,32 @@ dispatched synchronous method. Batch items are also serial. Retrieve the live
 contract with `xdoc.discover`, then shut down with an id-bearing
 `xdoc.shutdown` request or close stdin after the active request completes.
 
-Daemon and JSON-RPC are adapters over the same business handlers, not new
+Daemon, JSON-RPC, and MCP are adapters over the same business handlers, not new
 validation policies. Keep dry-run, apply, post-apply inspection, evidence, and
 publication gates above the chosen transport.
+
+## MCP stdio mode
+
+For an MCP client, `xdoc mcp` publishes the tools-only
+`xdoc-mcp-contract/v1` over stdio. Configure the client with command `xdoc` and
+arguments `["mcp"]`, then read the complete live contract from
+`commands.mcp.protocolContract` rather than inferring behavior from command
+presence.
+
+The verified runtime exposes `xdoc_discover`, `pptx_inspect`, and `pptx_apply`.
+It supports the modern `2026-07-28` era and the disclosed 2025 compatibility
+eras; one connection serves one era and no 2024 revision is negotiated. Result
+envelopes use `xdoc-mcp-tool-result/v1`. A business failure is returned with
+`isError: true` while preserving the xdoc report; it is not converted into a
+JSON-RPC protocol error. The full envelope appears in `structuredContent` for
+eras that support it and as compact JSON in `content` for the disclosed
+content-only era.
+
+Pass absolute paths. `overwrite` and raw-XML access default to false, artifact
+bytes stay outside the protocol channel, and remote exposure is out of scope.
+MCP replaces only its disclosed discover/inspect/apply adapter calls; commands
+such as conversion and visual checking still use the CLI, and all dry-run,
+post-apply inspection, evidence, and publication gates remain in force.
 
 ### Separately published service adapters
 
@@ -1815,8 +1839,9 @@ not a cross-machine latency SLA.
 | `check`    | Run fonts, links, compatibility, assets, and policy checks                    | `preflight/v1` JSON                        |
 | `pptx`     | Create, patch, inspect, render, compare, translate, brand, or refurbish decks | PPTX plus versioned reports                |
 | `pdf`      | Inspect, extract text from, or render PDFs                                    | PDF diagnostics, text, or PNG              |
-| `daemon`   | Start, inspect, or stop the local session service                             | `xdoc-daemon-status/v1` or diagnostics     |
+| `daemon`   | Start, inspect, or stop the local session service                             | `xdoc-daemon-status/v2` or diagnostics     |
 | `json-rpc` | Serve the published stdio Agent transport                                     | `xdoc-json-rpc-result/v1` NDJSON frames    |
+| `mcp`      | Serve the published tools-only MCP transport over stdio                       | MCP frames with `xdoc-mcp-tool-result/v1`  |
 | `schema`   | Print the machine-readable CLI and patch contract                             | `cli-agent/v1` JSON                        |
 
 ### PPTX action families
@@ -1881,9 +1906,9 @@ The following identifiers are useful when validating an integration:
 | `pptx-a11y/v1`                                                                          | Opt-in accessibility findings inside preflight              |
 | `pptx-copy-from/v2`                                                                     | Fingerprint-bound cross-deck structural plan/report         |
 | `pdf-inspect/v1`, `pdf-text/v1`                                                         | PDF diagnostics and extraction                              |
-| `xdoc-daemon-status/v1`                                                                 | Runtime daemon state and endpoint diagnostics               |
-| `daemon-status/v1`                                                                      | Stale generated-schema label; do not use as the runtime id  |
+| `xdoc-daemon-status/v2`                                                                 | Runtime daemon state, endpoint, and mutation diagnostics    |
 | `xdoc-json-rpc-contract/v1`, `xdoc-json-rpc-result/v1`                                  | Stdio Agent protocol and result envelope                    |
+| `xdoc-mcp-contract/v1`, `xdoc-mcp-tool-result/v1`                                       | MCP stdio tool protocol and result envelope                 |
 
 Treat a schema version as a compatibility boundary. If a worker sees an unknown
 version, it should preserve the raw report and stop at the integration boundary
@@ -1994,19 +2019,20 @@ claims should stay tied to the measured contract and its declared limitations.
     legal language, or brand approvals are correct.
 11. This repository does not currently publish an HTTP service contract; do not
     infer routes or security defaults from the CLI or local daemon.
-12. The supported external onboarding boundary is the CLI and its schema. A
-    bundled MCP server or IDE installer is not part of the current release
-    contract.
+12. The supported external onboarding boundary includes the CLI, its schema,
+    and the bundled local MCP stdio server described by
+    `xdoc-mcp-contract/v1`. IDE-specific installers and remote MCP exposure are
+    not part of the current release contract.
 13. The v0.3.5 PDF discovery map omits the executable `pdf render` action even
     though CLI help and schema examples expose it. Integrations should pin the
     build and retain this exception until the discovery contract is corrected.
 14. `discovery.commands`, `schema --index`, capability `enabled` status, and
     command `ioContract` fields are useful but not exhaustive or live host
     readiness proofs. Cache the full schema and run representative probes.
-15. The runtime daemon status id is `xdoc-daemon-status/v1`, while the generated
-    schema still advertises `daemon-status/v1`; the daemon's internal RPC
-    framing is not public. Use the independent published
-    `xdoc-json-rpc-contract/v1` stdio adapter for direct Agent protocol access.
+15. The runtime daemon status id is `xdoc-daemon-status/v2`; the daemon's
+    internal RPC framing is not public. Direct Agent protocol access uses the
+    independently published `xdoc-json-rpc-contract/v1` or
+    `xdoc-mcp-contract/v1` stdio adapter.
 16. Patch operations are transactional at the presentation-state boundary,
     but PPTX and sidecar writes are separate, and a daemon delivery failure can
     leave its in-memory session advanced. Sidecars do not carry deck hashes or

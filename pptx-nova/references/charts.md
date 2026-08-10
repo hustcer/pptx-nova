@@ -1158,15 +1158,17 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   ignored; use the default ChartEx legend semantics or separate editable
   labels when a custom legend is required.
 - `xdoc convert` is not sufficient evidence for ChartEx rendering. Always
-  verify these chart types with a non-interactive PowerPoint baseline render:
+  use a non-interactive PowerPoint baseline render when the optional macOS +
+  scriptable PowerPoint + Nushell + `mutool` evidence route is available:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
 --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, maps every `chartEx*.xml` relationship back to its 1-based
   slide, and requires candidate/hash/image-bound coverage for all such slides.
-  When PowerPoint is available, absence or staleness is a hard failure. When it
-  is unavailable, the result remains an explicit unverified risk rather than a
-  pass.
+  When the complete optional route is available, absence or staleness is a hard
+  failure. When any prerequisite is unavailable, the baseline workflow remains
+  usable but the result is an explicit unverified warning rather than a pass;
+  stop if the user or delivery policy explicitly requires PowerPoint-native proof.
   Treat user phrases such as "PowerPoint 截图" or "用 PowerPoint 显示效果对比" as
   PowerPoint render verification, not as permission to use window-mode screenshots.
   Use `--method window` only if `pdf-render` fails; keep the failed pdf-render

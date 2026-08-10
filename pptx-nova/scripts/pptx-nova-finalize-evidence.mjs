@@ -44,7 +44,8 @@ Options:
   --powerpoint-native-render <path>
                             Optional pptx-snapshot JSON. Defaults to
                             run-dir/powerpoint-native-render.json when present.
-                            Required for ChartEx when PowerPoint is available.
+                            Required for ChartEx only when the optional native
+                            render helper prerequisites are available.
   --native-render <path>    Alias for --powerpoint-native-render.
   --changed-slides <expr>   Optional 1-based changed-slide scope, e.g. 25-38.
                             Structural edit/template gates use this scoped
@@ -459,8 +460,16 @@ function validatePowerPointNativeRender(args, report) {
     chartExParts: result.packageInfo?.chartExParts ?? [],
     chartExSlides: result.packageInfo?.chartExSlides ?? [],
     unmappedParts: result.packageInfo?.unmappedParts ?? [],
-    powerpointAvailable: result.availability?.available ?? false,
-    powerpointAvailabilityReason: result.availability?.reason ?? null,
+    nativeRenderHelperAvailable: result.availability?.available ?? false,
+    powerpointAvailable:
+      result.availability?.powerpointAvailable ?? result.availability?.available ?? false,
+    nushellAvailable: result.availability?.nushellAvailable ?? null,
+    mutoolAvailable: result.availability?.mutoolAvailable ?? null,
+    nativeRenderAvailabilityReason: result.availability?.reason ?? null,
+    powerpointAvailabilityReason:
+      (result.availability?.powerpointAvailable ?? result.availability?.available ?? false)
+        ? null
+        : (result.availability?.reason ?? null),
     images: result.validation?.images ?? [],
     validationErrors: result.validation?.errors ?? [],
   }
@@ -481,7 +490,7 @@ function validatePowerPointNativeRender(args, report) {
       report,
       'warning',
       'chartex-native-render-unverified',
-      'ChartEx rendering remains unverified because PowerPoint-native rendering is unavailable',
+      'ChartEx rendering remains unverified because the optional PowerPoint-native rendering route is unavailable',
       details,
     )
   }

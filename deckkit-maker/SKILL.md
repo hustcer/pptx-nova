@@ -32,6 +32,21 @@ description: >
 如果两者缺一，先向用户索取，不要自己猜测或挑选文件。若参考源是 HTML 目录，优先确认其中
 的入口文件（通常是 `template.html`）和元数据文件（如 `template.json` / `design.md`）。
 
+## xdoc transport 边界
+
+本 skill 默认使用一次性 CLI 或 CLI `--daemon`，因为完整 DeckKit 流程还需要
+`convert`、`vision-check`、benchmark 等 MCP 未公开的命令。宿主若已配置 xdoc MCP，先用
+当前 `pptx-nova/scripts/pptx-nova-probe.mjs` 生成 capability snapshot；只有
+`capabilities.agentTransports.mcp.status == "disclosed"` 且合同版本被宿主识别时，才可按
+完整 `capabilities.agentTransports.mcp.contract` 使用它。
+
+- `xdoc_discover` 只能替换对应 schema discovery，`pptx_inspect` / `pptx_apply` 只能替换
+  对应的 inspect/apply 调用；其余 xdoc 命令继续走 CLI。
+- 所有文件路径传绝对路径；`overwrite` 默认 false，不能把 client 工作目录当成项目目录。
+- MCP 只替换调用 adapter，不能跳过 dry-run → apply → post-apply inspect、vision-check、
+  benchmark、人工 PNG 对比或 evidence gate。
+- MCP 未安装、未公开或合同不兼容时回退 CLI，不阻塞 DeckKit 创建或修复流程。
+
 ## 修复或扩展已有 DeckKit
 
 当用户要求“修一下现有 DeckKit / 重新走一遍 broadside / 对照参考源修几页”时，按

@@ -293,7 +293,8 @@ xdoc pptx morph-check <run-dir>/candidate.pptx --from-slide 0 --to-slide 1 --jso
 到 `type: morph`、正确的 mode/duration、extension wrapper 以及 fade fallback。若两页本来没有 `!!`
 名称，先通过普通 inspect/select 和受支持的重命名操作建立显式配对；不要通过 raw XML 绕过诊断。
 
-在 macOS + PowerPoint 环境还要运行 clean-open 和技能内播放探针：
+`clean-open.mjs` 在可用时按主流程运行。下面的 Nushell 播放探针是可选的、能力门控的
+PowerPoint-native 证据，仅在 macOS + PowerPoint + Nushell 都可用时运行：
 
 ```bash
 node <skill-root>/scripts/pptx-nova-clean-open.mjs \
@@ -302,6 +303,10 @@ nu <skill-root>/scripts/pptx-nova-morph-playback.nu <run-dir>/candidate.pptx \
   --from-slide 0 --to-slide 1 --mode by-object --duration-ms 900 \
   --output <run-dir>/morph-playback.json --json
 ```
+
+缺少 Nushell 或其他可选前置不阻断基线 Morph 流程，但必须把 PowerPoint 播放证据标为
+unverified，不能声称已经验证；若用户或交付策略明确要求 PowerPoint-native Morph 证明，
+则该证明门禁保持阻塞，直到可选前置可用。
 
 `--duration-ms` 是通过门禁的必填预期值，必须来自 patch 或 inspect，不能省略后仍宣称时长已验证。
 需要验证 PowerPoint 保存往返时，再加 `--resave-output <run-dir>/powerpoint-resaved.pptx`，随后对该文件

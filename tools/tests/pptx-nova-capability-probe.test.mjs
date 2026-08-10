@@ -84,6 +84,48 @@ if (args[0] === 'schema') {
     commands: {
       convert: {},
       schema: {},
+      mcp: {
+        inputMode: 'stream',
+        ioContract: {
+          stdin: { format: 'ndjson', maxFrameBytes: 8388608 },
+          stdout: { format: 'ndjson', usage: 'protocol-frames-only' },
+          stderr: { usage: 'logs-and-process-diagnostics-only' }
+        },
+        protocolContract: {
+          schemaVersion: 'xdoc-mcp-contract/v1',
+          protocol: 'Model Context Protocol',
+          transport: 'stdio',
+          scope: 'tools-only',
+          protocolVersions: {
+            modern: ['2026-07-28'],
+            legacy: ['2025-11-25', '2025-06-18', '2025-03-26']
+          },
+          framing: { format: 'newline-delimited UTF-8 JSON', maxFrameBytes: 8388608 },
+          methods: {
+            modern: ['server/discover', 'tools/list', 'tools/call'],
+            legacy: ['initialize', 'notifications/initialized', 'tools/list', 'tools/call']
+          },
+          tools: [
+            { name: 'xdoc_discover', agentMethod: 'xdoc.schema' },
+            { name: 'pptx_inspect', agentMethod: 'pptx.inspect' },
+            { name: 'pptx_apply', agentMethod: 'pptx.apply' }
+          ],
+          resultEncoding: {
+            envelopeSchemaVersion: 'xdoc-mcp-tool-result/v1',
+            businessErrorRule: 'A business failure uses isError true.'
+          },
+          artifactRef: { states: ['written', 'planned'] },
+          security: {
+            paths: 'Clients should pass absolute paths.',
+            overwrite: 'Defaults to false.'
+          },
+          errors: [{ code: -32600, message: 'Invalid Request' }]
+        },
+        usageNotes: [
+          'Configure an MCP client with command xdoc and args [mcp].',
+          'Pass absolute paths.'
+        ]
+      },
       'json-rpc': {
         protocolContract: {
           schemaVersion: 'xdoc-json-rpc-contract/v1',
@@ -270,10 +312,39 @@ test('capability probe captures truth and satisfies an exact supported feature',
 
 test('capability probe preserves the exact Agent transport contracts', () => {
   const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
-  const result = runProbe(xdoc, ['--require-command', 'json-rpc', '--strict'])
+  const result = runProbe(xdoc, [
+    '--require-command',
+    'mcp',
+    '--require-command',
+    'json-rpc',
+    '--strict',
+  ])
   assert.equal(result.status, 0, result.stderr)
   const report = JSON.parse(result.stdout)
 
+  assert.equal(report.capabilities.agentTransports.mcp.status, 'disclosed')
+  assert.equal(report.capabilities.agentTransports.mcp.schemaVersion, 'xdoc-mcp-contract/v1')
+  assert.deepEqual(
+    report.capabilities.agentTransports.mcp.tools.map(({ name, agentMethod }) => ({
+      name,
+      agentMethod,
+    })),
+    [
+      { name: 'xdoc_discover', agentMethod: 'xdoc.schema' },
+      { name: 'pptx_inspect', agentMethod: 'pptx.inspect' },
+      { name: 'pptx_apply', agentMethod: 'pptx.apply' },
+    ],
+  )
+  assert.deepEqual(report.capabilities.agentTransports.mcp.contract.protocolVersions.legacy, [
+    '2025-11-25',
+    '2025-06-18',
+    '2025-03-26',
+  ])
+  assert.equal(
+    report.capabilities.agentTransports.mcp.contract.resultEncoding.envelopeSchemaVersion,
+    'xdoc-mcp-tool-result/v1',
+  )
+  assert.match(report.capabilities.agentTransports.mcp.contract.security.paths, /absolute paths/)
   assert.equal(report.capabilities.agentTransports.jsonRpc.status, 'disclosed')
   assert.equal(
     report.capabilities.agentTransports.jsonRpc.schemaVersion,

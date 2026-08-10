@@ -17,10 +17,9 @@ test('Morph authoring publishes the explicit pairing and PowerPoint evidence con
   const playback = readSkill('scripts/pptx-nova-morph-playback.nu')
 
   assert.match(skill, /For Morph, use exact `!!` object names, run `morph-check`/)
-  assert.match(
-    skill,
-    /A static PNG\/PDF preview\s+or the viewer's fallback transition does not prove Morph interpolation/,
-  )
+  assert.match(skill, /Static PNG\/PDF or viewer fallback does not prove interpolation/)
+  assert.match(skill, /The `\.nu` playback probe is optional/)
+  assert.match(skill, /without it the baseline continues/)
 
   assert.match(animations, /xdoc schema --op set-slide-transition --minimal/)
   assert.match(animations, /完全相同、区分大小写的 `!!` 前缀名称/)
@@ -34,7 +33,7 @@ test('Morph authoring publishes the explicit pairing and PowerPoint evidence con
   assert.match(animations, /Windows fixture 补证，否则该维度保持 `inconclusive`/)
   assert.match(animations, /viewer\/parser 只消费 OOXML `mc:Fallback` 的 fade 语义/)
 
-  assert.match(scripts, /PowerPoint-native Morph semantic/)
+  assert.match(scripts, /optional macOS-only PowerPoint-native Morph semantic/)
   assert.match(playback, /pptx-morph-playback\/v1/)
   assert.match(playback, /entry effect morph by object/)
   assert.match(playback, /Expected Morph duration is required/)

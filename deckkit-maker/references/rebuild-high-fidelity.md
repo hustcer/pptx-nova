@@ -74,6 +74,11 @@ xdoc pptx vision-check out.pptx --json | tee vision.json   # high/medium 必须�
 rm -rf previews && xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 ```
 
+若宿主已按 `deckkit-maker/SKILL.md` 的 xdoc transport 边界验证 MCP 合同，可用
+`pptx_apply` 替换 dry-run/apply 两次对应调用，并在输入中传绝对路径；`vision-check`、
+`convert` 和其他未公开命令仍走 CLI。adapter 变化不改变 dry-run → apply → post-apply
+inspect、视觉检查及人工逐页对比门禁。
+
 **每次重渲前 `rm -rf previews`**：convert 在目录已存在且参数变化时会写进
 `previews/deck-img/` 子目录，复核时会看到陈旧图。
 

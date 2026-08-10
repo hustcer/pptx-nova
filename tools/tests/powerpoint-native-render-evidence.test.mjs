@@ -169,7 +169,7 @@ test('ChartEx package inspection maps modern chart parts to one-based slides', (
   })
 })
 
-test('ChartEx evidence fails closed when PowerPoint is available and render evidence is absent', () => {
+test('ChartEx evidence fails closed when the optional native-render route is available and evidence is absent', () => {
   const runDir = mkdtempSync(join(tmpdir(), 'pptx-native-evidence-required-'))
   const candidatePath = writeCandidate(runDir)
   const result = evaluateChartExNativeRender({
@@ -182,7 +182,7 @@ test('ChartEx evidence fails closed when PowerPoint is available and render evid
   assert.equal(result.reason, 'native-render-required')
 })
 
-test('ChartEx evidence discloses unresolved risk when PowerPoint is unavailable', () => {
+test('ChartEx evidence discloses unresolved risk when the optional native-render route is unavailable', () => {
   const runDir = mkdtempSync(join(tmpdir(), 'pptx-native-evidence-unavailable-'))
   const candidatePath = writeCandidate(runDir)
   const result = evaluateChartExNativeRender({
@@ -192,7 +192,28 @@ test('ChartEx evidence discloses unresolved risk when PowerPoint is unavailable'
     availability: { available: false, reason: 'unsupported-platform' },
   })
   assert.equal(result.status, 'warning')
-  assert.equal(result.reason, 'powerpoint-unavailable-native-render-unverified')
+  assert.equal(result.reason, 'native-render-helper-unavailable-unverified')
+})
+
+test('ChartEx evidence does not require the optional Nushell helper when it is unavailable', () => {
+  const runDir = mkdtempSync(join(tmpdir(), 'pptx-native-evidence-no-nu-'))
+  const candidatePath = writeCandidate(runDir)
+  const result = evaluateChartExNativeRender({
+    candidatePath,
+    runDir,
+    artifactPath: null,
+    availability: {
+      available: false,
+      reason: 'optional-nushell-helper-unavailable',
+      powerpointAvailable: true,
+      nushellAvailable: false,
+      mutoolAvailable: true,
+    },
+  })
+  assert.equal(result.status, 'warning')
+  assert.equal(result.reason, 'native-render-helper-unavailable-unverified')
+  assert.equal(result.availability.powerpointAvailable, true)
+  assert.equal(result.availability.nushellAvailable, false)
 })
 
 test('ChartEx evidence accepts candidate-bound pdf-render outputs with verified PNG identities', () => {

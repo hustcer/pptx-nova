@@ -147,16 +147,50 @@ export function inspectChartExPackage(candidatePath) {
 
 export function detectPowerPointAvailability() {
   if (process.platform !== 'darwin') {
-    return { available: false, reason: 'unsupported-platform', platform: process.platform }
+    return {
+      available: false,
+      reason: 'unsupported-platform',
+      platform: process.platform,
+      powerpointAvailable: false,
+      nushellAvailable: false,
+      mutoolAvailable: false,
+    }
   }
-  const result = spawnSync('osascript', ['-e', 'id of application "Microsoft PowerPoint"'], {
+  const powerpoint = spawnSync('osascript', ['-e', 'id of application "Microsoft PowerPoint"'], {
     encoding: 'utf8',
   })
+  const nushell = spawnSync('nu', ['--version'], { encoding: 'utf8' })
+  const mutool = spawnSync('mutool', ['-v'], { encoding: 'utf8' })
+  const powerpointAvailable = powerpoint.status === 0
+  const nushellAvailable = nushell.status === 0
+  const mutoolAvailable = mutool.status === 0
+  const available = powerpointAvailable && nushellAvailable && mutoolAvailable
+  const reason = !powerpointAvailable
+    ? 'powerpoint-not-installed-or-not-scriptable'
+    : !nushellAvailable
+      ? 'optional-nushell-helper-unavailable'
+      : !mutoolAvailable
+        ? 'optional-mutool-helper-unavailable'
+        : 'available'
   return {
-    available: result.status === 0,
-    reason: result.status === 0 ? 'available' : 'not-installed-or-not-scriptable',
+    available,
+    reason,
     platform: process.platform,
-    error: result.status === 0 ? null : (result.stderr || result.stdout || '').trim() || null,
+    powerpointAvailable,
+    nushellAvailable,
+    mutoolAvailable,
+    error: available
+      ? null
+      : [
+          [powerpointAvailable, powerpoint],
+          [nushellAvailable, nushell],
+          [mutoolAvailable, mutool],
+        ]
+          .filter(([probeAvailable]) => !probeAvailable)
+          .map(([, result]) =>
+            (result.stderr || result.stdout || result.error?.message || '').trim(),
+          )
+          .find(Boolean) || null,
   }
 }
 
@@ -420,7 +454,7 @@ export function evaluateChartExNativeRender({
     applicable: true,
     reason: availability.available
       ? 'native-render-required'
-      : 'powerpoint-unavailable-native-render-unverified',
+      : 'native-render-helper-unavailable-unverified',
     candidatePath,
     artifactPath: artifactPath || null,
     packageInfo,

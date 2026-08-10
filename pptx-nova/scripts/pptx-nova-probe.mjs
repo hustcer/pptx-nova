@@ -260,9 +260,16 @@ function nativeDeckkitIndex(value) {
 }
 
 function agentTransportIndex(commands) {
+  const mcpCommand = commands?.mcp
+  const mcpProtocol = mcpCommand?.protocolContract
   const jsonRpcCommand = commands?.['json-rpc']
   const protocol = jsonRpcCommand?.protocolContract
   const daemonCommand = commands?.daemon
+  const mcpDisclosed =
+    mcpProtocol &&
+    typeof mcpProtocol === 'object' &&
+    !Array.isArray(mcpProtocol) &&
+    mcpProtocol.transport === 'stdio'
   const jsonRpcDisclosed =
     protocol &&
     typeof protocol === 'object' &&
@@ -271,6 +278,23 @@ function agentTransportIndex(commands) {
   const daemonDisclosed =
     daemonCommand && typeof daemonCommand === 'object' && !Array.isArray(daemonCommand)
   return {
+    mcp: mcpDisclosed
+      ? {
+          status: 'disclosed',
+          schemaVersion: mcpProtocol.schemaVersion ?? null,
+          protocol: mcpProtocol.protocol ?? null,
+          transport: mcpProtocol.transport,
+          scope: mcpProtocol.scope ?? null,
+          inputMode: mcpCommand.inputMode ?? null,
+          ioContract: mcpCommand.ioContract ?? null,
+          contract: mcpProtocol,
+          tools: Array.isArray(mcpProtocol.tools) ? mcpProtocol.tools : [],
+          usageNotes: Array.isArray(mcpCommand.usageNotes) ? mcpCommand.usageNotes : [],
+        }
+      : {
+          status: 'undisclosed',
+          schemaVersion: mcpProtocol?.schemaVersion ?? null,
+        },
     jsonRpc: jsonRpcDisclosed
       ? {
           status: 'disclosed',
@@ -740,7 +764,7 @@ function createReport(args) {
             'read xdoc-capabilities.json#capabilities.capabilityTruth.entries by exact feature/subset; when axes is non-null, route create/edit/inspect/preserve/render/verify independently and follow each axis status, limits, Office target, and evidence ids',
           commandHelp: 'xdoc <command...> --help',
           agentTransport:
-            'read xdoc-capabilities.json#capabilities.agentTransports; use the disclosed method and framing contract rather than inferring JSON-RPC behavior from command presence',
+            'read xdoc-capabilities.json#capabilities.agentTransports; use the exact disclosed daemon, JSON-RPC, or MCP contract rather than inferring transport behavior from command presence',
           selectorEvidence: 'inspect output -> op schema -> dry-run suggestions',
           deckkitGeneratorCatalog:
             'read xdoc-capabilities.json#capabilities.generatorDeckkits for DeckKit-first creation support',

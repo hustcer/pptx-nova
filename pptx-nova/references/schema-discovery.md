@@ -20,6 +20,23 @@ xdoc schema --minimal                # 删 verbose 字段（与上面任一组�
 `--fields` 必须与 `--op/--ops` 组合；required 字段会自动保留，未知字段直接报错。
 `--defs` 只用于字段投影，因此也要求 `--fields`；默认值为 `full`，兼容旧调用。
 
+## Action 级 CLI 帮助
+
+只需要确认某个 PPTX action 的调用方式时，先用低成本的 action help，无需拉完整 schema：
+
+```bash
+xdoc help                         # 根帮助
+xdoc help pptx                    # PPTX action 总览
+xdoc pptx apply --help            # apply 的 usage / options / examples
+xdoc help pptx visual-verify      # 等价的 help verb 形式
+```
+
+每个 `xdoc pptx <action> --help` 都由运行时
+`commands.pptx.subcommands.<action>` 合同生成；其中 option 定义投影自同一 PPTX 父命令，
+因此适合发现 CLI flag、默认值和示例。它不是 patch operation JSON Schema：需要字段类型、
+selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --op ...`。help 是人类文本，
+不要附加 `--json` 或把输出当 JSON 解析。
+
 ## 典型 Agent 用法
 
 ### 1. 初次进 deck → 取 op 索引

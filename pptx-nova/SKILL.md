@@ -55,7 +55,9 @@ complete validation schemas: switch to `--defs full` before constructing nested 
 full-definition field projection remains incomplete; omit `--fields` or use `apply --dry-run` before
 treating a patch as valid. Read
 theme/style/native DeckKit information from the matching catalog indexes in the snapshot. Derive selectors in
-order from inspect, the target op schema, and dry-run suggestions. Treat `xdoc <command...> --help` as supplemental only; do not assume `--help --json` emits JSON.
+order from inspect, the target op schema, and dry-run suggestions. For PPTX CLI invocation syntax, use
+`xdoc pptx <action> --help` as the low-cost schema-backed synopsis of that action's usage, options, and examples;
+it supplements rather than replaces the machine schema, and `--help --json` does not emit JSON.
 
 Do not append `--json` to top-level `xdoc convert` or `xdoc check` by default. For structured PPTX PNG
 previews, prefer `xdoc pptx preview --json`; for structured single-file preflight results, prefer

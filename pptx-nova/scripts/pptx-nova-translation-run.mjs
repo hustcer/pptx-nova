@@ -46,12 +46,12 @@ const { runJsonPhase, addInternalPhase, requireGate } = createRunnerRuntime({
 })
 
 const usage = `Usage:
-  node <skill-root>/scripts/pptx-nova-translation-run.mjs --source <source.pptx> --candidate <candidate.pptx> --units <i18n-scan.json> --translations <translations.json> --output <output.pptx> [options]
+  node <skill-root>/scripts/pptx-nova-translation-run.mjs --source <source.pptx> --candidate <candidate.pptx> --units-file <i18n-scan.json> --translations <translations.json> --output <output.pptx> [options]
 
 Options:
   --source <path>                    Read-only source PPTX
   --candidate <path>                 Stable translated candidate PPTX
-  --units <path>                     Classified/source i18n scan consumed by i18n-plan
+  --units-file <path>                     Classified/source i18n scan consumed by i18n-plan
   --translations <path>              pptx-i18n-translations/v1 contract
   --output <path>                    Final PPTX published only after machine gates pass
   --run-dir <path>                   New, empty, or pre-probed (only xdoc-capabilities.json) finalization run directory
@@ -139,7 +139,7 @@ function parseArgs(argv) {
 const valueFlags = {
   '--source': 'source',
   '--candidate': 'candidate',
-  '--units': 'units',
+  '--units-file': 'units',
   '--translations': 'translations',
   '--output': 'output',
   '--run-dir': 'runDir',
@@ -442,7 +442,7 @@ function runCandidateConsistency(summary, args, artifacts) {
       artifacts.candidate,
       '--mode',
       'candidate',
-      '--units',
+      '--units-file',
       artifacts.units,
       '--data',
       artifacts.translations,

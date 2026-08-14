@@ -33,7 +33,7 @@ one bound partition when its individual units are actually needed.
 node <skill-root>/scripts/pptx-nova-translation-run.mjs \
   --source source.pptx \
   --candidate <run-dir>/candidate-final.pptx \
-  --units <run-dir>/i18n-scan-classified.json \
+  --units-file <run-dir>/i18n-scan-classified.json \
   --translations <run-dir>/translations.json \
   --output translated.pptx \
   --run-dir <run-dir>/finalize \

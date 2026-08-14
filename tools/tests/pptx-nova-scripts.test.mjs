@@ -3476,7 +3476,8 @@ const visionDiff = {
 }
 const audit = {
   schemaVersion: 'pptx-refurbish-audit/v1',
-  status: 'passed',
+  status: 'success',
+  outcome: 'passed',
   summary: {
     errorCount: 0,
     warningCount: 0,
@@ -3542,7 +3543,8 @@ if (args[0] === 'schema') {
   if (nativeFailureVisionDiff) {
     print({
       schemaVersion: 'pptx-refurbish-skin/v1',
-      status: 'failed',
+      status: 'success',
+      outcome: 'failed',
       gate: {
         passed: false,
         auditStatus: 'passed',
@@ -3561,7 +3563,8 @@ if (args[0] === 'schema') {
   }
   print({
     schemaVersion: 'pptx-refurbish-skin/v1',
-    status: 'passed',
+    status: 'success',
+    outcome: 'passed',
     gate: { passed: true, newHighIssues: 0, newMediumIssues: 0 },
     reports: { visionDiff, audit }
   })
@@ -4404,11 +4407,12 @@ if (args[0] === 'schema') {
   writeFileSync(valueAfter('--output'), 'candidate pptx')
   print({
     schemaVersion: 'pptx-refurbish-skin/v1',
-    status: 'passed',
+    status: 'success',
+    outcome: 'passed',
     gate: { passed: true, newHighIssues: 0, newMediumIssues: 0 },
     reports: {
       visionDiff: { schemaVersion: 'pptx-vision-diff/v1', status: 'success', summary: { byClass: { new: { high: 0, medium: 0, low: 0 }, changed: { high: 0, medium: 0, low: 0 } } } },
-      audit: { schemaVersion: 'pptx-refurbish-audit/v1', status: 'passed', summary: { errorCount: 0, warningCount: 0, sourceSlideCount: 1, finalSlideCount: 1, slideCountMatches: true }, issues: [] }
+      audit: { schemaVersion: 'pptx-refurbish-audit/v1', status: 'success', outcome: 'passed', summary: { errorCount: 0, warningCount: 0, sourceSlideCount: 1, finalSlideCount: 1, slideCountMatches: true }, issues: [] }
     }
   })
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
@@ -4558,7 +4562,7 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
       source,
       '--candidate',
       candidate,
-      '--units',
+      '--units-file',
       units,
       '--translations',
       translations,
@@ -4631,7 +4635,7 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
       source,
       '--candidate',
       candidate,
-      '--units',
+      '--units-file',
       units,
       '--translations',
       translations,
@@ -4680,7 +4684,7 @@ else process.exit(2)
       source,
       '--candidate',
       candidate,
-      '--units',
+      '--units-file',
       units,
       '--translations',
       translations,
@@ -4743,7 +4747,7 @@ else if (args[1] === 'preview') {
       source,
       '--candidate',
       candidate,
-      '--units',
+      '--units-file',
       units,
       '--translations',
       translations,
@@ -4863,7 +4867,7 @@ else process.exit(2)
       source,
       '--candidate',
       candidate,
-      '--units',
+      '--units-file',
       units,
       '--translations',
       translations,
@@ -4911,7 +4915,7 @@ else process.exit(2)
       source,
       '--candidate',
       candidate,
-      '--units',
+      '--units-file',
       units,
       '--translations',
       translations,

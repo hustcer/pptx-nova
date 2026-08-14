@@ -259,7 +259,7 @@ debugging path.
    ```bash
    xdoc pptx i18n-plan \
      --source source.pptx \
-     --units <run-dir>/i18n-scan-source.json \
+     --units-file <run-dir>/i18n-scan-source.json \
      --data <run-dir>/translations.json \
      --output <run-dir>/i18n-plan.json \
      --json
@@ -301,7 +301,7 @@ debugging path.
    ```bash
    xdoc pptx i18n-anchor-draft \
      --source source.pptx \
-     --units <run-dir>/i18n-scan-source.json \
+     --units-file <run-dir>/i18n-scan-source.json \
      --data <run-dir>/translations.json \
      --output <run-dir>/i18n-anchor-draft.json \
      --json
@@ -516,7 +516,7 @@ debugging path.
     xdoc pptx i18n-scan \
       --source candidate.pptx \
       --mode candidate \
-      --units <run-dir>/i18n-scan-classified.json \
+      --units-file <run-dir>/i18n-scan-classified.json \
       --data <run-dir>/translations.json \
       --output <run-dir>/i18n-scan-candidate.json \
       --overwrite \
@@ -527,9 +527,9 @@ debugging path.
     error (`outputUntouched: true` in the error JSON) and the previous report
     stays on disk — never read that stale file as this run's evidence.
 
-    Candidate mode takes the source language and scope from `--units`; it rejects
+    Candidate mode takes the source language and scope from `--units-file`; it rejects
     `--source-lang` and `--slides` so the command line cannot disagree with the
-    contract files. Use the same `--units` file you fed to `i18n-plan` (the
+    contract files. Use the same `--units-file` file you fed to `i18n-plan` (the
     classified scan when review units exist, otherwise `i18n-scan-source.json`)
     and the same `translations.json`.
 

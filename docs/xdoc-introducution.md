@@ -1314,12 +1314,12 @@ than treated as automatically understood by the scanner.
 
 ```bash
 xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --output i18n-source.json --json
-xdoc pptx i18n-plan --source source.pptx --units i18n-source.json --data translations.json --output i18n-plan.json --json
+xdoc pptx i18n-plan --source source.pptx --units-file i18n-source.json --data translations.json --output i18n-plan.json --json
 # Use the planner's textPlan artifact only when that lower-level route is selected.
 xdoc pptx i18n-text-plan --source source.pptx --data i18n-text-plan-input.json --output i18n-text-plan.json --json
 xdoc pptx replace-text --source source.pptx --data replacements.json --output translated.pptx --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
-xdoc pptx i18n-scan --source translated.pptx --mode candidate --units i18n-source.json --data translations.json --output i18n-candidate.json --json
+xdoc pptx i18n-scan --source translated.pptx --mode candidate --units-file i18n-source.json --data translations.json --output i18n-candidate.json --json
 ```
 
 The source scan emits `i18nUnits` as the stable inventory. Its `hits[]` entries

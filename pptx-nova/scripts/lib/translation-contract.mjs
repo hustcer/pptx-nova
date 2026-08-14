@@ -1,7 +1,7 @@
 function unitsFrom(value) {
   const units = value?.i18nUnits?.units
   if (value?.schemaVersion !== 'pptx-i18n-scan/v1') {
-    throw new Error('--units must use pptx-i18n-scan/v1')
+    throw new Error('--units-file must use pptx-i18n-scan/v1')
   }
   return { units: Array.isArray(units) ? units : [], complete: Array.isArray(units) }
 }
@@ -35,7 +35,7 @@ export function analyzeTypedTextAttributeAllowlist(unitsContract, translationsCo
   const unitContract = unitsFrom(unitsContract)
   const translations = translationsFrom(translationsContract)
   if (!unitContract.complete && translations.length > 0) {
-    throw new Error('--units must contain i18nUnits.units[] when translations are present')
+    throw new Error('--units-file must contain i18nUnits.units[] when translations are present')
   }
   const units = unitContract.units
   const translatedByUnit = new Map()

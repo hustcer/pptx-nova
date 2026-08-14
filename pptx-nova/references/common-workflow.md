@@ -296,7 +296,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     parts/relationships, blockers, preserve-only risks, and the whole-batch
     rollback boundary. `register-source` is the faithful default; use
     `rebind-target` only when target layout inheritance is deliberate.
-    Require `status: "ready"`, current target/donor `*FileSha256` values,
+    Require `status: "success"` with `outcome: "passed"`, current target/donor `*FileSha256` values,
     normalized OPC package fingerprints, no blockers, and
     `copy-size-gate.json.agentGate.passed=true` before apply. Package
     fingerprints and whole-file SHA-256 values are distinct contracts; do not

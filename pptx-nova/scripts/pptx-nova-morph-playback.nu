@@ -178,8 +178,8 @@ def run-powerpoint-probe [
 
 def main [
   pptx_file: path                 # Candidate PPTX file.
-  --from-slide: int = 0           # 0-based source slide index.
-  --to-slide: int = 1             # 0-based adjacent destination slide index.
+  --from-slide: int = 1           # 1-based source slide number.
+  --to-slide: int = 2             # 1-based adjacent destination slide number.
   --mode: string = 'by-object'    # Expected Morph mode.
   --duration-ms: int              # Required expected duration with 50 ms tolerance.
   --timeout-seconds: int = 10     # Playback navigation timeout.
@@ -188,8 +188,8 @@ def main [
   --overwrite                     # Replace an existing report or resaved PPTX.
   --json                          # Print the complete report as JSON.
 ] {
-  if $from_slide < 0 or $to_slide != ($from_slide + 1) {
-    error make {msg: 'Morph playback requires one adjacent 0-based slide pair.'}
+  if $from_slide < 1 or $to_slide != ($from_slide + 1) {
+    error make {msg: 'Morph playback requires one adjacent 1-based slide pair.'}
   }
   if $timeout_seconds <= 0 {
     error make {msg: 'Playback timeout must be positive.'}
@@ -257,8 +257,8 @@ def main [
         sha256: (open --raw $input_path | hash sha256)
       }
       request: {
-        fromSlideIndex: $from_slide
-        toSlideIndex: $to_slide
+        fromSlideIndex: ($from_slide - 1)
+        toSlideIndex: ($to_slide - 1)
         morphMode: $mode
         durationMs: $duration_ms
       }
@@ -301,8 +301,8 @@ def main [
     let observation = (
       run-powerpoint-probe
         $staged_path
-        ($from_slide + 1)
-        ($to_slide + 1)
+        $from_slide
+        $to_slide
         $timeout_seconds
         $staged_resave_path
     )
@@ -325,8 +325,8 @@ def main [
     let checks = {
       morphModeRecognized: ($observation.recognizedEntryEffect == $expected_effect)
       slideShowAnimationsEnabled: $observation.showWithAnimation
-      startedOnSource: ($observation.startSlideNumber == ($from_slide + 1))
-      advancedToDestination: ($observation.endSlideNumber == ($to_slide + 1))
+      startedOnSource: ($observation.startSlideNumber == $from_slide)
+      advancedToDestination: ($observation.endSlideNumber == $to_slide)
       durationMatched: $duration_matches
     }
     let passed = ($checks | values | all {|value| $value })
@@ -343,8 +343,8 @@ def main [
         sha256: (open --raw $input_path | hash sha256)
       }
       request: {
-        fromSlideIndex: $from_slide
-        toSlideIndex: $to_slide
+        fromSlideIndex: ($from_slide - 1)
+        toSlideIndex: ($to_slide - 1)
         morphMode: $mode
         durationMs: $duration_ms
       }

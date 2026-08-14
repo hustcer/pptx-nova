@@ -138,11 +138,11 @@ xdoc pptx copy-from -i target.pptx --from reference.pptx \
   --slides 1,3,5-8 --output out.pptx --json > copy-from.json
 ```
 
-`--slides` 是 1-based selector；兼容入口 `--slide N` 仍是 0-based 单页，省略所有
-selector 等价于 `--slide 0`；`--all` 复制 source 全部页。三者互斥。需要多页时必须优先
+`--slides` 是 1-based selector；省略所有 selector 时复制 source 第一页；`--all`
+复制 source 全部页。两者互斥。需要多页时必须优先
 一次事务复制，避免逐页调用、重复打开/序列化和中间候选分叉。`pptx-copy-from/v2` 会返回
 每页 `copied[]`、聚合 `dependencyMappings[]` / `changedParts[]`，以及只读 `preflight`。
-执行前必须确认 `status: "ready"`、target/donor 指纹仍匹配、`blockers[]` 为空，并人工处理
+执行前必须确认 `status: "success"` 且 `outcome: "passed"`、target/donor 指纹仍匹配、`blockers[]` 为空，并人工处理
 `risks[]`；结构 Edit Contract 直接消费该报告，不伪造 patch `opResults[]`。
 
 复制后必须立刻用 patch 替换旧文本、图表数据、表格数据和图片；不要交付带有参考 deck 旧内容的页面。

@@ -135,12 +135,12 @@ xdoc pptx preview deck.pptx --slides 25-38 \
   --contact-sheet <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
 
-xdoc pptx preview deck.pptx --layout 0 \
+xdoc pptx preview deck.pptx --layout 1 \
   --output-dir <run-dir>/layout-preview \
   --overwrite --json > <run-dir>/layout-preview.json
 ```
 
-`--layout N` is a 0-based registered-layout preview and is mutually exclusive
+`--layout N` is a 1-based registered-layout preview and is mutually exclusive
 with `--slides`. xdoc builds a one-slide candidate from that layout and its
 master/theme inheritance chain, persists
 `layout-preview-N-candidate.pptx` inside the requested output directory, and

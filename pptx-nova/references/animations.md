@@ -277,7 +277,7 @@ source/destination slide pair；`set-slide-transition.slide` 是 **0-based desti
 确切相邻页运行诊断，并保存 `pptx-morph-check/v1` 报告：
 
 ```bash
-xdoc pptx morph-check input.pptx --from-slide 0 --to-slide 1 --json \
+xdoc pptx morph-check input.pptx --from-slide 1 --to-slide 2 --json \
   > <run-dir>/morph-check-before.json
 xdoc pptx apply -i input.pptx --patch <run-dir>/patch.json --dry-run --json \
   > <run-dir>/dry-run.json
@@ -285,7 +285,7 @@ xdoc pptx apply -i input.pptx --patch <run-dir>/patch.json -o <run-dir>/candidat
   > <run-dir>/apply.json
 xdoc pptx inspect <run-dir>/candidate.pptx --daemon --json \
   > <run-dir>/inspect-after.json
-xdoc pptx morph-check <run-dir>/candidate.pptx --from-slide 0 --to-slide 1 --json \
+xdoc pptx morph-check <run-dir>/candidate.pptx --from-slide 1 --to-slide 2 --json \
   > <run-dir>/morph-check-after.json
 ```
 
@@ -300,7 +300,7 @@ PowerPoint-native 证据，仅在 macOS + PowerPoint + Nushell 都可用时运�
 node <skill-root>/scripts/pptx-nova-clean-open.mjs \
   --pptx <run-dir>/candidate.pptx --output <run-dir>/clean-open.json --json
 nu <skill-root>/scripts/pptx-nova-morph-playback.nu <run-dir>/candidate.pptx \
-  --from-slide 0 --to-slide 1 --mode by-object --duration-ms 900 \
+  --from-slide 1 --to-slide 2 --mode by-object --duration-ms 900 \
   --output <run-dir>/morph-playback.json --json
 ```
 

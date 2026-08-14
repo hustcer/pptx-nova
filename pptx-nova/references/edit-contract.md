@@ -153,7 +153,7 @@ single-slide selector (default 0), `--all` selects all donor slides, and the
 three selectors are mutually exclusive.
 
 Treat the v2 dry-run as a fingerprint-bound execution plan. Require
-`status: "ready"`, `preflight.readOnly: true`, no `preflight.blockers`, and
+`status: "success"` with `outcome: "passed"`, `preflight.readOnly: true`, no `preflight.blockers`, and
 target/donor `targetFileSha256` / `sourceFileSha256` values that still match the
 files immediately before apply. `targetFingerprint` / `sourceFingerprint` are
 normalized OPC package fingerprints, not whole-file hashes; require both

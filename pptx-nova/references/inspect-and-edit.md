@@ -301,8 +301,7 @@ dry-run 报告里会有：
   "opIndex": 2,
   "status": "error",
   "error": {
-    "kind": "AmbiguousSelector",
-    "code": "AMBIGUOUS_SELECTOR",
+    "code": "invalid_operation",
     "message": "Shape selector matched 3 candidates",
     "suggestions": [
       {

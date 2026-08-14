@@ -463,7 +463,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     then run `pptx-nova-compare.mjs --kind refurbish --slide-count <count>
 
 --compare-chunk-size 20 --dpi 192 --fallback-dpi 144`. Decks larger than
-    20 slides become numbered parts; only an explicit retryable `RenderError`     may lower the failed part to 144 DPI. Run
+    20 slides become numbered parts; only an explicit retryable `render_error`     may lower the failed part to 144 DPI. Run
     `pptx-nova-compare-gate.mjs --kind refurbish --publish --final-pptx-source
 <candidate>`; the gate must be the only final PPTX publisher. Require both
     `status=pass`and`finalBinding.status=bound`, keep the manifest and all

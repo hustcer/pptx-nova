@@ -630,7 +630,9 @@ function failureDetails(report, result) {
 }
 
 function isRetryableRenderError(error) {
-  return error.retryable === true && (error.kind === 'RenderError' || error.code === 'RenderError')
+  return (
+    error.retryable === true && (error.kind === 'render_error' || error.code === 'render_error')
+  )
 }
 
 function reportImagePath(report) {

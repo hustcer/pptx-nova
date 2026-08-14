@@ -295,8 +295,8 @@ if (shouldFail192 || shouldFailBoth || nonRetryable) {
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'error',
     error: {
-      kind: nonRetryable ? 'InputError' : 'RenderError',
-      code: nonRetryable ? 'InputError' : 'RenderError',
+      kind: nonRetryable ? 'input_error' : 'render_error',
+      code: nonRetryable ? 'input_error' : 'render_error',
       stage: 'render',
       retryable: !nonRetryable,
       requestedDpi: dpi,
@@ -3007,7 +3007,7 @@ if (args[0] === 'schema') {
 } else if (args[0] === 'pptx' && args[1] === 'apply' && args.includes('--dry-run')) {
   print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], semanticIssues: [], wouldWrite: true })
 } else if (args[0] === 'pptx' && args[1] === 'apply') {
-  print({ schemaVersion: 'pptx-apply/v1', status: 'error', error: { kind: 'OutputExists' }, visualRisks: [] })
+  print({ schemaVersion: 'pptx-apply/v1', status: 'error', error: { kind: 'output_exists' }, visualRisks: [] })
   process.exit(9)
 } else if (args[0] === 'pptx' && (args[1] === 'vision-check' || args[1] === 'preview')) {
   process.stderr.write('stale candidate validation should not run')
@@ -3632,7 +3632,7 @@ if (args[0] === 'schema') {
       schemaVersion: 'pptx-contact-diff/v1',
       status: 'error',
       error: {
-        kind: 'RenderError', code: 'RenderError', stage: 'render', retryable: true,
+        kind: 'render_error', code: 'render_error', stage: 'render', retryable: true,
         requestedDpi: 192, pairCount: slideCount, reason: 'render-resource-limit'
       }
     })
@@ -5313,7 +5313,7 @@ const output = valueAfter('--output')
 if (dpi === 192) {
   process.stdout.write(JSON.stringify({
     schemaVersion: 'pptx-contact-diff/v1', status: 'error',
-    error: { kind: 'RenderError', code: 'RenderError', stage: 'render', retryable: true, requestedDpi: 192, pairCount: 12, reason: 'render-resource-limit' }
+    error: { kind: 'render_error', code: 'render_error', stage: 'render', retryable: true, requestedDpi: 192, pairCount: 12, reason: 'render-resource-limit' }
   }))
   process.exit(7)
 }

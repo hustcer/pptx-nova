@@ -535,8 +535,8 @@ function validateMultipartManifest(report, blockers) {
         attempts[0]?.dpi === 192 &&
         attempts[0]?.status === 'failed' &&
         attempts[0]?.error?.retryable === true &&
-        (attempts[0]?.error?.kind === 'RenderError' ||
-          attempts[0]?.error?.code === 'RenderError') &&
+        (attempts[0]?.error?.kind === 'render_error' ||
+          attempts[0]?.error?.code === 'render_error') &&
         attempts[1]?.dpi === 144 &&
         (attempts[1]?.status === 'success' || (attempts[1]?.status === 'cache-hit' && cacheHit))
       )
@@ -680,7 +680,8 @@ function validateXdocContactDiffReport(report, compareState, blockers) {
       attempts[0]?.dpi === 192 &&
       attempts[0]?.status === 'failed' &&
       attempts[0]?.error?.retryable === true &&
-      (attempts[0]?.error?.kind === 'RenderError' || attempts[0]?.error?.code === 'RenderError') &&
+      (attempts[0]?.error?.kind === 'render_error' ||
+        attempts[0]?.error?.code === 'render_error') &&
       attempts[1]?.dpi === 144 &&
       (attempts[1]?.status === 'success' || (attempts[1]?.status === 'cache-hit' && cacheHit))
     if (!valid192 && !valid144)

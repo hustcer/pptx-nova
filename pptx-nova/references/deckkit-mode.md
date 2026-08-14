@@ -59,7 +59,7 @@ uses the separate `delivery-readiness.json` artifact.
 The final refurbish comparison defaults to 20 slides per PNG. Small decks keep
 the single `refurbish-compare.png`; larger decks receive numbered parts and a
 coverage manifest. Each part starts at 192 DPI. Only a structured retryable
-`RenderError` may retry that part once at 144 DPI; any second failure blocks the
+`render_error` may retry that part once at 144 DPI; any second failure blocks the
 compare gate and prevents both compare publication and final PPTX publication.
 Use `--compare-chunk-size <n>` only when the environment requires a different
 upper bound.

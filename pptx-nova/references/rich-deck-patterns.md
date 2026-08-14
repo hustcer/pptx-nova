@@ -926,7 +926,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
 | KPI 渲染成 3+1 不是 4-across        | 用了 `add-slide.recipe.kind="kpi-grid"` — 手堆 4 个卡片即可         |
 | 表格紧贴左上角看起来很小            | `add-table` 没显式给 `w` / `h`                                      |
 | chart Q3/Q4 是 0 看起来塌方         | 时间序列别留 0 占位 — 填预测值并标 "(预测)"                         |
-| 第二次 apply `OutputExists`         | 加 `--overwrite`，或先 `pptx rollback --from-sidecar`               |
+| 第二次 apply `output_exists`        | 加 `--overwrite`，或先 `pptx rollback --from-sidecar`               |
 | `titleStyle.bold` 报错              | 移到 `font: { bold: true }` 子对象，顶层不接受                      |
 | `legend: "b"` 被拒                  | 用全名 `"bottom"`，shorthand 不接受                                 |
 | `dataLabels` 的 `scope: "all"` 被拒 | scope 是对象，省略 = all；要某系列写 `{ "scope": { "series": 0 } }` |

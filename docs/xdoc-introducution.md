@@ -1121,12 +1121,12 @@ At operation level, `opResults[]` can include `opIndex`, `op`, `status`,
 
 The published bridge error catalog has 24 codes, including:
 
-`InvalidJson`, `InvalidArgument`, `InvalidArguments`, `UnsupportedFeature`,
-`InvalidOperation`, `InvalidPackage`, `InvalidXml`, `MissingPart`,
-`MissingRelationship`, `EncryptedPackage`, `SignedPackage`, `ZipError`,
-`PatchTooLarge`, `AssetTooLarge`, `InputError`, `OutputError`, `OutputExists`,
-`InvalidSidecar`, `DaemonUnavailable`, `InvalidRequest`, `ProtocolError`,
-`UnknownMethod`, `InternalError`, and `UnknownError`.
+`invalid_json`, `invalid_argument`, `invalid_arguments`, `unsupported_feature`,
+`invalid_operation`, `invalid_package`, `invalid_xml`, `missing_part`,
+`missing_relationship`, `encrypted_package`, `signed_package`, `zip_error`,
+`patch_too_large`, `asset_too_large`, `input_error`, `output_error`, `output_exists`,
+`invalid_sidecar`, `daemon_unavailable`, `invalid_request`, `protocol_error`,
+`unknown_method`, `internal_error`, and `unknown_error`.
 
 Structured error payloads carry a machine-readable kind and message; operation
 failures can include an `opIndex`. Where a repair is meaningful, the payload can

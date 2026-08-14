@@ -168,7 +168,7 @@ Use these entry points from skill workflows:
 - `pptx-nova-compare.mjs` - write a high-DPI full-deck before/after compare by
   delegating atomic parts to `xdoc pptx contact-diff`. With `--slide-count`,
   decks over the default 20-slide chunk size produce numbered PNGs and a
-  `pptx-nova-compare-manifest/v1`; a retryable 192 DPI `RenderError` retries
+  `pptx-nova-compare-manifest/v1`; a retryable 192 DPI `render_error` retries
   only that part once at 144 DPI.
 - `pptx-nova-compare-gate.mjs` - delivery guard for compare artifacts. It
   validates either the compatible single PNG or every multipart path, hash,

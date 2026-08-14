@@ -89,32 +89,32 @@ An Agent should distinguish these layers:
 
 The current `pptx-error-catalog/v1` contains 24 codes:
 
-| Code                  | Severity | Catalog `autoRetry` | Typical handling                                                                                         |
-| --------------------- | -------- | ------------------: | -------------------------------------------------------------------------------------------------------- |
-| `InvalidJson`         | error    |               false | Repair the JSON payload and validate it before rerunning.                                                |
-| `InvalidArgument`     | error    |                true | Inspect `path`, `expected`, `actual`, and suggestions; rerun a dry-run after a deterministic correction. |
-| `InvalidArguments`    | error    |               false | Add or correct required CLI arguments.                                                                   |
-| `UnsupportedFeature`  | error    |               false | Choose an explicitly supported alternative or stop for review.                                           |
-| `InvalidOperation`    | error    |                true | Re-inspect the current deck. Ambiguous selectors require refinement or human choice.                     |
-| `InvalidPackage`      | fatal    |               false | Quarantine the input and repair or replace the package.                                                  |
-| `InvalidXml`          | fatal    |               false | Quarantine the package; do not apply an automatic raw-XML repair.                                        |
-| `MissingPart`         | fatal    |               false | Treat the package as structurally incomplete.                                                            |
-| `MissingRelationship` | fatal    |               false | Inspect package relationships and route to a repair workflow.                                            |
-| `EncryptedPackage`    | fatal    |               false | Obtain an approved unencrypted input; xdoc has no decryption path.                                       |
-| `SignedPackage`       | fatal    |               false | Obtain an authorized unsigned copy before mutation; the current CLI exposes no signature-removal switch. |
-| `ZipError`            | fatal    |               false | Quarantine the archive and investigate package or resource limits.                                       |
-| `PatchTooLarge`       | error    |               false | Reduce the patch or change the size policy intentionally.                                                |
-| `AssetTooLarge`       | error    |               false | Reduce the asset or change the asset limit intentionally.                                                |
-| `InputError`          | error    |               false | Repair the input path or input materialization and re-run from the same source identity.                 |
-| `OutputError`         | error    |               false | Repair the output target, permissions, or filesystem capacity.                                           |
-| `OutputExists`        | error    |               false | Use a new candidate path or explicitly authorize overwrite.                                              |
-| `InvalidSidecar`      | error    |               false | Quarantine the sidecar/candidate pair and do not guess the missing history.                              |
-| `DaemonUnavailable`   | error    |               false | A plain `--daemon` call may fall back to one-shot; `--daemon-strict` must fail closed.                   |
-| `InvalidRequest`      | error    |               false | Repair the daemon request shape or CLI-to-daemon adapter.                                                |
-| `ProtocolError`       | error    |               false | Reconnect with a complete frame; preserve the broken frame and daemon logs.                              |
-| `UnknownMethod`       | error    |               false | Discover the daemon method set again; do not invent a fallback method.                                   |
-| `InternalError`       | fatal    |               false | Preserve the complete evidence bundle and escalate.                                                      |
-| `UnknownError`        | fatal    |               false | Treat the failure as opaque and fail closed.                                                             |
+| Code                   | Severity | Catalog `autoRetry` | Typical handling                                                                                         |
+| ---------------------- | -------- | ------------------: | -------------------------------------------------------------------------------------------------------- |
+| `invalid_json`         | error    |               false | Repair the JSON payload and validate it before rerunning.                                                |
+| `invalid_argument`     | error    |                true | Inspect `path`, `expected`, `actual`, and suggestions; rerun a dry-run after a deterministic correction. |
+| `invalid_arguments`    | error    |               false | Add or correct required CLI arguments.                                                                   |
+| `unsupported_feature`  | error    |               false | Choose an explicitly supported alternative or stop for review.                                           |
+| `invalid_operation`    | error    |                true | Re-inspect the current deck. Ambiguous selectors require refinement or human choice.                     |
+| `invalid_package`      | fatal    |               false | Quarantine the input and repair or replace the package.                                                  |
+| `invalid_xml`          | fatal    |               false | Quarantine the package; do not apply an automatic raw-XML repair.                                        |
+| `missing_part`         | fatal    |               false | Treat the package as structurally incomplete.                                                            |
+| `missing_relationship` | fatal    |               false | Inspect package relationships and route to a repair workflow.                                            |
+| `encrypted_package`    | fatal    |               false | Obtain an approved unencrypted input; xdoc has no decryption path.                                       |
+| `signed_package`       | fatal    |               false | Obtain an authorized unsigned copy before mutation; the current CLI exposes no signature-removal switch. |
+| `zip_error`            | fatal    |               false | Quarantine the archive and investigate package or resource limits.                                       |
+| `patch_too_large`      | error    |               false | Reduce the patch or change the size policy intentionally.                                                |
+| `asset_too_large`      | error    |               false | Reduce the asset or change the asset limit intentionally.                                                |
+| `input_error`          | error    |               false | Repair the input path or input materialization and re-run from the same source identity.                 |
+| `output_error`         | error    |               false | Repair the output target, permissions, or filesystem capacity.                                           |
+| `output_exists`        | error    |               false | Use a new candidate path or explicitly authorize overwrite.                                              |
+| `invalid_sidecar`      | error    |               false | Quarantine the sidecar/candidate pair and do not guess the missing history.                              |
+| `daemon_unavailable`   | error    |               false | A plain `--daemon` call may fall back to one-shot; `--daemon-strict` must fail closed.                   |
+| `invalid_request`      | error    |               false | Repair the daemon request shape or CLI-to-daemon adapter.                                                |
+| `protocol_error`       | error    |               false | Reconnect with a complete frame; preserve the broken frame and daemon logs.                              |
+| `unknown_method`       | error    |               false | Discover the daemon method set again; do not invent a fallback method.                                   |
+| `internal_error`       | fatal    |               false | Preserve the complete evidence bundle and escalate.                                                      |
+| `unknown_error`        | fatal    |               false | Treat the failure as opaque and fail closed.                                                             |
 
 `autoRetry: true` is a catalog hint, not an unconditional retry license. A retry
 is permitted only when the host has a deterministic correction, the operation is
@@ -132,8 +132,8 @@ has these required fields:
   "schemaVersion": "pptx-dry-run/v1",
   "status": "error",
   "error": {
-    "kind": "InvalidOperation",
-    "code": "InvalidOperation",
+    "kind": "invalid_operation",
+    "code": "invalid_operation",
     "severity": "error",
     "message": "shape selector matched multiple candidates",
     "opIndex": 0,
@@ -154,7 +154,7 @@ has these required fields:
         "autoRetry": false
       }
     ],
-    "docsRef": "https://structurify.io/docs/errors/InvalidOperation",
+    "docsRef": "https://structurify.io/docs/errors/invalid_operation",
     "autoRetry": true
   },
   "opResults": [],

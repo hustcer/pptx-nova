@@ -111,7 +111,7 @@ boundaries include:
 | SmartArt and diagrams | Existing parts and relationships are preserved and reported.                                                                   | Do not generate a high-level SmartArt edit. Copy from a known-good template when needed.                       |
 | VBA/macros            | Macro parts are detected and preserved by default; xdoc does not edit VBA.                                                     | Keep macro policy explicit and test the macro-enabled result in the target host.                               |
 
-Unknown future operation names must fail with a structured `UnsupportedFeature`
+Unknown future operation names must fail with a structured `unsupported_feature`
 result. They must not be silently downgraded to a similar operation or reported
 as partial success.
 

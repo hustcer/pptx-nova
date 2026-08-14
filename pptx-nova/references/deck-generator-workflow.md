@@ -438,7 +438,7 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 | textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                                            |
 | freeform / donut / polygon 在 PNG 中看不见              | `add-freeform` points 写成了英寸绝对小数，导致 XML extent 只有个位数 EMU；改用局部整数坐标 + `originX/originY` + `xScale/yScale` |
 | 同页左下 footer 写"BRAND·X"右上 watermark 写"XDOC DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化                                   |
-| 第二次跑 `apply` 报 `OutputExists`                      | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                         |
+| 第二次跑 `apply` 报 `output_exists`                     | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                         |
 | 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                                                   |
 | `xdoc -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                                                     |
 | `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须使用 canonical 值 `"bottom"` / `"outside-end"`，shorthand 拒                                                            |

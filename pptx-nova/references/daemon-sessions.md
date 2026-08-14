@@ -137,9 +137,9 @@ session 不会被 idle/LRU pruning 淘汰。PPTX 与 sidecar publication 也先�
 比较计数差值，才能证明先前 active mutation 仍在途；普通并发环境不要靠它识别“同
 一个 mutation”。
 
-shutdown 先关闭两个 listener，对尚未 dispatch 的业务请求返回 `ShuttingDown`，再
+shutdown 先关闭两个 listener，对尚未 dispatch 的业务请求返回 `shutting_down`，再
 排空所有已 accepted handler；已经进入 mutation 的请求不会被抢占。同 revision 旧
-daemon 仍在 drain 时，新 auto-spawn/readiness 会保持 `ShuttingDown` 并 fail closed，
+daemon 仍在 drain 时，新 auto-spawn/readiness 会保持 `shutting_down` 并 fail closed，
 应等待排空后重试，不要手删 state 文件或并行拉起替代进程。
 
 ## §5 与 dry-run / sidecar 的关系
@@ -300,7 +300,7 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
   使用，不能假设每次失败都有自动修复 patch。
 - 产物通过 artifact ref 返回（`path` / `state`）；deck 字节永不进协议通道。
   `dryRun` 的 artifact 是 `planned`，文件并不存在。
-- `overwrite` 默认 false，已存在的输出会得到 `OutputExists`。annotations 只是 hint，
+- `overwrite` 默认 false，已存在的输出会得到 `output_exists`。annotations 只是 hint，
   真正的防护是服务端检查。
 
 与 §8 同理：这是 transport，不替代 skill 的验证阶段。dry-run → apply →
@@ -315,7 +315,7 @@ post-apply inspect → 证据 gate 的因果顺序不变。
 | `--daemon-strict` 报 "no daemon reachable" | auto-spawn 被关了？检查 `XDOC_DAEMON_AUTO_SPAWN`；或子进程 fork 被沙箱拒绝                                         |
 | inspect 返回旧数据                         | 上次 apply 没成功导致 session 没更新；`xdoc daemon stop` + 再 inspect 触发重载                                     |
 | `status: stale` / revision 不匹配          | 用 `xdoc daemon stop` 让 runtime 安全退役旧 state/daemon，再由下一次 `--daemon` 自动拉起；不要手删 state 文件      |
-| `ShuttingDown`                             | 同 revision daemon 正在 drain；等待 accepted handler 排空后重试。不要手删 state，也不要并行 auto-spawn replacement |
+| `shutting_down`                            | 同 revision daemon 正在 drain；等待 accepted handler 排空后重试。不要手删 state，也不要并行 auto-spawn replacement |
 | data plane 饱和或 ping 排队                | 看 status v2 的 `activeConnections` / `maxConnections`；`status` / `stop` 应仍经独立 `controlPort` 可达            |
 | mutation overlap 证据不稳定                | 先排除无关 apply；累计 started/completed 不是 mutation id，只在受控 probe 中结合 `activeMutations` 判断            |
 | token 不匹配 / 权限拒绝                    | 先保留 `status --json` 与日志证据，再执行 `xdoc daemon stop`；若仍失败，切一次性 CLI 并报告，不要手删 state 文件   |

@@ -1032,7 +1032,7 @@ QA. Decks up to 20 slides keep the compatible single `translation-compare.png`.
 Larger decks produce numbered `translation-compare-01.png`, `-02.png`, ...
 parts plus a `pptx-nova-compare-manifest/v1` report. Every part places the
 source page on the left and translated page on the right, starts at 192 DPI,
-and may retry once at 144 DPI only after an explicit retryable `RenderError`.
+and may retry once at 144 DPI only after an explicit retryable `render_error`.
 Any second or non-retryable failure blocks delivery. Do not upscale a failed
 low-resolution image after rendering.
 

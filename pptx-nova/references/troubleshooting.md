@@ -231,12 +231,12 @@ unzip -p out.pptx 'ppt/charts/chart1.xml' |
 写错枚举名时,suggestions 不只看 Levenshtein 距离,还会优先匹配**别名表**。
 下面这些常见拼写都会自动得到正确候选(同时 `autoRetry=true` 直接重试):
 
-| 枚举类型      | 你写的（别名 / 拼错）                                                                                                       | suggestion 给出的正解                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `themeColor`  | `accent-1` / `text1` / `background1` / `hyperlink` / `followedHyperlink`                                                    | `accent1` / `dk1` / `lt1` / `hlink` / `folHlink`                                                                 |
-| `fontFamily`  | `aptos-body` / `aptos-display` / `calibri-body` / `calibri-light` / `times` / `times-new-roman` / `courier` / `noto-cjk-sc` | `Aptos` / `Aptos Display` / `Calibri` / `Calibri Light` / `Times New Roman` / `Courier New` / `Noto Sans CJK SC` |
-| `layoutName`  | `title` / `section` / `two-column` / `picture-caption`                                                                      | `Title Slide` / `Section Header` / `Two Content` / `Picture with Caption`                                        |
-| `shapePreset` | 形状的所有 alias(参考 `pptx catalog shapes`)                                                                                | 标准 preset 名(如 `rectangel` → `rectangle`)                                                                     |
+| 枚举类型      | 你写的（别名 / 拼错）                                                                                                       | suggestion 给出的正解                                                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `themeColor`  | `accent-1` / `text1` / `background1` / `hyperlink` / `followedHyperlink`                                                    | `accent1` / `dk1` / `lt1` / `hlink` / `folHlink`                                                                                |
+| `fontFamily`  | `aptos-body` / `aptos-display` / `calibri-body` / `calibri-light` / `times` / `times-new-roman` / `courier` / `noto-cjk-sc` | `Aptos` / `Aptos Display` / `Calibri` / `Calibri Light` / `Times New Roman` / `Courier New` / `Noto Sans CJK SC`                |
+| `layoutName`  | `Title Slide` / `title` / `section` / `two-column` / `picture-caption`                                                      | `title-slide` / `section-header` / `two-content` / `picture-with-caption`（真实 deck 版式名仍按字面/大小写/kebab 归一三级匹配） |
+| `shapePreset` | 形状的所有 alias(参考 `pptx catalog shapes`)                                                                                | 标准 preset 名(如 `rectangel` → `rectangle`)                                                                                    |
 
 **推论**:写 enum 时如果不确定标准名,先用直觉拼一个看 dry-run — 大概率会收到
 带 `autoRetry: true` 的修复建议,而不是 `UNSUPPORTED_FEATURE` 死路。

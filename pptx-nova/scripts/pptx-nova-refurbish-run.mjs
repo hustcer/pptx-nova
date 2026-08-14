@@ -366,10 +366,11 @@ function classifyNativeContrastRecovery(report) {
     (step) => step?.name === 'remap-theme',
   )
   const checks = {
-    reportSchema: report?.schemaVersion === 'pptx-refurbish-skin/v1' && report?.status === 'failed',
+    reportSchema:
+      report?.schemaVersion === 'pptx-refurbish-skin/v1' && report?.outcome === 'failed',
     auditPassed:
       audit?.schemaVersion === 'pptx-refurbish-audit/v1' &&
-      audit?.status === 'passed' &&
+      audit?.outcome === 'passed' &&
       Number(audit?.summary?.errorCount ?? 0) === 0 &&
       report?.gate?.auditStatus === 'passed',
     visionDiffValid:
@@ -753,11 +754,11 @@ function gateAudit(summary, report) {
     summary,
     'refurbish-audit',
     report?.schemaVersion === 'pptx-refurbish-audit/v1' &&
-      report?.status === 'passed' &&
+      report?.outcome === 'passed' &&
       Number(report?.summary?.errorCount ?? 0) === 0,
     {
       schemaVersion: report?.schemaVersion ?? '',
-      status: report?.status ?? '',
+      outcome: report?.outcome ?? '',
       errorCount: Number(report?.summary?.errorCount ?? 0),
       warningCount: Number(report?.summary?.warningCount ?? 0),
       message: 'refurbish-audit must pass with zero errors',
@@ -1058,7 +1059,7 @@ function validateNativeReport(summary, report, artifacts) {
     summary,
     'refurbish-skin-report',
     report?.schemaVersion === 'pptx-refurbish-skin/v1' &&
-      report?.status === 'passed' &&
+      report?.outcome === 'passed' &&
       report?.gate?.passed === true &&
       Number(report?.gate?.newHighIssues ?? 0) === 0 &&
       Number(report?.gate?.newMediumIssues ?? 0) === 0,

@@ -162,7 +162,7 @@ function validateCopyReport(copyReport, target, donor) {
       message: 'copy report schemaVersion must be pptx-copy-from/v2',
     })
   }
-  if (copyReport?.status !== 'ready' || copyReport?.preflight?.ready !== true) {
+  if (copyReport?.outcome !== 'passed' || copyReport?.preflight?.ready !== true) {
     failures.push({
       code: 'copy-preflight-not-ready',
       message: 'copy-from dry-run and preflight must both be ready',

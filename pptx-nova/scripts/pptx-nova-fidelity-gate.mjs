@@ -635,9 +635,9 @@ function validateFinalAudit(report, finalAudit, sourceCount, finalCount) {
       { schemaVersion: finalAudit?.schemaVersion ?? '' },
     )
   }
-  if (finalAudit?.status !== 'passed') {
-    push(report.errors, 'error', 'refurbish-audit-status', 'final audit did not pass', {
-      status: finalAudit?.status ?? '',
+  if (finalAudit?.outcome !== 'passed') {
+    push(report.errors, 'error', 'refurbish-audit-outcome', 'final audit did not pass', {
+      outcome: finalAudit?.outcome ?? '',
     })
   }
   if (errorCount > 0) {
@@ -673,7 +673,7 @@ function validateFinalAudit(report, finalAudit, sourceCount, finalCount) {
     report.checks,
     'refurbish-final-audit',
     finalAudit?.schemaVersion === REFURBISH_AUDIT_SCHEMA_VERSION &&
-      finalAudit?.status === 'passed' &&
+      finalAudit?.outcome === 'passed' &&
       errorCount === 0 &&
       finalAudit?.summary?.slideCountMatches !== false
       ? 'passed'

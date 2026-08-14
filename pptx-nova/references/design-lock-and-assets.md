@@ -419,7 +419,7 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 - 图片 / 截图资产是否声明 slot、ratio、fitPolicy；AI 生成图片是否设置 `noSlideChrome`。
 - `deck_lock.json` / `content.json` 中的 `assets[]`、`imageSlots{}`、`formulas[]`
   是否能在 `assets_manifest.json` 找到。
-- patch 是否为 `schemaVersion: 1`，是否使用 lock 外颜色、字体或绝对资源路径。
+- patch 是否为 `schemaVersion: "pptx-patch/v1"`，是否使用 lock 外颜色、字体或绝对资源路径。
 - patch 中 chart/table ops 的明显语义错误：chart series/category 长度不一致、combo 不是
   真实组合、table data 行列不齐、未设置 `resize` 却和表格维度冲突。
 - patch 里任何 `assetSource.path` 是否登记在 `assets_manifest.json`；只要 patch 引用外部资源，

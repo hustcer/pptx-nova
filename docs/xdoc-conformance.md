@@ -58,8 +58,8 @@ An implementation at Level D:
 
 1. exposes a machine-readable discovery document;
 2. identifies the discovery contract (`cli-agent/v1` for the xdoc CLI);
-3. identifies the patch contract separately (`pptx-patch/v1` and numeric patch
-   `schemaVersion: 1` in the current release);
+3. identifies the patch contract separately (the patch envelope carries
+   `schemaVersion: "pptx-patch/v1"`);
 4. reports document kinds, output formats, required backends, and capability
    status; and
 5. exposes operation schemas, controlled vocabularies, examples, and report
@@ -182,7 +182,7 @@ Keep these identifiers distinct:
 | `cli-agent/v1`                           | CLI discovery document                            |
 | `capabilities/v1`                        | Document kinds, outputs, and backend requirements |
 | `pptx-patch/v1`                          | Patch operation registry and JSON Schema surface  |
-| `schemaVersion: 1` in a patch            | Numeric patch envelope version                    |
+| `schemaVersion: "pptx-patch/v1"`         | Patch envelope version                            |
 | `pptx-apply/v1`, `pptx-dry-run/v1`, etc. | Command result contracts                          |
 
 An implementation MUST NOT treat a report's `schemaVersion` as interchangeable
@@ -273,7 +273,7 @@ The minimal patch used by M-001 can be represented as:
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "add-slide" },
     {

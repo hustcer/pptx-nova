@@ -668,7 +668,7 @@ function buildArtifacts(args) {
   }
 
   const patch = {
-    schemaVersion: 1,
+    schemaVersion: 'pptx-patch/v1',
     metadata: {
       deckkit: entry.id,
       strategy: fallback.strategy,

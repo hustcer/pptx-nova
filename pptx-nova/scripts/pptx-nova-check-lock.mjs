@@ -1186,8 +1186,8 @@ function checkContent(content, lock, errors, warnings) {
 
 function checkPatch(patch, lock, content, assets, args, errors, warnings) {
   if (!patch) return
-  if (patch.schemaVersion !== 1) {
-    push(errors, 'patch-schema-version', 'patch.json schemaVersion must be 1')
+  if (patch.schemaVersion !== 'pptx-patch/v1') {
+    push(errors, 'patch-schema-version', 'patch.json schemaVersion must be "pptx-patch/v1"')
   }
   if (!Array.isArray(patch.ops)) {
     push(errors, 'patch-ops-missing', 'patch.json must contain ops[]')

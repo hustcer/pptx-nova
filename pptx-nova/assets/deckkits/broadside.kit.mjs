@@ -820,7 +820,7 @@ export function createDeck(content) {
     fn(s, slide.data ?? {}, { path: `slides[${s}].data`, slideType: slide.type })
   })
 
-  return { patch: { schemaVersion: 1, ops: api.p.ops }, warnings }
+  return { patch: { schemaVersion: 'pptx-patch/v1', ops: api.p.ops }, warnings }
 }
 
 export { C, FONT_CN, FONT_DISPLAY, FONT_MONO }

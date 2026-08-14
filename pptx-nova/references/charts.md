@@ -1064,7 +1064,7 @@ clean-open。只看到 patch 成功不足以证明数组顺序和 `bold: false` 
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "add-slide", "layout": { "type": "title" } },
     {

@@ -15,7 +15,7 @@ patch。先用 `xdoc schema --op add-slide --minimal` 获取当前严格字段�
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "add-slide", "recipe": { "kind": "title", "title": "..." } },
     {
@@ -227,7 +227,7 @@ theme pack 时使用 `remap-theme`。背景、母版 placeholder 和默认文本
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-theme",

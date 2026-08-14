@@ -5,7 +5,7 @@
 table setter 已全部并入对应的聚合 op
 （`set-shape` / `set-chart` / `set-table` ...），本表只列 canonical 名字。
 
-> 通用：所有 patch op 都嵌进 `{ "schemaVersion": 1, "ops": [ { "op": "...", ... } ] }`。
+> 通用：所有 patch op 都嵌进 `{ "schemaVersion": "pptx-patch/v1", "ops": [ { "op": "...", ... } ] }`。
 >
 > 通用：`slide` 字段是 **0-based** 索引；`paragraph` / `run` / `row` / `col` 同样 0-based。
 >
@@ -501,7 +501,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "set-theme", "colors": { "accent1": "1A73E8" } },
     {
@@ -524,7 +524,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-run",
@@ -542,7 +542,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-chart-data",
@@ -564,7 +564,7 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "add-shape",

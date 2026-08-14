@@ -153,7 +153,7 @@ test('semantic-audit and check-lock share ChartEx dataEx semantics', () => {
   const lockPath = join(root, 'deck_lock.json')
   const auditPath = join(root, 'semantic-audit.json')
   writeJson(patchPath, {
-    schemaVersion: 1,
+    schemaVersion: 'pptx-patch/v1',
     ops: [
       {
         op: 'add-chart',
@@ -540,7 +540,7 @@ test('evidence writers require explicit overwrite for current-run artifacts', ()
 
   const patchPath = join(root, 'patch.json')
   const semanticOutput = join(root, 'semantic-audit.json')
-  writeJson(patchPath, { schemaVersion: 1, ops: [] })
+  writeJson(patchPath, { schemaVersion: 'pptx-patch/v1', ops: [] })
   const semanticArgs = [
     skillPath('scripts/pptx-nova-semantic-audit.mjs'),
     '--patch',
@@ -1300,14 +1300,14 @@ test('generic DeckKit build driver writes patch and quality sidecars', () => {
 
   const patch = JSON.parse(readFileSync(patchPath, 'utf8'))
   const quality = JSON.parse(readFileSync(qualityPath, 'utf8'))
-  assert.equal(patch.schemaVersion, 1)
+  assert.equal(patch.schemaVersion, 'pptx-patch/v1')
   assert.equal(quality.schemaVersion, 'pptx-nova-quality/v1')
 })
 
 test('DeckKit quality resolves the topmost containing panel without hiding real contrast failures', async () => {
   const { assessDeckQuality } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
   const patch = {
-    schemaVersion: 1,
+    schemaVersion: 'pptx-patch/v1',
     ops: [
       { op: 'add-slide' },
       {

@@ -763,7 +763,7 @@ operations:
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "add-slide"
@@ -2074,7 +2074,7 @@ such as:
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "add-slide" },
     {

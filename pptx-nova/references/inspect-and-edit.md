@@ -308,7 +308,7 @@ dry-run 报告里会有：
       {
         "kind": "use-id",
         "fixPatch": {
-          "schemaVersion": 1,
+          "schemaVersion": "pptx-patch/v1",
           "ops": [
             { ...同 op 但 shape 改为 { "id": 12 } }
           ]
@@ -317,7 +317,7 @@ dry-run 报告里会有：
       {
         "kind": "use-id",
         "fixPatch": {
-          "schemaVersion": 1,
+          "schemaVersion": "pptx-patch/v1",
           "ops": [
             { ...同 op 但 shape 改为 { "id": 27 } }
           ]
@@ -390,7 +390,7 @@ dry-run 报告里会有：
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "add-slide",
@@ -410,7 +410,7 @@ dry-run 报告里会有：
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "remove-shape",
@@ -435,7 +435,7 @@ dry-run 报告里会有：
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [{ "op": "set-theme", "colors": { "accent1": "1A73E8", "accent2": "34A853" } }]
 }
 ```
@@ -444,7 +444,7 @@ dry-run 报告里会有：
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-table",

@@ -109,7 +109,7 @@ if (args[0] === 'schema') {
     textPlan: { schemaVersion: 'pptx-i18n-text-plan-input/v1', translations: [] },
     replaceText: { schemaVersion: 'pptx-i18n-translations/v1', replacements: translations },
     replaceChartText: { schemaVersion: 'pptx-chart-text-replacements/v1', replacements: [] },
-    patch: { schemaVersion: 1, ops: [] }, reviewRequired: [], conflicts: [], missingTranslations: [],
+    patch: { schemaVersion: 'pptx-patch/v1', ops: [] }, reviewRequired: [], conflicts: [], missingTranslations: [],
     applyGate: { passed: true }, deliveryGate: { passed: true }
   }
   writeFileSync(output, JSON.stringify(report))

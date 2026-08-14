@@ -1722,7 +1722,7 @@ export function createDeck(content) {
     fn(s, slide.data ?? {})
   })
 
-  return { patch: { schemaVersion: 1, ops: builders.ops }, warnings }
+  return { patch: { schemaVersion: 'pptx-patch/v1', ops: builders.ops }, warnings }
 }
 
 export { ACCENTS, C, FONT_CN, FONT_EN }

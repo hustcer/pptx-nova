@@ -212,7 +212,7 @@ probe. Save this as `probe.patch.json`:
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "add-slide" },
     {

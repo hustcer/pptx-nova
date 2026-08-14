@@ -248,7 +248,7 @@ apply 后跑 `xdoc pptx vision-check out.pptx --json`（render-free 几何自检
   bash 等价：
 
   ```bash
-  jq '{schemaVersion:1, ops:[.issues[] | select(.fix.autoRetry==true) | .fix.fixPatch[]]}' \
+  jq '{schemaVersion:"pptx-patch/v1", ops:[.issues[] | select(.fix.autoRetry==true) | .fix.fixPatch[]]}' \
      vision.json > fix.json
   xdoc pptx apply -p fix.json -i out.pptx -o out.pptx --overwrite
   xdoc pptx vision-check out.pptx --json | jq '.summary'

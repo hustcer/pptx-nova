@@ -435,8 +435,13 @@ function makeReport(args, lock, patch, inspect) {
     warnings: [],
   }
 
-  if (patch?.schemaVersion !== 1) {
-    issue(report, 'error', 'patch-schema-version', 'patch.json schemaVersion must be 1')
+  if (patch?.schemaVersion !== 'pptx-patch/v1') {
+    issue(
+      report,
+      'error',
+      'patch-schema-version',
+      'patch.json schemaVersion must be "pptx-patch/v1"',
+    )
   }
   if (!Array.isArray(patch?.ops)) {
     issue(report, 'error', 'patch-ops-missing', 'patch.json must contain ops[]')

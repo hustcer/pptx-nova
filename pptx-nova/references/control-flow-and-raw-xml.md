@@ -169,7 +169,7 @@
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "define-macro",

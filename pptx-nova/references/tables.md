@@ -327,7 +327,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "add-table",
@@ -368,7 +368,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "add-slide", "layout": { "type": "title" } },
     {

@@ -150,12 +150,12 @@ convert indexes by intuition.
 
 ## 4. Build a small, versioned patch
 
-Patch input is JSON with `schemaVersion: 1` and an ordered `ops` array. A
+Patch input is JSON with `schemaVersion: "pptx-patch/v1"` and an ordered `ops` array. A
 minimal new-deck patch is:
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     { "op": "add-slide" },
     {
@@ -178,7 +178,7 @@ formatting:
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-run",

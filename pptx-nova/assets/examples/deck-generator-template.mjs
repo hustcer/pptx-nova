@@ -2130,4 +2130,6 @@ for (const renderSlide of variantSlideSets[layoutVariant]) {
   renderSlide(TOTAL)
 }
 
-process.stdout.write(JSON.stringify({ schemaVersion: 1, layoutVariant, ops }, null, 2))
+process.stdout.write(
+  JSON.stringify({ schemaVersion: 'pptx-patch/v1', layoutVariant, ops }, null, 2),
+)

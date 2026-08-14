@@ -18,7 +18,7 @@
     "blockingFitDiagnostics": 0
   },
   "patch": {
-    "schemaVersion": 1,
+    "schemaVersion": "pptx-patch/v1",
     "ops": 2471
   },
   "dryRun": {

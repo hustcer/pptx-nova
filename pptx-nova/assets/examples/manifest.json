@@ -59,7 +59,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 1047
       },
       "vision": {
@@ -163,7 +163,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 2471
       },
       "vision": {
@@ -274,7 +274,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 2248
       },
       "vision": {
@@ -376,7 +376,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 888
       },
       "vision": {
@@ -479,7 +479,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 535
       },
       "vision": {
@@ -581,7 +581,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 383
       },
       "vision": {
@@ -682,7 +682,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 632
       },
       "vision": {
@@ -784,7 +784,7 @@
         "blockingFitDiagnostics": 0
       },
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": 671
       },
       "vision": {

@@ -221,7 +221,7 @@ Keep these identifiers distinct:
 | `cli-agent/v1`                                           | CLI discovery contract                                   |
 | `capabilities/v1`                                        | Document kinds, output formats, and backend requirements |
 | `pptx-patch/v1`                                          | Patch operation registry                                 |
-| Numeric patch `schemaVersion: 1`                         | Patch envelope version                                   |
+| Patch `schemaVersion: "pptx-patch/v1"`                   | Patch envelope version                                   |
 | `pptx-apply/v1`, `pptx-dry-run/v1`, and other report ids | Command result contracts                                 |
 
 Cache a schema by executable build id, not only by the human version. If a

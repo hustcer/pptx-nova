@@ -277,5 +277,5 @@ export function createDeck(input) {
     renderer(ctx, index, slide.data ?? {}, total)
   })
 
-  return { patch: { schemaVersion: 1, ops: ctx.p.ops }, warnings }
+  return { patch: { schemaVersion: 'pptx-patch/v1', ops: ctx.p.ops }, warnings }
 }

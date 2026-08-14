@@ -11,7 +11,7 @@
         "replacement is similar length or changed-slide preview is generated"
       ],
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": [
           {
             "op": "set-text-frame",
@@ -40,7 +40,7 @@
         "dry-run reports one notes change"
       ],
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": [
           {
             "op": "set-slide-notes",
@@ -66,7 +66,7 @@
         "dry-run resolves exactly one footer-related target unless the user requested a batch edit"
       ],
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": [
           {
             "op": "set-text-frame",
@@ -95,7 +95,7 @@
         "dry-run reports only metadata changes"
       ],
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": [
           {
             "op": "set-document-properties",
@@ -124,7 +124,7 @@
         "dry-run removes exactly the old picture and adds one replacement at the same bbox"
       ],
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": [
           {
             "op": "remove-shape",
@@ -166,7 +166,7 @@
         "dry-run reports one object style change"
       ],
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": [
           {
             "op": "set-shape",
@@ -199,7 +199,7 @@
         "placeholder is empty/default and not the only visible content carrying user data"
       ],
       "patch": {
-        "schemaVersion": 1,
+        "schemaVersion": "pptx-patch/v1",
         "ops": [
           {
             "op": "remove-shape",

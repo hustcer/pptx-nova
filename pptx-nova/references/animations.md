@@ -55,7 +55,7 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-slide-animations",
@@ -171,7 +171,7 @@ probe snapshot 中若 capability entry 的 `axes` 非 null，不能只看 entry-
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-slide-animations",
@@ -260,7 +260,7 @@ source/destination slide pair；`set-slide-transition.slide` 是 **0-based desti
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-slide-transition",

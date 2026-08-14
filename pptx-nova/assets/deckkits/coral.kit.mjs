@@ -362,5 +362,5 @@ export function createDeck(content) {
     }
     renderSlide(ctx, index, slide)
   })
-  return { patch: { schemaVersion: 1, ops: ctx.p.ops }, warnings }
+  return { patch: { schemaVersion: 'pptx-patch/v1', ops: ctx.p.ops }, warnings }
 }

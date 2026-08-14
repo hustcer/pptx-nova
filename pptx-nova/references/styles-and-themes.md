@@ -28,7 +28,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 }
 ```
 
-`schemeClr` 取值：`lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink / bg1 / bg2 / tx1 / tx2`。
+`schemeClr` 取值：`lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink`（colorMap 层名字 `bg1/bg2/tx1/tx2` 不被接受，请先经 deck 的 clrMap 换算，默认 `tx1→dk1`、`bg1→lt1`）。
 `lumMod` / `lumOff` 控制亮度调整（百分比，0-1）。
 
 ## Fill（填充）

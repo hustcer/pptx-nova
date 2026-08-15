@@ -123,20 +123,20 @@ table setter 已全部并入对应的聚合 op
 
 ## 2. Shape 创建
 
-| op                | 用途                                                                               |
-| ----------------- | ---------------------------------------------------------------------------------- |
-| `add-shape`       | 加预设形状（182 个 catalog，`kind: "rounded-rectangle"` 或 `preset: "roundRect"`） |
-| `add-text-box`    | 纯文本框                                                                           |
-| `add-placeholder` | 加 placeholder shape（type=title/body/content/...）                                |
-| `add-image`       | 加图片（`assetSource.path` 或 `bytesBase64`）                                      |
-| `add-equation`    | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                  |
-| `add-video`       | 加视频，含 poster frame                                                            |
-| `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                              |
-| `add-group`       | 创建空 group shape，可后续填子 shape                                               |
-| `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                       |
-| `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                               |
-| `add-table`       | 加表 `rows x cols`，可选 `data: [[...]]` 初始化                                    |
-| `add-chart`       | 加图表，详见 `charts.md`                                                           |
+| op                | 用途                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| `add-shape`       | 加预设形状（`kind` 必填：182 个 catalog 名/别名，或任意 canonical OOXML ST_ShapeType prst；`preset` 已删除） |
+| `add-text-box`    | 纯文本框                                                                                                     |
+| `add-placeholder` | 加 placeholder shape（type=title/body/content/...）                                                          |
+| `add-image`       | 加图片（`assetSource.path` 或 `bytesBase64`）                                                                |
+| `add-equation`    | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                                            |
+| `add-video`       | 加视频，含 poster frame                                                                                      |
+| `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                                                        |
+| `add-group`       | 创建空 group shape，可后续填子 shape                                                                         |
+| `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                                                 |
+| `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                                                         |
+| `add-table`       | 加表 `rows x cols`，可选 `data: [[...]]` 初始化                                                              |
+| `add-chart`       | 加图表，详见 `charts.md`                                                                                     |
 
 ### add-freeform 可见性
 

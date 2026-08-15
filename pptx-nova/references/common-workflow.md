@@ -270,7 +270,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     of manufacturing an equivalent patch report:
 
     ```bash
-    xdoc pptx copy-from -i target.pptx --from donor.pptx \
+    xdoc pptx copy-from -i target.pptx --source donor.pptx \
       --slides 1,3,5-8 \
       --template-strategy register-source --size-strategy require-match \
       --output <run-dir>/candidate.pptx \

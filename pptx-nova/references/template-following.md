@@ -81,7 +81,7 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    are needed, copy them in one transaction:
 
    ```bash
-   xdoc pptx copy-from -i <run-dir>/starter.pptx --from source.pptx \
+   xdoc pptx copy-from -i <run-dir>/starter.pptx --source source.pptx \
      --slides 1,3,5-8 \
      --template-strategy register-source --size-strategy require-match \
      --output <run-dir>/mapped.pptx \

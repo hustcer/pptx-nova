@@ -213,8 +213,8 @@ helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `page
   `assets/themes/catalog.json` / `references/theme-packs.md`。
 
 生成后换风格不用改 `C` 重跑：直接执行
-`xdoc pptx swap-theme out.pptx --to consulting-grey -o out-grey.pptx` 或
-`xdoc pptx swap-style out.pptx --to minimal -o out-minimal.pptx`。
+`xdoc pptx swap-theme out.pptx --theme consulting-grey -o out-grey.pptx` 或
+`xdoc pptx swap-style out.pptx --style minimal -o out-minimal.pptx`。
 
 ---
 

@@ -11,7 +11,7 @@ const usage = `Usage:
 
 Options:
   --target <path>       Target PPTX that will receive copied slides.
-  --donor <path>        Donor PPTX passed to xdoc copy-from --from.
+  --donor <path>        Donor PPTX passed to xdoc copy-from --source.
   --copy-report <path>  Current pptx-copy-from/v2 dry-run report.
   --xdoc-bin <path>     xdoc executable or JavaScript wrapper. Defaults to xdoc.
   --output <path>       Optional persisted gate report.

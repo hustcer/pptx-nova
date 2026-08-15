@@ -38,7 +38,7 @@ brand/layout/deck profile JSON, theme/style pack JSON, and updates
 4. For whole-slide reuse, use:
 
 ```bash
-xdoc pptx copy-from -i target.pptx --from reference.pptx \
+xdoc pptx copy-from -i target.pptx --source reference.pptx \
   --slides 1,3,5-8 --output out.pptx --json
 ```
 

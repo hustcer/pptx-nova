@@ -8,8 +8,8 @@ and header/footer rhythm.
 
 ```bash
 xdoc pptx list-themes --json
-xdoc pptx swap-theme deck.pptx --to corporate-blue -o out.pptx
-xdoc pptx swap-style deck.pptx --to consulting -o out.pptx
+xdoc pptx swap-theme deck.pptx --theme corporate-blue -o out.pptx
+xdoc pptx swap-style deck.pptx --style consulting -o out.pptx
 xdoc pptx apply-brand deck.pptx --brand brand-profile.json -o out.pptx
 xdoc pptx extract-style reference.pptx --output style.json --json
 ```

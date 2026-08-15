@@ -1404,9 +1404,9 @@ Replace the uppercase tokens below with ids returned by `list-themes`.
 
 ```bash
 xdoc pptx list-themes --json
-xdoc pptx swap-theme deck.pptx --to THEME_PACK_ID --output themed.pptx
-xdoc pptx swap-style deck.pptx --to STYLE_PACK_ID --output styled.pptx
-xdoc pptx remap-theme deck.pptx --to THEME_PACK_ID --scope text,shapes,tables,charts --output remapped.pptx
+xdoc pptx swap-theme deck.pptx --theme THEME_PACK_ID --output themed.pptx
+xdoc pptx swap-style deck.pptx --style STYLE_PACK_ID --output styled.pptx
+xdoc pptx remap-theme deck.pptx --theme THEME_PACK_ID --scope text,shapes,tables,charts --output remapped.pptx
 ```
 
 Theme packs describe reusable colors, fonts, backgrounds, chart defaults, and
@@ -1465,7 +1465,7 @@ human approval.
 The bridge also supports explicit reuse workflows:
 
 ```bash
-xdoc pptx copy-from -i target.pptx --from source.pptx --slide 0 --output combined.pptx
+xdoc pptx copy-from -i target.pptx --source source.pptx --slide 0 --output combined.pptx
 xdoc pptx extract-style reference.pptx --output style.json --json
 xdoc pptx import-template reference.pptx --name reusable-template --output assets --json
 ```

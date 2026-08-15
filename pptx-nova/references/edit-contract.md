@@ -140,7 +140,7 @@ Edit Contract.
 For multiple donor slides, prefer one transactional command:
 
 ```bash
-xdoc pptx copy-from -i target.pptx --from donor.pptx \
+xdoc pptx copy-from -i target.pptx --source donor.pptx \
   --slides 1,3 \
   --template-strategy register-source --size-strategy require-match \
   --output <run-dir>/candidate.pptx \

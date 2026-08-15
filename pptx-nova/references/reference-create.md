@@ -132,9 +132,9 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
 `copy-from` 适合保留复杂整页结构：
 
 ```bash
-xdoc pptx copy-from -i target.pptx --from reference.pptx \
+xdoc pptx copy-from -i target.pptx --source reference.pptx \
   --slides 1,3,5-8 --output out.pptx --dry-run --json > dry-run.json
-xdoc pptx copy-from -i target.pptx --from reference.pptx \
+xdoc pptx copy-from -i target.pptx --source reference.pptx \
   --slides 1,3,5-8 --output out.pptx --json > copy-from.json
 ```
 
@@ -351,12 +351,12 @@ xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --overwrite --jso
 ```bash
 xdoc pptx chrome-detect source.pptx --json > chrome-detect.json
 xdoc pptx chrome-remove source.pptx --roles header,footer,page-number,rule --output 01-clean.pptx --json > chrome-remove.json
-xdoc pptx remap-theme 01-clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output 02-remapped.pptx --dry-run --json > remap-dry-run.json
-xdoc pptx remap-theme 01-clean.pptx --to corporate-blue --scope text,shapes,tables,charts --output 02-remapped.pptx --json > remap-theme.json
+xdoc pptx remap-theme 01-clean.pptx --theme corporate-blue --scope text,shapes,tables,charts --output 02-remapped.pptx --dry-run --json > remap-dry-run.json
+xdoc pptx remap-theme 01-clean.pptx --theme corporate-blue --scope text,shapes,tables,charts --output 02-remapped.pptx --json > remap-theme.json
 xdoc pptx chrome-apply 02-remapped.pptx --deckkit mckinsey-blue --output 03-styled.pptx --json > chrome-apply.json
 ```
 
-`remap-theme` 当前使用 `--to <themePack/stylePack>`；用目标 DeckKit 对应的 theme/style alias
+`remap-theme` 当前使用 `--theme <themePack/stylePack>`；用目标 DeckKit 对应的 theme/style alias
 （例如 `corporate-blue`）替代示例值。始终显式传 `--scope text,shapes,tables,charts`，
 因为默认 scope 可能只覆盖 `text,shapes`。不要假设所有 DeckKit id 都能传给 `chrome-apply`：
 先运行命令并读取 JSON 报告。若报告 `unknown DeckKit`、目标 DeckKit 是 `candidate` 但用户显式指定，

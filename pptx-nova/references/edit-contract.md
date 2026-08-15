@@ -278,7 +278,7 @@ worsened high/medium issues. A candidate-only `vision-check` remains useful for
 diagnosis, but it cannot reliably distinguish a regression from pre-existing
 noise in a dense legacy deck.
 
-Keep `visual-verify` outside the Edit Contract's semantic `requiredEvidence`
+Keep `visual-audit` outside the Edit Contract's semantic `requiredEvidence`
 list because it is the separate final visual decision, not another edit-kind
 fact. Its fixed pipeline audits both reference and candidate, so a pre-existing
 reference problem may correctly produce `decision.action=stop` without proving

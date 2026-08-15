@@ -28,7 +28,7 @@ xdoc schema --minimal                # 删 verbose 字段（与上面任一组�
 xdoc help                         # 根帮助
 xdoc help pptx                    # PPTX action 总览
 xdoc pptx apply --help            # apply 的 usage / options / examples
-xdoc help pptx visual-verify      # 等价的 help verb 形式
+xdoc help pptx visual-audit      # 等价的 help verb 形式
 ```
 
 每个 `xdoc pptx <action> --help` 都由运行时

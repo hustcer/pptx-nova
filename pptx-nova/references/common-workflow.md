@@ -590,10 +590,10 @@ pixel-level visual quality.
 Use these gates in order:
 
 ```text
-check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> one final pptx semantic diff for existing-deck audits when useful -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> visual-verify -> visual-evidence manifest consumer -> optional xdoc check
+check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when required -> one final pptx semantic diff for existing-deck audits when useful -> PNG/contact-sheet review -> chart/table semantic review when present -> narrative review when required -> visual-audit -> visual-evidence manifest consumer -> optional xdoc check
 ```
 
-Run `xdoc pptx visual-verify` once on the stable final candidate and consume
+Run `xdoc pptx visual-audit` once on the stable final candidate and consume
 `visual-evidence/manifest.json` with
 `pptx-nova-visual-evidence-gate.mjs`. Follow `export-and-check.md`. Preview,
 semantic diff, `vision-diff`, contact sheets, Translation/Refurbish comparison,

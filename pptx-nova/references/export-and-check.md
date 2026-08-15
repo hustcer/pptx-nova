@@ -31,7 +31,7 @@ authorize delivery.
 
 ## Unified Visual Evidence (Canonical Agent Gate)
 
-`xdoc pptx visual-verify` is the only xdoc report whose `decision` is consumed
+`xdoc pptx visual-audit` is the only xdoc report whose `decision` is consumed
 as the final Agent visual action. Run it once after the candidate is stable;
 `preview`, `diff`, `vision-diff`, and `contact-diff` remain specialized
 observation/review reports. The canonical transaction packages:
@@ -46,7 +46,7 @@ observation/review reports. The canonical transaction packages:
 
 Routine visual review still uses `preview`, and existing-deck diagnosis still
 uses `vision-diff` or `contact-diff`; those reports explain the result but do
-not create a second delivery verdict. `visual-verify` performs the governing
+not create a second delivery verdict. `visual-audit` performs the governing
 render transaction, does not create a contact sheet, and v1 implements neither
 OCR overflow nor an independent PowerPoint/Office renderer.
 
@@ -54,28 +54,28 @@ Confirm the current runtime disclosed the command:
 
 ```bash
 node <skill-root>/scripts/pptx-nova-probe.mjs \
-  --require-command pptx.visual-verify --strict --json
+  --require-command pptx.visual-audit --strict --json
 ```
 
 For candidate-only final-render/font diagnosis:
 
 ```bash
-xdoc pptx visual-verify \
+xdoc pptx visual-audit \
   --candidate deck.pptx \
   --output-dir <run-dir>/visual-evidence \
-  --json > <run-dir>/visual-verify.json
+  --json > <run-dir>/visual-audit.json
 ```
 
 For a stable before/after same-renderer comparison, use the same 1-based scope
 as the edit review:
 
 ```bash
-xdoc pptx visual-verify \
+xdoc pptx visual-audit \
   --reference before.pptx \
   --candidate after.pptx \
   --slides 2,5-7 \
   --output-dir <run-dir>/visual-evidence \
-  --json > <run-dir>/visual-verify.json
+  --json > <run-dir>/visual-audit.json
 ```
 
 The command atomically publishes `<run-dir>/visual-evidence/manifest.json` and

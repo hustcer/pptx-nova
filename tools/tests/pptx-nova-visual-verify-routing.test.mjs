@@ -10,7 +10,7 @@ function readSkill(path) {
   return readFileSync(join(skillRoot, path), 'utf8')
 }
 
-test('visual-verify is routed as the canonical final Agent decision', () => {
+test('visual-audit is routed as the canonical final Agent decision', () => {
   const skill = readSkill('SKILL.md')
   const common = readSkill('references/common-workflow.md')
   const exportAndCheck = readSkill('references/export-and-check.md')
@@ -19,10 +19,10 @@ test('visual-verify is routed as the canonical final Agent decision', () => {
     skill,
     /Preview is for inspection, while the canonical\s+visual-evidence decision remains the delivery authority/,
   )
-  assert.match(common, /Run `xdoc pptx visual-verify` once on the stable final candidate/)
+  assert.match(common, /Run `xdoc pptx visual-audit` once on the stable final candidate/)
 
   assert.match(exportAndCheck, /## Unified Visual Evidence \(Canonical Agent Gate\)/)
-  assert.match(exportAndCheck, /--require-command pptx\.visual-verify --strict --json/)
+  assert.match(exportAndCheck, /--require-command pptx\.visual-audit --strict --json/)
   assert.match(exportAndCheck, /process exit code of `0` means only that the evidence transaction/)
   assert.match(exportAndCheck, /then read `decision\.action`/)
   assert.match(exportAndCheck, /does not prove PowerPoint parity or\n\s+visual intent/)

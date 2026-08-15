@@ -342,7 +342,7 @@ deck, follow `common-workflow.md` -> Source Ingestion instead.
 # HTML file / glob / directory / URL -> Markdown (omit -o for stdout)
 xdoc html2md page.html -o <run-dir>/page.md
 xdoc html2md "https://example.com/post" -o <run-dir>/page.md
-xdoc html2md ./pages --recursive --out-dir <run-dir>/md     # batch
+xdoc html2md ./pages --recursive --output-dir <run-dir>/md     # batch
 xdoc html2md page.html --html-base-url "https://site.com/"  # resolve relative links
 xdoc html2md ./pages --recursive --report <run-dir>/html2md-report.json
 

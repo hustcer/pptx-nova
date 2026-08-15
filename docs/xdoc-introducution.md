@@ -547,7 +547,7 @@ entries, and backend requirements are the parts an agent must actually cache.
 
 ```bash
 xdoc convert deck.pptx --to pdf --output deck.pdf
-xdoc convert deck.pptx --to png --contact-sheet --out-dir previews
+xdoc convert deck.pptx --to png --contact-sheet --output-dir previews
 xdoc convert deck.pptx --to json --pretty --output deck.json
 xdoc convert deck.pptx --to md --md-detail ai --output deck.md
 ```
@@ -657,7 +657,7 @@ request use the documented auto-spawn path.
 
 `convert`, `html2md`, `extract`, and `check` accept a single file, multiple
 files, glob patterns, and directories. Use `--recursive` to descend into
-directory inputs. For batches, `--out-dir` collects outputs below one root and
+directory inputs. For batches, `--output-dir` collects outputs below one root and
 `--report` writes a stable `batch/v1` summary. `--fail-fast` stops at the first
 failed input.
 
@@ -695,15 +695,15 @@ representative conversion probes for the formats a worker will serve.
 When paths are omitted, xdoc derives them from the input stem. The important
 rules are:
 
-| Situation                        | Default                                             |
-| -------------------------------- | --------------------------------------------------- |
-| One input, one file format       | `<input-dir>/<input-stem>.<ext>`                    |
-| PNG only                         | `<input-dir>/<input-stem>-img/`                     |
-| Multiple formats                 | `<input-dir>/<input-stem>.xdoc/`                    |
-| Multiple inputs with `--out-dir` | Preserve relative parents where possible            |
-| PNG filenames                    | `<prefix>-<zero-padded-slide>.png`, minimum width 3 |
-| Manifest for a bundle            | `<root-dir>/manifest.json`                          |
-| Manifest for a single file       | `<input-dir>/<input-stem>.manifest.json`            |
+| Situation                           | Default                                             |
+| ----------------------------------- | --------------------------------------------------- |
+| One input, one file format          | `<input-dir>/<input-stem>.<ext>`                    |
+| PNG only                            | `<input-dir>/<input-stem>-img/`                     |
+| Multiple formats                    | `<input-dir>/<input-stem>.xdoc/`                    |
+| Multiple inputs with `--output-dir` | Preserve relative parents where possible            |
+| PNG filenames                       | `<prefix>-<zero-padded-slide>.png`, minimum width 3 |
+| Manifest for a bundle               | `<root-dir>/manifest.json`                          |
+| Manifest for a single file          | `<input-dir>/<input-stem>.manifest.json`            |
 
 An explicit `--output` path is used verbatim for a file. For PNG or multi-format
 bundles, a trailing separator selects parent-directory semantics; without it,
@@ -723,7 +723,7 @@ Use the dedicated command when the source is HTML:
 
 ```bash
 xdoc html2md page.html --output page.md
-xdoc html2md ./pages --recursive --out-dir ./markdown
+xdoc html2md ./pages --recursive --output-dir ./markdown
 ```
 
 Relative links can be resolved with `--html-base-url`. The conversion preserves
@@ -2204,7 +2204,7 @@ xdoc extract deck.pptx --parts map,resources,fonts --pretty --output resources.j
 ### Batch-convert a directory
 
 ```bash
-xdoc convert ./decks --recursive --to pdf --out-dir ./converted --report ./converted-report.json
+xdoc convert ./decks --recursive --to pdf --output-dir ./converted --report ./converted-report.json
 ```
 
 ### Diagnose a PDF generated from a deck

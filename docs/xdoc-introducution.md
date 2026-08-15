@@ -889,7 +889,7 @@ documentation:
 
 ```bash
 xdoc pptx catalog shapes --json
-xdoc pptx list-themes --json
+xdoc pptx catalog themes --json
 xdoc schema | jq '.commands.pptx.catalogs'
 ```
 
@@ -1400,10 +1400,10 @@ default-text-style patch operations. Run `check-brand` again after applying.
 
 The runtime exposes theme and style catalogs:
 
-Replace the uppercase tokens below with ids returned by `list-themes`.
+Replace the uppercase tokens below with ids returned by `catalog themes`.
 
 ```bash
-xdoc pptx list-themes --json
+xdoc pptx catalog themes --json
 xdoc pptx swap-theme deck.pptx --theme THEME_PACK_ID --output themed.pptx
 xdoc pptx swap-style deck.pptx --style STYLE_PACK_ID --output styled.pptx
 xdoc pptx remap-theme deck.pptx --theme THEME_PACK_ID --scope text,shapes,tables,charts --output remapped.pptx
@@ -1849,7 +1849,7 @@ not a cross-machine latency SLA.
 | Family                   | Actions                                                                                             |
 | ------------------------ | --------------------------------------------------------------------------------------------------- |
 | Creation and mutation    | `new`, `apply`, `recipe`, `template-fill`                                                           |
-| Discovery                | `inspect`, `select`, `catalog`, `list-themes`, `extract-style`                                      |
+| Discovery                | `inspect`, `select`, `catalog`, `extract-style`                                                     |
 | Rendering and comparison | `preview`, `vision-check`, `diff`, `vision-diff`, `contact-diff`                                    |
 | Translation              | `i18n-scan`, `i18n-plan`, `i18n-text-plan`, `i18n-style-diff`, `replace-text`, `replace-chart-text` |
 | Refurbishment            | `refurbish-skin`, `refurbish-audit`, `chrome-detect`, `chrome-remove`, `chrome-apply`               |

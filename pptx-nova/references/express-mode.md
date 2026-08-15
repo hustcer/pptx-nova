@@ -209,7 +209,7 @@ helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `page
   themePack JSON，并在生成后用 `remap-theme` / `swap-theme` 保持 deck 主题一致。
 - 用户**没指定** → 按内容领域推断一个安全牌，并在产出说明里记录理由（避免自嗨）。
   默认安全牌是 `corporate-blue` + `consulting`，字体 `Inter` + `Source Han Sans SC`。
-- 可用 catalog：`xdoc pptx list-themes --json`，或查看
+- 可用 catalog：`xdoc pptx catalog themes --json`，或查看
   `assets/themes/catalog.json` / `references/theme-packs.md`。
 
 生成后换风格不用改 `C` 重跑：直接执行

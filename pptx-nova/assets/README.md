@@ -11,7 +11,7 @@ introduced.
 - `brands/` - brand profiles, logo references, and font preferences.
 - `layouts/` - reusable grid systems and layout-contract mappings.
 - `decks/` - complete sample deck generators or patch bundles.
-- `themes/` - themePack/stylePack catalog consumed by `list-themes`.
+- `themes/` - themePack/stylePack catalog consumed by `catalog themes`.
 - `charts/` - native chart/table/diagram presets, not SVG-only templates.
 - `icons/` - icon metadata and migration policy for vector/native assets.
 - `schemas/` - run-level JSON Schemas such as `assets_manifest.json`.

@@ -7,7 +7,7 @@ and header/footer rhythm.
 ## Commands
 
 ```bash
-xdoc pptx list-themes --json
+xdoc pptx catalog themes --json
 xdoc pptx swap-theme deck.pptx --theme corporate-blue -o out.pptx
 xdoc pptx swap-style deck.pptx --style consulting -o out.pptx
 xdoc pptx apply-brand deck.pptx --brand brand-profile.json -o out.pptx
@@ -75,7 +75,7 @@ for external hand-written packs.
 Packaged skill consumers should treat the bundled generated catalogs as ready-to-use. Maintainers
 who change `assets/themes/catalog.json` must regenerate the derived catalogs before publishing.
 
-The CLI exposes the generated schema-backed catalog through `xdoc pptx list-themes --json`.
+The CLI exposes the generated schema-backed catalog through `xdoc pptx catalog themes --json`.
 
 ## Generator Usage
 

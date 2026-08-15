@@ -10,13 +10,13 @@ Use this reference when choosing or adding local assets under
 | `brands/`  | `brands/catalog.json`  | Brand profiles and apply/check commands                  |
 | `layouts/` | `layouts/catalog.json` | Layout patterns, grid systems, and layout-contract hints |
 | `decks/`   | `decks/catalog.json`   | Complete generators, outlines, and patch bundles         |
-| `themes/`  | `themes/catalog.json`  | themePack/stylePack entries for `list-themes`            |
+| `themes/`  | `themes/catalog.json`  | themePack/stylePack entries for `catalog themes`         |
 | `charts/`  | `charts/catalog.json`  | Native chart/table/diagram presets                       |
 | `icons/`   | `icons/catalog.json`   | Native shape icons, Tabler bundle, and vector policy     |
 
 ## Selection Flow
 
-1. Pick theme/style first with `xdoc pptx list-themes --json`.
+1. Pick theme/style first with `xdoc pptx catalog themes --json`.
 2. If the user provided a reference deck and a new outline/content goal, follow
    `reference-create.md` first. If the reference deck is only for style study, run:
 

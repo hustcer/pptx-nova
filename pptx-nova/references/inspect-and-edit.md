@@ -146,7 +146,7 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 - `textFrame` 同时区分显式 margin 与 effective margin。写入时省略字段表示保留，`null`
   清掉显式 `bodyPr` 值使继承/默认重新生效；不要把 effective 值误写成“原始显式值”。
 - `fontFacts[]` 是按 text/chart scope 报出的字体事实。拉丁、东亚、复杂文字脚本分别对应
-  patch font 的 `name`、`eastAsian`、`complexScript`；`spacing` 是独立字符间距字段。
+  patch font 的 `name`、`eastAsian`、`complexScript`；`letterSpacing` 是独立字符间距字段。
 - 动画状态现在也在每页暴露：`timing_summary`、`animations[]`、`animation_capabilities`。
   只有 `animations[].editable == true` 的安全子集可用 `set-slide-animations` /
   `set-slide-animations` 局部改；复杂 timing 仍看 `animation_capabilities.preserve_only`。

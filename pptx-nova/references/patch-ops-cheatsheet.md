@@ -337,7 +337,7 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
     "name": "Inter",
     "eastAsian": "Noto Sans CJK SC",
     "complexScript": "Noto Sans Arabic",
-    "spacing": "0.2pt",
+    "letterSpacing": "0.2pt",
     "size": "32pt",
     "bold": true,
     "italic": false,

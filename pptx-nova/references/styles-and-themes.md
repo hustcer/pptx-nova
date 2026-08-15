@@ -169,7 +169,7 @@ picture fill。
     "name": "Inter",
     "eastAsian": "Source Han Sans SC",
     "complexScript": "Noto Sans Arabic",
-    "spacing": "0.1pt",
+    "letterSpacing": "0.1pt",
     "size": "16pt",
     "bold": true,
     "italic": false,

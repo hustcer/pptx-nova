@@ -424,7 +424,7 @@ dry-run 报告里会有：
       "w": "8in",
       "h": "4.5in",
       "name": "Hero Image",
-      "assetSource": { "path": "images/new-hero.png", "mime": "image/png" }
+      "assetSource": { "path": "images/new-hero.png", "mimeType": "image/png" }
     }
   ]
 }

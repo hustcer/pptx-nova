@@ -106,7 +106,7 @@ node <skill-root>/scripts/pptx-nova-build.mjs \
 
 DeckKit 需要 Tabler 图标时，使用 `createOps()` 返回的 `icon()` 或直接使用
 `icon-assets.kit.mjs`。它只读取 `../icons/tabler-icons.pack.br`，并把 SVG
-内联为 `add-image` 的 `bytesBase64 + mime`，不依赖网络、临时 SVG 文件或 Tabler
+内联为 `add-image` 的 `bytesBase64 + mimeType`，不依赖网络、临时 SVG 文件或 Tabler
 源码目录：
 
 ```js

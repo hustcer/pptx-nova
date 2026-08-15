@@ -501,7 +501,7 @@ export function getTablerIconAsset(name, options = {}) {
   const svg = getTablerIconSvg(name, options)
   return {
     bytesBase64: Buffer.from(svg, 'utf8').toString('base64'),
-    mime: 'image/svg+xml',
+    mimeType: 'image/svg+xml',
   }
 }
 

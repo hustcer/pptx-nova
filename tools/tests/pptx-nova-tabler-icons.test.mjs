@@ -85,7 +85,7 @@ test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add
   assert.match(filled, /fill="#F59E0B"/)
 
   const asset = getTablerIconAsset('presentation', { color: 'C8583A', strokeWidth: 1.75 })
-  assert.equal(asset.mime, 'image/svg+xml')
+  assert.equal(asset.mimeType, 'image/svg+xml')
   assert.equal(Buffer.from(asset.bytesBase64, 'base64').toString('utf8'), svg)
 
   const p = createOps()
@@ -98,7 +98,7 @@ test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add
   assert.equal(op.y, '2in')
   assert.equal(op.w, '0.3in')
   assert.equal(op.h, '0.3in')
-  assert.equal(op.mime, 'image/svg+xml')
+  assert.equal(op.mimeType, 'image/svg+xml')
   const opSvg = Buffer.from(op.bytesBase64, 'base64').toString('utf8')
   assert.match(opSvg, /#FFFFFF/)
   assert.match(opSvg, /stroke-width="1"/)

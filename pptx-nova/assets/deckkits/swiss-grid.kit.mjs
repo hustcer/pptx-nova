@@ -263,7 +263,7 @@ function makeSwissOps() {
       w: `${logo.w ?? 0.34}in`,
       h: `${logo.h ?? 0.34}in`,
       bytesBase64: Buffer.from(svg).toString('base64'),
-      mime: 'image/svg+xml',
+      mimeType: 'image/svg+xml',
     })
     return true
   }

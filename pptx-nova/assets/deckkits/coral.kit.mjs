@@ -44,7 +44,7 @@ function makeCoralOps() {
       w: `${w}in`,
       h: `${h}in`,
       bytesBase64: Buffer.from(markup, 'utf8').toString('base64'),
-      mime: 'image/svg+xml',
+      mimeType: 'image/svg+xml',
     })
 
   const hatchSvg = (s, base, x, y, w, h, angle = 45) => {

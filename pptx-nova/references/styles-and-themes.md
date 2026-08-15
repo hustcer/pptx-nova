@@ -117,7 +117,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
   "shape": { "name": "Photo panel" },
   "fill": {
     "type": "picture",
-    "assetSource": { "path": "images/texture.png", "mime": "image/png" },
+    "assetSource": { "path": "images/texture.png", "mimeType": "image/png" },
     "mode": "stretch",
     "crop": { "left": 0.05, "right": 0.05 },
     "alpha": 0.9,

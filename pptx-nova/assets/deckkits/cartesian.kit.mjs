@@ -170,7 +170,7 @@ function drawImageAsset(ctx, s, x, y, w, h, label, asset) {
   const imageName = nm(s, 'ImageAsset')
   ctx.p.addImage(s, imageName, fitted.x, fitted.y, fitted.w, fitted.h, {
     path: asset.path,
-    mime: asset.mime,
+    mimeType: asset.mime,
   })
   ctx.p.setImageCrop(s, imageName, fitted.crop)
   ctx.tx(s, 'ImageLabel', x, y - 0.27, w, 0.18, upper(label), f(8.5, C.accent))

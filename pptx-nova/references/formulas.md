@@ -121,7 +121,7 @@ Preferred patch op for production typography after rendering an SVG asset:
   "display": true,
   "assetSource": {
     "path": "formulas/s3-objective.svg",
-    "mime": "image/svg+xml"
+    "mimeType": "image/svg+xml"
   },
   "name": "S3_Formula_Objective"
 }

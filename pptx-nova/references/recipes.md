@@ -136,12 +136,12 @@ recipe 与底层 patch op 可以混用：一份 patch 可同时包含 `add-slide
     "kind": "image-caption",
     "title": "新产品包装外观",
     "caption": "采用环保再生纸，符合 ESG 战略",
-    "image": { "bytesBase64": "...", "mime": "image/png", "objectFit": "cover" }
+    "image": { "bytesBase64": "...", "mimeType": "image/png", "objectFit": "cover" }
   }
 }
 ```
 
-canonical v1 的 `image-caption.image` 严格接受 `bytesBase64`、`mime` 和可选
+canonical v1 的 `image-caption.image` 严格接受 `bytesBase64`、`mimeType` 和可选
 `objectFit`；本地文件先由生成器读取并编码，不要把 `assetSource` 塞进该 recipe。
 
 ---

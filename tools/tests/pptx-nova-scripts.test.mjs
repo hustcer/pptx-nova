@@ -1771,7 +1771,7 @@ test('cartesian image stats injects a manifest-relative image with contain geome
   assert.ok(image)
   assert.deepEqual(image.assetSource, {
     path: 'assets/editorial.svg',
-    mime: 'image/svg+xml',
+    mimeType: 'image/svg+xml',
   })
   assert.deepEqual(
     { x: image.x, y: image.y, w: image.w, h: image.h },
@@ -2759,7 +2759,7 @@ test('create runner propagates assets to build, lock check, dry-run, and apply',
   const patch = JSON.parse(readFileSync(join(runDir, 'patch.json'), 'utf8'))
   assert.deepEqual(patch.ops.find((op) => op.op === 'add-image').assetSource, {
     path: 'assets/editorial.svg',
-    mime: 'image/svg+xml',
+    mimeType: 'image/svg+xml',
   })
 })
 

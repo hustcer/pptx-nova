@@ -231,7 +231,7 @@ Group target 是明确例外：只支持 `name`、`accessibility`、`position`�
 
 支持 `solid` / `gradient` / `pattern` / `picture` / `none`；24 个 preset gradients；
 gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fill，可用
-`assetSource`（或 `bytesBase64` + `mime`）、`mode: "stretch" | "tile"`、`crop`、
+`assetSource`（或 `bytesBase64` + `mimeType`）、`mode: "stretch" | "tile"`、`crop`、
 `alpha`、`rotateWithShape` 和 tile 参数。内置 preview/PDF 对 picture fill 目前只
 可靠呈现 stretch 与 alpha，crop/tile 交付以 PowerPoint 复核为准。详见
 `styles-and-themes.md`。
@@ -436,7 +436,7 @@ PowerPoint 原生渲染复核为准。
   "y": "1in",
   "w": "4in",
   "h": "3in",
-  "assetSource": { "path": "images/hero.png", "mime": "image/png" }
+  "assetSource": { "path": "images/hero.png", "mimeType": "image/png" }
 }
 ```
 

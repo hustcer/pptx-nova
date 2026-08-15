@@ -20,7 +20,7 @@ test('pptx-nova routes MCP from the exact capability contract', () => {
     assert.match(text, /(?:capabilities\.agentTransports\.)?mcp\.contract/)
   }
   assert.match(skill, /command presence alone is insufficient/)
-  for (const tool of ['xdoc_discover', 'pptx_inspect', 'pptx_apply']) {
+  for (const tool of ['xdoc_schema', 'pptx_inspect', 'pptx_apply']) {
     assert.ok(sessions.includes('| `' + tool + '`'))
   }
   assert.match(workflow, /keep one-shot CLI for commands\s+that MCP does not expose/)

@@ -42,7 +42,8 @@ process.stdout.write(JSON.stringify({
   )
   writeJson(copyReport, {
     schemaVersion: 'pptx-copy-from/v2',
-    status: 'ready',
+    status: 'success',
+    outcome: 'passed',
     transaction: {
       rollbackBoundary: 'entire-copy-batch',
       sourceSlides: [2],

@@ -455,7 +455,8 @@ function writeFidelityFixture(root, reviewedFindings) {
   })
   writeJson(finalAudit, {
     schemaVersion: 'pptx-refurbish-audit/v1',
-    status: 'passed',
+    status: 'success',
+    outcome: 'passed',
     summary: {
       errorCount: 0,
       warningCount: 0,

@@ -27,7 +27,7 @@ xdoc pptx extract-style reference.pptx --output style.json --json
 3. If the reference deck should become a reusable local template asset, run:
 
 ```bash
-xdoc pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json
+xdoc pptx import-template reference.pptx --name stable-id --output-dir skills/pptx-nova/assets --json
 ```
 
 This writes `decks/<id>/template.pptx`, `decks/<id>/profile.json`,

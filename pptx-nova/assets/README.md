@@ -45,7 +45,7 @@ introduced.
 
 - Use `xdoc pptx extract-style reference.pptx --output style.json --json` to
   create a draft profile before adding a new brand or theme entry.
-- Use `xdoc pptx import-template reference.pptx --name stable-id --output skills/pptx-nova/assets --json`
+- Use `xdoc pptx import-template reference.pptx --name stable-id --output-dir skills/pptx-nova/assets --json`
   to copy a reference PPTX into `decks/<id>/`, write brand/layout/theme/style
   profiles, and register the imported entries in the local catalogs.
 - Use `xdoc pptx slide-copy -i target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx`

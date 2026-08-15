@@ -628,7 +628,7 @@ const styleComparisonTable = (slide, tableName, rows, cols) => {
     shape: { name: tableName },
     borders: [
       {
-        range: { startRow: 0, startCol: 0, endRow: rows - 1, endCol: cols - 1 },
+        range: { startRow: 0, startColumn: 0, endRow: rows - 1, endColumn: cols - 1 },
         value: {
           top: { color: TABLE_BORDER, width: '0.75pt' },
           bottom: { color: TABLE_BORDER, width: '0.75pt' },
@@ -1279,7 +1279,7 @@ function slideTable(total) {
     op: 'add-table',
     slide: s,
     rows: 5,
-    cols: 3,
+    columns: 3,
     name: tableName,
     x: `${tableX}in`,
     y: '2.4in',
@@ -1922,7 +1922,7 @@ function slideDataRoomTable(total) {
     op: 'add-table',
     slide: s,
     rows: 5,
-    cols: 5,
+    columns: 5,
     name: tableName,
     x: `${S.layout.marginX}in`,
     y: '1.55in',

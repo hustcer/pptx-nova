@@ -75,7 +75,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
   "op": "add-table",
   "slide": 0,
   "rows": 4,
-  "cols": 3,
+  "columns": 3,
   "x": "1in",
   "y": "1.5in",
   "w": "8in",
@@ -102,7 +102,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
   "op": "set-table",
   "slide": 0,
   "shape": { "name": "Metrics Table" },
-  "cells": [{ "row": 1, "col": 1, "text": "$12M" }]
+  "cells": [{ "row": 1, "column": 1, "text": "$12M" }]
 }
 ```
 
@@ -179,7 +179,7 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
   "cells": [
     {
       "row": 0,
-      "col": 0,
+      "column": 0,
       "style": {
         "fill": { "type": "solid", "color": "1A73E8" },
         "font": { "name": "Inter", "size": "14pt", "bold": true, "color": "FFFFFF" },
@@ -207,7 +207,7 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
   "cells": [
     {
       "row": 0,
-      "col": 0,
+      "column": 0,
       "style": {
         "borders": {
           "top":    { "width": "1pt", "color": "1A73E8" },
@@ -234,7 +234,7 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
   "shape": {...},
   "borders": [
     {
-      "range": { "startRow": 0, "startCol": 0, "endRow": 3, "endCol": 2 },
+      "range": { "startRow": 0, "startColumn": 0, "endRow": 3, "endColumn": 2 },
       "value": {
         "top":     { "width": "1.5pt", "color": "1F1F1F" },
         "bottom":  { "width": "1.5pt", "color": "1F1F1F" },
@@ -284,7 +284,7 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
   "op": "set-table",
   "slide": 0,
   "shape": {...},
-  "columns": [{ "col": 0, "width": "2in" }],
+  "columns": [{ "column": 0, "width": "2in" }],
   "rows": [{ "row": 0, "height": "0.5in" }]
 }
 ```
@@ -297,9 +297,9 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
   "slide": 0,
   "shape": {...},
   "startRow": 0,
-  "startCol": 0,
+  "startColumn": 0,
   "endRow": 0,
-  "endCol": 2
+  "endColumn": 2
 }
 ```
 
@@ -312,7 +312,7 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
   "op": "set-table",
   "slide": 0,
   "shape": {...},
-  "cells": [{ "row": 4, "col": 1, "formula": "SUM(B2:B4)" }]
+  "cells": [{ "row": 4, "column": 1, "formula": "SUM(B2:B4)" }]
 }
 ```
 
@@ -333,7 +333,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
       "op": "add-table",
       "slide": 0,
       "rows": 1,
-      "cols": 1,
+      "columns": 1,
       "x": "1in",
       "y": "1.5in",
       "w": "8in",
@@ -381,7 +381,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
       "op": "add-table",
       "slide": 0,
       "rows": 4,
-      "cols": 3,
+      "columns": 3,
       "x": "1in",
       "y": "2in",
       "w": "11in",
@@ -401,7 +401,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
       "style": { "firstRow": true, "horizontalBanding": true },
       "borders": [
         {
-          "range": { "startRow": 0, "startCol": 0, "endRow": 3, "endCol": 2 },
+          "range": { "startRow": 0, "startColumn": 0, "endRow": 3, "endColumn": 2 },
           "value": {
             "top": { "width": "1pt", "color": "1F1F1F" },
             "bottom": { "width": "1pt", "color": "1F1F1F" },
@@ -414,7 +414,7 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
       "cells": [
         {
           "row": 0,
-          "col": 0,
+          "column": 0,
           "style": {
             "fill": { "type": "solid", "color": "1A73E8" },
             "font": { "color": "FFFFFF", "bold": true }

@@ -449,7 +449,9 @@ dry-run 报告里会有：
       "op": "set-table",
       "slide": 1,
       "shape": { "name": "Metrics Table" },
-      "cells": [{ "row": 0, "col": 2, "style": { "fill": { "type": "solid", "color": "EAF1FF" } } }]
+      "cells": [
+        { "row": 0, "column": 2, "style": { "fill": { "type": "solid", "color": "EAF1FF" } } }
+      ]
     }
   ]
 }

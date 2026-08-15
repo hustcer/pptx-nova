@@ -142,7 +142,7 @@ xdoc pptx template-fill data.json \
       "op": "add-table",
       "slide": 0,
       "rows": 1,
-      "cols": 1,
+      "columns": 1,
       "x": "0.5in",
       "y": "1.3in",
       "w": "4in",

@@ -645,7 +645,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "op": "add-table",
     "slide": 4,
     "rows": 7,
-    "cols": 3,
+    "columns": 3,
     "x": "0.8in",
     "y": "2.4in",
     "w": "11.7in",
@@ -669,7 +669,7 @@ y 坐标：`2.4 / 3.85 / 5.3 in`（每张 1.3in 高 + 0.15in 间距）。
     "cells": [
       {
         "row": 0,
-        "col": 0,
+        "column": 0,
         "style": {
           "fill": { "type": "solid", "color": "1A73E8" },
           "font": { "bold": true, "color": "FFFFFF" }

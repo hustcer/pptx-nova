@@ -666,7 +666,7 @@ function makePageTypes(
       op: 'add-table',
       slide: s,
       rows: rowsData.length,
-      cols: rowsData[0].length,
+      columns: rowsData[0].length,
       name: tableName,
       x: `${MX}in`,
       y: '2.1in',

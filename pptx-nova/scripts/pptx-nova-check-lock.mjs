@@ -672,8 +672,8 @@ function checkTableSemantic(op, index, errors, _warnings) {
     if (!Number.isInteger(op.rows) || op.rows <= 0) {
       push(errors, 'table-rows-invalid', `${label} must declare a positive rows count`)
     }
-    if (!Number.isInteger(op.cols) || op.cols <= 0) {
-      push(errors, 'table-cols-invalid', `${label} must declare a positive cols count`)
+    if (!Number.isInteger(op.columns) || op.columns <= 0) {
+      push(errors, 'table-columns-invalid', `${label} must declare a positive columns count`)
     }
   }
   if (rows.length > 0 && Array.isArray(rows[0])) {
@@ -689,11 +689,11 @@ function checkTableSemantic(op, index, errors, _warnings) {
         )
       }
     })
-    if (op.cols && width !== op.cols && op.resize !== true) {
+    if (op.columns && width !== op.columns && op.resize !== true) {
       push(
         errors,
         'table-data-cols-mismatch',
-        `${label} data has ${width} column(s), table has ${op.cols}; set resize=true or fix data`,
+        `${label} data has ${width} column(s), table has ${op.columns}; set resize=true or fix data`,
       )
     }
     if (op.rows && rows.length !== op.rows && op.resize !== true) {

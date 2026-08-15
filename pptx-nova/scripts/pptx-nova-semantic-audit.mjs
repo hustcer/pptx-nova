@@ -286,8 +286,8 @@ function auditTableOp(op, index, lock, inspect) {
       issue(item, 'error', 'table-rows-invalid', 'add-table must declare positive rows')
       rowColumnStatus = 'failed'
     }
-    if (!Number.isInteger(op.cols) || op.cols <= 0) {
-      issue(item, 'error', 'table-cols-invalid', 'add-table must declare positive cols')
+    if (!Number.isInteger(op.columns) || op.columns <= 0) {
+      issue(item, 'error', 'table-columns-invalid', 'add-table must declare positive columns')
       rowColumnStatus = 'failed'
     }
   }
@@ -307,12 +307,16 @@ function auditTableOp(op, index, lock, inspect) {
         rowColumnStatus = 'failed'
       }
     })
-    if (op.cols && Number.isInteger(width) && width !== op.cols && op.resize !== true) {
+    if (op.columns && Number.isInteger(width) && width !== op.columns && op.resize !== true) {
       issue(
         item,
         'error',
         'table-data-cols-mismatch',
-        'data has ' + width + ' column(s), table has ' + op.cols + '; set resize=true or fix data',
+        'data has ' +
+          width +
+          ' column(s), table has ' +
+          op.columns +
+          '; set resize=true or fix data',
       )
       rowColumnStatus = 'failed'
     }

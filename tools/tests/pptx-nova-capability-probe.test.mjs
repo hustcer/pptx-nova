@@ -248,7 +248,7 @@ if (args[0] === 'schema') {
           operationIndex: { 'set-text-frame': { feature: 'text', subset: 'native-authoring' } },
           legacyProjection: { schemaVersion: 'pptx-capability-legacy-projection/v1', lossy: true, partialStatus: 'not-represented', supported: ['set-text-frame'], preservedOnly: ['slide-transition/extended-existing-effects'], unsupported: [] }
         },
-        schemaDisclosure: { modes: [{ flag: '--index' }, { flag: '--op <name>' }] },
+        schemaDisclosure: { modes: [{ flag: '--mode index' }, { flag: '--mode ops --ops a,b,c' }] },
         patchSchema: { capabilityVersion: 'fake-v1', supportedOps: ['set-text-frame', 'set-slide-transition'], operations: [{ op: 'set-text-frame' }, { op: 'set-slide-transition' }] },
         recipeOps: [], enumRegistry: { enums: {} },
         catalogs: { themes: { ids: [] }, styles: { ids: [] }, nativeDeckkits: { deckkits: [] } }

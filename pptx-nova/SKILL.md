@@ -47,8 +47,8 @@ If a caller-provided run directory is rejected, the guard reports the allowed in
 detected entry, and a safe recovery hint; preserve that directory as evidence and retry with a new one.
 
 When unsure, first check exact capability truth, then the op index in `xdoc-capabilities.json`; use
-`xdoc schema --index` only when the snapshot is missing or stale. Then use
-`xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal` when the snapshot discloses
+`xdoc schema --mode index` only when the snapshot is missing or stale. Then use
+`xdoc schema --mode ops --ops <name> --fields <needed-fields> --defs summary --minimal` when the snapshot discloses
 both `--fields` and `--defs summary` and only a focused contract surface is needed; otherwise omit
 `--defs` for the compatible full-definition projection. Summary projections are discovery views, not
 complete validation schemas: switch to `--defs full` before constructing nested selectors. Even a

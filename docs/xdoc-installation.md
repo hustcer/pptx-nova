@@ -49,7 +49,7 @@ the executable that npm placed on `PATH`:
 ```bash
 npm i -g @s8fy/xdoc
 xdoc --version
-xdoc schema --index
+xdoc schema --mode index
 ```
 
 For a production worker, pin the package version instead of accepting a moving
@@ -152,7 +152,7 @@ ln -sfn "$install_dir/xdoc" "$HOME/.local/bin/xdoc"
 export PATH="$HOME/.local/bin:$PATH"
 
 xdoc --version
-xdoc schema --index > "$install_dir/patch-index.json"
+xdoc schema --mode index > "$install_dir/patch-index.json"
 ```
 
 For a system-wide installation, use a root-owned version directory and add a
@@ -186,7 +186,7 @@ $installDir = Join-Path $env:LOCALAPPDATA "xdoc\$releaseTag"
 Expand-Archive .\xdoc-download\xdoc-windows-x64.zip -DestinationPath $installDir -Force
 
 & (Join-Path $installDir 'xdoc.exe') --version
-& (Join-Path $installDir 'xdoc.exe') schema --index | Out-File (Join-Path $installDir 'patch-index.json') -Encoding utf8
+& (Join-Path $installDir 'xdoc.exe') schema --mode index | Out-File (Join-Path $installDir 'patch-index.json') -Encoding utf8
 ```
 
 If Windows blocks execution because the archive came from an untrusted source,
@@ -200,7 +200,7 @@ wrapper script is not a substitute for probing that executable.
 
 ```bash
 xdoc --version
-xdoc schema --index > runtime-patch-index.json
+xdoc schema --mode index > runtime-patch-index.json
 xdoc schema > runtime-schema.json
 
 jq -e '.schemaVersion == "cli-agent/v1"' runtime-schema.json

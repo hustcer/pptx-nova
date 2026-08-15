@@ -78,7 +78,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ```
 
 `fillToRect` 控制焦点/扩散区域；不确定当前 xdoc 版本的字段时先跑
-`xdoc schema --op set-shape --minimal`。
+`xdoc schema --mode ops --ops set-shape --minimal`。
 
 ### Preset Gradient（24 个内置）
 

@@ -23,7 +23,7 @@ At worker startup, run the executable that will process the job:
 ```bash
 xdoc --version
 xdoc schema > runtime-schema.json
-xdoc schema --index > runtime-patch-index.json
+xdoc schema --mode index > runtime-patch-index.json
 ```
 
 Installation is a deployment concern, not an Agent-protocol branch. A worker may
@@ -47,13 +47,13 @@ human version string.
 Use progressive disclosure when constructing a patch:
 
 ```bash
-xdoc schema --index
-xdoc schema --op add-text-box --minimal
-xdoc schema --op set-shape --fields name,shape,slide --defs summary
-xdoc schema --examples
+xdoc schema --mode index
+xdoc schema --mode ops --ops add-text-box --minimal
+xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary
+xdoc schema --mode examples
 ```
 
-`schema --index` is an operation index, not a complete command inventory. The
+`schema --mode index` is an operation index, not a complete command inventory. The
 full schema is the source for command metadata, capabilities, examples, report
 contracts, and error catalogs. A missing index entry means “not disclosed by
 this projection,” not automatically “unsupported.” Ask the running binary again

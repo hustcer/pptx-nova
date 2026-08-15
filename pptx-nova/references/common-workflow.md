@@ -140,13 +140,13 @@ commands, PPTX subcommands, the structured PPTX capability truth, exact Agent
 transport contracts, patch/recipe op names, enum registry names, theme/style ids,
 and native DeckKit declarations. It intentionally omits full op
 schemas. When `capabilities.schemaSlicing.fieldsAvailable` is true, fetch only the
-needed surface with `xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal`
+needed surface with `xdoc schema --mode ops --ops <name> --fields <needed-fields> --defs summary --minimal`
 when `capabilities.schemaSlicing.summaryDefsAvailable` is also true; otherwise omit `--defs` for the
 compatible full-definition projection. A summary projection is disclosure-only
 (`completeValidation=false`), so switch to `--defs full` before constructing nested values. A
 full-definition field projection is still incomplete; omit `--fields` or rely on `apply --dry-run`
 before claiming complete validation.
-Consult this snapshot before running `xdoc schema --index`; refresh the index only
+Consult this snapshot before running `xdoc schema --mode index`; refresh the index only
 when the snapshot is missing, stale, or does not disclose a capability you need.
 
 Treat the snapshot as runtime discovery evidence, not an allowlist. Query

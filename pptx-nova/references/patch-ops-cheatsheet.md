@@ -1,7 +1,7 @@
 # Patch Ops Cheatsheet —— 58 个 op 按场景速查
 
 下面把 xdoc schema v1 的 58 个 op 按 **"我想做什么"** 反向归类。每条只列
-关键字段；完整 schema 用 `xdoc schema --op <name>` 拉。旧版细粒度 shape / chart /
+关键字段；完整 schema 用 `xdoc schema --mode ops --ops <name>` 拉。旧版细粒度 shape / chart /
 table setter 已全部并入对应的聚合 op
 （`set-shape` / `set-chart` / `set-table` ...），本表只列 canonical 名字。
 
@@ -216,7 +216,7 @@ cloud-callout`。
 Group target 是明确例外：只支持 `name`、`accessibility`、`position`、`size`、
 `rotation`、`flip` 和 `effect`。`fill`、`line`、`clickAction` 会在任何 mutation 前返回
 `invalid_operation`；先 inspect/select 组内子形状，再分别对这些子形状设置对应字段。以当前
-`xdoc schema --op set-shape --minimal` 中的 `target-field-compatibility` constraint
+`xdoc schema --mode ops --ops set-shape --minimal` 中的 `target-field-compatibility` constraint
 和 dry-run 结果为准。
 
 ### Fill 示例

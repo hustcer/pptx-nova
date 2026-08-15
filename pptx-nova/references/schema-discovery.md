@@ -7,18 +7,18 @@ xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema
 
 ```bash
 xdoc schema                          # 完整 schema（贵）
-xdoc schema --index                  # 只 op 名 + level + required/optional 字段
-xdoc schema --op add-text-box         # 单个 op 完整 jsonSchema
-xdoc schema --ops add-slide,add-chart   # 多个 op
-xdoc schema --op set-shape --fields name,shape,slide --defs summary --minimal # 字段 + 紧凑定义摘要
-xdoc schema --op set-shape --fields name,shape,slide --defs full --minimal # 字段 + 完整定义闭包
-xdoc schema --examples               # 内置 12 个 patch 示例
+xdoc schema --mode index                  # 只 op 名 + level + required/optional 字段
+xdoc schema --mode ops --ops add-text-box         # 单个 op 完整 jsonSchema
+xdoc schema --mode ops --ops add-slide,add-chart   # 多个 op
+xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary --minimal # 字段 + 紧凑定义摘要
+xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs full --minimal # 字段 + 完整定义闭包
+xdoc schema --mode examples               # 内置 12 个 patch 示例
 xdoc schema --minimal                # 删 verbose 字段（与上面任一组合用）
 ```
 
-约束：`--examples` 和 `--op/--ops` 互斥（要看示例就单独跑一次）。
-`--fields` 必须与 `--op/--ops` 组合；required 字段会自动保留，未知字段直接报错。
-`--defs` 只用于字段投影，因此也要求 `--fields`；默认值为 `full`，兼容旧调用。
+约束：视图由 `--mode` 明说，不靠优先级推断——`--ops`/`--fields` 只属于 `--mode ops`，
+用在别的 mode 上直接报错。`--fields` 的 required 字段会自动保留，未知字段直接报错；
+`--defs` 只用于字段投影，因此也要求 `--fields`，默认值为 `full`。
 
 ## Action 级 CLI 帮助
 
@@ -34,7 +34,7 @@ xdoc help pptx visual-audit      # 等价的 help verb 形式
 每个 `xdoc pptx <action> --help` 都由运行时
 `commands.pptx.subcommands.<action>` 合同生成；其中 option 定义投影自同一 PPTX 父命令，
 因此适合发现 CLI flag、默认值和示例。它不是 patch operation JSON Schema：需要字段类型、
-selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --op ...`。help 是人类文本，
+selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --mode ops --ops ...`。help 是人类文本，
 不要附加 `--json` 或把输出当 JSON 解析。
 
 ## 典型 Agent 用法
@@ -42,7 +42,7 @@ selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --op ...
 ### 1. 初次进 deck → 取 op 索引
 
 ```bash
-xdoc schema --index | save -f schema-index.json
+xdoc schema --mode index | save -f schema-index.json
 ```
 
 得到所有 120 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
@@ -53,7 +53,7 @@ xdoc schema --index | save -f schema-index.json
 只确认 selector、name 等少量字段时，优先使用字段投影：
 
 ```bash
-xdoc schema --op set-shape --fields name,shape,slide --defs summary --minimal \
+xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary --minimal \
   | save -f schema-set-shape-name.json
 ```
 
@@ -64,9 +64,9 @@ xdoc schema --op set-shape --fields name,shape,slide --defs summary --minimal \
 可选字段或执行完整离线验证时，应省略 `--fields`（也可用 `apply --dry-run` 校验最终 patch）：
 
 ```bash
-xdoc schema --op set-shape --fields name,shape,slide --defs full --minimal \
+xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs full --minimal \
   | save -f schema-set-shape-name-full.json
-xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
+xdoc schema --mode ops --ops add-chart --minimal | save -f schema-add-chart.json
 ```
 
 `--defs full` 保留投影字段可达的完整 `$defs` 闭包；省略 `--defs` 与显式 `full` 等价。
@@ -82,7 +82,7 @@ xdoc schema --op add-chart --minimal | save -f schema-add-chart.json
 动画字段和安全边界更新频繁，涉及动画时先拉这三个 op：
 
 ```bash
-xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-animations.json
+xdoc schema --mode ops --ops set-slide-animations --minimal | save -f schema-set-slide-animations.json
 ```
 
 重点看 `mode`、`effect`、`phase`、`target`、`build`、`trigger` 的 enum。不要把旧版本
@@ -92,7 +92,7 @@ xdoc schema --op set-slide-animations --minimal | save -f schema-set-slide-anima
 ### 3. 想抄个例子 → 拉 examples
 
 ```bash
-xdoc schema --examples | save -f examples.json
+xdoc schema --mode examples | save -f examples.json
 ```
 
 里面 12 个示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
@@ -197,7 +197,7 @@ left / center / right / justify / distribute / thai-distribute
 
 `set-shape.effect` 使用 `shadow` / `glow` / `reflection` / `softEdge` 子对象；不要使用
 `effect.kind`。只查询 effect 时优先使用
-`xdoc schema --op set-shape --fields effect,shape,slide --defs summary --minimal`；构造 effect
+`xdoc schema --mode ops --ops set-shape --fields effect,shape,slide --defs summary --minimal`；构造 effect
 对象时切换到 `--defs full`，完整合同再省略 `--fields`。
 
 ## Catalog 命令
@@ -233,13 +233,13 @@ xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
 
 ```nu
 # 找 "做表" 相关的 op
-xdoc schema --index --minimal | from json | get operations | where op =~ 'table' | select op level required
+xdoc schema --mode index --minimal | from json | get operations | where op =~ 'table' | select op level required
 
 # 看 add-chart 必填 / 可选字段
-xdoc schema --op add-chart --minimal | from json | get operations.0 | { required: $in.required, optional: $in.optional }
+xdoc schema --mode ops --ops add-chart --minimal | from json | get operations.0 | { required: $in.required, optional: $in.optional }
 
 # 把所有 recipe op 列出来
-xdoc schema --index | from json | get operations | where level == 'recipe' | select op required optional
+xdoc schema --mode index | from json | get operations | where level == 'recipe' | select op required optional
 ```
 
 ## 何时不查 schema

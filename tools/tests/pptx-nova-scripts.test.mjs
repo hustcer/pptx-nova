@@ -342,12 +342,12 @@ if (args[0] === 'schema') {
         subcommands: { apply: {} },
         schemaDisclosure: {
           modes: [
-            { flag: '--op <name>' },
+            { flag: '--mode ops --ops a,b,c' },
             { flag: '--fields a,b,c' },
             { flag: '--defs summary|full' },
             { flag: '--minimal' }
           ],
-          agentHint: 'Use --op with --fields for focused discovery.'
+          agentHint: 'Use --mode ops with --fields for focused discovery.'
         },
         patchSchema: {
           supportedOps: ['set-shape', 'set-shape'],
@@ -402,7 +402,7 @@ if (args[0] === 'schema') {
       pptx: {
         subcommands: {},
         schemaDisclosure: {
-          modes: [{ flag: '--op <name>' }, { flag: '--minimal' }]
+          modes: [{ flag: '--mode ops --ops a,b,c' }, { flag: '--minimal' }]
         },
         patchSchema: {},
         catalogs: {}
@@ -428,7 +428,7 @@ process.exit(2)
   assert.deepEqual(report.capabilities.schemaSlicing.defsModes, [])
   assert.equal(
     report.disclosure.targetedLookup.operationSchema,
-    'xdoc schema --op <name> --minimal',
+    'xdoc schema --mode ops --ops <name> --minimal',
   )
 })
 

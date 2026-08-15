@@ -338,7 +338,7 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
 
 - dry-run 报告的 `opResults[]` 里,展开过的元 op 会带 `controlExpansion`
   metadata,记录子 op 数量;有歧义时这里也会带 `suggestions[]`
-- `recoverable` 写错 kind 名 → try 块照样冒错;先 `xdoc schema --op try` 查可用
+- `recoverable` 写错 kind 名 → try 块照样冒错;先 `xdoc schema --mode ops --ops try` 查可用
   enum,再对照 `references/troubleshooting.md` 的错误名
 - `foreach` 模板里 `{{$item.x}}` 漏写 `$` 不会报错 — schema 把它当成普通字面量
   字符串。看 dry-run `semanticChanges[]` 里的 text 字段确认是否被替换

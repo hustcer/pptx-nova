@@ -753,13 +753,13 @@ function createReport(args) {
         missingMeans: 'undisclosed, not unsupported',
         targetedLookup: {
           operationIndex:
-            'read xdoc-capabilities.json#capabilities.patchOperations; refresh with xdoc schema --index only when needed',
+            'read xdoc-capabilities.json#capabilities.patchOperations; refresh with xdoc schema --mode index only when needed',
           operationSchema:
             fieldsAvailable && summaryDefsAvailable
-              ? 'xdoc schema --op <name> --fields <needed-fields> --defs summary --minimal; use --defs full before constructing nested values; omit --fields or apply --dry-run for complete operation validation'
+              ? 'xdoc schema --mode ops --ops <name> --fields <needed-fields> --defs summary --minimal; use --defs full before constructing nested values; omit --fields or apply --dry-run for complete operation validation'
               : fieldsAvailable
-                ? 'xdoc schema --op <name> --fields <needed-fields> --minimal; omit --fields or use apply --dry-run for complete validation'
-                : 'xdoc schema --op <name> --minimal',
+                ? 'xdoc schema --mode ops --ops <name> --fields <needed-fields> --minimal; omit --fields or use apply --dry-run for complete validation'
+                : 'xdoc schema --mode ops --ops <name> --minimal',
           featureTruth:
             'read xdoc-capabilities.json#capabilities.capabilityTruth.entries by exact feature/subset; when axes is non-null, route create/edit/inspect/preserve/render/verify independently and follow each axis status, limits, Office target, and evidence ids',
           commandHelp: 'xdoc <command...> --help',

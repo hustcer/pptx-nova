@@ -21,7 +21,7 @@ test('Morph authoring publishes the explicit pairing and PowerPoint evidence con
   assert.match(skill, /The `\.nu` playback probe is optional/)
   assert.match(skill, /without it the baseline continues/)
 
-  assert.match(animations, /xdoc schema --op set-slide-transition --minimal/)
+  assert.match(animations, /xdoc schema --mode ops --ops set-slide-transition --minimal/)
   assert.match(animations, /完全相同、区分大小写的 `!!` 前缀名称/)
   assert.match(animations, /`by-object`、`by-word`、`by-char`/)
   assert.match(animations, /morph-check-before\.json/)

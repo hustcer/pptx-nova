@@ -248,7 +248,7 @@ inspect 给出的 `shape.id` 是 deck 内全局唯一的。一旦拿到，patch 
 
 唯一缺点：deck 变化后 id 也可能变（重写后），不适合长期固化。
 注意不要把 inspect 中的数字 id 转成字符串；`shapeSelector.id` 要按原始类型写入 patch。
-如果 dry-run 报 selector schema 错误，先用 `xdoc schema --op <op>` 或一个最小 patch
+如果 dry-run 报 selector schema 错误，先用 `xdoc schema --mode ops --ops <op>` 或一个最小 patch
 确认当前 xdoc 版本的 selector 形态，再批量生成 patch。
 
 ### 2.2 `{ "name": "..." }` —— 设计师友好

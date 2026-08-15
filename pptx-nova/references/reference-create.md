@@ -506,7 +506,7 @@ node <skill-root>/scripts/pptx-nova-refurbish-audit.mjs \
 - 异构 deck 中的导入模板页、整页 quote/cover、mismatched-canvas 页面和复杂图示页，不应机械套用普通
   header/rule。`chrome-apply` 后要检查目标 chrome 是否压住源内容；必要时按页删除或移动目标 chrome，
   或扩展 DeckKit 页型。
-- 对 xdoc op 或 selector schema 不确定时，先用 `xdoc schema --op <op>` 和一页最小 dry-run smoke
+- 对 xdoc op 或 selector schema 不确定时，先用 `xdoc schema --mode ops --ops <op>` 和一页最小 dry-run smoke
   验证。若主题级 op 在当前版本不稳定，优先对新增 textbox 使用显式 `set-run` 字体和颜色。
 
 对象保留但版式重排的推荐策略：

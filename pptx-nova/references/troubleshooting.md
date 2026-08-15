@@ -190,7 +190,7 @@ unzip -p out.pptx 'ppt/charts/chart1.xml' |
 | `invalid_json`                                          | patch / recipe 不是合法 JSON                                                          | 修 JSON 语法后重发                                                       |
 | `invalid_argument`                                      | 字段缺失、形状/取值错、资产路径读不到                                                 | 按 `path` / `expected` / `actual` 改字段                                 |
 | `invalid_arguments`                                     | CLI 调用缺参数                                                                        | 按帮助补齐命令行                                                         |
-| `unsupported_feature`                                   | 用了不支持的 op / schemaVersion                                                       | `xdoc schema --ops <name>` 查能力，找替代                                |
+| `unsupported_feature`                                   | 用了不支持的 op / schemaVersion                                                       | `xdoc schema --mode ops --ops <name>` 查能力，找替代                     |
 | `invalid_operation`                                     | patch 合法但当前 deck 应用不了（selector 匹配 0 或 >1 个、layout 找不到、维度冲突等） | 看 message / `candidates[]` / `suggestions[].fixPatch` 修正目标          |
 | `invalid_package` / `invalid_xml`                       | 输入包结构或 OOXML 解析失败                                                           | 换来源文件或先修复                                                       |
 | `missing_part` / `missing_relationship`                 | 输入包缺 part / relationship                                                          | 用 repair-relationships 或换文件                                         |
@@ -423,7 +423,7 @@ xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.j
 
 在已有的 dry-run 报告基础上追加 `explanations[]`：每个 op 的 `summary`（一句话）、
 `schema.requiredFields` / `optionalFields` / `fieldNotes` 直接告诉你"这个 op
-还少什么"，比单独 `xdoc schema --op <name>` 更精准 —— 只覆盖**当前 patch 里
+还少什么"，比单独 `xdoc schema --mode ops --ops <name>` 更精准 —— 只覆盖**当前 patch 里
 真用到**的 op。详见 `references/schema-discovery.md` 末尾。
 
 ### 拆 patch 二分

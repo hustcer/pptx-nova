@@ -8,7 +8,7 @@
 动画能力变化较快，先用运行时 schema 和 dry-run 证据，不靠记忆：
 
 ```bash
-xdoc schema --op set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
+xdoc schema --mode ops --ops set-slide-animations --minimal > <run-dir>/schema-set-slide-animations.json
 ```
 
 当前运行时 schema 暴露的安全子集包括：
@@ -247,7 +247,7 @@ dry-run 重点看：
 先从当前运行时确认 Morph 契约，不能仅凭 xdoc 版本号推断：
 
 ```bash
-xdoc schema --op set-slide-transition --minimal > <run-dir>/schema-set-slide-transition.json
+xdoc schema --mode ops --ops set-slide-transition --minimal > <run-dir>/schema-set-slide-transition.json
 xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect-before.json
 ```
 

@@ -65,7 +65,7 @@ single boolean:
 | `reserved`      | A future document kind or feature is named but not shipped.   | Treat it as unavailable.                                |
 | `undisclosed`   | This schema projection did not reveal the capability.         | Probe the full runtime schema before deciding.          |
 
-Use `xdoc schema --index` for a compact operation index and the full
+Use `xdoc schema --mode index` for a compact operation index and the full
 `xdoc schema` response for capability notes, report ids, limits, and examples.
 The index is a projection; a missing entry is not proof of unsupported status.
 
@@ -194,7 +194,7 @@ Before assigning a downloaded binary to an Agent, verify:
 ```bash
 xdoc --version
 xdoc schema > runtime-schema.json
-xdoc schema --index > runtime-index.json
+xdoc schema --mode index > runtime-index.json
 jq -e '.schemaVersion == "cli-agent/v1"' runtime-schema.json
 ```
 

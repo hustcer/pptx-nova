@@ -1,7 +1,7 @@
 # 图表（Chart）创建与编辑
 
 当前 `add-chart` schema 发布 **27 种 chart kind**，每种支持若干 variant。把
-`xdoc schema --op add-chart` 当作当前可写契约；操作名存在不等于内置 PDF/Viewer
+`xdoc schema --mode ops --ops add-chart` 当作当前可写契约；操作名存在不等于内置 PDF/Viewer
 拥有 PowerPoint 渲染等价性，尤其是 3D 和 ChartEx。
 
 ## 专项语义验证

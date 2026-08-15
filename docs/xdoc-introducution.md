@@ -325,11 +325,11 @@ An agent should not need to guess field names, enum spellings, selector shapes,
 or report formats. The schema command exposes the contract progressively:
 
 ```bash
-xdoc schema --index
-xdoc schema --op add-text-box
-xdoc schema --ops add-shape,add-table --minimal
-xdoc schema --op set-shape --fields name,shape,slide --defs summary
-xdoc schema --examples
+xdoc schema --mode index
+xdoc schema --mode ops --ops add-text-box
+xdoc schema --mode ops --ops add-shape,add-table --minimal
+xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary
+xdoc schema --mode examples
 ```
 
 The index is intentionally small. An agent can request the complete definition
@@ -341,7 +341,7 @@ discovery output as the field definitions.
 
 Cache the complete `xdoc schema` response for CLI discovery. In v0.3.5,
 `discovery.commands` is summary metadata (it omits `html2md`), while
-`xdoc schema --index` is specifically a patch-operation index rather than a
+`xdoc schema --mode index` is specifically a patch-operation index rather than a
 complete CLI inventory. Neither surface should be treated as an exhaustive
 replacement for the full `.commands` map or command help. The PDF command has
 one additional discovery exception documented in the PDF section below.
@@ -514,7 +514,7 @@ binary that will execute the job.
 
 ```bash
 xdoc --version
-xdoc schema --index
+xdoc schema --mode index
 xdoc schema > runtime-schema.json
 ```
 
@@ -786,7 +786,7 @@ operations:
 `slide` in patch operations is zero-based. This differs from the 1-based
 `--slides` selectors used by most CLI inspection and conversion commands.
 Lengths can be numeric or unit-bearing strings such as `in`, `cm`, `mm`, `pt`,
-`px`, or `emu`; ask `xdoc schema --op OP_NAME` for the exact field contract.
+`px`, or `emu`; ask `xdoc schema --mode ops --ops OP_NAME` for the exact field contract.
 
 ### Operation families
 
@@ -916,14 +916,14 @@ their own supported, partial, preserve-only, or unsupported status.
 
 Use the smallest disclosure that answers the next question:
 
-1. `xdoc schema --index` — discover operation names and one-line summaries.
-2. `xdoc schema --op add-text-box --minimal` — inspect one operation.
+1. `xdoc schema --mode index` — discover operation names and one-line summaries.
+2. `xdoc schema --mode ops --ops add-text-box --minimal` — inspect one operation.
 3. `--fields` — project only the fields needed for planning.
 4. `--defs summary` — inspect referenced definitions without pulling the full
    transitive closure.
 5. `--defs full` or an unprojected operation — obtain nested selector and field
    definitions before validation.
-6. `xdoc schema --examples` — copy a contract-tested patch pattern.
+6. `xdoc schema --mode examples` — copy a contract-tested patch pattern.
 7. `xdoc pptx apply --dry-run --json` — validate the complete operation against
    the actual deck state.
 
@@ -2027,7 +2027,7 @@ claims should stay tied to the measured contract and its declared limitations.
 13. The v0.3.5 PDF discovery map omits the executable `pdf render` action even
     though CLI help and schema examples expose it. Integrations should pin the
     build and retain this exception until the discovery contract is corrected.
-14. `discovery.commands`, `schema --index`, capability `enabled` status, and
+14. `discovery.commands`, `schema --mode index`, capability `enabled` status, and
     command `ioContract` fields are useful but not exhaustive or live host
     readiness proofs. Cache the full schema and run representative probes.
 15. The runtime daemon status id is `xdoc-daemon-status/v2`; the daemon's
@@ -2051,7 +2051,7 @@ For a reproducible deployment, record at minimum:
 ```bash
 xdoc --version
 xdoc schema > runtime-schema.json
-xdoc schema --index > patch-index.json
+xdoc schema --mode index > patch-index.json
 ```
 
 Then store:

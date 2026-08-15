@@ -202,7 +202,7 @@ whether an operation is implemented, partial, preserve-only, or unsupported.
 High-level recipe inputs can be compiled first:
 
 ```bash
-xdoc pptx recipe --patch recipe.json --compile --json > recipe-report.json
+xdoc pptx recipe --recipe recipe.json --compile --json > recipe-report.json
 ```
 
 Review the ordinary `pptx-patch/v1` patch embedded in the

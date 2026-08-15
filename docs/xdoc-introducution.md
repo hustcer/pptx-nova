@@ -877,7 +877,7 @@ Compile a recipe before applying it when you want the expanded patch as an
 auditable intermediate:
 
 ```bash
-xdoc pptx recipe --patch recipe.json --compile --json
+xdoc pptx recipe --recipe recipe.json --compile --json
 ```
 
 Apply reports expose the resulting `expandedOps` and created object ids.

@@ -103,10 +103,11 @@ shape effects / hyperlinks 等。对照修改最快。
 ### `length`
 
 ```
-number | "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)?$"
+"^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)$"
 ```
 
-裸 number 是 EMU；字符串可以是 `"1in"` / `"2.54cm"` / `"96px"` 等。
+必须带单位后缀的字符串：`"1in"` / `"2.54cm"` / `"96px"` / `"914400emu"` 等；
+裸 number 与无单位字符串会被拒收（EMU 用 `"…emu"` 显式表达）。
 
 ### `color`
 

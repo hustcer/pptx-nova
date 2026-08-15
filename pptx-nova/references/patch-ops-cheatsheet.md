@@ -9,8 +9,9 @@ table setter 已全部并入对应的聚合 op
 >
 > 通用：`slide` 字段是 **0-based** 索引；`paragraph` / `run` / `row` / `col` 同样 0-based。
 >
-> 通用：长度字段（`x` / `y` / `w` / `h` / `width` / `height`）接受 number（EMU）
-> 或字符串 `"1in"` / `"2cm"` / `"96px"` / `"72pt"`。**别裸写数字 1 当成 1 英寸**。
+> 通用：长度字段（`x` / `y` / `w` / `h` / `width` / `height`）只接受带单位的
+> 字符串：`"1in"` / `"2cm"` / `"96px"` / `"72pt"` / `"914400emu"`。
+> 裸 number 与无单位字符串会被拒收。
 
 ---
 

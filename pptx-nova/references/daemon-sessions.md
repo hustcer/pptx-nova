@@ -244,12 +244,12 @@ export XDOC_DAEMON_AUTO_SPAWN=0
 
 ```text
 {"jsonrpc":"2.0","id":1,"method":"xdoc.ping","params":{}}
-{"jsonrpc":"2.0","id":2,"method":"xdoc.discover","params":{}}
+{"jsonrpc":"2.0","id":2,"method":"xdoc.capabilities","params":{}}
 {"jsonrpc":"2.0","id":3,"method":"pptx.inspect","params":{"inputPath":"/abs/deck.pptx"}}
 {"jsonrpc":"2.0","id":4,"method":"xdoc.shutdown","params":{}}
 ```
 
-公开方法只有 `xdoc.ping`、`xdoc.discover`、`pptx.inspect`、`pptx.apply` 和
+公开方法只有 `xdoc.ping`、`xdoc.capabilities`、`pptx.inspect`、`pptx.apply` 和
 `xdoc.shutdown`。`pptx.apply` 的 `patch` 是对象；非 dry-run 时必须给
 `outputPath`。mutation 与 shutdown 必须带 request id，发送成 notification 会被
 忽略且不修改 deck。普通 notification 永远没有 response。
@@ -282,15 +282,15 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
 只使用当前 `contract.tools[]` 公开的 tool。已批准的 runtime 当前公开以下三个，细粒度
 操作仍在 `pptx_apply.patch.ops[]` 里：
 
-| tool            | 用途                                                                |
-| --------------- | ------------------------------------------------------------------- |
-| `xdoc_discover` | 渐进获取 patch operation schema（等价 `xdoc schema` 的 disclosure） |
-| `pptx_inspect`  | 只读结构化 report（`pptx-inspect/v1`）                              |
-| `pptx_apply`    | 创建/编辑 deck，支持 `dryRun` 与 `overwrite`                        |
+| tool           | 用途                                                                |
+| -------------- | ------------------------------------------------------------------- |
+| `xdoc_schema`  | 渐进获取 patch operation schema（等价 `xdoc schema` 的 disclosure） |
+| `pptx_inspect` | 只读结构化 report（`pptx-inspect/v1`）                              |
+| `pptx_apply`   | 创建/编辑 deck，支持 `dryRun` 与 `overwrite`                        |
 
 用它时有五条必须记住：
 
-- `xdoc_discover` 默认 `mode=index`（约 21 KB）。`mode=full` 约 1.5 MB、贵约 71 倍，
+- `xdoc_schema` 默认 `mode=index`（约 21 KB）。`mode=full` 约 1.5 MB、贵约 71 倍，
   只在确实需要时请求；通常 `mode=ops` + `ops:[...]` 才是正确选择。
 - **传绝对路径**。相对路径是相对 `xdoc` 子进程的工作目录，不是 client 的。
 - `isError: true` 是**业务失败**，不是 JSON-RPC transport error。完整

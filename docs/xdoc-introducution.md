@@ -1705,7 +1705,7 @@ There is no initialize handshake. Frames are limited to 8 MiB, execute serially
 with backpressure, and stdout is protocol-only; logs and diagnostics use
 stderr.
 
-The methods are `xdoc.ping`, `xdoc.discover`, `pptx.inspect`, `pptx.apply`, and
+The methods are `xdoc.ping`, `xdoc.capabilities`, `pptx.inspect`, `pptx.apply`, and
 `xdoc.shutdown`. `pptx.apply` and shutdown require a request id; sent as
 notifications they are ignored without mutation. Non-dry-run apply requires an
 `outputPath`. Results use `xdoc-json-rpc-result/v1`, preserving the exact
@@ -1714,7 +1714,7 @@ structured report in `value` and declaring binary outputs as artifact refs.
 `progressToken` opts into best-effort begin/end `$/progress` notifications.
 `$/cancelRequest` only suppresses queued work and cannot interrupt the already
 dispatched synchronous method. Batch items are also serial. Retrieve the live
-contract with `xdoc.discover`, then shut down with an id-bearing
+contract with `xdoc.capabilities`, then shut down with an id-bearing
 `xdoc.shutdown` request or close stdin after the active request completes.
 
 Daemon, JSON-RPC, and MCP are adapters over the same business handlers, not new
@@ -1729,7 +1729,7 @@ arguments `["mcp"]`, then read the complete live contract from
 `commands.mcp.protocolContract` rather than inferring behavior from command
 presence.
 
-The verified runtime exposes `xdoc_discover`, `pptx_inspect`, and `pptx_apply`.
+The verified runtime exposes `xdoc_schema`, `pptx_inspect`, and `pptx_apply`.
 It supports the modern `2026-07-28` era and the disclosed 2025 compatibility
 eras; one connection serves one era and no 2024 revision is negotiated. Result
 envelopes use `xdoc-mcp-tool-result/v1`. A business failure is returned with

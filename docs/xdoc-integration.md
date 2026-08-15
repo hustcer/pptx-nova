@@ -429,7 +429,7 @@ Launch `xdoc json-rpc` and keep the child process alive. The published
 frame per line, an 8 MiB frame limit, serial execution, and protocol-only
 stdout; diagnostics belong to stderr. No initialize handshake is required.
 
-The methods are `xdoc.ping`, `xdoc.discover`, `pptx.inspect`, `pptx.apply`, and
+The methods are `xdoc.ping`, `xdoc.capabilities`, `pptx.inspect`, `pptx.apply`, and
 `xdoc.shutdown`. Mutation and shutdown require a request id; sending them as a
 notification is ignored without mutation. `pptx.apply` requires a patch object
 and, unless `dryRun` is true, `outputPath`. Results use
@@ -439,7 +439,7 @@ Hosts may opt into begin/end `$/progress` notifications with `progressToken`.
 `$/cancelRequest` is queued cooperative cancellation only: it can suppress a
 request not yet dispatched, but cannot interrupt the current synchronous
 method. Batches execute serially. Send `xdoc.shutdown` with an id or close stdin
-after the active request; never mix logs into stdout. Use `xdoc.discover` to
+after the active request; never mix logs into stdout. Use `xdoc.capabilities` to
 retrieve the exact protocol contract from the running process.
 
 ### MCP over stdio
@@ -447,7 +447,7 @@ retrieve the exact protocol contract from the running process.
 Configure an MCP client with command `xdoc` and arguments `["mcp"]`. Before
 enabling the adapter, read the full `commands.mcp.protocolContract` disclosure
 and recognize its `xdoc-mcp-contract/v1` schema; command presence alone is not a
-protocol contract. The verified runtime currently exposes `xdoc_discover`,
+protocol contract. The verified runtime currently exposes `xdoc_schema`,
 `pptx_inspect`, and `pptx_apply`.
 
 Use an MCP SDK for protocol negotiation when possible. A custom host must obey

@@ -1279,12 +1279,12 @@ silently becoming empty presentation content. The patch-level `foreach`, `if`,
 and `try` operations provide a separate, schema-defined control-flow layer for
 choosing operations; neither layer executes arbitrary host code.
 
-### `from-data`
+### `template-fill`
 
 For a template-driven workflow, use:
 
 ```bash
-xdoc pptx from-data data.json --template template.pptx --bindings bindings.json --output generated.pptx
+xdoc pptx template-fill data.json --template template.pptx --bindings bindings.json --output generated.pptx
 ```
 
 The command is a convenience wrapper around the same guarded binding primitives;
@@ -1848,7 +1848,7 @@ not a cross-machine latency SLA.
 
 | Family                   | Actions                                                                                             |
 | ------------------------ | --------------------------------------------------------------------------------------------------- |
-| Creation and mutation    | `new`, `apply`, `recipe`, `from-data`                                                               |
+| Creation and mutation    | `new`, `apply`, `recipe`, `template-fill`                                                           |
 | Discovery                | `inspect`, `select`, `catalog`, `list-themes`, `extract-style`                                      |
 | Rendering and comparison | `preview`, `vision-check`, `diff`, `vision-diff`, `contact-diff`                                    |
 | Translation              | `i18n-scan`, `i18n-plan`, `i18n-text-plan`, `i18n-style-diff`, `replace-text`, `replace-chart-text` |

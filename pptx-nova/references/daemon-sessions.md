@@ -67,7 +67,7 @@ xdoc pptx apply -p patch.json -i deck.pptx -o deck.pptx --daemon-strict --overwr
 ```
 
 ⚠️ **`--daemon` 只对 `pptx apply` / `pptx inspect` 生效**。`pptx chrome-detect` /
-`pptx chrome-remove` / `pptx chrome-apply` / `pptx remap-theme` / `pptx from-data` /
+`pptx chrome-remove` / `pptx chrome-apply` / `pptx remap-theme` / `pptx template-fill` /
 `pptx check-brand` / `pptx new` / `pptx catalog` / `pptx recipe` /
 `pptx replay|audit|rollback` 都**不接受** `--daemon`（解析阶段会报
 `xdoc pptx --daemon is only valid with apply or inspect`）。
@@ -178,10 +178,10 @@ xdoc daemon stop
 ### 6.2 批量场景：同一模板上反复 apply / inspect
 
 ```bash
-# 注意：from-data 不接 --daemon。批量数据驱动场景仍是一次性进程
+# 注意：template-fill 不接 --daemon。批量数据驱动场景仍是一次性进程
 for data in data/*.json; do
   out="dist/$(basename $data .json).pptx"
-  xdoc pptx from-data $data --template template.pptx -o $out --overwrite
+  xdoc pptx template-fill $data --template template.pptx -o $out --overwrite
 done
 
 # 但如果你的批量是"反复改同一个 deck"，daemon 收益巨大：
@@ -225,7 +225,7 @@ export XDOC_DAEMON_AUTO_SPAWN=0
   加速）
 - **不要在 daemon 模式下手动覆写 `<out>.xdoc.json`** — sidecar 由 apply 路径自己
   写；手动改会让 rollback 失败
-- **不要给 `from-data` / `check-brand` / `apply-brand` / `copy-from` /
+- **不要给 `template-fill` / `check-brand` / `apply-brand` / `copy-from` /
   `extract-style` / `import-template` / `new` / `catalog` / `recipe` /
   `replay` / `audit` / `rollback` 加 `--daemon`** —
   解析阶段会拒绝

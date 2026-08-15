@@ -109,7 +109,7 @@
 
 - 用单个 foreach 生成 4-across KPI 卡(代替手写 4 份重复的 add-shape/add-text-box)
 - 时间线节点 / 议程编号卡 / 章节扉页批量化
-- 把 CSV / JSON 数据源转成 deck 内容,**不必落地一个 template.pptx**(对比 `from-data`)
+- 把 CSV / JSON 数据源转成 deck 内容,**不必落地一个 template.pptx**(对比 `template-fill`)
 
 > ⚠️ `foreach` 仍然不能脱离 patch op 自身的字段约束 — `add-text-box` 必须有
 > `slide` / `x` / `y` / `w` / `h`,变量替换只是文本插值。复杂坐标计算应该用
@@ -322,14 +322,14 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
 - **不要用来做** recipe / patch op 已经覆盖的事(字体颜色、对齐、placeholder 等);
   那等于自废 schema 校验、走老路。
 
-## §7 与 `bind-data` / `from-data` 的关系
+## §7 与 `bind-data` / `template-fill` 的关系
 
-| 路线         | 模板需要存在?        | 数据源                | 适合场景                                    |
-| ------------ | -------------------- | --------------------- | ------------------------------------------- |
-| `from-data`  | ✅ `.pptx` 文件      | JSON / 命令行         | 同一份品牌模板 + 多份数据反复出 deck        |
-| `bind-data`  | ❌ 在同一 patch 创建 | 内联 / 外部 JSON      | 一次性 deck,数据与样板同源                  |
-| `foreach` op | ❌                   | patch 内 `items` 字段 | 单页内重复结构(KPI 卡 / 议程项 / 行)        |
-| `if` op      | ❌                   | 输入 deck 状态        | 同一份 patch 在"新建"和"修改"两种入口下复用 |
+| 路线            | 模板需要存在?        | 数据源                | 适合场景                                    |
+| --------------- | -------------------- | --------------------- | ------------------------------------------- |
+| `template-fill` | ✅ `.pptx` 文件      | JSON / 命令行         | 同一份品牌模板 + 多份数据反复出 deck        |
+| `bind-data`     | ❌ 在同一 patch 创建 | 内联 / 外部 JSON      | 一次性 deck,数据与样板同源                  |
+| `foreach` op    | ❌                   | patch 内 `items` 字段 | 单页内重复结构(KPI 卡 / 议程项 / 行)        |
+| `if` op         | ❌                   | 输入 deck 状态        | 同一份 patch 在"新建"和"修改"两种入口下复用 |
 
 **配方**:中大型 deck 推荐 JS 生成器 + `foreach` 混用 — 生成器算 items 数组 +
 统一坐标,foreach 展开重复结构,patch 体积小、可维护性高。

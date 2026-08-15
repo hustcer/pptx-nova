@@ -11,7 +11,7 @@ const REUSE_MODES = new Set([
   'duplicate-slide',
   'copy-slide',
   'copy-from',
-  'from-data',
+  'template-fill',
   'fill-template',
   'fill-placeholder',
   'preserve',

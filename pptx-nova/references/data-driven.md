@@ -1,4 +1,4 @@
-# 数据驱动 Deck —— from-data + bind-data
+# 数据驱动 Deck —— template-fill + bind-data
 
 数据驱动场景的核心思路：**模板与数据分离**。Deck 里写占位符 `{{path}}`，数据塞在
 JSON 里，xdoc 渲染时把占位符替换成真值。
@@ -13,7 +13,7 @@ JSON 里，xdoc 渲染时把占位符替换成真值。
 ## 两条路径
 
 ```
-路径 1：from-data (有模板文件)
+路径 1：template-fill (有模板文件)
   template.pptx  +  data.json  +  bindings.json
         │              │              │
         └──────────────┴──────────────┘
@@ -27,7 +27,7 @@ JSON 里，xdoc 渲染时把占位符替换成真值。
   out.pptx
 ```
 
-## 路径 1：`from-data`（推荐：模板复用率高）
+## 路径 1：`template-fill`（推荐：模板复用率高）
 
 ### 1.1 准备模板
 
@@ -111,7 +111,7 @@ KPI 变化:   "{{kpi.revenue.delta}}"
 ### 1.4 执行
 
 ```bash
-xdoc pptx from-data data.json \
+xdoc pptx template-fill data.json \
      --template template.pptx \
      --bindings bindings.json \
      -o out.pptx
@@ -272,7 +272,7 @@ B - $20
 
 ## 检验 binding 结果
 
-写完 `from-data` / `bind-data` patch 后：
+写完 `template-fill` / `bind-data` patch 后：
 
 ```bash
 xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | jq '.opResults[] | select(.op == "bind-data")'
@@ -290,23 +290,23 @@ xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | jq '.opResults[] | 
 | Chart 数据全是 0                   | binding path 错或 chart 模板未绑定 | 检查 bindings.json 的 path 与 chart name |
 | 中文乱码                           | data.json 不是 UTF-8               | 转 UTF-8                                 |
 
-## from-data vs bind-data 选哪个
+## template-fill vs bind-data 选哪个
 
-| 场景                                         | 选                                                              |
-| -------------------------------------------- | --------------------------------------------------------------- |
-| 模板会复用 N 次（每月报告等）                | `from-data`                                                     |
-| 一次性生成 deck，模板 / 数据都在 patch 里    | `bind-data`                                                     |
-| 模板由设计师在 PowerPoint 里维护             | `from-data`                                                     |
-| 模板需要程序化生成（每个 AI 请求都不同布局） | `bind-data`                                                     |
-| 数据量大 / 来源是外部 JSON 文件              | 都行，建议 `from-data` 或 `bind-data + source.assetSource.path` |
+| 场景                                         | 选                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| 模板会复用 N 次（每月报告等）                | `template-fill`                                                     |
+| 一次性生成 deck，模板 / 数据都在 patch 里    | `bind-data`                                                         |
+| 模板由设计师在 PowerPoint 里维护             | `template-fill`                                                     |
+| 模板需要程序化生成（每个 AI 请求都不同布局） | `bind-data`                                                         |
+| 数据量大 / 来源是外部 JSON 文件              | 都行，建议 `template-fill` 或 `bind-data + source.assetSource.path` |
 
 ## 不要做的事
 
 - ❌ 不要把 `{{path}}` 写在 shape `name` 字段里 — 只支持文本内容
 - ❌ 不要在 binding `data` 字段里写裸字符串（如 `"rows"`）— 必须 `"{{rows}}"`
-- ❌ 不要假设 `from-data` 会创建新页 — 它只填充模板里已有的 placeholder / shape
+- ❌ 不要假设 `template-fill` 会创建新页 — 它只填充模板里已有的 placeholder / shape
 - ❌ 不要忘了 chart data 类型要匹配（column/line 用 `{categories, series}`，scatter 用 `{points}`）
-- ❌ 不要用新增 overlay 文本框遮住模板占位符来完成填充；`from-data` 应填充模板已有 placeholder /
+- ❌ 不要用新增 overlay 文本框遮住模板占位符来完成填充；`template-fill` 应填充模板已有 placeholder /
   shape，无法填充时先修模板或改走 Template Following。
 - ❌ 不要忽略空 placeholder。模板中未绑定的 title/body/date/footer/slide-number 占位符必须填充、
   删除或在交付摘要中列为阻塞风险。

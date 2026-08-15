@@ -8,7 +8,7 @@
 | 用户意图                          | 路线                                           |
 | --------------------------------- | ---------------------------------------------- |
 | "严格套这个模板/保留原版式改内容" | Template Following，见 `template-following.md` |
-| "按占位符填数据"                  | `from-data`，见 `data-driven.md`               |
+| "按占位符填数据"                  | `template-fill`，见 `data-driven.md`           |
 | "风格像这份 PPT，内容按新大纲"    | `extract-style` + 新建 deck                    |
 | "结构/版式也参考这份 PPT"         | `inspect` + `reference-map.json`               |
 | "美化/翻新这份 PPT，内容不变"     | Refurbish Existing Deck，见本文件第 6 节       |
@@ -93,7 +93,7 @@ xdoc pptx extract-style reference.pptx --output reference-style.json --json
 - `layout`：复用版式结构和对象关系，用新内容重建。
 - `copy-slide`：用 `copy-from` 复制整页骨架后替换内容；只在参考页结构很难重建、且不是严格模板跟随
   的普通 Reference Create 中使用。严格模板跟随改走 `template-following.md`。
-- `template`：已有占位符模板，改走 `from-data`。
+- `template`：已有占位符模板，改走 `template-fill`。
 
 如果用户同时给了精确 brand/layout/deck catalog id 或显式模板路径，先按
 `template-library.md` 的段级融合规则写入 `deck_lock.json.templateFusion`：

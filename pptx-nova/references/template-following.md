@@ -13,7 +13,7 @@ inherited objects, not rebuild a similar-looking deck from blank slides.
   most attractive slides.
 - Every output slide must map to a source slide, an existing template
   placeholder slide, or an explicit allowed insertion.
-- Prefer `duplicate-slide`, `copy-from`, `from-data`, or edits to copied source
+- Prefer `duplicate-slide`, `copy-from`, `template-fill`, or edits to copied source
   objects. Do not rebuild mapped slides with fresh coordinates just because the
   visual style looks easy.
 - Preserve source typography, spacing, alignment, crop, brand chrome, footers,

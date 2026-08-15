@@ -68,7 +68,7 @@
       "id": 10,
       "name": "data-driven-region-table",
       "prompt": "我有一份各区域销售额的 JSON 数组，需要套进模板生成一页表格 deck：用 {{#each}} 把每个区域渲染成表格的一行，表头是 区域 / Q3 销售额 / 同比。数据：[{\"region\":\"华东\",\"q3\":\"¥4.2M\",\"yoy\":\"+15%\"},{\"region\":\"华南\",\"q3\":\"¥3.1M\",\"yoy\":\"+9%\"},{\"region\":\"华北\",\"q3\":\"¥2.8M\",\"yoy\":\"+22%\"},{\"region\":\"西部\",\"q3\":\"¥1.5M\",\"yoy\":\"+31%\"}]。输出到 ~/Downloads/sales-by-region.pptx。",
-      "expected_output": "用 from-data + bind-data（含 {{#each}} 循环）把 JSON 数组绑定成表格行（不手抄数字），表头与四行区域数据正确；deck 原生可编辑。",
+      "expected_output": "用 template-fill + bind-data（含 {{#each}} 循环）把 JSON 数组绑定成表格行（不手抄数字），表头与四行区域数据正确；deck 原生可编辑。",
       "files": []
     },
     {

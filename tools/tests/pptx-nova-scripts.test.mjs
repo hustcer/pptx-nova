@@ -3618,7 +3618,6 @@ if (args[0] === 'schema') {
     status: 'success',
     agentGate: { semanticStatus: 'pass' },
     summary: { reliableChanges: 0, uncertainChanges: 0, unsupportedRegions: 0 },
-    changeRollup: { reliable: { count: 0 } },
     slides: []
   })
 } else if (args[0] === 'pptx' && args[1] === 'contact-diff') {
@@ -4433,7 +4432,6 @@ if (args[0] === 'schema') {
     status: 'success',
     agentGate: { semanticStatus: 'pass' },
     summary: { reliableChanges: 0, uncertainChanges: 0, unsupportedRegions: 0 },
-    changeRollup: { reliable: { count: 0 } },
     slides: []
   })
 } else if (args[0] === 'pptx' && args[1] === 'contact-diff') {

@@ -128,7 +128,6 @@ function buildInput({
     status: 'success',
     agentGate: { semanticStatus: 'pass' },
     summary: { reliableChanges: 0, uncertainChanges: 0, unsupportedRegions: 0 },
-    changeRollup: { reliable: { count: 0 } },
     slides: [],
   }
   const input = {

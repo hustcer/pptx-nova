@@ -281,10 +281,10 @@ internal decks, but still a cross-machine consistency risk for strict external
 delivery. Non-system `font_not_embedded` warnings should be fixed by embedding
 the font or switching to an approved system/DeckKit font.
 
-### Accessibility is opt-in
+### Accessibility is outside the default list
 
-`a11y` is deliberately excluded from both the default check set and
-`--checks all`. Name it explicitly:
+`a11y` is deliberately excluded from the default check set, but `--checks all`
+does include it. Name it explicitly:
 
 ```bash
 xdoc check deck.pptx \

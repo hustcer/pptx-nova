@@ -316,8 +316,9 @@ Static geometry checks do not prove rendered pixels. A human or visual-review
 worker must inspect the contact sheet for clipping, contrast, overlap, broken
 chart labels, and unintended layout drift.
 
-Accessibility checks are opt-in and are not included in `--checks all`. When
-the job requires them, add `a11y` explicitly and gate on
+Accessibility checks are outside the default `--checks` list, though
+`--checks all` does include them. When the job requires them, ask for `a11y`
+or `all` explicitly and gate on
 `checks.a11y.status` plus `summary.riskLevel`, not the exit code. A completed
 scan exits 0 even with findings; `inconclusive` is review-required, not a pass.
 An a11y `patchTemplate` contains placeholder text and is never auto-applicable.
@@ -517,8 +518,8 @@ actually changed.
 - [ ] Run structural, semantic, rendered, and human visual gates.
 - [ ] Fail closed on unknown report versions and stale input ownership.
 - [ ] Keep asset roots, daemon state, fonts, and license policy explicit.
-- [ ] Run `a11y` explicitly when accessibility is in scope; never infer it from
-      `--checks all` or process exit 0.
+- [ ] Ask for `a11y` (or `all`) when accessibility is in scope; the default
+      `--checks` list omits it, and process exit 0 never proves it ran.
 
 ## Related documentation
 

@@ -583,9 +583,10 @@ xdoc check deck.pptx --checks fonts,links,compat,assets,policy --pretty --output
 ```
 
 The check registry covers fonts, links, compatibility, assets, policy, and the
-opt-in accessibility check. `--checks all` still expands only to
-`fonts,links,compat,assets,policy`; request accessibility explicitly with
-`--checks a11y` or append `a11y` to that list. Compatibility checks can target a selected release family with
+accessibility check. The declared `--checks` default is the explicit list
+`fonts,links,compat,assets,policy`; `--checks all` means every check, a11y
+included, so accessibility arrives either by naming `a11y` or by asking for
+`all`. Compatibility checks can target a selected release family with
 `--target-office`; the flag name is retained for contract compatibility. The
 `preflight/v1` report records `passed`, `warning`, or `failed` status, severity
 counts, the checks requested/executed/unsupported, and an overall risk level.

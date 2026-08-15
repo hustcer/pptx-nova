@@ -343,7 +343,7 @@ function normalizeContract(draft, args) {
     required: true,
     allowed: EVIDENCE_KINDS,
   })
-  if (operationKind === 'copy-from' && !requiredEvidence.includes('copy-size-gate')) {
+  if (operationKind === 'slide-copy' && !requiredEvidence.includes('copy-size-gate')) {
     requiredEvidence.push('copy-size-gate')
   }
   if (targets.some((target) => target.expected?.alreadyCompliant === true)) {

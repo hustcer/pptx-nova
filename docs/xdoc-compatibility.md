@@ -83,7 +83,7 @@ Index bases are intentionally different at the CLI boundary:
 | ---------------------------------------------------------------- | ---------- |
 | Patch `slide` fields                                             | 0-based    |
 | `select` query `slideIndex`                                      | 0-based    |
-| `copy-from --slide`                                              | 0-based    |
+| `slide-copy --slide`                                             | 0-based    |
 | `--slides` on conversion, preview, checks, and most PPTX actions | 1-based    |
 
 Resolve an existing object with `inspect` or `select` before constructing a

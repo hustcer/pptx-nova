@@ -41,7 +41,7 @@ process.stdout.write(JSON.stringify({
 `,
   )
   writeJson(copyReport, {
-    schemaVersion: 'pptx-copy-from/v2',
+    schemaVersion: 'pptx-slide-copy/v1',
     status: 'success',
     outcome: 'passed',
     transaction: {
@@ -118,7 +118,7 @@ test('copy size gate passes current same-size inputs', () => {
 
   assert.equal(report.status, 'pass')
   assert.equal(report.agentGate.passed, true)
-  assert.equal(report.agentGate.nextAction, 'continue-copy-from')
+  assert.equal(report.agentGate.nextAction, 'continue-slide-copy')
   assert.equal(report.slideSizeComparison.matches, true)
   assert.equal(report.copyReport.templateStrategy, 'register-source')
   assert.equal(report.copyReport.slideSizeStrategy, 'require-match')
@@ -140,7 +140,7 @@ test('copy size gate rejects a dry-run report bound to stale donor bytes', () =>
   const report = runGate(fixture({ stale: true }), 3)
 
   assert.equal(report.status, 'fail')
-  assert.equal(report.agentGate.nextAction, 'refresh-copy-from-preflight')
+  assert.equal(report.agentGate.nextAction, 'refresh-slide-copy-preflight')
   assert.equal(
     report.agentGate.failures.some((failure) => failure.code === 'donor-file-sha256-mismatch'),
     true,

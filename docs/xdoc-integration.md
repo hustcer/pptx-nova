@@ -142,7 +142,7 @@ The index bases are intentionally explicit:
 | `--slides` on conversion, preview, checks, and most PPTX actions | 1-based    |
 | Patch `slide` fields                                             | 0-based    |
 | `select` query `slideIndex`                                      | 0-based    |
-| `copy-from --slide`                                              | 0-based    |
+| `slide-copy --slide`                                             | 0-based    |
 | PDF page selectors                                               | 1-based    |
 
 Ask the current schema when a new command introduces another selector. Do not
@@ -228,11 +228,11 @@ modified by the dry-run. If the report contains an unsupported operation,
 selector ambiguity, or a policy error, repair the plan and run the dry-run
 again. Do not turn a partial operation list into a successful job.
 
-For cross-deck whole-slide reuse, `copy-from` is a separate structural command,
+For cross-deck whole-slide reuse, `slide-copy` is a separate structural command,
 not a patch op:
 
 ```bash
-xdoc pptx copy-from \
+xdoc pptx slide-copy \
   --input target.pptx \
   --from donor.pptx \
   --slides 1,3 \
@@ -241,7 +241,7 @@ xdoc pptx copy-from \
 ```
 
 The executable currently requires `--input`/`-i` for the target deck. Its
-`pptx-copy-from/v2` dry-run is a read-only execution plan rather than
+`pptx-slide-copy/v1` dry-run is a read-only execution plan rather than
 `pptx-dry-run/v1`: require `status: "ready"`, `preflight.readOnly: true`, current
 target/donor SHA-256 fingerprints, and no `preflight.blockers`. Review
 `preflight.risks`, planned parts/relationships, and dependency reuse before

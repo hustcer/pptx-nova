@@ -183,12 +183,12 @@ template rules, brand/style changes, or full visual QA.
   `alignment` at the op top level.
 - Theme/font changes: `set-theme` (`colors` / `fonts`), or brand helpers.
 - Slide duplication: `duplicate-slide`.
-- Cross-deck whole-slide copy: `xdoc pptx copy-from -i target.pptx`. Use `--slide N` for the
+- Cross-deck whole-slide copy: `xdoc pptx slide-copy -i target.pptx`. Use `--slide N` for the
   compatible 0-based single slide, `--slides 1,3,5-8` for a 1-based selector,
   or `--all`; the selectors are mutually exclusive. Default to
   `--template-strategy register-source --size-strategy require-match`; use
   `rebind-target` only as an explicit target-inheritance decision. Copy multiple
-  slides in one transaction and retain the native `pptx-copy-from/v2` report
+  slides in one transaction and retain the native `pptx-slide-copy/v1` report
   for the structural Edit Contract. Require its read-only `ready` preflight,
   current target/donor fingerprints, explicit strategies, reviewed
   `templates[]` outcomes, and no blockers instead of creating intermediate

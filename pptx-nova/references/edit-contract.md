@@ -130,17 +130,17 @@ shape name declared by `session-operation.json`. Their
 `expected.sessionRulePostconditions[]` are limited to machine-verifiable
 `font-color` and `fill-color` values.
 
-### Native `copy-from` structural evidence
+### Native `slide-copy` structural evidence
 
-`xdoc pptx copy-from` is a first-class structural command, not a patch op. Its
-dry-run/apply report is `pptx-copy-from/v2` and intentionally has no
+`xdoc pptx slide-copy` is a first-class structural command, not a patch op. Its
+dry-run/apply report is `pptx-slide-copy/v1` and intentionally has no
 `opResults[]`. Never fabricate a `pptx-dry-run/v1` wrapper merely to satisfy the
 Edit Contract.
 
 For multiple donor slides, prefer one transactional command:
 
 ```bash
-xdoc pptx copy-from -i target.pptx --source donor.pptx \
+xdoc pptx slide-copy -i target.pptx --source donor.pptx \
   --slides 1,3 \
   --template-strategy register-source --size-strategy require-match \
   --output <run-dir>/candidate.pptx \
@@ -180,7 +180,7 @@ node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
 ```
 
 The normalizer automatically adds `copy-size-gate` to `requiredEvidence` for
-`operationKind: "copy-from"`. The final gate requires its SHA-bound report and
+`operationKind: "slide-copy"`. The final gate requires its SHA-bound report and
 rejects mismatched dimensions with
 `nextAction: "choose-explicit-slide-size-strategy"` for compatibility. Native
 xdoc now declares `require-match` and blocks the same mismatch in core
@@ -193,7 +193,7 @@ Bind each produced slide target to its donor identity:
 ```json
 {
   "scope": "structural",
-  "operationKind": "copy-from",
+  "operationKind": "slide-copy",
   "targets": [
     {
       "id": "copied-donor-slide-1",
@@ -237,14 +237,14 @@ into synthetic patch operations.
 
 Choose the smallest policy that can prove the requested edit:
 
-| Edit kind                          | Required evidence                                                                                                                                          |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Notes/core metadata only           | `dry-run`, `semantic-diff`                                                                                                                                 |
-| Visible single-object text         | `dry-run`, `semantic-diff`, `style-diff`, `png-preview`, `vision-diff`                                                                                     |
-| Visible multi-target/batch text    | Same as visible text, covering every target slide                                                                                                          |
-| Single-object fill/line/font style | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`                                                                                                   |
-| Geometry/image/layout              | Above plus `final-inspect`; add `structure-check` when package risk warrants it                                                                            |
-| Structural edit                    | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`, `final-inspect`, and normal structural audits; native `copy-from` also requires `copy-size-gate` |
+| Edit kind                          | Required evidence                                                                                                                                           |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Notes/core metadata only           | `dry-run`, `semantic-diff`                                                                                                                                  |
+| Visible single-object text         | `dry-run`, `semantic-diff`, `style-diff`, `png-preview`, `vision-diff`                                                                                      |
+| Visible multi-target/batch text    | Same as visible text, covering every target slide                                                                                                           |
+| Single-object fill/line/font style | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`                                                                                                    |
+| Geometry/image/layout              | Above plus `final-inspect`; add `structure-check` when package risk warrants it                                                                             |
+| Structural edit                    | `dry-run`, `semantic-diff`, `png-preview`, `vision-diff`, `final-inspect`, and normal structural audits; native `slide-copy` also requires `copy-size-gate` |
 
 For text-only edits that must preserve formatting, include
 `preserve: ["target-text-style"]` and require `style-diff`:
@@ -329,14 +329,14 @@ The gate checks:
 - the evidence manifest binds current candidate bytes and every post-apply
   report hash; mtime freshness is a supplemental stale-candidate signal;
 - every required patch target owns successful dry-run `opResults[]`, or every
-  native `copy-from` slide target owns a complete, fingerprint-current
-  `pptx-copy-from/v2`
+  native `slide-copy` slide target owns a complete, fingerprint-current
+  `pptx-slide-copy/v1`
   slide/relationship/dependency mapping;
-- native `copy-from` has a passing, target/donor file-bound
+- native `slide-copy` has a passing, target/donor file-bound
   `pptx-nova-copy-size-gate/v1` report with identical slide dimensions;
 - every dry-run op index is owned by a contract target;
 - patch dry-run `resolvedSelectors[]` and semantic targets match the contract;
-  native `copy-from` evidence instead matches the declared donor and produced
+  native `slide-copy` evidence instead matches the declared donor and produced
   slide identities without inventing selectors;
 - semantic diff source text still matches declared `beforeText` and the final
   candidate matches declared `afterText` when those guards are present;
@@ -368,7 +368,7 @@ Read `edit-contract-gate.json.agentGate` first:
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `refresh-inspect`                       | Source hash changed or source is missing; rebuild target evidence and contract                        |
 | `run-copy-size-gate`                    | Native copy evidence lacks the required page-size gate; run it before apply                           |
-| `refresh-copy-from-preflight`           | Copy preflight or size evidence is stale; regenerate both from current target/donor files             |
+| `refresh-slide-copy-preflight`          | Copy preflight or size evidence is stale; regenerate both from current target/donor files             |
 | `choose-explicit-slide-size-strategy`   | Donor/target dimensions differ; stop until an explicit runtime strategy exists or target size changes |
 | `regenerate-current-candidate-evidence` | A report belongs to another source/candidate; regenerate evidence from the stable candidate           |
 | `retry-dry-run-with-fix-patch`          | Dry-run itself did not succeed                                                                        |

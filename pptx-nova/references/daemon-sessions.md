@@ -225,7 +225,7 @@ export XDOC_DAEMON_AUTO_SPAWN=0
   加速）
 - **不要在 daemon 模式下手动覆写 `<out>.xdoc.json`** — sidecar 由 apply 路径自己
   写；手动改会让 rollback 失败
-- **不要给 `template-fill` / `check-brand` / `apply-brand` / `copy-from` /
+- **不要给 `template-fill` / `check-brand` / `apply-brand` / `slide-copy` /
   `extract-style` / `import-template` / `new` / `catalog` / `recipe` /
   `replay` / `audit` / `rollback` 加 `--daemon`** —
   解析阶段会拒绝

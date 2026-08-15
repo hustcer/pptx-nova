@@ -960,7 +960,7 @@ function writeCopyFromContractFixture() {
   const draft = JSON.parse(readFileSync(fixture.draft, 'utf8'))
   draft.request = 'Append donor slide 3 to the target deck'
   draft.scope = 'structural'
-  draft.operationKind = 'copy-from'
+  draft.operationKind = 'slide-copy'
   draft.targets = [
     {
       id: 'copied-slide-11',
@@ -986,7 +986,7 @@ function writeCopyFromContractFixture() {
   draft.expectedStructure = { slideCountDelta: 1, changedSlides: [10], objectTypes: [] }
   writeJson(fixture.draft, draft)
   writeJson(fixture.dryRun, {
-    schemaVersion: 'pptx-copy-from/v2',
+    schemaVersion: 'pptx-slide-copy/v1',
     status: 'ready',
     input: fixture.source,
     source: { path: fixture.donor, slides: [2] },
@@ -1144,7 +1144,7 @@ function writeCopyFromContractFixture() {
       slideSize: { wEmu: '12192000', hEmu: '6858000' },
     },
     slideSizeComparison: { matches: true },
-    agentGate: { passed: true, nextAction: 'continue-copy-from', failures: [] },
+    agentGate: { passed: true, nextAction: 'continue-slide-copy', failures: [] },
   })
   writeJson(fixture.diff, {
     schemaVersion: 'pptx-diff/v1',
@@ -1180,7 +1180,7 @@ function writeCopyFromContractFixture() {
   return fixture
 }
 
-test('edit contract gate accepts file-bound and package-fingerprinted copy-from/v2 evidence', () => {
+test('edit contract gate accepts file-bound and package-fingerprinted slide-copy/v2 evidence', () => {
   const fixture = writeCopyFromContractFixture()
   const contract = generateContract(fixture)
   const report = runGate(fixture)
@@ -1192,13 +1192,13 @@ test('edit contract gate accepts file-bound and package-fingerprinted copy-from/
   assert.equal(report.targetCoverage[0].copyFrom.targetSlidePartName, 'ppt/slides/slide11.xml')
   assert.equal(JSON.parse(readFileSync(fixture.dryRun, 'utf8')).preflight.templates.length, 1)
   assert.equal(
-    report.checks.some((item) => item.name === 'copy-from-preflight' && item.status === 'pass'),
+    report.checks.some((item) => item.name === 'slide-copy-preflight' && item.status === 'pass'),
     true,
   )
   assert.equal('opResults' in JSON.parse(readFileSync(fixture.dryRun, 'utf8')), false)
 })
 
-test('edit contract gate blocks copy-from when donor and target slide sizes differ', () => {
+test('edit contract gate blocks slide-copy when donor and target slide sizes differ', () => {
   const fixture = writeCopyFromContractFixture()
   const sizeGate = JSON.parse(readFileSync(fixture.copySizeGate, 'utf8'))
   sizeGate.status = 'fail'
@@ -1221,7 +1221,7 @@ test('edit contract gate blocks copy-from when donor and target slide sizes diff
   )
 })
 
-test('edit contract gate rejects copy-from evidence bound to the wrong donor slide', () => {
+test('edit contract gate rejects slide-copy evidence bound to the wrong donor slide', () => {
   const fixture = writeCopyFromContractFixture()
   const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
   evidence.copied[0].sourceSlide = 1
@@ -1231,12 +1231,12 @@ test('edit contract gate rejects copy-from evidence bound to the wrong donor sli
 
   assert.equal(report.agentGate.passed, false)
   assert.equal(
-    report.blockers.some((item) => item.code === 'copy-from-source-slide-mismatch'),
+    report.blockers.some((item) => item.code === 'slide-copy-source-slide-mismatch'),
     true,
   )
 })
 
-test('edit contract gate rejects a stale copy-from donor file SHA-256', () => {
+test('edit contract gate rejects a stale slide-copy donor file SHA-256', () => {
   const fixture = writeCopyFromContractFixture()
   const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
   evidence.preflight.sourceFileSha256 = '0'.repeat(64)
@@ -1246,7 +1246,7 @@ test('edit contract gate rejects a stale copy-from donor file SHA-256', () => {
 
   assert.equal(report.agentGate.passed, false)
   assert.equal(
-    report.blockers.some((item) => item.code === 'copy-from-source-file-sha256-mismatch'),
+    report.blockers.some((item) => item.code === 'slide-copy-source-file-sha256-mismatch'),
     true,
   )
 })
@@ -1261,12 +1261,12 @@ test('edit contract gate rejects an invalid normalized package fingerprint', () 
 
   assert.equal(report.agentGate.passed, false)
   assert.equal(
-    report.blockers.some((item) => item.code === 'copy-from-package-fingerprint-invalid'),
+    report.blockers.some((item) => item.code === 'slide-copy-package-fingerprint-invalid'),
     true,
   )
 })
 
-test('edit contract gate rejects copy-from evidence missing the planned slide part', () => {
+test('edit contract gate rejects slide-copy evidence missing the planned slide part', () => {
   const fixture = writeCopyFromContractFixture()
   const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
   evidence.preflight.parts = evidence.preflight.parts.filter((item) => item.role !== 'slide')
@@ -1278,12 +1278,12 @@ test('edit contract gate rejects copy-from evidence missing the planned slide pa
   assert.equal(report.agentGate.passed, false)
   assert.equal(report.targetCoverage[0].covered, false)
   assert.equal(
-    report.blockers.some((item) => item.code === 'copy-from-structural-evidence-invalid'),
+    report.blockers.some((item) => item.code === 'slide-copy-structural-evidence-invalid'),
     true,
   )
 })
 
-test('edit contract gate rejects inconsistent copy-from preflight summary counts', () => {
+test('edit contract gate rejects inconsistent slide-copy preflight summary counts', () => {
   const fixture = writeCopyFromContractFixture()
   const evidence = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
   evidence.preflight.summary.relationshipCount += 1
@@ -1293,7 +1293,7 @@ test('edit contract gate rejects inconsistent copy-from preflight summary counts
 
   assert.equal(report.agentGate.passed, false)
   assert.equal(
-    report.blockers.some((item) => item.code === 'copy-from-preflight-summary-mismatch'),
+    report.blockers.some((item) => item.code === 'slide-copy-preflight-summary-mismatch'),
     true,
   )
 })
@@ -1308,7 +1308,7 @@ test('edit contract gate rejects a template outcome incompatible with register-s
 
   assert.equal(report.agentGate.passed, false)
   assert.equal(
-    report.blockers.some((item) => item.code === 'copy-from-template-plan-invalid'),
+    report.blockers.some((item) => item.code === 'slide-copy-template-plan-invalid'),
     true,
   )
 })

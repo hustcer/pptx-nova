@@ -91,7 +91,7 @@ xdoc pptx extract-style reference.pptx --output reference-style.json --json
 
 - `style`：只复用色彩、字体、chrome、密度，不复制整页。
 - `layout`：复用版式结构和对象关系，用新内容重建。
-- `copy-slide`：用 `copy-from` 复制整页骨架后替换内容；只在参考页结构很难重建、且不是严格模板跟随
+- `copy-slide`：用 `slide-copy` 复制整页骨架后替换内容；只在参考页结构很难重建、且不是严格模板跟随
   的普通 Reference Create 中使用。严格模板跟随改走 `template-following.md`。
 - `template`：已有占位符模板，改走 `template-fill`。
 
@@ -115,7 +115,7 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
    `needs-review` / `needs-user` / `forbidden`，不要在 patch 中偷偷引用。无外部资源时不要创建空 manifest。
 4. 根据 `reference-map.json` 和 `deck_lock.json` 把 `outline.json` 转为 `content.json`
    或 generator 输入。
-5. 优先用 DeckKit / generator 新建页面；只有 `reuse: copy-slide` 时才用 `copy-from`。
+5. 优先用 DeckKit / generator 新建页面；只有 `reuse: copy-slide` 时才用 `slide-copy`。
 6. 生成 patch 后跑
    `node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`；
    有 `assets_manifest.json` 时加 `--assets assets_manifest.json`。
@@ -129,18 +129,18 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
 
 ## 4. 复制整页时的规则
 
-`copy-from` 适合保留复杂整页结构：
+`slide-copy` 适合保留复杂整页结构：
 
 ```bash
-xdoc pptx copy-from -i target.pptx --source reference.pptx \
+xdoc pptx slide-copy -i target.pptx --source reference.pptx \
   --slides 1,3,5-8 --output out.pptx --dry-run --json > dry-run.json
-xdoc pptx copy-from -i target.pptx --source reference.pptx \
-  --slides 1,3,5-8 --output out.pptx --json > copy-from.json
+xdoc pptx slide-copy -i target.pptx --source reference.pptx \
+  --slides 1,3,5-8 --output out.pptx --json > slide-copy.json
 ```
 
 `--slides` 是 1-based selector；省略所有 selector 时复制 source 第一页；`--all`
 复制 source 全部页。两者互斥。需要多页时必须优先
-一次事务复制，避免逐页调用、重复打开/序列化和中间候选分叉。`pptx-copy-from/v2` 会返回
+一次事务复制，避免逐页调用、重复打开/序列化和中间候选分叉。`pptx-slide-copy/v1` 会返回
 每页 `copied[]`、聚合 `dependencyMappings[]` / `changedParts[]`，以及只读 `preflight`。
 执行前必须确认 `status: "success"` 且 `outcome: "passed"`、target/donor 指纹仍匹配、`blockers[]` 为空，并人工处理
 `risks[]`；结构 Edit Contract 直接消费该报告，不伪造 patch `opResults[]`。

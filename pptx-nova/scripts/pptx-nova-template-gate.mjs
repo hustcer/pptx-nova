@@ -10,7 +10,7 @@ const GATE_SCHEMA_VERSION = 'pptx-nova-template-gate/v1'
 const REUSE_MODES = new Set([
   'duplicate-slide',
   'copy-slide',
-  'copy-from',
+  'slide-copy',
   'template-fill',
   'fill-template',
   'fill-placeholder',

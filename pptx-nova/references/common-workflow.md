@@ -270,7 +270,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     of manufacturing an equivalent patch report:
 
     ```bash
-    xdoc pptx copy-from -i target.pptx --source donor.pptx \
+    xdoc pptx slide-copy -i target.pptx --source donor.pptx \
       --slides 1,3,5-8 \
       --template-strategy register-source --size-strategy require-match \
       --output <run-dir>/candidate.pptx \
@@ -308,7 +308,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     stop or change deck dimensions until a future audited transform policy
     exists. Do not silently fit the slide or hide the mismatch in Viewer/PDF
     rendering. The
-    Edit Contract gate consumes both native `pptx-copy-from/v2` and
+    Edit Contract gate consumes both native `pptx-slide-copy/v1` and
     `pptx-nova-copy-size-gate/v1` evidence; do not invent `pptx-dry-run/v1` or
     `opResults[]`.
 
@@ -325,7 +325,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     scoped preview and `vision-diff` evidence. Use candidate-only
     `vision-check` as a diagnostic when needed; inherited source issues are not
     edit regressions.
-    For native `copy-from`, require both `preflight.strategy.slideSize` to be
+    For native `slide-copy`, require both `preflight.strategy.slideSize` to be
     `require-match` with no blocker and the copy-size gate to pass before
     launching apply. Review every `templates[]` outcome: faithful workflows may
     contain only `registered-source` / `reused-source`; `rebound-target` requires

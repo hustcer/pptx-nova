@@ -6,7 +6,7 @@ import { inflateRawSync } from 'node:zlib'
 
 const SCHEMA_VERSION = 'pptx-nova-edit-contract-gate/v1'
 const CONTRACT_SCHEMA_VERSION = 'pptx-nova-edit-contract/v1'
-const COPY_FROM_SCHEMA_VERSION = 'pptx-copy-from/v2'
+const COPY_FROM_SCHEMA_VERSION = 'pptx-slide-copy/v1'
 const COPY_SIZE_GATE_SCHEMA_VERSION = 'pptx-nova-copy-size-gate/v1'
 
 const usage = `Usage:
@@ -19,9 +19,9 @@ Options:
   --contract <path>        Required normalized edit-contract.json.
   --candidate <pptx>       Required stable run-directory candidate PPTX.
   --dry-run <path>         Defaults to dry-run.json beside the contract; accepts
-                           pptx-dry-run/v1 or pptx-copy-from/v2 preflight evidence.
+                           pptx-dry-run/v1 or pptx-slide-copy/v1 preflight evidence.
   --copy-size-gate <path>  Defaults to copy-size-gate.json beside the contract;
-                           required for native copy-from structural evidence.
+                           required for native slide-copy structural evidence.
   --diff <path>            Defaults to pptx-diff.json beside the contract.
   --style-diff <path>      Defaults to style-diff.json beside the contract.
   --preview <path>         Defaults to preview.json beside the contract.
@@ -741,8 +741,8 @@ function checkCopyFromPreflight(contract, copyReport, report) {
   }
   if (!preflight || typeof preflight !== 'object') {
     fail(
-      'copy-from-preflight-missing',
-      'copy-from/v2 evidence is missing its read-only preflight plan',
+      'slide-copy-preflight-missing',
+      'slide-copy/v2 evidence is missing its read-only preflight plan',
     )
     return false
   }
@@ -757,8 +757,8 @@ function checkCopyFromPreflight(contract, copyReport, report) {
     !Array.isArray(preflight.templates)
   ) {
     fail(
-      'copy-from-preflight-invalid',
-      'copy-from preflight must be ready, read-only, and include template, part, relationship, blocker, preserve-only risk, and risk arrays',
+      'slide-copy-preflight-invalid',
+      'slide-copy preflight must be ready, read-only, and include template, part, relationship, blocker, preserve-only risk, and risk arrays',
     )
   }
   if (
@@ -769,14 +769,14 @@ function checkCopyFromPreflight(contract, copyReport, report) {
     preflight.summary.riskCount !== preflight.risks?.length
   ) {
     fail(
-      'copy-from-preflight-summary-mismatch',
-      'copy-from preflight summary counts must exactly match the disclosed plan arrays',
+      'slide-copy-preflight-summary-mismatch',
+      'slide-copy preflight summary counts must exactly match the disclosed plan arrays',
     )
   }
   if (preflight.blockers?.length > 0 || Number(preflight.summary?.blockerCount ?? 0) > 0) {
     fail(
-      'copy-from-preflight-blocked',
-      'copy-from preflight contains blockers and cannot authorize a structural mutation',
+      'slide-copy-preflight-blocked',
+      'slide-copy preflight contains blockers and cannot authorize a structural mutation',
       { blockers: preflight.blockers },
     )
   }
@@ -787,8 +787,8 @@ function checkCopyFromPreflight(contract, copyReport, report) {
       (copyReport.copied?.length ?? 0)
   ) {
     fail(
-      'copy-from-preflight-slide-count-invalid',
-      'copy-from preflight slide counts do not match the planned copied slide count',
+      'slide-copy-preflight-slide-count-invalid',
+      'slide-copy preflight slide counts do not match the planned copied slide count',
     )
   }
 
@@ -803,8 +803,8 @@ function checkCopyFromPreflight(contract, copyReport, report) {
     preflight.targetFileSha256 !== contract.source?.sha256
   ) {
     fail(
-      'copy-from-target-file-sha256-mismatch',
-      'copy-from preflight targetFileSha256 is not bound to the current target PPTX bytes',
+      'slide-copy-target-file-sha256-mismatch',
+      'slide-copy preflight targetFileSha256 is not bound to the current target PPTX bytes',
       {
         expected: contract.source?.sha256 ?? null,
         actual: preflight.targetFileSha256 ?? null,
@@ -817,8 +817,8 @@ function checkCopyFromPreflight(contract, copyReport, report) {
     preflight.sourceFileSha256 !== donorFileSha256
   ) {
     fail(
-      'copy-from-source-file-sha256-mismatch',
-      'copy-from preflight sourceFileSha256 is not bound to the declared donor PPTX bytes',
+      'slide-copy-source-file-sha256-mismatch',
+      'slide-copy preflight sourceFileSha256 is not bound to the declared donor PPTX bytes',
       {
         expected: donorFileSha256,
         actual: preflight.sourceFileSha256 ?? null,
@@ -830,22 +830,22 @@ function checkCopyFromPreflight(contract, copyReport, report) {
     !sha256LooksValid(preflight.sourceFingerprint)
   ) {
     fail(
-      'copy-from-package-fingerprint-invalid',
-      'copy-from preflight must include normalized OPC source/target package fingerprints',
+      'slide-copy-package-fingerprint-invalid',
+      'slide-copy preflight must include normalized OPC source/target package fingerprints',
     )
   }
   const templateStrategy = preflight.strategy?.template
   const slideSizeStrategy = preflight.strategy?.slideSize
   if (!['register-source', 'rebind-target'].includes(templateStrategy)) {
     fail(
-      'copy-from-template-strategy-invalid',
-      'copy-from preflight must declare register-source or rebind-target',
+      'slide-copy-template-strategy-invalid',
+      'slide-copy preflight must declare register-source or rebind-target',
     )
   }
   if (slideSizeStrategy !== 'require-match') {
     fail(
-      'copy-from-size-strategy-invalid',
-      'copy-from preflight must declare slideSize strategy require-match',
+      'slide-copy-size-strategy-invalid',
+      'slide-copy preflight must declare slideSize strategy require-match',
     )
   }
   const allowedTemplateOutcomes =
@@ -862,8 +862,8 @@ function checkCopyFromPreflight(contract, copyReport, report) {
       template?.rollbackBoundary !== 'entire-copy-batch'
     ) {
       fail(
-        'copy-from-template-plan-invalid',
-        'copy-from templates[] contains an invalid outcome, mapping, or rollback boundary',
+        'slide-copy-template-plan-invalid',
+        'slide-copy templates[] contains an invalid outcome, mapping, or rollback boundary',
         { template },
       )
       break
@@ -871,20 +871,20 @@ function checkCopyFromPreflight(contract, copyReport, report) {
   }
   if (copyReport?.transaction?.rollbackBoundary !== 'entire-copy-batch') {
     fail(
-      'copy-from-rollback-boundary-invalid',
-      'copy-from report must declare the entire-copy-batch rollback boundary',
+      'slide-copy-rollback-boundary-invalid',
+      'slide-copy report must declare the entire-copy-batch rollback boundary',
     )
   }
   if (preflight.risks?.length > 0) {
     addIssue(
       report,
       'attention',
-      'copy-from-preflight-risks',
-      'copy-from preflight reported fidelity risks that require Agent review',
+      'slide-copy-preflight-risks',
+      'slide-copy preflight reported fidelity risks that require Agent review',
       { risks: preflight.risks },
     )
   }
-  addCheck(report, 'copy-from-preflight', valid ? 'pass' : 'fail', {
+  addCheck(report, 'slide-copy-preflight', valid ? 'pass' : 'fail', {
     readOnly: preflight.readOnly === true,
     ready: preflight.ready === true,
     parts: preflight.parts?.length ?? 0,
@@ -924,7 +924,7 @@ function checkCopySizeGate(contract, copyReport, sizeGate, report) {
       mismatch ? 'copy-size-gate-failed' : 'copy-size-gate-stale',
       mismatch
         ? 'donor and target slide sizes differ under native require-match'
-        : 'copy size gate is missing, failed, or not bound to the current copy-from preflight',
+        : 'copy size gate is missing, failed, or not bound to the current slide-copy preflight',
       { sizeGate: sizeGate?.agentGate ?? null },
     )
   }
@@ -948,8 +948,8 @@ function copyFromCoverage(contract, copyReport, report) {
     addIssue(
       report,
       'blockers',
-      'copy-from-slide-outside-contract',
-      'copy-from evidence contains target slides not owned by the structural contract',
+      'slide-copy-slide-outside-contract',
+      'slide-copy evidence contains target slides not owned by the structural contract',
       { targetSlides: outOfScope.map((entry) => entry?.targetSlide ?? null) },
     )
   }
@@ -1006,8 +1006,8 @@ function copyFromCoverage(contract, copyReport, report) {
       addIssue(
         report,
         'blockers',
-        'copy-from-source-slide-mismatch',
-        `copy-from source slide does not match contract target ${target.id}`,
+        'slide-copy-source-slide-mismatch',
+        `slide-copy source slide does not match contract target ${target.id}`,
         {
           targetId: target.id,
           expected: expectation.sourceSlide,
@@ -1019,16 +1019,16 @@ function copyFromCoverage(contract, copyReport, report) {
       addIssue(
         report,
         'blockers',
-        'copy-from-source-pptx-mismatch',
-        `copy-from donor PPTX does not match contract target ${target.id}`,
+        'slide-copy-source-pptx-mismatch',
+        `slide-copy donor PPTX does not match contract target ${target.id}`,
       )
     }
     if (entry && !structuralEvidenceValid) {
       addIssue(
         report,
         'blockers',
-        'copy-from-structural-evidence-invalid',
-        `copy-from part/dependency mapping is incomplete for contract target ${target.id}`,
+        'slide-copy-structural-evidence-invalid',
+        `slide-copy part/dependency mapping is incomplete for contract target ${target.id}`,
       )
     }
   }
@@ -1042,7 +1042,7 @@ function copyFromCoverage(contract, copyReport, report) {
       report,
       'blockers',
       'target-coverage-incomplete',
-      `copy-from evidence covered ${coveredCount} of ${contract.coverage.expectedTargetCount} required target(s)`,
+      `slide-copy evidence covered ${coveredCount} of ${contract.coverage.expectedTargetCount} required target(s)`,
       { coverage },
     )
   }
@@ -1051,7 +1051,7 @@ function copyFromCoverage(contract, copyReport, report) {
       report,
       'blockers',
       'dry-run-change-category-outside-contract',
-      'copy-from reported a structural change not allowed by the contract',
+      'slide-copy reported a structural change not allowed by the contract',
     )
   }
   return { coverage, coveredCount, coveredIdentities }
@@ -1425,14 +1425,14 @@ function checkEvidence(contract, args, report) {
       addIssue(
         report,
         'blockers',
-        'copy-from-structural-evidence-invalid',
-        'copy-from evidence is missing copied[], changedParts[], or dependencyMappings[]',
+        'slide-copy-structural-evidence-invalid',
+        'slide-copy evidence is missing copied[], changedParts[], or dependencyMappings[]',
       )
     } else {
       checkCopyFromPreflight(contract, dryRun, report)
       const sizeGate = loaded['copy-size-gate']
       if (sizeGate) checkCopySizeGate(contract, dryRun, sizeGate, report)
-      addCheck(report, 'copy-from-structural-evidence', 'pass', {
+      addCheck(report, 'slide-copy-structural-evidence', 'pass', {
         copiedSlides: dryRun.copied.length,
         dependencyMappings: dryRun.dependencyMappings.length,
       })
@@ -1609,7 +1609,7 @@ function nextAction(report) {
   if (codes.has('dry-run-not-successful')) return 'retry-dry-run-with-fix-patch'
   if (codes.has('copy-size-gate-missing')) return 'run-copy-size-gate'
   if (codes.has('copy-size-gate-failed')) return 'choose-explicit-slide-size-strategy'
-  if (codes.has('copy-size-gate-stale')) return 'refresh-copy-from-preflight'
+  if (codes.has('copy-size-gate-stale')) return 'refresh-slide-copy-preflight'
   if (codes.has('target-text-style-changed')) return 'retry-with-style-preserving-text-edit'
   if (codes.has('vision-diff-new-regression')) return 'repair-new-visual-regressions'
   if (codes.has('selector-resolution-missing')) return 'rebind-selectors'

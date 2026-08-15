@@ -11,8 +11,8 @@ const usage = `Usage:
 
 Options:
   --target <path>       Target PPTX that will receive copied slides.
-  --donor <path>        Donor PPTX passed to xdoc copy-from --source.
-  --copy-report <path>  Current pptx-copy-from/v2 dry-run report.
+  --donor <path>        Donor PPTX passed to xdoc slide-copy --source.
+  --copy-report <path>  Current pptx-slide-copy/v1 dry-run report.
   --xdoc-bin <path>     xdoc executable or JavaScript wrapper. Defaults to xdoc.
   --output <path>       Optional persisted gate report.
   --overwrite           Replace an existing output report.
@@ -156,22 +156,22 @@ function compareSizes(target, donor) {
 
 function validateCopyReport(copyReport, target, donor) {
   const failures = []
-  if (copyReport?.schemaVersion !== 'pptx-copy-from/v2') {
+  if (copyReport?.schemaVersion !== 'pptx-slide-copy/v1') {
     failures.push({
       code: 'copy-report-schema-invalid',
-      message: 'copy report schemaVersion must be pptx-copy-from/v2',
+      message: 'copy report schemaVersion must be pptx-slide-copy/v1',
     })
   }
   if (copyReport?.outcome !== 'passed' || copyReport?.preflight?.ready !== true) {
     failures.push({
       code: 'copy-preflight-not-ready',
-      message: 'copy-from dry-run and preflight must both be ready',
+      message: 'slide-copy dry-run and preflight must both be ready',
     })
   }
   if (copyReport?.preflight?.readOnly !== true) {
     failures.push({
       code: 'copy-preflight-not-read-only',
-      message: 'copy-from preflight must be read-only',
+      message: 'slide-copy preflight must be read-only',
     })
   }
   if (
@@ -180,13 +180,13 @@ function validateCopyReport(copyReport, target, donor) {
   ) {
     failures.push({
       code: 'copy-preflight-issues-missing',
-      message: 'copy-from preflight must include blockers and risks arrays',
+      message: 'slide-copy preflight must include blockers and risks arrays',
     })
   }
   if ((copyReport?.preflight?.blockers?.length ?? 0) > 0) {
     failures.push({
       code: 'copy-preflight-has-blockers',
-      message: 'copy-from preflight contains blockers',
+      message: 'slide-copy preflight contains blockers',
     })
   }
   const templateStrategy = copyReport?.preflight?.strategy?.template
@@ -194,19 +194,19 @@ function validateCopyReport(copyReport, target, donor) {
   if (!['register-source', 'rebind-target'].includes(templateStrategy)) {
     failures.push({
       code: 'copy-template-strategy-invalid',
-      message: 'copy-from preflight must declare register-source or rebind-target',
+      message: 'slide-copy preflight must declare register-source or rebind-target',
     })
   }
   if (slideSizeStrategy !== 'require-match') {
     failures.push({
       code: 'copy-size-strategy-invalid',
-      message: 'copy-from preflight must declare slideSize strategy require-match',
+      message: 'slide-copy preflight must declare slideSize strategy require-match',
     })
   }
   if (!Array.isArray(copyReport?.preflight?.templates)) {
     failures.push({
       code: 'copy-template-plan-missing',
-      message: 'copy-from preflight must disclose templates[] closure mappings',
+      message: 'slide-copy preflight must disclose templates[] closure mappings',
     })
   } else {
     const allowedOutcomes =
@@ -223,7 +223,7 @@ function validateCopyReport(copyReport, target, donor) {
       ) {
         failures.push({
           code: 'copy-template-plan-invalid',
-          message: 'copy-from templates[] contains an invalid outcome or incomplete mapping',
+          message: 'slide-copy templates[] contains an invalid outcome or incomplete mapping',
         })
         break
       }
@@ -232,31 +232,33 @@ function validateCopyReport(copyReport, target, donor) {
   if (copyReport?.transaction?.rollbackBoundary !== 'entire-copy-batch') {
     failures.push({
       code: 'copy-rollback-boundary-invalid',
-      message: 'copy-from report must declare the entire-copy-batch rollback boundary',
+      message: 'slide-copy report must declare the entire-copy-batch rollback boundary',
     })
   }
   if (!sha256LooksValid(copyReport?.preflight?.targetFingerprint)) {
     failures.push({
       code: 'target-package-fingerprint-invalid',
-      message: 'copy-from preflight targetFingerprint must be a normalized OPC package fingerprint',
+      message:
+        'slide-copy preflight targetFingerprint must be a normalized OPC package fingerprint',
     })
   }
   if (!sha256LooksValid(copyReport?.preflight?.sourceFingerprint)) {
     failures.push({
       code: 'donor-package-fingerprint-invalid',
-      message: 'copy-from preflight sourceFingerprint must be a normalized OPC package fingerprint',
+      message:
+        'slide-copy preflight sourceFingerprint must be a normalized OPC package fingerprint',
     })
   }
   if (copyReport?.preflight?.targetFileSha256 !== target.fileSha256) {
     failures.push({
       code: 'target-file-sha256-mismatch',
-      message: 'copy-from preflight targetFileSha256 is stale or belongs to another PPTX',
+      message: 'slide-copy preflight targetFileSha256 is stale or belongs to another PPTX',
     })
   }
   if (copyReport?.preflight?.sourceFileSha256 !== donor.fileSha256) {
     failures.push({
       code: 'donor-file-sha256-mismatch',
-      message: 'copy-from preflight sourceFileSha256 is stale or belongs to another PPTX',
+      message: 'slide-copy preflight sourceFileSha256 is stale or belongs to another PPTX',
     })
   }
   return failures
@@ -283,10 +285,10 @@ function buildReport(args) {
   const nextAction = failures.some((failure) => failure.code === 'slide-size-mismatch')
     ? 'choose-explicit-slide-size-strategy'
     : failures.some((failure) => failure.code.endsWith('file-sha256-mismatch'))
-      ? 'refresh-copy-from-preflight'
+      ? 'refresh-slide-copy-preflight'
       : failures.length > 0
-        ? 'resolve-copy-from-preflight'
-        : 'continue-copy-from'
+        ? 'resolve-slide-copy-preflight'
+        : 'continue-slide-copy'
   return {
     schemaVersion: SCHEMA_VERSION,
     observedAt: new Date().toISOString(),
@@ -314,7 +316,7 @@ function buildReport(args) {
       failures,
       attention:
         (copyReport?.preflight?.risks?.length ?? 0) > 0
-          ? ['Review every copy-from preflight risk separately; this gate covers slide size only.']
+          ? ['Review every slide-copy preflight risk separately; this gate covers slide size only.']
           : [],
     },
   }

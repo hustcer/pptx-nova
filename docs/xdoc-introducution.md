@@ -1465,18 +1465,18 @@ human approval.
 The bridge also supports explicit reuse workflows:
 
 ```bash
-xdoc pptx copy-from -i target.pptx --source source.pptx --slide 0 --output combined.pptx
+xdoc pptx slide-copy -i target.pptx --source source.pptx --slide 0 --output combined.pptx
 xdoc pptx extract-style reference.pptx --output style.json --json
 xdoc pptx import-template reference.pptx --name reusable-template --output assets --json
 ```
 
-`copy-from --slide` uses a zero-based source slide index. `extract-style`
+`slide-copy --slide` uses a zero-based source slide index. `extract-style`
 produces a structured style profile for inspection or reuse. `import-template`
 extracts a reusable template profile and updates the requested asset catalog
 location; it is an intentional asset-development operation, not part of an
 ordinary source-preserving edit.
 
-`copy-from` emits `pptx-copy-from/v2`. Its dry-run is a read-only,
+`slide-copy` emits `pptx-slide-copy/v1`. Its dry-run is a read-only,
 fingerprint-bound plan: require `status: "ready"`, matching target/donor
 SHA-256 values, no `preflight.blockers`, and review `preflight.risks` plus the
 planned parts/relationships before apply. It is not a patch report and does not
@@ -1854,7 +1854,7 @@ not a cross-machine latency SLA.
 | Translation              | `i18n-scan`, `i18n-plan`, `i18n-text-plan`, `i18n-style-diff`, `replace-text`, `replace-chart-text` |
 | Refurbishment            | `refurbish-skin`, `refurbish-audit`, `chrome-detect`, `chrome-remove`, `chrome-apply`               |
 | Theme and brand          | `remap-theme`, `swap-theme`, `swap-style`, `check-brand`, `apply-brand`                             |
-| Reuse and history        | `copy-from`, `import-template`, `replay`, `audit`, `rollback`                                       |
+| Reuse and history        | `slide-copy`, `import-template`, `replay`, `audit`, `rollback`                                      |
 
 ### Selector index conventions
 
@@ -1863,7 +1863,7 @@ not a cross-machine latency SLA.
 | `convert`, `extract`, `check`, `pdf`, most `pptx --slides` flags | 1-based    |
 | Patch `slide` fields                                             | 0-based    |
 | `select` `slideIndex` query field                                | 0-based    |
-| `copy-from --slide`                                              | 0-based    |
+| `slide-copy --slide`                                             | 0-based    |
 
 When in doubt, ask the command-specific schema instead of guessing.
 
@@ -1904,7 +1904,7 @@ The following identifiers are useful when validating an integration:
 | `map/v1`, `resources/v1`, `notes/v1`, `links/v1`, `fonts/v1`                            | Structured extraction artifacts                             |
 | `preflight/v1`                                                                          | Input diagnostics and risk summary                          |
 | `pptx-a11y/v1`                                                                          | Opt-in accessibility findings inside preflight              |
-| `pptx-copy-from/v2`                                                                     | Fingerprint-bound cross-deck structural plan/report         |
+| `pptx-slide-copy/v1`                                                                    | Fingerprint-bound cross-deck structural plan/report         |
 | `pdf-inspect/v1`, `pdf-text/v1`                                                         | PDF diagnostics and extraction                              |
 | `xdoc-daemon-status/v2`                                                                 | Runtime daemon state, endpoint, and mutation diagnostics    |
 | `xdoc-json-rpc-contract/v1`, `xdoc-json-rpc-result/v1`                                  | Stdio Agent protocol and result envelope                    |

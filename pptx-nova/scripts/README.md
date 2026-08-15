@@ -53,7 +53,7 @@ Use these entry points from skill workflows:
 - `pptx-nova-edit-contract-gate.mjs` - verify source freshness, dry-run target
   coverage, reliable semantic-diff locality, optional text style fidelity, and
   scoped preview/vision-diff/structure evidence before an Edit or Micro Edit is
-  published. Structural copy workflows may supply native `pptx-copy-from/v2`
+  published. Structural copy workflows may supply native `pptx-slide-copy/v1`
   evidence; the gate requires a read-only `ready` preflight whose target/donor
   whole-file SHA-256 values still match the current files, validates normalized
   package fingerprints, then validates donor/target slide
@@ -63,7 +63,7 @@ Use these entry points from skill workflows:
   identity and font/fill postconditions directly from candidate PPTX bytes.
   Read its stable `agentGate.nextAction` for repair routing.
 - `pptx-nova-copy-size-gate.mjs` - inspect donor and target slide dimensions,
-  verify the current `pptx-copy-from/v2` whole-file SHA-256 bindings separately
+  verify the current `pptx-slide-copy/v1` whole-file SHA-256 bindings separately
   from its normalized OPC package fingerprints, and fail closed before apply
   when the dimensions differ. Current policy is identical-size-only until xdoc
   exposes an explicit copy/import size strategy; the script never asks a

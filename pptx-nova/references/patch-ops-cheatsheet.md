@@ -23,7 +23,7 @@ table setter 已全部并入对应的聚合 op
 | `remove-slide`            | 删除指定 slide                                                                   |
 | `move-slide`              | 改 slide 顺序（`from` / `to` 都是 0-based）                                      |
 | `duplicate-slide`         | 复制 slide（保留全部内容，包括 notes）                                           |
-| `set-slide-size`          | 改 deck 尺寸：`"16:9"` / `"4:3"` / `{ w, h }`                                    |
+| `set-slide-size`          | 改 deck 尺寸（`slideSize` 字段）：`"16:9"` / `"4:3"` / `{ w, h }`                |
 | `set-slide-background`    | 改某页背景：`{ fill: ..., followMaster: false }`                                 |
 | `set-slide-transition`    | 设置/清理基础 slide transition 与自动切页                                        |
 | `set-slide-animations`    | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear`                   |
@@ -358,7 +358,7 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
 | `set-text-frame`（`frame.margin*`）        | 设置四边内边距；单位值或 `null`（清掉显式属性，恢复继承/默认）                                                          |
 | `set-text-frame`（`frame.verticalAnchor`） | `top` / `middle` / `bottom`；`null` 清除                                                                                |
 | `set-text-frame`（`frame.wordWrap`）       | 布尔值控制换行；`null` 清除                                                                                             |
-| `fit-text`                                 | 给 text frame 算合适字号（`maxSize` / `minSize`，可选 `strategy: "deterministic" / "font-metrics"`）                    |
+| `fit-text`                                 | 给 text frame 算合适字号（`maxFontSize` / `minFontSize`，可选 `strategy: "deterministic" / "font-metrics"`）            |
 
 `fit-text` 是直接计算并写死字号；要 PowerPoint 自己缩放文字的 autofit 行为，
 用 `set-text-frame` 的 `frame.autofit`。

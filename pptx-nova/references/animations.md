@@ -231,7 +231,7 @@ dry-run 重点看：
 {
   "op": "set-slide-transition",
   "slide": 0,
-  "type": "fade",
+  "kind": "fade",
   "speed": "medium",
   "advanceOnClick": true,
   "advanceAfter": 5000
@@ -251,7 +251,7 @@ xdoc schema --mode ops --ops set-slide-transition --minimal > <run-dir>/schema-s
 xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect-before.json
 ```
 
-只有 schema 同时披露 `type: "morph"`、`morphMode` 和需要的 mode 时才创建。Morph 目标是相邻的
+只有 schema 同时披露 `kind: "morph"`、`morphMode` 和需要的 mode 时才创建。Morph 目标是相邻的
 source/destination slide pair；`set-slide-transition.slide` 是 **0-based destination slide index**。
 对象配对是显式契约：在两页上给对应 shape 设置完全相同、区分大小写的 `!!` 前缀名称，例如
 `!!Hero`。不要宣称 xdoc 会按文本、位置或普通 shape name 自动推断配对。
@@ -265,7 +265,7 @@ source/destination slide pair；`set-slide-transition.slide` 是 **0-based desti
     {
       "op": "set-slide-transition",
       "slide": 1,
-      "type": "morph",
+      "kind": "morph",
       "morphMode": "by-object",
       "duration": 900
     }

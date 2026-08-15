@@ -363,8 +363,8 @@ function validateRefurbish(args, report) {
   const reviewEvaluation = readOptionalJson(args.reviewEvaluation, 'review evaluation')
 
   const inspectSourceCount = slideCountOf(sourceInspect)
-  const auditSourceCount = numeric(finalAudit?.summary?.sourceSlideCount)
-  const auditFinalCount = numeric(finalAudit?.summary?.finalSlideCount)
+  const auditSourceCount = numeric(finalAudit?.summary?.baselineSlideCount)
+  const auditFinalCount = numeric(finalAudit?.summary?.targetSlideCount)
   const sourceCount = auditSourceCount ?? inspectSourceCount
   const finalCount = auditFinalCount
 

@@ -460,8 +460,8 @@ function writeFidelityFixture(root, reviewedFindings) {
     summary: {
       errorCount: 0,
       warningCount: 0,
-      sourceSlideCount: 1,
-      finalSlideCount: 1,
+      baselineSlideCount: 1,
+      targetSlideCount: 1,
       slideCountMatches: true,
     },
     issues: [],

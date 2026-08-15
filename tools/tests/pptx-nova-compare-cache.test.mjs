@@ -30,7 +30,7 @@ const identity = (path) => ({ path, byteLength: statSync(path).size, sha256: cre
 const selector = value('--slides') || 'all'
 const slides = selector === 'all' ? [1] : selector.split('-').map(Number)
 const dpi = Number(value('--dpi'))
-process.stdout.write(JSON.stringify({ schemaVersion: 'pptx-contact-diff/v1', status: 'success', source: identity(source), candidate: identity(candidate), outputPath: output, output, scope: { requested: selector, slides, basis: 'source-slides' }, render: { path: output, dpi, width: 100, height: 56 }, agentReview: agentReviewOutput ? { status: 'success', path: agentReviewOutput, renderDpi: dpi, layoutDpi: agentReviewDpi, width: 50, height: 28, cacheReuse: 'same-render-dpi-page-cache' } : undefined, summary: { pairCount: slides.length, dpi, scopeMode: selector === 'all' ? 'all-slides' : 'selected-slides' }, agentGate: { passed: true, status: 'pass', pairCount: slides.length } }))
+process.stdout.write(JSON.stringify({ schemaVersion: 'pptx-contact-diff/v1', status: 'success', baseline: identity(source), target: identity(candidate), outputPath: output, output, scope: { requested: selector, slides, basis: 'baseline-slides' }, render: { path: output, dpi, width: 100, height: 56 }, agentReview: agentReviewOutput ? { status: 'success', path: agentReviewOutput, renderDpi: dpi, layoutDpi: agentReviewDpi, width: 50, height: 28, cacheReuse: 'same-render-dpi-page-cache' } : undefined, summary: { pairCount: slides.length, dpi, scopeMode: selector === 'all' ? 'all-slides' : 'selected-slides' }, agentGate: { passed: true, status: 'pass', pairCount: slides.length } }))
 `,
   )
   chmodSync(path, 0o755)
@@ -97,8 +97,8 @@ test('compare reuses content-addressed render evidence across run directories', 
   assert.equal(readFileSync(join(root, 'count.txt'), 'utf8'), '1')
   assert.equal(first.pptxNovaCompare.cache.status, 'miss')
   assert.equal(second.pptxNovaCompare.cache.status, 'hit')
-  assert.equal(second.source.path, source)
-  assert.equal(second.candidate.path, candidate)
+  assert.equal(second.baseline.path, source)
+  assert.equal(second.target.path, candidate)
   assert.equal(second.pptxNovaCompare.agentReview.cacheReuse, 'same-render-dpi-page-cache')
   assert.equal(second.pptxNovaCompare.agentReview.layoutDpi, 96)
   assert.equal(second.pptxNovaCompare.agentReview.renderDpi, 192)
@@ -112,8 +112,8 @@ test('compare reuses content-addressed render evidence across run directories', 
     'cached Agent review bytes',
   )
   assert.equal(third.pptxNovaCompare.cache.status, 'hit')
-  assert.equal(third.source.path, copiedSource)
-  assert.equal(third.candidate.path, copiedCandidate)
+  assert.equal(third.baseline.path, copiedSource)
+  assert.equal(third.target.path, copiedCandidate)
   assert.deepEqual(analyzeCompareRendering(second), {
     partCount: 1,
     renderInvocations: 0,

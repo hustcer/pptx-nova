@@ -490,10 +490,10 @@ function validateMultipartManifest(report, blockers) {
       if (partReport.schemaVersion !== 'pptx-contact-diff/v1' || partReport.status !== 'success') {
         blockers.push(`${label} JSON report is not a successful pptx-contact-diff/v1 report`)
       }
-      if (!sameIdentity(evidenceIdentity(partReport.source), manifestSource)) {
+      if (!sameIdentity(evidenceIdentity(partReport.baseline), manifestSource)) {
         blockers.push(`${label} source identity does not match multipart manifest`)
       }
-      if (!sameIdentity(evidenceIdentity(partReport.candidate), manifestCandidate)) {
+      if (!sameIdentity(evidenceIdentity(partReport.target), manifestCandidate)) {
         blockers.push(`${label} candidate identity does not match multipart manifest`)
       }
       for (const outputPath of reportImagePaths(partReport)) {
@@ -764,25 +764,29 @@ function buildReport(args) {
 
   const compareReport = reportState.exists && reportState.isFile ? readJson(args.report) : null
   const multipart = compareReport?.schemaVersion === 'pptx-nova-compare-manifest/v1'
-  const sourceIdentity = validatedIdentity(compareReport?.source, 'compare source', blockers)
+  const sourceIdentity = validatedIdentity(
+    multipart ? compareReport?.source : compareReport?.baseline,
+    'compare source',
+    blockers,
+  )
   const candidateIdentity = validatedIdentity(
-    compareReport?.candidate,
+    multipart ? compareReport?.candidate : compareReport?.target,
     'compare candidate',
     blockers,
   )
   if (
-    compareReport?.sourcePath &&
+    compareReport?.baselinePath &&
     sourceIdentity.path &&
-    resolve(compareReport.sourcePath) !== sourceIdentity.path
+    resolve(compareReport.baselinePath) !== sourceIdentity.path
   ) {
-    blockers.push('compare report sourcePath does not match source identity')
+    blockers.push('compare report baselinePath does not match baseline identity')
   }
   if (
-    compareReport?.candidatePath &&
+    compareReport?.targetPath &&
     candidateIdentity.path &&
-    resolve(compareReport.candidatePath) !== candidateIdentity.path
+    resolve(compareReport.targetPath) !== candidateIdentity.path
   ) {
-    blockers.push('compare report candidatePath does not match candidate identity')
+    blockers.push('compare report targetPath does not match target identity')
   }
 
   const expectedCandidateSha256 = candidateIdentity.expectedSha256

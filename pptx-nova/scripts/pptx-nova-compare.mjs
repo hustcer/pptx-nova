@@ -392,8 +392,8 @@ function writeJsonAtomic(path, value) {
 function retargetContactDiffReport(report, args, output, agentReviewOutput, descriptor) {
   return {
     ...report,
-    source: { ...report.source, ...descriptor.source, path: args.source },
-    candidate: { ...report.candidate, ...descriptor.candidate, path: args.candidate },
+    baseline: { ...report.baseline, ...descriptor.source, path: args.source },
+    target: { ...report.target, ...descriptor.candidate, path: args.candidate },
     outputPath: output,
     output,
     render: report?.render ? { ...report.render, path: output } : report?.render,
@@ -434,8 +434,8 @@ function readCachedContactDiff(args, output, agentReviewOutput, cache) {
       cachedReport?.scope?.requested !== cache.descriptor.slides ||
       Number(cachedReport?.render?.dpi ?? cachedReport?.summary?.dpi) !== cache.descriptor.dpi ||
       Number(cachedReport?.agentReview?.layoutDpi ?? 0) !== cache.descriptor.agentReviewDpi ||
-      cachedReport?.source?.sha256 !== cache.descriptor.source.sha256 ||
-      cachedReport?.candidate?.sha256 !== cache.descriptor.candidate.sha256
+      cachedReport?.baseline?.sha256 !== cache.descriptor.source.sha256 ||
+      cachedReport?.target?.sha256 !== cache.descriptor.candidate.sha256
     ) {
       return null
     }
@@ -528,8 +528,8 @@ function validateContactDiffInputIdentity(identity, expectedPath, label) {
 
 function validateContactDiffInputIdentities(report, args) {
   return {
-    source: validateContactDiffInputIdentity(report.source, args.source, 'source'),
-    candidate: validateContactDiffInputIdentity(report.candidate, args.candidate, 'candidate'),
+    source: validateContactDiffInputIdentity(report.baseline, args.source, 'baseline'),
+    candidate: validateContactDiffInputIdentity(report.target, args.candidate, 'target'),
   }
 }
 

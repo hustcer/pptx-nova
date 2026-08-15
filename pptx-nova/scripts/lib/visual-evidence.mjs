@@ -115,8 +115,8 @@ function validateMultipartContract(compareReport) {
     const report = reportForPart(part)
     if (
       report?.status !== 'success' ||
-      !sameIdentity(report?.source, source) ||
-      !sameIdentity(report?.candidate, candidate) ||
+      !sameIdentity(report?.baseline, source) ||
+      !sameIdentity(report?.target, candidate) ||
       report?.outputPath !== part.path ||
       report?.render?.path !== part.path ||
       JSON.stringify(report?.scope?.slides ?? []) !== JSON.stringify(part.slides)
@@ -313,8 +313,8 @@ export function materializeCompareAliases({
     ) {
       throw new VisualEvidenceError('Single compare report is not bound to its output')
     }
-    validateInputIdentity(compareReport.source, 'Compare source')
-    validateInputIdentity(compareReport.candidate, 'Compare candidate')
+    validateInputIdentity(compareReport.baseline, 'Compare source')
+    validateInputIdentity(compareReport.target, 'Compare candidate')
     copyFileSync(compareOutputPath, aliasOutputPath)
     report = {
       ...compareReport,

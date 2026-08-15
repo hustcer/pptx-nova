@@ -312,10 +312,10 @@ writeFileSync(output, 'png:' + selector + ':' + dpi)
 process.stdout.write(JSON.stringify({
   schemaVersion: 'pptx-contact-diff/v1',
   status: 'success',
-  source: identity(valueAfter('--source')),
-  candidate: identity(valueAfter('--candidate')),
-  sourcePath: valueAfter('--source'),
-  candidatePath: valueAfter('--candidate'),
+  baseline: identity(valueAfter('--source')),
+  target: identity(valueAfter('--candidate')),
+  baselinePath: valueAfter('--source'),
+  targetPath: valueAfter('--candidate'),
   outputPath: output,
   summary: { pairCount, scopeMode: 'selected-slides', dpi },
   scope: { requested: selector, slides: Array.from({ length: pairCount }, (_, index) => start + index), basis: 'source-slides' },
@@ -3481,8 +3481,8 @@ const audit = {
   summary: {
     errorCount: 0,
     warningCount: 0,
-    sourceSlideCount: slideCount,
-    finalSlideCount: slideCount,
+    baselineSlideCount: slideCount,
+    targetSlideCount: slideCount,
     slideCountMatches: true
   },
   issues: []
@@ -3654,10 +3654,10 @@ if (args[0] === 'schema') {
   print({
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
-    source: identity(valueAfter('--source')),
-    candidate: identity(valueAfter('--candidate')),
-    sourcePath: valueAfter('--source'),
-    candidatePath: valueAfter('--candidate'),
+    baseline: identity(valueAfter('--source')),
+    target: identity(valueAfter('--candidate')),
+    baselinePath: valueAfter('--source'),
+    targetPath: valueAfter('--candidate'),
     outputPath: valueAfter('--output'),
     summary: { pairCount: selectedSlides.length, scopeMode, dpi },
     scope: { requested: selector || null, slides: selectedSlides, basis: 'source-slides' },
@@ -4539,10 +4539,10 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
   writeFileSync(output, 'compare:' + selector)
   print({
     schemaVersion: 'pptx-contact-diff/v1', status: 'success',
-    source: identity(after('--source')), candidate: identity(after('--candidate')),
-    sourcePath: after('--source'), candidatePath: after('--candidate'), outputPath: output,
-    summary: { sourceSlideCount: 21, candidateSlideCount: 21, pairCount: slides.length, scopeMode: 'selected-slides', dpi },
-    scope: { requested: selector, slides, basis: 'source-slides' },
+    baseline: identity(after('--source')), target: identity(after('--candidate')),
+    baselinePath: after('--source'), targetPath: after('--candidate'), outputPath: output,
+    summary: { baselineSlideCount: 21, targetSlideCount: 21, pairCount: slides.length, scopeMode: 'selected-slides', dpi },
+    scope: { requested: selector, slides, basis: 'baseline-slides' },
     agentGate: { passed: true, status: 'pass', scopeMode: 'selected-slides', pairCount: slides.length },
     render: { path: output, width: 100, height: 56 * slides.length, dpi }
   })
@@ -4968,10 +4968,10 @@ if (args[0] === 'pptx' && args[1] === 'contact-diff') {
   process.stdout.write(JSON.stringify({
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
-    source: identity(valueAfter('--source')),
-    candidate: identity(valueAfter('--candidate')),
-    sourcePath: valueAfter('--source'),
-    candidatePath: valueAfter('--candidate'),
+    baseline: identity(valueAfter('--source')),
+    target: identity(valueAfter('--candidate')),
+    baselinePath: valueAfter('--source'),
+    targetPath: valueAfter('--candidate'),
     outputPath: output,
     summary: { pairCount: 1, scopeMode: 'scoped', dpi, slides: valueAfter('--slides') },
     agentGate: { passed: true, status: 'pass', scopeMode: 'scoped', pairCount: 1 },
@@ -5183,10 +5183,10 @@ writeFileSync(output, 'contact diff png')
 process.stdout.write(JSON.stringify({
   schemaVersion: 'pptx-contact-diff/v1',
   status: 'success',
-  source: identity(valueAfter('--source')),
-  candidate: identity(valueAfter('--candidate')),
-  sourcePath: valueAfter('--source'),
-  candidatePath: valueAfter('--candidate'),
+  baseline: identity(valueAfter('--source')),
+  target: identity(valueAfter('--candidate')),
+  baselinePath: valueAfter('--source'),
+  targetPath: valueAfter('--candidate'),
   outputPath: output,
   summary: { pairCount: 1, scopeMode: 'all-slides', dpi: Number(valueAfter('--dpi')) },
   agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 1 },
@@ -5322,10 +5322,10 @@ if (dpi === 192) {
 writeFileSync(output, 'single 144 dpi png')
 process.stdout.write(JSON.stringify({
   schemaVersion: 'pptx-contact-diff/v1', status: 'success', outputPath: output,
-  source: identity(valueAfter('--source')),
-  candidate: identity(valueAfter('--candidate')),
-  sourcePath: valueAfter('--source'),
-  candidatePath: valueAfter('--candidate'),
+  baseline: identity(valueAfter('--source')),
+  target: identity(valueAfter('--candidate')),
+  baselinePath: valueAfter('--source'),
+  targetPath: valueAfter('--candidate'),
   summary: { pairCount: 12, scopeMode: 'all-slides', dpi },
   agentGate: { passed: true, status: 'pass', scopeMode: 'all-slides', pairCount: 12 },
   render: { path: output, width: 5000, height: 6000, dpi }
@@ -5812,7 +5812,7 @@ test('compare gate rejects a multipart part report with a different input identi
   const manifest = JSON.parse(readFileSync(join(runDir, 'refurbish-compare.json'), 'utf8'))
   const partReportPath = manifest.parts[1].reportPath
   const partReport = JSON.parse(readFileSync(partReportPath, 'utf8'))
-  partReport.candidate.sha256 = '0'.repeat(64)
+  partReport.target.sha256 = '0'.repeat(64)
   writeJson(partReportPath, partReport)
 
   const result = runNodeStatus(
@@ -5908,10 +5908,10 @@ function contactDiffReport(options) {
   const report = {
     schemaVersion: 'pptx-contact-diff/v1',
     status: 'success',
-    source: fileIdentity(sourcePptx),
-    candidate: fileIdentity(finalPptx),
-    sourcePath: sourcePptx,
-    candidatePath: finalPptx,
+    baseline: fileIdentity(sourcePptx),
+    target: fileIdentity(finalPptx),
+    baselinePath: sourcePptx,
+    targetPath: finalPptx,
     summary,
     agentGate,
     render: { path: compare, width: 100, height: 56, dpi: 192 },
@@ -6136,8 +6136,8 @@ test('shared visual evidence rejects empty manifests and stale declared hashes',
   writeFileSync(part, 'actual bytes')
   writeJson(partReport, {
     status: 'success',
-    source: fileIdentity(source),
-    candidate: fileIdentity(candidate),
+    baseline: fileIdentity(source),
+    target: fileIdentity(candidate),
     outputPath: part,
     render: { path: part },
     scope: { slides: [1] },
@@ -6180,8 +6180,8 @@ test('shared visual evidence rejects empty manifests and stale declared hashes',
     compareReport: {
       schemaVersion: 'pptx-contact-diff/v1',
       status: 'success',
-      source: fileIdentity(source),
-      candidate: fileIdentity(candidate),
+      baseline: fileIdentity(source),
+      target: fileIdentity(candidate),
       outputPath: single,
       render: { path: single },
     },

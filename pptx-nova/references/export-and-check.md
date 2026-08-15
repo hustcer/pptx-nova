@@ -127,12 +127,12 @@ path:
 ```bash
 xdoc pptx preview deck.pptx \
   --output-dir <run-dir>/previews \
-  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
 
 xdoc pptx preview deck.pptx --slides 25-38 \
   --output-dir <run-dir>/previews \
-  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
 
 xdoc pptx preview deck.pptx --layout 1 \

@@ -904,12 +904,12 @@ A translation delivery must include a before/after visual review:
 ```bash
 xdoc pptx preview source.pptx --slides <changed> \
   --output-dir <run-dir>/previews-source \
-  --contact-sheet <run-dir>/previews-source/contact-sheet.png \
+  --contact-sheet --contact-output <run-dir>/previews-source/contact-sheet.png \
   --overwrite --json > <run-dir>/preview-source.json
 
 xdoc pptx preview candidate.pptx --slides <changed> \
   --output-dir <run-dir>/previews-candidate \
-  --contact-sheet <run-dir>/previews-candidate/contact-sheet.png \
+  --contact-sheet --contact-output <run-dir>/previews-candidate/contact-sheet.png \
   --overwrite --json > <run-dir>/preview-candidate.json
 
 xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx \

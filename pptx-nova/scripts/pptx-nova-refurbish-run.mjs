@@ -1745,6 +1745,7 @@ function runPreviews(summary, args, artifacts, inspect) {
         '--output-dir',
         artifacts.previews,
         '--contact-sheet',
+        '--contact-output',
         artifacts.contactSheet,
         '--dpi',
         '192',

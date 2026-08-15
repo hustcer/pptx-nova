@@ -417,7 +417,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     ```bash
     xdoc pptx preview out.pptx \
       --output-dir <run-dir>/previews \
-      --contact-sheet <run-dir>/previews/contact-sheet.png \
+      --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
       --overwrite --json > <run-dir>/preview.json
     ```
 
@@ -427,7 +427,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
 
         node <skill-root>/scripts/pptx-nova-visual-review.mjs \
           --run-dir <run-dir> \
-          --contact-sheet <run-dir>/previews/contact-sheet.png \
+          --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
           --previews <run-dir>/previews \
           --slides-reviewed <n> \
           --check titleWrap=pass \
@@ -699,7 +699,7 @@ Use the same scope for both machine and PNG gates:
 xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 25-38 --json > <run-dir>/vision-diff.json
 xdoc pptx preview out.pptx --slides 25-38 \
   --output-dir <run-dir>/previews \
-  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
 node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
   --mode structural-edit \

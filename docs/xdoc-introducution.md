@@ -621,7 +621,7 @@ creates the candidate. Existing output paths require `--overwrite`.
 
 ```bash
 xdoc pptx vision-check updated.pptx --json
-xdoc pptx preview updated.pptx --output-dir updated-previews --contact-sheet updated-contact.png --json
+xdoc pptx preview updated.pptx --output-dir updated-previews --contact-sheet --contact-output updated-contact.png --json
 xdoc pptx diff deck.pptx updated.pptx --json
 ```
 
@@ -1004,7 +1004,7 @@ unsupported schema operations instead of reporting a partial success.
 
 ```bash
 xdoc pptx vision-check candidate.pptx --json > vision.json
-xdoc pptx preview candidate.pptx --output-dir candidate-previews --contact-sheet candidate-contact.png --json > preview.json
+xdoc pptx preview candidate.pptx --output-dir candidate-previews --contact-sheet --contact-output candidate-contact.png --json > preview.json
 ```
 
 Static checks are fast and deterministic. PNG previews provide the evidence
@@ -2100,7 +2100,7 @@ xdoc pptx apply --patch probe.patch.json --output probe.pptx --dry-run --json > 
 xdoc pptx apply --patch probe.patch.json --output probe.pptx --json > apply.json
 xdoc pptx inspect probe.pptx --json > inspect.json
 xdoc pptx vision-check probe.pptx --json > vision.json
-xdoc pptx preview probe.pptx --output-dir preview --contact-sheet contact.png --json > preview.json
+xdoc pptx preview probe.pptx --output-dir preview --contact-sheet --contact-output contact.png --json > preview.json
 xdoc pptx audit --from-sidecar probe.pptx.xdoc.json --json > audit.json
 ```
 

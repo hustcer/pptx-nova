@@ -675,6 +675,7 @@ function runPreview(summary, args, artifacts) {
       '--output-dir',
       artifacts.previews,
       '--contact-sheet',
+      '--contact-output',
       artifacts.contactSheet,
       '--overwrite',
       '--json',

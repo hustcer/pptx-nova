@@ -134,7 +134,7 @@ For targeted visual edits, run scoped machine and PNG gates first:
 xdoc pptx vision-diff --source input.pptx --candidate out.pptx --slides 25-38 --json > <run-dir>/vision-diff.json
 xdoc pptx preview out.pptx --slides 25-38 \
   --output-dir <run-dir>/previews \
-  --contact-sheet <run-dir>/previews/contact-sheet.png \
+  --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
 ```
 

@@ -289,7 +289,7 @@ xdoc pptx inspect candidate.pptx --json > candidate-inspect.json
 xdoc pptx vision-check candidate.pptx --json > vision.json
 xdoc pptx preview candidate.pptx \
   --output-dir previews \
-  --contact-sheet previews/contact-sheet.png \
+  --contact-sheet --contact-output previews/contact-sheet.png \
   --overwrite \
   --json > preview.json
 xdoc pptx diff source.pptx candidate.pptx --detail summary --json > diff.json

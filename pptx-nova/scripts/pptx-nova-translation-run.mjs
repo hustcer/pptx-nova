@@ -602,6 +602,7 @@ function runPreview(summary, args, artifacts, slideCount) {
       '--output-dir',
       artifacts.previews,
       '--contact-sheet',
+      '--contact-output',
       artifacts.contactSheet,
       '--dpi',
       '192',

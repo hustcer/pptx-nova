@@ -1263,7 +1263,7 @@ if (args[0] === 'schema') {
   print({ schemaVersion: 'pptx-vision/v1', status: 'pass', summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } }, issues: [], semanticSummary: { passed: true, issueCount: 0, sourceRuleCount: 82, normalizedRuleCount: 81 }, semanticIssues: [] })
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
   const outputDir = valueAfter('--output-dir')
-  const contactSheet = valueAfter('--contact-sheet')
+  const contactSheet = valueAfter('--contact-output')
   mkdirSync(outputDir, { recursive: true })
   writeFileSync(outputDir + '/slide-001.png', 'png')
   writeFileSync(contactSheet, 'contact')
@@ -3595,7 +3595,7 @@ if (args[0] === 'schema') {
   print(audit)
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
   const outputDir = valueAfter('--output-dir')
-  const contactSheet = valueAfter('--contact-sheet')
+  const contactSheet = valueAfter('--contact-output')
   mkdirSync(outputDir, { recursive: true })
   const pages = Array.from({ length: slideCount }, (_, index) => {
     const path = outputDir + '/slide-' + String(index + 1).padStart(3, '0') + '.png'
@@ -4417,7 +4417,7 @@ if (args[0] === 'schema') {
   })
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
   const outputDir = valueAfter('--output-dir')
-  const contactSheet = valueAfter('--contact-sheet')
+  const contactSheet = valueAfter('--contact-output')
   mkdirSync(outputDir, { recursive: true })
   writeFileSync(outputDir + '/slide-001.png', 'png')
   writeFileSync(contactSheet, 'contact')
@@ -4519,7 +4519,7 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
   print({ schemaVersion: 'pptx-vision-diff/v1', status: 'success', agentGate: { passed: true, blockerCount: 0, blockersByEvidenceClass: {} } })
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
   const dir = after('--output-dir')
-  const contact = after('--contact-sheet')
+  const contact = after('--contact-output')
   mkdirSync(dir, { recursive: true })
   const pages = Array.from({ length: 21 }, (_, index) => {
     const path = dir + '/slide-' + String(index + 1).padStart(3, '0') + '.png'
@@ -4733,7 +4733,7 @@ else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', st
 else if (args[1] === 'vision-diff') print({ schemaVersion: 'pptx-vision-diff/v1', status: 'success', agentGate: { passed: true, blockersByEvidenceClass: {} } })
 else if (args[1] === 'preview') {
   const dir = after('--output-dir')
-  const contact = after('--contact-sheet')
+  const contact = after('--contact-output')
   mkdirSync(dir, { recursive: true })
   writeFileSync(contact, 'contact')
   print({ schemaVersion: 'pptx-preview/v1', status: 'success', pages: [{ path: dir + '/missing.png', byteLength: 3, file: { path: dir + '/missing.png', status: 'ok', byteLength: 3, width: 100, height: 56 } }], contactSheet: { path: contact, byteLength: 7 } })

@@ -34,7 +34,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 
 最小检查清单：
 
-- `add-table` 必须有正数 `rows` / `cols`。
+- `add-table` 必须有正数 `rows` / `columns`。
 - `data` 每一行列数一致；不一致是数据错误，不靠视觉裁切掩盖。
 - `data` 行列数和声明表格尺寸不一致时，显式写 `resize: true`，否则修正尺寸或数据。
 - header、单位、时间范围、来源说明必须随表格进入 content/patch，不能只在备注里解释。
@@ -106,7 +106,7 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 }
 ```
 
-`row` / `col` 都是 0-based。`cells` 数组一次可以写多格；同一格的 `text` 与
+`row` / `column` 都是 0-based。`cells` 数组一次可以写多格；同一格的 `text` 与
 `formula` 互斥，同一 op 里同一格只能出现一次。
 
 ### 整表覆盖

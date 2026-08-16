@@ -338,7 +338,7 @@ PowerPoint，必须在 Windows fixture 补证，否则该维度保持 `inconclus
 }
 ```
 
-若调用方要求保留兼容转场，则用同一 operation 将 `type` 明确设为 `fade`（或 schema 披露的其他基础
+若调用方要求保留兼容转场，则用同一 operation 将 `kind` 明确设为 `fade`（或 schema 披露的其他基础
 转场），不要把它与 `clear: true` 混用。apply 后 inspect 必须回读为无 transition 或指定基础转场，且
 目标 slide 不得残留 Morph namespace、extension wrapper 或失效 Choice。
 

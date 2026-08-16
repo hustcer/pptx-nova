@@ -2132,6 +2132,23 @@ test('consulting-dark benchmark chart omits the unsupported none legend value', 
   assert.equal('legend' in chart, false)
 })
 
+test('consulting-dark benchmark table emits canonical nested cell coordinates', async () => {
+  const kit = await import(skillUrl('assets/deckkits/consulting-dark.kit.mjs'))
+  const content = JSON.parse(
+    readFileSync(skillPath('assets/examples/consulting-dark/content.json'), 'utf8'),
+  )
+  const result = kit.createDeck(content)
+  const cells = result.patch.ops
+    .filter((op) => op.op === 'set-table')
+    .flatMap((op) => op.cells ?? [])
+
+  assert.equal(cells.length, 32)
+  for (const cell of cells) {
+    assert.equal('col' in cell, false, 'legacy set-table.cells[].col')
+    assert.equal(Number.isInteger(cell.column), true, 'set-table.cells[].column must be an integer')
+  }
+})
+
 test('quarterly report patch uses the current chart legend enum', () => {
   const patch = JSON.parse(
     readFileSync(skillPath('assets/examples/quarterly-report.patch.json'), 'utf8'),
@@ -2157,6 +2174,11 @@ test('deck generator data-room chart omits the unsupported none legend value', (
 })
 
 test('deck generator layouts emit canonical aggregate patch payloads', () => {
+  const expectedTableCells = {
+    'executive-grid': 15,
+    'narrative-split': 15,
+    'data-room': 40,
+  }
   for (const layout of ['executive-grid', 'narrative-split', 'data-room']) {
     const result = spawnSync(
       process.execPath,
@@ -2165,6 +2187,7 @@ test('deck generator layouts emit canonical aggregate patch payloads', () => {
     )
     assert.equal(result.status, 0, result.stderr || result.stdout)
     const patch = JSON.parse(result.stdout)
+    let tableCellCount = 0
 
     for (const op of patch.ops) {
       if (op.op === 'add-shape') {
@@ -2194,8 +2217,18 @@ test('deck generator layouts emit canonical aggregate patch payloads', () => {
         ]) {
           assert.equal(legacyField in op, false, `${layout}: legacy set-table.${legacyField}`)
         }
+        tableCellCount += (op.cells ?? []).length
+        for (const cell of op.cells ?? []) {
+          assert.equal('col' in cell, false, `${layout}: legacy set-table.cells[].col`)
+          assert.equal(
+            Number.isInteger(cell.column),
+            true,
+            `${layout}: set-table.cells[].column must be an integer`,
+          )
+        }
       }
     }
+    assert.equal(tableCellCount, expectedTableCells[layout])
   }
 })
 
@@ -2232,6 +2265,25 @@ test('copyable reference examples avoid removed xdoc payload aliases', () => {
     /"effect"\s*:\s*\{\s*"kind"/.test(markdown),
     false,
     'shape effects must use shadow/glow/reflection/softEdge objects',
+  )
+  const tableReferences = [
+    skillPath('references/tables.md'),
+    skillPath('references/patch-ops-cheatsheet.md'),
+  ]
+    .map((path) => readFileSync(path, 'utf8'))
+    .join('\n')
+  for (const legacyTableField of ['`cols`', '`col`', '{ col, width }']) {
+    assert.equal(
+      tableReferences.includes(legacyTableField),
+      false,
+      `legacy public table field: ${legacyTableField}`,
+    )
+  }
+  assert.equal(/\brow,\s*col\b/.test(tableReferences), false, 'legacy public table field: row, col')
+  assert.equal(
+    markdown.includes('将 `type` 明确设为 `fade`'),
+    false,
+    'transition fallback must use set-slide-transition.kind',
   )
   assert.equal(
     /"source"\s*:\s*\{\s*"assetSource"/.test(markdown),

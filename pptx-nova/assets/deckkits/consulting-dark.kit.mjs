@@ -770,7 +770,7 @@ function makePageTypes(
         const fontColor = isHeader ? C.white : isUs ? C.primaryDk : isFirst ? C.textPri : C.textSec
         cells.push({
           row: r,
-          col: c,
+          column: c,
           style: {
             fill: { type: 'solid', color: fillColor },
             font: {

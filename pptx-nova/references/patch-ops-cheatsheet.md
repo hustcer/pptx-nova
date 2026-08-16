@@ -7,7 +7,7 @@ table setter 已全部并入对应的聚合 op
 
 > 通用：所有 patch op 都嵌进 `{ "schemaVersion": "pptx-patch/v1", "ops": [ { "op": "...", ... } ] }`。
 >
-> 通用：`slide` 字段是 **0-based** 索引；`paragraph` / `run` / `row` / `col` 同样 0-based。
+> 通用：`slide` 字段是 **0-based** 索引；`paragraph` / `run` / `row` / `column` 同样 0-based。
 >
 > 通用：长度字段（`x` / `y` / `w` / `h` / `width` / `height`）只接受带单位的
 > 字符串：`"1in"` / `"2cm"` / `"96px"` / `"72pt"` / `"914400emu"`。
@@ -135,7 +135,7 @@ table setter 已全部并入对应的聚合 op
 | `add-group`       | 创建空 group shape，可后续填子 shape                                                                         |
 | `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                                                 |
 | `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                                                         |
-| `add-table`       | 加表 `rows x cols`，可选 `data: [[...]]` 初始化                                                              |
+| `add-table`       | 加表 `rows x columns`，可选 `data: [[...]]` 初始化                                                           |
 | `add-chart`       | 加图表，详见 `charts.md`                                                                                     |
 
 ### add-freeform 可见性
@@ -370,10 +370,10 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
 | op                                | 用途                                                                                               |
 | --------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `add-table`                       | 加表（详见 `tables.md`）                                                                           |
-| `set-table`（`cells[].text`）     | 改单元格文字（`cells: [{ row, col, text }]`）                                                      |
-| `set-table`（`cells[].style`）    | 单元格 fill/font/border/margin/对齐（`cells: [{ row, col, style: {...} }]`）                       |
-| `set-table`（`cells[].formula`）  | 静态公式 SUM/AVG/COUNT/MIN/MAX（`cells: [{ row, col, formula: "SUM(B2:B4)" }]`）                   |
-| `set-table`（`rows` / `columns`） | 改行高 / 列宽（`rows: [{ row, height }]`，`columns: [{ col, width }]`）                            |
+| `set-table`（`cells[].text`）     | 改单元格文字（`cells: [{ row, column, text }]`）                                                   |
+| `set-table`（`cells[].style`）    | 单元格 fill/font/border/margin/对齐（`cells: [{ row, column, style: {...} }]`）                    |
+| `set-table`（`cells[].formula`）  | 静态公式 SUM/AVG/COUNT/MIN/MAX（`cells: [{ row, column, formula: "SUM(B2:B4)" }]`）                |
+| `set-table`（`rows` / `columns`） | 改行高 / 列宽（`rows: [{ row, height }]`，`columns: [{ column, width }]`）                         |
 | `set-table`（`style`）            | 表格 `firstRow` / `horizontalBanding` / `verticalBanding` / `styleId`                              |
 | `set-table`（`borders`）          | 区域批量加边框（`borders: [{ range: {...}, value: {...} }]`，outline / insideH / insideV / cross） |
 | `set-table-data`                  | 整表数据覆盖，`resize: true` 自动改行列数                                                          |

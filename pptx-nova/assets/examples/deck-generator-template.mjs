@@ -547,7 +547,7 @@ const panelBox = (slide, name, x, y, w, h, color = SURFACE_BG) => {
   })
 }
 
-const tableCellStyle = (slide, tableName, row, col, style) => {
+const tableCellStyle = (slide, tableName, row, column, style) => {
   ops.push({
     op: 'set-table',
     slide,
@@ -555,7 +555,7 @@ const tableCellStyle = (slide, tableName, row, col, style) => {
     cells: [
       {
         row,
-        col,
+        column,
         style: {
           verticalAnchor: 'middle',
           marginLeft: '0.1in',

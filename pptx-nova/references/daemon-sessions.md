@@ -92,7 +92,7 @@ session 可以并发执行：
 | `XDOC_DAEMON_AUTO_SPAWN`       | `1`                              | `0` / `false` 关闭 auto-spawn；CI/sandbox 隔离用                  |
 | `XDOC_DAEMON_SPAWN_TIMEOUT_MS` | `5000`                           | auto-spawn 后等 daemon 就绪的最长时间（毫秒）                     |
 | `XDOC_DAEMON_LOG`              | `$TMPDIR/xdoc-daemon.log`        | auto-spawn 出来的 daemon stdout/stderr 合并日志路径               |
-| `XDOC_DAEMON_ADDR`             | `127.0.0.1:0`（随机端口）        | data endpoint；仅接受 IPv4 loopback，其他 host 会拒绝             |
+| `XDOC_DAEMON_PORT`             | `0`（随机端口）                  | data endpoint 端口；host 固定为 IPv4 loopback `127.0.0.1`         |
 | `XDOC_DAEMON_STATE`            | `$TMPDIR/xdoc-daemon-state.json` | 状态文件路径（含 data/control port + token）；lock 自动加 `.lock` |
 | `XDOC_DAEMON_IDLE_MS`          | `300000`（5 分钟）               | 单个 session 空闲多久后淘汰                                       |
 | `XDOC_DAEMON_MAX_SESSIONS`     | `64`                             | 同时常驻的 session 上限（LRU 淘汰）                               |

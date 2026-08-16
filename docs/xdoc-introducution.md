@@ -1662,7 +1662,7 @@ Relevant environment variables are:
 | Variable                       | Purpose                                     |
 | ------------------------------ | ------------------------------------------- |
 | `XDOC_DAEMON_STATE`            | Override the state-file path                |
-| `XDOC_DAEMON_ADDR`             | Override the loopback listen address        |
+| `XDOC_DAEMON_PORT`             | Override the loopback listen port           |
 | `XDOC_DAEMON_IDLE_MS`          | Change the idle timeout                     |
 | `XDOC_DAEMON_MAX_SESSIONS`     | Change the session pool limit               |
 | `XDOC_DAEMON_AUTO_SPAWN`       | Disable automatic spawn with `0` or `false` |
@@ -1677,8 +1677,9 @@ deck sessions may execute concurrently within the disclosed connection limit.
 The daemon defaults to a loopback-only local RPC boundary and authenticates
 requests with a 256-bit bearer token stored in its state file. State replacement
 uses a temporary file and rename, with mode `0600` where supported; keep both the
-state and auto-spawn log private. Do not broaden `XDOC_DAEMON_ADDR` beyond a
-trusted local boundary. A cached session is authoritative for its keyed path
+state and auto-spawn log private. The daemon host is fixed to `127.0.0.1`;
+`XDOC_DAEMON_PORT` changes only the port and cannot broaden that local boundary.
+A cached session is authoritative for its keyed path
 until eviction and is not re-stat'ed or hash-checked on every cache hit, so use
 one-shot mode or exclusive path ownership when another process may replace an
 input file.

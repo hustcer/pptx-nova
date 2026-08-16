@@ -124,18 +124,20 @@ raw XML still needs the explicit raw-XML policy.
 
 ## Structured error envelope
 
-For the report families that support the shared error schema, a failed report
-has these required fields:
+For the report families that support the shared error schema, a failed command
+emits the dedicated `pptx-error/v1` report. `error.producedBy` names the report
+contract the command would have produced on success. The error object requires
+`code`, `severity`, `message`, `producedBy`, `suggestions`, and `docsRef`:
 
 ```json
 {
-  "schemaVersion": "pptx-dry-run/v1",
+  "schemaVersion": "pptx-error/v1",
   "status": "error",
   "error": {
-    "kind": "invalid_operation",
     "code": "invalid_operation",
     "severity": "error",
     "message": "shape selector matched multiple candidates",
+    "producedBy": "pptx-dry-run/v1",
     "opIndex": 0,
     "path": "ops[0].shape",
     "candidates": ["slide-0/shape-2", "slide-0/shape-7"],
@@ -154,24 +156,23 @@ has these required fields:
         "autoRetry": false
       }
     ],
-    "docsRef": "https://structurify.io/docs/errors/invalid_operation",
-    "autoRetry": true
+    "docsRef": "https://structurify.io/docs/errors/invalid_operation"
   },
   "opResults": [],
   "traces": []
 }
 ```
 
-The error object may also contain `suggestion`, `expected`, `actual`, and
-`replacement`. Each `suggestions[]` item contains a `fixPatch`, `reason`, a
+The error object may also contain `stage`, `expected`, `actual`, `replacement`,
+and `details`. Each `suggestions[]` item contains a `fixPatch`, `reason`, a
 `confidence` from 0 to 1, and its own `autoRetry` flag. Treat candidate-specific
 suggestions as mutually exclusive choices. Never apply the first suggestion by
 array order when the report describes an ambiguity.
 
-The shared error report schema currently accepts these report versions:
-`pptx-dry-run/v1`, `pptx-apply/v1`, `pptx-inspect/v1`, `pptx-select/v1`, and
-`pptx-diff/v1`. Other command families can have a specialized error envelope;
-preserve unknown fields instead of forcing them into this shape.
+`error.producedBy` values include `pptx-dry-run/v1`, `pptx-apply/v1`,
+`pptx-inspect/v1`, `pptx-select/v1`, and `pptx-diff/v1`. Other command families
+can have a specialized error envelope; preserve unknown fields instead of
+forcing them into this shape.
 
 ## Report families
 

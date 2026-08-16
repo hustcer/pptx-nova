@@ -16,8 +16,16 @@ const FORBIDDEN_PUBLIC_TERMS = [
   '0.0.0.0:8080'
   '/healthz'
   '/readyz'
-  '/v1/jobs'
   'authorized signature-removal policy'
+]
+
+# Unpublished service routes are denied by shape rather than by name. An
+# enumerated list only ever blocks the routes someone already met: when
+# `xdoc schema` began publishing `capabilities.forms` it carried five `/v1`
+# endpoints while just `/v1/jobs` was listed, so the other four would have
+# reached the public snapshot unchallenged.
+const FORBIDDEN_PUBLIC_PATTERNS = [
+  r#'/v1/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*'#
 ]
 
 const RUNTIME_VERSION_PATTERN = r#'[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)? \([0-9a-f]{8}(?:-dirty)?\)'#
@@ -141,14 +149,38 @@ def assert-public-text [path: string, text: string] {
       error make {msg: $'public xdoc documentation contains maintainer-only or unpublished text: ($path) -> ($term)'}
     }
   }
+  for pattern in $FORBIDDEN_PUBLIC_PATTERNS {
+    let hit_capture = (['(?<hit>' $pattern ')'] | str join)
+    let hits = (
+      $text
+      | parse --regex $hit_capture
+      | get hit
+      | uniq
+      | sort
+    )
+    if not ($hits | is-empty) {
+      error make {
+        msg: $'public xdoc documentation contains maintainer-only or unpublished routes: ($path) -> ($hits | to json --raw)'
+      }
+    }
+  }
 }
 
+# The candidate snapshot and introduction are audited as the text this run is
+# about to write, not as whatever still sits on disk. `glob` yields absolute
+# paths while the two constants are repo-relative, so both sides are expanded
+# before they are compared: comparing them raw silently matched nothing and
+# fell through to `open --raw`, which audited the previous file and let a fresh
+# violation reach disk unchallenged whenever `--schema-file` pointed elsewhere.
 def audit-public-docs [schema_text: string, introduction_text: string] {
+  let snapshot_path = ($SNAPSHOT_PATH | path expand)
+  let introduction_path = ($INTRODUCTION_PATH | path expand)
   for path in (glob 'docs/xdoc-*') {
     let path_text = ($path | into string)
-    let text = if $path_text == $SNAPSHOT_PATH {
+    let expanded = ($path_text | path expand)
+    let text = if $expanded == $snapshot_path {
       $schema_text
-    } else if $path_text == $INTRODUCTION_PATH {
+    } else if $expanded == $introduction_path {
       $introduction_text
     } else {
       open --raw $path
@@ -208,5 +240,5 @@ def main [
     patchDefs: $defs_count
     schemaChanged: $schema_changed
     introductionChanged: $introduction_changed
-  }
+  } | table -t light
 }

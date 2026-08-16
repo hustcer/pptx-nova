@@ -59,7 +59,8 @@ lint:
 
 # Update xdoc schema
 schema:
-  @xdoc schema | from json | save -f docs/xdoc-schema.json; oxfmt docs/xdoc-schema.json
+  @xdoc schema | from json | save -f docs/xdoc-schema.json; oxfmt docs/xdoc-schema.json; \
+  nu tools/update-xdoc-public-docs.nu
 
 # Generate or check deterministic Brotli icon pack
 icon *OPTIONS: 

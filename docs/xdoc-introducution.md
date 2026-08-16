@@ -3,11 +3,11 @@
 > A compact native runtime for document conversion, editable PPTX execution,
 > rendering, validation, and auditable delivery.
 
-> **Runtime build verified for this document:** `v0.3.5 (71053ad7)`
+> **Runtime build verified for this document:** `v0.3.6 (5fe30221)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-08-10
+> **Verification date:** 2026-08-16
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
@@ -24,7 +24,7 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot is semantically equivalent to the
-runtime response for `v0.3.5 (71053ad7)`; JSON formatting may differ between the
+runtime response for `v0.3.6 (5fe30221)`; JSON formatting may differ between the
 checked-in file and the CLI output. Refresh the snapshot whenever the published
 binary identity changes.
 
@@ -521,7 +521,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.3.5 (71053ad7)
+0.3.6 (5fe30221)
 ```
 
 The top-level schema response identifies itself as:
@@ -529,7 +529,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.3.5 (71053ad7)"
+  "version": "0.3.6 (5fe30221)"
 }
 ```
 
@@ -2064,7 +2064,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.3.5 (71053ad7). Re-run the discovery
+This document is anchored to xdoc 0.3.6 (5fe30221). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

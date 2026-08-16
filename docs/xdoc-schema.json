@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.6 (5fe30221)",
+  "version": "0.3.6 (8db6dd35)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nAuthorization diagnostics:\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -12930,30 +12930,76 @@
             ],
             "aliases": [
               {
-                "alias": "subtitle",
-                "canonical": "subTitle"
+                "alias": "date",
+                "canonical": "dt"
               },
               {
-                "alias": "centerTitle",
-                "canonical": "ctrTitle"
+                "alias": "footer",
+                "canonical": "ftr"
               },
               {
-                "alias": "slideNumber",
+                "alias": "header",
+                "canonical": "hdr"
+              },
+              {
+                "alias": "slide-number",
                 "canonical": "sldNum"
+              },
+              {
+                "alias": "object",
+                "canonical": "obj"
+              },
+              {
+                "alias": "picture",
+                "canonical": "pic"
               },
               {
                 "alias": "table",
                 "canonical": "tbl"
               },
               {
-                "alias": "picture",
-                "canonical": "pic"
+                "alias": "clip-art",
+                "canonical": "clipArt"
+              },
+              {
+                "alias": "diagram",
+                "canonical": "dgm"
+              },
+              {
+                "alias": "slide-image",
+                "canonical": "sldImg"
+              },
+              {
+                "alias": "center-title",
+                "canonical": "ctrTitle"
+              },
+              {
+                "alias": "subtitle",
+                "canonical": "subTitle"
               }
             ],
             "fuzzySuggest": {
               "tool": "fuzzy_suggest",
               "candidateSource": "placeholderType",
               "aliasAware": true
+            },
+            "valueDescriptions": {
+              "title": "Title placeholder.",
+              "body": "Body text placeholder.",
+              "ctrTitle": "Centered title placeholder.",
+              "subTitle": "Subtitle placeholder.",
+              "dt": "Date placeholder.",
+              "ftr": "Footer placeholder.",
+              "sldNum": "Slide number placeholder.",
+              "obj": "Generic content object placeholder.",
+              "pic": "Picture placeholder.",
+              "chart": "Chart placeholder.",
+              "tbl": "Table placeholder.",
+              "clipArt": "Clip art placeholder.",
+              "media": "Media placeholder.",
+              "hdr": "Header placeholder.",
+              "dgm": "Diagram placeholder.",
+              "sldImg": "Slide image placeholder."
             }
           },
           "paragraphAlignment": {
@@ -13070,6 +13116,15 @@
               "tool": "fuzzy_suggest",
               "candidateSource": "verticalText",
               "aliasAware": true
+            },
+            "valueDescriptions": {
+              "horizontal": "Horizontal text mode (OOXML a:bodyPr vert=horz).",
+              "vertical": "Vertical text mode (OOXML a:bodyPr vert=vert).",
+              "vertical-270": "270-degree vertical text mode (OOXML a:bodyPr vert=vert270).",
+              "east-asian-vertical": "East Asian vertical text mode (OOXML a:bodyPr vert=eaVert).",
+              "mongolian-vertical": "Mongolian vertical text mode (OOXML a:bodyPr vert=mongolianVert).",
+              "word-art-vertical": "Vertical WordArt text mode (OOXML a:bodyPr vert=wordArtVert).",
+              "word-art-vertical-rtl": "Right-to-left vertical WordArt text mode (OOXML a:bodyPr vert=wordArtVertRtl)."
             }
           },
           "slideSize": {
@@ -13096,6 +13151,10 @@
               "tool": "fuzzy_suggest",
               "candidateSource": "slideSize",
               "aliasAware": true
+            },
+            "valueDescriptions": {
+              "standard": "PowerPoint Standard (4:3): 10 x 7.5 inches (9,144,000 x 6,858,000 EMU).",
+              "wide": "PowerPoint Widescreen (16:9): 13.333 x 7.5 inches (12,192,000 x 6,858,000 EMU)."
             }
           },
           "fillInputType": {
@@ -13187,6 +13246,12 @@
               "tool": "fuzzy_suggest",
               "candidateSource": "chartAxis",
               "aliasAware": true
+            },
+            "valueDescriptions": {
+              "category": "Category or date axis for category-based charts; not the scatter or bubble x axis.",
+              "value": "Value axis for category-based charts; not the scatter or bubble y axis.",
+              "x": "Horizontal value axis for scatter and bubble charts, independently addressed by bottom axPos.",
+              "y": "Vertical value axis for scatter and bubble charts, independently addressed by left axPos."
             }
           },
           "chartDataLabelPosition": {
@@ -22194,7 +22259,8 @@
                         "$ref": "#/$defs/chartData"
                       },
                       "dataEx": {
-                        "$ref": "#/$defs/chartExData"
+                        "$ref": "#/$defs/chartExData",
+                        "description": "Office chartEx data for waterfall, funnel, histogram, treemap, sunburst, and box-whisker charts; use data for classic chart kinds."
                       },
                       "h": {
                         "$ref": "#/$defs/length"
@@ -22855,6 +22921,7 @@
                     },
                     "required": ["op", "slide", "shape"],
                     "additionalProperties": false,
+                    "description": "This operation does not replace image content; replace an image by adding the new image with add-image and removing the old shape with remove-shape. Image source replacement is a planned extension.",
                     "allOf": [
                       {
                         "anyOf": [
@@ -23306,7 +23373,8 @@
                         "const": "replace-paragraph-text"
                       },
                       "expectedNodes": {
-                        "$ref": "#/$defs/structuredParagraphExpectedNodes"
+                        "$ref": "#/$defs/structuredParagraphExpectedNodes",
+                        "description": "i18n optimistic-concurrency guard: expected ordered paragraph node and style signatures; structural drift rejects the operation."
                       },
                       "paragraph": {
                         "type": "integer",
@@ -23323,13 +23391,16 @@
                         "description": "0-based slide index."
                       },
                       "sourceHash": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "i18n optimistic-concurrency guard: sha256 digest of the exact source paragraph text expected in the current PPTX."
                       },
                       "sourceText": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "i18n optimistic-concurrency guard: exact source paragraph text expected in the current PPTX."
                       },
                       "unitId": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
                       }
                     },
                     "required": [
@@ -23455,7 +23526,8 @@
                         "$ref": "#/$defs/chartData"
                       },
                       "dataEx": {
-                        "$ref": "#/$defs/chartExData"
+                        "$ref": "#/$defs/chartExData",
+                        "description": "Office chartEx data for waterfall, funnel, histogram, treemap, sunburst, and box-whisker charts; use data for classic chart kinds."
                       },
                       "shape": {
                         "$ref": "#/$defs/shapeSelector"
@@ -23685,16 +23757,19 @@
                         "description": "0-based slide index."
                       },
                       "sourceHash": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "i18n optimistic-concurrency guard: sha256 digest of the exact source paragraph text expected in the current PPTX."
                       },
                       "sourceText": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "i18n optimistic-concurrency guard: exact source paragraph text expected in the current PPTX."
                       },
                       "text": {
                         "type": "string"
                       },
                       "unitId": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
                       }
                     },
                     "required": ["op", "slide", "shape", "paragraph", "run"],
@@ -32149,7 +32224,8 @@
           {
             "op": "set-image",
             "category": "media",
-            "summary": "Update picture crop offsets and preset mask geometry; null crop clears all crop offsets and null maskPreset restores rect.",
+            "summary": "Update image crop offsets and preset mask geometry; null crop clears all crop offsets and null maskPreset restores rect.",
+            "description": "This operation does not replace image content; replace an image by adding the new image with add-image and removing the old shape with remove-shape. Image source replacement is a planned extension.",
             "required": ["op", "slide", "shape"],
             "constraints": [
               {
@@ -41059,9 +41135,7 @@
         ],
         "properties": {
           "schemaVersion": {
-            "type": "string",
-            "enum": ["pptx-vision/v1"],
-            "strict": true
+            "const": "pptx-vision/v1"
           },
           "status": {
             "type": "string",
@@ -43543,9 +43617,7 @@
         "required": ["schemaVersion", "status", "sidecar", "patchOpCount"],
         "properties": {
           "schemaVersion": {
-            "type": "string",
-            "enum": ["pptx-audit/v1"],
-            "strict": true
+            "const": "pptx-audit/v1"
           },
           "status": {
             "type": "string",
@@ -43604,9 +43676,7 @@
         "required": ["schemaVersion", "status", "sidecar"],
         "properties": {
           "schemaVersion": {
-            "type": "string",
-            "enum": ["pptx-rollback/v1"],
-            "strict": true
+            "const": "pptx-rollback/v1"
           },
           "status": {
             "type": "string",
@@ -44853,9 +44923,7 @@
         ],
         "properties": {
           "schemaVersion": {
-            "type": "string",
-            "enum": ["pdf-inspect/v1"],
-            "strict": true
+            "const": "pdf-inspect/v1"
           },
           "sourcePath": {
             "type": ["string", "null"]
@@ -45454,7 +45522,7 @@
         "Use `xdoc daemon start` to run the foreground loopback daemon for Agent multi-step PPTX editing.",
         "Use `xdoc daemon status --json` to distinguish running, stopping, draining, stale, and stopped lifecycle states.",
         "Use `xdoc daemon stop` to ask the reachable daemon to shut down and remove its state file.",
-        "The daemon listens only on IPv4 loopback. XDOC_DAEMON_ADDR selects the data endpoint; the state file publishes both port and controlPort.",
+        "The daemon listens only on IPv4 loopback. XDOC_DAEMON_PORT selects the data endpoint port; the state file publishes both port and controlPort.",
         "Each TCP connection carries one request. Data-plane connections are bounded by maxConnections; saturation leaves later connections in the kernel listen backlog instead of creating an unbounded application queue.",
         "Status and shutdown use a dedicated control endpoint outside data-plane admission, so shutdown remains reachable while every data connection is occupied.",
         "Data frames are bounded by maxFrameBytes. Control frames use controlMaxFrameBytes and controlFrameTimeoutMs so a partial control client cannot monopolize lifecycle operations.",
@@ -45465,7 +45533,7 @@
       ],
       "environment": {
         "XDOC_DAEMON_STATE": "Override daemon state file path.",
-        "XDOC_DAEMON_ADDR": "Override the loopback port using 127.0.0.1:<port>, default 127.0.0.1:0; other hosts are rejected.",
+        "XDOC_DAEMON_PORT": "Override the IPv4 loopback data-plane port, default 0 for an OS-assigned port; the host is fixed to 127.0.0.1.",
         "XDOC_DAEMON_IDLE_MS": "Override deck session idle timeout, default 300000.",
         "XDOC_DAEMON_MAX_SESSIONS": "Override maximum deck sessions, default 64.",
         "XDOC_DAEMON_MAX_CONNECTIONS": "Override maximum active data-plane TCP connections, default 64. The dedicated control endpoint is not counted.",
@@ -46026,42 +46094,6 @@
     "liveReports": "Consumers should discover the current executable schema before validating newly emitted reports.",
     "historicalSidecars": "audit and replay preserve embedded historical report objects verbatim and do not revalidate them against the current live-report schema."
   },
-  "invocation": {
-    "canonical": "xdoc convert <inputs...> [options]",
-    "shorthand": "xdoc <inputs...> [options]",
-    "extract": "xdoc extract <inputs...> --parts <parts>",
-    "check": "xdoc check <inputs...> --checks <checks> [--target-office 2007|2010|2013|2016|2019|2021|365]",
-    "authVerify": "xdoc auth verify --license <path>",
-    "pptx": "xdoc pptx new|apply --patch <patch.json> --output <out.pptx>",
-    "pptxRecipe": "xdoc pptx recipe --recipe <recipe.json> --compile --json",
-    "pptxDiff": "xdoc pptx diff before.pptx after.pptx --json",
-    "pptxMorphCheck": "xdoc pptx morph-check deck.pptx [--from-slide 1 --to-slide 2] --json",
-    "pptxI18nScan": "xdoc pptx i18n-scan --source candidate.pptx --mode candidate --units-file i18n-scan-source.json --data translations.json --output i18n-candidate.json --json",
-    "pptxI18nStyleDiff": "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json",
-    "pptxI18nPlan": "xdoc pptx i18n-plan --source old.pptx --units-file i18n-scan-source.json --data translations.json --output i18n-plan.json --json",
-    "pptxI18nAnchorDraft": "xdoc pptx i18n-anchor-draft --source old.pptx --units-file i18n-scan-source.json --data translations.json --output i18n-anchor-draft.json --json [--unit-id <unitId>]",
-    "pptxI18nTextPlan": "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
-    "pptxReplaceText": "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
-    "pptxReplaceChartText": "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
-    "pptxContactDiff": "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png [--map reference-map.json] [--slides 1,3-5] [--dpi 192] --json",
-    "pptxPreview": "xdoc pptx preview deck.pptx --output-dir shots/ [--slides 1,3-5 | --layout 1] [--contact-sheet] [--contact-output contact-sheet.png] [--dpi 192] --json",
-    "pptxVisualVerify": "xdoc pptx visual-audit --candidate new.pptx [--reference approved.pptx] --output-dir evidence [--slides 1,3-5] [--dpi 144] [--channel-threshold 26] --json",
-    "pptxRefurbishAudit": "xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json",
-    "pptxRefurbishSkin": "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json",
-    "pptxChromeDetect": "xdoc pptx chrome-detect deck.pptx --json",
-    "pptxChromeRemove": "xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx",
-    "pptxChromeApply": "xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx",
-    "pptxCopyFrom": "xdoc pptx slide-copy target.pptx --source source.pptx [--slides 1,3,5-8 | --all] [--template-strategy register-source|rebind-target] [--size-strategy require-match] --output out.pptx --json",
-    "pptxReplay": "xdoc pptx replay --from-sidecar <out.pptx.xdoc.json> --output <recovered.pptx>",
-    "pptxAudit": "xdoc pptx audit --from-sidecar <out.pptx.xdoc.json> --json",
-    "pptxRollback": "xdoc pptx rollback --from-sidecar <out.pptx.xdoc.json> --output <recovered.pptx>",
-    "pdfInspect": "xdoc pdf inspect <file.pdf> --json --pretty",
-    "daemon": "xdoc daemon start|status|stop",
-    "jsonRpc": "xdoc json-rpc",
-    "mcp": "xdoc mcp",
-    "help": "xdoc --help",
-    "schema": "xdoc schema"
-  },
   "discovery": {
     "help": "xdoc --help",
     "schemaCommand": "xdoc schema",
@@ -46082,7 +46114,28 @@
   },
   "capabilities": {
     "schemaVersion": "capabilities/v1",
-    "documentKinds": ["docx", "html", "pdf", "pptx", "xlsx"],
+    "documentKinds": [
+      {
+        "kind": "docx",
+        "status": "reserved"
+      },
+      {
+        "kind": "html",
+        "status": "enabled"
+      },
+      {
+        "kind": "pdf",
+        "status": "enabled"
+      },
+      {
+        "kind": "pptx",
+        "status": "enabled"
+      },
+      {
+        "kind": "xlsx",
+        "status": "reserved"
+      }
+    ],
     "outputs": {
       "convertTargets": ["json", "md", "pdf", "png", "text"],
       "extractParts": ["fonts", "links", "map", "notes", "resources"],

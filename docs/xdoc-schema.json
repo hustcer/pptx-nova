@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.7 (95eeeab0)",
+  "version": "0.3.7 (67d8c920)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nAuthorization diagnostics:\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -4039,6 +4039,18 @@
           ],
           "positionals": [],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "create",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": ["xdoc pptx new --output out.pptx"]
         },
         "apply": {
@@ -4180,6 +4192,18 @@
           ],
           "positionals": [],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "create-or-modify-by-input",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx --overwrite",
             "xdoc pptx apply --patch patch.json --dry-run"
@@ -4259,6 +4283,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx inspect deck.pptx --json"]
         },
         "morph-check": {
@@ -4370,6 +4398,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx morph-check deck.pptx --from-slide 1 --to-slide 2 --json"]
         },
         "select": {
@@ -4461,6 +4493,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx select deck.pptx --query '{\"textRegex\":\"Revenue\"}' --json"]
         },
         "preview": {
@@ -4594,6 +4630,19 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "unsupported",
+            "productWriteCondition": "--layout"
+          },
           "examples": [
             "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json"
           ]
@@ -4727,6 +4776,10 @@
           ],
           "positionals": [],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": [
             "xdoc pptx visual-audit --candidate new.pptx --reference old.pptx --output-dir evidence --json"
           ]
@@ -4831,6 +4884,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx vision-check deck.pptx --json"]
         },
         "diff": {
@@ -4941,6 +4998,10 @@
             }
           ],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx diff old.pptx new.pptx --json"]
         },
         "i18n-style-diff": {
@@ -5056,6 +5117,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": [
             "xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json"
           ]
@@ -5277,6 +5342,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": [
             "xdoc pptx i18n-scan --source old.pptx --source-lang multi --mode source --output i18n-scan.json --json"
           ]
@@ -5433,6 +5502,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": [
             "xdoc pptx i18n-anchor-draft --source old.pptx --units-file scan.json --data translations.json --unit-id ppt/slides/slide1.xml#shape:2#p:0 --json"
           ]
@@ -5603,12 +5676,16 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": [
             "xdoc pptx i18n-plan --source old.pptx --units-file scan.json --data translations.json --output i18n-plan.json --json"
           ]
         },
         "replace-text": {
-          "usage": "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json [--slides 1,3-5]",
+          "usage": "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json [--dry-run] [--slides 1,3-5]",
           "outputKind": "pptx",
           "inputs": [
             "source PPTX",
@@ -5639,7 +5716,7 @@
             },
             "filesystem": {
               "source": "read-only",
-              "output": "existing output PPTX requires --overwrite"
+              "output": "existing output PPTX requires --overwrite; --dry-run does not publish an output"
             },
             "stderr": {
               "usage": "errors-only"
@@ -5690,6 +5767,13 @@
               "style": "flag"
             },
             {
+              "name": "dry-run",
+              "type": "bool",
+              "description": "Validate and report the selected mutation without publishing its output artifact",
+              "required": false,
+              "style": "flag"
+            },
+            {
               "name": "json",
               "type": "bool",
               "description": "Emit the selected action's documented machine-readable result on stdout",
@@ -5720,6 +5804,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "translate",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json"
           ]
@@ -5883,6 +5979,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "translate",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json"
           ]
@@ -6000,6 +6108,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json"]
         },
         "vision-diff": {
@@ -6103,6 +6215,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx vision-diff --source old.pptx --candidate new.pptx --json"]
         },
         "contact-diff": {
@@ -6244,6 +6360,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": [
             "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png --dpi 192 --json"
           ]
@@ -6353,6 +6473,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json"]
         },
         "refurbish-skin": {
@@ -6476,6 +6600,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "refurbish",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "unsupported"
+          },
           "examples": [
             "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json"
           ]
@@ -6551,6 +6687,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx chrome-detect deck.pptx --json"]
         },
         "chrome-remove": {
@@ -6646,6 +6786,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx"
           ]
@@ -6769,6 +6921,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx"
           ]
@@ -6893,6 +7057,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx remap-theme deck.pptx --theme corporate-blue --scope text,shapes --output out.pptx"
           ]
@@ -7004,6 +7180,18 @@
             }
           ],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx template-fill data.json --template template.pptx --bindings bindings.json --output out.pptx"
           ]
@@ -7067,6 +7255,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx check-brand deck.pptx --brand brand.json --json"]
         },
         "apply-brand": {
@@ -7171,6 +7363,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": ["xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx"]
         },
         "slide-copy": {
@@ -7308,6 +7512,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": [
             "xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx"
           ]
@@ -7401,6 +7617,10 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx extract-style deck.pptx --output style.json --json"]
         },
         "import-template": {
@@ -7501,6 +7721,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "embedded-editable-template-pptx",
+            "dryRun": "unsupported"
+          },
           "examples": [
             "xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json"
           ]
@@ -7557,6 +7789,10 @@
             }
           ],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx catalog shapes --json", "xdoc pptx catalog themes --json"]
         },
         "swap-theme": {
@@ -7652,6 +7888,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": ["xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx"]
         },
         "swap-style": {
@@ -7748,6 +7996,18 @@
             }
           ],
           "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
           "examples": ["xdoc pptx swap-style deck.pptx --style consulting --output out.pptx"]
         },
         "recipe": {
@@ -7812,6 +8072,10 @@
           ],
           "positionals": [],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx recipe --recipe recipe.json --compile --json"]
         },
         "replay": {
@@ -7896,6 +8160,18 @@
           ],
           "positionals": [],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "unsupported"
+          },
           "examples": ["xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx"]
         },
         "audit": {
@@ -7946,6 +8222,10 @@
           ],
           "positionals": [],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": false,
+            "taskAuthorization": "not-applicable"
+          },
           "examples": ["xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json"]
         },
         "rollback": {
@@ -8024,10 +8304,90 @@
           ],
           "positionals": [],
           "acceptsInputPositional": false,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "unsupported"
+          },
           "examples": [
             "xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx"
           ]
         }
+      },
+      "writeAuthorization": {
+        "schemaVersion": "xdoc-pptx-write-authorization/v1",
+        "productWriteActions": [
+          "new",
+          "apply",
+          "replay",
+          "preview",
+          "rollback",
+          "slide-copy",
+          "swap-style",
+          "swap-theme",
+          "apply-brand",
+          "remap-theme",
+          "chrome-apply",
+          "replace-text",
+          "chrome-remove",
+          "template-fill",
+          "refurbish-skin",
+          "import-template",
+          "replace-chart-text"
+        ],
+        "pipeline": [
+          "freeze-input-bytes",
+          "admission-task-authorization",
+          "solve-obligation-consumption-plan",
+          "acquire-and-bind-service-signature-when-needed",
+          "execute-mutation",
+          "measure-actual-output",
+          "final-task-authorization",
+          "materialize-watermark-and-obligations",
+          "verify-published-carrier",
+          "atomic-publish"
+        ],
+        "obligationConsumption": {
+          "availability": "active",
+          "plans": [
+            {
+              "id": "materialize-only",
+              "blockingReason": null
+            },
+            {
+              "id": "preserve-exact",
+              "blockingReason": null
+            },
+            {
+              "id": "needs-signature",
+              "blockingReason": "provenance_signer_required"
+            },
+            {
+              "id": "reject-rewrite-required",
+              "blockingReason": "provenance_signer_required"
+            },
+            {
+              "id": "reject-tampered",
+              "blockingReason": "trial_metadata_tampered"
+            },
+            {
+              "id": "reject-unverifiable",
+              "blockingReason": "trial_provenance_unverifiable"
+            }
+          ],
+          "offlinePreservation": "exact-bytes",
+          "monotonicMergeCheck": "required",
+          "slideIdReservation": "carrier-seeded"
+        },
+        "readOnlyAndArtifactActions": "do not enter editable-PPTX Task Authorization",
+        "denial": "no editable PPTX writer invocation"
       },
       "catalogs": {
         "shapes": {
@@ -31585,7 +31945,15 @@
                     "kind": "matrix-2x2"
                   },
                   "op": "add-slide"
-                },
+                }
+              ]
+            }
+          },
+          {
+            "title": "More high-level recipe slides and deck styling",
+            "patch": {
+              "schemaVersion": "pptx-patch/v1",
+              "ops": [
                 {
                   "recipe": {
                     "title": "Sales process",
@@ -46309,7 +46677,7 @@
   },
   "authContract": {
     "schemaVersion": "xdoc-auth-contract-registry/v1",
-    "contractVersion": "2026.08.4",
+    "contractVersion": "2026.08.6",
     "decisionSchemaVersion": "xdoc-authorization-decision/v1",
     "buildProfile": "development",
     "buildId": "dev",
@@ -47048,6 +47416,107 @@
       "maxPolicies": 8,
       "maxEnvelopeBytes": 65536
     },
+    "provenanceProtocol": {
+      "availability": "active",
+      "authorizationSnapshotSchemaVersion": "xdoc-task-authorization-snapshot/v1",
+      "authorizationSnapshotCanonicalFieldOrder": [
+        "schemaVersion",
+        "product",
+        "feature",
+        "outputType",
+        "scope",
+        "inputDigest",
+        "taskDigest",
+        "credentialSetDigest",
+        "restrictionPolicySetDigest",
+        "existingObligationSetDigest",
+        "selectedModeDigest",
+        "watermarkVersion"
+      ],
+      "signingRequestSchemaVersion": "xdoc-provenance-signing-request/v1",
+      "signingRequestCanonicalFieldOrder": [
+        "schemaVersion",
+        "authorizationSnapshotDigest",
+        "feature",
+        "outputType",
+        "watermarkVersion",
+        "scope",
+        "existingObligationEnvelopes"
+      ],
+      "cliSemanticInputOrdering": [
+        {
+          "feature": "create",
+          "ordering": "semantic-order"
+        },
+        {
+          "feature": "modify",
+          "ordering": "semantic-order"
+        },
+        {
+          "feature": "convert",
+          "ordering": "semantic-order"
+        },
+        {
+          "feature": "refurbish",
+          "ordering": "semantic-order"
+        },
+        {
+          "feature": "translate",
+          "ordering": "semantic-order"
+        }
+      ],
+      "selectedMode": {
+        "schemaVersion": "xdoc-selected-mode/v1",
+        "canonicalFieldOrder": [
+          "schemaVersion",
+          "source",
+          "credentialEnvelopeDigest",
+          "licenseId",
+          "entitlement",
+          "capabilities",
+          "effective"
+        ],
+        "entitlementCanonicalFieldOrder": [
+          "enabled",
+          "watermark",
+          "maxTotalInputBytes",
+          "maxSlides",
+          "trial"
+        ],
+        "capabilityCanonicalFieldOrder": [
+          "allowCI",
+          "allowSharedServer",
+          "allowServiceUse",
+          "repairTrialProvenance",
+          "maxConcurrency",
+          "maxBatchSize"
+        ],
+        "effectiveCanonicalFieldOrder": [
+          "watermark",
+          "trial",
+          "maxTotalInputBytes",
+          "maxSlides",
+          "watermarkCarrier",
+          "requiresProvenance"
+        ],
+        "freeCredentialEnvelopeDigestSentinel": "free-baseline",
+        "diagnosticOnlyExcludedFields": ["fallbackFromCommercial"]
+      },
+      "taskInputDigestContext": "xdoc-task-input/v1",
+      "inputSetDigestContext": "xdoc-task-input-set/v1",
+      "credentialEnvelopeDigestContext": "xdoc-credential-envelope/v1",
+      "credentialSetDigestContext": "xdoc-credential-set/v1",
+      "selectedModeDigestContext": "xdoc-selected-mode/v1",
+      "snapshotDigestContext": "xdoc-task-authorization-snapshot/v1",
+      "requestDigestContext": "xdoc-provenance-signing-request/v1",
+      "taskRefDigestContext": "xdoc-provenance-task-ref/v1",
+      "obligationIdDigestContext": "xdoc-provenance-obligation-id/v1",
+      "digestBytes": 32,
+      "requestMaxBytes": 524288,
+      "taskRefEncoding": "tsk_ + full-base64url-no-pad",
+      "obligationIdEncoding": "obl_ + full-base64url-no-pad",
+      "responseBinding": "identical-second-local-solve-and-recomputed-obligation-set-normalization"
+    },
     "watermarkObligation": {
       "availability": "reserved",
       "schemaVersion": "xdoc-watermark-obligations/v1",
@@ -47063,6 +47532,38 @@
         "partName": "/xdoc/watermark-obligations.json",
         "contentType": "application/vnd.xdoc.watermark-obligations+json",
         "relationshipType": "https://schemas.xdoc.dev/relationships/watermark-obligations/2026"
+      },
+      "localConsumption": {
+        "availability": "active",
+        "plans": [
+          {
+            "id": "materialize-only",
+            "blockingReason": null
+          },
+          {
+            "id": "preserve-exact",
+            "blockingReason": null
+          },
+          {
+            "id": "needs-signature",
+            "blockingReason": "provenance_signer_required"
+          },
+          {
+            "id": "reject-rewrite-required",
+            "blockingReason": "provenance_signer_required"
+          },
+          {
+            "id": "reject-tampered",
+            "blockingReason": "trial_metadata_tampered"
+          },
+          {
+            "id": "reject-unverifiable",
+            "blockingReason": "trial_provenance_unverifiable"
+          }
+        ],
+        "offlinePreservation": "exact-bytes",
+        "monotonicMergeCheck": "required",
+        "slideIdReservation": "carrier-seeded"
       }
     },
     "diagnosticsKeyRotation": {

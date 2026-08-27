@@ -1,7 +1,7 @@
 {
   "name": "xdoc",
-  "version": "0.3.8 (92ea7636)",
-  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nAuthorization diagnostics:\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
+  "version": "0.3.9 (f556ce08)",
+  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nAuthorization diagnostics:\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
       "description": "Convert document file(s) to one or more output formats.",
@@ -1695,9 +1695,15 @@
         {
           "name": "output",
           "type": "path",
-          "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+          "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
           "required": false,
           "short": "o"
+        },
+        {
+          "name": "to",
+          "type": "string",
+          "description": "Final product for replace-text, replace-chart-text, or refurbish-skin: pptx|pdf|png (default: pptx)",
+          "required": false
         },
         {
           "name": "output-dir",
@@ -1905,11 +1911,14 @@
         "xdoc pptx i18n-anchor-draft --source old.pptx --units-file scan.json --data translations.json --unit-id ppt/slides/slide1.xml#shape:2#p:0 --json",
         "xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json",
         "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
+        "xdoc pptx replace-text --source old.pptx --data replacements.json --to pdf --output updated.pdf --json",
         "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
+        "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --to png --output updated-images --visible-cache-only --json",
         "xdoc pptx vision-diff --source old.pptx --candidate new.pptx --json",
         "xdoc pptx contact-diff --source old.pptx --candidate new.pptx --output contact-diff.png --dpi 192 --json",
         "xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json",
         "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json",
+        "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf --json",
         "xdoc pptx chrome-detect deck.pptx --json",
         "xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx",
         "xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx",
@@ -1946,7 +1955,7 @@
       },
       "usageNotes": [
         "PPTX actions execute inside the xdoc runtime and share its versioned schema and report contract.",
-        "Output surfaces follow one rule set: the primary artifact (declared per action as subcommands.<action>.outputKind) always uses --output; asset-dir actions write a directory through --output-dir and never take --output; a supplementary structured report next to a primary artifact uses --report. No action takes --output and --output-dir together.",
+        "Output surfaces follow one rule set: the primary artifact uses --output; outputKind is the default and outputKinds lists any allowed --to selection. For replace-text, replace-chart-text, and refurbish-skin, --to png treats --output as the transactional PNG directory. Other asset-dir actions write through --output-dir and never take --output; a supplementary structured report next to a primary artifact uses --report. No action takes --output and --output-dir together.",
         "Use `xdoc pptx <action> --help` for a low-cost synopsis generated from that action's schema usage, option projections, and examples; use `xdoc schema` for the complete machine contract.",
         "Use action new to create a minimal deck, apply to patch an existing or new deck, or inspect to summarize an existing deck.",
         "For inspect, pass either `xdoc pptx inspect deck.pptx --json` or `xdoc pptx inspect --input deck.pptx --json`.",
@@ -1959,11 +1968,11 @@
         "Use `xdoc pptx i18n-plan --source old.pptx --units-file i18n-scan-source.json --data translations.json --output i18n-plan.json --json` as the translation planner: agents receive a compact stdout result and read the persisted full plan only when materializing its execution artifacts. Reviewed slide/layout/master units with reviewDecision:\"translate\" route through the same guarded textPlan, replaceText, or replaceChartText primitives.",
         "When i18n-plan returns mixed-style-no-anchor, use its unit-specific draftCommand or run `xdoc pptx i18n-anchor-draft --source old.pptx --units-file i18n-scan-source.json --data translations.json --json`: merge only high-confidence translationsDraft anchors by unitId, then rerun i18n-plan. Drafts are never executable patches.",
         "Use `xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json` as a lower-level text-only fallback or execution primitive: it emits run-level set-run patchOps and marks mixed-style paragraphs review-required when styled-token anchors are not reliable.",
-        "Use `xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json` to copy the source PPTX and replace only existing OOXML text node or text attribute values, with sourceText/sourceHash/index checks and no paragraph/run rebuild.",
-        "Use `xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json` for translation-safe chart label updates: it changes chart visible text nodes or materializes a guarded generated classic Chart or ChartEx default title, and never writes workbook, relationship, external path, embedded workbook, or formatCode parts.",
+        "Use `xdoc pptx replace-text --source old.pptx --data replacements.json --to pptx|pdf|png --output <target> --json` to replace only existing OOXML text node or text attribute values, with sourceText/sourceHash/index checks and no paragraph/run rebuild. PPTX remains the default; PDF/PNG are terminal watermarked Free outputs.",
+        "Use `xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --to pptx|pdf|png --output <target> --visible-cache-only --json` for translation-safe chart label updates: it changes chart visible text nodes or materializes a guarded generated classic Chart or ChartEx default title, and never writes workbook, relationship, external path, embedded workbook, or formatCode parts.",
         "Use `xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json` as the translation-mode gate: it ignores known visible text node content, blocks run/paragraph/textbox/table/chart/style metadata changes, records font-size layout repairs, and separates typed user-visible text attribute changes from style blockers.",
         "Use `xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json` after skin-first refurbish to verify source/final preservation gates.",
-        "Use `xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json` to copy-preserve an existing deck, replace chrome/background, remap retained objects, and run audit/vision gates; run contact-diff explicitly for manual review.",
+        "Use `xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pptx|pdf|png --output <target> --json` to copy-preserve an existing deck, replace chrome/background, remap retained objects, and run audit/vision gates; PPTX remains the default, while PDF/PNG are terminal watermarked Free outputs. Contact-diff can use the published candidate only for PPTX output; terminal output reports it unavailable because no editable candidate is written.",
         "Use `xdoc pptx chrome-detect deck.pptx --json` to identify candidate headers, footers, page numbers, and rules before removing or replacing old deck chrome.",
         "Use `xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx` to delete high-confidence old chrome using real remove-shape patch ops.",
         "Use `xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx` to add deterministic DeckKit-derived native page chrome.",
@@ -3984,7 +3993,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -4109,7 +4118,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -4356,7 +4365,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -5287,7 +5296,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -5454,7 +5463,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -5621,7 +5630,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -5685,13 +5694,18 @@
           ]
         },
         "replace-text": {
-          "usage": "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json [--dry-run] [--slides 1,3-5]",
+          "usage": "xdoc pptx replace-text --source old.pptx --data replacements.json --output <target> [--to pptx|pdf|png] --json [--dry-run] [--slides 1,3-5]",
           "outputKind": "pptx",
+          "outputKinds": ["pptx", "pdf", "png"],
           "inputs": [
             "source PPTX",
             "replacements JSON with replacements[] records or translation workflow translations[] records"
           ],
-          "outputs": ["output PPTX", "pptx-replace-text/v1 JSON report", "human summary"],
+          "outputs": [
+            "output PPTX or PDF file, or PNG directory",
+            "pptx-replace-text/v1 JSON report",
+            "human summary"
+          ],
           "strategy": "Open the source PPTX as an OPC package and replace only existing XML text node content or allowlisted text attribute values; surrounding tags, run properties, paragraph properties, relationships, and part order are preserved.",
           "replacementUnit": {
             "schemaVersion": "pptx-i18n-translations/v1",
@@ -5716,7 +5730,7 @@
             },
             "filesystem": {
               "source": "read-only",
-              "output": "existing output PPTX requires --overwrite; --dry-run does not publish an output"
+              "output": "PPTX is the default; --to pdf writes one PDF and --to png writes an atomic PNG directory; an existing target requires --overwrite; --dry-run does not publish an output"
             },
             "stderr": {
               "usage": "errors-only"
@@ -5731,7 +5745,8 @@
               "missing part",
               "text-attr without attrName"
             ],
-            "followUpGate": "After replace-text, run i18n-style-diff; add --allow-text-attrs tooltip,descr,title only for intentionally translated user-visible tooltip or alt text attributes. Do not use it for metadata, relationship targets, formatCode, or internal names."
+            "followUpGate": "After replace-text, run i18n-style-diff; add --allow-text-attrs tooltip,descr,title only for intentionally translated user-visible tooltip or alt text attributes. Do not use it for metadata, relationship targets, formatCode, or internal names.",
+            "authorization": "Free/trial PDF and PNG are materialized-watermark terminal outputs independently re-verified by the PDF boundary. Editable PPTX keeps the provenance_signer_required fail-closed rule."
           },
           "options": [
             {
@@ -5749,9 +5764,15 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
+            },
+            {
+              "name": "to",
+              "type": "string",
+              "description": "Final product for replace-text, replace-chart-text, or refurbish-skin: pptx|pdf|png (default: pptx)",
+              "required": false
             },
             {
               "name": "slides",
@@ -5817,18 +5838,20 @@
             "dryRun": "validates-without-product-output"
           },
           "examples": [
-            "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json"
+            "xdoc pptx replace-text --source old.pptx --data replacements.json --output updated.pptx --json",
+            "xdoc pptx replace-text --source old.pptx --data replacements.json --to pdf --output updated.pdf --json"
           ]
         },
         "replace-chart-text": {
-          "usage": "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json [--dry-run] [--slides 1,3-5]",
+          "usage": "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output <target> [--to pptx|pdf|png] --visible-cache-only --json [--dry-run] [--slides 1,3-5]",
           "outputKind": "pptx",
+          "outputKinds": ["pptx", "pdf", "png"],
           "inputs": [
             "source PPTX",
             "chart replacements JSON with replacements[] records or translation workflow translations[] records"
           ],
           "outputs": [
-            "output PPTX unless --dry-run",
+            "output PPTX or PDF file, or PNG directory unless --dry-run",
             "pptx-replace-chart-text/v1 JSON report",
             "human summary"
           ],
@@ -5881,7 +5904,7 @@
             },
             "filesystem": {
               "source": "read-only",
-              "output": "existing output PPTX requires --overwrite; no output is written for --dry-run"
+              "output": "PPTX is the default; --to pdf writes one PDF and --to png writes an atomic PNG directory; an existing target requires --overwrite; no output is written for --dry-run"
             },
             "stderr": {
               "usage": "errors-only"
@@ -5899,7 +5922,8 @@
               "part outside ppt/charts/*.xml",
               "formatCode or XML structure drift"
             ],
-            "followUpGate": "After applying, run i18n-scan candidate mode and i18n-style-diff. embeddedWorkbook findings remain review signals; this helper intentionally leaves workbook data untouched."
+            "followUpGate": "After applying, run i18n-scan candidate mode and i18n-style-diff. embeddedWorkbook findings remain review signals; this helper intentionally leaves workbook data untouched.",
+            "authorization": "Free/trial PDF and PNG are materialized-watermark terminal outputs independently re-verified by the PDF boundary. Editable PPTX keeps the provenance_signer_required fail-closed rule."
           },
           "options": [
             {
@@ -5917,9 +5941,15 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
+            },
+            {
+              "name": "to",
+              "type": "string",
+              "description": "Final product for replace-text, replace-chart-text, or refurbish-skin: pptx|pdf|png (default: pptx)",
+              "required": false
             },
             {
               "name": "slides",
@@ -5992,7 +6022,8 @@
             "dryRun": "validates-without-product-output"
           },
           "examples": [
-            "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json"
+            "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --output updated.pptx --visible-cache-only --json",
+            "xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --to png --output updated-images --visible-cache-only --json"
           ]
         },
         "i18n-text-plan": {
@@ -6318,7 +6349,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -6480,14 +6511,19 @@
           "examples": ["xdoc pptx refurbish-audit --source old.pptx --final new.pptx --json"]
         },
         "refurbish-skin": {
-          "usage": "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json",
+          "usage": "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output <target> [--to pptx|pdf|png] --json",
           "outputKind": "pptx",
+          "outputKinds": ["pptx", "pdf", "png"],
           "inputs": [
             "source PPTX",
             "native skinning DeckKit id",
             "optional chrome role allow-list"
           ],
-          "outputs": ["output PPTX", "pptx-refurbish-skin/v1 JSON report", "human summary"],
+          "outputs": [
+            "output PPTX or PDF file, or PNG directory",
+            "pptx-refurbish-skin/v1 JSON report",
+            "human summary"
+          ],
           "strategy": "skin-first copy-preserve orchestration",
           "steps": [
             "chrome-remove",
@@ -6497,7 +6533,7 @@
             "vision-diff",
             "refurbish-audit",
             "contact-diff",
-            "contact-diff skipped by default; run explicitly for manual review"
+            "contact-diff skipped by default for PPTX and unavailable for terminal output because no editable candidate is published"
           ],
           "defaultRemapScope": ["text", "shapes", "tables", "charts"],
           "defaultRoles": ["header", "footer", "page-number", "rule"],
@@ -6516,9 +6552,9 @@
           "ioContract": {
             "file": {
               "option": "--output",
-              "format": "pptx",
-              "contactDiff": "reported as a suggested <output>.contact-diff.png path; not generated by default",
-              "overwrite": "existing output PPTX requires --overwrite"
+              "format": "pptx (default), pdf, or png directory selected by --to",
+              "contactDiff": "for PPTX output, reported as a suggested <output>.contact-diff.png path and not generated by default; for terminal PDF/PNG, unavailable because no editable PPTX candidate is published",
+              "overwrite": "an existing output file or directory requires --overwrite"
             },
             "stdout": {
               "format": "json when --json is set; human summary otherwise",
@@ -6528,6 +6564,18 @@
               "usage": "errors-only"
             },
             "exitStatus": "0 only when all orchestration steps and gates pass"
+          },
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "refurbish",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "unsupported"
           },
           "options": [
             {
@@ -6558,9 +6606,15 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
+            },
+            {
+              "name": "to",
+              "type": "string",
+              "description": "Final product for replace-text, replace-chart-text, or refurbish-skin: pptx|pdf|png (default: pptx)",
+              "required": false
             },
             {
               "name": "overwrite",
@@ -6600,20 +6654,9 @@
             }
           ],
           "acceptsInputPositional": true,
-          "authorization": {
-            "productWrite": true,
-            "taskAuthorization": "two-stage",
-            "defaultFeature": "refurbish",
-            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
-            "inputIdentity": "frozen-bytes-before-admission",
-            "finalMeasurement": "actual-output-slide-count",
-            "watermarkBoundary": "before-writer",
-            "publish": "atomic-file-replace",
-            "publishScope": "editable-pptx-output",
-            "dryRun": "unsupported"
-          },
           "examples": [
-            "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json"
+            "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --output new.pptx --json",
+            "xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf --json"
           ]
         },
         "chrome-detect": {
@@ -6737,7 +6780,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -6872,7 +6915,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -6995,7 +7038,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -7111,7 +7154,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -7294,7 +7337,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -7463,7 +7506,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -7575,7 +7618,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -7826,7 +7869,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -7934,7 +7977,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -8118,7 +8161,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -8262,7 +8305,7 @@
             {
               "name": "output",
               "type": "path",
-              "description": "Primary output artifact path; the action's outputKind declaration in the schema fixes whether it is a PPTX, a report, or an image",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
               "required": false,
               "short": "o"
             },
@@ -42892,6 +42935,7 @@
           "strategy",
           "source",
           "output",
+          "outputKind",
           "deckkit",
           "roles",
           "remapScope",
@@ -42922,6 +42966,11 @@
           },
           "output": {
             "type": "string"
+          },
+          "outputKind": {
+            "type": "string",
+            "enum": ["pptx", "pdf", "png"],
+            "strict": true
           },
           "deckkit": {
             "type": "object",
@@ -46677,7 +46726,7 @@
   },
   "authContract": {
     "schemaVersion": "xdoc-auth-contract-registry/v1",
-    "contractVersion": "2026.08.8",
+    "contractVersion": "2026.08.11",
     "decisionSchemaVersion": "xdoc-authorization-decision/v1",
     "buildProfile": "development",
     "buildId": "dev",
@@ -47510,6 +47559,158 @@
         "completionBinding": "exact-replan-from-validated-request",
         "hostIntegration": "not-connected"
       },
+      "signingService": {
+        "availability": "reserved",
+        "hostIntegration": "not-connected",
+        "endpoint": {
+          "method": "POST",
+          "path": "/v1/provenance/sign",
+          "unsupportedMethodResponseHeader": "Allow: POST",
+          "authorizationScheme": "Bearer",
+          "callerKindSource": "token-audience",
+          "requestContentType": "application/json",
+          "acceptedContentEncodings": ["identity"],
+          "requestMaxBytes": 524288,
+          "requestLimitMeasurement": "raw-entity-bytes-before-decode-and-parse",
+          "successStatus": 200,
+          "successBody": "raw-canonical-obligation-envelope",
+          "requiredResponseHeaders": [
+            "Content-Type: application/json; charset=utf-8",
+            "Cache-Control: no-store",
+            "X-Content-Type-Options: nosniff",
+            "X-Xdoc-Request-Id"
+          ],
+          "diagnosticResponseHeaders": ["X-Xdoc-Build-Profile"],
+          "diagnosticHeaderUse": "log-only-never-relaxes-response-verification",
+          "cacheControlScope": "every-response-including-errors"
+        },
+        "idempotencyKey": {
+          "header": "Idempotency-Key",
+          "required": true,
+          "minChars": 16,
+          "maxChars": 128,
+          "alphabet": "A-Za-z0-9._~-",
+          "clientMinEntropyBits": 128,
+          "logging": "raw-value-must-not-be-recorded"
+        },
+        "errors": {
+          "schemaVersion": "error/v1",
+          "bodyCanonicalFieldOrder": ["schemaVersion", "requestId", "build", "error"],
+          "errorCanonicalFieldOrder": ["code", "stage", "message", "retryable"],
+          "stages": ["auth", "input", "idempotency", "rate_limit", "signing", "internal"],
+          "retryAfterHeader": "required-when-retryable",
+          "retryableMeaning": "resend-identical-request-under-same-idempotency-key",
+          "unauthorizedRecovery": "obtain-new-token-and-regenerate-key-when-subject-changes",
+          "clientErrorDetail": "stage-only-no-verification-detail",
+          "wireErrors": [
+            {
+              "code": "unknown_method",
+              "status": 405,
+              "stage": "input",
+              "retryable": false
+            },
+            {
+              "code": "unsupported_media_type",
+              "status": 415,
+              "stage": "input",
+              "retryable": false
+            },
+            {
+              "code": "unauthorized",
+              "status": 401,
+              "stage": "auth",
+              "retryable": false
+            },
+            {
+              "code": "invalid_arguments",
+              "status": 400,
+              "stage": "input",
+              "retryable": false
+            },
+            {
+              "code": "provenance_request_invalid",
+              "status": 400,
+              "stage": "input",
+              "retryable": false
+            },
+            {
+              "code": "input_limit_exceeded",
+              "status": 413,
+              "stage": "input",
+              "retryable": false
+            },
+            {
+              "code": "idempotency_key_conflict",
+              "status": 409,
+              "stage": "idempotency",
+              "retryable": false
+            },
+            {
+              "code": "provenance_signing_pending",
+              "status": 503,
+              "stage": "idempotency",
+              "retryable": true
+            },
+            {
+              "code": "rate_limited",
+              "status": 429,
+              "stage": "rate_limit",
+              "retryable": true
+            },
+            {
+              "code": "provenance_signer_unavailable",
+              "status": 503,
+              "stage": "signing",
+              "retryable": true
+            },
+            {
+              "code": "internal_error",
+              "status": 500,
+              "stage": "internal",
+              "retryable": false
+            }
+          ]
+        },
+        "idempotency": {
+          "logicalKeyFields": ["subjectKey", "endpoint", "idempotencyKey"],
+          "recordBoundFields": ["requestDigest", "issuedAt", "keyId"],
+          "subjectKeySource": "authenticated-transport-never-request-body",
+          "recordIdContext": "xdoc-provenance-idempotency-record/v1",
+          "recordIdEncoding": "sha256-over-length-prefixed-fields + base64url-no-pad",
+          "states": ["pending", "complete"],
+          "claimOutcomes": ["acquired", "pending", "replay", "conflict"],
+          "completionOutcomes": [
+            "committed",
+            "already-complete",
+            "ownership-lost",
+            "binding-mismatch",
+            "record-unavailable"
+          ],
+          "signingPosition": "between-two-short-atomic-operations",
+          "completionOwnershipProof": ["requestDigest", "ownerTokenHash"],
+          "leaseRecovery": "reuse-persisted-issued-at-and-key-id",
+          "expiryAuthority": "explicit-expires-at-not-store-ttl-deletion",
+          "transientFailureCaching": "forbidden",
+          "successResponseOrdering": "durable-complete-before-response",
+          "replayGuarantee": "byte-identical-envelope-body",
+          "replayHeaderVariance": "diagnostic-headers-may-differ",
+          "adapterConformance": "platform-independent-state-machine-and-fault-corpus"
+        },
+        "clientMapping": {
+          "defaultReason": "provenance_signer_required",
+          "passthroughWireErrors": ["provenance_request_invalid"],
+          "retryExhaustedReason": "provenance_signer_required",
+          "serviceOnlyWireErrors": ["provenance_signing_pending", "provenance_signer_unavailable"],
+          "unreachableServiceReason": "provenance_signer_required",
+          "unsignedOutputOnFailure": "forbidden"
+        },
+        "convergenceGuard": {
+          "terminalFeature": "aggregate-trial-provenance",
+          "sizeGuardFailure": "internal-invariant-not-wire-error",
+          "sizeGuardStatus": 500,
+          "newAuthorizationReason": "forbidden"
+        }
+      },
       "taskInputDigestContext": "xdoc-task-input/v1",
       "inputSetDigestContext": "xdoc-task-input-set/v1",
       "credentialEnvelopeDigestContext": "xdoc-credential-envelope/v1",
@@ -47527,7 +47728,19 @@
     },
     "watermarkObligation": {
       "availability": "reserved",
-      "schemaVersion": "xdoc-watermark-obligations/v1",
+      "schemaVersion": "xdoc-watermark-obligations/v2",
+      "signingInput": "sha512-of-domain-separated-canonical-payload",
+      "signatureProfile": {
+        "algorithm": "Ed25519",
+        "ed25519Variant": "pure",
+        "context": "xdoc-watermark-obligations/v2",
+        "separatorHex": "00",
+        "preHash": "SHA-512",
+        "signingInputBytes": 64,
+        "signatureBytes": 64,
+        "signatureEncoding": "base64",
+        "kmsMessageType": "RAW"
+      },
       "watermarkVersion": 1,
       "maxEnvelopeBytes": 262144,
       "maxSlideIds": 128,

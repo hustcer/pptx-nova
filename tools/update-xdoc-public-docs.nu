@@ -28,6 +28,23 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   r#'/v1/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*'#
 ]
 
+# Deny-by-shape leaves no way to publish a route xdoc itself projects as part
+# of its executable contract, so the exemption is keyed on the *location* in
+# the schema rather than on the route string. Each entry below names a field
+# whose value has been reviewed as public; whatever route currently sits there
+# is subtracted from the shape scan for the snapshot only. A route that moves,
+# multiplies, or appears anywhere else still fails, which is exactly the
+# failure mode the enumerated allowlist could not catch.
+#
+# `authContract.provenanceProtocol.signingService.endpoint.path` is the wire
+# contract a self-hosted provenance signer must implement. Unlike `/healthz`
+# or the maintainer-side job routes it is addressed to whoever operates that
+# signer, and the block carries its own `availability` marker, so readers see
+# for themselves whether it is live yet.
+const AUDITED_ROUTE_LOCATIONS = [
+  [authContract provenanceProtocol signingService endpoint path]
+]
+
 const RUNTIME_VERSION_PATTERN = r#'[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)? \([0-9a-f]{8}(?:-dirty)?\)'#
 const VERIFICATION_DATE_PATTERN = r#'[0-9]{4}-[0-9]{2}-[0-9]{2}'#
 
@@ -143,7 +160,23 @@ def assert-introduction-contract [
   }
 }
 
-def assert-public-text [path: string, text: string] {
+# Resolve the reviewed locations against the schema this run is about to
+# publish. A location that has disappeared upstream contributes nothing rather
+# than erroring: the shape scan is the gate, and an exemption for a field that
+# no longer exists simply never applies.
+def audited-routes [schema: record]: nothing -> list<string> {
+  $AUDITED_ROUTE_LOCATIONS
+  | each {|location|
+    $location
+    | reduce --fold $schema {|segment, node|
+      if $node == null { null } else { $node | get -o $segment }
+    }
+  }
+  | where {|value| ($value | describe) == 'string' }
+  | sort
+}
+
+def assert-public-text [path: string, text: string, audited_routes: list<string>] {
   for term in $FORBIDDEN_PUBLIC_TERMS {
     if ($text | str contains $term) {
       error make {msg: $'public xdoc documentation contains maintainer-only or unpublished text: ($path) -> ($term)'}
@@ -151,11 +184,18 @@ def assert-public-text [path: string, text: string] {
   }
   for pattern in $FORBIDDEN_PUBLIC_PATTERNS {
     let hit_capture = (['(?<hit>' $pattern ')'] | str join)
+    # Occurrences are tallied rather than deduplicated: an exemption covers the
+    # reviewed field, not the route string. A second copy of an audited route
+    # somewhere else in the snapshot exceeds its budget and still fails.
     let hits = (
       $text
       | parse --regex $hit_capture
       | get hit
-      | uniq
+      | uniq --count
+      | where {|tally|
+        $tally.count > ($audited_routes | where {|route| $route == $tally.value } | length)
+      }
+      | get value
       | sort
     )
     if not ($hits | is-empty) {
@@ -172,20 +212,25 @@ def assert-public-text [path: string, text: string] {
 # before they are compared: comparing them raw silently matched nothing and
 # fell through to `open --raw`, which audited the previous file and let a fresh
 # violation reach disk unchallenged whenever `--schema-file` pointed elsewhere.
-def audit-public-docs [schema_text: string, introduction_text: string] {
+#
+# The location-keyed exemptions apply to the snapshot alone. Markdown carries
+# no reviewed route field, so every `/v1` route there stays denied by shape.
+def audit-public-docs [schema: record, schema_text: string, introduction_text: string] {
   let snapshot_path = ($SNAPSHOT_PATH | path expand)
   let introduction_path = ($INTRODUCTION_PATH | path expand)
+  let snapshot_routes = (audited-routes $schema)
   for path in (glob 'docs/xdoc-*') {
     let path_text = ($path | into string)
     let expanded = ($path_text | path expand)
-    let text = if $expanded == $snapshot_path {
+    let is_snapshot = ($expanded == $snapshot_path)
+    let text = if $is_snapshot {
       $schema_text
     } else if $expanded == $introduction_path {
       $introduction_text
     } else {
       open --raw $path
     }
-    assert-public-text $path_text $text
+    assert-public-text $path_text $text (if $is_snapshot { $snapshot_routes } else { [] })
   }
 }
 
@@ -213,7 +258,7 @@ def main [
   )
 
   assert-introduction-contract $updated_intro $runtime_version $defs_count
-  audit-public-docs $schema_text $updated_intro
+  audit-public-docs $source.schema $schema_text $updated_intro
 
   let schema_changed = ($current_schema != $source.schema)
   let introduction_changed = ($current_intro != $updated_intro)

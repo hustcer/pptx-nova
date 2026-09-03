@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import {
   chmodSync,
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -2421,12 +2422,18 @@ test('public xdoc docs refresher composes build, gate, capture, update, and chec
     version: '0.3.10 (deadbeef)',
     definitions: { first: {}, second: {} },
   })
-  const fakeXdoc = join(xdocRepo, 'fake-xdoc')
-  writeFileSync(
-    fakeXdoc,
-    `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify(schema))})\n`,
-  )
-  chmodSync(fakeXdoc, 0o755)
+  const isWindows = process.platform === 'win32'
+  const binaryName = isWindows ? 'xdoc.exe' : 'xdoc'
+  const fakeXdocName = isWindows ? 'fake-xdoc.exe' : 'fake-xdoc'
+  const fakeXdoc = join(xdocRepo, fakeXdocName)
+  const fakeXdocSource = `process.stdout.write(${JSON.stringify(JSON.stringify(schema))})\n`
+  if (isWindows) {
+    copyFileSync(process.execPath, fakeXdoc)
+    writeFileSync(join(root, 'schema'), fakeXdocSource)
+  } else {
+    writeFileSync(fakeXdoc, `#!/usr/bin/env node\n${fakeXdocSource}`)
+    chmodSync(fakeXdoc, 0o755)
+  }
   writeJson(manifest, { schemaVersion: 'xdoc-cli-trust-profile/v1' })
   writeFileSync(
     join(xdocTools, 'build-production-xdoc-cli.nu'),
@@ -2436,9 +2443,9 @@ test('public xdoc docs refresher composes build, gate, capture, update, and chec
       'def main [--manifest: path, --output-dir: path, --json] {',
       '  let root = ($env.CURRENT_FILE | path dirname | path dirname)',
       '  mkdir $output_dir',
-      "  let binary = ($output_dir | path join 'xdoc')",
-      "  cp ($root | path join 'fake-xdoc') $binary",
-      "  ^chmod '755' $binary",
+      `  let binary = ($output_dir | path join '${binaryName}')`,
+      `  cp ($root | path join '${fakeXdocName}') $binary`,
+      ...(isWindows ? [] : ["  ^chmod '755' $binary"]),
       '  let revision = (^git -C $root rev-parse HEAD | str trim)',
       '  {',
       "    schemaVersion: 'xdoc-cli-controlled-build/v1'",
@@ -2466,7 +2473,7 @@ test('public xdoc docs refresher composes build, gate, capture, update, and chec
       "    schemaVersion: 'xdoc-cli-release-check/v1'",
       "    status: 'passed'",
       '    sourceRevision: $source_revision',
-      "    binary: ($package_dir | path join 'xdoc' | path expand --strict | into string)",
+      `    binary: ($package_dir | path join '${binaryName}' | path expand --strict | into string)`,
       '  }',
       '  $value | to json | save --force $report',
       '  $value | to json --raw | print',
@@ -2536,7 +2543,7 @@ test('public xdoc docs refresher composes build, gate, capture, update, and chec
       '--verification-date',
       '2026-09-03',
     ],
-    { cwd: repoRoot, encoding: 'utf8' },
+    { cwd: root, encoding: 'utf8' },
   )
   assert.equal(result.status, 0, result.stderr || result.stdout)
   assert.match(result.stdout, /Public xdoc documentation refreshed from gated build/)

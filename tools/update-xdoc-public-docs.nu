@@ -28,27 +28,102 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   r#'/v1/[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*'#
 ]
 
-# Deny-by-shape leaves no way to publish a route xdoc itself projects as part
-# of its executable contract, so the exemption is keyed on the *location* in
-# the schema rather than on the route string. Each entry below names a field
-# whose value has been reviewed as public; whatever route currently sits there
-# is subtracted from the shape scan for the snapshot only. A route that moves,
-# multiplies, or appears anywhere else still fails, which is exactly the
-# failure mode the enumerated allowlist could not catch.
-#
-# `authContract.provenanceProtocol.signingService.endpoint.path` is the wire
-# contract a self-hosted provenance signer must implement. Unlike `/healthz`
-# or the maintainer-side job routes it is addressed to whoever operates that
-# signer, and the block carries its own `availability` marker, so readers see
-# for themselves whether it is live yet.
-const AUDITED_ROUTE_LOCATIONS = [
-  [authContract provenanceProtocol signingService endpoint path]
-]
+# The checked-in snapshot omits environment-specific build and authorization
+# provenance, so it currently has no reviewed route-field exemptions.
+const AUDITED_ROUTE_LOCATIONS = []
 
+const PUBLIC_BUILD_DESCRIPTOR_MIN_VERSION = '0.3.10'
+const APPROVED_PUBLIC_CLI_BUILD = {
+  schemaVersion: 'xdoc-build/v1'
+  product: 'xdoc-cli'
+  customerId: 'public'
+  licenseId: 'not-applicable'
+  edition: 'public-cli'
+}
 const RUNTIME_VERSION_PATTERN = r#'[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)? \([0-9a-f]{8}(?:-dirty)?\)'#
 const VERIFICATION_DATE_PATTERN = r#'[0-9]{4}-[0-9]{2}-[0-9]{2}'#
 
-def read-schema [schema_file: path]: nothing -> record {
+def required-record [value: any, label: string]: nothing -> record {
+  if not (($value | describe) starts-with 'record') {
+    error make {msg: $'approved public xdoc CLI schema requires ($label) to be an object'}
+  }
+  $value
+}
+
+def required-string-field [value: record, field: string, label: string]: nothing -> string {
+  let field_value = ($value | get -o $field)
+  if ($field_value | describe) != 'string' or ($field_value | str trim) == '' {
+    error make {msg: $'approved public xdoc CLI schema requires a non-empty ($label).($field) string'}
+  }
+  $field_value
+}
+
+def assert-exact-string-field [
+  value: record
+  field: string
+  expected: string
+  label: string
+] {
+  let actual = (required-string-field $value $field $label)
+  if $actual != $expected {
+    error make {
+      msg: $'approved public xdoc CLI schema ($label).($field) mismatch: expected ($expected), found ($actual)'
+    }
+  }
+}
+
+# xdoc 0.3.10 introduced an executable build descriptor. From that version
+# onward, a public snapshot candidate must identify the controlled public CLI
+# composition, not merely avoid a list of known private strings. Older checked-
+# in snapshots remain checkable until the next explicit release-doc refresh.
+def assert-approved-public-cli-schema [schema: record, runtime_version: string] {
+  let runtime_sdk_version = ($runtime_version | split row ' ' | first)
+  let requires_build_descriptor = (
+    ($runtime_sdk_version | into semver) >= ($PUBLIC_BUILD_DESCRIPTOR_MIN_VERSION | into semver)
+  )
+  let build_value = $schema.build?
+  if $build_value == null {
+    if $requires_build_descriptor {
+      error make {
+        msg: $'approved public xdoc CLI schema ($runtime_sdk_version) requires an xdoc-build/v1 descriptor'
+      }
+    }
+    return
+  }
+
+  let build = (required-record $build_value 'build')
+  for field in ($APPROVED_PUBLIC_CLI_BUILD | columns) {
+    assert-exact-string-field $build $field ($APPROVED_PUBLIC_CLI_BUILD | get $field) 'build'
+  }
+  if 'expiresAt' in ($build | columns) {
+    error make {msg: 'approved public xdoc CLI schema build must not carry expiresAt'}
+  }
+  let build_id = (required-string-field $build 'buildId' 'build')
+  let pdfium = (required-record $build.pdfium? 'build.pdfium')
+  assert-exact-string-field $pdfium 'linkMode' 'static' 'build.pdfium'
+  for field in [provider version commit sha256] {
+    required-string-field $pdfium $field 'build.pdfium' | ignore
+  }
+
+  let auth = (required-record $schema.authContract? 'authContract')
+  assert-exact-string-field $auth 'schemaVersion' 'xdoc-auth-contract-registry/v1' 'authContract'
+  assert-exact-string-field $auth 'buildProfile' 'production' 'authContract'
+  assert-exact-string-field $auth 'sdkVersion' $runtime_sdk_version 'authContract'
+  let auth_build_id = (required-string-field $auth 'buildId' 'authContract')
+  if $auth_build_id != $build_id {
+    error make {
+      msg: $'approved public xdoc CLI schema buildId mismatch: build=($build_id), authContract=($auth_build_id)'
+    }
+  }
+  let trust_profile_sha256 = (required-string-field $auth 'trustProfileSha256' 'authContract')
+  if not ($trust_profile_sha256 =~ '^[0-9a-f]{64}$') {
+    error make {
+      msg: 'approved public xdoc CLI schema authContract.trustProfileSha256 must be 64 lowercase hexadecimal characters'
+    }
+  }
+}
+
+def read-schema [schema_file: path, require_public_build: bool]: nothing -> record {
   let path = ($schema_file | path expand --strict)
   let raw = (open --raw $path)
   let schema = try {
@@ -76,7 +151,14 @@ def read-schema [schema_file: path]: nothing -> record {
   if ($parsed_versions | length) != 1 {
     error make {msg: $'xdoc schema contains an invalid runtime version: ($runtime_version)'}
   }
-  {path: $path, schema: $schema}
+  if $require_public_build {
+    assert-approved-public-cli-schema $schema $runtime_version
+  }
+  # The public snapshot is a stable executable-contract view. Build identity
+  # and authorization provenance vary by local, CI, and release composition;
+  # release mode validates them above, then omits them from the shared file.
+  let contract_schema = ($schema | reject -o build authContract)
+  {path: $path, schema: $contract_schema}
 }
 
 def schema-def-count [schema: record]: nothing -> int {
@@ -235,11 +317,12 @@ def audit-public-docs [schema: record, schema_text: string, introduction_text: s
 }
 
 def main [
-  --schema-file: path = 'docs/xdoc-schema.json' # Clean, approved `xdoc schema` output
+  --schema-file: path = 'docs/xdoc-schema.json' # Clean `xdoc schema` output
   --verification-date: string                  # Verification date to record (YYYY-MM-DD)
+  --require-public-build                       # Require approved public CLI build provenance before normalization
   --check                                      # Validate without writing files
 ]: nothing -> record {
-  let source = (read-schema $schema_file)
+  let source = (read-schema $schema_file $require_public_build)
   let runtime_version = $source.schema.version
   let defs_count = (schema-def-count $source.schema)
   let schema_text = ([($source.schema | to json --indent 2) ''] | str join (char nl))
@@ -282,6 +365,7 @@ def main [
     checked: $check
     runtimeVersion: $runtime_version
     verificationDate: $effective_verification_date
+    publicBuildVerified: $require_public_build
     patchDefs: $defs_count
     schemaChanged: $schema_changed
     introductionChanged: $introduction_changed

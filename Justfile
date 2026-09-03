@@ -57,10 +57,72 @@ lint:
   oxlint --fix; \
   $'(ansi g)The `lint` task finished!(ansi reset)(char nl)';
 
-# Update xdoc schema
-schema:
-  @xdoc schema | from json | save -f docs/xdoc-schema.json; oxfmt docs/xdoc-schema.json; \
-  nu tools/update-xdoc-public-docs.nu
+# Update the contract-only xdoc schema snapshot from a local runtime or file
+schema schema_file='':
+  #!/usr/bin/env nu
+
+  def run-updater [args: list<string>] {
+    let result = (^nu --no-config-file tools/update-xdoc-public-docs.nu ...$args | complete)
+    if $result.exit_code != 0 {
+      error make {
+        msg: 'Failed to update public xdoc documentation'
+        help: ($result.stderr | str trim)
+      }
+    }
+    let output = ($result.stdout | str trim)
+    if $output != '' {
+      print $output
+    }
+  }
+
+  def main [schema_file: string] {
+    let scratch = (mktemp --directory)
+    try {
+      let candidate = if ($schema_file | str trim) == '' {
+        let captured = ($scratch | path join 'xdoc-schema.json' | into string)
+        let result = (^xdoc schema | complete)
+        if $result.exit_code != 0 {
+          error make {
+            msg: 'Failed to capture schema from the local xdoc runtime'
+            help: ($result.stderr | str trim)
+          }
+        }
+        $result.stdout | save --force $captured
+        $captured
+      } else {
+        $schema_file | path expand --strict | into string
+      }
+      run-updater [--schema-file $candidate]
+      run-updater [--check]
+    } finally {
+      if ($scratch | path exists) {
+        rm -r $scratch
+      }
+    }
+  }
+
+# Build, gate, capture, and publish schema from an approved public xdoc CLI
+schema-public manifest xdoc_repo='../pptx':
+  #!/usr/bin/env nu
+
+  def main [manifest: path, xdoc_repo: path] {
+    let result = (
+      ^nu --no-config-file tools/refresh-xdoc-public-docs.nu
+        --manifest $manifest
+        --xdoc-repo $xdoc_repo
+      | complete
+    )
+    if $result.exit_code != 0 {
+      error make {
+        msg: 'Failed to refresh public xdoc documentation from a controlled CLI build'
+        help: ($result.stderr | str trim)
+      }
+    }
+    let output = ($result.stdout | str trim)
+    if $output != '' {
+      print $output
+    }
+  }
 
 # Generate or check deterministic Brotli icon pack
 icon *OPTIONS: 

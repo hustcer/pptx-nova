@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.3.10 (81d60580)",
+  "version": "0.3.12 (908b0091)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nAuthorization diagnostics:\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -625,20 +625,13 @@
           "XDOC_CONFIG_PATH/xdoc-license.json",
           "platform-user-config/xdoc-license.json"
         ],
+        "feature": "convert",
+        "contractRef": "#/authContract/cliFeatureTask",
+        "evaluation": "Limits, watermarks and fallback depend on signed entitlements, host facts, strict constraints and Restriction Policy; an active License alone grants no task access.",
         "denied": {
-          "failureKind": "authorization_denied",
+          "failureKind": "task decision or re-verification reason",
           "stage": "authorization",
-          "exitCode": 4,
-          "contentProcessing": "not started"
-        },
-        "missingOrInactive": {
-          "maxPptxInputBytes": 3145728,
-          "oversizeFailureKind": "file_too_large",
-          "renderedOutput": "includes a visible demo watermark"
-        },
-        "active": {
-          "maxPptxInputBytes": null,
-          "renderedOutput": "does not add the demo watermark"
+          "exitCode": 4
         }
       },
       "usageNotes": [
@@ -44421,13 +44414,13 @@
       }
     },
     "auth": {
-      "description": "Verify signed xdoc CLI authorization credentials.",
+      "description": "Verify, install, uninstall, inspect credentials, or reset the local clock anchor.",
       "options": [
         {
           "name": "license",
           "type": "path",
-          "description": "Path to an xdoc-cli-license/v1 JSON envelope",
-          "required": true
+          "description": "Credential envelope for auth verify; install uses one positional file",
+          "required": false
         },
         {
           "name": "pretty",
@@ -44439,14 +44432,98 @@
       ],
       "positionals": {
         "action": {
-          "description": "Authorization action: verify",
+          "description": "Authorization action: verify|install|uninstall|status|reset-clock",
           "required": true,
-          "enum": ["verify"],
+          "enum": ["verify", "install", "uninstall", "status", "reset-clock"],
           "strict": true
         }
       },
-      "examples": ["xdoc auth verify --license ./xdoc-license.json"],
-      "inputMode": "single-license",
+      "examples": [
+        "xdoc auth verify --license ./xdoc-license.json",
+        "xdoc auth install ./xdoc-license.json",
+        "xdoc auth uninstall",
+        "xdoc auth status --pretty",
+        "xdoc auth reset-clock"
+      ],
+      "inputMode": "action-specific",
+      "argumentsSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "files"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["verify", "install", "uninstall", "status", "reset-clock"],
+            "strict": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "license": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pretty": {
+            "type": "boolean"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "const": "verify"
+                }
+              }
+            },
+            "then": {
+              "required": ["license"],
+              "properties": {
+                "files": {
+                  "type": "array",
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "not": {
+                "required": ["license"]
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "action": {
+                  "const": "install"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "files": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "files": {
+                  "type": "array",
+                  "maxItems": 0
+                }
+              }
+            }
+          }
+        ]
+      },
       "ioContract": {
         "input": {
           "type": "file",
@@ -44456,10 +44533,10 @@
         },
         "stdout": {
           "format": "json",
-          "usage": "verification-report-only"
+          "usage": "json-report-only"
         },
         "stderr": {
-          "usage": "argument-and-process-diagnostics-only"
+          "usage": "argument-process-diagnostics-and-recovery-hints-only"
         }
       },
       "reportSchema": {
@@ -44702,173 +44779,7 @@
                 "const": "ok"
               },
               "trustedFacts": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "schemaVersion",
-                  "licenseKind",
-                  "policyVersion",
-                  "keyId",
-                  "product",
-                  "customerId",
-                  "licenseId",
-                  "issuedAt",
-                  "expiresAt",
-                  "deviceBound",
-                  "capabilities",
-                  "entitlements",
-                  "ignoredUnknownFeatureIds"
-                ],
-                "properties": {
-                  "schemaVersion": {
-                    "const": "xdoc-cli-license/v1"
-                  },
-                  "licenseKind": {
-                    "type": "string",
-                    "enum": ["offline-license", "org-ci-license"],
-                    "strict": true
-                  },
-                  "policyVersion": {
-                    "const": "2026.08"
-                  },
-                  "keyId": {
-                    "type": "string"
-                  },
-                  "product": {
-                    "const": "xdoc-cli"
-                  },
-                  "customerId": {
-                    "type": "string"
-                  },
-                  "userId": {
-                    "type": "string"
-                  },
-                  "organizationId": {
-                    "type": "string"
-                  },
-                  "licenseId": {
-                    "type": "string"
-                  },
-                  "issuedAt": {
-                    "type": "string"
-                  },
-                  "expiresAt": {
-                    "type": "string"
-                  },
-                  "deviceBound": {
-                    "type": "boolean"
-                  },
-                  "capabilities": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": [
-                      "allowCI",
-                      "allowSharedServer",
-                      "allowServiceUse",
-                      "repairTrialProvenance",
-                      "maxConcurrency",
-                      "maxBatchSize"
-                    ],
-                    "properties": {
-                      "allowCI": {
-                        "type": "boolean"
-                      },
-                      "allowSharedServer": {
-                        "type": "boolean"
-                      },
-                      "allowServiceUse": {
-                        "type": "boolean"
-                      },
-                      "repairTrialProvenance": {
-                        "type": "boolean"
-                      },
-                      "maxConcurrency": {
-                        "oneOf": [
-                          {
-                            "type": "null"
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          }
-                        ]
-                      },
-                      "maxBatchSize": {
-                        "oneOf": [
-                          {
-                            "type": "null"
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "entitlements": {
-                    "type": "object",
-                    "propertyNames": {
-                      "type": "string",
-                      "enum": ["create", "modify", "convert", "refurbish", "translate"],
-                      "strict": true
-                    },
-                    "additionalProperties": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "required": [
-                        "enabled",
-                        "watermark",
-                        "maxTotalInputBytes",
-                        "maxSlides",
-                        "trial"
-                      ],
-                      "properties": {
-                        "enabled": {
-                          "type": "boolean"
-                        },
-                        "watermark": {
-                          "type": "boolean"
-                        },
-                        "maxTotalInputBytes": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 9007199254740991
-                            }
-                          ]
-                        },
-                        "maxSlides": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 9007199254740991
-                            }
-                          ]
-                        },
-                        "trial": {
-                          "type": "boolean"
-                        }
-                      }
-                    }
-                  },
-                  "ignoredUnknownFeatureIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
+                "type": "object"
               }
             }
           },
@@ -44901,11 +44812,20 @@
           }
         ]
       },
+      "reports": {
+        "verify": "xdoc-cli-license-verification/v1",
+        "install": "xdoc-cli-auth-install/v1",
+        "uninstall": "xdoc-cli-auth-uninstall/v1",
+        "status": "xdoc-cli-auth-status/v1",
+        "reset-clock": "xdoc-cli-auth-reset-clock/v1"
+      },
       "usageNotes": [
-        "Verification uses the native host clock; callers cannot supply or override verification time.",
-        "Clock-rollback protection and device proof-of-possession are not performed; see authContract.cliLicense.clock and .deviceBinding.",
-        "A valid report exposes authenticated facts but does not authorize a concrete Feature Task.",
-        "Exit 0 means valid, exit 3 means the Credential file could not be read, and exit 4 means the Credential was rejected."
+        "verify uses --license and the host clock without Clock rollback admission or device proof-of-possession; reportSchema describes this action only.",
+        "install takes exactly one positional file and uses the same frozen bytes for full admission and atomic installation. Exit 3 is unreadable input, 4 is rejected Credential, and 9 is failed or uncertain publication.",
+        "status completes with exit 0 for missing, invalid, expired or admission-rejected Credentials when a coherent query can be formed. taskAuthorization always remains not-evaluated.",
+        "uninstall removes only the installed License; reset-clock removes only the fixed unauthenticated anchor. Neither initializes authorization host ports. Stop tasks and daemons, calibrate time, reset, then restart and inspect status.",
+        "An uncertain publication or removal is an error. Inspect status and retry the same operation if needed; no automatic rollback is performed.",
+        "Local report schemas are registered in reports. No action permits caller time overrides or supplies authority for a concrete Feature Task."
       ]
     },
     "pdf": {
@@ -46897,7 +46817,7 @@
       "stage": "output",
       "status": "error",
       "summary": "Output target validation or artifact writing failed",
-      "usedByCommands": ["convert", "html2md", "extract", "check", "pptx", "pdf", "daemon"]
+      "usedByCommands": ["convert", "html2md", "extract", "check", "pptx", "pdf", "auth", "daemon"]
     },
     "10": {
       "stage": "dependency",
@@ -46932,12 +46852,1403 @@
   },
   "reportContract": {
     "status": ["success", "error"],
-    "outcomes": ["passed", "failed", "blocked", "review-required"],
+    "outcomes": [
+      "passed",
+      "failed",
+      "blocked",
+      "review-required",
+      "installed",
+      "removed",
+      "not-installed",
+      "reset",
+      "already-missing",
+      "uncertain"
+    ],
     "rules": [
       "status is the transport verdict: success when the command completed, error when it did not.",
-      "Error payloads always use schemaVersion pptx-error/v1 with error.producedBy naming the producing contract.",
+      "Product-operation error payloads use pptx-error/v1 with error.producedBy naming the producing contract; auth actions use their own closed diagnostic report schemas.",
       "Domain verdicts (gates, audits, preflights) live in the top-level outcome field and must use a registered outcome value.",
-      "Exit code 0 pairs with status success and, when an outcome is present, outcome passed; gate-style commands exit non-zero when the outcome is failed or blocked."
+      "Exit code 0 pairs with status success. Gates use outcome passed; local auth actions use their declared success outcomes. Failed, blocked and uncertain outcomes exit non-zero."
     ]
+  },
+  "reports": {
+    "xdoc-cli-auth-install/v1": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://structurify.io/schemas/xdoc-cli-auth-install/v1.schema.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "status"],
+      "properties": {
+        "schemaVersion": {
+          "const": "xdoc-cli-auth-install/v1"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error"],
+          "strict": true
+        },
+        "outcome": {},
+        "installedPath": {},
+        "installedSha256": {},
+        "configDirectory": {},
+        "authenticatedFacts": {},
+        "clock": {},
+        "evaluatedAtUnixMs": {},
+        "reason": {},
+        "publication": {},
+        "targetPath": {},
+        "attemptedSha256": {}
+      },
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "clock",
+            "status",
+            "outcome",
+            "installedPath",
+            "schemaVersion",
+            "configDirectory",
+            "installedSha256",
+            "evaluatedAtUnixMs",
+            "authenticatedFacts"
+          ],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-install/v1"
+            },
+            "status": {
+              "const": "success"
+            },
+            "outcome": {
+              "const": "installed"
+            },
+            "installedPath": {
+              "type": "string"
+            },
+            "installedSha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "authenticatedFacts": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "issuedAt",
+                "expiresAt",
+                "deviceBound",
+                "licenseKind",
+                "capabilities",
+                "subjectSha256",
+                "licenseIdSha256"
+              ],
+              "properties": {
+                "licenseKind": {
+                  "type": "string",
+                  "enum": ["offline-license", "org-ci-license"],
+                  "strict": true
+                },
+                "licenseIdSha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "subjectSha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "issuedAt": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "type": "string"
+                },
+                "deviceBound": {
+                  "type": "boolean"
+                },
+                "capabilities": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "allowCI",
+                    "allowSharedServer",
+                    "allowServiceUse",
+                    "repairTrialProvenance",
+                    "maxConcurrency",
+                    "maxBatchSize"
+                  ],
+                  "properties": {
+                    "allowCI": {
+                      "type": "boolean"
+                    },
+                    "allowSharedServer": {
+                      "type": "boolean"
+                    },
+                    "allowServiceUse": {
+                      "type": "boolean"
+                    },
+                    "repairTrialProvenance": {
+                      "type": "boolean"
+                    },
+                    "maxConcurrency": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      ]
+                    },
+                    "maxBatchSize": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "clock": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "state",
+                "reason",
+                "anchorTrust",
+                "lastSeenUnixMs",
+                "systemNowUnixMs",
+                "rollbackToleranceMs"
+              ],
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "enum": ["ready", "unavailable"],
+                  "strict": true
+                },
+                "reason": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "enum": [
+                        "cli_clock_input_invalid",
+                        "cli_clock_tolerance_unsupported",
+                        "authorization_contract_invalid",
+                        "clock_anomaly"
+                      ],
+                      "strict": true
+                    }
+                  ]
+                },
+                "anchorTrust": {
+                  "type": "string",
+                  "enum": [
+                    "development-ephemeral",
+                    "unauthenticated-file",
+                    "authenticated",
+                    "unavailable"
+                  ],
+                  "strict": true
+                },
+                "systemNowUnixMs": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  ]
+                },
+                "lastSeenUnixMs": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  ]
+                },
+                "rollbackToleranceMs": {
+                  "const": 86400000
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "state": {
+                      "const": "ready"
+                    },
+                    "systemNowUnixMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "state": {
+                      "const": "unavailable"
+                    },
+                    "systemNowUnixMs": {
+                      "type": "null"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "cli_clock_input_invalid",
+                        "cli_clock_tolerance_unsupported",
+                        "authorization_contract_invalid",
+                        "clock_anomaly"
+                      ],
+                      "strict": true
+                    }
+                  }
+                }
+              ]
+            },
+            "evaluatedAtUnixMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reason",
+            "status",
+            "outcome",
+            "targetPath",
+            "publication",
+            "schemaVersion",
+            "attemptedSha256",
+            "configDirectory"
+          ],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-install/v1"
+            },
+            "status": {
+              "const": "error"
+            },
+            "outcome": {
+              "const": "failed"
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "auth_config_invalid",
+                "auth_storage_unavailable",
+                "auth_install_failed",
+                "cli_license_file_read_failed",
+                "cli_license_too_large",
+                "cli_license_json_invalid",
+                "cli_license_envelope_invalid",
+                "cli_license_payload_invalid",
+                "cli_license_schema_unsupported",
+                "cli_license_kind_unsupported",
+                "cli_license_key_not_found",
+                "cli_license_signature_invalid",
+                "cli_license_clock_invalid",
+                "cli_license_expired",
+                "cli_clock_input_invalid",
+                "cli_clock_tolerance_unsupported",
+                "authorization_contract_invalid",
+                "clock_anomaly",
+                "device_pop_failed",
+                "revocation_receipt_too_large",
+                "revocation_receipt_json_invalid",
+                "revocation_receipt_envelope_invalid",
+                "revocation_receipt_payload_invalid",
+                "revocation_receipt_schema_unsupported",
+                "revocation_receipt_target_unsupported",
+                "revocation_receipt_key_not_found",
+                "revocation_receipt_signature_invalid",
+                "revocation_receipt_binding_mismatch",
+                "subscription_cancelled",
+                "refund",
+                "credential_leaked",
+                "device_revoked",
+                "seat_revoked"
+              ],
+              "strict": true
+            },
+            "publication": {
+              "const": "not-published"
+            },
+            "targetPath": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "attemptedSha256": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              ]
+            },
+            "configDirectory": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reason",
+            "status",
+            "outcome",
+            "targetPath",
+            "publication",
+            "schemaVersion",
+            "attemptedSha256",
+            "configDirectory"
+          ],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-install/v1"
+            },
+            "status": {
+              "const": "error"
+            },
+            "outcome": {
+              "const": "uncertain"
+            },
+            "reason": {
+              "const": "auth_install_outcome_uncertain"
+            },
+            "publication": {
+              "const": "uncertain"
+            },
+            "targetPath": {
+              "type": "string"
+            },
+            "attemptedSha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "configDirectory": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "xdoc-cli-auth-uninstall/v1": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://structurify.io/schemas/xdoc-cli-auth-uninstall/v1.schema.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "status"],
+      "properties": {
+        "schemaVersion": {
+          "const": "xdoc-cli-auth-uninstall/v1"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error"],
+          "strict": true
+        },
+        "outcome": {},
+        "path": {},
+        "configDirectory": {},
+        "reason": {}
+      },
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-uninstall/v1"
+            },
+            "status": {
+              "const": "success"
+            },
+            "outcome": {
+              "const": "removed"
+            },
+            "path": {
+              "type": "string"
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-uninstall/v1"
+            },
+            "status": {
+              "const": "success"
+            },
+            "outcome": {
+              "const": "not-installed"
+            },
+            "path": {
+              "type": "null"
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-uninstall/v1"
+            },
+            "status": {
+              "const": "error"
+            },
+            "outcome": {
+              "const": "failed"
+            },
+            "path": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "configDirectory": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "enum": ["auth_config_invalid", "auth_storage_unavailable", "auth_uninstall_failed"],
+              "strict": true
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-uninstall/v1"
+            },
+            "status": {
+              "const": "error"
+            },
+            "outcome": {
+              "const": "uncertain"
+            },
+            "path": {
+              "type": "string"
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "reason": {
+              "const": "auth_uninstall_outcome_uncertain"
+            }
+          }
+        }
+      ]
+    },
+    "xdoc-cli-auth-status/v1": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://structurify.io/schemas/xdoc-cli-auth-status/v1.schema.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "status"],
+      "properties": {
+        "schemaVersion": {
+          "const": "xdoc-cli-auth-status/v1"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error"],
+          "strict": true
+        },
+        "health": {},
+        "source": {},
+        "verification": {},
+        "admission": {},
+        "taskAuthorization": {},
+        "fallbackPolicy": {},
+        "clock": {},
+        "configDirectory": {},
+        "evaluatedAtUnixMs": {},
+        "reason": {},
+        "path": {}
+      },
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "clock",
+            "health",
+            "source",
+            "status",
+            "admission",
+            "verification",
+            "schemaVersion",
+            "fallbackPolicy",
+            "configDirectory",
+            "evaluatedAtUnixMs",
+            "taskAuthorization"
+          ],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-status/v1"
+            },
+            "status": {
+              "const": "success"
+            },
+            "health": {
+              "type": "string",
+              "enum": ["healthy", "unhealthy", "not-installed"],
+              "strict": true
+            },
+            "source": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "path", "sha256"],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": ["config-path", "platform-default", "none"],
+                  "strict": true
+                },
+                "path": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "sha256": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  ]
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "kind": {
+                      "const": "none"
+                    },
+                    "path": {
+                      "type": "null"
+                    },
+                    "sha256": {
+                      "type": "null"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": ["config-path", "platform-default"],
+                      "strict": true
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    }
+                  }
+                }
+              ]
+            },
+            "verification": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["state", "reason", "authenticatedFacts"],
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "enum": ["not-installed", "verified", "invalid"],
+                  "strict": true
+                },
+                "reason": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "enum": [
+                        "cli_license_too_large",
+                        "cli_license_json_invalid",
+                        "cli_license_envelope_invalid",
+                        "cli_license_payload_invalid",
+                        "cli_license_schema_unsupported",
+                        "cli_license_kind_unsupported",
+                        "cli_license_key_not_found",
+                        "cli_license_signature_invalid",
+                        "cli_license_clock_invalid",
+                        "cli_license_expired"
+                      ],
+                      "strict": true
+                    }
+                  ]
+                },
+                "authenticatedFacts": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "issuedAt",
+                        "expiresAt",
+                        "deviceBound",
+                        "licenseKind",
+                        "capabilities",
+                        "subjectSha256",
+                        "licenseIdSha256"
+                      ],
+                      "properties": {
+                        "licenseKind": {
+                          "type": "string",
+                          "enum": ["offline-license", "org-ci-license"],
+                          "strict": true
+                        },
+                        "licenseIdSha256": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "subjectSha256": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "issuedAt": {
+                          "type": "string"
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        },
+                        "deviceBound": {
+                          "type": "boolean"
+                        },
+                        "capabilities": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "allowCI",
+                            "allowSharedServer",
+                            "allowServiceUse",
+                            "repairTrialProvenance",
+                            "maxConcurrency",
+                            "maxBatchSize"
+                          ],
+                          "properties": {
+                            "allowCI": {
+                              "type": "boolean"
+                            },
+                            "allowSharedServer": {
+                              "type": "boolean"
+                            },
+                            "allowServiceUse": {
+                              "type": "boolean"
+                            },
+                            "repairTrialProvenance": {
+                              "type": "boolean"
+                            },
+                            "maxConcurrency": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                }
+                              ]
+                            },
+                            "maxBatchSize": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 9007199254740991
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "state": {
+                      "const": "not-installed"
+                    },
+                    "reason": {
+                      "type": "null"
+                    },
+                    "authenticatedFacts": {
+                      "type": "null"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "state": {
+                      "const": "verified"
+                    },
+                    "reason": {
+                      "type": "null"
+                    },
+                    "authenticatedFacts": {
+                      "type": "object"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "state": {
+                      "const": "invalid"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "cli_license_too_large",
+                        "cli_license_json_invalid",
+                        "cli_license_envelope_invalid",
+                        "cli_license_payload_invalid",
+                        "cli_license_schema_unsupported",
+                        "cli_license_kind_unsupported",
+                        "cli_license_key_not_found",
+                        "cli_license_signature_invalid",
+                        "cli_license_clock_invalid",
+                        "cli_license_expired"
+                      ],
+                      "strict": true
+                    },
+                    "authenticatedFacts": {
+                      "type": "null"
+                    }
+                  }
+                }
+              ]
+            },
+            "admission": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["state", "reason"],
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "enum": ["not-applicable", "admitted", "rejected"],
+                  "strict": true
+                },
+                "reason": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "enum": [
+                        "cli_license_too_large",
+                        "cli_license_json_invalid",
+                        "cli_license_envelope_invalid",
+                        "cli_license_payload_invalid",
+                        "cli_license_schema_unsupported",
+                        "cli_license_kind_unsupported",
+                        "cli_license_key_not_found",
+                        "cli_license_signature_invalid",
+                        "cli_license_clock_invalid",
+                        "cli_license_expired",
+                        "cli_clock_input_invalid",
+                        "cli_clock_tolerance_unsupported",
+                        "authorization_contract_invalid",
+                        "clock_anomaly",
+                        "device_pop_failed",
+                        "revocation_receipt_too_large",
+                        "revocation_receipt_json_invalid",
+                        "revocation_receipt_envelope_invalid",
+                        "revocation_receipt_payload_invalid",
+                        "revocation_receipt_schema_unsupported",
+                        "revocation_receipt_target_unsupported",
+                        "revocation_receipt_key_not_found",
+                        "revocation_receipt_signature_invalid",
+                        "revocation_receipt_binding_mismatch",
+                        "subscription_cancelled",
+                        "refund",
+                        "credential_leaked",
+                        "device_revoked",
+                        "seat_revoked"
+                      ],
+                      "strict": true
+                    }
+                  ]
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "enum": ["not-applicable", "admitted"],
+                      "strict": true
+                    },
+                    "reason": {
+                      "type": "null"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "state": {
+                      "const": "rejected"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "cli_license_too_large",
+                        "cli_license_json_invalid",
+                        "cli_license_envelope_invalid",
+                        "cli_license_payload_invalid",
+                        "cli_license_schema_unsupported",
+                        "cli_license_kind_unsupported",
+                        "cli_license_key_not_found",
+                        "cli_license_signature_invalid",
+                        "cli_license_clock_invalid",
+                        "cli_license_expired",
+                        "cli_clock_input_invalid",
+                        "cli_clock_tolerance_unsupported",
+                        "authorization_contract_invalid",
+                        "clock_anomaly",
+                        "device_pop_failed",
+                        "revocation_receipt_too_large",
+                        "revocation_receipt_json_invalid",
+                        "revocation_receipt_envelope_invalid",
+                        "revocation_receipt_payload_invalid",
+                        "revocation_receipt_schema_unsupported",
+                        "revocation_receipt_target_unsupported",
+                        "revocation_receipt_key_not_found",
+                        "revocation_receipt_signature_invalid",
+                        "revocation_receipt_binding_mismatch",
+                        "subscription_cancelled",
+                        "refund",
+                        "credential_leaked",
+                        "device_revoked",
+                        "seat_revoked"
+                      ],
+                      "strict": true
+                    }
+                  }
+                }
+              ]
+            },
+            "taskAuthorization": {
+              "const": "not-evaluated"
+            },
+            "fallbackPolicy": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["interactive", "nonInteractive"],
+              "properties": {
+                "interactive": {
+                  "const": "confirmation-required-on-commercial-fallback"
+                },
+                "nonInteractive": {
+                  "const": "explicit-allow-required-on-commercial-fallback"
+                }
+              }
+            },
+            "clock": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "state",
+                "reason",
+                "anchorTrust",
+                "lastSeenUnixMs",
+                "systemNowUnixMs",
+                "rollbackToleranceMs"
+              ],
+              "properties": {
+                "state": {
+                  "type": "string",
+                  "enum": ["ready", "unavailable"],
+                  "strict": true
+                },
+                "reason": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "enum": [
+                        "cli_clock_input_invalid",
+                        "cli_clock_tolerance_unsupported",
+                        "authorization_contract_invalid",
+                        "clock_anomaly"
+                      ],
+                      "strict": true
+                    }
+                  ]
+                },
+                "anchorTrust": {
+                  "type": "string",
+                  "enum": [
+                    "development-ephemeral",
+                    "unauthenticated-file",
+                    "authenticated",
+                    "unavailable"
+                  ],
+                  "strict": true
+                },
+                "systemNowUnixMs": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  ]
+                },
+                "lastSeenUnixMs": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  ]
+                },
+                "rollbackToleranceMs": {
+                  "const": 86400000
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "state": {
+                      "const": "ready"
+                    },
+                    "systemNowUnixMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "state": {
+                      "const": "unavailable"
+                    },
+                    "systemNowUnixMs": {
+                      "type": "null"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "cli_clock_input_invalid",
+                        "cli_clock_tolerance_unsupported",
+                        "authorization_contract_invalid",
+                        "clock_anomaly"
+                      ],
+                      "strict": true
+                    }
+                  }
+                }
+              ]
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "evaluatedAtUnixMs": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              ]
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "health": {
+                  "const": "not-installed"
+                },
+                "source": {
+                  "properties": {
+                    "kind": {
+                      "const": "none"
+                    }
+                  }
+                },
+                "verification": {
+                  "properties": {
+                    "state": {
+                      "const": "not-installed"
+                    }
+                  }
+                },
+                "admission": {
+                  "properties": {
+                    "state": {
+                      "const": "not-applicable"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "properties": {
+                "health": {
+                  "const": "healthy"
+                },
+                "source": {
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": ["config-path", "platform-default"],
+                      "strict": true
+                    }
+                  }
+                },
+                "verification": {
+                  "properties": {
+                    "state": {
+                      "const": "verified"
+                    }
+                  }
+                },
+                "admission": {
+                  "properties": {
+                    "state": {
+                      "const": "admitted"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "properties": {
+                "health": {
+                  "const": "unhealthy"
+                },
+                "source": {
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": ["config-path", "platform-default"],
+                      "strict": true
+                    }
+                  }
+                },
+                "verification": {
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "enum": ["verified", "invalid"],
+                      "strict": true
+                    }
+                  }
+                },
+                "admission": {
+                  "properties": {
+                    "state": {
+                      "const": "rejected"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-status/v1"
+            },
+            "status": {
+              "const": "error"
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "auth_config_invalid",
+                "auth_storage_unavailable",
+                "cli_license_file_read_failed",
+                "cli_license_too_large",
+                "authorization_contract_invalid"
+              ],
+              "strict": true
+            },
+            "configDirectory": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "path": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "xdoc-cli-auth-reset-clock/v1": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://structurify.io/schemas/xdoc-cli-auth-reset-clock/v1.schema.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "status"],
+      "properties": {
+        "schemaVersion": {
+          "const": "xdoc-cli-auth-reset-clock/v1"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error"],
+          "strict": true
+        },
+        "outcome": {},
+        "path": {},
+        "configDirectory": {},
+        "reason": {}
+      },
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-reset-clock/v1"
+            },
+            "status": {
+              "const": "success"
+            },
+            "outcome": {
+              "const": "reset"
+            },
+            "path": {
+              "type": "string"
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-reset-clock/v1"
+            },
+            "status": {
+              "const": "success"
+            },
+            "outcome": {
+              "const": "already-missing"
+            },
+            "path": {
+              "type": "string"
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "null"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-reset-clock/v1"
+            },
+            "status": {
+              "const": "error"
+            },
+            "outcome": {
+              "const": "failed"
+            },
+            "path": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "configDirectory": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "auth_config_invalid",
+                "auth_storage_unavailable",
+                "auth_clock_reset_failed",
+                "auth_clock_reset_unsupported"
+              ],
+              "strict": true
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "reason", "status", "outcome", "schemaVersion", "configDirectory"],
+          "properties": {
+            "schemaVersion": {
+              "const": "xdoc-cli-auth-reset-clock/v1"
+            },
+            "status": {
+              "const": "error"
+            },
+            "outcome": {
+              "const": "uncertain"
+            },
+            "path": {
+              "type": "string"
+            },
+            "configDirectory": {
+              "type": "string"
+            },
+            "reason": {
+              "const": "auth_clock_reset_outcome_uncertain"
+            }
+          }
+        }
+      ]
+    }
   }
 }

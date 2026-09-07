@@ -235,6 +235,13 @@ one-based. A completed comparison still requires its `agentGate` and the
 
 ## Retry, quarantine, and publication algorithm
 
+An `invalid_configuration` failure identifies the environment variable through
+`details.field` and discloses the accepted tokens in `details.expected`. Correct
+the worker configuration before retrying. Invalid daemon auto-spawn settings
+also block one-shot fallback. The original configuration value is not included
+in the report, and JSON-RPC/MCP keep their existing error/tool-result envelopes.
+Help, schema discovery, and unrelated operations do not read these settings.
+
 Use this sequence for an unattended worker:
 
 1. **Capture first.** Save raw stdout, stderr, exit code, signal, command

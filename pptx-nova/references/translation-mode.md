@@ -268,10 +268,12 @@ debugging path.
    `i18n-plan` validates `unitId`, `sourceHash`, and `sourceText`, then routes
    units to the safest available execution primitive:
    - `textPlan.translations[]` for DrawingML shape and table paragraph/run planning.
-     This sub-artifact is labelled `pptx-i18n-text-plan-input/v1` and is the only
-     valid `--data` input for `xdoc pptx i18n-text-plan`; the top-level
-     unitId-based `pptx-i18n-translations/v1` document is rejected there with a
-     targeted error.
+     This sub-artifact is labelled `pptx-i18n-text-plan-input/v1`. For the
+     shape-only `i18n-text-plan --data` fallback, select the shape paragraph
+     records. Table paragraph records describe routing; execute their
+     materialized `replaceText` replacements from the full planner. The
+     top-level unitId-based `pptx-i18n-translations/v1` document is rejected by
+     the fallback with a targeted error.
    - `replaceText.replacements[]` for user-visible text attributes and table
      paragraph text-node replacements materialized by the shared text-plan route.
    - `replaceChartText.replacements[]` for chart visible cache labels.

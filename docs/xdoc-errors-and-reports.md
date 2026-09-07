@@ -44,6 +44,13 @@ deliberately different:
 
 Do not write an adapter that assumes every xdoc command has identical stdout
 semantics. The command's `ioContract` in the runtime schema is authoritative.
+For a JSON output with `variants`, evaluate `when` on the validated public
+parameters after defaults and require exactly one match. Its `schemaRef`
+resolves within that same runtime disclosure; use the referenced schema to
+validate the complete report, including nested repair material. Full scan
+reports use `mode` to distinguish source inventory from candidate verification.
+An input failure remains a structured PPTX error, whose `error.producedBy`
+identifies the report version selected for the requested JSON mode.
 
 ## Process exit codes
 
@@ -205,7 +212,10 @@ Most mutation and read reports use `success` or `error`. Planner and gate
 families may also use values such as `blocked`, `review-required`, or
 `incomplete`. The report's schema and `ioContract.exitCodePolicy` define what a
 value means for that command. Do not normalize every non-success status to a
-generic exception before preserving the original report.
+generic exception before preserving the original report. The runtime disclosure's
+`reportContract.statusBySchemaVersion` registers the exact vocabulary for these
+existing domain envelopes; it does not extend the default transport statuses
+of other report versions.
 
 ## Retry, quarantine, and publication algorithm
 

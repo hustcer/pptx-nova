@@ -642,6 +642,11 @@ fallback。
 ChartEx 使用同一个 `set-chart-data` op，但载荷仍是 `dataEx`。它只替换 ChartEx
 数据维度并保留已有 native title；不要把普通 `data` 当作 ChartEx 的等价输入：
 
+图表判别只用 `kind`。创建时以 `add-chart.kind` 为准，层级 `dataEx.kind` 若提供必须
+一致；更新 treemap/sunburst 的 `nodes[]` 时必须显式提供 `dataEx.kind`，执行器会核对
+目标的现有类型，不会靠数据提示换成另一种图表。组合系列的 `kind` 使用 `column`、
+`line` 或 `area`；`chartKind`、`type` 判别和 `columnChart` 等同义值均不可用。
+
 ```json
 {
   "op": "set-chart-data",
@@ -904,11 +909,9 @@ triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
   ] }
 ```
 
-- 推荐使用 `trendlines`，它按数组顺序**完整替换**同一系列的趋势线集合；数组顺序是
-  唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 或
-  `trendlines: null` 都会清空全部趋势线。
-- 兼容入口 `trendline` 仍可用：对象表示完整替换为单条，`null` 表示清空。一个 series
-  entry 同时出现 `trendline` 与 `trendlines` 会 fail-closed；不要混用。
+- 使用 `trendlines` 数组按顺序**完整替换**同一系列的趋势线集合；数组顺序是
+  唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
+  省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
 polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
@@ -934,7 +937,7 @@ semantic/structure gate，再 apply；随后用 inspect/parse 回读确认趋势
 clean-open。只看到 patch 成功不足以证明数组顺序和 `bold: false` 等显式值被保留。
 
 > ✅ **当前预览支持（xdoc ≥0.3.1）**：PNG/PDF 预览链会渲染
-> `trendlines`（以及兼容入口 `trendline`）/ `errorBars` / `dataTable` /
+> `trendlines` / `errorBars` / `dataTable` /
 > `displayUnits` / 轴标题 /
 > `minorGridlines`，包括趋势线方程与 R²、单位标签以及图下数据表布局。
 > 刻度标签 `rotation` 也可见。若 capability probe 显示当前 runtime 不支持某项，

@@ -175,7 +175,7 @@ lines / lines-no-markers / smooth / smooth-no-markers / exploded / wireframe
 ### `fill`
 
 - solid: `{ "type": "solid", "color": "RRGGBB" }`
-- gradient: `{ "type": "gradient", "stops": [{ "pos": 0, "color": "..." }, ...], "angle": 45 }`
+- gradient: `{ "type": "gradient", "stops": [{ "position": 0, "color": "..." }, ...], "angle": 45 }`
 - radial gradient: `{ "type": "gradient", "path": "circle", "stops": [...] }`
 - pattern: `{ "type": "pattern", "pattern": "wdDnDiag", "foregroundColor": "...", "backgroundColor": "..." }`
 - preset gradient: `{ "type": "gradient", "preset": "daybreak" }`

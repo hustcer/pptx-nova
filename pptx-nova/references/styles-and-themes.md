@@ -50,9 +50,9 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
   "type": "gradient",
   "angle": 45,
   "stops": [
-    { "pos": 0, "color": "1A73E8" },
-    { "pos": 0.5, "schemeClr": "accent2" },
-    { "pos": 1, "color": "FFFFFF" }
+    { "position": 0, "color": "1A73E8" },
+    { "position": 0.5, "schemeClr": "accent2" },
+    { "position": 1, "color": "FFFFFF" }
   ]
 }
 ```
@@ -68,11 +68,11 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 {
   "type": "gradient",
   "path": "circle",
-  "fillToRect": { "l": 0.5, "t": 0.5, "r": 0.5, "b": 0.5 },
+  "fillToRect": { "left": 0.5, "top": 0.5, "right": 0.5, "bottom": 0.5 },
   "stops": [
-    { "pos": 0, "color": "F1EE2E" },
-    { "pos": 0.72, "color": { "rgb": "F8F39B", "alpha": 0.42 } },
-    { "pos": 1, "color": { "rgb": "F0DA7C", "alpha": 0 } }
+    { "position": 0, "color": "F1EE2E" },
+    { "position": 0.72, "color": { "rgb": "F8F39B", "alpha": 0.42 } },
+    { "position": 1, "color": { "rgb": "F0DA7C", "alpha": 0 } }
   ]
 }
 ```

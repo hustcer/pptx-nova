@@ -9,8 +9,8 @@ const CHART_EX_KINDS = new Set([
   'region-map',
 ])
 const WATERFALL_POINT_KINDS = new Set(['increase', 'decrease', 'subtotal', 'total'])
-const SCATTER_KINDS = new Set(['scatter', 'bubble', 'bubble3d'])
-const PIE_KINDS = new Set(['pie', 'pie3d', 'doughnut'])
+const SCATTER_KINDS = new Set(['scatter', 'bubble', 'bubble-3d'])
+const PIE_KINDS = new Set(['pie', 'pie-3d', 'doughnut'])
 
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -26,13 +26,7 @@ function numericLike(value) {
 }
 
 function normalizeKind(value) {
-  const kind = String(value ?? '')
-    .trim()
-    .toLowerCase()
-    .replaceAll('_', '-')
-  if (kind === 'boxwhisker') return 'box-whisker'
-  if (kind === 'regionmap') return 'region-map'
-  return kind
+  return typeof value === 'string' ? value : ''
 }
 
 function inferChartExKind(data) {
@@ -42,7 +36,7 @@ function inferChartExKind(data) {
   if (Array.isArray(data.values)) return 'histogram'
   if (Array.isArray(data.series)) return 'box-whisker'
   if (Array.isArray(data.nodes)) {
-    return normalizeKind(data.kind ?? data.chartKind ?? data.type)
+    return normalizeKind(data.kind)
   }
   return ''
 }
@@ -70,13 +64,32 @@ export function normalizeChartSemantics(op, intent = null) {
   const chartExData = op?.dataEx ?? op?.chart?.dataEx ?? null
   const classicData = op?.data ?? op?.chart?.data ?? null
   const data = chartExData ?? classicData
-  const explicitKind =
-    op?.kind ??
-    intent?.chart?.kind ??
-    chartExData?.chartKind ??
-    chartExData?.kind ??
-    chartExData?.type
+  const explicitKind = op?.kind ?? intent?.chart?.kind ?? chartExData?.kind
   const kind = normalizeKind(explicitKind) || (chartExData ? inferChartExKind(chartExData) : '')
+  const inputErrors = []
+  if (
+    explicitKind !== undefined &&
+    (typeof explicitKind !== 'string' || !/^[a-z]+(?:-[a-z0-9]+)*$/.test(explicitKind))
+  ) {
+    add(inputErrors, 'chart-kind-invalid', 'Chart kind must use its canonical value')
+  }
+  if (isPlainObject(chartExData)) {
+    for (const key of ['chartKind', 'type']) {
+      if (Object.hasOwn(chartExData, key)) {
+        add(inputErrors, 'chart-kind-retired-field', `dataEx.${key} is not supported; use kind`)
+      }
+    }
+    if (Object.hasOwn(chartExData, 'kind') && chartExData.kind !== kind) {
+      add(inputErrors, 'chart-kind-mismatch', 'dataEx.kind must match the selected chart kind')
+    }
+    if (
+      op?.op === 'set-chart-data' &&
+      Array.isArray(chartExData.nodes) &&
+      !Object.hasOwn(chartExData, 'kind')
+    ) {
+      add(inputErrors, 'chart-kind-missing', 'Hierarchy set-chart-data requires dataEx.kind')
+    }
+  }
   return {
     kind,
     dialect: chartExData ? 'chartex' : classicData ? 'classic' : 'unknown',
@@ -84,6 +97,7 @@ export function normalizeChartSemantics(op, intent = null) {
     source: chartSourceOf(intent, op),
     hasClassicData: classicData !== null && classicData !== undefined,
     hasChartExData: chartExData !== null && chartExData !== undefined,
+    inputErrors,
   }
 }
 
@@ -370,6 +384,18 @@ function validateClassic(semantics, errors, warnings) {
     })
   })
   if (kind === 'combo') {
+    for (const [index, item] of series.entries()) {
+      if (item && (Object.hasOwn(item, 'chartKind') || Object.hasOwn(item, 'type'))) {
+        add(errors, 'chart-kind-retired-field', `series[${index}] must use kind`)
+      }
+      if (!['column', 'line', 'area'].includes(item?.kind)) {
+        add(
+          errors,
+          'chart-combo-kind-invalid',
+          `series[${index}].kind must be column, line, or area`,
+        )
+      }
+    }
     const kinds = new Set(series.map((item) => item?.kind).filter(Boolean))
     const hasSecondaryAxis = series.some((item) => item?.secondaryAxis === true)
     if (kinds.size < 2 && !hasSecondaryAxis) {
@@ -383,7 +409,7 @@ function validateClassic(semantics, errors, warnings) {
 }
 
 export function validateChartSemantics(semantics) {
-  const errors = []
+  const errors = [...(semantics.inputErrors ?? [])]
   const warnings = []
   if (semantics.hasClassicData && semantics.hasChartExData) {
     add(errors, 'chart-data-ambiguous', 'chart op must not disclose both data and dataEx')

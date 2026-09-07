@@ -408,10 +408,12 @@ debugging path.
      `i18n-plan.replaceText`. Do not hand-derive `kind`, `part`, `tag`,
      `attrName`, `index`, or `nodePath`. Preserve planner-emitted semantic
      `nodePath` values exactly.
-     `replace-text` currently does not support `--dry-run`; do not pass
-     `--dry-run`, `--compile`, or `--allow-raw-xml`. Its safety comes from
-     writing to a run-directory candidate plus `sourceText`/`sourceHash`/`index`
-     conflict and ambiguity checks. If you need to iterate the same current-run
+     Add `--dry-run` to check selectors without writing a candidate. Its report
+     retains `status: "success"` with `dryRun: true`; a named `output` does not
+     mean a file was produced. Conflicts or ambiguity produce `status: "blocked"`
+     and write no candidate. Validate the complete report through the command's
+     runtime `ioContract.stdout.schemaRef`. `--compile` and `--allow-raw-xml`
+     do not apply to this command. If you need to iterate the same current-run
      candidate path, overwrite only that run-generated candidate:
      ```bash
      xdoc pptx replace-text \

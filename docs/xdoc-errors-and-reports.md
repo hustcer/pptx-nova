@@ -217,6 +217,22 @@ generic exception before preserving the original report. The runtime disclosure'
 existing domain envelopes; it does not extend the default transport statuses
 of other report versions.
 
+Text replacement and chart-cache replacement expose complete schemas through
+their `ioContract.stdout.schemaRef`. Text replacement uses `success` for both
+an applied operation and a passing dry-run; chart replacement uses `dry-run`
+for the latter. Both use `blocked` when guards fail. A non-null `output` is the
+requested destination, including when no file is written. Read `dryRun`,
+`agentGate`, item results, and filesystem evidence together. Failed selectors
+can retain an invalid input index or source guard in their result echoes.
+
+The `vision-diff` schema includes all five issue classes and their numeric
+metrics, evidence classes, and canonical fix operations. `vision-check` reports
+static findings; `vision-diff` also includes final render findings. In a scoped
+comparison, `scope`, `scopedSummary`, `deckSummary`, and `deckResidualRisk`
+appear together. Issue `slideIndex` is zero-based while `scope.slides` is
+one-based. A completed comparison still requires its `agentGate` and the
+`visualEvidence` handoff before delivery.
+
 ## Retry, quarantine, and publication algorithm
 
 Use this sequence for an unattended worker:

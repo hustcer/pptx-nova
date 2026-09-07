@@ -750,12 +750,23 @@ prefixes, page usage, text-object counts, and Unicode-map diagnostics.
 `natural` and `layout`. The native `auto` engine resolves to PDFium in the
 current build.
 
-There is one known v0.3.5 discovery inconsistency: `xdoc pdf --help`, the
-published PDF examples, and the executable all expose `pdf render`, but the
-`commands.pdf.subcommands` map in `cli-agent/v1` currently lists only
-`inspect` and `extract-text`. Treat this as a contract defect to be fixed, and
-pin the executable build instead of inferring that `render` is absent from that
-single map.
+Current executable discovery publishes each action's own positional input,
+options and I/O contract. The older v0.3.5 snapshot omits `render`; use the
+current executable's `xdoc pdf <action> --help` and schema when constructing a
+new invocation.
+
+`inspect` is read-only and rejects `--output`. Its JSON report explicitly
+selects `status: success` or `status: error`; errors carry `code` and `message`.
+`extract-text --output` writes one file and requires `--overwrite` to replace
+existing content. Extraction errors in JSON mode still appear on stdout when
+an output file was requested; a delivery failure is reported on stderr.
+
+For `render`, `--output pages` selects the exact output root, while
+`--output pages/` creates an `<input-stem>-img` child beneath that parent.
+The examples above use the parent-directory form. `--overwrite` replaces the
+complete output root, including removal of old files that are not regenerated.
+The manifest records the selected pages and generated PNG filenames; render
+keeps stdout unused.
 
 ## The PPTX patch model
 

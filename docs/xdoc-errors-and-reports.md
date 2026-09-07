@@ -54,6 +54,14 @@ identifies the report version selected for the requested JSON mode.
 
 ## Process exit codes
 
+PDF reports use their action-specific schemas. `pdf inspect --json` has
+explicit success/error branches and a structured `error.code`/`error.message`;
+the failure branch does not contain successful inspection fields. PDF text
+extraction keeps its existing success artifact and a distinct `status: error`
+branch. An extraction error with `--json` goes to stdout even when `--output`
+was requested; argument and output-delivery failures use stderr. PDF render
+keeps stdout unused and writes its directory manifest after successful delivery.
+
 The current top-level contract defines these codes:
 
 | Code | Stage      | Meaning                                                                                     | First routing action                                                        |

@@ -351,14 +351,14 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
 
 ### Text frame 行为
 
-| op                                         | 用途                                                                                                                    |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `set-text-frame`（`frame.autofit`）        | PowerPoint autofit 属性（`frame: { autofit: { mode: "none" / "shape" / "text" } }`；`text` 模式可加 `fontScale` 1-100） |
-| `set-text-frame`（`frame.direction`）      | 竖排文本方向（`"vertical"` / `"vertical-270"` / `"east-asian-vertical"` 等；`"horizontal"` 或 `null` 恢复横排）         |
-| `set-text-frame`（`frame.margin*`）        | 设置四边内边距；单位值或 `null`（清掉显式属性，恢复继承/默认）                                                          |
-| `set-text-frame`（`frame.verticalAnchor`） | `top` / `middle` / `bottom`；`null` 清除                                                                                |
-| `set-text-frame`（`frame.wordWrap`）       | 布尔值控制换行；`null` 清除                                                                                             |
-| `fit-text`                                 | 给 text frame 算合适字号（`maxFontSize` / `minFontSize`，可选 `strategy: "deterministic" / "font-metrics"`）            |
+| op                                         | 用途                                                                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `set-text-frame`（`frame.autofit`）        | PowerPoint autofit 属性（`frame: { autofit: { mode: "none" / "shape" / "text" } }`；`text` 模式可加 `fontScale` 1-100）  |
+| `set-text-frame`（`frame.direction`）      | 竖排文本方向（`"vertical"` / `"vertical-270"` / `"east-asian-vertical"` 等；`"horizontal"` 或 `null` 恢复横排）          |
+| `set-text-frame`（`frame.margin*`）        | 设置四边内边距；单位值或 `null`（清掉显式属性，恢复继承/默认）                                                           |
+| `set-text-frame`（`frame.verticalAnchor`） | `top` / `middle` / `bottom`；`null` 清除                                                                                 |
+| `set-text-frame`（`frame.wordWrap`）       | 布尔值控制换行；`null` 清除                                                                                              |
+| `fit-text`                                 | 给 text frame 算合适字号（`maxFontSize` / `minFontSize`，可选 `strategy: "estimate" / "font-metrics"`，默认 `estimate`） |
 
 `fit-text` 是直接计算并写死字号；要 PowerPoint 自己缩放文字的 autofit 行为，
 用 `set-text-frame` 的 `frame.autofit`。

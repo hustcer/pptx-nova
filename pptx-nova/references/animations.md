@@ -238,6 +238,12 @@ dry-run 重点看：
 }
 ```
 
+`speed` 仅接受 `slow/medium/fast`，默认 `fast`。`dir` 在 `push/wipe` 上接受
+`left/up/right/down`，`cover` 还接受 `left-up/right-up/left-down/right-down`（默认 `left`），在
+`split/zoom` 上接受 `in/out`（默认 `out`）；其他 kind 禁止 `dir`。
+`orient` 仅用于 `split`，取 `horizontal/vertical`，默认 `horizontal`；
+`throughBlack` 仅用于 `fade/cut`。`clear:true` 禁止同时提供转场参数。
+
 如果 inspect 已有未披露的 p14/p15 扩展转场、声音或复杂 timing，默认 preserve-only。Zoom 等未被
 能力事实列为可创建的高级转场也保持 preserve-only。Morph 使用下面的专用流程，不要把它归入普通转场
 或 shape animation。

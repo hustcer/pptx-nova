@@ -31,7 +31,7 @@
   "op": "if",
   "condition": {
     "kind": "slide-count",
-    "op": "==",
+    "op": "eq",
     "value": 0
   },
   "then": [
@@ -56,13 +56,21 @@
 | kind               | 含义                                                          |
 | ------------------ | ------------------------------------------------------------- |
 | `slide-count`      | 当前 candidate state 的 slide 数                              |
-| `count`            | `slide-count` 的兼容 condition kind，同样读取当前 slide 数    |
 | `selector-match`   | 配合 `shape` 字段，判断 selector 是否命中当前 candidate state |
 | `property-compare` | 配合 `slide` + `shape` + `property`，比对该属性的当前值       |
 
-`condition.op` 全集（**用全名**，schema strict）：
-`== != > >= < <=` / `eq ne gt gte lt lte` / `equals notEquals` /
-`contains notContains` / `startsWith endsWith`
+操作符按条件类型选择，省略时默认 `eq`：
+
+| 条件                  | 值和操作符                                                  | 必填与边界                                                                             |
+| --------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `slide-count`         | integer；`eq/ne/gt/gte/lt/lte`                              | 必填 `value`，读取执行到此处的候选页数                                                 |
+| `selector-match` 计数 | 非负 integer；`eq/ne/gt/gte/lt/lte`                         | 必填 `slide/shape/value`                                                               |
+| `selector-match` 存在 | 不提供 `value/op`                                           | 必填 `slide/shape`；至少命中一个即 true                                                |
+| `property-compare`    | string；`eq/ne/contains/not-contains/starts-with/ends-with` | 必填 `slide/shape/property/value`，`property` 为 `name/text`；0 匹配 false，多匹配报错 |
+
+`slide` 为 0-based，`shape` 沿用互斥 selector 契约。各分支拒绝不适用字段、旧别名和错误类型；
+属性比较不会把数字或布尔转成字符串。模板在替换前检查符号结构，替换后仍按上述运行时条件校验。
+独立 `xdoc pptx recipe` 只静态展开建页 recipe；条件应放在普通 patch 中执行。
 
 **典型用法**：
 
@@ -86,12 +94,12 @@
     {
       "op": "add-text-box",
       "slide": 0,
-      "name": "{{$kpi.name}}",
+      "name": "{{kpi.name}}",
       "x": "0.5in",
       "y": "3in",
       "w": "2.8in",
       "h": "1.4in",
-      "text": "{{$kpi.label}}\n{{$kpi.value}}\n{{$kpi.delta}}"
+      "text": "{{kpi.label}}\n{{kpi.value}}\n{{kpi.delta}}"
     }
   ]
 }
@@ -100,8 +108,10 @@
 关键点：
 
 - `items` 必须是 JSON 数组；每个元素被赋给 `as` 变量（默认 `"item"`）
-- 在 `do[]` 内部用 **`{{$<as>.path}}`** 引用当前元素（注意是 `$kpi` 而非 `kpi`）；
-  支持任意深度的 `.` 路径
+- 在 `do[]` 内部用 `{{kpi}}` 或 `{{kpi.field}}` 插值当前元素或其直接字段；
+  字段名不加 `$`，不承诺递归路径解析
+- `{"$var":"kpi"}` 将整个变量作为 JSON 值替换，必须是只有 `$var` 一个键的对象。
+  例如循环 `items:[0]` 时可用 `"slide":{"$var":"item"}` 保持 integer 类型
 - 不支持索引变量（无 `{{$index}}`）。要带序号请在 `items` 数组里预先填好
 - 同一个 `foreach` 内可以嵌 `if` / 另一个 `foreach`,变量作用域逐层叠加
 
@@ -112,7 +122,8 @@
 - 把 CSV / JSON 数据源转成 deck 内容,**不必落地一个 template.pptx**(对比 `template-fill`)
 
 > ⚠️ `foreach` 仍然不能脱离 patch op 自身的字段约束 — `add-text-box` 必须有
-> `slide` / `x` / `y` / `w` / `h`,变量替换只是文本插值。复杂坐标计算应该用
+> `slide` / `x` / `y` / `w` / `h`。字符串插值的结果始终是 string，integer 字段
+> 需要 JSON 变量或数字字面量。复杂坐标计算应该用
 > JS 生成器(`assets/examples/deck-generator-template.mjs`)在生成 items 时
 > 算好,再交给 foreach 展开。
 
@@ -177,7 +188,7 @@
       "body": [
         {
           "op": "add-text-box",
-          "slide": "{{args.slide}}",
+          "slide": 0,
           "x": "{{args.x}}",
           "y": "{{args.y}}",
           "w": "2in",
@@ -194,7 +205,6 @@
       "op": "use-macro",
       "name": "metricBox",
       "args": {
-        "slide": 0,
         "x": "0.5in",
         "y": "3.2in",
         "name": "kpi-revenue",
@@ -206,7 +216,6 @@
       "op": "use-macro",
       "name": "metricBox",
       "args": {
-        "slide": 0,
         "x": "3.5in",
         "y": "3.2in",
         "name": "kpi-margin",
@@ -227,9 +236,10 @@
 | `use-macro`    | `name` | 非空字符串       | 要引用的宏；**必须先 `define-macro`** 后才能 `use-macro`          |
 | `use-macro`    | `args` | object（可省略） | 暴露给宏体内的 `{{args.*}}` 占位符；省略 = 空对象                 |
 
-`{{args.field}}` 在 `use-macro` 展开时做**字符串插值**（与 `foreach` 的 `{{$item.x}}`
-同机制），支持任意层级 `.path` 路径（如 `{{args.theme.accent1}}`）；插值后的
-op 才进入 schema 校验，所以**坐标/枚举字段**最终仍然必须是合法值。
+`{{args.field}}` 在 `use-macro` 展开时做**字符串插值**（与 `foreach` 的 `{{item.x}}`
+同机制），访问 `args` 的直接字段。`{"$var":"args"}` 可替换整个 JSON 对象，
+例如把宏的 `condition` 写成该对象、通过 `args` 传入完整条件。插值后的 op
+仍进入 schema 校验，所以坐标、枚举和数值字段必须保持各自的合法类型。
 
 ### 5.2 嵌套与递归
 

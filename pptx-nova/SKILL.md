@@ -57,6 +57,8 @@ treating a patch as valid. Read
 theme/style/native DeckKit information from matching snapshot catalogs. Derive selectors from inspect, the
 target op schema, then dry-run suggestions. For PPTX CLI syntax, use `xdoc pptx <action> --help`; this
 schema-backed human synopsis is neither machine schema nor JSON.
+Choose one selector lookup method; do not combine `id`, `name`, or `query` with another method.
+Combine AND predicates inside one query or its supported inline form, and pair `idx` with `placeholder`.
 
 Do not append `--json` to top-level `xdoc convert` or `xdoc check` by default. For structured PPTX PNG
 previews, prefer `xdoc pptx preview --json`; for structured single-file preflight results, prefer

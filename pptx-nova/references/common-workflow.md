@@ -554,10 +554,16 @@ xdoc pdf extract-text input.pdf --engine pdfium --json --pretty
 available). `--pages` is 1-based. `--mode layout` keeps the visual reading order;
 `natural` is the default reading flow.
 
-Writing with `-o file.md` also emits a `file.manifest.json` sidecar (manifest
+For HTML-to-Markdown, writing with `-o file.md` also emits a `file.manifest.json` sidecar (manifest
 mode `auto`) and refuses to overwrite an existing output. Write into the current
 run directory so reruns do not collide; add `--overwrite` to replace a current-run
 file, or `--manifest false` (or stdout without `-o`) for a single clean file.
+
+For `pdf extract-text`, `--output` is a text or JSON file. An existing destination
+is preserved and the command exits with code 9 unless `--overwrite` is explicit.
+Use that flag only to replace an output owned by the current run. The complete
+result is staged before replacement; without `--output`, the result stays on stdout.
+PDF text extraction does not create an HTML-to-Markdown manifest sidecar.
 
 Pipeline integration:
 

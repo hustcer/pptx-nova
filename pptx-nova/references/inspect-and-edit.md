@@ -234,13 +234,17 @@ query 复用 patch 的 `ShapeQuery`：
 - `matchCount == 0` 时回到 inspect 看实际文本、placeholder 和 group/SmartArt 边界，
   不要凭猜测生成 destructive op。
 
-## 2. 选 shape 的四种 selector
+## 2. shape selector 的定位方式
 
 按"先确定再模糊"的顺序选：
 
+一个 selector 只能选择一种定位方式。不要组合 `id + name`、`id + query`、
+`name + placeholder`，也不要将 `query` 与外层查询字段混用；即使额外字段的值是 `null`，
+混合定位也会被拒绝。需要多个条件共同约束目标时，使用下文的显式或内联查询。
+
 ### 2.1 `{ "id": ... }` —— 最稳
 
-inspect 给出的 `shape.id` 是 deck 内全局唯一的。一旦拿到，patch 直接引用：
+将 inspect 给出的数字 `shape.id` 与操作的 `slide` 一起用于定位。一旦拿到，patch 直接引用：
 
 ```json
 "shape": { "id": 12 }
@@ -248,6 +252,7 @@ inspect 给出的 `shape.id` 是 deck 内全局唯一的。一旦拿到，patch 
 
 唯一缺点：deck 变化后 id 也可能变（重写后），不适合长期固化。
 注意不要把 inspect 中的数字 id 转成字符串；`shapeSelector.id` 要按原始类型写入 patch。
+裸整数 `"shape": 12` 也表示 OOXML shape ID，不是形状数组下标。
 如果 dry-run 报 selector schema 错误，先用 `xdoc schema --mode ops --ops <op>` 或一个最小 patch
 确认当前 xdoc 版本的 selector 形态，再批量生成 patch。
 
@@ -269,7 +274,7 @@ shape 在 PowerPoint Selection Pane 里能看到 name；设计师常给关键 sh
 
 `type` 取值：`title / ctrTitle / body / subTitle / dt / sldNum / ftr / hdr /
 obj / chart / tbl / clipArt / dgm / media / sldImg / pic`。
-`idx` 在同 type 多 placeholder 时区分（0-based）。
+`idx` 是 OOXML placeholder 的身份属性，不是数组下标；它只能与同层 `placeholder` 一起提供。
 
 ### 2.4 `{ "query": { ... } }` —— 模糊查找
 
@@ -290,7 +295,19 @@ query 几种模式都可组合（AND 关系）：
 - `placeholder` —— 同上
 - `bboxNear` —— 找 bbox 中心在 `(x, y)` 周围 `radius` 内的 shape
 
-仍然唯一匹配才会执行；多匹配/无匹配都会失败。
+要求单个目标的操作仍需唯一匹配；多匹配/无匹配都会失败。
+
+### 2.5 内联查询
+
+也可在 selector 对象上直接提供至少一个 `nameRegex`、`textRegex` 或 `bboxNear`：
+
+```json
+"shape": { "nameRegex": "^Section", "textRegex": "Revenue" }
+```
+
+这些谓词同样按 AND 匹配，可带 `placeholder` 及其 `idx`，但不能再带 `id`、`name` 或 `query`。
+`idx` 单独出现无效。表格数据绑定的 `tableId` 字符串名称简写保持可用；不要将它扩展为
+所有 shape selector 的字符串入口。
 
 ## 3. Ambiguous selector 的自修复
 

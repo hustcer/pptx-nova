@@ -360,6 +360,10 @@ Notes:
   (`pdflite` is not yet available); `--pages` is 1-based; `--mode layout` keeps
   visual order, `natural` is the reading flow. With `--json --pretty` inspect
   `summary` and `warnings` for dropped/reordered characters.
+- `pdf extract-text --output` writes one text or JSON file. Existing files are
+  preserved with exit code 9 unless `--overwrite` is explicit; use it only for
+  current-run outputs. The complete result is staged before replacement. Omit
+  `--output` to keep the result on stdout; no manifest sidecar is generated.
 - This is text only. Images, styles, and layout from the source are not imported.
 - `html2md -o file.md` also writes a `file.manifest.json` sidecar and refuses to
   overwrite an existing output; add `--overwrite` for current-run files, or use

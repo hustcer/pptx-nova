@@ -290,7 +290,7 @@ xdoc pptx morph-check <run-dir>/candidate.pptx --from-slide 1 --to-slide 2 --jso
 ```
 
 交付前要求 `morph-check-after.json` 中预期显式配对成功且没有 blocking finding，并确认 inspect 回读
-到 `type: morph`、正确的 mode/duration、extension wrapper 以及 fade fallback。若两页本来没有 `!!`
+到 `kind: morph`、正确的 mode/duration、extension wrapper 以及 fade fallback。若两页本来没有 `!!`
 名称，先通过普通 inspect/select 和受支持的重命名操作建立显式配对；不要通过 raw XML 绕过诊断。
 
 `clean-open.mjs` 在可用时按主流程运行。下面的 Nushell 播放探针是可选的、能力门控的

@@ -1117,8 +1117,8 @@ a preview hash identifies the rendered artifact but does not prove OCR,
 font-fallback, or pixel-level correctness.
 
 At operation level, `opResults[]` can include `opIndex`, `op`, `status`,
-`changedParts`, `semanticChanges`, `visualRisks`, `warnings`, `created`,
-`createdIds`, `resolvedSelectors`, `expandedOps`, `analysis`, and `durationMs`.
+`changedParts`, `semanticChanges`, `visualRisks`, `warnings`,
+`createdObjects`, `resolvedSelectors`, `expandedOps`, `analysis`, and `durationMs`.
 
 ### Structured error behavior
 

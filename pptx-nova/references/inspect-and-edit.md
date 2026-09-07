@@ -365,7 +365,7 @@ dry-run 报告里会有：
 | `opResults[].status`              | success / error / skipped                                         |
 | `opResults[].changedParts[]`      | 影响了哪些 OOXML part（`ppt/slides/slide1.xml` 等）               |
 | `opResults[].resolvedSelectors[]` | 实际选到了哪个 shape（id + name）                                 |
-| `opResults[].createdIds[]`        | 新创建对象的 id（apply 后下一个 op 可以引用）                     |
+| `opResults[].createdObjects[]`    | 唯一的创建对象数组；按 kind 读取定位字段，普通和控制流操作一致    |
 | `opResults[].analysis`            | 部分 op 的额外信息（如 `fit-text` 的 `appliedSize`）              |
 | `opResults[].durationMs`          | op 耗时                                                           |
 | `semanticChanges[]`               | Agent 可读的语义 diff（slide/shape/text/style/media/chart/table） |
@@ -373,6 +373,18 @@ dry-run 报告里会有：
 | `warnings[]`                      | 一般警告                                                          |
 | `traces[]`                        | 调用链路（trace/debug level 才有）                                |
 | `error`                           | 失败时的结构化错误（kind / code / opIndex / suggestions）         |
+
+创建引用记录执行该 op 时的候选状态；后续移动或删除操作可能使索引失效，不能将它当作跨编辑的永久 ID。
+
+| kind        | 定位字段                               | 范围                                                                                 |
+| ----------- | -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `slide`     | `slide`                                | 从 0 开始的幻灯片索引                                                                |
+| `shape`     | `slide`、`id`                          | `id` 为该页内的 OOXML `cNvPr/@id`，取值 0–4294967295；附带 `shapeType` 和可选 `name` |
+| `layout`    | `layout`                               | 从 0 开始的版式索引；可选 `name`、`shapeType`，没有 `id`                             |
+| `paragraph` | `slide`、`shapeId`、`paragraph`        | 父形状 ID 与其文本框内从 0 开始的段落索引                                            |
+| `run`       | `slide`、`shapeId`、`paragraph`、`run` | 父形状和段落定位，加段落内从 0 开始的 run 索引                                       |
+
+`name` 只是可选元数据，不保证唯一。根据 `xdoc schema` 的 apply/dry-run report schema 校验结果，再按 `kind` 分支读取；不要把整个对象当作 ID。`created` 和 `createdIds` 已移除。
 
 ## 5. 常见修改模式
 
@@ -531,7 +543,7 @@ shape 重建"（节点少且用户要可编辑时建议重建）；翻译/替换
 # 回放（用 sidecar 从 input.pptx 重建 output.pptx，验证可重现性）
 xdoc pptx replay --from-sidecar output.pptx.xdoc.json -o recovered.pptx
 
-# 审计（输出 sidecar 的 op 列表与 createdIds）
+# 审计（输出 sidecar 的 op 列表与 createdObjects）
 xdoc pptx audit --from-sidecar output.pptx.xdoc.json --json
 
 # 回滚（撤销最近一次 apply）

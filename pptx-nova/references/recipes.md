@@ -7,7 +7,7 @@ recipe 已经把字体、间距、坐标、placeholder 类型预设好；模型�
 
 每个 recipe 都作为 `add-slide` 的 `recipe` 字段放进 patch JSON，并在执行时展开成底层
 patch。先用 `xdoc schema --mode ops --ops add-slide --minimal` 获取当前严格字段，再通过 dry-run
-审查 `expandedOps[]` 与 `createdIds[]`。
+审查 `expandedOps[]` 与 `createdObjects[]`。
 
 ## 通用 envelope
 

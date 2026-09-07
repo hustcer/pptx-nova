@@ -209,6 +209,12 @@ xdoc pptx select input.pptx --query query.json --json > <run-dir>/select.json
 
 query 复用 patch 的 `ShapeQuery`：
 
+`bboxNear` 的输入坐标与半径都必须显式带单位，不能用裸数字或无单位字符串。
+半径不得为负；省略时使用现有 `0.25in` 默认值。报告的 `query.bboxNear`
+单独回显整数 `xEmu/yEmu/radiusEmu`；省略半径时不补写 `radiusEmu`，
+不要把这些报告键直接复制回查询输入。非法值通过 `invalid_parameter.details`
+给出公开字段 Pointer、原因和可独立验证的约束。
+
 ```json
 {
   "textRegex": "Revenue",
@@ -293,7 +299,7 @@ query 几种模式都可组合（AND 关系）：
 
 - `nameRegex` / `textRegex` —— 字面匹配 + `.*` 通配 + `^` / `$` 锚定
 - `placeholder` —— 同上
-- `bboxNear` —— 找 bbox 中心在 `(x, y)` 周围 `radius` 内的 shape
+- `bboxNear` —— 点 `(x, y)` 位于 shape 的 bbox 内时直接匹配；否则判断它与 bbox 中心的距离是否不超过 `radius`
 
 要求单个目标的操作仍需唯一匹配；多匹配/无匹配都会失败。
 

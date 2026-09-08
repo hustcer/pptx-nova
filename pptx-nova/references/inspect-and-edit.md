@@ -12,7 +12,7 @@
 ```
                        ┌─ no risk ──→ 真 apply
 inspect → 写 patch → dry-run ──┤
-                       └─ has risk ─→ 按 fixPatch / suggestion 改写 patch
+                       └─ has risk ─→ 核对 remediation.kind 与目标，再 dry-run
 ```
 
 ## 1. Inspect 拿基础结构
@@ -317,46 +317,16 @@ query 几种模式都可组合（AND 关系）：
 
 ## 3. Ambiguous selector 的自修复
 
-dry-run 报告里会有：
+dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[]` 给出
+结构化诊断。用 `select` / `inspect` 查看候选的 bbox 和 textPreview，再选择建议。
+可执行建议使用 `remediation.kind="replace-request"`，`request` 是完整请求，
+其中只有对应 authored 节点的 selector 被改为具体 id；recipe、vars、preconditions
+和未修改的创建操作都保持原位。
 
-```json
-{
-  "opIndex": 2,
-  "status": "error",
-  "error": {
-    "code": "invalid_operation",
-    "message": "Shape selector matched 3 candidates",
-    "suggestions": [
-      {
-        "kind": "use-id",
-        "fixPatch": {
-          "schemaVersion": "pptx-patch/v1",
-          "ops": [
-            { ...同 op 但 shape 改为 { "id": 12 } }
-          ]
-        }
-      },
-      {
-        "kind": "use-id",
-        "fixPatch": {
-          "schemaVersion": "pptx-patch/v1",
-          "ops": [
-            { ...同 op 但 shape 改为 { "id": 27 } }
-          ]
-        }
-      }
-    ],
-    "candidates": [
-      { "id": 12, "name": "KPI Card 1", "bbox": {...} },
-      { "id": 27, "name": "KPI Card 1", "bbox": {...} },
-      { "id": 31, "name": "KPI Card 1", "bbox": {...} }
-    ]
-  }
-}
-```
-
-挑一个 candidate（看 bbox 或上下文 textPreview），用对应的 fixPatch 替换原 op，
-再 dry-run 一次。
+按 [troubleshooting.md](troubleshooting.md#两种-remediation-与重试流程) 使用
+首次提交前保存的 capsule。核对请求 JCS 摘要、原输入摘要及冻结的相对资源后，
+先 dry-run，再从原始输入重新执行完整请求。不得把 replacement 追加执行，
+也不能拿展开后的 opIndex 直接改写顶层 ops。无唯一来源或完整上下文时只读诊断。
 
 ## 4. dry-run 报告字段速记
 

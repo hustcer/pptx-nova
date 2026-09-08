@@ -75,7 +75,7 @@
       "id": 11,
       "name": "fix-visual-defects-loop",
       "prompt": "我做完一版 deck 后总担心有文字溢出或元素重叠的硬伤。请演示完整的几何自检闭环：先故意做一页有问题的 slide（一个文本框戳出幻灯片右边界、另外两个文本框互相重叠），然后用 vision-check 检出问题，把可以自动修的（autoRetry:true）合成一个 patch 重新 apply，再跑一次 vision-check 确认越界类问题清零。最后把前后两次 vision-check 的 summary 摘要展示给我。",
-      "expected_output": "首次 vision-check 检出 shape-out-of-bounds 与 geometry-overlap；把 autoRetry:true 的 fixPatch 合并 re-apply；二次 vision-check 中 shape-out-of-bounds / text-edge-margin 清零；展示前后 summary 对比；候选类（overlap/overflow）按需人工处理而非盲目套。",
+      "expected_output": "首次 vision-check 检出 shape-out-of-bounds 与 geometry-overlap；用首次提交前保存的上下文按 remediation.kind 分派，核对完整 shape、自己保有的文档摘要及资源快照，再 dry-run/授权/执行一次 apply-to-document.patch；每次对新文档重新诊断，不合并旧目标建议或重跑创建 ops；二次 vision-check 中 shape-out-of-bounds / text-edge-margin 清零；展示前后 summary 对比；候选类（overlap/overflow）按当前授权复核。",
       "files": []
     },
     {

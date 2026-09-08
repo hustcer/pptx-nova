@@ -72,7 +72,7 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 | ---------------------------- | ------ | ------- | ------------------------------------------ |
 | 内容大纲提炼                 | ~3 min | 15%     | 先列每页主题再下笔                         |
 | **JS 生成器编写**            | ~9 min | **45%** | **`grid()` / `txH()` helper 压缩坐标手算** |
-| dry-run gate + 修 schema bug | ~3 min | 15%     | 跟着 `fixPatch` 走,别凭直觉猜              |
+| dry-run gate + 修 schema bug | ~3 min | 15%     | 核对 remediation 目标，再校验完整请求      |
 | 落盘 + PNG 视觉验证          | ~5 min | 25%     | 逐页 Read,不要批量浏览                     |
 
 总计 ~20 min。这个样本代表从零探索主题、布局和生成器结构的场景。

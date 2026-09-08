@@ -43,7 +43,7 @@ Before apply, verify `dry-run.json`:
 - every op resolved the intended slide and object
 - each selector resolved to exactly one target unless the user asked for a
   multi-object edit
-- no unexpected `suggestions[].fixPatch` remains unused
+- every `suggestions[]` diagnostic has been reviewed; any selected remediation has a verified target and preserved context
 - any text-fit or visual-risk warning is either fixed or triggers changed-slide
   preview
 

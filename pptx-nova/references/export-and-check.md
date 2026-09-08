@@ -313,8 +313,8 @@ behavior, or description quality. Gradients, pictures, and pattern backgrounds
 may make contrast inconclusive.
 
 Findings may include `patchSelector` and `patchTemplate`. The template contains
-placeholder prose, has `autoApplicable: false`, and is deliberately not a
-`fixPatch`; replace it with a truthful description and dry-run it, never merge
+placeholder prose, has `autoApplicable: false`, and has no executable remediation
+target; replace it with a truthful description and dry-run it, never merge
 the placeholder unchanged. With `--target-office` earlier than 2019, a visual
 marked only as decorative still needs a description fallback or produces
 `a11y_decorative_not_supported`. Scoped `--slide` findings do not prove a

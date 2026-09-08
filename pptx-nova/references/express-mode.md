@@ -117,19 +117,23 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 # 6. 丰富度自检（客户演示级目标 ≥200 ops，见 §5）
 jq '.ops | length' patch.json
 
-# 7. dry-run 预演（多步默认 --daemon；--explain 拿字段约束）
-xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | save dry.json
+# 7. 首次提交前保存上下文，再 dry-run（运行时需披露 remediationSchema）
+node <skill-root>/scripts/pptx-nova-remediation.mjs run \
+  --patch patch.json --capsule run/remediation-context --output out.pptx \
+  --dry-run > dry.json
 #    读 semanticChanges[] / visualRisks[] / resolvedSelectors[]
 
-# 8. 自动修复：合并 autoRetry==true 的 fixPatch 重跑 dry-run（见 troubleshooting.md）
-#    ambiguous selector / fuzzy enum / RGB 规整 等机器有信心的修复直接合
+# 8. 修复：按 kind 分派、核对自己保有的身份与上下文，再 dry-run/授权/执行
+#    见 troubleshooting.md；不得将完整 replacement request 追加执行
 
-# 9. 真 apply（去掉 --dry-run，留 sidecar out.pptx.xdoc.json）
-xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
+# 9. 无需修复时，用首次提交的冻结请求/资产真 apply（保留 sidecar）
+#    若步骤 8 已经成功写出修复后的 out.pptx，直接继续步骤 10
+xdoc pptx apply -p run/remediation-context/request.json \
+  --asset-root run/remediation-context/assets -o out.pptx --daemon
 
 # 10. 几何自检闭环（render-free，见 §6）
 xdoc pptx vision-check out.pptx --json | save vision.json
-#    合并 autoRetry 的 fixPatch → 人工处理剩余 medium/high → 再 vision-check 到 medium/high 清零
+#    核对一条文档 remediation 并执行 → 重新诊断新文档 → 处理剩余 medium/high
 
 # 11. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 common-workflow.md）
 xdoc convert out.pptx --to png -o previews --overwrite
@@ -243,21 +247,21 @@ express 默认按**客户演示级**产出，不交 recipe-only 草稿。硬指�
 apply 后跑 `xdoc pptx vision-check out.pptx --json`（render-free 几何自检；公共门禁见 `common-workflow.md`）。
 闭环规则：
 
-- **自动套**：只把 `fix.autoRetry == true` 的两类（`shape-out-of-bounds` 越界回夹、
-  `text-edge-margin` 贴边推回）合成一个 patch envelope 重 apply，再 vision-check 确认清零。
-  bash 等价：
+- **允许尝试的修复**：选择一条 `remediation.autoRetry == true` 的建议，核对
+  `kind="apply-to-document"` 及文档摘要，在精确旧文档上仅执行它的完整 repair patch。
+  假设 `/issues/0` 是检查后选中的具体建议，并已有步骤 7 的首次提交 capsule：
 
   ```bash
-  jq '{schemaVersion:"pptx-patch/v1", ops:[.issues[] | select(.fix.autoRetry==true) | .fix.fixPatch[]]}' \
-     vision.json > fix.json
-  xdoc pptx apply -p fix.json -i out.pptx -o out.pptx --overwrite
-  xdoc pptx vision-check out.pptx --json | jq '.summary'
+  node <skill-root>/scripts/pptx-nova-remediation.mjs apply \
+    --capsule run/remediation-context --report vision.json --pointer /issues/0 \
+    --document out.pptx --output run/repaired.pptx
+  xdoc pptx vision-check run/repaired.pptx --json > run/vision-after.json
   ```
 
 - **人工确认**：`autoRetry==false` 的静态视觉问题（overlap / overflow / unexpected-wrap / alignment）
   不是可忽略项；它们是需要人工处理的候选修复。放大盒子或挪形状可能引入**新**碰撞，
   看 `reason` 后改 generator / layout / 文案 / textbox 尺寸，再重 apply。
-  `font-too-small` 无 fix（放大字号会反触发 overflow），但创建型 deck 不能把它当装饰性
+  `font-too-small` 无自动修复（放大字号会反触发 overflow），但创建型 deck 不能把它当装饰性
   warning：删字、放大容器或换版式后重跑。
 
 - **交付门槛**：创建型 deck 必须让 `summary.bySeverity.high == 0` 且

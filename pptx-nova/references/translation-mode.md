@@ -45,13 +45,13 @@ meaning and layout fidelity:
    the bilingual audit.
 3. Only when the slide has clear unused space may you make a minimal geometry
    adjustment such as increasing a text box width/height. Geometry repair is a
-   last resort, not the default response to `vision-check` `fixPatch` output.
+   last resort, not the default response to `vision-check` remediation output.
    It is allowed only when the adjusted shape does not overlap other shapes,
    does not touch the slide edge, and does not make neighboring spacing look
    cramped. Record the exact shape, before/after size or position, and reason
    in the bilingual audit and visual review.
 
-Do not apply a geometry `fixPatch` automatically in translation mode. Inspect
+Do not apply geometry remediation automatically in translation mode. Inspect
 the slide context first, prefer compact wording, and use geometry only when
 rendered before/after PNGs prove the page still has adequate spacing.
 
@@ -637,7 +637,7 @@ debugging path.
   allowed after checking neighboring objects. Do not move objects or resize
   boxes into other shapes, slide edges, chart labels, legends, footers, page
   numbers, or decorative chrome.
-- Treat `vision-check` geometry `fixPatch` suggestions as candidates, not
+- Treat `vision-check` geometry remediation suggestions as candidates, not
   instructions. Apply them only after a space check and rerun `vision-diff`,
   preview/contact sheet review, and any relevant style/semantic diff.
 - Do not split pages, change font weight/style, or shrink fonts below

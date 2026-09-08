@@ -1,56 +1,78 @@
 # 错误排查与自修复
 
-xdoc 的错误是**结构化的**，每个错误带：
+xdoc 的错误是结构化的。先读 `error.code`、诊断和 `suggestions[]`；可执行建议统一放在 `remediation` 中：
 
 ```json
 {
-  "kind": "<class>",
   "code": "<snake_case_code>",
   "severity": "error / warning / info",
   "message": "human-readable",
   "opIndex": 2,
   "docsRef": "https://...",
-  "autoRetry": true,
   "suggestions": [
     {
-      "kind": "...",
-      "message": "...",
-      "fixPatch": { "...": "可直接重试的 patch" },
-      "confidence": 0.82,
-      "autoRetry": true
+      "reason": "Review the corrected selector",
+      "remediationUnavailable": { "reason": "context-unavailable" }
     }
   ]
 }
 ```
 
-遇到错误时**第一步永远是读 `suggestions[]`** —— 很多错误直接附带 `fixPatch`，
-不用自己想。
+上例没有可执行建议。`remediationUnavailable` 与 `remediation` 互斥，原因只可能是
+`identity-unavailable`、`context-unavailable`、`ambiguous-source`、`target-unavailable`、
+`payload-limit`。保留诊断，按实际原因恢复输入或修正请求，不能把缺少摘要当作跳过校验。
 
-## `autoRetry` 标志位 —— 哪些 `fixPatch` 可以"无脑重试"
+## 两种 remediation 与重试流程
 
-每条 `suggestions[i]` 现在都带 `autoRetry: bool`，顶层 `error.autoRetry` 是
-"这些 suggestions 里有没有任何一条标了 autoRetry=true"的聚合。Agent 决策可以
-直接按它走：
+| kind                | 完整载荷                                                       | 执行目标                                           |
+| ------------------- | -------------------------------------------------------------- | -------------------------------------------------- |
+| `replace-request`   | `request`，保留版本、ops、recipe、vars、preconditions 等上下文 | 从原始输入重新执行完整请求；不得追加到原 ops       |
+| `apply-to-document` | `patch:{schemaVersion,ops}`，只含文档修复操作                  | 在诊断所依据的精确文档上执行一次；不重跑原创建操作 |
 
-| 场景                                                              | suggestion.autoRetry | Agent 该怎么做                                     |
-| ----------------------------------------------------------------- | -------------------- | -------------------------------------------------- |
-| ambiguous selector 候选 id / fuzzy enum / 颜色规整 / 拼字符近义层 | `true`               | 直接拿 `fixPatch` 替换原 op 重 dry-run，无需问用户 |
-| `layout-contract` 自动补全 / 兜底建议（无 op 索引时）             | `false`              | 把 suggestion 文字给用户看,确认后再改 patch        |
-| 兜底"用 enum.values 之一" / "改 layout type"                      | `false`              | 多个 candidate 没有明显赢家,需要人/上层 Agent 决策 |
+`replace-request.target` 必含 `kind:"original-input"`、
+`requestCanonicalization:"jcs-rfc8785"`、`requestSha256`、`inputSha256`。
+明确从空文档开始时 `inputSha256:null`；已有输入时必须是其 SHA-256。
+`apply-to-document.target` 必含 `kind:"document"` 和文档的 `inputSha256`。
+所有摘要均为 64 位小写十六进制。消费者对自己保存的原请求/文档计算摘要后比较，
+不使用报告中的摘要替代自己的预期。
 
-**首选 `autoRetry=true` 的 suggestion**：confidence 一般 ≥ 0.68（fuzzy 修复
-0.72-0.74，ambiguous 修复 0.82）；这一档不要再问用户，直接合 patch 走起。
+`remediation.reason` 是非空说明，`confidence` 是 0–1 有限数，`autoRetry` 是必填
+boolean。`autoRetry:true` 只允许按已有策略尝试，仍须验证完整 shape、目标和上下文，
+再 dry-run、重新授权和执行。删除失败操作改变请求意图，固定为 `autoRetry:false`；
+复核具体变更后才传 `--reviewed`，不要用该参数跳过用户当前要求的批准。
 
-`autoRetry=false` 仍然附带 `fixPatch`，只是建议人类先看一眼 — 比如把某 op
-直接删掉的兜底方案。
+要跨进程保留请求、输入和相对资源，在**首次提交前**使用快照脚本。先确认当前
+`xdoc schema --mode full` 披露 `commands.pptx.remediationSchema`；脚本会自动检查，
+旧运行时不提供旧字段 fallback。以下路径均为示例，输出与 capsule 必须使用新路径：
 
-> ⚠️ `autoRetry=true` 是"机器有信心的修复"，但**不能跳过 dry-run** — 重试时
-> 仍然先 `--dry-run`，因为修一处可能引出另一处歧义/错误。
+```bash
+node scripts/pptx-nova-remediation.mjs run \
+  --patch request.json --input original.pptx --asset-root assets \
+  --capsule run/remediation-context --output run/first.pptx > run/first-report.json
 
-## errorCatalog.scenarioCoverage —— 5 个最常见场景的快速 fixPatch
+node scripts/pptx-nova-remediation.mjs apply \
+  --capsule run/remediation-context --report run/first-report.json \
+  --pointer /error/suggestions/0 --output run/repaired.pptx
+```
 
-`xdoc schema` 的 `errorCatalog.scenarioCoverage` 给出当前覆盖最完整的 5 个修复场景。
-拿到错误时先按 `id` 匹配,直接抄 `typicalFixPatch`:
+从空文档开始时省略 `--input`。`run` 支持 `--transport json-rpc`、`--dry-run`、
+`--intent intent.json` 和已有授权下的 `--allow-raw-xml`。首次提交和重试都使用同一
+capsule 中的相对资源根；之后同名源文件变化不会换掉已冻结的资产。
+capsule 含私有原请求、PPTX 和资源，应保留到重试结束。没有首次提交的 capsule
+时不自动应用旧报告；重新组织一次有完整上下文的新请求。
+
+`apply` 按 kind 分派，只选一个具体 JSON Pointer，先校验、dry-run，再实际 apply。
+文档修复额外传 `--document diagnosed.pptx`。成功建议记录回执，同一建议不会重复执行。
+原始 intent、raw XML 约束和资产字节预算不会被放宽；当前授权仍由 xdoc 再次求解。
+任一摘要/上下文不匹配不写目标文件。修完后重新诊断新文档，再选择下一条建议，
+不要把同一旧文档的多条建议盲目合并。单份报告内可执行建议累计最多 1 MiB，
+超限建议保留诊断和 `payload-limit` 标记。
+
+## errorCatalog.scenarioCoverage —— 修复场景与手工模板
+
+`commands.pptx.errorCatalog.scenarioCoverage` 提供场景说明及
+`patchTemplate:{schemaVersion,ops}`，同时标记 `autoApplicable:false`。
+模板没有本次请求身份，不能作为可执行建议直接复制重试。
 
 | id                          | 触发                                                                     | 修复策略                                                       |
 | --------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- |
@@ -60,14 +82,13 @@ xdoc 的错误是**结构化的**，每个错误带：
 | `font-color-shape-spelling` | 字体名 / 颜色 / 主题色拼错,或 RGB 不是 6 位大写 hex                      | 用 `enumRegistry` 的 fuzzy 候选;或 `1A73E8`(不带 `#`,全大写)   |
 | `layout-contract`           | `populate-slide.content` 缺必填字段,或在 strict 模式下出现了非法额外字段 | 补上 placeholder 或删除非法字段;严格模式见 `recipes.md`        |
 
-完整 schema(含 docsRef 与 typicalFixPatch JSON 例子):
+完整 schema（含 docsRef 与手工模板）：
 
 ```bash
-xdoc schema | jq '.errorCatalog.scenarioCoverage'
+xdoc schema --mode full | jq '.commands.pptx.errorCatalog.scenarioCoverage'
 ```
 
-> Agent 流程建议:dry-run 报错 → grep `code` → 按 `scenarioCoverage[].code` 匹配 →
-> 直接抄 `typicalFixPatch` → 重试。比读 `suggestions[]` 里的自由文本更快。
+模板用于理解诊断。实际自动尝试只消费带完整目标身份的 `remediation`。
 
 ## OOXML 数值范围拦截 —— 报错自带允许范围与出处，改值即可
 
@@ -80,10 +101,10 @@ set-paragraph.format.lineSpacing must be at most 132
   (line spacing multiple written as a:spcPct val (1.0 = 100000) — OOXML a:spcPct@val 0..13200000)
 ```
 
-**优先走 fixPatch**：这类错误的 `suggestions[]` 现在自带一条
-`autoRetry: true`（confidence 0.8）的 clamp/wrap 修复——把越界值收回边界
+优先检查 `suggestions[].remediation`：这类错误可能带一条
+`autoRetry: true`（confidence 0.8）的 clamp/wrap 修复，把越界值收回边界
 （角度按 360 取模而非截断），且引擎已验证修复后的 op 能通过契约校验，
-直接拿 `fixPatch` 重 dry-run 即可，无需手改：
+核对原请求身份后用完整 `replace-request.request` 重做 dry-run：
 
 ```
 "reason": "Clamp /ops/1 out-of-range values to the OOXML bounds: plot.gapWidth: 501 -> 500 (…)"
@@ -127,7 +148,7 @@ before <a:buChar> (schema order: …)`。
 更多是原文件里预存的缺陷（外部工具删了形状却留下动画引用等）——这时走下面的
 `semanticIssues[]` 修复循环。
 
-### `semanticIssues[]` —— 结构化语义问题 + 确定性 fixPatch
+### `semanticIssues[]` —— 结构化语义问题与文档修复
 
 同一批发现还会以结构化形式出现在 apply / dry-run 报告顶层 `semanticIssues[]`：
 
@@ -136,9 +157,13 @@ before <a:buChar> (schema order: …)`。
   "code": "dangling-ref", // dangling-rel | dangling-ref | duplicate-id | part-truth
   "part": "ppt/slides/slide1.xml",
   "message": "<p:spTgt> spid=\"2\" references no <cNvPr> with id=\"2\" in the part",
-  "fix": {
-    // 仅确定性修复才附带
-    "fixPatch": [{ "op": "set-slide-animations", "slide": 0, "remove": ["5"] }],
+  "remediation": {
+    "kind": "apply-to-document",
+    "target": { "kind": "document", "inputSha256": "<64 lowercase hex characters>" },
+    "patch": {
+      "schemaVersion": "pptx-patch/v1",
+      "ops": [{ "op": "set-slide-animations", "slide": 0, "remove": ["5"] }],
+    },
     "reason": "remove the 1 animation entries targeting missing shape id 2 …",
     "confidence": 0.9,
     "autoRetry": true,
@@ -149,12 +174,11 @@ before <a:buChar> (schema order: …)`。
 
 处理规则：
 
-- `fix.autoRetry: true` → 直接把 `fixPatch` 合并进 ops 数组（或单独 apply 一次）
-  重跑即可，无需问用户；修完再 dry-run 一次确认 `semanticIssues` 清零。
-- `fix.requiresRawXml: true` → `fixPatch` 含 `patch-ooxml` op，apply 时必须加
-  `--allow-raw-xml`（如"补建缺失 rId"：唯一孤儿 image/media part 会被确定性
-  重新挂回缺失的 relationship）。
-- 没有 `fix` 的 issue = 修复不确定（多个候选孤儿 part、preserve-only 动画等），
+- 仅对可重新取得的精确文档执行 `apply-to-document.patch`；使用上述脚本并传
+  `--document`。dry-run 的未交付候选不能冒充原文件，缺目标时只读诊断。
+- `requiresRawXml:true` 必须已有相应权限；不能为执行建议自动增开权限。
+  受限 `repair-child-order` / `repair-relationships` 仍由当前运行时声明其权限要求。
+- 没有 remediation 的 issue 可能是修复不确定（多个候选孤儿 part、preserve-only 动画等），
   保持现状并把 message 原文上报，不要自造修复。
 - `remove-shape` 已自动清理被删形状（含组内子形状）的动画与 build 引用，删除
   带动画的形状**不需要**先手动清动画；出现 `dangling-ref` 通常来自 deck 预存
@@ -191,7 +215,7 @@ unzip -p out.pptx 'ppt/charts/chart1.xml' |
 | `invalid_argument`                                      | 字段缺失、形状/取值错、资产路径读不到                                                 | 按 `path` / `expected` / `actual` 改字段                                 |
 | `invalid_arguments`                                     | CLI 调用缺参数                                                                        | 按帮助补齐命令行                                                         |
 | `unsupported_feature`                                   | 用了不支持的 op / schemaVersion                                                       | `xdoc schema --mode ops --ops <name>` 查能力，找替代                     |
-| `invalid_operation`                                     | patch 合法但当前 deck 应用不了（selector 匹配 0 或 >1 个、layout 找不到、维度冲突等） | 看 message / `candidates[]` / `suggestions[].fixPatch` 修正目标          |
+| `invalid_operation`                                     | patch 合法但当前 deck 应用不了（selector 匹配 0 或 >1 个、layout 找不到、维度冲突等） | 看 message / `candidates[]`，核对完整 `suggestions[].remediation` 的目标 |
 | `invalid_package` / `invalid_xml`                       | 输入包结构或 OOXML 解析失败                                                           | 换来源文件或先修复                                                       |
 | `missing_part` / `missing_relationship`                 | 输入包缺 part / relationship                                                          | 用 repair-relationships 或换文件                                         |
 | `encrypted_package` / `signed_package`                  | 输入加密 / 已签名                                                                     | 先去密码；签名文件按策略处理                                             |
@@ -245,29 +269,15 @@ unzip -p out.pptx 'ppt/charts/chart1.xml' |
 
 ### 1. selector 匹配多个（最常见）
 
-```json
-{
-  "error": {
-    "code": "invalid_operation",
-    "message": "shape query {nameRegex=...} matched 3 shapes; use a unique id",
-    "suggestions": [
-      { "kind": "use-id", "fixPatch": { ...op with id A... } },
-      { "kind": "use-id", "fixPatch": { ...op with id B... } },
-      { "kind": "use-id", "fixPatch": { ...op with id C... } }
-    ],
-    "candidates": [
-      { "id": "A", "name": "...", "bbox": {...}, "textPreview": "..." },
-      ...
-    ]
-  }
-}
-```
+`error.candidates` 给出例如 `shape:12`、`shape:27` 的候选引用；用 `select` / `inspect`
+读取对应 bbox 和文本。可用建议的 `remediation.kind` 为 `replace-request`，其中
+`request` 保留整份原请求，仅将对应 authored 节点的 selector 改为具体 id。
 
 修复：
 
-1. 看 `candidates[]` 的 `bbox` / `textPreview` 决定哪个才是目标
-2. 复制对应 `fixPatch` 的 op 到原 patch（替换 ambiguous op）
-3. 重新 dry-run
+1. 对照候选引用的 bbox / textPreview 决定哪个才是目标。
+2. 用首次提交的 capsule 核对该建议的请求、输入和资源上下文。
+3. 运行本页通用消费者，重新 dry-run，再从原输入执行完整 replacement request。
 
 ### 2. selector 没匹配到
 
@@ -453,7 +463,7 @@ xdoc pptx rollback --from-sidecar out.pptx.xdoc.json -o restored.pptx
 
 ## 不要做的事
 
-- ❌ 不要忽略 `suggestions[].fixPatch` 自己瞎猜 — 那是机器给的最优修复路径
+- ❌ 不要忽略结构化诊断，也不要把 `remediation` 当作授权；先核对目标和当前请求意图。
 - ❌ 不要把 `--dry-run` 报告当 "warning 没什么" 跳过 — `visualRisks[]` 是设计师在意的
 - ❌ 不要不读 `opIndex` 直接重写整个 patch — opIndex 精确告诉你哪一条出错
 - ❌ 不要假装做了 — 如果 apply 反复失败，把完整报告给用户，让他决定下一步

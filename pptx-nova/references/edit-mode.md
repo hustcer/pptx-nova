@@ -84,7 +84,9 @@ xdoc pptx apply -p patch.json -i input.pptx -o out.pptx \
 ```
 
 Check `resolvedSelectors[]` for every op. If a selector is ambiguous, use the
-reported `suggestions[].fixPatch` and dry-run again. Do not ignore ambiguous or
+reported `suggestions[].remediation`: verify its original request/input target,
+then dry-run its complete replacement request from the retained original input.
+Use the snapshot consumer in `troubleshooting.md` for cross-process retries. Do not ignore ambiguous or
 unexpected selector resolution. Require an explicit empty `semanticIssues[]`;
 it is the full-package before/after semantic regression gate for the proposed
 edit, including indirect relationship and content-type effects.
@@ -99,17 +101,17 @@ Apply must also return `semanticIssues: []`. Stop and repair the patch when it
 reports a semantic issue; do not rely on a later full-deck scan to distinguish
 the edit from inherited debt.
 
-Semantic issues may carry a `fix` with `autoRetry: true` — a guarded
-`repair-child-order` or `repair-relationships` fixPatch (stale-safe, hash
-guarded, **no `--allow-raw-xml` needed**). Merge the `fixPatch` ops into your
-patch and re-apply; a second application of the same fix fails closed by
-design, so never replay one. On legacy decks, `vision-check.semanticIssues[]`
-is where inherited relationship debt (dangling references, relationships to
-missing parts, a missing `.rels` part) surfaces with these repair fixPatches:
-when the user asks to fix a broken deck, apply those `autoRetry` fixes and
-re-run `vision-check` to confirm the issues clear instead of hand-writing raw
-OOXML. Issues without a `fix` are ambiguous on purpose — report them, do not
-guess a repair.
+Semantic issues may carry `remediation.kind="apply-to-document"` with a guarded
+`repair-child-order` or `repair-relationships` patch. Match `target.inputSha256`
+against the exact delivered document before applying that repair-only patch
+once. Preserve existing intent and raw XML permissions; the restricted repair
+actions declare `requiresRawXml:false`. Dry-run candidates have no delivered
+target and cannot supply executable document repairs. On legacy decks,
+`vision-check.semanticIssues[]` exposes inherited relationship debt. After a
+verified repair, re-run vision-check on the new bytes before selecting another
+proposal. Never merge repair operations into the original creation request.
+Keep findings without executable remediation as diagnostics and follow their
+unavailable reason; do not invent a target or an automatic repair.
 
 Once the candidate is stable, run one semantic diff and the evidence required
 by `edit-contract.json`, then run `pptx-nova-edit-contract-gate.mjs --strict`.

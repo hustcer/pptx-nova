@@ -315,8 +315,9 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
 - `isError: true` 是**业务失败**，不是 JSON-RPC transport error。完整
   `xdoc-mcp-tool-result/v1` envelope 的位置由 `contract.resultEncoding` 决定：支持的 era
   放在 `structuredContent`，`2025-03-26` 则放在 `content` 的紧凑 JSON 中；从 envelope
-  的 `value` 读取完整 xdoc report。只有 report 实际给出 `suggestions[].fixPatch` 时才可
-  使用，不能假设每次失败都有自动修复 patch。
+  的 `value` 读取完整 xdoc report。只有实际存在的 `remediation` 才进入修复分派；
+  核对 kind、完整 shape、自己保有的请求/文档摘要与冻结的资源上下文后重新校验和授权。
+  `remediationUnavailable` 保留诊断，不允许跳过匹配；流程见 `troubleshooting.md`。
 - 产物通过 artifact ref 返回（`path` / `state`）；deck 字节永不进协议通道。
   `dryRun` 的 artifact 是 `planned`，文件并不存在。
 - `overwrite` 默认 false，已存在的输出会得到 `output_exists`。annotations 只是 hint，

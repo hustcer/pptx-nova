@@ -82,8 +82,14 @@ Presentation。无法取得对象身份时使用解析后的 lexical identity；
 session 可以并发执行：
 
 - `inspect` 直接读内存模型，几乎零成本
-- `apply` 仍然先生成一个候选快照，失败时不污染 live session；成功后用新
-  Presentation 替换原 session，**所以 dry-run 也会受益**（避开重复解析）
+- `apply` 使用 session 保留的原始读取字节或最近一次交付字节创建候选，失败时不污染
+  live session；成功后同时更新 Presentation 和交付字节，避免重新序列化改变输入身份。
+  dry-run 复用已有 session 的输入快照，不会重新读取路径或交付候选。
+
+CLI、JSON-RPC 和 MCP 的 patch 都拒绝重复 key，包括转义后名称相同的 key。
+保留完整原请求、原始 PPTX 字节和相对资产解析上下文；默认值补齐及资源物化后的
+执行内容不能代替原提交内容。重试应复用同一次读取的资产快照，不能因同名文件已
+被替换而悄悄改用新内容。
 
 ## §3 关键环境变量
 

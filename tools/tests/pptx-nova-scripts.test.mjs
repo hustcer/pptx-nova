@@ -2360,9 +2360,13 @@ test('copyable reference examples avoid removed xdoc payload aliases', () => {
   }
 })
 
-test('tracked literal patch op values stay within the current xdoc schema', () => {
+test('tracked literal op values stay within the current xdoc patch and condition schemas', () => {
   const schema = JSON.parse(readFileSync(join(repoRoot, 'docs/xdoc-schema.json'), 'utf8'))
   const canonicalOps = new Set(schema.commands.pptx.patchSchema.supportedOps)
+  // Both patch operations and control-flow comparisons use the literal key `op`.
+  const conditionOps = new Set(
+    schema.commands.pptx.patchSchema.jsonSchema.$defs.controlCondition.properties.op.enum,
+  )
   const tracked = spawnSync('git', ['ls-files', '-z'], {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -2376,7 +2380,7 @@ test('tracked literal patch op values stay within the current xdoc schema', () =
     const source = readFileSync(join(repoRoot, relativePath), 'utf8')
     if (source.includes('\0')) continue
     for (const match of source.matchAll(literalOp)) {
-      if (canonicalOps.has(match[2]) || ['==', '...'].includes(match[2])) continue
+      if (canonicalOps.has(match[2]) || conditionOps.has(match[2]) || match[2] === '...') continue
       invalid.push(`${relativePath}: ${match[2]}`)
     }
   }
@@ -3977,7 +3981,7 @@ if (args[0] === 'schema') {
   const patchPath = valueAfter('-p')
   const patchOps = patchPath ? JSON.parse(readFileSync(patchPath, 'utf8')).ops : []
   const opResults = patchOps.map((op, opIndex) => ({
-    opIndex, op: op.op, status: 'success', changedParts: []
+    opIndex, op: op.op, status: 'success', changedParts: [], resolvedSelectors: []
   }))
   if (args.includes('--dry-run')) {
     print({
@@ -4352,7 +4356,11 @@ if (args[0] === 'schema') {
   )
   assert.ok(fallbackPhases.includes('dry-run'))
   assert.ok(fallbackPhases.includes('apply'))
-  assert.equal(fallbackAnalysis.evaluation.status, 'complete')
+  assert.equal(
+    fallbackAnalysis.evaluation.status,
+    'complete',
+    JSON.stringify(fallbackAnalysis.evaluation),
+  )
   assert.equal(fallbackAnalysis.agentGate.effectiveStatus, 'not-applied')
   assert.equal(
     fallbackAnalysis.evaluation.diagnostics.some(

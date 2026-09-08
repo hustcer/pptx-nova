@@ -61,6 +61,14 @@ Keep user-facing capability claims precise.
 
 ## Validation
 
+Run the baseline tool suite with `node --test tools/tests/*.test.mjs`.
+The five remediation tests that execute a real xdoc binary are opt-in and report
+an explicit skip by default; the remediation unit test still runs. To include
+the integration tests, set `XDOC_TEST_BIN` to the absolute path of an approved
+xdoc executable publishing the remediation contract, then run
+`node --test tools/tests/pptx-nova-remediation.test.mjs`. An explicitly configured
+missing or incompatible binary fails the tests.
+
 Before changing runtime scripts, DeckKits, schemas, examples, or assets, run:
 
 ```bash

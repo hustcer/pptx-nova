@@ -10,8 +10,8 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { homedir, tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { inflateRawSync } from 'node:zlib'
@@ -26,7 +26,11 @@ import {
 const runtime = fileURLToPath(
   new URL('../../pptx-nova/scripts/pptx-nova-remediation.mjs', import.meta.url),
 )
-const binary = join(homedir(), '.cargo/bin', process.platform === 'win32' ? 'xdoc.exe' : 'xdoc')
+// Real-runtime tests are opt-in; the baseline suite needs only Node and Nushell.
+// An explicitly supplied but invalid runtime must fail, rather than silently skip.
+const binary = process.env.XDOC_TEST_BIN ? resolve(process.env.XDOC_TEST_BIN) : null
+const integrationTest = (name, fn) =>
+  test(name, { skip: binary ? false : 'Set XDOC_TEST_BIN to run real xdoc integration tests' }, fn)
 const hash = (value) => createHash('sha256').update(value).digest('hex')
 
 // Independent ZIP readback for the small, controlled decks created below.
@@ -197,187 +201,198 @@ function fixture(t) {
 }
 
 for (const transport of ['cli', 'json-rpc'])
-  test(`capsule ${transport}: frozen relative assets and complete replacement execute once`, (t) => {
+  integrationTest(
+    `capsule ${transport}: frozen relative assets and complete replacement execute once`,
+    (t) => {
+      const f = fixture(t)
+      const png = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6V6sAAAAASUVORK5CYII=',
+        'base64',
+      )
+      const imagePath = f.write('pixel.png', png)
+      const original = {
+        schemaVersion: 'pptx-patch/v1',
+        vars: { label: 'kept' },
+        preconditions: { review: 'preserved' },
+        ops: [
+          { op: 'add-slide' },
+          {
+            op: 'add-image',
+            slide: 0,
+            x: '1in',
+            y: '1in',
+            w: '1in',
+            h: '1in',
+            assetSource: { path: 'pixel.png' },
+            name: 'frozen-picture',
+          },
+          {
+            op: 'if',
+            condition: { kind: 'slide-count', op: 'eq', value: 1 },
+            then: [{ op: 'set-text-frame', slide: 0, shape: { name: 'missing' }, text: 'fails' }],
+          },
+        ],
+      }
+      const failed = f.first(JSON.stringify(original, null, 2) + '\n', { transport })
+      assert.notEqual(failed.status, 0)
+      assert.equal(existsSync(failed.output), false)
+      assert.ok(Array.isArray(failed.report.error?.suggestions), failed.stdout)
+      const index = failed.report.error.suggestions.findLastIndex((item) => item.remediation)
+      assert.ok(index >= 0, JSON.stringify(failed.report))
+      const remediation = failed.report.error.suggestions[index].remediation
+      assert.equal(remediation.kind, 'replace-request')
+      assert.equal(remediation.target.requestSha256, requestJcsSha256(original))
+      assert.deepEqual(remediation.request.vars, original.vars)
+      assert.deepEqual(remediation.request.preconditions, original.preconditions)
+      assert.equal(remediation.request.ops[2]?.op, 'if', JSON.stringify(failed.report))
+      assert.deepEqual(remediation.request.ops[2].then, [])
+      assert.equal(remediation.autoRetry, false)
+      const pointer = `/error/suggestions/${index}`
+      const mismatch = structuredClone(failed.report)
+      mismatch.error.suggestions[index].remediation.target.requestSha256 = '0'.repeat(64)
+      const rejected = f.repair(failed, mismatch, pointer)
+      assert.notEqual(rejected.status, 0)
+      assert.equal(rejected.report.error.code, 'request_mismatch')
+      assert.equal(existsSync(rejected.output), false)
+      writeFileSync(imagePath, 'changed after the first submission')
+      const repaired = f.repair(failed, failed.report, pointer)
+      assert.equal(repaired.status, 0, repaired.stdout)
+      const inspected = f.run(['pptx', 'inspect', repaired.output, '--json'], binary).report
+      assert.equal(inspected.slides.length, 1)
+      assert.equal(
+        inspected.slides[0].shapes.filter((shape) => shape.name === 'frozen-picture').length,
+        1,
+      )
+      assert.deepEqual(mediaBytes(repaired.output).map(hash), [hash(png)])
+      const duplicate = f.repair(failed, failed.report, pointer)
+      assert.notEqual(duplicate.status, 0)
+      assert.equal(duplicate.report.error.code, 'already_applied')
+      assert.equal(existsSync(duplicate.output), false)
+      const reordered = structuredClone(failed.report)
+      reordered.error.suggestions[index].remediation = Object.fromEntries(
+        Object.entries(remediation).reverse(),
+      )
+      const same = f.repair(failed, reordered, pointer)
+      assert.equal(same.report.error.code, 'already_applied')
+      assert.equal(existsSync(same.output), false)
+    },
+  )
+
+integrationTest(
+  'missing context, altered snapshots, templates and unreviewed changes cannot write output',
+  (t) => {
     const f = fixture(t)
-    const png = Buffer.from(
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6V6sAAAAASUVORK5CYII=',
-      'base64',
-    )
-    const imagePath = f.write('pixel.png', png)
-    const original = {
-      schemaVersion: 'pptx-patch/v1',
-      vars: { label: 'kept' },
-      preconditions: { review: 'preserved' },
-      ops: [
-        { op: 'add-slide' },
-        {
-          op: 'add-image',
-          slide: 0,
-          x: '1in',
-          y: '1in',
-          w: '1in',
-          h: '1in',
-          assetSource: { path: 'pixel.png' },
-          name: 'frozen-picture',
-        },
-        {
-          op: 'if',
-          condition: { kind: 'slide-count', op: 'eq', value: 1 },
-          then: [{ op: 'set-text-frame', slide: 0, shape: { name: 'missing' }, text: 'fails' }],
-        },
-      ],
-    }
-    const failed = f.first(JSON.stringify(original, null, 2) + '\n', { transport })
-    assert.notEqual(failed.status, 0)
-    assert.equal(existsSync(failed.output), false)
-    const index = failed.report.error.suggestions.findLastIndex((item) => item.remediation)
-    assert.ok(index >= 0, JSON.stringify(failed.report))
-    const remediation = failed.report.error.suggestions[index].remediation
-    assert.equal(remediation.kind, 'replace-request')
-    assert.equal(remediation.target.requestSha256, requestJcsSha256(original))
-    assert.deepEqual(remediation.request.vars, original.vars)
-    assert.deepEqual(remediation.request.preconditions, original.preconditions)
-    assert.equal(remediation.request.ops[2]?.op, 'if', JSON.stringify(failed.report))
-    assert.deepEqual(remediation.request.ops[2].then, [])
-    assert.equal(remediation.autoRetry, false)
-    const pointer = `/error/suggestions/${index}`
-    const mismatch = structuredClone(failed.report)
-    mismatch.error.suggestions[index].remediation.target.requestSha256 = '0'.repeat(64)
-    const rejected = f.repair(failed, mismatch, pointer)
-    assert.notEqual(rejected.status, 0)
-    assert.equal(rejected.report.error.code, 'request_mismatch')
-    assert.equal(existsSync(rejected.output), false)
-    writeFileSync(imagePath, 'changed after the first submission')
-    const repaired = f.repair(failed, failed.report, pointer)
-    assert.equal(repaired.status, 0, repaired.stdout)
-    const inspected = f.run(['pptx', 'inspect', repaired.output, '--json'], binary).report
-    assert.equal(inspected.slides.length, 1)
-    assert.equal(
-      inspected.slides[0].shapes.filter((shape) => shape.name === 'frozen-picture').length,
-      1,
-    )
-    assert.deepEqual(mediaBytes(repaired.output).map(hash), [hash(png)])
-    const duplicate = f.repair(failed, failed.report, pointer)
-    assert.notEqual(duplicate.status, 0)
-    assert.equal(duplicate.report.error.code, 'already_applied')
-    assert.equal(existsSync(duplicate.output), false)
-    const reordered = structuredClone(failed.report)
-    reordered.error.suggestions[index].remediation = Object.fromEntries(
-      Object.entries(remediation).reverse(),
-    )
-    const same = f.repair(failed, reordered, pointer)
-    assert.equal(same.report.error.code, 'already_applied')
-    assert.equal(existsSync(same.output), false)
-  })
-
-test('missing context, altered snapshots, templates and unreviewed changes cannot write output', (t) => {
-  const f = fixture(t)
-  const failed = f.first({
-    ...request,
-    ops: [...request.ops, { op: 'set-shape', slide: 0, shape: { name: 'missing' }, name: 'new' }],
-  })
-  const index = failed.report.error.suggestions.findLastIndex((item) => item.remediation)
-  assert.ok(index >= 0)
-  const pointer = `/error/suggestions/${index}`
-  const missing = f.repair({ capsule: join(f.directory, 'absent') }, failed.report, pointer)
-  assert.notEqual(missing.status, 0)
-  assert.equal(existsSync(missing.output), false)
-  const unreviewedOutput = join(f.directory, 'unreviewed.pptx')
-  const unreviewed = f.run([
-    runtime,
-    'apply',
-    '--capsule',
-    failed.capsule,
-    '--report',
-    f.write('unreviewed-report.json', failed.report),
-    '--pointer',
-    pointer,
-    '--output',
-    unreviewedOutput,
-  ])
-  assert.equal(unreviewed.report.error.code, 'review_required')
-  assert.equal(existsSync(unreviewedOutput), false)
-  const manual = f.repair(
-    failed,
-    {
-      suggestions: [
-        {
-          patchTemplate: request,
-          autoApplicable: false,
-          remediationUnavailable: { reason: 'context-unavailable' },
-        },
-      ],
-    },
-    '/suggestions/0',
-  )
-  assert.equal(manual.report.error.code, 'remediation_unavailable')
-  assert.equal(existsSync(manual.output), false)
-  writeFileSync(join(failed.capsule, 'request.json'), JSON.stringify(request))
-  const changed = f.repair(failed, failed.report, pointer)
-  assert.equal(changed.report.error.code, 'context_changed')
-  assert.equal(existsSync(changed.output), false)
-})
-
-test('original input digest and explicit intent survive a document repair attempt', (t) => {
-  const f = fixture(t)
-  const intent = {
-    schemaVersion: 'xdoc-cli-feature-intent/v1',
-    product: 'xdoc-cli',
-    feature: 'create',
-    outputType: 'pptx',
-    requireEntitlement: false,
-    requireUnwatermarked: false,
-    allowFallback: true,
-  }
-  const created = f.first(
-    {
+    const failed = f.first({
       ...request,
-      ops: [
-        ...request.ops,
-        {
-          op: 'add-text-box',
-          slide: 0,
-          x: '-1in',
-          y: '1in',
-          w: '2in',
-          h: '1in',
-          name: 'outside',
-          text: 'move',
-        },
-      ],
-    },
-    { intent },
-  )
-  assert.equal(created.status, 0, created.stdout)
-  const original = readFileSync(created.output)
-  const vision = f.run(['pptx', 'vision-check', created.output, '--json'], binary).report
-  const index = vision.issues.findIndex((item) => item.kind === 'shape-out-of-bounds')
-  const rejected = f.repair(created, vision, `/issues/${index}`, ['--document', created.output])
-  assert.notEqual(
-    rejected.status,
-    0,
-    'The create intent must not become a modify intent during remediation',
-  )
-  assert.equal(existsSync(rejected.output), false)
-  assert.deepEqual(readFileSync(created.output), original)
-  const failed = f.first(
-    { ...request, ops: [{ op: 'set-shape', slide: 0, shape: { name: 'missing' }, name: 'new' }] },
-    { input: created.output },
-  )
-  const suggestion = failed.report.error.suggestions.findIndex((item) => item.remediation)
-  assert.ok(suggestion >= 0)
-  assert.equal(
-    failed.report.error.suggestions[suggestion].remediation.target.inputSha256,
-    hash(original),
-  )
-  const wrong = structuredClone(failed.report)
-  wrong.error.suggestions[suggestion].remediation.target.inputSha256 = null
-  const mismatch = f.repair(failed, wrong, `/error/suggestions/${suggestion}`)
-  assert.equal(mismatch.report.error.code, 'input_mismatch')
-  assert.equal(existsSync(mismatch.output), false)
-})
+      ops: [...request.ops, { op: 'set-shape', slide: 0, shape: { name: 'missing' }, name: 'new' }],
+    })
+    assert.ok(Array.isArray(failed.report.error?.suggestions), failed.stdout)
+    const index = failed.report.error.suggestions.findLastIndex((item) => item.remediation)
+    assert.ok(index >= 0)
+    const pointer = `/error/suggestions/${index}`
+    const missing = f.repair({ capsule: join(f.directory, 'absent') }, failed.report, pointer)
+    assert.notEqual(missing.status, 0)
+    assert.equal(existsSync(missing.output), false)
+    const unreviewedOutput = join(f.directory, 'unreviewed.pptx')
+    const unreviewed = f.run([
+      runtime,
+      'apply',
+      '--capsule',
+      failed.capsule,
+      '--report',
+      f.write('unreviewed-report.json', failed.report),
+      '--pointer',
+      pointer,
+      '--output',
+      unreviewedOutput,
+    ])
+    assert.equal(unreviewed.report.error.code, 'review_required')
+    assert.equal(existsSync(unreviewedOutput), false)
+    const manual = f.repair(
+      failed,
+      {
+        suggestions: [
+          {
+            patchTemplate: request,
+            autoApplicable: false,
+            remediationUnavailable: { reason: 'context-unavailable' },
+          },
+        ],
+      },
+      '/suggestions/0',
+    )
+    assert.equal(manual.report.error.code, 'remediation_unavailable')
+    assert.equal(existsSync(manual.output), false)
+    writeFileSync(join(failed.capsule, 'request.json'), JSON.stringify(request))
+    const changed = f.repair(failed, failed.report, pointer)
+    assert.equal(changed.report.error.code, 'context_changed')
+    assert.equal(existsSync(changed.output), false)
+  },
+)
 
-test('document repair rejects stale target and uses only its repair operations', (t) => {
+integrationTest(
+  'original input digest and explicit intent survive a document repair attempt',
+  (t) => {
+    const f = fixture(t)
+    const intent = {
+      schemaVersion: 'xdoc-cli-feature-intent/v1',
+      product: 'xdoc-cli',
+      feature: 'create',
+      outputType: 'pptx',
+      requireEntitlement: false,
+      requireUnwatermarked: false,
+      allowFallback: true,
+    }
+    const created = f.first(
+      {
+        ...request,
+        ops: [
+          ...request.ops,
+          {
+            op: 'add-text-box',
+            slide: 0,
+            x: '-1in',
+            y: '1in',
+            w: '2in',
+            h: '1in',
+            name: 'outside',
+            text: 'move',
+          },
+        ],
+      },
+      { intent },
+    )
+    assert.equal(created.status, 0, created.stdout)
+    const original = readFileSync(created.output)
+    const vision = f.run(['pptx', 'vision-check', created.output, '--json'], binary).report
+    const index = vision.issues.findIndex((item) => item.kind === 'shape-out-of-bounds')
+    const rejected = f.repair(created, vision, `/issues/${index}`, ['--document', created.output])
+    assert.notEqual(
+      rejected.status,
+      0,
+      'The create intent must not become a modify intent during remediation',
+    )
+    assert.equal(existsSync(rejected.output), false)
+    assert.deepEqual(readFileSync(created.output), original)
+    const failed = f.first(
+      { ...request, ops: [{ op: 'set-shape', slide: 0, shape: { name: 'missing' }, name: 'new' }] },
+      { input: created.output },
+    )
+    const suggestion = failed.report.error.suggestions.findIndex((item) => item.remediation)
+    assert.ok(suggestion >= 0)
+    assert.equal(
+      failed.report.error.suggestions[suggestion].remediation.target.inputSha256,
+      hash(original),
+    )
+    const wrong = structuredClone(failed.report)
+    wrong.error.suggestions[suggestion].remediation.target.inputSha256 = null
+    const mismatch = f.repair(failed, wrong, `/error/suggestions/${suggestion}`)
+    assert.equal(mismatch.report.error.code, 'input_mismatch')
+    assert.equal(existsSync(mismatch.output), false)
+  },
+)
+
+integrationTest('document repair rejects stale target and uses only its repair operations', (t) => {
   const f = fixture(t)
   const created = f.first({
     schemaVersion: 'pptx-patch/v1',

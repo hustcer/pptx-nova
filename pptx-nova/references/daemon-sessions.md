@@ -22,9 +22,9 @@ patch 语义或验证规则：
 | Agent host 已持有长生命周期子进程              | `xdoc json-rpc` | stdio NDJSON，免端口/state-file 协调，直接复用 session |
 | MCP client（Claude Code / Cursor / Inspector） | `xdoc mcp`      | 标准 MCP over stdio，客户端已有 tool 发现与调用机制    |
 
-不要仅凭 `json-rpc` 命令存在就实现 host。先从 `xdoc schema` 或
-`pptx-nova-probe.mjs` 的 `capabilities.agentTransports.jsonRpc` 读取完整
-`xdoc-json-rpc-contract/v1`；协议版本未知时保留原始内容并 fail closed。
+不要仅凭 `json-rpc` 命令存在就实现 host。先在连接中调用 `xdoc.capabilities`，
+或从 `xdoc schema` / `pptx-nova-probe.mjs` 的 `capabilities.agentTransports.jsonRpc`
+读取完整 `xdoc-json-rpc-contract/v1`；协议版本未知时保留原始内容并 fail closed。
 daemon 也遵循同一原则：从
 `capabilities.agentTransports.daemon.contract` 读取当前 runtime 的完整公开契约，
 不要只看兼容索引里的 `defaults` / `environment` / `subcommands`。
@@ -245,14 +245,27 @@ export XDOC_DAEMON_AUTO_SPAWN=0
 ```text
 {"jsonrpc":"2.0","id":1,"method":"xdoc.ping","params":{}}
 {"jsonrpc":"2.0","id":2,"method":"xdoc.capabilities","params":{}}
-{"jsonrpc":"2.0","id":3,"method":"pptx.inspect","params":{"inputPath":"/abs/deck.pptx"}}
-{"jsonrpc":"2.0","id":4,"method":"xdoc.shutdown","params":{}}
+{"jsonrpc":"2.0","id":3,"method":"xdoc.schema","params":{"mode":"index"}}
+{"jsonrpc":"2.0","id":4,"method":"pptx.inspect","params":{"inputPath":"/abs/deck.pptx"}}
+{"jsonrpc":"2.0","id":5,"method":"xdoc.shutdown","params":{}}
 ```
 
-公开方法只有 `xdoc.ping`、`xdoc.capabilities`、`pptx.inspect`、`pptx.apply` 和
-`xdoc.shutdown`。`pptx.apply` 的 `patch` 是对象；非 dry-run 时必须给
+公开方法以返回契约的 `methods` 为准。若本次 runtime 披露 `schemaDiscovery`，
+按其中的 method/params 在同一连接获取完整 schema，以 `valuePointer` 指向的
+值作为 JSON Pointer fragment 引用的解析根；不需要另起 CLI 进程。
+`xdoc.schema` 复用渐进披露，默认 `mode=index`，需要操作细节时请求 `mode=ops`。
+调用前以该 method 的 `paramsSchema` 校验参数；完整 patch、报告与 intent 契约
+通过 apply 的相应 `*SchemaRef` 解析。旧 runtime 未披露时不要猜测可用入口。
+
+`pptx.apply` 的 `patch` 是对象；非 dry-run 时必须给
 `outputPath`。mutation 与 shutdown 必须带 request id，发送成 notification 会被
 忽略且不修改 deck。普通 notification 永远没有 response。
+
+当本次契约披露 `intentSchemaRef` 时，apply 可接收一个可选 `intent` JSON 对象。
+按解析后的现有 Feature Intent schema 构造完整对象：Feature/output 必须匹配实际
+动作（apply 无输入为 create、有输入为 modify，输出为 pptx）。该字段不接收路径或
+JSON 字符串，也不能改用内部 `intentJson` 或独立的授权布尔参数。未提供 intent
+时沿用默认求解；dry-run 仍校验显式 intent，成功不代表真实写入已获得授权。
 
 返回 value 包在 `xdoc-json-rpc-result/v1`（`method` / `exitCode` / `value` /
 `artifacts`）中；二进制不会进入 stdout，产物通过 artifact ref 报告。传
@@ -302,6 +315,12 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
   `dryRun` 的 artifact 是 `planned`，文件并不存在。
 - `overwrite` 默认 false，已存在的输出会得到 `output_exists`。annotations 只是 hint，
   真正的防护是服务端检查。
+
+若 `tools/list` 的 `pptx_apply.inputSchema` 披露可选 `intent`，按该 schema 传完整
+JSON 对象，遵守 §8 的 Feature/output 绑定；不传文件路径、JSON 字符串、`intentJson`
+或三个独立布尔便捷字段。对象由 runtime 的既有 intent 校验器和授权求解器处理，
+不能声明 host 实测事实。CLI 仍只在单 action schema/help 披露时接收授权选项，
+`--intent` 与三个便捷开关互斥；CLI dry-run 同样校验意图，但不发布产品。
 
 与 §8 同理：这是 transport，不替代 skill 的验证阶段。dry-run → apply →
 post-apply inspect → 证据 gate 的因果顺序不变。

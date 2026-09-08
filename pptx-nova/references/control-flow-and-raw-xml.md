@@ -21,6 +21,7 @@
 `dry-run` 报告的 `opResults[]` 里（含 `expandedOps[]` /
 `controlExpansion` 元数据），方便你审计。带 `--explain` 还会在
 `explanations[<i>].expandedOps` 里给出"该元 op 展开成哪些底层 op"。
+`opResults[].expandedOps[]` 是 `{op}` 名称摘要，不包含完整参数，不能作为 patch 重放。
 
 > canonical v1 schema 只接受上表字段；不要使用旧版控制流或宏字段别名。
 

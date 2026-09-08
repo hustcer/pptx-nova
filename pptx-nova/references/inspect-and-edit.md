@@ -234,6 +234,10 @@ query 复用 patch 的 `ShapeQuery`：
 
 - `select` 用于**找候选**，不是替代 dry-run。写 patch 后仍必须检查
   `resolvedSelectors[]`。
+  每项包含 `field`、规范化后的 `input` 和 `resolved`；用
+  `resolved.slide`（0-based）与 `resolved.id` 一起定位。它描述执行该 op 时的对象，
+  后续 op 可能移动或删除对象。数字简写回显为 `{id}`，bbox 查询回显为整数
+  `xEmu` / `yEmu` / `radiusEmu`，不能把回显直接当作带单位的 patch 输入。
 - `matchCount == 1` 时优先复制 `matches[0].patchSelector` 到 patch。
 - `matchCount > 1` 时用 `bbox` / `text` / `name` 继续收窄 query，或改用具体
   `{ "id": <shapeId> }`。
@@ -330,19 +334,26 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 
 ## 4. dry-run 报告字段速记
 
-| 字段                              | 看什么                                                            |
-| --------------------------------- | ----------------------------------------------------------------- |
-| `opResults[].status`              | success / error / skipped                                         |
-| `opResults[].changedParts[]`      | 影响了哪些 OOXML part（`ppt/slides/slide1.xml` 等）               |
-| `opResults[].resolvedSelectors[]` | 实际选到了哪个 shape（id + name）                                 |
-| `opResults[].createdObjects[]`    | 唯一的创建对象数组；按 kind 读取定位字段，普通和控制流操作一致    |
-| `opResults[].analysis`            | 部分 op 的额外信息（如 `fit-text` 的 `appliedSize`）              |
-| `opResults[].durationMs`          | op 耗时                                                           |
-| `semanticChanges[]`               | Agent 可读的语义 diff（slide/shape/text/style/media/chart/table） |
-| `visualRisks[]`                   | 结构性风险（文本溢出 / 表格越界 / 缺图尺寸 / OLE 缺 icon 等）     |
-| `warnings[]`                      | 一般警告                                                          |
-| `traces[]`                        | 调用链路（trace/debug level 才有）                                |
-| `error`                           | 失败时的结构化错误（kind / code / opIndex / suggestions）         |
+| 字段                              | 看什么                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| `opResults[].status`              | success / error / skipped                                              |
+| `opResults[].changedParts[]`      | 影响了哪些 OOXML part（`ppt/slides/slide1.xml` 等）                    |
+| `opResults[].resolvedSelectors[]` | 规范化 selector 与实际 shape；用 slide + id 定位，name 可选且可能重复  |
+| `opResults[].createdObjects[]`    | 唯一的创建对象数组；按 kind 读取定位字段，普通和控制流操作一致         |
+| `opResults[].expandedOps[]`       | 只有 `{op}` 的展开名称摘要；可执行完整请求见 recipe compile 的 `patch` |
+| `opResults[].analysis`            | 按 kind 判别：fit-text / layout-impact / remap-theme                   |
+| `opResults[].durationMs`          | op 耗时                                                                |
+| `semanticChanges[]`               | Agent 可读的语义 diff（slide/shape/text/style/media/chart/table）      |
+| `visualRisks[]`                   | 结构性风险（文本溢出 / 表格越界 / 缺图尺寸 / OLE 缺 icon 等）          |
+| `warnings[]`                      | 一般警告                                                               |
+| `traces[]`                        | 调用链路（trace/debug level 才有）                                     |
+| `error`                           | 失败时的结构化错误（kind / code / opIndex / suggestions）              |
+
+`fit-text` 分支提供 `chosenFontSizePt`、带 `pt` 单位的 `chosenFontSize`、
+`applied`、`overflow`、`strategy` 和 `evidence`；估算或 font-metrics fallback
+不证明 PowerPoint 渲染一定无溢出。`layout-impact` 提供 `affectedSlides` 和
+逐对象 `localOverrides`；`remap-theme` 提供 `scope`、`summary` 计数及逐对象
+`objects` 结果。缺字段、错类型或未知结构不能作为已验证的编辑证据。
 
 创建引用记录执行该 op 时的候选状态；后续移动或删除操作可能使索引失效，不能将它当作跨编辑的永久 ID。
 

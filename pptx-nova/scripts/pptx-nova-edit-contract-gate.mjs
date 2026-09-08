@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, posix, resolve } from 'node:path'
 import { inflateRawSync } from 'node:zlib'
+import { readResolvedSelectors } from './lib/resolved-selector.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-edit-contract-gate/v1'
 const CONTRACT_SCHEMA_VERSION = 'pptx-nova-edit-contract/v1'
@@ -540,8 +541,8 @@ function sameIdentity(actual, expected) {
 
 function resultIdentities(result) {
   const identities = []
-  for (const item of result?.resolvedSelectors ?? []) {
-    if (item?.resolved) identities.push(item.resolved)
+  for (const item of readResolvedSelectors(result)) {
+    identities.push(item.resolved)
   }
   for (const item of result?.semanticChanges ?? []) {
     if (item?.target) identities.push(item.target)
@@ -1745,7 +1746,13 @@ function buildReport(args) {
   let coverageResult = { coverage: [], coveredCount: 0, coveredIdentities: [] }
   if (dryRun?.schemaVersion === 'pptx-dry-run/v1' && dryRun.status === 'success') {
     checkDeclaredOps(contract, dryRun, report)
-    coverageResult = targetCoverage(contract, dryRun, report)
+    try {
+      if (!Array.isArray(dryRun.opResults)) throw new TypeError('opResults must be an array')
+      for (const result of dryRun.opResults) readResolvedSelectors(result)
+      coverageResult = targetCoverage(contract, dryRun, report)
+    } catch (error) {
+      addIssue(report, 'blockers', 'dry-run-selector-evidence-invalid', error.message)
+    }
     report.targetCoverage = coverageResult.coverage
     addCheck(
       report,

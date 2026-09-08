@@ -141,7 +141,13 @@ function dryRunFixture({ covered = true, source = '', candidate = '' } = {}) {
               {
                 field: 'shape',
                 input: { id: 5 },
-                resolved: { kind: 'shape', slide: 0, id: 5, name: 'S0_Title' },
+                resolved: {
+                  kind: 'shape',
+                  slide: 0,
+                  id: 5,
+                  shapeType: 'textBox',
+                  name: 'S0_Title',
+                },
               },
             ],
           },
@@ -615,7 +621,7 @@ function writeSessionRuleFixture({
           {
             field: 'shape',
             input: { name: shapeName },
-            resolved: { kind: 'shape', slide: 8, id: 2, name: shapeName },
+            resolved: { kind: 'shape', slide: 8, id: 2, shapeType: 'textBox', name: shapeName },
           },
         ],
       },
@@ -783,6 +789,18 @@ test('edit contract gate fails closed when dry-run semantic evidence is missing'
 
   assert.equal(report.status, 'fail')
   assert.ok(report.blockers.some((item) => item.code === 'dry-run-semantic-evidence-missing'))
+})
+
+test('edit contract gate rejects malformed selector evidence despite matching semantic targets', () => {
+  const fixture = writeFixture()
+  generateContract(fixture)
+  const dryRun = JSON.parse(readFileSync(fixture.dryRun, 'utf8'))
+  dryRun.opResults[0].resolvedSelectors[0].resolved.slide = '0'
+  writeJson(fixture.dryRun, dryRun)
+  const report = runGate(fixture, 2)
+  assert.equal(report.status, 'fail')
+  assert.equal(report.summary.coveredTargetCount, 0)
+  assert.ok(report.blockers.some((item) => item.code === 'dry-run-selector-evidence-invalid'))
 })
 
 test('edit contract gate blocks semantic regressions introduced by the edit', () => {

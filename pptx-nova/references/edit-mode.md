@@ -83,7 +83,10 @@ xdoc pptx apply -p patch.json -i input.pptx -o out.pptx \
   --daemon --dry-run --json
 ```
 
-Check `resolvedSelectors[]` for every op. If a selector is ambiguous, use the
+Check `opResults[].resolvedSelectors[]` for every op: require numeric
+`resolved.slide` and `resolved.id`, and check the operation-time target against
+the intended object. The normalized `input` echo uses explicit integer EMU
+geometry; it is not a complete authored patch. If a selector is ambiguous, use the
 reported `suggestions[].remediation`: verify its original request/input target,
 then dry-run its complete replacement request from the retained original input.
 Use the snapshot consumer in `troubleshooting.md` for cross-process retries. Do not ignore ambiguous or

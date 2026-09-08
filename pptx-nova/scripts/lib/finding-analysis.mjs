@@ -1,5 +1,6 @@
 import { canonicalJsonV1, canonicalSha256V1 } from './canonical-json.mjs'
 import { LAYOUT_SNAPSHOT_SCHEMA_VERSION, layoutSemanticSha256 } from './layout-snapshot.mjs'
+import { readResolvedSelectors } from './resolved-selector.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-finding-analysis/v1-draft'
 const IDENTITY_SCHEMA_VERSION = 'pptx-nova-finding-analysis-identity/v1-draft'
@@ -469,6 +470,15 @@ function validateOperationEvidence(envelope, stage, sourceSha, candidateSha, err
       errorItem('finding-analysis-mutation-evidence-invalid', 'apply candidate binding is stale'),
     )
   }
+  try {
+    if (!Array.isArray(envelope.report?.opResults))
+      throw new TypeError('opResults must be an array')
+    for (const result of envelope.report.opResults) readResolvedSelectors(result)
+  } catch (error) {
+    errors.push(
+      errorItem('finding-analysis-mutation-evidence-invalid', `${stage}: ${error.message}`),
+    )
+  }
 }
 
 function validateReviewEvaluation(input, errors) {
@@ -666,13 +676,6 @@ function targetForRisk(risk, stableTargetKey) {
   }
 }
 
-function selectorName(input) {
-  if (!isPlainObject(input)) return null
-  if (input.name !== undefined) return String(input.name)
-  if (isPlainObject(input.shape) && input.shape.name !== undefined) return String(input.shape.name)
-  return null
-}
-
 function selectorUsageForDuplicateName(name, slideIndex, mutationEvidence) {
   const evidence = []
   for (const [stage, envelope] of [
@@ -682,12 +685,8 @@ function selectorUsageForDuplicateName(name, slideIndex, mutationEvidence) {
     if (!envelope) continue
     for (const result of asArray(envelope.report?.opResults)) {
       if (result?.status && result.status !== 'success') continue
-      for (const selector of asArray(result?.resolvedSelectors)) {
-        const resolvedSlide = Number(selector?.resolved?.slide ?? selector?.resolved?.slideIndex)
-        if (
-          selectorName(selector?.input) === name &&
-          (!Number.isInteger(resolvedSlide) || resolvedSlide === slideIndex)
-        ) {
+      for (const selector of readResolvedSelectors(result)) {
+        if (selector.input.name === name && selector.resolved.slide === slideIndex) {
           evidence.push({
             stage,
             opIndex: Number.isInteger(result?.opIndex) ? result.opIndex : null,

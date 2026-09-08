@@ -8,6 +8,10 @@ recipe 已经把字体、间距、坐标、placeholder 类型预设好；模型�
 每个 recipe 都作为 `add-slide` 的 `recipe` 字段放进 patch JSON，并在执行时展开成底层
 patch。先用 `xdoc schema --mode ops --ops add-slide --minimal` 获取当前严格字段，再通过 dry-run
 审查 `expandedOps[]` 与 `createdObjects[]`。
+`opResults[].expandedOps[]` 每项只含操作名 `{op}`，不能直接执行。
+需要完整展开请求时，对 recipe envelope 执行
+`xdoc pptx recipe --recipe recipe.json --compile --json`，读取返回的 `patch`
+并按正常 patch 流程校验和 dry-run；`recipeResults[].expandedOps[]` 仍是名称摘要。
 
 ## 通用 envelope
 

@@ -558,7 +558,7 @@ test('ambiguous name selector is block when planned and applied', () => {
         {
           field: 'shape',
           input: { name: 'Same' },
-          resolved: { kind: 'shape', slide: 0, id: 1, name: 'Same' },
+          resolved: { kind: 'shape', slide: 0, id: 1, shapeType: 'connector', name: 'Same' },
         },
       ],
     },
@@ -581,6 +581,48 @@ test('semantic diff alone never fabricates selector usage', () => {
   ])
   const report = evaluateFindings(buildInput({ sourceInspect: inspect }))
   assert.equal(findingByCode(report, 'duplicate-object-name').selectorUsage.status, 'unknown')
+})
+
+test('operation evidence rejects malformed resolved selector locations without coercion', () => {
+  const inspect = simpleInspect([])
+  const selector = {
+    field: 'shape',
+    input: { name: 'Same' },
+    resolved: { kind: 'shape', slide: 0, id: 1, shapeType: 'connector', name: 'Same' },
+  }
+  for (const mutate of [
+    (value) => {
+      value.resolved.slide = '0'
+    },
+    (value) => {
+      delete value.resolved.slide
+    },
+    (value) => {
+      value.resolved.id = '1'
+    },
+    (value) => {
+      value.input = { shape: { name: 'Same' } }
+    },
+    (value) => {
+      value.resolved.slideIndex = 0
+    },
+  ]) {
+    const invalid = cloneJson(selector)
+    mutate(invalid)
+    const dryRun = {
+      schemaVersion: 'pptx-dry-run/v1',
+      status: 'success',
+      opResults: [{ opIndex: 0, op: 'set-shape', status: 'success', resolvedSelectors: [invalid] }],
+    }
+    const report = evaluateFindings(buildInput({ sourceInspect: inspect, dryRun }))
+    assert.equal(report.evaluation.status, 'failed')
+    assert.ok(
+      report.evaluation.errors.some(
+        (error) => error.code === 'finding-analysis-mutation-evidence-invalid',
+      ),
+    )
+    assert.equal(report.analysisIdentity, null)
+  }
 })
 
 test('dry-run/apply patch mismatch fails with structured mutation evidence error', () => {

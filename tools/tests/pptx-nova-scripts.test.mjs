@@ -2364,9 +2364,18 @@ test('tracked literal op values stay within the current xdoc patch and condition
   const schema = JSON.parse(readFileSync(join(repoRoot, 'docs/xdoc-schema.json'), 'utf8'))
   const canonicalOps = new Set(schema.commands.pptx.patchSchema.supportedOps)
   // Both patch operations and control-flow comparisons use the literal key `op`.
-  const conditionOps = new Set(
-    schema.commands.pptx.patchSchema.jsonSchema.$defs.controlCondition.properties.op.enum,
-  )
+  const definitions = schema.commands.pptx.patchSchema.jsonSchema.$defs
+  const conditionOps = new Set()
+  for (const condition of definitions.controlCondition.oneOf) {
+    const operator = condition.properties.op
+    // Selector-existence conditions have no comparison operator.
+    if (!operator) continue
+    assert.match(operator.$ref, /^#\/\$defs\/[^/]+$/)
+    const values = definitions[operator.$ref.slice('#/$defs/'.length)]?.enum
+    assert.ok(Array.isArray(values) && values.length > 0, `Missing operator enum: ${operator.$ref}`)
+    for (const value of values) conditionOps.add(value)
+  }
+  assert.ok(conditionOps.size > 0, 'Control conditions must define comparison operators')
   const tracked = spawnSync('git', ['ls-files', '-z'], {
     cwd: repoRoot,
     encoding: 'utf8',

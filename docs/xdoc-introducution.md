@@ -3,11 +3,11 @@
 > A compact native runtime for document conversion, editable PPTX execution,
 > rendering, validation, and auditable delivery.
 
-> **Runtime contract source for this document:** `v0.3.12 (908b0091)`
+> **Runtime contract source for this document:** `v0.3.12 (9131eeac)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-09-06
+> **Verification date:** 2026-09-09
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
@@ -24,7 +24,7 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot records the contract-bearing part
-of the runtime response for `v0.3.12 (908b0091)`; JSON formatting may differ,
+of the runtime response for `v0.3.12 (9131eeac)`; JSON formatting may differ,
 and the environment-specific top-level `build` and `authContract` provenance
 records are intentionally omitted. Release identity and authorization-profile
 evidence are verified separately by the public CLI release gate. Refresh the
@@ -255,7 +255,7 @@ screenshots or log interpretation alone.
 | Enum families                  | 20 controlled vocabularies                                                                     |
 | Published bridge error catalog | 24 error codes                                                                                 |
 | Embedded PPTX report schemas   | 20 report schemas                                                                              |
-| Patch schema definitions       | 206 `$defs` in the current runtime schema                                                      |
+| Patch schema definitions       | 215 `$defs` in the current runtime schema                                                      |
 | Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples                                 |
 | Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                   |
 
@@ -523,7 +523,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.3.12 (908b0091)
+0.3.12 (9131eeac)
 ```
 
 The top-level schema response identifies itself as:
@@ -531,7 +531,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.3.12 (908b0091)"
+  "version": "0.3.12 (9131eeac)"
 }
 ```
 
@@ -2078,7 +2078,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.3.12 (908b0091). Re-run the discovery
+This document is anchored to xdoc 0.3.12 (9131eeac). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

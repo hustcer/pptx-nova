@@ -17,11 +17,11 @@ Phase 2 抽象的唯一依据。
 
 ## 1. 解包参考文件
 
-`unpack-pptx.nu` 是 xdoc 维护者仓库的 developer-only 工具（本机 `../pptx/tools/unpack-pptx.nu`，
+`unpack-pptx.nu` 是 xdoc 维护者仓库的 developer-only 工具（本机 `tools/unpack-pptx.nu`，
 不在 pptx-nova 仓库中）。务必先看帮助再使用：
 
 ```bash
-nu ../pptx/tools/unpack-pptx.nu -h
+nu tools/unpack-pptx.nu -h
 ```
 
 常用方式（旗标：`-l/--list`、`-s/--slide`、`-f/--find`、`-r/--regex`、`-i/--info`、`-j/--json`、
@@ -29,10 +29,10 @@ nu ../pptx/tools/unpack-pptx.nu -h
 收束到 run 目录）：
 
 ```bash
-nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -i          # 结构概览：页数、layouts、masters
-nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -l          # 列出所有 slides 与关键文件
-nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -s 3        # 第 3 页 slide XML 路径
-nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -f "某文案"  # 全文搜索定位文案所在 XML
+nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -i          # 结构概览：页数、layouts、masters
+nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -l          # 列出所有 slides 与关键文件
+nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -s 3        # 第 3 页 slide XML 路径
+nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -f "某文案"  # 全文搜索定位文案所在 XML
 ```
 
 没有维护者工具时，可用公开命令 `unzip -q <ref.pptx> -d .tmp/deckkit-<id>/ref-unpack` 解包，

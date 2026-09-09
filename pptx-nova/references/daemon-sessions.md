@@ -279,6 +279,13 @@ JSON 字符串，也不能改用内部 `intentJson` 或独立的授权布尔参�
 `$/cancelRequest` 只会取消队列中尚未 dispatch 的同 id 请求，不能中断当前同步方法。
 batch 也按顺序执行，并在 progress notification 之后返回一个 response array。
 
+需要验证返回值时，通过同一连接的 `xdoc.schema`、`mode=full` 解析
+`resultEnvelope.schemaRef`、方法的 `reportSchemaRef` 与 `errorDataSchemaRef`；
+分别检查协议 envelope 和内部业务 report，不能只验证外层就认定操作成功。
+`-32602` 参数错误的 `data.details.field` 是相对公开参数的 JSON Pointer：
+apply 的字段从 `/patch` 或 `/intent` 开始，MCP 则从 `/arguments/patch` 或
+`/arguments/intent` 开始；保留原始指针，不自行补 `/params`。
+
 这是 Agent transport，不是替代 skill 的验证阶段。普通 runner 仍应保持 dry-run、
 apply、post-apply inspect 与证据 gate 的因果顺序；host 只替换调用 adapter。
 

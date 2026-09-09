@@ -102,7 +102,9 @@ An Agent should distinguish these layers:
 5. **Delivery state:** which candidate, sidecar, and preview files actually
    reached the filesystem.
 
-The current `pptx-error-catalog/v1` contains 24 codes:
+Discover the current `pptx-error-catalog/v1` entries through
+`commands.pptx.errorCatalog.codes` in the running `xdoc schema`. The following
+table is a handling guide for selected codes, not an exhaustive allowlist:
 
 | Code                   | Severity | Catalog `autoRetry` | Typical handling                                                                                         |
 | ---------------------- | -------- | ------------------: | -------------------------------------------------------------------------------------------------------- |
@@ -125,9 +127,6 @@ The current `pptx-error-catalog/v1` contains 24 codes:
 | `output_exists`        | error    |               false | Use a new candidate path or explicitly authorize overwrite.                                              |
 | `invalid_sidecar`      | error    |               false | Quarantine the sidecar/candidate pair and do not guess the missing history.                              |
 | `daemon_unavailable`   | error    |               false | A plain `--daemon` call may fall back to one-shot; `--daemon-strict` must fail closed.                   |
-| `invalid_request`      | error    |               false | Repair the daemon request shape or CLI-to-daemon adapter.                                                |
-| `protocol_error`       | error    |               false | Reconnect with a complete frame; preserve the broken frame and daemon logs.                              |
-| `unknown_method`       | error    |               false | Discover the daemon method set again; do not invent a fallback method.                                   |
 | `internal_error`       | fatal    |               false | Preserve the complete evidence bundle and escalate.                                                      |
 | `unknown_error`        | fatal    |               false | Treat the failure as opaque and fail closed.                                                             |
 
@@ -139,10 +138,16 @@ raw XML still needs the explicit raw-XML policy.
 
 ## Structured error envelope
 
-For the report families that support the shared error schema, a failed command
-emits the dedicated `pptx-error/v1` report. `error.producedBy` names the report
-contract the command would have produced on success. The error object requires
-`code`, `severity`, `message`, `producedBy`, `suggestions`, and `docsRef`:
+Select the failure envelope from the command's `ioContract.failure`, resolving
+its `schemaRef` against the same runtime disclosure. Do not assume every failure
+uses `pptx-error/v1`: preview, visual evidence, PDF actions, authorization, and
+protocols retain their own report shapes. Catalog entries describe error facts;
+they do not replace the command's complete report schema.
+
+For `pptx-error/v1`, `error.producedBy` names the producing report contract.
+The minimal error requires `code`, `message`, and `producedBy`; rich errors also
+require `severity`, `suggestions`, and `docsRef`. Read repair fields only when
+present. The following is a rich error example:
 
 ```json
 {

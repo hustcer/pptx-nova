@@ -86,6 +86,13 @@ output directory so shell redirection does not fail before xdoc creates it.
 
 Interpret the result in this order:
 
+If the command fails with `--json`, retain its stdout error report even when
+no manifest directory was published. It still uses `pptx-visual-evidence/v1`,
+with `status="error"` and `error.code`, `message`, `stage`, `retryable`, and
+`details`. Conversion failures preserve their original classification and
+resource/authorization details. Do not infer a code from the stage or retry
+solely because rendering was involved; a failure report has no visual decision.
+
 1. A process exit code of `0` means only that the evidence transaction
    completed. First require `schemaVersion="pptx-visual-evidence/v1"` and
    `status="success"`, then read `decision.action`.

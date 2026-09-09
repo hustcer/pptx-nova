@@ -253,7 +253,7 @@ screenshots or log interpretation alone.
 | Gradients and chart styles     | 24 preset gradients and 48 chart styles                                                        |
 | Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status                            |
 | Enum families                  | 20 controlled vocabularies                                                                     |
-| Published bridge error catalog | 24 error codes                                                                                 |
+| Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                            |
 | Embedded PPTX report schemas   | 20 report schemas                                                                              |
 | Patch schema definitions       | 215 `$defs` in the current runtime schema                                                      |
 | Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples                                 |
@@ -1133,14 +1133,14 @@ At operation level, `opResults[]` can include `opIndex`, `op`, `status`,
 
 ### Structured error behavior
 
-The published bridge error catalog has 24 codes, including:
+The running schema publishes `commands.pptx.errorCatalog.codes`, including:
 
 `invalid_json`, `invalid_argument`, `invalid_arguments`, `unsupported_feature`,
 `invalid_operation`, `invalid_package`, `invalid_xml`, `missing_part`,
 `missing_relationship`, `encrypted_package`, `signed_package`, `zip_error`,
 `patch_too_large`, `asset_too_large`, `input_error`, `output_error`, `output_exists`,
-`invalid_sidecar`, `daemon_unavailable`, `invalid_request`, `protocol_error`,
-`unknown_method`, `internal_error`, and `unknown_error`.
+`invalid_sidecar`, `daemon_unavailable`, `invalid_parameter`,
+`invalid_configuration`, `authorization_denied`, `internal_error`, and `unknown_error`.
 
 Structured error payloads carry a machine-readable kind and message; operation
 failures can include an `opIndex`. Where a repair is meaningful, the payload can
@@ -1150,13 +1150,12 @@ This allows an orchestrator to distinguish a malformed request from an invalid
 deck, a policy rejection, an unavailable backend, or an internal failure while
 still receiving a bounded next action.
 
-The catalog is a published bridge contract, not a guarantee that every
-implementation path has already normalized its internal kind into one of those
-24 names. A worker should preserve an unknown kind as opaque data, use the
-report and exit code for routing, and avoid branching on undocumented strings.
-Specialized failures may also carry a command-specific `schemaVersion` that is
-newer or broader than the shared error-schema enum, so error ingestion should
-preserve unknown version strings instead of rejecting the diagnostic itself.
+Resolve the command's `ioContract.failure.schemaRef` against the same runtime
+disclosure before interpreting its envelope. The catalog covers error facts
+across multiple report families; it does not make every failure a rich
+`pptx-error/v1` report or require repair suggestions on every error. Protocol
+errors retain their own codes and envelopes. Preserve unknown versions and
+codes as diagnostic evidence and fail closed for automated repair or delivery.
 
 ### Process exit codes
 

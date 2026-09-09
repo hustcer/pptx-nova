@@ -270,10 +270,12 @@ The CLI archive and its bundled native components can have different license
 terms. Read the `LICENSE` file in the exact archive and the notices under
 `licenses-pdfium/` before redistributing it. Runtime conversion authorization is
 a separate policy boundary. The verified runtime exposes its current behavior
-in `commands.convert.licensePolicy`: missing or inactive authorization limits
-every PPTX input handled by `convert` to 2 MiB, while PDF/PNG output also carries
-a visible demo watermark. Verify the exact artifact and schema instead of
-assuming that later distributions behave identically.
+in `commands.convert.licensePolicy` and `authContract.productLimits`: without
+an active entitlement, the Free Baseline limits each task to 10 slides and
+5 MiB (5,242,880 bytes) of compressed PPTX input, PDF/PNG output carries a
+visible `XDOC DEMO` watermark, and larger inputs are denied with exit code 4.
+Verify the exact artifact and schema instead of assuming that later
+distributions behave identically.
 
 ### Filesystem and security
 

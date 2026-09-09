@@ -306,12 +306,12 @@ xdoc pptx refurbish-skin \
 
 `refurbish-skin` 会复制保留源 deck，检测/删除高置信旧 chrome，应用 DeckKit 背景和 page chrome，
 对 text/shapes/tables/charts 做批量 remap，并运行 `vision-diff` 与原生 `refurbish-audit` gate。
-读取 `refurbish-skin.json`：`status` 必须为 `passed`，`gate.passed` 必须为 `true`，且
+读取 `refurbish-skin.json`：`status` 必须为 `success` 且 `outcome` 为 `passed`，`gate.passed` 必须为 `true`，且
 `gate.newHighIssues` / `gate.newMediumIssues` 必须为 0。`artifacts.contactDiff.status` 默认为
 `skipped`；标准 runner 最终会生成完整 `refurbish-compare`，不要为全量人工复核额外运行一次
 `xdoc pptx contact-diff`。只有局部修复预览才单独使用带 `--slides` 的 contact-diff。
 
-如果 `refurbish-skin` 返回 `UnsupportedComplexity`，不要重试同一条命令，也不要让用户等待长流程；
+如果 `refurbish-skin` 返回 `unsupported_complexity` 错误码，不要重试同一条命令，也不要让用户等待长流程；
 改用下方低层命令对 deck 分段处理，或先做 inspect/audit 后向用户说明当前 MVP 的大 deck 限制。
 如果返回 unsupported DeckKit/native skinning 错误，记录 JSON，并改用目标 DeckKit 对应的 brand profile
 或 inspect 驱动 patch；不得静默切换到其它 DeckKit。若 `refurbish-plan.json` 已返回
@@ -356,9 +356,9 @@ xdoc pptx remap-theme 01-clean.pptx --theme corporate-blue --scope text,shapes,t
 xdoc pptx chrome-apply 02-remapped.pptx --deckkit mckinsey-blue --output 03-styled.pptx --json > chrome-apply.json
 ```
 
-`remap-theme` 当前使用 `--theme <themePack/stylePack>`；用目标 DeckKit 对应的 theme/style alias
-（例如 `corporate-blue`）替代示例值。始终显式传 `--scope text,shapes,tables,charts`，
-因为默认 scope 可能只覆盖 `text,shapes`。不要假设所有 DeckKit id 都能传给 `chrome-apply`：
+`remap-theme` 当前使用 `--theme <themePack id>`（不接受 stylePack id，也没有 `--style`）；用目标
+DeckKit 对应的 themePack alias（例如 `corporate-blue`）替代示例值。始终显式传
+`--scope text,shapes,tables,charts`，因为默认 scope 只覆盖 `text,shapes`。不要假设所有 DeckKit id 都能传给 `chrome-apply`：
 先运行命令并读取 JSON 报告。若报告 `unknown DeckKit`、目标 DeckKit 是 `candidate` 但用户显式指定，
 或缺少匹配 theme/style alias，必须记录限制并 fallback 到 `apply-brand` + patch 实现目标视觉合同；
 不要静默改用其它 DeckKit 或只做轻量 chrome。
@@ -491,7 +491,7 @@ node <skill-root>/scripts/pptx-nova-refurbish-audit.mjs \
 - 候选稳定后运行一次 `xdoc pptx diff --source source.pptx --candidate candidate.pptx --detail summary --json`
   并保存为 `pptx-diff.json`。不要在每次 skin/remap 局部尝试后重复运行；只有 `summary` 指向可疑页或需要
   字段级证据时才追加 `--detail full`。用 `agentGate.semanticStatus`、`summary.reliableChanges`、
-  `changeRollup.reliable` 和 `slides[]` 检查可靠变更是否符合预期：翻新通常会有可靠的几何/样式变化，
+  `summary.byCategory`、`styleChangeSummary` 和 `slides[]` 检查可靠变更是否符合预期：翻新通常会有可靠的几何/样式变化，
   但不应出现未经批准的文本删除、slide 删除或对象类别大幅减少。`uncertainChanges` /
   `unsupportedRegions` 只表示需要人工、`refurbish-audit` 或专项审计补证，不能当作通过。
 - 不要通过把旧 header、footer、页码或标题移到画布外来隐藏它们；这会制造 `shape-out-of-bounds`

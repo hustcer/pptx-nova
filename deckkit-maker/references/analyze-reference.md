@@ -17,22 +17,28 @@ Phase 2 抽象的唯一依据。
 
 ## 1. 解包参考文件
 
-务必先看帮助再使用：
+`unpack-pptx.nu` 是 xdoc 维护者仓库的 developer-only 工具（本机 `../pptx/tools/unpack-pptx.nu`，
+不在 pptx-nova 仓库中）。务必先看帮助再使用：
 
 ```bash
-nu tools/unpack-pptx.nu -h
+nu ../pptx/tools/unpack-pptx.nu -h
 ```
 
-常用方式（解压到 `.tmp-slides/`，**不支持 -o 参数**）：
+常用方式（旗标：`-l/--list`、`-s/--slide`、`-f/--find`、`-r/--regex`、`-i/--info`、`-j/--json`、
+`-o/--output-dir`；不传 `-o` 时默认解压到唯一目录 `.tmp-slides/<stem>-<id>`，本流程一律用 `-o`
+收束到 run 目录）：
 
 ```bash
-nu tools/unpack-pptx.nu <ref.pptx> -i          # 结构概览：页数、layouts、masters
-nu tools/unpack-pptx.nu <ref.pptx> -l          # 列出所有 slides 与关键文件
-nu tools/unpack-pptx.nu <ref.pptx> -s 3        # 第 3 页 slide XML 路径
-nu tools/unpack-pptx.nu <ref.pptx> -f "某文案"  # 全文搜索定位文案所在 XML
+nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -i          # 结构概览：页数、layouts、masters
+nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -l          # 列出所有 slides 与关键文件
+nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -s 3        # 第 3 页 slide XML 路径
+nu ../pptx/tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -f "某文案"  # 全文搜索定位文案所在 XML
 ```
 
-关键 XML 位置（`.tmp-slides/` 下）：
+没有维护者工具时，可用公开命令 `unzip -q <ref.pptx> -d .tmp/deckkit-<id>/ref-unpack` 解包，
+并用 `xdoc extract <ref.pptx> --parts map -o .tmp/deckkit-<id>/ref-map.json` 获取 slide/shape 映射。
+
+关键 XML 位置（解包目录 `ref-unpack/` 下）：
 
 | 文件                                | 提取内容                                      |
 | ----------------------------------- | --------------------------------------------- |
@@ -64,7 +70,7 @@ xdoc pptx inspect <ref.pptx> --daemon --json > .tmp/deckkit-<id>/ref-inspect.jso
 
 - 先从 `ref-inspect.json` 获取 slide count、shape count、文本清单、图片/媒体关系和可能的
   unsupported 对象。
-- 再回到 `.tmp-slides/` 的 XML 查证具体 `a:xfrm`、`a:solidFill`、`a:rPr sz`、
+- 再回到 `ref-unpack/` 的 XML 查证具体 `a:xfrm`、`a:solidFill`、`a:rPr sz`、
   placeholder、layout/master 继承来源。
 - 如果 inspect 与 XML/PNG 不一致，以 XML + PNG 为准，并在 `findings.md` 记录差异。
 
@@ -122,7 +128,7 @@ xdoc convert <ref.pptx> --to png -o .tmp/deckkit-<id>/ref-previews --overwrite -
 ## 图标与图片
 
 - 参考 deck 用到的图标语义清单 → 每个给出 Tabler 候选
-  （用 node skills/pptx-nova/scripts/pptx-nova-icons.mjs search <概念> --json 查）
+  （用 node pptx-nova/scripts/pptx-nova-icons.mjs search <概念> --json 查）
 - 内容性图片/logo：记录位置、角色、是否图片主导页、可复用外壳（裁切/边框/callout/caption）；
   kit 中处理为 asset 槽位、语义相关原生替代或省略，需向用户披露。
 
@@ -162,8 +168,8 @@ xdoc convert <ref.pptx> --to png -o .tmp/deckkit-<id>/ref-previews --overwrite -
   哪些可以用语义相关 shape/icon/chart/table 原生替代
 ```
 
-页型命名用新 DeckKit 的短前缀（如 `swiss` → `swissCoverSlide`），与现有三套
-DeckKit 的页型名不冲突。归并原则：结构相同、仅内容不同的页合并为一个页型；
+页型命名用新 DeckKit 的短前缀（如 `swiss` → `swissCoverSlide`），与现有
+DeckKit（`schemas/content.schema.json` 的 `type` enum）的页型名不冲突。归并原则：结构相同、仅内容不同的页合并为一个页型；
 结构差异大到需要不同槽位集合的，拆成不同页型。**默认保留所有 slides**——
 宁可多一个页型，也不要丢页或把两页硬塞进一个不合身的页型。若 deck 很大或有大量
 重复/一次性页面，不要在这里暗自删页；转到 `fidelity-scope.md` 明确选择 full/scoped。

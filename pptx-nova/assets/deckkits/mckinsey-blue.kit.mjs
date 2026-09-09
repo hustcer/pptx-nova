@@ -550,9 +550,9 @@ function makePageTypes(builders, chrome, components, total) {
         type: 'gradient',
         angle: 0,
         stops: [
-          { pos: 0, color: '001B35' },
-          { pos: 0.55, color: '00387A' },
-          { pos: 1, color: '0063A8' },
+          { position: 0, color: '001B35' },
+          { position: 0.55, color: '00387A' },
+          { position: 1, color: '0063A8' },
         ],
       },
     })

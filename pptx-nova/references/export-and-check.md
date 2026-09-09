@@ -19,7 +19,9 @@ xdoc pptx diff --source before.pptx --candidate after.pptx \
 ```
 
 The default `summary` detail is the normal Agent path. It reports
-`pptx-diff/v1`, `agentGate`, `summary`, `changeRollup`, and per-slide rollups.
+`pptx-diff/v1`, `agentGate`, `summary` (`reliableChanges` / `uncertainChanges` /
+`unsupportedRegions` and `byCategory`), `styleChangeSummary`, and per-slide
+rollups; there is no `changeRollup` field.
 Only use `--detail full` when summary identifies a suspicious slide/object and
 field-level evidence is needed. The command can take around 10 seconds, so do
 not use it as a tight retry loop.
@@ -150,9 +152,11 @@ xdoc pptx preview deck.pptx --layout 1 \
 `--layout N` is a 1-based registered-layout preview and is mutually exclusive
 with `--slides`. xdoc builds a one-slide candidate from that layout and its
 master/theme inheritance chain, persists
-`layout-preview-N-candidate.pptx` inside the requested output directory, and
+`layout-preview-<index>-candidate.pptx` inside the requested output directory
+(`<index>` and the reported `layoutIndex` are 0-based: `--layout 1` writes
+`layout-preview-0-candidate.pptx` with `layoutIndex: 0`), and
 does not mutate the input deck. Require `previewTarget.kind: "layout"`, the
-requested `layoutIndex`, `candidatePersisted: true`, a readable
+expected 0-based `layoutIndex`, `candidatePersisted: true`, a readable
 `candidate.status: "ok"`, and `inputMutated: false` before treating the PNG as
 layout-level evidence. The manifest's `visualEvidence.command` must reference
 that persisted candidate, never an already-deleted temporary path.
@@ -177,8 +181,9 @@ jq -e '.status=="success"
 
 Do not gate on `pages[].status`; the per-page status lives at
 `pages[].file.status`. Field semantics are authoritative from the
-`pptx-preview/v1` schema — inspect it with `xdoc pptx schema` (the
-`previewReportSchema` entry) rather than assuming a single shared enum.
+`pptx-preview/v1` schema — inspect it with the top-level `xdoc schema` command
+(`xdoc schema | jq '.commands.pptx.previewReportSchema'`; there is no
+`xdoc pptx schema` action) rather than assuming a single shared enum.
 
 After the gate passes, PNG filenames preserve original slide numbers, so
 `slide-025.png` still refers to slide 25 even when the contact sheet only
@@ -206,6 +211,13 @@ xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-shee
 
 The command shape is `xdoc convert <pptx> --to <format>`, not
 `xdoc <pptx> -t png`.
+
+Without an installed License, PPTX conversion runs the Free Baseline: at most
+10 slides and 5 MiB (5,242,880 bytes) of compressed PPTX input per task, and
+visual outputs (PDF/PNG) carry a watermark. Inputs beyond those limits fail
+with exit code `4` (`no_executable_mode`). `--allow-fallback` pre-authorizes the
+Free Baseline for automation; `--require-unwatermarked` fails instead of
+producing a watermarked export.
 
 Do not add `--json` to top-level `xdoc convert` unless the current
 `xdoc convert --help` explicitly discloses it. The structured JSON result for

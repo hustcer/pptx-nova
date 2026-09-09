@@ -15,7 +15,7 @@ xdoc schema --mode ops --ops set-slide-animations --minimal > <run-dir>/schema-s
 
 - 创建/替换/清理：`set-slide-animations`，字段 `mode: "merge-safe" | "replace" | "clear"`。
 - 局部安全编辑：`set-slide-animations`，用 `inspect.animations[].id` 定位。
-- 局部安全删除：`set-slide-animations`，用 `inspect.animations[].id` 定位。
+- 局部安全删除：`set-slide-animations`，用 `remove: ["<inspect.animations[].id>"]` 定位。
 - 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fade-out/wipe-out/fly-out`
   或 `phase: "exit"`。
 - 支持的 trigger：`on-click`、`with-previous`、`after-previous`。
@@ -40,7 +40,7 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 - `timingSummary`: timing 是否存在、media/interactive/unsupported timing、editable 与
   preserve-only 数量。
 - `animations[]`: 稳定 `id`、`target`、`effect`、`phase`、`trigger`、`durationMs`、`delayMs`、
-  `repeat`、`autoReverse`、`restart`、`easing`、`editable` 和 preserve-only reason。
+  `repeat`、`autoReverse`、`restart`、`easing`、`editable` 和 preserve-only reason（`unsupportedReason`）。
 - `animationCapabilities`: `editable`、`preserveOnly`、`unsupportedCreate`。
 
 只有 `editable: true` 的既有 step 才能用 `set-slide-animations` 局部编辑或删除。
@@ -361,7 +361,7 @@ PowerPoint，必须在 Windows fixture 补证，否则该维度保持 `inconclus
 - media/video timing、interactive trigger、点击某个 shape 触发。
 - chart/SmartArt build。
 - word/character 级文本动画。
-- inspect 标记 `editable: false` 或 `animation_capabilities.preserve_only` 的 timing。
+- inspect 标记 `editable: false` 或 `animationCapabilities.preserveOnly` 的 timing。
 
 raw OOXML 不是常规 fallback。只有用户明确要求、你能写出最小 XPath 修改，并完成 OPC/XML/PowerPoint
 clean-open 与播放验证时，才读 `control-flow-and-raw-xml.md` 评估风险。

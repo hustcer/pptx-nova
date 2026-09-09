@@ -52,14 +52,16 @@ Theme packs:
 | `tech-dark`       | Technical keynotes, AI, data platforms    |
 | `health-soft`     | Healthcare and life-science decks         |
 | `minimal-mono`    | Minimal reports, internal memos           |
+| `cartesian-warm`  | Warm editorial / Cartesian DeckKit decks  |
 
 Style packs:
 
-| id           | Best For                                                |
-| ------------ | ------------------------------------------------------- |
-| `consulting` | Dense executive-document rhythm                         |
-| `minimal`    | Quiet low-density decks                                 |
-| `product`    | Balanced product update decks with room for screenshots |
+| id           | Best For                                                 |
+| ------------ | -------------------------------------------------------- |
+| `consulting` | Dense executive-document rhythm                          |
+| `minimal`    | Quiet low-density decks                                  |
+| `cartesian`  | Sparse editorial style with hairline rules, wide margins |
+| `product`    | Balanced product update decks with room for screenshots  |
 
 The source catalog is `assets/themes/catalog.json`. MoonBit CLI built-ins and the JS generator
 built-ins are generated from that file; do not hand-edit `s8fy/cmd/main/pptx_theme_catalog.generated.mbt`
@@ -68,7 +70,7 @@ or `assets/examples/theme-packs.generated.mjs`.
 Built-in style packs must include a complete `generator` object with `sizes`, `layout`, `surface`,
 `effects`, `chrome`, and `chart`. The source-repository theme sync validates required fields,
 unknown fields, numeric ranges, allowed shapes (`rectangle` / `rounded-rectangle`), and nullable
-shadow effect objects before a skill release. Keep the full consulting/minimal/product visual token
+shadow effect objects before a skill release. Keep the full consulting/minimal/cartesian/product visual token
 values in `assets/themes/catalog.json`; the JS template only carries a small compatibility fallback
 for external hand-written packs.
 

@@ -37,6 +37,18 @@ Use these entry points from skill workflows:
   DeckKit-specific palette/font overrides where available, preserves true native
   skinning declarations, defaults to dry-run, and supports `--check` for CI.
 - `pptx-nova-icons.mjs` - query and generate the bundled Tabler icon pack.
+- `pptx-nova-init-run.mjs` - create a new `.pptx-nova/<slug>-<timestamp>/` run
+  directory with starter `outline.json`, `deck_lock.json`, and `content.json`
+  for a DeckKit (`--slug`, `--deckkit`, optional `--mode express|studio|edit|export`).
+- `pptx-nova-build.mjs` - build the xdoc patch JSON from DeckKit `content.json`
+  (`--deckkit <id> content.json -o patch.json`), optionally writing
+  `--quality-json` and failing on `--fail-on-quality warning|error`.
+- `pptx-nova-deckkit-slots.mjs` - print the slot reference (`--format md|json`)
+  for one DeckKit's supported slide types.
+- `pptx-nova-deckkit-slot-consistency.mjs` - maintainer guard that every
+  schema-declared text slot reaches the generated patch (no ghost slots).
+- `pptx-nova-formula-render.mjs` - materialize formula assets declared in
+  `assets_manifest.json` (`--provider auto|text-svg`, `--dry-run`).
 - `pptx-nova-check-lock.mjs` - validate `deck_lock.json`, `assets_manifest.json`,
   DeckKit content, and patch output before xdoc dry-run.
 - `pptx-nova-session-rules.mjs` - normalize explicit current-deck rules against
@@ -65,9 +77,13 @@ Use these entry points from skill workflows:
 - `pptx-nova-copy-size-gate.mjs` - inspect donor and target slide dimensions,
   verify the current `pptx-slide-copy/v1` whole-file SHA-256 bindings separately
   from its normalized OPC package fingerprints, and fail closed before apply
-  when the dimensions differ. Current policy is identical-size-only until xdoc
-  exposes an explicit copy/import size strategy; the script never asks a
-  renderer to hide the mismatch.
+  when the dimensions differ. Current policy is identical-size-only: xdoc's
+  `--size-strategy` accepts only `require-match` (no implicit scaling), and the
+  script never asks a renderer to hide the mismatch.
+- `pptx-nova-remediation.mjs` - `run` captures the first `apply` submission
+  into a private capsule (request, input, and asset snapshots) before any
+  automatic retry; `apply` replays exactly one verified `suggestions[]`
+  pointer from a retained report. A report alone cannot restore context.
 - `pptx-nova-refurbish-plan.mjs` - build the preflight route for existing-deck
   refurbishment: readiness exception, native skinning support, fallback strategy,
   duplicate chrome policy, and required gates.
@@ -106,6 +122,18 @@ Use these entry points from skill workflows:
 - `lib/layout-snapshot.mjs` - pure layout detector shared by the layout CLI and
   refurbish source/candidate adapters. `lib/finding-analysis.mjs` is the pure FA
   decision seam; neither module reads files, launches commands, or renders.
+- `pptx-nova-layout-snapshot.mjs` - normalize a final `xdoc pptx inspect` JSON
+  into `layout-final.json`; structural layout risks are warnings, not a gate.
+- `pptx-nova-fidelity-gate.mjs` - summarize template-following or refurbish
+  evidence (`--mode template-following|refurbish`) after the template gate or
+  the vision-diff/refurbish-audit steps.
+- `pptx-nova-visual-evidence-gate.mjs` - evaluate a canonical
+  `pptx-visual-evidence/v1` manifest; exit code reflects its
+  `decision.action` (proceed / stop / needs human confirmation).
+- `pptx-nova-progress.mjs`, `pptx-nova-refurbish-style.mjs`,
+  `pptx-nova-session-rules-core.mjs`, `pptx-nova-vision-baseline.mjs`, and the
+  remaining `lib/*.mjs` files are import-only shared modules used by the
+  runners and gates above; they have no CLI entry point.
 - `lib/chart-semantics.mjs` - shared classic Chart/ChartEx semantic normalizer
   used by lock checking and semantic audit. It resolves `data` versus `dataEx`,
   slide-level semantic sources, and kind-specific dimensions from one contract

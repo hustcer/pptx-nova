@@ -29,7 +29,7 @@ verdict.
 
 ## Runtime capability matrix
 
-The current v0.3.5 discovery contract is `cli-agent/v1`, with a capability
+The current v0.3.12 discovery contract is `cli-agent/v1`, with a capability
 registry at `capabilities/v1`. The registry currently reports:
 
 | Input kind | Output                                                                       | Status     | Delivery    | Required backend               |
@@ -40,11 +40,11 @@ registry at `capabilities/v1`. The registry currently reports:
 | `pdf`      | `pdf`                                                                        | `enabled`  | single file | none                           |
 | `pdf`      | `png`                                                                        | `enabled`  | directory   | `image-backend`                |
 | `html`     | `md`                                                                         | `enabled`  | single file | none                           |
-| `docx`     | `*`                                                                          | `reserved` | undisclosed | none                           |
-| `xlsx`     | `*`                                                                          | `reserved` | undisclosed | none                           |
+| `docx`     | `*`                                                                          | `reserved` | unknown     | none                           |
+| `xlsx`     | `*`                                                                          | `reserved` | unknown     | none                           |
 
 `reserved` means a future name is present in discovery. It is not a supported
-conversion path. In particular, do not advertise xdoc v0.3.5 as a generic DOCX or
+conversion path. In particular, do not advertise xdoc v0.3.12 as a generic DOCX or
 XLSX ingestion layer.
 
 The registry is a capability matrix, not a live health check. A worker must also
@@ -73,9 +73,9 @@ The index is a projection; a missing entry is not proof of unsupported status.
 
 ### Patch and selector boundaries
 
-The bridge patch envelope is JSON with a numeric `schemaVersion` (currently `1`)
-and an ordered `ops` array. This number is distinct from the string report
-versions such as `pptx-apply/v1`.
+The bridge patch envelope is JSON with the string `schemaVersion`
+`"pptx-patch/v1"` (a bare numeric `1` is rejected) and an ordered `ops` array.
+This envelope version is distinct from report versions such as `pptx-apply/v1`.
 
 Index bases are intentionally different at the CLI boundary:
 
@@ -83,7 +83,7 @@ Index bases are intentionally different at the CLI boundary:
 | ---------------------------------------------------------------- | ---------- |
 | Patch `slide` fields                                             | 0-based    |
 | `select` query `slideIndex`                                      | 0-based    |
-| `slide-copy --slide`                                             | 0-based    |
+| `slide-copy --slides`                                            | 1-based    |
 | `--slides` on conversion, preview, checks, and most PPTX actions | 1-based    |
 
 Resolve an existing object with `inspect` or `select` before constructing a

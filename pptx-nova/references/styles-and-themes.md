@@ -22,14 +22,13 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 ```json
 "fill": {
   "type": "solid",
-  "schemeClr": "accent1",
-  "lumMod": 0.8,
-  "lumOff": 0.2
+  "color": { "schemeClr": "accent1", "alpha": 0.8 }
 }
 ```
 
-`schemeClr` 取值：`lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink`（colorMap 层名字 `bg1/bg2/tx1/tx2` 不被接受，请先经 deck 的 clrMap 换算，默认 `tx1→dk1`、`bg1→lt1`）。
-`lumMod` / `lumOff` 控制亮度调整（百分比，0-1）。
+`schemeClr` 必须放在 `color` 对象里（fill 顶层直接写 `schemeClr` 会报 `unknown field`）；
+取值：`lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink`（colorMap 层名字 `bg1/bg2/tx1/tx2` 不被接受，请先经 deck 的 clrMap 换算，默认 `tx1→dk1`、`bg1→lt1`）。
+`alpha` 控制不透明度（0-1）；当前 patch schema 不接受 `lumMod` / `lumOff` 亮度变换字段。
 
 ## Fill（填充）
 
@@ -57,7 +56,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 }
 ```
 
-`pos` 范围 `[0, 1]`；`angle` 度数（0 = 上→下）。stop 可以混用 `color` 与 `schemeClr`。
+`position` 范围 `[0, 1]`；`angle` 度数（0 = 上→下）。stop 可以混用 `color` 与 `schemeClr`。
 
 ### Radial gradient
 
@@ -100,7 +99,7 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 }
 ```
 
-`preset` 是 OOXML pattern name（`pct5 / pct10 / dkHorizontal / wdDnDiag / cross / shingle` 等）。
+`pattern` 是 OOXML pattern name（`pct5 / pct10 / dkHorizontal / wdDnDiag / cross / shingle` 等）。
 
 ### No fill
 
@@ -186,14 +185,14 @@ picture fill。
 | `name`            | 字体族名（如 `Inter` / `Microsoft YaHei` / `Source Han Sans SC`） |
 | `eastAsian`       | 东亚脚本字体；省略保留，`null` 清除并恢复继承                     |
 | `complexScript`   | 阿拉伯文等复杂脚本字体；省略保留，`null` 清除并恢复继承           |
-| `spacing`         | 字符间距；显式 `pt` 字符串或等价 raw EMU，`null` 清除             |
+| `letterSpacing`   | 字符间距；显式 `pt` 字符串或等价 raw EMU，`null` 清除             |
 | `size`            | 优先使用 `"<n>pt"`；裸数字按通用 length 规则解释                  |
 | `bold` / `italic` | 布尔                                                              |
 | `underline`       | `none / single / double / wavy / heavy / ...`                     |
 | `color`           | 字体颜色（6 位 hex）                                              |
 | `fill`            | 用 fill 对象（gradient/pattern）填字符                            |
 
-`name` / `eastAsian` / `complexScript` / `spacing` 都是 sparse patch：省略不改，
+`name` / `eastAsian` / `complexScript` / `letterSpacing` 都是 sparse patch：省略不改，
 `null` 清掉本地值使继承继续。不要只改 Latin `name` 就声称多语言字体已经统一；先从
 inspect 的 `fontFacts[]` 检查各脚本 scope。
 
@@ -328,7 +327,7 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 
 ```bash
 xdoc pptx remap-theme clean.pptx \
-  --to corporate-blue \
+  --theme corporate-blue \
   --scope text,shapes,tables,charts \
   --output remapped.pptx \
   --dry-run \
@@ -384,7 +383,7 @@ xdoc pptx remap-theme clean.pptx \
 ```
 
 `type` 取值与 placeholder 的 type 一致（`title` / `body` / `ctrTitle` / `subTitle` /
-`object` / `chart` / ...）。
+`obj` / `chart` / `pic` / `tbl` / ...；写 `object` 会报 invalid enum value）。
 
 ## Shape effect（阴影、发光、反射、柔化）
 

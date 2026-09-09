@@ -186,7 +186,7 @@ Keep these identifiers distinct:
 | `pptx-apply/v1`, `pptx-dry-run/v1`, etc. | Command result contracts                          |
 
 An implementation MUST NOT treat a report's `schemaVersion` as interchangeable
-with the patch envelope's numeric version. If a worker receives an unknown major
+with the patch envelope's `schemaVersion`. If a worker receives an unknown major
 contract, it MUST preserve the raw report and stop at the integration boundary.
 It MAY continue when an additive minor version is explicitly declared backward
 compatible.

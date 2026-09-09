@@ -241,23 +241,23 @@ screenshots or log interpretation alone.
 
 ### Current release surface
 
-| Area                           | Runtime contract in v0.3.5                                                                     |
-| ------------------------------ | ---------------------------------------------------------------------------------------------- |
-| Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `pdf`, `daemon`, `json-rpc`, `mcp`, `schema` |
-| PPTX CLI subcommands           | 37 discoverable subcommands                                                                    |
-| Patch operations               | 58 canonical operations                                                                        |
-| High-level recipes             | 18 recipe kinds                                                                                |
-| Shape catalog                  | 182 preset shapes                                                                              |
-| Layout contracts               | 6 built-in content contracts                                                                   |
-| Theme/style assets             | 9 theme packs and 4 style packs                                                                |
-| Gradients and chart styles     | 24 preset gradients and 48 chart styles                                                        |
-| Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status                            |
-| Enum families                  | 20 controlled vocabularies                                                                     |
-| Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                            |
-| Embedded PPTX report schemas   | 20 report schemas                                                                              |
-| Patch schema definitions       | 215 `$defs` in the current runtime schema                                                      |
-| Runtime examples               | 36 PPTX CLI examples, 18 patch examples, and 7 recipe examples                                 |
-| Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                   |
+| Area                           | Runtime contract in v0.3.12                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `auth`, `pdf`, `daemon`, `json-rpc`, `mcp`, `schema` |
+| PPTX CLI subcommands           | 37 discoverable subcommands                                                                            |
+| Patch operations               | 58 canonical operations                                                                                |
+| High-level recipes             | 18 recipe kinds                                                                                        |
+| Shape catalog                  | 182 preset shapes                                                                                      |
+| Layout contracts               | 6 built-in content contracts                                                                           |
+| Theme/style assets             | 9 theme packs and 4 style packs                                                                        |
+| Gradients and chart styles     | 24 preset gradients and 48 chart styles                                                                |
+| Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status                                    |
+| Enum families                  | 23 controlled vocabularies                                                                             |
+| Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                                    |
+| Embedded PPTX report schemas   | 31 report schemas                                                                                      |
+| Patch schema definitions       | 215 `$defs` in the current runtime schema                                                              |
+| Runtime examples               | 42 PPTX CLI examples, 21 patch examples, and 7 recipe examples                                         |
+| Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                           |
 
 Counts are discovery aids, not promises that every long-tail PPTX feature is
 fully editable. Each operation and capability carries its own support or
@@ -316,7 +316,7 @@ versioned system.
 - an implicit claim that reserved document kinds are already supported.
 
 The current capability registry marks `docx` and `xlsx` as `reserved`. They may
-be recognized as document kinds, but the v0.3.5 CLI must not be described as an
+be recognized as document kinds, but the v0.3.12 CLI must not be described as an
 implemented general-purpose converter for them.
 
 ## Design principles
@@ -337,16 +337,15 @@ xdoc schema --mode examples
 The index is intentionally small. An agent can request the complete definition
 only after it knows which operation it needs.
 
-The full runtime schema currently includes 36 PPTX CLI examples, 18 patch
+The full runtime schema currently includes 42 PPTX CLI examples, 21 patch
 examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
-Cache the complete `xdoc schema` response for CLI discovery. In v0.3.5,
-`discovery.commands` is summary metadata (it omits `html2md`), while
+Cache the complete `xdoc schema` response for CLI discovery. In v0.3.12,
+`discovery.commands` is only a list of the eleven top-level command names, while
 `xdoc schema --mode index` is specifically a patch-operation index rather than a
 complete CLI inventory. Neither surface should be treated as an exhaustive
-replacement for the full `.commands` map or command help. The PDF command has
-one additional discovery exception documented in the PDF section below.
+replacement for the full `.commands` map or command help.
 
 ### Deterministic targeting
 
@@ -494,7 +493,7 @@ successful report.
 | Boundary         | Already observable in xdoc                                                                            | What an ecosystem profile would freeze                                              |
 | ---------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | Discovery        | `cli-agent/v1`, progressive `xdoc schema`, catalogs, examples, and capability status                  | How a worker negotiates supported, partial, preserve-only, and unsupported features |
-| Mutation         | `pptx-patch/v1`, numeric patch envelope, selectors, ordered ops, recipe expansion                     | Selector determinism, atomicity, idempotency expectations, and extension rules      |
+| Mutation         | `pptx-patch/v1` patch envelope, selectors, ordered ops, recipe expansion                              | Selector determinism, atomicity, idempotency expectations, and extension rules      |
 | Evidence         | Versioned report ids, report-specific hashes or gates, changed parts, operation traces, and sidecars  | Minimum proof required before a candidate can be published or retried               |
 | Safety           | Asset roots, size and ZIP limits, raw-XML opt-in, signature/encryption policy, and exit codes         | Policy profiles that a sandbox, queue, or regulated worker can enforce consistently |
 | Conformance      | Contracted examples, fixture probes, semantic-rule summaries, and replayable artifacts                | Cross-implementation test vectors and compatibility/deprecation policy              |
@@ -535,8 +534,9 @@ The top-level schema response identifies itself as:
 }
 ```
 
-The numeric `schemaVersion` inside a patch envelope is a different contract: it
-is currently `1`. Keep the two version fields distinct in agent code.
+The `schemaVersion` inside a patch envelope is a different contract: it is the
+string `"pptx-patch/v1"` (a bare numeric `1` is rejected with
+`invalid_argument`). Keep the two version fields distinct in agent code.
 
 For a pinned integration, compare the captured `runtime-schema.json` with the
 checked-in snapshot only after normalizing JSON ordering. A matching build id is
@@ -680,7 +680,7 @@ The conversion command supports:
 | PPTX      | text     | enabled  | Plain extracted text                                                                |
 | PDF       | PNG/PDF  | enabled  | Render or inspect through the PDF command family                                    |
 | HTML      | Markdown | enabled  | Local HTML file, glob, or directory input                                           |
-| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in v0.3.5                |
+| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in v0.3.12               |
 
 The top-level capability registry is itself machine-readable:
 
@@ -751,9 +751,9 @@ prefixes, page usage, text-object counts, and Unicode-map diagnostics.
 current build.
 
 Current executable discovery publishes each action's own positional input,
-options and I/O contract. The older v0.3.5 snapshot omits `render`; use the
-current executable's `xdoc pdf <action> --help` and schema when constructing a
-new invocation.
+options and I/O contract under `commands.pdf.subcommands`, including `render`
+(older v0.3.5 snapshots omitted it); use the current executable's
+`xdoc pdf <action> --help` and schema when constructing a new invocation.
 
 `inspect` is read-only and rejects `--output`. Its JSON report explicitly
 selects `status: success` or `status: error`; errors carry `code` and `message`.
@@ -772,8 +772,8 @@ keeps stdout unused.
 
 ### Envelope
 
-Every patch is an object with a numeric envelope version and an ordered list of
-operations:
+Every patch is an object with a string envelope version (`"pptx-patch/v1"`) and
+an ordered list of operations:
 
 ```json
 {
@@ -1144,8 +1144,12 @@ The running schema publishes `commands.pptx.errorCatalog.codes`, including:
 
 Structured error payloads carry a machine-readable kind and message; operation
 failures can include an `opIndex`. Where a repair is meaningful, the payload can
-also include a field `path`, `expected`, `actual`, a documentation reference, and
-`suggestions[]` entries with `fixPatch`, `reason`, `confidence`, and `autoRetry`.
+also include a field `path`, `expected`, `actual`, `candidates[]`, a
+documentation reference, and `suggestions[]` entries that carry a `reason` plus
+either a `remediation` object (`kind` `replace-request` with a complete
+replacement `request` envelope, or `apply-to-document` with a `patch` envelope
+and `requiresRawXml`; both carry `confidence`, `autoRetry`, and a hash-bound
+`target`) or a `remediationUnavailable` marker.
 This allows an orchestrator to distinguish a malformed request from an invalid
 deck, a policy rejection, an unavailable backend, or an internal failure while
 still receiving a bounded next action.
@@ -1161,19 +1165,21 @@ codes as diagnostic evidence and fail closed for automated repair or delivery.
 
 The top-level contract currently defines:
 
-| Code | Stage      | Meaning                                                                                 |
-| ---- | ---------- | --------------------------------------------------------------------------------------- |
-| 0    | success    | Command completed successfully                                                          |
-| 2    | args       | Argument parsing or validation failed                                                   |
-| 3    | input      | Input was invalid, or a structured planner/gate report completed with a non-pass status |
-| 5    | slide      | A requested slide selection was out of range                                            |
-| 6    | parse      | PPTX parsing failed                                                                     |
-| 7    | pdf        | PDF generation failed                                                                   |
-| 8    | png        | PNG generation failed                                                                   |
-| 9    | output     | Output validation or writing failed                                                     |
-| 10   | dependency | A required backend was unavailable                                                      |
-| 11   | internal   | Unexpected internal failure                                                             |
-| 12   | batch      | At least one batch item failed                                                          |
+| Code | Stage         | Meaning                                                                                   |
+| ---- | ------------- | ----------------------------------------------------------------------------------------- |
+| 0    | success       | Command completed successfully                                                            |
+| 1    | failed        | Unclassified failure that reached no stage-specific code; treat it as a bug report        |
+| 2    | args          | Argument parsing or validation failed                                                     |
+| 3    | input         | Input was invalid, or a structured planner/gate report completed with a non-pass status   |
+| 4    | authorization | Authorization denied the requested product output, or `auth verify` rejected a credential |
+| 5    | slide         | A requested slide selection was out of range                                              |
+| 6    | parse         | PPTX parsing failed                                                                       |
+| 7    | pdf           | PDF generation failed                                                                     |
+| 8    | png           | PNG generation failed                                                                     |
+| 9    | output        | Output validation or writing failed                                                       |
+| 10   | dependency    | A required backend was unavailable                                                        |
+| 11   | internal      | Unexpected internal failure                                                               |
+| 12   | batch         | At least one batch item failed                                                            |
 
 Do not discard stdout automatically on a non-zero gate result. Several
 JSON-producing planner and validation commands still return a complete,
@@ -1181,13 +1187,16 @@ parseable report when the exit code is 3; the report explains the blockers.
 
 ### Machine-executable fixes
 
-Semantic audit findings can include a fix object with:
+Semantic audit findings can include a `remediation` object with:
 
-- a patch operation array (`fixPatch`);
+- a complete `pptx-patch/v1` envelope (`patch`, `kind: "apply-to-document"`);
 - a reason;
 - a confidence score;
-- an `autoRetry` decision; and
-- a `requiresRawXml` flag.
+- an `autoRetry` decision;
+- a `requiresRawXml` flag; and
+- a `target` bound to the input SHA-256.
+
+Findings without a deterministic repair carry `remediationUnavailable` instead.
 
 The current deterministic semantic fix generators are intentionally narrow:
 they cover a dangling animation reference and a uniquely resolvable orphan
@@ -1329,7 +1338,7 @@ than treated as automatically understood by the scanner.
 xdoc pptx i18n-scan --source source.pptx --source-lang multi --mode source --output i18n-source.json --json
 xdoc pptx i18n-plan --source source.pptx --units-file i18n-source.json --data translations.json --output i18n-plan.json --json
 # Use the planner's textPlan artifact only when that lower-level route is selected.
-xdoc pptx i18n-text-plan --source source.pptx --data i18n-text-plan-input.json --output i18n-text-plan.json --json
+xdoc pptx i18n-text-plan --source source.pptx --data i18n-text-plan-input.json --json > i18n-text-plan.json
 xdoc pptx replace-text --source source.pptx --data replacements.json --output translated.pptx --json
 xdoc pptx i18n-style-diff --source source.pptx --candidate translated.pptx --json
 xdoc pptx i18n-scan --source translated.pptx --mode candidate --units-file i18n-source.json --data translations.json --output i18n-candidate.json --json
@@ -1478,20 +1487,21 @@ human approval.
 The bridge also supports explicit reuse workflows:
 
 ```bash
-xdoc pptx slide-copy -i target.pptx --source source.pptx --slide 0 --output combined.pptx
+xdoc pptx slide-copy -i target.pptx --source source.pptx --slides 1 --output combined.pptx
 xdoc pptx extract-style reference.pptx --output style.json --json
-xdoc pptx import-template reference.pptx --name reusable-template --output assets --json
+xdoc pptx import-template reference.pptx --name reusable-template --output-dir assets --json
 ```
 
-`slide-copy --slide` uses a zero-based source slide index. `extract-style`
+`slide-copy --slides` uses 1-based source slide numbers (or `--all`). `extract-style`
 produces a structured style profile for inspection or reuse. `import-template`
 extracts a reusable template profile and updates the requested asset catalog
 location; it is an intentional asset-development operation, not part of an
 ordinary source-preserving edit.
 
 `slide-copy` emits `pptx-slide-copy/v1`. Its dry-run is a read-only,
-fingerprint-bound plan: require `status: "ready"`, matching target/donor
-SHA-256 values, no `preflight.blockers`, and review `preflight.risks` plus the
+fingerprint-bound plan: require `status: "success"`, `outcome: "passed"`,
+`preflight.ready: true`, matching target/donor SHA-256 values, no
+`preflight.blockers`, and review `preflight.risks` plus the
 planned parts/relationships before apply. It is not a patch report and does not
 carry `opResults[]`.
 
@@ -1527,7 +1537,7 @@ re-audit the resulting package. The checks cover:
 Exact source-rule inventory counts are maintainer evidence, not part of the
 public runtime contract, and are therefore not duplicated here. Public findings
 retain their part, element, attribute, and rule context in `semanticIssues[]`;
-a bounded `fixPatch` is only a proposal and must be reapplied and revalidated
+a bounded `remediation.patch` is only a proposal and must be reapplied and revalidated
 before it can clear a gate.
 
 ### Regression evidence is part of the product
@@ -1587,9 +1597,11 @@ deduplication.
 
 ### ZIP-bomb and path guards
 
-The native package reader rejects unsafe ZIP entry paths and applies default
-limits of 200 MiB uncompressed payload and 4096 package parts. These guards are
-part of the document boundary, not an afterthought in the caller.
+The native package reader rejects unsafe ZIP entry paths and applies the
+compiled `resourcePolicy` limits of the `native-api` profile (for example
+1 GiB of uncompressed ZIP payload, 50,000 ZIP entries, and a 300 MiB raw
+input). Runtime configuration may only tighten them. These guards are part of
+the document boundary, not an afterthought in the caller.
 
 ### Atomicity
 
@@ -1661,7 +1673,7 @@ xdoc daemon start
   → in-memory deck sessions
 ```
 
-Defaults in v0.3.5:
+Defaults in v0.3.12:
 
 - loopback TCP address: `127.0.0.1:0`;
 - idle session timeout: 300000 ms;
@@ -1671,15 +1683,16 @@ Defaults in v0.3.5:
 
 Relevant environment variables are:
 
-| Variable                       | Purpose                                     |
-| ------------------------------ | ------------------------------------------- |
-| `XDOC_DAEMON_STATE`            | Override the state-file path                |
-| `XDOC_DAEMON_PORT`             | Override the loopback listen port           |
-| `XDOC_DAEMON_IDLE_MS`          | Change the idle timeout                     |
-| `XDOC_DAEMON_MAX_SESSIONS`     | Change the session pool limit               |
-| `XDOC_DAEMON_AUTO_SPAWN`       | Disable automatic spawn with `0` or `false` |
-| `XDOC_DAEMON_SPAWN_TIMEOUT_MS` | Change auto-spawn readiness timeout         |
-| `XDOC_DAEMON_LOG`              | Override the auto-spawn log path            |
+| Variable                       | Purpose                                       |
+| ------------------------------ | --------------------------------------------- |
+| `XDOC_DAEMON_STATE`            | Override the state-file path                  |
+| `XDOC_DAEMON_PORT`             | Override the loopback listen port             |
+| `XDOC_DAEMON_IDLE_MS`          | Change the idle timeout                       |
+| `XDOC_DAEMON_MAX_SESSIONS`     | Change the session pool limit                 |
+| `XDOC_DAEMON_MAX_CONNECTIONS`  | Change the active data-plane connection limit |
+| `XDOC_DAEMON_AUTO_SPAWN`       | Disable automatic spawn with `0` or `false`   |
+| `XDOC_DAEMON_SPAWN_TIMEOUT_MS` | Change auto-spawn readiness timeout           |
+| `XDOC_DAEMON_LOG`              | Override the auto-spawn log path              |
 
 Sessions are keyed by canonical input paths and, after save, by output paths.
 Requests for the same filesystem-identity deck session are FIFO-serialized, so
@@ -1719,8 +1732,8 @@ There is no initialize handshake. Frames are limited to 8 MiB, execute serially
 with backpressure, and stdout is protocol-only; logs and diagnostics use
 stderr.
 
-The methods are `xdoc.ping`, `xdoc.capabilities`, `pptx.inspect`, `pptx.apply`, and
-`xdoc.shutdown`. `pptx.apply` and shutdown require a request id; sent as
+The methods are `xdoc.ping`, `xdoc.capabilities`, `xdoc.schema`, `pptx.inspect`,
+`pptx.apply`, and `xdoc.shutdown`. `pptx.apply` and shutdown require a request id; sent as
 notifications they are ignored without mutation. Non-dry-run apply requires an
 `outputPath`. Results use `xdoc-json-rpc-result/v1`, preserving the exact
 structured report in `value` and declaring binary outputs as artifact refs.
@@ -1812,11 +1825,13 @@ The native-first executable avoids a requirement for a full office desktop
 installation. It still needs the runtime backends and fonts required by the
 requested conversion. Runtime conversion authorization and distribution
 licensing are separate boundaries. The verified runtime publishes this behavior
-under `commands.convert.licensePolicy`: missing or inactive authorization limits
-every PPTX input handled by `convert` to 2 MiB, while PDF/PNG output also carries
-a visible demo watermark. A signed license JSON may be supplied through
-`--license` or the documented lookup locations. Probe the exact binary because a
-later release can revise the policy contract.
+under `commands.convert.licensePolicy` and `authContract.productLimits`: without
+an active entitlement, the Free Baseline limits each task to 10 slides and
+5 MiB (5,242,880 bytes) of compressed PPTX input, PDF/PNG output carries a
+visible `XDOC DEMO` watermark, and an input over those limits is denied with
+exit code 4 before any content is written. A signed license JSON may be
+supplied through `--license` or the documented lookup locations. Probe the
+exact binary because a later release can revise the policy contract.
 
 Verify the `LICENSE` file and bundled third-party notices in the exact binary
 archive before redistribution or commercial deployment. Different bundled
@@ -1852,6 +1867,7 @@ not a cross-machine latency SLA.
 | `extract`  | Extract PPTX map, resources, notes, links, and fonts                          | Versioned JSON artifact                    |
 | `check`    | Run fonts, links, compatibility, assets, and policy checks                    | `preflight/v1` JSON                        |
 | `pptx`     | Create, patch, inspect, render, compare, translate, brand, or refurbish decks | PPTX plus versioned reports                |
+| `auth`     | Verify, install, uninstall, inspect, or reset the local license credential    | `xdoc-cli-auth-*/v1` JSON reports          |
 | `pdf`      | Inspect, extract text from, or render PDFs                                    | PDF diagnostics, text, or PNG              |
 | `daemon`   | Start, inspect, or stop the local session service                             | `xdoc-daemon-status/v2` or diagnostics     |
 | `json-rpc` | Serve the published stdio Agent transport                                     | `xdoc-json-rpc-result/v1` NDJSON frames    |
@@ -1877,7 +1893,7 @@ not a cross-machine latency SLA.
 | `convert`, `extract`, `check`, `pdf`, most `pptx --slides` flags | 1-based    |
 | Patch `slide` fields                                             | 0-based    |
 | `select` `slideIndex` query field                                | 0-based    |
-| `slide-copy --slide`                                             | 0-based    |
+| `slide-copy --slides`                                            | 1-based    |
 
 When in doubt, ask the command-specific schema instead of guessing.
 
@@ -2012,7 +2028,7 @@ claims should stay tied to the measured contract and its declared limitations.
 
 ## Explicit limitations and non-claims
 
-1. `docx` and `xlsx` are reserved in the v0.3.5 capability registry.
+1. `docx` and `xlsx` are reserved in the v0.3.12 capability registry.
 2. The full CLI is native-first; parser/PDF WebAssembly paths do not imply a
    browser implementation of every command.
 3. Complex animations, transitions, SmartArt-like content, VBA, and other
@@ -2037,9 +2053,10 @@ claims should stay tied to the measured contract and its declared limitations.
     and the bundled local MCP stdio server described by
     `xdoc-mcp-contract/v1`. IDE-specific installers and remote MCP exposure are
     not part of the current release contract.
-13. The v0.3.5 PDF discovery map omits the executable `pdf render` action even
-    though CLI help and schema examples expose it. Integrations should pin the
-    build and retain this exception until the discovery contract is corrected.
+13. Older v0.3.5 snapshots omitted the executable `pdf render` action from the
+    PDF discovery map; the current runtime publishes it under
+    `commands.pdf.subcommands.render`. Integrations should still pin the build
+    and read the executable's own discovery map.
 14. `discovery.commands`, `schema --mode index`, capability `enabled` status, and
     command `ioContract` fields are useful but not exhaustive or live host
     readiness proofs. Cache the full schema and run representative probes.
@@ -2052,10 +2069,10 @@ claims should stay tied to the measured contract and its declared limitations.
     leave its in-memory session advanced. Sidecars do not carry deck hashes or
     cryptographic revision links.
 17. Distribution licensing and runtime conversion authorization are separate.
-    The current `commands.convert.licensePolicy` contract limits every PPTX
-    input handled by `convert` to 2 MiB when authorization is missing or
-    inactive, and PDF/PNG output also carries a visible demo watermark; verify
-    the exact artifact and terms.
+    Without an active entitlement the Free Baseline (`authContract.productLimits`)
+    limits each task to 10 slides and 5 MiB of compressed PPTX input, PDF/PNG
+    output carries a visible `XDOC DEMO` watermark, and larger inputs are denied
+    with exit code 4; verify the exact artifact and terms.
 
 ## Evidence and release discipline
 

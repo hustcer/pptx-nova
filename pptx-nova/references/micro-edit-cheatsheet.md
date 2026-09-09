@@ -99,6 +99,7 @@ Use `set-text-frame` for whole-shape text replacement:
 
 ```json
 {
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-text-frame",
@@ -121,6 +122,7 @@ not need PNG rendering.
 
 ```json
 {
+  "schemaVersion": "pptx-patch/v1",
   "ops": [{ "op": "set-slide-notes", "slide": 4, "text": "Speaker note update." }]
 }
 ```
@@ -138,6 +140,7 @@ run-level edits:
 
 ```json
 {
+  "schemaVersion": "pptx-patch/v1",
   "ops": [
     {
       "op": "set-text-frame",

@@ -9,6 +9,7 @@ assets/deckkits/
 ├── core-primitives.kit.mjs     # 几何安全 + op 生成（所有 DeckKit 共用）
 ├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
 ├── consulting-dark.kit.mjs     # 深墨蓝咨询风格 + 页型函数
+├── <deckkit-id>.kit.mjs        # 其余 DeckKit（mckinsey-blue、swiss-grid、broadside、coral、cartesian、long-table、biennale-yellow）
 ├── catalog.json                # DeckKit 注册表、版本、density 限制、验证记录
 ├── schemas/                    # content 和各页型 JSON Schema（渐进覆盖）
 ├── validate-content.mjs        # schema + fit 预检入口
@@ -125,8 +126,8 @@ node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation 
 ```
 
 图标包覆盖 Tabler `outline` 和 `filled` 全量图标。刷新 pack 与 license 时运行
-`node <skill-root>/scripts/pptx-nova-icons.mjs generate` 和
-`node <skill-root>/scripts/pptx-nova-icons.mjs generate --check`。
+`node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>` 和
+`node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check`（也可改用 `TABLER_ICONS_ROOT` 环境变量指定 checkout）。
 
 ## 版本规则（semver）
 

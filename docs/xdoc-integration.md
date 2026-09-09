@@ -39,9 +39,9 @@ image digest as provenance. Do not change patch construction, report parsing,
 or gate policy based on that channel: equivalent distributions of the same xdoc
 release must present the same CLI contract.
 
-The top-level discovery contract is `cli-agent/v1`. The patch envelope uses a
-numeric `schemaVersion` (currently `1`), which is a different field from the CLI
-discovery version. Cache the full schema by executable build id, not only by the
+The top-level discovery contract is `cli-agent/v1`. The patch envelope uses its
+own string `schemaVersion` (`"pptx-patch/v1"`; a bare numeric `1` is rejected),
+which is a different field from the CLI discovery version. Cache the full schema by executable build id, not only by the
 human version string.
 
 Use progressive disclosure when constructing a patch:
@@ -142,7 +142,7 @@ The index bases are intentionally explicit:
 | `--slides` on conversion, preview, checks, and most PPTX actions | 1-based    |
 | Patch `slide` fields                                             | 0-based    |
 | `select` query `slideIndex`                                      | 0-based    |
-| `slide-copy --slide`                                             | 0-based    |
+| `slide-copy --slides`                                            | 1-based    |
 | PDF page selectors                                               | 1-based    |
 
 Ask the current schema when a new command introduces another selector. Do not
@@ -234,16 +234,18 @@ not a patch op:
 ```bash
 xdoc pptx slide-copy \
   --input target.pptx \
-  --from donor.pptx \
+  --source donor.pptx \
   --slides 1,3 \
   --output candidate.pptx \
   --dry-run --json > copy-preflight.json
 ```
 
-The executable currently requires `--input`/`-i` for the target deck. Its
+The target deck is `--input`/`-i` (or the positional input) and the donor deck
+is `--source`; `--slides` is 1-based (`--all` selects every donor slide). Its
 `pptx-slide-copy/v1` dry-run is a read-only execution plan rather than
-`pptx-dry-run/v1`: require `status: "ready"`, `preflight.readOnly: true`, current
-target/donor SHA-256 fingerprints, and no `preflight.blockers`. Review
+`pptx-dry-run/v1`: require `status: "success"`, `outcome: "passed"`,
+`preflight.ready: true`, `preflight.readOnly: true`, current target/donor
+SHA-256 fingerprints, and no `preflight.blockers`. Review
 `preflight.risks`, planned parts/relationships, and dependency reuse before
 apply. Do not synthesize patch `opResults` for this command.
 
@@ -326,7 +328,9 @@ An a11y `patchTemplate` contains placeholder text and is never auto-applicable.
 ## 8. Handle errors and repair suggestions as data
 
 Structured failures can include an error kind, message, operation index,
-candidate selectors, and a machine-readable `fixPatch`. An Agent may retry only
+candidate selectors, and machine-readable `suggestions[].remediation` entries
+(a complete replacement `request` or an `apply-to-document` `patch` envelope
+with `confidence` and `autoRetry`). An Agent may retry only
 when the suggested fix is within the declared policy and the retry runs the same
 dry-run and evidence gates again.
 
@@ -370,11 +374,9 @@ signature-removal or VBA strip/reject switches. `patch-ooxml` is disabled unless
 structures, and other preserve-only regions as review boundaries, not as
 silently editable objects.
 
-For the shared PNG environment contract, CLI options override process
-environment values, which override defaults. Values are trimmed.
-`XDOC_PNG_OUTPUT_DIR` is optional, so an unset or blank value means no requested
-PNG output; a blank `XDOC_PNG_DPI`, `XDOC_PNG_PREFIX`, or
-`XDOC_PNG_START_INDEX` is invalid rather than silently defaulted. Relative paths
+Configure PNG rendering through the CLI options (`--dpi`, `--prefix`,
+`--output-dir`, `--output`); the `xdoc` executable does not read the
+`XDOC_PNG_*` variables used by the standalone converter tools. Relative paths
 are resolved against the xdoc process working directory, and `~` is not
 expanded. Normalize paths before changing `cwd` and pass an explicit working
 directory from workers.
@@ -430,8 +432,8 @@ Launch `xdoc json-rpc` and keep the child process alive. The published
 frame per line, an 8 MiB frame limit, serial execution, and protocol-only
 stdout; diagnostics belong to stderr. No initialize handshake is required.
 
-The methods are `xdoc.ping`, `xdoc.capabilities`, `pptx.inspect`, `pptx.apply`, and
-`xdoc.shutdown`. Mutation and shutdown require a request id; sending them as a
+The methods are `xdoc.ping`, `xdoc.capabilities`, `xdoc.schema`, `pptx.inspect`,
+`pptx.apply`, and `xdoc.shutdown`. Mutation and shutdown require a request id; sending them as a
 notification is ignored without mutation. `pptx.apply` requires a patch object
 and, unless `dryRun` is true, `outputPath`. Results use
 `xdoc-json-rpc-result/v1` and refer to binary outputs through artifact records.

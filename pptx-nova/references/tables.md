@@ -221,7 +221,9 @@ null 会转成文本），`text` 给 JSON 字符串（解析后同样必须是�
 }
 ```
 
-每条边是 line 对象（`width` / `color` / `dash`，`"none"` 字符串 = 去线）。单格
+每条边是 line 对象（`width` / `color` / `dash`；`noLine: true` = 去线，`dash: "none"` 或
+`clearDash: true` 只清掉继承的虚线）。边不能写成 `"none"` 字符串（会报
+`borders.top must be object`）。单格
 `borders` 只支持 `top / right / bottom / left / cross`；`insideH` / `insideV`
 属于区域边框（见下节）。style 里也可以写 `line` 一次性给四边同样式。
 
@@ -430,7 +432,8 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
 
 - ❌ 不要在 `set-table-data` 时假定 `resize: false` 会自动加减行列 — 不写 `resize: true`
   时维度必须严格匹配
-- ❌ 不要用 `set-table` 的 `cells[].text` 配合 newline (`\n`) 期望换行 — 单元格内换行用
-  `set-paragraph` / `add-paragraph` 多段写入
+- ❌ 不要对 table shape 用 `set-paragraph` / `add-paragraph` / `set-run`（会报
+  `shape does not contain a text frame`）— 单元格内换行直接在 `set-table` 的
+  `cells[].text` 里写 `\n`，每个 `\n` 会生成一个新段落
 - ❌ 不要给已合并区域再次 merge（会冲突）
 - ❌ 不要忘了 `set-table` 的 `cells[].formula` 是**静态**的 — 改基础数据后公式不会自动重算

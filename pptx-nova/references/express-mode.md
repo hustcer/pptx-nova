@@ -195,7 +195,8 @@ content manifest 生产路径；不要把临时 generator 当作最终交付路�
 
 1. **theme/style 选择** —— 默认 `--theme corporate-blue --style consulting`；可换成
    `consulting-grey` / `startup-vibrant` / `academic-formal` / `gov-blue` /
-   `tech-dark` / `health-soft` / `minimal-mono`，style 可换 `minimal` / `product`，或用
+   `tech-dark` / `health-soft` / `minimal-mono` / `cartesian-warm`，style 可换 `minimal` /
+   `product` / `cartesian`，或用
    `--theme-pack ./theme.json --style-pack ./style.json` 加载外部 pack。
 2. **各 slide 函数内容** —— 填 outline 里的标题、KPI 数据、表格行、bullet。
 3. **`TOTAL` + main 里的 slide 调用序列** —— 改成实际页数与页序。

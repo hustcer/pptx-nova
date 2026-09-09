@@ -207,6 +207,9 @@ debugging path.
      - Use `zh` for Chinese-only source decks, especially when the target is
        English.
      - Use `en` for English-only source decks.
+     - Native `i18n-scan` additionally accepts `cjk` (normalized to `zh` in
+       the report); `pptx-nova-translation-prepare.mjs` accepts only
+       `multi|zh|en`.
    - Native source-language classification scan:
      ```bash
      xdoc pptx i18n-scan \
@@ -527,9 +530,9 @@ debugging path.
       --json
     ```
 
-    Keep `--overwrite` in reruns: without it a rerun exits with an OutputExists
-    error (`outputUntouched: true` in the error JSON) and the previous report
-    stays on disk — never read that stale file as this run's evidence.
+    Keep `--overwrite` in reruns: without it a rerun exits 9 with an
+    `output_exists` error (`outputUntouched: true` in the error JSON) and the
+    previous report stays on disk — never read that stale file as this run's evidence.
 
     Candidate mode takes the source language and scope from `--units-file`; it rejects
     `--source-lang` and `--slides` so the command line cannot disagree with the
@@ -740,6 +743,9 @@ reuses the same strategies for table paragraphs. The strategies mean:
   remain.
 - `preserve-styled-token-boundaries`: styled anchors remain in their original
   runs and surrounding translated text is assigned to adjacent plain runs.
+- `preserve-anchor-boundaries`: uniquely ordered `anchors[]` map protected
+  hyperlink groups to target text and pass the same exact segment
+  reconstruction validator before patch ops are emitted.
 - `preserve-structural-boundaries`: break/tab/field nodes partition the
   paragraph into ordinary-run segments. The planner emits one atomic operation
   that validates the complete typed node sequence and field identity before
@@ -1140,8 +1146,8 @@ Keep these translation-specific artifacts in the run directory when available:
 - `patch-dry-run.json`
 - `i18n-text-plan.json`
 - `i18n-scan-source.json`
-- `i18n-chart-decisions.json` and `i18n-scan-classified.json` when chart review units exist
-- `i18n-chart-classification.json` when chart review units exist
+- `i18n-review-decisions.json` and `i18n-scan-classified.json` when review units exist
+- `i18n-review-classification.json` when review units exist
 - `i18n-scan-candidate.json`
 - `bilingual-translation-audit.md`
 - `bilingual-translation-audit.json`

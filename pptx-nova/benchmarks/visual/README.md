@@ -11,6 +11,7 @@ separate expected style noise from newly introduced visual issues.
 benchmarks/visual/
 ├── index.json
 ├── cases/
+│   ├── <deckkit>/               # one directory per DeckKit id in index.json
 │   └── consulting-dark/
 │       ├── golden-roadshow/
 │       │   ├── expected.json
@@ -27,10 +28,10 @@ benchmarks/visual/
     └── <deckkit>.<case>.vision-baseline.json
 ```
 
-Cases may reference existing DeckKit example content with `contentPath` to avoid
-duplicating large JSON fixtures during the candidate phase. A future production
-benchmark can materialize immutable `content.json` fixtures once the benchmark
-CLI is in place.
+Golden cases reference existing DeckKit example content through `contentPath`
+(`../../assets/deckkits/examples/<name>-content.json`) to avoid duplicating
+large JSON fixtures; stress and mixed-language cases ship their own immutable
+`content.json` beside `expected.json`.
 
 ## Minimum Gate
 

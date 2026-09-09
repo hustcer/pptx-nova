@@ -18,8 +18,8 @@
 
 **解释顺序**：patch 按数组顺序执行。宏与 `foreach` 可递归产生子 op；执行器到达
 `if` 时才求值条件，到达 `try` 时在 branch-local candidate 上执行 `body`。结果会反映在
-`dry-run` 报告的 `opResults[]` 里（含 `expandedOps[]` /
-`controlExpansion` 元数据），方便你审计。带 `--explain` 还会在
+`dry-run` 报告的 `opResults[]` 里（含 `expandedOps[]`，元 op 展开出的底层 op 名列表），
+方便你审计。带 `--explain` 还会在
 `explanations[<i>].expandedOps` 里给出"该元 op 展开成哪些底层 op"。
 `opResults[].expandedOps[]` 是 `{op}` 名称摘要，不包含完整参数，不能作为 patch 重放。
 
@@ -141,7 +141,7 @@
       "text": "替换文字"
     }
   ],
-  "recoverable": ["missing-shape", "ambiguous-selector"],
+  "recoverable": ["invalid_operation"],
   "catch": [
     {
       "op": "add-text-box",
@@ -157,11 +157,15 @@
 }
 ```
 
-- `recoverable` 列出可被 catch 接住的错误 `kind`（参考 `references/troubleshooting.md`
-  的 errorCatalog），其它错误仍然冒出
+- `recoverable` 列出可被 catch 接住的错误 `kind`：取值就是 dry-run 错误报告里的
+  `error.code`（`invalid_operation` / `invalid_argument` / `missing_part` / `unsupported_feature` 等，
+  见 `references/troubleshooting.md` 的 errorCatalog），`"*"` 匹配全部；其它错误仍然冒出。
+  selector 找不到 / 多命中都是 `invalid_operation`；`missing-shape`、`ambiguous-selector`
+  是 errorCatalog 的 scenario 名，不是 kind，写进 `recoverable` 不会生效
 - 不给 `recoverable` 时所有错误都会被 catch（强烈不建议 — 容易掩盖 bug）
 - `body` 在独立 candidate 上顺序执行；其中任一可恢复执行错误都会丢弃整个 body 的
-  修改，再从进入 `try` 前的 candidate 执行 `catch`
+  修改，再从进入 `try` 前的 candidate 执行 `catch`；`warnings[]` 里会出现
+  `try recovered from <kind>: <message>`
 
 **典型用法**：
 
@@ -293,18 +297,21 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 
 字段：
 
-| 字段     | 说明                                                                                |
-| -------- | ----------------------------------------------------------------------------------- |
-| `target` | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                           |
-| `xpath`  | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter |
-| `action` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)      |
-| `value`  | 文本或 raw XML 片段；`remove` 操作可省略                                            |
+| 字段     | 说明                                                                                                                                                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `target` | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                                                                                                                                                                                                    |
+| `xpath`  | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter                                                                                                                                                                          |
+| `action` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)；另有守卫 action `repair-child-order` / `repair-relationships`（`xpath` 固定 `/`，分别需要 `expectedPartSha256`+`repairs` / `relationshipRepairs`，不需要 `--allow-raw-xml`） |
+| `value`  | 文本或 raw XML 片段；`set/add/replace` 必填，`remove` 与两个 repair action **不能带**（带了报 union-no-match）                                                                                                                                               |
 
 **安全约束**：
 
-- 必须显式加 `--allow-raw-xml` 旗标
+- `set/add/remove/replace` 必须显式加 `--allow-raw-xml` 旗标（否则报
+  `patch-ooxml requires xdoc pptx apply --allow-raw-xml`）；守卫 action
+  `repair-child-order` / `repair-relationships` 不需要
 - `target` 只接受 OPC 包内部部件路径,会拒绝任意路径穿越
-- 写完会同时 emit `semanticChange` 和 `visualRisk`(severity=`medium`,kind=`raw-ooxml`)
+- 写完会同时 emit `semanticChanges[]`(category=`rawOoxml`)和 `visualRisks[]`
+  (code=`patch-ooxml`, severity=`high`, "raw OOXML patch bypasses the schema-v1 semantic contract")
 - 不参与 schema-v1 的字段校验,**写错了 dry-run 只能告诉你 XPath 没命中,无法告
   诉你 OOXML 结构错** — 最后必须跑 `xdoc check deck.pptx --checks compat` 兜底
 
@@ -347,15 +354,14 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
 
 ## §8 调试技巧
 
-- dry-run 报告的 `opResults[]` 里,展开过的元 op 会带 `controlExpansion`
-  metadata,记录子 op 数量;有歧义时这里也会带 `suggestions[]`
-- `recoverable` 写错 kind 名 → try 块照样冒错;先 `xdoc schema --mode ops --ops try` 查可用
-  enum,再对照 `references/troubleshooting.md` 的错误名
-- `foreach` 模板里 `{{$item.x}}` 漏写 `$` 不会报错 — schema 把它当成普通字面量
-  字符串。看 dry-run `semanticChanges[]` 里的 text 字段确认是否被替换
-- `use-macro` 模板里 `{{args.x}}` **不带 `$`**(与 `foreach` 的 `{{$item}}` 区分),
-  漏写或拼错同样不会报错 — 看 `semanticChanges[]` / `--explain` 的 `expandedOps`
-  确认占位符是否被替换
+- dry-run 报告的 `opResults[]` 里,展开过的元 op 会在 `expandedOps[]` 列出子 op 名;
+  有歧义时顶层 `error.suggestions[]` 会带修复建议
+- `recoverable` 写错 kind 名（例如写成 scenario 名 `missing-shape`）→ try 块照样冒错;
+  kind 取 dry-run 报告 `error.code` 的值(`invalid_operation` 等),对照 `references/troubleshooting.md` 的错误名
+- `foreach` / `use-macro` 模板占位符都**不带 `$`**:`{{item.x}}` / `{{kpi.label}}` /
+  `{{args.x}}`。写成 `{{$item.x}}` 不会报错 — schema 把它当成普通字面量字符串原样写入。
+  看 dry-run `semanticChanges[]` 里的 text 字段(或 `--explain` 的 `expandedOps`)确认占位符是否被替换;
+  `{"$var": "name"}` 是唯一带 `$` 的写法,用于整值 JSON 替换
 - 排查宏展开:`xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json`
   会在 `explanations[<i>].expandedOps` 列出每个 `use-macro` 展开成哪些底层 op
 
@@ -363,8 +369,9 @@ raw 逃生口只适合你已经确认目标路径足够窄、批量命中也可�
 
 - 不要用 `patch-ooxml` 修改 `[Content_Types].xml` 或 `.rels` 关系图谱以外
   的元数据 — 几乎一定会破坏 OPC 包结构
-- 不要在 `if.condition.kind: count` 里依赖具体数字 — `count` 是 expand 阶段的
-  累加器,与你想检验的 deck 状态(slide 数 / shape 数)是两码事
+- 不要发明 `if.condition.kind` —— 只有 `slide-count` / `selector-match` / `property-compare`
+  三种，没有 `count` 之类的 expand 期累加器;要检验 deck 状态(slide 数 / shape 命中数)
+  就用这三种
 - 不要把 `foreach` 当 SQL —— 不支持 `where` / `sort` / `groupBy`。需要时在
   JS 生成器里预处理 `items` 数组
 - 不要把所有错误都丢进 `try.catch[]` —— 没有 `recoverable` 列表时,真正的字段

@@ -28,7 +28,7 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 ```json
 {
   "schemaVersion": "pptx-inspect/v1",
-  "status": "ok",
+  "status": "success",
   "input": "input.pptx",
   "presentation": {
     "slideSize": { "wEmu": "12192000", "hEmu": "6858000" },
@@ -99,7 +99,7 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
             "verticalAnchor": "middle",
             "wordWrap": true
           },
-          "bbox": { "xEmu": "1016000", "yEmu": "1920240", "wEmu": "10160000", "hEmu": "1097280" }
+          "bbox": { "xEmu": 1016000, "yEmu": 1920240, "wEmu": 10160000, "hEmu": 1097280 }
         }
       ],
       "geometryOverlaps": [],
@@ -111,33 +111,33 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 
 ### 关键字段速记
 
-| 取什么                        | 路径                                                                                              |
-| ----------------------------- | ------------------------------------------------------------------------------------------------- |
-| Slide 数                      | `.presentation.slideCount`                                                                        |
-| Deck 尺寸 (EMU)               | `.presentation.slideSize.{wEmu, hEmu}`（除以 914400 = 英寸）                                      |
-| Layout 列表                   | `.presentation.layouts`                                                                           |
-| 每页类型                      | `.slides[N].semantic.pageType`（`title / section / content / data / quote / ...`）                |
-| 每页 layout 名                | `.slides[N].layout.name`                                                                          |
-| 每页 shape                    | `.slides[N].shapes[]`                                                                             |
-| Shape selector（写 patch 用） | `.slides[N].shapes[M].patchSelector`；当前 id 是非负整数，禁止转成字符串                          |
-| Shape name                    | `.slides[N].shapes[M].name`（写 patch 时优先用这个）                                              |
-| Shape 类型                    | `.slides[N].shapes[M].shapeType`（`textBox / autoShape / picture / table / chart / group / ...`） |
-| Shape 文字预览                | `.slides[N].shapes[M].textPreview`                                                                |
-| Shape bbox (EMU)              | `.slides[N].shapes[M].bbox.{xEmu, yEmu, wEmu, hEmu}`                                              |
-| Shape 填充                    | `.slides[N].shapes[M].fillType / fillColor / fillSchemeColor`                                     |
-| 图片内容 / shape 图片填充     | `.slides[N].shapes[M].image`（picture crop/mask）/ `.fillPicture`（shape picture fill）           |
-| 文本框布局                    | `.slides[N].shapes[M].textFrame`（显式/有效 margin、verticalAnchor、wordWrap）                    |
-| 字体事实                      | `.slides[N].shapes[M].fontFacts[]`（scope 与脚本字体等）                                          |
-| 图表 3D                       | `.slides[N].shapes[M].chart.{supportsView3D, kind, view3D}`                                       |
-| 无障碍元数据                  | `.slides[N].shapes[M].accessibility.{title, description, decorative}`                             |
-| Shape 线条                    | `.slides[N].shapes[M].lineColor / lineSchemeColor / lineWidthEmu / lineDash / lineNoFill`         |
-| 几何重叠（同 vision-check）   | `.slides[N].geometryOverlaps[]`（`{topShapeId, bottomShapeId, overlapRatio, kind, severity}`）    |
-| 文字溢出估计                  | `.slides[N].textOverflowEstimates[]`（`{shapeId, estLines, fontPt}`）                             |
+| 取什么                        | 路径                                                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Slide 数                      | `.presentation.slideCount`                                                                                             |
+| Deck 尺寸 (EMU)               | `.presentation.slideSize.{wEmu, hEmu}`（除以 914400 = 英寸）                                                           |
+| Layout 列表                   | `.presentation.layouts`                                                                                                |
+| 每页类型                      | `.slides[N].semantic.pageType`（`blank / title / section / content / two-column / comparison / data / media / mixed`） |
+| 每页 layout 名                | `.slides[N].layout.name`                                                                                               |
+| 每页 shape                    | `.slides[N].shapes[]`                                                                                                  |
+| Shape selector（写 patch 用） | `.slides[N].shapes[M].patchSelector`；当前 id 是非负整数，禁止转成字符串                                               |
+| Shape name                    | `.slides[N].shapes[M].name`（写 patch 时优先用这个）                                                                   |
+| Shape 类型                    | `.slides[N].shapes[M].shapeType`（`textBox / autoShape / picture / table / chart / group / ...`）                      |
+| Shape 文字预览                | `.slides[N].shapes[M].textPreview`                                                                                     |
+| Shape bbox (EMU)              | `.slides[N].shapes[M].bbox.{xEmu, yEmu, wEmu, hEmu}`                                                                   |
+| Shape 填充                    | `.slides[N].shapes[M].fillType / fillColor / fillSchemeColor`                                                          |
+| 图片内容 / shape 图片填充     | `.slides[N].shapes[M].image`（picture crop/mask）/ `.fillPicture`（shape picture fill）                                |
+| 文本框布局                    | `.slides[N].shapes[M].textFrame`（显式/有效 margin、verticalAnchor、wordWrap）                                         |
+| 字体事实                      | `.slides[N].shapes[M].fontFacts[]`（scope 与脚本字体等）                                                               |
+| 图表 3D                       | `.slides[N].shapes[M].chart.{supportsView3D, kind, view3D}`                                                            |
+| 无障碍元数据                  | `.slides[N].shapes[M].accessibility.{title, description, decorative}`                                                  |
+| Shape 线条                    | `.slides[N].shapes[M].lineColor / lineSchemeColor / lineWidthEmu / lineDash / lineNoFill`                              |
+| 几何重叠（同 vision-check）   | `.slides[N].geometryOverlaps[]`（`{topShapeId, bottomShapeId, overlapRatio, kind, severity}`）                         |
+| 文字溢出估计                  | `.slides[N].textOverflowEstimates[]`（`{shapeId, estLines, fontPt}`）                                                  |
 
 注意：
 
-- `bbox` 用 `xEmu / yEmu / wEmu / hEmu`（字符串，单位 EMU；1 in = 914400 EMU）
-- shape **不直接有** `placeholder` 字段，是否是 placeholder 看 `shapeType` 与 `name`；但**写 patch** 时仍可用 `{ "placeholder": "title" }` selector
+- shape `bbox` 用 `xEmu / yEmu / wEmu / hEmu`（整数，单位 EMU；1 in = 914400 EMU）；`presentation.slideSize.{wEmu,hEmu}` 则是数字字符串
+- shape 只有在本身是 placeholder 时才带 `placeholder: { type, idx? }` 字段；普通 shape 没有该字段。**写 patch** 时可直接用 `{ "placeholder": "<type>", "idx": <idx> }` selector
 - 普通 RGB 颜色在 inspect 中输出为不带 `#` 的 6 位大写十六进制；主题色输出在 `fillSchemeColor` /
   `lineSchemeColor`。shape 图片填充还会给出 `fillPicture` 的关系、mode、媒体类型、alpha 等
   事实，但内置 preview/PDF 对 crop/tile 仍是 partial；以 PowerPoint 原生渲染复核。
@@ -147,9 +147,9 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
   清掉显式 `bodyPr` 值使继承/默认重新生效；不要把 effective 值误写成“原始显式值”。
 - `fontFacts[]` 是按 text/chart scope 报出的字体事实。拉丁、东亚、复杂文字脚本分别对应
   patch font 的 `name`、`eastAsian`、`complexScript`；`letterSpacing` 是独立字符间距字段。
-- 动画状态现在也在每页暴露：`timing_summary`、`animations[]`、`animation_capabilities`。
-  只有 `animations[].editable == true` 的安全子集可用 `set-slide-animations` /
-  `set-slide-animations` 局部改；复杂 timing 仍看 `animation_capabilities.preserve_only`。
+- 动画状态现在也在每页暴露：`timingSummary`、`animations[]`、`animationCapabilities`。
+  只有 `animations[].editable == true` 的安全子集可用 `set-slide-animations`
+  局部改；复杂 timing 仍看 `animationCapabilities.preserveOnly`。
 - preserve-only 状态（SmartArt、复杂动画、复杂过渡等）也会通过 capabilities / per-slide
   summary 报告；不要只看一个布尔字段就决定能不能改。
 - **`geometryOverlaps` / `textOverflowEstimates` 是每页的几何风险**，复用 `vision-check` 的重叠/溢出核心算出来——Edit 模式一次 inspect 就能看到这两类风险，不必单独再跑 `vision-check`；但对比度、装饰是否真盖住文字仍要 PNG 复核。`kind` 取 `both-text`（两个文本框重叠）或 `decoration-over-text`（色块压住文字）
@@ -493,11 +493,11 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 
 inspect 报告中的这些字段说明该页有需要谨慎处理的内容：
 
-| 字段            | 含义                | 处理                                                            |
-| --------------- | ------------------- | --------------------------------------------------------------- |
-| `hasTransition` | 有 slide transition | 基础转场可用 `set-slide-transition`，高级/未知转场 preserve     |
-| `hasTiming`     | 有动画/timing       | 读 `timing_summary` / `animations[]` / `animation_capabilities` |
-| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape；语义摘要见下          |
+| 字段            | 含义                | 处理                                                          |
+| --------------- | ------------------- | ------------------------------------------------------------- |
+| `hasTransition` | 有 slide transition | 基础转场可用 `set-slide-transition`，高级/未知转场 preserve   |
+| `hasTiming`     | 有动画/timing       | 读 `timingSummary` / `animations[]` / `animationCapabilities` |
+| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape；语义摘要见下        |
 
 SmartArt 虽不可编辑，但不再是黑盒：`preserveOnly[]` 中 `category == "smartArt"` 且
 relationship 为 `diagramData` 的条目带只读 `diagram` 摘要 —— `layoutId`（如
@@ -511,7 +511,7 @@ shape 重建"（节点少且用户要可编辑时建议重建）；翻译/替换
 
 动画不是一概不能改：`animations[].editable == true` 的基础 entrance/exit 和安全文本 build
 可以按稳定 `id` 用 `set-slide-animations` 修改或删除；新增安全子集也使用同一个 op。
-如果 `animation_capabilities.preserve_only` 包含 `media-timing`、
+如果 `animationCapabilities.preserveOnly` 包含 `media-timing`、
 `interactive-trigger`、`unsupported-timing`、`motion-path`、`emphasis`、`chart-build` 或
 `smartart-build`，默认 preserve。需要覆盖整棵 timing tree 时必须让用户确认 `mode: "replace"` 或
 `mode: "clear"` 的语义损失，并按 `animations.md` 做结构和 PowerPoint clean-open 验证。

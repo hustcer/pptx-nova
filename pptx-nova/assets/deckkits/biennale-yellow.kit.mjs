@@ -123,12 +123,12 @@ function makeOps() {
       fill: {
         type: 'gradient',
         path: 'circle',
-        fillToRect: { l: 0.5, t: 0.5, r: 0.5, b: 0.5 },
+        fillToRect: { left: 0.5, top: 0.5, right: 0.5, bottom: 0.5 },
         stops: [
-          { pos: 0, color: { rgb: C.sun, alpha: alpha * 0.95 } },
-          { pos: 0.46, color: { rgb: C.sunSoft, alpha: alpha * 0.62 } },
-          { pos: 0.76, color: { rgb: C.haze, alpha: alpha * 0.3 } },
-          { pos: 1, color: { rgb: C.haze, alpha: 0 } },
+          { position: 0, color: { rgb: C.sun, alpha: alpha * 0.95 } },
+          { position: 0.46, color: { rgb: C.sunSoft, alpha: alpha * 0.62 } },
+          { position: 0.76, color: { rgb: C.haze, alpha: alpha * 0.3 } },
+          { position: 1, color: { rgb: C.haze, alpha: 0 } },
         ],
       },
     })

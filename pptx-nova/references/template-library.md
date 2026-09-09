@@ -43,8 +43,8 @@ xdoc pptx slide-copy -i target.pptx --source reference.pptx \
 ```
 
 `--slides` is 1-based and copies the requested set in one transaction.
-`--slide N` remains the 0-based single-slide compatibility entry; `--all`
-selects every source slide, and the selectors are mutually exclusive. Retain
+`--all` selects every source slide, and the two selectors are mutually
+exclusive; there is no `--slide N` option. Retain
 the native `pptx-slide-copy/v1` report when this copy participates in an Edit
 Contract; require its read-only `ready` preflight, current input fingerprints,
 and empty blockers.

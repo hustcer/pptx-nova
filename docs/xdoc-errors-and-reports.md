@@ -64,19 +64,21 @@ keeps stdout unused and writes its directory manifest after successful delivery.
 
 The current top-level contract defines these codes:
 
-| Code | Stage      | Meaning                                                                                     | First routing action                                                        |
-| ---: | ---------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-|  `0` | success    | The command completed according to its command-level policy.                                | Parse the report or artifact manifest and run the host's publication gates. |
-|  `2` | args       | CLI argument parsing or validation failed.                                                  | Repair the invocation; do not retry the same arguments.                     |
-|  `3` | input      | Input was invalid or unreadable, or a planner/gate report completed with a non-pass status. | Parse the report when present and classify the blocker.                     |
-|  `5` | slide      | A requested slide selection was outside the available range.                                | Re-inspect the deck and correct the 1-based selection.                      |
-|  `6` | parse      | PPTX parsing failed.                                                                        | Quarantine the input and inspect package validity.                          |
-|  `7` | pdf        | PDF generation failed.                                                                      | Check the PDF backend and renderer evidence before retrying.                |
-|  `8` | png        | PNG generation failed.                                                                      | Check the image/PDF backends, fonts, and output directory.                  |
-|  `9` | output     | Output validation or artifact writing failed.                                               | Treat delivery as incomplete; do not publish a partial artifact.            |
-| `10` | dependency | A required backend was unavailable.                                                         | Repair the worker image or route to a worker with the declared backend.     |
-| `11` | internal   | An unexpected internal failure occurred.                                                    | Preserve all evidence and escalate or retry under an incident policy.       |
-| `12` | batch      | At least one batch item failed.                                                             | Read the per-item report and quarantine only the failed items.              |
+| Code | Stage         | Meaning                                                                                                                        | First routing action                                                                                  |
+| ---: | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+|  `0` | success       | The command completed according to its command-level policy.                                                                   | Parse the report or artifact manifest and run the host's publication gates.                           |
+|  `1` | failed        | Unclassified failure that reached no stage-specific code.                                                                      | Treat it as a bug report rather than a condition to branch on.                                        |
+|  `2` | args          | CLI argument parsing or validation failed.                                                                                     | Repair the invocation; do not retry the same arguments.                                               |
+|  `3` | input         | Input was invalid or unreadable, or a planner/gate report completed with a non-pass status.                                    | Parse the report when present and classify the blocker.                                               |
+|  `4` | authorization | Authorization denied the requested product output (for example a Free Baseline limit), or `auth verify` rejected a credential. | Check the entitlement, the 10-slide / 5 MiB Free Baseline, and `auth status`; do not retry unchanged. |
+|  `5` | slide         | A requested slide selection was outside the available range.                                                                   | Re-inspect the deck and correct the 1-based selection.                                                |
+|  `6` | parse         | PPTX parsing failed.                                                                                                           | Quarantine the input and inspect package validity.                                                    |
+|  `7` | pdf           | PDF generation failed.                                                                                                         | Check the PDF backend and renderer evidence before retrying.                                          |
+|  `8` | png           | PNG generation failed.                                                                                                         | Check the image/PDF backends, fonts, and output directory.                                            |
+|  `9` | output        | Output validation or artifact writing failed.                                                                                  | Treat delivery as incomplete; do not publish a partial artifact.                                      |
+| `10` | dependency    | A required backend was unavailable.                                                                                            | Repair the worker image or route to a worker with the declared backend.                               |
+| `11` | internal      | An unexpected internal failure occurred.                                                                                       | Preserve all evidence and escalate or retry under an incident policy.                                 |
+| `12` | batch         | At least one batch item failed.                                                                                                | Read the per-item report and quarantine only the failed items.                                        |
 
 Codes are a routing layer, not the bridge error catalog. For example, exit code
 `3` can accompany a complete report with `status: "review-required"`, while a
@@ -159,21 +161,34 @@ present. The following is a rich error example:
     "message": "shape selector matched multiple candidates",
     "producedBy": "pptx-dry-run/v1",
     "opIndex": 0,
-    "path": "ops[0].shape",
-    "candidates": ["slide-0/shape-2", "slide-0/shape-7"],
+    "path": "/ops/0",
+    "candidates": ["shape:2", "shape:7"],
     "suggestions": [
       {
-        "fixPatch": [
-          {
-            "op": "set-text-frame",
-            "slide": 0,
-            "shape": { "id": 2 },
-            "text": "Retry text"
+        "reason": "Retry with /ops/0 using shape id 2 from the ambiguous selector candidates.",
+        "remediation": {
+          "kind": "replace-request",
+          "reason": "Retry with /ops/0 using shape id 2 from the ambiguous selector candidates.",
+          "confidence": 0.82,
+          "autoRetry": true,
+          "request": {
+            "schemaVersion": "pptx-patch/v1",
+            "ops": [
+              {
+                "op": "set-text-frame",
+                "slide": 0,
+                "shape": { "id": 2 },
+                "text": "Retry text"
+              }
+            ]
+          },
+          "target": {
+            "kind": "original-input",
+            "requestCanonicalization": "jcs-rfc8785",
+            "requestSha256": "<sha256 of the canonical original request>",
+            "inputSha256": "<sha256 of the input deck, or null>"
           }
-        ],
-        "reason": "Use a concrete candidate id after inspection",
-        "confidence": 0.96,
-        "autoRetry": false
+        }
       }
     ],
     "docsRef": "https://structurify.io/docs/errors/invalid_operation"
@@ -184,10 +199,14 @@ present. The following is a rich error example:
 ```
 
 The error object may also contain `stage`, `expected`, `actual`, `replacement`,
-and `details`. Each `suggestions[]` item contains a `fixPatch`, `reason`, a
-`confidence` from 0 to 1, and its own `autoRetry` flag. Treat candidate-specific
-suggestions as mutually exclusive choices. Never apply the first suggestion by
-array order when the report describes an ambiguity.
+`retryable`, `exitCode`, and `details`. Each `suggestions[]` item contains a
+`reason` plus either a `remediation` object or a `remediationUnavailable`
+marker. A `remediation` is `kind: "replace-request"` (a complete replacement
+`request` envelope) or `kind: "apply-to-document"` (a `patch` envelope plus
+`requiresRawXml`); both carry a `confidence` from 0 to 1, their own `autoRetry`
+flag, and a hash-bound `target`. Treat candidate-specific suggestions as
+mutually exclusive choices. Never apply the first suggestion by array order
+when the report describes an ambiguity.
 
 `error.producedBy` values include `pptx-dry-run/v1`, `pptx-apply/v1`,
 `pptx-inspect/v1`, `pptx-select/v1`, and `pptx-diff/v1`. Other command families

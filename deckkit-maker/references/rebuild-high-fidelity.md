@@ -9,7 +9,7 @@ Phase 2 再把内容抽到 content.json。
 高保真不是像素描摹：目标是网格、比例、层级、配色、字号节奏、chrome 和内容结构无
 hard defect；字体替代、Tabler 近似图标、明确披露的 unsupported 资产可以接受。
 
-先读 `skills/pptx-nova/references/deck-generator-workflow.md`（模板设计、txH 表、
+先读 `pptx-nova/references/deck-generator-workflow.md`（模板设计、txH 表、
 装饰安全区、视觉验证盲点清单），本文件只补充复刻场景的差异点与已知坑。
 
 ## 目录
@@ -24,7 +24,7 @@ hard defect；字体替代、Tabler 近似图标、明确披露的 unsupported �
 ## 1. 生成器起步
 
 ```bash
-cp skills/pptx-nova/assets/examples/deck-generator-template.mjs .tmp/deckkit-<id>/generate.mjs
+cp pptx-nova/assets/examples/deck-generator-template.mjs .tmp/deckkit-<id>/generate.mjs
 ```
 
 按 `style-spec.md` 改造：
@@ -38,7 +38,7 @@ cp skills/pptx-nova/assets/examples/deck-generator-template.mjs .tmp/deckkit-<id
 - 复刻不是像素描摹：优先还原**网格关系**（列数、间距、对齐、比例），坐标从
   `grid()` / bbox 推导后与 XML 原值核对，偏差 ≤0.05in 视为一致。
 
-可参考的成熟 kit 写法：`skills/pptx-nova/assets/deckkits/swiss-grid.kit.mjs`
+可参考的成熟 kit 写法：`pptx-nova/assets/deckkits/swiss-grid.kit.mjs`
 （常量区 → makeChrome → 几何 helper → makePageTypes → createDeck 的分层）。
 
 ## 2. 资产处理
@@ -79,8 +79,9 @@ rm -rf previews && xdoc convert out.pptx --to png -o previews --overwrite --cont
 `convert` 和其他未公开命令仍走 CLI。adapter 变化不改变 dry-run → apply → post-apply
 inspect、视觉检查及人工逐页对比门禁。
 
-**每次重渲前 `rm -rf previews`**：convert 在目录已存在且参数变化时会写进
-`previews/deck-img/` 子目录，复核时会看到陈旧图。
+**每次重渲前 `rm -rf previews`**：当前 xdoc 对已存在的 `-o previews` 必须带 `--overwrite`
+（否则退出码 9 拒绝写入），`--overwrite` 会清空并重写该目录；只有 `-o previews/`（尾部分隔符）
+才会写进 `previews/<stem>-img/` 子目录。`rm -rf` 仍能避免复核时看到陈旧图或漏掉尾部分隔符的落点漂移。
 
 ## 4. 逐页对比
 

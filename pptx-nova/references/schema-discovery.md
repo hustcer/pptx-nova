@@ -7,12 +7,12 @@ xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema
 
 ```bash
 xdoc schema                          # 完整 schema（贵）
-xdoc schema --mode index                  # 只 op 名 + level + required/optional 字段
+xdoc schema --mode index                  # 只 op 名 + summary + required/optional 字段 + constraints
 xdoc schema --mode ops --ops add-text-box         # 单个 op 完整 jsonSchema
 xdoc schema --mode ops --ops add-slide,add-chart   # 多个 op
 xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary --minimal # 字段 + 紧凑定义摘要
 xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs full --minimal # 字段 + 完整定义闭包
-xdoc schema --mode examples               # 内置 12 个 patch 示例
+xdoc schema --mode examples               # 内置 21 个 patch 示例
 xdoc schema --minimal                # 删 verbose 字段（与上面任一组合用）
 ```
 
@@ -45,8 +45,10 @@ selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --mode o
 xdoc schema --mode index | save -f schema-index.json
 ```
 
-得到所有 120 个 op 名、`level`（patch / recipe）、required / optional 字段名 —— 用来
-决定 "我要 `add-chart` 还是 `add-text-box`"。
+得到所有 58 个 op 名、summary、required / optional 字段名与 constraints —— 用来
+决定 "我要 `add-chart` 还是 `add-text-box`"。index 视图没有 `level` 字段（`--mode ops`
+里所有 op 的 `level` 都是 `patch`）；18 种 recipe kind 不是独立 op，而是
+`add-slide.recipe.kind`，清单在完整 schema 的 `commands.pptx.recipeOps[]`。
 
 ### 2. 选定 op → 先拉所需字段
 
@@ -95,7 +97,7 @@ xdoc schema --mode ops --ops set-slide-animations --minimal | save -f schema-set
 xdoc schema --mode examples | save -f examples.json
 ```
 
-里面 12 个示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
+里面 21 个示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
 shape effects / hyperlinks 等。对照修改最快。
 
 ## Schema 关键 `$defs` 速记
@@ -190,7 +192,7 @@ right / left / top / bottom / top-right
 ### `alignment`
 
 ```
-left / center / right / justify / distribute / thai-distribute
+left / center / right / justify / justify-low / distribute / thai-distribute
 ```
 
 ### `effect`
@@ -238,8 +240,8 @@ xdoc schema --mode index --minimal | from json | get operations | where op =~ 't
 # 看 add-chart 必填 / 可选字段
 xdoc schema --mode ops --ops add-chart --minimal | from json | get operations.0 | { required: $in.required, optional: $in.optional }
 
-# 把所有 recipe op 列出来
-xdoc schema --mode index | from json | get operations | where level == 'recipe' | select op required optional
+# 把所有 recipe kind 列出来（recipe 不是独立 op，index 视图没有 level 字段）
+xdoc schema | from json | get commands.pptx.recipeOps | select recipeKind description
 ```
 
 ## 何时不查 schema
@@ -262,7 +264,8 @@ schema 全集时，可以在 `apply --dry-run` 上加 `--explain`：
 xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.json
 ```
 
-报告顶层会新增 `explanations[]`，与 `opResults[]` / `traces[]` 一一对应，每项形如：
+报告顶层会新增 `explanations[]`，与 `opResults[]` / `traces[]` 一一对应，每项形如
+（`expandedOps` 只在 `if` / `foreach` / `try` / `use-macro` / recipe 等会展开的元 op 上出现）：
 
 ```json
 {
@@ -271,18 +274,34 @@ xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.j
   "status": "success",
   "summary": "Create a text box shape on a slide.",
   "reason": "Create a text box shape on a slide. Its arguments are validated against the published patch schema metadata before the bridge applies the concrete operation.",
-  "expandedOps": ["add-text-box"],
   "schema": {
     "level": "patch",
     "requiredFields": ["slide", "x", "y", "w", "h"],
-    "optionalFields": ["text", "name", "anchor", "verticalText", "fontSize", "..."],
+    "optionalFields": ["marginBottom", "marginLeft", "marginRight", "marginTop", "name", "text"],
     "fieldNotes": [
-      { "name": "slide", "required": true, "schemaRef": "#/$defs/nonNegativeInteger" },
-      { "name": "x", "required": true, "schemaRef": "#/$defs/length" },
+      {
+        "name": "slide",
+        "required": true,
+        "type": "integer",
+        "schemaRef": "",
+        "description": "0-based slide index.",
+        "strict": false
+      },
+      {
+        "name": "x",
+        "required": true,
+        "type": "string",
+        "schemaRef": "#/$defs/length",
+        "description": "Length value: a unit suffix is required, ...",
+        "strict": false
+      },
       {
         "name": "text",
         "required": false,
-        "description": "Text content; supports \\n for line breaks."
+        "type": "string",
+        "schemaRef": "",
+        "description": "",
+        "strict": false
       }
     ]
   }

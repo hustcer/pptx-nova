@@ -127,7 +127,9 @@ recipe 与底层 patch op 可以混用：一份 patch 可同时包含 `add-slide
 }
 ```
 
-`left` / `right` 都是 `{ heading?, text?, bullets?[] }` 对象，任一字段可省略。
+`left` / `right` 都是 `{ heading?, text?, bullets?[], image?, caption? }` 对象，每侧至少给
+一个字段（空对象会报 `add-slide.recipe.left requires field 'heading'` 之类的 union-no-match）；
+`image` 结构同 `image-caption.image`（`bytesBase64` + `mimeType` + 可选 `objectFit`）。
 
 ---
 
@@ -193,8 +195,8 @@ canonical v1 的 `image-caption.image` 严格接受 `bytesBase64`、`mimeType` �
 }
 ```
 
-`headers` / `rows` 都是字符串数组；`rows[*].length` 应与 `headers.length` 一致，
-不一致时会有 `visualRisks` 警告但仍会渲染。
+`headers` / `rows` 都是字符串数组；每一行 `rows[i].length` 必须等于 `headers.length`，
+不一致时 dry-run 直接报错（`rows[0] must have N cells`），不会降级渲染。
 
 ---
 

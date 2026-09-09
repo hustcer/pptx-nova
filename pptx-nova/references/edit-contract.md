@@ -148,9 +148,9 @@ xdoc pptx slide-copy -i target.pptx --source donor.pptx \
 ```
 
 CLI `--slides` is 1-based. The report and contract use 0-based
-`sourceSlide`/`targetSlide` indexes. `--slide N` is the compatible 0-based
-single-slide selector (default 0), `--all` selects all donor slides, and the
-three selectors are mutually exclusive.
+`sourceSlide`/`targetSlide` indexes. `--all` selects all donor slides, the two
+selectors are mutually exclusive, and omitting both copies only donor slide 1
+(there is no `--slide` option).
 
 Treat the v2 dry-run as a fingerprint-bound execution plan. Require
 `status: "success"` with `outcome: "passed"`, `preflight.readOnly: true`, no `preflight.blockers`, and

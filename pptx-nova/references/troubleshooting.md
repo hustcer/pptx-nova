@@ -5,7 +5,7 @@ xdoc 的错误是结构化的。先读 `error.code`、诊断和 `suggestions[]`�
 ```json
 {
   "code": "<snake_case_code>",
-  "severity": "error / warning / info",
+  "severity": "fatal / error / warning / info",
   "message": "human-readable",
   "opIndex": 2,
   "docsRef": "https://...",
@@ -124,13 +124,14 @@ exclusive 边界）才需要按 message 里的范围手改。写 patch 前就用
 | `format.lineSpacing`（数字＝倍数）   | >0..132   | 1.0＝单倍行距；上限 132    |
 | `fill.angle` / shadow `angle`（度）  | 0..<360   | **360 本身非法**，整圈用 0 |
 | `axes.*.scale.majorUnit`/`minorUnit` | >0        | 0 或负数非法               |
-| `alpha` / gradient `pos`             | 0..1      | 小数分数，**不是 0..100**  |
+| `alpha` / gradient stop `position`   | 0..1      | 小数分数，**不是 0..100**  |
 | autofit `fontScale`                  | 1..100    | 且要求 `mode: "text"`      |
 
 ## 写出侧自检 warnings 与 semanticIssues[] —— 语义审计信号
 
-apply / dry-run 报告的 `warnings[]` 里有五类**写出侧自检**前缀（按 OOXML 规范
-对 xdoc 本次生成/改写的 part 做的检查）：
+apply / dry-run 报告的 `warnings[]` 里有一组**写出侧自检**前缀（按 OOXML 规范
+对 xdoc 本次生成/改写的 part 做的检查；下表是最常见的五类，完整集合见
+`semanticIssues[].code` 枚举）：
 
 | 前缀            | 含义                                                               |
 | --------------- | ------------------------------------------------------------------ |
@@ -154,7 +155,8 @@ before <a:buChar> (schema order: …)`。
 
 ```jsonc
 {
-  "code": "dangling-ref", // dangling-rel | dangling-ref | duplicate-id | part-truth
+  "code": "dangling-ref", // 枚举: dangling-rel | rel-type-mismatch | dangling-ref | duplicate-id | part-truth | value-out-of-range | invalid-attribute-value | missing-required-attribute | invalid-attribute-comparison | invalid-xml | invalid-relationships | child-order | child-cardinality | child-choice
+  "ruleId": "<rule id>",
   "part": "ppt/slides/slide1.xml",
   "message": "<p:spTgt> spid=\"2\" references no <cNvPr> with id=\"2\" in the part",
   "remediation": {
@@ -203,6 +205,24 @@ unzip -p out.pptx 'ppt/charts/chart1.xml' |
 `xdoc pptx inspect out.pptx` 找到实际的 chart part，再替换命令中的路径。
 `set -o pipefail` 可确保上游 `unzip` 读取或匹配失败时整段审计返回失败，而不是被
 下游命令的成功状态掩盖。
+
+## 退出码速查（`xdoc schema` 的 `.exitCodes`）
+
+| code | stage         | 含义                                                                     |
+| ---- | ------------- | ------------------------------------------------------------------------ |
+| 0    | success       | 成功；gate/planner 类报告的裁决在 JSON 里，不在退出码里                  |
+| 1    | failed        | 未分类失败，当 bug 上报，不要按它分支                                    |
+| 2    | args          | CLI 参数解析/校验失败                                                    |
+| 3    | input         | 输入无效/不可读，或结构化 gate 报告以非 pass 状态完成（stdout 仍有报告） |
+| 4    | authorization | 授权拒绝（Free 限额超限、License 无效等），不写产物                      |
+| 5    | slide         | slide 选择超出范围                                                       |
+| 6    | parse         | PPTX 解析失败                                                            |
+| 7    | pdf           | PDF 生成失败                                                             |
+| 8    | png           | PNG 生成失败                                                             |
+| 9    | output        | 输出目标校验或写入失败（含输出已存在且未加 `--overwrite`）               |
+| 10   | dependency    | 后端依赖不可用                                                           |
+| 11   | internal      | 内部错误                                                                 |
+| 12   | batch         | 批处理至少一项失败（convert/html2md/extract/check），看 `--report`       |
 
 ## 错误分类速查（errorCatalog 注册表）
 
@@ -265,7 +285,7 @@ daemon / JSON-RPC / MCP 契约处理，不能把数字协议码当作业务错�
 **推论**:写 enum 时如果不确定标准名,先用直觉拼一个看 dry-run — 大概率会收到
 带 `autoRetry: true` 的修复建议,而不是 `unsupported_feature` 死路。
 
-`xdoc schema | jq '.enumRegistry.fuzzySuggest.examples'` 会给出 4 类常见错拼
+`xdoc schema | jq '.commands.pptx.enumRegistry.fuzzySuggest.examples'` 会给出 4 类常见错拼
 的真实候选示例,可以离线对照。
 
 ## 常见错误对照与修复
@@ -299,16 +319,12 @@ daemon / JSON-RPC / MCP 契约处理，不能把数字协议码当作业务错�
 ```json
 {
   "code": "invalid_operation",
-  "message": "slide layout not found by name 'custom'. available layouts: ...",
-  "candidates": [
-    { "index": 0, "name": "Title Slide", "type": "title" },
-    { "index": 1, "name": "Title and Content", "type": "obj" },
-    { "index": 2, "name": "Section Header", "type": "secHead" }
-  ]
+  "message": "slide layout not found by name 'custom'. available layouts: [{index:0, name:'Title Slide', type:'title'}, {index:1, name:'Title and Content', type:'obj'}, {index:2, name:'Section Header', type:'secHead'}]"
 }
 ```
 
-修复：从 candidates 抄一个 `name` / `type` / `index`。
+修复：从 `message` 内嵌的 available layouts 列表抄一个 `name` / `type` / `index`
+（`candidates` 是字符串数组，此场景为 `null`，不要依赖它）。
 
 ### 4. chart data 形状错
 
@@ -317,7 +333,7 @@ scatter / bubble 误传 `categories + values`：
 ```json
 {
   "code": "invalid_argument",
-  "message": "scatter chart requires series.points, got series.values"
+  "message": "add-chart has invalid data"
 }
 ```
 
@@ -326,7 +342,7 @@ scatter / bubble 误传 `categories + values`：
 ### 5. 资产路径逃出 --asset-root
 
 ```json
-{ "code": "invalid_argument", "message": "assetSource.path ../secret.pdf escapes --asset-root" }
+{ "code": "invalid_argument", "message": "assetSource.path escapes --asset-root" }
 ```
 
 修复：
@@ -338,21 +354,21 @@ scatter / bubble 误传 `categories + values`：
 ### 6. length 格式错
 
 ```json
-{ "code": "invalid_argument", "message": "field x: expected length, got '1 inch'" }
+{ "code": "invalid_argument", "message": "add-text-box requires x" }
 ```
 
-修复：
+非法 length（含裸数字）会被当作字段缺失报告，message 不会回显原值。修复：
 
-| 写错              | 改成                                  |
-| ----------------- | ------------------------------------- |
-| `"1 inch"`        | `"1in"`                               |
-| `"1.5 in"`        | `"1.5in"`（去空格）                   |
-| `1` 想表达 1 英寸 | `"1in"`（裸数字是 EMU，1 EMU ≠ 1 in） |
+| 写错                         | 改成                                                      |
+| ---------------------------- | --------------------------------------------------------- |
+| `"1 inch"`                   | `"1in"`                                                   |
+| `"1.5 in"`                   | `"1.5in"`（去空格）                                       |
+| `1` / `914400` 想表达 1 英寸 | `"1in"`（裸数字被拒绝，必须带 `in/cm/mm/pt/px/emu` 单位） |
 
 ### 7. color 格式错
 
 ```json
-{ "code": "invalid_argument", "message": "field color: expected #RRGGBB, got 'blue'" }
+{ "code": "invalid_argument", "message": "set-shape has invalid fill" }
 ```
 
 修复：CSS 颜色名不支持，必须 hex。`blue` → `"0000FF"`，`red` → `"FF0000"`。
@@ -362,17 +378,29 @@ scatter / bubble 误传 `categories + values`：
 ```json
 {
   "code": "unsupported_feature",
-  "message": "chart kind 'waterfall' is unsupported",
+  "message": "unknown patch op 'add-sparkline'",
   "suggestions": [
     {
-      "kind": "alternative",
-      "message": "Use column chart with manually colored points to simulate waterfall"
+      "reason": "Replace /ops/0/op 'add-sparkline' with 'add-slide'.",
+      "path": "/ops/0/op",
+      "expected": "supported patch op",
+      "actual": "add-sparkline",
+      "replacement": "add-slide",
+      "remediation": {
+        "kind": "replace-request",
+        "autoRetry": false,
+        "confidence": 0.78,
+        "...": "..."
+      }
     }
   ]
 }
 ```
 
-修复：按 suggestion 找替代，或告诉用户这种特性 xdoc 当前不支持。
+`unsupported_feature` 只用于未知 op / schemaVersion；拼错的 chart kind、枚举值走
+`invalid_argument`（如 `add-chart has invalid kind 'bogus-kind'`）并附带 fuzzy
+`replace-request` 建议。`waterfall`、`funnel`、`treemap` 等 chartEx kind 现已在
+`enumRegistry.chartKind` 中。修复：按 suggestion 找替代，或告诉用户这种特性 xdoc 当前不支持。
 
 ### 9. layout.requiredSlot.missing（DeckKit validate-content）
 
@@ -411,7 +439,7 @@ chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案�
 | `text-unexpected-wrap`         | 预期单行文本出现孤行    | 缩短 subtitle/label / 加宽 / 换布局         |
 | `chart-label-density-possible` | chart 标签太密          | 改 `set-chart.dataLabels[].position` 或缩放 |
 | `table-data-outside-grid`      | 表格数据超出 grid       | 加行列 / 调整数据                           |
-| `table-cell-text-long`         | 表格单元格文本过长      | 加列宽 / 缩字号 / 拆行                      |
+| `table-cell-overflow-possible` | 表格单元格文本过长      | 加列宽 / 缩字号 / 拆行                      |
 | `picture-missing-dimension`    | 加图片没指定 w/h        | 加 `w` / `h` 字段                           |
 | `ole-icon-missing-or-unsized`  | OLE icon 未显式定尺寸   | 加 `iconW` / `iconH` 或确认默认 icon        |
 
@@ -426,7 +454,8 @@ chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案�
 xdoc pptx apply -p patch.json -o out.pptx --dry-run --json --log-level trace 2>&1
 ```
 
-`--log-level trace` 让报告里多出 `traces[]`，可以看到每个 op 的 sub-call 链路与耗时。
+dry-run 报告默认就带 `traces[]`（每个 op 的 `name` / `status` / `durationMs`）；
+`--log-level trace` 额外把逐步诊断日志打到 stderr，所以需要 `2>&1` 或分开重定向。
 
 ### 用 `--explain` 把"这个 op 该怎么写"摊在面上
 
@@ -451,7 +480,7 @@ xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.j
 
 ```bash
 # 单独用 jq 检查 patch 是否符合 schema (基础校验)
-cat patch.json | jq -e '.schemaVersion == 1 and (.ops | type == "array")'
+jq -e '.schemaVersion == "pptx-patch/v1" and (.ops | type == "array")' patch.json
 ```
 
 ### Sidecar 回滚
@@ -462,7 +491,9 @@ cat patch.json | jq -e '.schemaVersion == 1 and (.ops | type == "array")'
 xdoc pptx rollback --from-sidecar out.pptx.xdoc.json -o restored.pptx
 ```
 
-会用 sidecar 重新执行除最后一次 apply 之外的所有历史 op，给出修改前的 deck。
+rollback 不会重放任何 op：它直接复制 sidecar 记录的修改前输入（`strategy: "copy-recorded-input"`），
+sidecar 来自 `new` 时则输出一个最小空 deck（`"minimal-deck"`）；报告为 `pptx-rollback/v1`，
+`--from-sidecar` 与 `-o` 必填，不接受位置参数。
 
 ## 不要做的事
 

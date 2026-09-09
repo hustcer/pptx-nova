@@ -1,8 +1,8 @@
 # Phase 2 — 组件化抽象
 
 目标：把验收通过的探索生成器冻结为正式 DeckKit，并走完注册、校验、benchmark、
-readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）、§3（content
-契约与字符串分层）和 `skills/pptx-nova/assets/deckkits/README.md`（冻结准入）为准，
+readiness 全链路。规范以 xdoc 维护者仓库 `docs/skill-dev-guide.md`（本机 `../pptx/docs/`）§4（开发流程）、§3（content
+契约与字符串分层）和 `pptx-nova/assets/deckkits/README.md`（冻结准入）为准，
 本文件按复刻场景串起执行顺序。
 
 ## 目录
@@ -20,10 +20,10 @@ readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）�
 
 把 `generate.mjs` 一拆为二：
 
-- `skills/pptx-nova/assets/deckkits/<id>.kit.mjs` —— 视觉语言（C/F 常量、chrome、
+- `pptx-nova/assets/deckkits/<id>.kit.mjs` —— 视觉语言（C/F 常量、chrome、
   几何 helper、页型函数）+ `export function createDeck(content)` 返回
   `{ patch, warnings }`。页型函数只消费 `slide.data`。
-- `skills/pptx-nova/assets/deckkits/examples/<id>-content.json` —— Phase 1 内联的
+- `pptx-nova/assets/deckkits/examples/<id>-content.json` —— Phase 1 内联的
   **全部业务内容**原样搬入，结构 `{ meta: { deckkit: "<id>" }, slides: [{ type, data }] }`。
   这份"参考 deck 内容"就是天然的 golden example。例外：参考 deck 中的一次性图片、截图、
   照片、插画和背景位图不搬入 examples/assets；对应字段写成 `asset` 槽位、占位行为或
@@ -39,7 +39,7 @@ readiness 全链路。规范以 `docs/skill-dev-guide.md` §4（开发流程）�
 
 ```bash
 mkdir -p .tmp/deckkit-<id>/audit
-node .claude/skills/deckkit-maker/scripts/content-leak-audit.mjs \
+node deckkit-maker/scripts/content-leak-audit.mjs \
   --patch .tmp/deckkit-<id>/audit/non-reference-patch.json \
   --denylist .tmp/deckkit-<id>/audit/content-leak-denylist.txt \
   --json > .tmp/deckkit-<id>/audit/content-leak-audit.json
@@ -77,8 +77,8 @@ callout 和缺失图片时的隐藏/占位策略。
 生成与一致性检查：
 
 ```bash
-node skills/pptx-nova/scripts/pptx-nova-deckkit-slots.mjs --deckkit <id>
-node skills/pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit <id> --json
+node pptx-nova/scripts/pptx-nova-deckkit-slots.mjs --deckkit <id>
+node pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit <id> --json
 ```
 
 判松紧：schema 通过但 build 报错 = schema 太松；schema 拒绝但 build 能跑 = 太紧。
@@ -89,22 +89,24 @@ node skills/pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit <
 `id / version(0.1.0) / path / primitiveDependency / readiness(experimental 起步) /
 qualityProfile / defaultFor / bestFor / coverage / supportedSlideTypes /
 visualGrammar / layoutContract / diversityGate / density / validatedWith / quality /
-knownLimits / examples`。
+knownLimits / examples / refurbishProfile`（`refurbishProfile` 可用
+`node pptx-nova/scripts/pptx-nova-deckkit-refurbish-profile-fill.mjs --deckkit <id> --write` 生成）。
 
-- `visualGrammar` 从 style-spec.md 直接提炼（positioning / mood / layoutPrinciples /
-  signatureElements / typography / colorSystem / compositionRules / avoid）——
+- `visualGrammar` 从 style-spec.md 直接提炼（`schemaVersion: pptx-nova-visual-grammar/v1`，
+  positioning / mood / layoutPrinciples / signatureElements / compositionRules / avoid 字符串数组，
+  typography / colorSystem / slideRhythm 对象）——
   production/default 必需，缺失会被 readiness audit 阻塞。
 - `qualityProfile`：参考 deck 若合法使用小于通用下限的风格字号，在此声明并说明。
-- `knownLimits` 第一条写明来源：`"Based on <ref.pptx>; ..."`（swiss-grid 先例）。
+- `knownLimits` 第一条写明来源：`"Based on <ref.pptx>; ..."`（broadside / cartesian 先例）。
 
 ## 4. 验证与 build
 
 ```bash
-node skills/pptx-nova/assets/deckkits/validate-content.mjs \
-  skills/pptx-nova/assets/deckkits/examples/<id>-content.json \
+node pptx-nova/assets/deckkits/validate-content.mjs \
+  pptx-nova/assets/deckkits/examples/<id>-content.json \
   --deckkit <id> --mode delivery --json
-node skills/pptx-nova/scripts/pptx-nova-build.mjs \
-  --deckkit <id> skills/pptx-nova/assets/deckkits/examples/<id>-content.json \
+node pptx-nova/scripts/pptx-nova-build.mjs \
+  --deckkit <id> pptx-nova/assets/deckkits/examples/<id>-content.json \
   -o .tmp/deckkit-<id>/kit-patch.json --quality-json .tmp/deckkit-<id>/kit-quality.json
 ```
 
@@ -116,7 +118,7 @@ schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 imp
 
 ## 5. 测试（强制）
 
-在 `tools/tests/pptx-nova-deckkit-validation.test.mjs` 中为新 kit 补：
+在 `tools/tests/pptx-nova-scripts.test.mjs` 中为新 kit 补：
 
 - **最小合法 content build 测试**：每个页型构造最小 delivery content，
   validation 通过则 `createDeck` 必须不崩。
@@ -131,14 +133,17 @@ schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 imp
   asset policy 中说明用户确认依据。
 
 ```bash
-node --test tools/tests/pptx-nova-deckkit-validation.test.mjs
+node --test tools/tests/pptx-nova-scripts.test.mjs
 ```
 
 ## 6. benchmark 与 readiness
 
-在 `skills/pptx-nova/benchmarks/visual/` 落 golden case 并登记 `index.json`：
+在 `pptx-nova/benchmarks/visual/` 落 golden case 并登记 `index.json`：
 
 - `golden-*`：直接用 `<id>-content.json`（即参考 deck 内容）。
+- 每个 case 需要 `index.json` 条目（`id`=`<id>.<case>`、`deckkit`、`kind`、`contentPath`、
+  `buildPath`、`expectedPath`、`reviewPath`），以及 `cases/<id>/<case>/expected.json`
+  （`pptx-nova-visual-case/v1`）和 `review.md`；`buildPath` 指向 `examples/<id>-build.mjs` build 胶水。
 
 必须额外审查 `stress-density` 和 `mixed-language`，但默认不要把这两个 case 写入
 `benchmarks/visual/index.json` 或提交到 git。把临时 content、patch、PPTX、PNG、
@@ -152,9 +157,9 @@ slot budget、validation tests 和有针对性的非视觉单测覆盖，避免�
 和密度边界，防止 scope 缩减掩盖组件化缺口。
 
 ```bash
-node skills/pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean
-node skills/pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live --json
-node skills/pptx-nova/scripts/pptx-nova-deckkit-catalog-update.mjs --deckkit <id> --write
+node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean
+node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live --json
+node pptx-nova/scripts/pptx-nova-deckkit-catalog-update.mjs --deckkit <id> --write
 ```
 
 vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受噪声才
@@ -184,5 +189,5 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 - [ ] validation tests（含 content leak regression）通过
 - [ ] golden benchmark 通过；stress-density 和 mixed-language 已在 `.tmp` 审查并记录；
       readiness audit 达到 candidate
-- [ ] 若改了默认行为/文档：按 skill-dev-guide §8.2 同步清单检查 pptx-nova 各文档
+- [ ] 若改了默认行为/文档：按维护者仓库 skill-dev-guide §8.2 同步清单检查 pptx-nova 各文档
 - [ ] `git diff --check`；按仓库规范提交（English Conventional Commit）

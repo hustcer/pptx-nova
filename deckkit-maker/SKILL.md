@@ -2,7 +2,7 @@
 name: deckkit-maker
 description: >
   从参考 .pptx 文件或 HTML 演示模板为 pptx-nova SKILL 创建新的 DeckKit（开发者侧
-  skill，操作 skills/pptx-nova/ 源码）。当用户提供一个参考 .pptx 文件、template.html
+  skill，操作 pptx-nova/ 源码）。当用户提供一个参考 .pptx 文件、template.html
   或 HTML 模板目录和新 DeckKit 的名字，要求"创建 DeckKit / 新增 DeckKit / 把这个 pptx
   做成 DeckKit / 把这个 HTML template 转成 DeckKit / 复刻这个 deck 的风格做成套件 /
   模仿这个 deck 新建 DeckKit" 时触发。两阶段工作流：
@@ -17,7 +17,7 @@ description: >
 从一个参考 `.pptx` 文件或 HTML 演示模板出发，为 pptx-nova 创建新的 DeckKit。目标是让以后的 Agent
 能用 `content.json → DeckKit → patch → xdoc` 稳定高效地产出同主题、同质量的 PPTX。
 
-本 skill 是 **开发者侧** skill：它修改 `skills/pptx-nova/` 源码，可以使用仓库根
+本 skill 是 **开发者侧** skill：它修改 `pptx-nova/` 源码，可以使用仓库根
 `tools/`、`Justfile` 等 developer-only 工具链；但写进 pptx-nova 的任何用户路径
 （kit、schema、scripts、references）必须保持 skill 自包含，不得依赖 skill 目录外文件。
 本 skill 自带的 `scripts/` 只服务 DeckKit 创建流程，不会随 pptx-nova 发布。
@@ -40,7 +40,7 @@ description: >
 `capabilities.agentTransports.mcp.status == "disclosed"` 且合同版本被宿主识别时，才可按
 完整 `capabilities.agentTransports.mcp.contract` 使用它。
 
-- `xdoc_discover` 只能替换对应 schema discovery，`pptx_inspect` / `pptx_apply` 只能替换
+- `xdoc_schema` 只能替换对应 schema discovery，`pptx_inspect` / `pptx_apply` 只能替换
   对应的 inspect/apply 调用；其余 xdoc 命令继续走 CLI。
 - 所有文件路径传绝对路径；`overwrite` 默认 false，不能把 client 工作目录当成项目目录。
 - MCP 只替换调用 adapter，不能跳过 dry-run → apply → post-apply inspect、vision-check、
@@ -74,29 +74,30 @@ git status --short
 node -e "const id=process.argv[1]; if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) process.exit(1)" <id>
 test -f <ref.pptx-or-template.html>   # HTML 目录输入时检查入口 template.html
 test ! -e .tmp/deckkit-<id>
-node -e "const c=require('./skills/pptx-nova/assets/deckkits/catalog.json'); const id=process.argv[1]; if ((c.entries||[]).some(e=>e.id===id)) process.exit(1)" <id>
-test ! -e skills/pptx-nova/assets/deckkits/<id>.kit.mjs
-test ! -e skills/pptx-nova/assets/deckkits/schemas/<id>
-test ! -e skills/pptx-nova/assets/deckkits/examples/<id>-content.json
-test ! -e skills/pptx-nova/benchmarks/visual/cases/<id>
-test ! -e skills/pptx-nova/assets/examples/<id>
+node -e "const c=require('./pptx-nova/assets/deckkits/catalog.json'); const id=process.argv[1]; if ((c.entries||[]).some(e=>e.id===id)) process.exit(1)" <id>
+test ! -e pptx-nova/assets/deckkits/<id>.kit.mjs
+test ! -e pptx-nova/assets/deckkits/schemas/<id>
+test ! -e pptx-nova/assets/deckkits/examples/<id>-content.json
+test ! -e pptx-nova/benchmarks/visual/cases/<id>
+test ! -e pptx-nova/assets/examples/<id>
 ```
 
 如果任一目标文件或目录已存在，先确认是继续扩展、接管未完成工作，还是换新 id。不要删除或覆盖
 不是本次任务创建的内容。参考 `.pptx` / HTML 模板必须只读；除 Phase 2 正式产物写入
-`skills/pptx-nova/` 外，任何导出、解包、截图、patch、PPTX、PNG、benchmark、审计和草稿文件
+`pptx-nova/` 外，任何导出、解包、截图、patch、PPTX、PNG、benchmark、审计和草稿文件
 都必须写入当前 run 目录，不得散落到仓库根目录、`.tmp/` 其他子目录或临时的一次性目录。
 
 ## 前置阅读（必读，按序）
 
-1. `skills/pptx-nova/SKILL.md` —— pptx-nova 路由与红线
-2. `docs/skill-dev-guide.md` —— §3 术语（DeckKit / content 契约 / content leak 防线 /
+1. `pptx-nova/SKILL.md` —— pptx-nova 路由与红线
+2. xdoc 维护者仓库的 `docs/skill-dev-guide.md`（不随本仓库分发，本机位于 `../pptx/docs/`）—— §3 术语（DeckKit / content 契约 / content leak 防线 /
    字符串分层规则 / 新增 DeckKit 准入标准）、§4 开发流程、§5 benchmark 与 readiness
-3. `skills/pptx-nova/assets/deckkits/README.md` —— core-primitives 职责边界、冻结准入
-4. `skills/pptx-nova/references/deck-generator-workflow.md` —— 探索生成器方法与避坑
+3. `pptx-nova/assets/deckkits/README.md` —— core-primitives 职责边界、冻结准入
+4. `pptx-nova/references/deck-generator-workflow.md` —— 探索生成器方法与避坑
 
-已有先例：`swiss-grid` DeckKit 即从 `demos/67-swiss-grid-systems.pptx` 复刻而来
-（见 catalog `knownLimits`），本 skill 把这条路径固化为标准流程。
+已有先例：`swiss-grid` DeckKit 即从 xdoc 维护者仓库的 `demos/67-swiss-grid-systems.pptx` 复刻而来，
+`broadside` / `coral` / `cartesian` / `biennale-yellow` 则来自 HTML 模板（见 catalog `knownLimits`），
+本 skill 把这条路径固化为标准流程。
 
 ## 两阶段总览
 
@@ -151,7 +152,7 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
    slide counter、hover-only UI 等 PPTX 不应复刻的交互元素。截图流程必须可复现：
    记录 `agent-browser set viewport 1440 810`、注入的 capture CSS、slide 切换方式，以及
    绝对 screenshot path；不要只留下手工点击后的散图。优先使用
-   `node .claude/skills/deckkit-maker/scripts/capture-html-slides.mjs --url <template.html-or-url> --out .tmp/deckkit-<id>/ref-previews`
+   `node deckkit-maker/scripts/capture-html-slides.mjs --url <template.html-or-url> --out .tmp/deckkit-<id>/ref-previews`
    生成逐页 PNG、`contact-sheet.png` 与 `capture-manifest.json`；非 `.slide` 模板通过
    `--selector` 调整，只有
    slide 原本是 `display:none` 且无法靠 `.active` 恢复时才传 `--active-display`，避免破坏
@@ -249,7 +250,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   下沉；下沉前必须与用户确认，并跑全部现有 DeckKit 的 validation tests。
 - **参考 pptx / HTML 只读**。所有解包、DOM/CSS 抽取和分析副本都放进
   `.tmp/deckkit-<id>/ref-unpack/` 或同一 run 目录下的对应子目录。
-- **content leak 防线**（详见 `docs/skill-dev-guide.md` §3 字符串分层规则）：
+- **content leak 防线**（详见维护者仓库 `docs/skill-dev-guide.md` §3 字符串分层规则）：
   `.kit.mjs` 只冻结视觉语言、几何、chrome、结构标签；参考 deck 的业务文案
   （标题、观点、指标、实体、年份、来源、callout 强调词）最终只能进入
   `content.json` / examples / benchmark fixture。Phase 1 的探索生成器里可以暂时
@@ -258,7 +259,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 - **坐标必须推导**：所有 op 坐标走 primitives（`nm()`/`grid()`/`txH()`）或显式
   bounds 计算，不凭目测摆放。幕布 13.333in × 7.5in。
 - **图标只用 pptx-nova 现有 Tabler pack**：用
-  `node skills/pptx-nova/scripts/pptx-nova-icons.mjs search <query> --json` 查询、
+  `node pptx-nova/scripts/pptx-nova-icons.mjs search <query> --json` 查询、
   `createOps().icon()` 内联。参考 deck 中的图标/装饰图找最接近的 Tabler 替代；
   不联网取图，不把参考 deck 的位图直接打进 kit。替代图标/shape 必须语义相关。
 - **视觉门禁**：每次 build 走
@@ -309,7 +310,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 ```
 
 `.tmp/deckkit-*` 均不提交。Phase 2 的正式产物写入
-`skills/pptx-nova/`（kit、schema、catalog、examples、benchmark、tests）。
+`pptx-nova/`（kit、schema、catalog、examples、benchmark、tests）。
 
 不要再创建 legacy 根目录 run 目录、散落的截图/解包目录、根目录 JSON，或按脚本名临时拼出来的
 目录。若外部工具默认输出到别处，显式传 `--out` / `-o` / 输出路径，把结果收束到

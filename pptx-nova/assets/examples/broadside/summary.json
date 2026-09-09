@@ -58,11 +58,11 @@
     "lowBuckets": {
       "total": 82,
       "styleAllowed": 81,
-      "baselineKnown": 1,
+      "baselineKnown": 0,
       "new": 0,
-      "changed": 0,
-      "resolved": 0,
-      "reviewable": 0,
+      "changed": 1,
+      "resolved": 1,
+      "reviewable": 1,
       "baselineUnavailable": false,
       "baselineUpdated": false
     },
@@ -71,7 +71,9 @@
       "unexpected-wrap": 1
     },
     "newLowByFamily": {},
-    "changedLowByFamily": {},
+    "changedLowByFamily": {
+      "unexpected-wrap": 1
+    },
     "baseline": {
       "schemaVersion": "pptx-nova-vision-baseline/v1",
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
@@ -88,8 +90,38 @@
       "note": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above."
     },
     "newLowSamples": [],
-    "changedLowSamples": [],
-    "resolvedLowSamples": []
+    "changedLowSamples": [
+      {
+        "severity": "low",
+        "family": "unexpected-wrap",
+        "kind": "text-unexpected-wrap",
+        "slideIndex": 4,
+        "target": "S4_StatLabel1",
+        "metrics": {
+          "availableWidthPt": 266.23,
+          "estLines": 2,
+          "fontPt": 11.5,
+          "mixedRunSpacing": 0,
+          "textLength": 46,
+          "textMeasureExact": 1,
+          "textRunCount": 1,
+          "unresolvedFontSizeRuns": 0
+        },
+        "identity": "dd284499d8bee0af53f4",
+        "fingerprint": "9be1cadd22d4514cec75",
+        "baselineFingerprints": ["e022c971b11fff908cad"]
+      }
+    ],
+    "resolvedLowSamples": [
+      {
+        "severity": "low",
+        "family": "unexpected-wrap",
+        "kind": "text-unexpected-wrap",
+        "slideIndex": 4,
+        "target": "S4_StatLabel1",
+        "fingerprint": "e022c971b11fff908cad"
+      }
+    ]
   },
   "contactSheet": {
     "format": "webp",
@@ -99,12 +131,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 250123,
-      "sha256": "d04636d2c5fe2a29fd730a0ae44118caaaa60a5e2fdddd8063d9981cc8f60480"
+      "bytes": 246522,
+      "sha256": "6864c1a77725a09f2ec4634128079c34e85e1ac53bb4cc549ac7188bf833239c"
     },
     "webp": {
-      "bytes": 110098,
-      "sha256": "c95f77af095931b4b9602ef50d4d4e875ce92e52fe04f200dfadd04fa98b784c"
+      "bytes": 109222,
+      "sha256": "28ec30a60e068aa5bead84ad65917101f5eef76f82ca7fbbe9421dc36098b10f"
     }
   }
 }

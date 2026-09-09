@@ -69,9 +69,10 @@ KPI 变化:   "{{kpi.revenue.delta}}"
 }
 ```
 
-### 1.3 准备 bindings.json（可选）
+### 1.3 准备 bindings.json（必填）
 
-`bindings.json` 告诉 xdoc 哪些 shape 不是简单文本替换 —— 而是 table / chart 整体绑定：
+`bindings.json` 列出全部绑定目标：文本 shape 用 `text`，table / chart 用整体绑定；没有出现在
+bindings 里的 shape 不会被触碰：
 
 ```json
 [
@@ -99,14 +100,15 @@ KPI 变化:   "{{kpi.revenue.delta}}"
 ]
 ```
 
-| binding.type | 行为                                                  |
-| ------------ | ----------------------------------------------------- |
-| `text`       | shape 内所有 text run 中的 `{{path}}` 都做替换        |
-| `table`      | 整张表用 `data` 里的二维数组覆盖（可 `resize: true`） |
-| `chart`      | 用 `data.categories` + `data.series` 替换 chart 数据  |
+| binding.type | 行为                                                                                     |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| `text`       | shape 内所有 text run 中的 `{{path}}` 都做替换                                           |
+| `table`      | 整张表用 `data` 里的二维数组覆盖（可 `resize: true`）                                    |
+| `chart`      | 用 `data.categories` + `data.series` 替换 chart 数据                                     |
+| `layout`     | 用 `layout` + `content` 填充内置 layout contract（可选 `contract: "strict" \| "loose"`） |
 
-> 如果 deck 里的占位符都是文本类型，bindings.json 可以省略；xdoc 默认会扫所有
-> shape 的 text 做 `{{path}}` 替换。
+> `--bindings` 是必填项（缺省报 `xdoc pptx template-fill requires --bindings`，退出码 2）；
+> xdoc 不会自动扫描所有 shape，只替换 bindings 里列出的 `text` shape。
 
 ### 1.4 执行
 
@@ -117,7 +119,7 @@ xdoc pptx template-fill data.json \
      -o out.pptx
 ```
 
-`--bindings` 可省。
+`--bindings` 不可省；`-o` 已存在时需要 `--overwrite`。
 
 ## 路径 2：`bind-data` op（推荐：临时一次性 deck）
 
@@ -254,21 +256,14 @@ B - $20
 {{/if}}
 ```
 
-`isPaid` 为 truthy（非空字符串、非 0、非 false、非 null）时渲染块内内容。
+`isPaid` 为 truthy（非空字符串、非 0、非 false、非 null、非空数组/对象）时渲染块内内容。
 
-### 嵌套
+### 嵌套（当前不支持）
 
-```
-{{#each regions}}
-  Region: {{name}}
-  {{#each cities}}
-    - {{$.name}} > {{name}}: {{population}}
-  {{/each}}
-{{/each}}
-```
-
-`{{$.name}}` 取根 data 的 `name`（不是当前 each 的）—— 实际应该是 region 的 name，
-所以用 `{{../name}}` 也可（详见实测）。
+当前运行时（xdoc 0.3.12）**不支持**嵌套 `{{#each}}`（报 `bind-data template has
+unterminated each block`），也不支持 `{{../path}}`（报 `bind-data template path not
+found: ../name`）。`{{#each}}` 块内只能用 `{{.}}`、当前元素字段和 `{{$.path}}`（根 data）；
+多层数据请先在 data.json 里拍平成单层列表。
 
 ## 检验 binding 结果
 
@@ -278,27 +273,29 @@ B - $20
 xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | jq '.opResults[] | select(.op == "bind-data")'
 ```
 
-看 `analysis` 字段：哪些 binding 命中、哪些 path 没找到（warning）。
+看 `status` / `semanticChanges` / `warnings`（bind-data 的 `analysis` 为 `null`）。data 里找不到的 path
+不是 warning，而是整条 op 失败：`invalid_argument` / `bind-data template path not found: <path>`。
 
 ## 常见错误
 
-| 现象                               | 原因                               | 解决                                     |
-| ---------------------------------- | ---------------------------------- | ---------------------------------------- |
-| `{{title}}` 没替换，原样输出       | data 里没 `title` 字段或 path 错   | 检查 data.json                           |
-| `{{products}}` 直接输出 `[object]` | 想循环但漏了 `{{#each}}`           | 加 `{{#each}}`                           |
-| Table binding 报维度不匹配         | 没加 `resize: true` 且行列数不同   | 加 `resize: true`                        |
-| Chart 数据全是 0                   | binding path 错或 chart 模板未绑定 | 检查 bindings.json 的 path 与 chart name |
-| 中文乱码                           | data.json 不是 UTF-8               | 转 UTF-8                                 |
+| 现象                                  | 原因                               | 解决                                     |
+| ------------------------------------- | ---------------------------------- | ---------------------------------------- |
+| `{{title}}` 没替换，原样输出          | 该 shape 没有进入 bindings         | 补 `text` binding                        |
+| `bind-data template path not found`   | data 里没 `title` 字段或 path 错   | 检查 data.json                           |
+| `{{products}}` 直接输出 JSON 数组文本 | 想循环但漏了 `{{#each}}`           | 加 `{{#each}}`                           |
+| Table binding 报维度不匹配            | 没加 `resize: true` 且行列数不同   | 加 `resize: true`                        |
+| Chart 数据全是 0                      | binding path 错或 chart 模板未绑定 | 检查 bindings.json 的 path 与 chart name |
+| 中文乱码                              | data.json 不是 UTF-8               | 转 UTF-8                                 |
 
 ## template-fill vs bind-data 选哪个
 
-| 场景                                         | 选                                                                  |
-| -------------------------------------------- | ------------------------------------------------------------------- |
-| 模板会复用 N 次（每月报告等）                | `template-fill`                                                     |
-| 一次性生成 deck，模板 / 数据都在 patch 里    | `bind-data`                                                         |
-| 模板由设计师在 PowerPoint 里维护             | `template-fill`                                                     |
-| 模板需要程序化生成（每个 AI 请求都不同布局） | `bind-data`                                                         |
-| 数据量大 / 来源是外部 JSON 文件              | 都行，建议 `template-fill` 或 `bind-data + source.assetSource.path` |
+| 场景                                         | 选                                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------------------- |
+| 模板会复用 N 次（每月报告等）                | `template-fill`                                                              |
+| 一次性生成 deck，模板 / 数据都在 patch 里    | `bind-data`                                                                  |
+| 模板由设计师在 PowerPoint 里维护             | `template-fill`                                                              |
+| 模板需要程序化生成（每个 AI 请求都不同布局） | `bind-data`                                                                  |
+| 数据量大 / 来源是外部 JSON 文件              | 都行，建议 `template-fill` 或 `bind-data + source.path`（配 `--asset-root`） |
 
 ## 不要做的事
 

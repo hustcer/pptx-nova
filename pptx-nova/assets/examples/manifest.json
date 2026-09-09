@@ -31,8 +31,8 @@
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 116460,
-          "sha256": "2d5ed29c236a3949bd9d4c19db5f838b23a8dbc9216799586ca043b19b29caeb",
+          "bytes": 115516,
+          "sha256": "71369acb4302b917b6f23fb9a0b8f3d170d616d2ce08cfcbad8b1b8e996ff875",
           "quality": 82
         },
         "content": {
@@ -47,8 +47,8 @@
         },
         "summary": {
           "path": "consulting-dark/summary.json",
-          "bytes": 2718,
-          "sha256": "014cf49011bfdd6ead7a03975e9bf0e62954e32bbd86da7ff8651430d3525876"
+          "bytes": 2732,
+          "sha256": "899ab4892cd5416251974f57d3035e4aae2be02ab216cfc1144c6af7f9a750cb"
         }
       },
       "validation": {
@@ -135,8 +135,8 @@
         },
         "contactSheet": {
           "path": "mckinsey-blue/contact-sheet.webp",
-          "bytes": 127698,
-          "sha256": "614354d9bfad0ecfa2f7d205e8a884f53b0483a6a6718752b41c09c1cb10463f",
+          "bytes": 126402,
+          "sha256": "1a47ca865fa52e7aada2d1760a59afa9eb63aee668c7e86de17ffe63c2c347ac",
           "quality": 82
         },
         "content": {
@@ -151,8 +151,8 @@
         },
         "summary": {
           "path": "mckinsey-blue/summary.json",
-          "bytes": 2758,
-          "sha256": "e2bbad9c6aa0629680adc2f620152efe1fa3a841f0aa9b5ee5a54f83315724db"
+          "bytes": 2772,
+          "sha256": "4b67b7c3b88096963bc73a5dfa7f0bcbd2493a9587eb769fabff585d0b8d6071"
         }
       },
       "validation": {
@@ -246,8 +246,8 @@
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 142908,
-          "sha256": "789e02688c54425ab984d4a133834a0999d2f247b98e9b166c18de7f9331e3e4",
+          "bytes": 140296,
+          "sha256": "6b319ca9e56aded714afd46c13bb2320a84c47d793fa4f93218bdb80687e0d7a",
           "quality": 82
         },
         "content": {
@@ -262,8 +262,8 @@
         },
         "summary": {
           "path": "swiss-grid/summary.json",
-          "bytes": 2769,
-          "sha256": "2a00eab945dbbb9308d657a06e525f00c9fc34484c8d01df6a62700c9c1b521f"
+          "bytes": 2783,
+          "sha256": "fbf264f6a231a0893c2963afba832190504f16cc9e1ee76d7a165b4206a9028a"
         }
       },
       "validation": {
@@ -348,8 +348,8 @@
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
-          "bytes": 110098,
-          "sha256": "c95f77af095931b4b9602ef50d4d4e875ce92e52fe04f200dfadd04fa98b784c",
+          "bytes": 109222,
+          "sha256": "28ec30a60e068aa5bead84ad65917101f5eef76f82ca7fbbe9421dc36098b10f",
           "quality": 82
         },
         "content": {
@@ -364,8 +364,8 @@
         },
         "summary": {
           "path": "broadside/summary.json",
-          "bytes": 2768,
-          "sha256": "e6277dfdf0f534867977e1d95e5931ced2afd1459147a92479fa8bc4dfa1f214"
+          "bytes": 3659,
+          "sha256": "5ecc4e8fca0063215702668fbd09cb1368c717f4c6d98220e7a032dfa1712f5a"
         }
       },
       "validation": {
@@ -392,11 +392,11 @@
         "lowBuckets": {
           "total": 82,
           "styleAllowed": 81,
-          "baselineKnown": 1,
+          "baselineKnown": 0,
           "new": 0,
-          "changed": 0,
-          "resolved": 0,
-          "reviewable": 0,
+          "changed": 1,
+          "resolved": 1,
+          "reviewable": 1,
           "baselineUnavailable": false,
           "baselineUpdated": false
         },
@@ -405,7 +405,9 @@
           "unexpected-wrap": 1
         },
         "newLowByFamily": {},
-        "changedLowByFamily": {},
+        "changedLowByFamily": {
+          "unexpected-wrap": 1
+        },
         "baseline": {
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
@@ -422,8 +424,38 @@
           "note": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above."
         },
         "newLowSamples": [],
-        "changedLowSamples": [],
-        "resolvedLowSamples": []
+        "changedLowSamples": [
+          {
+            "severity": "low",
+            "family": "unexpected-wrap",
+            "kind": "text-unexpected-wrap",
+            "slideIndex": 4,
+            "target": "S4_StatLabel1",
+            "metrics": {
+              "availableWidthPt": 266.23,
+              "estLines": 2,
+              "fontPt": 11.5,
+              "mixedRunSpacing": 0,
+              "textLength": 46,
+              "textMeasureExact": 1,
+              "textRunCount": 1,
+              "unresolvedFontSizeRuns": 0
+            },
+            "identity": "dd284499d8bee0af53f4",
+            "fingerprint": "9be1cadd22d4514cec75",
+            "baselineFingerprints": ["e022c971b11fff908cad"]
+          }
+        ],
+        "resolvedLowSamples": [
+          {
+            "severity": "low",
+            "family": "unexpected-wrap",
+            "kind": "text-unexpected-wrap",
+            "slideIndex": 4,
+            "target": "S4_StatLabel1",
+            "fingerprint": "e022c971b11fff908cad"
+          }
+        ]
       }
     },
     {
@@ -451,8 +483,8 @@
         },
         "contactSheet": {
           "path": "coral/contact-sheet.webp",
-          "bytes": 82794,
-          "sha256": "eaa19250c828ceea0bd688605d0f30472eccc6e90998e97e0ff776c01895ccf5",
+          "bytes": 82542,
+          "sha256": "8c62014745fd680c4ccf982ace16aa1abe7bc1ff745705b1bde896c25b7528a0",
           "quality": 82
         },
         "content": {
@@ -467,8 +499,8 @@
         },
         "summary": {
           "path": "coral/summary.json",
-          "bytes": 2746,
-          "sha256": "5de95ba40e6c2b08607847f88114007de6c7ffbddef570b5917109a4ae2f477e"
+          "bytes": 2760,
+          "sha256": "114994ab665ec37ee27249e46525d10a1434a8be3ca773eb28e650a31b59b3d5"
         }
       },
       "validation": {
@@ -553,8 +585,8 @@
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 66514,
-          "sha256": "bc3344af8105c895a8b5798a2ab857995902d9cf4e6b704ed4fb1cc957345599",
+          "bytes": 64844,
+          "sha256": "b51302cd7a2fdbbb480d9411e1358c05b87030d02f2000019607c126c7ee51a7",
           "quality": 82
         },
         "content": {
@@ -569,8 +601,8 @@
         },
         "summary": {
           "path": "cartesian/summary.json",
-          "bytes": 2779,
-          "sha256": "9094c1e33638111cf56ebab108cc89478a3d02c2052803b75b467f2ccf08c01a"
+          "bytes": 2793,
+          "sha256": "e21b6ffbacffe164f9ae626506bd7d9a7576f8e449c413f21c83ff05295d4059"
         }
       },
       "validation": {
@@ -654,8 +686,8 @@
         },
         "contactSheet": {
           "path": "long-table/contact-sheet.webp",
-          "bytes": 104014,
-          "sha256": "0bb1a651e42a19bf0de3a833d15d7d40baa534cccc708a80efecc090414eb68d",
+          "bytes": 102704,
+          "sha256": "46d59858be8c96e2a5d51a61178059932b26bdd884333aa969e7c8140086dbf8",
           "quality": 82
         },
         "content": {
@@ -670,8 +702,8 @@
         },
         "summary": {
           "path": "long-table/summary.json",
-          "bytes": 2774,
-          "sha256": "d17d6520699b99d2309094fda72f0092fc17e990d1f4abef746fede1e3aefb3a"
+          "bytes": 2788,
+          "sha256": "99c472ee4b646e3ef1f9f37d04a07bd6c2522fb9e05c6bba77162a631c200ca5"
         }
       },
       "validation": {
@@ -756,8 +788,8 @@
         },
         "contactSheet": {
           "path": "biennale-yellow/contact-sheet.webp",
-          "bytes": 104386,
-          "sha256": "05b3de34135666ee86ca35247efcdf92adfbb5238fbf3b5e2d50e88f04825f80",
+          "bytes": 102852,
+          "sha256": "2d954a319208ba2e6d4a67711707bb1f80eef96470393dc19d682b02c2dc9e24",
           "quality": 82
         },
         "content": {
@@ -772,8 +804,8 @@
         },
         "summary": {
           "path": "biennale-yellow/summary.json",
-          "bytes": 2793,
-          "sha256": "0df24e0bed8152d5f2510cb871e7ce598a47ae43072fbd4f2c47f9bd58afa981"
+          "bytes": 2807,
+          "sha256": "15a1126e28dfbc8a017e1515f9a602c65ec39953a3d52ba058237c5c80928e61"
         }
       },
       "validation": {

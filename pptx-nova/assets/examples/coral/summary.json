@@ -99,12 +99,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 219161,
-      "sha256": "a0567bfb52155f6142eaf59dee7fca10ae90c7f608c62049d9c7690db82b2a4c"
+      "bytes": 217515,
+      "sha256": "c21a2dd3c515d489aa403e4ec8b377e210fa8f69251521c5112d49fc91cd28a5"
     },
     "webp": {
-      "bytes": 82794,
-      "sha256": "eaa19250c828ceea0bd688605d0f30472eccc6e90998e97e0ff776c01895ccf5"
+      "bytes": 82542,
+      "sha256": "8c62014745fd680c4ccf982ace16aa1abe7bc1ff745705b1bde896c25b7528a0"
     }
   }
 }

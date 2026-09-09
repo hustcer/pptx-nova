@@ -17,19 +17,19 @@ table setter 已全部并入对应的聚合 op
 
 ## 1. 演示文稿与 slide 级
 
-| op                        | 用途                                                                             |
-| ------------------------- | -------------------------------------------------------------------------------- |
-| `add-slide`               | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选                   |
-| `remove-slide`            | 删除指定 slide                                                                   |
-| `move-slide`              | 改 slide 顺序（`from` / `to` 都是 0-based）                                      |
-| `duplicate-slide`         | 复制 slide（保留全部内容，包括 notes）                                           |
-| `set-slide-size`          | 改 deck 尺寸（`slideSize` 字段）：`"16:9"` / `"4:3"` / `{ w, h }`                |
-| `set-slide-background`    | 改某页背景：`{ fill: ..., followMaster: false }`                                 |
-| `set-slide-transition`    | 设置/清理基础 slide transition 与自动切页                                        |
-| `set-slide-animations`    | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear`                   |
-| `set-slide-animations`    | 按 inspect 动画 id 修改安全子集 step（`animations: [{ id, ... }]`）              |
-| `set-slide-animations`    | 按 inspect 动画 id 删除安全子集 step（`remove: ["<id>"]`）                       |
-| `set-document-properties` | core props（`properties` map，键如 `title` / `author` / `subject` / `keywords`） |
+| op                        | 用途                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| `add-slide`               | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选                    |
+| `remove-slide`            | 删除指定 slide                                                                    |
+| `move-slide`              | 改 slide 顺序（`from` / `to` 都是 0-based）                                       |
+| `duplicate-slide`         | 复制 slide（保留全部内容，包括 notes）                                            |
+| `set-slide-size`          | 改 deck 尺寸（`slideSize` 字段）：`"wide"`(16:9) / `"standard"`(4:3) / `{ w, h }` |
+| `set-slide-background`    | 改某页背景：`{ fill: ..., followMaster: false }`                                  |
+| `set-slide-transition`    | 设置/清理基础 slide transition 与自动切页                                         |
+| `set-slide-animations`    | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear`                    |
+| `set-slide-animations`    | 按 inspect 动画 id 修改安全子集 step（`animations: [{ id, ... }]`）               |
+| `set-slide-animations`    | 按 inspect 动画 id 删除安全子集 step（`remove: ["<id>"]`）                        |
+| `set-document-properties` | core props（`properties` map，键如 `title` / `author` / `subject` / `keywords`）  |
 
 ### Slide notes
 
@@ -123,20 +123,20 @@ table setter 已全部并入对应的聚合 op
 
 ## 2. Shape 创建
 
-| op                | 用途                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------ |
-| `add-shape`       | 加预设形状（`kind` 必填：182 个 catalog 名/别名，或任意 canonical OOXML ST_ShapeType prst；`preset` 已删除） |
-| `add-text-box`    | 纯文本框                                                                                                     |
-| `add-placeholder` | 加 placeholder shape（type=title/body/content/...）                                                          |
-| `add-image`       | 加图片（`assetSource.path` 或 `bytesBase64`）                                                                |
-| `add-equation`    | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                                            |
-| `add-video`       | 加视频，含 poster frame                                                                                      |
-| `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                                                        |
-| `add-group`       | 创建空 group shape，可后续填子 shape                                                                         |
-| `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                                                 |
-| `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                                                         |
-| `add-table`       | 加表 `rows x columns`，可选 `data: [[...]]` 初始化                                                           |
-| `add-chart`       | 加图表，详见 `charts.md`                                                                                     |
+| op                | 用途                                                                                                                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `add-shape`       | 加预设形状（`kind` 必填：182 个 catalog 名/别名，或任意 canonical OOXML ST_ShapeType prst；`preset` 已删除）               |
+| `add-text-box`    | 纯文本框                                                                                                                   |
+| `add-placeholder` | 加 placeholder shape（`type` 取 placeholderType enum：title/body/ctrTitle/subTitle/obj/pic/chart/tbl/...，没有 `content`） |
+| `add-image`       | 加图片（`assetSource.path` 或 `bytesBase64`）                                                                              |
+| `add-equation`    | 加数学公式 SVG（`latex` fallback 或 `assetSource.path` 渲染资产）                                                          |
+| `add-video`       | 加视频，含 poster frame                                                                                                    |
+| `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                                                                      |
+| `add-group`       | 创建空 group shape，可后续填子 shape                                                                                       |
+| `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                                                               |
+| `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                                                                       |
+| `add-table`       | 加表 `rows x columns`，可选 `data: [[...]]` 初始化                                                                         |
+| `add-chart`       | 加图表，详见 `charts.md`                                                                                                   |
 
 ### add-freeform 可见性
 
@@ -320,7 +320,7 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
 }
 ```
 
-`alignment`: `left / center / right / justify / distribute / thai-distribute`。
+`alignment`: `left / center / right / justify / justify-low / distribute / thai-distribute`。
 `lineSpacing`: 数字 = 倍数；字符串 `"24pt"` = 固定行高。
 把 `format` 中的字段设为 `null` 可清掉该属性（如 `"indent": null`）。
 
@@ -392,7 +392,7 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
 
 | op                                | 用途                                                                                              |
 | --------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `add-chart`                       | 创建（19 个 kind, 详见 `charts.md`）                                                              |
+| `add-chart`                       | 创建（27 个 kind, 详见 `charts.md`）                                                              |
 | `set-chart-data`                  | 替换数据                                                                                          |
 | `set-chart-text`                  | 改标题 / 系列名 / 分类名等文本                                                                    |
 | `set-chart`（`style`）            | PowerPoint 内置 chartStyle 1-48                                                                   |
@@ -462,35 +462,35 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 风格内容时，优先使用这些 recipe diagram ops 或显式 shape/connector patch；不要假设
 可以直接创建或编辑 OOXML SmartArt。
 
-| op / kind                                  | 等级   | 用途                                                                           |
-| ------------------------------------------ | ------ | ------------------------------------------------------------------------------ |
-| `add-slide.recipe.kind="title"`            | recipe | 封面                                                                           |
-| `add-slide.recipe.kind="section"`          | recipe | 章节扉页                                                                       |
-| `add-slide.recipe.kind="two-column"`       | recipe | 左右对照                                                                       |
-| `add-slide.recipe.kind="image-caption"`    | recipe | 大图 + 说明                                                                    |
-| `add-slide.recipe.kind="kpi-grid"`         | recipe | KPI 网格                                                                       |
-| `add-slide.recipe.kind="comparison-table"` | recipe | 对比表                                                                         |
-| `add-slide.recipe.kind="timeline"`         | recipe | 时间线 / 里程碑                                                                |
-| `add-slide.recipe.kind="roadmap"`          | recipe | 产品路线图 / 阶段计划                                                          |
-| `add-slide.recipe.kind="matrix-2x2"`       | recipe | 2x2 矩阵                                                                       |
-| `add-slide.recipe.kind="process-flow"`     | recipe | 流程图                                                                         |
-| `add-slide.recipe.kind="funnel"`           | recipe | 漏斗 / pipeline                                                                |
-| `add-slide.recipe.kind="swot"`             | recipe | SWOT 四象限                                                                    |
-| `add-slide.recipe.kind="pyramid"`          | recipe | 金字塔 / 层级模型                                                              |
-| `add-slide.recipe.kind="hub-spoke"`        | recipe | 中心辐射 / 能力地图                                                            |
-| `add-slide.recipe.kind="cycle"`            | recipe | 闭环 / 复盘循环                                                                |
-| `add-slide.recipe.kind="gantt"`            | recipe | 甘特 / 项目排期                                                                |
-| `add-slide.recipe.kind="scorecard-table"`  | recipe | 评分卡表格                                                                     |
-| `add-slide.recipe.kind="comparison-cards"` | recipe | 方案比较卡片                                                                   |
-| `set-theme` / `remap-theme`                | patch  | 品牌改装                                                                       |
-| `populate-slide`                           | patch  | 填 layout 契约（title-and-content/two-column/...），`mode: "strict" / "loose"` |
-| `bind-data`                                | patch  | JSON 数据绑定 text / table / chart                                             |
-| `if`                                       | patch  | 控制流：按状态分支（slide-count / selector-match / ...）                       |
-| `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops                                |
-| `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支                                    |
-| `define-macro`                             | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）                                  |
-| `use-macro`                                | patch  | 宏：展开已 `define-macro` 的命名宏，用 `args` 传参                             |
-| `patch-ooxml`                              | patch  | 逃生口：直接 XPath 改 OOXML（需 `--allow-raw-xml`）                            |
+| op / kind                                  | 等级   | 用途                                                                                                                                           |
+| ------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `add-slide.recipe.kind="title"`            | recipe | 封面                                                                                                                                           |
+| `add-slide.recipe.kind="section"`          | recipe | 章节扉页                                                                                                                                       |
+| `add-slide.recipe.kind="two-column"`       | recipe | 左右对照                                                                                                                                       |
+| `add-slide.recipe.kind="image-caption"`    | recipe | 大图 + 说明                                                                                                                                    |
+| `add-slide.recipe.kind="kpi-grid"`         | recipe | KPI 网格                                                                                                                                       |
+| `add-slide.recipe.kind="comparison-table"` | recipe | 对比表                                                                                                                                         |
+| `add-slide.recipe.kind="timeline"`         | recipe | 时间线 / 里程碑                                                                                                                                |
+| `add-slide.recipe.kind="roadmap"`          | recipe | 产品路线图 / 阶段计划                                                                                                                          |
+| `add-slide.recipe.kind="matrix-2x2"`       | recipe | 2x2 矩阵                                                                                                                                       |
+| `add-slide.recipe.kind="process-flow"`     | recipe | 流程图                                                                                                                                         |
+| `add-slide.recipe.kind="funnel"`           | recipe | 漏斗 / pipeline                                                                                                                                |
+| `add-slide.recipe.kind="swot"`             | recipe | SWOT 四象限                                                                                                                                    |
+| `add-slide.recipe.kind="pyramid"`          | recipe | 金字塔 / 层级模型                                                                                                                              |
+| `add-slide.recipe.kind="hub-spoke"`        | recipe | 中心辐射 / 能力地图                                                                                                                            |
+| `add-slide.recipe.kind="cycle"`            | recipe | 闭环 / 复盘循环                                                                                                                                |
+| `add-slide.recipe.kind="gantt"`            | recipe | 甘特 / 项目排期                                                                                                                                |
+| `add-slide.recipe.kind="scorecard-table"`  | recipe | 评分卡表格                                                                                                                                     |
+| `add-slide.recipe.kind="comparison-cards"` | recipe | 方案比较卡片                                                                                                                                   |
+| `set-theme` / `remap-theme`                | patch  | 品牌改装                                                                                                                                       |
+| `populate-slide`                           | patch  | 填 layout 契约（title-and-content/two-column/...），`mode: "strict" / "loose"`                                                                 |
+| `bind-data`                                | patch  | JSON 数据绑定 text / table / chart                                                                                                             |
+| `if`                                       | patch  | 控制流：按状态分支（slide-count / selector-match / ...）                                                                                       |
+| `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops                                                                                                |
+| `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支                                                                                                    |
+| `define-macro`                             | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）                                                                                                  |
+| `use-macro`                                | patch  | 宏：展开已 `define-macro` 的命名宏，用 `args` 传参                                                                                             |
+| `patch-ooxml`                              | patch  | 逃生口：直接 XPath 改 OOXML（`set/add/remove/replace` 需 `--allow-raw-xml`；守卫 action `repair-child-order` / `repair-relationships` 不需要） |
 
 详见 `recipes.md` / `data-driven.md` / `control-flow-and-raw-xml.md`。
 

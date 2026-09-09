@@ -284,9 +284,9 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
       --json
     ```
 
-    `--slide N` is the compatible 0-based single-slide selector (default 0),
-    while `--slides` is 1-based and `--all` selects the whole donor; the three
-    selectors are mutually exclusive. Prefer one multi-slide transaction over
+    `--slides` is a 1-based selector and `--all` selects the whole donor; the
+    two selectors are mutually exclusive, and omitting both copies only donor
+    slide 1 (there is no `--slide` option). Prefer one multi-slide transaction over
     repeated single-slide invocations and intermediate PPTX files. The command
     opens each deck once, validates the full requested selection before target
     mutation, serializes once, and reports `copied[]`, flattened
@@ -427,7 +427,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
 
         node <skill-root>/scripts/pptx-nova-visual-review.mjs \
           --run-dir <run-dir> \
-          --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
+          --contact-sheet <run-dir>/previews/contact-sheet.png \
           --previews <run-dir>/previews \
           --slides-reviewed <n> \
           --check titleWrap=pass \

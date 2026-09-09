@@ -1,6 +1,6 @@
 # PPTX Nova Assets
 
-This directory is the local asset catalog used by `skills/pptx-nova`.
+This directory is the local asset catalog used by the `pptx-nova` skill.
 
 The catalogs are intentionally small and metadata-first. They define stable IDs,
 selection hints, and generator/patch entry points before large binary assets are
@@ -45,17 +45,17 @@ introduced.
 
 - Use `xdoc pptx extract-style reference.pptx --output style.json --json` to
   create a draft profile before adding a new brand or theme entry.
-- Use `xdoc pptx import-template reference.pptx --name stable-id --output-dir skills/pptx-nova/assets --json`
+- Use `xdoc pptx import-template reference.pptx --name stable-id --output-dir <skill-root>/assets --json`
   to copy a reference PPTX into `decks/<id>/`, write brand/layout/theme/style
   profiles, and register the imported entries in the local catalogs.
 - Use `xdoc pptx slide-copy -i target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx`
-  for transactional whole-slide reuse. `--slides` is 1-based; `--slide N` is
-  the compatible 0-based single-slide selector and `--all` selects the whole
-  source. The three selectors are mutually exclusive.
+  for transactional whole-slide reuse. `--slides` is 1-based and `--all` selects
+  the whole source; the two selectors are mutually exclusive, and omitting both
+  copies only the first source slide.
 - Use `node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
   plus `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery --benchmark-mode required-live`
   for production visual gates. Store long-lived benchmark inputs under
-  `skills/pptx-nova/benchmarks/visual/`, not under `assets/decks/`.
+  `<skill-root>/benchmarks/visual/`, not under `assets/decks/`.
 - Do not commit generated `.pptx`, PNG previews, contact sheets, regenerated
   `patch.json`, dry-run reports, or full `vision*.json` files unless a future
   review explicitly needs a frozen full artifact.

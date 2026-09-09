@@ -88,9 +88,9 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
      --dry-run --json > <run-dir>/dry-run.json
    ```
 
-   `--slides` is 1-based; `--slide` remains the 0-based single-slide
-   compatibility entry and `--all` copies the complete source. These selectors
-   are mutually exclusive. Reuse the native `pptx-slide-copy/v1` report as the
+   `--slides` is 1-based and `--all` copies the complete source. These two
+   selectors are mutually exclusive; there is no `--slide` single-slide option
+   (the parser rejects it). Reuse the native `pptx-slide-copy/v1` report as the
    structural Edit Contract evidence, including its read-only `ready` preflight,
    current target/donor whole-file SHA-256 values, normalized OPC package
    fingerprints, per-slide/dependency mappings, and `templates[]` closure

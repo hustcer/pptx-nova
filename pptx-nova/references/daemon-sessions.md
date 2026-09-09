@@ -66,11 +66,13 @@ xdoc pptx inspect deck.pptx --daemon --json | save inspect.json
 xdoc pptx apply -p patch.json -i deck.pptx -o deck.pptx --daemon-strict --overwrite
 ```
 
-⚠️ **`--daemon` 只对 `pptx apply` / `pptx inspect` 生效**。`pptx chrome-detect` /
-`pptx chrome-remove` / `pptx chrome-apply` / `pptx remap-theme` / `pptx template-fill` /
-`pptx check-brand` / `pptx new` / `pptx catalog` / `pptx recipe` /
-`pptx replay|audit|rollback` 都**不接受** `--daemon`（解析阶段会报
-`xdoc pptx --daemon is only valid with apply or inspect`）。
+⚠️ **`--daemon` 只对 `pptx apply` / `pptx inspect` 生效**。`pptx new` / `pptx select`
+会在解析阶段报 `xdoc pptx --daemon is only valid with apply or inspect`；
+`pptx preview` / `slide-copy` / `extract-style` / `import-template` / `refurbish-skin` /
+`morph-check` 报 `does not accept --daemon/--daemon-strict`。其余 action
+（`chrome-detect` / `chrome-remove` / `chrome-apply` / `remap-theme` / `template-fill` /
+`check-brand` / `catalog` / `recipe` / `replay|audit|rollback` / i18n 系列等）当前
+会静默忽略该 flag 并按一次性进程执行，不要指望它们复用 session。
 
 session 按 filesystem identity 键化，而不是只比较 path 字符串。现存文件优先使用
 device/inode（Windows 为 volume/file-index）身份；可证明指向同一对象的 symlink、
@@ -184,7 +186,7 @@ xdoc daemon stop
 ### 6.2 批量场景：同一模板上反复 apply / inspect
 
 ```bash
-# 注意：template-fill 不接 --daemon。批量数据驱动场景仍是一次性进程
+# 注意：template-fill 上 --daemon 不生效（被忽略）。批量数据驱动场景仍是一次性进程
 for data in data/*.json; do
   out="dist/$(basename $data .json).pptx"
   xdoc pptx template-fill $data --template template.pptx -o $out --overwrite
@@ -231,10 +233,9 @@ export XDOC_DAEMON_AUTO_SPAWN=0
   加速）
 - **不要在 daemon 模式下手动覆写 `<out>.xdoc.json`** — sidecar 由 apply 路径自己
   写；手动改会让 rollback 失败
-- **不要给 `template-fill` / `check-brand` / `apply-brand` / `slide-copy` /
-  `extract-style` / `import-template` / `new` / `catalog` / `recipe` /
-  `replay` / `audit` / `rollback` 加 `--daemon`** —
-  解析阶段会拒绝
+- **不要给 `apply` / `inspect` 以外的 action 加 `--daemon`** —
+  `new` / `select` / `preview` / `slide-copy` / `extract-style` / `import-template` /
+  `refurbish-skin` / `morph-check` 在解析阶段会拒绝，其它 action 只会静默忽略
 - **Windows 上 daemon 仍在 MVP** — macOS/Linux 已稳定，Windows 路径走 `TEMP` /
   `TMP` / `LOCALAPPDATA` fallback，但 CI 覆盖还不全。生产 CI 用 Windows 时建议
   先用一次性模式跑通，再切 daemon
@@ -316,7 +317,7 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
 
 用它时有五条必须记住：
 
-- `xdoc_schema` 默认 `mode=index`（约 21 KB）。`mode=full` 约 1.5 MB、贵约 71 倍，
+- `xdoc_schema` 默认 `mode=index`（约 17 KB）。`mode=full` 约 1.8 MB、贵约 100 倍，
   只在确实需要时请求；通常 `mode=ops` + `ops:[...]` 才是正确选择。
 - **传绝对路径**。相对路径是相对 `xdoc` 子进程的工作目录，不是 client 的。
 - `isError: true` 是**业务失败**，不是 JSON-RPC transport error。完整

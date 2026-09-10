@@ -114,6 +114,7 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 | 取什么                        | 路径                                                                                                                   |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Slide 数                      | `.presentation.slideCount`                                                                                             |
+| 包 conformance                | `.presentation.conformance.package`（`transitional / strict / mixed / undetermined`）与四个计数字段                    |
 | Deck 尺寸 (EMU)               | `.presentation.slideSize.{wEmu, hEmu}`（除以 914400 = 英寸）                                                           |
 | Layout 列表                   | `.presentation.layouts`                                                                                                |
 | 每页类型                      | `.slides[N].semantic.pageType`（`blank / title / section / content / two-column / comparison / data / media / mixed`） |
@@ -152,6 +153,12 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
   局部改；复杂 timing 仍看 `animationCapabilities.preserveOnly`。
 - preserve-only 状态（SmartArt、复杂动画、复杂过渡等）也会通过 capabilities / per-slide
   summary 报告；不要只看一个布尔字段就决定能不能改。
+- `presentation.conformance` 披露包用的是 ECMA-376 Transitional 还是 ISO/IEC 29500
+  Strict 拼写（PowerPoint「Strict Open XML 演示文稿」另存会产出 `strict`）。两种输入都
+  按同一身份读取，inspect / convert / check 结果与 Transitional 双胞胎一致，不需要任何
+  预处理或转换。编辑 `strict` 包后未触达 part 保持原字节，新增 part 与 relationship 按
+  Transitional 写出，输出变成 `mixed`（PowerPoint 正常打开）；apply / dry-run 会用
+  `conformance:` 前缀的 warning 说明这一点，它是信息披露，不是缺陷，也不要为它重写 patch。
 - **`geometryOverlaps` / `textOverflowEstimates` 是每页的几何风险**，复用 `vision-check` 的重叠/溢出核心算出来——Edit 模式一次 inspect 就能看到这两类风险，不必单独再跑 `vision-check`；但对比度、装饰是否真盖住文字仍要 PNG 复核。`kind` 取 `both-text`（两个文本框重叠）或 `decoration-over-text`（色块压住文字）
 
 ### 用 nushell 高效消化 inspect
@@ -334,20 +341,20 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 
 ## 4. dry-run 报告字段速记
 
-| 字段                              | 看什么                                                                 |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| `opResults[].status`              | success / error / skipped                                              |
-| `opResults[].changedParts[]`      | 影响了哪些 OOXML part（`ppt/slides/slide1.xml` 等）                    |
-| `opResults[].resolvedSelectors[]` | 规范化 selector 与实际 shape；用 slide + id 定位，name 可选且可能重复  |
-| `opResults[].createdObjects[]`    | 唯一的创建对象数组；按 kind 读取定位字段，普通和控制流操作一致         |
-| `opResults[].expandedOps[]`       | 只有 `{op}` 的展开名称摘要；可执行完整请求见 recipe compile 的 `patch` |
-| `opResults[].analysis`            | 按 kind 判别：fit-text / layout-impact / remap-theme                   |
-| `opResults[].durationMs`          | op 耗时                                                                |
-| `semanticChanges[]`               | Agent 可读的语义 diff（slide/shape/text/style/media/chart/table）      |
-| `visualRisks[]`                   | 结构性风险（文本溢出 / 表格越界 / 缺图尺寸 / OLE 缺 icon 等）          |
-| `warnings[]`                      | 一般警告                                                               |
-| `traces[]`                        | 调用链路（trace/debug level 才有）                                     |
-| `error`                           | 失败时的结构化错误（kind / code / opIndex / suggestions）              |
+| 字段                              | 看什么                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `opResults[].status`              | success / error / skipped                                                  |
+| `opResults[].changedParts[]`      | 影响了哪些 OOXML part（`ppt/slides/slide1.xml` 等）                        |
+| `opResults[].resolvedSelectors[]` | 规范化 selector 与实际 shape；用 slide + id 定位，name 可选且可能重复      |
+| `opResults[].createdObjects[]`    | 唯一的创建对象数组；按 kind 读取定位字段，普通和控制流操作一致             |
+| `opResults[].expandedOps[]`       | 只有 `{op}` 的展开名称摘要；可执行完整请求见 recipe compile 的 `patch`     |
+| `opResults[].analysis`            | 按 kind 判别：fit-text / layout-impact / remap-theme                       |
+| `opResults[].durationMs`          | op 耗时                                                                    |
+| `semanticChanges[]`               | Agent 可读的语义 diff（slide/shape/text/style/media/chart/table）          |
+| `visualRisks[]`                   | 结构性风险（文本溢出 / 表格越界 / 缺图尺寸 / OLE 缺 icon 等）              |
+| `warnings[]`                      | 一般警告；`conformance:` 前缀只说明 Strict 输入将得到 mixed 输出，不需处理 |
+| `traces[]`                        | 调用链路（trace/debug level 才有）                                         |
+| `error`                           | 失败时的结构化错误（kind / code / opIndex / suggestions）                  |
 
 `fit-text` 分支提供 `chosenFontSizePt`、带 `pt` 单位的 `chosenFontSize`、
 `applied`、`overflow`、`strategy` 和 `evidence`；估算或 font-metrics fallback

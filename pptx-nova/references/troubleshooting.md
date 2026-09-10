@@ -145,6 +145,11 @@ apply / dry-run 报告的 `warnings[]` 里有一组**写出侧自检**前缀（�
 例：`child-order: ppt/slides/slide1.xml: <a:pPr> child <a:spcAft> must come
 before <a:buChar> (schema order: …)`。
 
+`conformance:` 前缀**不属于**这组自检：它只说明输入包是 ISO Strict（或已是 mixed），
+未触达 part 保持原字节、新增内容按 Transitional 写出，输出包会被 inspect 报为
+`conformance.package: "mixed"`。这是信息披露，PowerPoint 正常打开 mixed 包，不要为它
+改写 patch 或重跑。
+
 **来源判断**：从零由 xdoc 生成的 deck 上出现这些告警 = xdoc writer 内部 bug，
 不要为绕过它改写 patch，应把完整 warning 上报维护者。**编辑既有 deck** 时它们
 更多是原文件里预存的缺陷（外部工具删了形状却留下动画引用等）——这时走下面的

@@ -133,13 +133,14 @@ apply / dry-run 报告的 `warnings[]` 里有一组**写出侧自检**前缀（�
 对 xdoc 本次生成/改写的 part 做的检查；下表是最常见的五类，完整集合见
 `semanticIssues[].code` 枚举）：
 
-| 前缀            | 含义                                                               |
-| --------------- | ------------------------------------------------------------------ |
-| `child-order:`  | 子元素被写到 OOXML 规范顺序之外（含期望顺序全文）                  |
-| `dangling-rel:` | r:id / r:embed / r:link 引用在所属 `.rels` 里不存在                |
-| `dangling-ref:` | 动画/build 的 `spid` 引用了 part 内不存在的形状 id（cNvPr）        |
-| `duplicate-id:` | cNvPr / sldId 等 id 在 part 内重复（PowerPoint 会提示"修复"）      |
-| `part-truth:`   | relationship 指向缺失 part / 类型错配 / part 缺 Content-Types 声明 |
+| 前缀            | 含义                                                                                                                                                                                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `child-order:`  | 子元素被写到 OOXML 规范顺序之外（含期望顺序全文）                                                                                                                                                                                                          |
+| `dangling-rel:` | r:id / r:embed / r:link 引用在所属 `.rels` 里不存在                                                                                                                                                                                                        |
+| `dangling-ref:` | 动画/build 的 `spid` 引用了 part 内不存在的形状 id（cNvPr）                                                                                                                                                                                                |
+| `duplicate-id:` | cNvPr / sldId 等 id 在 part 内重复（PowerPoint 会提示"修复"）                                                                                                                                                                                              |
+| `part-truth:`   | relationship 指向缺失 part / 类型错配 / part 缺 Content-Types 声明                                                                                                                                                                                         |
+| `part-graph:`   | part 挂错父级（如 notes 直接挂在 presentation 下）/ 一个 slide 两个 notesSlide / 缺必需 slideMaster / 媒体引用挂在不允许的容器；ruleId `sdk/part-graph/<not-allowed\|required\|only-one\|content-type\|data-reference>/<Parent>/<Child>`，只报告不自动修复 |
 
 例：`child-order: ppt/slides/slide1.xml: <a:pPr> child <a:spcAft> must come
 before <a:buChar> (schema order: …)`。
@@ -155,7 +156,7 @@ before <a:buChar> (schema order: …)`。
 
 ```jsonc
 {
-  "code": "dangling-ref", // 枚举: dangling-rel | rel-type-mismatch | dangling-ref | duplicate-id | part-truth | value-out-of-range | invalid-attribute-value | missing-required-attribute | invalid-attribute-comparison | invalid-xml | invalid-relationships | child-order | child-cardinality | child-choice
+  "code": "dangling-ref", // 枚举: dangling-rel | rel-type-mismatch | dangling-ref | duplicate-id | part-truth | value-out-of-range | invalid-attribute-value | missing-required-attribute | invalid-attribute-comparison | invalid-xml | invalid-relationships | child-order | child-cardinality | child-choice | part-graph
   "ruleId": "<rule id>",
   "part": "ppt/slides/slide1.xml",
   "message": "<p:spTgt> spid=\"2\" references no <cNvPr> with id=\"2\" in the part",

@@ -3,11 +3,11 @@
 > A compact native runtime for document conversion, editable PPTX execution,
 > rendering, validation, and auditable delivery.
 
-> **Runtime contract source for this document:** `v0.3.12 (9131eeac)`
+> **Runtime contract source for this document:** `v0.5.0 (955fb66c)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-09-09
+> **Verification date:** 2026-09-11
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
@@ -24,7 +24,7 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot records the contract-bearing part
-of the runtime response for `v0.3.12 (9131eeac)`; JSON formatting may differ,
+of the runtime response for `v0.5.0 (955fb66c)`; JSON formatting may differ,
 and the environment-specific top-level `build` and `authContract` provenance
 records are intentionally omitted. Release identity and authorization-profile
 evidence are verified separately by the public CLI release gate. Refresh the
@@ -241,7 +241,7 @@ screenshots or log interpretation alone.
 
 ### Current release surface
 
-| Area                           | Runtime contract in v0.3.12                                                                            |
+| Area                           | Runtime contract in v0.5.0                                                                             |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `auth`, `pdf`, `daemon`, `json-rpc`, `mcp`, `schema` |
 | PPTX CLI subcommands           | 37 discoverable subcommands                                                                            |
@@ -316,7 +316,7 @@ versioned system.
 - an implicit claim that reserved document kinds are already supported.
 
 The current capability registry marks `docx` and `xlsx` as `reserved`. They may
-be recognized as document kinds, but the v0.3.12 CLI must not be described as an
+be recognized as document kinds, but the v0.5.0 CLI must not be described as an
 implemented general-purpose converter for them.
 
 ## Design principles
@@ -341,7 +341,7 @@ The full runtime schema currently includes 42 PPTX CLI examples, 21 patch
 examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
-Cache the complete `xdoc schema` response for CLI discovery. In v0.3.12,
+Cache the complete `xdoc schema` response for CLI discovery. In v0.5.0,
 `discovery.commands` is only a list of the eleven top-level command names, while
 `xdoc schema --mode index` is specifically a patch-operation index rather than a
 complete CLI inventory. Neither surface should be treated as an exhaustive
@@ -522,7 +522,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.3.12 (9131eeac)
+0.5.0 (955fb66c)
 ```
 
 The top-level schema response identifies itself as:
@@ -530,7 +530,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.3.12 (9131eeac)"
+  "version": "0.5.0 (955fb66c)"
 }
 ```
 
@@ -680,7 +680,7 @@ The conversion command supports:
 | PPTX      | text     | enabled  | Plain extracted text                                                                |
 | PDF       | PNG/PDF  | enabled  | Render or inspect through the PDF command family                                    |
 | HTML      | Markdown | enabled  | Local HTML file, glob, or directory input                                           |
-| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in v0.3.12               |
+| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in v0.5.0                |
 
 The top-level capability registry is itself machine-readable:
 
@@ -1673,7 +1673,7 @@ xdoc daemon start
   → in-memory deck sessions
 ```
 
-Defaults in v0.3.12:
+Defaults in v0.5.0:
 
 - loopback TCP address: `127.0.0.1:0`;
 - idle session timeout: 300000 ms;
@@ -2028,7 +2028,7 @@ claims should stay tied to the measured contract and its declared limitations.
 
 ## Explicit limitations and non-claims
 
-1. `docx` and `xlsx` are reserved in the v0.3.12 capability registry.
+1. `docx` and `xlsx` are reserved in the v0.5.0 capability registry.
 2. The full CLI is native-first; parser/PDF WebAssembly paths do not imply a
    browser implementation of every command.
 3. Complex animations, transitions, SmartArt-like content, VBA, and other
@@ -2094,7 +2094,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.3.12 (9131eeac). Re-run the discovery
+This document is anchored to xdoc 0.5.0 (955fb66c). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

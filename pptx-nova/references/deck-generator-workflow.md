@@ -414,10 +414,10 @@ dry-run 做 schema / selector / op-level 语义校验，并用和 `vision-check`
    = 7.3，页脚 y=7.1，会重叠；dry-run 不报。
 10. **hero 页深底白字遗漏改色** —— 复制白底页代码到 hero 时忘记把 textPri
     改成 white；dry-run 看到的只是合法 hex。
-11. **freeform 小到不可见** —— `add-freeform` 使用局部路径坐标；如果把 slide
-    英寸坐标当 `points` 直接传进去，生成的 `<a:ext>` 可能只有几个 EMU，PNG 里看不到。
-    donut segment、conic-gradient 替代、斜切块和 SVG-like polygon 要显式设置
-    `originX/originY` 与 `xScale/yScale`，并用 PNG 或解包 XML 检查真实尺寸。
+11. **freeform 尺寸或曲率不对** —— `add-freeform` 的 `x/y/w/h` 使用带单位的
+    slide 坐标，`path.width/height` 与 command 坐标使用局部整数。先通过 runtime
+    schema 确认该合同；显式设置 viewport 和形状框，逐个检查 cubic 的两个控制点。
+    控制点不会自动扩张形状框，apply 后仍须用 PNG 检查真实轮廓与尺寸。
 12. **页码连续性** —— `01 / 08` 跳到 `03 / 08` 因为漏调函数；dry-run 不知道
     你期望的页序。
 
@@ -436,7 +436,7 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 | 主题色没换干净（部分 shape 还是旧色）                   | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                                                     |
 | KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                                               |
 | textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                                                    |
-| freeform / donut / polygon 在 PNG 中看不见              | `add-freeform` points 写成了英寸绝对小数，导致 XML extent 只有个位数 EMU；改用局部整数坐标 + `originX/originY` + `xScale/yScale`         |
+| freeform / donut / polygon 在 PNG 中看不见              | 核对 `add-freeform` 的带单位 `x/y/w/h` 与整数 `path` viewport，按运行时 schema 使用 move/line/cubic/close，并检查填充和线条。            |
 | 同页左下 footer 写"BRAND·X"右上 watermark 写"XDOC DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化                                           |
 | 第二次跑 `apply` 报 `output_exists`                     | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                                 |
 | 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                                                           |

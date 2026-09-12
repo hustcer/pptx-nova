@@ -70,15 +70,27 @@ const ringSegmentPath = (cx, cy, outerR, innerR, startDeg, endDeg) => {
     Math.round((x - left) * FREEFORM_UNITS_PER_IN),
     Math.round((y - top) * FREEFORM_UNITS_PER_IN),
   ])
-  const [startX, startY] = localPoints[0] ?? [0, 0]
+  const minX = Math.min(...localPoints.map(([x]) => x))
+  const minY = Math.min(...localPoints.map(([, y]) => y))
+  const width = Math.max(...localPoints.map(([x]) => x)) - minX
+  const height = Math.max(...localPoints.map(([, y]) => y)) - minY
   return {
-    startX,
-    startY,
-    xScale: FREEFORM_SCALE,
-    yScale: FREEFORM_SCALE,
-    originX: `${Number(left.toFixed(3))}in`,
-    originY: `${Number(top.toFixed(3))}in`,
-    points: localPoints.slice(1),
+    x: `${Math.round(Number(left.toFixed(3)) * 914400) + minX * FREEFORM_SCALE}emu`,
+    y: `${Math.round(Number(top.toFixed(3)) * 914400) + minY * FREEFORM_SCALE}emu`,
+    w: `${width * FREEFORM_SCALE}emu`,
+    h: `${height * FREEFORM_SCALE}emu`,
+    path: {
+      width,
+      height,
+      commands: [
+        ...localPoints.map(([x, y], index) => ({
+          type: index === 0 ? 'move' : 'line',
+          x: x - minX,
+          y: y - minY,
+        })),
+        { type: 'close' },
+      ],
+    },
   }
 }
 const list = (value) =>
@@ -580,7 +592,6 @@ function makePageTypes(api, total) {
         slide: s,
         name,
         ...segment,
-        close: true,
       })
       p.fill(s, name, color)
       p.noLine(s, name)

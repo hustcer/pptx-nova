@@ -134,45 +134,48 @@ table setter 已全部并入对应的聚合 op
 | `add-ole-object`  | 嵌入 OLE 对象（Excel/Word/PDF 等），含 ProgID 与 icon                                                                      |
 | `add-group`       | 创建空 group shape，可后续填子 shape                                                                                       |
 | `add-connector`   | 加连接线（`kind: straight / elbow / curve`）                                                                               |
-| `add-freeform`    | 自由曲线（`points: [[x,y], ...]`，可 `close: true`）                                                                       |
+| `add-freeform`    | 显式形状框与整数 viewport；`path.commands` 使用 move / line / cubic / close，以运行时 schema 为准。                        |
 | `add-table`       | 加表 `rows x columns`，可选 `data: [[...]]` 初始化                                                                         |
 | `add-chart`       | 加图表，详见 `charts.md`                                                                                                   |
 
-### add-freeform 可见性
+### add-freeform 坐标与曲线
 
-`add-freeform` 的 `points` 是局部路径坐标，不等同于 slide 上的英寸绝对坐标。
-如果直接把 `"3.2in"` 级别的几何换成小数点数组传进去，生成的 XML 可能只有几个 EMU
-的 `<a:ext>`，PowerPoint 能打开但 PNG 里几乎不可见。
+先读取当前 `xdoc schema` 的 `add-freeform` operation，确认运行时支持 `path`
+合同。`x/y/w/h` 使用带单位的 slide 坐标；`path.width/height` 是正整数局部
+viewport，映射到形状框。控制点与端点均为局部绝对整数，不使用英寸字符串。
 
-写自由形状时优先使用整数局部坐标，并显式给：
-
-- `originX` / `originY`：形状放到 slide 上的位置，例如 `"2.06in"`。
-- `startX` / `startY`：路径起点，使用同一局部坐标系。
-- `xScale` / `yScale`：局部单位到 EMU 的缩放。若局部坐标使用 1/100in，scale 为 `9144`。
+每个 contour 用 `move` 开始，至少有一段 `line` 或 `cubic`；`cubic` 的
+`x1/y1`、`x2/y2` 是两个控制点，`x/y` 是终点。需要闭合时显式追加 `close`，
+其后只能开始新的 `move` 或结束。开放曲线通过 `set-shape` 设置无填充和线条。
 
 ```json
 {
   "op": "add-freeform",
   "slide": 0,
-  "name": "DonutSegment0",
-  "originX": "2.06in",
-  "originY": "2.3in",
-  "startX": 152,
-  "startY": 0,
-  "xScale": 9144,
-  "yScale": 9144,
-  "points": [
-    [160, 8],
-    [188, 20],
-    [224, 60]
-  ],
-  "close": true
+  "name": "CubicWave",
+  "x": "2in",
+  "y": "2in",
+  "w": "4in",
+  "h": "2in",
+  "path": {
+    "width": 1000,
+    "height": 1000,
+    "commands": [
+      { "type": "move", "x": 0, "y": 500 },
+      { "type": "cubic", "x1": 250, "y1": -500, "x2": 750, "y2": 1500, "x": 1000, "y": 500 }
+    ]
+  }
 }
 ```
 
-复刻 donut segment、conic-gradient、SVG-like polygon 或斜切块时，apply 后至少检查
-PNG；若图形看不见，再解包 slide XML 查对应 shape 的 `<a:ext cx="..." cy="...">`
-是否是实际英寸量级，而不是个位数 EMU。
+局部坐标范围为 -2147483648～2147483647；viewport 范围为 1～2147483647。
+控制点可以在 viewport 外，既不会被裁剪，也不会自动扩张形状框。实际曲线可能
+伸出形状框，必须检查 PNG。首批只支持三次 Bézier C，不接受 Q/A、公式或 SVG
+path 字符串；旧 `points/originX/xScale` 协议不能与新合同混用。
+
+用 `inspect` 的 `freeform.path` 回读完整路径；遇到 `status: "preserve-only"`
+时保留原形状，不把空路径或部分几何重建成替代品。样式继续使用普通
+`set-shape.fill/line`，控制点变化应出现在 semantic diff 中。
 
 ### add-shape 示例
 

@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.5.0 (955fb66c)",
+  "version": "0.5.0 (cb95679f)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -3307,6 +3307,10 @@
                 "description": "Preset geometry, freeform paths, connector endpoints, and selected shape fields follow the published catalogs and selectors."
               },
               {
+                "code": "freeform-line-cubic-path",
+                "description": "add-freeform uses explicit slide x/y/w/h and a positive integer local viewport with ordered move/line/cubic/close commands. Controls may lie outside the viewport without changing the frame. Quadratic curves, arcs, SVG strings, guide formulas and path-specific paint flags are not authored; unmodeled custom geometry is reported as preserve-only with no reconstructable path."
+              },
+              {
                 "code": "group-shape-formatting-bounded",
                 "description": "Group targets support name, accessibility metadata, geometry, transform, and effects; fill, line, and clickAction fail before mutation and must be applied to selected child shapes."
               },
@@ -6412,6 +6416,7 @@
           "coverage": {
             "text": "reliable",
             "shapeGeometry": "reliable",
+            "freeformGeometry": "reliable for supported move/line/cubic/close paths; preserve-only custom geometry is unsupported",
             "shapeStyle": "reliable",
             "mediaSummary": "summary",
             "mediaBinary": "unsupported",
@@ -6432,7 +6437,8 @@
             "pixel diff",
             "chart workbook/data internals",
             "table cell internals",
-            "embedded media binary equality"
+            "embedded media binary equality",
+            "custom geometry outside the canonical freeform path subset"
           ],
           "options": [
             {
@@ -25338,6 +25344,125 @@
                 "$ref": "#/$defs/transitionInOut"
               }
             ]
+          },
+          "freeformPath": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["width", "height", "commands"],
+            "description": "Absolute unitless local coordinates; positive viewport scales to x/y/w/h without fitting or clipping. cubic x1/y1 and x2/y2 are control points, x/y is the endpoint. Contours start with move and contain a drawing segment; close is optional, and only move/end may follow close. Empty contours are rejected at runtime.",
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "commands": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "$ref": "#/$defs/freeformCommand"
+                }
+              }
+            }
+          },
+          "freeformCommand": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "x", "y"],
+                "properties": {
+                  "type": {
+                    "const": "move"
+                  },
+                  "x": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "x", "y"],
+                "properties": {
+                  "type": {
+                    "const": "line"
+                  },
+                  "x": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "x1", "y1", "x2", "y2", "x", "y"],
+                "properties": {
+                  "type": {
+                    "const": "cubic"
+                  },
+                  "x1": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y1": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "x2": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y2": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "x": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type"],
+                "properties": {
+                  "type": {
+                    "const": "close"
+                  }
+                }
+              }
+            ]
           }
         },
         "properties": {
@@ -27075,40 +27200,32 @@
                         "op": {
                           "const": "add-freeform"
                         },
-                        "close": {
-                          "type": "boolean"
+                        "h": {
+                          "$ref": "#/$defs/length"
                         },
                         "name": {
                           "type": "string"
                         },
-                        "originX": {
-                          "$ref": "#/$defs/length"
-                        },
-                        "originY": {
-                          "$ref": "#/$defs/length"
-                        },
-                        "points": {
-                          "$ref": "#/$defs/pointArray"
+                        "path": {
+                          "$ref": "#/$defs/freeformPath"
                         },
                         "slide": {
                           "type": "integer",
                           "description": "0-based slide index."
                         },
-                        "startX": {
-                          "type": "number"
+                        "w": {
+                          "$ref": "#/$defs/length"
                         },
-                        "startY": {
-                          "type": "number"
+                        "x": {
+                          "$ref": "#/$defs/length"
                         },
-                        "xScale": {
-                          "type": "number"
-                        },
-                        "yScale": {
-                          "type": "number"
+                        "y": {
+                          "$ref": "#/$defs/length"
                         }
                       },
-                      "required": ["op", "slide", "points"],
-                      "additionalProperties": false
+                      "required": ["op", "slide", "x", "y", "w", "h", "path"],
+                      "additionalProperties": false,
+                      "description": "x/y/w/h place the shape on the slide. path.width/height define an absolute local coordinate viewport; points outside it are not clipped or auto-fitted. Each contour starts with move, draws line/cubic segments and optionally closes explicitly. Style with set-shape fill/line. No SVG strings, quadratic/arc commands or guide formulas."
                     },
                     {
                       "type": "object",
@@ -29329,10 +29446,29 @@
             "strict": true,
             "default": "rendered"
           },
-          "pointArray": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/xyPoint"
+          "freeformPath": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["width", "height", "commands"],
+            "description": "Absolute unitless local coordinates; positive viewport scales to x/y/w/h without fitting or clipping. cubic x1/y1 and x2/y2 are control points, x/y is the endpoint. Contours start with move and contain a drawing segment; close is optional, and only move/end may follow close. Empty contours are rejected at runtime.",
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "commands": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "$ref": "#/$defs/freeformCommand"
+                }
+              }
             }
           },
           "addGroupShapes": {
@@ -32318,31 +32454,95 @@
               }
             }
           },
-          "xyPoint": {
+          "freeformCommand": {
             "oneOf": [
               {
-                "type": "array",
-                "prefixItems": [
-                  {
-                    "type": "number"
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "x", "y"],
+                "properties": {
+                  "type": {
+                    "const": "move"
                   },
-                  {
-                    "type": "number"
+                  "x": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
                   }
-                ],
-                "minItems": 2,
-                "maxItems": 2
+                }
               },
               {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["x", "y"],
+                "required": ["type", "x", "y"],
                 "properties": {
+                  "type": {
+                    "const": "line"
+                  },
                   "x": {
-                    "type": "number"
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
                   },
                   "y": {
-                    "type": "number"
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "x1", "y1", "x2", "y2", "x", "y"],
+                "properties": {
+                  "type": {
+                    "const": "cubic"
+                  },
+                  "x1": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y1": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "x2": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y2": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "x": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": -2147483648,
+                    "maximum": 2147483647
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type"],
+                "properties": {
+                  "type": {
+                    "const": "close"
                   }
                 }
               }
@@ -34652,6 +34852,12 @@
             },
             "description": "Cell style payload. The containing operation selects the cell with zero-based row/column fields; these coordinates are not style properties. Styling a spanned merged cell is rejected, while the merge-origin cell may be styled."
           },
+          "pointArray": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/xyPoint"
+            }
+          },
           "bubblePointArray": {
             "type": "array",
             "items": {
@@ -34834,6 +35040,36 @@
             "type": "string",
             "enum": ["x", "y"],
             "strict": true
+          },
+          "xyPoint": {
+            "oneOf": [
+              {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "minItems": 2,
+                "maxItems": 2
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["x", "y"],
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  }
+                }
+              }
+            ]
           },
           "bubblePoint": {
             "oneOf": [
@@ -35469,40 +35705,32 @@
                       "op": {
                         "const": "add-freeform"
                       },
-                      "close": {
-                        "type": "boolean"
+                      "h": {
+                        "$ref": "#/$defs/length"
                       },
                       "name": {
                         "type": "string"
                       },
-                      "originX": {
-                        "$ref": "#/$defs/length"
-                      },
-                      "originY": {
-                        "$ref": "#/$defs/length"
-                      },
-                      "points": {
-                        "$ref": "#/$defs/pointArray"
+                      "path": {
+                        "$ref": "#/$defs/freeformPath"
                       },
                       "slide": {
                         "type": "integer",
                         "description": "0-based slide index."
                       },
-                      "startX": {
-                        "type": "number"
+                      "w": {
+                        "$ref": "#/$defs/length"
                       },
-                      "startY": {
-                        "type": "number"
+                      "x": {
+                        "$ref": "#/$defs/length"
                       },
-                      "xScale": {
-                        "type": "number"
-                      },
-                      "yScale": {
-                        "type": "number"
+                      "y": {
+                        "$ref": "#/$defs/length"
                       }
                     },
-                    "required": ["op", "slide", "points"],
-                    "additionalProperties": false
+                    "required": ["op", "slide", "x", "y", "w", "h", "path"],
+                    "additionalProperties": false,
+                    "description": "x/y/w/h place the shape on the slide. path.width/height define an absolute local coordinate viewport; points outside it are not clipped or auto-fitted. Each contour starts with move, draws line/cubic segments and optionally closes explicitly. Style with set-shape fill/line. No SVG strings, quadratic/arc commands or guide formulas."
                   },
                   {
                     "type": "object",
@@ -43278,6 +43506,125 @@
                   "$ref": "#/$defs/transitionInOut"
                 }
               ]
+            },
+            "freeformPath": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["width", "height", "commands"],
+              "description": "Absolute unitless local coordinates; positive viewport scales to x/y/w/h without fitting or clipping. cubic x1/y1 and x2/y2 are control points, x/y is the endpoint. Contours start with move and contain a drawing segment; close is optional, and only move/end may follow close. Empty contours are rejected at runtime.",
+              "properties": {
+                "width": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "commands": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "$ref": "#/$defs/freeformCommand"
+                  }
+                }
+              }
+            },
+            "freeformCommand": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "x", "y"],
+                  "properties": {
+                    "type": {
+                      "const": "move"
+                    },
+                    "x": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "y": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "x", "y"],
+                  "properties": {
+                    "type": {
+                      "const": "line"
+                    },
+                    "x": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "y": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "x1", "y1", "x2", "y2", "x", "y"],
+                  "properties": {
+                    "type": {
+                      "const": "cubic"
+                    },
+                    "x1": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "y1": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "x2": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "y2": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "x": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    },
+                    "y": {
+                      "type": "integer",
+                      "minimum": -2147483648,
+                      "maximum": 2147483647
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type"],
+                  "properties": {
+                    "type": {
+                      "const": "close"
+                    }
+                  }
+                }
+              ]
             }
           }
         },
@@ -44218,16 +44565,39 @@
                 },
                 {
                   "slide": 0,
-                  "points": [
-                    [0, 0],
-                    [2, 0],
-                    [1, 1]
-                  ],
-                  "xScale": 914400,
-                  "yScale": 914400,
-                  "originX": "4in",
-                  "originY": "1in",
-                  "name": "Triangle",
+                  "x": "4in",
+                  "y": "1in",
+                  "w": "2in",
+                  "h": "1in",
+                  "path": {
+                    "width": 1000,
+                    "height": 1000,
+                    "commands": [
+                      {
+                        "type": "move",
+                        "x": 0,
+                        "y": 1000
+                      },
+                      {
+                        "type": "cubic",
+                        "x1": 250,
+                        "y1": 1000,
+                        "x2": 750,
+                        "y2": 0,
+                        "x": 1000,
+                        "y": 0
+                      },
+                      {
+                        "type": "line",
+                        "x": 1000,
+                        "y": 1000
+                      },
+                      {
+                        "type": "close"
+                      }
+                    ]
+                  },
+                  "name": "Cubic wave",
                   "op": "add-freeform"
                 },
                 {
@@ -45477,19 +45847,11 @@
           {
             "op": "add-freeform",
             "category": "shape",
-            "summary": "Add a freeform shape from a point path.",
-            "required": ["op", "slide", "points"],
+            "summary": "Add an editable line/cubic path in an explicit shape frame.",
+            "description": "x/y/w/h place the shape on the slide. path.width/height define an absolute local coordinate viewport; points outside it are not clipped or auto-fitted. Each contour starts with move, draws line/cubic segments and optionally closes explicitly. Style with set-shape fill/line. No SVG strings, quadratic/arc commands or guide formulas.",
+            "required": ["op", "slide", "x", "y", "w", "h", "path"],
             "constraints": [],
-            "optional": [
-              "close",
-              "name",
-              "originX",
-              "originY",
-              "startX",
-              "startY",
-              "xScale",
-              "yScale"
-            ],
+            "optional": ["name"],
             "level": "patch"
           },
           {
@@ -85229,6 +85591,7 @@
                                   "linkedOleObject",
                                   "picture",
                                   "placeholder",
+                                  "shape",
                                   "table",
                                   "textBox"
                                 ],
@@ -87100,6 +87463,7 @@
                                   "linkedOleObject",
                                   "picture",
                                   "placeholder",
+                                  "shape",
                                   "table",
                                   "textBox"
                                 ],
@@ -88805,6 +89169,7 @@
                                   "linkedOleObject",
                                   "picture",
                                   "placeholder",
+                                  "shape",
                                   "table",
                                   "textBox"
                                 ],
@@ -90224,6 +90589,156 @@
                             }
                           }
                         }
+                      },
+                      "freeform": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["status", "path", "reason"],
+                            "properties": {
+                              "status": {
+                                "const": "supported"
+                              },
+                              "path": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["width", "height", "commands"],
+                                "description": "Absolute unitless local coordinates; positive viewport scales to x/y/w/h without fitting or clipping. cubic x1/y1 and x2/y2 are control points, x/y is the endpoint. Contours start with move and contain a drawing segment; close is optional, and only move/end may follow close. Empty contours are rejected at runtime.",
+                                "properties": {
+                                  "width": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 2147483647
+                                  },
+                                  "height": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 2147483647
+                                  },
+                                  "commands": {
+                                    "type": "array",
+                                    "minItems": 2,
+                                    "items": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["type", "x", "y"],
+                                          "properties": {
+                                            "type": {
+                                              "const": "move"
+                                            },
+                                            "x": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            },
+                                            "y": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["type", "x", "y"],
+                                          "properties": {
+                                            "type": {
+                                              "const": "line"
+                                            },
+                                            "x": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            },
+                                            "y": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["type", "x1", "y1", "x2", "y2", "x", "y"],
+                                          "properties": {
+                                            "type": {
+                                              "const": "cubic"
+                                            },
+                                            "x1": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            },
+                                            "y1": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            },
+                                            "x2": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            },
+                                            "y2": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            },
+                                            "x": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            },
+                                            "y": {
+                                              "type": "integer",
+                                              "minimum": -2147483648,
+                                              "maximum": 2147483647
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["type"],
+                                          "properties": {
+                                            "type": {
+                                              "const": "close"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              "reason": {
+                                "type": "null"
+                              }
+                            }
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["status", "path", "reason"],
+                            "properties": {
+                              "status": {
+                                "const": "preserve-only"
+                              },
+                              "path": {
+                                "type": "null"
+                              },
+                              "reason": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            }
+                          }
+                        ]
                       },
                       "fillPicture": {
                         "type": "object",
@@ -92653,7 +93168,8 @@
             "required": ["passed", "issueCount", "sourceRuleCount", "normalizedRuleCount"],
             "properties": {
               "passed": {
-                "type": "boolean"
+                "type": "boolean",
+                "description": "True exactly when semanticIssues is empty. Covers the implemented semantic, package, particle and raw attribute rules; not a full XSD or rendering guarantee."
               },
               "issueCount": {
                 "type": "integer",
@@ -92661,10 +93177,12 @@
               },
               "sourceRuleCount": {
                 "type": "integer",
+                "description": "Source registrations in the generated semantic-rule registry; excludes raw schema-attribute, particle and package-graph checks.",
                 "minimum": 107
               },
               "normalizedRuleCount": {
                 "type": "integer",
+                "description": "Normalized rules in the generated semantic-rule registry; excludes raw schema-attribute, particle and package-graph checks.",
                 "minimum": 106
               }
             }
@@ -92824,7 +93342,7 @@
             }
           }
         },
-        "description": "Render-free vision observations with canonical candidate patch operations. Optional fixes are advisory and retain their declared autoRetry policy. Final-render issues belong to vision-diff.",
+        "description": "Render-free vision observations and full-package residual semantic issues, including required/type/range checks for raw p:sldSz cx/cy and p:cNvPr id/name. This is not full XSD validation. Optional fixes are advisory and retain their declared autoRetry policy. Final-render issues belong to vision-diff.",
         "$defs": {
           "visionIssue": {
             "type": "object",
@@ -95953,7 +96471,7 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://structurify.io/schemas/pptx-diff/v1.schema.json",
         "type": "object",
-        "description": "Semantic PPTX diff report. Success criteria: deterministic conclusions are emitted only for stably identified slide/shape/text/media/table/chart summaries; unstable matches and unsupported structures are reported as uncertain/unsupported instead of presented as facts. Matching: slides match by 0-based index; shapes match by unique shape id + element kind, falling back to unique shape name + element kind, and ambiguous or non-unique fallback keys are reported as uncertain instead of guessed. Coverage: text/shapeGeometry/shapeStyle reliable; mediaSummary/chartData/tableSummary summary-level; mediaBinary/tableCells/smartArt/animations unsupported; themeInheritance partial; for visual rendering use xdoc pptx preview or the visual-audit evidence flow. CI policy: use only reliability=reliable entries (summary.reliableChanges, slides[].summaryChanges/shapeChanges/changes where reliability == reliable) as machine facts and never treat uncertain or unsupported entries (summary.uncertainChanges, summary.unsupportedRegions, slides[].shapeChanges where reliability == uncertain, slides[].unsupported) as pass-gate evidence. Review policy: this semantic report is advisory and never authorizes delivery; run the canonical visual-evidence command from agentGate.visualEvidence and consume manifest.decision before acceptance.",
+        "description": "Semantic PPTX diff report. Success criteria: deterministic conclusions are emitted only for stably identified slide/shape/text/media/table/chart summaries; unstable matches and unsupported structures are reported as uncertain/unsupported instead of presented as facts. Matching: slides match by 0-based index; shapes match by unique shape id + element kind, falling back to unique shape name + element kind, and ambiguous or non-unique fallback keys are reported as uncertain instead of guessed. Coverage: text/shapeGeometry/shapeStyle reliable; freeform move/line/cubic/close paths include control points, while preserve-only custom geometry is unsupported; mediaSummary/chartData/tableSummary summary-level; mediaBinary/tableCells/smartArt/animations unsupported; themeInheritance partial; for visual rendering use xdoc pptx preview or the visual-audit evidence flow. CI policy: use only reliability=reliable entries (summary.reliableChanges, slides[].summaryChanges/shapeChanges/changes where reliability == reliable) as machine facts and never treat uncertain or unsupported entries (summary.uncertainChanges, summary.unsupportedRegions, slides[].shapeChanges where reliability == uncertain, slides[].unsupported) as pass-gate evidence. Review policy: this semantic report is advisory and never authorizes delivery; run the canonical visual-evidence command from agentGate.visualEvidence and consume manifest.decision before acceptance.",
         "required": [
           "schemaVersion",
           "status",
@@ -98921,6 +99439,7 @@
                                   "linkedOleObject",
                                   "picture",
                                   "placeholder",
+                                  "shape",
                                   "table",
                                   "textBox"
                                 ],
@@ -100098,6 +100617,7 @@
                                   "linkedOleObject",
                                   "picture",
                                   "placeholder",
+                                  "shape",
                                   "table",
                                   "textBox"
                                 ],
@@ -102397,6 +102917,7 @@
                                       "linkedOleObject",
                                       "picture",
                                       "placeholder",
+                                      "shape",
                                       "table",
                                       "textBox"
                                     ],

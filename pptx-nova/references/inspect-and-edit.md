@@ -109,6 +109,26 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 }
 ```
 
+### Shape 3D 的只读识别与保留
+
+先从当前 runtime 的 capability truth 发现 `shape-3d/local-declarations`，分别读取
+inspect、preserve、render 和 verify 轴；只有 schema 披露该字段时，才消费
+`shapes[].threeDFacts[]`。没有字段表示未披露，空数组只表示未发现本地声明，不能据此
+断言 layout/master/theme 中没有继承的 3D 效果。
+
+每条事实按 `scope` 区分 `shape-properties`、`group-properties` 和 `text-body`。
+`ownerShapeId` 才是声明的实际对象；顶层 group 的事实可能属于其子对象。
+`groupPath` 相对于被 inspect 的对象，按外层到内层排列。ID 缺失或有歧义时先用
+select 核实目标，不拼出猜测的 selector。读取 `inspectionStatus` 和 `diagnostics`，
+未知或畸形字段不能用默认值补齐；`flatTx` 的存在也不证明可见的立体效果。
+
+这些事实用于定位与复核，不是可回写的 patch。相邻文字、样式或元数据编辑后重新
+inspect，按 owner/scope 核对 `sourceSha256`。摘要包含不透明 XML 和有效命名空间上下文，
+摘要变化需要调查；摘要相同只证明该 XML 身份未变，不能证明整页布局或视觉不变。
+还须核对授权范围外的对象几何，并在要求视觉保留时比较同一候选的独立 PowerPoint
+渲染。内置 PDF/Viewer 对 Shape 3D 的支持以 render 轴为准；不要把其二维预览当成
+camera、bevel、extrusion 或 material 已正确渲染的证据。Chart 3D 和 GLB 使用各自契约。
+
 ### 关键字段速记
 
 | 取什么                        | 路径                                                                                                                   |

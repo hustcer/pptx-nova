@@ -186,6 +186,7 @@ picture fill。
 | `eastAsian`       | 东亚脚本字体；省略保留，`null` 清除并恢复继承                     |
 | `complexScript`   | 阿拉伯文等复杂脚本字体；省略保留，`null` 清除并恢复继承           |
 | `letterSpacing`   | 字符间距；显式 `pt` 字符串或等价 raw EMU，`null` 清除             |
+| `kern`            | 字偶距调整的最小字号阈值；仅在当前 schema 披露时使用，规则见下文  |
 | `size`            | 优先使用 `"<n>pt"`；裸数字按通用 length 规则解释                  |
 | `bold` / `italic` | 布尔                                                              |
 | `underline`       | `none / single / double / wavy / heavy / ...`                     |
@@ -195,6 +196,22 @@ picture fill。
 `name` / `eastAsian` / `complexScript` / `letterSpacing` 都是 sparse patch：省略不改，
 `null` 清掉本地值使继承继续。不要只改 Latin `name` 就声称多语言字体已经统一；先从
 inspect 的 `fontFacts[]` 检查各脚本 scope。
+
+需要调整 kerning 时，先查询当前运行时的 `set-run.font` 完整定义，确认披露
+`kern` / `fontKernThreshold`。按该定义读取允许的单位、范围和精度，再使用
+`"12pt"`、`"12.5pt"` 等阈值字符串；省略保留本层值，`null` 清除本层值并恢复继承。
+`"0pt"` 写入显式零值，不能当作跨渲染器的开启开关：macOS PowerPoint 16.112.3 实测中零值会
+呈现未启用字偶距调整的效果。需要恢复模板继承时使用 `null`；不要传布尔值、裸数字、
+百分比或其他单位。
+`kern` 与统一增减字符间距的 `letterSpacing` 独立，不要互相替代，也不要为了统一
+字体族顺便重置 kern。
+
+按 inspect/select → dry-run → apply → reopen inspect 验证，回读目标
+`fontFacts[].font.kernPt` 和 `effectiveKernPt`：清除后前者应缺失，后者可能仍有继承值。
+普通 run 解析所支持的段落、列表、layout、master 与演示文稿默认样式链；表格和图表
+字体表面只披露直接值，不据此推断其样式继承。缺失字段也不表示关闭 kerning。
+这组事实说明保存的阈值，不提供完整字体来源追踪或实际字形间距测量；对布局敏感的
+修改仍须查看渲染结果，需要 PowerPoint 保真证据时使用对应 PowerPoint 检查流程。
 
 ### Theme 字体（一改全改）
 

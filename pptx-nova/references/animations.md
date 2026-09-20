@@ -18,6 +18,7 @@ xdoc schema --mode ops --ops set-slide-animations --minimal > <run-dir>/schema-s
 - 局部安全删除：`set-slide-animations`，用 `remove: ["<inspect.animations[].id>"]` 定位。
 - 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fade-out/wipe-out/fly-out`
   或 `phase: "exit"`。
+- 若当前 schema 披露 `grow-shrink` / `spin` 及其参数，可创建有限的整 shape 强调；详见下方幅度契约。
 - 支持的 trigger：`on-click`、`with-previous`、`after-previous`。
 - 支持的 timing modifier：`repeat`、`autoReverse`、`restart`、
   `easing.accelerate/decelerate`。
@@ -39,7 +40,7 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 
 - `timingSummary`: timing 是否存在、media/interactive/unsupported timing、editable 与
   preserve-only 数量。
-- `animations[]`: 稳定 `id`、`target`、`effect`、`phase`、`trigger`、`durationMs`、`delayMs`、
+- `animations[]`: 稳定 `id`、`target`、`effect`、`direction`、`scale`、`degrees`、`phase`、`trigger`、`durationMs`、`delayMs`、
   `repeat`、`autoReverse`、`restart`、`easing`、`editable` 和 preserve-only reason（`unsupportedReason`）。
 - `animationCapabilities`: `editable`、`preserveOnly`、`unsupportedCreate`。
 
@@ -76,13 +77,13 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 ```
 
 `merge-safe` 是默认思路：如果现有 timing 含 media timing、interactive trigger、unsupported timing、
-motion path、emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
+motion path、未建模的 emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
 接受丢弃/重建既有动画树。
 
 ## 基础动画 timing modifier
 
-四个 modifier 只适用于当前 schema 披露的 8 个基础 entrance/exit effect，不会解锁 motion path、
-emphasis、sequence/parallel、chart build、media timing 或 shape-trigger：
+四个 modifier 用于当前 schema 披露的安全效果；grow-shrink/spin 额外要求有限 repeat。
+它们不会解锁任意 emphasis、motion path、sequence/parallel、chart build、media timing 或 shape-trigger：
 
 ```json
 {
@@ -124,7 +125,7 @@ emphasis、sequence/parallel、chart build、media timing 或 shape-trigger：
   会保留并把相关 leaf 降为 preserve-only，Agent 不应通过 raw XML 把它们改写为无前缀属性。
 - PDF/PNG 仍是静态结果，不能用来证明 modifier 的播放语义。
 
-按 inspect 返回的稳定 `id` 更新时使用三态契约：字段省略表示保留，`null` 表示清除，合法值表示写入。
+按 inspect 返回的稳定 `id` 更新 timing modifier 时使用三态契约：字段省略表示保留，`null` 表示清除，合法值表示写入。
 `easing` 对象是完整替换：只提供 `accelerate` 会清除旧的 `decelerate`，反之亦然；`easing: null`
 清除两侧。创建新 step 时不要传 modifier `null`，因为没有既有值可清除。
 
@@ -146,6 +147,78 @@ emphasis、sequence/parallel、chart build、media timing 或 shape-trigger：
 
 apply 后必须重新 inspect，确认 omitted/null/value 语义、stable id 和目标对象都保持预期；不要只看
 patch 成功状态。
+
+## 有限 grow-shrink / spin
+
+先检查当前运行时 schema 同时披露 effect 和参数，随后 dry-run。两者只面向整 shape，
+不接受 paragraph/level/build/direction，也不能与同一目标的段落 build 混用。
+
+- `grow-shrink` 必须显式提供 `scale: { "x": 1.1, "y": 1.1 }`。这是相对倍数：1 为原尺寸，
+  1.1 为 110%；两个分量均在 `[0.00001, 1000]`，按十万分之一量化。
+- `spin` 必须显式提供有符号 `degrees`，范围 `[-3600, 3600]`，正数顺时针，0 合法；精度为 1/60000 度。
+- 两者默认 `phase: "emphasis"`、`trigger: "on-click"`、`duration: 500`、`delay: 0`。
+  `repeat` 只接受 `[0, 2147483]` 的整数；`"indefinite"` 被拒绝。轻微强调可用一次有限播放加 `autoReverse: true`。
+- 按 ID 更新省略 `effect` 时保留幅度；显式提供 `effect` 时必须再次提供完整 `scale` 或 `degrees`。
+  幅度、effect、direction、phase 不接受 `null`；只有上面的 timing modifier 支持清除。
+- 改幅度保持对象静态位置、尺寸和旋转不变；apply 后检查 shape、稳定动画 ID 和后继 `after-previous` 延迟。
+  最终保持态或反向返回态需要实际播放证据，不能从静态预览推定。
+
+下面是 operation 片段，置入 `pptx-patch/v1` 的 `ops` 后使用：
+
+```json
+{
+  "op": "set-slide-animations",
+  "slide": 0,
+  "animations": [
+    {
+      "shape": { "name": "KPI Card" },
+      "effect": "grow-shrink",
+      "scale": { "x": 1.08, "y": 1.08 },
+      "duration": 250,
+      "repeat": 1,
+      "autoReverse": true
+    },
+    {
+      "shape": { "name": "Arrow" },
+      "effect": "spin",
+      "degrees": -45,
+      "trigger": "after-previous",
+      "duration": 400
+    }
+  ]
+}
+```
+
+## 原生 fly 的有限边界
+
+若当前运行时披露原生 fly，新建 `fly` / `fly-out` 使用两个固定端点的 `ppt_x` / `ppt_y` 行为；
+inspect 把它们归为一个逻辑动画，不应按两个属性重复计算 duration。
+`direction: "from-left" | "from-right" | "from-top" | "from-bottom"` 始终命名屏幕外侧边缘：
+进入时是起点，退出时是终点。因此退出到右侧仍写 `"from-right"`，不要自行发明 `"to-right"`。
+
+```json
+{
+  "op": "set-slide-animations",
+  "slide": 0,
+  "animations": [
+    {
+      "shape": { "name": "KPI Card" },
+      "effect": "fly",
+      "phase": "exit",
+      "direction": "from-right",
+      "duration": 600
+    }
+  ]
+}
+```
+
+时长编辑应保留坐标公式、并行目标和稳定 ID，并重算退出末尾的短暂隐藏行为。旧 `slide(...)` filter
+形态仍可安全编辑；只有显式替换效果时才可能切换形态，不批量改写未触达效果。wipe 的方向映射不随 fly 改变。
+陌生公式、额外 keyframe、混合目标、额外属性动画、背景/chart target 或复杂共享 wrapper 都应保留；
+以 inspect 的 `editable` 为准，不能仅凭 `effect: "fly"` 推断可编辑。
+
+这些是生成和安全编辑能力。新效果的 Viewer 渲染、PowerPoint 重存及播放必须分别验证，
+不能用 create/edit 成功、结构校验或 clean-open 推定这些结果。
 
 ## 六轴 capability truth
 
@@ -196,6 +269,7 @@ dry-run 重点看：
 - `opResults[]` 成功且没有 preserve-only 拒绝。
 - `semanticChanges[]` / diff 中只有预期的 animation 变化。
 - 更新 target 时目标 shape 解析唯一；歧义时先 `select` 或改用 inspect 的 shape id/name。
+- 若目的 shape 在同一动画组已有 build 元数据，retarget 会拒绝；不要强行合并两个组的构建语义。
 
 ## 文本逐条出现
 
@@ -360,7 +434,7 @@ PowerPoint，必须在 Windows fixture 补证，否则该维度保持 `inconclus
 这些场景默认不能用普通 patch 改：
 
 - motion path / custom path 创建。
-- emphasis（grow-shrink、spin、color 等）主动创建。
+- 未披露的强调效果（例如 color）；grow-shrink/spin 超出上述整 shape、有限幅度与重复边界的变体。
 - media/video timing、interactive trigger、点击某个 shape 触发。
 - chart/SmartArt build。
 - word/character 级文本动画。

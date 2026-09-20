@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.5.0 (cb95679f)",
+  "version": "0.5.0 (9be9cac8)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -14,9 +14,6 @@
           "default": "pdf",
           "enum": ["pdf", "png", "json", "md", "text"],
           "strict": true,
-          "aliases": {
-            "markdown": "md"
-          },
           "separator": ",",
           "valueSyntax": "pdf|png|json|md|text[,pdf|png|json|md|text...]",
           "collection": "set",
@@ -1501,14 +1498,13 @@
           "description": "Checks (comma-separated): fonts,links,compat,assets,policy,a11y; all expands to every check including a11y",
           "required": false,
           "default": "fonts,links,compat,assets,policy",
-          "enum": ["fonts", "links", "compat", "compatibility", "assets", "policy", "a11y", "all"],
+          "enum": ["fonts", "links", "compat", "assets", "policy", "a11y", "all"],
           "strict": true,
           "aliases": {
-            "all": ["fonts", "links", "compat", "assets", "policy", "a11y"],
-            "compatibility": "compat"
+            "all": ["fonts", "links", "compat", "assets", "policy", "a11y"]
           },
           "separator": ",",
-          "valueSyntax": "fonts|links|compat|compatibility|assets|policy|a11y|all[,fonts|links|compat|compatibility|assets|policy|a11y|all...]",
+          "valueSyntax": "fonts|links|compat|assets|policy|a11y|all[,fonts|links|compat|assets|policy|a11y|all...]",
           "collection": "set",
           "duplicates": "ignored",
           "orderSensitive": false,
@@ -2685,6 +2681,10 @@
             {
               "feature": "slide-transition",
               "subset": "morph-authoring"
+            },
+            {
+              "feature": "shape-3d",
+              "subset": "local-declarations"
             }
           ]
         },
@@ -3454,6 +3454,134 @@
             "axes": null
           },
           {
+            "feature": "shape-3d",
+            "subset": "local-declarations",
+            "status": "preserve-only",
+            "summary": "Read and preserve existing DrawingML Shape 3D declarations without authoring or rendering them.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "read-only-local-facts",
+                "description": "Inspect threeDFacts per shape; nested group owners have their own id and groupPath. Empty arrays do not prove that inherited effects are absent. Follow the six axes separately."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "shape-3d-declarations",
+                "kind": "behavior",
+                "claim": "Explicit shape/text scene and geometry, namespace isolation, malformed fields, nested owners, and exact backdrop/color facts have read-only regressions."
+              },
+              {
+                "id": "shape-3d-preservation",
+                "kind": "behavior",
+                "claim": "Neighboring shape/text edits and save/reopen preserve recognized and opaque 3D subtrees; XML digest changes expose opaque changes."
+              }
+            ],
+            "recommendation": {
+              "action": "inspect-and-preserve",
+              "operations": [],
+              "note": "Inspect owner/scope/diagnostics, retain the original 3D subtrees, and compare their sourceSha256 after neighboring edits. Review an independent PowerPoint rendering when visible 3D fidelity matters."
+            },
+            "axes": {
+              "create": {
+                "status": "unsupported",
+                "summary": "No canonical Shape 3D creation operation is provided.",
+                "limits": [
+                  {
+                    "code": "no-shape-3d-writer",
+                    "description": "Preset recognition is not an authoring catalog; copy reviewed native content instead of synthesizing 3D XML."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2007",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["shape-3d-declarations"]
+              },
+              "edit": {
+                "status": "unsupported",
+                "summary": "3D declarations are read-only, including completely recognized values.",
+                "limits": [
+                  {
+                    "code": "no-shape-3d-edit",
+                    "description": "Do not turn inspect facts into a patch or overwrite unknown scene/effect content."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2007",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["shape-3d-declarations"]
+              },
+              "inspect": {
+                "status": "supported",
+                "summary": "Inspect explicit camera, light rig, rotation, backdrop, bevel, extrusion, material, unresolved colors and flat text with owner ids, scope, XML digest and diagnostics.",
+                "limits": [
+                  {
+                    "code": "local-declarations-only",
+                    "description": "threeDFacts inventories local shape/group/text-body scene3d, sp3d and flatTx, including group members. It does not resolve layout/master/theme inheritance, chart view3D, GLB or final appearance; unresolved color tokens remain lexical facts."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2007",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["shape-3d-declarations"]
+              },
+              "preserve": {
+                "status": "partial",
+                "summary": "Read without mutating the package and preserve 3D subtrees during tested neighboring shape/text edits and save/reopen.",
+                "limits": [
+                  {
+                    "code": "neighboring-edit-boundary",
+                    "description": "Preservation covers untouched 3D declarations during the tested shape/text property edits; deleting/replacing owning content or using raw XML is not a preservation guarantee. Compare sourceSha256 and unaffected object geometry before/after; XML identity alone does not prove layout or visual preservation."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2007",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["shape-3d-preservation"]
+              },
+              "render": {
+                "status": "unsupported",
+                "summary": "Bundled Viewer/PDF do not implement DrawingML Shape 3D camera, bevel, extrusion or material rendering.",
+                "limits": [
+                  {
+                    "code": "static-2d-fallback",
+                    "description": "2D output may omit these effects. Use an independent PowerPoint reference for visible acceptance; chart 3D is a separate capability."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2007",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["shape-3d-declarations"]
+              },
+              "verify": {
+                "status": "inconclusive",
+                "summary": "Typed inspection and XML preservation tests are available; they do not establish cross-platform PowerPoint visual parity.",
+                "limits": [
+                  {
+                    "code": "office-visual-parity-unproven",
+                    "description": "A static preview or successful inspect cannot prove Shape 3D rendering fidelity or all Office versions/platforms."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2007",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["shape-3d-declarations", "shape-3d-preservation"]
+              }
+            }
+          },
+          {
             "feature": "slide",
             "subset": "lifecycle-and-background",
             "status": "supported",
@@ -4116,6 +4244,10 @@
               {
                 "code": "text-contract-and-layout-gates",
                 "description": "Text mutation follows selector, style, fit, and layout-risk contracts; visual fit is not inferred from successful serialization alone."
+              },
+              {
+                "code": "kern-authored-threshold-only",
+                "description": "font.kern authors a 0pt..4000pt pair-kerning threshold or clears the local value with null. inspect fontFacts exposes kernPt/effectiveKernPt for the supported run inheritance chain; cell/chart styles, full font source provenance, glyph shaping and renderer fidelity are not promised by this authoring capability."
               }
             ],
             "evidence": [
@@ -4168,6 +4300,11 @@
                 "id": "text-native-roundtrip-and-fit",
                 "kind": "behavior",
                 "claim": "Text frame margins, anchoring, wrapping, paragraph, run, replacement, style, and fit operations are covered by semantic and layout tests."
+              },
+              {
+                "id": "font-kern-threshold-roundtrip",
+                "kind": "behavior",
+                "claim": "Exact hundredth-point wire thresholds, omission/set/clear, explicit zero, inherited run defaults, table/chart surfaces and namespace preservation are covered by font.kern regressions and real demo attribute fixtures."
               }
             ],
             "recommendation": {
@@ -4606,6 +4743,7 @@
           ],
           "preservedOnly": [
             "model-3d/existing-object-preservation",
+            "shape-3d/local-declarations",
             "slide-animation/complex-existing-timing",
             "slide-transition/extended-existing-effects",
             "smartart/existing-diagram",
@@ -19545,6 +19683,11 @@
             ],
             "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string or a numeric raw-EMU value; percentages and other unit strings are rejected."
           },
+          "fontKernThreshold": {
+            "type": "string",
+            "pattern": "^(?:0(?:\\.[0-9]{1,2})?|[1-9][0-9]{0,2}(?:\\.[0-9]{1,2})?|[1-3][0-9]{3}(?:\\.[0-9]{1,2})?|4000(?:\\.0{1,2})?)pt$",
+            "description": "DrawingML pair-kerning minimum font size, 0pt through 4000pt with at most two decimal places; maps rPr/defRPr@kern in hundredths of a point. Explicit zero is preserved but does not guarantee enabled kerning; PowerPoint can render zero as disabled. Explicit pt suffix required; bare numbers, other units, percentages and booleans are rejected. Actual kerning depends on the font and renderer."
+          },
           "chartTrendlineLabelFontSize": {
             "type": "string",
             "pattern": "^(?:[1-9][0-9]{0,2}(?:\\.[0-9]{1,4})?|[1-3][0-9]{3}(?:\\.[0-9]{1,4})?|4000(?:\\.0{1,4})?)pt$",
@@ -21177,6 +21320,17 @@
               "language": {
                 "type": "string"
               },
+              "kern": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/fontKernThreshold"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Omit to preserve the local threshold; null removes only the local kern attribute to resume inheritance. 0pt authors an explicit zero and must not be assumed to enable kerning in every renderer. Use inspect fontFacts.kernPt/effectiveKernPt to verify persisted thresholds; rendering and full font source provenance are not provided by this writer."
+              },
               "letterSpacing": {
                 "oneOf": [
                   {
@@ -21188,7 +21342,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "slideNotesParagraphs": {
             "type": "array",
@@ -29590,6 +29744,17 @@
               "language": {
                 "type": "string"
               },
+              "kern": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/fontKernThreshold"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Omit to preserve the local threshold; null removes only the local kern attribute to resume inheritance. 0pt authors an explicit zero and must not be assumed to enable kerning in every renderer. Use inspect fontFacts.kernPt/effectiveKernPt to verify persisted thresholds; rendering and full font source provenance are not provided by this writer."
+              },
               "letterSpacing": {
                 "oneOf": [
                   {
@@ -29601,7 +29766,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "paragraphLineSpacing": {
             "oneOf": [
@@ -32552,6 +32717,11 @@
             "type": "string",
             "pattern": "^#?[0-9A-Fa-f]{6}$",
             "description": "Six-digit hex RGB, with or without the leading '#' (e.g. '1F6FEB')."
+          },
+          "fontKernThreshold": {
+            "type": "string",
+            "pattern": "^(?:0(?:\\.[0-9]{1,2})?|[1-9][0-9]{0,2}(?:\\.[0-9]{1,2})?|[1-3][0-9]{3}(?:\\.[0-9]{1,2})?|4000(?:\\.0{1,2})?)pt$",
+            "description": "DrawingML pair-kerning minimum font size, 0pt through 4000pt with at most two decimal places; maps rPr/defRPr@kern in hundredths of a point. Explicit zero is preserved but does not guarantee enabled kerning; PowerPoint can render zero as disabled. Explicit pt suffix required; bare numbers, other units, percentages and booleans are rejected. Actual kerning depends on the font and renderer."
           },
           "fontSpacingLength": {
             "oneOf": [
@@ -37707,6 +37877,11 @@
               ],
               "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string or a numeric raw-EMU value; percentages and other unit strings are rejected."
             },
+            "fontKernThreshold": {
+              "type": "string",
+              "pattern": "^(?:0(?:\\.[0-9]{1,2})?|[1-9][0-9]{0,2}(?:\\.[0-9]{1,2})?|[1-3][0-9]{3}(?:\\.[0-9]{1,2})?|4000(?:\\.0{1,2})?)pt$",
+              "description": "DrawingML pair-kerning minimum font size, 0pt through 4000pt with at most two decimal places; maps rPr/defRPr@kern in hundredths of a point. Explicit zero is preserved but does not guarantee enabled kerning; PowerPoint can render zero as disabled. Explicit pt suffix required; bare numbers, other units, percentages and booleans are rejected. Actual kerning depends on the font and renderer."
+            },
             "chartTrendlineLabelFontSize": {
               "type": "string",
               "pattern": "^(?:[1-9][0-9]{0,2}(?:\\.[0-9]{1,4})?|[1-3][0-9]{3}(?:\\.[0-9]{1,4})?|4000(?:\\.0{1,4})?)pt$",
@@ -39339,6 +39514,17 @@
                 "language": {
                   "type": "string"
                 },
+                "kern": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/fontKernThreshold"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Omit to preserve the local threshold; null removes only the local kern attribute to resume inheritance. 0pt authors an explicit zero and must not be assumed to enable kerning in every renderer. Use inspect fontFacts.kernPt/effectiveKernPt to verify persisted thresholds; rendering and full font source provenance are not provided by this writer."
+                },
                 "letterSpacing": {
                   "oneOf": [
                     {
@@ -39350,7 +39536,7 @@
                   ]
                 }
               },
-              "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected."
+              "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
             },
             "slideNotesParagraphs": {
               "type": "array",
@@ -44097,6 +44283,7 @@
                     "eastAsian": "DengXian",
                     "complexScript": "Arial",
                     "letterSpacing": "0.2pt",
+                    "kern": "12pt",
                     "size": "32pt",
                     "color": "1F4E79",
                     "bold": true
@@ -49790,6 +49977,17 @@
               "language": {
                 "type": "string"
               },
+              "kern": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/fontKernThreshold"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Omit to preserve the local threshold; null removes only the local kern attribute to resume inheritance. 0pt authors an explicit zero and must not be assumed to enable kerning in every renderer. Use inspect fontFacts.kernPt/effectiveKernPt to verify persisted thresholds; rendering and full font source provenance are not provided by this writer."
+              },
               "letterSpacing": {
                 "oneOf": [
                   {
@@ -49801,7 +49999,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "runHyperlinkTarget": {
             "oneOf": [
@@ -49978,6 +50176,11 @@
               }
             ],
             "description": "Exactly one fill kind: solid, gradient, pattern, or none."
+          },
+          "fontKernThreshold": {
+            "type": "string",
+            "pattern": "^(?:0(?:\\.[0-9]{1,2})?|[1-9][0-9]{0,2}(?:\\.[0-9]{1,2})?|[1-3][0-9]{3}(?:\\.[0-9]{1,2})?|4000(?:\\.0{1,2})?)pt$",
+            "description": "DrawingML pair-kerning minimum font size, 0pt through 4000pt with at most two decimal places; maps rPr/defRPr@kern in hundredths of a point. Explicit zero is preserved but does not guarantee enabled kerning; PowerPoint can render zero as disabled. Explicit pt suffix required; bare numbers, other units, percentages and booleans are rejected. Actual kerning depends on the font and renderer."
           },
           "fontSpacingLength": {
             "oneOf": [
@@ -51092,6 +51295,17 @@
               "language": {
                 "type": "string"
               },
+              "kern": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/fontKernThreshold"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Omit to preserve the local threshold; null removes only the local kern attribute to resume inheritance. 0pt authors an explicit zero and must not be assumed to enable kerning in every renderer. Use inspect fontFacts.kernPt/effectiveKernPt to verify persisted thresholds; rendering and full font source provenance are not provided by this writer."
+              },
               "letterSpacing": {
                 "oneOf": [
                   {
@@ -51103,7 +51317,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or a numeric raw-EMU value in the equivalent range; percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "runHyperlinkTarget": {
             "oneOf": [
@@ -51280,6 +51494,11 @@
               }
             ],
             "description": "Exactly one fill kind: solid, gradient, pattern, or none."
+          },
+          "fontKernThreshold": {
+            "type": "string",
+            "pattern": "^(?:0(?:\\.[0-9]{1,2})?|[1-9][0-9]{0,2}(?:\\.[0-9]{1,2})?|[1-3][0-9]{3}(?:\\.[0-9]{1,2})?|4000(?:\\.0{1,2})?)pt$",
+            "description": "DrawingML pair-kerning minimum font size, 0pt through 4000pt with at most two decimal places; maps rPr/defRPr@kern in hundredths of a point. Explicit zero is preserved but does not guarantee enabled kerning; PowerPoint can render zero as disabled. Explicit pt suffix required; bare numbers, other units, percentages and booleans are rejected. Actual kerning depends on the font and renderer."
           },
           "fontSpacingLength": {
             "oneOf": [
@@ -90430,7 +90649,8 @@
                       "accessibility",
                       "bbox",
                       "hasText",
-                      "fontFacts"
+                      "fontFacts",
+                      "threeDFacts"
                     ],
                     "properties": {
                       "id": {
@@ -90982,7 +91202,7 @@
                             "font": {
                               "type": "object",
                               "additionalProperties": false,
-                              "description": "Persisted direct and effective FontPatch v2 facts. Missing direct fields mean no local override; effective fields include the complete text inheritance chain for ordinary runs.",
+                              "description": "Persisted direct and effective FontPatch v2 facts. Missing direct fields mean no local override, except kernPt may also be absent for a malformed local threshold; effective fields follow ordinary run text inheritance, with malformed kern thresholds left unknown rather than inherited past.",
                               "properties": {
                                 "name": {
                                   "type": "string"
@@ -90995,6 +91215,18 @@
                                 },
                                 "spacingPt": {
                                   "type": "number"
+                                },
+                                "kernPt": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 4000,
+                                  "description": "Local DrawingML pair-kerning minimum font size in points. Explicit zero is preserved but does not guarantee enabled kerning; absent means no local override or a malformed local threshold."
+                                },
+                                "effectiveKernPt": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 4000,
+                                  "description": "First authored kern threshold through ordinary run text inheritance. Cell/chart targets expose only direct values; table/chart style inheritance and renderer defaults are unresolved. Absent means no threshold found or a malformed authored threshold, not disabled kerning. Inspect leaves malformed local or inherited thresholds unknown without searching later inheritance layers; rendering skips malformed thresholds and continues searching, so inspect and rendered output can differ for the same deck."
                                 },
                                 "effectiveName": {
                                   "type": "string"
@@ -91011,6 +91243,541 @@
                               }
                             }
                           }
+                        }
+                      },
+                      "threeDFacts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "ownerShapeId",
+                            "ownerShapeName",
+                            "groupPath",
+                            "scope",
+                            "sourceSha256",
+                            "editable",
+                            "inspectionStatus",
+                            "scene",
+                            "shape",
+                            "flatText",
+                            "diagnostics"
+                          ],
+                          "properties": {
+                            "ownerShapeId": {
+                              "type": ["integer", "null"],
+                              "minimum": 1,
+                              "maximum": 4294967295
+                            },
+                            "ownerShapeName": {
+                              "type": ["string", "null"]
+                            },
+                            "groupPath": {
+                              "type": "array",
+                              "items": {
+                                "type": ["integer", "null"],
+                                "minimum": 1,
+                                "maximum": 4294967295
+                              }
+                            },
+                            "scope": {
+                              "type": "string",
+                              "enum": ["shape-properties", "group-properties", "text-body"],
+                              "strict": true
+                            },
+                            "sourceSha256": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            },
+                            "editable": {
+                              "const": false
+                            },
+                            "inspectionStatus": {
+                              "type": "string",
+                              "enum": ["complete", "partial"],
+                              "strict": true
+                            },
+                            "scene": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": ["camera", "lightRig", "backdrop"],
+                                  "properties": {
+                                    "camera": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": [
+                                            "preset",
+                                            "fieldOfViewAngle",
+                                            "zoomPercent1000",
+                                            "rotation"
+                                          ],
+                                          "properties": {
+                                            "preset": {
+                                              "type": ["string", "null"]
+                                            },
+                                            "fieldOfViewAngle": {
+                                              "type": ["integer", "null"],
+                                              "minimum": 0,
+                                              "maximum": 10800000
+                                            },
+                                            "zoomPercent1000": {
+                                              "type": ["integer", "null"],
+                                              "minimum": 0,
+                                              "maximum": 2147483647
+                                            },
+                                            "rotation": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "object",
+                                                  "additionalProperties": false,
+                                                  "required": [
+                                                    "latitudeAngle",
+                                                    "longitudeAngle",
+                                                    "revolutionAngle"
+                                                  ],
+                                                  "properties": {
+                                                    "latitudeAngle": {
+                                                      "type": ["integer", "null"],
+                                                      "minimum": 0,
+                                                      "maximum": 21599999
+                                                    },
+                                                    "longitudeAngle": {
+                                                      "type": ["integer", "null"],
+                                                      "minimum": 0,
+                                                      "maximum": 21599999
+                                                    },
+                                                    "revolutionAngle": {
+                                                      "type": ["integer", "null"],
+                                                      "minimum": 0,
+                                                      "maximum": 21599999
+                                                    }
+                                                  }
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "lightRig": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["rig", "direction", "rotation"],
+                                          "properties": {
+                                            "rig": {
+                                              "type": ["string", "null"]
+                                            },
+                                            "direction": {
+                                              "type": ["string", "null"]
+                                            },
+                                            "rotation": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "object",
+                                                  "additionalProperties": false,
+                                                  "required": [
+                                                    "latitudeAngle",
+                                                    "longitudeAngle",
+                                                    "revolutionAngle"
+                                                  ],
+                                                  "properties": {
+                                                    "latitudeAngle": {
+                                                      "type": ["integer", "null"],
+                                                      "minimum": 0,
+                                                      "maximum": 21599999
+                                                    },
+                                                    "longitudeAngle": {
+                                                      "type": ["integer", "null"],
+                                                      "minimum": 0,
+                                                      "maximum": 21599999
+                                                    },
+                                                    "revolutionAngle": {
+                                                      "type": ["integer", "null"],
+                                                      "minimum": 0,
+                                                      "maximum": 21599999
+                                                    }
+                                                  }
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "backdrop": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["anchorEmu", "normal", "up"],
+                                          "properties": {
+                                            "anchorEmu": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "object",
+                                                  "additionalProperties": false,
+                                                  "required": ["x", "y", "z"],
+                                                  "properties": {
+                                                    "x": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    },
+                                                    "y": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    },
+                                                    "z": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    }
+                                                  }
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            },
+                                            "normal": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "object",
+                                                  "additionalProperties": false,
+                                                  "required": ["x", "y", "z"],
+                                                  "properties": {
+                                                    "x": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    },
+                                                    "y": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    },
+                                                    "z": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    }
+                                                  }
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            },
+                                            "up": {
+                                              "anyOf": [
+                                                {
+                                                  "type": "object",
+                                                  "additionalProperties": false,
+                                                  "required": ["x", "y", "z"],
+                                                  "properties": {
+                                                    "x": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    },
+                                                    "y": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    },
+                                                    "z": {
+                                                      "type": ["string", "null"],
+                                                      "pattern": "^-?(0|[1-9][0-9]*)$",
+                                                      "description": "Exact signed Int64 decimal component; never rounded through a JSON number."
+                                                    }
+                                                  }
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "shape": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": [
+                                    "zEmu",
+                                    "extrusionHeightEmu",
+                                    "contourWidthEmu",
+                                    "material",
+                                    "bevelTop",
+                                    "bevelBottom",
+                                    "extrusionColor",
+                                    "contourColor"
+                                  ],
+                                  "properties": {
+                                    "zEmu": {
+                                      "type": ["integer", "null"],
+                                      "minimum": -27273042329600,
+                                      "maximum": 27273042316900
+                                    },
+                                    "extrusionHeightEmu": {
+                                      "type": ["integer", "null"],
+                                      "minimum": 0,
+                                      "maximum": 2147483647
+                                    },
+                                    "contourWidthEmu": {
+                                      "type": ["integer", "null"],
+                                      "minimum": 0,
+                                      "maximum": 2147483647
+                                    },
+                                    "material": {
+                                      "type": ["string", "null"]
+                                    },
+                                    "bevelTop": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["widthEmu", "heightEmu", "preset"],
+                                          "properties": {
+                                            "widthEmu": {
+                                              "type": ["integer", "null"],
+                                              "minimum": 0,
+                                              "maximum": 2147483647
+                                            },
+                                            "heightEmu": {
+                                              "type": ["integer", "null"],
+                                              "minimum": 0,
+                                              "maximum": 2147483647
+                                            },
+                                            "preset": {
+                                              "type": ["string", "null"]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "bevelBottom": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["widthEmu", "heightEmu", "preset"],
+                                          "properties": {
+                                            "widthEmu": {
+                                              "type": ["integer", "null"],
+                                              "minimum": 0,
+                                              "maximum": 2147483647
+                                            },
+                                            "heightEmu": {
+                                              "type": ["integer", "null"],
+                                              "minimum": 0,
+                                              "maximum": 2147483647
+                                            },
+                                            "preset": {
+                                              "type": ["string", "null"]
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "extrusionColor": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["kind", "components", "transforms"],
+                                          "properties": {
+                                            "kind": {
+                                              "type": "string",
+                                              "enum": [
+                                                "scrgbClr",
+                                                "srgbClr",
+                                                "hslClr",
+                                                "sysClr",
+                                                "schemeClr",
+                                                "prstClr"
+                                              ],
+                                              "strict": true
+                                            },
+                                            "components": {
+                                              "type": "object",
+                                              "additionalProperties": {
+                                                "type": "string"
+                                              },
+                                              "description": "Unresolved XML component tokens, not computed RGB or color-range validation."
+                                            },
+                                            "transforms": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "additionalProperties": false,
+                                                "required": ["kind", "value"],
+                                                "properties": {
+                                                  "kind": {
+                                                    "type": "string"
+                                                  },
+                                                  "value": {
+                                                    "type": ["string", "null"]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "contourColor": {
+                                      "anyOf": [
+                                        {
+                                          "type": "object",
+                                          "additionalProperties": false,
+                                          "required": ["kind", "components", "transforms"],
+                                          "properties": {
+                                            "kind": {
+                                              "type": "string",
+                                              "enum": [
+                                                "scrgbClr",
+                                                "srgbClr",
+                                                "hslClr",
+                                                "sysClr",
+                                                "schemeClr",
+                                                "prstClr"
+                                              ],
+                                              "strict": true
+                                            },
+                                            "components": {
+                                              "type": "object",
+                                              "additionalProperties": {
+                                                "type": "string"
+                                              },
+                                              "description": "Unresolved XML component tokens, not computed RGB or color-range validation."
+                                            },
+                                            "transforms": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "object",
+                                                "additionalProperties": false,
+                                                "required": ["kind", "value"],
+                                                "properties": {
+                                                  "kind": {
+                                                    "type": "string"
+                                                  },
+                                                  "value": {
+                                                    "type": ["string", "null"]
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "flatText": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": ["zEmu"],
+                                  "properties": {
+                                    "zEmu": {
+                                      "type": ["integer", "null"],
+                                      "minimum": -27273042329600,
+                                      "maximum": 27273042316900
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "diagnostics": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["code", "path", "rawValue"],
+                                "properties": {
+                                  "code": {
+                                    "type": "string",
+                                    "enum": [
+                                      "missing-element",
+                                      "duplicate-element",
+                                      "unknown-attribute",
+                                      "unknown-element",
+                                      "unexpected-text",
+                                      "missing-attribute",
+                                      "invalid-attribute",
+                                      "unrepresentable-attribute",
+                                      "unknown-token",
+                                      "invalid-color-choice",
+                                      "invalid-owner",
+                                      "conflicting-elements"
+                                    ],
+                                    "strict": true
+                                  },
+                                  "path": {
+                                    "type": "string"
+                                  },
+                                  "rawValue": {
+                                    "type": ["string", "null"]
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "description": "Local scene3d/sp3d/flatTx declarations for this shape and its nested group members. groupPath lists enclosing ids within the selected shape, outermost first (empty for the selected shape itself); null ids are diagnosed. Lengths are EMU, Angle fields are 1/60000 degree, zoomPercent1000 is 1/1000 percent, vector components are exact decimal strings. Camera zoom accepts integer and decimal percent spellings (100% = 100000); valid percent tokens not exactly representable in the field's range/precision remain null with unrepresentable-attribute and rawValue, without rounding or clamping. Missing or unreadable attributes remain null; diagnostics distinguish them. Colors are unresolved lexical tokens. sourceSha256 binds serialized XML and in-scope namespace bindings, including opaque content. It is not visual or semantic equivalence; changing namespace context can conservatively change the digest. Empty threeDFacts does not rule out inherited layout/master/theme effects. No writer, effective scene resolution, chart 3D, GLB or rendering support is implied."
                         }
                       }
                     }

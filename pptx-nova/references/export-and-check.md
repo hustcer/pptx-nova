@@ -212,6 +212,10 @@ xdoc convert deck.pptx --to png -o <run-dir>/previews --overwrite --contact-shee
 The command shape is `xdoc convert <pptx> --to <format>`, not
 `xdoc <pptx> -t png`.
 
+Use canonical tokens: Markdown is `md`, plain text is `text`, and the
+compatibility check is `compat`. Retired `markdown`, `txt`, and `compatibility`
+aliases are rejected; the same rule applies inside comma-separated lists.
+
 Without an installed License, PPTX conversion runs the Free Baseline: at most
 10 slides and 5 MiB (5,242,880 bytes) of compressed PPTX input per task, and
 visual outputs (PDF/PNG) carry a watermark. Inputs beyond those limits fail
@@ -389,6 +393,23 @@ Notes:
   `--manifest false` (or stdout without `-o`) for a single clean file.
 
 ## When Export Finds A Problem
+
+When rechecking after an xdoc upgrade, create a fresh run and render the same
+source bytes with the current binary before changing the deck. Text inheritance,
+kerning, autofit, CJK wrapping, mixed-size line metrics, Office math, gradients,
+shadows, and partial 3D rendering can change pixels without a PPTX edit. Old
+screenshots remain historical evidence. The bundled page cache binds PPTX bytes,
+DPI, and renderer bytes; retain that binding and use a fresh cache when fonts or
+the rendering environment change.
+
+For a before/after edit comparison, render both decks with the same current
+binary, fonts, scope, and DPI. Otherwise a renderer change can masquerade as an
+edit regression. Review actual line breaks, baseline/bullet alignment, equation
+bounds, and effect clipping before adding manual line breaks, shrinking fonts,
+or moving shapes. Preserve authored spacing and editable equations unless the
+current evidence calls for an authorized edit. A renderer improvement does not
+prove PowerPoint parity; use `inspect-and-edit.md` for Shape 3D boundaries and
+the existing native-evidence route when independent Office proof is required.
 
 If conversion/check reveals a problem and the user asks you to fix it, switch to
 `edit-mode.md` plus the relevant domain reference (`styles-and-themes.md`,

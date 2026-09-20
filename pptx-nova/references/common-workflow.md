@@ -159,6 +159,14 @@ with targeted command help, dry-run, or a documented fallback unless the current
 task explicitly requires a strict gate. Version strings are audit metadata and
 must not be used to infer feature support.
 
+Probe `status: ready` means the CLI schema was read, not that every capability contract is usable.
+Check `capabilities.capabilityTruth.available` and `warnings` before routing. The six-axis contract's
+`requiredFor` list can grow: consume every runtime-declared identity without assuming a fixed count
+or order. Missing or malformed required axes leave that feature undisclosed; do not substitute the
+entry-level status. `--require-feature` asks for full entry-level support, so a read-only Shape 3D
+inspection should follow its supported `inspect` axis rather than demand that its preserve-only
+entry pass `--strict`.
+
 For a task-specific check, add repeatable requirements such as:
 
 ```bash

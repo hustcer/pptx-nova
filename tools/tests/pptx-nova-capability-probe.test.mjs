@@ -68,6 +68,25 @@ const axisContract = {
 }
 if (mode === 'invalid-axis-contract') axisContract.names = axisContract.names.slice(0, -1)
 if (mode === 'invalid-required-for') axisContract.requiredFor = axisContract.requiredFor.slice(0, -1)
+const extendedAxes = mode.startsWith('extended-')
+if (extendedAxes) {
+  axisContract.requiredFor.unshift({ feature: 'shape-3d', subset: 'local-declarations' })
+  axisContract.requiredFor.reverse()
+}
+if (mode === 'duplicate-required-for') axisContract.requiredFor.push(axisContract.requiredFor[0])
+const shapeAxes = {
+  create: axis('unsupported'), edit: axis('unsupported'), inspect: axis('supported'),
+  preserve: axis('partial'), render: axis('unsupported'), verify: axis('inconclusive')
+}
+if (mode === 'extended-malformed-axes') shapeAxes.verify.status = 'unknown'
+const extraEntries = extendedAxes ? [{
+  feature: 'shape-3d', subset: 'local-declarations', status: 'preserve-only',
+  summary: 'Read and preserve local declarations.', operations: [],
+  limits: [{ code: 'local-only', description: 'No inherited or visual proof.' }],
+  evidence: [{ id: 'shape-declarations', kind: 'behavior', claim: 'Read-only facts.' }],
+  recommendation: { action: 'inspect-and-preserve', operations: [], note: 'Preserve source XML.' },
+  ...(mode === 'extended-missing-axes' ? {} : { axes: shapeAxes })
+}] : []
 const animationAxes = mode === 'missing-required-axes'
   ? undefined
   : mode === 'malformed-required-axes'
@@ -200,6 +219,7 @@ if (args[0] === 'schema') {
           missingMeans: 'undisclosed',
           axisContract,
           entries: [
+            ...extraEntries,
             {
               feature: 'text', subset: 'native-authoring', status: 'supported',
               summary: 'Native text editing.', operations: ['set-text-frame'],
@@ -309,6 +329,67 @@ test('capability probe captures truth and satisfies an exact supported feature',
   assert.equal(report.requirements.results[0].satisfied, true)
   assert.equal(report.requirements.results[0].axes.verify.status, 'inconclusive')
 })
+
+test('additional required axes preserve existing capabilities and Shape 3D boundaries', () => {
+  const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+  const result = runProbe(
+    xdoc,
+    ['--require-feature', 'slide-animation/basic-shape-and-text-builds', '--strict'],
+    { FAKE_XDOC_MODE: 'extended-valid-axes' },
+  )
+  assert.equal(result.status, 0, result.stderr)
+  const report = JSON.parse(result.stdout)
+  const truth = report.capabilities.capabilityTruth
+  assert.equal(truth.available, true)
+  assert.equal(truth.entries.length, 7)
+  assert.equal(truth.axisContract.requiredFor.length, 3)
+  const shape = truth.entries.find((entry) => entry.feature === 'shape-3d')
+  assert.equal(shape.status, 'preserve-only')
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(shape.axes).map(([key, value]) => [key, value.status])),
+    {
+      create: 'unsupported',
+      edit: 'unsupported',
+      inspect: 'supported',
+      preserve: 'partial',
+      render: 'unsupported',
+      verify: 'inconclusive',
+    },
+  )
+  assert.equal(report.requirements.results[0].satisfied, true)
+  assert.equal(report.warnings.length, 0)
+
+  const strict = runProbe(xdoc, ['--require-feature', 'shape-3d/local-declarations', '--strict'], {
+    FAKE_XDOC_MODE: 'extended-valid-axes',
+  })
+  assert.equal(strict.status, 2, strict.stderr)
+  assert.equal(JSON.parse(strict.stdout).requirements.results[0].state, 'preserve-only')
+})
+
+for (const mode of ['extended-missing-axes', 'extended-malformed-axes']) {
+  test(`${mode} withholds the new feature without losing valid existing capabilities`, () => {
+    const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+    const result = runProbe(
+      xdoc,
+      [
+        '--require-feature',
+        'shape-3d/local-declarations',
+        '--require-feature',
+        'slide-animation/basic-shape-and-text-builds',
+        '--strict',
+      ],
+      { FAKE_XDOC_MODE: mode },
+    )
+    assert.equal(result.status, 2, result.stderr)
+    const report = JSON.parse(result.stdout)
+    assert.equal(report.capabilities.capabilityTruth.available, true)
+    assert.deepEqual(
+      report.requirements.results.map((item) => item.state),
+      ['undisclosed', 'supported'],
+    )
+    assert.equal(report.capabilities.capabilityTruth.entries.length, 6)
+  })
+}
 
 test('capability probe preserves the exact Agent transport contracts', () => {
   const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
@@ -464,7 +545,7 @@ test('unknown capability truth versions fail closed for strict feature requireme
   assert.ok(report.warnings.some((warning) => warning.code === 'capability-truth-unavailable'))
 })
 
-for (const mode of ['invalid-axis-contract', 'invalid-required-for']) {
+for (const mode of ['invalid-axis-contract', 'invalid-required-for', 'duplicate-required-for']) {
   test(`${mode} makes the complete capability truth unavailable`, () => {
     const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
     const result = runProbe(xdoc, ['--require-feature', 'text/native-authoring', '--strict'], {

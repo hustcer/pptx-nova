@@ -187,7 +187,7 @@ picture fill。
 | `complexScript`   | 阿拉伯文等复杂脚本字体；省略保留，`null` 清除并恢复继承           |
 | `letterSpacing`   | 字符间距；显式 `pt` 字符串或等价 raw EMU，`null` 清除             |
 | `kern`            | 字偶距调整的最小字号阈值；仅在当前 schema 披露时使用，规则见下文  |
-| `size`            | 优先使用 `"<n>pt"`；裸数字按通用 length 规则解释                  |
+| `size`            | 使用 `"<n>pt"` 等带单位的 length 字符串；裸数字会被拒绝           |
 | `bold` / `italic` | 布尔                                                              |
 | `underline`       | `none / single / double / wavy / heavy / ...`                     |
 | `color`           | 字体颜色（6 位 hex）                                              |
@@ -210,10 +210,13 @@ inspect 的 `fontFacts[]` 检查各脚本 scope。
 `fontFacts[].font.kernPt` 和 `effectiveKernPt`：清除后前者应缺失，后者可能仍有继承值。
 普通 run 解析所支持的段落、列表、layout、master 与演示文稿默认样式链；表格和图表
 字体表面只披露直接值，不据此推断其样式继承。缺失字段也不表示关闭 kerning。
+遇到畸形的本地或继承阈值，inspect 会保留其他可读字体事实，但阈值保持未知，且不会继续
+搜索更后面的继承层；渲染则跳过畸形阈值继续继承，所以二者可能不同。不要把未知值改写成
+`"0pt"`，也不要仅因 inspect 缺值就断言 PNG/PDF 没有字偶距调整。
 这组事实说明保存的阈值，不提供完整字体来源追踪或实际字形间距测量；对布局敏感的
 修改仍须查看渲染结果，需要 PowerPoint 保真证据时使用对应 PowerPoint 检查流程。
 
-### Theme 字体（一改全改）
+### Theme 字体（影响继承该主题的文字）
 
 ```json
 {
@@ -295,8 +298,8 @@ Fonts 权重子集:
 PDF 导出会自动拉 `Barlow` 的 `wght=900` 子集；浏览器 viewer 也会把 `Barlow Black`
 当成 `Barlow` family + `font-weight: 900`。
 
-> 旧版（< `8d10d8ec`）总是拉 Regular 权重,Bold/Light 等带后缀的字体在 PDF 里
-> 会被静默回退到 400。如果用户报告"导出的 PDF 字重不对",先确认 xdoc 版本。
+是否取得所需字重取决于实际字体来源与渲染环境。用户报告 PDF 字重不对时，复核当前
+导出的字体证据和 PNG，不用版本号或字体名后缀代替实际 face 验证。
 
 ### PDF 导出的 bold / italic 现在正确解析
 
@@ -321,6 +324,12 @@ Google Fonts 子集(`ital,wght@1,400` 等坐标),写入 PDF。
 如果用了**离线字体缓存**(`cache/<family>/<style>.ttf`),xdoc 会按 style 拼文件
 名:`bold.ttf` / `italic.ttf` / `bold_italic.ttf`。缺哪种 style 哪种 style 回退
 到 regular。
+
+缓存文件必须含真实的 family/style 元数据与字形；把同一份 Regular 或可变字体复制并
+重命名为 `bold.ttf` 不会生成 Bold。需要可变字体时使用已正确实例化的静态 face，或用户
+提供的匹配静态字体。当前 native 精确匹配同时核对 family 和 style，本机 Regular 不应
+遮蔽缓存中的 Bold/Italic；缺样式时仍可能回退。用 `visual-audit` 的实际字体解析证据与
+PNG 核对目标对象，不能只凭 `check fonts` 找到字体族就宣布字重正确。
 
 ## Theme color（主题色一键改）
 

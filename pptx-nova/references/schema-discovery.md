@@ -12,7 +12,7 @@ xdoc schema --mode ops --ops add-text-box         # 单个 op 完整 jsonSchema
 xdoc schema --mode ops --ops add-slide,add-chart   # 多个 op
 xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary --minimal # 字段 + 紧凑定义摘要
 xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs full --minimal # 字段 + 完整定义闭包
-xdoc schema --mode examples               # 内置 21 个 patch 示例
+xdoc schema --mode examples               # 当前运行时的 patch 示例
 xdoc schema --minimal                # 删 verbose 字段（与上面任一组合用）
 ```
 
@@ -45,7 +45,7 @@ selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --mode o
 xdoc schema --mode index | save -f schema-index.json
 ```
 
-得到所有 58 个 op 名、summary、required / optional 字段名与 constraints —— 用来
+得到当前 op 名、summary、required / optional 字段名与 constraints —— 用来
 决定 "我要 `add-chart` 还是 `add-text-box`"。index 视图没有 `level` 字段（`--mode ops`
 里所有 op 的 `level` 都是 `patch`）；18 种 recipe kind 不是独立 op，而是
 `add-slide.recipe.kind`，清单在完整 schema 的 `commands.pptx.recipeOps[]`。
@@ -81,7 +81,7 @@ xdoc schema --mode ops --ops add-chart --minimal | save -f schema-add-chart.json
 
 ### 2b. 动画 op 必须按需拉 schema
 
-动画字段和安全边界更新频繁，涉及动画时先拉这三个 op：
+动画字段和安全边界更新频繁，涉及动画时先拉对应 op：
 
 ```bash
 xdoc schema --mode ops --ops set-slide-animations --minimal | save -f schema-set-slide-animations.json
@@ -97,7 +97,7 @@ xdoc schema --mode ops --ops set-slide-animations --minimal | save -f schema-set
 xdoc schema --mode examples | save -f examples.json
 ```
 
-里面 21 个示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
+示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
 shape effects / hyperlinks 等。对照修改最快。
 
 ## Schema 关键 `$defs` 速记
@@ -235,7 +235,7 @@ xdoc pptx select input.pptx --query query.json --slides 1,3-5 --json
 
 ```nu
 # 找 "做表" 相关的 op
-xdoc schema --mode index --minimal | from json | get operations | where op =~ 'table' | select op level required
+xdoc schema --mode index --minimal | from json | get operations | where op =~ 'table' | select op summary required
 
 # 看 add-chart 必填 / 可选字段
 xdoc schema --mode ops --ops add-chart --minimal | from json | get operations.0 | { required: $in.required, optional: $in.optional }

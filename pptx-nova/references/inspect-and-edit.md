@@ -122,12 +122,21 @@ inspect、preserve、render 和 verify 轴；只有 schema 披露该字段时，
 select 核实目标，不拼出猜测的 selector。读取 `inspectionStatus` 和 `diagnostics`，
 未知或畸形字段不能用默认值补齐；`flatTx` 的存在也不证明可见的立体效果。
 
+`scene.camera.zoomPercent1000` 是千分之一百分比，`100%` 和整数 token `100000`
+都会精确读为 `100000`，不是倍率 `100000`。超出字段范围或精度、无法精确表达的合法
+百分比保留为 `null`，并给出 `unrepresentable-attribute` 与 `rawValue`；语法畸形使用
+`invalid-attribute`。不要四舍五入、钳制或把诊断中的原始值写回源 XML。
+
 这些事实用于定位与复核，不是可回写的 patch。相邻文字、样式或元数据编辑后重新
 inspect，按 owner/scope 核对 `sourceSha256`。摘要包含不透明 XML 和有效命名空间上下文，
 摘要变化需要调查；摘要相同只证明该 XML 身份未变，不能证明整页布局或视觉不变。
 还须核对授权范围外的对象几何，并在要求视觉保留时比较同一候选的独立 PowerPoint
 渲染。内置 PDF/Viewer 对 Shape 3D 的支持以 render 轴为准；不要把其二维预览当成
-camera、bevel、extrusion 或 material 已正确渲染的证据。Chart 3D 和 GLB 使用各自契约。
+camera、bevel、extrusion 或 material 已正确渲染的证据。即使当前预览能显示部分倒角、
+光照或阴影，也不能提升 schema 尚未承诺的 render/verify 轴，更不能据此创建 3D XML。
+渲染侧诊断与 `threeDFacts` 不是同一种证据：没有诊断不代表完整支持，模型被保留也不等于
+源 XML 被保留。仅消费当前命令实际披露的报告，不给 CLI 臆造 SDK 回调或诊断参数。
+Chart 3D 和 GLB 使用各自契约。
 
 ### 关键字段速记
 

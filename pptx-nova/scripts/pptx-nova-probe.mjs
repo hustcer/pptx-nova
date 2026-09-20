@@ -401,11 +401,12 @@ function capabilityAxisContract(value) {
     return null
   }
   const requiredIdentities = requiredFor.map(({ feature, subset }) => `${feature}/${subset}`)
+  const requiredIdentitySet = new Set(requiredIdentities)
+  // requiredFor is an extensible runtime list, not a fixed enum. Keep the v1
+  // baseline and validate axes for every additional identity disclosed by xdoc.
   if (
-    requiredIdentities.length !== CAPABILITY_AXIS_REQUIRED_IDENTITIES.length ||
-    !requiredIdentities.every(
-      (identity, index) => identity === CAPABILITY_AXIS_REQUIRED_IDENTITIES[index],
-    )
+    requiredIdentitySet.size !== requiredIdentities.length ||
+    !CAPABILITY_AXIS_REQUIRED_IDENTITIES.every((identity) => requiredIdentitySet.has(identity))
   ) {
     return null
   }

@@ -666,6 +666,10 @@ function createReport(args) {
   const capabilities = {
     commands: objectKeys(schema?.commands).sort(),
     pptxSubcommands: objectKeys(pptx.subcommands).sort(),
+    visualAudit: {
+      modes: pptx.subcommands?.['visual-audit']?.visualModes?.values ?? [],
+      defaultMode: pptx.subcommands?.['visual-audit']?.visualModes?.default ?? null,
+    },
     patchOperations: uniqueSorted([
       ...namesFromCollection(patchSchema.supportedOps),
       ...namesFromCollection(patchSchema.operations),

@@ -48,11 +48,12 @@ capability probe
 -> dry-run
 -> apply candidate
 -> full-package visual + semantic vision check
--> one full preview/contact sheet
--> atomic publish
+-> one canonical Create PDF/PNG render
+-> actual Agent/human visual review of the exact candidate
+-> finalize with identity checks and atomic publish
 ```
 
-It never marks manual visual review complete.
+The initial run never marks visual review complete and does not write the final output.
 
 The runner fails closed on semantic evidence: dry-run and apply must each
 return an explicit empty `semanticIssues[]`; vision must return a consistent
@@ -112,7 +113,25 @@ new candidate, and rerun the runner in a new or safely reusable current run dire
 
 ## Delivery boundary
 
-Machine success produces `status=needs-human-review`, not visual completion. Review the contact sheet
-and suspicious full-size PNGs, verify narrative and brand quality, and only then report the deck as
-visually delivered. Preserve `create-run-summary.json`, the final candidate, patch/sidecars, preview
-manifest, contact sheet, and relevant issue-page PNGs as audit evidence.
+With a runtime that discloses `visualModes.values` including `create`, machine success produces
+`status=needs-visual-review`. Open `visual-evidence/review.html` (an index of the exact canonical PNGs)
+or inspect all PNGs directly. Review narrative and brand quality as applicable. Record the actual
+review using `pptx-nova-visual-review.mjs --mode create --candidate <run-dir>/candidate.pptx
+--manifest <run-dir>/visual-evidence/manifest.json --previews <run-dir>/visual-evidence
+--slides-reviewed <count>` and the required `--check` values from that helper's help. Record only
+checks actually performed; the helper validates the record, it does not understand images.
+
+Then rerun the original Create command with `--finalize --visual-review <run-dir>/visual_review.json`.
+This validates frozen inputs, candidate bytes, canonical PDF/PNG bytes, full coverage and the review
+binding, then publishes without rebuilding or rendering. Successful finalization reports
+`status=delivered`, `deliveryReady=true`. Missing, failed or stale review evidence blocks publication.
+Changed content, lock, assets manifest, patch or machine evidence requires a fresh run and review.
+
+Older runtimes retain diagnostic preview and `needs-human-review`; they cannot automatically finalize
+through this interface. Upgrade xdoc, or follow the legacy canonical gate and its actual human
+confirmation route. Never reinterpret a candidate-only confirmation result as Create success.
+
+Preserve the summary, candidate, content/lock, patch/sidecars, machine reports, `create-binding.json`,
+canonical manifest/PDF/PNGs and `visual_review.json`. Do not compare a candidate to itself to obtain
+a regression verdict. Native-object corpus tasks should follow the one-page smoke and preservation
+guidance in `inspect-and-edit.md` before expanding the deck.

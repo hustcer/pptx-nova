@@ -105,6 +105,8 @@ summary.
 Use these only to choose the entry reference; the routing table owns details.
 
 - **Create**: `create-runner.md`; formal/high-risk work also follows the Studio/design-lock references.
+  The runner prepares canonical candidate evidence first; after actual PNG review, use its
+  `--finalize --visual-review` phase to publish the same hash-bound candidate without rendering again.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
   collect scoped evidence, run the contract gate, then review changed slides.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve

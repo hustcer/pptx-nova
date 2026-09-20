@@ -46,7 +46,7 @@ observation/review reports. The canonical transaction packages:
 - one atomically published, hash-bound manifest with the exact PDF and PNG
   artifacts used by those checks.
 
-Routine visual review still uses `preview`, and existing-deck diagnosis still
+Create reuses canonical PNGs for its actual visual review; existing-deck diagnosis still
 uses `vision-diff` or `contact-diff`; those reports explain the result but do
 not create a second delivery verdict. `visual-audit` performs the governing
 render transaction, does not create a contact sheet, and v1 implements neither
@@ -67,6 +67,15 @@ xdoc pptx visual-audit \
   --output-dir <run-dir>/visual-evidence \
   --json > <run-dir>/visual-audit.json
 ```
+
+For a genuinely new deck, first verify that the runtime discloses
+`capabilities.visualAudit.modes` containing `create`, then add `--visual-mode create`.
+This explicit policy checks the complete candidate and rejects `--reference` and `--slides`.
+It reports `policyId=pptx-visual-oracle-create/v1` and, when candidate checks pass,
+`assurance=candidate-checks`. This is not regression equivalence, content-intent acceptance or
+PowerPoint parity. Review the exact manifest PNGs and the content contract before delivery.
+The standard Create runner handles preparation and finalization as described in `create-runner.md`.
+Old runtimes keep the legacy candidate-only confirmation boundary; do not remove it in the consumer.
 
 For a stable before/after same-renderer comparison, use the same 1-based scope
 as the edit review:
@@ -102,10 +111,11 @@ solely because rendering was involved; a failure report has no visual decision.
    subject owns the finding before calling it a regression: both reference and
    candidate receive static-layout, final-layout, raster, and font checks.
 3. `require-human-confirmation` means review the referenced PNGs and findings;
-   candidate-only runs reach this action even when all required candidate
+   default regression-mode candidate-only runs reach this action even when all required candidate
    checks pass because regression equivalence is unavailable.
-4. `proceed` proves only unchanged normalized pixels plus passing required v1
-   checks under the same xdoc renderer. It does not prove PowerPoint parity or
+4. Regression `proceed / same-renderer-regression` proves unchanged normalized pixels plus passing
+   required checks. Create `proceed / candidate-checks` proves only candidate machine checks;
+   actual visual review and content acceptance remain required. A machine verdict does not prove PowerPoint parity or
    visual intent.
 
 Consume the persisted manifest fail-closed:
@@ -121,6 +131,18 @@ Only exit status `0` and `deliveryAuthorized=true` authorize an automated
 delivery. Exit `4` is a content blocker. Exit `5` requires actual human
 confirmation; an Agent must not reinterpret it as success. Invalid or
 internally inconsistent manifests exit `3`.
+
+For Create, also pass `--candidate <current.pptx>` and, after actually reviewing the canonical PNGs,
+`--review <visual_review.json>`. Record that review with both `--candidate` and `--manifest` using
+`pptx-nova-visual-review.mjs`. The consumer verifies candidate, PDF/PNG and manifest hashes, complete
+slide coverage and all required review checks. Exit `6` means machine checks passed but actual
+visual review is missing; it does not require another user permission question. Stale or failed
+reviews do not authorize delivery. Use a fresh run after changing the candidate.
+
+Edit, Translation and Refurbish continue to use the common consumer with the default regression
+policy and their approved source/reference. Producing a new output filename does not make an edit
+a Create task. Keep each workflow's semantic/style/fidelity checks; do not substitute Create mode
+for explaining intended changes.
 
 `ocr-overflow=skipped` and `independent-reference=skipped` are expected v1
 limitations, not passing evidence. Keep manual PNG/contact-sheet review and

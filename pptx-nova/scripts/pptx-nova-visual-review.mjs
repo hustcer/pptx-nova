@@ -1,20 +1,10 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { captureVisualBinding, REVIEW_CHECKS } from './lib/canonical-visual-evidence.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-visual-review/v1'
-const BASE_REQUIRED_CHECKS = [
-  'titleWrap',
-  'bodyReadability',
-  'alignment',
-  'spacing',
-  'contrast',
-  'chartTableLegibility',
-  'repeatedLayoutRhythm',
-  'placeholderResidue',
-  'footerPageChrome',
-  'assetFit',
-]
+const BASE_REQUIRED_CHECKS = REVIEW_CHECKS
 const MODE_REQUIRED_CHECKS = {
   refurbish: ['targetDeckkitApplied'],
 }
@@ -35,6 +25,8 @@ const usage =
   '  --run-dir <path>        Optional run directory. Defaults output to run-dir/visual_review.json.\n' +
   '  --output <path>         Output path. Defaults to visual_review.json in cwd or run-dir.\n' +
   '  --mode <mode>           Workflow mode for context.\n' +
+  '  --candidate <path>      Bind the review to the current PPTX (requires --manifest).\n' +
+  '  --manifest <path>       Canonical manifest whose exact PNGs were reviewed.\n' +
   '  --reviewer <name>       reviewer label, e.g. agent or human.\n' +
   '  --slides-reviewed <n>   Number of rendered slides/contact-sheet pages reviewed.\n' +
   '  --contact-sheet <path>  Contact sheet image used for review.\n' +
@@ -71,6 +63,8 @@ function parseArgs(argv) {
     '--run-dir': 'runDir',
     '--output': 'output',
     '--mode': 'mode',
+    '--candidate': 'candidate',
+    '--manifest': 'manifest',
     '--reviewer': 'reviewer',
     '--slides-reviewed': 'slidesReviewed',
     '--contact-sheet': 'contactSheet',
@@ -346,6 +340,15 @@ function makeReport(args) {
   report.issueCount = report.summary.issueCount
   report.errorCount = report.summary.errors
   report.warningCount = report.summary.warnings
+  if (args.candidate || args.manifest) {
+    if (!args.candidate || !args.manifest)
+      throw new Error('--candidate and --manifest must be supplied together')
+    report.binding = captureVisualBinding(args.manifest, args.candidate)
+    if (args.slidesReviewed !== report.binding.slideCount)
+      throw new Error('review must cover every candidate slide')
+    report.artifacts.candidate = args.candidate
+    report.artifacts.manifest = args.manifest
+  }
   return report
 }
 

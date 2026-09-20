@@ -616,6 +616,14 @@ competing final Agent action. A reference problem can still produce
 `decision.action=stop`, so inspect subject ownership before calling it a new
 regression, but do not bypass the canonical decision.
 
+For genuine new-deck Create, use the runtime's explicitly disclosed `--visual-mode create` and
+reuse its canonical PNGs for review. `candidate-checks` is machine evidence only: bind the actual
+review to `--candidate` and `--manifest`, then use the shared consumer with `--review`. Missing
+review means complete the review, not request user approval just because no prior deck exists.
+Standard Create uses the runner's `--finalize` phase to publish the unchanged reviewed candidate.
+Edit, Translation and Refurbish retain their reference-based regression policy and specialized
+gates. Old runtimes retain their original confirmation requirement; never synthesize proceed.
+
 For Studio Create, Reference Create, structural Edit, strict Template Following,
 and Refurbish Existing Deck, keep `layout-final.json` before PNG/contact-sheet
 review. The bundled finalizer makes this default for manual high-risk routes and

@@ -193,9 +193,10 @@ try {
     apply: `${shellQuote(args.xdocBin)} pptx apply -p ${shellQuote(patchPath)} -o ${shellQuote(candidatePath)} --overwrite --json > ${shellQuote(applyPath)}`,
     vision: `${shellQuote(args.xdocBin)} pptx vision-check ${shellQuote(candidatePath)} --json > ${shellQuote(visionPath)}`,
     preview: `${shellQuote(args.xdocBin)} pptx preview ${shellQuote(candidatePath)} --output-dir ${shellQuote(previewsDir)} --contact-sheet --contact-output ${shellQuote(contactSheetPath)} --overwrite --json > ${shellQuote(previewReportPath)}`,
-    visualVerify: `${shellQuote(args.xdocBin)} pptx visual-audit --candidate ${shellQuote(candidatePath)} --output-dir ${shellQuote(visualEvidenceDir)} --overwrite --json`,
-    visualEvidenceGate: `node ${shellQuote(join(__dirname, 'pptx-nova-visual-evidence-gate.mjs'))} --manifest ${shellQuote(visualEvidenceManifestPath)} --output ${shellQuote(visualEvidenceGatePath)} --json`,
+    visualVerify: `${shellQuote(args.xdocBin)} pptx visual-audit --candidate ${shellQuote(candidatePath)} --visual-mode create --output-dir ${shellQuote(visualEvidenceDir)} --json`,
+    visualEvidenceGate: `node ${shellQuote(join(__dirname, 'pptx-nova-visual-evidence-gate.mjs'))} --manifest ${shellQuote(visualEvidenceManifestPath)} --candidate ${shellQuote(candidatePath)} --output ${shellQuote(visualEvidenceGatePath)} --json`,
   }
+  commands.finalize = `${commands.run} --finalize --visual-review ${shellQuote(join(runDir, 'visual_review.json'))}`
   writeJson(commandsPath, commands)
 
   const result = {

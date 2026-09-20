@@ -2996,6 +2996,9 @@ process.exit(2)
   assert.match(commands.apply, /--overwrite/)
   assert.match(commands.vision, /vision-check/)
   assert.match(commands.preview, /--contact-sheet/)
+  assert.match(commands.visualVerify, /--visual-mode create/)
+  assert.match(commands.visualEvidenceGate, /--candidate/)
+  assert.match(commands.finalize, /--finalize --visual-review/)
   const contentTemplate = JSON.parse(readFileSync(paths.contentTemplatePath, 'utf8'))
   const deckLockTemplate = JSON.parse(readFileSync(paths.deckLockTemplatePath, 'utf8'))
   assert.equal(contentTemplate._template, true)
@@ -3012,7 +3015,7 @@ process.exit(2)
   assert.equal(paths.finalPptx, join(root, 'script-test.pptx'))
 })
 
-test('create runner executes DeckKit create gates and publishes after preview', () => {
+test('create runner retains diagnostic previews on old runtimes without publishing', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-'))
   const runDir = join(root, 'run')
   const contentPath = join(runDir, 'content.json')
@@ -3062,13 +3065,13 @@ test('create runner executes DeckKit create gates and publishes after preview', 
   assert.equal(summary.agentSummary.gates.vision.semanticIssues, 0)
   assert.equal(summary.agentSummary.gates.vision.semanticSourceRules, 82)
   assert.equal(summary.agentSummary.gates.vision.semanticNormalizedRules, 81)
-  assert.equal(existsSync(output), true)
+  assert.equal(existsSync(output), false)
   assert.equal(existsSync(join(runDir, 'candidate.pptx')), true)
   assert.equal(existsSync(join(runDir, 'preview.json')), true)
   assert.equal(existsSync(join(runDir, 'previews', 'contact-sheet.png')), true)
   assert.ok(phaseNames.indexOf('dry-run') < phaseNames.indexOf('apply'))
   assert.ok(phaseNames.indexOf('apply') < phaseNames.indexOf('vision-check'))
-  assert.ok(phaseNames.indexOf('preview-render') < phaseNames.indexOf('publish'))
+  assert.equal(phaseNames.includes('publish'), false)
   for (const gate of [
     'validate-content',
     'build',
@@ -3077,10 +3080,112 @@ test('create runner executes DeckKit create gates and publishes after preview', 
     'apply',
     'vision-check',
     'png-previews',
-    'published-output',
   ]) {
     assert.ok(gateNames.includes(gate), gate)
   }
+})
+
+test('create runner finalizes only the same reviewed canonical candidate without rerendering', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-canonical-'))
+  const runDir = join(root, 'run')
+  mkdirSync(runDir)
+  const content = join(runDir, 'content.json')
+  const lock = join(runDir, 'deck_lock.json')
+  const output = join(root, 'final.pptx')
+  writeJson(content, swissColumnContent())
+  writeJson(lock, swissColumnLock({ finalPptx: output, runDir }))
+  let source = successfulFakeXdocSource().replace(
+    "import { mkdirSync, writeFileSync } from 'node:fs'",
+    "import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'\nimport { createHash } from 'node:crypto'",
+  )
+  source = source.replace(
+    'subcommands: { apply: {},',
+    "subcommands: { 'visual-audit': { visualModes: { default: 'regression', values: ['regression','create'] } }, apply: {},",
+  )
+  source = source.replace(
+    "} else if (args[0] === 'pptx' && args[1] === 'apply') {",
+    `} else if (args[1] === 'visual-audit') {
+  const dir = valueAfter('--output-dir')
+  mkdirSync(dir, { recursive: true })
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jfXkAAAAASUVORK5CYII=', 'base64')
+  writeFileSync(dir + '/slide.png', png)
+  writeFileSync(dir + '/candidate.pdf', 'test pdf')
+  const hash = b => createHash('sha256').update(b).digest('hex')
+  const candidate = readFileSync(valueAfter('--candidate'))
+  const report = {
+    schemaVersion: 'pptx-visual-evidence/v1', status: 'success', policyId: 'pptx-visual-oracle-create/v1',
+    subjects: [{ id: 'candidate', sha256: hash(candidate), byteLength: candidate.length, slideCount: 1, selectedSlides: [1] }],
+    checks: ['input-integrity','static-layout','pdf-final-layout','pdfium-raster','pixel-diff','ocr-overflow','font-resolution','region-attribution','independent-reference','policy'].map((id,i) => ({ id, required: i<4 || i===9, outcome: i<4 || i===9 ? 'pass' : 'skipped' })),
+    decision: { action: 'proceed', assurance: 'candidate-checks', reasons: [] }, findings: [],
+    artifacts: [['slide.png','image/png',1],['candidate.pdf','application/pdf',null]].map(([path,mimeType,slide]) => { const b = readFileSync(dir+'/'+path); return { id:path,path,mimeType,slide,subjectId:'candidate',sha256:hash(b),byteLength:b.length } }),
+  }
+  writeFileSync(dir + '/manifest.json', JSON.stringify(report))
+  print(report)
+} else if (args[0] === 'pptx' && args[1] === 'apply') {`,
+  )
+  const fake = writeFakeXdoc(root, source)
+  const args = [
+    skillPath('scripts/pptx-nova-create-run.mjs'),
+    '--content',
+    content,
+    '--lock',
+    lock,
+    '--output',
+    output,
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    fake,
+    '--json',
+  ]
+  const summary = readCreateSummary(runNode(args))
+  assert.equal(summary.status, 'needs-visual-review')
+  assert.equal(summary.agentSummary.gates.preview.gate, 'passed')
+  assert.equal(summary.agentSummary.gates.preview.pages, 1)
+  assert.equal(existsSync(output), false)
+  assert.equal(summary.performance.render.previewRenderInvocations, 1)
+  const review = join(runDir, 'visual_review.json')
+  runNodeStatus([...args, '--finalize', '--visual-review', review], 1)
+  const checks = [
+    'titleWrap',
+    'bodyReadability',
+    'alignment',
+    'spacing',
+    'contrast',
+    'chartTableLegibility',
+    'repeatedLayoutRhythm',
+    'placeholderResidue',
+    'footerPageChrome',
+    'assetFit',
+  ]
+  runNode([
+    skillPath('scripts/pptx-nova-visual-review.mjs'),
+    '--mode',
+    'create',
+    '--candidate',
+    summary.artifacts.candidate,
+    '--manifest',
+    summary.artifacts.canonicalManifest,
+    '--previews',
+    summary.artifacts.previews,
+    '--output',
+    review,
+    '--slides-reviewed',
+    '1',
+    ...checks.flatMap((c) => ['--check', c + '=pass']),
+  ])
+  const original = readFileSync(content)
+  writeFileSync(content, original.toString() + ' ')
+  runNodeStatus([...args, '--finalize', '--visual-review', review], 1)
+  assert.equal(existsSync(output), false)
+  writeFileSync(content, original)
+  const final = readCreateSummary(runNode([...args, '--finalize', '--visual-review', review]))
+  assert.equal(final.status, 'delivered')
+  assert.equal(final.deliveryReady, true)
+  assert.ok(final.performance.totalMs >= final.performance.measuredPhaseMs)
+  assert.equal(final.phases.filter((p) => p.name === 'preview-render').length, 1)
+  assert.equal(final.phases.filter((p) => p.name === 'apply').length, 1)
+  assert.deepEqual(readFileSync(output), readFileSync(summary.artifacts.candidate))
 })
 
 test('create runner propagates assets to build, lock check, dry-run, and apply', () => {
@@ -3345,7 +3450,7 @@ test('create runner resolves relative xdoc-bin before changing into run dir', ()
 
   assert.equal(summary.status, 'needs-human-review')
   assert.equal(summary.runDir.endsWith(join('artifacts', 'run')), true)
-  assert.equal(existsSync(output), true)
+  assert.equal(existsSync(output), false)
   assert.match(dryRun.command, /[/\\]bin[/\\]fake-xdoc\.mjs/)
 })
 

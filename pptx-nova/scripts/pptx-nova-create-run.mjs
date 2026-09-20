@@ -24,6 +24,7 @@ import {
 } from './lib/runner-runtime.mjs'
 import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { semanticIssueValid, semanticValidationEvidence } from './lib/semantic-evidence.mjs'
+import { canonicalCreatePreview, validateCreateDelivery } from './lib/create-delivery.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
@@ -46,7 +47,9 @@ Options:
   --content <path>        DeckKit content JSON.
   --lock <path>           deck_lock.json for drift checks.
   --assets <path>         Optional assets_manifest.json.
-  --output <path>         Final PPTX published only after machine gates pass.
+  --output <path>         Final PPTX published after canonical checks and actual visual review.
+  --finalize              Publish the previously generated candidate without rendering again.
+  --visual-review <path>  Hash-bound visual_review.json, required with --finalize.
   --run-dir <path>        Run artifact directory. Defaults to <cwd>/.pptx-nova/create-<deckkit>-<timestamp>.
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc.
   --overwrite             Allow replacing an existing final output after all machine gates pass.
@@ -56,9 +59,9 @@ Options:
   --help                  Show this help.
 
 The runner executes validate-content, build, check-lock, dry-run, apply, vision-check,
-and PNG/contact-sheet preview. It keeps all intermediate artifacts in the run directory,
-overwrites only current-run candidate artifacts, and still requires human/Agent visual
-review of the contact sheet before final delivery confidence.
+and canonical Create rendering once. Review its PNGs, then use --finalize --visual-review
+to publish the same candidate. Older runtimes retain diagnostic preview only and cannot
+finalize automatically; update xdoc or follow the documented human-confirmation route.
 `
 
 function parseArgs(argv) {
@@ -71,6 +74,8 @@ function parseArgs(argv) {
     runDir: '',
     xdocBin: 'xdoc',
     overwrite: false,
+    finalize: false,
+    visualReview: '',
     progress: 'auto',
     json: false,
     jsonFull: false,
@@ -80,6 +85,8 @@ function parseArgs(argv) {
     if (arg === '--help' || arg === '-h') {
       process.stdout.write(usage)
       process.exit(0)
+    } else if (arg === '--finalize') {
+      args.finalize = true
     } else if (arg === '--overwrite') {
       args.overwrite = true
     } else if (arg === '--json') {
@@ -97,6 +104,10 @@ function parseArgs(argv) {
   if (!args.content) throw new Error(`--content is required.\n\n${usage}`)
   if (!args.lock) throw new Error(`--lock is required.\n\n${usage}`)
   if (!args.output) throw new Error(`--output is required.\n\n${usage}`)
+  if (args.finalize && (!args.runDir || !args.visualReview))
+    throw new Error('--finalize requires --run-dir and --visual-review')
+  if (args.visualReview && !args.finalize)
+    throw new Error('--visual-review is only accepted with --finalize')
   return args
 }
 
@@ -109,6 +120,7 @@ const valueFlags = {
   '--run-dir': 'runDir',
   '--xdoc-bin': 'xdocBin',
   '--progress': 'progress',
+  '--visual-review': 'visualReview',
 }
 
 function valueAfter(argv, index, flag) {
@@ -248,6 +260,7 @@ function normalizeArgs(inputArgs) {
     content,
     lock: resolve(cwd, inputArgs.lock),
     assets: inputArgs.assets ? resolve(cwd, inputArgs.assets) : '',
+    visualReview: inputArgs.visualReview ? resolve(cwd, inputArgs.visualReview) : '',
     output: resolve(cwd, inputArgs.output),
     xdocBin: normalizeExecutablePath(inputArgs.xdocBin, cwd),
   }
@@ -294,6 +307,11 @@ function artifactPaths(runDir) {
     previewReport: join(runDir, 'preview.json'),
     contactSheet: join(runDir, 'previews', 'contact-sheet.png'),
     summary: join(runDir, 'create-run-summary.json'),
+    canonicalDir: join(runDir, 'visual-evidence'),
+    canonicalManifest: join(runDir, 'visual-evidence', 'manifest.json'),
+    visualGate: join(runDir, 'visual-evidence-gate.json'),
+    reviewGallery: join(runDir, 'visual-evidence', 'review.html'),
+    binding: join(runDir, 'create-binding.json'),
   }
 }
 
@@ -354,7 +372,7 @@ function buildAgentSummary(summary) {
   const dryRun = gateByName(summary, 'dry-run')
   const apply = gateByName(summary, 'apply')
   const vision = gateByName(summary, 'vision-check')
-  const preview = gateByName(summary, 'png-previews')
+  const preview = gateByName(summary, 'png-previews') ?? gateByName(summary, 'canonical-create')
   return {
     schemaVersion: AGENT_SUMMARY_SCHEMA_VERSION,
     mode: 'create',
@@ -362,7 +380,11 @@ function buildAgentSummary(summary) {
     machineGatesPassed: Boolean(summary.machineGatesPassed),
     deliveryReady: Boolean(summary.deliveryReady),
     needsHumanReview: Boolean(summary.needsHumanReview),
-    decision: summary.machineGatesPassed ? 'continue-to-human-review' : 'stop-and-fix',
+    decision: summary.deliveryReady
+      ? 'deliver'
+      : summary.machineGatesPassed
+        ? 'continue-to-human-review'
+        : 'stop-and-fix',
     deckkit: summary.deckkit,
     slideCount: summary.slideCount,
     gates: {
@@ -417,6 +439,8 @@ function buildAgentSummary(summary) {
       vision: summary.artifacts.vision,
       previewReport: summary.artifacts.previewReport,
       contactSheet: summary.artifacts.contactSheet,
+      canonicalManifest: summary.artifacts.canonicalManifest,
+      reviewGallery: summary.artifacts.reviewGallery,
     },
     warnings: summary.warnings,
     error: summary.error
@@ -475,6 +499,8 @@ function runCapabilityProbe(summary, args, artifacts) {
       'xdoc capability schema is degraded; runner continued and will rely on direct command results as gate evidence.',
     )
   }
+  summary.canonicalCreateAvailable =
+    report.capabilities?.visualAudit?.modes?.includes('create') === true
 }
 
 function runValidation(summary, args, artifacts) {
@@ -759,6 +785,26 @@ function runCreate(inputArgs) {
   validatePaths(args)
   mkdirSync(args.runDir, { recursive: true })
   const artifacts = artifactPaths(args.runDir)
+  if (args.finalize) {
+    const summary = readJson(artifacts.summary)
+    validateCreateDelivery(summary, args, artifacts)
+    publishCandidate(summary, args, artifacts)
+    summary.status = 'delivered'
+    summary.deliveryReady = true
+    summary.needsHumanReview = false
+    summary.review = { ...summary.review, completed: true, artifact: args.visualReview }
+    return finalizeRunnerSummary(summary, {
+      summaryPath: artifacts.summary,
+      totalMs: Number(summary.performance?.totalMs ?? 0) + durationMs(runStarted),
+      finalizeArtifacts: finalizeArtifactPaths,
+      buildPerformance: buildPerformanceSummary,
+      buildAgentSummary,
+    })
+  }
+  if (existsSync(artifacts.canonicalManifest))
+    throw new Error(
+      'This run already contains canonical evidence; use --finalize or a fresh run directory',
+    )
   const summary = initialSummary(args, contentJson, artifacts)
 
   try {
@@ -769,10 +815,21 @@ function runCreate(inputArgs) {
     runDryRun(summary, args, artifacts)
     runApply(summary, args, artifacts)
     runVision(summary, args, artifacts)
-    runPreview(summary, args, artifacts)
-    publishCandidate(summary, args, artifacts)
+    if (summary.canonicalCreateAvailable) {
+      canonicalCreatePreview(summary, args, artifacts, runJsonPhase)
+      requireGate(summary, 'canonical-create', true, {
+        count: summary.slideCount,
+        expectedCount: summary.slideCount,
+        message: 'Candidate checks passed; actual visual review remains required',
+      })
+    } else {
+      runPreview(summary, args, artifacts)
+      summary.warnings.push(
+        'Runtime does not disclose Create visual policy; diagnostic preview is not delivery authorization. Update xdoc or obtain actual human confirmation through the canonical legacy flow.',
+      )
+    }
 
-    summary.status = 'needs-human-review'
+    summary.status = summary.canonicalCreateAvailable ? 'needs-visual-review' : 'needs-human-review'
     summary.machineGatesPassed = true
     summary.deliveryReady = false
     return finalizeRunnerSummary(summary, {

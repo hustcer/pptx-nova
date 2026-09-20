@@ -230,6 +230,13 @@ Use these entry points from skill workflows:
   effect, exact adjacent slide navigation, animation-enabled slide show, and
   required expected duration plus optional resave evidence. It does not capture
   interpolation frames and therefore does not establish visual rendering parity.
+  It navigates without modifying presentation settings. Optional resave requires
+  editing-enabled PowerPoint and `unzip`; empty or corrupt packages fail before
+  publishing the resaved file or a passing report.
+- `pptx-nova-morph-examples.mjs` - executable focus, KPI zoom, and rotated exit
+  examples using the public xdoc operations. Writes patches and structural evidence
+  to a new run directory; see `references/morph-choreography.md` for the workflow
+  and the separate PowerPoint evidence requirements.
 - pptx-nova-structure-check.mjs - lightweight PPTX OOXML structure check. It
   scans XML inside the PPTX for expected font declarations, expected sRGB/theme
   colors, and empty/default-text placeholder residue, then writes

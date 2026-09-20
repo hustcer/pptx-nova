@@ -118,12 +118,6 @@ def run-powerpoint-probe [
     '      on error err_msg number err_num'
     '        error "read-transition: " & err_msg number err_num'
     '      end try'
-    '      tell slide show settings of target_presentation'
-    '        set starting slide to from_slide_number'
-    '        set ending slide to to_slide_number'
-    '        set range type to slide show range'
-    '        set show type to slide show type window'
-    '      end tell'
     '      set animations_enabled to show with animation of slide show settings of target_presentation'
     '      try'
     '        set show_window to run slide show (slide show settings of target_presentation)'
@@ -132,6 +126,13 @@ def run-powerpoint-probe [
     '        error "start-slideshow: " & err_msg number err_num'
     '      end try'
     '      delay 0.5'
+    '      go to first slide show_view'
+    '      set deadline to (current date) + timeout_seconds'
+    '      repeat while (current show position of show_view) is not from_slide_number'
+    '        if (current date) is greater than deadline then error "Timed out navigating to source slide"'
+    '        go to next slide show_view'
+    '        delay 0.1'
+    '      end repeat'
     '      set start_position to current show position of show_view'
     '      try'
     '        go to next slide show_view'
@@ -154,6 +155,14 @@ def run-powerpoint-probe [
     '      exit slide show show_view'
     '      if resave_path is not "" then'
     '        save target_presentation in POSIX file resave_path as save as Open XML presentation'
+    '        set deadline to (current date) + timeout_seconds'
+    '        repeat'
+    '          try'
+    '            if (size of (info for POSIX file resave_path)) > 0 then exit repeat'
+    '          end try'
+    '          if (current date) is greater than deadline then error "Timed out waiting for a nonempty PowerPoint resave"'
+    '          delay 0.1'
+    '        end repeat'
     '      end if'
     '      close target_presentation saving no'
     '      return presentation_name & tab_char & recognized_effect & tab_char & ¬'
@@ -311,6 +320,10 @@ def main [
     } else {
       if not ($staged_resave_path | path exists) {
         error make {msg: 'PowerPoint did not create the requested resaved PPTX.'}
+      }
+      let saved_zip = (^unzip -t $staged_resave_path | complete)
+      if $saved_zip.exit_code != 0 {
+        error make {msg: 'PowerPoint resave is not a complete PPTX ZIP package.'}
       }
       cp $staged_resave_path $resave_output_path
       {

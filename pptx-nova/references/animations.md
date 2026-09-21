@@ -19,6 +19,7 @@ xdoc schema --mode ops --ops set-slide-animations --minimal > <run-dir>/schema-s
 - 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fade-out/wipe-out/fly-out`
   或 `phase: "exit"`。
 - 若当前 schema 披露 `grow-shrink` / `spin` 及其参数，可创建有限的整 shape 强调；详见下方幅度契约。
+- 若当前 schema 同时披露 `motion-path` 和 `offset`，可创建有限的整 shape 直线路径；详见下方路径契约。
 - 支持的 trigger：`on-click`、`with-previous`、`after-previous`。
 - 支持的 timing modifier：`repeat`、`autoReverse`、`restart`、
   `easing.accelerate/decelerate`。
@@ -40,7 +41,7 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 
 - `timingSummary`: timing 是否存在、media/interactive/unsupported timing、editable 与
   preserve-only 数量。
-- `animations[]`: 稳定 `id`、`target`、`effect`、`direction`、`scale`、`degrees`、`phase`、`trigger`、`durationMs`、`delayMs`、
+- `animations[]`: 稳定 `id`、`target`、`effect`、`direction`、`scale`、`degrees`、`offset`、`phase`、`trigger`、`durationMs`、`delayMs`、
   `repeat`、`autoReverse`、`restart`、`easing`、`editable` 和 preserve-only reason（`unsupportedReason`）。
 - `animationCapabilities`: `editable`、`preserveOnly`、`unsupportedCreate`。
 
@@ -77,12 +78,12 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 ```
 
 `merge-safe` 是默认思路：如果现有 timing 含 media timing、interactive trigger、unsupported timing、
-motion path、未建模的 emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
+未建模的 motion path / emphasis 或复杂 build，dry-run 应拒绝覆盖。不要为通过门禁而改成 `replace`，除非用户明确
 接受丢弃/重建既有动画树。
 
 ## 基础动画 timing modifier
 
-四个 modifier 用于当前 schema 披露的安全效果；grow-shrink/spin 额外要求有限 repeat。
+四个 modifier 用于当前 schema 披露的安全效果；grow-shrink/spin/motion-path 额外要求有限 repeat。
 它们不会解锁任意 emphasis、motion path、sequence/parallel、chart build、media timing 或 shape-trigger：
 
 ```json
@@ -188,6 +189,21 @@ patch 成功状态。
   ]
 }
 ```
+
+## 有限直线路径
+
+只有当前运行时 schema 同时披露 `effect: "motion-path"` 和 `offset` 时才使用。`offset: { "x": 0.25, "y": -0.1 }`
+表示向右移动幻灯片宽度的 25%、向上移动幻灯片高度的 10%。两个分量均为 `[-1000, 1000]` 内的有限数，
+量化至六位小数，零位移合法。默认 `phase: "path"`、`trigger: "on-click"`、`duration: 500`、`delay: 0`。
+
+每条路径从对象原始布局位置出发，终点保持；`autoReverse: true` 返回本条路径的起点。
+连续路径分别从原始位置开始，不累加上条路径的位移。路径保留对象旋转和缩放，不自动朝向路径。
+仅支持整 shape 和有限 repeat，不接受 paragraph/level/build/direction；不允许任意路径字符串。
+
+按稳定 ID 修改时，省略 `effect` 保留原路径；显式提供 `motion-path` 必须同时提供完整 `offset`。
+`effect`、`phase`、`offset` 不接受 null。复杂路径、未知组合模式、额外 behavior 或复杂 target 仍按 inspect 的
+`editable` 与 `unsupportedReason` 处理。apply 后核对偏移、稳定 ID、目标和后继 `after-previous` 延迟，
+实际播放检查中间位置、保持态及反向返回态。生成与 Viewer 播放通过不能代替 PowerPoint 回存、播放认证。
 
 ## 原生 fly 的有限边界
 
@@ -486,7 +502,7 @@ inspect → patch → dry-run/apply → 回读和播放验证流程，共用同�
 
 这些场景默认不能用普通 patch 改：
 
-- motion path / custom path 创建。
+- 未披露的 motion path / 任意 custom path 创建；已披露的有限直线路径按上文契约处理。
 - 未披露的强调效果（例如 color）；grow-shrink/spin 超出上述整 shape、有限幅度与重复边界的变体。
 - media/video timing、interactive trigger、点击某个 shape 触发。
 - chart/SmartArt build。

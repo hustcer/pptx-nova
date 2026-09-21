@@ -264,14 +264,15 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   不联网取图，不把参考 deck 的位图直接打进 kit。替代图标/shape 必须语义相关。
 - **视觉门禁**：每次 build 走
   `dry-run → apply → vision-check(high/medium=0) → 按 fidelity-scope 做 PNG/contact-sheet 人工逐页`。
-  dry-run 与 vision-check 的溢出估算阈值不同，两个都要跑。
+  dry-run 与 vision-check 的溢出估算阈值不同，两个都要跑。benchmark 的历史 low 基线不等于
+  canonical Create 放行；仍须通过当前交付门禁，不能用 qualityProfile 覆盖它。
 - **常规 shape 也必须高保真**：不要只复刻版式语义而放松基础元素。人工 PNG 对比时逐页检查
   文本字号、字色、大小写、对齐、行高、圆形/方块尺寸、圆内文字颜色与居中、斜线/纹理方向、
   裁切边界和是否越界。除非为了通过可读性门禁并在 compare notes 中说明，PPTX 字号不应小于
   参考源；圆形、badge、编号、标题这类高识别元素必须优先按参考截图尺寸还原。
-- **字号下限**：正文 ≥10.5pt；label/badge/chart/table ≥9pt；页脚/来源 8.5–9pt。
-  若参考 deck 本身使用更小的风格字号（如 Swiss 标签），在 catalog
-  `qualityProfile` 中声明并说明理由，不要静默违反。
+- **字号下限**：正文 ≥10.5pt；label/badge/chart/table 和页脚/来源须满足当前 canonical
+  可读性门禁（默认 10pt）。若参考源使用更小字号，优先增高或加宽文字框并调整内容预算，
+  在 compare notes 记录可读性适配；同步 schema slot budget 和 catalog，不能仅声明小字号例外。
 - **readiness 不跳级**：新 kit 从 `experimental` 起步，benchmark 通过后
   `candidate`；`production` 必须 benchmark + 人工 PNG review +
   `--confirm-manual-png-review`。本 skill 默认推进到 `candidate`，

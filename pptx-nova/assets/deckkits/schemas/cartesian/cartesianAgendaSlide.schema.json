@@ -5,7 +5,13 @@
   "type": "object",
   "required": ["label", "title", "body", "items"],
   "properties": {
-    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 4.4 } },
+    "textLayout": {
+      "type": "string",
+      "enum": ["rows", "paragraphs"],
+      "description": "Default rows use separate text boxes. paragraphs creates native target S{slideIndex}_AgendaParagraphs with one paragraph per item and a bottom rule.",
+      "x-slotRole": "control"
+    },
+    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 4.4 } },
     "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 36, "widthIn": 4.9 } },
     "body": { "type": "string", "x-slotBudget": { "maxLines": 4, "fontPt": 13, "widthIn": 4.0 } },
     "items": {
@@ -16,6 +22,12 @@
         "type": "object",
         "required": ["text"],
         "properties": {
+          "level": {
+            "type": "number",
+            "enum": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            "description": "Native paragraph level for textLayout=paragraphs; defaults to 0.",
+            "x-slotRole": "control"
+          },
           "number": {
             "type": "string",
             "x-slotBudget": { "maxLines": 1, "fontPt": 18, "widthIn": 0.5 }

@@ -1,5 +1,5 @@
 // cartesian.kit.mjs - Minimal editorial geometry DeckKit
-// version: 0.2.0
+// version: 0.3.0
 import { createOps, fitImageRect, nm } from './core-primitives.kit.mjs'
 
 export const C = {
@@ -31,7 +31,7 @@ const f = (size, color = C.body, extra = {}) => ({
   ...(extra.bold ? { bold: true } : {}),
 })
 const d = (size, color = C.ink) => f(size, color, { name: FONT_DISPLAY })
-const labelFont = (size = 9) => f(size, C.accent, { bold: true })
+const labelFont = () => f(10, C.accent, { bold: true })
 const upper = (value) => String(value ?? '').toUpperCase()
 const roman = ['I', 'II', 'III', 'IV']
 
@@ -105,7 +105,7 @@ function makeCartesianOps(options = {}) {
     p.ops.push(fillOp(s, innerName, C.bg))
   }
   const label = (s, base, x, y, w, text, align) =>
-    tx(s, base, x, y, w, 0.2, upper(text), labelFont(), align)
+    tx(s, base, x, y, w, 0.23, upper(text), labelFont(), align)
   const slideBase = (s) => p.addSlide(s, C.bg)
 
   return {
@@ -154,7 +154,7 @@ function drawImageShell(ctx, s, x, y, w, h, label) {
     name: nm(s, 'ImageDiagB'),
   })
   p.ops.push(lineOp(s, nm(s, 'ImageDiagB'), C.line, '0.75pt'))
-  ctx.tx(s, 'ImageLabel', cx - 0.95, cy - 0.08, 1.9, 0.18, upper(label), f(9.5, C.accent), 'center')
+  ctx.tx(s, 'ImageLabel', cx - 0.95, cy - 0.11, 1.9, 0.23, upper(label), f(10, C.accent), 'center')
 }
 
 function drawImageAsset(ctx, s, x, y, w, h, label, asset) {
@@ -173,7 +173,7 @@ function drawImageAsset(ctx, s, x, y, w, h, label, asset) {
     mimeType: asset.mime,
   })
   ctx.p.setImageCrop(s, imageName, fitted.crop)
-  ctx.tx(s, 'ImageLabel', x, y - 0.27, w, 0.18, upper(label), f(8.5, C.accent))
+  ctx.tx(s, 'ImageLabel', x, y - 0.29, w, 0.23, upper(label), f(10, C.accent))
 }
 
 function resolveEditorialImage(ctx, slide) {
@@ -223,7 +223,7 @@ function chartBase(ctx, s, name, data, x, y, w, h, kind) {
     legend: {
       position: 'bottom',
       includeInLayout: false,
-      font: f(8.5, C.body),
+      font: f(10, C.body),
     },
   })
   p.ops.push({
@@ -259,6 +259,48 @@ function renderSlide(ctx, s, slide) {
     tx(s, 'Body', MX, 4.0, 4.0, 0.65, data.body, f(13, C.body))
     const rowX = 7.06
     const rowW = 5.74
+    if (data.textLayout === 'paragraphs') {
+      const items = data.items ?? []
+      const rowPitch = 0.664
+      const name = nm(s, 'AgendaParagraphs')
+      // Keep numbering and text in one native frame so paragraph builds have a
+      // stable target. A single bottom rule cannot cross an animated paragraph.
+      p.tx(
+        s,
+        name,
+        rowX,
+        2.6,
+        rowW,
+        items.length * rowPitch,
+        items
+          .map((item, i) => `${item.number ?? String(i + 1).padStart(2, '0')}  ${item.text}`)
+          .join('\n'),
+        f(13, C.body),
+      )
+      p.ops.push({
+        op: 'set-text-frame',
+        slide: s,
+        shape: { name },
+        frame: { verticalAnchor: 'top' },
+      })
+      items.forEach((item, i) =>
+        p.ops.push({
+          op: 'set-paragraph',
+          slide: s,
+          shape: { name },
+          paragraph: i,
+          format: {
+            level: item.level ?? 0,
+            indent: '0pt',
+            lineSpacing: '20pt',
+            spaceBefore: '0pt',
+            spaceAfter: `${rowPitch * 72 - 20}pt`,
+          },
+        }),
+      )
+      rule(s, 'AgendaRule', rowX, 2.6 + items.length * rowPitch, rowW, C.line)
+      return
+    }
     ;(data.items ?? []).forEach((item, i) => {
       const source = typeof item === 'string' ? { text: item } : (item ?? {})
       const y = 2.42 + i * 0.664
@@ -329,9 +371,9 @@ function renderSlide(ctx, s, slide) {
     })
     rule(s, 'StatsRule', 7.0, 4.56, 5.8, C.line, 0.01)
     ;(data.stats ?? []).forEach((stat, i) => {
-      const x = 7.0 + i * 1.48
+      const x = 7.0 + i * 1.9
       tx(s, `StatValue${i}`, x, 4.78, 1.3, 0.46, stat.value, d(24, C.ink))
-      tx(s, `StatLabel${i}`, x, 5.24, 1.35, 0.18, upper(stat.label), f(7.6, C.accent))
+      tx(s, `StatLabel${i}`, x, 5.24, 1.75, 0.23, upper(stat.label), f(10, C.accent))
     })
     return
   }
@@ -355,11 +397,11 @@ function renderSlide(ctx, s, slide) {
         s,
         `CardIconText${i}`,
         cell.x + 0.276,
-        3.61,
+        3.6,
         0.37,
-        0.16,
+        0.23,
         card.marker ?? roman[i] ?? String(i + 1),
-        f(9, C.accent),
+        f(10, C.accent),
         'center',
       )
       tx(s, `CardTitle${i}`, cell.x + 0.276, 4.08, 3.25, 0.28, card.title, d(15.5, C.ink))
@@ -433,7 +475,7 @@ function renderSlide(ctx, s, slide) {
     rule(s, 'TimelineRule', MX, 3.67, CW, C.line, 0.01)
     ;(data.items ?? []).forEach((item, i) => {
       const x = MX + i * 3.066
-      tx(s, `Phase${i}`, x, 3.9, 2.65, 0.18, upper(item.phase), f(9, C.accent))
+      tx(s, `Phase${i}`, x, 3.9, 2.65, 0.23, upper(item.phase), f(10, C.accent))
       tx(s, `StepTitle${i}`, x, 4.18, 2.65, 0.3, item.title, d(14.5, C.ink))
       tx(s, `StepBody${i}`, x, 4.51, 2.65, 0.5, item.body, f(10.5, C.body))
     })
@@ -455,9 +497,9 @@ function renderSlide(ctx, s, slide) {
         x - 0.2,
         5.24,
         2.0,
-        0.18,
+        0.23,
         upper(member.role),
-        f(7.8, C.accent),
+        f(10, C.accent),
         'center',
       )
     })

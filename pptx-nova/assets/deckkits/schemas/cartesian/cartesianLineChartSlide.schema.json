@@ -5,7 +5,7 @@
   "type": "object",
   "required": ["label", "title", "body", "chart"],
   "properties": {
-    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.8 } },
+    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 3.8 } },
     "title": { "type": "string", "x-slotBudget": { "maxLines": 2, "fontPt": 36, "widthIn": 5.5 } },
     "body": { "type": "string", "x-slotBudget": { "maxLines": 4, "fontPt": 13, "widthIn": 3.35 } },
     "chart": {
@@ -18,7 +18,7 @@
           "maxItems": 8,
           "items": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 0.8 }
+            "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 0.8 }
           }
         },
         "series": {
@@ -31,7 +31,7 @@
             "properties": {
               "name": {
                 "type": "string",
-                "x-slotBudget": { "maxLines": 1, "fontPt": 8.5, "widthIn": 1.6 }
+                "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 1.6 }
               },
               "values": {
                 "type": "array",

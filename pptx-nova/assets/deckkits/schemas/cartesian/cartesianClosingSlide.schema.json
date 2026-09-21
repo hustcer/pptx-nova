@@ -5,7 +5,7 @@
   "type": "object",
   "required": ["label", "title", "cta", "contact"],
   "properties": {
-    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.14 } },
+    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 3.14 } },
     "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 54, "widthIn": 4.4 } },
     "cta": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 10.8, "widthIn": 3.14 } },
     "contact": {

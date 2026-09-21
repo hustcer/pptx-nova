@@ -4,6 +4,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { normalizeChartSemantics, validateChartSemantics } from './lib/chart-semantics.mjs'
 import { validateSessionRulesDocument } from './pptx-nova-session-rules-core.mjs'
+import { inspectAnimationCorpus } from '../assets/deckkits/animation-corpus.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const skillRoot = resolve(__dirname, '..')
@@ -1074,6 +1075,17 @@ function contentAssetReferences(content) {
 
 function checkContent(content, lock, errors, warnings) {
   if (!content) return
+  if (
+    (content.meta?.deckProfile === 'animation-corpus' ||
+      lock.deckProfile?.primary === 'animation-corpus') &&
+    content.meta?.deckProfile !== lock.deckProfile?.primary
+  ) {
+    push(
+      errors,
+      'corpus-profile-mismatch',
+      'content.meta.deckProfile and lock.deckProfile.primary must both declare animation-corpus',
+    )
+  }
   if (!Array.isArray(content.slides)) {
     push(errors, 'content-slides-missing', 'content.json must contain slides[]')
     return
@@ -1318,6 +1330,15 @@ function main() {
   checkAssets(assets, args.assets, referencedAssets, errors, warnings)
   checkContent(content, lock, errors, warnings)
   checkPatch(patch, lock, content, assets, args, errors, warnings)
+  if (content?.meta?.deckProfile === 'animation-corpus') {
+    if (!patch)
+      push(
+        errors,
+        'corpus-patch-missing',
+        'animation-corpus requires the composed patch for authored-effect validation',
+      )
+    else errors.push(...inspectAnimationCorpus(content, patch).errors)
+  }
 
   const report = {
     schemaVersion: 'pptx-nova-lock-check/v1',

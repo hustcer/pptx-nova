@@ -10,6 +10,31 @@
       "required": ["deckkit"],
       "properties": {
         "deckkit": { "type": "string" },
+        "deckProfile": { "type": "string", "enum": ["animation-corpus"] },
+        "animationCases": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Corpus cases require id, kind, visible feature and expectedPlayback, 0-based slides, and effect or morphMode. The composed patch must contain each declared effect and explicit adjacent Morph pair.",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "feature", "expectedPlayback", "slides"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "kind": { "type": "string", "enum": ["animation", "morph", "transition"] },
+              "feature": { "type": "string", "minLength": 1 },
+              "expectedPlayback": { "type": "string", "minLength": 1 },
+              "slides": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": { "type": "number", "minimum": 0, "multipleOf": 1 }
+              },
+              "effect": { "type": "string", "minLength": 1 },
+              "morphMode": { "type": "string", "enum": ["by-object", "by-word", "by-char"] }
+            },
+            "additionalProperties": false
+          }
+        },
         "style": { "type": "string" },
         "layout": { "type": "string" },
         "footerLeft": { "type": "string" }

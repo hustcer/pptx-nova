@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { addTablerIconPicture } from './icon-assets.kit.mjs'
+import { inspectAnimationCorpus } from './animation-corpus.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -1385,16 +1386,19 @@ function matchingThreshold(thresholds = [], slideCount) {
 function checkDeckDiversity({ entry, content, mode, errors, warnings, fitDiagnostics }) {
   const gate = entry?.diversityGate
   if (!gate || !Array.isArray(content?.slides)) return
-  const groups = content.slides.map((slide) => slideGroupFor(slide?.type, gate))
+  const { coveredSlides } = inspectAnimationCorpus(content)
+  const groups = content.slides.map((slide, index) =>
+    coveredSlides.has(index) ? null : slideGroupFor(slide?.type, gate),
+  )
   const context = diversityContext(gate, content, groups)
   const contextSummary = diversityContextSummary(context)
-  const slideCount = groups.length
+  const slideCount = groups.filter((group) => group !== null).length
   const threshold = matchingThreshold(gate.thresholds, slideCount)
   const severity = validationSeverity(gate, mode)
 
   if (threshold?.minUniqueGroups) {
     const excluded = new Set(gate.excludeGroupsFromUnique ?? [])
-    const unique = new Set(groups.filter((group) => !excluded.has(group)))
+    const unique = new Set(groups.filter((group) => group !== null && !excluded.has(group)))
     if (unique.size < threshold.minUniqueGroups) {
       pushValidationGateIssue({
         errors,
@@ -1442,7 +1446,7 @@ function checkDeckDiversity({ entry, content, mode, errors, warnings, fitDiagnos
     for (let i = 1; i <= groups.length; i += 1) {
       if (groups[i] === groups[start]) continue
       const runLength = i - start
-      if (runLength > maxRun) {
+      if (groups[start] !== null && runLength > maxRun) {
         pushValidationGateIssue({
           errors,
           warnings,
@@ -1480,6 +1484,7 @@ export function validateContent(
   const errors = []
   const warnings = []
   const fitDiagnostics = []
+  errors.push(...inspectAnimationCorpus(content).errors)
 
   if (!content || typeof content !== 'object') {
     errors.push(makeIssue('structure', 'Content must be an object'))

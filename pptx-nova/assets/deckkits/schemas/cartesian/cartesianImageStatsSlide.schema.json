@@ -7,9 +7,9 @@
   "properties": {
     "imageLabel": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9.5, "widthIn": 1.9 }
+      "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 1.9 }
     },
-    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 4.2 } },
+    "label": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 4.2 } },
     "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 36, "widthIn": 5.8 } },
     "paragraphs": {
       "type": "array",
@@ -34,7 +34,7 @@
           },
           "label": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 7.6, "widthIn": 1.35 }
+            "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 1.75 }
           }
         },
         "additionalProperties": false

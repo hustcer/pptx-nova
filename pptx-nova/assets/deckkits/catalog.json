@@ -2595,7 +2595,7 @@
     },
     {
       "id": "cartesian",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "path": "cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -2633,10 +2633,10 @@
         ]
       },
       "qualityProfile": {
-        "minFontPt": 8.5,
-        "labelFontPt": 7.5,
-        "sourceFontPt": 8.5,
-        "baseline": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Cartesian preserves sparse editorial geometry with readable 10pt labels; core body text remains at or above 10.5pt."
       },
       "defaultFor": [],
       "bestFor": [
@@ -2850,30 +2850,30 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-21",
+        "lastBenchmark": "2026-09-21",
         "vision": {
           "high": 0,
           "medium": 0,
-          "low": 24,
+          "low": 0,
           "lowBuckets": {
-            "total": 24,
-            "styleAllowed": 24,
+            "total": 0,
+            "styleAllowed": 0,
             "baselineKnown": 0,
             "new": 0,
             "changed": 0,
-            "resolved": 0,
+            "resolved": 24,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 1
+            "baselineUpdatedCases": 0
           }
         },
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-21",
+          "date": "2026-09-21",
           "source": {
-            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/pptx-nova-visual"
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-cartesian/verified-animation-corpus"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -2882,17 +2882,17 @@
           "vision": {
             "high": 0,
             "medium": 0,
-            "low": 24,
+            "low": 0,
             "lowBuckets": {
-              "total": 24,
-              "styleAllowed": 24,
+              "total": 0,
+              "styleAllowed": 0,
               "baselineKnown": 0,
               "new": 0,
               "changed": 0,
-              "resolved": 0,
+              "resolved": 24,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 1
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -2900,8 +2900,8 @@
               "caseId": "cartesian.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/cartesian/golden-html/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
+              "summaryPath": ".tmp/deckkit-cartesian/verified-animation-corpus/cartesian/golden-html/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -2916,17 +2916,17 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 24,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 24,
-                  "styleAllowed": 24,
+                  "total": 0,
+                  "styleAllowed": 0,
                   "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
-                  "resolved": 0,
+                  "resolved": 24,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -2937,10 +2937,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 229674
+                "bytes": 180064
               },
               "patchOps": 383,
-              "p50TotalMs": 39.24
+              "p50TotalMs": 68.53
             }
           ],
           "blockers": []
@@ -2952,12 +2952,18 @@
         "Chart.js canvas charts are rebuilt as native editable PPTX charts driven by semantic chart data.",
         "The HTML accent #8A8178 is darkened to #665D56 for readable PPTX micro text on the sandstone background.",
         "Image-bearing layout accepts a registered local asset with contain fitting; without a binding it preserves the editable crossed placeholder shell.",
-        "Playfair Display and Inter are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution."
+        "Playfair Display and Inter are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
+        "Agenda data.textLayout=paragraphs provides one native S{slideIndex}_AgendaParagraphs target with per-item levels; the default rows variant remains static."
       ],
       "examples": [
         {
           "name": "cartesian-html-reference",
           "contentPath": "examples/cartesian-content.json"
+        },
+        {
+          "name": "cartesian-animation-corpus",
+          "contentPath": "examples/cartesian-animation-content.json",
+          "choreographyPath": "examples/cartesian-animation-choreography.json"
         }
       ]
     },

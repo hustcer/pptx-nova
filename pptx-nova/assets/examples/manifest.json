@@ -567,7 +567,7 @@
       "caseId": "cartesian.golden-html",
       "kind": "golden",
       "readiness": "production",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "title": "Cartesian",
       "bestFor": [
         "minimal strategy narrative",
@@ -580,13 +580,13 @@
       "files": {
         "deck": {
           "path": "cartesian/deck.pptx",
-          "bytes": 27502,
-          "sha256": "cbb1e3e2c0d8ce141d663c1009a5475bb5e024292c5592c1013cb2aaae877402"
+          "bytes": 27488,
+          "sha256": "9410dc5c4233cd137d327bdb2b27ba350230a9f4d91fc026fed22d66747678f6"
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 64844,
-          "sha256": "b51302cd7a2fdbbb480d9411e1358c05b87030d02f2000019607c126c7ee51a7",
+          "bytes": 65814,
+          "sha256": "d1f7fb3582793466aecad3b159f92f75fcb1c892894034637a48004e7a1da335",
           "quality": 82
         },
         "content": {
@@ -601,8 +601,8 @@
         },
         "summary": {
           "path": "cartesian/summary.json",
-          "bytes": 2793,
-          "sha256": "e21b6ffbacffe164f9ae626506bd7d9a7576f8e449c413f21c83ff05295d4059"
+          "bytes": 5324,
+          "sha256": "f509febdcbae3d55bf725414deab029b73d551bbac4d1e621086c85f0c22e960"
         }
       },
       "validation": {
@@ -619,27 +619,25 @@
       "vision": {
         "status": "success",
         "slideCount": 10,
-        "issueCount": 24,
+        "issueCount": 0,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 24
+          "low": 0
         },
         "lowBuckets": {
-          "total": 24,
-          "styleAllowed": 24,
+          "total": 0,
+          "styleAllowed": 0,
           "baselineKnown": 0,
           "new": 0,
           "changed": 0,
-          "resolved": 0,
+          "resolved": 24,
           "reviewable": 0,
           "baselineUnavailable": false,
           "baselineUpdated": false
         },
-        "lowByFamily": {
-          "small-font": 24
-        },
+        "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
@@ -652,14 +650,111 @@
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
           "source": "catalog.qualityProfile",
-          "minFontPt": 8.5,
-          "labelFontPt": 7.5,
-          "sourceFontPt": 8.5,
-          "note": "Cartesian follows a sparse HTML editorial template with 7.6-9pt uppercase micro labels; core body text remains at or above 10.5pt."
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Cartesian preserves sparse editorial geometry with readable 10pt labels; core body text remains at or above 10.5pt."
         },
         "newLowSamples": [],
         "changedLowSamples": [],
-        "resolvedLowSamples": []
+        "resolvedLowSamples": [
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 0,
+            "target": "S0_Label",
+            "fingerprint": "809a928b60988d8e3bc7"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 1,
+            "target": "S1_Label",
+            "fingerprint": "6c4df6173a9f9b90bfe8"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 3,
+            "target": "S3_Label",
+            "fingerprint": "4db97003f8af20d52b75"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 4,
+            "target": "S4_ImageLabel",
+            "fingerprint": "069d1b1d8eecd9a54fe2"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 4,
+            "target": "S4_Label",
+            "fingerprint": "321d1f337891d2b785f9"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 4,
+            "target": "S4_StatLabel0",
+            "fingerprint": "c732d12f72ba12daab46"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 4,
+            "target": "S4_StatLabel1",
+            "fingerprint": "4f6c504798d20f91f8aa"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 4,
+            "target": "S4_StatLabel2",
+            "fingerprint": "d1f2d754127f35353400"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 5,
+            "target": "S5_Label",
+            "fingerprint": "7889d5c8fd87de82c4ed"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 5,
+            "target": "S5_CardIconText0",
+            "fingerprint": "2438f8a5e84823902a73"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 5,
+            "target": "S5_CardIconText1",
+            "fingerprint": "31c3a2b54445060daea5"
+          },
+          {
+            "severity": "low",
+            "family": "small-font",
+            "kind": "font-too-small",
+            "slideIndex": 5,
+            "target": "S5_CardIconText2",
+            "fingerprint": "03b39e60991feae18889"
+          }
+        ]
       }
     },
     {

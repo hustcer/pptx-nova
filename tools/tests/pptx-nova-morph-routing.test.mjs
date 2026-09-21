@@ -31,7 +31,8 @@ test('Morph authoring publishes the explicit pairing and PowerPoint evidence con
   assert.match(animations, /slide2-powerpoint\.diff/)
   assert.match(animations, /"clear": true/)
   assert.match(animations, /Windows fixture 补证，否则该维度保持 `inconclusive`/)
-  assert.match(animations, /viewer\/parser 只消费 OOXML `mc:Fallback` 的 fade 语义/)
+  assert.match(animations, /Viewer 已部分支持 object\/group、word\/character Morph/)
+  assert.match(animations, /离散帧也不能证明整个过程视觉一致/)
 
   assert.match(scripts, /optional macOS-only PowerPoint-native Morph semantic/)
   assert.match(playback, /pptx-morph-playback\/v1/)

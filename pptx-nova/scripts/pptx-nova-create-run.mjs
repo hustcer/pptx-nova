@@ -8,6 +8,7 @@ import {
   renameSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
@@ -25,6 +26,7 @@ import {
 import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { semanticIssueValid, semanticValidationEvidence } from './lib/semantic-evidence.mjs'
 import { canonicalCreatePreview, validateCreateDelivery } from './lib/create-delivery.mjs'
+import { composeChoreography } from './lib/animation-choreography.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
@@ -47,6 +49,7 @@ Options:
   --content <path>        DeckKit content JSON.
   --lock <path>           deck_lock.json for drift checks.
   --assets <path>         Optional assets_manifest.json.
+  --choreography <path>   Optional native animation/Morph operations JSON.
   --output <path>         Final PPTX published after canonical checks and actual visual review.
   --finalize              Publish the previously generated candidate without rendering again.
   --visual-review <path>  Hash-bound visual_review.json, required with --finalize.
@@ -70,6 +73,7 @@ function parseArgs(argv) {
     content: '',
     lock: '',
     assets: '',
+    choreography: '',
     output: '',
     runDir: '',
     xdocBin: 'xdoc',
@@ -116,6 +120,7 @@ const valueFlags = {
   '--content': 'content',
   '--lock': 'lock',
   '--assets': 'assets',
+  '--choreography': 'choreography',
   '--output': 'output',
   '--run-dir': 'runDir',
   '--xdoc-bin': 'xdocBin',
@@ -260,6 +265,7 @@ function normalizeArgs(inputArgs) {
     content,
     lock: resolve(cwd, inputArgs.lock),
     assets: inputArgs.assets ? resolve(cwd, inputArgs.assets) : '',
+    choreography: inputArgs.choreography ? resolve(cwd, inputArgs.choreography) : '',
     visualReview: inputArgs.visualReview ? resolve(cwd, inputArgs.visualReview) : '',
     output: resolve(cwd, inputArgs.output),
     xdocBin: normalizeExecutablePath(inputArgs.xdocBin, cwd),
@@ -270,10 +276,16 @@ function normalizeArgs(inputArgs) {
 
 function validatePaths(args) {
   if (!args.deckkit) throw new Error('--deckkit is required when content.meta.deckkit is missing')
+  if (
+    args.choreography &&
+    [...Object.values(artifactPaths(args.runDir)), args.output].includes(args.choreography)
+  )
+    throw new Error('Choreography must not use a reserved run artifact or final output path')
   for (const [label, path] of [
     ['content', args.content],
     ['deck lock', args.lock],
     ...(args.assets ? [['assets manifest', args.assets]] : []),
+    ...(args.choreography ? [['choreography', args.choreography]] : []),
   ]) {
     if (!existsSync(path) || !statSync(path).isFile()) {
       throw new Error(`${label} does not exist or is not a file: ${path}`)
@@ -297,6 +309,7 @@ function artifactPaths(runDir) {
     capabilities: join(runDir, 'xdoc-capabilities.json'),
     validation: join(runDir, 'validate-content.json'),
     patch: join(runDir, 'patch.json'),
+    deckkitPatch: join(runDir, 'deckkit.patch.json'),
     quality: join(runDir, 'quality.json'),
     lockCheck: join(runDir, 'check-lock.json'),
     dryRun: join(runDir, 'dry-run.json'),
@@ -327,6 +340,7 @@ function initialSummary(args, content, artifacts) {
     content: args.content,
     deckLock: args.lock,
     assetsManifest: args.assets || null,
+    choreography: args.choreography || null,
     output: args.output,
     runDir: args.runDir,
     slideCount: Array.isArray(content?.slides) ? content.slides.length : null,
@@ -340,16 +354,24 @@ function initialSummary(args, content, artifacts) {
         'Review contact-sheet.png and suspicious full-size PNGs before treating the deck as visually delivered.',
     },
     requiredReferences:
-      Array.isArray(content?.slides) && content.slides.length >= 6
+      content?.meta?.deckProfile === 'animation-corpus'
         ? [
             {
-              path: 'references/narrative-quality.md',
-              section: 'Narrative Gate',
-              reason:
-                'The generated deck contains at least six slides and requires narrative review.',
+              path: 'references/animations.md',
+              section: 'Animation corpus',
+              reason: 'Review declared cases, actual timing and native playback evidence.',
             },
           ]
-        : [],
+        : Array.isArray(content?.slides) && content.slides.length >= 6
+          ? [
+              {
+                path: 'references/narrative-quality.md',
+                section: 'Narrative Gate',
+                reason:
+                  'The generated deck contains at least six slides and requires narrative review.',
+              },
+            ]
+          : [],
     warnings: [],
     error: null,
   }
@@ -553,6 +575,15 @@ function runBuild(summary, args, artifacts) {
   })
   for (const warning of quality?.warnings ?? []) {
     summary.warnings.push(`build-quality: ${warning.message ?? warning}`)
+  }
+  if (args.choreography) {
+    const combined = composeChoreography({
+      basePatch: patch,
+      choreography: readJson(args.choreography),
+      slideCount: summary.slideCount,
+    })
+    copyFileSync(artifacts.patch, artifacts.deckkitPatch)
+    writeFileSync(artifacts.patch, JSON.stringify(combined, null, 2) + '\n')
   }
 }
 

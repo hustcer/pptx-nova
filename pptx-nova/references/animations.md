@@ -425,9 +425,62 @@ PowerPoint，必须在 Windows fixture 补证，否则该维度保持 `inconclus
 转场），不要把它与 `clear: true` 混用。apply 后 inspect 必须回读为无 transition 或指定基础转场，且
 目标 slide 不得残留 Morph namespace、extension wrapper 或失效 Choice。
 
-当前 xdoc viewer/parser 只消费 OOXML `mc:Fallback` 的 fade 语义；PDF/PNG 是静态结果。因此 viewer
-播放、PNG、PDF 和普通语义 diff 都不能作为 Morph 插值已实现或视觉等价的证据。PowerPoint 播放与
-保存往返是当前兼容性权威；若 PowerPoint 不可用，必须明确写成未验证风险，不能把 fallback 当作通过。
+当前 Viewer 已部分支持 object/group、word/character Morph 插值及播放生命周期；具体边界以
+当前运行时 capability 的 `render` 轴为准。`create/edit/inspect/preserve/render/verify` 六轴分别
+核对：能创建或在 Viewer 播放，不代表已通过目标 Office 验证。PDF/PNG 仍是静态结果。
+PowerPoint 播放与保存往返提供原生兼容性证据；缺少目标平台证据时，`verify` 保持
+`inconclusive`，不能以 Viewer 播放或 fade fallback 代替。
+
+## Standard Create choreography
+
+新建 DeckKit 演示时，在标准 Create 命令加 `--choreography <run-dir>/choreography.json`。
+文件使用 `{"schemaVersion":"pptx-patch/v1","ops":[...]}`，只接受：
+
+- `set-slide-animations`：非空 replacement 列表，组合时明确写入 `mode: "replace"`；用
+  `shape.name` 或 `target.shape.name` 指向已生成对象。
+- `set-slide-transition`：明确的 kind；Morph 的 slide 必须是有前一页的目标页。
+- `set-shape`：仅允许把已有对象重命名为唯一的 `!!Name`，用于两页显式配对。
+
+字段、效果与参数先读取当前 `xdoc schema --mode ops --ops <op> --minimal`；不猜枚举，也不提供 JS/shell
+hook 或放开 `customOps`。组合发生在 build 后、check-lock 前；`deckkit.patch.json` 保留原始版式，
+`patch.json` 是最终组合。两份 patch 和编排输入均进入最终摘要绑定；修改后必须重新生成和审查，
+finalize 也须带原来的 `--choreography`。
+
+Cartesian Agenda 可设置 `data.textLayout: "paragraphs"`，生成单一原生对象
+`S{0-based slide index}_AgendaParagraphs`。每个 item 对应一个段落，可声明 `level: 0..8`，默认 0；
+编号随段落播放，装饰线仅在整个框下方。省略该字段或使用 `rows` 保留逐行版式。
+逐段动画用 `by-paragraph`，分层用 `target.level` + `by-level`；整框 grow-shrink/spin 不附带 build。
+
+### Animation corpus
+
+控制变量语料可同时声明 `content.meta.deckProfile: "animation-corpus"` 和
+`deck_lock.deckProfile.primary: "animation-corpus"`，并在 `content.meta.animationCases` 写案例：
+
+```json
+{
+  "id": "paragraph-fade",
+  "kind": "animation",
+  "effect": "fade",
+  "feature": "逐段淡入",
+  "expectedPlayback": "点击三次，观察段落依次淡入。",
+  "slides": [0]
+}
+```
+
+`feature` 与 `expectedPlayback` 必须在案例页的 data 文字中可见。animation 是单页；morph 与
+transition 使用相邻的 `[source, destination]`（0-based）。morph 声明 `morphMode`，基础 transition
+声明 `effect`。案例必须对应组合 patch 中的真实动画目标/转场，Morph 还须存在显式 `!!` 配对。
+只有有效声明覆盖的页可重复布局并免于填充无关 evidence 页；未覆盖页继续按普通 diversity 规则检查。
+所有溢出、语义和 canonical 视觉门禁保持有效，profile 名称本身不能放行。
+
+完整可复用输入见 `assets/deckkits/examples/cartesian-animation-content.json` 和同目录的
+`cartesian-animation-choreography.json`。这是标准 Create 的入口；编辑已有 PPTX 仍使用上述
+inspect → patch → dry-run/apply → 回读和播放验证流程，共用同一原生 probe。
+
+播放探针通过指定放映范围直接从源页开始，读取实际 slide index。`--navigation-timeout-seconds`
+默认 60 秒控制源页启动/定位；原 `--timeout-seconds` 默认 10 秒用于目标页播放/重存，两者均有
+1–600 秒边界。重用报告路径须显式 `--overwrite`，或选新路径；报告不会采集中间帧。
+验证源码变化时确认测试加载当前源码或重新构建的产物，不能用旧 dist 证明新行为。
 
 ## Preserve-only 边界
 
@@ -462,6 +515,9 @@ PowerPoint clean-open -> 播放/点击复核(可用时) -> Morph 时运行 morph
 视觉/播放证据：
 
 - PNG/contact sheet 只能证明静态最终态可读，不能证明动画顺序正确。
+- 报告分别注明结构校验、浏览器运行冒烟、离散时间点画面检查、PowerPoint 语义播放和逐帧视觉对照。
+  时间轴无异常不等于轨迹正确；DOM 状态采样不等于看过画面；离散帧也不能证明整个过程视觉一致。
+  JS/WASM 解析结果共用同一渲染器时，不能作为两个独立视觉基准。未实际录屏或逐帧比较，就不作相应声明。
 - 若用户关心播放，必须用 PowerPoint 或 viewer 播放复核点击次数、触发顺序、delay/duration 和自动切页。
 - 有 `with-previous` / `after-previous` 时，检查 dry-run/diff 是否报告 timing 改动符合预期，不要把 delay 累加成意外长等待。
 

@@ -5,6 +5,10 @@ import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import test from 'node:test'
 import {
+  recordCreateInputs,
+  verifyCreateInputs,
+} from '../../pptx-nova/scripts/lib/create-delivery.mjs'
+import {
   fileSha256,
   captureVisualBinding,
   evaluateVisualEvidence,
@@ -71,6 +75,28 @@ function fixture() {
   writeFileSync(manifestPath, JSON.stringify(manifest))
   return { root, candidate, manifestPath, manifest }
 }
+
+test('Create input binding rejects edited or omitted choreography and a changed DeckKit patch', () => {
+  const f = fixture()
+  const choreography = join(f.root, 'choreography.json')
+  const deckkitPatch = join(f.root, 'deckkit.patch.json')
+  writeFileSync(choreography, '{"ops":[]}')
+  writeFileSync(deckkitPatch, '{"ops":[{"op":"add-slide"}]}')
+  const args = { choreography, output: join(f.root, 'final.pptx') }
+  const artifacts = { candidate: f.candidate, deckkitPatch, binding: join(f.root, 'binding.json') }
+  writeFileSync(artifacts.binding, JSON.stringify(recordCreateInputs(args, artifacts)))
+  verifyCreateInputs(args, artifacts)
+  assert.throws(
+    () => verifyCreateInputs({ ...args, choreography: '' }, artifacts),
+    /inputs.*changed/,
+  )
+  for (const file of [choreography, deckkitPatch]) {
+    const original = readFileSync(file)
+    writeFileSync(file, 'changed')
+    assert.throws(() => verifyCreateInputs(args, artifacts), /inputs.*changed/)
+    writeFileSync(file, original)
+  }
+})
 
 function review(f) {
   const path = join(f.root, 'visual_review.json')

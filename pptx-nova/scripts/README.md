@@ -23,11 +23,14 @@ Use these entry points from skill workflows:
 - `pptx-nova-deckkit-benchmark.mjs` - run bundled visual benchmark cases.
 - `pptx-nova-deckkit-catalog-update.mjs` - update bundled DeckKit quality metadata.
 - `pptx-nova-create-run.mjs` - execute the standard DeckKit-first create
-  pipeline from existing `content.json` and `deck_lock.json`. It runs
+  pipeline from existing `content.json` and `deck_lock.json`, with optional
+  `--choreography` JSON for native animation and Morph operations. It retains
+  both the DeckKit and composed patches and runs
   validate-content, build, check-lock, dry-run, apply, vision-check, and
   PNG/contact-sheet preview through the shared runner runtime, preserves every
   artifact in the run directory, then atomically publishes the final output
-  after machine gates pass. Dry-run/apply require explicit zero semantic issues;
+  through `--finalize` after machine gates and hash-bound visual review pass.
+  Dry-run/apply require explicit zero semantic issues;
   vision requires a consistent, passing full-package semantic summary. `--json`
   emits a compact Agent result with
   performance evidence; use `--json-full` or the persisted
@@ -230,7 +233,9 @@ Use these entry points from skill workflows:
   effect, exact adjacent slide navigation, animation-enabled slide show, and
   required expected duration plus optional resave evidence. It does not capture
   interpolation frames and therefore does not establish visual rendering parity.
-  It navigates without modifying presentation settings. Optional resave requires
+  It starts at the requested source using a temporary slide-show range on the
+  staged copy and restores the original range before resaving. Navigation and
+  playback use separate bounded timeouts. Optional resave requires
   editing-enabled PowerPoint and `unzip`; empty or corrupt packages fail before
   publishing the resaved file or a passing report.
 - `pptx-nova-morph-examples.mjs` - executable focus, KPI zoom, and rotated exit

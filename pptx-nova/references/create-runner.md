@@ -12,6 +12,7 @@ The standard runner requires:
 - `deck_lock.json` binding the output path, run directory, slide plan, and assumptions;
 - an output `.pptx` path that does not already exist unless replacement was explicitly requested;
 - an optional `assets_manifest.json` when the content uses registered external assets.
+- an optional `choreography.json` for native animation/Morph operations; see [animations](animations.md#standard-create-choreography).
 
 If these inputs are not prepared yet:
 
@@ -44,6 +45,7 @@ The runner owns this sequence:
 capability probe
 -> validate content
 -> build patch
+-> compose optional choreography (retain deckkit.patch.json)
 -> check lock
 -> dry-run
 -> apply candidate
@@ -99,8 +101,9 @@ full-deck preview as the delivery evidence.
 
 ## Failure routing
 
-Follow `requiredReferences[]` from the compact result or full summary. The runner currently requests
-the narrative gate for decks with at least six slides. Other preparation-time routes remain explicit:
+Follow `requiredReferences[]` from the compact result or full summary. The runner requests animation
+case review for `animation-corpus`, and narrative review for ordinary decks with at least six slides.
+Other preparation-time routes remain explicit:
 
 - invalid DeckKit content or unresolved slots: `references/deckkit-mode.md`;
 - unclear express content construction: `references/create-express.md`;
@@ -125,7 +128,8 @@ Then rerun the original Create command with `--finalize --visual-review <run-dir
 This validates frozen inputs, candidate bytes, canonical PDF/PNG bytes, full coverage and the review
 binding, then publishes without rebuilding or rendering. Successful finalization reports
 `status=delivered`, `deliveryReady=true`. Missing, failed or stale review evidence blocks publication.
-Changed content, lock, assets manifest, patch or machine evidence requires a fresh run and review.
+Changed content, lock, assets manifest, choreography, original DeckKit patch, composed patch or machine
+evidence requires a fresh run and review. Repeat `--choreography` when finalizing an animated candidate.
 
 Older runtimes retain diagnostic preview and `needs-human-review`; they cannot automatically finalize
 through this interface. Upgrade xdoc, or follow the legacy canonical gate and its actual human

@@ -11,6 +11,8 @@ export function recordCreateInputs(args, artifacts) {
     args.content,
     args.lock,
     args.assets,
+    args.choreography,
+    args.choreography ? artifacts.deckkitPatch : null,
     artifacts.patch,
     artifacts.quality,
     artifacts.validation,
@@ -27,6 +29,7 @@ export function recordCreateInputs(args, artifacts) {
     content: args.content,
     lock: args.lock,
     assets: args.assets,
+    ...(args.choreography ? { choreography: args.choreography } : {}),
     files: paths.map((path) => ({ path, sha256: fileSha256(path) })),
   }
 }

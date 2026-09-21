@@ -80,13 +80,17 @@ def run-powerpoint-probe [
   to_slide_number: int
   timeout_seconds: int
   staged_resave_path: string
+  navigation_timeout_seconds: int
 ]: nothing -> record {
+  # A selected range starts its show position at 1; read the slide's own index.
+  # Only the staged copy's range changes, and restore it before an optional save.
   let script = (['on run argv'
     '  set ppt_path to item 1 of argv'
     '  set from_slide_number to (item 2 of argv) as integer'
     '  set to_slide_number to (item 3 of argv) as integer'
     '  set timeout_seconds to (item 4 of argv) as integer'
     '  set resave_path to item 5 of argv'
+    '  set navigation_timeout_seconds to (item 6 of argv) as integer'
     '  set tab_char to ASCII character 9'
     '  with timeout of 600 seconds'
     '    tell application "Microsoft PowerPoint"'
@@ -100,6 +104,8 @@ def run-powerpoint-probe [
     '        end if'
     '      end repeat'
     '      if target_presentation is missing value then'
+    '        try'
+    '          with timeout of navigation_timeout_seconds seconds'
     '        open POSIX file ppt_path'
     '        delay 1'
     '        set pres_count to count of presentations'
@@ -109,6 +115,10 @@ def run-powerpoint-probe [
     '            exit repeat'
     '          end if'
     '        end repeat'
+    '          end timeout'
+    '        on error err_msg number err_num'
+    '          error "open-presentation: " & err_msg number err_num'
+    '        end try'
     '      end if'
     '      if target_presentation is missing value then error "PowerPoint opened no matching presentation"'
     '      try'
@@ -120,32 +130,42 @@ def run-powerpoint-probe [
     '      end try'
     '      set animations_enabled to show with animation of slide show settings of target_presentation'
     '      try'
-    '        set show_window to run slide show (slide show settings of target_presentation)'
+    '        with timeout of navigation_timeout_seconds seconds'
+    '          set show_settings to slide show settings of target_presentation'
+    '          set original_range to range type of show_settings'
+    '          set original_start to starting slide of show_settings'
+    '          set original_end to ending slide of show_settings'
+    '          set range type of show_settings to slide show range'
+    '          set starting slide of show_settings to from_slide_number'
+    '          set ending slide of show_settings to count of slides of target_presentation'
+    '          set show_window to run slide show show_settings'
     '        set show_view to slideshow view of show_window'
+    '        end timeout'
     '      on error err_msg number err_num'
     '        error "start-slideshow: " & err_msg number err_num'
     '      end try'
     '      delay 0.5'
-    '      go to first slide show_view'
-    '      set deadline to (current date) + timeout_seconds'
-    '      repeat while (current show position of show_view) is not from_slide_number'
-    '        if (current date) is greater than deadline then error "Timed out navigating to source slide"'
-    '        go to next slide show_view'
+    '      set deadline to (current date) + navigation_timeout_seconds'
+    '      repeat while (slide index of slide of show_view) is not from_slide_number'
+    '        if (current date) is greater than deadline then error "navigate-source: timed out starting at source slide; observed " & (slide index of slide of show_view as string)'
     '        delay 0.1'
     '      end repeat'
-    '      set start_position to current show position of show_view'
+    '      set start_position to slide index of slide of show_view'
     '      try'
-    '        go to next slide show_view'
+    '        with timeout of timeout_seconds seconds'
+    '          go to next slide show_view'
+    '        end timeout'
     '      on error err_msg number err_num'
     '        error "advance-slideshow: " & err_msg number err_num'
     '      end try'
     '      set deadline to (current date) + timeout_seconds'
-    '      repeat while (current show position of show_view) is not to_slide_number'
-    '        if (current date) is greater than deadline then error "Timed out waiting for destination slide"'
+    '      repeat while (slide index of slide of show_view) is not to_slide_number'
+    '        if (current date) is greater than deadline then error "wait-destination: timed out waiting for destination slide"'
     '        delay 0.05'
     '      end repeat'
+    '      if recognized_duration > timeout_seconds then error "wait-transition: duration exceeds playback timeout"'
     '      delay (recognized_duration + 0.25)'
-    '      set end_position to current show position of show_view'
+    '      set end_position to slide index of slide of show_view'
     '      try'
     '        set elapsed_seconds to presentation elapsed time of show_view'
     '      on error err_msg number err_num'
@@ -153,16 +173,17 @@ def run-powerpoint-probe [
     '      end try'
     '      set presentation_name to name of target_presentation as string'
     '      exit slide show show_view'
+    '      set starting slide of show_settings to original_start'
+    '      set ending slide of show_settings to original_end'
+    '      set range type of show_settings to original_range'
     '      if resave_path is not "" then'
+    '        try'
+    '          with timeout of timeout_seconds seconds'
     '        save target_presentation in POSIX file resave_path as save as Open XML presentation'
-    '        set deadline to (current date) + timeout_seconds'
-    '        repeat'
-    '          try'
-    '            if (size of (info for POSIX file resave_path)) > 0 then exit repeat'
-    '          end try'
-    '          if (current date) is greater than deadline then error "Timed out waiting for a nonempty PowerPoint resave"'
-    '          delay 0.1'
-    '        end repeat'
+    '          end timeout'
+    '        on error err_msg number err_num'
+    '          error "resave: " & err_msg number err_num'
+    '        end try'
     '      end if'
     '      close target_presentation saving no'
     '      return presentation_name & tab_char & recognized_effect & tab_char & ¬'
@@ -173,7 +194,7 @@ def run-powerpoint-probe [
     'end run'] | str join (char nl))
   let result = (
     $script
-    | ^osascript - $staged_path ($from_slide_number | into string) ($to_slide_number | into string) ($timeout_seconds | into string) $staged_resave_path
+    | ^osascript - $staged_path ($from_slide_number | into string) ($to_slide_number | into string) ($timeout_seconds | into string) $staged_resave_path ($navigation_timeout_seconds | into string)
     | complete
   )
   if $result.exit_code != 0 {
@@ -191,7 +212,8 @@ def main [
   --to-slide: int = 2             # 1-based adjacent destination slide number.
   --mode: string = 'by-object'    # Expected Morph mode.
   --duration-ms: int              # Required expected duration with 50 ms tolerance.
-  --timeout-seconds: int = 10     # Playback navigation timeout.
+  --timeout-seconds: int = 10     # Destination playback/resave timeout, 1..600 seconds.
+  --navigation-timeout-seconds: int = 60 # Source startup/navigation timeout, 1..600 seconds.
   --output: path                  # Optional JSON report path.
   --resave-output: path           # Optional PowerPoint-resaved PPTX path.
   --overwrite                     # Replace an existing report or resaved PPTX.
@@ -200,8 +222,8 @@ def main [
   if $from_slide < 1 or $to_slide != ($from_slide + 1) {
     error make {msg: 'Morph playback requires one adjacent 1-based slide pair.'}
   }
-  if $timeout_seconds <= 0 {
-    error make {msg: 'Playback timeout must be positive.'}
+  if $timeout_seconds < 1 or $timeout_seconds > 600 or $navigation_timeout_seconds < 1 or $navigation_timeout_seconds > 600 {
+    error make {msg: 'Playback and navigation timeouts must be between 1 and 600 seconds.'}
   }
   if $duration_ms == null {
     error make {
@@ -270,6 +292,8 @@ def main [
         toSlideIndex: ($to_slide - 1)
         morphMode: $mode
         durationMs: $duration_ms
+        navigationTimeoutSeconds: $navigation_timeout_seconds
+        transitionTimeoutSeconds: $timeout_seconds
       }
       availability: $unavailability
       observations: null
@@ -314,6 +338,7 @@ def main [
         $to_slide
         $timeout_seconds
         $staged_resave_path
+        $navigation_timeout_seconds
     )
     let resave_evidence = if $resave_output_path == null {
       null
@@ -360,6 +385,8 @@ def main [
         toSlideIndex: ($to_slide - 1)
         morphMode: $mode
         durationMs: $duration_ms
+        navigationTimeoutSeconds: $navigation_timeout_seconds
+        transitionTimeoutSeconds: $timeout_seconds
       }
       observations: $observation
       checks: $checks

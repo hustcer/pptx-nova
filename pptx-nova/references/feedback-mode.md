@@ -123,6 +123,42 @@ silently change the scores while composing the final response.
   closure, and maintainability. Do not turn it into generic praise or a design
   review of the user's slide content.
 
+## Unexpected xdoc Rendering Problems
+
+During xdoc PPTX generation or modification in Feedback Mode, treat each newly
+observed rendering result that differs from the requested or expected appearance
+and is not already a known limitation as a possible product bug. Identify the
+affected candidate, slide/object, expected appearance, and actual appearance.
+Check whether the discrepancy is caused by the source content, an intentional
+layout choice, or a documented limitation before calling it a new xdoc issue.
+
+- If a PowerPoint-native screenshot of the same candidate and slide already
+  exists, compare it with the xdoc render. Check that the screenshot belongs to
+  the relevant candidate bytes; do not rely on an old or different candidate.
+- Otherwise, when the optional macOS/PowerPoint/Nushell prerequisites are
+  available, try `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu
+<candidate.pptx> --slides <suspect-slides> --out
+<run-dir>/powerpoint/slide-%d.png --method pdf-render --json >
+<run-dir>/powerpoint-native-render.json` and retain the report and images in
+  the current run. Follow the PowerPoint screenshot route in
+  `references/common-workflow.md` if PDF rendering fails.
+- Compare the same slides and objects, then record the conclusion and paths to
+  both sides of the comparison in `skill-feedback.md`. If PowerPoint shows the
+  same unexpected result, record a confirmed problem in the generated PPTX. If
+  only the xdoc render is wrong, record a confirmed xdoc preview/render problem.
+  Describe the visible effect and a likely component only when evidence
+  supports it.
+- If PowerPoint-native evidence cannot be obtained, is stale, or does not settle
+  the discrepancy, mark the observation `unverified` and explain why. Do not
+  present it as a confirmed product bug.
+
+After the main task ends, report **every** newly confirmed unexpected xdoc
+rendering problem in the final summary, including affected slide/object and
+the PowerPoint comparison result. This reporting rule applies even when there
+are more than three other feedback items; keep detailed evidence in
+`skill-feedback.md` and link that file. Fixing a problem in the delivered deck
+does not remove the reporting requirement for the newly discovered issue.
+
 ## Current-Capability Check
 
 When feedback audits an old run, compares behavior after an upgrade, or says a
@@ -147,7 +183,9 @@ capability is missing, verify the current state before concluding:
   categories, priorities, or longer explanations, write the file and only
   mention the detailed-feedback path in the final response; do not duplicate
   the detailed issue report in chat. The required execution scorecard and
-  weighted overall score are the exception and must still be printed.
+  weighted overall score are the exception and must still be printed. Newly
+  confirmed unexpected xdoc rendering problems are also an exception: summarize
+  each one in the final response.
 - When the task already has a run directory, use that current run directory. If
   the user only asks for standalone feedback and no run exists, create a small
   feedback run directory under `.pptx-nova/<slug>-<timestamp>/` and place

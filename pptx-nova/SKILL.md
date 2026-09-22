@@ -205,6 +205,8 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
 If the user prompt contains explicit feedback intent such as `need feedback`, English feedback phrases, or equivalent Chinese phrases meaning "give feedback", "needs feedback", or "any usage feedback", read `references/feedback-mode.md`. Once Feedback Mode is triggered, first write `skill-feedback.md` in the current run directory. Create, Refurbish, and Translation feedback must include the workflow's exact seven-dimension 0-10 process scorecard and a correctly weighted overall score, printed in the final response as required by Completion Summary. Before the final response, run the feedback gate with `--workflow create|refurbish|translation|other`: if the original prompt is available, use
 `node <skill-root>/scripts/pptx-nova-feedback-gate.mjs --run-dir <run-dir> --prompt-file <prompt.txt> --workflow <workflow> --strict --overwrite --json > <run-dir>/feedback-gate.json`; if the prompt was not saved but the user feedback request is known, use `--require-feedback`. If the gate fails, add real feedback or correct the scorecard before sending the final response.
 
+During xdoc PPTX creation or editing in Feedback Mode, investigate newly observed, unexpected rendering problems as possible product bugs. Compare with an existing PowerPoint-native screenshot when available; otherwise, if the optional prerequisites are available, try `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu` on the affected slides and compare. Record the evidence and every confirmed new problem in `skill-feedback.md`, and report all of them in the final task summary even when there are more than three feedback items. If native verification is unavailable or inconclusive, label the observation unverified rather than claiming a confirmed product bug. Follow `references/feedback-mode.md` for the evidence and reporting details.
+
 ## Common Creation Hard Rules
 
 These rules apply to all new decks, including Express and Studio:
@@ -357,6 +359,9 @@ validated seven-row execution scorecard and weighted overall score regardless of
 `feedback-gate.json` as well. Do not output xdoc version, CLI
 schema, or capability-disclosure audit details unless they affect the result, a fallback was used, or
 the user explicitly asks.
+In Feedback Mode, the three-item limit does not hide newly confirmed unexpected xdoc rendering
+problems: summarize every such problem in the final response, with its affected slide/object and
+PowerPoint comparison result, and link the detailed evidence in `skill-feedback.md`.
 
 Only output token information when the platform or tooling provides accurate token statistics; do not
 estimate.

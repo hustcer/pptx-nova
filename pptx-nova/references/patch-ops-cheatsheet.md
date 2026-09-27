@@ -17,19 +17,19 @@ table setter 已全部并入对应的聚合 op
 
 ## 1. 演示文稿与 slide 级
 
-| op                        | 用途                                                                              |
-| ------------------------- | --------------------------------------------------------------------------------- |
-| `add-slide`               | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选                    |
-| `remove-slide`            | 删除指定 slide                                                                    |
-| `move-slide`              | 改 slide 顺序（`from` / `to` 都是 0-based）                                       |
-| `duplicate-slide`         | 复制 slide（保留全部内容，包括 notes）                                            |
-| `set-slide-size`          | 改 deck 尺寸（`slideSize` 字段）：`"wide"`(16:9) / `"standard"`(4:3) / `{ w, h }` |
-| `set-slide-background`    | 改某页背景：`{ fill: ..., followMaster: false }`                                  |
-| `set-slide-transition`    | 设置/清理基础 slide transition 与自动切页                                         |
-| `set-slide-animations`    | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear`                    |
-| `set-slide-animations`    | 按 inspect 动画 id 修改安全子集 step（`animations: [{ id, ... }]`）               |
-| `set-slide-animations`    | 按 inspect 动画 id 删除安全子集 step（`remove: ["<id>"]`）                        |
-| `set-document-properties` | core props（`properties` map，键如 `title` / `author` / `subject` / `keywords`）  |
+| op                        | 用途                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| `add-slide`               | 加一页，`layout` 可按 `{ index }` / `{ name }` / `{ type }` 选                       |
+| `remove-slide`            | 删除指定 slide                                                                       |
+| `move-slide`              | 改 slide 顺序（`from` / `to` 都是 0-based）                                          |
+| `duplicate-slide`         | 复制 slide（保留全部内容，包括 notes）                                               |
+| `set-slide-size`          | 改 deck 尺寸（`slideSize` 字段）：`"wide"`(16:9) / `"standard"`(4:3) / `{ w, h }`    |
+| `set-slide-background`    | 改某页背景：`{ fill: ..., followMaster: false }`                                     |
+| `set-slide-transition`    | 设置/清理 schema 披露的基础、Morph、P14 转场与自动切页；参数和验证见 `animations.md` |
+| `set-slide-animations`    | 设置/清理安全子集动画，可 `mode: merge-safe / replace / clear`                       |
+| `set-slide-animations`    | 按 inspect 动画 id 修改安全子集 step（`animations: [{ id, ... }]`）                  |
+| `set-slide-animations`    | 按 inspect 动画 id 删除安全子集 step（`remove: ["<id>"]`）                           |
+| `set-document-properties` | core props（`properties` map，键如 `title` / `author` / `subject` / `keywords`）     |
 
 ### Slide notes
 

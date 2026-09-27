@@ -112,6 +112,8 @@ Use these only to choose the entry reference; the routing table owns details.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
   complex or unsupported timing. For basic effects, follow the disclosed repeat/autoReverse/restart/
   easing contract and its omitted/null/value update semantics.
+  For P14 transitions, follow `animations.md`'s per-kind schema and independent capability axes;
+  inspect source/fallback timing separately and never equate authoring with playback certification.
   For Morph, use exact `!!` object names, run `morph-check`, and bind delivery evidence to the
   bundled PowerPoint playback probe when that probe is available.
 - **Refurbish / translate**: use `refurbish-runner.md` / `translation-runner.md`. The runner owns route,

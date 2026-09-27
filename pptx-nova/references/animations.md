@@ -328,15 +328,72 @@ dry-run 重点看：
 }
 ```
 
+以下是基础转场的参数规则；P14 扩展使用下方单独的运行时契约。
 `speed` 仅接受 `slow/medium/fast`，默认 `fast`。`dir` 在 `push/wipe` 上接受
 `left/up/right/down`，`cover` 还接受 `left-up/right-up/left-down/right-down`（默认 `left`），在
 `split/zoom` 上接受 `in/out`（默认 `out`）；其他 kind 禁止 `dir`。
 `orient` 仅用于 `split`，取 `horizontal/vertical`，默认 `horizontal`；
 `throughBlack` 仅用于 `fade/cut`。`clear:true` 禁止同时提供转场参数。
 
-如果 inspect 已有未披露的 p14/p15 扩展转场、声音或复杂 timing，默认 preserve-only。Zoom 等未被
-能力事实列为可创建的高级转场也保持 preserve-only。Morph 使用下面的专用流程，不要把它归入普通转场
-或 shape animation。
+如果 inspect 已有未披露的 p14/p15 扩展转场、声音或复杂 timing，默认 preserve-only。
+不要将 schema 已披露的基础 `zoom` 与未披露的高级导航功能混为一谈。
+Morph 使用下面的专用流程，不要把它归入普通转场或 shape animation。
+
+### P14 转场与时间回读
+
+先读取当前 `slide-transition/p14-authoring` 的各能力轴，再查询完整
+`set-slide-transition` schema。条目总体 `partial` 不会否定其已披露的 create/edit 支持，
+也不会把 `render: partial` 或 `verify: inconclusive` 升级为 Office 播放已验证。
+标准 Create 可通过 `--choreography` 传入这些原生操作；无需绕过 DeckKit 或改写包 XML。
+
+当前披露的 P14 类型为 `honeycomb/flash/vortex/pan/switch/flip/ferris/gallery/conveyor/doors/window/
+warp/ripple/glitter/shred/flythrough/reveal/prism/wheel-reverse`。此清单用于发现，实际以当前 schema 为准。
+参数按 kind 分别校验，不沿用基础转场的限制，也不把一种效果的参数复制到另一种效果：
+
+| 类型                                                 | 专用参数                                            |
+| ---------------------------------------------------- | --------------------------------------------------- |
+| vortex / pan / glitter / prism                       | `dir: left/up/right/down`                           |
+| switch / flip / ferris / gallery / conveyor / reveal | `dir: left/right`                                   |
+| doors / window                                       | `orient: horizontal/vertical`                       |
+| warp / shred / flythrough                            | `dir: in/out`（默认值按 schema）                    |
+| ripple                                               | `dir: left-up/right-up/left-down/right-down/center` |
+| glitter / shred                                      | `pattern: diamond/hexagon` / `strip/rectangle`      |
+| flythrough / reveal                                  | `hasBounce` / `throughBlack` 布尔值                 |
+| prism                                                | `isContent`、`isInverted` 布尔值                    |
+| wheel-reverse                                        | `spokes` 为 UInt32；可写范围不等于 Web 可播放范围   |
+
+例如对已有第 2 页设置转场，先 dry-run，再 apply 到新候选并 inspect：
+
+```json
+{
+  "op": "set-slide-transition",
+  "slide": 1,
+  "kind": "prism",
+  "dir": "left",
+  "isContent": false,
+  "isInverted": false,
+  "duration": 750,
+  "advanceAfter": 2000,
+  "advanceOnClick": false
+}
+```
+
+- `slide` 为 0-based 目标页。`duration` 和 `advanceAfter` 的写入单位都是毫秒，当前接受
+  0–2147483647 的整数。`duration` 是效果时长，`advanceAfter` 是自动换页时间，不相互替代。
+- inspect 的 `transition.durationMs` 可含小数，`advanceAfterMs` 可读完整 UInt32。
+  保留 `durationRaw`、`parameters[].raw/value/source` 和 `diagnostics`；省略、显式 false、
+  implied、unspecified 与 invalid 不能混同。`editable:true` 不保证所有读到的值均可无损回写。
+  不改转场时保留原 XML；确需替换时只写 schema 可表达且符合用户意图的值，不自动取整或截断。
+- `set-slide-transition` 是整体替换，不是参数合并。核对目标 kind、所需参数、时间、
+  `extensionWrapped`、`fallbackKind` 和 `fallbackTiming`；P14 新建会写基本 fade fallback。
+  source 与 fallback 的时间事实分别解释，不要求二者拥有完全相同的精确 duration。
+  纯转场 carrier 可替换/清除，混有其他 payload 的 carrier 被拒绝时保留输入，不强行 raw XML 覆盖。
+- 当前 Web 源效果仅启用 flash/reveal/flip/prism/doors/window/pan/wheel-reverse；prism 要求
+  `isContent=false` 且 `isInverted=false`，wheel-reverse 仅支持 1–16 spokes。
+  不支持的变体或缺少场景能力时可回退，其他 P14 效果使用 MC 选中的 fallback。
+  动画开关、reduced-motion、前一页是否存在也会影响播放。Web 是近似实现，PDF/PNG 是静态证据。
+- Office 的 clean-open、播放、resave 分别记录候选 SHA、应用版本和观察结果。
+  不以 Web fallback 正常或静态 PNG 通过宣称 P14 Office 播放认证；没有原生播放证据就明确未验证。
 
 ## Morph 专用流程
 

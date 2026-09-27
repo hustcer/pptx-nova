@@ -541,11 +541,11 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 
 inspect 报告中的这些字段说明该页有需要谨慎处理的内容：
 
-| 字段            | 含义                | 处理                                                          |
-| --------------- | ------------------- | ------------------------------------------------------------- |
-| `hasTransition` | 有 slide transition | 基础转场可用 `set-slide-transition`，高级/未知转场 preserve   |
-| `hasTiming`     | 有动画/timing       | 读 `timingSummary` / `animations[]` / `animationCapabilities` |
-| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape；语义摘要见下        |
+| 字段            | 含义                | 处理                                                                                                       |
+| --------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `hasTransition` | 有 slide transition | 按当前能力轴与 schema 使用 `set-slide-transition`（含已披露 P14）；未知转场 preserve，详见 `animations.md` |
+| `hasTiming`     | 有动画/timing       | 读 `timingSummary` / `animations[]` / `animationCapabilities`                                              |
+| `hasSmartArt`   | 有 SmartArt diagram | 不能编辑 SmartArt 内容，可以删整个 shape；语义摘要见下                                                     |
 
 SmartArt 虽不可编辑，但不再是黑盒：`preserveOnly[]` 中 `category == "smartArt"` 且
 relationship 为 `diagramData` 的条目带只读 `diagram` 摘要 —— `layoutId`（如

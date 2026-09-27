@@ -301,8 +301,9 @@ review for created/edited decks.
 `365`. For Agent decisions, inspect `checks.compat.details.agentGate`, not only
 the command status:
 
-- `agentGate.passed=true` means every detected OOXML feature is available in
-  the requested target release.
+- `agentGate.passed=true` means the disclosed compatibility checks pass for
+  the requested target release, including parser readability and package
+  integrity when those checks are disclosed; it is not a playback certificate.
 - `unprotectedIssueCount>0` means newer markup has no recognized compatibility
   protection and is a structural interoperability risk.
 - `gracefulDegradationIssueCount>0` means `mc:Ignorable`, an OOXML
@@ -318,6 +319,19 @@ For a single PPTX, use `-o <run-dir>/check.json` as the canonical structured
 preflight artifact. Do not add `--json` unless `xdoc check --help` discloses it.
 If `--report` is available, treat it as a batch summary/report sidecar; it does
 not replace the per-file diagnostic JSON written by `-o`.
+
+When `compat` discloses `checks.compat.details.packageIntegrity`, require
+`scope: "full-package"`, `scanStatus: "completed"`, `passed: true`, and
+`issueCount: 0` before claiming package integrity passed. This checks XML/OPC
+structure, namespace bindings, relationships and owner identities independently
+of the target Office version. `fullyCompatible: true` alone is insufficient;
+also read `checks.compat.status`, `details.agentGate` and the actual issues.
+A failed or missing scan is not a clean package. On older runtimes that omit
+this field, keep the existing semantic gates and disclose this evidence as
+unavailable when package integrity is required. A slide-scoped check does not
+narrow this full-package scan. Keep inherited source findings separate from
+new edit regressions; follow the Edit Contract rather than silently repairing
+unrelated source debt. None of these checks proves Office clean-open or pixels.
 
 For `fonts`, `missingRiskCandidates` excludes common system fonts such as
 Arial, Aptos, Calibri, Times New Roman, Courier New, Helvetica, Verdana, and
@@ -432,6 +446,10 @@ or moving shapes. Preserve authored spacing and editable equations unless the
 current evidence calls for an authorized edit. A renderer improvement does not
 prove PowerPoint parity; use `inspect-and-edit.md` for Shape 3D boundaries and
 the existing native-evidence route when independent Office proof is required.
+
+For a rendering discrepancy, follow [fidelity diagnosis](fidelity-diagnosis.md)
+before compensating in the deck. It covers authored overflow, sparse chart
+data, image/clip semantics and valid single-variable probes.
 
 If conversion/check reveals a problem and the user asks you to fix it, switch to
 `edit-mode.md` plus the relevant domain reference (`styles-and-themes.md`,

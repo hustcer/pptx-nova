@@ -160,6 +160,9 @@ When creating or modifying PPTX files, this skill can directly consume these inp
 
 Determine the task type first, then read the corresponding files:
 
+For a rendering discrepancy or a preview regression after upgrading xdoc, also read
+`references/fidelity-diagnosis.md` before changing authored content or layout.
+
 | User intent                                                                              | Required references                                                                                                                                                     | Read conditionally                                                                                                                                   |
 | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Simple prompt / wants speed / default new deck generation                                | `references/create-runner.md`                                                                                                                                           | Follow its preparation routes to `references/create-express.md`, `references/deckkit-mode.md`, or `references/narrative-quality.md` only when needed |
@@ -389,6 +392,7 @@ Read the files required by routing first; do not read all references at once.
 | `references/refurbish-runner.md`          | Compact standard refurbish route, Agent output, comparison reuse, failure-driven disclosure, and review boundary                  |
 | `references/template-following.md`        | Strict template following: copy source slides, edit inherited objects, placeholder QA                                             |
 | `references/export-and-check.md`          | Export, extract, checks, semantic diff, and canonical unified visual evidence                                                     |
+| `references/fidelity-diagnosis.md`        | Distinguish authored semantics, renderer behavior and environment differences before repairing a deck                             |
 | `references/express-mode.md`              | Full golden path for Express mode                                                                                                 |
 | `references/reference-create.md`          | Reference PPTX + new outline generation                                                                                           |
 | `references/inspect-and-edit.md`          | Selectors, inspect output, and edit details                                                                                       |

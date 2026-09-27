@@ -600,8 +600,12 @@ debugging path.
     (`rendered` / `review-only` / `estimator` / `static-geometry`) and
     `agentGate.blockersByEvidenceClass` counts the blocking issues per class —
     read it first so estimator noise cannot hide rendered hard blockers:
-  - `rendered` blockers are proven on final output and are never eligible for
-    the multi-column human-review exception.
+  - `rendered` blockers come from final layout measurements or an observed
+    renderer fallback decision. For example, `soft-edge-skipped` reports an
+    effect that could not be painted; it is not a text-fit estimate or proof
+    of a measured pixel difference. These blockers are never eligible for
+    the multi-column human-review exception. Compare source/candidate findings
+    before changing the deck; do not remove an authored effect just to pass.
   - `review-only` blockers resolve through the bound multi-column review
     record.
   - `estimator` blockers (`text-overflow-estimate`,

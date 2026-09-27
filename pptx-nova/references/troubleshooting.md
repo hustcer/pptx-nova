@@ -257,7 +257,16 @@ daemon / JSON-RPC / MCP 契约处理，不能把数字协议码当作业务错�
 | `invalid_sidecar`                       | sidecar 不是 `pptx-apply-sidecar/v1`                                                  | 重新生成 sidecar                                                         |
 | `daemon_unavailable` / `shutting_down`  | daemon 不可达 / 正在退出                                                              | 关 `--daemon-strict` 或检查 `XDOC_DAEMON_AUTO_SPAWN` / `XDOC_DAEMON_LOG` |
 | `internal_error` / `unknown_error`      | 内部错误                                                                              | 附 message 上报                                                          |
-| `resource_*` 族                         | 12 项工程安全预算超限（输入体积/ZIP/XML/图像/超时/临时盘/输出）                       | 看 `details.limit` / `details.observed`，缩输入或调预算                  |
+| `resource_*` 族                         | 工程安全预算超限（输入/ZIP/XML/图像/图表槽位/超时/临时盘/输出）                       | 看 `details.stage/subject/unit/limit/observed`，按实际超限项处理         |
+
+`resource_chart_slots_exceeded` 的 `stage` 为 `chart`、`unit` 为 `slots`，限制的是
+图表展开后的逻辑槽位，不是 PPTX 压缩字节数。极大的稀疏点索引、声明的点数或
+系列/样式投影也可能让很小的文件触发此错误。先定位诊断中的 `subject` 并核对源数据；
+仅在确认输入错误时修正索引/计数，否则按用户意图拆分或缩小数据范围。
+不要压紧合法稀疏索引、把缺失值填成零或反复重试相同文件来绕过限制。
+工程上限不能靠购买授权解除，运行时配置只能收紧已编译的上限；按当前 schema 的
+`resourcePolicy` 读取实际限制和配置边界，
+不要把 `XDOC_PPTX_MAX_*` 当作所有 `resource_*` 的通用开关。
 
 ## PNG 预览落点漂移 / 陈旧 PNG
 

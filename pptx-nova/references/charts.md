@@ -21,6 +21,10 @@ chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标
 - PNG/contact-sheet 复核负责判断 legend、axis、data label、callout 是否遮挡；静态语义检查
   不替代视觉复核。
 
+既有图表的显示差异先走 [fidelity diagnosis](fidelity-diagnosis.md)，保留 category slot、
+point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
+[错误排查](troubleshooting.md) 检查逻辑槽位；压缩 PPTX 不会缩小图表投影。
+
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
 add-chart / set-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：

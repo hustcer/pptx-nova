@@ -333,6 +333,11 @@ narrow this full-package scan. Keep inherited source findings separate from
 new edit regressions; follow the Edit Contract rather than silently repairing
 unrelated source debt. None of these checks proves Office clean-open or pixels.
 
+The structural scan does not run element-schema, child-particle or element-reference
+rules; for example, duplicate shape IDs still need the full semantic audit.
+Keep dry-run/apply semantic checks and candidate `vision-check`/`vision-diff`
+evidence. A full-package scan is not a complete XSD validation.
+
 For `fonts`, `missingRiskCandidates` excludes common system fonts such as
 Arial, Aptos, Calibri, Times New Roman, Courier New, Helvetica, Verdana, and
 Tahoma. These may appear under `systemFontCandidates`: acceptable for many

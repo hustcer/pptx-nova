@@ -540,6 +540,13 @@ debugging path.
     classified scan when review units exist, otherwise `i18n-scan-source.json`)
     and the same `translations.json`.
 
+    Preserve each source unit's exact `part` and selector. For shape paragraphs,
+    candidate lookup uses that source part identity; `slide` is a logical page
+    number, not a filename. Do not reconstruct `ppt/slides/slideN.xml` or replace
+    a missing source part with a candidate inventory match. If the source
+    inventory lacks the required identity, regenerate it from the bound source
+    with the current runtime and rebuild the translation plan.
+
     This is the single authoritative source-leakage gate. It replaces the old
     external residual matcher: it does not run the heuristic language classifier,
     so a `multi` source translated to French, German, Spanish, or another
@@ -554,9 +561,12 @@ debugging path.
       candidate or refresh the contract from the current source deck.
     - `selector-missing` / `selector-ambiguous` / `part-missing` /
       `part-unreadable` / `unsupported-selector`: the source selector could not
-      resolve a unique candidate value; repair the selector or re-apply so it
-      resolves exactly once. Never fall back to the candidate inventory or a
-      language heuristic to hide the gap.
+      resolve a unique candidate value; inspect the bound source unit and
+      candidate part, then re-apply or regenerate the inventory and plan from
+      the source as appropriate. If the exact part exists but lookup still
+      fails, follow the runtime diagnosis in `inspect-and-edit.md`; do not
+      rewrite source identity to fit a guessed path. Never fall back to the
+      candidate inventory or a language heuristic to hide the gap.
 
     Translation records with `targetText === sourceText` are explicit approvals
     to preserve product names, URLs, code tokens, or equivalent text; the gate

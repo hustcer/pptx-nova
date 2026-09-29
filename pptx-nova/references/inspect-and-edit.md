@@ -128,10 +128,11 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 - 新 layout 不保证排在全局列表末尾。读取 apply 的 `opResults[].createdObjects[]`，并重新 inspect
   后再构造依赖它的 patch；不要用修改前的 layout 总数猜新索引。
 
-部件识别正确不代表所有消费链路都已支持该路径。对非标准 slide part，分别验证编辑回读、
-预览和翻译 candidate gate。若 inspect 正常而预览为空，或候选检查对实际存在的 part 报
-`part-missing`，保留输入、报告和 PowerPoint 对照，按渲染/验证器问题诊断；不要改名源部件、
-重写 source selector 或放宽 gate 来制造通过。
+非标准 slide part 按正常流程处理：预览按实际 owner 目录解析相对关系，翻译 candidate gate
+按 source unit 的 `part` 定位，截图按注册页序读取 slide 的显示状态，不按 `.xml` 后缀筛选。
+无需改名部件或增加专用 fallback；仍需验证编辑回读、预览内容、翻译 gate 和截图页码映射。
+若这些结果不一致，保留输入、报告和 PowerPoint 对照，按消费链路问题诊断；不要重写
+source selector 或放宽 gate 来制造通过。
 
 ### Shape 3D 的只读识别与保留
 

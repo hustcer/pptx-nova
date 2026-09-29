@@ -581,7 +581,7 @@ PowerPoint clean-open -> 播放/点击复核(可用时) -> Morph 时运行 morph
 结构证据：
 
 - `unzip -t out.pptx`
-- 检查修改过的 `ppt/slides/slideN.xml` well-formed。
+- 按报告中的实际 slide `partName` 检查修改部件的 XML well-formed；不要由页码拼文件名。
 - 对新增/编辑 timing，确认 `<p:timing>` 位于合法 slide 子元素顺序，`bldLst` 与目标 shape id 对齐。
 - PowerPoint clean-open 不得出现 Repair。
 

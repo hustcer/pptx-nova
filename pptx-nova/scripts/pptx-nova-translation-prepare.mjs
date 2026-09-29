@@ -15,6 +15,7 @@ import {
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
+import { readPptxPackage } from './lib/pptx-package.mjs'
 
 import { assertNewOrPreProbedRunDir, isNewOrPreProbedRunDir } from './lib/run-dir.mjs'
 import {
@@ -602,7 +603,11 @@ function prepareInventory(args, artifacts, summary, reporter) {
       writeJson(
         artifacts.reviewInventory,
         {
-          ...expandReviewInventory(scan, args.expandReview),
+          ...expandReviewInventory(
+            scan,
+            args.expandReview,
+            readPptxPackage(args.source).sharedParts,
+          ),
           source: summary.source,
           scan: { path: artifacts.scan, sha256: sha256(artifacts.scan) },
         },
@@ -631,6 +636,7 @@ function prepareInventory(args, artifacts, summary, reporter) {
 
 function buildMemory(args, artifacts, summary, classified, glossary, reporter) {
   const memory = buildTranslationMemory(classified.scan, {
+    sharedParts: readPptxPackage(args.source).sharedParts,
     sourceSha256: summary.source.sha256,
     unitsSha256: sha256(classified.path),
     targetLang: args.targetLang,
@@ -1268,7 +1274,11 @@ function runReviewExpansion(args, artifacts, binding, reporter) {
   try {
     summary.inventory = phase(summary, reporter, 'expand-bound-review-inventory', () => {
       const inventory = {
-        ...expandReviewInventory(binding.scan, args.expandReview),
+        ...expandReviewInventory(
+          binding.scan,
+          args.expandReview,
+          readPptxPackage(args.source).sharedParts,
+        ),
         source: summary.source,
         scan: summary.scan,
       }

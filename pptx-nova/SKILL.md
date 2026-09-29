@@ -197,6 +197,8 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
   editable objects, and never rasterize, downgrade content, or silently switch DeckKits.
 - **Edit / Micro Edit / Animation**: Inspect before patching. Micro edits use the short contract path;
   animation changes stay inside the capability-declared safe subset.
+  Use reported part identities and current inspect order for slide/layout/master selectors;
+  filename suffixes and ZIP order are not selector indices. See `references/inspect-and-edit.md`.
 - **Translation**: Copy, replace visible text in place, and preserve styling/layout semantics. Repair by
   compressing text, then minimally reducing font, then geometry only with proven whitespace. Changed
   multi-column text requires its bound human-review gate; real overflow/overlap/edge findings and

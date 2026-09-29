@@ -109,6 +109,30 @@ xdoc pptx inspect input.pptx --daemon --json | save inspect.json
 }
 ```
 
+### 部件身份、页序和版式索引
+
+上面的标准路径只是示例，不是定位规则。slide / layout / master / chart / theme 可以位于
+非标准目录，甚至没有 `.xml` 扩展名；身份由 OPC Content Types 和 relationship 决定。
+保留报告中的 `partName`，不要从 `slideN.xml` 的 N 推导页码，也不要按文件名或 ZIP 顺序排序。
+
+- `slides[].index`、patch 的 `slide`、`presentation.masters` 和 `presentation.layouts`
+  的选择索引是 **0-based**。CLI `--slides` / preview 的 `--layout`、i18n 的 `slide` / `referencedBySlides` 和
+  PowerPoint 截图页码是 **1-based**，均按演示文稿页序。
+- master 按 presentation 的注册顺序；layout 按该 master 顺序逐个展开各自注册的
+  layouts，同一 part 只计一次。未注册的孤立 part 不成为可选 master/layout。
+- layout 的 name/type 选择必须唯一。重名时使用本次 inspect 给出的 index；缺失、外部、
+  错类型或无效的已注册关系应先诊断，不能靠换一个文件名或猜索引继续。
+- `add-layout` 创建归属第一个已注册 master 的空版式；带 `source` 则复制选定版式并
+  保留其所属 master，内部关系按新位置重定位。两者都会在写入前检查相关注册表/关系。
+  即使故障属于另一 master 的 layout，也可能阻止操作；保留失败报告并定位该关系。
+- 新 layout 不保证排在全局列表末尾。读取 apply 的 `opResults[].createdObjects[]`，并重新 inspect
+  后再构造依赖它的 patch；不要用修改前的 layout 总数猜新索引。
+
+部件识别正确不代表所有消费链路都已支持该路径。对非标准 slide part，分别验证编辑回读、
+预览和翻译 candidate gate。若 inspect 正常而预览为空，或候选检查对实际存在的 part 报
+`part-missing`，保留输入、报告和 PowerPoint 对照，按渲染/验证器问题诊断；不要改名源部件、
+重写 source selector 或放宽 gate 来制造通过。
+
 ### Shape 3D 的只读识别与保留
 
 先从当前 runtime 的 capability truth 发现 `shape-3d/local-declarations`，分别读取

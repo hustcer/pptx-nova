@@ -20,6 +20,11 @@ is not a slide-show screenshot; an automatic fallback must report its actual
 method. Reuse an independent reference only while its source bytes and relevant
 Office/environment identity remain valid.
 
+When PowerPoint PDF export omits hidden slides, logical slide numbers differ from
+PDF page numbers. Retain the snapshot's `pdf_pages` mapping; a requested hidden
+slide absent from that export has no PDF evidence. A page-count mismatch is a
+failed identity check, not a reason to reuse the nearest page.
+
 ## Preserve distinctions that affect rendering
 
 | Content         | Inspect before modifying                                                                                                                                                                                                                                                                                                                      |
@@ -35,6 +40,23 @@ These are diagnostic distinctions, not a claim that every construct is
 authorable or rendered identically to Office. Query the exact capability and
 operation schema before selecting a repair. Rendering fixes do not expand
 authoring support.
+
+For the affected content, extend the check without rewriting the source:
+
+- Histograms: retain raw repeated observations, interval closure and precise
+  boundaries; counts must match the reported intervals. Stock high/low lines and
+  surface height-band legends carry data meaning. Hidden ChartEx axes/gridlines
+  and transparent strokes must not be restored merely to match an older preview.
+- Text/tables: distinguish ordinary-shape defaults from placeholder inheritance,
+  whole-table style from missing second-band styles, and solid glyph outlines from
+  text fill or shape borders. Include OMML outlines when inspecting math text.
+- Images/vectors: preserve video-poster frame versus crop, authored SVG stretch,
+  Unicode text, stroke coordinate systems and clipping. EMF/WMF recording canvas,
+  restored device context and cosmetic hairlines can explain changes after an upgrade.
+- Fonts/playback: browser/SDK Calibri fallback may use Carlito when Calibri is
+  unavailable; this is not a reason to rename the deck's authored font or a promise
+  about native font resolution. Record resolved fonts. Character Morph playback
+  has its own text-ownership behavior; static exports do not certify it.
 
 ## A small experiment should answer one question
 

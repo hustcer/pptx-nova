@@ -378,7 +378,7 @@ debugging path.
      `i18n-plan.replaceChartText`. Then rerun without `--dry-run` only when
      the dry-run report passes. This helper changes only chart visible cache
      labels (`title`, `series`, `category`, `dataLabel`) in
-     `ppt/charts/*.xml`; it does not write external workbook paths,
+     OPC-declared Chart/ChartEx parts regardless of path; it does not write external workbook paths,
      relationship targets, embedded workbook data, or `formatCode`.
      Classic Chart and ChartEx may expose the application-generated default
      title `Chart Title` without storing it as an ordinary visible text node.
@@ -883,6 +883,17 @@ Charts are a frequent translation blind spot.
   report lists `changedNodes[]`, `changedParts[]`, and `structureChecks[]`;
   block on any conflict, ambiguity, `formatCode` change, or failed structure
   check.
+
+  Part identity is OPC-based, including relocated Chart/ChartEx parts without an `.xml`
+  suffix. Keep the planner's exact `part` and selector; do not filter replacements by
+  `ppt/charts/` or reconstruct slide paths. `--slides` and `referencedBySlides` use
+  one-based presentation order. A shared chart may also affect unselected slides;
+  retain `crossScopeImpact` and planner conflicts rather than rewriting the scope.
+  Layout/master review grouping in the preparation runner reads Content Types from
+  the bound source. A path that looks like a layout is not proof of shared content.
+  `replace-chart-text` still changes visible caches only; it does not synchronize
+  embedded workbook cells or authorize metadata/relationship edits.
+
 - The top-level helper natively handles classic charts and namespace-aware
   ChartEx direct/nested point text, plus generated default titles in both
   dialects. Never search the package for the literal `Chart Title` or hand-build

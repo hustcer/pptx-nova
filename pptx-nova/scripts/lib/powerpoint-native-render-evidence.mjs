@@ -2,14 +2,10 @@ import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { basename, isAbsolute, relative, resolve, sep } from 'node:path'
-import { posix } from 'node:path'
-import { inflateRawSync } from 'node:zlib'
+import { readPptxPackage } from './pptx-package.mjs'
 
 export const POWERPOINT_SNAPSHOT_SCHEMA_VERSION = 'pptx-snapshot/v1'
 
-const EOCD_SIGNATURE = 0x06054b50
-const CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50
-const LOCAL_FILE_SIGNATURE = 0x04034b50
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
 
 function sha256(bytes) {
@@ -34,115 +30,8 @@ function pathInside(root, path) {
   return rel === '' || (!rel.startsWith(`..${sep}`) && rel !== '..' && !isAbsolute(rel))
 }
 
-function findEndOfCentralDirectory(bytes) {
-  const minimum = Math.max(0, bytes.length - 65_557)
-  for (let offset = bytes.length - 22; offset >= minimum; offset -= 1) {
-    if (bytes.readUInt32LE(offset) === EOCD_SIGNATURE) return offset
-  }
-  throw new Error('PPTX ZIP central directory was not found')
-}
-
-function readZipEntries(path) {
-  const bytes = readFileSync(path)
-  const eocd = findEndOfCentralDirectory(bytes)
-  const entryCount = bytes.readUInt16LE(eocd + 10)
-  let offset = bytes.readUInt32LE(eocd + 16)
-  const entries = new Map()
-
-  for (let index = 0; index < entryCount; index += 1) {
-    if (bytes.readUInt32LE(offset) !== CENTRAL_DIRECTORY_SIGNATURE) {
-      throw new Error(`Invalid PPTX ZIP central directory entry at offset ${offset}`)
-    }
-    const flags = bytes.readUInt16LE(offset + 8)
-    const compression = bytes.readUInt16LE(offset + 10)
-    const compressedSize = bytes.readUInt32LE(offset + 20)
-    const uncompressedSize = bytes.readUInt32LE(offset + 24)
-    const nameLength = bytes.readUInt16LE(offset + 28)
-    const extraLength = bytes.readUInt16LE(offset + 30)
-    const commentLength = bytes.readUInt16LE(offset + 32)
-    const localHeaderOffset = bytes.readUInt32LE(offset + 42)
-    const name = bytes.subarray(offset + 46, offset + 46 + nameLength).toString('utf8')
-    entries.set(name, {
-      bytes,
-      name,
-      flags,
-      compression,
-      compressedSize,
-      uncompressedSize,
-      localHeaderOffset,
-    })
-    offset += 46 + nameLength + extraLength + commentLength
-  }
-  return entries
-}
-
-function readZipEntry(entry) {
-  if ((entry.flags & 0x1) !== 0)
-    throw new Error(`Encrypted ZIP entry is unsupported: ${entry.name}`)
-  const bytes = entry.bytes
-  const offset = entry.localHeaderOffset
-  if (bytes.readUInt32LE(offset) !== LOCAL_FILE_SIGNATURE) {
-    throw new Error(`Invalid PPTX ZIP local header for ${entry.name}`)
-  }
-  const nameLength = bytes.readUInt16LE(offset + 26)
-  const extraLength = bytes.readUInt16LE(offset + 28)
-  const start = offset + 30 + nameLength + extraLength
-  const compressed = bytes.subarray(start, start + entry.compressedSize)
-  let result
-  if (entry.compression === 0) result = compressed
-  else if (entry.compression === 8) result = inflateRawSync(compressed)
-  else throw new Error(`Unsupported PPTX ZIP compression method ${entry.compression}`)
-  if (result.length !== entry.uncompressedSize) {
-    throw new Error(`PPTX ZIP entry size mismatch for ${entry.name}`)
-  }
-  return result
-}
-
-function xmlAttribute(tag, name) {
-  const match = tag.match(new RegExp(`\\b${name}=(?:"([^"]*)"|'([^']*)')`))
-  return match?.[1] ?? match?.[2] ?? null
-}
-
-function relationshipTarget(sourcePart, target) {
-  const normalized = String(target).replaceAll('\\', '/')
-  if (normalized.startsWith('/')) return normalized.slice(1)
-  return posix.normalize(posix.join(posix.dirname(sourcePart), normalized))
-}
-
 export function inspectChartExPackage(candidatePath) {
-  const entries = readZipEntries(candidatePath)
-  const chartExParts = [...entries.keys()]
-    .filter((name) => /^ppt\/charts\/chartEx[^/]*\.xml$/.test(name))
-    .sort()
-  if (chartExParts.length === 0) {
-    return { hasChartEx: false, chartExParts: [], chartExSlides: [], unmappedParts: [] }
-  }
-
-  const chartExSet = new Set(chartExParts)
-  const mapped = new Set()
-  const mappedParts = new Set()
-  for (const [name, entry] of entries) {
-    const match = name.match(/^ppt\/slides\/_rels\/slide([0-9]+)\.xml\.rels$/)
-    if (!match) continue
-    const slide = Number(match[1])
-    const sourcePart = `ppt/slides/slide${slide}.xml`
-    const xml = readZipEntry(entry).toString('utf8')
-    for (const tag of xml.matchAll(/<Relationship\b[^>]*>/g)) {
-      const target = xmlAttribute(tag[0], 'Target')
-      if (!target || xmlAttribute(tag[0], 'TargetMode') === 'External') continue
-      const part = relationshipTarget(sourcePart, target)
-      if (!chartExSet.has(part)) continue
-      mapped.add(slide)
-      mappedParts.add(part)
-    }
-  }
-
-  return {
-    hasChartEx: true,
-    chartExParts,
-    chartExSlides: [...mapped].sort((left, right) => left - right),
-    unmappedParts: chartExParts.filter((part) => !mappedParts.has(part)),
-  }
+  return readPptxPackage(candidatePath).chartExScope()
 }
 
 export function detectPowerPointAvailability() {
@@ -340,6 +229,38 @@ export function validatePowerPointNativeRender({
   }
 
   const coveredSlides = reportSlides(report)
+  // Historical reports without hidden slides have an identity mapping. With
+  // hidden slides, explicit logical-to-PDF mapping is required to avoid a false pass.
+  const logicalSlides = readPptxPackage(candidatePath).slides()
+  if (
+    logicalSlides.some((slide) => slide.hidden) ||
+    (report.pdf_pages !== null && report.pdf_pages !== undefined)
+  ) {
+    const visible = logicalSlides.filter((slide) => !slide.hidden)
+    const exported =
+      report.pdf_page_count === logicalSlides.length
+        ? logicalSlides
+        : report.pdf_page_count === visible.length
+          ? visible
+          : null
+    const mapping = Array.isArray(report.pdf_pages) ? report.pdf_pages : []
+    if (
+      !exported ||
+      packageInfo.chartExSlides.some((slide) => {
+        const index = exported.findIndex((item) => item.slide === slide)
+        const matches = mapping.filter((item) => item.slide === slide)
+        return (
+          index < 0 ||
+          matches.length !== 1 ||
+          matches[0].pdf_page !== index + 1 ||
+          matches[0].part !== exported[index].part ||
+          matches[0].hidden !== exported[index].hidden
+        )
+      })
+    ) {
+      errors.push({ code: 'chartex-native-render-pdf-page-identity-mismatch' })
+    }
+  }
   const missingSlides = packageInfo.chartExSlides.filter((slide) => !coveredSlides.includes(slide))
   if (packageInfo.chartExSlides.length === 0 || packageInfo.unmappedParts.length > 0) {
     errors.push({

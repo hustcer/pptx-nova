@@ -426,6 +426,10 @@ ChartEx 语义要点：
   value data labels 和 funnel 自己的 category axis gapWidth。
 - `histogram`：用原始样本 `values[]`，PowerPoint 语义通常是
   `layoutId="clusteredColumn"` + `<cx:binning intervalClosed="r">`，不是自造普通柱图。
+  保留重复样本和原始数值精度；不要预聚合为普通柱图、去重或先四舍五入。核对每个区间的
+  左/右闭合规则、边界值与计数总和，尤其是小数箱宽、大数偏移和极小间隔。已有 OOXML
+  的 binSize/binCount/underflow/overflow 等设置属于需要检查的输入语义；可写字段仍以
+  当前 `add-chart` / `set-chart-data` schema 为准，不能把 renderer 的内部字段当 patch 字段。
 - `sunburst` / `treemap`：层级输入可用 `nodes[]`，但写入 ChartEx 时通常只输出叶子行；
   多级 category cache 按 PowerPoint 的 leaf-to-root 层级顺序写入，不能把中间节点也当成
   独立 data point。
@@ -605,7 +609,7 @@ shape properties 和 text properties。
 
 只有 dry-run 报告满足 `agentGate.passed=true`、`changedNodes[]` 符合预期、
 `structureChecks[]` 全部通过时，才去掉 `--dry-run` 写候选文件。该命令只写
-`ppt/charts/*.xml` 中的可见文本节点；不会修改 external workbook path、chart
+OPC 声明为 Chart/ChartEx 的部件中的可见文本节点，不依赖路径或扩展名；不会修改 external workbook path、chart
 relationship target、embedded workbook 数据/sharedStrings 或 `formatCode`。
 
 普通 chart 编辑仍可用 patch op `set-chart-text`。它会改已有 chart 文本缓存和
@@ -1182,8 +1186,16 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
 --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
-  the final ZIP, maps every `chartEx*.xml` relationship back to its 1-based
-  slide, and requires candidate/hash/image-bound coverage for all such slides.
+  the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
+  through slide/layout/master ownership to one-based presentation order. Renamed
+  parts and inherited charts are included; a filename alone is not chart identity.
+  It requires candidate/hash/image-bound coverage for all mapped slides and keeps
+  unreferenced ChartEx parts unresolved rather than guessing a slide.
+  PDF exports can omit hidden slides: retain `pdf_page_count` and `pdf_pages` from
+  the snapshot report. The helper maps logical slides to physical PDF pages and
+  rejects an omitted requested slide or an unexplained page count. Do not label a
+  different PDF page as the requested slide; keep the failure and choose a disclosed
+  alternative if native proof is required.
   When the complete optional route is available, absence or staleness is a hard
   failure. When any prerequisite is unavailable, the baseline workflow remains
   usable but the result is an explicit unverified warning rather than a pass;

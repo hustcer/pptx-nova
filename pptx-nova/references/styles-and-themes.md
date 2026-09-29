@@ -1,7 +1,8 @@
 # 颜色、字体、主题、母版
 
 PPTX 的视觉风格由四个层次决定：**theme（主题）→ master（母版）→ layout（版式）→ slide**。
-xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 层改，影响最广、最便宜。
+xdoc 让这四层都能改。整 deck 的主题槽位更新可用 theme 层；局部修改应选择相应对象层，
+避免把一次局部改色扩大成全包主题更新。
 
 ## 颜色
 
@@ -125,10 +126,10 @@ xdoc 让这四层都能改，从最上到最下成本递增 — 优先在 theme 
 }
 ```
 
-`mode` 是 `stretch` 或 `tile`，tile 模式可另给 `tile` 参数。内置 preview/PDF
-目前对 picture fill 可靠支持 stretch 与 alpha，crop/tile 属于 partial；最终视觉
-以 PowerPoint 为准。已有 picture shape 的裁剪或 preset mask 则用 `set-image`，不是
-picture fill。
+`mode` 是 `stretch` 或 `tile`，tile 模式可另给 `tile` 参数。检查当前 preview/PDF 的
+源裁剪、目标矩形、平铺比例/偏移与透明度映射，并用 PowerPoint 复核目标页面；不要因旧版
+crop/tile 显示差异就删除这些设置。已有 picture shape 的裁剪或 preset mask 则用
+`set-image`。既有背景/表格单元格 picture fill 的读取与渲染不代表上述 authoring op 已能写入。
 
 ## Line（边框）
 
@@ -231,6 +232,12 @@ inspect 的 `fontFacts[]` 检查各脚本 scope。
 - `fonts.major` = 主题大标题字体（默认绑定到 placeholder type=title）
 - `fonts.minor` = 主题正文字体（默认绑定到所有 body / content）
 - `typeface` 指定拉丁字符字体，`eastAsian` / `complexScript` 分别指定东亚 / 复杂书写系统字符的字体（让中文/英文分别用不同字体）
+
+`set-theme` 按 OPC Content Type 更新包内**全部普通 Theme part**，包括未被引用但保留的主题，
+不限定 `ppt/theme/theme1.xml` 或当前 master。ThemeOverride 与对象上的显式格式保持原样；
+它们可能遮蔽更新后的主题槽位。无效 theme 内容或关系会使操作失败，不产生输出包。
+先看 `inspect.presentation.themes` 与关联 master，再用 dry-run 的 changed parts 和最终
+渲染确认实际范围。只授权某页或某对象时，不使用全包 `set-theme`。
 
 ### CJK 字体注意
 
@@ -337,7 +344,8 @@ PNG 核对目标对象，不能只凭 `check fonts` 找到字体族就宣布字�
 { "op": "set-theme", "colors": { "accent1": "1A73E8" } }
 ```
 
-所有引用 `accent1` 的 shape / chart / placeholder 都会跟着变。**最便宜的改色方式**。
+继承普通主题 `accent1` 且没有局部覆盖的对象会随之变化。ThemeOverride、显式对象颜色
+及其他本地覆盖可能维持原样；主题范围与验证见上文「Theme 字体」。
 
 如果只想改某些 shape 不动 theme：
 

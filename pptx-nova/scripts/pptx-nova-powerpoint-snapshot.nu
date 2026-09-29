@@ -20,9 +20,12 @@
 # - `window` mode needs macOS Screen Recording permission for the current terminal/host app
 # - `window` mode also needs macOS Accessibility permission to query the slide-show canvas rect
 # - `window` mode captures the slide-show canvas instead of the full editing window
-# - `pdf-render` mode requires `mutool`
+# - `pdf-render` mode requires `mutool` and Node.js
+# - PDF page identity follows presentation order and verified hidden-slide omissions
 # - `pdf-render` mode also requires App Data access to PowerPoint's sandbox container; use `auto` or
 #   `window` when the terminal/host app does not have that macOS privacy permission
+
+const SLIDE_VISIBILITY_TOOL = path self | path dirname | path join 'lib' 'pptx-package.mjs'
 
 def command-exists [name: string]: nothing -> bool {
   not (which $name | is-empty)
@@ -1270,6 +1273,31 @@ def capture-window-screenshot [
   }
 }
 
+# PowerPoint may include or omit hidden slides in its PDF export. Verify which
+# sequence was exported before interpreting the user's logical slide numbers.
+def resolve-pdf-slide-pages [
+  slides: list<record>
+  pdf_page_count: int
+  requested: list<int>
+]: nothing -> list<record> {
+  let visible = $slides | where {|slide| not $slide.hidden}
+  let exported = if $pdf_page_count == ($slides | length) {
+    $slides
+  } else if $pdf_page_count == ($visible | length) {
+    $visible
+  } else {
+    error make {msg: 'Exported PDF page count does not match all or visible slides'}
+  }
+  let mapping = $exported | enumerate | each {|entry| $entry.item | insert pdf_page ($entry.index + 1)}
+  $requested | each {|slide|
+    let found = $mapping | where slide == $slide
+    if ($found | length) != 1 {
+      error make {msg: $'Slide ($slide) is absent from the exported PDF; it may be hidden'}
+    }
+    $found | first
+  }
+}
+
 def render-via-pdf [
   pptx_path: string
   output_target: string
@@ -1317,6 +1345,23 @@ def render-via-pdf [
     return $export_result
   }
 
+  let requested = if $slide_selection.multi { $slide_selection.slides } else { [$slide_selection.slide] }
+  let identity = try {
+    let source = ^node $SLIDE_VISIBILITY_TOOL $pptx_path | complete
+    if $source.exit_code != 0 { error make {msg: $source.stderr} }
+    let count = ^mutool show $tmp_pdf trailer/Root/Pages/Count | complete
+    if $count.exit_code != 0 { error make {msg: $count.stderr} }
+    let pdf_page_count = $count.stdout | str trim | into int
+    let pages = resolve-pdf-slide-pages ($source.stdout | from json) $pdf_page_count $requested
+    {ok: true pages: $pages pdf_page_count: $pdf_page_count}
+  } catch {|err|
+    {ok: false message: 'Cannot establish logical slide identity in the exported PDF' details: {reason: $err.msg}}
+  }
+  if not $identity.ok {
+    cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir | ignore
+    return $identity
+  }
+
   let target_outputs = (
     if $slide_selection.multi {
       $slide_selection.slides | each {|slide| output-path-for-slide $output_target $slide }
@@ -1324,18 +1369,25 @@ def render-via-pdf [
       [$output_target]
     }
   )
-  for output_path in $target_outputs {
-    if ($output_path | path exists) { rm --force $output_path }
-  }
-
+  # MuPDF substitutes physical PDF page numbers for %d. Render once into owned
+  # staging, then publish each image under the requested logical slide number.
+  let staged_pattern = $tmp_dir | path join 'page-%d.png'
+  let pdf_spec = $identity.pages.pdf_page | uniq | each {into string} | str join ','
   let draw_result = (
     ^mutool draw
       -r ($dpi | into string)
-      -o $output_target
+      -o $staged_pattern
       $tmp_pdf
-      $slide_selection.spec
+      $pdf_spec
       | complete
   )
+  let staged = $identity.pages | each {|page| output-path-for-slide $staged_pattern $page.pdf_page}
+  let all_rendered = $staged | all {|path| $path | path exists}
+  if $draw_result.exit_code == 0 and $all_rendered {
+    for pair in ($staged | zip $target_outputs) {
+      cp --force $pair.0 $pair.1
+    }
+  }
   cleanup-owned-temp-dir $tmp_dir_result.root $tmp_dir | ignore
 
   let outputs = (
@@ -1358,7 +1410,7 @@ def render-via-pdf [
   let missing_outputs = (
     $outputs | where {|item| not ($item.output_path | path exists) }
   )
-  if ($draw_result.exit_code != 0 or not ($missing_outputs | is-empty)) {
+  if ($draw_result.exit_code != 0 or not $all_rendered or not ($missing_outputs | is-empty)) {
     return {
       ok: false
       message: (
@@ -1381,6 +1433,8 @@ def render-via-pdf [
   {
     ok: true
     method: 'pdf-render'
+    pdf_page_count: $identity.pdf_page_count
+    pdf_pages: $identity.pages
     presentation_name: $open_result.presentation_name
     slide: (
       if $slide_selection.multi {
@@ -1699,6 +1753,8 @@ def snapshot-result [
       }
     )
     outputs: ($capture.outputs? | default null)
+    pdf_page_count: ($capture.pdf_page_count? | default null)
+    pdf_pages: ($capture.pdf_pages? | default null)
     window: ($capture.window? | default null)
     image: (
       if $slide_selection.multi {

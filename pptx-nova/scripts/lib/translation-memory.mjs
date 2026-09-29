@@ -20,22 +20,18 @@ function hasExecutableSelector(unit) {
   return Boolean(selectors?.textPlan || selectors?.replaceText || selectors?.replaceChartText)
 }
 
-function reviewPartition(unit) {
+function reviewPartition(unit, sharedParts) {
   if (unit?.category === 'embeddedWorkbook') return 'embeddedWorkbook'
   if (unit?.notes?.includes?.('language-classification-uncertain')) return 'languageUncertain'
-  if (
-    String(unit?.part ?? '').startsWith('ppt/slideLayouts/') ||
-    String(unit?.part ?? '').startsWith('ppt/slideMasters/')
-  )
-    return 'shared'
+  if (sharedParts.includes(unit?.part)) return 'shared'
   return 'other'
 }
 
-export function expandReviewInventory(scan, partition) {
+export function expandReviewInventory(scan, partition, sharedParts = []) {
   const allowed = new Set(['languageUncertain', 'shared', 'embeddedWorkbook', 'other'])
   if (!allowed.has(partition)) throw new Error(`unsupported review partition: ${partition}`)
   const units = unitsFrom(scan).filter(
-    (unit) => unit.action === 'review' && reviewPartition(unit) === partition,
+    (unit) => unit.action === 'review' && reviewPartition(unit, sharedParts) === partition,
   )
   return {
     schemaVersion: 'pptx-nova-i18n-review-inventory/v1',
@@ -45,8 +41,10 @@ export function expandReviewInventory(scan, partition) {
   }
 }
 
-function partitionSummary(units, name) {
-  const members = units.filter((unit) => unit.action === 'review' && reviewPartition(unit) === name)
+function partitionSummary(units, name, sharedParts) {
+  const members = units.filter(
+    (unit) => unit.action === 'review' && reviewPartition(unit, sharedParts) === name,
+  )
   return {
     count: members.length,
     categories: [...new Set(members.map((unit) => unit.category).filter(Boolean))].sort(),
@@ -56,7 +54,10 @@ function partitionSummary(units, name) {
   }
 }
 
-export function buildTranslationMemory(scan, { sourceSha256, unitsSha256, targetLang }) {
+export function buildTranslationMemory(
+  scan,
+  { sourceSha256, unitsSha256, targetLang, sharedParts = [] },
+) {
   if (!sourceSha256 || !unitsSha256 || !targetLang) {
     throw new Error('sourceSha256, unitsSha256, and targetLang are required')
   }
@@ -110,10 +111,10 @@ export function buildTranslationMemory(scan, { sourceSha256, unitsSha256, target
           : Number(((eligible.length - entries.length) / eligible.length).toFixed(4)),
     },
     reviewPartitions: {
-      languageUncertain: partitionSummary(units, 'languageUncertain'),
-      shared: partitionSummary(units, 'shared'),
-      embeddedWorkbook: partitionSummary(units, 'embeddedWorkbook'),
-      other: partitionSummary(units, 'other'),
+      languageUncertain: partitionSummary(units, 'languageUncertain', sharedParts),
+      shared: partitionSummary(units, 'shared', sharedParts),
+      embeddedWorkbook: partitionSummary(units, 'embeddedWorkbook', sharedParts),
+      other: partitionSummary(units, 'other', sharedParts),
     },
     entries,
     unitOverrides: [],

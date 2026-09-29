@@ -648,12 +648,14 @@ PowerPoint display-effect screenshots and comparisons:
   with `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method
 pdf-render` first:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
-- When the candidate contains `ppt/charts/chartEx*.xml`, pass that report to
+- When the candidate contains OPC-declared ChartEx parts (at any path), pass that report to
   `pptx-nova-finalize-evidence.mjs --candidate deck.pptx
 --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
   verifies the candidate SHA-256, exact ChartEx slide coverage, and every PNG's
-  dimensions, byte length, and SHA-256. A same-path report from older candidate
-  bytes is rejected.
+  dimensions, byte length, and SHA-256. With hidden slides, it also requires the
+  snapshot's `pdf_page_count` / `pdf_pages` mapping to match logical slide identity;
+  omitted hidden slides have no PDF evidence. A same-path report from older
+  candidate bytes is rejected.
 - If all optional native-render prerequisites are available, missing or invalid
   ChartEx native evidence blocks the high-risk finalizer. If any prerequisite is
   unavailable, the finalizer emits `chartex-native-render-unverified` and returns

@@ -10,6 +10,8 @@ import {
   inspectChartExPackage,
 } from '../../pptx-nova/scripts/lib/powerpoint-native-render-evidence.mjs'
 
+import { storedZip, contentTypes } from './helpers/pptx-package.mjs'
+
 const ROOT = resolve(import.meta.dirname, '..', '..')
 const FINALIZER = join(ROOT, 'pptx-nova/scripts/pptx-nova-finalize-evidence.mjs')
 
@@ -17,54 +19,46 @@ function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex')
 }
 
-function storedZip(entries) {
-  const locals = []
-  const centrals = []
-  let offset = 0
-  for (const [name, value] of entries) {
-    const nameBytes = Buffer.from(name)
-    const data = Buffer.from(value)
-    const local = Buffer.alloc(30 + nameBytes.length + data.length)
-    local.writeUInt32LE(0x04034b50, 0)
-    local.writeUInt16LE(20, 4)
-    local.writeUInt32LE(0, 14)
-    local.writeUInt32LE(data.length, 18)
-    local.writeUInt32LE(data.length, 22)
-    local.writeUInt16LE(nameBytes.length, 26)
-    nameBytes.copy(local, 30)
-    data.copy(local, 30 + nameBytes.length)
-    locals.push(local)
-
-    const central = Buffer.alloc(46 + nameBytes.length)
-    central.writeUInt32LE(0x02014b50, 0)
-    central.writeUInt16LE(20, 4)
-    central.writeUInt16LE(20, 6)
-    central.writeUInt32LE(0, 16)
-    central.writeUInt32LE(data.length, 20)
-    central.writeUInt32LE(data.length, 24)
-    central.writeUInt16LE(nameBytes.length, 28)
-    central.writeUInt32LE(offset, 42)
-    nameBytes.copy(central, 46)
-    centrals.push(central)
-    offset += local.length
-  }
-  const centralBytes = Buffer.concat(centrals)
-  const eocd = Buffer.alloc(22)
-  eocd.writeUInt32LE(0x06054b50, 0)
-  eocd.writeUInt16LE(entries.length, 8)
-  eocd.writeUInt16LE(entries.length, 10)
-  eocd.writeUInt32LE(centralBytes.length, 12)
-  eocd.writeUInt32LE(offset, 16)
-  return Buffer.concat([...locals, centralBytes, eocd])
-}
-
-function writeCandidate(runDir, { chartEx = true } = {}) {
-  const entries = [['[Content_Types].xml', '<Types/>']]
+function writeCandidate(runDir, { chartEx = true, hidden = false } = {}) {
+  const entries = [
+    [
+      '[Content_Types].xml',
+      contentTypes([
+        [
+          'ppt/slides/slide1.xml',
+          'application/vnd.openxmlformats-officedocument.presentationml.slide+xml',
+        ],
+        [
+          'ppt/slides/slide2.xml',
+          'application/vnd.openxmlformats-officedocument.presentationml.slide+xml',
+        ],
+        ...(chartEx ? [['ppt/charts/chartEx1.xml', 'application/vnd.ms-office.chartex+xml']] : []),
+      ]),
+    ],
+    [
+      'ppt/presentation.xml',
+      '<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><p:sldIdLst><p:sldId id="256" r:id="a"/><p:sldId id="257" r:id="b"/></p:sldIdLst></p:presentation>',
+    ],
+    [
+      'ppt/_rels/presentation.xml.rels',
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="a" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide1.xml"/><Relationship Id="b" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide2.xml"/></Relationships>',
+    ],
+    [
+      'ppt/slides/slide1.xml',
+      '<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' +
+        (hidden ? ' show="0"' : '') +
+        '/>',
+    ],
+    [
+      'ppt/slides/slide2.xml',
+      '<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"/>',
+    ],
+  ]
   if (chartEx) {
     entries.push(['ppt/charts/chartEx1.xml', '<cx:chart/>'])
     entries.push([
       'ppt/slides/_rels/slide2.xml.rels',
-      '<Relationships><Relationship Id="rId1" Type="http://schemas.microsoft.com/office/2014/relationships/chartEx" Target="../charts/chartEx1.xml"/></Relationships>',
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.microsoft.com/office/2014/relationships/chartEx" Target="../charts/chartEx1.xml"/></Relationships>',
     ])
   }
   const path = join(runDir, 'candidate.pptx')
@@ -164,6 +158,51 @@ test('ChartEx package inspection maps modern chart parts to one-based slides', (
   assert.deepEqual(inspectChartExPackage(candidatePath), {
     hasChartEx: true,
     chartExParts: ['ppt/charts/chartEx1.xml'],
+    chartExSlides: [2],
+    unmappedParts: [],
+  })
+})
+
+test('ChartEx scope follows OPC types and presentation order rather than filenames', () => {
+  const runDir = mkdtempSync(join(tmpdir(), 'pptx-native-evidence-relocated-'))
+  const candidatePath = join(runDir, 'relocated.pptx')
+  writeFileSync(
+    candidatePath,
+    storedZip([
+      [
+        '[Content_Types].xml',
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Override PartName="/assets/plot.data" ContentType="application/vnd.ms-office.chartex+xml"/><Override PartName="/pages/last.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/><Override PartName="/pages/first.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/></Types>',
+      ],
+      [
+        'ppt/presentation.xml',
+        '<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><p:sldIdLst><p:sldId id="256" r:id="last"/><p:sldId id="257" r:id="first"/></p:sldIdLst></p:presentation>',
+      ],
+      [
+        'ppt/_rels/presentation.xml.rels',
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="first" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../pages/first.xml"/><Relationship Id="last" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../pages/last.xml"/></Relationships>',
+      ],
+      [
+        'pages/first.xml',
+        '<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"/>',
+      ],
+      [
+        'pages/last.xml',
+        '<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"/>',
+      ],
+      [
+        'pages/_rels/first.xml.rels',
+        '<r:Relationships xmlns:r="http://schemas.openxmlformats.org/package/2006/relationships"><r:Relationship Id="chart" Type="http://schemas.microsoft.com/office/2014/relationships/chartEx" Target="../assets/plot.data"/></r:Relationships>',
+      ],
+      [
+        'assets/plot.data',
+        '<cx:chartSpace xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex"/>',
+      ],
+      ['ppt/charts/chartEx-decoy.xml', '<unrelated/>'],
+    ]),
+  )
+  assert.deepEqual(inspectChartExPackage(candidatePath), {
+    hasChartEx: true,
+    chartExParts: ['assets/plot.data'],
     chartExSlides: [2],
     unmappedParts: [],
   })
@@ -279,4 +318,26 @@ test('high-risk finalizer publishes the ChartEx PowerPoint-native gate in its ag
   assert.equal(report.status, 'pass')
   assert.equal(report.agentSummary.gates.powerpointNativeRender.gate, 'passed')
   assert.deepEqual(report.agentSummary.gates.powerpointNativeRender.chartExSlides, [2])
+})
+
+test('ChartEx evidence requires correct physical PDF mapping when hidden slides precede it', () => {
+  const runDir = mkdtempSync(join(tmpdir(), 'pptx-native-evidence-hidden-'))
+  const candidatePath = writeCandidate(runDir, { hidden: true })
+  const artifactPath = writeArtifact(runDir, candidatePath)
+  const evaluate = () =>
+    evaluateChartExNativeRender({
+      candidatePath,
+      runDir,
+      artifactPath,
+      availability: { available: true },
+    })
+  assert.equal(evaluate().status, 'failed')
+  const report = JSON.parse(readFileSync(artifactPath, 'utf8'))
+  report.pdf_page_count = 1
+  report.pdf_pages = [{ slide: 2, part: 'ppt/slides/slide2.xml', hidden: false, pdf_page: 1 }]
+  writeFileSync(artifactPath, JSON.stringify(report))
+  assert.equal(evaluate().status, 'passed')
+  report.pdf_pages[0].pdf_page = 2
+  writeFileSync(artifactPath, JSON.stringify(report))
+  assert.equal(evaluate().status, 'failed')
 })

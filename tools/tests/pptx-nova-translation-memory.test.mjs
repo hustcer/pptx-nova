@@ -99,6 +99,31 @@ test('translation memory expands only the explicitly requested review partition'
   assert.throws(() => expandReviewInventory(scan, 'all'), /unsupported review partition/)
 })
 
+test('shared review uses declared part identity, including relocated layouts and excluding path lookalikes', () => {
+  const source = structuredClone(scan)
+  source.i18nUnits.units = [
+    { ...scan.i18nUnits.units[2], unitId: 'relocated', part: 'assets/brand.layout' },
+    { ...scan.i18nUnits.units[2], unitId: 'lookalike', part: 'ppt/slideLayouts/not-a-layout.xml' },
+  ]
+  const sharedParts = ['assets/brand.layout']
+  assert.deepEqual(
+    expandReviewInventory(source, 'shared', sharedParts).units.map((u) => u.unitId),
+    ['relocated'],
+  )
+  assert.deepEqual(
+    expandReviewInventory(source, 'other', sharedParts).units.map((u) => u.unitId),
+    ['lookalike'],
+  )
+  const memory = buildTranslationMemory(source, {
+    sourceSha256: 'sha256:source',
+    unitsSha256: 'sha256:units',
+    targetLang: 'de',
+    sharedParts,
+  })
+  assert.equal(memory.reviewPartitions.shared.count, 1)
+  assert.equal(memory.reviewPartitions.other.count, 1)
+})
+
 test('translation memory materializes per-unit records with explicit review override', () => {
   const memory = buildTranslationMemory(scan, {
     sourceSha256: 'sha256:source',

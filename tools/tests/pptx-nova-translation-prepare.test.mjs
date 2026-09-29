@@ -13,6 +13,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
+import { translationSource } from './helpers/pptx-package.mjs'
+
 const repoRoot = process.cwd()
 const runner = join(repoRoot, 'pptx-nova/scripts/pptx-nova-translation-prepare.mjs')
 
@@ -170,7 +172,7 @@ test('translation preparation refuses output aliases to the read-only source', (
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-collision-'))
   const source = join(root, 'source.pptx')
   const candidateAlias = join(root, 'candidate.pptx')
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   symlinkSync(source, candidateAlias)
   const result = run(
     [
@@ -191,7 +193,7 @@ test('translation preparation refuses output aliases to the read-only source', (
     1,
   )
   assert.match(result.error.message, /must not resolve to the read-only source/)
-  assert.equal(readFileSync(source, 'utf8'), 'source bytes')
+  assert.deepEqual(readFileSync(source), translationSource)
 })
 
 test('translation preparation deduplicates memory and resumes through guarded apply', () => {
@@ -199,7 +201,7 @@ test('translation preparation deduplicates memory and resumes through guarded ap
   const source = join(root, 'source.pptx')
   const runDir = join(root, 'run')
   const xdoc = fakeXdoc(root)
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
 
   const inventory = run([
     '--source',
@@ -400,7 +402,7 @@ test('translation preparation deduplicates memory and resumes through guarded ap
   ])
   assert.equal(applied.status, 'prepared')
   assert.equal(applied.summary.translationCount, 5)
-  assert.equal(readFileSync(applied.artifacts.candidate, 'utf8'), 'source bytes')
+  assert.deepEqual(readFileSync(applied.artifacts.candidate), translationSource)
   assert.equal(readFileSync(join(root, 'probe-count.txt'), 'utf8'), '5')
 })
 
@@ -408,7 +410,7 @@ test('translation preparation accepts a pre-probed run directory holding only xd
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-preprobe-'))
   const source = join(root, 'source.pptx')
   const runDir = join(root, 'run')
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   mkdirSync(runDir, { recursive: true })
   writeFileSync(
     join(runDir, 'xdoc-capabilities.json'),
@@ -437,7 +439,7 @@ test('translation preparation archives an external prompt only after the fresh-r
   const source = join(root, 'source.pptx')
   const prompt = join(root, 'prompt.txt')
   const runDir = join(root, 'run')
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   writeFileSync(prompt, 'Translate all visible labels to German.\n')
   const inventory = run([
     '--source',
@@ -469,7 +471,7 @@ test('translation preparation still rejects a reused run directory with real art
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-translation-reuse-'))
   const source = join(root, 'source.pptx')
   const runDir = join(root, 'run')
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   mkdirSync(runDir, { recursive: true })
   writeFileSync(join(runDir, 'xdoc-capabilities.json'), '{}')
   writeFileSync(join(runDir, 'prompt.txt'), 'prompt')
@@ -508,7 +510,7 @@ test('review partitions resume after needs-translations without rescanning or ch
   const source = join(root, 'source.pptx')
   const runDir = join(root, 'run')
   const xdoc = fakeXdoc(root)
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   const base = [
     '--source',
     source,
@@ -566,7 +568,7 @@ test('target-segment repair rounds write sequenced scaffolds and accept the fill
   const source = join(root, 'source.pptx')
   const runDir = join(root, 'run')
   const xdoc = fakeXdoc(root)
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   const base = [
     '--source',
     source,
@@ -647,7 +649,7 @@ test('translation preparation merges high-confidence anchor drafts and reruns th
   const source = join(root, 'source.pptx')
   const runDir = join(root, 'run')
   const xdoc = fakeXdoc(root)
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   const base = [
     '--source',
     source,
@@ -720,7 +722,7 @@ test('the compact fill view feeds --apply --fill without touching the full memor
   const source = join(root, 'source.pptx')
   const runDir = join(root, 'run')
   const xdoc = fakeXdoc(root)
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   const base = [
     '--source',
     source,
@@ -793,7 +795,7 @@ test('translation preparation blocks glossary violations before i18n-plan and re
   const glossary = join(root, 'glossary.json')
   const runDir = join(root, 'run')
   const xdoc = fakeXdoc(root)
-  writeFileSync(source, 'source bytes')
+  writeFileSync(source, translationSource)
   writeFileSync(
     glossary,
     JSON.stringify({

@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.5.0 (9be9cac8)",
+  "version": "0.6.0 (18e5b907)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -1811,6 +1811,7 @@
         "check emits preflight/v1 JSON reports.",
         "Default --checks is the explicit list fonts,links,compat,assets,policy; --checks all adds a11y on top of it.",
         "compat compares the full OOXML package against --target-office (default 365) and the actual parser MC profile independently. mc.office and mc.parser distinguish Fallback presence, selected Choice/Fallback, and effective content understanding; visualVerification remains not-performed. Parser MC blockers or missing branches fail the Agent gate.",
+        "compat also runs the canonical full-package XML/OPC structural audit independently of slide selection: XML parsing and namespace bindings, content types, relationship targets/types, typed part graph, and PowerPoint owner/master/layout identities. Package errors fail report status and the Agent gate. Element schema/particle rules are outside this structural scan; an empty result is not a complete XSD or PowerPoint rendering guarantee.",
         "policy currently runs fixed MVP publishing rules.",
         "a11y runs render-free accessibility rules; see checks.a11y for the rule catalog, the outcome vocabulary, and the declared non-goals."
       ],
@@ -1892,6 +1893,7 @@
           "reportSchemaVersion": "preflight/v1",
           "mcSchemaVersion": "ooxml-mc/v1",
           "mcReportPath": "checks.compat.details.mc",
+          "packageIntegrity": "checks.compat.details.packageIntegrity reports full-package scanStatus, passed and issueCount. A failed scan has null issueCount; package errors are projected to issues[] with package_ codes and part targets. Early Office/MC inspection failures already fail closed and may omit this independent scan.",
           "selection": "Branches use original XML child-slot paths; selectedChoice is a zero-based Choice ordinal or null. Only reached AlternateContent containers are counted.",
           "profiles": "office uses the requested target; parser uses the shared JS/WASM/native namespace capabilities.",
           "readable": "False for blocking MC conditions or a container without an eligible Choice/Fallback. True does not certify schema validity or rendering.",
@@ -2209,6 +2211,12 @@
           "name": "channel-threshold",
           "type": "int",
           "description": "Maximum per-channel pixel delta ignored by pptx visual-audit; defaults to 26",
+          "required": false
+        },
+        {
+          "name": "visual-mode",
+          "type": "string",
+          "description": "Visual-audit policy: regression (default) or create (complete new candidate, no reference)",
           "required": false
         },
         {
@@ -2681,6 +2689,10 @@
             {
               "feature": "slide-transition",
               "subset": "morph-authoring"
+            },
+            {
+              "feature": "slide-transition",
+              "subset": "p14-authoring"
             },
             {
               "feature": "shape-3d",
@@ -3457,7 +3469,7 @@
             "feature": "shape-3d",
             "subset": "local-declarations",
             "status": "preserve-only",
-            "summary": "Read and preserve existing DrawingML Shape 3D declarations without authoring or rendering them.",
+            "summary": "Read and preserve existing DrawingML Shape 3D declarations without authoring them; bundled rendering covers only the separately disclosed front-surface subset.",
             "operations": [],
             "limits": [
               {
@@ -3475,6 +3487,11 @@
                 "id": "shape-3d-preservation",
                 "kind": "behavior",
                 "claim": "Neighboring shape/text edits and save/reopen preserve recognized and opaque 3D subtrees; XML digest changes expose opaque changes."
+              },
+              {
+                "id": "shape-3d-front-surface",
+                "kind": "behavior",
+                "claim": "Viewer/PDF front-surface tests cover directional and Balanced lighting with bounded material, bevel and gradient rendering; unsupported light rigs remain diagnosed."
               }
             ],
             "recommendation": {
@@ -3548,12 +3565,16 @@
                 "evidenceIds": ["shape-3d-preservation"]
               },
               "render": {
-                "status": "unsupported",
-                "summary": "Bundled Viewer/PDF do not implement DrawingML Shape 3D camera, bevel, extrusion or material rendering.",
+                "status": "partial",
+                "summary": "Bundled Viewer/PDF render a bounded orthographicFront surface: front/angle/circle top bevel, solid or linear-gradient fill, matte/warmMatte/plastic material, and threePt/balanced lighting.",
                 "limits": [
                   {
-                    "code": "static-2d-fallback",
-                    "description": "2D output may omit these effects. Use an independent PowerPoint reference for visible acceptance; chart 3D is a separate capability."
+                    "code": "single-convex-contour",
+                    "description": "Requires one closed convex contour and an orthographicFront camera without 3D orientation. Light direction/rotation is supported; it does not enable camera rotation, perspective, extrusion walls, bottom bevels, non-convex or compound geometry, or true Text3D."
+                  },
+                  {
+                    "code": "bounded-surface-rendering",
+                    "description": "Unsupported combinations and resource-budget limits retain explicit fallback boundaries. Circle textures and sharp face edges remain finite raster approximations; independent PowerPoint references are required for visible acceptance. Chart 3D and GLB are separate capabilities."
                   }
                 ],
                 "officeTarget": {
@@ -3561,7 +3582,7 @@
                   "minimumVersion": "2007",
                   "platforms": ["windows", "macos"]
                 },
-                "evidenceIds": ["shape-3d-declarations"]
+                "evidenceIds": ["shape-3d-front-surface"]
               },
               "verify": {
                 "status": "inconclusive",
@@ -3648,12 +3669,16 @@
             "feature": "slide-animation",
             "subset": "basic-shape-and-text-builds",
             "status": "supported",
-            "summary": "Create, replace, and clear the published basic entrance, exit, and text-build animation subset.",
+            "summary": "Create, safely edit, and clear basic entrance/exit and text-build animations, four-edge native fly, finite whole-shape grow-shrink/spin, and straight motion-path.",
             "operations": ["set-slide-animations"],
             "limits": [
               {
                 "code": "merge-safe-animation-subset",
                 "description": "Editable effects and triggers are limited to the published merge-safe subset; stable ids are required for targeted update or removal."
+              },
+              {
+                "code": "native-fly-profile",
+                "description": "Native fly requires paired ppt_x/ppt_y behaviors with fixed two-endpoint formulas, one shared target and duration, and modeled visibility timing. Unknown formulas, properties, targets, and shared complex wrappers remain preserve-only. Direction names the entrance origin or exit destination edge."
               }
             ],
             "evidence": [
@@ -3665,12 +3690,22 @@
               {
                 "id": "slide-animation-basic-roundtrip",
                 "kind": "behavior",
-                "claim": "Basic entrance, exit, paragraph build, timing, trigger, stable-id update, and clear behavior are regression-tested."
+                "claim": "Basic entrance/exit, paragraph build, grow-shrink scale, signed spin degrees, timing, trigger, stable-id update, and clear behavior are regression-tested at the generation boundary."
+              },
+              {
+                "id": "slide-animation-native-fly-roundtrip",
+                "kind": "behavior",
+                "claim": "Native fly read/edit uses an independent SDK fixture and geometric checks for four entrance/exit edges. Source-generated PPTX is tested through JS/WASM parsers, core and Viewer controllers. Legacy filter fly stays editable. Office resave/playback is not certified."
               },
               {
                 "id": "slide-animation-basic-viewer-runtime",
                 "kind": "behavior",
-                "claim": "The Viewer regression suite covers the basic effect runtime, finite repeat scheduling, autoReverse, easing, and explicit non-playable repeat modes without treating static output as playback evidence."
+                "claim": "Source-generated fly, grow-shrink, and signed spin reach the Viewer through JS and both source and bundled WASM. Regressions cover consecutive transforms, paragraph fly, authored easing fractions, finite repeat, and autoReverse without treating static output as playback evidence."
+              },
+              {
+                "id": "slide-animation-straight-motion-roundtrip",
+                "kind": "behavior",
+                "claim": "Straight motion tests cover bounded signed displacement, stable-id editing, retargeting, deletion, namespace aliases and preserve-only unknown paths. Generated PPTX reaches the Viewer through JS and source/bundled WASM with repeat, autoReverse, rotation preservation and replay. Additive sum remains outside the playable subset; PowerPoint dynamic parity is not certified."
               }
             ],
             "recommendation": {
@@ -3681,11 +3716,15 @@
             "axes": {
               "create": {
                 "status": "supported",
-                "summary": "Create the published eight basic entrance and exit effects, paragraph builds, triggers, and finite or explicit timing modifiers through the canonical patch operation.",
+                "summary": "Create the published basic entrance/exit effects and paragraph builds, plus finite whole-shape grow-shrink, spin, and straight motion-path with explicit scale, degrees, or offset.",
                 "limits": [
                   {
                     "code": "basic-effect-subset-only",
-                    "description": "Creation is limited to appear, fade, wipe, fly-in, disappear, exit-fade, fly-out, and exit-wipe plus the published paragraph-build targets."
+                    "description": "Basic entrance/exit effects retain paragraph builds and timing modifiers. Grow-shrink supports whole shapes, scale x/y in [0.00001, 1000], existing triggers/easing/autoReverse, and finite repeat only; no arbitrary properties or from/to combinations."
+                  },
+                  {
+                    "code": "straight-motion-path-only",
+                    "description": "Motion-path requires offset x/y in [-1000, 1000] slide fractions, rounded to six decimals. Each path starts at the authored layout position (additive base), without accumulating prior motion. Whole shape and finite repeat only; no arbitrary path, paragraph build, or autoRotate."
                   }
                 ],
                 "officeTarget": {
@@ -3693,15 +3732,24 @@
                   "minimumVersion": "2007",
                   "platforms": ["windows", "macos"]
                 },
-                "evidenceIds": ["patch-op:set-slide-animations", "slide-animation-basic-roundtrip"]
+                "evidenceIds": [
+                  "patch-op:set-slide-animations",
+                  "slide-animation-basic-roundtrip",
+                  "slide-animation-native-fly-roundtrip",
+                  "slide-animation-straight-motion-roundtrip"
+                ]
               },
               "edit": {
                 "status": "supported",
-                "summary": "Update or remove an editable basic animation by stable animation id while preserving omitted modifier fields and clearing explicit null fields.",
+                "summary": "Update or remove an editable basic animation by stable id, preserving omitted modifiers and UInt32 shape/group build relationships; explicit null clears modifier fields.",
                 "limits": [
                   {
                     "code": "stable-id-required",
                     "description": "Targeted update and removal require the stable id returned by inspect; merge-safe rejects entries outside the editable subset."
+                  },
+                  {
+                    "code": "unambiguous-build-groups",
+                    "description": "Shared paragraph builds split on retarget. Ambiguous or extended builds are preserve-only; a destination build in the same group rejects retarget instead of merging metadata."
                   }
                 ],
                 "officeTarget": {
@@ -3709,11 +3757,16 @@
                   "minimumVersion": "2007",
                   "platforms": ["windows", "macos"]
                 },
-                "evidenceIds": ["patch-op:set-slide-animations", "slide-animation-basic-roundtrip"]
+                "evidenceIds": [
+                  "patch-op:set-slide-animations",
+                  "slide-animation-basic-roundtrip",
+                  "slide-animation-native-fly-roundtrip",
+                  "slide-animation-straight-motion-roundtrip"
+                ]
               },
               "inspect": {
                 "status": "supported",
-                "summary": "Inspect effect, target, trigger, duration, repeat, autoReverse, restart, easing, stable id, and editable versus preserve-only classification as structured data.",
+                "summary": "Inspect logical effect, edge direction, target, trigger, duration, scale, degrees, path offset, repeat, autoReverse, restart, easing, stable id, and editable versus preserve-only classification as structured data.",
                 "limits": [
                   {
                     "code": "modeled-timing-subset",
@@ -3725,7 +3778,11 @@
                   "minimumVersion": "2007",
                   "platforms": ["windows", "macos"]
                 },
-                "evidenceIds": ["slide-animation-basic-roundtrip"]
+                "evidenceIds": [
+                  "slide-animation-basic-roundtrip",
+                  "slide-animation-native-fly-roundtrip",
+                  "slide-animation-straight-motion-roundtrip"
+                ]
               },
               "preserve": {
                 "status": "partial",
@@ -3745,11 +3802,11 @@
               },
               "render": {
                 "status": "partial",
-                "summary": "Play the basic Viewer subset with easing, finite repeat, and autoReverse while keeping PDF and PNG static and declining non-playable repeat modes.",
+                "summary": "Play basic effects, four-edge native fly, whole-shape grow-shrink/spin, and base-origin motion paths in the Viewer with authored easing fractions, finite repeat and autoReverse. Emphasis preserves held transforms; each authored path starts at layout origin. PDF and PNG remain static.",
                 "limits": [
                   {
                     "code": "viewer-runtime-subset",
-                    "description": "The Viewer does not play repeat zero or indefinite and does not implement restart as a PowerPoint-compatible activation state machine; PDF and PNG remain static."
+                    "description": "The Viewer does not play repeat zero or indefinite and does not implement restart as a PowerPoint-compatible activation state machine. Native fly accepts only recognized coordinate patterns; browser regressions do not establish PowerPoint frame parity."
                   }
                 ],
                 "officeTarget": {
@@ -3757,7 +3814,10 @@
                   "minimumVersion": "2007",
                   "platforms": ["windows", "macos"]
                 },
-                "evidenceIds": ["slide-animation-basic-viewer-runtime"]
+                "evidenceIds": [
+                  "slide-animation-basic-viewer-runtime",
+                  "slide-animation-straight-motion-roundtrip"
+                ]
               },
               "verify": {
                 "status": "inconclusive",
@@ -3784,7 +3844,7 @@
             "feature": "slide-animation",
             "subset": "complex-existing-timing",
             "status": "preserve-only",
-            "summary": "Retain media timing, interactive triggers, motion paths, and unknown timing structures when untouched.",
+            "summary": "Retain media timing, interactive triggers, complex motion paths, and unknown timing structures when untouched.",
             "operations": [],
             "limits": [
               {
@@ -3810,7 +3870,7 @@
             "feature": "slide-animation",
             "subset": "complex-create-edit",
             "status": "unsupported",
-            "summary": "Create or semantically edit motion paths, media timing, interactive triggers, emphasis, or unknown timing structures.",
+            "summary": "Create or semantically edit complex motion paths, media timing, interactive triggers, unmodeled emphasis, or unknown timing structures.",
             "operations": [],
             "limits": [
               {
@@ -3988,12 +4048,12 @@
                 "evidenceIds": ["slide-transition-morph-ooxml-roundtrip"]
               },
               "render": {
-                "status": "unsupported",
-                "summary": "Do not emulate Morph interpolation in the Viewer, PDF, PNG, or static preview; parser engines select the authored fade fallback where applicable.",
+                "status": "partial",
+                "summary": "Play object/group, word, and character Morph in the Web Viewer with authored duration, drawing correspondence, and animation lifecycle integration. PDF, PNG, and static previews remain static.",
                 "limits": [
                   {
-                    "code": "no-in-house-morph-renderer",
-                    "description": "The repository does not implement object, word, or character Morph interpolation or PowerPoint matching heuristics."
+                    "code": "bounded-web-morph",
+                    "description": "Exact unique names and scoped drawing identity establish object pairs; text modes match words or Unicode graphemes. Ambiguous objects, compound content, incompatible appearance, and unknown modes use explicit crossfades. PowerPoint's undocumented matching heuristics and frame parity are not promised."
                   },
                   {
                     "code": "static-output-is-not-playback",
@@ -4006,8 +4066,8 @@
                   "platforms": ["windows", "macos"]
                 },
                 "evidenceIds": [
-                  "slide-transition-morph-rendering-policy",
-                  "slide-transition-morph-parser-fallback"
+                  "slide-transition-morph-viewer-runtime",
+                  "slide-transition-morph-parser-modes"
                 ]
               },
               "verify": {
@@ -4032,6 +4092,169 @@
                   "slide-transition-morph-ooxml-roundtrip",
                   "slide-transition-morph-powerpoint-playback"
                 ]
+              }
+            }
+          },
+          {
+            "feature": "slide-transition",
+            "subset": "morph-rendering",
+            "status": "partial",
+            "summary": "Play by-object, by-word, and by-char Morph in the Web Viewer; static export and PowerPoint playback certification remain separate.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "bounded-web-morph",
+                "description": "Matched objects and nested groups interpolate geometry; word/character modes move matching text units. Duplicate names stay unmatched, charts/tables/media and incompatible visuals crossfade, and unknown modes fade. Undocumented PowerPoint correspondence heuristics are not reproduced."
+              },
+              {
+                "code": "static-output-is-not-playback",
+                "description": "PDF, PNG, and static previews show slide states, not animation. Web playback follows animation scope and reduced-motion policy; browser evidence is not Office frame-parity certification."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-transition-morph-viewer-runtime",
+                "kind": "behavior",
+                "claim": "Renderer regressions exercise object/group transforms, text modes, appearance changes, current animation pose, completion clicks, delayed auto-advance, cancellation, and lazy plugin loading. Source-generated PPTX reaches all three Morph modes through both parser engines."
+              },
+              {
+                "id": "slide-transition-morph-parser-modes",
+                "kind": "behavior",
+                "claim": "Both parser engines select supported p159 Morph choices and preserve drawing names, mode, and duration; unsupported extension choices still select their supported fallback."
+              }
+            ],
+            "recommendation": {
+              "action": "run-visual-verification",
+              "operations": [],
+              "note": "Review playback in the Web Viewer with animation scope enabled. Use PowerPoint for Office fidelity approval and use static exports only to compare slide states."
+            },
+            "axes": null
+          },
+          {
+            "feature": "slide-transition",
+            "subset": "p14-authoring",
+            "status": "partial",
+            "summary": "Create, replace, inspect and clear the published P14 transition subset. Web playback enables selected source profiles with explicit variant limits and fallback behavior; Office certification remains pending.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "published-p14-types-only",
+                "description": "Query set-slide-transition for current kinds and parameters. P14 support does not admit arbitrary extension XML."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "slide-transition-p14-roundtrip",
+                "kind": "behavior",
+                "claim": "Independent C0 fixtures and writer tests cover source/fallback timing, URI identity, pure-carrier replacement and mixed-payload refusal."
+              },
+              {
+                "id": "slide-transition-p14-fallback-consumers",
+                "kind": "behavior",
+                "claim": "Generated P14 carriers retain actual fallback facts through both parser engines and core; renderer consumer tests select enabled source profiles and preserve unsupported fallback behavior."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["set-slide-transition"],
+              "note": "Query the schema, dry-run and inspect each branch. Review enabled Web profiles and fallback limits separately, and verify Office fidelity in PowerPoint."
+            },
+            "axes": {
+              "create": {
+                "status": "supported",
+                "summary": "Author published P14 kinds with finite keywords, booleans and full UInt32 spoke counts, explicit parameter values and coarse speed in both MCE branches, and a basic fade fallback.",
+                "limits": [
+                  {
+                    "code": "published-p14-types-only",
+                    "description": "Only P14 kinds in set-slide-transition are authorable. Whole-transition replacement does not merge unmodeled content; mixed MCE payloads are rejected."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2010",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["patch-op:set-slide-transition", "slide-transition-p14-roundtrip"]
+              },
+              "edit": {
+                "status": "supported",
+                "summary": "Replace or clear pure transition carriers across basic, Morph and published P14 kinds; reject mixed payloads without mutation.",
+                "limits": [
+                  {
+                    "code": "published-p14-types-only",
+                    "description": "Only P14 kinds in set-slide-transition are authorable. Whole-transition replacement does not merge unmodeled content; mixed MCE payloads are rejected."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2010",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["slide-transition-p14-roundtrip"]
+              },
+              "inspect": {
+                "status": "supported",
+                "summary": "Read published P14 source identity, raw and normalized parameters with explicit/implied/unspecified/invalid provenance, precise lexical duration, branch-local timing and actual fallback; unknown semantics remain preserve-only with diagnostics.",
+                "limits": [
+                  {
+                    "code": "published-p14-types-only",
+                    "description": "Only P14 kinds in set-slide-transition are authorable. Whole-transition replacement does not merge unmodeled content; mixed MCE payloads are rejected."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2010",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["slide-transition-p14-roundtrip"]
+              },
+              "preserve": {
+                "status": "supported",
+                "summary": "Preserve untouched parts and foreign or nested same-name XML when replacing a direct transition.",
+                "limits": [
+                  {
+                    "code": "published-p14-types-only",
+                    "description": "Only P14 kinds in set-slide-transition are authorable. Whole-transition replacement does not merge unmodeled content; mixed MCE payloads are rejected."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2010",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["slide-transition-p14-roundtrip"]
+              },
+              "render": {
+                "status": "partial",
+                "summary": "Web playback enables flash, reveal, flip, prism, doors, window, pan and wheel-reverse source profiles with branch-local timing. Other P14 kinds retain MC-selected fallback playback. PDF and PNG remain static.",
+                "limits": [
+                  {
+                    "code": "p14-playback-subset",
+                    "description": "Prism requires isContent=false and isInverted=false; wheel-reverse supports 1 through 16 spokes. Unsupported variants or unavailable scene capabilities use the usable basic fallback or fade while retaining enabled source timing. Playback obeys animation and reduced-motion policy; Web effects are approximations, not Office pixel-parity certification."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2010",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["slide-transition-p14-fallback-consumers"]
+              },
+              "verify": {
+                "status": "inconclusive",
+                "summary": "Independent schema and third-party XML evidence support engineering validation. Selected macOS playback observations are recorded separately; complete Office clean-open, resave and platform certification remains pending.",
+                "limits": [
+                  {
+                    "code": "p14-office-evidence-pending",
+                    "description": "No P14 type or parameter combination is certified for Office playback by this implementation."
+                  }
+                ],
+                "officeTarget": {
+                  "application": "powerpoint",
+                  "minimumVersion": "2010",
+                  "platforms": ["windows", "macos"]
+                },
+                "evidenceIds": ["slide-transition-p14-roundtrip"]
               }
             }
           },
@@ -4088,41 +4311,6 @@
                 "feature": "slide-transition",
                 "subset": "extended-existing-effects"
               }
-            },
-            "axes": null
-          },
-          {
-            "feature": "slide-transition",
-            "subset": "morph-rendering",
-            "status": "unsupported",
-            "summary": "Animate or emulate PowerPoint Morph in the xdoc Viewer, PDF, PNG, or static preview renderers.",
-            "operations": [],
-            "limits": [
-              {
-                "code": "no-in-house-morph-renderer",
-                "description": "Repository renderers expose static slide states and do not implement object interpolation, word/character Morph, or PowerPoint's matching heuristics."
-              },
-              {
-                "code": "mce-fallback-only",
-                "description": "Both parser engines select the authored fade fallback when they encounter p159:morph. The Viewer may therefore show a fade instead of silently dropping the transition; PDF and PNG output remain static."
-              }
-            ],
-            "evidence": [
-              {
-                "id": "slide-transition-morph-rendering-policy",
-                "kind": "policy",
-                "claim": "Morph rendering is explicitly excluded from the MVP; static preview output cannot be used as playback evidence."
-              },
-              {
-                "id": "slide-transition-morph-parser-fallback",
-                "kind": "behavior",
-                "claim": "Inline MCE regressions in both parser engines prove that an unsupported Morph Choice no longer masks its supported fade Fallback."
-              }
-            ],
-            "recommendation": {
-              "action": "do-not-attempt",
-              "operations": [],
-              "note": "Use Microsoft PowerPoint to review playback; use xdoc preview only to compare the static source and destination slide states."
             },
             "axes": null
           },
@@ -4754,7 +4942,6 @@
             "model-3d/create-edit",
             "slide-animation/complex-create-edit",
             "slide-transition/extended-create-edit",
-            "slide-transition/morph-rendering",
             "smartart/create-edit",
             "vba-project/code-editing"
           ]
@@ -6137,9 +6324,14 @@
           }
         },
         "visual-audit": {
-          "usage": "xdoc pptx visual-audit --candidate new.pptx [--reference approved.pptx] --output-dir evidence [--slides 1,3-5] [--dpi 144] [--channel-threshold 26] --json",
+          "usage": "xdoc pptx visual-audit --candidate new.pptx [--visual-mode regression|create] [--reference approved.pptx] --output-dir evidence [--slides 1,3-5] [--dpi 144] [--channel-threshold 26] --json",
           "outputKind": "asset-dir",
           "inputs": ["required candidate PPTX", "optional approved or pre-change reference PPTX"],
+          "visualModes": {
+            "default": "regression",
+            "values": ["regression", "create"],
+            "create": "Explicit complete-candidate checks; rejects --reference and --slides. candidate-checks is not regression equivalence or visual intent acceptance; the workflow must review these exact PNGs and its content contract before delivery."
+          },
           "outputs": [
             "manifest.json using pptx-visual-evidence/v1",
             "exact rendered PDF artifacts",
@@ -6269,6 +6461,12 @@
               "style": "flag"
             },
             {
+              "name": "visual-mode",
+              "type": "string",
+              "description": "Visual-audit policy: regression (default) or create (complete new candidate, no reference)",
+              "required": false
+            },
+            {
               "name": "json",
               "type": "bool",
               "description": "Emit the selected action's documented machine-readable result on stdout",
@@ -6324,6 +6522,9 @@
               "overwrite": {
                 "type": "boolean",
                 "default": false
+              },
+              "visual-mode": {
+                "type": "string"
               },
               "json": {
                 "type": "boolean",
@@ -8050,7 +8251,7 @@
             "pptx-replace-chart-text/v1 JSON report",
             "human summary"
           ],
-          "strategy": "Open the source PPTX as an OPC package and replace chart visible text nodes in ppt/charts/*.xml. A selector bound to a generated classic Chart or ChartEx title with no existing tx child may materialize the dialect-appropriate minimal title text structure; a title with any existing tx child is preserve-only and does not enter generated-title inventory. All other structural changes remain blocked. The command does not sync or rewrite embedded workbook cells.",
+          "strategy": "Open the source PPTX as an OPC package and replace chart visible text nodes in OPC-declared Chart/ChartEx parts. A selector bound to a generated classic Chart or ChartEx title with no existing tx child may materialize the dialect-appropriate minimal title text structure; a title with any existing tx child is preserve-only and does not enter generated-title inventory. All other structural changes remain blocked. The command does not sync or rewrite embedded workbook cells.",
           "requiredFlag": "--visible-cache-only",
           "replacementUnit": {
             "schemaVersion": "pptx-chart-text-replacements/v1",
@@ -8083,7 +8284,7 @@
             "chart XML textless signature unchanged except guarded generated-title text materialization",
             "generated title non-text structure signature unchanged",
             "formatCode values unchanged",
-            "changed parts limited to ppt/charts/*.xml"
+            "changed parts limited to OPC-declared Chart/ChartEx parts"
           ],
           "nonGoals": [
             "external workbook path changes",
@@ -8139,7 +8340,7 @@
               "multiple role matches without index",
               "generated title selector missing sourceState/chartDialect/structureSignature",
               "title already contains a tx child",
-              "part outside ppt/charts/*.xml",
+              "part outside OPC-declared Chart/ChartEx parts",
               "formatCode or XML structure drift"
             ],
             "followUpGate": "After applying, run i18n-scan candidate mode and i18n-style-diff. embeddedWorkbook findings remain review signals; this helper intentionally leaves workbook data untouched.",
@@ -19659,11 +19860,6 @@
         "additionalProperties": false,
         "required": ["schemaVersion", "ops"],
         "$defs": {
-          "nonNegativeInteger": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Integer value greater than or equal to zero."
-          },
           "length": {
             "type": "string",
             "pattern": "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)$",
@@ -20092,7 +20288,10 @@
                       "disappear",
                       "fade-out",
                       "wipe-out",
-                      "fly-out"
+                      "fly-out",
+                      "grow-shrink",
+                      "spin",
+                      "motion-path"
                     ],
                     "strict": true
                   },
@@ -20103,7 +20302,7 @@
                   },
                   "phase": {
                     "type": "string",
-                    "enum": ["entrance", "exit"],
+                    "enum": ["entrance", "exit", "emphasis", "path"],
                     "strict": true
                   },
                   "trigger": {
@@ -20133,6 +20332,18 @@
                   },
                   "order": {
                     "type": "integer"
+                  },
+                  "scale": {
+                    "$ref": "#/$defs/animationScale"
+                  },
+                  "degrees": {
+                    "type": "number",
+                    "minimum": -3600,
+                    "maximum": 3600,
+                    "description": "Signed relative rotation in degrees, -3600..3600 inclusive; zero is valid. Rounded to 1/60000 degree and written as animRot@by. Positive is clockwise. Explicit effect requires degrees even on update; omit effect to preserve it."
+                  },
+                  "offset": {
+                    "$ref": "#/$defs/animationOffset"
                   }
                 },
                 "oneOf": [
@@ -20141,6 +20352,11 @@
                   },
                   {
                     "required": ["shape"]
+                  }
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/animationEffectParameters"
                   }
                 ]
               },
@@ -20165,7 +20381,10 @@
                       "disappear",
                       "fade-out",
                       "wipe-out",
-                      "fly-out"
+                      "fly-out",
+                      "grow-shrink",
+                      "spin",
+                      "motion-path"
                     ],
                     "strict": true
                   },
@@ -20176,7 +20395,7 @@
                   },
                   "phase": {
                     "type": "string",
-                    "enum": ["entrance", "exit"],
+                    "enum": ["entrance", "exit", "emphasis", "path"],
                     "strict": true
                   },
                   "trigger": {
@@ -20224,6 +20443,18 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "scale": {
+                    "$ref": "#/$defs/animationScale"
+                  },
+                  "degrees": {
+                    "type": "number",
+                    "minimum": -3600,
+                    "maximum": 3600,
+                    "description": "Signed relative rotation in degrees, -3600..3600 inclusive; zero is valid. Rounded to 1/60000 degree and written as animRot@by. Positive is clockwise. Explicit effect requires degrees even on update; omit effect to preserve it."
+                  },
+                  "offset": {
+                    "$ref": "#/$defs/animationOffset"
                   }
                 },
                 "anyOf": [
@@ -20253,6 +20484,11 @@
                   },
                   {
                     "required": ["easing"]
+                  }
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/animationEffectParameters"
                   }
                 ]
               }
@@ -20470,10 +20706,29 @@
               "zoom",
               "dissolve",
               "random",
-              "morph"
+              "morph",
+              "honeycomb",
+              "flash",
+              "vortex",
+              "pan",
+              "switch",
+              "flip",
+              "ferris",
+              "gallery",
+              "conveyor",
+              "doors",
+              "window",
+              "warp",
+              "ripple",
+              "glitter",
+              "shred",
+              "flythrough",
+              "reveal",
+              "prism",
+              "wheel-reverse"
             ],
             "strict": true,
-            "description": "Canonical slide transition kind. morph writes an Office 2016+ p159:morph inside mc:AlternateContent with a p:fade fallback; legacy p:zoom remains a distinct transition kind."
+            "description": "Canonical slide transition kind. Morph and the published P14 effects use mc:AlternateContent with a basic fade fallback. Honeycomb/flash accept timing only; other parameters are constrained by kind. Explicit speed wins; duration-only extension transitions derive coarse speed (<=500ms fast, >=1000ms slow, otherwise medium). Source and fallback share coarse speed and advance timing; only source carries precise duration. Legacy p:zoom remains distinct."
           },
           "morphMode": {
             "type": "string",
@@ -25496,8 +25751,23 @@
               },
               {
                 "$ref": "#/$defs/transitionInOut"
+              },
+              {
+                "$ref": "#/$defs/transitionCornerCenterDirection"
               }
             ]
+          },
+          "transitionAdvanceAfter": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Automatic slide advance in milliseconds. The PowerPoint transition advTm constraint requires 0..2147483647 inclusive."
+          },
+          "transitionDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Authored precise duration in integer milliseconds, bounded by the typed Int32 model. Inspection accepts the broader OOXML universal-time lexical domain, including fractional units, without truncating."
           },
           "freeformPath": {
             "type": "object",
@@ -25617,6 +25887,289 @@
                 }
               }
             ]
+          },
+          "animationScale": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "y"],
+            "description": "Relative x/y scale factors, each 0.00001..1000; serialized in 1/100000 units. Explicit effect plus scale replaces the amplitude; omitting effect preserves it. No from/to, text build, or indefinite emphasis repeat.",
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 1000
+              },
+              "y": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 1000
+              }
+            }
+          },
+          "animationEffectParameters": {
+            "description": "Shared effect/phase/amplitude constraints. Create and update independently own required fields and nullability.",
+            "allOf": [
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "enum": ["grow-shrink", "spin"],
+                      "strict": true
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "phase": {
+                      "const": "emphasis"
+                    },
+                    "repeat": {
+                      "not": {
+                        "const": "indefinite"
+                      }
+                    },
+                    "target": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["paragraph"]
+                          },
+                          {
+                            "required": ["level"]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["direction"]
+                      },
+                      {
+                        "required": ["build"]
+                      }
+                    ]
+                  }
+                },
+                "else": {
+                  "not": {
+                    "properties": {
+                      "phase": {
+                        "const": "emphasis"
+                      }
+                    },
+                    "required": ["phase"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "anyOf": [
+                    {
+                      "required": ["direction"]
+                    },
+                    {
+                      "required": ["phase"]
+                    }
+                  ]
+                },
+                "then": {
+                  "required": ["effect"]
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "grow-shrink"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["scale"]
+                },
+                "else": {
+                  "not": {
+                    "required": ["scale"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "spin"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["degrees"]
+                },
+                "else": {
+                  "not": {
+                    "required": ["degrees"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "motion-path"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "phase": {
+                      "const": "path"
+                    },
+                    "repeat": {
+                      "not": {
+                        "const": "indefinite"
+                      }
+                    },
+                    "target": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["paragraph"]
+                          },
+                          {
+                            "required": ["level"]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["direction"]
+                      },
+                      {
+                        "required": ["build"]
+                      }
+                    ]
+                  }
+                },
+                "else": {
+                  "not": {
+                    "properties": {
+                      "phase": {
+                        "const": "path"
+                      }
+                    },
+                    "required": ["phase"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "motion-path"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["offset"]
+                },
+                "else": {
+                  "not": {
+                    "required": ["offset"]
+                  }
+                }
+              }
+            ]
+          },
+          "animationOffset": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "y"],
+            "description": "Straight-line displacement from the authored layout position in slide-width/height fractions, each -1000..1000; rounded to six decimals. Positive x is right, positive y is down; zero is valid and off-slide motion is allowed. Uses additive base: consecutive paths each start from the layout position, without accumulating earlier motion. Holds the endpoint unless autoReverse returns it. Whole shape and finite repeat only; no arbitrary path or autoRotate. Explicit effect plus offset replaces the displacement; omit effect to preserve it.",
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": -1000,
+                "maximum": 1000
+              },
+              "y": {
+                "type": "number",
+                "minimum": -1000,
+                "maximum": 1000
+              }
+            }
+          },
+          "transitionSideDirection": {
+            "type": "string",
+            "enum": ["left", "up", "right", "down"],
+            "strict": true,
+            "default": "left",
+            "description": "Four-side direction; creation default left follows CT_SideDirectionTransition and the P14 prism/glitter XSD defaults."
+          },
+          "transitionLeftRight": {
+            "type": "string",
+            "enum": ["left", "right"],
+            "strict": true,
+            "default": "left",
+            "description": "Creation default left. CT_LeftRightDirectionTransition has no XSD default, so a missing source dir remains unspecified; CT_RevealTransition instead implies left. Writers explicitly emit the creation value."
+          },
+          "transitionCornerCenterDirection": {
+            "type": "string",
+            "enum": ["left-up", "right-up", "left-down", "right-down", "center"],
+            "strict": true,
+            "default": "center",
+            "description": "Ripple origin; the P14 XSD union accepts the four corners or center and defaults to center."
+          },
+          "transitionInOutIn": {
+            "type": "string",
+            "enum": ["in", "out"],
+            "strict": true,
+            "default": "in",
+            "description": "P14 flythrough/shred default to in. Warp uses transitionInOut and defaults to out."
+          },
+          "transitionGlitterPattern": {
+            "type": "string",
+            "enum": ["diamond", "hexagon"],
+            "strict": true,
+            "default": "diamond",
+            "description": "Glitter pattern; creation default follows the P14 CT_GlitterTransition XSD."
+          },
+          "transitionShredPattern": {
+            "type": "string",
+            "enum": ["strip", "rectangle"],
+            "strict": true,
+            "default": "strip",
+            "description": "Shred pattern; creation default follows the P14 CT_ShredTransition XSD."
+          },
+          "transitionBoolean": {
+            "type": "boolean",
+            "default": false,
+            "description": "P14 prism isContent/isInverted, flythrough hasBounce and reveal throughBlack default to false in the XSD; writers explicitly emit the value."
+          },
+          "transitionPatternChoice": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/transitionGlitterPattern"
+              },
+              {
+                "$ref": "#/$defs/transitionShredPattern"
+              }
+            ]
+          },
+          "transitionSpokes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "default": 4,
+            "description": "WheelReverse spokes use the full UInt32 domain and XSD default 4. Structural validity does not certify Office playback of every value."
           }
         },
         "properties": {
@@ -28833,6 +29386,7 @@
                       },
                       "required": ["op", "slide"],
                       "additionalProperties": false,
+                      "description": "Whole-shape emphasis uses explicit grow-shrink scale x/y in [0.00001,1000] or spin degrees in [-3600,3600], with finite repeat. Emphasis defaults to on-click, duration=500ms and delay=0. Explicit effect replaces its full parameters; omit effect to preserve amplitude. Only timing modifiers accept null on updates. New fly uses fixed two-keyframe ppt_x/ppt_y behaviors; direction identifies the entrance origin or exit destination edge. Legacy filter fly stays editable without rewriting untouched effects. Unknown timing stays preserve-only.",
                       "allOf": [
                         {
                           "if": {
@@ -28943,7 +29497,7 @@
                           "const": "set-slide-transition"
                         },
                         "advanceAfter": {
-                          "$ref": "#/$defs/nonNegativeInteger"
+                          "$ref": "#/$defs/transitionAdvanceAfter"
                         },
                         "advanceOnClick": {
                           "type": "boolean"
@@ -28955,7 +29509,7 @@
                           "$ref": "#/$defs/transitionDirectionChoice"
                         },
                         "duration": {
-                          "$ref": "#/$defs/nonNegativeInteger"
+                          "$ref": "#/$defs/transitionDuration"
                         },
                         "morphMode": {
                           "$ref": "#/$defs/morphMode"
@@ -28971,10 +29525,25 @@
                           "$ref": "#/$defs/transitionSpeed"
                         },
                         "throughBlack": {
-                          "type": "boolean"
+                          "$ref": "#/$defs/transitionBoolean"
                         },
                         "kind": {
                           "$ref": "#/$defs/transitionType"
+                        },
+                        "pattern": {
+                          "$ref": "#/$defs/transitionPatternChoice"
+                        },
+                        "hasBounce": {
+                          "$ref": "#/$defs/transitionBoolean"
+                        },
+                        "isContent": {
+                          "$ref": "#/$defs/transitionBoolean"
+                        },
+                        "isInverted": {
+                          "$ref": "#/$defs/transitionBoolean"
+                        },
+                        "spokes": {
+                          "$ref": "#/$defs/transitionSpokes"
                         }
                       },
                       "required": ["op", "slide"],
@@ -29018,6 +29587,21 @@
                                 },
                                 {
                                   "required": ["duration"]
+                                },
+                                {
+                                  "required": ["pattern"]
+                                },
+                                {
+                                  "required": ["hasBounce"]
+                                },
+                                {
+                                  "required": ["isContent"]
+                                },
+                                {
+                                  "required": ["isInverted"]
+                                },
+                                {
+                                  "required": ["spokes"]
                                 }
                               ]
                             }
@@ -29030,7 +29614,7 @@
                           "if": {
                             "properties": {
                               "kind": {
-                                "enum": ["push", "wipe", "cover"],
+                                "enum": ["push", "wipe", "vortex", "pan", "glitter", "prism"],
                                 "strict": true
                               }
                             }
@@ -29038,7 +29622,7 @@
                           "then": {
                             "properties": {
                               "dir": {
-                                "$ref": "#/$defs/transitionDirection"
+                                "$ref": "#/$defs/transitionSideDirection"
                               }
                             }
                           },
@@ -29046,7 +29630,7 @@
                             "if": {
                               "properties": {
                                 "kind": {
-                                  "enum": ["split", "zoom"],
+                                  "enum": ["cover"],
                                   "strict": true
                                 }
                               }
@@ -29054,13 +29638,88 @@
                             "then": {
                               "properties": {
                                 "dir": {
-                                  "$ref": "#/$defs/transitionInOut"
+                                  "$ref": "#/$defs/transitionDirection"
                                 }
                               }
                             },
                             "else": {
-                              "not": {
-                                "required": ["dir"]
+                              "if": {
+                                "properties": {
+                                  "kind": {
+                                    "enum": [
+                                      "switch",
+                                      "flip",
+                                      "ferris",
+                                      "gallery",
+                                      "conveyor",
+                                      "reveal"
+                                    ],
+                                    "strict": true
+                                  }
+                                }
+                              },
+                              "then": {
+                                "properties": {
+                                  "dir": {
+                                    "$ref": "#/$defs/transitionLeftRight"
+                                  }
+                                }
+                              },
+                              "else": {
+                                "if": {
+                                  "properties": {
+                                    "kind": {
+                                      "enum": ["split", "zoom", "warp"],
+                                      "strict": true
+                                    }
+                                  }
+                                },
+                                "then": {
+                                  "properties": {
+                                    "dir": {
+                                      "$ref": "#/$defs/transitionInOut"
+                                    }
+                                  }
+                                },
+                                "else": {
+                                  "if": {
+                                    "properties": {
+                                      "kind": {
+                                        "enum": ["shred", "flythrough"],
+                                        "strict": true
+                                      }
+                                    }
+                                  },
+                                  "then": {
+                                    "properties": {
+                                      "dir": {
+                                        "$ref": "#/$defs/transitionInOutIn"
+                                      }
+                                    }
+                                  },
+                                  "else": {
+                                    "if": {
+                                      "properties": {
+                                        "kind": {
+                                          "enum": ["ripple"],
+                                          "strict": true
+                                        }
+                                      }
+                                    },
+                                    "then": {
+                                      "properties": {
+                                        "dir": {
+                                          "$ref": "#/$defs/transitionCornerCenterDirection"
+                                        }
+                                      }
+                                    },
+                                    "else": {
+                                      "not": {
+                                        "required": ["dir"]
+                                      }
+                                    }
+                                  }
+                                }
                               }
                             }
                           }
@@ -29069,25 +29728,8 @@
                           "if": {
                             "properties": {
                               "kind": {
-                                "enum": ["push", "wipe"],
+                                "enum": ["split", "doors", "window"],
                                 "strict": true
-                              }
-                            }
-                          },
-                          "then": {
-                            "properties": {
-                              "dir": {
-                                "enum": ["left", "up", "right", "down"],
-                                "strict": true
-                              }
-                            }
-                          }
-                        },
-                        {
-                          "if": {
-                            "properties": {
-                              "kind": {
-                                "const": "split"
                               }
                             }
                           },
@@ -29101,7 +29743,7 @@
                           "if": {
                             "properties": {
                               "kind": {
-                                "enum": ["fade", "cut"],
+                                "enum": ["fade", "cut", "reveal"],
                                 "strict": true
                               }
                             }
@@ -29123,6 +29765,101 @@
                           "else": {
                             "not": {
                               "required": ["morphMode"]
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "enum": ["glitter"],
+                                "strict": true
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "pattern": {
+                                "$ref": "#/$defs/transitionGlitterPattern"
+                              }
+                            }
+                          },
+                          "else": {
+                            "if": {
+                              "properties": {
+                                "kind": {
+                                  "enum": ["shred"],
+                                  "strict": true
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "pattern": {
+                                  "$ref": "#/$defs/transitionShredPattern"
+                                }
+                              }
+                            },
+                            "else": {
+                              "not": {
+                                "required": ["pattern"]
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "const": "flythrough"
+                              }
+                            }
+                          },
+                          "else": {
+                            "not": {
+                              "required": ["hasBounce"]
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "const": "prism"
+                              }
+                            }
+                          },
+                          "else": {
+                            "not": {
+                              "required": ["isContent"]
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "const": "prism"
+                              }
+                            }
+                          },
+                          "else": {
+                            "not": {
+                              "required": ["isInverted"]
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "const": "wheel-reverse"
+                              }
+                            }
+                          },
+                          "else": {
+                            "not": {
+                              "required": ["spokes"]
                             }
                           }
                         }
@@ -32071,10 +32808,11 @@
             ],
             "description": "'standard' is 4:3 and 'wide' is 16:9; explicit w/h follow the length rules."
           },
-          "nonNegativeInteger": {
+          "transitionAdvanceAfter": {
             "type": "integer",
             "minimum": 0,
-            "description": "Integer value greater than or equal to zero."
+            "maximum": 2147483647,
+            "description": "Automatic slide advance in milliseconds. The PowerPoint transition advTm constraint requires 0..2147483647 inclusive."
           },
           "transitionDirectionChoice": {
             "anyOf": [
@@ -32083,8 +32821,17 @@
               },
               {
                 "$ref": "#/$defs/transitionInOut"
+              },
+              {
+                "$ref": "#/$defs/transitionCornerCenterDirection"
               }
             ]
+          },
+          "transitionDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Authored precise duration in integer milliseconds, bounded by the typed Int32 model. Inspection accepts the broader OOXML universal-time lexical domain, including fractional units, without truncating."
           },
           "morphMode": {
             "type": "string",
@@ -32104,6 +32851,11 @@
             "strict": true,
             "default": "fast"
           },
+          "transitionBoolean": {
+            "type": "boolean",
+            "default": false,
+            "description": "P14 prism isContent/isInverted, flythrough hasBounce and reveal throughBlack default to false in the XSD; writers explicitly emit the value."
+          },
           "transitionType": {
             "type": "string",
             "enum": [
@@ -32117,10 +32869,53 @@
               "zoom",
               "dissolve",
               "random",
-              "morph"
+              "morph",
+              "honeycomb",
+              "flash",
+              "vortex",
+              "pan",
+              "switch",
+              "flip",
+              "ferris",
+              "gallery",
+              "conveyor",
+              "doors",
+              "window",
+              "warp",
+              "ripple",
+              "glitter",
+              "shred",
+              "flythrough",
+              "reveal",
+              "prism",
+              "wheel-reverse"
             ],
             "strict": true,
-            "description": "Canonical slide transition kind. morph writes an Office 2016+ p159:morph inside mc:AlternateContent with a p:fade fallback; legacy p:zoom remains a distinct transition kind."
+            "description": "Canonical slide transition kind. Morph and the published P14 effects use mc:AlternateContent with a basic fade fallback. Honeycomb/flash accept timing only; other parameters are constrained by kind. Explicit speed wins; duration-only extension transitions derive coarse speed (<=500ms fast, >=1000ms slow, otherwise medium). Source and fallback share coarse speed and advance timing; only source carries precise duration. Legacy p:zoom remains distinct."
+          },
+          "transitionPatternChoice": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/transitionGlitterPattern"
+              },
+              {
+                "$ref": "#/$defs/transitionShredPattern"
+              }
+            ]
+          },
+          "transitionSpokes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "default": 4,
+            "description": "WheelReverse spokes use the full UInt32 domain and XSD default 4. Structural validity does not certify Office playback of every value."
+          },
+          "transitionSideDirection": {
+            "type": "string",
+            "enum": ["left", "up", "right", "down"],
+            "strict": true,
+            "default": "left",
+            "description": "Four-side direction; creation default left follows CT_SideDirectionTransition and the P14 prism/glitter XSD defaults."
           },
           "transitionDirection": {
             "type": "string",
@@ -32137,11 +32932,46 @@
             "strict": true,
             "default": "left"
           },
+          "transitionLeftRight": {
+            "type": "string",
+            "enum": ["left", "right"],
+            "strict": true,
+            "default": "left",
+            "description": "Creation default left. CT_LeftRightDirectionTransition has no XSD default, so a missing source dir remains unspecified; CT_RevealTransition instead implies left. Writers explicitly emit the creation value."
+          },
           "transitionInOut": {
             "type": "string",
             "enum": ["in", "out"],
             "strict": true,
             "default": "out"
+          },
+          "transitionInOutIn": {
+            "type": "string",
+            "enum": ["in", "out"],
+            "strict": true,
+            "default": "in",
+            "description": "P14 flythrough/shred default to in. Warp uses transitionInOut and defaults to out."
+          },
+          "transitionCornerCenterDirection": {
+            "type": "string",
+            "enum": ["left-up", "right-up", "left-down", "right-down", "center"],
+            "strict": true,
+            "default": "center",
+            "description": "Ripple origin; the P14 XSD union accepts the four corners or center and defaults to center."
+          },
+          "transitionGlitterPattern": {
+            "type": "string",
+            "enum": ["diamond", "hexagon"],
+            "strict": true,
+            "default": "diamond",
+            "description": "Glitter pattern; creation default follows the P14 CT_GlitterTransition XSD."
+          },
+          "transitionShredPattern": {
+            "type": "string",
+            "enum": ["strip", "rectangle"],
+            "strict": true,
+            "default": "strip",
+            "description": "Shred pattern; creation default follows the P14 CT_ShredTransition XSD."
           },
           "tableRangeBorders": {
             "type": "array",
@@ -33752,7 +34582,10 @@
                       "disappear",
                       "fade-out",
                       "wipe-out",
-                      "fly-out"
+                      "fly-out",
+                      "grow-shrink",
+                      "spin",
+                      "motion-path"
                     ],
                     "strict": true
                   },
@@ -33763,7 +34596,7 @@
                   },
                   "phase": {
                     "type": "string",
-                    "enum": ["entrance", "exit"],
+                    "enum": ["entrance", "exit", "emphasis", "path"],
                     "strict": true
                   },
                   "trigger": {
@@ -33793,6 +34626,18 @@
                   },
                   "order": {
                     "type": "integer"
+                  },
+                  "scale": {
+                    "$ref": "#/$defs/animationScale"
+                  },
+                  "degrees": {
+                    "type": "number",
+                    "minimum": -3600,
+                    "maximum": 3600,
+                    "description": "Signed relative rotation in degrees, -3600..3600 inclusive; zero is valid. Rounded to 1/60000 degree and written as animRot@by. Positive is clockwise. Explicit effect requires degrees even on update; omit effect to preserve it."
+                  },
+                  "offset": {
+                    "$ref": "#/$defs/animationOffset"
                   }
                 },
                 "oneOf": [
@@ -33801,6 +34646,11 @@
                   },
                   {
                     "required": ["shape"]
+                  }
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/animationEffectParameters"
                   }
                 ]
               },
@@ -33825,7 +34675,10 @@
                       "disappear",
                       "fade-out",
                       "wipe-out",
-                      "fly-out"
+                      "fly-out",
+                      "grow-shrink",
+                      "spin",
+                      "motion-path"
                     ],
                     "strict": true
                   },
@@ -33836,7 +34689,7 @@
                   },
                   "phase": {
                     "type": "string",
-                    "enum": ["entrance", "exit"],
+                    "enum": ["entrance", "exit", "emphasis", "path"],
                     "strict": true
                   },
                   "trigger": {
@@ -33884,6 +34737,18 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "scale": {
+                    "$ref": "#/$defs/animationScale"
+                  },
+                  "degrees": {
+                    "type": "number",
+                    "minimum": -3600,
+                    "maximum": 3600,
+                    "description": "Signed relative rotation in degrees, -3600..3600 inclusive; zero is valid. Rounded to 1/60000 degree and written as animRot@by. Positive is clockwise. Explicit effect requires degrees even on update; omit effect to preserve it."
+                  },
+                  "offset": {
+                    "$ref": "#/$defs/animationOffset"
                   }
                 },
                 "anyOf": [
@@ -33913,6 +34778,11 @@
                   },
                   {
                     "required": ["easing"]
+                  }
+                ],
+                "allOf": [
+                  {
+                    "$ref": "#/$defs/animationEffectParameters"
                   }
                 ]
               }
@@ -34941,6 +35811,225 @@
               },
               {
                 "required": ["decelerate"]
+              }
+            ]
+          },
+          "animationScale": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "y"],
+            "description": "Relative x/y scale factors, each 0.00001..1000; serialized in 1/100000 units. Explicit effect plus scale replaces the amplitude; omitting effect preserves it. No from/to, text build, or indefinite emphasis repeat.",
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 1000
+              },
+              "y": {
+                "type": "number",
+                "minimum": 1e-5,
+                "maximum": 1000
+              }
+            }
+          },
+          "animationOffset": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["x", "y"],
+            "description": "Straight-line displacement from the authored layout position in slide-width/height fractions, each -1000..1000; rounded to six decimals. Positive x is right, positive y is down; zero is valid and off-slide motion is allowed. Uses additive base: consecutive paths each start from the layout position, without accumulating earlier motion. Holds the endpoint unless autoReverse returns it. Whole shape and finite repeat only; no arbitrary path or autoRotate. Explicit effect plus offset replaces the displacement; omit effect to preserve it.",
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": -1000,
+                "maximum": 1000
+              },
+              "y": {
+                "type": "number",
+                "minimum": -1000,
+                "maximum": 1000
+              }
+            }
+          },
+          "animationEffectParameters": {
+            "description": "Shared effect/phase/amplitude constraints. Create and update independently own required fields and nullability.",
+            "allOf": [
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "enum": ["grow-shrink", "spin"],
+                      "strict": true
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "phase": {
+                      "const": "emphasis"
+                    },
+                    "repeat": {
+                      "not": {
+                        "const": "indefinite"
+                      }
+                    },
+                    "target": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["paragraph"]
+                          },
+                          {
+                            "required": ["level"]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["direction"]
+                      },
+                      {
+                        "required": ["build"]
+                      }
+                    ]
+                  }
+                },
+                "else": {
+                  "not": {
+                    "properties": {
+                      "phase": {
+                        "const": "emphasis"
+                      }
+                    },
+                    "required": ["phase"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "anyOf": [
+                    {
+                      "required": ["direction"]
+                    },
+                    {
+                      "required": ["phase"]
+                    }
+                  ]
+                },
+                "then": {
+                  "required": ["effect"]
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "grow-shrink"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["scale"]
+                },
+                "else": {
+                  "not": {
+                    "required": ["scale"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "spin"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["degrees"]
+                },
+                "else": {
+                  "not": {
+                    "required": ["degrees"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "motion-path"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "phase": {
+                      "const": "path"
+                    },
+                    "repeat": {
+                      "not": {
+                        "const": "indefinite"
+                      }
+                    },
+                    "target": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["paragraph"]
+                          },
+                          {
+                            "required": ["level"]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["direction"]
+                      },
+                      {
+                        "required": ["build"]
+                      }
+                    ]
+                  }
+                },
+                "else": {
+                  "not": {
+                    "properties": {
+                      "phase": {
+                        "const": "path"
+                      }
+                    },
+                    "required": ["phase"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "const": "motion-path"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["offset"]
+                },
+                "else": {
+                  "not": {
+                    "required": ["offset"]
+                  }
+                }
               }
             ]
           },
@@ -37354,6 +38443,7 @@
                     },
                     "required": ["op", "slide"],
                     "additionalProperties": false,
+                    "description": "Whole-shape emphasis uses explicit grow-shrink scale x/y in [0.00001,1000] or spin degrees in [-3600,3600], with finite repeat. Emphasis defaults to on-click, duration=500ms and delay=0. Explicit effect replaces its full parameters; omit effect to preserve amplitude. Only timing modifiers accept null on updates. New fly uses fixed two-keyframe ppt_x/ppt_y behaviors; direction identifies the entrance origin or exit destination edge. Legacy filter fly stays editable without rewriting untouched effects. Unknown timing stays preserve-only.",
                     "allOf": [
                       {
                         "if": {
@@ -37464,7 +38554,7 @@
                         "const": "set-slide-transition"
                       },
                       "advanceAfter": {
-                        "$ref": "#/$defs/nonNegativeInteger"
+                        "$ref": "#/$defs/transitionAdvanceAfter"
                       },
                       "advanceOnClick": {
                         "type": "boolean"
@@ -37476,7 +38566,7 @@
                         "$ref": "#/$defs/transitionDirectionChoice"
                       },
                       "duration": {
-                        "$ref": "#/$defs/nonNegativeInteger"
+                        "$ref": "#/$defs/transitionDuration"
                       },
                       "morphMode": {
                         "$ref": "#/$defs/morphMode"
@@ -37492,10 +38582,25 @@
                         "$ref": "#/$defs/transitionSpeed"
                       },
                       "throughBlack": {
-                        "type": "boolean"
+                        "$ref": "#/$defs/transitionBoolean"
                       },
                       "kind": {
                         "$ref": "#/$defs/transitionType"
+                      },
+                      "pattern": {
+                        "$ref": "#/$defs/transitionPatternChoice"
+                      },
+                      "hasBounce": {
+                        "$ref": "#/$defs/transitionBoolean"
+                      },
+                      "isContent": {
+                        "$ref": "#/$defs/transitionBoolean"
+                      },
+                      "isInverted": {
+                        "$ref": "#/$defs/transitionBoolean"
+                      },
+                      "spokes": {
+                        "$ref": "#/$defs/transitionSpokes"
                       }
                     },
                     "required": ["op", "slide"],
@@ -37539,6 +38644,21 @@
                               },
                               {
                                 "required": ["duration"]
+                              },
+                              {
+                                "required": ["pattern"]
+                              },
+                              {
+                                "required": ["hasBounce"]
+                              },
+                              {
+                                "required": ["isContent"]
+                              },
+                              {
+                                "required": ["isInverted"]
+                              },
+                              {
+                                "required": ["spokes"]
                               }
                             ]
                           }
@@ -37551,7 +38671,7 @@
                         "if": {
                           "properties": {
                             "kind": {
-                              "enum": ["push", "wipe", "cover"],
+                              "enum": ["push", "wipe", "vortex", "pan", "glitter", "prism"],
                               "strict": true
                             }
                           }
@@ -37559,7 +38679,7 @@
                         "then": {
                           "properties": {
                             "dir": {
-                              "$ref": "#/$defs/transitionDirection"
+                              "$ref": "#/$defs/transitionSideDirection"
                             }
                           }
                         },
@@ -37567,7 +38687,7 @@
                           "if": {
                             "properties": {
                               "kind": {
-                                "enum": ["split", "zoom"],
+                                "enum": ["cover"],
                                 "strict": true
                               }
                             }
@@ -37575,13 +38695,88 @@
                           "then": {
                             "properties": {
                               "dir": {
-                                "$ref": "#/$defs/transitionInOut"
+                                "$ref": "#/$defs/transitionDirection"
                               }
                             }
                           },
                           "else": {
-                            "not": {
-                              "required": ["dir"]
+                            "if": {
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "switch",
+                                    "flip",
+                                    "ferris",
+                                    "gallery",
+                                    "conveyor",
+                                    "reveal"
+                                  ],
+                                  "strict": true
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "dir": {
+                                  "$ref": "#/$defs/transitionLeftRight"
+                                }
+                              }
+                            },
+                            "else": {
+                              "if": {
+                                "properties": {
+                                  "kind": {
+                                    "enum": ["split", "zoom", "warp"],
+                                    "strict": true
+                                  }
+                                }
+                              },
+                              "then": {
+                                "properties": {
+                                  "dir": {
+                                    "$ref": "#/$defs/transitionInOut"
+                                  }
+                                }
+                              },
+                              "else": {
+                                "if": {
+                                  "properties": {
+                                    "kind": {
+                                      "enum": ["shred", "flythrough"],
+                                      "strict": true
+                                    }
+                                  }
+                                },
+                                "then": {
+                                  "properties": {
+                                    "dir": {
+                                      "$ref": "#/$defs/transitionInOutIn"
+                                    }
+                                  }
+                                },
+                                "else": {
+                                  "if": {
+                                    "properties": {
+                                      "kind": {
+                                        "enum": ["ripple"],
+                                        "strict": true
+                                      }
+                                    }
+                                  },
+                                  "then": {
+                                    "properties": {
+                                      "dir": {
+                                        "$ref": "#/$defs/transitionCornerCenterDirection"
+                                      }
+                                    }
+                                  },
+                                  "else": {
+                                    "not": {
+                                      "required": ["dir"]
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }
@@ -37590,25 +38785,8 @@
                         "if": {
                           "properties": {
                             "kind": {
-                              "enum": ["push", "wipe"],
+                              "enum": ["split", "doors", "window"],
                               "strict": true
-                            }
-                          }
-                        },
-                        "then": {
-                          "properties": {
-                            "dir": {
-                              "enum": ["left", "up", "right", "down"],
-                              "strict": true
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "if": {
-                          "properties": {
-                            "kind": {
-                              "const": "split"
                             }
                           }
                         },
@@ -37622,7 +38800,7 @@
                         "if": {
                           "properties": {
                             "kind": {
-                              "enum": ["fade", "cut"],
+                              "enum": ["fade", "cut", "reveal"],
                               "strict": true
                             }
                           }
@@ -37644,6 +38822,101 @@
                         "else": {
                           "not": {
                             "required": ["morphMode"]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "enum": ["glitter"],
+                              "strict": true
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "pattern": {
+                              "$ref": "#/$defs/transitionGlitterPattern"
+                            }
+                          }
+                        },
+                        "else": {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "enum": ["shred"],
+                                "strict": true
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "pattern": {
+                                "$ref": "#/$defs/transitionShredPattern"
+                              }
+                            }
+                          },
+                          "else": {
+                            "not": {
+                              "required": ["pattern"]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "const": "flythrough"
+                            }
+                          }
+                        },
+                        "else": {
+                          "not": {
+                            "required": ["hasBounce"]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "const": "prism"
+                            }
+                          }
+                        },
+                        "else": {
+                          "not": {
+                            "required": ["isContent"]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "const": "prism"
+                            }
+                          }
+                        },
+                        "else": {
+                          "not": {
+                            "required": ["isInverted"]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "const": "wheel-reverse"
+                            }
+                          }
+                        },
+                        "else": {
+                          "not": {
+                            "required": ["spokes"]
                           }
                         }
                       }
@@ -37853,11 +39126,6 @@
           "required": ["schemaVersion", "ops"],
           "additionalProperties": false,
           "$defs": {
-            "nonNegativeInteger": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Integer value greater than or equal to zero."
-            },
             "length": {
               "type": "string",
               "pattern": "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)$",
@@ -38286,7 +39554,10 @@
                         "disappear",
                         "fade-out",
                         "wipe-out",
-                        "fly-out"
+                        "fly-out",
+                        "grow-shrink",
+                        "spin",
+                        "motion-path"
                       ],
                       "strict": true
                     },
@@ -38297,7 +39568,7 @@
                     },
                     "phase": {
                       "type": "string",
-                      "enum": ["entrance", "exit"],
+                      "enum": ["entrance", "exit", "emphasis", "path"],
                       "strict": true
                     },
                     "trigger": {
@@ -38327,6 +39598,18 @@
                     },
                     "order": {
                       "type": "integer"
+                    },
+                    "scale": {
+                      "$ref": "#/$defs/animationScale"
+                    },
+                    "degrees": {
+                      "type": "number",
+                      "minimum": -3600,
+                      "maximum": 3600,
+                      "description": "Signed relative rotation in degrees, -3600..3600 inclusive; zero is valid. Rounded to 1/60000 degree and written as animRot@by. Positive is clockwise. Explicit effect requires degrees even on update; omit effect to preserve it."
+                    },
+                    "offset": {
+                      "$ref": "#/$defs/animationOffset"
                     }
                   },
                   "oneOf": [
@@ -38335,6 +39618,11 @@
                     },
                     {
                       "required": ["shape"]
+                    }
+                  ],
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/animationEffectParameters"
                     }
                   ]
                 },
@@ -38359,7 +39647,10 @@
                         "disappear",
                         "fade-out",
                         "wipe-out",
-                        "fly-out"
+                        "fly-out",
+                        "grow-shrink",
+                        "spin",
+                        "motion-path"
                       ],
                       "strict": true
                     },
@@ -38370,7 +39661,7 @@
                     },
                     "phase": {
                       "type": "string",
-                      "enum": ["entrance", "exit"],
+                      "enum": ["entrance", "exit", "emphasis", "path"],
                       "strict": true
                     },
                     "trigger": {
@@ -38418,6 +39709,18 @@
                           "type": "null"
                         }
                       ]
+                    },
+                    "scale": {
+                      "$ref": "#/$defs/animationScale"
+                    },
+                    "degrees": {
+                      "type": "number",
+                      "minimum": -3600,
+                      "maximum": 3600,
+                      "description": "Signed relative rotation in degrees, -3600..3600 inclusive; zero is valid. Rounded to 1/60000 degree and written as animRot@by. Positive is clockwise. Explicit effect requires degrees even on update; omit effect to preserve it."
+                    },
+                    "offset": {
+                      "$ref": "#/$defs/animationOffset"
                     }
                   },
                   "anyOf": [
@@ -38447,6 +39750,11 @@
                     },
                     {
                       "required": ["easing"]
+                    }
+                  ],
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/animationEffectParameters"
                     }
                   ]
                 }
@@ -38664,10 +39972,29 @@
                 "zoom",
                 "dissolve",
                 "random",
-                "morph"
+                "morph",
+                "honeycomb",
+                "flash",
+                "vortex",
+                "pan",
+                "switch",
+                "flip",
+                "ferris",
+                "gallery",
+                "conveyor",
+                "doors",
+                "window",
+                "warp",
+                "ripple",
+                "glitter",
+                "shred",
+                "flythrough",
+                "reveal",
+                "prism",
+                "wheel-reverse"
               ],
               "strict": true,
-              "description": "Canonical slide transition kind. morph writes an Office 2016+ p159:morph inside mc:AlternateContent with a p:fade fallback; legacy p:zoom remains a distinct transition kind."
+              "description": "Canonical slide transition kind. Morph and the published P14 effects use mc:AlternateContent with a basic fade fallback. Honeycomb/flash accept timing only; other parameters are constrained by kind. Explicit speed wins; duration-only extension transitions derive coarse speed (<=500ms fast, >=1000ms slow, otherwise medium). Source and fallback share coarse speed and advance timing; only source carries precise duration. Legacy p:zoom remains distinct."
             },
             "morphMode": {
               "type": "string",
@@ -43690,8 +45017,23 @@
                 },
                 {
                   "$ref": "#/$defs/transitionInOut"
+                },
+                {
+                  "$ref": "#/$defs/transitionCornerCenterDirection"
                 }
               ]
+            },
+            "transitionAdvanceAfter": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647,
+              "description": "Automatic slide advance in milliseconds. The PowerPoint transition advTm constraint requires 0..2147483647 inclusive."
+            },
+            "transitionDuration": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647,
+              "description": "Authored precise duration in integer milliseconds, bounded by the typed Int32 model. Inspection accepts the broader OOXML universal-time lexical domain, including fractional units, without truncating."
             },
             "freeformPath": {
               "type": "object",
@@ -43811,6 +45153,289 @@
                   }
                 }
               ]
+            },
+            "animationScale": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["x", "y"],
+              "description": "Relative x/y scale factors, each 0.00001..1000; serialized in 1/100000 units. Explicit effect plus scale replaces the amplitude; omitting effect preserves it. No from/to, text build, or indefinite emphasis repeat.",
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": 1e-5,
+                  "maximum": 1000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": 1e-5,
+                  "maximum": 1000
+                }
+              }
+            },
+            "animationEffectParameters": {
+              "description": "Shared effect/phase/amplitude constraints. Create and update independently own required fields and nullability.",
+              "allOf": [
+                {
+                  "if": {
+                    "required": ["effect"],
+                    "properties": {
+                      "effect": {
+                        "enum": ["grow-shrink", "spin"],
+                        "strict": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "phase": {
+                        "const": "emphasis"
+                      },
+                      "repeat": {
+                        "not": {
+                          "const": "indefinite"
+                        }
+                      },
+                      "target": {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "required": ["paragraph"]
+                            },
+                            {
+                              "required": ["level"]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": ["direction"]
+                        },
+                        {
+                          "required": ["build"]
+                        }
+                      ]
+                    }
+                  },
+                  "else": {
+                    "not": {
+                      "properties": {
+                        "phase": {
+                          "const": "emphasis"
+                        }
+                      },
+                      "required": ["phase"]
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "anyOf": [
+                      {
+                        "required": ["direction"]
+                      },
+                      {
+                        "required": ["phase"]
+                      }
+                    ]
+                  },
+                  "then": {
+                    "required": ["effect"]
+                  }
+                },
+                {
+                  "if": {
+                    "required": ["effect"],
+                    "properties": {
+                      "effect": {
+                        "const": "grow-shrink"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": ["scale"]
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["scale"]
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "required": ["effect"],
+                    "properties": {
+                      "effect": {
+                        "const": "spin"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": ["degrees"]
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["degrees"]
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "required": ["effect"],
+                    "properties": {
+                      "effect": {
+                        "const": "motion-path"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "phase": {
+                        "const": "path"
+                      },
+                      "repeat": {
+                        "not": {
+                          "const": "indefinite"
+                        }
+                      },
+                      "target": {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "required": ["paragraph"]
+                            },
+                            {
+                              "required": ["level"]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": ["direction"]
+                        },
+                        {
+                          "required": ["build"]
+                        }
+                      ]
+                    }
+                  },
+                  "else": {
+                    "not": {
+                      "properties": {
+                        "phase": {
+                          "const": "path"
+                        }
+                      },
+                      "required": ["phase"]
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "required": ["effect"],
+                    "properties": {
+                      "effect": {
+                        "const": "motion-path"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": ["offset"]
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["offset"]
+                    }
+                  }
+                }
+              ]
+            },
+            "animationOffset": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["x", "y"],
+              "description": "Straight-line displacement from the authored layout position in slide-width/height fractions, each -1000..1000; rounded to six decimals. Positive x is right, positive y is down; zero is valid and off-slide motion is allowed. Uses additive base: consecutive paths each start from the layout position, without accumulating earlier motion. Holds the endpoint unless autoReverse returns it. Whole shape and finite repeat only; no arbitrary path or autoRotate. Explicit effect plus offset replaces the displacement; omit effect to preserve it.",
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              }
+            },
+            "transitionSideDirection": {
+              "type": "string",
+              "enum": ["left", "up", "right", "down"],
+              "strict": true,
+              "default": "left",
+              "description": "Four-side direction; creation default left follows CT_SideDirectionTransition and the P14 prism/glitter XSD defaults."
+            },
+            "transitionLeftRight": {
+              "type": "string",
+              "enum": ["left", "right"],
+              "strict": true,
+              "default": "left",
+              "description": "Creation default left. CT_LeftRightDirectionTransition has no XSD default, so a missing source dir remains unspecified; CT_RevealTransition instead implies left. Writers explicitly emit the creation value."
+            },
+            "transitionCornerCenterDirection": {
+              "type": "string",
+              "enum": ["left-up", "right-up", "left-down", "right-down", "center"],
+              "strict": true,
+              "default": "center",
+              "description": "Ripple origin; the P14 XSD union accepts the four corners or center and defaults to center."
+            },
+            "transitionInOutIn": {
+              "type": "string",
+              "enum": ["in", "out"],
+              "strict": true,
+              "default": "in",
+              "description": "P14 flythrough/shred default to in. Warp uses transitionInOut and defaults to out."
+            },
+            "transitionGlitterPattern": {
+              "type": "string",
+              "enum": ["diamond", "hexagon"],
+              "strict": true,
+              "default": "diamond",
+              "description": "Glitter pattern; creation default follows the P14 CT_GlitterTransition XSD."
+            },
+            "transitionShredPattern": {
+              "type": "string",
+              "enum": ["strip", "rectangle"],
+              "strict": true,
+              "default": "strip",
+              "description": "Shred pattern; creation default follows the P14 CT_ShredTransition XSD."
+            },
+            "transitionBoolean": {
+              "type": "boolean",
+              "default": false,
+              "description": "P14 prism isContent/isInverted, flythrough hasBounce and reveal throughBlack default to false in the XSD; writers explicitly emit the value."
+            },
+            "transitionPatternChoice": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/transitionGlitterPattern"
+                },
+                {
+                  "$ref": "#/$defs/transitionShredPattern"
+                }
+              ]
+            },
+            "transitionSpokes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295,
+              "default": 4,
+              "description": "WheelReverse spokes use the full UInt32 domain and XSD default 4. Structural validity does not certify Office playback of every value."
             }
           }
         },
@@ -43877,6 +45502,83 @@
         "deprecatedOps": [],
         "experimentalOps": [],
         "examples": [
+          {
+            "title": "Finite signed spin emphasis",
+            "patch": {
+              "schemaVersion": "pptx-patch/v1",
+              "ops": [
+                {
+                  "op": "add-slide"
+                },
+                {
+                  "slide": 0,
+                  "x": "3in",
+                  "y": "2in",
+                  "w": "3in",
+                  "h": "1in",
+                  "name": "Indicator",
+                  "text": "Quarter turn",
+                  "op": "add-text-box"
+                },
+                {
+                  "slide": 0,
+                  "animations": [
+                    {
+                      "shape": {
+                        "name": "Indicator"
+                      },
+                      "effect": "spin",
+                      "degrees": -90,
+                      "duration": 400,
+                      "autoReverse": true
+                    }
+                  ],
+                  "op": "set-slide-animations"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Finite grow-shrink emphasis",
+            "patch": {
+              "schemaVersion": "pptx-patch/v1",
+              "ops": [
+                {
+                  "op": "add-slide"
+                },
+                {
+                  "slide": 0,
+                  "x": "3in",
+                  "y": "2in",
+                  "w": "3in",
+                  "h": "1in",
+                  "name": "KPI",
+                  "text": "42%",
+                  "op": "add-text-box"
+                },
+                {
+                  "slide": 0,
+                  "animations": [
+                    {
+                      "shape": {
+                        "name": "KPI"
+                      },
+                      "effect": "grow-shrink",
+                      "phase": "emphasis",
+                      "scale": {
+                        "x": 1.15,
+                        "y": 1.15
+                      },
+                      "duration": 300,
+                      "repeat": 2,
+                      "autoReverse": true
+                    }
+                  ],
+                  "op": "set-slide-animations"
+                }
+              ]
+            }
+          },
           {
             "title": "Slide transition and entrance animations",
             "patch": {
@@ -46607,6 +48309,7 @@
             "op": "set-slide-animations",
             "category": "slide",
             "summary": "Create, update, remove, or clear supported basic slide animations and timing modifiers.",
+            "description": "Whole-shape emphasis uses explicit grow-shrink scale x/y in [0.00001,1000] or spin degrees in [-3600,3600], with finite repeat. Emphasis defaults to on-click, duration=500ms and delay=0. Explicit effect replaces its full parameters; omit effect to preserve amplitude. Only timing modifiers accept null on updates. New fly uses fixed two-keyframe ppt_x/ppt_y behaviors; direction identifies the entrance origin or exit destination edge. Legacy filter fly stays editable without rewriting untouched effects. Unknown timing stays preserve-only.",
             "required": ["op", "slide"],
             "constraints": [
               {
@@ -46709,7 +48412,12 @@
                   "speed",
                   "advanceOnClick",
                   "advanceAfter",
-                  "duration"
+                  "duration",
+                  "pattern",
+                  "hasBounce",
+                  "isContent",
+                  "isInverted",
+                  "spokes"
                 ],
                 "schema": {
                   "if": {
@@ -46749,6 +48457,21 @@
                         },
                         {
                           "required": ["duration"]
+                        },
+                        {
+                          "required": ["pattern"]
+                        },
+                        {
+                          "required": ["hasBounce"]
+                        },
+                        {
+                          "required": ["isContent"]
+                        },
+                        {
+                          "required": ["isInverted"]
+                        },
+                        {
+                          "required": ["spokes"]
                         }
                       ]
                     }
@@ -46766,7 +48489,7 @@
                   "if": {
                     "properties": {
                       "kind": {
-                        "enum": ["push", "wipe", "cover"],
+                        "enum": ["push", "wipe", "vortex", "pan", "glitter", "prism"],
                         "strict": true
                       }
                     }
@@ -46774,7 +48497,7 @@
                   "then": {
                     "properties": {
                       "dir": {
-                        "$ref": "#/$defs/transitionDirection"
+                        "$ref": "#/$defs/transitionSideDirection"
                       }
                     }
                   },
@@ -46782,7 +48505,7 @@
                     "if": {
                       "properties": {
                         "kind": {
-                          "enum": ["split", "zoom"],
+                          "enum": ["cover"],
                           "strict": true
                         }
                       }
@@ -46790,41 +48513,86 @@
                     "then": {
                       "properties": {
                         "dir": {
-                          "$ref": "#/$defs/transitionInOut"
+                          "$ref": "#/$defs/transitionDirection"
                         }
                       }
                     },
                     "else": {
-                      "not": {
-                        "required": ["dir"]
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "enum": ["switch", "flip", "ferris", "gallery", "conveyor", "reveal"],
+                            "strict": true
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "dir": {
+                            "$ref": "#/$defs/transitionLeftRight"
+                          }
+                        }
+                      },
+                      "else": {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "enum": ["split", "zoom", "warp"],
+                              "strict": true
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "dir": {
+                              "$ref": "#/$defs/transitionInOut"
+                            }
+                          }
+                        },
+                        "else": {
+                          "if": {
+                            "properties": {
+                              "kind": {
+                                "enum": ["shred", "flythrough"],
+                                "strict": true
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "dir": {
+                                "$ref": "#/$defs/transitionInOutIn"
+                              }
+                            }
+                          },
+                          "else": {
+                            "if": {
+                              "properties": {
+                                "kind": {
+                                  "enum": ["ripple"],
+                                  "strict": true
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "dir": {
+                                  "$ref": "#/$defs/transitionCornerCenterDirection"
+                                }
+                              }
+                            },
+                            "else": {
+                              "not": {
+                                "required": ["dir"]
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }
                 },
-                "summary": "dir is four-way for push/wipe and eight-way for cover (default left), in/out for split/zoom (default out), and forbidden otherwise."
-              },
-              {
-                "kind": "json-schema",
-                "fields": ["kind", "dir"],
-                "schema": {
-                  "if": {
-                    "properties": {
-                      "kind": {
-                        "enum": ["push", "wipe"],
-                        "strict": true
-                      }
-                    }
-                  },
-                  "then": {
-                    "properties": {
-                      "dir": {
-                        "enum": ["left", "up", "right", "down"],
-                        "strict": true
-                      }
-                    }
-                  }
-                },
-                "summary": "push/wipe accept only side directions; corner directions apply only to cover."
+                "summary": "dir follows the finite family selected by kind. Creation defaults: ripple center; shred/flythrough in; split/zoom/warp out; all side/left-right kinds left. P14 writers emit parameters explicitly."
               },
               {
                 "kind": "json-schema",
@@ -46833,7 +48601,8 @@
                   "if": {
                     "properties": {
                       "kind": {
-                        "const": "split"
+                        "enum": ["split", "doors", "window"],
+                        "strict": true
                       }
                     }
                   },
@@ -46843,7 +48612,7 @@
                     }
                   }
                 },
-                "summary": "orient applies only to split; omission defaults to horizontal."
+                "summary": "orient applies only to split/doors/window; omission defaults to horizontal. P14 writers bind it to XML dir."
               },
               {
                 "kind": "json-schema",
@@ -46852,7 +48621,7 @@
                   "if": {
                     "properties": {
                       "kind": {
-                        "enum": ["fade", "cut"],
+                        "enum": ["fade", "cut", "reveal"],
                         "strict": true
                       }
                     }
@@ -46863,7 +48632,7 @@
                     }
                   }
                 },
-                "summary": "throughBlack applies only to fade/cut; omission defaults to false."
+                "summary": "throughBlack applies only to fade/cut/reveal; omission defaults to false. Reveal writes XML thruBlk explicitly."
               },
               {
                 "kind": "json-schema",
@@ -46883,6 +48652,126 @@
                   }
                 },
                 "summary": "morphMode applies only to morph."
+              },
+              {
+                "kind": "json-schema",
+                "fields": ["kind", "pattern"],
+                "schema": {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "enum": ["glitter"],
+                        "strict": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "pattern": {
+                        "$ref": "#/$defs/transitionGlitterPattern"
+                      }
+                    }
+                  },
+                  "else": {
+                    "if": {
+                      "properties": {
+                        "kind": {
+                          "enum": ["shred"],
+                          "strict": true
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "pattern": {
+                          "$ref": "#/$defs/transitionShredPattern"
+                        }
+                      }
+                    },
+                    "else": {
+                      "not": {
+                        "required": ["pattern"]
+                      }
+                    }
+                  }
+                },
+                "summary": "pattern is diamond/hexagon for glitter (default diamond), strip/rectangle for shred (default strip), and forbidden otherwise."
+              },
+              {
+                "kind": "json-schema",
+                "fields": ["kind", "hasBounce"],
+                "schema": {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "const": "flythrough"
+                      }
+                    }
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["hasBounce"]
+                    }
+                  }
+                },
+                "summary": "hasBounce applies only to flythrough; omission defaults to false and is explicitly written."
+              },
+              {
+                "kind": "json-schema",
+                "fields": ["kind", "isContent"],
+                "schema": {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "const": "prism"
+                      }
+                    }
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["isContent"]
+                    }
+                  }
+                },
+                "summary": "isContent applies only to prism; omission defaults to false and is explicitly written."
+              },
+              {
+                "kind": "json-schema",
+                "fields": ["kind", "isInverted"],
+                "schema": {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "const": "prism"
+                      }
+                    }
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["isInverted"]
+                    }
+                  }
+                },
+                "summary": "isInverted applies only to prism; omission defaults to false and is explicitly written."
+              },
+              {
+                "kind": "json-schema",
+                "fields": ["kind", "spokes"],
+                "schema": {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "const": "wheel-reverse"
+                      }
+                    }
+                  },
+                  "else": {
+                    "not": {
+                      "required": ["spokes"]
+                    }
+                  }
+                },
+                "summary": "spokes applies only to wheel-reverse and accepts integers 0..4294967295; omitted values are explicitly written as 4. XML validity does not certify every count for Office playback."
               }
             ],
             "optional": [
@@ -46891,10 +48780,15 @@
               "clear",
               "dir",
               "duration",
+              "hasBounce",
+              "isContent",
+              "isInverted",
               "kind",
               "morphMode",
               "orient",
+              "pattern",
               "speed",
+              "spokes",
               "throughBlack"
             ],
             "level": "patch"
@@ -46941,7 +48835,7 @@
           {
             "op": "set-theme",
             "category": "theme",
-            "summary": "Rewrite the canonical color and font slots inside the theme parts; objects on the slides are not touched. Objects that inherit from the theme follow automatically, and objects carrying explicit colors keep them.",
+            "summary": "Rewrite the requested canonical color and font slots in all ordinary theme parts identified by OPC content type, including unreferenced themes, regardless of path. ThemeOverride parts and explicit object formatting are preserved; inherited appearance follows the updated slots unless locally overridden. Invalid theme parts or references fail the operation without an output package.",
             "required": ["op"],
             "constraints": [
               {
@@ -70055,6 +71949,339 @@
             ]
           },
           {
+            "code": "resource_chart_slots_exceeded",
+            "severity": "error",
+            "description": "A PPTX bridge error.",
+            "docsRef": "https://structurify.io/docs/errors/resource_chart_slots_exceeded",
+            "autoRetry": false,
+            "schema": {
+              "type": "object",
+              "required": ["code", "message", "details"],
+              "properties": {
+                "code": {
+                  "const": "resource_chart_slots_exceeded"
+                },
+                "severity": {
+                  "const": "error"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "opIndex": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "path": {
+                  "type": "string"
+                },
+                "suggestions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["reason"],
+                    "additionalProperties": false,
+                    "oneOf": [
+                      {
+                        "required": ["remediation"],
+                        "properties": {
+                          "remediation": true
+                        }
+                      },
+                      {
+                        "required": ["remediationUnavailable"],
+                        "properties": {
+                          "remediationUnavailable": true
+                        }
+                      }
+                    ],
+                    "dependentRequired": {
+                      "patchTemplate": ["autoApplicable", "remediationUnavailable"],
+                      "autoApplicable": ["patchTemplate"]
+                    },
+                    "properties": {
+                      "reason": {
+                        "type": "string"
+                      },
+                      "remediation": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "const": "replace-request"
+                              },
+                              "reason": {
+                                "type": "string",
+                                "minLength": 1,
+                                "pattern": "\\S"
+                              },
+                              "confidence": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "autoRetry": {
+                                "type": "boolean"
+                              },
+                              "request": {
+                                "type": "object",
+                                "required": ["schemaVersion", "ops"],
+                                "properties": {
+                                  "schemaVersion": {
+                                    "const": "pptx-patch/v1"
+                                  },
+                                  "ops": {
+                                    "type": "array",
+                                    "minItems": 0,
+                                    "items": {
+                                      "type": "object",
+                                      "required": ["op"],
+                                      "properties": {
+                                        "op": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "pattern": "\\S"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "additionalProperties": true,
+                                "description": "Complete patch envelope. Validate all operations through the canonical patch schema/runtime and reauthorize before execution; a remediation is not a validation or permission bypass."
+                              },
+                              "target": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "const": "original-input"
+                                  },
+                                  "requestCanonicalization": {
+                                    "const": "jcs-rfc8785"
+                                  },
+                                  "requestSha256": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  },
+                                  "inputSha256": {
+                                    "type": ["string", "null"],
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "requestCanonicalization",
+                                  "requestSha256",
+                                  "inputSha256"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "reason",
+                              "confidence",
+                              "autoRetry",
+                              "request",
+                              "target"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "const": "apply-to-document"
+                              },
+                              "reason": {
+                                "type": "string",
+                                "minLength": 1,
+                                "pattern": "\\S"
+                              },
+                              "confidence": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              "autoRetry": {
+                                "type": "boolean"
+                              },
+                              "patch": {
+                                "type": "object",
+                                "required": ["schemaVersion", "ops"],
+                                "properties": {
+                                  "schemaVersion": {
+                                    "const": "pptx-patch/v1"
+                                  },
+                                  "ops": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                      "type": "object",
+                                      "required": ["op"],
+                                      "properties": {
+                                        "op": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "pattern": "\\S"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "additionalProperties": false,
+                                "description": "Complete patch envelope. Validate all operations through the canonical patch schema/runtime and reauthorize before execution; a remediation is not a validation or permission bypass."
+                              },
+                              "target": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "const": "document"
+                                  },
+                                  "inputSha256": {
+                                    "type": "string",
+                                    "pattern": "^[0-9a-f]{64}$"
+                                  }
+                                },
+                                "required": ["kind", "inputSha256"],
+                                "additionalProperties": false
+                              },
+                              "requiresRawXml": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "reason",
+                              "confidence",
+                              "autoRetry",
+                              "patch",
+                              "target",
+                              "requiresRawXml"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "remediationUnavailable": {
+                        "type": "object",
+                        "properties": {
+                          "reason": {
+                            "type": "string",
+                            "strict": true,
+                            "enum": [
+                              "identity-unavailable",
+                              "context-unavailable",
+                              "ambiguous-source",
+                              "target-unavailable",
+                              "payload-limit"
+                            ]
+                          }
+                        },
+                        "required": ["reason"],
+                        "additionalProperties": false
+                      },
+                      "patchTemplate": {
+                        "type": "object",
+                        "required": ["schemaVersion", "ops"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "schemaVersion": {
+                            "const": "pptx-patch/v1"
+                          },
+                          "ops": {
+                            "type": "array",
+                            "items": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      },
+                      "autoApplicable": {
+                        "const": false
+                      },
+                      "command": {
+                        "type": "string",
+                        "description": "Manual command hint; never an executable remediation or an authorization grant."
+                      },
+                      "suggestedArgs": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "path": {
+                        "type": "string"
+                      },
+                      "expected": {},
+                      "actual": {},
+                      "replacement": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "docsRef": {
+                  "const": "https://structurify.io/docs/errors/resource_chart_slots_exceeded"
+                },
+                "details": {
+                  "type": "object",
+                  "required": [
+                    "reason",
+                    "stage",
+                    "subject",
+                    "limit",
+                    "observed",
+                    "unit",
+                    "policyVersion",
+                    "commercialUpgradeApplicable"
+                  ],
+                  "properties": {
+                    "reason": {
+                      "const": "resource_chart_slots_exceeded"
+                    },
+                    "stage": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "limit": {
+                      "type": "number"
+                    },
+                    "observed": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": "string"
+                    },
+                    "policyVersion": {
+                      "type": "string"
+                    },
+                    "commercialUpgradeApplicable": {
+                      "const": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "repairHints": [
+              {
+                "tool": "fuzzy_suggest",
+                "enumRegistry": "commands.pptx.enumRegistry",
+                "when": "Unknown enum-like field value, including misspelled shape preset, font family, theme color, chart kind, chart variant, connector kind, or placeholder type."
+              }
+            ],
+            "typicalFixes": [
+              {
+                "remediationUnavailable": {
+                  "reason": "context-unavailable"
+                },
+                "reason": "Inspect the diagnostic and prepare a complete validated request before retrying."
+              }
+            ]
+          },
+          {
             "code": "resource_image_pixels_exceeded",
             "severity": "error",
             "description": "An embedded raster image exceeds the decoded-pixel safety budget.",
@@ -90308,7 +92535,9 @@
                         "speed",
                         "advanceOnClick",
                         "extensionWrapped",
-                        "editable"
+                        "editable",
+                        "diagnostics",
+                        "parameters"
                       ],
                       "properties": {
                         "kind": {
@@ -90325,6 +92554,25 @@
                             "dissolve",
                             "random",
                             "morph",
+                            "honeycomb",
+                            "flash",
+                            "vortex",
+                            "pan",
+                            "switch",
+                            "flip",
+                            "ferris",
+                            "gallery",
+                            "conveyor",
+                            "doors",
+                            "window",
+                            "warp",
+                            "ripple",
+                            "glitter",
+                            "shred",
+                            "flythrough",
+                            "reveal",
+                            "prism",
+                            "wheel-reverse",
                             "unknown"
                           ],
                           "strict": true
@@ -90343,25 +92591,103 @@
                         "throughBlack": {
                           "type": "boolean"
                         },
+                        "parameters": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["name", "xmlAttribute", "source"],
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "xmlAttribute": {
+                                "type": "string"
+                              },
+                              "source": {
+                                "type": "string",
+                                "enum": ["explicit", "implied", "unspecified", "invalid"],
+                                "strict": true
+                              },
+                              "raw": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967295
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        },
                         "speed": {
                           "type": "string"
                         },
                         "durationMs": {
-                          "type": "integer",
+                          "type": "number",
                           "minimum": 0
+                        },
+                        "durationRaw": {
+                          "type": "string"
                         },
                         "advanceOnClick": {
                           "type": "boolean"
                         },
                         "advanceAfterMs": {
                           "type": "integer",
-                          "minimum": 0
+                          "minimum": 0,
+                          "maximum": 4294967295
                         },
                         "extensionWrapped": {
                           "type": "boolean"
                         },
                         "fallbackKind": {
                           "type": "string"
+                        },
+                        "fallbackTiming": {
+                          "type": "object",
+                          "required": ["speed", "advanceOnClick", "diagnostics"],
+                          "properties": {
+                            "speed": {
+                              "type": "string"
+                            },
+                            "durationMs": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "durationRaw": {
+                              "type": "string"
+                            },
+                            "advanceOnClick": {
+                              "type": "boolean"
+                            },
+                            "advanceAfterMs": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 4294967295
+                            },
+                            "diagnostics": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "diagnostics": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         },
                         "effectElement": {
                           "type": "string"
@@ -90421,6 +92747,9 @@
                       "target",
                       "effect",
                       "direction",
+                      "scale",
+                      "degrees",
+                      "offset",
                       "phase",
                       "trigger",
                       "durationMs",
@@ -90452,6 +92781,33 @@
                       },
                       "effect": {
                         "type": "string"
+                      },
+                      "degrees": {
+                        "type": ["number", "null"]
+                      },
+                      "offset": {
+                        "type": ["object", "null"],
+                        "required": ["x", "y"],
+                        "properties": {
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "scale": {
+                        "type": ["object", "null"],
+                        "required": ["x", "y"],
+                        "properties": {
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          }
+                        }
                       },
                       "direction": {
                         "type": ["string", "null"]
@@ -91885,7 +94241,9 @@
                         "speed",
                         "advanceOnClick",
                         "extensionWrapped",
-                        "editable"
+                        "editable",
+                        "diagnostics",
+                        "parameters"
                       ],
                       "properties": {
                         "kind": {
@@ -91902,6 +94260,25 @@
                             "dissolve",
                             "random",
                             "morph",
+                            "honeycomb",
+                            "flash",
+                            "vortex",
+                            "pan",
+                            "switch",
+                            "flip",
+                            "ferris",
+                            "gallery",
+                            "conveyor",
+                            "doors",
+                            "window",
+                            "warp",
+                            "ripple",
+                            "glitter",
+                            "shred",
+                            "flythrough",
+                            "reveal",
+                            "prism",
+                            "wheel-reverse",
                             "unknown"
                           ],
                           "strict": true
@@ -91920,25 +94297,103 @@
                         "throughBlack": {
                           "type": "boolean"
                         },
+                        "parameters": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": ["name", "xmlAttribute", "source"],
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "xmlAttribute": {
+                                "type": "string"
+                              },
+                              "source": {
+                                "type": "string",
+                                "enum": ["explicit", "implied", "unspecified", "invalid"],
+                                "strict": true
+                              },
+                              "raw": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "boolean"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 4294967295
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        },
                         "speed": {
                           "type": "string"
                         },
                         "durationMs": {
-                          "type": "integer",
+                          "type": "number",
                           "minimum": 0
+                        },
+                        "durationRaw": {
+                          "type": "string"
                         },
                         "advanceOnClick": {
                           "type": "boolean"
                         },
                         "advanceAfterMs": {
                           "type": "integer",
-                          "minimum": 0
+                          "minimum": 0,
+                          "maximum": 4294967295
                         },
                         "extensionWrapped": {
                           "type": "boolean"
                         },
                         "fallbackKind": {
                           "type": "string"
+                        },
+                        "fallbackTiming": {
+                          "type": "object",
+                          "required": ["speed", "advanceOnClick", "diagnostics"],
+                          "properties": {
+                            "speed": {
+                              "type": "string"
+                            },
+                            "durationMs": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "durationRaw": {
+                              "type": "string"
+                            },
+                            "advanceOnClick": {
+                              "type": "boolean"
+                            },
+                            "advanceAfterMs": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 4294967295
+                            },
+                            "diagnostics": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "diagnostics": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         },
                         "effectElement": {
                           "type": "string"
@@ -93300,7 +95755,9 @@
                 "strict": true
               },
               "policyId": {
-                "const": "pptx-visual-oracle-default/v1"
+                "type": "string",
+                "enum": ["pptx-visual-oracle-default/v1", "pptx-visual-oracle-create/v1"],
+                "strict": true
               },
               "subjects": {
                 "type": "array",
@@ -93725,7 +96182,8 @@
                       "environment-dependent",
                       "same-renderer-change-detected",
                       "candidate-only",
-                      "same-renderer-regression"
+                      "same-renderer-regression",
+                      "candidate-checks"
                     ],
                     "strict": true
                   },
@@ -93837,6 +96295,7 @@
                       "png_render_failed",
                       "provenance_signer_required",
                       "redirect_location_missing",
+                      "resource_chart_slots_exceeded",
                       "resource_image_pixels_exceeded",
                       "resource_input_too_large",
                       "resource_output_too_large",
@@ -95577,7 +98036,8 @@
                   "font-too-small",
                   "chart-title-external-text-collision",
                   "rendered-text-outside-page-horizontal",
-                  "rendered-text-outside-page-vertical"
+                  "rendered-text-outside-page-vertical",
+                  "soft-edge-skipped"
                 ],
                 "strict": true
               },
@@ -101917,6 +104377,7 @@
                   "redirect_location_missing",
                   "render_audit_error",
                   "render_error",
+                  "resource_chart_slots_exceeded",
                   "resource_image_pixels_exceeded",
                   "resource_input_too_large",
                   "resource_output_too_large",
@@ -102350,6 +104811,7 @@
                       "redirect_location_missing",
                       "render_audit_error",
                       "render_error",
+                      "resource_chart_slots_exceeded",
                       "resource_image_pixels_exceeded",
                       "resource_input_too_large",
                       "resource_output_too_large",
@@ -107854,7 +110316,7 @@
   },
   "resourcePolicy": {
     "schemaVersion": "xdoc-resource-policy-registry/v1",
-    "policyVersion": "2026.08",
+    "policyVersion": "2026.09",
     "profiles": [
       {
         "id": "native-api",
@@ -107868,6 +110330,7 @@
         "xmlNodes": 10000000,
         "textNodeBytes": 16777216,
         "imagePixels": 200000000,
+        "chartProjectionSlots": 1000000,
         "outputBytes": 1073741824,
         "wallClockMs": 900000,
         "tempDiskBytes": 4294967296
@@ -107884,6 +110347,7 @@
         "xmlNodes": 2000000,
         "textNodeBytes": 8388608,
         "imagePixels": 100000000,
+        "chartProjectionSlots": 1000000,
         "outputBytes": 536870912,
         "wallClockMs": 60000,
         "tempDiskBytes": null
@@ -107901,7 +110365,8 @@
       "resource_image_pixels_exceeded",
       "resource_timeout",
       "resource_temp_disk_exceeded",
-      "resource_output_too_large"
+      "resource_output_too_large",
+      "resource_chart_slots_exceeded"
     ],
     "configurationBoundary": "compiled profiles; runtime configuration may only tighten; licenses and requests cannot change limits",
     "hostEnforcementResponsibilities": ["process-memory", "cpu-quota", "process-count"],
@@ -107913,6 +110378,7 @@
       "zip-ratio",
       "xml-structure",
       "image-pixels",
+      "chart-projection",
       "task-budgets",
       "output"
     ]
@@ -108896,6 +111362,7 @@
           "png_render_failed",
           "provenance_signer_required",
           "redirect_location_missing",
+          "resource_chart_slots_exceeded",
           "resource_image_pixels_exceeded",
           "resource_input_too_large",
           "resource_output_too_large",
@@ -109039,6 +111506,7 @@
           "rate_limited",
           "redirect_location_missing",
           "remote_url_disabled",
+          "resource_chart_slots_exceeded",
           "resource_image_pixels_exceeded",
           "resource_input_too_large",
           "resource_output_too_large",
@@ -109132,6 +111600,7 @@
           "png_render_failed",
           "provenance_signer_required",
           "redirect_location_missing",
+          "resource_chart_slots_exceeded",
           "resource_image_pixels_exceeded",
           "resource_input_too_large",
           "resource_output_too_large",
@@ -109218,6 +111687,7 @@
           "invalid_xml",
           "missing_part",
           "missing_relationship",
+          "resource_chart_slots_exceeded",
           "resource_image_pixels_exceeded",
           "resource_input_too_large",
           "resource_output_too_large",
@@ -109298,6 +111768,7 @@
           "redirect_location_missing",
           "render_audit_error",
           "render_error",
+          "resource_chart_slots_exceeded",
           "resource_image_pixels_exceeded",
           "resource_input_too_large",
           "resource_output_too_large",
@@ -109371,6 +111842,7 @@
         "description": "Compiled engineering resource-limit reasons; commercial upgrades do not change these limits.",
         "codeType": "string",
         "codes": [
+          "resource_chart_slots_exceeded",
           "resource_image_pixels_exceeded",
           "resource_input_too_large",
           "resource_output_too_large",
@@ -109419,6 +111891,7 @@
           "png_render_failed",
           "provenance_signer_required",
           "redirect_location_missing",
+          "resource_chart_slots_exceeded",
           "resource_image_pixels_exceeded",
           "resource_input_too_large",
           "resource_output_too_large",
@@ -113575,6 +116048,78 @@
             }
           }
         },
+        "packageIntegrity": {
+          "description": "Full-package XML/OPC structural checks, including namespace bindings and PowerPoint owner/master/layout identities. Element-schema validation and MC branch readability are separate checks; passing does not certify full XSD validity or Office rendering.",
+          "type": "object",
+          "required": ["scope", "scanStatus", "passed", "issueCount"],
+          "additionalProperties": false,
+          "properties": {
+            "scope": {
+              "const": "full-package"
+            },
+            "scanStatus": {
+              "enum": ["completed", "failed"],
+              "strict": true
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "issueCount": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "scanStatus": {
+                    "const": "failed"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "passed": {
+                    "const": false
+                  },
+                  "issueCount": {
+                    "type": "null"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "issueCount": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "if": {
+                  "properties": {
+                    "issueCount": {
+                      "const": 0
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "passed": {
+                      "const": true
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "passed": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
         "compatCheckResult": {
           "allOf": [
             {
@@ -113597,6 +116142,9 @@
                     },
                     "agentGate": {
                       "$ref": "#/$defs/compatAgentGate"
+                    },
+                    "packageIntegrity": {
+                      "$ref": "#/$defs/packageIntegrity"
                     }
                   },
                   "allOf": [
@@ -113620,7 +116168,8 @@
                           "mc",
                           "conformance",
                           "parserMcIssueCount",
-                          "modelStatus"
+                          "modelStatus",
+                          "packageIntegrity"
                         ],
                         "properties": {
                           "minimumOfficeVersion": {

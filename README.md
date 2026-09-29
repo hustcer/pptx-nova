@@ -21,7 +21,7 @@ Agent-oriented comparison of current PPTX creation and editing tools. Within
 the evaluated set, xdoc ranked highest overall for the combined workflow of
 runtime discoverability, native editable creation and modification, dry-run
 safety, preservation, rendering, validation, and auditable evidence, while the
-current `v0.5.0` native packages remain roughly 20MB each. The claim is scoped
+current `v0.6.0` native packages remain roughly 22MB each. The claim is scoped
 to that evaluated set and workflow; it is not a claim of complete PowerPoint
 feature parity or superiority over every tool that may exist.
 
@@ -35,7 +35,7 @@ PDF, and leave replayable sidecar evidence.
 
 All of this runs through a single lightweight native CLI with integrated
 rendering backends: previews, PDF export, and visual checks require no
-PowerPoint, office suite, or headless browser. The current `v0.5.0` native
+PowerPoint, office suite, or headless browser. The current `v0.6.0` native
 packages unpack to roughly 20MB each, depending on the target, and need no
 separate server or always-on background service. Native builds are available
 for supported Linux, macOS, and Windows targets, keeping the whole pipeline

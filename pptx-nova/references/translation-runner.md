@@ -14,6 +14,13 @@ The finalizer requires:
 - the matching `pptx-i18n-translations/v1` data;
 - a new or empty run directory and a final output path.
 
+Pass the complete classified source inventory used by planning. Preserve the
+top-level `part` on every shape `textPlan` unit; it is source identity, not
+optional display metadata. If xdoc rejects incomplete identity as `invalid_data`,
+regenerate the inventory from the bound source and rebuild the translation plan
+before finalization. Do not fill the gap from logical slide filenames or from
+the candidate, and do not reuse a stale candidate report after an input error.
+
 Before these inputs exist, read `references/translation-mode.md` for scan, classification, planning,
 apply, repair, chart/table coverage, and multi-column review preparation. Do not invoke the finalizer
 with an intermediate candidate.

@@ -224,6 +224,16 @@ debugging path.
      `detectedScripts` to audit whether Chinese and English source text were
      both covered. Do not derive selectors or replacement indexes from
      `hits[].location`.
+     Keep the complete source units when classifying, filtering, or exporting a
+     standalone units document. Shape `textPlan` units require their non-empty
+     **top-level `part`**, including units classified as review or preserve;
+     retaining only `origin.part` or the selector is insufficient. The shared
+     planner, anchor-draft, and candidate input boundary rejects a missing,
+     null, empty, or non-string shape `part` as `invalid_data` before producing
+     a report. Regenerate an incomplete inventory from the bound source and
+     rebuild the plan; do not reconstruct part paths from `unitId`, logical
+     slide numbers, or the candidate deck. Table selectors retain their own
+     `part` contract.
 4. Build `<run-dir>/translations.json` using
    `pptx-i18n-translations/v1`. Create one record for every
    `i18nUnits.units[]` item with `action: "translate"`:
@@ -543,9 +553,10 @@ debugging path.
     Preserve each source unit's exact `part` and selector. For shape paragraphs,
     candidate lookup uses that source part identity; `slide` is a logical page
     number, not a filename. Do not reconstruct `ppt/slides/slideN.xml` or replace
-    a missing source part with a candidate inventory match. If the source
-    inventory lacks the required identity, regenerate it from the bound source
-    with the current runtime and rebuild the translation plan.
+    a missing source part with a candidate inventory match. An `invalid_data`
+    input error is not a candidate mismatch report: repair the incomplete
+    inventory through the source-scan step above and do not consume an older
+    report left at the requested output path.
 
     This is the single authoritative source-leakage gate. It replaces the old
     external residual matcher: it does not run the heuristic language classifier,

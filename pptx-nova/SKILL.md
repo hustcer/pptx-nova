@@ -164,7 +164,9 @@ When creating or modifying PPTX files, this skill can directly consume these inp
 Determine the task type first, then read the corresponding files:
 
 For a rendering discrepancy or a preview regression after upgrading xdoc, also read
-`references/fidelity-diagnosis.md` before changing authored content or layout.
+`references/fidelity-diagnosis.md` before changing authored content or layout. This includes
+Web text clipping, missing/stale reflections, and Shape 3D offsets that vary with display scale;
+identify the actual renderer and its fallback before treating the symptom as a deck defect.
 
 | User intent                                                                              | Required references                                                                                                                                                     | Read conditionally                                                                                                                                   |
 | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |

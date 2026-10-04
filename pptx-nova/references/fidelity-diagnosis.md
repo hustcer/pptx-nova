@@ -20,6 +20,12 @@ is not a slide-show screenshot; an automatic fallback must report its actual
 method. Reuse an independent reference only while its source bytes and relevant
 Office/environment identity remain valid.
 
+For Web evidence, also record the actual Viewer/renderer build and loaded source
+or bundled entry; `xdoc --version` does not identify the code running in a browser.
+Capture after fonts are ready and layout has settled, at a recorded display scale.
+When validating an upgrade, confirm the page loads the intended current build;
+an old bundle cannot verify new renderer behavior.
+
 When PowerPoint PDF export omits hidden slides, logical slide numbers differ from
 PDF page numbers. Retain the snapshot's `pdf_pages` mapping; a requested hidden
 slide absent from that export has no PDF evidence. A page-count mismatch is a
@@ -84,6 +90,41 @@ Recent rendering changes also require these distinctions when reviewing the same
   one renderer do not change inspect/edit/preserve/verify axes. Check actual
   per-object output and independent PowerPoint evidence; do not label remaining
   camera, material, text or playback discrepancies as certified fidelity.
+
+## Web clipping, reflections and display scale
+
+Read this section only for these symptoms; ordinary native PNG/PDF checks do not
+need a browser run. Confirm the fixes and fallbacks on the loaded Web build;
+neither xdoc identity nor an npm package version alone proves they are present.
+
+- **Clipped or stale reflections:** distinguish foreground clipping/ellipsis from
+  reflection paint. Reflections follow the actual text owner, including centered
+  anchor and Text 3D wrappers, and refresh after clipping and font readiness.
+  Check the visible foreground and its reflection after those stages, including
+  restoration when the frame becomes large enough. Browser layout probes exclude
+  reflection decoration; measuring a wrapper's full painted bounds is not proof
+  that foreground text overflows. Do not enlarge the authored frame or shrink
+  text solely because the mirrored decoration extends beyond it.
+- **Large paragraphs:** where the loaded Web renderer bounds reflection work per
+  paragraph, exceeding a node, UTF-16-character or measured-fragment budget omits that
+  paragraph's whole reflection, clears stale reflection paint and retains the
+  foreground content. These are decoration budgets, not PPTX input/text limits,
+  and are not a promise about native PDF rendering. Inspect the actual loaded
+  renderer or reproduce with a smaller diagnostic control before attributing a
+  missing effect to this fallback; absence alone is insufficient. Preserve the
+  source text, runs and effects, report the observed fallback, and obtain
+  independent evidence when effect fidelity is required.
+- **Shape 3D offsets:** compare the same object at the same display scale first.
+  Web camera Z translation scales with the rendered element; the camera basis,
+  zoom and authored 2D rotation remain separate. A displacement seen at different
+  zoom levels does not authorize changing the deck's Z/position/camera values.
+  A focused scale check should compare normalized geometry at more than one
+  scale and retain the original declarations. Use the exact capability axes and
+  independent PowerPoint evidence for fidelity claims, as for other 3D symptoms.
+
+Record whether verification inspected DOM state, captured discrete frames, or
+compared an independent renderer. Native `preview` / `visual-audit` still govern
+their disclosed workflow gates, but cannot certify these Web lifecycle behaviors.
 
 ## A small experiment should answer one question
 

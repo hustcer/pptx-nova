@@ -215,6 +215,12 @@ Read the contact sheet first to detect cross-slide issues such as rhythm, page
 number jumps, inconsistent dark/light pages, and obvious layout problems. Then
 inspect full-size PNGs for suspicious slides.
 
+For Web clipping, missing/stale text reflections, or scale-dependent Shape 3D
+offsets, follow [fidelity diagnosis](fidelity-diagnosis.md#web-clipping-reflections-and-display-scale)
+before changing the deck. Verify the actual Web build after fonts/layout settle;
+native PNG/PDF evidence does not exercise the Web renderer's decoration budgets
+or refresh lifecycle. A missing decoration alone does not prove lost text.
+
 Use `xdoc convert --to png` only for non-PPTX or generic conversion fallback,
 or when debugging the lower-level convert pipeline.
 

@@ -316,6 +316,17 @@ bindings. The public audit scans for machine-local paths, private repository
 context, unexpected binaries, missing license requirements, and other release
 blockers.
 
+To check an installed xdoc's native edit, autofit, translation and asset-boundary
+contracts, run the opt-in executable suite:
+
+```bash
+XDOC_TEST_BIN=/absolute/path/to/xdoc node --test tools/tests/pptx-nova-native-contracts.test.mjs
+```
+
+The default test suite skips these cases when `XDOC_TEST_BIN` is absent. Set
+`XDOC_TEST_EVIDENCE_DIR` to retain the independently allocated scenario outputs;
+these maintainer tests are not dependencies of the published skill.
+
 `xdoc` is the in-house, agent-oriented PPTX engine behind pptx-nova, exposed to
 the skill through its primary CLI. pptx-nova uses it for PowerPoint inspection,
 declarative patch dry-runs and application, conversion, preview rendering,

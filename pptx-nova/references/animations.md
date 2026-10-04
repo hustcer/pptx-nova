@@ -566,6 +566,11 @@ inspect → patch → dry-run/apply → 回读和播放验证流程，共用同�
 - word/character 级文本动画。
 - inspect 标记 `editable: false` 或 `animationCapabilities.preserveOnly` 的 timing。
 
+Viewer 对已有 chart 子目标和 SmartArt 节点/连接线 build 的播放改善，不改变这里的
+创建/编辑边界。保留原 timing/build 与对象身份，在实际 Viewer 或 PowerPoint 中验证
+目标、顺序、重播与复位；静态 PNG/PDF 只反映静态内容，不能证明这些 build 已播放。
+不要为得到新播放效果而把现有 build 重写成普通 shape 动画。
+
 raw OOXML 不是常规 fallback。只有用户明确要求、你能写出最小 XPath 修改，并完成 OPC/XML/PowerPoint
 clean-open 与播放验证时，才读 `control-flow-and-raw-xml.md` 评估风险。
 

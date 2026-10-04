@@ -25,6 +25,12 @@
 
 > canonical v1 schema 只接受上表字段；不要使用旧版控制流或宏字段别名。
 
+源快照保护有独立执行边界：带 `sourceText` / `sourceHash` / `unitId` 的 `set-run`
+和任何 `replace-paragraph-text` 只能放在顶层 `ops[]`。嵌套形式仅在实际执行到它时
+返回 `invalid_argument`，包括 foreach 替换、已调用宏和 recipe 展开；未选分支与未调用
+宏不报错。`try` 可按普通错误策略恢复且不提交失败 body。需要批量保护型编辑时，
+由生成器显式产出顶层 ops，保留完整 guard；详见 `inspect-and-edit.md`。
+
 ## §2 `if` —— 按状态分支
 
 ```json

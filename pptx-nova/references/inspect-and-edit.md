@@ -474,6 +474,54 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 }
 ```
 
+### 5.2a 源段落保护与稳定 selector
+
+普通 `set-run` 可以使用 name、query 或 placeholder。只要提供 `sourceText`、
+`sourceHash` 或 `unitId` 任一字段（空字符串也算提供），就必须用输入 PPTX 的
+`shape: { "id": <id> }` 或数字简写。ID 来自 inspect/i18n plan 的 OOXML
+`cNvPr/@id`，不是 shapes 数组索引；不要给 ID selector 混入其他查找方式。
+先查询完整 `set-run` schema 的 `sourceGuardShapeSelector` 和交叉约束；字段投影
+不能代替完整验证或 dry-run。
+
+`sourceText` / `sourceHash` 保护的是包含所有 run 的**源段落**，不是被修改的单个 run。
+不要把截断的 `textPreview` 当成完整 guard。校验发生在任何 op 执行前的输入快照上，
+同一段多个 run 的修改可以携带同一个原始段落 guard。`unitId` 只标记诊断上下文，
+不能单独用于检测内容过期。翻译应直接使用 planner 生成的 guard 和 patch。
+
+带保护的 `set-run` 和所有 `replace-paragraph-text` 必须放在顶层 `ops[]`。
+执行到 `if` / `foreach` / `try` / 宏调用 / recipe 展开中的嵌套保护型编辑时，
+运行时在该 op 修改前返回 `invalid_argument`；未选分支和未调用宏不触发错误。
+`try` 仍按原有错误策略恢复并丢弃失败 body；普通无 guard 的嵌套编辑仍可使用。
+生成器应把保护型编辑显式展开到顶层，不能通过删 guard 来绕开限制。
+
+错误按机器事实处理：
+
+- name/query 配 guard：`invalid_parameter`，`details.field` 指向实际
+  `/ops/<index>/shape`，`reason: "unsupported"`，`expected` 给出稳定 selector schema。
+  重新 inspect **同一输入**后修正 selector；这不是源内容冲突。
+- ID 能解析但内容过期：`i18n_source_guard_mismatch`；按 `details.field`、
+  `details.reason`（`source_text_mismatch` / `source_hash_mismatch`）、`opIndex`
+  和可选 `unitId` 定位。保留失败证据，重新扫描/计划；不要从错误消息推断实际文本、
+  自动覆盖 guard 或在未检查用户修改的情况下重试。错误 details 不回显源文本/哈希。
+
+### 5.2b 原生 shape autofit 会改变几何
+
+先读当前完整 `textFrameAutofitPatch` 定义。`mode: "none"` 固定框，`text` 表示
+溢出时缩小文字（`fontScale` 1–100，仅用于 text）；`null` 清除本层设置。
+`shape` 在披露原生测量契约的 xdoc 中请求写文件前的排版，不降低字号：
+
+- 已编辑的横排、单列矩形 frame 使用已解析的字体度量。换行开启时保持宽度、调整高度；
+  不换行时调整宽高，并按首段水平对齐保持锚点。两者均保持垂直锚点，可增大也可缩小。
+- 修改已有 shape-autofit frame 的文本、字体或布局可能触发 reflow；显式重新设置
+  `mode: "shape"` 也会触发。未触达的导入几何保留；`remap-theme` 本身保留框几何，
+  同一事务其他操作已请求的 reflow 则使用映射后的字体。
+- 不支持的排版（例如竖排、多列）或不可用字形度量会原子失败，dry-run 同样验证。
+  保留失败报告；根据任务意图选择受支持排版或固定框，不要静默换模式、删 op 或缩字号。
+
+因此，dry-run 后还要回读候选 bbox，并检查邻接对象、锚点和变化范围；翻译/严格模板
+任务须把实际几何变化纳入其保真策略。仅写入 `spAutoFit` XML 不会自行测量文字，
+也不能假设 PowerPoint 打开时会补算。`fit-text` 写死字号，是独立选择。
+
 ### 5.3 加一页和现有 layout 一样的
 
 ```json
@@ -493,6 +541,10 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 ```json
 { "op": "duplicate-slide", "slide": 1 }
 ```
+
+含 SmartArt 的 `duplicate-slide` 使用原生页级所有权复制：diagramData 与其页属 sidecar
+保持独立，允许共享的 layout/style/color/cache 可以复用。重复导入和跨 deck 复制同样
+遵循 `template-following.md` 的所有权及 preflight 规则；不要按字节相等自行去重。
 
 ### 5.4 换图但保留位置
 

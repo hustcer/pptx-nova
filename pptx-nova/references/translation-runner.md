@@ -10,11 +10,12 @@ The finalizer requires:
 
 - the read-only source `.pptx`;
 - the stable translated candidate `.pptx`;
-- the classified source `pptx-i18n-scan/v1` units consumed by the translation plan;
+- the effective source `pptx-i18n-scan/v1` inventory consumed by the translation plan
+  (classified when review classification was needed);
 - the matching `pptx-i18n-translations/v1` data;
 - a new or empty run directory and a final output path.
 
-Pass the complete classified source inventory used by planning. Preserve the
+Pass the complete effective source inventory used by planning. Preserve the
 top-level `part` on every shape `textPlan` unit; it is source identity, not
 optional display metadata. If xdoc rejects incomplete identity as `invalid_data`,
 regenerate the inventory from the bound source and rebuild the translation plan
@@ -33,6 +34,13 @@ as apply authorization. This finalizer begins only after that preparation result
 Preparation keeps review partitions count-only by default; use
 `--expand-review <languageUncertain|shared|embeddedWorkbook|other>` to persist
 one bound partition when its individual units are actually needed.
+Read the preparation result's actual artifact paths: use
+`artifacts.classifiedScan` when non-null, otherwise `artifacts.scan` as the
+effective units file. A run with no classification work does not create
+`i18n-scan-classified.json`; do not invent that file or reclassify a completed
+inventory just to satisfy a filename. Use the same effective inventory that
+the successful plan consumed, plus `artifacts.candidate` and
+`artifacts.translations`.
 
 ## Standard command
 
@@ -40,7 +48,7 @@ one bound partition when its individual units are actually needed.
 node <skill-root>/scripts/pptx-nova-translation-run.mjs \
   --source source.pptx \
   --candidate <run-dir>/candidate-final.pptx \
-  --units-file <run-dir>/i18n-scan-classified.json \
+  --units-file <effective-units-file> \
   --translations <run-dir>/translations.json \
   --output translated.pptx \
   --run-dir <run-dir>/finalize \

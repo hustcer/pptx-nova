@@ -352,19 +352,23 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
 }
 ```
 
+带 `sourceText` / `sourceHash` / `unitId` 的 `set-run` 必须使用输入的 numeric shape ID，
+并放在顶层 `ops[]`；guard 对应整个源段落。`replace-paragraph-text` 也只允许顶层执行。
+具体 selector、快照和错误处理见 `inspect-and-edit.md` 的源段落保护章节。
+
 ### Text frame 行为
 
 | op                                         | 用途                                                                                                                     |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| `set-text-frame`（`frame.autofit`）        | PowerPoint autofit 属性（`frame: { autofit: { mode: "none" / "shape" / "text" } }`；`text` 模式可加 `fontScale` 1-100）  |
+| `set-text-frame`（`frame.autofit`）        | `none` 固定框；`shape` 请求原生字体测量与框几何 reflow；`text` 缩小溢出文字，可加 `fontScale` 1-100；`null` 清本层设置   |
 | `set-text-frame`（`frame.direction`）      | 竖排文本方向（`"vertical"` / `"vertical-270"` / `"east-asian-vertical"` 等；`"horizontal"` 或 `null` 恢复横排）          |
 | `set-text-frame`（`frame.margin*`）        | 设置四边内边距；单位值或 `null`（清掉显式属性，恢复继承/默认）                                                           |
 | `set-text-frame`（`frame.verticalAnchor`） | `top` / `middle` / `bottom`；`null` 清除                                                                                 |
 | `set-text-frame`（`frame.wordWrap`）       | 布尔值控制换行；`null` 清除                                                                                              |
 | `fit-text`                                 | 给 text frame 算合适字号（`maxFontSize` / `minFontSize`，可选 `strategy: "estimate" / "font-metrics"`，默认 `estimate`） |
 
-`fit-text` 是直接计算并写死字号；要 PowerPoint 自己缩放文字的 autofit 行为，
-用 `set-text-frame` 的 `frame.autofit`。
+`fit-text` 直接计算并写死字号。`shape` autofit 的原生测量边界、锚点、失败条件与
+回读验证见 `inspect-and-edit.md`；不要把它描述为只写属性后等待 PowerPoint 调整。
 
 ---
 

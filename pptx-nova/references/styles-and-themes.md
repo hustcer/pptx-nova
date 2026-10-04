@@ -217,6 +217,17 @@ inspect 的 `fontFacts[]` 检查各脚本 scope。
 这组事实说明保存的阈值，不提供完整字体来源追踪或实际字形间距测量；对布局敏感的
 修改仍须查看渲染结果，需要 PowerPoint 保真证据时使用对应 PowerPoint 检查流程。
 
+DrawingML 未显式声明 kern 时，当前原生文本测量/绘制采用隐式 12pt 阈值；显式
+`0pt` 仍与省略不同。这个渲染默认值不要求写回源文件，也不保证 inspect 会显示本地值。
+字体解析和度量变化会影响空白、换行、gradient 文本边界及 shape autofit；升级后先用
+同一源文件重新渲染，按 `fidelity-diagnosis.md` 排除环境变化再修改 deck。
+
+本机字体可来自 TTF/TTC；TTC 的具体 face、legacy/typographic alias 及对应 style
+共同决定解析，不能把一个集合路径当成唯一字体族或把所有 alias 合并成 regular。
+保持 authored family 与 bold/italic，检查实际 PDF 字体证据。字体来自本机不表示已嵌入
+PPTX，也不证明接收方安装了同一 face；`xdoc check --checks fonts` 与
+`xdoc pdf inspect` 分别回答声明/风险和已导出 PDF 的字体情况。
+
 ### Theme 字体（影响继承该主题的文字）
 
 ```json

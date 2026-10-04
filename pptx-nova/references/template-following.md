@@ -99,6 +99,16 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    template route was not preserved and must stop;
    do not loop through one slide at a time or synthesize patch `opResults`.
 
+   For SmartArt, diagramData belongs to each destination slide occurrence.
+   Different slides must not share it merely because its bytes match; importing
+   the same donor again must still give the new occurrence independent data.
+   Cache/layout/style/color resources may legitimately be reused. Let native
+   `slide-copy` / `duplicate-slide` manage these identities and sidecars; do not
+   deduplicate or rename parts manually, including extensionless/custom paths
+   and Strict relationship spellings. Inspect each copied occurrence and retain
+   full-package compatibility plus semantic evidence; equal previews do not
+   prove independent ownership. SmartArt copying does not enable content editing.
+
    A `ready` preflight is not sufficient when the decks use different slide
    dimensions. Before apply, run:
 

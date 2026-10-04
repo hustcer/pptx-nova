@@ -338,6 +338,12 @@ rules; for example, duplicate shape IDs still need the full semantic audit.
 Keep dry-run/apply semantic checks and candidate `vision-check`/`vision-diff`
 evidence. A full-package scan is not a complete XSD validation.
 
+Markup-compatibility checks also cover XML-like/custom and extensionless parts;
+renaming a slide/layout/master/theme away from `.xml` does not exempt its
+`MustUnderstand` declarations. Resolve parts through Content Types and
+relationships, retain MC diagnostics, and preserve unselected branches. Do not
+repair a compatibility failure by stripping namespaces or renaming the part.
+
 For `fonts`, `missingRiskCandidates` excludes common system fonts such as
 Arial, Aptos, Calibri, Times New Roman, Courier New, Helvetica, Verdana, and
 Tahoma. These may appear under `systemFontCandidates`: acceptable for many

@@ -362,23 +362,39 @@ scatter / bubble 误传 `categories + values`：
 
 修复：
 
-1. 把资源移进 `--asset-root` 指定的目录
-2. 或扩大 `--asset-root` 范围
-3. 不要用绝对路径或 `..`
+1. 将本次所需资源复制到专用资产目录，保留用户原文件，以相对路径引用。
+2. 显式指定覆盖本次资源的 `--asset-root`；省略时根目录是 patch 文件所在目录，
+   不是进程 cwd。重定位 patch 时同步核对资产根目录。
+3. 路径同时受词法和实际文件系统边界约束：绝对路径、`..` 越界、逃逸符号链接
+   以及指向根外的目录链接均不可用。不要扩大到整个 home/磁盘来绕过诊断。
+   CLI、daemon、MCP 使用同一资产策略，切换 transport 不会解除约束。
 
 ### 6. length 格式错
 
-```json
-{ "code": "invalid_argument", "message": "add-text-box requires x" }
-```
-
-非法 length（含裸数字）会被当作字段缺失报告，message 不会回显原值。修复：
+新版运行时区分缺失与非法值：`add-text-box` 的非法 length 返回 `invalid_argument`，
+`error.path` 指向具体字段（嵌套 op 保留实际 authored path），`expected` 说明显式单位，
+`actual` 保留原值。缺失字段则报告 `required field` / `actual: "missing"`。
+先按当前报告修复该字段，不依赖旧版 message 文案。运行时不知道裸数字的目标单位时，
+会给出 `remediationUnavailable.reason: "input-required"`，而不是可自动执行的替换请求；
+必须按设计意图选单位，不能删除整条 op、静默猜单位或把提示视为自动重试授权。修复：
 
 | 写错                         | 改成                                                      |
 | ---------------------------- | --------------------------------------------------------- |
 | `"1 inch"`                   | `"1in"`                                                   |
 | `"1.5 in"`                   | `"1.5in"`（去空格）                                       |
 | `1` / `914400` 想表达 1 英寸 | `"1in"`（裸数字被拒绝，必须带 `in/cm/mm/pt/px/emu` 单位） |
+
+### 6a. 源保护或 shape autofit 失败
+
+`invalid_parameter` 的 `details.field: "/ops/<index>/shape"` 配合
+`reason: "unsupported"` 表示 guard 需要 numeric ID，不能用 name/query；
+`i18n_source_guard_mismatch` 才表示源验证失败。按结构化字段回到同一输入 inspect/scan，
+完整规则见 `inspect-and-edit.md`，不要删 guard。
+
+带 guard 的嵌套文本编辑报 `invalid_argument` 时，将操作显式放到顶层 `ops[]`。
+原生 shape autofit 的测量失败可能在 opResults 已显示局部操作成功后返回顶层
+`invalid_operation`；局部成功不代表候选已发布。核对顶层状态与实际文件，保留报告，
+按其横排、单列矩形框和字体度量边界修正，不要把失败 candidate 当成输出。
 
 ### 7. color 格式错
 

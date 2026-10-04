@@ -169,7 +169,8 @@ when the machine gate passes.
 Then resume with `--apply`. The runner revalidates source bytes, classified-unit
 bytes, languages, every source hash, and the translation constraints before
 producing a stable prepared candidate. Feed that candidate, the emitted
-classified scan, and `translations.json` to the finalizer in
+effective units (`artifacts.classifiedScan` when non-null, otherwise
+`artifacts.scan`), and `artifacts.translations` to the finalizer in
 `references/translation-runner.md`.
 If the current xdoc capability index discloses `pptx.i18n-anchor-draft` and the
 first plan is blocked, the runner invokes that read-only helper before asking
@@ -234,6 +235,13 @@ debugging path.
      rebuild the plan; do not reconstruct part paths from `unitId`, logical
      slide numbers, or the candidate deck. Table selectors retain their own
      `part` contract.
+     A non-empty string is not enough: `i18n-plan` and `i18n-anchor-draft`
+     also require that part to exist in the source package and match the
+     selector's 1-based slide through the source presentation's ordered
+     relationships, including review/preserve units. Reordered or relocated
+     source slides require a fresh scan even when their text is unchanged.
+     Candidate verification continues to use the recorded source part; never
+     rebind it from candidate slide order or assume `slideN.xml` naming.
 4. Build `<run-dir>/translations.json` using
    `pptx-i18n-translations/v1`. Create one record for every
    `i18nUnits.units[]` item with `action: "translate"`:
@@ -442,6 +450,14 @@ debugging path.
      `sourceText`, and `sourceHash` guards. The structured operation additionally
      carries `expectedNodes[]` and applies all ordinary-run replacements as one
      guarded operation; never hand-edit or weaken those fields.
+     Keep these ops at the top level of `patch.ops[]`, with the numeric shape
+     IDs supplied by the plan; do not wrap them in control flow/macros or
+     replace IDs with names/queries. Guards refer to the complete input
+     paragraph before any op runs. Read `inspect-and-edit.md` for structured
+     guard errors and native shape-autofit geometry changes. An inherited
+     `shape` autofit setting can resize a translated text frame during apply;
+     audit that change under the controlled fitting policy rather than
+     automatically declaring layout preservation.
      ```bash
      xdoc pptx apply \
        --input <current-candidate.pptx> \

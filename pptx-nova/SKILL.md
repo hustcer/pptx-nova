@@ -108,7 +108,10 @@ Use these only to choose the entry reference; the routing table owns details.
   The runner prepares canonical candidate evidence first; after actual PNG review, use its
   `--finalize --visual-review` phase to publish the same hash-bound candidate without rendering again.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
-  collect scoped evidence, run the contract gate, then review changed slides.
+  collect scoped evidence, run the contract gate, then review changed slides. Source-guarded
+  `set-run` / `replace-paragraph-text` edits require top-level operations and input-bound numeric
+  shape IDs. Read `inspect-and-edit.md` for paragraph guards and native shape-autofit reflow;
+  a text/font edit can resize an existing shape-autofit frame before serialization.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
   complex or unsupported timing. For basic effects, follow the disclosed repeat/autoReverse/restart/
   easing contract and its omitted/null/value update semantics.

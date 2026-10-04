@@ -58,6 +58,33 @@ For the affected content, extend the check without rewriting the source:
   about native font resolution. Record resolved fonts. Character Morph playback
   has its own text-ownership behavior; static exports do not certify it.
 
+Recent rendering changes also require these distinctions when reviewing the same bytes:
+
+- Text/effects: preserve leading, repeated and trailing spaces, implicit versus
+  explicit-zero kerning, authored gradients across adjacent equivalent runs,
+  glyph glow and line-scoped colored reflections. Shape shadow/glow/soft-edge/
+  reflection paint has separate geometry and clipping from glyph effects.
+  Do not split runs, insert spaces or disable effects to imitate an old export.
+- Fonts: record the actual resolved family/style and TTC face when disclosed,
+  including Office aliases and Apple TrueType sources. A valid font file, an
+  authored font declaration and an embedded PDF font are different facts.
+- SmartArt: distinguish cached drawing precedence from supported cacheless
+  linear-process/organization projections; keep semantic hierarchy, assistant
+  branches, node/connector identities, theme paint and authored label metrics.
+  A newly visible projection does not grant SmartArt authoring or universal
+  layout support. Compare with the original and current capability evidence.
+- Charts: examine stock category slots/markers, bubble size, hierarchy colors,
+  treemap typography/plot area and 3D camera/aspect/axis/label/lighting rules.
+  Automatic defaults and explicit overrides differ; do not force a generic
+  chart font size or flatten 3D data to match old preview pixels. For histograms,
+  retain observations and verify Office acceptance of authored bin width/count,
+  not just the histogram image or a nominal XML schema pass.
+- Media/3D/playback: retain authored audio icons, shape/text 3D camera and volume
+  declarations, and existing wipe/Morph/chart/SmartArt timing. Improvements in
+  one renderer do not change inspect/edit/preserve/verify axes. Check actual
+  per-object output and independent PowerPoint evidence; do not label remaining
+  camera, material, text or playback discrepancies as certified fidelity.
+
 ## A small experiment should answer one question
 
 Keep the input and control unchanged. State the predicted result, change one

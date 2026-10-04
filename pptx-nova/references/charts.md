@@ -430,6 +430,10 @@ ChartEx 语义要点：
   左/右闭合规则、边界值与计数总和，尤其是小数箱宽、大数偏移和极小间隔。已有 OOXML
   的 binSize/binCount/underflow/overflow 等设置属于需要检查的输入语义；可写字段仍以
   当前 `add-chart` / `set-chart-data` schema 为准，不能把 renderer 的内部字段当 patch 字段。
+  检查新生成的包时，Office 的 `cx:binSize` / `cx:binCount` 数值写在 `val` 属性中，
+  不要改成元素文本以迎合名义 simple-content schema。优先让原生 chart op 生成，
+  保留缓存/嵌入工作簿一致性检查，并通过 PowerPoint clean-open 验证；静态图像正常
+  或 schema 单独通过都不能排除 Repair。导入图表的既有 binning 声明仍需按源证据处理。
 - `sunburst` / `treemap`：层级输入可用 `nodes[]`，但写入 ChartEx 时通常只输出叶子行；
   多级 category cache 按 PowerPoint 的 leaf-to-root 层级顺序写入，不能把中间节点也当成
   独立 data point。

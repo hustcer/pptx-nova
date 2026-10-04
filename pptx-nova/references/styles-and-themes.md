@@ -186,7 +186,7 @@ crop/tile 显示差异就删除这些设置。已有 picture shape 的裁剪或 
 | `name`            | 字体族名（如 `Inter` / `Microsoft YaHei` / `Source Han Sans SC`） |
 | `eastAsian`       | 东亚脚本字体；省略保留，`null` 清除并恢复继承                     |
 | `complexScript`   | 阿拉伯文等复杂脚本字体；省略保留，`null` 清除并恢复继承           |
-| `letterSpacing`   | 字符间距；显式 `pt` 字符串或等价 raw EMU，`null` 清除             |
+| `letterSpacing`   | 字符间距；仅显式 `pt` 字符串，拒绝裸数字；省略保留，`null` 清除   |
 | `kern`            | 字偶距调整的最小字号阈值；仅在当前 schema 披露时使用，规则见下文  |
 | `size`            | 使用 `"<n>pt"` 等带单位的 length 字符串；裸数字会被拒绝           |
 | `bold` / `italic` | 布尔                                                              |

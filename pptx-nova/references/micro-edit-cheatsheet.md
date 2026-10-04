@@ -189,7 +189,7 @@ Run changed-slide PNG preview when any of these are true:
 Changed-slide preview command:
 
 ```bash
-xdoc convert <run-dir>/candidate.pptx --to png --slide <1-based-slide> \
+xdoc convert <run-dir>/candidate.pptx --to png --slides <1-based-slide> \
   -o <run-dir>/previews --overwrite
 ```
 

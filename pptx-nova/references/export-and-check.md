@@ -395,7 +395,7 @@ placeholder prose, has `autoApplicable: false`, and has no executable remediatio
 target; replace it with a truthful description and dry-run it, never merge
 the placeholder unchanged. With `--target-office` earlier than 2019, a visual
 marked only as decorative still needs a description fallback or produces
-`a11y_decorative_not_supported`. Scoped `--slide` findings do not prove a
+`a11y_decorative_not_supported`. Scoped `--slides` findings do not prove a
 deck-wide pass; verify `details.scope.outOfScopeFindingCount` and deck coverage.
 
 ## Extract

@@ -327,6 +327,11 @@ The default test suite skips these cases when `XDOC_TEST_BIN` is absent. Set
 `XDOC_TEST_EVIDENCE_DIR` to retain the independently allocated scenario outputs;
 these maintainer tests are not dependencies of the published skill.
 
+Add `XDOC_TEST_VISUAL=1` to also check every Cartesian stock page through
+canonical PDF/PNG Create gates. This additional case uses the installed
+authorization and requires an unwatermarked CLI License; the ordinary native
+cases keep isolated configuration. Evidence directories may be relative or absolute.
+
 `xdoc` is the in-house, agent-oriented PPTX engine behind pptx-nova, exposed to
 the skill through its primary CLI. pptx-nova uses it for PowerPoint inspection,
 declarative patch dry-runs and application, conversion, preview rendering,

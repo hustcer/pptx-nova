@@ -199,6 +199,12 @@ The ordinary `pptx-nova-edit-contract-gate.mjs --strict` then verifies:
 - final inspect contains the declared object on the declared slide;
 - candidate PPTX bytes contain the required font/fill value.
 
+Candidate-byte checks follow the resolved numeric shape ID from final inspect;
+an ID lookup never falls back to another object with the same name. Name-only
+targets must resolve uniquely on the declared slide. Bind an inspected ID when
+names collide; ambiguous identity blocks the gate instead of accepting the
+first matching object.
+
 Every applicable rule is reported in `sessionRuleResults[]` as `satisfied` or
 `blocked`. A failed style postcondition returns
 `nextAction: "apply-session-rules"`; stale bindings return

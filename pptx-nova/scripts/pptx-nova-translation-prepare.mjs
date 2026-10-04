@@ -566,6 +566,7 @@ function initialSummary(args, artifacts) {
     artifacts,
     phases: [],
     inventory: null,
+    units: null,
     memory: null,
     glossary: null,
     constraints: null,
@@ -631,6 +632,7 @@ function prepareInventory(args, artifacts, summary, reporter) {
     ]
     return null
   }
+  summary.units = { path: classified.path, sha256: sha256(classified.path) }
   return classified
 }
 
@@ -1056,12 +1058,14 @@ function compactResult(summary) {
       glossary: summary.glossary,
       constraints: summary.constraints,
       inventory: summary.inventory,
+      units: summary.units,
       plan: summary.plan,
       anchorDraft: summary.anchorDraft,
       translationCount: summary.translationCount ?? null,
     },
     artifacts: {
       summary: summary.artifacts.summary,
+      units: summary.units?.path ?? null,
       prompt:
         summary.artifacts.prompt && existsSync(summary.artifacts.prompt)
           ? summary.artifacts.prompt
@@ -1077,7 +1081,8 @@ function compactResult(summary) {
           ? summary.artifacts.reviewInventory
           : null,
       classifiedScan:
-        phasePassed('classify-review-units') && existsSync(summary.artifacts.classifiedScan)
+        summary.units?.path === summary.artifacts.classifiedScan &&
+        existsSync(summary.artifacts.classifiedScan)
           ? summary.artifacts.classifiedScan
           : null,
       reviewDecisionsTemplate:

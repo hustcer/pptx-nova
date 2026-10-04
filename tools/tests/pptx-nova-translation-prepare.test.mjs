@@ -401,6 +401,9 @@ test('translation preparation deduplicates memory and resumes through guarded ap
     '--json',
   ])
   assert.equal(applied.status, 'prepared')
+  assert.equal(applied.artifacts.classifiedScan, resumed.artifacts.classifiedScan)
+  assert.equal(applied.artifacts.units, resumed.artifacts.classifiedScan)
+  assert.equal(applied.summary.units.sha256, memory.units.sha256)
   assert.equal(applied.summary.translationCount, 5)
   assert.deepEqual(readFileSync(applied.artifacts.candidate), translationSource)
   assert.equal(readFileSync(join(root, 'probe-count.txt'), 'utf8'), '5')

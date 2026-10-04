@@ -2595,7 +2595,7 @@
     },
     {
       "id": "cartesian",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "path": "cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -2850,7 +2850,7 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-09-21",
+        "lastBenchmark": "2026-10-04",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -2870,10 +2870,10 @@
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-09-21",
+          "date": "2026-10-04",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-cartesian/verified-animation-corpus"
+            "out": ".tmp/deckkit-cartesian/runtime-review-20261004-150456/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -2900,7 +2900,7 @@
               "caseId": "cartesian.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-cartesian/verified-animation-corpus/cartesian/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-cartesian/runtime-review-20261004-150456/benchmark/cartesian/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -2937,10 +2937,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 180064
+                "bytes": 180220
               },
               "patchOps": 383,
-              "p50TotalMs": 68.53
+              "p50TotalMs": 50.13
             }
           ],
           "blockers": []

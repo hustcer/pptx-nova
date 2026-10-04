@@ -20,6 +20,12 @@ xdoc schema --minimal                # 删 verbose 字段（与上面任一组�
 用在别的 mode 上直接报错。`--fields` 的 required 字段会自动保留，未知字段直接报错；
 `--defs` 只用于字段投影，因此也要求 `--fields`，默认值为 `full`。
 
+能力探测同时读取 `schemaDisclosure.modes` 和 `schemaDisclosure.refinements`；
+新版将 `--fields` / `--defs` 放在 refinements，旧版可能放在 modes。
+`commands.schema.disclosure` 也可提供这份合同。以当前 snapshot 的
+`fieldsAvailable` / `summaryDefsAvailable` 选路，不因 mode 列表里没有字段 flag
+而退回完整 schema；未披露时仍用当前 help/schema 确认。
+
 ## Action 级 CLI 帮助
 
 只需要确认某个 PPTX action 的调用方式时，先用低成本的 action help，无需拉完整 schema：

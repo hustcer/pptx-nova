@@ -444,6 +444,7 @@ function sessionRuleSlideXml({
   color = '0076A8',
   elementKind = 'slide-title',
   shapeName = 'S8_Title',
+  shapeId = 2,
 } = {}) {
   const shapeFill =
     elementKind === 'summary-box'
@@ -453,7 +454,7 @@ function sessionRuleSlideXml({
     elementKind === 'slide-title' ? `<a:solidFill><a:srgbClr val="${color}"/></a:solidFill>` : ''
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
-  <p:cSld><p:spTree><p:sp><p:nvSpPr><p:cNvPr id="2" name="${shapeName}"/></p:nvSpPr>
+  <p:cSld><p:spTree><p:sp><p:nvSpPr><p:cNvPr id="${shapeId}" name="${shapeName}"/></p:nvSpPr>
   <p:spPr>${shapeFill}</p:spPr><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r>
   <a:rPr lang="en-US" sz="1800">${runFill}<a:latin typeface="Arial"/></a:rPr>
   <a:t>P1 Session Rules</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld>
@@ -465,6 +466,7 @@ function writeSessionRuleFixture({
   elementKind = 'slide-title',
   expectedColor = elementKind === 'summary-box' ? 'F2F2F2' : '0076A8',
   decoyColor = '',
+  sameNameDecoyColor = '',
 } = {}) {
   const fixture = writeFixture()
   const shapeName = elementKind === 'summary-box' ? 'S8_SummaryBox' : 'S8_Title'
@@ -484,6 +486,18 @@ function writeSessionRuleFixture({
     })
   }
   zipEntries['ppt/slides/slide9.xml'] = sessionRuleSlideXml({ color, elementKind, shapeName })
+  if (sameNameDecoyColor) {
+    const decoy = sessionRuleSlideXml({
+      color: sameNameDecoyColor,
+      elementKind,
+      shapeName,
+      shapeId: 7,
+    }).match(/<p:sp>[\s\S]*?<\/p:sp>/)[0]
+    zipEntries['ppt/slides/slide9.xml'] = zipEntries['ppt/slides/slide9.xml'].replace(
+      '<p:spTree>',
+      `<p:spTree>${decoy}`,
+    )
+  }
   writeStoredZip(fixture.candidate, zipEntries)
   writeJson(fixture.sessionRulesDraft, {
     schemaVersion: 'pptx-nova-session-rules/v1',
@@ -663,6 +677,7 @@ function writeSessionRuleFixture({
       {
         index: 8,
         shapes: [
+          ...(sameNameDecoyColor ? [{ id: 7, name: shapeName, shapeType: 'textBox' }] : []),
           {
             id: 2,
             name: shapeName,
@@ -1379,6 +1394,29 @@ test('edit contract gate does not accept a matching shape name from the wrong sl
 
   assert.equal(report.agentGate.nextAction, 'apply-session-rules')
   assert.equal(report.sessionRuleResults[0].postconditions[0].actual, 'D62728')
+})
+
+for (const [color, decoyColor, passed] of [
+  ['D62728', '0076A8', false],
+  ['0076A8', 'D62728', true],
+]) {
+  test(`session style gate follows the resolved ID with a same-name decoy (passed=${passed})`, () => {
+    const fixture = writeSessionRuleFixture({ color, sameNameDecoyColor: decoyColor })
+    const contract = generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+    contract.targets.find((target) => target.sessionRuleIds?.length).resolvedIdentity.id = 2
+    writeJson(fixture.contract, contract)
+    const report = runGate(fixture, passed ? 0 : 2)
+    assert.equal(report.agentGate.passed, passed)
+    assert.equal(report.sessionRuleResults[0].postconditions[0].actual, color)
+  })
+}
+
+test('session style gate blocks ambiguous names when no stable ID is bound', () => {
+  const fixture = writeSessionRuleFixture({ sameNameDecoyColor: '0076A8' })
+  generateContract(fixture, { sessionResolution: fixture.sessionResolution })
+  const report = runGate(fixture, 2)
+  assert.equal(report.agentGate.passed, false)
+  assert.equal(report.agentGate.nextAction, 'apply-session-rules')
 })
 
 test('edit contract gate proves a produced summary-box fill rule from candidate bytes', () => {

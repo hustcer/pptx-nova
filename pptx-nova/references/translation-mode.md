@@ -169,8 +169,8 @@ when the machine gate passes.
 Then resume with `--apply`. The runner revalidates source bytes, classified-unit
 bytes, languages, every source hash, and the translation constraints before
 producing a stable prepared candidate. Feed that candidate, the emitted
-effective units (`artifacts.classifiedScan` when non-null, otherwise
-`artifacts.scan`), and `artifacts.translations` to the finalizer in
+effective units (`artifacts.units`, bound in `summary.units`), and
+`artifacts.translations` to the finalizer in
 `references/translation-runner.md`.
 If the current xdoc capability index discloses `pptx.i18n-anchor-draft` and the
 first plan is blocked, the runner invokes that read-only helper before asking

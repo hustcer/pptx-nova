@@ -34,13 +34,12 @@ as apply authorization. This finalizer begins only after that preparation result
 Preparation keeps review partitions count-only by default; use
 `--expand-review <languageUncertain|shared|embeddedWorkbook|other>` to persist
 one bound partition when its individual units are actually needed.
-Read the preparation result's actual artifact paths: use
-`artifacts.classifiedScan` when non-null, otherwise `artifacts.scan` as the
-effective units file. A run with no classification work does not create
-`i18n-scan-classified.json`; do not invent that file or reclassify a completed
-inventory just to satisfy a filename. Use the same effective inventory that
-the successful plan consumed, plus `artifacts.candidate` and
-`artifacts.translations`.
+Use `artifacts.units`: the inventory and SHA-256 recorded in `summary.units` and used by planning,
+including when `--apply` reuses approved classification. With older preparation scripts, use
+`artifacts.classifiedScan` when non-null, otherwise `artifacts.scan` after checking the translation
+memory's bound units path/hash. No classification work means no `i18n-scan-classified.json`; do not
+invent that file or reclassify to satisfy a filename. Use the same effective inventory as the
+successful plan, plus `artifacts.candidate` and `artifacts.translations`.
 
 ## Standard command
 

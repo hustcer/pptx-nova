@@ -17,22 +17,32 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
 
 const binary = process.env.XDOC_TEST_BIN ? resolve(process.env.XDOC_TEST_BIN) : null
 const evidence = process.env.XDOC_TEST_EVIDENCE_DIR
+  ? resolve(process.env.XDOC_TEST_EVIDENCE_DIR)
+  : null
 const prepareScript = fileURLToPath(
   new URL('../../pptx-nova/scripts/pptx-nova-translation-prepare.mjs', import.meta.url),
 )
-const nativeTest = (name, fn) =>
+const cartesianContent = fileURLToPath(
+  new URL('../../pptx-nova/assets/deckkits/examples/cartesian-content.json', import.meta.url),
+)
+const nativeTest = (name, fn, { visual = false } = {}) =>
   test(
     name,
     {
-      skip: binary ? false : 'Set XDOC_TEST_BIN to run executable contract tests',
+      skip: !binary
+        ? 'Set XDOC_TEST_BIN to run executable contract tests'
+        : visual && process.env.XDOC_TEST_VISUAL !== '1'
+          ? 'Set XDOC_TEST_VISUAL=1 with an installed unwatermarked CLI License'
+          : false,
     },
     fn,
   )
 
-function scenario(t) {
+function scenario(t, { useInstalledAuthorization = false } = {}) {
   if (evidence) mkdirSync(evidence, { recursive: true })
   const directory = mkdtempSync(join(evidence || tmpdir(), 'nova-native-'))
   if (!evidence) t.after(() => rmSync(directory, { recursive: true, force: true }))
@@ -42,7 +52,10 @@ function scenario(t) {
   const env = Object.fromEntries(
     Object.entries(process.env).filter(([key]) => !key.startsWith('XDOC_')),
   )
-  Object.assign(env, { XDOC_CONFIG_PATH: config, CI: 'false' })
+  Object.assign(env, {
+    ...(useInstalledAuthorization ? {} : { XDOC_CONFIG_PATH: config }),
+    CI: 'false',
+  })
   let sequence = 0
   const write = (name, value) => {
     const path = join(directory, name)
@@ -123,6 +136,35 @@ function scenario(t) {
     ).output
   return { directory, write, run, apply, body, create }
 }
+
+nativeTest(
+  'Cartesian stock pages pass canonical PDF layout checks without shrinking display fonts',
+  (t) => {
+    const s = scenario(t, { useInstalledAuthorization: true })
+    const { patch } = createDeck(JSON.parse(readFileSync(cartesianContent, 'utf8')))
+    const candidate = s.apply(patch.ops).output
+    const output = join(s.directory, 'visual-evidence')
+    s.run([
+      'pptx',
+      'visual-audit',
+      '--candidate',
+      candidate,
+      '--visual-mode',
+      'create',
+      '--output-dir',
+      output,
+      '--json',
+    ])
+    const manifest = JSON.parse(readFileSync(join(output, 'manifest.json'), 'utf8'))
+    assert.equal(
+      manifest.checks.find((check) => check.id === 'pdf-final-layout').outcome,
+      'pass',
+      JSON.stringify(manifest.findings),
+    )
+    assert.equal(manifest.decision.action, 'proceed')
+  },
+  { visual: true },
+)
 
 nativeTest(
   'source guards use stable IDs and the original complete paragraph across run edits',

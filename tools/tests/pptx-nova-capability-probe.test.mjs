@@ -92,6 +92,13 @@ const animationAxes = mode === 'missing-required-axes'
   : mode === 'malformed-required-axes'
     ? { ...axes, verify: { ...axes.verify, status: 'unknown' } }
     : axes
+const slicingFlags = [{ flag: '--fields a,b,c' }, { flag: '--defs summary|full' }]
+const schemaDisclosure = {
+  modes: [{ flag: '--mode index' }, { flag: '--mode ops --ops a,b,c' },
+    ...(mode === 'legacy-slicing' ? slicingFlags : [])],
+  ...(mode === 'refinement-slicing' || mode === 'command-slicing'
+    ? { refinements: slicingFlags } : {})
+}
 if (args[0] === 'schema') {
   if (mode === 'degraded') {
     process.stderr.write('schema unavailable\\n')
@@ -102,7 +109,7 @@ if (args[0] === 'schema') {
     schemaVersion: mode === 'future-schema' ? 'cli-agent/vNext' : 'cli-agent/v1',
     commands: {
       convert: {},
-      schema: {},
+      schema: mode === 'command-slicing' ? { disclosure: schemaDisclosure } : {},
       mcp: {
         inputMode: 'stream',
         ioContract: {
@@ -268,7 +275,7 @@ if (args[0] === 'schema') {
           operationIndex: { 'set-text-frame': { feature: 'text', subset: 'native-authoring' } },
           legacyProjection: { schemaVersion: 'pptx-capability-legacy-projection/v1', lossy: true, partialStatus: 'not-represented', supported: ['set-text-frame'], preservedOnly: ['slide-transition/extended-existing-effects'], unsupported: [] }
         },
-        schemaDisclosure: { modes: [{ flag: '--mode index' }, { flag: '--mode ops --ops a,b,c' }] },
+        ...(mode === 'command-slicing' ? {} : { schemaDisclosure }),
         patchSchema: { capabilityVersion: 'fake-v1', supportedOps: ['set-text-frame', 'set-slide-transition'], operations: [{ op: 'set-text-frame' }, { op: 'set-slide-transition' }] },
         recipeOps: [], enumRegistry: { enums: {} },
         catalogs: { themes: { ids: [] }, styles: { ids: [] }, nativeDeckkits: { deckkits: [] } }
@@ -293,6 +300,30 @@ function runProbe(xdoc, args = [], env = {}) {
     env: { ...process.env, ...env },
   })
 }
+
+for (const mode of ['legacy-slicing', 'refinement-slicing', 'command-slicing']) {
+  test(`probe discovers field and definition projection from ${mode}`, () => {
+    const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+    const result = runProbe(xdoc, [], { FAKE_XDOC_MODE: mode })
+    assert.equal(result.status, 0, result.stderr)
+    const slicing = JSON.parse(result.stdout).capabilities.schemaSlicing
+    assert.equal(slicing.available, true)
+    assert.equal(slicing.fieldsAvailable, true)
+    assert.equal(slicing.defsAvailable, true)
+    assert.deepEqual(slicing.defsModes, ['summary', 'full'])
+    assert.equal(slicing.summaryDefsAvailable, true)
+  })
+}
+
+test('probe does not infer projection flags from operation disclosure alone', () => {
+  const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+  const result = runProbe(xdoc)
+  assert.equal(result.status, 0, result.stderr)
+  const slicing = JSON.parse(result.stdout).capabilities.schemaSlicing
+  assert.equal(slicing.fieldsAvailable, false)
+  assert.equal(slicing.defsAvailable, false)
+  assert.equal(slicing.summaryDefsAvailable, false)
+})
 
 test('capability probe captures truth and satisfies an exact supported feature', () => {
   const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))

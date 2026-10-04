@@ -229,13 +229,19 @@ function slideXmlEntries(candidate) {
     .sort((left, right) => left.index - right.index)
 }
 
-function findShapeXml(slides, slideIndex, shapeName) {
-  const namePattern = new RegExp(`\\bname="${escapeRegExp(shapeName)}"`)
+function findShapeXml(slides, slideIndex, identity) {
+  const hasId = identity.id !== null && identity.id !== undefined
+  const identityPattern = new RegExp(
+    `\\b${hasId ? 'id' : 'name'}="${escapeRegExp(hasId ? identity.id : identity.name)}"`,
+  )
   const slide = slides.find((item) => item.index === slideIndex)
   if (!slide) return null
   const blocks = slide.xml.match(/<p:sp(?:\s[^>]*)?>[\s\S]*?<\/p:sp>/g) ?? []
-  const block = blocks.find((item) => namePattern.test(item))
-  return block ? { part: slide.name, xml: block } : null
+  const matches = blocks.filter((item) => {
+    const nonVisualProperties = item.match(/<p:cNvPr\b[^>]*>/)?.[0]
+    return nonVisualProperties && identityPattern.test(nonVisualProperties)
+  })
+  return matches.length === 1 ? { part: slide.name, xml: matches[0] } : null
 }
 
 function shapeFontColors(shapeXml) {
@@ -392,9 +398,7 @@ function checkSessionRulePostconditions(contract, args, resolution, finalInspect
     let rulePassed = ruleTargets.length > 0
     for (const target of ruleTargets) {
       const inspected = findInspectedShape(finalInspect, target)
-      const shape = inspected
-        ? findShapeXml(slides, target.slide, target.resolvedIdentity?.name)
-        : null
+      const shape = inspected ? findShapeXml(slides, target.slide, inspected) : null
       const postconditions = []
       for (const condition of target.expected?.sessionRulePostconditions ?? []) {
         let actual = null
@@ -423,6 +427,7 @@ function checkSessionRulePostconditions(contract, args, resolution, finalInspect
       targetResults.push({
         targetId: target.id,
         slide: target.slide,
+        shapeId: inspected?.id ?? null,
         shapeName: target.resolvedIdentity?.name ?? null,
         inspected: Boolean(inspected),
         candidatePart: shape?.part ?? null,
@@ -1251,11 +1256,12 @@ function checkExpectedStructure(contract, diff, report) {
 function findInspectedShape(inspect, target) {
   const slide = (inspect?.slides ?? []).find((item) => item?.index === target.slide)
   const identity = selectorIdentity(target)
-  return (slide?.shapes ?? []).find(
-    (shape) =>
-      (identity.id !== null && shape?.id === identity.id) ||
-      (identity.name && shape?.name === identity.name),
+  const matches = (slide?.shapes ?? []).filter((shape) =>
+    identity.id !== null
+      ? shape?.id === identity.id
+      : identity.name && shape?.name === identity.name,
   )
+  return matches.length === 1 ? matches[0] : null
 }
 
 function checkAlreadyCompliant(contract, finalInspect, report) {

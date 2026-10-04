@@ -1,5 +1,5 @@
 // cartesian.kit.mjs - Minimal editorial geometry DeckKit
-// version: 0.3.0
+// version: 0.3.1
 import { createOps, fitImageRect, nm } from './core-primitives.kit.mjs'
 
 export const C = {
@@ -78,8 +78,12 @@ function makeCartesianOps(options = {}) {
     line: { width, color, ...(dash ? { dash } : {}) },
   })
   const rect = (s, base, x, y, w, h, color) => p.box(s, nm(s, base), 'rectangle', x, y, w, h, color)
-  const tx = (s, base, x, y, w, h, text, font, align) =>
-    p.tx(s, nm(s, base), x, y, w, h, String(text ?? ''), font, align)
+  const tx = (s, base, x, y, w, h, text, font, align) => {
+    // The native renderer's display-font line box is 1.2 em, even for a short title.
+    const frameHeight =
+      font.name === FONT_DISPLAY ? Math.max(h, (parseFloat(font.size) * 1.2) / 72) : h
+    return p.tx(s, nm(s, base), x, y, w, frameHeight, String(text ?? ''), font, align)
+  }
   const rule = (s, base, x, y, w, color = C.line, h = 0.01) => rect(s, base, x, y, w, h, color)
   const outline = (s, base, shape, x, y, w, h, color = C.line, width = '0.75pt', dash) => {
     const name = rawShape(s, base, shape, x, y, w, h)
@@ -477,7 +481,7 @@ function renderSlide(ctx, s, slide) {
       const x = MX + i * 3.066
       tx(s, `Phase${i}`, x, 3.9, 2.65, 0.23, upper(item.phase), f(10, C.accent))
       tx(s, `StepTitle${i}`, x, 4.18, 2.65, 0.3, item.title, d(14.5, C.ink))
-      tx(s, `StepBody${i}`, x, 4.51, 2.65, 0.5, item.body, f(10.5, C.body))
+      tx(s, `StepBody${i}`, x, 4.51, 2.65, 0.55, item.body, f(10.5, C.body))
     })
     return
   }

@@ -658,10 +658,14 @@ function createReport(args) {
   const patchSchema = pptx.patchSchema ?? {}
   const capabilityTruth = capabilityTruthIndex(pptx.capabilityTruth)
   const catalogs = pptx.catalogs ?? {}
-  const schemaSlicingModes = namesFromCollection(pptx.schemaDisclosure?.modes, ['flag'])
-  const fieldsAvailable = schemaSlicingModes.some((mode) => mode.startsWith('--fields'))
-  const defsAvailable = schemaSlicingModes.some((mode) => mode.startsWith('--defs'))
-  const defsModes = disclosedFlagValues(schemaSlicingModes, '--defs')
+  const schemaDisclosure = pptx.schemaDisclosure ?? schema?.commands?.schema?.disclosure
+  const schemaSlicingModes = namesFromCollection(schemaDisclosure?.modes, ['flag'])
+  const schemaRefinements = namesFromCollection(schemaDisclosure?.refinements, ['flag'])
+  // Older schemas listed projection flags as modes; current contracts separate refinements.
+  const schemaSlicingFlags = uniqueSorted([...schemaSlicingModes, ...schemaRefinements])
+  const fieldsAvailable = schemaSlicingFlags.some((flag) => /^--fields(?:\s|$)/.test(flag))
+  const defsAvailable = schemaSlicingFlags.some((flag) => /^--defs(?:\s|$)/.test(flag))
+  const defsModes = disclosedFlagValues(schemaSlicingFlags, '--defs')
   const summaryDefsAvailable = defsModes.includes('summary')
   const capabilities = {
     commands: objectKeys(schema?.commands).sort(),
@@ -684,13 +688,14 @@ function createReport(args) {
     generatorDeckkits: generatorDeckkitIndex(),
     agentTransports: agentTransportIndex(schema?.commands),
     schemaSlicing: {
-      available: Boolean(pptx.schemaDisclosure),
+      available: Boolean(schemaDisclosure),
       modes: schemaSlicingModes,
+      refinements: schemaRefinements,
       fieldsAvailable,
       defsAvailable,
       defsModes,
       summaryDefsAvailable,
-      recommended: pptx.schemaDisclosure?.agentHint ?? null,
+      recommended: schemaDisclosure?.agentHint ?? null,
     },
     commandFlags: helpFlagIndex(args.xdocBin),
   }

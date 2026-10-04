@@ -30,8 +30,10 @@ Use them as examples, then create or overwrite fresh `deck_lock.json` and
 `content.json`; do not append a second JSON object to a template file.
 After both files are ready, prefer the generated `commands.json.run` command or
 call `pptx-nova-create-run.mjs` directly. It runs validate/build/check-lock,
-dry-run, apply, vision-check, preview/contact-sheet, and final publish while
-preserving every intermediate artifact.
+dry-run, apply, vision-check and canonical PDF/PNG evidence while preserving
+every intermediate artifact. After actual visual review, its separate
+`--finalize --visual-review <path>` phase publishes the same bound candidate
+without rebuilding or rendering; see `create-runner.md`.
 
 Keep all temporary files in that run directory, including `outline.json`,
 `deck_lock.json`, `session-rules.json`, `session-operation.json`,

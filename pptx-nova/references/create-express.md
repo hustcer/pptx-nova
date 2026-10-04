@@ -47,10 +47,11 @@ main assumptions in the final summary.
 6. Validate content in delivery mode.
 7. Build patch with the selected DeckKit.
 8. Run `pptx-nova-create-run.mjs` to execute check-lock, dry-run, apply,
-   vision-check, PNG/contact-sheet preview, and final publish in one fail-closed
-   command while keeping the intermediate artifacts.
-9. Review the contact sheet/PNG artifacts and write the concise completion
-   summary.
+   vision-check and canonical PDF/PNG evidence while keeping the intermediate artifacts.
+9. Review the exact canonical PNGs, record `visual_review.json`, then repeat the
+   Create command with `--finalize --visual-review <path>` to publish that same
+   candidate without rebuilding or rendering. Follow `create-runner.md` for the
+   required review checks and finalization binding, then write the completion summary.
 
 If no production/default DeckKit fits, do not silently build a huge one-off
 patch. Either ask for approval to use a candidate/draft path, or create/extend a

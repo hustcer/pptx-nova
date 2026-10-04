@@ -29,6 +29,8 @@ const prepareScript = fileURLToPath(
 const cartesianContent = fileURLToPath(
   new URL('../../pptx-nova/assets/deckkits/examples/cartesian-content.json', import.meta.url),
 )
+const skillScript = (name) =>
+  fileURLToPath(new URL(`../../pptx-nova/scripts/${name}.mjs`, import.meta.url))
 const nativeTest = (name, fn, { visual = false } = {}) =>
   test(
     name,
@@ -84,7 +86,9 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     assert.equal(result.error, undefined)
     assert.equal(result.signal, null)
     const report = JSON.parse(result.stdout)
-    if (expectedCode) {
+    if (typeof expectedCode === 'number') {
+      assert.equal(result.status, expectedCode, result.stdout + result.stderr)
+    } else if (expectedCode) {
       assert.notEqual(result.status, 0, result.stdout)
       assert.equal(report.error.code, expectedCode, result.stdout)
     } else {
@@ -302,6 +306,52 @@ nativeTest(
 )
 
 nativeTest(
+  'guarded text edits on shape-autofit frames disclose final geometry and fail strict style preservation',
+  (t) => {
+    const s = scenario(t)
+    const text =
+      'A long review paragraph with multiple observations and supporting evidence that wraps inside the frame.'
+    const source = s.create(text, 1, { autofit: { mode: 'shape' }, wordWrap: true })
+    const original = s.body(source)
+    const changed = s.apply(
+      [
+        {
+          op: 'set-run',
+          slide: 0,
+          shape: { id: original.id },
+          paragraph: 0,
+          run: 0,
+          sourceText: text,
+          text: 'Short review',
+        },
+      ],
+      source,
+    )
+    assert(s.body(changed.output).bbox.hEmu < original.bbox.hEmu)
+    const diff = s.run([
+      'pptx',
+      'diff',
+      '--source',
+      source,
+      '--candidate',
+      changed.output,
+      '--detail',
+      'full',
+      '--json',
+    ])
+    const shape = diff.slides[0].shapeChanges.find((item) => item.target?.id === original.id)
+    assert(shape.categories.includes('text'))
+    assert(shape.categories.includes('shape'))
+    const style = s.run(
+      ['pptx', 'i18n-style-diff', '--source', source, '--candidate', changed.output, '--json'],
+      3,
+    )
+    assert.equal(style.agentGate.passed, false)
+    assert(style.styleBlockers.some((item) => item.field === 'styleSignature'))
+  },
+)
+
+nativeTest(
   'translation planning binds retained parts to source relationships even for preserved units',
   (t) => {
     const s = scenario(t)
@@ -458,6 +508,212 @@ nativeTest(
     ])
     assert.equal(gate.agentGate.passed, true)
     assert.equal(createHash('sha256').update(readFileSync(source)).digest('hex'), sourceHash)
+  },
+)
+
+nativeTest(
+  'published Edit Contract closes real guarded text edits using native semantic and visual reports',
+  (t) => {
+    const s = scenario(t)
+    const source = s.create()
+    const id = s.body(source).id
+    const output = join(s.directory, 'edited.pptx')
+    const draft = s.write('edit-contract-draft.json', {
+      schemaVersion: 'pptx-nova-edit-contract/v1',
+      request: 'Rename the review title and preserve the other objects and styling',
+      scope: 'single-object',
+      operationKind: 'text-edit',
+      targets: [
+        {
+          id: 'review-title',
+          slide: 0,
+          opIndexes: [0],
+          selector: { shape: { id } },
+          expected: {
+            beforeText: 'Quarterly review',
+            afterText: 'Annual review',
+            changeCategories: ['text'],
+          },
+        },
+      ],
+      allowedChanges: ['text'],
+      preserve: ['slide-count', 'non-target-shapes', 'target-text-style'],
+      requiredEvidence: [
+        'dry-run',
+        'semantic-diff',
+        'style-diff',
+        'png-preview',
+        'vision-diff',
+        'final-inspect',
+      ],
+    })
+    const contract = join(s.directory, 'edit-contract.json')
+    s.run(
+      [
+        skillScript('pptx-nova-edit-contract'),
+        '--draft',
+        draft,
+        '--source',
+        source,
+        '--output',
+        contract,
+        '--json',
+      ],
+      null,
+      process.execPath,
+    )
+    const patch = s.write('edit.patch.json', {
+      schemaVersion: 'pptx-patch/v1',
+      ops: [
+        {
+          op: 'set-run',
+          slide: 0,
+          shape: { id },
+          paragraph: 0,
+          run: 0,
+          sourceText: 'Quarterly review',
+          text: 'Annual review',
+        },
+      ],
+    })
+    const applyArgs = [
+      'pptx',
+      'apply',
+      '--input',
+      source,
+      '--patch',
+      patch,
+      '--output',
+      output,
+      '--json',
+    ]
+    const dryRun = s.write('dry-run.json', s.run([...applyArgs, '--dry-run']))
+    s.run(applyArgs)
+    const diff = s.run([
+      'pptx',
+      'diff',
+      '--source',
+      source,
+      '--candidate',
+      output,
+      '--detail',
+      'full',
+      '--json',
+    ])
+    assert.equal(diff.summary.baselineSlideCount, 1)
+    assert.equal(diff.summary.targetSlideCount, 1)
+    assert.equal(
+      diff.slides[0].shapeChanges.find((shape) => shape.target?.id === id).target.textPreview,
+      'Annual review',
+    )
+    const reports = {
+      'semantic-diff': s.write('pptx-diff.json', diff),
+      'style-diff': s.write(
+        'style-diff.json',
+        s.run(['pptx', 'i18n-style-diff', '--source', source, '--candidate', output, '--json']),
+      ),
+      'png-preview': s.write(
+        'preview.json',
+        s.run([
+          'pptx',
+          'preview',
+          output,
+          '--slides',
+          '1',
+          '--output-dir',
+          join(s.directory, 'previews'),
+          '--json',
+        ]),
+      ),
+      'vision-diff': s.write(
+        'vision-diff.json',
+        s.run([
+          'pptx',
+          'vision-diff',
+          '--source',
+          source,
+          '--candidate',
+          output,
+          '--slides',
+          '1',
+          '--json',
+        ]),
+      ),
+      'final-inspect': s.write('final-inspect.json', s.run(['pptx', 'inspect', output, '--json'])),
+    }
+    const manifest = join(s.directory, 'evidence-manifest.json')
+    s.run(
+      [
+        skillScript('pptx-nova-edit-evidence-manifest'),
+        '--candidate',
+        output,
+        ...Object.entries(reports).flatMap(([kind, path]) => ['--evidence', `${kind}=${path}`]),
+        '--output',
+        manifest,
+        '--json',
+      ],
+      null,
+      process.execPath,
+    )
+    const gate = s.run(
+      [
+        skillScript('pptx-nova-edit-contract-gate'),
+        '--contract',
+        contract,
+        '--candidate',
+        output,
+        '--dry-run',
+        dryRun,
+        '--strict',
+        '--json',
+      ],
+      null,
+      process.execPath,
+    )
+    assert.equal(gate.agentGate.passed, true, JSON.stringify(gate.blockers))
+    assert.equal(gate.status, 'pass')
+    const summaryDiff = s.write(
+      'summary-diff.json',
+      s.run(['pptx', 'diff', '--source', source, '--candidate', output, '--json']),
+    )
+    const summaryManifest = join(s.directory, 'summary-evidence-manifest.json')
+    s.run(
+      [
+        skillScript('pptx-nova-edit-evidence-manifest'),
+        '--candidate',
+        output,
+        ...Object.entries({ ...reports, 'semantic-diff': summaryDiff }).flatMap(([kind, path]) => [
+          '--evidence',
+          `${kind}=${path}`,
+        ]),
+        '--output',
+        summaryManifest,
+        '--json',
+      ],
+      null,
+      process.execPath,
+    )
+    const blocked = s.run(
+      [
+        skillScript('pptx-nova-edit-contract-gate'),
+        '--contract',
+        contract,
+        '--candidate',
+        output,
+        '--diff',
+        summaryDiff,
+        '--evidence-manifest',
+        summaryManifest,
+        '--output',
+        join(s.directory, 'summary-diff-gate.json'),
+        '--strict',
+        '--json',
+      ],
+      2,
+      process.execPath,
+    )
+    assert.equal(blocked.agentGate.passed, false)
+    assert.equal(blocked.agentGate.nextAction, 'collect-full-semantic-diff')
   },
 )
 

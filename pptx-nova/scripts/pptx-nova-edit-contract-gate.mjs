@@ -1075,8 +1075,23 @@ function reliableShapeChanges(diff) {
 }
 
 function diffIdentity(item) {
-  const shape = item.shape?.candidate ?? item.shape?.source ?? {}
+  const { source, candidate } = diffShapeSides(item.shape)
+  const shape = candidate ?? source ?? {}
   return { slide: item.slide, id: shape.id ?? null, name: shape.name ?? null }
+}
+
+function diffShapeSides(shape) {
+  return {
+    source: shape?.baseline ?? shape?.source,
+    candidate: shape?.target ?? shape?.candidate,
+  }
+}
+
+function diffSlideCounts(diff) {
+  return {
+    source: diff?.summary?.baselineSlideCount ?? diff?.summary?.sourceSlideCount,
+    candidate: diff?.summary?.targetSlideCount ?? diff?.summary?.candidateSlideCount,
+  }
 }
 
 function diffCategories(item) {
@@ -1089,6 +1104,7 @@ function diffCategories(item) {
 }
 
 function checkDiff(contract, diff, coverageResult, report) {
+  const counts = diffSlideCounts(diff)
   const coveredIdentities = coverageResult.coveredIdentities
   const outOfScope = []
   const disallowed = []
@@ -1109,7 +1125,7 @@ function checkDiff(contract, diff, coverageResult, report) {
   }
   if (
     contract.preserve.includes('slide-count') &&
-    (diff?.summary?.sourceSlideCount !== diff?.summary?.candidateSlideCount ||
+    (counts.source !== counts.candidate ||
       Number(diff?.summary?.slideAdded ?? 0) !== 0 ||
       Number(diff?.summary?.slideRemoved ?? 0) !== 0)
   ) {
@@ -1148,8 +1164,12 @@ function checkDiff(contract, diff, coverageResult, report) {
       expectedIdentities.some((identity) => sameIdentity(diffIdentity(item), identity)),
     )
     if (target.expected?.alreadyCompliant === true && !change) continue
-    const before = change?.shape?.source?.textPreview ?? change?.shape?.changes?.[0]?.before
-    const after = change?.shape?.candidate?.textPreview ?? change?.shape?.changes?.[0]?.after
+    const sides = diffShapeSides(change?.shape)
+    const textChange = change?.shape?.changes?.find(
+      (item) => item.field === 'textPreview' && item.reliability === 'reliable',
+    )
+    const before = sides.source?.textPreview ?? textChange?.before
+    const after = sides.candidate?.textPreview ?? textChange?.after
     if (target.expected?.beforeText !== undefined && before !== target.expected.beforeText) {
       addIssue(
         report,
@@ -1212,8 +1232,8 @@ function changedSlides(diff) {
 function checkExpectedStructure(contract, diff, report) {
   const expected = contract.expectedStructure
   if (!expected) return
-  const actualDelta =
-    Number(diff?.summary?.candidateSlideCount ?? 0) - Number(diff?.summary?.sourceSlideCount ?? 0)
+  const counts = diffSlideCounts(diff)
+  const actualDelta = counts.candidate - counts.source
   const actualSlides = changedSlides(diff)
   const expectedSlides = [...expected.changedSlides].sort((a, b) => a - b)
   if (actualDelta !== expected.slideCountDelta) {
@@ -1237,7 +1257,10 @@ function checkExpectedStructure(contract, diff, report) {
   if (expected.objectTypes.length > 0) {
     const actualTypes = new Set(
       reliableShapeChanges(diff)
-        .flatMap((item) => [item.shape?.source?.shapeType, item.shape?.candidate?.shapeType])
+        .flatMap((item) => {
+          const sides = diffShapeSides(item.shape)
+          return [sides.source?.shapeType, sides.candidate?.shapeType]
+        })
         .filter(Boolean),
     )
     const unexpected = [...actualTypes].filter((type) => !expected.objectTypes.includes(type))
@@ -1307,7 +1330,13 @@ function evidenceBindings(kind, evidence) {
     }
     return { source: evidence?.input, candidate: evidence?.wouldWrite }
   }
-  if (kind === 'semantic-diff' || kind === 'style-diff' || kind === 'vision-diff') {
+  if (kind === 'semantic-diff') {
+    return {
+      source: evidence?.baselinePath ?? evidence?.source,
+      candidate: evidence?.targetPath ?? evidence?.candidate,
+    }
+  }
+  if (kind === 'style-diff' || kind === 'vision-diff') {
     return { source: evidence?.source, candidate: evidence?.candidate }
   }
   if (kind === 'png-preview') return { candidate: evidence?.input }
@@ -1453,6 +1482,30 @@ function checkEvidence(contract, args, report) {
       'semantic-diff-not-successful',
       'semantic diff evidence is not successful',
     )
+  }
+  if (diff) {
+    if (diff.detail === 'summary') {
+      addIssue(
+        report,
+        'blockers',
+        'semantic-diff-detail-insufficient',
+        'Edit Contract requires --detail full for per-object identity and field-level evidence',
+      )
+    }
+    const counts = diffSlideCounts(diff)
+    if (
+      !Number.isInteger(counts.source) ||
+      counts.source < 0 ||
+      !Number.isInteger(counts.candidate) ||
+      counts.candidate < 0
+    ) {
+      addIssue(
+        report,
+        'blockers',
+        'semantic-diff-slide-counts-missing',
+        'semantic diff must disclose valid source and candidate slide counts',
+      )
+    }
   }
   const styleDiff = loaded['style-diff']
   if (styleDiff) {
@@ -1600,6 +1653,7 @@ function nextAction(report) {
   ) {
     return 'apply-session-rules'
   }
+  if (codes.has('semantic-diff-detail-insufficient')) return 'collect-full-semantic-diff'
   if (codes.has('expected-before-not-observed')) return 'refresh-inspect'
   if (codes.has('already-compliant-value-not-observed')) return 'complete-missing-coverage'
   if (codes.has('evidence-source-mismatch') || codes.has('evidence-candidate-mismatch')) {
@@ -1613,6 +1667,12 @@ function nextAction(report) {
     return 'regenerate-current-candidate-evidence'
   }
   if (codes.has('evidence-candidate-stale')) return 'regenerate-current-candidate-evidence'
+  if (
+    codes.has('semantic-diff-not-successful') ||
+    codes.has('semantic-diff-slide-counts-missing')
+  ) {
+    return 'regenerate-current-candidate-evidence'
+  }
   if (codes.has('dry-run-not-successful')) return 'retry-dry-run-with-fix-patch'
   if (codes.has('copy-size-gate-missing')) return 'run-copy-size-gate'
   if (codes.has('copy-size-gate-failed')) return 'choose-explicit-slide-size-strategy'

@@ -25,6 +25,11 @@ chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标
 point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
 [错误排查](troubleshooting.md) 检查逻辑槽位；压缩 PPTX 不会缩小图表投影。
 
+普通二维图表也要区分 inspect 的 chart 外框与渲染后的绘图区、轴和 legend。
+外框回读正确、原生 PNG 门禁通过，不证明 PowerPoint 使用相同的内部布局或文字换行。
+精确版式任务应核对同一候选的独立 PowerPoint 导出；未归因的差异保留为观察结果，
+不要移动外框、缩字号或重建原生 chart 来补偿单个 renderer 的显示。
+
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
 add-chart / set-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：

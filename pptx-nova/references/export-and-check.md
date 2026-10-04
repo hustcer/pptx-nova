@@ -22,8 +22,10 @@ The default `summary` detail is the normal Agent path. It reports
 `pptx-diff/v1`, `agentGate`, `summary` (`reliableChanges` / `uncertainChanges` /
 `unsupportedRegions` and `byCategory`), `styleChangeSummary`, and per-slide
 rollups; there is no `changeRollup` field.
-Only use `--detail full` when summary identifies a suspicious slide/object and
-field-level evidence is needed. The command can take around 10 seconds, so do
+Use `--detail full` directly when a generic Edit Contract consumes the report,
+because its object locality and expected text checks require `shapeChanges[]`.
+For observation-only audits, use full when summary identifies a suspicious slide/object
+and field-level evidence is needed. The command can take around 10 seconds, so do
 not use it as a tight retry loop.
 
 Use only `reliable` entries as machine-checkable facts. Treat `uncertain` and

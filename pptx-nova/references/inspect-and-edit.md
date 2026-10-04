@@ -522,6 +522,12 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 任务须把实际几何变化纳入其保真策略。仅写入 `spAutoFit` XML 不会自行测量文字，
 也不能假设 PowerPoint 打开时会补算。`fit-text` 写死字号，是独立选择。
 
+当前 dry-run/apply 的 `semanticChanges` 可能只披露文本变化，不能据此证明 bbox 未变。
+最终 `pptx diff` 可同时报告 `text` 与 `shape`，`i18n-style-diff` 的非文本签名也会因
+几何变化失败。普通编辑按 [Edit Contract](edit-contract.md) 处理允许的变化范围；
+翻译按 [Style Signature Gate](translation-mode.md#style-signature-gate) 处理。
+不要反复重试同一 `set-run`、关闭 autofit 或忽略失败签名来制造“保真通过”。
+
 ### 5.3 加一页和现有 layout 一样的
 
 ```json

@@ -263,6 +263,26 @@ neighboring `a:rPr`, `a:pPr`, and `a:bodyPr` structure. A whole-frame
 small footer/run styling. When style fidelity matters, prefer inspect-proven
 `set-run`/run-level edits or another text-node preserving path.
 
+The signature also includes non-text slide structure and geometry. On an existing
+`shape` autofit frame, even a guarded `set-run` can change its bbox during native
+reflow; dry-run/apply may report only the text change while the final semantic diff
+reports both `text` and `shape`. Compare source/candidate inspect bboxes before
+declaring a text-only edit. When geometry must stay fixed, stop at that change and
+resolve the fitting policy; repeating the same run edit will not restore the frame.
+When reflow is intended, declare the narrowly scoped `shape` change before apply,
+require final inspect and rendered review, and do not claim `target-text-style`
+preservation from a failed style signature. Never widen the contract just to pass.
+
+Consume the actual `pptx-diff/v1` fields: current xdoc reports `baselinePath` /
+`targetPath`, `summary.baselineSlideCount` / `targetSlideCount`, and shape
+`baseline` / `target`. The gate also accepts the earlier `source` / `candidate`
+form. Preserve the original report for path binding, object identity, text,
+slide-count delta and allowed object-type checks; do not rewrite it into a fixture.
+Request `--detail full` for the final contract diff. The default `summary` report
+has per-slide rollups without `shapeChanges[]` and cannot prove object locality;
+the gate returns `collect-full-semantic-diff` rather than treating omitted changes
+as an empty list. A normal final edit needs one full diff, not summary plus full.
+
 For visible edits, prefer a changed-scope differential visual gate:
 
 ```bash

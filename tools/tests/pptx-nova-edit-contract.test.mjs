@@ -218,6 +218,28 @@ function diffFixture({ outOfScope = false, source = '', candidate = '' } = {}) {
   }
 }
 
+function useRuntimeDiffFields(fixture) {
+  const diff = JSON.parse(readFileSync(fixture.diff, 'utf8'))
+  diff.baselinePath = diff.source
+  diff.targetPath = diff.candidate
+  delete diff.source
+  delete diff.candidate
+  diff.summary.baselineSlideCount = diff.summary.sourceSlideCount
+  diff.summary.targetSlideCount = diff.summary.candidateSlideCount
+  delete diff.summary.sourceSlideCount
+  delete diff.summary.candidateSlideCount
+  for (const slide of diff.slides) {
+    for (const shape of slide.shapeChanges) {
+      shape.baseline = shape.source
+      shape.target = shape.candidate
+      delete shape.source
+      delete shape.candidate
+    }
+  }
+  writeJson(fixture.diff, diff)
+  return diff
+}
+
 function previewFixture(candidate) {
   return {
     schemaVersion: 'pptx-preview/v1',
@@ -924,6 +946,70 @@ test('edit contract gate accepts an inspect-proven already-compliant target', ()
   assert.equal(report.targetCoverage[0].alreadyCompliant, true)
 })
 
+test('edit contracts consume current baseline/target identities and text values', () => {
+  const fixture = writeFixture()
+  useRuntimeDiffFields(fixture)
+  generateContract(fixture)
+  assert.equal(runGate(fixture).agentGate.passed, true)
+})
+
+for (const [field, code] of [
+  ['baselinePath', 'evidence-source-mismatch'],
+  ['targetPath', 'evidence-candidate-mismatch'],
+]) {
+  test(`current semantic diff bindings reject a mismatched ${field}`, () => {
+    const fixture = writeFixture()
+    const diff = useRuntimeDiffFields(fixture)
+    diff[field] = join(fixture.root, 'unrelated.pptx')
+    writeJson(fixture.diff, diff)
+    generateContract(fixture)
+    const report = runGate(fixture, 2)
+    assert.ok(report.blockers.some((item) => item.code === code))
+  })
+}
+
+test('current semantic diff checks structural object types rather than treating them as empty', () => {
+  const fixture = writeFixture()
+  useRuntimeDiffFields(fixture)
+  const draft = JSON.parse(readFileSync(fixture.draft, 'utf8'))
+  draft.scope = 'structural'
+  draft.expectedStructure = { slideCountDelta: 0, changedSlides: [0], objectTypes: ['picture'] }
+  writeJson(fixture.draft, draft)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+  assert.ok(report.blockers.some((item) => item.code === 'structural-object-type-outside-contract'))
+})
+
+test('missing semantic diff slide counts cannot prove preserved slide count', () => {
+  const fixture = writeFixture()
+  const diff = useRuntimeDiffFields(fixture)
+  delete diff.summary.baselineSlideCount
+  delete diff.summary.targetSlideCount
+  writeJson(fixture.diff, diff)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+  assert.ok(report.blockers.some((item) => item.code === 'semantic-diff-slide-counts-missing'))
+})
+
+test('summary diff cannot authorize an edit without per-object locality evidence', () => {
+  const fixture = writeFixture()
+  const diff = useRuntimeDiffFields(fixture)
+  diff.detail = 'summary'
+  for (const slide of diff.slides) {
+    slide.shapeChangeSummary = { changed: 1 }
+    delete slide.shapeChanges
+  }
+  const draft = JSON.parse(readFileSync(fixture.draft, 'utf8'))
+  delete draft.targets[0].expected.beforeText
+  delete draft.targets[0].expected.afterText
+  writeJson(fixture.draft, draft)
+  writeJson(fixture.diff, diff)
+  generateContract(fixture)
+  const report = runGate(fixture, 2)
+  assert.ok(report.blockers.some((item) => item.code === 'semantic-diff-detail-insufficient'))
+  assert.equal(report.agentGate.nextAction, 'collect-full-semantic-diff')
+})
+
 test('structural contracts verify expected slide scope and object types', () => {
   const fixture = writeFixture()
   const draft = JSON.parse(readFileSync(fixture.draft, 'utf8'))
@@ -967,6 +1053,7 @@ test('structural contracts support a newly added slide without a pre-existing sh
   diff.summary.reliableChanges = 0
   diff.slides = [{ index: 10, slide: 11, conclusion: 'added', shapeChanges: [] }]
   writeJson(fixture.diff, diff)
+  useRuntimeDiffFields(fixture)
   const preview = previewFixture(fixture.candidate)
   preview.slidesRequested = '11'
   preview.slidesSelected = [11]

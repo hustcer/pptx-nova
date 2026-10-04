@@ -458,6 +458,14 @@ debugging path.
      `shape` autofit setting can resize a translated text frame during apply;
      audit that change under the controlled fitting policy rather than
      automatically declaring layout preservation.
+     The standard style finalizer does not authorize bbox changes:
+     `i18n-style-diff` compares geometry in its non-text signature, so native
+     reflow can fail it even when the generated guarded run edit preserved
+     run/paragraph styling. Inspect the exact before/after bbox and signature.
+     Try meaning-preserving wording within the source layout; if geometry still
+     changes, stop the strict preservation route and resolve an explicit fitting
+     strategy. Do not treat font-size or text-attribute authorization as a geometry
+     waiver, remove the style gate, or repeat the same edit.
      ```bash
      xdoc pptx apply \
        --input <current-candidate.pptx> \

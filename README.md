@@ -317,7 +317,8 @@ context, unexpected binaries, missing license requirements, and other release
 blockers.
 
 To check an installed xdoc's native edit, autofit, translation and asset-boundary
-contracts, run the opt-in executable suite:
+contracts, including the published Edit Contract gate with real semantic/style/visual
+reports, run the opt-in executable suite:
 
 ```bash
 XDOC_TEST_BIN=/absolute/path/to/xdoc node --test tools/tests/pptx-nova-native-contracts.test.mjs

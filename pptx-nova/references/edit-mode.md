@@ -163,11 +163,14 @@ need this evidence:
 
 ```bash
 xdoc pptx diff --source input.pptx --candidate out.pptx \
-  --detail summary --json > <run-dir>/pptx-diff.json
+  --detail full --json > <run-dir>/pptx-diff.json
 ```
 
-Check `schemaVersion == "pptx-diff/v1"` and `status == "success"`. Compare
-`agentGate.semanticStatus`, `summary.reliableChanges`, `summary.byCategory`,
+Check `schemaVersion == "pptx-diff/v1"` and `status == "success"`.
+The Edit Contract requires `detail=full` because summary rollups do not disclose
+per-object identity, text or field-level locality. Collect this once on the stable
+candidate rather than running summary first and immediately repeating it.
+Compare `agentGate.semanticStatus`, `summary.reliableChanges`, `summary.byCategory`,
 `styleChangeSummary`, and `slides[]` against the intended edit scope. Reliable changes outside the
 requested slides or object categories are blockers until explained or fixed.
 `uncertainChanges` and `unsupportedRegions` trigger targeted review; do not use

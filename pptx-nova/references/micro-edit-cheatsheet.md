@@ -52,6 +52,8 @@ has passed the relevant checks.
 
 After apply, run one final semantic diff plus the evidence declared in
 `edit-contract.json`, then require `edit-contract-gate.json.agentGate.passed`.
+Use `xdoc pptx diff --source input.pptx --candidate <run-dir>/candidate.pptx
+--detail full --json`; the default summary cannot prove per-object locality.
 For visible text replacement, preserve `target-text-style` and run style diff;
 use `set-run` or another inspect-proven run/text-node edit when `set-text-frame` would
 replace meaningful run formatting.

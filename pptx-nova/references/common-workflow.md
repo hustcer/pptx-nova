@@ -417,8 +417,9 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
 
     This command is useful but comparatively slow. Do not run it after every
     patch attempt; run it at the final candidate stage, or only when debugging a
-    suspected unintended change. Use `--detail full` only when summary points to
-    a specific slide/object and field-level evidence is needed. Treat only
+    suspected unintended change. For a generic Edit Contract, request `--detail full`
+    directly; summary rollups cannot prove object locality. Other audits need full
+    only when summary points to a specific slide/object and field-level evidence is needed. Treat only
     `reliable` entries as machine facts. `uncertain` and `unsupported` entries
     require human review or a targeted audit; they are not pass evidence.
 

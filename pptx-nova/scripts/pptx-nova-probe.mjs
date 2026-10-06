@@ -158,9 +158,13 @@ function parseJson(text) {
 }
 
 function hasFlag(helpText, flag) {
-  return new RegExp(`(^|\\s)${flag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|,|$)`, 'm').test(
-    helpText,
-  )
+  // xdoc help declares options at two-space indentation. Descriptions,
+  // continuation prose and examples can mention flags belonging to other commands.
+  const declarations = /^ {2}(?:(-[A-Za-z0-9]),[ \t]+)?(--[A-Za-z0-9][A-Za-z0-9-]*)(?=\s|$)/gm
+  for (const match of helpText.matchAll(declarations)) {
+    if (match[1] === flag || match[2] === flag) return true
+  }
+  return false
 }
 
 function helpFlagIndex(bin) {

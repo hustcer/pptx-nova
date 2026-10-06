@@ -285,7 +285,10 @@ if (args[0] === 'schema') {
   process.exit(0)
 }
 if (args[0] === '--version') { process.stdout.write('0.1.0 (legacy)\\n'); process.exit(0) }
-if (args.at(-1) === '--help') { process.stdout.write('Usage: fake xdoc\\n'); process.exit(0) }
+if (args.at(-1) === '--help') {
+  process.stdout.write(process.env.FAKE_XDOC_HELP ?? 'Usage: fake xdoc\\n')
+  process.exit(0)
+}
 process.exit(2)
 `,
   )
@@ -300,6 +303,52 @@ function runProbe(xdoc, args = [], env = {}) {
     env: { ...process.env, ...env },
   })
 }
+
+test('probe does not promote help prose, examples or longer option names to supported flags', () => {
+  const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+  const result = runProbe(xdoc, [], {
+    FAKE_XDOC_HELP: [
+      'Usage: xdoc convert [options] <inputs...>',
+      'Use pptx preview --json for structured previews.',
+      'Options:',
+      '  -h, --help              Show help; use --report with other commands.',
+      '  --output-dir <path>     Not the single-file --output option.',
+      '  --json-format <value>   Not a JSON stdout declaration.',
+      '    --json is mentioned in continuation prose only.',
+      'Examples:',
+      '  xdoc check deck.pptx -o check.json --report summary.json',
+    ].join('\n'),
+  })
+  assert.equal(result.status, 0, result.stderr)
+  const flags = JSON.parse(result.stdout).capabilities.commandFlags
+  for (const name of ['convert', 'check']) {
+    assert.equal(flags[name].helpAvailable, true)
+    assert.equal(flags[name].jsonStdout, false)
+    assert.equal(flags[name].reportFile, false)
+    assert.equal(flags[name].outputFile, false)
+  }
+  assert.equal(flags.pptx.jsonStdout, false)
+})
+
+test('probe recognizes standalone and short-alias option declarations with CRLF help', () => {
+  const xdoc = createFakeXdoc(mkdtempSync(join(tmpdir(), 'nova-probe-')))
+  const result = runProbe(xdoc, [], {
+    FAKE_XDOC_HELP: [
+      'Options:',
+      '  --report <path>        Write a summary.',
+      '  -o, --output <path>    Write the output.',
+      '  --json',
+    ].join('\r\n'),
+  })
+  assert.equal(result.status, 0, result.stderr)
+  const flags = JSON.parse(result.stdout).capabilities.commandFlags
+  for (const name of ['convert', 'check']) {
+    assert.equal(flags[name].jsonStdout, true)
+    assert.equal(flags[name].reportFile, true)
+    assert.equal(flags[name].outputFile, true)
+  }
+  assert.equal(flags.pptx.jsonStdout, true)
+})
 
 for (const mode of ['legacy-slicing', 'refinement-slicing', 'command-slicing']) {
   test(`probe discovers field and definition projection from ${mode}`, () => {

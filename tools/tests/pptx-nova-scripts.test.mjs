@@ -3500,20 +3500,22 @@ test('create runner allocates unique default run dirs instead of reusing evidenc
   assert.equal(existsSync(join(second.runDir, 'candidate.pptx')), true)
 })
 
-test('create runner stops after apply failure without validating a stale candidate', () => {
-  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-fail-'))
-  const runDir = join(root, 'run')
-  const contentPath = join(runDir, 'content.json')
-  const lockPath = join(runDir, 'deck_lock.json')
-  const staleCandidate = join(runDir, 'candidate.pptx')
-  const output = join(root, 'out.pptx')
-  mkdirSync(runDir, { recursive: true })
-  writeJson(contentPath, swissColumnContent())
-  writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
-  writeFileSync(staleCandidate, 'old candidate')
-  const fakeXdoc = writeFakeXdoc(
-    root,
-    `#!/usr/bin/env node
+for (const partial of [false, true])
+  test(`create runner stops after apply failure without validating a stale candidate (partial=${partial})`, () => {
+    const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-fail-'))
+    const runDir = join(root, 'run')
+    const contentPath = join(runDir, 'content.json')
+    const lockPath = join(runDir, 'deck_lock.json')
+    const staleCandidate = join(runDir, 'candidate.pptx')
+    const output = join(root, 'out.pptx')
+    mkdirSync(runDir, { recursive: true })
+    writeJson(contentPath, swissColumnContent())
+    writeJson(lockPath, swissColumnLock({ finalPptx: output, runDir }))
+    writeFileSync(staleCandidate, 'old candidate')
+    const fakeXdoc = writeFakeXdoc(
+      root,
+      `#!/usr/bin/env node
+import { writeFileSync } from 'node:fs'
 const args = process.argv.slice(2)
 const print = (value) => process.stdout.write(JSON.stringify(value))
 
@@ -3527,7 +3529,10 @@ if (args[0] === 'schema') {
 } else if (args[0] === 'pptx' && args[1] === 'apply' && args.includes('--dry-run')) {
   print({ schemaVersion: 'pptx-dry-run/v1', status: 'success', warnings: [], changedParts: [], opResults: [], visualRisks: [], semanticIssues: [], wouldWrite: true })
 } else if (args[0] === 'pptx' && args[1] === 'apply') {
-  print({ schemaVersion: 'pptx-apply/v1', status: 'error', error: { kind: 'output_exists' }, visualRisks: [] })
+  const output = args[args.indexOf('-o') + 1]
+  if (${partial}) writeFileSync(output, 'partially published candidate')
+  print({ schemaVersion: 'pptx-error/v1', status: 'error', error: { code: ${partial} ? 'output_error' : 'output_exists' },
+    ...(${partial} ? { primaryOutputPublished: true, outputUntouched: false, output, blockedOutput: output + '.xdoc.json' } : {}) })
   process.exit(9)
 } else if (args[0] === 'pptx' && (args[1] === 'vision-check' || args[1] === 'preview')) {
   process.stderr.write('stale candidate validation should not run')
@@ -3537,43 +3542,52 @@ if (args[0] === 'schema') {
   process.exit(2)
 }
 `,
-  )
+    )
 
-  const result = spawnSync(
-    process.execPath,
-    [
-      skillPath('scripts/pptx-nova-create-run.mjs'),
-      '--deckkit',
-      'swiss-grid',
-      '--content',
-      contentPath,
-      '--lock',
-      lockPath,
-      '--output',
-      output,
-      '--run-dir',
-      runDir,
-      '--xdoc-bin',
-      fakeXdoc,
-      '--json',
-    ],
-    { cwd: repoRoot, encoding: 'utf8' },
-  )
-  assert.equal(result.status, 1, result.stderr || result.stdout)
-  const compactResult = readCreateResult(result)
-  const summary = JSON.parse(
-    readFileSync(join(compactResult.runDir, 'create-run-summary.json'), 'utf8'),
-  )
-  const phaseNames = summary.phases.map((phase) => phase.name)
+    const result = spawnSync(
+      process.execPath,
+      [
+        skillPath('scripts/pptx-nova-create-run.mjs'),
+        '--deckkit',
+        'swiss-grid',
+        '--content',
+        contentPath,
+        '--lock',
+        lockPath,
+        '--output',
+        output,
+        '--run-dir',
+        runDir,
+        '--xdoc-bin',
+        fakeXdoc,
+        '--json',
+      ],
+      { cwd: repoRoot, encoding: 'utf8' },
+    )
+    assert.equal(result.status, 1, result.stderr || result.stdout)
+    const compactResult = readCreateResult(result)
+    const summary = JSON.parse(
+      readFileSync(join(compactResult.runDir, 'create-run-summary.json'), 'utf8'),
+    )
+    const phaseNames = summary.phases.map((phase) => phase.name)
 
-  assert.equal(summary.status, 'failed')
-  assert.equal(summary.error.phase, 'apply')
-  assert.equal(existsSync(output), false)
-  assert.equal(existsSync(staleCandidate), false)
-  assert.equal(phaseNames.includes('vision-check'), false)
-  assert.equal(phaseNames.includes('preview-render'), false)
-  assert.equal(phaseNames.includes('publish'), false)
-})
+    assert.equal(summary.status, 'failed')
+    assert.equal(summary.error.phase, 'apply')
+    assert.equal(existsSync(output), false)
+    assert.equal(existsSync(staleCandidate), partial)
+    if (partial) {
+      assert.equal(readFileSync(staleCandidate, 'utf8'), 'partially published candidate')
+      assert.equal(compactResult.error.primaryOutputPublished, true)
+      assert.equal(compactResult.error.outputUntouched, false)
+      assert.equal(compactResult.error.output, staleCandidate)
+      assert.equal(compactResult.error.blockedOutput, staleCandidate + '.xdoc.json')
+    } else {
+      assert.equal('primaryOutputPublished' in compactResult.error, false)
+    }
+    assert.equal(phaseNames.includes('vision-check'), false)
+    assert.equal(phaseNames.includes('preview-render'), false)
+    assert.equal(phaseNames.includes('publish'), false)
+  })
 
 test('refurbish plan requires semantic diff gate by default', async () => {
   const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))

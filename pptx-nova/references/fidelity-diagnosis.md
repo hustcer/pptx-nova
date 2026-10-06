@@ -91,6 +91,35 @@ Recent rendering changes also require these distinctions when reviewing the same
   per-object output and independent PowerPoint evidence; do not label remaining
   camera, material, text or playback discrepancies as certified fidelity.
 
+## Chart, SmartArt and effect regressions
+
+For chart-label regressions, read the inheritance checklist in `charts.md`:
+omitted, explicit false and explicit true are distinct for label deletion;
+automatic circular-label placement and explicit no-fill lines also need separate
+checks. Do not reconstruct a chart to compensate for old rendering behavior.
+
+For SmartArt and text-effect regressions after an upgrade:
+
+- Keep cached-drawing resources tied to the drawing part and cacheless diagram
+  images/hyperlinks tied to their owning data part. Validate hierarchy identities,
+  selector scopes, inherited paragraph styles and group transforms before calling
+  a missing projection a lost object. Unsupported/ambiguous projections may fall
+  back; rendering changes do not authorize editing the SmartArt structure.
+- Compare text after font readiness and refitting, including explicit bullet
+  sizes, highlight/outline/glow coverage, clipping, 3D volume and reflection.
+  Reflections and extrusions must follow their actual paragraph animation target;
+  check reset/exit and fresh render separately. Preserve effect-list resets and
+  2D/3D transforms; neither repeated font shrinkage nor stripping effects repairs
+  a renderer lifecycle problem.
+- PDF reflection decoration and foreground text extraction are separate evidence.
+  A reflection may paint without contributing duplicate extracted text. Do not
+  diagnose missing authored text from a decoration's extraction behavior, or
+  assume a Web reflection budget/fallback applies to the PDF consumer.
+- For audio controls, check open/focus/hover after their native dimensions settle,
+  then while the slide moves, rotates or scales. Record host CSS transitions and
+  the current Viewer build; stale screen coordinates do not justify moving the
+  authored icon. For dissolve timing and playback, follow `animations.md`.
+
 ## Web clipping, reflections and display scale
 
 Read this section only for these symptoms; ordinary native PNG/PDF checks do not

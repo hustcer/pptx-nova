@@ -15,6 +15,7 @@ import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
 import {
   PhaseFailure,
+  summarizePhaseError,
   buildAgentResult as buildRuntimeAgentResult,
   buildPerformanceSummary as buildRuntimePerformanceSummary,
   createRunnerRuntime,
@@ -874,12 +875,7 @@ function runCreate(inputArgs) {
     summary.status = 'failed'
     summary.machineGatesPassed = false
     summary.deliveryReady = false
-    summary.error = {
-      phase: error.phase ?? 'runner',
-      kind: error.kind ?? error.name ?? 'Error',
-      message: error.message,
-      exitCode: error.exitCode ?? null,
-    }
+    summary.error = summarizePhaseError(error)
     finalizeRunnerSummary(summary, {
       summaryPath: artifacts.summary,
       totalMs: durationMs(runStarted),

@@ -22,6 +22,24 @@ xdoc 的错误是结构化的。先读 `error.code`、诊断和 `suggestions[]`�
 `identity-unavailable`、`context-unavailable`、`ambiguous-source`、`target-unavailable`、
 `payload-limit`。保留诊断，按实际原因恢复输入或修正请求，不能把缺少摘要当作跳过校验。
 
+## 输出失败：先判定是否已写出主文件
+
+sidecar 默认是 `<output>.xdoc.json`。它不能与输出 PPTX 或输入 PPTX、patch、brand、
+bindings、template data 指向同一文件，符号链接等路径别名也要检查；`--overwrite`
+不能解除这种冲突。已有 sidecar 同样受覆盖保护，优先使用新的 candidate/sidecar 路径。
+
+one-shot apply/new 先发布 PPTX，再写 sidecar，二者不是联合原子事务。晚期 sidecar
+失败仍返回错误，但会披露 `primaryOutputPublished:true`、`outputUntouched:false`、
+`output`（已写出的 PPTX）和 `blockedOutput`（失败的 sidecar）。保留报告与现有文件，
+核对两条路径、文件摘要及当前内容，不自动重放 mutation、不自动追加 `--overwrite`，
+也不把输出当成已通过交付门禁。无上述字段时不能推断“文件未变”。
+
+需要重新执行时，从保留的原输入和原 patch 向新的 candidate/sidecar 路径运行完整流程；
+不要把已经写出的 candidate 当作同一 patch 的新输入。若要继续使用已写出的 candidate，
+必须补齐当前流程所需的真实证据并完成门禁；不能伪造缺失 sidecar 或把失败报告改成成功。
+daemon 的 session 事务与磁盘文件是不同状态；失败后分别 inspect 会话和磁盘输出，
+不要根据其中一个推断另一个。参见 `daemon-sessions.md`。
+
 ## 两种 remediation 与重试流程
 
 | kind                | 完整载荷                                                       | 执行目标                                           |
@@ -239,25 +257,26 @@ PPTX 业务错误的 `error.code` 使用 **snake_case**，当前目录见本次�
 daemon / JSON-RPC / MCP 契约处理，不能把数字协议码当作业务错误码。
 高频类：
 
-| code                                    | 含义                                                                                  | 处理                                                                     |
-| --------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| `invalid_json`                          | patch / recipe 不是合法 JSON                                                          | 修 JSON 语法后重发                                                       |
-| `invalid_argument`                      | 字段缺失、形状/取值错、资产路径读不到                                                 | 按 `path` / `expected` / `actual` 改字段                                 |
-| `invalid_arguments`                     | CLI 调用缺参数                                                                        | 按帮助补齐命令行                                                         |
-| `unsupported_feature`                   | 用了不支持的 op / schemaVersion                                                       | `xdoc schema --mode ops --ops <name>` 查能力，找替代                     |
-| `invalid_operation`                     | patch 合法但当前 deck 应用不了（selector 匹配 0 或 >1 个、layout 找不到、维度冲突等） | 看 message / `candidates[]`，核对完整 `suggestions[].remediation` 的目标 |
-| `invalid_package` / `invalid_xml`       | 输入包结构或 OOXML 解析失败                                                           | 换来源文件或先修复                                                       |
-| `missing_part` / `missing_relationship` | 输入包缺 part / relationship                                                          | 用 repair-relationships 或换文件                                         |
-| `encrypted_package` / `signed_package`  | 输入加密 / 已签名                                                                     | 先去密码；签名文件按策略处理                                             |
-| `zip_error`                             | ZIP 读写失败                                                                          | 检查文件完整性与磁盘                                                     |
-| `patch_too_large` / `asset_too_large`   | patch / 资产超上限                                                                    | 拆 patch；压缩资产或调 `XDOC_PPTX_MAX_*`                                 |
-| `input_error` / `input_changed`         | 输入路径读不到 / 请求期间输入被改                                                     | 核对路径；重跑                                                           |
-| `output_error` / `output_exists`        | 输出写失败 / 输出已存在                                                               | 检查磁盘；加 `--overwrite` 或换路径                                      |
-| `session_conflict`                      | 输出被另一 daemon 会话占用                                                            | 换路径或等会话结束                                                       |
-| `invalid_sidecar`                       | sidecar 不是 `pptx-apply-sidecar/v1`                                                  | 重新生成 sidecar                                                         |
-| `daemon_unavailable` / `shutting_down`  | daemon 不可达 / 正在退出                                                              | 关 `--daemon-strict` 或检查 `XDOC_DAEMON_AUTO_SPAWN` / `XDOC_DAEMON_LOG` |
-| `internal_error` / `unknown_error`      | 内部错误                                                                              | 附 message 上报                                                          |
-| `resource_*` 族                         | 工程安全预算超限（输入/ZIP/XML/图像/图表槽位/超时/临时盘/输出）                       | 看 `details.stage/subject/unit/limit/observed`，按实际超限项处理         |
+| code                                    | 含义                                                                                  | 处理                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `invalid_json`                          | patch / recipe 不是合法 JSON                                                          | 修 JSON 语法后重发                                                            |
+| `invalid_argument`                      | 字段缺失、形状/取值错、资产路径读不到                                                 | 按 `path` / `expected` / `actual` 改字段                                      |
+| `invalid_arguments`                     | CLI 调用缺参数                                                                        | 按帮助补齐命令行                                                              |
+| `unsupported_feature`                   | 用了不支持的 op / schemaVersion                                                       | `xdoc schema --mode ops --ops <name>` 查能力，找替代                          |
+| `invalid_operation`                     | patch 合法但当前 deck 应用不了（selector 匹配 0 或 >1 个、layout 找不到、维度冲突等） | 看 message / `candidates[]`，核对完整 `suggestions[].remediation` 的目标      |
+| `invalid_package` / `invalid_xml`       | 输入包结构或 OOXML 解析失败                                                           | 换来源文件或先修复                                                            |
+| `missing_part` / `missing_relationship` | 输入包缺 part / relationship                                                          | 用 repair-relationships 或换文件                                              |
+| `encrypted_package` / `signed_package`  | 输入加密 / 已签名                                                                     | 先去密码；签名文件按策略处理                                                  |
+| `zip_error`                             | ZIP 读写失败                                                                          | 检查文件完整性与磁盘                                                          |
+| `patch_too_large` / `asset_too_large`   | patch / 资产超上限                                                                    | 拆 patch；压缩资产或调 `XDOC_PPTX_MAX_*`                                      |
+| `input_error` / `input_changed`         | 输入路径读不到 / 请求期间输入被改                                                     | 核对路径；重跑                                                                |
+| `output_error` / `output_exists`        | 输出写失败 / 输出已存在                                                               | 先查 publication facts 与两条路径；仅按已有授权覆盖本次生成文件，否则换新路径 |
+| `output_collision`                      | sidecar 或报告路径与输入/主输出冲突                                                   | 换独立路径；`--overwrite` 不能解除冲突                                        |
+| `session_conflict`                      | 输出被另一 daemon 会话占用                                                            | 换路径或等会话结束                                                            |
+| `invalid_sidecar`                       | sidecar 不是 `pptx-apply-sidecar/v1`                                                  | 重新生成 sidecar                                                              |
+| `daemon_unavailable` / `shutting_down`  | daemon 不可达 / 正在退出                                                              | 关 `--daemon-strict` 或检查 `XDOC_DAEMON_AUTO_SPAWN` / `XDOC_DAEMON_LOG`      |
+| `internal_error` / `unknown_error`      | 内部错误                                                                              | 附 message 上报                                                               |
+| `resource_*` 族                         | 工程安全预算超限（输入/ZIP/XML/图像/图表槽位/超时/临时盘/输出）                       | 看 `details.stage/subject/unit/limit/observed`，按实际超限项处理              |
 
 `resource_chart_slots_exceeded` 的 `stage` 为 `chart`、`unit` 为 `slots`，限制的是
 图表展开后的逻辑槽位，不是 PPTX 压缩字节数。极大的稀疏点索引、声明的点数或

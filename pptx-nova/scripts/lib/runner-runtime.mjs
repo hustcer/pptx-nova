@@ -58,6 +58,27 @@ function jsonStatusFailureKind(report) {
   return report?.error?.kind ?? report?.error?.code ?? report?.status ?? 'JsonStatusFailure'
 }
 
+function publicationFacts(report) {
+  const facts = {}
+  for (const key of ['primaryOutputPublished', 'outputUntouched']) {
+    if (typeof report?.[key] === 'boolean') facts[key] = report[key]
+  }
+  for (const key of ['output', 'blockedOutput']) {
+    if (typeof report?.[key] === 'string' || report?.[key] === null) facts[key] = report[key]
+  }
+  return facts
+}
+
+export function summarizePhaseError(error) {
+  return {
+    phase: error.phase ?? 'runner',
+    kind: error.kind ?? error.name ?? 'Error',
+    message: error.message,
+    exitCode: error.exitCode ?? null,
+    ...publicationFacts(error.report),
+  }
+}
+
 function nullReporter() {
   return createProgressReporter({ mode: 'off' })
 }
@@ -133,6 +154,7 @@ export function createRunnerRuntime({ getProgressReporter, maxBuffer = DEFAULT_M
       command: commandText(command.bin, command.args),
       artifact: relativeArtifact(summary.runDir, artifact),
       stderr: relativeArtifact(summary.runDir, stderrPath),
+      ...(jsonStatusFailure(report) ? publicationFacts(report) : {}),
     }
     summary.phases.push(phase)
     progress.emit('phase-complete', {
@@ -149,11 +171,15 @@ export function createRunnerRuntime({ getProgressReporter, maxBuffer = DEFAULT_M
         report,
       })
     }
+    const publicationWarning =
+      report?.primaryOutputPublished === true
+        ? '; primary PPTX was published; inspect the output and blocked sidecar before recovery; do not automatically repeat the mutation'
+        : ''
     if (result.status !== 0) {
       const kind = jsonStatusFailureKind(report)
       throw new PhaseFailure(
         name,
-        `${name} failed with exit code ${result.status}${kind ? ` (${kind})` : ''}`,
+        `${name} failed with exit code ${result.status}${kind ? ` (${kind})` : ''}${publicationWarning}`,
         { exitCode: result.status, kind, report },
       )
     }
@@ -161,7 +187,7 @@ export function createRunnerRuntime({ getProgressReporter, maxBuffer = DEFAULT_M
       const kind = jsonStatusFailureKind(report)
       throw new PhaseFailure(
         name,
-        `${name} emitted failure JSON status ${JSON.stringify(report.status)}${kind ? ` (${kind})` : ''}`,
+        `${name} emitted failure JSON status ${JSON.stringify(report.status)}${kind ? ` (${kind})` : ''}${publicationWarning}`,
         { exitCode: result.status, kind, report },
       )
     }

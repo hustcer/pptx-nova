@@ -157,7 +157,10 @@ daemon 不改变 patch 语义，只改变执行链路：
 - `--dry-run --json` 在 daemon 模式下同样工作，且更快（共用 in-memory model）
 - 写盘时 sidecar 文件 `<out>.xdoc.json` 照常生成，后续 `rollback --from-sidecar`
   不依赖 daemon
-- `apply` 失败时 live session 不变，可以接着 inspect 看当前状态
+- `apply` 失败时 live session 不变，可以接着 inspect 看当前状态；这不保证所有磁盘输出
+  未变。主 PPTX 与 sidecar 不是联合原子事务，按实际错误报告和磁盘状态恢复。
+- sidecar 不得与输入或主 PPTX 指向同一文件；已有 sidecar 需要覆盖授权。
+  同样适用 `common-workflow.md` 的输出安全和 `troubleshooting.md` 的部分发布恢复流程。
 - **agent schema 渲染缓存**：daemon 启动时会预热一次 `xdoc schema` 的 JSON
   渲染（多 KB / 多结构），后续每次 schema 取用从 in-memory 缓存深拷贝返回。
   Agent 反复拉 `--mode index` / `--mode ops --ops <name>` / 切 `--minimal` 都不会再付重新构建

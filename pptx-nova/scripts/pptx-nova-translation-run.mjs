@@ -6,6 +6,7 @@ import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
 import {
   PhaseFailure,
+  summarizePhaseError,
   buildAgentResult as buildRuntimeAgentResult,
   buildPerformanceSummary as buildRuntimePerformanceSummary,
   createRunnerRuntime,
@@ -1061,12 +1062,7 @@ function runTranslation(input) {
     })
   } catch (error) {
     summary.status = 'failed'
-    summary.error = {
-      phase: error.phase ?? 'runner',
-      kind: error.kind ?? error.name ?? 'Error',
-      message: error.message,
-      exitCode: error.exitCode ?? null,
-    }
+    summary.error = summarizePhaseError(error)
     summary.requiredReferences = failureReferences(error)
     finalizeRunnerSummary(summary, {
       summaryPath: artifacts.summary,

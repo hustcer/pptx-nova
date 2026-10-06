@@ -31,6 +31,13 @@ inspect 回读、PNG/播放复核和 clean-open gate 证明。
 
 ## Inspect First
 
+既有 dissolve 转场的 Web 显示或速度异常，先核对加载的 Viewer build、原始转场
+metadata、显式 Office duration（包括零）与 fallback。Web dissolve 采用有预算的
+整页场景遮罩；不可用时的降级不表示源转场丢失。静态 PDF/PNG 不验证时长、seek、
+清理或播放保真；保留原声明，在实际播放环境复核，不因 Viewer 新增显示支持就
+假设 `set-slide-transition` 扩大了可写范围。字体 refit 后的段落动画还应检查反射与
+Text 3D 是否随同一 target 运动、退出及复位，见 `fidelity-diagnosis.md`。
+
 动画编辑必须从 inspect 开始：
 
 ```bash

@@ -102,6 +102,21 @@ in-place modification, still validate through a run-dir copy before writing back
 Use `--overwrite` only for files created in the current run directory during the
 current iteration.
 
+The apply/new sidecar defaults to `<output>.xdoc.json`. Its destination must differ
+from the primary PPTX and every input PPTX, patch, brand, bindings or template-data
+file, including filesystem aliases. `--overwrite` does not permit these collisions;
+an existing sidecar also requires overwrite authorization. Use fresh candidate and
+sidecar paths together when starting a new attempt.
+
+PPTX and sidecar publication is not a two-file transaction. After an output failure,
+read `primaryOutputPublished`, `outputUntouched`, `output` and `blockedOutput` in the
+actual error report. When `primaryOutputPublished:true`, the primary PPTX reached disk
+despite failure; preserve it and the report, inspect both paths, and follow
+`troubleshooting.md` before recovery. Missing fields do not prove the output was
+untouched. Runners stop before validation/publication and retain disclosed facts in
+their phase/error summaries; a partially published run is failed evidence, not a
+completed deck or permission to repeat the mutation.
+
 For PPTX PNG/contact-sheet visual QA, use `xdoc pptx preview` as the canonical
 path. Write to a preview directory that does not already exist, or pass
 `--overwrite` when the directory is a current-run generated preview root. The

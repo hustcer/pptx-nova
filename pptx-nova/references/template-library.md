@@ -43,6 +43,9 @@ xdoc pptx slide-copy -i target.pptx --source reference.pptx \
 ```
 
 `--slides` is 1-based and copies the requested set in one transaction.
+Provide the target either positionally or with `--input`, never both, even when
+equal; blank targets are invalid. Path equality with source/output does not replace
+argument identity or bypass normal authorization and overwrite checks.
 `--all` selects every source slide, and the two selectors are mutually
 exclusive; there is no `--slide N` option. Retain
 the native `pptx-slide-copy/v1` report when this copy participates in an Edit

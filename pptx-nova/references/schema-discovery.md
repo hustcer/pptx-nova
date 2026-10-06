@@ -108,6 +108,12 @@ shape effects / hyperlinks 等。对照修改最快。
 
 ## Schema 关键 `$defs` 速记
 
+`convert` / `extract` / `check` 的页码参数统一为 `--slides`（短参数 `-s`），
+从 1 开始，支持逗号与范围；省略表示全部。不要使用已移除的 `--slide`。
+此规则不改名 skill 自有 helper 的参数；helper 仍以自身 `--help` 为准。
+所有 FontPatch 的 `letterSpacing` 使用显式 `pt` 字符串或 `null`，包括 chart、
+table、notes 的 run；裸数字会被拒绝，notes 的非法 font 不再可当作忽略样式继续执行。
+
 ### `length`
 
 ```

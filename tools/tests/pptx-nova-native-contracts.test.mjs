@@ -18,6 +18,10 @@ import { join, resolve } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
+import {
+  createRunnerRuntime,
+  summarizePhaseError,
+} from '../../pptx-nova/scripts/lib/runner-runtime.mjs'
 
 const binary = process.env.XDOC_TEST_BIN ? resolve(process.env.XDOC_TEST_BIN) : null
 const evidence = process.env.XDOC_TEST_EVIDENCE_DIR
@@ -140,6 +144,174 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     ).output
   return { directory, write, run, apply, body, create }
 }
+
+nativeTest('sidecar collisions and existing sidecars fail before primary publication', (t) => {
+  const s = scenario(t)
+  const source = s.create()
+  const sourceHash = createHash('sha256').update(readFileSync(source)).digest('hex')
+  const patch = s.write('edit.json', {
+    schemaVersion: 'pptx-patch/v1',
+    ops: [{ op: 'set-text-frame', slide: 0, shape: { name: 'Body' }, text: 'Edited once' }],
+  })
+  const alias = join(s.directory, 'source-alias.pptx')
+  symlinkSync(source, alias)
+  for (const [index, sidecar] of [source, patch, alias].entries()) {
+    const output = join(s.directory, `blocked-${index}.pptx`)
+    s.run(
+      [
+        'pptx',
+        'apply',
+        '-i',
+        source,
+        '-p',
+        patch,
+        '-o',
+        output,
+        '--sidecar',
+        sidecar,
+        '--overwrite',
+        '--json',
+      ],
+      'output_collision',
+    )
+    assert.equal(existsSync(output), false)
+  }
+  const output = join(s.directory, 'existing-sidecar.pptx')
+  const sidecar = s.write('existing.json', 'Keep this evidence')
+  s.run(
+    ['pptx', 'apply', '-i', source, '-p', patch, '-o', output, '--sidecar', sidecar, '--json'],
+    'output_exists',
+  )
+  assert.equal(existsSync(output), false)
+  assert.equal(readFileSync(sidecar, 'utf8'), 'Keep this evidence')
+  assert.equal(createHash('sha256').update(readFileSync(source)).digest('hex'), sourceHash)
+})
+
+nativeTest(
+  'late sidecar failure leaves the primary PPTX and reaches the runner error summary',
+  (t) => {
+    const s = scenario(t)
+    const source = s.create()
+    const patch = s.write('edit.json', {
+      schemaVersion: 'pptx-patch/v1',
+      ops: [{ op: 'set-text-frame', slide: 0, shape: { name: 'Body' }, text: 'Edited once' }],
+    })
+    const blocker = s.write('not-a-directory', 'Retain this file')
+    const output = join(s.directory, 'partial.pptx')
+    const sidecar = join(blocker, 'sidecar.json')
+    const report = s.run(
+      ['pptx', 'apply', '-i', source, '-p', patch, '-o', output, '--sidecar', sidecar, '--json'],
+      'output_error',
+    )
+    assert.equal(report.primaryOutputPublished, true)
+    assert.equal(report.outputUntouched, false)
+    assert.equal(report.output, output)
+    assert.equal(report.blockedOutput, sidecar)
+    assert.equal(s.body(output).textPreview, 'Edited once')
+    assert.equal(s.body(source).textPreview, 'Quarterly review')
+    assert.equal(report.retryCommand, undefined)
+    assert.equal(report.error.retryCommand, undefined)
+    const summary = { runDir: s.directory, phases: [], gates: [] }
+    const secondOutput = join(s.directory, 'runner-partial.pptx')
+    assert.throws(
+      () =>
+        createRunnerRuntime().runJsonPhase(summary, {
+          name: 'apply',
+          bin: binary,
+          args: [
+            'pptx',
+            'apply',
+            '-i',
+            source,
+            '-p',
+            patch,
+            '-o',
+            secondOutput,
+            '--sidecar',
+            sidecar,
+            '--json',
+          ],
+          artifact: join(s.directory, 'runner-apply.json'),
+        }),
+      (error) => {
+        summary.error = summarizePhaseError(error)
+        assert.equal(summary.error.primaryOutputPublished, true)
+        assert.equal(summary.error.output, secondOutput)
+        assert.equal(summary.error.blockedOutput, sidecar)
+        return true
+      },
+    )
+    s.write('runner-summary.json', summary)
+    assert.equal(summary.phases[0].status, 'failed')
+    assert.equal(s.body(secondOutput).textPreview, 'Edited once')
+  },
+)
+
+nativeTest('brand and slide-copy reject duplicate input forms before file access', (t) => {
+  const s = scenario(t)
+  for (const action of ['apply-brand', 'slide-copy']) {
+    const extra =
+      action === 'apply-brand' ? ['--brand', 'missing.json'] : ['--source', 'missing.pptx']
+    const args = [
+      'pptx',
+      action,
+      'missing.pptx',
+      '--input',
+      'missing.pptx',
+      ...extra,
+      '-o',
+      join(s.directory, `${action}.pptx`),
+      '--json',
+    ]
+    const result = spawnSync(binary, args, { cwd: s.directory, encoding: 'utf8', timeout: 30_000 })
+    s.write(`${action}-duplicate.json`, {
+      args,
+      status: result.status,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    })
+    assert.equal(result.error, undefined)
+    assert.equal(result.status, 2)
+    assert.match(result.stderr, /input|target/i)
+    assert.match(result.stderr, /both|duplicate|exactly one/i)
+    assert.equal(existsSync(join(s.directory, `${action}.pptx`)), false)
+  }
+})
+
+nativeTest(
+  'letter spacing uses pt strings in text and rich notes, including dry-run validation',
+  (t) => {
+    const s = scenario(t)
+    const source = s.create()
+    for (const spacing of ['0.2pt', null, 2540]) {
+      const ops = [
+        {
+          op: 'set-text-frame',
+          slide: 0,
+          shape: { name: 'Body' },
+          font: { letterSpacing: spacing },
+        },
+        {
+          op: 'set-slide-notes',
+          slide: 0,
+          paragraphs: [{ runs: [{ text: 'Speaker notes', font: { letterSpacing: spacing } }] }],
+        },
+      ]
+      for (const op of ops) {
+        for (const dryRun of [true, false]) {
+          const result = s.apply([op], source, {
+            dryRun,
+            error: typeof spacing === 'number' ? 'invalid_argument' : null,
+          })
+          if (typeof spacing === 'number') {
+            assert.equal(existsSync(result.output), false)
+            assert.match(result.report.error.message, /letterSpacing|spacing/)
+          } else assert.deepEqual(result.report.semanticIssues, [])
+        }
+      }
+    }
+  },
+)
 
 nativeTest(
   'Cartesian stock pages pass canonical PDF layout checks without shrinking display fonts',

@@ -30,6 +30,20 @@ point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
 精确版式任务应核对同一候选的独立 PowerPoint 导出；未归因的差异保留为观察结果，
 不要移动外框、缩字号或重建原生 chart 来补偿单个 renderer 的显示。
 
+核对升级后的图表显示时，保留以下继承差别：
+
+- data label 的删除状态有省略、显式 true、显式 false 三种。point override 先于
+  最终隐藏判定：局部 false 可恢复上层隐藏的标签；局部 true 应隐藏，包括自定义文本。
+  不要把省略变成 false，也不要把 parser 模型字段直接当作 patch 可写字段。
+- pie/doughnut 标签未指定位置时可自动放置，不代表关闭标签。doughnut 的自动环内
+  标签应位于内外半径之间；按实际 hole size 核对位置、数值与数量，不追加重复文本框。
+- 显式 no-fill 图表线不会因继承线宽而重新可见；省略 paint 则可能采用自动系列色。
+  同时保留 dash、category rotation（包括零）、大小写重置、语言和层级字体覆盖。
+- 自动 label/legend fitting 与作者显式字号不同；检查小图、末端 category、overlay
+  legend、treemap 下缘，不要为匹配旧预览统一缩小字号或改数据。
+
+这些是源文件和渲染的诊断语义；能否写入仍以该操作的实时 schema 与 dry-run 为准。
+
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
 add-chart / set-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：

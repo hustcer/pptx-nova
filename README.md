@@ -316,7 +316,7 @@ bindings. The public audit scans for machine-local paths, private repository
 context, unexpected binaries, missing license requirements, and other release
 blockers.
 
-To check an installed xdoc's native edit, autofit, translation and asset-boundary
+To check an installed xdoc's native edit, autofit, translation, sidecar-publication and asset-boundary
 contracts, including the published Edit Contract gate with real semantic/style/visual
 reports, run the opt-in executable suite:
 

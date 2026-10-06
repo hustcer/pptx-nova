@@ -108,6 +108,10 @@ xdoc 让这四层都能改。整 deck 的主题槽位更新可用 theme 层；�
 { "type": "none" }
 ```
 
+这是显式无填充，不是“删除本地声明并恢复继承”。slide background 的 no-fill 会阻断
+layout/master 背景继承；透明 solid 也仍是本地声明。需要恢复母版背景时，按当前
+`set-slide-background` schema 使用 `followMaster:true`，不要以 no-fill 或透明色代替。
+
 ### Picture fill（仅普通 shape）
 
 ```json

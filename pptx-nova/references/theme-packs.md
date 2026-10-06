@@ -14,6 +14,11 @@ xdoc pptx apply-brand deck.pptx --brand brand-profile.json -o out.pptx
 xdoc pptx extract-style reference.pptx --output style.json --json
 ```
 
+For `apply-brand`, provide exactly one nonblank input, positionally or via `--input`.
+Do not supply both, even with identical paths. Argument identity is independent of
+path equality with `--output`, `--brand` or `--sidecar`; normal file, authorization,
+overwrite and sidecar-collision checks still apply.
+
 `swap-theme` compiles the selected themePack into canonical theme/master patch operations, then reuses the normal
 apply/dry-run/sidecar path. `swap-style` uses the same bottom layer for master placeholder and
 presentation default text style; its density/radius/shadow/image-ratio fields are also consumed by

@@ -79,6 +79,12 @@ capsule 中的相对资源根；之后同名源文件变化不会换掉已冻结
 capsule 含私有原请求、PPTX 和资源，应保留到重试结束。没有首次提交的 capsule
 时不自动应用旧报告；重新组织一次有完整上下文的新请求。
 
+资产文件存在但包装脚本报 `ENOENT` 或使用了错误图片时，检查调用路径是否含
+`symlink/..`。在 POSIX 上按文件系统遍历，不能先用 `path.resolve` 或普通
+`realpathSync` 折叠；自定义 Node 包装可复用 `scripts/lib/filesystem-paths.mjs`。
+省略 `--asset-root` 时，资源相对于**提交的 patch 路径所在目录**，不是 patch 文件的
+符号链接目标目录。修复脚本会冻结该目录内的资源；逃逸到根外的资产链接仍拒绝。
+
 `apply` 按 kind 分派，只选一个具体 JSON Pointer，先校验、dry-run，再实际 apply。
 文档修复额外传 `--document diagnosed.pptx`。成功建议记录回执，同一建议不会重复执行。
 原始 intent、raw XML 约束和资产字节预算不会被放宽；当前授权仍由 xdoc 再次求解。

@@ -17,6 +17,7 @@ import {
 } from 'node:fs'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { parseArgs, TextDecoder } from 'node:util'
+import { resolveFilesystemPath } from './lib/filesystem-paths.mjs'
 import {
   compactRemediationJson,
   parseRemediationJson,
@@ -110,7 +111,7 @@ function execute(binary, args, { cwd, env, input } = {}) {
 
 function executable(value) {
   if (isAbsolute(value) || value.includes('/') || value.includes('\\'))
-    return realpathSync(resolve(value))
+    return realpathSync.native(value)
   for (const directory of (process.env.PATH ?? '').split(
     process.platform === 'win32' ? ';' : ':',
   )) {
@@ -267,11 +268,12 @@ function applyXdoc(context, { patchPath, inputPath, outputPath, intentPath, dryR
 }
 
 function run(options) {
-  const patch = realpathSync(required(options.patch, 'patch'))
-  const output = fresh(resolve(required(options.output, 'output')))
+  const submittedPatch = resolveFilesystemPath(required(options.patch, 'patch'))
+  const patch = realpathSync.native(submittedPatch)
+  const output = fresh(resolveFilesystemPath(required(options.output, 'output')))
   const binary = executable(options.xdoc ?? 'xdoc')
-  const root = resolve(required(options.capsule, 'capsule'))
-  const sourceRoot = realpathSync(options['asset-root'] ?? dirname(patch))
+  const root = resolveFilesystemPath(required(options.capsule, 'capsule'))
+  const sourceRoot = realpathSync.native(options['asset-root'] ?? dirname(submittedPatch))
   if (!['cli', 'json-rpc'].includes(options.transport ?? 'cli'))
     fail('invalid_argument', 'Transport must be cli or json-rpc')
   mkdirSync(root, { mode: 0o700 })
@@ -282,11 +284,11 @@ function run(options) {
   const requestBytes = read(patch, limits.maxPatchBytes)
   const authored = parseRemediationJson(utf8(requestBytes))
   write(join(root, 'request.json'), requestBytes)
-  const inputBytes = options.input ? read(realpathSync(options.input), MAX_DOCUMENT) : null
+  const inputBytes = options.input ? read(realpathSync.native(options.input), MAX_DOCUMENT) : null
   if (inputBytes !== null) write(join(root, 'input.pptx'), inputBytes)
   let intent = null
   if (options.intent) {
-    const bytes = read(realpathSync(options.intent), 8192)
+    const bytes = read(realpathSync.native(options.intent), 8192)
     parseRemediationJson(utf8(bytes))
     write(join(root, 'intent.json'), bytes)
     intent = descriptor('intent.json', bytes)
@@ -339,13 +341,13 @@ function apply(options) {
   const remediation = remediationAt(report, required(options.pointer, 'pointer'))
   const context = load(required(options.capsule, 'capsule'))
   const documentBytes = options.document
-    ? read(realpathSync(options.document), MAX_DOCUMENT)
+    ? read(realpathSync.native(options.document), MAX_DOCUMENT)
     : undefined
   const prepared = prepareRemediation(remediation, context.submitted, {
     documentBytes,
     reviewed: options.reviewed === true,
   })
-  const output = fresh(resolve(required(options.output, 'output')))
+  const output = fresh(resolveFilesystemPath(required(options.output, 'output')))
   const root = context.manifest.root
   const id = requestJcsSha256(remediation)
   const receipt = join(root, `applied-${id}.json`)

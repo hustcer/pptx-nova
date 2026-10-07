@@ -8,6 +8,7 @@ import {
   validateContent,
 } from '../assets/deckkits/core-primitives.kit.mjs'
 import { createAssetContext, readAssetManifest } from './lib/asset-manifest.mjs'
+import { resolveFilesystemPath } from './lib/filesystem-paths.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const skillRoot = resolve(__dirname, '..')
@@ -50,13 +51,13 @@ function parseArgs(argv) {
       args.deckkit = valueAfter(argv, i, arg)
       i += 1
     } else if (arg === '--assets') {
-      args.assets = resolve(valueAfter(argv, i, arg))
+      args.assets = resolveFilesystemPath(valueAfter(argv, i, arg))
       i += 1
     } else if (arg === '-o' || arg === '--output') {
-      args.output = resolve(valueAfter(argv, i, arg))
+      args.output = resolveFilesystemPath(valueAfter(argv, i, arg))
       i += 1
     } else if (arg === '--quality-json') {
-      args.qualityJson = resolve(valueAfter(argv, i, arg))
+      args.qualityJson = resolveFilesystemPath(valueAfter(argv, i, arg))
       i += 1
     } else if (arg === '--mode') {
       args.mode = valueAfter(argv, i, arg)
@@ -71,7 +72,7 @@ function parseArgs(argv) {
     } else if (arg === '--compact') {
       args.pretty = false
     } else if (!arg.startsWith('--') && !args.content) {
-      args.content = resolve(arg)
+      args.content = resolveFilesystemPath(arg)
     } else {
       throw new Error(`Unknown option: ${arg}\n\n${usage}`)
     }

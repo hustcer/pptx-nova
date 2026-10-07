@@ -146,6 +146,10 @@ self-contained: scripts required by user workflows live in `<skill-root>/scripts
 `<skill-root>/assets/`, documentation in `<skill-root>/references/`, and benchmarks in
 `<skill-root>/benchmarks/`.
 
+When wrapping xdoc or preparing asset inputs, follow `common-workflow.md`'s filesystem-path rules.
+Resolve POSIX symlink/parent traversal before lexical normalization; keep relative assets rooted
+at the submitted patch/manifest directory, including when the file itself is a symlink.
+
 Do not depend on repository-root `tools/`, `Justfile`, or files outside this skill directory in skill
 user paths. Repository-root tools are only for maintainers of this repository.
 

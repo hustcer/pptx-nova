@@ -10,6 +10,7 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -1819,6 +1820,39 @@ test('cartesian image stats injects a manifest-relative image with contain geome
   assert.equal(connectors.length, 0)
 })
 
+test('build and asset context preserve POSIX symlink parent traversal', async (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX filesystem contract')
+  const root = mkdtempSync(join(tmpdir(), 'nova-build-path-'))
+  const actual = join(root, 'real')
+  mkdirSync(join(actual, 'child'), { recursive: true })
+  symlinkSync(join(actual, 'child'), join(root, 'link'))
+  writeFileSync(
+    join(actual, 'image.svg'),
+    '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90"/>',
+  )
+  const manifest = {
+    schemaVersion: 'pptx-nova-assets-manifest/v1',
+    entries: [{ id: 'picture', kind: 'image', path: 'image.svg', pptxUse: { ratio: '16:9' } }],
+  }
+  writeJson(join(actual, 'assets.json'), manifest)
+  writeJson(join(actual, 'content.json'), cartesianImageContent({ 'image.editorial': 'picture' }))
+  const parent = `${root}/link/..`
+  runNode([
+    skillPath('scripts/pptx-nova-build.mjs'),
+    `${parent}/content.json`,
+    '--assets',
+    `${parent}/assets.json`,
+    '-o',
+    `${parent}/new/patch.json`,
+  ])
+  assert.equal(existsSync(join(root, 'new')), false)
+  const patch = JSON.parse(readFileSync(join(actual, 'new', 'patch.json'), 'utf8'))
+  assert.equal(patch.ops.find((op) => op.op === 'add-image').assetSource.path, 'image.svg')
+  const { createAssetContext } = await import(skillUrl('scripts/lib/asset-manifest.mjs'))
+  const asset = createAssetContext(manifest, `${parent}/assets.json`).get('picture')
+  assert.deepEqual(readFileSync(asset.absolutePath), readFileSync(join(actual, 'image.svg')))
+})
+
 test('cartesian image stats gives a self-repairing error when assets are omitted', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-cartesian-assets-missing-'))
   const contentPath = join(root, 'content.json')
@@ -3083,6 +3117,39 @@ test('create runner retains diagnostic previews on old runtimes without publishi
   ]) {
     assert.ok(gateNames.includes(gate), gate)
   }
+})
+
+test('create runner resolves POSIX input and run paths before invoking child tools', (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX filesystem contract')
+  const root = mkdtempSync(join(tmpdir(), 'nova-create-path-'))
+  const actual = join(root, 'real')
+  mkdirSync(join(actual, 'child'), { recursive: true })
+  symlinkSync(join(actual, 'child'), join(root, 'link'))
+  const parent = `${root}/link/..`
+  const output = `${parent}/out.pptx`
+  const runDir = `${parent}/run`
+  writeJson(join(actual, 'content.json'), swissColumnContent())
+  writeJson(join(actual, 'lock.json'), swissColumnLock({ finalPptx: output, runDir }))
+  const fakeXdoc = writeFakeXdoc(actual, successfulFakeXdocSource())
+  const result = runNode([
+    skillPath('scripts/pptx-nova-create-run.mjs'),
+    '--content',
+    `${parent}/content.json`,
+    '--lock',
+    `${parent}/lock.json`,
+    '--output',
+    output,
+    '--run-dir',
+    runDir,
+    '--xdoc-bin',
+    `${parent}/${basename(fakeXdoc)}`,
+    '--json',
+  ])
+  const summary = readCreateSummary(result)
+  assert.equal(summary.machineGatesPassed, true)
+  assert.equal(existsSync(join(actual, 'run', 'candidate.pptx')), true)
+  assert.equal(existsSync(join(root, 'run')), false)
+  assert.equal(existsSync(output), false)
 })
 
 test('create runner finalizes only the same reviewed canonical candidate without rerendering', () => {

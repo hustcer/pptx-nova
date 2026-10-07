@@ -28,6 +28,7 @@ import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { semanticIssueValid, semanticValidationEvidence } from './lib/semantic-evidence.mjs'
 import { canonicalCreatePreview, validateCreateDelivery } from './lib/create-delivery.mjs'
 import { composeChoreography } from './lib/animation-choreography.mjs'
+import { resolveFilesystemPath } from './lib/filesystem-paths.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
@@ -239,7 +240,7 @@ function hasPathSeparator(value) {
 }
 
 function normalizeExecutablePath(value, cwd) {
-  return hasPathSeparator(value) ? resolve(cwd, value) : value
+  return hasPathSeparator(value) ? resolveFilesystemPath(value, cwd) : value
 }
 
 function defaultRunDir(args, cwd) {
@@ -257,21 +258,23 @@ function defaultRunDir(args, cwd) {
 
 function normalizeArgs(inputArgs) {
   const cwd = process.cwd()
-  const content = resolve(cwd, inputArgs.content)
+  const content = resolveFilesystemPath(inputArgs.content, cwd)
   const contentJson = readJson(content)
   const deckkit = inputArgs.deckkit || contentJson?.meta?.deckkit || ''
   const args = {
     ...inputArgs,
     deckkit,
     content,
-    lock: resolve(cwd, inputArgs.lock),
-    assets: inputArgs.assets ? resolve(cwd, inputArgs.assets) : '',
-    choreography: inputArgs.choreography ? resolve(cwd, inputArgs.choreography) : '',
-    visualReview: inputArgs.visualReview ? resolve(cwd, inputArgs.visualReview) : '',
-    output: resolve(cwd, inputArgs.output),
+    lock: resolveFilesystemPath(inputArgs.lock, cwd),
+    assets: inputArgs.assets ? resolveFilesystemPath(inputArgs.assets, cwd) : '',
+    choreography: inputArgs.choreography ? resolveFilesystemPath(inputArgs.choreography, cwd) : '',
+    visualReview: inputArgs.visualReview ? resolveFilesystemPath(inputArgs.visualReview, cwd) : '',
+    output: resolveFilesystemPath(inputArgs.output, cwd),
     xdocBin: normalizeExecutablePath(inputArgs.xdocBin, cwd),
   }
-  args.runDir = inputArgs.runDir ? resolve(cwd, inputArgs.runDir) : defaultRunDir(args, cwd)
+  args.runDir = inputArgs.runDir
+    ? resolveFilesystemPath(inputArgs.runDir, cwd)
+    : defaultRunDir(args, cwd)
   return { args, contentJson }
 }
 

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
-import { dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path'
+import { dirname, extname, isAbsolute, relative, sep } from 'node:path'
+import { resolveFilesystemPath } from './filesystem-paths.mjs'
 
 export const ASSETS_MANIFEST_SCHEMA_VERSION = 'pptx-nova-assets-manifest/v1'
 
@@ -103,9 +104,9 @@ function resolveLocalAssetPath(manifest, manifestPath, entry) {
     )
   }
 
-  const baseDir = dirname(manifestPath)
+  const baseDir = realpathSync.native(dirname(manifestPath))
   const assetRoot = normalizePath(manifest.assetRoot || '')
-  const rootDir = resolve(baseDir, assetRoot || '.')
+  const rootDir = resolveFilesystemPath(assetRoot || '.', baseDir)
   if (!isWithin(baseDir, rootDir)) {
     throw new Error(
       `assets_manifest.json assetRoot must stay inside the manifest directory: ${manifest.assetRoot}`,
@@ -119,8 +120,8 @@ function resolveLocalAssetPath(manifest, manifestPath, entry) {
 
   const candidate =
     assetRoot && raw !== assetRoot && !raw.startsWith(`${assetRoot}/`)
-      ? resolve(rootDir, raw)
-      : resolve(baseDir, raw)
+      ? resolveFilesystemPath(raw, rootDir)
+      : resolveFilesystemPath(raw, baseDir)
   if (!isWithin(rootDir, candidate)) {
     throw new Error(`asset "${entry.id}" resolves outside the manifest assetRoot: ${raw}`)
   }
@@ -130,9 +131,9 @@ function resolveLocalAssetPath(manifest, manifestPath, entry) {
     )
   }
 
-  const realBaseDir = realpathSync(baseDir)
-  const realRootDir = realpathSync(rootDir)
-  const realCandidate = realpathSync(candidate)
+  const realBaseDir = realpathSync.native(baseDir)
+  const realRootDir = realpathSync.native(rootDir)
+  const realCandidate = realpathSync.native(candidate)
   if (!isWithin(realBaseDir, realRootDir) || !isWithin(realRootDir, realCandidate)) {
     throw new Error(`asset "${entry.id}" resolves outside the manifest assetRoot: ${raw}`)
   }
@@ -202,7 +203,7 @@ export function createAssetContext(manifest, manifestPath) {
   if (manifest.schemaVersion !== ASSETS_MANIFEST_SCHEMA_VERSION) {
     throw new Error(`assets_manifest.json schemaVersion must be ${ASSETS_MANIFEST_SCHEMA_VERSION}`)
   }
-  const absoluteManifestPath = resolve(manifestPath)
+  const absoluteManifestPath = resolveFilesystemPath(manifestPath)
   const rawEntries = entriesOf(manifest)
   const byId = new Map()
   for (const entry of rawEntries) {

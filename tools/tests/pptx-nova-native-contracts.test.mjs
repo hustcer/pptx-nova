@@ -9,6 +9,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -1289,4 +1290,190 @@ nativeTest(
       s.run(['daemon', 'stop', '--json'])
     }
   },
+)
+
+nativeTest('remediation preserves filesystem asset roots and the submitted patch parent', (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX filesystem contract')
+  const s = scenario(t)
+  const root = join(s.directory, 'real')
+  mkdirSync(join(root, 'child'), { recursive: true })
+  symlinkSync(join(root, 'child'), join(s.directory, 'link'))
+  const png = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j6GQAAAAASUVORK5CYII=',
+    'base64',
+  )
+  writeFileSync(join(root, 'inside.png'), png)
+  const patch = s.write('real/patch.json', {
+    schemaVersion: 'pptx-patch/v1',
+    ops: [
+      { op: 'add-slide' },
+      {
+        op: 'add-image',
+        slide: 0,
+        name: 'Frozen asset',
+        x: '1in',
+        y: '1in',
+        w: '1in',
+        h: '1in',
+        assetSource: { path: 'inside.png' },
+      },
+    ],
+  })
+  // A symlink to the patch does not move its caller-relative asset root.
+  const submitted = join(s.directory, 'submitted')
+  mkdirSync(submitted)
+  symlinkSync(patch, join(submitted, 'patch.json'))
+  writeFileSync(join(submitted, 'inside.png'), png)
+  const aliasedRoot = `${s.directory}/link/..`
+  for (const [index, options] of [
+    ['--patch', patch, '--asset-root', aliasedRoot],
+    ['--patch', `${aliasedRoot}/patch.json`],
+    ['--patch', join(submitted, 'patch.json')],
+  ].entries()) {
+    const capsule = join(realpathSync.native(s.directory), `context-${index}`)
+    const output = `${aliasedRoot}/frozen-${index}.pptx`
+    s.run(
+      [
+        skillScript('pptx-nova-remediation'),
+        'run',
+        '--xdoc',
+        binary,
+        ...options,
+        '--capsule',
+        capsule,
+        '--output',
+        output,
+      ],
+      null,
+      process.execPath,
+    )
+    assert.equal(existsSync(output), true)
+    assert.equal(existsSync(join(s.directory, `frozen-${index}.pptx`)), false)
+    assert.deepEqual(readFileSync(join(capsule, 'assets', 'inside.png')), png)
+    const manifest = JSON.parse(readFileSync(join(capsule, 'context.json'), 'utf8'))
+    assert.equal(manifest.sourceRoot.endsWith(index === 2 ? '/submitted' : '/real'), true)
+    assert.equal(s.inspect(output).slides[0].shapes[0].name, 'Frozen asset')
+  }
+  symlinkSync(s.write('outside.png', png), join(root, 'escape.png'))
+  const escapingPatch = JSON.parse(readFileSync(patch, 'utf8'))
+  escapingPatch.ops[1].assetSource.path = 'escape.png'
+  const output = join(root, 'blocked.pptx')
+  s.run(
+    [
+      skillScript('pptx-nova-remediation'),
+      'run',
+      '--xdoc',
+      binary,
+      '--patch',
+      s.write('escape.json', escapingPatch),
+      '--asset-root',
+      aliasedRoot,
+      '--capsule',
+      join(realpathSync.native(s.directory), 'context-blocked'),
+      '--output',
+      output,
+    ],
+    'context_unavailable',
+    process.execPath,
+  )
+  assert.equal(existsSync(output), false)
+})
+
+nativeTest(
+  'Create builds and renders manifest assets through POSIX aliased paths',
+  (t) => {
+    if (process.platform === 'win32') return t.skip('POSIX filesystem contract')
+    const s = scenario(t, { useInstalledAuthorization: true })
+    const root = join(s.directory, 'real')
+    mkdirSync(join(root, 'child'), { recursive: true })
+    symlinkSync(join(root, 'child'), join(s.directory, 'link'))
+    const parent = `${s.directory}/link/..`
+    s.write(
+      'real/image.svg',
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900"><rect width="1600" height="900" fill="#665D56"/><circle cx="800" cy="450" r="240" fill="#D9C7A4"/></svg>',
+    )
+    s.write('real/content.json', {
+      meta: { deckkit: 'cartesian' },
+      slides: [
+        {
+          type: 'cartesianImageStatsSlide',
+          imageSlots: { 'image.editorial': 'picture' },
+          data: {
+            imageLabel: 'Filesystem contract',
+            label: 'Runtime alignment',
+            title: 'Asset paths',
+            paragraphs: ['The image is loaded through a symlink and parent traversal.'],
+            stats: [
+              { value: '3', label: 'Root cases verified' },
+              { value: '0', label: 'Escaping links' },
+            ],
+          },
+        },
+      ],
+    })
+    s.write('real/assets.json', {
+      schemaVersion: 'pptx-nova-assets-manifest/v1',
+      entries: [
+        {
+          id: 'picture',
+          kind: 'image',
+          path: 'image.svg',
+          pptxUse: { slotId: 'image.editorial', ratio: '16:9', fitPolicy: 'contain' },
+        },
+      ],
+    })
+    const output = `${parent}/final.pptx`
+    const runDir = `${parent}/run`
+    s.write('real/lock.json', {
+      schemaVersion: 'pptx-nova-deck-lock/v1',
+      mode: 'express',
+      objective: 'Verify native asset path propagation',
+      output: { finalPptx: output, runDir },
+      canvas: { format: 'ppt169', width: '13.333in', height: '7.5in' },
+      deckkit: { id: 'cartesian' },
+      slides: [
+        {
+          type: 'cartesianImageStatsSlide',
+          title: 'Asset paths',
+          purpose: 'Verify the image and statistics',
+          rhythm: 'dense',
+          imageSlots: { 'image.editorial': 'picture' },
+        },
+      ],
+      assumptions: [],
+    })
+    const report = s.run(
+      [
+        skillScript('pptx-nova-create-run'),
+        '--content',
+        `${parent}/content.json`,
+        '--lock',
+        `${parent}/lock.json`,
+        '--assets',
+        `${parent}/assets.json`,
+        '--output',
+        output,
+        '--run-dir',
+        runDir,
+        '--xdoc-bin',
+        binary,
+        '--json-full',
+      ],
+      null,
+      process.execPath,
+    )
+    assert.equal(report.machineGatesPassed, true)
+    assert.equal(report.deliveryReady, false, 'Actual visual review is still required')
+    assert.equal(existsSync(output), false)
+    assert.equal(existsSync(join(s.directory, 'run')), false)
+    const candidate = join(root, 'run', 'candidate.pptx')
+    const inspected = s.inspect(candidate)
+    assert.equal(inspected.slides.length, 1)
+    assert.equal(
+      inspected.slides[0].shapes.filter((shape) => shape.shapeType === 'picture').length,
+      1,
+    )
+    assert.equal(existsSync(join(root, 'run', 'visual-evidence', 'manifest.json')), true)
+  },
+  { visual: true },
 )

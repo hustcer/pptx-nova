@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.7.0 (9078f53b)",
+  "version": "0.7.1 (90b6fb3a)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -2499,13 +2499,13 @@
         "Use `--daemon-strict` when an Agent workflow requires daemon reuse and should fail instead of falling back.",
         "--output is required for new/apply unless --dry-run is set. Inspect never writes output.",
         "An apply sidecar must resolve to a different file from the PPTX output and all input PPTX, patch/brand/bindings, and template data files, even with --overwrite. Existing sidecars require --overwrite; these path conflicts are rejected before the primary PPTX is published.",
-        "One-shot apply/new publish the PPTX before its sidecar. A later sidecar failure reports primaryOutputPublished=true, outputUntouched=false, output naming the PPTX, and blockedOutput naming the sidecar; inspect both paths before recovery instead of automatically repeating the mutation."
+        "One-shot apply/new and daemon apply publish the PPTX before its sidecar. A later sidecar failure uses the output exit code and reports primaryOutputPublished=true, outputUntouched=false, output naming the PPTX, and blockedOutput naming the sidecar (null if an internal plan failure leaves it unknown); inspect both paths before recovery instead of automatically repeating the mutation."
       ],
       "assetPolicy": {
         "assetRoot": {
           "option": "--asset-root",
           "default": "patch-file-directory",
-          "pathSecurity": "assetSource.path must be relative and remain inside the resolved asset root"
+          "pathSecurity": "assetSource.path must be relative and remain inside the resolved asset root. On POSIX, explicit roots and the default patch-file directory preserve symlink/.. traversal until filesystem resolution."
         },
         "maxPatchBytes": {
           "default": 33554432,
@@ -3650,7 +3650,7 @@
             "feature": "slide-animation",
             "subset": "basic-shape-and-text-builds",
             "status": "supported",
-            "summary": "Create, safely edit, and clear basic entrance/exit and text-build animations, four-edge native fly, finite whole-shape grow-shrink/spin, and straight motion-path.",
+            "summary": "Create, safely edit, and clear basic entrance/exit and text-build animations, fixed whole-shape box(in)/dissolve, four-edge native fly, finite whole-shape grow-shrink/spin, and straight motion-path.",
             "operations": ["set-slide-animations"],
             "limits": [
               {
@@ -3671,7 +3671,7 @@
               {
                 "id": "slide-animation-basic-roundtrip",
                 "kind": "behavior",
-                "claim": "Basic entrance/exit, paragraph build, grow-shrink scale, signed spin degrees, timing, trigger, stable-id update, and clear behavior are regression-tested at the generation boundary."
+                "claim": "Basic entrance/exit, paragraph build, grow-shrink scale, signed spin degrees, timing, trigger, stable-id update, and clear behavior are regression-tested. Fixed box(in) uses independent SDK entrance/exit leaves; tests cover boundary visibility, stable-id edits, retargeting, modifiers, namespace aliases and preserve-only mismatches. Dissolve uses independently cross-checked preset/filter facts. Source-generated box and dissolve reach JS/source WASM/bundled WASM and the Viewer; dissolve fallback tests cover both phases, repeat, autoReverse, reset and unknown-filter rejection."
               },
               {
                 "id": "slide-animation-native-fly-roundtrip",
@@ -3697,7 +3697,7 @@
             "axes": {
               "create": {
                 "status": "supported",
-                "summary": "Create the published basic entrance/exit effects and paragraph builds, plus finite whole-shape grow-shrink, spin, and straight motion-path with explicit scale, degrees, or offset.",
+                "summary": "Create the published basic entrance/exit effects and paragraph builds, plus finite whole-shape box(in), dissolve, grow-shrink, spin, and straight motion-path.",
                 "limits": [
                   {
                     "code": "basic-effect-subset-only",
@@ -3706,6 +3706,10 @@
                   {
                     "code": "straight-motion-path-only",
                     "description": "Motion-path requires offset x/y in [-1000, 1000] slide fractions, rounded to six decimals. Each path starts at the authored layout position (additive base), without accumulating prior motion. Whole shape and finite repeat only; no arbitrary path, paragraph build, or autoRotate."
+                  },
+                  {
+                    "code": "fixed-filter-profiles-only",
+                    "description": "Box uses preset 4/subtype 16/filter box(in); dissolve uses preset 9/subtype 0/filter dissolve. Entrance/exit, whole shape and finite repeat only; no box(out), direction, paragraph/level target, or build parameter. Extra behaviors or mismatched preset/filter metadata remain preserve-only."
                   }
                 ],
                 "officeTarget": {
@@ -3747,11 +3751,11 @@
               },
               "inspect": {
                 "status": "supported",
-                "summary": "Inspect logical effect, edge direction, target, trigger, duration, scale, degrees, path offset, repeat, autoReverse, restart, easing, stable id, and editable versus preserve-only classification as structured data.",
+                "summary": "Inspect logical effects, all shape targets, raw source/behavior metadata, modeled parameters and editable versus preserve-only classification. Unattributed timing has separate diagnostics and counts; merge safety is independent of effect counts.",
                 "limits": [
                   {
                     "code": "modeled-timing-subset",
-                    "description": "Inspection reports the modeled timing leaf and classifies unmodeled timing rather than claiming a complete PowerPoint timing graph."
+                    "description": "Explicit effect boundaries own their behaviors; shared group ids do not join effects. Unmodeled duration and delay are null. Raw metadata does not authorize edits or promise a complete PowerPoint timing graph."
                   }
                 ],
                 "officeTarget": {
@@ -3783,7 +3787,7 @@
               },
               "render": {
                 "status": "partial",
-                "summary": "Play basic effects, four-edge native fly, whole-shape grow-shrink/spin, and base-origin motion paths in the Viewer with authored easing fractions, finite repeat and autoReverse. Emphasis preserves held transforms; each authored path starts at layout origin. PDF and PNG remain static.",
+                "summary": "Play basic effects including fixed box(in), four-edge native fly, whole-shape grow-shrink/spin, and base-origin motion paths in the Viewer. Box uses a rectangular clip approximation. Dissolve retains its source identity with an explicit fade preview and typed effect-fallback diagnostic. Unknown filters remain unsupported. Emphasis preserves held transforms; each path starts at layout origin. PDF and PNG remain static.",
                 "limits": [
                   {
                     "code": "viewer-runtime-subset",
@@ -19854,7 +19858,7 @@
           "fontSpacingLength": {
             "type": "string",
             "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$",
-            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected."
+            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected. Any number of fractional digits is accepted and rounded directly to the nearest hundredth of a point, with exact halves away from zero."
           },
           "fontKernThreshold": {
             "type": "string",
@@ -20260,6 +20264,8 @@
                     "enum": [
                       "appear",
                       "fade",
+                      "box",
+                      "dissolve",
                       "wipe",
                       "fly",
                       "disappear",
@@ -20270,7 +20276,8 @@
                       "spin",
                       "motion-path"
                     ],
-                    "strict": true
+                    "strict": true,
+                    "description": "Box uses preset 4/subtype 16/filter box(in); dissolve uses preset 9/subtype 0/filter dissolve with explicit Web fade fallback. Entrance/exit phase, whole shape and finite repeat only; no direction or text build."
                   },
                   "direction": {
                     "type": "string",
@@ -20353,6 +20360,8 @@
                     "enum": [
                       "appear",
                       "fade",
+                      "box",
+                      "dissolve",
                       "wipe",
                       "fly",
                       "disappear",
@@ -20363,7 +20372,8 @@
                       "spin",
                       "motion-path"
                     ],
-                    "strict": true
+                    "strict": true,
+                    "description": "Box uses preset 4/subtype 16/filter box(in); dissolve uses preset 9/subtype 0/filter dissolve with explicit Web fade fallback. Entrance/exit phase, whole shape and finite repeat only; no direction or text build."
                   },
                   "direction": {
                     "type": "string",
@@ -21594,7 +21604,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. Decimal pt values round to the nearest hundredth of a point with exact halves away from zero. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "slideNotesParagraphs": {
             "type": "array",
@@ -26082,6 +26092,52 @@
                 "else": {
                   "not": {
                     "required": ["offset"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "enum": ["box", "dissolve"],
+                      "strict": true
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "phase": {
+                      "enum": ["entrance", "exit"],
+                      "strict": true
+                    },
+                    "repeat": {
+                      "not": {
+                        "const": "indefinite"
+                      }
+                    },
+                    "target": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["paragraph"]
+                          },
+                          {
+                            "required": ["level"]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["direction"]
+                      },
+                      {
+                        "required": ["build"]
+                      }
+                    ]
                   }
                 }
               }
@@ -30527,7 +30583,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. Decimal pt values round to the nearest hundredth of a point with exact halves away from zero. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "paragraphLineSpacing": {
             "oneOf": [
@@ -33600,7 +33656,7 @@
           "fontSpacingLength": {
             "type": "string",
             "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$",
-            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected."
+            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected. Any number of fractional digits is accepted and rounded directly to the nearest hundredth of a point, with exact halves away from zero."
           },
           "shapeQuery": {
             "type": "object",
@@ -34613,6 +34669,8 @@
                     "enum": [
                       "appear",
                       "fade",
+                      "box",
+                      "dissolve",
                       "wipe",
                       "fly",
                       "disappear",
@@ -34623,7 +34681,8 @@
                       "spin",
                       "motion-path"
                     ],
-                    "strict": true
+                    "strict": true,
+                    "description": "Box uses preset 4/subtype 16/filter box(in); dissolve uses preset 9/subtype 0/filter dissolve with explicit Web fade fallback. Entrance/exit phase, whole shape and finite repeat only; no direction or text build."
                   },
                   "direction": {
                     "type": "string",
@@ -34706,6 +34765,8 @@
                     "enum": [
                       "appear",
                       "fade",
+                      "box",
+                      "dissolve",
                       "wipe",
                       "fly",
                       "disappear",
@@ -34716,7 +34777,8 @@
                       "spin",
                       "motion-path"
                     ],
-                    "strict": true
+                    "strict": true,
+                    "description": "Box uses preset 4/subtype 16/filter box(in); dissolve uses preset 9/subtype 0/filter dissolve with explicit Web fade fallback. Entrance/exit phase, whole shape and finite repeat only; no direction or text build."
                   },
                   "direction": {
                     "type": "string",
@@ -36064,6 +36126,52 @@
                 "else": {
                   "not": {
                     "required": ["offset"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "required": ["effect"],
+                  "properties": {
+                    "effect": {
+                      "enum": ["box", "dissolve"],
+                      "strict": true
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "phase": {
+                      "enum": ["entrance", "exit"],
+                      "strict": true
+                    },
+                    "repeat": {
+                      "not": {
+                        "const": "indefinite"
+                      }
+                    },
+                    "target": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": ["paragraph"]
+                          },
+                          {
+                            "required": ["level"]
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["direction"]
+                      },
+                      {
+                        "required": ["build"]
+                      }
+                    ]
                   }
                 }
               }
@@ -39196,7 +39304,7 @@
             "fontSpacingLength": {
               "type": "string",
               "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$",
-              "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected."
+              "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected. Any number of fractional digits is accepted and rounded directly to the nearest hundredth of a point, with exact halves away from zero."
             },
             "fontKernThreshold": {
               "type": "string",
@@ -39602,6 +39710,8 @@
                       "enum": [
                         "appear",
                         "fade",
+                        "box",
+                        "dissolve",
                         "wipe",
                         "fly",
                         "disappear",
@@ -39612,7 +39722,8 @@
                         "spin",
                         "motion-path"
                       ],
-                      "strict": true
+                      "strict": true,
+                      "description": "Box uses preset 4/subtype 16/filter box(in); dissolve uses preset 9/subtype 0/filter dissolve with explicit Web fade fallback. Entrance/exit phase, whole shape and finite repeat only; no direction or text build."
                     },
                     "direction": {
                       "type": "string",
@@ -39695,6 +39806,8 @@
                       "enum": [
                         "appear",
                         "fade",
+                        "box",
+                        "dissolve",
                         "wipe",
                         "fly",
                         "disappear",
@@ -39705,7 +39818,8 @@
                         "spin",
                         "motion-path"
                       ],
-                      "strict": true
+                      "strict": true,
+                      "description": "Box uses preset 4/subtype 16/filter box(in); dissolve uses preset 9/subtype 0/filter dissolve with explicit Web fade fallback. Entrance/exit phase, whole shape and finite repeat only; no direction or text build."
                     },
                     "direction": {
                       "type": "string",
@@ -40936,7 +41050,7 @@
                   ]
                 }
               },
-              "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
+              "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. Decimal pt values round to the nearest hundredth of a point with exact halves away from zero. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
             },
             "slideNotesParagraphs": {
               "type": "array",
@@ -45424,6 +45538,52 @@
                   "else": {
                     "not": {
                       "required": ["offset"]
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "required": ["effect"],
+                    "properties": {
+                      "effect": {
+                        "enum": ["box", "dissolve"],
+                        "strict": true
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "phase": {
+                        "enum": ["entrance", "exit"],
+                        "strict": true
+                      },
+                      "repeat": {
+                        "not": {
+                          "const": "indefinite"
+                        }
+                      },
+                      "target": {
+                        "not": {
+                          "anyOf": [
+                            {
+                              "required": ["paragraph"]
+                            },
+                            {
+                              "required": ["level"]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": ["direction"]
+                        },
+                        {
+                          "required": ["build"]
+                        }
+                      ]
                     }
                   }
                 }
@@ -52053,7 +52213,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. Decimal pt values round to the nearest hundredth of a point with exact halves away from zero. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "runHyperlinkTarget": {
             "oneOf": [
@@ -52261,7 +52421,7 @@
           "fontSpacingLength": {
             "type": "string",
             "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$",
-            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected."
+            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected. Any number of fractional digits is accepted and rounded directly to the nearest hundredth of a point, with exact halves away from zero."
           },
           "hyperlinkTarget": {
             "type": "object",
@@ -53408,7 +53568,7 @@
                 ]
               }
             },
-            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
+            "description": "Sparse font override. Omitted name/eastAsian/complexScript/letterSpacing keys preserve the local value; null clears it so inheritance resumes. name maps a:latin, eastAsian maps a:ea, complexScript maps a:cs, and letterSpacing maps rPr/defRPr@spc in hundredths of a point. size follows the general length rules. letterSpacing accepts only an explicit pt string from -4000pt through 4000pt or null; bare numbers, percentages and other unit strings are rejected. Decimal pt values round to the nearest hundredth of a point with exact halves away from zero. kern is independently tri-state: explicit pt threshold authors, omission preserves, and null restores inheritance; see fontKernThreshold. kern is not letterSpacing or a renderer feature switch."
           },
           "runHyperlinkTarget": {
             "oneOf": [
@@ -53616,7 +53776,7 @@
           "fontSpacingLength": {
             "type": "string",
             "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$",
-            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected."
+            "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected. Any number of fractional digits is accepted and rounded directly to the nearest hundredth of a point, with exact halves away from zero."
           },
           "hyperlinkTarget": {
             "type": "object",
@@ -93034,7 +93194,9 @@
                     "hasInteractiveTrigger",
                     "hasUnsupportedTiming",
                     "editableAnimationCount",
-                    "preserveOnlyAnimationCount"
+                    "preserveOnlyAnimationCount",
+                    "unattributedTimingCount",
+                    "mergeSafe"
                   ],
                   "properties": {
                     "hasTiming": {
@@ -93056,6 +93218,13 @@
                     "preserveOnlyAnimationCount": {
                       "type": "integer",
                       "minimum": 0
+                    },
+                    "unattributedTimingCount": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "mergeSafe": {
+                      "type": "boolean"
                     }
                   }
                 },
@@ -93065,7 +93234,10 @@
                     "type": "object",
                     "required": [
                       "id",
-                      "target",
+                      "kind",
+                      "targets",
+                      "source",
+                      "behaviors",
                       "effect",
                       "direction",
                       "scale",
@@ -93087,16 +93259,63 @@
                       "id": {
                         "type": "string"
                       },
-                      "target": {
-                        "type": ["object", "null"],
-                        "required": ["shapeId", "shapeName"],
+                      "kind": {
+                        "type": "string",
+                        "enum": ["effect", "unattributed"],
+                        "strict": true
+                      },
+                      "targets": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["shapeId", "shapeName"],
+                          "properties": {
+                            "shapeId": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "shapeName": {
+                              "type": ["string", "null"]
+                            }
+                          }
+                        }
+                      },
+                      "source": {
+                        "type": "object",
+                        "required": ["tag", "namespaceUri", "attributes"],
                         "properties": {
-                          "shapeId": {
-                            "type": "integer",
-                            "minimum": 0
+                          "tag": {
+                            "type": "string"
                           },
-                          "shapeName": {
+                          "namespaceUri": {
                             "type": ["string", "null"]
+                          },
+                          "attributes": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "behaviors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": ["tag", "namespaceUri", "attributes"],
+                          "properties": {
+                            "tag": {
+                              "type": "string"
+                            },
+                            "namespaceUri": {
+                              "type": ["string", "null"]
+                            },
+                            "attributes": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "string"
+                              }
+                            }
                           }
                         }
                       },
@@ -93140,11 +93359,11 @@
                         "type": "string"
                       },
                       "durationMs": {
-                        "type": "integer",
+                        "type": ["integer", "null"],
                         "minimum": 0
                       },
                       "delayMs": {
-                        "type": "integer",
+                        "type": ["integer", "null"],
                         "minimum": 0
                       },
                       "repeat": {

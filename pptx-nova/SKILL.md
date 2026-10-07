@@ -113,8 +113,10 @@ Use these only to choose the entry reference; the routing table owns details.
   shape IDs. Read `inspect-and-edit.md` for paragraph guards and native shape-autofit reflow;
   a text/font edit can resize an existing shape-autofit frame before serialization.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
-  complex or unsupported timing. For basic effects, follow the disclosed repeat/autoReverse/restart/
-  easing contract and its omitted/null/value update semantics.
+  complex or unsupported timing. Read logical `kind`, all `targets[]`, and `timingSummary.mergeSafe`;
+  effect counts and raw behavior metadata do not authorize edits. `animations.md` covers fixed
+  whole-shape Box/Dissolve and their distinct preview limits. For basic effects, follow the disclosed
+  repeat/autoReverse/restart/easing contract and its omitted/null/value update semantics.
   For P14 transitions, follow `animations.md`'s per-kind schema and independent capability axes;
   inspect source/fallback timing separately and never equate authoring with playback certification.
   For Morph, use exact `!!` object names, run `morph-check`, and bind delivery evidence to the

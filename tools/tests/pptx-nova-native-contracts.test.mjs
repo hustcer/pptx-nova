@@ -18,6 +18,7 @@ import { join, resolve } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
+import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-choreography.mjs'
 import {
   createRunnerRuntime,
   summarizePhaseError,
@@ -60,6 +61,8 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
   )
   Object.assign(env, {
     ...(useInstalledAuthorization ? {} : { XDOC_CONFIG_PATH: config }),
+    XDOC_DAEMON_STATE: join(directory, 'daemon-state.json'),
+    XDOC_DAEMON_LOG: join(directory, 'daemon.log'),
     CI: 'false',
   })
   let sequence = 0
@@ -100,7 +103,11 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     }
     return report
   }
-  const apply = (ops, input, { dryRun = false, error = null, assetRoot } = {}) => {
+  const apply = (
+    ops,
+    input,
+    { dryRun = false, error = null, assetRoot, allowRawXml = false } = {},
+  ) => {
     const patch = write(`patch-${sequence++}.json`, { schemaVersion: 'pptx-patch/v1', ops })
     const output = join(directory, `candidate-${sequence++}.pptx`)
     const report = run(
@@ -114,6 +121,7 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
         ...(input ? ['--input', input] : []),
         ...(dryRun ? ['--dry-run'] : []),
         ...(assetRoot ? ['--asset-root', assetRoot] : []),
+        ...(allowRawXml ? ['--allow-raw-xml'] : []),
         '--json',
       ],
       error,
@@ -142,7 +150,7 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
         },
       ]).flat(),
     ).output
-  return { directory, write, run, apply, body, create }
+  return { directory, write, run, apply, inspect, body, create }
 }
 
 nativeTest('sidecar collisions and existing sidecars fail before primary publication', (t) => {
@@ -954,5 +962,331 @@ nativeTest(
       createHash('sha256').update(readFileSync(outside)).digest('hex'),
       createHash('sha256').update(png).digest('hex'),
     )
+  },
+)
+
+nativeTest(
+  'fixed filter choreography creates logical effects and supports stable-id edits',
+  (t) => {
+    const s = scenario(t)
+    const effects = ['box', 'dissolve']
+    const basePatch = {
+      schemaVersion: 'pptx-patch/v1',
+      ops: effects.flatMap((effect, slide) => [
+        { op: 'add-slide', layout: 'blank' },
+        {
+          op: 'add-text-box',
+          slide,
+          name: 'Body',
+          x: '1in',
+          y: '1in',
+          w: '7in',
+          h: '1in',
+          text: `${effect}: entrance, then exit`,
+        },
+        {
+          op: 'set-text-frame',
+          slide,
+          shape: { name: 'Body' },
+          font: { name: 'Arial', size: '24pt' },
+        },
+      ]),
+    }
+    const choreography = {
+      schemaVersion: 'pptx-patch/v1',
+      ops: effects.map((effect, slide) => ({
+        op: 'set-slide-animations',
+        slide,
+        animations: [
+          { shape: { name: 'Body' }, effect, duration: 400, repeat: 1 },
+          {
+            shape: { name: 'Body' },
+            effect,
+            phase: 'exit',
+            trigger: 'after-previous',
+            duration: 600,
+          },
+        ],
+      })),
+    }
+    const patch = composeChoreography({ basePatch, choreography, slideCount: 2 })
+    s.write('choreography.json', choreography)
+    s.apply(patch.ops, null, { dryRun: true })
+    const source = s.apply(patch.ops).output
+    const before = s.inspect(source)
+    s.write('animation-source.json', { candidate: source, inspect: before })
+    for (const [slide, effect] of effects.entries()) {
+      const page = before.slides[slide]
+      assert.equal(page.timingSummary.editableAnimationCount, 2)
+      assert.equal(page.timingSummary.unattributedTimingCount, 0)
+      assert.equal(page.timingSummary.mergeSafe, true)
+      for (const [index, entry] of page.animations.entries()) {
+        assert.equal(entry.kind, 'effect')
+        assert.equal(entry.effect, effect)
+        assert.equal(entry.phase, index ? 'exit' : 'entrance')
+        assert.equal(entry.editable, true)
+        assert.equal(entry.target, undefined)
+        assert.deepEqual(entry.targets, [{ shapeId: page.shapes[0].id, shapeName: 'Body' }])
+        assert.equal(entry.behaviors.length, 2, 'visibility and filter form one logical effect')
+        assert.equal(entry.source.attributes.presetID, effect === 'box' ? '4' : '9')
+        const filter = entry.behaviors.find((node) => node.tag.endsWith(':animEffect'))
+        assert.equal(filter.attributes.filter, effect === 'box' ? 'box(in)' : 'dissolve')
+      }
+    }
+    const id = before.slides[0].animations[0].id
+    const edit = [
+      { op: 'set-slide-animations', slide: 0, animations: [{ id, duration: 0, delay: 30 }] },
+    ]
+    s.apply(edit, source, { dryRun: true })
+    const changed = s.apply(edit, source).output
+    const after = s.inspect(changed)
+    assert.equal(after.slides[0].animations[0].id, id)
+    assert.equal(after.slides[0].animations[0].durationMs, 0)
+    assert.equal(after.slides[0].animations[0].delayMs, 30)
+    assert.deepEqual(after.slides[1].animations, before.slides[1].animations)
+    const removed = s.apply(
+      [{ op: 'set-slide-animations', slide: 0, remove: [id] }],
+      changed,
+    ).output
+    assert.equal(s.inspect(removed).slides[0].animations.length, 1)
+    assert.deepEqual(s.inspect(source), before, 'the original deck remains unchanged')
+  },
+)
+
+nativeTest(
+  'fixed filters reject text builds directions and indefinite repeats before publication',
+  (t) => {
+    const s = scenario(t)
+    const source = s.create()
+    const original = readFileSync(source)
+    for (const effect of ['box', 'dissolve']) {
+      for (const extra of [
+        { direction: 'from-left' },
+        { build: 'all-at-once' },
+        { repeat: 'indefinite' },
+        { target: { shape: { name: 'Body' }, paragraph: 0 } },
+      ]) {
+        const animation = { effect, ...extra }
+        if (!animation.target) animation.shape = { name: 'Body' }
+        const ops = [{ op: 'set-slide-animations', slide: 0, animations: [animation] }]
+        for (const dryRun of [true, false])
+          s.apply(ops, source, { dryRun, error: 'invalid_argument' })
+      }
+    }
+    assert.deepEqual(readFileSync(source), original)
+  },
+)
+
+nativeTest(
+  'logical inspect retains every compound target and keeps unmodeled timing nullable',
+  (t) => {
+    const s = scenario(t)
+    const source = s.create()
+    const withShapes = s.apply(
+      [
+        {
+          op: 'add-text-box',
+          slide: 0,
+          name: 'Other',
+          x: '1in',
+          y: '3in',
+          w: '5in',
+          h: '1in',
+          text: 'Other',
+        },
+      ],
+      source,
+    ).output
+    const page = s.inspect(withShapes).slides[0]
+    const targets = ['Body', 'Other'].map(
+      (name) => page.shapes.find((shape) => shape.name === name).id,
+    )
+    // Synthetic diagnostic fixture only; never a fallback for editing a user deck.
+    const p = 'http://schemas.openxmlformats.org/presentationml/2006/main'
+    const behavior = (tag, id, shape) =>
+      `<p:${tag}><p:cBhvr><p:cTn id="${id}" dur="500"/>` +
+      `<p:tgtEl><p:spTgt spid="${shape}"/></p:tgtEl></p:cBhvr></p:${tag}>`
+    const timing =
+      `<p:timing xmlns:p="${p}"><p:tnLst><p:par>` +
+      '<p:cTn id="20" presetClass="emph" presetID="999" nodeType="clickEffect"><p:childTnLst>' +
+      behavior('animScale', 21, targets[0]) +
+      behavior('animRot', 22, targets[1]) +
+      '</p:childTnLst></p:cTn></p:par></p:tnLst></p:timing>'
+    const fixture = s.apply(
+      [{ op: 'patch-ooxml', target: page.partName, xpath: '/p:sld', action: 'add', value: timing }],
+      withShapes,
+      { allowRawXml: true },
+    ).output
+    const inspected = s.inspect(fixture).slides[0]
+    assert.equal(inspected.animations.length, 1)
+    const entry = inspected.animations[0]
+    assert.equal(entry.id, '20')
+    assert.equal(entry.kind, 'effect')
+    assert.deepEqual(
+      entry.targets.map((target) => target.shapeId),
+      targets,
+    )
+    assert.equal(entry.behaviors.length, 2)
+    assert.equal(entry.durationMs, null)
+    assert.equal(entry.delayMs, null)
+    assert.equal(entry.editable, false)
+    assert.equal(inspected.timingSummary.mergeSafe, false)
+    assert.equal(inspected.timingSummary.preserveOnlyAnimationCount, 1)
+    const original = readFileSync(fixture)
+    for (const dryRun of [true, false])
+      s.apply(
+        [{ op: 'set-slide-animations', slide: 0, animations: [{ id: entry.id, duration: 300 }] }],
+        fixture,
+        { dryRun, error: 'invalid_operation' },
+      )
+    assert.deepEqual(readFileSync(fixture), original)
+  },
+)
+
+nativeTest('decimal letter spacing rounds once with exact halves away from zero', (t) => {
+  const s = scenario(t)
+  const source = s.create()
+  for (const [value, expected] of [
+    ['0.005pt', 0.01],
+    ['-0.005pt', -0.01],
+    ['0.004999pt', 0],
+    ['-0.004999pt', 0],
+    ['0.014999pt', 0.01],
+    ['-0.014999pt', -0.01],
+  ]) {
+    const ops = [
+      {
+        op: 'set-run',
+        slide: 0,
+        shape: { name: 'Body' },
+        paragraph: 0,
+        run: 0,
+        font: { letterSpacing: value },
+      },
+    ]
+    s.apply(ops, source, { dryRun: true })
+    const output = s.apply(ops, source).output
+    const facts = s.body(output).fontFacts
+    assert(
+      facts.some((fact) => fact.font.spacingPt === expected),
+      JSON.stringify(facts),
+    )
+  }
+})
+
+nativeTest(
+  'POSIX asset roots keep symlink parent traversal and literal output backslashes',
+  (t) => {
+    if (process.platform === 'win32') return t.skip('POSIX filesystem contract')
+    const s = scenario(t)
+    const root = join(s.directory, 'real')
+    mkdirSync(join(root, 'child'), { recursive: true })
+    symlinkSync(join(root, 'child'), join(s.directory, 'link'))
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j6GQAAAAASUVORK5CYII=',
+      'base64',
+    )
+    writeFileSync(join(root, 'inside.png'), png)
+    const patch = s.write('real/patch.json', {
+      schemaVersion: 'pptx-patch/v1',
+      ops: [
+        { op: 'add-slide' },
+        {
+          op: 'add-image',
+          slide: 0,
+          name: 'Asset',
+          x: '1in',
+          y: '1in',
+          w: '1in',
+          h: '1in',
+          assetSource: { path: 'inside.png', mimeType: 'image/png' },
+        },
+      ],
+    })
+    s.write('literal', 'This file must not become a directory')
+    for (const explicit of [true, false]) {
+      // Do not use join/resolve for a path whose symlink/.. semantics are under test.
+      const aliasedRoot = `${s.directory}/link/..`
+      const output = `${s.directory}/literal\\${explicit ? 'explicit' : 'inferred'}.pptx`
+      const result = s.run([
+        'pptx',
+        'apply',
+        '-p',
+        explicit ? patch : `${aliasedRoot}/patch.json`,
+        '-o',
+        output,
+        ...(explicit ? ['--asset-root', aliasedRoot] : []),
+        '--json',
+      ])
+      assert.deepEqual(result.semanticIssues, [])
+      assert.equal(existsSync(output), true)
+      assert.equal(existsSync(`${output}.xdoc.json`), true)
+      assert.equal(
+        s.inspect(output).slides[0].shapes.filter((shape) => shape.name === 'Asset').length,
+        1,
+      )
+    }
+    assert.equal(
+      readFileSync(join(s.directory, 'literal'), 'utf8'),
+      'This file must not become a directory',
+    )
+  },
+)
+
+nativeTest(
+  'daemon late sidecar failure reports publication while preserving its input session',
+  (t) => {
+    const s = scenario(t)
+    const source = s.create()
+    try {
+      s.run(['pptx', 'inspect', source, '--daemon-strict', '--json'])
+      const patch = s.write('edit.json', {
+        schemaVersion: 'pptx-patch/v1',
+        ops: [
+          {
+            op: 'set-text-frame',
+            slide: 0,
+            shape: { name: 'Body' },
+            text: 'Published before sidecar failure',
+          },
+        ],
+      })
+      const blocker = s.write('not-a-directory', 'Keep')
+      const output = join(s.directory, 'partial.pptx')
+      const sidecar = join(blocker, 'sidecar.json')
+      const report = s.run(
+        [
+          'pptx',
+          'apply',
+          '-i',
+          source,
+          '-p',
+          patch,
+          '-o',
+          output,
+          '--sidecar',
+          sidecar,
+          '--daemon-strict',
+          '--json',
+        ],
+        'output_error',
+      )
+      assert.equal(report.primaryOutputPublished, true)
+      assert.equal(report.outputUntouched, false)
+      assert.equal(report.output, output)
+      assert.equal(report.blockedOutput, sidecar)
+      assert.equal(report.retryCommand, undefined)
+      assert.equal(report.error.retryCommand, undefined)
+      assert.equal(s.body(output).textPreview, 'Published before sidecar failure')
+      const live = s.run(['pptx', 'inspect', source, '--daemon-strict', '--json'])
+      assert.equal(
+        live.slides[0].shapes.find((shape) => shape.name === 'Body').textPreview,
+        'Quarterly review',
+      )
+      assert.equal(existsSync(sidecar), false)
+    } finally {
+      // The state/log paths belong to this scenario, never the user's daemon.
+      s.run(['daemon', 'stop', '--json'])
+    }
   },
 )

@@ -215,8 +215,10 @@ Chart 3D 和 GLB 使用各自契约。
 - `fontFacts[]` 是按 text/chart scope 报出的字体事实。拉丁、东亚、复杂文字脚本分别对应
   patch font 的 `name`、`eastAsian`、`complexScript`；`letterSpacing` 是独立字符间距字段。
 - 动画状态现在也在每页暴露：`timingSummary`、`animations[]`、`animationCapabilities`。
-  只有 `animations[].editable == true` 的安全子集可用 `set-slide-animations`
-  局部改；复杂 timing 仍看 `animationCapabilities.preserveOnly`。
+  `animations[].kind` 区分逻辑效果与无法归属的 timing，`targets[]` 保留全部目标（不再用单个
+  `target`）；`source` / `behaviors[]` 是只读原始元数据。未知时长/延迟可为 null。
+  稳定 ID 编辑要求效果 `editable == true`，合并还看独立的 `timingSummary.mergeSafe`；
+  删除/替换仍可能因幸存引用被拒绝。计数不能代替权限判断，详见 `animations.md`。
 - preserve-only 状态（SmartArt、复杂动画、复杂过渡等）也会通过 capabilities / per-slide
   summary 报告；不要只看一个布尔字段就决定能不能改。
 - `presentation.conformance` 披露包用的是 ECMA-376 Transitional 还是 ISO/IEC 29500
@@ -640,8 +642,9 @@ shape 重建"（节点少且用户要可编辑时建议重建）；翻译/替换
 `replace-text` / i18n ops **触达不了** SmartArt 文本，`textPreview` 里出现的词若需要改，
 只能整体重建或明确告知用户此文本保持原样。
 
-动画不是一概不能改：`animations[].editable == true` 的基础 entrance/exit 和安全文本 build
-可以按稳定 `id` 用 `set-slide-animations` 修改或删除；新增安全子集也使用同一个 op。
+动画不是一概不能改：逻辑效果 `animations[].editable == true` 的安全子集可以按稳定 `id`
+尝试修改或删除；新增安全子集也使用 `set-slide-animations`。完整 carrier、调度和引用校验仍由
+dry-run/apply 决定；不要把 `targets[]` 的首项或 behavior 的内部 ID 当成可编辑效果。
 如果 `animationCapabilities.preserveOnly` 包含 `media-timing`、
 `interactive-trigger`、`unsupported-timing`、`motion-path`、`emphasis`、`chart-build` 或
 `smartart-build`，默认 preserve。需要覆盖整棵 timing tree 时必须让用户确认 `mode: "replace"` 或

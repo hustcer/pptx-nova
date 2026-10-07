@@ -202,6 +202,12 @@ crop/tile 显示差异就删除这些设置。已有 picture shape 的裁剪或 
 `null` 清掉本地值使继承继续。不要只改 Latin `name` 就声称多语言字体已经统一；先从
 inspect 的 `fontFacts[]` 检查各脚本 scope。
 
+`letterSpacing` 的范围是 `-4000pt` 至 `4000pt`，支持任意小数位，直接舍入到 0.01pt，
+恰好一半时远离零：`"0.005pt"` → 0.01pt，`"-0.005pt"` → -0.01pt，
+`"0.004999pt"` → 0pt。保留原十进制字符串交给运行时，避免先转 EMU、用二进制浮点
+预舍入或二次舍入；富文本 notes 遵循相同规则。inspect 的 `fontFacts[].font.spacingPt`
+（及继承后的 `effectiveSpacingPt`）用于回读，比较量化后的值，不要求原字符串一致。
+
 需要调整 kerning 时，先查询当前运行时的 `set-run.font` 完整定义，确认披露
 `kern` / `fontKernThreshold`。按该定义读取允许的单位、范围和精度，再使用
 `"12pt"`、`"12.5pt"` 等阈值字符串；省略保留本层值，`null` 清除本层值并恢复继承。

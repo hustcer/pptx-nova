@@ -158,7 +158,9 @@ daemon 不改变 patch 语义，只改变执行链路：
 - 写盘时 sidecar 文件 `<out>.xdoc.json` 照常生成，后续 `rollback --from-sidecar`
   不依赖 daemon
 - `apply` 失败时 live session 不变，可以接着 inspect 看当前状态；这不保证所有磁盘输出
-  未变。主 PPTX 与 sidecar 不是联合原子事务，按实际错误报告和磁盘状态恢复。
+  未变。晚期 sidecar 失败与 one-shot 一样披露 `primaryOutputPublished:true`、
+  `outputUntouched:false`、已发布的 `output` 和失败的 `blockedOutput`（未知时可为 null）。
+  主 PPTX 与 sidecar 不是联合原子事务；先读报告和磁盘，不自动重放 mutation 或补 `--overwrite`。
 - sidecar 不得与输入或主 PPTX 指向同一文件；已有 sidecar 需要覆盖授权。
   同样适用 `common-workflow.md` 的输出安全和 `troubleshooting.md` 的部分发布恢复流程。
 - **agent schema 渲染缓存**：daemon 启动时会预热一次 `xdoc schema` 的 JSON

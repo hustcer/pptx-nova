@@ -105,6 +105,11 @@ For SmartArt and text-effect regressions after an upgrade:
   selector scopes, inherited paragraph styles and group transforms before calling
   a missing projection a lost object. Unsupported/ambiguous projections may fall
   back; rendering changes do not authorize editing the SmartArt structure.
+- For cacheless hierarchy spacing, compare the currently instantiated layout scopes
+  and their live anchors, including supported named spacing copies and root defaults.
+  Inactive anchors, conflicting/cyclic or unsupported constraints may fall back;
+  do not compensate by manually moving nodes or promise arbitrary SmartArt layouts.
+  Re-render the original with the current Web/PDF consumers before changing spacing.
 - Compare text after font readiness and refitting, including explicit bullet
   sizes, highlight/outline/glow coverage, clipping, 3D volume and reflection.
   Reflections and extrusions must follow their actual paragraph animation target;
@@ -126,6 +131,11 @@ Read this section only for these symptoms; ordinary native PNG/PDF checks do not
 need a browser run. Confirm the fixes and fallbacks on the loaded Web build;
 neither xdoc identity nor an npm package version alone proves they are present.
 
+- **Text changes color in fullscreen/presenter/host chrome:** the rendered slide's
+  default text color should be isolated from host UI CSS. Compare unresolved text
+  and math separately from authored solid/gradient colors, at the same scale and
+  across standalone/fullscreen/thumbnail contexts. Do not force explicit colors
+  into the source or alter viewer controls to compensate for an old renderer.
 - **Clipped or stale reflections:** distinguish foreground clipping/ellipsis from
   reflection paint. Reflections follow the actual text owner, including centered
   anchor and Text 3D wrappers, and refresh after clipping and font readiness.

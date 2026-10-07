@@ -18,6 +18,8 @@ xdoc schema --mode ops --ops set-slide-animations --minimal > <run-dir>/schema-s
 - 局部安全删除：`set-slide-animations`，用 `remove: ["<inspect.animations[].id>"]` 定位。
 - 支持的创建效果：入口 `appear/fade/wipe/fly`；退出安全子集 `disappear/fade-out/wipe-out/fly-out`
   或 `phase: "exit"`。
+- 若 schema 披露 `box` / `dissolve`，可创建固定变体的整 shape 进入/退出；见下方专节，
+  不把同名整页转场或可播放的既有复杂效果当作创建契约。
 - 若当前 schema 披露 `grow-shrink` / `spin` 及其参数，可创建有限的整 shape 强调；详见下方幅度契约。
 - 若当前 schema 同时披露 `motion-path` 和 `offset`，可创建有限的整 shape 直线路径；详见下方路径契约。
 - 支持的 trigger：`on-click`、`with-previous`、`after-previous`。
@@ -47,14 +49,37 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 看每页：
 
 - `timingSummary`: timing 是否存在、media/interactive/unsupported timing、editable 与
-  preserve-only 数量。
-- `animations[]`: 稳定 `id`、`target`、`effect`、`direction`、`scale`、`degrees`、`offset`、`phase`、`trigger`、`durationMs`、`delayMs`、
+  preserve-only **逻辑效果**数量、`unattributedTimingCount` 和独立安全判定 `mergeSafe`。
+- `animations[]`: 稳定 `id`、`kind`、全部 `targets[]`、`source`、`behaviors[]`、`effect`、`direction`、`scale`、`degrees`、`offset`、`phase`、`trigger`、`durationMs`、`delayMs`、
   `repeat`、`autoReverse`、`restart`、`easing`、`editable` 和 preserve-only reason（`unsupportedReason`）。
 - `animationCapabilities`: `editable`、`preserveOnly`、`unsupportedCreate`。
 
-只有 `editable: true` 的既有 step 才能用 `set-slide-animations` 局部编辑或删除。
-`preserveOnly` 命中的 timing 不要 raw XML 猜改；需要重建时必须让用户确认
-`mode: "replace"` 或 `mode: "clear"` 会改变原动画语义。
+`kind: "effect"` 按明确的 effect `cTn` 聚合行为；`kind: "unattributed"` 是无可靠归属的
+timing 诊断，不计入逻辑效果数量。相同 `grpId` 不合并不同效果，嵌套效果分别保留归属。
+`source` / `behaviors[]` 保留 `tag`、`namespaceUri` 和原始 `attributes`，仅供诊断。
+未知效果的 `durationMs` / `delayMs` 可为 `null`，不能当零或从第一个 behavior 猜时长。
+不要再读取旧的 `animations[].target`；`targets[]` 可以为空或含多个对象，不能自动取首项当 selector。
+旧 CLI 未披露这些字段时保留旧报告，按其实际 schema 和 dry-run 处理，不伪造逻辑计数或 `mergeSafe`。
+
+只有 `kind: "effect"` 且 `editable: true` 的既有 step 才能尝试稳定 ID 编辑或删除；
+它不是任意修改都成功的保证。`mergeSafe` 独立判断能否安全合并整棵 timing，计数变少不扩大权限。
+`preserveOnly` 命中的 timing 不要 raw XML 猜改；仅在用户已明确授权丢弃/重建相应动画语义时
+使用 `mode: "replace"` 或 `mode: "clear"`，否则先说明影响并取得授权。
+
+安全修改还取决于 carrier、调度和引用：
+
+- 可写 carrier 必须是唯一、直接的 PresentationML timing；包装在 `AlternateContent`、外来
+  namespace 或多个 timing 中的内容保持只读。合法 namespace 别名/默认 namespace 本身不是风险。
+- 重复或非法 time ID、不完整的 click/automatic 调度容器、未知 wrapper 属性会阻止安全合并。
+  根 group 的 `grpId` 省略或数值零可合法，不能自行补为别的值或“修好”容器来绕过拒绝。
+- 删除/替换效果可能移除内部 behavior ID；若幸存节点仍引用它们，即使该效果 `editable:true`
+  也会拒绝。纯时长编辑可有不同结果，必须验证用户实际请求，不自动切换到 replace/clear。
+- 删除 shape 同时清理完整所属效果，并检查所有 target、build 与包内相关扩展元数据中的引用；
+  归属不明、会误删嵌套效果或留下引用时原子拒绝。无关扩展 metadata 保留，不是可写动画树；
+  不能因为 metadata 中也有 timing/id 就改它，也不能忽略它对被删 shape 的引用。
+
+失败后保留输入、patch 和报告，按真实拒绝原因缩小操作或重新规划；不要靠计数、preset ID
+或名字推断权限。apply 后重新 inspect，核对稳定 ID、所有 targets、未触达效果及 metadata。
 
 ## 新增动画
 
@@ -90,7 +115,7 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 
 ## 基础动画 timing modifier
 
-四个 modifier 用于当前 schema 披露的安全效果；grow-shrink/spin/motion-path 额外要求有限 repeat。
+四个 modifier 用于当前 schema 披露的安全效果；box/dissolve/grow-shrink/spin/motion-path 额外要求有限 repeat。
 它们不会解锁任意 emphasis、motion path、sequence/parallel、chart build、media timing 或 shape-trigger：
 
 ```json
@@ -155,6 +180,54 @@ xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 
 apply 后必须重新 inspect，确认 omitted/null/value 语义、stable id 和目标对象都保持预期；不要只看
 patch 成功状态。
+
+## 固定 Box / Dissolve
+
+先核对 effect 枚举与 `slide-animation/basic-shape-and-text-builds` 各能力轴。
+这两个效果均只接受整 shape、`phase: "entrance" | "exit"` 和有限整数 repeat；
+默认 entrance、on-click、500ms、delay 0。省略 repeat 使用默认播放次数。
+不传 `direction`、`build`、paragraph/level，也不与同一 shape 的段落 build 混用；
+`repeat: "indefinite"` 被拒绝。有限 repeat、autoReverse、restart、easing 沿用上文契约。
+
+| effect     | 固定源语义                                                           | Web 预览边界                                                |
+| ---------- | -------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `box`      | preset 4 / subtype 16 / filter `box(in)`；退出由 `phase:"exit"` 表达 | 矩形裁剪近似，不承诺 Office 逐帧一致                        |
+| `dissolve` | preset 9 / subtype 0 / filter `dissolve`                             | 保留 dissolve 身份，显式降级为 fade，不模拟 Office 粒子效果 |
+
+不发明 `box-out`、`dissolve-out`、`box(out)` 等 wire 值。入口/出口可共用同一 effect：
+
+```json
+{
+  "op": "set-slide-animations",
+  "slide": 0,
+  "animations": [
+    { "shape": { "name": "KPI Card" }, "effect": "box", "duration": 400 },
+    {
+      "shape": { "name": "KPI Card" },
+      "effect": "dissolve",
+      "phase": "exit",
+      "trigger": "after-previous",
+      "duration": 600,
+      "repeat": 1
+    }
+  ]
+}
+```
+
+稳定 ID 更新可改时序/target、替换效果或删除，但完整 profile 不匹配（preset、filter、
+phase、目标、行为顺序、时长、可见性边界或额外 metadata）仍 preserve-only。
+只改时长时省略 `effect`，由运行时维护原 profile 与 visibility boundary；零时长也要回读。
+进入边界设 visible，退出末尾设 hidden。不要手写额外 visibility op 修补预览。
+
+检查 Web dissolve 时分别保留原始效果和实际播放计划：`kind:"effect-fallback"` 诊断的
+`fromEffect:"dissolve"` / `toEffect:"fade"`，以及可播放 step 的 `previewFallback:"fade"`。
+只有精确 filter 与有效、一致的 phase/transition（含显式 preset class）才允许该降级；
+`animEffect/@transition` 省略时按 OOXML 默认入口解释，非法值和相互冲突的声明不等于省略。
+`dissolve(fade)`、大小写变体或 unknown 效果不能套用通用 fade，旧诊断也不授权播放。
+`text-granularity`、`timing-fill` 与 `effect-fallback` 是不同诊断，不能混作一种文字降级。
+
+此处是对象动画；前述 dissolve **整页转场**的场景遮罩走不同管道。
+静态 PNG/PDF、结构校验和 clean-open 都不能证明上述动画动态等价或 Office 回存无损。
 
 ## 有限 grow-shrink / spin
 
@@ -605,6 +678,11 @@ PowerPoint clean-open -> 播放/点击复核(可用时) -> Morph 时运行 morph
   JS/WASM 解析结果共用同一渲染器时，不能作为两个独立视觉基准。未实际录屏或逐帧比较，就不作相应声明。
 - 若用户关心播放，必须用 PowerPoint 或 viewer 播放复核点击次数、触发顺序、delay/duration 和自动切页。
 - 有 `with-previous` / `after-previous` 时，检查 dry-run/diff 是否报告 timing 改动符合预期，不要把 delay 累加成意外长等待。
+- 对 Web 中同一 owner 的直接并行行为，若实际播放计划披露 `trigger.parallelGroup`，同组成员
+  共享触发与 delay 原点，不应逐项增加点击或串行等待；后继 after 应等待组结束（含有限 repeat/
+  autoReverse），不是只等第一个成员。该字段属于播放计划，不是 patch 字段，也不开放任意并行树创建。
+  检查延迟 visibility、重叠 owner、reset/重播的真实初始/结束态；被拒绝的效果及其诊断不能在
+  visibility 合并时消失。段落目标的播放改善不扩大 Box/Dissolve 的整 shape 创建边界。
 
 最终摘要列出动画能力审计：xdoc 版本、相关 op schema 是否披露、涉及的动画 id、哪些 step 被编辑/删除、
 哪些 preserve-only 风险保留，以及 clean-open / 播放复核是否完成。

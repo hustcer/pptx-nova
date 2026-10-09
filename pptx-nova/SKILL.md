@@ -51,9 +51,9 @@ When unsure, first check exact capability truth, then the op index in `xdoc-capa
 `xdoc schema --mode ops --ops <name> --fields <needed-fields> --defs summary --minimal` when the snapshot discloses
 both `--fields` and `--defs summary` and only a focused contract surface is needed; otherwise omit
 `--defs` for the compatible full-definition projection. Summary projections are discovery views, not
-complete validation schemas: switch to `--defs full` before constructing nested selectors. Even a
-full-definition field projection remains incomplete; omit `--fields` or use `apply --dry-run` before
-treating a patch as valid. Read
+complete validation schemas: switch to `--defs full` with the same `--fields` before constructing
+nested selectors. Even a full-definition field projection remains incomplete; omit both `--fields`
+and `--defs`, or use `apply --dry-run`, before treating a patch as valid. Read
 theme/style/native DeckKit information from matching snapshot catalogs. Derive selectors from inspect, the
 target op schema, then dry-run suggestions. For PPTX CLI syntax, use `xdoc pptx <action> --help`; this
 schema-backed human synopsis is neither machine schema nor JSON.
@@ -173,8 +173,8 @@ Determine the task type first, then read the corresponding files:
 
 For a rendering discrepancy or a preview regression after upgrading xdoc, also read
 `references/fidelity-diagnosis.md` before changing authored content or layout. This includes
-text columns, font/placeholder inheritance, shared table borders, chart domains/direction,
-resized cached SmartArt, Web text clipping, missing/stale reflections, and Shape 3D scale offsets;
+text columns and Unicode break controls, font/placeholder inheritance, shared table borders,
+chart domains/direction, resized cached SmartArt, Web text clipping, missing/stale reflections, and Shape 3D scale offsets;
 identify the actual renderer and its fallback before treating the symptom as a deck defect.
 
 | User intent                                                                              | Required references                                                                                                                                                     | Read conditionally                                                                                                                                   |

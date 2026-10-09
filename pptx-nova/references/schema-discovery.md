@@ -74,7 +74,7 @@ xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary 
 属性名、required 组合、引用和顶层枚举/分支数量；它用于低 token 成本的字段与定义发现。
 输出中的 `disclosure.completeValidation=false` 表示它不是完整校验合同。开始构造嵌套 selector、
 需要传递引用时，应改用 `--defs full`。即使如此，字段投影仍不是完整校验合同；需要检查全部
-可选字段或执行完整离线验证时，应省略 `--fields`（也可用 `apply --dry-run` 校验最终 patch）：
+可选字段或执行完整离线验证时，应同时省略 `--fields` 和 `--defs`（也可用 `apply --dry-run` 校验最终 patch）：
 
 ```bash
 xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs full --minimal \
@@ -217,7 +217,7 @@ left / center / right / justify / justify-low / distribute / thai-distribute
 `set-shape.effect` 使用 `shadow` / `glow` / `reflection` / `softEdge` 子对象；不要使用
 `effect.kind`。只查询 effect 时优先使用
 `xdoc schema --mode ops --ops set-shape --fields effect,shape,slide --defs summary --minimal`；构造 effect
-对象时切换到 `--defs full`，完整合同再省略 `--fields`。
+对象时保持 `--fields` 并切换到 `--defs full`，完整合同再同时省略 `--fields` 和 `--defs`。
 
 ## Catalog 命令
 

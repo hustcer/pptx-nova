@@ -86,6 +86,10 @@ Recent rendering changes also require these distinctions when reviewing the same
   Compare node font fitting separately from geometry, including enclosing groups.
   Rendering reflow does not rewrite the source cache, grant SmartArt editing or
   remap document-root animation targets; verify those targets independently.
+  Cache/data text identity includes decoded whitespace, paragraph boundaries and
+  explicit breaks. Run/style splits alone do not change identity, but flattened
+  text equality does not prove it. Stale text or ambiguous child order must retain
+  the cache; do not force a reflow by normalizing or replacing the labels.
 - Charts: examine stock category slots/markers, bubble size, hierarchy colors,
   treemap typography/plot area and 3D camera/aspect/axis/label/lighting rules.
   Automatic defaults and explicit overrides differ; do not force a generic
@@ -112,10 +116,32 @@ Read only the matching diagnostic when these symptoms occur:
   gap and horizontal group scaling. Web/PDF fill the authored usable height before
   advancing; ordinary overflow can grow a shared column block, whereas explicit
   clip/ellipsis keeps the authored height. Check all columns, paragraph gaps and
-  vertical alignment at final fonts. Rendered overflow does not mean the frame was
+  vertical alignment at final fonts. A line can fit even when its trailing
+  paragraph gap does not; do not move that line to the next column or enlarge the
+  frame based on the gap alone. Rendered overflow does not mean the frame was
   resized or multi-column shape-autofit became authorable. ASCII hyphen break-after
   opportunities can change line wrapping without changing text; do not insert
   manual line breaks to restore old pixels.
+- **Unicode/numeric breaks:** preserve the source code points and styled run
+  boundaries while diagnosing wrapping. ZWSP (`U+200B`) supplies an explicit
+  break; WORD JOINER (`U+2060`) and in-text FEFF (`U+FEFF`) inhibit adjacent
+  breaks, including emergency splitting. An explicit ZWSP opportunity takes
+  precedence over a following joiner. Unicode hyphen (`U+2010`), nonbreaking
+  hyphen (`U+2011`), soft hyphen (`U+00AD`) and mathematical minus (`U+2212`)
+  are distinct; do not replace them all with ASCII `-` or promise identical
+  rendering. Numeric decimal/grouping separators must stay with their numeric
+  token and, during emergency splitting, with the preceding digit. PDF handles
+  Unicode decimal digits as well as ASCII/fullwidth digits; verify the actual
+  Web consumer separately. Path slash opportunities and numeric date slashes
+  also differ. Use a narrow-frame control with a style boundary at the affected
+  character; do not remove controls or insert manual breaks to fix a preview.
+  Inspect/source-guard text must remain exact. PDF extraction may omit invisible
+  controls or insert layout line breaks, so it cannot prove source preservation.
+  Check plain and styled runs independently, including FEFF advance and
+  discretionary soft-hyphen paint. Passing a ZWSP control does not certify
+  ordinary hyphen/path runs or Office's line breaks. If those controls differ,
+  retain both outputs and the source; do not merge runs, delete controls or
+  rewrite punctuation to hide the discrepancy.
 - **Math/SVG glyphs:** attributed OMML `m:t`, including `xml:space`, must retain
   its text. Inspect nested fraction/subscript content independently of math metrics.
   Local SVG text uses its own inline/inherited font styles and needs PDF glyph
@@ -126,6 +152,10 @@ Read only the matching diagnostic when these symptoms occur:
   continuation perimeter paint survives while internal merged edges disappear;
   CSS border arbitration or overpaint from an older export is not the authority.
   Follow `tables.md` before changing borders, dash lengths or merges.
+  For Web-only offsets, wait for mounting, visibility, final fonts and measured
+  row/cell redistribution; capture again after those stages. Border overlays
+  follow actual cell edges, not just the initial declared grid. A pre-layout or
+  hidden-slide capture does not justify editing row heights or adding lines.
 - **Chart domains/direction:** automatic line domains include error endpoints;
   overlap differs from stack accumulation; horizontal category direction affects
   slots and legend identity. Bubble domains use valid points and scale-dependent

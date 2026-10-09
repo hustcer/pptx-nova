@@ -130,6 +130,13 @@ memory afterwards.
 
 ### Protected Tokens And Project Glossary
 
+Keep `sourceText` and its guard identity exactly as scanned, including leading,
+repeated or trailing spaces, ZWSP, WORD JOINER and in-text FEFF. Do not trim,
+collapse whitespace, normalize hyphens or decode XML entities again. Choose
+target-language wrapping deliberately in `targetText`; never rewrite the source
+guard to accommodate it. For unusual wrapping or mixed-run differences, use the
+Unicode/numeric diagnostics in `fidelity-diagnosis.md` before changing layout.
+
 When `--glossary` is supplied, it must use this small, auditable contract:
 
 ```json

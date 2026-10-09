@@ -105,6 +105,10 @@ with `status="error"` and `error.code`, `message`, `stage`, `retryable`, and
 `details`. Conversion failures preserve their original classification and
 resource/authorization details. Do not infer a code from the stage or retry
 solely because rendering was involved; a failure report has no visual decision.
+This local report's `retryable` field remains part of its own schema. Do not
+replace it with a transport-specific retry directive, or treat it as permission
+to replay an edit; follow the reporting command's current contract and the
+publication checks in `troubleshooting.md`.
 
 1. A process exit code of `0` means only that the evidence transaction
    completed. First require `schemaVersion="pptx-visual-evidence/v1"` and

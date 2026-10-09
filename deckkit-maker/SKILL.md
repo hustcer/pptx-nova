@@ -268,7 +268,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   canonical Create 放行；仍须通过当前交付门禁，不能用 qualityProfile 覆盖它。
   现有 benchmark 的 vision/PNG 成功也不能代替 canonical PDF 最终布局检查。修复 kit 后，
   至少对完整 golden 示例执行一次当前 runtime 的 `xdoc pptx visual-audit --candidate <deck.pptx>
---visual-mode create --output-dir <run-dir>/canonical --json`，读取 manifest 的 required checks、
+  --visual-mode create --output-dir <run-dir>/canonical --json`，读取 manifest 的 required checks、
   findings 和 decision；若运行时未披露该路线，按 `create-runner.md` 的兼容路径处理并记录边界。
 - **常规 shape 也必须高保真**：不要只复刻版式语义而放松基础元素。人工 PNG 对比时逐页检查
   文本字号、字色、大小写、对齐、行高、圆形/方块尺寸、圆内文字颜色与居中、斜线/纹理方向、

@@ -547,6 +547,11 @@ overflow 会扩展共同栏高；显式 clip/ellipsis 则保留作者高度。�
 最终 PDF fit 通过后，canonical audit 仍可能保留 `multi-column-text-layout-review` 并要求
 人工确认；按真实 `decision.action` 收尾，不靠反复改字号或 Agent 自评覆盖这个要求。
 含 ASCII `-` 的词、数字或连续连字符可在连字符后断行；不要为模仿旧预览插入换行或改原文。
+行本身放得下而尾随段间距放不下，不等于该行必须提前转栏。检查当前渲染结果后再决定改框。
+保留 ZWSP、WORD JOINER、正文内 FEFF、不同连字符及数字分隔符；这些不可见字符和标点会影响
+断行，不能先做 trim、空白折叠、统一连字符或二次 XML entity 解码再构造 guard/patch。
+样式边界不应让原有断行约束失效。按 `fidelity-diagnosis.md` 的 Unicode/numeric breaks
+检查窄框与混合 run；用源段落/OOXML 核对字符，用 PDF/PNG 检查排版，不能互相替代。
 
 ### 5.3 加一页和现有 layout 一样的
 

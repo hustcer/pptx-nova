@@ -55,7 +55,7 @@ Its power comes from several properties that reinforce each other, not from any 
   source-vs-candidate diffs, operation traces, and sidecars make a revision reviewable and replayable
   instead of reducing success to “the file exists.”
 - **Local, lightweight, and automation-friendly.** Preview rendering, PDF export, and visual checks do
-  not require PowerPoint, a full office suite, or a headless browser. The current `v0.7.1` native
+  not require PowerPoint, a full office suite, or a headless browser. The current `v0.9.0` native
   packages unpack to roughly 20MB each depending on the supported target, require no separate server
   or always-on
   background service, and are practical for CI, containers, offline workers, and unattended Agent

@@ -46,7 +46,7 @@ CLI 是公开分发与集成界面，execution layer 是它在 Agent 与文档�
 - **证据是输出的一部分。** 结构检查、语义检查、渲染预览、源文件与候选文件 diff、操作 trace
   和 sidecar 使一次修改可审阅、可回放，而不是只用“文件已经生成”判断成功。
 - **本地、轻量、适合自动化。** 预览渲染、PDF 导出和视觉检查不依赖 PowerPoint、完整 Office
-  套件或 headless browser。当前的 `v0.7.1` 原生包会因受支持目标不同而略有差异，单个包
+  套件或 headless browser。当前的 `v0.9.0` 原生包会因受支持目标不同而略有差异，单个包
   解压后约 20MB；不需要独立服务器或常驻后台服务，适合 CI、容器、离线 worker 和无人值守的
   Agent 环境。多步骤任务也可以按需使用仅监听本机 loopback 的可选 daemon。
 

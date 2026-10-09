@@ -79,6 +79,13 @@ Recent rendering changes also require these distinctions when reviewing the same
   branches, node/connector identities, theme paint and authored label metrics.
   A newly visible projection does not grant SmartArt authoring or universal
   layout support. Compare with the original and current capability evidence.
+- Resized cached SmartArt: distinguish a stale cache viewport from authored node
+  positions. Supported, proven process/cycle/composite profiles may reflow inside
+  the current host while retaining cached paint, resources, model identity and
+  ordering; unsupported, authored, incomplete or ambiguous caches stay preserved.
+  Compare node font fitting separately from geometry, including enclosing groups.
+  Rendering reflow does not rewrite the source cache, grant SmartArt editing or
+  remap document-root animation targets; verify those targets independently.
 - Charts: examine stock category slots/markers, bubble size, hierarchy colors,
   treemap typography/plot area and 3D camera/aspect/axis/label/lighting rules.
   Automatic defaults and explicit overrides differ; do not force a generic
@@ -90,6 +97,46 @@ Recent rendering changes also require these distinctions when reviewing the same
   one renderer do not change inspect/edit/preserve/verify axes. Check actual
   per-object output and independent PowerPoint evidence; do not label remaining
   camera, material, text or playback discrepancies as certified fidelity.
+
+## Text, table and chart changes in the same source
+
+Read only the matching diagnostic when these symptoms occur:
+
+- **Fonts/placeholders:** concrete authored fonts are distinct from an unreferenced
+  theme script inventory; ordinary text boxes do not borrow master `otherStyle`
+  fonts. An explicit placeholder index matches the layout exactly; a failed match
+  does not borrow another same-type shape. Omitted indices and the master-only
+  sentinel have different inheritance. Preserve explicit zero-size frames and
+  global text defaults. See `inspect-and-edit.md` before patching identity/fonts.
+- **Columns/line breaks:** text boxes and ordinary shapes retain authored count,
+  gap and horizontal group scaling. Web/PDF fill the authored usable height before
+  advancing; ordinary overflow can grow a shared column block, whereas explicit
+  clip/ellipsis keeps the authored height. Check all columns, paragraph gaps and
+  vertical alignment at final fonts. Rendered overflow does not mean the frame was
+  resized or multi-column shape-autofit became authorable. ASCII hyphen break-after
+  opportunities can change line wrapping without changing text; do not insert
+  manual line breaks to restore old pixels.
+- **Math/SVG glyphs:** attributed OMML `m:t`, including `xml:space`, must retain
+  its text. Inspect nested fraction/subscript content independently of math metrics.
+  Local SVG text uses its own inline/inherited font styles and needs PDF glyph
+  sources; browser font readiness alone is insufficient. Follow `formulas.md` and
+  the font-evidence guidance in `export-and-check.md`.
+- **Table edges:** use the effective bottom edge above/right edge on the left,
+  including explicit noFill, and paint each physical boundary once. Merged-cell
+  continuation perimeter paint survives while internal merged edges disappear;
+  CSS border arbitration or overpaint from an older export is not the authority.
+  Follow `tables.md` before changing borders, dash lengths or merges.
+- **Chart domains/direction:** automatic line domains include error endpoints;
+  overlap differs from stack accumulation; horizontal category direction affects
+  slots and legend identity. Bubble domains use valid points and scale-dependent
+  padding; explicit bounds remain authoritative. Horizontal 3D bars project axes,
+  geometry, labels and gridlines together. See `charts.md`; do not reorder data,
+  force zero or flatten 3D solely to match an old renderer.
+- **Idle video posters:** on a current Web build, a video with an authored poster
+  can hide controls at rest and reveal them on hover/focus/touch. Compare idle and
+  interactive states separately, including click/key isolation from slide navigation.
+  Static poster evidence does not prove playback or timing support; do not replace
+  the poster to compensate for old browser chrome.
 
 ## Chart, SmartArt and effect regressions
 

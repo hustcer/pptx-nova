@@ -77,6 +77,9 @@ timing 诊断，不计入逻辑效果数量。相同 `grpId` 不合并不同效�
 - 删除 shape 同时清理完整所属效果，并检查所有 target、build 与包内相关扩展元数据中的引用；
   归属不明、会误删嵌套效果或留下引用时原子拒绝。无关扩展 metadata 保留，不是可写动画树；
   不能因为 metadata 中也有 timing/id 就改它，也不能忽略它对被删 shape 的引用。
+- 幸存容器的 `stCondLst/endCondLst/prevCondLst/nextCondLst` 若仍引用被删 shape，必须原子拒绝，
+  即使列表还有其他条件也不能删掉这一项来绕过拒绝。条件只随被完整删除的所属效果/行为一起移除。
+  新空的 timing 子列表只可在封闭、安全的结构内清理；属性、注释或其他 metadata 不能随容器丢弃。
 
 失败后保留输入、patch 和报告，按真实拒绝原因缩小操作或重新规划；不要靠计数、preset ID
 或名字推断权限。apply 后重新 inspect，核对稳定 ID、所有 targets、未触达效果及 metadata。
@@ -189,10 +192,10 @@ patch 成功状态。
 不传 `direction`、`build`、paragraph/level，也不与同一 shape 的段落 build 混用；
 `repeat: "indefinite"` 被拒绝。有限 repeat、autoReverse、restart、easing 沿用上文契约。
 
-| effect     | 固定源语义                                                           | Web 预览边界                                                |
-| ---------- | -------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `box`      | preset 4 / subtype 16 / filter `box(in)`；退出由 `phase:"exit"` 表达 | 矩形裁剪近似，不承诺 Office 逐帧一致                        |
-| `dissolve` | preset 9 / subtype 0 / filter `dissolve`                             | 保留 dissolve 身份，显式降级为 fade，不模拟 Office 粒子效果 |
+| effect     | 固定源语义                                                           | Web 预览边界                                                              |
+| ---------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `box`      | preset 4 / subtype 16 / filter `box(in)`；退出由 `phase:"exit"` 表达 | 矩形裁剪近似，不承诺 Office 逐帧一致                                      |
+| `dissolve` | preset 9 / subtype 0 / filter `dissolve`                             | 确定性散点单元遮罩；支持有限 repeat/reverse，不承诺 Office 粒子或逐帧一致 |
 
 不发明 `box-out`、`dissolve-out`、`box(out)` 等 wire 值。入口/出口可共用同一 effect：
 
@@ -219,12 +222,17 @@ phase、目标、行为顺序、时长、可见性边界或额外 metadata）仍
 只改时长时省略 `effect`，由运行时维护原 profile 与 visibility boundary；零时长也要回读。
 进入边界设 visible，退出末尾设 hidden。不要手写额外 visibility op 修补预览。
 
-检查 Web dissolve 时分别保留原始效果和实际播放计划：`kind:"effect-fallback"` 诊断的
-`fromEffect:"dissolve"` / `toEffect:"fade"`，以及可播放 step 的 `previewFallback:"fade"`。
-只有精确 filter 与有效、一致的 phase/transition（含显式 preset class）才允许该降级；
+检查当前 Web dissolve 时，原始效果与实际播放计划均应保留 `dissolve` 身份，不再要求
+`kind:"effect-fallback"` 或 `previewFallback:"fade"`。升级后重新解析原始 PPTX，不能将
+旧播放计划、旧诊断或缓存的 fade fallback 当作当前事实；旧 Viewer 则按其实际加载的实现记录降级。
+只有精确 filter 与有效、一致的 phase/transition（含显式 preset class）才允许播放；
 `animEffect/@transition` 省略时按 OOXML 默认入口解释，非法值和相互冲突的声明不等于省略。
 `dissolve(fade)`、大小写变体或 unknown 效果不能套用通用 fade，旧诊断也不授权播放。
-`text-granularity`、`timing-fill` 与 `effect-fallback` 是不同诊断，不能混作一种文字降级。
+`text-granularity` 与 `timing-fill` 仍是不同诊断；移除旧效果降级字段不代表所有动画均完整支持。
+
+实播检查进入/退出、有限 repeat、autoReverse、延迟开始、同一 shape 的混合效果与 reset/replay。
+初始遮罩以首次出现的 click segment 为边界，后续未激活的 click 不可提前隐藏或显示对象。
+保留显式 visibility 和原始 opacity；粒子遮罩不是将作者的不透明度重置为 1。
 
 此处是对象动画；前述 dissolve **整页转场**的场景遮罩走不同管道。
 静态 PNG/PDF、结构校验和 clean-open 都不能证明上述动画动态等价或 Office 回存无损。
@@ -683,6 +691,13 @@ PowerPoint clean-open -> 播放/点击复核(可用时) -> Morph 时运行 morph
   autoReverse），不是只等第一个成员。该字段属于播放计划，不是 patch 字段，也不开放任意并行树创建。
   检查延迟 visibility、重叠 owner、reset/重播的真实初始/结束态；被拒绝的效果及其诊断不能在
   visibility 合并时消失。段落目标的播放改善不扩大 Box/Dissolve 的整 shape 创建边界。
+- 播放计划若披露 `trigger.delayOrigin`，`segment` 的 `delayMs` 已是本段累计偏移，不能再次加上
+  前一效果的等待；`trigger`（其他 step 的默认原点）则是相对触发的延迟：with 相对前一 owner
+  开始，after 相对当前组结束，on-click/auto 相对段开始。不能按数值大小猜原点；这是播放计划
+  字段，不是 patch 参数，也不能从祖先 delay 推断已包含前序 sibling duration。
+- `p:set` 的显式 visibility 是属性赋值，不是 opacity tween。检查延迟赋值、`fill=remove`、held
+  state 和相邻零时长 click；完成当前 click 不激活下一 click。退出边界、seek、reset/replay
+  不应留下未来赋值，也不应重复累计相对 spin/scale。不要往源 PPTX 加额外 visibility 来修预览。
 
 最终摘要列出动画能力审计：xdoc 版本、相关 op schema 是否披露、涉及的动画 id、哪些 step 被编辑/删除、
 哪些 preserve-only 风险保留，以及 clean-open / 播放复核是否完成。

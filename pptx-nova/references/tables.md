@@ -44,6 +44,17 @@ DeckKit 的视觉表格页型、文本框网格或重新 `add-table` 来替代�
 
 ## 先分辨：真表格还是视觉表格
 
+### 共享边框的渲染诊断
+
+当前 Web/PDF 将每条物理网格边画一次：水平共享边优先取上方格的 bottom，垂直共享边
+优先取左方格的 right，显式 `noFill` 也参与优先级；不是粗线、直接格式或 CSS 冲突胜出。
+合并只隐藏合并区域的内部边，continuation cell 仍保留自己的周界样式，不将 origin cell
+的边框无限延伸。比较 dash 长度、空边、合并边与实际行高，勿为恢复旧预览而复制边框、
+加分割线 shape 或取消合并。缺失边与显式 noFill 不等价；写入字段仍以当前 table schema
+为准，渲染改进不授予任意原始边框 XML 的编辑能力。升级诊断参见 `fidelity-diagnosis.md`。
+
+### 对象类型
+
 编辑已有 deck 前先看 inspect。只有 `shapeType == "table"` 的对象才使用
 `set-table`、`set-table-data`、`merge-table-cells` 等 table ops。
 

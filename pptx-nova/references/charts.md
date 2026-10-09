@@ -1148,6 +1148,25 @@ point 作用域目前只收 `position` 和 `font`（带 `showValue` 等会报
 > ⚠️ 上例 `dataLabels` 条目省略了 `scope` —— 这等价于 plot 0（覆盖所有系列）。要只标
 > 某一个系列，加 `"scope": { "series": 1 }`。
 
+## 升级后图表渲染变化的诊断
+
+先用当前 xdoc 对同一源文件重渲染，不为恢复旧像素改数据或固定自动轴：
+
+- 折线自动 domain 包含实际绘制的误差棒端点；累计/统计误差须按系列语义解释，显式
+  min/max 仍优先。不要缩减误差值或截断轴来掩盖旧 domain 的问题。
+- 柱/条形的 overlap 与 stacking 是独立因素；类目轴方向还影响 horizontal bar 的系列
+  槽位和 legend 身份。检查 category/series 索引、正负累计与顺序，不靠交换数据数组修预览。
+- Bubble 自动轴使用有效 x/y/正 size 点及 bubbleScale 对应留白，窄的同号范围可不含零。
+  显式范围和 major unit 仍优先，且可裁切气泡；轴留白不等于气泡直径。散点 spline、精确
+  bubble 直径或 plot layout 仍须独立证据，不从本次自动轴改进推导保真。
+- 3D horizontal bar 同时检查 `barDir`、类目/数值反转、投影 geometry、刻度、gridline 与
+  depth 标题；轴与柱体不能分别转向。保留 view3D 与真实数据，勿改成竖柱或 2D 补偿。
+- 字体取证应包含实际可见 title、axis/depth title、display-unit label、legend 与 data label，
+  包括 combo 分组和 point override；隐藏或已删除的 label 不该强迫修改作者字体。
+
+这些是 Web/PDF 诊断边界，不扩大 chart authoring 或 Office playback 支持。按
+`fidelity-diagnosis.md` 记录消费者与字体；静态预览不能证明 Office 逐帧/逐像素一致。
+
 ## 时间序列 / 预测的视觉陷阱
 
 按时间序列画 column / bar 时，如果只填了上半年实际数据、下半年用 `0` 占位，

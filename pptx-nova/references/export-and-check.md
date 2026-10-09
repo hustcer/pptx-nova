@@ -125,6 +125,7 @@ Consume the persisted manifest fail-closed:
 ```bash
 node <skill-root>/scripts/pptx-nova-visual-evidence-gate.mjs \
   --manifest <run-dir>/visual-evidence/manifest.json \
+  --candidate <current.pptx> \
   --output <run-dir>/visual-evidence-gate.json \
   --json
 ```
@@ -134,8 +135,8 @@ delivery. Exit `4` is a content blocker. Exit `5` requires actual human
 confirmation; an Agent must not reinterpret it as success. Invalid or
 internally inconsistent manifests exit `3`.
 
-For Create, also pass `--candidate <current.pptx>` and, after actually reviewing the canonical PNGs,
-`--review <visual_review.json>`. Record that review with both `--candidate` and `--manifest` using
+Always bind the gate to the current candidate. For Create, after actually reviewing the canonical PNGs,
+also pass `--review <visual_review.json>`. Record that review with both `--candidate` and `--manifest` using
 `pptx-nova-visual-review.mjs`. The consumer verifies candidate, PDF/PNG and manifest hashes, complete
 slide coverage and all required review checks. Exit `6` means machine checks passed but actual
 visual review is missing; it does not require another user permission question. Stale or failed
@@ -358,6 +359,25 @@ Tahoma. These may appear under `systemFontCandidates`: acceptable for many
 internal decks, but still a cross-machine consistency risk for strict external
 delivery. Non-system `font_not_embedded` warnings should be fixed by embedding
 the font or switching to an approved system/DeckKit font.
+
+Font preflight inventories, resolved family/style, embedded font bytes and final
+glyph coverage are separate evidence. Use canonical visual-audit font findings
+and actual PDF/PNG review; a system font candidate or valid font file does not
+prove every codepoint rendered. Include visible bullets, chart axis/depth titles,
+display-unit labels, combo groups and local SVG text when diagnosing missing
+glyphs. Browser CSS fonts and browser PDF font bytes have separate lifecycles;
+font discovery does not imply that remote SVG images/stylesheets were loaded.
+
+If an existing browser export integration actually supplies a `cjkFallback`
+report, retain its status, required/covered/missing/unknown codepoints and
+coverage sources. `complete` concerns only that resolver's returned CJK fallback
+assets; it excludes original-family/embedded/Latin/emoji fonts and does not prove
+final PDF shaping or style fidelity. `partial`, `missing`, `unknown`, `not-checked`
+and `not-needed` are distinct; declared CSS unicode ranges and decoded cmap
+coverage are different evidence. Apply the task's export policy and review the
+output. This optional SDK report is not an xdoc CLI preflight field: do not
+fabricate it, add an SDK dependency to the baseline, or block native CLI export
+merely because it is absent.
 
 ### Accessibility is outside the default list
 

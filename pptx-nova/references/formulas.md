@@ -215,5 +215,15 @@ Add formula-specific checks during PNG review:
 4. Block formulas have stable visual rhythm and do not overpower the slide title.
 5. The final summary mentions whether formulas are editable text, rendered assets, or native equations.
 
+For an imported native equation, retain attributed OMML text, including `m:t`
+with `xml:space` or other attributes, whitespace, fractions and sub/superscript
+structure. Re-render the same source with the current runtime before diagnosing
+missing math text or replacing it with an image. Restored content and remaining
+math metric differences are separate findings.
+
 When exporting to PDF, run `xdoc check --checks fonts,links,compat` if the deck uses
-native equations or math fonts; font fallback issues can change glyph coverage.
+native equations or math fonts, then review actual glyphs; the font preflight
+does not prove codepoint coverage. SVG formula/image text needs resolved PDF font
+bytes independently of browser CSS font readiness; inspect local SVG text and
+inherited inline styles, and do not assume external images/stylesheets were
+fetched. See `export-and-check.md` for the distinct font-evidence boundaries.

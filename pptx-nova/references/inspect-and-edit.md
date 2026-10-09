@@ -214,6 +214,9 @@ Chart 3D 和 GLB 使用各自契约。
   清掉显式 `bodyPr` 值使继承/默认重新生效；不要把 effective 值误写成“原始显式值”。
 - `fontFacts[]` 是按 text/chart scope 报出的字体事实。拉丁、东亚、复杂文字脚本分别对应
   patch font 的 `name`、`eastAsian`、`complexScript`；`letterSpacing` 是独立字符间距字段。
+  具体作者字体优先于未被引用的 theme script 默认字体；适用的继承东亚字体仍有独立优先级。
+  普通文本框不借用 master 的 `otherStyle` 字体。渲染换字体时先回查实际继承与解析结果，
+  不把 theme 字体清单直接写进所有 run，也不把字体声明当作 PDF 字形覆盖证明。
 - 动画状态现在也在每页暴露：`timingSummary`、`animations[]`、`animationCapabilities`。
   `animations[].kind` 区分逻辑效果与无法归属的 timing，`targets[]` 保留全部目标（不再用单个
   `target`）；`source` / `behaviors[]` 是只读原始元数据。未知时长/延迟可为 null。
@@ -360,6 +363,10 @@ shape 在 PowerPoint Selection Pane 里能看到 name；设计师常给关键 sh
 `type` 取值：`title / ctrTitle / body / subTitle / dt / sldNum / ftr / hdr /
 obj / chart / tbl / clipArt / dgm / media / sldImg / pic`。
 `idx` 是 OOXML placeholder 的身份属性，不是数组下标；它只能与同层 `placeholder` 一起提供。
+诊断继承时，slide 上显式 `p:ph/@idx` 必须精确匹配 layout；匹配失败不借用同类型的另一
+placeholder，也不绕过 layout 去借 master shape 的几何。省略 idx 与 Office 的 master-only
+sentinel `4294967295` 有不同继承规则；全局文本默认值仍可能适用。保留显式零宽/零高，
+不将其当成缺失尺寸或为使预览有字而扩框。不要把 sentinel 或解析后的 bbox 当作修复建议。
 
 ### 2.4 `{ "query": { ... } }` —— 模糊查找
 
@@ -529,6 +536,17 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 几何变化失败。普通编辑按 [Edit Contract](edit-contract.md) 处理允许的变化范围；
 翻译按 [Style Signature Gate](translation-mode.md#style-signature-gate) 处理。
 不要反复重试同一 `set-run`、关闭 autofit 或忽略失败签名来制造“保真通过”。
+
+### 5.2c 已有文本分栏与断行
+
+保留 textBox 和普通 shape 的 `bodyPr/@numCol,@spcCol`、组变换、段间距与垂直对齐；
+组的横向缩放同时影响栏间距。当前 Web/PDF 横排分栏先填作者的可用高度再转栏，普通
+overflow 会扩展共同栏高；显式 clip/ellipsis 则保留作者高度。这是渲染行为，不代表
+多列 `shape` autofit 已可写，也不证明 frame 几何已改变。用当前完整 `set-text-frame` schema
+与 dry-run 确认能改的字段，按 `fidelity-diagnosis.md` 区分溢出与渲染变化。
+最终 PDF fit 通过后，canonical audit 仍可能保留 `multi-column-text-layout-review` 并要求
+人工确认；按真实 `decision.action` 收尾，不靠反复改字号或 Agent 自评覆盖这个要求。
+含 ASCII `-` 的词、数字或连续连字符可在连字符后断行；不要为模仿旧预览插入换行或改原文。
 
 ### 5.3 加一页和现有 layout 一样的
 

@@ -47,11 +47,11 @@ def render-json-value [value: any]: nothing -> string {
     let items = ($value | each {|item| render-json-value $item } | str join ", ")
     $"Json::array([($items)])"
   } else if $type_name == "string" {
-    (string-literal $value) + ".to_json()"
+    "Json(" + (string-literal $value) + ")"
   } else if $type_name == "bool" {
-    ($value | to text) + ".to_json()"
+    "Json(" + ($value | to text) + ")"
   } else if ($type_name == "int") or ($type_name == "float") {
-    "(" + ($value | to text) + ").to_json()"
+    "Json(" + ($value | to text) + ")"
   } else if $type_name == "nothing" {
     "Json::null()"
   } else {

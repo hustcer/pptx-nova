@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.9.0 (0ffd5f9d)",
+  "version": "0.11.0 (ccedd2f7)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -178,8 +178,9 @@
           "description": "PNG render DPI",
           "required": false,
           "default": 144,
-          "valueSyntax": "<int>",
           "minimum": 1,
+          "maximum": 1200,
+          "valueSyntax": "<int>",
           "unit": "dpi",
           "applicability": {
             "formatIncludesAny": ["png"]
@@ -684,6 +685,7 @@
           "dpi": {
             "type": "integer",
             "minimum": 1,
+            "maximum": 1200,
             "default": 144
           },
           "prefix": {
@@ -2184,7 +2186,9 @@
           "name": "dpi",
           "type": "int",
           "description": "PNG render DPI for pptx preview/contact-diff/visual-audit. Preview and visual-audit default to 144; contact-diff defaults to 72",
-          "required": false
+          "required": false,
+          "minimum": 1,
+          "maximum": 1200
         },
         {
           "name": "channel-threshold",
@@ -6148,7 +6152,10 @@
               "name": "dpi",
               "type": "int",
               "description": "PNG render DPI for pptx preview/contact-diff/visual-audit. Preview and visual-audit default to 144; contact-diff defaults to 72",
-              "required": false
+              "required": false,
+              "minimum": 1,
+              "maximum": 1200,
+              "default": 144
             },
             {
               "name": "overwrite",
@@ -6261,7 +6268,10 @@
                 "type": "string"
               },
               "dpi": {
-                "type": "integer"
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1200,
+                "default": 144
               },
               "overwrite": {
                 "type": "boolean",
@@ -6297,6 +6307,7 @@
             },
             "required": [
               "contact-sheet",
+              "dpi",
               "overwrite",
               "json",
               "quiet",
@@ -6430,7 +6441,10 @@
               "name": "dpi",
               "type": "int",
               "description": "PNG render DPI for pptx preview/contact-diff/visual-audit. Preview and visual-audit default to 144; contact-diff defaults to 72",
-              "required": false
+              "required": false,
+              "minimum": 1,
+              "maximum": 1200,
+              "default": 144
             },
             {
               "name": "channel-threshold",
@@ -6499,7 +6513,10 @@
                 "type": "string"
               },
               "dpi": {
-                "type": "integer"
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1200,
+                "default": 144
               },
               "channel-threshold": {
                 "type": "integer"
@@ -6524,7 +6541,7 @@
                 "default": "info"
               }
             },
-            "required": ["overwrite", "json", "quiet", "log-level"],
+            "required": ["dpi", "overwrite", "json", "quiet", "log-level"],
             "description": "Validated public parameters with defaults inserted. Omitted optional paths stay absent; json-full=true normalizes json to true. Admission, path resolution and authorization precede I/O selection."
           }
         },
@@ -9000,7 +9017,10 @@
               "name": "dpi",
               "type": "int",
               "description": "PNG render DPI for pptx preview/contact-diff/visual-audit. Preview and visual-audit default to 144; contact-diff defaults to 72",
-              "required": false
+              "required": false,
+              "minimum": 1,
+              "maximum": 1200,
+              "default": 72
             },
             {
               "name": "output",
@@ -9074,7 +9094,10 @@
                 "type": "string"
               },
               "dpi": {
-                "type": "integer"
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1200,
+                "default": 72
               },
               "output": {
                 "type": "string"
@@ -9099,7 +9122,7 @@
                 "type": "string"
               }
             },
-            "required": ["overwrite", "json", "quiet", "log-level"],
+            "required": ["dpi", "overwrite", "json", "quiet", "log-level"],
             "description": "Validated public parameters with defaults inserted. Omitted optional paths stay absent; json-full=true normalizes json to true. Admission, path resolution and authorization precede I/O selection."
           }
         },
@@ -100282,6 +100305,705 @@
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://structurify.io/schemas/pptx-diff/v1.schema.json",
         "type": "object",
+        "additionalProperties": false,
+        "$defs": {
+          "diffSummarySlide": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "slide",
+              "conclusion",
+              "unsupported",
+              "styleChanges",
+              "changedFields",
+              "categorySummary",
+              "reliableChanges",
+              "uncertainChanges",
+              "shapeChangeSummary",
+              "summaryChangeCount",
+              "unsupportedRegions"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "slide": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "conclusion": {
+                "type": "string",
+                "enum": ["added", "removed", "changed", "unchanged", "uncertain", "unsupported"],
+                "strict": true
+              },
+              "changedFields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "reliableChanges": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "uncertainChanges": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "unsupportedRegions": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "summaryChangeCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "shapeChangeSummary": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "added",
+                  "changed",
+                  "removed",
+                  "uncertain",
+                  "unchanged",
+                  "unsupported"
+                ],
+                "properties": {
+                  "added": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "removed": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "changed": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "unchanged": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "uncertain": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "unsupported": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "categorySummary": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "styleChanges": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "unsupported": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["path", "side", "reason", "category", "reliability"],
+                  "properties": {
+                    "category": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "reliability": {
+                      "type": "string",
+                      "enum": ["unsupported"],
+                      "strict": true
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": ["baseline", "target"],
+                      "strict": true
+                    },
+                    "path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "diffFullSlide": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "slide",
+              "target",
+              "baseline",
+              "conclusion",
+              "unsupported",
+              "shapeChanges",
+              "changedFields",
+              "summaryChanges"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "slide": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "conclusion": {
+                "type": "string",
+                "enum": ["added", "removed", "changed", "unchanged", "uncertain", "unsupported"],
+                "strict": true
+              },
+              "changedFields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "baseline": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["index", "slide", "partName"],
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "slide": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "partName": {
+                        "type": "string"
+                      },
+                      "slideId": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "target": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["index", "slide", "partName"],
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "slide": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "partName": {
+                        "type": "string"
+                      },
+                      "slideId": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "summaryChanges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "category",
+                    "field",
+                    "path",
+                    "conclusion",
+                    "reliability",
+                    "matchStrategy",
+                    "matchConfidence",
+                    "evidence"
+                  ],
+                  "properties": {
+                    "category": {
+                      "type": "string"
+                    },
+                    "field": {
+                      "type": "string"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "conclusion": {
+                      "type": "string",
+                      "enum": ["changed"],
+                      "strict": true
+                    },
+                    "reliability": {
+                      "type": "string",
+                      "enum": ["reliable", "uncertain", "unsupported"],
+                      "strict": true
+                    },
+                    "matchStrategy": {
+                      "type": "string"
+                    },
+                    "matchConfidence": {
+                      "type": "number"
+                    },
+                    "evidence": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["path"],
+                      "properties": {
+                        "path": {
+                          "type": "string"
+                        },
+                        "beforeHash": {
+                          "type": "string"
+                        },
+                        "afterHash": {
+                          "type": "string"
+                        },
+                        "beforePreview": {
+                          "type": "string"
+                        },
+                        "afterPreview": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "before": {
+                      "type": "string"
+                    },
+                    "after": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "shapeChanges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conclusion",
+                    "reliability",
+                    "category",
+                    "categories",
+                    "matchStrategy",
+                    "matchConfidence",
+                    "match",
+                    "evidence",
+                    "baseline",
+                    "target",
+                    "changedFields",
+                    "changes"
+                  ],
+                  "properties": {
+                    "conclusion": {
+                      "type": "string",
+                      "enum": [
+                        "added",
+                        "removed",
+                        "changed",
+                        "unchanged",
+                        "uncertain",
+                        "unsupported"
+                      ],
+                      "strict": true
+                    },
+                    "reliability": {
+                      "type": "string",
+                      "enum": ["reliable", "uncertain", "unsupported"],
+                      "strict": true
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "matchStrategy": {
+                      "type": "string"
+                    },
+                    "matchConfidence": {
+                      "type": "number"
+                    },
+                    "match": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["key", "strategy", "confidence"],
+                      "properties": {
+                        "strategy": {
+                          "type": "string"
+                        },
+                        "confidence": {
+                          "type": "number"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "evidence": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["path"],
+                      "properties": {
+                        "path": {
+                          "type": "string"
+                        },
+                        "beforeHash": {
+                          "type": "string"
+                        },
+                        "afterHash": {
+                          "type": "string"
+                        },
+                        "beforePreview": {
+                          "type": "string"
+                        },
+                        "afterPreview": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "baseline": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["id", "bbox", "name", "hasText", "category", "shapeType"],
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "shapeType": {
+                              "type": "string"
+                            },
+                            "category": {
+                              "type": "string"
+                            },
+                            "hasText": {
+                              "type": "boolean"
+                            },
+                            "bbox": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": ["hEmu", "wEmu", "xEmu", "yEmu"],
+                                  "properties": {
+                                    "xEmu": {
+                                      "type": "integer"
+                                    },
+                                    "yEmu": {
+                                      "type": "integer"
+                                    },
+                                    "wEmu": {
+                                      "type": "integer"
+                                    },
+                                    "hEmu": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentKind": {
+                              "type": "string"
+                            },
+                            "textPreview": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "target": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": ["id", "bbox", "name", "hasText", "category", "shapeType"],
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "shapeType": {
+                              "type": "string"
+                            },
+                            "category": {
+                              "type": "string"
+                            },
+                            "hasText": {
+                              "type": "boolean"
+                            },
+                            "bbox": {
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "additionalProperties": false,
+                                  "required": ["hEmu", "wEmu", "xEmu", "yEmu"],
+                                  "properties": {
+                                    "xEmu": {
+                                      "type": "integer"
+                                    },
+                                    "yEmu": {
+                                      "type": "integer"
+                                    },
+                                    "wEmu": {
+                                      "type": "integer"
+                                    },
+                                    "hEmu": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentKind": {
+                              "type": "string"
+                            },
+                            "textPreview": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "baselineCount": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "targetCount": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "changedFields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "changes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "category",
+                          "field",
+                          "path",
+                          "conclusion",
+                          "reliability",
+                          "matchStrategy",
+                          "matchConfidence",
+                          "evidence"
+                        ],
+                        "properties": {
+                          "category": {
+                            "type": "string"
+                          },
+                          "field": {
+                            "type": "string"
+                          },
+                          "path": {
+                            "type": "string"
+                          },
+                          "conclusion": {
+                            "type": "string",
+                            "enum": ["changed"],
+                            "strict": true
+                          },
+                          "reliability": {
+                            "type": "string",
+                            "enum": ["reliable", "uncertain", "unsupported"],
+                            "strict": true
+                          },
+                          "matchStrategy": {
+                            "type": "string"
+                          },
+                          "matchConfidence": {
+                            "type": "number"
+                          },
+                          "evidence": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["path"],
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "beforeHash": {
+                                "type": "string"
+                              },
+                              "afterHash": {
+                                "type": "string"
+                              },
+                              "beforePreview": {
+                                "type": "string"
+                              },
+                              "afterPreview": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "before": {
+                            "type": "string"
+                          },
+                          "after": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "reason": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "unsupported": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "scope",
+                    "category",
+                    "reason",
+                    "detail",
+                    "reliability",
+                    "side",
+                    "path"
+                  ],
+                  "properties": {
+                    "scope": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "reason": {
+                      "type": "string"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "reliability": {
+                      "type": "string",
+                      "enum": ["unsupported"],
+                      "strict": true
+                    },
+                    "side": {
+                      "type": "string",
+                      "enum": ["baseline", "target"],
+                      "strict": true
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "slideIndex": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "detail": {
+                  "const": "summary"
+                }
+              }
+            },
+            "then": {
+              "required": ["styleChangeSummary", "fullEvidenceAvailable", "fullEvidenceHint"],
+              "properties": {
+                "slides": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/diffSummarySlide"
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "styleChangeSummary": false,
+                "fullEvidenceAvailable": false,
+                "fullEvidenceHint": false,
+                "slides": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/diffFullSlide"
+                  }
+                }
+              }
+            }
+          }
+        ],
         "description": "Semantic PPTX diff report. Success criteria: deterministic conclusions are emitted only for stably identified slide/shape/text/media/table/chart summaries; unstable matches and unsupported structures are reported as uncertain/unsupported instead of presented as facts. Matching: slides match by 0-based index; shapes match by unique shape id + element kind, falling back to unique shape name + element kind, and ambiguous or non-unique fallback keys are reported as uncertain instead of guessed. Coverage: text/shapeGeometry/shapeStyle reliable; freeform move/line/cubic/close paths include control points, while preserve-only custom geometry is unsupported; mediaSummary/chartData/tableSummary summary-level; mediaBinary/tableCells/smartArt/animations unsupported; themeInheritance partial; for visual rendering use xdoc pptx preview or the visual-audit evidence flow. CI policy: use only reliability=reliable entries (summary.reliableChanges, slides[].summaryChanges/shapeChanges/changes where reliability == reliable) as machine facts and never treat uncertain or unsupported entries (summary.uncertainChanges, summary.unsupportedRegions, slides[].shapeChanges where reliability == uncertain, slides[].unsupported) as pass-gate evidence. Review policy: this semantic report is advisory and never authorizes delivery; run the canonical visual-evidence command from agentGate.visualEvidence and consume manifest.decision before acceptance.",
         "required": [
           "schemaVersion",
@@ -100318,6 +101040,7 @@
           },
           "agentGate": {
             "type": "object",
+            "additionalProperties": false,
             "description": "Verdict plus actionable references only. Counts live in summary; the CI/review signal policy lives in this report schema's description (see the report's policyRef).",
             "required": ["semanticStatus", "previewCommand", "visualEvidence"],
             "properties": {
@@ -100367,6 +101090,7 @@
           },
           "summary": {
             "type": "object",
+            "additionalProperties": false,
             "required": [
               "baselineSlideCount",
               "targetSlideCount",
@@ -100447,12 +101171,96 @@
                 "minimum": 0
               },
               "byCategory": {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "added",
+                    "changed",
+                    "removed",
+                    "uncertain",
+                    "unchanged",
+                    "unsupported"
+                  ],
+                  "properties": {
+                    "added": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "removed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "changed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "unchanged": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "uncertain": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "unsupported": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
               }
             }
           },
           "styleChangeSummary": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["total", "byField", "truncated", "transitions", "transitionCount"],
+            "properties": {
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "byField": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "transitions": {
+                "type": "array",
+                "maxItems": 40,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["after", "count", "field", "before"],
+                  "properties": {
+                    "field": {
+                      "type": "string"
+                    },
+                    "before": {
+                      "type": "string"
+                    },
+                    "after": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              },
+              "transitionCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "truncated": {
+                "type": "boolean"
+              }
+            }
           },
           "fullEvidenceAvailable": {
             "type": "boolean"
@@ -100463,347 +101271,14 @@
           "slides": {
             "type": "array",
             "items": {
-              "type": "object",
-              "required": ["index", "slide", "conclusion"],
-              "properties": {
-                "index": {
-                  "type": "integer",
-                  "minimum": 0
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/diffSummarySlide"
                 },
-                "slide": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "conclusion": {
-                  "type": "string",
-                  "enum": ["added", "removed", "changed", "unchanged", "uncertain", "unsupported"],
-                  "strict": true
-                },
-                "baseline": {
-                  "type": ["object", "null"]
-                },
-                "target": {
-                  "type": ["object", "null"]
-                },
-                "changedFields": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "reliableChanges": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "uncertainChanges": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "unsupportedRegions": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "summaryChangeCount": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "shapeChangeSummary": {
-                  "type": "object"
-                },
-                "categorySummary": {
-                  "type": "object"
-                },
-                "styleChanges": {
-                  "type": "object"
-                },
-                "summaryChanges": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "category",
-                      "field",
-                      "path",
-                      "conclusion",
-                      "reliability",
-                      "matchStrategy",
-                      "matchConfidence",
-                      "evidence"
-                    ],
-                    "properties": {
-                      "category": {
-                        "type": "string"
-                      },
-                      "field": {
-                        "type": "string"
-                      },
-                      "path": {
-                        "type": "string"
-                      },
-                      "conclusion": {
-                        "type": "string",
-                        "enum": ["changed"],
-                        "strict": true
-                      },
-                      "reliability": {
-                        "type": "string",
-                        "enum": ["reliable", "uncertain", "unsupported"],
-                        "strict": true
-                      },
-                      "matchStrategy": {
-                        "type": "string"
-                      },
-                      "matchConfidence": {
-                        "type": "number"
-                      },
-                      "evidence": {
-                        "type": "object",
-                        "required": ["path"],
-                        "properties": {
-                          "path": {
-                            "type": "string"
-                          },
-                          "beforeHash": {
-                            "type": "string"
-                          },
-                          "afterHash": {
-                            "type": "string"
-                          },
-                          "beforePreview": {
-                            "type": "string"
-                          },
-                          "afterPreview": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "before": {
-                        "type": "string"
-                      },
-                      "after": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "shapeChanges": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "conclusion",
-                      "reliability",
-                      "category",
-                      "categories",
-                      "matchStrategy",
-                      "matchConfidence",
-                      "match",
-                      "evidence",
-                      "baseline",
-                      "target",
-                      "changedFields",
-                      "changes"
-                    ],
-                    "properties": {
-                      "conclusion": {
-                        "type": "string",
-                        "enum": [
-                          "added",
-                          "removed",
-                          "changed",
-                          "unchanged",
-                          "uncertain",
-                          "unsupported"
-                        ],
-                        "strict": true
-                      },
-                      "reliability": {
-                        "type": "string",
-                        "enum": ["reliable", "uncertain", "unsupported"],
-                        "strict": true
-                      },
-                      "category": {
-                        "type": "string"
-                      },
-                      "categories": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "matchStrategy": {
-                        "type": "string"
-                      },
-                      "matchConfidence": {
-                        "type": "number"
-                      },
-                      "match": {
-                        "type": "object"
-                      },
-                      "evidence": {
-                        "type": "object",
-                        "required": ["path"],
-                        "properties": {
-                          "path": {
-                            "type": "string"
-                          },
-                          "beforeHash": {
-                            "type": "string"
-                          },
-                          "afterHash": {
-                            "type": "string"
-                          },
-                          "beforePreview": {
-                            "type": "string"
-                          },
-                          "afterPreview": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "baseline": {
-                        "type": ["object", "null"]
-                      },
-                      "target": {
-                        "type": ["object", "null"]
-                      },
-                      "baselineCount": {
-                        "type": "integer",
-                        "minimum": 0
-                      },
-                      "targetCount": {
-                        "type": "integer",
-                        "minimum": 0
-                      },
-                      "changedFields": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "changes": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "required": [
-                            "category",
-                            "field",
-                            "path",
-                            "conclusion",
-                            "reliability",
-                            "matchStrategy",
-                            "matchConfidence",
-                            "evidence"
-                          ],
-                          "properties": {
-                            "category": {
-                              "type": "string"
-                            },
-                            "field": {
-                              "type": "string"
-                            },
-                            "path": {
-                              "type": "string"
-                            },
-                            "conclusion": {
-                              "type": "string",
-                              "enum": ["changed"],
-                              "strict": true
-                            },
-                            "reliability": {
-                              "type": "string",
-                              "enum": ["reliable", "uncertain", "unsupported"],
-                              "strict": true
-                            },
-                            "matchStrategy": {
-                              "type": "string"
-                            },
-                            "matchConfidence": {
-                              "type": "number"
-                            },
-                            "evidence": {
-                              "type": "object",
-                              "required": ["path"],
-                              "properties": {
-                                "path": {
-                                  "type": "string"
-                                },
-                                "beforeHash": {
-                                  "type": "string"
-                                },
-                                "afterHash": {
-                                  "type": "string"
-                                },
-                                "beforePreview": {
-                                  "type": "string"
-                                },
-                                "afterPreview": {
-                                  "type": "string"
-                                }
-                              }
-                            },
-                            "before": {
-                              "type": "string"
-                            },
-                            "after": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "reason": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "unsupported": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "scope",
-                      "category",
-                      "reason",
-                      "detail",
-                      "reliability",
-                      "side",
-                      "path"
-                    ],
-                    "properties": {
-                      "scope": {
-                        "type": "string"
-                      },
-                      "category": {
-                        "type": "string"
-                      },
-                      "reason": {
-                        "type": "string"
-                      },
-                      "detail": {
-                        "type": "string"
-                      },
-                      "reliability": {
-                        "type": "string",
-                        "enum": ["unsupported"],
-                        "strict": true
-                      },
-                      "side": {
-                        "type": "string",
-                        "enum": ["baseline", "target"],
-                        "strict": true
-                      },
-                      "path": {
-                        "type": "string"
-                      },
-                      "slideIndex": {
-                        "type": "integer",
-                        "minimum": 0
-                      }
-                    }
-                  }
+                {
+                  "$ref": "#/$defs/diffFullSlide"
                 }
-              }
+              ]
             }
           }
         }
@@ -107036,13 +107511,589 @@
           }
         ]
       },
-      "ioContract": {
-        "input": {
-          "type": "file",
-          "encoding": "utf-8",
-          "maxBytes": 65536,
-          "callerClockOverride": "forbidden"
+      "subcommands": {
+        "verify": {
+          "usage": "xdoc auth verify --license <file> [--pretty]",
+          "options": [
+            {
+              "name": "license",
+              "type": "path",
+              "description": "Credential envelope for auth verify; install uses one positional file",
+              "required": true
+            },
+            {
+              "name": "pretty",
+              "type": "bool",
+              "description": "Pretty-print the JSON report",
+              "required": false,
+              "style": "flag"
+            }
+          ],
+          "positionals": [],
+          "acceptsInputPositional": false,
+          "argumentsSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "files"],
+            "properties": {
+              "action": {
+                "const": "verify"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pretty": {
+                "type": "boolean"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "verify"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["license"],
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                },
+                "else": {
+                  "not": {
+                    "required": ["license"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "install"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 1
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ioContract": {
+            "input": {
+              "type": "file",
+              "source": "--license",
+              "encoding": "utf-8",
+              "maxBytes": 65536
+            },
+            "callerClockOverride": "forbidden",
+            "taskAuthorization": "not-evaluated",
+            "filesystem": {
+              "usage": "read-only",
+              "description": "Reads the specified UTF-8 Credential using the host clock for diagnostic verification only. No Clock rollback admission or device proof-of-possession; does not write local authorization state.",
+              "initializesAuthorizationHost": false
+            },
+            "stdout": {
+              "format": "json",
+              "usage": "json-report-only",
+              "schemaVersion": "xdoc-cli-license-verification/v1",
+              "schemaRef": "#/reports/xdoc-cli-license-verification~1v1"
+            },
+            "stderr": {
+              "usage": "argument-process-diagnostics-and-recovery-hints-only"
+            },
+            "failureSemantics": "Argument failures use stderr and exit 2 before execution. Process failures may prevent a JSON report. Report-level rejection and uncertain output retain each action's existing exit codes and recovery hints."
+          }
         },
+        "install": {
+          "usage": "xdoc auth install <file> [--pretty]",
+          "options": [
+            {
+              "name": "pretty",
+              "type": "bool",
+              "description": "Pretty-print the JSON report",
+              "required": false,
+              "style": "flag"
+            }
+          ],
+          "positionals": [
+            {
+              "name": "files",
+              "type": "path",
+              "required": true,
+              "description": "Exactly one Credential file; --license is forbidden."
+            }
+          ],
+          "acceptsInputPositional": true,
+          "argumentsSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "files"],
+            "properties": {
+              "action": {
+                "const": "install"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pretty": {
+                "type": "boolean"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "verify"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["license"],
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                },
+                "else": {
+                  "not": {
+                    "required": ["license"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "install"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 1
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ioContract": {
+            "input": {
+              "type": "file",
+              "source": "positional",
+              "encoding": "utf-8",
+              "maxBytes": 65536
+            },
+            "callerClockOverride": "forbidden",
+            "taskAuthorization": "not-evaluated",
+            "filesystem": {
+              "usage": "read-write",
+              "description": "Freezes the input bytes, performs full admission, and atomically installs those same bytes. May write local configuration and Clock state. Exit 3 means unreadable input, 4 rejected Credential, and 9 failed or uncertain publication. No automatic rollback; inspect status and retry when publication is uncertain.",
+              "initializesAuthorizationHost": true
+            },
+            "stdout": {
+              "format": "json",
+              "usage": "json-report-only",
+              "schemaVersion": "xdoc-cli-auth-install/v1",
+              "schemaRef": "#/reports/xdoc-cli-auth-install~1v1"
+            },
+            "stderr": {
+              "usage": "argument-process-diagnostics-and-recovery-hints-only"
+            },
+            "failureSemantics": "Argument failures use stderr and exit 2 before execution. Process failures may prevent a JSON report. Report-level rejection and uncertain output retain each action's existing exit codes and recovery hints."
+          }
+        },
+        "uninstall": {
+          "usage": "xdoc auth uninstall [--pretty]",
+          "options": [
+            {
+              "name": "pretty",
+              "type": "bool",
+              "description": "Pretty-print the JSON report",
+              "required": false,
+              "style": "flag"
+            }
+          ],
+          "positionals": [],
+          "acceptsInputPositional": false,
+          "argumentsSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "files"],
+            "properties": {
+              "action": {
+                "const": "uninstall"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pretty": {
+                "type": "boolean"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "verify"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["license"],
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                },
+                "else": {
+                  "not": {
+                    "required": ["license"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "install"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 1
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ioContract": {
+            "input": {
+              "type": "none"
+            },
+            "callerClockOverride": "forbidden",
+            "taskAuthorization": "not-evaluated",
+            "filesystem": {
+              "usage": "delete-installed-license-only",
+              "description": "Removes only the installed License without initializing authorization host ports. Uncertain removal is an error; inspect status and retry. Other configuration and Clock state are retained.",
+              "initializesAuthorizationHost": false
+            },
+            "stdout": {
+              "format": "json",
+              "usage": "json-report-only",
+              "schemaVersion": "xdoc-cli-auth-uninstall/v1",
+              "schemaRef": "#/reports/xdoc-cli-auth-uninstall~1v1"
+            },
+            "stderr": {
+              "usage": "argument-process-diagnostics-and-recovery-hints-only"
+            },
+            "failureSemantics": "Argument failures use stderr and exit 2 before execution. Process failures may prevent a JSON report. Report-level rejection and uncertain output retain each action's existing exit codes and recovery hints."
+          }
+        },
+        "status": {
+          "usage": "xdoc auth status [--pretty]",
+          "options": [
+            {
+              "name": "pretty",
+              "type": "bool",
+              "description": "Pretty-print the JSON report",
+              "required": false,
+              "style": "flag"
+            }
+          ],
+          "positionals": [],
+          "acceptsInputPositional": false,
+          "argumentsSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "files"],
+            "properties": {
+              "action": {
+                "const": "status"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pretty": {
+                "type": "boolean"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "verify"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["license"],
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                },
+                "else": {
+                  "not": {
+                    "required": ["license"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "install"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 1
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ioContract": {
+            "input": {
+              "type": "none"
+            },
+            "callerClockOverride": "forbidden",
+            "taskAuthorization": "not-evaluated",
+            "filesystem": {
+              "usage": "read-write",
+              "description": "Queries local authorization state using full admission, which may update Clock state. A coherent query exits 0 even for missing, invalid, expired or admission-rejected Credentials; taskAuthorization remains not-evaluated.",
+              "initializesAuthorizationHost": true
+            },
+            "stdout": {
+              "format": "json",
+              "usage": "json-report-only",
+              "schemaVersion": "xdoc-cli-auth-status/v1",
+              "schemaRef": "#/reports/xdoc-cli-auth-status~1v1"
+            },
+            "stderr": {
+              "usage": "argument-process-diagnostics-and-recovery-hints-only"
+            },
+            "failureSemantics": "Argument failures use stderr and exit 2 before execution. Process failures may prevent a JSON report. Report-level rejection and uncertain output retain each action's existing exit codes and recovery hints."
+          }
+        },
+        "reset-clock": {
+          "usage": "xdoc auth reset-clock [--pretty]",
+          "options": [
+            {
+              "name": "pretty",
+              "type": "bool",
+              "description": "Pretty-print the JSON report",
+              "required": false,
+              "style": "flag"
+            }
+          ],
+          "positionals": [],
+          "acceptsInputPositional": false,
+          "argumentsSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action", "files"],
+            "properties": {
+              "action": {
+                "const": "reset-clock"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pretty": {
+                "type": "boolean"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "verify"
+                    }
+                  }
+                },
+                "then": {
+                  "required": ["license"],
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                },
+                "else": {
+                  "not": {
+                    "required": ["license"]
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "install"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 1
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "files": {
+                      "type": "array",
+                      "maxItems": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "ioContract": {
+            "input": {
+              "type": "none"
+            },
+            "callerClockOverride": "forbidden",
+            "taskAuthorization": "not-evaluated",
+            "filesystem": {
+              "usage": "delete-clock-anchor-only",
+              "description": "Removes only the fixed unauthenticated Clock anchor and retains the lock file; does not initialize authorization host ports. Stop tasks and daemons, calibrate time, reset, then restart and inspect status. Uncertain removal is an error.",
+              "initializesAuthorizationHost": false
+            },
+            "stdout": {
+              "format": "json",
+              "usage": "json-report-only",
+              "schemaVersion": "xdoc-cli-auth-reset-clock/v1",
+              "schemaRef": "#/reports/xdoc-cli-auth-reset-clock~1v1"
+            },
+            "stderr": {
+              "usage": "argument-process-diagnostics-and-recovery-hints-only"
+            },
+            "failureSemantics": "Argument failures use stderr and exit 2 before execution. Process failures may prevent a JSON report. Report-level rejection and uncertain output retain each action's existing exit codes and recovery hints."
+          }
+        }
+      },
+      "ioContract": {
+        "callerClockOverride": "forbidden",
         "stdout": {
           "format": "json",
           "usage": "json-report-only"
@@ -107051,349 +108102,14 @@
           "usage": "argument-process-diagnostics-and-recovery-hints-only"
         }
       },
-      "reportSchema": {
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://structurify.io/schemas/xdoc-cli-license-verification/v1.schema.json",
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "schemaVersion",
-          "status",
-          "outcome",
-          "verifiedAtUnixMs",
-          "reason",
-          "trustedFacts"
-        ],
-        "properties": {
-          "schemaVersion": {
-            "const": "xdoc-cli-license-verification/v1"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["success", "error"],
-            "strict": true
-          },
-          "outcome": {
-            "type": "string",
-            "enum": ["passed", "failed"],
-            "strict": true
-          },
-          "verifiedAtUnixMs": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          },
-          "reason": {
-            "type": "string",
-            "enum": [
-              "ok",
-              "cli_license_file_read_failed",
-              "cli_license_too_large",
-              "cli_license_json_invalid",
-              "cli_license_envelope_invalid",
-              "cli_license_payload_invalid",
-              "cli_license_schema_unsupported",
-              "cli_license_kind_unsupported",
-              "cli_license_key_not_found",
-              "cli_license_signature_invalid",
-              "cli_license_clock_invalid",
-              "cli_license_expired"
-            ],
-            "strict": true
-          },
-          "error": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["code", "message"],
-            "properties": {
-              "code": {
-                "type": "string",
-                "enum": [
-                  "auth_clock_reset_failed",
-                  "auth_clock_reset_outcome_uncertain",
-                  "auth_clock_reset_unsupported",
-                  "auth_config_invalid",
-                  "auth_install_failed",
-                  "auth_install_outcome_uncertain",
-                  "auth_storage_unavailable",
-                  "auth_uninstall_failed",
-                  "auth_uninstall_outcome_uncertain",
-                  "authorization_contract_invalid",
-                  "cli_clock_input_invalid",
-                  "cli_clock_tolerance_unsupported",
-                  "cli_license_clock_invalid",
-                  "cli_license_envelope_invalid",
-                  "cli_license_expired",
-                  "cli_license_file_read_failed",
-                  "cli_license_json_invalid",
-                  "cli_license_key_not_found",
-                  "cli_license_kind_unsupported",
-                  "cli_license_payload_invalid",
-                  "cli_license_schema_unsupported",
-                  "cli_license_signature_invalid",
-                  "cli_license_too_large",
-                  "clock_anomaly",
-                  "config_path_invalid",
-                  "credential_revoked",
-                  "device_pop_failed",
-                  "revocation_receipt_binding_mismatch",
-                  "revocation_receipt_envelope_invalid",
-                  "revocation_receipt_json_invalid",
-                  "revocation_receipt_key_not_found",
-                  "revocation_receipt_payload_invalid",
-                  "revocation_receipt_schema_unsupported",
-                  "revocation_receipt_signature_invalid",
-                  "revocation_receipt_target_unsupported",
-                  "revocation_receipt_too_large"
-                ],
-                "strict": true
-              },
-              "message": {
-                "type": "string"
-              }
-            }
-          },
-          "trustedFacts": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "schemaVersion",
-                  "licenseKind",
-                  "policyVersion",
-                  "keyId",
-                  "product",
-                  "customerId",
-                  "licenseId",
-                  "issuedAt",
-                  "expiresAt",
-                  "deviceBound",
-                  "capabilities",
-                  "entitlements",
-                  "ignoredUnknownFeatureIds"
-                ],
-                "properties": {
-                  "schemaVersion": {
-                    "const": "xdoc-cli-license/v1"
-                  },
-                  "licenseKind": {
-                    "type": "string",
-                    "enum": ["offline-license", "org-ci-license"],
-                    "strict": true
-                  },
-                  "policyVersion": {
-                    "const": "2026.08"
-                  },
-                  "keyId": {
-                    "type": "string"
-                  },
-                  "product": {
-                    "const": "xdoc-cli"
-                  },
-                  "customerId": {
-                    "type": "string"
-                  },
-                  "userId": {
-                    "type": "string"
-                  },
-                  "organizationId": {
-                    "type": "string"
-                  },
-                  "licenseId": {
-                    "type": "string"
-                  },
-                  "issuedAt": {
-                    "type": "string"
-                  },
-                  "expiresAt": {
-                    "type": "string"
-                  },
-                  "deviceBound": {
-                    "type": "boolean"
-                  },
-                  "capabilities": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": [
-                      "allowCI",
-                      "allowSharedServer",
-                      "allowServiceUse",
-                      "repairTrialProvenance",
-                      "maxConcurrency",
-                      "maxBatchSize"
-                    ],
-                    "properties": {
-                      "allowCI": {
-                        "type": "boolean"
-                      },
-                      "allowSharedServer": {
-                        "type": "boolean"
-                      },
-                      "allowServiceUse": {
-                        "type": "boolean"
-                      },
-                      "repairTrialProvenance": {
-                        "type": "boolean"
-                      },
-                      "maxConcurrency": {
-                        "oneOf": [
-                          {
-                            "type": "null"
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          }
-                        ]
-                      },
-                      "maxBatchSize": {
-                        "oneOf": [
-                          {
-                            "type": "null"
-                          },
-                          {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 9007199254740991
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "entitlements": {
-                    "type": "object",
-                    "propertyNames": {
-                      "type": "string",
-                      "enum": ["create", "modify", "convert", "refurbish", "translate"],
-                      "strict": true
-                    },
-                    "additionalProperties": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "required": [
-                        "enabled",
-                        "watermark",
-                        "maxTotalInputBytes",
-                        "maxSlides",
-                        "trial"
-                      ],
-                      "properties": {
-                        "enabled": {
-                          "type": "boolean"
-                        },
-                        "watermark": {
-                          "type": "boolean"
-                        },
-                        "maxTotalInputBytes": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 9007199254740991
-                            }
-                          ]
-                        },
-                        "maxSlides": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "integer",
-                              "minimum": 0,
-                              "maximum": 9007199254740991
-                            }
-                          ]
-                        },
-                        "trial": {
-                          "type": "boolean"
-                        }
-                      }
-                    }
-                  },
-                  "ignoredUnknownFeatureIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        },
-        "oneOf": [
-          {
-            "not": {
-              "required": ["error"]
-            },
-            "properties": {
-              "status": {
-                "const": "success"
-              },
-              "outcome": {
-                "const": "passed"
-              },
-              "reason": {
-                "const": "ok"
-              },
-              "trustedFacts": {
-                "type": "object"
-              }
-            }
-          },
-          {
-            "required": ["error"],
-            "properties": {
-              "outcome": {
-                "const": "failed"
-              },
-              "reason": {
-                "type": "string",
-                "enum": [
-                  "cli_license_file_read_failed",
-                  "cli_license_too_large",
-                  "cli_license_json_invalid",
-                  "cli_license_envelope_invalid",
-                  "cli_license_payload_invalid",
-                  "cli_license_schema_unsupported",
-                  "cli_license_kind_unsupported",
-                  "cli_license_key_not_found",
-                  "cli_license_signature_invalid",
-                  "cli_license_clock_invalid",
-                  "cli_license_expired"
-                ],
-                "strict": true
-              },
-              "trustedFacts": {
-                "type": "null"
-              }
-            }
-          }
-        ]
-      },
-      "reports": {
-        "verify": "xdoc-cli-license-verification/v1",
-        "install": "xdoc-cli-auth-install/v1",
-        "uninstall": "xdoc-cli-auth-uninstall/v1",
-        "status": "xdoc-cli-auth-status/v1",
-        "reset-clock": "xdoc-cli-auth-reset-clock/v1"
-      },
       "usageNotes": [
-        "verify uses --license and the host clock without Clock rollback admission or device proof-of-possession; reportSchema describes this action only.",
+        "Each subcommands.<action> entry publishes its complete options, positionals, argumentsSchema and ioContract; stdout.schemaRef resolves to the root reports registry.",
+        "verify uses --license and the host clock for diagnostics without Clock rollback admission or device proof-of-possession; it does not write local authorization state.",
         "install takes exactly one positional file and uses the same frozen bytes for full admission and atomic installation. Exit 3 is unreadable input, 4 is rejected Credential, and 9 is failed or uncertain publication.",
         "status completes with exit 0 for missing, invalid, expired or admission-rejected Credentials when a coherent query can be formed. taskAuthorization always remains not-evaluated.",
         "uninstall removes only the installed License; reset-clock removes only the fixed unauthenticated anchor. Neither initializes authorization host ports. Stop tasks and daemons, calibrate time, reset, then restart and inspect status.",
         "An uncertain publication or removal is an error. Inspect status and retry the same operation if needed; no automatic rollback is performed.",
-        "Local report schemas are registered in reports. No action permits caller time overrides or supplies authority for a concrete Feature Task."
+        "All five report schemas are registered in root reports. No action permits caller time overrides or supplies authority for a concrete Feature Task."
       ]
     },
     "pdf": {
@@ -107429,7 +108145,9 @@
           "name": "dpi",
           "type": "int",
           "description": "PNG render DPI for pdf render",
-          "required": false
+          "required": false,
+          "minimum": 1,
+          "maximum": 1200
         },
         {
           "name": "prefix",
@@ -107914,9 +108632,9 @@
               "type": "int",
               "description": "PNG render DPI for pdf render",
               "required": false,
-              "default": 144,
               "minimum": 1,
-              "maximum": 1200
+              "maximum": 1200,
+              "default": 144
             },
             {
               "name": "prefix",
@@ -114085,6 +114803,335 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://structurify.io/schemas/pptx-native-deckkit-catalog/v1.schema.json",
       "description": "Native deckkit catalog entries and their asset sources."
+    },
+    "xdoc-cli-license-verification/v1": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://structurify.io/schemas/xdoc-cli-license-verification/v1.schema.json",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "status",
+        "outcome",
+        "verifiedAtUnixMs",
+        "reason",
+        "trustedFacts"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "xdoc-cli-license-verification/v1"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error"],
+          "strict": true
+        },
+        "outcome": {
+          "type": "string",
+          "enum": ["passed", "failed"],
+          "strict": true
+        },
+        "verifiedAtUnixMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "cli_license_file_read_failed",
+            "cli_license_too_large",
+            "cli_license_json_invalid",
+            "cli_license_envelope_invalid",
+            "cli_license_payload_invalid",
+            "cli_license_schema_unsupported",
+            "cli_license_kind_unsupported",
+            "cli_license_key_not_found",
+            "cli_license_signature_invalid",
+            "cli_license_clock_invalid",
+            "cli_license_expired"
+          ],
+          "strict": true
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message"],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "auth_clock_reset_failed",
+                "auth_clock_reset_outcome_uncertain",
+                "auth_clock_reset_unsupported",
+                "auth_config_invalid",
+                "auth_install_failed",
+                "auth_install_outcome_uncertain",
+                "auth_storage_unavailable",
+                "auth_uninstall_failed",
+                "auth_uninstall_outcome_uncertain",
+                "authorization_contract_invalid",
+                "cli_clock_input_invalid",
+                "cli_clock_tolerance_unsupported",
+                "cli_license_clock_invalid",
+                "cli_license_envelope_invalid",
+                "cli_license_expired",
+                "cli_license_file_read_failed",
+                "cli_license_json_invalid",
+                "cli_license_key_not_found",
+                "cli_license_kind_unsupported",
+                "cli_license_payload_invalid",
+                "cli_license_schema_unsupported",
+                "cli_license_signature_invalid",
+                "cli_license_too_large",
+                "clock_anomaly",
+                "config_path_invalid",
+                "credential_revoked",
+                "device_pop_failed",
+                "revocation_receipt_binding_mismatch",
+                "revocation_receipt_envelope_invalid",
+                "revocation_receipt_json_invalid",
+                "revocation_receipt_key_not_found",
+                "revocation_receipt_payload_invalid",
+                "revocation_receipt_schema_unsupported",
+                "revocation_receipt_signature_invalid",
+                "revocation_receipt_target_unsupported",
+                "revocation_receipt_too_large"
+              ],
+              "strict": true
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        },
+        "trustedFacts": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "schemaVersion",
+                "licenseKind",
+                "policyVersion",
+                "keyId",
+                "product",
+                "customerId",
+                "licenseId",
+                "issuedAt",
+                "expiresAt",
+                "deviceBound",
+                "capabilities",
+                "entitlements",
+                "ignoredUnknownFeatureIds"
+              ],
+              "properties": {
+                "schemaVersion": {
+                  "const": "xdoc-cli-license/v1"
+                },
+                "licenseKind": {
+                  "type": "string",
+                  "enum": ["offline-license", "org-ci-license"],
+                  "strict": true
+                },
+                "policyVersion": {
+                  "const": "2026.08"
+                },
+                "keyId": {
+                  "type": "string"
+                },
+                "product": {
+                  "const": "xdoc-cli"
+                },
+                "customerId": {
+                  "type": "string"
+                },
+                "userId": {
+                  "type": "string"
+                },
+                "organizationId": {
+                  "type": "string"
+                },
+                "licenseId": {
+                  "type": "string"
+                },
+                "issuedAt": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "type": "string"
+                },
+                "deviceBound": {
+                  "type": "boolean"
+                },
+                "capabilities": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "allowCI",
+                    "allowSharedServer",
+                    "allowServiceUse",
+                    "repairTrialProvenance",
+                    "maxConcurrency",
+                    "maxBatchSize"
+                  ],
+                  "properties": {
+                    "allowCI": {
+                      "type": "boolean"
+                    },
+                    "allowSharedServer": {
+                      "type": "boolean"
+                    },
+                    "allowServiceUse": {
+                      "type": "boolean"
+                    },
+                    "repairTrialProvenance": {
+                      "type": "boolean"
+                    },
+                    "maxConcurrency": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      ]
+                    },
+                    "maxBatchSize": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      ]
+                    }
+                  }
+                },
+                "entitlements": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "enum": ["create", "modify", "convert", "refurbish", "translate"],
+                    "strict": true
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "enabled",
+                      "watermark",
+                      "maxTotalInputBytes",
+                      "maxSlides",
+                      "trial"
+                    ],
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "watermark": {
+                        "type": "boolean"
+                      },
+                      "maxTotalInputBytes": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        ]
+                      },
+                      "maxSlides": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        ]
+                      },
+                      "trial": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                },
+                "ignoredUnknownFeatureIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "not": {
+            "required": ["error"]
+          },
+          "properties": {
+            "status": {
+              "const": "success"
+            },
+            "outcome": {
+              "const": "passed"
+            },
+            "reason": {
+              "const": "ok"
+            },
+            "trustedFacts": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "required": ["error"],
+          "properties": {
+            "outcome": {
+              "const": "failed"
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "cli_license_file_read_failed",
+                "cli_license_too_large",
+                "cli_license_json_invalid",
+                "cli_license_envelope_invalid",
+                "cli_license_payload_invalid",
+                "cli_license_schema_unsupported",
+                "cli_license_kind_unsupported",
+                "cli_license_key_not_found",
+                "cli_license_signature_invalid",
+                "cli_license_clock_invalid",
+                "cli_license_expired"
+              ],
+              "strict": true
+            },
+            "trustedFacts": {
+              "type": "null"
+            }
+          }
+        }
+      ]
     },
     "xdoc-cli-auth-install/v1": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",

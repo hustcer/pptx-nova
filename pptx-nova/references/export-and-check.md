@@ -33,6 +33,15 @@ Use only `reliable` entries as machine-checkable facts. Treat `uncertain` and
 the canonical handoff; semantic diff and PNG preview remain advisory and never
 authorize delivery.
 
+For schema validation, resolve the diff action's `ioContract.stdout.schemaRef` from the same
+runtime's full schema (`commands.pptx.diffReportSchema`). `pptx-diff/v1` has distinct `detail`
+branches: summary slide rollups are not full `shapeChanges[]` evidence. Do not pad omitted
+fields with null, mix branch fields, or drop unknown fields to make validation pass. Fixed
+objects are closed; category/style maps permit dynamic keys with typed counts. Full shape
+bounds can contain signed extents from malformed source geometry: retain them as diagnostics,
+not as permission to author negative sizes. Schema acceptance proves report shape only;
+the existing reliability, scope and delivery gates still apply.
+
 ## Unified Visual Evidence (Canonical Agent Gate)
 
 `xdoc pptx visual-audit` is the only xdoc report whose `decision` is consumed
@@ -158,6 +167,14 @@ a specialized semantic, Edit Contract, Translation, Refurbish, or Office gate
 with this manifest.
 
 ## PPTX PNG Preview
+
+Read `options[]` for the exact rendering action before choosing `--dpi`. The current CLI
+accepts integers from 1 through 1200 for `convert`, `pdf render`, `pptx preview`,
+`pptx visual-audit` and `pptx contact-diff`. Their defaults are 144 except contact-diff's 72;
+skill runners may explicitly choose other values, such as 192 for comparison evidence.
+Preserve those explicit workflow settings. The shared parent option is not an action's default.
+A legal DPI is not a guarantee that a large deck/contact sheet fits resource limits. Use
+normal workflow DPI and chunking for real decks; test extreme DPI only on tiny fixtures.
 
 For PPTX visual review, use `xdoc pptx preview` as the default PNG/contact-sheet
 path:
@@ -479,7 +496,9 @@ kerning, autofit, CJK wrapping, mixed-size line metrics, Office math, gradients,
 shadows, and partial 3D rendering can change pixels without a PPTX edit. Old
 screenshots remain historical evidence. The bundled page cache binds PPTX bytes,
 DPI, and renderer bytes; retain that binding and use a fresh cache when fonts or
-the rendering environment change.
+the rendering environment change. Supported dynamic short-date fields also use the operation's
+local calendar date and effective language. Record date/timezone and use fresh evidence/cache
+after a date or timezone change; unchanged PPTX bytes do not prove unchanged rendered dates.
 
 For a before/after edit comparison, render both decks with the same current
 binary, fonts, scope, and DPI. Otherwise a renderer change can masquerade as an

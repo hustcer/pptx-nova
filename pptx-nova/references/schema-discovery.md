@@ -50,6 +50,31 @@ selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --mode o
 
 ## 典型 Agent 用法
 
+### Command / report 合同不在 op 投影里
+
+`--mode index` / `--mode ops` 和 skill 的 capability snapshot 用于渐进发现，不包含完整
+auth、渲染参数或报告校验合同。需要这些内容时，将本次运行时的 `xdoc schema --mode full`
+保存到 run 目录，再局部读取 `commands.<command>.subcommands.<action>` 的参数和
+`ioContract.stdout.schemaRef`。按 JSON Pointer 解引用到同一份 schema；`~1` 表示 `/`，
+`~0` 表示 `~`。不要从报告名称猜引用位置：diff 指向 `commands.pptx.diffReportSchema`，
+auth 的各动作指向根 `reports`。
+
+auth 通过 `commands.auth.subcommands.<action>` 披露 `usage`、`options`、`positionals`、
+`acceptsInputPositional`、`argumentsSchema` 和 `ioContract`；旧的
+`commands.auth.reportSchema` / `commands.auth.reports` 已移除。CLI 调用方式没有因此改变：
+
+| action        | 输入                                | I/O 与结果边界                                                                                   |
+| ------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `verify`      | `xdoc auth verify --license <file>` | 只读指定文件，做诊断校验，不完成任务授权或本地安装准入。                                         |
+| `install`     | `xdoc auth install <file>`          | 恰好一个位置文件，禁止 `--license`；可写本地配置和 Clock 状态。                                  |
+| `status`      | `xdoc auth status`                  | 无文件参数；准入可能更新 Clock 状态，不是纯只读查询。退出 0 不代表 Credential 健康或任务获授权。 |
+| `uninstall`   | `xdoc auth uninstall`               | 无文件参数；只删除已安装 License。                                                               |
+| `reset-clock` | `xdoc auth reset-clock`             | 无文件参数；只删除固定 Clock anchor，保留锁文件；按实际恢复指引执行。                            |
+
+这些动作的 stdout 本身是 JSON report，不追加 `--json`。参数或进程失败可能只有 stderr，
+不能假设每次失败都有 JSON。认证维护不是普通 PPTX 任务的自动准备步骤；仅在任务需要时
+使用相应动作。测试这些写操作时用新建的 `XDOC_CONFIG_PATH` **目录**隔离本机配置。
+
 ### 1. 初次进 deck → 取 op 索引
 
 ```bash

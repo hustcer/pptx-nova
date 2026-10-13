@@ -112,9 +112,11 @@ Read only the matching diagnostic when these symptoms occur:
   does not borrow another same-type shape. Omitted indices and the master-only
   sentinel have different inheritance. Preserve explicit zero-size frames and
   global text defaults. See `inspect-and-edit.md` before patching identity/fonts.
-- **Columns/line breaks:** text boxes and ordinary shapes retain authored count,
-  gap and horizontal group scaling. Web/PDF fill the authored usable height before
-  advancing; ordinary overflow can grow a shared column block, whereas explicit
+- **Columns/line breaks:** text boxes and ordinary shapes retain authored count
+  and gap. Group transforms change geometry, but absolute body insets, column gaps,
+  paragraph indents, run tracking and bullet metrics remain absolute; do not scale
+  those values again to compensate for a resized group. Web/PDF fill the authored
+  usable height before advancing; ordinary overflow can grow a shared column block, whereas explicit
   clip/ellipsis keeps the authored height. Check all columns, paragraph gaps and
   vertical alignment at final fonts. A line can fit even when its trailing
   paragraph gap does not; do not move that line to the next column or enlarge the
@@ -167,6 +169,53 @@ Read only the matching diagnostic when these symptoms occur:
   interactive states separately, including click/key isolation from slide navigation.
   Static poster evidence does not prove playback or timing support; do not replace
   the poster to compensate for old browser chrome.
+
+## Current-runtime checks after an upgrade
+
+Use these only for the affected content; compare original and candidate with the same runtime.
+
+- **Text inheritance and fields:** list counters depend on level and effective numbering
+  type/start; advancing a parent resets child counters. List-marker paint can follow the first
+  run. Explicit normal weight, underline-off and strike-off differ from omission; double
+  underline and double strike are independent. Placeholders paint at their owning level, so a
+  removed duplicate is not necessarily lost content. Supported short-date fields refresh from
+  one operation-local calendar date and effective language; cached field text, ordinary text
+  and displayed date are different evidence. Record date/timezone when comparing renders and
+  keep the native field unless the user asks to replace it with static text.
+- **Clipping and line breaks:** horizontal overflow is independent of vertical overflow,
+  including inherited settings and rotated frames. Verify visible text and link hit regions in
+  the local text frame; preserve surrounding fill/outline and sibling objects. Internal colons
+  stay attached during wrapping. Inspect whole emoji clusters (ZWJ sequences, modifiers and
+  flags), including styled-run boundaries, rather than replacing missing components with
+  separate glyphs. PDF bitmap fallback and Web font fallback need their own evidence.
+- **SmartArt:** complete cached pyramids may fit a resized host only when the current parser
+  admits the cache's identity, layout and ordering. Incomplete or ambiguous caches remain
+  preserved. Axis-aligned cached text frames can overhang shape bounds and take precedence over
+  preset guides; unsupported transforms need their fallback. Supported organization layouts
+  fit implicit margins with the fitted font, while explicit body margins stay absolute through
+  nested/nonuniform group transforms. Do not reset margins or rewrite cache XML from a preview.
+- **Chart data and formatting:** retain blank stacked-line contributions and error-slot
+  continuity, histogram raw observations/bin count and per-bin count labels, hierarchy depth
+  and authored leaf labels. Number-format quotes/escapes, literal percent signs, Unicode
+  currency affixes, zero/negative sections and standalone `General` have distinct meanings;
+  compare displayed labels with underlying values, including large numbers and rounding ties.
+  Do not rewrite values or format codes to imitate an old label. Radar scale/legend layout,
+  independent fill alpha, stock up/down defaults, point-specific circular/scatter paint,
+  axis-title space, negative-value headroom and log/reversed surface axes also affect pixels.
+  Omitted 3D bar views use family-specific defaults; explicit camera/paint remains distinct.
+- **Tables:** regional style inheritance and shared grid resolution precede cell overrides;
+  an absent border can recover the default grid while explicit no-fill remains intentional.
+  Check merged perimeters and explicit overrides before adding borders or replacing the table.
+- **Equations:** preserve explicit n-ary limit placement, display-style operator size,
+  Word run properties inside OMML, singleton child collections and equation-array delimiter
+  ownership. Missing-glyph fallback metrics can change bounds across renderers. Rendering an
+  imported equation does not expand the native formula-authoring subset in `formulas.md`.
+- **Paint and playback:** picture opacity/outward outlines, inherited stroke geometry,
+  unequal-ellipse arc angles, curved/short-path markers, physical pattern sampling, tile
+  mirroring, gradient weights and rounded/reflection clips can change without source edits.
+  SVG non-scaling strokes use the assigned viewport. Check these at matched scale. In Web
+  Presenter, test authored navigation, pending animation builds, available-frame fitting and
+  a fresh-show history reset separately; a static export cannot prove those interactions.
 
 ## Chart, SmartArt and effect regressions
 

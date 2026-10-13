@@ -71,6 +71,8 @@ use an existing fallback, and never disable new xdoc capabilities only because t
 For Agent transport routing, read the exact contracts under `capabilities.agentTransports`, including
 `mcp.contract`; command presence alone is insufficient and unknown contracts fail closed. MCP replaces
 only disclosed adapter calls, never workflow gates. Read `references/daemon-sessions.md` for details.
+For auth diagnostics or report validation, use the action-specific schema and report reference in
+`references/schema-discovery.md`; the compact capability snapshot is not a complete command contract.
 
 ### Run Reuse and Isolation
 
@@ -134,7 +136,8 @@ Use these only to choose the entry reference; the routing table owns details.
   different slide sizes, and the workflow must not invent `opResults` or silently fit donor geometry.
 - **Export / diff / preview / check**: use `export-and-check.md`. Run semantic diff once on a stable
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
-  visual-evidence decision remains the delivery authority.
+  visual-evidence decision remains the delivery authority. Discover each action's DPI bounds/default;
+  after upgrades or calendar changes, use fresh rendering evidence as described in `fidelity-diagnosis.md`.
 - **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
   required; an unavailable optional evidence route is disclosed risk, not invented proof.
 - **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `inspect-and-edit.md`.

@@ -57,6 +57,36 @@ semantic normalizer：经典 Chart 读取 `data`，ChartEx 读取 `dataEx`，并
 `deck_lock.slides[].chart.semanticSource` / `source` / `dataSource`；不要为了消除假警告而
 给 `add-chart` 伪造 schema 不存在的 `source` 字段。
 
+## 数值精度、格式回退与区间验证
+
+区分原始数据、PPTX 保存的数据、显示标签。`inspect` 的 chart 类型/外框和轻量语义审计
+不能证明全部数值一致；精度敏感任务可用 `xdoc convert <candidate.pptx> --to json
+--output <run-dir>/chart-data.json` 回读已披露的 series/points，与原始输入逐项核对。
+该导出是数据投影，不是完整 chart XML、轴声明或 embedded workbook 等价证明；未披露的
+属性仍需针对原生部件检查。不要把 PDF 提取的格式化标签当作原始数据。
+
+- 当前 Web/PDF 的普通数值回退保留有限 binary64 值，不再为缩短标签截掉有效数字。
+  `General`、空格式和不支持的格式可能走该回退；例如 `1234567890123` 与
+  `1.23456789012345` 应保留，而显式 `0.00` 仍可显示为 `1.23`。格式回退不是完整
+  Excel 格式支持，也不保证保留输入的十进制拼写。超过 binary64 精度的数据应在进入
+  JSON number 前保留原始文本并明确转换限制，不能宣称已经丢失的位数可被渲染器恢复。
+- 对升级后变长的标签，先核对数值与格式，再检查实际渲染的遮挡。只有任务允许改变
+  显示格式时才设置 `numberFormat` 或轴 `displayUnits`；保留底层数据，不做预先舍入。
+- 直方图保留原始重复样本和区间闭合规则。有限样本的跨度/偏移也可能在中间运算溢出，
+  如 `[-1e308, 1e308]`；当前渲染器可保持有限区间端点。检查标签没有 `NaN`/`Infinity`，
+  并核对每箱计数与总和，不能仅因图像存在就判定通过。不要手工缩放或截断观测值。
+- 曲面图的 legend 表示高度区间，不是空间系列名。自动边界可消除浮点噪声造成的多余
+  色带，例如范围 `0..0.3`、`majorUnit=0.1` 应有三个区间；作者显式设置的
+  `max=0.30000000000000004` 则保留最后的极小区间。大数偏移下的窄区间、包含真实
+  观测值的尾区间也不能按相对容差合并。反转轴时同时核对区间顺序与颜色对应，勿倒排
+  原始数据来修复图例；数值不同的边界即使格式化后同名，也仍是不同边界。
+
+仅对任务相关的边界制作小型验证页：大整数、长小数与固定格式对照；跨正负极值的
+直方图；自动/显式/反转轴的 surface 与 surface-3d。用同一运行时、字体和冻结日期生成
+canonical PDF/PNG，提取 PDF 标签作辅助断言，再检查实际图像。保留数据回读、区间/计数
+核对与渲染证据；按既有 ChartEx/3D 规则补 PowerPoint 证据。这些改进不扩大 authoring
+能力，也不把 xdoc 自身的 PDF/JSON 交叉检查升级为 Office 保真认证。
+
 ## Native diagram/table presets
 
 常见商务图示优先用 `add-slide.recipe` preset，而不是手算几十个 `add-shape` 坐标。
@@ -829,7 +859,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -921,7 +951,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -950,7 +980,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1227,7 +1257,7 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   scriptable PowerPoint + Nushell + `mutool` evidence route is available:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

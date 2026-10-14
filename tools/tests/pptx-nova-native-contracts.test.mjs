@@ -20,6 +20,7 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
 import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-choreography.mjs'
+import { verifyDiffEvidence } from '../../pptx-nova/scripts/lib/diff-evidence.mjs'
 import {
   createRunnerRuntime,
   summarizePhaseError,
@@ -75,7 +76,7 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     )
     return path
   }
-  const run = (args, expectedCode = null, executable = binary) => {
+  const run = (args, expectedCode = null, executable = binary, { json = true } = {}) => {
     const result = spawnSync(executable, args, {
       cwd: directory,
       env,
@@ -93,7 +94,7 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     })
     assert.equal(result.error, undefined)
     assert.equal(result.signal, null)
-    const report = JSON.parse(result.stdout)
+    const report = json ? JSON.parse(result.stdout) : result.stdout
     if (typeof expectedCode === 'number') {
       assert.equal(result.status, expectedCode, result.stdout + result.stderr)
     } else if (expectedCode) {
@@ -347,6 +348,201 @@ nativeTest(
       JSON.stringify(manifest.findings),
     )
     assert.equal(manifest.decision.action, 'proceed')
+  },
+  { visual: true },
+)
+
+nativeTest(
+  'chart precision survives creation, format edits and canonical PDF rendering',
+  (t) => {
+    const s = scenario(t, { useInstalledAuthorization: true })
+    const fieldDate = '2026-10-14'
+    const surfaceData = {
+      categories: ['A', 'B', 'C'],
+      series: [
+        { name: 'Front', values: [0, 0.1, 0.2] },
+        { name: 'Back', values: [0.1, 0.2, 0.3] },
+      ],
+    }
+    const cases = [
+      ...[1234567890123, 1.23456789012345, 1.23456789012345].map((value, index) => ({
+        name: ['General integer', 'General fraction', 'Fixed fraction'][index],
+        kind: 'column',
+        data: { categories: ['A'], series: [{ name: 'Value', values: [value] }] },
+        format: 'General',
+      })),
+      {
+        name: 'Finite histogram',
+        kind: 'histogram',
+        dataEx: { values: [-1e308, -5e307, 0, 5e307, 1e308], binCount: 2 },
+      },
+      ...['surface', 'surface-3d'].flatMap((kind) =>
+        [false, true].map((reverseOrder) => ({
+          name: `${kind} ${reverseOrder ? 'reversed' : 'automatic'}`,
+          kind,
+          data: surfaceData,
+          scale: { majorUnit: 0.1, reverseOrder },
+        })),
+      ),
+      {
+        name: 'Authored tail',
+        kind: 'surface',
+        data: surfaceData,
+        scale: { min: 0, max: 0.30000000000000004, majorUnit: 0.1 },
+      },
+    ]
+    const ops = cases.flatMap(({ name, kind, data, dataEx, format, scale }, slide) => [
+      { op: 'add-slide', layout: 'blank' },
+      {
+        op: 'add-text-box',
+        slide,
+        name: 'Caption',
+        x: '0.65in',
+        y: '0.55in',
+        w: '12in',
+        h: '0.5in',
+        text: name,
+      },
+      {
+        op: 'add-chart',
+        slide,
+        name: 'Chart',
+        kind,
+        x: '0.65in',
+        y: '1.3in',
+        w: '12in',
+        h: '5.5in',
+        ...(data ? { data, legend: 'right' } : { dataEx }),
+      },
+      ...(format
+        ? [
+            {
+              op: 'set-chart',
+              slide,
+              shape: { name: 'Chart' },
+              dataLabels: [
+                {
+                  showValue: true,
+                  numberFormat: format,
+                  position: 'outside-end',
+                  font: { name: 'Arial', size: '14pt' },
+                },
+              ],
+            },
+          ]
+        : []),
+      ...(scale
+        ? [
+            {
+              op: 'set-chart',
+              slide,
+              shape: { name: 'Chart' },
+              axes: [{ axis: 'value', scale }],
+            },
+          ]
+        : []),
+    ])
+    s.apply(ops, undefined, { dryRun: true })
+    const source = s.apply(ops).output
+    const sourceBytes = readFileSync(source)
+    const edits = [
+      { op: 'set-text-frame', slide: 0, shape: { name: 'Caption' }, text: 'Verified integer' },
+      {
+        op: 'set-chart',
+        slide: 2,
+        shape: { name: 'Chart' },
+        dataLabels: [{ showValue: true, numberFormat: '0.00', position: 'outside-end' }],
+      },
+    ]
+    s.apply(edits, source, { dryRun: true })
+    const candidate = s.apply(edits, source).output
+    const charts = (input, name) => {
+      const path = join(s.directory, `${name}-data.json`)
+      s.run(
+        ['convert', input, '--to', 'json', '--output', path, '--field-date', fieldDate, '--quiet'],
+        null,
+        binary,
+        { json: false },
+      )
+      return JSON.parse(readFileSync(path, 'utf8')).presentation.slides.map(
+        (slide) => slide.elements.find((element) => element.kind === 'chart').chart,
+      )
+    }
+    const before = charts(source, 'source')
+    const after = charts(candidate, 'candidate')
+    assert.deepEqual(after, before, 'Display formatting must not change the source data')
+    for (const [index, item] of cases.entries()) {
+      assert.deepEqual(
+        after[index].series.map((series) => series.points.map((point) => point.y)),
+        item.data ? item.data.series.map((series) => series.values) : [item.dataEx.values],
+        item.name,
+      )
+    }
+    const inspected = s.inspect(candidate)
+    assert.deepEqual(
+      inspected.slides.map(
+        (slide) => slide.shapes.find((shape) => shape.name === 'Chart').chart.kind,
+      ),
+      cases.map((item) => item.kind),
+    )
+    const summary = s.run([
+      'pptx',
+      'diff',
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--detail',
+      'summary',
+      '--output',
+      join(s.directory, 'diff-full.json'),
+      '--json',
+    ])
+    s.write('diff-summary.json', summary)
+    const full = verifyDiffEvidence(summary, source, candidate)
+    assert.equal(full.slides.length, cases.length)
+    assert.ok(full.summary.reliableChanges > 0)
+    assert.deepEqual(readFileSync(source), sourceBytes)
+    const output = join(s.directory, 'visual-evidence')
+    const manifest = s.run([
+      'pptx',
+      'visual-audit',
+      '--candidate',
+      candidate,
+      '--visual-mode',
+      'create',
+      '--field-date',
+      fieldDate,
+      '--output-dir',
+      output,
+      '--json',
+    ])
+    assert.equal(manifest.renderContext.fieldDate, fieldDate)
+    assert.equal(manifest.decision.action, 'proceed', JSON.stringify(manifest.findings))
+    assert.equal(manifest.artifacts.filter((a) => a.mimeType === 'image/png').length, cases.length)
+    const pdf = manifest.artifacts.find((a) => a.mimeType === 'application/pdf')
+    const text = s.run(['pdf', 'extract-text', join(output, pdf.path), '--json'])
+    s.write('pdf-text.json', text)
+    assert.equal(text.pageCount, cases.length)
+    const lines = text.pages.map((page) => page.text.split(/\r?\n/))
+    assert.ok(lines[0].includes('1234567890123'))
+    assert.ok(lines[1].includes('1.23456789012345'))
+    assert.ok(lines[2].includes('1.23'))
+    assert.ok(!lines[2].includes('1.23456789012345'))
+    assert.match(text.pages[3].text, /\[-1e\+308, 0\]/)
+    assert.match(text.pages[3].text, /\(0, 1e\+308\]/)
+    assert.doesNotMatch(text.pages[3].text, /NaN|Infinity/)
+    const bands = ['0.2–0.3', '0.1–0.2', '0–0.1']
+    for (const index of [4, 5, 6, 7]) {
+      assert.deepEqual(
+        lines[index].filter((line) => line.includes('–')),
+        index % 2 ? [...bands].reverse() : bands,
+      )
+    }
+    assert.deepEqual(
+      lines[8].filter((line) => line.includes('–')),
+      ['0.3–0.30000000000000004', ...bands],
+    )
   },
   { visual: true },
 )

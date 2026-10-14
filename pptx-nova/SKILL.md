@@ -146,6 +146,9 @@ Use these only to choose the entry reference; the routing table owns details.
   after upgrades or calendar changes, use fresh rendering evidence as described in `fidelity-diagnosis.md`.
 - **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
   required; an unavailable optional evidence route is disclosed risk, not invented proof.
+- **Chart numeric precision**: follow `charts.md`'s numeric checks for long labels, extreme
+  histogram ranges and narrow surface bands. Verify source values separately from displayed
+  formatting; retain explicit bounds and real tail intervals when automatic axes change.
 - **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `inspect-and-edit.md`.
   Preserve owner-bound XML facts during neighboring edits; render improvements do not grant
   authoring support or PowerPoint fidelity. Chart 3D and embedded models have separate contracts.

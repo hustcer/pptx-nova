@@ -205,6 +205,10 @@ Use these only for the affected content; compare original and candidate with the
   independent fill alpha, stock up/down defaults, point-specific circular/scatter paint,
   axis-title space, negative-value headroom and log/reversed surface axes also affect pixels.
   Omitted 3D bar views use family-specific defaults; explicit camera/paint remains distinct.
+  Lossless numeric fallback can lengthen labels without changing data. Extreme finite histogram
+  samples must keep finite bounds/counts; automatic surface endpoints may lose phantom bands,
+  while explicit or observation-bearing narrow tails remain. Use `charts.md`'s numeric checks
+  before rounding values, pinning automatic axes or merging apparently equal legend labels.
 - **Tables:** regional style inheritance and shared grid resolution precede cell overrides;
   an absent border can recover the default grid while explicit no-fill remains intentional.
   Check merged perimeters and explicit overrides before adding borders or replacing the table.

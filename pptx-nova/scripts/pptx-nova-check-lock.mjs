@@ -26,7 +26,7 @@ const IMAGE_FIT_POLICIES = new Set(['cover', 'contain', 'no-crop', 'crop-safe'])
 const SLIDE_RHYTHM_VALUES = ['anchor', 'dense', 'breathing', 'appendix']
 const SLIDE_RHYTHMS = new Set(SLIDE_RHYTHM_VALUES)
 const VISUAL_DENSITIES = new Set(['low', 'medium', 'high'])
-const CHART_LEGENDS = new Set(['right', 'left', 'top', 'bottom', 'corner', 'none'])
+const CHART_LEGENDS = new Set(['right', 'left', 'top', 'bottom', 'top-right'])
 const CHART_LABEL_POSITIONS = new Set([
   'above',
   'below',
@@ -644,7 +644,7 @@ function checkChartSemantic(op, index, intent, errors, warnings) {
     push(warnings, warning.code, `${label}: ${warning.message}`)
   }
 
-  if (op.legend && !CHART_LEGENDS.has(String(op.legend))) {
+  if (Object.hasOwn(op, 'legend') && !CHART_LEGENDS.has(op.legend)) {
     push(
       errors,
       'chart-legend-invalid',

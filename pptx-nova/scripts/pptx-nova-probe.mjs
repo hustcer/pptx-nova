@@ -639,7 +639,8 @@ function compactFailure(result) {
 }
 
 function createReport(args) {
-  const schemaRun = run(args.xdocBin, ['schema'])
+  let schemaRun = run(args.xdocBin, ['schema', '--mode', 'capabilities'])
+  if (!schemaRun.ok || !parseJson(schemaRun.stdout)) schemaRun = run(args.xdocBin, ['schema'])
   const schema = schemaRun.ok ? parseJson(schemaRun.stdout) : null
   let version = typeof schema?.version === 'string' ? schema.version : null
   let fallbackVersion = null
@@ -759,9 +760,15 @@ function createReport(args) {
         patchCapabilityVersion: patchSchema.capabilityVersion ?? null,
         capabilityTruthVersion: capabilityTruth.schemaVersion,
         schemaSha256: schema ? createHash('sha256').update(schemaRun.stdout).digest('hex') : null,
+        schemaDigest: schema?.disclosure?.schemaDigest ?? null,
       },
       disclosure: {
-        source: schema ? 'xdoc schema' : 'xdoc --help fallback',
+        source:
+          schema?.disclosure?.mode === 'capabilities'
+            ? 'xdoc schema --mode capabilities'
+            : schema
+              ? 'xdoc schema'
+              : 'xdoc --help fallback',
         scope: schema ? 'runtime-schema-name-index' : 'unstructured-fallback',
         notAnAllowlist: true,
         missingMeans: 'undisclosed, not unsupported',
@@ -777,6 +784,8 @@ function createReport(args) {
           featureTruth:
             'read xdoc-capabilities.json#capabilities.capabilityTruth.entries by exact feature/subset; when axes is non-null, route create/edit/inspect/preserve/render/verify independently and follow each axis status, limits, Office target, and evidence ids',
           commandHelp: 'xdoc <command...> --help',
+          commandSchema: 'xdoc schema --command <command.action>',
+          reportSchema: 'xdoc schema --report <schemaVersion>',
           agentTransport:
             'read xdoc-capabilities.json#capabilities.agentTransports; use the exact disclosed daemon, JSON-RPC, or MCP contract rather than inferring transport behavior from command presence',
           selectorEvidence: 'inspect output -> op schema -> dry-run suggestions',

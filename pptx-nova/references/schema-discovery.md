@@ -7,6 +7,10 @@ xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema
 
 ```bash
 xdoc schema                          # 完整 schema（贵）
+xdoc schema --mode capabilities      # 工作流能力清单，不含完整校验树
+xdoc schema --command auth.status    # 单命令合同及其报告引用闭包
+xdoc schema --command pptx.preview   # 渲染参数与报告合同
+xdoc schema --report pptx-diff/v1     # 按 schemaVersion 取报告合同
 xdoc schema --mode index                  # 只 op 名 + summary + required/optional 字段 + constraints
 xdoc schema --mode ops --ops add-text-box         # 单个 op 完整 jsonSchema
 xdoc schema --mode ops --ops add-slide,add-chart   # 多个 op
@@ -19,6 +23,8 @@ xdoc schema --minimal                # 删 verbose 字段（与上面任一组�
 约束：视图由 `--mode` 明说，不靠优先级推断——`--ops`/`--fields` 只属于 `--mode ops`，
 用在别的 mode 上直接报错。`--fields` 的 required 字段会自动保留，未知字段直接报错；
 `--defs` 只用于字段投影，因此也要求 `--fields`，默认值为 `full`。
+`--command` 与 `--report` 互斥，也不能与 `--mode`、`--ops`、`--fields`、`--defs`
+混用；两者都支持 `--minimal`。命令名使用点分路径，报告名使用确切的 `schemaVersion`。
 
 能力探测同时读取 `schemaDisclosure.modes` 和 `schemaDisclosure.refinements`；
 新版将 `--fields` / `--defs` 放在 refinements，旧版可能放在 modes。
@@ -53,11 +59,16 @@ selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --mode o
 ### Command / report 合同不在 op 投影里
 
 `--mode index` / `--mode ops` 和 skill 的 capability snapshot 用于渐进发现，不包含完整
-auth、渲染参数或报告校验合同。需要这些内容时，将本次运行时的 `xdoc schema --mode full`
-保存到 run 目录，再局部读取 `commands.<command>.subcommands.<action>` 的参数和
+auth、渲染参数或报告校验合同。需要这些内容时，将 `xdoc schema --command <command.action>`
+或 `xdoc schema --report <schemaVersion>` 保存到 run 目录，再读取原位置的参数和
 `ioContract.stdout.schemaRef`。按 JSON Pointer 解引用到同一份 schema；`~1` 表示 `/`，
 `~0` 表示 `~`。不要从报告名称猜引用位置：diff 指向 `commands.pptx.diffReportSchema`，
 auth 的各动作指向根 `reports`。
+
+定向视图保留原始路径和可达的报告合同，不需要再下载完整 schema。
+`disclosure.schemaDigest` 标识同一运行时的完整合同；不要拼接来自不同 digest 的片段。
+`--mode capabilities` 仅供工作流能力发现，`validationSchema=false` 明确禁止将其当成
+完整参数校验树。probe 优先使用此视图；定向查询应按实际任务读取。
 
 auth 通过 `commands.auth.subcommands.<action>` 披露 `usage`、`options`、`positionals`、
 `acceptsInputPositional`、`argumentsSchema` 和 `ioContract`；旧的

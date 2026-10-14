@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { ensureRenderContext } from './lib/render-context.mjs'
 import {
   copyFileSync,
   existsSync,
@@ -310,6 +311,7 @@ function validatePaths(args) {
 
 function artifactPaths(runDir) {
   return {
+    renderContext: join(runDir, 'render-context.json'),
     capabilities: join(runDir, 'xdoc-capabilities.json'),
     validation: join(runDir, 'validate-content.json'),
     patch: join(runDir, 'patch.json'),
@@ -819,6 +821,7 @@ function runCreate(inputArgs) {
   const { args, contentJson } = normalizeArgs(inputArgs)
   validatePaths(args)
   mkdirSync(args.runDir, { recursive: true })
+  ensureRenderContext(args.runDir)
   const artifacts = artifactPaths(args.runDir)
   if (args.finalize) {
     const summary = readJson(artifacts.summary)

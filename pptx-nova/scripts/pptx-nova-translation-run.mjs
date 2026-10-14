@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { ensureRenderContext, verifyRenderContext } from './lib/render-context.mjs'
+import { verifyDiffEvidence } from './lib/diff-evidence.mjs'
 import { createHash } from 'node:crypto'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
@@ -297,6 +299,7 @@ function visionEvidenceIdentity(report) {
 
 function artifactPaths(runDir) {
   return {
+    renderContext: join(runDir, 'render-context.json'),
     source: join(runDir, 'source.pptx'),
     candidate: join(runDir, 'candidate.pptx'),
     units: join(runDir, 'i18n-units.json'),
@@ -310,6 +313,7 @@ function artifactPaths(runDir) {
     previewReport: join(runDir, 'preview-candidate.json'),
     contactSheet: join(runDir, 'previews-candidate', 'contact-sheet.png'),
     semanticDiff: join(runDir, 'pptx-diff.json'),
+    semanticDiffFull: join(runDir, 'pptx-diff-full.json'),
     compare: join(runDir, 'translation-compare.png'),
     compareReport: join(runDir, 'translation-compare.json'),
     compareGate: join(runDir, 'translation-compare-gate.json'),
@@ -613,6 +617,7 @@ function runPreview(summary, args, artifacts, slideCount) {
     artifact: artifacts.previewReport,
     env: { XDOC_PAGE_CACHE_PREFIX: cache.prefix },
   })
+  verifyRenderContext(report)
   const cacheAfter = snapshotPageBitmapCache(cache, slides)
   const pages = report?.pages ?? []
   const phase = summary.phases.findLast((item) => item.name === 'preview-render')
@@ -655,10 +660,13 @@ function runSemanticDiff(summary, args, artifacts) {
       artifacts.candidate,
       '--detail',
       'summary',
+      '--output',
+      artifacts.semanticDiffFull,
       '--json',
     ],
     artifact: artifacts.semanticDiff,
   })
+  verifyDiffEvidence(report, artifacts.source, artifacts.candidate)
   requireGate(summary, 'pptx-semantic-diff', report?.status === 'success', {
     status: report?.status ?? null,
     semanticStatus: report?.agentGate?.semanticStatus ?? null,
@@ -1015,6 +1023,7 @@ function runTranslation(input) {
   const args = normalizeArgs(input)
   const typedTextAttrs = validatePaths(args)
   mkdirSync(args.runDir, { recursive: true })
+  ensureRenderContext(args.runDir)
   const artifacts = artifactPaths(args.runDir)
   const summary = initialSummary(args, artifacts)
   attachProgressArchive(args, artifacts)

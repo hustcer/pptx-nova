@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { ensureRenderContext, verifyRenderContext } from './lib/render-context.mjs'
+import { verifyDiffEvidence } from './lib/diff-evidence.mjs'
 import { createHash } from 'node:crypto'
 import {
   copyFileSync,
@@ -843,6 +845,7 @@ function validatePaths(args) {
 
 function artifactPaths(runDir) {
   return {
+    renderContext: join(runDir, 'render-context.json'),
     sourceSnapshot: join(runDir, 'source.pptx'),
     capabilities: join(runDir, 'xdoc-capabilities.json'),
     plan: join(runDir, 'refurbish-plan.json'),
@@ -865,6 +868,7 @@ function artifactPaths(runDir) {
     reviewPolicyEvaluation: join(runDir, 'review-policy-evaluation.json'),
     fidelityGate: join(runDir, 'fidelity-gate.json'),
     pptxDiff: join(runDir, 'pptx-diff.json'),
+    pptxDiffFull: join(runDir, 'pptx-diff-full.json'),
     finalInspect: join(runDir, 'candidate-inspect.json'),
     layoutSource: join(runDir, 'layout-source.json'),
     layoutFinal: join(runDir, 'layout-final.json'),
@@ -1790,6 +1794,16 @@ function runPreviews(summary, args, artifacts, inspect) {
       env: { XDOC_PAGE_CACHE_PREFIX: cache.prefix },
     })
   }
+  if (previewReport) verifyRenderContext(previewReport)
+  else {
+    const converted = JSON.parse(readFileSync(artifacts.convertReport, 'utf8'))
+    const manifests = (converted.items ?? [])
+      .flatMap((item) => item.outputs ?? [])
+      .filter((path) => /(?:^|[/.])manifest\.json$/.test(path))
+    if (manifests.length !== 1)
+      throw new Error('Fallback conversion must retain one render-context manifest')
+    verifyRenderContext(JSON.parse(readFileSync(manifests[0], 'utf8')))
+  }
   const cacheAfter = snapshotPageBitmapCache(cache, slides)
   const previewPhase = summary.phases.findLast((item) =>
     ['preview-render', 'preview-render-fallback-convert'].includes(item.name),
@@ -1868,10 +1882,13 @@ function runSemanticDiff(summary, args, artifacts) {
       artifacts.candidate,
       '--detail',
       'summary',
+      '--output',
+      artifacts.pptxDiffFull,
       '--json',
     ],
     artifact: artifacts.pptxDiff,
   })
+  verifyDiffEvidence(report, artifacts.sourceSnapshot, artifacts.candidate)
   gateSemanticDiff(summary, report)
   if (summary.operationAudit) {
     const emittedOps = Number(summary.operationAudit.emittedOps ?? 0)
@@ -2039,6 +2056,7 @@ function runRefurbish(inputArgs) {
   const args = normalizeArgs(inputArgs)
   validatePaths(args)
   mkdirSync(args.runDir, { recursive: true })
+  ensureRenderContext(args.runDir)
   const artifacts = artifactPaths(args.runDir)
   const summary = initialSummary(args, artifacts)
   attachProgressArchive(args, artifacts)

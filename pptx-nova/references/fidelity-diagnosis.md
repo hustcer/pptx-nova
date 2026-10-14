@@ -180,8 +180,10 @@ Use these only for the affected content; compare original and candidate with the
   underline and double strike are independent. Placeholders paint at their owning level, so a
   removed duplicate is not necessarily lost content. Supported short-date fields refresh from
   one operation-local calendar date and effective language; cached field text, ordinary text
-  and displayed date are different evidence. Record date/timezone when comparing renders and
-  keep the native field unless the user asks to replace it with static text.
+  and displayed date are different evidence. Freeze `--field-date YYYY-MM-DD` across manual
+  comparisons and check `renderContext`; standard runners retain `render-context.json` for
+  resume. Date changes must invalidate cached visual evidence. Keep the native field unless
+  the user asks to replace it with static text.
 - **Clipping and line breaks:** horizontal overflow is independent of vertical overflow,
   including inherited settings and rotated frames. Verify visible text and link hit regions in
   the local text frame; preserve surrounding fill/outline and sibling objects. Internal colons

@@ -73,6 +73,11 @@ For Agent transport routing, read the exact contracts under `capabilities.agentT
 only disclosed adapter calls, never workflow gates. Read `references/daemon-sessions.md` for details.
 For auth diagnostics or report validation, use the action-specific schema and report reference in
 `references/schema-discovery.md`; the compact capability snapshot is not a complete command contract.
+Use `xdoc schema --command <command.action>` or `--report <schemaVersion>` for focused contracts.
+Standard runners freeze the display date in `render-context.json`; preserve it when resuming and
+verify the effective `renderContext` in rendering evidence. Manual render sequences must use the
+same `--field-date`. Semantic summaries should persist full evidence with `diff --output`, then
+read and verify that file when detail is needed; see `references/export-and-check.md`.
 
 ### Run Reuse and Isolation
 
@@ -90,7 +95,8 @@ judgment about "missing capabilities" must be checked against the current runtim
 ## Artifact Retention and Cleanup Strategy
 
 `.pptx-nova/<slug>-<timestamp>/` is auditable evidence, not an ordinary cache. Keep the current run's
-capability snapshot, planning/contract inputs, patch and sidecars, machine-gate reports, final
+capability snapshot, render context, planning/contract inputs, patch and sidecars, machine-gate reports
+(including retained full diff evidence), final
 candidate, comparison/contact overview, visual review, and issue-page evidence. Do not invent missing
 artifacts. The workflow-specific exact retention set is defined in `references/common-workflow.md`.
 

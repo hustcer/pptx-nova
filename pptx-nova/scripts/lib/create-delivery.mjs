@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { verifyRenderContext } from './render-context.mjs'
 import {
   captureVisualBinding,
   evaluateVisualEvidence,
@@ -22,6 +23,7 @@ export function recordCreateInputs(args, artifacts) {
     artifacts.vision,
     artifacts.candidate,
     artifacts.canonicalManifest,
+    artifacts.renderContext,
   ].filter(Boolean)
   return {
     schemaVersion: 'pptx-nova-create-binding/v1',
@@ -59,6 +61,7 @@ export function canonicalCreatePreview(summary, args, artifacts, runJsonPhase) {
     ],
     artifact: artifacts.previewReport,
   })
+  verifyRenderContext(JSON.parse(readFileSync(artifacts.canonicalManifest, 'utf8')))
   const gate = evaluateVisualEvidence(artifacts.canonicalManifest, {
     candidate: artifacts.candidate,
   })
@@ -114,6 +117,7 @@ export function validateCreateDelivery(summary, args, artifacts) {
   )
     throw new Error('candidate does not belong to this run')
   verifyCreateInputs(args, artifacts)
+  verifyRenderContext(JSON.parse(readFileSync(artifacts.canonicalManifest, 'utf8')))
   const gate = evaluateVisualEvidence(artifacts.canonicalManifest, {
     candidate: artifacts.candidate,
     review: args.visualReview,

@@ -2,9 +2,10 @@ import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, statSync } from 'node:fs'
 import { delimiter, join, resolve } from 'node:path'
 import { inflateSync } from 'node:zlib'
+import { renderContextForDate } from './render-context.mjs'
 
-const RGB_CACHE_MAGIC = Buffer.from('XDRGB03\n')
-const RGB_CACHE_HEADER_BYTES = 68
+const RGB_CACHE_MAGIC = Buffer.from('XDRGB04\n')
+const RGB_CACHE_HEADER_BYTES = 100
 const MAX_RGB_CACHE_BYTES = 360_000_000
 
 const CRC32_TABLE = Array.from({ length: 256 }, (_, index) => {
@@ -21,7 +22,7 @@ function crc32(buffer) {
   return (value ^ 0xffffffff) >>> 0
 }
 
-export function isValidPageBitmapCacheEntry(path, { dpi, slide, identity } = {}) {
+export function isValidPageBitmapCacheEntry(path, { dpi, slide, identity, pdfSha256 } = {}) {
   if (!existsSync(path)) return false
   try {
     const state = statSync(path)
@@ -36,6 +37,7 @@ export function isValidPageBitmapCacheEntry(path, { dpi, slide, identity } = {})
     const cachedDpi = record.readUInt32LE(28)
     const cachedSlide = record.readUInt32LE(32)
     const cachedIdentity = record.subarray(36, 68).toString('hex')
+    const cachedPdfSha256 = record.subarray(68, 100).toString('hex')
     if (
       width === 0 ||
       height === 0 ||
@@ -46,6 +48,7 @@ export function isValidPageBitmapCacheEntry(path, { dpi, slide, identity } = {})
       (dpi !== undefined && cachedDpi !== dpi) ||
       (slide !== undefined && cachedSlide !== slide) ||
       (identity !== undefined && cachedIdentity !== identity) ||
+      (pdfSha256 !== undefined && cachedPdfSha256 !== pdfSha256) ||
       RGB_CACHE_HEADER_BYTES + compressedSize !== record.length
     ) {
       return false
@@ -73,7 +76,13 @@ function resolveExecutable(bin) {
   return bin
 }
 
-export function createPageBitmapCacheBinding({ cacheDir, pptxPath, dpi, xdocBin }) {
+export function createPageBitmapCacheBinding({
+  cacheDir,
+  pptxPath,
+  dpi,
+  xdocBin,
+  renderContext = renderContextForDate(),
+}) {
   const pptxSha256 = sha256File(pptxPath)
   const executable = resolveExecutable(xdocBin)
   const rendererVersion =
@@ -83,16 +92,17 @@ export function createPageBitmapCacheBinding({ cacheDir, pptxPath, dpi, xdocBin 
   const identity = createHash('sha256')
     .update(
       JSON.stringify({
-        schemaVersion: 'pptx-nova-page-bitmap-cache-key/v1',
+        schemaVersion: 'pptx-nova-page-bitmap-cache-key/v2',
         pptxSha256,
         dpi,
         rendererVersion,
+        renderContext,
       }),
     )
     .digest('hex')
   const directory = join(
     resolve(cacheDir),
-    'page-bitmap-v1',
+    'page-bitmap-v2',
     pptxSha256,
     String(dpi),
     rendererVersion,
@@ -100,10 +110,11 @@ export function createPageBitmapCacheBinding({ cacheDir, pptxPath, dpi, xdocBin 
   )
   mkdirSync(directory, { recursive: true })
   return {
-    schemaVersion: 'pptx-nova-page-bitmap-cache-key/v1',
+    schemaVersion: 'pptx-nova-page-bitmap-cache-key/v2',
     pptxSha256,
     dpi,
     rendererVersion,
+    renderContext,
     identity,
     prefix: join(directory, 'page'),
   }
@@ -124,21 +135,32 @@ export function snapshotPageBitmapCache(binding, slides) {
   return {
     requestedSlides: slides,
     cachedSlides,
+    pdfHashes: Object.fromEntries(
+      cachedSlides.map((slide) => [
+        slide,
+        readFileSync(pageBitmapCachePath(binding, slide)).subarray(68, 100).toString('hex'),
+      ]),
+    ),
     hitCount: cachedSlides.length,
     missCount: slides.length - cachedSlides.length,
   }
 }
 
 export function pageBitmapCacheMetrics(binding, before, after) {
+  const retainedHits = before.cachedSlides.filter(
+    (slide) =>
+      after.cachedSlides.includes(slide) && before.pdfHashes[slide] === after.pdfHashes[slide],
+  ).length
   return {
     schemaVersion: binding.schemaVersion,
     pptxSha256: binding.pptxSha256,
     dpi: binding.dpi,
     rendererVersion: binding.rendererVersion,
     requestedPageCount: before.requestedSlides.length,
-    hitCount: before.hitCount,
-    missCount: before.missCount,
-    populatedCount: after.hitCount - before.hitCount,
+    hitCount: retainedHits,
+    missCount: before.requestedSlides.length - retainedHits,
+    populatedCount: after.hitCount - retainedHits,
+    invalidatedCount: before.hitCount - retainedHits,
     complete: after.missCount === 0,
   }
 }

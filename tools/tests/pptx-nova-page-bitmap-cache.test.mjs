@@ -22,10 +22,10 @@ function crc32(buffer) {
   return (value ^ 0xffffffff) >>> 0
 }
 
-function writeRgbCache(path, binding, slide, rgb = Buffer.from([1, 2, 3])) {
+function writeRgbCache(path, binding, slide, rgb = Buffer.from([1, 2, 3]), pdf = 'a'.repeat(64)) {
   const compressed = deflateSync(rgb)
-  const header = Buffer.alloc(68)
-  header.write('XDRGB03\n', 0, 'ascii')
+  const header = Buffer.alloc(100)
+  header.write('XDRGB04\n', 0, 'ascii')
   header.writeUInt32LE(1, 8)
   header.writeUInt32LE(1, 12)
   header.writeUInt32LE(rgb.length, 16)
@@ -34,6 +34,7 @@ function writeRgbCache(path, binding, slide, rgb = Buffer.from([1, 2, 3])) {
   header.writeUInt32LE(binding.dpi, 28)
   header.writeUInt32LE(slide, 32)
   Buffer.from(binding.identity, 'hex').copy(header, 36)
+  Buffer.from(pdf, 'hex').copy(header, 68)
   writeFileSync(path, Buffer.concat([header, compressed]))
 }
 
@@ -55,6 +56,15 @@ test('page bitmap cache key binds PPTX bytes, DPI, renderer bytes, and slide', (
   })
   assert.equal(first.prefix, same.prefix)
   assert.notEqual(first.prefix, differentDpi.prefix)
+  const dated = (date) =>
+    createPageBitmapCacheBinding({
+      cacheDir,
+      pptxPath: deck,
+      dpi: 192,
+      xdocBin: xdoc,
+      renderContext: { schemaVersion: 'xdoc-render-context/v1', fieldDate: date },
+    })
+  assert.notEqual(dated('2026-10-13').identity, dated('2026-10-14').identity)
   assert.match(pageBitmapCachePath(first, 9), /page-slide-000009\.rgbz$/)
 
   writeFileSync(xdoc, 'renderer-v2')
@@ -96,7 +106,7 @@ test('page bitmap cache metrics distinguish existing hits from newly populated m
   writeRgbCache(pageBitmapCachePath(binding, 2), binding, 2, Buffer.from([4, 5, 6]))
   const after = snapshotPageBitmapCache(binding, [1, 2])
   assert.deepEqual(pageBitmapCacheMetrics(binding, before, after), {
-    schemaVersion: 'pptx-nova-page-bitmap-cache-key/v1',
+    schemaVersion: 'pptx-nova-page-bitmap-cache-key/v2',
     pptxSha256: binding.pptxSha256,
     dpi: 192,
     rendererVersion: binding.rendererVersion,
@@ -104,6 +114,16 @@ test('page bitmap cache metrics distinguish existing hits from newly populated m
     hitCount: 1,
     missCount: 1,
     populatedCount: 1,
+    invalidatedCount: 0,
     complete: true,
   })
+  writeRgbCache(pageBitmapCachePath(binding, 1), binding, 1, Buffer.from([7, 8, 9]), 'b'.repeat(64))
+  const invalidated = pageBitmapCacheMetrics(
+    binding,
+    after,
+    snapshotPageBitmapCache(binding, [1, 2]),
+  )
+  assert.equal(invalidated.hitCount, 1)
+  assert.equal(invalidated.invalidatedCount, 1)
+  assert.equal(invalidated.populatedCount, 1)
 })

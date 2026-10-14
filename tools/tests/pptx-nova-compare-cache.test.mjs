@@ -30,15 +30,19 @@ const identity = (path) => ({ path, byteLength: statSync(path).size, sha256: cre
 const selector = value('--slides') || 'all'
 const slides = selector === 'all' ? [1] : selector.split('-').map(Number)
 const dpi = Number(value('--dpi'))
-process.stdout.write(JSON.stringify({ schemaVersion: 'pptx-contact-diff/v1', status: 'success', baseline: identity(source), target: identity(candidate), outputPath: output, output, scope: { requested: selector, slides, basis: 'baseline-slides' }, render: { path: output, dpi, width: 100, height: 56 }, agentReview: agentReviewOutput ? { status: 'success', path: agentReviewOutput, renderDpi: dpi, layoutDpi: agentReviewDpi, width: 50, height: 28, cacheReuse: 'same-render-dpi-page-cache' } : undefined, summary: { pairCount: slides.length, dpi, scopeMode: selector === 'all' ? 'all-slides' : 'selected-slides' }, agentGate: { passed: true, status: 'pass', pairCount: slides.length } }))
+const renderContext = { schemaVersion: 'xdoc-render-context/v1', fieldDate: process.env.XDOC_FIELD_DATE, authorizationClock: 'independent', bitmapCacheBinding: 'pdf-sha256' }
+process.stdout.write(JSON.stringify({ renderContext, schemaVersion: 'pptx-contact-diff/v1', status: 'success', baseline: identity(source), target: identity(candidate), outputPath: output, output, scope: selector === 'all' ? undefined : { requested: selector, slides, basis: 'baseline-slides' }, render: { path: output, dpi, width: 100, height: 56 }, agentReview: agentReviewOutput ? { status: 'success', path: agentReviewOutput, renderDpi: dpi, layoutDpi: agentReviewDpi, width: 50, height: 28, cacheReuse: 'same-render-dpi-page-cache' } : undefined, summary: { pairCount: slides.length, dpi, scopeMode: selector === 'all' ? 'all-slides' : 'selected-slides' }, agentGate: { passed: true, status: 'pass', pairCount: slides.length } }))
 `,
   )
   chmodSync(path, 0o755)
   return path
 }
 
-function run(args) {
-  const result = spawnSync(process.execPath, [compare, ...args], { encoding: 'utf8' })
+function run(args, date = '2026-10-13') {
+  const result = spawnSync(process.execPath, [compare, ...args], {
+    encoding: 'utf8',
+    env: { ...process.env, XDOC_FIELD_DATE: date },
+  })
   assert.equal(result.status, 0, result.stderr || result.stdout)
   return JSON.parse(result.stdout)
 }
@@ -114,6 +118,8 @@ test('compare reuses content-addressed render evidence across run directories', 
   assert.equal(third.pptxNovaCompare.cache.status, 'hit')
   assert.equal(third.baseline.path, copiedSource)
   assert.equal(third.target.path, copiedCandidate)
+  assert.equal(third.baselinePath, copiedSource)
+  assert.equal(third.targetPath, copiedCandidate)
   assert.deepEqual(analyzeCompareRendering(second), {
     partCount: 1,
     renderInvocations: 0,
@@ -150,6 +156,9 @@ test('compare reuses content-addressed render evidence across run directories', 
   const fourth = run([...common, '--run-dir', join(root, 'run-4')])
   assert.equal(readFileSync(join(root, 'count.txt'), 'utf8'), '2')
   assert.equal(fourth.pptxNovaCompare.cache.status, 'miss')
+  const nextDate = run([...common, '--run-dir', join(root, 'run-next-day')], '2026-10-14')
+  assert.equal(nextDate.pptxNovaCompare.cache.status, 'miss')
+  assert.equal(readFileSync(join(root, 'count.txt'), 'utf8'), '3')
 })
 
 test('render metrics count a failed primary invocation before a fallback cache hit', () => {

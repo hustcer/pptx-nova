@@ -52,10 +52,11 @@ hide validation evidence, selector resolution, sidecar replay data, visual
 review context, or a failure state.
 
 Keep this minimum evidence set after successful delivery when the files exist:
-`xdoc-capabilities.json`, `outline.json`, `deck_lock.json`, `content.json`,
+`xdoc-capabilities.json`, `render-context.json`, `outline.json`, `deck_lock.json`, `content.json`,
 `patch.json`, sidecar files, dry-run/apply/refurbish JSON reports,
 `vision.json`, `visual_review.json`, `clean-open.json`, `check.json`,
 `semantic-audit.json`, `structure-check.json`, `evidence-summary.json`,
+`pptx-diff.json` and its hash-bound `pptx-diff-full.json`,
 `layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`, `catalog-readiness.json`,
 optional `delivery-readiness.json`, the final candidate PPTX,
 `visual-evidence/manifest.json` when unified visual evidence was requested,
@@ -255,7 +256,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     JSON-mode compare failures still return one `pptx-nova-compare-error/v1`
     document on stdout and emit `compare-failed` as JSONL on stderr.
     Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
-    text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
+text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     or page-level repair. - Data/template: template, data, bindings, and asset paths. - If the source outline only gives a slide title or leaves factual content
     blank, record any AI-filled facts, competitors, metrics, or examples in
     `deck_lock.assumptions[]` before writing `content.json`. - If the user-provided outline explicitly fixes slide titles or subtitles,
@@ -444,7 +445,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 
     ```bash
     xdoc pptx diff --source source.pptx --candidate out.pptx \
-      --detail summary --json > <run-dir>/pptx-diff.json
+      --detail summary --output <run-dir>/pptx-diff-full.json --json > <run-dir>/pptx-diff.json
     ```
 
     This command is useful but comparatively slow. Do not run it after every
@@ -558,7 +559,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
     `feedback wanted`, `需要反馈`, `给反馈`,
     or equivalent), write the feedback first and run
     `pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback
-    --workflow <create|refurbish|translation|other> --strict` or the same
+--workflow <create|refurbish|translation|other> --strict` or the same
     command with `--prompt-file`. Create, Refurbish, and Translation feedback
     must contain the exact seven-dimension process scorecard and a matching
     weighted overall score. Do not send the final response while
@@ -681,11 +682,11 @@ PowerPoint display-effect screenshots and comparisons:
   `chartex-native-render-unverified` and do not claim PowerPoint-native proof.
 - When a visual gate must reflect PowerPoint's display/export result and the optional route is available, render
   with `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method
-  pdf-render` first:
+pdf-render` first:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
 - When the candidate contains OPC-declared ChartEx parts (at any path), pass that report to
   `pptx-nova-finalize-evidence.mjs --candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
   verifies the candidate SHA-256, exact ChartEx slide coverage, and every PNG's
   dimensions, byte length, and SHA-256. With hidden slides, it also requires the
   snapshot's `pdf_page_count` / `pdf_pages` mapping to match logical slide identity;

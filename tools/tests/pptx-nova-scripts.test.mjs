@@ -295,6 +295,36 @@ function readCreateSummary(result) {
 
 function writeFakeXdoc(root, source) {
   const scriptPath = join(root, 'fake-xdoc.mjs')
+  // Model the current executable's evidence contract in every successful
+  // rendering fixture. These helpers only construct test reports; production
+  // gates still validate real artifact/input hashes independently.
+  source = source.replace(
+    /schemaVersion: '(pptx-preview|pptx-contact-diff|pptx-visual-evidence)\/v1'/g,
+    "$&, renderContext: { schemaVersion: 'xdoc-render-context/v1', fieldDate: process.env.XDOC_FIELD_DATE, authorizationClock: 'independent', bitmapCacheBinding: 'pdf-sha256' }",
+  )
+  source = source.replace(
+    /(else if \(args\[0\] === 'pptx' && args\[1\] === 'diff'\) \{[\s\S]*?)print\((\{[\s\S]*?\})\)/g,
+    '$1print(__fakeFullDiff($2))',
+  )
+  source = source.replace(
+    '\n',
+    `
+import { readFileSync as __read, writeFileSync as __write } from 'node:fs'
+import { createHash as __hash } from 'node:crypto'
+function __fakeFullDiff(report) {
+  const argv = process.argv.slice(2)
+  const value = flag => argv[argv.indexOf(flag) + 1]
+  const hash = bytes => __hash('sha256').update(bytes).digest('hex')
+  const inputBinding = { algorithm: 'sha256', baseline: hash(__read(value('--source'))), target: hash(__read(value('--candidate'))) }
+  const full = { ...report, detail: 'full', inputBinding }
+  const text = JSON.stringify(full)
+  const path = value('--output')
+  __write(path, text, { flag: 'wx' })
+  return { ...report, detail: 'summary', inputBinding, fullEvidenceAvailable: true,
+    fullEvidence: { path, sha256: hash(text), schemaVersion: 'pptx-diff/v1', detail: 'full' } }
+}
+`,
+  )
   writeFileSync(scriptPath, source)
   chmodSync(scriptPath, 0o755)
   return scriptPath

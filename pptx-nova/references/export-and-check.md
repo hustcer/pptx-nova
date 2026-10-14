@@ -15,7 +15,8 @@ the read-only semantic diff path:
 
 ```bash
 xdoc pptx diff --source before.pptx --candidate after.pptx \
-  --detail summary --json > <run-dir>/pptx-diff.json
+  --detail summary --output <run-dir>/pptx-diff-full.json \
+  --json > <run-dir>/pptx-diff.json
 ```
 
 The default `summary` detail is the normal Agent path. It reports
@@ -24,23 +25,41 @@ The default `summary` detail is the normal Agent path. It reports
 rollups; there is no `changeRollup` field.
 Use `--detail full` directly when a generic Edit Contract consumes the report,
 because its object locality and expected text checks require `shapeChanges[]`.
-For observation-only audits, use full when summary identifies a suspicious slide/object
-and field-level evidence is needed. The command can take around 10 seconds, so do
-not use it as a tight retry loop.
+For observation-only audits, read `fullEvidence.path` when the summary identifies a suspicious
+slide/object. `--output` persists the full report in the same comparison; verify its SHA-256
+and both `inputBinding` hashes before consuming it. Translation and Refurbish runners perform
+these checks automatically and retain both files. Without `--output`, a summary truthfully
+reports `fullEvidenceAvailable=false`; it does not promise evidence that requires another run.
+Existing output files and input/output aliases are rejected. Use a fresh evidence path.
 
 Use only `reliable` entries as machine-checkable facts. Treat `uncertain` and
 `unsupported` as review signals. The report's `visualEvidence` block identifies
 the canonical handoff; semantic diff and PNG preview remain advisory and never
 authorize delivery.
 
-For schema validation, resolve the diff action's `ioContract.stdout.schemaRef` from the same
-runtime's full schema (`commands.pptx.diffReportSchema`). `pptx-diff/v1` has distinct `detail`
+For schema validation, execute `policyRef.discoveryCommand` (`xdoc schema --report pptx-diff/v1`)
+and resolve `policyRef.schemaRef` for the policy text. The report schema remains at
+`commands.pptx.diffReportSchema`. `pptx-diff/v1` has distinct `detail`
 branches: summary slide rollups are not full `shapeChanges[]` evidence. Do not pad omitted
 fields with null, mix branch fields, or drop unknown fields to make validation pass. Fixed
 objects are closed; category/style maps permit dynamic keys with typed counts. Full shape
 bounds can contain signed extents from malformed source geometry: retain them as diagnostics,
 not as permission to author negative sizes. Schema acceptance proves report shape only;
 the existing reliability, scope and delivery gates still apply.
+
+## Reproducible Dynamic Fields
+
+One-shot rendering commands accept `--field-date YYYY-MM-DD`, with `XDOC_FIELD_DATE` as the
+environment fallback. The flag takes precedence. Omission captures the host's local date once;
+invalid dates fail before rendering. This controls displayed dynamic fields only, never
+authorization or expiry clocks. Preview/contact-diff reports, conversion manifests and canonical
+visual manifests disclose `renderContext` with the effective date and cache binding.
+
+Create, Translation, Refurbish and Compare runners persist `render-context.json` in the run directory
+and pass its date to child commands. Resume/finalize reuses that date; a conflicting override
+requires a new run directory. For manual multi-command diagnosis, pass the same explicit date to
+every render and inspect the reported context. Keep native fields editable. Bitmap caches validate
+the actual PDF SHA-256; the skill's comparison cache also includes the frozen date.
 
 ## Unified Visual Evidence (Canonical Agent Gate)
 

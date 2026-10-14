@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+import {
+  ensureRenderContext,
+  renderContextForDate,
+  verifyRenderContext,
+} from './lib/render-context.mjs'
 import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import {
@@ -328,6 +333,7 @@ function cacheDescriptor(args, { slides, dpi }) {
   const xdoc = xdocIdentity(args.xdocBin)
   const descriptor = {
     schemaVersion: 'pptx-nova-contact-diff-cache-key/v1',
+    renderContext: renderContextForDate(),
     source,
     candidate,
     slides: slides || 'all',
@@ -363,6 +369,7 @@ function cacheEntryPaths(args, key) {
 function sameCacheDescriptor(left, right) {
   const projection = (value) => ({
     schemaVersion: value?.schemaVersion ?? null,
+    renderContext: value?.renderContext ?? null,
     slides: value?.slides ?? null,
     dpi: value?.dpi ?? null,
     agentReviewDpi: value?.agentReviewDpi ?? 0,
@@ -392,6 +399,8 @@ function writeJsonAtomic(path, value) {
 function retargetContactDiffReport(report, args, output, agentReviewOutput, descriptor) {
   return {
     ...report,
+    baselinePath: args.source,
+    targetPath: args.candidate,
     baseline: { ...report.baseline, ...descriptor.source, path: args.source },
     target: { ...report.target, ...descriptor.candidate, path: args.candidate },
     outputPath: output,
@@ -428,10 +437,13 @@ function readCachedContactDiff(args, output, agentReviewOutput, cache) {
       return null
     }
     const cachedReport = JSON.parse(readFileSync(paths.report, 'utf8'))
+    verifyRenderContext(cachedReport)
     if (
       cachedReport?.schemaVersion !== 'pptx-contact-diff/v1' ||
       cachedReport?.status !== 'success' ||
-      cachedReport?.scope?.requested !== cache.descriptor.slides ||
+      (cachedReport?.scope?.requested ??
+        (cachedReport?.summary?.scopeMode === 'all-slides' ? 'all' : null)) !==
+        cache.descriptor.slides ||
       Number(cachedReport?.render?.dpi ?? cachedReport?.summary?.dpi) !== cache.descriptor.dpi ||
       Number(cachedReport?.agentReview?.layoutDpi ?? 0) !== cache.descriptor.agentReviewDpi ||
       cachedReport?.baseline?.sha256 !== cache.descriptor.source.sha256 ||
@@ -726,6 +738,7 @@ async function runContactDiff(
     }
   }
   if (!report) parseJsonReport(result.stdout)
+  verifyRenderContext(report)
   const outputPath = reportImagePath(report)
   if (outputPath && resolve(outputPath) !== output) {
     throw new Error(`xdoc contact-diff reported a different output path: ${outputPath}`)
@@ -1078,6 +1091,7 @@ async function main(args, reporter) {
   ensureInputFile(args.candidate, 'candidate PPTX')
   ensureWritable(args.report, args.overwrite)
   mkdirSync(args.runDir, { recursive: true })
+  ensureRenderContext(args.runDir)
 
   const multipart = !args.slides && args.slideCount > args.chunkSize
   if (!multipart) {

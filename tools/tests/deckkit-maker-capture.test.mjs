@@ -1,15 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import {
-  chmodSync,
-  mkdtempSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-  existsSync,
-  rmSync,
-} from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -18,8 +10,7 @@ const script = resolve('deckkit-maker/scripts/capture-html-slides.mjs')
 
 // Emulate the browser boundary, but execute the exact injected scripts. Resource promises
 // are deliberately delayed so the test exercises readiness rather than a canned response.
-const browser = `#!/usr/bin/env node
-const fs = require('node:fs');
+const browser = `const fs = require('node:fs');
 const vm = require('node:vm');
 const args = process.argv.slice(2);
 const mode = process.env.CAPTURE_TEST_MODE;
@@ -57,10 +48,23 @@ if (args.includes('eval')) {
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'deckkit-capture-test-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
-  const bin = join(root, 'bin')
-  mkdirSync(bin)
-  writeFileSync(join(bin, 'agent-browser'), browser)
-  chmodSync(join(bin, 'agent-browser'), 0o755)
+  const browserScript = join(root, 'agent-browser.cjs')
+  writeFileSync(browserScript, browser)
+  // Launch the fixture through Node on every platform: Windows cannot execute
+  // a POSIX shebang shim, and shell wrappers would change argument/stdin handling.
+  const preload = join(root, 'browser-preload.cjs')
+  writeFileSync(
+    preload,
+    `
+const childProcess = require('node:child_process');
+const { syncBuiltinESMExports } = require('node:module');
+const originalSpawnSync = childProcess.spawnSync;
+childProcess.spawnSync = (command, args, options) => command === 'agent-browser'
+  ? originalSpawnSync(process.execPath, [${JSON.stringify(browserScript)}, ...args], options)
+  : originalSpawnSync(command, args, options);
+syncBuiltinESMExports();
+`,
+  )
   const source = join(root, 'template.html')
   writeFileSync(source, '<html>capture fixture</html>')
   const out = join(root, 'capture')
@@ -68,12 +72,22 @@ function fixture(t) {
   const run = (mode = '', extra = [], output = out) =>
     spawnSync(
       process.execPath,
-      [script, '--url', source, '--out', output, '--no-contact-sheet', '--json', ...extra],
+      [
+        '--require',
+        preload,
+        script,
+        '--url',
+        source,
+        '--out',
+        output,
+        '--no-contact-sheet',
+        '--json',
+        ...extra,
+      ],
       {
         encoding: 'utf8',
         env: {
           ...process.env,
-          PATH: `${bin}:${process.env.PATH}`,
           CAPTURE_TEST_MODE: mode,
           CAPTURE_TEST_LOG: log,
         },

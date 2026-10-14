@@ -29,14 +29,17 @@ description: >
 1. **参考 `.pptx` 文件路径，或 HTML template 文件/目录** —— 风格、主题、模板、内容的唯一事实来源。参考文件只读。
 2. **新 DeckKit 的名字** —— kebab-case id（如 `swiss-grid`、`consulting-dark`）。
 
-如果两者缺一，先向用户索取，不要自己猜测或挑选文件。若参考源是 HTML 目录，优先确认其中
+新建 DeckKit 时如果两者缺一，先向用户索取，不要自己猜测或挑选文件。已有 kit 修复、skill
+维护或兼容性评估按用户指定范围开展，不需要虚构新 id 或索取无关参考文件。若参考源是 HTML 目录，优先确认其中
 的入口文件（通常是 `template.html`）和元数据文件（如 `template.json` / `design.md`）。
 
 ## xdoc transport 边界
 
 本 skill 默认使用一次性 CLI 或 CLI `--daemon`，因为完整 DeckKit 流程还需要
-`convert`、`vision-check`、benchmark 等 MCP 未公开的命令。宿主若已配置 xdoc MCP，先用
-当前 `pptx-nova/scripts/pptx-nova-probe.mjs` 生成 capability snapshot；只有
+`convert`、`vision-check`、benchmark 等命令。每次任务先记录 `xdoc --version`，用
+`node pptx-nova/scripts/pptx-nova-probe.mjs --json` 保存当前 runtime 的 capability snapshot。
+新增或修改 op 前按 `pptx-nova/references/patch-ops-cheatsheet.md` 查询 focused schema；不要从
+旧示例推断字段、enum 或能力。宿主若已配置 xdoc MCP，只有
 `capabilities.agentTransports.mcp.status == "disclosed"` 且合同版本被宿主识别时，才可按
 完整 `capabilities.agentTransports.mcp.contract` 使用它。
 
@@ -47,6 +50,23 @@ description: >
   benchmark、人工 PNG 对比或 evidence gate。
 - MCP 未安装、未公开或合同不兼容时回退 CLI，不阻塞 DeckKit 创建或修复流程。
 
+### 当前合同与按需阅读
+
+能力以本次可执行文件的 schema、报告和实际产物为准；支持写入、保留、渲染与播放是不同能力，
+不能互相推导。维护者文档只提供线索，不把私有构建方式或库 API 写成公开集成路径。
+
+| 涉及内容                                                   | 必须核对的依据                                                                                                                                               |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OPC/Strict 包、非标准 part 名、继承主题、group/placeholder | `references/analyze-reference.md`；按关系解析，有效样式与局部 XML 分开记录                                                                                   |
+| freeform、自定义路径、gradient、group 几何                 | `pptx-nova/references/patch-ops-cheatsheet.md` 与 focused schema；检查最终 slide 坐标和 PNG                                                                  |
+| CJK/RTL、项目符号、rich text、autofit                      | `pptx-nova/references/deck-generator-workflow.md`；以新 runtime 的实际字体/换行复核旧补偿，不重复加大旧 workaround                                           |
+| 原生图表、极小数/百分比、数据标签                          | `pptx-nova/references/charts.md`；保留原始数值，显示精度单独设格式，转换为 JSON 回读                                                                         |
+| 原生源稿编辑、3D、动画/transition/Morph                    | `pptx-nova/SKILL.md` 对应路由；按 schema 中各能力轴评估，不能把静态 PNG 或 generator kit 视为保留/播放证明                                                   |
+| 视觉漂移与质量放行                                         | `pptx-nova/references/fidelity-diagnosis.md`、`pptx-nova/references/create-runner.md`；同一 PPTX 字节、冻结 field date、canonical evidence 与人工逐页 review |
+
+修复现有 PPTX 的对象时遵循主 skill 的 inspect → 精确 selector/guard → dry-run → apply →
+inspect 回读；DeckKit 新建 patch 不能混入已有文件的 stale selector/source guard。
+
 ## 修复或扩展已有 DeckKit
 
 当用户要求“修一下现有 DeckKit / 重新走一遍 broadside / 对照参考源修几页”时，按
@@ -54,11 +74,9 @@ description: >
 
 - `catalog.json` 已注册该 id、`<id>.kit.mjs`、schema、examples 和 benchmark case 已存在是
   预期状态，不要按“目标文件已存在”判定为阻塞；只需确认这些文件确实属于本次要修的 DeckKit。
-- run 目录仍优先使用 `.tmp/deckkit-<id>/`，继续追加 `progress.md` / `findings.md`，并把新的
-  benchmark、PNG、审计 patch、实验 deck 放进其下的 `benchmark/`、`audit/`、`previews/`
-  等子目录。不要因为目录已存在就散落到 `.tmp/` 其他位置。
-- 若 `.tmp/deckkit-<id>/` 中已有不相关或需要保留的旧分析产物，创建同目录下带语义名的子目录
-  （如 `audit/freeform-visibility/`）或在 `progress.md` 记录覆盖原因；只有无法安全区分时再询问用户。
+- 选择新的 `.tmp/deckkit-<id>-<run>/`；仅明确续做同一任务时复用其状态文件。
+  每次迭代写新的 `iterations/01/`、`iterations/02/` 等目录；旧 benchmark、PNG 和报告只读保留。
+  不以“已记录覆盖原因”代替授权，不清空旧目录，也不让 readiness 读取其他 run 的证据。
 - 修复流程应以参考源和现有 benchmark 为事实来源：先复现/查看当前 PNG，再改 kit/test，最后跑
   validation、目标 benchmark、必要时全量 benchmark 和 showcase 更新。不要重新执行新建 DeckKit
   的 catalog/schema 初始化步骤。
@@ -111,7 +129,7 @@ test ! -e pptx-nova/assets/examples/<id>
   │
   ├─ Phase 1  高保真重建（第一交付物）  → references/rebuild-high-fidelity.md
   │    探索生成器 generate.mjs → 按 fidelity-scope 重建 → 逐页与参考 PNG 对比
-  │    门禁：dry-run 无阻塞 + vision-check high/medium=0 + 范围内逐页人工对比通过
+  │    门禁：dry-run → apply → inspect → vision → canonical Create → 范围内逐页人工对比
   │
   └─ Phase 2  组件化抽象（第二交付物）  → references/componentize.md
        抽 <id>.kit.mjs + schemas + content.json + catalog 注册
@@ -153,7 +171,9 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
    记录 `agent-browser set viewport 1440 810`、注入的 capture CSS、slide 切换方式，以及
    绝对 screenshot path；不要只留下手工点击后的散图。优先使用
    `node deckkit-maker/scripts/capture-html-slides.mjs --url <template.html-or-url> --out .tmp/deckkit-<id>/ref-previews`
-   生成逐页 PNG、`contact-sheet.png` 与 `capture-manifest.json`；非 `.slide` 模板通过
+   生成逐页 PNG 与 `capture-manifest.json`（ImageMagick 可用时另有 contact sheet）；输出目录必须新建或为空。
+   脚本默认独立 session，逐页等待字体、图片解码与布局，保存截图 hash/几何；具体限制见 HTML reference。
+   非 `.slide` 模板通过
    `--selector` 调整，只有
    slide 原本是 `display:none` 且无法靠 `.active` 恢复时才传 `--active-display`，避免破坏
    源 HTML 的 grid/flex 布局。macOS 上 ImageMagick 可能找不到默认字体；脚本会优先使用
@@ -171,11 +191,11 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
 6. 图片/截图区域默认转为 asset slot 或占位框；不把 HTML 模板中的一次性位图、远程图、CSS
    背景图直接写入 kit。
 7. CSS texture、SVG pattern、全页背景 SVG/bitmap 默认不要直接迁移为整页 `add-image`。
-   这类资源在 xdoc demo/render 路径中可能变成图片占位覆盖层，遮住后续可编辑内容；优先用
-   flat fill、线条、重复 shape 或低密度 hatch 表达纹理语气。若必须用图片背景，先在 run
-   目录做最小实验并确认 PNG、PowerPoint 打开效果和 layer order，再写入 knownLimits。
+   优先用 flat fill、线条、重复 shape 或低密度 hatch 表达纹理语气。若必须用图片背景，先在 run
+   目录以当前 runtime 做最小实验，核对同一 PPTX 的 layer order、PNG 和 PowerPoint 打开效果；
+   不沿用旧版 renderer 的占位覆盖层假设，实际限制再写入 knownLimits。
 8. Phase 1 对比时用浏览器截图作为参考 PNG；Phase 2 benchmark 仍必须用 xdoc 生成 PPTX
-   PNG 并走 `dry-run → apply → vision-check → contact-sheet review`。
+   PNG，并走下文完整视觉门禁；benchmark 不能替代 canonical Create 和逐页 review。
 
 ### HTML 到 PPTX 视觉语义避坑
 
@@ -191,11 +211,11 @@ HTML/CSS 的视觉语义不能逐字搬到 PPTX patch，尤其是透明色和自
 - **小号透明/白色文本允许可读性适配**：HTML 中的小号透明黑、透明白或低 alpha chrome
   在 PPTX 门禁中可能触发低对比。正文、小号 label、页眉页脚、来源和按钮文字可以加深为
   同色系高对比实体色；在 `compare-notes.md` 标记为可读性适配即可。
-- **freeform 必须验证真实尺寸**：用 `add-freeform` 复刻 donut、conic-gradient、斜切块、
-  不规则图形或 SVG-like 分段时，不要只传英寸绝对 `points`。xdoc freeform 使用局部坐标，
-  通常需要显式 `originX` / `originY` 和 `xScale` / `yScale`；否则 PPTX 可打开但形状可能只有
-  几个 EMU，PNG 中几乎不可见。修这类图形时，至少用一个最小实验或解包 XML 检查
-  `<a:ext cx="..." cy="...">` 是实际英寸量级，再看 PNG。
+- **freeform 使用当前 canonical path 合同**：`add-freeform` 的 `x/y/w/h` 是显式形状框，
+  `path.width/height` 是正整数局部 viewport，`path.commands` 使用 `move/line/cubic/close`。
+  旧 `points/originX/originY/xScale/yScale` 写法已不适用。先读 cheatsheet 的 freeform 示例与
+  当前 focused schema，再用 inspect 回读 `freeform.path`、真实尺寸和 PNG 验证；控制点可以超出
+  viewport，不能假设形状框会自动裁剪或扩张。遇到 `preserve-only` 不重建成空路径。
 
 ### 门禁与 benchmark 判读
 
@@ -263,13 +283,15 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   `createOps().icon()` 内联。参考 deck 中的图标/装饰图找最接近的 Tabler 替代；
   不联网取图，不把参考 deck 的位图直接打进 kit。替代图标/shape 必须语义相关。
 - **视觉门禁**：每次 build 走
-  `dry-run → apply → vision-check(high/medium=0) → 按 fidelity-scope 做 PNG/contact-sheet 人工逐页`。
+  `dry-run → apply → inspect → vision-check(high/medium=0) → canonical Create → 人工逐页 PNG review`。
   dry-run 与 vision-check 的溢出估算阈值不同，两个都要跑。benchmark 的历史 low 基线不等于
   canonical Create 放行；仍须通过当前交付门禁，不能用 qualityProfile 覆盖它。
   现有 benchmark 的 vision/PNG 成功也不能代替 canonical PDF 最终布局检查。修复 kit 后，
   至少对完整 golden 示例执行一次当前 runtime 的 `xdoc pptx visual-audit --candidate <deck.pptx>
-  --visual-mode create --output-dir <run-dir>/canonical --json`，读取 manifest 的 required checks、
+--visual-mode create --field-date <YYYY-MM-DD> --output-dir <iteration-dir>/canonical --json`，读取 manifest 的 required checks、
   findings 和 decision；若运行时未披露该路线，按 `create-runner.md` 的兼容路径处理并记录边界。
+  参考、candidate、benchmark 使用同一冻结日期；按 manifest/artifact path 定位产物，不猜文件名。
+  exit code 0、PNG 存在或旧 baseline 通过均不足以单独证明放行。
 - **常规 shape 也必须高保真**：不要只复刻版式语义而放松基础元素。人工 PNG 对比时逐页检查
   文本字号、字色、大小写、对齐、行高、圆形/方块尺寸、圆内文字颜色与居中、斜线/纹理方向、
   裁切边界和是否越界。除非为了通过可读性门禁并在 compare notes 中说明，PPTX 字号不应小于
@@ -297,6 +319,9 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 
 ## Run 目录约定
 
+以下 `.tmp/deckkit-<id>/` 均代表本次唯一 run；目录已存在时使用
+`.tmp/deckkit-<id>-<run>/`，并统一替换所有命令路径。不要混用新旧 run 的报告。
+
 ```text
 .tmp/deckkit-<id>/
 ├── ref-previews/          # 参考 deck PNG 基准（contact-sheet + 逐页）
@@ -307,9 +332,9 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 ├── fidelity-scope.md      # Phase 0 高保真范围决策（full/scoped）
 ├── task_plan.md / findings.md / progress.md / skill-feedback.md
 ├── generate.mjs           # Phase 1 探索生成器
-├── patch.json / out.pptx / dry-run.json / vision.json
-├── previews/              # 重建 deck PNG（每次重渲前 rm -rf）
-├── benchmark/             # 本次候选 kit 的 benchmark 输出、summary、contact sheets
+├── render-context.json    # 本次 runtime/build、源文件 hash、冻结 fieldDate
+├── iterations/01/         # patch、PPTX、dry-run、inspect、vision、canonical manifest/PNG/PDF
+├── benchmark/01/          # benchmark/readiness/catalog-update 共同 --out，旧轮次保留
 ├── compare-notes.md       # Phase 1 逐页对比记录
 └── audit/                 # Phase 2 content leak / text extraction / slot audit 产物
 ```

@@ -17,8 +17,9 @@ Phase 2 抽象的唯一依据。
 
 ## 1. 解包参考文件
 
-`unpack-pptx.nu` 是 xdoc 维护者仓库的 developer-only 工具（本机 `tools/unpack-pptx.nu`，
-不在 pptx-nova 仓库中）。务必先看帮助再使用：
+本仓库的 `tools/unpack-pptx.nu` 是可选 developer-only 工具，需要 Nushell；从仓库根目录
+运行，务必先看帮助。它按传统 `ppt/presentation.xml` 布局解析，非标准 OPC part 路径不要
+依赖它的页序结果；优先用当前 xdoc inspect/extract 并追踪实际关系：
 
 ```bash
 nu tools/unpack-pptx.nu -h
@@ -30,15 +31,16 @@ nu tools/unpack-pptx.nu -h
 
 ```bash
 nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -i          # 结构概览：页数、layouts、masters
-nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -l          # 列出所有 slides 与关键文件
-nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -s 3        # 第 3 页 slide XML 路径
-nu tools/unpack-pptx.nu <ref.pptx> -o .tmp/deckkit-<id>/ref-unpack -f "某文案"  # 全文搜索定位文案所在 XML
 ```
 
-没有维护者工具时，可用公开命令 `unzip -q <ref.pptx> -d .tmp/deckkit-<id>/ref-unpack` 解包，
+只在新目录执行一次解包；该 helper 会清空已有带标记的输出目录，不要重跑到旧证据目录。
+之后直接读取已解包文件。没有 Nushell 时，可用 `unzip -q <ref.pptx> -d .tmp/deckkit-<id>/ref-unpack` 解包，
 并用 `xdoc extract <ref.pptx> --parts map -o .tmp/deckkit-<id>/ref-map.json` 获取 slide/shape 映射。
 
-关键 XML 位置（解包目录 `ref-unpack/` 下）：
+先从 `[Content_Types].xml`、根 `_rels/.rels` 的 officeDocument 关系定位 presentation，
+再按 `sldIdLst` 的关系 id 解析实际 slide 顺序和 layout → master → theme。兼容 Strict 与
+Transitional namespace；不能按文件名排序、认定 theme1 属于全部 slides，或把 app.xml 页数当事实。
+下表仅列常见位置，不是固定路径合同：
 
 | 文件                                | 提取内容                                      |
 | ----------------------------------- | --------------------------------------------- |
@@ -72,18 +74,24 @@ xdoc pptx inspect <ref.pptx> --daemon --json > .tmp/deckkit-<id>/ref-inspect.jso
   unsupported 对象。
 - 再回到 `ref-unpack/` 的 XML 查证具体 `a:xfrm`、`a:solidFill`、`a:rPr sz`、
   placeholder、layout/master 继承来源。
-- 如果 inspect 与 XML/PNG 不一致，以 XML + PNG 为准，并在 `findings.md` 记录差异。
+- 分清局部 XML 与 layout/master/theme 的有效继承样式；group 子坐标先映射到最终 slide
+  坐标再比较。若 inspect 与 XML/PNG 不一致，记录对象、原始字段、继承来源、runtime 和报告，
+  按 `pptx-nova/references/fidelity-diagnosis.md` 定位，不用旧 renderer 的 PNG 覆盖文件事实。
 
 ## 3. 生成参考 PNG 基准
 
 ```bash
-xdoc convert <ref.pptx> --to png -o .tmp/deckkit-<id>/ref-previews --overwrite --contact-sheet
+xdoc pptx preview <ref.pptx> --output-dir .tmp/deckkit-<id>/ref-previews --contact-sheet --field-date <YYYY-MM-DD> --json > .tmp/deckkit-<id>/ref-preview.json
 ```
 
-先 Read `ref-previews/contact-sheet.png` 总览全 deck 的配色节奏、页型分布、chrome
+本次任务选定一个日期写入 `render-context.json`，所有参考/candidate 渲染复用它，同时记录
+runtime/build、源文件 hash 和字体替代。按 preview 报告的实际 artifact 路径找到 PNG/contact sheet，
+不猜 `slide-NN.png`。若 runtime 未披露 preview，按主 skill 的 export-and-check 兼容路线执行。
+
+先 Read contact sheet 总览全 deck 的配色节奏、页型分布、chrome
 一致性；再逐页 Read PNG。**每看完 1–2 页立刻把观察写进 `style-spec.md` /
 `slide-inventory.md`**（多模态信息不落盘就会丢失）。转换产物若带 `XDOC DEMO`
-水印，是渲染期叠加，分析与后续对比时一律忽略。
+水印，应记录为渲染环境限制，人工风格分析可排除其影响；不要遮掉水印来声称无水印交付或忽略 canonical finding。
 
 ## 4. style-spec.md 模板
 
@@ -92,7 +100,7 @@ xdoc convert <ref.pptx> --to png -o .tmp/deckkit-<id>/ref-previews --overwrite -
 ```markdown
 # <id> Style Spec（来源：<ref.pptx>）
 
-## 调色板（theme1.xml clrScheme + slide 实际用色统计）
+## 调色板（实际 owning theme 的 clrScheme + slide 有效用色统计）
 
 | 角色    | hex    | 出处          | 用途      |
 | ------- | ------ | ------------- | --------- |

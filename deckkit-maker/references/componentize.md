@@ -54,6 +54,11 @@ node deckkit-maker/scripts/content-leak-audit.mjs \
 用它审计会把正常 content 输出误报成 kit 泄漏。脚本命中时不要简单删词，要回到 schema、
 layoutContract 和页型函数，确认该字符串应由 `content.json`、`data.labels` 或 asset slot 驱动。
 
+**审计覆盖边界**：当前脚本只检查 `set-text-frame/add-text-box/add-paragraph/set-paragraph/add-run/set-run`
+的直接 `text` 字段。`ok: true` 不证明所有可见文本已检查；原生 chart/table、其他 op、拆成多个 run
+的短语、继承文本和图片里的字不在完整覆盖范围内。根据本次实际输出补对应回归断言，并对非参考
+content 构建后的 PPTX 做 inspect/文本提取与人工 review；不能把 `textCount: 0` 当作无泄漏证据。
+
 **图片资产防线**：对 kit 源码、examples、benchmark fixture 和新增 assets 搜索参考 deck
 提取出的图片文件名、hash、media 路径和 alt/name。除非是授权明确、跨 deck 可复用且用户确认的
 品牌资产，否则命中即泄漏。图片页型应只冻结图片使用结构：slot 名、裁切规则、边框、caption、
@@ -96,8 +101,11 @@ knownLimits / examples / refurbishProfile`（`refurbishProfile` 可用
   positioning / mood / layoutPrinciples / signatureElements / compositionRules / avoid 字符串数组，
   typography / colorSystem / slideRhythm 对象）——
   production/default 必需，缺失会被 readiness audit 阻塞。
-- `qualityProfile`：参考 deck 若合法使用小于通用下限的风格字号，在此声明并说明。
+- `qualityProfile`：记录 kit 的质量约束，不能降低 canonical Create 的可读性下限；参考小字号
+  按入口 SKILL 的规则适配，并同步 `x-slotBudget`、几何和 notes。
 - `knownLimits` 第一条写明来源：`"Based on <ref.pptx>; ..."`（broadside / cartesian 先例）。
+- generator DeckKit、`refurbishProfile` 和 xdoc 原生 skinning 是独立能力。不要因为 generator
+  benchmark 通过就声明 `nativeSkinning` 或源稿无损保留；有此需求按主 skill 的 probe 与对应合同验证。
 
 ## 4. 验证与 build
 
@@ -122,8 +130,8 @@ schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 imp
 
 - **最小合法 content build 测试**：每个页型构造最小 delivery content，
   validation 通过则 `createDeck` 必须不崩。
-- **content leak regression**：收集 patch 全部 `add-text-box`/`set-text-frame`/`add-run`
-  文本，断言不出现参考 deck 的主题词、产品名、示例指标、示例年份；
+- **content leak regression**：检查页型实际生成的所有可见文本载体（包括使用到的
+  chart/table、paragraph/rich runs；不能只搜三种 op），断言不出现参考专有主题词、产品名、指标或年份组合；
   rich text 页型断言 `data.calloutHighlights` 等字段能驱动 emphasis run。
 - **参数化测试**：每个页型至少一个非参考主题的输入被正确渲染。
 - **asset slot 测试**：Phase 1 登记过的 logo/截图/图片槽位若进入 Phase 2，必须验证缺失时
@@ -157,15 +165,26 @@ slot budget、validation tests 和有针对性的非视觉单测覆盖，避免�
 和密度边界，防止 scope 缩减掩盖组件化缺口。
 
 ```bash
-node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean
-node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live --json
-node pptx-nova/scripts/pptx-nova-deckkit-catalog-update.mjs --deckkit <id> --write
+XDOC_FIELD_DATE=<YYYY-MM-DD> node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --out .tmp/deckkit-<id>/benchmark/01
+node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live --out .tmp/deckkit-<id>/benchmark/01 --json
+node pptx-nova/scripts/pptx-nova-deckkit-catalog-update.mjs --deckkit <id> --readiness candidate --out .tmp/deckkit-<id>/benchmark/01 --write
 ```
+
+三条命令必须使用**同一个本轮新建的 `--out`**，不要读取默认共享目录里的旧 summary。
+上例为 POSIX shell 环境变量写法；Nushell 使用 `with-env { XDOC_FIELD_DATE: '<YYYY-MM-DD>' } { ... }`。
+`--repeat 3` 检查重复 validation/build，不代表三次独立渲染或人工审查。不要加 `--clean` 删除旧证据；
+下一轮换 `benchmark/02`。正式更新 catalog 前查看 readiness JSON 与将写入的 benchmark 结论。
+修复已有 kit 时保留既有 readiness，不因为复用示例而降为 candidate；只有新 kit 默认到 candidate。
+
+从 summary 的实际路径取完整 golden PPTX，按 `rebuild-high-fidelity.md` 对它执行一次冻结日期的
+canonical Create 并逐页 review 其 PNG；benchmark 的成功或历史 low baseline 都不能替代该门禁。
+reference 与 kit 产物若不完全相同，先用当前同一 runtime/日期重新渲染两者，再判定是否组件化回归。
 
 vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受噪声才
 `--update-baseline`。本 skill 默认推进到 **candidate** 即停；`production` 需要
 人工逐页 PNG review 后由用户确认，再带
 `--manual-hard-defects 0 --readiness production --confirm-manual-png-review --write`。
+promotion 的 catalog-update 同样传本轮 `--out`，不能重新读取共享默认目录。
 用户可见 showcase（`assets/examples/<id>/`）用 `just deckkit-examples` 维护，
 通常在 production 阶段才补。
 
@@ -189,5 +208,6 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 - [ ] validation tests（含 content leak regression）通过
 - [ ] golden benchmark 通过；stress-density 和 mixed-language 已在 `.tmp` 审查并记录；
       readiness audit 达到 candidate
+- [ ] 完整 golden 的 canonical Create 通过且已逐页 review；benchmark/readiness/catalog 使用同轮证据目录和冻结日期
 - [ ] 若改了默认行为/文档：按维护者仓库 skill-dev-guide §8.2 同步清单检查 pptx-nova 各文档
 - [ ] `git diff --check`；按仓库规范提交（English Conventional Commit）

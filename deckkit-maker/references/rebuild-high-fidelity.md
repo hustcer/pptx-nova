@@ -25,7 +25,11 @@ hard defect；字体替代、Tabler 近似图标、明确披露的 unsupported �
 
 ```bash
 cp pptx-nova/assets/examples/deck-generator-template.mjs .tmp/deckkit-<id>/generate.mjs
+cp pptx-nova/assets/examples/theme-packs.generated.mjs .tmp/deckkit-<id>/theme-packs.generated.mjs
 ```
+
+模板静态 import 同目录的 `theme-packs.generated.mjs`，必须一起复制；在新 run 中执行，
+不要覆盖旧探索生成器。模板中的历史 op 数量/overwrite 注释不构成当前门禁，以本文件循环为准。
 
 按 `style-spec.md` 改造：
 
@@ -56,40 +60,49 @@ Phase 1 的高保真目标不包括复刻一次性图片素材。优先重建图
   的 `assetSource` 提供。
 - 照片、插画、背景位图、嵌入对象预览：默认 scope out 或用中性占位，不为单一 deck 下沉 primitive。
 - HTML/CSS texture、SVG pattern、全页背景图：默认用可编辑 flat fill、线条、重复 shape 或
-  hatch 近似，不直接作为整页 `add-image` 背景。整页 SVG/bitmap 在 xdoc demo/render 中可能
-  生成占位覆盖层并遮住内容；确需使用时先做最小实验，验证 layer order、PNG 渲染和 PowerPoint
+  hatch 近似，不直接作为整页 `add-image` 背景。确需使用时以当前 runtime 做最小实验，
+  验证同一 PPTX 的 layer order、PNG 渲染和 PowerPoint
   打开效果，并在 `compare-notes.md` / catalog `knownLimits` 披露。
 - 替代元素必须语义相关：例如流程图可用箭头/节点，指标看板可用表格/图表，人物照片 quote 可用
   avatar slot；禁止用无关图标或装饰形状填满画面。
 
 ## 3. 重建循环
 
+每轮选择全新目录，以下命令在 run 根目录执行，`<YYYY-MM-DD>` 使用 Phase 0 冻结日期。
+命令逐项执行并读报告；有阻塞先修，不盲目串行跑到底。op 数量只用于排查，不能作为质量或完整性阈值。
+
 ```bash
-cd .tmp/deckkit-<id>
-node generate.mjs > patch.json
-jq '.ops | length' patch.json        # 客户演示级通常 ≥200 ops；明显偏低先怀疑装饰缺失
-xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json
-xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
-xdoc pptx vision-check out.pptx --json | tee vision.json   # high/medium 必须为 0
-rm -rf previews && xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
+mkdir -p iterations
+mkdir iterations/01
+node generate.mjs > iterations/01/patch.json
+xdoc pptx apply -p iterations/01/patch.json -o iterations/01/out.pptx --daemon --dry-run --json > iterations/01/dry-run.json
+xdoc pptx apply -p iterations/01/patch.json -o iterations/01/out.pptx --daemon --json > iterations/01/apply.json
+xdoc pptx inspect iterations/01/out.pptx --daemon --json > iterations/01/inspect.json
+xdoc pptx vision-check iterations/01/out.pptx --json > iterations/01/vision.json
+xdoc pptx visual-audit --candidate iterations/01/out.pptx --visual-mode create --field-date <YYYY-MM-DD> --output-dir iterations/01/canonical --json > iterations/01/visual-audit.json
 ```
+
+检查 dry-run 的阻塞、apply/inspect 的页数与对象、vision 的 high/medium，以及 canonical manifest
+的 required checks、findings、decision。Create 必须覆盖完整 candidate；PDF 最终布局是门禁的一部分。
+PNG 人工逐页 review 使用 manifest 中实际路径，避免重复渲染另一批不一致的图。
+需要 contact sheet 时可额外 preview，但须保留同一 PPTX hash 与 field date。
+runtime 未披露 canonical 路线时按 `pptx-nova/references/create-runner.md` 兼容路径执行并披露证据缺口。
 
 若宿主已按 `deckkit-maker/SKILL.md` 的 xdoc transport 边界验证 MCP 合同，可用
 `pptx_apply` 替换 dry-run/apply 两次对应调用，并在输入中传绝对路径；`vision-check`、
 `convert` 和其他未公开命令仍走 CLI。adapter 变化不改变 dry-run → apply → post-apply
 inspect、视觉检查及人工逐页对比门禁。
 
-**每次重渲前 `rm -rf previews`**：当前 xdoc 对已存在的 `-o previews` 必须带 `--overwrite`
-（否则退出码 9 拒绝写入），`--overwrite` 会清空并重写该目录；只有 `-o previews/`（尾部分隔符）
-才会写进 `previews/<stem>-img/` 子目录。`rm -rf` 仍能避免复核时看到陈旧图或漏掉尾部分隔符的落点漂移。
+下轮使用 `iterations/02/`，旧报告与图片保留。不要 `rm -rf previews`、重用旧 output-dir，
+或用 `--overwrite` 清空之前的证据。每轮更新 `compare-notes.md` 中对应的 PPTX hash、日期和 manifest 路径。
 
 ## 4. 逐页对比
 
 对比是本阶段的核心验收，不能用 contact-sheet 一眼带过：
 
-1. 先并排 Read 两张 contact-sheet（`ref-previews/` vs `previews/`），扫全局：
+1. 先查看参考 contact sheet 与本轮候选总览（若生成），扫全局：
    重建页与 `fidelity-scope.md` 一致、页序一致、配色节奏一致、chrome 一致。
-2. 逐页 Read rebuild set 中每一页的 `ref-previews/slide-NN.png` 与 `previews/slide-NN.png`，
+2. 按 slide-inventory 与两份 manifest 的页序/路径映射，逐页 Read rebuild set 的参考与 candidate PNG，
    按下表记录到 `compare-notes.md`：
 
 ```markdown
@@ -103,10 +116,11 @@ inspect、视觉检查及人工逐页对比门禁。
 
 - **hard defect**（必须修）：缺元素、错位 >0.1in、撞字/截断/折行孤行、配色错、
   层级错、连接线脱靶、对齐破坏。
-- **可接受替代**（披露即可）：字体替代、图标用 Tabler 近似替代、嵌入位图省略、
-  `XDOC DEMO` 水印。
-- **有意改进**（需用户确认）：参考 deck 本身的可读性缺陷（如 <9pt 正文）。默认
-  忠实复刻 + 在 notes 里标注；只有用户同意才偏离参考。
+- **可接受替代**（披露即可）：字体替代、图标用 Tabler 近似替代、嵌入位图省略。
+  `XDOC DEMO` 另记为渲染环境限制，不能据此忽略 canonical finding 或声称无水印交付。
+- **可读性适配**：依主 skill 的门禁增大过小正文/label、加深低对比颜色，优先调整文字框与
+  内容预算，保留层级和视觉语气，在 notes 记录即可。改变内容含义、整体风格或缩小重建范围才需确认；
+  不能以“忠实复刻”或 qualityProfile 例外绕过 canonical gate。
 
 修复后整个循环重跑，直到所有页 pass。
 
@@ -126,7 +140,9 @@ visual element。若发现新增形态，回到 Phase 0 扩大 rebuild set。
 - 单行高度用 `txH(sizePt)`（中文 1.5 系数），多行 `txH(sizePt, lines)`。
 - dry-run 与 vision-check 的 overflow 阈值不同，dry-run 干净不代表 vision-check
   干净，两个都跑。
-- 二次 `apply` / `convert` 记得 `--overwrite`。
+- 旧版 text layout 补偿在新 runtime 可能造成多余留白或折行；先看实际字体、body margin、
+  autofit、CJK/RTL/rich text 输出，再改 `txH` 或 slot budget，不能只更新静态估算。
+- freeform 使用显式 frame + 整数 `path`；group 几何须按最终 slide 坐标核对，不能比较局部坐标。
 - 图标：`p.icon(s, nm(s,'Xxx'), '<tabler-name>', x, y, w, h, { color, strokeWidth })`；
   名字必须先用 `pptx-nova-icons.mjs search` 确认存在。
 - 调试图片槽位时只记录尺寸、角色和来源；`generate.mjs` 默认用占位框或语义相关原生元素，
@@ -136,7 +152,8 @@ visual element。若发现新增形态，回到 Phase 0 扩大 rebuild set。
 
 - [ ] `fidelity-scope.md` 为 full 时，参考 deck 每一页都有对应重建页（页数、页序一致）
 - [ ] `fidelity-scope.md` 为 scoped 时，rebuild set 全部重建；未重建页影响已记录且无遗漏页型
-- [ ] dry-run 无阻塞 visualRisks；vision-check high/medium = 0
+- [ ] dry-run 无阻塞 visualRisks；apply 后 inspect 回读正确；vision-check high/medium = 0
+- [ ] 完整 candidate 的 canonical Create 判定通过；使用本轮 manifest 的 PNG 逐页复核，日期与 hash 已记录
 - [ ] `compare-notes.md` 范围内全部页 pass；可接受替代逐条披露
 - [ ] 图片/logo/截图均登记在 `findings.md`，并有 scope-out、shell rebuild、asset slot、
       known limit 或用户确认例外的 Phase 2 决策

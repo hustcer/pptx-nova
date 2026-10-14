@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import { createHash, randomUUID } from 'node:crypto'
 
 const DEFAULT_HIDE_SELECTORS = [
   'nav',
@@ -11,6 +12,7 @@ const DEFAULT_HIDE_SELECTORS = [
   '.slide-controls',
   '.presentation-controls',
   '.nav-dots',
+  '#nav-dots',
   '.nav-dot',
   '.nav-arrows',
   '.nav-arrow',
@@ -47,13 +49,15 @@ Options:
   --contact-cols <n>        Contact sheet columns. Default: 2
   --contact-thumb <WxH>     Contact sheet thumbnail size. Default: 640x360
   --contact-gap <px>        Contact sheet gap and outer margin. Default: 16
-  --session <name>          agent-browser session name. Default: deckkit-html-capture
+  --session <name>          Dedicated agent-browser session. Default: unique per run
+  --timeout-ms <n>          Per-browser-command/resource timeout in ms. Default: 30000
   --keep-open               Leave the browser session open after capture
   --json                    Print capture manifest JSON
 
-The script is intentionally generic: it only assumes that each slide can be
-selected with one CSS selector. By default it preserves each slide's CSS display
-mode; pass --active-display only when the template leaves slides display:none.\n`)
+Use a new or empty output directory; existing evidence is never overwritten.
+The generic adapter activates each slide with .active and preserves CSS display.
+Pass --active-display for display:none slides. Deck transforms and application
+state may need a template-specific adapter; invisible or clipped slides fail.\n`)
 }
 
 function parseArgs(argv) {
@@ -67,7 +71,8 @@ function parseArgs(argv) {
     contactCols: 2,
     contactThumb: '640x360',
     contactGap: 16,
-    session: 'deckkit-html-capture',
+    session: `deckkit-html-${randomUUID()}`,
+    timeoutMs: 30000,
     keepOpen: false,
     json: false,
   }
@@ -103,6 +108,7 @@ function parseArgs(argv) {
         '--contact-thumb',
         '--contact-gap',
         '--session',
+        '--timeout-ms',
       ].includes(arg)
     ) {
       const value = argv[i + 1]
@@ -124,7 +130,7 @@ function parseArgs(argv) {
   }
 
   const viewport = /^(\d+)x(\d+)$/i.exec(args.viewport)
-  if (!viewport) {
+  if (!viewport || Number(viewport[1]) < 1 || Number(viewport[2]) < 1) {
     process.stderr.write(
       `Invalid --viewport "${args.viewport}". Expected WxH, for example 1440x810.\n`,
     )
@@ -132,8 +138,12 @@ function parseArgs(argv) {
   }
   args.viewportWidth = Number(viewport[1])
   args.viewportHeight = Number(viewport[2])
-  args.contactCols = Number.parseInt(args.contactCols, 10)
-  args.contactGap = Number.parseInt(args.contactGap, 10)
+  args.contactCols = Number(args.contactCols)
+  args.contactGap = Number(args.contactGap)
+  args.timeoutMs = Number(args.timeoutMs)
+  if (!Number.isSafeInteger(args.timeoutMs) || args.timeoutMs < 1000) {
+    throw new Error('--timeout-ms must be an integer of at least 1000')
+  }
   if (!Number.isInteger(args.contactCols) || args.contactCols < 1) {
     process.stderr.write('--contact-cols must be a positive integer\n')
     process.exit(1)
@@ -142,7 +152,8 @@ function parseArgs(argv) {
     process.stderr.write('--contact-gap must be a non-negative integer\n')
     process.exit(1)
   }
-  if (!/^\d+x\d+$/i.test(args.contactThumb)) {
+  const contactThumb = /^(\d+)x(\d+)$/i.exec(args.contactThumb)
+  if (!contactThumb || Number(contactThumb[1]) < 1 || Number(contactThumb[2]) < 1) {
     process.stderr.write('--contact-thumb must use WxH, for example 640x360\n')
     process.exit(1)
   }
@@ -155,16 +166,31 @@ function normalizeUrl(input) {
 }
 
 function runAgentBrowser(args, commandArgs, options = {}) {
-  const result = spawnSync('agent-browser', ['--session', args.session, ...commandArgs], {
-    encoding: 'utf8',
-    input: options.input,
-  })
+  const fileAccess = args.url.startsWith('file:') ? ['--allow-file-access'] : []
+  const result = spawnSync(
+    'agent-browser',
+    ['--session', args.session, ...fileAccess, ...commandArgs],
+    {
+      encoding: 'utf8',
+      input: options.input,
+      timeout: args.timeoutMs,
+      maxBuffer: 8 * 1024 * 1024,
+    },
+  )
   if (result.status !== 0) {
     if (result.stdout) process.stderr.write(result.stdout)
     if (result.stderr) process.stderr.write(result.stderr)
-    throw new Error(`agent-browser ${commandArgs.join(' ')} failed`)
+    throw new Error(
+      `agent-browser ${commandArgs.join(' ')} failed${result.error ? `: ${result.error.message}` : ''}`,
+    )
   }
   return result.stdout.trim()
+}
+
+function fileEvidence(path) {
+  const bytes = readFileSync(path)
+  if (!bytes.length) throw new Error(`Empty capture artifact: ${path}`)
+  return { bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }
 }
 
 function parseEvalJson(stdout) {
@@ -267,7 +293,15 @@ function renderContactSheet(args, screenshots, outDir) {
 const args = parseArgs(process.argv.slice(2))
 const url = normalizeUrl(args.url)
 const outDir = resolve(args.out)
+if (existsSync(outDir) && (!statSync(outDir).isDirectory() || readdirSync(outDir).length)) {
+  throw new Error(`Output must be a new or empty directory: ${outDir}`)
+}
+const source = url.startsWith('file:')
+  ? { path: fileURLToPath(url), ...fileEvidence(fileURLToPath(url)) }
+  : { url, sha256: null }
 mkdirSync(outDir, { recursive: true })
+const browserArgs = { ...args, url }
+let browserStarted = false
 
 const captureCss = `
 *, *::before, *::after {
@@ -282,7 +316,8 @@ ${args.hideSelectors ? `${args.hideSelectors} { display: none !important; visibi
 `
 
 try {
-  runAgentBrowser(args, ['open', url])
+  browserStarted = true
+  runAgentBrowser(browserArgs, ['open', url])
   runAgentBrowser(args, [
     'set',
     'viewport',
@@ -307,6 +342,8 @@ const slides = Array.from(document.querySelectorAll(selector));
 return JSON.stringify({
   title: document.title,
   href: location.href,
+  userAgent: navigator.userAgent,
+  devicePixelRatio: window.devicePixelRatio,
   count: slides.length,
   selector,
 });
@@ -321,9 +358,10 @@ return JSON.stringify({
 
   const screenshots = []
   for (let index = 0; index < init.count; index += 1) {
-    runAgentBrowser(args, ['eval', '--stdin'], {
-      input: `
-(() => {
+    const readiness = parseEvalJson(
+      runAgentBrowser(args, ['eval', '--stdin'], {
+        input: `
+(async () => {
 const selector = ${JSON.stringify(args.selector)};
 const activeDisplay = ${JSON.stringify(args.activeDisplay)};
 const activeIndex = ${index};
@@ -344,19 +382,49 @@ slides.forEach((slide, i) => {
   }
 });
 window.dispatchEvent(new Event('resize'));
-return JSON.stringify({ activeIndex });
+const active = slides[activeIndex];
+let timer;
+try {
+  return await Promise.race([
+    (async () => {
+      // Flush layout after activation so newly used fonts and lazy images start loading.
+      active.getBoundingClientRect();
+      await document.fonts.ready;
+      const failedFonts = Array.from(document.fonts).filter(font => font.status === 'error');
+      if (failedFonts.length) throw new Error('Font loading failed: ' + failedFonts.map(font => font.family).join(', '));
+      const images = Array.from(active.querySelectorAll('img'));
+      await Promise.all(images.map(img => img.decode()));
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const box = active.getBoundingClientRect();
+      const style = getComputedStyle(active);
+      if (style.display === 'none' || style.visibility !== 'visible' || Number(style.opacity) === 0 ||
+          box.width <= 0 || box.height <= 0 || box.left < -1 || box.top < -1 ||
+          box.right > innerWidth + 1 || box.bottom > innerHeight + 1) {
+        throw new Error('Slide ' + (activeIndex + 1) + ' is hidden, offscreen or clipped; use a template-specific activation adapter or --active-display');
+      }
+      return JSON.stringify({ activeIndex, fonts: document.fonts.status, decodedImages: images.length,
+        bounds: { x: box.x, y: box.y, width: box.width, height: box.height } });
+    })(),
+    new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Slide resource readiness timed out')), ${Math.max(500, args.timeoutMs - 1000)}); }),
+  ]);
+} finally { clearTimeout(timer); }
 })()
 `,
-    })
-    runAgentBrowser(args, ['wait', '100'])
+      }),
+    )
     const path = resolve(outDir, screenshotName(index))
     runAgentBrowser(args, ['screenshot', path])
-    screenshots.push({ slideIndex: index, path })
+    screenshots.push({ slideIndex: index, path, ...fileEvidence(path), readiness })
   }
 
   const contactSheet = renderContactSheet(args, screenshots, outDir)
+  if (contactSheet.generated) Object.assign(contactSheet, fileEvidence(contactSheet.path))
   const manifest = {
     ok: true,
+    capturedAt: new Date().toISOString(),
+    source,
+    session: args.session,
+    browser: { userAgent: init.userAgent, devicePixelRatio: init.devicePixelRatio },
     title: init.title,
     url: init.href,
     inputUrl: args.url,
@@ -386,7 +454,7 @@ return JSON.stringify({ activeIndex });
   process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
   process.exitCode = 1
 } finally {
-  if (!args.keepOpen) {
+  if (browserStarted && !args.keepOpen) {
     try {
       runAgentBrowser(args, ['close'])
     } catch {

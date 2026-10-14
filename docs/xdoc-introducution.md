@@ -1828,7 +1828,7 @@ licensing are separate boundaries. The verified runtime publishes this behavior
 under `commands.convert.licensePolicy` and `authContract.productLimits`: without
 an active entitlement, the Free Baseline limits each task to 10 slides and
 5 MiB (5,242,880 bytes) of compressed PPTX input, PDF/PNG output carries a
-visible `XDOC DEMO` watermark, and an input over those limits is denied with
+visible `structurify.io` watermark, and an input over those limits is denied with
 exit code 4 before any content is written. A signed license JSON may be
 supplied through `--license` or the documented lookup locations. Probe the
 exact binary because a later release can revise the policy contract.
@@ -2071,7 +2071,7 @@ claims should stay tied to the measured contract and its declared limitations.
 17. Distribution licensing and runtime conversion authorization are separate.
     Without an active entitlement the Free Baseline (`authContract.productLimits`)
     limits each task to 10 slides and 5 MiB of compressed PPTX input, PDF/PNG
-    output carries a visible `XDOC DEMO` watermark, and larger inputs are denied
+    output carries a visible `structurify.io` watermark, and larger inputs are denied
     with exit code 4; verify the exact artifact and terms.
 
 ## Evidence and release discipline

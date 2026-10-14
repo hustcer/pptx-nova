@@ -90,7 +90,7 @@ runtime/build、源文件 hash 和字体替代。按 preview 报告的实际 art
 
 先 Read contact sheet 总览全 deck 的配色节奏、页型分布、chrome
 一致性；再逐页 Read PNG。**每看完 1–2 页立刻把观察写进 `style-spec.md` /
-`slide-inventory.md`**（多模态信息不落盘就会丢失）。转换产物若带 `XDOC DEMO`
+`slide-inventory.md`**（多模态信息不落盘就会丢失）。转换产物若带 `structurify.io`
 水印，应记录为渲染环境限制，人工风格分析可排除其影响；不要遮掉水印来声称无水印交付或忽略 canonical finding。
 
 ## 4. style-spec.md 模板

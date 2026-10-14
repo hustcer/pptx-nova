@@ -667,8 +667,8 @@ const _txH = (sizePt, lines = 1) => `${((sizePt / 72) * 1.5 * lines).toFixed(2)}
 
 // 每页通用底层：顶部品牌色横条 + 页脚 + 页码 + watermark
 // watermark 参数化:默认空串(不渲染);传字串则渲染为右上角半透明品牌标识。
-// 早期模板把 'XDOC DEMO' 硬编码在这里,导致换品牌时左下角 footerLeft 写"BRAND·X"、
-// 右上角 watermark 仍写"XDOC DEMO"—— 同一页面两种身份。
+// 早期模板把 'structurify.io' 硬编码在这里,导致换品牌时左下角 footerLeft 写"BRAND·X"、
+// 右上角 watermark 仍写"structurify.io"—— 同一页面两种身份。
 const pageChrome = (slide, total, footerLeft, watermark = '') => {
   const top = nm(slide, 'TopBar')
   if (S.chrome.topBarH > 0) {

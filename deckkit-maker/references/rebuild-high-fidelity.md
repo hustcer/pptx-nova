@@ -117,7 +117,7 @@ inspect、视觉检查及人工逐页对比门禁。
 - **hard defect**（必须修）：缺元素、错位 >0.1in、撞字/截断/折行孤行、配色错、
   层级错、连接线脱靶、对齐破坏。
 - **可接受替代**（披露即可）：字体替代、图标用 Tabler 近似替代、嵌入位图省略。
-  `XDOC DEMO` 另记为渲染环境限制，不能据此忽略 canonical finding 或声称无水印交付。
+  `structurify.io` 另记为渲染环境限制，不能据此忽略 canonical finding 或声称无水印交付。
 - **可读性适配**：依主 skill 的门禁增大过小正文/label、加深低对比颜色，优先调整文字框与
   内容预算，保留层级和视觉语气，在 notes 记录即可。改变内容含义、整体风格或缩小重建范围才需确认；
   不能以“忠实复刻”或 qualityProfile 例外绕过 canonical gate。

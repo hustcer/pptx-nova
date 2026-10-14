@@ -429,20 +429,20 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](./rich-deck-patte
 
 ## 常见返工原因（生成器特有）
 
-| 现象                                                    | 根因                                                                                                                                     |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 第一发 dry-run 报 `set-paragraph` 字段错误              | `pAlign` helper 必须用 `op: 'set-paragraph'` 且把 `alignment` 放进嵌套 `format` 对象(模板已修,自己写新 helper 时别把 `alignment` 放顶层) |
-| fill / line op 命不中（resolvedSelectors 报 not-found） | shape name 引用裸名，应用 `nm(s, "...")`                                                                                                 |
-| 主题色没换干净（部分 shape 还是旧色）                   | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                                                     |
-| KPI 4 卡片不等距                                        | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                                               |
-| textbox 大量 text-overflow-estimate warning             | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                                                    |
-| freeform / donut / polygon 在 PNG 中看不见              | 核对 `add-freeform` 的带单位 `x/y/w/h` 与整数 `path` viewport，按运行时 schema 使用 move/line/cubic/close，并检查填充和线条。            |
-| 同页左下 footer 写"BRAND·X"右上 watermark 写"XDOC DEMO" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化                                           |
-| 第二次跑 `apply` 报 `output_exists`                     | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                                 |
-| 第二次跑 `convert` 报 PNG 已存在                        | `convert` 也需要 `--overwrite`                                                                                                           |
-| `xdoc -t png` 返回 help                                 | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                                                             |
-| `legend: "b"` / `position: "outEnd"` 被拒               | enum 必须使用 canonical 值 `"bottom"` / `"outside-end"`，shorthand 拒                                                                    |
-| `titleStyle.bold` 被拒                                  | 放进 `font: { bold: true }` 子对象                                                                                                       |
+| 现象                                                         | 根因                                                                                                                                     |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 第一发 dry-run 报 `set-paragraph` 字段错误                   | `pAlign` helper 必须用 `op: 'set-paragraph'` 且把 `alignment` 放进嵌套 `format` 对象(模板已修,自己写新 helper 时别把 `alignment` 放顶层) |
+| fill / line op 命不中（resolvedSelectors 报 not-found）      | shape name 引用裸名，应用 `nm(s, "...")`                                                                                                 |
+| 主题色没换干净（部分 shape 还是旧色）                        | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                                                     |
+| KPI 4 卡片不等距                                             | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                                               |
+| textbox 大量 text-overflow-estimate warning                  | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                                                    |
+| freeform / donut / polygon 在 PNG 中看不见                   | 核对 `add-freeform` 的带单位 `x/y/w/h` 与整数 `path` viewport，按运行时 schema 使用 move/line/cubic/close，并检查填充和线条。            |
+| 同页左下 footer 写"BRAND·X"右上 watermark 写"structurify.io" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化                                           |
+| 第二次跑 `apply` 报 `output_exists`                          | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                                 |
+| 第二次跑 `convert` 报 PNG 已存在                             | `convert` 也需要 `--overwrite`                                                                                                           |
+| `xdoc -t png` 返回 help                                      | 错误命令格式，正确是 `xdoc convert <pptx> --to png -o <dir>`                                                                             |
+| `legend: "b"` / `position: "outEnd"` 被拒                    | enum 必须使用 canonical 值 `"bottom"` / `"outside-end"`，shorthand 拒                                                                    |
+| `titleStyle.bold` 被拒                                       | 放进 `font: { bold: true }` 子对象                                                                                                       |
 
 ---
 

@@ -3299,7 +3299,7 @@
       },
       "knownLimits": [
         "Bricolage Grotesque and Fraunces are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
-        "Paper texture is represented by flat editable fills rather than bitmap texture assets because full-slide SVG texture pictures render as xdoc demo placeholders.",
+        "Paper texture is represented by flat editable fills rather than bitmap texture assets because full-slide SVG texture pictures render as structurify.io watermark placeholders.",
         "The cover edition-number block is optional; omit bigEdition/bigLabel/bigMeta when a deck has no meaningful issue-number content."
       ],
       "examples": [

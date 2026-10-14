@@ -273,7 +273,7 @@ a separate policy boundary. The verified runtime exposes its current behavior
 in `commands.convert.licensePolicy` and `authContract.productLimits`: without
 an active entitlement, the Free Baseline limits each task to 10 slides and
 5 MiB (5,242,880 bytes) of compressed PPTX input, PDF/PNG output carries a
-visible `XDOC DEMO` watermark, and larger inputs are denied with exit code 4.
+visible `structurify.io` watermark, and larger inputs are denied with exit code 4.
 Verify the exact artifact and schema instead of assuming that later
 distributions behave identically.
 
@@ -294,7 +294,7 @@ command.
 | macOS reports an incompatible system version         | The artifact was built with a newer deployment target than the worker    | Publish and select an archive whose documented minimum macOS version includes the worker; do not promise compatibility from the runner name alone |
 | Text wraps differently across workers                | Fonts or font cache differ                                               | Compare `xdoc extract ... --parts fonts`, provision the same fonts, and retain render provenance                                                  |
 | A file exists but the Agent marks the job successful | The caller checked filesystem existence instead of the report            | Parse the command's versioned report and exit policy; a file alone is not a gate                                                                  |
-| `XDOC DEMO` appears in PDF/PNG output                | The runtime's conversion authorization policy is inactive or restricted  | Check the exact edition/license and document the watermark policy for the deployment                                                              |
+| `structurify.io` appears in PDF/PNG output           | The runtime's conversion authorization policy is inactive or restricted  | Check the exact edition/license and document the watermark policy for the deployment                                                              |
 
 ## Related documentation
 

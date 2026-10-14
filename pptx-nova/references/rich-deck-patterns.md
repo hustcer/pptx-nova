@@ -109,7 +109,7 @@
     "x": "11.5in", "y": "0.2in", "w": "1.7in", "h": "0.3in",
     "name": "Watermark" },
   { "op": "set-text-frame", "slide": N, "shape": { "name": "Watermark" },
-    "text": "XDOC DEMO" },
+    "text": "structurify.io" },
   { "op": "set-run", "slide": N, "shape": { "name": "Watermark" },
     "paragraph": 0, "run": 0,
     "font": { "name": "Inter", "size": "9pt", "bold": true, "color": "E8EAED" } }

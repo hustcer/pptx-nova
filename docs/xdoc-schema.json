@@ -1,7 +1,7 @@
 {
   "name": "xdoc",
-  "version": "0.11.0 (ccedd2f7)",
-  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
+  "version": "0.11.0 (3cdd156d)",
+  "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
       "description": "Convert document file(s) to one or more output formats.",
@@ -185,6 +185,12 @@
           "applicability": {
             "formatIncludesAny": ["png"]
           }
+        },
+        {
+          "name": "field-date",
+          "type": "string",
+          "description": "Freeze dynamic date fields as YYYY-MM-DD; overrides XDOC_FIELD_DATE and never changes authorization time",
+          "required": false
         },
         {
           "name": "prefix",
@@ -687,6 +693,9 @@
             "minimum": 1,
             "maximum": 1200,
             "default": 144
+          },
+          "field-date": {
+            "type": "string"
           },
           "prefix": {
             "type": "string",
@@ -2191,6 +2200,12 @@
           "maximum": 1200
         },
         {
+          "name": "field-date",
+          "type": "string",
+          "description": "Freeze dynamic date fields as YYYY-MM-DD; overrides XDOC_FIELD_DATE and never changes authorization time",
+          "required": false
+        },
+        {
           "name": "channel-threshold",
           "type": "int",
           "description": "Maximum per-channel pixel delta ignored by pptx visual-audit; defaults to 26",
@@ -2345,7 +2360,7 @@
         {
           "name": "allow-raw-xml",
           "type": "bool",
-          "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
+          "description": "Enable raw OOXML mutations through patch-ooxml. Guarded repair-child-order, repair-preset-adjustments and repair-relationships actions do not require this flag.",
           "required": false,
           "style": "flag"
         },
@@ -2416,7 +2431,7 @@
         "xdoc pptx apply --patch patch.json --dry-run",
         "xdoc pptx inspect deck.pptx --json",
         "xdoc pptx select deck.pptx --query '{\"textRegex\":\"Revenue\"}' --json",
-        "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json",
+        "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json",
         "xdoc pptx visual-audit --candidate new.pptx --reference old.pptx --output-dir evidence --json",
         "xdoc pptx vision-check deck.pptx --json",
         "xdoc pptx diff old.pptx new.pptx --json",
@@ -5288,7 +5303,7 @@
             {
               "name": "allow-raw-xml",
               "type": "bool",
-              "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
+              "description": "Enable raw OOXML mutations through patch-ooxml. Guarded repair-child-order, repair-preset-adjustments and repair-relationships actions do not require this flag.",
               "required": false,
               "style": "flag"
             },
@@ -6165,6 +6180,12 @@
               "style": "flag"
             },
             {
+              "name": "field-date",
+              "type": "string",
+              "description": "Freeze dynamic date fields as YYYY-MM-DD; overrides XDOC_FIELD_DATE and never changes authorization time",
+              "required": false
+            },
+            {
               "name": "json",
               "type": "bool",
               "description": "Emit the selected action's documented machine-readable result on stdout",
@@ -6242,7 +6263,7 @@
             "productWriteCondition": "--layout"
           },
           "examples": [
-            "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet out.png --json"
+            "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json"
           ],
           "parametersSchema": {
             "type": "object",
@@ -6276,6 +6297,9 @@
               "overwrite": {
                 "type": "boolean",
                 "default": false
+              },
+              "field-date": {
+                "type": "string"
               },
               "json": {
                 "type": "boolean",
@@ -6466,6 +6490,12 @@
               "required": false
             },
             {
+              "name": "field-date",
+              "type": "string",
+              "description": "Freeze dynamic date fields as YYYY-MM-DD; overrides XDOC_FIELD_DATE and never changes authorization time",
+              "required": false
+            },
+            {
               "name": "json",
               "type": "bool",
               "description": "Emit the selected action's documented machine-readable result on stdout",
@@ -6528,6 +6558,9 @@
               "visual-mode": {
                 "type": "string"
               },
+              "field-date": {
+                "type": "string"
+              },
               "json": {
                 "type": "boolean",
                 "default": false
@@ -6576,7 +6609,8 @@
             "child-order",
             "child-cardinality",
             "child-choice",
-            "part-graph"
+            "part-graph",
+            "preset-adjustments"
           ],
           "ioContract": {
             "stdout": {
@@ -6703,13 +6737,17 @@
           }
         },
         "diff": {
-          "usage": "xdoc pptx diff before.pptx after.pptx --json [--detail summary|full]",
+          "usage": "xdoc pptx diff before.pptx after.pptx --json [--detail summary|full] [--output evidence.json]",
           "outputKind": "report",
           "inputs": ["source PPTX", "candidate PPTX"],
-          "outputs": ["pptx-diff/v1 JSON report", "human summary"],
+          "outputs": [
+            "pptx-diff/v1 JSON report",
+            "human summary",
+            "optional hash-bound full JSON evidence file"
+          ],
           "defaultDetail": "summary",
           "detailModes": {
-            "summary": "default compact rollup for agents and CI; omits per-shape evidence arrays and points to --detail full when evidence is needed",
+            "summary": "default compact rollup; --output persists the complete evidence in this execution and returns its path/hash. Without --output, fullEvidenceAvailable is false.",
             "full": "complete per-slide/per-shape/per-field evidence with hashes and previews"
           },
           "classes": ["added", "removed", "changed", "unchanged", "uncertain", "unsupported"],
@@ -6801,6 +6839,13 @@
               "required": false
             },
             {
+              "name": "output",
+              "type": "path",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
+              "required": false,
+              "short": "o"
+            },
+            {
               "name": "json",
               "type": "bool",
               "description": "Emit the selected action's documented machine-readable result on stdout",
@@ -6853,6 +6898,9 @@
                 "type": "string"
               },
               "detail": {
+                "type": "string"
+              },
+              "output": {
                 "type": "string"
               },
               "json": {
@@ -9037,6 +9085,12 @@
               "style": "flag"
             },
             {
+              "name": "field-date",
+              "type": "string",
+              "description": "Freeze dynamic date fields as YYYY-MM-DD; overrides XDOC_FIELD_DATE and never changes authorization time",
+              "required": false
+            },
+            {
               "name": "json",
               "type": "bool",
               "description": "Emit the selected action's documented machine-readable result on stdout",
@@ -9105,6 +9159,9 @@
               "overwrite": {
                 "type": "boolean",
                 "default": false
+              },
+              "field-date": {
+                "type": "string"
               },
               "json": {
                 "type": "boolean",
@@ -10520,7 +10577,7 @@
             {
               "name": "allow-raw-xml",
               "type": "bool",
-              "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
+              "description": "Enable raw OOXML mutations through patch-ooxml. Guarded repair-child-order, repair-preset-adjustments and repair-relationships actions do not require this flag.",
               "required": false,
               "style": "flag"
             },
@@ -10947,7 +11004,7 @@
             {
               "name": "allow-raw-xml",
               "type": "bool",
-              "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
+              "description": "Enable raw OOXML mutations through patch-ooxml. Guarded repair-child-order, repair-preset-adjustments and repair-relationships actions do not require this flag.",
               "required": false,
               "style": "flag"
             },
@@ -12640,7 +12697,7 @@
             {
               "name": "allow-raw-xml",
               "type": "bool",
-              "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
+              "description": "Enable raw OOXML mutations through patch-ooxml. Guarded repair-child-order, repair-preset-adjustments and repair-relationships actions do not require this flag.",
               "required": false,
               "style": "flag"
             },
@@ -12783,7 +12840,7 @@
             {
               "name": "allow-raw-xml",
               "type": "bool",
-              "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
+              "description": "Enable raw OOXML mutations through patch-ooxml. Guarded repair-child-order, repair-preset-adjustments and repair-relationships actions do not require this flag.",
               "required": false,
               "style": "flag"
             },
@@ -13097,7 +13154,7 @@
             {
               "name": "allow-raw-xml",
               "type": "bool",
-              "description": "Enable raw OOXML mutations through patch-ooxml. The guarded repair-child-order and repair-relationships actions do not require this flag.",
+              "description": "Enable raw OOXML mutations through patch-ooxml. Guarded repair-child-order, repair-preset-adjustments and repair-relationships actions do not require this flag.",
               "required": false,
               "style": "flag"
             },
@@ -19920,10 +19977,11 @@
               "remove",
               "replace",
               "repair-child-order",
+              "repair-preset-adjustments",
               "repair-relationships"
             ],
             "strict": true,
-            "description": "Supported raw OOXML mutations plus the guarded generated child-order and relationship repair actions."
+            "description": "Raw OOXML mutations and guarded child-order, preset-adjustment and relationship repairs. Preset adjustment normalization requires explicit adoption and an unchanged part; it preserves existing values, fills declared defaults and orders known constant guides. Unknown or ambiguous content is not repaired."
           },
           "sha256Hex": {
             "type": "string",
@@ -19932,13 +19990,13 @@
             "pattern": "^[0-9a-f]{64}$",
             "description": "Lowercase SHA-256 hex digest."
           },
-          "childOrderRepairs": {
+          "elementRepairs": {
             "type": "array",
             "minItems": 1,
             "items": {
-              "$ref": "#/$defs/childOrderRepair"
+              "$ref": "#/$defs/elementRepair"
             },
-            "description": "Exact element paths and generated-rule identities for one atomic child-order repair."
+            "description": "Exact element paths and rule identities for one atomic guarded element repair; the selected action determines the supported rules."
           },
           "relationshipRepair": {
             "type": "object",
@@ -19992,7 +20050,7 @@
             },
             "description": "Guarded relationship repairs applied atomically to one .rels part."
           },
-          "childOrderRepair": {
+          "elementRepair": {
             "type": "object",
             "additionalProperties": false,
             "required": ["elementPath", "element", "ruleId", "expectedRuleSha256"],
@@ -20018,7 +20076,7 @@
               },
               "expectedElementSha256": {
                 "$ref": "#/$defs/sha256Hex",
-                "description": "Optional target-element precondition used when unrelated edits changed the enclosing part."
+                "description": "Optional target-element precondition. Child-order repair may use it after unrelated part edits; preset-adjustment repair still requires the exact part SHA."
               }
             }
           },
@@ -20052,7 +20110,7 @@
             "required": ["type"],
             "properties": {
               "type": {
-                "$ref": "#/$defs/placeholderType"
+                "$ref": "#/$defs/slidePlaceholderType"
               },
               "font": {
                 "$ref": "#/$defs/fontOrName"
@@ -21594,7 +21652,29 @@
                 "type": "boolean"
               },
               "underline": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "none",
+                  "words",
+                  "sng",
+                  "dbl",
+                  "heavy",
+                  "dotted",
+                  "dottedHeavy",
+                  "dash",
+                  "dashHeavy",
+                  "dashLong",
+                  "dashLongHeavy",
+                  "dotDash",
+                  "dotDashHeavy",
+                  "dotDotDash",
+                  "dotDotDashHeavy",
+                  "wavy",
+                  "wavyHeavy",
+                  "wavyDbl"
+                ],
+                "strict": true,
+                "description": "Exact DrawingML ST_TextUnderlineType keyword. Use sng for single underline and dbl for double; aliases such as single are rejected before writing. Omit to preserve the local value; none explicitly disables underline. This does not repair preserved source XML or certify rendering of every style."
               },
               "color": {
                 "$ref": "#/$defs/color"
@@ -22981,8 +23061,27 @@
             "enum": ["straight", "elbow", "curve"],
             "strict": true
           },
+          "connectorCreationEndpoint": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/connectorEndpoint"
+              },
+              {
+                "anyOf": [
+                  {
+                    "required": ["x", "y"]
+                  },
+                  {
+                    "required": ["shape", "site"]
+                  }
+                ]
+              }
+            ],
+            "description": "Creation requires both coordinates or a shape/site binding. Binding resolves the native connection site and takes precedence over supplied fallback coordinates."
+          },
           "connectorEndpoint": {
             "type": "object",
+            "description": "A coordinate edit or native shape/site binding. Site indices belong to the target geometry, not a universal four-side enumeration. Binding takes precedence over coordinates and includes adjustments, rotation, flips and group transforms. set-connector permits a partial coordinate edit; add-connector requires both coordinates when unbound.",
             "additionalProperties": false,
             "dependentRequired": {
               "shape": ["site"],
@@ -23001,7 +23100,7 @@
               "site": {
                 "type": "integer",
                 "minimum": 0,
-                "maximum": 3
+                "maximum": 2147483647
               }
             },
             "anyOf": [
@@ -23036,7 +23135,8 @@
               "dgm",
               "sldImg"
             ],
-            "strict": true
+            "strict": true,
+            "description": "PresentationML placeholder identities for lookup, including notes/handout types in preserved input. Authoring uses slidePlaceholderType."
           },
           "chartAxis": {
             "type": "string",
@@ -23490,7 +23590,7 @@
           "chartDataLabelsPatch": {
             "type": "object",
             "additionalProperties": false,
-            "description": "Data-label mutation shared by classic and ChartEx charts. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
+            "description": "Data-label mutation shared by classic and ChartEx charts. Classic area and area-3d reject explicit position at plot, series and point scope; omit position to preserve default or imported placement. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
             "properties": {
               "scope": {
                 "$ref": "#/$defs/chartLabelScope"
@@ -26247,6 +26347,70 @@
             "maximum": 4294967295,
             "default": 4,
             "description": "WheelReverse spokes use the full UInt32 domain and XSD default 4. Structural validity does not certify Office playback of every value."
+          },
+          "slidePlaceholderType": {
+            "type": "string",
+            "enum": [
+              "title",
+              "body",
+              "ctrTitle",
+              "subTitle",
+              "dt",
+              "ftr",
+              "sldNum",
+              "obj",
+              "pic",
+              "chart",
+              "tbl",
+              "clipArt",
+              "media",
+              "dgm"
+            ],
+            "strict": true,
+            "description": "Canonical PresentationML types for ordinary slides and slide layouts. Notes/handout-only hdr and sldImg are not authorable here."
+          },
+          "slideLayoutType": {
+            "type": "string",
+            "strict": true,
+            "enum": [
+              "title",
+              "tx",
+              "twoColTx",
+              "tbl",
+              "txAndChart",
+              "chartAndTx",
+              "dgm",
+              "chart",
+              "txAndClipArt",
+              "clipArtAndTx",
+              "titleOnly",
+              "blank",
+              "txAndObj",
+              "objAndTx",
+              "objOnly",
+              "obj",
+              "txAndMedia",
+              "mediaAndTx",
+              "objOverTx",
+              "txOverObj",
+              "txAndTwoObj",
+              "twoObjAndTx",
+              "twoObjOverTx",
+              "fourObj",
+              "vertTx",
+              "clipArtAndVertTx",
+              "vertTitleAndTx",
+              "vertTitleAndTxOverChart",
+              "twoObj",
+              "objAndTwoObj",
+              "twoObjAndObj",
+              "cust",
+              "secHead",
+              "twoTxTwoObj",
+              "objTx",
+              "picTx"
+            ],
+            "description": "Canonical PresentationML slide layout type for explicit authoring. This changes metadata only, not layout geometry. Omitted create uses blank; omitted copy/set preserves existing identity. Layout selectors can match arbitrary preserved types."
           }
         },
         "properties": {
@@ -27912,10 +28076,10 @@
                           "const": "add-connector"
                         },
                         "begin": {
-                          "$ref": "#/$defs/connectorEndpoint"
+                          "$ref": "#/$defs/connectorCreationEndpoint"
                         },
                         "end": {
-                          "$ref": "#/$defs/connectorEndpoint"
+                          "$ref": "#/$defs/connectorCreationEndpoint"
                         },
                         "kind": {
                           "$ref": "#/$defs/connectorKind"
@@ -28082,11 +28246,12 @@
                           "$ref": "#/$defs/layoutSelector"
                         },
                         "type": {
-                          "type": "string"
+                          "$ref": "#/$defs/slideLayoutType"
                         }
                       },
                       "required": ["op"],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "description": "Create a blank layout or copy an existing layout. Explicit type values use canonical PresentationML tokens, such as cust. Omitting type preserves blank on creation or the copied source identity."
                     },
                     {
                       "type": "object",
@@ -28117,7 +28282,7 @@
                           "type": "string"
                         },
                         "type": {
-                          "$ref": "#/$defs/placeholderType"
+                          "$ref": "#/$defs/slidePlaceholderType"
                         },
                         "w": {
                           "$ref": "#/$defs/length"
@@ -28130,7 +28295,8 @@
                         }
                       },
                       "required": ["op", "layout", "type", "x", "y", "w", "h"],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "description": "Create an ordinary slide-layout placeholder using canonical PresentationML tokens. Notes/handout-only hdr and sldImg are rejected before mutation."
                     },
                     {
                       "type": "object",
@@ -28229,11 +28395,12 @@
                           "type": "string"
                         },
                         "type": {
-                          "$ref": "#/$defs/placeholderType"
+                          "$ref": "#/$defs/slidePlaceholderType"
                         }
                       },
                       "required": ["op", "slide", "type"],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "description": "Copy a matching layout/master placeholder onto an ordinary slide. Uses canonical PresentationML type tokens; notes/handout-only hdr and sldImg are rejected before mutation."
                     },
                     {
                       "type": "object",
@@ -28730,7 +28897,7 @@
                           "$ref": "#/$defs/relationshipRepairs"
                         },
                         "repairs": {
-                          "$ref": "#/$defs/childOrderRepairs"
+                          "$ref": "#/$defs/elementRepairs"
                         },
                         "target": {
                           "type": "string"
@@ -28837,6 +29004,27 @@
                               "properties": {
                                 "action": {
                                   "const": "repair-child-order"
+                                },
+                                "xpath": {
+                                  "const": "/"
+                                }
+                              },
+                              "required": ["expectedPartSha256", "repairs"],
+                              "not": {
+                                "anyOf": [
+                                  {
+                                    "required": ["value"]
+                                  },
+                                  {
+                                    "required": ["relationshipRepairs"]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "properties": {
+                                "action": {
+                                  "const": "repair-preset-adjustments"
                                 },
                                 "xpath": {
                                   "const": "/"
@@ -29260,11 +29448,12 @@
                           "type": "string"
                         },
                         "type": {
-                          "type": "string"
+                          "$ref": "#/$defs/slideLayoutType"
                         }
                       },
                       "required": ["op", "layout"],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "description": "Update layout metadata. An explicit type must be a canonical PresentationML token; omitted type is preserved. Changing type does not synthesize placeholder geometry."
                     },
                     {
                       "type": "object",
@@ -29284,6 +29473,7 @@
                       },
                       "required": ["op"],
                       "additionalProperties": false,
+                      "description": "Update slide-master background or shared title/body/other text-style slots selected by ordinary slide placeholder types. Types can share a style slot. This does not create placeholder shapes or edit notes/handout masters.",
                       "allOf": [
                         {
                           "anyOf": [
@@ -30362,40 +30552,23 @@
             "strict": true,
             "description": "Variant matrix: bar/column/bar-3d=clustered|stacked|percent-stacked; column-3d=standard|clustered|stacked|percent-stacked; area/area-3d=standard|stacked|percent-stacked; line=standard|markers|stacked|percent-stacked; line-3d=standard; scatter=markers|lines|lines-no-markers|smooth|smooth-no-markers; pie/pie-3d/doughnut=standard|exploded; surface/surface-3d=standard|wireframe; stock=standard."
           },
-          "connectorEndpoint": {
-            "type": "object",
-            "additionalProperties": false,
-            "dependentRequired": {
-              "shape": ["site"],
-              "site": ["shape"]
-            },
-            "properties": {
-              "x": {
-                "$ref": "#/$defs/length"
+          "connectorCreationEndpoint": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/connectorEndpoint"
               },
-              "y": {
-                "$ref": "#/$defs/length"
-              },
-              "shape": {
-                "$ref": "#/$defs/shapeSelector"
-              },
-              "site": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 3
+              {
+                "anyOf": [
+                  {
+                    "required": ["x", "y"]
+                  },
+                  {
+                    "required": ["shape", "site"]
+                  }
+                ]
               }
-            },
-            "anyOf": [
-              {
-                "required": ["x"]
-              },
-              {
-                "required": ["y"]
-              },
-              {
-                "required": ["shape", "site"]
-              }
-            ]
+            ],
+            "description": "Creation requires both coordinates or a shape/site binding. Binding resolves the native connection site and takes precedence over supplied fallback coordinates."
           },
           "connectorKind": {
             "type": "string",
@@ -30515,6 +30688,49 @@
               }
             ]
           },
+          "slideLayoutType": {
+            "type": "string",
+            "strict": true,
+            "enum": [
+              "title",
+              "tx",
+              "twoColTx",
+              "tbl",
+              "txAndChart",
+              "chartAndTx",
+              "dgm",
+              "chart",
+              "txAndClipArt",
+              "clipArtAndTx",
+              "titleOnly",
+              "blank",
+              "txAndObj",
+              "objAndTx",
+              "objOnly",
+              "obj",
+              "txAndMedia",
+              "mediaAndTx",
+              "objOverTx",
+              "txOverObj",
+              "txAndTwoObj",
+              "twoObjAndTx",
+              "twoObjOverTx",
+              "fourObj",
+              "vertTx",
+              "clipArtAndVertTx",
+              "vertTitleAndTx",
+              "vertTitleAndTxOverChart",
+              "twoObj",
+              "objAndTwoObj",
+              "twoObjAndObj",
+              "cust",
+              "secHead",
+              "twoTxTwoObj",
+              "objTx",
+              "picTx"
+            ],
+            "description": "Canonical PresentationML slide layout type for explicit authoring. This changes metadata only, not layout geometry. Omitted create uses blank; omitted copy/set preserves existing identity. Layout selectors can match arbitrary preserved types."
+          },
           "paragraphAlignment": {
             "type": "string",
             "enum": [
@@ -30573,7 +30789,29 @@
                 "type": "boolean"
               },
               "underline": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "none",
+                  "words",
+                  "sng",
+                  "dbl",
+                  "heavy",
+                  "dotted",
+                  "dottedHeavy",
+                  "dash",
+                  "dashHeavy",
+                  "dashLong",
+                  "dashLongHeavy",
+                  "dotDash",
+                  "dotDashHeavy",
+                  "dotDotDash",
+                  "dotDotDashHeavy",
+                  "wavy",
+                  "wavyHeavy",
+                  "wavyDbl"
+                ],
+                "strict": true,
+                "description": "Exact DrawingML ST_TextUnderlineType keyword. Use sng for single underline and dbl for double; aliases such as single are rejected before writing. Omit to preserve the local value; none explicitly disables underline. This does not repair preserved source XML or certify rendering of every style."
               },
               "color": {
                 "$ref": "#/$defs/color"
@@ -30623,7 +30861,7 @@
               }
             ]
           },
-          "placeholderType": {
+          "slidePlaceholderType": {
             "type": "string",
             "enum": [
               "title",
@@ -30639,11 +30877,10 @@
               "tbl",
               "clipArt",
               "media",
-              "hdr",
-              "dgm",
-              "sldImg"
+              "dgm"
             ],
-            "strict": true
+            "strict": true,
+            "description": "Canonical PresentationML types for ordinary slides and slide layouts. Notes/handout-only hdr and sldImg are not authorable here."
           },
           "oleProgId": {
             "type": "string",
@@ -31795,10 +32032,11 @@
               "remove",
               "replace",
               "repair-child-order",
+              "repair-preset-adjustments",
               "repair-relationships"
             ],
             "strict": true,
-            "description": "Supported raw OOXML mutations plus the guarded generated child-order and relationship repair actions."
+            "description": "Raw OOXML mutations and guarded child-order, preset-adjustment and relationship repairs. Preset adjustment normalization requires explicit adoption and an unchanged part; it preserves existing values, fills declared defaults and orders known constant guides. Unknown or ambiguous content is not repaired."
           },
           "sha256Hex": {
             "type": "string",
@@ -31815,13 +32053,13 @@
             },
             "description": "Guarded relationship repairs applied atomically to one .rels part."
           },
-          "childOrderRepairs": {
+          "elementRepairs": {
             "type": "array",
             "minItems": 1,
             "items": {
-              "$ref": "#/$defs/childOrderRepair"
+              "$ref": "#/$defs/elementRepair"
             },
-            "description": "Exact element paths and generated-rule identities for one atomic child-order repair."
+            "description": "Exact element paths and rule identities for one atomic guarded element repair; the selected action determines the supported rules."
           },
           "layoutContractContent": {
             "oneOf": [
@@ -32357,6 +32595,42 @@
             "items": {
               "$ref": "#/$defs/chartSeriesTextReplacement"
             }
+          },
+          "connectorEndpoint": {
+            "type": "object",
+            "description": "A coordinate edit or native shape/site binding. Site indices belong to the target geometry, not a universal four-side enumeration. Binding takes precedence over coordinates and includes adjustments, rotation, flips and group transforms. set-connector permits a partial coordinate edit; add-connector requires both coordinates when unbound.",
+            "additionalProperties": false,
+            "dependentRequired": {
+              "shape": ["site"],
+              "site": ["shape"]
+            },
+            "properties": {
+              "x": {
+                "$ref": "#/$defs/length"
+              },
+              "y": {
+                "$ref": "#/$defs/length"
+              },
+              "shape": {
+                "$ref": "#/$defs/shapeSelector"
+              },
+              "site": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            },
+            "anyOf": [
+              {
+                "required": ["x"]
+              },
+              {
+                "required": ["y"]
+              },
+              {
+                "required": ["shape", "site"]
+              }
+            ]
           },
           "defaultTextStyleLevels": {
             "type": "array",
@@ -33681,6 +33955,29 @@
             "pattern": "^-?(?:[0-9]{1,3}(?:\\.[0-9]+)?|[1-3][0-9]{3}(?:\\.[0-9]+)?|4000(?:\\.0+)?)pt$",
             "description": "Character spacing from -4000pt through 4000pt. Use an explicit pt string; bare numbers, percentages and other unit strings are rejected. Any number of fractional digits is accepted and rounded directly to the nearest hundredth of a point, with exact halves away from zero."
           },
+          "placeholderType": {
+            "type": "string",
+            "enum": [
+              "title",
+              "body",
+              "ctrTitle",
+              "subTitle",
+              "dt",
+              "ftr",
+              "sldNum",
+              "obj",
+              "pic",
+              "chart",
+              "tbl",
+              "clipArt",
+              "media",
+              "hdr",
+              "dgm",
+              "sldImg"
+            ],
+            "strict": true,
+            "description": "PresentationML placeholder identities for lookup, including notes/handout types in preserved input. Authoring uses slidePlaceholderType."
+          },
           "shapeQuery": {
             "type": "object",
             "additionalProperties": false,
@@ -33994,7 +34291,7 @@
             },
             "description": "One guarded relationship repair; every declared precondition is re-verified at apply time and any mismatch fails closed without mutating the package."
           },
-          "childOrderRepair": {
+          "elementRepair": {
             "type": "object",
             "additionalProperties": false,
             "required": ["elementPath", "element", "ruleId", "expectedRuleSha256"],
@@ -34020,7 +34317,7 @@
               },
               "expectedElementSha256": {
                 "$ref": "#/$defs/sha256Hex",
-                "description": "Optional target-element precondition used when unrelated edits changed the enclosing part."
+                "description": "Optional target-element precondition. Child-order repair may use it after unrelated part edits; preset-adjustment repair still requires the exact part SHA."
               }
             }
           },
@@ -34200,7 +34497,7 @@
           "chartDataLabelsPatch": {
             "type": "object",
             "additionalProperties": false,
-            "description": "Data-label mutation shared by classic and ChartEx charts. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
+            "description": "Data-label mutation shared by classic and ChartEx charts. Classic area and area-3d reject explicit position at plot, series and point scope; omit position to preserve default or imported placement. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
             "properties": {
               "scope": {
                 "$ref": "#/$defs/chartLabelScope"
@@ -34461,7 +34758,7 @@
             "required": ["type"],
             "properties": {
               "type": {
-                "$ref": "#/$defs/placeholderType"
+                "$ref": "#/$defs/slidePlaceholderType"
               },
               "font": {
                 "$ref": "#/$defs/fontOrName"
@@ -37059,10 +37356,10 @@
                         "const": "add-connector"
                       },
                       "begin": {
-                        "$ref": "#/$defs/connectorEndpoint"
+                        "$ref": "#/$defs/connectorCreationEndpoint"
                       },
                       "end": {
-                        "$ref": "#/$defs/connectorEndpoint"
+                        "$ref": "#/$defs/connectorCreationEndpoint"
                       },
                       "kind": {
                         "$ref": "#/$defs/connectorKind"
@@ -37229,11 +37526,12 @@
                         "$ref": "#/$defs/layoutSelector"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/$defs/slideLayoutType"
                       }
                     },
                     "required": ["op"],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Create a blank layout or copy an existing layout. Explicit type values use canonical PresentationML tokens, such as cust. Omitting type preserves blank on creation or the copied source identity."
                   },
                   {
                     "type": "object",
@@ -37264,7 +37562,7 @@
                         "type": "string"
                       },
                       "type": {
-                        "$ref": "#/$defs/placeholderType"
+                        "$ref": "#/$defs/slidePlaceholderType"
                       },
                       "w": {
                         "$ref": "#/$defs/length"
@@ -37277,7 +37575,8 @@
                       }
                     },
                     "required": ["op", "layout", "type", "x", "y", "w", "h"],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Create an ordinary slide-layout placeholder using canonical PresentationML tokens. Notes/handout-only hdr and sldImg are rejected before mutation."
                   },
                   {
                     "type": "object",
@@ -37376,11 +37675,12 @@
                         "type": "string"
                       },
                       "type": {
-                        "$ref": "#/$defs/placeholderType"
+                        "$ref": "#/$defs/slidePlaceholderType"
                       }
                     },
                     "required": ["op", "slide", "type"],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Copy a matching layout/master placeholder onto an ordinary slide. Uses canonical PresentationML type tokens; notes/handout-only hdr and sldImg are rejected before mutation."
                   },
                   {
                     "type": "object",
@@ -37877,7 +38177,7 @@
                         "$ref": "#/$defs/relationshipRepairs"
                       },
                       "repairs": {
-                        "$ref": "#/$defs/childOrderRepairs"
+                        "$ref": "#/$defs/elementRepairs"
                       },
                       "target": {
                         "type": "string"
@@ -37984,6 +38284,27 @@
                             "properties": {
                               "action": {
                                 "const": "repair-child-order"
+                              },
+                              "xpath": {
+                                "const": "/"
+                              }
+                            },
+                            "required": ["expectedPartSha256", "repairs"],
+                            "not": {
+                              "anyOf": [
+                                {
+                                  "required": ["value"]
+                                },
+                                {
+                                  "required": ["relationshipRepairs"]
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "properties": {
+                              "action": {
+                                "const": "repair-preset-adjustments"
                               },
                               "xpath": {
                                 "const": "/"
@@ -38407,11 +38728,12 @@
                         "type": "string"
                       },
                       "type": {
-                        "type": "string"
+                        "$ref": "#/$defs/slideLayoutType"
                       }
                     },
                     "required": ["op", "layout"],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Update layout metadata. An explicit type must be a canonical PresentationML token; omitted type is preserved. Changing type does not synthesize placeholder geometry."
                   },
                   {
                     "type": "object",
@@ -38431,6 +38753,7 @@
                     },
                     "required": ["op"],
                     "additionalProperties": false,
+                    "description": "Update slide-master background or shared title/body/other text-style slots selected by ordinary slide placeholder types. Types can share a style slot. This does not create placeholder shapes or edit notes/handout masters.",
                     "allOf": [
                       {
                         "anyOf": [
@@ -39366,10 +39689,11 @@
                 "remove",
                 "replace",
                 "repair-child-order",
+                "repair-preset-adjustments",
                 "repair-relationships"
               ],
               "strict": true,
-              "description": "Supported raw OOXML mutations plus the guarded generated child-order and relationship repair actions."
+              "description": "Raw OOXML mutations and guarded child-order, preset-adjustment and relationship repairs. Preset adjustment normalization requires explicit adoption and an unchanged part; it preserves existing values, fills declared defaults and orders known constant guides. Unknown or ambiguous content is not repaired."
             },
             "sha256Hex": {
               "type": "string",
@@ -39378,13 +39702,13 @@
               "pattern": "^[0-9a-f]{64}$",
               "description": "Lowercase SHA-256 hex digest."
             },
-            "childOrderRepairs": {
+            "elementRepairs": {
               "type": "array",
               "minItems": 1,
               "items": {
-                "$ref": "#/$defs/childOrderRepair"
+                "$ref": "#/$defs/elementRepair"
               },
-              "description": "Exact element paths and generated-rule identities for one atomic child-order repair."
+              "description": "Exact element paths and rule identities for one atomic guarded element repair; the selected action determines the supported rules."
             },
             "relationshipRepair": {
               "type": "object",
@@ -39438,7 +39762,7 @@
               },
               "description": "Guarded relationship repairs applied atomically to one .rels part."
             },
-            "childOrderRepair": {
+            "elementRepair": {
               "type": "object",
               "additionalProperties": false,
               "required": ["elementPath", "element", "ruleId", "expectedRuleSha256"],
@@ -39464,7 +39788,7 @@
                 },
                 "expectedElementSha256": {
                   "$ref": "#/$defs/sha256Hex",
-                  "description": "Optional target-element precondition used when unrelated edits changed the enclosing part."
+                  "description": "Optional target-element precondition. Child-order repair may use it after unrelated part edits; preset-adjustment repair still requires the exact part SHA."
                 }
               }
             },
@@ -39498,7 +39822,7 @@
               "required": ["type"],
               "properties": {
                 "type": {
-                  "$ref": "#/$defs/placeholderType"
+                  "$ref": "#/$defs/slidePlaceholderType"
                 },
                 "font": {
                   "$ref": "#/$defs/fontOrName"
@@ -41040,7 +41364,29 @@
                   "type": "boolean"
                 },
                 "underline": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "words",
+                    "sng",
+                    "dbl",
+                    "heavy",
+                    "dotted",
+                    "dottedHeavy",
+                    "dash",
+                    "dashHeavy",
+                    "dashLong",
+                    "dashLongHeavy",
+                    "dotDash",
+                    "dotDashHeavy",
+                    "dotDotDash",
+                    "dotDotDashHeavy",
+                    "wavy",
+                    "wavyHeavy",
+                    "wavyDbl"
+                  ],
+                  "strict": true,
+                  "description": "Exact DrawingML ST_TextUnderlineType keyword. Use sng for single underline and dbl for double; aliases such as single are rejected before writing. Omit to preserve the local value; none explicitly disables underline. This does not repair preserved source XML or certify rendering of every style."
                 },
                 "color": {
                   "$ref": "#/$defs/color"
@@ -42427,8 +42773,27 @@
               "enum": ["straight", "elbow", "curve"],
               "strict": true
             },
+            "connectorCreationEndpoint": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/connectorEndpoint"
+                },
+                {
+                  "anyOf": [
+                    {
+                      "required": ["x", "y"]
+                    },
+                    {
+                      "required": ["shape", "site"]
+                    }
+                  ]
+                }
+              ],
+              "description": "Creation requires both coordinates or a shape/site binding. Binding resolves the native connection site and takes precedence over supplied fallback coordinates."
+            },
             "connectorEndpoint": {
               "type": "object",
+              "description": "A coordinate edit or native shape/site binding. Site indices belong to the target geometry, not a universal four-side enumeration. Binding takes precedence over coordinates and includes adjustments, rotation, flips and group transforms. set-connector permits a partial coordinate edit; add-connector requires both coordinates when unbound.",
               "additionalProperties": false,
               "dependentRequired": {
                 "shape": ["site"],
@@ -42447,7 +42812,7 @@
                 "site": {
                   "type": "integer",
                   "minimum": 0,
-                  "maximum": 3
+                  "maximum": 2147483647
                 }
               },
               "anyOf": [
@@ -42482,7 +42847,8 @@
                 "dgm",
                 "sldImg"
               ],
-              "strict": true
+              "strict": true,
+              "description": "PresentationML placeholder identities for lookup, including notes/handout types in preserved input. Authoring uses slidePlaceholderType."
             },
             "chartAxis": {
               "type": "string",
@@ -42936,7 +43302,7 @@
             "chartDataLabelsPatch": {
               "type": "object",
               "additionalProperties": false,
-              "description": "Data-label mutation shared by classic and ChartEx charts. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
+              "description": "Data-label mutation shared by classic and ChartEx charts. Classic area and area-3d reject explicit position at plot, series and point scope; omit position to preserve default or imported placement. Classic chart point scope supports position and font; point fonts are written to the matching c:dLbl/c:txPr/a:p/a:pPr/a:defRPr without changing sibling point labels. On ChartEx, position maps to cx:dataLabels@pos and showValue/showCategoryName/showSeriesName map to cx:visibility@value/categoryName/seriesName. On ChartEx, font writes the default label font into cx:dataLabels/cx:txPr (a:p/a:pPr/a:defRPr), creating the text body when absent. ChartEx rejects point scope and the unsupported showPercentage/showLegendKey/numberFormat/separator fields instead of silently dropping them.",
               "properties": {
                 "scope": {
                   "$ref": "#/$defs/chartLabelScope"
@@ -45693,6 +46059,70 @@
               "maximum": 4294967295,
               "default": 4,
               "description": "WheelReverse spokes use the full UInt32 domain and XSD default 4. Structural validity does not certify Office playback of every value."
+            },
+            "slidePlaceholderType": {
+              "type": "string",
+              "enum": [
+                "title",
+                "body",
+                "ctrTitle",
+                "subTitle",
+                "dt",
+                "ftr",
+                "sldNum",
+                "obj",
+                "pic",
+                "chart",
+                "tbl",
+                "clipArt",
+                "media",
+                "dgm"
+              ],
+              "strict": true,
+              "description": "Canonical PresentationML types for ordinary slides and slide layouts. Notes/handout-only hdr and sldImg are not authorable here."
+            },
+            "slideLayoutType": {
+              "type": "string",
+              "strict": true,
+              "enum": [
+                "title",
+                "tx",
+                "twoColTx",
+                "tbl",
+                "txAndChart",
+                "chartAndTx",
+                "dgm",
+                "chart",
+                "txAndClipArt",
+                "clipArtAndTx",
+                "titleOnly",
+                "blank",
+                "txAndObj",
+                "objAndTx",
+                "objOnly",
+                "obj",
+                "txAndMedia",
+                "mediaAndTx",
+                "objOverTx",
+                "txOverObj",
+                "txAndTwoObj",
+                "twoObjAndTx",
+                "twoObjOverTx",
+                "fourObj",
+                "vertTx",
+                "clipArtAndVertTx",
+                "vertTitleAndTx",
+                "vertTitleAndTxOverChart",
+                "twoObj",
+                "objAndTwoObj",
+                "twoObjAndObj",
+                "cust",
+                "secHead",
+                "twoTxTwoObj",
+                "objTx",
+                "picTx"
+              ],
+              "description": "Canonical PresentationML slide layout type for explicit authoring. This changes metadata only, not layout geometry. Omitted create uses blank; omitted copy/set preserves existing identity. Layout selectors can match arbitrary preserved types."
             }
           }
         },
@@ -48022,6 +48452,7 @@
             "op": "add-layout",
             "category": "layout",
             "summary": "Create a slide layout by name and type.",
+            "description": "Create a blank layout or copy an existing layout. Explicit type values use canonical PresentationML tokens, such as cust. Omitting type preserves blank on creation or the copied source identity.",
             "required": ["op"],
             "constraints": [],
             "optional": ["name", "source", "type"],
@@ -48031,6 +48462,7 @@
             "op": "add-layout-placeholder",
             "category": "layout",
             "summary": "Add a placeholder to a slide layout.",
+            "description": "Create an ordinary slide-layout placeholder using canonical PresentationML tokens. Notes/handout-only hdr and sldImg are rejected before mutation.",
             "required": ["op", "layout", "type", "x", "y", "w", "h"],
             "constraints": [],
             "optional": ["alignment", "font", "idx", "lineSpacing", "name"],
@@ -48068,6 +48500,7 @@
             "op": "add-placeholder",
             "category": "shape",
             "summary": "Add a placeholder shape to a slide.",
+            "description": "Copy a matching layout/master placeholder onto an ordinary slide. Uses canonical PresentationML type tokens; notes/handout-only hdr and sldImg are rejected before mutation.",
             "required": ["op", "slide", "type"],
             "constraints": [],
             "optional": ["idx", "name", "text"],
@@ -48285,6 +48718,14 @@
                     }
                   },
                   {
+                    "value": "repair-preset-adjustments",
+                    "required": ["expectedPartSha256", "repairs"],
+                    "forbidden": ["value", "relationshipRepairs"],
+                    "const": {
+                      "xpath": "/"
+                    }
+                  },
+                  {
                     "value": "repair-relationships",
                     "required": ["relationshipRepairs"],
                     "forbidden": ["value", "repairs"],
@@ -48481,6 +48922,7 @@
             "op": "set-layout",
             "category": "layout",
             "summary": "Update slide layout metadata and placeholders.",
+            "description": "Update layout metadata. An explicit type must be a canonical PresentationML token; omitted type is preserved. Changing type does not synthesize placeholder geometry.",
             "required": ["op", "layout"],
             "constraints": [],
             "optional": ["name", "type"],
@@ -48490,6 +48932,7 @@
             "op": "set-master",
             "category": "layout",
             "summary": "Update slide master background and placeholders.",
+            "description": "Update slide-master background or shared title/body/other text-style slots selected by ordinary slide placeholder types. Types can share a style slot. This does not create placeholder shapes or edit notes/handout masters.",
             "required": ["op"],
             "constraints": [
               {
@@ -52203,7 +52646,29 @@
                 "type": "boolean"
               },
               "underline": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "none",
+                  "words",
+                  "sng",
+                  "dbl",
+                  "heavy",
+                  "dotted",
+                  "dottedHeavy",
+                  "dash",
+                  "dashHeavy",
+                  "dashLong",
+                  "dashLongHeavy",
+                  "dotDash",
+                  "dotDashHeavy",
+                  "dotDotDash",
+                  "dotDotDashHeavy",
+                  "wavy",
+                  "wavyHeavy",
+                  "wavyDbl"
+                ],
+                "strict": true,
+                "description": "Exact DrawingML ST_TextUnderlineType keyword. Use sng for single underline and dbl for double; aliases such as single are rejected before writing. Omit to preserve the local value; none explicitly disables underline. This does not repair preserved source XML or certify rendering of every style."
               },
               "color": {
                 "$ref": "#/$defs/color"
@@ -52335,7 +52800,8 @@
               "dgm",
               "sldImg"
             ],
-            "strict": true
+            "strict": true,
+            "description": "PresentationML placeholder identities for lookup, including notes/handout types in preserved input. Authoring uses slidePlaceholderType."
           },
           "shapeQuery": {
             "type": "object",
@@ -53558,7 +54024,29 @@
                 "type": "boolean"
               },
               "underline": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "none",
+                  "words",
+                  "sng",
+                  "dbl",
+                  "heavy",
+                  "dotted",
+                  "dottedHeavy",
+                  "dash",
+                  "dashHeavy",
+                  "dashLong",
+                  "dashLongHeavy",
+                  "dotDash",
+                  "dotDashHeavy",
+                  "dotDotDash",
+                  "dotDotDashHeavy",
+                  "wavy",
+                  "wavyHeavy",
+                  "wavyDbl"
+                ],
+                "strict": true,
+                "description": "Exact DrawingML ST_TextUnderlineType keyword. Use sng for single underline and dbl for double; aliases such as single are rejected before writing. Omit to preserve the local value; none explicitly disables underline. This does not repair preserved source XML or certify rendering of every style."
               },
               "color": {
                 "$ref": "#/$defs/color"
@@ -53690,7 +54178,8 @@
               "dgm",
               "sldImg"
             ],
-            "strict": true
+            "strict": true,
+            "description": "PresentationML placeholder identities for lookup, including notes/handout types in preserved input. Authoring uses slidePlaceholderType."
           },
           "shapeQuery": {
             "type": "object",
@@ -54896,9 +55385,24 @@
         }
       },
       "schemaDisclosure": {
+        "selectors": [
+          {
+            "flag": "--command <name>",
+            "description": "One dotted command contract, e.g. pptx.preview or auth.status, plus referenced reports at their original JSON Pointer paths."
+          },
+          {
+            "flag": "--report <schemaVersion>",
+            "description": "One standalone report schema, e.g. pptx-diff/v1, plus referenced definitions. The disclosure.schemaRef locates it; schemaDigest identifies the full runtime contract."
+          }
+        ],
         "summary": "Slice the CLI schema before it lands on stdout.",
         "modeFlag": "--mode",
         "modes": [
+          {
+            "mode": "capabilities",
+            "flag": "--mode capabilities",
+            "description": "Capability/name index for workflow setup; retains capability truth and transport contracts, omits report and patch validation schemas. Use --command/--report/--mode ops for execution details."
+          },
           {
             "mode": "index",
             "flag": "--mode index",
@@ -54917,7 +55421,7 @@
           {
             "mode": "full",
             "flag": "--mode full",
-            "description": "The complete CLI schema; this is the default when --mode is omitted."
+            "description": "The complete CLI schema; this is the fallback when --mode, --command, and --report are all omitted."
           }
         ],
         "refinements": [
@@ -54937,7 +55441,7 @@
             "description": "Orthogonal to every mode: drops description/examples/sharedFieldShapes."
           }
         ],
-        "combination": "A view is named, never inferred: --ops and --fields outside --mode ops are rejected instead of resolved by precedence.",
+        "combination": "Choose --mode, --command, or --report; named selectors cannot be combined with mode/ops/fields/defs. --minimal composes with all views. --ops and --fields require --mode ops.",
         "agentHint": "Most agents should reach for --mode index first, then --mode ops with --fields and --defs summary for field discovery; request --defs full before nested selector construction, then omit --fields or use apply --dry-run for complete operation validation."
       },
       "errorCatalog": {
@@ -87420,7 +87924,8 @@
                     "child-order",
                     "child-cardinality",
                     "child-choice",
-                    "part-graph"
+                    "part-graph",
+                    "preset-adjustments"
                   ],
                   "strict": true
                 },
@@ -89294,7 +89799,8 @@
                     "child-order",
                     "child-cardinality",
                     "child-choice",
-                    "part-graph"
+                    "part-graph",
+                    "preset-adjustments"
                   ],
                   "strict": true
                 },
@@ -91001,7 +91507,8 @@
                     "child-order",
                     "child-cardinality",
                     "child-choice",
-                    "part-graph"
+                    "part-graph",
+                    "preset-adjustments"
                   ],
                   "strict": true
                 },
@@ -95706,6 +96213,41 @@
           "schemaVersion": {
             "const": "pptx-preview/v1"
           },
+          "renderContext": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "fieldDate",
+              "dateSource",
+              "timezone",
+              "authorizationClock",
+              "bitmapCacheBinding"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "xdoc-render-context/v1"
+              },
+              "fieldDate": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              },
+              "dateSource": {
+                "type": "string",
+                "enum": ["explicit", "host-local-calendar"],
+                "strict": true
+              },
+              "timezone": {
+                "type": "string"
+              },
+              "authorizationClock": {
+                "const": "independent"
+              },
+              "bitmapCacheBinding": {
+                "const": "pdf-sha256"
+              }
+            }
+          },
           "status": {
             "type": "string",
             "enum": ["success"],
@@ -96304,6 +96846,7 @@
               "checks",
               "evidence",
               "findings",
+              "renderContext",
               "provenance",
               "nextChecks",
               "decision",
@@ -96317,6 +96860,41 @@
                 "type": "string",
                 "enum": ["success"],
                 "strict": true
+              },
+              "renderContext": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schemaVersion",
+                  "fieldDate",
+                  "dateSource",
+                  "timezone",
+                  "authorizationClock",
+                  "bitmapCacheBinding"
+                ],
+                "properties": {
+                  "schemaVersion": {
+                    "const": "xdoc-render-context/v1"
+                  },
+                  "fieldDate": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                  },
+                  "dateSource": {
+                    "type": "string",
+                    "enum": ["explicit", "host-local-calendar"],
+                    "strict": true
+                  },
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "authorizationClock": {
+                    "const": "independent"
+                  },
+                  "bitmapCacheBinding": {
+                    "const": "pdf-sha256"
+                  }
+                }
               },
               "policyId": {
                 "type": "string",
@@ -97008,7 +97586,8 @@
                     "child-order",
                     "child-cardinality",
                     "child-choice",
-                    "part-graph"
+                    "part-graph",
+                    "preset-adjustments"
                   ],
                   "strict": true
                 },
@@ -97902,7 +98481,8 @@
               "dgm",
               "sldImg"
             ],
-            "strict": true
+            "strict": true,
+            "description": "PresentationML placeholder identities for lookup, including notes/handout types in preserved input. Authoring uses slidePlaceholderType."
           },
           "shapeQuery": {
             "type": "object",
@@ -99414,7 +99994,8 @@
               "dgm",
               "sldImg"
             ],
-            "strict": true
+            "strict": true,
+            "description": "PresentationML placeholder identities for lookup, including notes/handout types in preserved input. Authoring uses slidePlaceholderType."
           },
           "shapeQuery": {
             "type": "object",
@@ -100980,6 +101561,21 @@
             },
             "then": {
               "required": ["styleChangeSummary", "fullEvidenceAvailable", "fullEvidenceHint"],
+              "if": {
+                "properties": {
+                  "fullEvidenceAvailable": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "required": ["fullEvidence"]
+              },
+              "else": {
+                "properties": {
+                  "fullEvidence": false
+                }
+              },
               "properties": {
                 "slides": {
                   "type": "array",
@@ -101014,7 +101610,8 @@
           "policyRef",
           "agentGate",
           "summary",
-          "slides"
+          "slides",
+          "inputBinding"
         ],
         "properties": {
           "schemaVersion": {
@@ -101035,7 +101632,17 @@
             "type": "string"
           },
           "policyRef": {
-            "const": "xdoc schema commands.pptx.diffReportSchema.description",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["schemaRef", "discoveryCommand"],
+            "properties": {
+              "schemaRef": {
+                "const": "#/commands/pptx/diffReportSchema/description"
+              },
+              "discoveryCommand": {
+                "const": ["xdoc", "schema", "--report", "pptx-diff/v1"]
+              }
+            },
             "description": "Pointer to the prose contract (success criteria, matching, coverage, CI/review policy) carried by this schema's description."
           },
           "agentGate": {
@@ -101085,6 +101692,45 @@
                     }
                   }
                 }
+              }
+            }
+          },
+          "inputBinding": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["algorithm", "baseline", "target"],
+            "properties": {
+              "algorithm": {
+                "const": "sha256"
+              },
+              "baseline": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "target": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "fullEvidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256", "schemaVersion", "detail"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "schemaVersion": {
+                "const": "pptx-diff/v1"
+              },
+              "detail": {
+                "const": "full"
               }
             }
           },
@@ -101505,11 +102151,47 @@
           "agentGate",
           "render",
           "pairs",
-          "visualEvidence"
+          "visualEvidence",
+          "renderContext"
         ],
         "properties": {
           "schemaVersion": {
             "const": "pptx-contact-diff/v1"
+          },
+          "renderContext": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "schemaVersion",
+              "fieldDate",
+              "dateSource",
+              "timezone",
+              "authorizationClock",
+              "bitmapCacheBinding"
+            ],
+            "properties": {
+              "schemaVersion": {
+                "const": "xdoc-render-context/v1"
+              },
+              "fieldDate": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+              },
+              "dateSource": {
+                "type": "string",
+                "enum": ["explicit", "host-local-calendar"],
+                "strict": true
+              },
+              "timezone": {
+                "type": "string"
+              },
+              "authorizationClock": {
+                "const": "independent"
+              },
+              "bitmapCacheBinding": {
+                "const": "pdf-sha256"
+              }
+            }
           },
           "status": {
             "type": "string",
@@ -109807,10 +110489,21 @@
               "properties": {
                 "mode": {
                   "type": "string",
-                  "enum": ["index", "ops", "examples", "full"],
+                  "enum": ["index", "ops", "examples", "full", "capabilities"],
                   "strict": true,
-                  "default": "index",
-                  "description": "Schema disclosure view. Use index first and full only when explicitly required."
+                  "description": "Schema disclosure view; omitted means index unless command or report is selected. Do not combine mode with either selector."
+                },
+                "command": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S",
+                  "description": "One dotted command name, e.g. auth.status or pptx.preview. Mutually exclusive with report and mode/ops/fields/defs."
+                },
+                "report": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S",
+                  "description": "One report schema version, e.g. pptx-diff/v1. Mutually exclusive with command and mode/ops/fields/defs."
                 },
                 "ops": {
                   "type": "array",
@@ -109864,6 +110557,78 @@
                 "defs": ["fields"]
               },
               "dependentSchemas": {
+                "command": {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["report"],
+                        "properties": {
+                          "report": true
+                        }
+                      },
+                      {
+                        "required": ["mode"],
+                        "properties": {
+                          "mode": true
+                        }
+                      },
+                      {
+                        "required": ["ops"],
+                        "properties": {
+                          "ops": true
+                        }
+                      },
+                      {
+                        "required": ["fields"],
+                        "properties": {
+                          "fields": true
+                        }
+                      },
+                      {
+                        "required": ["defs"],
+                        "properties": {
+                          "defs": true
+                        }
+                      }
+                    ]
+                  }
+                },
+                "report": {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": ["command"],
+                        "properties": {
+                          "command": true
+                        }
+                      },
+                      {
+                        "required": ["mode"],
+                        "properties": {
+                          "mode": true
+                        }
+                      },
+                      {
+                        "required": ["ops"],
+                        "properties": {
+                          "ops": true
+                        }
+                      },
+                      {
+                        "required": ["fields"],
+                        "properties": {
+                          "fields": true
+                        }
+                      },
+                      {
+                        "required": ["defs"],
+                        "properties": {
+                          "defs": true
+                        }
+                      }
+                    ]
+                  }
+                },
                 "ops": {
                   "properties": {
                     "mode": {
@@ -111297,12 +112062,11 @@
         {
           "name": "mode",
           "type": "string",
-          "description": "Disclosure view: index|ops|examples|full",
+          "description": "Disclosure view: index|ops|examples|full|capabilities; omitted means full unless --command or --report is selected",
           "required": false,
-          "default": "full",
-          "enum": ["index", "ops", "examples", "full"],
+          "enum": ["index", "ops", "examples", "full", "capabilities"],
           "strict": true,
-          "valueSyntax": "index|ops|examples|full"
+          "valueSyntax": "index|ops|examples|full|capabilities"
         },
         {
           "name": "ops",
@@ -111321,6 +112085,18 @@
           "separator": ",",
           "collection": "set",
           "requiresMode": "ops"
+        },
+        {
+          "name": "command",
+          "type": "string",
+          "description": "Select one command contract, e.g. auth.status or pptx.preview; includes referenced reports",
+          "required": false
+        },
+        {
+          "name": "report",
+          "type": "path",
+          "description": "Select one report by schema version, e.g. pptx-diff/v1; includes referenced definitions",
+          "required": false
         },
         {
           "name": "defs",
@@ -111363,9 +112139,24 @@
         }
       },
       "disclosure": {
+        "selectors": [
+          {
+            "flag": "--command <name>",
+            "description": "One dotted command contract, e.g. pptx.preview or auth.status, plus referenced reports at their original JSON Pointer paths."
+          },
+          {
+            "flag": "--report <schemaVersion>",
+            "description": "One standalone report schema, e.g. pptx-diff/v1, plus referenced definitions. The disclosure.schemaRef locates it; schemaDigest identifies the full runtime contract."
+          }
+        ],
         "summary": "Slice the CLI schema before it lands on stdout.",
         "modeFlag": "--mode",
         "modes": [
+          {
+            "mode": "capabilities",
+            "flag": "--mode capabilities",
+            "description": "Capability/name index for workflow setup; retains capability truth and transport contracts, omits report and patch validation schemas. Use --command/--report/--mode ops for execution details."
+          },
           {
             "mode": "index",
             "flag": "--mode index",
@@ -111384,7 +112175,7 @@
           {
             "mode": "full",
             "flag": "--mode full",
-            "description": "The complete CLI schema; this is the default when --mode is omitted."
+            "description": "The complete CLI schema; this is the fallback when --mode, --command, and --report are all omitted."
           }
         ],
         "refinements": [
@@ -111404,7 +112195,7 @@
             "description": "Orthogonal to every mode: drops description/examples/sharedFieldShapes."
           }
         ],
-        "combination": "A view is named, never inferred: --ops and --fields outside --mode ops are rejected instead of resolved by precedence.",
+        "combination": "Choose --mode, --command, or --report; named selectors cannot be combined with mode/ops/fields/defs. --minimal composes with all views. --ops and --fields require --mode ops.",
         "agentHint": "Most agents should reach for --mode index first, then --mode ops with --fields and --defs summary for field discovery; request --defs full before nested selector construction, then omit --fields or use apply --dry-run for complete operation validation."
       }
     }

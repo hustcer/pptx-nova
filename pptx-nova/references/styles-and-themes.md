@@ -177,7 +177,7 @@ crop/tile 显示差异就删除这些设置。已有 picture shape 的裁剪或 
     "size": "16pt",
     "bold": true,
     "italic": false,
-    "underline": "single",
+    "underline": "sng",
     "color": "1F1F1F"
   }
 }
@@ -185,18 +185,18 @@ crop/tile 显示差异就删除这些设置。已有 picture shape 的裁剪或 
 
 字段说明：
 
-| 字段              | 含义                                                              |
-| ----------------- | ----------------------------------------------------------------- |
-| `name`            | 字体族名（如 `Inter` / `Microsoft YaHei` / `Source Han Sans SC`） |
-| `eastAsian`       | 东亚脚本字体；省略保留，`null` 清除并恢复继承                     |
-| `complexScript`   | 阿拉伯文等复杂脚本字体；省略保留，`null` 清除并恢复继承           |
-| `letterSpacing`   | 字符间距；仅显式 `pt` 字符串，拒绝裸数字；省略保留，`null` 清除   |
-| `kern`            | 字偶距调整的最小字号阈值；仅在当前 schema 披露时使用，规则见下文  |
-| `size`            | 使用 `"<n>pt"` 等带单位的 length 字符串；裸数字会被拒绝           |
-| `bold` / `italic` | 布尔                                                              |
-| `underline`       | `none / single / double / wavy / heavy / ...`                     |
-| `color`           | 字体颜色（6 位 hex）                                              |
-| `fill`            | 用 fill 对象（gradient/pattern）填字符                            |
+| 字段              | 含义                                                                                                     |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `name`            | 字体族名（如 `Inter` / `Microsoft YaHei` / `Source Han Sans SC`）                                        |
+| `eastAsian`       | 东亚脚本字体；省略保留，`null` 清除并恢复继承                                                            |
+| `complexScript`   | 阿拉伯文等复杂脚本字体；省略保留，`null` 清除并恢复继承                                                  |
+| `letterSpacing`   | 字符间距；仅显式 `pt` 字符串，拒绝裸数字；省略保留，`null` 清除                                          |
+| `kern`            | 字偶距调整的最小字号阈值；仅在当前 schema 披露时使用，规则见下文                                         |
+| `size`            | 使用 `"<n>pt"` 等带单位的 length 字符串；裸数字会被拒绝                                                  |
+| `bold` / `italic` | 布尔                                                                                                     |
+| `underline`       | DrawingML token，如 `none / sng / dbl / wavy / heavy`；完整枚举读当前 schema，`single` / `double` 被拒绝 |
+| `color`           | 字体颜色（6 位 hex）                                                                                     |
+| `fill`            | 用 fill 对象（gradient/pattern）填字符                                                                   |
 
 `name` / `eastAsian` / `complexScript` / `letterSpacing` 都是 sparse patch：省略不改，
 `null` 清掉本地值使继承继续。不要只改 Latin `name` 就声称多语言字体已经统一；先从

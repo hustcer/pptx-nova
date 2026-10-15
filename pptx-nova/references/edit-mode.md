@@ -105,7 +105,7 @@ reports a semantic issue; do not rely on a later full-deck scan to distinguish
 the edit from inherited debt.
 
 Semantic issues may carry `remediation.kind="apply-to-document"` with a guarded
-`repair-child-order` or `repair-relationships` patch. Match `target.inputSha256`
+`repair-child-order`, `repair-preset-adjustments` or `repair-relationships` patch. Match `target.inputSha256`
 against the exact delivered document before applying that repair-only patch
 once. Preserve existing intent and raw XML permissions; the restricted repair
 actions declare `requiresRawXml:false`. Dry-run candidates have no delivered
@@ -115,6 +115,11 @@ verified repair, re-run vision-check on the new bytes before selecting another
 proposal. Never merge repair operations into the original creation request.
 Keep findings without executable remediation as diagnostics and follow their
 unavailable reason; do not invent a target or an automatic repair.
+Preset-adjustment normalization has `autoRetry:false`: review and explicitly adopt
+the proposed change within the authorized task before using `--reviewed`. It requires
+the exact part hash even when an element hash is supplied; any intervening edit to
+that part requires fresh diagnosis. See `troubleshooting.md` for its Office
+interoperability boundary and `native-shape-editing.md` for geometry edits.
 
 Once the candidate is stable, run one semantic diff and the evidence required
 by `edit-contract.json`, then run `pptx-nova-edit-contract-gate.mjs --strict`.

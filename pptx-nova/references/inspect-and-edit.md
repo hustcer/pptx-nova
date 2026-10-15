@@ -175,6 +175,9 @@ runtime 未披露对象导入时，明确记录受控手动路径的支持前提
 也不把无关系对象的复制例子外推成可处理任意关系、继承和组坐标的通用能力。
 Chart 3D 和 GLB 使用各自契约。
 
+连接线、group/ungroup、SmartArt shape 复制、OLE 或模型几何编辑，还须读取
+`native-shape-editing.md`；这些对象的外框、内部 preview 和资源归属不能互相替代。
+
 ### 关键字段速记
 
 | 取什么                        | 路径                                                                                                                   |
@@ -576,6 +579,8 @@ overflow 会扩展共同栏高；显式 clip/ellipsis 则保留作者高度。�
 含 SmartArt 的 `duplicate-slide` 使用原生页级所有权复制：diagramData 与其页属 sidecar
 保持独立，允许共享的 layout/style/color/cache 可以复用。重复导入和跨 deck 复制同样
 遵循 `template-following.md` 的所有权及 preflight 规则；不要按字节相等自行去重。
+notes、chart 与 embedded workbook 也必须随复制页独立；classic chart palette 不应跨
+chart owner 共享。需要复制后独立编辑时，按该参考验证副本隔离和内部导航。
 
 ### 5.4 换图但保留位置
 

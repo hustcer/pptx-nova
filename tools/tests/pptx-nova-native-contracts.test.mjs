@@ -18,6 +18,8 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
+import { inflateRawSync } from 'node:zlib'
+import { prepareRemediation } from '../../pptx-nova/scripts/lib/remediation.mjs'
 import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
 import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-choreography.mjs'
 import { verifyDiffEvidence } from '../../pptx-nova/scripts/lib/diff-evidence.mjs'
@@ -50,6 +52,30 @@ const nativeTest = (name, fn, { visual = false } = {}) =>
     },
     fn,
   )
+
+// Independent readback for controlled native fixtures; never rewrites a package.
+function nativeParts(input) {
+  const bytes = readFileSync(input)
+  const end = bytes.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]))
+  assert.ok(end >= 0)
+  let offset = bytes.readUInt32LE(end + 16)
+  const parts = new Map()
+  for (let i = 0; i < bytes.readUInt16LE(end + 10); i++) {
+    assert.equal(bytes.readUInt32LE(offset), 0x02014b50)
+    const method = bytes.readUInt16LE(offset + 10)
+    const size = bytes.readUInt32LE(offset + 20)
+    const length = bytes.readUInt16LE(offset + 28)
+    const name = bytes.subarray(offset + 46, offset + 46 + length).toString('utf8')
+    const local = bytes.readUInt32LE(offset + 42)
+    assert.equal(bytes.readUInt32LE(local), 0x04034b50)
+    const start = local + 30 + bytes.readUInt16LE(local + 26) + bytes.readUInt16LE(local + 28)
+    const compressed = bytes.subarray(start, start + size)
+    assert.ok(method === 0 || method === 8)
+    parts.set(name, method === 0 ? compressed : inflateRawSync(compressed))
+    offset += 46 + length + bytes.readUInt16LE(offset + 30) + bytes.readUInt16LE(offset + 32)
+  }
+  return parts
+}
 
 function scenario(t, { useInstalledAuthorization = false } = {}) {
   if (evidence) mkdirSync(evidence, { recursive: true })
@@ -154,6 +180,268 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     ).output
   return { directory, write, run, apply, inspect, body, create }
 }
+
+nativeTest('current authoring enums reject aliases without publishing partial files', (t) => {
+  const s = scenario(t)
+  const source = s.create()
+  const bytes = readFileSync(source)
+  const font = (underline) => ({
+    op: 'set-run',
+    slide: 0,
+    shape: { name: 'Body' },
+    paragraph: 0,
+    run: 0,
+    font: { underline },
+  })
+  for (const op of [
+    font('single'),
+    font('double'),
+    { op: 'add-layout', name: 'Invalid layout', type: 'custom' },
+    {
+      op: 'add-layout-placeholder',
+      layout: 0,
+      type: 'hdr',
+      x: '1in',
+      y: '1in',
+      w: '2in',
+      h: '1in',
+    },
+    { op: 'add-placeholder', slide: 0, type: 'date' },
+  ]) {
+    for (const dryRun of [true, false]) s.apply([op], source, { dryRun, error: 'invalid_argument' })
+  }
+  for (const underline of ['sng', 'dbl', 'none']) s.apply([font(underline)], source)
+  s.apply([{ op: 'add-layout', name: 'Custom layout', type: 'cust' }], source)
+  assert.deepEqual(readFileSync(source), bytes)
+
+  // Execute the user-facing font examples, so aliases cannot silently return.
+  for (const reference of ['styles-and-themes.md', 'patch-ops-cheatsheet.md']) {
+    const markdown = readFileSync(
+      fileURLToPath(new URL(`../../pptx-nova/references/${reference}`, import.meta.url)),
+      'utf8',
+    )
+    const example = [...markdown.matchAll(/```json\n([\s\S]*?)\n```/g)]
+      .map((match) => {
+        try {
+          return JSON.parse(match[1])
+        } catch {
+          return null
+        }
+      })
+      .find((op) => op?.op === 'set-run' && op.font?.underline)
+    assert.ok(example, reference)
+    s.apply([{ ...example, shape: { name: 'Body' } }], source)
+  }
+})
+
+nativeTest('native connector sites resolve beyond four and reroute after target rotation', (t) => {
+  const s = scenario(t)
+  const source = s.apply([
+    { op: 'add-slide', layout: 'blank' },
+    {
+      op: 'add-shape',
+      slide: 0,
+      kind: 'ellipse',
+      name: 'Target',
+      x: '1in',
+      y: '2in',
+      w: '2in',
+      h: '1in',
+    },
+    {
+      op: 'add-connector',
+      slide: 0,
+      name: 'Link',
+      begin: { shape: { name: 'Target' }, site: 6, x: '0in', y: '0in' },
+      end: { x: '6in', y: '4in' },
+    },
+  ]).output
+  const part = s.inspect(source).slides[0].partName
+  const xml = nativeParts(source).get(part).toString('utf8')
+  assert.match(xml, /<a:stCxn[^>]*idx="6"/)
+  // Ellipse site 6 is its right midpoint, overriding fallback (0, 0).
+  assert.match(xml, /<a:off x="2743200" y="2286000"/)
+  const edit = [{ op: 'set-shape', slide: 0, shape: { name: 'Target' }, rotation: 90 }]
+  s.apply(edit, source, { dryRun: true })
+  const candidate = s.apply(edit, source).output
+  const after = nativeParts(candidate).get(part).toString('utf8')
+  assert.match(after, /<a:stCxn[^>]*idx="6"/)
+  assert.match(after, /<a:off x="1828800" y="3200400"/)
+  s.apply(
+    [
+      {
+        op: 'set-connector',
+        slide: 0,
+        shape: { name: 'Link' },
+        begin: { shape: { name: 'Target' }, site: 8 },
+      },
+    ],
+    source,
+    { error: 'invalid_argument' },
+  )
+  assert.equal(nativeParts(source).get(part).toString('utf8'), xml)
+})
+
+nativeTest('copied chart and notes stay independent and area placement is owner checked', (t) => {
+  const s = scenario(t)
+  const data = { categories: ['A', 'B'], series: [{ name: 'Revenue', values: [10, 20] }] }
+  const source = s.apply([
+    { op: 'add-slide', layout: 'blank' },
+    {
+      op: 'add-chart',
+      slide: 0,
+      kind: 'area',
+      name: 'Chart',
+      title: 'Original',
+      x: '1in',
+      y: '1in',
+      w: '8in',
+      h: '4in',
+      data,
+    },
+    { op: 'set-slide-notes', slide: 0, text: 'Original notes' },
+  ]).output
+  const duplicated = s.apply([{ op: 'duplicate-slide', slide: 0 }], source).output
+  const original = nativeParts(source)
+  const copies = nativeParts(duplicated)
+  for (const pattern of [
+    /^ppt\/charts\/chart\d+\.xml$/,
+    /^ppt\/notesSlides\/notesSlide\d+\.xml$/,
+    /^ppt\/embeddings\//,
+  ]) {
+    const before = [...original.keys()].filter((name) => pattern.test(name))
+    assert.ok(before.length > 0)
+    assert.equal([...copies.keys()].filter((name) => pattern.test(name)).length, before.length * 2)
+    for (const name of before) assert.deepEqual(copies.get(name), original.get(name))
+  }
+  const changed = s.apply(
+    [
+      { op: 'set-slide-notes', slide: 1, text: 'Copy notes' },
+      {
+        op: 'set-chart-data',
+        slide: 1,
+        shape: { name: 'Chart' },
+        data: { ...data, series: [{ name: 'Revenue', values: [30, 40] }] },
+      },
+      {
+        op: 'set-chart',
+        slide: 1,
+        shape: { name: 'Chart' },
+        title: { font: { color: 'FF0000', size: '20pt' } },
+        dataLabels: [{ showValue: true }],
+      },
+      { op: 'set-chart-text', slide: 1, shape: { name: 'Chart' }, title: 'Changed copy' },
+    ],
+    duplicated,
+  ).output
+  const after = nativeParts(changed)
+  for (const [name, bytes] of original) {
+    if (/^ppt\/(charts|notesSlides|embeddings)\//.test(name))
+      assert.deepEqual(after.get(name), bytes, name)
+  }
+  const changedChart = [...after].find(
+    ([name, bytes]) =>
+      /^ppt\/charts\/chart\d+\.xml$/.test(name) && /Changed copy/.test(bytes.toString()),
+  )
+  assert.ok(changedChart)
+  const title = changedChart[1].toString().match(/<c:title>([\s\S]*?)<\/c:title>/)?.[1]
+  assert.ok(title)
+  assert.match(
+    title,
+    /<a:rPr\b[^>]*sz="2000"[^>]*>[\s\S]*?<a:srgbClr val="FF0000"\/>[\s\S]*?<\/a:rPr><a:t>Changed copy<\/a:t>/,
+  )
+  for (const scope of [{ plot: 0 }, { series: 0 }, { series: 0, point: 0 }]) {
+    for (const dryRun of [true, false]) {
+      s.apply(
+        [
+          {
+            op: 'set-chart',
+            slide: 1,
+            shape: { name: 'Chart' },
+            dataLabels: [{ scope, position: 'center' }],
+          },
+        ],
+        changed,
+        { dryRun, error: 'invalid_argument' },
+      )
+    }
+  }
+})
+
+nativeTest('preset adjustment repair needs review and rejects stale exact-part evidence', (t) => {
+  const s = scenario(t)
+  const ops = [
+    { op: 'add-slide', layout: 'blank' },
+    {
+      op: 'add-shape',
+      slide: 0,
+      kind: 'upArrow',
+      name: 'Arrow',
+      x: '1in',
+      y: '1in',
+      w: '2in',
+      h: '3in',
+    },
+    {
+      op: 'patch-ooxml',
+      target: 'ppt/slides/slide1.xml',
+      xpath: '//a:avLst',
+      action: 'replace',
+      value:
+        '<a:avLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:gd name="adj2" fmla="val 25000"/></a:avLst>',
+    },
+  ]
+  const request = { schemaVersion: 'pptx-patch/v1', ops }
+  const patch = s.write('fixture.json', request)
+  const source = join(s.directory, 'incomplete.pptx')
+  s.run(['pptx', 'apply', '--patch', patch, '--output', source, '--allow-raw-xml', '--json'])
+  const report = s.run(['pptx', 'vision-check', source, '--json'])
+  const finding = report.semanticIssues.find((issue) => issue.code === 'preset-adjustments')
+  assert.ok(finding?.remediation)
+  const remediation = finding.remediation
+  assert.equal(remediation.autoRetry, false)
+  assert.equal(remediation.requiresRawXml, false)
+  const context = {
+    requestText: JSON.stringify(request),
+    inputBytes: null,
+    assets: [],
+    assetRoot: s.directory,
+  }
+  assert.throws(
+    () => prepareRemediation(remediation, context, { documentBytes: readFileSync(source) }),
+    { code: 'review_required' },
+  )
+  const prepared = prepareRemediation(remediation, context, {
+    documentBytes: readFileSync(source),
+    reviewed: true,
+  })
+  const repaired = s.apply(prepared.patch.ops, source).output
+  const checked = s.run(['pptx', 'vision-check', repaired, '--json'])
+  assert.deepEqual(checked.semanticIssues, [])
+  const xml = nativeParts(repaired).get('ppt/slides/slide1.xml').toString('utf8')
+  assert.match(xml, /name="adj1"[^>]*fmla="val 50000"/)
+  assert.match(xml, /name="adj2"[^>]*fmla="val 25000"/)
+  const changed = s.apply(
+    [
+      {
+        op: 'add-text-box',
+        slide: 0,
+        name: 'Unrelated note',
+        x: '5in',
+        y: '1in',
+        w: '2in',
+        h: '1in',
+        text: 'Part changed',
+      },
+    ],
+    source,
+  ).output
+  s.apply(prepared.patch.ops, changed, { error: 'invalid_operation' })
+  const refreshed = s
+    .run(['pptx', 'vision-check', changed, '--json'])
+    .semanticIssues.find((issue) => issue.code === 'preset-adjustments').remediation
+  s.apply(refreshed.patch.ops, changed)
+})
 
 nativeTest('sidecar collisions and existing sidecars fail before primary publication', (t) => {
   const s = scenario(t)

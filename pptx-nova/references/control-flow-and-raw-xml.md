@@ -303,23 +303,26 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
 
 字段：
 
-| 字段     | 说明                                                                                                                                                                                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `target` | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                                                                                                                                                                                                    |
-| `xpath`  | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter                                                                                                                                                                          |
-| `action` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)；另有守卫 action `repair-child-order` / `repair-relationships`（`xpath` 固定 `/`，分别需要 `expectedPartSha256`+`repairs` / `relationshipRepairs`，不需要 `--allow-raw-xml`） |
-| `value`  | 文本或 raw XML 片段；`set/add/replace` 必填，`remove` 与两个 repair action **不能带**（带了报 union-no-match）                                                                                                                                               |
+| 字段     | 说明                                                                                                                                                                                                                                                       |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target` | OPC 部件路径（`.xml` / `.rels` 结尾，禁止 `..` 路径穿越）                                                                                                                                                                                                  |
+| `xpath`  | 受限 XPath；支持 `/`、`//`、元素名路径和最终 `/@attribute`，不支持 predicate/filter                                                                                                                                                                        |
+| `action` | `set`(替换文本) / `add`(追加子元素) / `remove`(删除节点) / `replace`(整节点换)；守卫 action `repair-child-order` / `repair-preset-adjustments` 用 `expectedPartSha256`+`repairs`，`repair-relationships` 用 `relationshipRepairs`，三者 `xpath` 均固定 `/` |
+| `value`  | 文本或 raw XML 片段；`set/add/replace` 必填，`remove` 与所有 repair action **不能带**                                                                                                                                                                      |
 
 **安全约束**：
 
 - `set/add/remove/replace` 必须显式加 `--allow-raw-xml` 旗标（否则报
   `patch-ooxml requires xdoc pptx apply --allow-raw-xml`）；守卫 action
-  `repair-child-order` / `repair-relationships` 不需要
+  `repair-child-order` / `repair-preset-adjustments` / `repair-relationships` 不需要。
+  preset 修复必须显式采纳报告建议，不能自动重试；其精确 part hash 不允许退回
+  element-only guard。完整流程见 `troubleshooting.md`，不要手写这些 guard。
 - `target` 只接受 OPC 包内部部件路径,会拒绝任意路径穿越
-- 写完会同时 emit `semanticChanges[]`(category=`rawOoxml`)和 `visualRisks[]`
+- 普通 raw mutation 会 emit `semanticChanges[]`(category=`rawOoxml`)和 `visualRisks[]`
   (code=`patch-ooxml`, severity=`high`, "raw OOXML patch bypasses the schema-v1 semantic contract")
-- 不参与 schema-v1 的字段校验,**写错了 dry-run 只能告诉你 XPath 没命中,无法告
-  诉你 OOXML 结构错** — 最后必须跑 `xdoc check deck.pptx --checks compat` 兜底
+- raw XML 内容不受 typed op 的完整字段约束；dry-run/apply 仍执行全包语义前后差分，
+  可能发现子元素顺序、关系和 preset adjustment 等问题。没有新增 issue 也不证明
+  Office 保真；最终补全量 semantic/compat、渲染和适用的 PowerPoint clean-open。
 
 **XPath 能力边界**：
 

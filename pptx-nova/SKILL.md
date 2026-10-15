@@ -120,6 +120,10 @@ Use these only to choose the entry reference; the routing table owns details.
   `set-run` / `replace-paragraph-text` edits require top-level operations and input-bound numeric
   shape IDs. Read `inspect-and-edit.md` for paragraph guards and native shape-autofit reflow;
   a text/font edit can resize an existing shape-autofit frame before serialization.
+- **Connectors / groups / OLE / embedded models**: read `native-shape-editing.md` before geometry
+  edits or duplication. Use native connection sites, retain owner-specific resources and reject
+  unrepresentable transforms. A `preset-adjustments` finding uses an explicitly reviewed,
+  document-bound repair from `troubleshooting.md`; it is not an automatic retry or an XSD failure.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
   complex or unsupported timing. Read logical `kind`, all `targets[]`, and `timingSummary.mergeSafe`;
   effect counts and raw behavior metadata do not authorize edits. `animations.md` covers fixed
@@ -140,6 +144,8 @@ Use these only to choose the entry reference; the routing table owns details.
   `rebind-target` only when target inheritance is intentional. Before apply, run
   `pptx-nova-copy-size-gate.mjs` as an independent SHA-bound defense; `require-match` never authorizes
   different slide sizes, and the workflow must not invent `opResults` or silently fit donor geometry.
+  Verify independent notes/chart/workbook/classic palette ownership and copied navigation as
+  described in `template-following.md`; equal previews do not prove editing isolation.
 - **Export / diff / preview / check**: use `export-and-check.md`. Run semantic diff once on a stable
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual-evidence decision remains the delivery authority. Discover each action's DPI bounds/default;
@@ -200,6 +206,7 @@ identify the actual renderer and its fallback before treating the symptom as a d
 | Continue the same deck with an explicit future/carryover rule                            | `references/common-workflow.md`, `references/session-rules.md`, `references/edit-contract.md`                                                                           | `references/edit-mode.md`, `references/inspect-and-edit.md`                                                                                          |
 | Translate an existing `.pptx` while preserving original layout                           | `references/translation-runner.md`                                                                                                                                      | Follow its preparation/failure routes into `references/translation-mode.md`; load charts/tables only when detected                                   |
 | Modify an existing `.pptx`                                                               | `references/common-workflow.md`, `references/edit-contract.md`, `references/edit-mode.md`, `references/inspect-and-edit.md`                                             | `references/patch-ops-cheatsheet.md`                                                                                                                 |
+| Edit connector/group/OLE/model geometry or duplicate native objects                      | Existing-deck edit references plus `references/native-shape-editing.md`                                                                                                 | `references/troubleshooting.md` for guarded preset repairs                                                                                           |
 | Add/modify/delete animations or transitions                                              | `references/common-workflow.md`, `references/edit-mode.md`, `references/animations.md`, `references/inspect-and-edit.md`                                                | `references/patch-ops-cheatsheet.md`; for complex timing, read `references/control-flow-and-raw-xml.md` only for risk judgment                       |
 | Data + template / JSON filling                                                           | `references/common-workflow.md`, `references/data-driven.md`                                                                                                            | `references/tables.md`, `references/charts.md`                                                                                                       |
 | Brand conversion / brand check                                                           | `references/common-workflow.md`, `references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                                                     |
@@ -425,6 +432,7 @@ Read the files required by routing first; do not read all references at once.
 | `references/express-mode.md`              | Full golden path for Express mode                                                                                                 |
 | `references/reference-create.md`          | Reference PPTX + new outline generation                                                                                           |
 | `references/inspect-and-edit.md`          | Selectors, inspect output, and edit details                                                                                       |
+| `references/native-shape-editing.md`      | Native connector sites, exact group transforms, OLE/model preview geometry, and object-copy ownership                             |
 | `references/design-lock-and-assets.md`    | `deck_lock.json`, `assets_manifest.json`, check-lock                                                                              |
 | `references/narrative-quality.md`         | Deck profile, claim spine, contact-sheet plan, comeback review                                                                    |
 | `references/patch-ops-cheatsheet.md`      | Patch op quick reference                                                                                                          |

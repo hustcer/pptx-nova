@@ -216,12 +216,37 @@ before <a:buChar> (schema order: …)`。
 - 仅对可重新取得的精确文档执行 `apply-to-document.patch`；使用上述脚本并传
   `--document`。dry-run 的未交付候选不能冒充原文件，缺目标时只读诊断。
 - `requiresRawXml:true` 必须已有相应权限；不能为执行建议自动增开权限。
-  受限 `repair-child-order` / `repair-relationships` 仍由当前运行时声明其权限要求。
+  受限 `repair-child-order` / `repair-preset-adjustments` / `repair-relationships`
+  仍由当前运行时声明其权限要求。
 - 没有 remediation 的 issue 可能是修复不确定（多个候选孤儿 part、preserve-only 动画等），
   保持现状并把 message 原文上报，不要自造修复。
 - `remove-shape` 已自动清理被删形状（含组内子形状）的动画与 build 引用，删除
   带动画的形状**不需要**先手动清动画；出现 `dangling-ref` 通常来自 deck 预存
   缺陷而非本次操作。
+
+### `preset-adjustments`：Office 互操作诊断与显式修复
+
+已知 preset 的非空 adjustment 列表若缺项或顺序不规范，会报告
+`code: "preset-adjustments"` 与 `ruleId: "office/preset-adjustments/<preset>"`。
+这是 PowerPoint 互操作风险，不是 XSD 无效的同义词；空列表沿用 preset 默认值，
+不要为了消除此问题批量填充所有空列表。
+
+仅在已知、唯一、整数常量 guide 能安全归一化时，报告提供
+`apply-to-document` remediation，内部 action 为 `repair-preset-adjustments`。
+该修复保留显式值、补齐声明默认值并恢复声明顺序，`autoRetry:false`，
+`requiresRawXml:false`。先核对修复范围与已有任务授权，明确采纳后才使用
+remediation helper 的 `--reviewed`；不要因建议存在就自动重试，也不额外打开 raw XML。
+
+保留 `target.inputSha256`、`expectedPartSha256`、`elementPath`、`ruleId`、
+`expectedRuleSha256` 及报告给出的 element guard，不手写或放宽它们。与 child-order
+修复不同，preset 修复即使带 element hash，仍要求整个 part 的精确 SHA 一致。
+同一 part 被其他编辑/修复改变后，重新审计新候选再取建议；旧建议不能继续串用。
+未知/重复 guide、非恒定公式、扩展内容或含糊结构可能只有诊断，不自造修复 patch。
+
+修复后重跑完整 semantic/vision 检查、受影响页预览和可用的 PowerPoint clean-open。
+dry-run/apply 的新增 issue delta 仍与 candidate 的全量 inherited debt 分开判断。
+重命名或结构编辑可能改变问题的归属身份；若既有 finding 再次出现在 delta，仍应停下
+核对源/候选和当前完整诊断，不能因为肉眼认为它是旧问题就过滤掉门禁报告。
 
 ### `[Content_Types].xml` 的 shell 审计
 

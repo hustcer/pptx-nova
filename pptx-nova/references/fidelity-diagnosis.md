@@ -184,6 +184,9 @@ Use these only for the affected content; compare original and candidate with the
   comparisons and check `renderContext`; standard runners retain `render-context.json` for
   resume. Date changes must invalidate cached visual evidence. Keep the native field unless
   the user asks to replace it with static text.
+  Placeholder font resolution depends on actual run text/language; empty paragraphs
+  can inherit weight too. Explicit normal and unspecified weight remain distinct.
+  A zero text-column gap is authored zero, not an absent value or browser `normal` gap.
 - **Clipping and line breaks:** horizontal overflow is independent of vertical overflow,
   including inherited settings and rotated frames. Verify visible text and link hit regions in
   the local text frame; preserve surrounding fill/outline and sibling objects. Internal colons
@@ -222,6 +225,15 @@ Use these only for the affected content; compare original and candidate with the
   SVG non-scaling strokes use the assigned viewport. Check these at matched scale. In Web
   Presenter, test authored navigation, pending animation builds, available-frame fitting and
   a fresh-show history reset separately; a static export cannot prove those interactions.
+  Box direction depends on entrance/exit phase as well as spatial direction. Dissolve
+  grain scale, feathering and authored paint need current Web playback evidence;
+  follow `animations.md` and do not use old fade or mask screenshots as the oracle.
+
+For new shape/copy differences, use `native-shape-editing.md` and
+`template-following.md`: native connector sites, exact ungrouping, OLE/model poster
+geometry and owner isolation require structural evidence as well as fresh pixels.
+For horizontal chart legends, negative/narrow axes and ChartEx contiguous hierarchy
+runs, use `charts.md` before changing authored layout, sorting or aggregating data.
 
 ## Chart, SmartArt and effect regressions
 

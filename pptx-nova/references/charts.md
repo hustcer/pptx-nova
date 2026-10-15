@@ -44,6 +44,15 @@ point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
 
 这些是源文件和渲染的诊断语义；能否写入仍以该操作的实时 schema 与 dry-run 为准。
 
+自动水平 legend 当前可在 frame 内换行，布局留白与实际绘制应使用同样的行数；
+长标签、overlay 和显式 manual box 仍须单独复核。category label 位于反转/交叉轴的
+另一侧时，应检查其实际物理侧与另一侧数值端点，不能靠移动 chart 外框补偿旧 renderer。
+
+读取/渲染已有 ChartEx 多层 category cache 时按连续 run 建树，分隔开的同名路径不能全局合并；
+连续重复完整路径保留首条观测，不擅自求和。sunburst 的值排序、等值次序、颜色身份及
+长径向标签换行与 treemap 不同。保留输入顺序与节点身份，升级后先重渲染源文件，
+不要排序原始数据去复刻旧截图；原生 Office 复核要求仍然适用。
+
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
 add-chart / set-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
 pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
@@ -72,6 +81,10 @@ semantic normalizer：经典 Chart 读取 `data`，ChartEx 读取 `dataEx`，并
   JSON number 前保留原始文本并明确转换限制，不能宣称已经丢失的位数可被渲染器恢复。
 - 对升级后变长的标签，先核对数值与格式，再检查实际渲染的遮挡。只有任务允许改变
   显示格式时才设置 `numberFormat` 或轴 `displayUnits`；保留底层数据，不做预先舍入。
+- 线性轴 ticks 在极小/极大域和窄区间应保持可区分、有限且有序；浮点清理不能吞掉
+  作者显式 origin/bounds 或真实尾区间。全负数据的自动上界不总是零，窄负域也不应被
+  强制拉到零；按实际数据域检查，勿用旧截图反推固定 min/max。非法 log domain 或
+  冲突的显式 bounds 不能靠伪造 ticks/gridline 掩盖，需回到数据与作者意图处理。
 - 直方图保留原始重复样本和区间闭合规则。有限样本的跨度/偏移也可能在中间运算溢出，
   如 `[-1e308, 1e308]`；当前渲染器可保持有限区间端点。检查标签没有 `NaN`/`Infinity`，
   并核对每箱计数与总和，不能仅因图像存在就判定通过。不要手工缩放或截断观测值。
@@ -794,6 +807,10 @@ surface/legend 细节与 PowerPoint 相同。3D 图表的最终视觉证据必�
 }
 ```
 
+标题 font 的稀疏更新会作用于实际显示的 rich runs/fields/breaks 及已有段落默认值；
+只改 color 不应擅自补 bold。标题替换应保留显式字体默认值，formula cache 与相邻
+title/axis 样式另行核对。验证真实显示文字及源 run 属性，不只检查外层 `txPr`。
+
 ### 改图例
 
 ```json
@@ -1034,13 +1051,18 @@ clean-open。只看到 patch 成功不足以证明数组顺序和 `bold: false` 
 
 `scope` 是 **对象**（不是字符串）：
 
-- 省略 `scope` → 整个 plot 0（= all 全部系列）
+- 省略 `scope` → plot 0（组合图不等于全部 plot）
 - `{ "series": 0 }` → 第 0 个系列
 - `{ "series": 0, "point": 2 }` → 第 0 系列的第 2 个点
 - 想同时给 plot 显式指定：`{ "plot": 0 }`
 
 `position` 必须用全名（**shorthand 不接受**）：
 `above / below / best-fit / center / inside-base / inside-end / left / outside-end / right`。
+
+这些值不是所有 chart kind 的通用可写集合。`area` / `area-3d` 在 plot、series、point
+范围均拒绝显式 `position`，包括 `center`；省略以保留默认/导入位置，其他标签字段
+仍按 scope 校验。组合图按实际所属 plot 判断，不能按系列输入顺序猜 plot index。
+库层的 clear 能力不代表 patch 接受 `position:null`；必须以当前字段 schema 为准。
 
 > ⚠️ 老版本里见过的 `"all"` / `"ctr"` / `"l"` / `"r"` / `"t"` / `"b"` / `"inBase"` /
 > `"inEnd"` / `"outEnd"` 全部被 schema 拒绝。

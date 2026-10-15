@@ -215,6 +215,8 @@ cloud-callout`。
 | `remove-shape`                 | 删除                                                                        |
 
 同一个 `set-shape` 可同时给多个字段（如 `position` + `size` + `fill` 一次改完）。
+连接线原生 site、精确 ungroup、OLE/model preview 几何和复制身份边界见
+`native-shape-editing.md`；不要把 `site` 当四边枚举，也不要绕过不可表示变换的拒绝。
 
 Group target 是明确例外：只支持 `name`、`accessibility`、`position`、`size`、
 `rotation`、`flip` 和 `effect`。`fill`、`line`、`clickAction` 会在任何 mutation 前返回
@@ -345,7 +347,7 @@ gradient stop 可用 `schemeClr` 引用主题色。`picture` 是 shape 专用 fi
     "size": "32pt",
     "bold": true,
     "italic": false,
-    "underline": "single",
+    "underline": "sng",
     "color": "1F1F1F",
     "fill": { "type": "solid", "color": "1F1F1F" }
   }
@@ -469,35 +471,35 @@ SmartArt diagram parts 主要走 inspect/report/preserve。需要展示或生成
 风格内容时，优先使用这些 recipe diagram ops 或显式 shape/connector patch；不要假设
 可以直接创建或编辑 OOXML SmartArt。
 
-| op / kind                                  | 等级   | 用途                                                                                                                                           |
-| ------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `add-slide.recipe.kind="title"`            | recipe | 封面                                                                                                                                           |
-| `add-slide.recipe.kind="section"`          | recipe | 章节扉页                                                                                                                                       |
-| `add-slide.recipe.kind="two-column"`       | recipe | 左右对照                                                                                                                                       |
-| `add-slide.recipe.kind="image-caption"`    | recipe | 大图 + 说明                                                                                                                                    |
-| `add-slide.recipe.kind="kpi-grid"`         | recipe | KPI 网格                                                                                                                                       |
-| `add-slide.recipe.kind="comparison-table"` | recipe | 对比表                                                                                                                                         |
-| `add-slide.recipe.kind="timeline"`         | recipe | 时间线 / 里程碑                                                                                                                                |
-| `add-slide.recipe.kind="roadmap"`          | recipe | 产品路线图 / 阶段计划                                                                                                                          |
-| `add-slide.recipe.kind="matrix-2x2"`       | recipe | 2x2 矩阵                                                                                                                                       |
-| `add-slide.recipe.kind="process-flow"`     | recipe | 流程图                                                                                                                                         |
-| `add-slide.recipe.kind="funnel"`           | recipe | 漏斗 / pipeline                                                                                                                                |
-| `add-slide.recipe.kind="swot"`             | recipe | SWOT 四象限                                                                                                                                    |
-| `add-slide.recipe.kind="pyramid"`          | recipe | 金字塔 / 层级模型                                                                                                                              |
-| `add-slide.recipe.kind="hub-spoke"`        | recipe | 中心辐射 / 能力地图                                                                                                                            |
-| `add-slide.recipe.kind="cycle"`            | recipe | 闭环 / 复盘循环                                                                                                                                |
-| `add-slide.recipe.kind="gantt"`            | recipe | 甘特 / 项目排期                                                                                                                                |
-| `add-slide.recipe.kind="scorecard-table"`  | recipe | 评分卡表格                                                                                                                                     |
-| `add-slide.recipe.kind="comparison-cards"` | recipe | 方案比较卡片                                                                                                                                   |
-| `set-theme` / `remap-theme`                | patch  | 品牌改装                                                                                                                                       |
-| `populate-slide`                           | patch  | 填 layout 契约（title-and-content/two-column/...），`mode: "strict" / "loose"`                                                                 |
-| `bind-data`                                | patch  | JSON 数据绑定 text / table / chart                                                                                                             |
-| `if`                                       | patch  | 控制流：按状态分支（slide-count / selector-match / ...）                                                                                       |
-| `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops                                                                                                |
-| `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支                                                                                                    |
-| `define-macro`                             | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）                                                                                                  |
-| `use-macro`                                | patch  | 宏：展开已 `define-macro` 的命名宏，用 `args` 传参                                                                                             |
-| `patch-ooxml`                              | patch  | 逃生口：直接 XPath 改 OOXML（`set/add/remove/replace` 需 `--allow-raw-xml`；守卫 action `repair-child-order` / `repair-relationships` 不需要） |
+| op / kind                                  | 等级   | 用途                                                                                                                                                                                                  |
+| ------------------------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `add-slide.recipe.kind="title"`            | recipe | 封面                                                                                                                                                                                                  |
+| `add-slide.recipe.kind="section"`          | recipe | 章节扉页                                                                                                                                                                                              |
+| `add-slide.recipe.kind="two-column"`       | recipe | 左右对照                                                                                                                                                                                              |
+| `add-slide.recipe.kind="image-caption"`    | recipe | 大图 + 说明                                                                                                                                                                                           |
+| `add-slide.recipe.kind="kpi-grid"`         | recipe | KPI 网格                                                                                                                                                                                              |
+| `add-slide.recipe.kind="comparison-table"` | recipe | 对比表                                                                                                                                                                                                |
+| `add-slide.recipe.kind="timeline"`         | recipe | 时间线 / 里程碑                                                                                                                                                                                       |
+| `add-slide.recipe.kind="roadmap"`          | recipe | 产品路线图 / 阶段计划                                                                                                                                                                                 |
+| `add-slide.recipe.kind="matrix-2x2"`       | recipe | 2x2 矩阵                                                                                                                                                                                              |
+| `add-slide.recipe.kind="process-flow"`     | recipe | 流程图                                                                                                                                                                                                |
+| `add-slide.recipe.kind="funnel"`           | recipe | 漏斗 / pipeline                                                                                                                                                                                       |
+| `add-slide.recipe.kind="swot"`             | recipe | SWOT 四象限                                                                                                                                                                                           |
+| `add-slide.recipe.kind="pyramid"`          | recipe | 金字塔 / 层级模型                                                                                                                                                                                     |
+| `add-slide.recipe.kind="hub-spoke"`        | recipe | 中心辐射 / 能力地图                                                                                                                                                                                   |
+| `add-slide.recipe.kind="cycle"`            | recipe | 闭环 / 复盘循环                                                                                                                                                                                       |
+| `add-slide.recipe.kind="gantt"`            | recipe | 甘特 / 项目排期                                                                                                                                                                                       |
+| `add-slide.recipe.kind="scorecard-table"`  | recipe | 评分卡表格                                                                                                                                                                                            |
+| `add-slide.recipe.kind="comparison-cards"` | recipe | 方案比较卡片                                                                                                                                                                                          |
+| `set-theme` / `remap-theme`                | patch  | 品牌改装                                                                                                                                                                                              |
+| `populate-slide`                           | patch  | 填 layout 契约（title-and-content/two-column/...），`mode: "strict" / "loose"`                                                                                                                        |
+| `bind-data`                                | patch  | JSON 数据绑定 text / table / chart                                                                                                                                                                    |
+| `if`                                       | patch  | 控制流：按状态分支（slide-count / selector-match / ...）                                                                                                                                              |
+| `foreach`                                  | patch  | 控制流：对 `items[]` 数组循环展开 `do[]` 子 ops                                                                                                                                                       |
+| `try`                                      | patch  | 控制流：高风险 op 失败时退到 `catch[]` 分支                                                                                                                                                           |
+| `define-macro`                             | patch  | 宏：注册一个命名 op 块（`{{args.*}}` 占位符）                                                                                                                                                         |
+| `use-macro`                                | patch  | 宏：展开已 `define-macro` 的命名宏，用 `args` 传参                                                                                                                                                    |
+| `patch-ooxml`                              | patch  | 直接 XPath 改 OOXML；`set/add/remove/replace` 需 raw XML 权限。守卫修复 `repair-child-order` / `repair-preset-adjustments` / `repair-relationships` 必须按报告绑定与权限执行，见 `troubleshooting.md` |
 
 详见 `recipes.md` / `data-driven.md` / `control-flow-and-raw-xml.md`。
 

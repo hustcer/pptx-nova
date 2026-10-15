@@ -25,6 +25,9 @@ xdoc schema --minimal                # 删 verbose 字段（与上面任一组�
 `--defs` 只用于字段投影，因此也要求 `--fields`，默认值为 `full`。
 `--command` 与 `--report` 互斥，也不能与 `--mode`、`--ops`、`--fields`、`--defs`
 混用；两者都支持 `--minimal`。命令名使用点分路径，报告名使用确切的 `schemaVersion`。
+只有不带任何选择器时，省略 `--mode` 才回退完整 schema；传 `--command` / `--report`
+时不要由包装器自动补 `--mode full`。定向报告闭包还会跟随命名 `*SchemaRef` 引用，
+保留其原始 JSON Pointer 路径；不要只处理 `$ref` 或拼接旧 snapshot 来补定义。
 
 能力探测同时读取 `schemaDisclosure.modes` 和 `schemaDisclosure.refinements`；
 新版将 `--fields` / `--defs` 放在 refinements，旧版可能放在 modes。
@@ -183,6 +186,23 @@ lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink
 `set-theme.fonts` 使用 `major` / `minor` 两个槽位；每个槽位是字体对象，例如
 `{ "typeface": "Inter", "eastAsian": "Source Han Sans SC" }`。不要使用已删除的
 `themeFontKind` / `majorFont` / `minorFont` 别名。
+
+### 严格写入枚举与保留身份
+
+对下列字段读取目标 op 的完整定义；lookup/preserve 域不等于 create/edit 域：
+
+- 字体 `underline` 使用 DrawingML token，例如 `sng`、`dbl`、`none`，不接受
+  `single` / `double`。省略保留本地值，`none` 显式关闭；规则适用于 run、notes、
+  table、chart 等共享 font surface。保留的陌生源值不等于可再次写入。
+- 普通 slide/layout placeholder 创建用 `slidePlaceholderType`；例如 `dt`、
+  `ctrTitle`、`subTitle`、`obj`，不用 `date`、`centerTitle`、`subtitle`、`object`。
+  `hdr` / `sldImg` 属于 notes/handout，不可在此创建；lookup 的 `placeholderType`
+  仍可描述这些保留身份。`set-master` 的共享文字样式槽不创建 placeholder shape。
+- `add-layout` / `set-layout` 显式 `type` 使用 `slideLayoutType`，如 `cust`，不是
+  `custom`。省略时新建默认 blank，复制/更新保留源身份；改 type 只改元数据，
+  不生成对应占位符或布局。selector 可以匹配既有不透明类型，不据此放宽 authoring。
+
+无效值先修正 patch，再 dry-run；不要通过 raw XML 写入被 typed writer 拒绝的别名。
 
 ### `chartKind`
 

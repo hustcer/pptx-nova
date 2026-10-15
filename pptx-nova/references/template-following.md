@@ -109,6 +109,23 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    full-package compatibility plus semantic evidence; equal previews do not
    prove independent ownership. SmartArt copying does not enable content editing.
 
+   Notes parts and their relationship sidecars belong to each copied slide;
+   shared notes masters/resources may remain shared. Classic/ChartEx chart parts
+   and embedded workbooks must be independent per destination occurrence.
+   Classic chart color-style palettes follow the chart owner; do not deduplicate
+   them across charts. Valid ChartEx style/color sharing has a different contract.
+   For `duplicate-slide` and repeated donor selections, edit one disposable copy's
+   notes/data and verify the source and other copies remain unchanged, using actual
+   part/relationship readback as well as inspect. Do not demand that every resource
+   be cloned, or treat matching pixels as proof of independent editing.
+
+   Native copy reserves the selected destinations together so forward/cyclic
+   navigation can resolve among selected slides. Repeated selections retain
+   per-copy self links; incoming links resolve to the first copied occurrence.
+   Check the requested selection order and actual jump/return actions separately
+   from static previews. Do not promise remapping of unselected destinations or
+   split the transaction into separate per-slide imports.
+
    A `ready` preflight is not sufficient when the decks use different slide
    dimensions. Before apply, run:
 

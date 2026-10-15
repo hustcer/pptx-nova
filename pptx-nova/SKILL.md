@@ -46,25 +46,14 @@ Viewer fallback evidence never upgrades `verify` to PowerPoint playback support.
 If a caller-provided run directory is rejected, the guard reports the allowed initial entries, every
 detected entry, and a safe recovery hint; preserve that directory as evidence and retry with a new one.
 
-When unsure, first check exact capability truth, then the op index in `xdoc-capabilities.json`; use
-`xdoc schema --mode index` only when the snapshot is missing or stale. Then use
-`xdoc schema --mode ops --ops <name> --fields <needed-fields> --defs summary --minimal` when the snapshot discloses
-both `--fields` and `--defs summary` and only a focused contract surface is needed; otherwise omit
-`--defs` for the compatible full-definition projection. Summary projections are discovery views, not
-complete validation schemas: switch to `--defs full` with the same `--fields` before constructing
-nested selectors. Even a full-definition field projection remains incomplete; omit both `--fields`
-and `--defs`, or use `apply --dry-run`, before treating a patch as valid. Read
-theme/style/native DeckKit information from matching snapshot catalogs. Derive selectors from inspect, the
-target op schema, then dry-run suggestions. For PPTX CLI syntax, use `xdoc pptx <action> --help`; this
-schema-backed human synopsis is neither machine schema nor JSON.
+For operation lookup, schema projections, or CLI output flags, read
+`references/schema-discovery.md#focused-lookup-and-output-flags` first. Prefer exact capability truth
+and the saved op index; projected schemas discover fields but do not prove patch validity.
+Derive selectors from inspect, the target op schema, then dry-run suggestions.
 Choose one selector lookup method; do not combine `id`, `name`, or `query` with another method.
 Combine AND predicates inside one query or its supported inline form, and pair `idx` with `placeholder`.
 
-Do not append `--json` to top-level `xdoc convert` or `xdoc check` by default. For structured PPTX PNG
-previews, prefer `xdoc pptx preview --json`; for structured single-file preflight results, prefer
-`xdoc check ... -o check.json`. If the current `xdoc-capabilities.json#capabilities.commandFlags` or
-`xdoc <command> --help` discloses `--report`, treat it only as a report/summary sidecar, not as a
-replacement for `preview.json` or single-file `check.json`. Block only when the caller explicitly
+Block only when the caller explicitly
 requires a strict gate and a task-critical capability is still undisclosed; otherwise keep exploring or
 use an existing fallback, and never disable new xdoc capabilities only because the snapshot is minimal.
 

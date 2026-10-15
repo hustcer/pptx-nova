@@ -3,6 +3,26 @@
 xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema 几千行 / 几十万 token
 ——你不需要一次拉全部，按需取就行。
 
+## Focused Lookup and Output Flags
+
+When unsure, first check exact capability truth, then the op index in `xdoc-capabilities.json`; use
+`xdoc schema --mode index` only when the snapshot is missing or stale. Then use
+`xdoc schema --mode ops --ops <name> --fields <needed-fields> --defs summary --minimal` when the snapshot discloses
+both `--fields` and `--defs summary` and only a focused contract surface is needed; otherwise omit
+`--defs` for the compatible full-definition projection. Summary projections are discovery views, not
+complete validation schemas: switch to `--defs full` with the same `--fields` before constructing
+nested selectors. Even a full-definition field projection remains incomplete; omit both `--fields`
+and `--defs`, or use `apply --dry-run`, before treating a patch as valid. Read
+theme/style/native DeckKit information from matching snapshot catalogs. Derive selectors from inspect, the
+target op schema, then dry-run suggestions. For PPTX CLI syntax, use `xdoc pptx <action> --help`; this
+schema-backed human synopsis is neither machine schema nor JSON.
+
+Do not append `--json` to top-level `xdoc convert` or `xdoc check` by default. For structured PPTX PNG
+previews, prefer `xdoc pptx preview --json`; for structured single-file preflight results, prefer
+`xdoc check ... -o check.json`. If the current `xdoc-capabilities.json#capabilities.commandFlags` or
+`xdoc <command> --help` discloses `--report`, treat it only as a report/summary sidecar, not as a
+replacement for `preview.json` or single-file `check.json`.
+
 ## 拉法
 
 ```bash

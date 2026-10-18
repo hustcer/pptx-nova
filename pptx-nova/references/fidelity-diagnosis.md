@@ -56,6 +56,10 @@ For the affected content, extend the check without rewriting the source:
 - Text/tables: distinguish ordinary-shape defaults from placeholder inheritance,
   whole-table style from missing second-band styles, and solid glyph outlines from
   text fill or shape borders. Include OMML outlines when inspecting math text.
+- Audit attribution: distinguish painted glyph bounds and authored text frames from invisible
+  PDF selection layers or renderer-created chart label boxes. Use the current
+  [visual audit boundary](export-and-check.md#unified-visual-evidence-canonical-agent-gate)
+  before resizing a chart or text frame to address an old finding; real overlap and authored overflow still count.
 - Images/vectors: preserve video-poster frame versus crop, authored SVG stretch,
   Unicode text, stroke coordinate systems and clipping. EMF/WMF recording canvas,
   restored device context and cosmetic hairlines can explain changes after an upgrade.

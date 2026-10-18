@@ -88,6 +88,14 @@ observation/review reports. The canonical transaction packages:
 - one atomically published, hash-bound manifest with the exact PDF and PNG
   artifacts used by those checks.
 
+Visible PDF page-bound checks exclude invisible selection/OCR text layers and clip-only glyphs;
+their text bounds do not prove painted overflow. Chart labels still supply ink-region evidence
+for collision checks, but renderer-created label positioning boxes are not authored text frames
+and are excluded from frame-height fit auditing. Authored text frames and visible out-of-page
+glyphs remain checked. These exclusions do not certify clipping paths, OCR correctness or chart
+layout; do not waive actual overlap/overflow findings. Re-audit the original bytes with the current
+runtime before changing a deck to compensate for an older synthetic-frame finding.
+
 Create reuses canonical PNGs for its actual visual review; existing-deck diagnosis still
 uses `vision-diff` or `contact-diff`; those reports explain the result but do
 not create a second delivery verdict. `visual-audit` performs the governing

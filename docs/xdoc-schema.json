@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.11.0 (3cdd156d)",
+  "version": "0.12.3 (93a52706)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -2138,7 +2138,7 @@
         {
           "name": "detail",
           "type": "string",
-          "description": "PPTX diff JSON detail mode: summary|full",
+          "description": "PPTX apply/diff JSON detail mode: summary|full (apply defaults to full)",
           "required": false
         },
         {
@@ -2432,6 +2432,7 @@
         "xdoc pptx inspect deck.pptx --json",
         "xdoc pptx select deck.pptx --query '{\"textRegex\":\"Revenue\"}' --json",
         "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json",
+        "xdoc pptx preview deck.pptx --output-dir shots/ --require-entitlement --require-unwatermarked --json",
         "xdoc pptx visual-audit --candidate new.pptx --reference old.pptx --output-dir evidence --json",
         "xdoc pptx vision-check deck.pptx --json",
         "xdoc pptx diff old.pptx new.pptx --json",
@@ -2498,7 +2499,7 @@
         "Use `xdoc pptx i18n-scan --source source.pptx --source-lang multi|zh|en --mode source --output i18n-scan.json --json` to persist the full stable i18nUnits inventory while returning only a compact result on stdout; use candidate mode with --output as the authoritative target-consistency gate. Reserve --json-full for interactive debugging of small reports.",
         "Use `xdoc pptx i18n-plan --source old.pptx --units-file i18n-scan-source.json --data translations.json --output i18n-plan.json --json` as the translation planner: agents receive a compact stdout result and read the persisted full plan only when materializing its execution artifacts. Reviewed slide/layout/master units with reviewDecision:\"translate\" route through the same guarded textPlan, replaceText, or replaceChartText primitives.",
         "When i18n-plan returns mixed-style-no-anchor, use its unit-specific draftCommand or run `xdoc pptx i18n-anchor-draft --source old.pptx --units-file i18n-scan-source.json --data translations.json --json`: merge only high-confidence translationsDraft anchors by unitId, then rerun i18n-plan. Drafts are never executable patches.",
-        "Use `xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json` as a lower-level text-only fallback or execution primitive: it emits run-level set-run patchOps and marks mixed-style paragraphs review-required when styled-token anchors are not reliable.",
+        "Use `xdoc pptx i18n-text-plan --source old.pptx --data translations.json --json` as a lower-level text-only fallback or execution primitive: it emits set-run or atomic replace-paragraph-text patchOps with textLayout=preserve-geometry and marks mixed-style paragraphs review-required when styled-token anchors are not reliable. Stored geometry and autofit settings are preserved; visual fit still requires post-translation verification.",
         "Use `xdoc pptx replace-text --source old.pptx --data replacements.json --to pptx|pdf|png --output <target> --json` to replace only existing OOXML text node or text attribute values, with sourceText/sourceHash/index checks and no paragraph/run rebuild. PPTX remains the default; PDF/PNG are terminal watermarked Free outputs.",
         "Use `xdoc pptx replace-chart-text --source old.pptx --data chart-replacements.json --to pptx|pdf|png --output <target> --visible-cache-only --json` for translation-safe chart label updates: it changes chart visible text nodes or materializes a guarded generated classic Chart or ChartEx default title, and never writes workbook, relationship, external path, embedded workbook, or formatCode parts.",
         "Use `xdoc pptx i18n-style-diff --source old.pptx --candidate translated.pptx --json` as the translation-mode gate: it ignores known visible text node content, blocks run/paragraph/textbox/table/chart/style metadata changes, records font-size layout repairs, and separates typed user-visible text attribute changes from style blockers.",
@@ -5207,7 +5208,7 @@
           }
         },
         "apply": {
-          "usage": "xdoc pptx apply --patch patch.json [--input in.pptx] --output out.pptx [--daemon]",
+          "usage": "xdoc pptx apply --patch patch.json [--input in.pptx] --output out.pptx [--daemon] [--detail full|summary]",
           "outputKind": "pptx",
           "inputs": ["patch JSON", "optional input PPTX"],
           "outputs": [
@@ -5216,6 +5217,11 @@
             "pptx-apply/v1 report",
             "optional pptx-apply-sidecar/v1 sidecar JSON"
           ],
+          "detailModes": {
+            "default": "full",
+            "full": "Complete before/after values; preserves the default report format.",
+            "summary": "Omit semantic before/after strings over 1024 UTF-8 bytes and emit valueSummaries with JSON Pointer, UTF-8 byte count, SHA-256 and a preview of at most 128 Unicode scalars. Validation, authored patches and sidecars retain complete values."
+          },
           "dryRun": {
             "scope": "complete-candidate-package",
             "validates": [
@@ -5320,6 +5326,12 @@
               "description": "Require the local xdoc daemon for pptx apply/inspect; fail instead of falling back.",
               "required": false,
               "style": "flag"
+            },
+            {
+              "name": "detail",
+              "type": "string",
+              "description": "PPTX apply/diff JSON detail mode: summary|full (apply defaults to full)",
+              "required": false
             },
             {
               "name": "json",
@@ -5440,6 +5452,9 @@
               "daemon-strict": {
                 "type": "boolean",
                 "default": false
+              },
+              "detail": {
+                "type": "string"
               },
               "json": {
                 "type": "boolean",
@@ -6062,6 +6077,10 @@
             "pptx-preview/v1 JSON manifest",
             "human summary"
           ],
+          "authorizationNotes": [
+            "Without --layout, --intent must bind convert/png; with --layout it must bind modify/pptx for the persisted editable candidate.",
+            "--require-entitlement, --require-unwatermarked and --allow-fallback are accepted in both preview modes; --intent is mutually exclusive with these flags. The same caller constraints apply to PNG conversion, including layout previews."
+          ],
           "scope": {
             "slides": {
               "option": "--slides",
@@ -6260,10 +6279,29 @@
             "publish": "atomic-file-replace",
             "publishScope": "editable-pptx-output",
             "dryRun": "unsupported",
-            "productWriteCondition": "--layout"
+            "productWriteCondition": "--layout",
+            "intentBindings": [
+              {
+                "condition": "without --layout",
+                "feature": "convert",
+                "outputType": "png"
+              },
+              {
+                "condition": "with --layout",
+                "feature": "modify",
+                "outputType": "pptx"
+              }
+            ],
+            "renderAuthorization": {
+              "taskAuthorization": "two-stage",
+              "feature": "convert",
+              "outputType": "png",
+              "callerConstraints": "caller constraints also apply to PNG rendering"
+            }
           },
           "examples": [
-            "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json"
+            "xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json",
+            "xdoc pptx preview deck.pptx --output-dir shots/ --require-entitlement --require-unwatermarked --json"
           ],
           "parametersSchema": {
             "type": "object",
@@ -6835,7 +6873,7 @@
             {
               "name": "detail",
               "type": "string",
-              "description": "PPTX diff JSON detail mode: summary|full",
+              "description": "PPTX apply/diff JSON detail mode: summary|full (apply defaults to full)",
               "required": false
             },
             {
@@ -7750,7 +7788,7 @@
             "reviewDecision": "Set reviewDecision:\"translate\" together with the unit's sourceHash to apply a reviewed unit's targetText through the standard execution primitives; without it, a review unit carrying targetText stays a review-target conflict. Applied reviewed units are counted in summary.reviewedTranslationCount."
           },
           "routes": {
-            "textPlan": "DrawingML shape and table paragraphs share the i18n-text-plan run-mapping strategies. Shape targets materialize as guarded set-run patch.ops; table targets materialize as guarded replaceText replacements for existing a:t nodes. The report.textPlan sub-artifact is labelled pptx-i18n-text-plan-input/v1 and is the only valid --data input for i18n-text-plan.",
+            "textPlan": "DrawingML shape and table paragraphs share the i18n-text-plan run-mapping strategies. Shape targets materialize as guarded text operations with textLayout=preserve-geometry; table targets materialize as guarded replaceText replacements for existing a:t nodes. The report.textPlan sub-artifact is labelled pptx-i18n-text-plan-input/v1 and is the only valid --data input for i18n-text-plan.",
             "replaceText": "User-visible text attributes become replace-text replacements with stable part/tag/attr/index selectors copied from i18nUnits.",
             "replaceChartText": "Chart visible text units become replace-chart-text replacements with part/role/nodePath/index selectors copied from i18nUnits. Generated classic Chart and ChartEx title units additionally carry sourceState=generated-default-title, chartDialect, and structureSignature and are materialized only while all guarded state still matches.",
             "reviewedSharedText": "A slideLayout or slideMaster unit remains manual-review until translations[].reviewDecision is translate and sourceHash matches. Authorization selects the executable selector already carried by the unit, so shared text uses guarded textPlan/replaceText/replaceChartText instead of remaining permanently review-only."
@@ -8616,7 +8654,7 @@
             "run-level set-run and atomic structured-paragraph patchOps",
             "human summary"
           ],
-          "strategy": "Inspect existing DrawingML text and structural nodes, map ordinary runs without rebuilding paragraphs, and preserve break/tab/field identity through one guarded atomic structured-paragraph operation.",
+          "strategy": "Inspect existing DrawingML text and structural nodes, map ordinary runs without rebuilding paragraphs, and preserve break/tab/field identity through one guarded atomic structured-paragraph operation. Generated text operations use textLayout=preserve-geometry, retaining stored frame geometry and autofit settings without introducing implicit reflow. Earlier pending reflow requests remain effective; translated text fit is verified separately.",
           "translationUnit": {
             "schemaVersion": "pptx-i18n-text-plan-input/v1",
             "note": "Use the report.textPlan sub-artifact emitted by `xdoc pptx i18n-plan`. The top-level unitId-based pptx-i18n-translations/v1 document is not valid input here and is rejected with a targeted error.",
@@ -11257,7 +11295,7 @@
               "default": "register-source",
               "enum": ["register-source", "rebind-target"],
               "strict": true,
-              "register-source": "Faithfully registers the selected source layout/master/theme closure, reusing a normalized registered closure when equivalent and copying only selected layouts rather than every sibling layout.",
+              "register-source": "Faithfully registers the selected source layout/master/theme closure, reusing a normalized registered closure when equivalent and copying only selected layouts rather than every sibling layout. Preserves presentation paragraph/run defaults in copied shape list styles below direct and template formatting; destination-only text defaults do not replace source styling. Presentation-default image bullets or hyperlinks requiring presentation-owned relationships, and changes to effective primary/alternate text language, block preflight and fail atomically during apply. Set explicit source paragraph/run languages when an unset language would inherit the destination locale; no application locale is guessed.",
               "rebind-target": "Explicitly points copied slides at an existing registered target layout and reports inherited-style fidelity risk when the closures differ."
             },
             "slideSize": {
@@ -22724,7 +22762,7 @@
                 ]
               }
             ],
-            "description": "'none' keeps the frame fixed; 'shape' requests authoring reflow without reducing font sizes; 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the local autofit setting. Native xdoc materializes edited horizontal, single-column rectangular shape-autofit frames using resolved font metrics. Wrapped frames preserve width; unwrapped frames resize both dimensions around the first paragraph's horizontal alignment. Both preserve the vertical anchor and may grow or shrink. Unsupported layouts or unavailable glyph metrics fail atomically, including dry runs. Untouched imported geometry is preserved; setting mode='shape' explicitly requests reflow. Theme remapping preserves stored geometry unless another operation already requested reflow. Low-level OOXML serialization alone does not measure text."
+            "description": "'none' keeps the frame fixed; 'shape' requests authoring reflow without reducing font sizes; 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the local autofit setting. Native xdoc materializes requested horizontal, single-column rectangular shape-autofit reflows using resolved font metrics. Wrapped frames preserve width; unwrapped frames resize both dimensions around the first paragraph's horizontal alignment. Both preserve the vertical anchor and may grow or shrink. Unsupported requested layouts or unavailable glyph metrics fail atomically, including dry runs. Untouched imported geometry is preserved; setting mode='shape' explicitly requests reflow. Text operations with textLayout='preserve-geometry' and theme remapping preserve stored geometry without cancelling reflow requests already pending. Low-level OOXML serialization alone does not measure text."
           },
           "textFramePatch": {
             "type": "object",
@@ -25835,6 +25873,12 @@
             "enum": ["estimate", "font-metrics"],
             "strict": true,
             "default": "estimate"
+          },
+          "textLayoutPolicy": {
+            "type": "string",
+            "enum": ["respect-autofit", "preserve-geometry"],
+            "strict": true,
+            "default": "respect-autofit"
           },
           "slideAnimationEditMode": {
             "type": "string",
@@ -29186,6 +29230,10 @@
                           "type": "string",
                           "description": "i18n optimistic-concurrency guard: exact source paragraph text expected in the current PPTX."
                         },
+                        "textLayout": {
+                          "$ref": "#/$defs/textLayoutPolicy",
+                          "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                        },
                         "unitId": {
                           "type": "string",
                           "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -29201,7 +29249,7 @@
                         "replacements"
                       ],
                       "additionalProperties": false,
-                      "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
+                      "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. textLayout defaults to respect-autofit; preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request. A request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that translated text fits. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
                     },
                     {
                       "type": "object",
@@ -29577,6 +29625,10 @@
                         "text": {
                           "type": "string"
                         },
+                        "textLayout": {
+                          "$ref": "#/$defs/textLayoutPolicy",
+                          "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                        },
                         "unitId": {
                           "type": "string",
                           "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -29584,7 +29636,7 @@
                       },
                       "required": ["op", "slide", "shape", "paragraph", "run"],
                       "additionalProperties": false,
-                      "description": "Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
+                      "description": "textLayout defaults to respect-autofit for text and font edits. preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request; a request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that text fits. Other text operations do not accept textLayout and keep ordinary authoring reflow. Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
                       "allOf": [
                         {
                           "if": {
@@ -32360,6 +32412,12 @@
             "items": {
               "$ref": "#/$defs/structuredParagraphReplacement"
             }
+          },
+          "textLayoutPolicy": {
+            "type": "string",
+            "enum": ["respect-autofit", "preserve-geometry"],
+            "strict": true,
+            "default": "respect-autofit"
           },
           "chartAxesPatch": {
             "type": "array",
@@ -35381,7 +35439,7 @@
                 ]
               }
             ],
-            "description": "'none' keeps the frame fixed; 'shape' requests authoring reflow without reducing font sizes; 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the local autofit setting. Native xdoc materializes edited horizontal, single-column rectangular shape-autofit frames using resolved font metrics. Wrapped frames preserve width; unwrapped frames resize both dimensions around the first paragraph's horizontal alignment. Both preserve the vertical anchor and may grow or shrink. Unsupported layouts or unavailable glyph metrics fail atomically, including dry runs. Untouched imported geometry is preserved; setting mode='shape' explicitly requests reflow. Theme remapping preserves stored geometry unless another operation already requested reflow. Low-level OOXML serialization alone does not measure text."
+            "description": "'none' keeps the frame fixed; 'shape' requests authoring reflow without reducing font sizes; 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the local autofit setting. Native xdoc materializes requested horizontal, single-column rectangular shape-autofit reflows using resolved font metrics. Wrapped frames preserve width; unwrapped frames resize both dimensions around the first paragraph's horizontal alignment. Both preserve the vertical anchor and may grow or shrink. Unsupported requested layouts or unavailable glyph metrics fail atomically, including dry runs. Untouched imported geometry is preserved; setting mode='shape' explicitly requests reflow. Text operations with textLayout='preserve-geometry' and theme remapping preserve stored geometry without cancelling reflow requests already pending. Low-level OOXML serialization alone does not measure text."
           },
           "textFrameVerticalText": {
             "oneOf": [
@@ -38466,6 +38524,10 @@
                         "type": "string",
                         "description": "i18n optimistic-concurrency guard: exact source paragraph text expected in the current PPTX."
                       },
+                      "textLayout": {
+                        "$ref": "#/$defs/textLayoutPolicy",
+                        "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                      },
                       "unitId": {
                         "type": "string",
                         "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -38481,7 +38543,7 @@
                       "replacements"
                     ],
                     "additionalProperties": false,
-                    "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
+                    "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. textLayout defaults to respect-autofit; preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request. A request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that translated text fits. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
                   },
                   {
                     "type": "object",
@@ -38857,6 +38919,10 @@
                       "text": {
                         "type": "string"
                       },
+                      "textLayout": {
+                        "$ref": "#/$defs/textLayoutPolicy",
+                        "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                      },
                       "unitId": {
                         "type": "string",
                         "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -38864,7 +38930,7 @@
                     },
                     "required": ["op", "slide", "shape", "paragraph", "run"],
                     "additionalProperties": false,
-                    "description": "Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
+                    "description": "textLayout defaults to respect-autofit for text and font edits. preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request; a request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that text fits. Other text operations do not accept textLayout and keep ordinary authoring reflow. Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
                     "allOf": [
                       {
                         "if": {
@@ -42436,7 +42502,7 @@
                   ]
                 }
               ],
-              "description": "'none' keeps the frame fixed; 'shape' requests authoring reflow without reducing font sizes; 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the local autofit setting. Native xdoc materializes edited horizontal, single-column rectangular shape-autofit frames using resolved font metrics. Wrapped frames preserve width; unwrapped frames resize both dimensions around the first paragraph's horizontal alignment. Both preserve the vertical anchor and may grow or shrink. Unsupported layouts or unavailable glyph metrics fail atomically, including dry runs. Untouched imported geometry is preserved; setting mode='shape' explicitly requests reflow. Theme remapping preserves stored geometry unless another operation already requested reflow. Low-level OOXML serialization alone does not measure text."
+              "description": "'none' keeps the frame fixed; 'shape' requests authoring reflow without reducing font sizes; 'text' shrinks text on overflow (fontScale is a percent, text mode only); null clears the local autofit setting. Native xdoc materializes requested horizontal, single-column rectangular shape-autofit reflows using resolved font metrics. Wrapped frames preserve width; unwrapped frames resize both dimensions around the first paragraph's horizontal alignment. Both preserve the vertical anchor and may grow or shrink. Unsupported requested layouts or unavailable glyph metrics fail atomically, including dry runs. Untouched imported geometry is preserved; setting mode='shape' explicitly requests reflow. Text operations with textLayout='preserve-geometry' and theme remapping preserve stored geometry without cancelling reflow requests already pending. Low-level OOXML serialization alone does not measure text."
             },
             "textFramePatch": {
               "type": "object",
@@ -45547,6 +45613,12 @@
               "enum": ["estimate", "font-metrics"],
               "strict": true,
               "default": "estimate"
+            },
+            "textLayoutPolicy": {
+              "type": "string",
+              "enum": ["respect-autofit", "preserve-geometry"],
+              "strict": true,
+              "default": "respect-autofit"
             },
             "slideAnimationEditMode": {
               "type": "string",
@@ -48789,7 +48861,7 @@
             "op": "replace-paragraph-text",
             "category": "text",
             "summary": "Replace matched paragraph text.",
-            "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy.",
+            "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. textLayout defaults to respect-autofit; preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request. A request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that translated text fits. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy.",
             "required": [
               "op",
               "slide",
@@ -48800,7 +48872,7 @@
               "replacements"
             ],
             "constraints": [],
-            "optional": ["sourceHash", "unitId"],
+            "optional": ["sourceHash", "textLayout", "unitId"],
             "level": "patch"
           },
           {
@@ -48963,7 +49035,7 @@
             "op": "set-run",
             "category": "text",
             "summary": "Update a text run and its formatting.",
-            "description": "Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
+            "description": "textLayout defaults to respect-autofit for text and font edits. preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request; a request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that text fits. Other text operations do not accept textLayout and keep ordinary authoring reflow. Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
             "required": ["op", "slide", "shape", "paragraph", "run"],
             "constraints": [
               {
@@ -48994,7 +49066,15 @@
                 "summary": "sourceText, sourceHash or unitId requires shape.id or a numeric shape ID from the input PPTX; name and query selectors are only supported without source guards."
               }
             ],
-            "optional": ["font", "hyperlink", "sourceHash", "sourceText", "text", "unitId"],
+            "optional": [
+              "font",
+              "hyperlink",
+              "sourceHash",
+              "sourceText",
+              "text",
+              "textLayout",
+              "unitId"
+            ],
             "level": "patch"
           },
           {
@@ -52211,6 +52291,10 @@
                     "type": "string",
                     "description": "i18n optimistic-concurrency guard: exact source paragraph text expected in the current PPTX."
                   },
+                  "textLayout": {
+                    "$ref": "#/$defs/textLayoutPolicy",
+                    "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                  },
                   "unitId": {
                     "type": "string",
                     "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -52226,7 +52310,7 @@
                   "replacements"
                 ],
                 "additionalProperties": false,
-                "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
+                "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. textLayout defaults to respect-autofit; preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request. A request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that translated text fits. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
               },
               {
                 "type": "object",
@@ -52273,6 +52357,10 @@
                   "text": {
                     "type": "string"
                   },
+                  "textLayout": {
+                    "$ref": "#/$defs/textLayoutPolicy",
+                    "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                  },
                   "unitId": {
                     "type": "string",
                     "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -52280,7 +52368,7 @@
                 },
                 "required": ["op", "slide", "shape", "paragraph", "run"],
                 "additionalProperties": false,
-                "description": "Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
+                "description": "textLayout defaults to respect-autofit for text and font edits. preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request; a request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that text fits. Other text operations do not accept textLayout and keep ordinary authoring reflow. Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
                 "allOf": [
                   {
                     "if": {
@@ -52601,6 +52689,12 @@
               }
             ],
             "description": "Choose one lookup method: id, name, query, or placeholder/inline predicates. Inline predicates combine with AND; idx requires same-level placeholder. Integers are OOXML shape IDs, not array indexes. Consumers enforce match cardinality."
+          },
+          "textLayoutPolicy": {
+            "type": "string",
+            "enum": ["respect-autofit", "preserve-geometry"],
+            "strict": true,
+            "default": "respect-autofit"
           },
           "font": {
             "type": "object",
@@ -53542,7 +53636,7 @@
         },
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://structurify.io/schemas/pptx-i18n-text-plan/v1.schema.json",
-        "description": "Every translation must resolve to deterministic set-run or atomic replace-paragraph-text operations. Mixed styles without reliable anchors and delimiter drift require review. Source run language/proofing metadata is preserved; only apply patch when agentGate.passed=true.",
+        "description": "Every translation must resolve to deterministic set-run or atomic replace-paragraph-text operations with textLayout=preserve-geometry. Stored frame geometry, autofit settings and source run language/proofing metadata are preserved; reflow requests already pending remain effective. Mixed styles without reliable anchors and delimiter drift require review. Visual text fit is a separate post-translation gate; only apply patch when agentGate.passed=true.",
         "$defs": {
           "i18nTextIssue": {
             "type": "object",
@@ -53798,6 +53892,10 @@
                     "type": "string",
                     "description": "i18n optimistic-concurrency guard: exact source paragraph text expected in the current PPTX."
                   },
+                  "textLayout": {
+                    "$ref": "#/$defs/textLayoutPolicy",
+                    "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                  },
                   "unitId": {
                     "type": "string",
                     "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -53813,7 +53911,7 @@
                   "replacements"
                 ],
                 "additionalProperties": false,
-                "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
+                "description": "Supported only as a top-level operation so the native host can verify guards against the input snapshot. textLayout defaults to respect-autofit; preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request. A request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that translated text fits. A nested replace-paragraph-text returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy."
               },
               {
                 "type": "object",
@@ -53860,6 +53958,10 @@
                   "text": {
                     "type": "string"
                   },
+                  "textLayout": {
+                    "$ref": "#/$defs/textLayoutPolicy",
+                    "description": "Geometry intent for this text operation; omission respects existing autofit. preserve-geometry retains stored coordinates, size and autofit settings and adds no reflow request, but a request already pending for the shape still measures final text; it does not guarantee text fit. Only set-run and replace-paragraph-text accept textLayout."
+                  },
                   "unitId": {
                     "type": "string",
                     "description": "i18n optimistic-concurrency context: unit identifier reported with guard conflicts."
@@ -53867,7 +53969,7 @@
                 },
                 "required": ["op", "slide", "shape", "paragraph", "run"],
                 "additionalProperties": false,
-                "description": "Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
+                "description": "textLayout defaults to respect-autofit for text and font edits. preserve-geometry preserves stored frame geometry and autofit settings without adding a reflow request; a request already pending for the shape, from explicit autofit or an earlier respect-autofit edit, still measures final text. Preservation does not promise that text fits. Other text operations do not accept textLayout and keep ordinary authoring reflow. Supplying sourceText, sourceHash or unitId requires a top-level operation so the native host can verify guards against the input snapshot. A nested guarded set-run returns invalid_argument when reached, before mutation, including foreach substitutions, invoked macros and recipe expansions. Unchosen branches and unused macros do not execute; try may recover under its ordinary error policy. Unguarded nested edits remain supported.",
                 "allOf": [
                   {
                     "if": {
@@ -53979,6 +54081,12 @@
               }
             ],
             "description": "Choose one lookup method: id, name, query, or placeholder/inline predicates. Inline predicates combine with AND; idx requires same-level placeholder. Integers are OOXML shape IDs, not array indexes. Consumers enforce match cardinality."
+          },
+          "textLayoutPolicy": {
+            "type": "string",
+            "enum": ["respect-autofit", "preserve-geometry"],
+            "strict": true,
+            "default": "respect-autofit"
           },
           "font": {
             "type": "object",
@@ -87572,6 +87680,40 @@
           "output": {
             "type": ["string", "null"]
           },
+          "detail": {
+            "type": "string",
+            "enum": ["summary", "full"],
+            "strict": true
+          },
+          "valueSummaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "utf8Bytes", "sha256", "preview", "previewTruncated"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "JSON Pointer to the omitted before/after value in the full report"
+                },
+                "utf8Bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "preview": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "previewTruncated": {
+                  "const": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
           "changedParts": {
             "type": "array",
             "items": {
@@ -89447,6 +89589,40 @@
           "output": {
             "type": ["string", "null"]
           },
+          "detail": {
+            "type": "string",
+            "enum": ["summary", "full"],
+            "strict": true
+          },
+          "valueSummaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "utf8Bytes", "sha256", "preview", "previewTruncated"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "JSON Pointer to the omitted before/after value in the full report"
+                },
+                "utf8Bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "preview": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "previewTruncated": {
+                  "const": true
+                }
+              },
+              "additionalProperties": false
+            }
+          },
           "changedParts": {
             "type": "array",
             "items": {
@@ -91154,6 +91330,40 @@
           },
           "output": {
             "type": ["string", "null"]
+          },
+          "detail": {
+            "type": "string",
+            "enum": ["summary", "full"],
+            "strict": true
+          },
+          "valueSummaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "utf8Bytes", "sha256", "preview", "previewTruncated"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "JSON Pointer to the omitted before/after value in the full report"
+                },
+                "utf8Bytes": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "preview": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "previewTruncated": {
+                  "const": true
+                }
+              },
+              "additionalProperties": false
+            }
           },
           "changedParts": {
             "type": "array",
@@ -106480,6 +106690,40 @@
                 "type": "string",
                 "enum": ["error"],
                 "strict": true
+              },
+              "detail": {
+                "type": "string",
+                "enum": ["summary", "full"],
+                "strict": true
+              },
+              "valueSummaries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["path", "utf8Bytes", "sha256", "preview", "previewTruncated"],
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "description": "JSON Pointer to the omitted before/after value in the full report"
+                    },
+                    "utf8Bytes": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "preview": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "previewTruncated": {
+                      "const": true
+                    }
+                  },
+                  "additionalProperties": false
+                }
               },
               "input": {
                 "type": ["string", "null"]

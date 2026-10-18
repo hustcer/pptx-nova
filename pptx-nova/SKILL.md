@@ -107,8 +107,8 @@ Use these only to choose the entry reference; the routing table owns details.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
   collect scoped evidence, run the contract gate, then review changed slides. Source-guarded
   `set-run` / `replace-paragraph-text` edits require top-level operations and input-bound numeric
-  shape IDs. Read `inspect-and-edit.md` for paragraph guards and native shape-autofit reflow;
-  a text/font edit can resize an existing shape-autofit frame before serialization.
+  shape IDs. Read `inspect-and-edit.md` for paragraph guards and `textLayout`: ordinary edits
+  respect autofit; geometry-preserving edits require the disclosed policy and final fit checks.
 - **Connectors / groups / OLE / embedded models**: read `native-shape-editing.md` before geometry
   edits or duplication. Use native connection sites, retain owner-specific resources and reject
   unrepresentable transforms. A `preset-adjustments` finding uses an explicitly reviewed,

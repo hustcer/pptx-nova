@@ -11,6 +11,7 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  statSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs'
@@ -1017,10 +1018,246 @@ nativeTest(
 )
 
 nativeTest(
+  'text layout policy preserves geometry and autofit without cancelling pending reflow',
+  (t) => {
+    const s = scenario(t)
+    const text = 'A long review paragraph with multiple observations that wraps inside the frame.'
+    const source = s.create(text, 1, { autofit: { mode: 'shape' }, wordWrap: true })
+    const original = s.body(source)
+    const edit = {
+      op: 'set-run',
+      slide: 0,
+      shape: { id: original.id },
+      paragraph: 0,
+      run: 0,
+      sourceText: text,
+      text: 'Short review',
+      textLayout: 'preserve-geometry',
+    }
+    s.apply([edit], source, { dryRun: true })
+    const kept = s.apply([edit], source)
+    assert.equal(s.body(kept.output).textPreview, edit.text)
+    assert.deepEqual(s.body(kept.output).bbox, original.bbox)
+    assert.match(nativeParts(kept.output).get('ppt/slides/slide1.xml').toString(), /spAutoFit/)
+    const style = s.run([
+      'pptx',
+      'i18n-style-diff',
+      '--source',
+      source,
+      '--candidate',
+      kept.output,
+      '--json',
+    ])
+    assert.equal(style.agentGate.passed, true)
+    for (const pending of [
+      {
+        op: 'set-text-frame',
+        slide: 0,
+        shape: { id: original.id },
+        frame: { autofit: { mode: 'shape' } },
+      },
+      { ...edit, textLayout: 'respect-autofit' },
+    ]) {
+      const changed = s.apply([pending, edit], source)
+      assert(s.body(changed.output).bbox.hEmu < original.bbox.hEmu)
+    }
+    for (const textLayout of [null, 'preserve', true]) {
+      for (const dryRun of [true, false]) {
+        s.apply([{ ...edit, textLayout }], source, { dryRun, error: 'invalid_argument' })
+      }
+    }
+  },
+)
+
+nativeTest(
+  'apply summary binds omitted Unicode values while retaining full candidate and sidecar text',
+  (t) => {
+    const s = scenario(t)
+    const source = s.create('Original')
+    const text = '季度报告📊'.repeat(220)
+    const patch = s.write('long-text.json', {
+      schemaVersion: 'pptx-patch/v1',
+      ops: [{ op: 'set-run', slide: 0, shape: { name: 'Body' }, paragraph: 0, run: 0, text }],
+    })
+    const full = s.run([
+      'pptx',
+      'apply',
+      '--input',
+      source,
+      '--patch',
+      patch,
+      '--dry-run',
+      '--json',
+    ])
+    for (const dryRun of [true, false]) {
+      const output = join(s.directory, dryRun ? 'dry.pptx' : 'summary.pptx')
+      const summary = s.run([
+        'pptx',
+        'apply',
+        '--input',
+        source,
+        '--patch',
+        patch,
+        '--output',
+        output,
+        '--detail',
+        'summary',
+        ...(dryRun ? ['--dry-run'] : []),
+        '--json',
+      ])
+      assert.equal(summary.detail, 'summary')
+      assert(summary.valueSummaries.length > 0)
+      assert.deepEqual(summary.semanticIssues, full.semanticIssues)
+      for (const item of summary.valueSummaries) {
+        const keys = item.path
+          .slice(1)
+          .split('/')
+          .map((key) => key.replaceAll('~1', '/').replaceAll('~0', '~'))
+        const value = keys.reduce((node, key) => node[key], full)
+        assert.equal(typeof value, 'string')
+        assert.equal(Buffer.byteLength(value), item.utf8Bytes)
+        assert.equal(createHash('sha256').update(value).digest('hex'), item.sha256)
+        assert.equal(item.preview, [...value].slice(0, 128).join(''))
+        assert.equal(item.previewTruncated, true)
+        assert.equal(
+          keys.reduce((node, key) => node?.[key], summary),
+          undefined,
+        )
+      }
+      assert.equal(existsSync(output), !dryRun)
+      if (!dryRun) {
+        assert(nativeParts(output).get('ppt/slides/slide1.xml').toString().includes(`>${text}<`))
+        assert(readFileSync(`${output}.xdoc.json`, 'utf8').includes(text))
+      }
+    }
+  },
+)
+
+nativeTest('daemon invalidates cached inspection after same-inode external writes', (t) => {
+  const s = scenario(t)
+  const source = s.create('Original cached text')
+  const changed = s.create('Externally replaced text')
+  try {
+    const inspect = () => s.run(['pptx', 'inspect', source, '--daemon-strict', '--json'])
+    const first = inspect()
+    assert.deepEqual(inspect(), first)
+    const inode = statSync(source).ino
+    writeFileSync(source, readFileSync(changed))
+    assert.equal(statSync(source).ino, inode)
+    const fresh = inspect()
+    assert.equal(
+      fresh.slides[0].shapes.find((shape) => shape.name === 'Body').textPreview,
+      'Externally replaced text',
+    )
+    assert.deepEqual(fresh, s.inspect(source))
+  } finally {
+    s.run(['daemon', 'stop', '--json'])
+  }
+})
+
+nativeTest('strict slide preview refuses Free fallback without publishing artifacts', (t) => {
+  const s = scenario(t)
+  const source = s.create()
+  const output = join(s.directory, 'strict-preview')
+  const report = s.run(
+    [
+      'pptx',
+      'preview',
+      source,
+      '--output-dir',
+      output,
+      '--require-entitlement',
+      '--require-unwatermarked',
+      '--json',
+    ],
+    4,
+  )
+  assert.equal(report.error.code, 'strict_mode_unsatisfied')
+  assert.equal(report.error.stage, 'authorization')
+  assert.equal(report.error.details.outputDisposition, 'deny')
+  assert.equal(existsSync(output), false)
+  const schema = s.run(['schema', '--command', 'pptx.preview'])
+  const preview = schema.commands.pptx.subcommands.preview
+  assert.deepEqual(preview.authorization.intentBindings, [
+    { condition: 'without --layout', feature: 'convert', outputType: 'png' },
+    { condition: 'with --layout', feature: 'modify', outputType: 'pptx' },
+  ])
+})
+
+nativeTest('cross-deck copy retains source language and blocks destination locale leakage', (t) => {
+  const s = scenario(t)
+  const created = s.create('Source language')
+  // Controlled fixture: expose presentation-level language inheritance.
+  const base = s.apply(
+    [
+      {
+        op: 'patch-ooxml',
+        target: 'ppt/slides/slide1.xml',
+        xpath: '//a:rPr/@lang',
+        action: 'remove',
+      },
+    ],
+    created,
+    { allowRawXml: true },
+  ).output
+  const withDefaults = (input, language) =>
+    s.apply(
+      [
+        {
+          op: 'patch-ooxml',
+          target: 'ppt/presentation.xml',
+          xpath: '/p:presentation/p:defaultTextStyle',
+          action: 'replace',
+          value:
+            '<p:defaultTextStyle xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">' +
+            `<a:lvl1pPr><a:defRPr${language ? ` lang="${language}"` : ''}/></a:lvl1pPr></p:defaultTextStyle>`,
+        },
+      ],
+      input,
+      { allowRawXml: true },
+    ).output
+  const target = withDefaults(base, 'de-DE')
+  const source = withDefaults(base, 'en-US')
+  const sourceBytes = readFileSync(source)
+  const targetSlide = nativeParts(target).get('ppt/slides/slide1.xml')
+  const args = (donor, output) => [
+    'pptx',
+    'slide-copy',
+    '--input',
+    target,
+    '--source',
+    donor,
+    '--all',
+    '--template-strategy',
+    'register-source',
+    '--size-strategy',
+    'require-match',
+    '--output',
+    output,
+    '--json',
+  ]
+  const copied = join(s.directory, 'copied.pptx')
+  const preflight = s.run([...args(source, copied), '--dry-run'])
+  assert.equal(preflight.preflight.ready, true)
+  s.run(args(source, copied))
+  const parts = nativeParts(copied)
+  assert.deepEqual(parts.get('ppt/slides/slide1.xml'), targetSlide)
+  assert.match(parts.get('ppt/slides/slide2.xml').toString(), /lang="en-US"/)
+  assert.deepEqual(readFileSync(source), sourceBytes)
+  const unset = withDefaults(base, null)
+  for (const dryRun of [true, false]) {
+    const output = join(s.directory, dryRun ? 'blocked-dry.pptx' : 'blocked-copy.pptx')
+    const blocked = s.run([...args(unset, output), ...(dryRun ? ['--dry-run'] : [])], 3)
+    assert(blocked.preflight.blockers.some((item) => item.code === 'unsupported-text-defaults'))
+    assert.equal(existsSync(output), false)
+  }
+})
+
+nativeTest(
   'translation planning binds retained parts to source relationships even for preserved units',
   (t) => {
     const s = scenario(t)
-    const source = s.create('Quarterly review', 2)
+    const source = s.create('Quarterly review', 2, { autofit: { mode: 'shape' }, wordWrap: false })
     const scanFile = join(s.directory, 'scan.json')
     s.run([
       'pptx',
@@ -1068,7 +1305,20 @@ nativeTest(
       planFile,
       '--json',
     ])
-    assert.equal(JSON.parse(readFileSync(planFile, 'utf8')).status, 'pass')
+    const plan = JSON.parse(readFileSync(planFile, 'utf8'))
+    assert.equal(plan.status, 'pass')
+    assert(plan.patch.ops.length > 0)
+    assert(plan.patch.ops.every((op) => op.textLayout === 'preserve-geometry'))
+    const textPlan = s.run([
+      'pptx',
+      'i18n-text-plan',
+      '--source',
+      source,
+      '--data',
+      s.write('text-plan-input.json', plan.textPlan),
+      '--json',
+    ])
+    assert.deepEqual(textPlan.patch.ops, plan.patch.ops)
     for (const part of [undefined, 'missing/page.slide', shapes[1].part]) {
       for (const action of ['i18n-plan', 'i18n-anchor-draft']) {
         const inventory = structuredClone(scan.i18nUnits)
@@ -1110,7 +1360,7 @@ nativeTest(
   'published translation preparation preserves source identities through real guarded apply',
   (t) => {
     const s = scenario(t)
-    const source = s.create('Quarterly review', 2)
+    const source = s.create('Quarterly review', 2, { autofit: { mode: 'shape' }, wordWrap: false })
     const sourceHash = createHash('sha256').update(readFileSync(source)).digest('hex')
     const runDir = join(s.directory, 'prepare')
     const args = [
@@ -1148,6 +1398,17 @@ nativeTest(
     assert.equal(prepared.status, 'prepared')
     const candidate = prepared.artifacts.candidate
     assert.equal(s.body(candidate).textPreview, 'Revue trimestrielle')
+    assert.deepEqual(s.body(candidate).bbox, s.body(source).bbox)
+    const style = s.run([
+      'pptx',
+      'i18n-style-diff',
+      '--source',
+      source,
+      '--candidate',
+      candidate,
+      '--json',
+    ])
+    assert.equal(style.agentGate.passed, true)
     const unitsFile = prepared.artifacts.classifiedScan ?? prepared.artifacts.scan
     const classified = JSON.parse(readFileSync(unitsFile, 'utf8'))
     assert(

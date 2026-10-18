@@ -83,10 +83,20 @@ Presentation。无法取得对象身份时使用解析后的 lexical identity；
 同一 session 的 `inspect` / `apply` 按进入顺序 FIFO 串行，不同 filesystem-identity
 session 可以并发执行：
 
-- `inspect` 直接读内存模型，几乎零成本
+- `inspect` 可复用同 revision、精确输入字节及路径绑定的报告；冷 inspect 仍要构建完整模型，
+  大报告还受缓存预算与传输开销影响，不能承诺每次几乎零成本。
 - `apply` 使用 session 保留的原始读取字节或最近一次交付字节创建候选，失败时不污染
   live session；成功后同时更新 Presentation 和交付字节，避免重新序列化改变输入身份。
-  dry-run 复用已有 session 的输入快照，不会重新读取路径或交付候选。
+  dry-run 不交付候选。当前 runtime 会检查磁盘字节，外部原地改写（即使 inode 不变）
+  也会使旧模型/报告失效并重新加载；不要把 live session 当作永远冻结的文件快照。
+  保留不可变输入文件与 SHA-256 作为任务证据。
+
+同一 deck 的多轮 inspect/apply 优先复用一个 daemon；冷 inspect 并发受工作锁约束，
+不要靠并行重复读取同一大文件提速。缓存命中可绕过冷工作锁，基线审计只复用精确
+输入，候选仍完整检查。协作式执行让状态查询保持响应，不改变 FIFO、失败原子性或
+已开始 mutation 的取消保护；不把本机性能测量当作跨机器延迟保证。
+长文本交互可在当前 `pptx.apply` 合同披露后选用 `--detail summary`，
+但需要完整前后值的门禁继续使用默认 `full`；见 `schema-discovery.md#apply-report-detail`。
 
 CLI、JSON-RPC 和 MCP 的 patch 都拒绝重复 key，包括转义后名称相同的 key。
 保留完整原请求、原始 PPTX 字节和相对资产解析上下文；默认值补齐及资源物化后的

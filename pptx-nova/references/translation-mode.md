@@ -461,16 +461,23 @@ debugging path.
      IDs supplied by the plan; do not wrap them in control flow/macros or
      replace IDs with names/queries. Guards refer to the complete input
      paragraph before any op runs. Read `inspect-and-edit.md` for structured
-     guard errors and native shape-autofit geometry changes. An inherited
-     `shape` autofit setting can resize a translated text frame during apply;
-     audit that change under the controlled fitting policy rather than
-     automatically declaring layout preservation.
+     guard errors and the `textLayout` contract. When disclosed by the current
+     runtime, both planner serializers emit `textLayout: "preserve-geometry"`
+     for these operations. Materialize the plan verbatim, retaining this field;
+     it preserves stored frame geometry and autofit settings without requesting
+     new implicit reflow. Do not add an explicit shape-autofit request or an
+     earlier `respect-autofit` edit to the same shape: pending requests still
+     measure final text. Other text operations do not inherit this policy.
+     With an older runtime/plan that omits the policy, ordinary autofit can
+     resize the frame; check the live schema and regenerate the plan when
+     supported instead of restoring geometry with an extra patch by default.
      The standard style finalizer does not authorize bbox changes:
      `i18n-style-diff` compares geometry in its non-text signature, so native
      reflow can fail it even when the generated guarded run edit preserved
      run/paragraph styling. Inspect the exact before/after bbox and signature.
-     Try meaning-preserving wording within the source layout; if geometry still
-     changes, stop the strict preservation route and resolve an explicit fitting
+     Geometry preservation does not prove translated text fits. Keep overflow
+     diagnostics, visual comparison and meaning-preserving compact wording.
+     If geometry still changes, stop the strict preservation route and resolve an explicit fitting
      strategy. Do not treat font-size or text-attribute authorization as a geometry
      waiver, remove the style gate, or repeat the same edit.
      ```bash

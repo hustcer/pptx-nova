@@ -99,6 +99,19 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    template route was not preserved and must stop;
    do not loop through one slide at a time or synthesize patch `opResults`.
 
+   Cross-deck copy also carries source presentation-level paragraph/run defaults
+   below local/list/template overrides, retaining theme font references and
+   effective primary/alternate languages (`lang` / `altLang`). This may materialize
+   defaults locally; byte-identical slide XML is not the preservation criterion.
+   Check text, empty paragraphs, fields, breaks and used list levels as well as
+   fonts and final rendering. If preflight reports `unsupported-text-defaults`
+   (including presentation-owned relationships or an unset source language that
+   would inherit the destination language), stop and retain the report. Do not
+   guess an application locale, strip defaults or raw-copy XML to bypass it.
+   Resolve source language/defaults only with grounded task intent and re-preflight.
+   `rebind-target` intentionally adopts target inheritance; its exemption is not
+   a faithful-copy workaround.
+
    For SmartArt, diagramData belongs to each destination slide occurrence.
    Different slides must not share it merely because its bytes match; importing
    the same donor again must still give the new occurrence independent data.

@@ -34,6 +34,7 @@ as apply authorization. This finalizer begins only after that preparation result
 Preparation keeps review partitions count-only by default; use
 `--expand-review <languageUncertain|shared|embeddedWorkbook|other>` to persist
 one bound partition when its individual units are actually needed.
+Retain the planner's disclosed `textLayout: "preserve-geometry"`; see `translation-mode.md` for pending reflow, fitting and older runtimes. Keep all gates; avoid a default geometry-restoration pass.
 Use `artifacts.units`: the inventory and SHA-256 recorded in `summary.units` and used by planning,
 including when `--apply` reuses approved classification. With older preparation scripts, use
 `artifacts.classifiedScan` when non-null, otherwise `artifacts.scan` after checking the translation

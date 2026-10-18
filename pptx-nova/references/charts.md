@@ -44,6 +44,19 @@ point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
 
 这些是源文件和渲染的诊断语义；能否写入仍以该操作的实时 schema 与 dry-run 为准。
 
+升级后也要核对这些具体边界，先以当前 runtime 重渲染原始文件：
+
+- 二维 bar/column 的错误值标签（如 `#N/A`）可以可见而没有有限数值柱体；保留
+  error、blank、zero 的区别，以及 point 隐藏/自定义标签，不把错误改成 0 来消除显示差异。
+- treemap 的行分区评分依赖实际方向与宽高；数据比例、输入身份和稳定等值次序须保持。
+  分区修正不证明 legend 换行或 plot 边界已与 Office 等价，不通过排序/改值复刻旧像素。
+- surface 的自动值带间隔、投影标签与 legend 容量共同规划；显式范围、间隔、log 和
+  反转轴保持作者语义。轮廓应包含网格边和真实值带边界，不应暴露仅用于着色的三角剖分线；
+  真实斜向刻度边界和 wireframe 仍可能可见。
+- 显式 `heightPercent` 的 3D 高度基于 category/series 数据网格及有效轴间距，水平 bar
+  与竖向图表的方向处理不同；自动高度是另一策略。不要套用固定 4:3 倍率，或为了匹配旧
+  预览改写高度、网格/轴参数。整体 fit、材质和相机差异仍须独立 PowerPoint 证据。
+
 自动水平 legend 当前可在 frame 内换行，布局留白与实际绘制应使用同样的行数；
 长标签、overlay 和显式 manual box 仍须单独复核。category label 位于反转/交叉轴的
 另一侧时，应检查其实际物理侧与另一侧数值端点，不能靠移动 chart 外框补偿旧 renderer。
@@ -876,7 +889,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -968,7 +981,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -997,7 +1010,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1279,7 +1292,7 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   scriptable PowerPoint + Nushell + `mutool` evidence route is available:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

@@ -106,6 +106,11 @@ Recent rendering changes also require these distinctions when reviewing the same
 
 Read only the matching diagnostic when these symptoms occur:
 
+- **Web text measurement:** current Web text fitting and chart-label layout use
+  natural text width; explicit hard breaks use the widest line. Confirm the
+  loaded Web build and final fonts before comparing old label wrapping or fit.
+  A Web measurement fix does not prove native PDF/PowerPoint parity; do not
+  resize authored frames or shrink fonts merely to restore an old screenshot.
 - **Fonts/placeholders:** concrete authored fonts are distinct from an unreferenced
   theme script inventory; ordinary text boxes do not borrow master `otherStyle`
   fonts. An explicit placeholder index matches the layout exactly; a failed match

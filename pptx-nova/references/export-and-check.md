@@ -8,6 +8,18 @@ Read `common-workflow.md` before this file. Export/check tasks still write
 artifacts, so use a run directory by default and follow its `--overwrite` safety
 rules.
 
+## Preview authorization constraints
+
+Read `xdoc schema --command pptx.preview` or action help before supplying strict constraints.
+Slide preview binds caller intent to `feature=convert`, `outputType=png`; layout preview binds
+to `feature=modify`, `outputType=pptx` and reuses that admitted intent for PNG rendering.
+When supported, pass either `--intent <file-or-inline-json>` or the required strict flags
+(`--require-entitlement`, `--require-unwatermarked`, `--allow-fallback`); never combine the two
+forms. Preserve the user's constraints through rendering. A preview refusal is not permission
+to drop flags, change transport or silently accept watermarked fallback. Keep the actual
+authorization/error report and disclose unavailable evidence. Ordinary preview needs no
+additional authorization-maintenance step.
+
 ## Semantic PPTX Diff
 
 When the user only asks to compare two decks or audit before/after changes, use

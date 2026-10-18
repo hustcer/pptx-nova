@@ -524,11 +524,21 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 
 - 已编辑的横排、单列矩形 frame 使用已解析的字体度量。换行开启时保持宽度、调整高度；
   不换行时调整宽高，并按首段水平对齐保持锚点。两者均保持垂直锚点，可增大也可缩小。
-- 修改已有 shape-autofit frame 的文本、字体或布局可能触发 reflow；显式重新设置
+- `set-run` / `replace-paragraph-text` 默认 `textLayout: "respect-autofit"`。
+  修改已有 shape-autofit frame 的文本、字体或布局可能触发 reflow；显式重新设置
   `mode: "shape"` 也会触发。未触达的导入几何保留；`remap-theme` 本身保留框几何，
   同一事务其他操作已请求的 reflow 则使用映射后的字体。
 - 不支持的排版（例如竖排、多列）或不可用字形度量会原子失败，dry-run 同样验证。
   保留失败报告；根据任务意图选择受支持排版或固定框，不要静默换模式、删 op 或缩字号。
+
+对于翻译、严格模板或明确要求固定原框的文本/字体编辑，先从当前 `set-run` /
+`replace-paragraph-text` 完整 schema 确认 `textLayout`，再使用
+`"textLayout": "preserve-geometry"`。该策略保留存储的坐标、尺寸与 autofit 设置，
+只阻止本次文本操作新增隐式 reflow；不会取消同一 shape 先前已经排队的请求，
+包括较早的普通文本编辑或显式 `autofit.mode: "shape"`，这些请求仍测量最终文本。
+不要在纯翻译 patch 中混入此类排版操作，也不要给其他文本 op 添加未披露字段。
+旧 runtime 未披露该策略时不能假装支持；使用其已验证路径并核对几何，或换用披露该合同的 runtime。
+保留几何不保证文本放得下，溢出诊断、候选 bbox 回读和 PNG/视觉检查仍然必需。
 
 因此，dry-run 后还要回读候选 bbox，并检查邻接对象、锚点和变化范围；翻译/严格模板
 任务须把实际几何变化纳入其保真策略。仅写入 `spAutoFit` XML 不会自行测量文字，

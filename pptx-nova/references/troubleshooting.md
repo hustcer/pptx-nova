@@ -224,6 +224,14 @@ before <a:buChar> (schema order: …)`。
   带动画的形状**不需要**先手动清动画；出现 `dangling-ref` 通常来自 deck 预存
   缺陷而非本次操作。
 
+### 重复 XML 属性与命名空间
+
+重复 XML 属性是另一类解析失败：相同 QName，或不同前缀解析到同一 namespace URI +
+local name，都会被拒绝；默认 namespace 不适用于无前缀属性。raw XML 编辑在 dry-run
+和 apply 中也会对完整 part 重新解析。不要用正则任取首个/末个值、删 namespace 或
+开启 raw XML 来绕过；保留输入/失败报告，定位具体 part 和来源后再作有依据的修复。
+几何编辑优先使用原生 shape/OLE 操作，保留命名空间别名及同名外部扩展元素。
+
 ### `preset-adjustments`：Office 互操作诊断与显式修复
 
 已知 preset 的非空 adjustment 列表若缺项或顺序不规范，会报告

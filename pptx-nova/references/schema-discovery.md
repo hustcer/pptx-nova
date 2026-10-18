@@ -23,6 +23,19 @@ previews, prefer `xdoc pptx preview --json`; for structured single-file prefligh
 `xdoc <command> --help` discloses `--report`, treat it only as a report/summary sidecar, not as a
 replacement for `preview.json` or single-file `check.json`.
 
+### Apply report detail
+
+When `xdoc schema --command pptx.apply` discloses `detailModes`, `apply --detail summary`
+(including `--dry-run`) reduces long semantic before/after strings in stdout; the default is
+`full`, unlike `pptx diff`'s default summary. Strings over 1024 UTF-8 bytes are omitted and
+represented in `valueSummaries[]` by JSON Pointer `path`, `utf8Bytes`, SHA-256 and a preview of
+at most 128 Unicode scalars. This also applies to completed `opResults` in error reports.
+Authored patches, candidate validation and sidecars keep complete values; omission is not null,
+deletion or proof of an unchanged value. Keep `full` for runners/gates requiring exact values.
+Use summary for interactive inspection only when the consumer can handle omissions, retain its
+report, and inspect the complete patch/sidecar or a full dry-run when the exact value matters.
+Unlike `diff --output`, apply summary does not promise a retained full-report sidecar.
+
 ## 拉法
 
 ```bash

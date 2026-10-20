@@ -518,6 +518,11 @@ dry-run 的 `error.candidates` 给出 `shape:12` 等候选引用，`suggestions[
 
 ### 5.2b 原生 shape autofit 会改变几何
 
+导入文件的渲染与编辑时的 reflow 是两件事。当前 Web/PDF 渲染 shape-autofit 文本时，
+保留已保存高度作为最小高度，并尊重 middle/bottom 垂直锚点；内容增长不代表源 frame 被改写。
+不要因旧版预览曾顶端对齐就改成 top 或缩短 frame。制表位、字号和语言回退的升级诊断见
+`fidelity-diagnosis.md`；其 parser/渲染字段不是新增的 patch 可写字段。
+
 先读当前完整 `textFrameAutofitPatch` 定义。`mode: "none"` 固定框，`text` 表示
 溢出时缩小文字（`fontScale` 1–100，仅用于 text）；`null` 清除本层设置。
 `shape` 在披露原生测量契约的 xdoc 中请求写文件前的排版，不降低字号：

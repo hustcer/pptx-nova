@@ -3,6 +3,9 @@
 读取本文件的场景：用户要求新增、修改或删除 PPTX 动画/转场，或提到点击顺序、自动播放、
 `with previous` / `after previous`、逐条 bullet、退出动画、motion path、emphasis、timing tree。
 
+仅当任务涉及 Web 放映、play/pause、自动切页或键盘/焦点异常时，再读
+[Viewer 播放诊断](viewer-playback.md)。普通 PPTX 导出无需启动浏览器。
+
 ## 能力发现
 
 动画能力变化较快，先用运行时 schema 和 dry-run 证据，不靠记忆：
@@ -644,6 +647,15 @@ inspect → patch → dry-run/apply → 回读和播放验证流程，共用同�
 验证源码变化时确认测试加载当前源码或重新构建的产物，不能用旧 dist 证明新行为。
 
 ## Preserve-only 边界
+
+既有 slide drawing group 的 appearance 动画可在当前 Web build 中以完整 leaf 集合播放，
+保留嵌套 group 身份、原始叠放、非整数原点及链接。checkerboard 的 across/down、blinds 的
+horizontal/vertical 使用共享 group mask；blinds 当前是六条带近似。visibility helper 归入
+所属 click build，不应额外消耗点击。测试 wipe 尾部、描边/箭头、反射的 overflow paint，
+以及布局刷新、暂停、重播和 reset；扩展绘制范围不能扩大链接命中区。
+group-level motion/scale/spin 仍不受支持，旋转 group 内 leaf 的运动/旋转修正不改变此边界。
+保留诊断与 timing，不能因 Web 会播放导入 pattern/group 效果，就把 checkerboard/blinds
+或任意 group transform 当成新增 patch 可写效果，也不扩大 chart/SmartArt 子 build 支持。
 
 这些场景默认不能用普通 patch 改：
 

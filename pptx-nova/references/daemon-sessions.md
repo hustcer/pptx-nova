@@ -97,6 +97,9 @@ session 可以并发执行：
 已开始 mutation 的取消保护；不把本机性能测量当作跨机器延迟保证。
 长文本交互可在当前 `pptx.apply` 合同披露后选用 `--detail summary`，
 但需要完整前后值的门禁继续使用默认 `full`；见 `schema-discovery.md#apply-report-detail`。
+派生 inspect/baseline 缓存随所属 session 淘汰、替换或部分发布失效一起释放；成功提交也使
+旧 inspect 报告失效。无输入的新建 apply 不占用输入 baseline 缓存。保留磁盘证据与普通
+重开路径，不将缓存生命周期或命中情况当成正确性门禁，也不为清缓存重放 mutation。
 
 CLI、JSON-RPC 和 MCP 的 patch 都拒绝重复 key，包括转义后名称相同的 key。
 保留完整原请求、原始 PPTX 字节和相对资产解析上下文；默认值补齐及资源物化后的

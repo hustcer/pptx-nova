@@ -118,8 +118,8 @@ Use these only to choose the entry reference; the routing table owns details.
   effect counts and raw behavior metadata do not authorize edits. `animations.md` covers fixed
   whole-shape Box/Dissolve and their distinct preview limits. For basic effects, follow the disclosed
   repeat/autoReverse/restart/easing contract and its omitted/null/value update semantics.
-  For current Web Dissolve, check particle masking, click boundaries and reset; old fade-fallback
-  metadata is historical evidence. Shape deletion must preserve surviving timing conditions or reject.
+  For imported group/pattern effects and Web slideshow controls, follow `animations.md` and its
+  conditional playback reference. Shape deletion must preserve surviving timing conditions or reject.
   For P14 transitions, follow `animations.md`'s per-kind schema and independent capability axes;
   inspect source/fallback timing separately and never equate authoring with playback certification.
   For Morph, use exact `!!` object names, run `morph-check`, and bind delivery evidence to the
@@ -180,7 +180,7 @@ Determine the task type first, then read the corresponding files:
 
 For a rendering discrepancy or a preview regression after upgrading xdoc, also read
 `references/fidelity-diagnosis.md` before changing authored content or layout. This includes
-text columns and Unicode break controls, font/placeholder inheritance, shared table borders,
+columns/Unicode breaks, tabs/autofit anchors, font/language/placeholder inheritance, merged borders,
 chart domains/direction, resized cached SmartArt, Web text clipping, missing/stale reflections, and Shape 3D scale offsets;
 identify the actual renderer and its fallback before treating the symptom as a deck defect.
 

@@ -158,10 +158,12 @@ Read only the matching diagnostic when these symptoms occur:
   Local SVG text uses its own inline/inherited font styles and needs PDF glyph
   sources; browser font readiness alone is insufficient. Follow `formulas.md` and
   the font-evidence guidance in `export-and-check.md`.
-- **Table edges:** use the effective bottom edge above/right edge on the left,
-  including explicit noFill, and paint each physical boundary once. Merged-cell
-  continuation perimeter paint survives while internal merged edges disappear;
-  CSS border arbitration or overpaint from an older export is not the authority.
+- **Table edges:** paint each physical boundary once, using merged anchors rather
+  than continuation formatting and suppressing internal merged edges. On shared
+  horizontal/vertical segments, the anchor farther right/down wins; ties prefer
+  the upper bottom/left right edge. An absent preferred edge can fall back, whereas
+  explicit noFill remains authoritative. Table perimeter fallback follows the full
+  merged span. CSS arbitration or overpaint from an older export is not the authority.
   Follow `tables.md` before changing borders, dash lengths or merges.
   For Web-only offsets, wait for mounting, visibility, final fonts and measured
   row/cell redistribution; capture again after those stages. Border overlays
@@ -182,6 +184,33 @@ Read only the matching diagnostic when these symptoms occur:
 ## Current-runtime checks after an upgrade
 
 Use these only for the affected content; compare original and candidate with the same runtime.
+
+- **Saved text frames and tabs:** imported shape-autofit frames retain their saved
+  minimum height for middle/bottom anchoring during rendering; growth is distinct
+  from an edit that requests native reflow. Preserve the frame, margins and anchor
+  before testing `textLayout`; see `inspect-and-edit.md`. Tabs use inherited
+  `defTabSz` (including explicit zero), custom stops and hanging indents. The
+  regular grid is frame-rooted and resumes after custom stops; a hanging first tab
+  can reach the reading margin. Check no-wrap/center/right alignment separately.
+  Do not replace tabs with spaces or force top alignment to imitate old exports.
+- **Glyph sizing and language:** enclosed symbols keep authored sizes; a centered
+  indivisible overflowing glyph can overhang by measured advance without moving
+  the frame. Supplemental East Asian theme fonts follow inherited run language,
+  not a guess from CJK glyphs. Explicit East Asian faces remain authoritative;
+  absent language may leave host fallback. Native PDF fallback prefers matching
+  slant before approximate weight; browser PDF additionally needs the actual styled
+  font bytes and glyph inventory. Compare regular/bold/italic and Symbol fallback
+  separately; font presence alone does not prove glyph paint. Keep Unicode spaces,
+  source guards, font declarations and language unchanged while diagnosing.
+- **Metafile and disabled-fill paint:** EMF conversion retains picture `srcRect`;
+  converted WMF uses its viewBox crop mapping. PolyPolyline records remain separate
+  open subpaths. WMF text uses saved top/bottom/baseline alignment and window/viewport
+  mapping, including mirrored axes; MathType comments are baseline metadata, not
+  horizontal canvas padding. Check OLE host geometry separately from the preview.
+  DrawingML `fillRef` index 0/1000 disables reference fill before color resolution;
+  explicit shape fill still wins. An empty sector or open arc may be intentional.
+  Do not remove crops, close paths, recolor disabled fills or add equation offsets
+  to compensate for an older renderer. See `formulas.md` for imported equations.
 
 - **Text inheritance and fields:** list counters depend on level and effective numbering
   type/start; advancing a parent resets child counters. List-marker paint can follow the first

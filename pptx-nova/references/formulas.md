@@ -201,6 +201,13 @@ render those formulas to SVG instead.
 
 ## Verification
 
+For imported MathType/OLE equations, keep the embedded object and its preview
+relationship/crop. WMF comments carry baseline metadata, not horizontal padding;
+the current renderer uses saved text alignment and window/viewport mapping.
+Re-render the unchanged source before adding offsets, removing crop or replacing
+the equation. A corrected preview is not native OMML conversion or newly editable
+math. Follow `native-shape-editing.md` for host geometry and resource ownership.
+
 Formula decks still pass the normal gates:
 
 ```

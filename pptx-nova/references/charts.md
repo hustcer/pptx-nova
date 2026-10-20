@@ -53,6 +53,11 @@ point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
 - surface 的自动值带间隔、投影标签与 legend 容量共同规划；显式范围、间隔、log 和
   反转轴保持作者语义。轮廓应包含网格边和真实值带边界，不应暴露仅用于着色的三角剖分线；
   真实斜向刻度边界和 wireframe 仍可能可见。
+- 顶视 surface/contour 的长宽来自 category/series 比例及作者 depth，再应用 manual layout；
+  Web 坐标只解析一次。位置移动不应改变法线或光照，着色法线不应带入柱槽间距，自动高度
+  与 fit 后尺寸也不是同一事实。核对空间轴 ticks、显式隐藏/无 outline、反转高度下的标签侧。
+  当前中性高光仍是有界材质近似；网格、轮廓更准确不证明 Office 光照一致，勿改数据或相机
+  去追旧颜色。精确保真仍需同候选的独立 PowerPoint 对照。
 - 显式 `heightPercent` 的 3D 高度基于 category/series 数据网格及有效轴间距，水平 bar
   与竖向图表的方向处理不同；自动高度是另一策略。不要套用固定 4:3 倍率，或为了匹配旧
   预览改写高度、网格/轴参数。整体 fit、材质和相机差异仍须独立 PowerPoint 证据。

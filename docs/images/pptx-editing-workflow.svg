@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-labelledby="pptx-editing-workflow-title pptx-editing-workflow-desc" font-family="Arial, Helvetica, sans-serif" id="pptx-editing-workflow-root">
+  <title id="pptx-editing-workflow-title">Agent workflow for editing PPTX</title>
+  <desc id="pptx-editing-workflow-desc">Inspect the retained source, bind the edit scope, dry-run a declarative patch, apply it to a separate candidate and verify evidence before publication, retrying failures.</desc>
+  <defs>
+      <style>#pptx-editing-workflow-root { color: #101d3c; font-family: Arial, Helvetica, sans-serif; }
+      #pptx-editing-workflow-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#pptx-editing-workflow-root .diagram-container { overflow-x: visible; }
+}</style>
+    <marker id="pptx-editing-workflow-arrow" viewBox="0 0 10 10" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M2 1 8 5 2 9" fill="none" stroke="#7e8fa7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="1280" height="720" fill="#ffffff"/>
+  <text x="640" y="56" text-anchor="middle" font-size="36" font-weight="700" fill="#101d3c">Agent workflow for editing PPTX</text>
+  <text x="640" y="84" text-anchor="middle" font-size="16" fill="#64748b">Source-preserving edits · exact targets, declared scope and evidence before publication</text>
+  <g data-connectors="true"><path d="M416 192H484" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <path d="M784 192H852" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <path d="M1068 248V316" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <path d="M1016 412V484" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <g><rect x="1024" y="436" width="40" height="20" fill="#ffffff"/><text x="1044" y="450" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600" letter-spacing="1">PASS</text></g>
+  <path d="M852 364H784" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5 5" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <g><rect x="802" y="334" width="32" height="20" fill="#ffffff"/><text x="818" y="348" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600" letter-spacing="1">FIX</text></g>
+  <path d="M636 316V280Q636 272 644 272H952Q960 272 960 264V248" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5 5" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <path d="M852 544H784" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <path d="M484 544H416" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <g><rect x="432" y="514" width="40" height="20" fill="#ffffff"/><text x="452" y="528" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600" letter-spacing="1">PASS</text></g>
+  <path d="M636 484V412" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="5 5" marker-end="url(#pptx-editing-workflow-arrow)"/>
+  <g><rect x="644" y="438" width="32" height="20" fill="#ffffff"/><text x="660" y="452" text-anchor="middle" fill="#64748b" font-size="11" font-weight="600" letter-spacing="1">FIX</text></g></g>
+  <text x="104" y="344" fill="#101d3c" font-size="21" font-weight="600">The contract sets the boundary.</text><text x="104" y="372" fill="#64748b" font-size="16">Check intended changes and preservation</text><text x="104" y="396" fill="#64748b" font-size="16">before publishing the candidate.</text>
+  <g data-node="source">
+  <rect x="104" y="136" width="312" height="112" rx="10" fill="#fbf9ff" stroke="#d9cbef" stroke-width="1.4"/>
+  <circle cx="144" cy="192" r="28" fill="#f3edfc" stroke="#d9cbef"/>
+  <g transform="translate(144 192)" fill="none" stroke="#6739b5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-12-17h15l10 10v24h-25zM3-17v10h10M-6 0H6M-6 6H6M-6 12H3"/></g>
+  <text x="184" y="179" fill="#6739b5" font-size="21" font-weight="600">Source .pptx</text>
+  <text x="184" y="203" fill="#505d72" font-size="14">Read-only by default</text>
+  <text x="184" y="223" fill="#505d72" font-size="14">Retain the original input</text>
+</g>
+  <g data-node="inspect">
+  <rect x="484" y="136" width="300" height="112" rx="10" fill="#f7fcf9" stroke="#c8e1d0" stroke-width="1.4"/>
+  <circle cx="524" cy="192" r="28" fill="#edf8f0" stroke="#c8e1d0"/>
+  <g transform="translate(524 192)" fill="none" stroke="#227a43" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="-3" cy="-3" r="13"/><path d="M7 7l12 12M-9-3h12M-3-9V3"/></g>
+  <text x="564" y="179" fill="#227a43" font-size="21" font-weight="600">Inspect &amp; select</text>
+  <text x="564" y="203" fill="#505d72" font-size="14">Slides, objects, text, IDs</text>
+  <text x="564" y="223" fill="#505d72" font-size="14">Confirm exact targets</text>
+</g>
+  <g data-node="patch">
+  <rect x="852" y="136" width="324" height="112" rx="10" fill="#f5fcfc" stroke="#c1dfe2" stroke-width="1.4"/>
+  <circle cx="892" cy="192" r="28" fill="#eaf7f8" stroke="#c1dfe2"/>
+  <g transform="translate(892 192)" fill="none" stroke="#167d87" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-7-12c-6 0-3 10-8 12 5 2 2 12 8 12M7-12c6 0 3 10 8 12-5 2-2 12-8 12M-3 17h6"/></g>
+  <text x="932" y="179" fill="#167d87" font-size="21" font-weight="600">Scope &amp; patch</text>
+  <text x="932" y="203" fill="#505d72" font-size="14">edit-contract.json first</text>
+  <text x="932" y="223" fill="#505d72" font-size="14">Then write patch.json</text>
+</g>
+  <g data-node="dryrun">
+  <rect x="852" y="316" width="324" height="96" rx="10" fill="#f6faff" stroke="#c4d8f2" stroke-width="1.4"/>
+  <circle cx="892" cy="364" r="28" fill="#edf5ff" stroke="#c4d8f2"/>
+  <g transform="translate(892 364)" fill="none" stroke="#1468ce" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M0-18c6 4 11 5 15 6v12c0 9-6 15-15 20C-9 15-15 9-15 0v-12c4-1 9-2 15-6zM-7 0l5 5 10-11"/></g>
+  <text x="932" y="351" fill="#1468ce" font-size="21" font-weight="600">Dry-run gate</text>
+  <text x="932" y="375" fill="#505d72" font-size="14">Confirm resolved targets</text>
+  <text x="932" y="395" fill="#505d72" font-size="14">Require semanticIssues = 0</text>
+</g>
+  <g data-node="revise">
+  <rect x="484" y="316" width="300" height="96" rx="10" fill="#fffbf5" stroke="#efdbc0" stroke-width="1.4"/>
+  <circle cx="524" cy="364" r="28" fill="#fff4e5" stroke="#efdbc0"/>
+  <g transform="translate(524 364)" fill="none" stroke="#b75b0d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-15 15 3-3M-13 17l-4-4 4-4M-2-15a9 9 0 0 0 11 11l9-9-8 1-2-8-10 10M-4 7l10 10a4 4 0 0 0 6-6L2 1"/></g>
+  <text x="564" y="351" fill="#b75b0d" font-size="21" font-weight="600">Revise patch</text>
+  <text x="564" y="375" fill="#505d72" font-size="14">Fix targets or operations</text>
+  <text x="564" y="395" fill="#505d72" font-size="14">Retry from original input</text>
+</g>
+  <g data-node="apply">
+  <rect x="852" y="484" width="324" height="124" rx="10" fill="#f5fcfc" stroke="#c1dfe2" stroke-width="1.4"/>
+  <circle cx="892" cy="546" r="28" fill="#eaf7f8" stroke="#c1dfe2"/>
+  <g transform="translate(892 546)" fill="none" stroke="#167d87" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="-15" y="-9" width="22" height="28" rx="3"/><path d="M-7-9v-9h22v28H7M-9-2H1M-9 4H1M-9 10H1"/></g>
+  <text x="932" y="523" fill="#167d87" font-size="21" font-weight="600">Apply to candidate</text>
+  <text x="932" y="547" fill="#505d72" font-size="14">Require semanticIssues = 0</text>
+  <text x="932" y="567" fill="#505d72" font-size="14">Keep the replay sidecar</text>
+  <text x="932" y="587" fill="#505d72" font-size="14">Source stays untouched</text>
+</g>
+  <g data-node="verify">
+  <rect x="484" y="484" width="300" height="124" rx="10" fill="#f6faff" stroke="#c4d8f2" stroke-width="1.4"/>
+  <circle cx="524" cy="546" r="28" fill="#edf5ff" stroke="#c4d8f2"/>
+  <g transform="translate(524 546)" fill="none" stroke="#1468ce" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="-17" y="-13" width="34" height="23" rx="3"/><path d="M0 10v8M-8 18H8M-9-1l6 6L9-7"/></g>
+  <text x="564" y="523" fill="#1468ce" font-size="21" font-weight="600">Verify &amp; review</text>
+  <text x="564" y="547" fill="#505d72" font-size="14">Semantic diff + contract gate</text>
+  <text x="564" y="567" fill="#505d72" font-size="14">Scoped vision-diff / style-diff</text>
+  <text x="564" y="587" fill="#505d72" font-size="14">PNG review when visible</text>
+</g>
+  <g data-node="final">
+  <rect x="104" y="484" width="312" height="124" rx="10" fill="#f7fcf9" stroke="#c8e1d0" stroke-width="1.4"/>
+  <circle cx="144" cy="546" r="28" fill="#edf8f0" stroke="#c8e1d0"/>
+  <g transform="translate(144 546)" fill="none" stroke="#227a43" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-18-12h36M-15-12v24h30v-24M0 12v6M-7 23l7-5 7 5M-8 3v2M0-2v7M8-7V5"/></g>
+  <text x="184" y="533" fill="#227a43" font-size="21" font-weight="600">Final editable .pptx</text>
+  <text x="184" y="557" fill="#505d72" font-size="14">Publish after gates pass</text>
+  <text x="184" y="577" fill="#505d72" font-size="14">+ audit artifacts</text>
+</g>
+  <text x="640" y="692" text-anchor="middle" font-size="14" fill="#64748b">Solid arrows: forward path · Dashed arrows: revise and retry · Clean-open when available or required</text>
+</svg>

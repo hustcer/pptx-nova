@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" role="img" aria-labelledby="pptx-creating-workflow-title pptx-creating-workflow-desc" font-family="Arial, Helvetica, sans-serif" id="pptx-creating-workflow-root">
+  <title id="pptx-creating-workflow-title">Agent workflow for creating PPTX</title>
+  <desc id="pptx-creating-workflow-desc">A brief becomes a locked outline, DeckKit content and a native PPTX candidate, which is published only after machine checks and visual review.</desc>
+  <defs>
+      <style>#pptx-creating-workflow-root { color: #101d3c; font-family: Arial, Helvetica, sans-serif; }
+      #pptx-creating-workflow-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#pptx-creating-workflow-root .diagram-container { overflow-x: visible; }
+}</style>
+    <marker id="pptx-creating-workflow-arrow" viewBox="0 0 10 10" markerWidth="9" markerHeight="9" refX="8" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M2 1 8 5 2 9" fill="none" stroke="#7e8fa7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+  </defs>
+  <rect width="1280" height="720" fill="#ffffff"/>
+  <text x="640" y="56" text-anchor="middle" font-size="36" font-weight="700" fill="#101d3c">Agent workflow for creating PPTX</text>
+  <text x="640" y="84" text-anchor="middle" font-size="16" fill="#64748b">DeckKit-first creation · explicit planning, checked execution and reviewed delivery</text>
+  <g data-connectors="true"><path d="M640 168V176Q640 184 632 184H372Q364 184 364 192V200" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-creating-workflow-arrow)"/>
+  <path d="M592 236H688" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-creating-workflow-arrow)"/>
+  <path d="M916 272V304" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-creating-workflow-arrow)"/>
+  <path d="M640 364V388" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-creating-workflow-arrow)"/>
+  <path d="M376 452V480" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-creating-workflow-arrow)"/>
+  <path d="M616 524H664" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-creating-workflow-arrow)"/>
+  <path d="M904 568V604" fill="none" stroke="#7e8fa7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#pptx-creating-workflow-arrow)"/></g>
+
+  <g data-node="brief">
+  <rect x="384" y="108" width="512" height="60" rx="10" fill="#f6faff" stroke="#c4d8f2" stroke-width="1.4"/>
+  <circle cx="432" cy="138" r="26" fill="#edf5ff" stroke="#c4d8f2"/>
+  <g transform="translate(432 138)" fill="none" stroke="#1468ce" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-12-17h15l10 10v24h-25zM3-17v10h10M-6 0H6M-6 6H6M-6 12H3"/></g>
+  <text x="480" y="145" fill="#1468ce" font-size="22" font-weight="600">Brief / source material</text>
+
+</g>
+  <g data-node="outline">
+  <rect x="136" y="200" width="456" height="72" rx="10" fill="#fbf9ff" stroke="#d9cbef" stroke-width="1.4"/>
+  <circle cx="184" cy="236" r="30" fill="#f3edfc" stroke="#d9cbef"/>
+  <g transform="translate(184 236)" fill="none" stroke="#6739b5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-4-10h18M-4 0h18M-4 10h18"/><circle cx="-12" cy="-10" r="2"/><circle cx="-12" cy="0" r="2"/><circle cx="-12" cy="10" r="2"/></g>
+  <text x="232" y="233" fill="#6739b5" font-size="22" font-weight="600">outline.json</text>
+  <text x="232" y="257" fill="#505d72" font-size="16">Slide intent, narrative and order</text>
+</g>
+  <g data-node="lock">
+  <rect x="688" y="200" width="456" height="72" rx="10" fill="#f7fcf9" stroke="#c8e1d0" stroke-width="1.4"/>
+  <circle cx="736" cy="236" r="30" fill="#edf8f0" stroke="#c8e1d0"/>
+  <g transform="translate(736 236)" fill="none" stroke="#227a43" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="-12" y="-3" width="24" height="21" rx="3"/><path d="M-7-3v-7a7 7 0 0 1 14 0v7M0 7v5"/><circle cy="5" r="2"/></g>
+  <text x="784" y="233" fill="#227a43" font-size="22" font-weight="600">deck_lock.json</text>
+  <text x="784" y="257" fill="#505d72" font-size="16">Audience, constraints and page plan</text>
+</g>
+  <g data-node="content">
+  <rect x="136" y="304" width="1008" height="60" rx="10" fill="#fffbf5" stroke="#efdbc0" stroke-width="1.4"/>
+  <circle cx="184" cy="334" r="26" fill="#fff4e5" stroke="#efdbc0"/>
+  <g transform="translate(184 334)" fill="none" stroke="#b75b0d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-12-17h15l10 10v24h-25zM3-17v10h10M-6 0H6M-6 6H6M-6 12H3"/></g>
+  <text x="232" y="331" fill="#b75b0d" font-size="22" font-weight="600">content.json</text>
+  <text x="232" y="355" fill="#505d72" font-size="16">Business content mapped to DeckKit page types and slots</text>
+</g>
+  <g data-node="build">
+  <rect x="136" y="388" width="1008" height="64" rx="10" fill="#f5fcfc" stroke="#c1dfe2" stroke-width="1.4"/>
+  <circle cx="184" cy="420" r="26" fill="#eaf7f8" stroke="#c1dfe2"/>
+  <g transform="translate(184 420)" fill="none" stroke="#167d87" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-15-12h10v-3a5 5 0 0 1 10 0v3h10v10h3a5 5 0 0 1 0 10h-3v10H5v-3a5 5 0 0 0-10 0v3h-10V8h-3a5 5 0 0 1 0-10h3z"/></g>
+  <text x="232" y="417" fill="#167d87" font-size="22" font-weight="600">Validate content → DeckKit build → check-lock</text>
+  <text x="232" y="441" fill="#505d72" font-size="16">Reusable visual grammar → patch.json with native editable PowerPoint operations</text>
+</g>
+  <g data-node="execute">
+  <rect x="136" y="480" width="480" height="88" rx="10" fill="#f6faff" stroke="#c4d8f2" stroke-width="1.4"/>
+  <circle cx="184" cy="524" r="30" fill="#edf5ff" stroke="#c4d8f2"/>
+  <g transform="translate(184 524)" fill="none" stroke="#1468ce" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M0-18c6 4 11 5 15 6v12c0 9-6 15-15 20C-9 15-15 9-15 0v-12c4-1 9-2 15-6zM-7 0l5 5 10-11"/></g>
+  <text x="232" y="511" fill="#1468ce" font-size="22" font-weight="600">xdoc dry-run → apply</text>
+  <text x="232" y="535" fill="#505d72" font-size="16">Check semantics before writing a candidate</text>
+  <text x="232" y="555" fill="#505d72" font-size="16">Retain candidate PPTX + replay sidecar</text>
+</g>
+  <g data-node="review">
+  <rect x="664" y="480" width="480" height="88" rx="10" fill="#f6faff" stroke="#c4d8f2" stroke-width="1.4"/>
+  <circle cx="712" cy="524" r="30" fill="#edf5ff" stroke="#c4d8f2"/>
+  <g transform="translate(712 524)" fill="none" stroke="#1468ce" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="-17" y="-13" width="34" height="23" rx="3"/><path d="M0 10v8M-8 18H8M-9-1l6 6L9-7"/></g>
+  <text x="760" y="511" fill="#1468ce" font-size="22" font-weight="600">Verify &amp; review</text>
+  <text x="760" y="535" fill="#505d72" font-size="16">vision-check → canonical PDF/PNG audit</text>
+  <text x="760" y="555" fill="#505d72" font-size="16">Review PNGs; clean-open when required</text>
+</g>
+  <g data-node="final">
+  <rect x="136" y="604" width="1008" height="60" rx="10" fill="#f7fcf9" stroke="#c8e1d0" stroke-width="1.4"/>
+  <circle cx="184" cy="634" r="26" fill="#edf8f0" stroke="#c8e1d0"/>
+  <g transform="translate(184 634)" fill="none" stroke="#227a43" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M-18-12h36M-15-12v24h30v-24M0 12v6M-7 23l7-5 7 5M-8 3v2M0-2v7M8-7V5"/></g>
+  <text x="232" y="631" fill="#227a43" font-size="22" font-weight="600">Final editable .pptx</text>
+  <text x="232" y="655" fill="#505d72" font-size="16">Finalize after machine gates + visual review · optional PDF / PNG / contact sheet</text>
+</g>
+  <text x="640" y="692" text-anchor="middle" font-size="14" fill="#64748b">Probe runtime capabilities first. Reports, sidecars and review evidence stay in the run directory.</text>
+</svg>

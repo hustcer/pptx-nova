@@ -217,7 +217,7 @@ with page types, layout rules, typography, color rules, and quality checks. The
 normal new-deck path is:
 
 <p align="center">
-  <img src="docs/images/pptx-creating-workflow.webp" alt="pptx-nova new deck creation workflow" />
+  <img src="docs/images/pptx-creating-workflow.svg" alt="pptx-nova creation workflow: planning, DeckKit build, dry-run, candidate verification and visual review before publication" />
 </p>
 
 The typical existing-deck edit path is intentionally different from a one-shot
@@ -225,7 +225,7 @@ The typical existing-deck edit path is intentionally different from a one-shot
 first, selects the exact target objects, and checks the patch before writing:
 
 <p align="center">
-  <img src="docs/images/pptx-editing-workflow.webp" alt="pptx-nova existing deck editing workflow" />
+  <img src="docs/images/pptx-editing-workflow.svg" alt="pptx-nova editing workflow: inspect and select, bind edit scope, dry-run, apply to a candidate, verify and review, then publish; retry failed gates" />
 </p>
 
 ### Scoped edit safety

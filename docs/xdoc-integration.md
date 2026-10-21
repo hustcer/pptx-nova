@@ -2,7 +2,10 @@
 
 This guide is for an Agent runtime, queue worker, CI job, or application that
 needs to call `xdoc` as a document execution layer. It describes the process
-boundary and the evidence policy. It does not replace the operation details in
+boundary and the evidence policy. CI, shared-server, and Service/API deployment
+are outside the launch plans and require separately applicable authorization;
+the same process contract can be used for supported local scripts. This guide
+does not replace the operation details in
 the [runtime schema](./xdoc-schema.json).
 
 The short version is:
@@ -38,6 +41,13 @@ Record the installation channel and the npm version, archive digest, or worker
 image digest as provenance. Do not change patch construction, report parsing,
 or gate policy based on that channel: equivalent distributions of the same xdoc
 release must present the same CLI contract.
+
+The published npm launcher requires Node.js 22+ and selects an exact-version
+native platform package. A standalone release archive does not require Node.js.
+Free mode limits a local task to 10 slides and 5 MiB of compressed PPTX inputs
+combined, including donor decks; visual PPTX/PDF/PNG outputs carry an `XDOC DEMO`
+watermark. Paid task access depends on signed entitlements and host facts, so
+neither `auth verify` nor a healthy `auth status` alone authorizes a job.
 
 The top-level discovery contract is `cli-agent/v1`. The patch envelope uses its
 own string `schemaVersion` (`"pptx-patch/v1"`; a bare numeric `1` is rejected),
@@ -314,6 +324,21 @@ Use the report-specific gates, not a single generic “command succeeded” flag
 - `apply.json` plus the sidecar: bind the reports to the exact candidate path
   and SHA-256 recorded by the host.
 
+These are observation reports. For a canonical Agent visual decision, run:
+
+```bash
+xdoc pptx visual-audit --candidate candidate.pptx --reference source.pptx --output-dir visual-evidence --json > visual-evidence.json
+```
+
+Use the `pptx-visual-evidence/v1` decision and review its exact rendered
+artifacts. `preview`, `diff`, `vision-diff`, and `contact-diff` carry
+observation-only `visualEvidence` handoffs; their gates alone do not authorize
+visual delivery. For new decks, select `--visual-mode create` and omit
+`--reference` and `--slides`. Create checks do not establish design-intent
+acceptance or regression equivalence. The audit requires unwatermarked
+`convert/pdf` task authorization: Free mode fails with exit 4 without publishing
+an evidence directory. Static previews remain available within Free limits.
+
 Static geometry checks do not prove rendered pixels. A human or visual-review
 worker must inspect the contact sheet for clipping, contrast, overlap, broken
 chart labels, and unintended layout drift.
@@ -373,6 +398,13 @@ signature-removal or VBA strip/reject switches. `patch-ooxml` is disabled unless
 `--allow-raw-xml` is supplied. Treat complex animations, SmartArt-like
 structures, and other preserve-only regions as review boundaries, not as
 silently editable objects.
+
+Use the feature/subset entries in `commands.pptx.capabilityTruth`
+(`pptx-capability-truth/v3`) and their separate authoring, inspection,
+preservation, rendering, and verification axes. Published Morph/P14 subsets can
+be authored even though their overall support remains partial; unmodeled timing
+and transition extensions retain preservation boundaries. `morph-check` reports
+explicit `!!` object-name pairs on adjacent slides and does not certify playback.
 
 Configure PNG rendering through the CLI options (`--dpi`, `--prefix`,
 `--output-dir`, `--output`); the `xdoc` executable does not read the

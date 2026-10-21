@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.13.0 (968dffe8)",
+  "version": "0.13.0 (96708959)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -2937,7 +2937,7 @@
               {
                 "id": "chart-3d-viewer-geometry-vectors",
                 "kind": "behavior",
-                "claim": "The viewer's projection, camera, wall, axis, gridline, draw-order, pie and surface geometry are asserted against vectors generated from the same MoonBit modules the PDF renderer uses, so the two implementations cannot drift apart without a failing test."
+                "claim": "The viewer's projection, camera, wall, axis, gridline, draw-order, pie and surface geometry are asserted against vectors generated from the same shared geometry modules the PDF renderer uses, so the two implementations cannot drift apart without a failing test."
               },
               {
                 "id": "chart-3d-viewer-families",
@@ -16003,7 +16003,7 @@
               "math-multiply",
               "math-not-equal",
               "math-plus",
-              "moon",
+              "\u006doon",
               "non-isosceles-trapezoid",
               "notched-right-arrow",
               "no-symbol",
@@ -109195,7 +109195,7 @@
       "usageNotes": [
         "Use `xdoc pdf inspect out.pdf --json --pretty` after converting a PPTX to PDF when diagnosing font embedding, font fallback, text extraction, or copy/search issues.",
         "Use `xdoc pdf extract-text input.pdf --engine pdfium --json --pretty` to produce the shared pdf-text/v1 contract for CLI/API-compatible PDF text extraction.",
-        "`--engine auto` currently resolves to PDFium in native builds; `--engine pdflite` is exposed for comparison but returns engine_unavailable until the pure MoonBit reader lands.",
+        "`--engine auto` currently resolves to PDFium in native builds; `--engine pdflite` is exposed for comparison but returns engine_unavailable until the alternative PDF reader lands.",
         "`--pages` uses 1-based PDF page numbers, e.g. `1,3-5`.",
         "The inspect backend is PDFium and adds no external runtime dependency beyond the PDFium runtime already used by xdoc PNG/PDF diagnostics.",
         "For agent workflows, prefer --json --pretty and inspect summary.hasNonEmbeddedFonts, fonts[].embedded, fonts[].subset, fonts[].pages, and unicodeMapErrorCount fields.",

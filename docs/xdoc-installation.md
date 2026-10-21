@@ -4,35 +4,40 @@ This guide explains how to install the native `xdoc` CLI, verify the executable
 that will run an Agent job, and keep the runtime evidence needed for a
 repeatable PPTX workflow.
 
-`xdoc` is a native executable with two designated public distribution channels:
+Verified on 2026-10-21 against the published `0.13.0 (96708959)` CLI. `xdoc`
+is a native executable with two published distribution channels:
 
 1. a global npm package, `@s8fy/xdoc`; and
 2. versioned native archives on the
-   [pptx-nova Releases page](https://github.com/hustcer/pptx-nova/releases#release-v0.3.0).
+   [pptx-nova Releases page](https://github.com/hustcer/pptx-nova/releases/tag/xdoc-v0.13.0).
 
 Both channels are expected to expose the same `xdoc` command, runtime version,
 discovery schema, native backends, and license notices for a given release. The
 npm package is a distribution entry point for the CLI, not a second execution
 contract.
 
-A release archive contains the CLI, the PDFium runtime used by PDF/PNG
-conversion, and the applicable license notices. You do not need PowerPoint or a
+A release archive contains the CLI with a statically linked PDFium backend,
+release evidence, and applicable license notices. You do not need PowerPoint or a
 full office installation for the native conversion and PPTX bridge paths, but
 you do need the fonts and backends required by the requested operation.
 
-> **npm availability:** the package name `@s8fy/xdoc` is reserved for this
-> distribution path, but the package is not yet published. Until
-> `npm view @s8fy/xdoc version` succeeds, use a versioned GitHub Release archive.
-> The commands below become the supported npm path when the first package is
-> published.
+The npm launcher requires **Node.js 22 or newer**. It selects an exact-version
+platform package containing the native executable; installation does not fetch
+binaries from an external release server. The standalone release archive does
+not require Node.js.
 
 ## Choose an installation path
 
 | Use case                                         | Recommended path                              | Why                                                                       |
 | ------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------- |
-| Interactive installation after npm publication   | `npm i -g @s8fy/xdoc`                         | Installs the `xdoc` command through a familiar cross-platform CLI channel |
+| Interactive local installation                   | `npm i -g @s8fy/xdoc`                         | Installs the `xdoc` command through a familiar cross-platform CLI channel |
 | A pinned worker or air-gapped promotion pipeline | Download a versioned GitHub Release archive   | The exact binary, native renderer, notices, and digest move together      |
-| CI, a container image, or a managed worker       | Promote an approved binary archive as a layer | The runtime can be verified once and deployed as an immutable image layer |
+| Local container or offline workstation           | Promote an approved binary archive as a layer | The exact runtime can be verified before use                              |
+
+These are installation mechanisms. The launch Free, Personal, and Enterprise
+plans cover local use, local scripts, and a per-user daemon; they do not include
+CI, shared servers, or Service/API use. A deployment in those environments needs
+separately applicable terms and task capabilities.
 
 Do not install a nightly artifact when the job needs a reproducible result. Pin
 the release tag, archive digest, and the `xdoc schema` snapshot together.
@@ -43,7 +48,7 @@ boundary.
 
 ## Install from npm
 
-After the package is published, install the CLI globally and immediately probe
+Install the published CLI globally and immediately probe
 the executable that npm placed on `PATH`:
 
 ```bash
@@ -52,11 +57,11 @@ xdoc --version
 xdoc schema --mode index
 ```
 
-For a production worker, pin the package version instead of accepting a moving
+For a repeatable installation, pin the package version instead of accepting a moving
 tag:
 
 ```bash
-npm i -g @s8fy/xdoc@0.3.0
+npm i -g @s8fy/xdoc@0.13.0
 xdoc --version
 ```
 
@@ -72,47 +77,42 @@ npm update -g @s8fy/xdoc
 npm uninstall -g @s8fy/xdoc
 ```
 
-Before the first npm release is accepted, its clean-machine test must confirm
-that it exposes `xdoc` on `PATH`, installs the correct platform runtime and
-notices, and produces the same version and schema as the corresponding GitHub
-Release. The package must document whether installation needs network access
-beyond the npm registry; this guide does not assume a particular bundling or
-download implementation.
+Keep npm optional dependencies enabled: they deliver the matching native
+platform package. Pin the package version and retain its registry integrity
+metadata together with the runtime probe.
 
 ## Release archive matrix
 
 The current release workflow publishes these target names. The matrix is a
 release fact, not a promise that every CPU/OS combination is available.
 
-| Target         | Archive                   | Archive format | Bundled native library |
-| -------------- | ------------------------- | -------------- | ---------------------- |
-| Linux x86-64   | `xdoc-linux-x64.tar.gz`   | tar + gzip     | `libpdfium.so`         |
-| Linux ARM64    | `xdoc-linux-arm64.tar.gz` | tar + gzip     | `libpdfium.so`         |
-| macOS ARM64    | `xdoc-macos-arm64.tar.gz` | tar + gzip     | `libpdfium.dylib`      |
-| Windows x86-64 | `xdoc-windows-x64.zip`    | ZIP            | `pdfium.dll`           |
+| Target         | Archive                   | Archive format | Rendering backend        |
+| -------------- | ------------------------- | -------------- | ------------------------ |
+| Linux x86-64   | `xdoc-linux-x64.tar.gz`   | tar + gzip     | statically linked PDFium |
+| Linux ARM64    | `xdoc-linux-arm64.tar.gz` | tar + gzip     | statically linked PDFium |
+| macOS ARM64    | `xdoc-macos-arm64.tar.gz` | tar + gzip     | statically linked PDFium |
+| Windows x86-64 | `xdoc-windows-x64.zip`    | ZIP            | statically linked PDFium |
 
 There is currently no published macOS x86-64 or Windows ARM64 archive. A worker
 must reject an archive whose target does not match its host rather than trying
 to execute it and reporting a generic file error.
 
-> **v0.3.0 macOS ARM64 caveat:** the currently published executable declares a
-> macOS minimum version of 26.0 in its Mach-O load command. It therefore does
-> not run on macOS 15.x hosts. Treat that asset as pending until it is rebuilt
-> with the intended deployment target and passes a clean-host probe; the release
-> runner label alone is not a compatibility guarantee.
+The v0.13.0 macOS ARM64 executable declares macOS **13.0** as its minimum
+deployment target. The release runner label alone is not a compatibility
+guarantee; check the selected artifact and its host requirements.
 
 ## Download a pinned release
 
-Replace `v0.3.0` and the archive name with the release and target you have
+Replace `xdoc-v0.13.0` and the archive name with the release and target you have
 approved. GitHub's release API exposes an asset digest; retain that digest in
 the deployment record. If the public release process later publishes a signed
 manifest, verify the manifest as well.
 
-The canonical v0.3.0 entry point is:
-<https://github.com/hustcer/pptx-nova/releases#release-v0.3.0>.
+The v0.13.0 entry point is:
+<https://github.com/hustcer/pptx-nova/releases/tag/xdoc-v0.13.0>.
 
 ```bash
-release_tag=v0.3.0
+release_tag=xdoc-v0.13.0
 archive=xdoc-linux-x64.tar.gz
 release_repo=hustcer/pptx-nova
 
@@ -134,12 +134,12 @@ URL. Do not parse a branch build directory as a release.
 
 ## Install on Unix-like systems
 
-Keep the executable and its colocated PDFium library in the same directory. The
-release binary is prepared with a relative runtime search path; moving only
-`xdoc` and leaving the library behind breaks PDF/PNG commands.
+The current archive has a standalone executable with statically linked PDFium;
+there is no separate `libpdfium` file to install. Keep the complete archive's
+notices and evidence alongside the installed runtime.
 
 ```bash
-release_tag=v0.3.0
+release_tag=xdoc-v0.13.0
 archive=xdoc-linux-x64.tar.gz       # use xdoc-macos-arm64.tar.gz on Apple Silicon
 install_dir="$HOME/.local/lib/xdoc/$release_tag"
 
@@ -160,14 +160,16 @@ symlink to a directory already managed by the host's package policy. Do not
 overwrite a live binary in place while a worker is running; install the new
 version beside the old one and switch the symlink after verification.
 
-The archive also contains `LICENSE` and a `licenses-pdfium/` directory. Keep
-those files with the binary when redistributing the archive or building a
-container image.
+The archive also contains `LICENSE`, `EVALUATION-LICENSE.md`,
+`THIRD-PARTY-NOTICES`, `licenses-pdfium/`, and release evidence JSON files.
+Retain these when redistributing an authorized archive or building an image.
 
 ## Install in CI, a container, or a managed worker
 
-Create the worker layer from the exact approved release archive. Keep `xdoc`,
-its colocated PDFium library, and all license notices together; record the
+First establish the applicable deployment entitlement: the launch plans do not
+include CI, shared servers, or Service/API use. For a separately authorized
+deployment, create the worker layer from the exact approved release archive.
+Keep `xdoc`, its evidence, and all license notices together; record the
 archive digest and image digest; and run the same `xdoc --version` plus
 `xdoc schema` probe during image creation and again when the worker starts.
 
@@ -177,11 +179,11 @@ verified archive unchanged between environments.
 
 ## Install on Windows
 
-Extract the ZIP without separating `xdoc.exe` from `pdfium.dll`, then add the
+Extract the ZIP with its notices and evidence, then add the
 version directory to the worker's `PATH` or invoke the absolute path.
 
 ```powershell
-$releaseTag = 'v0.3.0'
+$releaseTag = 'xdoc-v0.13.0'
 $installDir = Join-Path $env:LOCALAPPDATA "xdoc\$releaseTag"
 Expand-Archive .\xdoc-download\xdoc-windows-x64.zip -DestinationPath $installDir -Force
 
@@ -271,30 +273,44 @@ terms. Read the `LICENSE` file in the exact archive and the notices under
 `licenses-pdfium/` before redistributing it. Runtime conversion authorization is
 a separate policy boundary. The verified runtime exposes its current behavior
 in `commands.convert.licensePolicy` and `authContract.productLimits`: without
-an active entitlement, the Free Baseline limits each task to 10 slides and
-5 MiB (5,242,880 bytes) of compressed PPTX input, PDF/PNG output carries a
-visible `structurify.io` watermark, and larger inputs are denied with exit code 4.
-Verify the exact artifact and schema instead of assuming that later
-distributions behave identically.
+a credential, the Free Baseline supports single-user local tasks up to 10 slides
+and 5 MiB (5,242,880 bytes) of compressed PPTX inputs combined. Visual outputs,
+including editable PPTX, PDF, and PNG, carry an `XDOC DEMO` watermark; larger
+tasks are denied with exit code 4. The task slide count includes both input
+and planned output, and the byte total includes primary and donor PPTX inputs.
+
+Personal is an offline 30-day License for its individual purchaser; Enterprise
+is an offline contract License for local organizational use, with multi-year
+terms supported. Both remove plan-level slide/PPTX byte limits and new plan
+watermarks; format/resource limits and existing signed watermark obligations
+still apply. An installed or signature-valid License alone does not authorize
+every task: the signed entitlements, host facts, and restrictions are evaluated
+for the actual operation. `xdoc auth status --pretty` diagnoses local credentials
+and explicitly does not evaluate task authorization.
+
+Public downloads use the default non-commercial `LICENSE`. Commercial
+evaluation requires accepting the supplied Evaluation Terms through the approved
+channel before delivery; paid usage follows the order terms. Free technical
+access does not expand legal usage rights.
 
 ### Filesystem and security
 
 Run the CLI in an isolated input/output root when it processes untrusted decks.
 The native package reader rejects unsafe ZIP paths and applies package-size and
 part-count limits. Keep daemon state files private, keep release libraries
-colocated, and never pass user-controlled strings through an interpolated shell
+with their notices, and never pass user-controlled strings through an interpolated shell
 command.
 
 ## Troubleshooting
 
-| Symptom                                              | Likely cause                                                             | Action                                                                                                                                            |
-| ---------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Exec format error` or an immediate loader failure   | The archive target does not match the host architecture or OS            | Select the exact target from the release matrix and verify with `file`/`Get-FileHash` before installation                                         |
-| PDF/PNG commands cannot load PDFium                  | `xdoc` was moved without `libpdfium.*`, or the library is not executable | Restore the archive layout and run `xdoc --version` before moving the symlink                                                                     |
-| macOS reports an incompatible system version         | The artifact was built with a newer deployment target than the worker    | Publish and select an archive whose documented minimum macOS version includes the worker; do not promise compatibility from the runner name alone |
-| Text wraps differently across workers                | Fonts or font cache differ                                               | Compare `xdoc extract ... --parts fonts`, provision the same fonts, and retain render provenance                                                  |
-| A file exists but the Agent marks the job successful | The caller checked filesystem existence instead of the report            | Parse the command's versioned report and exit policy; a file alone is not a gate                                                                  |
-| `structurify.io` appears in PDF/PNG output           | The runtime's conversion authorization policy is inactive or restricted  | Check the exact edition/license and document the watermark policy for the deployment                                                              |
+| Symptom                                              | Likely cause                                                          | Action                                                                                                                                            |
+| ---------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Exec format error` or an immediate loader failure   | The archive target does not match the host architecture or OS         | Select the exact target from the release matrix and verify with `file`/`Get-FileHash` before installation                                         |
+| PDF/PNG commands fail                                | Runtime/backend mismatch, invalid input, or missing fonts             | Re-probe the exact runtime and inspect its report; v0.13.0 does not require a separate PDFium library                                             |
+| macOS reports an incompatible system version         | The artifact was built with a newer deployment target than the worker | Publish and select an archive whose documented minimum macOS version includes the worker; do not promise compatibility from the runner name alone |
+| Text wraps differently across workers                | Fonts or font cache differ                                            | Compare `xdoc extract ... --parts fonts`, provision the same fonts, and retain render provenance                                                  |
+| A file exists but the Agent marks the job successful | The caller checked filesystem existence instead of the report         | Parse the command's versioned report and exit policy; a file alone is not a gate                                                                  |
+| `XDOC DEMO` appears in PPTX/PDF/PNG output           | The task uses Free mode or retains an existing watermark obligation   | Check task authorization and the input's existing obligations; a paid License does not automatically remove prior marks                           |
 
 ## Related documentation
 

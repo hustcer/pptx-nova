@@ -56,16 +56,28 @@ Its power comes from several properties that reinforce each other, not from any 
   instead of reducing success to “the file exists.”
 - **Local, lightweight, and automation-friendly.** Preview rendering, PDF export, and visual checks do
   not require PowerPoint, a full office suite, or a headless browser. The current `v0.13.0` native
-  packages unpack to roughly 20MB each depending on the supported target, require no separate server
-  or always-on
-  background service, and are practical for CI, containers, offline workers, and unattended Agent
-  environments. Multi-step jobs may optionally use the loopback-only local daemon.
+  archives download as approximately 8.3–10.1 MB depending on the target and require no separate
+  server or always-on background service. Local scripts and multi-step jobs may optionally use
+  the loopback-only local daemon.
 
 The small distribution size is release-specific evidence, not a permanent compatibility guarantee;
 platform support, rendering backends, fonts, and exact binary size should be checked for the selected
 release. The current public native targets cover supported Linux, macOS, and Windows builds. Rendering
 still depends on the required backend and fonts, and unusual or unsupported PPTX features still need
 explicit review.
+
+The verified release is `0.13.0 (96708959)`. Install with
+`npm i -g @s8fy/xdoc@0.13.0` using Node.js 22+, or use a standalone native
+archive (see the [installation guide](../docs/xdoc-installation.md)). Free mode
+supports single-user local tasks up to 10 slides and 5 MiB of compressed PPTX
+inputs combined. Visual outputs, including editable PPTX, PDF, and PNG, carry
+an `XDOC DEMO` watermark. Personal and Enterprise remove plan-level size/slide
+limits and new plan watermarks; existing signed watermark obligations still
+apply. The launch plans cover local scripts and a per-user daemon, and exclude
+CI, shared servers, and Service/API use. Public downloads use non-commercial
+terms unless separately licensed.
+The canonical automated visual audit requires unwatermarked conversion
+authorization; Free mode still supports watermarked previews for review.
 
 Taken together, this makes `pptx-nova` closer to a checkable, replayable PPTX build and editing
 pipeline than a workflow that renders content into images and inserts those images into slides.
@@ -332,9 +344,10 @@ Edit launch.pptx: on slide 4, make the bullets appear one by one on click; on sl
 transition to fade. Do not change other animations. Output launch-animated.pptx.
 ```
 
-Best for: you only need basic entrance, exit, step-by-step reveal, or slide transition changes.
-Advanced effects such as complex motion paths, video timing, or object-triggered actions may need
-confirmation before they can be edited safely.
+Best for: supported entrance, exit, step-by-step reveal, finite spin/scale, straight motion paths,
+or slide transition changes. Published Morph/P14 subsets can also be authored, with separate
+playback and Office verification limits. Complex motion paths, media timing, and interactive
+triggers have no high-level authoring path; existing timing may be preserved when left untouched.
 
 ### 10. Brand Check Or Brand Conversion
 

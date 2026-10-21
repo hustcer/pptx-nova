@@ -14,20 +14,14 @@ PPTX compatibility.
 
 xdoc is an agent-native document execution runtime for native, editable PPTX work.
 
-> **xdoc is the best agent-first, headless PPTX runtime for high-fidelity creation and editing.**
+> **xdoc is a high-performance, agent-first, headless PPTX runtime built for high-fidelity creation and editing.**
 
-That is a deliberately bold positioning statement, backed by a July 2026
-Agent-oriented comparison of current PPTX creation and editing tools. Within
-the evaluated set, xdoc ranked highest overall for the combined workflow of
-runtime discoverability, native editable creation and modification, dry-run
-safety, preservation, rendering, validation, and auditable evidence, while the
-current `v0.13.0` native packages remain roughly 22MB each. The claim is scoped
-to that evaluated set and workflow; it is not a claim of complete PowerPoint
-feature parity or superiority over every tool that may exist.
+The verified release is `0.13.0 (96708959)`. It exposes runtime discovery,
+native editable creation and modification, dry-runs, preservation diagnostics,
+rendering, validation, and auditable evidence. Support is specific to each
+object and operation; it does not imply complete PowerPoint feature parity.
 
-Most slide-generation tools either create flattened slide images or rely on
-small, brittle PowerPoint scripting snippets. pptx-nova is built on `xdoc`, an
-in-house PPTX engine designed from the ground up for AI agents. It can inspect
+pptx-nova is built on `xdoc`, an in-house PPTX engine for AI agents. It can inspect
 the real PowerPoint file structure, validate declarative JSON patches with
 dry-runs, apply native editable changes, render previews, compare source and
 candidate decks, export existing or generated presentations to high-fidelity
@@ -36,10 +30,21 @@ PDF, and leave replayable sidecar evidence.
 All of this runs through a single lightweight native CLI with integrated
 rendering backends: previews, PDF export, and visual checks require no
 PowerPoint, office suite, or headless browser. The current `v0.13.0` native
-packages unpack to roughly 20MB each, depending on the target, and need no
+archives download as approximately 8.3–10.1 MB, depending on the target, and need no
 separate server or always-on background service. Native builds are available
-for supported Linux, macOS, and Windows targets, keeping the whole pipeline
-practical in CI, containers, and unattended agent environments.
+for Linux x64/ARM64, macOS 13+ ARM64, and Windows x64. Rendering still depends
+on the available fonts and the support status of the requested feature.
+
+Install the published CLI with `npm i -g @s8fy/xdoc@0.13.0` (Node.js 22+), or
+use a [native release archive](docs/xdoc-installation.md). Free mode supports
+single-user local tasks up to 10 slides and 5 MiB of compressed PPTX inputs
+combined; editable PPTX, PDF, and PNG outputs carry an `XDOC DEMO` watermark.
+Local scripts and a per-user daemon are supported. The launch Free, Personal,
+and Enterprise plans do not include CI, shared servers, or Service/API use;
+deployment in those environments requires separately applicable authorization.
+Public downloads use non-commercial terms unless separately licensed.
+The canonical automated visual audit requires unwatermarked conversion
+authorization; Free mode can still produce watermarked previews for review.
 
 That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real
 PPTX objects instead of screenshots, check selectors before writing, preserve
@@ -61,11 +66,11 @@ result is published as a separately validated candidate.
   easier to version, review, replay, and regenerate with visual checks.
 - Refurbish an existing deck with the goal of preserving the original content
   while making the visual system cleaner and more consistent, and deliver a
-  single all-slides source-vs-final comparison image for review.
+  source-vs-final comparison images covering every slide for review.
 - Translate an existing `.pptx` into another language while aiming to preserve
   original deck structure, layout, styles, objects, notes, animations, and
-  visual hierarchy, and deliver a single all-slides source-vs-translation
-  comparison image for review.
+  visual hierarchy, and deliver source-vs-translation comparison images
+  covering every slide for review.
 - Edit existing decks, including titles, copy, slide order, visuals, colors,
   charts, tables, and selected page elements.
 - Preserve explicit current-deck follow-up rules, such as applying the same
@@ -158,9 +163,9 @@ A normal run can produce:
 - A high-fidelity PDF export and optional per-slide PNG previews.
 - Optional validation reports for visual checks, template checks, and
   content-preservation checks.
-- For translation or refurbishment runs, a single all-slides side-by-side
-  comparison image that helps review each source slide against the delivered
-  result.
+- For translation or refurbishment runs, side-by-side comparison images that
+  cover each source slide and its delivered result. Decks up to 20 slides use
+  one image; larger decks use numbered images and a coverage manifest.
 - For translation runs, optional source-language/target-language review notes
   that show what was translated, what was intentionally shortened, and any
   layout risks that still deserve human review.

@@ -89,6 +89,8 @@ important examples are:
 
 - `vision-diff` exits `0` when the comparison completed even if
   `agentGate.passed` is false. The gate verdict is in the report.
+- `visual-audit` exits `0` when its evidence transaction completes; delivery
+  disposition is `manifest.decision.action`, which may still require review or stop.
 - i18n scan/plan commands use exit `3` for blocker sets but still emit their
   documented compact or full report when the report was produced.
 
@@ -218,25 +220,41 @@ forcing them into this shape.
 The full report schemas and examples are discoverable from `xdoc schema`. The
 following table names the fields a host normally uses:
 
-| Report                  | Main fields                                                                                                                     | Use                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `pptx-inspect/v1`       | `input`, `presentation`, `slides`                                                                                               | Discover stable ids, names, geometry, preserve-only regions, and package facts. |
-| `pptx-select/v1`        | `input`, `query`, `scope`, `summary`, `matches`                                                                                 | Resolve a target and detect ambiguity before patching.                          |
-| `pptx-dry-run/v1`       | `status`, `changedParts`, `semanticChanges`, `visualRisks`, `semanticIssues`, `warnings`, `opResults`, `traces`, `capabilities` | Prove that a proposed mutation is isolated and reviewable before writing.       |
-| `pptx-apply/v1`         | The dry-run fields plus `input`, `output`, and delivery metadata when available                                                 | Record the candidate mutation and its operation-level evidence.                 |
-| `pptx-preview/v1`       | Render manifest, output paths, slide images, and summary                                                                        | Bind rendered artifacts to the candidate.                                       |
-| `pptx-vision/v1`        | `slideCount`, `summary`, `issues`, `semanticSummary`, `semanticIssues`                                                          | Run geometry and semantic checks without treating them as pixel proof.          |
-| `pptx-diff/v1`          | `baselinePath`, `targetPath`, `policyRef`, `agentGate`, `summary`, `slides`                                                     | Decide whether an existing-deck edit changed only the intended content.         |
-| `pptx-vision-diff/v1`   | Source/candidate render comparison and gate details                                                                             | Compare visual evidence; inspect `agentGate` rather than only the exit code.    |
-| `pptx-contact-diff/v1`  | Contact-sheet paths and comparison summary                                                                                      | Human review aid, not a replacement for structured diff evidence.               |
-| `pptx-apply-sidecar/v1` | `input`, `output`, `patch`, `report`, `mode`, `patchSource`, `build`                                                            | Replay, audit, or roll back a delivered candidate.                              |
-| `pptx-audit/v1`         | Sidecar identity, recorded input/output/mode/schema/build, patch count, and projected report                                    | Verify that history belongs to the candidate being inspected.                   |
-| `pptx-rollback/v1`      | `sidecar`, `strategy`, source/output identity, and status                                                                       | Record a recovery action without guessing at a missing pre-image.               |
-| `preflight/v1`          | Requested checks, status, issue counts, risk level, and check details                                                           | Gate fonts, links, Office compatibility, assets, and policy.                    |
+| Report                    | Main fields                                                                                                                     | Use                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `pptx-inspect/v1`         | `input`, `presentation`, `slides`                                                                                               | Discover stable ids, names, geometry, preserve-only regions, and package facts. |
+| `pptx-select/v1`          | `input`, `query`, `scope`, `summary`, `matches`                                                                                 | Resolve a target and detect ambiguity before patching.                          |
+| `pptx-dry-run/v1`         | `status`, `changedParts`, `semanticChanges`, `visualRisks`, `semanticIssues`, `warnings`, `opResults`, `traces`, `capabilities` | Prove that a proposed mutation is isolated and reviewable before writing.       |
+| `pptx-apply/v1`           | The dry-run fields plus `input`, `output`, and delivery metadata when available                                                 | Record the candidate mutation and its operation-level evidence.                 |
+| `pptx-preview/v1`         | Render manifest, output paths, slide images, and summary                                                                        | Bind rendered artifacts to the candidate.                                       |
+| `pptx-visual-evidence/v1` | Exact PDF/PNG artifacts, check outcomes, and decision                                                                           | Canonical visual audit and Agent action; other visual reports are observations. |
+| `pptx-morph-check/v1`     | Adjacent slide pair and explicit object-name matching diagnostics                                                               | Review Morph correspondence without inferring playback verification.            |
+| `pptx-vision/v1`          | `slideCount`, `summary`, `issues`, `semanticSummary`, `semanticIssues`                                                          | Run geometry and semantic checks without treating them as pixel proof.          |
+| `pptx-diff/v1`            | `baselinePath`, `targetPath`, `policyRef`, `agentGate`, `summary`, `slides`                                                     | Decide whether an existing-deck edit changed only the intended content.         |
+| `pptx-vision-diff/v1`     | Source/candidate render comparison and gate details                                                                             | Compare visual evidence; inspect `agentGate` rather than only the exit code.    |
+| `pptx-contact-diff/v1`    | Contact-sheet paths and comparison summary                                                                                      | Human review aid, not a replacement for structured diff evidence.               |
+| `pptx-apply-sidecar/v1`   | `input`, `output`, `patch`, `report`, `mode`, `patchSource`, `build`                                                            | Replay, audit, or roll back a delivered candidate.                              |
+| `pptx-audit/v1`           | Sidecar identity, recorded input/output/mode/schema/build, patch count, and projected report                                    | Verify that history belongs to the candidate being inspected.                   |
+| `pptx-rollback/v1`        | `sidecar`, `strategy`, source/output identity, and status                                                                       | Record a recovery action without guessing at a missing pre-image.               |
+| `preflight/v1`            | Requested checks, status, issue counts, risk level, and check details                                                           | Gate fonts, links, Office compatibility, assets, and policy.                    |
 
 Specialized report families include brand, theme/style, template, refurbishment,
 and i18n contracts. Their fields and blocker semantics are not interchangeable
 with `pptx-apply/v1`.
+
+`visual-audit` is the visual report that authorizes an Agent action. Preview,
+diff, vision-diff, and contact-diff expose observation-only `visualEvidence`
+handoffs. Preserve the audit decision and exact rendered artifacts together.
+Its rendering requires unwatermarked `convert/pdf` task authorization; Free mode
+is denied with exit 4 before any evidence directory is published. Neither
+same-renderer regression nor a passing Create candidate check certifies Office
+parity or accepts the presentation's design intent.
+
+`i18n-anchor-draft` uses `pptx-i18n-anchor-draft/v1`. Its `pass`, `partial`,
+`blocked`, or `no-op` status is a draft result, and exit 0 only means draft
+evaluation completed. Merge only the proposed `translationsDraft` entries by
+unit id, retain blocked units, and rerun `i18n-plan`; the draft's
+`agentGate.applyAuthorized` is always false.
 
 ### Status is command-specific
 

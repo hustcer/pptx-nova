@@ -2652,6 +2652,11 @@ test('public xdoc docs updater replaces literal $defs text and keeps checks dete
   localSchema.build.edition = 'development'
   localSchema.authContract.buildProfile = 'development'
   localSchema.authContract.buildId = 'dev'
+  localSchema.prose = [
+    'Generated from the same MoonBit modules the PDF renderer uses.',
+    'Unavailable until the pure MoonBit reader lands.',
+  ]
+  localSchema.presets = ['moon', 'rect']
   writeJson(schemaPath, localSchema)
   writeJson(
     join(docsDir, 'xdoc-schema.json'),
@@ -2694,6 +2699,13 @@ test('public xdoc docs updater replaces literal $defs text and keeps checks dete
   const writtenSchema = JSON.parse(readFileSync(join(docsDir, 'xdoc-schema.json'), 'utf8'))
   assert.equal('build' in writtenSchema, false)
   assert.equal('authContract' in writtenSchema, false)
+  assert.deepEqual(writtenSchema.prose, [
+    'Generated from the same shared geometry modules the PDF renderer uses.',
+    'Unavailable until the alternative PDF reader lands.',
+  ])
+  assert.deepEqual(writtenSchema.presets, localSchema.presets)
+  assert.doesNotMatch(readFileSync(join(docsDir, 'xdoc-schema.json'), 'utf8'), /moon|mbt/i)
+  assert.deepEqual(JSON.parse(readFileSync(schemaPath, 'utf8')), localSchema)
 
   const check = spawnSync('nu', [join(repoRoot, 'tools/update-xdoc-public-docs.nu'), '--check'], {
     cwd: root,
@@ -2701,6 +2713,25 @@ test('public xdoc docs updater replaces literal $defs text and keeps checks dete
   })
   assert.equal(check.status, 0, check.stderr || check.stdout)
   assert.doesNotMatch(`${check.stdout}${check.stderr}`, /[\u3400-\u9fff]/u)
+  const snapshotBefore = readFileSync(join(docsDir, 'xdoc-schema.json'))
+  for (const [relativePath, term] of [
+    ['README.md', 'MOONBIT'],
+    ['pptx-nova/README.md', 'moon'],
+    ['docs/nested/guide.md', 'mbt'],
+  ]) {
+    const path = join(root, relativePath)
+    mkdirSync(join(path, '..'), { recursive: true })
+    writeFileSync(path, term)
+    const rejected = spawnSync(
+      'nu',
+      [join(repoRoot, 'tools/update-xdoc-public-docs.nu'), '--check'],
+      { cwd: root, encoding: 'utf8' },
+    )
+    assert.notEqual(rejected.status, 0, relativePath)
+    assert.match(`${rejected.stdout}${rejected.stderr}`, /forbidden text/)
+    assert.deepEqual(readFileSync(join(docsDir, 'xdoc-schema.json')), snapshotBefore)
+    rmSync(path)
+  }
 })
 
 test('public xdoc docs updater rejects development and spoofed CLI identities before writing', (t) => {

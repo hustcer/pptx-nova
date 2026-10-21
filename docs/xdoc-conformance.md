@@ -24,15 +24,15 @@ The current xdoc runtime exposes `cli-agent/v1`, `capabilities/v1`,
 the parts that a third-party host needs to depend on and marks the remaining
 parts as proposals.
 
-| Area                       | Current xdoc surface                                                         | Profile status                                                                      |
-| -------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Discovery                  | `xdoc schema`, progressive projections, catalogs, examples                   | Required                                                                            |
-| PPTX patching              | JSON patch envelope, selectors, dry-run, apply reports                       | Required for mutation profiles                                                      |
-| Evidence                   | Inspect, vision, preview, diff, preflight, sidecar reports                   | Required for delivery profiles                                                      |
-| Safety                     | Asset roots, byte limits, preserve-only/unsupported states, raw-XML opt-in   | Required                                                                            |
-| Native distribution        | Versioned platform archives with PDFium and notices; npm CLI channel planned | Required for a binary profile; cross-channel and signature rules are still proposed |
-| Governance                 | Repository-owned schemas and tests                                           | Proposed ecosystem process                                                          |
-| Cross-implementation suite | Release probes and public conformance fixtures                               | Not yet a separately published certification suite                                  |
+| Area                       | Current xdoc surface                                                               | Profile status                                                                      |
+| -------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Discovery                  | `xdoc schema`, progressive projections, catalogs, examples                         | Required                                                                            |
+| PPTX patching              | JSON patch envelope, selectors, dry-run, apply reports                             | Required for mutation profiles                                                      |
+| Evidence                   | Inspect, canonical visual audit, vision, preview, diff, preflight, sidecar reports | Required for delivery profiles                                                      |
+| Safety                     | Asset roots, byte limits, preserve-only/unsupported states, raw-XML opt-in         | Required                                                                            |
+| Native distribution        | Versioned platform archives and published npm CLI with static PDFium and notices   | Required for a binary profile; cross-channel and signature rules are still proposed |
+| Governance                 | Repository-owned schemas and tests                                                 | Proposed ecosystem process                                                          |
+| Cross-implementation suite | Release probes and public conformance fixtures                                     | Not yet a separately published certification suite                                  |
 
 The profile covers PPTX execution. `docx` and `xlsx` may appear in a capability
 registry as `reserved`; that does not make them conforming implementations of
@@ -117,8 +117,11 @@ An implementation at Level E additionally:
 
 For xdoc, a normal visible edit uses `pptx-apply/v1`, `pptx-apply-sidecar/v1`,
 `pptx-vision/v1`, `pptx-preview/v1`, `pptx-diff/v1`, `pptx-vision-diff/v1`, and
-`preflight/v1`. A contact sheet is human evidence, not a replacement for the
-structured reports.
+`preflight/v1`, followed by the canonical `pptx-visual-evidence/v1` decision
+from `visual-audit`. The other visual reports are observation-only handoffs.
+The audit requires unwatermarked conversion authorization; evidence transaction
+completion alone does not imply a passing `manifest.decision.action`. A contact
+sheet supports human review and does not replace these structured reports.
 
 ### Level S: safety and isolation
 
@@ -132,8 +135,10 @@ An implementation at Level S additionally:
 - avoids shell interpolation of user-controlled arguments; and
 - keeps daemon/service credentials, state, and logs private.
 
-Level S is the minimum for an unattended multi-tenant worker. A visual pass
-without these boundaries is not a safe execution layer.
+Level S is the minimum for an unattended multi-tenant worker under this proposed
+profile. It does not grant deployment rights: xdoc's launch plans exclude CI,
+shared servers, and Service/API use. Those deployments require separately
+applicable terms and task capabilities.
 
 ### Level B: binary distribution
 
@@ -159,17 +164,13 @@ package and the corresponding GitHub Release MUST NOT create separate command,
 patch, or report contracts. If a package installs or retrieves a platform
 binary, its provenance and integrity checks MUST be visible to the deployer.
 
-The current xdoc release workflow already packages the CLI, PDFium, `LICENSE`,
-and `licenses-pdfium/` for Linux x86-64, Linux ARM64, macOS ARM64, and Windows
-x86-64. The planned npm package is `@s8fy/xdoc`; it is not yet published.
-Publishing that package, a standalone release manifest/signature, minimum OS
-metadata, and an independent public certification record should be treated as
-the next release work, not assumed from the package or archive name.
-
-The current v0.3.0 macOS ARM64 asset declares macOS 26.0 as its minimum
-deployment target and fails the intended macOS 15.x compatibility baseline. That
-target must be rebuilt or its support claim narrowed before the archive can pass
-B-001 as a generally downloadable artifact.
+The v0.13.0 archives package the CLI with statically linked PDFium, `LICENSE`,
+`EVALUATION-LICENSE.md`, `THIRD-PARTY-NOTICES`, `licenses-pdfium/`, and release
+evidence for Linux x86-64, Linux ARM64, macOS ARM64, and Windows x86-64.
+`@s8fy/xdoc@0.13.0` is published; its Node.js 22+ launcher selects an exact-version
+platform package from npm. The macOS ARM64 executable declares a minimum
+deployment target of 13.0. These distribution facts do not establish independent
+certification under this proposed profile or a universally signed channel manifest.
 
 ## Wire-contract rules
 
@@ -361,14 +362,14 @@ items remain ecosystem work:
 - publish a public, versioned conformance fixture repository and runner;
 - publish signed release manifests with target minimum OS versions and backend
   identities;
-- rebuild or explicitly scope the v0.3.0 macOS ARM64 artifact until its
-  deployment target passes the supported-host matrix;
-- publish `@s8fy/xdoc` and a machine-readable mapping from each npm version to
-  the corresponding release tag, target artifact, digest, and runtime build;
+- maintain the supported-host matrix and publish clean-host evidence for each
+  claimed minimum OS;
+- retain the exact-version npm platform mapping and release digests, and verify
+  matching runtime contracts across the npm and archive channels;
 - make the runtime schema and release archive discoverable from one stable
   public URL;
-- reconcile stale generated labels (for example the daemon status id) before
-  freezing them as cross-implementation contracts;
+- freeze current report identifiers (including `xdoc-daemon-status/v2`) with
+  executable compatibility vectors before adopting them across implementations;
 - define a compatibility/deprecation policy and an extension registry;
 - provide independent implementations or host adapters that pass the same
   vectors; and
@@ -395,7 +396,8 @@ build with a pinned toolchain
   → publish release notes, channel mapping, manifest, and rollback instructions
 ```
 
-For the current archive layout, `xdoc` and `libpdfium.*` must remain colocated.
+For v0.13.0, PDFium is statically linked; no separate PDFium library is required.
+Keep the archive's notices and evidence with redistributed packages.
 Do not call an archive “portable” until its minimum OS and native-loader
 behavior have been tested on a clean machine for that target. In particular, the
 CI runner's OS label is not by itself a compatibility guarantee.

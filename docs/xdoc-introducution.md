@@ -3,11 +3,11 @@
 > A compact native runtime for document conversion, editable PPTX execution,
 > rendering, validation, and auditable delivery.
 
-> **Runtime contract source for this document:** `v0.13.0 (968dffe8)`
+> **Runtime contract source for this document:** `v0.13.0 (96708959)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-10-20
+> **Verification date:** 2026-10-21
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
@@ -24,9 +24,11 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot records the contract-bearing part
-of the runtime response for `v0.13.0 (968dffe8)`; JSON formatting may differ,
+of the runtime response for `v0.13.0 (96708959)`; JSON formatting may differ,
 and the environment-specific top-level `build` and `authContract` provenance
-records are intentionally omitted. Release identity and authorization-profile
+records are intentionally omitted. Implementation-specific prose is normalized,
+and selected catalog identifiers use JSON Unicode escaping without changing
+their decoded values. Release identity and authorization-profile
 evidence are verified separately by the public CLI release gate. Refresh the
 snapshot whenever the executable contract changes.
 
@@ -153,14 +155,20 @@ artifact boundaries.
 
 ### Native-first deployment and release footprint
 
-The verified `v0.3.5` native packages unpack to roughly 20MB each, with exact
+The verified `v0.13.0` archives download as approximately 8.3–10.1 MB, with exact
 size varying by target. That footprint includes the executable distribution
 and applicable notices for the selected target. It is small enough to promote
-as a pinned CI, container, managed-worker, or offline-job layer without
+as a pinned local container or offline-job layer without
 requiring PowerPoint, a full office installation, a headless browser, a
 separate server, or an always-on background service for ordinary one-shot
 execution. Multi-step sessions may optionally use the loopback-only local
 daemon while retaining the documented CLI and report boundary.
+
+The npm CLI is published as `@s8fy/xdoc@0.13.0` and requires Node.js 22+ for
+its launcher; standalone archives need no Node.js. PDFium is statically linked
+in the current archives. Launch plans cover local use, local scripts, and a
+per-user daemon; CI, shared servers, and Service/API use require separately
+applicable terms and task capabilities.
 
 The size statement is release evidence, not a stable API or compatibility
 promise. Record exact bytes, archive digest, target, runtime build, rendering
@@ -256,7 +264,7 @@ screenshots or log interpretation alone.
 | Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                                    |
 | Embedded PPTX report schemas   | 31 report schemas                                                                                      |
 | Patch schema definitions       | 236 `$defs` in the current runtime schema                                                              |
-| Runtime examples               | 42 PPTX CLI examples, 21 patch examples, and 7 recipe examples                                         |
+| Runtime examples               | 43 PPTX CLI examples, 23 patch examples, and 7 recipe examples                                         |
 | Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                           |
 
 Counts are discovery aids, not promises that every long-tail PPTX feature is
@@ -301,7 +309,8 @@ versioned system.
 - a native PPTX package reader/writer with a declarative bridge;
 - an agent-facing contract that can be discovered at runtime;
 - a preserve-first editing pipeline with explicit safety gates;
-- a source of structured reports suitable for CI, orchestration, and audit; and
+- a source of structured reports for local automation and audit, with other
+  deployment modes subject to separate authorization; and
 - a local execution layer that can keep a deck in memory across multiple agent
   steps.
 
@@ -337,7 +346,7 @@ xdoc schema --mode examples
 The index is intentionally small. An agent can request the complete definition
 only after it knows which operation it needs.
 
-The full runtime schema currently includes 42 PPTX CLI examples, 21 patch
+The full runtime schema currently includes 43 PPTX CLI examples, 23 patch
 examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
@@ -422,8 +431,8 @@ capability registry.
 When the distribution includes the declared PDF and image backends, the same
 native worker can produce PDF bytes, per-slide PNGs, and contact sheets without
 starting a browser, a desktop presentation application, or a full office
-service. This makes the evidence path suitable for CI, containers, offline
-queues, and other unattended jobs. The claim is intentionally backend-aware:
+service. This supports local scripts, containers, and offline jobs; CI and
+shared-service deployments require separate authorization. The claim is backend-aware:
 `capabilities/v1` names `pdf-backend` and `image-backend` explicitly, and a
 deployment must provision the exact backends and fonts required by its build.
 
@@ -431,7 +440,7 @@ Keep the render manifest, backend identity, and font inventory with the output.
 They explain why two otherwise identical jobs might differ in rasterized text or
 pagination and give a platform a reproducible provenance record.
 
-Record the exact `xdoc` and colocated backend sizes in the release manifest for
+Record the exact archive and executable sizes and static backend identity for
 each platform artifact. Binary size is build-specific evidence, not a stable
 runtime capability, so it should not be copied forward when only the schema
 snapshot changes.
@@ -522,7 +531,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.13.0 (968dffe8)
+0.13.0 (96708959)
 ```
 
 The top-level schema response identifies itself as:
@@ -530,7 +539,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.13.0 (968dffe8)"
+  "version": "0.13.0 (96708959)"
 }
 ```
 
@@ -925,6 +934,16 @@ about the availability of operation entry points, not universal OOXML parity:
 individual chart variants, extension parts, and long-tail objects still carry
 their own supported, partial, preserve-only, or unsupported status.
 
+For feature decisions, prefer `commands.pptx.capabilityTruth`
+(`pptx-capability-truth/v3`) over these legacy operation-name arrays. Feature
+entries identify both `feature` and `subset`; a missing feature is undisclosed.
+Where present, evaluate the `create`, `edit`, `inspect`, `preserve`, `render`,
+and `verify` axes separately. Successful authoring does not prove playback or
+rendering fidelity. For example, published Morph/P14 transition authoring is
+available while its overall feature status remains partial and Office
+verification is inconclusive. Shape 3D inspection/preservation and its bounded
+front-surface rendering do not provide a Shape 3D authoring operation.
+
 ### Schema discovery workflow for agents
 
 Use the smallest disclosure that answers the next question:
@@ -1275,6 +1294,31 @@ slide pairs. The `agentGate` means the pairs are complete and safe to hand to a
 human reviewer; changed slides are expected and do not, by themselves, fail the
 gate.
 
+### `visual-audit`
+
+`visual-audit` emits `pptx-visual-evidence/v1` and stages the exact PDF/PNG
+artifacts with a manifest. It is the visual report that authorizes an Agent
+action; `preview`, `diff`, `vision-diff`, and `contact-diff` carry
+observation-only `visualEvidence` handoffs. Their local gates do not replace
+the canonical visual audit or final visual review.
+
+```bash
+xdoc pptx visual-audit --candidate candidate.pptx --reference source.pptx --output-dir visual-evidence --json
+xdoc pptx visual-audit --candidate new.pptx --visual-mode create --output-dir create-evidence --json
+```
+
+The default `regression` mode compares against a reference when supplied.
+Explicit `create` mode checks the complete candidate and rejects `--reference`
+and `--slides`; its candidate checks do not establish regression equivalence
+or acceptance of the design intent. Review those exact rendered images against
+the content contract. Rendering requires unwatermarked `convert/pdf` task
+authorization; Free mode fails with exit 4 before publishing evidence.
+Same-renderer comparison does not establish PowerPoint parity, and unavailable
+independent Office evidence remains skipped.
+
+Exit 0 means the evidence transaction completed. The content disposition is
+`manifest.decision.action`; a completed audit can still require review or stop.
+
 ## Data-driven slide generation
 
 ### `bind-data`
@@ -1358,6 +1402,13 @@ Planner status is deliberately explicit: `blocked` means conflicts exist,
 required translation is missing, and `pass` is the only state that can open the
 apply gate. Final delivery still requires the candidate, style, visual, and text
 overflow gates.
+
+For a mixed-style unit blocked by missing anchors, use the planner's
+`i18n-anchor-draft` repair command. Merge only `translationsDraft` entries by
+unit id into the existing translations document, retain blocked units for
+review, and rerun `i18n-plan`. A draft report always has
+`agentGate.applyAuthorized: false`; only the new plan's passing apply gate
+authorizes execution.
 
 For a lower-level text-only route, `i18n-text-plan` emits run-level `set-run`
 operations from the planner's `pptx-i18n-text-plan-input/v1` artifact. Mixed-style
@@ -1824,14 +1875,29 @@ independent compatibility adapter and version policy.
 The native-first executable avoids a requirement for a full office desktop
 installation. It still needs the runtime backends and fonts required by the
 requested conversion. Runtime conversion authorization and distribution
-licensing are separate boundaries. The verified runtime publishes this behavior
-under `commands.convert.licensePolicy` and `authContract.productLimits`: without
-an active entitlement, the Free Baseline limits each task to 10 slides and
-5 MiB (5,242,880 bytes) of compressed PPTX input, PDF/PNG output carries a
-visible `structurify.io` watermark, and an input over those limits is denied with
-exit code 4 before any content is written. A signed license JSON may be
-supplied through `--license` or the documented lookup locations. Probe the
-exact binary because a later release can revise the policy contract.
+licensing are separate boundaries. The runtime publishes policy in
+`commands.convert.licensePolicy`, `commands.pptx.writeAuthorization`, and the
+live `authContract`. With no credential, Free supports single-user local tasks
+up to 10 slides and 5 MiB (5,242,880 bytes) of compressed PPTX inputs combined.
+The byte total includes primary and donor PPTX inputs; slide count includes
+input, planned processing, and planned output. Visual outputs, including
+editable PPTX, PDF, and PNG, carry an `XDOC DEMO` watermark; larger tasks are
+denied with exit code 4 before delivery. A signed License may be supplied
+through `--license` or the documented lookup locations, but its presence or a
+successful signature check alone does not authorize a task.
+
+Personal is an offline 30-day License for its individual purchaser; Enterprise
+is an offline local organizational contract License supporting multi-year
+terms. Both remove plan-level slide/PPTX byte limits and new plan watermarks.
+Resource limits and existing signed watermark obligations still apply. Launch
+plans include local scripts and a per-user daemon and exclude CI, shared
+servers, and Service/API. Public downloads use non-commercial terms; commercial
+evaluation requires accepting the supplied Evaluation Terms through the approved
+channel before delivery, and paid use follows the order terms.
+
+`xdoc auth status --pretty` diagnoses credentials and reports
+`taskAuthorization: "not-evaluated"`. It does not prove that the next task is
+authorized. Probe the exact binary because later releases can revise policy.
 
 Verify the `LICENSE` file and bundled third-party notices in the exact binary
 archive before redistribution or commercial deployment. Different bundled
@@ -1865,7 +1931,7 @@ not a cross-machine latency SLA.
 | `convert`  | Convert document files to PDF, PNG, JSON, Markdown, or text                   | File, directory, manifest, or batch report |
 | `html2md`  | Convert HTML files to Markdown                                                | Markdown file/directory                    |
 | `extract`  | Extract PPTX map, resources, notes, links, and fonts                          | Versioned JSON artifact                    |
-| `check`    | Run fonts, links, compatibility, assets, and policy checks                    | `preflight/v1` JSON                        |
+| `check`    | Run font, link, compatibility, asset, policy, and opt-in accessibility checks | `preflight/v1` JSON                        |
 | `pptx`     | Create, patch, inspect, render, compare, translate, brand, or refurbish decks | PPTX plus versioned reports                |
 | `auth`     | Verify, install, uninstall, inspect, or reset the local license credential    | `xdoc-cli-auth-*/v1` JSON reports          |
 | `pdf`      | Inspect, extract text from, or render PDFs                                    | PDF diagnostics, text, or PNG              |
@@ -1876,15 +1942,15 @@ not a cross-machine latency SLA.
 
 ### PPTX action families
 
-| Family                   | Actions                                                                                             |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| Creation and mutation    | `new`, `apply`, `recipe`, `template-fill`                                                           |
-| Discovery                | `inspect`, `select`, `catalog`, `extract-style`                                                     |
-| Rendering and comparison | `preview`, `vision-check`, `diff`, `vision-diff`, `contact-diff`                                    |
-| Translation              | `i18n-scan`, `i18n-plan`, `i18n-text-plan`, `i18n-style-diff`, `replace-text`, `replace-chart-text` |
-| Refurbishment            | `refurbish-skin`, `refurbish-audit`, `chrome-detect`, `chrome-remove`, `chrome-apply`               |
-| Theme and brand          | `remap-theme`, `swap-theme`, `swap-style`, `check-brand`, `apply-brand`                             |
-| Reuse and history        | `slide-copy`, `import-template`, `replay`, `audit`, `rollback`                                      |
+| Family                   | Actions                                                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Creation and mutation    | `new`, `apply`, `recipe`, `template-fill`                                                                                |
+| Discovery                | `inspect`, `morph-check`, `select`, `catalog`, `extract-style`                                                           |
+| Rendering and comparison | `preview`, `visual-audit`, `vision-check`, `diff`, `vision-diff`, `contact-diff`                                         |
+| Translation              | `i18n-scan`, `i18n-anchor-draft`, `i18n-plan`, `i18n-text-plan`, `i18n-style-diff`, `replace-text`, `replace-chart-text` |
+| Refurbishment            | `refurbish-skin`, `refurbish-audit`, `chrome-detect`, `chrome-remove`, `chrome-apply`                                    |
+| Theme and brand          | `remap-theme`, `swap-theme`, `swap-style`, `check-brand`, `apply-brand`                                                  |
+| Reuse and history        | `slide-copy`, `import-template`, `replay`, `audit`, `rollback`                                                           |
 
 ### Selector index conventions
 
@@ -1901,44 +1967,47 @@ When in doubt, ask the command-specific schema instead of guessing.
 
 The following identifiers are useful when validating an integration:
 
-| Contract                                                                                | Meaning                                                     |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `cli-agent/v1`                                                                          | Top-level CLI discovery response                            |
-| `capabilities/v1`                                                                       | Document kinds, output formats, and backend requirements    |
-| `pptx-patch/v1`                                                                         | Patch operation registry and JSON schema                    |
-| `pptx-inspect/v1`                                                                       | Read-only deck inspection                                   |
-| `pptx-select/v1`                                                                        | Deterministic selector resolution                           |
-| `pptx-preview/v1`                                                                       | Rendered PNG manifest                                       |
-| `pptx-vision/v1`                                                                        | Static and semantic visual-risk report                      |
-| `pptx-diff/v1`                                                                          | Deterministic structural source/candidate diff              |
-| `pptx-vision-diff/v1`                                                                   | Source/candidate visual issue diff                          |
-| `pptx-apply/v1`                                                                         | Apply result                                                |
-| `pptx-dry-run/v1`                                                                       | Non-writing apply result                                    |
-| `pptx-apply-sidecar/v1`                                                                 | Materialized patch and evidence record (not a deck archive) |
-| `pptx-audit/v1`, `pptx-rollback/v1`                                                     | Sidecar history projection and bounded recovery             |
-| `pptx-contact-diff/v1`                                                                  | Source/candidate contact sheet evidence                     |
-| `pptx-recipe/v1`, `pptx-recipe-compile/v1`                                              | High-level recipe input and compiled operation report       |
-| `pptx-i18n-units/v1`, `pptx-i18n-translations/v1`                                       | Stable translation inventory and guarded translation input  |
-| `pptx-i18n-scan-result/v1`, `pptx-i18n-candidate-result/v1`, `pptx-i18n-plan-result/v1` | Compact scan, candidate-gate, and planner results           |
-| `pptx-i18n-scan/v1`, `pptx-i18n-plan/v1`                                                | Persisted translation inventory/gate and execution plan     |
-| `pptx-i18n-text-plan-input/v1`, `pptx-i18n-text-plan/v1`                                | Lower-level run-mapping input and text plan                 |
-| `pptx-replace-text/v1`, `pptx-replace-chart-text/v1`                                    | Guarded visible-text replacement reports                    |
-| `pptx-i18n-style-diff/v1`                                                               | Translation-specific style and structure gate               |
-| `pptx-refurbish-skin/v1`, `pptx-refurbish-audit/v1`                                     | Skin-first orchestration and preservation audit             |
-| `pptx-chrome-detect/v1`, `pptx-chrome-remove/v1`, `pptx-chrome-apply/v1`                | Structural chrome discovery and mutation reports            |
-| `pptx-brand-check/v1`, `pptx-theme-remap/v1`                                            | Brand compliance and native theme-remap reports             |
-| `pptx-shape-catalog/v1`, `pptx-theme-catalog/v1`                                        | Discoverable shape and theme catalogs                       |
-| `pptx-enum-registry/v1`, `pptx-error-catalog/v1`                                        | Controlled vocabularies and published bridge errors         |
-| `pptx-xl-chart-type-map/v1`, `pptx-chart-style-catalog/v1`                              | Chart support-status map and style catalog                  |
-| `batch/v1`                                                                              | Multi-input conversion summary                              |
-| `map/v1`, `resources/v1`, `notes/v1`, `links/v1`, `fonts/v1`                            | Structured extraction artifacts                             |
-| `preflight/v1`                                                                          | Input diagnostics and risk summary                          |
-| `pptx-a11y/v1`                                                                          | Opt-in accessibility findings inside preflight              |
-| `pptx-slide-copy/v1`                                                                    | Fingerprint-bound cross-deck structural plan/report         |
-| `pdf-inspect/v1`, `pdf-text/v1`                                                         | PDF diagnostics and extraction                              |
-| `xdoc-daemon-status/v2`                                                                 | Runtime daemon state, endpoint, and mutation diagnostics    |
-| `xdoc-json-rpc-contract/v1`, `xdoc-json-rpc-result/v1`                                  | Stdio Agent protocol and result envelope                    |
-| `xdoc-mcp-contract/v1`, `xdoc-mcp-tool-result/v1`                                       | MCP stdio tool protocol and result envelope                 |
+| Contract                                                                                | Meaning                                                          |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `cli-agent/v1`                                                                          | Top-level CLI discovery response                                 |
+| `capabilities/v1`                                                                       | Document kinds, output formats, and backend requirements         |
+| `pptx-patch/v1`                                                                         | Patch operation registry and JSON schema                         |
+| `pptx-inspect/v1`                                                                       | Read-only deck inspection                                        |
+| `pptx-select/v1`                                                                        | Deterministic selector resolution                                |
+| `pptx-preview/v1`                                                                       | Rendered PNG manifest                                            |
+| `pptx-visual-evidence/v1`                                                               | Canonical visual audit, exact render artifacts, and Agent action |
+| `pptx-morph-check/v1`                                                                   | Explicit adjacent-slide Morph object-pair diagnostics            |
+| `pptx-vision/v1`                                                                        | Static and semantic visual-risk report                           |
+| `pptx-diff/v1`                                                                          | Deterministic structural source/candidate diff                   |
+| `pptx-vision-diff/v1`                                                                   | Source/candidate visual issue diff                               |
+| `pptx-apply/v1`                                                                         | Apply result                                                     |
+| `pptx-dry-run/v1`                                                                       | Non-writing apply result                                         |
+| `pptx-apply-sidecar/v1`                                                                 | Materialized patch and evidence record (not a deck archive)      |
+| `pptx-audit/v1`, `pptx-rollback/v1`                                                     | Sidecar history projection and bounded recovery                  |
+| `pptx-contact-diff/v1`                                                                  | Source/candidate contact sheet evidence                          |
+| `pptx-recipe/v1`, `pptx-recipe-compile/v1`                                              | High-level recipe input and compiled operation report            |
+| `pptx-i18n-units/v1`, `pptx-i18n-translations/v1`                                       | Stable translation inventory and guarded translation input       |
+| `pptx-i18n-scan-result/v1`, `pptx-i18n-candidate-result/v1`, `pptx-i18n-plan-result/v1` | Compact scan, candidate-gate, and planner results                |
+| `pptx-i18n-scan/v1`, `pptx-i18n-plan/v1`                                                | Persisted translation inventory/gate and execution plan          |
+| `pptx-i18n-text-plan-input/v1`, `pptx-i18n-text-plan/v1`                                | Lower-level run-mapping input and text plan                      |
+| `pptx-i18n-anchor-draft/v1`                                                             | Review-only anchor draft requiring planner revalidation          |
+| `pptx-replace-text/v1`, `pptx-replace-chart-text/v1`                                    | Guarded visible-text replacement reports                         |
+| `pptx-i18n-style-diff/v1`                                                               | Translation-specific style and structure gate                    |
+| `pptx-refurbish-skin/v1`, `pptx-refurbish-audit/v1`                                     | Skin-first orchestration and preservation audit                  |
+| `pptx-chrome-detect/v1`, `pptx-chrome-remove/v1`, `pptx-chrome-apply/v1`                | Structural chrome discovery and mutation reports                 |
+| `pptx-brand-check/v1`, `pptx-theme-remap/v1`                                            | Brand compliance and native theme-remap reports                  |
+| `pptx-shape-catalog/v1`, `pptx-theme-catalog/v1`                                        | Discoverable shape and theme catalogs                            |
+| `pptx-enum-registry/v1`, `pptx-error-catalog/v1`                                        | Controlled vocabularies and published bridge errors              |
+| `pptx-xl-chart-type-map/v1`, `pptx-chart-style-catalog/v1`                              | Chart support-status map and style catalog                       |
+| `batch/v1`                                                                              | Multi-input conversion summary                                   |
+| `map/v1`, `resources/v1`, `notes/v1`, `links/v1`, `fonts/v1`                            | Structured extraction artifacts                                  |
+| `preflight/v1`                                                                          | Input diagnostics and risk summary                               |
+| `pptx-a11y/v1`                                                                          | Opt-in accessibility findings inside preflight                   |
+| `pptx-slide-copy/v1`                                                                    | Fingerprint-bound cross-deck structural plan/report              |
+| `pdf-inspect/v1`, `pdf-text/v1`                                                         | PDF diagnostics and extraction                                   |
+| `xdoc-daemon-status/v2`                                                                 | Runtime daemon state, endpoint, and mutation diagnostics         |
+| `xdoc-json-rpc-contract/v1`, `xdoc-json-rpc-result/v1`                                  | Stdio Agent protocol and result envelope                         |
+| `xdoc-mcp-contract/v1`, `xdoc-mcp-tool-result/v1`                                       | MCP stdio tool protocol and result envelope                      |
 
 Treat a schema version as a compatibility boundary. If a worker sees an unknown
 version, it should preserve the raw report and stop at the integration boundary
@@ -2068,11 +2137,14 @@ claims should stay tied to the measured contract and its declared limitations.
     but PPTX and sidecar writes are separate, and a daemon delivery failure can
     leave its in-memory session advanced. Sidecars do not carry deck hashes or
     cryptographic revision links.
-17. Distribution licensing and runtime conversion authorization are separate.
-    Without an active entitlement the Free Baseline (`authContract.productLimits`)
-    limits each task to 10 slides and 5 MiB of compressed PPTX input, PDF/PNG
-    output carries a visible `structurify.io` watermark, and larger inputs are denied
-    with exit code 4; verify the exact artifact and terms.
+17. Distribution licensing and task authorization are separate. Free local
+    tasks are limited to 10 slides and 5 MiB of compressed PPTX inputs combined,
+    with `XDOC DEMO` marks on visual PPTX/PDF/PNG output. Larger tasks are denied
+    with exit code 4. Launch plans exclude CI, shared servers, and Service/API.
+18. Static PDF/PNG and previews do not play animations or transitions. Morph
+    pair checks and authoring success do not establish Office playback parity.
+    `visual-audit` requires unwatermarked conversion authorization, and its
+    same-renderer evidence does not certify PowerPoint fidelity.
 
 ## Evidence and release discipline
 
@@ -2094,7 +2166,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.13.0 (968dffe8). Re-run the discovery
+This document is anchored to xdoc 0.13.0 (96708959). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

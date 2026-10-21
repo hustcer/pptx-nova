@@ -101,19 +101,26 @@ supported, partial, or unsupported.
 These facts do not imply complete PowerPoint object-model parity. Important
 boundaries include:
 
-| Area                  | Current contract                                                                                                               | Compatibility consequence                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Charts                | Bar/column clustered, stacked, and percent-stacked paths are covered; other kinds and variants have individual statuses.       | Query the chart-kind and chart-variant registries. An accepted kind does not make every variant safe.          |
-| Chart data            | Generated charts keep the visible XML cache and embedded workbook synchronized on supported data paths.                        | Reopen and inspect the candidate after a chart mutation. Do not assume a cache-only edit updates the workbook. |
-| Animations            | Basic entrance/exit and paragraph-build subsets can be created or edited. Complex effects remain preserve-only or degraded.    | Use the reported animation capability and do not replace unknown timing XML implicitly.                        |
-| Transitions           | Basic transitions are supported; extended PowerPoint 2010+ `p14` transitions remain preserve-only.                             | A transition can survive an edit without being editable.                                                       |
-| OLE                   | Embedded bytes and metadata can be created, preserved, or fallback-rendered. Activation and editing belong to the Office host. | Treat OLE as a host-dependent artifact, not an xdoc editing surface.                                           |
-| SmartArt and diagrams | Existing parts and relationships are preserved and reported.                                                                   | Do not generate a high-level SmartArt edit. Copy from a known-good template when needed.                       |
-| VBA/macros            | Macro parts are detected and preserved by default; xdoc does not edit VBA.                                                     | Keep macro policy explicit and test the macro-enabled result in the target host.                               |
+| Area                  | Current contract                                                                                                                                               | Compatibility consequence                                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Charts                | Published classic, 3D, and modern chart kinds have native authoring paths; kind, variant, styling, and renderer support remain separate.                       | Query the kind/variant registries and feature subsets. 3D PDF rendering is partial and does not establish Office parity.    |
+| Chart data            | Generated charts keep the visible XML cache and embedded workbook synchronized on supported data paths.                                                        | Reopen and inspect the candidate after a chart mutation. Do not assume a cache-only edit updates the workbook.              |
+| Animations            | Published entrance/exit, text builds, four-edge fly, finite grow-shrink/spin, and straight motion paths can be authored. Complex timing remains preserve-only. | Query effect/trigger fields. Static PNG/PDF proves no playback behavior.                                                    |
+| Transitions           | Basic transitions and published Morph/P14 subsets can be created, inspected, replaced, or cleared. Overall Morph/P14 support remains partial.                  | Read all six capability axes; Office verification remains inconclusive. Unmodeled effects are preserve-only when untouched. |
+| Shape 3D              | Local declarations can be inspected and preserved; rendering covers a bounded front-surface subset. No high-level Shape 3D writer exists.                      | Recognized declarations do not authorize synthesizing 3D shapes. This is separate from chart 3D.                            |
+| OLE                   | Embedded bytes and metadata can be created, preserved, or fallback-rendered. Activation and editing belong to the Office host.                                 | Treat OLE as a host-dependent artifact, not an xdoc editing surface.                                                        |
+| SmartArt and diagrams | Existing parts and relationships are preserved and reported.                                                                                                   | Do not generate a high-level SmartArt edit. Copy from a known-good template when needed.                                    |
+| VBA/macros            | Macro parts are detected and preserved by default; xdoc does not edit VBA.                                                                                     | Keep macro policy explicit and test the macro-enabled result in the target host.                                            |
 
 Unknown future operation names must fail with a structured `unsupported_feature`
 result. They must not be silently downgraded to a similar operation or reported
 as partial success.
+
+Use `commands.pptx.capabilityTruth` (`pptx-capability-truth/v3`) for decisions
+by `feature` and `subset`, including `create`, `edit`, `inspect`, `preserve`,
+`render`, and `verify` axes where present. Legacy supported/preserve-only arrays
+are lossy projections; a supported operation name does not imply that every
+feature it touches is fully supported. Missing feature entries mean undisclosed.
 
 ## Package preservation and policy
 
@@ -181,13 +188,27 @@ Use `vision-check` for geometry and semantic signals and a rendered preview or
 visual diff for pixels. A preview hash identifies a rendered artifact; it does
 not prove OCR correctness, font provenance, or human visual quality.
 
+For an Agent delivery decision, use `visual-audit` and its
+`pptx-visual-evidence/v1` manifest. Preview and diff reports provide
+observation-only handoffs. The audit requires unwatermarked `convert/pdf`
+authorization and denies Free mode with exit 4 before evidence publication.
+Its explicit `create` mode checks the whole candidate; same-renderer regression
+and independent PowerPoint fidelity remain different claims.
+
 ## Downloadable binary compatibility
 
 When xdoc is distributed as a native binary, the archive and the runtime
 contract must be treated as one release unit. The
-[installation guide](./xdoc-installation.md) documents the planned npm and
-release-archive channels, target names, bundled PDFium libraries, and current
-publication caveats.
+[installation guide](./xdoc-installation.md) documents the published npm and
+release-archive channels, target names, statically linked PDFium backend, and
+host requirements. npm installation requires Node.js 22+; native archives do
+not require Node.js. The v0.13.0 macOS ARM64 target requires macOS 13+.
+
+Technical deployability is separate from task authorization. The launch plans
+support single-user or organizational local use, local scripts, and a per-user
+daemon; CI, shared servers, and Service/API use are outside those plans.
+Free tasks are limited to 10 slides and 5 MiB of compressed PPTX inputs
+combined, with `XDOC DEMO` marks on editable PPTX, PDF, and PNG outputs.
 
 Before assigning a downloaded binary to an Agent, verify:
 
@@ -204,7 +225,7 @@ The release record should bind all of the following:
 - runtime version and build id from `xdoc --version` and `xdoc schema`;
 - OS/architecture and minimum OS version;
 - archive or package SHA-256, preferably with a signed manifest;
-- bundled native library and third-party license notices; and
+- statically linked backend identity and third-party license notices; and
 - clean-host probe results for discovery, a minimal mutation, reopen, and one
   relevant renderer path.
 

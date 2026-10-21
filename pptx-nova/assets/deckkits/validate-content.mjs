@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // validate-content.mjs — schema + DeckKit density 校验入口
 // 用法: node validate-content.mjs content.json --deckkit consulting-dark
-import { loadContent, validateContent } from './core-primitives.kit.mjs'
+import { loadContent } from './core-primitives.kit.mjs'
+import { validateDeckkitContent as validateContent } from './validate-deckkit.mjs'
 
 const argValue = (name, fallback = '') => {
   const idx = process.argv.indexOf(name)
@@ -41,6 +42,7 @@ function output(result) {
     warnings: result.warnings,
     fitDiagnostics: result.fitDiagnostics,
     valid: result.valid,
+    ...(result.designDiversity ? { designDiversity: result.designDiversity } : {}),
   }
   if (process.argv.includes('--json')) {
     process.stdout.write(JSON.stringify(publicResult, null, 2) + '\n')

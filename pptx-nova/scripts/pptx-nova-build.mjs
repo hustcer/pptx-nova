@@ -2,11 +2,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import {
-  assessDeckQuality,
-  loadCatalog,
-  validateContent,
-} from '../assets/deckkits/core-primitives.kit.mjs'
+import { assessDeckQuality, loadCatalog } from '../assets/deckkits/core-primitives.kit.mjs'
+import { validateDeckkitContent as validateContent } from '../assets/deckkits/validate-deckkit.mjs'
 import { createAssetContext, readAssetManifest } from './lib/asset-manifest.mjs'
 import { resolveFilesystemPath } from './lib/filesystem-paths.mjs'
 
@@ -147,6 +144,14 @@ try {
   const result = deckkitModule.createDeck(content, { assets })
   const patch = result.patch ?? result
   const quality = assessDeckQuality({ patch, deckkit })
+  if (result.designPlan) {
+    quality.design = result.designCheck
+    if (args.output) {
+      writeJson(join(dirname(args.output), 'design-plan.json'), result.designPlan)
+      writeJson(join(dirname(args.output), 'design-check.json'), result.designCheck)
+      writeJson(join(dirname(args.output), 'design-contract.json'), result.designContract)
+    }
+  }
   if (args.qualityJson) writeJson(args.qualityJson, quality)
   if (shouldFailQuality(quality.status, args.failOnQuality)) {
     throw new Error(

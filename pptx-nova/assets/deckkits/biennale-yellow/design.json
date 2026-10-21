@@ -1,0 +1,848 @@
+{
+  "schemaVersion": "pptx-nova-design/v1",
+  "id": "biennale-yellow",
+  "version": "0.2.0",
+  "canvas": {
+    "widthIn": 13.333,
+    "heightIn": 7.5
+  },
+  "colors": {
+    "paper": "E9E5DB",
+    "paperDeep": "DCD6C4",
+    "sun": "F1EE2E",
+    "sunSoft": "F8F39B",
+    "haze": "F0DA7C",
+    "ink": "1B2566",
+    "ember": "E26B4A"
+  },
+  "fonts": {
+    "display": {
+      "latin": "Times New Roman",
+      "eastAsian": "Microsoft YaHei"
+    },
+    "body": {
+      "latin": "Arial",
+      "eastAsian": "Microsoft YaHei"
+    },
+    "mono": {
+      "latin": "Courier New",
+      "eastAsian": "Microsoft YaHei"
+    }
+  },
+  "textFrame": {
+    "marginLeft": "0.02in",
+    "marginRight": "0.02in",
+    "marginTop": "0in",
+    "marginBottom": "0in"
+  },
+  "rules": [
+    {
+      "id": "palette",
+      "check": "allowed-colors"
+    },
+    {
+      "id": "typography",
+      "check": "allowed-fonts"
+    },
+    {
+      "id": "effects",
+      "check": "forbidden-effects",
+      "values": ["shadow", "glow", "reflection"]
+    },
+    {
+      "id": "editable",
+      "check": "forbidden-operations",
+      "values": ["add-image"]
+    },
+    {
+      "id": "bounds",
+      "check": "bounds"
+    },
+    {
+      "id": "floor",
+      "check": "font-floor",
+      "minPt": 10
+    }
+  ],
+  "legacyLayouts": {
+    "biennaleCoverSlide": {
+      "slots": {
+        "DateRail": {
+          "frames": [[9.72, 0.48, 2.86, 1.35]],
+          "font": {
+            "role": "display",
+            "sizePt": 42
+          },
+          "paragraph": {
+            "alignment": "right",
+            "lineSpacing": 0.9,
+            "spaceAfter": "0pt"
+          },
+          "autofit": "text"
+        },
+        "Title": {
+          "frames": [[0.53, 2.08, 7.25, 2.95]],
+          "font": {
+            "role": "display",
+            "sizePt": 92
+          },
+          "paragraph": {
+            "lineSpacing": 0.86,
+            "spaceAfter": "0pt"
+          },
+          "autofit": "text"
+        },
+        "Subline": {
+          "frames": [[0.53, 5.92, 3.7, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "FootLabel{i}": {
+          "frames": [
+            [0.53, 6.36, 2.26, 0.23],
+            [3.11, 6.36, 2.06, 0.23],
+            [5.49, 6.36, 2.88, 0.23],
+            [8.69, 6.36, 3.45, 0.23]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "FootText{i}": {
+          "frames": [
+            [0.53, 6.65, 2.26, 0.72],
+            [3.11, 6.65, 2.06, 0.72],
+            [5.49, 6.65, 2.88, 0.72],
+            [8.69, 6.65, 3.45, 0.72]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "lineSpacing": 1.15,
+            "spaceAfter": "0pt"
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      },
+      "footer": {
+        "ruleY": 6.25
+      }
+    },
+    "biennaleManifestoSlide": {
+      "slots": {
+        "Quote": {
+          "frames": [[0.92, 2.05, 11.65, 3.1]],
+          "font": {
+            "role": "display",
+            "sizePt": 56,
+            "italic": true
+          },
+          "paragraph": {
+            "lineSpacing": 1.04,
+            "spaceAfter": "0pt"
+          },
+          "autofit": "text"
+        },
+        "Attribution": {
+          "frames": [[0.53, 6.42, 4.8, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      }
+    },
+    "biennaleProgrammeSlide": {
+      "slots": {
+        "Kicker": {
+          "frames": [[0.53, 0.52, 3.5, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "Word": {
+          "frames": [[0.53, 3.05, 6.05, 1.25]],
+          "font": {
+            "role": "display",
+            "sizePt": 84
+          },
+          "paragraph": {
+            "lineSpacing": 0.86,
+            "spaceAfter": "0pt"
+          },
+          "autofit": "text"
+        },
+        "Description": {
+          "frames": [[0.65, 6.28, 5.7, 0.55]],
+          "font": {
+            "role": "body",
+            "sizePt": 10.5
+          },
+          "paragraph": {
+            "lineSpacing": 1.35,
+            "spaceAfter": "0pt"
+          }
+        },
+        "Head": {
+          "frames": [[7.23, 0.55, 5.6, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "StrandNum{i}": {
+          "frames": [
+            [7.23, 0.92, 0.5, 0.35],
+            [7.23, 1.9700000000000002, 0.5, 0.35],
+            [7.23, 3.02, 0.5, 0.35],
+            [7.23, 4.07, 0.5, 0.35],
+            [7.23, 5.12, 0.5, 0.35]
+          ],
+          "font": {
+            "role": "display",
+            "sizePt": 18
+          }
+        },
+        "StrandTitle{i}": {
+          "frames": [
+            [7.92, 0.91, 4.6, 0.34],
+            [7.92, 1.9600000000000002, 4.6, 0.34],
+            [7.92, 3.0100000000000002, 4.6, 0.34],
+            [7.92, 4.0600000000000005, 4.6, 0.34],
+            [7.92, 5.11, 4.6, 0.34]
+          ],
+          "font": {
+            "role": "display",
+            "sizePt": 18
+          }
+        },
+        "StrandBody{i}": {
+          "frames": [
+            [7.92, 1.26, 4.55, 0.66],
+            [7.92, 2.31, 4.55, 0.66],
+            [7.92, 3.36, 4.55, 0.66],
+            [7.92, 4.41, 4.55, 0.66],
+            [7.92, 5.46, 4.55, 0.66]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10.5
+          },
+          "paragraph": {
+            "lineSpacing": 1.25,
+            "spaceAfter": "0pt"
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      },
+      "rowRuleOffset": 1.02
+    },
+    "biennaleChapterSlide": {
+      "slots": {
+        "Rail": {
+          "frames": [[0.53, 0.52, 3.75, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "Number": {
+          "frames": [[1.55, 0.75, 5, 3.3]],
+          "font": {
+            "role": "display",
+            "sizePt": 195
+          },
+          "paragraph": {
+            "lineSpacing": 0.84,
+            "spaceAfter": "0pt"
+          }
+        },
+        "Title": {
+          "frames": [[1.55, 4.22, 9.3, 1.28]],
+          "font": {
+            "role": "display",
+            "sizePt": 38
+          }
+        },
+        "Lede": {
+          "frames": [[1.55, 5.58, 6.25, 0.9]],
+          "font": {
+            "role": "body",
+            "sizePt": 10.5
+          },
+          "paragraph": {
+            "lineSpacing": 1.25,
+            "spaceAfter": "0pt"
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      }
+    },
+    "biennaleDataSlide": {
+      "slots": {
+        "Title": {
+          "frames": [[0.53, 0.48, 5.6, 0.75]],
+          "font": {
+            "role": "display",
+            "sizePt": 34
+          },
+          "autofit": "text"
+        },
+        "Label": {
+          "frames": [[10.3, 0.83, 2.5, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        },
+        "Stat{i}": {
+          "frames": [
+            [0.53, 2.45, 2.8, 1],
+            [0.53, 4.82, 2.8, 1]
+          ],
+          "font": {
+            "role": "display",
+            "sizePt": 62
+          },
+          "paragraph": {
+            "lineSpacing": 0.9,
+            "spaceAfter": "0pt"
+          },
+          "autofit": "text"
+        },
+        "StatLabel{i}": {
+          "frames": [
+            [0.53, 3.5, 2.8, 0.22],
+            [0.53, 5.87, 2.8, 0.22]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "StatDesc{i}": {
+          "frames": [
+            [0.53, 3.8, 3.1, 0.95],
+            [0.53, 6.17, 3.1, 0.7]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10.5
+          },
+          "paragraph": {
+            "lineSpacing": 1.25,
+            "spaceAfter": "0pt"
+          }
+        },
+        "BarYear{i}": {
+          "frames": [
+            [5.8, 3.5900000000000003, 0.7, 0.22],
+            [5.8, 3.8100000000000005, 0.7, 0.22],
+            [5.8, 4.03, 0.7, 0.22],
+            [5.8, 4.25, 0.7, 0.22],
+            [5.8, 4.47, 0.7, 0.22],
+            [5.8, 4.69, 0.7, 0.22]
+          ],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          }
+        },
+        "BarVal{i}": {
+          "frames": [
+            [12.05, 3.5900000000000003, 0.75, 0.22],
+            [12.05, 3.8100000000000005, 0.75, 0.22],
+            [12.05, 4.03, 0.75, 0.22],
+            [12.05, 4.25, 0.75, 0.22],
+            [12.05, 4.47, 0.75, 0.22],
+            [12.05, 4.69, 0.75, 0.22]
+          ],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      }
+    },
+    "biennaleQuoteSlide": {
+      "slots": {
+        "Kicker": {
+          "frames": [[0.53, 2.18, 4, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "Quote": {
+          "frames": [[0.53, 2.72, 9.5, 2.45]],
+          "font": {
+            "role": "display",
+            "sizePt": 34
+          },
+          "paragraph": {
+            "lineSpacing": 1.02,
+            "spaceAfter": "0pt"
+          },
+          "autofit": "text"
+        },
+        "Author": {
+          "frames": [[0.53, 5.3, 1.6, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "Role": {
+          "frames": [[2.25, 5.3, 6.25, 0.4]],
+          "font": {
+            "role": "body",
+            "sizePt": 10
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      }
+    },
+    "biennaleCalendarSlide": {
+      "slots": {
+        "Title": {
+          "frames": [[0.53, 0.48, 5.5, 0.75]],
+          "font": {
+            "role": "display",
+            "sizePt": 38
+          },
+          "autofit": "text"
+        },
+        "Label": {
+          "frames": [[10.25, 0.75, 2.55, 0.35]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        },
+        "Col{i}": {
+          "frames": [
+            [0.53, 1.38, 0.86, 0.22],
+            [1.57, 1.38, 6.15, 0.22],
+            [8.23, 1.38, 3.4, 0.22],
+            [12.06, 1.38, 0.74, 0.22]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          },
+          "paragraph": {
+            "alignment": "left"
+          },
+          "paragraphs": [
+            {
+              "alignment": "left"
+            },
+            {
+              "alignment": "left"
+            },
+            {
+              "alignment": "left"
+            },
+            {
+              "alignment": "right"
+            }
+          ]
+        },
+        "Date{i}": {
+          "frames": [
+            [0.53, 1.74, 0.86, 0.22],
+            [0.53, 2.19, 0.86, 0.22],
+            [0.53, 2.64, 0.86, 0.22],
+            [0.53, 3.09, 0.86, 0.22],
+            [0.53, 3.54, 0.86, 0.22],
+            [0.53, 3.99, 0.86, 0.22],
+            [0.53, 4.44, 0.86, 0.22],
+            [0.53, 4.89, 0.86, 0.22]
+          ],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          }
+        },
+        "Event{i}": {
+          "frames": [
+            [1.57, 1.71, 6.25, 0.34],
+            [1.57, 2.16, 6.25, 0.34],
+            [1.57, 2.6100000000000003, 6.25, 0.34],
+            [1.57, 3.06, 6.25, 0.34],
+            [1.57, 3.5100000000000002, 6.25, 0.34],
+            [1.57, 3.9600000000000004, 6.25, 0.34],
+            [1.57, 4.41, 6.25, 0.34],
+            [1.57, 4.859999999999999, 6.25, 0.34]
+          ],
+          "font": {
+            "role": "display",
+            "sizePt": 17.2
+          }
+        },
+        "Venue{i}": {
+          "frames": [
+            [8.23, 1.74, 3.45, 0.22],
+            [8.23, 2.19, 3.45, 0.22],
+            [8.23, 2.64, 3.45, 0.22],
+            [8.23, 3.09, 3.45, 0.22],
+            [8.23, 3.54, 3.45, 0.22],
+            [8.23, 3.99, 3.45, 0.22],
+            [8.23, 4.44, 3.45, 0.22],
+            [8.23, 4.89, 3.45, 0.22]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10.5
+          }
+        },
+        "Length{i}": {
+          "frames": [
+            [12.05, 1.74, 0.75, 0.22],
+            [12.05, 2.19, 0.75, 0.22],
+            [12.05, 2.64, 0.75, 0.22],
+            [12.05, 3.09, 0.75, 0.22],
+            [12.05, 3.54, 0.75, 0.22],
+            [12.05, 3.99, 0.75, 0.22],
+            [12.05, 4.44, 0.75, 0.22],
+            [12.05, 4.89, 0.75, 0.22]
+          ],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      }
+    },
+    "biennaleColophonSlide": {
+      "slots": {
+        "Kicker": {
+          "frames": [[0.65, 0.45, 3.6, 0.22]],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "Title": {
+          "frames": [[0.53, 1.1, 6.3, 4.75]],
+          "font": {
+            "role": "display",
+            "sizePt": 76
+          },
+          "paragraph": {
+            "lineSpacing": 0.86,
+            "spaceAfter": "0pt"
+          }
+        },
+        "FootLabel{i}": {
+          "frames": [
+            [0.53, 6.23, 2.65, 0.23],
+            [3.11, 6.23, 2.45, 0.23],
+            [5.49, 6.23, 2.25, 0.23],
+            [8.69, 6.23, 3, 0.23]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10,
+            "bold": true
+          }
+        },
+        "FootText{i}": {
+          "frames": [
+            [0.53, 6.5200000000000005, 2.65, 0.78],
+            [3.11, 6.5200000000000005, 2.45, 0.78],
+            [5.49, 6.5200000000000005, 2.25, 0.78],
+            [8.69, 6.5200000000000005, 3, 0.78]
+          ],
+          "font": {
+            "role": "body",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "lineSpacing": 1.15,
+            "spaceAfter": "0pt"
+          }
+        },
+        "PageNum": {
+          "frames": [[12.45, 7.14, 0.7, 0.22]],
+          "font": {
+            "role": "mono",
+            "sizePt": 10
+          },
+          "paragraph": {
+            "alignment": "right"
+          }
+        }
+      },
+      "footer": {
+        "ruleY": 6.12
+      }
+    }
+  },
+  "evidence": {
+    "slideType": "biennaleEvidenceSlide",
+    "maxConsecutiveLayout": 2,
+    "fontPt": {
+      "title": 32,
+      "label": 11,
+      "body": 12,
+      "value": 42,
+      "source": 10
+    },
+    "limits": {
+      "minPoints": 2,
+      "maxPoints": 10,
+      "maxLabelUnits": 30,
+      "maxTitleUnits": 42,
+      "maxDescriptionUnits": 110
+    },
+    "layouts": {
+      "chart-left": {
+        "maxPoints": 6,
+        "maxLabelUnits": 16,
+        "chart": [0.65, 1.75, 8.25, 4.7],
+        "stats": [
+          [9.5, 1.85, 3, 2.05],
+          [9.5, 4.25, 3, 2.05]
+        ],
+        "shiftStatsWithHeader": true
+      },
+      "chart-wide": {
+        "maxPoints": 10,
+        "maxLabelUnits": 24,
+        "chart": [0.65, 3.65, 12, 2.85],
+        "stats": [
+          [0.65, 1.85, 5.7, 1.6],
+          [6.9, 1.85, 5.7, 1.6]
+        ],
+        "shiftStatsWithHeader": true
+      },
+      "chart-top": {
+        "maxPoints": 10,
+        "maxLabelUnits": 30,
+        "chart": [0.65, 1.85, 12, 3.25],
+        "stats": [
+          [0.65, 5.35, 5.7, 1.5],
+          [6.9, 5.35, 5.7, 1.5]
+        ],
+        "shiftStatsWithHeader": false
+      }
+    },
+    "header": {
+      "title": [0.65, 0.48, 12, 0.7],
+      "label": [0.65, 1.28, 12, 0.25],
+      "rule": [0.65, 1.58, 12, 0.008],
+      "source": [0.65, 6.88, 11.2, 0.28],
+      "page": [12.1, 6.8, 0.7, 0.28]
+    },
+    "numberFormat": "#,##0.##",
+    "statComponents": {
+      "chart-left": {
+        "value": {
+          "y": 0,
+          "h": 0.85,
+          "role": "display",
+          "fontPt": 42
+        },
+        "label": {
+          "y": 0.92,
+          "h": 0.25,
+          "role": "body"
+        },
+        "description": {
+          "y": 1.25,
+          "h": 0.75,
+          "role": "body"
+        }
+      },
+      "chart-wide": {
+        "value": {
+          "y": 0,
+          "h": 0.75,
+          "role": "display",
+          "fontPt": 36
+        },
+        "label": {
+          "y": 0.8,
+          "h": 0.25,
+          "role": "body"
+        },
+        "description": {
+          "y": 1.1,
+          "h": 0.46,
+          "role": "body"
+        }
+      },
+      "chart-top": {
+        "value": {
+          "y": 0,
+          "h": 0.68,
+          "role": "display",
+          "fontPt": 32
+        },
+        "label": {
+          "y": 0.72,
+          "h": 0.25,
+          "role": "body"
+        },
+        "description": {
+          "y": 1.02,
+          "h": 0.46,
+          "role": "body"
+        }
+      }
+    },
+    "shortTitleUnits": 26,
+    "titleShiftIn": 0.5,
+    "textLineHeight": 1.32,
+    "chartStyle": {
+      "valueTicks": false,
+      "lineWidthPt": 1.5
+    },
+    "scientificFormat": "0.00E+00",
+    "scientificBelow": 0.01,
+    "scientificAbove": 1000000000,
+    "cjkWrapSafety": 0.9
+  },
+  "theme": {
+    "colors": {
+      "lt1": "paper",
+      "dk1": "ink",
+      "lt2": "paperDeep",
+      "dk2": "ink",
+      "accent1": "sun",
+      "accent2": "ink",
+      "accent3": "sunSoft",
+      "accent4": "haze",
+      "accent5": "paperDeep",
+      "accent6": "ember",
+      "hlink": "ink",
+      "folHlink": "ink"
+    },
+    "fonts": {
+      "major": "display",
+      "minor": "body"
+    }
+  },
+  "refurbish": {
+    "palette": {
+      "background": "paper",
+      "text": "ink",
+      "accent": "sun",
+      "softAccent": "sunSoft",
+      "secondary": "ink",
+      "surface": "paperDeep",
+      "rule": "ink"
+    },
+    "fonts": {
+      "heading": "display",
+      "body": "body",
+      "label": "mono",
+      "cjk": "body"
+    }
+  },
+  "roles": {
+    "surface": "paper",
+    "text": "ink",
+    "rule": "ink",
+    "series": "ink",
+    "focus": "sun"
+  }
+}

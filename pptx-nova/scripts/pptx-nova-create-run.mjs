@@ -29,12 +29,18 @@ import { createProgressReporter } from './pptx-nova-progress.mjs'
 import { semanticIssueValid, semanticValidationEvidence } from './lib/semantic-evidence.mjs'
 import { canonicalCreatePreview, validateCreateDelivery } from './lib/create-delivery.mjs'
 import { composeChoreography } from './lib/animation-choreography.mjs'
+import {
+  designHash,
+  loadDesignContract,
+  checkDesignPatch,
+} from '../assets/deckkits/design-contract.mjs'
 import { resolveFilesystemPath } from './lib/filesystem-paths.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const SKILL_ROOT = resolve(SCRIPT_DIR, '..')
 const VALIDATE_CONTENT_SCRIPT = join(SKILL_ROOT, 'assets/deckkits/validate-content.mjs')
 const BUILD_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-build.mjs')
+const DESIGN_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-deckkit-design.mjs')
 const CHECK_LOCK_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-check-lock.mjs')
 const CAPABILITY_PROBE_SCRIPT = join(SCRIPT_DIR, 'pptx-nova-probe.mjs')
 const AGENT_SUMMARY_SCHEMA_VERSION = 'pptx-nova-agent-summary/v1'
@@ -317,6 +323,12 @@ function artifactPaths(runDir) {
     patch: join(runDir, 'patch.json'),
     deckkitPatch: join(runDir, 'deckkit.patch.json'),
     quality: join(runDir, 'quality.json'),
+    designPlan: join(runDir, 'design-plan.json'),
+    designContract: join(runDir, 'design-contract.json'),
+    designCheck: join(runDir, 'design-check.json'),
+    designReadback: join(runDir, 'design-readback.json'),
+    designInspect: join(runDir, 'design-inspect.json'),
+    designModel: join(runDir, 'design-model.json'),
     lockCheck: join(runDir, 'check-lock.json'),
     dryRun: join(runDir, 'dry-run.json'),
     apply: join(runDir, 'apply.json'),
@@ -400,6 +412,7 @@ function buildAgentSummary(summary) {
   const dryRun = gateByName(summary, 'dry-run')
   const apply = gateByName(summary, 'apply')
   const vision = gateByName(summary, 'vision-check')
+  const designReadback = gateByName(summary, 'design-readback')
   const preview = gateByName(summary, 'png-previews') ?? gateByName(summary, 'canonical-create')
   return {
     schemaVersion: AGENT_SUMMARY_SCHEMA_VERSION,
@@ -456,6 +469,16 @@ function buildAgentSummary(summary) {
         expectedPages: preview?.expectedCount ?? null,
         contactSheetBytes: preview?.contactSheetBytes ?? null,
       },
+      ...(designReadback
+        ? {
+            designReadback: {
+              gate: gateStatus(designReadback),
+              contractHash: designReadback.contractHash,
+              checkedObjects: designReadback.checkedObjects,
+              checkedCharts: designReadback.checkedCharts,
+            },
+          }
+        : {}),
     },
     artifacts: {
       summary: summary.artifacts.summary,
@@ -469,6 +492,14 @@ function buildAgentSummary(summary) {
       contactSheet: summary.artifacts.contactSheet,
       canonicalManifest: summary.artifacts.canonicalManifest,
       reviewGallery: summary.artifacts.reviewGallery,
+      ...(designReadback
+        ? {
+            designContract: summary.artifacts.designContract,
+            designPlan: summary.artifacts.designPlan,
+            designCheck: summary.artifacts.designCheck,
+            designReadback: summary.artifacts.designReadback,
+          }
+        : {}),
     },
     warnings: summary.warnings,
     error: summary.error
@@ -590,6 +621,16 @@ function runBuild(summary, args, artifacts) {
     })
     copyFileSync(artifacts.patch, artifacts.deckkitPatch)
     writeFileSync(artifacts.patch, JSON.stringify(combined, null, 2) + '\n')
+    if (existsSync(artifacts.designPlan)) {
+      const plan = readJson(artifacts.designPlan)
+      plan.patchHash = designHash(combined)
+      const check = checkDesignPatch(loadDesignContract(args.deckkit), combined)
+      requireGate(summary, 'design-composition', check.status === 'pass', {
+        message: 'Composed operations must preserve the design contract',
+      })
+      writeFileSync(artifacts.designPlan, JSON.stringify(plan, null, 2) + '\n')
+      writeFileSync(artifacts.designCheck, JSON.stringify(check, null, 2) + '\n')
+    }
   }
 }
 
@@ -698,6 +739,49 @@ function runApply(summary, args, artifacts) {
         'apply must succeed, keep high/medium visual risks and semantic issues at zero, and write candidate.pptx',
     },
   )
+}
+
+function runDesignReadback(summary, args, artifacts) {
+  if (!existsSync(artifacts.designPlan)) return
+  const plan = readJson(artifacts.designPlan)
+  const patch = readJson(artifacts.patch)
+  runJsonPhase(summary, {
+    name: 'design-inspect',
+    bin: args.xdocBin,
+    args: ['pptx', 'inspect', artifacts.candidate, '--json'],
+    artifact: artifacts.designInspect,
+  })
+  const checkArgs = [
+    DESIGN_SCRIPT,
+    '--deckkit',
+    args.deckkit,
+    '--plan',
+    artifacts.designPlan,
+    '--patch',
+    artifacts.patch,
+    '--inspect',
+    artifacts.designInspect,
+  ]
+  if (patch.ops.some((op) => op.op === 'add-chart')) {
+    runPlainPhase(summary, {
+      name: 'design-data-projection',
+      bin: args.xdocBin,
+      args: ['convert', artifacts.candidate, '--to', 'json', '--output', artifacts.designModel],
+    })
+    checkArgs.push('--model', artifacts.designModel)
+  }
+  const result = runJsonPhase(summary, {
+    name: 'design-readback',
+    bin: process.execPath,
+    args: checkArgs,
+    artifact: artifacts.designReadback,
+  })
+  requireGate(summary, 'design-readback', result?.status === 'pass', {
+    contractHash: plan.contractHash,
+    checkedObjects: result?.checkedObjects ?? null,
+    checkedCharts: result?.checkedCharts ?? null,
+    message: 'Applied objects and native chart data must match the design plan',
+  })
 }
 
 function runVision(summary, args, artifacts) {
@@ -852,6 +936,7 @@ function runCreate(inputArgs) {
     runCheckLock(summary, args, artifacts)
     runDryRun(summary, args, artifacts)
     runApply(summary, args, artifacts)
+    runDesignReadback(summary, args, artifacts)
     runVision(summary, args, artifacts)
     if (summary.canonicalCreateAvailable) {
       canonicalCreatePreview(summary, args, artifacts, runJsonPhase)

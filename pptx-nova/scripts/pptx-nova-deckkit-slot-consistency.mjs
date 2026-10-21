@@ -68,7 +68,9 @@ function loadSlideSchema(deckkit, slideType) {
 let tokenCounter = 0
 function nextToken() {
   tokenCounter += 1
-  return `SLOTPROBE${String(tokenCounter).padStart(3, '0')}END`
+  // Keep probes inside compact KPI slots, including composed value+unit fields.
+  // Fixed delimiters prevent one probe from matching another probe's prefix.
+  return `Q${String(tokenCounter).padStart(4, '0')}Z`
 }
 
 // 返回 { value, sentinels: [{path, token, fallbackOf}], dynamics: [path] }

@@ -7,6 +7,9 @@
 ```
 assets/deckkits/
 ├── core-primitives.kit.mjs     # 几何安全 + op 生成（所有 DeckKit 共用）
+├── design-contract.mjs         # opt-in 设计合同、槽位解析、规则与回读检查
+├── evidence-components.mjs     # 由合同驱动的原生数据证据组件
+├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
 ├── consulting-dark.kit.mjs     # 深墨蓝咨询风格 + 页型函数
 ├── <deckkit-id>.kit.mjs        # 其余 DeckKit（mckinsey-blue、swiss-grid、broadside、coral、cartesian、long-table、biennale-yellow）
@@ -35,8 +38,11 @@ assets/deckkits/
 
 ## 校验合同
 
-`validate-content.mjs`、DeckKit build 胶水和 benchmark CLI 都必须调用
-`core-primitives.kit.mjs` 导出的同一个 `validateContent(content, { deckkit, mode })`。
+`validate-content.mjs`、DeckKit build 胶水和 benchmark CLI 调用
+`validate-deckkit.mjs` 的 `validateDeckkitContent(content, { deckkit, mode })`。
+它先运行 core 的 `validateContent`；只有 catalog 注册了 `designContract` 的套件才增加
+合同与语义检查、逐实例的文字容量估计。未迁移套件保持原有行为。直接调用 core 校验
+不包含这些额外检查。
 
 `validateContent` 返回：
 
@@ -63,9 +69,9 @@ assets/deckkits/
   选择 DeckKit 后知道"这套页面应该长什么样"，并在 readiness audit 中阻止缺少风格合同的
   production/default DeckKit 进入交付。
 
-这些 gate 属于 DeckKit 元数据，不属于单个 deck 的临时 patch。新增或调整规则时优先修改
-`catalog.json` 和 `core-primitives.kit.mjs`，让 `validate-content.mjs`、build 胶水和 benchmark
-共享同一套判断。
+这些 gate 属于 DeckKit 元数据，不属于单个 deck 的临时 patch。设计合同规则放在合同模块，
+不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
+检查应用后的对象和原生数值。详见 `../../references/design-contracts.md`。
 
 `layoutContract.slideTypes.<slideType>.assetSlots` 是页型的图片槽位合同。它是一个以语义
 slot id 为键的对象，每项至少说明 `kind`、`acceptsAsset` 和

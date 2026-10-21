@@ -7,6 +7,11 @@ DeckKit is the default path for delivery-quality new decks. It keeps the visual
 language, page geometry, density limits, and reusable components in a frozen
 generator so ordinary creation only needs a small `content.json`.
 
+If the selected catalog entry has `designContract`, also read `design-contracts.md` and its
+`intent.md`. Discover allowed layouts with `pptx-nova-deckkit-design.mjs`; use registered
+`layoutId` values rather than writing coordinates. The normal build/create runner owns the
+resolved design plan, style checks and post-apply native-data readback.
+
 ## Selection
 
 Before writing `content.json`, select a DeckKit from

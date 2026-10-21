@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { designHash, loadDesignContract } from '../../assets/deckkits/design-contract.mjs'
 import { join, resolve } from 'node:path'
 import { verifyRenderContext } from './render-context.mjs'
 import {
@@ -24,6 +25,14 @@ export function recordCreateInputs(args, artifacts) {
     artifacts.candidate,
     artifacts.canonicalManifest,
     artifacts.renderContext,
+    ...[
+      artifacts.designContract,
+      artifacts.designPlan,
+      artifacts.designCheck,
+      artifacts.designReadback,
+      artifacts.designInspect,
+      artifacts.designModel,
+    ].filter((p) => p && existsSync(p)),
   ].filter(Boolean)
   return {
     schemaVersion: 'pptx-nova-create-binding/v1',
@@ -42,6 +51,11 @@ export function verifyCreateInputs(args, artifacts) {
     throw new Error(
       'Create inputs or machine evidence changed; generate and review a new candidate',
     )
+  if (artifacts.designPlan && existsSync(artifacts.designPlan)) {
+    const plan = JSON.parse(readFileSync(artifacts.designPlan, 'utf8'))
+    if (plan.contractHash !== designHash(loadDesignContract(plan.designId)))
+      throw new Error('Design contract changed; generate and review a new candidate')
+  }
 }
 
 export function canonicalCreatePreview(summary, args, artifacts, runJsonPhase) {

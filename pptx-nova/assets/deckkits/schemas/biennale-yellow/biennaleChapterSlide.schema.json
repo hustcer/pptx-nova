@@ -7,20 +7,49 @@
   "properties": {
     "rail": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.2 }
+      "x-designSlot": "Rail",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 3.75,
+        "heightIn": 0.22,
+        "lineHeight": 1.2,
+        "maxLines": 1
+      }
     },
     "number": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 245, "widthIn": 5.0 }
+      "x-designSlot": "Number",
+      "x-slotBudget": {
+        "fontPt": 195,
+        "widthIn": 5,
+        "heightIn": 3.3,
+        "lineHeight": 0.84,
+        "maxLines": 1
+      }
     },
     "title": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 2, "fontPt": 40, "widthIn": 9.3 }
+      "x-designSlot": "Title",
+      "x-slotBudget": {
+        "fontPt": 38,
+        "widthIn": 9.3,
+        "heightIn": 1.28,
+        "lineHeight": 1.2,
+        "maxLines": 2
+      }
     },
     "lede": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 4, "fontPt": 10.5, "widthIn": 6.25 }
+      "x-designSlot": "Lede",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 6.25,
+        "heightIn": 0.9,
+        "lineHeight": 1.25,
+        "maxLines": 4
+      }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
 }

@@ -44,7 +44,7 @@ cp skills/pptx-nova/assets/examples/deck-generator-template.mjs ./generate.mjs
 
 # 3. 生成探索 patch + 丰富度自检 + dry-run gate + 落盘
 node generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
-jq '.ops | length' patch.json   # ← 客户演示级 ≥ 200,低于这条线视觉一定空,回去加装饰
+jq '.ops | length' patch.json   # 仅记录构建规模；质量由内容、结构和真实渲染证明，不设操作数下限
 # shell 驱动的多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：当前 runtime
 # 自动按需拉起，首次 ~200ms、之后调用 ~5ms 走 RPC。CI 用 --daemon-strict。
 xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json

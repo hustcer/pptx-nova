@@ -7,11 +7,25 @@
   "properties": {
     "kicker": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.6 }
+      "x-designSlot": "Kicker",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 3.6,
+        "heightIn": 0.22,
+        "lineHeight": 1.2,
+        "maxLines": 1
+      }
     },
     "title": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 5, "fontPt": 76, "widthIn": 6.3 }
+      "x-designSlot": "Title",
+      "x-slotBudget": {
+        "fontPt": 76,
+        "widthIn": 6.3,
+        "heightIn": 4.75,
+        "lineHeight": 0.86,
+        "maxLines": 5
+      }
     },
     "footerItems": {
       "type": "array",
@@ -23,16 +37,31 @@
         "properties": {
           "label": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 2.6 }
+            "x-designSlot": "FootLabel{i}",
+            "x-slotBudget": {
+              "fontPt": 10,
+              "widthIn": 2.25,
+              "heightIn": 0.23,
+              "lineHeight": 1.2,
+              "maxLines": 1
+            }
           },
           "text": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 3, "fontPt": 9, "widthIn": 3.0 }
+            "x-designSlot": "FootText{i}",
+            "x-slotBudget": {
+              "fontPt": 10,
+              "widthIn": 2.25,
+              "heightIn": 0.78,
+              "lineHeight": 1.15,
+              "maxLines": 4
+            }
           }
         },
         "additionalProperties": false
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
 }

@@ -7,15 +7,36 @@
   "properties": {
     "dateRange": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 3, "fontPt": 50, "widthIn": 2.6 }
+      "x-designSlot": "DateRail",
+      "x-slotBudget": {
+        "fontPt": 42,
+        "widthIn": 2.86,
+        "heightIn": 1.35,
+        "lineHeight": 0.9,
+        "maxLines": 2
+      }
     },
     "title": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 3, "fontPt": 132, "widthIn": 6.7 }
+      "x-designSlot": "Title",
+      "x-slotBudget": {
+        "fontPt": 92,
+        "widthIn": 7.25,
+        "heightIn": 2.95,
+        "lineHeight": 0.86,
+        "maxLines": 2
+      }
     },
     "subline": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.7 }
+      "x-designSlot": "Subline",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 3.7,
+        "heightIn": 0.22,
+        "lineHeight": 1.2,
+        "maxLines": 1
+      }
     },
     "footerItems": {
       "type": "array",
@@ -27,16 +48,31 @@
         "properties": {
           "label": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 2.2 }
+            "x-designSlot": "FootLabel{i}",
+            "x-slotBudget": {
+              "fontPt": 10,
+              "widthIn": 2.06,
+              "heightIn": 0.23,
+              "lineHeight": 1.2,
+              "maxLines": 1
+            }
           },
           "text": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 3, "fontPt": 9, "widthIn": 3.4 }
+            "x-designSlot": "FootText{i}",
+            "x-slotBudget": {
+              "fontPt": 10,
+              "widthIn": 2.06,
+              "heightIn": 0.72,
+              "lineHeight": 1.15,
+              "maxLines": 4
+            }
           }
         },
         "additionalProperties": false
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
 }

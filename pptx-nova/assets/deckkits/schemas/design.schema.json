@@ -1,0 +1,523 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pptx-nova-design/v1",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": "pptx-nova-design/v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "canvas": {
+      "type": "object",
+      "properties": {
+        "widthIn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "heightIn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": ["widthIn", "heightIn"],
+      "additionalProperties": false
+    },
+    "colors": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9A-F]{6}$"
+      }
+    },
+    "fonts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "latin": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eastAsian": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["latin", "eastAsian"],
+        "additionalProperties": false
+      }
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "colors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": ["colors", "fonts"],
+      "additionalProperties": false
+    },
+    "textFrame": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/rule"
+      },
+      "minItems": 1
+    },
+    "legacyLayouts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "slots": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/$defs/slot"
+            }
+          },
+          "footer": {
+            "type": "object",
+            "properties": {
+              "ruleY": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": ["ruleY"],
+            "additionalProperties": false
+          },
+          "rowRuleOffset": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": ["slots"],
+        "additionalProperties": false
+      }
+    },
+    "evidence": {
+      "$ref": "#/$defs/evidence"
+    },
+    "refurbish": {
+      "type": "object",
+      "required": ["palette", "fonts"],
+      "additionalProperties": false,
+      "properties": {
+        "palette": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "roles": {
+      "type": "object",
+      "required": ["surface", "text", "rule", "series", "focus"],
+      "properties": {
+        "surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "series": {
+          "type": "string",
+          "minLength": 1
+        },
+        "focus": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "version",
+    "canvas",
+    "colors",
+    "fonts",
+    "theme",
+    "textFrame",
+    "rules",
+    "legacyLayouts",
+    "evidence",
+    "refurbish",
+    "roles"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "frame": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "font": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sizePt": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "italic": {
+          "type": "boolean"
+        }
+      },
+      "required": ["role", "sizePt"],
+      "additionalProperties": false
+    },
+    "slot": {
+      "type": "object",
+      "properties": {
+        "frames": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/frame"
+          },
+          "minItems": 1
+        },
+        "font": {
+          "$ref": "#/$defs/font"
+        },
+        "paragraph": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "autofit": {
+          "enum": ["text", "shape", "none"]
+        },
+        "heightByLines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "minLines": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "heightIn": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": ["minLines", "heightIn"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "required": ["frames", "font"],
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check": {
+          "type": "string",
+          "minLength": 1
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "minPt": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": ["id", "check"],
+      "additionalProperties": false
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "maxPoints": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maxLabelUnits": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chart": {
+          "$ref": "#/$defs/frame"
+        },
+        "stats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/frame"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "shiftStatsWithHeader": {
+          "type": "boolean"
+        }
+      },
+      "required": ["maxPoints", "maxLabelUnits", "chart", "stats", "shiftStatsWithHeader"],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "slideType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "maxConsecutiveLayout": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fontPt": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "label": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "body": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "value": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "source": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["title", "label", "body", "value", "source"],
+          "additionalProperties": false
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "minPoints": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxPoints": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxLabelUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxTitleUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxDescriptionUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "minPoints",
+            "maxPoints",
+            "maxLabelUnits",
+            "maxTitleUnits",
+            "maxDescriptionUnits"
+          ],
+          "additionalProperties": false
+        },
+        "layouts": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/layout"
+          }
+        },
+        "header": {
+          "type": "object",
+          "required": ["title", "label", "rule", "source", "page"],
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "label": {
+              "$ref": "#/$defs/frame"
+            },
+            "rule": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "additionalProperties": false
+        },
+        "numberFormat": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statComponents": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["value", "label", "description"],
+            "additionalProperties": {
+              "type": "object",
+              "required": ["y", "h", "role"],
+              "additionalProperties": false,
+              "properties": {
+                "y": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "h": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "fontPt": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            }
+          }
+        },
+        "shortTitleUnits": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "titleShiftIn": {
+          "type": "number",
+          "minimum": 0
+        },
+        "textLineHeight": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "chartStyle": {
+          "type": "object",
+          "required": ["valueTicks", "lineWidthPt"],
+          "additionalProperties": false,
+          "properties": {
+            "valueTicks": {
+              "type": "boolean"
+            },
+            "lineWidthPt": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "scientificFormat": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scientificBelow": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "scientificAbove": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "cjkWrapSafety": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "slideType",
+        "maxConsecutiveLayout",
+        "fontPt",
+        "limits",
+        "layouts",
+        "header",
+        "numberFormat",
+        "statComponents",
+        "shortTitleUnits",
+        "titleShiftIn",
+        "textLineHeight",
+        "chartStyle",
+        "scientificFormat",
+        "scientificBelow",
+        "scientificAbove",
+        "cjkWrapSafety"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -7,12 +7,27 @@
   "properties": {
     "quote": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 6, "fontPt": 63, "widthIn": 11.65 }
+      "x-designSlot": "Quote",
+      "x-slotBudget": {
+        "fontPt": 56,
+        "widthIn": 11.65,
+        "heightIn": 3.1,
+        "lineHeight": 1.04,
+        "maxLines": 3
+      }
     },
     "attribution": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 4.8 }
+      "x-designSlot": "Attribution",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 4.8,
+        "heightIn": 0.22,
+        "lineHeight": 1.2,
+        "maxLines": 1
+      }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
 }

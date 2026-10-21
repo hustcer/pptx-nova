@@ -7,19 +7,47 @@
   "properties": {
     "kicker": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 3.5 }
+      "x-designSlot": "Kicker",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 3.5,
+        "heightIn": 0.22,
+        "lineHeight": 1.2,
+        "maxLines": 1
+      }
     },
     "word": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 2, "fontPt": 108, "widthIn": 5.8 }
+      "x-designSlot": "Word",
+      "x-slotBudget": {
+        "fontPt": 84,
+        "widthIn": 6.05,
+        "heightIn": 1.25,
+        "lineHeight": 0.86,
+        "maxLines": 1
+      }
     },
     "description": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 3, "fontPt": 10.5, "widthIn": 5.7 }
+      "x-designSlot": "Description",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 5.7,
+        "heightIn": 0.55,
+        "lineHeight": 1.35,
+        "maxLines": 2
+      }
     },
     "headLabel": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 5.6 }
+      "x-designSlot": "Head",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 5.6,
+        "heightIn": 0.22,
+        "lineHeight": 1.2,
+        "maxLines": 1
+      }
     },
     "strands": {
       "type": "array",
@@ -31,20 +59,42 @@
         "properties": {
           "num": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 18, "widthIn": 0.5 }
+            "x-designSlot": "StrandNum{i}",
+            "x-slotBudget": {
+              "fontPt": 18,
+              "widthIn": 0.5,
+              "heightIn": 0.35,
+              "lineHeight": 1.2,
+              "maxLines": 1
+            }
           },
           "title": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 18, "widthIn": 4.6 }
+            "x-designSlot": "StrandTitle{i}",
+            "x-slotBudget": {
+              "fontPt": 18,
+              "widthIn": 4.6,
+              "heightIn": 0.34,
+              "lineHeight": 1.2,
+              "maxLines": 1
+            }
           },
           "body": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 4, "fontPt": 10.5, "widthIn": 4.55 }
+            "x-designSlot": "StrandBody{i}",
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 4.55,
+              "heightIn": 0.66,
+              "lineHeight": 1.25,
+              "maxLines": 3
+            }
           }
         },
         "additionalProperties": false
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
 }

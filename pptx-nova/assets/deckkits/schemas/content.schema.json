@@ -179,7 +179,17 @@
               "ledgerTrendSlide",
               "ledgerMatrixSlide",
               "ledgerRankingSlide",
-              "ledgerDecisionSlide"
+              "ledgerDecisionSlide",
+              "slateCoverSlide",
+              "slateSummarySlide",
+              "slateRangeSlide",
+              "slateMatrixSlide",
+              "slateRoadmapSlide",
+              "slateValueSlide",
+              "slateFlowSlide",
+              "slateSectionSlide",
+              "slateNoticeSlide",
+              "slateClosingSlide"
             ]
           },
           "data": {

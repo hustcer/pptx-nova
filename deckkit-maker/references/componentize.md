@@ -54,9 +54,9 @@ node deckkit-maker/scripts/content-leak-audit.mjs \
 用它审计会把正常 content 输出误报成 kit 泄漏。脚本命中时不要简单删词，要回到 schema、
 layoutContract 和页型函数，确认该字符串应由 `content.json`、`data.labels` 或 asset slot 驱动。
 
-**审计覆盖边界**：当前脚本只检查 `set-text-frame/add-text-box/add-paragraph/set-paragraph/add-run/set-run`
-的直接 `text` 字段。`ok: true` 不证明所有可见文本已检查；原生 chart/table、其他 op、拆成多个 run
-的短语、继承文本和图片里的字不在完整覆盖范围内。根据本次实际输出补对应回归断言，并对非参考
+**审计覆盖边界**：当前脚本检查 `set-text-frame/add-text-box/add-paragraph/set-paragraph/add-run/set-run`
+的直接 `text` 字段、支持的原生表格单元格与经典图表类别/系列名。`ok: true` 不证明所有可见文本已检查；
+其他图表变体/操作、拆成多个 run 的短语、继承文本和图片里的字不在完整覆盖范围内。根据本次实际输出补对应回归断言，并对非参考
 content 构建后的 PPTX 做 inspect/文本提取与人工 review；不能把 `textCount: 0` 当作无泄漏证据。
 
 **图片资产防线**：对 kit 源码、examples、benchmark fixture 和新增 assets 搜索参考 deck
@@ -178,6 +178,8 @@ node pptx-nova/scripts/pptx-nova-deckkit-catalog-update.mjs --deckkit <id> --rea
 
 从 summary 的实际路径取完整 golden PPTX，按 `rebuild-high-fidelity.md` 对它执行一次冻结日期的
 canonical Create 并逐页 review 其 PNG；benchmark 的成功或历史 low baseline 都不能替代该门禁。
+golden 及本次准备接受的构图变体、stress、mixed-language 每页都按
+[visual-acceptance.md](visual-acceptance.md) 检查，保留逐页结果和关键局部证据。
 reference 与 kit 产物若不完全相同，先用当前同一 runtime/日期重新渲染两者，再判定是否组件化回归。
 
 vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受噪声才

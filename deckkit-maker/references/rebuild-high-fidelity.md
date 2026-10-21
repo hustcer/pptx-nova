@@ -98,6 +98,9 @@ inspect、视觉检查及人工逐页对比门禁。
 
 ## 4. 逐页对比
 
+先读 [visual-acceptance.md](visual-acceptance.md)，补查圆形编号、底色标签、表格底边附注等
+机器门禁曾漏检的实例，并按其中方法保留逐页记录和局部放大证据。
+
 对比是本阶段的核心验收，不能用 contact-sheet 一眼带过：
 
 1. 先查看参考 contact sheet 与本轮候选总览（若生成），扫全局：

@@ -11,8 +11,11 @@ assets/deckkits/
 ├── evidence-components.mjs     # 由合同驱动的原生数据证据组件
 ├── editorial-components.mjs    # 期刊式证据、原生矩阵与判断/行动组件
 ├── editorial-layouts.mjs       # 内容容量与确定性构图选择
+├── strategy-components.mjs     # 深色策略报告、原生图表/矩阵与阶段路线图
+├── strategy-layouts.mjs        # 策略报告容量与确定性构图选择
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
+├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
 ├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
 ├── consulting-dark.kit.mjs     # 深墨蓝咨询风格 + 页型函数
 ├── <deckkit-id>.kit.mjs        # 其余 DeckKit（mckinsey-blue、swiss-grid、broadside、coral、cartesian、long-table、biennale-yellow）
@@ -76,8 +79,9 @@ assets/deckkits/
 不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
 检查应用后的对象和原生数值。详见 `../../references/design-contracts.md`。
 
-合同路线现覆盖 Biennale 与 Black Gold 两种视觉语言。后者新增原生表格逐格回读、单焦点与
-图表/表格语言规则；其 candidate 状态不等于 production/default 交付资格。开发者从设计规范和
+合同路线现覆盖 Biennale、Black Gold 与 Green Slate。Black Gold 增加原生表格逐格回读、单焦点与
+期刊图表/表格规则；Green Slate 增加深色策略报告构图、带底色标签、形状内编号、按时长分配的
+阶段路线图和独立说明区。candidate 状态不等于 production/default 交付资格。开发者从设计规范和
 参考图迁入新风格时，使用仓库内 deckkit-maker 的 design-source 路线，保持运行时自包含。
 
 `layoutContract.slideTypes.<slideType>.assetSlots` 是页型的图片槽位合同。它是一个以语义

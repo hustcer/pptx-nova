@@ -299,6 +299,10 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   findings 和 decision；若运行时未披露该路线，按 `create-runner.md` 的兼容路径处理并记录边界。
   参考、candidate、benchmark 使用同一冻结日期；按 manifest/artifact path 定位产物，不猜文件名。
   exit code 0、PNG 存在或旧 baseline 通过均不足以单独证明放行。
+- **逐页与局部验收**：首次走查前读 [references/visual-acceptance.md](references/visual-acceptance.md)。
+  对准备接受的 golden、构图变体、压力、多语言样例逐张检查实际 canonical PNG，并记录每页结果。
+  圆形编号、带底色标签、密集数值与表格底部说明须放大复核；重点防止圆内数字偏心、文字超出底条、
+  附注贴线。机器零 findings 不能替代视觉验收；用户指出漏检后撤回受影响结论，复查全部同类组件。
 - **常规 shape 也必须高保真**：不要只复刻版式语义而放松基础元素。人工 PNG 对比时逐页检查
   文本字号、字色、大小写、对齐、行高、圆形/方块尺寸、圆内文字颜色与居中、斜线/纹理方向、
   裁切边界和是否越界。除非为了通过可读性门禁并在 compare notes 中说明，PPTX 字号不应小于
@@ -376,3 +380,4 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 | `references/rebuild-high-fidelity.md`   | Phase 1：探索生成器、逐页重建与对比循环、避坑清单   |
 | `references/componentize.md`            | Phase 2：抽 kit/schema/catalog/benchmark/readiness  |
 | `references/design-source-migration.md` | design.md + 参考图：来源、设计裁决、合同与复用验证  |
+| `references/visual-acceptance.md`       | 逐页验收、局部放大、居中/标签/附注反例              |

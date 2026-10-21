@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import { dirname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { wrapCjkText } from './design-text.mjs'
+import { STRATEGY_REGIONS } from './strategy-registry.mjs'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -18,6 +19,7 @@ const CHECKS = new Set([
   'font-floor',
   'single-accent-focus',
   'editorial-language',
+  'strategy-language',
 ])
 
 // A deliberately bounded validator for the bundled design schema, not a general JSON Schema API.
@@ -88,7 +90,7 @@ export function assertDesignContract(design) {
       for (const frame of slot.frames) assertFrame(design, frame, `${type}.${name}`)
     }
   }
-  if (!design.evidence && !design.editorial)
+  if (!design.evidence && !design.editorial && !design.strategy)
     throw new Error('A registered design renderer is required')
   for (const [id, layout] of Object.entries(design.evidence?.layouts ?? {})) {
     assertFrame(design, layout.chart, id)
@@ -132,6 +134,30 @@ export function assertDesignContract(design) {
         for (const name of Object.keys(variant.regions))
           if (!expected.includes(name) && !(family.role === 'trend' && name === 'support'))
             throw new Error(`${type}.${id}: unknown region ${name}`)
+        for (const [key, frame] of Object.entries(variant.regions))
+          assertFrame(design, frame, `${type}.${id}.${key}`)
+      }
+    }
+  }
+  if (design.strategy) {
+    const strategy = design.strategy
+    for (const role of ['body', 'display'])
+      if (!design.fonts[role]) throw new Error(`Strategy requires ${role} font`)
+    for (const role of ['panel', 'header', 'secondary', 'negative', 'reference'])
+      if (!design.roles[role]) throw new Error(`Strategy requires ${role} color role`)
+    assertFrame(design, strategy.coverZone, 'coverZone')
+    for (const [key, frame] of Object.entries(strategy.chrome))
+      assertFrame(design, frame, `strategy.chrome.${key}`)
+    if (!Object.keys(strategy.families).length) throw new Error('Strategy requires families')
+    for (const [type, family] of Object.entries(strategy.families)) {
+      if (!Object.keys(family.variants).length) throw new Error(`${type}: no variants`)
+      for (const [id, variant] of Object.entries(family.variants)) {
+        const expected = STRATEGY_REGIONS[family.role]
+        if (
+          expected.some((name) => !variant.regions[name]) ||
+          Object.keys(variant.regions).some((name) => !expected.includes(name))
+        )
+          throw new Error(`${type}.${id}: regions must match strategy role ${family.role}`)
         for (const [key, frame] of Object.entries(variant.regions))
           assertFrame(design, frame, `${type}.${id}.${key}`)
       }
@@ -438,6 +464,56 @@ export function checkDesignPatch(design, patch) {
       }
     }
     for (const rule of design.rules) {
+      if (rule.check === 'strategy-language') {
+        if (op.op === 'add-chart' && !['bar', 'line'].includes(op.kind))
+          issue(rule, `Unregistered strategy chart ${op.kind}`, index)
+        if (op.op === 'set-chart' && op.view3D) issue(rule, '3D is forbidden', index)
+        if (
+          op.op === 'set-slide-background' &&
+          (op.fill?.type !== 'solid' || op.fill.color !== design.colors[design.roles.surface])
+        )
+          issue(rule, 'Strategy content requires the contracted dark surface', index)
+        if (op.op === 'set-table' && (op.style?.horizontalBanding || op.style?.verticalBanding))
+          issue(rule, 'Strategy tables use explicit cells and fine rules', index)
+        if (op.op === 'set-text-frame' && typeof op.text === 'string') {
+          const owner = patch.ops.find(
+            (o) => o.op === 'add-shape' && o.slide === op.slide && o.name === op.shape?.name,
+          )
+          if (owner?.kind === 'oval') {
+            const paragraph = patch.ops.find(
+              (o) =>
+                o.op === 'set-paragraph' && o.slide === op.slide && o.shape?.name === owner.name,
+            )
+            if (op.frame?.verticalAnchor !== 'middle' || paragraph?.format?.alignment !== 'center')
+              issue(rule, 'Circle-owned text must be centered horizontally and vertically', index)
+          }
+          const textbox = patch.ops.find(
+            (o) => o.op === 'add-text-box' && o.slide === op.slide && o.name === op.shape?.name,
+          )
+          if (textbox) {
+            const [x, y, w, h] = [textbox.x, textbox.y, textbox.w, textbox.h].map(parseFloat)
+            for (const shape of patch.ops.filter(
+              (o) =>
+                o.op === 'add-shape' &&
+                o.slide === op.slide &&
+                ['oval', 'rectangle'].includes(o.kind),
+            )) {
+              const [sx, sy, sw, sh] = [shape.x, shape.y, shape.w, shape.h].map(parseFloat)
+              if (sw > 6 || sh > 1.1) continue
+              const overlap =
+                (Math.max(0, Math.min(x + w, sx + sw) - Math.max(x, sx)) *
+                  Math.max(0, Math.min(y + h, sy + sh) - Math.max(y, sy))) /
+                (w * h)
+              if (overlap >= 0.35)
+                issue(
+                  rule,
+                  'Enclosed labels must use shape-owned text, not an independent overlapping textbox',
+                  index,
+                )
+            }
+          }
+        }
+      }
       if (rule.check === 'editorial-language') {
         if (op.op === 'add-chart' && !['bar', 'column', 'line'].includes(op.kind))
           issue(rule, `Unregistered editorial chart ${op.kind}`, index)
@@ -492,12 +568,12 @@ export function checkDesignPatch(design, patch) {
           issue(rule, `Unapproved color ${v}`, index)
         if (v && typeof v === 'object') {
           if (
-            rule.check === 'editorial-language' &&
+            ['editorial-language', 'strategy-language'].includes(rule.check) &&
             key === 'fill' &&
             v.type !== 'solid' &&
             v.type !== 'none'
           )
-            issue(rule, 'Gradient/pattern fills are not part of editorial language', index)
+            issue(rule, 'Gradient/pattern fills are not part of this language', index)
           if (rule.check === 'allowed-fonts') {
             for (const k of ['name', 'eastAsian', 'typeface']) {
               if ((key === 'font' || ['major', 'minor'].includes(key)) && v[k] && !fonts.has(v[k]))
@@ -543,7 +619,9 @@ export function finishDesign(design, content, patch, layouts = []) {
     throw new Error(`Design check failed: ${check.issues.map((i) => i.message).join('; ')}`)
   }
   const objects = patch.ops
-    .filter((o) => ['add-text-box', 'add-shape', 'add-chart', 'add-table'].includes(o.op))
+    .filter((o) =>
+      ['add-text-box', 'add-shape', 'add-freeform', 'add-chart', 'add-table'].includes(o.op),
+    )
     .map((o) => ({
       slide: o.slide,
       name: o.name,
@@ -582,7 +660,7 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
     }
     if (object.kind === 'add-table' && shape.contentKind !== 'table')
       fail(`${object.name}: native table missing`)
-    if (object.kind === 'add-text-box') {
+    if (['add-text-box', 'add-shape', 'add-freeform'].includes(object.kind)) {
       const expected = patch.ops
         .filter(
           (o) =>
@@ -606,6 +684,18 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
       if (expected !== undefined && expected.replace(/\r\n?/g, '\n') !== actualText) {
         fail(`${object.name}: text changed or was dropped`)
       }
+      const frame = patch.ops
+        .filter(
+          (o) =>
+            o.op === 'set-text-frame' &&
+            o.slide === object.slide &&
+            o.shape?.name === object.name &&
+            o.frame,
+        )
+        .at(-1)?.frame
+      for (const key of ['verticalAnchor', 'wordWrap'])
+        if (frame?.[key] !== undefined && shape.textFrame?.[key] !== frame[key])
+          fail(`${object.name}: ${key} text-frame setting changed`)
     }
     const actual = ['xEmu', 'yEmu', 'wEmu', 'hEmu'].map((k) => Number(shape.bbox?.[k]) / 914400)
     if (actual.some((v, i) => !Number.isFinite(v) || Math.abs(v - object.frame[i]) > 0.002)) {

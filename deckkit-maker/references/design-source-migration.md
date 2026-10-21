@@ -48,6 +48,8 @@ node deckkit-maker/scripts/analyze-design-source.mjs \
 先验证代表页的 patch、实际对象和 canonical PDF/PNG，再完成约定范围逐页审查。
 比较参考与生成图的层级、阅读路径、可读性和身份特征，记录有意差异。
 没有可接受的视觉基线，不冻结为已验证套件。
+按 [visual-acceptance.md](visual-acceptance.md) 逐页记录；圆形内文字、标签底条和表格附注须
+局部放大核对。参考图的缺陷可以改进，迁移产物自身的细节缺陷不能因风格相似而被接受。
 
 ## 合同与执行边界
 

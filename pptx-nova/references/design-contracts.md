@@ -1,7 +1,7 @@
 # Contract-driven DeckKits
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
-existing workflow. The opt-in designs are `biennale-yellow` and `black-gold`; this is a pptx-nova
+existing workflow. The opt-in designs are `biennale-yellow`, `black-gold` and `green-slate`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow
@@ -128,6 +128,33 @@ Native-table creation also runs the semantic audit and binds its report to final
 The optional [finance research policy](policies/finance-research.md) applies when requested content
 requires it; skin selection does not activate financial assumptions or conclusions. The kit is a
 candidate migration, not an automatic production/default choice or a verified refurbishment route.
+
+### Strategy family: Green Slate
+
+`green-slate` uses `strategy-report/v1`: a charcoal/forest/mint report with ten content types for
+cover, summary, intervals, matrix, roadmap, value, flow, section, notice and closing. Read
+`assets/deckkits/green-slate/intent.md`, discover its design and slots, and start from
+`assets/deckkits/examples/green-slate-content.json`. Do not reuse another family's field names.
+
+Rail/wide intervals and vertical/horizontal flows change geometry for the same content. Matrix
+full/compact variants change density. Selection is deterministic from fit and recent layout history;
+explicit `layoutId` must also fit. Matrices accept 3–6 columns and rows with column weights/alignment.
+Intervals accept 2–6 categories with finite `0 <= low <= high`. Line series accept 2–8 categories;
+flows accept 3–5 steps (vertical at most three); roadmaps accept 3–4 positive-duration phases with one
+activity per track/phase. Exact capacities and visible fields are in the selected schema and contract.
+
+Interval plots stack the lower bound and remaining span; exact bounds remain directly labeled.
+Tiny and negative native line observations are retained without promising individual pixel visibility
+on a shared linear scale. Native tables retain literal cell strings. Owned circle text is centered in
+both axes, label text shares its background frame, and roadmap captions reserve space below rules.
+Style checks reject unsupported chart kinds, effects, pictures and unstyled table cells; applied
+readback includes shape-owned text and explicitly set frame anchors. These checks cannot establish
+optical centering or replace per-page visual review.
+
+Every body page includes title, basis, source, as-of and verdict. Full-deck/excerpt semantics follow
+the declared `meta.designScope`. The skin carries no business assumptions: claims, labels, units,
+dates, durations and data remain content. CJK rendering was checked with Arial Unicode MS; font
+availability and regular/bold output require rechecking on another machine. Fonts are not bundled.
 
 ### Shared contract boundaries
 

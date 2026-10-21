@@ -180,6 +180,15 @@
       "buildPath": "../../assets/deckkits/examples/black-gold-build.mjs",
       "expectedPath": "cases/black-gold/golden-design/expected.json",
       "reviewPath": "cases/black-gold/golden-design/review.md"
+    },
+    {
+      "id": "green-slate.golden-design",
+      "deckkit": "green-slate",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/green-slate-content.json",
+      "buildPath": "../../assets/deckkits/examples/green-slate-build.mjs",
+      "expectedPath": "cases/green-slate/golden-design/expected.json",
+      "reviewPath": "cases/green-slate/golden-design/review.md"
     }
   ]
 }

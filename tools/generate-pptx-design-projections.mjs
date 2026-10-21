@@ -63,12 +63,13 @@ const raw = readFileSync(path, 'utf8')
 const catalog = JSON.parse(raw)
 const entry = catalog.entries.find((e) => e.id === id)
 const before = JSON.stringify(entry)
-if (design.editorial) {
-  const types = Object.keys(design.editorial.families)
+if (design.editorial || design.strategy) {
+  const families = (design.editorial ?? design.strategy).families
+  const types = Object.keys(families)
   entry.supportedSlideTypes = types
   entry.coverage.slideTypes = types
   const groups = { anchor: [], judgment: [], evidence: [] }
-  for (const [type, family] of Object.entries(design.editorial.families)) {
+  for (const [type, family] of Object.entries(families)) {
     const schema = JSON.parse(
       readFileSync(resolve(root, 'schemas', id, `${type}.schema.json`), 'utf8'),
     )
@@ -76,12 +77,11 @@ if (design.editorial) {
       requiredSlots: schema.required.map((key) => `data.${key}`),
       allowedLayoutIds: ['auto', ...Object.keys(family.variants)],
     }
-    const group =
-      family.role === 'cover'
-        ? 'anchor'
-        : ['summary', 'decision'].includes(family.role)
-          ? 'judgment'
-          : 'evidence'
+    const group = ['cover', 'section', 'closing'].includes(family.role)
+      ? 'anchor'
+      : ['summary', 'decision'].includes(family.role)
+        ? 'judgment'
+        : 'evidence'
     groups[group].push(type)
   }
   entry.layoutContract.slideTypes = Object.fromEntries(

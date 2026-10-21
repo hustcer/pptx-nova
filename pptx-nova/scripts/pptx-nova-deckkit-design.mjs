@@ -89,6 +89,7 @@ try {
       legacySlideTypes: Object.keys(d.legacyLayouts),
       evidence: d.evidence,
       ...(d.editorial ? { editorial: d.editorial } : {}),
+      ...(d.strategy ? { strategy: d.strategy } : {}),
       inputGuide:
         'Use registered content schemas and layoutId=auto. Raw coordinates/colors/fonts are not content inputs.',
       visualReviewRequired: true,

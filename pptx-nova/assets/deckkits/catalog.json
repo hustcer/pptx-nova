@@ -4045,6 +4045,383 @@
           "contentPath": "examples/black-gold-content.json"
         }
       ]
+    },
+    {
+      "id": "green-slate",
+      "version": "0.1.0",
+      "path": "green-slate.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "designContract": "green-slate/design.json",
+      "qualityProfile": {
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "dark strategy report",
+        "operating-model assessment",
+        "transformation roadmap",
+        "methodology and evidence briefing"
+      ],
+      "coverage": {
+        "languages": ["en", "zh", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "slateCoverSlide",
+          "slateSummarySlide",
+          "slateRangeSlide",
+          "slateMatrixSlide",
+          "slateRoadmapSlide",
+          "slateValueSlide",
+          "slateFlowSlide",
+          "slateSectionSlide",
+          "slateNoticeSlide",
+          "slateClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "slateCoverSlide",
+        "slateSummarySlide",
+        "slateRangeSlide",
+        "slateMatrixSlide",
+        "slateRoadmapSlide",
+        "slateValueSlide",
+        "slateFlowSlide",
+        "slateSectionSlide",
+        "slateNoticeSlide",
+        "slateClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Dark slate consulting reports with layered green evidence and explicit decisions.",
+        "mood": ["analytical", "restrained", "structured"],
+        "layoutPrinciples": [
+          "One assertion, one dominant proof object, traceable sources.",
+          "Chart + interpretation, native matrix, phase gates and sparse transitions."
+        ],
+        "signatureElements": [
+          "angled cover field",
+          "small green tab",
+          "mint data encoding",
+          "thin rules",
+          "duration-scaled roadmap"
+        ],
+        "typography": {
+          "display": "Arial / Arial Unicode MS",
+          "body": "Arial / Arial Unicode MS"
+        },
+        "colorSystem": {
+          "background": ["dark slate", "deep green"],
+          "primary": ["near white"],
+          "accent": ["mint"],
+          "secondary": ["green ladder", "gray reference", "rose for explicit negative table states"]
+        },
+        "slideRhythm": {
+          "anchor": ["slateCoverSlide", "slateSectionSlide", "slateClosingSlide"],
+          "judgment": ["slateSummarySlide"],
+          "evidence": [
+            "slateRangeSlide",
+            "slateMatrixSlide",
+            "slateRoadmapSlide",
+            "slateValueSlide",
+            "slateFlowSlide",
+            "slateNoticeSlide"
+          ]
+        },
+        "compositionRules": [
+          "Dark surface throughout.",
+          "No 3D, decorative imagery, shadows or rainbow palettes.",
+          "Status text accompanies semantic colors."
+        ],
+        "avoid": [
+          "light content backgrounds",
+          "glowing text",
+          "oversized icons",
+          "dense floating callouts"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slideTypes": {
+          "slateCoverSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.abstract",
+              "data.metrics",
+              "data.callout"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "slateSummarySlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.basis",
+              "data.verdict",
+              "data.findings",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "slateRangeSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.basis",
+              "data.verdict",
+              "data.range",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "wide"]
+          },
+          "slateMatrixSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.basis",
+              "data.verdict",
+              "data.columns",
+              "data.rows",
+              "data.legend"
+            ],
+            "allowedLayoutIds": ["auto", "full", "compact"]
+          },
+          "slateRoadmapSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.basis",
+              "data.verdict",
+              "data.unit",
+              "data.phases",
+              "data.tracks"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "slateValueSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.basis",
+              "data.verdict",
+              "data.chart",
+              "data.investment",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "slateFlowSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.basis",
+              "data.verdict",
+              "data.steps",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "vertical", "horizontal"]
+          },
+          "slateSectionSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.abstract"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "slateNoticeSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.paragraphs"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "slateClosingSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.source",
+              "data.asOf",
+              "data.abstract",
+              "data.next",
+              "data.contact"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "groups": {
+          "anchor": ["slateCoverSlide", "slateSectionSlide", "slateClosingSlide"],
+          "judgment": ["slateSummarySlide"],
+          "evidence": [
+            "slateRangeSlide",
+            "slateMatrixSlide",
+            "slateRoadmapSlide",
+            "slateValueSlide",
+            "slateFlowSlide",
+            "slateNoticeSlide"
+          ]
+        },
+        "maxConsecutiveSameGroup": 8,
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 130
+        },
+        "hard": {
+          "titleMaxChars": 130
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "Phase 1 twelve-page canonical baseline: zero findings",
+        "pngReview": "Source-role baseline reviewed; reusable-kit validation pending"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-10-22",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-22",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-green-slate-20261021/benchmark/02"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
+            }
+          },
+          "cases": [
+            {
+              "caseId": "green-slate.golden-design",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-green-slate-20261021/benchmark/02/green-slate/golden-design/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/green-slate/golden-design/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 12,
+                "expectedCount": 12,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 282022
+              },
+              "patchOps": 931,
+              "p50TotalMs": 105.48
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Migrated from moss-green design prose and an eight-panel reference image; readability and composition adapted.",
+        "Arial and Arial Unicode MS replace the unavailable reference typeface; fonts must be installed.",
+        "Range plots encode lower bound plus derived span; explicit low/high labels retain interval meaning.",
+        "Roadmaps are editable shapes derived from phase durations, not live synchronized schedules.",
+        "No source portrait, logo, image assets, financial verification or refurbishment parity is bundled."
+      ],
+      "examples": [
+        {
+          "name": "green-slate-reference",
+          "contentPath": "examples/green-slate-content.json"
+        }
+      ]
     }
   ]
 }

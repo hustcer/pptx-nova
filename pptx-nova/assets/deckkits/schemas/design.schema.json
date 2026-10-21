@@ -221,12 +221,35 @@
         "focus": {
           "type": "string",
           "minLength": 1
+        },
+        "panel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "header": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secondary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "negative": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": false
     },
     "editorial": {
       "$ref": "#/$defs/editorial"
+    },
+    "strategy": {
+      "$ref": "#/$defs/strategy"
     }
   },
   "required": [
@@ -825,6 +848,177 @@
         "contrast",
         "chart",
         "limits"
+      ],
+      "additionalProperties": false
+    },
+    "strategy": {
+      "type": "object",
+      "properties": {
+        "renderer": {
+          "const": "strategy-report/v1"
+        },
+        "typography": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "cover": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "body": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "label": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "source": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "metric": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["title", "cover", "body", "label", "source", "metric"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "basis": {
+              "$ref": "#/$defs/frame"
+            },
+            "footer": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            },
+            "verdict": {
+              "$ref": "#/$defs/frame"
+            },
+            "tab": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["title", "basis", "footer", "page", "verdict", "tab"],
+          "additionalProperties": false
+        },
+        "coverZone": {
+          "$ref": "#/$defs/frame"
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "titleUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "footerUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["titleUnits", "footerUnits"],
+          "additionalProperties": false
+        },
+        "maxConsecutive": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "summary",
+                  "range",
+                  "matrix",
+                  "roadmap",
+                  "value",
+                  "flow",
+                  "section",
+                  "notice",
+                  "closing"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    },
+                    "maxItems": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 8
+                    }
+                  },
+                  "required": ["regions", "maxItems"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        },
+        "roadmap": {
+          "type": "object",
+          "properties": {
+            "headerHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "trackTop": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "gateHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "gateGap": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "rowBottomGap": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["headerHeight", "trackTop", "gateHeight", "gateGap", "rowBottomGap"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "renderer",
+        "typography",
+        "chrome",
+        "coverZone",
+        "limits",
+        "maxConsecutive",
+        "families",
+        "roadmap"
       ],
       "additionalProperties": false
     }

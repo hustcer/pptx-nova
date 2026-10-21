@@ -10,6 +10,42 @@ into an editable PowerPoint file. The primary target is PowerPoint; Keynote and
 other compatible office suites can usually open the result, subject to their
 PPTX compatibility.
 
+## Install the skill
+
+Install only the user-facing `pptx-nova` skill from this repository:
+
+```bash
+npx skills add hustcer/pptx-nova --skill pptx-nova
+```
+
+The default scope is the current project. For a global installation to a specific Agent:
+
+```bash
+# Claude Code
+npx skills add hustcer/pptx-nova --skill pptx-nova -g -a claude-code -y
+
+# Codex
+npx skills add hustcer/pptx-nova --skill pptx-nova -g -a codex -y
+```
+
+`-g` installs at user scope, `-a` selects the Agent, and `-y` skips confirmation prompts.
+To list the repository's skills without installing them, run
+`npx skills add hustcer/pptx-nova --list`. The `deckkit-maker` skill is for DeckKit
+development and is not required to use `pptx-nova`.
+
+The skill installer does not install the `xdoc` runtime. Real PPTX creation, editing,
+conversion, and preview workflows also require `xdoc` on the Agent's `PATH`.
+Install the documented release separately with Node.js 22+:
+
+```bash
+npm i -g @s8fy/xdoc@0.13.0
+xdoc --version
+```
+
+See the [xdoc installation guide](docs/xdoc-installation.md) for native archives,
+platform requirements, and runtime verification. After setup, describe the presentation
+task to your Agent in plain language.
+
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
 xdoc is an agent-native document execution runtime for native, editable PPTX work.

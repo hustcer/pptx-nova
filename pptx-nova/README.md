@@ -4,8 +4,41 @@
 what you need in everyday language, and it will aim to deliver a real editable `.pptx` file instead of
 a deck made of screenshots.
 
-This guide is for regular users. You do not need to understand command lines, config files, or the
-internal workflow.
+This guide is for regular users. Once installed, you can use the skill without understanding config
+files or the internal workflow.
+
+## Installation
+
+Install the skill into the current project:
+
+```bash
+npx skills add hustcer/pptx-nova --skill pptx-nova
+```
+
+For a global installation, choose the command for your Agent:
+
+```bash
+# Claude Code
+npx skills add hustcer/pptx-nova --skill pptx-nova -g -a claude-code -y
+
+# Codex
+npx skills add hustcer/pptx-nova --skill pptx-nova -g -a codex -y
+```
+
+`-g` installs at user scope, `-a` selects the Agent, and `-y` skips confirmation prompts.
+Only `pptx-nova` is selected; the developer-side `deckkit-maker` skill is not required.
+
+The skill installer does not install `xdoc`. Real PPTX creation, editing, conversion, and preview
+workflows require the runtime separately, available on the Agent's `PATH`. With Node.js 22+:
+
+```bash
+npm i -g @s8fy/xdoc@0.13.0
+xdoc --version
+```
+
+See the [xdoc installation guide](https://github.com/hustcer/pptx-nova/blob/main/docs/xdoc-installation.md)
+for native archives, platform requirements, and runtime verification. After setup, describe your
+presentation task to your Agent in plain language.
 
 ## Why It Is More Than Another PPT Generator
 
@@ -68,7 +101,7 @@ explicit review.
 
 The verified release is `0.13.0 (96708959)`. Install with
 `npm i -g @s8fy/xdoc@0.13.0` using Node.js 22+, or use a standalone native
-archive (see the [installation guide](../docs/xdoc-installation.md)). Free mode
+archive (see the [installation guide](https://github.com/hustcer/pptx-nova/blob/main/docs/xdoc-installation.md)). Free mode
 supports single-user local tasks up to 10 slides and 5 MiB of compressed PPTX
 inputs combined. Visual outputs, including editable PPTX, PDF, and PNG, carry
 a `structurify.io` watermark. Personal and Enterprise remove plan-level size/slide

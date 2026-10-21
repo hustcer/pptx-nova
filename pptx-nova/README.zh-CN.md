@@ -3,7 +3,40 @@
 `pptx-nova` 可以帮你制作、修改、翻新、翻译和检查 PowerPoint 演示文稿。你只需要用日常语言说明想要什么，
 它会尽量交付一份真正可编辑的 `.pptx` 文件，而不是一张张截图。
 
-这份文档写给普通使用者。你不需要了解命令行、配置文件或内部流程。
+这份文档写给普通使用者。完成安装后，你不需要了解配置文件或内部流程，即可用自然语言提出需求。
+
+## 安装
+
+将 skill 安装到当前项目：
+
+```bash
+npx skills add hustcer/pptx-nova --skill pptx-nova
+```
+
+如果需要全局安装，按使用的 Agent 选择命令：
+
+```bash
+# Claude Code
+npx skills add hustcer/pptx-nova --skill pptx-nova -g -a claude-code -y
+
+# Codex
+npx skills add hustcer/pptx-nova --skill pptx-nova -g -a codex -y
+```
+
+`-g` 表示用户级全局安装，`-a` 指定 Agent，`-y` 跳过确认提示。这些命令只选择 `pptx-nova`；
+普通使用者不需要安装开发者侧的 `deckkit-maker` skill。
+
+skill 安装命令不会安装 `xdoc`。实际生成、编辑、转换 PPTX 和渲染预览，还需要单独安装该运行时，
+并确保 Agent 可以通过 `PATH` 找到 `xdoc`。使用 Node.js 22+ 时可以运行：
+
+```bash
+npm i -g @s8fy/xdoc@0.13.0
+xdoc --version
+```
+
+原生安装包、平台要求和运行时验证方法见
+[xdoc 安装指南](https://github.com/hustcer/pptx-nova/blob/main/docs/xdoc-installation.md)。
+完成配置后，直接用自然语言向 Agent 描述演示文稿需求即可。
 
 ## 为什么它不只是普通 PPT 生成器
 

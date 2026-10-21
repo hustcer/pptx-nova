@@ -275,7 +275,7 @@ a separate policy boundary. The verified runtime exposes its current behavior
 in `commands.convert.licensePolicy` and `authContract.productLimits`: without
 a credential, the Free Baseline supports single-user local tasks up to 10 slides
 and 5 MiB (5,242,880 bytes) of compressed PPTX inputs combined. Visual outputs,
-including editable PPTX, PDF, and PNG, carry an `XDOC DEMO` watermark; larger
+including editable PPTX, PDF, and PNG, carry a `structurify.io` watermark; larger
 tasks are denied with exit code 4. The task slide count includes both input
 and planned output, and the byte total includes primary and donor PPTX inputs.
 
@@ -310,7 +310,7 @@ command.
 | macOS reports an incompatible system version         | The artifact was built with a newer deployment target than the worker | Publish and select an archive whose documented minimum macOS version includes the worker; do not promise compatibility from the runner name alone |
 | Text wraps differently across workers                | Fonts or font cache differ                                            | Compare `xdoc extract ... --parts fonts`, provision the same fonts, and retain render provenance                                                  |
 | A file exists but the Agent marks the job successful | The caller checked filesystem existence instead of the report         | Parse the command's versioned report and exit policy; a file alone is not a gate                                                                  |
-| `XDOC DEMO` appears in PPTX/PDF/PNG output           | The task uses Free mode or retains an existing watermark obligation   | Check task authorization and the input's existing obligations; a paid License does not automatically remove prior marks                           |
+| `structurify.io` appears in PPTX/PDF/PNG output      | The task uses Free mode or retains an existing watermark obligation   | Check task authorization and the input's existing obligations; a paid License does not automatically remove prior marks                           |
 
 ## Related documentation
 

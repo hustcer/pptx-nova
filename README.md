@@ -38,7 +38,7 @@ on the available fonts and the support status of the requested feature.
 Install the published CLI with `npm i -g @s8fy/xdoc@0.13.0` (Node.js 22+), or
 use a [native release archive](docs/xdoc-installation.md). Free mode supports
 single-user local tasks up to 10 slides and 5 MiB of compressed PPTX inputs
-combined; editable PPTX, PDF, and PNG outputs carry an `XDOC DEMO` watermark.
+combined; editable PPTX, PDF, and PNG outputs carry a `structurify.io` watermark.
 Local scripts and a per-user daemon are supported. The launch Free, Personal,
 and Enterprise plans do not include CI, shared servers, or Service/API use;
 deployment in those environments requires separately applicable authorization.

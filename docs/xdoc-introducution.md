@@ -1881,7 +1881,7 @@ live `authContract`. With no credential, Free supports single-user local tasks
 up to 10 slides and 5 MiB (5,242,880 bytes) of compressed PPTX inputs combined.
 The byte total includes primary and donor PPTX inputs; slide count includes
 input, planned processing, and planned output. Visual outputs, including
-editable PPTX, PDF, and PNG, carry an `XDOC DEMO` watermark; larger tasks are
+editable PPTX, PDF, and PNG, carry a `structurify.io` watermark; larger tasks are
 denied with exit code 4 before delivery. A signed License may be supplied
 through `--license` or the documented lookup locations, but its presence or a
 successful signature check alone does not authorize a task.
@@ -2139,7 +2139,7 @@ claims should stay tied to the measured contract and its declared limitations.
     cryptographic revision links.
 17. Distribution licensing and task authorization are separate. Free local
     tasks are limited to 10 slides and 5 MiB of compressed PPTX inputs combined,
-    with `XDOC DEMO` marks on visual PPTX/PDF/PNG output. Larger tasks are denied
+    with `structurify.io` marks on visual PPTX/PDF/PNG output. Larger tasks are denied
     with exit code 4. Launch plans exclude CI, shared servers, and Service/API.
 18. Static PDF/PNG and previews do not play animations or transitions. Morph
     pair checks and authoring success do not establish Office playback parity.

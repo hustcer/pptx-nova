@@ -208,7 +208,7 @@ Technical deployability is separate from task authorization. The launch plans
 support single-user or organizational local use, local scripts, and a per-user
 daemon; CI, shared servers, and Service/API use are outside those plans.
 Free tasks are limited to 10 slides and 5 MiB of compressed PPTX inputs
-combined, with `XDOC DEMO` marks on editable PPTX, PDF, and PNG outputs.
+combined, with `structurify.io` marks on editable PPTX, PDF, and PNG outputs.
 
 Before assigning a downloaded binary to an Agent, verify:
 

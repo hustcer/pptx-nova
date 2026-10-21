@@ -45,7 +45,7 @@ release must present the same CLI contract.
 The published npm launcher requires Node.js 22+ and selects an exact-version
 native platform package. A standalone release archive does not require Node.js.
 Free mode limits a local task to 10 slides and 5 MiB of compressed PPTX inputs
-combined, including donor decks; visual PPTX/PDF/PNG outputs carry an `XDOC DEMO`
+combined, including donor decks; visual PPTX/PDF/PNG outputs carry a `structurify.io`
 watermark. Paid task access depends on signed entitlements and host facts, so
 neither `auth verify` nor a healthy `auth status` alone authorizes a job.
 

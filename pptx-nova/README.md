@@ -71,7 +71,7 @@ The verified release is `0.13.0 (96708959)`. Install with
 archive (see the [installation guide](../docs/xdoc-installation.md)). Free mode
 supports single-user local tasks up to 10 slides and 5 MiB of compressed PPTX
 inputs combined. Visual outputs, including editable PPTX, PDF, and PNG, carry
-an `XDOC DEMO` watermark. Personal and Enterprise remove plan-level size/slide
+a `structurify.io` watermark. Personal and Enterprise remove plan-level size/slide
 limits and new plan watermarks; existing signed watermark obligations still
 apply. The launch plans cover local scripts and a per-user daemon, and exclude
 CI, shared servers, and Service/API use. Public downloads use non-commercial

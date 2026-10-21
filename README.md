@@ -18,10 +18,10 @@ A 20-second recording of native PPTX playback in the browser. Click the preview 
 
 Explore presentations created with `pptx-nova` directly in your browser:
 
-- [Quiet Canvas](https://structurify.io/en/showcases/quiet-canvas/)
-- [Electric Stage](https://structurify.io/en/showcases/electric-stage/)
-- [Copper Motion](https://structurify.io/en/showcases/copper-motion/)
-- [Signal Depth](https://structurify.io/en/showcases/signal-depth/)
+- [Quiet Canvas](https://structurify.io/en/showcases/quiet-canvas/) · [PPTX source](showcases/D1-Quiet-Canvas.pptx)
+- [Electric Stage](https://structurify.io/en/showcases/electric-stage/) · [PPTX source](showcases/D2-Electric-Stage.pptx)
+- [Copper Motion](https://structurify.io/en/showcases/copper-motion/) · [PPTX source](showcases/D5-Copper-Motion.pptx)
+- [Signal Depth](https://structurify.io/en/showcases/signal-depth/) · [PPTX source](showcases/D6-Signal-Depth.pptx)
 
 Tip: Click the triangular play button in the bottom-right corner of a showcase to see it in action.
 **These are real, native, editable PPTX files!**

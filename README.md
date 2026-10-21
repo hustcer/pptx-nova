@@ -12,6 +12,10 @@ PPTX compatibility.
 
 ## See the results
 
+[![Copper Motion — native PPTX playback](docs/images/copper-motion-playback.gif)](https://structurify.io/en/showcases/copper-motion/)
+
+A 20-second recording of native PPTX playback in the browser. Click the preview for the full interactive showcase.
+
 Explore presentations created with `pptx-nova` directly in your browser:
 
 - [Quiet Canvas](https://structurify.io/en/showcases/quiet-canvas/)

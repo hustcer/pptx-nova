@@ -1,20 +1,18 @@
 ---
 name: deckkit-maker
 description: >
-  从参考 .pptx 文件或 HTML 演示模板为 pptx-nova SKILL 创建新的 DeckKit（开发者侧
-  skill，操作 pptx-nova/ 源码）。当用户提供一个参考 .pptx 文件、template.html
-  或 HTML 模板目录和新 DeckKit 的名字，要求"创建 DeckKit / 新增 DeckKit / 把这个 pptx
-  做成 DeckKit / 把这个 HTML template 转成 DeckKit / 复刻这个 deck 的风格做成套件 /
-  模仿这个 deck 新建 DeckKit" 时触发。两阶段工作流：
-  第一阶段对参考 deck 做高保真基线重建（默认覆盖所有 slides；大型或高度重复 deck
-  先确认代表页型范围，风格、主题、内容可照搬），第二阶段组件化抽象为 id.kit.mjs +
+  从参考 .pptx、HTML 模板，或 design.md + 参考图为 pptx-nova 创建或迁移 DeckKit
+  （开发者侧 skill，操作 pptx-nova/ 源码）。用户提供设计规范、截图/风格板并要求
+  创建套件、迁移皮肤或扩展设计语言时适用；也支持 PPTX/HTML 风格重建。两阶段工作流：
+  第一阶段建立视觉基线（PPTX/HTML 按约定范围重建；设计规范与图片提取身份、构图并修正不合理设计），
+  第二阶段组件化抽象为 id.kit.mjs +
   schema + catalog + benchmark 并走 readiness
   流程。不要把本 skill 用于普通交付型 deck 生成——那是 pptx-nova 的 DeckKit 模式。
 ---
 
 # deckkit-maker
 
-从一个参考 `.pptx` 文件或 HTML 演示模板出发，为 pptx-nova 创建新的 DeckKit。目标是让以后的 Agent
+从参考 `.pptx`、HTML 模板，或 `design.md + 参考图` 出发，为 pptx-nova 创建新的 DeckKit。目标是让以后的 Agent
 能用 `content.json → DeckKit → patch → xdoc` 稳定高效地产出同主题、同质量的 PPTX。
 
 本 skill 是 **开发者侧** skill：它修改 `pptx-nova/` 源码，可以使用仓库根
@@ -26,12 +24,17 @@ description: >
 
 用户会提供：
 
-1. **参考 `.pptx` 文件路径，或 HTML template 文件/目录** —— 风格、主题、模板、内容的唯一事实来源。参考文件只读。
+1. **参考源** —— `.pptx`、HTML template 文件/目录，或 `design.md + 一张/多张参考图`。参考文件只读。
 2. **新 DeckKit 的名字** —— kebab-case id（如 `swiss-grid`、`consulting-dark`）。
 
 新建 DeckKit 时如果两者缺一，先向用户索取，不要自己猜测或挑选文件。已有 kit 修复、skill
 维护或兼容性评估按用户指定范围开展，不需要虚构新 id 或索取无关参考文件。若参考源是 HTML 目录，优先确认其中
 的入口文件（通常是 `template.html`）和元数据文件（如 `template.json` / `design.md`）。
+
+输入为设计规范和图片时，先读 [references/design-source-migration.md](references/design-source-migration.md)。
+文档约束、图片布局和领域政策可能冲突，先记录来源与优先级；截图不自动成为业务数据来源。
+用户允许设计优化时，以身份一致、可读性和内容表达为验收目标，主动修正不合理参考，不要求逐像素复刻。
+该路线采用 `design.json + intent.md + 已注册执行组件`，复用现有合同门禁；不要给新风格复制一整套生成器。
 
 ## xdoc transport 边界
 
@@ -83,6 +86,9 @@ inspect 回读；DeckKit 新建 patch 不能混入已有文件的 stale selector
 
 ## 新建 DeckKit preflight（必做）
 
+`design.md + 参考图` 路线用设计文档/图片的存在性、source manifest 和目标 id 检查替代下例的
+PPTX/HTML 输入检查；不要求不存在的二进制参考源。其他身份、目标路径、输出隔离检查仍适用。
+
 新建 DeckKit 时，在读取参考 deck 或创建 run 目录前，先完成这些检查并把结果写进
 `.tmp/deckkit-<id>/progress.md`；若 run 目录已存在，改用带时间戳的目录或先询问用户，
 不要覆盖旧分析产物。
@@ -120,11 +126,12 @@ test ! -e pptx-nova/assets/examples/<id>
 ## 两阶段总览
 
 ```text
-参考 .pptx / HTML template + 新 DeckKit 名字
+参考 .pptx / HTML template / design.md + 参考图 + 新 DeckKit 名字
   │
   ├─ Phase 0  分析参考 deck/template   → references/analyze-reference.md
   │    pptx: unpack → 参考 PNG 基准
   │    html: browser screenshots → DOM/CSS/token extraction
+  │    design + image: provenance → page/signature inventory → conflict decisions
   │    → style-spec.md + slide-inventory.md + fidelity-scope.md
   │
   ├─ Phase 1  高保真重建（第一交付物）  → references/rebuild-high-fidelity.md
@@ -288,7 +295,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   canonical Create 放行；仍须通过当前交付门禁，不能用 qualityProfile 覆盖它。
   现有 benchmark 的 vision/PNG 成功也不能代替 canonical PDF 最终布局检查。修复 kit 后，
   至少对完整 golden 示例执行一次当前 runtime 的 `xdoc pptx visual-audit --candidate <deck.pptx>
-  --visual-mode create --field-date <YYYY-MM-DD> --output-dir <iteration-dir>/canonical --json`，读取 manifest 的 required checks、
+--visual-mode create --field-date <YYYY-MM-DD> --output-dir <iteration-dir>/canonical --json`，读取 manifest 的 required checks、
   findings 和 decision；若运行时未披露该路线，按 `create-runner.md` 的兼容路径处理并记录边界。
   参考、candidate、benchmark 使用同一冻结日期；按 manifest/artifact path 定位产物，不猜文件名。
   exit code 0、PNG 存在或旧 baseline 通过均不足以单独证明放行。
@@ -368,3 +375,4 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 | `references/html-template-reference.md` | Phase 0 补充：HTML 模板截图、DOM/CSS 分析、交互过滤 |
 | `references/rebuild-high-fidelity.md`   | Phase 1：探索生成器、逐页重建与对比循环、避坑清单   |
 | `references/componentize.md`            | Phase 2：抽 kit/schema/catalog/benchmark/readiness  |
+| `references/design-source-migration.md` | design.md + 参考图：来源、设计裁决、合同与复用验证  |

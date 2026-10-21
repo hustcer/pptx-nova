@@ -1,7 +1,8 @@
 # Contract-driven DeckKits
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
-existing workflow. The pilot is `biennale-yellow`; this is an opt-in extension, not a new xdoc format.
+existing workflow. The opt-in designs are `biennale-yellow` and `black-gold`; this is a pptx-nova
+extension, not a new xdoc format.
 
 ## Agent workflow
 
@@ -92,6 +93,43 @@ the renderer's full-value fallback; inspect the visible output rather than claim
 format was applied.
 
 ## Maintainer boundary
+
+### Editorial family: Black Gold
+
+`black-gold` uses the `editorial-ledger/v1` family with six content types: `ledgerCoverSlide`,
+`ledgerSummarySlide`, `ledgerTrendSlide`, `ledgerMatrixSlide`, `ledgerRankingSlide`,
+`ledgerDecisionSlide`. Discover its own contract and content schemas; do not reuse Biennale fields.
+Its example is `assets/deckkits/examples/black-gold-content.json`.
+
+Trend pages choose full-width, explanation rail or a supporting native chart. Rankings choose a
+KPI rail or a lower KPI band. Matrices support bounded row densities. Content capacity and the
+geometry fingerprint, rather than random positions, determine valid changes. Repetition warnings
+remain review inputs. Full decks use light evidence and dark summary/action stages; an explicit
+`meta.designScope: "excerpt"` allows long evidence excerpts without inventing narrative stages.
+
+Each body page requires assertion, basis, source, as-of, unit and verdict. Cover fields differ and
+do not contain unused body slots. Dual-unit trends use `chart.categories` once; `secondary` supplies
+only kind/name/unit/values and inherits those categories. Current tested JSON projection omits a
+combo group, so the adapter uses two independently verifiable native plots.
+
+Matrix input has five headers and 3–5 rows (`name`, numeric `amount`, numeric `share` from 0–100,
+`representative`, `thesis`), plus `totalLabel`. The native table retains every cell's text. Share bars
+are editable shapes computed from the same source numbers; editing cells manually in PowerPoint
+does not automatically update the bars. Regenerate from content to keep them synchronized.
+Cells use one authored paragraph with automatic wrapping. Native cell style/OOXML equality is not
+proved by cell-text readback.
+
+Gold focus is counted from actual styled objects/points, with the cover rule exempt as structure.
+Bar/column focus uses an outline to avoid large accent fills; line endpoints use a small gold marker.
+The palette, typography, flat effects, chart kinds, axis/grid and table-rule restrictions are checked
+in patch operations. Gold pixel area, assertion quality and overall aesthetics require visual review.
+Native-table creation also runs the semantic audit and binds its report to finalization.
+
+The optional [finance research policy](policies/finance-research.md) applies when requested content
+requires it; skin selection does not activate financial assumptions or conclusions. The kit is a
+candidate migration, not an automatic production/default choice or a verified refurbishment route.
+
+### Shared contract boundaries
 
 The published runtime uses only Node built-ins and xdoc. The design schema is a bounded first-party
 schema, validated by `design-contract.mjs`; this is not an exported general-purpose JSON Schema

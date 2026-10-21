@@ -327,6 +327,7 @@ function artifactPaths(runDir) {
     designContract: join(runDir, 'design-contract.json'),
     designCheck: join(runDir, 'design-check.json'),
     designReadback: join(runDir, 'design-readback.json'),
+    designSemantic: join(runDir, 'design-semantic.json'),
     designInspect: join(runDir, 'design-inspect.json'),
     designModel: join(runDir, 'design-model.json'),
     lockCheck: join(runDir, 'check-lock.json'),
@@ -476,6 +477,7 @@ function buildAgentSummary(summary) {
               contractHash: designReadback.contractHash,
               checkedObjects: designReadback.checkedObjects,
               checkedCharts: designReadback.checkedCharts,
+              checkedTables: designReadback.checkedTables,
             },
           }
         : {}),
@@ -498,6 +500,9 @@ function buildAgentSummary(summary) {
             designPlan: summary.artifacts.designPlan,
             designCheck: summary.artifacts.designCheck,
             designReadback: summary.artifacts.designReadback,
+            ...(existsSync(summary.artifacts.designSemantic)
+              ? { designSemantic: summary.artifacts.designSemantic }
+              : {}),
           }
         : {}),
     },
@@ -762,7 +767,7 @@ function runDesignReadback(summary, args, artifacts) {
     '--inspect',
     artifacts.designInspect,
   ]
-  if (patch.ops.some((op) => op.op === 'add-chart')) {
+  if (patch.ops.some((op) => ['add-chart', 'add-table'].includes(op.op))) {
     runPlainPhase(summary, {
       name: 'design-data-projection',
       bin: args.xdocBin,
@@ -780,8 +785,43 @@ function runDesignReadback(summary, args, artifacts) {
     contractHash: plan.contractHash,
     checkedObjects: result?.checkedObjects ?? null,
     checkedCharts: result?.checkedCharts ?? null,
+    checkedTables: result?.checkedTables ?? null,
     message: 'Applied objects and native chart data must match the design plan',
   })
+  if (patch.ops.some((op) => op.op === 'add-table')) {
+    const audit = runJsonPhase(summary, {
+      name: 'design-semantic',
+      bin: process.execPath,
+      args: [
+        join(SCRIPT_DIR, 'pptx-nova-semantic-audit.mjs'),
+        '--deck-lock',
+        args.lock,
+        '--patch',
+        artifacts.patch,
+        '--final-inspect',
+        artifacts.designInspect,
+        '--output',
+        artifacts.designSemantic,
+        '--json',
+      ],
+      artifact: artifacts.designSemantic,
+    })
+    requireGate(
+      summary,
+      'design-semantic',
+      audit.schemaVersion === 'pptx-nova-semantic-audit/v1' &&
+        audit.status !== 'fail' &&
+        audit.summary.errors === 0,
+      {
+        message: 'Native tables require semantic metadata and object checks',
+        warnings: audit.summary.warnings,
+      },
+    )
+    if (audit.summary.warnings)
+      summary.warnings.push(
+        `design-semantic: ${audit.summary.warnings} review warnings; inspect design-semantic.json`,
+      )
+  }
 }
 
 function runVision(summary, args, artifacts) {

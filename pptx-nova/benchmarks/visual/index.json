@@ -171,6 +171,15 @@
       "buildPath": "../../assets/deckkits/examples/biennale-yellow-build.mjs",
       "expectedPath": "cases/biennale-yellow/evidence-variants/expected.json",
       "reviewPath": "cases/biennale-yellow/evidence-variants/review.md"
+    },
+    {
+      "id": "black-gold.golden-design",
+      "deckkit": "black-gold",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/black-gold-content.json",
+      "buildPath": "../../assets/deckkits/examples/black-gold-build.mjs",
+      "expectedPath": "cases/black-gold/golden-design/expected.json",
+      "reviewPath": "cases/black-gold/golden-design/review.md"
     }
   ]
 }

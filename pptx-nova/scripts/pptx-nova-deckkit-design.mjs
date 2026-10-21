@@ -16,7 +16,7 @@ const usage = `Usage:
 
 Without content: discover tokens, rules and layout capacities.
 With content: validate and resolve a deterministic plan without invoking xdoc.
-With plan/patch/inspect: verify applied objects; native charts also require the xdoc JSON model.
+With plan/patch/inspect: verify applied objects; native charts/tables require the xdoc JSON model.
 All output is JSON. Unknown arguments fail. Does not publish or certify visual quality.
 `
 const read = (p) => JSON.parse(readFileSync(resolve(p), 'utf8'))
@@ -88,8 +88,9 @@ try {
       rules: d.rules,
       legacySlideTypes: Object.keys(d.legacyLayouts),
       evidence: d.evidence,
+      ...(d.editorial ? { editorial: d.editorial } : {}),
       inputGuide:
-        'Use the registered evidence slide schema and layoutId=auto. Raw coordinates/colors/fonts are not content inputs.',
+        'Use registered content schemas and layoutId=auto. Raw coordinates/colors/fonts are not content inputs.',
       visualReviewRequired: true,
     }
   }

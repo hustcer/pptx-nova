@@ -59,17 +59,73 @@
       "properties": {
         "colors": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 1
-          }
+          "properties": {
+            "lt1": {
+              "type": "string",
+              "minLength": 1
+            },
+            "dk1": {
+              "type": "string",
+              "minLength": 1
+            },
+            "lt2": {
+              "type": "string",
+              "minLength": 1
+            },
+            "dk2": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accent1": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accent2": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accent3": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accent4": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accent5": {
+              "type": "string",
+              "minLength": 1
+            },
+            "accent6": {
+              "type": "string",
+              "minLength": 1
+            },
+            "hlink": {
+              "type": "string",
+              "minLength": 1
+            },
+            "folHlink": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["lt1", "dk1", "accent1"],
+          "additionalProperties": false
         },
         "fonts": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 1
-          }
+          "properties": {
+            "major": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minor": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["major", "minor"],
+          "additionalProperties": false
         }
       },
       "required": ["colors", "fonts"],
@@ -168,6 +224,9 @@
         }
       },
       "additionalProperties": false
+    },
+    "editorial": {
+      "$ref": "#/$defs/editorial"
     }
   },
   "required": [
@@ -181,7 +240,6 @@
     "textFrame",
     "rules",
     "legacyLayouts",
-    "evidence",
     "refurbish",
     "roles"
   ],
@@ -516,6 +574,257 @@
         "scientificBelow",
         "scientificAbove",
         "cjkWrapSafety"
+      ],
+      "additionalProperties": false
+    },
+    "editorial": {
+      "type": "object",
+      "properties": {
+        "renderer": {
+          "const": "editorial-ledger/v1"
+        },
+        "typography": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "number",
+              "minimum": 10
+            },
+            "cover": {
+              "type": "number",
+              "minimum": 10
+            },
+            "body": {
+              "type": "number",
+              "minimum": 10
+            },
+            "label": {
+              "type": "number",
+              "minimum": 10
+            },
+            "source": {
+              "type": "number",
+              "minimum": 10
+            },
+            "metric": {
+              "type": "number",
+              "minimum": 10
+            },
+            "watermark": {
+              "type": "number",
+              "minimum": 10
+            }
+          },
+          "required": ["title", "cover", "body", "label", "source", "metric", "watermark"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "margin": {
+              "type": "number",
+              "minimum": 0
+            },
+            "topRule": {
+              "$ref": "#/$defs/frame"
+            },
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "basis": {
+              "$ref": "#/$defs/frame"
+            },
+            "footer": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            },
+            "verdict": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["margin", "topRule", "title", "basis", "footer", "page", "verdict"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "minFullDeck": {
+              "type": "number",
+              "minimum": 1
+            },
+            "darkTarget": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1
+            }
+          },
+          "required": ["minFullDeck", "darkTarget", "maxConsecutive"],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "enum": ["cover", "summary", "trend", "matrix", "ranking", "decision"]
+              },
+              "mode": {
+                "enum": ["light", "dark"]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    },
+                    "maxItems": {
+                      "type": "number",
+                      "minimum": 1
+                    },
+                    "maxLabelUnits": {
+                      "type": "number",
+                      "minimum": 1
+                    }
+                  },
+                  "required": ["regions", "maxItems", "maxLabelUnits"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "mode", "variants"],
+            "additionalProperties": false
+          }
+        },
+        "contrast": {
+          "type": "object",
+          "properties": {
+            "muted": {
+              "type": "string",
+              "minLength": 1
+            },
+            "onDark": {
+              "type": "string",
+              "minLength": 1
+            },
+            "darkSurface": {
+              "type": "string",
+              "minLength": 1
+            },
+            "lightSurface": {
+              "type": "string",
+              "minLength": 1
+            },
+            "hairline": {
+              "type": "string",
+              "minLength": 1
+            },
+            "history": {
+              "type": "string",
+              "minLength": 1
+            },
+            "primary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "panel": {
+              "type": "string",
+              "minLength": 1
+            },
+            "darkRule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "watermark": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "muted",
+            "onDark",
+            "darkSurface",
+            "lightSurface",
+            "hairline",
+            "history",
+            "primary",
+            "panel",
+            "darkRule",
+            "watermark"
+          ],
+          "additionalProperties": false
+        },
+        "chart": {
+          "type": "object",
+          "properties": {
+            "linePt": {
+              "type": "number",
+              "minimum": 0.1
+            },
+            "markerPt": {
+              "type": "number",
+              "minimum": 1
+            },
+            "labelPt": {
+              "type": "number",
+              "minimum": 10
+            },
+            "gap": {
+              "type": "number",
+              "minimum": 1
+            },
+            "focusLinePt": {
+              "type": "number",
+              "minimum": 0.1
+            }
+          },
+          "required": ["linePt", "markerPt", "labelPt", "gap", "focusLinePt"],
+          "additionalProperties": false
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "titleUnits": {
+              "type": "number",
+              "minimum": 1
+            },
+            "basisUnits": {
+              "type": "number",
+              "minimum": 1
+            },
+            "footerUnits": {
+              "type": "number",
+              "minimum": 1
+            },
+            "bodyUnits": {
+              "type": "number",
+              "minimum": 1
+            }
+          },
+          "required": ["titleUnits", "basisUnits", "footerUnits", "bodyUnits"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "renderer",
+        "typography",
+        "chrome",
+        "rhythm",
+        "families",
+        "contrast",
+        "chart",
+        "limits"
       ],
       "additionalProperties": false
     }

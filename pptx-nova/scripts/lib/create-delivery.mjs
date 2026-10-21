@@ -30,6 +30,7 @@ export function recordCreateInputs(args, artifacts) {
       artifacts.designPlan,
       artifacts.designCheck,
       artifacts.designReadback,
+      artifacts.designSemantic,
       artifacts.designInspect,
       artifacts.designModel,
     ].filter((p) => p && existsSync(p)),

@@ -3747,6 +3747,304 @@
         }
       ],
       "designContract": "biennale-yellow/design.json"
+    },
+    {
+      "id": "black-gold",
+      "version": "0.1.0",
+      "path": "black-gold.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "designContract": "black-gold/design.json",
+      "qualityProfile": {
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": ["investment research", "financial periodical", "evidence-led executive briefing"],
+      "coverage": {
+        "languages": ["en", "zh", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "ledgerCoverSlide",
+          "ledgerSummarySlide",
+          "ledgerTrendSlide",
+          "ledgerMatrixSlide",
+          "ledgerRankingSlide",
+          "ledgerDecisionSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "ledgerCoverSlide",
+        "ledgerSummarySlide",
+        "ledgerTrendSlide",
+        "ledgerMatrixSlide",
+        "ledgerRankingSlide",
+        "ledgerDecisionSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Grayscale financial-periodical order with one gold focus and dark judgment stages.",
+        "mood": ["restrained", "institutional", "evidence-led"],
+        "layoutPrinciples": [
+          "White evidence, dark summary/action only.",
+          "Direct numeric labels, hairline tables and one gold focus."
+        ],
+        "signatureElements": ["top rule", "KPI rail", "watermark", "basis band"],
+        "typography": {
+          "display": "Arial and Microsoft YaHei",
+          "body": "Arial and Microsoft YaHei",
+          "mono": "Arial"
+        },
+        "colorSystem": {
+          "background": ["white", "charcoal"],
+          "primary": ["ink"],
+          "accent": ["gold"],
+          "secondary": ["copper for risk/exit only"]
+        },
+        "slideRhythm": {
+          "anchor": ["ledgerCoverSlide"],
+          "judgment": ["ledgerSummarySlide", "ledgerDecisionSlide"],
+          "evidence": ["ledgerTrendSlide", "ledgerMatrixSlide", "ledgerRankingSlide"]
+        },
+        "compositionRules": [
+          "No raster backgrounds or decorative icons.",
+          "No y-axis/gridlines.",
+          "Gold focus is counted structurally; area requires visual review."
+        ],
+        "avoid": ["card grids", "decorative images", "3D and shadow"]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slideTypes": {
+          "ledgerCoverSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.source",
+              "data.asOf",
+              "data.unit",
+              "data.masthead",
+              "data.date",
+              "data.abstract",
+              "data.watermark",
+              "data.disclosure",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "snapshot"]
+          },
+          "ledgerSummarySlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.unit",
+              "data.verdict",
+              "data.label",
+              "data.judgments",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "judgments"]
+          },
+          "ledgerTrendSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.unit",
+              "data.verdict",
+              "data.chart",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail", "paired"]
+          },
+          "ledgerMatrixSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.unit",
+              "data.verdict",
+              "data.headers",
+              "data.rows",
+              "data.totalLabel"
+            ],
+            "allowedLayoutIds": ["auto", "ledger", "compact"]
+          },
+          "ledgerRankingSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.unit",
+              "data.verdict",
+              "data.chart",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "wide"]
+          },
+          "ledgerDecisionSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.unit",
+              "data.verdict",
+              "data.label",
+              "data.actions",
+              "data.decision"
+            ],
+            "allowedLayoutIds": ["auto", "triggers"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "groups": {
+          "anchor": ["ledgerCoverSlide"],
+          "judgment": ["ledgerSummarySlide", "ledgerDecisionSlide"],
+          "evidence": ["ledgerTrendSlide", "ledgerMatrixSlide", "ledgerRankingSlide"]
+        },
+        "maxConsecutiveSameGroup": 8,
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 130
+        },
+        "hard": {
+          "titleMaxChars": 130
+        }
+      },
+      "validatedWith": {
+        "s8fy": ">=10",
+        "visionCheck": "Golden and robustness matrix: zero high/medium/low findings",
+        "pngReview": "Agent reviewed eight representative pages plus variant/stress/mixed/non-finance cases; candidate only"
+      },
+      "quality": {
+        "knownBlockingLimits": [],
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-10-21",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-21",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-black-gold-ledger-contract-20261021/benchmark/04"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "black-gold.golden-design",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-black-gold-ledger-contract-20261021/benchmark/04/black-gold/golden-design/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/black-gold/golden-design/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 190090
+              },
+              "patchOps": 591,
+              "p50TotalMs": 115.95
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Migrated from design prose and an eight-panel reference image; not a pixel-identical reproduction.",
+        "Finance content policy is separate and opt-in.",
+        "Dual-unit trend uses aligned native charts: combo model projection omits secondary group in tested runtime.",
+        "Fonts must be available in the renderer.",
+        "Gold pixel area and PowerPoint parity require separate verification."
+      ],
+      "examples": [
+        {
+          "name": "black-gold-reference",
+          "contentPath": "examples/black-gold-content.json"
+        }
+      ]
     }
   ]
 }

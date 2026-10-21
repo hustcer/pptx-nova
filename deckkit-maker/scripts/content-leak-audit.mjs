@@ -7,8 +7,9 @@ function usage() {
   node scripts/content-leak-audit.mjs --patch patch.json --denylist terms.txt [--json]
 
 Checks visible text emitted by set-text-frame, add-text-box, add-paragraph,
-set-paragraph, add-run, and set-run ops for forbidden reference-deck business
-terms. The denylist is one term per line; blank lines and
+set-paragraph, add-run, set-run, native table cells and classic chart category/
+series text for forbidden reference-deck business terms. Does not inspect binary
+PPTX parts or arbitrary raw XML. The denylist is one term per line; blank lines and
 lines starting with # are ignored.
 
 Denylist entry modes:
@@ -64,6 +65,26 @@ function collectVisibleText(patch) {
   const ops = Array.isArray(patch?.ops) ? patch.ops : []
   const texts = []
   for (const [index, op] of ops.entries()) {
+    const remember = (text, path) => {
+      if (typeof text === 'string' && text.length)
+        texts.push({ index, op: op.op, shape: op.shape?.name ?? op.name ?? null, path, text })
+    }
+    if (['add-table', 'set-table-data'].includes(op?.op)) {
+      const matrix = Array.isArray(op.data) ? op.data : op.data?.values
+      if (Array.isArray(matrix))
+        matrix.forEach((row, r) => {
+          if (Array.isArray(row)) row.forEach((cell, c) => remember(cell, `data[${r}][${c}]`))
+        })
+      if (typeof op.data?.text === 'string') remember(op.data.text, 'data.text')
+    }
+    if (op?.op === 'set-table')
+      (op.cells ?? []).forEach((cell, i) => remember(cell.text, `cells[${i}].text`))
+    if (['add-chart', 'set-chart-data'].includes(op?.op)) {
+      ;(op.data?.categories ?? []).forEach((text, i) => remember(text, `data.categories[${i}]`))
+      ;(op.data?.series ?? []).forEach((series, i) =>
+        remember(series.name, `data.series[${i}].name`),
+      )
+    }
     if (
       ![
         'set-text-frame',

@@ -1,6 +1,7 @@
 import { validateContent } from './core-primitives.kit.mjs'
 import { loadDesignContract, resolveDesignSlot, resolveEvidenceLayout } from './design-contract.mjs'
 import { readFileSync } from 'node:fs'
+import { resolveEditorialDeck } from './editorial-layouts.mjs'
 
 // Keep legacy validation intact. Only registered design contracts add semantic checks.
 export function validateDeckkitContent(content, options = {}) {
@@ -9,6 +10,19 @@ export function validateDeckkitContent(content, options = {}) {
   try {
     const design = loadDesignContract(options.deckkit || content.meta.deckkit)
     if (!design) return result
+    if (design.editorial) {
+      const resolved = resolveEditorialDeck(design, content)
+      result.errors = result.errors.filter((e) => e.type !== 'diversity')
+      result.warnings = result.warnings.filter((e) => e.type !== 'diversity')
+      result.fitDiagnostics = result.fitDiagnostics.filter((d) => !d.code?.startsWith('diversity.'))
+      result.valid = result.errors.length === 0
+      result.designDiversity = {
+        mode: 'resolved-editorial-layouts',
+        uniqueCompositions: new Set(resolved.layouts.map((r) => r.fingerprint)).size,
+      }
+      for (const message of resolved.warnings) result.warnings.push({ type: 'design', message })
+      return result
+    }
     const nativeOnly = content.slides.every((s) => s.type === design.evidence.slideType)
     const replaced = []
     if (nativeOnly) {

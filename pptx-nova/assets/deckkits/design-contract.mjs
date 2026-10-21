@@ -16,6 +16,8 @@ const CHECKS = new Set([
   'forbidden-operations',
   'bounds',
   'font-floor',
+  'single-accent-focus',
+  'editorial-language',
 ])
 
 // A deliberately bounded validator for the bundled design schema, not a general JSON Schema API.
@@ -86,7 +88,9 @@ export function assertDesignContract(design) {
       for (const frame of slot.frames) assertFrame(design, frame, `${type}.${name}`)
     }
   }
-  for (const [id, layout] of Object.entries(design.evidence.layouts)) {
+  if (!design.evidence && !design.editorial)
+    throw new Error('A registered design renderer is required')
+  for (const [id, layout] of Object.entries(design.evidence?.layouts ?? {})) {
     assertFrame(design, layout.chart, id)
     layout.stats.forEach((frame) => assertFrame(design, frame, id))
     const components = design.evidence.statComponents[id]
@@ -98,9 +102,40 @@ export function assertDesignContract(design) {
       }
     }
   }
-  for (const frame of Object.values(design.evidence.header)) assertFrame(design, frame, 'header')
-  if (design.evidence.scientificBelow >= design.evidence.scientificAbove) {
+  for (const frame of Object.values(design.evidence?.header ?? {}))
+    assertFrame(design, frame, 'header')
+  if (design.evidence && design.evidence.scientificBelow >= design.evidence.scientificAbove) {
     throw new Error('Scientific format thresholds must be ordered')
+  }
+  if (design.editorial) {
+    if (!design.fonts.body) throw new Error('Editorial renderer requires a body font role')
+    for (const [key, frame] of Object.entries(design.editorial.chrome)) {
+      if (Array.isArray(frame)) assertFrame(design, frame, `chrome.${key}`)
+    }
+    for (const token of Object.values(design.editorial.contrast)) {
+      if (!Object.hasOwn(design.colors, token)) throw new Error(`Unknown editorial token: ${token}`)
+    }
+    for (const [type, family] of Object.entries(design.editorial.families)) {
+      if (family.mode === 'dark' && !['summary', 'decision'].includes(family.role))
+        throw new Error(`${type}: dark pages require summary/decision roles`)
+      for (const [id, variant] of Object.entries(family.variants)) {
+        const expected = {
+          cover: ['title', 'abstract', 'metrics', 'watermark', 'band'],
+          summary: ['main', 'side'],
+          trend: ['main', 'detail'],
+          matrix: ['main'],
+          ranking: ['main', 'side'],
+          decision: ['main'],
+        }[family.role]
+        for (const name of expected)
+          if (!variant.regions[name]) throw new Error(`${type}.${id}: missing region ${name}`)
+        for (const name of Object.keys(variant.regions))
+          if (!expected.includes(name) && !(family.role === 'trend' && name === 'support'))
+            throw new Error(`${type}.${id}: unknown region ${name}`)
+        for (const [key, frame] of Object.entries(variant.regions))
+          assertFrame(design, frame, `${type}.${id}.${key}`)
+      }
+    }
   }
   return design
 }
@@ -211,6 +246,27 @@ export function designTheme(design) {
 export const textUnits = (value) =>
   [...String(value ?? '')].reduce((n, ch) => n + (ch.codePointAt(0) > 255 ? 1 : 0.52), 0)
 
+// Selection is shared; visual families own candidate geometry and content compatibility.
+export function selectDesignLayout(candidates, requested, previous = [], maxConsecutive = 2) {
+  const eligible =
+    requested === 'auto' ? candidates : candidates.filter((c) => c.layoutId === requested)
+  if (!eligible.length)
+    throw new Error('No layout fits; choose auto, reorganize content or split the slide')
+  const recent = previous.slice(-maxConsecutive)
+  return eligible
+    .map((candidate, order) => ({
+      ...candidate,
+      order,
+      used: previous.filter((p) => p.fingerprint === candidate.fingerprint).length,
+      repeated:
+        recent.length === maxConsecutive &&
+        recent.every((p) => p.fingerprint === candidate.fingerprint),
+    }))
+    .sort(
+      (a, b) => Number(a.repeated) - Number(b.repeated) || a.used - b.used || a.order - b.order,
+    )[0]
+}
+
 export function resolveEvidenceLayout(design, slide, previous = []) {
   const d = slide.data
   const e = design.evidence
@@ -320,23 +376,15 @@ export function resolveEvidenceLayout(design, slide, previous = []) {
     })
     return { frame, header, fingerprint }
   }
-  const recent = previous.slice(-e.maxConsecutiveLayout)
-  const ranked = eligible.map(([id, layout], order) => {
+  const ranked = eligible.map(([id, layout]) => {
     const resolved = geometry(id, layout)
     return {
       id,
+      layoutId: id,
       ...resolved,
-      order,
-      used: previous.filter((p) => p.fingerprint === resolved.fingerprint).length,
-      repeated:
-        recent.length === e.maxConsecutiveLayout &&
-        recent.every((p) => p.fingerprint === resolved.fingerprint),
     }
   })
-  ranked.sort(
-    (a, b) => Number(a.repeated) - Number(b.repeated) || a.used - b.used || a.order - b.order,
-  )
-  const chosen = ranked[0]
+  const chosen = selectDesignLayout(ranked, requested, previous, e.maxConsecutiveLayout)
   const { frame, header, fingerprint } = chosen
   assertFrame(design, frame.chart, chosen.id)
   for (const f of frame.stats) assertFrame(design, f, chosen.id)
@@ -360,12 +408,63 @@ export function resolveEvidenceLayout(design, slide, previous = []) {
 
 export function checkDesignPatch(design, patch) {
   const issues = []
+  const accentGroups = new Map()
   const colors = new Set(Object.values(design.colors))
   const fonts = new Set(Object.values(design.fonts).flatMap((f) => [f.latin, f.eastAsian]))
   const issue = (rule, message, index) =>
     issues.push({ ruleId: rule.id, severity: 'error', message, opIndex: index })
   patch.ops.forEach((op, index) => {
+    if (design.rules.some((r) => r.check === 'single-accent-focus')) {
+      const gold = design.colors[design.roles.focus]
+      const hasGold = (v) =>
+        typeof v === 'string'
+          ? v === gold
+          : v && typeof v === 'object' && Object.values(v).some(hasGold)
+      const name = op.shape?.name ?? op.name
+      const remember = (group) => {
+        const groups = accentGroups.get(op.slide) ?? new Set()
+        groups.add(group)
+        accentGroups.set(op.slide, groups)
+      }
+      if (hasGold(op) && op.op !== 'set-theme' && !name?.endsWith('_AccentRule')) {
+        if (op.op === 'set-chart') {
+          for (const series of op.series ?? []) {
+            if (hasGold(series.fill) || hasGold(series.line) || hasGold(series.marker))
+              remember(`${name}:series${series.series}`)
+            for (const point of series.points ?? [])
+              if (hasGold(point)) remember(`${name}:series${series.series}:point${point.point}`)
+          }
+        } else remember(name ?? op.op)
+      }
+    }
     for (const rule of design.rules) {
+      if (rule.check === 'editorial-language') {
+        if (op.op === 'add-chart' && !['bar', 'column', 'line'].includes(op.kind))
+          issue(rule, `Unregistered editorial chart ${op.kind}`, index)
+        if (op.op === 'set-chart') {
+          if (op.view3D) issue(rule, '3D is forbidden', index)
+          for (const axis of op.axes ?? []) {
+            if (
+              (axis.gridlines && !axis.gridlines.noLine) ||
+              (axis.minorGridlines && !axis.minorGridlines.noLine)
+            )
+              issue(rule, 'Chart gridlines are forbidden', index)
+            if (
+              axis.axis === 'value' &&
+              (axis.ticks?.visible === true || parseFloat(axis.line?.width ?? '0') > 0)
+            )
+              issue(rule, 'Visible value axis is forbidden', index)
+          }
+        }
+        if (op.op === 'set-table' && (op.style?.horizontalBanding || op.style?.verticalBanding))
+          issue(rule, 'Table banding is forbidden', index)
+        for (const cell of op.cells ?? [])
+          for (const key of ['left', 'right']) {
+            const border = cell.style?.borders?.[key]
+            if (border && !border.noLine && parseFloat(border.width ?? '1') > 0)
+              issue(rule, 'Dense vertical table rules are forbidden', index)
+          }
+      }
       if (rule.check === 'forbidden-operations' && rule.values.includes(op.op)) {
         issue(rule, `Forbidden operation ${op.op}`, index)
       }
@@ -392,6 +491,13 @@ export function checkDesignPatch(design, patch) {
         )
           issue(rule, `Unapproved color ${v}`, index)
         if (v && typeof v === 'object') {
+          if (
+            rule.check === 'editorial-language' &&
+            key === 'fill' &&
+            v.type !== 'solid' &&
+            v.type !== 'none'
+          )
+            issue(rule, 'Gradient/pattern fills are not part of editorial language', index)
           if (rule.check === 'allowed-fonts') {
             for (const k of ['name', 'eastAsian', 'typeface']) {
               if ((key === 'font' || ['major', 'minor'].includes(key)) && v[k] && !fonts.has(v[k]))
@@ -416,6 +522,11 @@ export function checkDesignPatch(design, patch) {
       walk(op)
     }
   })
+  const accentRule = design.rules.find((r) => r.check === 'single-accent-focus')
+  for (const [slide, groups] of accentGroups) {
+    if (groups.size > 1)
+      issue(accentRule, `Slide ${slide}: ${groups.size} gold focus groups; maximum one`)
+  }
   return {
     schemaVersion: 'pptx-nova-design-check/v1',
     status: issues.length ? 'fail' : 'pass',
@@ -469,6 +580,8 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
     if (object.kind === 'add-chart' && shape.contentKind !== 'chart') {
       fail(`${object.name}: native chart missing`)
     }
+    if (object.kind === 'add-table' && shape.contentKind !== 'table')
+      fail(`${object.name}: native table missing`)
     if (object.kind === 'add-text-box') {
       const expected = patch.ops
         .filter(
@@ -500,8 +613,26 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
     }
   }
   const chartOps = patch.ops.filter((o) => o.op === 'add-chart')
+  const tableOps = patch.ops.filter((o) => o.op === 'add-table')
   if (chartOps.length && !model) fail('Native chart data projection is required')
+  if (tableOps.length && !model) fail('Native table cell projection is required')
   if (model) {
+    for (const slide of inspect.slides ?? []) {
+      const expected = tableOps.filter((o) => o.slide === slide.index)
+      const actual =
+        model.presentation?.slides?.[slide.index]?.elements?.filter((e) => e.kind === 'table') ?? []
+      if (expected.length !== actual.length) fail(`Slide ${slide.index}: table count changed`)
+      expected.forEach((op, i) => {
+        const table = actual[i]?.table
+        if (
+          !table ||
+          table.rows !== op.rows ||
+          table.columns !== op.columns ||
+          JSON.stringify(table.cells) !== JSON.stringify(op.data)
+        )
+          fail(`${op.name}: native table dimensions or cell text changed`)
+      })
+    }
     for (const slide of inspect.slides ?? []) {
       const expected = chartOps.filter((o) => o.slide === slide.index)
       const actual =
@@ -533,6 +664,7 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
     status: issues.length ? 'fail' : 'pass',
     checkedObjects: plan.objects.length,
     checkedCharts: chartOps.length,
+    checkedTables: tableOps.length,
     issues,
     coverage: [
       'object identity',
@@ -541,6 +673,7 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
       'geometry',
       'patch binding',
       ...(model ? ['chart categories, series names and numeric values'] : []),
+      ...(model && tableOps.length ? ['native table dimensions and every cell text'] : []),
     ],
     notVerified: [
       'complete chart XML/workbook equality',

@@ -63,17 +63,47 @@ const raw = readFileSync(path, 'utf8')
 const catalog = JSON.parse(raw)
 const entry = catalog.entries.find((e) => e.id === id)
 const before = JSON.stringify(entry)
+if (design.editorial) {
+  const types = Object.keys(design.editorial.families)
+  entry.supportedSlideTypes = types
+  entry.coverage.slideTypes = types
+  const groups = { anchor: [], judgment: [], evidence: [] }
+  for (const [type, family] of Object.entries(design.editorial.families)) {
+    const schema = JSON.parse(
+      readFileSync(resolve(root, 'schemas', id, `${type}.schema.json`), 'utf8'),
+    )
+    entry.layoutContract.slideTypes[type] = {
+      requiredSlots: schema.required.map((key) => `data.${key}`),
+      allowedLayoutIds: ['auto', ...Object.keys(family.variants)],
+    }
+    const group =
+      family.role === 'cover'
+        ? 'anchor'
+        : ['summary', 'decision'].includes(family.role)
+          ? 'judgment'
+          : 'evidence'
+    groups[group].push(type)
+  }
+  entry.layoutContract.slideTypes = Object.fromEntries(
+    types.map((type) => [type, entry.layoutContract.slideTypes[type]]),
+  )
+  entry.visualGrammar.slideRhythm = groups
+  entry.diversityGate.groups = groups
+}
 entry.version = design.version
 entry.qualityProfile.minFontPt = design.rules.find((r) => r.check === 'font-floor').minPt
 entry.qualityProfile.labelFontPt = entry.qualityProfile.minFontPt
 entry.qualityProfile.sourceFontPt = entry.qualityProfile.minFontPt
 entry.qualityProfile.baseline = `Contract-driven typography with a ${entry.qualityProfile.minFontPt}pt floor; actual render review remains required.`
-for (const [role, token] of Object.entries(design.refurbish.palette)) {
-  entry.refurbishProfile.fallback.palette[role] = design.colors[token]
-}
-for (const [role, font] of Object.entries(design.refurbish.fonts)) {
-  entry.refurbishProfile.fallback.fonts[role] =
-    role === 'cjk' ? design.fonts[font].eastAsian : design.fonts[font].latin
+// Creation-only candidate designs do not implicitly claim a refurbishment route.
+if (entry.refurbishProfile?.fallback) {
+  for (const [role, token] of Object.entries(design.refurbish.palette)) {
+    entry.refurbishProfile.fallback.palette[role] = design.colors[token]
+  }
+  for (const [role, font] of Object.entries(design.refurbish.fonts)) {
+    entry.refurbishProfile.fallback.fonts[role] =
+      role === 'cjk' ? design.fonts[font].eastAsian : design.fonts[font].latin
+  }
 }
 if (JSON.stringify(entry) !== before) {
   if (check) {

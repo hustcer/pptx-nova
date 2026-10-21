@@ -11,6 +11,7 @@
 //   x-slotRole: "control"        布局/匹配控制值（如 calloutHighlights、align），不要求出现在输出文本中
 //   x-slotFallbackOf: "<field>"  本槽位是同级 <field> 的回退别名；用移除 <field> 的 solo 探针复验
 //   enum 槽位与非 string 槽位自动跳过；无 properties 的 object/array（动态结构）记为 dynamic 并跳过
+//   x-slotProbeVariants: [{omit: ['optionalField']}] probes legal alternatives; every field must remain covered.
 //
 // 用法：
 //   node <skill-root>/scripts/pptx-nova-deckkit-slot-consistency.mjs [--deckkit <id>] [--json]
@@ -138,68 +139,81 @@ function renderPatchText(mod, deckkit, slideType, data) {
   return JSON.stringify(result?.patch ?? result)
 }
 
-async function checkDeckkit(entry) {
-  const modulePath = join(deckkitRoot, entry.path)
-  const mod = await import(pathToFileURL(modulePath).href)
-  if (typeof mod.createDeck !== 'function') {
-    return { deckkit: entry.id, error: 'no createDeck export', slideTypes: [] }
+function checkProbe(mod, deckkit, slideType, schema) {
+  const { value, sentinels, dynamics } = buildProbe(schema, 'data')
+  let text
+  try {
+    text = renderPatchText(mod, deckkit, slideType, value)
+  } catch (error) {
+    return { slideType, status: 'render-error', error: error.message, ghosts: [], dynamics }
   }
-  const slideTypes = entry.supportedSlideTypes ?? []
+  const ghosts = []
+  for (const sentinel of sentinels) {
+    if (text.includes(sentinel.token)) continue
+    if (sentinel.fallbackOf) {
+      const soloData = structuredClone(value)
+      const nested = sentinel.fallbackOf.match(/^([A-Za-z0-9_]+)\[\]\.([A-Za-z0-9_]+)$/)
+      if (nested) {
+        const arr = soloData[nested[1]]
+        if (Array.isArray(arr)) for (const item of arr) delete item?.[nested[2]]
+      } else delete soloData[sentinel.fallbackOf]
+      try {
+        if (renderPatchText(mod, deckkit, slideType, soloData).includes(sentinel.token)) continue
+      } catch {
+        /* report the ghost */
+      }
+    }
+    ghosts.push(sentinel.path)
+  }
+  return { slideType, status: ghosts.length ? 'ghost-slots' : 'ok', ghosts, dynamics }
+}
+
+async function checkDeckkit(entry) {
+  const mod = await import(pathToFileURL(join(deckkitRoot, entry.path)).href)
+  if (typeof mod.createDeck !== 'function')
+    return { deckkit: entry.id, error: 'no createDeck export', slideTypes: [] }
   const report = []
-  for (const slideType of slideTypes) {
+  for (const slideType of entry.supportedSlideTypes ?? []) {
     const schema = loadSlideSchema(entry.id, slideType)
     if (!schema) {
       report.push({ slideType, status: 'no-schema', ghosts: [], dynamics: [] })
       continue
     }
-    const { value, sentinels, dynamics } = buildProbe(schema, 'data')
-    let text
+    const variants = schema['x-slotProbeVariants'] ?? [{ omit: [] }]
     try {
-      text = renderPatchText(mod, entry.id, slideType, value)
-    } catch (error) {
-      const stackTop = String(error.stack ?? '')
-        .split('\n')
-        .slice(1, 3)
-        .map((line) => line.trim())
-        .join(' <- ')
+      const covered = new Set()
+      if (!Array.isArray(variants) || !variants.length)
+        throw new Error('Slot probe variants must be a non-empty array')
+      const probes = variants.map((variant) => {
+        const selected = structuredClone(schema)
+        for (const key of variant.omit ?? []) {
+          if (!selected.properties[key] || selected.required?.includes(key))
+            throw new Error('Probe omissions must name optional top-level fields')
+          delete selected.properties[key]
+        }
+        for (const key of Object.keys(selected.properties)) covered.add(key)
+        return checkProbe(mod, entry.id, slideType, selected)
+      })
+      if (Object.keys(schema.properties).some((key) => !covered.has(key)))
+        throw new Error('Every declared field needs at least one probe variant')
+      const failure = probes.find((p) => p.status !== 'ok')
       report.push({
         slideType,
-        status: 'render-error',
-        error: stackTop ? `${error.message} (${stackTop})` : error.message,
-        ghosts: [],
-        dynamics,
+        status: failure?.status ?? 'ok',
+        ...(failure?.error ? { error: failure.error } : {}),
+        ghosts: [...new Set(probes.flatMap((p) => p.ghosts))],
+        dynamics: [...new Set(probes.flatMap((p) => p.dynamics))],
+        ...(variants.length > 1 ? { probeVariants: variants.length } : {}),
       })
-      continue
+    } catch (error) {
+      report.push({
+        slideType,
+        status: 'probe-config-error',
+        error: error.message,
+        ghosts: [],
+        dynamics: [],
+      })
     }
-    const ghosts = []
-    for (const sentinel of sentinels) {
-      if (text.includes(sentinel.token)) continue
-      if (sentinel.fallbackOf) {
-        // 回退别名：移除其回退目标后 solo 复验。
-        // fallbackOf 支持顶层字段（"title"）和嵌套 item 字段（"cards[].sampleText"）。
-        const soloData = JSON.parse(JSON.stringify(value))
-        const nested = sentinel.fallbackOf.match(/^([A-Za-z0-9_]+)\[\]\.([A-Za-z0-9_]+)$/)
-        if (nested) {
-          const arr = soloData[nested[1]]
-          if (Array.isArray(arr)) for (const item of arr) delete item?.[nested[2]]
-        } else {
-          delete soloData[sentinel.fallbackOf]
-        }
-        try {
-          const soloText = renderPatchText(mod, entry.id, slideType, soloData)
-          if (soloText.includes(sentinel.token)) continue
-        } catch {
-          // solo 渲染失败也算 ghost，下面统一记录
-        }
-      }
-      ghosts.push(sentinel.path)
-    }
-    report.push({
-      slideType,
-      status: ghosts.length > 0 ? 'ghost-slots' : 'ok',
-      ghosts,
-      dynamics,
-    })
   }
   return { deckkit: entry.id, slideTypes: report }
 }

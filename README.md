@@ -10,6 +10,17 @@ into an editable PowerPoint file. The primary target is PowerPoint; Keynote and
 other compatible office suites can usually open the result, subject to their
 PPTX compatibility.
 
+## See the results
+
+Explore presentations created with `pptx-nova` directly in your browser:
+
+- [Quiet Canvas](https://structurify.io/en/showcases/quiet-canvas/)
+- [Electric Stage](https://structurify.io/en/showcases/electric-stage/)
+- [Copper Motion](https://structurify.io/en/showcases/copper-motion/)
+- [Signal Depth](https://structurify.io/en/showcases/signal-depth/)
+
+Tip: Click the triangular play button in the bottom-right corner of a showcase to see it in action.
+
 ## Install the skill
 
 Install only the user-facing `pptx-nova` skill from this repository:

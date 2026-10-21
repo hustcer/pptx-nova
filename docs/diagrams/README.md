@@ -1,13 +1,16 @@
 # PPTX workflow diagrams
 
 These diagrams use the original workflow images' white background, pale colored
-borders, system sans-serif typography, and line icons. Both have a 1280 × 720
-canvas with eight nodes. The HTML files contain editable inline SVG; the exported
-SVG files are the images embedded in the repository README. Neither format loads
-external fonts, scripts, raster images, or other remote assets.
+borders, and system sans-serif typography. The repository README uses a compact
+1280 × 432 overview with a prominent check–refine feedback loop and a separate
+delivery exit. It has four nodes. The two detailed diagrams
+use line icons and a 1280 × 720 canvas with eight nodes each; they appear in the
+[full workflow guide](../workflows.md). The HTML files contain editable inline SVG.
+Neither format loads external fonts, scripts, raster images, or other remote assets.
 
-| Workflow | Editable source                     | README image                                |
+| Workflow | Editable source                     | SVG image                                   |
 | -------- | ----------------------------------- | ------------------------------------------- |
+| Overview | [HTML](pptx-workflow-overview.html) | [SVG](../images/pptx-workflow-overview.svg) |
 | Create   | [HTML](pptx-creating-workflow.html) | [SVG](../images/pptx-creating-workflow.svg) |
 | Edit     | [HTML](pptx-editing-workflow.html)  | [SVG](../images/pptx-editing-workflow.svg)  |
 
@@ -22,6 +25,13 @@ implementation. The local runtime reported `0.13.0 (96708959)`; capabilities mus
 still be probed for each run. These diagrams show the normal paths, not every
 task-specific branch or optional evidence integration.
 
+- **Overview:** combine creation and editing in one authoring stage and make
+  check–refine iteration the focal path. Review findings return to authoring for
+  fixes and rechecks; passing candidates leave through the delivery exit. The
+  loop represents Agent-directed refinement using machine and visual evidence,
+  not an unlimited automatic runtime retry or a guarantee that every issue can
+  be repaired. Patch details, individual gates, and sidecars remain in the
+  detailed diagrams.
 - **Create:** retain the outline and design lock, validate the content, build the
   DeckKit patch, and check the lock before dry-run/apply. The runner checks the
   candidate and renders canonical visual evidence. Machine checks alone do not

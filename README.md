@@ -212,21 +212,21 @@ human review of facts, claims, numbers, brand compliance, and legal language.
 
 ## How it works
 
-pptx-nova uses a DeckKit-first workflow. A DeckKit is a reusable visual system
-with page types, layout rules, typography, color rules, and quality checks. The
-normal new-deck path is:
+Describe the result you need. pptx-nova creates or edits the deck, checks it,
+and uses machine findings and visual review to guide the next revision.
+Fixes return to validation; delivery follows the required checks and review.
 
 <p align="center">
-  <img src="docs/images/pptx-creating-workflow.svg" alt="pptx-nova creation workflow: planning, DeckKit build, dry-run, candidate verification and visual review before publication" />
+  <img src="docs/images/pptx-workflow-overview.svg" alt="Agent feedback loop: create or edit a deck, check structure, scope and visuals, use findings to fix and recheck it, and deliver an editable PPTX only after the required checks and visual review pass" />
 </p>
 
-The typical existing-deck edit path is intentionally different from a one-shot
-"rewrite the file" flow. pptx-nova asks `xdoc` to inspect the real PPTX structure
-first, selects the exact target objects, and checks the patch before writing:
+New decks use DeckKits: reusable visual systems with page types, typography,
+layout rules, and quality checks. Existing decks are edited through scoped
+changes to their native objects, with the original file kept read-only by
+default.
 
-<p align="center">
-  <img src="docs/images/pptx-editing-workflow.svg" alt="pptx-nova editing workflow: inspect and select, bind edit scope, dry-run, apply to a candidate, verify and review, then publish; retry failed gates" />
-</p>
+See the [full creation and editing workflows](docs/workflows.md) for the
+detailed steps, validation gates, and retry paths.
 
 ### Scoped edit safety
 

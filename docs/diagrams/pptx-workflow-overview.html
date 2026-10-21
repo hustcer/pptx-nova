@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create, check and refine before delivery</title>
+    <!-- A feedback flowchart, not an infinite flywheel: only a reviewed candidate can exit. -->
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #ffffff;
+        color: #101d3c;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .frame {
+        width: 100%;
+        max-width: 1280px;
+        min-width: 0;
+        margin: 0 auto;
+      }
+      .diagram-container {
+        width: 100%;
+        overflow-x: auto;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        min-width: 1280px;
+      }
+      @media print {
+        .diagram-container {
+          overflow-x: visible;
+        }
+        svg {
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="frame">
+      <div class="diagram-container">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1280 432"
+          width="1280"
+          height="432"
+          role="img"
+          aria-labelledby="pptx-workflow-overview-title pptx-workflow-overview-desc"
+          font-family="Arial, Helvetica, sans-serif"
+        >
+          <title id="pptx-workflow-overview-title">Create, check and refine before delivery</title>
+          <desc id="pptx-workflow-overview-desc">
+            The Agent creates or edits a deck, checks structure, scope and visuals, and uses
+            findings to revise and recheck it, delivering an editable PPTX only after the required
+            checks and visual review pass.
+          </desc>
+          <defs>
+            <marker
+              id="arrow"
+              viewBox="0 0 10 10"
+              markerWidth="9"
+              markerHeight="9"
+              refX="8"
+              refY="5"
+              orient="auto"
+              markerUnits="userSpaceOnUse"
+            >
+              <path
+                d="M2 1 8 5 2 9"
+                fill="none"
+                stroke="#7e8fa7"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </marker>
+            <marker
+              id="arrow-loop"
+              viewBox="0 0 12 12"
+              markerWidth="12"
+              markerHeight="12"
+              refX="10"
+              refY="6"
+              orient="auto"
+              markerUnits="userSpaceOnUse"
+            >
+              <path
+                d="M3 2 10 6 3 10"
+                fill="none"
+                stroke="#2458c6"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </marker>
+            <marker
+              id="arrow-pass"
+              viewBox="0 0 10 10"
+              markerWidth="10"
+              markerHeight="10"
+              refX="8"
+              refY="5"
+              orient="auto"
+              markerUnits="userSpaceOnUse"
+            >
+              <path
+                d="M2 1 8 5 2 9"
+                fill="none"
+                stroke="#227a43"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </marker>
+          </defs>
+          <rect width="1280" height="432" fill="#ffffff" />
+          <text x="288" y="52" fill="#101d3c" font-size="34" font-weight="700">
+            Create. Check.
+            <tspan fill="#2458c6">Refine.</tspan>
+          </text>
+          <text x="288" y="84" fill="#505d72" font-size="17">
+            Feedback drives the next revision.
+          </text>
+          <g data-zone="agent-feedback-loop">
+            <rect
+              x="256"
+              y="112"
+              width="752"
+              height="280"
+              rx="10"
+              fill="#f4f8ff"
+              stroke="#d6e2f5"
+              stroke-width="1.2"
+            />
+            <text
+              x="288"
+              y="144"
+              fill="#2458c6"
+              font-size="12"
+              font-weight="600"
+              letter-spacing="1.6"
+            >
+              AGENT FEEDBACK LOOP
+            </text>
+          </g>
+          <g data-connectors="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M216 228H288" stroke="#7e8fa7" stroke-width="1.8" marker-end="url(#arrow)" />
+            <path d="M560 228H688" stroke="#7e8fa7" stroke-width="1.8" marker-end="url(#arrow)" />
+            <path
+              d="M828 280V332Q828 340 820 340H432Q424 340 424 332V280"
+              stroke="#2458c6"
+              stroke-width="3"
+              marker-end="url(#arrow-loop)"
+            />
+            <path
+              d="M968 228H1048"
+              stroke="#227a43"
+              stroke-width="2"
+              marker-end="url(#arrow-pass)"
+            />
+          </g>
+          <g data-label="candidate">
+            <rect x="574" y="194" width="100" height="24" fill="#f4f8ff" />
+            <text
+              x="624"
+              y="211"
+              text-anchor="middle"
+              fill="#64748b"
+              font-size="11"
+              font-weight="600"
+              letter-spacing="1"
+            >
+              CANDIDATE
+            </text>
+          </g>
+          <g data-label="refine">
+            <rect x="538" y="304" width="176" height="28" fill="#f4f8ff" />
+            <text
+              x="626"
+              y="326"
+              text-anchor="middle"
+              fill="#2458c6"
+              font-size="16"
+              font-weight="700"
+              letter-spacing="1"
+            >
+              FIX + RECHECK
+            </text>
+          </g>
+          <g data-label="pass">
+            <rect x="982" y="198" width="52" height="20" fill="#ffffff" />
+            <text
+              x="1008"
+              y="213"
+              text-anchor="middle"
+              fill="#227a43"
+              font-size="11"
+              font-weight="700"
+              letter-spacing="1"
+            >
+              PASS
+            </text>
+          </g>
+          <g data-node="request" text-anchor="middle">
+            <circle cx="128" cy="176" r="28" fill="#f3edfc" stroke="#d9cbef" />
+            <g
+              transform="translate(128 176)"
+              fill="none"
+              stroke="#6739b5"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M-11-16H3L12-7V16H-11ZM3-16V-7H12M-5 0H6M-5 6H6M-5 12H2" />
+            </g>
+            <text x="128" y="232" fill="#101d3c" font-size="22" font-weight="600">
+              Your request
+            </text>
+            <text x="128" y="258" fill="#505d72" font-size="16">Brief, outline or</text>
+            <text x="128" y="280" fill="#505d72" font-size="16">existing PPTX</text>
+          </g>
+          <g data-node="author">
+            <rect
+              x="288"
+              y="176"
+              width="272"
+              height="104"
+              rx="8"
+              fill="#ffffff"
+              stroke="#c4d3ea"
+              stroke-width="1.4"
+            />
+            <g
+              transform="translate(318 208)"
+              fill="none"
+              stroke="#2458c6"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="-12" y="-12" width="24" height="24" rx="2" />
+              <path d="M-12-4H12M-4-4V12M2 2H7M2 7H7" />
+            </g>
+            <text x="344" y="214" fill="#101d3c" font-size="22" font-weight="600">
+              Create or edit
+            </text>
+            <text x="344" y="240" fill="#505d72" font-size="16">Build or revise the deck</text>
+            <text x="344" y="262" fill="#64748b" font-size="14">Content · layout · style</text>
+          </g>
+          <g data-node="review">
+            <rect
+              x="688"
+              y="176"
+              width="280"
+              height="104"
+              rx="8"
+              fill="#ffffff"
+              stroke="#89a7e6"
+              stroke-width="1.6"
+            />
+            <g
+              transform="translate(718 208)"
+              fill="none"
+              stroke="#2458c6"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M0-15C5-12 9-11 12-10V0C12 7 7 12 0 16C-7 12-12 7-12 0V-10C-9-11-5-12 0-15ZM-6 0-1 5 7-5"
+              />
+            </g>
+            <text x="744" y="214" fill="#2458c6" font-size="22" font-weight="600">
+              Check &amp; review
+            </text>
+            <text x="744" y="240" fill="#505d72" font-size="16">
+              Structure, scope &amp; visuals
+            </text>
+            <text x="744" y="262" fill="#64748b" font-size="14">Evidence + PNG review</text>
+          </g>
+          <g data-node="deliver" text-anchor="middle">
+            <rect
+              x="1048"
+              y="176"
+              width="200"
+              height="104"
+              rx="8"
+              fill="#f7fcf9"
+              stroke="#a8d4b8"
+              stroke-width="1.4"
+            />
+            <text x="1148" y="214" fill="#227a43" font-size="22" font-weight="600">
+              Editable .pptx
+            </text>
+            <text x="1148" y="240" fill="#505d72" font-size="15">Native editable PPTX</text>
+            <text x="1148" y="262" fill="#64748b" font-size="14">PDF / PNG optional</text>
+          </g>
+          <text x="632" y="376" text-anchor="middle" fill="#505d72" font-size="14">
+            Delivery follows passed checks and visual review.
+          </text>
+        </svg>
+      </div>
+    </main>
+  </body>
+</html>

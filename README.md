@@ -20,6 +20,7 @@ Explore presentations created with `pptx-nova` directly in your browser:
 - [Signal Depth](https://structurify.io/en/showcases/signal-depth/)
 
 Tip: Click the triangular play button in the bottom-right corner of a showcase to see it in action.
+**These are real, native, editable PPTX files!**
 
 ## Install the skill
 
@@ -136,6 +137,18 @@ result is published as a separately validated candidate.
 - Run quality checks that look for overlap, clipped text, layout drift,
   template violations, content-preservation issues, visual defects, and
   before/after drift.
+
+## Our other products
+
+- **[xdoc Runtime](https://structurify.io/en/products/pptx-runtime/)** — An Agent-ready native
+  CLI to inspect, create, edit, render, and verify PowerPoint files.
+- **[PPTX Viewer](https://structurify.io/en/products/pptx-viewer/)** — A browser SDK for
+  PowerPoint preview and supported animation playback, with Web Component and framework integrations.
+- **[PPTX Converter](https://structurify.io/en/products/pptx-converter/)** — An SDK for local
+  PPTX-to-PDF and Markdown conversion in browsers, Node.js, Bun, and Deno.
+- **[PPTX API Service](https://structurify.io/en/products/pptx-api/)** — An HTTP service designed
+  for **private deployment via Docker images**, with PPTX conversion, extraction, and checks.
+  Currently a loopback-only development preview; production deployment is not yet available.
 
 ## Typical requests
 

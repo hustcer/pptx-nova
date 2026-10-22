@@ -17,23 +17,32 @@ const mode = process.env.CAPTURE_TEST_MODE;
 fs.appendFileSync(process.env.CAPTURE_TEST_LOG, JSON.stringify(args) + '\\n');
 if (args.includes('eval')) {
   let fontLoaded = false;
+  let animationFinished = false;
   const fonts = new Set(mode === 'font-error' ? [{ status: 'error', family: 'Missing' }] : []);
   fonts.ready = mode === 'font-pending' ? new Promise(() => {}) : new Promise(resolve => setTimeout(() => { fontLoaded = true; resolve(); }, 40));
   Object.defineProperty(fonts, 'status', { get: () => fontLoaded ? 'loaded' : 'loading' });
   const slides = [0, 1].map(() => ({
-    style: { setProperty() {} }, classList: { add() {}, remove() {} },
+    style: { setProperty() {} }, classList: {
+      add(name) { if (mode === 'animation-end' && name !== 'is-active') throw new Error('Wrong activation class'); },
+      remove() {},
+    },
     removeAttribute() {}, setAttribute() {}, scrollIntoView() {},
     getBoundingClientRect: () => ({ x: 0, y: 0, left: 0, top: 0,
       right: mode === 'clipped' ? 1500 : 1440, bottom: 810, width: 1440, height: 810 }),
-    querySelectorAll: () => [{ decode: () => new Promise((resolve, reject) => setTimeout(() =>
-      mode === 'image-error' ? reject(new Error('Image decode failed')) : resolve(), 40)) }],
+    querySelectorAll: selector => selector === '[data-anim]'
+      ? (mode === 'hidden-content' || mode === 'animation-end'
+        ? [{ textContent: 'Animated title', hidden: mode === 'hidden-content' || !animationFinished }] : [])
+      : [{ decode: () => new Promise((resolve, reject) => setTimeout(() =>
+          mode === 'image-error' ? reject(new Error('Image decode failed')) : resolve(), 40)) }],
+    getAnimations: () => [{ effect: { getComputedTiming: () => ({ endTime: 500 }) },
+      finish() { animationFinished = true; } }],
   }));
   const context = {
     document: { fonts, title: 'Capture fixture', head: { append() {} },
       getElementById: () => null, createElement: () => ({}), querySelectorAll: () => slides },
     window: { devicePixelRatio: 1, dispatchEvent() {} },
     location: { href: 'file:///fixture.html' }, navigator: { userAgent: 'Fixture Browser' },
-    getComputedStyle: () => ({ display: mode === 'hidden' ? 'none' : 'grid', visibility: 'visible', opacity: '1' }),
+    getComputedStyle: el => ({ display: mode === 'hidden' ? 'none' : 'grid', visibility: 'visible', opacity: el.hidden ? '0' : '1' }),
     innerWidth: 1440, innerHeight: 810, Event: class {}, setTimeout, clearTimeout,
     requestAnimationFrame: callback => setTimeout(callback, 1),
   };
@@ -124,7 +133,7 @@ test('capture waits for resources, records hashes and owns a unique session', (t
   assert.notEqual(second.session, report.session)
 })
 
-for (const mode of ['font-error', 'image-error', 'clipped', 'hidden']) {
+for (const mode of ['font-error', 'image-error', 'clipped', 'hidden', 'hidden-content']) {
   test(`capture fails without success evidence for ${mode}`, (t) => {
     const f = fixture(t)
     const result = f.run(mode)
@@ -166,8 +175,20 @@ test('capture rejects invalid dimensions and timeouts without opening a browser'
     ['--viewport', '0x810'],
     ['--timeout-ms', '0'],
     ['--contact-cols', '2junk'],
+    ['--active-class', 'two classes'],
   ]) {
     assert.equal(f.run('', args).status, 1)
   }
   assert.equal(existsSync(f.log), false)
+})
+
+test('capture activates the requested class and finishes entry animations before checking text', (t) => {
+  const f = fixture(t)
+  const result = f.run('animation-end', ['--active-class', 'is-active'])
+  assert.equal(result.status, 0, result.stderr)
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.activeClass, 'is-active')
+  assert.match(report.captureCss, /animation-fill-mode: forwards/)
+  assert.doesNotMatch(report.captureCss, /animation: none/)
+  assert.match(report.hideSelectors, /#slide-counter/)
 })

@@ -2,10 +2,10 @@
 
 DeckKit: `broadside`
 Showcase case: `broadside.golden-html`
-Readiness: `production`
+Readiness: `candidate`
 Slides: 16
-Patch ops: 888
-Title: the broadside style
+Patch ops: 1178
+Title: public ideas made real
 
 ## Best For
 

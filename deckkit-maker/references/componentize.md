@@ -85,6 +85,11 @@ callout 和缺失图片时的隐藏/占位策略。
   数值直接来自 Phase 0 的 style-spec 字号表和页型几何。
 - 条目数上限来自 slide-inventory 的条目区间，写进 catalog `density.soft/hard`。
 
+字体替换遵循用户授权，可选择已安装且风格相近的常用字体，并记录参考字体、替代字体和
+主要视觉差异。不能只检查字体家族名：Latin 的重字体文件与 CJK fallback 的字重是两件事；
+需要粗体的 CJK 标题须显式指定 bold，正文保留常规字重。逐页 canonical 和可用的原生宿主
+均检查实际常规/粗体、混排、换行与意外倾斜，不为缺失字体重复索取已获授权的确认。
+
 合同路线用 `tools/generate-pptx-design-projections.mjs <id>` 生成预算、容量、布局和节奏投影，
 随后运行 `--check`。投影必须保留该页型的 `assetSlots` 等有效元数据及既有翻新映射；
 无现有映射时不得凭空添加翻新能力。为这些保留行为写回归断言。

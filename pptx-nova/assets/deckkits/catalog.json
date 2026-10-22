@@ -1548,35 +1548,15 @@
     },
     {
       "id": "broadside",
-      "version": "0.1.0",
+      "version": "2.0.0",
       "path": "broadside.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "production",
+      "readiness": "candidate",
       "qualityProfile": {
-        "minFontPt": 9,
-        "labelFontPt": 9,
-        "sourceFontPt": 9,
-        "baseline": "Broadside uses small mono catalogue chrome, but core body text remains at 10.5pt or above.",
-        "contrastExemptions": [
-          {
-            "textColor": "743119",
-            "backgroundColor": "E85D26",
-            "shapePattern": "^S\\d+_Item1$",
-            "reason": "Intentional middle fade-list display text"
-          },
-          {
-            "textColor": "9B4020",
-            "backgroundColor": "E85D26",
-            "shapePattern": "^S\\d+_Item2$",
-            "reason": "Intentional trailing fade-list display text"
-          },
-          {
-            "textColor": "923F1E",
-            "backgroundColor": "E85D26",
-            "shapePattern": "^S\\d+_StepNum\\d+$",
-            "reason": "Intentional ghost step numbers on flow slides"
-          }
-        ]
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
       },
       "defaultFor": [],
       "bestFor": [
@@ -1629,7 +1609,7 @@
       ],
       "visualGrammar": {
         "schemaVersion": "pptx-nova-visual-grammar/v1",
-        "positioning": "Protest-poster editorial deck system built from massive lowercase Barlow type, near-black ink fields, and one fire-orange environment color.",
+        "positioning": "Protest-poster editorial deck system built from massive upright heavy sans type, near-black ink fields, and one fire-orange environment color.",
         "mood": ["editorial", "dramatic", "loud", "newspaper", "manifesto"],
         "layoutPrinciples": [
           "Use one enormous typographic gesture per page and let it dominate the composition.",
@@ -1640,16 +1620,16 @@
         "signatureElements": [
           "fire-orange full-slide declarations",
           "near-black editorial evidence pages with cream type",
-          "massive lowercase Barlow headlines",
-          "IBM Plex Mono catalogue numbers, labels, sources, and slash bullets",
+          "massive lowercase Arial Black headlines with bold CJK display",
+          "Menlo catalogue numbers, labels, sources, and slash bullets",
           "orange payoff panel in comparison layouts",
           "fading stacked word list inspired by SPACE10 before/during/after treatments"
         ],
         "typography": {
-          "display": "Barlow weight 900, lowercase, poster-scale",
-          "body": "Barlow regular/medium with short editorial paragraphs",
-          "chrome": "IBM Plex Mono uppercase labels and catalogue numbers",
-          "cjk": "Noto Sans SC fallback for Chinese and mixed-language decks"
+          "display": "Arial Black upright, lowercase preference, poster-scale",
+          "body": "Arial regular with short editorial paragraphs",
+          "chrome": "Menlo uppercase labels and catalogue numbers",
+          "cjk": "Noto Sans SC: explicit bold display and regular supporting text"
         },
         "colorSystem": {
           "background": ["near-black #111111", "fire orange #E85D26"],
@@ -1666,7 +1646,7 @@
             "broadsideFadeListSlide",
             "broadsideEndSlide"
           ],
-          "statement": ["broadsideStatementSlide", "broadsideQuoteSlide", "broadsideListSlide"],
+          "statement": ["broadsideStatementSlide", "broadsideListSlide", "broadsideQuoteSlide"],
           "evidence": [
             "broadsideStatsSlide",
             "broadsideBarChartSlide",
@@ -1717,12 +1697,14 @@
             "softAccent": "331D14",
             "secondary": "B8B8AE",
             "surface": "1A1A18",
-            "rule": "282826"
+            "rule": "282826",
+            "muted": "B8B8AE",
+            "line": "505048"
           },
           "fonts": {
-            "heading": "Barlow",
-            "body": "Barlow",
-            "label": "IBM Plex Mono",
+            "heading": "Arial Black",
+            "body": "Arial",
+            "label": "Menlo",
             "cjk": "Noto Sans SC"
           },
           "styleOps": [
@@ -1737,8 +1719,8 @@
           "contentPolicy": "preserve-source-slides-and-editable-objects",
           "titleZone": {
             "placement": "poster-scale typographic block, usually left or low on the page",
-            "headingStyle": "Barlow 900 lowercase, oversized, tight and flat",
-            "labelStyle": "IBM Plex Mono uppercase catalogue label",
+            "headingStyle": "Arial Black upright, lowercase preference, oversized and flat",
+            "labelStyle": "Menlo uppercase catalogue label",
             "accentRule": "1px rule or slash label, never a glossy title bar",
             "avoid": ["cream paper slides", "multi-color title badges", "rounded title cards"]
           },
@@ -1794,13 +1776,16 @@
         },
         "slideTypes": {
           "broadsideCoverSlide": {
-            "requiredSlots": ["data.title", "data.subtitle"]
+            "requiredSlots": ["data.title", "data.subtitle"],
+            "allowedLayoutIds": ["auto", "poster", "reading"]
           },
           "broadsideChapterSlide": {
-            "requiredSlots": ["data.title"]
+            "requiredSlots": ["data.title"],
+            "allowedLayoutIds": ["auto", "declaration"]
           },
           "broadsideStatementSlide": {
-            "requiredSlots": ["data.kicker", "data.title"]
+            "requiredSlots": ["data.kicker", "data.title"],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
           },
           "broadsideSplitSlide": {
             "requiredSlots": ["data.kicker", "data.title", "data.lead", "data.bullets"],
@@ -1813,43 +1798,68 @@
                 "captionSlot": "data.caption",
                 "note": "This split layout renders an editable placeholder shell. No image asset can be injected through content.json."
               }
-            }
+            },
+            "allowedLayoutIds": ["auto", "image-right", "image-left"]
           },
           "broadsideStatsSlide": {
-            "requiredSlots": ["data.items"]
+            "requiredSlots": ["data.items"],
+            "allowedLayoutIds": ["auto", "row", "register"]
           },
           "broadsideFadeListSlide": {
-            "requiredSlots": ["data.items", "data.title"]
+            "requiredSlots": ["data.items", "data.title"],
+            "allowedLayoutIds": ["auto", "stack"]
           },
           "broadsideListSlide": {
-            "requiredSlots": ["data.kicker", "data.title", "data.items"]
+            "requiredSlots": ["data.kicker", "data.title", "data.items"],
+            "allowedLayoutIds": ["auto", "split", "stacked"]
           },
           "broadsideQuoteSlide": {
-            "requiredSlots": ["data.kicker", "data.quote", "data.author"]
+            "requiredSlots": ["data.kicker", "data.quote", "data.author"],
+            "allowedLayoutIds": ["auto", "reading", "wide"]
           },
           "broadsideCompareSlide": {
-            "requiredSlots": ["data.left", "data.right"]
+            "requiredSlots": ["data.left", "data.right"],
+            "allowedLayoutIds": ["auto", "equal", "weighted"]
           },
           "broadsideBarChartSlide": {
-            "requiredSlots": ["data.title", "data.bars"]
+            "requiredSlots": [
+              "data.title",
+              "data.bars",
+              "data.unit",
+              "data.source",
+              "data.seriesName"
+            ],
+            "allowedLayoutIds": ["auto", "column", "horizontal"]
           },
           "broadsideFlowSlide": {
-            "requiredSlots": ["data.title", "data.steps"]
+            "requiredSlots": ["data.title", "data.steps"],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
           },
           "broadsideDonutSlide": {
-            "requiredSlots": ["data.title", "data.items"]
+            "requiredSlots": [
+              "data.title",
+              "data.items",
+              "data.unit",
+              "data.source",
+              "data.seriesName"
+            ],
+            "allowedLayoutIds": ["auto", "ring-left", "ring-right"]
           },
           "broadsidePyramidSlide": {
-            "requiredSlots": ["data.title", "data.levels"]
+            "requiredSlots": ["data.title", "data.levels"],
+            "allowedLayoutIds": ["auto", "levels"]
           },
           "broadsideTimelineSlide": {
-            "requiredSlots": ["data.title", "data.events"]
+            "requiredSlots": ["data.title", "data.events"],
+            "allowedLayoutIds": ["auto", "vertical", "horizontal"]
           },
           "broadsideCycleSlide": {
-            "requiredSlots": ["data.title", "data.steps"]
+            "requiredSlots": ["data.title", "data.steps"],
+            "allowedLayoutIds": ["auto", "loop"]
           },
           "broadsideEndSlide": {
-            "requiredSlots": ["data.title", "data.contact"]
+            "requiredSlots": ["data.title", "data.contact"],
+            "allowedLayoutIds": ["auto", "poster", "wide"]
           }
         }
       },
@@ -1863,7 +1873,7 @@
             "broadsideFadeListSlide",
             "broadsideEndSlide"
           ],
-          "statement": ["broadsideStatementSlide", "broadsideQuoteSlide", "broadsideListSlide"],
+          "statement": ["broadsideStatementSlide", "broadsideListSlide", "broadsideQuoteSlide"],
           "evidence": [
             "broadsideStatsSlide",
             "broadsideBarChartSlide",
@@ -1898,21 +1908,24 @@
         }
       },
       "validatedWith": {
-        "s8fy": ">=10",
-        "visionCheck": "pending benchmark",
-        "pngReview": "pending"
+        "xdoc": "0.13.0 (92a5aa13)",
+        "visionCheck": "high=0 medium=0 low=0 across golden, stress and mixed-language benchmarks",
+        "pngReview": "60 final-source canonical pages individually reviewed, plus 7 registered benchmark probe pages; enlarged detail review passed",
+        "powerPoint": "Four candidates opened, saved and reopened without Repair; independent object/data readback passed; representative text, shape and embedded workbook edits persisted",
+        "report": "docs/broadside-v2-migration-results.md"
       },
       "quality": {
+        "manualHardDefects": 0,
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-21",
+        "lastBenchmark": "2026-10-22",
         "vision": {
           "high": 0,
           "medium": 0,
-          "low": 135,
+          "low": 0,
           "lowBuckets": {
-            "total": 135,
-            "styleAllowed": 130,
-            "baselineKnown": 5,
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
             "new": 0,
             "changed": 0,
             "resolved": 0,
@@ -1921,13 +1934,12 @@
             "baselineUpdatedCases": 3
           }
         },
-        "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-21",
+          "date": "2026-10-22",
           "source": {
-            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/pptx-nova-visual"
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-broadside-v2-20261022/benchmark/02"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -1936,11 +1948,11 @@
           "vision": {
             "high": 0,
             "medium": 0,
-            "low": 135,
+            "low": 0,
             "lowBuckets": {
-              "total": 135,
-              "styleAllowed": 130,
-              "baselineKnown": 5,
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
               "new": 0,
               "changed": 0,
               "resolved": 0,
@@ -1954,8 +1966,8 @@
               "caseId": "broadside.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/broadside/golden-html/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/broadside/golden-html/review.md",
+              "summaryPath": ".tmp/deckkit-broadside-v2-20261022/benchmark/02/broadside/golden-html/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/golden-html/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -1970,11 +1982,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 82,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 82,
-                  "styleAllowed": 81,
-                  "baselineKnown": 1,
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -1991,17 +2003,17 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 312848
+                "bytes": 271781
               },
-              "patchOps": 888,
-              "p50TotalMs": 51.38
+              "patchOps": 1178,
+              "p50TotalMs": 105.92
             },
             {
               "caseId": "broadside.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/broadside/stress-density/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/broadside/stress-density/review.md",
+              "summaryPath": ".tmp/deckkit-broadside-v2-20261022/benchmark/02/broadside/stress-density/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/stress-density/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -2016,11 +2028,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 40,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 40,
-                  "styleAllowed": 36,
-                  "baselineKnown": 4,
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -2037,17 +2049,17 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 81829
+                "bytes": 76901
               },
-              "patchOps": 338,
-              "p50TotalMs": 38.7
+              "patchOps": 379,
+              "p50TotalMs": 77.05
             },
             {
               "caseId": "broadside.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/broadside/mixed-language/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/broadside/mixed-language/review.md",
+              "summaryPath": ".tmp/deckkit-broadside-v2-20261022/benchmark/02/broadside/mixed-language/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/mixed-language/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -2062,10 +2074,10 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 13,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 13,
-                  "styleAllowed": 13,
+                  "total": 0,
+                  "styleAllowed": 0,
                   "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
@@ -2083,23 +2095,25 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 64596
+                "bytes": 57167
               },
-              "patchOps": 143,
-              "p50TotalMs": 46.78
+              "patchOps": 220,
+              "p50TotalMs": 90.64
             }
           ],
           "blockers": []
         }
       },
       "knownLimits": [
-        "Experimental DeckKit based on beautiful-html-templates/templates/broadside/template.html; source was HTML, not PPTX.",
-        "HTML navigation dots, keyboard handlers, slide transitions, and entry animations are intentionally excluded from the PPTX DeckKit.",
-        "Source metadata declares 20 slides, but the HTML DOM and browser capture contain 16 actual slides.",
-        "Donut chart is rendered as native editable shapes rather than a literal CSS conic-gradient.",
-        "Image-bearing split layouts provide a placeholder/asset-slot shell; reference HTML contains no reusable image asset."
+        "Based on the original Broadside HTML/CSS design language; all sixteen page responsibilities use the broadside-poster/v1 contract.",
+        "Fonts are not bundled. This candidate uses Arial Black / Arial / Menlo with an explicit CJK fallback; each environment needs actual regular/bold rendering checks.",
+        "Bar and doughnut data use native editable charts. All values, units, series names and sources must be supplied; 1.x display strings and arbitrary segment colors are retired.",
+        "Doughnut legend values are editable text derived from the numeric model. PowerPoint chart edits do not update that independent legend; regenerate from content to synchronize.",
+        "image.split remains an editable placeholder shell and does not accept an external asset.",
+        "HTML navigation, entry animations and interactions are excluded. The independent refurbishment profile is retained without a new preservation claim."
       ],
-      "examples": ["examples/broadside-content.json"]
+      "examples": ["examples/broadside-content.json"],
+      "designContract": "broadside/design.json"
     },
     {
       "id": "cartesian",

@@ -1,7 +1,7 @@
 # Contract-driven DeckKits
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
-existing workflow. The opt-in designs are `biennale-yellow`, `cartesian`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
+existing workflow. The registered designs are `biennale-yellow`, `cartesian`, `broadside`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow
@@ -94,6 +94,23 @@ the renderer's full-value fallback; inspect the visible output rather than claim
 format was applied.
 
 ## Maintainer boundary
+
+### Poster family: Broadside
+
+`broadside` 2.0 uses `broadside-poster/v1`. Its sixteen retained slide types resolve into twenty-eight
+registered compositions through the same design, slots, validation, build and Create commands.
+Read `assets/deckkits/broadside/intent.md` and start from its content example. Dark/orange registers,
+heavy upright display, monospace chrome, slash lists and the closed cycle are design identity.
+Explicit `layoutId` still requires capacity; full decks open with cover and end with closing.
+Use `meta.designScope: "excerpt"` for extracts.
+
+Native column/bar and doughnut pages require numeric values, unit, source and series name. Legacy
+display strings and arbitrary segment colors fail validation. Zero values have no artificial
+minimum height. The native chart retains raw data while its independent doughnut legend is editable
+text; manual chart edits do not synchronize that legend. Statistics are display strings and the
+stepped hierarchy is categorical. `image.split` remains a native placeholder shell without asset
+ingestion. Arial Black / Arial / Menlo and Noto Sans SC replace unavailable reference fonts; fonts
+are not bundled. Canonical review and applicable native-host checks remain necessary.
 
 ### Warm editorial family: Cartesian
 

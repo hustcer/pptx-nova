@@ -21,6 +21,10 @@ assets/deckkits/
 ├── cartesian-components.mjs  # 暖石编辑语言的组件计划执行、原生图表与图片
 ├── cartesian-layouts.mjs     # 十类职责、十八个布局、实例容量和节奏选择
 ├── cartesian/                # Cartesian 2.0 合同与设计意图（candidate）
+├── broadside-components.mjs   # 黑橙海报语言的文字、形状与原生图表执行
+├── broadside-layouts.mjs      # 十六类职责、二十八个布局与实例容量
+├── broadside-registry.mjs     # Broadside 视觉族检查与发现投影
+├── broadside/                # Broadside 2.0 合同与设计意图（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
@@ -41,6 +45,11 @@ Biennale Yellow 2.0 保留九个页型名称，全部经注册合同执行；数
 Cartesian 2.0 同样保留十个页型入口，全部经注册组件计划执行；图表必须提供单位、来源，
 图片槽位和原生段落动画 target 保留。旧页型生成器及旧版 showcase 已替换，
 不提供双执行路径。见 [设计与迁移说明](cartesian/intent.md)。
+
+Broadside 2.0 保留十六类职责，提供二十八个注册构图；黑橙色域、超重标题、斜线列表、
+衰减文字与闭环结构经合同执行。柱图、横条图和环图保留原生数据对象，要求数值、单位、
+来源和系列名；独立环图图例需从 content 重新生成以同步手工数据编辑。
+字体采用相近的常用替代，图壳仍为占位形状。见 [设计与迁移说明](broadside/intent.md)。
 
 ## core-primitives 职责边界
 

@@ -1506,19 +1506,19 @@ test('broadside bar chart uses explicit accents without an implicit trailing acc
       slides: [
         {
           type: 'broadsideBarChartSlide',
-          data: { title: 'Comparison', bars },
+          data: {
+            title: 'Comparison',
+            bars,
+            unit: 'score',
+            source: 'Synthetic test data',
+            seriesName: 'Score',
+          },
         },
       ],
     })
-    return bars.map(
-      (_, index) =>
-        patch.ops.find(
-          (op) =>
-            op.op === 'set-shape' &&
-            op.shape?.name === `S0_Bar${index}` &&
-            op.fill?.type === 'solid',
-        )?.fill?.color,
-    )
+    return patch.ops
+      .find((op) => op.op === 'set-chart')
+      .series[0].points.map((point) => point.fill.color)
   }
   const bars = [
     { label: 'Product', value: 9.8, accent: true },
@@ -1526,22 +1526,22 @@ test('broadside bar chart uses explicit accents without an implicit trailing acc
     { label: 'Peer B', value: 6.5 },
   ]
 
-  assert.deepEqual(buildBarColors(bars), ['E85D26', 'A8A8A0', 'A8A8A0'])
+  assert.deepEqual(buildBarColors(bars), ['E85D26', '707068', '707068'])
   assert.deepEqual(buildBarColors(bars.map(({ accent: _accent, ...bar }) => bar)), [
-    'A8A8A0',
-    'A8A8A0',
-    'E85D26',
+    '707068',
+    '707068',
+    '707068',
   ])
 })
 
-test('broadside cover title budget blocks estimated multi-line titles in delivery mode', () => {
+test('broadside cover blocks text that exceeds every registered composition in delivery mode', () => {
   const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-broadside-cover-budget-'))
   const contentPath = join(dir, 'content.json')
   const content = JSON.parse(
     readFileSync(skillPath('assets/deckkits/examples/broadside-content.json'), 'utf8'),
   )
   const cover = content.slides.find((slide) => slide.type === 'broadsideCoverSlide')
-  cover.data.title = '重写演示文稿全链路基础设施能力版图'
+  cover.data.title = '重写演示文稿全链路基础设施能力版图'.repeat(3)
   writeJson(contentPath, content)
 
   const result = runNodeStatus(
@@ -1560,9 +1560,8 @@ test('broadside cover title budget blocks estimated multi-line titles in deliver
 
   assert.equal(validation.valid, false)
   assert.ok(
-    validation.fitDiagnostics.some(
-      (diagnostic) =>
-        diagnostic.code === 'slotBudget.lines.limit' && diagnostic.path === 'slides[0].data.title',
+    validation.errors.some(
+      (error) => error.type === 'design' && /slides\[0\].data.title/.test(error.message),
     ),
   )
 })
@@ -4003,6 +4002,11 @@ test('refurbish fallback plan overwrites current-run candidate commands', async 
       path: 'references/reference-create.md',
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
+    },
+    {
+      path: 'references/deckkit-mode.md',
+      section: 'Selection',
+      reason: 'The explicitly selected DeckKit uses a readiness exception.',
     },
   ])
 })

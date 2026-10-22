@@ -4,15 +4,70 @@
   "type": "object",
   "required": ["title", "contact"],
   "properties": {
-    "number": { "type": "string" },
-    "label": { "type": "string" },
-    "title": { "type": "string", "x-slotBudget": { "fontPt": 72, "maxLines": 2, "widthIn": 6.5 } },
+    "number": {
+      "type": "string",
+      "maxLength": 32,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 2,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "label": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 2.7,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 76,
+        "widthIn": 9.7,
+        "heightIn": 3.7,
+        "lineHeight": 1,
+        "maxLines": 2
+      }
+    },
     "contact": {
       "type": "string",
-      "x-slotBudget": { "fontPt": 14, "maxLines": 2, "widthIn": 5.8 }
+      "x-slotBudget": {
+        "fontPt": 14,
+        "widthIn": 11.87,
+        "heightIn": 0.65,
+        "lineHeight": 1.25,
+        "maxLines": 2
+      }
     },
-    "author": { "type": "string" },
-    "context": { "type": "string" }
+    "author": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 7.3,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "context": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 4.35,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$id": "pptx-nova-slide/broadside/broadsideEndSlide",
+  "x-generatedBudgetsFrom": "broadside/design.json",
+  "x-capacityCheck": "resolve-broadside-components/v1"
 }

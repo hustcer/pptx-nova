@@ -1,5 +1,9 @@
 {
-  "meta": { "deckkit": "broadside" },
+  "meta": {
+    "deckkit": "broadside",
+    "designScope": "excerpt",
+    "footerLeft": "SYNTHETIC BENCHMARK DATA"
+  },
   "slides": [
     {
       "type": "broadsideCoverSlide",
@@ -49,7 +53,11 @@
             "title": "发布",
             "body": "Ship the smallest version that can reveal real behavior."
           },
-          { "num": "04", "title": "学习", "body": "保留有效信号，删掉漂亮但无用的部分。" }
+          {
+            "num": "04",
+            "title": "学习",
+            "body": "保留有效信号，删掉漂亮但无用的部分。"
+          }
         ],
         "footerRight": "Open Studio"
       }

@@ -20,6 +20,7 @@ const DEFAULT_HIDE_SELECTORS = [
   '.pagination',
   '.dots',
   '.slide-counter',
+  '#slide-counter',
   'button[aria-label*="next" i]',
   'button[aria-label*="previous" i]',
 ].join(', ')
@@ -43,6 +44,7 @@ Options:
   --selector <css>          Slide selector. Default: .slide
   --viewport <WxH>          Browser viewport in CSS pixels. Default: 1440x810
   --active-display <value>  Optional forced display for the active slide. Default: preserve CSS
+  --active-class <name>     Template activation class. Default: active
   --hide-selectors <css>    Comma-separated UI selectors to hide. Default hides common deck controls
   --no-contact-sheet        Skip ImageMagick contact sheet generation
   --contact-sheet-font <f>  Font name/path for ImageMagick labels. Default: DECKKIT_CONTACT_SHEET_FONT or macOS/Linux fallback
@@ -65,6 +67,7 @@ function parseArgs(argv) {
     selector: '.slide',
     viewport: '1440x810',
     activeDisplay: null,
+    activeClass: 'active',
     hideSelectors: DEFAULT_HIDE_SELECTORS,
     contactSheet: true,
     contactSheetFont: '',
@@ -102,6 +105,7 @@ function parseArgs(argv) {
         '--selector',
         '--viewport',
         '--active-display',
+        '--active-class',
         '--hide-selectors',
         '--contact-sheet-font',
         '--contact-cols',
@@ -128,6 +132,8 @@ function parseArgs(argv) {
     usage()
     process.exit(1)
   }
+  if (!/^[a-zA-Z_][\w-]*$/.test(args.activeClass))
+    throw new Error('--active-class must be a single CSS class name')
 
   const viewport = /^(\d+)x(\d+)$/i.exec(args.viewport)
   if (!viewport || Number(viewport[1]) < 1 || Number(viewport[2]) < 1) {
@@ -305,7 +311,10 @@ let browserStarted = false
 
 const captureCss = `
 *, *::before, *::after {
-  animation: none !important;
+  animation-duration: 0.001s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  animation-fill-mode: forwards !important;
   transition: none !important;
 }
 html, body {
@@ -364,6 +373,7 @@ return JSON.stringify({
 (async () => {
 const selector = ${JSON.stringify(args.selector)};
 const activeDisplay = ${JSON.stringify(args.activeDisplay)};
+const activeClass = ${JSON.stringify(args.activeClass)};
 const activeIndex = ${index};
 const slides = Array.from(document.querySelectorAll(selector));
 slides.forEach((slide, i) => {
@@ -371,13 +381,13 @@ slides.forEach((slide, i) => {
     if (activeDisplay) slide.style.setProperty('display', activeDisplay, 'important');
     slide.style.setProperty('visibility', 'visible', 'important');
     slide.style.setProperty('opacity', '1', 'important');
-    slide.classList.add('active');
+    slide.classList.add(activeClass);
     slide.removeAttribute('aria-hidden');
     slide.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   } else {
     slide.style.setProperty('visibility', 'hidden', 'important');
     slide.style.setProperty('opacity', '0', 'important');
-    slide.classList.remove('active');
+    slide.classList.remove(activeClass);
     slide.setAttribute('aria-hidden', 'true');
   }
 });
@@ -394,7 +404,16 @@ try {
       if (failedFonts.length) throw new Error('Font loading failed: ' + failedFonts.map(font => font.family).join(', '));
       const images = Array.from(active.querySelectorAll('img'));
       await Promise.all(images.map(img => img.decode()));
+      for (const animation of active.getAnimations?.({ subtree: true }) ?? []) {
+        if (Number.isFinite(animation.effect?.getComputedTiming().endTime)) animation.finish();
+      }
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const hiddenAnimatedText = Array.from(active.querySelectorAll('[data-anim]')).filter(el => {
+        const style = getComputedStyle(el);
+        return el.textContent.trim() && (Number(style.opacity) === 0 || style.visibility === 'hidden');
+      });
+      if (hiddenAnimatedText.length)
+        throw new Error('Animated content remains hidden; set --active-class to the template activation class');
       const box = active.getBoundingClientRect();
       const style = getComputedStyle(active);
       if (style.display === 'none' || style.visibility !== 'visible' || Number(style.opacity) === 0 ||
@@ -433,6 +452,7 @@ try {
     selector: args.selector,
     viewport: { width: args.viewportWidth, height: args.viewportHeight },
     activeDisplay: args.activeDisplay,
+    activeClass: args.activeClass,
     hideSelectors: args.hideSelectors,
     captureCss,
     slideCount: init.count,

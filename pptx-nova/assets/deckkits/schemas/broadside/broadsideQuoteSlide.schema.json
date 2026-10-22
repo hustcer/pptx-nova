@@ -4,10 +4,49 @@
   "type": "object",
   "required": ["kicker", "quote", "author"],
   "properties": {
-    "kicker": { "type": "string" },
-    "quote": { "type": "string", "x-slotBudget": { "fontPt": 36, "maxLines": 4, "widthIn": 9.6 } },
-    "author": { "type": "string" },
-    "source": { "type": "string" }
+    "kicker": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10,
+        "heightIn": 0.35,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "quote": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 30,
+        "widthIn": 10.5,
+        "heightIn": 2.7,
+        "lineHeight": 1.15,
+        "maxLines": 4
+      }
+    },
+    "author": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10,
+        "heightIn": 0.35,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "source": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 11.87,
+        "heightIn": 0.5,
+        "lineHeight": 1.1,
+        "maxLines": 2
+      }
+    }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$id": "pptx-nova-slide/broadside/broadsideQuoteSlide",
+  "x-generatedBudgetsFrom": "broadside/design.json",
+  "x-capacityCheck": "resolve-broadside-components/v1"
 }

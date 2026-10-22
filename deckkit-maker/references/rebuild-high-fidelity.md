@@ -163,4 +163,5 @@ visual element。若发现新增形态，回到 Phase 0 扩大 rebuild set。
 - [ ] generate.mjs 内：hex 全走 `C.*`、字号全走 `F.*`、shape 名全走 `nm()`、
       每个页型函数只读自己的 data 对象（为 Phase 2 抽取做好准备）
 
-向用户展示 contact-sheet 对比结果并确认后，进入 `componentize.md`。
+记录并向用户展示基线结论后进入 `componentize.md`。用户已授权自主迭代与验收时继续执行，
+不重复索取阶段确认；只有未获授权的范围变化或核心设计冲突才需要澄清。

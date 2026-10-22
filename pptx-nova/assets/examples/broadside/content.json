@@ -1,300 +1,341 @@
 {
   "meta": {
     "deckkit": "broadside",
-    "footerLeft": "Broadside"
+    "designScope": "complete",
+    "footerLeft": "FIELD STUDIO · SYNTHETIC EXAMPLE"
   },
   "slides": [
     {
       "type": "broadsideCoverSlide",
       "data": {
         "number": "01",
-        "label": "Broadside",
-        "title": "the broadside style",
-        "subtitle": "Protest poster meets publication cover. Type so large it becomes image.",
-        "author": "[[Author Name]]",
-        "context": "[Year] · Context"
+        "label": "FIELD STUDIO",
+        "title": "public ideas\nmade real",
+        "subtitle": "An illustrative programme for making civic services with the people who use them.",
+        "author": "Field Studio · fictional example",
+        "context": "SYNTHETIC PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideChapterSlide",
       "data": {
-        "number": "02 / Chapter",
-        "title": "the next chapter begins here",
-        "lead": "One optional sentence that frames what this section is about."
+        "number": "01 / PRINCIPLE",
+        "title": "start with\nreal needs",
+        "lead": "Research sets the question. Public participation makes the work accountable."
       }
     },
     {
       "type": "broadsideStatementSlide",
       "data": {
-        "section": "The Argument",
+        "section": "The argument",
+        "kicker": "Core principle",
+        "title": "a useful idea\nbelongs outside",
         "page": "03",
-        "kicker": "Core Thesis",
-        "title": "orange is not an accent. it is the room.",
-        "footerRight": "[Author Name]"
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideSplitSlide",
       "data": {
-        "section": "Details",
-        "page": "04",
-        "kicker": "Context",
-        "title": "when content needs image support",
-        "lead": "One or two sentences of supporting context. Short. Dense. No padding.",
+        "section": "Research",
+        "kicker": "Open practice",
+        "title": "research in\nthe open",
+        "lead": "Use workshops to understand a service before drawing its next version.",
         "bullets": [
-          "First key supporting point",
-          "Second point, equally direct",
-          "Third and final - end strong"
+          "Listen to lived experience",
+          "Keep observations separate from assumptions",
+          "Share the questions still unanswered"
         ],
-        "imageLabel": "Image Placeholder",
-        "caption": "Image caption or source · Year",
-        "footerRight": "[Author Name]"
+        "imageLabel": "FIELD NOTES / IMAGE SHELL",
+        "caption": "Editable placeholder · no reference image is bundled",
+        "page": "04",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideStatsSlide",
       "data": {
-        "section": "By the numbers",
-        "page": "05",
+        "section": "Programme at a glance",
         "items": [
           {
-            "value": "$3.5B",
-            "label": "Series E closed at $61.5B valuation",
-            "note": "[Source] · [Year]"
+            "value": "12",
+            "label": "public workshops in the test programme",
+            "note": "Synthetic programme data"
           },
           {
-            "value": "3x",
-            "label": "Enterprise deployments up quarter over quarter",
-            "note": "Primary research"
+            "value": "240",
+            "label": "participants in the illustrative dataset",
+            "note": "Synthetic programme data"
           },
           {
-            "value": "#1",
-            "label": "App Store ranking · [Product Name] · [Date]",
-            "note": "App Store Charts"
+            "value": "4",
+            "label": "districts represented in the pilot plan",
+            "note": "Synthetic programme data"
           }
         ],
-        "footerRight": "[Author Name]"
+        "page": "05",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideFadeListSlide",
       "data": {
-        "number": "01",
-        "items": ["Before", "During", "After"],
-        "title": "the\nsession",
-        "author": "[Studio X] Guidelines",
-        "context": "06 / 10"
+        "number": "06",
+        "items": ["listen", "make", "share"],
+        "title": "the\npractice",
+        "author": "Field Studio · fictional example",
+        "context": "SYNTHETIC PROGRAMME"
       }
     },
     {
       "type": "broadsideListSlide",
       "data": {
-        "section": "The Framework",
-        "page": "07",
+        "section": "Working principles",
         "kicker": "Four rules",
-        "title": "what separates\nsignal from noise",
+        "title": "four rules\nfor public work",
         "items": [
-          "Ship before it's ready - learn faster than you plan",
-          "One metric that matters - ignore everything else this quarter",
-          "The customer is always wrong about solutions, never about problems",
-          "Speed is a feature - slow companies don't get a second chance"
+          "Start with a clear question",
+          "Use evidence people can inspect",
+          "Invite changes before committing",
+          "Publish what the team learns"
         ],
-        "footerRight": "[Author Name]"
+        "page": "07",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideQuoteSlide",
       "data": {
-        "kicker": "On speed",
-        "quote": "\"Move fast and you'll break things. Move slow and something else will break you.\"",
-        "author": "[Industry Leader]",
-        "source": "[Source] · [Year]"
+        "kicker": "A working principle",
+        "quote": "A public idea grows stronger when people can change it.",
+        "author": "Field Studio · illustrative voice",
+        "source": "Original synthetic text for DeckKit demonstration"
       }
     },
     {
       "type": "broadsideCompareSlide",
       "data": {
-        "section": "Before · After",
-        "page": "09",
+        "section": "From brief to shared brief",
         "left": {
-          "label": "Before",
-          "title": "six-month build cycles",
-          "body": "Teams planned for months before shipping anything. By launch, the market had moved.",
+          "label": "CLOSED BRIEF",
+          "title": "one team defines it",
+          "body": "A service brief is written inside the organisation before public testing.",
           "bullets": [
-            "Waterfall planning, quarterly roadmaps",
-            "User testing at the end, not the start",
-            "Success measured by features shipped"
+            "Limited research visibility",
+            "Late feedback from service users",
+            "Decisions stay inside the project"
           ]
         },
         "right": {
-          "label": "After",
-          "title": "two-week iteration loops",
-          "body": "Ship a rough version. Watch what users actually do. Rebuild. Ship again.",
+          "label": "SHARED BRIEF",
+          "title": "people help shape it",
+          "body": "The question, evidence and early options are shared while the work can change.",
           "bullets": [
-            "Weekly user sessions, continuous discovery",
-            "Metrics reviewed daily, not quarterly",
-            "Success measured by behavior change"
+            "Publish the research question",
+            "Test a rough service together",
+            "Keep a visible decision record"
           ]
         },
-        "footerRight": "[Author Name]"
+        "page": "09",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideBarChartSlide",
       "data": {
-        "section": "Growth Metrics",
-        "page": "11",
-        "title": "revenue by quarter",
-        "caption": "USD · Millions · FY 2025",
+        "section": "Participation",
+        "title": "participation grows",
+        "caption": "Illustrative pilot weeks",
+        "unit": "people",
+        "seriesName": "Participants",
         "bars": [
-          { "label": "Q1", "value": 1.2, "display": "$1.2M" },
-          { "label": "Q2", "value": 1.7, "display": "$1.7M" },
-          { "label": "Q3", "value": 2.1, "display": "$2.1M" },
-          { "label": "Q4", "value": 2.8, "display": "$2.8M", "accent": true }
+          {
+            "label": "W1",
+            "value": 40
+          },
+          {
+            "label": "W2",
+            "value": 55
+          },
+          {
+            "label": "W3",
+            "value": 65
+          },
+          {
+            "label": "W4",
+            "value": 80,
+            "accent": true
+          }
         ],
-        "source": "Source: Internal finance data · Q4 2025 Annual Report",
-        "footerRight": "[Author Name]"
+        "source": "Source: synthetic pilot dataset · not actual results",
+        "page": "10",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideFlowSlide",
       "data": {
-        "section": "The Process",
-        "page": "12",
-        "title": "how it works",
+        "section": "The process",
+        "title": "from question to field",
         "steps": [
           {
             "num": "01",
-            "title": "Discover",
-            "body": "Talk to users. Read the data. Surface what's actually true vs. what the team assumes."
+            "title": "listen",
+            "body": "Hear how people use the service and record the needs they describe."
           },
           {
             "num": "02",
-            "title": "Define",
-            "body": "Narrow to one problem worth solving. Write it as a testable hypothesis, not a feature request."
+            "title": "frame",
+            "body": "Choose a specific question that can be checked with evidence."
           },
           {
             "num": "03",
-            "title": "Design",
-            "body": "Build the simplest thing that could prove or disprove the hypothesis. Skip the polish."
+            "title": "build",
+            "body": "Make the smallest useful version that people can try."
           },
           {
             "num": "04",
-            "title": "Deploy",
-            "body": "Ship to real users. Measure behavior, not opinions. Repeat from step one with new data."
+            "title": "share",
+            "body": "Publish what changed, what failed and what the next test will explore."
           }
         ],
-        "footerRight": "[Author Name]"
+        "page": "11",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideDonutSlide",
       "data": {
-        "section": "Market Share",
-        "page": "13",
-        "title": "where the market sits",
+        "section": "Programme resources",
+        "title": "where time goes",
         "items": [
-          { "label": "Leader", "value": "40%", "color": "E85D26" },
-          { "label": "Challenger", "value": "28%", "color": "3A3A38" },
-          { "label": "Followers", "value": "20%", "color": "555550" },
-          { "label": "Other", "value": "12%", "color": "282826" }
+          {
+            "label": "Research",
+            "value": 40
+          },
+          {
+            "label": "Design",
+            "value": 28
+          },
+          {
+            "label": "Testing",
+            "value": 20
+          },
+          {
+            "label": "Publishing",
+            "value": 12
+          }
         ],
-        "total": "TOTAL MARKET: $[X]B · [Year] ESTIMATE",
-        "source": "Source: [Industry report] · [Year] · Estimates only",
-        "footerLeft": "[Author]",
-        "footerRight": "[Year]"
+        "unit": "hours",
+        "seriesName": "Time allocation",
+        "total": "100 HOURS · SYNTHETIC PROJECT",
+        "source": "Source: illustrative planning allocation · not actual time records",
+        "page": "12",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsidePyramidSlide",
       "data": {
-        "section": "The Hierarchy",
-        "page": "14",
-        "title": "what actually matters",
+        "section": "The hierarchy",
+        "title": "what guides the work",
         "levels": [
-          { "name": "mission", "desc": "why this exists" },
-          { "name": "strategy", "desc": "what we're betting on" },
-          { "name": "product", "desc": "what we're building" },
-          { "name": "growth", "desc": "how we reach people" },
-          { "name": "operations", "desc": "how we run the day-to-day" }
+          {
+            "name": "purpose",
+            "desc": "why the service exists"
+          },
+          {
+            "name": "principles",
+            "desc": "how choices are made"
+          },
+          {
+            "name": "service",
+            "desc": "what people can use"
+          },
+          {
+            "name": "projects",
+            "desc": "what changes next"
+          },
+          {
+            "name": "operations",
+            "desc": "how the work is sustained"
+          }
         ],
-        "footerLeft": "[Author]",
-        "footerRight": "[Year]"
+        "page": "13",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideTimelineSlide",
       "data": {
-        "section": "The Story",
-        "page": "15",
-        "title": "how we got here",
+        "section": "The programme story",
+        "title": "how a pilot takes shape",
         "events": [
           {
-            "date": "[Year -3]",
-            "title": "the idea",
-            "body": "One slide. Three slides. Nineteen rejections. One yes."
+            "date": "WEEK 01",
+            "title": "open the question",
+            "body": "Invite a group to describe the service as it works today."
           },
           {
-            "date": "[Year -2]",
-            "title": "first product",
-            "body": "Launched to [N] users. [X]% used it daily after week one."
+            "date": "WEEK 02",
+            "title": "share the evidence",
+            "body": "Publish observations and identify gaps that need another test."
           },
           {
-            "date": "[Year -1]",
-            "title": "the pivot",
-            "body": "Killed [X] features. Found the one thing that changed retention."
+            "date": "WEEK 03",
+            "title": "try a small change",
+            "body": "Make an editable prototype and observe people using it."
           },
           {
-            "date": "[Year 0]",
-            "title": "now",
-            "body": "[N]k users. $[X]M ARR. The hard part starts here."
+            "date": "WEEK 04",
+            "title": "publish the learning",
+            "body": "Record the outcome and choose the next useful question."
           }
         ],
-        "footerLeft": "[Author] / [Year]",
-        "footerRight": "15"
+        "page": "14",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideCycleSlide",
       "data": {
-        "section": "The Loop",
-        "page": "16",
-        "title": "build · measure · learn",
+        "section": "The learning loop",
+        "title": "listen · build · learn",
         "steps": [
           {
             "num": "01",
-            "title": "build",
-            "body": "Ship the smallest version that could prove the idea wrong."
+            "title": "listen",
+            "body": "Start with a service question and people with direct experience."
           },
           {
             "num": "02",
-            "title": "measure",
-            "body": "What did users actually do? Not what they said - what they did."
+            "title": "build",
+            "body": "Make a rough version that tests the question in practice."
           },
           {
             "num": "03",
-            "title": "decide",
-            "body": "Ship to more users or go back to step one. There is no third option."
+            "title": "observe",
+            "body": "Record behaviour and evidence rather than assumed preferences."
           },
           {
             "num": "04",
             "title": "learn",
-            "body": "Update the hypothesis. Kill what didn't work. Double what did."
+            "body": "Update the question and share the next test with the group."
           }
         ],
-        "footerLeft": "[Author] / [Year]",
-        "footerRight": "16"
+        "page": "15",
+        "footerRight": "ILLUSTRATIVE PROGRAMME · 2026"
       }
     },
     {
       "type": "broadsideEndSlide",
       "data": {
-        "number": "10",
-        "label": "End",
-        "title": "let's\ntalk.",
-        "contact": "[hello@company.com] · [@handle] · [company.com]",
-        "author": "[Author Name]",
-        "context": "[Year]"
+        "number": "16",
+        "label": "NEXT CONVERSATION",
+        "title": "let's make\nit useful",
+        "contact": "hello@example.org · field studio",
+        "author": "Field Studio · fictional example",
+        "context": "SYNTHETIC PROGRAMME · 2026"
       }
     }
   ]

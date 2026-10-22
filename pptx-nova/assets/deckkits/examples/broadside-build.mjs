@@ -1,6 +1,8 @@
 // broadside-build.mjs - content -> Broadside DeckKit -> patch
 import { writeFileSync } from 'node:fs'
-import { assessDeckQuality, loadContent, validateContent } from '../core-primitives.kit.mjs'
+import { fileURLToPath } from 'node:url'
+import { assessDeckQuality, loadContent } from '../core-primitives.kit.mjs'
+import { validateDeckkitContent } from '../validate-deckkit.mjs'
 import { createDeck } from '../broadside.kit.mjs'
 
 function parseArgs(argv) {
@@ -39,9 +41,9 @@ function qualityFails(report, level) {
 const deckkitId = 'broadside'
 const args = parseArgs(process.argv)
 const content = await loadContent(
-  args.contentPath ?? 'skills/pptx-nova/assets/deckkits/examples/broadside-content.json',
+  args.contentPath ?? fileURLToPath(new URL('./broadside-content.json', import.meta.url)),
 )
-const validation = validateContent(content, { deckkit: deckkitId })
+const validation = validateDeckkitContent(content, { deckkit: deckkitId, mode: 'delivery' })
 if (!validation.valid) {
   console.error(JSON.stringify(validation, null, 2))
   process.exit(1)

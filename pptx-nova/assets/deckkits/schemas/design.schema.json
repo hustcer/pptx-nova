@@ -228,6 +228,9 @@
     },
     "cartesian": {
       "$ref": "#/$defs/cartesian"
+    },
+    "broadside": {
+      "$ref": "#/$defs/broadside"
     }
   },
   "required": [
@@ -1631,6 +1634,319 @@
         }
       },
       "required": ["family", "styles", "spacing", "chart", "capacity", "rhythm", "families"],
+      "additionalProperties": false
+    },
+    "broadside": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "broadside-poster/v1"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sizePt": {
+                "type": "number",
+                "minimum": 10
+              },
+              "lineHeight": {
+                "type": "number",
+                "minimum": 1
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "italic": {
+                "type": "boolean"
+              },
+              "alignment": {
+                "enum": ["left", "right", "center"]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              },
+              "cjkBold": {
+                "type": "boolean"
+              },
+              "cjkLineHeight": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "required": ["role", "sizePt", "lineHeight", "color"],
+            "additionalProperties": false
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "columnGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "paragraphGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "ruleGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "itemGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "padding": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": ["columnGap", "paragraphGap", "ruleGap", "itemGap", "padding"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "topLeft": {
+              "$ref": "#/$defs/frame"
+            },
+            "topRight": {
+              "$ref": "#/$defs/frame"
+            },
+            "topRule": {
+              "$ref": "#/$defs/frame"
+            },
+            "bottomLeft": {
+              "$ref": "#/$defs/frame"
+            },
+            "bottomRight": {
+              "$ref": "#/$defs/frame"
+            },
+            "bottomRule": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["topLeft", "topRight", "topRule", "bottomLeft", "bottomRight", "bottomRule"],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "stats": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "bullets": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "splitBullets": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "fade": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "bars": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "donut": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "flow": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "cycle": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "levels": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "events": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "compareBullets": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            }
+          },
+          "required": [
+            "stats",
+            "bullets",
+            "splitBullets",
+            "fade",
+            "bars",
+            "donut",
+            "flow",
+            "cycle",
+            "levels",
+            "events",
+            "compareBullets"
+          ],
+          "additionalProperties": false
+        },
+        "chart": {
+          "type": "object",
+          "properties": {
+            "fontPt": {
+              "type": "number",
+              "minimum": 10
+            },
+            "numberFormat": {
+              "type": "string",
+              "minLength": 1
+            },
+            "holeSize": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 90
+            },
+            "pointColors": {
+              "type": "array",
+              "minItems": 5,
+              "maxItems": 5,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": ["fontPt", "numberFormat", "holeSize", "pointColors"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "minFullDeck": {
+              "type": "number",
+              "minimum": 2
+            }
+          },
+          "required": ["maxConsecutive", "minFullDeck"],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mode": {
+                "enum": ["dark", "orange"]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "titleStyle": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["titleStyle", "regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "mode", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "family",
+        "styles",
+        "spacing",
+        "chrome",
+        "capacity",
+        "chart",
+        "rhythm",
+        "families"
+      ],
       "additionalProperties": false
     }
   }

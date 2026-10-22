@@ -1,5 +1,9 @@
 {
-  "meta": { "deckkit": "broadside" },
+  "meta": {
+    "deckkit": "broadside",
+    "designScope": "excerpt",
+    "footerLeft": "SYNTHETIC BENCHMARK DATA"
+  },
   "slides": [
     {
       "type": "broadsideStatsSlide",
@@ -38,14 +42,35 @@
         "title": "six market signals",
         "caption": "Index · FY 2026",
         "bars": [
-          { "label": "A", "value": 18, "display": "18" },
-          { "label": "B", "value": 25, "display": "25" },
-          { "label": "C", "value": 32, "display": "32" },
-          { "label": "D", "value": 41, "display": "41" },
-          { "label": "E", "value": 49, "display": "49" },
-          { "label": "F", "value": 61, "display": "61", "accent": true }
+          {
+            "label": "A",
+            "value": 18
+          },
+          {
+            "label": "B",
+            "value": 25
+          },
+          {
+            "label": "C",
+            "value": 32
+          },
+          {
+            "label": "D",
+            "value": 41
+          },
+          {
+            "label": "E",
+            "value": 49
+          },
+          {
+            "label": "F",
+            "value": 61,
+            "accent": true
+          }
         ],
-        "source": "Source: benchmark fixture"
+        "source": "Source: synthetic benchmark fixture",
+        "unit": "index points",
+        "seriesName": "Signal index"
       }
     },
     {

@@ -184,7 +184,9 @@ HTML 模板不是 PPTX，不能走 `xdoc inspect` / `xdoc convert <ref.pptx>` �
    脚本默认独立 session，逐页等待字体、图片解码与布局，保存截图 hash/几何；具体限制见 HTML reference。
    非 `.slide` 模板通过
    `--selector` 调整，只有
-   slide 原本是 `display:none` 且无法靠 `.active` 恢复时才传 `--active-display`，避免破坏
+   模板用 `.is-active` 等激活类时传 `--active-class is-active`；脚本将有限入场动画推进终态，
+   并拒绝仍透明的 `data-anim` 文字。不要用 `animation:none` 冻结初始透明态后把空页当成功。
+   slide 原本是 `display:none` 且无法靠激活类恢复时才传 `--active-display`，避免破坏
    源 HTML 的 grid/flex 布局。macOS 上 ImageMagick 可能找不到默认字体；脚本会优先使用
    `DECKKIT_CONTACT_SHEET_FONT` / `--contact-sheet-font`，否则回退到系统 Arial/Helvetica
    路径，避免 contact sheet 因空字体失败。

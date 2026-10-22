@@ -1,5 +1,10 @@
 # broadside.golden-html
 
-Manual PNG review: pending formal promotion review.
+Manual PNG review: passed for Broadside 2.0 on 2026-10-22; candidate readiness.
 
-Expected visual direction: 16-slide HTML-template coverage with dark/orange registers, massive lowercase headlines, mono catalogue chrome, slash bullets, and native editable chart/diagram approximations. Browser navigation dots and animations are intentionally absent.
+All sixteen canonical pages were reviewed individually, including enlarged chart legends, colored
+comparison text and footnotes. The coherent Field Studio programme is synthetic content, separate
+from the skin. Dark/orange registers, massive upright type, monospace chrome, slash bullets and
+editable diagrams retain the reference identity. Column and doughnut charts are native data objects.
+Browser navigation and entry animations are excluded. See `docs/broadside-v2-migration-results.md`
+for the independent machine, visual and PowerPoint evidence and font substitutions.

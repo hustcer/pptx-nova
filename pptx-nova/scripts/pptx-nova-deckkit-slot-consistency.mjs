@@ -12,6 +12,7 @@
 //   x-slotFallbackOf: "<field>"  本槽位是同级 <field> 的回退别名；用移除 <field> 的 solo 探针复验
 //   enum 槽位与非 string 槽位自动跳过；无 properties 的 object/array（动态结构）记为 dynamic 并跳过
 //   x-slotProbeVariants: [{omit: ['optionalField']}] probes legal alternatives; every field must remain covered.
+//   x-slotProbeOmit: true       Omit optional control fields that conflict in a generic probe; never visible text.
 //
 // 用法：
 //   node <skill-root>/scripts/pptx-nova-deckkit-slot-consistency.mjs [--deckkit <id>] [--json]
@@ -70,8 +71,8 @@ let tokenCounter = 0
 function nextToken() {
   tokenCounter += 1
   // Keep probes inside compact KPI slots, including composed value+unit fields.
-  // Fixed delimiters prevent one probe from matching another probe's prefix.
-  return `Q${String(tokenCounter).padStart(4, '0')}Z`
+  // Base32 excludes the Z terminator, so short tokens cannot match longer tokens.
+  return `Q${tokenCounter.toString(32).toUpperCase()}Z`
 }
 
 // 返回 { value, sentinels: [{path, token, fallbackOf}], dynamics: [path] }
@@ -82,6 +83,11 @@ function buildProbe(schema, basePath) {
   function fillObject(objSchema, path) {
     const out = {}
     for (const [field, fieldSchema] of Object.entries(objSchema.properties ?? {})) {
+      if (fieldSchema['x-slotProbeOmit'] === true) {
+        if (fieldSchema['x-slotRole'] !== 'control' || objSchema.required?.includes(field))
+          throw new Error('Probe-only omissions require optional control fields')
+        continue
+      }
       const fieldPath = `${path}.${field}`
       const value = fillField(field, fieldSchema, fieldPath)
       if (value !== undefined) out[field] = value
@@ -140,6 +146,9 @@ function renderPatchText(mod, deckkit, slideType, data) {
 }
 
 function checkProbe(mod, deckkit, slideType, schema) {
+  // Tokens need uniqueness only within this rendered probe. Compact figure labels
+  // must be exercised with realistic text rather than a six-character fixture.
+  tokenCounter = 0
   const { value, sentinels, dynamics } = buildProbe(schema, 'data')
   let text
   try {
@@ -233,10 +242,7 @@ try {
   }
   const failed = results.some(
     (kit) =>
-      kit.error ||
-      kit.slideTypes.some(
-        (slide) => slide.status === 'ghost-slots' || slide.status === 'render-error',
-      ),
+      kit.error || kit.slideTypes.some((slide) => !['ok', 'no-schema'].includes(slide.status)),
   )
   if (args.json) {
     process.stdout.write(`${JSON.stringify({ ok: !failed, results }, null, 2)}\n`)
@@ -256,6 +262,8 @@ try {
           console.log(`  no-schema     ${slide.slideType}`)
         } else if (slide.status === 'render-error') {
           console.log(`  render-error  ${slide.slideType}: ${slide.error}`)
+        } else if (slide.status === 'probe-config-error') {
+          console.log(`  config-error  ${slide.slideType}: ${slide.error}`)
         } else {
           console.log(`  GHOST-SLOTS   ${slide.slideType}: ${slide.ghosts.join(', ')}`)
         }

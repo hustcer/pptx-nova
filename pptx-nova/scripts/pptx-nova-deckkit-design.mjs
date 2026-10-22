@@ -88,6 +88,7 @@ try {
       rules: d.rules,
       legacySlideTypes: Object.keys(d.legacyLayouts),
       evidence: d.evidence,
+      annual: d.annual,
       ...(d.editorial ? { editorial: d.editorial } : {}),
       ...(d.strategy ? { strategy: d.strategy } : {}),
       inputGuide:

@@ -3,6 +3,7 @@ import { loadDesignContract, resolveDesignSlot, resolveEvidenceLayout } from './
 import { readFileSync } from 'node:fs'
 import { resolveEditorialDeck } from './editorial-layouts.mjs'
 import { resolveStrategyDeck } from './strategy-layouts.mjs'
+import { resolveAnnualDeck } from './annual-layouts.mjs'
 
 // Keep legacy validation intact. Only registered design contracts add semantic checks.
 export function validateDeckkitContent(content, options = {}) {
@@ -11,16 +12,29 @@ export function validateDeckkitContent(content, options = {}) {
   try {
     const design = loadDesignContract(options.deckkit || content.meta.deckkit)
     if (!design) return result
-    if (design.editorial || design.strategy) {
-      const resolved = design.strategy
-        ? resolveStrategyDeck(design, content)
-        : resolveEditorialDeck(design, content)
+    if (design.editorial || design.strategy || design.annual) {
+      const resolved = design.annual
+        ? resolveAnnualDeck(design, content)
+        : design.strategy
+          ? resolveStrategyDeck(design, content)
+          : resolveEditorialDeck(design, content)
       result.errors = result.errors.filter((e) => e.type !== 'diversity')
       result.warnings = result.warnings.filter((e) => e.type !== 'diversity')
       result.fitDiagnostics = result.fitDiagnostics.filter((d) => !d.code?.startsWith('diversity.'))
+      if (design.annual) {
+        // Annual frames depend on the resolved chart count, column weights and row count.
+        // The resolver above checked actual instances; generic repeating budgets are discovery hints.
+        const generic = (d) => d?.code?.startsWith('slotBudget.')
+        result.warnings = result.warnings.filter((w) => !generic(w.diagnostic))
+        result.fitDiagnostics = result.fitDiagnostics.filter((d) => !generic(d))
+      }
       result.valid = result.errors.length === 0
       result.designDiversity = {
-        mode: design.strategy ? 'resolved-strategy-layouts' : 'resolved-editorial-layouts',
+        mode: design.annual
+          ? 'resolved-annual-layouts'
+          : design.strategy
+            ? 'resolved-strategy-layouts'
+            : 'resolved-editorial-layouts',
         uniqueCompositions: new Set(resolved.layouts.map((r) => r.fingerprint)).size,
       }
       for (const message of resolved.warnings) result.warnings.push({ type: 'design', message })

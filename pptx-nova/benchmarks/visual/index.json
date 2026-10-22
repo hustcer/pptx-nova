@@ -189,6 +189,15 @@
       "buildPath": "../../assets/deckkits/examples/green-slate-build.mjs",
       "expectedPath": "cases/green-slate/golden-design/expected.json",
       "reviewPath": "cases/green-slate/golden-design/review.md"
+    },
+    {
+      "id": "clear-value.golden-design",
+      "deckkit": "clear-value",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/clear-value-content.json",
+      "buildPath": "../../assets/deckkits/examples/clear-value-build.mjs",
+      "expectedPath": "cases/clear-value/golden-design/expected.json",
+      "reviewPath": "cases/clear-value/golden-design/review.md"
     }
   ]
 }

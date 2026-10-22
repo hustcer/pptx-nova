@@ -4422,6 +4422,356 @@
           "contentPath": "examples/green-slate-content.json"
         }
       ]
+    },
+    {
+      "id": "clear-value",
+      "version": "0.1.0",
+      "path": "clear-value.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "designContract": "clear-value/design.json",
+      "qualityProfile": {
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "Institutional research and annual reports",
+        "Serif white-page evidence boards",
+        "Scenario, allocation and decision records"
+      ],
+      "coverage": {
+        "languages": ["en", "zh", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "valueCoverSlide",
+          "valueSummarySlide",
+          "valueEvidenceSlide",
+          "valueMatrixSlide",
+          "valueCompositeSlide",
+          "valueTimelineSlide",
+          "valueDecisionSlide",
+          "valueArgumentSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "valueCoverSlide",
+        "valueSummarySlide",
+        "valueEvidenceSlide",
+        "valueMatrixSlide",
+        "valueCompositeSlide",
+        "valueTimelineSlide",
+        "valueDecisionSlide",
+        "valueArgumentSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "White institutional annual-report evidence, serif hierarchy and restrained teal data",
+        "mood": ["calm", "precise", "editorial"],
+        "layoutPrinciples": [
+          "Evidence determines composition",
+          "Use rules and whitespace rather than cards",
+          "Preserve numeric alignment and source traceability"
+        ],
+        "signatureElements": [
+          "Inset black top bar",
+          "Serif title and three-layer figure head",
+          "Teal current data, gray history",
+          "Terracotta conclusion ticks",
+          "Minimal running footer"
+        ],
+        "compositionRules": [
+          "White-only pages",
+          "Never use terracotta as a negative series",
+          "At most four data colors",
+          "Outline large current marks to avoid blanket teal"
+        ],
+        "avoid": [
+          "Dark pages",
+          "Rounded cards",
+          "Decorative icons",
+          "Gradients and shadows",
+          "Hidden assumptions"
+        ],
+        "typography": {
+          "heading": "Georgia / Songti SC",
+          "body": "Arial / Arial Unicode MS",
+          "hierarchy": "Serif titles and prominent metrics; sans data and labels"
+        },
+        "colorSystem": {
+          "background": "white",
+          "structure": "black",
+          "data": "teal / dark teal / gray / sand",
+          "conclusion": "terracotta"
+        },
+        "slideRhythm": {
+          "anchor": ["valueCoverSlide"],
+          "judgment": ["valueSummarySlide", "valueDecisionSlide"],
+          "evidence": [
+            "valueEvidenceSlide",
+            "valueMatrixSlide",
+            "valueCompositeSlide",
+            "valueTimelineSlide",
+            "valueArgumentSlide"
+          ]
+        }
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "error"
+        },
+        "slideTypes": {
+          "valueCoverSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.abstract",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "valueSummarySlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.items",
+              "data.side"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "valueEvidenceSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.charts"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "wide", "paired", "lead", "quad"]
+          },
+          "valueMatrixSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.tableName",
+              "data.columns",
+              "data.rows",
+              "data.note"
+            ],
+            "allowedLayoutIds": ["auto", "full", "compact"]
+          },
+          "valueCompositeSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.tableName",
+              "data.columns",
+              "data.rows",
+              "data.note",
+              "data.charts"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "valueTimelineSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.tableName",
+              "data.columns",
+              "data.rows",
+              "data.note",
+              "data.phases"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "valueDecisionSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.items",
+              "data.side"
+            ],
+            "allowedLayoutIds": ["auto", "standard"]
+          },
+          "valueArgumentSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.asOf",
+              "data.verdict",
+              "data.paragraphs"
+            ],
+            "allowedLayoutIds": ["auto", "column", "split"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "groups": {
+          "anchor": ["valueCoverSlide"],
+          "judgment": ["valueSummarySlide", "valueDecisionSlide"],
+          "evidence": [
+            "valueEvidenceSlide",
+            "valueMatrixSlide",
+            "valueCompositeSlide",
+            "valueTimelineSlide",
+            "valueArgumentSlide"
+          ]
+        },
+        "maxConsecutiveSameGroup": 8,
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 130
+        },
+        "hard": {
+          "titleMaxChars": 130
+        }
+      },
+      "validatedWith": [
+        "node pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit clear-value --json",
+        "node --test tools/tests/pptx-nova-clear-value.test.mjs",
+        "node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit clear-value --all --repeat 3",
+        "node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit clear-value --target candidate --benchmark-mode required-live"
+      ],
+      "quality": {
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-10-22",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-22",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-clear-value-20261022/benchmark/02"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
+            }
+          },
+          "cases": [
+            {
+              "caseId": "clear-value.golden-design",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-clear-value-20261022/benchmark/02/clear-value/golden-design/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/clear-value/golden-design/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
+                }
+              },
+              "previews": {
+                "count": 12,
+                "expectedCount": 12,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 292406
+              },
+              "patchOps": 897,
+              "p50TotalMs": 99.67
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Migrated from Ebony Ledger design prose and an eight-panel landscape reference; recomposed for readable native output.",
+        "Georgia/Songti SC and Arial/Arial Unicode MS replace requested fonts; installed font availability must be checked.",
+        "Classic native line endpoint-only labels are not supported by the tested runtime; first/last values are listed in the chart head.",
+        "Large current bars and circle marks use restrained outlines; teal pixel share still requires visual review.",
+        "Proportional circles are editable data-derived shapes; no source images, business conclusions or arbitrary refurbishment parity are bundled."
+      ],
+      "examples": {
+        "content": "examples/clear-value-content.json",
+        "build": "examples/clear-value-build.mjs"
+      }
     }
   ]
 }

@@ -5,6 +5,7 @@ import { dirname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { wrapCjkText } from './design-text.mjs'
 import { STRATEGY_REGIONS } from './strategy-registry.mjs'
+import { ANNUAL_LAYOUTS } from './annual-registry.mjs'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -20,6 +21,7 @@ const CHECKS = new Set([
   'single-accent-focus',
   'editorial-language',
   'strategy-language',
+  'annual-language',
 ])
 
 // A deliberately bounded validator for the bundled design schema, not a general JSON Schema API.
@@ -90,7 +92,7 @@ export function assertDesignContract(design) {
       for (const frame of slot.frames) assertFrame(design, frame, `${type}.${name}`)
     }
   }
-  if (!design.evidence && !design.editorial && !design.strategy)
+  if (!design.evidence && !design.editorial && !design.strategy && !design.annual)
     throw new Error('A registered design renderer is required')
   for (const [id, layout] of Object.entries(design.evidence?.layouts ?? {})) {
     assertFrame(design, layout.chart, id)
@@ -160,6 +162,29 @@ export function assertDesignContract(design) {
           throw new Error(`${type}.${id}: regions must match strategy role ${family.role}`)
         for (const [key, frame] of Object.entries(variant.regions))
           assertFrame(design, frame, `${type}.${id}.${key}`)
+      }
+    }
+  }
+  if (design.annual) {
+    const annual = design.annual
+    for (const token of Object.values(annual.palette))
+      if (!design.colors[token]) throw new Error('Annual palette contains an unknown token')
+    for (const font of ['display', 'body'])
+      if (!design.fonts[font]) throw new Error(`Annual requires ${font} font`)
+    for (const [key, frame] of Object.entries(annual.chrome)) assertFrame(design, frame, key)
+    if (!Object.keys(annual.families).length) throw new Error('Annual requires families')
+    for (const [type, family] of Object.entries(annual.families)) {
+      if (!Object.keys(family.variants).length) throw new Error(`${type}: no variants`)
+      for (const [id, variant] of Object.entries(family.variants)) {
+        const expected = ANNUAL_LAYOUTS[family.role]?.[id]
+        if (
+          !expected ||
+          expected.some((k) => !variant.regions[k]) ||
+          Object.keys(variant.regions).some((k) => !expected.includes(k))
+        )
+          throw new Error(`${type}.${id}: unregistered annual composition`)
+        for (const frame of Object.values(variant.regions))
+          assertFrame(design, frame, `${type}.${id}`)
       }
     }
   }
@@ -464,6 +489,45 @@ export function checkDesignPatch(design, patch) {
       }
     }
     for (const rule of design.rules) {
+      if (rule.check === 'annual-language') {
+        const a = design.annual,
+          palette = Object.fromEntries(
+            Object.entries(a.palette).map(([k, v]) => [k, design.colors[v]]),
+          )
+        if (
+          op.op === 'set-slide-background' &&
+          (op.fill?.type !== 'solid' || op.fill.color !== palette.paper)
+        )
+          issue(rule, 'Annual pages require a white contracted surface', index)
+        if (op.op === 'add-shape' && !['rectangle', 'oval'].includes(op.kind))
+          issue(rule, 'Unregistered annual shape', index)
+        if (op.op === 'add-chart' && !['bar', 'column', 'line', 'doughnut'].includes(op.kind))
+          issue(rule, 'Unregistered annual chart', index)
+        if (op.op === 'set-chart' && op.view3D) issue(rule, '3D is forbidden', index)
+        if (op.op === 'set-table' && (op.style?.horizontalBanding || op.style?.verticalBanding))
+          issue(rule, 'Annual tables use explicit horizontal rules', index)
+        if (op.op === 'set-shape' && op.fill?.type === 'solid') {
+          const owner = patch.ops.find(
+            (o) => o.op === 'add-shape' && o.slide === op.slide && o.name === op.shape?.name,
+          )
+          if (
+            owner &&
+            op.fill.color === palette.terracotta &&
+            parseFloat(owner.w) * parseFloat(owner.h) > 0.08
+          )
+            issue(rule, 'Conclusion color cannot fill a panel', index)
+        }
+        if (op.op === 'set-chart')
+          for (const series of op.series ?? []) {
+            const used = [
+              series.fill?.color,
+              series.line?.color,
+              ...(series.points ?? []).flatMap((p) => [p.fill?.color, p.line?.color]),
+            ]
+            if (used.includes(palette.terracotta))
+              issue(rule, 'Conclusion color is not a series or negative color', index)
+          }
+      }
       if (rule.check === 'strategy-language') {
         if (op.op === 'add-chart' && !['bar', 'line'].includes(op.kind))
           issue(rule, `Unregistered strategy chart ${op.kind}`, index)
@@ -568,7 +632,7 @@ export function checkDesignPatch(design, patch) {
           issue(rule, `Unapproved color ${v}`, index)
         if (v && typeof v === 'object') {
           if (
-            ['editorial-language', 'strategy-language'].includes(rule.check) &&
+            ['editorial-language', 'strategy-language', 'annual-language'].includes(rule.check) &&
             key === 'fill' &&
             v.type !== 'solid' &&
             v.type !== 'none'
@@ -733,7 +797,10 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
       }
       expected.forEach((op, i) => {
         const chart = actual[i].chart
-        if (chart.type !== op.kind || chart.series.length !== op.data.series.length) {
+        // The current JSON projection names the native c:doughnutChart family "ring".
+        // Normalize only this verified alias; a pie or other family still fails closed.
+        const expectedKind = op.kind === 'doughnut' ? 'ring' : op.kind
+        if (chart.type !== expectedKind || chart.series.length !== op.data.series.length) {
           fail(`${op.name}: chart structure changed`)
           return
         }

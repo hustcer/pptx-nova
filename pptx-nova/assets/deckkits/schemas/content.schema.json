@@ -189,7 +189,15 @@
               "slateFlowSlide",
               "slateSectionSlide",
               "slateNoticeSlide",
-              "slateClosingSlide"
+              "slateClosingSlide",
+              "valueCoverSlide",
+              "valueSummarySlide",
+              "valueEvidenceSlide",
+              "valueMatrixSlide",
+              "valueCompositeSlide",
+              "valueTimelineSlide",
+              "valueDecisionSlide",
+              "valueArgumentSlide"
             ]
           },
           "data": {

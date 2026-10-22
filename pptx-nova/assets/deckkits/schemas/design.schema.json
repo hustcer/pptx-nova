@@ -250,6 +250,9 @@
     },
     "strategy": {
       "$ref": "#/$defs/strategy"
+    },
+    "annual": {
+      "$ref": "#/$defs/annual"
     }
   },
   "required": [
@@ -1019,6 +1022,201 @@
         "maxConsecutive",
         "families",
         "roadmap"
+      ],
+      "additionalProperties": false
+    },
+    "annual": {
+      "type": "object",
+      "properties": {
+        "renderer": {
+          "const": "annual-research/v1"
+        },
+        "typography": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "cover": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "body": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "label": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "source": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "metric": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "figure": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["title", "cover", "body", "label", "source", "metric", "figure"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "basis": {
+              "$ref": "#/$defs/frame"
+            },
+            "footer": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            },
+            "verdict": {
+              "$ref": "#/$defs/frame"
+            },
+            "topRule": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["title", "basis", "footer", "page", "verdict", "topRule"],
+          "additionalProperties": false
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "titleUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "footerUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["titleUnits", "footerUnits"],
+          "additionalProperties": false
+        },
+        "maxConsecutive": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "summary",
+                  "evidence",
+                  "matrix",
+                  "composite",
+                  "timeline",
+                  "decision",
+                  "argument"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    },
+                    "maxItems": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 8
+                    }
+                  },
+                  "required": ["regions", "maxItems"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        },
+        "palette": {
+          "type": "object",
+          "properties": {
+            "paper": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ink": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muted": {
+              "type": "string",
+              "minLength": 1
+            },
+            "teal": {
+              "type": "string",
+              "minLength": 1
+            },
+            "deep": {
+              "type": "string",
+              "minLength": 1
+            },
+            "terracotta": {
+              "type": "string",
+              "minLength": 1
+            },
+            "history": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sand": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "paper",
+            "ink",
+            "muted",
+            "teal",
+            "deep",
+            "terracotta",
+            "history",
+            "plate",
+            "sand"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "renderer",
+        "typography",
+        "chrome",
+        "limits",
+        "maxConsecutive",
+        "families",
+        "palette"
       ],
       "additionalProperties": false
     }

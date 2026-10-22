@@ -63,8 +63,8 @@ const raw = readFileSync(path, 'utf8')
 const catalog = JSON.parse(raw)
 const entry = catalog.entries.find((e) => e.id === id)
 const before = JSON.stringify(entry)
-if (design.editorial || design.strategy) {
-  const families = (design.editorial ?? design.strategy).families
+if (design.editorial || design.strategy || design.annual) {
+  const families = (design.editorial ?? design.strategy ?? design.annual).families
   const types = Object.keys(families)
   entry.supportedSlideTypes = types
   entry.coverage.slideTypes = types

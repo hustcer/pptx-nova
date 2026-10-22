@@ -1,7 +1,7 @@
 # Contract-driven DeckKits
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
-existing workflow. The opt-in designs are `biennale-yellow`, `black-gold` and `green-slate`; this is a pptx-nova
+existing workflow. The opt-in designs are `biennale-yellow`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow
@@ -155,6 +155,35 @@ Every body page includes title, basis, source, as-of and verdict. Full-deck/exce
 the declared `meta.designScope`. The skin carries no business assumptions: claims, labels, units,
 dates, durations and data remain content. CJK rendering was checked with Arial Unicode MS; font
 availability and regular/bold output require rechecking on another machine. Fonts are not bundled.
+
+### Annual research family: Clear Value
+
+`clear-value` uses `annual-research/v1`: white pages, serif headings, black rules, restrained teal
+current evidence, gray history and conclusion-only terracotta. Discover its eight `value*Slide`
+schemas and read `assets/deckkits/clear-value/intent.md`. The example covers cover, summary, evidence,
+matrix, chart/table composite, timeline, decision and argument. The skin carries no business policy.
+
+Evidence accepts 1–4 figures: rail/wide for one, paired for two, lead for three, quad for four.
+Argument column/split and matrix full/compact change geometry or density. Capacity checks use the
+actual figure count, composed series head, weighted columns, row count and positive phase duration.
+Generic repeated-field budgets are discovery hints; resolved checks govern these inputs. Overflow
+fails before operations rather than shrinking fonts. All pages require title, basis, source, as-of
+and verdict. `meta.designScope: "excerpt"` supports standalone evidence.
+
+Charts support bar, column, line and native doughnut, plus two data-derived editable circles.
+Native JSON calls doughnut `ring`; readback normalizes only that verified alias and still checks
+every category, series name and raw value. Lines show first/last values in the figure head because
+selective classic endpoint value labels were not supported by the tested runtime. Forecasts use
+single-series columns: `forecastFrom` is the last observed zero-based category index; subsequent
+columns are dashed outlines. Stacked labels use light backgrounds and dark text. A common linear
+axis does not make tiny observations separately visible. Circle area, rather than diameter, tracks
+value; regenerate to synchronize these shapes after data changes.
+
+Matrices have 2–7 weighted/aligned columns and bounded rows; exact per-type limits live in schemas.
+Each cell/header is one authored paragraph with automatic wrapping. Native readback checks literal
+cell text, not complete table XML or visual styling. Timeline widths encode positive durations,
+with a separate risk table and reserved lower note. Actual Latin/CJK regular/bold rendering and
+every accepted PNG still require review. Fonts are not bundled; no PowerPoint parity is inferred.
 
 ### Shared contract boundaries
 

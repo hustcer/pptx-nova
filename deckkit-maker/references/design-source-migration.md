@@ -71,6 +71,9 @@ node deckkit-maker/scripts/analyze-design-source.mjs \
 - 输入 schema、catalog 必需槽位和实际可见内容一致；字段先注册再消费。
 - 有互斥可选组件时，schema 可声明 `x-slotProbeVariants: [{"omit":["optionalField"]}]`，
   按合法组合审计。只可省略可选顶层字段，每个声明字段必须至少被一组探针覆盖。
+- 嵌套的可选控制字段互斥时，可标记 `x-slotProbeOmit: true`；只允许可选且
+  `x-slotRole: "control"` 的字段，不允许跳过可见文字或必填控制。被省略控制必须另由真实输入、
+  边界和反例验证。探针配置错误必须让命令失败；不能把未完成审计当成无 ghost slot。
 - 同内容至少两种真正不同的合法构图；比较实际几何，不靠 layoutId 改名。
 - 反例覆盖未知规则、错误色/字体、第二焦点、来源/单位缺失、过量内容、重复构图、零/负/缺失值。
 - 用 CJK/Latin、短/长标题、稀疏/密集证据和不同业务主题检查泛化。硬规则须有检查器；
@@ -81,3 +84,8 @@ node deckkit-maker/scripts/analyze-design-source.mjs \
 
 Black Gold 的经验不是所有风格的固定模板：它采用深色判断、灰阶证据、单焦点、原生矩阵和
 当前运行时可完整回读的双单位对齐图。后续风格应从自己的规范重新提取身份与构图。
+
+Clear Value 迁移暴露了几个边界：通用 schema 中存在标签字段，不代表每种经典图表都支持它；
+先做实际探针。原生 doughnut 的 JSON 投影名可能是 ring，只在确认当前 runtime 后归一化
+明确别名，不能放松类别/系列/数值比较。图表头由系列名、首末类别与数值组成时，必须按组合
+后的真实文字检查容量。动态列宽/多图布局不能仅靠每个字段的固定字数预算证明可读。

@@ -39,7 +39,7 @@
       "data": {
         "section": "Research",
         "kicker": "Open practice",
-        "title": "research in\nthe open",
+        "title": "Research in\nthe open",
         "lead": "Use workshops to understand a service before drawing its next version.",
         "bullets": [
           "Listen to lived experience",
@@ -92,7 +92,7 @@
       "data": {
         "section": "Working principles",
         "kicker": "Four rules",
-        "title": "four rules\nfor public work",
+        "title": "Four rules\nfor public work",
         "items": [
           "Start with a clear question",
           "Use evidence people can inspect",
@@ -118,7 +118,7 @@
         "section": "From brief to shared brief",
         "left": {
           "label": "CLOSED BRIEF",
-          "title": "one team defines it",
+          "title": "One team defines it",
           "body": "A service brief is written inside the organisation before public testing.",
           "bullets": [
             "Limited research visibility",
@@ -128,7 +128,7 @@
         },
         "right": {
           "label": "SHARED BRIEF",
-          "title": "people help shape it",
+          "title": "People help shape it",
           "body": "The question, evidence and early options are shared while the work can change.",
           "bullets": [
             "Publish the research question",
@@ -144,7 +144,7 @@
       "type": "broadsideBarChartSlide",
       "data": {
         "section": "Participation",
-        "title": "participation grows",
+        "title": "Participation grows",
         "caption": "Illustrative pilot weeks",
         "unit": "people",
         "seriesName": "Participants",
@@ -176,26 +176,26 @@
       "type": "broadsideFlowSlide",
       "data": {
         "section": "The process",
-        "title": "from question to field",
+        "title": "From question to field",
         "steps": [
           {
             "num": "01",
-            "title": "listen",
+            "title": "Listen",
             "body": "Hear how people use the service and record the needs they describe."
           },
           {
             "num": "02",
-            "title": "frame",
+            "title": "Frame",
             "body": "Choose a specific question that can be checked with evidence."
           },
           {
             "num": "03",
-            "title": "build",
+            "title": "Build",
             "body": "Make the smallest useful version that people can try."
           },
           {
             "num": "04",
-            "title": "share",
+            "title": "Share",
             "body": "Publish what changed, what failed and what the next test will explore."
           }
         ],
@@ -207,7 +207,7 @@
       "type": "broadsideDonutSlide",
       "data": {
         "section": "Programme resources",
-        "title": "where time goes",
+        "title": "Where time goes",
         "items": [
           {
             "label": "Research",
@@ -238,26 +238,26 @@
       "type": "broadsidePyramidSlide",
       "data": {
         "section": "The hierarchy",
-        "title": "what guides the work",
+        "title": "What guides the work",
         "levels": [
           {
-            "name": "purpose",
+            "name": "Purpose",
             "desc": "why the service exists"
           },
           {
-            "name": "principles",
+            "name": "Principles",
             "desc": "how choices are made"
           },
           {
-            "name": "service",
+            "name": "Service",
             "desc": "what people can use"
           },
           {
-            "name": "projects",
+            "name": "Projects",
             "desc": "what changes next"
           },
           {
-            "name": "operations",
+            "name": "Operations",
             "desc": "how the work is sustained"
           }
         ],
@@ -269,26 +269,26 @@
       "type": "broadsideTimelineSlide",
       "data": {
         "section": "The programme story",
-        "title": "how a pilot takes shape",
+        "title": "How a pilot takes shape",
         "events": [
           {
             "date": "WEEK 01",
-            "title": "open the question",
+            "title": "Open the question",
             "body": "Invite a group to describe the service as it works today."
           },
           {
             "date": "WEEK 02",
-            "title": "share the evidence",
+            "title": "Share the evidence",
             "body": "Publish observations and identify gaps that need another test."
           },
           {
             "date": "WEEK 03",
-            "title": "try a small change",
+            "title": "Try a small change",
             "body": "Make an editable prototype and observe people using it."
           },
           {
             "date": "WEEK 04",
-            "title": "publish the learning",
+            "title": "Publish the learning",
             "body": "Record the outcome and choose the next useful question."
           }
         ],
@@ -300,26 +300,26 @@
       "type": "broadsideCycleSlide",
       "data": {
         "section": "The learning loop",
-        "title": "listen · build · learn",
+        "title": "Listen · build · learn",
         "steps": [
           {
             "num": "01",
-            "title": "listen",
+            "title": "Listen",
             "body": "Start with a service question and people with direct experience."
           },
           {
             "num": "02",
-            "title": "build",
+            "title": "Build",
             "body": "Make a rough version that tests the question in practice."
           },
           {
             "num": "03",
-            "title": "observe",
+            "title": "Observe",
             "body": "Record behaviour and evidence rather than assumed preferences."
           },
           {
             "num": "04",
-            "title": "learn",
+            "title": "Learn",
             "body": "Update the question and share the next test with the group."
           }
         ],
@@ -333,7 +333,7 @@
         "number": "16",
         "label": "NEXT CONVERSATION",
         "title": "let's make\nit useful",
-        "contact": "hello@example.org · field studio",
+        "contact": "hello@example.org · Field Studio",
         "author": "Field Studio · fictional example",
         "context": "SYNTHETIC PROGRAMME · 2026"
       }

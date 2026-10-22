@@ -5,6 +5,10 @@
 [旧套件清理方案](legacy-deckkit-cleanup.md)和用户补充的完整验收要求。
 本次只退役 Broadside 的旧创建实现与旧产物，不代表全部旧 DeckKit 已清理。
 
+本文保留迁移时的验收范围与历史产物绑定。当前标题撰写约定及最新展示已按
+[大小写调整记录](broadside-title-casing-results.md)更新：普通英文标题默认 sentence case，
+全小写仅作为封面、章节和短宣言的可选海报表达。
+
 ## 执行合同与能力
 
 [design.json](../pptx-nova/assets/deckkits/broadside/design.json) 是颜色、字体角色、空间、容量和
@@ -127,7 +131,7 @@ ZIP 完整性、全部 XML well-formedness、内部关系目标、图表关键�
   不保留永久 legacy 目录、静默回退或第二份生成器。
 - 原位替换十六份 schema/预算、示例 content/build、catalog 质量登记、三份 baseline，
   以及 `assets/examples/broadside/` 中全部旧 PPTX、WebP、content、brief、summary。
-  新展示 PPTX 与已验收 golden SHA-256 相同：
+  迁移时的展示 PPTX 与当轮已验收 golden SHA-256 相同（当前展示已由上述大小写修订替换）：
   `bbf6d4117517e480a6cd77654cef228e4f752e3b891680de9a76eeb85113f3b2`。
 - 保留仍有效的示例入口、页型名、图壳元数据、已登记测试和独立翻新配置。
   全部 Broadside 发布资产已核对；旧内容字节不再随 skill 分发。

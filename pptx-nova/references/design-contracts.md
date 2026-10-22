@@ -101,6 +101,9 @@ format was applied.
 registered compositions through the same design, slots, validation, build and Create commands.
 Read `assets/deckkits/broadside/intent.md` and start from its content example. Dark/orange registers,
 heavy upright display, monospace chrome, slash lists and the closed cycle are design identity.
+Ordinary English headings default to sentence case, preserving proper names and acronyms. Covers,
+chapter openers and short declarations may deliberately use lowercase. User or brand casing takes
+precedence; the renderer preserves input, and line breaks do not restart capitalization.
 Explicit `layoutId` still requires capacity; full decks open with cover and end with closing.
 Use `meta.designScope: "excerpt"` for extracts.
 

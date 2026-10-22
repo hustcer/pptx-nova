@@ -1620,13 +1620,13 @@
         "signatureElements": [
           "fire-orange full-slide declarations",
           "near-black editorial evidence pages with cream type",
-          "massive lowercase Arial Black headlines with bold CJK display",
+          "massive upright Arial Black headlines with bold CJK display; optional lowercase poster declarations",
           "Menlo catalogue numbers, labels, sources, and slash bullets",
           "orange payoff panel in comparison layouts",
           "fading stacked word list inspired by SPACE10 before/during/after treatments"
         ],
         "typography": {
-          "display": "Arial Black upright, lowercase preference, poster-scale",
+          "display": "Arial Black upright, poster-scale; sentence case for ordinary headings, optional lowercase for deliberate poster declarations",
           "body": "Arial regular with short editorial paragraphs",
           "chrome": "Menlo uppercase labels and catalogue numbers",
           "cjk": "Noto Sans SC: explicit bold display and regular supporting text"
@@ -1663,7 +1663,8 @@
         },
         "compositionRules": [
           "Prefer short, punchy titles; move explanations to lead/body slots.",
-          "Do not uppercase display headlines; Broadside's voice is heavy lowercase.",
+          "Default ordinary English headings to sentence case, including chart, comparison, process, timeline and hierarchy headings; a line break does not restart capitalization.",
+          "Allow deliberate lowercase on covers, chapter openers and short poster declarations; preserve proper names, acronyms and user or brand casing. The renderer never converts supplied casing.",
           "Use orange sparingly on dark slides except for full payoff panels and chart highlights.",
           "Keep bullet lists short; three slash bullets is the default rhythm."
         ],
@@ -1719,7 +1720,7 @@
           "contentPolicy": "preserve-source-slides-and-editable-objects",
           "titleZone": {
             "placement": "poster-scale typographic block, usually left or low on the page",
-            "headingStyle": "Arial Black upright, lowercase preference, oversized and flat",
+            "headingStyle": "Arial Black upright, oversized and flat; preserve source casing, with sentence case preferred for newly authored ordinary headings",
             "labelStyle": "Menlo uppercase catalogue label",
             "accentRule": "1px rule or slash label, never a glossy title bar",
             "avoid": ["cream paper slides", "multi-color title badges", "rounded title cards"]
@@ -1909,10 +1910,10 @@
       },
       "validatedWith": {
         "xdoc": "0.13.0 (92a5aa13)",
-        "visionCheck": "high=0 medium=0 low=0 across golden, stress and mixed-language benchmarks",
-        "pngReview": "60 final-source canonical pages individually reviewed, plus 7 registered benchmark probe pages; enlarged detail review passed",
-        "powerPoint": "Four candidates opened, saved and reopened without Repair; independent object/data readback passed; representative text, shape and embedded workbook edits persisted",
-        "report": "docs/broadside-v2-migration-results.md"
+        "visionCheck": "high=0 medium=0 low=0 across current golden, stress and mixed-language benchmarks",
+        "pngReview": "35 current sentence-case canonical pages individually reviewed, covering the complete example, all 12 alternate compositions, stress and mixed-language fixtures; four enlarged details passed",
+        "powerPoint": "Current sentence-case golden clean-open passed without Repair. Four native round trips and representative text, shape and workbook edits were verified for the earlier 2.0 migration candidates; see the migration report for that historical scope.",
+        "report": "docs/broadside-title-casing-results.md"
       },
       "quality": {
         "manualHardDefects": 0,
@@ -1931,7 +1932,7 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 3
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
@@ -1939,7 +1940,7 @@
           "date": "2026-10-22",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-broadside-v2-20261022/benchmark/02"
+            "out": ".tmp/deckkit-broadside-casing-20261022/benchmark/01"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -1958,7 +1959,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 3
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -1966,7 +1967,7 @@
               "caseId": "broadside.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-broadside-v2-20261022/benchmark/02/broadside/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-broadside-casing-20261022/benchmark/01/broadside/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -1992,7 +1993,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -2003,16 +2004,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 271781
+                "bytes": 272408
               },
               "patchOps": 1178,
-              "p50TotalMs": 105.92
+              "p50TotalMs": 140.87
             },
             {
               "caseId": "broadside.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-broadside-v2-20261022/benchmark/02/broadside/stress-density/summary.json",
+              "summaryPath": ".tmp/deckkit-broadside-casing-20261022/benchmark/01/broadside/stress-density/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/stress-density/review.md",
               "validation": {
                 "valid": true,
@@ -2038,7 +2039,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -2049,16 +2050,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 76901
+                "bytes": 77037
               },
               "patchOps": 379,
-              "p50TotalMs": 77.05
+              "p50TotalMs": 73.97
             },
             {
               "caseId": "broadside.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-broadside-v2-20261022/benchmark/02/broadside/mixed-language/summary.json",
+              "summaryPath": ".tmp/deckkit-broadside-casing-20261022/benchmark/01/broadside/mixed-language/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/mixed-language/review.md",
               "validation": {
                 "valid": true,
@@ -2084,7 +2085,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -2095,10 +2096,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 57167
+                "bytes": 57077
               },
               "patchOps": 220,
-              "p50TotalMs": 90.64
+              "p50TotalMs": 82.97
             }
           ],
           "blockers": []

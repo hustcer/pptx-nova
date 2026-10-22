@@ -39,7 +39,7 @@
       "data": {
         "section": "Dense Bars",
         "page": "S2",
-        "title": "six market signals",
+        "title": "Six market signals",
         "caption": "Index · FY 2026",
         "bars": [
           {
@@ -78,31 +78,31 @@
       "data": {
         "section": "Long Story",
         "page": "S3",
-        "title": "five moments of change",
+        "title": "Five moments of change",
         "events": [
           {
             "date": "2022",
-            "title": "signal",
+            "title": "Signal",
             "body": "A small user cohort exposed a larger workflow gap."
           },
           {
             "date": "2023",
-            "title": "prototype",
+            "title": "Prototype",
             "body": "The team shipped a rough internal tool and measured repeat usage."
           },
           {
             "date": "2024",
-            "title": "expansion",
+            "title": "Expansion",
             "body": "More teams adopted the loop, forcing clearer governance."
           },
           {
             "date": "2025",
-            "title": "platform",
+            "title": "Platform",
             "body": "The operating model became reusable across regions."
           },
           {
             "date": "2026",
-            "title": "standard",
+            "title": "Standard",
             "body": "The system now anchors quarterly planning and reporting."
           }
         ]
@@ -115,13 +115,13 @@
         "page": "S4",
         "left": {
           "label": "Old",
-          "title": "slow research theatre",
+          "title": "Slow research theatre",
           "body": "A large committee reviewed stale reports after the decision had already drifted.",
           "bullets": ["Monthly meetings", "Long summaries", "Late escalation"]
         },
         "right": {
           "label": "New",
-          "title": "weekly evidence loop",
+          "title": "Weekly evidence loop",
           "body": "Teams make smaller bets, review live signals, and change direction before costs lock in.",
           "bullets": ["Weekly evidence", "Short memos", "Early decisions"]
         }

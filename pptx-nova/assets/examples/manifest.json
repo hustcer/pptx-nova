@@ -343,19 +343,19 @@
       "files": {
         "deck": {
           "path": "broadside/deck.pptx",
-          "bytes": 41226,
-          "sha256": "bbf6d4117517e480a6cd77654cef228e4f752e3b891680de9a76eeb85113f3b2"
+          "bytes": 41228,
+          "sha256": "30fe8fa99f987cd876c218791c7f780aaaf2fd050ef0e9b57bd0baebcca4f45c"
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
-          "bytes": 131108,
-          "sha256": "2840e2037c3740565c8f5b6299316b7c257f7b0119d22cf818b3e821f70ebe3d",
+          "bytes": 131522,
+          "sha256": "e1a99273b15854553f4314980255f50635efefe7a690272d686e425d0f3d95b0",
           "quality": 82
         },
         "content": {
           "path": "broadside/content.json",
           "bytes": 9961,
-          "sha256": "209e58d3776f8ecc14579cc4420a0a7ed40e515585a968699664bb38eb92d44e"
+          "sha256": "04e0a204b4bea9d98673994435aac351bdd531f899bc8c8de80b5d859e92aefb"
         },
         "brief": {
           "path": "broadside/brief.md",
@@ -365,7 +365,7 @@
         "summary": {
           "path": "broadside/summary.json",
           "bytes": 2724,
-          "sha256": "ed5ae08d45b2c30b66bb92937bbe4afdbe157d112f526499effd775ade865732"
+          "sha256": "871c4fa870aca1fe0b23e537b40d9c7747d03effc09276e10eb8eb10d0b5590c"
         }
       },
       "validation": {

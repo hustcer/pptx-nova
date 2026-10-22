@@ -1,6 +1,6 @@
 # Broadside 2.0
 
-Broadside is a flat protest-poster editorial language: enormous heavy lowercase type, near-black
+Broadside is a flat protest-poster editorial language: enormous heavy upright type, near-black
 records, fire-orange declarations, warm cream text, monospace metadata, slash bullets and hairlines.
 The JSON contract owns colors, font roles, region geometry, capacity and registered compositions.
 Its public `createDeck(content)` adapter resolves a component plan and executes that plan; there is
@@ -26,8 +26,15 @@ The source uses Barlow and IBM Plex Mono. This implementation uses available clo
 Arial Black, Arial and Menlo, with Noto Sans SC for CJK. CJK headings explicitly request bold and more
 open line spacing; Latin display remains the already-heavy upright Arial Black. Fonts are not
 bundled or embedded. Availability, regular/bold appearance and wrapping need checking in each host.
-Lowercase/sentence-case display and uppercase metadata are authoring preferences: the renderer does
-not rewrite supplied casing, punctuation or facts. CJK has no lowercase distinction. Negative CSS
+Use sentence case for ordinary English content headings: capitalize the first word and retain the
+correct casing of proper names and acronyms, such as PowerPoint and AI. This includes chart titles,
+comparison headings, process/cycle steps, timeline milestones and hierarchy labels. A line break
+does not start a new heading. All-lowercase display is an optional, deliberate poster treatment for
+covers, chapter openers and short declarations, including fading-word slogans and closing calls.
+It is not a requirement for every page. Follow a user's or brand's title-case convention when supplied.
+Uppercase metadata remains an authoring option. The renderer preserves supplied casing, punctuation
+and facts without converting text or rejecting another valid casing choice. CJK has no lowercase
+distinction. Negative CSS
 tracking is omitted to keep mixed text safe; the two color registers, weight and spatial hierarchy
 carry the identity. Small source/chrome text is enlarged and contrast is improved. Faded words use
 three readable solid ink tones, rather than relying on low-contrast exceptions.

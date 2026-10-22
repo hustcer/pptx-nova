@@ -184,56 +184,6 @@ const PROFILE_OVERRIDES = {
       ],
     },
   },
-  coral: {
-    palette: {
-      background: 'F5F0E8',
-      text: '1A1A1A',
-      accent: 'E85D5D',
-      softAccent: 'E8E0D4',
-      secondary: '6B6B6B',
-      surface: 'FFFFFF',
-      rule: '1A1A1A',
-    },
-    fonts: {
-      heading: 'Bebas Neue',
-      body: 'Inter',
-      label: 'Inter',
-      cjk: 'Noto Sans SC',
-    },
-    titleZone: {
-      placement: 'hard-edged poster title block on cream, ink, or coral plane',
-      headingStyle: 'Bebas Neue all-caps, large condensed display',
-      labelStyle: 'Inter uppercase labels with restrained tracking',
-      accentRule: 'coral plane, top rule, hatch edge, or zigzag marker',
-      avoid: ['soft glass cards', 'low-contrast small white text on coral'],
-    },
-    tableRemap: {
-      structure: 'graphic card stack or objective table with coral top rules',
-      headerFill: 'palette.accent',
-      headerText: 'palette.text',
-      bodyFill: 'palette.surface',
-      borderColor: 'palette.text',
-      emphasis: 'use coral blocks and ink rules, not pastel bands',
-      rules: [
-        'Keep table shapes hard-edged with no shadow and no rounded SaaS card language.',
-        'Use Bebas Neue only for short headers or large numeric values.',
-        'Use Inter body text for readable table cells.',
-      ],
-    },
-    chartRemap: {
-      structure: 'native bar or KPI chart with coral and ink series',
-      backgroundFill: 'palette.background',
-      primarySeries: 'palette.accent',
-      secondarySeries: 'palette.text',
-      axisColor: 'palette.secondary',
-      gridColor: 'palette.softAccent',
-      rules: [
-        'Keep charts native and editable.',
-        'Use coral for progress or emphasis and ink for baselines.',
-        'Avoid gradients, shadows, and decorative chart containers.',
-      ],
-    },
-  },
   'long-table': {
     palette: {
       background: 'FAF1E2',
@@ -351,7 +301,7 @@ Options:
 Examples:
   node <skill-root>/scripts/pptx-nova-deckkit-refurbish-profile-fill.mjs --json
   node <skill-root>/scripts/pptx-nova-deckkit-refurbish-profile-fill.mjs --write --json
-  node <skill-root>/scripts/pptx-nova-deckkit-refurbish-profile-fill.mjs --deckkit coral --write --json
+  node <skill-root>/scripts/pptx-nova-deckkit-refurbish-profile-fill.mjs --deckkit broadside --write --json
 `
 
 function parseArgs(argv) {

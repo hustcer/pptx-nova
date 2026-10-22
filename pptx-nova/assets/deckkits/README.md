@@ -23,7 +23,7 @@ assets/deckkits/
 ├── clear-value/                # 白底衬线研究报告合同与设计意图（状态以 catalog 为准）
 ├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
 ├── consulting-dark.kit.mjs     # 深墨蓝咨询风格 + 页型函数
-├── <deckkit-id>.kit.mjs        # 其余 DeckKit（mckinsey-blue、swiss-grid、broadside、coral、cartesian、long-table、biennale-yellow）
+├── <deckkit-id>.kit.mjs        # 其余 DeckKit（mckinsey-blue、swiss-grid、broadside、cartesian、long-table、biennale-yellow）
 ├── catalog.json                # DeckKit 注册表、版本、density 限制、验证记录
 ├── schemas/                    # content 和各页型 JSON Schema（渐进覆盖）
 ├── validate-content.mjs        # schema + fit 预检入口

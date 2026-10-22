@@ -42,7 +42,6 @@ Biennale 源码、schemas、示例、benchmark 与 showcase 更新工具。
 | mckinsey-blue   | 0.1.0 / production  |      8 | 未注册 designContract          | 完整迁移，保留原生换肤能力边界             |
 | swiss-grid      | 0.1.0 / production  |     15 | 未注册 designContract          | 完整迁移，保留网格、字体展示及特殊页职责   |
 | broadside       | 0.1.0 / production  |     16 | 未注册 designContract          | 完整迁移，逐项核对图形和数据表达           |
-| coral           | 0.1.0 / production  |     10 | 未注册 designContract          | 完整迁移，保留独立的视觉语法               |
 | cartesian       | 0.3.1 / production  |     10 | 未注册 designContract          | 完整迁移，核对图片槽位、图表和原生换肤     |
 | long-table      | 0.1.0 / production  |      8 | 未注册 designContract          | 完整迁移，核对清单、日程和编辑式构图       |
 | biennale-yellow | 0.2.0 / production  |      9 | 混合：旧 8 页型 + 新原生证据页 | 本方案试点，迁完旧 8 页型再删除旧执行路径  |
@@ -50,7 +49,7 @@ Biennale 源码、schemas、示例、benchmark 与 showcase 更新工具。
 | green-slate     | 0.1.0 / candidate   |     10 | strategy-report/v1             | 无需迁回旧方案；参加共享机制退役回归       |
 | clear-value     | 0.1.0 / candidate   |      8 | annual-research/v1             | 无需迁回旧方案；参加回归并核对 Repair 证据 |
 
-即 **7 套完整旧实现 + 1 套混合实现 + 3 套合同实现**。当前新合同的四份 `design.json`
+即 **6 套完整旧实现 + 1 套混合实现 + 3 套合同实现**。当前新合同的四份 `design.json`
 仍都有 `legacyLayouts` 字段，后三套为空对象，因为共享 schema 仍要求该字段。
 删除 Biennale 的旧页面后，还需要一次共享机制清理，才能让这个字段真正退出系统。
 
@@ -241,13 +240,13 @@ ember 保持受限的装饰职责，不自动变成数据系列色。
 | 批次 | 范围                     | 重点                                                     |
 | ---- | ------------------------ | -------------------------------------------------------- |
 | 1    | biennale-yellow          | 证明混合实现可完整退役，形成字段映射、清理清单和验收模板 |
-| 2    | long-table、coral        | 复用迁移流程；验证编辑式清单与另一种色彩/构图语法        |
+| 2    | long-table               | 复用迁移流程；验证编辑式清单、日程与暖色编辑构图         |
 | 3    | cartesian、mckinsey-blue | 核对数据图、图片与原生翻新路径，防止把换肤能力一起删除   |
 | 4    | swiss-grid、broadside    | 验证更多页型与特殊图形；拒绝为统一接口牺牲风格特征       |
 | 5    | consulting-dark          | 完成默认/咨询路径及其调用方切换；同时收拢全仓旧机制      |
 
 每套都执行 A–E，不以 Biennale 的验收替代。每批完成后复查共享接口和已迁套件，
-只有遇到第二个真实消费者才提取公共视觉能力；不为赶进度先复制七套生成器再慢慢整理。
+只有遇到第二个真实消费者才提取公共视觉能力；不为赶进度先复制六套生成器再慢慢整理。
 
 每套迁移报告至少记录：起始版本、来源、字段和资产覆盖、布局覆盖、输入兼容决策、
 机器/视觉/宿主证据、未关闭缺陷、退役符号、剩余共享消费者和当前发布资格。
@@ -351,8 +350,8 @@ benchmark 与说明；相关依赖应能在该 commit 一起工作。共享前�
 
 ### 全仓最终完成标准
 
-- [ ] 当前 11 套及届时新增的所有可分发 DeckKit 均采用合同执行路径。
-- [ ] 七套旧实现与 Biennale 的旧 8 页型分支全部退役，所有页型完整覆盖。
+- [ ] 当前 10 套及届时新增的所有可分发 DeckKit 均采用合同执行路径。
+- [ ] 六套旧实现与 Biennale 的旧 8 页型分支全部退役，所有页型完整覆盖。
 - [ ] `legacyLayouts` 从所有合同、schema 和活动消费者中移除，旧 API 和无合同降级已删除。
 - [ ] 共用图表/表格、资产、翻新、选择与交付流程没有因清理而失去有效能力。
 - [ ] 公共审计、投影、测试、各套件 live benchmark/readiness 和所需宿主检查通过。

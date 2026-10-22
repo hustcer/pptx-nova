@@ -1,28 +1,40 @@
 {
   "meta": {
     "deckkit": "mckinsey-blue",
-    "style": "consulting",
-    "layout": "loyalty-strategy"
+    "designScope": "complete"
   },
   "slides": [
     {
       "type": "mckCoverSlide",
       "data": {
-        "eyebrow": "A.CO. EUROPE · CUSTOMER STRATEGY PRACTICE",
-        "title": ["A.CO. Customer", "Loyalty Programme"],
+        "eyebrow": "Kimsoong EUROPE · CUSTOMER STRATEGY PRACTICE",
+        "title": "Kimsoong Customer\nLoyalty Programme",
         "subtitle": "Strategic Framework for Customer Retention · European Market",
         "details": [
-          ["Client", "A.CO. European Headquarters, Paris"],
-          ["Date", "November 2025 | Ref: ACOEU-2025-CL01"],
-          ["Scope", "Customer loyalty programme — European franchise network"],
-          ["Cost model", "50/50 split — Head Office and European franchises"]
+          {
+            "label": "Client",
+            "value": "Kimsoong European Headquarters, Paris"
+          },
+          {
+            "label": "Date",
+            "value": "November 2025 | Ref: KIMEU-2025-CL01"
+          },
+          {
+            "label": "Scope",
+            "value": "European franchise loyalty programme"
+          },
+          {
+            "label": "Cost model",
+            "value": "50/50 split — Head Office and European franchises"
+          }
         ],
         "primaryMetric": {
           "label": "REPEAT PURCHASE RATE",
           "value": "15%",
-          "sub": "Only 1 in 7 buyers ever returns",
+          "sub": "Only one in seven returns",
           "note": "Target: 30% by Q4 2026",
-          "extra": "78% of losses are controllable"
+          "extra": "78% of loss is controllable",
+          "bottom": "Retention target: double"
         },
         "lossMetric": {
           "label": "CONTROLLABLE LOSS DRIVERS",
@@ -30,426 +42,590 @@
           "sub": "switched to competitor",
           "value2": "26%",
           "sub2": "cited service failure",
-          "note": "= 78% controllable total"
+          "note": "= 78% controllable total",
+          "bottom": "Both directly addressable"
         },
-        "source": "Source: A.CO. Customer Loyalty Programme Brief"
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA",
+        "detailsLabel": "PROJECT DETAILS"
       }
     },
     {
       "type": "mckCrisisSnapshotSlide",
       "data": {
-        "title": "A.CO. retains only 15% of buyers — a structural loyalty crisis threatening long-term growth",
-        "subtitle": "85% never return; price and service drive 78% of defections",
+        "title": "A loyalty crisis threatens long-term growth",
+        "subtitle": "Only 15% return; price and service account for 78% of reported losses",
         "metrics": [
           {
             "label": "Repeat purchase rate",
             "value": "15%",
             "sub": "vs. target 30%",
-            "note": "Gap: -50% | Only 1 in 7 ever returns",
-            "accent": "DC2626",
-            "bg": "FEF2F2"
+            "note": "Only one in seven returns",
+            "tone": "red"
           },
           {
             "label": "Lost to competitors",
             "value": "52%",
             "sub": "of lapsed buyers",
-            "note": "Primary defection driver — directly controllable",
-            "accent": "F59E0B",
-            "bg": "FFFBEB"
+            "note": "Directly controllable",
+            "tone": "amber"
           },
           {
             "label": "After-sales rated Fair or Poor",
             "value": "67%",
             "sub": "of all customers",
-            "note": "Drives 26% of all defection — must-fix priority",
-            "accent": "F59E0B",
-            "bg": "FEF2F2"
+            "note": "Must-fix priority",
+            "tone": "amber"
           }
         ],
-        "cohortTitle": "FATE OF 100 A.CO. BUYERS — ONE PURCHASE COHORT",
+        "cohortTitle": "FATE OF 100 Kimsoong BUYERS — ONE PURCHASE COHORT",
         "cohort": [
-          { "value": 15, "label": "Return to A.CO.", "color": "005587" },
+          {
+            "value": 15,
+            "label": "Return to Kimsoong",
+            "tone": "primary"
+          },
           {
             "value": 52,
             "label": "Bought competitor model",
-            "note": "Initiative: loyalty discount + trade-in",
-            "color": "DC2626"
+            "note": "loyalty discount + trade-in",
+            "tone": "red"
           },
           {
             "value": 26,
             "label": "Disappointed with service",
-            "note": "Initiative: free 3-yr after-sales",
-            "color": "F59E0B"
+            "note": "free 3-yr after-sales",
+            "tone": "amber"
           },
-          { "value": 7, "label": "Other", "color": "CBD5E1" }
+          {
+            "value": 7,
+            "label": "Other",
+            "tone": "muted"
+          }
         ],
         "cohortSum": "52 + 26 = 78 customers · 78% controllable",
         "implication": {
           "title": "Strategic implication:",
-          "body": "78% of A.CO.'s customer loss is caused by controllable price and service factors.\nA targeted loyalty programme can double repeat purchase within 12 months."
+          "body": "Price and service are addressable. Target retention through focused incentives."
         },
         "gap": {
           "title": "Data quality gap:",
-          "body": "9% are unknown due to 40% survey return.\nIncentives reduce the blind spot."
+          "body": "9% unknown; survey return is 40%. Incentives can reduce the blind spot."
         },
         "lever": {
           "title": "Key management lever:",
-          "body": "50/50 cost share: HQ and franchises.\nLow investment, high retention upside."
+          "body": "Share costs 50/50 between HQ and franchises to support roll-out."
         },
-        "source": "Source: A.CO. Customer Loyalty Programme Brief, November 2025"
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA",
+        "metricLabel": "THREE CRITICAL METRICS",
+        "unit": "% of one purchase cohort"
       }
     },
     {
       "type": "mckDemographicProfileSlide",
       "data": {
-        "title": "Young, middle-income employed buyers dominate — yet only 1 in 7 ever returns for a second purchase",
-        "subtitle": "82% middle-income, 48% under 30, 75% employed — loyalty-ready segment",
+        "title": "Young, middle-income buyers form the core audience",
+        "subtitle": "82% middle-income, 48% under 30 and 75% employed — validate the source base",
         "age": [
-          ["Under 30", "48%", ""],
-          ["31 - 40", "27%", ""],
-          ["41 - 50", "15%", ""],
-          ["Over 50", "10%", ""]
+          {
+            "label": "Under 30",
+            "value": 48
+          },
+          {
+            "label": "31 - 40",
+            "value": 27
+          },
+          {
+            "label": "41 - 50",
+            "value": 15
+          },
+          {
+            "label": "Over 50",
+            "value": 10
+          }
         ],
         "ageNote": {
-          "title": "75% of buyers are under 40",
-          "body": "A digitally-native, value-conscious generation responsive to financial loyalty incentives.\nUnder-30 + 31-40 cohorts: 75% of customers"
+          "title": "75% are under 40",
+          "body": "A young, value-conscious audience is responsive to loyalty incentives."
         },
         "income": [
-          ["Middle income", "82%", ""],
-          ["Lower income", "16%", ""],
-          ["Higher income", "5%", ""]
+          {
+            "label": "Middle income",
+            "value": 82
+          },
+          {
+            "label": "Lower income",
+            "value": 16
+          },
+          {
+            "label": "Higher income",
+            "value": 5
+          }
         ],
         "incomeNote": {
-          "title": "Programme design implication",
-          "body": "82% middle-income buyers are price-sensitive and value-driven.\nFinancial incentives strongly affect return decisions.\nEconomy = #1 priority · Price = #2 priority"
+          "title": "Validate the income base",
+          "body": "Value incentives matter. Source categories total 103%; validate the denominator."
         },
         "occupation": [
-          ["Employed", "75%"],
-          ["Self-employed", "15%"],
-          ["Student", "8%"],
-          ["Retired", "2%"]
+          {
+            "label": "Employed",
+            "value": 75
+          },
+          {
+            "label": "Self-employed",
+            "value": 15
+          },
+          {
+            "label": "Student",
+            "value": 8
+          },
+          {
+            "label": "Retired",
+            "value": 2
+          }
         ],
-        "occupationNote": "90% employed — predictable cycle for structured loyalty.",
+        "occupationNote": "90% employed: a predictable purchase cycle.",
         "interests": [
-          [1, "Eating & drinking", "Magazine content angle"],
-          [2, "Sport", "Magazine content angle"],
-          [3, "Travel", "Magazine content angle"],
-          [4, "Environment", "A.CO. eco-car narrative"],
-          [5, "Health / fitness", "Active lifestyle brand fit"]
+          {
+            "index": 1,
+            "title": "Eating & drinking",
+            "body": "Editorial signal"
+          },
+          {
+            "index": 2,
+            "title": "Sport",
+            "body": "Editorial signal"
+          },
+          {
+            "index": 3,
+            "title": "Travel",
+            "body": "Editorial signal"
+          },
+          {
+            "index": 4,
+            "title": "Environment",
+            "body": "Eco-car narrative"
+          },
+          {
+            "index": 5,
+            "title": "Health / fitness",
+            "body": "Active lifestyle"
+          }
         ],
-        "interestNote": "Interests inform magazine editorial, survey questions, and loyalty messaging",
-        "source": "Source: A.CO. customer database survey"
+        "interestNote": "Use interests to guide editorial, surveys and messaging.",
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA",
+        "labels": {
+          "age": "AGE DISTRIBUTION",
+          "income": "INCOME DISTRIBUTION",
+          "occupation": "OCCUPATION",
+          "interests": "INTERESTS & PROGRAMME ALIGNMENT"
+        },
+        "unit": "% of surveyed customers"
       }
     },
     {
       "type": "mckPriorityMatrixSlide",
       "data": {
-        "title": "After-sales service is the highest-priority performance gap — high customer importance, lowest A.CO. score",
-        "subtitle": "Reliability and price are strengths; after-sales is the urgent Invest priority",
+        "title": "After-sales service is the most urgent performance gap",
+        "subtitle": "Protect reliability and price; invest in after-sales service",
         "bubbles": [
-          { "label": "Reliab-\nility", "x": 0.67, "y": 0.25, "size": 0.54, "color": "059669" },
-          { "label": "Price", "x": 0.77, "y": 0.35, "size": 0.46, "color": "0076A8" },
-          { "label": "Econ-\nomy", "x": 0.88, "y": 0.51, "size": 0.48, "color": "005587" },
           {
-            "label": "After-\nSales\nService",
+            "label": "Reliability",
+            "x": 0.67,
+            "y": 0.25,
+            "weight": 0.2916,
+            "tone": "green"
+          },
+          {
+            "label": "Price",
+            "x": 0.77,
+            "y": 0.35,
+            "weight": 0.2116,
+            "tone": "blue"
+          },
+          {
+            "label": "Economy",
+            "x": 0.88,
+            "y": 0.51,
+            "weight": 0.2304,
+            "tone": "primary"
+          },
+          {
+            "label": "After-sales Service",
             "x": 0.68,
             "y": 0.82,
-            "size": 0.64,
-            "color": "DC2626"
+            "weight": 0.4096,
+            "tone": "red"
           }
         ],
         "legend": [
-          ["059669", "Reliability — strength"],
-          ["0076A8", "Price — competitive"],
-          ["005587", "Economy — monitor"],
-          ["DC2626", "After-sales — critical"]
+          {
+            "tone": "green",
+            "label": "Reliability — strength"
+          },
+          {
+            "tone": "blue",
+            "label": "Price — competitive"
+          },
+          {
+            "tone": "primary",
+            "label": "Economy — monitor"
+          },
+          {
+            "tone": "red",
+            "label": "After-sales — critical"
+          }
         ],
         "finding": {
           "label": "CRITICAL FINDING",
           "title": "After-Sales Service",
-          "rank": "Customer rank: #4 of 7\n(top 57% of priorities)",
+          "rank": "Rank #4 of 7 priorities",
           "value": "67%",
-          "body": "rate it Fair or Poor\nOnly 33% say Good+",
-          "must": "Must-fix priority"
+          "body": "67% rate Fair or Poor; 33% Good+",
+          "must": "Must-fix priority",
+          "action": "Free three-year service"
         },
-        "source": "Source: A.CO. customer satisfaction survey"
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA",
+        "labels": {
+          "xAxis": "Customer priority →",
+          "yAxis": "Performance: better ↑",
+          "quadrants": ["MAINTAIN", "PROTECT", "DE-PRIORITISE", "INVEST / FIX"],
+          "legend": "AREA = RELATIVE PRIORITY"
+        }
       }
     },
     {
       "type": "mckLossDriverSlide",
       "data": {
-        "title": "52% switch to competitors, 26% cite service failure — 78% of all customer loss is directly controllable",
-        "subtitle": "Competitive switching and service failure are the twin root causes",
+        "title": "Two loss drivers account for 78% of reported defections",
+        "subtitle": "Concentrate resources on competitive switching and service failure",
         "chartTitle": "WHY CUSTOMERS DO NOT RETURN (% of non-returning customers)",
         "drivers": [
           {
             "label": "Competitor switch",
             "sub": "Bought a competing model",
             "value": 52,
-            "color": "DC2626",
             "tag": "CONTROLLABLE",
-            "action": "→ Loyalty discount"
+            "action": "Loyalty discount",
+            "tone": "red"
           },
           {
             "label": "Service failure",
             "sub": "Disappointed with after-sales",
             "value": 26,
-            "color": "F59E0B",
             "tag": "CONTROLLABLE",
-            "tagBg": "FFFBEB",
-            "action": "→ Free 3-yr service"
+            "action": "Free three-year service",
+            "tone": "amber"
           },
           {
             "label": "Unknown reason",
             "sub": "Survey not returned",
             "value": 9,
-            "color": "94A3B8",
-            "action": "Reduce via survey incentive (40% → 70% return rate)"
+            "action": "Survey incentive",
+            "tone": "muted"
           },
           {
             "label": "Customer relocated",
             "sub": "Moved away from franchise",
             "value": 8,
-            "color": "CBD5E1",
-            "action": "Structural — not addressable"
+            "action": "Not addressable",
+            "tone": "muted"
           },
           {
             "label": "Stopped driving",
             "sub": "No longer owns vehicle",
             "value": 5,
-            "color": "CBD5E1",
-            "action": "Structural — not addressable"
+            "action": "Not addressable",
+            "tone": "muted"
           }
         ],
         "summary": {
           "label": "STRATEGIC SUMMARY",
           "value": "78%",
-          "text": "of customer loss is\ncontrollable",
-          "eq": "= 52% competitor\n+ 26% service\nBoth are addressable\nwith 5 targeted initiatives"
+          "text": "of reported loss is controllable",
+          "eq": "52% competitor + 26% service\nBoth addressable with five initiatives"
         },
         "controllable": {
           "value": "78%",
-          "label": "control-\nlabel"
+          "label": "Controllable"
         },
         "uncontrollable": {
           "title": "UNCONTROLLABLE (22%)",
-          "body": "Structural losses:\nRelocation (8%) + stopped driving (5%) = 13% genuinely unaddressable\nUnknown (9%) is reducible"
+          "body": "Relocation 8% + stopped driving 5% = 13% structural; unknown 9% is reducible."
         },
         "pareto": {
           "title": "The Pareto principle at work:",
-          "body": "Two causes drive 78% of loss. Focus resources on price and service quality."
+          "body": "Focus resources on price and service."
         },
-        "source": "Source: A.CO. post-purchase survey | Figures as % of non-returning customers"
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA",
+        "unit": "% of non-returning customers"
       }
     },
     {
       "type": "mckPillarsSlide",
       "data": {
-        "title": "Four strategic pillars translate loyalty objectives into measurable business outcomes — each with a clear KPI target",
-        "subtitle": "The programme links customer behaviour change to accountable revenue impact",
+        "title": "Four pillars link customer behaviour to measurable outcomes",
+        "subtitle": "A common framework connects actions, outcomes and accountable KPIs",
         "defaultTimeframe": "within 12 months",
         "pillars": [
           {
             "index": "01",
-            "title": "Long-term\nRelationships",
-            "body": "Build emotional bonds\nbetween buyers and brand\nthroughout ownership\ntouchpoint interactions",
-            "outcome": "Increase customer lifetime\nvalue over 10 years",
-            "kpi": "3-4 vehicles\nper customer / 10 yrs",
+            "title": "Long-term Relationships",
+            "body": "Build emotional bonds between buyers and brand throughout ownership touchpoint interactions",
+            "outcome": "Increase customer lifetime value over 10 years",
+            "kpi": "3–4 vehicles / 10 yrs",
             "icon": "users",
-            "accent": "0C2744"
+            "tone": "navy"
           },
           {
             "index": "02",
-            "title": "Customer\nLoyalty",
-            "body": "Incentivise repeat\npurchase through\nfinancial and service\ntouchpoint interactions",
-            "outcome": "Boost repeat purchase\nrate to target",
-            "kpi": "15% → 30%\nrepeat rate (12 months)",
+            "title": "Customer Loyalty",
+            "body": "Incentivise repeat purchase through financial and service touchpoint interactions",
+            "outcome": "Boost repeat purchase rate to target",
+            "kpi": "15% → 30% repeat",
             "icon": "trending-up",
-            "accent": "005587"
+            "tone": "primary"
           },
           {
             "index": "03",
-            "title": "Buyer\nProfiling",
-            "body": "Develop accurate buyer\nprofiles through improved\ndata collection and\ntouchpoint interactions",
-            "outcome": "Enable data-driven\nproduct decisions",
-            "kpi": "40% → 70%\nsurvey return rate",
+            "title": "Buyer Profiling",
+            "body": "Develop accurate buyer profiles through improved data collection and touchpoint interactions",
+            "outcome": "Enable data-driven product decisions",
+            "kpi": "40% → 70% survey",
             "icon": "chart-bar",
-            "accent": "0076A8"
+            "tone": "blue"
           },
           {
             "index": "04",
-            "title": "Staff\nEngagement",
-            "body": "Empower franchise staff\nto build customer\nrelationships at every\ntouchpoint interactions",
-            "outcome": "Deliver consistent\nservice excellence",
-            "kpi": "33% → 60%\nGood+ service rating",
+            "title": "Staff Engagement",
+            "body": "Empower franchise staff to build customer relationships at every touchpoint interactions",
+            "outcome": "Deliver consistent service excellence",
+            "kpi": "33% → 60% Good+",
             "icon": "target",
-            "accent": "4A90A4"
+            "tone": "teal"
           }
         ],
-        "source": "Source: A.CO. Customer Loyalty Programme Brief, November 2025"
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA",
+        "labels": {
+          "outcome": "BUSINESS OUTCOME",
+          "kpi": "KPI TARGET"
+        }
       }
     },
     {
       "type": "mckInitiativeRankingSlide",
       "data": {
-        "title": "Free after-sales service and loyalty discount are the must-win priorities — together addressing 78% of controllable loss",
-        "subtitle": "Five initiatives ranked by impact-cost; budget focuses on initiatives 01 and 02",
-        "sectionTitle": "FIVE INITIATIVES — RANKED LEFT TO RIGHT BY IMPACT-TO-COST RATIO",
+        "title": "Prioritise service and loyalty incentives to tackle avoidable loss",
+        "subtitle": "Five initiatives ranked by impact and cost; focus funding on priorities 01 and 02",
+        "sectionTitle": "FIVE INITIATIVES — PRIORITISED BY IMPACT-TO-COST RATIO",
         "initiatives": [
           {
             "index": "01",
             "tag": "HIGHEST IMPACT",
-            "title": "Free 3-Year\nAfter-Sales\nService",
-            "body": "3 years free servicing\nafter every purchase.\nDirectly addresses the\n67% Fair/Poor rating.",
+            "title": "Free 3-Year After-Sales Service",
+            "body": "Free service for three years after each purchase; tackles 67% Fair/Poor ratings.",
             "cost": "Med-High",
             "pillars": "Pillar 1, 2",
             "owner": "Director B",
-            "footer": "Highest impact\n50/50 cost share\nHQ + franchises",
+            "footer": "50/50 HQ + franchises",
             "icon": "settings",
-            "accent": "DC2626"
+            "tone": "red",
+            "ownerDetail": "Customer Services · HQ Paris"
           },
           {
             "index": "02",
             "tag": "HIGH ROI",
-            "title": "20% Loyalty\nDiscount",
-            "body": "20% discount for\nreturning customers\non all new model\npurchases.",
+            "title": "20% Loyalty Discount",
+            "body": "20% discount for returning customers on all new model purchases.",
             "cost": "Medium",
             "pillars": "Pillar 2",
             "owner": "Director A",
-            "footer": "High ROI\n50/50 cost share\nHQ + franchises",
+            "footer": "50/50 HQ + franchises",
             "icon": "currency-dollar",
-            "accent": "F59E0B"
+            "tone": "amber",
+            "ownerDetail": "Customer Services · HQ Paris"
           },
           {
             "index": "03",
-            "tag": "REDUCES FRICTION",
-            "title": "Enhanced\nTrade-in\nProgramme",
-            "body": "Generous trade-in\nvaluations to lower\nthe cost barrier to\nupgrading.",
+            "tag": "FRICTION",
+            "title": "Enhanced Trade-in Programme",
+            "body": "Generous trade-in valuations to lower the cost barrier to upgrading.",
             "cost": "Low-Med",
             "pillars": "Pillar 2",
             "owner": "Director A",
-            "footer": "Reduces friction\n50/50 cost share\nHQ + franchises",
-            "icon": "shopping-cart",
-            "accent": "0076A8"
+            "footer": "50/50 HQ + franchises",
+            "icon": "trending-up",
+            "tone": "blue",
+            "ownerDetail": "Customer Services · HQ Paris"
           },
           {
             "index": "04",
-            "tag": "BRAND ENGAGEMENT",
-            "title": "Customer\nMagazine",
-            "body": "Free monthly brand\nmagazine with owner\nfeatures, lifestyle\ntips and offers.",
+            "tag": "ENGAGEMENT",
+            "title": "Customer Magazine",
+            "body": "Free monthly brand magazine with owner features, lifestyle tips and offers.",
             "cost": "Low",
             "pillars": "Pillar 1, 4",
             "owner": "Director A",
-            "footer": "Brand engagement\n50/50 cost share\nHQ + franchises",
+            "footer": "50/50 HQ + franchises",
             "icon": "news",
-            "accent": "4A90A4"
+            "tone": "teal",
+            "ownerDetail": "Customer Services · HQ Paris"
           },
           {
             "index": "05",
             "tag": "DATA QUALITY",
-            "title": "Survey\nIncentive\n(Branded Pen)",
-            "body": "Premium branded pen\nfor completing\nlifestyle questionnaire.\nImproves data return.",
+            "title": "Survey Incentive (Branded Pen)",
+            "body": "A branded pen rewards completed lifestyle surveys and improves data return.",
             "cost": "Very Low",
             "pillars": "Pillar 3",
             "owner": "Director B",
-            "footer": "Data quality\n50/50 cost share\nHQ + franchises",
+            "footer": "50/50 HQ + franchises",
             "icon": "circle-check",
-            "accent": "64748B"
+            "tone": "muted",
+            "ownerDetail": "Customer Services · HQ Paris"
           }
         ],
-        "source": "Source: Director A and Director B programme recommendations | A.CO. European HQ"
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA",
+        "labels": {
+          "cost": "COST",
+          "pillars": "PILLARS",
+          "owner": "OWNER"
+        }
       }
     },
     {
       "type": "mckRoadmapSlide",
       "data": {
-        "title": "Four-phase delivery doubles repeat purchase rate and nearly doubles service satisfaction — both within 12 months",
-        "subtitle": "Q1 quick wins, Q2 service reform, Q3 financial incentives, Q4 evaluation",
+        "title": "Sequence delivery across four phases and track three outcomes",
+        "subtitle": "Quick wins build momentum; reform service, activate incentives, then evaluate",
         "phases": [
           {
-            "title": "Q1 2026 — QUICK WINS",
+            "title": "Q1 \nQUICK WINS",
             "sub": "Months 1-3 · Launch phase",
             "items": [
-              ["Customer Magazine", "Brand publication launch", "news"],
-              ["Survey Incentive", "Branded-pen questionnaire", "circle-check"]
+              {
+                "title": "Customer Magazine",
+                "body": "Publication launch",
+                "icon": "news"
+              },
+              {
+                "title": "Survey Incentive",
+                "body": "Pen questionnaire",
+                "icon": "circle-check"
+              }
             ],
-            "cost": "Cost: Low · Momentum-building",
-            "accent": "0C2744"
+            "cost": "Low · Momentum-building",
+            "tone": "navy"
           },
           {
-            "title": "Q2 2026 — SERVICE REFORM",
+            "title": "Q2 \nSERVICE REFORM",
             "sub": "Months 4-6 · Core delivery",
             "items": [
-              ["Free After-Sales Service", "3-year free plan rollout", "settings"],
-              ["Staff Training", "Relationship skills upgrade", "users"]
+              {
+                "title": "Free After-Sales Service",
+                "body": "Three-year plan",
+                "icon": "settings"
+              },
+              {
+                "title": "Staff Training",
+                "body": "Relationship skills",
+                "icon": "users"
+              }
             ],
-            "cost": "Cost: Medium-High · Highest impact",
-            "accent": "005587"
+            "cost": "Medium-High · Highest impact",
+            "tone": "primary"
           },
           {
-            "title": "Q3 2026 — INCENTIVE LAUNCH",
+            "title": "Q3 \nINCENTIVE LAUNCH",
             "sub": "Months 7-9 · Financial activation",
             "items": [
-              ["20% Loyalty Discount", "Activate for returning buyers", "currency-dollar"],
-              ["Enhanced Trade-in", "Generous trade-in offer", "trending-up"]
+              {
+                "title": "20% Loyalty Discount",
+                "body": "Returning buyers",
+                "icon": "currency-dollar"
+              },
+              {
+                "title": "Enhanced Trade-in",
+                "body": "Trade-in offer",
+                "icon": "trending-up"
+              }
             ],
-            "cost": "Cost: Medium · Direct retention",
-            "accent": "0076A8"
+            "cost": "Medium · Direct retention",
+            "tone": "blue"
           },
           {
-            "title": "Q4 2026 — EVALUATION",
+            "title": "Q4 \nEVALUATION",
             "sub": "Months 10-12 · Lock-in gains",
             "items": [
-              ["KPI Review", "Full metric assessment", "chart-bar"],
-              ["Programme Optimise", "Based on franchise data", "target"]
+              {
+                "title": "KPI Review",
+                "body": "Assess all metrics",
+                "icon": "chart-bar"
+              },
+              {
+                "title": "Programme Optimise",
+                "body": "Use franchise data",
+                "icon": "target"
+              }
             ],
-            "cost": "Cost: Low · Year-2 planning",
-            "accent": "4A90A4"
+            "cost": "Low · Year-2 planning",
+            "tone": "teal"
           }
         ],
         "metrics": [
           {
             "label": "REPEAT PURCHASE RATE",
             "value": "2×",
-            "target": "15% → 30%\nby Q4 2026",
-            "by": "Primary success metric",
-            "note": "Driven by: init. 01, 02, 03",
-            "accent": "DC2626"
+            "target": "15% → 30% by Q4 2026",
+            "by": "Primary outcome",
+            "note": "From: init. 01, 02, 03",
+            "tone": "red"
           },
           {
             "label": "SERVICE SATISFACTION",
             "value": "+82%",
-            "target": "33% → 60% Good+\nby Q3-Q4 2026",
-            "by": "Key retention driver",
-            "note": "Driven by: init. 01 + staff",
-            "accent": "F59E0B"
+            "target": "33% → 60% Good+ by Q3-Q4 2026",
+            "by": "Retention driver",
+            "note": "From: init. 01 + staff",
+            "tone": "amber"
           },
           {
             "label": "SURVEY RETURN RATE",
             "value": "+75%",
-            "target": "40% → 70%\nby Q2 2026",
-            "by": "Enables better profiling",
-            "note": "Driven by: init. 05",
-            "accent": "4A90A4"
+            "target": "40% → 70% by Q2 2026",
+            "by": "Better profiling",
+            "note": "From: init. 05",
+            "tone": "teal"
           }
         ],
         "governance": {
-          "title": "GOVERNANCE · ACCOUNTABILITY · COST STRUCTURE",
+          "title": "GOVERNANCE & COST",
           "items": [
-            ["Accountable party", "Customer Services Dept", "Head Office, Paris"],
-            [
-              "Cost sharing model",
-              "50% Head Office + 50% Franchises",
-              "Available to all European franchise locations"
-            ],
-            [
-              "Programme design principle",
-              "Low incremental cost",
-              "High ROI through retention gains"
-            ]
+            {
+              "label": "Accountable party",
+              "value": "Customer Services Dept",
+              "note": "Head Office, Paris"
+            },
+            {
+              "label": "Cost sharing model",
+              "value": "50% Head Office + 50% Franchises",
+              "note": "All European franchises"
+            },
+            {
+              "label": "Programme design principle",
+              "value": "Low incremental cost",
+              "note": "High ROI through retention gains"
+            }
           ]
         },
-        "source": "Source: A.CO. Customer Loyalty Programme Brief"
+        "source": "Reference-derived demonstration · data and targets unverified",
+        "confidentiality": "REFERENCE DEMONSTRATION · UNVERIFIED DATA"
       }
     }
   ]

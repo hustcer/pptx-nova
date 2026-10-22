@@ -298,11 +298,19 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   dry-run 与 vision-check 的溢出估算阈值不同，两个都要跑。benchmark 的历史 low 基线不等于
   canonical Create 放行；仍须通过当前交付门禁，不能用 qualityProfile 覆盖它。
   现有 benchmark 的 vision/PNG 成功也不能代替 canonical PDF 最终布局检查。修复 kit 后，
-  至少对完整 golden 示例执行一次当前 runtime 的 `xdoc pptx visual-audit --candidate <deck.pptx>
---visual-mode create --field-date <YYYY-MM-DD> --output-dir <iteration-dir>/canonical --json`，读取 manifest 的 required checks、
-  findings 和 decision；若运行时未披露该路线，按 `create-runner.md` 的兼容路径处理并记录边界。
+  至少对完整 golden 示例执行一次当前 runtime 的 canonical 检查。替换下例路径和冻结日期：
+
+  ```sh
+  xdoc pptx visual-audit --candidate ./deck.pptx \
+    --visual-mode create --field-date 2026-10-22 \
+    --output-dir ./iteration/canonical --json
+  ```
+
+  读取 manifest 的 required checks、findings 和 decision；若运行时未披露该路线，
+  按 `create-runner.md` 的兼容路径处理并记录边界。
   参考、candidate、benchmark 使用同一冻结日期；按 manifest/artifact path 定位产物，不猜文件名。
   exit code 0、PNG 存在或旧 baseline 通过均不足以单独证明放行。
+
 - **逐页与局部验收**：首次走查前读 [references/visual-acceptance.md](references/visual-acceptance.md)。
   对准备接受的 golden、构图变体、压力、多语言样例逐张检查实际 canonical PNG，并记录每页结果。
   圆形编号、带底色标签、密集数值与表格底部说明须放大复核；重点防止圆内数字偏心、文字超出底条、

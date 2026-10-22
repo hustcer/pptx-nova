@@ -1,109 +1,276 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "pptx-nova-slide/mckinsey-blue/mckCoverSlide",
-  "title": "mckCoverSlide data schema",
+  "title": "mckCoverSlide — 2.0 content",
   "type": "object",
   "properties": {
-    "eyebrow": {
-      "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 8.25, "widthIn": 3.8 }
-    },
     "title": {
-      "type": "array",
-      "minItems": 2,
-      "maxItems": 2,
-      "items": {
-        "type": "string",
-        "x-slotBudget": { "maxLines": 1, "fontPt": 34.5, "widthIn": 5.7 }
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 34,
+        "widthIn": 9.7,
+        "heightIn": 1.48,
+        "lineHeight": 1.1,
+        "maxLines": 2
       }
     },
     "subtitle": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 9, "widthIn": 6.9 }
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 13,
+        "widthIn": 11.3,
+        "heightIn": 0.35,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 7.45,
+        "heightIn": 0.4,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "confidentiality": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 3.95,
+        "heightIn": 0.4,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.6,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "detailsLabel": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 6.4,
+        "heightIn": 0.26,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "details": {
       "type": "array",
+      "minItems": 1,
       "maxItems": 4,
-      "description": "封面左下角的 [label, value] 信息对列表。",
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "maxItems": 2,
-        "items": [
-          {
+        "type": "object",
+        "properties": {
+          "label": {
             "type": "string",
-            "description": "Project detail label rendered in the DtlL* text box.",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 7.4, "widthIn": 0.85 }
+            "minLength": 1,
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 1.1,
+              "heightIn": 0.43499999999999994,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
           },
-          {
+          "value": {
             "type": "string",
-            "description": "Project detail value rendered in the DtlV* text box.",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 4.5 }
+            "minLength": 1,
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 2.9475,
+              "heightIn": 0.5999999999999999,
+              "lineHeight": 1.1,
+              "maxLines": 2
+            }
           }
-        ]
+        },
+        "required": ["label", "value"],
+        "additionalProperties": false
       }
     },
     "primaryMetric": {
       "type": "object",
-      "description": "右侧主指标卡。",
       "properties": {
         "label": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.45,
+            "lineHeight": 1.1,
+            "maxLines": 2
+          }
         },
         "value": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 30, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 19,
+            "widthIn": 2.1262499999999998,
+            "heightIn": 0.75,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
         },
         "sub": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.3,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
         },
         "note": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 1,
+            "lineHeight": 1.1,
+            "maxLines": 4
+          }
         },
         "extra": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 1.85 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 1,
+            "lineHeight": 1.1,
+            "maxLines": 4
+          }
+        },
+        "bottom": {
+          "type": "string",
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 1,
+            "lineHeight": 1.1,
+            "maxLines": 4
+          }
         }
       },
-      "required": ["value"],
-      "additionalProperties": true
+      "required": ["label", "value", "sub", "note"],
+      "additionalProperties": false
     },
     "lossMetric": {
       "type": "object",
-      "description": "右侧损失指标卡。",
       "properties": {
         "label": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.45,
+            "lineHeight": 1.1,
+            "maxLines": 2
+          }
         },
         "value": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 30, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 19,
+            "widthIn": 2.1262499999999998,
+            "heightIn": 0.75,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
         },
         "sub": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.3,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
         },
         "value2": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 20, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 32,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.71,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
         },
         "sub2": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 1.8 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.26,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
         },
         "note": {
           "type": "string",
-          "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 1.9 }
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.48,
+            "lineHeight": 1.1,
+            "maxLines": 2
+          }
+        },
+        "bottom": {
+          "type": "string",
+          "minLength": 1,
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 2.3300000000000005,
+            "heightIn": 0.48,
+            "lineHeight": 1.1,
+            "maxLines": 2
+          }
         }
       },
-      "required": ["value"],
-      "additionalProperties": true
-    },
-    "source": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 6.3, "widthIn": 4.7 } }
+      "required": ["label", "value", "sub", "value2", "sub2", "note"],
+      "additionalProperties": false
+    }
   },
-  "additionalProperties": true
+  "required": [
+    "title",
+    "subtitle",
+    "source",
+    "eyebrow",
+    "detailsLabel",
+    "details",
+    "primaryMetric",
+    "lossMetric"
+  ],
+  "additionalProperties": false
 }

@@ -1972,7 +1972,7 @@ test('asset manifest ignores unrelated non-image entries and blocks paths outsid
   )
 })
 
-test('DeckKit slot reference and consistency cover mckinsey-blue cover tuple slots', () => {
+test('DeckKit slot reference and consistency cover mckinsey-blue 2.0 named cover slots', () => {
   const referenceResult = runNode([
     skillPath('scripts/pptx-nova-deckkit-slots.mjs'),
     '--deckkit',
@@ -1984,14 +1984,17 @@ test('DeckKit slot reference and consistency cover mckinsey-blue cover tuple slo
   const coverRows = reference.slideTypes.find((slide) => slide.slideType === 'mckCoverSlide').rows
   const rowByPath = new Map(coverRows.map((row) => [row.path, row]))
 
-  assert.ok(rowByPath.get('data.details[][0]')?.budget.includes('~1 line(s); 7.4pt @ 0.85in'))
-  assert.ok(rowByPath.get('data.details[][0]')?.budget.includes('CJK ~8 chars x 1 line(s)'))
-  assert.ok(rowByPath.get('data.details[][1]')?.budget.includes('~1 line(s); 7.2pt @ 4.5in'))
-  assert.ok(rowByPath.get('data.details[][1]')?.budget.includes('CJK ~45 chars x 1 line(s)'))
-  assert.ok(rowByPath.get('data.lossMetric.value2')?.budget.includes('~1 line(s); 20pt @ 1.8in'))
-  assert.ok(rowByPath.get('data.lossMetric.value2')?.budget.includes('CJK ~6 chars x 1 line(s)'))
-  assert.ok(rowByPath.get('data.lossMetric.sub2')?.budget.includes('~1 line(s); 7.2pt @ 1.8in'))
-  assert.ok(rowByPath.get('data.lossMetric.note')?.budget.includes('~1 line(s); 7.2pt @ 1.9in'))
+  for (const key of [
+    'data.details[].label',
+    'data.details[].value',
+    'data.lossMetric.value2',
+    'data.lossMetric.sub2',
+    'data.lossMetric.note',
+  ]) {
+    assert.ok(rowByPath.get(key)?.budget.includes('pt @'), key)
+    assert.ok(rowByPath.get(key)?.budget.includes('CJK'), key)
+  }
+  assert.equal(rowByPath.has('data.details[][0]'), false)
 
   const consistencyResult = runNode([
     skillPath('scripts/pptx-nova-deckkit-slot-consistency.mjs'),
@@ -2999,69 +3002,35 @@ test('tracked repository sources do not retain removed legacy xdoc op names', ()
   assert.deepEqual(residuals, [])
 })
 
-test('mckinsey-blue pillars omit optional empty timeframe labels', async () => {
+test('mckinsey-blue 2.0 requires an explicit shared timeframe instead of business defaults', async () => {
   const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
-  const result = kit.createDeck({
-    meta: { deckkit: 'mckinsey-blue' },
-    slides: [
-      {
-        type: 'mckPillarsSlide',
-        data: {
-          title: 'Pillars',
-          subtitle: 'Optional timeframe labels may be absent',
-          pillars: [
-            {
-              index: '01',
-              title: 'Loyalty',
-              body: 'Build repeat behavior',
-              outcome: 'Higher repeat purchase',
-              kpi: '30%',
-              icon: 'target',
-            },
-          ],
-        },
-      },
-    ],
-  })
-  const timeOps = result.patch.ops.filter((op) => JSON.stringify(op).includes('Pillar0Time'))
-
-  assert.deepEqual(timeOps, [])
+  const source = JSON.parse(
+    readFileSync(skillPath('assets/deckkits/examples/mckinsey-blue-loyalty-content.json'), 'utf8'),
+  )
+  const content = {
+    meta: { deckkit: 'mckinsey-blue', designScope: 'excerpt' },
+    slides: [source.slides[5]],
+  }
+  delete content.slides[0].data.defaultTimeframe
+  assert.throws(() => kit.createDeck(content), /missing defaultTimeframe/)
+  content.slides[0].data.defaultTimeframe = 'Review after 90 days'
+  assert.ok(JSON.stringify(kit.createDeck(content).patch).includes('Review after 90 days'))
 })
 
-test('mckinsey-blue loss-driver bar keeps finite geometry for missing or invalid value', async () => {
+test('mckinsey-blue 2.0 rejects invalid percentages without clamping or inventing visible bars', async () => {
   const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
-  // Drivers-only data with no value, a "%" string, an over-100 value, and a negative
-  // value. Before the fix this threw "Invalid geometry S0_Driver0Fill: ... w=NaN".
-  const result = kit.createDeck({
-    meta: { deckkit: 'mckinsey-blue' },
-    slides: [
-      {
-        type: 'mckLossDriverSlide',
-        data: {
-          title: 'Loss drivers',
-          chartTitle: 'Share of churn',
-          drivers: [
-            { label: 'Missing value', sub: 'no value field' },
-            { label: 'Percent string', sub: 'with % suffix', value: '62%' },
-            { label: 'Out of range', sub: 'over 100', value: 320 },
-            { label: 'Negative', sub: 'below 0', value: -5 },
-          ],
-        },
-      },
-    ],
-  })
-
-  const fillWidths = result.patch.ops
-    .filter((op) => /Driver\d+Fill$/.test(op.name ?? ''))
-    .map((op) => Number.parseFloat(String(op.w)))
-
-  assert.equal(fillWidths.length, 4)
-  for (const w of fillWidths) {
-    assert.ok(Number.isFinite(w) && w > 0, `fill width should be finite and positive, got ${w}`)
+  const source = JSON.parse(
+    readFileSync(skillPath('assets/deckkits/examples/mckinsey-blue-loyalty-content.json'), 'utf8'),
+  )
+  for (const value of [undefined, '62%', 320, -5]) {
+    const slide = structuredClone(source.slides[4])
+    if (value === undefined) delete slide.data.drivers[0].value
+    else slide.data.drivers[0].value = value
+    assert.throws(
+      () => kit.createDeck({ meta: { deckkit: 'mckinsey-blue' }, slides: [slide] }),
+      /value|number|maximum|minimum/,
+    )
   }
-  // Out-of-range value clamps to the full track width; missing/negative clamp to the
-  // minimum visible width instead of overflowing or collapsing.
-  assert.ok(Math.max(...fillWidths) <= 6.38 + 1e-6, 'fill width must not exceed the bar track')
 })
 
 test('run initializer creates standard artifacts and reusable commands', () => {
@@ -3755,13 +3724,13 @@ test('refurbish plan requires semantic diff gate by default', async () => {
     source: 'source.pptx',
     output: 'candidate.pptx',
     catalog: skillPath('assets/deckkits/catalog.json'),
-    explicit: false,
+    explicit: true,
     json: true,
   })
   const semanticIndex = plan.requiredGates.indexOf('semantic-diff')
 
-  assert.equal(plan.status, 'ready')
-  assert.deepEqual(plan.requiredReferences, [])
+  assert.equal(plan.status, 'explicit-only')
+  assert.ok(plan.requiredReferences.some((reference) => reference.section === 'Selection'))
   assert.notEqual(semanticIndex, -1)
   assert.ok(semanticIndex < plan.requiredGates.indexOf('fidelity-gate'))
   assert.ok(
@@ -3809,7 +3778,7 @@ test('explicit swiss-grid refurbishment retains its independent manual fallback 
 test('explicit fallback keeps refurbish plan route commands gates and references consistent', async () => {
   const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
   const plan = buildRefurbishPlan({
-    deckkit: 'mckinsey-blue',
+    deckkit: 'consulting-dark',
     source: 'source.pptx',
     output: 'candidate.pptx',
     catalog: skillPath('assets/deckkits/catalog.json'),
@@ -4096,7 +4065,7 @@ test('refurbish runner persists catalog readiness before any xdoc command starts
     [
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
-      'mckinsey-blue',
+      'consulting-dark',
       '--source',
       source,
       '--output',
@@ -4383,6 +4352,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       source,
       '--output',
@@ -4542,7 +4512,7 @@ if (args[0] === 'schema') {
   const catalogReadiness = JSON.parse(readFileSync(summary.artifacts.readiness, 'utf8'))
   assert.equal(catalogReadiness.schemaVersion, 'pptx-nova-catalog-readiness/v1')
   assert.equal(catalogReadiness.status, 'pass')
-  assert.equal(catalogReadiness.readiness, 'production')
+  assert.equal(catalogReadiness.readiness, 'candidate')
   assert.equal(catalogReadiness.agentGate.passed, true)
   assert.equal(catalogReadiness.agentGate.benchmarkAvailable, true)
   assert.equal(catalogReadiness.agentGate.benchmarkEvidencePassed, true)
@@ -4622,6 +4592,7 @@ if (args[0] === 'schema') {
     skillPath('scripts/pptx-nova-refurbish-run.mjs'),
     '--deckkit',
     'mckinsey-blue',
+    '--explicit',
     '--source',
     fallbackSource,
     '--output',
@@ -4705,6 +4676,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       recoverableSource,
       '--output',
@@ -4800,6 +4772,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       nonRecoverableSource,
       '--output',
@@ -4852,6 +4825,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       shadowFailureSource,
       '--output',
@@ -4894,6 +4868,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       singleSource,
       '--output',
@@ -4947,6 +4922,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       unreviewedSource,
       '--output',
@@ -5001,6 +4977,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       reviewedSource,
       '--output',
@@ -5157,6 +5134,7 @@ if (args[0] === 'schema') {
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'mckinsey-blue',
+      '--explicit',
       '--source',
       source,
       '--output',

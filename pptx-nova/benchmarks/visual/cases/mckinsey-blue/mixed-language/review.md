@@ -1,14 +1,17 @@
 # mckinsey-blue / mixed-language
 
-- Last reviewed: 2026-06-07
-- Reviewer: hustcer
+- Last reviewed: 2026-10-22
+- Reviewer: agent
 - Result: pass
+- Version: 2.0.0 / candidate
 
-Manual checks:
+Eight canonical pages from matrix/07/mixed/run were individually inspected; the candidate, manifest and page SHA-256 are recorded in visual-review-ledger.json. Contact sheets were separately inspected for rhythm. Native PowerPoint 16.114 open/save/close/reopen and complete design readback passed without Repair. Machine, visual and host evidence remain separate.
 
-- [x] Chinese and English text are both readable
-- [x] CJK titles do not clip in blue consulting chrome
-- [x] Icons remain aligned with CJK labels
-- [x] Roadmap and KPI panels remain balanced
+- [x] All supplied fields visible; no clipping, missing glyphs, overlap or unexpected italic.
+- [x] Blue conclusion bands, rule spacing, native charts, numerical precision and footer checked.
+- [x] Number ownership, icons, dense table and governance footer enlarged where applicable.
+- [x] Standard Create finalized the same hash-bound candidate.
 
-Notes:
+Synthetic library scenario verifies Chinese/English regular and bold text without Kimsoong/car-policy leakage.
+
+Runtime: xdoc 0.13.0 (92a5aa13-dirty), frozen field date 2026-10-22. This records the tested local runtime, not a public installation or parity claim. See docs/mckinsey-blue-v2-migration-results.md for coverage, closed defects and limitations.

@@ -2,10 +2,10 @@
 
 DeckKit: `mckinsey-blue`
 Showcase case: `mckinsey-blue.golden-loyalty`
-Readiness: `production`
+Readiness: `candidate`
 Slides: 8
-Patch ops: 2471
-Title: A.CO. Customer,Loyalty Programme
+Patch ops: 1661
+Title: Kimsoong Customer Loyalty Programme
 
 ## Best For
 

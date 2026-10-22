@@ -113,9 +113,9 @@
       "deckkit": "mckinsey-blue",
       "caseId": "mckinsey-blue.golden-loyalty",
       "kind": "golden",
-      "readiness": "production",
-      "version": "0.1.0",
-      "title": "A.CO. Customer,Loyalty Programme",
+      "readiness": "candidate",
+      "version": "2.0.0",
+      "title": "Kimsoong Customer Loyalty Programme",
       "bestFor": [
         "customer strategy",
         "loyalty programme",
@@ -130,29 +130,29 @@
       "files": {
         "deck": {
           "path": "mckinsey-blue/deck.pptx",
-          "bytes": 48604,
-          "sha256": "01157063f22a294e83c73cfff94b23e3282a76da03a4d91379c87a660315dc31"
+          "bytes": 52723,
+          "sha256": "41f09bebfb16710771d861d5508be86aeaace418b6f003e7c050c8258bb564f0"
         },
         "contactSheet": {
           "path": "mckinsey-blue/contact-sheet.webp",
-          "bytes": 126402,
-          "sha256": "1a47ca865fa52e7aada2d1760a59afa9eb63aee668c7e86de17ffe63c2c347ac",
+          "bytes": 168072,
+          "sha256": "90e318967e37832d448d97f5e8c4a4521ccfaded2c7c6b5c2ff077f38affa6f9",
           "quality": 82
         },
         "content": {
           "path": "mckinsey-blue/content.json",
-          "bytes": 17933,
-          "sha256": "6b7ddded8e377bb0bf638e66b5406fb9cd456ed2b9a5c0bfc3c9d9fa7fa8ec60"
+          "bytes": 20657,
+          "sha256": "c2d43d7bba39c7c05776c64ccf6060dd75334f1da0a23580512ad6095686344c"
         },
         "brief": {
           "path": "mckinsey-blue/brief.md",
-          "bytes": 739,
-          "sha256": "d3732cd18fad02e85656b0cec54da3562b332af4b6858a9b6746318b0d8b2422"
+          "bytes": 741,
+          "sha256": "4e14ade46c37cd65078672730b0632f1a833e8e879f39e70ac2f416a561b285e"
         },
         "summary": {
           "path": "mckinsey-blue/summary.json",
-          "bytes": 2772,
-          "sha256": "4b67b7c3b88096963bc73a5dfa7f0bcbd2493a9587eb769fabff585d0b8d6071"
+          "bytes": 2777,
+          "sha256": "a90ba21ea66ff8c5c832d530a33ea5ca54dda8323fc2fb217c4bd1988bcebc42"
         }
       },
       "validation": {
@@ -164,22 +164,22 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 2471
+        "ops": 1661
       },
       "vision": {
         "status": "success",
         "slideCount": 8,
-        "issueCount": 319,
+        "issueCount": 0,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 319
+          "low": 0
         },
         "lowBuckets": {
-          "total": 319,
-          "styleAllowed": 300,
-          "baselineKnown": 19,
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
           "new": 0,
           "changed": 0,
           "resolved": 0,
@@ -187,11 +187,7 @@
           "baselineUnavailable": false,
           "baselineUpdated": false
         },
-        "lowByFamily": {
-          "small-font": 303,
-          "composition": 13,
-          "overlap": 3
-        },
+        "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
@@ -199,15 +195,15 @@
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
           "available": true,
-          "issueCount": 319
+          "issueCount": 0
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
           "source": "catalog.qualityProfile",
-          "minFontPt": 6,
-          "labelFontPt": 6,
-          "sourceFontPt": 6,
-          "note": ""
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
         },
         "newLowSamples": [],
         "changedLowSamples": [],

@@ -494,19 +494,20 @@
     },
     {
       "id": "mckinsey-blue",
-      "version": "0.1.0",
+      "version": "2.0.0",
       "path": "mckinsey-blue.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "production",
+      "readiness": "candidate",
       "nativeSkinning": {
         "themePack": "corporate-blue",
         "stylePack": "consulting",
         "chromeSource": "themePack.generator.colors + stylePack.generator.chrome"
       },
       "qualityProfile": {
-        "minFontPt": 6,
-        "labelFontPt": 6,
-        "sourceFontPt": 6
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
       },
       "defaultFor": [
         "McKinsey-style consulting",
@@ -572,13 +573,10 @@
         },
         "slideRhythm": {
           "anchor": ["mckCoverSlide"],
-          "evidence": [
-            "mckCrisisSnapshotSlide",
-            "mckDemographicProfileSlide",
-            "mckPriorityMatrixSlide",
-            "mckLossDriverSlide"
-          ],
-          "action": ["mckPillarsSlide", "mckInitiativeRankingSlide", "mckRoadmapSlide"]
+          "situation": ["mckCrisisSnapshotSlide", "mckDemographicProfileSlide"],
+          "analysis": ["mckPriorityMatrixSlide", "mckLossDriverSlide"],
+          "action": ["mckPillarsSlide", "mckInitiativeRankingSlide"],
+          "timeline": ["mckRoadmapSlide"]
         },
         "compositionRules": [
           "Keep titles specific enough to read as a recommendation or finding.",
@@ -614,14 +612,17 @@
             "accent": "005587",
             "softAccent": "EFF6FF",
             "secondary": "475569",
-            "surface": "F8FAFC",
-            "rule": "CBD5E1"
+            "surface": "F1F5F9",
+            "rule": "CBD5E1",
+            "muted": "475569",
+            "line": "CBD5E1"
           },
           "fonts": {
             "heading": "Arial",
             "body": "Arial",
             "label": "Arial",
-            "cjk": "Arial"
+            "cjk": "Arial Unicode MS",
+            "display": "Arial"
           },
           "styleOps": [
             "set-theme",
@@ -693,17 +694,24 @@
         "slideTypes": {
           "mckCoverSlide": {
             "requiredSlots": [
-              "data.eyebrow",
               "data.title",
               "data.subtitle",
+              "data.source",
+              "data.eyebrow",
+              "data.detailsLabel",
+              "data.details",
               "data.primaryMetric",
               "data.lossMetric"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "split", "band"]
           },
           "mckCrisisSnapshotSlide": {
             "requiredSlots": [
               "data.title",
               "data.subtitle",
+              "data.source",
+              "data.metricLabel",
+              "data.unit",
               "data.metrics",
               "data.cohortTitle",
               "data.cohort",
@@ -711,12 +719,16 @@
               "data.implication",
               "data.gap",
               "data.lever"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "stacked", "rail"]
           },
           "mckDemographicProfileSlide": {
             "requiredSlots": [
               "data.title",
               "data.subtitle",
+              "data.source",
+              "data.unit",
+              "data.labels",
               "data.age",
               "data.ageNote",
               "data.income",
@@ -725,53 +737,68 @@
               "data.occupationNote",
               "data.interests",
               "data.interestNote"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "quadrants", "bands"]
           },
           "mckPriorityMatrixSlide": {
             "requiredSlots": [
               "data.title",
               "data.subtitle",
+              "data.source",
               "data.bubbles",
               "data.legend",
+              "data.labels",
               "data.finding"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "rail", "reversed"]
           },
           "mckLossDriverSlide": {
             "requiredSlots": [
               "data.title",
               "data.subtitle",
+              "data.source",
               "data.chartTitle",
+              "data.unit",
               "data.drivers",
-              "data.controllable",
               "data.summary",
+              "data.controllable",
               "data.uncontrollable",
               "data.pareto"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "rail", "wide"]
           },
           "mckPillarsSlide": {
             "requiredSlots": [
               "data.title",
               "data.subtitle",
-              "data.pillars",
-              "data.defaultTimeframe"
-            ]
+              "data.source",
+              "data.labels",
+              "data.defaultTimeframe",
+              "data.pillars"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "rows"]
           },
           "mckInitiativeRankingSlide": {
             "requiredSlots": [
               "data.title",
               "data.subtitle",
+              "data.source",
               "data.sectionTitle",
+              "data.labels",
               "data.initiatives"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "columns", "ledger"]
           },
           "mckRoadmapSlide": {
             "requiredSlots": [
               "data.title",
               "data.subtitle",
+              "data.source",
               "data.phases",
               "data.metrics",
               "data.governance"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
           }
         }
       },
@@ -821,21 +848,22 @@
         }
       },
       "validatedWith": {
-        "s8fy": ">=10",
-        "visionCheck": "high=0 medium=0",
-        "pngReview": "contact-sheet"
+        "visionCheck": "xdoc 0.13.0 (92a5aa13-dirty); final matrix: no high, medium or low issues",
+        "pngReview": "56 final canonical pages individually reviewed; owned numbers/icons, tiny chart values, native table and governance footer enlarged",
+        "nativeHost": "PowerPoint for Mac 16.114: seven files saved, closed and reopened; title, owned number, chart data and native table-cell edits read back"
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-21",
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-10-22",
         "vision": {
           "high": 0,
           "medium": 0,
-          "low": 514,
+          "low": 0,
           "lowBuckets": {
-            "total": 514,
-            "styleAllowed": 482,
-            "baselineKnown": 32,
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
             "new": 0,
             "changed": 0,
             "resolved": 0,
@@ -844,13 +872,12 @@
             "baselineUpdatedCases": 3
           }
         },
-        "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-21",
+          "date": "2026-10-22",
           "source": {
-            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/pptx-nova-visual"
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -859,11 +886,11 @@
           "vision": {
             "high": 0,
             "medium": 0,
-            "low": 514,
+            "low": 0,
             "lowBuckets": {
-              "total": 514,
-              "styleAllowed": 482,
-              "baselineKnown": 32,
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
               "new": 0,
               "changed": 0,
               "resolved": 0,
@@ -877,8 +904,8 @@
               "caseId": "mckinsey-blue.golden-loyalty",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/mckinsey-blue/golden-loyalty/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/review.md",
+              "summaryPath": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final/mckinsey-blue/golden-loyalty/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -893,11 +920,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 319,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 319,
-                  "styleAllowed": 300,
-                  "baselineKnown": 19,
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -914,22 +941,22 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 303234
+                "bytes": 284470
               },
-              "patchOps": 2471,
-              "p50TotalMs": 77.51
+              "patchOps": 1661,
+              "p50TotalMs": 130.2
             },
             {
               "caseId": "mckinsey-blue.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/mckinsey-blue/stress-density/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/stress-density/review.md",
+              "summaryPath": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final/mckinsey-blue/stress-density/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/stress-density/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
-                "warnings": 1,
-                "fitDiagnostics": 1,
+                "warnings": 0,
+                "fitDiagnostics": 0,
                 "blockingFitDiagnostics": 0
               },
               "dryRun": {
@@ -939,11 +966,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 86,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 86,
-                  "styleAllowed": 81,
-                  "baselineKnown": 5,
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -953,29 +980,29 @@
                 }
               },
               "previews": {
-                "count": 2,
-                "expectedCount": 2,
+                "count": 8,
+                "expectedCount": 8,
                 "nonEmpty": true,
                 "countEqualsSlides": true
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 69762
+                "bytes": 241742
               },
-              "patchOps": 815,
-              "p50TotalMs": 61.8
+              "patchOps": 1353,
+              "p50TotalMs": 175.17
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/mckinsey-blue/mixed-language/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/mckinsey-blue/mixed-language/review.md",
+              "summaryPath": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final/mckinsey-blue/mixed-language/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/mixed-language/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
-                "warnings": 1,
-                "fitDiagnostics": 1,
+                "warnings": 0,
+                "fitDiagnostics": 0,
                 "blockingFitDiagnostics": 0
               },
               "dryRun": {
@@ -985,11 +1012,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 109,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 109,
-                  "styleAllowed": 101,
-                  "baselineKnown": 8,
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -999,28 +1026,33 @@
                 }
               },
               "previews": {
-                "count": 3,
-                "expectedCount": 3,
+                "count": 8,
+                "expectedCount": 8,
                 "nonEmpty": true,
                 "countEqualsSlides": true
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 127063
+                "bytes": 236727
               },
-              "patchOps": 701,
-              "p50TotalMs": 64.82
+              "patchOps": 1688,
+              "p50TotalMs": 157.35
             }
           ],
           "blockers": []
         }
       },
       "knownLimits": [
-        "Designed for 16:9 dense consulting pages; short executive titles work best",
-        "Initiative ranking fits five compact cards; split if each initiative needs long legal copy",
-        "Priority matrix supports four labelled bubbles in the current layout"
+        "Based on all eight Kimsoong customer-loyalty reference pages; Arial / Arial Unicode MS substitute source Arial / Microsoft YaHei without embedding.",
+        "2.0 uses numeric percentage records and semantic tones; see intent.md for the explicit field migration.",
+        "Cohort lengths and matrix areas are derived editable shapes. Manually changing data or annotations does not synchronize the other; regenerate from content.",
+        "Tabler icons are SVG pictures; their individual path nodes are not native shapes. No one-off reference media or logo is bundled.",
+        "Source business figures and targets are unverified demonstrations. No entity, conclusion, confidentiality text, target or funding policy is fixed in the skin.",
+        "Five-segment rail cohorts need short labels; ledger cells are limited to 80 characters. Narrow Chinese cells may wrap punctuation. Use another registered layout or split content when capacity fails.",
+        "Windows, other Office versions, cross-host pixel parity and source-deck refurbishment fidelity were not verified in this migration."
       ],
-      "examples": ["examples/mckinsey-blue-loyalty-content.json"]
+      "examples": ["examples/mckinsey-blue-loyalty-content.json"],
+      "designContract": "mckinsey-blue/design.json"
     },
     {
       "id": "swiss-grid",

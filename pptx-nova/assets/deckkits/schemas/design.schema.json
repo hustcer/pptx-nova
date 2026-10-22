@@ -237,6 +237,9 @@
     },
     "swiss": {
       "$ref": "#/$defs/swiss"
+    },
+    "mck": {
+      "$ref": "#/$defs/mck"
     }
   },
   "required": [
@@ -2324,6 +2327,198 @@
         }
       },
       "required": ["family", "styles", "families", "capacity", "spacing", "chrome", "rhythm"],
+      "additionalProperties": false
+    },
+    "mck": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "mck-consulting/v1"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sizePt": {
+                "type": "number",
+                "minimum": 10
+              },
+              "lineHeight": {
+                "type": "number",
+                "minimum": 1
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "italic": {
+                "type": "boolean"
+              },
+              "alignment": {
+                "enum": ["left", "right", "center"]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["role", "sizePt", "lineHeight", "color"],
+            "additionalProperties": false
+          }
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "enum": [
+                  "cover",
+                  "snapshot",
+                  "profile",
+                  "matrix",
+                  "drivers",
+                  "pillars",
+                  "initiatives",
+                  "roadmap"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        },
+        "capacity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "inset": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "rulePt": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 1
+            }
+          },
+          "required": ["gap", "inset", "rulePt"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "bar": {
+              "$ref": "#/$defs/frame"
+            },
+            "subtitle": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "confidentiality": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["title", "bar", "subtitle", "source", "confidentiality", "page"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          "required": ["maxConsecutive"],
+          "additionalProperties": false
+        },
+        "chart": {
+          "type": "object",
+          "properties": {
+            "fontPt": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 16
+            },
+            "format": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["fontPt", "format"],
+          "additionalProperties": false
+        },
+        "table": {
+          "type": "object",
+          "properties": {
+            "maxCellChars": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 80
+            }
+          },
+          "required": ["maxCellChars"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "family",
+        "styles",
+        "families",
+        "capacity",
+        "spacing",
+        "chrome",
+        "rhythm",
+        "chart",
+        "table"
+      ],
       "additionalProperties": false
     }
   }

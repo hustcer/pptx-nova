@@ -3,7 +3,7 @@
   "deckkit": "mckinsey-blue",
   "caseId": "mckinsey-blue.golden-loyalty",
   "kind": "golden",
-  "title": "A.CO. Customer,Loyalty Programme",
+  "title": "Kimsoong Customer Loyalty Programme",
   "source": {
     "content": "pptx-nova/assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
     "build": "pptx-nova/assets/deckkits/examples/mckinsey-blue-build.mjs",
@@ -19,46 +19,46 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 2471
+    "ops": 1661
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 35,
-    "opResults": 2471,
+    "changedParts": 47,
+    "opResults": 1661,
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 4,
+      "total": 4
     }
   },
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 35,
-    "opResults": 2471,
+    "changedParts": 47,
+    "opResults": 1661,
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 4,
+      "total": 4
     }
   },
   "vision": {
     "status": "success",
     "slideCount": 8,
-    "issueCount": 319,
+    "issueCount": 0,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 319
+      "low": 0
     },
     "lowBuckets": {
-      "total": 319,
-      "styleAllowed": 300,
-      "baselineKnown": 19,
+      "total": 0,
+      "styleAllowed": 0,
+      "baselineKnown": 0,
       "new": 0,
       "changed": 0,
       "resolved": 0,
@@ -66,11 +66,7 @@
       "baselineUnavailable": false,
       "baselineUpdated": false
     },
-    "lowByFamily": {
-      "small-font": 303,
-      "composition": 13,
-      "overlap": 3
-    },
+    "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
@@ -78,15 +74,15 @@
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/mckinsey-blue.golden-loyalty.vision-baseline.json",
       "available": true,
-      "issueCount": 319
+      "issueCount": 0
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
       "source": "catalog.qualityProfile",
-      "minFontPt": 6,
-      "labelFontPt": 6,
-      "sourceFontPt": 6,
-      "note": ""
+      "minFontPt": 10,
+      "labelFontPt": 10,
+      "sourceFontPt": 10,
+      "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
     },
     "newLowSamples": [],
     "changedLowSamples": [],
@@ -100,12 +96,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 245333,
-      "sha256": "edc114b233cfbfd80eacb9bb2046f3ada2a3b1888224fa43bbeee4d9bac8c623"
+      "bytes": 284470,
+      "sha256": "158ebe17d14cf386a953568d6e54de7eb8ea6d51be27e8fae8181e6a8b676f26"
     },
     "webp": {
-      "bytes": 126402,
-      "sha256": "1a47ca865fa52e7aada2d1760a59afa9eb63aee668c7e86de17ffe63c2c347ac"
+      "bytes": 168072,
+      "sha256": "90e318967e37832d448d97f5e8c4a4521ccfaded2c7c6b5c2ff077f38affa6f9"
     }
   }
 }

@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 // mckinsey-blue-build.mjs - content -> McKinsey-blue DeckKit -> patch
-import { loadContent, validateContent } from '../core-primitives.kit.mjs'
+import { loadContent } from '../core-primitives.kit.mjs'
+import { validateDeckkitContent } from '../validate-deckkit.mjs'
 import { createDeck } from '../mckinsey-blue.kit.mjs'
+import { fileURLToPath } from 'node:url'
 
 const deckkitId = 'mckinsey-blue'
-const content = await loadContent(process.argv[2] ?? 'mckinsey-blue-loyalty-content.json')
+const content = await loadContent(
+  process.argv[2] ??
+    fileURLToPath(new URL('./mckinsey-blue-loyalty-content.json', import.meta.url)),
+)
 
-const validation = validateContent(content, { deckkit: deckkitId })
+const validation = validateDeckkitContent(content, { deckkit: deckkitId, mode: 'delivery' })
 const { errors, warnings: valWarnings, fitDiagnostics } = validation
 const blockingFitDiagnostics = fitDiagnostics.filter((d) => d.blocking === true)
 if (errors.length > 0 || blockingFitDiagnostics.length > 0) {

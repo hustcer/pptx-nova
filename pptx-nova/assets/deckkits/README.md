@@ -33,6 +33,10 @@ assets/deckkits/
 ├── swiss-layouts.mjs          # 十五类职责、二十四个布局、数值模型与实例容量
 ├── swiss-registry.mjs         # Swiss 视觉族断言、身份检查与发现投影
 ├── swiss-grid/                # Swiss Grid 2.0 合同与设计意图（candidate）
+├── mck-components.mjs         # 白底咨询语言、原生条图、表格与 SVG 图标执行
+├── mck-layouts.mjs            # 八类职责、十六个有界构图与逐实例容量
+├── mck-registry.mjs           # McKinsey 视觉族断言、检查与发现投影
+├── mckinsey-blue/             # McKinsey Blue 2.0 合同与设计意图（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
@@ -71,6 +75,12 @@ Swiss Grid 2.0 保留十五个页型入口，以二十四个注册布局表达�
 网格示意、时间线与原生表格。封面/收束不显示灰色施工网格；原稿图标、字重差异和列末注释已补齐。
 计量示意的几何与标注来自同一数值模型，手工编辑后须重新生成才能同步；Tabler SVG 是矢量图片。
 Helvetica / Arial Black / Arial Unicode MS 是不嵌入的替代字体。见 [设计与迁移说明](swiss-grid/intent.md)。
+
+McKinsey Blue 2.0 保留八个页型入口，十六个注册布局覆盖观点标题、直接数值、面积优先矩阵、
+渐进蓝色支柱、五项排序与四阶段路线。补回原稿图标、责任/成本明细和治理栏；图表与表格为原生对象，
+cohort 宽度和圆面积来自数值。Arial / Arial Unicode MS 不嵌入；SVG 图标的路径节点不承诺原生编辑。
+手工改图表、派生形状或旁注不会自动同步，须从 content 重新生成。较长内容应改用合法变体、重组或拆页。
+见 [设计与迁移说明](mckinsey-blue/intent.md)。
 
 ## core-primitives 职责边界
 
@@ -125,7 +135,7 @@ Helvetica / Arial Black / Arial Unicode MS 是不嵌入的替代字体。见 [�
 不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
 检查应用后的对象和原生数值。详见 `../../references/design-contracts.md`。
 
-合同路线现覆盖 Biennale、Cartesian、Broadside、Long Table、Swiss Grid、Black Gold、Green Slate 与 Clear Value。Black Gold 增加原生表格逐格回读、单焦点与
+合同路线现覆盖 Biennale、Cartesian、Broadside、Long Table、Swiss Grid、McKinsey Blue、Black Gold、Green Slate 与 Clear Value。Black Gold 增加原生表格逐格回读、单焦点与
 期刊图表/表格规则；Green Slate 增加深色策略报告构图、带底色标签、形状内编号、按时长分配的
 阶段路线图和独立说明区。Clear Value 增加白底衬线研究报告、多图证据板、可变列矩阵、原生环图、
 预测柱虚线边界和面积成比例的可编辑圆。candidate 状态不等于 production/default 交付资格。开发者从设计规范和

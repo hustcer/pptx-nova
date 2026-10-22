@@ -262,13 +262,11 @@ export function createAnnualDeck(design, content) {
             showSeriesName: false,
             showLegendKey: false,
             showCategoryName: kind === 'doughnut',
-            position: line
-              ? 'above'
-              : kind === 'doughnut'
-                ? 'outside-end'
-                : stacked
-                  ? 'center'
-                  : 'outside-end',
+            // Office rejects explicit doughnut label positions, including center.
+            // Keep visibility/font/format and let the host choose default placement.
+            ...(kind === 'doughnut'
+              ? {}
+              : { position: line ? 'above' : stacked ? 'center' : 'outside-end' }),
             font,
             numberFormat: ch.numberFormat ?? 'General',
           },

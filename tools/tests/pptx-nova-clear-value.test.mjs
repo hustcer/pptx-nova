@@ -314,3 +314,18 @@ test('Slot probes omit only optional controls and configuration failures exit no
     fs.rmSync(root, { recursive: true, force: true })
   }
 })
+test('Clear Value: doughnut labels omit explicit position while preserving native labels', () => {
+  const patch = createDeck(source).patch
+  const rings = patch.ops.filter((o) => o.op === 'add-chart' && o.kind === 'doughnut')
+  assert.ok(rings.length)
+  for (const ring of rings) {
+    const style = patch.ops.find(
+      (o) => o.op === 'set-chart' && o.slide === ring.slide && o.shape.name === ring.name,
+    )
+    assert.ok(style.dataLabels.every((l) => !Object.hasOwn(l, 'position')))
+    assert.equal(style.dataLabels[0].showValue, true)
+    assert.equal(style.dataLabels[0].showCategoryName, true)
+    assert.ok(style.dataLabels[0].font)
+    assert.equal(style.dataLabels[0].numberFormat, 'General')
+  }
+})

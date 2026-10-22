@@ -1,18 +1,45 @@
 # pptx-nova 设计语言载体评估
 
-评估日期：2026-10-21。范围：设计语言的表达、执行、扩展与验证；不修改现有生成流程。
+初评日期：2026-10-21；更新日期：2026-10-22。
+范围：设计语言的表达、执行、扩展与验证。初评为方案比较，本次结合 Biennale、Black Gold、
+Green Slate、Clear Value 的落地结果更新结论；本次文档更新不修改生成器或发布状态。
 
 ## 结论
 
-如果今天必须二选一，继续以 DeckKit 为交付基础。它已经连接内容校验、确定性生成和质量门禁，纯 `design.md` 无法直接替代它。
+继续以 DeckKit 为分发与执行基础，采用 **JSON 设计合同 + Markdown 设计意图 + 已注册的可执行视觉族**。
+这一方向已从建议变成四套风格的实际实现；纯 `design.md` 仍适合作为迁移输入，不能直接替代执行合同。
 
-但面向“同一风格稳定、布局灵活、表达多样”的目标，建议演进为 **JSON 设计合同 + Markdown 设计意图 + 可执行组件与布局配方**。继续沿用 DeckKit 作为分发与兼容单位，让 `.kit.mjs` 逐步成为合同的执行适配器，而不是让每种风格都重复实现一套大生成器。
+实际结果支持“身份固定、构图有界变化、语义与交付流程共享”的职责划分。
+`.kit.mjs` 可以成为很薄的适配器，但新视觉语法仍需要代码：Black Gold、Green Slate、Clear Value
+分别增加 editorial、strategy、annual 视觉族。尚未证明后续风格只改 JSON 就能迁入，也没有实现通用排版求解器。
 
 关键变化是：**锁定设计身份，开放受约束的构图；把可验证的规则从模型记忆中移到执行链中。** 单纯把 Markdown 转成 JSON，或者把 JS 常量抽成配置，都不足以达到这个目标。
 
-以下架构和示例均为建议，尚未实现；自定义合同不能直接传给当前 xdoc。
+**验收结论必须收紧：机器通过、PNG 视觉通过，都不能替代 PowerPoint 原生兼容性。**
+Clear Value 曾有实机 Repair 丢页反例，原完整验收结论因此撤回。2026-10-22 已用重构建的
+`xdoc 0.13.0 (92a5aa13)` 复核修复，并同步调用方：新完整样例原生打开、另存、关闭重开均无 Repair，
+第 11 页内容和原生环图保留。历史 PPTX 不会被新二进制自动修好，catalog 也不因此自动晋级。见第 7 节及
+[REPAIR-001](repair-issues.md)。其余风格也不能因本次未发现 Repair 就推定已通过原生宿主验证。
+
+下文第 1–3 节保留初评依据并标注历史范围；第 4–10 节区分已实现能力、实测经验和后续建议。
+自有合同始终由 pptx-nova 编译，不能直接传给 xdoc。
+
+### 当前落地快照
+
+| DeckKit         | 当前版本 / catalog 状态          | 实际实现                                     | 证据与边界                                                                                                                                                            |
+| --------------- | -------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| biennale-yellow | 0.2.0 / production（沿用原状态） | 原 8 页型兼容适配 + 原生证据页，3 种证据构图 | [第一、二阶段报告](design-contract-pilot-results.md)；25 页对象/数值回读与视觉矩阵，不是所有内容的原生化                                                              |
+| black-gold      | 0.1.0 / candidate                | editorial-ledger/v1，6 页型、10 个注册布局   | [第三阶段报告](black-gold-migration-results.md)；26 页迁移验证，金融 policy 与皮肤分离                                                                                |
+| green-slate     | 0.1.0 / candidate                | strategy-report/v1，10 页型、13 个注册布局   | [迁移报告](green-slate-migration-results.md)；36 页最终视觉矩阵，初轮漏检已撤回并返修                                                                                 |
+| clear-value     | 0.1.0 / candidate（登记值）      | annual-research/v1，8 页型、14 个注册布局    | [迁移记录](clear-value-migration-results.md)记录 41 页机器/视觉矩阵；REPAIR-001 的新生成样例已通过原生打开/保存重开复核；历史 41 页文件须重新生成，不能沿用旧交付结论 |
+
+页型/布局数量描述覆盖范围，不能作为质量评分。上述回读、视觉数量来自各轮记录，不是本次重新生成的结果。
+这四套风格共用合同和执行流程，不等于彼此已能复用同一套视觉组件；仍需更多同族风格验证组件的复用收益。
 
 ## 1. 比较对象应是两套机制
+
+本节比较的是 2026-10-21 抽取前的机制。当前 Biennale 已读取 design.json，以下“隐含在代码中”
+及“形状数据页”的描述不能泛化到新增原生证据页。
 
 `biennale-yellow.kit.mjs` 本身是生成器。它的完整合同还分布在：
 
@@ -23,7 +50,7 @@
 
 Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kimi-ppt/reference/design_system/finance/black-gold-ledger/design.md) 则是面向模型/设计者的语义规范，包含金融领域基线与黑金视觉系统，不能只看成一张配色表。
 
-| 维度         | 当前 Biennale DeckKit 机制                       | Black Gold Ledger design.md                            |
+| 维度         | 抽取前的 Biennale DeckKit 机制                   | Black Gold Ledger design.md                            |
 | ------------ | ------------------------------------------------ | ------------------------------------------------------ |
 | 设计意图     | catalog 有概述，具体实现主要隐含在代码中         | 明确说明气质、注意力、阅读路径、页面职责               |
 | 一致性       | 固定字体、色值、坐标与组件，执行稳定             | 规则丰富，但依赖模型逐条记住、解释和落实               |
@@ -38,33 +65,43 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 
 ## 2. 从现有实现得到的直接证据
 
-### 2.1 稳定性来自程序，而不是扩展名
+### 2.1 稳定性来自程序，而不是扩展名（初评历史基线）
 
 对 bundled Biennale 内容直接调用 `createDeck()`：8 页、671 条操作；两次相同输入得到相同 patch SHA-256。操作种类为 slide、shape、text，未出现 `set-theme`、`add-chart` 或 `add-table`。
 
 这证明此样例的 **patch 生成确定性**，不证明 PPTX 字节一致，也不证明跨字体、平台或渲染器的像素一致。[本次实验记录](../.pptx-nova/style-contract-evaluation-20261021/generator-observations.json)
 
-生成器按 `slide.type` 分派固定函数，见 [biennale-yellow.kit.mjs](../pptx-nova/assets/deckkits/biennale-yellow.kit.mjs) 第 526–543 行。只在直接调用生成器时增加 `layoutIntent` / `macroLayout`，patch 不变；当前内容校验还会拒绝这两个额外 slide 字段。因此，不能把写入布局意图当成已经获得了新布局能力。要扩展这种能力，必须同时修改合同与执行层。
+初评生成器按 `slide.type` 分派固定函数。直接增加 `layoutIntent` / `macroLayout` 时 patch 不变，
+当时的内容校验也拒绝这两个额外 slide 字段。现在的构图能力来自新增的 `layoutId`、容量解析和执行组件，
+没有把这两个叙事规划字段变成任意布局 API；它们仍应按工作流放在 deck_lock 等规划数据中。
 
-### 2.2 已有合同也会漂移
+### 2.2 已有合同也会漂移（抽取前发现，试点已处理）
 
 - 数据页标题：schema 的 `x-slotBudget` 是 **36pt / 3.4in**；生成器实际是 **34pt / 5.6in**。
 - 统计值：schema 分别为 value/suffix 预算 **72pt / 1.3in、0.5in**；生成器合并两者，以 **62pt / 2.8in** 绘制。
 - catalog 的翻新配置将 `secondarySeries` 指向 `palette.secondary`，其值是 ember；同一 chartRemap 的 prose 又要求 ember 只用于光晕，不能用于图表系列。
 
-来源：[数据页 schema](../pptx-nova/assets/deckkits/schemas/biennale-yellow/biennaleDataSlide.schema.json) 第 10、25–29 行；[生成器](../pptx-nova/assets/deckkits/biennale-yellow.kit.mjs) 第 359–379 行；[catalog](../pptx-nova/assets/deckkits/catalog.json) 第 3418–3425、3463–3473 行。
+这些数值是初评时的历史差异，不是当前文件的缺陷清单。对应文件为
+[数据页 schema](../pptx-nova/assets/deckkits/schemas/biennale-yellow/biennaleDataSlide.schema.json)、
+[生成器](../pptx-nova/assets/deckkits/biennale-yellow.kit.mjs) 和 [catalog](../pptx-nova/assets/deckkits/catalog.json)；
+修复与投影防漂移证据见[试点报告](design-contract-pilot-results.md)。
 
-这些事实说明：需要统一事实来源，并从实际解析后的组件几何生成槽位预算，而非继续手工同步几份描述。这里记录的是局部不一致，不代表整个 DeckKit 不可交付。本次 readiness 检查按既有 catalog 证据判定 delivery PASS；没有重新运行视觉 benchmark。
+这些事实促成了统一事实源和投影检查。试点后来重新执行 benchmark、canonical 和视觉验证；
+不能继续把初评“只读取 catalog readiness”的证据范围当成今天的验证状态。
+对于动态列宽、多图和组合文字，固定 slot budget 仍只是发现/规划提示，必须补逐实例容量检查。
 
 ### 2.3 形状可编辑与原生数据对象可编辑需要区分
 
-数据页第 408–418 行以 `pct` 控制矩形宽度，并单独显示字符串 `value`，二者没有在此处建立数值一致性关系。比例还会被限制到 0.04–1，零值也会出现最小宽度。
+初评旧数据页以 `pct` 控制矩形宽度，并单独显示字符串 `value`，当时零值也会被画出最小宽度。
+试点已去掉零值强制 4% 的行为；旧页型仍为形状/文字，新证据页才使用原生系列。
 
 形状绘制适合部分高度定制的数据图形，但不能因此宣称它具有原生图表的数据系列、坐标轴或工作簿语义。新合同应该明确 `native-chart`、`native-table`、`data-backed-shapes` 等实现方式及各自验证责任；当使用数据形状时，从一个数值模型计算图形与标签，并保存来源、单位和尺度。
 
 ## 3. xdoc 的特点决定了合同该怎样落地
 
-本次读取本机 `xdoc --version`：`0.13.0 (ea2c8e58)`；能力探测、定向命令合同与 operation schema 保存于 [本次证据目录](../.pptx-nova/style-contract-evaluation-20261021/)。判断以当前 schema 披露为准，不把旧 snapshot 或命令存在本身当作全部能力证明。
+初评及后续迁移记录使用 `xdoc 0.13.0 (ea2c8e58)`；初评能力探测、定向命令合同与 operation schema
+保存于[初评证据目录](../.pptx-nova/style-contract-evaluation-20261021/)。能力表描述该运行时的已披露范围，
+不是任意版本或任意图表组合的保证。新迁移仍须查询实际运行时并做最小实物探针。
 
 | 设计合同内容       | 已披露的 xdoc 表达能力                                            | pptx-nova 仍需承担的工作                            |
 | ------------------ | ----------------------------------------------------------------- | --------------------------------------------------- |
@@ -79,7 +116,7 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 
 不能把这些能力理解为 xdoc 自带任意设计语言解释器或通用布局求解器。当前可见合同并没有提供“读取这份 style JSON，就自动理解所有设计规则”的接口。新格式需要由 pptx-nova 解释和编译，输出已有的 `pptx-patch/v1`。
 
-也不要把 `swap-style` 等同于重排页面：现有 [theme-packs.md](../pptx-nova/references/theme-packs.md) 第 33–44 行明确，其安全作用面是母版/默认文字样式，任意现有形状几何、阴影、图表布局不会因此自动改变。换肤与重新构图应共享设计合同，但采用不同操作策略。
+也不要把 `swap-style` 等同于重排页面：[theme-packs.md](../pptx-nova/references/theme-packs.md) 描述的安全作用面是母版/默认文字样式，任意现有形状几何、阴影、图表布局不会因此自动改变。换肤与重新构图应共享设计合同，但采用不同操作策略。
 
 原生能力也需要按子集选择，例如当前 capability truth 对 chartEx 样式的声明比 classic chart 更窄；不能给所有图表套同一套 `set-chart` 字段。原生图表应优先用于需要数据语义和后续编辑的对象；确需形状实现时，显式记录其语义和验证限制。
 
@@ -87,7 +124,8 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 
 ### 4.1 JSON：可执行的设计合同
 
-建议新增每种风格的 `design.json`，使用一个小而明确的、带版本的 schema。它定义：
+四套风格已使用 `design.json`，执行层采用有边界的第一方 schema 和已注册检查器，
+不是完整通用 JSON Schema 引擎。下面六类内容是合同职责，实际支持范围以对应 schema/组件为准：
 
 1. **语义 tokens**：背景、主文字、次文字、结构线、强调、历史/当前/预测、风险；标题、正文、数字、图注等文字角色；单位明确的间距和尺寸。
 2. **身份不变量**：允许的字体和色系、装饰语言、页面公共结构、禁止效果、关键对齐关系。
@@ -111,34 +149,49 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 
 ### 4.2 Markdown：保留设计意图与使用判断
 
-建议保留小篇幅 `intent.md`：写气质、构图理由、适用/不适用内容、图像选择、好坏范例和难以机器化的视觉判断。供模型规划与视觉复核使用。
+四套风格已保留 `intent.md`：写气质、构图理由、适用/不适用内容、适配和难以机器化的视觉判断。
+它供模型规划与视觉复核使用，不能充当机器已执行规则的证明。
 
-数值、白名单、容量等以 JSON 为唯一来源。面向阅读的数值速查页由 JSON 生成；不要在 Markdown 再维护一套权威数值。
+数值、白名单、容量等以 JSON 为权威来源，已实现的 discovery/projection 从合同导出。
+动态容量还依赖解析器推导；并非所有组件内部偏移和约束都已声明化，也不能宣称所有摘要均自动生成。
+后续应减少重复几何、字号与规则分支，避免 Markdown 再成为第二套权威数值。
 
-Black Gold 文档中有些规则属于 finance 领域/叙事政策，例如估值必须有敏感性表、回报采用情景范围、结尾必须落到投资决策。这些应拆到独立领域 policy，不能让选择“黑金皮肤”自动改变用户的非金融内容。用户内容与数据语义不能为了风格被删改；发生真实冲突时，报告不兼容并调整布局/明确风格例外。
+Black Gold 来源文档中的估值敏感性、情景回报和投资决策属于 finance 领域/叙事政策。
+迁移已提供独立的[按需金融政策参考](../pptx-nova/references/policies/finance-research.md)，
+不能让选择皮肤自动改变用户的非金融内容。用户内容与数据语义不能为了风格被删改；
+发生真实冲突时，报告不兼容并调整布局/明确风格例外。
 
 ### 4.3 MJS：共享执行器与少量专用实现
 
-JSON 表达参数、规则与关系，MJS 负责字体测量结果消费、几何求值、组件组合和 patch 编译。普通样式不应重复实现 textbox、边框、页脚、图表标签。
+JSON 表达参数、规则与注册构图，MJS 负责容量估计、几何求值、组件组合和 patch 编译。
+现有文字容量主要是启发式估计，并未接入普遍精确的字体墨迹测量。实际 PNG 与字体探针不可省略。
 
 共享的是内容语义与底层能力，不必强制所有风格使用同一套视觉组件。Biennale 的大字、黄色结构块、光晕与黑金的资料栏、单焦点、灰阶证据图应有各自的组合规则；如果只让同一套卡片换颜色，会丢掉设计语言。也不能承诺所有内容都能无条件切换到任意皮肤，必须先检查证据类型与组件覆盖是否兼容。
 
 复杂专用组件仍可保留 MJS。先使用有限的已注册组件与布局操作，不急于发明一门带任意表达式、继承、循环的配置语言。xdoc 宏/recipe 可以复用其中适配的操作，但不必把所有 JS 强行迁移成宏。
 
-概念目录如下，不要求一次建立所有目录：
+实际目录采用合同文件夹与视觉族模块分开组织；无需为每套风格建立尚无用途的 recipes/examples 子目录：
 
 ```text
-assets/deckkits/<id>/
-  design.json          # 机器合同：tokens、角色、规则、组件/布局注册
-  intent.md            # 人/模型阅读的意图与视觉判断
-  recipes/             # 受约束的布局配方；非直接 xdoc recipe 的须另行编译
-  components.mjs       # 可选，真正独有的组件
-  examples/            # 基线、允许的变化、反例
+assets/deckkits/
+  <id>/design.json + intent.md
+  <id>.kit.mjs                    # 保留 createDeck 接口
+  design-contract.mjs             # 合同、theme/字体、布局排序、规则与回读
+  evidence-components.mjs         # Biennale 证据组件
+  editorial-{components,layouts}.mjs
+  strategy-{components,layouts,registry}.mjs
+  annual-{components,layouts,registry}.mjs
+  schemas/<id>/                  # 内容输入与槽位提示
+  examples/<id>-content.json      # 业务文案和数据留在内容侧
 
-assets/deckkits/<id>.kit.mjs  # 保留 createDeck 接口的兼容适配器
+benchmarks/visual/                # 独立的验证 fixture，不是风格事实源
 ```
 
 catalog 的风格数值、槽位 budgets、readiness 摘要等尽量从合同与解析后的组件数据生成。不要因增加 `design.json`，反而多出第五份需要手动同步的事实源。
+
+实际代价也已暴露：每种新语法仍增加布局/绘制代码，`design-contract.mjs` 也包含视觉族专属分支。
+下一步适合明确注册接口、按族拆分检查器并在有第二个真实消费者时提取公共能力；不应因为文件名叫
+“shared”就宣称已经证明跨皮肤组件复用，也不应继续把新风格特例堆进 core-primitives。
 
 ## 5. 用构图语法实现稳定的多样性
 
@@ -148,64 +201,62 @@ catalog 的风格数值、槽位 budgets、readiness 摘要等尽量从合同与
 - **结构可选**：同一趋势内容可使用全宽主图、主图+KPI 侧栏、主图+底部解释带、小多图等布局族。
 - **内容驱动**：根据数据点、标签长度、表格行数、解释数量及讲述目的，筛选能够容纳内容的布局。
 - **变体有界**：仅允许注册的列比例、密度、强调位置和组件组合，禁止随意改变字号/颜色来制造差异。
-- **选择可复现**：固定版本与环境下，用确定性排序选取候选；需要多个版本时显式提供 variation/seed，并记录最终选择，而不是每次随机。
+- **选择可复现**：固定版本与环境下，用确定性排序选取候选；需要不同构图时显式选择支持的 `layoutId`，并记录最终选择，而不是每次随机。
 
-建议使用逐级选择：先排除内容/数据语义不兼容和硬约束失败的布局，再比较文字适配、阅读层级和跨页重复，最后用稳定次序打破平局。初期不必实现通用约束求解器。
+当前已实现容量筛选、解析几何指纹和确定性排序；阅读层级与叙事适切性仍由 Agent 判断。
+没有现成 variation/seed API，不应把上述可选方向写成当前支持的输入。初期不必实现通用约束求解器。
 
-当前 diversity gate 主要统计 slide type 所属分组、最少独特分组及连续同组数量，见 [core-primitives](../pptx-nova/assets/deckkits/core-primitives.kit.mjs) 第 1386–1482 行。它可以阻止部分模板重复，却不能证明最终视觉构图有变化。
+旧 diversity gate 主要统计 slide type 分组；新合同路径已按覆盖范围加入解析后构图指纹与重复提示。
+它们与 [core-primitives](../pptx-nova/assets/deckkits/core-primitives.kit.mjs) 的旧检查并存，
+不能把一个分组阈值当成真实构图多样性的证明。
 
-建议扩展为：记录实际布局族、区域关系、证据对象类型、密度与主视觉位置；基于这些解析结果检查连续重复，结合 contact sheet 验证。不能只给相同坐标的页面换一个 `variant` 名字，也不应为了凑多样性插入不合适的图表或呼吸页。
+记录实际布局族、区域关系、证据对象和几何，再结合 contact sheet 判断节奏。
+同一内容在 rail/wide、column/split、full/compact 等构图中变化，比“每页换一种图”更能验证灵活性。
+不能只给相同坐标换一个 `variant` 名字，也不能靠删内容或插入无关页面凑多样性。
 
-### 合同的概念片段
+### 合同的实际字段片段
 
-下面是拟议的 pptx-nova 自有格式片段；省略了完整 tokens、组件和规则定义。不是 xdoc 当前输入，也不是已经可执行的 schema。
+下面节选自当前 [black-gold/design.json](../pptx-nova/assets/deckkits/black-gold/design.json)。
+省略的 tokens、字体、其他必需字段使该片段不能单独执行；字段名与检查器已实际存在，完整合同由
+pptx-nova 编译为 xdoc patch。
 
 ```json
 {
   "schemaVersion": "pptx-nova-design/v1",
-  "id": "black-gold-ledger",
+  "id": "black-gold",
   "version": "0.1.0",
-  "intent": "金融期刊式秩序；证据页克制，判断页凝练",
-  "colors": {
-    "paper": "FFFFFF",
-    "ink": "0A0A0A",
-    "dark": "151515",
-    "focus": "D6A000",
-    "historical": "D6D6D6",
-    "risk": "A86038"
-  },
-  "pageModes": {
-    "evidence": { "background": "paper", "titleColor": "ink" },
-    "judgment": { "background": "dark", "allowedRoles": ["summary", "decision"] }
-  },
-  "layoutFamilies": {
-    "trend": {
-      "proofKinds": ["time-series"],
-      "variants": ["full-width", "with-kpi-rail", "with-explanation-band"],
-      "components": ["assertion-header", "trend-chart", "source-footer"],
-      "overflowOrder": ["choose-larger-region", "choose-other-variant", "split-slide"]
+  "editorial": {
+    "renderer": "editorial-ledger/v1",
+    "families": {
+      "ledgerTrendSlide": {
+        "role": "trend",
+        "mode": "light",
+        "variants": {
+          "rail": {
+            "regions": {
+              "main": [0.73, 1.93, 8.05, 4.48],
+              "detail": [9.15, 2.05, 3.45, 4.35]
+            },
+            "maxItems": 8,
+            "maxLabelUnits": 11
+          }
+        }
+      }
     }
   },
   "rules": [
+    { "id": "single-focus", "check": "single-accent-focus" },
     {
-      "id": "focus-one-group",
-      "scope": "slide",
-      "strength": "must",
-      "check": "semantic-accent-group-count",
-      "max": 1
-    },
-    {
-      "id": "no-shadow",
-      "scope": "deck",
-      "strength": "must",
-      "check": "forbidden-effect",
-      "effect": "shadow"
+      "id": "flat",
+      "check": "forbidden-effects",
+      "values": ["shadow", "glow", "softEdge", "reflection"]
     }
   ]
 }
 ```
 
-上例的 `check` 名称必须由新增的验证器实际实现；未知检查器不能被忽略后报告“合规”。JSON Schema 只能检查这种数据结构，不能自动证明其视觉规则成立。
+未知检查器、未注册区域和错误 token 引用应失败；不能忽略后报告“合规”。
+结构校验、patch 检查与实际画面是不同证据，JSON Schema 本身不证明视觉规则成立。
 
 ## 6. JSON、YAML、Markdown、JS 的取舍
 
@@ -224,65 +275,155 @@ tokens 层可以参考 [DTCG 2025.10 Format](https://www.designtokens.org/TR/202
 ## 7. 执行与验证闭环
 
 ```text
-brief + content + 可选领域 policy
+design.md + 参考图 / 已有参考稿 → 来源、冲突裁决、视觉基线
+                   ↓
+brief + content + 显式采用的领域 policy
                    ↓
 design.json + intent.md → 内容/证据规划
                    ↓
-选择布局族、组件与受约束变体
+输入校验 → 兼容性与容量筛选 → 确定性构图计划
                    ↓
-resolved design + layout plan + 计算得到的 slot budgets
+createDeck / 注册视觉族 → patch + 合同快照 + design plan/check
                    ↓
-现有 createDeck 适配器 / 共享编译器
+dry-run → apply → 对象、文本、原生数据回读 / semantic / vision
                    ↓
-pptx-patch/v1 → dry-run → apply → inspect / 检查 / 预览
+同一候选的 canonical PDF/PNG → 每页及关键局部真实视觉复核
                    ↓
-机器规则验证 + PNG / contact sheet 视觉复核
+缺陷登记核对 + 需要的原生宿主验证 → 绑定证据与最终 PPTX
 ```
 
-把规则按能证明的层级分配，而非用一个总分替代所有证据：
+现有标准 Create 已实现候选、canonical 和 review 的 hash 绑定，但**没有完整实现缺陷登记与
+PowerPoint 原生打开证据的自动联动**。末端一行包含必须补足的验收要求，不是当前 CLI 的能力承诺。
 
-1. **输入层**：schema、组件输入、数值/单位、内容完整性、兼容条件。
-2. **解析/patch 层**：已求值的字体/颜色、组件几何、禁用效果、语义强调组、数据到标记映射。
-3. **实际 PPTX 层**：应用后读回对象、主题、图表/表格语义；检查不应只信任生成器的自我声明。
-4. **渲染层**：真实文字适配、密度、留白、对比、风格辨识度与跨页节奏。
+### 7.1 五层证据必须分别成立
 
-`check-brand` 可以覆盖其已实现的品牌检查范围，不能替代风格专属检查。dry-run 成功也不等于视觉成功。master/theme 继承、透明度、字体替换及特殊图表要按当前运行时能力验证；静态预览不能证明 PowerPoint 播放或其他宿主的全部保真性。
+| 层级             | 当前能证明什么                                         | 不能据此推导什么                                   |
+| ---------------- | ------------------------------------------------------ | -------------------------------------------------- |
+| 输入             | 必填字段、数量、有限数值、已实现的语义与容量约束       | 所有合法组合都适配真实字体和小图框                 |
+| 解析 / patch     | 注册构图、已实现的色彩/字体/效果/边界检查、确定性输出  | 所有 prose 规则已被执行，或真实视觉面积合规        |
+| 实际 PPTX 回读   | 覆盖范围内对象/文字/几何、原生类别/系列/数值、表格文字 | 完整 OOXML/工作簿等价、所有宿主都接受包结构        |
+| canonical 与视觉 | 当前渲染器下布局、文字可读性、逐页层级与局部细节       | PowerPoint 打开无 Repair、保存无丢页或图表仍可编辑 |
+| 原生宿主         | 指定版本中打开、保存重开、关键原生对象编辑的实际结果   | 其他平台/版本或未测试对象组合也同样兼容            |
 
-每次 run 建议记录：设计合同与组件版本/hash、xdoc build/schema digest、字体环境、内容 hash、最终布局计划、变体选择、patch 和最终文件 hash、渲染上下文及规则报告。风格稳定应定义为这些条件下的规则和视觉稳定，而不只是文件 hash 相同。
+`check-brand`、schema、Office 校验器和 vision 各有覆盖范围。缺证据应记录未验证，不能计为通过。
+readiness 的 production/candidate 是注册与门禁状态，不能把上述维度压缩成一个可信的质量总分。
 
-文字过多时遵循有界适配：选择更合适的空间/变体、拆页；确需精简必须满足内容授权。不得无限缩小字号、静默删信息或把原生数据对象栅格化来通过 fit gate。正文、图注、来源的字号下限应分角色，并由实际用途决定，不能只照搬参考图的缩放尺寸。
+### 7.2 已确认的反例必须覆盖旧通过结论
 
-## 8. 最小落地顺序与验收
+Clear Value 的 [REPAIR-001](repair-issues.md) 揭示了通用 XML 校验与 Office 实现约束的差异，现已复核修复：
 
-### 第一阶段：减少重复事实，不改变现有视觉输出
+- 历史 iteration 09 打开要求 Repair，修复后第 11 页 22 个对象被清空，关联环图部件删除。
+  通用 XSD 和渲染未拦住该输出；这个历史失败仍然成立。
+- 后续隔离实验确认根因是圆环图显式 `c:dLblPos`；替换为 `ctr` 仍失败，必须省略整个位置元素。
+  新引擎拒绝 plot/series/point 标签的显式位置，而不是静默改写请求。
+- 本次实际二进制为 `0.13.0 (92a5aa13)`。原始非法 patch 在 dry-run 返回 3、没有输出文件。
+  当前 annual 调用方也已省略环图 `position`，保留标签可见性、字体和格式，并增加回归测试。
+- 固定历史 patch 仅省略该字段重建后，56 个 ZIP entry 全部保留；唯一部件差异为 chart7 删除
+  `outEnd` 元素，第 11 页 XML 和工作簿不变。全部部件与此前实机无 Repair 的安全对照一致。
+- 当前公共套件重新生成的 12 页 golden 和 3 页图表边界样例均通过构建、数据回读、semantic、
+  vision 和 canonical 检查。本次在 PowerPoint 实际打开新 golden，无 Repair；第 11 页视觉完整，
+  另存独立副本、关闭后重开仍无 Repair。重开后选中环图可见原生 Chart Design 功能区。
+- 回存文件保留全部 12 页对象名称集合、7 个原生图表及环图 Core/New/Other = 60/25/15。
+  这证明本次打开/回存路径，不声称所有 Office 编辑行为或全部风格宿主兼容已验证。
 
-- 给 Biennale 提取 tokens 与身份规则，保持已有 8 页型和 `createDeck(content)` 接口。
-- 先解决代码/schema/catalog 的冲突，明确每个数值的唯一来源。
-- 生成槽位预算和阅读摘要；保留旧输入兼容适配，不同时重写内容格式。
-- 比较同一基线的解析样式与视觉证据；不要求无关的生成文件字节完全一致。
+本次证据位于 `.tmp/deckkit-clear-value-repair-20261022/`，摘要为 `verification-summary.json`，
+原生回存文件为 `matrix/golden/run/native-resaved.pptx`。旧轮次未覆盖。
+REPAIR-001 的该生成路径已修复；此前 41 页视觉矩阵仍是历史记录，未在本次全部重新生成/复核，
+不能将局部修复扩写为全套 DeckKit 的重新验收或 production 晋级。
 
-### 第二阶段：验证同风格的灵活表达
+因此应增加缺陷登记的放行优先级：已知且未关闭的 Repair/丢内容问题阻止该能力组合的完整验收与晋级，
+即使 canonical 为 proceed、review 为 pass、脚本内部状态为 delivered。
+“另存一份已被 PowerPoint 清空内容的修复稿”不构成修复；必须修生成端，并验证原生打开无 Repair、
+对象/数据保留、可编辑、保存后重开仍正常。缺少宿主时披露未验证，不能把可选工具缺失记作通过。
+这约束维护者的 DeckKit 准入，不要求普通发布运行时强制依赖 macOS/PowerPoint。
 
-- 为一个证据类型增加少量有实际差异的布局族/变体，打通 schema、执行器和验证。
-- 用相同内容测试多个合法布局，确认不是改名或随机坐标偏移。
-- 用不同内容长度、CJK/Latin、稀疏/密集数据、长标签、零/负值/缺失值进行压力验证。
+### 7.3 同一份实物、完整的覆盖和可追溯的反证
 
-### 第三阶段：迁入 Black Gold，检验抽象是否成立
+每次 run 记录来源 hash、合同/组件版本、xdoc build 与能力、字体环境、field date、content/patch/PPTX hash、
+布局计划、canonical manifest、每页 PNG/hash、视觉结果与原生宿主证据。任何候选变化都重新核对绑定；
+“与被审文件字节相同”证明审的是同一实物，不证明实物没有缺陷。
 
-- 将金融领域 policy 与视觉合同分开。
-- 先覆盖趋势、排名和表格三类核心证据，再增加更多页型。
-- 优先使用原生图表/表格；专用数据形状必须有单一数值来源与独立验证。
-- 验证跨页深浅节奏、单焦点、数据直接标注，以及短 deck 的合理例外。
+覆盖以实际对象和组合为准：列出每个注册布局是否已有实物，同内容的不同布局是否保留全部信息，
+各图表 kind/系列/标签/样式的有效组合是否被验证。只数页型、测试数或原生对象数会掩盖未覆盖分支。
+golden 之外还需要压力、混排、无关主题和失败反例；无关主题用于发现参考业务内容或政策泄漏。
 
-建议增加反例测试：故意引入第二强调组、禁用效果、超量行数、错误颜色、来源缺失、重复构图，确认对应规则真能发现问题。未实现或无法证明的规则应报告未验证，不能以“配置存在”作为通过。
+Green Slate 的圆内数字偏心、摘要文字超出底条、阶段说明贴线，均曾在机器通过后由用户发现。
+因此每张最终 canonical PNG 都要实际查看，不能抽样或仅看总览；编号、标签、堆叠数值、表格附注须放大。
+容器自身持有文字、共用几何、预留说明区能降低风险，但设置 center 或 bbox 不重叠本身仍不是光学验收。
+用户指出漏检时撤回受影响结论，复查全部同类组件并保留旧轮次，不能只补规则而沿用旧 pass。
 
-最终验收应分别回答：**风格身份是否稳定、数据语义是否完整、内容是否适配、多样性是否真实、视觉是否达到交付标准**。现有 golden 基线保留用于回归，新内容与合法变体用于检查泛化能力；不能只让唯一参考样例通过。
+字体至少用实际 Latin/CJK 常规与粗体做原生探针；字体名存在或查询为正体，不证明实际字形无倾斜或替代。
+内容过量时换构图、拆页或在授权下改写，不靠无限缩字、删字段、栅格化原生证据或降低门禁消除告警。
 
-## 9. 本次核对范围
+## 8. 落地阶段回顾与新的迁移方法
 
-- 读取了两份比较对象以及 DeckKit catalog、schema、核心校验和构建路径。
-- 查看了 Biennale 已有 contact sheet；它能展示现有的视觉身份与 8 页型，不是本次新生成证据。
-- 运行本机 xdoc 版本/能力探测，以及 theme、chart、table、text、macro 等定向 schema 查询。
-- 执行了生成器确定性/元数据探针与内容校验探针；没有创建新的交付 PPTX。
-- 执行 Biennale readiness，使用持久化 catalog 证据；没有重新跑 benchmark 或宣称新架构已通过视觉验证。
-- 未修改现有运行时、DeckKit、catalog 或 `docs/xdoc-schema.json`。
+最初三阶段已经执行，结论应以各阶段证据的实际范围表述：
+
+1. **Biennale 合同抽取**：先做旧 patch 比对以保留兼容，再修复实际发现的可读性/几何问题。
+   “保持原视觉”是抽取阶段的控制变量，不应成为保留原有缺陷的永久要求。
+2. **Biennale 构图验证**：同内容三种真实布局、确定性选择、对象/数值回读已落地。
+   这证明受约束变化可行，不代表所有内容都能无条件选择任一布局。
+3. **Black Gold 跨风格验证**：第二种语言保留自己的深浅职责、单焦点和矩阵语法，复用了合同流程。
+   它支持抽象方向，尚未证明组件可以跨所有新风格零代码复用。
+4. **Green Slate / Clear Value 扩展**：进一步验证新视觉族、可变密度、混排和来源输入路线；
+   同时暴露了视觉漏检、宿主 Repair 和发布结论过度，成为下一阶段优先补强项。
+
+后续接收 `design.md + 参考图` 时，采用已进入
+[deckkit-maker](../deckkit-maker/references/design-source-migration.md) 的迁移方法：
+
+1. **来源与裁决**：保存文档/图片指纹、尺寸和页边界，查看所有来源页面；区分视觉身份、构图偏好、
+   领域政策和业务内容。等高分割只是建议。文档内部覆盖规则、图片比例和用户授权冲突须记录裁决。
+2. **先证实表达**：按参考角色与 signature 建立原生基线。允许改善参考中的小字、低对比和不合理构图，
+   但要说明差异，不把截图中的不清晰数字猜成事实，也不将图片作为整页背景冒充原生生成。
+3. **再冻结接口**：选择已有视觉族；确有新语法时增加有界组件。分开 content、design、intent、policy、
+   fixture 与运行证据。日常 Agent 仍走 discover → content → validate/build/create，不必手写坐标。
+4. **验证复用而非唯一样例**：覆盖各布局、同内容变体、最大合理密度、中英/粗体、无关主题和失败输入。
+   每个可见字段必须进入输出；可选控制的探针省略不能延伸成可见文本豁免。
+5. **关闭缺陷再宣布完成**：机器、视觉、原生宿主结果分别记录；先核对 issue，再冻结/promotion。
+   当前 Repair 联动尚待实现，维护者不能因自动流程漏查而放行已知失败。
+
+### 工具链适配的新增经验
+
+- **能力按具体图表组合验证**：Black Gold 的 combo 投影未覆盖完整系列，因此采用两个可独立回读的原生图；
+  Clear Value 的经典折线无法选择性显示端点值，改在图头列首末值。它们是本次 runtime 的适配，不是永久禁令。
+- **显示和数据分开证明**：doughnut 投影为 ring 时只归一化已证实别名，仍比较所有类别/系列/数值；
+  科学计数等请求格式若回退，必须检查可见文字。别名处理不修复 OOXML，与 REPAIR-001 的 Office 显式位置修复是两项不同工作。
+- **容量基于组合实例**：value+suffix、系列名+首末值、图号/表名、加权列宽与说明区需要共同预算。
+  单字段字数合法不代表组合后能放下；已实现范围不足时明确失败，不能无条件移除全部预算告警。
+- **探针也要被验证**：互斥可选字段采用合法探针组；嵌套可选控制可显式省略，但另做真实/边界测试。
+  配置错误须非零退出，哨兵既不能过长撑爆合法槽位，也不能因前缀碰撞漏报被丢弃的字段。
+- **原生对象与数据形状不是同一承诺**：表格与系列可完整回读，不代表派生进度条、面积圆或时间轴在
+  PowerPoint 内手工改数据后会同步。面积用平方根推导直径；零值、负值和极小数必须保留真实语义。
+
+## 9. 相比旧 DeckKit，收益与代价如何评价
+
+| 维度           | 实际收益                                                     | 尚未解决 / 付出的代价                                              |
+| -------------- | ------------------------------------------------------------ | ------------------------------------------------------------------ |
+| 身份一致性     | 颜色/字体/效果和部分角色规则有合同与检查器，token 映射可验证 | prose 中的审美、真实面积和所有跨页职责没有全自动证明               |
+| 构图灵活性     | 同一内容可在有限布局中变化，按真实几何与容量选择             | 新证据形态仍需实现组件，合法输入组合不能只靠计数保证               |
+| 数据语义       | 原生系列/单元格回读，派生形状从同一数值计算                  | 完整工作簿、OOXML、宿主可编辑性及手动编辑后的同步未普遍证明        |
+| Agent 可用性   | 可 discover 已注册字段/容量；错误前移，日常不再各写生成器    | authoring 与诊断仍需理解各视觉族和当前运行时边界                   |
+| 维护与扩展     | 合同快照、投影、统一运行器和反例复用，四种语言可以共存       | 多个族仍有重复容量/绘制代码；抽象质量须由更多真实消费者验证        |
+| 可追溯性       | 候选、patch、布局与逐页 PNG 绑定，可复现具体问题             | 旧的通过摘要若不被缺陷撤销，仍会制造错误的完成结论                 |
+| 最终 PPTX 质量 | 增加了程序约束、可读性返修和真实逐页检查                     | Repair 已修复，但反例证明仅机器/视觉门禁不足，不能宣称全面优于旧版 |
+
+这些是工程证据支持的方向性收益，**目前不能给出可信的“提升百分之多少”或统一质量总分**。
+迁移样例的内容、渲染环境和验证覆盖不同，代码行数、op 数、测试数、通过页数也不是质量基准。
+若需要评分，应先固定新老同一内容、字体、runtime/宿主与评审量表，盲评身份、可读性、数据准确性、
+构图多样性和修改成本；Repair/内容丢失单列为阻塞，不能让其他维度高分把它平均掉。
+
+## 10. 后续优先级与本次更新范围
+
+1. **保持 REPAIR-001 的回归防线**：根因、引擎拒绝非法输入和调用方省略字段已验证；新 golden
+   原生打开/回存重开通过。后续重建历史受影响产物、按目标宿主复验，保留原始失败样本，避免旧稿继续流通。
+2. **让发布状态接受反证**：同步受影响的迁移结论与质量元数据，建立未关闭缺陷阻断验收/晋级的联动；
+   状态至少能表达机器、视觉、宿主分别通过/失败/未验证。当前 catalog/readiness 尚不能完整表达这些事实。
+3. **巩固迁移接口**：把来源裁决、组合容量、合法探针和逐布局覆盖做成可复用流程；只在真实复用出现后
+   提取视觉族公共能力。保留 `.kit.mjs` 和现有内容兼容性，不急着删除适配器或发明另一门 DSL。
+4. **建立可比较的质量基准**：同内容对照旧方案与新合同、记录人工修订成本和盲评结果，之后再讨论量化提升。
+
+本次更新读取当前合同、catalog、执行/发现入口，核对四份阶段/迁移报告、逐页验收经验及 Repair 登记。
+布局/版本表依据当前源码；反例依据实机记录和此前的原始/最终环图 XML 比较。
+本次修复复核新增了历史 patch 重建、当前 golden/图表边界的标准 Create 机器验证及 PowerPoint 原生
+打开/另存/关闭重开检查；未重跑完整 41 页视觉矩阵，未调整 catalog 或 xdoc schema 快照。
+历史报告中的测试数量与视觉通过记录仅证明当轮覆盖范围；跳过项不计通过，未验证项不计成功。

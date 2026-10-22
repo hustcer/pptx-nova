@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
+import { fileURLToPath } from 'node:url'
 
 test('rendered diagnostic accepts thin strokes while rejecting missing, escaped and off-center ink', (t) => {
   if (spawnSync('magick', ['-version']).status !== 0) return t.skip('ImageMagick unavailable')
@@ -47,7 +48,7 @@ test('rendered diagnostic accepts thin strokes while rejecting missing, escaped 
   const result = spawnSync(
     process.execPath,
     [
-      new URL('../pptx-nova-enclosed-text-audit.mjs', import.meta.url).pathname,
+      fileURLToPath(new URL('../pptx-nova-enclosed-text-audit.mjs', import.meta.url)),
       '--patch',
       join(dir, 'patch.json'),
       '--previews',
@@ -58,6 +59,7 @@ test('rendered diagnostic accepts thin strokes while rejecting missing, escaped 
     { encoding: 'utf8' },
   )
   assert.equal(result.status, 1, result.stderr)
+  assert.ok(existsSync(join(dir, 'report.json')), result.stderr)
   const report = JSON.parse(readFileSync(join(dir, 'report.json')))
   assert.deepEqual(
     report.checks.map((c) => c.passed),

@@ -18,6 +18,7 @@ import {
 import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
 import { wrapCjkText } from '../../pptx-nova/assets/deckkits/design-text.mjs'
 import { renderEvidence } from '../../pptx-nova/assets/deckkits/evidence-components.mjs'
+import { validateContent } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
 import { createOps } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
 
 const read = (path) => JSON.parse(readFileSync(new URL('../../' + path, import.meta.url), 'utf8'))
@@ -174,7 +175,7 @@ test('explicit repeated compositions are disclosed and legacy diversity gates re
   assert.ok(repeated.warnings.some((w) => w.diagnostic?.code === 'design.diversity.repeated'))
   const legacy = read('pptx-nova/assets/deckkits/examples/roadshow-content.json')
   legacy.slides = Array.from({ length: 8 }, () => structuredClone(legacy.slides[0]))
-  const checked = validateDeckkitContent(legacy, { mode: 'delivery' })
+  const checked = validateContent(legacy, { mode: 'delivery' })
   assert.equal(checked.valid, false)
   assert.ok(checked.errors.some((e) => e.type === 'diversity'))
 })

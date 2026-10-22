@@ -91,7 +91,7 @@ const icons = runJson('query bundled icon pack', 'node', [
 ])
 if (icons[0]?.name !== 'presentation') throw new Error('icon search did not return presentation')
 
-const selection = runJson('select bundled DeckKit', 'node', [
+const selection = runJson('select bundled candidate DeckKit', 'node', [
   selectScript,
   '--scenario',
   'roadshow',
@@ -102,7 +102,7 @@ const selection = runJson('select bundled DeckKit', 'node', [
   '--slide-types',
   'heroSlide,multiCardSlide,benchmarkSlide,timelineSlide,askSlide',
   '--target',
-  'delivery',
+  'candidate',
   '--json',
 ])
 if (!selection.selected?.id) throw new Error('DeckKit selector did not choose a DeckKit')

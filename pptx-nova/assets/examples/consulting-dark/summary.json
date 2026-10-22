@@ -3,7 +3,7 @@
   "deckkit": "consulting-dark",
   "caseId": "consulting-dark.golden-roadshow",
   "kind": "golden",
-  "title": "浏览器端高保真 PPTX 渲染 与 AI 原生生成",
+  "title": "A clearer path from signal to scale",
   "source": {
     "content": "pptx-nova/assets/deckkits/examples/roadshow-content.json",
     "build": "pptx-nova/assets/deckkits/examples/roadshow-build.mjs",
@@ -13,19 +13,19 @@
   "validation": {
     "valid": true,
     "errors": 0,
-    "warnings": 1,
-    "fitDiagnostics": 1,
+    "warnings": 0,
+    "fitDiagnostics": 0,
     "blockingFitDiagnostics": 0
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 1047
+    "ops": 1045
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 26,
-    "opResults": 1047,
+    "changedParts": 27,
+    "opResults": 1045,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -36,8 +36,8 @@
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 26,
-    "opResults": 1047,
+    "changedParts": 27,
+    "opResults": 1045,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -48,17 +48,17 @@
   "vision": {
     "status": "success",
     "slideCount": 10,
-    "issueCount": 8,
+    "issueCount": 0,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 8
+      "low": 0
     },
     "lowBuckets": {
-      "total": 8,
+      "total": 0,
       "styleAllowed": 0,
-      "baselineKnown": 8,
+      "baselineKnown": 0,
       "new": 0,
       "changed": 0,
       "resolved": 0,
@@ -66,9 +66,7 @@
       "baselineUnavailable": false,
       "baselineUpdated": false
     },
-    "lowByFamily": {
-      "composition": 8
-    },
+    "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
@@ -76,15 +74,15 @@
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
       "available": true,
-      "issueCount": 8
+      "issueCount": 0
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
       "source": "catalog.qualityProfile",
-      "minFontPt": 9,
-      "labelFontPt": 9,
-      "sourceFontPt": 8.5,
-      "note": ""
+      "minFontPt": 10,
+      "labelFontPt": 10,
+      "sourceFontPt": 10,
+      "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
     },
     "newLowSamples": [],
     "changedLowSamples": [],
@@ -98,12 +96,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 243479,
-      "sha256": "a8f0a8c3fc09e88605cb5f2e6d26f1e6006392a301fc6a054f962c250ebf5511"
+      "bytes": 255776,
+      "sha256": "fbd3a22e3731241cac301a830187d7aae15dfc50184f4c99bd869eb62936d9c7"
     },
     "webp": {
-      "bytes": 115516,
-      "sha256": "71369acb4302b917b6f23fb9a0b8f3d170d616d2ce08cfcbad8b1b8e996ff875"
+      "bytes": 127266,
+      "sha256": "b1948308979f5a7ec6f0aec47c0e390217d93e3488cc89e21b14508d57197060"
     }
   }
 }

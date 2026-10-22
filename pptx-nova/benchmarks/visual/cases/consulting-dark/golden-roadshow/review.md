@@ -1,15 +1,13 @@
 # consulting-dark / golden-roadshow
 
-- Last reviewed: 2026-06-07
-- Reviewer: hustcer
-- Result: pass
+- Version: 2.0.0
+- Reviewed: 2026-10-22
+- Result: pass, zero hard defects
 
-Manual checks:
+10 final canonical PNGs from matrix/05/golden/run were individually inspected. The final candidate, manifest and page hashes are recorded in the migration run's matrix/05/visual-review-ledger.json. Same-content alternatives and all twenty registered layouts are covered by the golden/variants sets. Enlarged chart labels, table/source spacing, native output text, metric spacing and anchor circles were separately inspected; contact sheets supplement the individual review.
 
-- [x] No text overlap, clipping, or crushed line spacing
-- [x] Header, footer, and page numbers remain stable
-- [x] Dark-background text has sufficient contrast
-- [x] Dense slides remain readable
-- [x] Chart/table/callout elements do not collide with body content
+Native PowerPoint 16.114 for macOS opened this candidate without Repair. English and Chinese complete examples also passed save/close/reopen and full native readback. Representative text, owned shape text, table and embedded chart data edits were verified separately. Machine, visual and host checks are independent.
 
-Notes:
+Ten-page English synthetic operating-model example covers every registered role once. It replaces the old Chinese product roadshow and its unsupported benchmark claims.
+
+Runtime: xdoc 0.13.0 (993a9628), frozen field date 2026-10-22. Fonts: upright Arial and Arial Unicode MS, not embedded. Windows and other Office versions are unverified. Candidate requires explicit selection. See docs/consulting-dark-v2-migration-results.md for effective paths, closed defects and limitations.

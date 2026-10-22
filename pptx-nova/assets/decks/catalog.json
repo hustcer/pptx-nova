@@ -95,7 +95,7 @@
       "content": "../examples/consulting-dark/content.json",
       "summary": "../examples/consulting-dark/summary.json",
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
-      "status": "available"
+      "status": "preview"
     },
     {
       "id": "long-table-showcase",

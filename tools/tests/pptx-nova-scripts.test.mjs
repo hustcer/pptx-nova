@@ -2247,6 +2247,8 @@ test('consulting-dark benchmark chart omits the unsupported none legend value', 
         data: {
           eyebrow: 'Benchmark',
           title: 'Comparison',
+          source: 'Synthetic validation fixture',
+          unit: 'Points',
           tableRows: [
             ['Metric', 'Product'],
             ['Score', '9.8'],
@@ -2278,7 +2280,10 @@ test('consulting-dark benchmark table emits canonical nested cell coordinates', 
     .filter((op) => op.op === 'set-table')
     .flatMap((op) => op.cells ?? [])
 
-  assert.equal(cells.length, 32)
+  assert.equal(
+    cells.length,
+    content.slides.find((s) => s.type === 'benchmarkSlide').data.tableRows.flat().length,
+  )
   for (const cell of cells) {
     assert.equal('col' in cell, false, 'legacy set-table.cells[].col')
     assert.equal(Number.isInteger(cell.column), true, 'set-table.cells[].column must be an integer')
@@ -3775,7 +3780,7 @@ test('explicit swiss-grid refurbishment retains its independent manual fallback 
   ])
 })
 
-test('explicit fallback keeps refurbish plan route commands gates and references consistent', async () => {
+test('explicit candidate fallback keeps refurbish plan route commands gates and references consistent', async () => {
   const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
   const plan = buildRefurbishPlan({
     deckkit: 'consulting-dark',
@@ -3783,14 +3788,14 @@ test('explicit fallback keeps refurbish plan route commands gates and references
     output: 'candidate.pptx',
     catalog: skillPath('assets/deckkits/catalog.json'),
     route: 'fallback',
-    explicit: false,
+    explicit: true,
     json: true,
   })
 
   assert.equal(plan.route, 'fallback-patch')
   assert.equal(plan.routeSelection.requested, 'fallback')
   assert.equal(plan.routeSelection.selected, 'fallback-patch')
-  assert.equal(plan.status, 'manual-fallback')
+  assert.equal(plan.status, 'explicit-manual-fallback')
   assert.equal(plan.requiredGates.includes('fallback-patch-report'), true)
   assert.equal(plan.requiredGates.includes('refurbish-skin-report'), false)
   assert.equal(
@@ -3806,6 +3811,11 @@ test('explicit fallback keeps refurbish plan route commands gates and references
       path: 'references/reference-create.md',
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
+    },
+    {
+      path: 'references/deckkit-mode.md',
+      section: 'Selection',
+      reason: 'The explicitly selected DeckKit uses a readiness exception.',
     },
   ])
 })
@@ -4066,6 +4076,7 @@ test('refurbish runner persists catalog readiness before any xdoc command starts
       skillPath('scripts/pptx-nova-refurbish-run.mjs'),
       '--deckkit',
       'consulting-dark',
+      '--explicit',
       '--source',
       source,
       '--output',
@@ -4085,7 +4096,9 @@ test('refurbish runner persists catalog readiness before any xdoc command starts
 
   assert.equal(summary.status, 'failed')
   assert.equal(summary.artifacts.readiness, readinessPath)
-  assert.equal(JSON.parse(readFileSync(readinessPath, 'utf8')).status, 'pass')
+  const readiness = JSON.parse(readFileSync(readinessPath, 'utf8'))
+  assert.equal(readiness.status, 'pass')
+  assert.equal(readiness.explicitException, true)
   assert.ok(phaseNames.includes('catalog-readiness-evidence'))
   assert.ok(phaseNames.includes('xdoc-capability-probe'))
   assert.ok(

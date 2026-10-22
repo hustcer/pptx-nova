@@ -4,7 +4,7 @@
   "deckkit": "consulting-dark",
   "caseId": "consulting-dark.mixed-language",
   "kind": "mixed-language",
-  "generatedAt": "2026-06-21T01:33:11.552Z",
+  "generatedAt": "2026-10-22T15:51:39.212Z",
   "review": {
     "status": "accepted",
     "source": "--update-baseline",
@@ -13,81 +13,18 @@
   "stylePolicy": {
     "schemaVersion": "pptx-nova-vision-style-policy/v1",
     "source": "catalog.qualityProfile",
-    "minFontPt": 9,
-    "labelFontPt": 9,
-    "sourceFontPt": 8.5,
-    "note": ""
+    "minFontPt": 10,
+    "labelFontPt": 10,
+    "sourceFontPt": 10,
+    "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
   },
   "summary": {
     "low": {
-      "total": 3,
+      "total": 0,
       "styleAllowed": 0,
-      "reviewed": 3,
-      "byFamily": {
-        "composition": 3
-      }
+      "reviewed": 0,
+      "byFamily": {}
     }
   },
-  "issues": [
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 3,
-      "target": "S3_R0D",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 438911,
-        "rowSize": 6
-      },
-      "identity": "c1f16068a678ec02a464",
-      "fingerprint": "0251d8d968d8bc970b17",
-      "source": {
-        "shapeName": "S3_R0D",
-        "shapeId": 16
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 3,
-      "target": "S3_R2D",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 438911,
-        "rowSize": 6
-      },
-      "identity": "58be3dcc780e12c5f75f",
-      "fingerprint": "c5ddec42501a536e0a35",
-      "source": {
-        "shapeName": "S3_R2D",
-        "shapeId": 32
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 3,
-      "target": "S3_R4D",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 438911,
-        "rowSize": 6
-      },
-      "identity": "17ff16de0d7b411057f3",
-      "fingerprint": "f5a1b682d24fbfa29838",
-      "source": {
-        "shapeName": "S3_R4D",
-        "shapeId": 48
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    }
-  ]
+  "issues": []
 }

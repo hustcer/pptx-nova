@@ -1,15 +1,13 @@
 # consulting-dark / stress-density
 
-- Last reviewed: 2026-06-07
-- Reviewer: hustcer
-- Result: pass
+- Version: 2.0.0
+- Reviewed: 2026-10-22
+- Result: pass, zero hard defects
 
-Manual checks:
+10 final canonical PNGs from matrix/06/stress/run were individually inspected. The final candidate, manifest and page hashes are recorded in the migration run's matrix/05/visual-review-ledger.json. Same-content alternatives and all twenty registered layouts are covered by the golden/variants sets. Enlarged chart labels, table/source spacing, native output text, metric spacing and anchor circles were separately inspected; contact sheets supplement the individual review.
 
-- [x] Soft warnings are expected and actionable
-- [x] No hard validation or fit diagnostic errors
-- [x] Dense KPI, card, table, and timeline pages remain legible
-- [x] Long titles do not overlap with body content
-- [x] Future PNG review confirms no text clipping or shape collision
+Native PowerPoint 16.114 for macOS opened this candidate without Repair. English and Chinese complete examples also passed save/close/reopen and full native readback. Representative text, owned shape text, table and embedded chart data edits were verified separately. Machine, visual and host checks are independent.
 
-Notes:
+Synthetic maximum-count probe: four history rows, three metrics, four achievements, four product KPIs, three alternatives, five audiences with four items, four outputs, six capabilities, nine by five table, six chart categories including -12/0/0.0001, five roadmap phases and four asks. Alternate maximum-count layouts are separately reviewed in matrix/06/stress-alt.
+
+Runtime: xdoc 0.13.0 (993a9628), frozen field date 2026-10-22. Fonts: upright Arial and Arial Unicode MS, not embedded. Windows and other Office versions are unverified. Candidate requires explicit selection. See docs/consulting-dark-v2-migration-results.md for effective paths, closed defects and limitations.

@@ -162,7 +162,9 @@ creation workflow have been recorded in `.tmp`.
 
 Current consulting-dark cases:
 
-- `golden-roadshow` validates the normal delivery path.
-- `stress-density` intentionally triggers soft fit warnings without hard errors.
-- `mixed-language` verifies CJK, English, numbers, and compact business terms
-  stay inside normal density limits.
+- `golden-roadshow` covers all ten 2.0 roles with English synthetic content.
+- `stress-density` exercises maximum item counts, a nine-by-five native table,
+  and native chart negative, zero and tiny values without blocking fit warnings.
+- `mixed-language` verifies Chinese/English regular and bold text in a synthetic
+  community-library scenario. The migration report records the separate complete
+  Chinese, alternate-layout and sparse probes. Readiness remains candidate.

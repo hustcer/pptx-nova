@@ -4,7 +4,7 @@
   "deckkit": "consulting-dark",
   "caseId": "consulting-dark.golden-roadshow",
   "kind": "golden",
-  "generatedAt": "2026-06-21T01:33:00.139Z",
+  "generatedAt": "2026-10-22T15:51:29.256Z",
   "review": {
     "status": "accepted",
     "source": "--update-baseline",
@@ -13,181 +13,18 @@
   "stylePolicy": {
     "schemaVersion": "pptx-nova-vision-style-policy/v1",
     "source": "catalog.qualityProfile",
-    "minFontPt": 9,
-    "labelFontPt": 9,
-    "sourceFontPt": 8.5,
-    "note": ""
+    "minFontPt": 10,
+    "labelFontPt": 10,
+    "sourceFontPt": 10,
+    "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
   },
   "summary": {
     "low": {
-      "total": 8,
+      "total": 0,
       "styleAllowed": 0,
-      "reviewed": 8,
-      "byFamily": {
-        "composition": 8
-      }
+      "reviewed": 0,
+      "byFamily": {}
     }
   },
-  "issues": [
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 4,
-      "target": "S4_SrcT",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 502920,
-        "rowSize": 7
-      },
-      "identity": "b1993ac7785d28cbc605",
-      "fingerprint": "61b72d7444e17df57ede",
-      "source": {
-        "shapeName": "S4_SrcT",
-        "shapeId": 9
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 4,
-      "target": "S4_EngT",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 384048,
-        "rowSize": 7
-      },
-      "identity": "0b2ab163ae2e57ddf131",
-      "fingerprint": "9812e863eeeb96812c88",
-      "source": {
-        "shapeName": "S4_EngT",
-        "shapeId": 13
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 4,
-      "target": "S4_EngS",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 914400,
-        "rowSize": 7
-      },
-      "identity": "77f774989bb4079578ce",
-      "fingerprint": "b790d672a520d868c35f",
-      "source": {
-        "shapeName": "S4_EngS",
-        "shapeId": 14
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 4,
-      "target": "S4_O2Bg",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 1005840,
-        "rowSize": 7
-      },
-      "identity": "7c954c387d3ae833c41f",
-      "fingerprint": "9a3aabc9c43dbcdd76f8",
-      "source": {
-        "shapeName": "S4_O2Bg",
-        "shapeId": 24
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 4,
-      "target": "S4_O3Bg",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 1005840,
-        "rowSize": 7
-      },
-      "identity": "824ed7a1392365bf15bb",
-      "fingerprint": "402e283dcea3641b1ef4",
-      "source": {
-        "shapeName": "S4_O3Bg",
-        "shapeId": 28
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 8,
-      "target": "S8_R0D",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 438911,
-        "rowSize": 6
-      },
-      "identity": "a414f9743d6ccdc839e2",
-      "fingerprint": "1f276d749e42558f20a8",
-      "source": {
-        "shapeName": "S8_R0D",
-        "shapeId": 16
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 8,
-      "target": "S8_R2D",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 438911,
-        "rowSize": 6
-      },
-      "identity": "d1cc236d78322e699e59",
-      "fingerprint": "b4c4064c25af7dbf0aca",
-      "source": {
-        "shapeName": "S8_R2D",
-        "shapeId": 32
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    },
-    {
-      "severity": "low",
-      "family": "composition",
-      "kind": "arrangement-imbalance",
-      "slideIndex": 8,
-      "target": "S8_R4D",
-      "messageKey": "card-is-not-top-aligned-with-its-row",
-      "metrics": {
-        "deltaEmu": 438911,
-        "rowSize": 6
-      },
-      "identity": "e9c29b7ec69024e40cf3",
-      "fingerprint": "bf30ca44803d0877ab6a",
-      "source": {
-        "shapeName": "S8_R4D",
-        "shapeId": 48
-      },
-      "disposition": "reviewed-low",
-      "reason": "accepted by benchmark --update-baseline"
-    }
-  ]
+  "issues": []
 }

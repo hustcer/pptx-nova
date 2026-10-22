@@ -78,7 +78,11 @@ node <skill-root>/scripts/pptx-nova-deckkit-select.mjs \
   --json
 
 # 1b. 对 selected.id 再跑 delivery readiness audit
-node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target delivery
+node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <selected-id> --target delivery
+
+# 当前内置套件均为 candidate，自动 delivery 选择可能没有结果。
+# 用户明确指定 consulting-dark 等候选时，按 deckkit-mode.md 的 explicit 路线继续，
+# 不把候选提升到 production 或伪造自动选择成功。
 
 # 1c. 使用 selected.visualGrammar 约束内容创作：
 #     positioning 决定风格判断，signatureElements/compositionRules 决定页面构成，

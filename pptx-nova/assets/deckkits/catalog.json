@@ -3,27 +3,28 @@
   "entries": [
     {
       "id": "consulting-dark",
-      "version": "0.1.0",
+      "version": "2.0.0",
       "path": "consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "production",
+      "readiness": "candidate",
       "qualityProfile": {
-        "minFontPt": 9,
-        "labelFontPt": 9,
-        "sourceFontPt": 8.5
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
       },
-      "defaultFor": ["roadshow", "executive consulting", "technical roadshow", "技术路演"],
+      "defaultFor": [],
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
       "coverage": {
         "languages": ["zh", "en", "mixed"],
-        "density": ["normal", "dense"],
+        "density": ["sparse", "normal", "dense"],
         "slideTypes": [
           "heroSlide",
           "profileTableSlide",
           "kpiRowSlide",
           "previewProductSlide",
-          "multiCardSlide",
           "landscapeSlide",
+          "multiCardSlide",
           "convertFlowSlide",
           "benchmarkSlide",
           "timelineSlide",
@@ -35,8 +36,8 @@
         "profileTableSlide",
         "kpiRowSlide",
         "previewProductSlide",
-        "multiCardSlide",
         "landscapeSlide",
+        "multiCardSlide",
         "convertFlowSlide",
         "benchmarkSlide",
         "timelineSlide",
@@ -44,19 +45,20 @@
       ],
       "visualGrammar": {
         "schemaVersion": "pptx-nova-visual-grammar/v1",
-        "positioning": "Dark executive consulting deck for technical roadshows, investor updates, and dense strategic narratives.",
+        "positioning": "Navy anchor pages with varied circle ornaments, warm paper evidence, faceted surfaces and copper/teal emphasis for executive strategy.",
         "mood": ["executive", "technical", "high-conviction", "investor-ready"],
         "layoutPrinciples": [
-          "Use a dark canvas with disciplined top and bottom chrome.",
-          "Anchor each page with one dominant headline or KPI cluster before secondary evidence.",
-          "Keep dense pages structured with panels, tables, and consistent gutters.",
-          "Prefer native PPTX cards, rules, charts, and tables over decorative imagery."
+          "Frame the narrative with navy opening and decision pages; use warm paper for evidence.",
+          "Anchor each page with one dominant headline or metric group.",
+          "Use faceted panels, tables, nodes and consistent gutters to group content.",
+          "Keep all business text, native chart data and native table cells editable."
         ],
         "signatureElements": [
-          "copper or coral accents on deep navy backgrounds",
-          "KPI row cards with strong numeric hierarchy",
-          "dark evidence panels with thin rules and small source notes",
-          "benchmark tables, conversion flows, roadmap steps, and ask pages"
+          "different-sized native circles on cover and decision pages",
+          "cut-corner navy, copper and teal surfaces",
+          "warm paper evidence",
+          "fine structural rules and process arrows",
+          "native table and bar evidence"
         ],
         "typography": {
           "display": "large compact sans headline with tight executive hierarchy",
@@ -64,28 +66,34 @@
           "numeric": "oversized tabular numbers paired with short labels"
         },
         "colorSystem": {
-          "background": ["deep navy", "ink blue", "near black panels"],
-          "primary": ["off-white text", "muted blue-gray dividers"],
-          "accent": ["copper", "coral", "warm orange"],
-          "semantic": ["green for positive deltas", "amber for caution", "red only for risk"]
+          "background": ["deep navy anchors", "warm paper evidence", "off-white and mist surfaces"],
+          "primary": ["navy text on paper", "paper text on navy"],
+          "accent": ["copper for emphasis and short indexes", "teal for outputs"],
+          "semantic": [
+            "Colors express hierarchy and component roles; business policy belongs to content."
+          ]
         },
         "slideRhythm": {
           "anchor": ["heroSlide", "askSlide"],
           "evidence": ["profileTableSlide", "landscapeSlide", "benchmarkSlide"],
-          "breathing": ["previewProductSlide", "convertFlowSlide", "timelineSlide"]
+          "operating": ["kpiRowSlide", "previewProductSlide", "multiCardSlide"],
+          "process": ["convertFlowSlide", "timelineSlide"]
         },
         "compositionRules": [
-          "Lead with the decision message, then expose supporting metrics or evidence below.",
-          "Use 2-4 visual zones per page; avoid scattering many unrelated mini-cards.",
-          "Reserve warm accents for emphasis, not broad fills.",
-          "Keep footers and sources quiet but consistently placed."
+          "Lead with the author-supplied message and expose supporting evidence.",
+          "Use the registered layout variants to vary information organisation.",
+          "Use substantial colored surfaces with intentional whitespace.",
+          "Keep sources and page numbers readable and consistently placed."
         ],
         "avoid": [
           "pastel consumer palettes",
           "marketing hero pages without evidence",
           "decorative illustrations that do not carry data",
           "arbitrary customOps outside DeckKit slide data",
-          "long legal copy inside KPI cards"
+          "long legal copy inside KPI cards",
+          "rounded cards with colored edge strips",
+          "circle ornaments covering live text",
+          "rainbow category colors"
         ]
       },
       "refurbishProfile": {
@@ -103,19 +111,22 @@
           "strategy": "inspect-driven-consulting-dark-editable-object-restyle",
           "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
           "palette": {
-            "background": "0E2638",
-            "text": "F5F2EA",
-            "accent": "C8583A",
+            "background": "F6F4EE",
+            "text": "102B3A",
+            "accent": "B34F32",
             "softAccent": "15334A",
             "secondary": "AEC0CE",
-            "surface": "13233A",
-            "rule": "20435E"
+            "surface": "FFFDF9",
+            "rule": "20435E",
+            "muted": "52626A",
+            "line": "C8CFCC"
           },
           "fonts": {
             "heading": "Inter",
-            "body": "Inter",
+            "body": "Arial",
             "label": "Inter",
-            "cjk": "PingFang SC"
+            "cjk": "Arial Unicode MS",
+            "display": "Arial"
           },
           "styleOps": [
             "set-theme",
@@ -186,35 +197,72 @@
         },
         "slideTypes": {
           "heroSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.sub"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.sub",
+              "data.tag",
+              "data.infoL",
+              "data.infoR"
+            ],
+            "allowedLayoutIds": ["auto", "split", "stacked"]
           },
           "profileTableSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.rows"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.rows",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "ledger", "bands"]
           },
           "kpiRowSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.items"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"],
+            "allowedLayoutIds": ["auto", "quadrants", "ledger"]
           },
           "previewProductSlide": {
             "requiredSlots": [
               "data.eyebrow",
               "data.title",
+              "data.source",
               "data.banner",
               "data.kpis",
               "data.capHeader",
               "data.capLeft",
               "data.capRight"
-            ]
-          },
-          "multiCardSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.cards"]
+            ],
+            "allowedLayoutIds": ["auto", "strip", "rail"]
           },
           "landscapeSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.comps"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.usLabel",
+              "data.usTitle",
+              "data.usSub",
+              "data.comps",
+              "data.conclusion"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "ledger"]
+          },
+          "multiCardSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.intro",
+              "data.cards"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "ledger"]
           },
           "convertFlowSlide": {
             "requiredSlots": [
               "data.eyebrow",
               "data.title",
+              "data.source",
               "data.srcLabel",
               "data.srcSub",
               "data.engTitle",
@@ -223,24 +271,38 @@
               "data.featHeader",
               "data.featLeft",
               "data.featRight"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
           },
           "benchmarkSlide": {
             "requiredSlots": [
               "data.eyebrow",
               "data.title",
+              "data.source",
               "data.tableRows",
               "data.chartTitle",
+              "data.unit",
               "data.chartData",
               "data.calloutNum",
               "data.calloutText"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "rail", "stacked"]
           },
           "timelineSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.steps"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.steps"],
+            "allowedLayoutIds": ["auto", "horizontal", "ledger"]
           },
           "askSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.asks"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.sub",
+              "data.asks",
+              "data.closing",
+              "data.closingR"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "rows"]
           }
         }
       },
@@ -250,12 +312,10 @@
         "deliverySeverity": "error",
         "maxConsecutiveSameGroup": 2,
         "groups": {
-          "anchor": ["heroSlide"],
-          "product": ["previewProductSlide", "convertFlowSlide"],
+          "anchor": ["heroSlide", "askSlide"],
           "evidence": ["profileTableSlide", "landscapeSlide", "benchmarkSlide"],
-          "cards": ["kpiRowSlide", "multiCardSlide"],
-          "timeline": ["timelineSlide"],
-          "close": ["askSlide"]
+          "operating": ["kpiRowSlide", "previewProductSlide", "multiCardSlide"],
+          "process": ["convertFlowSlide", "timelineSlide"]
         },
         "thresholds": [
           {
@@ -291,20 +351,23 @@
         }
       },
       "validatedWith": {
-        "s8fy": ">=10",
-        "visionCheck": "high=0 medium=0",
-        "pngReview": "full"
+        "xdoc": "0.13.0 (993a9628)",
+        "visionCheck": "2026-10-22: final Create matrix high/medium/low = 0",
+        "pngReview": "2026-10-22: 64 final canonical pages individually reviewed; seven contact sheets and five enlarged details",
+        "nativeHost": "Microsoft PowerPoint 16.114 for macOS: seven candidate opens; English/Chinese save/reopen/readback; representative native edits"
       },
       "quality": {
-        "lastBenchmark": "2026-06-21",
+        "knownBlockingLimits": [],
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-10-22",
         "vision": {
           "high": 0,
           "medium": 0,
-          "low": 14,
+          "low": 0,
           "lowBuckets": {
-            "total": 14,
+            "total": 0,
             "styleAllowed": 0,
-            "baselineKnown": 14,
+            "baselineKnown": 0,
             "new": 0,
             "changed": 0,
             "resolved": 0,
@@ -313,14 +376,12 @@
             "baselineUpdatedCases": 3
           }
         },
-        "manualHardDefects": 0,
-        "knownBlockingLimits": [],
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-21",
+          "date": "2026-10-22",
           "source": {
-            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/pptx-nova-visual"
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-consulting-dark-20261022/benchmark/01"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -329,11 +390,11 @@
           "vision": {
             "high": 0,
             "medium": 0,
-            "low": 14,
+            "low": 0,
             "lowBuckets": {
-              "total": 14,
+              "total": 0,
               "styleAllowed": 0,
-              "baselineKnown": 14,
+              "baselineKnown": 0,
               "new": 0,
               "changed": 0,
               "resolved": 0,
@@ -347,13 +408,13 @@
               "caseId": "consulting-dark.golden-roadshow",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/golden-roadshow/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/review.md",
+              "summaryPath": ".tmp/deckkit-consulting-dark-20261022/benchmark/01/consulting-dark/golden-roadshow/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
-                "warnings": 1,
-                "fitDiagnostics": 1,
+                "warnings": 0,
+                "fitDiagnostics": 0,
                 "blockingFitDiagnostics": 0
               },
               "dryRun": {
@@ -363,11 +424,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 8,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 8,
+                  "total": 0,
                   "styleAllowed": 0,
-                  "baselineKnown": 8,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -384,22 +445,22 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 318823
+                "bytes": 255776
               },
-              "patchOps": 1090,
-              "p50TotalMs": 48.12
+              "patchOps": 1045,
+              "p50TotalMs": 90.48
             },
             {
               "caseId": "consulting-dark.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/stress-density/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/stress-density/review.md",
+              "summaryPath": ".tmp/deckkit-consulting-dark-20261022/benchmark/01/consulting-dark/stress-density/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/stress-density/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
-                "warnings": 9,
-                "fitDiagnostics": 9,
+                "warnings": 2,
+                "fitDiagnostics": 2,
                 "blockingFitDiagnostics": 0
               },
               "dryRun": {
@@ -409,11 +470,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 3,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 3,
+                  "total": 0,
                   "styleAllowed": 0,
-                  "baselineKnown": 3,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -423,24 +484,24 @@
                 }
               },
               "previews": {
-                "count": 6,
-                "expectedCount": 6,
+                "count": 10,
+                "expectedCount": 10,
                 "nonEmpty": true,
                 "countEqualsSlides": true
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 190347
+                "bytes": 258287
               },
-              "patchOps": 689,
-              "p50TotalMs": 42.6
+              "patchOps": 1152,
+              "p50TotalMs": 94.44
             },
             {
               "caseId": "consulting-dark.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/consulting-dark/mixed-language/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/consulting-dark/mixed-language/review.md",
+              "summaryPath": ".tmp/deckkit-consulting-dark-20261022/benchmark/01/consulting-dark/mixed-language/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/mixed-language/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -455,11 +516,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 3,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 3,
+                  "total": 0,
                   "styleAllowed": 0,
-                  "baselineKnown": 3,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -469,28 +530,30 @@
                 }
               },
               "previews": {
-                "count": 5,
-                "expectedCount": 5,
+                "count": 4,
+                "expectedCount": 4,
                 "nonEmpty": true,
                 "countEqualsSlides": true
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 136744
+                "bytes": 111575
               },
-              "patchOps": 483,
-              "p50TotalMs": 40.45
+              "patchOps": 348,
+              "p50TotalMs": 86.5
             }
           ],
           "blockers": []
         }
       },
       "knownLimits": [
-        "large tables should use benchmarkSlide or split across pages",
-        "custCard number badge fits 2 digits max (width 0.5in)",
-        "heroSlide decorative dots avoid y 6.4-7.0 text band"
+        "2.0 replaces colored rounded-card caps with faceted panels and retains anchor circle ornaments; see intent.md for named-field migration.",
+        "Native single-series bar chart and native table remain editable. Related callouts are independent objects; regenerate from content after changing data.",
+        "Fonts are not embedded. Windows and other Office versions are unverified.",
+        "Candidate qualification requires explicit selection; old production/default eligibility does not carry over."
       ],
-      "examples": ["examples/roadshow-content.json"]
+      "examples": ["examples/roadshow-content.json"],
+      "designContract": "consulting-dark/design.json"
     },
     {
       "id": "mckinsey-blue",

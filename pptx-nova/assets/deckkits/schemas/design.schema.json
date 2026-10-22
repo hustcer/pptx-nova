@@ -240,6 +240,9 @@
     },
     "mck": {
       "$ref": "#/$defs/mck"
+    },
+    "consulting": {
+      "$ref": "#/$defs/consulting"
     }
   },
   "required": [
@@ -2493,6 +2496,190 @@
             }
           },
           "required": ["fontPt", "format"],
+          "additionalProperties": false
+        },
+        "table": {
+          "type": "object",
+          "properties": {
+            "maxCellChars": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 80
+            }
+          },
+          "required": ["maxCellChars"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "family",
+        "styles",
+        "families",
+        "capacity",
+        "spacing",
+        "chrome",
+        "rhythm",
+        "chart",
+        "table"
+      ],
+      "additionalProperties": false
+    },
+    "consulting": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "consulting-editorial/v1"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sizePt": {
+                "type": "number",
+                "minimum": 10
+              },
+              "lineHeight": {
+                "type": "number",
+                "minimum": 1
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "italic": {
+                "type": "boolean"
+              },
+              "alignment": {
+                "enum": ["left", "right", "center"]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["role", "sizePt", "lineHeight", "color"],
+            "additionalProperties": false
+          }
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "enum": [
+                  "cover",
+                  "profile",
+                  "achievements",
+                  "product",
+                  "landscape",
+                  "audiences",
+                  "flow",
+                  "benchmark",
+                  "roadmap",
+                  "decision"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        },
+        "capacity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "inset": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "rulePt": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 1
+            }
+          },
+          "required": ["gap", "inset", "rulePt"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "eyebrow": {
+              "$ref": "#/$defs/frame"
+            },
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["eyebrow", "title", "source", "page"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          "required": ["maxConsecutive"],
+          "additionalProperties": false
+        },
+        "chart": {
+          "type": "object",
+          "properties": {
+            "fontPt": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 16
+            }
+          },
+          "required": ["fontPt"],
           "additionalProperties": false
         },
         "table": {

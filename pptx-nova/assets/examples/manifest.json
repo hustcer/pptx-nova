@@ -18,64 +18,64 @@
       "deckkit": "consulting-dark",
       "caseId": "consulting-dark.golden-roadshow",
       "kind": "golden",
-      "readiness": "production",
-      "version": "0.1.0",
-      "title": "浏览器端高保真 PPTX 渲染 与 AI 原生生成",
+      "readiness": "candidate",
+      "version": "2.0.0",
+      "title": "A clearer path from signal to scale",
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
-      "defaultFor": ["roadshow", "executive consulting", "technical roadshow", "技术路演"],
+      "defaultFor": [],
       "files": {
         "deck": {
           "path": "consulting-dark/deck.pptx",
-          "bytes": 34105,
-          "sha256": "303a73b269fa26cf1c68da3ab0c626af6f401180aea10aaba8e8515c7ea083e2"
+          "bytes": 34267,
+          "sha256": "1fddd331709a2c350bfa3a5395bacb74a26ffa4fee1c544b6cc9838406de3ba2"
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 115516,
-          "sha256": "71369acb4302b917b6f23fb9a0b8f3d170d616d2ce08cfcbad8b1b8e996ff875",
+          "bytes": 127266,
+          "sha256": "b1948308979f5a7ec6f0aec47c0e390217d93e3488cc89e21b14508d57197060",
           "quality": 82
         },
         "content": {
           "path": "consulting-dark/content.json",
-          "bytes": 8655,
-          "sha256": "469d1882981f892d21357548847ae55f212f710ebed6b8a52f458b93a099e1e1"
+          "bytes": 11111,
+          "sha256": "98e66498ac9649a6476b9fba44c34219d45b22b932acfab0e94552adbc1a3ee8"
         },
         "brief": {
           "path": "consulting-dark/brief.md",
-          "bytes": 730,
-          "sha256": "964bb7fd70183f291355f98412b660a94c218673619312ddbe2fe34b98876306"
+          "bytes": 704,
+          "sha256": "d2696b617b887d0544a1ccbc49b7d83c2c8cb2efe6447b20fcb1f2bdcc800008"
         },
         "summary": {
           "path": "consulting-dark/summary.json",
-          "bytes": 2732,
-          "sha256": "899ab4892cd5416251974f57d3035e4aae2be02ab216cfc1144c6af7f9a750cb"
+          "bytes": 2771,
+          "sha256": "6bc9e028ee2c4d59935cc6da566352ee4f7ed67623e0cb60c5e8741420d2a284"
         }
       },
       "validation": {
         "valid": true,
         "errors": 0,
-        "warnings": 1,
-        "fitDiagnostics": 1,
+        "warnings": 0,
+        "fitDiagnostics": 0,
         "blockingFitDiagnostics": 0
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1047
+        "ops": 1045
       },
       "vision": {
         "status": "success",
         "slideCount": 10,
-        "issueCount": 8,
+        "issueCount": 0,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 8
+          "low": 0
         },
         "lowBuckets": {
-          "total": 8,
+          "total": 0,
           "styleAllowed": 0,
-          "baselineKnown": 8,
+          "baselineKnown": 0,
           "new": 0,
           "changed": 0,
           "resolved": 0,
@@ -83,9 +83,7 @@
           "baselineUnavailable": false,
           "baselineUpdated": false
         },
-        "lowByFamily": {
-          "composition": 8
-        },
+        "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
@@ -93,15 +91,15 @@
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/consulting-dark.golden-roadshow.vision-baseline.json",
           "available": true,
-          "issueCount": 8
+          "issueCount": 0
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
           "source": "catalog.qualityProfile",
-          "minFontPt": 9,
-          "labelFontPt": 9,
-          "sourceFontPt": 8.5,
-          "note": ""
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
         },
         "newLowSamples": [],
         "changedLowSamples": [],

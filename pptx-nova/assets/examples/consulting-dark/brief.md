@@ -2,10 +2,10 @@
 
 DeckKit: `consulting-dark`
 Showcase case: `consulting-dark.golden-roadshow`
-Readiness: `production`
+Readiness: `candidate`
 Slides: 10
-Patch ops: 1047
-Title: 浏览器端高保真 PPTX 渲染 与 AI 原生生成
+Patch ops: 1045
+Title: A clearer path from signal to scale
 
 ## Best For
 
@@ -13,7 +13,7 @@ roadshow, investor update, executive consulting, 技术路演
 
 ## Default For
 
-roadshow, executive consulting, technical roadshow, 技术路演
+No default scenarios are declared in the DeckKit catalog.
 
 ## Files
 

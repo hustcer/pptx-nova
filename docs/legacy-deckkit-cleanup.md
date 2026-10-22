@@ -8,7 +8,9 @@ Broadside 已完成 [2.0 迁移与验收](broadside-v2-migration-results.md)，�
 Long Table 已完成 [2.0 迁移与验收](long-table-v2-migration-results.md)，为 candidate。
 Swiss Grid 已完成 [2.0 迁移与验收](swiss-grid-v2-migration-results.md)，为 candidate。
 McKinsey Blue 已完成 [2.0 迁移与验收](mckinsey-blue-v2-migration-results.md)，为 candidate。
-当前为一套无合同旧创建实现（consulting-dark）、九套合同实现；尚未完成全仓旧机制退役目标。
+Consulting Dark 已完成 [2.0 迁移与验收](consulting-dark-v2-migration-results.md)，为 candidate。
+当前十套均有设计合同；Consulting Dark 专属旧绘制器及十份全局 tuple schema 已退役。
+共享旧槽位/预算/无合同降级路径尚未全部移除，§6.2 的全仓旧机制退役目标仍需独立执行。
 
 依据：[设计语言载体评估](design-language-contract-evaluation.md)、当前 catalog、合同执行链、
 Biennale 源码、schemas、示例、benchmark 与 showcase 更新工具。

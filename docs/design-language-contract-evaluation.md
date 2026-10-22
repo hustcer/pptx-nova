@@ -7,7 +7,7 @@ Green Slate、Clear Value，以及后续 Biennale/Cartesian/Broadside/Long Table
 ## 结论
 
 继续以 DeckKit 为分发与执行基础，采用 **JSON 设计合同 + Markdown 设计意图 + 已注册的可执行视觉族**。
-这一方向已从建议变成九套风格的实际实现；纯 `design.md` 仍适合作为迁移输入，不能直接替代执行合同。
+这一方向已从建议变成十套风格的实际实现；纯 `design.md` 仍适合作为迁移输入，不能直接替代执行合同。
 
 实际结果支持“身份固定、构图有界变化、语义与交付流程共享”的职责划分。
 `.kit.mjs` 可以成为很薄的适配器，但新视觉语法仍需要代码：Black Gold、Green Slate、Clear Value
@@ -26,21 +26,22 @@ Clear Value 曾有实机 Repair 丢页反例，原完整验收结论因此撤回
 
 ### 当前落地快照
 
-| DeckKit         | 当前版本 / catalog 状态     | 实际实现                                         | 证据与边界                                                                                                                                                            |
-| --------------- | --------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| biennale-yellow | 2.0.0 / candidate           | 九类职责全部经注册合同执行，旧分支退役           | [2.0 清理报告](biennale-yellow-v2-cleanup-results.md)；35 页最终矩阵、原生保存重开及回读                                                                              |
-| cartesian       | 2.0.0 / candidate           | cartesian-editorial/v1，10 类职责、18 个注册布局 | [2.0 迁移报告](cartesian-v2-migration-results.md)；42 页最终 canonical 逐张检查，六份原生保存重开与回读，代表文字/圆内字/图表数据编辑通过                             |
-| broadside       | 2.0.0 / candidate           | broadside-poster/v1，16 类职责、28 个注册布局    | [2.0 迁移报告](broadside-v2-migration-results.md)；60 页最终 canonical 逐张检查，四份原生保存重开与回读，代表文字/形状/图表数据编辑通过                               |
-| long-table      | 2.0.0 / candidate           | long-table-editorial/v1，8 类职责、15 个注册布局 | [2.0 迁移报告](long-table-v2-migration-results.md)；45 页最终 canonical 逐张检查，六份原生保存重开，标题/圆内字/胶囊/表格单元格实际编辑回读通过                       |
-| swiss-grid      | 2.0.0 / candidate           | swiss-typographic/v1，15 类职责、24 个注册布局   | [2.0 迁移报告](swiss-grid-v2-migration-results.md)；57 页最终 canonical 逐张检查，五份原生保存重开，标题/形状内文字/表格单元格实际编辑回读通过                        |
-| mckinsey-blue   | 2.0.0 / candidate           | mck-consulting/v1，8 类职责、16 个注册布局       | [2.0 迁移报告](mckinsey-blue-v2-migration-results.md)；56 页最终 canonical 逐张检查，七份原生保存重开，标题/编号/图表数据/表格单元格实际编辑回读通过                  |
-| black-gold      | 0.1.0 / candidate           | editorial-ledger/v1，6 页型、10 个注册布局       | [第三阶段报告](black-gold-migration-results.md)；26 页迁移验证，金融 policy 与皮肤分离                                                                                |
-| green-slate     | 0.1.0 / candidate           | strategy-report/v1，10 页型、13 个注册布局       | [迁移报告](green-slate-migration-results.md)；36 页最终视觉矩阵，初轮漏检已撤回并返修                                                                                 |
-| clear-value     | 0.1.0 / candidate（登记值） | annual-research/v1，8 页型、14 个注册布局        | [迁移记录](clear-value-migration-results.md)记录 41 页机器/视觉矩阵；REPAIR-001 的新生成样例已通过原生打开/保存重开复核；历史 41 页文件须重新生成，不能沿用旧交付结论 |
+| DeckKit         | 当前版本 / catalog 状态     | 实际实现                                          | 证据与边界                                                                                                                                                            |
+| --------------- | --------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| consulting-dark | 2.0.0 / candidate           | consulting-editorial/v1，10 类职责、20 个注册布局 | [2.0 迁移报告](consulting-dark-v2-migration-results.md)；64 页最终 canonical 逐张检查，七组原生打开，英文/中文保存重开回读，标题/形状文字/表格/图表数据编辑通过       |
+| biennale-yellow | 2.0.0 / candidate           | 九类职责全部经注册合同执行，旧分支退役            | [2.0 清理报告](biennale-yellow-v2-cleanup-results.md)；35 页最终矩阵、原生保存重开及回读                                                                              |
+| cartesian       | 2.0.0 / candidate           | cartesian-editorial/v1，10 类职责、18 个注册布局  | [2.0 迁移报告](cartesian-v2-migration-results.md)；42 页最终 canonical 逐张检查，六份原生保存重开与回读，代表文字/圆内字/图表数据编辑通过                             |
+| broadside       | 2.0.0 / candidate           | broadside-poster/v1，16 类职责、28 个注册布局     | [2.0 迁移报告](broadside-v2-migration-results.md)；60 页最终 canonical 逐张检查，四份原生保存重开与回读，代表文字/形状/图表数据编辑通过                               |
+| long-table      | 2.0.0 / candidate           | long-table-editorial/v1，8 类职责、15 个注册布局  | [2.0 迁移报告](long-table-v2-migration-results.md)；45 页最终 canonical 逐张检查，六份原生保存重开，标题/圆内字/胶囊/表格单元格实际编辑回读通过                       |
+| swiss-grid      | 2.0.0 / candidate           | swiss-typographic/v1，15 类职责、24 个注册布局    | [2.0 迁移报告](swiss-grid-v2-migration-results.md)；57 页最终 canonical 逐张检查，五份原生保存重开，标题/形状内文字/表格单元格实际编辑回读通过                        |
+| mckinsey-blue   | 2.0.0 / candidate           | mck-consulting/v1，8 类职责、16 个注册布局        | [2.0 迁移报告](mckinsey-blue-v2-migration-results.md)；56 页最终 canonical 逐张检查，七份原生保存重开，标题/编号/图表数据/表格单元格实际编辑回读通过                  |
+| black-gold      | 0.1.0 / candidate           | editorial-ledger/v1，6 页型、10 个注册布局        | [第三阶段报告](black-gold-migration-results.md)；26 页迁移验证，金融 policy 与皮肤分离                                                                                |
+| green-slate     | 0.1.0 / candidate           | strategy-report/v1，10 页型、13 个注册布局        | [迁移报告](green-slate-migration-results.md)；36 页最终视觉矩阵，初轮漏检已撤回并返修                                                                                 |
+| clear-value     | 0.1.0 / candidate（登记值） | annual-research/v1，8 页型、14 个注册布局         | [迁移记录](clear-value-migration-results.md)记录 41 页机器/视觉矩阵；REPAIR-001 的新生成样例已通过原生打开/保存重开复核；历史 41 页文件须重新生成，不能沿用旧交付结论 |
 
 页型/布局数量描述覆盖范围，不能作为质量评分。后续分别重新生成和验收 Cartesian、Broadside；其他风格的回读、视觉
 数量来自各轮报告，不代表本次全量重新验收。
-这九套风格共用合同和执行流程，不等于彼此已能复用同一套视觉组件；仍需更多同族风格验证组件的复用收益。
+这十套风格共用合同和执行流程，不等于彼此已能复用同一套视觉组件；仍需更多同族风格验证组件的复用收益。
 
 Cartesian 新增视觉族注册 seam，供断言、解析、风格检查与投影统一接入；保留旧图片槽位、动画 target
 及独立翻新配置。实例容量不能替代最终排版，auto 成功也不能证明每个注册布局可用，详见其迁移报告。
@@ -137,7 +138,7 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 
 ### 4.1 JSON：可执行的设计合同
 
-九套风格已使用 `design.json`，执行层采用有边界的第一方 schema 和已注册检查器，
+十套风格已使用 `design.json`，执行层采用有边界的第一方 schema 和已注册检查器，
 不是完整通用 JSON Schema 引擎。下面六类内容是合同职责，实际支持范围以对应 schema/组件为准：
 
 1. **语义 tokens**：背景、主文字、次文字、结构线、强调、历史/当前/预测、风险；标题、正文、数字、图注等文字角色；单位明确的间距和尺寸。

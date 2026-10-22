@@ -1,94 +1,120 @@
 {
   "meta": {
     "deckkit": "consulting-dark",
-    "style": "consulting",
-    "layout": "executive-grid"
+    "designScope": "complete"
   },
   "slides": [
     {
       "type": "heroSlide",
       "data": {
-        "eyebrow": "MIXED LANGUAGE · 2026",
-        "title": "AI Native DeckKit 质量验证",
-        "sub": "中文 + English + numbers: ARR 120M, NRR 138%, p95 latency 42ms",
-        "tag": "Checks CJK, Latin words, percentages, currency, and product terminology.",
-        "infoL": "benchmark · mixed-language",
-        "infoR": "CJK · LATIN · NUMERIC"
-      }
+        "eyebrow": "COMMUNITY LIBRARY / 社区图书馆",
+        "title": "Community Library\n让阅读服务连接社区",
+        "source": "Synthetic demonstration / 合成验证数据",
+        "sub": "以统一流程和实际反馈改善读者体验",
+        "tag": "社区服务计划",
+        "infoL": "统一入口与服务说明，让读者顺利完成任务。",
+        "infoR": "统一入口与服务说明，让读者顺利完成任务。"
+      },
+      "layoutId": "split"
     },
     {
-      "type": "multiCardSlide",
+      "type": "previewProductSlide",
       "data": {
-        "eyebrow": "01 · LANGUAGE MIX",
-        "title": "中英混排场景覆盖",
-        "intro": "Chinese labels, English phrases, and numbers share one slide.",
-        "cards": [
-          [
-            "C8583A",
-            "01",
-            "North Star 北极星指标",
-            ["ARR $120M", "NRR 138%", "Logo-to-revenue loop"]
-          ],
-          ["3C6FA6", "02", "Product-Led Growth", ["自助试用", "Activation D7", "Sales assist"]],
-          ["3E9D6E", "03", "Enterprise Ready", ["SSO/SAML", "Audit log", "私有化部署"]],
-          ["7B6AAE", "04", "AI Workflow", ["Prompt-to-PPTX", "Human review", "Benchmark gate"]]
+        "eyebrow": "COMMUNITY LIBRARY / 社区图书馆",
+        "title": "Reader services / 读者服务",
+        "source": "Synthetic demonstration / 合成验证数据",
+        "banner": "统一入口与服务说明，让读者顺利完成任务。",
+        "kpis": [
+          {
+            "value": "96%",
+            "label": "预约 / Booking",
+            "note": "统一入口与服务说明，让读者顺利完成任务。"
+          },
+          {
+            "value": "93%",
+            "label": "改善读者服务",
+            "note": "统一入口与服务说明，让读者顺利完成任务。"
+          },
+          {
+            "value": "2",
+            "label": "改善读者服务",
+            "note": "统一入口与服务说明，让读者顺利完成任务。"
+          },
+          {
+            "value": "6",
+            "label": "改善读者服务",
+            "note": "统一入口与服务说明，让读者顺利完成任务。"
+          }
+        ],
+        "capHeader": "改善读者服务",
+        "capLeft": [
+          "统一入口与服务说明，让读者顺利完成任务。",
+          "统一入口与服务说明，让读者顺利完成任务。",
+          "统一入口与服务说明，让读者顺利完成任务。"
+        ],
+        "capRight": [
+          "统一入口与服务说明，让读者顺利完成任务。",
+          "统一入口与服务说明，让读者顺利完成任务。",
+          "统一入口与服务说明，让读者顺利完成任务。"
         ]
-      }
+      },
+      "layoutId": "strip"
     },
     {
       "type": "benchmarkSlide",
       "data": {
-        "eyebrow": "02 · BENCHMARK",
-        "title": "中英混排指标表",
+        "eyebrow": "COMMUNITY LIBRARY / 社区图书馆",
+        "title": "Service evidence / 服务方案比较",
+        "source": "Synthetic demonstration / 合成验证数据",
         "tableRows": [
-          ["Metric 指标", "CN / EN", "Value"],
-          ["生成链路", "content -> DeckKit -> patch", "stable"],
-          ["可读性", "中文正文 + English tokens", "pass"],
-          ["业务数字", "ARR / NRR / p95", "$120M / 138% / 42ms"],
-          ["风险", "LongEnglishIdentifier", "tracked"]
+          ["服务指标", "服务指标", "服务指标", "服务指标"],
+          ["服务指标", "试点结果", "试点结果", "试点结果"],
+          ["服务指标", "试点结果", "试点结果", "试点结果"],
+          ["服务指标", "试点结果", "试点结果", "试点结果"],
+          ["服务指标", "试点结果", "试点结果", "试点结果"],
+          ["服务指标", "试点结果", "试点结果", "试点结果"]
         ],
-        "chartTitle": "Mixed Language Score",
+        "chartTitle": "统一入口与服务说明，让读者顺利完成任务。",
+        "unit": "占试点服务任务的比例（%）",
         "chartData": {
-          "categories": ["CJK", "Latin", "Numeric"],
+          "categories": ["预约 Booking", "借阅 Loans", "续借 Renew"],
           "series": [
             {
-              "name": "coverage",
-              "values": [9.2, 8.8, 9.5]
+              "name": "Completion 完成率",
+              "values": [86, 72, 65]
             }
           ]
         },
-        "calloutNum": "0",
-        "calloutText": "No soft warning expected for this mixed-language fixture."
-      }
-    },
-    {
-      "type": "timelineSlide",
-      "data": {
-        "eyebrow": "03 · ROLLOUT",
-        "title": "双语发布节奏",
-        "steps": [
-          ["C8583A", "01", "Research 调研", "collect CJK and Latin copy", "done"],
-          ["3C6FA6", "02", "Design 设计", "verify typography rhythm", "done"],
-          ["3E9D6E", "03", "Build 生成", "run DeckKit benchmark", "active"],
-          ["CF9B43", "04", "Review 复核", "manual PNG check later", "next"],
-          ["7B6AAE", "05", "Ship 交付", "promote after gates pass", "planned"]
-        ]
-      }
+        "calloutNum": "+14pp",
+        "calloutText": "统一入口与服务说明，让读者顺利完成任务。"
+      },
+      "layoutId": "rail"
     },
     {
       "type": "askSlide",
       "data": {
-        "eyebrow": "04 · ACCEPTANCE",
-        "title": "混排样例验收点",
-        "sub": "Validate that mixed copy remains within normal density boundaries.",
+        "eyebrow": "COMMUNITY LIBRARY / 社区图书馆",
+        "title": "Pilot first\n以证据决定推广",
+        "source": "Synthetic demonstration / 合成验证数据",
+        "sub": "以统一流程和实际反馈改善读者体验",
         "asks": [
-          ["C8583A", "CJK + Latin", "中文短句和 English token 不应触发容量警告"],
-          ["3C6FA6", "Numbers", "金额、百分比和延迟指标保持可读"],
-          ["3E9D6E", "Future visual gate", "接入 PNG 后确认无截断和重叠"]
+          {
+            "title": "改善读者服务",
+            "description": "统一入口与服务说明，让读者顺利完成任务。"
+          },
+          {
+            "title": "改善读者服务",
+            "description": "统一入口与服务说明，让读者顺利完成任务。"
+          },
+          {
+            "title": "改善读者服务",
+            "description": "统一入口与服务说明，让读者顺利完成任务。"
+          }
         ],
-        "closing": "mixed-language complete",
-        "closingR": "CJK · EN · NUMBERS"
-      }
+        "closing": "统一入口与服务说明，让读者顺利完成任务。",
+        "closingR": "统一入口与服务说明，让读者顺利完成任务。"
+      },
+      "layoutId": "columns"
     }
   ]
 }

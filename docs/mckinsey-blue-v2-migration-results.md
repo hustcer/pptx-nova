@@ -136,7 +136,8 @@ smoke、严格公开审计、投影检查、十套槽位一致性、showcase 重
 | corporate-blue / consulting 换肤配置及共享 primitives/图标 | 保留有效消费者，不误删独立翻新或其他套件依赖                     |
 
 已无本套旧创建器专属的失效分发资产；相同公共文件名保留是替换内容后的有效入口。
-consulting-dark 仍为唯一未迁移创建器，共享旧机制的全仓退役不在本次范围。
+该轮结束时 consulting-dark 为唯一未迁移创建器；其后已完成 [2.0 迁移](consulting-dark-v2-migration-results.md)。
+共享旧机制的全仓退役不在 McKinsey Blue 迁移范围。
 
 ## 最新文件与复现
 

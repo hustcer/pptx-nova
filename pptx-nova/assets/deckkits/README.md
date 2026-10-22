@@ -29,6 +29,10 @@ assets/deckkits/
 ├── long-table-layouts.mjs     # 八类职责、十五个布局、完整组件计划与实例容量
 ├── long-table-registry.mjs    # Long Table 视觉族断言、检查与发现投影
 ├── long-table/               # Long Table 2.0 合同与设计意图（candidate）
+├── swiss-components.mjs       # 非对称文字、原生网格示意、Tabler 图标与原生表格
+├── swiss-layouts.mjs          # 十五类职责、二十四个布局、数值模型与实例容量
+├── swiss-registry.mjs         # Swiss 视觉族断言、身份检查与发现投影
+├── swiss-grid/                # Swiss Grid 2.0 合同与设计意图（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
@@ -62,6 +66,11 @@ Long Table 2.0 保留八个页型入口，十五个注册布局支持封面、�
 Arial Black / Georgia 和正体 Arial Unicode MS 为明确替代字体，不随套件打包。
 手工调整表格行高或列宽不会同步独立状态轮廓，须从 content 重新生成；不提供图表或图片输入。
 见 [设计与迁移说明](long-table/intent.md)。
+
+Swiss Grid 2.0 保留十五个页型入口，以二十四个注册布局表达非对称排版、开放名录、字体样张、
+网格示意、时间线与原生表格。封面/收束不显示灰色施工网格；原稿图标、字重差异和列末注释已补齐。
+计量示意的几何与标注来自同一数值模型，手工编辑后须重新生成才能同步；Tabler SVG 是矢量图片。
+Helvetica / Arial Black / Arial Unicode MS 是不嵌入的替代字体。见 [设计与迁移说明](swiss-grid/intent.md)。
 
 ## core-primitives 职责边界
 
@@ -116,7 +125,7 @@ Arial Black / Georgia 和正体 Arial Unicode MS 为明确替代字体，不随�
 不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
 检查应用后的对象和原生数值。详见 `../../references/design-contracts.md`。
 
-合同路线现覆盖 Biennale、Cartesian、Broadside、Long Table、Black Gold、Green Slate 与 Clear Value。Black Gold 增加原生表格逐格回读、单焦点与
+合同路线现覆盖 Biennale、Cartesian、Broadside、Long Table、Swiss Grid、Black Gold、Green Slate 与 Clear Value。Black Gold 增加原生表格逐格回读、单焦点与
 期刊图表/表格规则；Green Slate 增加深色策略报告构图、带底色标签、形状内编号、按时长分配的
 阶段路线图和独立说明区。Clear Value 增加白底衬线研究报告、多图证据板、可变列矩阵、原生环图、
 预测柱虚线边界和面积成比例的可编辑圆。candidate 状态不等于 production/default 交付资格。开发者从设计规范和

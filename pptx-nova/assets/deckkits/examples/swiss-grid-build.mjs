@@ -1,6 +1,7 @@
-// swiss-grid-build.mjs - content -> Swiss-grid DeckKit -> patch
+#!/usr/bin/env node
 import { writeFileSync } from 'node:fs'
-import { assessDeckQuality, loadContent, validateContent } from '../core-primitives.kit.mjs'
+import { assessDeckQuality, loadContent } from '../core-primitives.kit.mjs'
+import { validateDeckkitContent as validateContent } from '../validate-deckkit.mjs'
 import { createDeck } from '../swiss-grid.kit.mjs'
 
 function parseArgs(argv) {
@@ -39,7 +40,7 @@ function qualityFails(report, level) {
 const deckkitId = 'swiss-grid'
 const args = parseArgs(process.argv)
 const content = await loadContent(
-  args.contentPath ?? 'skills/pptx-nova/assets/deckkits/examples/swiss-grid-content.json',
+  args.contentPath ?? new URL('./swiss-grid-content.json', import.meta.url),
 )
 const validation = validateContent(content, { deckkit: deckkitId })
 if (!validation.valid) {

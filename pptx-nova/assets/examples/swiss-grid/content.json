@@ -1,8 +1,7 @@
 {
   "meta": {
     "deckkit": "swiss-grid",
-    "style": "swiss-international",
-    "layout": "modular-grid-lecture"
+    "designScope": "complete"
   },
   "slides": [
     {
@@ -11,8 +10,7 @@
         "eyebrow": "A LECTURE · 2026",
         "title": "网格系统",
         "subtitle": "The Grid as a Way of Seeing",
-        "tag": "Swiss International Typographic Style\nMüller-Brockmann · Helvetica · Univers · 1896 — Today",
-        "footer": "01 / 15"
+        "tag": "Swiss International Typographic Style\nMüller-Brockmann · Helvetica · Univers · 1896 — Today"
       }
     },
     {
@@ -27,7 +25,7 @@
     {
       "type": "swissTimelineSlide",
       "data": {
-        "eyebrow": "P · 03",
+        "eyebrow": "Origins",
         "title": "双源头 · 1896 → 1957",
         "subtitle": "THE SIXTY YEARS THAT MADE SWISS DESIGN POSSIBLE",
         "steps": [
@@ -55,7 +53,7 @@
             "year": "1957",
             "title": "Helvetica + Univers",
             "body": "同年问世\n瑞士理性\n凝结为字体\n输出全球",
-            "accent": "E2231A"
+            "focus": true
           }
         ],
         "calloutTitle": "理性主义不是凭空而至",
@@ -66,7 +64,7 @@
     {
       "type": "swissPrinciplesSlide",
       "data": {
-        "eyebrow": "P · 04",
+        "eyebrow": "Principles",
         "title": "八条核心原则",
         "subtitle": "EIGHT PRINCIPLES OF SWISS DESIGN",
         "items": [
@@ -111,7 +109,7 @@
             "title": "留白是结构",
             "subtitle": "NEGATIVE SPACE AS STRUCTURE",
             "body": "空白是信息的载体\n而非剩余。",
-            "accent": "E2231A"
+            "focus": true
           },
           {
             "num": "08",
@@ -125,7 +123,7 @@
     {
       "type": "swissPeopleGridSlide",
       "data": {
-        "eyebrow": "P · 05",
+        "eyebrow": "Practitioners",
         "title": "八位塑造者",
         "subtitle": "EIGHT DESIGNERS WHO MADE THE SWISS STYLE",
         "people": [
@@ -158,7 +156,7 @@
             "name": "Müller-Brockmann",
             "years": "1914 — 1996",
             "body": "苏黎世学派核心\n《Grid Systems in\nGraphic Design》作者\n本讲下页详述",
-            "accent": "E2231A"
+            "focus": true
           },
           {
             "name": "Max Miedinger",
@@ -176,7 +174,7 @@
     {
       "type": "swissProfileSlide",
       "data": {
-        "eyebrow": "P · 06",
+        "eyebrow": "Profile",
         "title": "Josef Müller-Brockmann",
         "subtitle": "A LIFE IN GRID · 1914 — 1996 · SEVEN MOMENTS",
         "initials": "JMB",
@@ -197,8 +195,8 @@
           {
             "year": "1950",
             "title": "Tonhalle 音乐会海报系列开启",
-            "body": "用圆 · 弧 · 线 · 矩形抽象表达音乐结构",
-            "accent": "E2231A"
+            "body": "“Musica Viva” · 用圆、弧、线与矩形抽象表达音乐结构",
+            "focus": true
           },
           {
             "year": "1957",
@@ -208,13 +206,13 @@
           {
             "year": "1958",
             "title": "创办《Neue Grafik》期刊",
-            "body": "三语并行 · 把瑞士理念输出到国际共同体"
+            "body": "三语并行 · 把瑞士理念输出到国际平面设计共同体"
           },
           {
             "year": "1981",
             "title": "出版《Grid Systems in Graphic Design》",
-            "body": "至今仍是设计教育最权威的网格手册",
-            "accent": "E2231A"
+            "body": "设计教育的网格手册 · 本讲的参考底本",
+            "focus": true
           },
           {
             "year": "1996",
@@ -227,7 +225,7 @@
     {
       "type": "swissTypefaceSlide",
       "data": {
-        "eyebrow": "P · 07",
+        "eyebrow": "Typography",
         "title": "三款决定性字体",
         "subtitle": "THREE TYPEFACES THAT WROTE THE SWISS STYLE",
         "sampleText": "Aa",
@@ -236,20 +234,26 @@
             "name": "Akzidenz-Grotesk",
             "meta": "1896 · Berthold Type Foundry",
             "weight": "EXTRA BOLD · 900",
-            "body": "第一款现代意义的\n商业无衬线字体\n瑞士学派早期首选\n比 Helvetica 早 61 年问世"
+            "body": "瑞士学派早期首选\n比 Helvetica 早 61 年问世\n奠定无衬线美学基础",
+            "specimenStyle": "heavy",
+            "lead": "第一款现代意义的\n商业无衬线字体"
           },
           {
             "name": "Helvetica",
             "meta": "1957 · Miedinger + Hoffmann",
             "weight": "BOLD · 700 · NEUTRAL",
-            "body": "字面意思就是“瑞士”\n中性 · 客观 · 可读至极\n原名 Neue Haas Grotesk\n传播范围最广的字体",
-            "accent": "E2231A"
+            "body": "原名 Neue Haas Grotesk\n取自拉丁文 Helvetia\n20 世纪传播范围最广的字体",
+            "focus": true,
+            "specimenStyle": "bold",
+            "lead": "字面意思就是“瑞士”\n中性 · 客观 · 可读"
           },
           {
             "name": "Univers",
             "meta": "1957 · Adrian Frutiger",
             "weight": "REGULAR · 400 · LIGHT",
-            "body": "21 字重的二维坐标\n字体工程的开端\n把“家族+字重+宽度”\n工程化"
+            "body": "Univers 39—83 二维编号\n把家族、字重、宽度工程化\n现代家族字体结构的祖先",
+            "specimenStyle": "regular",
+            "lead": "21 字重的二维坐标\n字体工程的开端"
           }
         ]
       }
@@ -257,7 +261,7 @@
     {
       "type": "swissGridTypesSlide",
       "data": {
-        "eyebrow": "P · 08",
+        "eyebrow": "Grid vocabulary",
         "title": "网格四种类型",
         "subtitle": "FOUR GRID TYPES · MÜLLER-BROCKMANN, 1981",
         "items": [
@@ -281,7 +285,7 @@
             "subtitle": "MODULAR GRID",
             "body": "横列 × 纵行的方格矩阵\n瑞士国际主义最具识别度的网格类型",
             "diagram": "modular",
-            "accent": "E2231A"
+            "focus": true
           },
           {
             "num": "04 · 复合",
@@ -296,27 +300,34 @@
     {
       "type": "swissSystemSlide",
       "data": {
-        "eyebrow": "P · 09",
+        "eyebrow": "A measured system",
         "title": "一切都是可计算的",
         "subtitle": "EVERYTHING DERIVES FROM THE BASE UNIT",
-        "baseLabel": "BASE UNIT",
-        "baseValue": "16px",
         "baseNote": "所有距离的最小公因子",
-        "body": "DERIVED FROM 16\nsafe margin 64 px = 4 × 16\ncolumn width 264 px = 16 × 16 + 8\ncolumn gap 32 px = 2 × 16\nrow height 96 px = 6 × 16\nbody line-height 27 px = 1.5 × 18\ntitle size 32 px = 2 × 16",
-        "callout": "设计师不再“画”版面\n而是“建立系统并按系统落子”",
-        "measure": "528",
-        "measureLabels": ["264", "264", "264", "264"],
+        "callout": "设计师不再“画”版面\n而是建立系统，并按系统组织内容",
         "labels": {
-          "image": "IMAGE 2×2",
-          "text": "TEXT 1×2",
-          "headline": "HEADLINE 4×1"
+          "base": "BASE UNIT",
+          "column": "Column",
+          "gap": "Gutter",
+          "row": "Row",
+          "image": "IMAGE 2 × 2",
+          "text": "TEXT 1 × 2",
+          "headline": "HEADLINE 4 × 1"
+        },
+        "model": {
+          "baseUnit": 16,
+          "unit": "px",
+          "columnUnits": 16,
+          "gapUnits": 2,
+          "rowUnits": 6,
+          "columns": 4,
+          "rows": 5
         }
       }
     },
     {
       "type": "swissStatementSlide",
       "data": {
-        "eyebrow": "ARGUMENT · 07",
         "label": "ARGUMENT · 07",
         "title": "留白即结构",
         "subtitle": "Negative space is structure, not absence.",
@@ -326,7 +337,7 @@
     {
       "type": "swissColumnSlide",
       "data": {
-        "eyebrow": "P · 11",
+        "eyebrow": "Applications",
         "title": "输出到现代世界",
         "subtitle": "1960s → · FROM SWITZERLAND TO THE GLOBAL DESIGN SYSTEM",
         "items": [
@@ -334,26 +345,30 @@
             "title": "企业 VI",
             "subtitle": "CORPORATE IDENTITY",
             "body": "把瑞士理性变成“识别系统”\n产业的开端",
-            "examples": "IBM (Paul Rand)\nKnoll · Lufthansa\nOlivetti · Braun\nJMB 任 IBM 顾问"
+            "examples": "IBM (Paul Rand)\nKnoll · Lufthansa\nOlivetti · Braun\nJMB 任 IBM 顾问",
+            "note": "JMB 任 IBM 顾问 · 1967 起"
           },
           {
             "title": "机场 / 地铁标识",
             "subtitle": "SIGNAGE SYSTEMS",
             "body": "公共空间的可读性\n是瑞士理性的延伸",
-            "examples": "纽约地铁 Unimark\n巴黎机场 Frutiger 字体\n慕尼黑 Otl Aicher"
+            "examples": "纽约地铁 Unimark\n巴黎机场 Frutiger 字体\n慕尼黑 Otl Aicher",
+            "note": "Vignelli · 纽约地铁手册"
           },
           {
             "title": "出版业",
             "subtitle": "EDITORIAL DESIGN",
             "body": "期刊 · 杂志 · 文化出版\n的版面语法",
-            "examples": "Du 杂志\nEye Magazine\nDomus · Wallpaper*"
+            "examples": "Du 杂志\nEye Magazine\nDomus · Wallpaper*",
+            "note": "文化出版的版面语法"
           },
           {
             "title": "设计教育",
             "subtitle": "DESIGN EDUCATION",
             "body": "巴塞尔 + 苏黎世\n两条教学路径全球化",
             "examples": "Yale (Hofmann)\nRISD · Cooper Union\n东京 GS 学派",
-            "accent": "E2231A"
+            "focus": true,
+            "note": "教学方法与实践的延续"
           }
         ]
       }
@@ -361,7 +376,7 @@
     {
       "type": "swissProgressSlide",
       "data": {
-        "eyebrow": "P · 12",
+        "eyebrow": "Continuity",
         "title": "数字时代的延续",
         "subtitle": "THE GRID ON SCREEN · 2008 — TODAY",
         "steps": [
@@ -384,7 +399,7 @@
             "year": "2020s",
             "title": "Design Systems",
             "body": "Material · HIG · FAST\n从规则到组件库",
-            "accent": "E2231A"
+            "focus": true
           }
         ],
         "callout": "同一套语法 · 1981 → 2026 · 从印刷海报到 CSS Grid\n介质变换但模数 · 列 · 留白 · 数学比例四件套从未改变。"
@@ -393,7 +408,7 @@
     {
       "type": "swissBrandGridSlide",
       "data": {
-        "eyebrow": "P · 13",
+        "eyebrow": "Contemporary practice",
         "title": "当代品牌的瑞士血脉",
         "subtitle": "SIX BRANDS WHERE THE SWISS GRID STILL LIVES",
         "brands": [
@@ -401,38 +416,38 @@
             "name": "Apple",
             "meta": "CUPERTINO · 1976",
             "body": "极简理性的产品语言\n从早期 Keynote 到 HIG\n瑞士血脉最显眼的继承者",
-            "icon": "device-desktop"
+            "icon": "brand-apple"
           },
           {
             "name": "Google",
             "meta": "MOUNTAIN VIEW · 1998",
             "body": "Material 设计系统\n8dp 网格 + 几何字体\n把瑞士工程化到移动端",
-            "icon": "brand-google-analytics"
+            "icon": "brand-google"
           },
           {
             "name": "Spotify",
             "meta": "STOCKHOLM · 2006",
             "body": "杂志感的版面语法\n大字号 · 网格分块\n把音乐变成视觉故事",
-            "icon": "microphone"
+            "icon": "brand-spotify"
           },
           {
             "name": "Airbnb",
             "meta": "SAN FRANCISCO · 2008",
             "body": "DLS 设计语言系统\n模数 grid + 极简识别\n摄影也走客观纪实路线",
-            "icon": "home"
+            "icon": "brand-airbnb"
           },
           {
             "name": "IBM",
             "meta": "ARMONK · 1911",
             "body": "JMB 1967 起任 IBM 顾问\nPaul Rand 同期接手识别\n直系瑞士血统案例",
             "icon": "building",
-            "accent": "E2231A"
+            "focus": true
           },
           {
             "name": "Lufthansa",
             "meta": "COLOGNE · 1955",
             "body": "Otl Aicher 1962 VI\n乌尔姆系统化设计标杆\n基本沿用至今 60 余年",
-            "icon": "world"
+            "icon": "plane"
           }
         ]
       }
@@ -440,72 +455,53 @@
     {
       "type": "swissTableSlide",
       "data": {
-        "eyebrow": "P · 14",
+        "eyebrow": "Synthetic validation",
         "title": "网格应用评分表",
-        "subtitle": "ELEVEN CRITERIA · THREE COMPACT COLUMNS",
+        "subtitle": "合成评分数据 · 仅用于表格验证",
         "columns": [
-          { "key": "criterion", "label": "评分项", "align": "left", "width": 2.2 },
-          { "key": "score", "label": "得分", "align": "center", "width": 0.72 },
-          { "key": "status", "label": "状态", "align": "left", "kind": "status", "width": 1.08 }
-        ],
-        "rows": [
           {
-            "criterion": "信息层级",
-            "score": "96",
-            "status": { "label": "清晰", "tone": "success" }
+            "label": "评分项",
+            "align": "left",
+            "weight": 2.2
           },
           {
-            "criterion": "阅读路径",
-            "score": "92",
-            "status": { "label": "稳定", "tone": "success" }
+            "label": "得分",
+            "align": "center",
+            "weight": 0.72
           },
           {
-            "criterion": "栏宽控制",
-            "score": "88",
-            "status": { "label": "可优化", "tone": "warning" }
-          },
-          {
-            "criterion": "行距节奏",
-            "score": "90",
-            "status": { "label": "稳定", "tone": "success" }
-          },
-          {
-            "criterion": "留白比例",
-            "score": "94",
-            "status": { "label": "清晰", "tone": "success" }
-          },
-          {
-            "criterion": "跨页一致性",
-            "score": "87",
-            "status": { "label": "可优化", "tone": "warning" }
-          },
-          {
-            "criterion": "数字可读性",
-            "score": "91",
-            "status": { "label": "稳定", "tone": "success" }
-          },
-          {
-            "criterion": "对齐纪律",
-            "score": "95",
-            "status": { "label": "清晰", "tone": "success" }
-          },
-          {
-            "criterion": "密度承载",
-            "score": "84",
-            "status": { "label": "需复核", "tone": "risk" }
-          },
-          {
-            "criterion": "中英混排",
-            "score": "86",
-            "status": { "label": "可优化", "tone": "warning" }
-          },
-          {
-            "criterion": "导出稳定性",
-            "score": "93",
-            "status": { "label": "稳定", "tone": "success" }
+            "label": "状态",
+            "align": "left",
+            "weight": 1.08
           }
         ],
-        "source": "Source: lecture scoring matrix · illustrative"
+        "rows": [
+          ["信息层级", "96", "清晰"],
+          ["阅读路径", "92", "稳定"],
+          ["栏宽控制", "88", "可优化"],
+          ["行距节奏", "90", "稳定"],
+          ["留白比例", "94", "清晰"],
+          ["跨页一致性", "87", "可优化"],
+          ["数字可读性", "91", "稳定"],
+          ["对齐纪律", "95", "清晰"],
+          ["密度承载", "84", "需复核"],
+          ["中英混排", "86", "可优化"],
+          ["导出稳定性", "93", "稳定"]
+        ],
+        "source": "来源：合成评分矩阵，用于布局验证；不代表真实评估。",
+        "rowTones": [
+          "neutral",
+          "neutral",
+          "neutral",
+          "neutral",
+          "neutral",
+          "neutral",
+          "neutral",
+          "neutral",
+          "focus",
+          "neutral",
+          "neutral"
+        ]
       }
     },
     {
@@ -515,30 +511,8 @@
         "titleB": "是自由的语法",
         "subtitle": "The grid is not a constraint. It is a grammar of freedom.",
         "footerL": "SWISS GRID SYSTEMS · A LECTURE",
-        "footerR": "END · 15 / 15 · 2026",
-        "dots": [
-          [8.82, 0.98],
-          [9.49, 0.99],
-          [10.34, 0.99],
-          [11.19, 1.4],
-          [8.14, 1.7],
-          [12.2, 1.69],
-          [10.51, 2.26],
-          [11.86, 2.26],
-          [7.3, 3.09],
-          [7.79, 3.09],
-          [7.63, 3.66],
-          [9.15, 3.66],
-          [12.2, 4.2],
-          [12.2, 4.49],
-          [12.2, 4.77],
-          [8.64, 5.19],
-          [9.15, 5.19],
-          [11.87, 5.51],
-          [12.54, 5.51],
-          [10.51, 6.31],
-          [8.48, 7.04]
-        ]
+        "footerR": "END · 2026",
+        "eyebrow": "Swiss Grid · Closing"
       }
     }
   ]

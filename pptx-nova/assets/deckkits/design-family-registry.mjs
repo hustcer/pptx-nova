@@ -3,6 +3,7 @@
 import { CARTESIAN_FAMILY } from './cartesian-registry.mjs'
 import { BROADSIDE_FAMILY } from './broadside-registry.mjs'
 import { LONG_TABLE_FAMILY } from './long-table-registry.mjs'
-export const DESIGN_FAMILIES = [CARTESIAN_FAMILY, BROADSIDE_FAMILY, LONG_TABLE_FAMILY]
+import { SWISS_FAMILY } from './swiss-registry.mjs'
+export const DESIGN_FAMILIES = [CARTESIAN_FAMILY, BROADSIDE_FAMILY, LONG_TABLE_FAMILY, SWISS_FAMILY]
 export const registeredDesignFamily = (design) => DESIGN_FAMILIES.find((f) => design[f.key])
 export const registeredDesignChecks = DESIGN_FAMILIES.flatMap((f) => Object.keys(f.checks))

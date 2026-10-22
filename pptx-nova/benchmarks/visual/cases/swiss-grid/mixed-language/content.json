@@ -1,69 +1,70 @@
 {
   "meta": {
     "deckkit": "swiss-grid",
-    "style": "swiss-international",
-    "layout": "mixed-language"
+    "designScope": "excerpt"
   },
   "slides": [
     {
       "type": "swissQuoteSlide",
       "data": {
-        "quote": "A grid is a grammar,\nnot a cage.",
-        "body": "网格提供共同语法，但不替代判断。\nThe system defines rhythm; the designer still decides emphasis.",
-        "author": "SWISS GRID SYSTEMS",
-        "source": "Mixed-language benchmark · 2026"
-      }
+        "quote": "The grid system is an aid,\nnot a guarantee.",
+        "body": "It permits a number of possible uses, and each\ndesigner can look for a solution appropriate to\nhis personal style. But one must learn how to\nuse the grid — it is an art that requires practice.",
+        "author": "JOSEF MÜLLER-BROCKMANN",
+        "source": "Grid Systems in Graphic Design · 1981"
+      },
+      "layoutId": "bracket"
     },
     {
       "type": "swissColumnSlide",
       "data": {
-        "eyebrow": "P · 02",
-        "title": "跨语言版式",
-        "subtitle": "MIXED LANGUAGE · SAME GRID",
+        "eyebrow": "Applications",
+        "title": "输出到现代世界",
+        "subtitle": "1960s → · FROM SWITZERLAND TO THE GLOBAL DESIGN SYSTEM",
         "items": [
           {
-            "title": "中文标题",
-            "subtitle": "CHINESE TITLE",
-            "body": "短句需要更强行距\n但仍沿用同一列宽",
-            "examples": "标题 · 正文 · 页码\n全部齐左"
+            "title": "企业 VI",
+            "subtitle": "CORPORATE IDENTITY",
+            "body": "把瑞士理性变成“识别系统”\n产业的开端",
+            "examples": "IBM (Paul Rand)\nKnoll · Lufthansa\nOlivetti · Braun\nJMB 任 IBM 顾问",
+            "note": "JMB 任 IBM 顾问 · 1967 起"
           },
           {
-            "title": "English copy",
-            "subtitle": "LATIN TEXT",
-            "body": "Uppercase labels and compact body copy share the same modular baseline.",
-            "examples": "Caption\nKicker\nFooter"
+            "title": "机场 / 地铁标识",
+            "subtitle": "SIGNAGE SYSTEMS",
+            "body": "公共空间的可读性\n是瑞士理性的延伸",
+            "examples": "纽约地铁 Unimark\n巴黎机场 Frutiger 字体\n慕尼黑 Otl Aicher",
+            "note": "Vignelli · 纽约地铁手册"
           },
           {
-            "title": "数字标签",
-            "subtitle": "NUMERIC SYSTEM",
-            "body": "01 / 14\nP · 02\n16px unit",
-            "examples": "Numbers keep orientation\nwithout decoration"
+            "title": "出版业",
+            "subtitle": "EDITORIAL DESIGN",
+            "body": "期刊 · 杂志 · 文化出版\n的版面语法",
+            "examples": "Du 杂志\nEye Magazine\nDomus · Wallpaper*",
+            "note": "文化出版的版面语法"
           },
           {
-            "title": "红色强调",
-            "subtitle": "RED ACCENT",
-            "body": "只在需要建立优先级时出现\nNever as decoration.",
-            "examples": "Rule · Dot · Active item",
-            "accent": "E2231A"
+            "title": "设计教育",
+            "subtitle": "DESIGN EDUCATION",
+            "body": "巴塞尔 + 苏黎世\n两条教学路径全球化",
+            "examples": "Yale (Hofmann)\nRISD · Cooper Union\n东京 GS 学派",
+            "focus": true,
+            "note": "教学方法与实践的延续"
           }
         ]
-      }
+      },
+      "layoutId": "columns"
     },
     {
       "type": "swissClosingSlide",
       "data": {
-        "titleA": "同一套网格",
-        "titleB": "容纳多种语言",
-        "subtitle": "One grid hosts many writing systems without changing grammar.",
-        "dots": [
-          [8.7, 1.6],
-          [9.5, 2.2],
-          [10.6, 2.8],
-          [11.4, 3.9],
-          [9.2, 5.0],
-          [10.1, 5.7]
-        ]
-      }
+        "titleA": "网格不是限制",
+        "titleB": "是自由的语法",
+        "subtitle": "The grid is not a constraint. It is a grammar of freedom.",
+        "footerL": "SWISS GRID SYSTEMS · A LECTURE",
+        "footerR": "END · 2026",
+        "eyebrow": "Swiss Grid · Closing"
+      },
+      "layoutId": "lower"
     }
   ]
 }

@@ -506,13 +506,13 @@ scatter / bubble 误传 `categories + values`：
 
 ```text
 [error] slides[3]: required layout slot "data.eyebrow" is missing or empty
-  — swiss-grid 内页 eyebrow 为顶部排版必填项；页码型 kicker 填 "P · <两位页码>" ...
+  — swiss-grid 内页 eyebrow 为真实的顶部短文案，请按内容补齐 ...
 ```
 
 修复：按错误信息尾部的 hint 补齐对应槽位（hint 来自 catalog `layoutContract.slotHints`）。
 常见案例 swiss-grid 的 `data.eyebrow`：它是顶部排版契约的一部分，**必填且不可放宽**；
-不需要可见 kicker 时填页码型 `"P · <两位页码>"`（与页码一致，如第 4 页填 `"P · 04"`，
-chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案（如 `"ARGUMENT · 07"`）。
+2.0 会完整显示该字段，请填真实短文案（如 `"Origins"` 或 `"设计原则"`）。
+独立页码由生成器按页面位置计算；旧 `"P · 04"` 输入不会再被静默抑制。
 没有 hint 的槽位按 DeckKit 的 `assets/examples/<deckkit>/content.json` 对照补齐。
 
 ## visualRisks[] 警告处理

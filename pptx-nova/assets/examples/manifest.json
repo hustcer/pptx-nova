@@ -219,8 +219,8 @@
       "deckkit": "swiss-grid",
       "caseId": "swiss-grid.golden-lecture",
       "kind": "golden",
-      "readiness": "production",
-      "version": "0.1.0",
+      "readiness": "candidate",
+      "version": "2.0.0",
       "title": "网格系统",
       "bestFor": [
         "design education",
@@ -230,40 +230,33 @@
         "minimal comparison tables",
         "Swiss-style presentation"
       ],
-      "defaultFor": [
-        "swiss grid systems",
-        "Swiss International Typographic Style",
-        "design lecture",
-        "grid system lecture",
-        "瑞士网格系统",
-        "设计课程"
-      ],
+      "defaultFor": [],
       "files": {
         "deck": {
           "path": "swiss-grid/deck.pptx",
-          "bytes": 51697,
-          "sha256": "a4f5ed0461df3e2f9360a60141c8baa7e2c2edd122d24578fada26497b62ead7"
+          "bytes": 49032,
+          "sha256": "c1aa0816b0488b677da544886e089cfdd65ddff8cf52519f93a1982574873af2"
         },
         "contactSheet": {
           "path": "swiss-grid/contact-sheet.webp",
-          "bytes": 140296,
-          "sha256": "6b319ca9e56aded714afd46c13bb2320a84c47d793fa4f93218bdb80687e0d7a",
+          "bytes": 159868,
+          "sha256": "9f751f2d78234c23726c2ee7387a9bbb36d51a38b8e21001fe0d08c749ea92dc",
           "quality": 82
         },
         "content": {
           "path": "swiss-grid/content.json",
-          "bytes": 19121,
-          "sha256": "b295d41ffd91d15f41372c269be59e9d72f666cca1c604e3301a55e21f995d90"
+          "bytes": 18164,
+          "sha256": "1b39571544a6e68763e12e502095af7519a93f88f8044822f742028cfdf4f7fd"
         },
         "brief": {
           "path": "swiss-grid/brief.md",
-          "bytes": 807,
-          "sha256": "4c5a72442f5b0e22182e2ea42e11419bc4ff88ec7ab2a5b8d79d992a4867ce90"
+          "bytes": 735,
+          "sha256": "8cb0288625356e2dafc56aa50d698198db88be5274548f450a529d50916d7be3"
         },
         "summary": {
           "path": "swiss-grid/summary.json",
-          "bytes": 2783,
-          "sha256": "fbf264f6a231a0893c2963afba832190504f16cc9e1ee76d7a165b4206a9028a"
+          "bytes": 2729,
+          "sha256": "279fce2d6189cafcd532dbc141b98e96d7e603c424f3a59e6cbaeb1f97218cb1"
         }
       },
       "validation": {
@@ -275,21 +268,21 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 2248
+        "ops": 1960
       },
       "vision": {
         "status": "success",
         "slideCount": 15,
-        "issueCount": 208,
+        "issueCount": 0,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 208
+          "low": 0
         },
         "lowBuckets": {
-          "total": 208,
-          "styleAllowed": 208,
+          "total": 0,
+          "styleAllowed": 0,
           "baselineKnown": 0,
           "new": 0,
           "changed": 0,
@@ -298,9 +291,7 @@
           "baselineUnavailable": false,
           "baselineUpdated": false
         },
-        "lowByFamily": {
-          "small-font": 208
-        },
+        "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
@@ -308,15 +299,15 @@
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
           "available": true,
-          "issueCount": 208
+          "issueCount": 0
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
           "source": "catalog.qualityProfile",
-          "minFontPt": 6.8,
-          "labelFontPt": 6.8,
-          "sourceFontPt": 6.8,
-          "note": "DeckKit golden constants override generic prose readability floors for Swiss typographic labels."
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
         },
         "newLowSamples": [],
         "changedLowSamples": [],

@@ -1265,8 +1265,8 @@ function swissColumnContent() {
             {
               title: 'View',
               subtitle: 'Preview surfaces',
-              body: ['Inspect layouts', 'Review changes'],
-              examples: ['Open PPTX', 'Render slide', 'Check notes'],
+              body: 'Inspect layouts\nReview changes',
+              examples: 'Open PPTX\nRender slide\nCheck notes',
             },
           ],
         },
@@ -1687,12 +1687,12 @@ test('DeckKit slot reference covers every swiss-grid slide type', () => {
   assert.ok(
     reference.slideTypes
       .find((slideType) => slideType.slideType === 'swissTypefaceSlide')
-      ?.rows.some((row) => row.path === 'data.cards' && row.budget.includes('max 3 items')),
+      ?.rows.some((row) => row.path === 'data.cards' && row.budget.includes('items 1-3')),
   )
   assert.ok(
     reference.slideTypes
       .find((slideType) => slideType.slideType === 'swissTableSlide')
-      ?.rows.some((row) => row.path === 'data.rows' && row.budget.includes('max 11 items')),
+      ?.rows.some((row) => row.path === 'data.rows' && row.budget.includes('items 1-11')),
   )
   assert.ok(
     reference.slideTypes
@@ -1700,8 +1700,8 @@ test('DeckKit slot reference covers every swiss-grid slide type', () => {
       ?.rows.some(
         (row) =>
           row.path === 'data.tag' &&
-          row.budget.includes('10pt @ 4.6in x 0.7in') &&
-          row.budget.includes('CJK ~33 chars x 4 line(s)'),
+          row.budget.includes('11pt @ 11.81in x 0.67in') &&
+          row.budget.includes('2 line(s)'),
       ),
   )
 })
@@ -3774,18 +3774,18 @@ test('refurbish plan requires semantic diff gate by default', async () => {
   )
 })
 
-test('swiss-grid refurbishment stays on the reviewed manual fallback route', async () => {
+test('explicit swiss-grid refurbishment retains its independent manual fallback route', async () => {
   const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
   const plan = buildRefurbishPlan({
     deckkit: 'swiss-grid',
     source: 'source.pptx',
     output: 'candidate.pptx',
     catalog: skillPath('assets/deckkits/catalog.json'),
-    explicit: false,
+    explicit: true,
     json: true,
   })
 
-  assert.equal(plan.status, 'manual-fallback')
+  assert.equal(plan.status, 'explicit-manual-fallback')
   assert.equal(plan.route, 'fallback-patch')
   assert.equal(plan.nativeSkinning.supported, false)
   assert.equal(
@@ -3797,6 +3797,11 @@ test('swiss-grid refurbishment stays on the reviewed manual fallback route', asy
       path: 'references/reference-create.md',
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
+    },
+    {
+      path: 'references/deckkit-mode.md',
+      section: 'Selection',
+      reason: 'The explicitly selected DeckKit uses a readiness exception.',
     },
   ])
 })

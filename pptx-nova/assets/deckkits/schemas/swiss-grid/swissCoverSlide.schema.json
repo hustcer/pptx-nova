@@ -1,27 +1,72 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "pptx-nova-slide/swiss-grid/swissCoverSlide",
-  "title": "swissCoverSlide data schema",
+  "title": "swissCoverSlide 2.0 data",
   "type": "object",
   "properties": {
     "eyebrow": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 10.5, "widthIn": 2.2 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
-    "title": { "type": "string", "x-slotBudget": { "maxLines": 2, "fontPt": 48, "widthIn": 6.6 } },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 64,
+        "widthIn": 10.7,
+        "heightIn": 1.5,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "subtitle": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 24, "widthIn": 5.6 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 19,
+        "widthIn": 11.7,
+        "heightIn": 0.7,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "tag": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 4, "fontPt": 10, "widthIn": 4.6, "heightIn": 0.7 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 11.81,
+        "heightIn": 0.67,
+        "lineHeight": 1.1,
+        "maxLines": 2
+      }
     },
     "footer": {
       "type": "string",
-      "description": "Optional page-count override; defaults to 01 / <total slides>.",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 7.5, "widthIn": 1.0 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 10,
+        "heightIn": 0.25,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     }
   },
-  "additionalProperties": true
+  "required": ["eyebrow", "title", "subtitle", "tag"],
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "swiss-grid/design.json",
+  "x-capacityCheck": "resolve-swiss-components/v1"
 }

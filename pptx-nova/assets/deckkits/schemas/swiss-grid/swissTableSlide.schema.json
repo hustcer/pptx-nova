@@ -1,76 +1,124 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "pptx-nova-slide/swiss-grid/swissTableSlide",
-  "title": "swissTableSlide data schema",
+  "title": "swissTableSlide 2.0 data",
   "type": "object",
   "properties": {
     "eyebrow": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 8.8, "widthIn": 1.5 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
-    "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 30, "widthIn": 6.6 } },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 30,
+        "widthIn": 12.03,
+        "heightIn": 0.78,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "subtitle": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 11, "widthIn": 6.6 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 12.03,
+        "heightIn": 0.42,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "columns": {
       "type": "array",
-      "minItems": 2,
-      "maxItems": 6,
-      "description": "Column definitions. Use width/weight for relative width, align for left|center|right, and kind=status for dot+label status cells.",
-      "x-slotBudget": { "maxItems": 6 },
       "items": {
         "type": "object",
         "properties": {
-          "key": {
-            "type": "string",
-            "description": "Field key read from each row object."
-          },
           "label": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 8.2, "widthIn": 1.8 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 1.805,
+              "heightIn": 0.38,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
           },
           "align": {
-            "type": "string",
-            "enum": ["left", "center", "right"]
-          },
-          "kind": {
-            "type": "string",
-            "enum": ["text", "number", "status"]
-          },
-          "width": {
-            "type": "number",
-            "description": "Relative column width; first text column usually uses 1.5-2.0."
+            "enum": ["left", "center", "right"],
+            "x-slotRole": "control"
           },
           "weight": {
             "type": "number",
-            "description": "Alias for width."
+            "exclusiveMinimum": 0,
+            "x-slotRole": "control"
           }
         },
-        "additionalProperties": true
-      }
+        "required": ["label"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 6
     },
     "rows": {
       "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "x-slotBudget": {
+            "fontPt": 11,
+            "widthIn": 1.805,
+            "heightIn": 0.33636363636363636,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
+        },
+        "minItems": 2,
+        "maxItems": 6
+      },
+      "minItems": 1,
+      "maxItems": 11
+    },
+    "rowTones": {
+      "type": "array",
+      "items": {
+        "enum": ["neutral", "focus"]
+      },
       "minItems": 1,
       "maxItems": 11,
-      "description": "Object rows keyed by columns[].key, or array rows matching column order. Status cells may be { label, tone, color }.",
-      "x-slotBudget": { "maxItems": 11 },
-      "items": {
-        "type": ["object", "array"],
-        "additionalProperties": true
-      }
+      "x-slotRole": "control"
     },
     "source": {
       "type": "string",
-      "description": "表格下方的来源行（faint，西文字体）；与 note 同时存在时来源在下。",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 7.8 }
-    },
-    "note": {
-      "type": "string",
-      "description": "表格下方的备注行（muted，中文字体）；与 source 同时存在时备注在上、来源在下。",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 7.2, "widthIn": 7.8 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 10.03,
+        "heightIn": 0.25,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     }
   },
-  "additionalProperties": true
+  "required": ["eyebrow", "title", "subtitle", "columns", "rows", "source"],
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "swiss-grid/design.json",
+  "x-capacityCheck": "resolve-swiss-components/v1"
 }

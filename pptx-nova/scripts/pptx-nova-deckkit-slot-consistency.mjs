@@ -13,6 +13,7 @@
 //   enum 槽位与非 string 槽位自动跳过；无 properties 的 object/array（动态结构）记为 dynamic 并跳过
 //   x-slotProbeVariants: [{omit: ['optionalField']}] probes legal alternatives; every field must remain covered.
 //   x-slotProbeOmit: true       Omit optional control fields that conflict in a generic probe; never visible text.
+//   x-slotProbeValue: value     A valid semantic control value, e.g. an offline icon id; never visible text.
 //
 // 用法：
 //   node <skill-root>/scripts/pptx-nova-deckkit-slot-consistency.mjs [--deckkit <id>] [--json]
@@ -98,6 +99,11 @@ function buildProbe(schema, basePath) {
   function fillField(field, fieldSchema, path, inheritedSlotRole = null) {
     const type = Array.isArray(fieldSchema.type) ? fieldSchema.type[0] : fieldSchema.type
     const slotRole = fieldSchema['x-slotRole'] ?? inheritedSlotRole
+    if (Object.hasOwn(fieldSchema, 'x-slotProbeValue')) {
+      if (slotRole !== 'control') throw new Error('Probe values require control fields')
+      return structuredClone(fieldSchema['x-slotProbeValue'])
+    }
+    if (Object.hasOwn(fieldSchema, 'const')) return fieldSchema.const
     if (fieldSchema.enum) return fieldSchema.enum[0]
     if (type === 'string') {
       if (slotRole === 'control' || CONTROL_FIELD_NAMES.has(field)) {
@@ -107,7 +113,13 @@ function buildProbe(schema, basePath) {
       sentinels.push({ path, token, fallbackOf: fieldSchema['x-slotFallbackOf'] ?? null })
       return token
     }
-    if (type === 'number' || type === 'integer') return 1
+    if (type === 'number' || type === 'integer') {
+      let value = Math.max(1, fieldSchema.minimum ?? -Infinity)
+      if (fieldSchema.exclusiveMinimum !== undefined && value <= fieldSchema.exclusiveMinimum)
+        value = fieldSchema.exclusiveMinimum + 1
+      if (fieldSchema.maximum !== undefined) value = Math.min(value, fieldSchema.maximum)
+      return type === 'integer' ? Math.ceil(value) : value
+    }
     if (type === 'boolean') return false
     if (type === 'array') {
       const itemSchema = fieldSchema.items

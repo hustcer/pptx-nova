@@ -42,8 +42,9 @@ cp pptx-nova/assets/examples/theme-packs.generated.mjs .tmp/deckkit-<id>/theme-p
 - 复刻不是像素描摹：优先还原**网格关系**（列数、间距、对齐、比例），坐标从
   `grid()` / bbox 推导后与 XML 原值核对，偏差 ≤0.05in 视为一致。
 
-可参考的成熟 kit 写法：`pptx-nova/assets/deckkits/swiss-grid.kit.mjs`
-（常量区 → makeChrome → 几何 helper → makePageTypes → createDeck 的分层）。
+可参考 Swiss Grid 2.0 的 `swiss-grid/design.json`、`swiss-layouts.mjs` 和
+`swiss-components.mjs`：合同定义区域与身份，解析器按实例编译完整组件计划，执行器消费计划。
+`swiss-grid.kit.mjs` 只保留公共薄接口；不要再复制已退役的 makePageTypes 固定绘制结构。
 
 ## 2. 资产处理
 

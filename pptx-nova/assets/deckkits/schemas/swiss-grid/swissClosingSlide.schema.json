@@ -1,28 +1,84 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "pptx-nova-slide/swiss-grid/swissClosingSlide",
-  "title": "swissClosingSlide data schema",
+  "title": "swissClosingSlide 2.0 data",
   "type": "object",
   "properties": {
-    "titleA": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 54, "widthIn": 6.0 } },
-    "titleB": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 54, "widthIn": 6.0 } },
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "titleA": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 64,
+        "widthIn": 10.3,
+        "heightIn": 1.38,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "titleB": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 64,
+        "widthIn": 10.3,
+        "heightIn": 1.38,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "subtitle": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 2, "fontPt": 12, "widthIn": 6.6 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 15,
+        "widthIn": 11.9,
+        "heightIn": 0.55,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "footerL": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 3.0 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 9,
+        "heightIn": 0.32,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "footerR": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 8.4, "widthIn": 1.7 }
-    },
-    "dots": {
-      "type": "array",
-      "maxItems": 24,
-      "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 2.58,
+        "heightIn": 0.32,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     }
   },
-  "additionalProperties": true
+  "required": ["eyebrow", "titleA", "titleB", "subtitle", "footerL", "footerR"],
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "swiss-grid/design.json",
+  "x-capacityCheck": "resolve-swiss-components/v1"
 }

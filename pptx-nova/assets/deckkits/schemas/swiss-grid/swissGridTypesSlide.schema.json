@@ -1,51 +1,116 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "pptx-nova-slide/swiss-grid/swissGridTypesSlide",
-  "title": "swissGridTypesSlide data schema",
+  "title": "swissGridTypesSlide 2.0 data",
   "type": "object",
   "properties": {
     "eyebrow": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 8.8, "widthIn": 1.5 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
-    "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 30, "widthIn": 6.6 } },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 30,
+        "widthIn": 12.03,
+        "heightIn": 0.78,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "subtitle": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 11, "widthIn": 6.6 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 12.03,
+        "heightIn": 0.42,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "items": {
       "type": "array",
-      "minItems": 1,
-      "maxItems": 4,
-      "x-slotBudget": { "maxItems": 4 },
       "items": {
         "type": "object",
         "properties": {
           "num": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 10.5, "widthIn": 1.4 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 3.964999999999999,
+              "heightIn": 0.3,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
           },
           "title": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 15.5, "widthIn": 3.0 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 15,
+              "widthIn": 3.964999999999999,
+              "heightIn": 0.45,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
           },
           "subtitle": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 11, "widthIn": 2.5 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 3.964999999999999,
+              "heightIn": 0.35,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
           },
           "body": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 2, "fontPt": 10.2, "widthIn": 3.3 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 3.964999999999999,
+              "heightIn": 0.5499999999999998,
+              "lineHeight": 1.1,
+              "maxLines": 2
+            }
           },
           "diagram": {
-            "type": "string",
-            "enum": ["manuscript", "columns", "modular", "mosaic", "hierarchical"],
-            "description": "右侧装饰图形样式（hierarchical 与 mosaic 同形）；未指定时按条目顺序自动轮换 mosaic → columns → manuscript → modular，避免同页四个图形完全相同。"
+            "enum": ["manuscript", "columns", "modular", "hierarchical"],
+            "x-slotRole": "control"
+          },
+          "focus": {
+            "type": "boolean",
+            "x-slotRole": "control"
           }
         },
-        "additionalProperties": true
-      }
+        "required": ["num", "title", "subtitle", "body", "diagram"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 4
     }
   },
-  "additionalProperties": true
+  "required": ["eyebrow", "title", "subtitle", "items"],
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "swiss-grid/design.json",
+  "x-capacityCheck": "resolve-swiss-components/v1"
 }

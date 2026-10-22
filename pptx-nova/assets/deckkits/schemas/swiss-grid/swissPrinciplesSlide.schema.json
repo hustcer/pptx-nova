@@ -1,46 +1,112 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "pptx-nova-slide/swiss-grid/swissPrinciplesSlide",
-  "title": "swissPrinciplesSlide data schema",
+  "title": "swissPrinciplesSlide 2.0 data",
   "type": "object",
   "properties": {
     "eyebrow": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 8.8, "widthIn": 1.5 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9,
+        "heightIn": 0.3,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
-    "title": { "type": "string", "x-slotBudget": { "maxLines": 1, "fontPt": 30, "widthIn": 6.6 } },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 30,
+        "widthIn": 12.03,
+        "heightIn": 0.78,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "subtitle": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 11, "widthIn": 6.6 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 12.03,
+        "heightIn": 0.42,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "items": {
       "type": "array",
-      "minItems": 1,
-      "maxItems": 8,
-      "x-slotBudget": { "maxItems": 8 },
       "items": {
         "type": "object",
         "properties": {
           "num": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 31, "widthIn": 2.5 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 22,
+              "widthIn": 2.7824999999999998,
+              "heightIn": 0.5,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
           },
           "title": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 9.4, "widthIn": 2.5 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 12,
+              "widthIn": 2.7824999999999998,
+              "heightIn": 0.35,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
           },
           "subtitle": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 1, "fontPt": 6.8, "widthIn": 2.5 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 2.7824999999999998,
+              "heightIn": 0.47,
+              "lineHeight": 1.1,
+              "maxLines": 2
+            }
           },
           "body": {
             "type": "string",
-            "x-slotBudget": { "maxLines": 3, "fontPt": 7.2, "widthIn": 2.4 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 2.7824999999999998,
+              "heightIn": 0.5,
+              "lineHeight": 1.1,
+              "maxLines": 2
+            }
+          },
+          "focus": {
+            "type": "boolean",
+            "x-slotRole": "control"
           }
         },
-        "additionalProperties": true
-      }
+        "required": ["num", "title", "subtitle", "body"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 8
     }
   },
-  "additionalProperties": true
+  "required": ["eyebrow", "title", "subtitle", "items"],
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "swiss-grid/design.json",
+  "x-capacityCheck": "resolve-swiss-components/v1"
 }

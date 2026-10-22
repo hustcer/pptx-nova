@@ -234,6 +234,9 @@
     },
     "longTable": {
       "$ref": "#/$defs/longTable"
+    },
+    "swiss": {
+      "$ref": "#/$defs/swiss"
     }
   },
   "required": [
@@ -2152,6 +2155,175 @@
         "table",
         "rhythm"
       ],
+      "additionalProperties": false
+    },
+    "swiss": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "swiss-typographic/v1"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sizePt": {
+                "type": "number",
+                "minimum": 10
+              },
+              "lineHeight": {
+                "type": "number",
+                "minimum": 1
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "italic": {
+                "type": "boolean"
+              },
+              "alignment": {
+                "enum": ["left", "right", "center"]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["role", "sizePt", "lineHeight", "color"],
+            "additionalProperties": false
+          }
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "enum": [
+                  "cover",
+                  "quote",
+                  "timeline",
+                  "progress",
+                  "principles",
+                  "people",
+                  "columns",
+                  "brands",
+                  "profile",
+                  "typeface",
+                  "gridTypes",
+                  "system",
+                  "statement",
+                  "table",
+                  "closing"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "titleStyle": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["titleStyle", "regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        },
+        "capacity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "margin": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "gap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pad": {
+              "type": "number",
+              "minimum": 0
+            },
+            "rulePt": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["margin", "gap", "pad", "rulePt"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "eyebrow": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            },
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "subtitle": {
+              "$ref": "#/$defs/frame"
+            },
+            "mark": {
+              "$ref": "#/$defs/frame"
+            },
+            "footer": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["eyebrow", "page", "title", "subtitle", "mark", "footer"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "minFullDeck": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["maxConsecutive", "minFullDeck"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["family", "styles", "families", "capacity", "spacing", "chrome", "rhythm"],
       "additionalProperties": false
     }
   }

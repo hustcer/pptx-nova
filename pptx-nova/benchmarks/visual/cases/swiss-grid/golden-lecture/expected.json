@@ -10,11 +10,26 @@
       "swissQuoteSlide",
       "swissTimelineSlide",
       "swissPrinciplesSlide",
+      "swissPeopleGridSlide",
+      "swissProfileSlide",
+      "swissTypefaceSlide",
+      "swissGridTypesSlide",
+      "swissSystemSlide",
+      "swissStatementSlide",
+      "swissColumnSlide",
+      "swissProgressSlide",
+      "swissBrandGridSlide",
       "swissTableSlide",
       "swissClosingSlide"
     ],
-    "validate": { "errors": 0, "blockingWarnings": 0 },
-    "fitDiagnostics": { "errors": 0, "blockingWarnings": 0 },
+    "validate": {
+      "errors": 0,
+      "blockingWarnings": 0
+    },
+    "fitDiagnostics": {
+      "errors": 0,
+      "blockingWarnings": 0
+    },
     "dryRun": {
       "status": "success",
       "warnings": 0,
@@ -27,9 +42,24 @@
       "visualRisksHigh": 0,
       "visualRisksMedium": 0
     },
-    "vision": { "status": "success", "high": 0, "medium": 0 },
-    "previews": { "enabled": true, "countEqualsSlides": true, "nonEmpty": true },
-    "contactSheet": { "enabled": true, "exists": true, "nonEmpty": true },
-    "performance": { "record": true, "compareToBaseline": true }
+    "vision": {
+      "status": "success",
+      "high": 0,
+      "medium": 0
+    },
+    "previews": {
+      "enabled": true,
+      "countEqualsSlides": true,
+      "nonEmpty": true
+    },
+    "contactSheet": {
+      "enabled": true,
+      "exists": true,
+      "nonEmpty": true
+    },
+    "performance": {
+      "record": true,
+      "compareToBaseline": true
+    }
   }
 }

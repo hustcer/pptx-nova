@@ -1024,24 +1024,17 @@
     },
     {
       "id": "swiss-grid",
-      "version": "0.1.0",
+      "version": "2.0.0",
       "path": "swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "production",
+      "readiness": "candidate",
       "qualityProfile": {
-        "minFontPt": 6.8,
-        "labelFontPt": 6.8,
-        "sourceFontPt": 6.8,
-        "baseline": "DeckKit golden constants override generic prose readability floors for Swiss typographic labels."
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
       },
-      "defaultFor": [
-        "swiss grid systems",
-        "Swiss International Typographic Style",
-        "design lecture",
-        "grid system lecture",
-        "瑞士网格系统",
-        "设计课程"
-      ],
+      "defaultFor": [],
       "bestFor": [
         "design education",
         "typography lecture",
@@ -1057,16 +1050,16 @@
           "swissCoverSlide",
           "swissQuoteSlide",
           "swissTimelineSlide",
+          "swissProgressSlide",
           "swissPrinciplesSlide",
           "swissPeopleGridSlide",
+          "swissColumnSlide",
+          "swissBrandGridSlide",
           "swissProfileSlide",
           "swissTypefaceSlide",
           "swissGridTypesSlide",
           "swissSystemSlide",
           "swissStatementSlide",
-          "swissColumnSlide",
-          "swissProgressSlide",
-          "swissBrandGridSlide",
           "swissTableSlide",
           "swissClosingSlide"
         ]
@@ -1075,16 +1068,16 @@
         "swissCoverSlide",
         "swissQuoteSlide",
         "swissTimelineSlide",
+        "swissProgressSlide",
         "swissPrinciplesSlide",
         "swissPeopleGridSlide",
+        "swissColumnSlide",
+        "swissBrandGridSlide",
         "swissProfileSlide",
         "swissTypefaceSlide",
         "swissGridTypesSlide",
         "swissSystemSlide",
         "swissStatementSlide",
-        "swissColumnSlide",
-        "swissProgressSlide",
-        "swissBrandGridSlide",
         "swissTableSlide",
         "swissClosingSlide"
       ],
@@ -1100,7 +1093,7 @@
         ],
         "signatureElements": [
           "red dot, red bar, or red index marker as the recurring accent",
-          "black type on white with sparse gray rule systems",
+          "black type on white, functional rules and invisible alignment; no cover construction grid",
           "oversized typographic statements and quote pages",
           "modular people grids, typeface specimens, column systems, minimalist tables, and progress markers"
         ],
@@ -1117,9 +1110,17 @@
         },
         "slideRhythm": {
           "anchor": ["swissCoverSlide", "swissClosingSlide"],
-          "statement": ["swissQuoteSlide", "swissStatementSlide", "swissColumnSlide"],
-          "evidence": ["swissTableSlide"],
-          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"]
+          "statement": ["swissQuoteSlide", "swissStatementSlide"],
+          "timeline": ["swissTimelineSlide", "swissProgressSlide"],
+          "register": [
+            "swissPrinciplesSlide",
+            "swissPeopleGridSlide",
+            "swissColumnSlide",
+            "swissBrandGridSlide",
+            "swissProfileSlide"
+          ],
+          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"],
+          "evidence": ["swissTableSlide"]
         },
         "compositionRules": [
           "Use the grid before adding decoration; every element should justify its alignment.",
@@ -1150,18 +1151,21 @@
           "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
           "palette": {
             "background": "FFFFFF",
-            "text": "111111",
-            "accent": "DC2626",
+            "text": "1A1A1A",
+            "accent": "D9251D",
             "softAccent": "F3F4F6",
             "secondary": "6B7280",
             "surface": "FFFFFF",
-            "rule": "111111"
+            "rule": "111111",
+            "muted": "666666",
+            "line": "D0D0D0"
           },
           "fonts": {
             "heading": "Helvetica",
-            "body": "Aptos",
+            "body": "Helvetica",
             "label": "Aptos",
-            "cjk": "Microsoft YaHei"
+            "cjk": "Arial Unicode MS",
+            "display": "Helvetica"
           },
           "styleOps": [
             "set-theme",
@@ -1195,15 +1199,15 @@
           "allowed": false,
           "severity": "error"
         },
-        "slotHints": {
-          "data.eyebrow": "swiss-grid 内页 eyebrow 为顶部排版必填项；页码型 kicker 填 \"P · <两位页码>\"（如 \"P · 04\"，chrome 会抑制重复显示），需要可见 kicker 时填自定义短文案"
-        },
+        "slotHints": {},
         "slideTypes": {
           "swissCoverSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.tag"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.tag"],
+            "allowedLayoutIds": ["auto", "poster", "upper"]
           },
           "swissQuoteSlide": {
-            "requiredSlots": ["data.quote", "data.body", "data.author", "data.source"]
+            "requiredSlots": ["data.quote", "data.body", "data.author", "data.source"],
+            "allowedLayoutIds": ["auto", "bracket", "wide"]
           },
           "swissTimelineSlide": {
             "requiredSlots": [
@@ -1212,15 +1216,35 @@
               "data.subtitle",
               "data.steps",
               "data.calloutTitle",
-              "data.callout",
-              "data.calloutHighlights"
-            ]
+              "data.callout"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+          },
+          "swissProgressSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.steps",
+              "data.callout"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
           },
           "swissPrinciplesSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"],
+            "allowedLayoutIds": ["auto", "matrix"]
           },
           "swissPeopleGridSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.people"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.people"],
+            "allowedLayoutIds": ["auto", "matrix"]
+          },
+          "swissColumnSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"],
+            "allowedLayoutIds": ["auto", "columns"]
+          },
+          "swissBrandGridSlide": {
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.brands"],
+            "allowedLayoutIds": ["auto", "matrix"]
           },
           "swissProfileSlide": {
             "requiredSlots": [
@@ -1232,7 +1256,8 @@
               "data.bio",
               "data.meta",
               "data.events"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "left", "reversed"]
           },
           "swissTypefaceSlide": {
             "requiredSlots": [
@@ -1241,58 +1266,50 @@
               "data.subtitle",
               "data.sampleText",
               "data.cards"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "columns"]
           },
           "swissGridTypesSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"]
+            "requiredSlots": ["data.eyebrow", "data.title", "data.subtitle", "data.items"],
+            "allowedLayoutIds": ["auto", "quadrants"]
           },
           "swissSystemSlide": {
             "requiredSlots": [
               "data.eyebrow",
               "data.title",
               "data.subtitle",
-              "data.baseLabel",
-              "data.baseValue",
               "data.baseNote",
-              "data.body",
               "data.callout",
-              "data.measureLabels",
+              "data.model",
               "data.labels"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "annotated", "reversed"]
           },
           "swissStatementSlide": {
-            "requiredAny": [
-              {
-                "label": "statement or title",
-                "paths": ["data.statement", "data.title"]
-              }
-            ]
-          },
-          "swissColumnSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"]
-          },
-          "swissProgressSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"],
-            "autoIndexSlots": [
-              {
-                "path": "data.steps[].year",
-                "hint": "swissProgressSlide 会自动渲染 01/02/… 大号序号；steps[].year 是序号下方的红色语义小标签（年份 / 阶段名 / 格式名等），填与序号重复的数字会被渲染层去重跳过，等于浪费这个槽位"
-              }
-            ]
-          },
-          "swissBrandGridSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title"]
+            "requiredSlots": ["data.label", "data.title", "data.subtitle", "data.body"],
+            "allowedLayoutIds": ["auto", "right", "left"]
           },
           "swissTableSlide": {
-            "requiredSlots": ["data.eyebrow", "data.title", "data.columns", "data.rows"]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.columns",
+              "data.rows",
+              "data.source"
+            ],
+            "allowedLayoutIds": ["auto", "full", "rail"]
           },
           "swissClosingSlide": {
-            "requiredAny": [
-              {
-                "label": "title/titleA/titleB",
-                "paths": ["data.title", "data.titleA", "data.titleB"]
-              }
-            ]
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.titleA",
+              "data.titleB",
+              "data.subtitle",
+              "data.footerL",
+              "data.footerR"
+            ],
+            "allowedLayoutIds": ["auto", "lower", "upper"]
           }
         }
       },
@@ -1303,12 +1320,17 @@
         "maxConsecutiveSameGroup": 3,
         "groups": {
           "anchor": ["swissCoverSlide", "swissClosingSlide"],
-          "statement": ["swissQuoteSlide", "swissStatementSlide", "swissColumnSlide"],
-          "evidence": ["swissTableSlide"],
+          "statement": ["swissQuoteSlide", "swissStatementSlide"],
           "timeline": ["swissTimelineSlide", "swissProgressSlide"],
-          "principles": ["swissPrinciplesSlide", "swissBrandGridSlide"],
-          "people": ["swissPeopleGridSlide", "swissProfileSlide"],
-          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"]
+          "register": [
+            "swissPrinciplesSlide",
+            "swissPeopleGridSlide",
+            "swissColumnSlide",
+            "swissBrandGridSlide",
+            "swissProfileSlide"
+          ],
+          "system": ["swissTypefaceSlide", "swissGridTypesSlide", "swissSystemSlide"],
+          "evidence": ["swissTableSlide"]
         },
         "thresholds": [
           {
@@ -1344,20 +1366,21 @@
         }
       },
       "validatedWith": {
-        "s8fy": ">=10",
-        "visionCheck": "candidate pending full benchmark",
-        "pngReview": "contact-sheet"
+        "visionCheck": "xdoc 0.13.0 (92a5aa13); final matrix: no high, medium or low issues",
+        "pngReview": "57 final canonical pages reviewed individually; owned labels and dense table/source enlarged",
+        "nativeHost": "PowerPoint for Mac 16.114: five files saved, closed and reopened; title, shape-owned text and table-cell edits independently read back"
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-21",
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-10-22",
         "vision": {
           "high": 0,
           "medium": 0,
-          "low": 277,
+          "low": 0,
           "lowBuckets": {
-            "total": 277,
-            "styleAllowed": 277,
+            "total": 0,
+            "styleAllowed": 0,
             "baselineKnown": 0,
             "new": 0,
             "changed": 0,
@@ -1367,13 +1390,12 @@
             "baselineUpdatedCases": 3
           }
         },
-        "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-21",
+          "date": "2026-10-22",
           "source": {
-            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/pptx-nova-visual"
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -1382,10 +1404,10 @@
           "vision": {
             "high": 0,
             "medium": 0,
-            "low": 277,
+            "low": 0,
             "lowBuckets": {
-              "total": 277,
-              "styleAllowed": 277,
+              "total": 0,
+              "styleAllowed": 0,
               "baselineKnown": 0,
               "new": 0,
               "changed": 0,
@@ -1400,8 +1422,8 @@
               "caseId": "swiss-grid.golden-lecture",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/golden-lecture/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/review.md",
+              "summaryPath": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02/swiss-grid/golden-lecture/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -1416,10 +1438,10 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 208,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 208,
-                  "styleAllowed": 208,
+                  "total": 0,
+                  "styleAllowed": 0,
                   "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
@@ -1437,17 +1459,17 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 369655
+                "bytes": 312698
               },
-              "patchOps": 2248,
-              "p50TotalMs": 58.71
+              "patchOps": 1960,
+              "p50TotalMs": 191.38
             },
             {
               "caseId": "swiss-grid.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/stress-density/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/stress-density/review.md",
+              "summaryPath": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02/swiss-grid/stress-density/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/swiss-grid/stress-density/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -1462,10 +1484,10 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 43,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 43,
-                  "styleAllowed": 43,
+                  "total": 0,
+                  "styleAllowed": 0,
                   "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
@@ -1476,24 +1498,24 @@
                 }
               },
               "previews": {
-                "count": 4,
-                "expectedCount": 4,
+                "count": 12,
+                "expectedCount": 12,
                 "nonEmpty": true,
                 "countEqualsSlides": true
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 104520
+                "bytes": 244628
               },
-              "patchOps": 815,
-              "p50TotalMs": 45.05
+              "patchOps": 1726,
+              "p50TotalMs": 121.7
             },
             {
               "caseId": "swiss-grid.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/swiss-grid/mixed-language/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/swiss-grid/mixed-language/review.md",
+              "summaryPath": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02/swiss-grid/mixed-language/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/swiss-grid/mixed-language/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -1508,10 +1530,10 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 26,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 26,
-                  "styleAllowed": 26,
+                  "total": 0,
+                  "styleAllowed": 0,
                   "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
@@ -1529,22 +1551,24 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 68350
+                "bytes": 60638
               },
-              "patchOps": 608,
-              "p50TotalMs": 42.97
+              "patchOps": 282,
+              "p50TotalMs": 119.65
             }
           ],
           "blockers": []
         }
       },
       "knownLimits": [
-        "Candidate DeckKit based on the bundled Swiss grid benchmark; run the visual benchmark before delivery promotion",
-        "Designed for white-background 16:9 lecture decks with short Swiss-style titles",
-        "swissTableSlide fits up to 11 compact rows and 6 columns; split longer tables",
-        "Small footer and marker typography is intentionally sparse; avoid long legal footnotes"
+        "Fonts are substituted with Helvetica, Arial Black and Arial Unicode MS; not embedded. Recheck other platforms.",
+        "Tabler SVG icons remain vector pictures, not editable path nodes; brand substitutions are documented.",
+        "Numeric system geometry and labels share one input model; manual edits do not synchronize other objects.",
+        "No chart, photo/screenshot slot or source-animation preservation capability is claimed.",
+        "Candidate requires explicit selection; creation evidence does not establish lossless refurbishment."
       ],
-      "examples": ["examples/swiss-grid-content.json"]
+      "examples": ["examples/swiss-grid-content.json"],
+      "designContract": "swiss-grid/design.json"
     },
     {
       "id": "broadside",

@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 2248
+    "ops": 1960
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 39,
-    "opResults": 2248,
+    "changedParts": 40,
+    "opResults": 1960,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -36,8 +36,8 @@
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 39,
-    "opResults": 2248,
+    "changedParts": 40,
+    "opResults": 1960,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -48,16 +48,16 @@
   "vision": {
     "status": "success",
     "slideCount": 15,
-    "issueCount": 208,
+    "issueCount": 0,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 208
+      "low": 0
     },
     "lowBuckets": {
-      "total": 208,
-      "styleAllowed": 208,
+      "total": 0,
+      "styleAllowed": 0,
       "baselineKnown": 0,
       "new": 0,
       "changed": 0,
@@ -66,9 +66,7 @@
       "baselineUnavailable": false,
       "baselineUpdated": false
     },
-    "lowByFamily": {
-      "small-font": 208
-    },
+    "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
@@ -76,15 +74,15 @@
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/swiss-grid.golden-lecture.vision-baseline.json",
       "available": true,
-      "issueCount": 208
+      "issueCount": 0
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
       "source": "catalog.qualityProfile",
-      "minFontPt": 6.8,
-      "labelFontPt": 6.8,
-      "sourceFontPt": 6.8,
-      "note": "DeckKit golden constants override generic prose readability floors for Swiss typographic labels."
+      "minFontPt": 10,
+      "labelFontPt": 10,
+      "sourceFontPt": 10,
+      "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
     },
     "newLowSamples": [],
     "changedLowSamples": [],
@@ -98,12 +96,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 288541,
-      "sha256": "1622dc83cd69c955c0baade83b9170f3dbca19b00a9221096d29297ed1e5afd2"
+      "bytes": 312698,
+      "sha256": "79f70b4f7cc8a24b027b4ae3930cd96e2f2f1c4d4ba5034c4b6c32b8427a5b7a"
     },
     "webp": {
-      "bytes": 140296,
-      "sha256": "6b319ca9e56aded714afd46c13bb2320a84c47d793fa4f93218bdb80687e0d7a"
+      "bytes": 159868,
+      "sha256": "9f751f2d78234c23726c2ee7387a9bbb36d51a38b8e21001fe0d08c749ea92dc"
     }
   }
 }

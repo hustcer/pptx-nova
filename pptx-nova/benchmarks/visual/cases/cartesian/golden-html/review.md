@@ -9,4 +9,10 @@ Expected result:
 - Chart.js canvases are represented as native editable PPTX charts with content-driven data.
 - High and medium vision issues must remain 0.
 - Small accent labels are intentionally darkened from the HTML source where needed for PPTX readability.
-- Labels and roles use at least 10pt, with taller text frames and wider metric slots; the canonical Create gate takes precedence over the historical micro-label styling. Default chart-axis typography remains unchanged.
+- Cartesian 2.0 resolves all ten roles through `cartesian/design.json` and registered component plans.
+- Labels, chart ticks and roles use at least 10pt; paragraphs clear the KPI rule. The canonical Create gate takes precedence over historical micro-label styling.
+- Chart unit/source are explicit synthetic metadata; both series retain their exact source numbers. Automatic axes replace the old fixed 0–60 line range.
+- Final source golden candidate SHA-256: `f8353d9e23cd5d8d0e7f928a642d3dfc255c35acae6e5c32fd50ee69ba25d212`.
+- All ten canonical pages were individually reviewed. The wider 42-page matrix covers all eighteen compositions, CJK/mixed text, capacity limits, native paragraphs and real contain/cover image slots.
+- PowerPoint 16.114 opened, saved and reopened all six matrix decks without Repair. Saved-file readback passed; title, owned-circle text and embedded chart data edits were independently verified.
+- See [migration results](../../../../../../docs/cartesian-v2-migration-results.md) for scope, evidence paths and unverified capabilities. This is candidate readiness, not automatic production/default qualification.

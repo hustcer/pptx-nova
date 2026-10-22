@@ -463,8 +463,8 @@
       "deckkit": "cartesian",
       "caseId": "cartesian.golden-html",
       "kind": "golden",
-      "readiness": "production",
-      "version": "0.3.1",
+      "readiness": "candidate",
+      "version": "2.0.0",
       "title": "Cartesian",
       "bestFor": [
         "minimal strategy narrative",
@@ -477,29 +477,29 @@
       "files": {
         "deck": {
           "path": "cartesian/deck.pptx",
-          "bytes": 27488,
-          "sha256": "9410dc5c4233cd137d327bdb2b27ba350230a9f4d91fc026fed22d66747678f6"
+          "bytes": 28606,
+          "sha256": "f8353d9e23cd5d8d0e7f928a642d3dfc255c35acae6e5c32fd50ee69ba25d212"
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 65814,
-          "sha256": "d1f7fb3582793466aecad3b159f92f75fcb1c892894034637a48004e7a1da335",
+          "bytes": 69434,
+          "sha256": "de13a0b0fa186170ce4f05f60778b4ac79a8b5398059ed2a51f167ae3009fd28",
           "quality": 82
         },
         "content": {
           "path": "cartesian/content.json",
-          "bytes": 5260,
-          "sha256": "e22acbb6f4b0bfb3db14868dd1ef787c0a9ed611743a49c47eb73159cd457c69"
+          "bytes": 6029,
+          "sha256": "f983198fb9c4a2b2dc1e8ba18fc49af9b750e1ddab7e75aa29a66074e6a3a64f"
         },
         "brief": {
           "path": "cartesian/brief.md",
-          "bytes": 709,
-          "sha256": "0a89ace46b772add78ccef190a23f61895b8540c8f9beee10d6f799037963472"
+          "bytes": 708,
+          "sha256": "b9d7c38aeefbc4381d03136c90129be77b4e16d3e34eb616ca37b633042575c0"
         },
         "summary": {
           "path": "cartesian/summary.json",
-          "bytes": 5324,
-          "sha256": "f509febdcbae3d55bf725414deab029b73d551bbac4d1e621086c85f0c22e960"
+          "bytes": 2707,
+          "sha256": "dbea903740de1a0d2ebb27d293435d4a98660c3279a823e945060811f51dc6af"
         }
       },
       "validation": {
@@ -511,7 +511,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 383
+        "ops": 479
       },
       "vision": {
         "status": "success",
@@ -529,7 +529,7 @@
           "baselineKnown": 0,
           "new": 0,
           "changed": 0,
-          "resolved": 24,
+          "resolved": 0,
           "reviewable": 0,
           "baselineUnavailable": false,
           "baselineUpdated": false
@@ -542,7 +542,7 @@
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
           "available": true,
-          "issueCount": 24
+          "issueCount": 0
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -550,108 +550,11 @@
           "minFontPt": 10,
           "labelFontPt": 10,
           "sourceFontPt": 10,
-          "note": "Cartesian preserves sparse editorial geometry with readable 10pt labels; core body text remains at or above 10.5pt."
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
         },
         "newLowSamples": [],
         "changedLowSamples": [],
-        "resolvedLowSamples": [
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 0,
-            "target": "S0_Label",
-            "fingerprint": "809a928b60988d8e3bc7"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 1,
-            "target": "S1_Label",
-            "fingerprint": "6c4df6173a9f9b90bfe8"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 3,
-            "target": "S3_Label",
-            "fingerprint": "4db97003f8af20d52b75"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 4,
-            "target": "S4_ImageLabel",
-            "fingerprint": "069d1b1d8eecd9a54fe2"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 4,
-            "target": "S4_Label",
-            "fingerprint": "321d1f337891d2b785f9"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 4,
-            "target": "S4_StatLabel0",
-            "fingerprint": "c732d12f72ba12daab46"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 4,
-            "target": "S4_StatLabel1",
-            "fingerprint": "4f6c504798d20f91f8aa"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 4,
-            "target": "S4_StatLabel2",
-            "fingerprint": "d1f2d754127f35353400"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 5,
-            "target": "S5_Label",
-            "fingerprint": "7889d5c8fd87de82c4ed"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 5,
-            "target": "S5_CardIconText0",
-            "fingerprint": "2438f8a5e84823902a73"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 5,
-            "target": "S5_CardIconText1",
-            "fingerprint": "31c3a2b54445060daea5"
-          },
-          {
-            "severity": "low",
-            "family": "small-font",
-            "kind": "font-too-small",
-            "slideIndex": 5,
-            "target": "S5_CardIconText2",
-            "fingerprint": "03b39e60991feae18889"
-          }
-        ]
+        "resolvedLowSamples": []
       }
     },
     {

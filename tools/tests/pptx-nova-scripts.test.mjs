@@ -1304,7 +1304,8 @@ function swissColumnLock({ finalPptx, runDir }) {
 
 function successfulFakeXdocSource() {
   return `#!/usr/bin/env node
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 
 const args = process.argv.slice(2)
 const valueAfter = (flag) => {
@@ -1328,6 +1329,20 @@ if (args[0] === 'schema') {
     writeFileSync(output, 'candidate pptx')
     print({ schemaVersion: 'pptx-apply/v1', status: 'success', warnings: [], changedParts: ['ppt/presentation.xml'], opResults: [], visualRisks: [], semanticIssues: [], output })
   }
+} else if (args[0] === 'pptx' && args[1] === 'inspect') {
+  // Runner orchestration fixture only; real native readback has separate integration evidence.
+  const patch = JSON.parse(readFileSync(join(dirname(args[2]), 'patch.json'), 'utf8'))
+  const slides = patch.ops.filter(op => op.op === 'add-slide').map((_, index) => ({ index, shapes: [] }))
+  for (const op of patch.ops.filter(op => ['add-text-box', 'add-shape', 'add-image'].includes(op.op))) {
+    const frame = patch.ops.filter(p => p.op === 'set-text-frame' && p.slide === op.slide && p.shape?.name === op.name).at(-1)
+    const text = patch.ops.filter(p => p.op === 'set-text-frame' && p.slide === op.slide && p.shape?.name === op.name && typeof p.text === 'string').at(-1)?.text ?? ''
+    const crop = patch.ops.filter(p => p.op === 'set-image' && p.slide === op.slide && p.shape?.name === op.name).at(-1)?.crop ?? {}
+    slides[op.slide].shapes.push({ name: op.name, shapeType: op.op === 'add-image' ? 'picture' : 'shape',
+      bbox: Object.fromEntries(['x','y','w','h'].map(k => [k+'Emu', Math.round(parseFloat(op[k])*914400)])),
+      fontFacts: text.split('\\n').map((text, paragraph) => ({ scope: 'textRun', paragraph, text })),
+      textFrame: frame?.frame ?? {}, image: { crop: { left: 0, right: 0, top: 0, bottom: 0, ...crop } } })
+  }
+  print({ schemaVersion: 'pptx-inspect/v1', slides })
 } else if (args[0] === 'pptx' && args[1] === 'vision-check') {
   print({ schemaVersion: 'pptx-vision/v1', status: 'pass', summary: { issueCount: 0, bySeverity: { high: 0, medium: 0, low: 0 } }, issues: [], semanticSummary: { passed: true, issueCount: 0, sourceRuleCount: 82, normalizedRuleCount: 81 }, semanticIssues: [] })
 } else if (args[0] === 'pptx' && args[1] === 'preview') {
@@ -1844,7 +1859,7 @@ test('cartesian image stats injects a manifest-relative image with contain geome
   })
   assert.deepEqual(
     { x: image.x, y: image.y, w: image.w, h: image.h },
-    { x: '0.613in', y: '2.16375in', w: '5.64in', h: '3.1725in' },
+    { x: '0.61in', y: '2.16375in', w: '5.64in', h: '3.1725in' },
   )
   assert.equal(crop, undefined)
   assert.equal(connectors.length, 0)
@@ -2178,6 +2193,8 @@ test('cartesian line chart emits xdoc-compatible marker colors', async () => {
           label: 'Trend Analysis',
           title: 'Growth Projection',
           body: 'Marker payloads must follow the current xdoc chart contract.',
+          unit: 'percent',
+          source: 'Source: synthetic marker fixture',
           chart: {
             categories: ['2024', '2025'],
             series: [
@@ -2198,7 +2215,7 @@ test('cartesian line chart emits xdoc-compatible marker colors', async () => {
     markers.map((marker) => [marker.fill, marker.line]),
     [
       ['1A1A1A', 'EDE8E0'],
-      ['B8B0A4', 'B8B0A4'],
+      ['665D56', 'EDE8E0'],
     ],
   )
 })
@@ -3223,8 +3240,8 @@ test('create runner finalizes only the same reviewed canonical candidate without
   writeJson(content, swissColumnContent())
   writeJson(lock, swissColumnLock({ finalPptx: output, runDir }))
   let source = successfulFakeXdocSource().replace(
-    "import { mkdirSync, writeFileSync } from 'node:fs'",
-    "import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'\nimport { createHash } from 'node:crypto'",
+    "import { dirname, join } from 'node:path'",
+    "import { dirname, join } from 'node:path'\nimport { createHash } from 'node:crypto'",
   )
   source = source.replace(
     'subcommands: { apply: {},',

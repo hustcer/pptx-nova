@@ -18,7 +18,13 @@ readiness 全链路。规范以 xdoc 维护者仓库 `docs/skill-dev-guide.md`�
 
 ## 1. 拆分：什么进 kit，什么进 content
 
-把 `generate.mjs` 一拆为二：
+合同路线先按 [design-source-migration.md](design-source-migration.md) 抽出
+`<id>/design.json` 的事实、`intent.md` 的判断与已注册视觉族。`<id>.kit.mjs` 只保留稳定适配接口；
+布局解析器按角色和逐实例容量编译组件计划，组件执行器消费该计划，不把旧页型函数换文件名后继续分发。
+新视觉族通过 `design-family-registry.mjs` 注册合同断言、解析、风格检查和投影元数据，复用共享门禁。
+新增/迁移优先走此路线；下列 kit/content 分离原则也适用于仍在维护的无合同套件。
+
+把 `generate.mjs` 的业务内容与视觉执行分离：
 
 - `pptx-nova/assets/deckkits/<id>.kit.mjs` —— 视觉语言（C/F 常量、chrome、
   几何 helper、页型函数）+ `export function createDeck(content)` 返回
@@ -78,6 +84,10 @@ callout 和缺失图片时的隐藏/占位策略。
 - 每个可见文本槽位写 `x-slotBudget`（至少 `maxLines`、`fontPt`、`widthIn`）；
   数值直接来自 Phase 0 的 style-spec 字号表和页型几何。
 - 条目数上限来自 slide-inventory 的条目区间，写进 catalog `density.soft/hard`。
+
+合同路线用 `tools/generate-pptx-design-projections.mjs <id>` 生成预算、容量、布局和节奏投影，
+随后运行 `--check`。投影必须保留该页型的 `assetSlots` 等有效元数据及既有翻新映射；
+无现有映射时不得凭空添加翻新能力。为这些保留行为写回归断言。
 
 生成与一致性检查：
 

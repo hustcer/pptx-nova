@@ -7,13 +7,36 @@
   "properties": {
     "quoteMark": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 52, "widthIn": 0.6 }
+      "x-slotBudget": {
+        "fontPt": 46,
+        "widthIn": 1.03,
+        "heightIn": 1,
+        "lineHeight": 1.2,
+        "maxLines": 1
+      }
     },
-    "quote": { "type": "string", "x-slotBudget": { "maxLines": 3, "fontPt": 36, "widthIn": 8.9 } },
+    "quote": {
+      "type": "string",
+      "x-slotBudget": {
+        "fontPt": 36,
+        "widthIn": 9.03,
+        "heightIn": 1.9,
+        "lineHeight": 1.2,
+        "maxLines": 2
+      }
+    },
     "attribution": {
       "type": "string",
-      "x-slotBudget": { "maxLines": 1, "fontPt": 10, "widthIn": 2.25 }
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 9.03,
+        "heightIn": 0.45,
+        "lineHeight": 1.2,
+        "maxLines": 2
+      }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "cartesian/design.json",
+  "x-capacityCheck": "resolve-cartesian-components/v1"
 }

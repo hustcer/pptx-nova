@@ -225,6 +225,9 @@
     },
     "biennale": {
       "$ref": "#/$defs/biennale"
+    },
+    "cartesian": {
+      "$ref": "#/$defs/cartesian"
     }
   },
   "required": [
@@ -1319,6 +1322,315 @@
         }
       },
       "required": ["family", "styles", "chrome", "spacing", "table", "rhythm", "families"],
+      "additionalProperties": false
+    },
+    "cartesian": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "cartesian-editorial/v1"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sizePt": {
+                "type": "number",
+                "minimum": 10
+              },
+              "lineHeight": {
+                "type": "number",
+                "minimum": 1
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "italic": {
+                "type": "boolean"
+              },
+              "alignment": {
+                "enum": ["left", "right", "center"]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["role", "sizePt", "lineHeight", "color"],
+            "additionalProperties": false
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "columnGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "ruleGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "paragraphGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "padding": {
+              "type": "number",
+              "minimum": 0
+            },
+            "markerDiameter": {
+              "type": "number",
+              "minimum": 0
+            },
+            "markerGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "itemTitleGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "itemBodyGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "imagePadding": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "columnGap",
+            "ruleGap",
+            "paragraphGap",
+            "padding",
+            "markerDiameter",
+            "markerGap",
+            "itemTitleGap",
+            "itemBodyGap",
+            "imagePadding"
+          ],
+          "additionalProperties": false
+        },
+        "chart": {
+          "type": "object",
+          "properties": {
+            "fontPt": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "lineWidthPt": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "comparisonWidthPt": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "numberFormat": {
+              "type": "string",
+              "minLength": 1
+            },
+            "maxLabelUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxSeriesUnits": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "fontPt",
+            "lineWidthPt",
+            "comparisonWidthPt",
+            "numberFormat",
+            "maxLabelUnits",
+            "maxSeriesUnits"
+          ],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "agenda": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "cards": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "columnPoints": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "linePoints": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "paragraphs": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "stats": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "timeline": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "team": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          },
+          "required": [
+            "agenda",
+            "cards",
+            "columnPoints",
+            "linePoints",
+            "paragraphs",
+            "stats",
+            "timeline",
+            "team"
+          ],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "minFullDeck": {
+              "type": "number",
+              "minimum": 2
+            }
+          },
+          "required": ["maxConsecutive", "minFullDeck"],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "enum": [
+                  "cover",
+                  "agenda",
+                  "statement",
+                  "column",
+                  "image",
+                  "cards",
+                  "line",
+                  "timeline",
+                  "team",
+                  "closing"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "titleStyle": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    },
+                    "decorations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "ring"
+                          },
+                          "frame": {
+                            "$ref": "#/$defs/frame"
+                          },
+                          "inner": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "maximum": 0.95
+                          },
+                          "color": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": ["kind", "frame", "inner", "color"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["titleStyle", "regions", "decorations"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["family", "styles", "spacing", "chart", "capacity", "rhythm", "families"],
       "additionalProperties": false
     }
   }

@@ -32,6 +32,8 @@ description: >
 的入口文件（通常是 `template.html`）和元数据文件（如 `template.json` / `design.md`）。
 
 输入为设计规范和图片时，先读 [references/design-source-migration.md](references/design-source-migration.md)。
+迁移已有 DeckKit（包括 HTML/PPTX 来源）时，先读
+[references/legacy-deckkit-migration.md](references/legacy-deckkit-migration.md)，再沿原参考类型完成两个阶段。
 文档约束、图片布局和领域政策可能冲突，先记录来源与优先级；截图不自动成为业务数据来源。
 用户允许设计优化时，以身份一致、可读性和内容表达为验收目标，主动修正不合理参考，不要求逐像素复刻。
 该路线采用 `design.json + intent.md + 已注册执行组件`，复用现有合同门禁；不要给新风格复制一整套生成器。
@@ -295,7 +297,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   canonical Create 放行；仍须通过当前交付门禁，不能用 qualityProfile 覆盖它。
   现有 benchmark 的 vision/PNG 成功也不能代替 canonical PDF 最终布局检查。修复 kit 后，
   至少对完整 golden 示例执行一次当前 runtime 的 `xdoc pptx visual-audit --candidate <deck.pptx>
-  --visual-mode create --field-date <YYYY-MM-DD> --output-dir <iteration-dir>/canonical --json`，读取 manifest 的 required checks、
+--visual-mode create --field-date <YYYY-MM-DD> --output-dir <iteration-dir>/canonical --json`，读取 manifest 的 required checks、
   findings 和 decision；若运行时未披露该路线，按 `create-runner.md` 的兼容路径处理并记录边界。
   参考、candidate、benchmark 使用同一冻结日期；按 manifest/artifact path 定位产物，不猜文件名。
   exit code 0、PNG 存在或旧 baseline 通过均不足以单独证明放行。
@@ -373,11 +375,12 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 
 ## Reference 索引
 
-| 文件                                    | 用途                                                |
-| --------------------------------------- | --------------------------------------------------- |
-| `references/analyze-reference.md`       | Phase 0：解包、PNG 基准、风格提取、页型归并         |
-| `references/html-template-reference.md` | Phase 0 补充：HTML 模板截图、DOM/CSS 分析、交互过滤 |
-| `references/rebuild-high-fidelity.md`   | Phase 1：探索生成器、逐页重建与对比循环、避坑清单   |
-| `references/componentize.md`            | Phase 2：抽 kit/schema/catalog/benchmark/readiness  |
-| `references/design-source-migration.md` | design.md + 参考图：来源、设计裁决、合同与复用验证  |
-| `references/visual-acceptance.md`       | 逐页验收、局部放大、居中/标签/附注反例              |
+| 文件                                     | 用途                                                |
+| ---------------------------------------- | --------------------------------------------------- |
+| `references/analyze-reference.md`        | Phase 0：解包、PNG 基准、风格提取、页型归并         |
+| `references/html-template-reference.md`  | Phase 0 补充：HTML 模板截图、DOM/CSS 分析、交互过滤 |
+| `references/rebuild-high-fidelity.md`    | Phase 1：探索生成器、逐页重建与对比循环、避坑清单   |
+| `references/componentize.md`             | Phase 2：抽 kit/schema/catalog/benchmark/readiness  |
+| `references/design-source-migration.md`  | design.md + 参考图：来源、设计裁决、合同与复用验证  |
+| `references/legacy-deckkit-migration.md` | 已有套件：调用清单、合同切换、验收与旧资产退役      |
+| `references/visual-acceptance.md`        | 逐页验收、局部放大、居中/标签/附注反例              |

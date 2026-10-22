@@ -2103,10 +2103,10 @@
     },
     {
       "id": "cartesian",
-      "version": "0.3.1",
+      "version": "2.0.0",
       "path": "cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "production",
+      "readiness": "candidate",
       "nativeSkinning": {
         "themePack": "cartesian-warm",
         "stylePack": "cartesian",
@@ -2136,7 +2136,7 @@
           "png-contact-review"
         ],
         "notes": [
-          "Experimental for automatic delivery; allowed when the user explicitly names cartesian.",
+          "Candidate creation readiness; existing native refurbishment remains explicit-only and is not revalidated by this migration.",
           "Use native skinning first when the generated xdoc catalog includes cartesian; otherwise use the fallback strategy without switching DeckKits."
         ]
       },
@@ -2144,7 +2144,7 @@
         "minFontPt": 10,
         "labelFontPt": 10,
         "sourceFontPt": 10,
-        "baseline": "Cartesian preserves sparse editorial geometry with readable 10pt labels; core body text remains at or above 10.5pt."
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
       },
       "defaultFor": [],
       "bestFor": [
@@ -2155,7 +2155,7 @@
         "quiet data presentation"
       ],
       "coverage": {
-        "languages": ["en", "mixed"],
+        "languages": ["zh", "en", "mixed"],
         "density": ["normal"],
         "slideTypes": [
           "cartesianCoverSlide",
@@ -2256,16 +2256,27 @@
         },
         "slideTypes": {
           "cartesianCoverSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.subtitle"]
+            "requiredSlots": ["data.label", "data.title", "data.subtitle"],
+            "allowedLayoutIds": ["auto", "hero", "wide"]
           },
           "cartesianAgendaSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.body", "data.items"]
+            "requiredSlots": ["data.label", "data.title", "data.body", "data.items"],
+            "allowedLayoutIds": ["auto", "split", "stacked"]
           },
           "cartesianStatementSlide": {
-            "requiredSlots": ["data.quote", "data.attribution"]
+            "requiredSlots": ["data.quote", "data.attribution"],
+            "allowedLayoutIds": ["auto", "centered", "reading"]
           },
           "cartesianBarChartSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.body", "data.chart"]
+            "requiredSlots": [
+              "data.label",
+              "data.title",
+              "data.body",
+              "data.chart",
+              "data.unit",
+              "data.source"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "wide"]
           },
           "cartesianImageStatsSlide": {
             "requiredSlots": [
@@ -2275,6 +2286,7 @@
               "data.paragraphs",
               "data.stats"
             ],
+            "allowedLayoutIds": ["auto", "image-left", "image-right"],
             "assetSlots": {
               "image.editorial": {
                 "kind": "image",
@@ -2287,19 +2299,31 @@
             }
           },
           "cartesianCardsSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.cards"]
+            "requiredSlots": ["data.label", "data.title", "data.cards"],
+            "allowedLayoutIds": ["auto", "row", "register"]
           },
           "cartesianLineChartSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.body", "data.chart"]
+            "requiredSlots": [
+              "data.label",
+              "data.title",
+              "data.body",
+              "data.chart",
+              "data.unit",
+              "data.source"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
           },
           "cartesianTimelineSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.items"]
+            "requiredSlots": ["data.label", "data.title", "data.items"],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
           },
           "cartesianTeamSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.members"]
+            "requiredSlots": ["data.label", "data.title", "data.members"],
+            "allowedLayoutIds": ["auto", "row"]
           },
           "cartesianClosingSlide": {
-            "requiredSlots": ["data.label", "data.title", "data.cta", "data.contact"]
+            "requiredSlots": ["data.label", "data.title", "data.cta", "data.contact"],
+            "allowedLayoutIds": ["auto", "centered"]
           }
         }
       },
@@ -2352,13 +2376,13 @@
         }
       },
       "validatedWith": {
-        "s8fy": ">=10",
-        "visionCheck": "golden high=0 medium=0; stress/mixed reviewed in .tmp",
-        "pngReview": "golden contact-sheet"
+        "xdoc": "0.13.0 (92a5aa13)",
+        "visionCheck": "Cartesian 2.0 live golden H0/M0/L0; all 42 standard Create matrix pages pass canonical gates",
+        "pngReview": "42 final canonical pages individually reviewed; PowerPoint 16.114 open/save/close/reopen and saved-file object/data readback passed; title, owned-circle text and chart-data edits verified"
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-10-04",
+        "lastBenchmark": "2026-10-22",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -2369,19 +2393,19 @@
             "baselineKnown": 0,
             "new": 0,
             "changed": 0,
-            "resolved": 24,
+            "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 0
+            "baselineUpdatedCases": 1
           }
         },
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-04",
+          "date": "2026-10-22",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-cartesian/runtime-review-20261004-150456/benchmark"
+            "out": ".tmp/deckkit-cartesian-v2-20261022-01/benchmark-accepted"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -2397,10 +2421,10 @@
               "baselineKnown": 0,
               "new": 0,
               "changed": 0,
-              "resolved": 24,
+              "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 0
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -2408,7 +2432,7 @@
               "caseId": "cartesian.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-cartesian/runtime-review-20261004-150456/benchmark/cartesian/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-cartesian-v2-20261022-01/benchmark-accepted/cartesian/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -2431,10 +2455,10 @@
                   "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
-                  "resolved": 24,
+                  "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": false
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -2445,10 +2469,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 180220
+                "bytes": 186299
               },
-              "patchOps": 383,
-              "p50TotalMs": 50.13
+              "patchOps": 479,
+              "p50TotalMs": 75.31
             }
           ],
           "blockers": []
@@ -2456,12 +2480,12 @@
       },
       "knownLimits": [
         "Based on beautiful-html-templates/templates/cartesian/template.html; source was HTML, not PPTX.",
-        "Browser navigation dots, arrows, slide counter, keyboard handlers, CSS transitions, and hover states are intentionally excluded.",
-        "Chart.js canvas charts are rebuilt as native editable PPTX charts driven by semantic chart data.",
-        "The HTML accent #8A8178 is darkened to #665D56 for readable PPTX micro text on the sandstone background.",
-        "Image-bearing layout accepts a registered local asset with contain fitting; without a binding it preserves the editable crossed placeholder shell.",
-        "Playfair Display and Inter are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
-        "Agenda data.textLayout=paragraphs provides one native S{slideIndex}_AgendaParagraphs target with per-item levels; the default rows variant remains static."
+        "Contract-driven cartesian-editorial/v1; all ten page roles use registered layouts and actual-instance capacity checks.",
+        "Chart unit and source are required in 2.0; migrate metadata explicitly. Both raw series remain native editable data.",
+        "Fonts are not bundled: Playfair Display/Inter Latin, Songti SC display CJK, Arial Unicode MS body CJK; actual environment rendering needs review.",
+        "Native editable image.editorial slot uses an assets manifest; no binding retains the crossed shell.",
+        "Source browser navigation/motion excluded; native paragraph agenda targets retained.",
+        "Creation migration does not revalidate arbitrary existing-deck native refurbishment or preservation."
       ],
       "examples": [
         {
@@ -2473,7 +2497,8 @@
           "contentPath": "examples/cartesian-animation-content.json",
           "choreographyPath": "examples/cartesian-animation-choreography.json"
         }
-      ]
+      ],
+      "designContract": "cartesian/design.json"
     },
     {
       "id": "long-table",

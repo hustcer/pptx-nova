@@ -1,7 +1,7 @@
 # Contract-driven DeckKits
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
-existing workflow. The opt-in designs are `biennale-yellow`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
+existing workflow. The opt-in designs are `biennale-yellow`, `cartesian`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow
@@ -94,6 +94,27 @@ the renderer's full-value fallback; inspect the visible output rather than claim
 format was applied.
 
 ## Maintainer boundary
+
+### Warm editorial family: Cartesian
+
+`cartesian` 2.0 uses `cartesian-editorial/v1`. Read `assets/deckkits/cartesian/intent.md` and discover
+its ten retained slide types and eighteen registered compositions with the same CLI. Cover,
+agenda, statement, column chart, image/stats, cards, line chart and timeline each have two real
+geometries; team and closing have one. `auto` resolves capacity and recent layout rhythm;
+explicit IDs still need to fit. A complete deck opens with cover and ends with closing;
+use `meta.designScope: "excerpt"` for extracts.
+
+Both chart types require `data.unit` and `data.source`, two named numeric series and matching
+categories. Authored axis domains cannot clip data. Formatting changes visible ticks while raw
+values stay unchanged. Native lines use straight segments. Tiny observations on a shared linear
+axis may be subpixel; raw values are independently checked by readback.
+
+`image.editorial` accepts an assets manifest; contain and cover are verified. An unbound image
+uses the intentionally editable crossed frame. Native paragraph agenda keeps its existing target
+and levels; row mode rejects levels rather than dropping them. Circles own their centered text.
+Picture readback checks presence, geometry and crop in addition to text/shape/chart checks.
+Final canonical review and applicable native-host checks remain necessary. Candidate readiness
+does not prove arbitrary existing-deck refurbishment or preservation; fonts are not bundled.
 
 ### Editorial family: Black Gold
 
@@ -205,3 +226,7 @@ tokens. In a source checkout, the maintainer-only projection command is
 `node tools/generate-pptx-design-projections.mjs biennale-yellow`, followed by the same command with
 `--check`. That tool is not needed or distributed as a user workflow dependency. Keep new design
 languages opt-in; shared semantics do not require every design to use the same visual components.
+
+New visual families register assertion, resolver, style checks and projection metadata in
+`design-family-registry.mjs`. Projection preserves existing per-type asset metadata and independently
+registered refurbishment mappings. Adding a creation family does not create refurbishment support.

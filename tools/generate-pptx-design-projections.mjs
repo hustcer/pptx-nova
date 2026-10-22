@@ -7,6 +7,7 @@ import { isDeepStrictEqual } from 'node:util'
 import { loadDesignContract } from '../pptx-nova/assets/deckkits/design-contract.mjs'
 
 import { biennaleProjectedBudgets } from '../pptx-nova/assets/deckkits/biennale-layouts.mjs'
+import { registeredDesignFamily } from '../pptx-nova/assets/deckkits/design-family-registry.mjs'
 
 const root = fileURLToPath(new URL('../pptx-nova/assets/deckkits/', import.meta.url))
 const args = process.argv.slice(2)
@@ -17,6 +18,7 @@ if (args.includes('--help')) {
   process.exit(0)
 }
 const design = loadDesignContract(id)
+const registered = registeredDesignFamily(design)
 if (!design) throw new Error(`${id} has no registered design contract`)
 let stale = 0
 function output(path, data) {
@@ -41,32 +43,65 @@ if (design.biennale) {
     output(path, schema)
   }
 }
+if (registered) {
+  for (const [type, family] of Object.entries(design[registered.key].families)) {
+    const path = resolve(root, 'schemas', id, type + '.schema.json')
+    const schema = JSON.parse(readFileSync(path, 'utf8'))
+    for (const [field, [minItems, maxItems]] of Object.entries(
+      registered.projectedCapacities?.(design, family) ?? {},
+    )) {
+      let node = schema
+      for (const key of field.replaceAll('[]', '.[]').split('.'))
+        node = key === '[]' ? node.items : node.properties?.[key]
+      if (node?.type !== 'array')
+        throw new Error(`${type}.${field}: capacity needs an array schema`)
+      Object.assign(node, { minItems, maxItems })
+    }
+    for (const [field, budget] of Object.entries(registered.projectedBudgets(design, family))) {
+      let node = schema
+      for (const key of field.replaceAll('[]', '.[]').split('.'))
+        node = key === '[]' ? node.items : node.properties?.[key]
+      if (!node) throw new Error(`${type}.${field}: projected field has no schema`)
+      node['x-slotBudget'] = budget
+    }
+    output(path, schema)
+  }
+}
 // Refurbishment uses the same role tokens as creation. Preserve unrelated catalog formatting.
 const path = resolve(root, 'catalog.json')
 const raw = readFileSync(path, 'utf8')
 const catalog = JSON.parse(raw)
 const entry = catalog.entries.find((e) => e.id === id)
 const before = JSON.stringify(entry)
-if (design.editorial || design.strategy || design.annual || design.biennale) {
-  const families = (design.editorial ?? design.strategy ?? design.annual ?? design.biennale)
-    .families
+if (registered || design.editorial || design.strategy || design.annual || design.biennale) {
+  const families = (
+    registered
+      ? design[registered.key]
+      : (design.editorial ?? design.strategy ?? design.annual ?? design.biennale)
+  ).families
   const types = [...Object.keys(families), ...(design.biennale ? [design.evidence.slideType] : [])]
   entry.supportedSlideTypes = types
   entry.coverage.slideTypes = types
-  const groups = { anchor: [], judgment: [], evidence: [] }
+  const groups = registered?.groups
+    ? Object.fromEntries(Object.keys(registered.groups).map((key) => [key, []]))
+    : { anchor: [], judgment: [], evidence: [] }
   for (const [type, family] of Object.entries(families)) {
     const schema = JSON.parse(
       readFileSync(resolve(root, 'schemas', id, `${type}.schema.json`), 'utf8'),
     )
     entry.layoutContract.slideTypes[type] = {
+      ...entry.layoutContract.slideTypes[type],
       requiredSlots: schema.required.map((key) => `data.${key}`),
       allowedLayoutIds: ['auto', ...Object.keys(family.variants)],
     }
-    const group = ['cover', 'section', 'closing', 'chapter', 'colophon'].includes(family.role)
-      ? 'anchor'
-      : ['summary', 'decision'].includes(family.role)
-        ? 'judgment'
-        : 'evidence'
+    const group = registered?.groups
+      ? Object.entries(registered.groups).find(([, roles]) => roles.includes(family.role))?.[0]
+      : ['cover', 'section', 'closing', 'chapter', 'colophon'].includes(family.role)
+        ? 'anchor'
+        : ['summary', 'decision'].includes(family.role)
+          ? 'judgment'
+          : 'evidence'
+    if (!group) throw new Error(`${type}: registered family has no rhythm group`)
     groups[group].push(type)
   }
   if (design.biennale) {
@@ -94,10 +129,12 @@ entry.qualityProfile.labelFontPt = entry.qualityProfile.minFontPt
 entry.qualityProfile.sourceFontPt = entry.qualityProfile.minFontPt
 entry.qualityProfile.baseline = `Contract-driven typography with a ${entry.qualityProfile.minFontPt}pt floor; actual render review remains required.`
 // Creation-only candidate designs do not implicitly claim a refurbishment route.
-if (entry.refurbishProfile?.fallback) {
+if (entry.refurbishProfile?.fallback?.palette) {
   for (const [role, token] of Object.entries(design.refurbish.palette)) {
     entry.refurbishProfile.fallback.palette[role] = design.colors[token]
   }
+}
+if (entry.refurbishProfile?.fallback?.fonts) {
   for (const [role, font] of Object.entries(design.refurbish.fonts)) {
     entry.refurbishProfile.fallback.fonts[role] =
       role === 'cjk' ? design.fonts[font].eastAsian : design.fonts[font].latin

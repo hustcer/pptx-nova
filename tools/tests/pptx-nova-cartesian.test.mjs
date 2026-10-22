@@ -1,8 +1,16 @@
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { test } from 'node:test'
-import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
 import { validateContent } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+import {
+  assertDesignContract,
+  checkDesignPatch,
+  checkDesignReadback,
+  designHash,
+} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+import { execFileSync } from 'node:child_process'
 
 const assetRoot = new URL('../../pptx-nova/assets/deckkits/', import.meta.url)
 const readJson = (path) => JSON.parse(readFileSync(new URL(path, assetRoot), 'utf8'))
@@ -16,6 +24,255 @@ function fontSizes(value, path = '$') {
     return fontSizes(child, childPath)
   })
 }
+
+const fixture = () => readJson('examples/cartesian-content.json')
+const excerpt = (slide) => ({
+  meta: { deckkit: 'cartesian', designScope: 'excerpt' },
+  slides: [slide],
+})
+
+test('Cartesian 2.0 resolves every page and all 18 real compositions deterministically', () => {
+  const content = fixture(),
+    built = createDeck(content)
+  assert.equal(built.designPlan.layouts.length, 10)
+  assert.equal(built.designCheck.status, 'pass')
+  let layouts = 0
+  for (const slide of content.slides) {
+    const fingerprints = new Set()
+    for (const layoutId of Object.keys(DESIGN.cartesian.families[slide.type].variants)) {
+      const sample = excerpt({ ...structuredClone(slide), layoutId })
+      const result = createDeck(sample)
+      assert.equal(result.designPlan.layouts[0].layoutId, layoutId)
+      assert.deepEqual(result, createDeck(structuredClone(sample)))
+      fingerprints.add(result.designPlan.layouts[0].fingerprint)
+      layouts++
+    }
+    assert.equal(
+      fingerprints.size,
+      Object.keys(DESIGN.cartesian.families[slide.type].variants).length,
+    )
+  }
+  assert.equal(layouts, 18)
+})
+
+test('source numbers remain raw native chart data; authored domains cannot clip them', () => {
+  const slide = fixture().slides[6]
+  const values = [0, -12.5, 1e-8, 1.23456789012345, 1234567890123, 7]
+  slide.data.chart.series[0].values = values
+  slide.data.numberFormat = '0.00E+00'
+  const { patch } = createDeck(excerpt(slide))
+  assert.deepEqual(patch.ops.find((o) => o.op === 'add-chart').data.series[0].values, values)
+  assert.equal(patch.ops.filter((o) => o.op === 'add-chart').length, 1)
+  const style = patch.ops.find((o) => o.op === 'set-chart')
+  assert.equal(style.axes.find((a) => a.axis === 'value').scale, undefined)
+  assert.equal(style.axes.find((a) => a.axis === 'value').ticks.numberFormat, '0.00E+00')
+  slide.data.valueAxis = { max: 60 }
+  assert.throws(() => createDeck(excerpt(slide)), /clips data/)
+  slide.data.valueAxis = { min: -13, max: 2e12, majorUnit: 1e11 }
+  assert.doesNotThrow(() => createDeck(excerpt(slide)))
+})
+
+test('invalid, ambiguous and excessive content fails before rendering', () => {
+  for (const [index, mutate, pattern] of [
+    [0, (d) => (d.title = 'W'.repeat(200)), /title/],
+    [1, (d) => d.items.push(...d.items), /too many items/],
+    [1, (d) => (d.items[0].level = 1), /requires textLayout/],
+    [3, (d) => delete d.unit, /missing unit/],
+    [3, (d) => (d.source = ' '), /source/],
+    [3, (d) => d.chart.series[0].values.pop(), /match every category/],
+    [3, (d) => (d.chart.series[0].values[0] = '2'), /expected number/],
+    [3, (d) => (d.chart.series[0].values[0] = NaN), /finite/],
+    [3, (d) => (d.valueAxis = { min: 10, max: 1 }), /clips data|invalid range/],
+    [3, (d) => (d.valueAxis = { majorUnit: 0 }), /must exceed|positive/],
+    [4, (d) => (d.paragraphs[1] = 'Long '.repeat(200)), /paragraphs/],
+    [5, (d) => d.cards.push(d.cards[0]), /too many items/],
+    [5, (d) => (d.cards[0].body = 'Long '.repeat(200)), /cards/],
+    [7, (d) => (d.items[0].title = '长'.repeat(100)), /items/],
+    [8, (d) => (d.members[0].role = 'Long '.repeat(100)), /members/],
+    [9, (d) => (d.contact = 'Long '.repeat(100)), /contact/],
+  ]) {
+    const slide = fixture().slides[index]
+    mutate(slide.data)
+    assert.throws(() => createDeck(excerpt(slide)), pattern)
+    assert.equal(validateDeckkitContent(excerpt(slide), { mode: 'delivery' }).valid, false)
+  }
+  const slide = fixture().slides[0]
+  slide.layoutId = 'unregistered'
+  assert.throws(() => createDeck(excerpt(slide)), /No layout fits/)
+  delete slide.layoutId
+  slide.data.unknown = 'DROPPED'
+  assert.throws(() => createDeck(excerpt(slide)), /unknown field/)
+  slide.type = 'cartesianUnknownSlide'
+  assert.throws(() => createDeck(excerpt(slide)), /unregistered/)
+})
+
+test('minimum and maximum supported item counts retain every native text field', () => {
+  for (const [index, field, key] of [
+    [1, 'items', 'agenda'],
+    [4, 'paragraphs', 'paragraphs'],
+    [4, 'stats', 'stats'],
+    [5, 'cards', 'cards'],
+    [7, 'items', 'timeline'],
+    [8, 'members', 'team'],
+  ]) {
+    for (const count of DESIGN.cartesian.capacity[key]) {
+      const slide = fixture().slides[index]
+      slide.data[field] = Array.from({ length: count }, (_, i) =>
+        structuredClone(slide.data[field][i % slide.data[field].length]),
+      )
+      const result = createDeck(excerpt(slide))
+      assert.equal(result.designPlan.layouts.length, 1)
+      const components = result.designPlan.layouts[0].components.filter((c) =>
+        c.path?.includes(`.${field}[`),
+      )
+      assert.ok(components.some((c) => c.path.includes(`[${count - 1}]`)))
+    }
+  }
+  const c = fixture()
+  c.slides[0].data.title = 'A considered framework\nfor shared public life'
+  assert.equal(createDeck(c).designPlan.layouts[0].layoutId, 'wide')
+})
+
+test('native medallions own centered text; the asset contract and projections stay intact', () => {
+  const { patch } = createDeck(fixture())
+  for (const name of ['S5_CardIcon0', 'S8_Initial0']) {
+    assert.equal(patch.ops.find((o) => o.name === name).kind, 'oval')
+    assert.ok(patch.ops.some((o) => o.shape?.name === name && o.frame?.verticalAnchor === 'middle'))
+    assert.ok(patch.ops.some((o) => o.shape?.name === name && o.format?.alignment === 'center'))
+  }
+  const catalog = readJson('catalog.json').entries.find((e) => e.id === 'cartesian')
+  assert.equal(
+    catalog.layoutContract.slideTypes.cartesianImageStatsSlide.assetSlots['image.editorial']
+      .acceptsAsset,
+    true,
+  )
+  execFileSync(process.execPath, [
+    'tools/generate-pptx-design-projections.mjs',
+    'cartesian',
+    '--check',
+  ])
+  execFileSync(process.execPath, [
+    'tools/generate-pptx-design-projections.mjs',
+    'biennale-yellow',
+    '--check',
+  ])
+})
+
+test('registered language rejects style and contract counterexamples', () => {
+  for (const op of [
+    { op: 'add-shape', kind: 'rounded-rectangle' },
+    { op: 'add-chart', kind: 'pie' },
+    { op: 'set-shape', line: { width: '4pt', color: DESIGN.colors.line } },
+    { op: 'set-shape', fill: { type: 'gradient' } },
+    { op: 'set-shape', effect: { shadow: {} } },
+    { op: 'set-run', font: { name: 'Inter', color: 'FF0000', size: '13pt' } },
+    { op: 'set-run', font: { name: 'Unapproved', size: '13pt' } },
+    { op: 'set-run', font: { name: 'Playfair Display', bold: true, size: '36pt' } },
+    { op: 'set-chart', series: [{ series: 0, smooth: true }] },
+    { op: 'set-chart', series: [{ series: 1, line: { dash: 'solid' } }] },
+  ])
+    assert.equal(checkDesignPatch(DESIGN, { ops: [op] }).status, 'fail', JSON.stringify(op))
+  for (const mutate of [
+    (d) =>
+      (d.cartesian.families.cartesianCoverSlide.variants.typo =
+        d.cartesian.families.cartesianCoverSlide.variants.hero),
+    (d) => (d.cartesian.families.cartesianCoverSlide.variants.hero.regions.title[0] = -1),
+    (d) => (d.cartesian.styles.body.color = 'missing'),
+    (d) => (d.cartesian.capacity.agenda = [5, 3]),
+    (d) => d.rules.push({ id: 'typo', check: 'unknown' }),
+  ]) {
+    const d = structuredClone(DESIGN)
+    mutate(d)
+    assert.throws(() => assertDesignContract(d))
+  }
+})
+
+test('minimum unrelated content retains every visible field without reference-copy fallback', () => {
+  let counter = 0
+  const tokens = []
+  const fill = (schema, field = '') => {
+    if (schema['x-slotRole'] === 'control') return undefined
+    if (schema.enum) return schema.enum[0]
+    if (schema.type === 'string') {
+      const token = `Q${(++counter).toString(32).toUpperCase().padStart(2, '0')}`
+      tokens.push(token)
+      return token
+    }
+    if (schema.type === 'number') return 1
+    if (schema.type === 'array')
+      return Array.from({ length: schema.minItems ?? 1 }, () => fill(schema.items, field))
+    if (schema.type === 'object')
+      return Object.fromEntries(
+        Object.entries(schema.properties).flatMap(([key, child]) => {
+          const value = fill(child, key)
+          return value === undefined ? [] : [[key, value]]
+        }),
+      )
+  }
+  const content = {
+    meta: { deckkit: 'cartesian' },
+    slides: Object.keys(DESIGN.cartesian.families).map((type) => ({
+      type,
+      data: fill(readJson(`schemas/cartesian/${type}.schema.json`)),
+    })),
+  }
+  const validation = validateDeckkitContent(content, { mode: 'delivery' })
+  assert.equal(validation.valid, true, JSON.stringify(validation.errors))
+  const text = JSON.stringify(createDeck(content).patch)
+  for (const token of tokens) assert.ok(text.includes(token), `Missing visible field ${token}`)
+  for (const phrase of [
+    'Quarterly Metrics',
+    'Revenue Impact',
+    'Market Share',
+    'Alex Morgan',
+    'Precision in approach',
+  ])
+    assert.equal(text.includes(phrase), false)
+})
+
+test('picture readback rejects a missing picture, moved frame or changed native crop', () => {
+  const patch = {
+    ops: [
+      { op: 'add-slide' },
+      { op: 'add-image', slide: 0, name: 'S0_ImageAsset', x: '1in', y: '2in', w: '3in', h: '4in' },
+      {
+        op: 'set-image',
+        slide: 0,
+        shape: { name: 'S0_ImageAsset' },
+        crop: { left: 0.1, right: 0.1 },
+      },
+    ],
+  }
+  const plan = {
+    patchHash: designHash(patch),
+    objects: [{ slide: 0, name: 'S0_ImageAsset', kind: 'add-image', frame: [1, 2, 3, 4] }],
+  }
+  const inspect = {
+    slides: [
+      {
+        index: 0,
+        shapes: [
+          {
+            name: 'S0_ImageAsset',
+            shapeType: 'picture',
+            image: { crop: { left: 0.1, right: 0.1, top: 0, bottom: 0 } },
+            bbox: { xEmu: 914400, yEmu: 1828800, wEmu: 2743200, hEmu: 3657600 },
+          },
+        ],
+      },
+    ],
+  }
+  assert.equal(checkDesignReadback(plan, patch, inspect).status, 'pass')
+  for (const mutate of [
+    (s) => (s.shapeType = 'textBox'),
+    (s) => (s.image.crop.left = 0.2),
+    (s) => (s.bbox.xEmu += 91440),
+  ]) {
+    const bad = structuredClone(inspect)
+    mutate(bad.slides[0].shapes[0])
+    assert.equal(checkDesignReadback(plan, patch, bad).status, 'fail')
+  }
+})
 
 test('Cartesian stock text and chart legends meet the canonical 10 pt readability floor', () => {
   const content = readJson('examples/cartesian-content.json')

@@ -7,6 +7,7 @@ import { wrapCjkText } from './design-text.mjs'
 import { STRATEGY_REGIONS } from './strategy-registry.mjs'
 import { ANNUAL_LAYOUTS } from './annual-registry.mjs'
 import { BIENNALE_REGIONS } from './biennale-registry.mjs'
+import { registeredDesignFamily, registeredDesignChecks } from './design-family-registry.mjs'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -23,6 +24,7 @@ const CHECKS = new Set([
   'editorial-language',
   'strategy-language',
   'annual-language',
+  ...registeredDesignChecks,
 ])
 
 // A deliberately bounded validator for the bundled design schema, not a general JSON Schema API.
@@ -93,9 +95,11 @@ export function assertDesignContract(design) {
     !design.editorial &&
     !design.strategy &&
     !design.annual &&
-    !design.biennale
+    !design.biennale &&
+    !registeredDesignFamily(design)
   )
     throw new Error('A registered design renderer is required')
+  registeredDesignFamily(design)?.assert(design, { assertFrame })
   if (design.biennale) {
     const b = design.biennale
     if (!design.evidence) throw new Error('Biennale requires the native evidence renderer')
@@ -469,6 +473,9 @@ export function checkDesignPatch(design, patch) {
       }
     }
     for (const rule of design.rules) {
+      registeredDesignFamily(design)?.checks[rule.check]?.(design, op, (message) =>
+        issue(rule, message, index),
+      )
       if (rule.check === 'annual-language') {
         const a = design.annual,
           palette = Object.fromEntries(
@@ -664,7 +671,9 @@ export function finishDesign(design, content, patch, layouts = []) {
   }
   const objects = patch.ops
     .filter((o) =>
-      ['add-text-box', 'add-shape', 'add-freeform', 'add-chart', 'add-table'].includes(o.op),
+      ['add-text-box', 'add-shape', 'add-freeform', 'add-chart', 'add-table', 'add-image'].includes(
+        o.op,
+      ),
     )
     .map((o) => ({
       slide: o.slide,
@@ -704,6 +713,25 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
     }
     if (object.kind === 'add-table' && shape.contentKind !== 'table')
       fail(`${object.name}: native table missing`)
+    if (object.kind === 'add-image') {
+      if (shape.shapeType !== 'picture') fail(`${object.name}: native picture missing`)
+      const crop =
+        patch.ops
+          .filter(
+            (o) =>
+              o.op === 'set-image' && o.slide === object.slide && o.shape?.name === object.name,
+          )
+          .at(-1)?.crop ?? {}
+      if (
+        !shape.image?.crop ||
+        ['left', 'right', 'top', 'bottom'].some(
+          (key) =>
+            !Number.isFinite(shape.image.crop[key]) ||
+            Math.abs(shape.image.crop[key] - (crop[key] ?? 0)) > 0.00001,
+        )
+      )
+        fail(`${object.name}: picture crop changed or is undisclosed`)
+    }
     if (['add-text-box', 'add-shape', 'add-freeform'].includes(object.kind)) {
       const expected = patch.ops
         .filter(
@@ -809,6 +837,9 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
       'native chart presence',
       'geometry',
       'patch binding',
+      ...(plan.objects.some((o) => o.kind === 'add-image')
+        ? ['native picture presence, geometry and crop']
+        : []),
       ...(model ? ['chart categories, series names and numeric values'] : []),
       ...(model && tableOps.length ? ['native table dimensions and every cell text'] : []),
     ],

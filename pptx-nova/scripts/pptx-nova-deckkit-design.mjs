@@ -9,6 +9,7 @@ import {
   loadDesignContract,
 } from '../assets/deckkits/design-contract.mjs'
 import { validateDeckkitContent } from '../assets/deckkits/validate-deckkit.mjs'
+import { registeredDesignFamily } from '../assets/deckkits/design-family-registry.mjs'
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-deckkit-design.mjs --deckkit <id> [--content content.json] [--output report.json]
@@ -87,7 +88,10 @@ try {
       fonts: d.fonts,
       rules: d.rules,
       registeredSlideTypes: [
-        ...Object.keys((d.biennale ?? d.editorial ?? d.strategy ?? d.annual)?.families ?? {}),
+        ...Object.keys(
+          (d[registeredDesignFamily(d)?.key] ?? d.biennale ?? d.editorial ?? d.strategy ?? d.annual)
+            ?.families ?? {},
+        ),
         ...(d.evidence ? [d.evidence.slideType] : []),
       ],
       ...(d.biennale ? { biennale: d.biennale } : {}),
@@ -95,6 +99,9 @@ try {
       annual: d.annual,
       ...(d.editorial ? { editorial: d.editorial } : {}),
       ...(d.strategy ? { strategy: d.strategy } : {}),
+      ...(registeredDesignFamily(d)
+        ? { [registeredDesignFamily(d).key]: d[registeredDesignFamily(d).key] }
+        : {}),
       inputGuide:
         'Use registered content schemas and layoutId=auto. Raw coordinates/colors/fonts are not content inputs.',
       visualReviewRequired: true,

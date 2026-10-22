@@ -19,30 +19,30 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 383
+    "ops": 479
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 29,
-    "opResults": 383,
+    "changedParts": 30,
+    "opResults": 479,
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 13,
-      "total": 13
+      "low": 2,
+      "total": 2
     }
   },
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 29,
-    "opResults": 383,
+    "changedParts": 30,
+    "opResults": 479,
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 13,
-      "total": 13
+      "low": 2,
+      "total": 2
     }
   },
   "vision": {
@@ -61,7 +61,7 @@
       "baselineKnown": 0,
       "new": 0,
       "changed": 0,
-      "resolved": 24,
+      "resolved": 0,
       "reviewable": 0,
       "baselineUnavailable": false,
       "baselineUpdated": false
@@ -74,7 +74,7 @@
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/cartesian.golden-html.vision-baseline.json",
       "available": true,
-      "issueCount": 24
+      "issueCount": 0
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
@@ -82,108 +82,11 @@
       "minFontPt": 10,
       "labelFontPt": 10,
       "sourceFontPt": 10,
-      "note": "Cartesian preserves sparse editorial geometry with readable 10pt labels; core body text remains at or above 10.5pt."
+      "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
     },
     "newLowSamples": [],
     "changedLowSamples": [],
-    "resolvedLowSamples": [
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 0,
-        "target": "S0_Label",
-        "fingerprint": "809a928b60988d8e3bc7"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 1,
-        "target": "S1_Label",
-        "fingerprint": "6c4df6173a9f9b90bfe8"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 3,
-        "target": "S3_Label",
-        "fingerprint": "4db97003f8af20d52b75"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 4,
-        "target": "S4_ImageLabel",
-        "fingerprint": "069d1b1d8eecd9a54fe2"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 4,
-        "target": "S4_Label",
-        "fingerprint": "321d1f337891d2b785f9"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 4,
-        "target": "S4_StatLabel0",
-        "fingerprint": "c732d12f72ba12daab46"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 4,
-        "target": "S4_StatLabel1",
-        "fingerprint": "4f6c504798d20f91f8aa"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 4,
-        "target": "S4_StatLabel2",
-        "fingerprint": "d1f2d754127f35353400"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 5,
-        "target": "S5_Label",
-        "fingerprint": "7889d5c8fd87de82c4ed"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 5,
-        "target": "S5_CardIconText0",
-        "fingerprint": "2438f8a5e84823902a73"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 5,
-        "target": "S5_CardIconText1",
-        "fingerprint": "31c3a2b54445060daea5"
-      },
-      {
-        "severity": "low",
-        "family": "small-font",
-        "kind": "font-too-small",
-        "slideIndex": 5,
-        "target": "S5_CardIconText2",
-        "fingerprint": "03b39e60991feae18889"
-      }
-    ]
+    "resolvedLowSamples": []
   },
   "contactSheet": {
     "format": "webp",
@@ -193,12 +96,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 180064,
-      "sha256": "f5ef761f27d667e25ecf1dea33a16a3d15eadb760de658dede2e91cb910eaa92"
+      "bytes": 186299,
+      "sha256": "c1d43a9d8da5717df515241b77923a0bdf4c6cbaa01d56e442ba744f8c42c8ad"
     },
     "webp": {
-      "bytes": 65814,
-      "sha256": "d1f7fb3582793466aecad3b159f92f75fcb1c892894034637a48004e7a1da335"
+      "bytes": 69434,
+      "sha256": "de13a0b0fa186170ce4f05f60778b4ac79a8b5398059ed2a51f167ae3009fd28"
     }
   }
 }

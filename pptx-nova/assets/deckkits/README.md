@@ -17,13 +17,17 @@ assets/deckkits/
 ├── annual-layouts.mjs          # 逐实例容量检查与确定性构图选择
 ├── biennale-components.mjs    # 编辑式文字/结构平面、光晕、原生图表与日程表格
 ├── biennale-layouts.mjs       # 九类页面的完整计划、实例容量和构图选择
+├── design-family-registry.mjs # 新视觉族的断言、解析、检查与投影注册
+├── cartesian-components.mjs  # 暖石编辑语言的组件计划执行、原生图表与图片
+├── cartesian-layouts.mjs     # 十类职责、十八个布局、实例容量和节奏选择
+├── cartesian/                # Cartesian 2.0 合同与设计意图（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
 ├── clear-value/                # 白底衬线研究报告合同与设计意图（状态以 catalog 为准）
 ├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
 ├── consulting-dark.kit.mjs     # 深墨蓝咨询风格 + 页型函数
-├── <deckkit-id>.kit.mjs        # 其余 DeckKit（mckinsey-blue、swiss-grid、broadside、cartesian、long-table、biennale-yellow）
+├── <deckkit-id>.kit.mjs        # 各套件公共入口；合同套件为薄适配器
 ├── catalog.json                # DeckKit 注册表、版本、density 限制、验证记录
 ├── schemas/                    # content 和各页型 JSON Schema（渐进覆盖）
 ├── validate-content.mjs        # schema + fit 预检入口
@@ -33,6 +37,10 @@ assets/deckkits/
 
 Biennale Yellow 2.0 保留九个页型名称，全部经注册合同执行；数据页改用数值、单位、来源，
 不再分发旧固定页型渲染器。字段迁移与构图说明见 [intent.md](biennale-yellow/intent.md)。
+
+Cartesian 2.0 同样保留十个页型入口，全部经注册组件计划执行；图表必须提供单位、来源，
+图片槽位和原生段落动画 target 保留。旧页型生成器及旧版 showcase 已替换，
+不提供双执行路径。见 [设计与迁移说明](cartesian/intent.md)。
 
 ## core-primitives 职责边界
 

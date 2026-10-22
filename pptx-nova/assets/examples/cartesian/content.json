@@ -6,9 +6,9 @@
     {
       "type": "cartesianCoverSlide",
       "data": {
-        "label": "Presentation Template",
+        "label": "Synthetic demonstration",
         "title": "Cartesian",
-        "subtitle": "A minimalist framework for strategic narratives. Clean geometry meets editorial refinement."
+        "subtitle": "A minimalist framework for strategic narratives. Clean geometry meets editorial refinement. All data and claims are synthetic."
       }
     },
     {
@@ -18,10 +18,18 @@
         "title": "Session Agenda",
         "body": "An outline of key discussion points structured to guide our strategic conversation forward.",
         "items": [
-          { "text": "Market Position Analysis" },
-          { "text": "Core Value Proposition" },
-          { "text": "Growth Trajectory" },
-          { "text": "Implementation Roadmap" }
+          {
+            "text": "Market Position Analysis"
+          },
+          {
+            "text": "Core Value Proposition"
+          },
+          {
+            "text": "Growth Trajectory"
+          },
+          {
+            "text": "Implementation Roadmap"
+          }
         ]
       }
     },
@@ -41,10 +49,18 @@
         "chart": {
           "categories": ["Q1", "Q2", "Q3", "Q4"],
           "series": [
-            { "name": "Revenue", "values": [2.4, 3.1, 3.8, 4.5] },
-            { "name": "Target", "values": [2.5, 3.0, 3.5, 4.2] }
+            {
+              "name": "Revenue",
+              "values": [2.4, 3.1, 3.8, 4.5]
+            },
+            {
+              "name": "Target",
+              "values": [2.5, 3, 3.5, 4.2]
+            }
           ]
-        }
+        },
+        "unit": "USD million · synthetic",
+        "source": "Source: synthetic demonstration data"
       }
     },
     {
@@ -58,9 +74,18 @@
           "Through iterative refinement and measured adaptation, the methodology ensures alignment with evolving objectives and stakeholder expectations."
         ],
         "stats": [
-          { "value": "47%", "label": "Efficiency Gain" },
-          { "value": "12x", "label": "Scale Factor" },
-          { "value": "3.2M", "label": "Revenue Impact" }
+          {
+            "value": "47%",
+            "label": "Efficiency Gain"
+          },
+          {
+            "value": "12x",
+            "label": "Scale Factor"
+          },
+          {
+            "value": "3.2M",
+            "label": "Revenue Impact"
+          }
         ]
       }
     },
@@ -97,10 +122,18 @@
         "chart": {
           "categories": ["2020", "2021", "2022", "2023", "2024", "2025"],
           "series": [
-            { "name": "Market Share", "values": [12, 18, 25, 34, 42, 51] },
-            { "name": "Industry Average", "values": [10, 14, 19, 24, 30, 36] }
+            {
+              "name": "Market Share",
+              "values": [12, 18, 25, 34, 42, 51]
+            },
+            {
+              "name": "Industry Average",
+              "values": [10, 14, 19, 24, 30, 36]
+            }
           ]
-        }
+        },
+        "unit": "Percent · synthetic",
+        "source": "Source: synthetic demonstration data"
       }
     },
     {
@@ -138,10 +171,26 @@
         "label": "Leadership",
         "title": "Key Contributors",
         "members": [
-          { "initial": "A", "name": "Alex Morgan", "role": "Strategy Director" },
-          { "initial": "J", "name": "Jordan Lee", "role": "Operations Lead" },
-          { "initial": "S", "name": "Sam Taylor", "role": "Research Head" },
-          { "initial": "R", "name": "Reese Park", "role": "Design Principal" }
+          {
+            "initial": "A",
+            "name": "Alex Morgan",
+            "role": "Strategy Director"
+          },
+          {
+            "initial": "J",
+            "name": "Jordan Lee",
+            "role": "Operations Lead"
+          },
+          {
+            "initial": "S",
+            "name": "Sam Taylor",
+            "role": "Research Head"
+          },
+          {
+            "initial": "R",
+            "name": "Reese Park",
+            "role": "Design Principal"
+          }
         ]
       }
     },

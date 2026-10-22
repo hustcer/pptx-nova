@@ -89,14 +89,13 @@ for (const owner of patch.ops.filter(
       'off',
       '-fuzz',
       '8%',
-      '-fill',
-      'black',
-      '+opaque',
+      // Build the mask through alpha so black glyphs cannot collide with the
+      // temporary mask background color.
+      '-transparent',
       `#${font.color}`,
-      '-fill',
-      'white',
-      '-opaque',
-      `#${font.color}`,
+      '-alpha',
+      'extract',
+      '-negate',
       '-trim',
       '-format',
       '%w,%h,%X,%Y',
@@ -108,8 +107,9 @@ for (const owner of patch.ops.filter(
     const dx = (ink[0] + inkWidth / 2 - bounds[0] - bounds[2] / 2) / bounds[2]
     const dy = (ink[1] + inkHeight / 2 - bounds[1] - bounds[3] / 2) / bounds[3]
     const contained =
-      inkWidth > 1 &&
-      inkHeight > 1 &&
+      // A narrow I/1 or a horizontal glyph stroke can be one pixel wide/high.
+      // ImageMagick's empty-mask sentinel is 1x1; reject that, not valid thin ink.
+      (inkWidth > 1 || inkHeight > 1) &&
       ink[0] >= bounds[0] - 2 &&
       ink[1] >= bounds[1] - 2 &&
       ink[0] + inkWidth <= bounds[0] + bounds[2] + 2 &&

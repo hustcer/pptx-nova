@@ -5,31 +5,109 @@
   "type": "object",
   "required": ["mark", "eyebrow", "title", "body", "site", "cta", "footer"],
   "properties": {
-    "mark": { "type": "string", "maxLength": 2 },
-    "eyebrow": { "type": "string", "maxLength": 48 },
+    "mark": {
+      "type": "string",
+      "maxLength": 2,
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 0.44,
+        "heightIn": 0.44,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "eyebrow": {
+      "type": "string",
+      "maxLength": 48,
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 14,
+        "widthIn": 10,
+        "heightIn": 0.4,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "title": {
       "type": "string",
       "maxLength": 56,
-      "x-slotBudget": { "maxLines": 2, "fontPt": 49, "widthIn": 6.2 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 43,
+        "widthIn": 8.8,
+        "heightIn": 2.2,
+        "lineHeight": 1.1,
+        "maxLines": 2
+      }
     },
     "body": {
       "type": "string",
       "maxLength": 220,
-      "x-slotBudget": { "maxLines": 3, "fontPt": 14.1, "widthIn": 6.0 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 14,
+        "widthIn": 7.5,
+        "heightIn": 1.15,
+        "lineHeight": 1.1,
+        "maxLines": 3
+      }
     },
-    "site": { "type": "string", "maxLength": 36 },
-    "cta": { "type": "string", "maxLength": 28 },
+    "site": {
+      "type": "string",
+      "maxLength": 36,
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 2.785,
+        "heightIn": 0.45,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "cta": {
+      "type": "string",
+      "maxLength": 28,
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 3.5549999999999993,
+        "heightIn": 0.45,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "footer": {
       "type": "array",
-      "minItems": 3,
+      "minItems": 1,
       "maxItems": 3,
       "items": {
         "type": "array",
         "minItems": 2,
         "maxItems": 2,
-        "items": { "type": "string", "maxLength": 72 }
+        "items": {
+          "type": "string",
+          "maxLength": 72,
+          "minLength": 1,
+          "pattern": "\\S",
+          "x-slotBudget": {
+            "fontPt": 10.5,
+            "widthIn": 3.78,
+            "heightIn": 0.25,
+            "lineHeight": 1.1,
+            "maxLines": 1
+          }
+        }
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "long-table/design.json",
+  "x-capacityCheck": "resolve-long-table-components/v1"
 }

@@ -8,43 +8,113 @@
     "title": {
       "type": "string",
       "maxLength": 60,
-      "x-slotBudget": { "maxLines": 1, "fontPt": 37, "widthIn": 7.7 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 34,
+        "widthIn": 11.9,
+        "heightIn": 0.85,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "subtitle": {
       "type": "string",
       "maxLength": 54,
-      "x-slotBudget": { "maxLines": 1, "fontPt": 10.5, "widthIn": 2.6 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 11.9,
+        "heightIn": 0.35,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "cards": {
       "type": "array",
-      "minItems": 3,
+      "minItems": 1,
       "maxItems": 3,
       "items": {
         "type": "object",
         "required": ["no", "city", "title", "text", "meta"],
         "properties": {
-          "no": { "type": "string", "maxLength": 12 },
-          "city": { "type": "string", "maxLength": 24 },
+          "no": {
+            "type": "string",
+            "maxLength": 12,
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 1.4027999999999998,
+              "heightIn": 0.28,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 24,
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 1.9037999999999997,
+              "heightIn": 0.28,
+              "lineHeight": 1.1,
+              "maxLines": 1
+            }
+          },
           "title": {
             "type": "string",
             "maxLength": 44,
-            "x-slotBudget": { "maxLines": 2, "fontPt": 24, "widthIn": 3.2 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 20,
+              "widthIn": 3.34,
+              "heightIn": 1,
+              "lineHeight": 1.1,
+              "maxLines": 2
+            }
           },
           "text": {
             "type": "string",
             "maxLength": 220,
-            "x-slotBudget": { "maxLines": 5, "fontPt": 11.1, "widthIn": 3.2 }
+            "minLength": 1,
+            "pattern": "\\S",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 3.34,
+              "heightIn": 1.4499999999999997,
+              "lineHeight": 1.1,
+              "maxLines": 6
+            }
           },
           "meta": {
             "type": "array",
             "minItems": 2,
             "maxItems": 2,
-            "items": { "type": "string", "maxLength": 22 }
+            "items": {
+              "type": "string",
+              "maxLength": 22,
+              "minLength": 1,
+              "pattern": "\\S",
+              "x-slotBudget": {
+                "fontPt": 10.5,
+                "widthIn": 1.2691999999999999,
+                "heightIn": 0.28,
+                "lineHeight": 1.1,
+                "maxLines": 1
+              }
+            }
           }
         },
         "additionalProperties": false
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "long-table/design.json",
+  "x-capacityCheck": "resolve-long-table-components/v1"
 }

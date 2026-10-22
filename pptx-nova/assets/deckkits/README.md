@@ -25,6 +25,10 @@ assets/deckkits/
 ├── broadside-layouts.mjs      # 十六类职责、二十八个布局与实例容量
 ├── broadside-registry.mjs     # Broadside 视觉族检查与发现投影
 ├── broadside/                # Broadside 2.0 合同与设计意图（candidate）
+├── long-table-components.mjs  # 奶油纸底单墨编辑语言、形状持有文字与原生日程表格
+├── long-table-layouts.mjs     # 八类职责、十五个布局、完整组件计划与实例容量
+├── long-table-registry.mjs    # Long Table 视觉族断言、检查与发现投影
+├── long-table/               # Long Table 2.0 合同与设计意图（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
@@ -52,6 +56,12 @@ Broadside 2.0 保留十六类职责，提供二十八个注册构图；黑橙色
 字体采用相近的常用替代，图壳仍为占位形状。见 [设计与迁移说明](broadside/intent.md)。
 普通英文标题默认 sentence case；封面、章节和短宣言可有意采用全小写。专名、缩写与用户指定
 写法保留，渲染器不自动转换大小写；换行也不重新大写。
+
+Long Table 2.0 保留八个页型入口，十五个注册布局支持封面、信札、索引、特写、节目单、引文、
+日程与收束。奶油纸底、锈红单墨、重标题、衬线正文、徽章与胶囊由合同约束；原生日程表格逐格回读。
+Arial Black / Georgia 和正体 Arial Unicode MS 为明确替代字体，不随套件打包。
+手工调整表格行高或列宽不会同步独立状态轮廓，须从 content 重新生成；不提供图表或图片输入。
+见 [设计与迁移说明](long-table/intent.md)。
 
 ## core-primitives 职责边界
 
@@ -106,7 +116,7 @@ Broadside 2.0 保留十六类职责，提供二十八个注册构图；黑橙色
 不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
 检查应用后的对象和原生数值。详见 `../../references/design-contracts.md`。
 
-合同路线现覆盖 Biennale、Black Gold、Green Slate 与 Clear Value。Black Gold 增加原生表格逐格回读、单焦点与
+合同路线现覆盖 Biennale、Cartesian、Broadside、Long Table、Black Gold、Green Slate 与 Clear Value。Black Gold 增加原生表格逐格回读、单焦点与
 期刊图表/表格规则；Green Slate 增加深色策略报告构图、带底色标签、形状内编号、按时长分配的
 阶段路线图和独立说明区。Clear Value 增加白底衬线研究报告、多图证据板、可变列矩阵、原生环图、
 预测柱虚线边界和面积成比例的可编辑圆。candidate 状态不等于 production/default 交付资格。开发者从设计规范和

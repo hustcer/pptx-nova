@@ -8,17 +8,41 @@
     "mark": {
       "type": "string",
       "maxLength": 2,
-      "x-slotBudget": { "maxLines": 1, "fontPt": 18, "widthIn": 0.28 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 0.44,
+        "heightIn": 0.44,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "eyebrow": {
       "type": "string",
       "maxLength": 48,
-      "x-slotBudget": { "maxLines": 1, "fontPt": 10.5, "widthIn": 2.6 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 14,
+        "widthIn": 6,
+        "heightIn": 0.4,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "title": {
       "type": "string",
       "maxLength": 56,
-      "x-slotBudget": { "maxLines": 3, "fontPt": 48, "widthIn": 5.35 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 43,
+        "widthIn": 4.65,
+        "heightIn": 3.3,
+        "lineHeight": 1.1,
+        "maxLines": 3
+      }
     },
     "paragraphs": {
       "type": "array",
@@ -27,19 +51,45 @@
       "items": {
         "type": "string",
         "maxLength": 210,
-        "x-slotBudget": { "maxLines": 4, "fontPt": 14.4, "widthIn": 5.86 }
+        "minLength": 1,
+        "pattern": "\\S",
+        "x-slotBudget": {
+          "fontPt": 14,
+          "widthIn": 6.55,
+          "heightIn": 0.3166666666666667,
+          "lineHeight": 1.1,
+          "maxLines": 1
+        }
       }
     },
     "signature": {
       "type": "string",
       "maxLength": 36,
-      "x-slotBudget": { "maxLines": 1, "fontPt": 15.5, "widthIn": 1.9 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 14,
+        "widthIn": 6.55,
+        "heightIn": 0.38,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
     "source": {
       "type": "string",
       "maxLength": 96,
-      "x-slotBudget": { "maxLines": 1, "fontPt": 10.5, "widthIn": 4.7 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 6.55,
+        "heightIn": 0.45,
+        "lineHeight": 1.1,
+        "maxLines": 2
+      }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "long-table/design.json",
+  "x-capacityCheck": "resolve-long-table-components/v1"
 }

@@ -2010,6 +2010,11 @@ test('DeckKit slot reference and consistency cover mckinsey-blue cover tuple slo
 })
 
 test('readiness defaults to catalog benchmark evidence', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-catalog-evidence-'))
+  const catalogPath = join(dir, 'catalog.json')
+  const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
+  catalog.entries.find((entry) => entry.id === 'long-table').readiness = 'production'
+  writeJson(catalogPath, catalog)
   const result = runNode([
     skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
     '--deckkit',
@@ -2017,6 +2022,8 @@ test('readiness defaults to catalog benchmark evidence', () => {
     '--target',
     'delivery',
     '--explicit',
+    '--catalog',
+    catalogPath,
     '--json',
   ])
   const report = JSON.parse(result.stdout)
@@ -2048,6 +2055,7 @@ test('readiness catalog benchmark requires passing required case evidence', () =
   const catalogPath = join(dir, 'catalog.json')
   const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
   const entry = catalog.entries.find((candidate) => candidate.id === 'long-table')
+  entry.readiness = 'production'
   entry.quality.benchmark.passed = true
   entry.quality.benchmark.cases = entry.quality.benchmark.cases.map((benchCase) =>
     benchCase.caseId === 'long-table.golden-html' ? { ...benchCase, passed: false } : benchCase,
@@ -2084,6 +2092,10 @@ test('readiness catalog benchmark requires passing required case evidence', () =
 
 test('readiness reports live benchmark attention separately from explicit exception', () => {
   const outDir = mkdtempSync(join(tmpdir(), 'pptx-nova-missing-benchmark-'))
+  const catalogPath = join(outDir, 'catalog.json')
+  const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
+  catalog.entries.find((entry) => entry.id === 'long-table').readiness = 'production'
+  writeJson(catalogPath, catalog)
   const result = runNode([
     skillPath('scripts/pptx-nova-deckkit-readiness.mjs'),
     '--deckkit',
@@ -2093,6 +2105,8 @@ test('readiness reports live benchmark attention separately from explicit except
     '--explicit',
     '--out',
     outDir,
+    '--catalog',
+    catalogPath,
     '--json',
   ])
   const report = JSON.parse(result.stdout)
@@ -2120,6 +2134,7 @@ test('readiness human output tolerates missing vision severity details', () => {
   const catalogPath = join(dir, 'catalog.json')
   const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
   const entry = catalog.entries.find((candidate) => candidate.id === 'long-table')
+  entry.readiness = 'production'
   const benchCase = entry.quality.benchmark.cases.find(
     (candidate) => candidate.caseId === 'long-table.golden-html',
   )

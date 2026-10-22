@@ -2517,15 +2517,15 @@
     },
     {
       "id": "long-table",
-      "version": "0.1.0",
+      "version": "2.0.0",
       "path": "long-table.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "production",
+      "readiness": "candidate",
       "qualityProfile": {
-        "minFontPt": 8.5,
-        "labelFontPt": 8.5,
-        "sourceFontPt": 8.5,
-        "baseline": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
+        "minFontPt": 10,
+        "labelFontPt": 10,
+        "sourceFontPt": 10,
+        "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
       },
       "defaultFor": [],
       "bestFor": [
@@ -2536,8 +2536,8 @@
         "lifestyle launch"
       ],
       "coverage": {
-        "languages": ["en"],
-        "density": ["normal"],
+        "languages": ["en", "zh", "mixed"],
+        "density": ["sparse", "normal", "dense"],
         "slideTypes": [
           "longTableCoverSlide",
           "longTableManifestoSlide",
@@ -2561,7 +2561,7 @@
       ],
       "visualGrammar": {
         "schemaVersion": "pptx-nova-visual-grammar/v1",
-        "positioning": "Warm editorial dinner-series DeckKit with paper textures implied through flat cream surfaces, rust ink, serif copy, and oversized display typography.",
+        "positioning": "Warm editorial programme DeckKit with flat cream paper, rust ink, serif copy, edition badges and oversized display typography.",
         "mood": ["warm", "editorial", "intimate", "culinary", "literary"],
         "layoutPrinciples": [
           "Use flat cream paper fields and rust-red rules instead of gradients or soft cards.",
@@ -2577,9 +2577,9 @@
           "menu rows and calendar structure"
         ],
         "typography": {
-          "display": "Bricolage Grotesque bold for large titles",
-          "body": "Fraunces italic-style editorial body copy",
-          "label": "Small serif labels and table metadata"
+          "display": "Contract display role: heavy upright grotesk titles",
+          "body": "Contract body role: italic serif English and upright CJK copy",
+          "label": "Contract label role: readable metadata with a 10pt floor"
         },
         "colorSystem": {
           "background": ["warm paper #FAF1E2", "aged paper #F2E5CF"],
@@ -2602,13 +2602,8 @@
         ],
         "slideRhythm": {
           "anchor": ["longTableCoverSlide", "longTableClosingSlide"],
-          "editorial": ["longTableManifestoSlide", "longTableQuoteSlide"],
-          "catalogue": [
-            "longTableIndexSlide",
-            "longTableFeaturedSlide",
-            "longTableMenuSlide",
-            "longTableCalendarSlide"
-          ]
+          "editorial": ["longTableManifestoSlide", "longTableFeaturedSlide", "longTableQuoteSlide"],
+          "register": ["longTableIndexSlide", "longTableMenuSlide", "longTableCalendarSlide"]
         }
       },
       "refurbishProfile": {
@@ -2628,17 +2623,20 @@
           "palette": {
             "background": "FAF1E2",
             "text": "B53D2A",
-            "accent": "8E2D1F",
+            "accent": "B53D2A",
             "softAccent": "F2E5CF",
             "secondary": "DEC0A5",
-            "surface": "FAF1E2",
-            "rule": "DEC0A5"
+            "surface": "F2E5CF",
+            "rule": "DEC0A5",
+            "muted": "8E2D1F",
+            "line": "DEC0A5"
           },
           "fonts": {
-            "heading": "Bricolage Grotesque",
-            "body": "Fraunces",
-            "label": "Fraunces",
-            "cjk": "Microsoft YaHei"
+            "heading": "Arial Black",
+            "body": "Georgia",
+            "label": "Georgia",
+            "cjk": "Arial Unicode MS",
+            "display": "Arial Black"
           },
           "styleOps": [
             "set-theme",
@@ -2652,8 +2650,8 @@
           "contentPolicy": "preserve-source-slides-and-editable-objects",
           "titleZone": {
             "placement": "warm editorial title with optional edition badge or small right metadata",
-            "headingStyle": "Bricolage Grotesque bold, oversized, rust ink",
-            "labelStyle": "Fraunces small serif metadata",
+            "headingStyle": "Contract display role, oversized, rust ink",
+            "labelStyle": "Contract body role for readable editorial metadata",
             "accentRule": "thin rust rule, badge outline, or menu divider",
             "avoid": ["stock food photo headers", "SaaS cards", "blue corporate title bars"]
           },
@@ -2703,28 +2701,67 @@
         "severity": "warning",
         "slideTypes": {
           "longTableCoverSlide": {
-            "requiredSlots": ["data.edition", "data.title", "data.description"]
+            "requiredSlots": [
+              "data.edition",
+              "data.editionLabel",
+              "data.title",
+              "data.pills",
+              "data.stat",
+              "data.statNote",
+              "data.tagline",
+              "data.description"
+            ],
+            "allowedLayoutIds": ["auto", "split", "verso"]
           },
           "longTableManifestoSlide": {
-            "requiredSlots": ["data.title", "data.paragraphs"]
+            "requiredSlots": [
+              "data.mark",
+              "data.eyebrow",
+              "data.title",
+              "data.paragraphs",
+              "data.signature",
+              "data.source"
+            ],
+            "allowedLayoutIds": ["auto", "letter", "wide"]
           },
           "longTableIndexSlide": {
-            "requiredSlots": ["data.title", "data.cards"]
+            "requiredSlots": ["data.title", "data.subtitle", "data.cards"],
+            "allowedLayoutIds": ["auto", "cards", "register"]
           },
           "longTableFeaturedSlide": {
-            "requiredSlots": ["data.title", "data.body", "data.details"]
+            "requiredSlots": [
+              "data.edition",
+              "data.eyebrow",
+              "data.title",
+              "data.body",
+              "data.pills",
+              "data.details"
+            ],
+            "allowedLayoutIds": ["auto", "right", "left"]
           },
           "longTableMenuSlide": {
-            "requiredSlots": ["data.title", "data.items"]
+            "requiredSlots": ["data.title", "data.subtitle", "data.items"],
+            "allowedLayoutIds": ["auto", "ledger", "programme"]
           },
           "longTableQuoteSlide": {
-            "requiredSlots": ["data.quote", "data.author"]
+            "requiredSlots": ["data.label", "data.quote", "data.author", "data.role"],
+            "allowedLayoutIds": ["auto", "centered", "reading"]
           },
           "longTableCalendarSlide": {
-            "requiredSlots": ["data.title", "data.columns", "data.rows"]
+            "requiredSlots": ["data.title", "data.subtitle", "data.columns", "data.rows"],
+            "allowedLayoutIds": ["auto", "ledger"]
           },
           "longTableClosingSlide": {
-            "requiredSlots": ["data.title", "data.body", "data.footer"]
+            "requiredSlots": [
+              "data.mark",
+              "data.eyebrow",
+              "data.title",
+              "data.body",
+              "data.site",
+              "data.cta",
+              "data.footer"
+            ],
+            "allowedLayoutIds": ["auto", "left", "centered"]
           }
         }
       },
@@ -2749,15 +2786,16 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-06-21",
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-10-22",
         "vision": {
           "high": 0,
           "medium": 0,
-          "low": 41,
+          "low": 0,
           "lowBuckets": {
-            "total": 41,
-            "styleAllowed": 40,
-            "baselineKnown": 1,
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
             "new": 0,
             "changed": 0,
             "resolved": 0,
@@ -2766,13 +2804,12 @@
             "baselineUpdatedCases": 1
           }
         },
-        "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-06-21",
+          "date": "2026-10-22",
           "source": {
-            "visualIndex": "skills/pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/pptx-nova-visual"
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-long-table-v2-20261022/benchmark/02"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -2781,11 +2818,11 @@
           "vision": {
             "high": 0,
             "medium": 0,
-            "low": 41,
+            "low": 0,
             "lowBuckets": {
-              "total": 41,
-              "styleAllowed": 40,
-              "baselineKnown": 1,
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
               "new": 0,
               "changed": 0,
               "resolved": 0,
@@ -2799,8 +2836,8 @@
               "caseId": "long-table.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/pptx-nova-visual/long-table/golden-html/summary.json",
-              "reviewPath": "skills/pptx-nova/benchmarks/visual/cases/long-table/golden-html/review.md",
+              "summaryPath": ".tmp/deckkit-long-table-v2-20261022/benchmark/02/long-table/golden-html/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/long-table/golden-html/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
@@ -2815,11 +2852,11 @@
               "vision": {
                 "high": 0,
                 "medium": 0,
-                "low": 41,
+                "low": 0,
                 "lowBuckets": {
-                  "total": 41,
-                  "styleAllowed": 40,
-                  "baselineKnown": 1,
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
                   "resolved": 0,
@@ -2836,26 +2873,39 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 233573
+                "bytes": 178651
               },
-              "patchOps": 632,
-              "p50TotalMs": 36.91
+              "patchOps": 634,
+              "p50TotalMs": 81.36
             }
           ],
           "blockers": []
         }
       },
       "knownLimits": [
-        "Bricolage Grotesque and Fraunces are referenced by family name; actual rendering depends on local font availability or PowerPoint substitution.",
-        "Paper texture is represented by flat editable fills rather than bitmap texture assets because full-slide SVG texture pictures render as structurify.io watermark placeholders.",
-        "The cover edition-number block is optional; omit bigEdition/bigLabel/bigMeta when a deck has no meaningful issue-number content."
+        "HTML-derived single-ink editorial language; browser navigation and animations are excluded.",
+        "Arial Black / Georgia and upright Arial Unicode MS replace unavailable Bricolage Grotesque / Fraunces; fonts are not bundled.",
+        "Paper grain is approximated by a solid cream fill. A native pattern probe rendered white in the tested canonical renderer.",
+        "Calendar is a native five-column table with independent capsule outlines. Manual table row/column resizing does not synchronize these outlines; regenerate from content.",
+        "All content uses bounded registered layouts; overflow fails rather than dropping fields or shrinking text. No chart or image input is advertised."
       ],
       "examples": [
         {
           "name": "long-table-editorial",
           "contentPath": "examples/long-table-content.json"
         }
-      ]
+      ],
+      "designContract": "long-table/design.json",
+      "diversityGate": {
+        "minSlides": 6,
+        "minGroups": 3,
+        "maxConsecutive": 3,
+        "groups": {
+          "anchor": ["longTableCoverSlide", "longTableClosingSlide"],
+          "editorial": ["longTableManifestoSlide", "longTableFeaturedSlide", "longTableQuoteSlide"],
+          "register": ["longTableIndexSlide", "longTableMenuSlide", "longTableCalendarSlide"]
+        }
+      }
     },
     {
       "id": "biennale-yellow",

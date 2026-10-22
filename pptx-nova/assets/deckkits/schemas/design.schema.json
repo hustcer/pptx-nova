@@ -231,6 +231,9 @@
     },
     "broadside": {
       "$ref": "#/$defs/broadside"
+    },
+    "longTable": {
+      "$ref": "#/$defs/longTable"
     }
   },
   "required": [
@@ -1946,6 +1949,208 @@
         "chart",
         "rhythm",
         "families"
+      ],
+      "additionalProperties": false
+    },
+    "longTable": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "long-table-editorial/v1"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sizePt": {
+                "type": "number",
+                "minimum": 10
+              },
+              "lineHeight": {
+                "type": "number",
+                "minimum": 1
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "italic": {
+                "type": "boolean"
+              },
+              "alignment": {
+                "enum": ["left", "right", "center"]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["role", "sizePt", "lineHeight", "color"],
+            "additionalProperties": false
+          }
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "enum": [
+                  "cover",
+                  "manifesto",
+                  "index",
+                  "featured",
+                  "menu",
+                  "quote",
+                  "calendar",
+                  "closing"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "titleStyle": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["titleStyle", "regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        },
+        "capacity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pad": {
+              "type": "number",
+              "minimum": 0
+            },
+            "ruleGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "cellPad": {
+              "type": "number",
+              "minimum": 0
+            },
+            "outlinePt": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxRowHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "registerMaxRowHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "singleCardHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "gap",
+            "pad",
+            "ruleGap",
+            "cellPad",
+            "outlinePt",
+            "maxRowHeight",
+            "registerMaxRowHeight",
+            "singleCardHeight"
+          ],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["page"],
+          "additionalProperties": false
+        },
+        "table": {
+          "type": "object",
+          "properties": {
+            "weights": {
+              "type": "array",
+              "minItems": 5,
+              "maxItems": 5,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "headerHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["weights", "headerHeight"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "minFullDeck": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxConsecutive": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["minFullDeck", "maxConsecutive"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "family",
+        "styles",
+        "families",
+        "capacity",
+        "spacing",
+        "chrome",
+        "table",
+        "rhythm"
       ],
       "additionalProperties": false
     }

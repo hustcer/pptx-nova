@@ -8,26 +8,72 @@
     "title": {
       "type": "string",
       "maxLength": 48,
-      "x-slotBudget": { "maxLines": 1, "fontPt": 37, "widthIn": 5.2 }
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 34,
+        "widthIn": 11.9,
+        "heightIn": 0.85,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
     },
-    "subtitle": { "type": "string", "maxLength": 56 },
+    "subtitle": {
+      "type": "string",
+      "maxLength": 56,
+      "minLength": 1,
+      "pattern": "\\S",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 11.9,
+        "heightIn": 0.35,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "columns": {
       "type": "array",
       "minItems": 5,
       "maxItems": 5,
-      "items": { "type": "string", "maxLength": 16 }
+      "items": {
+        "type": "string",
+        "maxLength": 16,
+        "minLength": 1,
+        "pattern": "\\S",
+        "x-slotBudget": {
+          "fontPt": 10.5,
+          "widthIn": 0.6135,
+          "heightIn": 0.27,
+          "lineHeight": 1.1,
+          "maxLines": 1
+        }
+      }
     },
     "rows": {
       "type": "array",
-      "minItems": 3,
+      "minItems": 1,
       "maxItems": 6,
       "items": {
         "type": "array",
         "minItems": 5,
         "maxItems": 5,
-        "items": { "type": "string", "maxLength": 80 }
+        "items": {
+          "type": "string",
+          "maxLength": 80,
+          "minLength": 1,
+          "pattern": "\\S",
+          "x-slotBudget": {
+            "fontPt": 11,
+            "widthIn": 0.6135,
+            "heightIn": 0.51,
+            "lineHeight": 1.1,
+            "maxLines": 2
+          }
+        }
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "x-generatedBudgetsFrom": "long-table/design.json",
+  "x-capacityCheck": "resolve-long-table-components/v1"
 }

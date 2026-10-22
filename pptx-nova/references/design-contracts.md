@@ -1,7 +1,7 @@
 # Contract-driven DeckKits
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
-existing workflow. The registered designs are `biennale-yellow`, `cartesian`, `broadside`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
+existing workflow. The registered designs are `biennale-yellow`, `cartesian`, `broadside`, `long-table`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow
@@ -114,6 +114,23 @@ text; manual chart edits do not synchronize that legend. Statistics are display 
 stepped hierarchy is categorical. `image.split` remains a native placeholder shell without asset
 ingestion. Arial Black / Arial / Menlo and Noto Sans SC replace unavailable reference fonts; fonts
 are not bundled. Canonical review and applicable native-host checks remain necessary.
+
+### Single-ink editorial family: Long Table
+
+`long-table` 2.0 uses `long-table-editorial/v1`. Read `assets/deckkits/long-table/intent.md` and discover
+its eight retained slide types and fifteen registered compositions with the same CLI. All roles except
+the five-column calendar have two genuinely different geometries. Explicit `layoutId` still needs to
+fit; `auto` checks capacity and recent layout rhythm. Complete decks open with cover and end with
+closing; use `meta.designScope: "excerpt"` for extracts. The optional large edition, label and metadata
+fields on the cover remain independent. Input casing and explicit line breaks are preserved.
+
+Cream paper, rust single ink, heavy display, serif English, fine rules, owned edition badges and
+native freeform capsules define the identity. Arial Black / Georgia and upright Arial Unicode MS
+replace unavailable reference fonts; fonts are not bundled. The flat paper fill deliberately omits
+the source grain because the tested native pattern differed between PowerPoint and canonical rendering.
+The native calendar preserves every header and cell. Its separate status outlines do not follow
+manual row-height or column-width edits; regenerate from content to synchronize them. No chart or
+image ingestion is provided. Candidate readiness does not prove arbitrary existing-deck refurbishment.
 
 ### Warm editorial family: Cartesian
 

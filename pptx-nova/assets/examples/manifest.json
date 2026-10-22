@@ -527,9 +527,9 @@
       "deckkit": "long-table",
       "caseId": "long-table.golden-html",
       "kind": "golden",
-      "readiness": "production",
-      "version": "0.1.0",
-      "title": "Long Table",
+      "readiness": "candidate",
+      "version": "2.0.0",
+      "title": "LONG TABLE",
       "bestFor": [
         "hospitality brand",
         "food and beverage editorial deck",
@@ -541,29 +541,29 @@
       "files": {
         "deck": {
           "path": "long-table/deck.pptx",
-          "bytes": 22769,
-          "sha256": "c5f56bf6f3f44df61005de9772825c7e877fa795eabc584fc5f33033380e0907"
+          "bytes": 24314,
+          "sha256": "28b35d2c35a4ed50e8790cd6e301b664168d5d59dc195dff051326bf07d14e44"
         },
         "contactSheet": {
           "path": "long-table/contact-sheet.webp",
-          "bytes": 102704,
-          "sha256": "46d59858be8c96e2a5d51a61178059932b26bdd884333aa969e7c8140086dbf8",
+          "bytes": 103470,
+          "sha256": "64d8ff1d8353a73870534a35b83394ba32e7bdb5bd6f58c91d04df0352dd29f1",
           "quality": 82
         },
         "content": {
           "path": "long-table/content.json",
-          "bytes": 6669,
-          "sha256": "eab2c349ca9d5d1e03ee0536ce0d2361f11cff082400f44527fce246bbf62ce7"
+          "bytes": 6702,
+          "sha256": "6c6a59b7d8676699b4e46a9bfc1490d8604a9e186d11a0204cb92bfae14b0d63"
         },
         "brief": {
           "path": "long-table/brief.md",
-          "bytes": 712,
-          "sha256": "0fdc3730ff73b07277c7bd3a698805c0421805b31892b5f6c10e09f54572e86d"
+          "bytes": 711,
+          "sha256": "b440e4a97700c6d854105978fd1660357d12e29fb4199c6e1007b5691c6b15da"
         },
         "summary": {
           "path": "long-table/summary.json",
-          "bytes": 2788,
-          "sha256": "99c472ee4b646e3ef1f9f37d04a07bd6c2522fb9e05c6bba77162a631c200ca5"
+          "bytes": 2714,
+          "sha256": "38cba7480fddcd7bbbb9f7e1b1c158e62c61a7505b60d16d47c382e7cd5a3c0b"
         }
       },
       "validation": {
@@ -575,22 +575,22 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 632
+        "ops": 634
       },
       "vision": {
         "status": "success",
         "slideCount": 8,
-        "issueCount": 41,
+        "issueCount": 0,
         "autoFixable": 0,
         "bySeverity": {
           "high": 0,
           "medium": 0,
-          "low": 41
+          "low": 0
         },
         "lowBuckets": {
-          "total": 41,
-          "styleAllowed": 40,
-          "baselineKnown": 1,
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
           "new": 0,
           "changed": 0,
           "resolved": 0,
@@ -598,10 +598,7 @@
           "baselineUnavailable": false,
           "baselineUpdated": false
         },
-        "lowByFamily": {
-          "overlap": 1,
-          "small-font": 40
-        },
+        "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
@@ -609,15 +606,15 @@
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
           "available": true,
-          "issueCount": 41
+          "issueCount": 0
         },
         "stylePolicy": {
           "schemaVersion": "pptx-nova-vision-style-policy/v1",
           "source": "catalog.qualityProfile",
-          "minFontPt": 8.5,
-          "labelFontPt": 8.5,
-          "sourceFontPt": 8.5,
-          "note": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
         },
         "newLowSamples": [],
         "changedLowSamples": [],

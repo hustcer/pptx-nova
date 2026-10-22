@@ -3,7 +3,7 @@
   "deckkit": "long-table",
   "caseId": "long-table.golden-html",
   "kind": "golden",
-  "title": "Long Table",
+  "title": "LONG TABLE",
   "source": {
     "content": "pptx-nova/assets/deckkits/examples/long-table-content.json",
     "build": "pptx-nova/assets/deckkits/examples/long-table-build.mjs",
@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 632
+    "ops": 634
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 19,
-    "opResults": 632,
+    "changedParts": 20,
+    "opResults": 634,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -36,8 +36,8 @@
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 19,
-    "opResults": 632,
+    "changedParts": 20,
+    "opResults": 634,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -48,17 +48,17 @@
   "vision": {
     "status": "success",
     "slideCount": 8,
-    "issueCount": 41,
+    "issueCount": 0,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 41
+      "low": 0
     },
     "lowBuckets": {
-      "total": 41,
-      "styleAllowed": 40,
-      "baselineKnown": 1,
+      "total": 0,
+      "styleAllowed": 0,
+      "baselineKnown": 0,
       "new": 0,
       "changed": 0,
       "resolved": 0,
@@ -66,10 +66,7 @@
       "baselineUnavailable": false,
       "baselineUpdated": false
     },
-    "lowByFamily": {
-      "overlap": 1,
-      "small-font": 40
-    },
+    "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
@@ -77,15 +74,15 @@
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/long-table.golden-html.vision-baseline.json",
       "available": true,
-      "issueCount": 41
+      "issueCount": 0
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
       "source": "catalog.qualityProfile",
-      "minFontPt": 8.5,
-      "labelFontPt": 8.5,
-      "sourceFontPt": 8.5,
-      "note": "Long Table uses small editorial labels and table cells while keeping core body copy at readable sizes."
+      "minFontPt": 10,
+      "labelFontPt": 10,
+      "sourceFontPt": 10,
+      "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
     },
     "newLowSamples": [],
     "changedLowSamples": [],
@@ -99,12 +96,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 182472,
-      "sha256": "263357aea019376a24d2904e2ffe4f2aa67eb6056553c09a621a531fdfe5a21c"
+      "bytes": 178651,
+      "sha256": "801b7b9c20d3fc2740fac6481f3bc2ea2a4eee325a90e117a9650de7fbf91d0d"
     },
     "webp": {
-      "bytes": 102704,
-      "sha256": "46d59858be8c96e2a5d51a61178059932b26bdd884333aa969e7c8140086dbf8"
+      "bytes": 103470,
+      "sha256": "64d8ff1d8353a73870534a35b83394ba32e7bdb5bd6f58c91d04df0352dd29f1"
     }
   }
 }

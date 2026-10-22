@@ -95,6 +95,12 @@ For paper grain, hatch, noise, SVG pattern, or CSS texture effects, prefer edita
 thin rules, repeated native shapes, low-density hatch marks, or an explicit known limit. If a picture background is
 unavoidable, validate layer order in the rendered PNG and in PowerPoint before freezing the kit.
 
+A native pattern fill also needs that visual comparison: accepted schema/dry-run and a clean canonical report
+do not prove the paper color survived. In the Long Table migration, `pct5` with explicit cream background rendered
+white in canonical PNGs while PowerPoint displayed cream and dots. Preserve both samples, identify the renderer
+boundary, and use an acceptable flat-fill approximation when the texture cannot survive the delivery route.
+Do not turn this observed combination into a permanent ban on all native patterns.
+
 ## Unit Mapping
 
 Use a 16:9 capture viewport so ratios map cleanly to PPTX:

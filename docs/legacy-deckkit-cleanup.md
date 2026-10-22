@@ -5,7 +5,8 @@
 最新进展：Biennale 已完成 [2.0 清理](biennale-yellow-v2-cleanup-results.md)；
 Cartesian 已完成 [2.0 迁移与验收](cartesian-v2-migration-results.md)，均为 candidate。
 Broadside 已完成 [2.0 迁移与验收](broadside-v2-migration-results.md)，目标同为 candidate。
-当前为四套无合同旧创建实现、六套合同实现；尚未完成其他旧套件的全仓退役目标。
+Long Table 已完成 [2.0 迁移与验收](long-table-v2-migration-results.md)，为 candidate。
+当前为三套无合同旧创建实现、七套合同实现；尚未完成其他旧套件的全仓退役目标。
 
 依据：[设计语言载体评估](design-language-contract-evaluation.md)、当前 catalog、合同执行链、
 Biennale 源码、schemas、示例、benchmark 与 showcase 更新工具。

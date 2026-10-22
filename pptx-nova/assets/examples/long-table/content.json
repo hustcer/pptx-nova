@@ -1,6 +1,7 @@
 {
   "meta": {
-    "deckkit": "long-table"
+    "deckkit": "long-table",
+    "designScope": "complete"
   },
   "slides": [
     {
@@ -8,13 +9,13 @@
       "data": {
         "edition": "5",
         "editionLabel": "december edition",
-        "title": "Long Table",
+        "title": "LONG\nTABLE",
         "pills": ["Lisbon", "Apply now"],
         "stat": "22 seats only",
         "statNote": "More than dinner, it's a long evening.",
         "tagline": "Not a meal, an evening",
         "description": "Where ten strangers, one cook, and a long evening meet under low light. Twice a month, by application.",
-        "bigEdition": "No. 05",
+        "bigEdition": "No.\n05",
         "bigLabel": "December · Lisbon · Edition",
         "bigMeta": "Twice a month, ten strangers, one cook, one long table. By application."
       }
@@ -24,7 +25,7 @@
       "data": {
         "mark": "·",
         "eyebrow": "a letter from the table",
-        "title": "A note\nbefore\nwe sit.",
+        "title": "A NOTE\nBEFORE\nWE SIT.",
         "paragraphs": [
           "We started Long Table in a borrowed kitchen, with six chairs we'd carried up the stairs, and the conviction that an evening is more than the food on the plates.",
           "Three years on we've seated almost two thousand strangers across nine cities, and we've learned that the chairs are sometimes the most important part.",
@@ -37,27 +38,27 @@
     {
       "type": "longTableIndexSlide",
       "data": {
-        "title": "Three recent editions",
+        "title": "THREE RECENT EDITIONS",
         "subtitle": "Long Table · 2025 · selected",
         "cards": [
           {
             "no": "No. 03",
             "city": "Mexico City",
-            "title": "A Plate\nof Quiet",
+            "title": "A PLATE\nOF QUIET",
             "text": "Eight courses cooked entirely on a single induction ring. The room agreed not to use phones for the entire evening, and almost kept the agreement.",
             "meta": ["22 seats", "14 March 2025"]
           },
           {
             "no": "No. 04",
             "city": "Tokyo",
-            "title": "A Soup\nof Letters",
+            "title": "A SOUP\nOF LETTERS",
             "text": "A reading evening, with a single course served slowly. Four guest writers, one bowl per person, and the longest pause we have ever held between courses.",
             "meta": ["18 seats", "06 July 2025"]
           },
           {
             "no": "No. 05",
             "city": "Lisbon",
-            "title": "December\nEdition",
+            "title": "DECEMBER\nEDITION",
             "text": "A long winter dinner. Twenty-two seats, one shared roast, and a quiet bookshop next door we'll wander to between courses, when the rain agrees.",
             "meta": ["22 seats", "11 December 2025"]
           }
@@ -69,7 +70,7 @@
       "data": {
         "edition": "5",
         "eyebrow": "december · the featured edition",
-        "title": "An evening\nfor the rain.",
+        "title": "AN EVENING\nFOR THE RAIN.",
         "body": "A long winter dinner in a converted printing room above a bookshop. One shared roast, an unhurried wine list, and a single intermission that may, if the weather agrees, become a walk to the harbour and back.",
         "pills": ["Apply by 28 November", "Twelve seats left"],
         "details": [
@@ -84,7 +85,7 @@
     {
       "type": "longTableMenuSlide",
       "data": {
-        "title": "A Menu, in Five Slow Movements",
+        "title": "A MENU, IN FIVE SLOW MOVEMENTS",
         "subtitle": "December · Lisbon",
         "items": [
           [
@@ -124,7 +125,7 @@
       "type": "longTableQuoteSlide",
       "data": {
         "label": "A guest writes",
-        "quote": "An evening I keep\ndescribing,\nbadly, to people who weren't there.",
+        "quote": "AN EVENING I KEEP DESCRIBING,\nBADLY, TO PEOPLE WHO\nWEREN'T THERE.",
         "author": "Hana Brennan",
         "role": "long-table guest · Edition No. 04 · Tokyo"
       }
@@ -132,7 +133,7 @@
     {
       "type": "longTableCalendarSlide",
       "data": {
-        "title": "What's coming up",
+        "title": "WHAT'S COMING UP",
         "subtitle": "2026 calendar · subject to weather",
         "columns": ["No.", "City", "Theme", "Date", "Status"],
         "rows": [
@@ -162,7 +163,7 @@
       "data": {
         "mark": "·",
         "eyebrow": "come and sit with us",
-        "title": "See you\nat the table.",
+        "title": "SEE YOU\nAT THE TABLE.",
         "body": "Every Long Table evening is by application. We read each one, and we usually answer within a week. The next room opens for Brooklyn on the seventeenth of January.",
         "site": "long-table.co",
         "cta": "Apply for Brooklyn",

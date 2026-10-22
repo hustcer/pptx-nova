@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { wrapCjkText } from './design-text.mjs'
 import { STRATEGY_REGIONS } from './strategy-registry.mjs'
 import { ANNUAL_LAYOUTS } from './annual-registry.mjs'
+import { BIENNALE_REGIONS } from './biennale-registry.mjs'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -25,8 +26,9 @@ const CHECKS = new Set([
 ])
 
 // A deliberately bounded validator for the bundled design schema, not a general JSON Schema API.
-function validate(value, schema, doc, path = '$') {
-  if (schema.$ref) return validate(value, doc.$defs[schema.$ref.split('/').at(-1)], doc, path)
+export function assertDesignValue(value, schema, doc = schema, path = '$') {
+  if (schema.$ref)
+    return assertDesignValue(value, doc.$defs[schema.$ref.split('/').at(-1)], doc, path)
   const fail = (message) => {
     throw new Error(`${path}: ${message}`)
   }
@@ -49,21 +51,21 @@ function validate(value, schema, doc, path = '$') {
   if (type === 'array') {
     if (schema.minItems !== undefined && value.length < schema.minItems) fail('too few items')
     if (schema.maxItems !== undefined && value.length > schema.maxItems) fail('too many items')
-    value.forEach((v, i) => validate(v, schema.items ?? {}, doc, `${path}[${i}]`))
+    value.forEach((v, i) => assertDesignValue(v, schema.items ?? {}, doc, `${path}[${i}]`))
   }
   if (type === 'object') {
     for (const k of schema.required ?? []) if (!Object.hasOwn(value, k)) fail(`missing ${k}`)
     for (const [k, v] of Object.entries(value)) {
       const child = schema.properties?.[k] ?? schema.additionalProperties
       if (child === false) fail(`unknown field ${k}`)
-      if (child && typeof child === 'object') validate(v, child, doc, `${path}.${k}`)
+      if (child && typeof child === 'object') assertDesignValue(v, child, doc, `${path}.${k}`)
     }
   }
 }
 
 export function assertDesignContract(design) {
   const schema = readJson(resolve(root, 'schemas/design.schema.json'))
-  validate(design, schema, schema)
+  assertDesignValue(design, schema, schema)
   const ruleIds = new Set()
   for (const rule of design.rules) {
     if (!CHECKS.has(rule.check)) throw new Error(`Unknown design checker: ${rule.check}`)
@@ -86,14 +88,39 @@ export function assertDesignContract(design) {
     ...Object.values(design.refurbish.fonts),
   ])
     if (!Object.hasOwn(design.fonts, role)) throw new Error(`Unknown font role: ${role}`)
-  for (const [type, layout] of Object.entries(design.legacyLayouts)) {
-    for (const [name, slot] of Object.entries(layout.slots)) {
-      if (!design.fonts[slot.font.role]) throw new Error(`${type}.${name}: unknown font role`)
-      for (const frame of slot.frames) assertFrame(design, frame, `${type}.${name}`)
+  if (
+    !design.evidence &&
+    !design.editorial &&
+    !design.strategy &&
+    !design.annual &&
+    !design.biennale
+  )
+    throw new Error('A registered design renderer is required')
+  if (design.biennale) {
+    const b = design.biennale
+    if (!design.evidence) throw new Error('Biennale requires the native evidence renderer')
+    for (const [name, style] of Object.entries(b.styles))
+      if (!design.fonts[style.role]) throw new Error(name + ': unknown font role')
+    for (const frame of Object.values(b.chrome)) assertFrame(design, frame, 'biennale.chrome')
+    if (!Object.keys(b.families).length) throw new Error('Biennale requires families')
+    for (const [type, family] of Object.entries(b.families)) {
+      if (!Object.keys(family.variants).length) throw new Error(type + ': no variants')
+      for (const [id, v] of Object.entries(family.variants)) {
+        const expected = BIENNALE_REGIONS[family.role]
+        if (
+          expected.some((k) => !v.regions[k]) ||
+          Object.keys(v.regions).some((k) => !expected.includes(k))
+        )
+          throw new Error(type + '.' + id + ': unregistered Biennale regions')
+        if (!b.styles[v.titleStyle]) throw new Error(type + ': unknown title style')
+        for (const frame of Object.values(v.regions)) assertFrame(design, frame, type + '.' + id)
+        for (const decoration of v.decorations) {
+          assertFrame(design, decoration.frame, type + '.' + id)
+          if (!design.colors[decoration.color]) throw new Error('Unknown decoration token')
+        }
+      }
     }
   }
-  if (!design.evidence && !design.editorial && !design.strategy && !design.annual)
-    throw new Error('A registered design renderer is required')
   for (const [id, layout] of Object.entries(design.evidence?.layouts ?? {})) {
     assertFrame(design, layout.chart, id)
     layout.stats.forEach((frame) => assertFrame(design, frame, id))
@@ -219,18 +246,6 @@ function assertFrame(design, frame, path) {
     throw new Error(`${path}: frame outside canvas`)
 }
 
-export function resolveDesignSlot(design, type, name) {
-  const index = Number(name.match(/\d+$/)?.[0] ?? 0)
-  const key = name.replace(/\d+$/, '{i}')
-  const slot = design.legacyLayouts[type]?.slots[key]
-  if (!slot?.frames[index]) throw new Error(`Unknown design slot: ${type}.${name}`)
-  return {
-    ...slot,
-    frame: [...slot.frames[index]],
-    paragraph: slot.paragraphs?.[index] ?? slot.paragraph,
-  }
-}
-
 export function designFont(design, role, sizePt, extra = {}) {
   const family = design.fonts[role]
   if (!family) throw new Error(`Unknown font role: ${role}`)
@@ -241,41 +256,6 @@ export function designFont(design, role, sizePt, extra = {}) {
     color: design.colors[design.roles.text],
     ...extra,
   }
-}
-
-export function writeDesignText(p, design, type, s, base, value) {
-  const slot = resolveDesignSlot(design, type, base)
-  const lineCount = value.split(/\r\n|\r|\n/).length
-  for (const step of slot.heightByLines ?? []) {
-    if (lineCount >= step.minLines) {
-      slot.frame[3] = Math.min(step.heightIn, design.canvas.heightIn - slot.frame[1] - 0.02)
-    }
-  }
-  const name = `S${s}_${base}`
-  p.textbox(s, name, ...slot.frame)
-  p.setText(s, name, value)
-  const { role, sizePt, ...extra } = slot.font
-  for (let i = 0; i < value.split(/\r\n|\r|\n/).length; i++) {
-    p.runFont(s, name, designFont(design, role, sizePt, extra), i)
-    if (slot.paragraph) {
-      p.ops.push({
-        op: 'set-paragraph',
-        slide: s,
-        shape: { name },
-        paragraph: i,
-        format: slot.paragraph,
-      })
-    }
-  }
-  if (slot.autofit) {
-    p.ops.push({
-      op: 'set-text-frame',
-      slide: s,
-      shape: { name },
-      frame: { autofit: { mode: slot.autofit } },
-    })
-  }
-  return name
 }
 
 export function designTheme(design) {

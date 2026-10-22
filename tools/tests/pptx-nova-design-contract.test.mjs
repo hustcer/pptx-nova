@@ -24,12 +24,12 @@ const read = (path) => JSON.parse(readFileSync(new URL('../../' + path, import.m
 const fixture = () =>
   read('pptx-nova/assets/deckkits/examples/biennale-yellow-evidence-content.json')
 
-test('legacy content still builds, uses a native theme and meets the new readability floor', () => {
+test('all editorial page types build through registered plans with a native theme and readable text', () => {
   const content = read('pptx-nova/assets/deckkits/examples/biennale-yellow-content.json')
   assert.equal(validateDeckkitContent(content, { mode: 'delivery' }).valid, true)
   const a = createDeck(content)
   assert.deepEqual(a, createDeck(structuredClone(content)))
-  assert.equal(a.patch.ops.filter((o) => o.op === 'add-slide').length, 8)
+  assert.equal(a.patch.ops.filter((o) => o.op === 'add-slide').length, 9)
   assert.ok(a.patch.ops.some((o) => o.op === 'set-theme'))
   assert.ok(a.patch.ops.filter((o) => o.font?.size).every((o) => parseFloat(o.font.size) >= 10))
   assert.equal(a.designCheck.status, 'pass')
@@ -45,9 +45,12 @@ test('generated projections match the runtime geometry and are idempotent', () =
   const schema = read(
     'pptx-nova/assets/deckkits/schemas/biennale-yellow/biennaleDataSlide.schema.json',
   )
-  const slot = DESIGN.legacyLayouts.biennaleDataSlide.slots.Title
-  assert.equal(schema.properties.title['x-slotBudget'].fontPt, slot.font.sizePt)
-  assert.equal(schema.properties.title['x-slotBudget'].widthIn, slot.frames[0][2])
+  const variant = DESIGN.biennale.families.biennaleDataSlide.variants.ledger
+  assert.equal(
+    schema.properties.title['x-slotBudget'].fontPt,
+    DESIGN.biennale.styles[variant.titleStyle].sizePt,
+  )
+  assert.equal(schema.properties.title['x-slotBudget'].widthIn, variant.regions.title[2])
 })
 
 test('contract rejects typos, unknown rules, invalid tokens and invalid geometry', () => {
@@ -157,8 +160,8 @@ test('long evidence-only decks use resolved diversity without inventing editoria
   const result = validateDeckkitContent(content, { mode: 'delivery' })
   assert.equal(result.valid, true, JSON.stringify(result.errors))
   assert.equal(result.designDiversity.uniqueCompositions, 3)
-  assert.ok(result.designDiversity.replacedLegacyCodes.length > 0)
-  assert.equal(result.warnings.length, 0)
+  assert.equal(result.designDiversity.mode, 'resolved-biennale-layouts')
+  assert.equal(result.warnings.filter((w) => w.type !== 'catalog').length, 0)
   const built = createDeck(content)
   assert.equal(new Set(built.designPlan.layouts.map((r) => r.fingerprint)).size, 3)
 })
@@ -169,7 +172,7 @@ test('explicit repeated compositions are disclosed and legacy diversity gates re
   const repeated = validateDeckkitContent(content, { mode: 'delivery' })
   assert.equal(repeated.valid, true)
   assert.ok(repeated.warnings.some((w) => w.diagnostic?.code === 'design.diversity.repeated'))
-  const legacy = read('pptx-nova/assets/deckkits/examples/biennale-yellow-content.json')
+  const legacy = read('pptx-nova/assets/deckkits/examples/roadshow-content.json')
   legacy.slides = Array.from({ length: 8 }, () => structuredClone(legacy.slides[0]))
   const checked = validateDeckkitContent(legacy, { mode: 'delivery' })
   assert.equal(checked.valid, false)
@@ -249,11 +252,9 @@ test('zero, negative and fractional native values preserve exact input numbers',
   )
   assert.equal(createDeck(content).designPlan.layouts[0].numberFormat, '0.00E+00')
   const legacy = read('pptx-nova/assets/deckkits/examples/biennale-yellow-content.json')
-  legacy.slides[4].data.bars[0].pct = 0
-  assert.equal(
-    createDeck(legacy).patch.ops.some((o) => o.op === 'add-shape' && o.name === 'S4_Bar0'),
-    false,
-  )
+  legacy.slides[4].data.bars[0].value = 0
+  const chart2 = createDeck(legacy).patch.ops.find((o) => o.op === 'add-chart')
+  assert.equal(chart2.data.series[0].values[0], 0)
 })
 
 test('CJK layout breaks preserve input characters and avoid punctuation-only lines', () => {

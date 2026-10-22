@@ -3311,10 +3311,10 @@
     },
     {
       "id": "biennale-yellow",
-      "version": "0.2.0",
+      "version": "2.0.0",
       "path": "biennale-yellow.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "production",
+      "readiness": "candidate",
       "qualityProfile": {
         "minFontPt": 10,
         "labelFontPt": 10,
@@ -3361,12 +3361,12 @@
         "mood": ["editorial", "cultural", "solar", "quiet", "institutional"],
         "layoutPrinciples": [
           "Use a warm paper canvas with one disciplined ink color for all text and rules.",
-          "Let yellow planes, translucent block tiles, and native soft-edge ovals carry the visual identity.",
+          "Let yellow planes, translucent block tiles, and native gradient blooms carry the visual identity.",
           "Use large serif display type as the primary composition anchor.",
-          "Structure dense pages with hairline rules, ledger rows, numbered strands, and editable native bars."
+          "Structure dense pages with hairline rules, ledger rows, numbered strands, and editable native charts and tables."
         ],
         "signatureElements": [
-          "solar yellow blocks and soft native oval blooms",
+          "solar yellow blocks and native gradient oval blooms",
           "bottom-right mono page number",
           "oversized editorial serif titles and numerals",
           "thin ink rules with low-alpha row separators",
@@ -3374,7 +3374,7 @@
         ],
         "typography": {
           "display": "Times New Roman for large editorial titles, quotes, numerals, and poster words",
-          "body": "Arial for compact labels, body copy, footer metadata, and institutional notes",
+          "body": "Arial body/labels and Arial Unicode MS for explicit CJK text",
           "mono": "Courier New for page numbers, dates, durations, and chart labels"
         },
         "colorSystem": {
@@ -3384,16 +3384,22 @@
           "secondary": ["low-opacity ember #E26B4A for atmospheric blooms only"]
         },
         "slideRhythm": {
-          "anchor": ["biennaleCoverSlide", "biennaleColophonSlide"],
-          "editorial": ["biennaleManifestoSlide", "biennaleChapterSlide", "biennaleQuoteSlide"],
-          "programme": ["biennaleProgrammeSlide", "biennaleCalendarSlide"],
-          "evidence": ["biennaleDataSlide", "biennaleEvidenceSlide"]
+          "anchor": ["biennaleCoverSlide", "biennaleChapterSlide", "biennaleColophonSlide"],
+          "judgment": [],
+          "evidence": [
+            "biennaleManifestoSlide",
+            "biennaleProgrammeSlide",
+            "biennaleDataSlide",
+            "biennaleQuoteSlide",
+            "biennaleCalendarSlide",
+            "biennaleEvidenceSlide"
+          ]
         },
         "compositionRules": [
           "Keep every slide image-free and editable through native PPTX shapes and text.",
           "Do not add shadows, rounded cards, icons, or decorative bitmap overlays.",
           "Use yellow as plane, bloom, tile, or chart emphasis rather than colored text.",
-          "Prefer fixed item counts that match the locked layouts; reject oversized arrays through schema and density gates."
+          "Resolve registered compositions from actual text and row heights; reject overflow before rendering."
         ],
         "avoid": [
           "browser navigation or transition controls",
@@ -3430,7 +3436,7 @@
             "heading": "Times New Roman",
             "body": "Arial",
             "label": "Courier New",
-            "cjk": "Microsoft YaHei"
+            "cjk": "Arial Unicode MS"
           },
           "styleOps": [
             "set-theme",
@@ -3500,10 +3506,12 @@
         },
         "slideTypes": {
           "biennaleCoverSlide": {
-            "requiredSlots": ["data.dateRange", "data.title", "data.subline", "data.footerItems"]
+            "requiredSlots": ["data.dateRange", "data.title", "data.subline", "data.footerItems"],
+            "allowedLayoutIds": ["auto", "poster", "wide"]
           },
           "biennaleManifestoSlide": {
-            "requiredSlots": ["data.quote", "data.attribution"]
+            "requiredSlots": ["data.quote", "data.attribution"],
+            "allowedLayoutIds": ["auto", "statement", "reading"]
           },
           "biennaleProgrammeSlide": {
             "requiredSlots": [
@@ -3512,22 +3520,35 @@
               "data.description",
               "data.headLabel",
               "data.strands"
-            ]
+            ],
+            "allowedLayoutIds": ["auto", "split"]
           },
           "biennaleChapterSlide": {
-            "requiredSlots": ["data.rail", "data.number", "data.title", "data.lede"]
+            "requiredSlots": ["data.rail", "data.number", "data.title", "data.lede"],
+            "allowedLayoutIds": ["auto", "monument"]
           },
           "biennaleDataSlide": {
-            "requiredSlots": ["data.title", "data.label", "data.stats", "data.bars"]
+            "requiredSlots": [
+              "data.title",
+              "data.label",
+              "data.stats",
+              "data.bars",
+              "data.unit",
+              "data.source"
+            ],
+            "allowedLayoutIds": ["auto", "ledger"]
           },
           "biennaleQuoteSlide": {
-            "requiredSlots": ["data.kicker", "data.quote", "data.author", "data.role"]
+            "requiredSlots": ["data.kicker", "data.quote", "data.author", "data.role"],
+            "allowedLayoutIds": ["auto", "margin"]
           },
           "biennaleCalendarSlide": {
-            "requiredSlots": ["data.title", "data.label", "data.columns", "data.rows"]
+            "requiredSlots": ["data.title", "data.label", "data.columns", "data.rows"],
+            "allowedLayoutIds": ["auto", "table"]
           },
           "biennaleColophonSlide": {
-            "requiredSlots": ["data.kicker", "data.title", "data.footerItems"]
+            "requiredSlots": ["data.kicker", "data.title", "data.footerItems"],
+            "allowedLayoutIds": ["auto", "echo"]
           },
           "biennaleEvidenceSlide": {
             "requiredSlots": [
@@ -3550,10 +3571,16 @@
         "deliverySeverity": "error",
         "maxConsecutiveSameGroup": 3,
         "groups": {
-          "anchor": ["biennaleCoverSlide", "biennaleColophonSlide"],
-          "editorial": ["biennaleManifestoSlide", "biennaleChapterSlide", "biennaleQuoteSlide"],
-          "programme": ["biennaleProgrammeSlide", "biennaleCalendarSlide"],
-          "evidence": ["biennaleDataSlide", "biennaleEvidenceSlide"]
+          "anchor": ["biennaleCoverSlide", "biennaleChapterSlide", "biennaleColophonSlide"],
+          "judgment": [],
+          "evidence": [
+            "biennaleManifestoSlide",
+            "biennaleProgrammeSlide",
+            "biennaleDataSlide",
+            "biennaleQuoteSlide",
+            "biennaleCalendarSlide",
+            "biennaleEvidenceSlide"
+          ]
         },
         "thresholds": [
           {
@@ -3561,7 +3588,9 @@
             "minUniqueGroups": 3,
             "requiredGroups": ["anchor", "editorial"]
           }
-        ]
+        ],
+        "requiredGroups": [],
+        "minUniqueGroups": 2
       },
       "density": {
         "soft": {
@@ -3582,14 +3611,14 @@
         }
       },
       "validatedWith": {
-        "s8fy": ">=10",
-        "visionCheck": "golden pending benchmark",
-        "pngReview": "Phase 1 full rebuild contact-sheet reviewed"
+        "xdoc": "0.13.0 (92a5aa13)",
+        "visionCheck": "2.0 live golden and evidence variants: H0/M0/L0; canonical Create passes all 35 matrix pages",
+        "pngReview": "35 canonical pages manually reviewed; PowerPoint 16.114 open/save/close/reopen and saved-file object/data readback passed"
       },
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-21",
+        "lastBenchmark": "2026-10-22",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -3608,10 +3637,10 @@
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-21",
+          "date": "2026-10-22",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-biennale-yellow-contract-20261021/benchmark/08"
+            "out": ".tmp/deckkit-biennale-yellow-cleanup-20261022-01/iterations/08/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -3638,7 +3667,7 @@
               "caseId": "biennale-yellow.evidence-variants",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-biennale-yellow-contract-20261021/benchmark/08/biennale-yellow/evidence-variants/summary.json",
+              "summaryPath": ".tmp/deckkit-biennale-yellow-cleanup-20261022-01/iterations/08/benchmark/biennale-yellow/evidence-variants/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/biennale-yellow/evidence-variants/review.md",
               "validation": {
                 "valid": true,
@@ -3678,19 +3707,19 @@
                 "bytes": 58419
               },
               "patchOps": 142,
-              "p50TotalMs": 64.82
+              "p50TotalMs": 61.75
             },
             {
               "caseId": "biennale-yellow.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-biennale-yellow-contract-20261021/benchmark/08/biennale-yellow/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-biennale-yellow-cleanup-20261022-01/iterations/08/benchmark/biennale-yellow/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/review.md",
               "validation": {
                 "valid": true,
                 "errors": 0,
-                "warnings": 2,
-                "fitDiagnostics": 2,
+                "warnings": 0,
+                "fitDiagnostics": 0,
                 "blockingFitDiagnostics": 0
               },
               "dryRun": {
@@ -3714,31 +3743,30 @@
                 }
               },
               "previews": {
-                "count": 8,
-                "expectedCount": 8,
+                "count": 9,
+                "expectedCount": 9,
                 "nonEmpty": true,
                 "countEqualsSlides": true
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 218777
+                "bytes": 243469
               },
-              "patchOps": 672,
-              "p50TotalMs": 79.54
+              "patchOps": 520,
+              "p50TotalMs": 81.46
             }
           ],
           "blockers": []
         }
       },
       "knownLimits": [
-        "Based on the HTML template at beautiful-html-templates/templates/biennale-yellow; browser-only navigation, keyboard/touch interaction, crossfade transitions, and hover states are excluded.",
-        "Typography uses PowerPoint-safe system families (Times New Roman, Arial, and Courier New) so browser viewer output does not depend on remote font loading.",
-        "CSS radial gradients are approximated with editable PowerPoint soft-edge oval shapes and translucent yellow rectangles.",
-        "The chapter rail uses native PPTX vertical text rather than a rasterized CSS rotated label.",
-        "The source template has no reusable image assets; the DeckKit intentionally remains image-free.",
-        "Native evidence supports bar and line charts with finite source numbers; missing values require a content decision.",
-        "Legacy data and calendar pages retain shape/text implementations; biennaleEvidenceSlide supplies the native numeric chart route.",
-        "Declared fonts are not bundled; actual font resolution and canonical PNG/PDF review remain required."
+        "Derived from the Biennale HTML visual identity; browser navigation, transitions, touch and hover behavior are excluded.",
+        "Editorial pages use native text, structural yellow planes and radial-gradient oval blooms; CSS effects are approximations.",
+        "Native data and evidence charts preserve numeric source values; the calendar is a four-column editable native table.",
+        "Times New Roman, Arial, Courier New and Arial Unicode MS are not bundled; other font environments require fresh render review.",
+        "2.0 replaces ambiguous bars[].pct and string values with numeric values plus explicit unit/source; choose authoritative source data before migration. No old renderer is bundled.",
+        "Very small/large observations request scientific labels; the validated runtime renders some scientific requests as exact full-value labels.",
+        "Candidate readiness uses new 2.0 evidence; promotion to production/default is a separate confirmed release decision."
       ],
       "examples": [
         {

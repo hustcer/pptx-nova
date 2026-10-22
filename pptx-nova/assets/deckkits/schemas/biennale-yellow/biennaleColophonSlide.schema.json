@@ -7,24 +7,22 @@
   "properties": {
     "kicker": {
       "type": "string",
-      "x-designSlot": "Kicker",
       "x-slotBudget": {
         "fontPt": 10,
-        "widthIn": 3.6,
-        "heightIn": 0.22,
-        "lineHeight": 1.2,
+        "widthIn": 9,
+        "heightIn": 0.25,
+        "lineHeight": 1.18,
         "maxLines": 1
       }
     },
     "title": {
       "type": "string",
-      "x-designSlot": "Title",
       "x-slotBudget": {
-        "fontPt": 76,
-        "widthIn": 6.3,
-        "heightIn": 4.75,
-        "lineHeight": 0.86,
-        "maxLines": 5
+        "fontPt": 72,
+        "widthIn": 8.2,
+        "heightIn": 4.7,
+        "lineHeight": 1.08,
+        "maxLines": 4
       }
     },
     "footerItems": {
@@ -36,26 +34,10 @@
         "required": ["label", "text"],
         "properties": {
           "label": {
-            "type": "string",
-            "x-designSlot": "FootLabel{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 2.25,
-              "heightIn": 0.23,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "text": {
-            "type": "string",
-            "x-designSlot": "FootText{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 2.25,
-              "heightIn": 0.78,
-              "lineHeight": 1.15,
-              "maxLines": 4
-            }
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -63,5 +45,6 @@
     }
   },
   "additionalProperties": false,
-  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json",
+  "x-capacityCheck": "resolve-biennale-components/v1"
 }

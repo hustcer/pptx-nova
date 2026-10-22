@@ -19,46 +19,46 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 671
+    "ops": 520
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 19,
-    "opResults": 671,
+    "changedParts": 28,
+    "opResults": 520,
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 2,
+      "total": 2
     }
   },
   "apply": {
     "status": "success",
     "warnings": 0,
-    "changedParts": 19,
-    "opResults": 671,
+    "changedParts": 28,
+    "opResults": 520,
     "visualRisks": {
       "high": 0,
       "medium": 0,
-      "low": 0,
-      "total": 0
+      "low": 2,
+      "total": 2
     }
   },
   "vision": {
     "status": "success",
-    "slideCount": 8,
-    "issueCount": 72,
+    "slideCount": 9,
+    "issueCount": 0,
     "autoFixable": 0,
     "bySeverity": {
       "high": 0,
       "medium": 0,
-      "low": 72
+      "low": 0
     },
     "lowBuckets": {
-      "total": 72,
-      "styleAllowed": 67,
-      "baselineKnown": 5,
+      "total": 0,
+      "styleAllowed": 0,
+      "baselineKnown": 0,
       "new": 0,
       "changed": 0,
       "resolved": 0,
@@ -66,10 +66,7 @@
       "baselineUnavailable": false,
       "baselineUpdated": false
     },
-    "lowByFamily": {
-      "small-font": 67,
-      "overlap": 5
-    },
+    "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
@@ -77,15 +74,15 @@
       "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
       "available": true,
-      "issueCount": 72
+      "issueCount": 0
     },
     "stylePolicy": {
       "schemaVersion": "pptx-nova-vision-style-policy/v1",
       "source": "catalog.qualityProfile",
-      "minFontPt": 9,
-      "labelFontPt": 9,
-      "sourceFontPt": 9,
-      "note": "Biennale Yellow uses 9pt mono/body labels and otherwise keeps body copy at or above 10.5pt."
+      "minFontPt": 10,
+      "labelFontPt": 10,
+      "sourceFontPt": 10,
+      "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
     },
     "newLowSamples": [],
     "changedLowSamples": [],
@@ -99,12 +96,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 204839,
-      "sha256": "95d4178a84eb9fce5ed9a7a60bc15b360c7c48445730784ffb14058c67ef30ea"
+      "bytes": 243469,
+      "sha256": "ea8ebf485156aaf8733ddc2442aee371907e8c2f60cb491535b859a8a25f92ea"
     },
     "webp": {
-      "bytes": 102852,
-      "sha256": "2d954a319208ba2e6d4a67711707bb1f80eef96470393dc19d682b02c2dc9e24"
+      "bytes": 113062,
+      "sha256": "fb12518116907af8a507b7b6d0ba76263e539cf84716118338509f426c22a3d6"
     }
   }
 }

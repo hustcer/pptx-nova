@@ -143,7 +143,8 @@
       "contentPath": "../../assets/deckkits/examples/biennale-yellow-content.json",
       "buildPath": "../../assets/deckkits/examples/biennale-yellow-build.mjs",
       "expectedPath": "cases/biennale-yellow/golden-html/expected.json",
-      "reviewPath": "cases/biennale-yellow/golden-html/review.md"
+      "reviewPath": "cases/biennale-yellow/golden-html/review.md",
+      "showcase": true
     },
     {
       "id": "coral.stress-density",

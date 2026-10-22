@@ -4,10 +4,9 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { isDeepStrictEqual } from 'node:util'
-import {
-  loadDesignContract,
-  resolveDesignSlot,
-} from '../pptx-nova/assets/deckkits/design-contract.mjs'
+import { loadDesignContract } from '../pptx-nova/assets/deckkits/design-contract.mjs'
+
+import { biennaleProjectedBudgets } from '../pptx-nova/assets/deckkits/biennale-layouts.mjs'
 
 const root = fileURLToPath(new URL('../pptx-nova/assets/deckkits/', import.meta.url))
 const args = process.argv.slice(2)
@@ -31,31 +30,16 @@ function output(path, data) {
   }
   writeFileSync(path, text)
 }
-for (const [type, layout] of Object.entries(design.legacyLayouts)) {
-  const path = resolve(root, 'schemas', id, `${type}.schema.json`)
-  const schema = JSON.parse(readFileSync(path, 'utf8'))
-  const walk = (node) => {
-    if (node['x-designSlot']) {
-      const name = node['x-designSlot']
-      const slot = resolveDesignSlot(design, type, name.replace('{i}', '0'))
-      const all = layout.slots[name].frames
-      const widthIn = Math.min(...all.map((f) => f[2]))
-      const heightIn = Math.min(...all.map((f) => f[3]))
-      const lineHeight = slot.paragraph?.lineSpacing ?? 1.2
-      node['x-slotBudget'] = {
-        fontPt: slot.font.sizePt,
-        widthIn,
-        heightIn,
-        lineHeight,
-        maxLines: Math.max(1, Math.floor((heightIn * 72) / (slot.font.sizePt * lineHeight))),
-      }
-    }
-    for (const child of Object.values(node.properties ?? {})) walk(child)
-    if (node.items && !Array.isArray(node.items)) walk(node.items)
+if (design.biennale) {
+  for (const [type, family] of Object.entries(design.biennale.families)) {
+    const path = resolve(root, 'schemas', id, type + '.schema.json')
+    const schema = JSON.parse(readFileSync(path, 'utf8'))
+    for (const [field, budget] of Object.entries(biennaleProjectedBudgets(design, family)))
+      schema.properties[field]['x-slotBudget'] = budget
+    schema['x-generatedBudgetsFrom'] = id + '/design.json'
+    schema['x-capacityCheck'] = 'resolve-biennale-components/v1'
+    output(path, schema)
   }
-  walk(schema)
-  schema['x-generatedBudgetsFrom'] = `${id}/design.json`
-  output(path, schema)
 }
 // Refurbishment uses the same role tokens as creation. Preserve unrelated catalog formatting.
 const path = resolve(root, 'catalog.json')
@@ -63,9 +47,10 @@ const raw = readFileSync(path, 'utf8')
 const catalog = JSON.parse(raw)
 const entry = catalog.entries.find((e) => e.id === id)
 const before = JSON.stringify(entry)
-if (design.editorial || design.strategy || design.annual) {
-  const families = (design.editorial ?? design.strategy ?? design.annual).families
-  const types = Object.keys(families)
+if (design.editorial || design.strategy || design.annual || design.biennale) {
+  const families = (design.editorial ?? design.strategy ?? design.annual ?? design.biennale)
+    .families
+  const types = [...Object.keys(families), ...(design.biennale ? [design.evidence.slideType] : [])]
   entry.supportedSlideTypes = types
   entry.coverage.slideTypes = types
   const groups = { anchor: [], judgment: [], evidence: [] }
@@ -77,12 +62,25 @@ if (design.editorial || design.strategy || design.annual) {
       requiredSlots: schema.required.map((key) => `data.${key}`),
       allowedLayoutIds: ['auto', ...Object.keys(family.variants)],
     }
-    const group = ['cover', 'section', 'closing'].includes(family.role)
+    const group = ['cover', 'section', 'closing', 'chapter', 'colophon'].includes(family.role)
       ? 'anchor'
       : ['summary', 'decision'].includes(family.role)
         ? 'judgment'
         : 'evidence'
     groups[group].push(type)
+  }
+  if (design.biennale) {
+    const schema = JSON.parse(
+      readFileSync(
+        resolve(root, 'schemas', id, design.evidence.slideType + '.schema.json'),
+        'utf8',
+      ),
+    )
+    entry.layoutContract.slideTypes[design.evidence.slideType] = {
+      requiredSlots: schema.required.map((key) => 'data.' + key),
+      allowedLayoutIds: ['auto', ...Object.keys(design.evidence.layouts)],
+    }
+    groups.evidence.push(design.evidence.slideType)
   }
   entry.layoutContract.slideTypes = Object.fromEntries(
     types.map((type) => [type, entry.layoutContract.slideTypes[type]]),

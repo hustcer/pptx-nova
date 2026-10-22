@@ -13,8 +13,9 @@ node <skill-root>/scripts/pptx-nova-deckkit-design.mjs --deckkit biennale-yellow
 ```
 
 Read `assets/deckkits/biennale-yellow/intent.md` for design judgment and the evidence page schema under
-`assets/deckkits/schemas/biennale-yellow/` for content fields. The original eight page types and content
-inputs remain supported. Use `biennaleEvidenceSlide` for a native numeric chart:
+`assets/deckkits/schemas/biennale-yellow/` for content fields. Biennale 2.0 retains the nine slide type names and routes every page through registered layouts.
+For `biennaleDataSlide`, supply numeric `bars[].value`, `unit` and `source`; retired `pct` and display
+strings require an explicit source-data migration. See `intent.md` for the field mapping. Use `biennaleEvidenceSlide` for a native numeric chart:
 
 ```json
 {
@@ -193,8 +194,10 @@ implementation. Unknown fields/checkers and invalid token references fail. Curre
 palette, font families, a font floor, forbidden effects/operations and creation bounds. The public
 readback report names its coverage; a rule's presence alone is never visual proof.
 
-Legacy repeating slots are resolved per instance. Composed fields such as value+suffix share one
-budget. Capacity estimates are heuristics; autofit slots explicitly require render review. Existing
+Biennale repeating components are resolved per instance. Composed fields such as value+suffix share
+one budget; programme rows and all calendar cells use actual instance geometry. Capacity estimates
+are heuristics and require canonical render review. Discovery v2 reports `registeredSlideTypes` and
+registered families; the retired `legacySlideTypes` and slot APIs are no longer exposed. Existing
 design-less DeckKits retain their original checks. `core-primitives.kit.mjs` remains unchanged.
 
 Edit the selected contract rather than hand-editing generated budgets or projected refurbishment

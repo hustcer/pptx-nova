@@ -79,14 +79,18 @@ try {
     }
   } else {
     report = {
-      schemaVersion: 'pptx-nova-design-discovery/v1',
+      schemaVersion: 'pptx-nova-design-discovery/v2',
       designId: d.id,
       version: d.version,
       contractHash: designHash(d),
       colors: d.colors,
       fonts: d.fonts,
       rules: d.rules,
-      legacySlideTypes: Object.keys(d.legacyLayouts),
+      registeredSlideTypes: [
+        ...Object.keys((d.biennale ?? d.editorial ?? d.strategy ?? d.annual)?.families ?? {}),
+        ...(d.evidence ? [d.evidence.slideType] : []),
+      ],
+      ...(d.biennale ? { biennale: d.biennale } : {}),
       evidence: d.evidence,
       annual: d.annual,
       ...(d.editorial ? { editorial: d.editorial } : {}),

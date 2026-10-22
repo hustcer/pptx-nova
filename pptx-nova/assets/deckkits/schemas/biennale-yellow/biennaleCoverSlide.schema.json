@@ -7,34 +7,31 @@
   "properties": {
     "dateRange": {
       "type": "string",
-      "x-designSlot": "DateRail",
       "x-slotBudget": {
-        "fontPt": 42,
-        "widthIn": 2.86,
-        "heightIn": 1.35,
-        "lineHeight": 0.9,
+        "fontPt": 40,
+        "widthIn": 3.1,
+        "heightIn": 1.65,
+        "lineHeight": 1.08,
         "maxLines": 2
       }
     },
     "title": {
       "type": "string",
-      "x-designSlot": "Title",
       "x-slotBudget": {
-        "fontPt": 92,
-        "widthIn": 7.25,
-        "heightIn": 2.95,
-        "lineHeight": 0.86,
+        "fontPt": 84,
+        "widthIn": 7.8,
+        "heightIn": 3.35,
+        "lineHeight": 1.06,
         "maxLines": 2
       }
     },
     "subline": {
       "type": "string",
-      "x-designSlot": "Subline",
       "x-slotBudget": {
         "fontPt": 10,
-        "widthIn": 3.7,
-        "heightIn": 0.22,
-        "lineHeight": 1.2,
+        "widthIn": 8,
+        "heightIn": 0.26,
+        "lineHeight": 1.18,
         "maxLines": 1
       }
     },
@@ -47,26 +44,10 @@
         "required": ["label", "text"],
         "properties": {
           "label": {
-            "type": "string",
-            "x-designSlot": "FootLabel{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 2.06,
-              "heightIn": 0.23,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "text": {
-            "type": "string",
-            "x-designSlot": "FootText{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 2.06,
-              "heightIn": 0.72,
-              "lineHeight": 1.15,
-              "maxLines": 4
-            }
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -74,5 +55,6 @@
     }
   },
   "additionalProperties": false,
-  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json",
+  "x-capacityCheck": "resolve-biennale-components/v1"
 }

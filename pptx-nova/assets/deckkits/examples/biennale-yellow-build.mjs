@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { writeFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { assessDeckQuality, loadContent } from '../core-primitives.kit.mjs'
 import { validateDeckkitContent as validateContent } from '../validate-deckkit.mjs'
 import { createDeck } from '../biennale-yellow.kit.mjs'
@@ -40,7 +41,7 @@ function qualityFails(report, level) {
 const deckkitId = 'biennale-yellow'
 const args = parseArgs(process.argv)
 const content = await loadContent(
-  args.contentPath ?? new URL('./biennale-yellow-content.json', import.meta.url),
+  args.contentPath ?? fileURLToPath(new URL('./biennale-yellow-content.json', import.meta.url)),
 )
 const validation = validateContent(content, { deckkit: deckkitId })
 if (!validation.valid) {

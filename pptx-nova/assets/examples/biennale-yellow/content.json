@@ -103,35 +103,33 @@
         "bars": [
           {
             "label": "2022",
-            "pct": 0.32,
-            "value": "76,400",
+            "value": 76400,
             "accent": false
           },
           {
             "label": "2023",
-            "pct": 0.48,
-            "value": "112,800",
+            "value": 112800,
             "accent": false
           },
           {
             "label": "2024",
-            "pct": 0.62,
-            "value": "141,200",
+            "value": 141200,
             "accent": false
           },
           {
             "label": "2025",
-            "pct": 0.72,
-            "value": "164,900",
+            "value": 164900,
             "accent": false
           },
           {
             "label": "2026",
-            "pct": 0.86,
-            "value": "182,300",
+            "value": 182300,
             "accent": true
           }
-        ]
+        ],
+        "unit": "visitors",
+        "source": "Source: Aurora Institute · synthetic attendance counts",
+        "numberFormat": "#,##0"
       }
     },
     {
@@ -197,6 +195,55 @@
             "title": "The Last Window, closing performance",
             "venue": "Pavilion of Quiet Form, Rotterdam",
             "length": "60 min"
+          }
+        ]
+      }
+    },
+    {
+      "type": "biennaleEvidenceSlide",
+      "layoutId": "auto",
+      "data": {
+        "title": "Public attendance keeps growing",
+        "label": "OPEN PROGRAMME · 2022–2026",
+        "source": "Source: programme attendance register · annual visitors",
+        "seriesName": "Visitors",
+        "unit": "people",
+        "kind": "bar",
+        "points": [
+          {
+            "label": "2022",
+            "value": 76400
+          },
+          {
+            "label": "2023",
+            "value": 112800
+          },
+          {
+            "label": "2024",
+            "value": 141200
+          },
+          {
+            "label": "2025",
+            "value": 164900
+          },
+          {
+            "label": "2026",
+            "value": 182300,
+            "emphasis": true
+          }
+        ],
+        "stats": [
+          {
+            "value": "182",
+            "suffix": "k",
+            "label": "VISITORS · YEAR FOUR",
+            "description": "A growing audience across the programme."
+          },
+          {
+            "value": "74",
+            "suffix": "%",
+            "label": "RETURNING AUDIENCE",
+            "description": "Visitors return to shared public spaces."
           }
         ]
       }

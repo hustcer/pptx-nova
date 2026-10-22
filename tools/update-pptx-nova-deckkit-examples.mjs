@@ -217,24 +217,30 @@ function convertContactSheetToWebp({ pngPath, webpPath, args }) {
   )
 }
 
-function selectGoldenCases(index, deckkit) {
-  const cases = index.cases.filter((item) => item.kind === 'golden')
-  const selected = deckkit ? cases.filter((item) => item.deckkit === deckkit) : cases
-  const seen = new Map()
-  for (const item of selected) {
-    if (seen.has(item.deckkit)) {
-      throw new Error(
-        `Multiple golden cases found for DeckKit "${item.deckkit}": ${seen.get(item.deckkit).id}, ${item.id}`,
-      )
-    }
-    seen.set(item.deckkit, item)
+export function selectGoldenCases(index, deckkit) {
+  const scoped = deckkit ? index.cases.filter((c) => c.deckkit === deckkit) : index.cases
+  const groups = new Map()
+  for (const item of scoped) {
+    if (item.showcase !== undefined && typeof item.showcase !== 'boolean')
+      throw new Error('showcase must be boolean: ' + item.id)
+    if (item.showcase && item.kind !== 'golden')
+      throw new Error('Showcase must select a golden case: ' + item.id)
+    if (item.kind !== 'golden') continue
+    if (!groups.has(item.deckkit)) groups.set(item.deckkit, [])
+    groups.get(item.deckkit).push(item)
   }
-  if (selected.length === 0) {
+  if (!groups.size)
     throw new Error(
-      deckkit ? `No golden case found for DeckKit "${deckkit}"` : 'No golden cases found',
+      deckkit ? 'No golden case found for DeckKit "' + deckkit + '"' : 'No golden cases found',
     )
-  }
-  return selected
+  return [...groups.entries()].map(([id, cases]) => {
+    const marked = cases.filter((c) => c.showcase)
+    if (marked.length > 1 || (cases.length > 1 && marked.length !== 1))
+      throw new Error(
+        'Multiple golden cases require exactly one showcase:true for DeckKit "' + id + '"',
+      )
+    return marked[0] ?? cases[0]
+  })
 }
 
 function readCatalogEntries() {

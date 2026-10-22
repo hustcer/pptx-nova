@@ -7,24 +7,22 @@
   "properties": {
     "title": {
       "type": "string",
-      "x-designSlot": "Title",
       "x-slotBudget": {
-        "fontPt": 38,
-        "widthIn": 5.5,
-        "heightIn": 0.75,
-        "lineHeight": 1.2,
+        "fontPt": 36,
+        "widthIn": 8,
+        "heightIn": 0.74,
+        "lineHeight": 1.18,
         "maxLines": 1
       }
     },
     "label": {
       "type": "string",
-      "x-designSlot": "Label",
       "x-slotBudget": {
         "fontPt": 10,
-        "widthIn": 2.55,
-        "heightIn": 0.35,
-        "lineHeight": 1.2,
-        "maxLines": 2
+        "widthIn": 4,
+        "heightIn": 0.55,
+        "lineHeight": 1.18,
+        "maxLines": 3
       }
     },
     "columns": {
@@ -32,15 +30,7 @@
       "minItems": 4,
       "maxItems": 4,
       "items": {
-        "type": "string",
-        "x-designSlot": "Col{i}",
-        "x-slotBudget": {
-          "fontPt": 10,
-          "widthIn": 0.74,
-          "heightIn": 0.22,
-          "lineHeight": 1.2,
-          "maxLines": 1
-        }
+        "type": "string"
       }
     },
     "rows": {
@@ -52,48 +42,16 @@
         "required": ["date", "title", "venue", "length"],
         "properties": {
           "date": {
-            "type": "string",
-            "x-designSlot": "Date{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 0.86,
-              "heightIn": 0.22,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "title": {
-            "type": "string",
-            "x-designSlot": "Event{i}",
-            "x-slotBudget": {
-              "fontPt": 17.2,
-              "widthIn": 6.25,
-              "heightIn": 0.34,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "venue": {
-            "type": "string",
-            "x-designSlot": "Venue{i}",
-            "x-slotBudget": {
-              "fontPt": 10.5,
-              "widthIn": 3.45,
-              "heightIn": 0.22,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "length": {
-            "type": "string",
-            "x-designSlot": "Length{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 0.75,
-              "heightIn": 0.22,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -101,5 +59,6 @@
     }
   },
   "additionalProperties": false,
-  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json",
+  "x-capacityCheck": "resolve-biennale-components/v1"
 }

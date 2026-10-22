@@ -97,7 +97,6 @@
       "check": "strategy-language"
     }
   ],
-  "legacyLayouts": {},
   "refurbish": {
     "palette": {
       "background": "slate",

@@ -3,28 +3,26 @@
   "$id": "pptx-nova-slide/biennale-yellow/biennaleDataSlide",
   "title": "biennaleDataSlide data schema",
   "type": "object",
-  "required": ["title", "label", "stats", "bars"],
+  "required": ["title", "label", "stats", "bars", "unit", "source"],
   "properties": {
     "title": {
       "type": "string",
-      "x-designSlot": "Title",
       "x-slotBudget": {
-        "fontPt": 34,
-        "widthIn": 5.6,
-        "heightIn": 0.75,
-        "lineHeight": 1.2,
+        "fontPt": 36,
+        "widthIn": 8,
+        "heightIn": 0.74,
+        "lineHeight": 1.18,
         "maxLines": 1
       }
     },
     "label": {
       "type": "string",
-      "x-designSlot": "Label",
       "x-slotBudget": {
         "fontPt": 10,
-        "widthIn": 2.5,
-        "heightIn": 0.22,
-        "lineHeight": 1.2,
-        "maxLines": 1
+        "widthIn": 4,
+        "heightIn": 0.55,
+        "lineHeight": 1.18,
+        "maxLines": 3
       }
     },
     "stats": {
@@ -36,48 +34,16 @@
         "required": ["value", "suffix", "label", "description"],
         "properties": {
           "value": {
-            "type": "string",
-            "x-designSlot": "Stat{i}",
-            "x-slotBudget": {
-              "fontPt": 62,
-              "widthIn": 2.8,
-              "heightIn": 1,
-              "lineHeight": 0.9,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "suffix": {
-            "type": "string",
-            "x-designSlot": "Stat{i}",
-            "x-slotBudget": {
-              "fontPt": 62,
-              "widthIn": 2.8,
-              "heightIn": 1,
-              "lineHeight": 0.9,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "label": {
-            "type": "string",
-            "x-designSlot": "StatLabel{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 2.8,
-              "heightIn": 0.22,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "string"
           },
           "description": {
-            "type": "string",
-            "x-designSlot": "StatDesc{i}",
-            "x-slotBudget": {
-              "fontPt": 10.5,
-              "widthIn": 3.1,
-              "heightIn": 0.7,
-              "lineHeight": 1.25,
-              "maxLines": 3
-            }
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -85,38 +51,17 @@
     },
     "bars": {
       "type": "array",
-      "minItems": 3,
+      "minItems": 2,
       "maxItems": 6,
       "items": {
         "type": "object",
-        "required": ["label", "pct", "value", "accent"],
+        "required": ["label", "value", "accent"],
         "properties": {
           "label": {
-            "type": "string",
-            "x-designSlot": "BarYear{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 0.7,
-              "heightIn": 0.22,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
-          },
-          "pct": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
+            "type": "string"
           },
           "value": {
-            "type": "string",
-            "x-designSlot": "BarVal{i}",
-            "x-slotBudget": {
-              "fontPt": 10,
-              "widthIn": 0.75,
-              "heightIn": 0.22,
-              "lineHeight": 1.2,
-              "maxLines": 1
-            }
+            "type": "number"
           },
           "accent": {
             "type": "boolean"
@@ -124,8 +69,27 @@
         },
         "additionalProperties": false
       }
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10,
+        "widthIn": 11.4,
+        "heightIn": 0.28,
+        "lineHeight": 1.18,
+        "maxLines": 1
+      }
+    },
+    "numberFormat": {
+      "enum": ["#,##0", "#,##0.##", "0.00E+00"]
     }
   },
   "additionalProperties": false,
-  "x-generatedBudgetsFrom": "biennale-yellow/design.json"
+  "x-generatedBudgetsFrom": "biennale-yellow/design.json",
+  "x-capacityCheck": "resolve-biennale-components/v1"
 }

@@ -7,7 +7,7 @@
 ```
 assets/deckkits/
 ├── core-primitives.kit.mjs     # 几何安全 + op 生成（所有 DeckKit 共用）
-├── design-contract.mjs         # opt-in 设计合同、槽位解析、规则与回读检查
+├── design-contract.mjs         # 已注册设计合同、规则与对象/数值回读检查
 ├── evidence-components.mjs     # 由合同驱动的原生数据证据组件
 ├── editorial-components.mjs    # 期刊式证据、原生矩阵与判断/行动组件
 ├── editorial-layouts.mjs       # 内容容量与确定性构图选择
@@ -15,6 +15,8 @@ assets/deckkits/
 ├── strategy-layouts.mjs        # 策略报告容量与确定性构图选择
 ├── annual-components.mjs       # 白底研究报告、原生多图/矩阵与面积比较
 ├── annual-layouts.mjs          # 逐实例容量检查与确定性构图选择
+├── biennale-components.mjs    # 编辑式文字/结构平面、光晕、原生图表与日程表格
+├── biennale-layouts.mjs       # 九类页面的完整计划、实例容量和构图选择
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
@@ -28,6 +30,9 @@ assets/deckkits/
 ├── examples/                   # 示例 content + build 胶水
 └── README.md                   # 本文件
 ```
+
+Biennale Yellow 2.0 保留九个页型名称，全部经注册合同执行；数据页改用数值、单位、来源，
+不再分发旧固定页型渲染器。字段迁移与构图说明见 [intent.md](biennale-yellow/intent.md)。
 
 ## core-primitives 职责边界
 

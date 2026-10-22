@@ -145,37 +145,6 @@
       },
       "minItems": 1
     },
-    "legacyLayouts": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "slots": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/$defs/slot"
-            }
-          },
-          "footer": {
-            "type": "object",
-            "properties": {
-              "ruleY": {
-                "type": "number",
-                "minimum": 0
-              }
-            },
-            "required": ["ruleY"],
-            "additionalProperties": false
-          },
-          "rowRuleOffset": {
-            "type": "number",
-            "minimum": 0
-          }
-        },
-        "required": ["slots"],
-        "additionalProperties": false
-      }
-    },
     "evidence": {
       "$ref": "#/$defs/evidence"
     },
@@ -253,6 +222,9 @@
     },
     "annual": {
       "$ref": "#/$defs/annual"
+    },
+    "biennale": {
+      "$ref": "#/$defs/biennale"
     }
   },
   "required": [
@@ -265,7 +237,6 @@
     "theme",
     "textFrame",
     "rules",
-    "legacyLayouts",
     "refurbish",
     "roles"
   ],
@@ -278,77 +249,6 @@
       },
       "minItems": 4,
       "maxItems": 4
-    },
-    "font": {
-      "type": "object",
-      "properties": {
-        "role": {
-          "type": "string",
-          "minLength": 1
-        },
-        "sizePt": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "bold": {
-          "type": "boolean"
-        },
-        "italic": {
-          "type": "boolean"
-        }
-      },
-      "required": ["role", "sizePt"],
-      "additionalProperties": false
-    },
-    "slot": {
-      "type": "object",
-      "properties": {
-        "frames": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/frame"
-          },
-          "minItems": 1
-        },
-        "font": {
-          "$ref": "#/$defs/font"
-        },
-        "paragraph": {
-          "type": "object",
-          "additionalProperties": {}
-        },
-        "autofit": {
-          "enum": ["text", "shape", "none"]
-        },
-        "heightByLines": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "minLines": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "heightIn": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              }
-            },
-            "required": ["minLines", "heightIn"],
-            "additionalProperties": false
-          },
-          "minItems": 1
-        },
-        "paragraphs": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": {}
-          }
-        }
-      },
-      "required": ["frames", "font"],
-      "additionalProperties": false
     },
     "rule": {
       "type": "object",
@@ -1218,6 +1118,207 @@
         "families",
         "palette"
       ],
+      "additionalProperties": false
+    },
+    "biennale": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "biennale-editorial/v1"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sizePt": {
+                "type": "number",
+                "minimum": 10
+              },
+              "lineHeight": {
+                "type": "number",
+                "minimum": 1
+              },
+              "bold": {
+                "type": "boolean"
+              },
+              "italic": {
+                "type": "boolean"
+              },
+              "alignment": {
+                "enum": ["left", "right", "center"]
+              }
+            },
+            "required": ["role", "sizePt", "lineHeight"],
+            "additionalProperties": false
+          }
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["page"],
+          "additionalProperties": false
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "columnGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "creditLabelHeight": {
+              "type": "number",
+              "minimum": 0
+            },
+            "creditBodyGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "ruleGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "strandGap": {
+              "type": "number",
+              "minimum": 0
+            },
+            "numberWidth": {
+              "type": "number",
+              "minimum": 0
+            },
+            "strandInset": {
+              "type": "number",
+              "minimum": 0
+            },
+            "cellPadding": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "columnGap",
+            "creditLabelHeight",
+            "creditBodyGap",
+            "ruleGap",
+            "strandGap",
+            "numberWidth",
+            "strandInset",
+            "cellPadding"
+          ],
+          "additionalProperties": false
+        },
+        "table": {
+          "type": "object",
+          "properties": {
+            "columnWeights": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "minRowHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": ["columnWeights", "minRowHeight"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "minFullDeck": {
+              "type": "number",
+              "minimum": 2
+            },
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1
+            }
+          },
+          "required": ["minFullDeck", "maxConsecutive"],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "enum": [
+                  "cover",
+                  "manifesto",
+                  "programme",
+                  "chapter",
+                  "data",
+                  "quote",
+                  "calendar",
+                  "colophon"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "titleStyle": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    },
+                    "decorations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "enum": ["plane", "bloom"]
+                          },
+                          "frame": {
+                            "$ref": "#/$defs/frame"
+                          },
+                          "color": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "alpha": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          }
+                        },
+                        "required": ["kind", "frame", "color", "alpha"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["titleStyle", "regions", "decorations"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["family", "styles", "chrome", "spacing", "table", "rhythm", "families"],
       "additionalProperties": false
     }
   }

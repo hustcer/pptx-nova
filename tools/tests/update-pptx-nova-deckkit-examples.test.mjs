@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+  selectGoldenCases,
   mergeManifestEntries,
   parseArgs as parseDeckkitExampleArgs,
   syncManifestEntriesWithCatalog,
@@ -77,4 +78,36 @@ test('DeckKit examples updater syncs preserved entries to current catalog readin
     ],
   )
   assert.equal(synced[1].defaultFor[0], 'quiet board readout')
+})
+
+test('multiple golden cases require an explicit showcase without removing regression cases', () => {
+  const a = { id: 'kit.full', deckkit: 'kit', kind: 'golden' },
+    b = { id: 'kit.variants', deckkit: 'kit', kind: 'golden' }
+  assert.throws(() => selectGoldenCases({ cases: [a, b] }, 'kit'), /exactly one showcase/)
+  assert.deepEqual(
+    selectGoldenCases({ cases: [{ ...a, showcase: true }, b] }, 'kit').map((c) => c.id),
+    ['kit.full'],
+  )
+  assert.throws(
+    () =>
+      selectGoldenCases(
+        {
+          cases: [
+            { ...a, showcase: true },
+            { ...b, showcase: true },
+          ],
+        },
+        'kit',
+      ),
+    /exactly one showcase/,
+  )
+  assert.throws(
+    () => selectGoldenCases({ cases: [{ ...a, kind: 'stress', showcase: true }] }, 'kit'),
+    /must select a golden/,
+  )
+  assert.throws(
+    () => selectGoldenCases({ cases: [{ ...a, showcase: 'yes' }] }, 'kit'),
+    /must be boolean/,
+  )
+  assert.deepEqual(selectGoldenCases({ cases: [a] }, 'kit'), [a])
 })

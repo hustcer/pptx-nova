@@ -64,8 +64,18 @@ export function renderEvidence(p, design, s, slide, resolved, total) {
       )
     }
   })
+  renderEvidenceChart(p, design, s, d, resolved, 'EvidenceChart')
+}
+
+export function renderEvidenceChart(p, design, s, d, resolved, base) {
+  const e = design.evidence
+  const c = Object.fromEntries(
+    Object.entries(design.roles).map(([role, token]) => [role, design.colors[token]]),
+  )
+  const name = (base) => `S${s}_${base}`
+  const layout = resolved.frame
   const [x, y, w, h] = layout.chart
-  const chart = name('EvidenceChart')
+  const chart = name(base)
   p.ops.push({
     op: 'add-chart',
     slide: s,

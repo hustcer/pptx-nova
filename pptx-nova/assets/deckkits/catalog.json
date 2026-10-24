@@ -6,7 +6,7 @@
       "version": "2.0.0",
       "path": "consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10,
         "labelFontPt": 10,
@@ -359,7 +359,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -373,15 +373,15 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 3
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-consulting-dark-20261022/benchmark/01"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -400,7 +400,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 3
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -408,7 +408,7 @@
               "caseId": "consulting-dark.golden-roadshow",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-consulting-dark-20261022/benchmark/01/consulting-dark/golden-roadshow/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/consulting-dark/golden-roadshow/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/review.md",
               "validation": {
                 "valid": true,
@@ -434,7 +434,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -448,13 +448,13 @@
                 "bytes": 255776
               },
               "patchOps": 1045,
-              "p50TotalMs": 90.48
+              "p50TotalMs": 106.78
             },
             {
               "caseId": "consulting-dark.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-consulting-dark-20261022/benchmark/01/consulting-dark/stress-density/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/consulting-dark/stress-density/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/stress-density/review.md",
               "validation": {
                 "valid": true,
@@ -480,7 +480,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -491,16 +491,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 258287
+                "bytes": 258284
               },
               "patchOps": 1152,
-              "p50TotalMs": 94.44
+              "p50TotalMs": 106.59
             },
             {
               "caseId": "consulting-dark.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-consulting-dark-20261022/benchmark/01/consulting-dark/mixed-language/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/consulting-dark/mixed-language/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/mixed-language/review.md",
               "validation": {
                 "valid": true,
@@ -526,7 +526,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -540,7 +540,7 @@
                 "bytes": 111575
               },
               "patchOps": 348,
-              "p50TotalMs": 86.5
+              "p50TotalMs": 104.82
             }
           ],
           "blockers": []
@@ -560,7 +560,7 @@
       "version": "2.0.0",
       "path": "mckinsey-blue.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "nativeSkinning": {
         "themePack": "corporate-blue",
         "stylePack": "consulting",
@@ -918,7 +918,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -932,15 +932,15 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 3
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -959,7 +959,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 3
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -967,7 +967,7 @@
               "caseId": "mckinsey-blue.golden-loyalty",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final/mckinsey-blue/golden-loyalty/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/mckinsey-blue/golden-loyalty/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/review.md",
               "validation": {
                 "valid": true,
@@ -993,7 +993,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -1007,13 +1007,13 @@
                 "bytes": 284470
               },
               "patchOps": 1661,
-              "p50TotalMs": 130.2
+              "p50TotalMs": 156.47
             },
             {
               "caseId": "mckinsey-blue.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final/mckinsey-blue/stress-density/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/mckinsey-blue/stress-density/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/stress-density/review.md",
               "validation": {
                 "valid": true,
@@ -1039,7 +1039,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -1053,13 +1053,13 @@
                 "bytes": 241742
               },
               "patchOps": 1353,
-              "p50TotalMs": 175.17
+              "p50TotalMs": 212.39
             },
             {
               "caseId": "mckinsey-blue.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-mckinsey-blue-20261022/benchmark-final/mckinsey-blue/mixed-language/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/mckinsey-blue/mixed-language/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/mixed-language/review.md",
               "validation": {
                 "valid": true,
@@ -1085,7 +1085,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -1099,7 +1099,7 @@
                 "bytes": 236727
               },
               "patchOps": 1688,
-              "p50TotalMs": 157.35
+              "p50TotalMs": 223.71
             }
           ],
           "blockers": []
@@ -1122,7 +1122,7 @@
       "version": "2.0.0",
       "path": "swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "default",
       "qualityProfile": {
         "minFontPt": 10,
         "labelFontPt": 10,
@@ -1468,7 +1468,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -1482,15 +1482,15 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 3
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -1509,7 +1509,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 3
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -1517,7 +1517,7 @@
               "caseId": "swiss-grid.golden-lecture",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02/swiss-grid/golden-lecture/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/swiss-grid/golden-lecture/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/review.md",
               "validation": {
                 "valid": true,
@@ -1543,7 +1543,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -1557,13 +1557,13 @@
                 "bytes": 312698
               },
               "patchOps": 1960,
-              "p50TotalMs": 191.38
+              "p50TotalMs": 166.2
             },
             {
               "caseId": "swiss-grid.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02/swiss-grid/stress-density/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/swiss-grid/stress-density/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/swiss-grid/stress-density/review.md",
               "validation": {
                 "valid": true,
@@ -1589,7 +1589,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -1603,13 +1603,13 @@
                 "bytes": 244628
               },
               "patchOps": 1726,
-              "p50TotalMs": 121.7
+              "p50TotalMs": 153.92
             },
             {
               "caseId": "swiss-grid.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-swiss-grid-v2-20261022/benchmark-final-02/swiss-grid/mixed-language/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/swiss-grid/mixed-language/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/swiss-grid/mixed-language/review.md",
               "validation": {
                 "valid": true,
@@ -1635,7 +1635,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -1649,7 +1649,7 @@
                 "bytes": 60638
               },
               "patchOps": 282,
-              "p50TotalMs": 119.65
+              "p50TotalMs": 194.77
             }
           ],
           "blockers": []
@@ -1670,7 +1670,7 @@
       "version": "2.0.0",
       "path": "broadside.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10,
         "labelFontPt": 10,
@@ -2037,7 +2037,7 @@
       "quality": {
         "manualHardDefects": 0,
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -2056,10 +2056,10 @@
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-broadside-casing-20261022/benchmark/01"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -2086,7 +2086,7 @@
               "caseId": "broadside.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-broadside-casing-20261022/benchmark/01/broadside/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/broadside/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -2123,16 +2123,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 272408
+                "bytes": 272389
               },
               "patchOps": 1178,
-              "p50TotalMs": 140.87
+              "p50TotalMs": 120.79
             },
             {
               "caseId": "broadside.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-broadside-casing-20261022/benchmark/01/broadside/stress-density/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/broadside/stress-density/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/stress-density/review.md",
               "validation": {
                 "valid": true,
@@ -2169,16 +2169,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 77037
+                "bytes": 77074
               },
               "patchOps": 379,
-              "p50TotalMs": 73.97
+              "p50TotalMs": 81.42
             },
             {
               "caseId": "broadside.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-broadside-casing-20261022/benchmark/01/broadside/mixed-language/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/broadside/mixed-language/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/broadside/mixed-language/review.md",
               "validation": {
                 "valid": true,
@@ -2218,7 +2218,7 @@
                 "bytes": 57077
               },
               "patchOps": 220,
-              "p50TotalMs": 82.97
+              "p50TotalMs": 89.05
             }
           ],
           "blockers": []
@@ -2240,7 +2240,7 @@
       "version": "2.0.0",
       "path": "cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "nativeSkinning": {
         "themePack": "cartesian-warm",
         "stylePack": "cartesian",
@@ -2516,7 +2516,7 @@
       },
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -2530,16 +2530,16 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 1
+            "baselineUpdatedCases": 0
           }
         },
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-cartesian-v2-20261022-01/benchmark-accepted"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -2558,7 +2558,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 1
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -2566,7 +2566,7 @@
               "caseId": "cartesian.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-cartesian-v2-20261022-01/benchmark-accepted/cartesian/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/cartesian/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -2592,7 +2592,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -2603,10 +2603,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 186299
+                "bytes": 186240
               },
               "patchOps": 479,
-              "p50TotalMs": 75.31
+              "p50TotalMs": 79.33
             }
           ],
           "blockers": []
@@ -2639,7 +2639,7 @@
       "version": "2.0.0",
       "path": "long-table.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10,
         "labelFontPt": 10,
@@ -2906,7 +2906,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -2920,15 +2920,15 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 1
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-long-table-v2-20261022/benchmark/02"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -2947,7 +2947,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 1
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -2955,7 +2955,7 @@
               "caseId": "long-table.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-long-table-v2-20261022/benchmark/02/long-table/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/long-table/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/long-table/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -2981,7 +2981,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -2995,7 +2995,7 @@
                 "bytes": 178651
               },
               "patchOps": 634,
-              "p50TotalMs": 81.36
+              "p50TotalMs": 87.72
             }
           ],
           "blockers": []
@@ -3031,7 +3031,7 @@
       "version": "2.0.0",
       "path": "biennale-yellow.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10,
         "labelFontPt": 10,
@@ -3335,7 +3335,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -3346,7 +3346,7 @@
             "baselineKnown": 0,
             "new": 0,
             "changed": 0,
-            "resolved": 72,
+            "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
             "baselineUpdatedCases": 0
@@ -3354,10 +3354,10 @@
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-biennale-yellow-cleanup-20261022-01/iterations/08/benchmark"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -3373,7 +3373,7 @@
               "baselineKnown": 0,
               "new": 0,
               "changed": 0,
-              "resolved": 72,
+              "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
               "baselineUpdatedCases": 0
@@ -3384,7 +3384,7 @@
               "caseId": "biennale-yellow.evidence-variants",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-biennale-yellow-cleanup-20261022-01/iterations/08/benchmark/biennale-yellow/evidence-variants/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/biennale-yellow/evidence-variants/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/biennale-yellow/evidence-variants/review.md",
               "validation": {
                 "valid": true,
@@ -3424,13 +3424,13 @@
                 "bytes": 58419
               },
               "patchOps": 142,
-              "p50TotalMs": 61.75
+              "p50TotalMs": 71.55
             },
             {
               "caseId": "biennale-yellow.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-biennale-yellow-cleanup-20261022-01/iterations/08/benchmark/biennale-yellow/golden-html/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/biennale-yellow/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -3453,7 +3453,7 @@
                   "baselineKnown": 0,
                   "new": 0,
                   "changed": 0,
-                  "resolved": 72,
+                  "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
                   "baselineUpdated": false
@@ -3470,7 +3470,7 @@
                 "bytes": 243469
               },
               "patchOps": 520,
-              "p50TotalMs": 81.46
+              "p50TotalMs": 109.35
             }
           ],
           "blockers": []
@@ -3498,7 +3498,7 @@
       "version": "0.1.0",
       "path": "black-gold.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "designContract": "black-gold/design.json",
       "qualityProfile": {
         "minFontPt": 10,
@@ -3682,7 +3682,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-21",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -3701,10 +3701,10 @@
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-21",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-black-gold-ledger-contract-20261021/benchmark/04"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -3731,7 +3731,7 @@
               "caseId": "black-gold.golden-design",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-black-gold-ledger-contract-20261021/benchmark/04/black-gold/golden-design/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/black-gold/golden-design/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/black-gold/golden-design/review.md",
               "validation": {
                 "valid": true,
@@ -3768,10 +3768,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 190090
+                "bytes": 190265
               },
               "patchOps": 591,
-              "p50TotalMs": 115.95
+              "p50TotalMs": 128.29
             }
           ],
           "blockers": []
@@ -3796,7 +3796,7 @@
       "version": "0.1.0",
       "path": "green-slate.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "designContract": "green-slate/design.json",
       "qualityProfile": {
         "minFontPt": 10,
@@ -4059,7 +4059,7 @@
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -4073,15 +4073,15 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 1
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-green-slate-20261021/benchmark/02"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -4100,7 +4100,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 1
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -4108,7 +4108,7 @@
               "caseId": "green-slate.golden-design",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-green-slate-20261021/benchmark/02/green-slate/golden-design/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/green-slate/golden-design/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/green-slate/golden-design/review.md",
               "validation": {
                 "valid": true,
@@ -4134,7 +4134,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -4145,10 +4145,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 282022
+                "bytes": 281976
               },
               "patchOps": 931,
-              "p50TotalMs": 105.48
+              "p50TotalMs": 229.31
             }
           ],
           "blockers": []
@@ -4173,7 +4173,7 @@
       "version": "0.1.0",
       "path": "clear-value.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "designContract": "clear-value/design.json",
       "qualityProfile": {
         "minFontPt": 10,
@@ -4411,7 +4411,7 @@
       "quality": {
         "manualHardDefects": 0,
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-10-22",
+        "lastBenchmark": "2026-10-24",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -4425,15 +4425,15 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 1
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-22",
+          "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-clear-value-20261022/benchmark/02"
+            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -4452,7 +4452,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 1
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -4460,7 +4460,7 @@
               "caseId": "clear-value.golden-design",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-clear-value-20261022/benchmark/02/clear-value/golden-design/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/clear-value/golden-design/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/clear-value/golden-design/review.md",
               "validation": {
                 "valid": true,
@@ -4486,7 +4486,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -4497,10 +4497,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 292406
+                "bytes": 292751
               },
               "patchOps": 897,
-              "p50TotalMs": 99.67
+              "p50TotalMs": 162.95
             }
           ],
           "blockers": []

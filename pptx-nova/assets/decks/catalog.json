@@ -43,7 +43,7 @@
         "museum exhibition narrative",
         "arts residency showcase"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "black-gold-showcase",
@@ -56,7 +56,7 @@
       "content": "../examples/black-gold/content.json",
       "summary": "../examples/black-gold/summary.json",
       "bestFor": ["investment research", "financial periodical", "evidence-led executive briefing"],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "broadside-showcase",
@@ -76,7 +76,7 @@
         "bilingual EN/CN editorial deck",
         "campaign launch"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "cartesian-showcase",
@@ -95,7 +95,7 @@
         "research readout",
         "quiet data presentation"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "clear-value-showcase",
@@ -112,7 +112,7 @@
         "Serif white-page evidence boards",
         "Scenario, allocation and decision records"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "consulting-dark-showcase",
@@ -125,7 +125,7 @@
       "content": "../examples/consulting-dark/content.json",
       "summary": "../examples/consulting-dark/summary.json",
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "green-slate-showcase",
@@ -143,7 +143,7 @@
         "transformation roadmap",
         "methodology and evidence briefing"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "long-table-showcase",
@@ -162,7 +162,7 @@
         "cultural supper club",
         "lifestyle launch"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "mckinsey-blue-showcase",
@@ -180,7 +180,7 @@
         "executive consulting",
         "McKinsey-style management deck"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "swiss-grid-showcase",
@@ -200,7 +200,7 @@
         "minimal comparison tables",
         "Swiss-style presentation"
       ],
-      "status": "preview"
+      "status": "available"
     }
   ]
 }

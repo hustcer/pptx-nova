@@ -2,7 +2,7 @@
 
 DeckKit: `consulting-dark`
 Showcase case: `consulting-dark.golden-roadshow`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 10
 Patch ops: 1045
 Title: A clearer path from signal to scale

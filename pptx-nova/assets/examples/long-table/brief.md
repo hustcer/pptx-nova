@@ -2,7 +2,7 @@
 
 DeckKit: `long-table`
 Showcase case: `long-table.golden-html`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 8
 Patch ops: 634
 Title: LONG TABLE

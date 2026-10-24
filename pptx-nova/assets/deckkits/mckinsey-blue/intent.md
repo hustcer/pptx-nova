@@ -30,7 +30,8 @@ Tabler 为 SVG 矢量图片，不承诺图标路径节点可编辑。文字、�
 
 ## 验收状态
 
-2.0.0 / candidate，须显式选择，不继承旧版 production/default 资格。
+2.0.0 / production，于 2026-10-24 经维护者明确授权、三项 live benchmark 和 delivery readiness
+复核后晋级；资格依据当前合同与验收记录，不继承旧版登记状态。
 七组共 56 页最终 canonical PNG 已逐张检查，覆盖十六个注册布局、同内容替代构图、中英混排、异领域和密度边界。
 七份 PowerPoint for Mac 16.114 保存关闭重开与完整回读通过；标题、形状持有编号、图表数据、表格单元格实际编辑后保留。
 窄 rail 的五条 cohort 应使用短标签；五项 ledger 单元格最多 80 字符，中文标点可能自然换行，较长内容应改用 columns 或重组拆页。

@@ -3734,8 +3734,12 @@ test('refurbish plan requires semantic diff gate by default', async () => {
   })
   const semanticIndex = plan.requiredGates.indexOf('semantic-diff')
 
-  assert.equal(plan.status, 'explicit-only')
-  assert.ok(plan.requiredReferences.some((reference) => reference.section === 'Selection'))
+  assert.equal(plan.status, 'ready')
+  assert.equal(plan.explicitSelection.required, false)
+  assert.equal(
+    plan.requiredReferences.some((reference) => reference.section === 'Selection'),
+    false,
+  )
   assert.notEqual(semanticIndex, -1)
   assert.ok(semanticIndex < plan.requiredGates.indexOf('fidelity-gate'))
   assert.ok(
@@ -3759,7 +3763,8 @@ test('explicit swiss-grid refurbishment retains its independent manual fallback 
     json: true,
   })
 
-  assert.equal(plan.status, 'explicit-manual-fallback')
+  assert.equal(plan.status, 'manual-fallback')
+  assert.equal(plan.explicitSelection.required, false)
   assert.equal(plan.route, 'fallback-patch')
   assert.equal(plan.nativeSkinning.supported, false)
   assert.equal(
@@ -3772,21 +3777,21 @@ test('explicit swiss-grid refurbishment retains its independent manual fallback 
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
     },
-    {
-      path: 'references/deckkit-mode.md',
-      section: 'Selection',
-      reason: 'The explicitly selected DeckKit uses a readiness exception.',
-    },
   ])
 })
 
 test('explicit candidate fallback keeps refurbish plan route commands gates and references consistent', async () => {
   const { buildRefurbishPlan } = await import(skillUrl('scripts/pptx-nova-refurbish-plan.mjs'))
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-candidate-fallback-'))
+  const catalogPath = join(root, 'catalog.json')
+  const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
+  catalog.entries.find((entry) => entry.id === 'consulting-dark').readiness = 'candidate'
+  writeJson(catalogPath, catalog)
   const plan = buildRefurbishPlan({
     deckkit: 'consulting-dark',
     source: 'source.pptx',
     output: 'candidate.pptx',
-    catalog: skillPath('assets/deckkits/catalog.json'),
+    catalog: catalogPath,
     route: 'fallback',
     explicit: true,
     json: true,
@@ -4002,12 +4007,9 @@ test('refurbish fallback plan overwrites current-run candidate commands', async 
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
     },
-    {
-      path: 'references/deckkit-mode.md',
-      section: 'Selection',
-      reason: 'The explicitly selected DeckKit uses a readiness exception.',
-    },
   ])
+  assert.equal(plan.status, 'manual-fallback')
+  assert.equal(plan.explicitSelection.required, false)
 })
 
 test('refurbish runner persists catalog readiness before a blocked plan exits', () => {
@@ -4098,7 +4100,7 @@ test('refurbish runner persists catalog readiness before any xdoc command starts
   assert.equal(summary.artifacts.readiness, readinessPath)
   const readiness = JSON.parse(readFileSync(readinessPath, 'utf8'))
   assert.equal(readiness.status, 'pass')
-  assert.equal(readiness.explicitException, true)
+  assert.equal(readiness.explicitException, false)
   assert.ok(phaseNames.includes('catalog-readiness-evidence'))
   assert.ok(phaseNames.includes('xdoc-capability-probe'))
   assert.ok(
@@ -4525,7 +4527,7 @@ if (args[0] === 'schema') {
   const catalogReadiness = JSON.parse(readFileSync(summary.artifacts.readiness, 'utf8'))
   assert.equal(catalogReadiness.schemaVersion, 'pptx-nova-catalog-readiness/v1')
   assert.equal(catalogReadiness.status, 'pass')
-  assert.equal(catalogReadiness.readiness, 'candidate')
+  assert.equal(catalogReadiness.readiness, 'production')
   assert.equal(catalogReadiness.agentGate.passed, true)
   assert.equal(catalogReadiness.agentGate.benchmarkAvailable, true)
   assert.equal(catalogReadiness.agentGate.benchmarkEvidencePassed, true)

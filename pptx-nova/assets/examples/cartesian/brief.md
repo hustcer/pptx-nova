@@ -2,7 +2,7 @@
 
 DeckKit: `cartesian`
 Showcase case: `cartesian.golden-html`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 10
 Patch ops: 479
 Title: Cartesian

@@ -2,7 +2,7 @@
 
 DeckKit: `green-slate`
 Showcase case: `green-slate.golden-design`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 12
 Patch ops: 931
 Title: Service transformation Value follows adoption

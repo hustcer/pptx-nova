@@ -2,7 +2,7 @@
 
 DeckKit: `mckinsey-blue`
 Showcase case: `mckinsey-blue.golden-loyalty`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 8
 Patch ops: 1661
 Title: Kimsoong Customer Loyalty Programme

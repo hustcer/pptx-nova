@@ -14,6 +14,10 @@ resolved design plan, style checks and post-apply native-data readback.
 
 ## Selection
 
+The bundled catalog has nine `production` DeckKits and one `default`, `swiss-grid`.
+When the user omits a style and no other constraints favor a different kit, select Swiss Grid.
+Scenario, language, density and required slide types still govern eligibility and ranking.
+
 Before writing `content.json`, select a DeckKit from
 `assets/deckkits/catalog.json`:
 

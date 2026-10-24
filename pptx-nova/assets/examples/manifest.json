@@ -18,7 +18,7 @@
       "deckkit": "consulting-dark",
       "caseId": "consulting-dark.golden-roadshow",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "2.0.0",
       "title": "A clearer path from signal to scale",
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
@@ -42,8 +42,8 @@
         },
         "brief": {
           "path": "consulting-dark/brief.md",
-          "bytes": 704,
-          "sha256": "d2696b617b887d0544a1ccbc49b7d83c2c8cb2efe6447b20fcb1f2bdcc800008"
+          "bytes": 705,
+          "sha256": "6bf49bf3fc1beb50c30f029edcde0abe5078724d69631062b2bbe03355d6ab64"
         },
         "summary": {
           "path": "consulting-dark/summary.json",
@@ -111,7 +111,7 @@
       "deckkit": "mckinsey-blue",
       "caseId": "mckinsey-blue.golden-loyalty",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "2.0.0",
       "title": "Kimsoong Customer Loyalty Programme",
       "bestFor": [
@@ -144,8 +144,8 @@
         },
         "brief": {
           "path": "mckinsey-blue/brief.md",
-          "bytes": 741,
-          "sha256": "4e14ade46c37cd65078672730b0632f1a833e8e879f39e70ac2f416a561b285e"
+          "bytes": 742,
+          "sha256": "1b409870133558dc2ee10af018c4e062613d0d8f0a3eccbe18ba78382a7b0f15"
         },
         "summary": {
           "path": "mckinsey-blue/summary.json",
@@ -213,7 +213,7 @@
       "deckkit": "swiss-grid",
       "caseId": "swiss-grid.golden-lecture",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "default",
       "version": "2.0.0",
       "title": "网格系统",
       "bestFor": [
@@ -244,8 +244,8 @@
         },
         "brief": {
           "path": "swiss-grid/brief.md",
-          "bytes": 735,
-          "sha256": "8cb0288625356e2dafc56aa50d698198db88be5274548f450a529d50916d7be3"
+          "bytes": 733,
+          "sha256": "1b8db2a375c7e0642b9a3a40fdc972f5e2483eb0510a5f32ab78f12cf69daf6b"
         },
         "summary": {
           "path": "swiss-grid/summary.json",
@@ -313,7 +313,7 @@
       "deckkit": "broadside",
       "caseId": "broadside.golden-html",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "2.0.0",
       "title": "public ideas made real",
       "bestFor": [
@@ -344,8 +344,8 @@
         },
         "brief": {
           "path": "broadside/brief.md",
-          "bytes": 734,
-          "sha256": "407f42ef612861c99f2fa27d88667536178e4118c8153a6322598d023370a09b"
+          "bytes": 735,
+          "sha256": "5afd830e6043e810ff1c009353a2d85c8785af6486824e3a4849aae9e35a16c8"
         },
         "summary": {
           "path": "broadside/summary.json",
@@ -413,7 +413,7 @@
       "deckkit": "cartesian",
       "caseId": "cartesian.golden-html",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "2.0.0",
       "title": "Cartesian",
       "bestFor": [
@@ -443,8 +443,8 @@
         },
         "brief": {
           "path": "cartesian/brief.md",
-          "bytes": 708,
-          "sha256": "b9d7c38aeefbc4381d03136c90129be77b4e16d3e34eb616ca37b633042575c0"
+          "bytes": 709,
+          "sha256": "b3b3ce3d23f7dbcd4dda95726a7170ed108408de2b1fec8ae133dd1b0edb991e"
         },
         "summary": {
           "path": "cartesian/summary.json",
@@ -512,7 +512,7 @@
       "deckkit": "long-table",
       "caseId": "long-table.golden-html",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "2.0.0",
       "title": "LONG TABLE",
       "bestFor": [
@@ -542,8 +542,8 @@
         },
         "brief": {
           "path": "long-table/brief.md",
-          "bytes": 711,
-          "sha256": "b440e4a97700c6d854105978fd1660357d12e29fb4199c6e1007b5691c6b15da"
+          "bytes": 712,
+          "sha256": "173f1b70f0dd5a759bca17224af0e60456d94189f41399fac34aba3e8b4abad6"
         },
         "summary": {
           "path": "long-table/summary.json",
@@ -611,7 +611,7 @@
       "deckkit": "biennale-yellow",
       "caseId": "biennale-yellow.golden-html",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "2.0.0",
       "title": "Aurora Programme",
       "bestFor": [
@@ -641,8 +641,8 @@
         },
         "brief": {
           "path": "biennale-yellow/brief.md",
-          "bytes": 755,
-          "sha256": "3df58fca4558c7fcebb44735df50bf3891c7f8c16f278c7664843e6b1cabce38"
+          "bytes": 756,
+          "sha256": "a65a75b8b762e8d16f1e1d279670847286461d213f3cac7856708f0c6ec64fd5"
         },
         "summary": {
           "path": "biennale-yellow/summary.json",
@@ -710,7 +710,7 @@
       "deckkit": "black-gold",
       "caseId": "black-gold.golden-design",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Q1 2026 Embodied AI Venture Capital Monitor",
       "bestFor": ["investment research", "financial periodical", "evidence-led executive briefing"],
@@ -734,8 +734,8 @@
         },
         "brief": {
           "path": "black-gold/brief.md",
-          "bytes": 706,
-          "sha256": "94e5eb68ccbb1ca544d23a5b5384318b2ddc605c8b27692191d2c98c2416b421"
+          "bytes": 707,
+          "sha256": "a9cb47a5e863828b36fb18e39b8fae0427fa9b54830b9c5e791f90f4b1392216"
         },
         "summary": {
           "path": "black-gold/summary.json",
@@ -803,7 +803,7 @@
       "deckkit": "green-slate",
       "caseId": "green-slate.golden-design",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Service transformation Value follows adoption",
       "bestFor": [
@@ -832,8 +832,8 @@
         },
         "brief": {
           "path": "green-slate/brief.md",
-          "bytes": 745,
-          "sha256": "8a25d9921307d1065aa7c6d493ce0a2558b99099d9cf74aadd0bec736c7948ac"
+          "bytes": 746,
+          "sha256": "94d64b1e180d9a13f96fb752b2f3651fcdf87926275f70565e9c36be6471003b"
         },
         "summary": {
           "path": "green-slate/summary.json",
@@ -901,7 +901,7 @@
       "deckkit": "clear-value",
       "caseId": "clear-value.golden-design",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Clear value Evidence before conviction",
       "bestFor": [
@@ -929,8 +929,8 @@
         },
         "brief": {
           "path": "clear-value/brief.md",
-          "bytes": 749,
-          "sha256": "147df4c0334f1700d1430e5f1da8b9c98b7c6f9dd7cdfb57923ec88335579328"
+          "bytes": 750,
+          "sha256": "74543305bbb773a89c2ff7ee2622e50534d9d602d081e82180710440edadc4ac"
         },
         "summary": {
           "path": "clear-value/summary.json",

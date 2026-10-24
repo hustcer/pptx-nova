@@ -185,8 +185,8 @@ in patch operations. Gold pixel area, assertion quality and overall aesthetics r
 Native-table creation also runs the semantic audit and binds its report to finalization.
 
 The optional [finance research policy](policies/finance-research.md) applies when requested content
-requires it; skin selection does not activate financial assumptions or conclusions. The kit is a
-candidate migration, not an automatic production/default choice or a verified refurbishment route.
+requires it; skin selection does not activate financial assumptions or conclusions. The catalog
+records the kit's production selection eligibility; arbitrary existing-deck refurbishment remains unverified.
 
 ### Strategy family: Green Slate
 

@@ -2,6 +2,10 @@
 
 经过验证矩阵通过后冻结的 DeckKit，用于 pptx-nova 的“DeckKit 模式”二次创作快路径。
 
+当前十套 DeckKit 均已获得交付选型资格：Swiss Grid 登记为唯一的 `default`，其余九套为
+`production`。未指定风格且没有其他内容约束时，自动选型采用 Swiss Grid；有具体用途或页型
+要求时，仍按覆盖范围和匹配度选择。状态以 `catalog.json` 为准。
+
 ## 目录结构
 
 ```
@@ -20,25 +24,25 @@ assets/deckkits/
 ├── design-family-registry.mjs # 新视觉族的断言、解析、检查与投影注册
 ├── cartesian-components.mjs  # 暖石编辑语言的组件计划执行、原生图表与图片
 ├── cartesian-layouts.mjs     # 十类职责、十八个布局、实例容量和节奏选择
-├── cartesian/                # Cartesian 2.0 合同与设计意图（candidate）
+├── cartesian/                # Cartesian 2.0 合同与设计意图（production）
 ├── broadside-components.mjs   # 黑橙海报语言的文字、形状与原生图表执行
 ├── broadside-layouts.mjs      # 十六类职责、二十八个布局与实例容量
 ├── broadside-registry.mjs     # Broadside 视觉族检查与发现投影
-├── broadside/                # Broadside 2.0 合同与设计意图（candidate）
+├── broadside/                # Broadside 2.0 合同与设计意图（production）
 ├── long-table-components.mjs  # 奶油纸底单墨编辑语言、形状持有文字与原生日程表格
 ├── long-table-layouts.mjs     # 八类职责、十五个布局、完整组件计划与实例容量
 ├── long-table-registry.mjs    # Long Table 视觉族断言、检查与发现投影
-├── long-table/               # Long Table 2.0 合同与设计意图（candidate）
+├── long-table/               # Long Table 2.0 合同与设计意图（production）
 ├── swiss-components.mjs       # 非对称文字、原生网格示意、Tabler 图标与原生表格
 ├── swiss-layouts.mjs          # 十五类职责、二十四个布局、数值模型与实例容量
 ├── swiss-registry.mjs         # Swiss 视觉族断言、身份检查与发现投影
-├── swiss-grid/                # Swiss Grid 2.0 合同与设计意图（candidate）
+├── swiss-grid/                # Swiss Grid 2.0 合同与设计意图（default）
 ├── mck-components.mjs         # 白底咨询语言、原生条图、表格与 SVG 图标执行
 ├── mck-layouts.mjs            # 八类职责、十六个有界构图与逐实例容量
 ├── mck-registry.mjs           # McKinsey 视觉族断言、检查与发现投影
-├── mckinsey-blue/             # McKinsey Blue 2.0 合同与设计意图（candidate）
+├── mckinsey-blue/             # McKinsey Blue 2.0 合同与设计意图（production）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
-├── black-gold/                 # 第二种合同设计语言（candidate，以 catalog 为准）
+├── black-gold/                 # 第二种合同设计语言（production，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
 ├── clear-value/                # 白底衬线研究报告合同与设计意图（状态以 catalog 为准）
 ├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
@@ -227,9 +231,8 @@ node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation 
 8. catalog 记录版本、visual grammar、验证命令、示例路径和已知限制
 
 当前 readiness audit 会明确报告 candidate / delivery / default 三个结论。
-benchmark CLI 已接入逐页 PNG 与 contact-sheet 机器 gate；人工视觉复核、
-catalog 质量字段和已知限制仍需补齐后，才能把 DeckKit 提升为 `production`
-或 `default`。
+benchmark CLI 已接入逐页 PNG 与 contact-sheet 机器 gate；新增 DeckKit 只有在人工视觉复核、
+catalog 质量字段和已知限制满足晋级要求后，才能提升为 `production` 或 `default`。
 
 ## Catalog 质量元数据回写
 

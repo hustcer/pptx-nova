@@ -2,7 +2,7 @@
 
 DeckKit: `black-gold`
 Showcase case: `black-gold.golden-design`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 8
 Patch ops: 591
 Title: Q1 2026 Embodied AI Venture Capital Monitor

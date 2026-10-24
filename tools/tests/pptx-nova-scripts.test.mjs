@@ -1636,6 +1636,11 @@ test('DeckKit diversity diagnostics disclose current, missing, and available gro
     'cartesianBarChartSlide',
     'cartesianImageStatsSlide',
     'cartesianLineChartSlide',
+    'cartesianExhibitSlide',
+    'cartesianAnalyticalSlide',
+    'cartesianComparisonSlide',
+    'cartesianSceneSlide',
+    'cartesianFormulaSlide',
   ])
   assert.equal(diagnostic.slideGroups.length, 7)
   assert.deepEqual(diagnostic.slideGroups[0], {

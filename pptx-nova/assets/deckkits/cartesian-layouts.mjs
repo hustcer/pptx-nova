@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { assertDesignValue, designHash, selectDesignLayout, textUnits } from './design-contract.mjs'
 import { wrapCjkText } from './design-text.mjs'
+import { resolveCartesianSpecimen } from './cartesian-exhibit.mjs'
 
 const schemas = new Map()
 function inputSchema(type) {
@@ -103,6 +104,15 @@ export function compileCartesianLayout(design, family, layoutId, variant, data, 
       'body',
       role === 'line' && layoutId === 'wide' ? { alignment: 'right' } : {},
     )
+  }
+  if (role === 'exhibit') {
+    text('Source', r.source, data.source, 'source', 'source')
+    components.push({
+      kind: 'exhibit',
+      name: 'Exhibit',
+      frame: r.stage,
+      specimen: resolveCartesianSpecimen(r.stage, data.specimen, cartesianText, `${path}.specimen`),
+    })
   }
   if (role === 'cover') text('Description', r.subtitle, data.subtitle, 'subtitle', 'subtitle')
   if (role === 'closing') {

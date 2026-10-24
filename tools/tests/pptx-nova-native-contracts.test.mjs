@@ -22,6 +22,12 @@ import { fileURLToPath } from 'node:url'
 import { inflateRawSync } from 'node:zlib'
 import { prepareRemediation } from '../../pptx-nova/scripts/lib/remediation.mjs'
 import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
+import {
+  checkDesignReadback,
+  designHash,
+} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+import { readNativeCharts } from '../../pptx-nova/scripts/lib/native-chart-readback.mjs'
+import { cartesianChartMatrix } from './helpers/cartesian-exhibits.mjs'
 import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-choreography.mjs'
 import { verifyDiffEvidence } from '../../pptx-nova/scripts/lib/diff-evidence.mjs'
 import {
@@ -53,6 +59,107 @@ const nativeTest = (name, fn, { visual = false } = {}) =>
     },
     fn,
   )
+
+nativeTest(
+  'Cartesian native exhibit readback verifies all chart families and rejects data corruption',
+  (t) => {
+    const s = scenario(t, { useInstalledAuthorization: true })
+    const example = JSON.parse(
+      readFileSync(
+        new URL(
+          '../../pptx-nova/assets/deckkits/examples/cartesian-native-exhibits-content.json',
+          import.meta.url,
+        ),
+      ),
+    )
+    const matrix = cartesianChartMatrix()
+    const content = {
+      meta: { deckkit: 'cartesian', designScope: 'excerpt' },
+      slides: [
+        ...example.slides.filter((slide) => slide.data?.specimen?.kind === 'charts'),
+        ...matrix.slides,
+      ],
+    }
+    const built = createDeck(content),
+      { output } = s.apply(built.patch.ops)
+    const inspect = s.inspect(output),
+      modelPath = join(s.directory, 'model.json')
+    s.run(['convert', output, '--to', 'json', '--output', modelPath], null, binary, { json: false })
+    const model = JSON.parse(readFileSync(modelPath)),
+      caches = readNativeCharts(output)
+    const histogram = [...nativeParts(output).values()]
+      .map((bytes) => bytes.toString('utf8'))
+      .find((xml) => xml.includes('layoutId="clusteredColumn"'))
+    assert.match(histogram ?? '', /<cx:visibility[^>]*categoryName="1"[^>]*value="1"/)
+    const verify = (plan = built.designPlan, patch = built.patch, charts = caches) =>
+      checkDesignReadback(plan, patch, inspect, model, charts)
+    assert.equal(verify().status, 'pass', JSON.stringify(verify().issues))
+    const ops = built.patch.ops.filter((op) => op.op === 'add-chart')
+    assert.equal(new Set(ops.map((op) => op.kind)).size, 20)
+    // Each family must detect a changed source value while the candidate stays unchanged.
+    for (const op of ops) {
+      const patch = structuredClone(built.patch),
+        changed = patch.ops.find(
+          (o) => o.op === 'add-chart' && o.name === op.name && o.slide === op.slide,
+        )
+      const q = changed.dataEx ?? changed.data
+      if (q.points) q.points[0].value += 1
+      else if (q.stages) q.stages[0].value += 1
+      else if (q.nodes) q.nodes.at(-1).value += 1
+      else if (q.values) q.values[0] += 1
+      else if (q.series[0].points) q.series[0].points[0].y += 1
+      else q.series[0].values[0] += 1
+      const plan = { ...built.designPlan, patchHash: designHash(patch) }
+      assert.equal(verify(plan, patch).status, 'fail', op.kind)
+    }
+    const combo = caches.find((chart) => chart.kind === 'combo')
+    const missingSecond = structuredClone(caches)
+    missingSecond.find((c) => c.name === combo.name && c.slide === combo.slide).series.pop()
+    assert.equal(verify(built.designPlan, built.patch, missingSecond).status, 'fail')
+    // Exercise the same CLI gate invoked by create-run, including its bound package cache reader.
+    const report = s.run(
+      [
+        skillScript('pptx-nova-deckkit-design'),
+        '--deckkit',
+        'cartesian',
+        '--plan',
+        s.write('plan.json', built.designPlan),
+        '--patch',
+        s.write('original-patch.json', built.patch),
+        '--inspect',
+        s.write('inspect.json', inspect),
+        '--model',
+        modelPath,
+      ],
+      null,
+      process.execPath,
+    )
+    assert.equal(report.status, 'pass')
+    const renamedPatch = structuredClone(built.patch)
+    const original = ops[0]
+    renamedPatch.ops.push({
+      op: 'set-shape',
+      slide: original.slide,
+      shape: { name: original.name },
+      name: 'MorphNativeChart',
+    })
+    const renamedPlan = { ...built.designPlan, patchHash: designHash(renamedPatch) }
+    const renamed = s.apply(renamedPatch.ops).output
+    const renamedInspect = s.inspect(renamed),
+      renamedModelPath = join(s.directory, 'renamed-model.json')
+    s.run(['convert', renamed, '--to', 'json', '--output', renamedModelPath], null, binary, {
+      json: false,
+    })
+    const renamedResult = checkDesignReadback(
+      renamedPlan,
+      renamedPatch,
+      renamedInspect,
+      JSON.parse(readFileSync(renamedModelPath)),
+      readNativeCharts(renamed),
+    )
+    assert.equal(renamedResult.status, 'pass', JSON.stringify(renamedResult.issues))
+  },
+)
 
 // Independent readback for controlled native fixtures; never rewrites a package.
 function nativeParts(input) {

@@ -1122,7 +1122,7 @@
       "version": "2.0.0",
       "path": "swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "default",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10,
         "labelFontPt": 10,
@@ -2301,7 +2301,12 @@
           "cartesianLineChartSlide",
           "cartesianTimelineSlide",
           "cartesianTeamSlide",
-          "cartesianClosingSlide"
+          "cartesianClosingSlide",
+          "cartesianExhibitSlide",
+          "cartesianAnalyticalSlide",
+          "cartesianComparisonSlide",
+          "cartesianSceneSlide",
+          "cartesianFormulaSlide"
         ]
       },
       "supportedSlideTypes": [
@@ -2314,7 +2319,12 @@
         "cartesianLineChartSlide",
         "cartesianTimelineSlide",
         "cartesianTeamSlide",
-        "cartesianClosingSlide"
+        "cartesianClosingSlide",
+        "cartesianExhibitSlide",
+        "cartesianAnalyticalSlide",
+        "cartesianComparisonSlide",
+        "cartesianSceneSlide",
+        "cartesianFormulaSlide"
       ],
       "visualGrammar": {
         "schemaVersion": "pptx-nova-visual-grammar/v1",
@@ -2355,7 +2365,12 @@
           "evidence": [
             "cartesianBarChartSlide",
             "cartesianImageStatsSlide",
-            "cartesianLineChartSlide"
+            "cartesianLineChartSlide",
+            "cartesianExhibitSlide",
+            "cartesianAnalyticalSlide",
+            "cartesianComparisonSlide",
+            "cartesianSceneSlide",
+            "cartesianFormulaSlide"
           ],
           "structure": [
             "cartesianAgendaSlide",
@@ -2458,6 +2473,56 @@
           "cartesianClosingSlide": {
             "requiredSlots": ["data.label", "data.title", "data.cta", "data.contact"],
             "allowedLayoutIds": ["auto", "centered"]
+          },
+          "cartesianExhibitSlide": {
+            "requiredSlots": [
+              "data.label",
+              "data.title",
+              "data.body",
+              "data.source",
+              "data.specimen"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
+          },
+          "cartesianAnalyticalSlide": {
+            "requiredSlots": [
+              "data.label",
+              "data.title",
+              "data.body",
+              "data.source",
+              "data.specimen"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
+          },
+          "cartesianComparisonSlide": {
+            "requiredSlots": [
+              "data.label",
+              "data.title",
+              "data.body",
+              "data.source",
+              "data.specimen"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
+          },
+          "cartesianSceneSlide": {
+            "requiredSlots": [
+              "data.label",
+              "data.title",
+              "data.body",
+              "data.source",
+              "data.specimen"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
+          },
+          "cartesianFormulaSlide": {
+            "requiredSlots": [
+              "data.label",
+              "data.title",
+              "data.body",
+              "data.source",
+              "data.specimen"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
           }
         }
       },
@@ -2472,7 +2537,12 @@
           "evidence": [
             "cartesianBarChartSlide",
             "cartesianImageStatsSlide",
-            "cartesianLineChartSlide"
+            "cartesianLineChartSlide",
+            "cartesianExhibitSlide",
+            "cartesianAnalyticalSlide",
+            "cartesianComparisonSlide",
+            "cartesianSceneSlide",
+            "cartesianFormulaSlide"
           ],
           "structure": [
             "cartesianAgendaSlide",
@@ -2539,7 +2609,7 @@
           "date": "2026-10-24",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
+            "out": ".tmp/cartesian-p1p2-miTfop/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -2566,7 +2636,7 @@
               "caseId": "cartesian.golden-html",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/cartesian/golden-html/summary.json",
+              "summaryPath": ".tmp/cartesian-p1p2-miTfop/benchmark/cartesian/golden-html/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/cartesian/golden-html/review.md",
               "validation": {
                 "valid": true,
@@ -2603,10 +2673,56 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 186240
+                "bytes": 185982
               },
               "patchOps": 479,
-              "p50TotalMs": 79.33
+              "p50TotalMs": 85.32
+            },
+            {
+              "caseId": "cartesian.native-exhibits",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/cartesian-p1p2-miTfop/benchmark/cartesian/native-exhibits/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/cartesian/native-exhibits/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 1,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": false,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 9,
+                "expectedCount": 9,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 178004
+              },
+              "patchOps": 303,
+              "p50TotalMs": 73.12
             }
           ],
           "blockers": []
@@ -2614,8 +2730,8 @@
       },
       "knownLimits": [
         "Based on beautiful-html-templates/templates/cartesian/template.html; source was HTML, not PPTX.",
-        "Contract-driven cartesian-editorial/v1; all ten page roles use registered layouts and actual-instance capacity checks.",
-        "Chart unit and source are required in 2.0; migrate metadata explicitly. Both raw series remain native editable data.",
+        "Contract-driven cartesian-editorial/v1; ten editorial and five specimen page types use 28 registered layouts and actual-instance capacity checks, including rotated node bounds and specimen text.",
+        "Editorial charts require unit and source; specimen pages require source and unit disclosure in authored descriptions where applicable. Native chart caches verify source data beyond the lossy JSON projection.",
         "Fonts are not bundled: Playfair Display/Inter Latin, Songti SC display CJK, Arial Unicode MS body CJK; actual environment rendering needs review.",
         "Native editable image.editorial slot uses an assets manifest; no binding retains the crossed shell.",
         "Source browser navigation/motion excluded; native paragraph agenda targets retained.",

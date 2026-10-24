@@ -310,9 +310,7 @@ Machine gates cannot see every pixel-level defect. In particular, check:
 - Whether template pages retain placeholders, old footers, old dates, old page numbers, empty image frames, or invisible-but-editable empty objects.
 - Whether multi-page contact sheets show repetitive layout rhythm, meaningless decorative containers, topic-only titles, or awkward blank space.
 - Whether chart/table pages pass specialized semantic checks: data dimensions, series/categories, legend/labels, table rows/columns, and binding sources must match the content before checking the PNG for occlusion.
-- For deliverable PPTX files, especially for formal/enterprise users or high-risk chart/table/OOXML changes, if the current environment is macOS and Microsoft PowerPoint for Mac is installed, run the clean-open smoke gate:
-  `node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json`.
-  The live clean-open helper supports only macOS + PowerPoint for Mac + `osascript`/System Events; Windows/Linux have no equivalent clean-open run. If macOS lacks PowerPoint, `osascript`, or UI scripting permission, the helper returns `status: "skipped"` and does not block delivery. The final summary must explicitly state that the clean-open gate did not run and list the alternate structural checks performed. The helper stages the file in the PowerPoint sandbox, opens the candidate automatically, waits through PowerPoint's delayed chart/ChartEx loading window, and uses System Events to check Repair-like modals. Checking only that the presentation object opened is insufficient: PowerPoint may open it and show a Repair dialog at the same time. An ordinary `Cancel` button is not a failure; only Repair wording, a `Repair` button, or an equivalent repair prompt blocks. `--classify-ui` is only for offline UI snapshot classification tests and may run cross-platform.
+- For deliverable PPTX files, especially formal/enterprise or high-risk chart/table/OOXML changes, run the clean-open smoke gate when macOS + PowerPoint are available. Follow `references/export-and-check.md` for the command, prerequisites, delayed Repair-dialog checks, and skipped-evidence disclosure.
 
 ## Required Validation
 
@@ -402,45 +400,45 @@ estimate.
 
 Read the files required by routing first; do not read all references at once.
 
-| File                                      | Purpose                                                                                                                           |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `references/common-workflow.md`           | Run directory, output collision avoidance, artifact retention/cleanup, common workflow                                            |
-| `references/create-runner.md`             | Standard Create runner contract, compact output, performance, progressive preparation and failure routing                         |
-| `references/deckkit-mode.md`              | DeckKit selection, readiness, content, user-visible examples                                                                      |
-| `references/create-express.md`            | Quick deck generation from a simple prompt                                                                                        |
-| `references/create-studio.md`             | Confirmation, design lock, and split for high-risk/formal/precision decks                                                         |
-| `references/edit-mode.md`                 | Inspect/dry-run/selector workflow for modifying existing PPTX files                                                               |
-| `references/edit-contract.md`             | Existing-deck edit scope, source hash, target coverage, locality/style evidence, and final contract gate                          |
-| `references/session-rules.md`             | Explicit current-deck future/carryover rules, revision lifecycle, deterministic resolver, and Edit Contract integration           |
-| `references/micro-edit-cheatsheet.md`     | Fast path for small text, notes, footer, metadata, and single-object edits                                                        |
-| `references/translation-runner.md`        | Standard stable-candidate translation finalizer, compact output, compare reuse, publication binding, and failure routing          |
-| `references/translation-mode.md`          | Existing-PPTX translation, visible text coverage, source-language/target-language comparison, and layout-consistency visual gates |
-| `references/feedback-mode.md`             | Skill usage feedback, old-run feedback audit, and feedback persistence rules                                                      |
-| `references/refurbish-runner.md`          | Compact standard refurbish route, Agent output, comparison reuse, failure-driven disclosure, and review boundary                  |
-| `references/template-following.md`        | Strict template following: copy source slides, edit inherited objects, placeholder QA                                             |
-| `references/export-and-check.md`          | Export, extract, checks, semantic diff, and canonical unified visual evidence                                                     |
-| `references/fidelity-diagnosis.md`        | Distinguish authored semantics, renderer behavior and environment differences before repairing a deck                             |
-| `references/express-mode.md`              | Full golden path for Express mode                                                                                                 |
-| `references/reference-create.md`          | Reference PPTX + new outline generation                                                                                           |
-| `references/inspect-and-edit.md`          | Selectors, inspect output, and edit details                                                                                       |
-| `references/native-shape-editing.md`      | Native connector sites, exact group transforms, OLE/model preview geometry, and object-copy ownership                             |
-| `references/design-lock-and-assets.md`    | `deck_lock.json`, `assets_manifest.json`, check-lock                                                                              |
-| `references/narrative-quality.md`         | Deck profile, claim spine, contact-sheet plan, comeback review                                                                    |
-| `references/patch-ops-cheatsheet.md`      | Patch op quick reference                                                                                                          |
-| `references/animations.md`                | PPTX animation/transition creation, safe edits, preserve-only boundaries, validation                                              |
-| `references/recipes.md`                   | Recipe op schema and examples                                                                                                     |
-| `references/charts.md`                    | Chart creation/editing and OOXML chart semantics                                                                                  |
-| `references/tables.md`                    | Table creation/editing, CSV, formulas                                                                                             |
-| `references/formulas.md`                  | LaTeX/math formula strategy and formula assets                                                                                    |
-| `references/styles-and-themes.md`         | Colors, gradients, fonts, themes, masters                                                                                         |
-| `references/theme-packs.md`               | themePack / stylePack built-ins, `catalog themes`, swap-theme / swap-style / apply-brand commands, generator usage                |
-| `references/data-driven.md`               | `template-fill` and `bind-data`                                                                                                   |
-| `references/rich-deck-patterns.md`        | Rich visual patterns when no suitable DeckKit exists                                                                              |
-| `references/schema-discovery.md`          | Progressive xdoc schema / dry-run --explain capability discovery                                                                  |
-| `references/visual-qa-and-asset-slots.md` | Image slots, AI image prompt guard, P0/P1 QA                                                                                      |
-| `references/deck-generator-workflow.md`   | Creating or extending DeckKits                                                                                                    |
-| `references/template-library.md`          | Brand/layout/deck/chart/icon catalog fusion                                                                                       |
-| `references/resume-split-mode.md`         | Split handoff and resume generation                                                                                               |
-| `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` / raw OOXML                                                                                              |
-| `references/daemon-sessions.md`           | Daemon/stdio JSON-RPC/MCP selection, exact contracts, tuning, and troubleshooting                                                 |
-| `references/troubleshooting.md`           | Common errors and automatic repair suggestions                                                                                    |
+| File                                      | Purpose                                                                                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `references/common-workflow.md`           | Run directory, output collision avoidance, artifact retention/cleanup, common workflow                                  |
+| `references/create-runner.md`             | Standard Create runner contract, compact output, performance, progressive preparation and failure routing               |
+| `references/deckkit-mode.md`              | DeckKit selection, readiness, content, user-visible examples                                                            |
+| `references/create-express.md`            | Quick deck generation from a simple prompt                                                                              |
+| `references/create-studio.md`             | Confirmation, design lock, and split for high-risk/formal/precision decks                                               |
+| `references/edit-mode.md`                 | Inspect/dry-run/selector workflow for modifying existing PPTX files                                                     |
+| `references/edit-contract.md`             | Existing-deck edit scope, source hash, target coverage, locality/style evidence, and final contract gate                |
+| `references/session-rules.md`             | Explicit current-deck future/carryover rules, revision lifecycle, deterministic resolver, and Edit Contract integration |
+| `references/micro-edit-cheatsheet.md`     | Fast path for small text, notes, footer, metadata, and single-object edits                                              |
+| `references/translation-runner.md`        | Translation finalizer, stable candidate, compact output, compare reuse, publication binding, and failure routing        |
+| `references/translation-mode.md`          | PPTX translation, visible text coverage, source/candidate comparison, and layout-consistency gates                      |
+| `references/feedback-mode.md`             | Skill usage feedback, old-run feedback audit, and feedback persistence rules                                            |
+| `references/refurbish-runner.md`          | Compact standard refurbish route, Agent output, comparison reuse, failure-driven disclosure, and review boundary        |
+| `references/template-following.md`        | Strict template following: copy source slides, edit inherited objects, placeholder QA                                   |
+| `references/export-and-check.md`          | Export, extract, checks, semantic diff, and canonical unified visual evidence                                           |
+| `references/fidelity-diagnosis.md`        | Distinguish authored semantics, renderer behavior and environment differences before repairing a deck                   |
+| `references/express-mode.md`              | Full golden path for Express mode                                                                                       |
+| `references/reference-create.md`          | Reference PPTX + new outline generation                                                                                 |
+| `references/inspect-and-edit.md`          | Selectors, inspect output, and edit details                                                                             |
+| `references/native-shape-editing.md`      | Native connector sites, exact group transforms, OLE/model preview geometry, and object-copy ownership                   |
+| `references/design-lock-and-assets.md`    | `deck_lock.json`, `assets_manifest.json`, check-lock                                                                    |
+| `references/narrative-quality.md`         | Deck profile, claim spine, contact-sheet plan, comeback review                                                          |
+| `references/patch-ops-cheatsheet.md`      | Patch op quick reference                                                                                                |
+| `references/animations.md`                | PPTX animation/transition creation, safe edits, preserve-only boundaries, validation                                    |
+| `references/recipes.md`                   | Recipe op schema and examples                                                                                           |
+| `references/charts.md`                    | Chart creation/editing and OOXML chart semantics                                                                        |
+| `references/tables.md`                    | Table creation/editing, CSV, formulas                                                                                   |
+| `references/formulas.md`                  | LaTeX/math formula strategy and formula assets                                                                          |
+| `references/styles-and-themes.md`         | Colors, gradients, fonts, themes, masters                                                                               |
+| `references/theme-packs.md`               | themePack / stylePack built-ins, `catalog themes`, swap-theme / swap-style / apply-brand commands, generator usage      |
+| `references/data-driven.md`               | `template-fill` and `bind-data`                                                                                         |
+| `references/rich-deck-patterns.md`        | Rich visual patterns when no suitable DeckKit exists                                                                    |
+| `references/schema-discovery.md`          | Progressive xdoc schema / dry-run --explain capability discovery                                                        |
+| `references/visual-qa-and-asset-slots.md` | Image slots, AI image prompt guard, P0/P1 QA                                                                            |
+| `references/deck-generator-workflow.md`   | Creating or extending DeckKits                                                                                          |
+| `references/template-library.md`          | Brand/layout/deck/chart/icon catalog fusion                                                                             |
+| `references/resume-split-mode.md`         | Split handoff and resume generation                                                                                     |
+| `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` / raw OOXML                                                                                    |
+| `references/daemon-sessions.md`           | Daemon/stdio JSON-RPC/MCP selection, exact contracts, tuning, and troubleshooting                                       |
+| `references/troubleshooting.md`           | Common errors and automatic repair suggestions                                                                          |

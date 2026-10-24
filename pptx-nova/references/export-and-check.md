@@ -555,3 +555,9 @@ data, image/clip semantics and valid single-variable probes.
 If conversion/check reveals a problem and the user asks you to fix it, switch to
 `edit-mode.md` plus the relevant domain reference (`styles-and-themes.md`,
 `charts.md`, `tables.md`, or `patch-ops-cheatsheet.md`).
+
+## PowerPoint clean-open gate
+
+- For deliverable PPTX files, especially for formal/enterprise users or high-risk chart/table/OOXML changes, if the current environment is macOS and Microsoft PowerPoint for Mac is installed, run the clean-open smoke gate:
+  `node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json`.
+  The live clean-open helper supports only macOS + PowerPoint for Mac + `osascript`/System Events; Windows/Linux have no equivalent clean-open run. If macOS lacks PowerPoint, `osascript`, or UI scripting permission, the helper returns `status: "skipped"` and does not block delivery. The final summary must explicitly state that the clean-open gate did not run and list the alternate structural checks performed. The helper stages the file in the PowerPoint sandbox, opens the candidate automatically, waits through PowerPoint's delayed chart/ChartEx loading window, and uses System Events to check Repair-like modals. Checking only that the presentation object opened is insufficient: PowerPoint may open it and show a Repair dialog at the same time. An ordinary `Cancel` button is not a failure; only Repair wording, a `Repair` button, or an equivalent repair prompt blocks. `--classify-ui` is only for offline UI snapshot classification tests and may run cross-platform.

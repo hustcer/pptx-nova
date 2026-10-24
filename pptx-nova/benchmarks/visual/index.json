@@ -172,6 +172,15 @@
       "buildPath": "../../assets/deckkits/examples/clear-value-build.mjs",
       "expectedPath": "cases/clear-value/golden-design/expected.json",
       "reviewPath": "cases/clear-value/golden-design/review.md"
+    },
+    {
+      "id": "cartesian.native-exhibits",
+      "deckkit": "cartesian",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/cartesian-native-exhibits-content.json",
+      "buildPath": "../../assets/deckkits/examples/cartesian-build.mjs",
+      "expectedPath": "cases/cartesian/native-exhibits/expected.json",
+      "reviewPath": "cases/cartesian/native-exhibits/review.md"
     }
   ]
 }

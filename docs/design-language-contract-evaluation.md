@@ -26,22 +26,22 @@ Clear Value 曾有实机 Repair 丢页反例，原完整验收结论因此撤回
 
 ### 当前落地快照
 
-2026-10-24 经维护者明确授权，十套均获得交付选型资格，Swiss Grid 为唯一的 `default`，
-其余九套为 `production`。本次重跑全部 19 个注册基准及十套 readiness；历史人工视觉与
+2026-10-24 经维护者明确授权，十套均获得交付选型资格，均登记为 `production`。
+交付资格登记时重跑了当时全部 19 个注册基准及十套 readiness；新增 Cartesian native-exhibits 后共有 20 个注册基准。历史人工视觉与
 原生宿主证据仍按下表所列范围使用，不扩写为所有未来输入的保真保证。
 
-| DeckKit         | 当前版本 / catalog 状态      | 实际实现                                          | 证据与边界                                                                                                                                                            |
-| --------------- | ---------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| consulting-dark | 2.0.0 / production           | consulting-editorial/v1，10 类职责、20 个注册布局 | [2.0 迁移报告](consulting-dark-v2-migration-results.md)；64 页最终 canonical 逐张检查，七组原生打开，英文/中文保存重开回读，标题/形状文字/表格/图表数据编辑通过       |
-| biennale-yellow | 2.0.0 / production           | 九类职责全部经注册合同执行，旧分支退役            | [2.0 清理报告](biennale-yellow-v2-cleanup-results.md)；35 页最终矩阵、原生保存重开及回读                                                                              |
-| cartesian       | 2.0.0 / production           | cartesian-editorial/v1，10 类职责、18 个注册布局  | [2.0 迁移报告](cartesian-v2-migration-results.md)；42 页最终 canonical 逐张检查，六份原生保存重开与回读，代表文字/圆内字/图表数据编辑通过                             |
-| broadside       | 2.0.0 / production           | broadside-poster/v1，16 类职责、28 个注册布局     | [2.0 迁移报告](broadside-v2-migration-results.md)；60 页最终 canonical 逐张检查，四份原生保存重开与回读，代表文字/形状/图表数据编辑通过                               |
-| long-table      | 2.0.0 / production           | long-table-editorial/v1，8 类职责、15 个注册布局  | [2.0 迁移报告](long-table-v2-migration-results.md)；45 页最终 canonical 逐张检查，六份原生保存重开，标题/圆内字/胶囊/表格单元格实际编辑回读通过                       |
-| swiss-grid      | 2.0.0 / default              | swiss-typographic/v1，15 类职责、24 个注册布局    | [2.0 迁移报告](swiss-grid-v2-migration-results.md)；57 页最终 canonical 逐张检查，五份原生保存重开，标题/形状内文字/表格单元格实际编辑回读通过                        |
-| mckinsey-blue   | 2.0.0 / production           | mck-consulting/v1，8 类职责、16 个注册布局        | [2.0 迁移报告](mckinsey-blue-v2-migration-results.md)；56 页最终 canonical 逐张检查，七份原生保存重开，标题/编号/图表数据/表格单元格实际编辑回读通过                  |
-| black-gold      | 0.1.0 / production           | editorial-ledger/v1，6 页型、10 个注册布局        | [第三阶段报告](black-gold-migration-results.md)；26 页迁移验证，金融 policy 与皮肤分离                                                                                |
-| green-slate     | 0.1.0 / production           | strategy-report/v1，10 页型、13 个注册布局        | [迁移报告](green-slate-migration-results.md)；36 页最终视觉矩阵，初轮漏检已撤回并返修                                                                                 |
-| clear-value     | 0.1.0 / production（登记值） | annual-research/v1，8 页型、14 个注册布局         | [迁移记录](clear-value-migration-results.md)记录 41 页机器/视觉矩阵；REPAIR-001 的新生成样例已通过原生打开/保存重开复核；历史 41 页文件须重新生成，不能沿用旧交付结论 |
+| DeckKit         | 当前版本 / catalog 状态      | 实际实现                                          | 证据与边界                                                                                                                                                                                                       |
+| --------------- | ---------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| consulting-dark | 2.0.0 / production           | consulting-editorial/v1，10 类职责、20 个注册布局 | [2.0 迁移报告](consulting-dark-v2-migration-results.md)；64 页最终 canonical 逐张检查，七组原生打开，英文/中文保存重开回读，标题/形状文字/表格/图表数据编辑通过                                                  |
+| biennale-yellow | 2.0.0 / production           | 九类职责全部经注册合同执行，旧分支退役            | [2.0 清理报告](biennale-yellow-v2-cleanup-results.md)；35 页最终矩阵、原生保存重开及回读                                                                                                                         |
+| cartesian       | 2.0.0 / production           | cartesian-editorial/v1，15 个页型、28 个注册布局  | 原十页型的 [2.0 迁移报告](cartesian-v2-migration-results.md) 覆盖 42 页 canonical 与原生宿主证据；新增五个展示页型的证据及边界见 [intent.md](../pptx-nova/assets/deckkits/cartesian/intent.md)，不沿用旧宿主结论 |
+| broadside       | 2.0.0 / production           | broadside-poster/v1，16 类职责、28 个注册布局     | [2.0 迁移报告](broadside-v2-migration-results.md)；60 页最终 canonical 逐张检查，四份原生保存重开与回读，代表文字/形状/图表数据编辑通过                                                                          |
+| long-table      | 2.0.0 / production           | long-table-editorial/v1，8 类职责、15 个注册布局  | [2.0 迁移报告](long-table-v2-migration-results.md)；45 页最终 canonical 逐张检查，六份原生保存重开，标题/圆内字/胶囊/表格单元格实际编辑回读通过                                                                  |
+| swiss-grid      | 2.0.0 / production           | swiss-typographic/v1，15 类职责、24 个注册布局    | [2.0 迁移报告](swiss-grid-v2-migration-results.md)；57 页最终 canonical 逐张检查，五份原生保存重开，标题/形状内文字/表格单元格实际编辑回读通过                                                                   |
+| mckinsey-blue   | 2.0.0 / production           | mck-consulting/v1，8 类职责、16 个注册布局        | [2.0 迁移报告](mckinsey-blue-v2-migration-results.md)；56 页最终 canonical 逐张检查，七份原生保存重开，标题/编号/图表数据/表格单元格实际编辑回读通过                                                             |
+| black-gold      | 0.1.0 / production           | editorial-ledger/v1，6 页型、10 个注册布局        | [第三阶段报告](black-gold-migration-results.md)；26 页迁移验证，金融 policy 与皮肤分离                                                                                                                           |
+| green-slate     | 0.1.0 / production           | strategy-report/v1，10 页型、13 个注册布局        | [迁移报告](green-slate-migration-results.md)；36 页最终视觉矩阵，初轮漏检已撤回并返修                                                                                                                            |
+| clear-value     | 0.1.0 / production（登记值） | annual-research/v1，8 页型、14 个注册布局         | [迁移记录](clear-value-migration-results.md)记录 41 页机器/视觉矩阵；REPAIR-001 的新生成样例已通过原生打开/保存重开复核；历史 41 页文件须重新生成，不能沿用旧交付结论                                            |
 
 页型/布局数量描述覆盖范围，不能作为质量评分。后续分别重新生成和验收 Cartesian、Broadside；其他风格的回读、视觉
 数量来自各轮报告，不代表本次全量重新验收。

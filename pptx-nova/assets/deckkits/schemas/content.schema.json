@@ -187,7 +187,12 @@
               "valueCompositeSlide",
               "valueTimelineSlide",
               "valueDecisionSlide",
-              "valueArgumentSlide"
+              "valueArgumentSlide",
+              "cartesianExhibitSlide",
+              "cartesianAnalyticalSlide",
+              "cartesianComparisonSlide",
+              "cartesianSceneSlide",
+              "cartesianFormulaSlide"
             ]
           },
           "data": {

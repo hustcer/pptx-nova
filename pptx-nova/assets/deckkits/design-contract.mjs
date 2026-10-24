@@ -8,6 +8,7 @@ import { STRATEGY_REGIONS } from './strategy-registry.mjs'
 import { ANNUAL_LAYOUTS } from './annual-registry.mjs'
 import { BIENNALE_REGIONS } from './biennale-registry.mjs'
 import { registeredDesignFamily, registeredDesignChecks } from './design-family-registry.mjs'
+import { nativeChartMatches } from '../../scripts/lib/native-chart-readback.mjs'
 
 const root = dirname(fileURLToPath(import.meta.url))
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
@@ -33,6 +34,17 @@ export function assertDesignValue(value, schema, doc = schema, path = '$') {
     return assertDesignValue(value, doc.$defs[schema.$ref.split('/').at(-1)], doc, path)
   const fail = (message) => {
     throw new Error(`${path}: ${message}`)
+  }
+  if (schema.oneOf) {
+    const matches = schema.oneOf.filter((branch) => {
+      try {
+        assertDesignValue(value, branch, doc, path)
+        return true
+      } catch {
+        return false
+      }
+    })
+    if (matches.length !== 1) fail('expected exactly one specimen branch with its required payload')
   }
   if (schema.const !== undefined && value !== schema.const) fail(`expected ${schema.const}`)
   if (schema.enum && !schema.enum.includes(value)) fail(`expected one of ${schema.enum.join(', ')}`)
@@ -716,7 +728,7 @@ function readbackObjectState(object, patch) {
   return state
 }
 
-export function checkDesignReadback(plan, patch, inspect, model = null) {
+export function checkDesignReadback(plan, patch, inspect, model = null, nativeCharts = null) {
   const issues = []
   const fail = (message) => issues.push({ severity: 'error', message })
   if (plan.patchHash !== designHash(patch)) fail('Patch hash does not match design plan')
@@ -805,7 +817,27 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
         continue
       }
       expected.forEach((op, i) => {
+        if (nativeCharts) {
+          const state = readbackObjectState(
+            { kind: 'add-chart', slide: op.slide, name: op.name },
+            patch,
+          )
+          const matches = nativeCharts.filter((c) => c.slide === op.slide && c.name === state.name)
+          if (matches.length !== 1 || !nativeChartMatches(op, matches[0]))
+            fail(`${op.name}: native chart kind, categories, values or series semantics changed`)
+          return
+        }
         const chart = actual[i].chart
+        if (
+          !op.data?.series ||
+          ['combo', 'scatter', 'bubble'].includes(op.kind) ||
+          op.kind.endsWith('-3d')
+        ) {
+          fail(
+            `${op.name}: native chart caches are required for ${op.kind}; JSON projection is incomplete`,
+          )
+          return
+        }
         // The current JSON projection names the native c:doughnutChart family "ring".
         // Normalize only this verified alias; a pie or other family still fails closed.
         const expectedKind = op.kind === 'doughnut' ? 'ring' : op.kind
@@ -842,6 +874,7 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
         ? ['native picture presence, geometry and crop']
         : []),
       ...(model ? ['chart categories, series names and numeric values'] : []),
+      ...(nativeCharts ? ['native chart cache families, all series and source data'] : []),
       ...(model && tableOps.length ? ['native table dimensions and every cell text'] : []),
     ],
     notVerified: [

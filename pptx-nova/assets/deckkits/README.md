@@ -2,9 +2,8 @@
 
 经过验证矩阵通过后冻结的 DeckKit，用于 pptx-nova 的“DeckKit 模式”二次创作快路径。
 
-当前十套 DeckKit 均已获得交付选型资格：Swiss Grid 登记为唯一的 `default`，其余九套为
-`production`。未指定风格且没有其他内容约束时，自动选型采用 Swiss Grid；有具体用途或页型
-要求时，仍按覆盖范围和匹配度选择。状态以 `catalog.json` 为准。
+当前十套 DeckKit 均登记为 `production`，已获得交付选型资格。自动选型按用途、语言、
+内容密度、页型覆盖范围和匹配度选择。状态以 `catalog.json` 为准。
 
 ## 目录结构
 
@@ -23,7 +22,7 @@ assets/deckkits/
 ├── biennale-layouts.mjs       # 九类页面的完整计划、实例容量和构图选择
 ├── design-family-registry.mjs # 新视觉族的断言、解析、检查与投影注册
 ├── cartesian-components.mjs  # 暖石编辑语言的组件计划执行、原生图表与图片
-├── cartesian-layouts.mjs     # 十类职责、十八个布局、实例容量和节奏选择
+├── cartesian-layouts.mjs     # 十五个页型、二十八个布局、实例容量和节奏选择
 ├── cartesian/                # Cartesian 2.0 合同与设计意图（production）
 ├── broadside-components.mjs   # 黑橙海报语言的文字、形状与原生图表执行
 ├── broadside-layouts.mjs      # 十六类职责、二十八个布局与实例容量
@@ -36,7 +35,7 @@ assets/deckkits/
 ├── swiss-components.mjs       # 非对称文字、原生网格示意、Tabler 图标与原生表格
 ├── swiss-layouts.mjs          # 十五类职责、二十四个布局、数值模型与实例容量
 ├── swiss-registry.mjs         # Swiss 视觉族断言、身份检查与发现投影
-├── swiss-grid/                # Swiss Grid 2.0 合同与设计意图（default）
+├── swiss-grid/                # Swiss Grid 2.0 合同与设计意图（production）
 ├── mck-components.mjs         # 白底咨询语言、原生条图、表格与 SVG 图标执行
 ├── mck-layouts.mjs            # 八类职责、十六个有界构图与逐实例容量
 ├── mck-registry.mjs           # McKinsey 视觉族断言、检查与发现投影
@@ -58,7 +57,8 @@ assets/deckkits/
 Biennale Yellow 2.0 保留九个页型名称，全部经注册合同执行；数据页改用数值、单位、来源，
 不再分发旧固定页型渲染器。字段迁移与构图说明见 [intent.md](biennale-yellow/intent.md)。
 
-Cartesian 2.0 同样保留十个页型入口，全部经注册组件计划执行；图表必须提供单位、来源，
+Cartesian 2.0 保留十个编辑式页型，另提供五个原生展示页型，共二十八个注册布局，
+全部经注册组件计划执行。编辑式图表必须提供单位、来源；展示页须提供来源，并在说明中标明适用的单位。
 图片槽位和原生段落动画 target 保留。旧页型生成器及旧版 showcase 已替换，
 不提供双执行路径。见 [设计与迁移说明](cartesian/intent.md)。
 

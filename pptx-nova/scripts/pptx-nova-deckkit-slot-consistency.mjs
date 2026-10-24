@@ -220,16 +220,20 @@ async function checkDeckkit(entry) {
       const covered = new Set()
       if (!Array.isArray(variants) || !variants.length)
         throw new Error('Slot probe variants must be a non-empty array')
-      const probes = variants.map((variant) => {
-        const selected = structuredClone(schema)
-        for (const key of variant.omit ?? []) {
-          if (!selected.properties[key] || selected.required?.includes(key))
-            throw new Error('Probe omissions must name optional top-level fields')
-          delete selected.properties[key]
-        }
-        for (const key of Object.keys(selected.properties)) covered.add(key)
-        return checkProbe(mod, entry.id, slideType, selected)
-      })
+      const probes = variants
+        .map((variant) => {
+          const selected = structuredClone(schema)
+          for (const key of variant.omit ?? []) {
+            if (!selected.properties[key] || selected.required?.includes(key))
+              throw new Error('Probe omissions must name optional top-level fields')
+            delete selected.properties[key]
+          }
+          for (const key of Object.keys(selected.properties)) covered.add(key)
+          return expandProbeSchemas(selected).map((branch) =>
+            checkProbe(mod, entry.id, slideType, branch),
+          )
+        })
+        .flat()
       if (Object.keys(schema.properties).some((key) => !covered.has(key)))
         throw new Error('Every declared field needs at least one probe variant')
       const failure = probes.find((p) => p.status !== 'ok')
@@ -239,7 +243,7 @@ async function checkDeckkit(entry) {
         ...(failure?.error ? { error: failure.error } : {}),
         ghosts: [...new Set(probes.flatMap((p) => p.ghosts))],
         dynamics: [...new Set(probes.flatMap((p) => p.dynamics))],
-        ...(variants.length > 1 ? { probeVariants: variants.length } : {}),
+        ...(probes.length > 1 ? { probeVariants: probes.length } : {}),
       })
     } catch (error) {
       report.push({
@@ -252,6 +256,60 @@ async function checkDeckkit(entry) {
     }
   }
   return { deckkit: entry.id, slideTypes: report }
+}
+
+// Probe every discriminated branch, keeping visible fields in their legal context.
+function expandProbeSchemas(schema) {
+  if (!schema || typeof schema !== 'object') return [schema]
+  if (schema.oneOf) {
+    const { oneOf, ...base } = schema
+    return oneOf.flatMap((branch) =>
+      expandProbeSchemas({
+        ...base,
+        ...branch,
+        required: [...new Set([...(base.required ?? []), ...(branch.required ?? [])])],
+        properties: Object.fromEntries(
+          Object.entries({ ...base.properties, ...branch.properties })
+            .filter(([, value]) => value !== false)
+            .map(([key, value]) => [
+              key,
+              typeof value === 'object'
+                ? {
+                    ...base.properties?.[key],
+                    ...value,
+                    ...(value.properties
+                      ? {
+                          properties: {
+                            ...base.properties?.[key]?.properties,
+                            ...value.properties,
+                          },
+                        }
+                      : {}),
+                  }
+                : value,
+            ]),
+        ),
+      }),
+    )
+  }
+  const properties = Object.fromEntries(
+    Object.entries(schema.properties ?? {}).filter(([, value]) => value !== false),
+  )
+  let variants = [{ ...schema, ...(schema.properties ? { properties } : {}) }]
+  for (const [key, value] of Object.entries(properties)) {
+    const alternatives = expandProbeSchemas(value)
+    variants = variants.flatMap((variant) =>
+      alternatives.map((child) => ({
+        ...variant,
+        properties: { ...variant.properties, [key]: child },
+      })),
+    )
+  }
+  if (schema.items && !Array.isArray(schema.items))
+    variants = variants.flatMap((variant) =>
+      expandProbeSchemas(schema.items).map((items) => ({ ...variant, items })),
+    )
+  return variants
 }
 
 try {

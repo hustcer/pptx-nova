@@ -10,6 +10,7 @@ import {
 } from '../assets/deckkits/design-contract.mjs'
 import { validateDeckkitContent } from '../assets/deckkits/validate-deckkit.mjs'
 import { registeredDesignFamily } from '../assets/deckkits/design-family-registry.mjs'
+import { readNativeCharts } from './lib/native-chart-readback.mjs'
 
 const usage = `Usage:
   node <skill-root>/scripts/pptx-nova-deckkit-design.mjs --deckkit <id> [--content content.json] [--output report.json]
@@ -49,11 +50,17 @@ try {
       throw new Error('Design contract changed since build; rebuild and inspect the same candidate')
     }
     const inspect = read(args.inspect)
+    const patch = read(args.patch)
+    const nativeCharts =
+      patch.ops.some((op) => op.op === 'add-chart') && typeof inspect.input === 'string'
+        ? readNativeCharts(inspect.input)
+        : null
     report = checkDesignReadback(
       plan,
-      read(args.patch),
+      patch,
       inspect,
       args.model ? read(args.model) : null,
+      nativeCharts,
     )
     if (inspect.input && typeof inspect.input === 'string') {
       report.candidateSha256 = createHash('sha256')

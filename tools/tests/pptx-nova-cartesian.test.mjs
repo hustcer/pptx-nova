@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { test } from 'node:test'
+import { fileURLToPath } from 'node:url'
 import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
 import { validateContent } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
 import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
@@ -211,10 +212,12 @@ test('minimum unrelated content retains every visible field without reference-co
   }
   const content = {
     meta: { deckkit: 'cartesian' },
-    slides: Object.keys(DESIGN.cartesian.families).map((type) => ({
-      type,
-      data: fill(readJson(`schemas/cartesian/${type}.schema.json`)),
-    })),
+    slides: Object.keys(DESIGN.cartesian.families)
+      .filter((type) => DESIGN.cartesian.families[type].role !== 'exhibit')
+      .map((type) => ({
+        type,
+        data: fill(readJson(`schemas/cartesian/${type}.schema.json`)),
+      })),
   }
   const validation = validateDeckkitContent(content, { mode: 'delivery' })
   assert.equal(validation.valid, true, JSON.stringify(validation.errors))
@@ -285,11 +288,11 @@ test('Cartesian stock text and chart legends meet the canonical 10 pt readabilit
   )
 })
 
-test('Cartesian slot budgets describe readable fonts for all ten slide types', () => {
+test('Cartesian slot budgets describe readable fonts for all registered slide types', () => {
   const names = readdirSync(new URL('schemas/cartesian/', assetRoot)).filter((name) =>
     name.endsWith('.json'),
   )
-  assert.equal(names.length, 10)
+  assert.equal(names.length, Object.keys(DESIGN.cartesian.families).length)
   const fonts = names.flatMap((name) => fontSizes(readJson(`schemas/cartesian/${name}`), name))
   assert.ok(fonts.length > 30)
   assert.deepEqual(
@@ -341,3 +344,170 @@ for (const count of [3, 5]) {
     )
   })
 }
+
+test('native exhibit rejects executable payloads, bad stage geometry and unregistered charts', () => {
+  const data = {
+    label: 'NATIVE OBJECTS',
+    title: 'Retain the difficult detail',
+    body: 'A bounded editable specimen',
+    source: 'Synthetic demonstration',
+    specimen: { kind: 'nodes', nodes: [{ text: 'QX7', x: 0.1, y: 0.1, w: 0.2, h: 0.7 }] },
+  }
+  const sample = () =>
+    excerpt({ type: 'cartesianExhibitSlide', layoutId: 'wide', data: structuredClone(data) })
+  const patch = createDeck(sample()).patch
+  assert.ok(JSON.stringify(patch).includes('QX7'))
+  assert.equal(
+    patch.ops.some((op) => op.op === 'patch-ooxml'),
+    false,
+  )
+  for (const mutate of [
+    (d) => (d.specimen.customOps = []),
+    (d) => (d.specimen.nodes[0].x = 0.95),
+    (d) => (d.specimen.nodes[0].shape = 'unknown'),
+    (d) => (d.specimen.nodes[0].text = 'W'.repeat(200)),
+  ]) {
+    const input = sample()
+    mutate(input.slides[0].data)
+    assert.throws(() => createDeck(input))
+  }
+})
+
+test('single and paired native exhibits retain chart values and 3D camera declarations', () => {
+  for (const type of [
+    'cartesianAnalyticalSlide',
+    'cartesianComparisonSlide',
+    'cartesianSceneSlide',
+  ]) {
+    const charts = Array.from({ length: type === 'cartesianComparisonSlide' ? 2 : 1 }, (_, i) => ({
+      kind: 'column-3d',
+      variant: 'clustered',
+      caption: 'QX native chart ' + i,
+      data: { categories: ['X', 'Y'], series: [{ name: 'Sample ' + i, values: [-3.25, 7.125] }] },
+      view3D: { rotX: 25, rotY: 35, perspective: 40, rightAngleAxes: false },
+    }))
+    const input = excerpt({
+      type,
+      layoutId: 'rail',
+      data: {
+        label: 'NATIVE CHART',
+        title: 'Data keeps its identity',
+        body: 'Synthetic values expose projection details',
+        source: 'Synthetic demonstration',
+        specimen: { kind: 'charts', charts },
+      },
+    })
+    const { patch, designCheck } = createDeck(input)
+    assert.equal(designCheck.status, 'pass')
+    const native = patch.ops.filter((o) => o.op === 'add-chart')
+    assert.equal(native.length, charts.length)
+    native.forEach((o) => assert.deepEqual(o.data.series[0].values, [-3.25, 7.125]))
+    assert.ok(patch.ops.some((o) => o.op === 'set-chart' && o.view3D?.perspective === 40))
+    assert.equal(
+      patch.ops.some((o) => o.op === 'add-image'),
+      false,
+    )
+  }
+})
+
+const exhibit = (specimen, layoutId = 'wide') =>
+  excerpt({
+    type: 'cartesianExhibitSlide',
+    layoutId,
+    data: {
+      label: 'EXHIBIT',
+      title: 'A bounded specimen',
+      body: 'Synthetic test',
+      source: 'Synthetic',
+      specimen,
+    },
+  })
+
+test('exhibit preflight rejects rotated bounds and accepts a contained rotation', () => {
+  const node = { text: 'X', shape: 'rectangle', x: 0, y: 0, w: 1, h: 1, rotation: 45 }
+  const content = exhibit({ kind: 'nodes', nodes: [node] })
+  assert.throws(() => createDeck(content), /rotated|outside stage/)
+  assert.equal(validateDeckkitContent(content, { mode: 'delivery' }).valid, false)
+  assert.doesNotThrow(() =>
+    createDeck(exhibit({ kind: 'nodes', nodes: [{ ...node, x: 0.4, y: 0.3, w: 0.1, h: 0.4 }] })),
+  )
+})
+
+test('specimen discriminants require their payload and reject inactive branches', () => {
+  for (const specimen of [
+    { kind: 'equations' },
+    { kind: 'charts' },
+    { kind: 'nodes', equations: [{ caption: 'Must show', latex: 'x^2' }] },
+    { kind: 'equations', equations: [{ caption: 'Math', latex: 'x^2' }], nodes: [] },
+  ]) {
+    const content = exhibit(specimen)
+    assert.throws(() => createDeck(content), /specimen|missing|branch/)
+    assert.equal(validateDeckkitContent(content, { mode: 'delivery' }).valid, false)
+  }
+  assert.doesNotThrow(() => createDeck(exhibit({ kind: 'nodes', nodes: [] })))
+})
+
+test('all specimen text is capacity checked during content preflight', () => {
+  for (const specimen of [
+    { kind: 'nodes', nodes: [], paragraphs: ['Long '.repeat(500)] },
+    { kind: 'nodes', nodes: [], wordArt: 'Long '.repeat(500) },
+    { kind: 'equations', equations: [{ caption: 'Long '.repeat(500), latex: 'x^2' }] },
+    {
+      kind: 'charts',
+      charts: [
+        {
+          kind: 'column',
+          caption: 'Long '.repeat(500),
+          data: { categories: ['A'], series: [{ name: 'Sample', values: [1] }] },
+        },
+      ],
+    },
+  ]) {
+    assert.throws(() => createDeck(exhibit(specimen)), /specimen|width|lines/)
+    assert.equal(validateDeckkitContent(exhibit(specimen), { mode: 'delivery' }).valid, false)
+  }
+})
+
+test('node text renders the same CJK wrapping that passed preflight', () => {
+  const content = exhibit({
+    kind: 'nodes',
+    nodes: [{ text: '中文字需要可靠换行', x: 0.1, y: 0.1, w: 0.1, h: 0.8 }],
+  })
+  const patch = createDeck(content).patch
+  const text = patch.ops.find(
+    (op) => op.shape?.name === 'S0_ExhibitNode0' && typeof op.text === 'string',
+  ).text
+  assert.ok(text.includes('\n'))
+  assert.equal(text.replaceAll('\n', ''), content.slides[0].data.specimen.nodes[0].text)
+})
+
+test('published exhibit copies match their canonical schema and layout source', () => {
+  execFileSync(process.execPath, [
+    fileURLToPath(new URL('../update-pptx-nova-cartesian-exhibits.mjs', import.meta.url)),
+  ])
+})
+
+test('ChartEx labels are retained and unsupported display options are rejected', () => {
+  const chart = {
+    kind: 'histogram',
+    caption: 'Histogram',
+    dataEx: { values: [1, 2, 3], binCount: 2 },
+    labels: [{ scope: { plot: 0 }, showValue: true, showCategoryName: true }],
+  }
+  const content = exhibit({ kind: 'charts', charts: [chart] })
+  const set = createDeck(content).patch.ops.find((op) => op.op === 'set-chart')
+  assert.deepEqual(set.dataLabels, chart.labels)
+  for (const [key, value] of Object.entries({
+    legend: 'bottom',
+    xScale: { min: 0 },
+    yScale: { min: 0 },
+    view3D: { rotX: 10 },
+    plot: { gapWidth: 30 },
+    seriesStyles: [{}],
+  })) {
+    const invalid = structuredClone(content)
+    invalid.slides[0].data.specimen.charts[0][key] = value
+    assert.throws(() => createDeck(invalid), /branch/)
+    assert.equal(validateDeckkitContent(invalid, { mode: 'delivery' }).valid, false)
+  }
+})

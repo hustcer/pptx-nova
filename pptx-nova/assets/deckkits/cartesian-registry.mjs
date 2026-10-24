@@ -26,20 +26,28 @@ export const CARTESIAN_LAYOUTS = {
   timeline: { horizontal: ['label', 'title', 'items'], vertical: ['label', 'title', 'items'] },
   team: { row: ['label', 'title', 'items'] },
   closing: { centered: ['label', 'title', 'cta', 'contact'] },
+  exhibit: {
+    wide: ['label', 'title', 'body', 'stage', 'source'],
+    rail: ['label', 'title', 'body', 'stage', 'source'],
+  },
 }
-const TYPES = [
-  'Cover',
-  'Agenda',
-  'Statement',
-  'BarChart',
-  'ImageStats',
-  'Cards',
-  'LineChart',
-  'Timeline',
-  'Team',
-  'Closing',
-]
-const ROLES = Object.keys(CARTESIAN_LAYOUTS)
+const PAGE_ROLES = {
+  Cover: 'cover',
+  Agenda: 'agenda',
+  Statement: 'statement',
+  BarChart: 'column',
+  ImageStats: 'image',
+  Cards: 'cards',
+  LineChart: 'line',
+  Timeline: 'timeline',
+  Team: 'team',
+  Closing: 'closing',
+  Exhibit: 'exhibit',
+  Analytical: 'exhibit',
+  Comparison: 'exhibit',
+  Scene: 'exhibit',
+  Formula: 'exhibit',
+}
 
 function assertCartesian(design, { assertFrame }) {
   const b = design.cartesian
@@ -62,8 +70,8 @@ function assertCartesian(design, { assertFrame }) {
     'quoteMark',
   ])
     if (!b.styles[name]) throw Error(`Missing Cartesian style ${name}`)
-  if (Object.keys(b.families).length !== TYPES.length)
-    throw Error('Cartesian requires all ten page roles')
+  if (Object.keys(b.families).length !== Object.keys(PAGE_ROLES).length)
+    throw Error('Cartesian requires all registered page roles')
   for (const [name, style] of Object.entries(b.styles)) {
     if (!design.fonts[style.role] || !design.colors[style.color])
       throw Error(`${name}: unregistered font/color role`)
@@ -71,7 +79,7 @@ function assertCartesian(design, { assertFrame }) {
       throw Error('Cartesian display text is regular upright')
   }
   for (const [type, family] of Object.entries(b.families)) {
-    const role = ROLES[TYPES.findIndex((t) => type === `cartesian${t}Slide`)]
+    const role = PAGE_ROLES[type.replace(/^cartesian|Slide$/g, '')]
     if (!role || family.role !== role) throw Error(`${type}: unregistered Cartesian role`)
     for (const [id, v] of Object.entries(family.variants)) {
       const expected = CARTESIAN_LAYOUTS[role][id]
@@ -95,6 +103,8 @@ function assertCartesian(design, { assertFrame }) {
       throw Error(`${key}: invalid capacity`)
 }
 function checkCartesian(design, op, fail) {
+  // Exhibit specimens have their own bounded renderer; editorial chrome remains unchanged.
+  if (/^S\d+_Exhibit/.test(op.name ?? op.shape?.name ?? '')) return
   if (op.op === 'set-shape' && parseFloat(op.line?.width) > 1)
     fail('Cartesian structural outlines are hairlines')
   if (op.op === 'add-shape' && !['rectangle', 'oval'].includes(op.kind))
@@ -179,6 +189,11 @@ export function cartesianProjectedBudgets(design, family) {
         members: many('team', () => ({ initial: 'x', name: 'x', role: 'x' })),
       },
       closing: { label: 'x', title: 'x', cta: 'x', contact: 'x' },
+      exhibit: {
+        ...basic,
+        source: 'x',
+        specimen: { kind: 'nodes', nodes: [{ text: 'x', x: 0, y: 0, w: 1, h: 1 }] },
+      },
     }[family.role]
   const [id, v] = Object.entries(family.variants)[0],
     components = compileCartesianLayout(design, family, id, v, data),
@@ -230,7 +245,7 @@ export const CARTESIAN_FAMILY = {
   groups: {
     anchor: ['cover', 'closing'],
     statement: ['statement'],
-    evidence: ['column', 'line', 'image'],
+    evidence: ['column', 'line', 'image', 'exhibit'],
     structure: ['agenda', 'cards', 'timeline', 'team'],
   },
   projectedBudgets: cartesianProjectedBudgets,

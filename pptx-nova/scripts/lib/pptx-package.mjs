@@ -1,4 +1,4 @@
-// Read-only OPC metadata for evidence and translation routing, not a full OOXML validator.
+// Read-only OPC/XML access for evidence, not a full OOXML validator.
 import { readFileSync } from 'node:fs'
 import { posix } from 'node:path'
 import { inflateRawSync } from 'node:zlib'
@@ -100,7 +100,7 @@ function decodeEntities(text) {
 }
 
 // Small namespace-aware tree reader: no DTD, external entities or XML editing.
-// Only package metadata and slide roots are interpreted by this module.
+// Consumers interpret the returned namespace-aware trees; this reader never edits XML.
 function xmlTree(bytes) {
   if (bytes.length > 64 * 1024 * 1024) throw new Error('OPC XML exceeds 64 MiB')
   const encoding =
@@ -124,6 +124,10 @@ function xmlTree(bytes) {
     if (token.startsWith('<!--') || token.startsWith('<?')) continue
     if (!token.startsWith('<') || token.startsWith('<![CDATA[')) {
       if (!stack.length && token.trim()) throw new Error('Text outside OPC XML root')
+      if (stack.length)
+        stack.at(-1).text += token.startsWith('<![CDATA[')
+          ? token.slice(9, -3)
+          : decodeEntities(token)
       continue
     }
     if (token.startsWith('<!')) throw new Error('DTD is unsupported in OPC metadata')
@@ -153,7 +157,7 @@ function xmlTree(bytes) {
       if (prefix && !ns.has(prefix)) throw new Error('Unbound OPC XML prefix')
       return { local: segments.at(-1), uri: !prefix && attribute ? '' : (ns.get(prefix) ?? '') }
     }
-    const node = { ...expanded(tag[1]), qname: tag[1], ns, attrs: [], children: [] }
+    const node = { ...expanded(tag[1]), qname: tag[1], ns, attrs: [], children: [], text: '' }
     for (const [name, value] of attrs) {
       if (name !== 'xmlns' && !name.startsWith('xmlns:'))
         node.attrs.push({ ...expanded(name, true), value })
@@ -311,7 +315,14 @@ export function readPptxPackage(path) {
       unmappedParts: chartExParts.filter((part) => !mapped.has(part)),
     }
   }
-  return { sharedParts, slides, chartExScope }
+  const relatedPart = (owner, id) => {
+    const edge = relations(owner).find((e) => e.id === id)
+    if (!edge || edge.external) throw new Error(`Missing internal OPC relationship: ${owner}#${id}`)
+    const part = targetPart(owner, edge.target)
+    if (!entries.has(part)) throw new Error(`Missing OPC relationship target: ${part}`)
+    return part
+  }
+  return { sharedParts, slides, chartExScope, partTree: root, relatedPart }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

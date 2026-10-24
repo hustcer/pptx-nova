@@ -1,3 +1,4 @@
+import { renderCartesianExhibit } from './cartesian-exhibit.mjs'
 import { createOps, fitImageRect } from './core-primitives.kit.mjs'
 import { designFont, designTheme, finishDesign } from './design-contract.mjs'
 import { resolveCartesianDeck } from './cartesian-layouts.mjs'
@@ -7,7 +8,11 @@ export function createCartesianDeck(design, content, options = {}) {
   const resolved = resolveCartesianDeck(design, content),
     p = createOps({ textbox: design.textFrame }),
     b = design.cartesian
-  p.ops.push(designTheme(design))
+  const theme = designTheme(design)
+  if (content.slides.some((slide) => design.cartesian.families[slide.type]?.role === 'exhibit')) {
+    for (let i = 0; i < 6; i++) theme.colors[`accent${i + 1}`] = design.colors[`specimen${i}`]
+  }
+  p.ops.push(theme)
   const color = (token) => design.colors[token]
   for (const [s, slide] of content.slides.entries()) {
     p.addSlide(s, color(design.roles.surface))
@@ -215,6 +220,8 @@ export function createCartesianDeck(design, content, options = {}) {
               : {}),
           })),
         })
+      } else if (c.kind === 'exhibit') {
+        renderCartesianExhibit({ p, s, c, design, text, named })
       } else throw Error(`Unregistered Cartesian component ${c.kind}`)
     }
   }

@@ -16,7 +16,17 @@
     "line": "B8B0A4",
     "card": "F5F2ED",
     "ring30": "DED8D2",
-    "ring20": "E3DED9"
+    "ring20": "E3DED9",
+    "specimenTaupe": "887B6E",
+    "specimenSand": "D0C5B8",
+    "specimenClay": "746A60",
+    "specimenStone": "A9A095",
+    "specimen0": "6E8580",
+    "specimen1": "99826B",
+    "specimen2": "7D8EA4",
+    "specimen3": "B09B82",
+    "specimen4": "91978A",
+    "specimen5": "B6A5A1"
   },
   "fonts": {
     "display": {
@@ -492,6 +502,141 @@
                 "color": "ring30"
               }
             ]
+          }
+        }
+      },
+      "cartesianExhibitSlide": {
+        "role": "exhibit",
+        "variants": {
+          "wide": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 0.95, 12.2, 0.9],
+              "body": [0.55, 1.95, 11.8, 0.75],
+              "stage": [0.55, 2.9, 12.2, 3.5],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          },
+          "rail": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 1, 12.2, 0.9],
+              "body": [0.55, 2.25, 2.55, 3.85],
+              "stage": [3.5, 2.15, 9.25, 4.45],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          }
+        }
+      },
+      "cartesianAnalyticalSlide": {
+        "role": "exhibit",
+        "variants": {
+          "wide": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 0.95, 12.2, 0.9],
+              "body": [0.55, 1.95, 11.8, 0.75],
+              "stage": [0.55, 2.9, 12.2, 3.5],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          },
+          "rail": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 1, 12.2, 0.9],
+              "body": [0.55, 2.25, 2.55, 3.85],
+              "stage": [3.5, 2.15, 9.25, 4.45],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          }
+        }
+      },
+      "cartesianComparisonSlide": {
+        "role": "exhibit",
+        "variants": {
+          "wide": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 0.95, 12.2, 0.9],
+              "body": [0.55, 1.95, 11.8, 0.75],
+              "stage": [0.55, 2.9, 12.2, 3.5],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          },
+          "rail": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 1, 12.2, 0.9],
+              "body": [0.55, 2.25, 2.55, 3.85],
+              "stage": [3.5, 2.15, 9.25, 4.45],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          }
+        }
+      },
+      "cartesianSceneSlide": {
+        "role": "exhibit",
+        "variants": {
+          "wide": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 0.95, 12.2, 0.9],
+              "body": [0.55, 1.95, 11.8, 0.75],
+              "stage": [0.55, 2.9, 12.2, 3.5],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          },
+          "rail": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 1, 12.2, 0.9],
+              "body": [0.55, 2.25, 2.55, 3.85],
+              "stage": [3.5, 2.15, 9.25, 4.45],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          }
+        }
+      },
+      "cartesianFormulaSlide": {
+        "role": "exhibit",
+        "variants": {
+          "wide": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 0.95, 12.2, 0.9],
+              "body": [0.55, 1.95, 11.8, 0.75],
+              "stage": [0.55, 2.9, 12.2, 3.5],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
+          },
+          "rail": {
+            "titleStyle": "title",
+            "regions": {
+              "label": [0.55, 0.45, 11.6, 0.3],
+              "title": [0.55, 1, 12.2, 0.9],
+              "body": [0.55, 2.25, 2.55, 3.85],
+              "stage": [3.5, 2.15, 9.25, 4.45],
+              "source": [0.55, 6.88, 11.5, 0.35]
+            },
+            "decorations": []
           }
         }
       }

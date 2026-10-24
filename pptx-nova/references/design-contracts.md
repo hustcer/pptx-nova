@@ -1,7 +1,8 @@
 # Contract-driven DeckKits
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
-existing workflow. The registered designs are `biennale-yellow`, `cartesian`, `broadside`, `long-table`, `black-gold`, `green-slate` and `clear-value`; this is a pptx-nova
+existing workflow. Registered designs include `biennale-yellow`, `cartesian`, `broadside`, `long-table`,
+`black-gold`, `green-slate`, `clear-value`, `swiss-grid`, `mckinsey-blue` and `clear-impact`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow

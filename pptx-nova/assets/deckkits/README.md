@@ -2,7 +2,7 @@
 
 经过验证矩阵通过后冻结的 DeckKit，用于 pptx-nova 的“DeckKit 模式”二次创作快路径。
 
-当前十套 DeckKit 均登记为 `production`，已获得交付选型资格。自动选型按用途、语言、
+已有十套 DeckKit 登记为 `production`，另有 Clear Impact `candidate`。自动选型按用途、语言、
 内容密度、页型覆盖范围和匹配度选择。状态以 `catalog.json` 为准。
 
 ## 目录结构
@@ -40,6 +40,10 @@ assets/deckkits/
 ├── mck-layouts.mjs            # 八类职责、十六个有界构图与逐实例容量
 ├── mck-registry.mjs           # McKinsey 视觉族断言、检查与发现投影
 ├── mckinsey-blue/             # McKinsey Blue 2.0 合同与设计意图（production）
+├── impact-components.mjs      # 开放证据报告的原生图表、表格、指标和流程
+├── impact-layouts.mjs         # 十二类职责、二十四个构图与逐实例容量
+├── impact-registry.mjs        # Clear Impact 视觉族断言、检查与发现投影
+├── clear-impact/              # Clear Impact 0.1.0 合同、意图和迁移验收（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（production，以 catalog 为准）
 ├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
@@ -85,6 +89,10 @@ McKinsey Blue 2.0 保留八个页型入口，十六个注册布局覆盖观点�
 cohort 宽度和圆面积来自数值。Arial / Arial Unicode MS 不嵌入；SVG 图标的路径节点不承诺原生编辑。
 手工改图表、派生形状或旁注不会自动同步，须从 content 重新生成。较长内容应改用合法变体、重组或拆页。
 见 [设计与迁移说明](mckinsey-blue/intent.md)。
+
+Clear Impact 提供十二类开放式证据报告职责及二十四个注册构图，支持白底深绿层级、指标带、
+原生柱图、稀疏表格、处理链、数值派生达成条和差异桥。中文、英文与混排使用正体无衬线字体。
+它须显式选择；派生形状与旁注编辑后须从 content 重新生成。详见 [设计与边界](clear-impact/intent.md)。
 
 ## core-primitives 职责边界
 

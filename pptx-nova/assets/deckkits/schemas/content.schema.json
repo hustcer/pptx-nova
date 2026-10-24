@@ -192,7 +192,19 @@
               "cartesianAnalyticalSlide",
               "cartesianComparisonSlide",
               "cartesianSceneSlide",
-              "cartesianFormulaSlide"
+              "cartesianFormulaSlide",
+              "impactOverviewSlide",
+              "impactReviewSlide",
+              "impactChartSlide",
+              "impactComparisonSlide",
+              "impactProcessSlide",
+              "impactCapacitySlide",
+              "impactScorecardSlide",
+              "impactCommitmentsSlide",
+              "impactProgressSlide",
+              "impactVarianceSlide",
+              "impactMilestonesSlide",
+              "impactDecisionsSlide"
             ]
           },
           "data": {

@@ -13,7 +13,7 @@
 //   enum 槽位与非 string 槽位自动跳过；无 properties 的 object/array（动态结构）记为 dynamic 并跳过
 //   x-slotProbeVariants: [{omit: ['optionalField']}] probes legal alternatives; every field must remain covered.
 //   x-slotProbeOmit: true       Omit optional control fields that conflict in a generic probe; never visible text.
-//   x-slotProbeValue: value     A valid semantic control value, e.g. an offline icon id; never visible text.
+//   x-slotProbeValue: value     A valid control value or finite numeric specimen for coupled data constraints; never visible text.
 //   x-slotProbeSequence: [...]  Array-item control values by item index; never visible text.
 //
 // 用法：
@@ -115,7 +115,14 @@ function buildProbe(schema, basePath) {
       return structuredClone(sequence[index % sequence.length])
     }
     if (Object.hasOwn(fieldSchema, 'x-slotProbeValue')) {
-      if (slotRole !== 'control') throw new Error('Probe values require control fields')
+      const value = fieldSchema['x-slotProbeValue']
+      const numeric =
+        ['number', 'integer'].includes(type) &&
+        typeof value === 'number' &&
+        Number.isFinite(value) &&
+        (type !== 'integer' || Number.isInteger(value))
+      if (slotRole !== 'control' && !numeric)
+        throw new Error('Probe values require control fields or finite numeric data')
       return structuredClone(fieldSchema['x-slotProbeValue'])
     }
     if (Object.hasOwn(fieldSchema, 'const')) return fieldSchema.const

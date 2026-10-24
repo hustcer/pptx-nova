@@ -181,6 +181,15 @@
       "buildPath": "../../assets/deckkits/examples/cartesian-build.mjs",
       "expectedPath": "cases/cartesian/native-exhibits/expected.json",
       "reviewPath": "cases/cartesian/native-exhibits/review.md"
+    },
+    {
+      "id": "clear-impact.golden-impact",
+      "deckkit": "clear-impact",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/clear-impact-content.json",
+      "buildPath": "../../assets/deckkits/examples/clear-impact-build.mjs",
+      "expectedPath": "cases/clear-impact/golden-impact/expected.json",
+      "reviewPath": "cases/clear-impact/golden-impact/review.md"
     }
   ]
 }

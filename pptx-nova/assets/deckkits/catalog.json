@@ -4633,6 +4633,418 @@
         "content": "examples/clear-value-content.json",
         "build": "examples/clear-value-build.mjs"
       }
+    },
+    {
+      "id": "clear-impact",
+      "version": "0.1.0",
+      "path": "clear-impact.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": ["impact report", "operating review", "sustainability report", "工作汇报"],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["sparse", "normal", "dense"],
+        "slideTypes": [
+          "impactOverviewSlide",
+          "impactReviewSlide",
+          "impactChartSlide",
+          "impactComparisonSlide",
+          "impactProcessSlide",
+          "impactCapacitySlide",
+          "impactScorecardSlide",
+          "impactCommitmentsSlide",
+          "impactProgressSlide",
+          "impactVarianceSlide",
+          "impactMilestonesSlide",
+          "impactDecisionsSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "impactOverviewSlide",
+        "impactReviewSlide",
+        "impactChartSlide",
+        "impactComparisonSlide",
+        "impactProcessSlide",
+        "impactCapacitySlide",
+        "impactScorecardSlide",
+        "impactCommitmentsSlide",
+        "impactProgressSlide",
+        "impactVarianceSlide",
+        "impactMilestonesSlide",
+        "impactDecisionsSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "White documentary evidence reports with forest-green hierarchy, spring-green subject and open ruled structure.",
+        "mood": ["calm", "documentary", "precise"],
+        "layoutPrinciples": [
+          "Use whitespace, typography and fine rules to organise evidence.",
+          "Keep numbers, sources and measurement basis in content.",
+          "Choose bounded layouts without hand-authoring coordinates."
+        ],
+        "signatureElements": [
+          "open metric rail and strip",
+          "dark overview metric band",
+          "green-gray native columns",
+          "sparse native tables",
+          "light and dark status cells",
+          "open process and feedback arrows"
+        ],
+        "typography": {
+          "display": "Upright neutral sans, regular titles and bold hero.",
+          "body": "Readable sans copy and source labels.",
+          "numeric": "Large numerals; units grouped with small labels."
+        },
+        "colorSystem": {
+          "background": ["white"],
+          "primary": ["forest green"],
+          "accent": ["spring green for the subject; readable green ink on white"],
+          "semantic": ["Business status and labels are supplied by content."]
+        },
+        "slideRhythm": {
+          "anchor": ["impactOverviewSlide"],
+          "review": ["impactReviewSlide", "impactCapacitySlide"],
+          "evidence": [
+            "impactChartSlide",
+            "impactComparisonSlide",
+            "impactScorecardSlide",
+            "impactProgressSlide",
+            "impactVarianceSlide"
+          ],
+          "process": ["impactProcessSlide", "impactMilestonesSlide"],
+          "action": ["impactCommitmentsSlide", "impactDecisionsSlide"]
+        },
+        "compositionRules": [
+          "Vary evidence organisation using registered geometries.",
+          "Keep one subject focus and readable small text.",
+          "Do not fill intentional whitespace with cards."
+        ],
+        "avoid": [
+          "rounded card scaffolding",
+          "gradients",
+          "decorative photos",
+          "rainbow charts",
+          "hardcoded business policies"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "impactOverviewSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.source",
+              "data.highlight",
+              "data.verdict",
+              "data.description",
+              "data.sections",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "verdict", "bandFirst"]
+          },
+          "impactReviewSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.metrics",
+              "data.findings",
+              "data.verdict"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "impactChartSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.seriesName",
+              "data.unit",
+              "data.points",
+              "data.notes",
+              "data.summary"
+            ],
+            "allowedLayoutIds": ["auto", "chartLeft", "chartRight"]
+          },
+          "impactComparisonSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.columns",
+              "data.rows",
+              "data.metrics",
+              "data.tableNote",
+              "data.evidence"
+            ],
+            "allowedLayoutIds": ["auto", "side", "stacked"]
+          },
+          "impactProcessSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.metrics",
+              "data.steps",
+              "data.feedback",
+              "data.assurance"
+            ],
+            "allowedLayoutIds": ["auto", "chain", "vertical"]
+          },
+          "impactCapacitySlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.metrics",
+              "data.explanation",
+              "data.outlook"
+            ],
+            "allowedLayoutIds": ["auto", "strip", "rail"]
+          },
+          "impactScorecardSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.columns",
+              "data.rows",
+              "data.note"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "inset"]
+          },
+          "impactCommitmentsSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.items",
+              "data.verificationLabel",
+              "data.verification"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "ledger"]
+          },
+          "impactProgressSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.items",
+              "data.basis"
+            ],
+            "allowedLayoutIds": ["auto", "rows", "columns"]
+          },
+          "impactVarianceSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.startLabel",
+              "data.start",
+              "data.endLabel",
+              "data.end",
+              "data.unit",
+              "data.drivers",
+              "data.explanation"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "split"]
+          },
+          "impactMilestonesSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.items",
+              "data.governance"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+          },
+          "impactDecisionsSlide": {
+            "requiredSlots": [
+              "data.document",
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.source",
+              "data.items",
+              "data.consequence"
+            ],
+            "allowedLayoutIds": ["auto", "ledger", "split"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 2,
+        "groups": {
+          "anchor": ["impactOverviewSlide"],
+          "review": ["impactReviewSlide", "impactCapacitySlide"],
+          "evidence": [
+            "impactChartSlide",
+            "impactComparisonSlide",
+            "impactScorecardSlide",
+            "impactProgressSlide",
+            "impactVarianceSlide"
+          ],
+          "process": ["impactProcessSlide", "impactMilestonesSlide"],
+          "action": ["impactCommitmentsSlide", "impactDecisionsSlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 85
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {},
+      "quality": {
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-10-24",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "manualHardDefects": 0,
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-24",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-clear-impact/benchmark/03"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "clear-impact.golden-impact",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-clear-impact/benchmark/03/clear-impact/golden-impact/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/clear-impact/golden-impact/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 12,
+                "expectedCount": 12,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 257697
+              },
+              "patchOps": 1362,
+              "p50TotalMs": 217.71
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on the eight-panel Moon-White design reference; source photography claims conflict with actual pages and are not registered capabilities.",
+        "Native column chart and tables are editable. Progress and variance use data-derived native shapes; regenerate from content after edits to keep geometry, values and annotations synchronized.",
+        "Arial / Arial Unicode MS fonts are not embedded. Other Office versions and platforms are unverified.",
+        "Candidate requires explicit selection; no native-skinning or existing-deck preservation claim.",
+        "Arial Unicode MS has a Regular face on the validated host; CJK bold is synthesized. Scientific chart label formatting can differ between PowerPoint and the current canonical renderer while retaining equal raw values."
+      ],
+      "examples": ["examples/clear-impact-content.json"],
+      "designContract": "clear-impact/design.json"
     }
   ]
 }

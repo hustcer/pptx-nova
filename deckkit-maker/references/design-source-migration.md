@@ -69,6 +69,9 @@ node deckkit-maker/scripts/analyze-design-source.mjs \
 ## 冻结与复用验证
 
 - 输入 schema、catalog 必需槽位和实际可见内容一致；字段先注册再消费。
+- 数值存在跨字段关系（例如期初 + 差异 = 期末）时，可在数值 schema 使用有限的
+  `x-slotProbeValue` 提供合法探针样本，不必将业务数值伪装成 control 或改变真实数值范围。
+  该注解不能替换可见字符串哨兵；真实数据、零/负值、密度边界及不一致反例仍须另测。
 - 有互斥可选组件时，schema 可声明 `x-slotProbeVariants: [{"omit":["optionalField"]}]`，
   按合法组合审计。只可省略可选顶层字段，每个声明字段必须至少被一组探针覆盖。
 - 嵌套的可选控制字段互斥时，可标记 `x-slotProbeOmit: true`；只允许可选且

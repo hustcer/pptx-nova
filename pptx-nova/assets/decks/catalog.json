@@ -46,6 +46,19 @@
       "status": "preview"
     },
     {
+      "id": "black-gold-showcase",
+      "name": "black-gold DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "black-gold",
+      "caseId": "black-gold.golden-design",
+      "path": "../examples/black-gold/deck.pptx",
+      "preview": "../examples/black-gold/contact-sheet.webp",
+      "content": "../examples/black-gold/content.json",
+      "summary": "../examples/black-gold/summary.json",
+      "bestFor": ["investment research", "financial periodical", "evidence-led executive briefing"],
+      "status": "preview"
+    },
+    {
       "id": "broadside-showcase",
       "name": "broadside DeckKit Showcase",
       "type": "deckkit-showcase",
@@ -85,6 +98,23 @@
       "status": "preview"
     },
     {
+      "id": "clear-value-showcase",
+      "name": "clear-value DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "clear-value",
+      "caseId": "clear-value.golden-design",
+      "path": "../examples/clear-value/deck.pptx",
+      "preview": "../examples/clear-value/contact-sheet.webp",
+      "content": "../examples/clear-value/content.json",
+      "summary": "../examples/clear-value/summary.json",
+      "bestFor": [
+        "Institutional research and annual reports",
+        "Serif white-page evidence boards",
+        "Scenario, allocation and decision records"
+      ],
+      "status": "preview"
+    },
+    {
       "id": "consulting-dark-showcase",
       "name": "consulting-dark DeckKit Showcase",
       "type": "deckkit-showcase",
@@ -95,6 +125,24 @@
       "content": "../examples/consulting-dark/content.json",
       "summary": "../examples/consulting-dark/summary.json",
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "status": "preview"
+    },
+    {
+      "id": "green-slate-showcase",
+      "name": "green-slate DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "green-slate",
+      "caseId": "green-slate.golden-design",
+      "path": "../examples/green-slate/deck.pptx",
+      "preview": "../examples/green-slate/contact-sheet.webp",
+      "content": "../examples/green-slate/content.json",
+      "summary": "../examples/green-slate/summary.json",
+      "bestFor": [
+        "dark strategy report",
+        "operating-model assessment",
+        "transformation roadmap",
+        "methodology and evidence briefing"
+      ],
       "status": "preview"
     },
     {

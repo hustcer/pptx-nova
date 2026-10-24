@@ -333,8 +333,8 @@
         },
         "contactSheet": {
           "path": "broadside/contact-sheet.webp",
-          "bytes": 131522,
-          "sha256": "e1a99273b15854553f4314980255f50635efefe7a690272d686e425d0f3d95b0",
+          "bytes": 131476,
+          "sha256": "7cd941c4f1dbc9f91ca813de755490786feff890760652f888a0dd64383875bf",
           "quality": 82
         },
         "content": {
@@ -350,7 +350,7 @@
         "summary": {
           "path": "broadside/summary.json",
           "bytes": 2724,
-          "sha256": "871c4fa870aca1fe0b23e537b40d9c7747d03effc09276e10eb8eb10d0b5590c"
+          "sha256": "1f471b8d7b831f59444360149854f37daf36a71469e30c8619d0e318f443fc62"
         }
       },
       "validation": {
@@ -432,8 +432,8 @@
         },
         "contactSheet": {
           "path": "cartesian/contact-sheet.webp",
-          "bytes": 69434,
-          "sha256": "de13a0b0fa186170ce4f05f60778b4ac79a8b5398059ed2a51f167ae3009fd28",
+          "bytes": 69382,
+          "sha256": "e134f33c75f0c22e4cbe867d494bd09edc5655cf326e09ecad631daff3890625",
           "quality": 82
         },
         "content": {
@@ -449,7 +449,7 @@
         "summary": {
           "path": "cartesian/summary.json",
           "bytes": 2707,
-          "sha256": "dbea903740de1a0d2ebb27d293435d4a98660c3279a823e945060811f51dc6af"
+          "sha256": "184eba1be82c1eee1d826d39286ffed2f08878cbc74a1fcc2b433189785272be"
         }
       },
       "validation": {
@@ -689,6 +689,294 @@
           "schemaVersion": "pptx-nova-vision-baseline/v1",
           "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/biennale-yellow.golden-html.vision-baseline.json",
+          "available": true,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "black-gold",
+      "deckkit": "black-gold",
+      "caseId": "black-gold.golden-design",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Q1 2026 Embodied AI Venture Capital Monitor",
+      "bestFor": ["investment research", "financial periodical", "evidence-led executive briefing"],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "black-gold/deck.pptx",
+          "bytes": 42656,
+          "sha256": "f52b1ebe6966bfff511250441a198e27734bb43946615c107d34ad64f8775296"
+        },
+        "contactSheet": {
+          "path": "black-gold/contact-sheet.webp",
+          "bytes": 103044,
+          "sha256": "32159bea396bd68df5e04fb8ab64425c46ffdee3eeb8a7050bd947d8a557da1c",
+          "quality": 82
+        },
+        "content": {
+          "path": "black-gold/content.json",
+          "bytes": 11061,
+          "sha256": "dfa3d2785582e58068dab3d4b5373f7b4135f97c51e04916e498a9c37672fc64"
+        },
+        "brief": {
+          "path": "black-gold/brief.md",
+          "bytes": 706,
+          "sha256": "94e5eb68ccbb1ca544d23a5b5384318b2ddc605c8b27692191d2c98c2416b421"
+        },
+        "summary": {
+          "path": "black-gold/summary.json",
+          "bytes": 2753,
+          "sha256": "433e6caf7ccb4ac5a8d57dbd5b7ab3bc506f4671136243cda6a469c43b0c5cbf"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 591
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "pptx-nova/benchmarks/visual/baselines/black-gold.golden-design.vision-baseline.json",
+          "available": true,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "green-slate",
+      "deckkit": "green-slate",
+      "caseId": "green-slate.golden-design",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Service transformation Value follows adoption",
+      "bestFor": [
+        "dark strategy report",
+        "operating-model assessment",
+        "transformation roadmap",
+        "methodology and evidence briefing"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "green-slate/deck.pptx",
+          "bytes": 43495,
+          "sha256": "c1ac2a7931cdade10aa46f4be75b0690508dedfcbfb865bec60d11976a92cff2"
+        },
+        "contactSheet": {
+          "path": "green-slate/contact-sheet.webp",
+          "bytes": 138272,
+          "sha256": "64089f959bb78d116a2a05fd2657fb89a71b1e47e326af263c96699fb1998e1b",
+          "quality": 82
+        },
+        "content": {
+          "path": "green-slate/content.json",
+          "bytes": 18172,
+          "sha256": "3db3f8f7979005bc47cc03eb7972f98073e34a1a560e0c18c975c50ea7db5348"
+        },
+        "brief": {
+          "path": "green-slate/brief.md",
+          "bytes": 745,
+          "sha256": "8a25d9921307d1065aa7c6d493ce0a2558b99099d9cf74aadd0bec736c7948ac"
+        },
+        "summary": {
+          "path": "green-slate/summary.json",
+          "bytes": 2762,
+          "sha256": "acb77a4653f41b09fbca0cc22ae50d867a6e099921ec866e8cab4f92f7ef99b4"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 931
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 12,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "pptx-nova/benchmarks/visual/baselines/green-slate.golden-design.vision-baseline.json",
+          "available": true,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10,
+          "labelFontPt": 10,
+          "sourceFontPt": 10,
+          "note": "Contract-driven typography with a 10pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "clear-value",
+      "deckkit": "clear-value",
+      "caseId": "clear-value.golden-design",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Clear value Evidence before conviction",
+      "bestFor": [
+        "Institutional research and annual reports",
+        "Serif white-page evidence boards",
+        "Scenario, allocation and decision records"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "clear-value/deck.pptx",
+          "bytes": 56246,
+          "sha256": "f2be8d4c1a3d8de4e7c0c7080214d1f57c275cbf8ea9552e96cab39139095e1d"
+        },
+        "contactSheet": {
+          "path": "clear-value/contact-sheet.webp",
+          "bytes": 168578,
+          "sha256": "d8807b23358e4fcdd4f62224a1a054562409b0e86486bff2dda02848c6cbd30e",
+          "quality": 82
+        },
+        "content": {
+          "path": "clear-value/content.json",
+          "bytes": 26490,
+          "sha256": "1ea18885ef9976c8f8681771b4ec0d44816bd946de7e8a99de986d22f3662b82"
+        },
+        "brief": {
+          "path": "clear-value/brief.md",
+          "bytes": 749,
+          "sha256": "147df4c0334f1700d1430e5f1da8b9c98b7c6f9dd7cdfb57923ec88335579328"
+        },
+        "summary": {
+          "path": "clear-value/summary.json",
+          "bytes": 2755,
+          "sha256": "7cd3a7fa548e49b8308534a24c3b4f88f50710e57bc1870e566069117cab3497"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 897
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 12,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": false,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
+          "path": "pptx-nova/benchmarks/visual/baselines/clear-value.golden-design.vision-baseline.json",
           "available": true,
           "issueCount": 0
         },

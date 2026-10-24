@@ -6,6 +6,10 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-choreography.mjs'
+import {
+  checkDesignReadback,
+  designHash,
+} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
 
 const basePatch = {
   schemaVersion: 'pptx-patch/v1',
@@ -22,6 +26,50 @@ const compose = (ops) =>
     choreography: { schemaVersion: 'pptx-patch/v1', ops },
     slideCount: 2,
   })
+
+test('design readback follows chained Morph renames without losing text and geometry checks', () => {
+  const base = {
+    schemaVersion: 'pptx-patch/v1',
+    ops: [
+      { op: 'add-slide', index: 0 },
+      { op: 'add-text-box', slide: 0, name: 'S0_Title' },
+      { op: 'set-text-frame', slide: 0, shape: { name: 'S0_Title' }, text: 'Original title' },
+    ],
+  }
+  const patch = composeChoreography({
+    basePatch: base,
+    slideCount: 1,
+    choreography: {
+      schemaVersion: 'pptx-patch/v1',
+      ops: [
+        { op: 'set-shape', slide: 0, shape: { name: 'S0_Title' }, name: '!!Title' },
+        { op: 'set-shape', slide: 0, shape: { name: '!!Title' }, name: '!!Hero' },
+      ],
+    },
+  })
+  const plan = {
+    patchHash: designHash(patch),
+    objects: [{ slide: 0, name: 'S0_Title', kind: 'add-text-box', frame: [1, 1, 4, 2] }],
+  }
+  const shape = {
+    name: '!!Hero',
+    bbox: { xEmu: 914400, yEmu: 914400, wEmu: 3657600, hEmu: 1828800 },
+    fontFacts: [{ scope: 'textRun', paragraph: 0, text: 'Original title' }],
+  }
+  const inspect = { slides: [{ index: 0, shapes: [shape] }] }
+  assert.equal(checkDesignReadback(plan, patch, inspect).status, 'pass')
+  assert.equal(plan.objects[0].name, 'S0_Title', 'the original design identity is immutable')
+  const alteredText = structuredClone(inspect)
+  alteredText.slides[0].shapes[0].fontFacts[0].text = 'Dropped content'
+  assert.equal(checkDesignReadback(plan, patch, alteredText).status, 'fail')
+  const alteredGeometry = structuredClone(inspect)
+  alteredGeometry.slides[0].shapes[0].bbox.wEmu = 1
+  assert.equal(checkDesignReadback(plan, patch, alteredGeometry).status, 'fail')
+  assert.equal(
+    checkDesignReadback(plan, patch, { slides: [{ index: 0, shapes: [] }] }).status,
+    'fail',
+  )
+})
 
 test('Create refuses a choreography file that its own build would overwrite', (t) => {
   const root = mkdtempSync(join(tmpdir(), 'choreography-path-'))

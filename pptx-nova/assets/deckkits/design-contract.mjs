@@ -694,6 +694,28 @@ export function finishDesign(design, content, patch, layouts = []) {
   return { patch, warnings: [], designPlan: plan, designCheck: check, designContract: design }
 }
 
+function readbackObjectState(object, patch) {
+  // Keep the plan's creation identity, while following names in operation order.
+  // This also retains text/frame/crop expectations authored before a Morph rename.
+  const state = { name: object.name }
+  let created = false
+  for (const op of patch.ops) {
+    if (op.slide !== object.slide) continue
+    if (!created) {
+      if (op.op === object.kind && op.name === object.name) created = true
+      continue
+    }
+    if (op.shape?.name !== state.name) continue
+    if (op.op === 'set-text-frame') {
+      if (typeof op.text === 'string') state.text = op.text
+      if (op.frame) state.frame = op.frame
+    }
+    if (op.op === 'set-image' && op.crop !== undefined) state.crop = op.crop
+    if (op.op === 'set-shape' && typeof op.name === 'string') state.name = op.name
+  }
+  return state
+}
+
 export function checkDesignReadback(plan, patch, inspect, model = null) {
   const issues = []
   const fail = (message) => issues.push({ severity: 'error', message })
@@ -701,10 +723,11 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
   const expectedSlides = patch.ops.filter((o) => o.op === 'add-slide').length
   if (inspect.slides?.length !== expectedSlides) fail('Slide count differs from plan')
   for (const object of plan.objects) {
+    const expectedState = readbackObjectState(object, patch)
     const matches =
-      inspect.slides?.[object.slide]?.shapes?.filter((s) => s.name === object.name) ?? []
+      inspect.slides?.[object.slide]?.shapes?.filter((s) => s.name === expectedState.name) ?? []
     if (matches.length !== 1) {
-      fail(`Expected exactly one ${object.name}`)
+      fail(`Expected exactly one ${expectedState.name}`)
       continue
     }
     const shape = matches[0]
@@ -715,13 +738,7 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
       fail(`${object.name}: native table missing`)
     if (object.kind === 'add-image') {
       if (shape.shapeType !== 'picture') fail(`${object.name}: native picture missing`)
-      const crop =
-        patch.ops
-          .filter(
-            (o) =>
-              o.op === 'set-image' && o.slide === object.slide && o.shape?.name === object.name,
-          )
-          .at(-1)?.crop ?? {}
+      const crop = expectedState.crop ?? {}
       if (
         !shape.image?.crop ||
         ['left', 'right', 'top', 'bottom'].some(
@@ -733,15 +750,7 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
         fail(`${object.name}: picture crop changed or is undisclosed`)
     }
     if (['add-text-box', 'add-shape', 'add-freeform'].includes(object.kind)) {
-      const expected = patch.ops
-        .filter(
-          (o) =>
-            o.slide === object.slide &&
-            o.shape?.name === object.name &&
-            o.op === 'set-text-frame' &&
-            typeof o.text === 'string',
-        )
-        .at(-1)?.text
+      const expected = expectedState.text
       const paragraphs = new Map()
       for (const fact of shape.fontFacts ?? []) {
         if (fact.scope === 'textRun' && typeof fact.text === 'string') {
@@ -756,15 +765,7 @@ export function checkDesignReadback(plan, patch, inspect, model = null) {
       if (expected !== undefined && expected.replace(/\r\n?/g, '\n') !== actualText) {
         fail(`${object.name}: text changed or was dropped`)
       }
-      const frame = patch.ops
-        .filter(
-          (o) =>
-            o.op === 'set-text-frame' &&
-            o.slide === object.slide &&
-            o.shape?.name === object.name &&
-            o.frame,
-        )
-        .at(-1)?.frame
+      const frame = expectedState.frame
       for (const key of ['verticalAnchor', 'wordWrap'])
         if (frame?.[key] !== undefined && shape.textFrame?.[key] !== frame[key])
           fail(`${object.name}: ${key} text-frame setting changed`)

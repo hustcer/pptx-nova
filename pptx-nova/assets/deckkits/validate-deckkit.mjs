@@ -15,6 +15,11 @@ export function validateDeckkitContent(content, options = {}) {
     if (!design) return result
     const registered = registeredDesignFamily(design)
     if (registered || design.editorial || design.strategy || design.annual || design.biennale) {
+      // Registered compositions own diversity even when capacity resolution fails.
+      // Keep the actual design error without unrelated legacy group blockers.
+      result.errors = result.errors.filter((e) => e.type !== 'diversity')
+      result.warnings = result.warnings.filter((e) => e.type !== 'diversity')
+      result.fitDiagnostics = result.fitDiagnostics.filter((d) => !d.code?.startsWith('diversity.'))
       const resolved = registered
         ? registered.resolve(design, content)
         : design.biennale
@@ -24,9 +29,6 @@ export function validateDeckkitContent(content, options = {}) {
             : design.strategy
               ? resolveStrategyDeck(design, content)
               : resolveEditorialDeck(design, content)
-      result.errors = result.errors.filter((e) => e.type !== 'diversity')
-      result.warnings = result.warnings.filter((e) => e.type !== 'diversity')
-      result.fitDiagnostics = result.fitDiagnostics.filter((d) => !d.code?.startsWith('diversity.'))
       if (registered || design.annual || design.biennale) {
         // Annual frames depend on the resolved chart count, column weights and row count.
         // The resolver above checked actual instances; generic repeating budgets are discovery hints.

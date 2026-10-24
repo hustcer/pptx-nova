@@ -115,6 +115,11 @@ instead of always opening every published byte:
 Confirm:
 
 - the target DeckKit is visually apparent across the deck;
+- the requested display/body font roles are actually applied: inspect the visible title and subtitle
+  `fontFacts`, not only the theme fonts. For Cartesian, verify regular Playfair Display headlines and
+  Inter supporting text. A successful skin report does not establish this visual identity;
+- native chart recoloring preserves distinctions between series, categories and value bands; a pie
+  or surface that collapses into one uniform fill needs a scoped palette repair and renewed evidence;
 - titles, body text, tables, charts, diagrams, and assets remain legible;
 - no source content disappeared or became a screenshot substitute;
 - no new overlap, clipping, weak contrast, placeholder residue, or broken page chrome is visible.

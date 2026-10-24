@@ -12,6 +12,30 @@ const excerpt = (slide) => ({
   slides: [slide],
 })
 
+test('failed editorial fit reports the design error without obsolete legacy diversity blockers', () => {
+  const content = fixture()
+  content.slides[0].data.footerItems[3].text = 'Overflowing credit '.repeat(100)
+  const result = validateDeckkitContent(content, { mode: 'delivery' })
+  assert.equal(result.valid, false)
+  assert.ok(
+    result.errors.some(
+      (error) => error.type === 'design' && /footerItems\[3\]/.test(error.message),
+    ),
+  )
+  assert.equal(
+    result.errors.some((error) => error.type === 'diversity'),
+    false,
+  )
+  assert.equal(
+    result.warnings.some((warning) => warning.type === 'diversity'),
+    false,
+  )
+  assert.equal(
+    result.fitDiagnostics.some((diagnostic) => diagnostic.code?.startsWith('diversity.')),
+    false,
+  )
+})
+
 test('every page has a registered plan; native chart and all calendar cells retain source data', () => {
   const c = fixture(),
     evidence = read('examples/biennale-yellow-evidence-content.json').slides

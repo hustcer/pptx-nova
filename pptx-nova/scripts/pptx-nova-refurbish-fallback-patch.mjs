@@ -150,33 +150,24 @@ function contrastSafeColor(preferred, background, fallback) {
   return relativeLuminance(bg) < 0.45 ? 'FFFFFF' : '111111'
 }
 
-function fontForShape(shape, fallback, backgroundColor) {
+function fontRoleForShape(shape) {
   const name = shape.name ?? ''
   const text = (shape.textPreview ?? '').trim()
-  const isTitle = /(^|_)Title$|_Title|title/i.test(name)
-  const isLabel = /Eyebrow|Kicker|Foot|PageNum|Label|Badge/i.test(name)
-  const isMetric = /Val|Num|Score|Pct|Metric/i.test(name) || /^[0-9.→+\-%年]+$/.test(text)
-  if (isTitle)
-    return {
-      name: fallback.fonts.heading,
-      color: contrastSafeColor(fallback.palette.text, backgroundColor, fallback),
-      bold: true,
-    }
-  if (isMetric)
-    return {
-      name: fallback.fonts.heading,
-      color: contrastSafeColor(fallback.palette.text, backgroundColor, fallback),
-      bold: true,
-    }
-  if (isLabel)
-    return {
-      name: fallback.fonts.label,
-      color: contrastSafeColor(fallback.palette.secondary, backgroundColor, fallback),
-      bold: true,
-    }
+  if (/sub[-_\s]*(?:title|headline|heading)/i.test(name)) return 'body'
+  if (/title|headline|heading|(?:^|[_\s-])hero(?:$|[_\s-])/i.test(name)) return 'heading'
+  if (/Eyebrow|Kicker|Foot|PageNum|Label|Badge/i.test(name)) return 'label'
+  if (/Val|Num|Score|Pct|Metric/i.test(name) || /^[0-9.→+\-%年]+$/.test(text)) return 'heading'
+  return 'body'
+}
+
+function fontForShape(shape, fallback, backgroundColor) {
+  const role = fontRoleForShape(shape)
+  const color = role === 'label' ? fallback.palette.secondary : fallback.palette.text
   return {
-    name: fallback.fonts.body,
-    color: contrastSafeColor(fallback.palette.text, backgroundColor, fallback),
+    name: fallback.fonts[role],
+    color: contrastSafeColor(color, backgroundColor, fallback),
+    ...(role === 'heading' ? { bold: fallback.headingBold ?? true } : {}),
+    ...(role === 'label' ? { bold: true } : {}),
   }
 }
 

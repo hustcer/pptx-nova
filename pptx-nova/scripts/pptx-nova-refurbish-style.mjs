@@ -212,6 +212,7 @@ export function genericFallbackFor(entry) {
       ),
       cjk: fontFamilyFrom(typography.cjk, 'Microsoft YaHei', 'CJK', warnings),
     },
+    headingBold: !/\bregular\b/i.test(typography.display ?? ''),
     styleOps: [
       'set-theme',
       'set-master',

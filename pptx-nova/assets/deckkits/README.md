@@ -2,7 +2,7 @@
 
 经过验证矩阵通过后冻结的 DeckKit，用于 pptx-nova 的“DeckKit 模式”二次创作快路径。
 
-已有十套 DeckKit 登记为 `production`，另有 Clear Impact `candidate`。自动选型按用途、语言、
+已有十套 DeckKit 登记为 `production`，另有 Clear Impact 与 Warm Clay `candidate`。自动选型按用途、语言、
 内容密度、页型覆盖范围和匹配度选择。状态以 `catalog.json` 为准。
 
 ## 目录结构
@@ -43,6 +43,10 @@ assets/deckkits/
 ├── impact-components.mjs      # 开放证据报告的原生图表、表格、指标和流程
 ├── impact-layouts.mjs         # 十二类职责、二十四个构图与逐实例容量
 ├── impact-registry.mjs        # Clear Impact 视觉族断言、检查与发现投影
+├── clay-components.mjs        # 暖陶土原生文本、编号、角落圆环、柱图与表格
+├── clay-layouts.mjs           # 八类职责、十五个布局与逐实例容量
+├── clay-registry.mjs          # 暖陶土视觉族断言、检查与发现投影
+├── warm-clay/                 # Warm Clay 0.1.0 合同、意图和迁移验收（candidate）
 ├── clear-impact/              # Clear Impact 0.1.0 合同、意图和迁移验收（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
 ├── black-gold/                 # 第二种合同设计语言（production，以 catalog 为准）
@@ -93,6 +97,11 @@ cohort 宽度和圆面积来自数值。Arial / Arial Unicode MS 不嵌入；SVG
 Clear Impact 提供十二类开放式证据报告职责及二十四个注册构图，支持白底深绿层级、指标带、
 原生柱图、稀疏表格、处理链、数值派生达成条和差异桥。中文、英文与混排使用正体无衬线字体。
 它须显式选择；派生形状与旁注编辑后须从 content 重新生成。详见 [设计与边界](clear-impact/intent.md)。
+
+Warm Clay 提供八类暖陶土报告职责与十五个有界构图，使用奶油底、墨棕衬线标题、
+陶土证据、粉色编号和角落圆环。柱图与表格为原生对象；中文、英文及混排有实际渲染覆盖。
+封面竖幅仅为原生占位外壳，不接受图片输入；字体不嵌入，须显式选择。
+详见 [设计意图与编辑边界](warm-clay/intent.md) 及 [迁移验收](warm-clay/migration-report.md)。
 
 ## core-primitives 职责边界
 

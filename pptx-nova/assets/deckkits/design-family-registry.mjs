@@ -7,7 +7,9 @@ import { SWISS_FAMILY } from './swiss-registry.mjs'
 import { MCK_FAMILY } from './mck-registry.mjs'
 import { CONSULTING_FAMILY } from './consulting-registry.mjs'
 import { IMPACT_FAMILY } from './impact-registry.mjs'
+import { CLAY_FAMILY } from './clay-registry.mjs'
 export const DESIGN_FAMILIES = [
+  CLAY_FAMILY,
   CARTESIAN_FAMILY,
   BROADSIDE_FAMILY,
   LONG_TABLE_FAMILY,

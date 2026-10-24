@@ -204,7 +204,15 @@
               "impactProgressSlide",
               "impactVarianceSlide",
               "impactMilestonesSlide",
-              "impactDecisionsSlide"
+              "impactDecisionsSlide",
+              "clayCoverSlide",
+              "clayOverviewSlide",
+              "clayChartSlide",
+              "clayComparisonSlide",
+              "clayProcessSlide",
+              "clayKpiSlide",
+              "clayStatusSlide",
+              "clayCommitmentsSlide"
             ]
           },
           "data": {

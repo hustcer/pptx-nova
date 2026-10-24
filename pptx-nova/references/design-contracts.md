@@ -2,7 +2,7 @@
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
 existing workflow. Registered designs include `biennale-yellow`, `cartesian`, `broadside`, `long-table`,
-`black-gold`, `green-slate`, `clear-value`, `swiss-grid`, `mckinsey-blue` and `clear-impact`; this is a pptx-nova
+`black-gold`, `green-slate`, `clear-value`, `swiss-grid`, `mckinsey-blue`, `clear-impact` and `warm-clay`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow
@@ -244,6 +244,20 @@ Each cell/header is one authored paragraph with automatic wrapping. Native readb
 cell text, not complete table XML or visual styling. Timeline widths encode positive durations,
 with a separate risk table and reserved lower note. Actual Latin/CJK regular/bold rendering and
 every accepted PNG still require review. Fonts are not bundled; no PowerPoint parity is inferred.
+
+### Warm clay editorial family: Warm Clay
+
+`warm-clay` uses `warm-clay-editorial/v1`: cream paper, upright serif assertions/numerals, terracotta
+evidence, blush numbered squares, corner quarter-disks/rings and open hairline structures. Eight roles
+resolve into fifteen bounded layouts; discover its `clay*Slide` schemas and read
+`assets/deckkits/warm-clay/intent.md`. It is candidate and requires explicit selection.
+
+Native single-series columns and horizontal-rule tables retain numeric data and every cell. Integer,
+decimal and scientific labels use separate formats checked against PowerPoint. Metric units append
+as native runs on the numeral baseline; shared readback follows appended text by paragraph.
+The cover portrait is an editable placeholder shell only, without image ingestion. Fonts are not
+embedded. Claims, status meanings, units, sources, dates and targets remain content; no sector policy
+is added. Complete decks open with a cover and end with commitments; extracts declare excerpt scope.
 
 ### Shared contract boundaries
 

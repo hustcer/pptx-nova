@@ -722,6 +722,16 @@ function readbackObjectState(object, patch) {
       if (typeof op.text === 'string') state.text = op.text
       if (op.frame) state.frame = op.frame
     }
+    // add-run appends to one paragraph, not to the end of the whole frame.
+    // Follow the current name, including intervening native-shape renames.
+    if (op.op === 'add-run' && typeof op.text === 'string' && state.text !== undefined) {
+      const paragraphs = state.text.replace(/\r\n?/g, '\n').split('\n')
+      const paragraph = op.paragraph
+      if (Number.isInteger(paragraph) && paragraph >= 0 && paragraph < paragraphs.length) {
+        paragraphs[paragraph] += op.text
+        state.text = paragraphs.join('\n')
+      }
+    }
     if (op.op === 'set-image' && op.crop !== undefined) state.crop = op.crop
     if (op.op === 'set-shape' && typeof op.name === 'string') state.name = op.name
   }

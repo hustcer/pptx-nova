@@ -108,6 +108,10 @@ node pptx-nova/scripts/pptx-nova-deckkit-slots.mjs --deckkit <id>
 node pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit <id> --json
 ```
 
+槽位检查器生成的单页探针须明确使用 `meta.designScope: "excerpt"`，避免完整 deck 的首尾
+约束误拦截探针；不得为让单页探针通过而放松真实完整 deck 的约束。数字与单位使用 `add-run`
+时，还须执行应用后的文字回读，确认追加文本进入正确段落；仅在 patch JSON 中找到哨兵不够。
+
 判松紧：schema 通过但 build 报错 = schema 太松；schema 拒绝但 build 能跑 = 太紧。
 
 ## 3. catalog 注册

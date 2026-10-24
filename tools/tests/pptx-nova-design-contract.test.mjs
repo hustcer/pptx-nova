@@ -352,3 +352,42 @@ test('finalization binds design reports and rejects a stale design contract', ()
   writeFileSync(artifacts.binding, JSON.stringify(recordCreateInputs(args, artifacts)))
   assert.throws(() => verifyCreateInputs(args, artifacts), /Design contract changed/)
 })
+
+test('native readback follows appended rich text units per paragraph across shape rename', async () => {
+  const { designHash } = await import('../../pptx-nova/assets/deckkits/design-contract.mjs')
+  const patch = {
+    ops: [
+      { op: 'add-slide' },
+      { op: 'add-text-box', slide: 0, name: 'Value', x: '1in', y: '1in', w: '3in', h: '1in' },
+      { op: 'set-text-frame', slide: 0, shape: { name: 'Value' }, text: '12\n24' },
+      { op: 'add-run', slide: 0, shape: { name: 'Value' }, paragraph: 0, text: ' kg' },
+      { op: 'set-shape', slide: 0, shape: { name: 'Value' }, name: 'Renamed' },
+      { op: 'add-run', slide: 0, shape: { name: 'Renamed' }, paragraph: 1, text: ' items' },
+    ],
+  }
+  const plan = {
+    patchHash: designHash(patch),
+    objects: [{ slide: 0, name: 'Value', kind: 'add-text-box', frame: [1, 1, 3, 1] }],
+  }
+  const inspect = {
+    slides: [
+      {
+        shapes: [
+          {
+            name: 'Renamed',
+            bbox: { xEmu: 914400, yEmu: 914400, wEmu: 2743200, hEmu: 914400 },
+            fontFacts: [
+              { scope: 'textRun', paragraph: 0, text: '12' },
+              { scope: 'textRun', paragraph: 0, text: ' kg' },
+              { scope: 'textRun', paragraph: 1, text: '24' },
+              { scope: 'textRun', paragraph: 1, text: ' items' },
+            ],
+          },
+        ],
+      },
+    ],
+  }
+  assert.equal(checkDesignReadback(plan, patch, inspect).status, 'pass')
+  inspect.slides[0].shapes[0].fontFacts[1].text = ' lb'
+  assert.equal(checkDesignReadback(plan, patch, inspect).status, 'fail')
+})

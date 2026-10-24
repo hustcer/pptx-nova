@@ -201,6 +201,19 @@
         "Swiss-style presentation"
       ],
       "status": "available"
+    },
+    {
+      "id": "warm-clay-showcase",
+      "name": "warm-clay DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "warm-clay",
+      "caseId": "warm-clay.golden-workshop",
+      "path": "../examples/warm-clay/deck.pptx",
+      "preview": "../examples/warm-clay/contact-sheet.webp",
+      "content": "../examples/warm-clay/content.json",
+      "summary": "../examples/warm-clay/summary.json",
+      "bestFor": ["work report", "programme review", "craft editorial", "工作汇报"],
+      "status": "preview"
     }
   ]
 }

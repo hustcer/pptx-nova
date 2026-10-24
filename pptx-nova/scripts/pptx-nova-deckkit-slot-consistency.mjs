@@ -175,7 +175,10 @@ function buildProbe(schema, basePath) {
 }
 
 function renderPatchText(mod, deckkit, slideType, data) {
-  const result = mod.createDeck({ meta: { deckkit }, slides: [{ type: slideType, data }] })
+  const result = mod.createDeck({
+    meta: { deckkit, designScope: 'excerpt' },
+    slides: [{ type: slideType, data }],
+  })
   return JSON.stringify(result?.patch ?? result)
 }
 

@@ -5045,6 +5045,359 @@
       ],
       "examples": ["examples/clear-impact-content.json"],
       "designContract": "clear-impact/design.json"
+    },
+    {
+      "id": "warm-clay",
+      "version": "0.1.0",
+      "path": "warm-clay.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": ["work report", "programme review", "craft editorial", "工作汇报"],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["sparse", "normal"],
+        "slideTypes": [
+          "clayCoverSlide",
+          "clayOverviewSlide",
+          "clayChartSlide",
+          "clayComparisonSlide",
+          "clayProcessSlide",
+          "clayKpiSlide",
+          "clayStatusSlide",
+          "clayCommitmentsSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "clayCoverSlide",
+        "clayOverviewSlide",
+        "clayChartSlide",
+        "clayComparisonSlide",
+        "clayProcessSlide",
+        "clayKpiSlide",
+        "clayStatusSlide",
+        "clayCommitmentsSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Warm cream editorial reporting with ink-brown upright serif assertions and terracotta evidence.",
+        "mood": ["warm", "measured", "crafted"],
+        "layoutPrinciples": [
+          "Open aligned columns and low density.",
+          "Use checked content-driven geometry, never default card walls.",
+          "Keep facts, labels, units, dates and status meaning in content."
+        ],
+        "signatureElements": [
+          "corner quarter-disks and thin rings",
+          "pink owned-number squares",
+          "serif numeral with smaller baseline unit",
+          "native single-series terracotta columns",
+          "open horizontal-rule native tables",
+          "bottom rule and verdict"
+        ],
+        "typography": {
+          "display": "Upright serif, no italic titles.",
+          "body": "Readable upright sans.",
+          "numeric": "Serif numeral with smaller unit on same baseline."
+        },
+        "colorSystem": {
+          "background": ["warm cream"],
+          "primary": ["ink brown"],
+          "accent": ["readable terracotta"],
+          "semantic": ["Attention status comes from literal content; no inferred threshold."]
+        },
+        "slideRhythm": {
+          "anchor": ["clayCoverSlide", "clayCommitmentsSlide"],
+          "review": ["clayOverviewSlide", "clayKpiSlide"],
+          "evidence": ["clayChartSlide", "clayComparisonSlide", "clayStatusSlide"],
+          "process": ["clayProcessSlide"]
+        },
+        "compositionRules": [
+          "Kicker → assertion → basis → evidence → verdict/source.",
+          "One foreground metric focus; chrome and semantic table attention remain separate.",
+          "Cover and closing may use corner groups; body uses safe bleed zones."
+        ],
+        "avoid": [
+          "cool colors",
+          "gradient",
+          "shadow",
+          "rounded card walls",
+          "decorative icons",
+          "body photography",
+          "pie/line/3D charts"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "clayCoverSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.quote",
+              "data.description",
+              "data.metrics",
+              "data.assetLabel",
+              "data.assetCaption"
+            ],
+            "allowedLayoutIds": ["auto", "portrait", "editorial"],
+            "assetSlots": {
+              "portrait": {
+                "kind": "image",
+                "acceptsAsset": false,
+                "placeholderBehavior": "Editable empty portrait frame with content-supplied label and caption.",
+                "labelSlot": "data.assetLabel",
+                "captionSlot": "data.assetCaption"
+              }
+            }
+          },
+          "clayOverviewSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.metrics",
+              "data.findings"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "clayChartSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.seriesName",
+              "data.unit",
+              "data.points",
+              "data.caption",
+              "data.analysisLabel",
+              "data.analysis",
+              "data.conclusion"
+            ],
+            "allowedLayoutIds": ["auto", "chartLeft", "chartRight"]
+          },
+          "clayComparisonSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.columns",
+              "data.rows",
+              "data.tableNote",
+              "data.evidence",
+              "data.quote",
+              "data.attribution"
+            ],
+            "allowedLayoutIds": ["auto", "side", "stacked"]
+          },
+          "clayProcessSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.metrics",
+              "data.steps"
+            ],
+            "allowedLayoutIds": ["auto", "chain", "vertical"]
+          },
+          "clayKpiSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.metrics",
+              "data.explanation"
+            ],
+            "allowedLayoutIds": ["auto", "strip", "rail"]
+          },
+          "clayStatusSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.columns",
+              "data.rows",
+              "data.tableNote"
+            ],
+            "allowedLayoutIds": ["auto", "wide"]
+          },
+          "clayCommitmentsSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.verdict",
+              "data.source",
+              "data.items",
+              "data.mechanism"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "ledger"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 2,
+        "groups": {
+          "anchor": ["clayCoverSlide", "clayCommitmentsSlide"],
+          "review": ["clayOverviewSlide", "clayKpiSlide"],
+          "evidence": ["clayChartSlide", "clayComparisonSlide", "clayStatusSlide"],
+          "process": ["clayProcessSlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 85
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (6fa897c7)",
+        "powerPoint": "macOS 16.114.1",
+        "report": "warm-clay/migration-report.md"
+      },
+      "quality": {
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-10-25",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-25",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-warm-clay/benchmark/02"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "warm-clay.golden-workshop",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-warm-clay/benchmark/02/warm-clay/golden-workshop/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/warm-clay/golden-workshop/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 187880
+              },
+              "patchOps": 906,
+              "p50TotalMs": 95.81
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on Warm Clay Works design.md and eight-panel reference image; migrated visual identity only, no source business claims or one-time photograph.",
+        "Native single-series columns, native tables, editable shapes and text. Cover portrait is an editable placeholder shell only; image ingestion is not registered.",
+        "Georgia / Songti SC / Arial / Arial Unicode MS are not embedded. Other platforms, fonts and PowerPoint versions require separate validation.",
+        "Explicit candidate selection only; no automatic production/default selection, native-skinning or existing-deck preservation claim.",
+        "KPI rail fits 2–3 short metrics; strip supports up to five. Actual combined field geometry can reject inputs below array maxima. Regenerate from content to synchronize native data and separate commentary after editing.",
+        "On macOS PowerPoint 16.114.1, manual embedded-Excel numeric edits did not propagate to chart cache. Update content and regenerate. Title, series-name and table-cell edits survived save/reopen.",
+        "Native PowerPoint editor/slideshow display is verified separately. This host PDF-export route omitted some text and moved tables; it is not an accepted export route."
+      ],
+      "examples": ["examples/warm-clay-content.json"],
+      "designContract": "warm-clay/design.json"
     }
   ]
 }

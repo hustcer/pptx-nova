@@ -7098,3 +7098,17 @@ test('shared visual evidence rejects empty manifests and stale declared hashes',
   })
   assert.equal(singleResult.report.reuse.sourceKind, 'refurbish')
 })
+
+test('isolated slot probes declare excerpt scope for complete-deck contracts', () => {
+  const result = runNode([
+    skillPath('scripts/pptx-nova-deckkit-slot-consistency.mjs'),
+    '--deckkit',
+    'warm-clay',
+    '--json',
+  ])
+  assert.equal(result.status, 0, result.stderr)
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.ok, true)
+  assert.equal(report.results[0].slideTypes.length, 8)
+  assert.ok(report.results[0].slideTypes.every((page) => page.status === 'ok'))
+})

@@ -118,6 +118,32 @@ canonical PDF/PNG，提取 PDF 标签作辅助断言，再检查实际图像。�
 核对与渲染证据；按既有 ChartEx/3D 规则补 PowerPoint 证据。这些改进不扩大 authoring
 能力，也不把 xdoc 自身的 PDF/JSON 交叉检查升级为 Office 保真认证。
 
+## 自动轴、标签适配与正负百分比堆叠
+
+升级后先重渲染同一源文件；自动布局可能改变 ticks、换行、斜排或缩写，而原始数据不变。
+作者显式 major unit、rotation（包括 0）和 manual layout 优先，不能把自动策略当作
+覆盖作者声明的理由。当前 Web/PDF 的适配仍是 Office 布局近似，需分别记录消费者。
+
+- 显式 min 或 max 是刻度锚点；自动间隔不能移动该边界。窄正值域不应被一律拉到零，
+  自动 logarithmic surface 需核对正值域、数量级、有限 ticks 和高度色带；非法非正 log
+  数据仍需处理，不能靠造刻度掩盖。不要从旧预览抄 min/max 来抵消升级变化。
+- 水平轴按真实文字 advance 估算容量；line/area 数值轴还考虑字号与可读间距。
+  column 的数值刻度密度和 category fitting 是不同决策：category 可能先换行，再斜排，
+  最后按绘图区、轴交叉和标题空间缩写。不要为增加 category 空间而强制改变数值间隔。
+- 缩写只改变绘制文字。Web 可访问标签/title 与 PDF 文本提取可保留完整 category，
+  所以提取到全文不证明 PNG 上显示全文，也不能因此报告重复或漏字。分别核对原始
+  category 顺序、数据回读和实际 PNG；不能截短源 category 去匹配画面。
+- signed percentage area 与 3D bar 堆叠以每个 category 的绝对值总和为共同分母，
+  但累积规则不同。对按源系列顺序的 `[30, -10]`，贡献分别为 `+75%/-25%`：
+  area 沿同一带符号基线累积，边界为 `0 → 75% → 50%`；3D bar 正负各自累积，
+  两段为 `0 → 75%` 和 `0 → -25%`。不能跨图表家族套用基线、重排系列，或使用
+  代数和得到 `150%/-50%`，也不把正负两侧各自归一到 100%。核对段基线、边界、
+  反转方向及原始数值；百分比坐标不意味着底层值已经改成百分数。
+
+针对实际任务选择控制页：自动/显式单边界、窄正值域、长 category/大字号/轴交叉、
+正负混合百分比。对 3D 和精确 Office 布局沿用专项审计与独立 PowerPoint 证据，
+不要以 xdoc PDF 与自身 PNG 一致代替 Office 验证。
+
 ## Native diagram/table presets
 
 常见商务图示优先用 `add-slide.recipe` preset，而不是手算几十个 `add-shape` 坐标。
@@ -894,7 +920,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -986,7 +1012,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -1015,7 +1041,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1077,10 +1103,13 @@ clean-open。只看到 patch 成功不足以证明数组顺序和 `bold: false` 
 `position` 必须用全名（**shorthand 不接受**）：
 `above / below / best-fit / center / inside-base / inside-end / left / outside-end / right`。
 
-这些值不是所有 chart kind 的通用可写集合。`area` / `area-3d` 在 plot、series、point
+这些值不是所有 chart kind 的通用可写集合。`area` / `area-3d` / `doughnut` 在 plot、series、point
 范围均拒绝显式 `position`，包括 `center`；省略以保留默认/导入位置，其他标签字段
 仍按 scope 校验。组合图按实际所属 plot 判断，不能按系列输入顺序猜 plot index。
 库层的 clear 能力不代表 patch 接受 `position:null`；必须以当前字段 schema 为准。
+新建 doughnut 使用默认 Center 放置，不应为了居中而写 `position: "center"`。
+若旧文件含显式位置且需要清理，先查询当前 patch schema；不要反复换位置枚举重试，
+也不要把错误回退成 raw XML 写入。只改字号、格式或可见性时省略位置字段即可。
 
 > ⚠️ 老版本里见过的 `"all"` / `"ctr"` / `"l"` / `"r"` / `"t"` / `"b"` / `"inBase"` /
 > `"inEnd"` / `"outEnd"` 全部被 schema 拒绝。
@@ -1112,7 +1141,14 @@ point 作用域目前只收 `position` 和 `font`（带 `showValue` 等会报
 - `varyByCategories` 单系列时每类目不同颜色
 - `bubbleScale` bubble 缩放
 - `firstSliceAngle` 0-360（pie / doughnut 首片起始角，**预览可见**）
-- `holeSize` 1-90（仅 doughnut 环孔大小百分比，**预览可见**；数值越小环越粗）
+- `holeSize` 1-90（仅 doughnut 环孔大小百分比，**预览可见**；数值越小环越粗）。
+  新建 `standard` / `exploded` doughnut 会显式写入一个 `c:holeSize val="50"`；
+  50 是 xdoc 的创建默认值，不是 Office 强制的数值。需要其他孔径时通过
+  `set-chart.plot.holeSize` 覆盖；编辑时省略保留既有值，不能假定默认值会修复导入图表。
+  这里的保留指 `set-chart` 局部编辑。经典 `set-chart-data` 会重建 chart XML/workbook，
+  实测 doughnut 的既有 62 会重置为 50，标题/标签样式等也不能假定保留。
+  换数据前记录所需声明，在重建之后重新应用孔径及所需样式，回读最终 chart 部件并复核 PNG；
+  仅改标题/系列名/category 文本时优先用前述安全文本编辑路线。
 - `sizeRepresents` `area / width`（仅 bubble：气泡大小映射面积还是直径）
 
 ### 图表级选项（displayBlanksAs / roundedCorners / dataTable）
@@ -1297,7 +1333,7 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   scriptable PowerPoint + Nushell + `mutool` evidence route is available:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

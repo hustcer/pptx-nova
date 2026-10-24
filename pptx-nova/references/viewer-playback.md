@@ -16,6 +16,9 @@ On a build that exposes `play(options?)`, `pause()`, `playing` and
   the final dwell stops playback by default. `loop: true` repeats visible slides,
   including builds on a single visible slide. Existing `autoPlay` is a separate
   looping policy; explicit playback takes precedence even while paused.
+  A single static visible slide with zero authored dwell and no timed builds or transition uses
+  the positive fallback interval when looping, avoiding an immediate-redraw loop. Do not replace
+  zero timing in the source or apply this exception to timed animation replay.
 - After natural end, the next `play()` restarts at the first visible slide.
   Manual pause or intervening page selection instead continues at the current
   slide. A playback callback that selects a page must keep that selection;
@@ -74,3 +77,20 @@ State whether evidence is DOM state, timed screenshots, a recording, or an
 independent PowerPoint comparison. JS/WASM parser parity shares a renderer;
 static PDF/PNG and a working play button do not certify Office playback or
 unsupported effects. Keep unresolved observations and preserve the source timing.
+
+## Optional playback recordings
+
+When a GIF/recording is requested, capture actual playback from the intended loaded Viewer build;
+static PDF/PNG sequences do not demonstrate page builds or transitions. This is an optional browser
+route, not an xdoc GIF command or a dependency of ordinary PPTX delivery. Use an available capture
+integration only after checking its prerequisites; do not depend on another repository's private demo
+or development bridge from the published skill.
+
+Retain source hash, loaded build, actual visible slide sequence, resolution, frame timing/dwell,
+decoded frame count, duration, output hash and tool versions. A physical page range can contain hidden
+slides skipped by playback; do not equate range length with captured page count or fixed duration.
+Wait for fonts/layout and preserve the compositor timing of static holds. Decode the result to verify
+dimensions, duration and changed frames; one static slide may legitimately have one unique frame.
+On timeout/cancellation retain failed evidence and do not publish a truncated recording as complete.
+GIF palette/quantization artifacts, media autoplay and interactive actions need separate assessment.
+A recording certifies only the observed Viewer session, not PowerPoint playback fidelity.

@@ -4,7 +4,7 @@ This guide explains how to install the native `xdoc` CLI, verify the executable
 that will run an Agent job, and keep the runtime evidence needed for a
 repeatable PPTX workflow.
 
-Verified on 2026-10-21 against the published `0.15.0 (96708959)` CLI. `xdoc`
+Runtime contract verified on 2026-10-24 against the clean `0.15.0 (a79e6eaa)` CLI. `xdoc`
 is a native executable with two published distribution channels:
 
 1. a global npm package, `@s8fy/xdoc`; and

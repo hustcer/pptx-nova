@@ -185,6 +185,27 @@ Read only the matching diagnostic when these symptoms occur:
 
 Use these only for the affected content; compare original and candidate with the same runtime.
 
+- **Independent text frames:** shape rotation, inherited body rotation (including explicit zero),
+  `vert270` and supported cached SmartArt text transforms are separate facts. Quarter-turn children
+  under nonuniform group scaling change geometry without rescaling absolute text metrics. Supported
+  group flips keep glyphs readable while frames, clipping, shadows and link rectangles transform.
+  Preserve these declarations; do not counter-rotate text or resize groups from an old preview.
+  Incomplete/flipped SmartArt caches and general vertical writing are not certified by these fixes;
+  parser/model fields do not become patch authoring fields.
+- **Glyph outlines and symbols:** supported solid glyph outlines use merged coverage, including
+  synthesized bold. PDF may rasterize only the decorative outline while retaining selectable text;
+  missing/over-budget coverage can fall back to contour strokes. Web effects/transparency can use
+  another paint path. Inspect paint and text separately, including clipping after autofit. Uncovered
+  legacy symbol-font slots can intentionally reserve blank advances; a blank is not permission to
+  insert a substitute glyph. Check original code points, font mapping and Office reference first.
+- **Cached artwork and color:** do not reapply `a14:imgLayer` editing effects over Office's rendered
+  preview. Direct grayscale/duotone is separate. Cached SmartArt shade is not tint; ordered/repeated
+  source color transforms can affect the result. Mirrored WMF fallback font sizes use absolute window
+  extents without removing the mirror. Preserve source effects/colors and diagnose each consumer.
+- **Automatic charts:** tick anchoring, positive/log domains, signed percentage stacks and category
+  fitting can change the same bytes' pixels. Full PDF-extracted labels can differ from shortened
+  painted labels. Follow [the chart checks](charts.md#自动轴标签适配与正负百分比堆叠) before changing data,
+  axis bounds or category strings.
 - **Saved text frames and tabs:** imported shape-autofit frames retain their saved
   minimum height for middle/bottom anchoring during rendering; growth is distinct
   from an edit that requests native reflow. Preserve the frame, margins and anchor

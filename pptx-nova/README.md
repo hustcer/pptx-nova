@@ -99,7 +99,7 @@ release. The current public native targets cover supported Linux, macOS, and Win
 still depends on the required backend and fonts, and unusual or unsupported PPTX features still need
 explicit review.
 
-The verified release is `0.15.0 (96708959)`. Install with
+The runtime contract was verified with `0.15.0 (a79e6eaa)`. Install with
 `npm i -g @s8fy/xdoc@0.15.0` using Node.js 22+, or use a standalone native
 archive (see the [installation guide](https://github.com/hustcer/pptx-nova/blob/main/docs/xdoc-installation.md)). Free mode
 supports single-user local tasks up to 10 slides and 5 MiB of compressed PPTX

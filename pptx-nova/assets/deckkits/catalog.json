@@ -5398,6 +5398,394 @@
       ],
       "examples": ["examples/warm-clay-content.json"],
       "designContract": "warm-clay/design.json"
+    },
+    {
+      "id": "amber-ledger",
+      "version": "0.1.0",
+      "path": "amber-ledger.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "annual report",
+        "board review",
+        "operational performance",
+        "年度经营汇报",
+        "董事会报告"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "amberCoverSlide",
+          "amberSummarySlide",
+          "amberMixSlide",
+          "amberTrendSlide",
+          "amberBridgeSlide",
+          "amberProjectsSlide",
+          "amberMatrixSlide",
+          "amberDecisionsSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "amberCoverSlide",
+        "amberSummarySlide",
+        "amberMixSlide",
+        "amberTrendSlide",
+        "amberBridgeSlide",
+        "amberProjectsSlide",
+        "amberMatrixSlide",
+        "amberDecisionsSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Auditable warm ivory editorial reports, charcoal sans evidence, upright serif interpretation and honey-amber focus.",
+        "mood": ["warm", "measured", "auditable"],
+        "layoutPrinciples": [
+          "Open unequal evidence regions divided by hairlines, never card walls.",
+          "Capacity-checked text and numeric evidence; choose legal variants or split.",
+          "Business claims, units, dates, target definitions, owners and thresholds are content."
+        ],
+        "signatureElements": [
+          "dual-circle cover and dark edge rail",
+          "four open KPI modules with central serif verdict",
+          "one small amber decisive-number block",
+          "native history columns and composition ring",
+          "straight native point-line trend with annotation",
+          "reconciled data-derived difference bridge",
+          "black actual tracks and amber plan ticks",
+          "horizontal-rule native matrix and decision register"
+        ],
+        "typography": {
+          "display": "Tahoma with upright Noto Sans SC for CJK; bold assertions and sans numerals.",
+          "body": "Georgia with Songti SC for upright serif reading.",
+          "numeric": "Native raw values; bounded display precision, no serif numeral or forced shrink."
+        },
+        "colorSystem": {
+          "background": ["warm ivory"],
+          "primary": ["charcoal"],
+          "accent": ["honey amber"],
+          "semantic": [
+            "Current evidence uses amber; status wording is literal content, no inferred RAG threshold."
+          ]
+        },
+        "slideRhythm": {
+          "anchor": ["amberCoverSlide", "amberDecisionsSlide"],
+          "judgment": ["amberSummarySlide"],
+          "evidence": [
+            "amberMixSlide",
+            "amberTrendSlide",
+            "amberBridgeSlide",
+            "amberProjectsSlide",
+            "amberMatrixSlide"
+          ]
+        },
+        "compositionRules": [
+          "Section → assertion → basis/period → evidence → verdict/source.",
+          "At most one large amber metric block; chart emphasis remains subordinate.",
+          "Complete decks open with cover and close with decisions; excerpts declare scope."
+        ],
+        "avoid": [
+          "rounded cards",
+          "shadows",
+          "gradients",
+          "decorative status colors",
+          "photographic backgrounds",
+          "3D",
+          "unreconciled bridges",
+          "silent field dropping"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "amberCoverSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.edition",
+              "data.description",
+              "data.metadata"
+            ],
+            "allowedLayoutIds": ["auto", "circleRight", "circleLeft"]
+          },
+          "amberSummarySlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.metricKey",
+              "data.ratioLabel",
+              "data.metrics",
+              "data.focus",
+              "data.analysis",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "verdictCenter", "verdictBand"]
+          },
+          "amberMixSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.seriesName",
+              "data.mixLabel",
+              "data.totalLabel",
+              "data.unit",
+              "data.history",
+              "data.segments",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "evidenceRail", "evidenceBand"]
+          },
+          "amberTrendSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.seriesName",
+              "data.unit",
+              "data.points",
+              "data.notes",
+              "data.annotation"
+            ],
+            "allowedLayoutIds": ["auto", "chartRail", "chartBand"]
+          },
+          "amberBridgeSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.unit",
+              "data.seriesName",
+              "data.startLabel",
+              "data.endLabel",
+              "data.start",
+              "data.end",
+              "data.steps",
+              "data.analysis",
+              "data.tableColumns",
+              "data.tableRows",
+              "data.tableNote",
+              "data.baseline"
+            ],
+            "allowedLayoutIds": ["auto", "bridgeRail", "bridgeBand"]
+          },
+          "amberProjectsSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.actualLabel",
+              "data.planLabel",
+              "data.projects",
+              "data.recovery"
+            ],
+            "allowedLayoutIds": ["auto", "progressRows", "progressColumns"]
+          },
+          "amberMatrixSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.columns",
+              "data.rows",
+              "data.focusColumn",
+              "data.focusTone",
+              "data.note"
+            ],
+            "allowedLayoutIds": ["auto", "matrixWide", "matrixRail"]
+          },
+          "amberDecisionsSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.headers",
+              "data.items",
+              "data.closing"
+            ],
+            "allowedLayoutIds": ["auto", "decisionTable", "decisionLedger"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["amberCoverSlide", "amberDecisionsSlide"],
+          "judgment": ["amberSummarySlide"],
+          "evidence": [
+            "amberMixSlide",
+            "amberTrendSlide",
+            "amberBridgeSlide",
+            "amberProjectsSlide",
+            "amberMatrixSlide"
+          ]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (6fa897c7)",
+        "report": "amber-ledger/migration-report.md",
+        "powerPoint": "16.114.1 (macOS): open, editable title/table/chart-data probes, save/reopen, object readback"
+      },
+      "quality": {
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-10-25",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-25",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-amber-ledger/benchmark/02"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "amber-ledger.golden-operations",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-amber-ledger/benchmark/02/amber-ledger/golden-operations/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/amber-ledger/golden-operations/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 205959
+              },
+              "patchOps": 853,
+              "p50TotalMs": 97
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on Warm Jade Annual Report design.md and its eight-panel reference image; visual identity migration with labeled synthetic content, no reference business policy or image reuse.",
+        "Native single-series column, line and doughnut charts and native tables. Tiny nonzero column/line domains below 1e-5 use editable numeric-derived shapes; difference bridges and progress tracks also use numeric-derived shapes, not native charts.",
+        "Tahoma / Noto Sans SC / Georgia / Songti SC fonts are not embedded. Recheck on other hosts and platforms.",
+        "Manual edits to charts, independent labels, ring totals, progress shapes and bridge shapes do not automatically synchronize; update content and regenerate.",
+        "Explicit candidate selection only after acceptance; no native-skinning, arbitrary image ingestion or existing-deck preservation claim.",
+        "Per-instance text/row capacity may be lower than array maxima; overflow fails and requires another legal layout, reorganization or splitting."
+      ],
+      "examples": ["examples/amber-ledger-content.json"],
+      "designContract": "amber-ledger/design.json"
     }
   ]
 }

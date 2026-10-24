@@ -2,7 +2,7 @@
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
 existing workflow. Registered designs include `biennale-yellow`, `cartesian`, `broadside`, `long-table`,
-`black-gold`, `green-slate`, `clear-value`, `swiss-grid`, `mckinsey-blue`, `clear-impact` and `warm-clay`; this is a pptx-nova
+`black-gold`, `green-slate`, `clear-value`, `swiss-grid`, `mckinsey-blue`, `clear-impact`, `warm-clay` and `amber-ledger`; this is a pptx-nova
 extension, not a new xdoc format.
 
 ## Agent workflow
@@ -258,6 +258,20 @@ as native runs on the numeral baseline; shared readback follows appended text by
 The cover portrait is an editable placeholder shell only, without image ingestion. Fonts are not
 embedded. Claims, status meanings, units, sources, dates and targets remain content; no sector policy
 is added. Complete decks open with a cover and end with commitments; extracts declare excerpt scope.
+
+### Amber ledger family: Amber Ledger
+
+`amber-ledger/v1` provides eight annual-report roles and sixteen bounded compositions. Warm ivory,
+charcoal assertions, upright serif interpretation, gray history and honey-amber emphasis remain
+identity constraints. Read `assets/deckkits/amber-ledger/intent.md` for the role/layout mapping.
+Business claims, sources, units, dates, targets and status meanings stay in content.
+
+Ordinary columns, point-lines and rings are native charts; matrices and decision registers are native
+tables. Tiny nonzero column/line domains below `1e-5` use editable numeric-derived shapes with literal
+values, including a native freeform line. Reconciled bridges and actual/plan tracks also derive from
+raw content. Independent labels, totals, interpretations and derived shapes require regeneration
+after data edits. No minimum fake bar is added for zero. Fonts are not embedded. Candidate selection
+is explicit; no arbitrary images, existing-deck preservation or all-host pixel parity is implied.
 
 ### Shared contract boundaries
 

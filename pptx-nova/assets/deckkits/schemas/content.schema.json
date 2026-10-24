@@ -212,7 +212,15 @@
               "clayProcessSlide",
               "clayKpiSlide",
               "clayStatusSlide",
-              "clayCommitmentsSlide"
+              "clayCommitmentsSlide",
+              "amberCoverSlide",
+              "amberSummarySlide",
+              "amberMixSlide",
+              "amberTrendSlide",
+              "amberBridgeSlide",
+              "amberProjectsSlide",
+              "amberMatrixSlide",
+              "amberDecisionsSlide"
             ]
           },
           "data": {

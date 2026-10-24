@@ -7112,3 +7112,16 @@ test('isolated slot probes declare excerpt scope for complete-deck contracts', (
   assert.equal(report.results[0].slideTypes.length, 8)
   assert.ok(report.results[0].slideTypes.every((page) => page.status === 'ok'))
 })
+
+test('amber-ledger registered slot probes preserve every visible field', () => {
+  const result = runNode([
+    skillPath('scripts/pptx-nova-deckkit-slot-consistency.mjs'),
+    '--deckkit',
+    'amber-ledger',
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.ok, true)
+  assert.equal(report.results[0].slideTypes.length, 8)
+  assert.ok(report.results[0].slideTypes.every((page) => page.status === 'ok'))
+})

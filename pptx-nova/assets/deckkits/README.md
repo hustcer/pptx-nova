@@ -2,7 +2,7 @@
 
 经过验证矩阵通过后冻结的 DeckKit，用于 pptx-nova 的“DeckKit 模式”二次创作快路径。
 
-已有十套 DeckKit 登记为 `production`，另有 Clear Impact 与 Warm Clay `candidate`。自动选型按用途、语言、
+已有十套 DeckKit 登记为 `production`，另有 Clear Impact、Warm Clay 与 Amber Ledger `candidate`。自动选型按用途、语言、
 内容密度、页型覆盖范围和匹配度选择。状态以 `catalog.json` 为准。
 
 ## 目录结构
@@ -46,6 +46,10 @@ assets/deckkits/
 ├── clay-components.mjs        # 暖陶土原生文本、编号、角落圆环、柱图与表格
 ├── clay-layouts.mjs           # 八类职责、十五个布局与逐实例容量
 ├── clay-registry.mjs          # 暖陶土视觉族断言、检查与发现投影
+├── amber-components.mjs       # 象牙纸底年度报告、原生图表/表格与数值派生证据
+├── amber-layouts.mjs          # 八类职责、十六个构图与逐实例容量
+├── amber-registry.mjs         # Amber Ledger 视觉族断言、检查与发现投影
+├── amber-ledger/              # Amber Ledger 0.1.0 合同、意图和迁移验收（candidate）
 ├── warm-clay/                 # Warm Clay 0.1.0 合同、意图和迁移验收（candidate）
 ├── clear-impact/              # Clear Impact 0.1.0 合同、意图和迁移验收（candidate）
 ├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
@@ -102,6 +106,11 @@ Warm Clay 提供八类暖陶土报告职责与十五个有界构图，使用奶�
 陶土证据、粉色编号和角落圆环。柱图与表格为原生对象；中文、英文及混排有实际渲染覆盖。
 封面竖幅仅为原生占位外壳，不接受图片输入；字体不嵌入，须显式选择。
 详见 [设计意图与编辑边界](warm-clay/intent.md) 及 [迁移验收](warm-clay/migration-report.md)。
+
+Amber Ledger 提供八类年度报告职责与十六个注册构图，以暖象牙底、炭黑观点、灰色历史证据、
+正体衬线解释及蜂蜜琥珀焦点组织开放版面。常规柱图、点线、环图和表格为原生对象；极小量图、
+差异桥、进度为数值派生形状，编辑后须从 content 重建同步。须显式选择，字体不嵌入。
+详见 [设计意图与编辑边界](amber-ledger/intent.md) 及 [迁移验收](amber-ledger/migration-report.md)。
 
 ## core-primitives 职责边界
 

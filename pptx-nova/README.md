@@ -32,7 +32,7 @@ The skill installer does not install `xdoc`. Real PPTX creation, editing, conver
 workflows require the runtime separately, available on the Agent's `PATH`. With Node.js 22+:
 
 ```bash
-npm i -g @s8fy/xdoc@0.13.0
+npm i -g @s8fy/xdoc@0.15.0
 xdoc --version
 ```
 
@@ -88,7 +88,7 @@ Its power comes from several properties that reinforce each other, not from any 
   source-vs-candidate diffs, operation traces, and sidecars make a revision reviewable and replayable
   instead of reducing success to “the file exists.”
 - **Local, lightweight, and automation-friendly.** Preview rendering, PDF export, and visual checks do
-  not require PowerPoint, a full office suite, or a headless browser. The current `v0.13.0` native
+  not require PowerPoint, a full office suite, or a headless browser. The current `v0.15.0` native
   archives download as approximately 8.3–10.1 MB depending on the target and require no separate
   server or always-on background service. Local scripts and multi-step jobs may optionally use
   the loopback-only local daemon.
@@ -99,8 +99,8 @@ release. The current public native targets cover supported Linux, macOS, and Win
 still depends on the required backend and fonts, and unusual or unsupported PPTX features still need
 explicit review.
 
-The verified release is `0.13.0 (96708959)`. Install with
-`npm i -g @s8fy/xdoc@0.13.0` using Node.js 22+, or use a standalone native
+The verified release is `0.15.0 (96708959)`. Install with
+`npm i -g @s8fy/xdoc@0.15.0` using Node.js 22+, or use a standalone native
 archive (see the [installation guide](https://github.com/hustcer/pptx-nova/blob/main/docs/xdoc-installation.md)). Free mode
 supports single-user local tasks up to 10 slides and 5 MiB of compressed PPTX
 inputs combined. Visual outputs, including editable PPTX, PDF, and PNG, carry

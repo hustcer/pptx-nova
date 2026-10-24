@@ -585,6 +585,12 @@ chart 的系列默认颜色来自 chart part 关联的 colorStyle part（`ppt/ch
 
 选择 `colorStyle.colors` / 系列色时，按以下通用规则减少人工试色与返工：
 
+- 创建图表或在本次获授权范围内重新配色时，文字、线条可使用黑色，但不要让
+  数据系列、柱体、面积、饼片、层级区域、曲面色带或图表背景出现大面积黑色／近黑色填充。
+  可用不同明度的灰色替代，也可选有足够对比度的主题色；不必为了避黑而统一换成浅灰。
+  3D 图表还要检查挤出侧壁与阴影面，避免正面已经换色、侧面仍成为大片近黑色。
+  在 PNG／Web 视觉复核时检查实际填充、相邻区域区分度及标签可读性，不能只检查色值配置。
+  保留源稿的编辑任务不因此自动获得重配色授权。
 - 浅色背景（paper/白）配深色系列（如 navy/deep coral/teal 系），保证
   柱/线与背景对比度 ≥ 3:1；数据标签文字与其所在填充色对比度 ≥ 4.5:1。
 - 数据标签压在系列填充上时，标签颜色相对填充色取深色（深底白字/浅底深字），
@@ -920,7 +926,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -1012,7 +1018,7 @@ ten-millions / hundred-millions / billions / trillions`，或直接给正数作�
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -1041,7 +1047,7 @@ triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1333,7 +1339,7 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   scriptable PowerPoint + Nushell + `mutool` evidence route is available:
   `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
---powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

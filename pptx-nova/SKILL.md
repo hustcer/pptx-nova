@@ -286,6 +286,7 @@ For client-facing, investor-facing, or formal-report decks, all visible text suc
 
 - Core body text is usually at least `10.5pt`.
 - Label / badge / chart/table text is usually at least `9pt`.
+- In newly created or explicitly recolored charts, avoid large black or near-black filled regions; black text and lines are allowed. Prefer suitable grays or theme colors, and review 3D sidewalls as well as front faces. Follow `references/charts.md` for palette and contrast checks; this does not authorize recoloring preserved source charts.
 - Footers/sources may be `8.5-9pt`, but must not carry critical information.
 - DeckKit-first creation uses the catalog `qualityProfile` and that DeckKit's golden baseline as machine gates. Do not damage validated DeckKit layout constants just to satisfy generic font-size hard rules.
 - Short labels such as percentages, number+unit, amounts, quarters, years, `ROI`, and `KPI` must not be split.

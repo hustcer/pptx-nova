@@ -751,7 +751,7 @@ if (args[0] === 'schema') {
   assert.equal(recoverableCompact.agentSummary.operationAudit.semanticDiff.reliableChanges, 0)
   assert.match(
     recoverableCompact.agentSummary.nextSteps.visualReviewCommand,
-    /cli\/review\/visual-review\.mjs/,
+    /cli[\\/]+review[\\/]+visual-review\.mjs/,
   )
   for (const check of [
     'titleWrap',
@@ -773,7 +773,7 @@ if (args[0] === 'schema') {
   }
   assert.match(
     recoverableCompact.agentSummary.nextSteps.feedbackGateCommand,
-    /cli\/review\/feedback-gate\.mjs/,
+    /cli[\\/]+review[\\/]+feedback-gate\.mjs/,
   )
   assert.ok(recoverableCompact.performance.artifactBytesByRole.json.bytes > 0)
   assert.match(

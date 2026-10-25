@@ -2,6 +2,8 @@
 
 2026-10-26: `pink-script@1.0.0` accepted as candidate for explicit creation.
 
+Promoted to production on 2026-10-26. The golden benchmark passed again with vision high/medium/low 0/0/0 and an empty accepted vision baseline. All nine canonical PNGs and the contact sheet are byte-identical to the previously reviewed benchmark. Current benchmark evidence: `.tmp/deckkit-production-20261026-fBFdCq/pink-script/golden-editorial/`.
+
 The nine-page DOM reference, its design document and all source screenshots were inspected before the visual baseline was accepted. The unused tenth CSS type is not a source page. The canvas remains 16:9. Warm black, a single hot pink, upright blush serif, large numerals, open evidence and alternating editorial density remain the visual identity. All outer frames were removed by user direction. The closing QR is transparent, authentic and caption-free. All sample evidence is explicitly synthetic or fictional.
 
 Final golden candidate SHA-256:

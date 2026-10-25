@@ -2,6 +2,8 @@
 
 2026-10-25: version 0.1.0 accepted as candidate for explicit selection.
 
+Promoted to production on 2026-10-26. The golden benchmark passed again with vision high/medium/low 0/0/0 and an empty accepted vision baseline. All ten canonical PNGs and the contact sheet are byte-identical to the previously reviewed benchmark. Current benchmark evidence: `.tmp/deckkit-production-20261026-fBFdCq/blue-research/golden-learning/`.
+
 Ten roles and twenty registered compositions retain the open navy/cyan research identity:
 masthead and cover spine, linked metric capsules, native evidence chart, blue-scale matrix,
 reconciled bridge, numeric microbars, numbered timeline, rising acceptance stages,

@@ -1,6 +1,6 @@
 # Teal Journal：青绿手记
 
-1.0.0 是显式选择的创建型 DeckKit。暖纸底、河蓝结构、珊瑚强调、叙事衬线、方角色域与开放细线共同构成身份；数值事实以同目录 `design.json` 为唯一来源。
+1.0.0 是 default 创建型 DeckKit，可参与默认及自动交付选择。暖纸底、河蓝结构、珊瑚强调、叙事衬线、方角色域与开放细线共同构成身份；数值事实以同目录 `design.json` 为唯一来源。
 
 八类职责、十六个执行构图：
 
@@ -27,4 +27,4 @@
 
 参考的照片只迁移为显式资产外壳，不复制原图，也不伪装成插画替代。1.0.0 没有注册外部图片输入或自由 customOps，不宣称照片摄入、原生换肤、已有源稿无损保留、动画或其他比例验证。若真实交付需要照片，先扩展可验证的资产合同再使用；不能把外壳示例称作完整摄影主题复刻。
 
-标准流程为 `slots → validate-content → create/build → create/run → exact-candidate PNG review → finalize`。此版本止于 candidate，须显式选择；验证范围与环境未验证项见 [验收记录](../../../benchmarks/visual/cases/teal-journal/golden-handbook/review.md)。
+标准流程为 `slots → validate-content → create/build → create/run → exact-candidate PNG review → finalize`。验证范围与环境未验证项见 [验收记录](../../../benchmarks/visual/cases/teal-journal/golden-handbook/review.md)。

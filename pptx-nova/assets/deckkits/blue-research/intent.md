@@ -1,7 +1,7 @@
 # Blue Research
 
-白底、海军蓝结论、青蓝证据、开放细线矩阵与浅灰解释带构成研究报告身份。套件为显式选择的
-candidate 目标，创建可编辑原生对象；不承担行业政策、投资建议或任意已有 PPTX 的无损翻新。
+白底、海军蓝结论、青蓝证据、开放细线矩阵与浅灰解释带构成研究报告身份。套件为 production，
+可参与自动交付选择，创建可编辑原生对象；不承担行业政策、投资建议或任意已有 PPTX 的无损翻新。
 所有标题、观点、数值、单位、时间、来源、解释、阈值、角色和行动均来自 content。
 
 通过标准 `slots`、`design`、`validate-content`、`create/build`、`create/run` 使用；无需手写坐标。
@@ -56,4 +56,4 @@ steps 最多四条行动；register 最多两条行动。字长仍须通过真�
 
 机器、逐页 canonical PNG 与原生宿主事实见
 [benchmark review](../../../benchmarks/visual/cases/blue-research/golden-learning/review.md)。
-本说明只声明实际覆盖的能力；candidate 不等于 production/default，不推断跨平台像素一致或无损保留能力。
+本说明只声明实际覆盖的能力，不推断跨平台像素一致或无损保留能力。

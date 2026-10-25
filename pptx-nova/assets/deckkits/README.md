@@ -5,17 +5,17 @@
 套件版本、readiness、选型条件和验证记录以 `catalog.json` 为准。自动选型按用途、语言、
 内容密度、页型覆盖范围和匹配度选择。
 
-Teal Journal 1.0.0 为显式选择的 candidate：八类页面职责、十六种构图，以暖纸底、河蓝结构、
+Teal Journal 1.0.0 为 default，可参与默认及自动交付选择：八类页面职责、十六种构图，以暖纸底、河蓝结构、
 珊瑚强调、开放表格与时间派生路径表达编辑式手册。支持中文、英文及混排；图表和表格原生可编辑，
 照片仅为明确标识的可编辑外壳，未注册图片输入。容量、同步边界与验收范围见
 [使用说明](teal-journal/intent.md)。
 
-Pink Script 1.0.0 为显式选择的 candidate：九类页面职责、十八种构图，以暖黑、玫红、正体衬线、
+Pink Script 1.0.0 为 production，可参与自动交付选择：九类页面职责、十八种构图，以暖黑、玫红、正体衬线、
 巨大数字与开放细线表达夜间编辑叙事。支持中文、英文及混排，原生折线和矩阵可编辑；透明二维码
 通过资产槽绑定。容量、字体、同步边界及机器/视觉/原生验收范围见
 [使用说明](pink-script/intent.md)。
 
-Paper Scholar 1.0.0 为显式选择的 candidate：八类研究课件职责、十六种构图，保留暖纸底、
+Paper Scholar 1.0.0 为 default，可参与默认及自动交付选择：八类研究课件职责、十六种构图，保留暖纸底、
 橄榄绿／珊瑚层级、拱形等高线、十点比例图、半衰期机制图和开放分组表。支持中文、英文及
 混排；文字、形状、柱图和表格原生可编辑，案例照片使用 shape 外壳。容量、字体、同步边界
 及逐页／PowerPoint 验收范围见 [使用说明](paper-scholar/intent.md)。
@@ -318,6 +318,6 @@ promotion。
 5. 在 `catalog.json` 注册，绑定最新 canonical 逐页审查、benchmark 和 readiness 结论。
 
 `blue-research` 为白底海军蓝研究报告套件，提供 10 种职责、20 种注册构图；保留刊头、
-指标椭圆链、蓝阶矩阵、差异桥、数值短条、时间节点、递升阶段与证据结论。当前为显式选择的
-candidate；能力与同步边界见 [intent](blue-research/intent.md)，验收范围见
+指标椭圆链、蓝阶矩阵、差异桥、数值短条、时间节点、递升阶段与证据结论。当前为 production，
+可参与自动交付选择；能力与同步边界见 [intent](blue-research/intent.md)，验收范围见
 [benchmark review](../../benchmarks/visual/cases/blue-research/golden-learning/review.md)。

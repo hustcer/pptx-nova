@@ -7018,7 +7018,7 @@
       "path": "teal-journal/teal-journal.kit.mjs",
       "designContract": "teal-journal/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "default",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -7263,7 +7263,7 @@
         "powerPoint": "PowerPoint for Mac: final golden-04 opened, saved and reopened with 8 slides and no Repair; saved 219-object/1-chart/1-table readback passed. Native text/table/embedded-chart edits persisted in golden-03 probe; mixed-04 negative/zero/tiny labels checked. CLI clean-open skipped (UI scripting unavailable); CUA native UI used. Other hosts, full pixel parity and freeform path-node UI editing unverified."
       },
       "quality": {
-        "lastBenchmark": "2026-10-25",
+        "lastBenchmark": "2026-10-26",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -7276,18 +7276,18 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "manualHardDefects": 0,
         "knownBlockingLimits": [],
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-25",
+          "date": "2026-10-26",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-teal-journal/benchmark/02"
+            "out": ".tmp/deckkit-production-20261026-fBFdCq"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -7305,8 +7305,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -7314,7 +7314,7 @@
               "caseId": "teal-journal.golden-handbook",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-teal-journal/benchmark/02/teal-journal/golden-handbook/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261026-fBFdCq/teal-journal/golden-handbook/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/teal-journal/golden-handbook/review.md",
               "validation": {
                 "valid": true,
@@ -7339,8 +7339,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -7354,7 +7354,7 @@
                 "bytes": 206626
               },
               "patchOps": 1024,
-              "p50TotalMs": 111.15
+              "p50TotalMs": 162.58
             }
           ],
           "blockers": []
@@ -7376,7 +7376,7 @@
       "path": "blue-research/blue-research.kit.mjs",
       "designContract": "blue-research/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -7689,7 +7689,7 @@
         "powerPoint": "PowerPoint for Mac 16.114.1: golden/stacked/mixed opened, saved and reopened via native UI; text/table/chart edits and 274/299/262-object saved readback pass. Later automated UI probes timed out; see golden review."
       },
       "quality": {
-        "lastBenchmark": "2026-10-25",
+        "lastBenchmark": "2026-10-26",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -7702,18 +7702,18 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "manualHardDefects": 0,
         "knownBlockingLimits": [],
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-25",
+          "date": "2026-10-26",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-blue-research/benchmark/accepted-04"
+            "out": ".tmp/deckkit-production-20261026-fBFdCq"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -7731,8 +7731,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -7740,7 +7740,7 @@
               "caseId": "blue-research.golden-learning",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-blue-research/benchmark/accepted-04/blue-research/golden-learning/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261026-fBFdCq/blue-research/golden-learning/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/blue-research/golden-learning/review.md",
               "validation": {
                 "valid": true,
@@ -7765,8 +7765,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -7780,7 +7780,7 @@
                 "bytes": 252686
               },
               "patchOps": 1260,
-              "p50TotalMs": 109.44
+              "p50TotalMs": 172.8
             }
           ],
           "blockers": []
@@ -7788,7 +7788,7 @@
       },
       "knownLimits": [
         "Based on supplied marine-blue-research design specification and eight-panel reference; Part B overrides baseline navigation and typography.",
-        "Creation only; explicit selection required. No native skinning or arbitrary source-deck preservation claim.",
+        "Creation only. No native skinning or arbitrary source-deck preservation claim.",
         "Reference contains no photographs despite the prose hard requirement; no photography, map, image slot or third-party asset ingestion is registered.",
         "Arial and Songti SC are nonembedded substitutes; installed upright regular/bold must be available.",
         "Native charts/tables remain editable. Bridge, microbars, forecast boundary, independent captions and stage geometry require regeneration from content after manual edits.",
@@ -7803,7 +7803,7 @@
       "path": "pink-script/pink-script.kit.mjs",
       "designContract": "pink-script/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -8072,8 +8072,8 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "benchmark": {
@@ -8081,7 +8081,7 @@
           "date": "2026-10-26",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-pink-script/benchmark/01"
+            "out": ".tmp/deckkit-production-20261026-fBFdCq"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -8099,8 +8099,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -8108,7 +8108,7 @@
               "caseId": "pink-script.golden-editorial",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-pink-script/benchmark/01/pink-script/golden-editorial/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261026-fBFdCq/pink-script/golden-editorial/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/pink-script/golden-editorial/review.md",
               "validation": {
                 "valid": true,
@@ -8133,8 +8133,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -8148,7 +8148,7 @@
                 "bytes": 455706
               },
               "patchOps": 1479,
-              "p50TotalMs": 208.12
+              "p50TotalMs": 174.6
             }
           ],
           "blockers": []
@@ -8156,7 +8156,7 @@
       },
       "knownLimits": [
         "Based on the nine-page Pink Script HTML/design reference; unused system CSS is not a source page. Browser motion and controls are excluded.",
-        "Creation only, explicit candidate selection; no native skinning, arbitrary refurbishment or animation claim.",
+        "Creation only; no native skinning, arbitrary refurbishment or animation claim.",
         "Fonts are not embedded. Chinese display uses Songti SC bold instead of Noto Serif SC 900; English body uses Inter regular instead of Light.",
         "Sparse native grain and glow approximate CSS atmosphere. Outer frame removed by user; folio rotated caption becomes horizontal.",
         "Native line chart retains two series and numeric source. Independent callout and legend require regeneration after manual data edits.",
@@ -8175,7 +8175,7 @@
       "path": "paper-scholar/paper-scholar.kit.mjs",
       "designContract": "paper-scholar/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "default",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -8433,8 +8433,8 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "benchmark": {
@@ -8442,7 +8442,7 @@
           "date": "2026-10-26",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-paper-scholar/benchmark/03"
+            "out": ".tmp/deckkit-production-20261026-fBFdCq"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -8460,8 +8460,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -8469,7 +8469,7 @@
               "caseId": "paper-scholar.golden-learning",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-paper-scholar/benchmark/03/paper-scholar/golden-learning/summary.json",
+              "summaryPath": ".tmp/deckkit-production-20261026-fBFdCq/paper-scholar/golden-learning/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/paper-scholar/golden-learning/review.md",
               "validation": {
                 "valid": true,
@@ -8494,8 +8494,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -8509,7 +8509,7 @@
                 "bytes": 225919
               },
               "patchOps": 900,
-              "p50TotalMs": 135.67
+              "p50TotalMs": 198.69
             }
           ],
           "blockers": []
@@ -8517,7 +8517,7 @@
       },
       "knownLimits": [
         "Based on supplied paper-white-courseware specification and eight-panel reference; observed olive/coral identity and 16:9 override conflicting blue/yellow marketing prose.",
-        "Explicit creation selection only; no arbitrary existing-deck preservation or native skinning claim.",
+        "Creation only; no arbitrary existing-deck preservation or native skinning claim.",
         "Arial / Arial Unicode MS replace unavailable Liter / MiSans; fonts are not embedded.",
         "Reference photo is replaced by an editable shape shell; external photo ingestion is not registered. Bundled Tabler SVG icons are image objects, not native editable path nodes.",
         "Native chart/table data remain editable; independent icons, labels, fractional dots, gap and half-life curves require regeneration from content to synchronize after manual edits.",

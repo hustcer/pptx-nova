@@ -108,6 +108,32 @@ test('DeckKit listing retains candidates and defaults and discloses absent examp
   assert.match(table, /missing:/)
 })
 
+test('DeckKit listing normalizes separators in every asset path', (t) => {
+  const { root, write } = fixture(t)
+  const copied = join(root, 'tools/list-deckkits.nu')
+  write('tools/list-deckkits.nu', '')
+  copyFileSync(script, copied)
+  write('pptx-nova/assets/deckkits/catalog.json', { entries: [{ id: 'test-kit' }] })
+  write(`${examples}/manifest.json`, {
+    examples: [
+      {
+        deckkit: 'test-kit',
+        files: {
+          deck: { path: 'folder with spaces//deck.pptx' },
+          contactSheet: { path: 'folder with spaces//contact-sheet.png' },
+          content: { path: 'folder with spaces//content.json' },
+        },
+      },
+    ],
+  })
+  write(`${examples}/folder with spaces/deck.pptx`, '')
+  const [row] = JSON.parse(run(copied, tmpdir()))
+  assert.equal(row.pptx, join(examples, 'folder with spaces/deck.pptx'))
+  assert.equal(row.preview, join(examples, 'folder with spaces/contact-sheet.png'))
+  assert.equal(row.content, join(examples, 'folder with spaces/content.json'))
+  assert.equal(row.example_status, 'available')
+})
+
 test('just list forwards JSON arguments and preserves failures', (t) => {
   if (spawnSync('just', ['--version']).status !== 0) return t.skip('just unavailable')
   const { root } = fixture(t)

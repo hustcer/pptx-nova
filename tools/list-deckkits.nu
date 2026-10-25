@@ -32,9 +32,10 @@ def main [
         version: ($entry.version? | default '-')
         slide_types: ($entry.supportedSlideTypes? | default [] | length)
         example_status: $example_status
-        pptx: (if ($deck | is-not-empty) { $example_base | path join $deck } else { null })
-        preview: (if ($preview | is-not-empty) { $example_base | path join $preview } else { null })
-        content: (if ($content | is-not-empty) { $example_base | path join $content } else { null })
+        # Rebuild components so manifest slashes become native separators on Windows too.
+        pptx: (if ($deck | is-not-empty) { $example_base | path join $deck | path split | path join } else { null })
+        preview: (if ($preview | is-not-empty) { $example_base | path join $preview | path split | path join } else { null })
+        content: (if ($content | is-not-empty) { $example_base | path join $content | path split | path join } else { null })
       }
     }
   )

@@ -6181,7 +6181,7 @@
     },
     {
       "id": "sky-compass",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "sky-compass/sky-compass.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
@@ -6242,12 +6242,12 @@
           "Claims, units, sources, dates, status meaning and thresholds come from content."
         ],
         "signatureElements": [
-          "gray quarter-disk verdict cover and navy scope strip",
+          "open sky-blue compass arcs above an uninterrupted navy scope strip",
           "pale section tag with owned text",
           "RAG performance rows and current-period column",
-          "native mix ring and quantitative explanation tracks",
+          "native mix ring and quantitative tracks on quiet ice-blue explanation surfaces",
           "value-derived editable bullet bars with baseline ticks",
-          "elapsed-time process nodes",
+          "elapsed-time process nodes with a whole-process target bracket",
           "highlighted attribution column and reconciled gap",
           "owned action nodes and decision ledger",
           "five project metadata arcs",
@@ -6527,9 +6527,9 @@
         }
       },
       "validatedWith": {
-        "xdoc": "0.15.0 (6fa897c7)",
+        "xdoc": "0.15.0 (9ee8ef0c)",
         "report": "../../benchmarks/visual/cases/sky-compass/golden-operations/review.md",
-        "powerPoint": "16.114.1 on macOS: English and Chinese native export, edit/save/reopen; text/table/chart/freeform edit and full object readback verified. Other platforms unverified."
+        "powerPoint": "0.2.0: complete English PDF export verified; cover/table spot-checked. Repair-dialog gate unverified because UI scripting was unavailable. The 0.1 edit/save/reopen evidence is historical; other platforms remain unverified."
       },
       "quality": {
         "lastBenchmark": "2026-10-25",
@@ -6545,7 +6545,7 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
+            "baselineUnavailableCases": 0,
             "baselineUpdatedCases": 0
           }
         },
@@ -6556,7 +6556,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-sky-compass-20261025/benchmark/13"
+            "out": ".tmp/deckkit-sky-compass-20261025-design/benchmark/accepted-09"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -6574,7 +6574,7 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
+              "baselineUnavailableCases": 0,
               "baselineUpdatedCases": 0
             }
           },
@@ -6583,7 +6583,7 @@
               "caseId": "sky-compass.golden-operations",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-sky-compass-20261025/benchmark/13/sky-compass/golden-operations/summary.json",
+              "summaryPath": ".tmp/deckkit-sky-compass-20261025-design/benchmark/accepted-09/sky-compass/golden-operations/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/sky-compass/golden-operations/review.md",
               "validation": {
                 "valid": true,
@@ -6608,7 +6608,7 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
+                  "baselineUnavailable": false,
                   "baselineUpdated": false
                 }
               },
@@ -6620,10 +6620,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 278488
+                "bytes": 297052
               },
-              "patchOps": 1362,
-              "p50TotalMs": 171.97
+              "patchOps": 1363,
+              "p50TotalMs": 106.21
             }
           ],
           "blockers": []
@@ -6634,7 +6634,8 @@
         "Explicit candidate selection; no native skinning or arbitrary existing-deck preservation claim.",
         "Arial and Noto Sans SC replace unavailable Liter/MiSans; fonts are not embedded.",
         "Native charts/tables retain source data; independent labels, tracks, process positions and bridge shapes require regeneration after manual edits.",
-        "Photography is not registered: the actual reference uses an editable quarter-disk cover.",
+        "Photography is not registered: the cover uses editable open compass linework.",
+        "Bridge levelUnit optionally distinguishes endpoint levels from unit increments; true-scale tiny driver bars remain small and use direct labels.",
         "Bounded appendix supports up to eight rows at readable type; longer lists require another page."
       ],
       "examples": ["sky-compass/examples/content.json"],

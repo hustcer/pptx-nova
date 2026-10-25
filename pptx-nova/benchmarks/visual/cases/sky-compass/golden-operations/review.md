@@ -1,5 +1,46 @@
 # Sky Compass golden review
 
+## Current review — 0.2.0, 2026-10-25
+
+The 12-slide showcase has been refined after independent visual critique and native-object inspection.
+The solid gray cover sector is replaced by four editable, unfilled blue compass arcs above the
+uninterrupted navy scope strip. The title and KPI hierarchy is stronger. Explanation surfaces are
+quiet ice blue with navy headings. Native table evidence is 11.5pt; headers, owner/date and supporting
+labels retain the 10.5pt floor. Wide and rail performance tables have distinct column allocations,
+and numeric value/unit cells fail before generation if they cannot fit on one line.
+
+The process target bracket now spans the whole process. Bridge endpoint levels use `%` while
+driver increments use `pp`; direct labels remain legible without exaggerating true-scale bars.
+Page-specific conclusions replace the repeated sample footer, and action dependencies name the
+existing approval requests. All numeric facts remain unchanged.
+
+The current standard Create golden candidate SHA-256 is
+`6a752a317e631b390bc770353a86f04e22dbd543be438cf4481267197ac95575`.
+All 36 canonical PNGs across golden, alternate and Chinese/mixed-language stress content were
+reviewed individually. Subsequent changes affected only performance slide 2; each changed PNG
+was reviewed again, with hashes proving the remaining pages unchanged. No blocking visual defect
+was observed. Two non-blocking alternate-layout details remain: a short trailing English `plan`
+line in a metric cell and tight spacing around the Chinese September tick.
+
+The golden benchmark passes with zero fit errors, zero dry-run/apply semantic issues, zero XML
+warnings, and vision high/medium/low=0. Canonical PDF/PNG, content/slot checks, structure checks,
+ZIP integrity and all 39 XML/relationship parts pass. Current source reproduces all three reviewed
+patches. Readiness remains candidate for explicit selection; this revision does not claim automatic
+production selection or arbitrary imported-deck refurbishment.
+
+PowerPoint exported all twelve current golden pages to PDF; cover and performance pages were
+visually spot-checked. This is native render evidence, not pixel parity or an edit/save/reopen test.
+The Repair-dialog clean-open gate is unverified because UI scripting timed out; structural and
+canonical gates do not replace that evidence. Fonts remain unembedded, and independent labels and
+data-derived shapes still require regeneration after manual edits.
+
+Current retained evidence: `.tmp/deckkit-sky-compass-20261025-design/`, with final candidates and
+canonical review bindings in `iterations/09`, benchmark/readiness under `benchmark/accepted-09`,
+the source numeric/pixel binding in `final-source-binding.json`, and current native export in
+`powerpoint-accepted-render.json`. core-primitives is unchanged.
+
+## Historical review — 0.1.0
+
 2026-10-25: candidate accepted for explicit selection; all data are synthetic.
 
 All eight source panels were analyzed; source roles map to final golden slides 1–7 and 12.

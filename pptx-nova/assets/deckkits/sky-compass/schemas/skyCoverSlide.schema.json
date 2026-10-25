@@ -40,7 +40,7 @@
       "minLength": 1,
       "x-slotBudget": {
         "fontPt": 10.5,
-        "widthIn": 8.25,
+        "widthIn": 11.9,
         "heightIn": 0.26,
         "lineHeight": 1.1,
         "maxLines": 1
@@ -51,7 +51,7 @@
       "minLength": 1,
       "x-slotBudget": {
         "fontPt": 10.5,
-        "widthIn": 8.25,
+        "widthIn": 11.9,
         "heightIn": 0.26,
         "lineHeight": 1.1,
         "maxLines": 1
@@ -90,7 +90,7 @@
             "x-slotBudget": {
               "fontPt": 10.5,
               "widthIn": 2.52,
-              "heightIn": 0.36000000000000004,
+              "heightIn": 0.30000000000000004,
               "lineHeight": 1.1,
               "maxLines": 1
             }
@@ -106,9 +106,9 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 15,
+              "fontPt": 19,
               "widthIn": 2.52,
-              "heightIn": 0.39,
+              "heightIn": 0.44,
               "lineHeight": 1.1,
               "maxLines": 1
             }

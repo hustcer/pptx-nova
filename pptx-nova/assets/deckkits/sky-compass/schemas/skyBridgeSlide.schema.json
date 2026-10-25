@@ -2,6 +2,17 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
+    "levelUnit": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 15,
+        "widthIn": 1.3645,
+        "heightIn": 0.36,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
     "section": {
       "type": "string",
       "minLength": 1,
@@ -72,9 +83,9 @@
       "type": "string",
       "minLength": 1,
       "x-slotBudget": {
-        "fontPt": 10.5,
-        "widthIn": 7.3,
-        "heightIn": 0.3,
+        "fontPt": 15,
+        "widthIn": 1.3645,
+        "heightIn": 0.36,
         "lineHeight": 1.1,
         "maxLines": 1
       }
@@ -145,7 +156,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 3.7399999999999998,
               "heightIn": 0.34,
               "lineHeight": 1.1,

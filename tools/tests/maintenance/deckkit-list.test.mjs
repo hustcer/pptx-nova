@@ -134,11 +134,11 @@ test('DeckKit listing normalizes separators in every asset path', (t) => {
   assert.equal(row.example_status, 'available')
 })
 
-test('just list forwards JSON arguments and preserves failures', (t) => {
+test('just ls forwards JSON arguments and preserves failures', (t) => {
   if (spawnSync('just', ['--version']).status !== 0) return t.skip('just unavailable')
   const { root } = fixture(t)
   const invoke = (args) =>
-    spawnSync('just', ['--justfile', join(repoRoot, 'Justfile'), 'list', ...args], {
+    spawnSync('just', ['--justfile', join(repoRoot, 'Justfile'), 'ls', ...args], {
       cwd: root,
       encoding: 'utf8',
     })

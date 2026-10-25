@@ -134,7 +134,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 3.7399999999999998,
               "heightIn": 0.34,
               "lineHeight": 1.1,

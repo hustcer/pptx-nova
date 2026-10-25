@@ -19,13 +19,13 @@
   },
   "patch": {
     "schemaVersion": "pptx-patch/v1",
-    "ops": 1362
+    "ops": 1363
   },
   "dryRun": {
     "status": "success",
     "warnings": 0,
     "changedParts": 34,
-    "opResults": 1362,
+    "opResults": 1363,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -37,7 +37,7 @@
     "status": "success",
     "warnings": 0,
     "changedParts": 34,
-    "opResults": 1362,
+    "opResults": 1363,
     "visualRisks": {
       "high": 0,
       "medium": 0,
@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/sky-compass.golden-operations.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -96,12 +96,12 @@
       "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 278488,
-      "sha256": "f9f0a08329136928c3d378e154d13de34eaa8e5186570892cb03fa4fc7553243"
+      "bytes": 297052,
+      "sha256": "79f5e78cc7befb4a6ec12a09415834a376ea30e9c2c35f6c5349562b1cfc84d1"
     },
     "webp": {
-      "bytes": 168626,
-      "sha256": "a7a380be296a34c4695bb8c424e46b8f039a17cf5239775ff6e637cd665d3c4f"
+      "bytes": 183268,
+      "sha256": "d5abc1a28a9dc69a5d208fc0081abb56fa58413c6f5f4ee6ca7df9e84e6188bf"
     }
   }
 }

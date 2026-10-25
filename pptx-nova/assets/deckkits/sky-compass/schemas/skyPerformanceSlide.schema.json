@@ -75,7 +75,7 @@
         "minLength": 1,
         "x-slotBudget": {
           "fontPt": 10.5,
-          "widthIn": 0.8592783505154639,
+          "widthIn": 0.7993150684931508,
           "heightIn": 0.8275,
           "lineHeight": 1.1,
           "maxLines": 3
@@ -93,8 +93,8 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
-              "widthIn": 1.8685567010309279,
+              "fontPt": 11.5,
+              "widthIn": 2.2910958904109595,
               "heightIn": 0.8275,
               "lineHeight": 1.1,
               "maxLines": 3
@@ -111,8 +111,8 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
-              "widthIn": 0.8592783505154639,
+              "fontPt": 11.5,
+              "widthIn": 0.8897260273972604,
               "heightIn": 0.8275,
               "lineHeight": 1.1,
               "maxLines": 3
@@ -127,8 +127,8 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
-              "widthIn": 0.9051546391752575,
+              "fontPt": 11.5,
+              "widthIn": 0.7993150684931508,
               "heightIn": 0.8275,
               "lineHeight": 1.1,
               "maxLines": 3
@@ -138,9 +138,9 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
-              "widthIn": 2.602577319587629,
-              "heightIn": 0.8275,
+              "fontPt": 11.5,
+              "widthIn": 3.128969072164949,
+              "heightIn": 0.7525000000000001,
               "lineHeight": 1.1,
               "maxLines": 3
             }
@@ -149,8 +149,8 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
-              "widthIn": 1.8685567010309279,
+              "fontPt": 11.5,
+              "widthIn": 2.2910958904109595,
               "heightIn": 0.8275,
               "lineHeight": 1.1,
               "maxLines": 3
@@ -177,7 +177,7 @@
       "minLength": 1,
       "x-slotBudget": {
         "fontPt": 12,
-        "widthIn": 2.4,
+        "widthIn": 1.63,
         "heightIn": 3.65,
         "lineHeight": 1.1,
         "maxLines": 14

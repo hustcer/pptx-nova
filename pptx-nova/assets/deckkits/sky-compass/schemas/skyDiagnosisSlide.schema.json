@@ -88,7 +88,7 @@
       "type": "string",
       "minLength": 1,
       "x-slotBudget": {
-        "fontPt": 10.5,
+        "fontPt": 11.5,
         "widthIn": 0.9591620111731843,
         "heightIn": 1.1066666666666665,
         "lineHeight": 1.1,
@@ -124,7 +124,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 0.8975418994413408,
               "heightIn": 1.1066666666666665,
               "lineHeight": 1.1,
@@ -135,7 +135,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 1.6369832402234639,
               "heightIn": 1.1066666666666665,
               "lineHeight": 1.1,
@@ -146,7 +146,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 3.30072625698324,
               "heightIn": 1.1066666666666665,
               "lineHeight": 1.1,
@@ -182,7 +182,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 1.8218435754189946,
               "heightIn": 1.1066666666666665,
               "lineHeight": 1.1,

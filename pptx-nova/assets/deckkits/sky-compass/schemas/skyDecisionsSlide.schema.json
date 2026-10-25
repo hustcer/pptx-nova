@@ -93,22 +93,22 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 2.431489361702128,
               "heightIn": 1.4149999999999998,
               "lineHeight": 1.1,
-              "maxLines": 6
+              "maxLines": 5
             }
           },
           "rationale": {
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 3.6048936170212764,
               "heightIn": 1.4149999999999998,
               "lineHeight": 1.1,
-              "maxLines": 6
+              "maxLines": 5
             }
           },
           "owner": {
@@ -137,11 +137,11 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 2.666170212765957,
               "heightIn": 1.4149999999999998,
               "lineHeight": 1.1,
-              "maxLines": 6
+              "maxLines": 5
             }
           }
         },

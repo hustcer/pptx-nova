@@ -76,6 +76,7 @@ export function skyStressBusiness() {
       reconciliationLabel: '归因核对',
       observedLabel: '实绩截至',
       planLabel: '计划开始',
+      levelUnit: '%',
       openingLabel: '期初',
       closingLabel: '期末',
       methodology: '各列使用同一测试口径，真实报告必须提供自己的定义。',

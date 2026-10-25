@@ -194,8 +194,14 @@ test('sky-compass checkers reject wrong colors/fonts/effects and unregistered pa
     {
       op: 'set-shape',
       slide: 0,
-      shape: { name: 'S0_CoverQuarterDisk' },
+      shape: { name: 'S0_CoverCompassArc0' },
       fill: { type: 'gradient', stops: [] },
+    },
+    {
+      op: 'set-shape',
+      slide: 0,
+      shape: { name: 'S0_CoverCompassArc0' },
+      fill: { type: 'solid', color: DESIGN.colors.gray },
     },
     {
       op: 'add-freeform',
@@ -218,23 +224,48 @@ test('sky-compass checkers reject wrong colors/fonts/effects and unregistered pa
     )
   }
 })
-test('sky-compass cover quarter disks reach the canvas bottom in both layouts', () => {
+test('sky-compass cover compass arcs stay open and preserve the full navy scope strip', () => {
   const source = fixture().slides[0]
   for (const layoutId of Object.keys(DESIGN.sky.families.skyCoverSlide.variants)) {
     const b = createDeck(excerpt([{ ...source, layoutId }]))
-    const disk = b.patch.ops.find(
-      (o) => o.op === 'add-freeform' && o.name.endsWith('CoverQuarterDisk'),
+    const arcs = b.designPlan.layouts[0].components.filter((c) => /^CoverCompassArc/.test(c.name))
+    assert.equal(arcs.length, DESIGN.sky.compass.arcCount)
+    const bandTop = DESIGN.sky.chrome.coverScope[1]
+    for (const arc of arcs) {
+      assert.equal(arc.fill, undefined, 'compass linework must not become a solid sector')
+      assert.equal(
+        arc.path.commands.some((c) => c.type === 'close'),
+        false,
+      )
+      assert.ok(Math.abs(arc.frame[1] + arc.frame[3] - bandTop) < 1e-8)
+    }
+    assert.equal(
+      b.designPlan.layouts[0].components.some((c) => c.fill === 'gray'),
+      false,
     )
-    assert.ok(Math.abs(parseFloat(disk.y) + parseFloat(disk.h) - DESIGN.canvas.heightIn) < 1e-8)
     const band = b.patch.ops.find((o) => o.op === 'add-shape' && o.name.endsWith('CoverScopeBand'))
     assert.equal(parseFloat(band.w), DESIGN.canvas.widthIn)
-    assert.ok(
-      b.patch.ops.indexOf(band) < b.patch.ops.indexOf(disk),
-      'full-width navy is behind the gray disk, avoiding a white wedge',
-    )
     const scope = b.designPlan.layouts[0].components.find((c) => c.name === 'CoverPeriod')
     assert.ok(scope.frame[1] + scope.frame[3] <= DESIGN.canvas.heightIn - 0.399)
   }
+})
+test('sky-compass renders planned table typography and separates level and delta units', () => {
+  const built = createDeck(fixture())
+  for (const layout of built.designPlan.layouts) {
+    for (const table of layout.components.filter((c) => c.kind === 'table')) {
+      const op = built.patch.ops.find(
+        (o) => o.op === 'set-table' && o.shape.name.endsWith('_' + table.name),
+      )
+      op.cells.forEach((cell, i) =>
+        assert.equal(cell.style.font.size, table.bindings[i].style.sizePt + 'pt'),
+      )
+      assert.ok(table.bindings.some((b) => b.style.sizePt === 11.5))
+    }
+  }
+  const bridge = built.designPlan.layouts[9].components
+  assert.equal(bridge.find((c) => c.name === 'BridgeValue0').text, '94 %')
+  assert.equal(bridge.find((c) => c.name === 'BridgeValue1').text, '+1.2 pp')
+  assert.equal(bridge.find((c) => c.name === 'BridgeValue3').text, '96 %')
 })
 test('sky-compass zero bridge drivers retain a level connector without a fake bar', () => {
   const s = fixture().slides[9]
@@ -252,6 +283,24 @@ test('sky-compass zero bridge drivers retain a level connector without a fake ba
 })
 import { skyStressBusiness } from '../fixtures/sky-compass-fixtures.mjs'
 import { fitTextPlan } from '../../../pptx-nova/assets/deckkits/shared/text-layout.mjs'
+test('sky-compass performance values and Chinese units stay on one line in both layouts', () => {
+  const slide = skyStressBusiness().slides[1]
+  for (const layoutId of Object.keys(DESIGN.sky.families.skyPerformanceSlide.variants)) {
+    const table = createDeck(
+      excerpt([{ ...slide, layoutId }]),
+    ).designPlan.layouts[0].components.find((c) => c.name === 'Performance')
+    for (let row = 1; row < table.cells.length; row++) {
+      for (const column of [1, 2, 3]) {
+        const binding = table.bindings[row * table.columns.length + column]
+        assert.equal(
+          fitTextPlan(table.cells[row][column], binding.frame, binding.style, 'numeric/unit')
+            .estimatedLines,
+          1,
+        )
+      }
+    }
+  }
+})
 test('sky-compass decision owner and Chinese date fit together at the documented font floor', () => {
   const slide = skyStressBusiness().slides[11]
   for (const layoutId of Object.keys(DESIGN.sky.families.skyDecisionsSlide.variants)) {

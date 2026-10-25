@@ -44,7 +44,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Prioritize completion and waiting time; demand and digital share are ahead of plan.",
         "section": "PERFORMANCE",
         "title": "Demand beats plan; two outcomes need recovery",
         "headers": ["Metric", "Target", "Actual", "Attainment", "Status", "Evidence"],
@@ -99,7 +99,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Match peak support to demand while keeping assisted routes available.",
         "section": "COVERAGE",
         "title": "Digital share rises; peak pressure remains concentrated",
         "seriesName": "Share of accepted requests",
@@ -150,7 +150,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Standard steps and guided support address the largest routine-service opportunities.",
         "section": "RANKING",
         "title": "Routine services account for most demand",
         "seriesName": "Request share",
@@ -214,7 +214,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Use a shared checklist before handoff, then review the same queue cohort each week.",
         "section": "PROCESS",
         "title": "Handoff time is the clearest efficiency lever",
         "totalLabel": "Average handling",
@@ -264,7 +264,7 @@
             "body": "Review the same queue cohort each week."
           }
         ],
-        "targetMarkerLabel": "Average target ≤"
+        "targetMarkerLabel": "Whole-process target ≤"
       }
     },
     {
@@ -273,7 +273,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Repeated handoffs and device downtime reconcile the full 2 pp completion gap.",
         "section": "DIAGNOSIS",
         "title": "Two quantified causes reconcile the completion gap",
         "headers": ["Status", "Issue", "Evidence", "Impact", "Owner / date", "Action"],
@@ -310,7 +310,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Track three dated commitments with named owners and explicit approval dependencies.",
         "section": "ACTIONS",
         "title": "Three owned commitments guide the next operating cycle",
         "items": [
@@ -333,7 +333,7 @@
             "unit": "% returns",
             "owner": "Service lead",
             "impact": "Recover 1.2 pp completion.",
-            "dependency": "Request 1 · staffing",
+            "dependency": "Approve four peak-period posts",
             "dateLabel": "Complete 31 Aug"
           },
           {
@@ -344,7 +344,7 @@
             "unit": "% success",
             "owner": "Access lead",
             "impact": "Improve supported access.",
-            "dependency": "Request 2 · access",
+            "dependency": "Open two verification interfaces",
             "dateLabel": "Complete 30 Sep"
           }
         ],
@@ -372,7 +372,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Close the two remaining checks and resolve access approval before the next gate.",
         "section": "PROJECT",
         "title": "One service project has a clear recovery path",
         "metadata": [
@@ -427,7 +427,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Keep observed results through June distinct from the plan beginning in July.",
         "section": "TREND",
         "title": "Completion improves after the checklist pilot",
         "seriesName": "On-time completion",
@@ -487,7 +487,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "94% + 1.2 pp + 0.8 pp = 96%; this synthetic bridge does not establish causality.",
         "section": "BRIDGE",
         "title": "Named drivers explain the two-point movement",
         "unit": "pp",
@@ -514,7 +514,8 @@
             "heading": "Interpret with care",
             "body": "The bridge is a synthetic validation example, with no causal fact implied."
           }
-        ]
+        ],
+        "levelUnit": "%"
       }
     },
     {
@@ -523,7 +524,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Use consistent definitions and period boundaries when comparing prior and current values.",
         "section": "APPENDIX",
         "title": "Definitions keep the operating register auditable",
         "columns": [
@@ -565,7 +566,7 @@
         "period": "Q2 2026 · synthetic",
         "basis": "Validation example; no real-world claim",
         "source": "Source: synthetic validation dataset",
-        "verdict": "Focus the next cycle on queue reduction and reliable handoffs.",
+        "verdict": "Staffing capacity and verification access are the two decisions needed.",
         "section": "DECISIONS",
         "title": "Approve capacity and access to protect the recovery",
         "headers": ["Decision", "Rationale", "Owner / date", "Cost of delay"],

@@ -4,7 +4,7 @@ DeckKit: `sky-compass`
 Showcase case: `sky-compass.golden-operations`
 Readiness: `candidate`
 Slides: 12
-Patch ops: 1362
+Patch ops: 1363
 Title: Community support Operations review
 
 ## Best For

@@ -1383,7 +1383,7 @@
       "caseId": "sky-compass.golden-operations",
       "kind": "golden",
       "readiness": "candidate",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Community support Operations review",
       "bestFor": [
         "operating review",
@@ -1397,29 +1397,29 @@
       "files": {
         "deck": {
           "path": "sky-compass/deck.pptx",
-          "bytes": 44554,
-          "sha256": "b0747c8a729cdb98d16e19396ef3a4147fde50f72e50634592f8c2897851113d"
+          "bytes": 44762,
+          "sha256": "6a752a317e631b390bc770353a86f04e22dbd543be438cf4481267197ac95575"
         },
         "contactSheet": {
           "path": "sky-compass/contact-sheet.webp",
-          "bytes": 168626,
-          "sha256": "a7a380be296a34c4695bb8c424e46b8f039a17cf5239775ff6e637cd665d3c4f",
+          "bytes": 183268,
+          "sha256": "d5abc1a28a9dc69a5d208fc0081abb56fa58413c6f5f4ee6ca7df9e84e6188bf",
           "quality": 82
         },
         "content": {
           "path": "sky-compass/content.json",
-          "bytes": 18613,
-          "sha256": "5c67c519fc38a4c539aa29500db63b46a79565f50df8131fa77cc24e6acef75a"
+          "bytes": 18860,
+          "sha256": "37901ceb287890a3aee89c05e33c995b2250383d0c295ed6d9142328d6f7fe00"
         },
         "brief": {
           "path": "sky-compass/brief.md",
           "bytes": 732,
-          "sha256": "056c17a5bc505fda6bed6555e9dd582bf7a9751121eb09382a495fa65bd86b46"
+          "sha256": "a429b42c1dc12431eaec4f780697fb3e59578fed45cd2cddb59aaca6b215d58a"
         },
         "summary": {
           "path": "sky-compass/summary.json",
-          "bytes": 2716,
-          "sha256": "36743ac30f2367b999834de71bb6fd5351c65268db3689a27d7d0fa1feae6725"
+          "bytes": 2775,
+          "sha256": "f326b38ce30029bc65f04f9bcd927c7b69e6cb1060511f5843e192694ba387d0"
         }
       },
       "validation": {
@@ -1431,7 +1431,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1362
+        "ops": 1363
       },
       "vision": {
         "status": "success",
@@ -1451,17 +1451,17 @@
           "changed": 0,
           "resolved": 0,
           "reviewable": 0,
-          "baselineUnavailable": true,
+          "baselineUnavailable": false,
           "baselineUpdated": false
         },
         "lowByFamily": {},
         "newLowByFamily": {},
         "changedLowByFamily": {},
         "baseline": {
-          "schemaVersion": "",
-          "fingerprintVersion": "",
+          "schemaVersion": "pptx-nova-vision-baseline/v1",
+          "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
           "path": "pptx-nova/benchmarks/visual/baselines/sky-compass.golden-operations.vision-baseline.json",
-          "available": false,
+          "available": true,
           "issueCount": 0
         },
         "stylePolicy": {

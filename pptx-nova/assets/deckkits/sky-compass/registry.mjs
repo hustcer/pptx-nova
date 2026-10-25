@@ -56,6 +56,15 @@ function assertSky(design, { assertFrame }) {
     if (!design.colors[st.color] || !design.fonts[st.role] || st.italic || st.sizePt < 10.5)
       throw Error(`${name}: readable upright registered style required`)
   for (const [name, f] of Object.entries(b.chrome)) assertFrame(design, f, `sky.chrome.${name}`)
+  const { arcCount, radiusStep, strokePt } = b.compass
+  if (
+    !Number.isInteger(arcCount) ||
+    arcCount < 2 ||
+    arcCount > 5 ||
+    !(radiusStep > 0 && radiusStep * (arcCount - 1) < 1) ||
+    !(strokePt > 0 && strokePt <= 2)
+  )
+    throw Error('Sky Compass requires bounded open compass linework')
   for (const [name, v] of Object.entries(b.capacity))
     if (v.length !== 2 || v.some((n) => !Number.isInteger(n) || n < 1) || v[1] < v[0])
       throw Error(`${name}: invalid capacity`)
@@ -70,8 +79,17 @@ function checkSky(design, op, fail) {
     fail('Unregistered Sky native chart')
   if (op.op === 'add-shape' && !['rectangle', 'ellipse'].includes(op.kind))
     fail('Sky uses square regions and functional circles')
-  if (op.op === 'add-freeform' && !/(CoverQuarterDisk|ProjectArc[0-4]|ProcessTarget)$/.test(name))
+  if (
+    op.op === 'add-freeform' &&
+    !/(CoverCompassArc[0-4]|ProjectArc[0-4]|ProcessTarget)$/.test(name)
+  )
     fail('Unregistered Sky path')
+  if (/CoverCompassArc[0-4]$/.test(name)) {
+    if (op.op === 'add-freeform' && op.path.commands.some((c) => c.type === 'close'))
+      fail('Cover compass paths must remain open')
+    if (op.op === 'set-shape' && op.fill && op.fill.type !== 'none')
+      fail('Cover compass linework must not become a solid sector')
+  }
   if (['add-image', 'add-group'].includes(op.op)) fail('No Sky image or group input is registered')
   if (
     op.op === 'set-slide-background' &&

@@ -3756,6 +3756,16 @@
     "sky": {
       "type": "object",
       "properties": {
+        "compass": {
+          "type": "object",
+          "properties": {
+            "arcCount": { "type": "number", "minimum": 2, "maximum": 5 },
+            "radiusStep": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.4 },
+            "strokePt": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 }
+          },
+          "required": ["arcCount", "radiusStep", "strokePt"],
+          "additionalProperties": false
+        },
         "family": {
           "const": "sky-wayfinding/v1"
         },

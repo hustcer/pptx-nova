@@ -131,7 +131,9 @@ export function renderNativeEvidencePlan(design, layouts, b) {
                 fill:
                   j === c.focusColumn ? { type: 'solid', color: C[c.focusTone] } : { type: 'none' },
                 font: font({
-                  ...b.styles.small,
+                  ...(c.useBindingStyles
+                    ? c.bindings[i * c.columns.length + j].style
+                    : b.styles.small),
                   bold: i === 0 || j === c.focusColumn,
                   color:
                     c.cellTones?.[i]?.[j] ??

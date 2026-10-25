@@ -40,10 +40,16 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
     Object.assign(c, { kind: 'owned', color, shapeKind, anchor: 'middle' })
   }
   const notes = (f, vs, prefix = 'notes') => {
-    box('ExplanationPanel', f, 'pale')
+    box('ExplanationPanel', f, 'surface')
     cells([f[0] + 0.22, f[1] + 0.2, f[2] - 0.44, f[3] - 0.4], vs.length, f[3] > 2, 0.25).forEach(
       ([x, y, w, h], i) => {
-        tx('NoteHeading' + i, [x, y, w, 0.34], vs[i].heading, 'small', `${prefix}[${i}].heading`)
+        tx(
+          'NoteHeading' + i,
+          [x, y, w, 0.34],
+          vs[i].heading,
+          'noteHeading',
+          `${prefix}[${i}].heading`,
+        )
         tx(
           'NoteBody' + i,
           [x, y + 0.42, w, h - 0.42 - (vs[i].measure ? 0.67 : 0)],
@@ -79,7 +85,7 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
       },
     )
   }
-  const table = (name, f, cols, rows, paths, focus = -1, cellTones) => {
+  const table = (name, f, cols, rows, paths, focus = -1, cellTones, singleLineColumns = []) => {
     if (rows.some((v) => v.length !== cols.length)) throw Error('Every row must match all columns')
     if (!Number.isInteger(focus) || focus < -1 || focus >= cols.length)
       throw Error('focusColumn outside columns')
@@ -91,14 +97,22 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
     all.forEach((row, i) => {
       let x = f[0]
       row.forEach((value, j) => {
-        const frame = [x + 0.075, f[1] + i * rh + 0.055, widths[j] - 0.15, rh - 0.11],
-          st = { ...b.styles.small, bold: i === 0 || j === focus }
+        const frame = [x + 0.075, f[1] + i * rh + 0.055, widths[j] - 0.15, rh - 0.11]
         if (/[\r\n]/u.test(value))
           throw Error('Native table cells require one paragraph; use automatic wrapping')
         const sourcePaths = (Array.isArray(paths(i, j)) ? paths(i, j) : [paths(i, j)]).map(
           (k) => `${path}.${k}`,
         )
-        fitTextPlan(value, frame, st, sourcePaths[0])
+        const ownerDate =
+            sourcePaths.some((p) => p.endsWith('.owner')) &&
+            sourcePaths.some((p) => p.endsWith('.date')),
+          st = {
+            ...(ownerDate || i === 0 ? b.styles.small : b.styles.table),
+            bold: i === 0 || j === focus,
+          }
+        const fitted = fitTextPlan(value, frame, st, sourcePaths[0])
+        if (i > 0 && singleLineColumns.includes(j) && fitted.estimatedLines !== 1)
+          throw Error(`${sourcePaths[0]}: numeric value and unit must fit on one line`)
         bindings.push({ paths: sourcePaths, frame, style: st })
         x += widths[j]
       })
@@ -114,6 +128,7 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
       focusColumn: focus,
       focusTone: 'highlight',
       bindings,
+      useBindingStyles: true,
       cellTones,
       blueRules: true,
     })
@@ -195,22 +210,29 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
   if (role === 'cover') {
     const f = r.ornament
     box('CoverScopeBand', b.chrome.coverScope, 'navy')
-    cs.push({
-      kind: 'path',
-      name: 'CoverQuarterDisk',
-      frame: f,
-      fill: 'gray',
-      path: {
-        width: 100000,
-        height: 100000,
-        commands: [
-          { type: 'move', x: 100000, y: 0 },
-          { type: 'cubic', x1: 44772, y1: 0, x2: 0, y2: 44772, x: 0, y: 100000 },
-          { type: 'line', x: 100000, y: 100000 },
-          { type: 'close' },
-        ],
-      },
-    })
+    // Open concentric quadrants share a bottom-right origin, stop above the scope
+    // strip and echo the project-page arcs without obscuring text or metadata.
+    const compass = b.compass
+    for (let i = 0; i < compass.arcCount; i++) {
+      const scale = 1 - i * compass.radiusStep,
+        w = f[2] * scale,
+        h = f[3] * scale
+      cs.push({
+        kind: 'path',
+        name: 'CoverCompassArc' + i,
+        frame: [f[0] + f[2] - w, f[1] + f[3] - h, w, h],
+        line: i === 0 ? 'accent' : 'pale',
+        linePt: i === 0 ? compass.strokePt : compass.strokePt * 0.6,
+        path: {
+          width: 100000,
+          height: 100000,
+          commands: [
+            { type: 'move', x: 100000, y: 0 },
+            { type: 'cubic', x1: 44772, y1: 0, x2: 0, y2: 44772, x: 0, y: 100000 },
+          ],
+        },
+      })
+    }
     box('CoverNavigationDot', [0.67, 0.5, 0.1, 0.1], 'accent', 'circle')
     tx('CoverMasthead', [0.98, 0.43, 9.3, 0.3], d.masthead, 'small', 'masthead')
     rule('CoverMastheadRule', 0.65, 0.95, 8.6, 'highlight')
@@ -241,14 +263,14 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
     cells(r.metrics, d.metrics.length, vertical, 0.22).forEach(([x, y, w, h], i) => {
       tx(
         'CoverMetric' + i,
-        [x, y, w, 0.39],
+        [x, y, w, 0.44],
         `${number(d.metrics[i].actual)} / ${number(d.metrics[i].target)} ${d.metrics[i].unit}`,
-        'heading',
+        'coverMetric',
         [`metrics[${i}].actual`, `metrics[${i}].target`, `metrics[${i}].unit`],
       )
       tx(
         'CoverMetricLabel' + i,
-        [x, y + 0.44, w, h - 0.44],
+        [x, y + 0.5, w, h - 0.5],
         d.metrics[i].label,
         'small',
         `metrics[${i}].label`,
@@ -259,7 +281,7 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
       [
         b.chrome.coverSource[0],
         b.chrome.coverSource[1],
-        Math.min(b.chrome.coverSource[2], r.ornament[0] - 0.85),
+        b.chrome.coverSource[2],
         b.chrome.coverSource[3],
       ],
       `${d.period} · ${d.source}`,
@@ -286,7 +308,9 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
   if (role === 'performance') {
     const cols = d.headers.map((label, i) => ({
       label,
-      weight: [2.2, 1.1, 1.1, 1.15, 1.15, 3][i],
+      weight: (layoutId === 'rail'
+        ? [2.7, 1.15, 1.2, 1.2, 1.05, 3.65]
+        : [2.5, 1.1, 1.1, 1.15, 1.15, 2.7])[i],
       align: i > 0 && i < 5 ? 'right' : 'left',
     }))
     const rows = d.metrics.map((v) => {
@@ -320,6 +344,7 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
         d.headers.map(() => 'muted'),
         ...d.metrics.map((v) => ['ink', 'muted', 'navy', 'navy', v.status, 'ink']),
       ],
+      [1, 2, 3],
     )
     // Render units separately only as part of the original target/actual literal cells.
     d.metrics.forEach((v, i) => {
@@ -503,6 +528,27 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
         ['targetMarkerLabel', 'target', 'unit'],
         { color: 'navy' },
       )
+    else {
+      tx(
+        'ProcessTargetLabel',
+        [r.summary[0] + 7.1, r.summary[1], r.summary[2] - 7.1, 0.3],
+        `${d.targetMarkerLabel} ${number(d.target)} ${d.unit}`,
+        'small',
+        ['targetMarkerLabel', 'target', 'unit'],
+        { alignment: 'right', color: 'navy' },
+      )
+      pathLine(
+        'ProcessTarget',
+        [start, y - 0.4, span, 0.18],
+        [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [1, 0],
+        ],
+        { color: 'navy', dash: true },
+      )
+    }
     d.steps.forEach((v, i) => {
       const pos = vertical ? start + (span * (i + 0.5)) / d.steps.length : positions[i],
         dot = i === d.focusIndex ? 0.35 : 0.18,
@@ -550,31 +596,6 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
           color: v.status === 'neutral' ? 'muted' : v.status,
         },
       )
-      if (i === d.focusIndex && !vertical) {
-        const targetCenter = Math.min(
-          design.canvas.widthIn - 2.05,
-          Math.max(px, r.summary[0] + 6.7 + 1.5),
-        )
-        tx(
-          'ProcessTargetLabel',
-          [targetCenter - 1.4, r.summary[1], 2.8, 0.3],
-          `${d.targetMarkerLabel} ${number(d.target)} ${d.unit}`,
-          'small',
-          ['targetMarkerLabel', 'target', 'unit'],
-          { alignment: 'center', color: 'navy' },
-        )
-        const left = Math.min(px, targetCenter),
-          width = Math.max(0.012, Math.abs(px - targetCenter))
-        pathLine(
-          'ProcessTarget',
-          [left, r.summary[1] + 0.4, width, y - r.summary[1] - 0.44],
-          [
-            [targetCenter > px ? 1 : 0, 0],
-            [targetCenter > px ? 0 : 1, 1],
-          ],
-          { color: 'navy', dash: true },
-        )
-      }
     })
     notes(r.notes, d.notes)
   } else if (role === 'diagnosis') {
@@ -639,6 +660,7 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
     const timeX = (v) => x + 1.65 + ((asDate(v) - first) / (last - first)) * (w - 3.3)
     if (d.ticks.some((v) => asDate(v.date) < first || asDate(v.date) > last))
       throw Error('Timeline tick outside range')
+    const axisY = y + h * 0.4
     if (vertical) {
       tx(
         'ActionTickLabels',
@@ -649,13 +671,13 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
       )
       rule('ActionAxis', x + 0.2, y + 0.2, h - 0.4, 'navy', true)
     } else {
-      rule('ActionAxis', x + 0.3, y + h * 0.48, w - 0.6, 'navy')
+      rule('ActionAxis', x + 0.3, axisY, w - 0.6, 'navy')
       d.ticks.forEach((v, i) => {
         const xx = timeX(v.date)
-        rule('MonthTick' + i, xx, y + h * 0.48 - 0.06, 0.12, 'navy', true)
+        rule('MonthTick' + i, xx, axisY - 0.06, 0.12, 'navy', true)
         tx(
           'MonthLabel' + i,
-          [xx - 0.4, y + h * 0.48 + 0.14, 0.8, 0.25],
+          [xx - 0.4, axisY + 0.14, 0.8, 0.25],
           v.label,
           'small',
           `ticks[${i}].label`,
@@ -666,7 +688,7 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
     cells(f, d.items.length, vertical, 0.25).forEach(([itemX, itemY, itemWidth], i) => {
       const v = d.items[i],
         cx = vertical ? x + 0.2 : timeX(v.date),
-        cy = vertical ? itemY + 0.25 : y + h * 0.48
+        cy = vertical ? itemY + 0.25 : axisY
       if (!vertical) {
         const neighbor = Math.min(
           i ? cx - timeX(d.items[i - 1].date) : itemWidth,
@@ -946,13 +968,18 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
         )
       if (!height && i > 0 && i < all.length - 1)
         rule('BridgeZeroStep' + i, bx, scale(to), bw, 'navy')
-      const labelY = Math.max(y, top - 0.32)
+      const labelY = Math.max(y, top - 0.39),
+        endpoint = i === 0 || i === all.length - 1,
+        unit = endpoint ? (d.levelUnit ?? d.unit) : d.unit
       tx(
         'BridgeValue' + i,
-        [bx - 0.08, labelY, bw + 0.16, 0.28],
-        number(v.value),
-        'small',
-        i === 0 ? 'opening' : i === all.length - 1 ? 'closing' : `drivers[${i - 1}].value`,
+        [bx - 0.08, labelY, bw + 0.16, 0.36],
+        `${!endpoint && v.value > 0 ? '+' : ''}${number(v.value)} ${unit}`,
+        all.length <= 4 ? 'heading' : 'body',
+        [
+          i === 0 ? 'opening' : i === all.length - 1 ? 'closing' : `drivers[${i - 1}].value`,
+          endpoint && d.levelUnit ? 'levelUnit' : 'unit',
+        ],
         { alignment: 'center', color: 'navy' },
       )
       tx(
@@ -969,7 +996,6 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
       )
       if (i < all.length - 1) rule('BridgeConnector' + i, bx + bw, scale(to), slot * 0.34, 'navy')
     })
-    tx('BridgeUnit', [x, y - 0.35, w, 0.3], d.unit, 'small', 'unit')
     notes(r.notes, d.notes)
   } else if (role === 'appendix') {
     table(

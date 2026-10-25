@@ -1185,7 +1185,7 @@
       "caseId": "amber-ledger.golden-operations",
       "kind": "golden",
       "readiness": "candidate",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Annual operations report",
       "bestFor": [
         "annual report",
@@ -1198,29 +1198,29 @@
       "files": {
         "deck": {
           "path": "amber-ledger/deck.pptx",
-          "bytes": 36133,
-          "sha256": "7541d30afdb2b87358869a9173502106957fcb5eb5f1e89fe4a96d6716535b01"
+          "bytes": 36172,
+          "sha256": "64086096d67c4327f5a9c9fe44703dc1e16f544a1413a2ba0185b334c815ae50"
         },
         "contactSheet": {
           "path": "amber-ledger/contact-sheet.webp",
-          "bytes": 113864,
-          "sha256": "10b69cf045e62bdcb7c537b73f84c7de0b00b41eeb91ed27026d06117a97d037",
+          "bytes": 115362,
+          "sha256": "2eebaf95912a2fbaeedd4dda9903808adfb7fa16e549184e32fb1fa66a1de6c7",
           "quality": 82
         },
         "content": {
           "path": "amber-ledger/content.json",
-          "bytes": 13684,
-          "sha256": "cba8eb35d6a1a7c894f9c4f3700e4e81834ff2780025bf53566bdb8e7ce33584"
+          "bytes": 13685,
+          "sha256": "b1786c797810c4344a356ec2c4811aa97cb09ce144b292a3b52ef858d9335f07"
         },
         "brief": {
           "path": "amber-ledger/brief.md",
           "bytes": 712,
-          "sha256": "a8c8d51cd2da887ec8006203d97b3a34547b94192a7707eb7a79fb6bb6a1bf20"
+          "sha256": "978ad76aecd1d7dfff1cae7c48e18b1eb789192178b46bc7ad803eb471ec51ef"
         },
         "summary": {
           "path": "amber-ledger/summary.json",
           "bytes": 2707,
-          "sha256": "1b0ee56a0e0ca1d768269f2aea5c8211b4a3bdfa63b84faf76f81e26558c9f21"
+          "sha256": "5373445ea95758af3598a56df8330870106554b2eeee1347536290ac201a87b5"
         }
       },
       "validation": {
@@ -1232,7 +1232,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 853
+        "ops": 855
       },
       "vision": {
         "status": "success",

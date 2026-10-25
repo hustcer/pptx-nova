@@ -5401,7 +5401,7 @@
     },
     {
       "id": "amber-ledger",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "amber-ledger/amber-ledger.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
@@ -5445,7 +5445,7 @@
       ],
       "visualGrammar": {
         "schemaVersion": "pptx-nova-visual-grammar/v1",
-        "positioning": "Auditable warm ivory editorial reports, charcoal sans evidence, upright serif interpretation and honey-amber focus.",
+        "positioning": "Warm ivory editorial reports with charcoal text, upright serif interpretation, sage evidence and honey-amber focus.",
         "mood": ["warm", "measured", "auditable"],
         "layoutPrinciples": [
           "Open unequal evidence regions divided by hairlines, never card walls.",
@@ -5453,13 +5453,13 @@
           "Business claims, units, dates, target definitions, owners and thresholds are content."
         ],
         "signatureElements": [
-          "dual-circle cover and dark edge rail",
+          "amber outlined cover circle, sage medallion and sage edge rail",
           "four open KPI modules with central serif verdict",
           "one small amber decisive-number block",
           "native history columns and composition ring",
           "straight native point-line trend with annotation",
           "reconciled data-derived difference bridge",
-          "black actual tracks and amber plan ticks",
+          "sage actual tracks and ochre plan ticks",
           "horizontal-rule native matrix and decision register"
         ],
         "typography": {
@@ -5469,10 +5469,10 @@
         },
         "colorSystem": {
           "background": ["warm ivory"],
-          "primary": ["charcoal"],
-          "accent": ["honey amber"],
+          "primary": ["charcoal text", "sage evidence"],
+          "accent": ["honey amber", "pale sage or amber matrix emphasis"],
           "semantic": [
-            "Current evidence uses amber; status wording is literal content, no inferred RAG threshold."
+            "Chart and legend categorical tones share one source; sage evidence and ochre plan markers do not infer business status."
           ]
         },
         "slideRhythm": {
@@ -5499,7 +5499,8 @@
           "photographic backgrounds",
           "3D",
           "unreconciled bridges",
-          "silent field dropping"
+          "silent field dropping",
+          "large charcoal evidence fills"
         ]
       },
       "layoutContract": {
@@ -5674,9 +5675,9 @@
         }
       },
       "validatedWith": {
-        "xdoc": "0.15.0 (6fa897c7)",
-        "report": "amber-ledger/migration-report.md",
-        "powerPoint": "16.114.1 (macOS): open, editable title/table/chart-data probes, save/reopen, object readback"
+        "xdoc": "0.15.0 (9ee8ef0c)",
+        "report": "amber-ledger/intent.md",
+        "powerPoint": "macOS PowerPoint clean-open passed; current object editing and pixel parity not certified."
       },
       "quality": {
         "manualHardDefects": 0,
@@ -5703,7 +5704,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-amber-ledger/benchmark/02"
+            "out": ".tmp/deckkit-amber-ledger-refine-20261025/benchmark/01"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -5730,7 +5731,7 @@
               "caseId": "amber-ledger.golden-operations",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-amber-ledger/benchmark/02/amber-ledger/golden-operations/summary.json",
+              "summaryPath": ".tmp/deckkit-amber-ledger-refine-20261025/benchmark/01/amber-ledger/golden-operations/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/amber-ledger/golden-operations/review.md",
               "validation": {
                 "valid": true,
@@ -5767,10 +5768,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 205959
+                "bytes": 207885
               },
-              "patchOps": 853,
-              "p50TotalMs": 97
+              "patchOps": 855,
+              "p50TotalMs": 108.98
             }
           ],
           "blockers": []

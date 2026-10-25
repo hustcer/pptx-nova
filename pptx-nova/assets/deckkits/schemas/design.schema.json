@@ -3021,6 +3021,43 @@
         "family": {
           "const": "amber-ledger/v1"
         },
+        "evidence": {
+          "type": "object",
+          "properties": {
+            "series": { "type": "string", "minLength": 1 },
+            "history": { "type": "string", "minLength": 1 },
+            "categorical": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "track": { "type": "string", "minLength": 1 },
+            "plan": { "type": "string", "minLength": 1 },
+            "focusTones": {
+              "type": "object",
+              "properties": {
+                "sage": { "type": "string", "minLength": 1 },
+                "amber": { "type": "string", "minLength": 1 },
+                "ink": { "type": "string", "minLength": 1 },
+                "history": { "type": "string", "minLength": 1 }
+              },
+              "required": ["sage", "amber", "ink", "history"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["series", "history", "categorical", "track", "plan", "focusTones"],
+          "additionalProperties": false
+        },
+        "cover": {
+          "type": "object",
+          "properties": {
+            "ringLinePt": { "type": "number", "minimum": 1, "maximum": 24 },
+            "smallLinePt": { "type": "number", "minimum": 0.5, "maximum": 2 }
+          },
+          "required": ["ringLinePt", "smallLinePt"],
+          "additionalProperties": false
+        },
         "styles": {
           "type": "object",
           "additionalProperties": {

@@ -10,6 +10,7 @@ import {
   checkDesignPatch,
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { amberTrendScale } from '../../../pptx-nova/assets/deckkits/amber-ledger/layouts.mjs'
 const read = (p) => JSON.parse(readFileSync(new URL('../../../' + p, import.meta.url)))
 const fixture = () => read('pptx-nova/assets/deckkits/amber-ledger/examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'amber-ledger', designScope: 'excerpt' }, slides })
@@ -210,4 +211,88 @@ test('amber-ledger scopes native series properties to their OOXML chart family',
       if (Object.hasOwn(series, 'invertIfNegative')) assert.equal(kind, 'column')
     }
   }
+})
+
+test('amber-ledger separates evidence fills from text ink and keeps ring legends synchronized', () => {
+  const built = createDeck(fixture())
+  for (const layout of built.designPlan.layouts)
+    for (const c of layout.components) {
+      if (['box', 'circle'].includes(c.kind)) assert.notEqual(c.color, 'ink', c.name)
+      if (c.kind === 'chart') assert.equal(c.seriesTone, DESIGN.amber.evidence.series)
+    }
+  const mix = built.designPlan.layouts[2].components
+  const ring = mix.find((c) => c.name === 'MixChart')
+  assert.deepEqual(ring.pointTones, DESIGN.amber.evidence.categorical)
+  for (const [i, token] of ring.pointTones.entries())
+    assert.equal(mix.find((c) => c.name === 'LegendSwatch' + i).color, token)
+  const bad = {
+    op: 'set-shape',
+    slide: 4,
+    shape: { name: 'S4_BridgeBar0' },
+    fill: { type: 'solid', color: DESIGN.colors.ink },
+  }
+  assert.equal(
+    checkDesignPatch(DESIGN, { ...built.patch, ops: [...built.patch.ops, bad] }).status,
+    'fail',
+  )
+})
+
+test('amber-ledger matrix supports light sage and amber with backward compatible tone aliases', () => {
+  for (const [tone, token] of Object.entries(DESIGN.amber.evidence.focusTones)) {
+    const c = fixture()
+    c.slides[6].data.focusTone = tone
+    assert.equal(validateDeckkitContent(c, { mode: 'delivery' }).valid, true)
+    const built = createDeck(c)
+    const table = built.patch.ops.find((o) => o.op === 'set-table' && o.slide === 6)
+    const cells = table.cells.filter((v) => v.column === c.slides[6].data.focusColumn)
+    assert.equal(cells.length, c.slides[6].data.rows.length + 1)
+    for (const cell of cells) {
+      assert.equal(cell.style.fill.color, DESIGN.colors[token])
+      assert.equal(cell.style.font.color, DESIGN.colors.ink)
+    }
+  }
+})
+
+test('amber-ledger cover rings remain editable and their visible strokes stay inside the canvas', () => {
+  for (const layoutId of ['circleRight', 'circleLeft']) {
+    const c = fixture()
+    c.slides[0].layoutId = layoutId
+    const b = createDeck(c)
+    const ring = b.designPlan.layouts[0].components.find((v) => v.name === 'LargeCircle')
+    const [x, y, w, h] = ring.frame,
+      halfStroke = ring.linePt / 144
+    assert.ok(x - halfStroke >= 0 && y - halfStroke >= 0)
+    assert.ok(
+      x + w + halfStroke <= DESIGN.canvas.widthIn && y + h + halfStroke <= DESIGN.canvas.heightIn,
+    )
+    assert.ok(w > 2 * halfStroke && h === w)
+    const style = b.patch.ops
+      .filter((o) => o.op === 'set-shape' && o.shape?.name === 'S0_LargeCircle')
+      .at(-1)
+    assert.equal(style.fill.type, 'none')
+    assert.equal(style.line.color, DESIGN.colors.accent)
+    assert.equal(style.line.width, DESIGN.amber.cover.ringLinePt + 'pt')
+  }
+})
+
+test('amber-ledger round trend ticks retain raw signed, fractional and flat observations', () => {
+  assert.deepEqual(amberTrendScale([310, 380, 360]), { minimum: 300, maximum: 400, majorUnit: 20 })
+  for (const values of [
+    [-12, -4],
+    [0, 0],
+    [0.013, 0.027],
+    [125, 125],
+  ]) {
+    const original = [...values],
+      scale = amberTrendScale(values)
+    assert.ok(scale.minimum < Math.min(...values) && scale.maximum > Math.max(...values))
+    assert.ok(Number.isFinite(scale.majorUnit) && scale.majorUnit > 0)
+    assert.deepEqual(values, original)
+  }
+  const chart = createDeck(fixture()).patch.ops.find((o) => o.op === 'set-chart' && o.slide === 3)
+  assert.deepEqual(chart.axes.find((a) => a.axis === 'value').scale, {
+    min: 300,
+    max: 400,
+    majorUnit: 20,
+  })
 })

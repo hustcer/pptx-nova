@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "amber-ledger",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -10,10 +10,15 @@
     "paper": "FBF9EE",
     "ink": "181716",
     "body": "6B625D",
-    "history": "A09B93",
+    "history": "B1BBA7",
     "accent": "FDC356",
     "rule": "CCC5BE",
-    "wash": "F0EDE1"
+    "wash": "F0EDE1",
+    "sage": "728578",
+    "sageWash": "DFE6D7",
+    "clay": "B39478",
+    "gold": "B48036",
+    "amberWash": "F6E6BF"
   },
   "fonts": {
     "display": {
@@ -38,11 +43,11 @@
       "lt2": "wash",
       "dk2": "body",
       "accent1": "accent",
-      "accent2": "history",
-      "accent3": "body",
-      "accent4": "rule",
-      "accent5": "wash",
-      "accent6": "ink",
+      "accent2": "sage",
+      "accent3": "history",
+      "accent4": "clay",
+      "accent5": "sageWash",
+      "accent6": "gold",
       "hlink": "ink",
       "folHlink": "body"
     },
@@ -103,6 +108,23 @@
   ],
   "amber": {
     "family": "amber-ledger/v1",
+    "evidence": {
+      "series": "sage",
+      "history": "history",
+      "categorical": ["sage", "accent", "history", "clay"],
+      "track": "sageWash",
+      "plan": "gold",
+      "focusTones": {
+        "sage": "sageWash",
+        "amber": "amberWash",
+        "ink": "sageWash",
+        "history": "sageWash"
+      }
+    },
+    "cover": {
+      "ringLinePt": 22,
+      "smallLinePt": 1
+    },
     "styles": {
       "hero": {
         "role": "display",

@@ -42,6 +42,20 @@ function assertAmber(design, { assertFrame }) {
     throw Error('Amber Ledger requires warm ivory, charcoal and honey amber identity')
   if (Object.keys(b.families).length !== Object.keys(AMBER_LAYOUTS).length)
     throw Error('Amber Ledger requires eight registered responsibilities')
+  const evidence = b.evidence
+  if (!evidence || !b.cover) throw Error('Amber Ledger requires explicit evidence and cover roles')
+  for (const token of [
+    evidence.series,
+    evidence.history,
+    ...evidence.categorical,
+    evidence.track,
+    evidence.plan,
+    ...Object.values(evidence.focusTones),
+  ])
+    if (!design.colors[token] || token === 'ink')
+      throw Error('Amber Ledger evidence fills require registered colors separate from text ink')
+  if (new Set(evidence.categorical).size !== 4)
+    throw Error('Amber Ledger composition categories require four distinct tones')
   for (const [type, f] of Object.entries(b.families)) {
     const expected = AMBER_LAYOUTS[f.role]
     if (!type.startsWith('amber') || !expected || seen.has(f.role))
@@ -101,6 +115,8 @@ function checkAmber(design, op, fail) {
     if (key === 'font' && v.italic) fail('Amber Ledger requires upright type')
     if (key === 'fill' && ['gradient', 'picture', 'pattern'].includes(v.type))
       fail('Amber Ledger prohibits decorative fills')
+    if (key === 'fill' && v.type === 'solid' && v.color === design.colors.ink)
+      fail('Amber Ledger reserves charcoal for text and fine lines, not evidence fills')
     for (const [k, child] of Object.entries(v)) walk(child, k)
   }
   walk(op)

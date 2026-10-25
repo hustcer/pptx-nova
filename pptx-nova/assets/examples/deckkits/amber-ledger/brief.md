@@ -4,7 +4,7 @@ DeckKit: `amber-ledger`
 Showcase case: `amber-ledger.golden-operations`
 Readiness: `candidate`
 Slides: 8
-Patch ops: 853
+Patch ops: 855
 Title: Annual operations report
 
 ## Best For

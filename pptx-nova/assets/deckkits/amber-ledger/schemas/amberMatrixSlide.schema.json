@@ -128,7 +128,7 @@
     },
     "focusTone": {
       "type": "string",
-      "enum": ["ink", "history"],
+      "enum": ["sage", "amber", "ink", "history"],
       "x-slotRole": "control"
     },
     "note": {

@@ -383,7 +383,7 @@
           ["Surplus · m credits", "4.1", "6.6", "8.4"]
         ],
         "focusColumn": 2,
-        "focusTone": "ink",
+        "focusTone": "sage",
         "note": "Synthetic assumptions: timing and capacity affect the range. These values are demonstrations, not a forecast or policy."
       }
     },

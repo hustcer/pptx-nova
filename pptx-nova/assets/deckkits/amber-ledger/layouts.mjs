@@ -6,8 +6,23 @@ export const amberNumber = (n) => {
   if (n !== 0 && (Math.abs(n) < 0.001 || Math.abs(n) >= 1e7)) return n.toExponential(2)
   return Number(n.toPrecision(8)).toString()
 }
+// Round tick intervals, never the observations. Keep headroom above and below the series.
+export function amberTrendScale(values) {
+  const lo = Math.min(...values),
+    hi = Math.max(...values)
+  const span = hi - lo || Math.max(1, Math.abs(hi) * 0.2)
+  const raw = span / 4,
+    power = 10 ** Math.floor(Math.log10(raw))
+  const step = [1, 2, 5, 10].find((v) => v * power >= raw) * power
+  return {
+    minimum: Math.floor((lo - span * 0.12) / step) * step,
+    maximum: Math.ceil((hi + span * 0.16) / step) * step,
+    majorUnit: step,
+  }
+}
 export function compileAmberLayout(design, family, layoutId, variant, d, path = 'data') {
   const b = design.amber,
+    evidence = b.evidence,
     r = variant.regions,
     cs = [],
     gap = b.spacing.gap
@@ -124,13 +139,13 @@ export function compileAmberLayout(design, family, layoutId, variant, d, path = 
           box(
             name + 'MicroBar' + i,
             [a + slot * 0.2, Math.min(vy, scale(0)), slot * 0.6, Math.abs(vy - scale(0))],
-            i === points.length - 1 ? 'accent' : 'history',
+            i === points.length - 1 ? 'accent' : evidence.history,
           )
         if (kind === 'line')
           box(
             name + 'MicroPoint' + i,
             [a - 0.035, vy - 0.035, 0.07, 0.07],
-            i === focusPoint ? 'accent' : 'ink',
+            i === focusPoint ? 'accent' : evidence.series,
             'circle',
           )
         tx(
@@ -169,6 +184,9 @@ export function compileAmberLayout(design, family, layoutId, variant, d, path = 
           ? '0'
           : `0.${'0'.repeat(Math.min(4, Math.max(...vals.map((v) => (String(v).split('.')[1] || '').length))))}`,
       inputPaths: paths,
+      seriesTone: evidence.series,
+      pointTones: kind === 'doughnut' ? evidence.categorical.slice(0, points.length) : undefined,
+      ...(kind === 'line' ? amberTrendScale(vals) : {}),
     })
   }
   const role = family.role
@@ -184,9 +202,11 @@ export function compileAmberLayout(design, family, layoutId, variant, d, path = 
   if (role === 'cover') {
     const [x, y, w, h] = r.ornament,
       diam = Math.min(w, h * 0.68)
-    box('LargeCircle', [x, y, diam, diam], 'history', 'circle')
-    box('SmallCircle', [x + w * 0.42, y + diam + 0.25, w * 0.4, w * 0.4], 'history', 'circle')
-    box('EdgeRail', [13.02, 0, 0.313, 7.5], 'ink')
+    box('LargeCircle', [x, y, diam, diam], 'paper', 'circle')
+    Object.assign(cs.at(-1), { outline: 'accent', linePt: b.cover.ringLinePt, hollow: true })
+    box('SmallCircle', [x + w * 0.42, y + diam + 0.25, w * 0.4, w * 0.4], evidence.series, 'circle')
+    Object.assign(cs.at(-1), { outline: 'gold', linePt: b.cover.smallLinePt })
+    box('EdgeRail', [13.02, 0, 0.313, 7.5], evidence.series)
     box('EdgeAmber', [12.94, 0, 0.08, 7.5], 'accent')
     tx('Title', r.hero, d.title, 'hero', 'title')
     rule('CoverRule', r.hero[0], r.hero[1] + r.hero[3] + 0.05, r.hero[2])
@@ -324,7 +344,7 @@ export function compileAmberLayout(design, family, layoutId, variant, d, path = 
       { alignment: 'center' },
     )
     cells(r.legend, d.segments.length, true, 0.02).forEach(([lx, ly, lw, lh], i) => {
-      box('LegendSwatch' + i, [lx, ly + 0.07, 0.08, 0.08], ['ink', 'accent', 'history', 'body'][i])
+      box('LegendSwatch' + i, [lx, ly + 0.07, 0.08, 0.08], evidence.categorical[i])
       tx(
         'Legend' + i,
         [lx + 0.17, ly, lw - 0.17, lh],
@@ -446,7 +466,7 @@ export function compileAmberLayout(design, family, layoutId, variant, d, path = 
         box(
           'BridgeBar' + i,
           [bx, by, bw, bh],
-          i === 0 || i === vs.length - 1 ? 'ink' : v.focus ? 'accent' : 'history',
+          i === 0 || i === vs.length - 1 ? evidence.series : v.focus ? 'accent' : evidence.history,
         )
       tx(
         'BridgeValue' + i,
@@ -475,12 +495,13 @@ export function compileAmberLayout(design, family, layoutId, variant, d, path = 
       const bx = columns ? x : x + 3.6,
         by = columns ? y + 0.62 : y + 0.08,
         bw = columns ? w : w - 3.6
-      box('ProgressTrack' + i, [bx, by, bw, 0.16], 'wash')
-      if (v.actual > 0) box('ActualProgress' + i, [bx, by, (bw * v.actual) / 100, 0.16], 'ink')
+      box('ProgressTrack' + i, [bx, by, bw, 0.16], evidence.track)
+      if (v.actual > 0)
+        box('ActualProgress' + i, [bx, by, (bw * v.actual) / 100, 0.16], evidence.series)
       box(
         'PlanTick' + i,
         [bx + Math.min(bw - 0.025, (bw * v.plan) / 100), by - 0.07, 0.025, 0.3],
-        'accent',
+        evidence.plan,
       )
       tx(
         'ProgressValues' + i,
@@ -519,7 +540,7 @@ export function compileAmberLayout(design, family, layoutId, variant, d, path = 
       d.rows,
       (i, j) => (i === 0 ? `columns[${j}].label` : `rows[${i - 1}][${j}]`),
       d.focusColumn,
-      d.focusTone,
+      evidence.focusTones[d.focusTone],
     )
     tx('MatrixNote', r.note, d.note, 'body', 'note')
   } else if (role === 'decisions') {

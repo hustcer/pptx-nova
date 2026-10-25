@@ -1,5 +1,33 @@
 # Amber Ledger golden review
 
+## 0.2 refinement
+
+2026-10-25: candidate readiness retained. The full eight-slide source was refined through native
+object edits before the approved visual rules were incorporated into the DeckKit. Reviewed final
+standard Create candidate SHA-256:
+`64086096d67c4327f5a9c9fe44703dc1e16f544a1413a2ba0185b334c815ae50`.
+
+The cover now uses an amber hollow circle, a sage medallion and a sage edge rail. Large black fills
+on slides 3/5/6/7 are replaced by role-specific sage evidence and pale matrix emphasis. Chart and
+legend categories share one palette; progress plan ticks use darker ochre. Trend axes derive round
+ticks from the original observations. Legacy matrix tone inputs remain accepted with light fills.
+
+Golden benchmark, all sixteen registered compositions, maximum-entry density and mixed-language
+probes pass content/fit, dry-run/apply, native readback and canonical Create gates. Vision H/M/L=0
+with no semantic issues. Actual canonical PNGs were reviewed for every layout and probe page;
+identical probe pages were bound by exact PNG SHA-256 to the reviewed golden bytes.
+
+All eight slide text-node sequences, native chart cache categories/values and the three embedded
+workbook byte streams equal the source. Three charts and three tables remain native. ZIP integrity,
+33 XML/relationship parts, package semantics and Microsoft 365 compatibility pass. macOS PowerPoint
+clean-open passes. No new object-editing or pixel-parity certification is claimed for this revision.
+
+The curated showcase matches the reviewed candidate bytes. The design contract, regression tests,
+schema, intent and catalog record these rules; shared execution and core-primitives are unchanged.
+Fonts remain unembedded; independent labels and numeric-derived shapes still require regeneration.
+
+## 0.1 historical baseline
+
 2026-10-25: candidate accepted, explicitly selected; synthetic data only.
 
 All eight source panels were analyzed and rebuilt before freezing the contract. Eight roles have
@@ -20,5 +48,5 @@ Other platforms, complete workbook equality, native PDF export and pixel parity 
 
 Fonts are not embedded. Independent labels/totals and numeric-derived bridge/progress/microplot
 shapes require content regeneration after data edits. No raster charts or reference imagery.
-See `assets/deckkits/amber-ledger/migration-report.md` for paths, design decisions, exact evidence,
-superseded samples and limitations. core-primitives unchanged.
+Current design decisions, validation scope and limitations are maintained in
+[the design intent](../../../../../assets/deckkits/amber-ledger/intent.md). core-primitives unchanged.

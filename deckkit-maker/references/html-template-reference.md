@@ -13,6 +13,11 @@ Turn browser-rendered HTML slide evidence into the same Phase 0 artifacts requir
 
 The browser is the visual fact source. The HTML/CSS is the token and structure fact source.
 
+Count actual selected DOM sections before announcing scope. Numbered CSS comments, unused page-type
+styles and speaker-note descriptions do not prove that a page exists. The capture manifest now retains
+`sourceInventory[]` in real DOM order (id/classes/data-label/textContent), including text from initially
+hidden pages. Compare this inventory with metadata and screenshots; do not infer slide count from CSS.
+
 ## Capture Baseline Screenshots
 
 Use `agent-browser` after reading its current `skills get core` output.

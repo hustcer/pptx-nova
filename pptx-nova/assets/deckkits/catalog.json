@@ -7796,6 +7796,378 @@
         "Horizontal timeline positions encode time; vertical timeline is an ordered register. Close events or lengthy labels may require the vertical layout or a split."
       ],
       "examples": ["blue-research/examples/content.json"]
+    },
+    {
+      "id": "pink-script",
+      "version": "1.0.0",
+      "path": "pink-script/pink-script.kit.mjs",
+      "designContract": "pink-script/design.json",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Upright editorial serif with actual font-specific paragraph spacing; all canonical gates remain active."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "editorial feature",
+        "luxury launch",
+        "creator brand",
+        "research keynote",
+        "编辑式品牌提案"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "pinkCoverSlide",
+          "pinkIndexSlide",
+          "pinkStatsSlide",
+          "pinkSectionSlide",
+          "pinkTrendSlide",
+          "pinkProcessSlide",
+          "pinkMatrixSlide",
+          "pinkQuoteSlide",
+          "pinkClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "pinkCoverSlide",
+        "pinkIndexSlide",
+        "pinkStatsSlide",
+        "pinkSectionSlide",
+        "pinkTrendSlide",
+        "pinkProcessSlide",
+        "pinkMatrixSlide",
+        "pinkQuoteSlide",
+        "pinkClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Nocturnal warm-black editorial with hot pink, blush upright serif and open evidence.",
+        "mood": ["nocturnal", "literary", "considered"],
+        "layoutPrinciples": [
+          "One oversized editorial focus, open evidence and generous negative space.",
+          "Content owns every claim, number, entity, unit, source and policy.",
+          "Deterministic bounded layouts; no manual coordinates, field dropping or endless shrinking."
+        ],
+        "signatureElements": [
+          "hanging two-tone serif cover",
+          "giant chapter numerals",
+          "five open statistic rows or lower numeric band",
+          "native pink/white two-series curve with focus marker",
+          "numbered ruled process with arrows",
+          "native focus-column matrix and rectangular status cells",
+          "oversized quotation mark and attribution rail",
+          "transparent uncropped QR slot without contact plate",
+          "warm native radial atmosphere and sparse editable grain"
+        ],
+        "typography": {
+          "display": "DM Serif Display regular; Songti SC bold Chinese substitute.",
+          "body": "Inter regular / Songti SC regular.",
+          "metadata": "JetBrains Mono / Noto Sans SC, upright; Latin tracking only."
+        },
+        "colorSystem": {
+          "background": ["warm near-black"],
+          "primary": ["paper blush", "readable muted paper"],
+          "accent": ["ED3D8C pink"],
+          "semantic": ["No domain-specific color or business policy."]
+        },
+        "slideRhythm": {
+          "anchor": ["pinkCoverSlide", "pinkSectionSlide", "pinkClosingSlide"],
+          "editorial": ["pinkIndexSlide", "pinkQuoteSlide"],
+          "evidence": ["pinkStatsSlide", "pinkTrendSlide", "pinkMatrixSlide"],
+          "process": ["pinkProcessSlide"]
+        },
+        "compositionRules": [
+          "No outer frame, per explicit user refinement.",
+          "Content-local hairlines remain.",
+          "Two registered geometries per role, selected by actual fit.",
+          "QR URL comes from supplied asset; QR is a replaceable picture, never a fake pattern."
+        ],
+        "avoid": [
+          "rounded cards",
+          "outer frame",
+          "drop shadows",
+          "italic text",
+          "secondary accent hues",
+          "full-page screenshots",
+          "hardcoded business defaults"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "pinkCoverSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.title",
+              "data.continuation",
+              "data.metadata"
+            ],
+            "allowedLayoutIds": ["auto", "hanging", "offset"]
+          },
+          "pinkIndexSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.title",
+              "data.continuation",
+              "data.items"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "pinkStatsSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.title",
+              "data.intro",
+              "data.stats"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "pinkSectionSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.number",
+              "data.title",
+              "data.intro",
+              "data.sideLabel"
+            ],
+            "allowedLayoutIds": ["auto", "left", "right"]
+          },
+          "pinkTrendSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.title",
+              "data.unit",
+              "data.categories",
+              "data.series",
+              "data.focusIndex",
+              "data.callout"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "pinkProcessSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.title",
+              "data.intro",
+              "data.steps",
+              "data.timeline"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "rows"]
+          },
+          "pinkMatrixSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.title",
+              "data.columns",
+              "data.rows",
+              "data.focusColumn",
+              "data.note"
+            ],
+            "allowedLayoutIds": ["auto", "full", "inset"]
+          },
+          "pinkQuoteSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.quote",
+              "data.author",
+              "data.role"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "broad"]
+          },
+          "pinkClosingSlide": {
+            "requiredSlots": [
+              "data.brand",
+              "data.section",
+              "data.kicker",
+              "data.source",
+              "data.title",
+              "data.actions"
+            ],
+            "allowedLayoutIds": ["auto", "invitation", "sidecar"],
+            "assetSlots": {
+              "contact.qr": {
+                "kind": "image",
+                "acceptsAsset": true,
+                "placeholderBehavior": "Empty reserved region when unbound; square/no-crop QR with its own quiet zone, preferably transparent."
+              }
+            }
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["pinkCoverSlide", "pinkSectionSlide", "pinkClosingSlide"],
+          "editorial": ["pinkIndexSlide", "pinkQuoteSlide"],
+          "evidence": ["pinkStatsSlide", "pinkTrendSlide", "pinkMatrixSlide"],
+          "process": ["pinkProcessSlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (9ee8ef0c)",
+        "report": "../../benchmarks/visual/cases/pink-script/golden-editorial/review.md",
+        "powerPoint": "Microsoft PowerPoint for Mac 16.114.1: golden and mixed opened, saved and reopened without Repair; native text/table/chart-workbook/QR-position edits persisted in isolated golden probe. Other hosts and every alternate/stress sample not verified."
+      },
+      "quality": {
+        "lastBenchmark": "2026-10-26",
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-26",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-pink-script/benchmark/01"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "pink-script.golden-editorial",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-pink-script/benchmark/01/pink-script/golden-editorial/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/pink-script/golden-editorial/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 9,
+                "expectedCount": 9,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 455706
+              },
+              "patchOps": 1479,
+              "p50TotalMs": 208.12
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on the nine-page Pink Script HTML/design reference; unused system CSS is not a source page. Browser motion and controls are excluded.",
+        "Creation only, explicit candidate selection; no native skinning, arbitrary refurbishment or animation claim.",
+        "Fonts are not embedded. Chinese display uses Songti SC bold instead of Noto Serif SC 900; English body uses Inter regular instead of Light.",
+        "Sparse native grain and glow approximate CSS atmosphere. Outer frame removed by user; folio rotated caption becomes horizontal.",
+        "Native line chart retains two series and numeric source. Independent callout and legend require regeneration after manual data edits.",
+        "Matrix cells remain native editable; statuses use native cell fills/text rather than independent pill overlays.",
+        "Optional contact.qr accepts a square uncropped asset, with no generated white plate or caption. Image position/size is editable; code modules and URL require replacing the asset."
+      ],
+      "examples": [
+        "pink-script/examples/content.json",
+        "pink-script/examples/alternate-content.json",
+        "pink-script/examples/community-content.json"
+      ]
     }
   ]
 }

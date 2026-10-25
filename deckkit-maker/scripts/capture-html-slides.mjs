@@ -354,6 +354,13 @@ return JSON.stringify({
   userAgent: navigator.userAgent,
   devicePixelRatio: window.devicePixelRatio,
   count: slides.length,
+  sourceInventory: slides.map((slide, slideIndex) => ({
+    slideIndex,
+    id: slide.id || null,
+    classes: String(slide.className || '').split(/\\s+/).filter(Boolean),
+    label: slide.getAttribute?.('data-label') || null,
+    textContent: String(slide.textContent || '').replace(/\\s+/g, ' ').trim(),
+  })),
   selector,
 });
 })()
@@ -456,6 +463,7 @@ try {
     hideSelectors: args.hideSelectors,
     captureCss,
     slideCount: init.count,
+    sourceInventory: init.sourceInventory,
     screenshots,
     contactSheet,
   }

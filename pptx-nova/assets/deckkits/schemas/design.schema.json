@@ -267,6 +267,9 @@
     },
     "research": {
       "$ref": "#/$defs/research"
+    },
+    "pink": {
+      "$ref": "#/$defs/pink"
     }
   },
   "required": [
@@ -4747,6 +4750,294 @@
         }
       },
       "required": ["family", "styles", "spacing", "rhythm", "chrome", "capacity", "families"],
+      "additionalProperties": false
+    },
+    "pink": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "pink-editorial/v1"
+        },
+        "styles": {
+          "type": "object",
+          "properties": {
+            "hero": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "continuation": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "giant": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "indexHero": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "title": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "heading": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "quote": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "subhead": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "metric": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "number": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "body": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "muted": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "label": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "kicker": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "small": {
+              "$ref": "#/$defs/pinkStyle"
+            },
+            "table": {
+              "$ref": "#/$defs/pinkStyle"
+            }
+          },
+          "required": [
+            "hero",
+            "continuation",
+            "giant",
+            "indexHero",
+            "title",
+            "heading",
+            "quote",
+            "subhead",
+            "metric",
+            "number",
+            "body",
+            "muted",
+            "label",
+            "kicker",
+            "small",
+            "table"
+          ],
+          "additionalProperties": false
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0.15,
+              "maximum": 0.5
+            },
+            "rulePt": {
+              "type": "number",
+              "minimum": 0.4,
+              "maximum": 1.2
+            }
+          },
+          "required": ["gap", "rulePt"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            }
+          },
+          "required": ["maxConsecutive"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "brand": {
+              "$ref": "#/$defs/frame"
+            },
+            "section": {
+              "$ref": "#/$defs/frame"
+            },
+            "kicker": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["brand", "section", "kicker", "source", "page"],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "metadata": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "stats": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "metadata",
+            "items",
+            "stats",
+            "steps",
+            "columns",
+            "rows",
+            "actions",
+            "categories"
+          ],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "index",
+                  "stats",
+                  "section",
+                  "trend",
+                  "process",
+                  "matrix",
+                  "quote",
+                  "closing"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["family", "styles", "spacing", "rhythm", "chrome", "capacity", "families"],
+      "additionalProperties": false
+    },
+    "pinkStyle": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["display", "body", "mono"]
+        },
+        "sizePt": {
+          "type": "number",
+          "minimum": 10.5,
+          "maximum": 300
+        },
+        "color": {
+          "type": "string"
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "lineHeight": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1.5
+        }
+      },
+      "required": ["role", "sizePt", "color", "bold", "lineHeight"],
       "additionalProperties": false
     }
   }

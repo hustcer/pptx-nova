@@ -254,6 +254,15 @@
       "buildPath": "../../assets/deckkits/blue-research/examples/build.mjs",
       "expectedPath": "cases/blue-research/golden-learning/expected.json",
       "reviewPath": "cases/blue-research/golden-learning/review.md"
+    },
+    {
+      "id": "pink-script.golden-editorial",
+      "deckkit": "pink-script",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/pink-script/examples/content.json",
+      "buildPath": "../../assets/deckkits/pink-script/examples/build.mjs",
+      "expectedPath": "cases/pink-script/golden-editorial/expected.json",
+      "reviewPath": "cases/pink-script/golden-editorial/review.md"
     }
   ]
 }

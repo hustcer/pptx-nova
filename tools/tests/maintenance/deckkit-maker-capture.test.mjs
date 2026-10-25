@@ -21,7 +21,10 @@ if (args.includes('eval')) {
   const fonts = new Set(mode === 'font-error' ? [{ status: 'error', family: 'Missing' }] : []);
   fonts.ready = mode === 'font-pending' ? new Promise(() => {}) : new Promise(resolve => setTimeout(() => { fontLoaded = true; resolve(); }, 40));
   Object.defineProperty(fonts, 'status', { get: () => fontLoaded ? 'loaded' : 'loading' });
-  const slides = [0, 1].map(() => ({
+  const slides = [0, 1].map(i => ({
+    id: 'page-' + i, className: 'slide type-' + i,
+    textContent: 'Source page ' + (i + 1),
+    getAttribute: name => name === 'data-label' ? 'Label ' + (i + 1) : null,
     style: { setProperty() {} }, classList: {
       add(name) { if (mode === 'animation-end' && name !== 'is-active') throw new Error('Wrong activation class'); },
       remove() {},
@@ -111,6 +114,13 @@ test('capture waits for resources, records hashes and owns a unique session', (t
   assert.equal(result.status, 0, result.stderr)
   const report = JSON.parse(result.stdout)
   assert.equal(report.slideCount, 2)
+  assert.deepEqual(
+    report.sourceInventory.map((s) => [s.slideIndex, s.id, s.classes, s.label, s.textContent]),
+    [
+      [0, 'page-0', ['slide', 'type-0'], 'Label 1', 'Source page 1'],
+      [1, 'page-1', ['slide', 'type-1'], 'Label 2', 'Source page 2'],
+    ],
+  )
   assert.equal(report.browser.userAgent, 'Fixture Browser')
   assert.equal(
     report.source.sha256,

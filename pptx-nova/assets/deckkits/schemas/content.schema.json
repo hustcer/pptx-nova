@@ -268,7 +268,16 @@
               "researchTimelineSlide",
               "researchScorecardSlide",
               "researchFindingsSlide",
-              "researchImplicationsSlide"
+              "researchImplicationsSlide",
+              "pinkCoverSlide",
+              "pinkIndexSlide",
+              "pinkStatsSlide",
+              "pinkSectionSlide",
+              "pinkTrendSlide",
+              "pinkProcessSlide",
+              "pinkMatrixSlide",
+              "pinkQuoteSlide",
+              "pinkClosingSlide"
             ]
           },
           "data": {

@@ -25,6 +25,7 @@ const BINARY_EXTENSIONS = new Set([
 const ALLOWED_BINARY_PATTERNS = [
   /^assets\/examples\/deckkits\/[^/]+\/deck\.pptx$/,
   /^assets\/examples\/deckkits\/[^/]+\/contact-sheet\.webp$/,
+  /^assets\/examples\/deckkits\/pink-script\/structurify-qr\.png$/,
   /^assets\/icons\/tabler-icons\.pack\.br$/,
 ]
 const LICENSE_REQUIRED_PATTERNS = [/^assets\/icons\/tabler-icons\.pack\.br$/]

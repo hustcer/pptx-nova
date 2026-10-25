@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { tmpdir } from 'node:os'
@@ -7,6 +7,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import test from 'node:test'
 import { auditDeckkitLayout } from '../../lib/deckkit-layout.mjs'
+import { createAssetContext } from '../../../pptx-nova/scripts/lib/assets/asset-manifest.mjs'
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -82,7 +83,17 @@ test('all example CLIs resolve adjacent content from an unrelated working direct
     assert.equal(result.status, 0, `${entry.id}: ${result.stderr}`)
     const content = JSON.parse(readFileSync(join(base, entry.id, 'examples/content.json'), 'utf8'))
     const { createDeck } = await import(pathToFileURL(join(base, entry.path)))
-    assert.deepEqual(JSON.parse(result.stdout), createDeck(content).patch, entry.id)
+    const manifestPath = join(
+      repo,
+      'pptx-nova/assets/examples/deckkits',
+      entry.id,
+      'assets_manifest.json',
+    )
+    const assets = existsSync(manifestPath)
+      ? createAssetContext(JSON.parse(readFileSync(manifestPath, 'utf8')), manifestPath)
+      : undefined
+    const expected = JSON.parse(JSON.stringify(createDeck(content, { assets }).patch))
+    assert.deepEqual(JSON.parse(result.stdout), expected, entry.id)
   }
 })
 

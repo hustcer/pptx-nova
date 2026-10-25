@@ -36,7 +36,7 @@ production/default DeckKit。若有可用 DeckKit，直接回到 `deckkit-mode.m
 
 ```bash
 # 1. 复制模板
-cp skills/pptx-nova/assets/examples/deck-generator-template.mjs ./generate.mjs
+cp <skill-root>/assets/examples/deck-generator-template.mjs <run-dir>/generate.mjs
 
 # 2. 选择 themePack/stylePack；要新增风格时先改 assets/themes/catalog.json
 #    并在发布前同步生成的 theme catalogs
@@ -92,8 +92,8 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 模板里 `grid()` 把网格对齐从手算变 1 行,`txH()` 把字号→高度的人脑表查变函数
 调用,这两个是压缩"JS 生成器编写"耗时的关键。新建生成器还必须把**可读字号下限**
 写进 helper，而不是靠每个 slide 函数自觉：核心正文不低于 `10.5pt`，label / badge /
-chart / table 不低于 `9pt`，页脚 / 来源才允许 `8.5-9pt`。如果文字放不下，删字、
-换布局、扩容器；不要降到 `7pt` / `8pt` 让 deck 变成必须凑近看的图片。
+chart / table 和页脚 / 来源不低于当前 canonical 门禁（默认 `10pt`），套件合同更严格时
+采用更严格下限。如果文字放不下，重组内容、换布局、扩容器或拆页；不要静默删字段或缩字通过。
 
 > **当前 runtime 可用 `--daemon`**：dry-run + apply 两步会复用同一份 in-memory deck，
 > 把"dry-run gate + 修 schema bug"和"apply + PNG"这两阶段里"重新解 PPTX zip"
@@ -138,7 +138,7 @@ const F = {
   body: '14pt', // 正文
   pill: '11pt', // delta pill
   eyebrow: '10pt', // eyebrow 小标
-  foot: '9pt', // 页脚 / 注脚
+  foot: '10.5pt', // 页脚 / 注脚；按当前合同和 canonical 门禁复核
 }
 ```
 
@@ -177,7 +177,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs \
 
 benchmark 输出和 `scripts/pptx-nova-deckkit-readiness.mjs` 共同决定 DeckKit 是否能进入
 delivery/default 路径。需要验证 theme/style 是否跨版式稳定时，把对应 fixture 收敛到
-`skills/pptx-nova/benchmarks/visual/`。
+`<skill-root>/benchmarks/visual/`。
 
 ### 3. `nm()` 命名规范（双向必经）
 
@@ -267,7 +267,7 @@ txH(14, 4) // → "0.58in"  (4 行 14pt body)
 
 `text-overflow-estimate` 是 dry-run 和 `vision-check` 共用的静态估算信号。
 它会基于最终 shape 文本、字号、inset 和 autofit 判断可用空间；创建型 deck 里出现
-medium 时优先加高、删字、拆页或改 autofit。**单行最小给字号的 1.4 倍,中文给
+medium 时优先加高、重组内容、拆页或选择合法布局。**单行最小给字号的 1.4 倍,中文给
 1.5 倍**;多行按行数线性放大。
 
 | 字号 | 单行 `txH()` 输出 | 2 行 `txH()` 输出 | 4 行 `txH()` 输出 |

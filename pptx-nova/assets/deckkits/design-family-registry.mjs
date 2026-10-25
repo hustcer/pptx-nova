@@ -1,3 +1,4 @@
+import { SKY_FAMILY } from './sky-registry.mjs'
 import { AMBER_FAMILY } from './amber-registry.mjs'
 import { PULSE_FAMILY } from './pulse-registry.mjs'
 // Registration seam for visual families: shared callers discover/resolve/validate
@@ -11,6 +12,7 @@ import { CONSULTING_FAMILY } from './consulting-registry.mjs'
 import { IMPACT_FAMILY } from './impact-registry.mjs'
 import { CLAY_FAMILY } from './clay-registry.mjs'
 export const DESIGN_FAMILIES = [
+  SKY_FAMILY,
   PULSE_FAMILY,
   AMBER_FAMILY,
   CLAY_FAMILY,

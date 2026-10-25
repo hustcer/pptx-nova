@@ -49,6 +49,7 @@ assets/deckkits/
 ├── amber-components.mjs       # 象牙纸底年度报告、原生图表/表格与数值派生证据
 ├── amber-layouts.mjs          # 八类职责、十六个构图与逐实例容量
 ├── amber-registry.mjs         # Amber Ledger 视觉族断言、检查与发现投影
+├── sky-compass/               # Sky Compass 0.1.0 合同与意图（candidate）
 ├── amber-ledger/              # Amber Ledger 0.1.0 合同、意图和迁移验收（candidate）
 ├── warm-clay/                 # Warm Clay 0.1.0 合同、意图和迁移验收（candidate）
 ├── clear-impact/              # Clear Impact 0.1.0 合同、意图和迁移验收（candidate）
@@ -111,6 +112,11 @@ Amber Ledger 提供八类年度报告职责与十六个注册构图，以暖象�
 正体衬线解释及蜂蜜琥珀焦点组织开放版面。常规柱图、点线、环图和表格为原生对象；极小量图、
 差异桥、进度为数值派生形状，编辑后须从 content 重建同步。须显式选择，字体不嵌入。
 详见 [设计意图与编辑边界](amber-ledger/intent.md) 及 [迁移验收](amber-ledger/migration-report.md)。
+
+Sky Compass 提供十二类运营复盘职责与二十四个注册构图，以白底、天空蓝观点、海军蓝重点、
+浅蓝解释栏及开放式原生表格组织证据。保留贴底灰色扇形、蓝点页眉、短下划线、基准刻线、
+流程虚线及日期刻度；原生环图、趋势柱图、表格和数值派生形状支持编辑，独立标签须从 content 重建同步。
+须显式选择，字体不嵌入。详见 [设计与边界](sky-compass/intent.md) 及 [验收记录](../../benchmarks/visual/cases/sky-compass/golden-operations/review.md)。
 
 ## Midnight Pulse
 

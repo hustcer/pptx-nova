@@ -6170,6 +6170,467 @@
       ],
       "examples": ["examples/midnight-pulse-content.json"],
       "designContract": "midnight-pulse/design.json"
+    },
+    {
+      "id": "sky-compass",
+      "version": "0.1.0",
+      "path": "sky-compass.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "operating review",
+        "service performance",
+        "project progress",
+        "decision brief",
+        "运营复盘",
+        "项目进度"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "skyCoverSlide",
+          "skyPerformanceSlide",
+          "skyCoverageSlide",
+          "skyRankingSlide",
+          "skyProcessSlide",
+          "skyDiagnosisSlide",
+          "skyActionsSlide",
+          "skyProjectSlide",
+          "skyTrendSlide",
+          "skyBridgeSlide",
+          "skyAppendixSlide",
+          "skyDecisionsSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "skyCoverSlide",
+        "skyPerformanceSlide",
+        "skyCoverageSlide",
+        "skyRankingSlide",
+        "skyProcessSlide",
+        "skyDiagnosisSlide",
+        "skyActionsSlide",
+        "skyProjectSlide",
+        "skyTrendSlide",
+        "skyBridgeSlide",
+        "skyAppendixSlide",
+        "skyDecisionsSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "White and pale-sky operating reviews with auditable evidence and blue wayfinding.",
+        "mood": ["calm", "precise", "auditable"],
+        "layoutPrinciples": [
+          "Open asymmetric evidence and explanation regions; no card wall.",
+          "Native tables and charts with capacity-checked content.",
+          "Claims, units, sources, dates, status meaning and thresholds come from content."
+        ],
+        "signatureElements": [
+          "gray quarter-disk verdict cover and navy scope strip",
+          "pale section tag with owned text",
+          "RAG performance rows and current-period column",
+          "native mix ring and quantitative explanation tracks",
+          "value-derived editable bullet bars with baseline ticks",
+          "elapsed-time process nodes",
+          "highlighted attribution column and reconciled gap",
+          "owned action nodes and decision ledger",
+          "five project metadata arcs",
+          "explicit observed/plan boundary and forecast outlines"
+        ],
+        "typography": {
+          "display": "Upright Arial; Noto Sans SC for Chinese.",
+          "body": "One sans-serif family per script, regular and bold.",
+          "numeric": "Raw native values; finite derived geometry and bounded display precision."
+        },
+        "colorSystem": {
+          "background": ["white"],
+          "primary": ["electric blue", "deep navy"],
+          "accent": ["pale sky"],
+          "semantic": ["Green/amber/red are explicit content statuses only."]
+        },
+        "slideRhythm": {
+          "anchor": ["skyCoverSlide", "skyDecisionsSlide"],
+          "judgment": ["skyPerformanceSlide", "skyDiagnosisSlide"],
+          "evidence": [
+            "skyCoverageSlide",
+            "skyRankingSlide",
+            "skyTrendSlide",
+            "skyBridgeSlide",
+            "skyAppendixSlide"
+          ],
+          "process": ["skyProcessSlide", "skyActionsSlide", "skyProjectSlide"]
+        },
+        "compositionRules": [
+          "Complete decks begin with verdict cover and end with management decisions.",
+          "Explicit layouts must fit, auto resolves capacity and cadence.",
+          "Regenerate data-derived shapes and independent labels to synchronize edits."
+        ],
+        "avoid": [
+          "rounded cards",
+          "photographic backgrounds",
+          "shadows",
+          "glow",
+          "gradients",
+          "decorative status colors",
+          "silent field dropping",
+          "unlimited font shrinking"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "skyCoverSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.description",
+              "data.metrics",
+              "data.masthead",
+              "data.reportLabel"
+            ],
+            "allowedLayoutIds": ["auto", "verdict", "rail"]
+          },
+          "skyPerformanceSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.headers",
+              "data.metrics",
+              "data.context"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "rail"]
+          },
+          "skyCoverageSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.seriesName",
+              "data.unit",
+              "data.focusIndex",
+              "data.points",
+              "data.notes",
+              "data.mixNote"
+            ],
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+          },
+          "skyRankingSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.seriesName",
+              "data.baselineName",
+              "data.unit",
+              "data.focusIndex",
+              "data.points",
+              "data.notes",
+              "data.changeLabel"
+            ],
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+          },
+          "skyProcessSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.totalLabel",
+              "data.targetLabel",
+              "data.target",
+              "data.unit",
+              "data.focusIndex",
+              "data.steps",
+              "data.notes",
+              "data.targetMarkerLabel"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+          },
+          "skyDiagnosisSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.headers",
+              "data.unit",
+              "data.gap",
+              "data.reconciliationLabel",
+              "data.issues"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "compact"]
+          },
+          "skyActionsSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.items",
+              "data.startDate",
+              "data.endDate",
+              "data.ticks"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+          },
+          "skyProjectSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.status",
+              "data.statusLabel",
+              "data.progress",
+              "data.metadata",
+              "data.items"
+            ],
+            "allowedLayoutIds": ["auto", "arcLeft", "arcRight"]
+          },
+          "skyTrendSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.seriesName",
+              "data.unit",
+              "data.boundaryIndex",
+              "data.observedLabel",
+              "data.planLabel",
+              "data.points",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+          },
+          "skyBridgeSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.unit",
+              "data.openingLabel",
+              "data.opening",
+              "data.closingLabel",
+              "data.closing",
+              "data.drivers",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+          },
+          "skyAppendixSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.columns",
+              "data.focusColumn",
+              "data.rows",
+              "data.methodology"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "inset"]
+          },
+          "skyDecisionsSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.basis",
+              "data.period",
+              "data.source",
+              "data.verdict",
+              "data.headers",
+              "data.items",
+              "data.commitment"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "compact"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["skyCoverSlide", "skyDecisionsSlide"],
+          "judgment": ["skyPerformanceSlide", "skyDiagnosisSlide"],
+          "evidence": [
+            "skyCoverageSlide",
+            "skyRankingSlide",
+            "skyTrendSlide",
+            "skyBridgeSlide",
+            "skyAppendixSlide"
+          ],
+          "process": ["skyProcessSlide", "skyActionsSlide", "skyProjectSlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (6fa897c7)",
+        "report": "../../benchmarks/visual/cases/sky-compass/golden-operations/review.md",
+        "powerPoint": "16.114.1 on macOS: English and Chinese native export, edit/save/reopen; text/table/chart/freeform edit and full object readback verified. Other platforms unverified."
+      },
+      "quality": {
+        "lastBenchmark": "2026-10-25",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-25",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-sky-compass-20261025/benchmark/13"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "sky-compass.golden-operations",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-sky-compass-20261025/benchmark/13/sky-compass/golden-operations/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/sky-compass/golden-operations/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 12,
+                "expectedCount": 12,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 278488
+              },
+              "patchOps": 1362,
+              "p50TotalMs": 171.97
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on supplied Sky Blue Wayfinding design specification and eight-panel reference; synthetic validation content only.",
+        "Explicit candidate selection; no native skinning or arbitrary existing-deck preservation claim.",
+        "Arial and Noto Sans SC replace unavailable Liter/MiSans; fonts are not embedded.",
+        "Native charts/tables retain source data; independent labels, tracks, process positions and bridge shapes require regeneration after manual edits.",
+        "Photography is not registered: the actual reference uses an editable quarter-disk cover.",
+        "Bounded appendix supports up to eight rows at readable type; longer lists require another page."
+      ],
+      "examples": ["examples/sky-compass-content.json"],
+      "designContract": "sky-compass/design.json"
     }
   ]
 }

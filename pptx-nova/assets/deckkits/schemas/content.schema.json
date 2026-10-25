@@ -228,7 +228,19 @@
               "pulseAttributionSlide",
               "pulseComparisonSlide",
               "pulseStatusSlide",
-              "pulseCloseSlide"
+              "pulseCloseSlide",
+              "skyCoverSlide",
+              "skyPerformanceSlide",
+              "skyCoverageSlide",
+              "skyRankingSlide",
+              "skyProcessSlide",
+              "skyDiagnosisSlide",
+              "skyActionsSlide",
+              "skyProjectSlide",
+              "skyTrendSlide",
+              "skyBridgeSlide",
+              "skyAppendixSlide",
+              "skyDecisionsSlide"
             ]
           },
           "data": {

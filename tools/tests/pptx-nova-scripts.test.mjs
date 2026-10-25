@@ -7139,3 +7139,16 @@ test('midnight-pulse registered entry preserves every visible slot across all ei
   assert.equal(report.results[0].slideTypes.length, 8)
   assert.ok(report.results[0].slideTypes.every((page) => page.status === 'ok'))
 })
+
+test('sky-compass registered entry preserves every visible slot across twelve roles', () => {
+  const result = runNode([
+    'pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs',
+    '--deckkit',
+    'sky-compass',
+    '--json',
+  ])
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.ok, true)
+  assert.equal(report.results[0].slideTypes.length, 12)
+  assert.ok(report.results[0].slideTypes.every((s) => s.status === 'ok'))
+})

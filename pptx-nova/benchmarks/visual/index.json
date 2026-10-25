@@ -217,6 +217,15 @@
       "buildPath": "../../assets/deckkits/examples/midnight-pulse-build.mjs",
       "expectedPath": "cases/midnight-pulse/golden-operations/expected.json",
       "reviewPath": "cases/midnight-pulse/golden-operations/review.md"
+    },
+    {
+      "id": "sky-compass.golden-operations",
+      "deckkit": "sky-compass",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/sky-compass-content.json",
+      "buildPath": "../../assets/deckkits/examples/sky-compass-build.mjs",
+      "expectedPath": "cases/sky-compass/golden-operations/expected.json",
+      "reviewPath": "cases/sky-compass/golden-operations/review.md"
     }
   ]
 }

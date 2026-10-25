@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "warm-clay",
   "case": "golden-workshop",
-  "contentPath": "../../../../../assets/deckkits/examples/warm-clay-content.json",
+  "contentPath": "../../../../../assets/deckkits/warm-clay/examples/content.json",
   "expected": {
     "minSlides": 8,
     "requiredSlideTypes": [

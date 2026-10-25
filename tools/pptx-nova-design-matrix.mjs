@@ -33,7 +33,7 @@ const content = JSON.parse(
       args.content ??
         fileURLToPath(
           new URL(
-            '../pptx-nova/assets/deckkits/examples/biennale-yellow-evidence-content.json',
+            '../pptx-nova/assets/deckkits/biennale-yellow/examples/evidence-content.json',
             import.meta.url,
           ),
         ),

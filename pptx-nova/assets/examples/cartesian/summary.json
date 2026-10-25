@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Cartesian",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/cartesian-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/cartesian-build.mjs",
+    "content": "pptx-nova/assets/deckkits/cartesian/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/cartesian/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/cartesian/golden-html/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

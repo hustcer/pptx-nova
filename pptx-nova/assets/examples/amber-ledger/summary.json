@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Annual operations report",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/amber-ledger-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/amber-ledger-build.mjs",
+    "content": "pptx-nova/assets/deckkits/amber-ledger/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/amber-ledger/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/amber-ledger/golden-operations/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

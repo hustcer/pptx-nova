@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "biennale-yellow",
   "case": "golden-html",
-  "contentPath": "../../../../../assets/deckkits/examples/biennale-yellow-content.json",
+  "contentPath": "../../../../../assets/deckkits/biennale-yellow/examples/content.json",
   "expected": {
     "minSlides": 9,
     "requiredSlideTypes": [

@@ -33,7 +33,7 @@ import {
   designHash,
   loadDesignContract,
   checkDesignPatch,
-} from '../assets/deckkits/design-contract.mjs'
+} from '../assets/deckkits/shared/design-contract.mjs'
 import { resolveFilesystemPath } from './lib/filesystem-paths.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))

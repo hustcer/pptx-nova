@@ -39,7 +39,7 @@ tools belong under `tools/`.
 - Prefer Nushell for repository maintenance scripts when structured file
   inspection or release checks benefit from it.
 - Use kebab-case for DeckKit ids and file names, for example
-  `consulting-dark.kit.mjs` and `pptx-nova-build.mjs`.
+  `consulting-dark/consulting-dark.kit.mjs` and `pptx-nova-build.mjs`.
 - Prefer JSON catalogs and schemas over undocumented loose files.
 
 Do not add Python scripts unless there is a specific requirement.

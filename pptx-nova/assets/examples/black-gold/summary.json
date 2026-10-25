@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Q1 2026 Embodied AI Venture Capital Monitor",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/black-gold-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/black-gold-build.mjs",
+    "content": "pptx-nova/assets/deckkits/black-gold/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/black-gold/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/black-gold/golden-design/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

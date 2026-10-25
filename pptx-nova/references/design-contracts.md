@@ -14,7 +14,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-design.mjs --deckkit biennale-yellow
 ```
 
 Read `assets/deckkits/biennale-yellow/intent.md` for design judgment and the evidence page schema under
-`assets/deckkits/schemas/biennale-yellow/` for content fields. Biennale 2.0 retains the nine slide type names and routes every page through registered layouts.
+`assets/deckkits/biennale-yellow/schemas/` for content fields. Biennale 2.0 retains the nine slide type names and routes every page through registered layouts.
 For `biennaleDataSlide`, supply numeric `bars[].value`, `unit` and `source`; retired `pct` and display
 strings require an explicit source-data migration. See `intent.md` for the field mapping. Use `biennaleEvidenceSlide` for a native numeric chart:
 
@@ -159,7 +159,7 @@ does not prove arbitrary existing-deck refurbishment or preservation; fonts are 
 `black-gold` uses the `editorial-ledger/v1` family with six content types: `ledgerCoverSlide`,
 `ledgerSummarySlide`, `ledgerTrendSlide`, `ledgerMatrixSlide`, `ledgerRankingSlide`,
 `ledgerDecisionSlide`. Discover its own contract and content schemas; do not reuse Biennale fields.
-Its example is `assets/deckkits/examples/black-gold-content.json`.
+Its example is `assets/deckkits/black-gold/examples/content.json`.
 
 Trend pages choose full-width, explanation rail or a supporting native chart. Rankings choose a
 KPI rail or a lower KPI band. Matrices support bounded row densities. Content capacity and the
@@ -194,7 +194,7 @@ records the kit's production selection eligibility; arbitrary existing-deck refu
 `green-slate` uses `strategy-report/v1`: a charcoal/forest/mint report with ten content types for
 cover, summary, intervals, matrix, roadmap, value, flow, section, notice and closing. Read
 `assets/deckkits/green-slate/intent.md`, discover its design and slots, and start from
-`assets/deckkits/examples/green-slate-content.json`. Do not reuse another family's field names.
+`assets/deckkits/green-slate/examples/content.json`. Do not reuse another family's field names.
 
 Rail/wide intervals and vertical/horizontal flows change geometry for the same content. Matrix
 full/compact variants change density. Selection is deterministic from fit and recent layout history;
@@ -276,7 +276,7 @@ is explicit; no arbitrary images, existing-deck preservation or all-host pixel p
 ### Shared contract boundaries
 
 The published runtime uses only Node built-ins and xdoc. The design schema is a bounded first-party
-schema, validated by `design-contract.mjs`; this is not an exported general-purpose JSON Schema
+schema, validated by `shared/design-contract.mjs`; this is not an exported general-purpose JSON Schema
 implementation. Unknown fields/checkers and invalid token references fail. Current checks cover
 palette, font families, a font floor, forbidden effects/operations and creation bounds. The public
 readback report names its coverage; a rule's presence alone is never visual proof.
@@ -285,7 +285,8 @@ Biennale repeating components are resolved per instance. Composed fields such as
 one budget; programme rows and all calendar cells use actual instance geometry. Capacity estimates
 are heuristics and require canonical render review. Discovery v2 reports `registeredSlideTypes` and
 registered families; the retired `legacySlideTypes` and slot APIs are no longer exposed. Existing
-design-less DeckKits retain their original checks. `core-primitives.kit.mjs` remains unchanged.
+design-less DeckKits retain their original checks. `shared/core-primitives.kit.mjs` owns common
+geometry and baseline validation; suite-specific design rules stay outside it.
 
 Edit the selected contract rather than hand-editing generated budgets or projected refurbishment
 tokens. In a source checkout, the maintainer-only projection command is
@@ -294,5 +295,5 @@ tokens. In a source checkout, the maintainer-only projection command is
 languages opt-in; shared semantics do not require every design to use the same visual components.
 
 New visual families register assertion, resolver, style checks and projection metadata in
-`design-family-registry.mjs`. Projection preserves existing per-type asset metadata and independently
+`shared/design-family-registry.mjs`. Projection preserves existing per-type asset metadata and independently
 registered refurbishment mappings. Adding a creation family does not create refurbishment support.

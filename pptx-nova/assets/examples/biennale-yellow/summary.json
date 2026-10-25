@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Aurora Programme",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/biennale-yellow-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/biennale-yellow-build.mjs",
+    "content": "pptx-nova/assets/deckkits/biennale-yellow/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/biennale-yellow/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/biennale-yellow/golden-html/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

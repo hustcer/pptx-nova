@@ -9,7 +9,7 @@ import {
   skyStressBusiness,
   skyGeometryCoverage,
 } from './tests/fixtures/sky-compass-fixtures.mjs'
-import { DESIGN } from '../pptx-nova/assets/deckkits/sky-compass.kit.mjs'
+import { DESIGN } from '../pptx-nova/assets/deckkits/sky-compass/sky-compass.kit.mjs'
 const out = path.resolve(process.argv[2] ?? '.tmp/deckkit-sky-compass/verification'),
   selected = (process.argv[3] ?? 'golden,variants,stress-business').split(',')
 const cases = { golden: skyGolden, variants: skyVariants, 'stress-business': skyStressBusiness }

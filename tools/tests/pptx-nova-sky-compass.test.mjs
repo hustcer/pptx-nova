@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/sky-compass.kit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/sky-compass/sky-compass.kit.mjs'
 import { readFileSync } from 'node:fs'
 const fixture = () =>
   JSON.parse(
     readFileSync(
-      new URL('../../pptx-nova/assets/deckkits/examples/sky-compass-content.json', import.meta.url),
+      new URL('../../pptx-nova/assets/deckkits/sky-compass/examples/content.json', import.meta.url),
     ),
   )
 test('sky-compass registers a native editable twelve-role design', () => {
@@ -24,15 +24,15 @@ test('sky-compass registers a native editable twelve-role design', () => {
 import {
   assertDesignContract,
   checkDesignPatch,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
-import { skySpecimen } from '../../pptx-nova/assets/deckkits/sky-registry.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { skySpecimen } from '../../pptx-nova/assets/deckkits/sky-compass/registry.mjs'
 const excerpt = (slides) => ({ meta: { deckkit: 'sky-compass', designScope: 'excerpt' }, slides })
 function specimen(type, maximum) {
   const schema = JSON.parse(
     readFileSync(
       new URL(
-        `../../pptx-nova/assets/deckkits/schemas/sky-compass/${type}.schema.json`,
+        `../../pptx-nova/assets/deckkits/sky-compass/schemas/${type}.schema.json`,
         import.meta.url,
       ),
     ),
@@ -245,7 +245,7 @@ test('sky-compass zero bridge drivers retain a level connector without a fake ba
   assert.ok(cs.some((c) => c.name === 'BridgeZeroStep1'))
 })
 import { skyStressBusiness } from './fixtures/sky-compass-fixtures.mjs'
-import { fitAmberText } from '../../pptx-nova/assets/deckkits/amber-layouts.mjs'
+import { fitTextPlan } from '../../pptx-nova/assets/deckkits/shared/text-layout.mjs'
 test('sky-compass decision owner and Chinese date fit together at the documented font floor', () => {
   const slide = skyStressBusiness().slides[11]
   for (const layoutId of Object.keys(DESIGN.sky.families.skyDecisionsSlide.variants)) {
@@ -254,7 +254,7 @@ test('sky-compass decision owner and Chinese date fit together at the documented
     )
     const binding = t.bindings[t.columns.length + 2]
     assert.equal(
-      fitAmberText(t.cells[1][2], binding.frame, binding.style, 'owner/date').estimatedLines,
+      fitTextPlan(t.cells[1][2], binding.frame, binding.style, 'owner/date').estimatedLines,
       1,
     )
     assert.equal(binding.style.sizePt, 10.5)

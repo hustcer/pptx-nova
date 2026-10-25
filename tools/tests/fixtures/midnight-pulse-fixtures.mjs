@@ -3,7 +3,7 @@ export const pulseExample = () =>
   JSON.parse(
     readFileSync(
       new URL(
-        '../../../pptx-nova/assets/deckkits/examples/midnight-pulse-content.json',
+        '../../../pptx-nova/assets/deckkits/midnight-pulse/examples/content.json',
         import.meta.url,
       ),
     ),

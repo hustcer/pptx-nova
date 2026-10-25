@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "swiss-grid",
   "case": "golden-lecture",
-  "contentPath": "../../../../../assets/deckkits/examples/swiss-grid-content.json",
+  "contentPath": "../../../../../assets/deckkits/swiss-grid/examples/content.json",
   "expected": {
     "minSlides": 15,
     "requiredSlideTypes": [

@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Service transformation Value follows adoption",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/green-slate-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/green-slate-build.mjs",
+    "content": "pptx-nova/assets/deckkits/green-slate/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/green-slate/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/green-slate/golden-design/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

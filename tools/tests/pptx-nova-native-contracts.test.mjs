@@ -21,11 +21,11 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { inflateRawSync } from 'node:zlib'
 import { prepareRemediation } from '../../pptx-nova/scripts/lib/remediation.mjs'
-import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
+import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian/cartesian.kit.mjs'
 import {
   checkDesignReadback,
   designHash,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { readNativeCharts } from '../../pptx-nova/scripts/lib/native-chart-readback.mjs'
 import { cartesianChartMatrix } from './helpers/cartesian-exhibits.mjs'
 import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-choreography.mjs'
@@ -43,7 +43,7 @@ const prepareScript = fileURLToPath(
   new URL('../../pptx-nova/scripts/pptx-nova-translation-prepare.mjs', import.meta.url),
 )
 const cartesianContent = fileURLToPath(
-  new URL('../../pptx-nova/assets/deckkits/examples/cartesian-content.json', import.meta.url),
+  new URL('../../pptx-nova/assets/deckkits/cartesian/examples/content.json', import.meta.url),
 )
 const skillScript = (name) =>
   fileURLToPath(new URL(`../../pptx-nova/scripts/${name}.mjs`, import.meta.url))
@@ -67,7 +67,7 @@ nativeTest(
     const example = JSON.parse(
       readFileSync(
         new URL(
-          '../../pptx-nova/assets/deckkits/examples/cartesian-native-exhibits-content.json',
+          '../../pptx-nova/assets/deckkits/cartesian/examples/native-exhibits-content.json',
           import.meta.url,
         ),
       ),

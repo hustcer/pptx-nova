@@ -2,15 +2,15 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import test from 'node:test'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/warm-clay.kit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/warm-clay/warm-clay.kit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 const read = (p) => JSON.parse(readFileSync(new URL('../../' + p, import.meta.url), 'utf8'))
-const fixture = () => read('pptx-nova/assets/deckkits/examples/warm-clay-content.json')
+const fixture = () => read('pptx-nova/assets/deckkits/warm-clay/examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'warm-clay', designScope: 'excerpt' }, slides })
 function minimal(s, index = 0, key = '') {
   if (s['x-slotProbeSequence'])
@@ -32,7 +32,7 @@ const deny =
   /low-altitude|carbon intensity|drone|2025 impact|workshop|ceramics|cohort|participants|synthetic participant quotation/i
 for (const type of Object.keys(DESIGN.clay.families))
   test(`warm-clay minimal nonreference ${type} validates and builds every registered composition`, () => {
-    const schema = read(`pptx-nova/assets/deckkits/schemas/warm-clay/${type}.schema.json`),
+    const schema = read(`pptx-nova/assets/deckkits/warm-clay/schemas/${type}.schema.json`),
       data = minimal(schema),
       frames = []
     for (const layoutId of Object.keys(DESIGN.clay.families[type].variants)) {
@@ -151,10 +151,10 @@ test('warm-clay source image is not embedded and owned labels use explicit align
   assert.ok(chips.length >= 8)
   assert.ok(chips.every((o) => o.frame.verticalAnchor === 'middle'))
   for (const p of [
-    'clay-components.mjs',
-    'clay-layouts.mjs',
-    'warm-clay.kit.mjs',
-    'examples/warm-clay-content.json',
+    'warm-clay/components.mjs',
+    'warm-clay/layouts.mjs',
+    'warm-clay/warm-clay.kit.mjs',
+    'warm-clay/examples/content.json',
   ])
     assert.equal(
       /5e3b594c0d532372|warm-clay-works\.jpg|drone|Carbon intensity/i.test(

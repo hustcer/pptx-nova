@@ -1,18 +1,18 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/broadside.kit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/broadside/broadside.kit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   designHash,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
-import { broadsideProbeData } from '../../pptx-nova/assets/deckkits/broadside-registry.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { broadsideProbeData } from '../../pptx-nova/assets/deckkits/broadside/registry.mjs'
 
 const root = new URL('../../pptx-nova/assets/deckkits/', import.meta.url)
 const read = (path) => JSON.parse(readFileSync(new URL(path, root)))
-const fixture = () => read('examples/broadside-content.json')
+const fixture = () => read('broadside/examples/content.json')
 const excerpt = (slide) => ({
   meta: { deckkit: 'broadside', designScope: 'excerpt' },
   slides: [slide],
@@ -57,7 +57,7 @@ function minimal(schema) {
 }
 for (const [type, family] of Object.entries(DESIGN.broadside.families)) {
   test(`${type}: minimum content and maximum-count alternate-theme input retain their content`, () => {
-    const data = minimal(read(`schemas/broadside/${type}.schema.json`)),
+    const data = minimal(read(`broadside/schemas/${type}.schema.json`)),
       content = excerpt({ type, data })
     assert.equal(
       validateDeckkitContent(content, { deckkit: 'broadside', mode: 'delivery' }).valid,

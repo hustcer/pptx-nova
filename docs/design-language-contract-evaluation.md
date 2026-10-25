@@ -59,11 +59,11 @@ Broadside 复用该注册接口，同时保留黑橙海报、衰减文字和闭�
 本节比较的是 2026-10-21 抽取前的机制。当前 Biennale 已读取 design.json，以下“隐含在代码中”
 及“形状数据页”的描述不能泛化到新增原生证据页。
 
-`biennale-yellow.kit.mjs` 本身是生成器。它的完整合同还分布在：
+`biennale-yellow/biennale-yellow.kit.mjs` 本身是生成器。它的完整合同还分布在：
 
 - [catalog.json](../pptx-nova/assets/deckkits/catalog.json)：`visualGrammar`、`layoutContract`、`diversityGate`、密度、字体底线、翻新配置、readiness 等。
-- [页型 schemas](../pptx-nova/assets/deckkits/schemas/biennale-yellow/)：字段、条目数量、槽位文字预算。
-- [core-primitives.kit.mjs](../pptx-nova/assets/deckkits/core-primitives.kit.mjs)：几何边界、内容校验、版式分组多样性和部分质量检查。
+- [页型 schemas](../pptx-nova/assets/deckkits/biennale-yellow/schemas/)：字段、条目数量、槽位文字预算。
+- [core-primitives.kit.mjs](../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs)：几何边界、内容校验、版式分组多样性和部分质量检查。
 - [DeckKit 工作流](../pptx-nova/references/deckkit-mode.md)：内容合同、生成、dry-run、应用、预览和人工视觉复核。
 
 Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kimi-ppt/reference/design_system/finance/black-gold-ledger/design.md) 则是面向模型/设计者的语义规范，包含金融领域基线与黑金视觉系统，不能只看成一张配色表。
@@ -100,8 +100,8 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 - catalog 的翻新配置将 `secondarySeries` 指向 `palette.secondary`，其值是 ember；同一 chartRemap 的 prose 又要求 ember 只用于光晕，不能用于图表系列。
 
 这些数值是初评时的历史差异，不是当前文件的缺陷清单。对应文件为
-[数据页 schema](../pptx-nova/assets/deckkits/schemas/biennale-yellow/biennaleDataSlide.schema.json)、
-[生成器](../pptx-nova/assets/deckkits/biennale-yellow.kit.mjs) 和 [catalog](../pptx-nova/assets/deckkits/catalog.json)；
+[数据页 schema](../pptx-nova/assets/deckkits/biennale-yellow/schemas/biennaleDataSlide.schema.json)、
+[生成器](../pptx-nova/assets/deckkits/biennale-yellow/biennale-yellow.kit.mjs) 和 [catalog](../pptx-nova/assets/deckkits/catalog.json)；
 修复与投影防漂移证据见[试点报告](design-contract-pilot-results.md)。
 
 这些事实促成了统一事实源和投影检查。试点后来重新执行 benchmark、canonical 和视觉验证；
@@ -188,26 +188,29 @@ JSON 表达参数、规则与注册构图，MJS 负责容量估计、几何求�
 
 复杂专用组件仍可保留 MJS。先使用有限的已注册组件与布局操作，不急于发明一门带任意表达式、继承、循环的配置语言。xdoc 宏/recipe 可以复用其中适配的操作，但不必把所有 JS 强行迁移成宏。
 
-实际目录采用合同文件夹与视觉族模块分开组织；无需为每套风格建立尚无用途的 recipes/examples 子目录：
+实际目录按套件归拢合同、视觉族实现、schema 和示例，共用运行时集中到 shared/：
 
 ```text
 assets/deckkits/
-  <id>/design.json + intent.md
-  <id>.kit.mjs                    # 保留 createDeck 接口
-  design-contract.mjs             # 合同、theme/字体、布局排序、规则与回读
-  evidence-components.mjs         # Biennale 证据组件
-  editorial-{components,layouts}.mjs
-  strategy-{components,layouts,registry}.mjs
-  annual-{components,layouts,registry}.mjs
-  schemas/<id>/                  # 内容输入与槽位提示
-  examples/<id>-content.json      # 业务文案和数据留在内容侧
+  catalog.json
+  shared/design-contract.mjs      # 合同、theme/字体、布局排序、规则与回读
+  shared/evidence-components.mjs  # 共用原生证据组件
+  schemas/                       # 仅放公共 content/design schema
+  <id>/
+    <id>.kit.mjs                 # 保留 createDeck 接口
+    design.json + intent.md
+    components.mjs + layouts.mjs # 需要时提供专属组件
+    registry.mjs                 # 需要时注册视觉族
+    schemas/                     # 内容输入与槽位提示
+    examples/content.json        # 业务文案和数据留在内容侧
+    examples/build.mjs           # 开发与 benchmark 胶水
 
 benchmarks/visual/                # 独立的验证 fixture，不是风格事实源
 ```
 
 catalog 的风格数值、槽位 budgets、readiness 摘要等尽量从合同与解析后的组件数据生成。不要因增加 `design.json`，反而多出第五份需要手动同步的事实源。
 
-实际代价也已暴露：每种新语法仍增加布局/绘制代码，`design-contract.mjs` 也包含视觉族专属分支。
+实际代价也已暴露：每种新语法仍增加布局/绘制代码，`shared/design-contract.mjs` 也包含视觉族专属分支。
 下一步适合明确注册接口、按族拆分检查器并在有第二个真实消费者时提取公共能力；不应因为文件名叫
 “shared”就宣称已经证明跨皮肤组件复用，也不应继续把新风格特例堆进 core-primitives。
 
@@ -225,7 +228,7 @@ catalog 的风格数值、槽位 budgets、readiness 摘要等尽量从合同与
 没有现成 variation/seed API，不应把上述可选方向写成当前支持的输入。初期不必实现通用约束求解器。
 
 旧 diversity gate 主要统计 slide type 分组；新合同路径已按覆盖范围加入解析后构图指纹与重复提示。
-它们与 [core-primitives](../pptx-nova/assets/deckkits/core-primitives.kit.mjs) 的旧检查并存，
+它们与 [core-primitives](../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs) 的旧检查并存，
 不能把一个分组阈值当成真实构图多样性的证明。
 
 记录实际布局族、区域关系、证据对象和几何，再结合 contact sheet 判断节奏。

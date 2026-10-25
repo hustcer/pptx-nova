@@ -59,7 +59,7 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 ```
 
 探索样例通过后，应把视觉 token、组件和页型函数抽取到
-`assets/deckkits/<name>.kit.mjs`，补 schema、catalog、benchmark 和 review。最终交付 deck
+`assets/deckkits/<id>/<id>.kit.mjs`，把布局、组件、schema 和示例归入同一 `<id>/`，补 catalog、benchmark 和 review。最终交付 deck
 仍从 content manifest 调用 DeckKit 生成，不直接交付这份临时 generator 的输出。
 
 ---
@@ -487,12 +487,12 @@ production/default DeckKit；模板只用于抽取或扩展 DeckKit。
 
 ## 二次创作快路径（DeckKit 模式）
 
-当目标场景已经有冻结的 DeckKit（`assets/deckkits/<deckkit>.kit.mjs`），可以跳过从头写
+当目标场景已经有冻结的 DeckKit（`assets/deckkits/<id>/<id>.kit.mjs`），可以跳过从头写
 generator 的全流程，直接走 **content manifest → DeckKit → patch** 的快路径：
 
 ```bash
 # 1. 只写内容清单（~200 行 JSON，不含坐标/配色/组件逻辑）
-cp assets/deckkits/examples/roadshow-content.json ./content.json
+cp assets/deckkits/consulting-dark/examples/content.json ./content.json
 #    参照 assets/deckkits/schemas/<slideType>.schema.json 改内容
 #    或运行 node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs --deckkit <id> 查看槽位速查
 

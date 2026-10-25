@@ -2,15 +2,15 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
-import { validateContent } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/cartesian/cartesian.kit.mjs'
+import { validateContent } from '../../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
   designHash,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { execFileSync } from 'node:child_process'
 
 const assetRoot = new URL('../../pptx-nova/assets/deckkits/', import.meta.url)
@@ -26,7 +26,7 @@ function fontSizes(value, path = '$') {
   })
 }
 
-const fixture = () => readJson('examples/cartesian-content.json')
+const fixture = () => readJson('cartesian/examples/content.json')
 const excerpt = (slide) => ({
   meta: { deckkit: 'cartesian', designScope: 'excerpt' },
   slides: [slide],
@@ -216,7 +216,7 @@ test('minimum unrelated content retains every visible field without reference-co
       .filter((type) => DESIGN.cartesian.families[type].role !== 'exhibit')
       .map((type) => ({
         type,
-        data: fill(readJson(`schemas/cartesian/${type}.schema.json`)),
+        data: fill(readJson(`cartesian/schemas/${type}.schema.json`)),
       })),
   }
   const validation = validateDeckkitContent(content, { mode: 'delivery' })
@@ -278,7 +278,7 @@ test('picture readback rejects a missing picture, moved frame or changed native 
 })
 
 test('Cartesian stock text and chart legends meet the canonical 10 pt readability floor', () => {
-  const content = readJson('examples/cartesian-content.json')
+  const content = readJson('cartesian/examples/content.json')
   const { patch } = createDeck(content)
   const fonts = fontSizes(patch)
   assert.ok(fonts.length > 40, 'exercise all stock slide types')
@@ -289,11 +289,11 @@ test('Cartesian stock text and chart legends meet the canonical 10 pt readabilit
 })
 
 test('Cartesian slot budgets describe readable fonts for all registered slide types', () => {
-  const names = readdirSync(new URL('schemas/cartesian/', assetRoot)).filter((name) =>
+  const names = readdirSync(new URL('cartesian/schemas/', assetRoot)).filter((name) =>
     name.endsWith('.json'),
   )
   assert.equal(names.length, Object.keys(DESIGN.cartesian.families).length)
-  const fonts = names.flatMap((name) => fontSizes(readJson(`schemas/cartesian/${name}`), name))
+  const fonts = names.flatMap((name) => fontSizes(readJson(`cartesian/schemas/${name}`), name))
   assert.ok(fonts.length > 30)
   assert.deepEqual(
     fonts.filter(({ size }) => size < 10),

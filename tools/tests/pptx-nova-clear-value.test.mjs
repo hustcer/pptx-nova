@@ -4,25 +4,25 @@ import fs from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/clear-value.kit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/clear-value/clear-value.kit.mjs'
 import {
   createAnnualDeck,
   annualNumber,
-} from '../../pptx-nova/assets/deckkits/annual-components.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+} from '../../pptx-nova/assets/deckkits/clear-value/components.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 const read = (p) => JSON.parse(fs.readFileSync(new URL(p, import.meta.url))),
-  source = read('../../pptx-nova/assets/deckkits/examples/clear-value-content.json'),
+  source = read('../../pptx-nova/assets/deckkits/clear-value/examples/content.json'),
   clone = structuredClone,
   excerpt = (slides) => ({ meta: { deckkit: 'clear-value', designScope: 'excerpt' }, slides })
 function minimal(slide) {
   const s = clone(slide)
   let n = 0
-  const schema = read(`../../pptx-nova/assets/deckkits/schemas/clear-value/${s.type}.schema.json`)
+  const schema = read(`../../pptx-nova/assets/deckkits/clear-value/schemas/${s.type}.schema.json`)
   function transform(v, node) {
     if (node['x-slotRole'] === 'control') return v
     if (typeof v === 'string') return `V${++n}Q`
@@ -259,7 +259,7 @@ test('Slot probes omit only optional controls and configuration failures exit no
   const root = fs.mkdtempSync(join(tmpdir(), 'nova-slot-control-'))
   try {
     const deck = join(root, 'assets/deckkits'),
-      schemas = join(deck, 'schemas/probe')
+      schemas = join(deck, 'probe/schemas')
     fs.mkdirSync(schemas, { recursive: true })
     fs.mkdirSync(join(root, 'scripts'))
     const script = join(root, 'scripts/check.mjs')

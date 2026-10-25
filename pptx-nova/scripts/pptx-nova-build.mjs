@@ -2,8 +2,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { assessDeckQuality, loadCatalog } from '../assets/deckkits/core-primitives.kit.mjs'
-import { validateDeckkitContent as validateContent } from '../assets/deckkits/validate-deckkit.mjs'
+import { assessDeckQuality, loadCatalog } from '../assets/deckkits/shared/core-primitives.kit.mjs'
+import { validateDeckkitContent as validateContent } from '../assets/deckkits/shared/validate-deckkit.mjs'
 import { createAssetContext, readAssetManifest } from './lib/asset-manifest.mjs'
 import { resolveFilesystemPath } from './lib/filesystem-paths.mjs'
 

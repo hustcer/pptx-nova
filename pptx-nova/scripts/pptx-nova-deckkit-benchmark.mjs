@@ -11,8 +11,8 @@ import {
 } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { loadContent } from '../assets/deckkits/core-primitives.kit.mjs'
-import { validateDeckkitContent as validateContent } from '../assets/deckkits/validate-deckkit.mjs'
+import { loadContent } from '../assets/deckkits/shared/core-primitives.kit.mjs'
+import { validateDeckkitContent as validateContent } from '../assets/deckkits/shared/validate-deckkit.mjs'
 import { createVisionBaseline, summarizeVisionReport } from './pptx-nova-vision-baseline.mjs'
 
 const SKILL_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')

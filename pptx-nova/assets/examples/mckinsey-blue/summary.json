@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Kimsoong Customer Loyalty Programme",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/mckinsey-blue-build.mjs",
+    "content": "pptx-nova/assets/deckkits/mckinsey-blue/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/mckinsey-blue/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/mckinsey-blue/golden-loyalty/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

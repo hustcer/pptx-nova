@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Impact report",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/clear-impact-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/clear-impact-build.mjs",
+    "content": "pptx-nova/assets/deckkits/clear-impact/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/clear-impact/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/clear-impact/golden-impact/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

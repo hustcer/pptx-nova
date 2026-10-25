@@ -4,21 +4,21 @@ import fs from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/black-gold.kit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/black-gold/black-gold.kit.mjs'
 import {
   createEditorialDeck,
   ledgerNumber,
-} from '../../pptx-nova/assets/deckkits/editorial-components.mjs'
+} from '../../pptx-nova/assets/deckkits/black-gold/components.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 const fixture = () =>
   JSON.parse(
     fs.readFileSync(
-      new URL('../../pptx-nova/assets/deckkits/examples/black-gold-content.json', import.meta.url),
+      new URL('../../pptx-nova/assets/deckkits/black-gold/examples/content.json', import.meta.url),
     ),
   )
 const excerpt = (...slides) => ({

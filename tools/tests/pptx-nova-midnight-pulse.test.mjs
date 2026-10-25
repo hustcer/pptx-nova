@@ -1,21 +1,24 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { DESIGN, createDeck } from '../../pptx-nova/assets/deckkits/midnight-pulse.kit.mjs'
+import {
+  DESIGN,
+  createDeck,
+} from '../../pptx-nova/assets/deckkits/midnight-pulse/midnight-pulse.kit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
   designHash,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
-import { clippedPulseEllipse } from '../../pptx-nova/assets/deckkits/pulse-atmosphere.mjs'
-import { textUnits } from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { clippedPulseEllipse } from '../../pptx-nova/assets/deckkits/midnight-pulse/atmosphere.mjs'
+import { textUnits } from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { pulseVariants, pulseStress, pulseLibrary } from './fixtures/midnight-pulse-fixtures.mjs'
 const content = JSON.parse(
   readFileSync(
     new URL(
-      '../../pptx-nova/assets/deckkits/examples/midnight-pulse-content.json',
+      '../../pptx-nova/assets/deckkits/midnight-pulse/examples/content.json',
       import.meta.url,
     ),
   ),
@@ -145,7 +148,7 @@ test('midnight-pulse minimum schema-valid inputs build without example fallbacks
     const schema = JSON.parse(
       readFileSync(
         new URL(
-          `../../pptx-nova/assets/deckkits/schemas/midnight-pulse/${s.type}.schema.json`,
+          `../../pptx-nova/assets/deckkits/midnight-pulse/schemas/${s.type}.schema.json`,
           import.meta.url,
         ),
       ),

@@ -7,9 +7,9 @@ import {
   checkDesignReadback,
   designHash,
   loadDesignContract,
-} from '../assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../assets/deckkits/validate-deckkit.mjs'
-import { registeredDesignFamily } from '../assets/deckkits/design-family-registry.mjs'
+} from '../assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../assets/deckkits/shared/validate-deckkit.mjs'
+import { registeredDesignFamily } from '../assets/deckkits/shared/design-family-registry.mjs'
 import { readNativeCharts } from './lib/native-chart-readback.mjs'
 
 const usage = `Usage:

@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "amber-ledger",
   "case": "golden-operations",
-  "contentPath": "../../../../../assets/deckkits/examples/amber-ledger-content.json",
+  "contentPath": "../../../../../assets/deckkits/amber-ledger/examples/content.json",
   "expected": {
     "minSlides": 8,
     "requiredSlideTypes": [

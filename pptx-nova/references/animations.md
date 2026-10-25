@@ -637,7 +637,7 @@ transition 使用相邻的 `[source, destination]`（0-based）。morph 声明 `
 只有有效声明覆盖的页可重复布局并免于填充无关 evidence 页；未覆盖页继续按普通 diversity 规则检查。
 所有溢出、语义和 canonical 视觉门禁保持有效，profile 名称本身不能放行。
 
-完整可复用输入见 `assets/deckkits/examples/cartesian-animation-content.json` 和同目录的
+完整可复用输入见 `assets/deckkits/cartesian/examples/animation-content.json` 和同目录的
 `cartesian-animation-choreography.json`。这是标准 Create 的入口；编辑已有 PPTX 仍使用上述
 inspect → patch → dry-run/apply → 回读和播放验证流程，共用同一原生 probe。
 

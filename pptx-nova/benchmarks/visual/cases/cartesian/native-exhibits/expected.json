@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "cartesian",
   "case": "native-exhibits",
-  "contentPath": "../../../../../assets/deckkits/examples/cartesian-native-exhibits-content.json",
+  "contentPath": "../../../../../assets/deckkits/cartesian/examples/native-exhibits-content.json",
   "expected": {
     "minSlides": 9,
     "requiredSlideTypes": [

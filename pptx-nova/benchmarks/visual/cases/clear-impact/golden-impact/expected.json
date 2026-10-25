@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "clear-impact",
   "case": "golden-impact",
-  "contentPath": "../../../../../assets/deckkits/examples/clear-impact-content.json",
+  "contentPath": "../../../../../assets/deckkits/clear-impact/examples/content.json",
   "expected": {
     "minSlides": 12,
     "requiredSlideTypes": [

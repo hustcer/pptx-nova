@@ -1,15 +1,18 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/mckinsey-blue.kit.mjs'
-import { checkDesignPatch, designHash } from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+import {
+  createDeck,
+  DESIGN,
+} from '../../pptx-nova/assets/deckkits/mckinsey-blue/mckinsey-blue.kit.mjs'
+import {
+  checkDesignPatch,
+  designHash,
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 const golden = JSON.parse(
   readFileSync(
-    new URL(
-      '../../pptx-nova/assets/deckkits/examples/mckinsey-blue-loyalty-content.json',
-      import.meta.url,
-    ),
+    new URL('../../pptx-nova/assets/deckkits/mckinsey-blue/examples/content.json', import.meta.url),
   ),
 )
 const excerpt = (i) => ({
@@ -176,7 +179,7 @@ test('indexed control probes build legal distinct positions and reject invalid a
   const root = fs.mkdtempSync(join(tmpdir(), 'mck-probe-sequence-'))
   try {
     const deck = join(root, 'assets/deckkits'),
-      schemas = join(deck, 'schemas/probe')
+      schemas = join(deck, 'probe/schemas')
     fs.mkdirSync(schemas, { recursive: true })
     fs.mkdirSync(join(root, 'scripts'))
     const script = join(root, 'scripts/check.mjs')

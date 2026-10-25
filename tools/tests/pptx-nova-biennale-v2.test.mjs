@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/biennale-yellow.kit.mjs'
-import { assertDesignContract } from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+import {
+  createDeck,
+  DESIGN,
+} from '../../pptx-nova/assets/deckkits/biennale-yellow/biennale-yellow.kit.mjs'
+import { assertDesignContract } from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 const read = (p) =>
   JSON.parse(readFileSync(new URL('../../pptx-nova/assets/deckkits/' + p, import.meta.url)))
-const fixture = () => read('examples/biennale-yellow-content.json')
+const fixture = () => read('biennale-yellow/examples/content.json')
 const excerpt = (slide) => ({
   meta: { deckkit: 'biennale-yellow', designScope: 'excerpt' },
   slides: [slide],
@@ -38,7 +41,7 @@ test('failed editorial fit reports the design error without obsolete legacy dive
 
 test('every page has a registered plan; native chart and all calendar cells retain source data', () => {
   const c = fixture(),
-    evidence = read('examples/biennale-yellow-evidence-content.json').slides
+    evidence = read('biennale-yellow/examples/evidence-content.json').slides
   c.slides.splice(-1, 0, ...evidence)
   const b = createDeck(c)
   assert.equal(b.designPlan.layouts.length, c.slides.length)
@@ -201,7 +204,10 @@ test('retired slots cannot be restored and contracts reject invalid registration
   }
   assert.equal(DESIGN.version, '2.0.0')
   const kit = readFileSync(
-    new URL('../../pptx-nova/assets/deckkits/biennale-yellow.kit.mjs', import.meta.url),
+    new URL(
+      '../../pptx-nova/assets/deckkits/biennale-yellow/biennale-yellow.kit.mjs',
+      import.meta.url,
+    ),
     'utf8',
   )
   assert.doesNotMatch(kit, /makePageTypes|writeDesignText|resolveDesignSlot|legacyLayouts/)

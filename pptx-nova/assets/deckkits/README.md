@@ -2,70 +2,64 @@
 
 经过验证矩阵通过后冻结的 DeckKit，用于 pptx-nova 的“DeckKit 模式”二次创作快路径。
 
-已有十套 DeckKit 登记为 `production`，另有 Clear Impact、Warm Clay 与 Amber Ledger `candidate`。自动选型按用途、语言、
-内容密度、页型覆盖范围和匹配度选择。状态以 `catalog.json` 为准。
+套件版本、readiness、选型条件和验证记录以 `catalog.json` 为准。自动选型按用途、语言、
+内容密度、页型覆盖范围和匹配度选择。
 
 ## 目录结构
 
-```
+```text
 assets/deckkits/
-├── core-primitives.kit.mjs     # 几何安全 + op 生成（所有 DeckKit 共用）
-├── design-contract.mjs         # 已注册设计合同、规则与对象/数值回读检查
-├── evidence-components.mjs     # 由合同驱动的原生数据证据组件
-├── editorial-components.mjs    # 期刊式证据、原生矩阵与判断/行动组件
-├── editorial-layouts.mjs       # 内容容量与确定性构图选择
-├── strategy-components.mjs     # 深色策略报告、原生图表/矩阵与阶段路线图
-├── strategy-layouts.mjs        # 策略报告容量与确定性构图选择
-├── annual-components.mjs       # 白底研究报告、原生多图/矩阵与面积比较
-├── annual-layouts.mjs          # 逐实例容量检查与确定性构图选择
-├── biennale-components.mjs    # 编辑式文字/结构平面、光晕、原生图表与日程表格
-├── biennale-layouts.mjs       # 九类页面的完整计划、实例容量和构图选择
-├── design-family-registry.mjs # 新视觉族的断言、解析、检查与投影注册
-├── cartesian-components.mjs  # 暖石编辑语言的组件计划执行、原生图表与图片
-├── cartesian-layouts.mjs     # 十五个页型、二十八个布局、实例容量和节奏选择
-├── cartesian/                # Cartesian 2.0 合同与设计意图（production）
-├── broadside-components.mjs   # 黑橙海报语言的文字、形状与原生图表执行
-├── broadside-layouts.mjs      # 十六类职责、二十八个布局与实例容量
-├── broadside-registry.mjs     # Broadside 视觉族检查与发现投影
-├── broadside/                # Broadside 2.0 合同与设计意图（production）
-├── long-table-components.mjs  # 奶油纸底单墨编辑语言、形状持有文字与原生日程表格
-├── long-table-layouts.mjs     # 八类职责、十五个布局、完整组件计划与实例容量
-├── long-table-registry.mjs    # Long Table 视觉族断言、检查与发现投影
-├── long-table/               # Long Table 2.0 合同与设计意图（production）
-├── swiss-components.mjs       # 非对称文字、原生网格示意、Tabler 图标与原生表格
-├── swiss-layouts.mjs          # 十五类职责、二十四个布局、数值模型与实例容量
-├── swiss-registry.mjs         # Swiss 视觉族断言、身份检查与发现投影
-├── swiss-grid/                # Swiss Grid 2.0 合同与设计意图（production）
-├── mck-components.mjs         # 白底咨询语言、原生条图、表格与 SVG 图标执行
-├── mck-layouts.mjs            # 八类职责、十六个有界构图与逐实例容量
-├── mck-registry.mjs           # McKinsey 视觉族断言、检查与发现投影
-├── mckinsey-blue/             # McKinsey Blue 2.0 合同与设计意图（production）
-├── impact-components.mjs      # 开放证据报告的原生图表、表格、指标和流程
-├── impact-layouts.mjs         # 十二类职责、二十四个构图与逐实例容量
-├── impact-registry.mjs        # Clear Impact 视觉族断言、检查与发现投影
-├── clay-components.mjs        # 暖陶土原生文本、编号、角落圆环、柱图与表格
-├── clay-layouts.mjs           # 八类职责、十五个布局与逐实例容量
-├── clay-registry.mjs          # 暖陶土视觉族断言、检查与发现投影
-├── amber-components.mjs       # 象牙纸底年度报告、原生图表/表格与数值派生证据
-├── amber-layouts.mjs          # 八类职责、十六个构图与逐实例容量
-├── amber-registry.mjs         # Amber Ledger 视觉族断言、检查与发现投影
-├── sky-compass/               # Sky Compass 0.1.0 合同与意图（candidate）
-├── amber-ledger/              # Amber Ledger 0.1.0 合同、意图和迁移验收（candidate）
-├── warm-clay/                 # Warm Clay 0.1.0 合同、意图和迁移验收（candidate）
-├── clear-impact/              # Clear Impact 0.1.0 合同、意图和迁移验收（candidate）
-├── biennale-yellow/            # design.json 唯一事实源 + intent.md 设计说明
-├── black-gold/                 # 第二种合同设计语言（production，以 catalog 为准）
-├── green-slate/                # 深色策略报告合同与设计意图（状态以 catalog 为准）
-├── clear-value/                # 白底衬线研究报告合同与设计意图（状态以 catalog 为准）
-├── icon-assets.kit.mjs         # 固定 Tabler SVG bundle → add-image helper
-├── consulting-dark.kit.mjs     # 2.0 咨询风格合同薄适配器
-├── <deckkit-id>.kit.mjs        # 各套件公共入口；合同套件为薄适配器
-├── catalog.json                # DeckKit 注册表、版本、density 限制、验证记录
-├── schemas/                    # content 和各页型 JSON Schema（渐进覆盖）
-├── validate-content.mjs        # schema + fit 预检入口
-├── examples/                   # 示例 content + build 胶水
-└── README.md                   # 本文件
+├── README.md
+├── catalog.json                   # 所有路径相对本目录
+├── validate-content.mjs            # content 校验 CLI
+├── shared/                        # 共用运行时、校验和注册调度
+│   ├── core-primitives.kit.mjs     # 几何安全与 op 生成
+│   ├── icon-assets.kit.mjs         # 固定 Tabler bundle 的图片 helper
+│   ├── deckkit-paths.mjs           # 与 cwd 无关的资源路径
+│   ├── design-contract.mjs         # 合同断言与对象/数值回读
+│   ├── design-family-registry.mjs  # 套件视觉族注册
+│   ├── design-text.mjs             # 通用文字换行
+│   ├── text-layout.mjs             # 跨套件文字容量计划
+│   ├── evidence-components.mjs     # 原生数据证据组件
+│   ├── native-evidence-plan.mjs    # 共用证据计划执行
+│   ├── animation-corpus.mjs        # 动画语料检查
+│   └── validate-deckkit.mjs        # 统一内容/语义校验
+├── schemas/                       # 仅放公共 schema
+│   ├── content.schema.json
+│   └── design.schema.json
+├── cartesian/                     # 每个套件采用同一组织方式
+│   ├── cartesian.kit.mjs           # 对外薄入口
+│   ├── design.json                # 设计合同事实源
+│   ├── intent.md                  # 设计判断与编辑边界
+│   ├── components.mjs             # 套件组件执行（需要时提供）
+│   ├── layouts.mjs                # 构图选择与逐实例容量
+│   ├── registry.mjs               # 视觉族注册（需要时提供）
+│   ├── exhibit.mjs                # 额外套件模块（需要时提供）
+│   ├── schemas/                   # 本套件各页型 schema
+│   └── examples/
+│       ├── content.json           # 主示例
+│       ├── build.mjs              # 开发/benchmark 构建胶水
+│       └── animation-content.json # 命名明确的补充示例
+├── consulting-dark/
+├── mckinsey-blue/
+└── ...                            # 其他 catalog 注册套件
 ```
+
+目录约定：
+
+- 套件入口固定为 `<id>/<id>.kit.mjs`，设计合同固定为 `<id>/design.json`。
+  套件内模块使用 `components.mjs`、`layouts.mjs`、`registry.mjs` 等职责名称，不再重复套件前缀。
+- 每个套件的页型 schema 和开发示例分别归入 `<id>/schemas/` 与 `<id>/examples/`。
+  `examples/build.mjs` 不传参数时读取同目录的 `content.json`，可从任意工作目录运行。
+  catalog 的 `path`、`designContract`、`examples` 路径均相对 `assets/deckkits/`；
+  benchmark index 的路径相对 `benchmarks/visual/`。
+- 共用 helper 放在 `shared/`，套件不能直接导入另一个套件的实现。
+  `shared/design-family-registry.mjs` 和统一合同/校验模块负责注册调度，可以导入各套件公开的注册或解析接口。
+- 用户可见的 PPTX showcase 继续位于 `assets/examples/<id>/`；
+  视觉回归 fixture、基线与验收记录继续位于 `benchmarks/visual/cases/<id>/`。
+- 根目录只保留 README、catalog 和校验 CLI。`node tools/pptx-nova-audit-public.mjs --strict`
+  同时检查目录归属、标准模块名、catalog 路径、schema/示例存在性和套件间直接依赖。
+  新增 DeckKit 时也须通过 `node --test tools/tests/pptx-nova-deckkit-layout.test.mjs`。
 
 Biennale Yellow 2.0 保留九个页型名称，全部经注册合同执行；数据页改用数值、单位、来源，
 不再分发旧固定页型渲染器。字段迁移与构图说明见 [intent.md](biennale-yellow/intent.md)。
@@ -144,7 +138,7 @@ Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青�
 ## 校验合同
 
 `validate-content.mjs`、DeckKit build 胶水和 benchmark CLI 调用
-`validate-deckkit.mjs` 的 `validateDeckkitContent(content, { deckkit, mode })`。
+`shared/validate-deckkit.mjs` 的 `validateDeckkitContent(content, { deckkit, mode })`。
 它先运行 core 的 `validateContent`；只有 catalog 注册了 `designContract` 的套件才增加
 合同与语义检查、逐实例的文字容量估计。未迁移套件保持原有行为。直接调用 core 校验
 不包含这些额外检查。
@@ -226,7 +220,7 @@ node <skill-root>/scripts/pptx-nova-build.mjs \
 ## 图标使用
 
 DeckKit 需要 Tabler 图标时，使用 `createOps()` 返回的 `icon()` 或直接使用
-`icon-assets.kit.mjs`。它只读取 `../icons/tabler-icons.pack.br`，并把 SVG
+`shared/icon-assets.kit.mjs`。它通过 skill 内的图标入口读取 `assets/icons/tabler-icons.pack.br`，并把 SVG
 内联为 `add-image` 的 `bytesBase64 + mimeType`，不依赖网络、临时 SVG 文件或 Tabler
 源码目录：
 

@@ -4,10 +4,10 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { isDeepStrictEqual } from 'node:util'
-import { loadDesignContract } from '../pptx-nova/assets/deckkits/design-contract.mjs'
+import { loadDesignContract } from '../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 
-import { biennaleProjectedBudgets } from '../pptx-nova/assets/deckkits/biennale-layouts.mjs'
-import { registeredDesignFamily } from '../pptx-nova/assets/deckkits/design-family-registry.mjs'
+import { biennaleProjectedBudgets } from '../pptx-nova/assets/deckkits/biennale-yellow/layouts.mjs'
+import { registeredDesignFamily } from '../pptx-nova/assets/deckkits/shared/design-family-registry.mjs'
 
 const root = fileURLToPath(new URL('../pptx-nova/assets/deckkits/', import.meta.url))
 const args = process.argv.slice(2)
@@ -34,7 +34,7 @@ function output(path, data) {
 }
 if (design.biennale) {
   for (const [type, family] of Object.entries(design.biennale.families)) {
-    const path = resolve(root, 'schemas', id, type + '.schema.json')
+    const path = resolve(root, id, 'schemas', type + '.schema.json')
     const schema = JSON.parse(readFileSync(path, 'utf8'))
     for (const [field, budget] of Object.entries(biennaleProjectedBudgets(design, family)))
       schema.properties[field]['x-slotBudget'] = budget
@@ -45,7 +45,7 @@ if (design.biennale) {
 }
 if (registered) {
   for (const [type, family] of Object.entries(design[registered.key].families)) {
-    const path = resolve(root, 'schemas', id, type + '.schema.json')
+    const path = resolve(root, id, 'schemas', type + '.schema.json')
     const schema = JSON.parse(readFileSync(path, 'utf8'))
     for (const [field, [minItems, maxItems]] of Object.entries(
       registered.projectedCapacities?.(design, family) ?? {},
@@ -87,7 +87,7 @@ if (registered || design.editorial || design.strategy || design.annual || design
     : { anchor: [], judgment: [], evidence: [] }
   for (const [type, family] of Object.entries(families)) {
     const schema = JSON.parse(
-      readFileSync(resolve(root, 'schemas', id, `${type}.schema.json`), 'utf8'),
+      readFileSync(resolve(root, id, 'schemas', `${type}.schema.json`), 'utf8'),
     )
     entry.layoutContract.slideTypes[type] = {
       ...entry.layoutContract.slideTypes[type],
@@ -107,7 +107,7 @@ if (registered || design.editorial || design.strategy || design.annual || design
   if (design.biennale) {
     const schema = JSON.parse(
       readFileSync(
-        resolve(root, 'schemas', id, design.evidence.slideType + '.schema.json'),
+        resolve(root, id, 'schemas', design.evidence.slideType + '.schema.json'),
         'utf8',
       ),
     )

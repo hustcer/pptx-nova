@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Clear value Evidence before conviction",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/clear-value-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/clear-value-build.mjs",
+    "content": "pptx-nova/assets/deckkits/clear-value/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/clear-value/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/clear-value/golden-design/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

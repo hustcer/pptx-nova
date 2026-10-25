@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "broadside",
   "case": "golden-html",
-  "contentPath": "../../assets/deckkits/examples/broadside-content.json",
+  "contentPath": "../../assets/deckkits/broadside/examples/content.json",
   "expected": {
     "minSlides": 16,
     "requiredSlideTypes": [

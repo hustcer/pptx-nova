@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "green-slate",
   "case": "golden-design",
-  "contentPath": "../../../../../assets/deckkits/examples/green-slate-content.json",
+  "contentPath": "../../../../../assets/deckkits/green-slate/examples/content.json",
   "expected": {
     "minSlides": 12,
     "requiredSlideTypes": [

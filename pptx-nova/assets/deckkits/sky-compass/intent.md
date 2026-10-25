@@ -12,7 +12,7 @@
 
 ## 使用
 
-从 [合成数据完整示例](../examples/sky-compass-content.json) 开始，通过标准工作流生成，无需手写坐标：
+从 [合成数据完整示例](../sky-compass/examples/content.json) 开始，通过标准工作流生成，无需手写坐标：
 
 ```sh
 node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit sky-compass

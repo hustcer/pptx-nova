@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "网格系统",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/swiss-grid-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/swiss-grid-build.mjs",
+    "content": "pptx-nova/assets/deckkits/swiss-grid/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/swiss-grid/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/swiss-grid/golden-lecture/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

@@ -62,7 +62,7 @@ function parseArgs(argv) {
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))
 
 function loadSlideSchema(deckkit, slideType) {
-  const deckkitSchema = join(schemasRoot, deckkit, `${slideType}.schema.json`)
+  const deckkitSchema = join(deckkitRoot, deckkit, 'schemas', `${slideType}.schema.json`)
   if (existsSync(deckkitSchema)) return readJson(deckkitSchema)
   const globalSchema = join(schemasRoot, `${slideType}.schema.json`)
   if (existsSync(globalSchema)) return readJson(globalSchema)

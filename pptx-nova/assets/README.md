@@ -39,7 +39,7 @@ introduced.
   checkout paths.
 
   During PPTX generation, DeckKit code should consume this pack through
-  `assets/deckkits/icon-assets.kit.mjs`; agents should search/get icons through
+  `assets/deckkits/shared/icon-assets.kit.mjs`; agents should search/get icons through
   `node <skill-root>/scripts/pptx-nova-icons.mjs ...`. Do not fetch icons from the network or
   scan the Tabler checkout in the deck generation path.
 

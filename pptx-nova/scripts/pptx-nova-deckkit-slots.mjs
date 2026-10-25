@@ -2,7 +2,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { summarizeSlotBudgetFit } from '../assets/deckkits/core-primitives.kit.mjs'
+import { summarizeSlotBudgetFit } from '../assets/deckkits/shared/core-primitives.kit.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const skillRoot = resolve(__dirname, '..')
@@ -53,7 +53,7 @@ function loadCatalog() {
 }
 
 function loadSlideSchema(deckkit, slideType) {
-  const deckkitSchema = join(schemasRoot, deckkit, `${slideType}.schema.json`)
+  const deckkitSchema = join(deckkitRoot, deckkit, 'schemas', `${slideType}.schema.json`)
   if (existsSync(deckkitSchema)) return readJson(deckkitSchema)
   const globalSchema = join(schemasRoot, `${slideType}.schema.json`)
   if (existsSync(globalSchema)) return readJson(globalSchema)

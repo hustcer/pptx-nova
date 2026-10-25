@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "midnight-pulse",
   "case": "golden-operations",
-  "contentPath": "../../../../../assets/deckkits/examples/midnight-pulse-content.json",
+  "contentPath": "../../../../../assets/deckkits/midnight-pulse/examples/content.json",
   "expected": {
     "minSlides": 8,
     "requiredSlideTypes": [

@@ -2,14 +2,17 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/swiss-grid.kit.mjs'
-import { checkDesignPatch, designHash } from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
-import { SWISS_LAYOUTS } from '../../pptx-nova/assets/deckkits/swiss-registry.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/swiss-grid/swiss-grid.kit.mjs'
+import {
+  checkDesignPatch,
+  designHash,
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { SWISS_LAYOUTS } from '../../pptx-nova/assets/deckkits/swiss-grid/registry.mjs'
 
 const fixture = JSON.parse(
   readFileSync(
-    new URL('../../pptx-nova/assets/deckkits/examples/swiss-grid-content.json', import.meta.url),
+    new URL('../../pptx-nova/assets/deckkits/swiss-grid/examples/content.json', import.meta.url),
   ),
 )
 const excerpt = (slides) => ({

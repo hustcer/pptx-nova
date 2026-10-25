@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "biennale-yellow",
   "case": "evidence-variants",
-  "contentPath": "../../../../../assets/deckkits/examples/biennale-yellow-evidence-content.json",
+  "contentPath": "../../../../../assets/deckkits/biennale-yellow/examples/evidence-content.json",
   "expected": {
     "minSlides": 3,
     "requiredSlideTypes": ["biennaleEvidenceSlide"],

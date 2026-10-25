@@ -94,7 +94,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs \
   > deckkit-slots.md
 
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
-cp skills/pptx-nova/assets/deckkits/examples/roadshow-content.json content.json
+cp skills/pptx-nova/assets/deckkits/consulting-dark/examples/content.json content.json
 #    按 outline.json 改 slides[].type 和 slides[].data
 
 # 3. 校验 content（schema + density + layout contract + diversity + fit diagnostics）

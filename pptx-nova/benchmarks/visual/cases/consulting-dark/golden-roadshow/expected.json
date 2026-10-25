@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "consulting-dark",
   "case": "golden-roadshow",
-  "contentPath": "../../../../../assets/deckkits/examples/roadshow-content.json",
+  "contentPath": "../../../../../assets/deckkits/consulting-dark/examples/content.json",
   "expected": {
     "minSlides": 10,
     "requiredSlideTypes": [

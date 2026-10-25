@@ -13,7 +13,7 @@ const out = resolve(argv[1])
 if (fs.existsSync(out)) throw new Error('Output must be new; preserve old evidence')
 fs.mkdirSync(out, { recursive: true })
 const original = JSON.parse(
-  fs.readFileSync('pptx-nova/assets/deckkits/examples/black-gold-content.json'),
+  fs.readFileSync('pptx-nova/assets/deckkits/black-gold/examples/content.json'),
 )
 const clone = structuredClone
 const variants = { meta: { deckkit: 'black-gold', designScope: 'excerpt' }, slides: [] }

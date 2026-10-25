@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "LONG TABLE",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/long-table-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/long-table-build.mjs",
+    "content": "pptx-nova/assets/deckkits/long-table/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/long-table/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/long-table/golden-html/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

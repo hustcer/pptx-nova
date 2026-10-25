@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "mckinsey-blue",
   "case": "golden-loyalty",
-  "contentPath": "../../../../../assets/deckkits/examples/mckinsey-blue-loyalty-content.json",
+  "contentPath": "../../../../../assets/deckkits/mckinsey-blue/examples/content.json",
   "expected": {
     "minSlides": 8,
     "requiredSlideTypes": [

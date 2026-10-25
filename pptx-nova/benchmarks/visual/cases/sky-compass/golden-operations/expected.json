@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "sky-compass",
   "case": "golden-operations",
-  "contentPath": "../../../../../assets/deckkits/examples/sky-compass-content.json",
+  "contentPath": "../../../../../assets/deckkits/sky-compass/examples/content.json",
   "expected": {
     "minSlides": 12,
     "requiredSlideTypes": [

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { validateContent } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
-import { inspectAnimationCorpus } from '../../pptx-nova/assets/deckkits/animation-corpus.mjs'
-import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian.kit.mjs'
+import { validateContent } from '../../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs'
+import { inspectAnimationCorpus } from '../../pptx-nova/assets/deckkits/shared/animation-corpus.mjs'
+import { createDeck } from '../../pptx-nova/assets/deckkits/cartesian/cartesian.kit.mjs'
 import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-choreography.mjs'
 
 function fixture() {

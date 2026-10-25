@@ -147,7 +147,7 @@ and empty blockers.
   `icons/tabler-icons.pack.br` contains outline and filled icons, and
   `icons/icon-license` carries the Tabler MIT license. Agents should search or
   fetch icon names through `node <skill-root>/scripts/pptx-nova-icons.mjs ...`; DeckKit
-  generators should read icons through `assets/deckkits/icon-assets.kit.mjs`
+  generators should read icons through `assets/deckkits/shared/icon-assets.kit.mjs`
   instead of fetching icons online or reading the Tabler checkout during PPTX
   generation.
 - Keep chart/table/diagram presets themePack-aware so `swap-theme` can recolor

@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Community support Operations review",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/sky-compass-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/sky-compass-build.mjs",
+    "content": "pptx-nova/assets/deckkits/sky-compass/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/sky-compass/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/sky-compass/golden-operations/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

@@ -9,7 +9,7 @@ import { composeChoreography } from '../../pptx-nova/scripts/lib/animation-chore
 import {
   checkDesignReadback,
   designHash,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 
 const basePatch = {
   schemaVersion: 'pptx-patch/v1',

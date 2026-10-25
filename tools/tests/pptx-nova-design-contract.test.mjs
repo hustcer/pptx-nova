@@ -8,25 +8,28 @@ import {
 } from '../../pptx-nova/scripts/lib/create-delivery.mjs'
 import { spawnSync } from 'node:child_process'
 import test from 'node:test'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/biennale-yellow.kit.mjs'
+import {
+  createDeck,
+  DESIGN,
+} from '../../pptx-nova/assets/deckkits/biennale-yellow/biennale-yellow.kit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
   resolveEvidenceLayout,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
-import { wrapCjkText } from '../../pptx-nova/assets/deckkits/design-text.mjs'
-import { renderEvidence } from '../../pptx-nova/assets/deckkits/evidence-components.mjs'
-import { validateContent } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
-import { createOps } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { wrapCjkText } from '../../pptx-nova/assets/deckkits/shared/design-text.mjs'
+import { renderEvidence } from '../../pptx-nova/assets/deckkits/shared/evidence-components.mjs'
+import { validateContent } from '../../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs'
+import { createOps } from '../../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs'
 
 const read = (path) => JSON.parse(readFileSync(new URL('../../' + path, import.meta.url), 'utf8'))
 const fixture = () =>
-  read('pptx-nova/assets/deckkits/examples/biennale-yellow-evidence-content.json')
+  read('pptx-nova/assets/deckkits/biennale-yellow/examples/evidence-content.json')
 
 test('all editorial page types build through registered plans with a native theme and readable text', () => {
-  const content = read('pptx-nova/assets/deckkits/examples/biennale-yellow-content.json')
+  const content = read('pptx-nova/assets/deckkits/biennale-yellow/examples/content.json')
   assert.equal(validateDeckkitContent(content, { mode: 'delivery' }).valid, true)
   const a = createDeck(content)
   assert.deepEqual(a, createDeck(structuredClone(content)))
@@ -44,7 +47,7 @@ test('generated projections match the runtime geometry and are idempotent', () =
   )
   assert.equal(result.status, 0, result.stderr)
   const schema = read(
-    'pptx-nova/assets/deckkits/schemas/biennale-yellow/biennaleDataSlide.schema.json',
+    'pptx-nova/assets/deckkits/biennale-yellow/schemas/biennaleDataSlide.schema.json',
   )
   const variant = DESIGN.biennale.families.biennaleDataSlide.variants.ledger
   assert.equal(
@@ -173,7 +176,7 @@ test('explicit repeated compositions are disclosed and legacy diversity gates re
   const repeated = validateDeckkitContent(content, { mode: 'delivery' })
   assert.equal(repeated.valid, true)
   assert.ok(repeated.warnings.some((w) => w.diagnostic?.code === 'design.diversity.repeated'))
-  const legacy = read('pptx-nova/assets/deckkits/examples/roadshow-content.json')
+  const legacy = read('pptx-nova/assets/deckkits/consulting-dark/examples/content.json')
   legacy.slides = Array.from({ length: 8 }, () => structuredClone(legacy.slides[0]))
   const checked = validateContent(legacy, { mode: 'delivery' })
   assert.equal(checked.valid, false)
@@ -252,7 +255,7 @@ test('zero, negative and fractional native values preserve exact input numbers',
     false,
   )
   assert.equal(createDeck(content).designPlan.layouts[0].numberFormat, '0.00E+00')
-  const legacy = read('pptx-nova/assets/deckkits/examples/biennale-yellow-content.json')
+  const legacy = read('pptx-nova/assets/deckkits/biennale-yellow/examples/content.json')
   legacy.slides[4].data.bars[0].value = 0
   const chart2 = createDeck(legacy).patch.ops.find((o) => o.op === 'add-chart')
   assert.equal(chart2.data.series[0].values[0], 0)
@@ -354,7 +357,7 @@ test('finalization binds design reports and rejects a stale design contract', ()
 })
 
 test('native readback follows appended rich text units per paragraph across shape rename', async () => {
-  const { designHash } = await import('../../pptx-nova/assets/deckkits/design-contract.mjs')
+  const { designHash } = await import('../../pptx-nova/assets/deckkits/shared/design-contract.mjs')
   const patch = {
     ops: [
       { op: 'add-slide' },

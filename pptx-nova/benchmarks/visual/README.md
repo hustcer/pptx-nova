@@ -29,7 +29,7 @@ benchmarks/visual/
 ```
 
 Golden cases reference existing DeckKit example content through `contentPath`
-(`../../assets/deckkits/examples/<name>-content.json`) to avoid duplicating
+(`../../assets/deckkits/<id>/examples/content.json`) to avoid duplicating
 large JSON fixtures; stress and mixed-language cases ship their own immutable
 `content.json` beside `expected.json`.
 

@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "black-gold",
   "case": "golden-design",
-  "contentPath": "../../../../../assets/deckkits/examples/black-gold-content.json",
+  "contentPath": "../../../../../assets/deckkits/black-gold/examples/content.json",
   "expected": {
     "minSlides": 8,
     "requiredSlideTypes": [

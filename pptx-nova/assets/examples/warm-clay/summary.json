@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "A season of making, measured with care",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/warm-clay-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/warm-clay-build.mjs",
+    "content": "pptx-nova/assets/deckkits/warm-clay/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/warm-clay/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/warm-clay/golden-workshop/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

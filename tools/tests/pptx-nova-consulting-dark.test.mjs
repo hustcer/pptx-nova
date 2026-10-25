@@ -1,16 +1,22 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/consulting-dark.kit.mjs'
+import {
+  createDeck,
+  DESIGN,
+} from '../../pptx-nova/assets/deckkits/consulting-dark/consulting-dark.kit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   designHash,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 const golden = JSON.parse(
   readFileSync(
-    new URL('../../pptx-nova/assets/deckkits/examples/roadshow-content.json', import.meta.url),
+    new URL(
+      '../../pptx-nova/assets/deckkits/consulting-dark/examples/content.json',
+      import.meta.url,
+    ),
   ),
 )
 const excerpt = (i) => ({

@@ -1,8 +1,11 @@
 import { readFileSync } from 'node:fs'
-import { DESIGN, createDeck } from '../../../pptx-nova/assets/deckkits/sky-compass.kit.mjs'
+import {
+  DESIGN,
+  createDeck,
+} from '../../../pptx-nova/assets/deckkits/sky-compass/sky-compass.kit.mjs'
 const root = new URL('../../../pptx-nova/assets/deckkits/', import.meta.url)
 export const skyGolden = () =>
-  JSON.parse(readFileSync(new URL('examples/sky-compass-content.json', root)))
+  JSON.parse(readFileSync(new URL('sky-compass/examples/content.json', root)))
 export function skyVariants() {
   const c = skyGolden()
   for (const s of c.slides) s.layoutId = Object.keys(DESIGN.sky.families[s.type].variants)[1]
@@ -114,7 +117,7 @@ export function skyStressBusiness() {
   }
   for (const [i, slide] of c.slides.entries()) {
     const schema = JSON.parse(
-      readFileSync(new URL(`schemas/sky-compass/${slide.type}.schema.json`, root)),
+      readFileSync(new URL(`sky-compass/schemas/${slide.type}.schema.json`, root)),
     )
     slide.data = transform(slide.data, schema, 'data', i % 2 === 1)
     slide.data.title = titles[i] + (i % 2 === 1 ? ' / Pilot' : '')

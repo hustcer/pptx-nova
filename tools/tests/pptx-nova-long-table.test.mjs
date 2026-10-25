@@ -2,19 +2,19 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/long-table.kit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/long-table/long-table.kit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
   designHash,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
-import { LONG_TABLE_LAYOUTS } from '../../pptx-nova/assets/deckkits/long-table-registry.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { LONG_TABLE_LAYOUTS } from '../../pptx-nova/assets/deckkits/long-table/registry.mjs'
 
 const fixture = JSON.parse(
   readFileSync(
-    new URL('../../pptx-nova/assets/deckkits/examples/long-table-content.json', import.meta.url),
+    new URL('../../pptx-nova/assets/deckkits/long-table/examples/content.json', import.meta.url),
   ),
 )
 const excerpt = (slides) => ({
@@ -230,7 +230,7 @@ test('design projections preserve registered refurbishment metadata and remain s
   const coverSchema = JSON.parse(
     readFileSync(
       new URL(
-        '../../pptx-nova/assets/deckkits/schemas/long-table/longTableCoverSlide.schema.json',
+        '../../pptx-nova/assets/deckkits/long-table/schemas/longTableCoverSlide.schema.json',
         import.meta.url,
       ),
     ),

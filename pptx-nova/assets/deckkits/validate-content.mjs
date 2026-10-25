@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // validate-content.mjs — schema + DeckKit density 校验入口
 // 用法: node validate-content.mjs content.json --deckkit consulting-dark
-import { loadContent } from './core-primitives.kit.mjs'
-import { validateDeckkitContent as validateContent } from './validate-deckkit.mjs'
+import { loadContent } from './shared/core-primitives.kit.mjs'
+import { validateDeckkitContent as validateContent } from './shared/validate-deckkit.mjs'
 
 const argValue = (name, fallback = '') => {
   const idx = process.argv.indexOf(name)

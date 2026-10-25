@@ -22,7 +22,7 @@ if (fs.existsSync(out)) throw Error('Output must be new; preserve old evidence')
 fs.mkdirSync(out, { recursive: true })
 const read = (p) => JSON.parse(fs.readFileSync(p))
 const design = read('pptx-nova/assets/deckkits/green-slate/design.json')
-const original = read('pptx-nova/assets/deckkits/examples/green-slate-content.json')
+const original = read('pptx-nova/assets/deckkits/green-slate/examples/content.json')
 const clone = structuredClone
 const n = (heading, body) => ({ heading, body })
 const excerpt = (slides) => ({ meta: { deckkit: 'green-slate', designScope: 'excerpt' }, slides })

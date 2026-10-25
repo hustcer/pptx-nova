@@ -13,7 +13,7 @@
 
 ## 标准工作流
 
-从 [合成示例](../examples/warm-clay-content.json) 开始；无需手写页面坐标：
+从 [合成示例](../warm-clay/examples/content.json) 开始；无需手写页面坐标：
 
 ```sh
 node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit warm-clay

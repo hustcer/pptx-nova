@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { designHash, loadDesignContract } from '../../assets/deckkits/design-contract.mjs'
+import { designHash, loadDesignContract } from '../../assets/deckkits/shared/design-contract.mjs'
 import { join, resolve } from 'node:path'
 import { verifyRenderContext } from './render-context.mjs'
 import {

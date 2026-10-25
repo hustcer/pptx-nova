@@ -4,7 +4,7 @@
     {
       "id": "consulting-dark",
       "version": "2.0.0",
-      "path": "consulting-dark.kit.mjs",
+      "path": "consulting-dark/consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "qualityProfile": {
@@ -552,13 +552,13 @@
         "Fonts are not embedded. Windows and other Office versions are unverified.",
         "Candidate qualification requires explicit selection; old production/default eligibility does not carry over."
       ],
-      "examples": ["examples/roadshow-content.json"],
+      "examples": ["consulting-dark/examples/content.json"],
       "designContract": "consulting-dark/design.json"
     },
     {
       "id": "mckinsey-blue",
       "version": "2.0.0",
-      "path": "mckinsey-blue.kit.mjs",
+      "path": "mckinsey-blue/mckinsey-blue.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "nativeSkinning": {
@@ -1114,13 +1114,13 @@
         "Five-segment rail cohorts need short labels; ledger cells are limited to 80 characters. Narrow Chinese cells may wrap punctuation. Use another registered layout or split content when capacity fails.",
         "Windows, other Office versions, cross-host pixel parity and source-deck refurbishment fidelity were not verified in this migration."
       ],
-      "examples": ["examples/mckinsey-blue-loyalty-content.json"],
+      "examples": ["mckinsey-blue/examples/content.json"],
       "designContract": "mckinsey-blue/design.json"
     },
     {
       "id": "swiss-grid",
       "version": "2.0.0",
-      "path": "swiss-grid.kit.mjs",
+      "path": "swiss-grid/swiss-grid.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "qualityProfile": {
@@ -1662,13 +1662,13 @@
         "No chart, photo/screenshot slot or source-animation preservation capability is claimed.",
         "Candidate requires explicit selection; creation evidence does not establish lossless refurbishment."
       ],
-      "examples": ["examples/swiss-grid-content.json"],
+      "examples": ["swiss-grid/examples/content.json"],
       "designContract": "swiss-grid/design.json"
     },
     {
       "id": "broadside",
       "version": "2.0.0",
-      "path": "broadside.kit.mjs",
+      "path": "broadside/broadside.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "qualityProfile": {
@@ -2232,13 +2232,13 @@
         "image.split remains an editable placeholder shell and does not accept an external asset.",
         "HTML navigation, entry animations and interactions are excluded. The independent refurbishment profile is retained without a new preservation claim."
       ],
-      "examples": ["examples/broadside-content.json"],
+      "examples": ["broadside/examples/content.json"],
       "designContract": "broadside/design.json"
     },
     {
       "id": "cartesian",
       "version": "2.0.0",
-      "path": "cartesian.kit.mjs",
+      "path": "cartesian/cartesian.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "nativeSkinning": {
@@ -2740,12 +2740,12 @@
       "examples": [
         {
           "name": "cartesian-html-reference",
-          "contentPath": "examples/cartesian-content.json"
+          "contentPath": "cartesian/examples/content.json"
         },
         {
           "name": "cartesian-animation-corpus",
-          "contentPath": "examples/cartesian-animation-content.json",
-          "choreographyPath": "examples/cartesian-animation-choreography.json"
+          "contentPath": "cartesian/examples/animation-content.json",
+          "choreographyPath": "cartesian/examples/animation-choreography.json"
         }
       ],
       "designContract": "cartesian/design.json"
@@ -2753,7 +2753,7 @@
     {
       "id": "long-table",
       "version": "2.0.0",
-      "path": "long-table.kit.mjs",
+      "path": "long-table/long-table.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "qualityProfile": {
@@ -3127,7 +3127,7 @@
       "examples": [
         {
           "name": "long-table-editorial",
-          "contentPath": "examples/long-table-content.json"
+          "contentPath": "long-table/examples/content.json"
         }
       ],
       "designContract": "long-table/design.json",
@@ -3145,7 +3145,7 @@
     {
       "id": "biennale-yellow",
       "version": "2.0.0",
-      "path": "biennale-yellow.kit.mjs",
+      "path": "biennale-yellow/biennale-yellow.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "qualityProfile": {
@@ -3604,7 +3604,7 @@
       "examples": [
         {
           "name": "biennale-yellow-html-reference",
-          "contentPath": "examples/biennale-yellow-content.json"
+          "contentPath": "biennale-yellow/examples/content.json"
         }
       ],
       "designContract": "biennale-yellow/design.json"
@@ -3612,7 +3612,7 @@
     {
       "id": "black-gold",
       "version": "0.1.0",
-      "path": "black-gold.kit.mjs",
+      "path": "black-gold/black-gold.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "designContract": "black-gold/design.json",
@@ -3903,14 +3903,14 @@
       "examples": [
         {
           "name": "black-gold-reference",
-          "contentPath": "examples/black-gold-content.json"
+          "contentPath": "black-gold/examples/content.json"
         }
       ]
     },
     {
       "id": "green-slate",
       "version": "0.1.0",
-      "path": "green-slate.kit.mjs",
+      "path": "green-slate/green-slate.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "designContract": "green-slate/design.json",
@@ -4280,14 +4280,14 @@
       "examples": [
         {
           "name": "green-slate-reference",
-          "contentPath": "examples/green-slate-content.json"
+          "contentPath": "green-slate/examples/content.json"
         }
       ]
     },
     {
       "id": "clear-value",
       "version": "0.1.0",
-      "path": "clear-value.kit.mjs",
+      "path": "clear-value/clear-value.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
       "designContract": "clear-value/design.json",
@@ -4630,14 +4630,14 @@
         "Proportional circles are editable data-derived shapes; no source images, business conclusions or arbitrary refurbishment parity are bundled."
       ],
       "examples": {
-        "content": "examples/clear-value-content.json",
-        "build": "examples/clear-value-build.mjs"
+        "content": "clear-value/examples/content.json",
+        "build": "clear-value/examples/build.mjs"
       }
     },
     {
       "id": "clear-impact",
       "version": "0.1.0",
-      "path": "clear-impact.kit.mjs",
+      "path": "clear-impact/clear-impact.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
       "qualityProfile": {
@@ -5043,13 +5043,13 @@
         "Candidate requires explicit selection; no native-skinning or existing-deck preservation claim.",
         "Arial Unicode MS has a Regular face on the validated host; CJK bold is synthesized. Scientific chart label formatting can differ between PowerPoint and the current canonical renderer while retaining equal raw values."
       ],
-      "examples": ["examples/clear-impact-content.json"],
+      "examples": ["clear-impact/examples/content.json"],
       "designContract": "clear-impact/design.json"
     },
     {
       "id": "warm-clay",
       "version": "0.1.0",
-      "path": "warm-clay.kit.mjs",
+      "path": "warm-clay/warm-clay.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
       "qualityProfile": {
@@ -5396,13 +5396,13 @@
         "On macOS PowerPoint 16.114.1, manual embedded-Excel numeric edits did not propagate to chart cache. Update content and regenerate. Title, series-name and table-cell edits survived save/reopen.",
         "Native PowerPoint editor/slideshow display is verified separately. This host PDF-export route omitted some text and moved tables; it is not an accepted export route."
       ],
-      "examples": ["examples/warm-clay-content.json"],
+      "examples": ["warm-clay/examples/content.json"],
       "designContract": "warm-clay/design.json"
     },
     {
       "id": "amber-ledger",
       "version": "0.1.0",
-      "path": "amber-ledger.kit.mjs",
+      "path": "amber-ledger/amber-ledger.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
       "qualityProfile": {
@@ -5784,13 +5784,13 @@
         "Explicit candidate selection only after acceptance; no native-skinning, arbitrary image ingestion or existing-deck preservation claim.",
         "Per-instance text/row capacity may be lower than array maxima; overflow fails and requires another legal layout, reorganization or splitting."
       ],
-      "examples": ["examples/amber-ledger-content.json"],
+      "examples": ["amber-ledger/examples/content.json"],
       "designContract": "amber-ledger/design.json"
     },
     {
       "id": "midnight-pulse",
       "version": "0.1.0",
-      "path": "midnight-pulse.kit.mjs",
+      "path": "midnight-pulse/midnight-pulse.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
       "qualityProfile": {
@@ -6168,13 +6168,13 @@
         "Explicit candidate selection only; no native-skinning or arbitrary source-deck preservation claim.",
         "Per-instance capacity may be lower than array maxima; choose a legal variant, reorganize or split."
       ],
-      "examples": ["examples/midnight-pulse-content.json"],
+      "examples": ["midnight-pulse/examples/content.json"],
       "designContract": "midnight-pulse/design.json"
     },
     {
       "id": "sky-compass",
       "version": "0.1.0",
-      "path": "sky-compass.kit.mjs",
+      "path": "sky-compass/sky-compass.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
       "qualityProfile": {
@@ -6629,7 +6629,7 @@
         "Photography is not registered: the actual reference uses an editable quarter-disk cover.",
         "Bounded appendix supports up to eight rows at readable type; longer lists require another page."
       ],
-      "examples": ["examples/sky-compass-content.json"],
+      "examples": ["sky-compass/examples/content.json"],
       "designContract": "sky-compass/design.json"
     }
   ]

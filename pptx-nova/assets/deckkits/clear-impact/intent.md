@@ -13,7 +13,7 @@
 
 ## 标准工作流
 
-从 [完整合成示例](../examples/clear-impact-content.json) 开始，只填写内容，无需手写页面坐标：
+从 [完整合成示例](../clear-impact/examples/content.json) 开始，只填写内容，无需手写页面坐标：
 
 ```sh
 node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit clear-impact

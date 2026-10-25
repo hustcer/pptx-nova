@@ -1,18 +1,18 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/green-slate.kit.mjs'
-import { createStrategyDeck } from '../../pptx-nova/assets/deckkits/strategy-components.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/green-slate/green-slate.kit.mjs'
+import { createStrategyDeck } from '../../pptx-nova/assets/deckkits/green-slate/components.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
   checkDesignReadback,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 
 const original = JSON.parse(
   readFileSync(
-    new URL('../../pptx-nova/assets/deckkits/examples/green-slate-content.json', import.meta.url),
+    new URL('../../pptx-nova/assets/deckkits/green-slate/examples/content.json', import.meta.url),
   ),
 )
 const excerpt = (slides) => ({ meta: { deckkit: 'green-slate', designScope: 'excerpt' }, slides })
@@ -36,7 +36,7 @@ test('Green Slate: every family builds minimum unrelated content without source 
       schema = JSON.parse(
         readFileSync(
           new URL(
-            `../../pptx-nova/assets/deckkits/schemas/green-slate/${type}.schema.json`,
+            `../../pptx-nova/assets/deckkits/green-slate/schemas/${type}.schema.json`,
             import.meta.url,
           ),
         ),

@@ -19,17 +19,17 @@ readiness 全链路。规范以 xdoc 维护者仓库 `docs/skill-dev-guide.md`�
 ## 1. 拆分：什么进 kit，什么进 content
 
 合同路线先按 [design-source-migration.md](design-source-migration.md) 抽出
-`<id>/design.json` 的事实、`intent.md` 的判断与已注册视觉族。`<id>.kit.mjs` 只保留稳定适配接口；
+`<id>/design.json` 的事实、`<id>/intent.md` 的判断与已注册视觉族。`<id>/<id>.kit.mjs` 只保留稳定适配接口；
 布局解析器按角色和逐实例容量编译组件计划，组件执行器消费该计划，不把旧页型函数换文件名后继续分发。
-新视觉族通过 `design-family-registry.mjs` 注册合同断言、解析、风格检查和投影元数据，复用共享门禁。
+新视觉族通过 `shared/design-family-registry.mjs` 注册合同断言、解析、风格检查和投影元数据，复用共享门禁。
 新增/迁移优先走此路线；下列 kit/content 分离原则也适用于仍在维护的无合同套件。
 
 把 `generate.mjs` 的业务内容与视觉执行分离：
 
-- `pptx-nova/assets/deckkits/<id>.kit.mjs` —— 视觉语言（C/F 常量、chrome、
+- `pptx-nova/assets/deckkits/<id>/<id>.kit.mjs` —— 视觉语言（C/F 常量、chrome、
   几何 helper、页型函数）+ `export function createDeck(content)` 返回
   `{ patch, warnings }`。页型函数只消费 `slide.data`。
-- `pptx-nova/assets/deckkits/examples/<id>-content.json` —— Phase 1 内联的
+- `pptx-nova/assets/deckkits/<id>/examples/content.json` —— Phase 1 内联的
   **全部业务内容**原样搬入，结构 `{ meta: { deckkit: "<id>" }, slides: [{ type, data }] }`。
   这份"参考 deck 内容"就是天然的 golden example。例外：参考 deck 中的一次性图片、截图、
   照片、插画和背景位图不搬入 examples/assets；对应字段写成 `asset` 槽位、占位行为或
@@ -78,7 +78,7 @@ callout 和缺失图片时的隐藏/占位策略。
 ## 2. Schema 与槽位
 
 - 新页型注册进 `schemas/content.schema.json` 的 enum；
-  每个页型写 `schemas/<id>/<slideType>.schema.json`。
+  每个页型写 `<id>/schemas/<slideType>.schema.json`。
 - 覆盖：必填字段、数组 min/maxItems、tuple 结构、enum、`data.labels` 覆盖入口、
   rich text 强调字段（如 `calloutHighlights`）。
 - 每个可见文本槽位写 `x-slotBudget`（至少 `maxLines`、`fontPt`、`widthIn`）；
@@ -123,6 +123,13 @@ visualGrammar / layoutContract / diversityGate / density / validatedWith / quali
 knownLimits / examples / refurbishProfile`（`refurbishProfile` 可用
 `node pptx-nova/scripts/pptx-nova-deckkit-refurbish-profile-fill.mjs --deckkit <id> --write` 生成）。
 
+`path` 固定为 `<id>/<id>.kit.mjs`，`designContract` 为 `<id>/design.json`，
+示例路径为 `<id>/examples/content.json`。套件模块、schema 和示例必须遵循入口 SKILL
+的正式文件目录约定；不要恢复全局 examples/schema 子目录或根目录专属模块。
+`examples/build.mjs` 不传参数时须从自身目录读取 `content.json`，不能依赖调用 cwd。
+调用 `loadContent` 时用 `fileURLToPath(new URL('./content.json', import.meta.url))` 转为字符串；
+直接调用 `readFileSync` 时可以传入 URL 对象。跨 cwd 的 CLI 回归由目录规范测试覆盖。
+
 - `visualGrammar` 从 style-spec.md 直接提炼（`schemaVersion: pptx-nova-visual-grammar/v1`，
   positioning / mood / layoutPrinciples / signatureElements / compositionRules / avoid 字符串数组，
   typography / colorSystem / slideRhythm 对象）——
@@ -137,10 +144,10 @@ knownLimits / examples / refurbishProfile`（`refurbishProfile` 可用
 
 ```bash
 node pptx-nova/assets/deckkits/validate-content.mjs \
-  pptx-nova/assets/deckkits/examples/<id>-content.json \
+  pptx-nova/assets/deckkits/<id>/examples/content.json \
   --deckkit <id> --mode delivery --json
 node pptx-nova/scripts/pptx-nova-build.mjs \
-  --deckkit <id> pptx-nova/assets/deckkits/examples/<id>-content.json \
+  --deckkit <id> pptx-nova/assets/deckkits/<id>/examples/content.json \
   -o .tmp/deckkit-<id>/kit-patch.json --quality-json .tmp/deckkit-<id>/kit-quality.json
 ```
 
@@ -174,10 +181,11 @@ node --test tools/tests/pptx-nova-scripts.test.mjs
 
 在 `pptx-nova/benchmarks/visual/` 落 golden case 并登记 `index.json`：
 
-- `golden-*`：直接用 `<id>-content.json`（即参考 deck 内容）。
+- `golden-*`：直接用 `<id>/examples/content.json`（即参考 deck 内容）。
 - 每个 case 需要 `index.json` 条目（`id`=`<id>.<case>`、`deckkit`、`kind`、`contentPath`、
   `buildPath`、`expectedPath`、`reviewPath`），以及 `cases/<id>/<case>/expected.json`
-  （`pptx-nova-visual-case/v1`）和 `review.md`；`buildPath` 指向 `examples/<id>-build.mjs` build 胶水。
+  （`pptx-nova-visual-case/v1`）和 `review.md`；`buildPath` 为
+  `../../assets/deckkits/<id>/examples/build.mjs`，相对 `benchmarks/visual/index.json` 所在目录解析。
 
 必须额外审查 `stress-density` 和 `mixed-language`，但默认不要把这两个 case 写入
 `benchmarks/visual/index.json` 或提交到 git。把临时 content、patch、PPTX、PNG、

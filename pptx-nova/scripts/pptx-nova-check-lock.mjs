@@ -4,7 +4,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { normalizeChartSemantics, validateChartSemantics } from './lib/chart-semantics.mjs'
 import { validateSessionRulesDocument } from './pptx-nova-session-rules-core.mjs'
-import { inspectAnimationCorpus } from '../assets/deckkits/animation-corpus.mjs'
+import { inspectAnimationCorpus } from '../assets/deckkits/shared/animation-corpus.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const skillRoot = resolve(__dirname, '..')

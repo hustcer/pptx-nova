@@ -2,6 +2,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { basename, dirname, extname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { auditDeckkitLayout } from './lib/deckkit-layout.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(SCRIPT_DIR, '..')
@@ -127,7 +128,7 @@ function scanTextFile(path, relPath, issues) {
 }
 
 function audit() {
-  const issues = []
+  const issues = auditDeckkitLayout(SKILL_ROOT)
   const files = walk(SKILL_ROOT)
   for (const path of files) {
     const relPath = relative(SKILL_ROOT, path).replaceAll('\\', '/')

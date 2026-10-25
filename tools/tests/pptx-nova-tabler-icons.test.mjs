@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
-import { createOps } from '../../pptx-nova/assets/deckkits/core-primitives.kit.mjs'
+import { createOps } from '../../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs'
 import {
   getTablerIconAsset,
   getTablerIconPackInfo,
@@ -14,7 +14,7 @@ import {
   listTablerIconNames,
   resolveTablerIconName,
   searchTablerIcons,
-} from '../../pptx-nova/assets/deckkits/icon-assets.kit.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/icon-assets.kit.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TOOL = join(ROOT, 'tools/generate-pptx-nova-tabler-icons.nu')
@@ -106,9 +106,9 @@ test('Tabler icon helper searches, resolves aliases, recolors SVG, and emits add
 
 test('DeckKits do not override Tabler outline icon stroke width by default', () => {
   const deckkitPaths = [
-    join(ROOT, 'pptx-nova/assets/deckkits/consulting-dark.kit.mjs'),
-    join(ROOT, 'pptx-nova/assets/deckkits/mckinsey-blue.kit.mjs'),
-    join(ROOT, 'pptx-nova/assets/deckkits/swiss-grid.kit.mjs'),
+    join(ROOT, 'pptx-nova/assets/deckkits/consulting-dark/consulting-dark.kit.mjs'),
+    join(ROOT, 'pptx-nova/assets/deckkits/mckinsey-blue/mckinsey-blue.kit.mjs'),
+    join(ROOT, 'pptx-nova/assets/deckkits/swiss-grid/swiss-grid.kit.mjs'),
   ]
 
   for (const deckkitPath of deckkitPaths) {

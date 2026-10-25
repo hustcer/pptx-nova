@@ -1,14 +1,17 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { createDeck, DESIGN } from '../../pptx-nova/assets/deckkits/amber-ledger.kit.mjs'
+import {
+  createDeck,
+  DESIGN,
+} from '../../pptx-nova/assets/deckkits/amber-ledger/amber-ledger.kit.mjs'
 import {
   assertDesignContract,
   checkDesignPatch,
-} from '../../pptx-nova/assets/deckkits/design-contract.mjs'
-import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/validate-deckkit.mjs'
+} from '../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
+import { validateDeckkitContent } from '../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
 const read = (p) => JSON.parse(readFileSync(new URL('../../' + p, import.meta.url)))
-const fixture = () => read('pptx-nova/assets/deckkits/examples/amber-ledger-content.json')
+const fixture = () => read('pptx-nova/assets/deckkits/amber-ledger/examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'amber-ledger', designScope: 'excerpt' }, slides })
 function specimen(s, maximum = false) {
   if (s['x-slotProbeValue'] !== undefined) return s['x-slotProbeValue']
@@ -25,7 +28,7 @@ function specimen(s, maximum = false) {
 }
 for (const type of Object.keys(DESIGN.amber.families))
   test(`amber-ledger ${type}: minimal and maximum nonreference content, every real layout`, () => {
-    const schema = read(`pptx-nova/assets/deckkits/schemas/amber-ledger/${type}.schema.json`)
+    const schema = read(`pptx-nova/assets/deckkits/amber-ledger/schemas/${type}.schema.json`)
     for (const maximum of [false, true]) {
       const data = specimen(schema, maximum),
         frames = []
@@ -185,10 +188,10 @@ test('amber-ledger retains literal business fields and has no reference bitmap d
     false,
   )
   for (const name of [
-    'amber-ledger.kit.mjs',
-    'amber-layouts.mjs',
-    'amber-components.mjs',
-    'amber-registry.mjs',
+    'amber-ledger/amber-ledger.kit.mjs',
+    'amber-ledger/layouts.mjs',
+    'amber-ledger/components.mjs',
+    'amber-ledger/registry.mjs',
   ])
     assert.doesNotMatch(
       readFileSync(new URL('../../pptx-nova/assets/deckkits/' + name, import.meta.url), 'utf8'),

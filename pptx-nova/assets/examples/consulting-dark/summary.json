@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "A clearer path from signal to scale",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/roadshow-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/roadshow-build.mjs",
+    "content": "pptx-nova/assets/deckkits/consulting-dark/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/consulting-dark/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

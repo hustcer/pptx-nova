@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "clear-value",
   "case": "golden-design",
-  "contentPath": "../../../../../assets/deckkits/examples/clear-value-content.json",
+  "contentPath": "../../../../../assets/deckkits/clear-value/examples/content.json",
   "expected": {
     "minSlides": 12,
     "requiredSlideTypes": [

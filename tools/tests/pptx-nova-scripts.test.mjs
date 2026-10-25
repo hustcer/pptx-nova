@@ -1389,7 +1389,9 @@ test('generic DeckKit build driver writes patch and quality sidecars', () => {
 })
 
 test('DeckKit quality resolves the topmost containing panel without hiding real contrast failures', async () => {
-  const { assessDeckQuality } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
+  const { assessDeckQuality } = await import(
+    skillUrl('assets/deckkits/shared/core-primitives.kit.mjs')
+  )
   const patch = {
     schemaVersion: 'pptx-patch/v1',
     ops: [
@@ -1487,10 +1489,12 @@ test('DeckKit quality resolves the topmost containing panel without hiding real 
 })
 
 test('official broadside example has no blocking build-quality issues', async () => {
-  const { assessDeckQuality } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
-  const { createDeck } = await import(skillUrl('assets/deckkits/broadside.kit.mjs'))
+  const { assessDeckQuality } = await import(
+    skillUrl('assets/deckkits/shared/core-primitives.kit.mjs')
+  )
+  const { createDeck } = await import(skillUrl('assets/deckkits/broadside/broadside.kit.mjs'))
   const content = JSON.parse(
-    readFileSync(skillPath('assets/deckkits/examples/broadside-content.json'), 'utf8'),
+    readFileSync(skillPath('assets/deckkits/broadside/examples/content.json'), 'utf8'),
   )
   const { patch } = createDeck(content)
   const quality = assessDeckQuality({ patch, deckkit: 'broadside' })
@@ -1500,7 +1504,7 @@ test('official broadside example has no blocking build-quality issues', async ()
 })
 
 test('broadside bar chart uses explicit accents without an implicit trailing accent', async () => {
-  const { createDeck } = await import(skillUrl('assets/deckkits/broadside.kit.mjs'))
+  const { createDeck } = await import(skillUrl('assets/deckkits/broadside/broadside.kit.mjs'))
   const buildBarColors = (bars) => {
     const { patch } = createDeck({
       slides: [
@@ -1538,7 +1542,7 @@ test('broadside cover blocks text that exceeds every registered composition in d
   const dir = mkdtempSync(join(tmpdir(), 'pptx-nova-broadside-cover-budget-'))
   const contentPath = join(dir, 'content.json')
   const content = JSON.parse(
-    readFileSync(skillPath('assets/deckkits/examples/broadside-content.json'), 'utf8'),
+    readFileSync(skillPath('assets/deckkits/broadside/examples/content.json'), 'utf8'),
   )
   const cover = content.slides.find((slide) => slide.type === 'broadsideCoverSlide')
   cover.data.title = '重写演示文稿全链路基础设施能力版图'.repeat(3)
@@ -1607,7 +1611,9 @@ test('chart preview and Content_Types audit guidance stay current', () => {
 })
 
 test('DeckKit diversity diagnostics disclose current, missing, and available groups', async () => {
-  const { validateContent } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
+  const { validateContent } = await import(
+    skillUrl('assets/deckkits/shared/core-primitives.kit.mjs')
+  )
   const content = {
     meta: { deckkit: 'cartesian' },
     slides: Array.from({ length: 7 }, () => ({
@@ -1654,9 +1660,11 @@ test('DeckKit diversity diagnostics disclose current, missing, and available gro
 })
 
 test('placeholder-only DeckKit asset slots reject image injection in delivery mode', async () => {
-  const { validateContent } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
+  const { validateContent } = await import(
+    skillUrl('assets/deckkits/shared/core-primitives.kit.mjs')
+  )
   const content = JSON.parse(
-    readFileSync(skillPath('assets/deckkits/examples/broadside-content.json'), 'utf8'),
+    readFileSync(skillPath('assets/deckkits/broadside/examples/content.json'), 'utf8'),
   )
   const imageSlide = content.slides.find((slide) => slide.type === 'broadsideSplitSlide')
   imageSlide.imageSlots = { 'image.split': 'product_screenshot' }
@@ -1784,7 +1792,7 @@ function cartesianImageContent(imageSlots) {
 }
 
 test('cartesian image stats keeps the crossed shell when no asset is bound', async () => {
-  const { createDeck } = await import(skillUrl('assets/deckkits/cartesian.kit.mjs'))
+  const { createDeck } = await import(skillUrl('assets/deckkits/cartesian/cartesian.kit.mjs'))
   const result = createDeck(cartesianImageContent())
   const connectors = result.patch.ops.filter((op) => op.op === 'add-connector')
   const images = result.patch.ops.filter((op) => op.op === 'add-image')
@@ -1794,7 +1802,7 @@ test('cartesian image stats keeps the crossed shell when no asset is bound', asy
 })
 
 test('core image crop builder emits the canonical set-image operation', async () => {
-  const { createOps } = await import(skillUrl('assets/deckkits/core-primitives.kit.mjs'))
+  const { createOps } = await import(skillUrl('assets/deckkits/shared/core-primitives.kit.mjs'))
   const builder = createOps()
   builder.setImageCrop(2, 'Hero', { left: 0.08, right: 0.12, top: 0.03 })
 
@@ -2194,8 +2202,12 @@ test('readiness required-live mode blocks missing live benchmark evidence', () =
 })
 
 test('clear-impact builds every minimum role and all registered layout variants without reference content', async () => {
-  const { createDeck, DESIGN } = await import(skillUrl('assets/deckkits/clear-impact.kit.mjs'))
-  const { validateDeckkitContent } = await import(skillUrl('assets/deckkits/validate-deckkit.mjs'))
+  const { createDeck, DESIGN } = await import(
+    skillUrl('assets/deckkits/clear-impact/clear-impact.kit.mjs')
+  )
+  const { validateDeckkitContent } = await import(
+    skillUrl('assets/deckkits/shared/validate-deckkit.mjs')
+  )
   function specimen(s, key = '') {
     if (s['x-slotProbeValue'] !== undefined) return s['x-slotProbeValue']
     if (s.enum) return s.enum[0]
@@ -2208,7 +2220,7 @@ test('clear-impact builds every minimum role and all registered layout variants 
   }
   for (const [type, family] of Object.entries(DESIGN.impact.families)) {
     const schema = JSON.parse(
-      readFileSync(skillPath(`assets/deckkits/schemas/clear-impact/${type}.schema.json`)),
+      readFileSync(skillPath(`assets/deckkits/clear-impact/schemas/${type}.schema.json`)),
     )
     for (const layoutId of Object.keys(family.variants)) {
       const data = specimen(schema)
@@ -2240,10 +2252,12 @@ test('clear-impact builds every minimum role and all registered layout variants 
 })
 
 test('clear-impact preserves numeric evidence and rejects unsafe or inconsistent content', async () => {
-  const { createDeck } = await import(skillUrl('assets/deckkits/clear-impact.kit.mjs'))
-  const { validateDeckkitContent } = await import(skillUrl('assets/deckkits/validate-deckkit.mjs'))
+  const { createDeck } = await import(skillUrl('assets/deckkits/clear-impact/clear-impact.kit.mjs'))
+  const { validateDeckkitContent } = await import(
+    skillUrl('assets/deckkits/shared/validate-deckkit.mjs')
+  )
   const sample = JSON.parse(
-    readFileSync(skillPath('assets/deckkits/examples/clear-impact-content.json')),
+    readFileSync(skillPath('assets/deckkits/clear-impact/examples/content.json')),
   )
   const one = (type) => ({
     meta: { deckkit: 'clear-impact' },
@@ -2330,12 +2344,14 @@ test('clear-impact preserves numeric evidence and rejects unsafe or inconsistent
 })
 
 test('clear-impact enforces design rules and exposes numeric probe values without hiding text slots', async () => {
-  const { createDeck, DESIGN } = await import(skillUrl('assets/deckkits/clear-impact.kit.mjs'))
+  const { createDeck, DESIGN } = await import(
+    skillUrl('assets/deckkits/clear-impact/clear-impact.kit.mjs')
+  )
   const { checkDesignPatch, assertDesignContract } = await import(
-    skillUrl('assets/deckkits/design-contract.mjs')
+    skillUrl('assets/deckkits/shared/design-contract.mjs')
   )
   const content = JSON.parse(
-      readFileSync(skillPath('assets/deckkits/examples/clear-impact-content.json')),
+      readFileSync(skillPath('assets/deckkits/clear-impact/examples/content.json')),
     ),
     patch = createDeck(content).patch
   for (const mutation of [
@@ -2405,7 +2421,7 @@ test('DeckKit slot consistency honors array-level control roles by default', () 
 })
 
 test('cartesian line chart emits xdoc-compatible marker colors', async () => {
-  const kit = await import(skillUrl('assets/deckkits/cartesian.kit.mjs'))
+  const kit = await import(skillUrl('assets/deckkits/cartesian/cartesian.kit.mjs'))
   const result = kit.createDeck({
     meta: { deckkit: 'cartesian' },
     slides: [
@@ -2443,7 +2459,7 @@ test('cartesian line chart emits xdoc-compatible marker colors', async () => {
 })
 
 test('consulting-dark benchmark chart omits the unsupported none legend value', async () => {
-  const kit = await import(skillUrl('assets/deckkits/consulting-dark.kit.mjs'))
+  const kit = await import(skillUrl('assets/deckkits/consulting-dark/consulting-dark.kit.mjs'))
   const result = kit.createDeck({
     meta: { deckkit: 'consulting-dark' },
     slides: [
@@ -2476,7 +2492,7 @@ test('consulting-dark benchmark chart omits the unsupported none legend value', 
 })
 
 test('consulting-dark benchmark table emits canonical nested cell coordinates', async () => {
-  const kit = await import(skillUrl('assets/deckkits/consulting-dark.kit.mjs'))
+  const kit = await import(skillUrl('assets/deckkits/consulting-dark/consulting-dark.kit.mjs'))
   const content = JSON.parse(
     readFileSync(skillPath('assets/examples/consulting-dark/content.json'), 'utf8'),
   )
@@ -3213,9 +3229,9 @@ test('tracked repository sources do not retain removed legacy xdoc op names', ()
 })
 
 test('mckinsey-blue 2.0 requires an explicit shared timeframe instead of business defaults', async () => {
-  const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
+  const kit = await import(skillUrl('assets/deckkits/mckinsey-blue/mckinsey-blue.kit.mjs'))
   const source = JSON.parse(
-    readFileSync(skillPath('assets/deckkits/examples/mckinsey-blue-loyalty-content.json'), 'utf8'),
+    readFileSync(skillPath('assets/deckkits/mckinsey-blue/examples/content.json'), 'utf8'),
   )
   const content = {
     meta: { deckkit: 'mckinsey-blue', designScope: 'excerpt' },
@@ -3228,9 +3244,9 @@ test('mckinsey-blue 2.0 requires an explicit shared timeframe instead of busines
 })
 
 test('mckinsey-blue 2.0 rejects invalid percentages without clamping or inventing visible bars', async () => {
-  const kit = await import(skillUrl('assets/deckkits/mckinsey-blue.kit.mjs'))
+  const kit = await import(skillUrl('assets/deckkits/mckinsey-blue/mckinsey-blue.kit.mjs'))
   const source = JSON.parse(
-    readFileSync(skillPath('assets/deckkits/examples/mckinsey-blue-loyalty-content.json'), 'utf8'),
+    readFileSync(skillPath('assets/deckkits/mckinsey-blue/examples/content.json'), 'utf8'),
   )
   for (const value of [undefined, '62%', 320, -5]) {
     const slide = structuredClone(source.slides[4])

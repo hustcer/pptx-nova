@@ -5,8 +5,8 @@
   "kind": "golden",
   "title": "Volume grew; efficiency needs a reset",
   "source": {
-    "content": "pptx-nova/assets/deckkits/examples/midnight-pulse-content.json",
-    "build": "pptx-nova/assets/deckkits/examples/midnight-pulse-build.mjs",
+    "content": "pptx-nova/assets/deckkits/midnight-pulse/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/midnight-pulse/examples/build.mjs",
     "expected": "pptx-nova/benchmarks/visual/cases/midnight-pulse/golden-operations/expected.json",
     "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
   },

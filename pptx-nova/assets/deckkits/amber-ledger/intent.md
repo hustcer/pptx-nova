@@ -11,7 +11,7 @@
 
 ## 标准工作流
 
-从 [明确标注为合成数据的示例](../examples/amber-ledger-content.json) 开始，无需手写坐标：
+从 [明确标注为合成数据的示例](../amber-ledger/examples/content.json) 开始，无需手写坐标：
 
 ```sh
 node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit amber-ledger

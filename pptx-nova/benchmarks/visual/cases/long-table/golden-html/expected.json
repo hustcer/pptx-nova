@@ -2,7 +2,7 @@
   "schemaVersion": "pptx-nova-visual-case/v1",
   "deckkit": "long-table",
   "case": "golden-html",
-  "contentPath": "../../../../../assets/deckkits/examples/long-table-content.json",
+  "contentPath": "../../../../../assets/deckkits/long-table/examples/content.json",
   "expected": {
     "minSlides": 8,
     "requiredSlideTypes": [

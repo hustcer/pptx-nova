@@ -116,7 +116,7 @@ visual reference, then choose stable PPTX point sizes and text box heights.
 
 ## Phase 2 Notes
 
-- Use the HTML example text only in `examples/<id>-content.json` and benchmark fixtures.
+- Use the HTML example text only in `<id>/examples/content.json` and benchmark fixtures.
 - Run content leak audit against a non-reference content patch, not the golden example patch. The golden patch is
   expected to contain reference text because its content fixture is the HTML example; it cannot distinguish legitimate
   content output from `.kit.mjs` hard-coded leaks.

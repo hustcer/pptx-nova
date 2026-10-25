@@ -20,7 +20,7 @@ const out = resolve(argv[1])
 if (fs.existsSync(out)) throw Error('Preserve prior evidence; output must be new')
 const read = (p) => JSON.parse(fs.readFileSync(p)),
   clone = structuredClone,
-  original = read('pptx-nova/assets/deckkits/examples/clear-value-content.json'),
+  original = read('pptx-nova/assets/deckkits/clear-value/examples/content.json'),
   design = read('pptx-nova/assets/deckkits/clear-value/design.json'),
   n = (heading, body) => ({ heading, body }),
   excerpt = (slides) => ({ meta: { deckkit: 'clear-value', designScope: 'excerpt' }, slides })

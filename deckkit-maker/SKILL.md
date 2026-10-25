@@ -107,9 +107,7 @@ node -e "const id=process.argv[1]; if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) pr
 test -f <ref.pptx-or-template.html>   # HTML 目录输入时检查入口 template.html
 test ! -e .tmp/deckkit-<id>
 node -e "const c=require('./pptx-nova/assets/deckkits/catalog.json'); const id=process.argv[1]; if ((c.entries||[]).some(e=>e.id===id)) process.exit(1)" <id>
-test ! -e pptx-nova/assets/deckkits/<id>.kit.mjs
-test ! -e pptx-nova/assets/deckkits/schemas/<id>
-test ! -e pptx-nova/assets/deckkits/examples/<id>-content.json
+test ! -e pptx-nova/assets/deckkits/<id>
 test ! -e pptx-nova/benchmarks/visual/cases/<id>
 test ! -e pptx-nova/assets/examples/<id>
 ```
@@ -130,6 +128,42 @@ test ! -e pptx-nova/assets/examples/<id>
 已有先例：`swiss-grid` DeckKit 即从 xdoc 维护者仓库的 `demos/67-swiss-grid-systems.pptx` 复刻而来，
 `broadside` / `cartesian` / `biennale-yellow` 则来自 HTML 模板（见 catalog `knownLimits`），
 本 skill 把这条路径固化为标准流程。
+
+## 正式文件目录约定（必做）
+
+每个套件的正式文件集中在 `pptx-nova/assets/deckkits/<id>/`：
+
+```text
+<id>/
+├── <id>.kit.mjs       # 稳定入口；catalog.path = <id>/<id>.kit.mjs
+├── design.json        # catalog.designContract = <id>/design.json
+├── intent.md
+├── layouts.mjs
+├── components.mjs     # 需要套件专属执行器时提供
+├── registry.mjs       # 需要注册视觉族时提供
+├── schemas/           # <slideType>.schema.json
+└── examples/
+    ├── content.json   # 主示例
+    ├── build.mjs      # 开发和 benchmark 胶水
+    └── <variant>-content.json
+```
+
+套件内使用职责文件名，不创建根目录 `<prefix>-components.mjs` 等文件，不再使用全局
+`deckkits/examples/` 或 `deckkits/schemas/<id>/`。catalog 的路径以 `assets/deckkits/`
+为基准，benchmark index 的路径以 `benchmarks/visual/` 为基准。真正跨套件复用的 helper
+放在 `shared/`；套件不得直接导入其他套件的实现。统一注册和合同/校验调度模块可以导入
+套件的公开注册或解析接口。共享资源定位复用 `shared/deckkit-paths.mjs`，不得依赖运行 cwd。
+
+公共 `content.schema.json`、`design.schema.json` 继续位于 `deckkits/schemas/`；
+用户可见 showcase 仍位于 `assets/examples/<id>/`，视觉回归资料仍位于
+`benchmarks/visual/cases/<id>/`。每次新增或修改套件后运行：
+
+```bash
+node --test tools/tests/pptx-nova-deckkit-layout.test.mjs
+node tools/pptx-nova-audit-public.mjs --strict
+```
+
+目录规则由公共审计强制检查；不要用旧路径 wrapper、复制文件或双份 schema 绕过检查。
 
 ## 两阶段总览
 
@@ -282,7 +316,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 
 ## 不可跳过的红线
 
-- **core-primitives 只读为默认**。`core-primitives.kit.mjs` 不承担任何 DeckKit 专属
+- **core-primitives 只读为默认**。`shared/core-primitives.kit.mjs` 不承担任何 DeckKit 专属
   风格。只有当一段逻辑"换了主题色/间距后仍然正确"且至少有跨 kit 复用证据时，才考虑
   下沉；下沉前必须与用户确认，并跑全部现有 DeckKit 的 validation tests。
 - **参考 pptx / HTML 只读**。所有解包、DOM/CSS 抽取和分析副本都放进

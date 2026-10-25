@@ -44,7 +44,7 @@ t:
   @node tools/run-tests.mjs
 
 # List DeckKit readiness, versions and committed PPTX examples
-list *args:
+ls *args:
     @nu --no-config-file tools/list-deckkits.nu {{args}}
 
 # Format code

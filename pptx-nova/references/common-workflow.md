@@ -19,7 +19,7 @@ For DeckKit-first create workflows, prefer the bundled initializer so path names
 template files, and output collision checks are consistent:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-init-run.mjs \
+node <skill-root>/scripts/cli/runtime/init-run.mjs \
   --slug <slug> \
   --deckkit <id> \
   --output <final.pptx>
@@ -29,7 +29,7 @@ The initializer writes `deck_lock.template.json` and `content.template.json`.
 Use them as examples, then create or overwrite fresh `deck_lock.json` and
 `content.json`; do not append a second JSON object to a template file.
 After both files are ready, prefer the generated `commands.json.run` command or
-call `pptx-nova-create-run.mjs` directly. It runs validate/build/check-lock,
+call `cli/create/run.mjs` directly. It runs validate/build/check-lock,
 dry-run, apply, vision-check and canonical PDF/PNG evidence while preserving
 every intermediate artifact. After actual visual review, its separate
 `--finalize --visual-review <path>` phase publishes the same bound candidate
@@ -126,7 +126,7 @@ canonical inputs, resolve existing files through the filesystem first. Assets mu
 still remain inside the resolved root. These filesystem rules do not change OPC
 part-name or `assetSource.path` security rules; see `troubleshooting.md`.
 
-For Node wrappers, use the bundled `scripts/lib/filesystem-paths.mjs` helper for
+For Node wrappers, use the bundled `scripts/lib/runtime/filesystem-paths.mjs` helper for
 caller-supplied create/build paths, including new output directories. It resolves
 POSIX parent traversal before normalization; `realpathSync.native` supplies filesystem
 identity where needed. Plain `realpathSync` also folds `symlink/..` lexically and
@@ -160,12 +160,12 @@ replace them or they are current-run intermediate outputs.
 After creating the run directory, capture one runtime capability index:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-probe.mjs \
+node <skill-root>/scripts/cli/runtime/probe.mjs \
   --output <run-dir>/xdoc-capabilities.json
 ```
 
 Exception: the standard refurbish runner performs this probe internally. When
-using `scripts/pptx-nova-refurbish-run.mjs`, do not pre-initialize a full run
+using `scripts/cli/refurbish/run.mjs`, do not pre-initialize a full run
 directory. A caller-provided `--run-dir` may be new, empty, or contain only
 `xdoc-capabilities.json`; any other existing artifact means that directory is
 not a fresh runner target.
@@ -205,7 +205,7 @@ entry pass `--strict`.
 For a task-specific check, add repeatable requirements such as:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-probe.mjs \
+node <skill-root>/scripts/cli/runtime/probe.mjs \
   --require-command pptx.apply \
   --require-command json-rpc \
   --require-op set-text-frame \
@@ -236,7 +236,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     `references/edit-contract.md` before patch/apply. - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
     `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
     `xdoc pptx refurbish-skin` JSON report.
-    Prefer `scripts/pptx-nova-refurbish-run.mjs` for the standard route so these
+    Prefer `scripts/cli/refurbish/run.mjs` for the standard route so these
     artifacts, phase failures, previews, and final publication use one run-dir
     contract. Use the lower-level commands directly only for diagnosis or
     selective page repair.
@@ -256,7 +256,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     JSON-mode compare failures still return one `pptx-nova-compare-error/v1`
     document on stdout and emit `compare-failed` as JSONL on stderr.
     Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
-    text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
+text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     or page-level repair. - Data/template: template, data, bindings, and asset paths. - If the source outline only gives a slide title or leaves factual content
     blank, record any AI-filled facts, competitors, metrics, or examples in
     `deck_lock.assumptions[]` before writing `content.json`. - If the user-provided outline explicitly fixes slide titles or subtitles,
@@ -275,7 +275,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
       `content.json`) first; do not let the patch become a hidden second plan.
 5.  For standard DeckKit create workflows, prefer the bundled runner:
     ```bash
-    node <skill-root>/scripts/pptx-nova-create-run.mjs \
+    node <skill-root>/scripts/cli/create/run.mjs \
       --deckkit <id> \
       --content content.json \
       --lock deck_lock.json \
@@ -292,7 +292,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 6.  When manually debugging or running a non-standard route, run design-lock
     drift check before dry-run when `deck_lock.json` exists:
     ```bash
-    node <skill-root>/scripts/pptx-nova-check-lock.mjs \
+    node <skill-root>/scripts/cli/create/check-lock.mjs \
       --lock deck_lock.json --content content.json --patch patch.json --json
     ```
     Add `--assets assets_manifest.json` when assets exist. For brand-sensitive
@@ -319,7 +319,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
       --output <run-dir>/candidate.pptx \
       --dry-run --json > <run-dir>/dry-run.json
 
-    node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
+    node <skill-root>/scripts/cli/edit/copy-size-gate.mjs \
       --target target.pptx \
       --donor donor.pptx \
       --copy-report <run-dir>/dry-run.json \
@@ -398,7 +398,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     native chart/table data ops, run the lightweight semantic audit first so the
     finalizer can consume semantic-audit.json from the run directory:
 
-         node <skill-root>/scripts/pptx-nova-semantic-audit.mjs \
+         node <skill-root>/scripts/cli/review/semantic-audit.mjs \
            --deck-lock deck_lock.json \
            --patch patch.json \
            --final-inspect <run-dir>/final-inspect.json \
@@ -409,7 +409,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     structure check before the finalizer so it can prove target fonts/colors are
     written into the PPTX and catch empty placeholder residue:
 
-         node <skill-root>/scripts/pptx-nova-structure-check.mjs \
+         node <skill-root>/scripts/cli/review/structure-check.mjs \
            --pptx out.pptx \
            --deck-lock deck_lock.json \
            --strict-placeholders \
@@ -418,7 +418,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 
     ```bash
     xdoc pptx inspect out.pptx --daemon --json > <run-dir>/final-inspect.json
-    node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
+    node <skill-root>/scripts/cli/review/finalize-evidence.mjs \
       --mode <studio-create|reference-create|structural-edit|template-following> \
       --run-dir <run-dir> \
       --candidate out.pptx \
@@ -469,7 +469,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     slides at full size. Record the review as visual_review.json so the final
     summary can disclose which visual checks were actually performed:
 
-        node <skill-root>/scripts/pptx-nova-visual-review.mjs \
+        node <skill-root>/scripts/cli/review/visual-review.mjs \
           --run-dir <run-dir> \
           --contact-sheet <run-dir>/previews/contact-sheet.png \
           --previews <run-dir>/previews \
@@ -501,7 +501,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     the compatible `refurbish-compare.png` or numbered `refurbish-compare-*.png`
     set, `refurbish-compare.json`, and `refurbish-compare-gate.json`
     before returning. If running low-level commands manually, run
-    `pptx-nova-layout-snapshot.mjs` on final inspect, then run
+    `cli/review/layout-snapshot.mjs` on final inspect, then run
     `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
     `refurbish-audit` so the final policy receipt can consume the raw layout findings,
     then run `pptx-nova-compare.mjs --kind refurbish --slide-count <count>
@@ -527,7 +527,7 @@ only when the short summary points to a warning, failure, or unsupported area.
     hand-writing AppleScript:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-clean-open.mjs \
+node <skill-root>/scripts/cli/runtime/clean-open.mjs \
   --pptx out.pptx \
   --output <run-dir>/clean-open.json \
   --json
@@ -559,7 +559,7 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
     `feedback wanted`, `需要反馈`, `给反馈`,
     or equivalent), write the feedback first and run
     `pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback
-    --workflow <create|refurbish|translation|other> --strict` or the same
+--workflow <create|refurbish|translation|other> --strict` or the same
     command with `--prompt-file`. Create, Refurbish, and Translation feedback
     must contain the exact seven-dimension process scorecard and a matching
     weighted overall score. Do not send the final response while
@@ -645,7 +645,7 @@ check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when requi
 
 Run `xdoc pptx visual-audit` once on the stable final candidate and consume
 `visual-evidence/manifest.json` with
-`pptx-nova-visual-evidence-gate.mjs`. Follow `export-and-check.md`. Preview,
+`cli/review/visual-evidence-gate.mjs`. Follow `export-and-check.md`. Preview,
 semantic diff, `vision-diff`, contact sheets, Translation/Refurbish comparison,
 and PowerPoint-native evidence remain specialized observations; none creates a
 competing final Agent action. A reference problem can still produce
@@ -681,12 +681,12 @@ PowerPoint display-effect screenshots and comparisons:
   macOS, scriptable PowerPoint, Nushell, and `mutool` are present; otherwise record
   `chartex-native-render-unverified` and do not claim PowerPoint-native proof.
 - When a visual gate must reflect PowerPoint's display/export result and the optional route is available, render
-  with `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method
-  pdf-render` first:
-  `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
+  with `<skill-root>/scripts/cli/office/powerpoint-snapshot.nu --method
+pdf-render` first:
+  `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
 - When the candidate contains OPC-declared ChartEx parts (at any path), pass that report to
   `pptx-nova-finalize-evidence.mjs --candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
   verifies the candidate SHA-256, exact ChartEx slide coverage, and every PNG's
   dimensions, byte length, and SHA-256. With hidden slides, it also requires the
   snapshot's `pdf_page_count` / `pdf_pages` mapping to match logical slide identity;
@@ -761,7 +761,7 @@ xdoc pptx preview out.pptx --slides 25-38 \
   --output-dir <run-dir>/previews \
   --contact-sheet --contact-output <run-dir>/previews/contact-sheet.png \
   --overwrite --json > <run-dir>/preview.json
-node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
+node <skill-root>/scripts/cli/review/finalize-evidence.mjs \
   --mode structural-edit \
   --run-dir <run-dir> \
   --candidate out.pptx \

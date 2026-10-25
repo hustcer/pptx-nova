@@ -1,7 +1,7 @@
 # Design Lock and Assets
 
 本文件定义 `pptx-nova` 的轻量运行契约：`deck_lock.json`、按需生成的 `assets_manifest.json`、
-split handoff 使用的 `resume_manifest.json` 和 `pptx-nova-check-lock.mjs`。它们只服务 xdoc 原生 PPTX / DeckKit / patch
+split handoff 使用的 `resume_manifest.json` 和 `cli/create/check-lock.mjs`。它们只服务 xdoc 原生 PPTX / DeckKit / patch
 工作流，不引入 SVG executor、逐页手写或 `spec_lock.md` 阶段。
 
 ## 1. 何时生成
@@ -62,7 +62,7 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
 它不保存完整正文，也不替代 `content.json`。
 
 当当前 deck 存在用户明确声明的 future/carryover 规则时，可以增加相对路径
-`sessionRulesPath: "session-rules.json"`。`pptx-nova-check-lock.mjs` 会验证该文件存在且符合
+`sessionRulesPath: "session-rules.json"`。`cli/create/check-lock.mjs` 会验证该文件存在且符合
 `pptx-nova-session-rules/v1`。规则的生命周期、解析和 Edit Contract 接入见
 `session-rules.md`；不要把规则正文复制进 `deck_lock.json`。
 
@@ -225,9 +225,9 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
 纯 DeckKit/native shape deck 不要创建空 manifest。它只管资源可用性、来源和 PPTX 使用方式。
 所有临时资源放在 run 目录或其子目录，例如 `.pptx-nova/<run>/assets/`。
 正式 schema 位于 `assets/schemas/assets-manifest.schema.json`；它约束 manifest 形状，
-`pptx-nova-check-lock.mjs` 负责跨文件引用、文件存在、图片槽位和 AI prompt guard。
+`cli/create/check-lock.mjs` 负责跨文件引用、文件存在、图片槽位和 AI prompt guard。
 如果 manifest 里有 `kind: "formula"` 且状态还不是 `rendered` / `native` / `available`，
-先运行 `node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json`
+先运行 `node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json`
 批量生成 SVG 并回写状态，再生成引用这些资源的 patch。
 
 ```json
@@ -365,7 +365,7 @@ Logo、客户 mark、产品 UI、产品截图、App icon、人物照片、活动
 - AI 生成素材不能充当真实公司的 logo、真实产品 UI、客户证据、人物照片、新闻/活动照片或
   第三方品牌资产；这类证据只能来自用户、源 deck 授权资产或官方可验证来源。
 
-`pptx-nova-check-lock.mjs` 会检查：`missing` / `needs-user` / `forbidden` 为 error；
+`cli/create/check-lock.mjs` 会检查：`missing` / `needs-user` / `forbidden` 为 error；
 `placeholder` / `needs-review` 和 `licenseRisk: "unknown"` 为 warning；身份资产来源不在
 `user` / `source-deck` / `official` / `built-in` 时为 error；图片资产缺 slot、ratio、
 fitPolicy 时给 warning；AI 生成图片缺 `noSlideChrome` 时给 error；`deck_lock.json` /
@@ -397,7 +397,7 @@ Phase B 恢复时先读取 manifest 做 sanity check；通过后才生成 `conte
 在生成 `patch.json` 后、`xdoc pptx apply --dry-run` 前运行：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-check-lock.mjs \
+node <skill-root>/scripts/cli/create/check-lock.mjs \
   --lock deck_lock.json \
   --content content.json \
   --patch patch.json \

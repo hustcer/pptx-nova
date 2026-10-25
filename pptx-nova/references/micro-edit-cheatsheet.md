@@ -29,7 +29,7 @@ Create a run directory and capture xdoc capability evidence as required by
 ```bash
 xdoc pptx inspect input.pptx --daemon --json > <run-dir>/inspect.json
 xdoc pptx select input.pptx --query '{"textRegex":"old text"}' --json > <run-dir>/select.json # optional target lookup
-node <skill-root>/scripts/pptx-nova-edit-contract.mjs \
+node <skill-root>/scripts/cli/edit/contract.mjs \
   --draft <run-dir>/edit-contract-draft.json --source input.pptx \
   --output <run-dir>/edit-contract.json --json
 xdoc pptx apply -p <run-dir>/patch.json -i input.pptx -o <run-dir>/candidate.pptx \

@@ -26,7 +26,7 @@ Before these inputs exist, read `references/translation-mode.md` for scan, class
 apply, repair, chart/table coverage, and multi-column review preparation. Do not invoke the finalizer
 with an intermediate candidate.
 
-For a new translation, prefer `pptx-nova-translation-prepare.mjs`. It creates a hash-bound,
+For a new translation, prefer `cli/translation/prepare.mjs`. It creates a hash-bound,
 content-deduplicated translation memory, resumes bound review classification, and sequentially applies
 the planner artifacts. When supported by the current xdoc contract, preparation also consumes
 high-confidence `i18n-anchor-draft` merge material and reruns `i18n-plan`; it never treats the draft
@@ -45,7 +45,7 @@ successful plan, plus `artifacts.candidate` and `artifacts.translations`.
 ## Standard command
 
 ```bash
-node <skill-root>/scripts/pptx-nova-translation-run.mjs \
+node <skill-root>/scripts/cli/translation/run.mjs \
   --source source.pptx \
   --candidate <run-dir>/candidate-final.pptx \
   --units-file <effective-units-file> \

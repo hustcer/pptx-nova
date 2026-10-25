@@ -157,15 +157,15 @@ When `assets_manifest.json` contains formula entries, render them with the bundl
 script before building the patch:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json
+node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json
 ```
 
 Useful variants:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json --dry-run
-node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json --out assets_manifest.rendered.json
-node <skill-root>/scripts/pptx-nova-formula-render.mjs assets_manifest.json --asset-root assets
+node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json --dry-run
+node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json --out assets_manifest.rendered.json
+node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json --asset-root assets
 ```
 
 The current bundled provider is `text-svg`: deterministic, offline, and safe for

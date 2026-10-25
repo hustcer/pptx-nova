@@ -8,7 +8,7 @@ language, page geometry, density limits, and reusable components in a frozen
 generator so ordinary creation only needs a small `content.json`.
 
 If the selected catalog entry has `designContract`, also read `design-contracts.md` and its
-`intent.md`. Discover allowed layouts with `pptx-nova-deckkit-design.mjs`; use registered
+`intent.md`. Discover allowed layouts with `cli/deckkits/design.mjs`; use registered
 `layoutId` values rather than writing coordinates. The normal build/create runner owns the
 resolved design plan, style checks and post-apply native-data readback.
 
@@ -21,7 +21,7 @@ Before writing `content.json`, select a DeckKit from
 `assets/deckkits/catalog.json`:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-select.mjs --target delivery
+node <skill-root>/scripts/cli/deckkits/select.mjs --target delivery
 ```
 
 Use the selected DeckKit's `visualGrammar` as the deck's visual contract:
@@ -45,7 +45,7 @@ page-level repair requires inspecting intermediate reports.
 For the standard existing-deck workflow, run the bundled orchestrator:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
+node <skill-root>/scripts/cli/refurbish/run.mjs \
   --deckkit <id> \
   --source source.pptx \
   --output candidate.pptx \
@@ -75,7 +75,7 @@ upper bound.
 To inspect the route without executing it, generate the plan directly:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
+node <skill-root>/scripts/cli/refurbish/plan.mjs \
   --deckkit <id> \
   --source source.pptx \
   --output candidate.pptx \
@@ -89,7 +89,7 @@ blocker; do not discover the same failure later by trial-running `xdoc`.
 For DeckKits without native skinning, the plan should return `manual-fallback`
 or `explicit-manual-fallback` instead of blocking when a generic inspect-driven
 fallback can preserve source slides and editable objects. In that route, run
-`scripts/pptx-nova-refurbish-fallback-patch.mjs` after `inspect` and
+`scripts/cli/refurbish/fallback-patch.mjs` after `inspect` and
 `chrome-detect` to generate `patch.json`, `deck_lock.json`, baseline
 `content-audit.json`, and `reference-map.json` from the DeckKit's
 `refurbishProfile.fallback` or, when absent, from `visualGrammar`.
@@ -102,7 +102,7 @@ Other native failures stop the run, and the runner never switches DeckKit silent
 For the selected DeckKit, run readiness:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
+node <skill-root>/scripts/cli/deckkits/readiness.mjs \
   --deckkit <id> \
   --target delivery
 ```
@@ -143,7 +143,7 @@ Fallback minimums are mandatory, not suggestions:
 - Run and save `refurbish-plan.json`, `chrome-detect.json`, dry-run/apply report,
   `vision-diff.json`, and final `refurbish-audit` or supplemental audit report.
 - Run and save `fallback-patch-report.json` from
-  `pptx-nova-refurbish-fallback-patch.mjs` when route is `manual-fallback` or
+  `cli/refurbish/fallback-patch.mjs` when route is `manual-fallback` or
   `explicit-manual-fallback`.
 - For whole text-frame restyling, use `set-text-frame` with a `font` object;
   use indexed `set-run` only after inspect exposes the
@@ -159,7 +159,7 @@ Before writing `content.json`, generate the DeckKit slot reference and keep it
 beside the run artifacts:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs \
+node <skill-root>/scripts/cli/deckkits/slots.mjs \
   --deckkit <id> \
   > deckkit-slots.md
 ```
@@ -187,7 +187,7 @@ outline.json
 The preferred agent-facing command is:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-create-run.mjs \
+node <skill-root>/scripts/cli/create/run.mjs \
   --deckkit <id> \
   --content content.json \
   --lock deck_lock.json \
@@ -207,12 +207,12 @@ The equivalent manual command sequence for debugging is:
 ```bash
 node <skill-root>/assets/deckkits/validate-content.mjs \
   content.json --deckkit <id> --mode delivery
-node <skill-root>/scripts/pptx-nova-build.mjs \
+node <skill-root>/scripts/cli/create/build.mjs \
   --deckkit <id> \
   content.json \
   -o patch.json \
   --quality-json quality.json
-node <skill-root>/scripts/pptx-nova-check-lock.mjs \
+node <skill-root>/scripts/cli/create/check-lock.mjs \
   --lock deck_lock.json --content content.json --patch patch.json --json
 xdoc pptx apply -p patch.json -o <run-dir>/candidate.pptx --overwrite --dry-run --json
 xdoc pptx apply -p patch.json -o <run-dir>/candidate.pptx --overwrite --json

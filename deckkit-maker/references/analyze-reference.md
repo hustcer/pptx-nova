@@ -136,7 +136,7 @@ runtime/build、源文件 hash 和字体替代。按 preview 报告的实际 art
 ## 图标与图片
 
 - 参考 deck 用到的图标语义清单 → 每个给出 Tabler 候选
-  （用 node pptx-nova/scripts/pptx-nova-icons.mjs search <概念> --json 查）
+  （用 node pptx-nova/scripts/cli/assets/icons.mjs search <概念> --json 查）
 - 内容性图片/logo：记录位置、角色、是否图片主导页、可复用外壳（裁切/边框/callout/caption）；
   kit 中处理为 asset 槽位、语义相关原生替代或省略，需向用户披露。
 - 品牌图标可能是原生路径或组，不能只清点 image 关系。逐个登记 exact/approximate/semantic

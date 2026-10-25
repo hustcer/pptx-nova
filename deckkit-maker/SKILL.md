@@ -42,7 +42,7 @@ description: >
 
 本 skill 默认使用一次性 CLI 或 CLI `--daemon`，因为完整 DeckKit 流程还需要
 `convert`、`vision-check`、benchmark 等命令。每次任务先记录 `xdoc --version`，用
-`node pptx-nova/scripts/pptx-nova-probe.mjs --json` 保存当前 runtime 的 capability snapshot。
+`node pptx-nova/scripts/cli/runtime/probe.mjs --json` 保存当前 runtime 的 capability snapshot。
 新增或修改 op 前按 `pptx-nova/references/patch-ops-cheatsheet.md` 查询 focused schema；不要从
 旧示例推断字段、enum 或能力。宿主若已配置 xdoc MCP，只有
 `capabilities.agentTransports.mcp.status == "disclosed"` 且合同版本被宿主识别时，才可按
@@ -159,7 +159,7 @@ test ! -e pptx-nova/assets/examples/<id>
 `benchmarks/visual/cases/<id>/`。每次新增或修改套件后运行：
 
 ```bash
-node --test tools/tests/pptx-nova-deckkit-layout.test.mjs
+node --test tools/tests/maintenance/deckkit-layout.test.mjs
 node tools/pptx-nova-audit-public.mjs --strict
 ```
 
@@ -330,7 +330,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
 - **坐标必须推导**：所有 op 坐标走 primitives（`nm()`/`grid()`/`txH()`）或显式
   bounds 计算，不凭目测摆放。幕布 13.333in × 7.5in。
 - **图标只用 pptx-nova 现有 Tabler pack**：用
-  `node pptx-nova/scripts/pptx-nova-icons.mjs search <query> --json` 查询、
+  `node pptx-nova/scripts/cli/assets/icons.mjs search <query> --json` 查询、
   `createOps().icon()` 内联。参考 deck 中的图标/装饰图找最接近的 Tabler 替代；
   不联网取图，不把参考 deck 的位图直接打进 kit。替代图标/shape 必须语义相关。
 - **视觉门禁**：每次 build 走

@@ -10,7 +10,7 @@ extension, not a new xdoc format.
 Discover only the selected design and its layout capacities:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-design.mjs --deckkit biennale-yellow
+node <skill-root>/scripts/cli/deckkits/design.mjs --deckkit biennale-yellow
 ```
 
 Read `assets/deckkits/biennale-yellow/intent.md` for design judgment and the evidence page schema under
@@ -55,7 +55,7 @@ strings require an explicit source-data migration. See `intent.md` for the field
 Resolve before rendering when content fit or repetition is uncertain:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-design.mjs \
+node <skill-root>/scripts/cli/deckkits/design.mjs \
   --deckkit biennale-yellow --content content.json --output design-preview.json
 ```
 
@@ -71,7 +71,7 @@ than the legacy page-type groups. `auto` favors less-used fitting compositions a
 repetition when alternatives fit. Explicit repeated layouts produce a review warning. Legacy and
 mixed page-type decks retain their existing group checks.
 
-Keep using `validate-content.mjs`, `pptx-nova-build.mjs` and `pptx-nova-create-run.mjs`. Builds with an
+Keep using `validate-content.mjs`, `cli/create/build.mjs` and `cli/create/run.mjs`. Builds with an
 output patch also save `design-contract.json`, `design-plan.json` and `design-check.json` beside it.
 The standard create runner automatically inspects the candidate, exports its native chart data and
 writes `design-readback.json`. Those artifacts are retained and bound to finalization. A changed
@@ -82,7 +82,7 @@ For manual pipelines, after dry-run/apply save `xdoc pptx inspect ... --json` an
 `xdoc convert ... --to json --output model.json`, then run:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-design.mjs \
+node <skill-root>/scripts/cli/deckkits/design.mjs \
   --deckkit biennale-yellow --plan design-plan.json --patch patch.json \
   --inspect inspect.json --model model.json --output design-readback.json
 ```

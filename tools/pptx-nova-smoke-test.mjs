@@ -42,9 +42,9 @@ function runJson(name, command, args) {
 
 const contentPath = join(SKILL_ROOT, 'assets/examples/consulting-dark/content.json')
 const validateScript = join(SKILL_ROOT, 'assets/deckkits/validate-content.mjs')
-const buildScript = join(SKILL_ROOT, 'scripts/pptx-nova-build.mjs')
-const iconsScript = join(SKILL_ROOT, 'scripts/pptx-nova-icons.mjs')
-const selectScript = join(SKILL_ROOT, 'scripts/pptx-nova-deckkit-select.mjs')
+const buildScript = join(SKILL_ROOT, 'scripts/cli/create/build.mjs')
+const iconsScript = join(SKILL_ROOT, 'scripts/cli/assets/icons.mjs')
+const selectScript = join(SKILL_ROOT, 'scripts/cli/deckkits/select.mjs')
 const patchPath = join(TMP_ROOT, 'patch.json')
 const qualityPath = join(TMP_ROOT, 'quality.json')
 const editContractDraftPath = join(TMP_ROOT, 'edit-contract-draft.json')
@@ -135,7 +135,7 @@ writeFileSync(
   )}\n`,
 )
 const sessionRules = runJson('normalize current-deck session rules', 'node', [
-  join(SKILL_ROOT, 'scripts/pptx-nova-session-rules.mjs'),
+  join(SKILL_ROOT, 'scripts/cli/edit/session-rules.mjs'),
   '--draft',
   sessionRulesDraftPath,
   '--source',
@@ -169,7 +169,7 @@ writeFileSync(
   )}\n`,
 )
 const sessionResolution = runJson('resolve session rules into contract overlay', 'node', [
-  join(SKILL_ROOT, 'scripts/pptx-nova-session-rules-resolve.mjs'),
+  join(SKILL_ROOT, 'scripts/cli/edit/session-rules-resolve.mjs'),
   '--rules',
   sessionRulesPath,
   '--operation',
@@ -215,7 +215,7 @@ writeFileSync(
   )}\n`,
 )
 const contract = runJson('bind edit contract to source PPTX', 'node', [
-  join(SKILL_ROOT, 'scripts/pptx-nova-edit-contract.mjs'),
+  join(SKILL_ROOT, 'scripts/cli/edit/contract.mjs'),
   '--draft',
   editContractDraftPath,
   '--source',
@@ -228,7 +228,7 @@ if (!/^[a-f0-9]{64}$/.test(contract.source?.sha256 ?? '')) {
   throw new Error('edit contract did not bind a source SHA-256')
 }
 const evidenceManifest = runJson('bind edit candidate and evidence hashes', 'node', [
-  join(SKILL_ROOT, 'scripts/pptx-nova-edit-evidence-manifest.mjs'),
+  join(SKILL_ROOT, 'scripts/cli/edit/evidence-manifest.mjs'),
   '--candidate',
   join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
   '--evidence',

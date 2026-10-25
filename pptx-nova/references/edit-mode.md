@@ -58,7 +58,7 @@ active rule applies, continue normally without additional evidence or user
 confirmation.
 
 After target resolution, write `edit-contract-draft.json` and normalize it to
-`edit-contract.json` with `pptx-nova-edit-contract.mjs`. Bind each target to the
+`edit-contract.json` with `cli/edit/contract.mjs`. Bind each target to the
 patch `opIndexes[]`, expected change categories, allowed changes, preserve
 rules, and required evidence. Do this before writing/applying the patch so the
 contract remains the source of truth rather than a description of whatever the

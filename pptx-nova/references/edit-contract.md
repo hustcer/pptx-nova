@@ -75,7 +75,7 @@ The agent authors a small draft. Slide indexes and `opIndexes` are 0-based.
 Generate the normalized contract:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-edit-contract.mjs \
+node <skill-root>/scripts/cli/edit/contract.mjs \
   --draft <run-dir>/edit-contract-draft.json \
   --source source.pptx \
   --output <run-dir>/edit-contract.json \
@@ -85,7 +85,7 @@ node <skill-root>/scripts/pptx-nova-edit-contract.mjs \
 When a session-rules resolver returned a passed overlay:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-edit-contract.mjs \
+node <skill-root>/scripts/cli/edit/contract.mjs \
   --draft <run-dir>/edit-contract-draft.json \
   --source source.pptx \
   --session-rules-resolution <run-dir>/session-rules-resolution.json \
@@ -171,7 +171,7 @@ it is an explicit fidelity decision rather than a hidden fallback.
 Before apply, bind the report to the donor/target page-size policy:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
+node <skill-root>/scripts/cli/edit/copy-size-gate.mjs \
   --target target.pptx \
   --donor donor.pptx \
   --copy-report <run-dir>/dry-run.json \
@@ -310,7 +310,7 @@ consume the canonical visual manifest as described in `export-and-check.md`.
 After the candidate and evidence are stable:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-edit-evidence-manifest.mjs \
+node <skill-root>/scripts/cli/edit/evidence-manifest.mjs \
   --candidate <run-dir>/candidate.pptx \
   --evidence semantic-diff=<run-dir>/pptx-diff.json \
   --evidence style-diff=<run-dir>/style-diff.json \
@@ -325,7 +325,7 @@ post-apply evidence file. Regenerate it whenever the candidate or evidence
 changes.
 
 ```bash
-node <skill-root>/scripts/pptx-nova-edit-contract-gate.mjs \
+node <skill-root>/scripts/cli/edit/contract-gate.mjs \
   --contract <run-dir>/edit-contract.json \
   --candidate <run-dir>/candidate.pptx \
   --dry-run <run-dir>/dry-run.json \

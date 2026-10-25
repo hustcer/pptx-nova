@@ -68,7 +68,7 @@ deduplicated translation memory, plan materialization, guarded dry-runs, and
 sequential apply:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-translation-prepare.mjs \
+node <skill-root>/scripts/cli/translation/prepare.mjs \
   --source source.pptx \
   --source-lang <multi|zh|en> \
   --target-lang <target-lang> \
@@ -109,7 +109,7 @@ after the run has reached `needs-translations`, use the explicit recovery stage
 below; do not append `--expand-review` to an ordinary apply command:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-translation-prepare.mjs \
+node <skill-root>/scripts/cli/translation/prepare.mjs \
   --source source.pptx \
   --source-lang <multi|zh|en> \
   --target-lang <target-lang> \
@@ -216,7 +216,7 @@ debugging path.
        English.
      - Use `en` for English-only source decks.
      - Native `i18n-scan` additionally accepts `cjk` (normalized to `zh` in
-       the report); `pptx-nova-translation-prepare.mjs` accepts only
+       the report); `cli/translation/prepare.mjs` accepts only
        `multi|zh|en`.
    - Native source-language classification scan:
      ```bash
@@ -893,7 +893,7 @@ Charts are a frequent translation blind spot.
   SHA-256, then materialize a classified scan artifact:
 
   ```bash
-  node <skill-root>/scripts/pptx-nova-i18n-classify-review-units.mjs \
+  node <skill-root>/scripts/cli/translation/classify-review-units.mjs \
     --scan <run-dir>/i18n-scan-source.json \
     --decisions <run-dir>/i18n-review-decisions.json \
     --output <run-dir>/i18n-scan-classified.json \
@@ -919,7 +919,7 @@ Charts are a frequent translation blind spot.
   absent from the inventory entirely, stop and update/rebuild xdoc; do not hide
   the coverage gap with a run-local XML scanner.
 
-  The older `pptx-nova-i18n-classify-chart-units.mjs` remains available only
+  The older `cli/translation/classify-chart-units.mjs` remains available only
   for replaying historical runs whose review inventory is chart-only.
 
   Review units outside the language-classification scaffold — typically
@@ -1000,14 +1000,14 @@ xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx \
   --slides <changed> \
   --output <run-dir>/contact-diff.png --json > <run-dir>/contact-diff.json
 
-node <skill-root>/scripts/pptx-nova-multi-column-review-gate.mjs \
+node <skill-root>/scripts/cli/review/multi-column-gate.mjs \
   --candidate candidate.pptx \
   --vision-diff <run-dir>/vision-diff.json \
   --review <run-dir>/multi-column-review.json \
   --output <run-dir>/multi-column-review-gate.json \
   --overwrite --json
 
-node <skill-root>/scripts/pptx-nova-compare.mjs \
+node <skill-root>/scripts/cli/review/compare.mjs \
   --source source.pptx \
   --candidate candidate.pptx \
   --run-dir <run-dir> \
@@ -1021,7 +1021,7 @@ node <skill-root>/scripts/pptx-nova-compare.mjs \
   --cache-dir <run-parent>/.render-cache \
   --json
 
-node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
+node <skill-root>/scripts/cli/review/compare-gate.mjs \
   --run-dir <run-dir> \
   --final-pptx translated.pptx \
   --final-pptx-source candidate.pptx \
@@ -1034,7 +1034,7 @@ node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
 Generate the review record instead of copying evidence metadata by hand:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-multi-column-review-scaffold.mjs \
+node <skill-root>/scripts/cli/review/multi-column-scaffold.mjs \
   --candidate translated.pptx \
   --vision-diff <run-dir>/vision-diff.json \
   --preview <run-dir>/preview-candidate.json \
@@ -1136,7 +1136,7 @@ populates each source page once. Both the page cache and the validated pair-leve
 cache survive a failed finalize run. Corrupt page entries are ignored and repaired;
 144 DPI retries use a separate key space.
 
-With `--json`, `pptx-nova-compare.mjs` writes the same report to stdout that it
+With `--json`, `cli/review/compare.mjs` writes the same report to stdout that it
 writes to `--report`. For multipart runs (deck larger than the chunk size) this
 is the `pptx-nova-compare-manifest/v1` manifest; single-PNG runs emit the
 underlying contact-diff report instead and have no `parts[]`. Manifest

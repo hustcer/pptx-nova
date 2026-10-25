@@ -14,7 +14,7 @@ table XML 等价检查。semantic-audit.json 若为 fail，最终 evidence-summa
 
 table 页优先保留 PowerPoint 原生 table 语义；只有 inspect 证明源 deck 是视觉表格时，才按
 普通 shape 编辑。写 table 前先在 `deck_lock.slides[].table` 记录数据来源、表格角色和验证点；
-生成 `patch.json` 后由 `pptx-nova-check-lock.mjs` 检查明显行列错误，再交给 dry-run /
+生成 `patch.json` 后由 `cli/create/check-lock.mjs` 检查明显行列错误，再交给 dry-run /
 vision-check / PNG 复核。
 
 在已有 deck 美化 / 翻新场景中，源表格若是 `shapeType == "table"` 且用户要求内容或样式不变，

@@ -30,7 +30,7 @@ free text must not drive applicability.
 2. Normalize it against the current PPTX revision:
 
    ```bash
-   node <skill-root>/scripts/pptx-nova-session-rules.mjs \
+   node <skill-root>/scripts/cli/edit/session-rules.mjs \
      --draft <run-dir>/session-rules-draft.json \
      --source current.pptx \
      --output <run-dir>/session-rules.json \
@@ -51,7 +51,7 @@ free text must not drive applicability.
    to the new revision. Do not advance after a failed or abandoned candidate.
 
    ```bash
-   node <skill-root>/scripts/pptx-nova-session-rules.mjs \
+   node <skill-root>/scripts/cli/edit/session-rules.mjs \
      --rules <previous-run>/session-rules.json \
      --source <accepted-candidate.pptx> \
      --output <next-run>/session-rules.json \
@@ -129,7 +129,7 @@ Use stable names for produced objects. DeckKit primitives already follow the
 `S<slide>_<role>` convention; manual structural patches should do the same.
 
 ```bash
-node <skill-root>/scripts/pptx-nova-session-rules-resolve.mjs \
+node <skill-root>/scripts/cli/edit/session-rules-resolve.mjs \
   --rules <run-dir>/session-rules.json \
   --operation <run-dir>/session-operation.json \
   --source current.pptx \
@@ -176,7 +176,7 @@ Do not suppress a rule without the current user quote.
 Pass the successful resolution to the contract normalizer:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-edit-contract.mjs \
+node <skill-root>/scripts/cli/edit/contract.mjs \
   --draft <run-dir>/edit-contract-draft.json \
   --source current.pptx \
   --session-rules-resolution <run-dir>/session-rules-resolution.json \

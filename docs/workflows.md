@@ -32,7 +32,7 @@ human-confirmation route instead of automatic finalization. Failed checks return
 to content, layout, or patch revision.
 
 For the executable workflow, see [DeckKit mode](../pptx-nova/references/deckkit-mode.md)
-and the [create runner](../pptx-nova/scripts/pptx-nova-create-run.mjs).
+and the [create runner](../pptx-nova/scripts/cli/create/run.mjs).
 
 ## Edit an existing presentation
 

@@ -1,5 +1,5 @@
 // icon-assets.kit.mjs - local Tabler icon pack consumption for DeckKit generators
-import { getTablerIconAsset } from '../../../scripts/pptx-nova-icons.mjs'
+import { getTablerIconAsset } from '../../../scripts/lib/assets/tabler-icons.mjs'
 
 export {
   getTablerIconAsset,
@@ -13,7 +13,7 @@ export {
   resolveTablerIconEntry,
   resolveTablerIconName,
   searchTablerIcons,
-} from '../../../scripts/pptx-nova-icons.mjs'
+} from '../../../scripts/lib/assets/tabler-icons.mjs'
 
 const unit = (value) => (typeof value === 'number' && Number.isFinite(value) ? `${value}in` : value)
 

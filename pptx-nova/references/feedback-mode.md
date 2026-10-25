@@ -23,7 +23,7 @@ Feedback Mode must be checked immediately before the final response. If the
 original user prompt is available as text or saved in the run directory, run:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-feedback-gate.mjs \
+node <skill-root>/scripts/cli/review/feedback-gate.mjs \
   --run-dir <run-dir> \
   --prompt-file <run-dir>/prompt.txt \
   --workflow <create|refurbish|translation|other> \
@@ -136,10 +136,10 @@ layout choice, or a documented limitation before calling it a new xdoc issue.
   exists, compare it with the xdoc render. Check that the screenshot belongs to
   the relevant candidate bytes; do not rely on an old or different candidate.
 - Otherwise, when the optional macOS/PowerPoint/Nushell prerequisites are
-  available, try `nu <skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu
-  <candidate.pptx> --slides <suspect-slides> --out
-  <run-dir>/powerpoint/slide-%d.png --method pdf-render --json >
-  <run-dir>/powerpoint-native-render.json` and retain the report and images in
+  available, try `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu
+<candidate.pptx> --slides <suspect-slides> --out
+<run-dir>/powerpoint/slide-%d.png --method pdf-render --json >
+<run-dir>/powerpoint-native-render.json` and retain the report and images in
   the current run. Follow the PowerPoint screenshot route in
   `references/common-workflow.md` if PDF rendering fails.
 - Compare the same slides and objects, then record the conclusion and paths to

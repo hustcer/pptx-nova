@@ -27,7 +27,7 @@ Do not load all creation references by default.
 ## Standard command
 
 ```bash
-node <skill-root>/scripts/pptx-nova-create-run.mjs \
+node <skill-root>/scripts/cli/create/run.mjs \
   --deckkit <id> \
   --content <run-dir>/content.json \
   --lock <run-dir>/deck_lock.json \

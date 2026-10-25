@@ -69,7 +69,7 @@ prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资�
 # 0b. 自动生成 deck_lock.json；只有使用外部/复用资源时生成 assets_manifest.json。Express 不阻塞确认，假设写入 assumptions[]
 # 0c. 若用户选择 split，写 resume_manifest.json + 必要的 source_brief.md，停止并给出“继续生成 <run-dir>”
 # 1. 选择 production/default DeckKit
-node <skill-root>/scripts/pptx-nova-deckkit-select.mjs \
+node <skill-root>/scripts/cli/deckkits/select.mjs \
   --scenario roadshow \
   --language mixed \
   --density dense \
@@ -78,7 +78,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-select.mjs \
   --json
 
 # 1b. 对 selected.id 再跑 delivery readiness audit
-node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <selected-id> --target delivery
+node <skill-root>/scripts/cli/deckkits/readiness.mjs --deckkit <selected-id> --target delivery
 
 # 当前内置套件均为 candidate，自动 delivery 选择可能没有结果。
 # 用户明确指定 consulting-dark 等候选时，按 deckkit-mode.md 的 explicit 路线继续，
@@ -89,7 +89,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <selected-id
 #     avoid 清单用于拒绝不匹配的视觉选择。
 
 # 1d. 生成槽位速查，按字段、数组上限和字数/行数预算写 content
-node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs \
+node <skill-root>/scripts/cli/deckkits/slots.mjs \
   --deckkit consulting-dark \
   > deckkit-slots.md
 
@@ -104,14 +104,14 @@ node <skill-root>/assets/deckkits/validate-content.mjs \
   --mode delivery
 
 # 4. 生成 patch
-node <skill-root>/scripts/pptx-nova-build.mjs \
+node <skill-root>/scripts/cli/create/build.mjs \
   --deckkit consulting-dark \
   content.json \
   -o patch.json \
   --quality-json quality.json
 
 # 5. 设计锁漂移检查（deck_lock/assets/content/patch 一致性 + image slot/prompt guard）
-node <skill-root>/scripts/pptx-nova-check-lock.mjs \
+node <skill-root>/scripts/cli/create/check-lock.mjs \
   --lock deck_lock.json \
   --content content.json \
   --patch patch.json \
@@ -122,7 +122,7 @@ node <skill-root>/scripts/pptx-nova-check-lock.mjs \
 jq '.ops | length' patch.json
 
 # 7. 首次提交前保存上下文，再 dry-run（运行时需披露 remediationSchema）
-node <skill-root>/scripts/pptx-nova-remediation.mjs run \
+node <skill-root>/scripts/cli/runtime/remediation.mjs run \
   --patch patch.json --capsule run/remediation-context --output out.pptx \
   --dry-run > dry.json
 #    读 semanticChanges[] / visualRisks[] / resolvedSelectors[]
@@ -257,7 +257,7 @@ apply 后跑 `xdoc pptx vision-check out.pptx --json`（render-free 几何自检
   假设 `/issues/0` 是检查后选中的具体建议，并已有步骤 7 的首次提交 capsule：
 
   ```bash
-  node <skill-root>/scripts/pptx-nova-remediation.mjs apply \
+  node <skill-root>/scripts/cli/runtime/remediation.mjs apply \
     --capsule run/remediation-context --report vision.json --pointer /issues/0 \
     --document out.pptx --output run/repaired.pptx
   xdoc pptx vision-check run/repaired.pptx --json > run/vision-after.json

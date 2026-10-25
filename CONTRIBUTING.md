@@ -39,7 +39,7 @@ tools belong under `tools/`.
 - Prefer Nushell for repository maintenance scripts when structured file
   inspection or release checks benefit from it.
 - Use kebab-case for DeckKit ids and file names, for example
-  `consulting-dark/consulting-dark.kit.mjs` and `pptx-nova-build.mjs`.
+  `consulting-dark/consulting-dark.kit.mjs` and `cli/create/build.mjs`.
 - Prefer JSON catalogs and schemas over undocumented loose files.
 
 Do not add Python scripts unless there is a specific requirement.
@@ -61,12 +61,19 @@ Keep user-facing capability claims precise.
 
 ## Validation
 
-Run the baseline tool suite with `node --test tools/tests/*.test.mjs`.
+Run the baseline tool suite with `node tools/run-tests.mjs` or `just t`. Tests are grouped by
+domain under `tools/tests/`; select a group with `node tools/run-tests.mjs deckkits` and inspect
+discovery with `node tools/run-tests.mjs --list`. CI uses this same recursive entry point.
+
+Published CLI entries live in `pptx-nova/scripts/cli/<workflow>/` and reusable internal modules
+in `pptx-nova/scripts/lib/<domain>/`. Keep internal modules independent of CLI entry points and
+anchor skill resources through `lib/runtime/skill-paths.mjs`. See the scripts and tests READMEs
+for ownership and naming rules; the public audit and layout tests enforce these conventions.
 The five remediation tests that execute a real xdoc binary are opt-in and report
 an explicit skip by default; the remediation unit test still runs. To include
 the integration tests, set `XDOC_TEST_BIN` to the absolute path of an approved
 xdoc executable publishing the remediation contract, then run
-`node --test tools/tests/pptx-nova-remediation.test.mjs`. An explicitly configured
+`node --test tools/tests/runtime/remediation.test.mjs`. An explicitly configured
 missing or incompatible binary fails the tests.
 
 Before changing runtime scripts, DeckKits, schemas, examples, or assets, run:
@@ -80,8 +87,8 @@ For DeckKit changes, also run targeted readiness and benchmark checks for the
 affected DeckKit:
 
 ```bash
-node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <deckkit-id> --target delivery
-node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <deckkit-id> --all
+node pptx-nova/scripts/cli/deckkits/readiness.mjs --deckkit <deckkit-id> --target delivery
+node pptx-nova/scripts/cli/deckkits/benchmark.mjs --deckkit <deckkit-id> --all
 ```
 
 The smoke test validates bundled DeckKit content, patch generation, icon lookup,

@@ -14,9 +14,9 @@
 从 [明确标注为合成数据的示例](../amber-ledger/examples/content.json) 开始，无需手写坐标：
 
 ```sh
-node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit amber-ledger
+node pptx-nova/scripts/cli/deckkits/design.mjs --deckkit amber-ledger
 node pptx-nova/assets/deckkits/validate-content.mjs content.json --deckkit amber-ledger --mode delivery --json
-node pptx-nova/scripts/pptx-nova-build.mjs --deckkit amber-ledger content.json -o patch.json
+node pptx-nova/scripts/cli/create/build.mjs --deckkit amber-ledger content.json -o patch.json
 ```
 
 使用标准 Create runner 完成锁定、机器检查、对象回读、canonical 逐页审查和同一候选交付绑定。

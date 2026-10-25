@@ -71,7 +71,7 @@ for (const name of selected) {
   const r = spawnSync(
     process.execPath,
     [
-      'pptx-nova/scripts/pptx-nova-create-run.mjs',
+      'pptx-nova/scripts/cli/create/run.mjs',
       '--deckkit',
       'sky-compass',
       '--content',

@@ -16,9 +16,9 @@
 从 [完整合成示例](../clear-impact/examples/content.json) 开始，只填写内容，无需手写页面坐标：
 
 ```sh
-node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit clear-impact
+node pptx-nova/scripts/cli/deckkits/design.mjs --deckkit clear-impact
 node pptx-nova/assets/deckkits/validate-content.mjs content.json --deckkit clear-impact --mode delivery --json
-node pptx-nova/scripts/pptx-nova-build.mjs --deckkit clear-impact content.json -o patch.json
+node pptx-nova/scripts/cli/create/build.mjs --deckkit clear-impact content.json -o patch.json
 ```
 
 标准 Create runner 使用相同合同，保存计划、规则检查、原生图表/表格回读与交付绑定。

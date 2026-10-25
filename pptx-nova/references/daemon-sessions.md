@@ -23,7 +23,7 @@ patch 语义或验证规则：
 | MCP client（Claude Code / Cursor / Inspector） | `xdoc mcp`      | 标准 MCP over stdio，客户端已有 tool 发现与调用机制    |
 
 不要仅凭 `json-rpc` 命令存在就实现 host。先在连接中调用 `xdoc.capabilities`，
-或从 `xdoc schema` / `pptx-nova-probe.mjs` 的 `capabilities.agentTransports.jsonRpc`
+或从 `xdoc schema` / `cli/runtime/probe.mjs` 的 `capabilities.agentTransports.jsonRpc`
 读取完整 `xdoc-json-rpc-contract/v1`；协议版本未知时保留原始内容并 fail closed。
 daemon 也遵循同一原则：从
 `capabilities.agentTransports.daemon.contract` 读取当前 runtime 的完整公开契约，

@@ -11,8 +11,8 @@ There is no root package manifest or build step. Run scripts directly with Node:
 ```bash
 node tools/pptx-nova-smoke-test.mjs
 node tools/pptx-nova-audit-public.mjs --strict
-node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit consulting-dark --target delivery
-node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit consulting-dark --all
+node pptx-nova/scripts/cli/deckkits/readiness.mjs --deckkit consulting-dark --target delivery
+node pptx-nova/scripts/cli/deckkits/benchmark.mjs --deckkit consulting-dark --all
 ```
 
 The smoke test validates bundled DeckKit content, patch generation, icon lookup, and DeckKit selection. The public audit checks for private paths, unexpected binaries, missing licenses, and release blockers.
@@ -23,11 +23,15 @@ Local skill-development, validation, inspection, release-check, and repository-m
 
 Every script required by a published user workflow must be a plain JavaScript ES module (`.mjs`) that runs directly on Node.js 20 or later. These required runtime scripts must use only Node built-in modules and must not require Nushell, Python, a package-manager install, or any third-party runtime dependency; the published `xdoc` binary is the only allowed external runtime dependency. Nushell scripts may appear inside a published skill only for optional, platform-specific, or capability-gated enhancements whose absence does not break the baseline workflow. Existing `.nu` helpers are optional evidence integrations, not precedent for mandatory runtime dependencies. Such optional routes must detect or clearly disclose unavailability and must not silently claim that their evidence was produced. If an optional Nushell helper becomes required by a user workflow, port it to a dependency-free `.mjs` implementation before making that route mandatory. Do not add Python scripts to published user workflows.
 
-Keep files self-contained inside the publishable skill when they are part of `pptx-nova`; runtime code must not depend on repository-root `tools/` or local machine paths. Use kebab-case for DeckKit ids and file names, for example `consulting-dark/consulting-dark.kit.mjs` and `pptx-nova-build.mjs`. Prefer JSON catalogs and schemas over undocumented loose files.
+Keep files self-contained inside the publishable skill when they are part of `pptx-nova`; runtime code must not depend on repository-root `tools/` or local machine paths. Use kebab-case for DeckKit ids and file names, for example `consulting-dark/consulting-dark.kit.mjs` and `cli/create/build.mjs`. Prefer JSON catalogs and schemas over undocumented loose files.
 
 Keep each DeckKit under `pptx-nova/assets/deckkits/<id>/`: `<id>.kit.mjs`, `design.json`, `intent.md`, `layouts.mjs`, optional `components.mjs`/`registry.mjs`, `schemas/`, and `examples/content.json` plus `examples/build.mjs`. Common runtime modules belong in `deckkits/shared/`; only the common content/design schemas belong in `deckkits/schemas/`. Suite modules must not import another suite directly. Catalog paths are relative to `deckkits/`. Run the directory-policy test and public audit after adding or moving DeckKit files; update `deckkit-maker` authoring conventions with any layout-policy change.
 
 ## Testing Guidelines
+
+Published CLI entries belong under `pptx-nova/scripts/cli/<workflow>/` and internal modules under `pptx-nova/scripts/lib/<domain>/`. Keep the scripts root limited to README plus these two roles. Use concise file names within each namespace; internal modules must not import CLI entry points or execute a CLI when imported. Resolve shared resources and child commands through `scripts/lib/runtime/skill-paths.mjs`.
+
+Keep tests under `tools/tests/{deckkits,workflows,contracts,evidence,runtime,maintenance}/`, with support code in `helpers/` and data in `fixtures/`. Run all suites with `node tools/run-tests.mjs`; CI and `just t` must use this same recursive discovery entry point. Do not restore flat test globs. Preserve test names and conditional integration coverage when splitting suites.
 
 Before changing runtime scripts, DeckKits, schemas, examples, or assets, run the smoke test and public audit. For DeckKit changes, also run targeted readiness and benchmark commands for the affected id. Do not commit generated `.pptx`, PNG previews, contact sheets, full vision reports, or temporary run outputs unless they are intentional curated examples under `pptx-nova/assets/examples/`.
 

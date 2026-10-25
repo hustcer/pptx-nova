@@ -35,11 +35,11 @@
 最后验证配对、几何变化、目标页转场及非阻断提示。目标 run 目录必须尚不存在。
 
 ```bash
-node <skill-root>/scripts/pptx-nova-morph-examples.mjs \
+node <skill-root>/scripts/cli/animation/examples.mjs \
   --example focus --run-dir .pptx-nova/morph-focus-<unique>
-node <skill-root>/scripts/pptx-nova-morph-examples.mjs \
+node <skill-root>/scripts/cli/animation/examples.mjs \
   --example kpi --run-dir .pptx-nova/morph-kpi-<unique>
-node <skill-root>/scripts/pptx-nova-morph-examples.mjs \
+node <skill-root>/scripts/cli/animation/examples.mjs \
   --example exit --run-dir .pptx-nova/morph-exit-<unique>
 ```
 

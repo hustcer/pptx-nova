@@ -41,7 +41,7 @@ default:
 
 # Run all tests
 t:
-  @node --test ...(glob tools/tests/*.test.mjs)
+  @node tools/run-tests.mjs
 
 # Format code
 fmt:
@@ -158,7 +158,7 @@ deckkit-examples action=('update') *args='':
       match $action {
         'update' => { node tools/update-pptx-nova-deckkit-examples.mjs --write {{ args }} }
         'check' => { node tools/update-pptx-nova-deckkit-examples.mjs --check {{ args }} }
-        'all' => { node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --all --out .tmp/pptx-nova-visual --clean {{ args }} }
+        'all' => { node pptx-nova/scripts/cli/deckkits/benchmark.mjs --all --out .tmp/pptx-nova-visual --clean {{ args }} }
       }
     } else if ($action | str starts-with '-') {
       node tools/update-pptx-nova-deckkit-examples.mjs --write $action {{ args }}

@@ -105,7 +105,7 @@ OCR overflow nor an independent PowerPoint/Office renderer.
 Confirm the current runtime disclosed the command:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-probe.mjs \
+node <skill-root>/scripts/cli/runtime/probe.mjs \
   --require-command pptx.visual-audit --strict --json
 ```
 
@@ -175,7 +175,7 @@ publication checks in `troubleshooting.md`.
 Consume the persisted manifest fail-closed:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-visual-evidence-gate.mjs \
+node <skill-root>/scripts/cli/review/visual-evidence-gate.mjs \
   --manifest <run-dir>/visual-evidence/manifest.json \
   --candidate <current.pptx> \
   --output <run-dir>/visual-evidence-gate.json \
@@ -189,7 +189,7 @@ internally inconsistent manifests exit `3`.
 
 Always bind the gate to the current candidate. For Create, after actually reviewing the canonical PNGs,
 also pass `--review <visual_review.json>`. Record that review with both `--candidate` and `--manifest` using
-`pptx-nova-visual-review.mjs`. The consumer verifies candidate, PDF/PNG and manifest hashes, complete
+`cli/review/visual-review.mjs`. The consumer verifies candidate, PDF/PNG and manifest hashes, complete
 slide coverage and all required review checks. Exit `6` means machine checks passed but actual
 visual review is missing; it does not require another user permission question. Stale or failed
 reviews do not authorize delivery. Use a fresh run after changing the candidate.
@@ -559,5 +559,5 @@ If conversion/check reveals a problem and the user asks you to fix it, switch to
 ## PowerPoint clean-open gate
 
 - For deliverable PPTX files, especially for formal/enterprise users or high-risk chart/table/OOXML changes, if the current environment is macOS and Microsoft PowerPoint for Mac is installed, run the clean-open smoke gate:
-  `node <skill-root>/scripts/pptx-nova-clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json`.
+  `node <skill-root>/scripts/cli/runtime/clean-open.mjs --pptx out.pptx --output <run-dir>/clean-open.json --json`.
   The live clean-open helper supports only macOS + PowerPoint for Mac + `osascript`/System Events; Windows/Linux have no equivalent clean-open run. If macOS lacks PowerPoint, `osascript`, or UI scripting permission, the helper returns `status: "skipped"` and does not block delivery. The final summary must explicitly state that the clean-open gate did not run and list the alternate structural checks performed. The helper stages the file in the PowerPoint sandbox, opens the candidate automatically, waits through PowerPoint's delayed chart/ChartEx loading window, and uses System Events to check Repair-like modals. Checking only that the presentation object opened is insufficient: PowerPoint may open it and show a Repair dialog at the same time. An ordinary `Cancel` button is not a failure; only Repair wording, a `Repair` button, or an equivalent repair prompt blocks. `--classify-ui` is only for offline UI snapshot classification tests and may run cross-platform.

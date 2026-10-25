@@ -30,8 +30,8 @@ introduced.
   `icons/icon-license`. Refresh both from the local Tabler checkout with:
 
   ```bash
-  node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>
-  node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check
+  node <skill-root>/scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout>
+  node <skill-root>/scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout> --check
   ```
 
   Maintainers may set `TABLER_ICONS_ROOT=<tabler-icons-checkout>` instead of
@@ -40,7 +40,7 @@ introduced.
 
   During PPTX generation, DeckKit code should consume this pack through
   `assets/deckkits/shared/icon-assets.kit.mjs`; agents should search/get icons through
-  `node <skill-root>/scripts/pptx-nova-icons.mjs ...`. Do not fetch icons from the network or
+  `node <skill-root>/scripts/cli/assets/icons.mjs ...`. Do not fetch icons from the network or
   scan the Tabler checkout in the deck generation path.
 
 - Use `xdoc pptx extract-style reference.pptx --output style.json --json` to
@@ -52,8 +52,8 @@ introduced.
   for transactional whole-slide reuse. `--slides` is 1-based and `--all` selects
   the whole source; the two selectors are mutually exclusive, and omitting both
   copies only the first source slide.
-- Use `node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
-  plus `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target delivery --benchmark-mode required-live`
+- Use `node <skill-root>/scripts/cli/deckkits/benchmark.mjs --deckkit <id> --all --repeat 3 --clean`
+  plus `node <skill-root>/scripts/cli/deckkits/readiness.mjs --deckkit <id> --target delivery --benchmark-mode required-live`
   for production visual gates. Store long-lived benchmark inputs under
   `<skill-root>/benchmarks/visual/`, not under `assets/decks/`.
 - Do not commit generated `.pptx`, PNG previews, contact sheets, regenerated

@@ -38,10 +38,10 @@
   视觉问题 delta 报告。
 - `pptx-diff.json`：Refurbish Existing Deck 或需要 before/after 审计时由 `xdoc pptx diff`
   生成的 `pptx-diff/v1` 语义变更报告，用可靠变更核对源/候选的文本、几何、样式和对象摘要。
-- `fidelity-gate.json`：Refurbish Existing Deck 时由 `pptx-nova-fidelity-gate.mjs`
+- `fidelity-gate.json`：Refurbish Existing Deck 时由 `cli/review/fidelity-gate.mjs`
   汇总 `vision-diff`、最终 `refurbish-audit` 和可用 `reference-map` 的保真门禁报告。
 - `candidate-inspect.json` / `layout-final.json`：Refurbish Existing Deck 时对候选 PPTX
-  做最终 inspect，并由 `pptx-nova-layout-snapshot.mjs` 生成对象 bbox、文本、字体、颜色、
+  做最终 inspect，并由 `cli/review/layout-snapshot.mjs` 生成对象 bbox、文本、字体、颜色、
   placeholder、frame 和 z-order 的结构化布局证据。
 - `catalog-readiness.json`：每次 refurbish runner 都会持久化的 DeckKit catalog readiness
   与 benchmark 摘要；如显式请求 live benchmark readiness，则另存为 `delivery-readiness.json`。
@@ -117,7 +117,7 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
    或 generator 输入。
 5. 优先用 DeckKit / generator 新建页面；只有 `reuse: copy-slide` 时才用 `slide-copy`。
 6. 生成 patch 后跑
-   `node <skill-root>/scripts/pptx-nova-check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`；
+   `node <skill-root>/scripts/cli/create/check-lock.mjs --lock deck_lock.json --content content.json --patch patch.json --json`；
    有 `assets_manifest.json` 时加 `--assets assets_manifest.json`。
 7. 跑 dry-run，确认 selector、layout 和 visualRisks。
 8. apply 到 run 目录中间 `.pptx`。
@@ -223,7 +223,7 @@ SmartArt 保真要求，就退回"源页 + chrome"的保守方案；正确策略
 vision-diff、refurbish-audit、semantic diff、preview、`refurbish-compare` 和同目录发布门禁阶段写入同一个 run 目录：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
+node <skill-root>/scripts/cli/refurbish/run.mjs \
   --deckkit <id> \
   --source source.pptx \
   --output candidate.pptx \
@@ -238,7 +238,7 @@ node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
 1. 先生成 `refurbish-plan.json`，再执行任何 `xdoc` 换肤命令：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
+node <skill-root>/scripts/cli/refurbish/plan.mjs \
   --deckkit <id> \
   --source source.pptx \
   --output candidate.pptx \
@@ -248,7 +248,7 @@ node <skill-root>/scripts/pptx-nova-refurbish-plan.mjs \
 如果用户显式指定 experimental/candidate DeckKit，加 `--explicit`。`status: blocked`
 时停止并说明缺口；`status: explicit-only`、`manual-fallback` 或
 `explicit-manual-fallback` 时继续但必须逐项执行 `requiredGates[]`。`manual-fallback`
-不是自由发挥路线：先用 `pptx-nova-refurbish-fallback-patch.mjs` 从 inspect 和 catalog
+不是自由发挥路线：先用 `cli/refurbish/fallback-patch.mjs` 从 inspect 和 catalog
 生成可审计 patch，再 dry-run/apply。
 
 2. 同时生成 `reference-inspect.json`、`source_extract.md`（或等价文本提取）和源 deck PNG/contact sheet。
@@ -320,7 +320,7 @@ xdoc pptx refurbish-skin \
 ```bash
 xdoc pptx chrome-detect source.pptx --json > chrome-detect.json
 
-node <skill-root>/scripts/pptx-nova-refurbish-fallback-patch.mjs \
+node <skill-root>/scripts/cli/refurbish/fallback-patch.mjs \
   --deckkit <id> \
   --source source.pptx \
   --inspect reference-inspect.json \
@@ -426,12 +426,12 @@ xdoc pptx refurbish-audit \
 
 xdoc pptx inspect candidate.pptx --json > candidate-inspect.json
 
-node <skill-root>/scripts/pptx-nova-layout-snapshot.mjs \
+node <skill-root>/scripts/cli/review/layout-snapshot.mjs \
   --inspect candidate-inspect.json \
   --output layout-final.json \
   --json
 
-node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
+node <skill-root>/scripts/cli/review/fidelity-gate.mjs \
   --mode refurbish \
   --source-inspect reference-inspect.json \
   --source-pptx source.pptx \
@@ -450,7 +450,7 @@ xdoc pptx contact-diff \
   --dpi 192 \
   --json > <run-dir>/refurbish-compare.json
 
-node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
+node <skill-root>/scripts/cli/review/compare-gate.mjs \
   --run-dir <run-dir> \
   --final-pptx final-output.pptx \
   --final-pptx-source <run-dir>/candidate.pptx \
@@ -469,7 +469,7 @@ node <skill-root>/scripts/pptx-nova-compare-gate.mjs \
 如果任务还需要检查 OOXML 可见文本泄漏，或需要禁止某类遗留 shape name，可额外运行 legacy supplemental audit：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-refurbish-audit.mjs \
+node <skill-root>/scripts/cli/refurbish/audit.mjs \
   --source-pptx source.pptx \
   --final-pptx candidate.pptx \
   --source-inspect reference-inspect.json \
@@ -585,7 +585,7 @@ DeckKit 选择注意事项：
   常规内容保真检查应优先由 `xdoc pptx refurbish-audit` 生成 `content-audit-final.json`。如果
   原生命令非零退出、被系统 kill、崩溃、或写出空 JSON，不要把文件存在当作通过；保存
   `*.exit` / `*.stderr`，单独重试一次，并立刻运行
-  `scripts/pptx-nova-refurbish-audit.mjs`。若 legacy audit 也不足以覆盖当前风险，再用
+  `scripts/cli/refurbish/audit.mjs`。若 legacy audit 也不足以覆盖当前风险，再用
   `inspect` 生成 supplemental audit，对比 slide count、可见文本、picture/table/chart/connector/
   graphicFrame/placeholder 数量、notes、links 和 `reference-map.json` 覆盖率。最终摘要必须明确
   native audit 的工具失败和 supplemental audit 的结论。

@@ -109,7 +109,7 @@
           "schemaVersion": "pptx-nova-refurbish-fallback/v1",
           "source": "consulting-dark-refurbish-profile",
           "strategy": "inspect-driven-consulting-dark-editable-object-restyle",
-          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "patchScript": "scripts/cli/refurbish/fallback-patch.mjs",
           "palette": {
             "background": "F6F4EE",
             "text": "102B3A",
@@ -668,7 +668,7 @@
           "schemaVersion": "pptx-nova-refurbish-fallback/v1",
           "source": "mckinsey-blue-refurbish-profile",
           "strategy": "inspect-driven-mckinsey-blue-editable-object-restyle",
-          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "patchScript": "scripts/cli/refurbish/fallback-patch.mjs",
           "palette": {
             "background": "FFFFFF",
             "text": "0F172A",
@@ -1243,7 +1243,7 @@
           "schemaVersion": "pptx-nova-refurbish-fallback/v1",
           "source": "swiss-grid-refurbish-profile",
           "strategy": "inspect-driven-swiss-grid-editable-object-restyle",
-          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "patchScript": "scripts/cli/refurbish/fallback-patch.mjs",
           "palette": {
             "background": "FFFFFF",
             "text": "1A1A1A",
@@ -1809,7 +1809,7 @@
           "schemaVersion": "pptx-nova-refurbish-fallback/v1",
           "source": "broadside-refurbish-profile",
           "strategy": "inspect-driven-broadside-editable-object-restyle",
-          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "patchScript": "scripts/cli/refurbish/fallback-patch.mjs",
           "palette": {
             "background": "111111",
             "text": "F0ECE5",
@@ -2854,7 +2854,7 @@
           "schemaVersion": "pptx-nova-refurbish-fallback/v1",
           "source": "long-table-refurbish-profile",
           "strategy": "inspect-driven-long-table-editable-object-restyle",
-          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "patchScript": "scripts/cli/refurbish/fallback-patch.mjs",
           "palette": {
             "background": "FAF1E2",
             "text": "B53D2A",
@@ -3255,7 +3255,7 @@
           "schemaVersion": "pptx-nova-refurbish-fallback/v1",
           "source": "biennale-yellow-refurbish-profile",
           "strategy": "inspect-driven-biennale-yellow-editable-object-restyle",
-          "patchScript": "scripts/pptx-nova-refurbish-fallback-patch.mjs",
+          "patchScript": "scripts/cli/refurbish/fallback-patch.mjs",
           "palette": {
             "background": "E9E5DB",
             "text": "1B2566",
@@ -4519,10 +4519,10 @@
         }
       },
       "validatedWith": [
-        "node pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit clear-value --json",
-        "node --test tools/tests/pptx-nova-clear-value.test.mjs",
-        "node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit clear-value --all --repeat 3",
-        "node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit clear-value --target candidate --benchmark-mode required-live"
+        "node pptx-nova/scripts/cli/deckkits/slot-consistency.mjs --deckkit clear-value --json",
+        "node --test tools/tests/deckkits/clear-value.test.mjs",
+        "node pptx-nova/scripts/cli/deckkits/benchmark.mjs --deckkit clear-value --all --repeat 3",
+        "node pptx-nova/scripts/cli/deckkits/readiness.mjs --deckkit clear-value --target candidate --benchmark-mode required-live"
       ],
       "quality": {
         "manualHardDefects": 0,

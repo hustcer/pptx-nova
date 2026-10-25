@@ -507,8 +507,8 @@ DeckKit 运行 `pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mo
 必须显式提供 Tabler checkout：
 
 ```bash
-node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>
-node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check
+node scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout>
+node scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout> --check
 ```
 
 也可以设置：

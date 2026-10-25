@@ -59,7 +59,7 @@ assets/deckkits/
   视觉回归 fixture、基线与验收记录继续位于 `benchmarks/visual/cases/<id>/`。
 - 根目录只保留 README、catalog 和校验 CLI。`node tools/pptx-nova-audit-public.mjs --strict`
   同时检查目录归属、标准模块名、catalog 路径、schema/示例存在性和套件间直接依赖。
-  新增 DeckKit 时也须通过 `node --test tools/tests/pptx-nova-deckkit-layout.test.mjs`。
+  新增 DeckKit 时也须通过 `node --test tools/tests/maintenance/deckkit-layout.test.mjs`。
 
 Biennale Yellow 2.0 保留九个页型名称，全部经注册合同执行；数据页改用数值、单位、来源，
 不再分发旧固定页型渲染器。字段迁移与构图说明见 [intent.md](biennale-yellow/intent.md)。
@@ -198,7 +198,7 @@ slot id 为键的对象，每项至少说明 `kind`、`acceptsAsset` 和
 ## 使用方式
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs \
+node <skill-root>/scripts/cli/deckkits/slots.mjs \
   --deckkit consulting-dark \
   > deckkit-slots.md
 
@@ -207,7 +207,7 @@ node <skill-root>/assets/deckkits/validate-content.mjs \
   --deckkit consulting-dark \
   --mode delivery
 
-node <skill-root>/scripts/pptx-nova-build.mjs \
+node <skill-root>/scripts/cli/create/build.mjs \
   --deckkit consulting-dark \
   content.json \
   -o patch.json \
@@ -235,13 +235,13 @@ p.icon(0, 'S0_StatusIcon', 'chart-line', 0.72, 0.72, 0.28, 0.28, {
 查找图标时使用 agent 入口，避免把全量 SVG 读入上下文：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-icons.mjs search "analytics dashboard" --style outline --limit 12 --json
-node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation --style outline --json
+node <skill-root>/scripts/cli/assets/icons.mjs search "analytics dashboard" --style outline --limit 12 --json
+node <skill-root>/scripts/cli/assets/icons.mjs get chart-line users presentation --style outline --json
 ```
 
 图标包覆盖 Tabler `outline` 和 `filled` 全量图标。刷新 pack 与 license 时运行
-`node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>` 和
-`node <skill-root>/scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check`（也可改用 `TABLER_ICONS_ROOT` 环境变量指定 checkout）。
+`node <skill-root>/scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout>` 和
+`node <skill-root>/scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout> --check`（也可改用 `TABLER_ICONS_ROOT` 环境变量指定 checkout）。
 
 ## 版本规则（semver）
 
@@ -254,10 +254,10 @@ node <skill-root>/scripts/pptx-nova-icons.mjs get chart-line users presentation 
 ## 冻结准入
 
 1. `validate-content` 通过，只有可解释的非阻塞 warning
-2. `pptx-nova-build.mjs` 可重复生成稳定 patch 和 `quality.json`
+2. `cli/create/build.mjs` 可重复生成稳定 patch 和 `quality.json`
 3. DeckKit benchmark 的 repo-indexed cases 全部通过；新 kit 至少要有 golden case，stress /
    mixed-language 可在 `.tmp` 做审查而不入库
-4. `node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live` 通过
+4. `node <skill-root>/scripts/cli/deckkits/readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live` 通过
 5. `xdoc pptx apply --dry-run --json` 通过
 6. `xdoc pptx vision-check out.pptx --json` 的 high/medium 为 0
 7. PNG contact sheet 和逐页检查通过
@@ -273,7 +273,7 @@ benchmark 通过后，用 catalog update 工具把机器可证明的结果写回
 `assets/deckkits/catalog.json`：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/cli/deckkits/catalog-update.mjs \
   --deckkit consulting-dark \
   --write
 ```
@@ -283,7 +283,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
 结果假定为通过。人工复核完成后，再显式写入 hard defect 数：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/cli/deckkits/catalog-update.mjs \
   --deckkit consulting-dark \
   --manual-hard-defects 0 \
   --write

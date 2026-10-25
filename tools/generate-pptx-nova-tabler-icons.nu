@@ -3,7 +3,7 @@
 const default_output = "pptx-nova/assets/icons/tabler-icons.pack.br"
 const default_license_output = "pptx-nova/assets/icons/icon-license"
 const default_source_root = ($nu.home-dir | path join "iWork" "refs" "tabler-icons")
-const icon_tool = "pptx-nova/scripts/pptx-nova-icons.mjs"
+const icon_tool = "pptx-nova/scripts/cli/assets/icons.mjs"
 
 def main [
   --source-root (-s): string = $default_source_root   # Local tabler-icons checkout root.

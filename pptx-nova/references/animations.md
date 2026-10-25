@@ -544,9 +544,9 @@ xdoc pptx morph-check <run-dir>/candidate.pptx --from-slide 1 --to-slide 2 --jso
 PowerPoint-native 证据，仅在 macOS + PowerPoint + Nushell 都可用时运行：
 
 ```bash
-node <skill-root>/scripts/pptx-nova-clean-open.mjs \
+node <skill-root>/scripts/cli/runtime/clean-open.mjs \
   --pptx <run-dir>/candidate.pptx --output <run-dir>/clean-open.json --json
-nu <skill-root>/scripts/pptx-nova-morph-playback.nu <run-dir>/candidate.pptx \
+nu <skill-root>/scripts/cli/office/morph-playback.nu <run-dir>/candidate.pptx \
   --from-slide 1 --to-slide 2 --mode by-object --duration-ms 900 \
   --output <run-dir>/morph-playback.json --json
 ```

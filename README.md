@@ -390,7 +390,7 @@ contracts, including the published Edit Contract gate with real semantic/style/v
 reports, run the opt-in executable suite:
 
 ```bash
-XDOC_TEST_BIN=/absolute/path/to/xdoc node --test tools/tests/pptx-nova-native-contracts.test.mjs
+XDOC_TEST_BIN=/absolute/path/to/xdoc node --test tools/tests/contracts/native-contracts.test.mjs
 ```
 
 The default test suite skips these cases when `XDOC_TEST_BIN` is absent. Set

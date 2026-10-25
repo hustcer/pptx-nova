@@ -37,7 +37,7 @@ main assumptions in the final summary.
 ## Minimal Express Pipeline
 
 1. Create run directory and check final output collision; for DeckKit-first runs prefer
-   `pptx-nova-init-run.mjs`.
+   `cli/runtime/init-run.mjs`.
 2. Generate or normalize `outline.json`.
 3. Generate `deck_lock.json` with canvas, DeckKit, theme/style, font, color,
    language, page-type decisions, and for persuasive decks the lightweight
@@ -46,7 +46,7 @@ main assumptions in the final summary.
 5. Write `content.json`.
 6. Validate content in delivery mode.
 7. Build patch with the selected DeckKit.
-8. Run `pptx-nova-create-run.mjs` to execute check-lock, dry-run, apply,
+8. Run `cli/create/run.mjs` to execute check-lock, dry-run, apply,
    vision-check and canonical PDF/PNG evidence while keeping the intermediate artifacts.
 9. Review the exact canonical PNGs, record `visual_review.json`, then repeat the
    Create command with `--finalize --visual-review <path>` to publish that same

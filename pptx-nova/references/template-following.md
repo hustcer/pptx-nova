@@ -143,7 +143,7 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    dimensions. Before apply, run:
 
    ```bash
-   node <skill-root>/scripts/pptx-nova-copy-size-gate.mjs \
+   node <skill-root>/scripts/cli/edit/copy-size-gate.mjs \
      --target <run-dir>/starter.pptx \
      --donor source.pptx \
      --copy-report <run-dir>/dry-run.json \
@@ -164,7 +164,7 @@ xdoc pptx inspect source.pptx --daemon --json > template-inspect.json
    and the placeholder/chrome QA below.
 
 ```bash
-node <skill-root>/scripts/pptx-nova-template-gate.mjs \
+node <skill-root>/scripts/cli/edit/template-gate.mjs \
   --frame-map template-frame-map.json \
   --source-inspect template-inspect.json \
   --edit-plan template-edit-plan.json \
@@ -175,7 +175,7 @@ node <skill-root>/scripts/pptx-nova-template-gate.mjs \
   --final-pptx out.pptx \
   --json > template-gate.json
 
-node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
+node <skill-root>/scripts/cli/review/fidelity-gate.mjs \
   --mode template-following \
   --source-inspect template-inspect.json \
   --final-inspect final-inspect.json \
@@ -183,7 +183,7 @@ node <skill-root>/scripts/pptx-nova-fidelity-gate.mjs \
   --template-gate template-gate.json \
   --json > fidelity-gate.json
 
-node <skill-root>/scripts/pptx-nova-finalize-evidence.mjs \
+node <skill-root>/scripts/cli/review/finalize-evidence.mjs \
   --mode template-following \
   --run-dir <run-dir> \
   --candidate out.pptx \
@@ -287,7 +287,7 @@ Before delivery, inspect or otherwise verify:
 If these checks fail, fix the inherited object mapping or choose another source
 slide. Do not switch to a parallel rebuild that only resembles the template.
 
-`pptx-nova-template-gate.mjs` machine-checks the highest-risk subset:
+`cli/edit/template-gate.mjs` machine-checks the highest-risk subset:
 
 - every mapped output slide has a valid source slide unless it is an explicit
   allowed insertion;
@@ -306,7 +306,7 @@ template frame-map coverage, and `template-gate.json` result into one
 `fidelity-gate.json` artifact. A failed `template-gate` remains a failed
 fidelity gate.
 
-`pptx-nova-finalize-evidence.mjs` runs the layout snapshot and records final
+`cli/review/finalize-evidence.mjs` runs the layout snapshot and records final
 object bbox, text, font, color, placeholder, frame, and z-order evidence into
 `layout-final.json`, then summarizes the existing vision/fidelity reports in
 `evidence-summary.json`. Treat layout risks as QA warnings, not as a replacement

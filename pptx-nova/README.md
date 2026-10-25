@@ -584,8 +584,8 @@ Runtime icon lookup uses the bundled `assets/icons/tabler-icons.pack.br`. When r
 pack inside `pptx-nova/`, explicitly provide a Tabler checkout:
 
 ```bash
-node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout>
-node scripts/pptx-nova-icons.mjs generate --source-root <tabler-icons-checkout> --check
+node scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout>
+node scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout> --check
 ```
 
 You can also set:

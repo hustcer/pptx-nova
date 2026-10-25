@@ -385,7 +385,7 @@ function stageFile({ targetRoot, relativePath, bytes, mode, staged }) {
 }
 
 function runBenchmarkCase({ benchCase, args }) {
-  const benchmarkScript = join(SKILL_ROOT, 'scripts/pptx-nova-deckkit-benchmark.mjs')
+  const benchmarkScript = join(SKILL_ROOT, 'scripts/cli/deckkits/benchmark.mjs')
   const commandArgs = [
     benchmarkScript,
     '--case',

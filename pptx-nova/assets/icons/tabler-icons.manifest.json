@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-tabler-icons-manifest/v1",
   "sourceRepo": "https://github.com/tabler/tabler-icons",
-  "sourceRootHint": "Set TABLER_ICONS_ROOT or pass --source-root to scripts/pptx-nova-icons.mjs",
+  "sourceRootHint": "Set TABLER_ICONS_ROOT or pass --source-root to scripts/cli/assets/icons.mjs",
   "sourceVersion": "3.44.0",
   "license": "MIT",
   "defaultStyle": "outline",

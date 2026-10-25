@@ -50,7 +50,7 @@ jobs:
         run: nu tools/ci-check.nu
 
       - name: Run tool tests
-        run: node --test tools/tests/*.test.mjs
+        run: node tools/run-tests.mjs
 
       - name: Check theme catalog outputs
         shell: nu {0}

@@ -104,8 +104,8 @@ callout 和缺失图片时的隐藏/占位策略。
 生成与一致性检查：
 
 ```bash
-node pptx-nova/scripts/pptx-nova-deckkit-slots.mjs --deckkit <id>
-node pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit <id> --json
+node pptx-nova/scripts/cli/deckkits/slots.mjs --deckkit <id>
+node pptx-nova/scripts/cli/deckkits/slot-consistency.mjs --deckkit <id> --json
 ```
 
 槽位检查器生成的单页探针须明确使用 `meta.designScope: "excerpt"`，避免完整 deck 的首尾
@@ -121,7 +121,7 @@ node pptx-nova/scripts/pptx-nova-deckkit-slot-consistency.mjs --deckkit <id> --j
 qualityProfile / defaultFor / bestFor / coverage / supportedSlideTypes /
 visualGrammar / layoutContract / diversityGate / density / validatedWith / quality /
 knownLimits / examples / refurbishProfile`（`refurbishProfile` 可用
-`node pptx-nova/scripts/pptx-nova-deckkit-refurbish-profile-fill.mjs --deckkit <id> --write` 生成）。
+`node pptx-nova/scripts/cli/deckkits/refurbish-profile-fill.mjs --deckkit <id> --write` 生成）。
 
 `path` 固定为 `<id>/<id>.kit.mjs`，`designContract` 为 `<id>/design.json`，
 示例路径为 `<id>/examples/content.json`。套件模块、schema 和示例必须遵循入口 SKILL
@@ -146,7 +146,7 @@ knownLimits / examples / refurbishProfile`（`refurbishProfile` 可用
 node pptx-nova/assets/deckkits/validate-content.mjs \
   pptx-nova/assets/deckkits/<id>/examples/content.json \
   --deckkit <id> --mode delivery --json
-node pptx-nova/scripts/pptx-nova-build.mjs \
+node pptx-nova/scripts/cli/create/build.mjs \
   --deckkit <id> pptx-nova/assets/deckkits/<id>/examples/content.json \
   -o .tmp/deckkit-<id>/kit-patch.json --quality-json .tmp/deckkit-<id>/kit-quality.json
 ```
@@ -155,11 +155,11 @@ node pptx-nova/scripts/pptx-nova-build.mjs \
 回归。若 `fidelity-scope.md` 是 `scoped`，只把 rebuild set 用作视觉回归基线；未重建页
 仍必须通过 validation、slot budget、density 和 benchmark 覆盖，不能因为 Phase 1 未重建就从
 schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 import `.kit.mjs`；交付路径一律走
-`pptx-nova-build.mjs` 通用 driver。
+`cli/create/build.mjs` 通用 driver。
 
 ## 5. 测试（强制）
 
-在 `tools/tests/pptx-nova-scripts.test.mjs` 中为新 kit 补：
+在 `tools/tests/deckkits/<id>.test.mjs` 中为新 kit 补：
 
 - **最小合法 content build 测试**：每个页型构造最小 delivery content，
   validation 通过则 `createDeck` 必须不崩。
@@ -174,7 +174,7 @@ schema 或 examples 中消失。需要直接调试 `createDeck` 时才临时 imp
   asset policy 中说明用户确认依据。
 
 ```bash
-node --test tools/tests/pptx-nova-scripts.test.mjs
+node tools/run-tests.mjs deckkits
 ```
 
 ## 6. benchmark 与 readiness
@@ -199,9 +199,9 @@ slot budget、validation tests 和有针对性的非视觉单测覆盖，避免�
 和密度边界，防止 scope 缩减掩盖组件化缺口。
 
 ```bash
-XDOC_FIELD_DATE=<YYYY-MM-DD> node pptx-nova/scripts/pptx-nova-deckkit-benchmark.mjs --deckkit <id> --all --repeat 3 --out .tmp/deckkit-<id>/benchmark/01
-node pptx-nova/scripts/pptx-nova-deckkit-readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live --out .tmp/deckkit-<id>/benchmark/01 --json
-node pptx-nova/scripts/pptx-nova-deckkit-catalog-update.mjs --deckkit <id> --readiness candidate --out .tmp/deckkit-<id>/benchmark/01 --write
+XDOC_FIELD_DATE=<YYYY-MM-DD> node pptx-nova/scripts/cli/deckkits/benchmark.mjs --deckkit <id> --all --repeat 3 --out .tmp/deckkit-<id>/benchmark/01
+node pptx-nova/scripts/cli/deckkits/readiness.mjs --deckkit <id> --target candidate --benchmark-mode required-live --out .tmp/deckkit-<id>/benchmark/01 --json
+node pptx-nova/scripts/cli/deckkits/catalog-update.mjs --deckkit <id> --readiness candidate --out .tmp/deckkit-<id>/benchmark/01 --write
 ```
 
 三条命令必须使用**同一个本轮新建的 `--out`**，不要读取默认共享目录里的旧 summary。

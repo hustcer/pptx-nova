@@ -61,7 +61,7 @@ def main [] {
         ]
     }
 
-    let readiness_script = ($repo_root | path join 'pptx-nova' 'scripts' 'pptx-nova-deckkit-readiness.mjs')
+    let readiness_script = ($repo_root | path join 'pptx-nova' 'scripts' 'cli/deckkits/readiness.mjs')
     let catalog_path = ($repo_root | path join 'pptx-nova' 'assets' 'deckkits' 'catalog.json')
     let delivery_deckkits = read-delivery-deckkits $catalog_path
 

@@ -70,7 +70,7 @@ block delivery/default readiness and production/default promotion until reviewed
 Accept the current low findings as the reviewed baseline with:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs \
+node <skill-root>/scripts/cli/deckkits/benchmark.mjs \
   --deckkit consulting-dark \
   --all \
   --update-baseline \
@@ -84,7 +84,7 @@ runs then surface only `new` or `changed` low findings for human review.
 ## Current CLI
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-benchmark.mjs \
+node <skill-root>/scripts/cli/deckkits/benchmark.mjs \
   --deckkit consulting-dark \
   --case golden-roadshow \
   --repeat 3 \
@@ -100,7 +100,7 @@ canonical low bucketing, PNG preview, and contact-sheet gates. It writes
 After benchmark output exists, run the readiness audit:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-readiness.mjs \
+node <skill-root>/scripts/cli/deckkits/readiness.mjs \
   --deckkit consulting-dark \
   --target candidate \
   --benchmark-mode required-live
@@ -118,7 +118,7 @@ missing, empty, or out of sync with the slide count, or when
 To write machine-verifiable benchmark metadata back to `catalog.json`, run:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/cli/deckkits/catalog-update.mjs \
   --deckkit consulting-dark \
   --write
 ```
@@ -139,7 +139,7 @@ Manual PNG review remains a separate human step:
    manual count:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/cli/deckkits/catalog-update.mjs \
   --deckkit consulting-dark \
   --manual-hard-defects 0 \
   --write
@@ -148,7 +148,7 @@ node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
 Promotion requires an explicit manual review confirmation:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-deckkit-catalog-update.mjs \
+node <skill-root>/scripts/cli/deckkits/catalog-update.mjs \
   --deckkit consulting-dark \
   --manual-hard-defects 0 \
   --readiness production \

@@ -71,11 +71,11 @@ boolean。`autoRetry:true` 只允许按已有策略尝试，仍须验证完整 s
 旧运行时不提供旧字段 fallback。以下路径均为示例，输出与 capsule 必须使用新路径：
 
 ```bash
-node scripts/pptx-nova-remediation.mjs run \
+node scripts/cli/runtime/remediation.mjs run \
   --patch request.json --input original.pptx --asset-root assets \
   --capsule run/remediation-context --output run/first.pptx > run/first-report.json
 
-node scripts/pptx-nova-remediation.mjs apply \
+node scripts/cli/runtime/remediation.mjs apply \
   --capsule run/remediation-context --report run/first-report.json \
   --pointer /error/suggestions/0 --output run/repaired.pptx
 ```
@@ -88,7 +88,7 @@ capsule 含私有原请求、PPTX 和资源，应保留到重试结束。没有�
 
 资产文件存在但包装脚本报 `ENOENT` 或使用了错误图片时，检查调用路径是否含
 `symlink/..`。在 POSIX 上按文件系统遍历，不能先用 `path.resolve` 或普通
-`realpathSync` 折叠；自定义 Node 包装可复用 `scripts/lib/filesystem-paths.mjs`。
+`realpathSync` 折叠；自定义 Node 包装可复用 `scripts/lib/runtime/filesystem-paths.mjs`。
 省略 `--asset-root` 时，资源相对于**提交的 patch 路径所在目录**，不是 patch 文件的
 符号链接目标目录。修复脚本会冻结该目录内的资源；逃逸到根外的资产链接仍拒绝。
 

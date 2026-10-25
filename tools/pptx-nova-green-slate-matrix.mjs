@@ -326,7 +326,7 @@ for (const [name, content] of Object.entries(cases)) {
   const r = spawnSync(
     process.execPath,
     [
-      'pptx-nova/scripts/pptx-nova-create-run.mjs',
+      'pptx-nova/scripts/cli/create/run.mjs',
       '--content',
       resolve(dir, 'content.json'),
       '--lock',

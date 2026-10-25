@@ -133,7 +133,7 @@ and empty blockers.
 }
 ```
 
-`pptx-nova-check-lock.mjs` 不解析完整 fusion 语义，但会检查 `deck_lock.json` 中的颜色、
+`cli/create/check-lock.mjs` 不解析完整 fusion 语义，但会检查 `deck_lock.json` 中的颜色、
 字体、资源和 slide type 是否被 content/patch 漂移。fusion 阶段的目标是让这些约束先进入 lock。
 
 ## Adding Assets
@@ -146,7 +146,7 @@ and empty blockers.
 - For common deck icons, use the Tabler full icon pack:
   `icons/tabler-icons.pack.br` contains outline and filled icons, and
   `icons/icon-license` carries the Tabler MIT license. Agents should search or
-  fetch icon names through `node <skill-root>/scripts/pptx-nova-icons.mjs ...`; DeckKit
+  fetch icon names through `node <skill-root>/scripts/cli/assets/icons.mjs ...`; DeckKit
   generators should read icons through `assets/deckkits/shared/icon-assets.kit.mjs`
   instead of fetching icons online or reading the Tabler checkout during PPTX
   generation.

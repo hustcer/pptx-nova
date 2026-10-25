@@ -15,9 +15,9 @@
 从 [合成数据完整示例](../sky-compass/examples/content.json) 开始，通过标准工作流生成，无需手写坐标：
 
 ```sh
-node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit sky-compass
+node pptx-nova/scripts/cli/deckkits/design.mjs --deckkit sky-compass
 node pptx-nova/assets/deckkits/validate-content.mjs content.json --deckkit sky-compass --mode delivery --json
-node pptx-nova/scripts/pptx-nova-build.mjs --deckkit sky-compass content.json -o patch.json
+node pptx-nova/scripts/cli/create/build.mjs --deckkit sky-compass content.json -o patch.json
 ```
 
 按标准 Create runner 完成 deck lock、机器检查、原生对象回读、canonical PNG 逐页检查和同一候选

@@ -150,7 +150,7 @@ for (const [name, input] of Object.entries({ variants, stress, mixed, long })) {
     })),
   })
   const command = [
-    resolve(root, 'pptx-nova/scripts/pptx-nova-create-run.mjs'),
+    resolve(root, 'pptx-nova/scripts/cli/create/run.mjs'),
     '--content',
     contentPath,
     '--lock',

@@ -79,12 +79,12 @@ P1 不一定阻塞草稿，但客户演示级 / 投资人级 / 董事会 deck �
 }
 ```
 
-`pptx-nova-check-lock.mjs` 会检查 manifest id 覆盖、图片 slot 字段和 AI 图片
+`cli/create/check-lock.mjs` 会检查 manifest id 覆盖、图片 slot 字段和 AI 图片
 `noSlideChrome`；`missing` / `needs-user` / `forbidden` 会阻塞，`placeholder` /
 `needs-review` 会提示复核；`validate-content.mjs` 会检查 DeckKit 的 layout contract 与
 diversity gate。
 
-DeckKit 的页型槽位参考（`node <skill-root>/scripts/pptx-nova-deckkit-slots.mjs --deckkit <id> [--format md|json]`）
+DeckKit 的页型槽位参考（`node <skill-root>/scripts/cli/deckkits/slots.mjs --deckkit <id> [--format md|json]`）
 还会列出 `layoutContract.slideTypes[*].assetSlots`。其中
 `acceptsAsset: false` 表示该页型只有可编辑的占位框：`imageLabel` / `caption` 等字段只
 负责显示说明文字，不能通过 `content.json.imageSlots` 绑定图片。若需要真实图片，应改用
@@ -92,7 +92,7 @@ DeckKit 的页型槽位参考（`node <skill-root>/scripts/pptx-nova-deckkit-slo
 placeholder-only 槽位后继续生成。
 
 `acceptsAsset: true` 表示 build 会从 `assets_manifest.json` 解析对应 asset id。运行
-`pptx-nova-build.mjs` 或标准 create runner 时必须同时传 `--assets`；runner 会把 manifest
+`cli/create/build.mjs` 或标准 create runner 时必须同时传 `--assets`；runner 会把 manifest
 所在目录作为 xdoc 的 `--asset-root`，patch 中只保留受限的相对路径。Cartesian 的
 `image.editorial` 默认使用 `contain`，没有 `imageSlots` 绑定时继续渲染 crossed shell，
 因此无合法图片的任务不会被迫使用伪造素材。

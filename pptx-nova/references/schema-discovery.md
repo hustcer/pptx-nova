@@ -87,7 +87,7 @@ selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --mode o
 
 从 help 探测参数时只认 `Options` 中的声明行（如 `  -o, --output <path>`），
 不要把描述、续行或示例里提到的其他命令参数当成当前命令的能力。
-`pptx-nova-probe.mjs` 的 `commandFlags` 使用同样规则；例如正文建议
+`cli/runtime/probe.mjs` 的 `commandFlags` 使用同样规则；例如正文建议
 `pptx preview --json`，并不表示顶层 `convert` 支持 `--json`。
 
 ## 典型 Agent 用法

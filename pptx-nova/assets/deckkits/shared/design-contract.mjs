@@ -8,7 +8,7 @@ import { STRATEGY_REGIONS } from '../green-slate/registry.mjs'
 import { ANNUAL_LAYOUTS } from '../clear-value/registry.mjs'
 import { BIENNALE_REGIONS } from '../biennale-yellow/registry.mjs'
 import { registeredDesignFamily, registeredDesignChecks } from './design-family-registry.mjs'
-import { nativeChartMatches } from '../../../scripts/lib/native-chart-readback.mjs'
+import { nativeChartMatches } from '../../../scripts/lib/pptx/native-chart-readback.mjs'
 
 const root = resolve(DECKKIT_ROOT)
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'))

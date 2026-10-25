@@ -16,7 +16,7 @@ the execution boundary: it chooses a route, validates fidelity, binds publicatio
 Check that the requested final path does not already exist, then run:
 
 ```bash
-node <skill-root>/scripts/pptx-nova-refurbish-run.mjs \
+node <skill-root>/scripts/cli/refurbish/run.mjs \
   --deckkit <id> \
   --source source.pptx \
   --output out.pptx \
@@ -103,7 +103,7 @@ instead of always opening every published byte:
 - When thumbnails are too small, render a focused high-resolution excerpt:
 
   ```bash
-  node <skill-root>/scripts/pptx-nova-compare.mjs \
+  node <skill-root>/scripts/cli/review/compare.mjs \
     --source source.pptx --candidate candidate.pptx \
     --run-dir . --kind refurbish --slides <n>[,<n>...] \
     --output focused-review.png --report focused-review.json --overwrite --json
@@ -128,7 +128,7 @@ Run `visualReviewCommand`; it supplies all 11 checks including `targetDeckkitApp
 also exposes `feedbackGateCommand`; write `skill-feedback.md` first. On failure use `recoveryCommand`,
 which points at `<new-empty-run-dir>`; never retry in a failed/historical run.
 
-If the final candidate contains ChartEx parts, xdoc preview/compare is not PowerPoint-native proof. Generate a candidate-bound `<skill-root>/scripts/pptx-nova-powerpoint-snapshot.nu --method pdf-render` report covering every ChartEx slide and pass it to
+If the final candidate contains ChartEx parts, xdoc preview/compare is not PowerPoint-native proof. Generate a candidate-bound `<skill-root>/scripts/cli/office/powerpoint-snapshot.nu --method pdf-render` report covering every ChartEx slide and pass it to
 `pptx-nova-finalize-evidence.mjs --mode refurbish --candidate <candidate> --powerpoint-native-render <report>` when the optional macOS + scriptable PowerPoint + Nushell + `mutool` evidence route is available. With that route available, missing, stale, or incomplete coverage is a blocker. If any optional prerequisite is unavailable, the finalizer returns an explicit unverified warning without breaking the baseline workflow; do not claim PowerPoint-native verification, and stop if the user or delivery policy explicitly requires it.
 Window capture is retained only after pdf-render failure and does not satisfy the ChartEx gate.
 

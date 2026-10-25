@@ -16,9 +16,9 @@
 从 [合成示例](../warm-clay/examples/content.json) 开始；无需手写页面坐标：
 
 ```sh
-node pptx-nova/scripts/pptx-nova-deckkit-design.mjs --deckkit warm-clay
+node pptx-nova/scripts/cli/deckkits/design.mjs --deckkit warm-clay
 node pptx-nova/assets/deckkits/validate-content.mjs content.json --deckkit warm-clay --mode delivery --json
-node pptx-nova/scripts/pptx-nova-build.mjs --deckkit warm-clay content.json -o patch.json
+node pptx-nova/scripts/cli/create/build.mjs --deckkit warm-clay content.json -o patch.json
 ```
 
 标准 Create runner 使用同一合同、对象/数值回读和候选交付绑定。candidate 须显式选择，

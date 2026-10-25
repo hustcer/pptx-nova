@@ -6631,6 +6631,377 @@
       ],
       "examples": ["sky-compass/examples/content.json"],
       "designContract": "sky-compass/design.json"
+    },
+    {
+      "id": "violet-momentum",
+      "version": "0.1.0",
+      "path": "violet-momentum/violet-momentum.kit.mjs",
+      "designContract": "violet-momentum/design.json",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "operating review",
+        "quarterly performance",
+        "project progress",
+        "evidence-led decisions"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "violetCoverSlide",
+          "violetSummarySlide",
+          "violetScorecardSlide",
+          "violetTrendSlide",
+          "violetAttributionSlide",
+          "violetDiagnosisSlide",
+          "violetProjectsSlide",
+          "violetActionsSlide",
+          "violetSectionSlide",
+          "violetRatingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "violetCoverSlide",
+        "violetSummarySlide",
+        "violetScorecardSlide",
+        "violetTrendSlide",
+        "violetAttributionSlide",
+        "violetDiagnosisSlide",
+        "violetProjectsSlide",
+        "violetActionsSlide",
+        "violetSectionSlide",
+        "violetRatingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Electric violet operational editorial",
+        "mood": ["Crisp", "Corporate", "Evidence-led"],
+        "layoutPrinciples": [
+          "Judgment leads; evidence follows",
+          "Open rules and whitespace; no decorative cards"
+        ],
+        "signatureElements": [
+          "Near-black split verdict cover",
+          "Single violet native columns",
+          "Converging additive total bubble",
+          "Outlined progress",
+          "Milestone nodes and decision rails",
+          "Outlined position dots"
+        ],
+        "compositionRules": [
+          "Use registered variants according to capacity",
+          "Keep source, period and units content-owned"
+        ],
+        "avoid": ["Gradients", "Shadows", "Multicolor data", "Rasterized charts"],
+        "typography": {
+          "display": "Tahoma / Noto Sans SC",
+          "body": "Tahoma / Noto Sans SC",
+          "hierarchy": "Weight, size and space"
+        },
+        "colorSystem": {
+          "paper": "FFFFFF",
+          "ink": "121212",
+          "accent": "5114F6",
+          "muted": "626262"
+        },
+        "slideRhythm": {
+          "anchor": ["violetCoverSlide", "violetSectionSlide"],
+          "judgment": ["violetSummarySlide", "violetDiagnosisSlide", "violetActionsSlide"],
+          "evidence": [
+            "violetScorecardSlide",
+            "violetTrendSlide",
+            "violetAttributionSlide",
+            "violetProjectsSlide",
+            "violetRatingSlide"
+          ]
+        }
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "slideTypes": {
+          "violetCoverSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.eyebrow",
+              "data.description",
+              "data.verdict",
+              "data.metricHeading",
+              "data.period",
+              "data.source",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "split", "band"]
+          },
+          "violetSummarySlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.judgment",
+              "data.description",
+              "data.headers",
+              "data.metrics"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "violetScorecardSlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.headers",
+              "data.rows"
+            ],
+            "allowedLayoutIds": ["auto", "wide"]
+          },
+          "violetTrendSlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.seriesName",
+              "data.unit",
+              "data.points",
+              "data.boundaryIndex",
+              "data.beforeLabel",
+              "data.afterLabel",
+              "data.notes",
+              "data.events"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "wide"]
+          },
+          "violetAttributionSlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.notes",
+              "data.drivers",
+              "data.total",
+              "data.totalLabel",
+              "data.unit"
+            ],
+            "allowedLayoutIds": ["auto", "converge", "stack"]
+          },
+          "violetDiagnosisSlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.context",
+              "data.cases"
+            ],
+            "allowedLayoutIds": ["auto", "columns", "rows"]
+          },
+          "violetProjectsSlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.projects"
+            ],
+            "allowedLayoutIds": ["auto", "rows", "columns"]
+          },
+          "violetActionsSlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.phases",
+              "data.decisions",
+              "data.decisionHeading"
+            ],
+            "allowedLayoutIds": ["auto", "timeline", "stack"]
+          },
+          "violetSectionSlide": {
+            "requiredSlots": [
+              "data.index",
+              "data.title",
+              "data.description",
+              "data.source",
+              "data.period"
+            ],
+            "allowedLayoutIds": ["auto", "full"]
+          },
+          "violetRatingSlide": {
+            "requiredSlots": [
+              "data.period",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.title",
+              "data.ratings"
+            ],
+            "allowedLayoutIds": ["auto", "rows", "columns"]
+          }
+        },
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["violetCoverSlide", "violetSectionSlide"],
+          "judgment": ["violetSummarySlide", "violetDiagnosisSlide", "violetActionsSlide"],
+          "evidence": [
+            "violetScorecardSlide",
+            "violetTrendSlide",
+            "violetAttributionSlide",
+            "violetProjectsSlide",
+            "violetRatingSlide"
+          ]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (6fa897c7)",
+        "report": "violet-momentum/migration-report.md",
+        "powerPoint": "16.114.1 on macOS 27.0.1: all five cases clean-open; golden native export; mixed/signed chart spot checks; isolated text/table/chart/shape edit/save/reopen and chart cache/workbook readback. Other hosts unverified."
+      },
+      "quality": {
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-10-25",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-25",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-violet-momentum/benchmark/02"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "violet-momentum.golden-operations",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-violet-momentum/benchmark/02/violet-momentum/golden-operations/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/violet-momentum/golden-operations/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 202784
+              },
+              "patchOps": 978,
+              "p50TotalMs": 208.05
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on an eight-panel electric-violet-business reference image and design specification; all example values are explicitly synthetic.",
+        "No photograph asset ingestion, forecast segments or arbitrary existing-deck refurbishment is registered.",
+        "Native chart data is editable. Independent chart annotations, progress shapes and total bubbles must be regenerated from content after manual data edits.",
+        "Tahoma and Noto Sans SC must be available; fonts are not bundled.",
+        "Attainment, status wording and metric definitions belong to content; the visual skin does not infer business policy."
+      ],
+      "examples": ["violet-momentum/examples/content.json"]
     }
   ]
 }

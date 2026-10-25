@@ -227,6 +227,15 @@
       "buildPath": "../../assets/deckkits/sky-compass/examples/build.mjs",
       "expectedPath": "cases/sky-compass/golden-operations/expected.json",
       "reviewPath": "cases/sky-compass/golden-operations/review.md"
+    },
+    {
+      "id": "violet-momentum.golden-operations",
+      "deckkit": "violet-momentum",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/violet-momentum/examples/content.json",
+      "buildPath": "../../assets/deckkits/violet-momentum/examples/build.mjs",
+      "expectedPath": "cases/violet-momentum/golden-operations/expected.json",
+      "reviewPath": "cases/violet-momentum/golden-operations/review.md"
     }
   ]
 }

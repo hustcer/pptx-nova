@@ -274,6 +274,24 @@
       "status": "available"
     },
     {
+      "id": "violet-momentum-showcase",
+      "name": "violet-momentum DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "violet-momentum",
+      "caseId": "violet-momentum.golden-operations",
+      "path": "../examples/deckkits/violet-momentum/deck.pptx",
+      "preview": "../examples/deckkits/violet-momentum/contact-sheet.webp",
+      "content": "../examples/deckkits/violet-momentum/content.json",
+      "summary": "../examples/deckkits/violet-momentum/summary.json",
+      "bestFor": [
+        "operating review",
+        "quarterly performance",
+        "project progress",
+        "evidence-led decisions"
+      ],
+      "status": "preview"
+    },
+    {
       "id": "warm-clay-showcase",
       "name": "warm-clay DeckKit Showcase",
       "type": "deckkit-showcase",

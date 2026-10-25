@@ -1,0 +1,173 @@
+{
+  "type": "object",
+  "properties": {
+    "period": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 11.28,
+        "heightIn": 0.32,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "basis": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 11.28,
+        "heightIn": 0.32,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.1,
+        "heightIn": 0.27,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 13,
+        "widthIn": 11.28,
+        "heightIn": 0.46,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 25,
+        "widthIn": 11.28,
+        "heightIn": 1.02,
+        "lineHeight": 1.1,
+        "maxLines": 1
+      }
+    },
+    "judgment": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 17,
+        "widthIn": 3.48,
+        "heightIn": 1.3,
+        "lineHeight": 1.1,
+        "maxLines": 3
+      }
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "x-slotBudget": {
+        "fontPt": 13,
+        "widthIn": 3.48,
+        "heightIn": 1.8499999999999999,
+        "lineHeight": 1.1,
+        "maxLines": 6
+      }
+    },
+    "headers": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "x-slotBudget": {
+          "fontPt": 10.5,
+          "widthIn": 1.1612048192771085,
+          "heightIn": 0.77,
+          "lineHeight": 1.1,
+          "maxLines": 3
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 1.5949397590361443,
+              "heightIn": 0.77,
+              "lineHeight": 1.1,
+              "maxLines": 3
+            }
+          },
+          "actual": {
+            "type": "number"
+          },
+          "target": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 1.2479518072289157,
+              "heightIn": 0.77,
+              "lineHeight": 1.1,
+              "maxLines": 3
+            }
+          },
+          "statusLabel": {
+            "type": "string",
+            "minLength": 1,
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 1.1612048192771085,
+              "heightIn": 0.77,
+              "lineHeight": 1.1,
+              "maxLines": 3
+            }
+          },
+          "gapUnit": {
+            "type": "string",
+            "minLength": 1,
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 1.2479518072289157,
+              "heightIn": 0.77,
+              "lineHeight": 1.1,
+              "maxLines": 3
+            }
+          }
+        },
+        "required": ["label", "actual", "target", "unit", "statusLabel", "gapUnit"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "period",
+    "basis",
+    "source",
+    "verdict",
+    "title",
+    "judgment",
+    "description",
+    "headers",
+    "metrics"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

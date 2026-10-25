@@ -1,3 +1,4 @@
+import { VIOLET_FAMILY } from '../violet-momentum/registry.mjs'
 import { SKY_FAMILY } from '../sky-compass/registry.mjs'
 import { AMBER_FAMILY } from '../amber-ledger/registry.mjs'
 import { PULSE_FAMILY } from '../midnight-pulse/registry.mjs'
@@ -12,6 +13,7 @@ import { CONSULTING_FAMILY } from '../consulting-dark/registry.mjs'
 import { IMPACT_FAMILY } from '../clear-impact/registry.mjs'
 import { CLAY_FAMILY } from '../warm-clay/registry.mjs'
 export const DESIGN_FAMILIES = [
+  VIOLET_FAMILY,
   SKY_FAMILY,
   PULSE_FAMILY,
   AMBER_FAMILY,

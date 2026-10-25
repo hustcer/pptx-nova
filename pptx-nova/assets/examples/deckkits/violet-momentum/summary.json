@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "violet-momentum",
+  "caseId": "violet-momentum.golden-operations",
+  "kind": "golden",
+  "title": "Fleet operations review and next-quarter priorities",
+  "source": {
+    "content": "pptx-nova/assets/deckkits/violet-momentum/examples/content.json",
+    "build": "pptx-nova/assets/deckkits/violet-momentum/examples/build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/violet-momentum/golden-operations/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "fitDiagnostics": 0,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": "pptx-patch/v1",
+    "ops": 978
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 27,
+    "opResults": 978,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 1,
+      "total": 1
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 27,
+    "opResults": 978,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 1,
+      "total": 1
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 10,
+    "issueCount": 0,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "lowBuckets": {
+      "total": 0,
+      "styleAllowed": 0,
+      "baselineKnown": 0,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": true,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {},
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "",
+      "fingerprintVersion": "",
+      "path": "pptx-nova/benchmarks/visual/baselines/violet-momentum.golden-operations.vision-baseline.json",
+      "available": false,
+      "issueCount": 0
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 10.5,
+      "labelFontPt": 10.5,
+      "sourceFontPt": 10.5,
+      "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 202784,
+      "sha256": "2ab80153f7293a69276dea27ceca9e865a125d01fcf0f12a2f6ec2e0554c3f42"
+    },
+    "webp": {
+      "bytes": 120640,
+      "sha256": "4b62bb51b924154883f81615ff8a9b15e292eb3eb7d8522f4673583ef10163b0"
+    }
+  }
+}

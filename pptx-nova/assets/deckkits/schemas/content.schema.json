@@ -240,7 +240,17 @@
               "skyTrendSlide",
               "skyBridgeSlide",
               "skyAppendixSlide",
-              "skyDecisionsSlide"
+              "skyDecisionsSlide",
+              "violetCoverSlide",
+              "violetSectionSlide",
+              "violetSummarySlide",
+              "violetScorecardSlide",
+              "violetTrendSlide",
+              "violetAttributionSlide",
+              "violetDiagnosisSlide",
+              "violetProjectsSlide",
+              "violetRatingSlide",
+              "violetActionsSlide"
             ]
           },
           "data": {

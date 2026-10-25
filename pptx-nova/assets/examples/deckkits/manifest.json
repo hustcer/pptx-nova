@@ -1476,6 +1476,104 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "violet-momentum",
+      "deckkit": "violet-momentum",
+      "caseId": "violet-momentum.golden-operations",
+      "kind": "golden",
+      "readiness": "experimental",
+      "version": "0.1.0",
+      "title": "Fleet operations review and next-quarter priorities",
+      "bestFor": [
+        "operating review",
+        "quarterly performance",
+        "project progress",
+        "evidence-led decisions"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "violet-momentum/deck.pptx",
+          "bytes": 33777,
+          "sha256": "0f5b4e7ed366c43d1f76bff96602d7297ee8b80acdbeb10b2cb9dd6d419948b1"
+        },
+        "contactSheet": {
+          "path": "violet-momentum/contact-sheet.webp",
+          "bytes": 120640,
+          "sha256": "4b62bb51b924154883f81615ff8a9b15e292eb3eb7d8522f4673583ef10163b0",
+          "quality": 82
+        },
+        "content": {
+          "path": "violet-momentum/content.json",
+          "bytes": 13037,
+          "sha256": "ed504441cdc620a5a060134d43577e39abf5767558c14ab51bf24b79fe867528"
+        },
+        "brief": {
+          "path": "violet-momentum/brief.md",
+          "bytes": 744,
+          "sha256": "03519b8d85fd15a4676339c5bd853911be587717f44215a48c6dd6584aa18ef8"
+        },
+        "summary": {
+          "path": "violet-momentum/summary.json",
+          "bytes": 2753,
+          "sha256": "dc0469e399d561dfd0e42f6641235eb811e368c9326f5c3fa7c62aa4e59d1a72"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 978
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/violet-momentum.golden-operations.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

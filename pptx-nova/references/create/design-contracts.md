@@ -94,6 +94,21 @@ Visible numeric formatting is separate from raw source values. Unsupported numbe
 the renderer's full-value fallback; inspect the visible output rather than claiming the requested
 format was applied.
 
+### Violet operational family
+
+`violet-momentum` uses `violet-operations/v1`: white evidence, near-black verdict cover,
+Electric Violet, open native tables, single-series native columns, convergence totals,
+outlined progress, milestone actions and ten-position ratings. Discover its ten roles and
+eighteen compositions through the same design/slots/build/Create commands. Read
+`assets/deckkits/violet-momentum/intent.md` for capacities and editing boundaries.
+
+All data, units, status wording, owners, dates and decisions come from content. Signed/zero
+numeric evidence stays unchanged; tiny observations can be subpixel. Independent annotations,
+derived gaps, tracks and bubbles require regeneration after manual data edits. The uniform
+violet series avoids redundant per-point style overrides. No image ingestion, forecast,
+animation or arbitrary existing-deck refurbishment is registered. Candidate status requires
+explicit selection and does not imply production/default eligibility.
+
 ## Maintainer boundary
 
 ### Poster family: Broadside

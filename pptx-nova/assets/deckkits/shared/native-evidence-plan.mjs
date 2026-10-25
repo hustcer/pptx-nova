@@ -16,7 +16,7 @@ export function renderNativeEvidencePlan(design, layouts, b) {
   const text = (s, name, c) => {
     p.setText(s, name, c.text)
     c.text.split(/\r\n|\r|\n/).forEach((_, i) => {
-      p.runFont(s, name, font(c.style), i)
+      p.runFont(s, name, font(c.paragraphStyles?.[i] ?? c.style), i)
       p.ops.push({
         op: 'set-paragraph',
         slide: s,
@@ -174,7 +174,7 @@ export function renderNativeEvidencePlan(design, layouts, b) {
         })
         const series = {
           series: 0,
-          fill: { type: 'solid', color: C.history },
+          fill: { type: 'solid', color: C[c.uniformSeriesTone ?? 'history'] },
           line: { color: C[c.seriesTone ?? 'ink'], width: line ? '1.6pt' : '0pt' },
           ...(line ? { smooth: false } : !ring ? { invertIfNegative: false } : {}),
         }
@@ -191,7 +191,7 @@ export function renderNativeEvidencePlan(design, layouts, b) {
               marker: { symbol: 'circle', size: 6, fill: C.accent, line: C.accent },
             },
           ]
-        } else
+        } else if (!c.uniformSeriesTone)
           series.points = c.data.categories.map((_, i) => ({
             point: i,
             fill: {

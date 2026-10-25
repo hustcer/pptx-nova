@@ -125,6 +125,9 @@ test ! -e pptx-nova/assets/examples/deckkits/<id>
 3. `pptx-nova/assets/deckkits/README.md` —— core-primitives 职责边界、冻结准入
 4. `pptx-nova/references/create/deck-generator-workflow.md` —— 探索生成器方法与避坑
 
+外部维护者指南可能仍含旧的扁平目录或 CLI 名称。目录、发布边界与当前命令以本仓库
+AGENTS.md、skill 和真实 CLI `--help` 为准；记录冲突，不照搬旧路径，也不要为兼容旧示例添加 wrapper。
+
 已有先例：`swiss-grid` DeckKit 即从 xdoc 维护者仓库的 `demos/67-swiss-grid-systems.pptx` 复刻而来，
 `broadside` / `cartesian` / `biennale-yellow` 则来自 HTML 模板（见 catalog `knownLimits`），
 本 skill 把这条路径固化为标准流程。

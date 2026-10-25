@@ -250,7 +250,15 @@
               "violetDiagnosisSlide",
               "violetProjectsSlide",
               "violetRatingSlide",
-              "violetActionsSlide"
+              "violetActionsSlide",
+              "journalCoverSlide",
+              "journalOutlookSlide",
+              "journalAudienceSlide",
+              "journalCalendarSlide",
+              "journalJourneySlide",
+              "journalAnatomySlide",
+              "journalResultsSlide",
+              "journalRoadmapSlide"
             ]
           },
           "data": {

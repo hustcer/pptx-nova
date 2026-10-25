@@ -236,6 +236,15 @@
       "buildPath": "../../assets/deckkits/violet-momentum/examples/build.mjs",
       "expectedPath": "cases/violet-momentum/golden-operations/expected.json",
       "reviewPath": "cases/violet-momentum/golden-operations/review.md"
+    },
+    {
+      "id": "teal-journal.golden-handbook",
+      "deckkit": "teal-journal",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/teal-journal/examples/content.json",
+      "buildPath": "../../assets/deckkits/teal-journal/examples/build.mjs",
+      "expectedPath": "cases/teal-journal/golden-handbook/expected.json",
+      "reviewPath": "cases/teal-journal/golden-handbook/review.md"
     }
   ]
 }

@@ -261,6 +261,9 @@
     },
     "violet": {
       "$ref": "#/$defs/violet"
+    },
+    "journal": {
+      "$ref": "#/$defs/journal"
     }
   },
   "required": [
@@ -3024,23 +3027,50 @@
         "evidence": {
           "type": "object",
           "properties": {
-            "series": { "type": "string", "minLength": 1 },
-            "history": { "type": "string", "minLength": 1 },
+            "series": {
+              "type": "string",
+              "minLength": 1
+            },
+            "history": {
+              "type": "string",
+              "minLength": 1
+            },
             "categorical": {
               "type": "array",
               "minItems": 4,
               "maxItems": 4,
-              "items": { "type": "string", "minLength": 1 }
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
             },
-            "track": { "type": "string", "minLength": 1 },
-            "plan": { "type": "string", "minLength": 1 },
+            "track": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan": {
+              "type": "string",
+              "minLength": 1
+            },
             "focusTones": {
               "type": "object",
               "properties": {
-                "sage": { "type": "string", "minLength": 1 },
-                "amber": { "type": "string", "minLength": 1 },
-                "ink": { "type": "string", "minLength": 1 },
-                "history": { "type": "string", "minLength": 1 }
+                "sage": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "amber": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ink": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "history": {
+                  "type": "string",
+                  "minLength": 1
+                }
               },
               "required": ["sage", "amber", "ink", "history"],
               "additionalProperties": false
@@ -3052,8 +3082,16 @@
         "cover": {
           "type": "object",
           "properties": {
-            "ringLinePt": { "type": "number", "minimum": 1, "maximum": 24 },
-            "smallLinePt": { "type": "number", "minimum": 0.5, "maximum": 2 }
+            "ringLinePt": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 24
+            },
+            "smallLinePt": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 2
+            }
           },
           "required": ["ringLinePt", "smallLinePt"],
           "additionalProperties": false
@@ -3759,9 +3797,21 @@
         "compass": {
           "type": "object",
           "properties": {
-            "arcCount": { "type": "number", "minimum": 2, "maximum": 5 },
-            "radiusStep": { "type": "number", "exclusiveMinimum": 0, "maximum": 0.4 },
-            "strokePt": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 }
+            "arcCount": {
+              "type": "number",
+              "minimum": 2,
+              "maximum": 5
+            },
+            "radiusStep": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 0.4
+            },
+            "strokePt": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 2
+            }
           },
           "required": ["arcCount", "radiusStep", "strokePt"],
           "additionalProperties": false
@@ -4032,6 +4082,336 @@
         }
       },
       "required": ["family", "styles", "families", "capacity", "spacing", "chrome", "rhythm"],
+      "additionalProperties": false
+    },
+    "journalStyle": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["display", "body", "numeral"]
+        },
+        "sizePt": {
+          "type": "number",
+          "minimum": 10.5,
+          "maximum": 56
+        },
+        "color": {
+          "type": "string"
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "lineHeight": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1.5
+        }
+      },
+      "required": ["role", "sizePt", "color", "bold", "lineHeight"],
+      "additionalProperties": false
+    },
+    "journal": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "teal-editorial/v1"
+        },
+        "styles": {
+          "type": "object",
+          "properties": {
+            "hero": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "title": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "subtitle": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "heading": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "body": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "small": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "table": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "number": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "metric": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "label": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "strip": {
+              "$ref": "#/$defs/journalStyle"
+            }
+          },
+          "required": [
+            "hero",
+            "title",
+            "subtitle",
+            "heading",
+            "body",
+            "small",
+            "table",
+            "number",
+            "metric",
+            "label",
+            "strip"
+          ],
+          "additionalProperties": false
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0.15,
+              "maximum": 0.5
+            },
+            "rulePt": {
+              "type": "number",
+              "minimum": 0.4,
+              "maximum": 1.2
+            }
+          },
+          "required": ["gap", "rulePt"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            }
+          },
+          "required": ["maxConsecutive"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "eyebrow": {
+              "$ref": "#/$defs/frame"
+            },
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "subtitle": {
+              "$ref": "#/$defs/frame"
+            },
+            "verdict": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["eyebrow", "title", "subtitle", "verdict", "source", "page"],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "notes": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "phases": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "annotations": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "outcomes": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "outputs": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "kpis": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "targets": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "allocation": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "markers": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "notes",
+            "points",
+            "rows",
+            "columns",
+            "phases",
+            "steps",
+            "annotations",
+            "outcomes",
+            "outputs",
+            "kpis",
+            "targets",
+            "actions",
+            "allocation",
+            "markers"
+          ],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "outlook",
+                  "audience",
+                  "calendar",
+                  "journey",
+                  "anatomy",
+                  "results",
+                  "roadmap"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["family", "styles", "spacing", "rhythm", "chrome", "capacity", "families"],
       "additionalProperties": false
     }
   }

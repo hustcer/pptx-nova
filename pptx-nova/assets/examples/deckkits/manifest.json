@@ -1574,6 +1574,106 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "teal-journal",
+      "deckkit": "teal-journal",
+      "caseId": "teal-journal.golden-handbook",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "1.0.0",
+      "title": "VISIT ONCE, RETURN ALL YEAR.",
+      "bestFor": [
+        "editorial handbook",
+        "destination review",
+        "community programme",
+        "campaign report",
+        "旅行手册",
+        "年度复盘"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "teal-journal/deck.pptx",
+          "bytes": 32500,
+          "sha256": "56cc6a9a6c9680c32bba11f87c71c0a1598566d4191d65412be31e32b4400397"
+        },
+        "contactSheet": {
+          "path": "teal-journal/contact-sheet.webp",
+          "bytes": 583658,
+          "sha256": "99d6d30419a639ff38e377c86cd9647c34439f14cbdb5ed0b24b7ace5ffa3a4e",
+          "quality": 86
+        },
+        "content": {
+          "path": "teal-journal/content.json",
+          "bytes": 12856,
+          "sha256": "8b46e21c2c09265e3b8d4176a83dca2856151a177563c135f12ab64ea9693422"
+        },
+        "brief": {
+          "path": "teal-journal/brief.md",
+          "bytes": 730,
+          "sha256": "302cb564eec1b6d0aca3dc549a808cbbd0fd187b2827965288276543fe263dc6"
+        },
+        "summary": {
+          "path": "teal-journal/summary.json",
+          "bytes": 2709,
+          "sha256": "5a6a26e47177c04b562cd1b3dbf96913d1a9fee51fa561a33d9b9a0c2013d9c1"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 1024
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/teal-journal.golden-handbook.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

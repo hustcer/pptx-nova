@@ -274,6 +274,26 @@
       "status": "available"
     },
     {
+      "id": "teal-journal-showcase",
+      "name": "teal-journal DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "teal-journal",
+      "caseId": "teal-journal.golden-handbook",
+      "path": "../examples/deckkits/teal-journal/deck.pptx",
+      "preview": "../examples/deckkits/teal-journal/contact-sheet.webp",
+      "content": "../examples/deckkits/teal-journal/content.json",
+      "summary": "../examples/deckkits/teal-journal/summary.json",
+      "bestFor": [
+        "editorial handbook",
+        "destination review",
+        "community programme",
+        "campaign report",
+        "旅行手册",
+        "年度复盘"
+      ],
+      "status": "preview"
+    },
+    {
       "id": "violet-momentum-showcase",
       "name": "violet-momentum DeckKit Showcase",
       "type": "deckkit-showcase",

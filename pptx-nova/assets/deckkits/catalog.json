@@ -7011,6 +7011,364 @@
         "Attainment, status wording and metric definitions belong to content; the visual skin does not infer business policy."
       ],
       "examples": ["violet-momentum/examples/content.json"]
+    },
+    {
+      "id": "teal-journal",
+      "version": "1.0.0",
+      "path": "teal-journal/teal-journal.kit.mjs",
+      "designContract": "teal-journal/design.json",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "editorial handbook",
+        "destination review",
+        "community programme",
+        "campaign report",
+        "旅行手册",
+        "年度复盘"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "journalCoverSlide",
+          "journalOutlookSlide",
+          "journalAudienceSlide",
+          "journalCalendarSlide",
+          "journalJourneySlide",
+          "journalAnatomySlide",
+          "journalResultsSlide",
+          "journalRoadmapSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "journalCoverSlide",
+        "journalOutlookSlide",
+        "journalAudienceSlide",
+        "journalCalendarSlide",
+        "journalJourneySlide",
+        "journalAnatomySlide",
+        "journalResultsSlide",
+        "journalRoadmapSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Warm paper and river teal editorial journals with coral focal marks and open evidence.",
+        "mood": ["humanistic", "measured", "calm"],
+        "layoutPrinciples": [
+          "Open asymmetric evidence regions; square functional colour fields.",
+          "Narrative serif and sans structure; all policies and facts from content.",
+          "Deterministic capacity-aware registered variants; never shrink or omit."
+        ],
+        "signatureElements": [
+          "angular cover field with coral lower edge",
+          "square seasonal marks",
+          "tinted focal metric and open native table",
+          "temporal ticks and hollow planned markers",
+          "numeric time-derived half-circle route",
+          "six fine specimen leaders and hollow endpoints",
+          "outcome rows and tinted KPI rail",
+          "numbered planning rail and data-derived allocation"
+        ],
+        "typography": {
+          "display": "Arial / Arial Unicode MS, upright regular and bold.",
+          "body": "Georgia / Songti SC, upright narrative serif.",
+          "numeric": "Arial; raw finite values and separate display precision."
+        },
+        "colorSystem": {
+          "background": ["warm paper"],
+          "primary": ["river teal", "dark teal", "pale teal"],
+          "accent": ["coral"],
+          "semantic": ["No fixed positive/negative colour policy."]
+        },
+        "slideRhythm": {
+          "anchor": ["journalCoverSlide", "journalRoadmapSlide"],
+          "judgment": ["journalOutlookSlide", "journalResultsSlide"],
+          "evidence": ["journalAudienceSlide", "journalAnatomySlide"],
+          "process": ["journalCalendarSlide", "journalJourneySlide"]
+        },
+        "compositionRules": [
+          "Geometry follows content and registered bounds.",
+          "Claims, sources, dates, units and judgments come from content.",
+          "Regenerate derived geometry after manual edits."
+        ],
+        "avoid": [
+          "rounded cards",
+          "shadows",
+          "gradients",
+          "3D",
+          "photographic background screenshots",
+          "silent field dropping",
+          "unlimited font shrinking"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "journalCoverSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.summary",
+              "data.markers",
+              "data.assetCaption"
+            ],
+            "allowedLayoutIds": ["auto", "angular", "inset"]
+          },
+          "journalOutlookSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.metric",
+              "data.seriesName",
+              "data.unit",
+              "data.points",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "leadLeft", "leadRight"]
+          },
+          "journalAudienceSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.lead",
+              "data.columns",
+              "data.rows",
+              "data.focusColumn",
+              "data.methodology"
+            ],
+            "allowedLayoutIds": ["auto", "leadLeft", "leadBottom"]
+          },
+          "journalCalendarSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.axisStart",
+              "data.axisEnd",
+              "data.unit",
+              "data.allocationUnit",
+              "data.phases",
+              "data.allocation"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+          },
+          "journalJourneySlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.axisStart",
+              "data.axisEnd",
+              "data.unit",
+              "data.steps"
+            ],
+            "allowedLayoutIds": ["auto", "arc", "linear"]
+          },
+          "journalAnatomySlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.sample",
+              "data.annotations",
+              "data.unit",
+              "data.comparison"
+            ],
+            "allowedLayoutIds": ["auto", "center", "offset"]
+          },
+          "journalResultsSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.outcomes",
+              "data.outputs",
+              "data.kpis"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "journalRoadmapSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.subtitle",
+              "data.eyebrow",
+              "data.verdict",
+              "data.source",
+              "data.sectionLabels",
+              "data.allocation",
+              "data.allocationUnit",
+              "data.targets",
+              "data.actions"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "stacked"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["journalCoverSlide", "journalRoadmapSlide"],
+          "judgment": ["journalOutlookSlide", "journalResultsSlide"],
+          "evidence": ["journalAudienceSlide", "journalAnatomySlide"],
+          "process": ["journalCalendarSlide", "journalJourneySlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (9ee8ef0c)",
+        "report": "../../benchmarks/visual/cases/teal-journal/golden-handbook/review.md",
+        "powerPoint": "PowerPoint for Mac: final golden-04 opened, saved and reopened with 8 slides and no Repair; saved 219-object/1-chart/1-table readback passed. Native text/table/embedded-chart edits persisted in golden-03 probe; mixed-04 negative/zero/tiny labels checked. CLI clean-open skipped (UI scripting unavailable); CUA native UI used. Other hosts, full pixel parity and freeform path-node UI editing unverified."
+      },
+      "quality": {
+        "lastBenchmark": "2026-10-25",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-25",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-teal-journal/benchmark/02"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "teal-journal.golden-handbook",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-teal-journal/benchmark/02/teal-journal/golden-handbook/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/teal-journal/golden-handbook/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 206626
+              },
+              "patchOps": 1024,
+              "p50TotalMs": 111.15
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on supplied travel-green-handbook design specification and eight-panel reference; use the observed 16:9 evidence grammar where mismatched document sections describe another source.",
+        "Creation only; no native skinning or arbitrary existing-deck preservation claim.",
+        "Arial/Arial Unicode MS and Georgia/Songti SC are nonembedded substitutes; installed upright regular and bold must be available.",
+        "Reference photographs are not redistributed; explicit editable asset shells only. External photo ingestion is not registered in 1.0.0.",
+        "Native chart/table source data remain editable; route intervals, allocation segments, independent labels and annotation leaders require regeneration from content after edits.",
+        "Bounded 2–5 table rows, 3–4 phases/routes and exactly six specimen annotations; longer content must reorganize or split."
+      ],
+      "examples": ["teal-journal/examples/content.json"]
     }
   ]
 }

@@ -79,6 +79,8 @@ callout 和缺失图片时的隐藏/占位策略。
 
 - 新页型注册进 `schemas/content.schema.json` 的 enum；
   每个页型写 `<id>/schemas/<slideType>.schema.json`。
+- 独立有意义的可见字符串须拒绝纯空白，例如 `pattern: "\\S"`；`minLength: 1` 不足以做到这一点。
+  尤其是将负责人、日期、衡量合并进一个文字框时，先逐字段校验，再拼接；增加某个字段仅含空格的反例。
 - 覆盖：必填字段、数组 min/maxItems、tuple 结构、enum、`data.labels` 覆盖入口、
   rich text 强调字段（如 `calloutHighlights`）。
 - 每个可见文本槽位写 `x-slotBudget`（至少 `maxLines`、`fontPt`、`widthIn`）；

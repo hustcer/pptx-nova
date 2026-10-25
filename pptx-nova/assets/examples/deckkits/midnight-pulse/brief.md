@@ -2,7 +2,7 @@
 
 DeckKit: `midnight-pulse`
 Showcase case: `midnight-pulse.golden-operations`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 8
 Patch ops: 1115
 Title: Volume grew; efficiency needs a reset

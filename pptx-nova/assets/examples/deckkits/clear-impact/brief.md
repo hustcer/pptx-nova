@@ -2,7 +2,7 @@
 
 DeckKit: `clear-impact`
 Showcase case: `clear-impact.golden-impact`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 12
 Patch ops: 1362
 Title: Impact report

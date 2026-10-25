@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/clear-impact.golden-impact.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -90,18 +90,18 @@
   },
   "contactSheet": {
     "format": "webp",
-    "quality": 82,
+    "quality": 86,
     "encoder": {
       "tool": "cwebp",
-      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+      "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 257697,
-      "sha256": "a9f134236a9c14a9853430f033e8185755cdf484d526bc34258d47db313de4b6"
+      "bytes": 1509313,
+      "sha256": "bbddae0eba0952e14e8fe62ab680aa6ca8c721860cc2450d2c0de842b8c29fa1"
     },
     "webp": {
-      "bytes": 148760,
-      "sha256": "3e583bc8dbabf2c5737e66f92c76e4c37192ac288410b3030d8653612ad96a82"
+      "bytes": 696394,
+      "sha256": "b55d6eab8d23ff4facedc011bbf1647728f15364b45a02d99dfef602183a80cf"
     }
   }
 }

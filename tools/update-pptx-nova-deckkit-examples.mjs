@@ -12,7 +12,9 @@ const VISUAL_INDEX = join(SKILL_ROOT, 'benchmarks/visual/index.json')
 const DECKKIT_CATALOG = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 const EXAMPLES_ROOT = join(SKILL_ROOT, 'assets/examples/deckkits')
 const DEFAULT_TMP = join(REPO_ROOT, '.tmp/pptx-nova-deckkit-examples')
-const DEFAULT_WEBP_QUALITY = 82
+const DEFAULT_WEBP_QUALITY = 86
+// Preserve the native 144 DPI slide previews so small text remains readable when zoomed.
+const CONTACT_THUMB = '1920x1080'
 
 const usage = `Usage:
   node tools/update-pptx-nova-deckkit-examples.mjs [options]
@@ -22,7 +24,7 @@ Options:
   --check                   Regenerate and fail if committed examples differ
   --deckkit, -d <id>        Update/check one DeckKit id
   --tmp <dir>               Temporary output root. Defaults to .tmp/pptx-nova-deckkit-examples
-  --webp-quality <n>        WebP quality for contact-sheet.webp. Defaults to 82
+  --webp-quality <n>        WebP quality for contact-sheet.webp. Defaults to 95
   --xdoc-bin <path>         xdoc binary path passed to benchmark CLI. Defaults to xdoc
   --cwebp-bin <path>        cwebp binary path. Defaults to cwebp when available
   --no-clean                Do not remove the temporary output root before running
@@ -401,6 +403,8 @@ function runBenchmarkCase({ benchCase, args }) {
     args.tmp,
     '--repeat',
     '1',
+    '--contact-thumb',
+    CONTACT_THUMB,
     '--clean',
   ]
   if (args.xdocBin) commandArgs.push('--xdoc-bin', args.xdocBin)
@@ -419,6 +423,8 @@ function makeReadme() {
     'Each subdirectory is named after a DeckKit id and includes a native editable',
     '`deck.pptx`, a compact `contact-sheet.webp`, the source `content.json`,',
     'a short `brief.md`, and a stable `summary.json`.',
+    'Contact sheets preserve 1920×1080 pixels per slide at WebP quality 86 by default;',
+    'open the image and zoom in to read small text.',
     '',
     'Bundled examples are synthetic, generated showcase materials created for this',
     'skill and are intended to be redistributable with the repository.',

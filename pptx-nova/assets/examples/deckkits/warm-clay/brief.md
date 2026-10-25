@@ -2,7 +2,7 @@
 
 DeckKit: `warm-clay`
 Showcase case: `warm-clay.golden-workshop`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 8
 Patch ops: 906
 Title: A season of making, measured with care

@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/warm-clay.golden-workshop.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -90,18 +90,18 @@
   },
   "contactSheet": {
     "format": "webp",
-    "quality": 82,
+    "quality": 86,
     "encoder": {
       "tool": "cwebp",
-      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+      "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 187880,
-      "sha256": "e70403b96be6109cdb5a10056cb6c99cd01d1133c7fb3404078e7420a2f0835e"
+      "bytes": 1085478,
+      "sha256": "ff70f6ee1df033717867663b9e6ec6f022a4592e24b6124ac09fe4f4b9c26392"
     },
     "webp": {
-      "bytes": 86314,
-      "sha256": "d4427fad533784674e2125de4ed84790b43af708e46328dbabea60e678e8e23a"
+      "bytes": 418334,
+      "sha256": "034c7563d626c5ab8693f9e979843d1eaf766fd067928893db0e325d8934979e"
     }
   }
 }

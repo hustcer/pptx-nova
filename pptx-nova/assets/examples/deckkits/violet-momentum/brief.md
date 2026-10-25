@@ -2,7 +2,7 @@
 
 DeckKit: `violet-momentum`
 Showcase case: `violet-momentum.golden-operations`
-Readiness: `candidate`
+Readiness: `production`
 Slides: 10
 Patch ops: 1018
 Title: Fleet operations review and next-quarter priorities

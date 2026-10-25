@@ -34,6 +34,7 @@ Options:
   --no-render-previews        Skip PNG preview and contact-sheet rendering
   --contact-sheet             Render PNG previews and contact sheet. Default
   --no-contact-sheet          Skip contact sheet while keeping per-slide previews
+  --contact-thumb <WxH>        Contact sheet thumbnail size. Defaults to 640x360
   --update-baseline           Accept current low vision issues as reviewed visual baselines
   --xdoc-bin <path>           xdoc binary path. Defaults to xdoc
   --clean                     Remove each case output directory before running
@@ -52,6 +53,7 @@ function parseArgs(argv) {
     failOnVision: 'medium',
     renderPreviews: true,
     contactSheet: true,
+    contactThumb: '640x360',
     updateBaseline: false,
     xdocBin: '',
     clean: false,
@@ -79,6 +81,9 @@ function parseArgs(argv) {
       args.contactSheet = true
     } else if (arg === '--no-contact-sheet') {
       args.contactSheet = false
+    } else if (arg === '--contact-thumb') {
+      args.contactThumb = valueAfter(argv, i, arg)
+      i += 1
     } else if (arg === '--update-baseline') {
       args.updateBaseline = true
     } else if (arg === '--deckkit' || arg === '-d') {
@@ -112,6 +117,9 @@ function parseArgs(argv) {
   }
   if (!Number.isInteger(args.repeat) || args.repeat < 1) {
     throw new Error('--repeat must be a positive integer')
+  }
+  if (!/^[1-9]\d*x[1-9]\d*$/.test(args.contactThumb)) {
+    throw new Error('--contact-thumb must be a positive WxH size, e.g. 1920x1080')
   }
   if (!['none', 'error', 'warning'].includes(args.failOnFit)) {
     throw new Error('--fail-on-fit must be one of none|error|warning')
@@ -442,7 +450,13 @@ function runPreviewStages({ args, deckPath, outDir, expectedCount }) {
     convertReportPath,
   ]
   if (args.contactSheet) {
-    commandArgs.push('--contact-sheet', '--contact-output', contactSheetPath)
+    commandArgs.push(
+      '--contact-sheet',
+      '--contact-thumb',
+      args.contactThumb,
+      '--contact-output',
+      contactSheetPath,
+    )
   }
 
   const convertStart = performance.now()

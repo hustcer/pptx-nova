@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/amber-ledger.golden-operations.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -90,18 +90,18 @@
   },
   "contactSheet": {
     "format": "webp",
-    "quality": 82,
+    "quality": 86,
     "encoder": {
       "tool": "cwebp",
-      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+      "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 207885,
-      "sha256": "f473616898aebef449af2db0f28090f91acd27d21dfc7b3b509064006ed580a5"
+      "bytes": 1184728,
+      "sha256": "138b1d6501a79f91c48fa70fb9cea77c51870727dbbcd6a44396d77fb45397a0"
     },
     "webp": {
-      "bytes": 115362,
-      "sha256": "2eebaf95912a2fbaeedd4dda9903808adfb7fa16e549184e32fb1fa66a1de6c7"
+      "bytes": 499100,
+      "sha256": "4f37433116afd80b1355a246d74e67c452ab1b2e98bb8315a657abb9dd93af97"
     }
   }
 }

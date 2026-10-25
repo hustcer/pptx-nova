@@ -90,18 +90,18 @@
   },
   "contactSheet": {
     "format": "webp",
-    "quality": 82,
+    "quality": 86,
     "encoder": {
       "tool": "cwebp",
-      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+      "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 272389,
-      "sha256": "65f933052ee959b325cc103d2d323bcc79b3dce5d19092b46a91a1d8a296d442"
+      "bytes": 1531028,
+      "sha256": "c6f3ead0c498c4958bdbff9b2d365917e78d818ff098d257100f629cd79c4c09"
     },
     "webp": {
-      "bytes": 131476,
-      "sha256": "7cd941c4f1dbc9f91ca813de755490786feff890760652f888a0dd64383875bf"
+      "bytes": 552766,
+      "sha256": "7b0ce0bd3cfacefd2aaea4f42caaf1c85f396bcc954343a935dfefa42a4324de"
     }
   }
 }

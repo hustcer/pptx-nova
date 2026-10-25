@@ -63,17 +63,17 @@
       "changed": 0,
       "resolved": 0,
       "reviewable": 0,
-      "baselineUnavailable": true,
+      "baselineUnavailable": false,
       "baselineUpdated": false
     },
     "lowByFamily": {},
     "newLowByFamily": {},
     "changedLowByFamily": {},
     "baseline": {
-      "schemaVersion": "",
-      "fingerprintVersion": "",
+      "schemaVersion": "pptx-nova-vision-baseline/v1",
+      "fingerprintVersion": "pptx-nova-vision-fingerprint/v1",
       "path": "pptx-nova/benchmarks/visual/baselines/midnight-pulse.golden-operations.vision-baseline.json",
-      "available": false,
+      "available": true,
       "issueCount": 0
     },
     "stylePolicy": {
@@ -90,18 +90,18 @@
   },
   "contactSheet": {
     "format": "webp",
-    "quality": 82,
+    "quality": 86,
     "encoder": {
       "tool": "cwebp",
-      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+      "command": "cwebp -quiet -q 86 -m 6 <png> -o <webp>"
     },
     "sourcePng": {
-      "bytes": 250413,
-      "sha256": "3ceaf5f0645eddc409fc87a2e80843fba4e2a699fe2db30b71bf935f46160843"
+      "bytes": 1471486,
+      "sha256": "90f5f6e20bcd28f66d437ae91ea700a12a53e14aed7f9efe81320130c37e95d4"
     },
     "webp": {
-      "bytes": 107364,
-      "sha256": "f99ce97708aadbe34758be7d323149c7dc5953e867ac8d54d8a8748189eaa040"
+      "bytes": 470144,
+      "sha256": "67a8f49f438868d8c28dc73a1c73018b99ccce279d40eccd2dfb072a7079c4f6"
     }
   }
 }

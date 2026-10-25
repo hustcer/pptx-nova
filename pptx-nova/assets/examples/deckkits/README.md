@@ -4,6 +4,8 @@ This directory contains committed, user-facing DeckKit showcase assets.
 Each subdirectory is named after a DeckKit id and includes a native editable
 `deck.pptx`, a compact `contact-sheet.webp`, the source `content.json`,
 a short `brief.md`, and a stable `summary.json`.
+Contact sheets preserve 1920×1080 pixels per slide at WebP quality 86 by default;
+open the image and zoom in to read small text.
 
 Bundled examples are synthetic, generated showcase materials created for this
 skill and are intended to be redistributable with the repository.

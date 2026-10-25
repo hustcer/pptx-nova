@@ -258,7 +258,17 @@
               "journalJourneySlide",
               "journalAnatomySlide",
               "journalResultsSlide",
-              "journalRoadmapSlide"
+              "journalRoadmapSlide",
+              "researchCoverSlide",
+              "researchOverviewSlide",
+              "researchEvidenceSlide",
+              "researchMatrixSlide",
+              "researchBridgeSlide",
+              "researchTiersSlide",
+              "researchTimelineSlide",
+              "researchScorecardSlide",
+              "researchFindingsSlide",
+              "researchImplicationsSlide"
             ]
           },
           "data": {

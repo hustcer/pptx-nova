@@ -1,4 +1,5 @@
 import { JOURNAL_FAMILY } from '../teal-journal/registry.mjs'
+import { RESEARCH_FAMILY } from '../blue-research/registry.mjs'
 import { VIOLET_FAMILY } from '../violet-momentum/registry.mjs'
 import { SKY_FAMILY } from '../sky-compass/registry.mjs'
 import { AMBER_FAMILY } from '../amber-ledger/registry.mjs'
@@ -14,6 +15,7 @@ import { CONSULTING_FAMILY } from '../consulting-dark/registry.mjs'
 import { IMPACT_FAMILY } from '../clear-impact/registry.mjs'
 import { CLAY_FAMILY } from '../warm-clay/registry.mjs'
 export const DESIGN_FAMILIES = [
+  RESEARCH_FAMILY,
   JOURNAL_FAMILY,
   VIOLET_FAMILY,
   SKY_FAMILY,

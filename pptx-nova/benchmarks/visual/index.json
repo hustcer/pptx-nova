@@ -245,6 +245,15 @@
       "buildPath": "../../assets/deckkits/teal-journal/examples/build.mjs",
       "expectedPath": "cases/teal-journal/golden-handbook/expected.json",
       "reviewPath": "cases/teal-journal/golden-handbook/review.md"
+    },
+    {
+      "id": "blue-research.golden-learning",
+      "deckkit": "blue-research",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/blue-research/examples/content.json",
+      "buildPath": "../../assets/deckkits/blue-research/examples/build.mjs",
+      "expectedPath": "cases/blue-research/golden-learning/expected.json",
+      "reviewPath": "cases/blue-research/golden-learning/review.md"
     }
   ]
 }

@@ -1674,6 +1674,105 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "blue-research",
+      "deckkit": "blue-research",
+      "caseId": "blue-research.golden-learning",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Community Learning Service Network Outlook",
+      "bestFor": [
+        "research report",
+        "comparative evidence",
+        "service operations",
+        "蓝色研究报告",
+        "运营对比"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "blue-research/deck.pptx",
+          "bytes": 40046,
+          "sha256": "c3f573f20efb2ca6e4140a664674986470af102abcacb0e7b9a6905fb575cf5b"
+        },
+        "contactSheet": {
+          "path": "blue-research/contact-sheet.webp",
+          "bytes": 768766,
+          "sha256": "b8d4c24acdcfdc38c5d2cd36488af80df71a74b02e9707e6068173b4b66bc1ae",
+          "quality": 86
+        },
+        "content": {
+          "path": "blue-research/content.json",
+          "bytes": 17475,
+          "sha256": "fd8af1b6c7d0ed8f2b315dbeb6d76fbdf11cde22d84ed1055bd073633444b190"
+        },
+        "brief": {
+          "path": "blue-research/brief.md",
+          "bytes": 735,
+          "sha256": "c177fe2bda8d3ee73b11bff5ac7bde6b97d50d69ab27e3cf15651265f53690b9"
+        },
+        "summary": {
+          "path": "blue-research/summary.json",
+          "bytes": 2730,
+          "sha256": "30a6231012a2d47cd65b2dd91d89db5cfbc5b78aa00bc7612ae876714df71d83"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 1260
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 10,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/blue-research.golden-learning.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

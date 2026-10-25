@@ -78,6 +78,25 @@
       "status": "available"
     },
     {
+      "id": "blue-research-showcase",
+      "name": "blue-research DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "blue-research",
+      "caseId": "blue-research.golden-learning",
+      "path": "../examples/deckkits/blue-research/deck.pptx",
+      "preview": "../examples/deckkits/blue-research/contact-sheet.webp",
+      "content": "../examples/deckkits/blue-research/content.json",
+      "summary": "../examples/deckkits/blue-research/summary.json",
+      "bestFor": [
+        "research report",
+        "comparative evidence",
+        "service operations",
+        "蓝色研究报告",
+        "运营对比"
+      ],
+      "status": "preview"
+    },
+    {
       "id": "broadside-showcase",
       "name": "broadside DeckKit Showcase",
       "type": "deckkit-showcase",

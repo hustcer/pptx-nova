@@ -7369,6 +7369,433 @@
         "Bounded 2–5 table rows, 3–4 phases/routes and exactly six specimen annotations; longer content must reorganize or split."
       ],
       "examples": ["teal-journal/examples/content.json"]
+    },
+    {
+      "id": "blue-research",
+      "version": "0.1.0",
+      "path": "blue-research/blue-research.kit.mjs",
+      "designContract": "blue-research/design.json",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "research report",
+        "comparative evidence",
+        "service operations",
+        "蓝色研究报告",
+        "运营对比"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "researchCoverSlide",
+          "researchOverviewSlide",
+          "researchEvidenceSlide",
+          "researchMatrixSlide",
+          "researchBridgeSlide",
+          "researchTiersSlide",
+          "researchTimelineSlide",
+          "researchScorecardSlide",
+          "researchFindingsSlide",
+          "researchImplicationsSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "researchCoverSlide",
+        "researchOverviewSlide",
+        "researchEvidenceSlide",
+        "researchMatrixSlide",
+        "researchBridgeSlide",
+        "researchTiersSlide",
+        "researchTimelineSlide",
+        "researchScorecardSlide",
+        "researchFindingsSlide",
+        "researchImplicationsSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "White analytical research, navy assertions, cyan evidence and open blue-scale matrices.",
+        "mood": ["precise", "measured", "authoritative"],
+        "layoutPrinciples": [
+          "Open asymmetric evidence with bounded alternate geometry.",
+          "Assertions and scope precede evidence; synthesis and source remain visible.",
+          "Business policy and all thresholds come from content."
+        ],
+        "signatureElements": [
+          "cyan cover spine and open masthead",
+          "linked metric capsules",
+          "direct native chart labels and dashed forecast columns",
+          "blue-scale native matrix and oversized quote",
+          "reconciled bridge and dashed connectors",
+          "numeric table microbars",
+          "time-positioned numbered nodes",
+          "rising stage outlines, dependency axis and shared acceptance rail",
+          "gray findings register and yellow emphasis"
+        ],
+        "typography": {
+          "display": "Arial / Songti SC; upright navy assertions.",
+          "body": "Arial / Songti SC; regular and bold, nonembedded.",
+          "numeric": "Arial; raw values retained independently from display format."
+        },
+        "colorSystem": {
+          "background": ["white"],
+          "primary": ["navy", "cyan", "deep blue"],
+          "accent": ["orange numbering", "yellow emphasis"],
+          "semantic": ["No fixed positive/negative or industry threshold policy."]
+        },
+        "slideRhythm": {
+          "anchor": ["researchCoverSlide", "researchImplicationsSlide"],
+          "judgment": ["researchOverviewSlide", "researchFindingsSlide"],
+          "evidence": [
+            "researchEvidenceSlide",
+            "researchMatrixSlide",
+            "researchBridgeSlide",
+            "researchTiersSlide"
+          ],
+          "process": ["researchTimelineSlide", "researchScorecardSlide"]
+        },
+        "compositionRules": [
+          "All titles, claims, dates, units, sources and thresholds come from content.",
+          "Do not omit content or shrink fonts; choose a fitting variant or split.",
+          "Regenerate independent labels and numeric-derived shapes after manual data edits."
+        ],
+        "avoid": [
+          "rounded cards",
+          "shadows",
+          "gradients",
+          "3D",
+          "whole-slide screenshots",
+          "unlicensed photographs",
+          "persistent breadcrumbs"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "researchCoverSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.edition",
+              "data.period",
+              "data.source",
+              "data.masthead",
+              "data.editionLabel",
+              "data.disclosure"
+            ],
+            "allowedLayoutIds": ["auto", "spine", "split"]
+          },
+          "researchOverviewSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.claims",
+              "data.notes",
+              "data.agenda",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "reverse"]
+          },
+          "researchEvidenceSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.chart",
+              "data.notes",
+              "data.metric",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "band"]
+          },
+          "researchMatrixSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.columns",
+              "data.rows",
+              "data.methodology",
+              "data.excerpt",
+              "data.attribution",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "reverse"]
+          },
+          "researchBridgeSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.openingLabel",
+              "data.closingLabel",
+              "data.opening",
+              "data.closing",
+              "data.unit",
+              "data.drivers",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "reverse"]
+          },
+          "researchTiersSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.headers",
+              "data.unit",
+              "data.rows",
+              "data.methodology",
+              "data.notes",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "rail", "reverse"]
+          },
+          "researchTimelineSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.start",
+              "data.end",
+              "data.unit",
+              "data.events",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+          },
+          "researchScorecardSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.goals",
+              "data.steps",
+              "data.acceptanceLabel",
+              "data.acceptancePeriod",
+              "data.acceptanceGate",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "steps", "register"]
+          },
+          "researchFindingsSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.items",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "register", "leadRail"]
+          },
+          "researchImplicationsSlide": {
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.subtitle",
+              "data.period",
+              "data.source",
+              "data.synthesisLabel",
+              "data.verdict",
+              "data.readers",
+              "data.headers",
+              "data.dependencyLabel",
+              "data.dependencies",
+              "data.acceptanceLabel",
+              "data.acceptance",
+              "data.reportTitle"
+            ],
+            "allowedLayoutIds": ["auto", "matrix", "ledger"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["researchCoverSlide", "researchImplicationsSlide"],
+          "judgment": ["researchOverviewSlide", "researchFindingsSlide"],
+          "evidence": [
+            "researchEvidenceSlide",
+            "researchMatrixSlide",
+            "researchBridgeSlide",
+            "researchTiersSlide"
+          ],
+          "process": ["researchTimelineSlide", "researchScorecardSlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (9ee8ef0c)",
+        "report": "../../benchmarks/visual/cases/blue-research/golden-learning/review.md",
+        "powerPoint": "PowerPoint for Mac 16.114.1: golden/stacked/mixed opened, saved and reopened via native UI; text/table/chart edits and 274/299/262-object saved readback pass. Later automated UI probes timed out; see golden review."
+      },
+      "quality": {
+        "lastBenchmark": "2026-10-25",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-25",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-blue-research/benchmark/accepted-04"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "blue-research.golden-learning",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-blue-research/benchmark/accepted-04/blue-research/golden-learning/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/blue-research/golden-learning/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 10,
+                "expectedCount": 10,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 252686
+              },
+              "patchOps": 1260,
+              "p50TotalMs": 109.44
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on supplied marine-blue-research design specification and eight-panel reference; Part B overrides baseline navigation and typography.",
+        "Creation only; explicit selection required. No native skinning or arbitrary source-deck preservation claim.",
+        "Reference contains no photographs despite the prose hard requirement; no photography, map, image slot or third-party asset ingestion is registered.",
+        "Arial and Songti SC are nonembedded substitutes; installed upright regular/bold must be available.",
+        "Native charts/tables remain editable. Bridge, microbars, forecast boundary, independent captions and stage geometry require regeneration from content after manual edits.",
+        "Native evidence supports one-series columns/lines and two-series nonnegative stacked columns; no combo, percentage-stack, 3D or tiny-mark visibility claim.",
+        "Horizontal timeline positions encode time; vertical timeline is an ordered register. Close events or lengthy labels may require the vertical layout or a split."
+      ],
+      "examples": ["blue-research/examples/content.json"]
     }
   ]
 }

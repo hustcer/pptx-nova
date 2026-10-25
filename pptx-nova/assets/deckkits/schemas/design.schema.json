@@ -264,6 +264,9 @@
     },
     "journal": {
       "$ref": "#/$defs/journal"
+    },
+    "research": {
+      "$ref": "#/$defs/research"
     }
   },
   "required": [
@@ -4387,6 +4390,338 @@
                   "anatomy",
                   "results",
                   "roadmap"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["family", "styles", "spacing", "rhythm", "chrome", "capacity", "families"],
+      "additionalProperties": false
+    },
+    "research": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "blue-research/v1"
+        },
+        "styles": {
+          "type": "object",
+          "properties": {
+            "hero": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "title": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "heading": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "body": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "small": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "table": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "figure": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "edition": {
+              "$ref": "#/$defs/journalStyle"
+            },
+            "quote": {
+              "$ref": "#/$defs/journalStyle"
+            }
+          },
+          "required": [
+            "hero",
+            "title",
+            "heading",
+            "body",
+            "small",
+            "table",
+            "figure",
+            "edition",
+            "quote"
+          ],
+          "additionalProperties": false
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "rulePt": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 2
+            }
+          },
+          "required": ["gap", "rulePt"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            }
+          },
+          "required": ["maxConsecutive"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "eyebrow": {
+              "$ref": "#/$defs/frame"
+            },
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "subtitle": {
+              "$ref": "#/$defs/frame"
+            },
+            "strip": {
+              "$ref": "#/$defs/frame"
+            },
+            "stripLabel": {
+              "$ref": "#/$defs/frame"
+            },
+            "verdict": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": [
+            "eyebrow",
+            "title",
+            "subtitle",
+            "strip",
+            "stripLabel",
+            "verdict",
+            "source",
+            "page"
+          ],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "claims": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "notes": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "agenda": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "chartCategories": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "chartSeries": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "drivers": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "tierRows": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "goals": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "stepActions": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "readers": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "dependencies": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            }
+          },
+          "required": [
+            "claims",
+            "notes",
+            "agenda",
+            "chartCategories",
+            "chartSeries",
+            "columns",
+            "rows",
+            "drivers",
+            "tierRows",
+            "events",
+            "goals",
+            "steps",
+            "stepActions",
+            "findings",
+            "readers",
+            "dependencies"
+          ],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "overview",
+                  "evidence",
+                  "matrix",
+                  "bridge",
+                  "tiers",
+                  "timeline",
+                  "scorecard",
+                  "findings",
+                  "implications"
                 ]
               },
               "variants": {

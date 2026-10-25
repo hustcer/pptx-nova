@@ -301,8 +301,13 @@ promotion。
 
 ## 新增 DeckKit 流程
 
-1. 从已验证的 gen.mjs 抽取视觉语言和页型 → `<name>.kit.mjs`
-2. 把内容数据 → `examples/<name>-content.json`
-3. 写 `schemas/<name>/<slideType>.schema.json` 和 slot budget
+1. 从已验收的视觉基线提取身份与构图，集中放入 `<id>/design.json`、`intent.md` 和 `<id>.kit.mjs`。
+2. 内容数据放入 `<id>/examples/content.json`，开发胶水为同目录 `build.mjs`。
+3. 写 `<id>/schemas/<slideType>.schema.json` 和 slot budget；复用注册执行组件与共享校验。
 4. 跑验证矩阵（文本长度 × 语言 × 密度 × 主题 × 页数 × 页型组合）
-5. 在 `catalog.json` 注册
+5. 在 `catalog.json` 注册，绑定最新 canonical 逐页审查、benchmark 和 readiness 结论。
+
+`blue-research` 为白底海军蓝研究报告套件，提供 10 种职责、20 种注册构图；保留刊头、
+指标椭圆链、蓝阶矩阵、差异桥、数值短条、时间节点、递升阶段与证据结论。当前为显式选择的
+candidate；能力与同步边界见 [intent](blue-research/intent.md)，验收范围见
+[benchmark review](../../benchmarks/visual/cases/blue-research/golden-learning/review.md)。

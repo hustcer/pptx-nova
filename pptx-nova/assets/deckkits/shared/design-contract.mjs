@@ -485,8 +485,11 @@ export function checkDesignPatch(design, patch) {
       }
     }
     for (const rule of design.rules) {
-      registeredDesignFamily(design)?.checks[rule.check]?.(design, op, (message) =>
-        issue(rule, message, index),
+      registeredDesignFamily(design)?.checks[rule.check]?.(
+        design,
+        op,
+        (message) => issue(rule, message, index),
+        { patch, index },
       )
       if (rule.check === 'annual-language') {
         const a = design.annual,

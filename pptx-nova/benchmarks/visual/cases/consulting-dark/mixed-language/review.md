@@ -1,13 +1,13 @@
 # consulting-dark / mixed-language
 
-- Version: 2.0.0
-- Reviewed: 2026-10-22
-- Result: pass, zero hard defects
+Consulting Dark 2.1 was reviewed on 2026-10-25 with xdoc 0.15.0 and the same frozen field date.
 
-4 final canonical PNGs from matrix/05/mixed/run were individually inspected. The final candidate, manifest and page hashes are recorded in the migration run's matrix/05/visual-review-ledger.json. Same-content alternatives and all twenty registered layouts are covered by the golden/variants sets. Enlarged chart labels, table/source spacing, native output text, metric spacing and anchor circles were separately inspected; contact sheets supplement the individual review.
+- All 4 canonical Create PNGs individually reviewed; no visual hard defect.
+- Navy canvas throughout; warm-white/pale text, copper numbers and light-teal output relationships.
+- No folded-corner surfaces; native charts and tables retained.
+- Dry-run/apply semantic issues = 0; vision high/medium/low = 0; canonical decision = proceed.
+- The complete suite additionally covers the other ten registered compositions and both flow directions.
 
-Native PowerPoint 16.114 for macOS opened this candidate without Repair. English and Chinese complete examples also passed save/close/reopen and full native readback. Representative text, owned shape text, table and embedded chart data edits were verified separately. Machine, visual and host checks are independent.
-
-Synthetic community-library scenario with actual Chinese/English regular and bold text. A separate ten-page Chinese scenario covers every role; this four-page mixed set concentrates on the anchor, product, evidence and decision components.
-
-Runtime: xdoc 0.13.0 (993a9628), frozen field date 2026-10-22. Fonts: upright Arial and Arial Unicode MS, not embedded. Windows and other Office versions are unverified. Candidate requires explicit selection. See docs/consulting-dark-v2-migration-results.md for effective paths, closed defects and limitations.
+Fonts are upright Arial / Arial Unicode MS and are not embedded. The golden candidate passed macOS
+PowerPoint clean-open without Repair. This is not cross-platform or native editing certification.
+See [the design review](../../../../../assets/deckkits/consulting-dark/design-review.md) for scope and limits.

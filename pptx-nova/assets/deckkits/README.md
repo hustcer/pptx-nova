@@ -172,8 +172,8 @@ Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青�
 不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
 检查应用后的对象和原生数值。详见 `../../references/create/design-contracts.md`。
 
-合同路线现覆盖全部十套风格：Consulting Dark、Biennale、Cartesian、Broadside、Long Table、Swiss Grid、McKinsey Blue、Black Gold、Green Slate 与 Clear Value。Consulting Dark 2.0 保留深蓝首尾与大小不同的圆形装饰，
-用切角面板替换圆角卡片贴色条，提供十类职责、二十个注册布局及英文完整示例；支持中文和混排，
+合同路线现覆盖全部十套风格：Consulting Dark、Biennale、Cartesian、Broadside、Long Table、Swiss Grid、McKinsey Blue、Black Gold、Green Slate 与 Clear Value。Consulting Dark 2.1 保留深蓝首尾与大小不同的圆形装饰，
+所有内容页统一深蓝底，以暖白正文、暖铜数字、浅青输出关系和开放台账、比较栏、共享时间轴替换重复切角面板，提供十类职责、二十个注册布局及英文完整示例；支持中文和混排，
 原生条形图保留负数、零与极小值，表格逐格回读。字段迁移和编辑同步边界见 `consulting-dark/intent.md`。
 Black Gold 增加原生表格逐格回读、单焦点与
 期刊图表/表格规则；Green Slate 增加深色策略报告构图、带底色标签、形状内编号、按时长分配的

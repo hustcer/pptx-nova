@@ -47,9 +47,9 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 25,
-              "widthIn": 0.7,
-              "heightIn": 0.6,
+              "fontPt": 11,
+              "widthIn": 0.45,
+              "heightIn": 0.4,
               "lineHeight": 1.1,
               "maxLines": 1
             }
@@ -70,19 +70,19 @@
             "minLength": 1,
             "x-slotBudget": {
               "fontPt": 13,
-              "widthIn": 4.759999999999999,
-              "heightIn": 0.9100000000000001,
+              "widthIn": 4.85,
+              "heightIn": 0.6399999999999999,
               "lineHeight": 1.1,
-              "maxLines": 3
+              "maxLines": 2
             }
           },
           "badge": {
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 28,
+              "fontPt": 34,
               "widthIn": 1.9,
-              "heightIn": 0.65,
+              "heightIn": 0.85,
               "lineHeight": 1.1,
               "maxLines": 1
             }

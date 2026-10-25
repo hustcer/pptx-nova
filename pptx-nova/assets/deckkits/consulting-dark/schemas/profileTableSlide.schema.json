@@ -105,9 +105,9 @@
             "x-slotBudget": {
               "fontPt": 11.5,
               "widthIn": 1.708,
-              "heightIn": 1.0533333333333332,
+              "heightIn": 0.9066666666666667,
               "lineHeight": 1.1,
-              "maxLines": 4
+              "maxLines": 3
             }
           },
           "note": {
@@ -116,9 +116,9 @@
             "x-slotBudget": {
               "fontPt": 11.5,
               "widthIn": 1.708,
-              "heightIn": 1.0533333333333332,
+              "heightIn": 0.9066666666666667,
               "lineHeight": 1.1,
-              "maxLines": 4
+              "maxLines": 3
             }
           }
         },

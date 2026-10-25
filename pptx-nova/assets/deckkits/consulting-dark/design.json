@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "consulting-dark",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -18,12 +18,13 @@
     "warm": "EBAD87",
     "teal": "316E74",
     "rule": "C8CFCC",
-    "darkRule": "36505D",
+    "darkRule": "4A6270",
     "pale": "D9E2E4",
     "sand": "E7E0D5",
     "mist": "DFE9E5",
     "copperTint": "F0E0D5",
-    "primaryInk": "98432C"
+    "primaryInk": "98432C",
+    "tealLight": "9BC7C6"
   },
   "fonts": {
     "body": {
@@ -62,20 +63,20 @@
     }
   },
   "roles": {
-    "surface": "paper",
-    "text": "ink",
-    "rule": "rule",
-    "series": "primary",
-    "focus": "primary"
+    "surface": "navy",
+    "text": "paper",
+    "rule": "darkRule",
+    "series": "warm",
+    "focus": "warm"
   },
   "refurbish": {
     "palette": {
-      "background": "paper",
-      "text": "ink",
-      "muted": "secondary",
-      "accent": "primary",
-      "line": "rule",
-      "surface": "white"
+      "background": "navy",
+      "text": "paper",
+      "muted": "pale",
+      "accent": "warm",
+      "line": "darkRule",
+      "surface": "deep"
     },
     "fonts": {
       "display": "display",
@@ -124,7 +125,7 @@
       "title": {
         "role": "body",
         "sizePt": 28,
-        "color": "ink",
+        "color": "paper",
         "bold": true,
         "lineHeight": 1.1
       },
@@ -138,56 +139,70 @@
       "heading": {
         "role": "body",
         "sizePt": 17,
-        "color": "ink",
+        "color": "paper",
         "bold": true,
         "lineHeight": 1.1
       },
       "body": {
         "role": "body",
         "sizePt": 13,
-        "color": "ink",
+        "color": "paper",
         "bold": false,
         "lineHeight": 1.1
       },
       "small": {
         "role": "body",
         "sizePt": 11.5,
-        "color": "secondary",
+        "color": "pale",
         "bold": false,
         "lineHeight": 1.1
       },
       "label": {
         "role": "body",
         "sizePt": 11,
-        "color": "primaryInk",
+        "color": "warm",
         "bold": true,
         "lineHeight": 1.1
       },
       "source": {
         "role": "body",
         "sizePt": 10,
-        "color": "secondary",
+        "color": "pale",
         "bold": false,
         "lineHeight": 1.1
       },
       "metric": {
         "role": "body",
         "sizePt": 40,
-        "color": "primary",
+        "color": "warm",
         "bold": true,
         "lineHeight": 1.1
       },
       "index": {
         "role": "body",
         "sizePt": 25,
-        "color": "primary",
+        "color": "warm",
         "bold": false,
         "lineHeight": 1.1
       },
       "compactMetric": {
         "role": "body",
         "sizePt": 28,
-        "color": "primary",
+        "color": "warm",
+        "bold": true,
+        "lineHeight": 1.1
+      },
+      "reading": {
+        "role": "body",
+        "sizePt": 13,
+        "color": "pale",
+        "bold": false,
+        "lineHeight": 1.1
+      },
+      "proofMetric": {
+        "role": "body",
+        "sizePt": 34,
+        "color": "warm",
         "bold": true,
         "lineHeight": 1.1
       }
@@ -223,7 +238,7 @@
       "categories": [1, 6]
     },
     "chart": {
-      "fontPt": 11
+      "fontPt": 12
     },
     "table": {
       "maxCellChars": 48
@@ -303,8 +318,8 @@
           "columns": {
             "regions": {
               "position": [0.8, 1.95, 11.7, 1.25],
-              "competitors": [0.8, 3.6, 11.7, 2.3],
-              "conclusion": [0.8, 6, 11.7, 0.6]
+              "competitors": [0.8, 3.6, 11.7, 2.5],
+              "conclusion": [0.8, 6.25, 11.7, 0.4]
             }
           },
           "ledger": {

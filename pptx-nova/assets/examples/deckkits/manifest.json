@@ -19,20 +19,20 @@
       "caseId": "consulting-dark.golden-roadshow",
       "kind": "golden",
       "readiness": "production",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "title": "A clearer path from signal to scale",
       "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
       "defaultFor": [],
       "files": {
         "deck": {
           "path": "consulting-dark/deck.pptx",
-          "bytes": 34267,
-          "sha256": "1fddd331709a2c350bfa3a5395bacb74a26ffa4fee1c544b6cc9838406de3ba2"
+          "bytes": 31852,
+          "sha256": "bb70e07aa3e1e02063a5ab0f123a3de8869422bc5e9c7a31a1e42accc93067b4"
         },
         "contactSheet": {
           "path": "consulting-dark/contact-sheet.webp",
-          "bytes": 127266,
-          "sha256": "b1948308979f5a7ec6f0aec47c0e390217d93e3488cc89e21b14508d57197060",
+          "bytes": 129588,
+          "sha256": "1395f933cbcb26d4a49df1fe18b46be5ec154569e4a674eea27a841047aed449",
           "quality": 82
         },
         "content": {
@@ -43,12 +43,12 @@
         "brief": {
           "path": "consulting-dark/brief.md",
           "bytes": 705,
-          "sha256": "6bf49bf3fc1beb50c30f029edcde0abe5078724d69631062b2bbe03355d6ab64"
+          "sha256": "d61b638e286ecf94e761529e758dbee45b2aa09baffc43f71975bcaa38d0003c"
         },
         "summary": {
           "path": "consulting-dark/summary.json",
           "bytes": 2785,
-          "sha256": "033a3488578bc14c0cf6c28ea66417d2381351993ba17f7f3773dd9640eb272f"
+          "sha256": "643ddc286950ce6c162516e096714e27d5ee7a48d1929ab18c6f5f2d795dbe19"
         }
       },
       "validation": {
@@ -60,7 +60,7 @@
       },
       "patch": {
         "schemaVersion": "pptx-patch/v1",
-        "ops": 1045
+        "ops": 1041
       },
       "vision": {
         "status": "success",

@@ -48,6 +48,8 @@ function assertConsulting(design, { assertFrame }) {
     'metric',
     'index',
     'compactMetric',
+    'proofMetric',
+    'reading',
   ]) {
     const st = b.styles[key]
     if (!st || !design.colors[st.color] || !design.fonts[st.role] || st.italic)
@@ -67,15 +69,14 @@ function checkConsulting(design, op, fail) {
     !['rectangle', 'oval', 'right-arrow', 'down-arrow'].includes(op.kind)
   )
     fail('Unregistered Consulting shape; rounded containers are not part of this language')
-  if (op.op === 'add-freeform' && !op.name?.includes('Surface'))
-    fail('Only registered faceted surfaces are allowed')
+  if (op.op === 'add-freeform')
+    fail('Consulting uses open ruled layouts; cut-corner surfaces are not registered')
   if (['add-group', 'add-image'].includes(op.op)) fail('No registered grouped or raster component')
   if (
     op.op === 'set-slide-background' &&
-    (!['navy', 'paper'].some((k) => design.colors[k] === op.fill?.color) ||
-      op.fill?.type !== 'solid')
+    (design.colors.navy !== op.fill?.color || op.fill?.type !== 'solid')
   )
-    fail('Consulting requires navy or warm paper')
+    fail('Consulting Dark requires a navy canvas on every slide')
   const walk = (v, key = '') => {
     if (!v || typeof v !== 'object') return
     if (key === 'font' && v.italic) fail('Consulting typography must be upright')
@@ -132,11 +133,10 @@ export function consultingProjectedBudgets(design, family) {
           for (const p of binding.paths) add(p, binding.frame, design.consulting.styles.small)
       if (c.kind === 'chart')
         for (const p of c.inputPaths)
-          add(
-            p,
-            [0, 0, c.frame[2] * 0.4, c.frame[3] / c.data.categories.length],
-            design.consulting.styles.small,
-          )
+          add(p, [0, 0, c.frame[2] * 0.4, c.frame[3] / c.data.categories.length], {
+            ...design.consulting.styles.small,
+            sizePt: design.consulting.chart.fontPt,
+          })
     }
   }
   if (!Object.keys(budgets).length) throw Error(type + ': no projection could be compiled')

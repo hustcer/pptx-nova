@@ -1,4 +1,4 @@
-// Consulting Dark 2.0: a registered editorial consulting language.
+// Consulting Dark 2.1: open editorial evidence with restrained solid process nodes.
 import { loadDesignContract, finishDesign } from '../shared/design-contract.mjs'
 import { resolveConsultingDeck } from './layouts.mjs'
 import { renderConsultingPlan } from './components.mjs'

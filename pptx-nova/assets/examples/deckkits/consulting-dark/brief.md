@@ -4,7 +4,7 @@ DeckKit: `consulting-dark`
 Showcase case: `consulting-dark.golden-roadshow`
 Readiness: `production`
 Slides: 10
-Patch ops: 1045
+Patch ops: 1041
 Title: A clearer path from signal to scale
 
 ## Best For

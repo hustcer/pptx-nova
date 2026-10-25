@@ -102,22 +102,22 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 11.5,
+              "fontPt": 13,
               "widthIn": 2.3,
               "heightIn": 0.78,
               "lineHeight": 1.1,
-              "maxLines": 3
+              "maxLines": 2
             }
           },
           "limitation": {
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 11.5,
+              "fontPt": 13,
               "widthIn": 2.8500000000000005,
               "heightIn": 0.78,
               "lineHeight": 1.1,
-              "maxLines": 3
+              "maxLines": 2
             }
           }
         },

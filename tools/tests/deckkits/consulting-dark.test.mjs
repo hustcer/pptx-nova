@@ -11,6 +11,7 @@ import {
   designHash,
 } from '../../../pptx-nova/assets/deckkits/shared/design-contract.mjs'
 import { validateDeckkitContent } from '../../../pptx-nova/assets/deckkits/shared/validate-deckkit.mjs'
+import { consultingProjectedBudgets } from '../../../pptx-nova/assets/deckkits/consulting-dark/registry.mjs'
 const golden = JSON.parse(
   readFileSync(
     new URL(
@@ -45,7 +46,7 @@ const assertVisible = (content, patch) => {
 test('Consulting Dark covers all ten roles with deterministic complete plans and native evidence', () => {
   const a = createDeck(golden),
     b = createDeck(golden)
-  assert.equal(DESIGN.version, '2.0.0')
+  assert.equal(DESIGN.version, '2.1.0')
   assert.equal(Object.keys(DESIGN.consulting.families).length, 10)
   assert.equal(designHash(a), designHash(b))
   assert.equal(a.designPlan.layouts.length, 10)
@@ -148,6 +149,8 @@ test('the style gate rejects rounded cap containers, foreign colors, fonts and e
     (p) => (p.ops.find((o) => o.op === 'set-run').font.italic = true),
     (p) => (p.ops.find((o) => o.op === 'set-shape').fill = { type: 'gradient', stops: [] }),
     (p) => (p.ops.find((o) => o.op === 'add-chart').kind = 'pie'),
+    (p) => p.ops.push({ op: 'add-freeform', name: 'LegacySurface' }),
+    (p) => (p.ops.find((o) => o.op === 'set-slide-background').fill.color = DESIGN.colors.paper),
   ]) {
     const p = structuredClone(base)
     mutate(p)
@@ -194,4 +197,79 @@ test('cover and decision retain native circles with varied sizes in every layout
       assert.ok(orbs.every((o) => o.kind === 'oval'))
       assert.ok(new Set(orbs.map((o) => o.w)).size >= 5)
     }
+})
+
+test('every composition groups peers without folded corners or arbitrary first-item fills', () => {
+  for (const [i, slide] of golden.slides.entries())
+    for (const layoutId of Object.keys(DESIGN.consulting.families[slide.type].variants)) {
+      const c = excerpt(i)
+      c.slides[0].layoutId = layoutId
+      const { patch, designPlan } = createDeck(c)
+      assert.equal(
+        patch.ops.some((o) => o.op === 'add-freeform'),
+        false,
+        slide.type,
+      )
+      assert.ok(
+        patch.ops
+          .filter((o) => o.op === 'set-slide-background')
+          .every((o) => o.fill.color === DESIGN.colors.navy),
+      )
+      assert.equal(designPlan.layouts[0].mode, 'dark')
+      const components = designPlan.layouts[0].components
+      const surfaces = components.filter((x) => x.name.includes('Surface'))
+      assert.ok(surfaces.every((x) => /^(Position|Engine|Output)Surface/.test(x.name)))
+      if (slide.type === 'previewProductSlide') {
+        const values = components.filter((x) => /^Kpi\d+Value$/.test(x.name))
+        assert.equal(new Set(values.map((x) => x.style.color)).size, 1)
+      }
+    }
+})
+
+test('the flow connection owns the output group and its guides survive node fill ordering', () => {
+  for (const layoutId of ['horizontal', 'vertical']) {
+    const content = excerpt(6)
+    content.slides[0].layoutId = layoutId
+    const { designPlan } = createDeck(content)
+    const cs = designPlan.layouts[0].components
+    const outputs = cs.filter((x) => /^OutputSurface/.test(x.name))
+    const guides = cs.filter((x) => /^OutputGroup/.test(x.name))
+    assert.equal(outputs.length, 4)
+    assert.equal(guides.length, 3)
+    assert.ok(guides.every((g) => cs.indexOf(g) > Math.max(...outputs.map((x) => cs.indexOf(x)))))
+    const top = guides.find((x) => x.name === 'OutputGroupTop').frame
+    const bottom = guides.find(
+      (x) => x.name === (layoutId === 'horizontal' ? 'OutputGroupBottom' : 'OutputGroupRight'),
+    ).frame
+    for (const output of outputs) {
+      assert.ok(output.frame[0] >= top[0])
+      assert.ok(output.frame[0] + output.frame[2] <= top[0] + top[2] + 0.001)
+      assert.ok(output.frame[1] >= top[1] - 0.001)
+      assert.ok(output.frame[1] + output.frame[3] <= bottom[1] + bottom[3] + 0.001)
+    }
+  }
+})
+
+test('chart capacity and refurbishment aliases use the current dark contract', () => {
+  const budgets = consultingProjectedBudgets(DESIGN, DESIGN.consulting.families.benchmarkSlide)
+  assert.equal(budgets['chartData.categories[]'].fontPt, DESIGN.consulting.chart.fontPt)
+  const catalog = JSON.parse(
+    readFileSync(new URL('../../../pptx-nova/assets/deckkits/catalog.json', import.meta.url)),
+  )
+  const fallback = catalog.entries.find((e) => e.id === DESIGN.id).refurbishProfile.fallback
+  for (const [alias, role] of Object.entries({
+    background: 'navy',
+    text: 'paper',
+    accent: 'warm',
+    softAccent: 'deep',
+    surface: 'deep',
+    secondary: 'pale',
+    muted: 'pale',
+    rule: 'darkRule',
+    line: 'darkRule',
+  }))
+    assert.equal(fallback.palette[alias], DESIGN.colors[role], alias)
+  for (const role of ['heading', 'label', 'body', 'display'])
+    assert.equal(fallback.fonts[role], DESIGN.fonts.body.latin, role)
+  assert.equal(fallback.fonts.cjk, DESIGN.fonts.body.eastAsian)
 })

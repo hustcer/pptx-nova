@@ -3,7 +3,7 @@
   "entries": [
     {
       "id": "consulting-dark",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "path": "consulting-dark/consulting-dark.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "production",
@@ -45,18 +45,18 @@
       ],
       "visualGrammar": {
         "schemaVersion": "pptx-nova-visual-grammar/v1",
-        "positioning": "Navy anchor pages with varied circle ornaments, warm paper evidence, faceted surfaces and copper/teal emphasis for executive strategy.",
+        "positioning": "A consistently deep-navy executive consulting deck with warm-white typography, copper proof numbers, open ledgers and light-teal output relationships.",
         "mood": ["executive", "technical", "high-conviction", "investor-ready"],
         "layoutPrinciples": [
-          "Frame the narrative with navy opening and decision pages; use warm paper for evidence.",
+          "Use a deep navy canvas on every page; vary information structure and density rather than switching to light pages.",
           "Anchor each page with one dominant headline or metric group.",
-          "Use faceted panels, tables, nodes and consistent gutters to group content.",
+          "Use open ledgers, comparison columns, native tables and shared axes; reserve solid nodes for meaningful process structure.",
           "Keep all business text, native chart data and native table cells editable."
         ],
         "signatureElements": [
           "different-sized native circles on cover and decision pages",
-          "cut-corner navy, copper and teal surfaces",
-          "warm paper evidence",
+          "open ruled evidence with restrained solid process nodes",
+          "warm-white evidence on a navy canvas",
           "fine structural rules and process arrows",
           "native table and bar evidence"
         ],
@@ -66,9 +66,12 @@
           "numeric": "oversized tabular numbers paired with short labels"
         },
         "colorSystem": {
-          "background": ["deep navy anchors", "warm paper evidence", "off-white and mist surfaces"],
-          "primary": ["navy text on paper", "paper text on navy"],
-          "accent": ["copper for emphasis and short indexes", "teal for outputs"],
+          "background": [
+            "deep navy canvas throughout",
+            "slate surfaces for meaningful process nodes"
+          ],
+          "primary": ["warm-white primary text", "pale blue-gray supporting text"],
+          "accent": ["warm copper proof numbers and indexes", "light teal for outputs"],
           "semantic": [
             "Colors express hierarchy and component roles; business policy belongs to content."
           ]
@@ -82,7 +85,7 @@
         "compositionRules": [
           "Lead with the author-supplied message and expose supporting evidence.",
           "Use the registered layout variants to vary information organisation.",
-          "Use substantial colored surfaces with intentional whitespace.",
+          "Give equal-role items equal styling and use whitespace to separate evidence groups.",
           "Keep sources and page numbers readable and consistently placed."
         ],
         "avoid": [
@@ -93,7 +96,10 @@
           "long legal copy inside KPI cards",
           "rounded cards with colored edge strips",
           "circle ornaments covering live text",
-          "rainbow category colors"
+          "rainbow category colors",
+          "repeated cut-corner containers",
+          "first-item fills without author-supplied priority",
+          "light content pages inside the dark theme"
         ]
       },
       "refurbishProfile": {
@@ -111,20 +117,20 @@
           "strategy": "inspect-driven-consulting-dark-editable-object-restyle",
           "patchScript": "scripts/cli/refurbish/fallback-patch.mjs",
           "palette": {
-            "background": "F6F4EE",
-            "text": "102B3A",
-            "accent": "B34F32",
-            "softAccent": "15334A",
-            "secondary": "AEC0CE",
-            "surface": "FFFDF9",
-            "rule": "20435E",
-            "muted": "52626A",
-            "line": "C8CFCC"
+            "background": "102B3A",
+            "text": "F6F4EE",
+            "accent": "EBAD87",
+            "softAccent": "1B3948",
+            "secondary": "D9E2E4",
+            "surface": "1B3948",
+            "rule": "4A6270",
+            "muted": "D9E2E4",
+            "line": "4A6270"
           },
           "fonts": {
-            "heading": "Inter",
+            "heading": "Arial",
+            "label": "Arial",
             "body": "Arial",
-            "label": "Inter",
             "cjk": "Arial Unicode MS",
             "display": "Arial"
           },
@@ -140,8 +146,8 @@
           "contentPolicy": "preserve-source-slides-and-editable-objects",
           "titleZone": {
             "placement": "top executive header with quiet eyebrow and decision headline",
-            "headingStyle": "Inter semibold, off-white, compact line height",
-            "labelStyle": "Inter uppercase, secondary blue-gray",
+            "headingStyle": "Upright bold Arial, warm white, compact line height",
+            "labelStyle": "Upright Arial, warm copper or pale supporting text",
             "accentRule": "thin copper rule or small copper label marker",
             "avoid": ["oversized poster titles", "bright full-width title bars"]
           },
@@ -151,10 +157,10 @@
             "headerText": "palette.text",
             "bodyFill": "palette.surface",
             "borderColor": "palette.rule",
-            "emphasis": "use palette.accent only for winning cells, deltas, or callout rows",
+            "emphasis": "Use palette.accent for author-supplied emphasis; do not infer winners from item order.",
             "rules": [
               "Keep table geometry and row count from the source deck.",
-              "Use tight Inter body text and muted secondary labels for sources or units.",
+              "Use legible Arial body text and muted secondary labels for sources or units.",
               "Prefer thin internal rules over heavy boxed cells."
             ]
           },
@@ -351,15 +357,15 @@
         }
       },
       "validatedWith": {
-        "xdoc": "0.13.0 (993a9628)",
-        "visionCheck": "2026-10-22: final Create matrix high/medium/low = 0",
-        "pngReview": "2026-10-22: 64 final canonical pages individually reviewed; seven contact sheets and five enlarged details",
-        "nativeHost": "Microsoft PowerPoint 16.114 for macOS: seven candidate opens; English/Chinese save/reopen/readback; representative native edits"
+        "xdoc": "0.15.0 (9ee8ef0c)",
+        "visionCheck": "2026-10-25: dark golden, all alternative layouts, maximum density and mixed-language canonical Create passed; high/medium/low = 0",
+        "pngReview": "2026-10-25: 34 dark canonical pages individually reviewed (10 golden, 10 alternative, 10 stress, 4 mixed); no hard defects",
+        "nativeHost": "2026-10-25: Microsoft PowerPoint for macOS clean-open passed for the hash-bound 10-page dark golden candidate; no Repair dialog. No new cross-platform or native edit/save/reopen certification."
       },
       "quality": {
         "knownBlockingLimits": [],
         "manualHardDefects": 0,
-        "lastBenchmark": "2026-10-24",
+        "lastBenchmark": "2026-10-25",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -378,10 +384,10 @@
         },
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-24",
+          "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-production-20261024-otJsel/benchmark"
+            "out": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden", "stress", "mixed-language"],
@@ -408,7 +414,7 @@
               "caseId": "consulting-dark.golden-roadshow",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/consulting-dark/golden-roadshow/summary.json",
+              "summaryPath": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark/consulting-dark/golden-roadshow/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/golden-roadshow/review.md",
               "validation": {
                 "valid": true,
@@ -445,16 +451,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 255776
+                "bytes": 232128
               },
-              "patchOps": 1045,
-              "p50TotalMs": 106.78
+              "patchOps": 1041,
+              "p50TotalMs": 100.7
             },
             {
               "caseId": "consulting-dark.stress-density",
               "kind": "stress",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/consulting-dark/stress-density/summary.json",
+              "summaryPath": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark/consulting-dark/stress-density/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/stress-density/review.md",
               "validation": {
                 "valid": true,
@@ -491,16 +497,16 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 258284
+                "bytes": 233394
               },
-              "patchOps": 1152,
-              "p50TotalMs": 106.59
+              "patchOps": 1146,
+              "p50TotalMs": 100.74
             },
             {
               "caseId": "consulting-dark.mixed-language",
               "kind": "mixed-language",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-production-20261024-otJsel/benchmark/consulting-dark/mixed-language/summary.json",
+              "summaryPath": ".tmp/deckkit-consulting-dark-20261025-redesign/benchmark/dark/consulting-dark/mixed-language/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/consulting-dark/mixed-language/review.md",
               "validation": {
                 "valid": true,
@@ -537,20 +543,21 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 111575
+                "bytes": 102741
               },
-              "patchOps": 348,
-              "p50TotalMs": 104.82
+              "patchOps": 346,
+              "p50TotalMs": 102.98
             }
           ],
           "blockers": []
         }
       },
       "knownLimits": [
-        "2.0 replaces colored rounded-card caps with faceted panels and retains anchor circle ornaments; see intent.md for named-field migration.",
+        "2.1 replaces repeated cut-corner panels with open evidence structures; 2.0 named fields and all twenty layout ids remain compatible. See intent.md.",
         "Native single-series bar chart and native table remain editable. Related callouts are independent objects; regenerate from content after changing data.",
         "Fonts are not embedded. Windows and other Office versions are unverified.",
-        "Candidate qualification requires explicit selection; old production/default eligibility does not carry over."
+        "Candidate qualification requires explicit selection; old production/default eligibility does not carry over.",
+        "Refurbishment fallback shares the dark palette and Arial roles but preserves source geometry; rebuilding from content is required for the new open compositions."
       ],
       "examples": ["consulting-dark/examples/content.json"],
       "designContract": "consulting-dark/design.json"

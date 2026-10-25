@@ -15,7 +15,7 @@ export function renderConsultingPlan(design, layouts) {
     italic: false,
   })
   for (const [s, l] of layouts.entries()) {
-    p.addSlide(s, C[l.mode === 'dark' ? 'navy' : 'paper'])
+    p.addSlide(s, C.navy)
     for (const c of l.components) {
       const name = `S${s}_${c.owner ?? c.name}`,
         [x, y, w, h] = c.frame
@@ -46,37 +46,6 @@ export function renderConsultingPlan(design, layouts) {
             verticalAnchor: 'top',
             autofit: { mode: 'none' },
           },
-        })
-      } else if (c.kind === 'facet') {
-        const cutX = Math.round((c.cut / w) * 1000),
-          cutY = Math.round((c.cut / h) * 1000)
-        p.ops.push({
-          op: 'add-freeform',
-          slide: s,
-          name,
-          x: x + 'in',
-          y: y + 'in',
-          w: w + 'in',
-          h: h + 'in',
-          path: {
-            width: 1000,
-            height: 1000,
-            commands: [
-              { type: 'move', x: 0, y: 0 },
-              { type: 'line', x: 1000 - cutX, y: 0 },
-              { type: 'line', x: 1000, y: cutY },
-              { type: 'line', x: 1000, y: 1000 },
-              { type: 'line', x: 0, y: 1000 },
-              { type: 'close' },
-            ],
-          },
-        })
-        p.ops.push({
-          op: 'set-shape',
-          slide: s,
-          shape: { name },
-          fill: { type: 'solid', color: C[c.color] },
-          line: { noLine: true },
         })
       } else if (c.kind === 'box' || c.kind === 'arrow' || c.kind === 'circle') {
         p.shape(
@@ -126,10 +95,10 @@ export function renderConsultingPlan(design, layouts) {
               row: i,
               column,
               style: {
-                fill: i === 0 ? { type: 'solid', color: C.navy } : { type: 'none' },
+                fill: i === 0 ? { type: 'solid', color: C.deep } : { type: 'none' },
                 font: font({
                   ...b.styles.small,
-                  color: i === 0 ? 'paper' : 'ink',
+                  color: i === 0 || column === 1 ? 'paper' : 'pale',
                   bold: i === 0 || column === 1,
                 }),
                 alignment: 'left',
@@ -142,14 +111,14 @@ export function renderConsultingPlan(design, layouts) {
                   top: { noLine: true },
                   left: { noLine: true },
                   right: { noLine: true },
-                  bottom: { color: C.rule, width: b.spacing.rulePt + 'pt' },
+                  bottom: { color: C.darkRule, width: b.spacing.rulePt + 'pt' },
                 },
               },
             })),
           ),
         })
       } else if (c.kind === 'chart') {
-        const ft = font({ ...b.styles.small, sizePt: b.chart.fontPt, color: 'secondary' })
+        const ft = font({ ...b.styles.small, sizePt: b.chart.fontPt, color: 'pale' })
         const values = c.data.series[0].values
         const minimum = Math.min(0, ...values)
         // Reserve room before a negative outside-end label, away from category text.
@@ -174,16 +143,16 @@ export function renderConsultingPlan(design, layouts) {
           series: [
             {
               series: 0,
-              fill: { type: 'solid', color: C.primary },
+              fill: { type: 'solid', color: C.warm },
               invertIfNegative: false,
-              line: { color: C.paper, width: '0pt' },
+              line: { color: C.warm, width: '0pt' },
             },
           ],
           axes: [
             {
               axis: 'category',
               scale: { reverseOrder: true },
-              line: { color: C.paper, width: '0pt' },
+              line: { color: C.darkRule, width: '0.6pt' },
               ticks: { font: ft, major: 'none', minor: 'none', labelPosition: 'low' },
             },
             {
@@ -191,7 +160,7 @@ export function renderConsultingPlan(design, layouts) {
               ...(minimum < 0 && Number.isFinite(paddedMinimum)
                 ? { scale: { min: paddedMinimum } }
                 : {}),
-              line: { color: C.rule, width: '0pt' },
+              line: { color: C.darkRule, width: '0pt' },
               gridlines: null,
               minorGridlines: null,
               ticks: { font: ft, visible: false, major: 'none', minor: 'none' },
@@ -204,7 +173,7 @@ export function renderConsultingPlan(design, layouts) {
               showCategoryName: false,
               showLegendKey: false,
               position: 'outside-end',
-              font: { ...ft, color: C.ink, bold: true },
+              font: { ...ft, color: C.paper, bold: true },
               numberFormat: 'General',
             },
           ],

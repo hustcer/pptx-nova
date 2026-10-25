@@ -45,23 +45,9 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
     r = variant.regions,
     cs = [],
     gap = b.spacing.gap
-  const dark = ['cover', 'decision'].includes(family.role)
   const tx = (name, f, v, key = 'body', fields = name, extra = {}) => {
     if (v === undefined) return
-    const st = {
-      ...b.styles[key],
-      ...(dark
-        ? {
-            color:
-              key === 'label' || key === 'index' || key === 'metric'
-                ? 'warm'
-                : key === 'small' || key === 'source'
-                  ? 'pale'
-                  : 'paper',
-          }
-        : {}),
-      ...extra,
-    }
+    const st = { ...b.styles[key], ...extra }
     const paths = (Array.isArray(fields) ? fields : [fields]).map((k) => path + '.' + k)
     const c = { ...fitConsultingText(v, f, st, paths[0]), name, paths, allocatedFrame: [...f] }
     c.frame[3] = c.requiredHeight
@@ -69,22 +55,10 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
     return c
   }
   const box = (name, frame, color) => cs.push({ kind: 'box', name, frame, color })
-  const facet = (name, frame, color) =>
-    cs.push({
-      kind: 'facet',
-      name,
-      frame,
-      color,
-      cut: Math.min(0.2, frame[2] * 0.08, frame[3] * 0.15),
-    })
   const circle = (name, frame, color) => cs.push({ kind: 'circle', name, frame, color })
   const inset = ([x, y, w, h], p = b.spacing.inset) => [x + p, y + p, w - p * 2, h - p * 2]
-  const recolor = (from, color, secondary = color) => {
-    for (const c of cs.slice(from))
-      if (c.style) c.style.color = c.style.sizePt <= b.styles.small.sizePt ? secondary : color
-  }
   const rule = (name, x, y, w, vertical = false) =>
-    box(name, vertical ? [x, y, 0.008, w] : [x, y, w, 0.008], dark ? 'darkRule' : 'rule')
+    box(name, vertical ? [x, y, 0.008, w] : [x, y, w, 0.008], 'darkRule')
   const grid = (f, n, cols = n, g = gap) => {
     const rows = Math.ceil(n / cols),
       w = (f[2] - g * (cols - 1)) / cols,
@@ -121,25 +95,25 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
         'small',
         [field + '.label', field + '.note'],
       )
-      caption.paragraphStyles = [{ bold: true, color: dark ? 'paper' : 'ink' }, {}]
+      caption.paragraphStyles = [{ bold: true, color: 'paper' }, {}]
       return
     }
     tx(name + 'Label', [lx, ly, lw, 0.43], v.label, 'small', field + '.label', {
       bold: true,
-      color: dark ? 'paper' : 'ink',
+      color: 'paper',
     })
     tx(name + 'Note', [lx, ly + 0.32, lw, h - (ly - y) - 0.32], v.note, 'small', field + '.note')
   }
   const capability = (f, title, left, right, prefix, merge = false) => {
     const [x, y, w, h] = f
-    facet('CapabilitiesSurface', f, 'white')
+    rule('CapabilitiesRule', x, y, w)
     tx(
       'CapabilitiesTitle',
       [x + 0.24, y + 0.16, w - 0.48, 0.4],
       title,
       'heading',
       prefix + 'Header',
-      { color: 'teal' },
+      { color: 'tealLight' },
     )
     const cols = grid([x + 0.24, y + 0.71, w - 0.48, h - 0.8], 2)
     if (merge) {
@@ -159,11 +133,11 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       )
       return
     }
-    list('CapabilityLeft', cols[0], left, prefix + 'Left', 'small')
-    list('CapabilityRight', cols[1], right, prefix + 'Right', 'small')
+    list('CapabilityLeft', cols[0], left, prefix + 'Left', 'reading')
+    list('CapabilityRight', cols[1], right, prefix + 'Right', 'reading')
   }
   // Anchor circles retain the old atmosphere without occupying live text or footer zones.
-  if (dark) {
+  if (['cover', 'decision'].includes(family.role)) {
     for (const [i, f] of [
       [12.6, 1.45, 0.46, 0.46],
       [10.65, 0.9, 0.24, 0.24],
@@ -209,7 +183,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       const [x, y, w, h] = frames[i],
         p = `rows[${i}]`
       rule('HistoryRule' + i, x, y, w)
-      circle('HistoryNode' + i, [x + 1.62, y + 0.2, 0.12, 0.12], 'primary')
+      circle('HistoryNode' + i, [x + 1.62, y + 0.2, 0.12, 0.12], 'warm')
       tx('Period' + i, [x, y + 0.17, band ? w : 1.6, 0.4], v.period, 'label', p + '.period')
       tx(
         'Organisation' + i,
@@ -226,14 +200,9 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
         p + '.role',
       )
     })
-    grid(r.metrics, d.metrics.length, band ? d.metrics.length : 1, 0.16).forEach((f, i) => {
-      facet('ProfileMetricSurface' + i, f, i === 0 ? 'primary' : 'navy')
-      const from = cs.length
+    grid(r.metrics, d.metrics.length, band ? d.metrics.length : 1, gap).forEach((f, i) => {
+      rule('ProfileMetricRule' + i, f[0], f[1], f[2])
       metric('ProfileMetric' + i, inset(f, 0.16), d.metrics[i], `metrics[${i}]`, true, true)
-      recolor(from, 'paper', 'paper')
-      for (const c of cs.slice(from))
-        if (c.paragraphStyles)
-          c.paragraphStyles = [{ bold: true, color: 'paper' }, { color: 'paper' }]
     })
   } else if (family.role === 'achievements') {
     const rows = layoutId === 'ledger',
@@ -241,30 +210,26 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
     frames.forEach(([x, y, w, h], i) => {
       const v = d.items[i],
         p = `items[${i}]`
-      facet(
-        'AchievementSurface' + i,
-        [x - 0.1, y - 0.04, w + 0.2, h + 0.08],
-        i === 0 ? 'mist' : 'white',
-      )
-      tx('AchievementIndex' + i, [x, y + 0.15, 0.7, 0.6], v.index, 'index', p + '.index')
+      rule('AchievementRule' + i, x, y, w)
+      tx('AchievementIndex' + i, [x, y + 0.2, 0.45, 0.4], v.index, 'label', p + '.index')
       tx(
         'AchievementTitle' + i,
-        [x + 0.9, y + 0.17, rows ? 3.5 : w - 2.8, 0.75],
+        [x + 0.65, y + 0.2, rows ? 3.5 : w - 2.8, 0.75],
         v.title,
         'heading',
         p + '.title',
       )
       tx(
         'AchievementBadge' + i,
-        [x + w - 1.9, y + 0.12, 1.9, 0.65],
+        [x + w - 1.9, y + 0.12, 1.9, 0.85],
         v.badge,
-        'compactMetric',
+        'proofMetric',
         p + '.badge',
         { alignment: 'right' },
       )
       tx(
         'AchievementBody' + i,
-        rows ? [x + 4.65, y + 0.17, w - 6.85, h - 0.2] : [x + 0.9, y + 1.12, w - 0.9, h - 1.15],
+        rows ? [x + 4.65, y + 0.17, w - 6.85, h - 0.2] : [x + 0.65, y + 1.12, w - 0.65, h - 1.15],
         v.body,
         'body',
         p + '.body',
@@ -275,19 +240,14 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
     const rail = layoutId === 'rail',
       fs = grid(r.metrics, d.kpis.length, rail ? 1 : d.kpis.length, 0.14)
     fs.forEach((f, i) => {
-      facet('KpiSurface' + i, f, ['primary', 'navy', 'teal', 'deep'][i % 4])
-      const from = cs.length
+      rule('KpiRule' + i, f[0], f[1], f[2])
       metric('Kpi' + i, inset(f, rail ? 0.12 : 0.18), d.kpis[i], `kpis[${i}]`, rail, rail)
-      recolor(from, 'paper', 'paper')
-      for (const c of cs.slice(from))
-        if (c.paragraphStyles)
-          c.paragraphStyles = [{ bold: true, color: 'paper' }, { color: 'paper' }]
     })
     capability(r.capabilities, d.capHeader, d.capLeft, d.capRight, 'cap')
   } else if (family.role === 'landscape') {
     const [x, y, w, h] = r.position,
       rows = layoutId === 'ledger'
-    facet('PositionSurface', [x - 0.18, y - 0.14, w + 0.36, h + 0.28], 'navy')
+    box('PositionSurface', [x - 0.18, y - 0.14, w + 0.36, h + 0.28], 'deep')
     tx('PositionLabel', [x, y, w, 0.3], d.usLabel, 'label', 'usLabel')
     tx('PositionTitle', [x, y + 0.4, w, rows ? 1.6 : 0.4], d.usTitle, 'heading', 'usTitle')
     tx(
@@ -305,11 +265,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       ([cx, cy, cw, ch], i) => {
         const v = d.comps[i],
           p = `comps[${i}]`
-        facet(
-          'ComparisonSurface' + i,
-          [cx - 0.12, cy - 0.08, cw + 0.24, ch + 0.16],
-          i === 1 ? 'mist' : 'white',
-        )
+        rule('ComparisonRule' + i, cx, cy, cw)
         tx(
           'Competitor' + i,
           [cx, cy + 0.16, rows ? 2.2 : cw, rows ? 0.45 : 0.5],
@@ -326,10 +282,11 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
         )
         tx(
           'Strength' + i,
-          rows ? [cx + 2.6, cy + 0.16, 2.3, ch - 0.2] : [cx, cy + 1.17, cw, 0.5],
+          rows ? [cx + 2.6, cy + 0.16, 2.3, ch - 0.2] : [cx, cy + 1.17, cw, 0.65],
           v.strength,
           'small',
           p + '.strength',
+          { sizePt: 13 },
         )
         tx(
           'Limitation' + i,
@@ -337,12 +294,13 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
           v.limitation,
           'small',
           p + '.limitation',
+          { sizePt: 13 },
         )
       },
     )
     tx('Conclusion', r.conclusion, d.conclusion, 'body', 'conclusion', {
       bold: true,
-      color: 'primary',
+      color: 'warm',
     })
   } else if (family.role === 'audiences') {
     tx('Intro', r.intro, d.intro, 'body', 'intro')
@@ -351,12 +309,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       ([x, y, w, h], i) => {
         const v = d.cards[i],
           p = `cards[${i}]`
-        facet(
-          'AudienceSurface' + i,
-          [x - 0.1, y - 0.04, w + 0.2, h + 0.08],
-          i === 0 ? 'navy' : 'white',
-        )
-        const from = cs.length
+        rule('AudienceRule' + i, x, y, w)
         tx('AudienceIndex' + i, [x, y + 0.08, 0.6, 0.6], v.index, 'index', p + '.index')
         tx(
           'AudienceName' + i,
@@ -374,8 +327,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
             v.items.map((_, j) => p + `.items[${j}]`),
           )
         else
-          list('AudienceItem' + i + '_', [x, y + 2.0, w, h - 2.0], v.items, p + '.items', 'small')
-        if (i === 0) recolor(from, 'paper', 'pale')
+          list('AudienceItem' + i + '_', [x, y + 2.0, w, h - 2.0], v.items, p + '.items', 'reading')
       },
     )
   } else if (family.role === 'flow') {
@@ -384,36 +336,34 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
     const src = vertical ? [x, y, 2.2, 1.05] : [x, y + 0.2, 2.05, 1.9],
       eng = vertical ? [x + 3, y, 3, 1.3] : [x + 3.0, y + 0.2, 3, 1.9],
       out = vertical ? [x, y + 2.2, w, h - 2.2] : [x + 7.25, y, w - 7.25, h]
-    facet('SourceSurface', [src[0] - 0.12, src[1] - 0.14, src[2] + 0.24, 1.95], 'navy')
-    facet('EngineSurface', [eng[0] - 0.14, eng[1] - 0.14, eng[2] + 0.28, 1.95], 'primary')
+    rule('SourceRule', src[0], src[1] - 0.14, src[2])
+    box('EngineSurface', [eng[0] - 0.14, eng[1] - 0.14, eng[2] + 0.28, 1.95], 'primary')
     tx('SourceLabel', [src[0], src[1], src[2], 0.6], d.srcLabel, 'index', 'srcLabel')
-    tx('SourceDetail', [src[0], src[1] + 0.8, src[2], 0.9], d.srcSub, 'small', 'srcSub')
+    tx('SourceDetail', [src[0], src[1] + 0.8, src[2], 0.9], d.srcSub, 'body', 'srcSub')
     tx('EngineTitle', [eng[0], eng[1], eng[2], 0.8], d.engTitle, 'heading', 'engTitle')
-    tx('EngineDetail', [eng[0], eng[1] + 0.8, eng[2], 1.2], d.engSub, 'small', 'engSub')
-    for (const c of cs.filter((c) =>
-      ['SourceLabel', 'SourceDetail', 'EngineTitle', 'EngineDetail'].includes(c.name),
-    ))
+    tx('EngineDetail', [eng[0], eng[1] + 0.8, eng[2], 1.2], d.engSub, 'body', 'engSub')
+    for (const c of cs.filter((c) => ['EngineTitle', 'EngineDetail'].includes(c.name)))
       c.style.color = 'paper'
     // A shared connector is derived from the two content frames, not attached decoration.
     cs.push({
       kind: 'arrow',
       name: 'FlowConnector',
       frame: [src[0] + src[2] + 0.2, y + 0.35, eng[0] - (src[0] + src[2]) - 0.4, 0.16],
-      color: 'primary',
+      color: 'warm',
     })
-    cs.push({
-      kind: 'arrow',
-      name: 'OutputConnector',
-      direction: vertical ? 'down' : 'right',
-      frame: vertical
-        ? [eng[0] + eng[2] / 2 - 0.08, eng[1] + 1.65, 0.16, out[1] - eng[1] - 1.8]
-        : [eng[0] + eng[2] + 0.2, y + 0.35, out[0] - eng[0] - eng[2] - 0.4, 0.16],
-      color: 'primary',
-    })
+    if (vertical) {
+      cs.push({
+        kind: 'arrow',
+        name: 'OutputConnector',
+        direction: 'down',
+        frame: [eng[0] + eng[2] / 2 - 0.08, eng[1] + 1.65, 0.16, out[1] - eng[1] - 1.8],
+        color: 'warm',
+      })
+    }
     grid(out, d.outputs.length, 2).forEach(([ox, oy, ow, oh], i) => {
       const v = d.outputs[i],
         p = `outputs[${i}]`
-      facet('OutputSurface' + i, [ox - 0.1, oy + 0.04, ow + 0.2, oh - 0.08], 'white')
+      box('OutputSurface' + i, [ox - 0.1, oy + 0.04, ow + 0.2, oh - 0.08], 'deep')
       const heading = fitConsultingText(
         v.title,
         [ox, oy, ow, 0.45],
@@ -433,7 +383,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       if (caption.requiredHeight > caption.allocatedFrame[3])
         throw Error(`${path}.${p}: output caption exceeds height`)
       caption.frame[3] = caption.requiredHeight
-      caption.paragraphStyles = [{ ...b.styles.heading, color: 'teal' }, {}]
+      caption.paragraphStyles = [{ ...b.styles.heading, color: 'tealLight' }, {}]
       caption.owner = 'OutputSurface' + i
       caption.ownerMargins = {
         marginLeft: '0.1in',
@@ -442,13 +392,34 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
         marginBottom: '0.04in',
       }
     })
+    {
+      // Bind the group to actual output-node bounds, and draw above their fills.
+      const nodes = cs.filter((c) => c.kind === 'box' && c.name.startsWith('OutputSurface')),
+        groupLeft = Math.min(...nodes.map((c) => c.frame[0])) - 0.02,
+        groupRight = Math.max(...nodes.map((c) => c.frame[0] + c.frame[2])) + 0.02,
+        groupTop = Math.min(...nodes.map((c) => c.frame[1])),
+        groupBottom = Math.max(...nodes.map((c) => c.frame[1] + c.frame[3])),
+        engineRight = eng[0] + eng[2] + 0.14,
+        engineCenterY = eng[1] - 0.14 + 1.95 / 2
+      box('OutputGroupBracket', [groupLeft, groupTop, 0.012, groupBottom - groupTop], 'tealLight')
+      box('OutputGroupTop', [groupLeft, groupTop, groupRight - groupLeft, 0.012], 'tealLight')
+      box(
+        vertical ? 'OutputGroupRight' : 'OutputGroupBottom',
+        vertical
+          ? [groupRight - 0.012, groupTop, 0.012, groupBottom - groupTop]
+          : [groupLeft, groupBottom - 0.012, groupRight - groupLeft, 0.012],
+        'tealLight',
+      )
+      if (!vertical)
+        cs.push({
+          kind: 'arrow',
+          name: 'OutputConnector',
+          frame: [engineRight + 0.05, engineCenterY - 0.07, groupLeft - engineRight - 0.05, 0.14],
+          color: 'warm',
+        })
+    }
     capability(r.capabilities, d.featHeader, d.featLeft, d.featRight, 'feat', vertical)
   } else if (family.role === 'benchmark') {
-    facet(
-      'TableSurface',
-      [r.table[0] - 0.15, r.table[1] - 0.1, r.table[2] + 0.3, r.table[3] + 0.2],
-      'white',
-    )
     const rows = d.tableRows,
       cols = rows[0].length
     if (rows.some((row) => row.length !== cols))
@@ -485,7 +456,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       fitConsultingText(
         v,
         [0, 0, r.chart[2] * 0.4, r.chart[3] / values.length],
-        b.styles.small,
+        { ...b.styles.small, sizePt: b.chart.fontPt },
         `${path}.chartData.categories[${i}]`,
       ),
     )
@@ -495,7 +466,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
       d.chartTitle,
       'small',
       'chartTitle',
-      { bold: true, color: 'ink' },
+      { bold: true, color: 'paper' },
     )
     tx(
       'ChartUnit',
@@ -529,8 +500,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
         p = `steps[${i}]`
       if (rows) rule('StepRule' + i, x, y, w)
       if (!rows) {
-        facet('PhaseSurface' + i, [x - 0.1, y + 1.2, w + 0.2, h - 1.1], i === 0 ? 'mist' : 'white')
-        circle('PhaseNode' + i, [x + w / 2 - 0.065, y + 0.97, 0.13, 0.13], 'primary')
+        circle('PhaseNode' + i, [x + w / 2 - 0.065, y + 0.97, 0.13, 0.13], 'warm')
       }
       tx('StepIndex' + i, [x, y + 0.12, 0.7, 0.6], v.index, 'index', p + '.index')
       tx(
@@ -566,11 +536,7 @@ export function compileConsultingLayout(design, family, layoutId, variant, d, pa
     grid(r.items, d.asks.length, rows ? 1 : d.asks.length).forEach(([cx, cy, cw, ch], i) => {
       const v = d.asks[i],
         p = `asks[${i}]`
-      facet(
-        'AskSurface' + i,
-        [cx - 0.12, cy - 0.06, cw + 0.24, ch + 0.12],
-        i === 0 ? 'deep' : 'darkRule',
-      )
+      rule('AskRule' + i, cx, cy, cw)
       tx(
         'AskTitle' + i,
         [cx, cy + 0.18, rows ? 2.5 : cw, rows ? ch - 0.2 : 0.75],
@@ -624,7 +590,7 @@ export function resolveConsultingDeck(design, content) {
             design.consulting.chrome.page,
             {
               ...design.consulting.styles.source,
-              color: ['cover', 'decision'].includes(family.role) ? 'pale' : 'secondary',
+              color: 'pale',
               alignment: 'right',
             },
             'structural.page',
@@ -647,7 +613,7 @@ export function resolveConsultingDeck(design, content) {
           {
             layoutId,
             role: family.role,
-            mode: ['cover', 'decision'].includes(family.role) ? 'dark' : 'light',
+            mode: 'dark',
             components,
             fingerprint: designHash({
               role: family.role,

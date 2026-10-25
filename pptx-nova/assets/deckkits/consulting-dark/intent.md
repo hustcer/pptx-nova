@@ -1,8 +1,8 @@
-# Consulting Dark 2.0
+# Consulting Dark 2.1
 
-An executive consulting language built around decisive typography and substantial geometric forms. Navy opening and decision
-pages frame warm paper evidence pages. Copper directs attention to numbers and short indexes;
-teal distinguishes outputs. Neither color is a business policy or a category palette.
+An executive consulting language built around a deep navy canvas on every page, decisive warm-white
+typography and open evidence structures. Warm copper directs attention to numbers and short indexes;
+light teal distinguishes outputs. Neither color is a business policy or a category palette.
 
 The design contract is the numerical authority. Everyday authors use the registered slide types and
 `layoutId`; they do not write coordinates. The resolver checks actual text and data capacity, records
@@ -11,15 +11,25 @@ If none fits, reorganise or split the content. No field is truncated and no font
 
 ## Visual decisions
 
-- Replace the former rounded containers and colored edge strips with faceted, cut-corner surfaces,
-  confident navy/copper/teal blocks, native tabular evidence, and fine rules that explain relationships.
+- Use open ledgers, typographic proof numbers, comparison columns and a shared timeline instead of
+  repeating a panel around every item. Cut-corner surfaces are not registered in this version.
+  Reserve solid rectangles for the position statement, process engine and editable output nodes.
+  Fine rules explain relationships without turning every page into another card grid.
   Preserve different-sized native circle ornaments on cover and decision pages, outside text zones.
   Do not attach colored caps to rounded cards or add shadows and gradients.
 - Keep separate visual structures for achievements, audience groups, process flow, comparison and
-  roadmap. Use shaped surfaces and clear nodes to retain the visual richness of the original; sparse content
-  still needs balanced grouping rather than a text-only page.
-- Use warm paper for sustained reading and navy for the opening and final decision. Dark pages do
-  not imply financial, technical or governance conclusions.
+  roadmap. Equal-role items receive equal styling: an array index never makes a peer a recommended
+  option or a current stage. Copper proof numbers share one hierarchy; teal identifies outputs.
+  Process arrows enter an open bracket around the whole output group, rather than
+  implying that only its first item is produced. Derive this bracket from actual node bounds and
+  draw it above their fills so the guides remain continuous.
+- Use 13pt for allocated capability, audience and comparison reading regions, 12pt for chart labels,
+  and 34pt for achievement proof values. Compact labels, dense native table text and provenance retain
+  their validated 10–11.5pt roles. Instance fit checks still reject excess copy instead of shrinking it.
+- Keep every role dark, including native table/chart evidence. Slate node fills and fine blue-gray
+  rules provide local depth; pale supporting text remains readable against navy. Layout, density and
+  typography create the deck rhythm. Do not turn evidence pages light or infer business meaning from
+  the dark palette.
 - Explicitly request upright Arial and Arial Unicode MS, including regular and bold runs. Fonts are
   not embedded; another font environment requires new visual checks.
 - The source note, units, dates, claims and every business label come from content. Example figures
@@ -71,7 +81,7 @@ instead. Unknown fields fail rather than pretending to affect output.
 
 ## Editability and boundaries
 
-All text, circular ornaments, faceted shapes, rules, arrows, the benchmark table and the clustered bar chart remain native editable
+All text, circular ornaments, rectangular process nodes, rules, arrows, the benchmark table and the clustered bar chart remain native editable
 PowerPoint objects. The chart uses one finite numeric series, with original zero, negative and tiny
 values retained. No normalisation or fabricated minimum width is applied. Data labels use General;
 the caller supplies units, and a small value may appear in scientific notation.
@@ -84,3 +94,14 @@ Schemas and projected budgets are discovery aids. Maximum item counts do not gua
 combination of long text fits every layout. Each component still runs an instance capacity check.
 The release report records actual maximum-density, sparse, Chinese, mixed and alternative-layout
 coverage, visual review and native-host evidence. Candidate is not automatic production eligibility.
+
+## Compatibility from 2.0
+
+The ten slide types, twenty layout ids and named content fields are unchanged. Rebuild existing content
+to receive the open composition; editing an old deck's colors alone does not remove its old container
+geometry. The renderer and style gate both reject the retired folded-corner language. See
+[the design review and validation record](design-review.md) for the changes and checked scope.
+
+The refurbishment fallback shares the dark palette and Arial font roles. It preserves source object
+geometry and does not convert arbitrary source layouts into these open compositions. Its color/font
+configuration is distinct from the content-first generator's composition and native readback gates.

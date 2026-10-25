@@ -90,7 +90,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 11.5,
+              "fontPt": 12,
               "widthIn": 1.46,
               "heightIn": 0.3833333333333333,
               "lineHeight": 1.1,

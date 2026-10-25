@@ -111,11 +111,11 @@
         "type": "string",
         "minLength": 1,
         "x-slotBudget": {
-          "fontPt": 11.5,
+          "fontPt": 13,
           "widthIn": 3.02,
           "heightIn": 0.8266666666666665,
           "lineHeight": 1.1,
-          "maxLines": 3
+          "maxLines": 2
         }
       }
     },
@@ -127,11 +127,11 @@
         "type": "string",
         "minLength": 1,
         "x-slotBudget": {
-          "fontPt": 11.5,
+          "fontPt": 13,
           "widthIn": 3.02,
           "heightIn": 0.8266666666666665,
           "lineHeight": 1.1,
-          "maxLines": 3
+          "maxLines": 2
         }
       }
     }

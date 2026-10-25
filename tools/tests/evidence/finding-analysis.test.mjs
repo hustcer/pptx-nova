@@ -26,7 +26,7 @@ import { reviewFindingSha256 } from '../../../pptx-nova/scripts/lib/review/polic
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const fixturePath = join(
   repoRoot,
-  'tools/fixtures/finding-analysis/refurbish-duplicate-name-empty-sldnum/scenario.json',
+  'tools/tests/fixtures/finding-analysis/refurbish-duplicate-name-empty-sldnum/scenario.json',
 )
 const schemaPath = join(repoRoot, 'pptx-nova/assets/schemas/finding-analysis.schema.json')
 const SHA = {

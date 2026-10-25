@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import {
   createDeck,
   DESIGN,
@@ -20,7 +21,7 @@ const assetPath = new URL(
   '../../../pptx-nova/assets/examples/deckkits/pink-script/assets_manifest.json',
   import.meta.url,
 )
-const assets = createAssetContext(JSON.parse(readFileSync(assetPath)), assetPath.pathname)
+const assets = createAssetContext(JSON.parse(readFileSync(assetPath)), fileURLToPath(assetPath))
 const fixture = () => file('examples/content.json')
 const excerpt = (slides) => ({ meta: { deckkit: 'pink-script', designScope: 'excerpt' }, slides })
 test('pink-script: source grammar and explicit no-frame / QR-only refinements', () => {

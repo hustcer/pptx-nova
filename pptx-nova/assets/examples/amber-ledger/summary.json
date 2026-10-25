@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "pptx-nova-example-summary/v1",
+  "deckkit": "amber-ledger",
+  "caseId": "amber-ledger.golden-operations",
+  "kind": "golden",
+  "title": "Annual operations report",
+  "source": {
+    "content": "pptx-nova/assets/deckkits/examples/amber-ledger-content.json",
+    "build": "pptx-nova/assets/deckkits/examples/amber-ledger-build.mjs",
+    "expected": "pptx-nova/benchmarks/visual/cases/amber-ledger/golden-operations/expected.json",
+    "benchmarkIndex": "pptx-nova/benchmarks/visual/index.json"
+  },
+  "validation": {
+    "valid": true,
+    "errors": 0,
+    "warnings": 0,
+    "fitDiagnostics": 0,
+    "blockingFitDiagnostics": 0
+  },
+  "patch": {
+    "schemaVersion": "pptx-patch/v1",
+    "ops": 853
+  },
+  "dryRun": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 29,
+    "opResults": 853,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 3,
+      "total": 3
+    }
+  },
+  "apply": {
+    "status": "success",
+    "warnings": 0,
+    "changedParts": 29,
+    "opResults": 853,
+    "visualRisks": {
+      "high": 0,
+      "medium": 0,
+      "low": 3,
+      "total": 3
+    }
+  },
+  "vision": {
+    "status": "success",
+    "slideCount": 8,
+    "issueCount": 0,
+    "autoFixable": 0,
+    "bySeverity": {
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "lowBuckets": {
+      "total": 0,
+      "styleAllowed": 0,
+      "baselineKnown": 0,
+      "new": 0,
+      "changed": 0,
+      "resolved": 0,
+      "reviewable": 0,
+      "baselineUnavailable": true,
+      "baselineUpdated": false
+    },
+    "lowByFamily": {},
+    "newLowByFamily": {},
+    "changedLowByFamily": {},
+    "baseline": {
+      "schemaVersion": "",
+      "fingerprintVersion": "",
+      "path": "pptx-nova/benchmarks/visual/baselines/amber-ledger.golden-operations.vision-baseline.json",
+      "available": false,
+      "issueCount": 0
+    },
+    "stylePolicy": {
+      "schemaVersion": "pptx-nova-vision-style-policy/v1",
+      "source": "catalog.qualityProfile",
+      "minFontPt": 10.5,
+      "labelFontPt": 10.5,
+      "sourceFontPt": 10.5,
+      "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+    },
+    "newLowSamples": [],
+    "changedLowSamples": [],
+    "resolvedLowSamples": []
+  },
+  "contactSheet": {
+    "format": "webp",
+    "quality": 82,
+    "encoder": {
+      "tool": "cwebp",
+      "command": "cwebp -quiet -q 82 -m 6 <png> -o <webp>"
+    },
+    "sourcePng": {
+      "bytes": 205959,
+      "sha256": "166d3c9bf071b031576db7e6bfe16d51c899045e7aa9e0a483a402b23bab687e"
+    },
+    "webp": {
+      "bytes": 113864,
+      "sha256": "10b69cf045e62bdcb7c537b73f84c7de0b00b41eeb91ed27026d06117a97d037"
+    }
+  }
+}

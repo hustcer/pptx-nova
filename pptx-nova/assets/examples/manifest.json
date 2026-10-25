@@ -213,7 +213,7 @@
       "deckkit": "swiss-grid",
       "caseId": "swiss-grid.golden-lecture",
       "kind": "golden",
-      "readiness": "default",
+      "readiness": "production",
       "version": "2.0.0",
       "title": "网格系统",
       "bestFor": [
@@ -1070,6 +1070,397 @@
           "schemaVersion": "",
           "fingerprintVersion": "",
           "path": "pptx-nova/benchmarks/visual/baselines/warm-clay.golden-workshop.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "clear-impact",
+      "deckkit": "clear-impact",
+      "caseId": "clear-impact.golden-impact",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Impact report",
+      "bestFor": ["impact report", "operating review", "sustainability report", "工作汇报"],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "clear-impact/deck.pptx",
+          "bytes": 37954,
+          "sha256": "56309183a33af8d3266f39c1a6befb4ce5f06310e3a0e9b71a738cd74a758e8c"
+        },
+        "contactSheet": {
+          "path": "clear-impact/contact-sheet.webp",
+          "bytes": 148760,
+          "sha256": "3e583bc8dbabf2c5737e66f92c76e4c37192ac288410b3030d8653612ad96a82",
+          "quality": 82
+        },
+        "content": {
+          "path": "clear-impact/content.json",
+          "bytes": 17446,
+          "sha256": "3e62d4aac23ed5f2c1de5171028454d985a5dcf863e65730333079dc44fc7514"
+        },
+        "brief": {
+          "path": "clear-impact/brief.md",
+          "bytes": 678,
+          "sha256": "a0ec5f9757cc9b50297a10964616ca39018bcb11ec9121b7cbdcc5a346e7eec6"
+        },
+        "summary": {
+          "path": "clear-impact/summary.json",
+          "bytes": 2688,
+          "sha256": "6bd1566a47f2e19662ad8c52906bdcbd8322104390f8be7b363558aaee155c37"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 1362
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 12,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/clear-impact.golden-impact.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "amber-ledger",
+      "deckkit": "amber-ledger",
+      "caseId": "amber-ledger.golden-operations",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Annual operations report",
+      "bestFor": [
+        "annual report",
+        "board review",
+        "operational performance",
+        "年度经营汇报",
+        "董事会报告"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "amber-ledger/deck.pptx",
+          "bytes": 36133,
+          "sha256": "7541d30afdb2b87358869a9173502106957fcb5eb5f1e89fe4a96d6716535b01"
+        },
+        "contactSheet": {
+          "path": "amber-ledger/contact-sheet.webp",
+          "bytes": 113864,
+          "sha256": "10b69cf045e62bdcb7c537b73f84c7de0b00b41eeb91ed27026d06117a97d037",
+          "quality": 82
+        },
+        "content": {
+          "path": "amber-ledger/content.json",
+          "bytes": 13684,
+          "sha256": "cba8eb35d6a1a7c894f9c4f3700e4e81834ff2780025bf53566bdb8e7ce33584"
+        },
+        "brief": {
+          "path": "amber-ledger/brief.md",
+          "bytes": 712,
+          "sha256": "a8c8d51cd2da887ec8006203d97b3a34547b94192a7707eb7a79fb6bb6a1bf20"
+        },
+        "summary": {
+          "path": "amber-ledger/summary.json",
+          "bytes": 2707,
+          "sha256": "e6052bf56d652d999e27997aab5b464780169af4774f82462be546428b7c6ec6"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 853
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/amber-ledger.golden-operations.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "midnight-pulse",
+      "deckkit": "midnight-pulse",
+      "caseId": "midnight-pulse.golden-operations",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Volume grew; efficiency needs a reset",
+      "bestFor": [
+        "operations review",
+        "performance diagnosis",
+        "project governance",
+        "运营复盘",
+        "项目治理"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "midnight-pulse/deck.pptx",
+          "bytes": 58101,
+          "sha256": "ac3e864ff51e6689cec5769f604e67a5a9630bac4139a395f4f55b2157ff551a"
+        },
+        "contactSheet": {
+          "path": "midnight-pulse/contact-sheet.webp",
+          "bytes": 107364,
+          "sha256": "f99ce97708aadbe34758be7d323149c7dc5953e867ac8d54d8a8748189eaa040",
+          "quality": 82
+        },
+        "content": {
+          "path": "midnight-pulse/content.json",
+          "bytes": 13462,
+          "sha256": "e26b4376b75a03f5f5923dcf383967e3837f3b66aebd7b2a8b59ff5c167cd6ab"
+        },
+        "brief": {
+          "path": "midnight-pulse/brief.md",
+          "bytes": 731,
+          "sha256": "a10af0f0a8ef5bdc63552f1a109bbfa35d872c397daeb53e062883e47d148e84"
+        },
+        "summary": {
+          "path": "midnight-pulse/summary.json",
+          "bytes": 2735,
+          "sha256": "9ea65cddb569dcf1ebd97ea45905b67e844073ba3ec8eaf8ed15ecdd36931918"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 1115
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/midnight-pulse.golden-operations.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
+    },
+    {
+      "id": "sky-compass",
+      "deckkit": "sky-compass",
+      "caseId": "sky-compass.golden-operations",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Community support Operations review",
+      "bestFor": [
+        "operating review",
+        "service performance",
+        "project progress",
+        "decision brief",
+        "运营复盘",
+        "项目进度"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "sky-compass/deck.pptx",
+          "bytes": 44554,
+          "sha256": "b0747c8a729cdb98d16e19396ef3a4147fde50f72e50634592f8c2897851113d"
+        },
+        "contactSheet": {
+          "path": "sky-compass/contact-sheet.webp",
+          "bytes": 168626,
+          "sha256": "a7a380be296a34c4695bb8c424e46b8f039a17cf5239775ff6e637cd665d3c4f",
+          "quality": 82
+        },
+        "content": {
+          "path": "sky-compass/content.json",
+          "bytes": 18613,
+          "sha256": "5c67c519fc38a4c539aa29500db63b46a79565f50df8131fa77cc24e6acef75a"
+        },
+        "brief": {
+          "path": "sky-compass/brief.md",
+          "bytes": 732,
+          "sha256": "056c17a5bc505fda6bed6555e9dd582bf7a9751121eb09382a495fa65bd86b46"
+        },
+        "summary": {
+          "path": "sky-compass/summary.json",
+          "bytes": 2716,
+          "sha256": "12d83c6d655230c1fd55f5058ad223e12e449c3a82879143e6e480da82638b1c"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 1362
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 12,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/sky-compass.golden-operations.vision-baseline.json",
           "available": false,
           "issueCount": 0
         },

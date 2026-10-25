@@ -263,6 +263,15 @@
       "buildPath": "../../assets/deckkits/pink-script/examples/build.mjs",
       "expectedPath": "cases/pink-script/golden-editorial/expected.json",
       "reviewPath": "cases/pink-script/golden-editorial/review.md"
+    },
+    {
+      "id": "paper-scholar.golden-learning",
+      "deckkit": "paper-scholar",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/paper-scholar/examples/content.json",
+      "buildPath": "../../assets/deckkits/paper-scholar/examples/build.mjs",
+      "expectedPath": "cases/paper-scholar/golden-learning/expected.json",
+      "reviewPath": "cases/paper-scholar/golden-learning/review.md"
     }
   ]
 }

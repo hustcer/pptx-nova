@@ -270,6 +270,9 @@
     },
     "pink": {
       "$ref": "#/$defs/pink"
+    },
+    "scholar": {
+      "$ref": "#/$defs/scholar"
     }
   },
   "required": [
@@ -5024,6 +5027,299 @@
           "type": "number",
           "minimum": 10.5,
           "maximum": 300
+        },
+        "color": {
+          "type": "string"
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "lineHeight": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1.5
+        }
+      },
+      "required": ["role", "sizePt", "color", "bold", "lineHeight"],
+      "additionalProperties": false
+    },
+    "scholar": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "paper-scholar/v1"
+        },
+        "styles": {
+          "type": "object",
+          "properties": {
+            "hero": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "title": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "heading": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "body": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "small": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "label": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "table": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "metric": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "comparator": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "formula": {
+              "$ref": "#/$defs/scholarStyle"
+            },
+            "badge": {
+              "$ref": "#/$defs/scholarStyle"
+            }
+          },
+          "required": [
+            "hero",
+            "title",
+            "heading",
+            "body",
+            "small",
+            "label",
+            "table",
+            "metric",
+            "comparator",
+            "formula",
+            "badge"
+          ],
+          "additionalProperties": false
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "rulePt": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 2
+            }
+          },
+          "required": ["gap", "rulePt"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            }
+          },
+          "required": ["maxConsecutive"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/frame"
+            },
+            "basis": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            },
+            "index": {
+              "$ref": "#/$defs/frame"
+            },
+            "eyebrow": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["title", "basis", "source", "page", "index", "eyebrow"],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "steps": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "sources": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "notes": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "points": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "rows": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "columns": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "definitions": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "ticks": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "actions": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            },
+            "review": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1
+              }
+            }
+          },
+          "required": [
+            "steps",
+            "sources",
+            "notes",
+            "points",
+            "rows",
+            "columns",
+            "definitions",
+            "ticks",
+            "actions",
+            "review"
+          ],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "methods",
+                  "finding",
+                  "chart",
+                  "mechanism",
+                  "segments",
+                  "case",
+                  "closing"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["family", "styles", "spacing", "rhythm", "chrome", "capacity", "families"],
+      "additionalProperties": false
+    },
+    "scholarStyle": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["display", "body", "numeral"]
+        },
+        "sizePt": {
+          "type": "number",
+          "minimum": 10.5,
+          "maximum": 110
         },
         "color": {
           "type": "string"

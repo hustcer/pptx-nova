@@ -1872,6 +1872,106 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "paper-scholar",
+      "deckkit": "paper-scholar",
+      "caseId": "paper-scholar.golden-learning",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "1.0.0",
+      "title": "Small routines build durable recall",
+      "bestFor": [
+        "research courseware",
+        "methods teaching",
+        "evidence report",
+        "study review",
+        "研究课件",
+        "证据报告"
+      ],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "paper-scholar/deck.pptx",
+          "bytes": 43946,
+          "sha256": "f536d7f17842203f3ae66e1a0ec634b4548425edb59dc1bb304c5972e25189a8"
+        },
+        "contactSheet": {
+          "path": "paper-scholar/contact-sheet.webp",
+          "bytes": 547992,
+          "sha256": "a55b1b34bac34d0e6d2b2b71277ec7c4e211dd78b60cb9ce3418298c9f8deb16",
+          "quality": 86
+        },
+        "content": {
+          "path": "paper-scholar/content.json",
+          "bytes": 10324,
+          "sha256": "9abd56952075f5b7859339698a4bfc4c8d1197c8745bc3185f028f3d2db22a91"
+        },
+        "brief": {
+          "path": "paper-scholar/brief.md",
+          "bytes": 731,
+          "sha256": "8146d571ae41fd102f925e986035d92eecc621efa34bdece196f2dd86e0b1c91"
+        },
+        "summary": {
+          "path": "paper-scholar/summary.json",
+          "bytes": 2719,
+          "sha256": "7cb492ac67f80dc7403d5a4d2fde5f74887e5202e57f6da14f9ea764e08c5bc9"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 900
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 8,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/paper-scholar.golden-learning.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

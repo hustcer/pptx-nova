@@ -8168,6 +8168,369 @@
         "pink-script/examples/alternate-content.json",
         "pink-script/examples/community-content.json"
       ]
+    },
+    {
+      "id": "paper-scholar",
+      "version": "1.0.0",
+      "path": "paper-scholar/paper-scholar.kit.mjs",
+      "designContract": "paper-scholar/design.json",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "research courseware",
+        "methods teaching",
+        "evidence report",
+        "study review",
+        "研究课件",
+        "证据报告"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "scholarCoverSlide",
+          "scholarMethodsSlide",
+          "scholarFindingSlide",
+          "scholarChartSlide",
+          "scholarMechanismSlide",
+          "scholarSegmentsSlide",
+          "scholarCaseSlide",
+          "scholarClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "scholarCoverSlide",
+        "scholarMethodsSlide",
+        "scholarFindingSlide",
+        "scholarChartSlide",
+        "scholarMechanismSlide",
+        "scholarSegmentsSlide",
+        "scholarCaseSlide",
+        "scholarClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Warm paper academic research with olive hierarchy, coral marks and editable evidence.",
+        "mood": ["calm", "precise", "editorial"],
+        "layoutPrinciples": [
+          "Open evidence rather than generic cards.",
+          "Native curves, tables, columns and content-driven comparison.",
+          "Bounded variants retain all information without shrinking."
+        ],
+        "signatureElements": [
+          "arched contour field with smooth study path and ticks",
+          "short coral title underline and top-right index",
+          "owned coral numbered circles and connected arrows",
+          "ten exact fractional retention dots",
+          "coral columns with internal unit labels",
+          "paired half-life curves, internal labels, time ticks and upright equation",
+          "olive row labels with circular icons and pale/blush evidence cells",
+          "blush case band overlapped by editable image shell",
+          "rounded functional action rows and next-review ledger"
+        ],
+        "typography": {
+          "display": "Arial / Arial Unicode MS; upright regular and bold.",
+          "body": "Upright sans serif, 14pt body with a 10.5pt floor.",
+          "numeric": "Large olive focal metric; raw finite values and separate display formats."
+        },
+        "colorSystem": {
+          "background": ["warm paper"],
+          "primary": ["olive", "blue-gray"],
+          "accent": ["coral"],
+          "semantic": ["All judgments and row meanings come from content."]
+        },
+        "slideRhythm": {
+          "anchor": ["scholarCoverSlide", "scholarClosingSlide"],
+          "method": ["scholarMethodsSlide", "scholarMechanismSlide"],
+          "evidence": ["scholarFindingSlide", "scholarChartSlide", "scholarSegmentsSlide"],
+          "case": ["scholarCaseSlide"]
+        },
+        "compositionRules": [
+          "Preserve signature geometry in every registered variant.",
+          "Claims, units, dates, sources and model parameters come from content.",
+          "Regenerate numeric-derived shapes and independent annotations after manual edits."
+        ],
+        "avoid": [
+          "generic card walls",
+          "photographic backgrounds",
+          "reference brand or facts",
+          "shadows",
+          "gradients",
+          "3D",
+          "silent field omission",
+          "unlimited font shrinking"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "scholarCoverSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.eyebrow",
+              "data.subtitle",
+              "data.metadata",
+              "data.scope",
+              "data.badge",
+              "data.source"
+            ],
+            "allowedLayoutIds": ["auto", "contour", "inset"]
+          },
+          "scholarMethodsSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.steps",
+              "data.evidenceLabel",
+              "data.sources",
+              "data.note"
+            ],
+            "allowedLayoutIds": ["auto", "horizontal", "vertical"]
+          },
+          "scholarFindingSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.metric",
+              "data.comparator",
+              "data.unit",
+              "data.dotCaption",
+              "data.gapLabel",
+              "data.gapUnit",
+              "data.notes"
+            ],
+            "allowedLayoutIds": ["auto", "leadLeft", "leadRight"]
+          },
+          "scholarChartSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.seriesName",
+              "data.unit",
+              "data.points",
+              "data.notes",
+              "data.plotNote"
+            ],
+            "allowedLayoutIds": ["auto", "plotLeft", "plotRight"]
+          },
+          "scholarMechanismSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.definitions",
+              "data.series",
+              "data.maxTime",
+              "data.ticks",
+              "data.unit",
+              "data.xLabel",
+              "data.yLabel",
+              "data.formulaLabel",
+              "data.plotNote",
+              "data.modelNote"
+            ],
+            "allowedLayoutIds": ["auto", "center", "plotLeft"]
+          },
+          "scholarSegmentsSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.headers",
+              "data.rows",
+              "data.summaryLabel",
+              "data.summaryValue",
+              "data.footnote",
+              "data.takeaway"
+            ],
+            "allowedLayoutIds": ["auto", "full", "rail"]
+          },
+          "scholarCaseSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.notes",
+              "data.assetCaption",
+              "data.before",
+              "data.after",
+              "data.unit",
+              "data.resultLabel",
+              "data.resultNote",
+              "data.caution"
+            ],
+            "allowedLayoutIds": ["auto", "portrait", "resultFirst"]
+          },
+          "scholarClosingSlide": {
+            "requiredSlots": [
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.actions",
+              "data.reviewLabel",
+              "data.review"
+            ],
+            "allowedLayoutIds": ["auto", "bands", "ledger"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["scholarCoverSlide", "scholarClosingSlide"],
+          "method": ["scholarMethodsSlide", "scholarMechanismSlide"],
+          "evidence": ["scholarFindingSlide", "scholarChartSlide", "scholarSegmentsSlide"],
+          "case": ["scholarCaseSlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (9ee8ef0c)",
+        "report": "../../benchmarks/visual/cases/paper-scholar/golden-learning/review.md",
+        "powerPoint": "macOS PowerPoint 16.114.1: final golden/water open, Save As, close/reopen without Repair; saved readback passed. Separate native text/table/chart edit probe passed. CLI clean-open skipped: UI scripting unavailable."
+      },
+      "quality": {
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-10-26",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-26",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-paper-scholar/benchmark/03"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "paper-scholar.golden-learning",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-paper-scholar/benchmark/03/paper-scholar/golden-learning/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/paper-scholar/golden-learning/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 225919
+              },
+              "patchOps": 900,
+              "p50TotalMs": 135.67
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on supplied paper-white-courseware specification and eight-panel reference; observed olive/coral identity and 16:9 override conflicting blue/yellow marketing prose.",
+        "Explicit creation selection only; no arbitrary existing-deck preservation or native skinning claim.",
+        "Arial / Arial Unicode MS replace unavailable Liter / MiSans; fonts are not embedded.",
+        "Reference photo is replaced by an editable shape shell; external photo ingestion is not registered. Bundled Tabler SVG icons are image objects, not native editable path nodes.",
+        "Native chart/table data remain editable; independent icons, labels, fractional dots, gap and half-life curves require regeneration from content to synchronize after manual edits.",
+        "Eight roles and sixteen bounded compositions; 2–4 methods, 2–5 chart observations, 3–5 table columns and 2–5 rows. Longer content must reorganize or split.",
+        "Half-life curves model R(t)=2^(-t/h); model choice, parameters and scientific interpretation are authored content, never an inferred real finding.",
+        "When any column is too short for an internal value, labels move outside for the entire series; complete series-scope defaults avoid current point-label inheritance differences.",
+        "Canonical previews simplify scientific numeric labels; PowerPoint retains the specified scientific format and unit. Source data and explicit plot-note units remain unchanged. Windows/older Office and pixel parity are unverified."
+      ],
+      "examples": [
+        "paper-scholar/examples/content.json",
+        "paper-scholar/examples/alternate-content.json",
+        "paper-scholar/examples/water-content.json"
+      ]
     }
   ]
 }

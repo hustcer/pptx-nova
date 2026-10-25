@@ -253,6 +253,26 @@
       "status": "available"
     },
     {
+      "id": "paper-scholar-showcase",
+      "name": "paper-scholar DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "paper-scholar",
+      "caseId": "paper-scholar.golden-learning",
+      "path": "../examples/deckkits/paper-scholar/deck.pptx",
+      "preview": "../examples/deckkits/paper-scholar/contact-sheet.webp",
+      "content": "../examples/deckkits/paper-scholar/content.json",
+      "summary": "../examples/deckkits/paper-scholar/summary.json",
+      "bestFor": [
+        "research courseware",
+        "methods teaching",
+        "evidence report",
+        "study review",
+        "研究课件",
+        "证据报告"
+      ],
+      "status": "preview"
+    },
+    {
       "id": "pink-script-showcase",
       "name": "pink-script DeckKit Showcase",
       "type": "deckkit-showcase",

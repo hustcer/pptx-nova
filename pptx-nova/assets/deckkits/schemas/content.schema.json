@@ -277,7 +277,15 @@
               "pinkProcessSlide",
               "pinkMatrixSlide",
               "pinkQuoteSlide",
-              "pinkClosingSlide"
+              "pinkClosingSlide",
+              "scholarCoverSlide",
+              "scholarMethodsSlide",
+              "scholarFindingSlide",
+              "scholarChartSlide",
+              "scholarMechanismSlide",
+              "scholarSegmentsSlide",
+              "scholarCaseSlide",
+              "scholarClosingSlide"
             ]
           },
           "data": {

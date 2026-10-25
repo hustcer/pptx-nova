@@ -1,3 +1,4 @@
+import { SCHOLAR_FAMILY } from '../paper-scholar/registry.mjs'
 import { PINK_FAMILY } from '../pink-script/registry.mjs'
 import { JOURNAL_FAMILY } from '../teal-journal/registry.mjs'
 import { RESEARCH_FAMILY } from '../blue-research/registry.mjs'
@@ -16,6 +17,7 @@ import { CONSULTING_FAMILY } from '../consulting-dark/registry.mjs'
 import { IMPACT_FAMILY } from '../clear-impact/registry.mjs'
 import { CLAY_FAMILY } from '../warm-clay/registry.mjs'
 export const DESIGN_FAMILIES = [
+  SCHOLAR_FAMILY,
   PINK_FAMILY,
   RESEARCH_FAMILY,
   JOURNAL_FAMILY,

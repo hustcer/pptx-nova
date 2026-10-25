@@ -498,7 +498,7 @@ content validation、DeckKit patch build、icon pack query、DeckKit selector、
 - Tabler icon pack license 是否随包携带。
 - examples 是否声明 synthetic / redistributable policy。
 
-`tools/ci-check.nu` 还会校验 `pptx-nova/assets/examples/*/content.json`，并对 production/default
+`tools/ci-check.nu` 还会校验 `pptx-nova/assets/examples/deckkits/*/content.json`，并对 production/default
 DeckKit 运行 `pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mode catalog`。
 
 ### Tabler 图标包

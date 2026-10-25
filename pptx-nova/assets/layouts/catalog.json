@@ -39,7 +39,7 @@
       "name": "Executive Grid",
       "type": "generatorLayoutVariant",
       "bestFor": ["board-style readout", "KPI evidence", "consulting executive summary"],
-      "generatorEntryPoint": "deck-generator-template.mjs --layout executive-grid",
+      "generatorEntryPoint": "assets/examples/generator/deck-generator-template.mjs --layout executive-grid",
       "referenceStyle": "McKinsey-style dense client loyalty readout",
       "generatorHints": {
         "columns": 12,
@@ -55,7 +55,7 @@
       "name": "Narrative Split",
       "type": "generatorLayoutVariant",
       "bestFor": ["story-led recommendation", "thesis plus evidence", "client decision memo"],
-      "generatorEntryPoint": "deck-generator-template.mjs --layout narrative-split",
+      "generatorEntryPoint": "assets/examples/generator/deck-generator-template.mjs --layout narrative-split",
       "referenceStyle": "McKinsey-style left narrative rail with right-side data evidence",
       "generatorHints": {
         "columns": 2,
@@ -71,7 +71,7 @@
       "name": "Data Room",
       "type": "generatorLayoutVariant",
       "bestFor": ["analytical appendix", "due-diligence metrics", "operational action register"],
-      "generatorEntryPoint": "deck-generator-template.mjs --layout data-room",
+      "generatorEntryPoint": "assets/examples/generator/deck-generator-template.mjs --layout data-room",
       "referenceStyle": "McKinsey-style compact data room with tables, dashboards, and action rows",
       "generatorHints": {
         "columns": 12,

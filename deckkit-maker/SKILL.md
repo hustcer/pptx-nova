@@ -109,7 +109,7 @@ test ! -e .tmp/deckkit-<id>
 node -e "const c=require('./pptx-nova/assets/deckkits/catalog.json'); const id=process.argv[1]; if ((c.entries||[]).some(e=>e.id===id)) process.exit(1)" <id>
 test ! -e pptx-nova/assets/deckkits/<id>
 test ! -e pptx-nova/benchmarks/visual/cases/<id>
-test ! -e pptx-nova/assets/examples/<id>
+test ! -e pptx-nova/assets/examples/deckkits/<id>
 ```
 
 如果任一目标文件或目录已存在，先确认是继续扩展、接管未完成工作，还是换新 id。不要删除或覆盖
@@ -155,7 +155,7 @@ test ! -e pptx-nova/assets/examples/<id>
 套件的公开注册或解析接口。共享资源定位复用 `shared/deckkit-paths.mjs`，不得依赖运行 cwd。
 
 公共 `content.schema.json`、`design.schema.json` 继续位于 `deckkits/schemas/`；
-用户可见 showcase 仍位于 `assets/examples/<id>/`，视觉回归资料仍位于
+用户可见 showcase 仍位于 `assets/examples/deckkits/<id>/`，视觉回归资料仍位于
 `benchmarks/visual/cases/<id>/`。每次新增或修改套件后运行：
 
 ```bash

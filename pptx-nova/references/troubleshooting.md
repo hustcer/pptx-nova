@@ -513,7 +513,7 @@ scatter / bubble 误传 `categories + values`：
 常见案例 swiss-grid 的 `data.eyebrow`：它是顶部排版契约的一部分，**必填且不可放宽**；
 2.0 会完整显示该字段，请填真实短文案（如 `"Origins"` 或 `"设计原则"`）。
 独立页码由生成器按页面位置计算；旧 `"P · 04"` 输入不会再被静默抑制。
-没有 hint 的槽位按 DeckKit 的 `assets/examples/<deckkit>/content.json` 对照补齐。
+没有 hint 的槽位按 DeckKit 的 `assets/examples/deckkits/<deckkit>/content.json` 对照补齐。
 
 ## visualRisks[] 警告处理
 

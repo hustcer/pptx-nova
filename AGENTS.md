@@ -29,6 +29,8 @@ Keep each DeckKit under `pptx-nova/assets/deckkits/<id>/`: `<id>.kit.mjs`, `desi
 
 ## Testing Guidelines
 
+Group `pptx-nova/assets/examples/` by purpose: curated showcases plus their generated README/manifest under `deckkits/`, the exploratory template and generated theme dependency together under `generator/`, and creation/edit input examples under `create/` and `edit/`. Keep the root README as the maintained index. The DeckKit example updater owns only `examples/deckkits/` and its deck-catalog entries; update paths, hashes and the examples-layout audit when relocating assets.
+
 Published CLI entries belong under `pptx-nova/scripts/cli/<workflow>/` and internal modules under `pptx-nova/scripts/lib/<domain>/`. Keep the scripts root limited to README plus these two roles. Use concise file names within each namespace; internal modules must not import CLI entry points or execute a CLI when imported. Resolve shared resources and child commands through `scripts/lib/runtime/skill-paths.mjs`.
 
 Keep tests under `tools/tests/{deckkits,workflows,contracts,evidence,runtime,maintenance}/`, with support code in `helpers/` and data in `fixtures/`. Run all suites with `node tools/run-tests.mjs`; CI and `just t` must use this same recursive discovery entry point. Do not restore flat test globs. Preserve test names and conditional integration coverage when splitting suites.

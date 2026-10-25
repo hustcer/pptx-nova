@@ -10,7 +10,7 @@ const REPO_ROOT = resolve(dirname(__filename), '..')
 const SKILL_ROOT = join(REPO_ROOT, 'pptx-nova')
 const VISUAL_INDEX = join(SKILL_ROOT, 'benchmarks/visual/index.json')
 const DECKKIT_CATALOG = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
-const EXAMPLES_ROOT = join(SKILL_ROOT, 'assets/examples')
+const EXAMPLES_ROOT = join(SKILL_ROOT, 'assets/examples/deckkits')
 const DEFAULT_TMP = join(REPO_ROOT, '.tmp/pptx-nova-deckkit-examples')
 const DEFAULT_WEBP_QUALITY = 82
 
@@ -18,7 +18,7 @@ const usage = `Usage:
   node tools/update-pptx-nova-deckkit-examples.mjs [options]
 
 Options:
-  --write                   Update pptx-nova/assets/examples from golden DeckKit cases
+  --write                   Update pptx-nova/assets/examples/deckkits from golden DeckKit cases
   --check                   Regenerate and fail if committed examples differ
   --deckkit, -d <id>        Update/check one DeckKit id
   --tmp <dir>               Temporary output root. Defaults to .tmp/pptx-nova-deckkit-examples
@@ -101,18 +101,25 @@ export function syncManifestEntriesWithCatalog({ entries, catalogEntries }) {
     catalogEntries instanceof Map
       ? catalogEntries
       : new Map((catalogEntries ?? []).map((entry) => [entry.id, entry]))
+  const order = new Map([...lookup.keys()].map((id, index) => [id, index]))
 
-  return entries.map((entry) => {
-    const catalogEntry = lookup.get(entry.deckkit)
-    if (!catalogEntry) return entry
-    return {
-      ...entry,
-      readiness: catalogEntry.readiness ?? entry.readiness ?? null,
-      version: catalogEntry.version ?? entry.version ?? null,
-      bestFor: catalogEntry.bestFor ?? [],
-      defaultFor: catalogEntry.defaultFor ?? [],
-    }
-  })
+  return entries
+    .map((entry) => {
+      const catalogEntry = lookup.get(entry.deckkit)
+      if (!catalogEntry) return entry
+      return {
+        ...entry,
+        readiness: catalogEntry.readiness ?? entry.readiness ?? null,
+        version: catalogEntry.version ?? entry.version ?? null,
+        bestFor: catalogEntry.bestFor ?? [],
+        defaultFor: catalogEntry.defaultFor ?? [],
+      }
+    })
+    .sort(
+      (a, b) =>
+        (order.get(a.deckkit) ?? Number.MAX_SAFE_INTEGER) -
+          (order.get(b.deckkit) ?? Number.MAX_SAFE_INTEGER) || a.deckkit.localeCompare(b.deckkit),
+    )
 }
 
 function valueAfter(argv, index, flag) {
@@ -452,10 +459,10 @@ function updateDeckCatalog({ manifestEntries, mode, staged }) {
     type: 'deckkit-showcase',
     deckkit: entry.deckkit,
     caseId: entry.caseId,
-    path: `../examples/${entry.deckkit}/deck.pptx`,
-    preview: `../examples/${entry.deckkit}/contact-sheet.webp`,
-    content: `../examples/${entry.deckkit}/content.json`,
-    summary: `../examples/${entry.deckkit}/summary.json`,
+    path: `../examples/deckkits/${entry.deckkit}/deck.pptx`,
+    preview: `../examples/deckkits/${entry.deckkit}/contact-sheet.webp`,
+    content: `../examples/deckkits/${entry.deckkit}/content.json`,
+    summary: `../examples/deckkits/${entry.deckkit}/summary.json`,
     bestFor: entry.bestFor,
     status:
       entry.readiness === 'production' || entry.readiness === 'default' ? 'available' : 'preview',

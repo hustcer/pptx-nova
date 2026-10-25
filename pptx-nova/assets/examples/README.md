@@ -1,32 +1,23 @@
-# pptx-nova DeckKit Examples
+# pptx-nova Examples
 
-This directory contains committed, user-facing DeckKit showcase assets.
-Each subdirectory is named after a DeckKit id and includes a native editable
-`deck.pptx`, a compact `contact-sheet.webp`, the source `content.json`,
-a short `brief.md`, and a stable `summary.json`.
+Examples are grouped by purpose. Bundled DeckKit showcases are synthetic, generated materials
+intended to be redistributable with the skill; source examples demonstrate workflow input formats.
 
-Bundled examples are synthetic, generated showcase materials created for this
-skill and are intended to be redistributable with the repository.
+| Directory                           | Purpose                                       | Entry points                                                                        |
+| ----------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [`deckkits/`](deckkits/README.md)   | Curated editable DeckKit showcases            | `manifest.json`, then `<id>/` with source content, PPTX, preview, brief and summary |
+| [`generator/`](generator/README.md) | Exploratory generator for DeckKit development | Template plus its adjacent generated themes                                         |
+| [`create/`](create/README.md)       | Creation input examples                       | Quarterly review outline and quarterly-report patch                                 |
+| [`edit/`](edit/README.md)           | Existing-deck edit examples                   | Title patch and Micro Edit evidence matrix                                          |
 
-Update the showcase decks with:
+Use DeckKit content and the standard create runner for ordinary delivery. The generator is a
+development starting point for creating or extending DeckKits.
 
-```bash
-just deckkit-examples
-```
+`just deckkit-examples` updates only `deckkits/`; it does not replace this index or the other examples.
+Use `just deckkit-examples -d broadside` for one showcase, `just deckkit-examples check` to check
+reproducibility without writing committed assets, or `just deckkit-examples all` for all visual cases.
+Each `just` invocation uses a fresh temporary run unless an explicit `--tmp` or `--out` is supplied.
 
-Update one DeckKit showcase by id:
-
-```bash
-just deckkit-examples -d broadside
-```
-
-Check that committed assets are in sync without writing files:
-
-```bash
-just deckkit-examples check
-```
-
-When DeckKit code, content, or xdoc output logic has not changed, repeating
-`just deckkit-examples` should not create git-visible changes. A repeated
-change in `deck.pptx`, `contact-sheet.webp`, `summary.json`, or
-`manifest.json` is treated as a reproducibility bug.
+Keep new examples in the owning directory and generator dependencies adjacent. Preserve showcase
+manifest hashes and update the deck catalog whenever asset paths change.
+Full and single-kit updates keep manifest entries in the DeckKit catalog's order.

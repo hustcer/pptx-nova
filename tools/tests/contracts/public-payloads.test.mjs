@@ -7,7 +7,7 @@ import { repoRoot, skillPath } from '../helpers/common.mjs'
 
 test('quarterly report patch uses the current chart legend enum', () => {
   const patch = JSON.parse(
-    readFileSync(skillPath('assets/examples/quarterly-report.patch.json'), 'utf8'),
+    readFileSync(skillPath('assets/examples/create/quarterly-report.patch.json'), 'utf8'),
   )
   const chart = patch.ops.find((op) => op.op === 'add-chart' && op.name === 'Revenue')
 
@@ -18,7 +18,7 @@ test('quarterly report patch uses the current chart legend enum', () => {
 test('deck generator data-room chart omits the unsupported none legend value', () => {
   const result = spawnSync(
     process.execPath,
-    [skillPath('assets/examples/deck-generator-template.mjs'), '--layout', 'data-room'],
+    [skillPath('assets/examples/generator/deck-generator-template.mjs'), '--layout', 'data-room'],
     { cwd: repoRoot, encoding: 'utf8' },
   )
   assert.equal(result.status, 0, result.stderr || result.stdout)
@@ -38,7 +38,7 @@ test('deck generator layouts emit canonical aggregate patch payloads', () => {
   for (const layout of ['executive-grid', 'narrative-split', 'data-room']) {
     const result = spawnSync(
       process.execPath,
-      [skillPath('assets/examples/deck-generator-template.mjs'), '--layout', layout],
+      [skillPath('assets/examples/generator/deck-generator-template.mjs'), '--layout', layout],
       { cwd: repoRoot, encoding: 'utf8' },
     )
     assert.equal(result.status, 0, result.stderr || result.stdout)

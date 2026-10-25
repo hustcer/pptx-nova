@@ -7,7 +7,7 @@
 > 显式拆开，让换主题色、换内容、换字号节奏各自 1 行修改解决。
 >
 > 出处：实战做 8 页 / 775 ops 橙色 deck 后沉淀。模板代码在
-> `assets/examples/deck-generator-template.mjs`，仅在创建/扩展 DeckKit 的探索阶段复制使用。
+> `assets/examples/generator/deck-generator-template.mjs`，仅在创建/扩展 DeckKit 的探索阶段复制使用。
 
 ---
 
@@ -36,7 +36,7 @@ production/default DeckKit。若有可用 DeckKit，直接回到 `deckkit-mode.m
 
 ```bash
 # 1. 复制模板
-cp <skill-root>/assets/examples/deck-generator-template.mjs <run-dir>/generate.mjs
+cp <skill-root>/assets/examples/generator/deck-generator-template.mjs <run-dir>/generate.mjs
 
 # 2. 选择 themePack/stylePack；要新增风格时先改 assets/themes/catalog.json
 #    并在发布前同步生成的 theme catalogs
@@ -159,7 +159,7 @@ consulting/minimal/product 的完整字号 token 属于 `assets/themes/catalog.j
 探索用单 deck 生成：
 
 ```bash
-node <skill-root>/assets/examples/deck-generator-template.mjs \
+node <skill-root>/assets/examples/generator/deck-generator-template.mjs \
   --theme consulting-grey \
   --style consulting \
   --layout narrative-split > .tmp-narrative.patch.json

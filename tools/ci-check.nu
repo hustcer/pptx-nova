@@ -44,7 +44,7 @@ def main [] {
 
     let validate_script = ($repo_root | path join 'pptx-nova' 'assets' 'deckkits' 'validate-content.mjs')
     let example_contents = (
-        glob 'pptx-nova/assets/examples/*/content.json'
+        glob 'pptx-nova/assets/examples/deckkits/*/content.json'
         | sort
     )
 

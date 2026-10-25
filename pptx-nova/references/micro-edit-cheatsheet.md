@@ -77,7 +77,7 @@ If the selector is ambiguous, stop the micro path and use `edit-mode.md` plus
 
 ## Example Matrix
 
-Use `assets/examples/micro-edit-matrix.json` as the quick fixture matrix for
+Use `assets/examples/edit/micro-edit-matrix.json` as the quick fixture matrix for
 the common small-edit surface:
 
 | Case                    | Minimal success pattern                                       | Failure trigger                                                         |

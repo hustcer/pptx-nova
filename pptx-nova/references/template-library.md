@@ -52,7 +52,7 @@ the native `pptx-slide-copy/v1` report when this copy participates in an Edit
 Contract; require its read-only `ready` preflight, current input fingerprints,
 and empty blockers.
 
-5. For generated decks, start from `assets/examples/deck-generator-template.mjs`
+5. For generated decks, start from `assets/examples/generator/deck-generator-template.mjs`
    and pass selected theme/style IDs.
 
 ## Brand / Layout / Deck Fusion

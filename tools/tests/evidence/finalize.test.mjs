@@ -31,7 +31,7 @@ test('evidence writers require explicit overwrite for current-run artifacts', ()
   const structureArgs = [
     skillPath('scripts/cli/review/structure-check.mjs'),
     '--pptx',
-    skillPath('assets/examples/cartesian/deck.pptx'),
+    skillPath('assets/examples/deckkits/cartesian/deck.pptx'),
     '--output',
     structureOutput,
     '--json',

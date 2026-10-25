@@ -221,7 +221,7 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 人工逐页 PNG review 后由用户确认，再带
 `--manual-hard-defects 0 --readiness production --confirm-manual-png-review --write`。
 promotion 的 catalog-update 同样传本轮 `--out`，不能重新读取共享默认目录。
-用户可见 showcase（`assets/examples/<id>/`）用 `just deckkit-examples` 维护，
+用户可见 showcase（`assets/examples/deckkits/<id>/`）用 `just deckkit-examples` 维护，
 通常在 production 阶段才补。
 
 ## 7. core-primitives 修改门槛

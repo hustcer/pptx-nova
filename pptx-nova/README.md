@@ -574,7 +574,7 @@ normalization and resolution, Edit Contract source binding, and candidate/eviden
 - Whether the Tabler icon pack license is included with the package.
 - Whether examples declare the synthetic / redistributable policy.
 
-`tools/ci-check.nu` also validates `pptx-nova/assets/examples/*/content.json` and runs
+`tools/ci-check.nu` also validates `pptx-nova/assets/examples/deckkits/*/content.json` and runs
 `pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mode catalog` for production/default
 DeckKits.
 

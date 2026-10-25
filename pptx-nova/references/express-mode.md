@@ -161,7 +161,7 @@ DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称
 
 ### 3.1 outline 中间表示
 
-先得到一份结构化 outline（参考 `assets/examples/qbr-outline.json`），用页型 `kind`
+先得到一份结构化 outline（参考 `assets/examples/create/qbr-outline.json`），用页型 `kind`
 描述每页。该示例用到的 5 种 `kind`：
 
 | `kind`    | 用途         | 关键字段                            |
@@ -193,7 +193,7 @@ Express 生成的 `deck_lock.json` 必须记录这些推断值和 `assumptions[]
 ### 3.2 无可用 DeckKit 时：创建/扩展 DeckKit
 
 只有 readiness audit 没有合适 DeckKit、outline 缺页型或需要改组件结构时，才复制
-`assets/examples/deck-generator-template.mjs`。目标是抽取/扩展 DeckKit，再回到
+`assets/examples/generator/deck-generator-template.mjs`。目标是抽取/扩展 DeckKit，再回到
 content manifest 生产路径；不要把临时 generator 当作最终交付路径。按 outline 改这三处即可，
 **不要重写 helper**：
 

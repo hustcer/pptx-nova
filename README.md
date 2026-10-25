@@ -355,7 +355,7 @@ labels, lost formatting, or PowerPoint repair issues.
 
 ## DeckKit examples
 
-Committed showcase assets live under `pptx-nova/assets/examples/`. They are
+Committed showcase assets live under `pptx-nova/assets/examples/deckkits/`. They are
 synthetic, redistributable examples, not customer materials. Each example
 usually includes the generated editable `deck.pptx`, a compact contact sheet,
 the source `content.json`, a brief, and summary metadata.
@@ -442,4 +442,4 @@ itself needs to be built or extended.
 - [Translation workflow](pptx-nova/references/translation-mode.md)
 - [pptx-nova assets](pptx-nova/assets/README.md)
 - [DeckKits](pptx-nova/assets/deckkits/README.md)
-- [DeckKit examples](pptx-nova/assets/examples/README.md)
+- [DeckKit examples](pptx-nova/assets/examples/deckkits/README.md)

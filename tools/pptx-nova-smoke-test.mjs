@@ -40,7 +40,7 @@ function runJson(name, command, args) {
   }
 }
 
-const contentPath = join(SKILL_ROOT, 'assets/examples/consulting-dark/content.json')
+const contentPath = join(SKILL_ROOT, 'assets/examples/deckkits/consulting-dark/content.json')
 const validateScript = join(SKILL_ROOT, 'assets/deckkits/validate-content.mjs')
 const buildScript = join(SKILL_ROOT, 'scripts/cli/create/build.mjs')
 const iconsScript = join(SKILL_ROOT, 'scripts/cli/assets/icons.mjs')
@@ -139,7 +139,7 @@ const sessionRules = runJson('normalize current-deck session rules', 'node', [
   '--draft',
   sessionRulesDraftPath,
   '--source',
-  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  join(SKILL_ROOT, 'assets/examples/deckkits/cartesian/deck.pptx'),
   '--output',
   sessionRulesPath,
   '--json',
@@ -175,7 +175,7 @@ const sessionResolution = runJson('resolve session rules into contract overlay',
   '--operation',
   sessionOperationPath,
   '--source',
-  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  join(SKILL_ROOT, 'assets/examples/deckkits/cartesian/deck.pptx'),
   '--output',
   sessionResolutionPath,
   '--strict',
@@ -219,7 +219,7 @@ const contract = runJson('bind edit contract to source PPTX', 'node', [
   '--draft',
   editContractDraftPath,
   '--source',
-  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  join(SKILL_ROOT, 'assets/examples/deckkits/cartesian/deck.pptx'),
   '--output',
   editContractPath,
   '--json',
@@ -230,7 +230,7 @@ if (!/^[a-f0-9]{64}$/.test(contract.source?.sha256 ?? '')) {
 const evidenceManifest = runJson('bind edit candidate and evidence hashes', 'node', [
   join(SKILL_ROOT, 'scripts/cli/edit/evidence-manifest.mjs'),
   '--candidate',
-  join(SKILL_ROOT, 'assets/examples/cartesian/deck.pptx'),
+  join(SKILL_ROOT, 'assets/examples/deckkits/cartesian/deck.pptx'),
   '--evidence',
   `edit-contract=${editContractPath}`,
   '--output',

@@ -148,22 +148,38 @@ theme flag=(''):
       _ => { error make { msg: 'usage: just theme [-g]' } }
     }
 
-# Update/check pptx-nova DeckKit user-facing examples:
+# Update/check curated examples under pptx-nova/assets/examples/deckkits/:
 # `just deckkit-examples`, `just deckkit-examples -d broadside`, `just deckkit-examples check`, `just deckkit-examples all`
-deckkit-examples action=('update') *args='':
+deckkit-examples *args:
     #!/usr/bin/env nu
 
-    let action = '{{ action }}'
-    if $action in ['update' 'check' 'all'] {
-      match $action {
-        'update' => { node tools/update-pptx-nova-deckkit-examples.mjs --write {{ args }} }
-        'check' => { node tools/update-pptx-nova-deckkit-examples.mjs --check {{ args }} }
-        'all' => { node pptx-nova/scripts/cli/deckkits/benchmark.mjs --all --out .tmp/pptx-nova-visual --clean {{ args }} }
+    def main --wrapped [...args: string]: nothing -> nothing {
+      let action = ($args.0? | default 'update')
+      let rest = ($args | skip 1)
+      let updater = 'tools/update-pptx-nova-deckkit-examples.mjs'
+      let invocation = match $action {
+        'update' => { {script: $updater, argv: [--write ...$rest], output_flag: '--tmp'} }
+        'check' => { {script: $updater, argv: [--check ...$rest], output_flag: '--tmp'} }
+        'all' => { {script: 'pptx-nova/scripts/cli/deckkits/benchmark.mjs', argv: [--all ...$rest], output_flag: '--out'} }
+        _ => {
+          if ($action | str starts-with '-') {
+            {script: $updater, argv: [--write ...$args], output_flag: '--tmp'}
+          } else {
+            error make {msg: 'usage: just deckkit-examples [update|check|all] [-d|--deckkit <id>]'}
+          }
+        }
       }
-    } else if ($action | str starts-with '-') {
-      node tools/update-pptx-nova-deckkit-examples.mjs --write $action {{ args }}
-    } else {
-      error make { msg: 'usage: just deckkit-examples [update|check|all] [-d|--deckkit <id>]' }
+      let forwarded = if ($invocation.argv | any {|value| $value == $invocation.output_flag }) {
+        $invocation.argv
+      } else {
+        mkdir .tmp
+        let scratch = (mktemp --directory --tmpdir-path .tmp deckkit-examples-XXXXXX)
+        [$invocation.output_flag $scratch ...$invocation.argv]
+      }
+      let result = (^node $invocation.script ...$forwarded | complete)
+      print --no-newline $result.stdout
+      print --stderr --no-newline $result.stderr
+      if $result.exit_code != 0 { exit $result.exit_code }
     }
 
 # Plugins need to be registered only once after nu v0.61

@@ -24,8 +24,8 @@ hard defect；字体替代、Tabler 近似图标、明确披露的 unsupported �
 ## 1. 生成器起步
 
 ```bash
-cp pptx-nova/assets/examples/deck-generator-template.mjs .tmp/deckkit-<id>/generate.mjs
-cp pptx-nova/assets/examples/theme-packs.generated.mjs .tmp/deckkit-<id>/theme-packs.generated.mjs
+cp pptx-nova/assets/examples/generator/deck-generator-template.mjs .tmp/deckkit-<id>/generate.mjs
+cp pptx-nova/assets/examples/generator/theme-packs.generated.mjs .tmp/deckkit-<id>/theme-packs.generated.mjs
 ```
 
 模板静态 import 同目录的 `theme-packs.generated.mjs`，必须一起复制；在新 run 中执行，

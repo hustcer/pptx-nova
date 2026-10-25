@@ -4,6 +4,7 @@ import { basename, dirname, extname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { auditDeckkitLayout } from './lib/deckkit-layout.mjs'
 import { auditScriptsLayout } from './lib/scripts-layout.mjs'
+import { auditExamplesLayout } from './lib/examples-layout.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(SCRIPT_DIR, '..')
@@ -21,8 +22,8 @@ const BINARY_EXTENSIONS = new Set([
   '.zip',
 ])
 const ALLOWED_BINARY_PATTERNS = [
-  /^assets\/examples\/[^/]+\/deck\.pptx$/,
-  /^assets\/examples\/[^/]+\/contact-sheet\.webp$/,
+  /^assets\/examples\/deckkits\/[^/]+\/deck\.pptx$/,
+  /^assets\/examples\/deckkits\/[^/]+\/contact-sheet\.webp$/,
   /^assets\/icons\/tabler-icons\.pack\.br$/,
 ]
 const LICENSE_REQUIRED_PATTERNS = [/^assets\/icons\/tabler-icons\.pack\.br$/]
@@ -129,7 +130,11 @@ function scanTextFile(path, relPath, issues) {
 }
 
 function audit() {
-  const issues = [...auditDeckkitLayout(SKILL_ROOT), ...auditScriptsLayout(SKILL_ROOT)]
+  const issues = [
+    ...auditDeckkitLayout(SKILL_ROOT),
+    ...auditScriptsLayout(SKILL_ROOT),
+    ...auditExamplesLayout(SKILL_ROOT),
+  ]
   const files = walk(SKILL_ROOT)
   for (const path of files) {
     const relPath = relative(SKILL_ROOT, path).replaceAll('\\', '/')
@@ -189,7 +194,7 @@ function audit() {
     }
   }
 
-  const examplesReadme = join(SKILL_ROOT, 'assets/examples/README.md')
+  const examplesReadme = join(SKILL_ROOT, 'assets/examples/deckkits/README.md')
   try {
     const text = readFileSync(examplesReadme, 'utf8')
     if (!/redistributable|synthetic|generated/i.test(text)) {
@@ -197,7 +202,7 @@ function audit() {
         issues,
         'warning',
         'examples-license-policy',
-        'assets/examples/README.md',
+        'assets/examples/deckkits/README.md',
         'examples README should state whether bundled examples are synthetic or redistributable',
       )
     }
@@ -206,7 +211,7 @@ function audit() {
       issues,
       'warning',
       'examples-license-policy',
-      'assets/examples/README.md',
+      'assets/examples/deckkits/README.md',
       'examples README is missing',
     )
   }

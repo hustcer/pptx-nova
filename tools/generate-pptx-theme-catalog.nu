@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 const catalog_path = "pptx-nova/assets/themes/catalog.json"
-const js_output = "pptx-nova/assets/examples/theme-packs.generated.mjs"
+const js_output = "pptx-nova/assets/examples/generator/theme-packs.generated.mjs"
 
 def string-literal [value: string]: nothing -> string {
   $value | to json --raw

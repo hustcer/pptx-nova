@@ -77,7 +77,7 @@ test('consulting-dark benchmark chart omits the unsupported none legend value', 
 test('consulting-dark benchmark table emits canonical nested cell coordinates', async () => {
   const kit = await import(skillUrl('assets/deckkits/consulting-dark/consulting-dark.kit.mjs'))
   const content = JSON.parse(
-    readFileSync(skillPath('assets/examples/consulting-dark/content.json'), 'utf8'),
+    readFileSync(skillPath('assets/examples/deckkits/consulting-dark/content.json'), 'utf8'),
   )
   const result = kit.createDeck(content)
   const cells = result.patch.ops

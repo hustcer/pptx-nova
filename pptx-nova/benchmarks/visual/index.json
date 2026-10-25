@@ -113,6 +113,7 @@
       "id": "cartesian.golden-html",
       "deckkit": "cartesian",
       "kind": "golden",
+      "showcase": true,
       "contentPath": "../../assets/deckkits/cartesian/examples/content.json",
       "buildPath": "../../assets/deckkits/cartesian/examples/build.mjs",
       "expectedPath": "cases/cartesian/golden-html/expected.json",

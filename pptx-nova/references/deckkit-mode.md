@@ -306,7 +306,7 @@ diagnostics do not treat long filesystem paths as visible text. For refurbish
 workflows, do not design page types that depend on rendered source-slide
 screenshots; those PNGs are review evidence, not deliverable content.
 
-Use `assets/examples/deck-generator-template.mjs` only as a development starting
+Use `assets/examples/generator/deck-generator-template.mjs` only as a development starting
 point for creating or extending DeckKits. Do not use it as the default delivery
 path when a production/default DeckKit is available.
 
@@ -315,7 +315,7 @@ path when a production/default DeckKit is available.
 Curated examples live in:
 
 ```text
-assets/examples/<deckkit>/
+assets/examples/deckkits/<deckkit>/
 ```
 
 Each directory contains `deck.pptx`, `contact-sheet.webp`, `content.json`,

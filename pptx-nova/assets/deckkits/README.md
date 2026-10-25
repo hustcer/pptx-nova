@@ -55,7 +55,7 @@ assets/deckkits/
   benchmark index 的路径相对 `benchmarks/visual/`。
 - 共用 helper 放在 `shared/`，套件不能直接导入另一个套件的实现。
   `shared/design-family-registry.mjs` 和统一合同/校验模块负责注册调度，可以导入各套件公开的注册或解析接口。
-- 用户可见的 PPTX showcase 继续位于 `assets/examples/<id>/`；
+- 用户可见的 PPTX showcase 继续位于 `assets/examples/deckkits/<id>/`；
   视觉回归 fixture、基线与验收记录继续位于 `benchmarks/visual/cases/<id>/`。
 - 根目录只保留 README、catalog 和校验 CLI。`node tools/pptx-nova-audit-public.mjs --strict`
   同时检查目录归属、标准模块名、catalog 路径、schema/示例存在性和套件间直接依赖。

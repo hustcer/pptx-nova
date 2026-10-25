@@ -131,7 +131,7 @@
 > ⚠️ `foreach` 仍然不能脱离 patch op 自身的字段约束 — `add-text-box` 必须有
 > `slide` / `x` / `y` / `w` / `h`。字符串插值的结果始终是 string，integer 字段
 > 需要 JSON 变量或数字字面量。复杂坐标计算应该用
-> JS 生成器(`assets/examples/deck-generator-template.mjs`)在生成 items 时
+> JS 生成器(`assets/examples/generator/deck-generator-template.mjs`)在生成 items 时
 > 算好,再交给 foreach 展开。
 
 ## §4 `try` —— 容错执行

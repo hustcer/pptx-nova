@@ -55,7 +55,7 @@ test('all bundled DeckKits follow the directory policy', () => {
 })
 
 test('showcase provenance uses live source paths and manifest hashes match bundled files', () => {
-  const base = join(repo, 'pptx-nova/assets/examples')
+  const base = join(repo, 'pptx-nova/assets/examples/deckkits')
   const manifest = JSON.parse(readFileSync(join(base, 'manifest.json'), 'utf8'))
   for (const entry of manifest.examples) {
     for (const file of Object.values(entry.files)) {

@@ -111,3 +111,23 @@ test('multiple golden cases require an explicit showcase without removing regres
   )
   assert.deepEqual(selectGoldenCases({ cases: [a] }, 'kit'), [a])
 })
+
+test('full and partial showcase updates use the same catalog order', () => {
+  const first = { id: 'first', deckkit: 'first', caseId: 'first.golden' }
+  const second = { id: 'second', deckkit: 'second', caseId: 'second.golden' }
+  const catalogEntries = [{ id: 'first' }, { id: 'second' }]
+  const partial = mergeManifestEntries({
+    existingEntries: [second, first],
+    generatedEntries: [first],
+    deckkit: 'first',
+  })
+  const full = mergeManifestEntries({ generatedEntries: [first, second] })
+  assert.deepEqual(
+    syncManifestEntriesWithCatalog({ entries: partial, catalogEntries }),
+    syncManifestEntriesWithCatalog({ entries: full, catalogEntries }),
+  )
+  assert.deepEqual(
+    partial.map((e) => e.deckkit),
+    ['second', 'first'],
+  )
+})

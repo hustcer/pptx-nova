@@ -1009,6 +1009,6 @@ dry-run 的 `text-overflow-estimate` 与 `vision-check` 复用同一套静态文
 
 ### 与生成器模板的关系
 
-`assets/examples/deck-generator-template.mjs` 里的 `slideCover` 函数已经按
+`assets/examples/generator/deck-generator-template.mjs` 里的 `slideCover` 函数已经按
 "装饰右下安全区"实现，可直接复用；改主题色只动 `C` 调色板，不动布局。详见
 [deck-generator-workflow.md](./deck-generator-workflow.md)。

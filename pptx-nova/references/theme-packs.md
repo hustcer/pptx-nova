@@ -70,7 +70,7 @@ Style packs:
 
 The source catalog is `assets/themes/catalog.json`. MoonBit CLI built-ins and the JS generator
 built-ins are generated from that file; do not hand-edit `s8fy/cmd/main/pptx_theme_catalog.generated.mbt`
-or `assets/examples/theme-packs.generated.mjs`.
+or `assets/examples/generator/theme-packs.generated.mjs`.
 
 Built-in style packs must include a complete `generator` object with `sizes`, `layout`, `surface`,
 `effects`, `chrome`, and `chart`. The source-repository theme sync validates required fields,
@@ -87,7 +87,7 @@ The CLI exposes the generated schema-backed catalog through `xdoc pptx catalog t
 ## Generator Usage
 
 ```bash
-node <skill-root>/assets/examples/deck-generator-template.mjs \
+node <skill-root>/assets/examples/generator/deck-generator-template.mjs \
   --theme corporate-blue \
   --style consulting > patch.json
 ```

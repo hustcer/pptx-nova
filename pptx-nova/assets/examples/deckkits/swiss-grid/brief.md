@@ -2,7 +2,7 @@
 
 DeckKit: `swiss-grid`
 Showcase case: `swiss-grid.golden-lecture`
-Readiness: `default`
+Readiness: `production`
 Slides: 15
 Patch ops: 1960
 Title: 网格系统

@@ -137,9 +137,9 @@ layout choice, or a documented limitation before calling it a new xdoc issue.
   the relevant candidate bytes; do not rely on an old or different candidate.
 - Otherwise, when the optional macOS/PowerPoint/Nushell prerequisites are
   available, try `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu
-<candidate.pptx> --slides <suspect-slides> --out
-<run-dir>/powerpoint/slide-%d.png --method pdf-render --json >
-<run-dir>/powerpoint-native-render.json` and retain the report and images in
+  <candidate.pptx> --slides <suspect-slides> --out
+  <run-dir>/powerpoint/slide-%d.png --method pdf-render --json >
+  <run-dir>/powerpoint-native-render.json` and retain the report and images in
   the current run. Follow the PowerPoint screenshot route in
   `references/common-workflow.md` if PDF rendering fails.
 - Compare the same slides and objects, then record the conclusion and paths to

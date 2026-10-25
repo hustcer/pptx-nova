@@ -43,6 +43,10 @@ default:
 t:
   @node tools/run-tests.mjs
 
+# List DeckKit readiness, versions and committed PPTX examples
+list *args:
+    @nu --no-config-file tools/list-deckkits.nu {{args}}
+
 # Format code
 fmt:
   @$'(ansi g)Start `fmt` task...(ansi reset)'; \

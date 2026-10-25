@@ -123,8 +123,8 @@ test('copyable reference examples avoid removed xdoc payload aliases', () => {
     'shape effects must use shadow/glow/reflection/softEdge objects',
   )
   const tableReferences = [
-    skillPath('references/tables.md'),
-    skillPath('references/patch-ops-cheatsheet.md'),
+    skillPath('references/content/tables.md'),
+    skillPath('references/edit/patch-ops-cheatsheet.md'),
   ]
     .map((path) => readFileSync(path, 'utf8'))
     .join('\n')

@@ -33,7 +33,7 @@ call `cli/create/run.mjs` directly. It runs validate/build/check-lock,
 dry-run, apply, vision-check and canonical PDF/PNG evidence while preserving
 every intermediate artifact. After actual visual review, its separate
 `--finalize --visual-review <path>` phase publishes the same bound candidate
-without rebuilding or rendering; see `create-runner.md`.
+without rebuilding or rendering; see `create/create-runner.md`.
 
 Keep all temporary files in that run directory, including `outline.json`,
 `deck_lock.json`, `session-rules.json`, `session-operation.json`,
@@ -113,7 +113,7 @@ One-shot and daemon PPTX/sidecar publication are not two-file transactions. Afte
 read `primaryOutputPublished`, `outputUntouched`, `output` and `blockedOutput` in the
 actual error report. When `primaryOutputPublished:true`, the primary PPTX reached disk
 despite failure; preserve it and the report, inspect both paths, and follow
-`troubleshooting.md` before recovery. Missing fields do not prove the output was
+`runtime/troubleshooting.md` before recovery. Missing fields do not prove the output was
 untouched. Runners stop before validation/publication and retain disclosed facts in
 their phase/error summaries; a partially published run is failed evidence, not a
 completed deck or permission to repeat the mutation.
@@ -124,7 +124,7 @@ Keep symlink/`..` traversal intact until filesystem resolution, including explic
 with string replacement or lexical `path.resolve`/`normalize`; if a wrapper needs
 canonical inputs, resolve existing files through the filesystem first. Assets must
 still remain inside the resolved root. These filesystem rules do not change OPC
-part-name or `assetSource.path` security rules; see `troubleshooting.md`.
+part-name or `assetSource.path` security rules; see `runtime/troubleshooting.md`.
 
 For Node wrappers, use the bundled `scripts/lib/runtime/filesystem-paths.mjs` helper for
 caller-supplied create/build paths, including new output directories. It resolves
@@ -228,12 +228,12 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 1.  Initialize run directory and check output collision rules.
 2.  Generate `<run-dir>/xdoc-capabilities.json`. Review warnings and task-specific
     undisclosed requirements, but do not turn the snapshot into an allowlist.
-3.  Gather mode-specific context: - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`. - Formal create: also apply `narrative-quality.md` and lock `deckProfile`,
+3.  Gather mode-specific context: - Create: `outline.json`, `deck_lock.json`, optional `assets_manifest.json`. - Formal create: also apply `create/narrative-quality.md` and lock `deckProfile`,
     per-slide `claimTitle`, `proofObject`, `rhythm`, `layoutIntent`, and
     `visualDensity`. - Edit: `xdoc pptx inspect <input.pptx> --json`, optional
     `select.json`; when current-deck session rules exist, resolve the structured
-    `session-operation.json` according to `references/session-rules.md`; then normalize `edit-contract.json` according to
-    `references/edit-contract.md` before patch/apply. - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
+    `session-operation.json` according to `references/edit/session-rules.md`; then normalize `edit-contract.json` according to
+    `references/edit/edit-contract.md` before patch/apply. - Refurbish: source inspect/extract/contact sheet, `content-audit.json`,
     `reference-map.json`, `fidelity-gate.json`, `layout-final.json`, and the
     `xdoc pptx refurbish-skin` JSON report.
     Prefer `scripts/cli/refurbish/run.mjs` for the standard route so these
@@ -518,7 +518,7 @@ text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
    `evidence-summary.json.agentSummary` first; open the underlying gate reports
 only when the short summary points to a warning, failure, or unsupported area.
 
-12. For formal create workflows covered by `narrative-quality.md`, write
+12. For formal create workflows covered by `create/narrative-quality.md`, write
     `narrative_quality_review.json` after the PNG review. If any score is below
     4, fix the weakest 1-3 slides before delivery unless the user explicitly
     accepts a draft.
@@ -645,7 +645,7 @@ check-lock -> dry-run -> vision-check -> high-risk evidence finalizer when requi
 
 Run `xdoc pptx visual-audit` once on the stable final candidate and consume
 `visual-evidence/manifest.json` with
-`cli/review/visual-evidence-gate.mjs`. Follow `export-and-check.md`. Preview,
+`cli/review/visual-evidence-gate.mjs`. Follow `review/export-and-check.md`. Preview,
 semantic diff, `vision-diff`, contact sheets, Translation/Refurbish comparison,
 and PowerPoint-native evidence remain specialized observations; none creates a
 competing final Agent action. A reference problem can still produce
@@ -780,8 +780,8 @@ discloses inherited problems outside the scope.
 
 If the prompt/source contains LaTeX, equations, dense math symbols, screenshots,
 logos, or third-party images, record the policy in `deck_lock.json` and use
-`assets_manifest.json`. For formula-heavy work read `formulas.md`; for image and
-asset slots read `visual-qa-and-asset-slots.md`.
+`assets_manifest.json`. For formula-heavy work read `content/formulas.md`; for image and
+asset slots read `review/visual-qa-and-asset-slots.md`.
 
 ## Agent Transports
 
@@ -794,14 +794,14 @@ that MCP does not expose. The capability probe preserves the exact daemon,
 JSON-RPC, and MCP contracts under `capabilities.agentTransports`; do not infer
 transport semantics from command presence or compatibility indexes alone. No
 transport choice removes dry-run, apply, post-apply inspection, visual review,
-or evidence gates. Read `daemon-sessions.md` when choosing or debugging a
+or evidence gates. Read `runtime/daemon-sessions.md` when choosing or debugging a
 session transport.
 
 ## Error Handling
 
 If dry-run returns ambiguous selectors, enum fixes, or field suggestions, prefer
 `suggestion.autoRetry: true` fixes and rerun dry-run. For unclear failures read
-`troubleshooting.md`. Do not silently ignore failed dry-run, failed apply, failed
+`runtime/troubleshooting.md`. Do not silently ignore failed dry-run, failed apply, failed
 vision-check, or preview conversion failures.
 
 Some xdoc commands may still write a structured JSON report when the process

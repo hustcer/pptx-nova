@@ -29,6 +29,13 @@ There is no root package manifest or build step. Runtime scripts that ship with
 the skill should stay under `pptx-nova/scripts/`. Repository-only maintenance
 tools belong under `tools/`.
 
+Workflow references are grouped under `pptx-nova/references/{create,edit,translation,runtime,review,content,policies}/`.
+The reference root contains only its index and shared `common-workflow.md`. Refurbishment and
+template-following belong to `edit/`. When moving references, preserve filenames and section
+headings and update skill routing, relative reading paths, runtime `requiredReferences[]`, and
+repository callers together. The public audit checks reference layout, links and discoverability;
+the maintenance suite also checks callers in repository documentation and `deckkit-maker`.
+
 ## Development Guidelines
 
 - Keep publishable skill files self-contained inside `pptx-nova/`.

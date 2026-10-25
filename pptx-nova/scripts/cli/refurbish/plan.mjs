@@ -330,7 +330,7 @@ export function buildRefurbishPlan(args) {
       ...(usesFallback
         ? [
             {
-              path: 'references/reference-create.md',
+              path: 'references/create/reference-create.md',
               section: '6. Refurbish Existing Deck',
               reason: 'The selected route requires the catalog-driven fallback contract.',
             },
@@ -339,7 +339,7 @@ export function buildRefurbishPlan(args) {
       ...(explicitOnly
         ? [
             {
-              path: 'references/deckkit-mode.md',
+              path: 'references/create/deckkit-mode.md',
               section: 'Selection',
               reason: 'The explicitly selected DeckKit uses a readiness exception.',
             },
@@ -370,7 +370,7 @@ function planResult(args, entry, blockers) {
       ? []
       : [
           {
-            path: 'references/deckkit-mode.md',
+            path: 'references/create/deckkit-mode.md',
             section: 'Selection',
             reason: 'The requested DeckKit is missing from the catalog.',
           },

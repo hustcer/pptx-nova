@@ -9,7 +9,7 @@ Phase 2 再把内容抽到 content.json。
 高保真不是像素描摹：目标是网格、比例、层级、配色、字号节奏、chrome 和内容结构无
 hard defect；字体替代、Tabler 近似图标、明确披露的 unsupported 资产可以接受。
 
-先读 `pptx-nova/references/deck-generator-workflow.md`（模板设计、txH 表、
+先读 `pptx-nova/references/create/deck-generator-workflow.md`（模板设计、txH 表、
 装饰安全区、视觉验证盲点清单），本文件只补充复刻场景的差异点与已知坑。
 
 ## 目录
@@ -87,7 +87,7 @@ xdoc pptx visual-audit --candidate iterations/01/out.pptx --visual-mode create -
 的 required checks、findings、decision。Create 必须覆盖完整 candidate；PDF 最终布局是门禁的一部分。
 PNG 人工逐页 review 使用 manifest 中实际路径，避免重复渲染另一批不一致的图。
 需要 contact sheet 时可额外 preview，但须保留同一 PPTX hash 与 field date。
-runtime 未披露 canonical 路线时按 `pptx-nova/references/create-runner.md` 兼容路径执行并披露证据缺口。
+runtime 未披露 canonical 路线时按 `pptx-nova/references/create/create-runner.md` 兼容路径执行并披露证据缺口。
 
 若宿主已按 `deckkit-maker/SKILL.md` 的 xdoc transport 边界验证 MCP 合同，可用
 `pptx_apply` 替换 dry-run/apply 两次对应调用，并在输入中传绝对路径；`vision-check`、

@@ -624,7 +624,7 @@ function prepareInventory(args, artifacts, summary, reporter) {
       'Fill each byText entry once (decision plus reason cover every unit with that source text), add decisions[] entries only for per-unit exceptions, then rerun this command with --review-decisions.'
     summary.requiredReferences = [
       requiredReference(
-        'references/translation-mode.md',
+        'references/translation/translation-mode.md',
         'Chart And Table Coverage',
         'Classify the bound language-review partition before translation.',
       ),
@@ -671,7 +671,7 @@ function buildMemory(args, artifacts, summary, classified, glossary, reporter) {
   }
   summary.requiredReferences = [
     requiredReference(
-      'references/translation-mode.md',
+      'references/translation/translation-mode.md',
       'Translation Quality Rules',
       'Fill unique target text and only the necessary unit-level overrides.',
     ),
@@ -773,7 +773,7 @@ function applyPlan(args, artifacts, summary, classified, memory, glossary, repor
     summary.nextAction = constraintsCheck.nextAction
     summary.requiredReferences = [
       requiredReference(
-        'references/translation-mode.md',
+        'references/translation/translation-mode.md',
         'Protected Tokens And Project Glossary',
         'Repair only the protected-token or glossary violations in the bound constraints report.',
       ),
@@ -888,7 +888,7 @@ function applyPlan(args, artifacts, summary, classified, memory, glossary, repor
     }
     summary.requiredReferences = [
       requiredReference(
-        'references/translation-mode.md',
+        'references/translation/translation-mode.md',
         'I18n Plan Gate',
         'Repair only the blocker class emitted by the current bound plan.',
       ),
@@ -1036,7 +1036,7 @@ function applyPlan(args, artifacts, summary, classified, memory, glossary, repor
   summary.nextAction = 'Run the standard translation finalizer with this stable candidate.'
   summary.requiredReferences = [
     requiredReference(
-      'references/translation-runner.md',
+      'references/translation/translation-runner.md',
       'Standard command',
       'Finalize and publish the stable prepared candidate with delivery gates.',
     ),
@@ -1301,7 +1301,7 @@ function runReviewExpansion(args, artifacts, binding, reporter) {
       'Review only the persisted partition, then continue filling the existing translation memory; this expansion does not change preparation state.'
     summary.requiredReferences = [
       requiredReference(
-        'references/translation-mode.md',
+        'references/translation/translation-mode.md',
         'Review Partition Recovery',
         'Use the expanded bound partition without restarting translation preparation.',
       ),

@@ -8,7 +8,7 @@ test('published translation compare reference enables multipart output for long 
   const documents = [
     {
       name: 'translation-mode.md',
-      text: readFileSync(skillPath('references/translation-mode.md'), 'utf8'),
+      text: readFileSync(skillPath('references/translation/translation-mode.md'), 'utf8'),
     },
   ]
 

@@ -380,7 +380,7 @@ function initialSummary(args, content, artifacts) {
       content?.meta?.deckProfile === 'animation-corpus'
         ? [
             {
-              path: 'references/animations.md',
+              path: 'references/content/animations.md',
               section: 'Animation corpus',
               reason: 'Review declared cases, actual timing and native playback evidence.',
             },
@@ -388,7 +388,7 @@ function initialSummary(args, content, artifacts) {
         : Array.isArray(content?.slides) && content.slides.length >= 6
           ? [
               {
-                path: 'references/narrative-quality.md',
+                path: 'references/create/narrative-quality.md',
                 section: 'Narrative Gate',
                 reason:
                   'The generated deck contains at least six slides and requires narrative review.',

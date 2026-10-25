@@ -71,7 +71,7 @@ node deckkit-maker/scripts/analyze-design-source.mjs \
 
 ## 合同与执行边界
 
-读取 `pptx-nova/references/design-contracts.md` 与 `schemas/design.schema.json`：
+读取 `pptx-nova/references/create/design-contracts.md` 与 `schemas/design.schema.json`：
 
 - JSON 定义 tokens、角色、硬规则、容量、注册构图；intent.md 解释判断，数值保持一个事实源。
 - 复用字体/theme、合同检查、确定性布局选择、原生数据回读、交付绑定等共享能力。

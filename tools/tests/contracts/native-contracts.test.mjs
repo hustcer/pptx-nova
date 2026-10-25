@@ -323,7 +323,7 @@ nativeTest('current authoring enums reject aliases without publishing partial fi
   assert.deepEqual(readFileSync(source), bytes)
 
   // Execute the user-facing font examples, so aliases cannot silently return.
-  for (const reference of ['styles-and-themes.md', 'patch-ops-cheatsheet.md']) {
+  for (const reference of ['content/styles-and-themes.md', 'edit/patch-ops-cheatsheet.md']) {
     const markdown = readFileSync(
       fileURLToPath(new URL(`../../../pptx-nova/references/${reference}`, import.meta.url)),
       'utf8',

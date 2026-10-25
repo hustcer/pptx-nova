@@ -41,7 +41,7 @@ test('bundled Nushell scripts are explicitly optional evidence integrations', ()
 test('missing optional PowerPoint evidence prerequisites do not block the baseline', () => {
   const skill = read('pptx-nova/SKILL.md')
   const workflow = read('pptx-nova/references/common-workflow.md')
-  const animations = read('pptx-nova/references/animations.md')
+  const animations = read('pptx-nova/references/content/animations.md')
   const evidence = read('pptx-nova/scripts/lib/review/powerpoint-native-render-evidence.mjs')
 
   assert.match(

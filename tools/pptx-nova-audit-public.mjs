@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { auditDeckkitLayout } from './lib/deckkit-layout.mjs'
 import { auditScriptsLayout } from './lib/scripts-layout.mjs'
 import { auditExamplesLayout } from './lib/examples-layout.mjs'
+import { auditReferencesLayout } from './lib/references-layout.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(SCRIPT_DIR, '..')
@@ -134,6 +135,7 @@ function audit() {
     ...auditDeckkitLayout(SKILL_ROOT),
     ...auditScriptsLayout(SKILL_ROOT),
     ...auditExamplesLayout(SKILL_ROOT),
+    ...auditReferencesLayout(SKILL_ROOT),
   ]
   const files = walk(SKILL_ROOT)
   for (const path of files) {

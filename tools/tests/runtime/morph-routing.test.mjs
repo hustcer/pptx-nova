@@ -12,7 +12,7 @@ function readSkill(path) {
 
 test('Morph authoring publishes the explicit pairing and PowerPoint evidence contract', () => {
   const skill = readSkill('SKILL.md')
-  const animations = readSkill('references/animations.md')
+  const animations = readSkill('references/content/animations.md')
   const scripts = readSkill('scripts/README.md')
   const playback = readSkill('scripts/cli/office/morph-playback.nu')
 

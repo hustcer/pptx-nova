@@ -43,7 +43,7 @@ description: >
 本 skill 默认使用一次性 CLI 或 CLI `--daemon`，因为完整 DeckKit 流程还需要
 `convert`、`vision-check`、benchmark 等命令。每次任务先记录 `xdoc --version`，用
 `node pptx-nova/scripts/cli/runtime/probe.mjs --json` 保存当前 runtime 的 capability snapshot。
-新增或修改 op 前按 `pptx-nova/references/patch-ops-cheatsheet.md` 查询 focused schema；不要从
+新增或修改 op 前按 `pptx-nova/references/edit/patch-ops-cheatsheet.md` 查询 focused schema；不要从
 旧示例推断字段、enum 或能力。宿主若已配置 xdoc MCP，只有
 `capabilities.agentTransports.mcp.status == "disclosed"` 且合同版本被宿主识别时，才可按
 完整 `capabilities.agentTransports.mcp.contract` 使用它。
@@ -60,14 +60,14 @@ description: >
 能力以本次可执行文件的 schema、报告和实际产物为准；支持写入、保留、渲染与播放是不同能力，
 不能互相推导。维护者文档只提供线索，不把私有构建方式或库 API 写成公开集成路径。
 
-| 涉及内容                                                   | 必须核对的依据                                                                                                                                               |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OPC/Strict 包、非标准 part 名、继承主题、group/placeholder | `references/analyze-reference.md`；按关系解析，有效样式与局部 XML 分开记录                                                                                   |
-| freeform、自定义路径、gradient、group 几何                 | `pptx-nova/references/patch-ops-cheatsheet.md` 与 focused schema；检查最终 slide 坐标和 PNG                                                                  |
-| CJK/RTL、项目符号、rich text、autofit                      | `pptx-nova/references/deck-generator-workflow.md`；以新 runtime 的实际字体/换行复核旧补偿，不重复加大旧 workaround                                           |
-| 原生图表、极小数/百分比、数据标签                          | `pptx-nova/references/charts.md`；保留原始数值，显示精度单独设格式，转换为 JSON 回读                                                                         |
-| 原生源稿编辑、3D、动画/transition/Morph                    | `pptx-nova/SKILL.md` 对应路由；按 schema 中各能力轴评估，不能把静态 PNG 或 generator kit 视为保留/播放证明                                                   |
-| 视觉漂移与质量放行                                         | `pptx-nova/references/fidelity-diagnosis.md`、`pptx-nova/references/create-runner.md`；同一 PPTX 字节、冻结 field date、canonical evidence 与人工逐页 review |
+| 涉及内容                                                   | 必须核对的依据                                                                                                                                                             |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OPC/Strict 包、非标准 part 名、继承主题、group/placeholder | `references/analyze-reference.md`；按关系解析，有效样式与局部 XML 分开记录                                                                                                 |
+| freeform、自定义路径、gradient、group 几何                 | `pptx-nova/references/edit/patch-ops-cheatsheet.md` 与 focused schema；检查最终 slide 坐标和 PNG                                                                           |
+| CJK/RTL、项目符号、rich text、autofit                      | `pptx-nova/references/create/deck-generator-workflow.md`；以新 runtime 的实际字体/换行复核旧补偿，不重复加大旧 workaround                                                  |
+| 原生图表、极小数/百分比、数据标签                          | `pptx-nova/references/content/charts.md`；保留原始数值，显示精度单独设格式，转换为 JSON 回读                                                                               |
+| 原生源稿编辑、3D、动画/transition/Morph                    | `pptx-nova/SKILL.md` 对应路由；按 schema 中各能力轴评估，不能把静态 PNG 或 generator kit 视为保留/播放证明                                                                 |
+| 视觉漂移与质量放行                                         | `pptx-nova/references/review/fidelity-diagnosis.md`、`pptx-nova/references/create/create-runner.md`；同一 PPTX 字节、冻结 field date、canonical evidence 与人工逐页 review |
 
 修复现有 PPTX 的对象时遵循主 skill 的 inspect → 精确 selector/guard → dry-run → apply →
 inspect 回读；DeckKit 新建 patch 不能混入已有文件的 stale selector/source guard。
@@ -123,7 +123,7 @@ test ! -e pptx-nova/assets/examples/deckkits/<id>
 2. xdoc 维护者仓库的 `docs/skill-dev-guide.md`（不随本仓库分发，本机位于 `../pptx/docs/`）—— §3 术语（DeckKit / content 契约 / content leak 防线 /
    字符串分层规则 / 新增 DeckKit 准入标准）、§4 开发流程、§5 benchmark 与 readiness
 3. `pptx-nova/assets/deckkits/README.md` —— core-primitives 职责边界、冻结准入
-4. `pptx-nova/references/deck-generator-workflow.md` —— 探索生成器方法与避坑
+4. `pptx-nova/references/create/deck-generator-workflow.md` —— 探索生成器方法与避坑
 
 已有先例：`swiss-grid` DeckKit 即从 xdoc 维护者仓库的 `demos/67-swiss-grid-systems.pptx` 复刻而来，
 `broadside` / `cartesian` / `biennale-yellow` 则来自 HTML 模板（见 catalog `knownLimits`），

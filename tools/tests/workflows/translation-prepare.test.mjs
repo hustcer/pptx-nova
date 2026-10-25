@@ -219,7 +219,7 @@ test('translation preparation deduplicates memory and resumes through guarded ap
     '--json',
   ])
   assert.equal(inventory.status, 'needs-review-decisions')
-  assert.equal(inventory.requiredReferences[0].path, 'references/translation-mode.md')
+  assert.equal(inventory.requiredReferences[0].path, 'references/translation/translation-mode.md')
   assert.equal(typeof inventory.requiredReferences[0].reason, 'string')
   assert.equal(inventory.requiredReferences[0].file, undefined)
   const decisionsPath = inventory.artifacts.reviewDecisionsTemplate

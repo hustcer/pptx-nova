@@ -76,7 +76,7 @@ xdoc pptx inspect <ref.pptx> --daemon --json > .tmp/deckkit-<id>/ref-inspect.jso
   placeholder、layout/master 继承来源。
 - 分清局部 XML 与 layout/master/theme 的有效继承样式；group 子坐标先映射到最终 slide
   坐标再比较。若 inspect 与 XML/PNG 不一致，记录对象、原始字段、继承来源、runtime 和报告，
-  按 `pptx-nova/references/fidelity-diagnosis.md` 定位，不用旧 renderer 的 PNG 覆盖文件事实。
+  按 `pptx-nova/references/review/fidelity-diagnosis.md` 定位，不用旧 renderer 的 PNG 覆盖文件事实。
 
 ## 3. 生成参考 PNG 基准
 

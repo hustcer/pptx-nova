@@ -439,7 +439,7 @@ itself needs to be built or extended.
 - [xdoc conformance profile](docs/xdoc-conformance.md)
 - [xdoc runtime schema snapshot](docs/xdoc-schema.json)
 - [pptx-nova scripts](pptx-nova/scripts/README.md)
-- [Translation workflow](pptx-nova/references/translation-mode.md)
+- [Translation workflow](pptx-nova/references/translation/translation-mode.md)
 - [pptx-nova assets](pptx-nova/assets/README.md)
 - [DeckKits](pptx-nova/assets/deckkits/README.md)
 - [DeckKit examples](pptx-nova/assets/examples/deckkits/README.md)

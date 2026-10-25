@@ -13,7 +13,7 @@ function readSkill(path) {
 test('visual-audit is routed as the canonical final Agent decision', () => {
   const skill = readSkill('SKILL.md')
   const common = readSkill('references/common-workflow.md')
-  const exportAndCheck = readSkill('references/export-and-check.md')
+  const exportAndCheck = readSkill('references/review/export-and-check.md')
 
   assert.match(
     skill,

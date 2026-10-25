@@ -170,7 +170,7 @@ Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青�
 
 这些 gate 属于 DeckKit 元数据，不属于单个 deck 的临时 patch。设计合同规则放在合同模块，
 不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
-检查应用后的对象和原生数值。详见 `../../references/design-contracts.md`。
+检查应用后的对象和原生数值。详见 `../../references/create/design-contracts.md`。
 
 合同路线现覆盖全部十套风格：Consulting Dark、Biennale、Cartesian、Broadside、Long Table、Swiss Grid、McKinsey Blue、Black Gold、Green Slate 与 Clear Value。Consulting Dark 2.0 保留深蓝首尾与大小不同的圆形装饰，
 用切角面板替换圆角卡片贴色条，提供十类职责、二十个注册布局及英文完整示例；支持中文和混排，

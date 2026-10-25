@@ -31,7 +31,7 @@ Older runtimes can provide diagnostic previews but require the documented
 human-confirmation route instead of automatic finalization. Failed checks return
 to content, layout, or patch revision.
 
-For the executable workflow, see [DeckKit mode](../pptx-nova/references/deckkit-mode.md)
+For the executable workflow, see [DeckKit mode](../pptx-nova/references/create/deckkit-mode.md)
 and the [create runner](../pptx-nova/scripts/cli/create/run.mjs).
 
 ## Edit an existing presentation
@@ -59,8 +59,8 @@ issues. Clean-open and other specialized checks depend on availability and task
 risk. The final summary should identify checks actually run and any residual
 risks that need review.
 
-See [Edit mode](../pptx-nova/references/edit-mode.md) and
-[Edit Contract](../pptx-nova/references/edit-contract.md) for the detailed rules.
+See [Edit mode](../pptx-nova/references/edit/edit-mode.md) and
+[Edit Contract](../pptx-nova/references/edit/edit-contract.md) for the detailed rules.
 
 ## Diagram sources
 

@@ -296,7 +296,7 @@ The public release audit checks this layout and local module imports.
 
 - `cli/animation/examples.mjs` - executable focus, KPI zoom, and rotated exit
   examples using the public xdoc operations. Writes patches and structural evidence
-  to a new run directory; see `references/morph-choreography.md` for the workflow
+  to a new run directory; see `references/content/morph-choreography.md` for the workflow
   and the separate PowerPoint evidence requirements.
 
 ## Optional Office integrations

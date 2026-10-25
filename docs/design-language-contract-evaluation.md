@@ -64,7 +64,7 @@ Broadside 复用该注册接口，同时保留黑橙海报、衰减文字和闭�
 - [catalog.json](../pptx-nova/assets/deckkits/catalog.json)：`visualGrammar`、`layoutContract`、`diversityGate`、密度、字体底线、翻新配置、readiness 等。
 - [页型 schemas](../pptx-nova/assets/deckkits/biennale-yellow/schemas/)：字段、条目数量、槽位文字预算。
 - [core-primitives.kit.mjs](../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs)：几何边界、内容校验、版式分组多样性和部分质量检查。
-- [DeckKit 工作流](../pptx-nova/references/deckkit-mode.md)：内容合同、生成、dry-run、应用、预览和人工视觉复核。
+- [DeckKit 工作流](../pptx-nova/references/create/deckkit-mode.md)：内容合同、生成、dry-run、应用、预览和人工视觉复核。
 
 Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kimi-ppt/reference/design_system/finance/black-gold-ledger/design.md) 则是面向模型/设计者的语义规范，包含金融领域基线与黑金视觉系统，不能只看成一张配色表。
 
@@ -134,7 +134,7 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 
 不能把这些能力理解为 xdoc 自带任意设计语言解释器或通用布局求解器。当前可见合同并没有提供“读取这份 style JSON，就自动理解所有设计规则”的接口。新格式需要由 pptx-nova 解释和编译，输出已有的 `pptx-patch/v1`。
 
-也不要把 `swap-style` 等同于重排页面：[theme-packs.md](../pptx-nova/references/theme-packs.md) 描述的安全作用面是母版/默认文字样式，任意现有形状几何、阴影、图表布局不会因此自动改变。换肤与重新构图应共享设计合同，但采用不同操作策略。
+也不要把 `swap-style` 等同于重排页面：[theme-packs.md](../pptx-nova/references/content/theme-packs.md) 描述的安全作用面是母版/默认文字样式，任意现有形状几何、阴影、图表布局不会因此自动改变。换肤与重新构图应共享设计合同，但采用不同操作策略。
 
 原生能力也需要按子集选择，例如当前 capability truth 对 chartEx 样式的声明比 classic chart 更窄；不能给所有图表套同一套 `set-chart` 字段。原生图表应优先用于需要数据语义和后续编辑的对象；确需形状实现时，显式记录其语义和验证限制。
 

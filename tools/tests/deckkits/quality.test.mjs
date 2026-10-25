@@ -188,7 +188,7 @@ test('broadside cover blocks text that exceeds every registered composition in d
 })
 
 test('manual DeckKit retry commands overwrite only the current-run candidate', () => {
-  const deckkitMode = readFileSync(skillPath('references/deckkit-mode.md'), 'utf8')
+  const deckkitMode = readFileSync(skillPath('references/create/deckkit-mode.md'), 'utf8')
   const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
 
   assert.match(
@@ -204,8 +204,8 @@ test('manual DeckKit retry commands overwrite only the current-run candidate', (
 })
 
 test('chart preview and Content_Types audit guidance stay current', () => {
-  const charts = readFileSync(skillPath('references/charts.md'), 'utf8')
-  const troubleshooting = readFileSync(skillPath('references/troubleshooting.md'), 'utf8')
+  const charts = readFileSync(skillPath('references/content/charts.md'), 'utf8')
+  const troubleshooting = readFileSync(skillPath('references/runtime/troubleshooting.md'), 'utf8')
 
   assert.match(charts, /当前预览支持/)
   assert.match(charts, /xdoc ≥0\.3\.1/)

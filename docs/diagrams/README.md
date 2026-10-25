@@ -52,11 +52,11 @@ task-specific branch or optional evidence integration.
 
 Maintained workflow references:
 
-- [DeckKit production path](../../pptx-nova/references/deckkit-mode.md)
+- [DeckKit production path](../../pptx-nova/references/create/deckkit-mode.md)
 - [Create runner](../../pptx-nova/scripts/cli/create/run.mjs)
 - [Create delivery binding and visual evidence](../../pptx-nova/scripts/lib/create/create-delivery.mjs)
-- [Edit workflow](../../pptx-nova/references/edit-mode.md)
-- [Edit Contract](../../pptx-nova/references/edit-contract.md)
+- [Edit workflow](../../pptx-nova/references/edit/edit-mode.md)
+- [Edit Contract](../../pptx-nova/references/edit/edit-contract.md)
 - [Runtime discovery and delivery gates](../../pptx-nova/SKILL.md)
 
 ## Updating the figures

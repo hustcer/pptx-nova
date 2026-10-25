@@ -14,7 +14,7 @@ test('pptx-nova routes MCP from the exact capability contract', () => {
   const skill = read('pptx-nova/SKILL.md')
   const scriptsReadme = read('pptx-nova/scripts/README.md')
   const workflow = read('pptx-nova/references/common-workflow.md')
-  const sessions = read('pptx-nova/references/daemon-sessions.md')
+  const sessions = read('pptx-nova/references/runtime/daemon-sessions.md')
 
   for (const text of [skill, scriptsReadme, workflow, sessions]) {
     assert.match(text, /(?:capabilities\.agentTransports\.)?mcp\.contract/)

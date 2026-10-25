@@ -56,7 +56,7 @@ test('explicit swiss-grid refurbishment retains its independent manual fallback 
   )
   assert.deepEqual(plan.requiredReferences, [
     {
-      path: 'references/reference-create.md',
+      path: 'references/create/reference-create.md',
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
     },
@@ -96,12 +96,12 @@ test('explicit candidate fallback keeps refurbish plan route commands gates and 
   )
   assert.deepEqual(plan.requiredReferences, [
     {
-      path: 'references/reference-create.md',
+      path: 'references/create/reference-create.md',
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
     },
     {
-      path: 'references/deckkit-mode.md',
+      path: 'references/create/deckkit-mode.md',
       section: 'Selection',
       reason: 'The explicitly selected DeckKit uses a readiness exception.',
     },
@@ -226,12 +226,12 @@ test('refurbish fallback prunes only inspect-proven exact theme and solid-fill n
 
 test('skill routes standard refurbishment through one compact reference', () => {
   const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
-  const reference = readFileSync(skillPath('references/refurbish-runner.md'), 'utf8')
+  const reference = readFileSync(skillPath('references/edit/refurbish-runner.md'), 'utf8')
   const routingRow = skill
     .split('\n')
     .find((line) => line.includes('Polish / refurbish an existing PPTX'))
 
-  assert.match(routingRow, /references\/refurbish-runner\.md/)
+  assert.match(routingRow, /references\/edit\/refurbish-runner\.md/)
   assert.doesNotMatch(routingRow, /common-workflow|reference-create|deckkit-mode/)
   assert.match(reference, /Do not add `--contact-diff` for ordinary full-deck review/)
   assert.match(reference, /refurbish-plan\.json\.requiredReferences/)
@@ -252,12 +252,12 @@ test('skill stays within the progressive-disclosure byte budget', () => {
 
 test('skill routes standard translation finalization through one compact reference', () => {
   const skill = readFileSync(skillPath('SKILL.md'), 'utf8')
-  const reference = readFileSync(skillPath('references/translation-runner.md'), 'utf8')
+  const reference = readFileSync(skillPath('references/translation/translation-runner.md'), 'utf8')
   const routingRow = skill
     .split('\n')
     .find((line) => line.includes('Translate an existing `.pptx`'))
 
-  assert.match(routingRow, /references\/translation-runner\.md/)
+  assert.match(routingRow, /references\/translation\/translation-runner\.md/)
   assert.doesNotMatch(routingRow, /common-workflow|edit-mode|inspect-and-edit/)
   assert.match(reference, /stable translated candidate/i)
   assert.match(reference, /requiredReferences\[\]/)
@@ -286,7 +286,7 @@ test('refurbish fallback plan overwrites current-run candidate commands', async 
   )
   assert.deepEqual(plan.requiredReferences, [
     {
-      path: 'references/reference-create.md',
+      path: 'references/create/reference-create.md',
       section: '6. Refurbish Existing Deck',
       reason: 'The selected route requires the catalog-driven fallback contract.',
     },

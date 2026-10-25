@@ -31,6 +31,10 @@ If a task spans multiple types, read the entry reference for each relevant type.
 formulas, raw XML, complex brand styling, or other specialized content appears, then read the matching
 specialized reference.
 
+References are grouped by create, edit, translation, runtime, review, content, and policies;
+see [the reference index](references/README.md) for ownership. Reading paths in references are
+relative to the containing document; explicit `references/...` paths start at the skill root.
+
 ## Progressive xdoc Capability Discovery
 
 After creating each run, run `<skill-root>/scripts/cli/runtime/probe.mjs` once and save the result as
@@ -47,7 +51,7 @@ If a caller-provided run directory is rejected, the guard reports the allowed in
 detected entry, and a safe recovery hint; preserve that directory as evidence and retry with a new one.
 
 For operation lookup, schema projections, or CLI output flags, read
-`references/schema-discovery.md#focused-lookup-and-output-flags` first. Prefer exact capability truth
+`references/runtime/schema-discovery.md#focused-lookup-and-output-flags` first. Prefer exact capability truth
 and the saved op index; projected schemas discover fields but do not prove patch validity.
 Derive selectors from inspect, the target op schema, then dry-run suggestions.
 Choose one selector lookup method; do not combine `id`, `name`, or `query` with another method.
@@ -59,14 +63,14 @@ use an existing fallback, and never disable new xdoc capabilities only because t
 
 For Agent transport routing, read the exact contracts under `capabilities.agentTransports`, including
 `mcp.contract`; command presence alone is insufficient and unknown contracts fail closed. MCP replaces
-only disclosed adapter calls, never workflow gates. Read `references/daemon-sessions.md` for details.
+only disclosed adapter calls, never workflow gates. Read `references/runtime/daemon-sessions.md` for details.
 For auth diagnostics or report validation, use the action-specific schema and report reference in
-`references/schema-discovery.md`; the compact capability snapshot is not a complete command contract.
+`references/runtime/schema-discovery.md`; the compact capability snapshot is not a complete command contract.
 Use `xdoc schema --command <command.action>` or `--report <schemaVersion>` for focused contracts.
 Standard runners freeze the display date in `render-context.json`; preserve it when resuming and
 verify the effective `renderContext` in rendering evidence. Manual render sequences must use the
 same `--field-date`. Semantic summaries should persist full evidence with `diff --output`, then
-read and verify that file when detail is needed; see `references/export-and-check.md`.
+read and verify that file when detail is needed; see `references/review/export-and-check.md`.
 
 ### Run Reuse and Isolation
 
@@ -101,30 +105,30 @@ summary.
 
 Use these only to choose the entry reference; the routing table owns details.
 
-- **Create**: `create-runner.md`; formal/high-risk work also follows the Studio/design-lock references.
+- **Create**: `references/create/create-runner.md`; formal/high-risk work also follows the Studio/design-lock references.
   The runner prepares canonical candidate evidence first; after actual PNG review, use its
   `--finalize --visual-review` phase to publish the same hash-bound candidate without rendering again.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
   collect scoped evidence, run the contract gate, then review changed slides. Source-guarded
   `set-run` / `replace-paragraph-text` edits require top-level operations and input-bound numeric
-  shape IDs. Read `inspect-and-edit.md` for paragraph guards and `textLayout`: ordinary edits
+  shape IDs. Read `references/edit/inspect-and-edit.md` for paragraph guards and `textLayout`: ordinary edits
   respect autofit; geometry-preserving edits require the disclosed policy and final fit checks.
-- **Connectors / groups / OLE / embedded models**: read `native-shape-editing.md` before geometry
+- **Connectors / groups / OLE / embedded models**: read `references/edit/native-shape-editing.md` before geometry
   edits or duplication. Use native connection sites, retain owner-specific resources and reject
   unrepresentable transforms. A `preset-adjustments` finding uses an explicitly reviewed,
-  document-bound repair from `troubleshooting.md`; it is not an automatic retry or an XSD failure.
+  document-bound repair from `references/runtime/troubleshooting.md`; it is not an automatic retry or an XSD failure.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
   complex or unsupported timing. Read logical `kind`, all `targets[]`, and `timingSummary.mergeSafe`;
-  effect counts and raw behavior metadata do not authorize edits. `animations.md` covers fixed
+  effect counts and raw behavior metadata do not authorize edits. `references/content/animations.md` covers fixed
   whole-shape Box/Dissolve and their distinct preview limits. For basic effects, follow the disclosed
   repeat/autoReverse/restart/easing contract and its omitted/null/value update semantics.
-  For imported group/pattern effects and Web slideshow controls, follow `animations.md` and its
+  For imported group/pattern effects and Web slideshow controls, follow `references/content/animations.md` and its
   conditional playback reference. Shape deletion must preserve surviving timing conditions or reject.
-  For P14 transitions, follow `animations.md`'s per-kind schema and independent capability axes;
+  For P14 transitions, follow `references/content/animations.md`'s per-kind schema and independent capability axes;
   inspect source/fallback timing separately and never equate authoring with playback certification.
   For Morph, use exact `!!` object names, run `morph-check`, and bind delivery evidence to the
   bundled PowerPoint playback probe when that probe is available.
-- **Refurbish / translate**: use `refurbish-runner.md` / `translation-runner.md`. The runner owns route,
+- **Refurbish / translate**: use `references/edit/refurbish-runner.md` / `references/translation/translation-runner.md`. The runner owns route,
   evidence, one canonical comparison, and publication; read only references it names on failure.
 - **Template / cross-deck copy**: edit inherited objects or use one transactional `slide-copy`; keep the
   native `pptx-slide-copy/v1` report as evidence, require a read-only `ready` preflight with current
@@ -134,18 +138,18 @@ Use these only to choose the entry reference; the routing table owns details.
   `cli/edit/copy-size-gate.mjs` as an independent SHA-bound defense; `require-match` never authorizes
   different slide sizes, and the workflow must not invent `opResults` or silently fit donor geometry.
   Verify independent notes/chart/workbook/classic palette ownership and copied navigation as
-  described in `template-following.md`; equal previews do not prove editing isolation.
-- **Export / diff / preview / check**: use `export-and-check.md`. Run semantic diff once on a stable
+  described in `references/edit/template-following.md`; equal previews do not prove editing isolation.
+- **Export / diff / preview / check**: use `references/review/export-and-check.md`. Run semantic diff once on a stable
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual-evidence decision remains the delivery authority. Discover each action's DPI bounds/default;
-  after upgrades or calendar changes, use fresh rendering evidence as described in `fidelity-diagnosis.md`.
+  after upgrades or calendar changes, use fresh rendering evidence as described in `references/review/fidelity-diagnosis.md`.
 - **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
   required; an unavailable optional evidence route is disclosed risk, not invented proof.
-- **Chart numeric precision**: follow `charts.md`'s numeric checks for long labels, extreme
+- **Chart numeric precision**: follow `references/content/charts.md`'s numeric checks for long labels, extreme
   histogram ranges, signed percentage stacks and automatic axes/category fitting. Verify source
   values separately from painted or extracted labels; retain explicit bounds and real tail intervals.
   For doughnuts, follow its label-position restrictions and explicit hole-size default.
-- **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `inspect-and-edit.md`.
+- **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `references/edit/inspect-and-edit.md`.
   Preserve owner-bound XML facts during neighboring edits; render improvements do not grant
   authoring support or PowerPoint fidelity. Chart 3D and embedded models have separate contracts.
 
@@ -156,7 +160,7 @@ self-contained: scripts required by user workflows live in `<skill-root>/scripts
 `<skill-root>/assets/`, documentation in `<skill-root>/references/`, and benchmarks in
 `<skill-root>/benchmarks/`.
 
-When wrapping xdoc or preparing asset inputs, follow `common-workflow.md`'s filesystem-path rules.
+When wrapping xdoc or preparing asset inputs, follow `references/common-workflow.md`'s filesystem-path rules.
 Resolve POSIX symlink/parent traversal before lexical normalization; keep relative assets rooted
 at the submitted patch/manifest directory, including when the file itself is a symlink.
 
@@ -180,35 +184,35 @@ When creating or modifying PPTX files, this skill can directly consume these inp
 Determine the task type first, then read the corresponding files:
 
 For a rendering discrepancy or a preview regression after upgrading xdoc, also read
-`references/fidelity-diagnosis.md` before changing authored content or layout. This includes
+`references/review/fidelity-diagnosis.md` before changing authored content or layout. This includes
 columns/Unicode breaks, tabs/autofit anchors, font/language/placeholder inheritance, merged borders,
 chart domains/direction, resized cached SmartArt, Web text clipping, missing/stale reflections, and Shape 3D scale offsets;
 identify the actual renderer and its fallback before treating the symptom as a deck defect.
 
-| User intent                                                                              | Required references                                                                                                                                                     | Read conditionally                                                                                                                                   |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Simple prompt / wants speed / default new deck generation                                | `references/create-runner.md`                                                                                                                                           | Follow its preparation routes to `references/create-express.md`, `references/deckkit-mode.md`, or `references/narrative-quality.md` only when needed |
-| Investor / client / board / Studio / needs precise control                               | `references/common-workflow.md`, `references/deckkit-mode.md`, `references/create-studio.md`, `references/design-lock-and-assets.md`, `references/narrative-quality.md` | `references/visual-qa-and-asset-slots.md`, `references/rich-deck-patterns.md`                                                                        |
-| Strictly follow an existing PPTX template / adapt content to a template                  | `references/common-workflow.md`, `references/template-following.md`, `references/edit-mode.md`                                                                          | `references/design-lock-and-assets.md`, `references/inspect-and-edit.md`                                                                             |
-| Reference PPTX + new outline to generate a new deck                                      | `references/common-workflow.md`, `references/reference-create.md`, `references/deckkit-mode.md`                                                                         | `references/template-library.md`                                                                                                                     |
-| Polish / refurbish an existing PPTX while preserving original content and changing style | `references/refurbish-runner.md`                                                                                                                                        | Only the references named by `refurbish-plan.json.requiredReferences[]` after route selection                                                        |
-| Small text/notes/footer/metadata edit                                                    | `references/common-workflow.md`, `references/edit-contract.md`, `references/micro-edit-cheatsheet.md`                                                                   | If selectors are ambiguous or complex image/multi-object edits are involved, then read `references/edit-mode.md`, `references/inspect-and-edit.md`   |
-| Continue the same deck with an explicit future/carryover rule                            | `references/common-workflow.md`, `references/session-rules.md`, `references/edit-contract.md`                                                                           | `references/edit-mode.md`, `references/inspect-and-edit.md`                                                                                          |
-| Translate an existing `.pptx` while preserving original layout                           | `references/translation-runner.md`                                                                                                                                      | Follow its preparation/failure routes into `references/translation-mode.md`; load charts/tables only when detected                                   |
-| Modify an existing `.pptx`                                                               | `references/common-workflow.md`, `references/edit-contract.md`, `references/edit-mode.md`, `references/inspect-and-edit.md`                                             | `references/patch-ops-cheatsheet.md`                                                                                                                 |
-| Edit connector/group/OLE/model geometry or duplicate native objects                      | Existing-deck edit references plus `references/native-shape-editing.md`                                                                                                 | `references/troubleshooting.md` for guarded preset repairs                                                                                           |
-| Add/modify/delete animations or transitions                                              | `references/common-workflow.md`, `references/edit-mode.md`, `references/animations.md`, `references/inspect-and-edit.md`                                                | `references/patch-ops-cheatsheet.md`; for complex timing, read `references/control-flow-and-raw-xml.md` only for risk judgment                       |
-| Data + template / JSON filling                                                           | `references/common-workflow.md`, `references/data-driven.md`                                                                                                            | `references/tables.md`, `references/charts.md`                                                                                                       |
-| Brand conversion / brand check                                                           | `references/common-workflow.md`, `references/styles-and-themes.md`                                                                                                      | `references/template-library.md`                                                                                                                     |
-| Only export PDF/PNG/MD/JSON, extract, check, or compare two PPTX files                   | `references/common-workflow.md`, `references/export-and-check.md`                                                                                                       | No need to read creation/edit docs unless the user then asks for fixes                                                                               |
-| Long-task split / resume generation                                                      | `references/common-workflow.md`, `references/resume-split-mode.md`                                                                                                      | References for the original task type                                                                                                                |
-| Formulas, charts, tables, raw XML                                                        | Current task references plus the matching `formulas.md` / `charts.md` / `tables.md` / `control-flow-and-raw-xml.md`                                                     | `troubleshooting.md`                                                                                                                                 |
+| User intent                                                                              | Required references                                                                                                                                                                                 | Read conditionally                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Simple prompt / wants speed / default new deck generation                                | `references/create/create-runner.md`                                                                                                                                                                | Follow its preparation routes to `references/create/create-express.md`, `references/create/deckkit-mode.md`, or `references/create/narrative-quality.md` only when needed |
+| Investor / client / board / Studio / needs precise control                               | `references/common-workflow.md`, `references/create/deckkit-mode.md`, `references/create/create-studio.md`, `references/create/design-lock-and-assets.md`, `references/create/narrative-quality.md` | `references/review/visual-qa-and-asset-slots.md`, `references/create/rich-deck-patterns.md`                                                                               |
+| Strictly follow an existing PPTX template / adapt content to a template                  | `references/common-workflow.md`, `references/edit/template-following.md`, `references/edit/edit-mode.md`                                                                                            | `references/create/design-lock-and-assets.md`, `references/edit/inspect-and-edit.md`                                                                                      |
+| Reference PPTX + new outline to generate a new deck                                      | `references/common-workflow.md`, `references/create/reference-create.md`, `references/create/deckkit-mode.md`                                                                                       | `references/create/template-library.md`                                                                                                                                   |
+| Polish / refurbish an existing PPTX while preserving original content and changing style | `references/edit/refurbish-runner.md`                                                                                                                                                               | Only the references named by `refurbish-plan.json.requiredReferences[]` after route selection                                                                             |
+| Small text/notes/footer/metadata edit                                                    | `references/common-workflow.md`, `references/edit/edit-contract.md`, `references/edit/micro-edit-cheatsheet.md`                                                                                     | If selectors are ambiguous or complex image/multi-object edits are involved, then read `references/edit/edit-mode.md`, `references/edit/inspect-and-edit.md`              |
+| Continue the same deck with an explicit future/carryover rule                            | `references/common-workflow.md`, `references/edit/session-rules.md`, `references/edit/edit-contract.md`                                                                                             | `references/edit/edit-mode.md`, `references/edit/inspect-and-edit.md`                                                                                                     |
+| Translate an existing `.pptx` while preserving original layout                           | `references/translation/translation-runner.md`                                                                                                                                                      | Follow its preparation/failure routes into `references/translation/translation-mode.md`; load charts/tables only when detected                                            |
+| Modify an existing `.pptx`                                                               | `references/common-workflow.md`, `references/edit/edit-contract.md`, `references/edit/edit-mode.md`, `references/edit/inspect-and-edit.md`                                                          | `references/edit/patch-ops-cheatsheet.md`                                                                                                                                 |
+| Edit connector/group/OLE/model geometry or duplicate native objects                      | Existing-deck edit references plus `references/edit/native-shape-editing.md`                                                                                                                        | `references/runtime/troubleshooting.md` for guarded preset repairs                                                                                                        |
+| Add/modify/delete animations or transitions                                              | `references/common-workflow.md`, `references/edit/edit-mode.md`, `references/content/animations.md`, `references/edit/inspect-and-edit.md`                                                          | `references/edit/patch-ops-cheatsheet.md`; for complex timing, read `references/edit/control-flow-and-raw-xml.md` only for risk judgment                                  |
+| Data + template / JSON filling                                                           | `references/common-workflow.md`, `references/content/data-driven.md`                                                                                                                                | `references/content/tables.md`, `references/content/charts.md`                                                                                                            |
+| Brand conversion / brand check                                                           | `references/common-workflow.md`, `references/content/styles-and-themes.md`                                                                                                                          | `references/create/template-library.md`                                                                                                                                   |
+| Only export PDF/PNG/MD/JSON, extract, check, or compare two PPTX files                   | `references/common-workflow.md`, `references/review/export-and-check.md`                                                                                                                            | No need to read creation/edit docs unless the user then asks for fixes                                                                                                    |
+| Long-task split / resume generation                                                      | `references/common-workflow.md`, `references/runtime/resume-split-mode.md`                                                                                                                          | References for the original task type                                                                                                                                     |
+| Formulas, charts, tables, raw XML                                                        | Current task references plus the matching `references/content/formulas.md` / `references/content/charts.md` / `references/content/tables.md` / `references/edit/control-flow-and-raw-xml.md`        | `references/runtime/troubleshooting.md`                                                                                                                                   |
 
 When the user provides an HTML file, web URL, or PDF as material, first normalize it to Markdown/text
 with xdoc according to Source Ingestion in `references/common-workflow.md`, then route by the real task
 type (create / data / edit) in the table above; ingestion itself does not change the target task type.
 If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, follow
-`references/export-and-check.md`.
+`references/review/export-and-check.md`.
 
 ## Mode Detection
 
@@ -221,21 +225,21 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
 - **Edit / Micro Edit / Animation**: Inspect before patching. Micro edits use the short contract path;
   animation changes stay inside the capability-declared safe subset.
   Use reported part identities and current inspect order for slide/layout/master selectors;
-  filename suffixes and ZIP order are not selector indices. See `references/inspect-and-edit.md`.
+  filename suffixes and ZIP order are not selector indices. See `references/edit/inspect-and-edit.md`.
 - **Translation**: Copy, replace visible text in place, and preserve styling/layout semantics. Repair by
   compressing text, then minimally reducing font, then geometry only with proven whitespace. Changed
   multi-column text requires its bound human-review gate; real overflow/overlap/edge findings and
   rendered chart-title/page-bound collisions never receive a review override. The translation runner
   owns coverage, style/vision audits, comparison parts, and SHA-256 publication binding.
-- **Data-driven / Export-Check**: Data plus template selects `data-driven.md`; conversion, preview,
+- **Data-driven / Export-Check**: Data plus template selects `references/content/data-driven.md`; conversion, preview,
   extraction, or checking alone must not mutate the PPTX.
 
 ## Feedback Mode
 
-If the user prompt contains explicit feedback intent such as `need feedback`, English feedback phrases, or equivalent Chinese phrases meaning "give feedback", "needs feedback", or "any usage feedback", read `references/feedback-mode.md`. Once Feedback Mode is triggered, first write `skill-feedback.md` in the current run directory. Create, Refurbish, and Translation feedback must include the workflow's exact seven-dimension 0-10 process scorecard and a correctly weighted overall score, printed in the final response as required by Completion Summary. Before the final response, run the feedback gate with `--workflow create|refurbish|translation|other`: if the original prompt is available, use
+If the user prompt contains explicit feedback intent such as `need feedback`, English feedback phrases, or equivalent Chinese phrases meaning "give feedback", "needs feedback", or "any usage feedback", read `references/review/feedback-mode.md`. Once Feedback Mode is triggered, first write `skill-feedback.md` in the current run directory. Create, Refurbish, and Translation feedback must include the workflow's exact seven-dimension 0-10 process scorecard and a correctly weighted overall score, printed in the final response as required by Completion Summary. Before the final response, run the feedback gate with `--workflow create|refurbish|translation|other`: if the original prompt is available, use
 `node <skill-root>/scripts/cli/review/feedback-gate.mjs --run-dir <run-dir> --prompt-file <prompt.txt> --workflow <workflow> --strict --overwrite --json > <run-dir>/feedback-gate.json`; if the prompt was not saved but the user feedback request is known, use `--require-feedback`. If the gate fails, add real feedback or correct the scorecard before sending the final response.
 
-During xdoc PPTX creation or editing in Feedback Mode, investigate newly observed, unexpected rendering problems as possible product bugs. Compare with an existing PowerPoint-native screenshot when available; otherwise, if the optional prerequisites are available, try `<skill-root>/scripts/cli/office/powerpoint-snapshot.nu` on the affected slides and compare. Record the evidence and every confirmed new problem in `skill-feedback.md`, and report all of them in the final task summary even when there are more than three feedback items. If native verification is unavailable or inconclusive, label the observation unverified rather than claiming a confirmed product bug. Follow `references/feedback-mode.md` for the evidence and reporting details.
+During xdoc PPTX creation or editing in Feedback Mode, investigate newly observed, unexpected rendering problems as possible product bugs. Compare with an existing PowerPoint-native screenshot when available; otherwise, if the optional prerequisites are available, try `<skill-root>/scripts/cli/office/powerpoint-snapshot.nu` on the affected slides and compare. Record the evidence and every confirmed new problem in `skill-feedback.md`, and report all of them in the final task summary even when there are more than three feedback items. If native verification is unavailable or inconclusive, label the observation unverified rather than claiming a confirmed product bug. Follow `references/review/feedback-mode.md` for the evidence and reporting details.
 
 ## Common Creation Hard Rules
 
@@ -243,7 +247,7 @@ These rules apply to all new decks, including Express and Studio:
 
 - Generate or normalize `outline.json` first, then write `deck_lock.json`; do not jump directly from prompt to patch.
 - Default to DeckKit-first: `content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`.
-- Persuasive decks for formal reports, clients, investors, boards, roadshows, strategy, product-platform, and similar contexts must read `references/narrative-quality.md`, lock `deckProfile`, and per-slide `claimTitle` / `proofObject` / `rhythm` / `layoutIntent` / `visualDensity` in `deck_lock.json`, then write `narrative_quality_review.json` after PNG review.
+- Persuasive decks for formal reports, clients, investors, boards, roadshows, strategy, product-platform, and similar contexts must read `references/create/narrative-quality.md`, lock `deckProfile`, and per-slide `claimTitle` / `proofObject` / `rhythm` / `layoutIntent` / `visualDensity` in `deck_lock.json`, then write `narrative_quality_review.json` after PNG review.
 - Before writing `content.json` or a manual patch, compare each slide against `deck_lock.slides[]` and confirm page type, rhythm, structural intent, density, and proof object have not drifted from memory. If mismatched, fix the lock or content source first instead of patching around it.
 - Non-appendix slides should have a clear point of view or direction. Main titles/subtitles should be short, scannable, and fitted to DeckKit slots. Avoid pure topic labels such as `Product Overview`, `Market Analysis`, or `Roadmap`. Put the full conclusion in `claimTitle`; when needed, move it into the subtitle, callout, or `proofObject`. Do not sacrifice layout merely to make the displayed title conclusion-like.
 - Main titles and subtitles do not use terminal periods by default. Use question marks/exclamation marks only when the tone or interactive intent is explicit.
@@ -262,8 +266,8 @@ These rules apply to all new decks, including Express and Studio:
 These rules apply to modifying existing PPTX files:
 
 - Treat the input deck as read-only by default. Inspect first, then dry-run, then write intermediate files in the run directory.
-- Keep sidecars distinct from the primary PPTX and every input. On an output failure, inspect publication facts before recovery: `primaryOutputPublished:true` means the PPTX already reached disk even though the command failed. Preserve both paths and the report; never automatically replay or add `--overwrite`. See `common-workflow.md` and `troubleshooting.md` for sidecar recovery, including creation tasks.
-- Do not edit objects by guessing selectors. When the target object is unclear, first narrow candidates with `xdoc pptx select input.pptx --query '{"textRegex":"..."}' --json` or a query file, then write the patch. Check dry-run `resolvedSelectors[]`; for an ambiguous selector, inspect `suggestions[].remediation` and follow `references/troubleshooting.md`. Capture the first submission before an automatic retry, validate the complete kind/target shape against retained request/input/asset snapshots, and revalidate and authorize. A replacement request runs once from the original input; document remediation applies only its repair patch to the exact diagnosed bytes. Missing context or `remediationUnavailable` never permits a guessed replay.
+- Keep sidecars distinct from the primary PPTX and every input. On an output failure, inspect publication facts before recovery: `primaryOutputPublished:true` means the PPTX already reached disk even though the command failed. Preserve both paths and the report; never automatically replay or add `--overwrite`. See `references/common-workflow.md` and `references/runtime/troubleshooting.md` for sidecar recovery, including creation tasks.
+- Do not edit objects by guessing selectors. When the target object is unclear, first narrow candidates with `xdoc pptx select input.pptx --query '{"textRegex":"..."}' --json` or a query file, then write the patch. Check dry-run `resolvedSelectors[]`; for an ambiguous selector, inspect `suggestions[].remediation` and follow `references/runtime/troubleshooting.md`. Capture the first submission before an automatic retry, validate the complete kind/target shape against retained request/input/asset snapshots, and revalidate and authorize. A replacement request runs once from the original input; document remediation applies only its repair patch to the exact diagnosed bytes. Missing context or `remediationUnavailable` never permits a guessed replay.
 - After inspect/select resolves the targets, normalize `edit-contract.json` before patch/apply. Bind each target to its patch `opIndexes[]`, expected categories/values, allowed changes, preserve policy, and required evidence. After the stable candidate is produced, require `edit-contract-gate.json.agentGate.passed=true` before publication. Translation and Refurbish keep their stronger specialized contracts instead of replacing them with this generic gate.
 - Only create `session-rules.json` from an explicit current-deck future/carryover instruction. Resolve it from a structured `session-operation.json`; never execute free-form `appliesWhen` text. Pass a successful `session-rules-resolution.json` to the Edit Contract normalizer so rule-owned targets and preserve requirements are hash-bound and verified by the final contract gate. If no active rule applies, continue without extra evidence or user confirmation. Advance the rules to a new revision only after the candidate passes and is accepted.
 - After post-apply evidence is stable, generate `evidence-manifest.json` to bind the candidate SHA-256 and exact evidence-file hashes. The gate must reject a missing/stale manifest, including when the candidate is overwritten at the same path.
@@ -286,7 +290,7 @@ For client-facing, investor-facing, or formal-report decks, all visible text suc
 
 - Core body text is usually at least `10.5pt`.
 - Label / badge / chart/table text is usually at least `9pt`.
-- In newly created or explicitly recolored charts, avoid large black or near-black filled regions; black text and lines are allowed. Prefer suitable grays or theme colors, and review 3D sidewalls as well as front faces. Follow `references/charts.md` for palette and contrast checks; this does not authorize recoloring preserved source charts.
+- In newly created or explicitly recolored charts, avoid large black or near-black filled regions; black text and lines are allowed. Prefer suitable grays or theme colors, and review 3D sidewalls as well as front faces. Follow `references/content/charts.md` for palette and contrast checks; this does not authorize recoloring preserved source charts.
 - Footers/sources may be `8.5-9pt`, but must not carry critical information.
 - DeckKit-first creation uses the catalog `qualityProfile` and that DeckKit's golden baseline as machine gates. Do not damage validated DeckKit layout constants just to satisfy generic font-size hard rules.
 - Short labels such as percentages, number+unit, amounts, quarters, years, `ROI`, and `KPI` must not be split.
@@ -310,7 +314,7 @@ Machine gates cannot see every pixel-level defect. In particular, check:
 - Whether template pages retain placeholders, old footers, old dates, old page numbers, empty image frames, or invisible-but-editable empty objects.
 - Whether multi-page contact sheets show repetitive layout rhythm, meaningless decorative containers, topic-only titles, or awkward blank space.
 - Whether chart/table pages pass specialized semantic checks: data dimensions, series/categories, legend/labels, table rows/columns, and binding sources must match the content before checking the PNG for occlusion.
-- For deliverable PPTX files, especially formal/enterprise or high-risk chart/table/OOXML changes, run the clean-open smoke gate when macOS + PowerPoint are available. Follow `references/export-and-check.md` for the command, prerequisites, delayed Repair-dialog checks, and skipped-evidence disclosure.
+- For deliverable PPTX files, especially formal/enterprise or high-risk chart/table/OOXML changes, run the clean-open smoke gate when macOS + PowerPoint are available. Follow `references/review/export-and-check.md` for the command, prerequisites, delayed Repair-dialog checks, and skipped-evidence disclosure.
 
 ## Required Validation
 
@@ -358,13 +362,13 @@ corrupted content for an input combination, stop delivery. First fix the xdoc/pp
 regression test covering the scenario that previously generated a bad file, asserting that, after the
 fix, it either generates a structurally valid file or returns a clear op-level error.
 
-When only exporting or checking files, follow `export-and-check.md`.
+When only exporting or checking files, follow `references/review/export-and-check.md`.
 
 ## Common Command Entry Points
 
 Read the routed reference first and use its canonical runner or command sequence. Creation,
-refurbishment, and translation entry commands live in `create-runner.md`, `refurbish-runner.md`, and
-`translation-runner.md`; inspect/apply, export/check, specialized content, visual review, and feedback
+refurbishment, and translation entry commands live in `references/create/create-runner.md`, `references/edit/refurbish-runner.md`, and
+`references/translation/translation-runner.md`; inspect/apply, export/check, specialized content, visual review, and feedback
 commands live in their matching references. Do not preload a command encyclopedia or reconstruct a
 runner from individual commands when a standard runner owns the workflow.
 
@@ -382,7 +386,7 @@ Add conditional material only when relevant: for high-risk tasks, list `evidence
 `layout-final.json`; for chart/table/XML risk, list the specialized audit; for refurbish/strict template
 following, list fidelity/template/content audits; for formal persuasive decks, list the narrative-quality
 conclusion; when cleanup occurs, state retained evidence and deleted rebuildable artifacts. When
-Feedback Mode triggers, save feedback according to `references/feedback-mode.md` and list the
+Feedback Mode triggers, save feedback according to `references/review/feedback-mode.md` and list the
 `skill-feedback.md` path. Show detailed issues only for 3 or fewer feedback items; beyond 3, list only
 the detailed-report path. For Create, Refurbish, and Translation, always print the
 validated seven-row execution scorecard and weighted overall score regardless of issue count. Retain
@@ -399,46 +403,4 @@ estimate.
 ## Reference Index
 
 Read the files required by routing first; do not read all references at once.
-
-| File                                      | Purpose                                                                                                                 |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `references/common-workflow.md`           | Run directory, output collision avoidance, artifact retention/cleanup, common workflow                                  |
-| `references/create-runner.md`             | Standard Create runner contract, compact output, performance, progressive preparation and failure routing               |
-| `references/deckkit-mode.md`              | DeckKit selection, readiness, content, user-visible examples                                                            |
-| `references/create-express.md`            | Quick deck generation from a simple prompt                                                                              |
-| `references/create-studio.md`             | Confirmation, design lock, and split for high-risk/formal/precision decks                                               |
-| `references/edit-mode.md`                 | Inspect/dry-run/selector workflow for modifying existing PPTX files                                                     |
-| `references/edit-contract.md`             | Existing-deck edit scope, source hash, target coverage, locality/style evidence, and final contract gate                |
-| `references/session-rules.md`             | Explicit current-deck future/carryover rules, revision lifecycle, deterministic resolver, and Edit Contract integration |
-| `references/micro-edit-cheatsheet.md`     | Fast path for small text, notes, footer, metadata, and single-object edits                                              |
-| `references/translation-runner.md`        | Translation finalizer, stable candidate, compact output, compare reuse, publication binding, and failure routing        |
-| `references/translation-mode.md`          | PPTX translation, visible text coverage, source/candidate comparison, and layout-consistency gates                      |
-| `references/feedback-mode.md`             | Skill usage feedback, old-run feedback audit, and feedback persistence rules                                            |
-| `references/refurbish-runner.md`          | Compact standard refurbish route, Agent output, comparison reuse, failure-driven disclosure, and review boundary        |
-| `references/template-following.md`        | Strict template following: copy source slides, edit inherited objects, placeholder QA                                   |
-| `references/export-and-check.md`          | Export, extract, checks, semantic diff, and canonical unified visual evidence                                           |
-| `references/fidelity-diagnosis.md`        | Distinguish authored semantics, renderer behavior and environment differences before repairing a deck                   |
-| `references/express-mode.md`              | Full golden path for Express mode                                                                                       |
-| `references/reference-create.md`          | Reference PPTX + new outline generation                                                                                 |
-| `references/inspect-and-edit.md`          | Selectors, inspect output, and edit details                                                                             |
-| `references/native-shape-editing.md`      | Native connector sites, exact group transforms, OLE/model preview geometry, and object-copy ownership                   |
-| `references/design-lock-and-assets.md`    | `deck_lock.json`, `assets_manifest.json`, check-lock                                                                    |
-| `references/narrative-quality.md`         | Deck profile, claim spine, contact-sheet plan, comeback review                                                          |
-| `references/patch-ops-cheatsheet.md`      | Patch op quick reference                                                                                                |
-| `references/animations.md`                | PPTX animation/transition creation, safe edits, preserve-only boundaries, validation                                    |
-| `references/recipes.md`                   | Recipe op schema and examples                                                                                           |
-| `references/charts.md`                    | Chart creation/editing and OOXML chart semantics                                                                        |
-| `references/tables.md`                    | Table creation/editing, CSV, formulas                                                                                   |
-| `references/formulas.md`                  | LaTeX/math formula strategy and formula assets                                                                          |
-| `references/styles-and-themes.md`         | Colors, gradients, fonts, themes, masters                                                                               |
-| `references/theme-packs.md`               | themePack / stylePack built-ins, `catalog themes`, swap-theme / swap-style / apply-brand commands, generator usage      |
-| `references/data-driven.md`               | `template-fill` and `bind-data`                                                                                         |
-| `references/rich-deck-patterns.md`        | Rich visual patterns when no suitable DeckKit exists                                                                    |
-| `references/schema-discovery.md`          | Progressive xdoc schema / dry-run --explain capability discovery                                                        |
-| `references/visual-qa-and-asset-slots.md` | Image slots, AI image prompt guard, P0/P1 QA                                                                            |
-| `references/deck-generator-workflow.md`   | Creating or extending DeckKits                                                                                          |
-| `references/template-library.md`          | Brand/layout/deck/chart/icon catalog fusion                                                                             |
-| `references/resume-split-mode.md`         | Split handoff and resume generation                                                                                     |
-| `references/control-flow-and-raw-xml.md`  | `if` / `foreach` / `try` / raw OOXML                                                                                    |
-| `references/daemon-sessions.md`           | Daemon/stdio JSON-RPC/MCP selection, exact contracts, tuning, and troubleshooting                                       |
-| `references/troubleshooting.md`           | Common errors and automatic repair suggestions                                                                          |
+See [the reference index](references/README.md) for the complete grouped guide descriptions.

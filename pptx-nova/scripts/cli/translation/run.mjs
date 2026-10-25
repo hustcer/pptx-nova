@@ -923,73 +923,73 @@ function buildAgentSummary(summary) {
 function failureReferences(error) {
   const routes = {
     'i18n-style-diff': {
-      path: 'references/translation-mode.md',
+      path: 'references/translation/translation-mode.md',
       section: 'Style Signature Gate',
       reason: 'The stable candidate changed translation-protected style signatures.',
     },
     'i18n-candidate-consistency-contract': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Failure routing',
       reason:
         'The installed xdoc emitted an i18n-scan schema this runner does not recognize; align the skill and xdoc versions instead of debugging translations.',
     },
     'i18n-candidate-consistency': {
-      path: 'references/translation-mode.md',
+      path: 'references/translation/translation-mode.md',
       section: 'I18n Plan Gate',
       reason: 'One or more planned translation units do not resolve to the expected target text.',
     },
     'multi-column-review-input': {
-      path: 'references/translation-mode.md',
+      path: 'references/translation/translation-mode.md',
       section: 'Visual Parity Gate',
       reason: 'The supplied multi-column review evidence is incomplete or stale.',
     },
     'multi-column-review-revalidate': {
-      path: 'references/translation-mode.md',
+      path: 'references/translation/translation-mode.md',
       section: 'Visual Parity Gate',
       reason: 'The multi-column review evidence no longer passes its fail-closed gate.',
     },
     'multi-column-review-binding': {
-      path: 'references/translation-mode.md',
+      path: 'references/translation/translation-mode.md',
       section: 'Visual Parity Gate',
       reason: 'The reviewed findings do not bind the current candidate and final vision evidence.',
     },
     'translation-vision-diff': {
-      path: 'references/translation-mode.md',
+      path: 'references/translation/translation-mode.md',
       section: 'Visual Parity Gate',
       reason: 'Vision blockers require translation repair or a bound multi-column review.',
     },
     'translation-preview': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Visual evidence and performance',
       reason: 'The candidate preview did not produce complete verified slide evidence.',
     },
     'preview-render': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Visual evidence and performance',
       reason: 'The candidate preview command failed before complete slide evidence was produced.',
     },
     'pptx-semantic-diff': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Failure routing',
       reason: 'The final semantic evidence command failed and must be diagnosed before comparison.',
     },
     'translation-compare-artifact': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Visual evidence and performance',
       reason: 'The full translation comparison is incomplete or invalid.',
     },
     'translation-compare': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Visual evidence and performance',
       reason: 'The full translation comparison command failed and requires evidence diagnosis.',
     },
     'contact-diff-artifact': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Visual evidence and performance',
       reason: 'The requested compatibility aliases could not be verified from compare evidence.',
     },
     'translation-compare-delivery': {
-      path: 'references/translation-runner.md',
+      path: 'references/translation/translation-runner.md',
       section: 'Delivery boundary',
       reason: 'The final PPTX and comparison evidence were not hash-bound for publication.',
     },

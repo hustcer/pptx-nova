@@ -229,7 +229,7 @@ else process.exit(2)
   assert.equal(compact.status, 'failed')
   assert.deepEqual(compact.requiredReferences, [
     {
-      path: 'references/translation-mode.md',
+      path: 'references/translation/translation-mode.md',
       section: 'Visual Parity Gate',
       reason: 'Vision blockers require translation repair or a bound multi-column review.',
     },

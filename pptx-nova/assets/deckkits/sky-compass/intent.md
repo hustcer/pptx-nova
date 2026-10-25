@@ -30,7 +30,7 @@ node pptx-nova/scripts/cli/create/build.mjs --deckkit sky-compass content.json -
 ```
 
 按标准 Create runner 完成 deck lock、机器检查、原生对象回读、canonical PNG 逐页检查和同一候选
-交付绑定。candidate 必须显式选择。完整报告使用 `meta.designScope: "complete"`，封面开场、
+交付绑定。当前为 default，作为默认 DeckKit 参与自动交付选择。完整报告使用 `meta.designScope: "complete"`，封面开场、
 决策收束；节选使用 `"excerpt"`。`auto` 确定性选择能容纳内容的合法布局；显式选择仍检查容量。
 
 | type                | 表达职责                   | layoutId              |

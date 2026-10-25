@@ -21,7 +21,7 @@ node pptx-nova/assets/deckkits/validate-content.mjs content.json --deckkit warm-
 node pptx-nova/scripts/cli/create/build.mjs --deckkit warm-clay content.json -o patch.json
 ```
 
-标准 Create runner 使用同一合同、对象/数值回读和候选交付绑定。candidate 须显式选择，
+标准 Create runner 使用同一合同、对象/数值回读和候选交付绑定。production 可参与自动交付选择，
 不属于 production/default 自动交付资格。完整 deck 用 `meta.designScope: "complete"`，
 以封面开场、承诺页收束；单页及节选使用 `"excerpt"`。
 

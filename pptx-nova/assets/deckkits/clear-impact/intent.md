@@ -22,7 +22,7 @@ node pptx-nova/scripts/cli/create/build.mjs --deckkit clear-impact content.json 
 ```
 
 标准 Create runner 使用相同合同，保存计划、规则检查、原生图表/表格回读与交付绑定。
-当前为 candidate，须显式选择，不属于 production/default 自动交付资格。
+当前为 production，可参与自动交付选择。
 
 ## 页面职责与构图
 

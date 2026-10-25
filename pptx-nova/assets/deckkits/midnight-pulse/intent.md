@@ -2,7 +2,7 @@
 
 深夜运营指挥室式的证据报告：近黑蓝底、青蓝仪表、冰蓝数字、琥珀异常，以及交叠并裁切到画布边缘的深海军蓝／深青薄雾。**背景叠层是身份必需项**，不能为追求通用极简而删除。只有注册的背景薄雾可使用渐变，图表、表格与其他形状保持平面表达。
 
-通过标准 `content.json → validate-content → build → create runner` 使用。显式选择本套件；candidate 不进入自动交付选择。发现字段、可用布局和容量时运行 `pptx-nova-deckkit-design.mjs --deckkit midnight-pulse` 与 slots 命令。数值事实以同目录 design.json 和投影 schema 为准。
+通过标准 `content.json → validate-content → build → create runner` 使用。本套件为 production，可参与自动交付选择。发现字段、可用布局和容量时运行 `pptx-nova-deckkit-design.mjs --deckkit midnight-pulse` 与 slots 命令。数值事实以同目录 design.json 和投影 schema 为准。
 
 ## 页面职责与构图
 

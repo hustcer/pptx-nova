@@ -22,7 +22,7 @@ node pptx-nova/scripts/cli/create/build.mjs --deckkit amber-ledger content.json 
 ```
 
 使用标准 Create runner 完成锁定、机器检查、对象回读、canonical 逐页审查和同一候选交付绑定。
-candidate 须显式选择。完整报告声明 `meta.designScope: "complete"`，以封面开场、决策收束；
+production 可参与自动交付选择。完整报告声明 `meta.designScope: "complete"`，以封面开场、决策收束；
 单页及节选声明 `"excerpt"`。`auto` 确定性选择能容纳内容的合法构图；显式选择仍执行容量检查。
 
 | type                | 职责                         | layoutId                       |
@@ -75,4 +75,4 @@ candidate 须显式选择。完整报告声明 `meta.designScope: "complete"`，
 完整八页示例、十六个注册布局、最大条目数及中英混排样例均通过机器检查与实际 PNG 审查。
 八页全部文字序列、三个原生图表的类别和数值缓存、三个嵌入工作簿保持一致；三个表格仍为原生对象。
 ZIP/XML、完整包语义及兼容检查通过，本机 PowerPoint clean-open 通过。
-本轮未新增交互编辑、跨平台或像素等价认证，readiness 仍为 candidate。
+本轮未新增交互编辑、跨平台或像素等价认证，readiness 为 production。

@@ -4646,7 +4646,7 @@
       "version": "0.1.0",
       "path": "clear-impact/clear-impact.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -4947,7 +4947,7 @@
       "validatedWith": {},
       "quality": {
         "knownBlockingLimits": [],
-        "lastBenchmark": "2026-10-24",
+        "lastBenchmark": "2026-10-25",
         "vision": {
           "high": 0,
           "medium": 0,
@@ -4960,17 +4960,17 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "manualHardDefects": 0,
         "benchmark": {
           "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
-          "date": "2026-10-24",
+          "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-clear-impact/benchmark/03"
+            "out": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -4988,8 +4988,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -4997,7 +4997,7 @@
               "caseId": "clear-impact.golden-impact",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-clear-impact/benchmark/03/clear-impact/golden-impact/summary.json",
+              "summaryPath": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines/clear-impact/golden-impact/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/clear-impact/golden-impact/review.md",
               "validation": {
                 "valid": true,
@@ -5022,8 +5022,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -5037,7 +5037,7 @@
                 "bytes": 257697
               },
               "patchOps": 1362,
-              "p50TotalMs": 217.71
+              "p50TotalMs": 126.12
             }
           ],
           "blockers": []
@@ -5047,7 +5047,7 @@
         "Based on the eight-panel Moon-White design reference; source photography claims conflict with actual pages and are not registered capabilities.",
         "Native column chart and tables are editable. Progress and variance use data-derived native shapes; regenerate from content after edits to keep geometry, values and annotations synchronized.",
         "Arial / Arial Unicode MS fonts are not embedded. Other Office versions and platforms are unverified.",
-        "Candidate requires explicit selection; no native-skinning or existing-deck preservation claim.",
+        "No native-skinning or existing-deck preservation claim.",
         "Arial Unicode MS has a Regular face on the validated host; CJK bold is synthesized. Scientific chart label formatting can differ between PowerPoint and the current canonical renderer while retaining equal raw values."
       ],
       "examples": ["clear-impact/examples/content.json"],
@@ -5058,7 +5058,7 @@
       "version": "0.1.0",
       "path": "warm-clay/warm-clay.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -5312,8 +5312,8 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "benchmark": {
@@ -5321,7 +5321,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-warm-clay/benchmark/02"
+            "out": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -5339,8 +5339,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -5348,7 +5348,7 @@
               "caseId": "warm-clay.golden-workshop",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-warm-clay/benchmark/02/warm-clay/golden-workshop/summary.json",
+              "summaryPath": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines/warm-clay/golden-workshop/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/warm-clay/golden-workshop/review.md",
               "validation": {
                 "valid": true,
@@ -5373,8 +5373,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -5388,7 +5388,7 @@
                 "bytes": 187880
               },
               "patchOps": 906,
-              "p50TotalMs": 95.81
+              "p50TotalMs": 105.86
             }
           ],
           "blockers": []
@@ -5398,7 +5398,7 @@
         "Based on Warm Clay Works design.md and eight-panel reference image; migrated visual identity only, no source business claims or one-time photograph.",
         "Native single-series columns, native tables, editable shapes and text. Cover portrait is an editable placeholder shell only; image ingestion is not registered.",
         "Georgia / Songti SC / Arial / Arial Unicode MS are not embedded. Other platforms, fonts and PowerPoint versions require separate validation.",
-        "Explicit candidate selection only; no automatic production/default selection, native-skinning or existing-deck preservation claim.",
+        "No native-skinning or existing-deck preservation claim.",
         "KPI rail fits 2–3 short metrics; strip supports up to five. Actual combined field geometry can reject inputs below array maxima. Regenerate from content to synchronize native data and separate commentary after editing.",
         "On macOS PowerPoint 16.114.1, manual embedded-Excel numeric edits did not propagate to chart cache. Update content and regenerate. Title, series-name and table-cell edits survived save/reopen.",
         "Native PowerPoint editor/slideshow display is verified separately. This host PDF-export route omitted some text and moved tables; it is not an accepted export route."
@@ -5411,7 +5411,7 @@
       "version": "0.2.0",
       "path": "amber-ledger/amber-ledger.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -5702,8 +5702,8 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "benchmark": {
@@ -5711,7 +5711,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-amber-ledger-refine-20261025/benchmark/01"
+            "out": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -5729,8 +5729,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -5738,7 +5738,7 @@
               "caseId": "amber-ledger.golden-operations",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-amber-ledger-refine-20261025/benchmark/01/amber-ledger/golden-operations/summary.json",
+              "summaryPath": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines/amber-ledger/golden-operations/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/amber-ledger/golden-operations/review.md",
               "validation": {
                 "valid": true,
@@ -5763,8 +5763,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -5778,7 +5778,7 @@
                 "bytes": 207885
               },
               "patchOps": 855,
-              "p50TotalMs": 108.98
+              "p50TotalMs": 107.96
             }
           ],
           "blockers": []
@@ -5789,7 +5789,7 @@
         "Native single-series column, line and doughnut charts and native tables. Tiny nonzero column/line domains below 1e-5 use editable numeric-derived shapes; difference bridges and progress tracks also use numeric-derived shapes, not native charts.",
         "Tahoma / Noto Sans SC / Georgia / Songti SC fonts are not embedded. Recheck on other hosts and platforms.",
         "Manual edits to charts, independent labels, ring totals, progress shapes and bridge shapes do not automatically synchronize; update content and regenerate.",
-        "Explicit candidate selection only after acceptance; no native-skinning, arbitrary image ingestion or existing-deck preservation claim.",
+        "No native-skinning, arbitrary image ingestion or existing-deck preservation claim.",
         "Per-instance text/row capacity may be lower than array maxima; overflow fails and requires another legal layout, reorganization or splitting."
       ],
       "examples": ["amber-ledger/examples/content.json"],
@@ -5800,7 +5800,7 @@
       "version": "0.1.0",
       "path": "midnight-pulse/midnight-pulse.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -6084,8 +6084,8 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "benchmark": {
@@ -6093,7 +6093,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-midnight-pulse/benchmark/03"
+            "out": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -6111,8 +6111,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -6120,7 +6120,7 @@
               "caseId": "midnight-pulse.golden-operations",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-midnight-pulse/benchmark/03/midnight-pulse/golden-operations/summary.json",
+              "summaryPath": ".tmp/deckkit-promotion-1792927651117/benchmark-baselines/midnight-pulse/golden-operations/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/midnight-pulse/golden-operations/review.md",
               "validation": {
                 "valid": true,
@@ -6145,8 +6145,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -6160,7 +6160,7 @@
                 "bytes": 250413
               },
               "patchOps": 1115,
-              "p50TotalMs": 181.69
+              "p50TotalMs": 223.4
             }
           ],
           "blockers": []
@@ -6173,7 +6173,7 @@
         "Arial / Noto Sans SC / Georgia / Songti SC are not embedded. Recheck fonts on another host.",
         "Editing chart data, cells or independent shapes does not synchronize labels, gauges, rules, callouts or targets; update content and regenerate.",
         "On the tested macOS PowerPoint host, Excel workbook edits persisted while chart cache/render stayed unchanged; regenerate from content for synchronized numeric changes.",
-        "Explicit candidate selection only; no native-skinning or arbitrary source-deck preservation claim.",
+        "No native-skinning or arbitrary source-deck preservation claim.",
         "Per-instance capacity may be lower than array maxima; choose a legal variant, reorganize or split."
       ],
       "examples": ["midnight-pulse/examples/content.json"],
@@ -6184,7 +6184,7 @@
       "version": "0.2.0",
       "path": "sky-compass/sky-compass.kit.mjs",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "default",
       "qualityProfile": {
         "minFontPt": 10.5,
         "labelFontPt": 10.5,
@@ -6556,7 +6556,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-sky-compass-20261025-design/benchmark/accepted-09"
+            "out": ".tmp/deckkit-promotion-1792927651117/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -6583,7 +6583,7 @@
               "caseId": "sky-compass.golden-operations",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-sky-compass-20261025-design/benchmark/accepted-09/sky-compass/golden-operations/summary.json",
+              "summaryPath": ".tmp/deckkit-promotion-1792927651117/benchmark/sky-compass/golden-operations/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/sky-compass/golden-operations/review.md",
               "validation": {
                 "valid": true,
@@ -6623,7 +6623,7 @@
                 "bytes": 297052
               },
               "patchOps": 1363,
-              "p50TotalMs": 106.21
+              "p50TotalMs": 145.78
             }
           ],
           "blockers": []
@@ -6631,7 +6631,7 @@
       },
       "knownLimits": [
         "Based on supplied Sky Blue Wayfinding design specification and eight-panel reference; synthetic validation content only.",
-        "Explicit candidate selection; no native skinning or arbitrary existing-deck preservation claim.",
+        "No native skinning or arbitrary existing-deck preservation claim.",
         "Arial and Noto Sans SC replace unavailable Liter/MiSans; fonts are not embedded.",
         "Native charts/tables retain source data; independent labels, tracks, process positions and bridge shapes require regeneration after manual edits.",
         "Photography is not registered: the cover uses editable open compass linework.",
@@ -6647,7 +6647,7 @@
       "path": "violet-momentum/violet-momentum.kit.mjs",
       "designContract": "violet-momentum/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
-      "readiness": "candidate",
+      "readiness": "production",
       "qualityProfile": {
         "minFontPt": 11.5,
         "labelFontPt": 11.5,
@@ -6922,7 +6922,7 @@
             "resolved": 0,
             "reviewable": 0,
             "baselineUnavailableCases": 0,
-            "baselineUpdatedCases": 1
+            "baselineUpdatedCases": 0
           }
         },
         "benchmark": {
@@ -6930,7 +6930,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-violet-momentum-20261025-refine/benchmark/accepted"
+            "out": ".tmp/deckkit-promotion-1792927651117/benchmark"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -6949,7 +6949,7 @@
               "resolved": 0,
               "reviewable": 0,
               "baselineUnavailableCases": 0,
-              "baselineUpdatedCases": 1
+              "baselineUpdatedCases": 0
             }
           },
           "cases": [
@@ -6957,7 +6957,7 @@
               "caseId": "violet-momentum.golden-operations",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-violet-momentum-20261025-refine/benchmark/accepted/violet-momentum/golden-operations/summary.json",
+              "summaryPath": ".tmp/deckkit-promotion-1792927651117/benchmark/violet-momentum/golden-operations/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/violet-momentum/golden-operations/review.md",
               "validation": {
                 "valid": true,
@@ -6983,7 +6983,7 @@
                   "resolved": 0,
                   "reviewable": 0,
                   "baselineUnavailable": false,
-                  "baselineUpdated": true
+                  "baselineUpdated": false
                 }
               },
               "previews": {
@@ -6997,7 +6997,7 @@
                 "bytes": 209545
               },
               "patchOps": 1018,
-              "p50TotalMs": 105.26
+              "p50TotalMs": 116.8
             }
           ],
           "blockers": []

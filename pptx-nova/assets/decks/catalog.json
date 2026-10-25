@@ -43,7 +43,7 @@
         "年度经营汇报",
         "董事会报告"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "biennale-yellow-showcase",
@@ -127,7 +127,7 @@
       "content": "../examples/deckkits/clear-impact/content.json",
       "summary": "../examples/deckkits/clear-impact/summary.json",
       "bestFor": ["impact report", "operating review", "sustainability report", "工作汇报"],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "clear-value-showcase",
@@ -231,7 +231,7 @@
         "运营复盘",
         "项目治理"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "sky-compass-showcase",
@@ -251,7 +251,7 @@
         "运营复盘",
         "项目进度"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "swiss-grid-showcase",
@@ -289,7 +289,7 @@
         "project progress",
         "evidence-led decisions"
       ],
-      "status": "preview"
+      "status": "available"
     },
     {
       "id": "warm-clay-showcase",
@@ -302,7 +302,7 @@
       "content": "../examples/deckkits/warm-clay/content.json",
       "summary": "../examples/deckkits/warm-clay/summary.json",
       "bestFor": ["work report", "programme review", "craft editorial", "工作汇报"],
-      "status": "preview"
+      "status": "available"
     }
   ]
 }

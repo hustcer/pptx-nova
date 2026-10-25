@@ -998,7 +998,7 @@
       "deckkit": "clear-impact",
       "caseId": "clear-impact.golden-impact",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Impact report",
       "bestFor": ["impact report", "operating review", "sustainability report", "工作汇报"],
@@ -1091,7 +1091,7 @@
       "deckkit": "warm-clay",
       "caseId": "warm-clay.golden-workshop",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "A season of making, measured with care",
       "bestFor": ["work report", "programme review", "craft editorial", "工作汇报"],
@@ -1184,7 +1184,7 @@
       "deckkit": "amber-ledger",
       "caseId": "amber-ledger.golden-operations",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.2.0",
       "title": "Annual operations report",
       "bestFor": [
@@ -1283,7 +1283,7 @@
       "deckkit": "midnight-pulse",
       "caseId": "midnight-pulse.golden-operations",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.1.0",
       "title": "Volume grew; efficiency needs a reset",
       "bestFor": [
@@ -1382,7 +1382,7 @@
       "deckkit": "sky-compass",
       "caseId": "sky-compass.golden-operations",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "default",
       "version": "0.2.0",
       "title": "Community support Operations review",
       "bestFor": [
@@ -1413,8 +1413,8 @@
         },
         "brief": {
           "path": "sky-compass/brief.md",
-          "bytes": 732,
-          "sha256": "a429b42c1dc12431eaec4f780697fb3e59578fed45cd2cddb59aaca6b215d58a"
+          "bytes": 730,
+          "sha256": "857dffb2fc267b3b00b084bc3e01ac9e1116879fc16d21d1aaaca5e786a497c4"
         },
         "summary": {
           "path": "sky-compass/summary.json",
@@ -1482,7 +1482,7 @@
       "deckkit": "violet-momentum",
       "caseId": "violet-momentum.golden-operations",
       "kind": "golden",
-      "readiness": "candidate",
+      "readiness": "production",
       "version": "0.2.0",
       "title": "Fleet operations review and next-quarter priorities",
       "bestFor": [

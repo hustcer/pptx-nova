@@ -1,4 +1,5 @@
 import { AMBER_FAMILY } from './amber-registry.mjs'
+import { PULSE_FAMILY } from './pulse-registry.mjs'
 // Registration seam for visual families: shared callers discover/resolve/validate
 // through this interface. Existing families can move here independently.
 import { CARTESIAN_FAMILY } from './cartesian-registry.mjs'
@@ -10,6 +11,7 @@ import { CONSULTING_FAMILY } from './consulting-registry.mjs'
 import { IMPACT_FAMILY } from './impact-registry.mjs'
 import { CLAY_FAMILY } from './clay-registry.mjs'
 export const DESIGN_FAMILIES = [
+  PULSE_FAMILY,
   AMBER_FAMILY,
   CLAY_FAMILY,
   CARTESIAN_FAMILY,

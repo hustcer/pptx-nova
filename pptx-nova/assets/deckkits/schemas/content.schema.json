@@ -220,7 +220,15 @@
               "amberBridgeSlide",
               "amberProjectsSlide",
               "amberMatrixSlide",
-              "amberDecisionsSlide"
+              "amberDecisionsSlide",
+              "pulseCoverSlide",
+              "pulseOverviewSlide",
+              "pulseAuditSlide",
+              "pulseTrendSlide",
+              "pulseAttributionSlide",
+              "pulseComparisonSlide",
+              "pulseStatusSlide",
+              "pulseCloseSlide"
             ]
           },
           "data": {

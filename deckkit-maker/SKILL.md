@@ -88,6 +88,12 @@ inspect 回读；DeckKit 新建 patch 不能混入已有文件的 stale selector
 
 ## 新建 DeckKit preflight（必做）
 
+先定位真实源码根目录：安装的 skill 可能是符号链接，当前工作目录也可能是 xdoc 维护者仓库。
+解析本 SKILL.md 的真实路径，找到同时包含 `deckkit-maker/` 和 `pptx-nova/` 的仓库，
+读取该仓库 AGENTS.md 并检查其工作区。下文相对路径都以这个源码仓库为基准；不要因为
+当前目录没有 `pptx-nova/SKILL.md` 就初始化另一份套件。维护者仓库的文档和可选工具用其
+独立绝对路径访问。运行会创建系统临时目录的维护者测试时，将支持的临时根显式指向当前 run。
+
 `design.md + 参考图` 路线用设计文档/图片的存在性、source manifest 和目标 id 检查替代下例的
 PPTX/HTML 输入检查；不要求不存在的二进制参考源。其他身份、目标路径、输出隔离检查仍适用。
 

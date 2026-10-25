@@ -5786,6 +5786,390 @@
       ],
       "examples": ["examples/amber-ledger-content.json"],
       "designContract": "amber-ledger/design.json"
+    },
+    {
+      "id": "midnight-pulse",
+      "version": "0.1.0",
+      "path": "midnight-pulse.kit.mjs",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": [
+        "operations review",
+        "performance diagnosis",
+        "project governance",
+        "运营复盘",
+        "项目治理"
+      ],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "pulseCoverSlide",
+          "pulseOverviewSlide",
+          "pulseAuditSlide",
+          "pulseTrendSlide",
+          "pulseAttributionSlide",
+          "pulseComparisonSlide",
+          "pulseStatusSlide",
+          "pulseCloseSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "pulseCoverSlide",
+        "pulseOverviewSlide",
+        "pulseAuditSlide",
+        "pulseTrendSlide",
+        "pulseAttributionSlide",
+        "pulseComparisonSlide",
+        "pulseStatusSlide",
+        "pulseCloseSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Late-night operational evidence: near-black blue, flame cyan instruments, ice-blue numeric anchors and open serif diagnosis.",
+        "mood": ["precise", "calm", "instrumental"],
+        "layoutPrinciples": [
+          "Four-corner ownership/report/source/page skeleton.",
+          "Open evidence regions and thin rules; functional outlines only.",
+          "Claims, targets, units, period, status meanings, owners and dates come from content."
+        ],
+        "signatureElements": [
+          "layered native navy/cyan atmospheric ellipses clipped to the canvas",
+          "mixed-weight assertions",
+          "triple top-tick attainment gauges",
+          "single-series cyan bars with numbered events",
+          "open serif native audit table",
+          "double-ring reconciled attribution",
+          "invisible comparison scorecards",
+          "cyan progress with RAG status dots",
+          "hollow roadmap nodes and outlined decisions"
+        ],
+        "typography": {
+          "display": "Arial and upright Noto Sans SC; content-owned emphasis.",
+          "body": "Arial; Georgia/Songti SC only for diagnostic table.",
+          "numeric": "Ice-blue upright values with direct units and actual/target basis."
+        },
+        "colorSystem": {
+          "background": ["near-black blue"],
+          "primary": ["cold white", "ice blue"],
+          "accent": ["flame cyan"],
+          "semantic": [
+            "Amber means a miss or consequence; green/coral restricted to project status."
+          ]
+        },
+        "slideRhythm": {
+          "anchor": ["pulseCoverSlide", "pulseCloseSlide"],
+          "judgment": ["pulseOverviewSlide"],
+          "evidence": [
+            "pulseAuditSlide",
+            "pulseTrendSlide",
+            "pulseAttributionSlide",
+            "pulseComparisonSlide",
+            "pulseStatusSlide"
+          ]
+        },
+        "compositionRules": [
+          "Complete decks open with verdict and close on roadmap decisions; extracts declare scope.",
+          "Registered capacity-driven variants preserve every field.",
+          "Photography is restricted to the cover content slot."
+        ],
+        "avoid": [
+          "generic card walls",
+          "body photographs",
+          "3D",
+          "glows",
+          "shadows",
+          "gradients outside registered atmospheric backgrounds",
+          "green attainment",
+          "silent field dropping"
+        ]
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        },
+        "slideTypes": {
+          "pulseCoverSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.source",
+              "data.verdict",
+              "data.subtitle",
+              "data.metrics",
+              "data.imageLabel"
+            ],
+            "allowedLayoutIds": ["auto", "widePhoto", "photoRail"],
+            "assetSlots": {
+              "cover.photo": {
+                "kind": "image",
+                "acceptsAsset": true,
+                "placeholderBehavior": "editable-shell",
+                "labelSlot": "data.imageLabel",
+                "note": "Optional independent content-owned photo; never copy the reference photograph."
+              }
+            }
+          },
+          "pulseOverviewSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.judgment",
+              "data.notes",
+              "data.metrics",
+              "data.actualLabel",
+              "data.targetLabel"
+            ],
+            "allowedLayoutIds": ["auto", "gaugeRail", "gaugeBand"]
+          },
+          "pulseAuditSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.headers",
+              "data.rows",
+              "data.note"
+            ],
+            "allowedLayoutIds": ["auto", "auditWide", "auditRail"]
+          },
+          "pulseTrendSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.seriesName",
+              "data.unit",
+              "data.points",
+              "data.events",
+              "data.boundary",
+              "data.boundaryLabel"
+            ],
+            "allowedLayoutIds": ["auto", "trendRail", "trendBand"]
+          },
+          "pulseAttributionSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.target",
+              "data.actual",
+              "data.unit",
+              "data.targetLabel",
+              "data.actualLabel",
+              "data.totalLabel",
+              "data.groups",
+              "data.factors"
+            ],
+            "allowedLayoutIds": ["auto", "targetRight", "targetLeft"]
+          },
+          "pulseComparisonSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.overview",
+              "data.overviewNote",
+              "data.subjects"
+            ],
+            "allowedLayoutIds": ["auto", "compareColumns", "compareRows"]
+          },
+          "pulseStatusSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.projects"
+            ],
+            "allowedLayoutIds": ["auto", "statusRows", "statusColumns"]
+          },
+          "pulseCloseSlide": {
+            "requiredSlots": [
+              "data.owner",
+              "data.report",
+              "data.title",
+              "data.basis",
+              "data.source",
+              "data.verdict",
+              "data.phases",
+              "data.decisions"
+            ],
+            "allowedLayoutIds": ["auto", "routeTop", "routeLeft"]
+          }
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["pulseCoverSlide", "pulseCloseSlide"],
+          "judgment": ["pulseOverviewSlide"],
+          "evidence": [
+            "pulseAuditSlide",
+            "pulseTrendSlide",
+            "pulseAttributionSlide",
+            "pulseComparisonSlide",
+            "pulseStatusSlide"
+          ]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.15.0 (6fa897c7)",
+        "report": "midnight-pulse/migration-report.md"
+      },
+      "quality": {
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-10-25",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-10-25",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-midnight-pulse/benchmark/03"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "midnight-pulse.golden-operations",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-midnight-pulse/benchmark/03/midnight-pulse/golden-operations/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/midnight-pulse/golden-operations/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 8,
+                "expectedCount": 8,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 250413
+              },
+              "patchOps": 1115,
+              "p50TotalMs": 181.69
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on Blue Flame Brand design.md and all eight reference panels; labeled synthetic fixture, no source photograph or domain policy copied.",
+        "Native columns, doughnut gauges and tables; progress, ticks, event circles, attribution rays and roadmap are editable numeric-derived shapes.",
+        "Gauges saturate at 100% while literal ratios remain uncapped. Zero target and undefined inverse attainment fail.",
+        "Arial / Noto Sans SC / Georgia / Songti SC are not embedded. Recheck fonts on another host.",
+        "Editing chart data, cells or independent shapes does not synchronize labels, gauges, rules, callouts or targets; update content and regenerate.",
+        "On the tested macOS PowerPoint host, Excel workbook edits persisted while chart cache/render stayed unchanged; regenerate from content for synchronized numeric changes.",
+        "Explicit candidate selection only; no native-skinning or arbitrary source-deck preservation claim.",
+        "Per-instance capacity may be lower than array maxima; choose a legal variant, reorganize or split."
+      ],
+      "examples": ["examples/midnight-pulse-content.json"],
+      "designContract": "midnight-pulse/design.json"
     }
   ]
 }

@@ -112,6 +112,13 @@ Amber Ledger 提供八类年度报告职责与十六个注册构图，以暖象�
 差异桥、进度为数值派生形状，编辑后须从 content 重建同步。须显式选择，字体不嵌入。
 详见 [设计意图与编辑边界](amber-ledger/intent.md) 及 [迁移验收](amber-ledger/migration-report.md)。
 
+## Midnight Pulse
+
+Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青蓝仪表、开放式衬线诊断表、
+差异汇聚、比较、状态治理与路线决策。背景薄雾是原生可编辑路径，不可为通用极简而删除。
+套件须显式选择；派生形状和独立标签在手工数据编辑后须从 content 重建。
+详见 [设计与编辑边界](midnight-pulse/intent.md) 及 [迁移验收](midnight-pulse/migration-report.md)。
+
 ## core-primitives 职责边界
 
 | 属于 core-primitives（几何安全 + op 生成）             | 不属于 core-primitives（视觉语言）         |

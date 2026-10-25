@@ -208,6 +208,15 @@
       "buildPath": "../../assets/deckkits/examples/amber-ledger-build.mjs",
       "expectedPath": "cases/amber-ledger/golden-operations/expected.json",
       "reviewPath": "cases/amber-ledger/golden-operations/review.md"
+    },
+    {
+      "id": "midnight-pulse.golden-operations",
+      "deckkit": "midnight-pulse",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/examples/midnight-pulse-content.json",
+      "buildPath": "../../assets/deckkits/examples/midnight-pulse-build.mjs",
+      "expectedPath": "cases/midnight-pulse/golden-operations/expected.json",
+      "reviewPath": "cases/midnight-pulse/golden-operations/review.md"
     }
   ]
 }

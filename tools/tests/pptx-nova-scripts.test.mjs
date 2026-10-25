@@ -7125,3 +7125,17 @@ test('amber-ledger registered slot probes preserve every visible field', () => {
   assert.equal(report.results[0].slideTypes.length, 8)
   assert.ok(report.results[0].slideTypes.every((page) => page.status === 'ok'))
 })
+
+test('midnight-pulse registered entry preserves every visible slot across all eight roles', () => {
+  const result = runNode([
+    skillPath('scripts/pptx-nova-deckkit-slot-consistency.mjs'),
+    '--deckkit',
+    'midnight-pulse',
+    '--json',
+  ])
+  assert.equal(result.status, 0, result.stderr)
+  const report = JSON.parse(result.stdout)
+  assert.equal(report.ok, true)
+  assert.equal(report.results[0].slideTypes.length, 8)
+  assert.ok(report.results[0].slideTypes.every((page) => page.status === 'ok'))
+})

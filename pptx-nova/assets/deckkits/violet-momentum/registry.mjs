@@ -45,7 +45,7 @@ function assertViolet(d, { assertFrame }) {
   }
   if (seen.size !== 10) throw Error('Violet requires ten registered roles')
   for (const [n, s] of Object.entries(d.violet.styles))
-    if (!d.colors[s.color] || !d.fonts[s.role] || s.italic || s.sizePt < 10.5)
+    if (!d.colors[s.color] || !d.fonts[s.role] || s.italic || s.sizePt < 11.5)
       throw Error(n + ': readable upright registered style required')
   for (const [n, f] of Object.entries(d.violet.chrome)) assertFrame(d, f, n)
 }

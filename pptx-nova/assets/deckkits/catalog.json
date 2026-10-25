@@ -6634,16 +6634,16 @@
     },
     {
       "id": "violet-momentum",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "path": "violet-momentum/violet-momentum.kit.mjs",
       "designContract": "violet-momentum/design.json",
       "primitiveDependency": "core-primitives@0.1.0",
       "readiness": "candidate",
       "qualityProfile": {
-        "minFontPt": 10.5,
-        "labelFontPt": 10.5,
-        "sourceFontPt": 10.5,
-        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        "minFontPt": 11.5,
+        "labelFontPt": 11.5,
+        "sourceFontPt": 11.5,
+        "baseline": "Contract-driven typography with a 11.5pt floor; actual render review remains required."
       },
       "defaultFor": [],
       "bestFor": [
@@ -6892,9 +6892,9 @@
         }
       },
       "validatedWith": {
-        "xdoc": "0.15.0 (6fa897c7)",
-        "report": "violet-momentum/migration-report.md",
-        "powerPoint": "16.114.1 on macOS 27.0.1: all five cases clean-open; golden native export; mixed/signed chart spot checks; isolated text/table/chart/shape edit/save/reopen and chart cache/workbook readback. Other hosts unverified."
+        "xdoc": "0.15.0 (9ee8ef0c)",
+        "report": "../../benchmarks/visual/cases/violet-momentum/golden-operations/review.md",
+        "powerPoint": "PowerPoint for Mac: accepted ten-slide v0.2.0 golden clean-opened without Repair; complete native PDF export inspected. Other hosts and edit/save behavior not re-certified in this run."
       },
       "quality": {
         "manualHardDefects": 0,
@@ -6912,8 +6912,8 @@
             "changed": 0,
             "resolved": 0,
             "reviewable": 0,
-            "baselineUnavailableCases": 1,
-            "baselineUpdatedCases": 0
+            "baselineUnavailableCases": 0,
+            "baselineUpdatedCases": 1
           }
         },
         "benchmark": {
@@ -6921,7 +6921,7 @@
           "date": "2026-10-25",
           "source": {
             "visualIndex": "pptx-nova/benchmarks/visual/index.json",
-            "out": ".tmp/deckkit-violet-momentum/benchmark/02"
+            "out": ".tmp/deckkit-violet-momentum-20261025-refine/benchmark/accepted"
           },
           "minimumRequiredKinds": ["golden"],
           "requiredKinds": ["golden"],
@@ -6939,8 +6939,8 @@
               "changed": 0,
               "resolved": 0,
               "reviewable": 0,
-              "baselineUnavailableCases": 1,
-              "baselineUpdatedCases": 0
+              "baselineUnavailableCases": 0,
+              "baselineUpdatedCases": 1
             }
           },
           "cases": [
@@ -6948,7 +6948,7 @@
               "caseId": "violet-momentum.golden-operations",
               "kind": "golden",
               "passed": true,
-              "summaryPath": ".tmp/deckkit-violet-momentum/benchmark/02/violet-momentum/golden-operations/summary.json",
+              "summaryPath": ".tmp/deckkit-violet-momentum-20261025-refine/benchmark/accepted/violet-momentum/golden-operations/summary.json",
               "reviewPath": "pptx-nova/benchmarks/visual/cases/violet-momentum/golden-operations/review.md",
               "validation": {
                 "valid": true,
@@ -6973,8 +6973,8 @@
                   "changed": 0,
                   "resolved": 0,
                   "reviewable": 0,
-                  "baselineUnavailable": true,
-                  "baselineUpdated": false
+                  "baselineUnavailable": false,
+                  "baselineUpdated": true
                 }
               },
               "previews": {
@@ -6985,10 +6985,10 @@
               },
               "contactSheet": {
                 "nonEmpty": true,
-                "bytes": 202784
+                "bytes": 209545
               },
-              "patchOps": 978,
-              "p50TotalMs": 208.05
+              "patchOps": 1018,
+              "p50TotalMs": 105.26
             }
           ],
           "blockers": []

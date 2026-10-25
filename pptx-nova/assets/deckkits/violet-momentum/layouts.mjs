@@ -112,20 +112,22 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
   }
   const metric = (name, f, m, p, white = false) => {
     const [x, y, w, h] = f
-    tx(
-      name + 'Value',
-      [x, y, w, 0.56],
-      `${number(m.actual)} ${m.unit}`,
-      'metric',
-      [`${p}.actual`, `${p}.unit`],
-      { color: white ? 'paper' : 'ink' },
-    )
-    tx(name + 'Label', [x, y + 0.65, w, 0.38], m.label, 'small', `${p}.label`, {
-      color: white ? 'paper' : 'muted',
+    tx(name + 'Value', [x, y, w, 0.65], number(m.actual), 'metric', `${p}.actual`, {
+      color: white ? 'paper' : 'ink',
     })
     tx(
+      name + 'Label',
+      [x, y + 0.72, w, 0.38],
+      `${m.label} · ${m.unit}`,
+      'small',
+      [`${p}.label`, `${p}.unit`],
+      {
+        color: white ? 'paper' : 'muted',
+      },
+    )
+    tx(
       name + 'Target',
-      [x, y + 1.05, w, h - 1.05],
+      [x, y + 1.12, w, h - 1.12],
       `${m.targetLabel} ${number(m.target)} ${m.unit}`,
       'small',
       [`${p}.targetLabel`, `${p}.target`, `${p}.unit`],
@@ -138,7 +140,8 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
       tx('Note' + i, [x + 0.14, y, w - 0.14, h], values[i], 'body', `notes[${i}]`)
     })
   const table = (name, f, headers, rows, weights, paths, align) => {
-    const sum = weights.reduce((a, v) => a + v, 0),
+    const padding = b.spacing.tablePaddingIn,
+      sum = weights.reduce((a, v) => a + v, 0),
       widths = weights.map((v) => (f[2] * v) / sum),
       all = [headers, ...rows],
       rh = f[3] / all.length,
@@ -146,8 +149,12 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
     all.forEach((row, i) => {
       let x = f[0]
       row.forEach((value, j) => {
-        const st = { ...b.styles.small, bold: i === 0, color: i === 0 ? 'muted' : 'ink' },
-          frame = [x + 0.07, f[1] + i * rh + 0.065, widths[j] - 0.14, rh - 0.13],
+        const st = {
+            ...b.styles.small,
+            bold: i === 0 || (i > 0 && j === (name === 'SummaryTable' ? 1 : 2)),
+            color: i > 0 && j === (name === 'SummaryTable' ? 1 : 2) ? 'accent' : 'ink',
+          },
+          frame = [x + padding, f[1] + i * rh + 0.065, widths[j] - 2 * padding, rh - 0.13],
           sourcePaths = (Array.isArray(paths(i, j)) ? paths(i, j) : [paths(i, j)]).map(
             (k) => `${path}.${k}`,
           )
@@ -165,6 +172,9 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
       widths,
       rowHeights: all.map(() => rh),
       focusColumn: -1,
+      cellTones: all.map((row, i) =>
+        row.map((_, j) => (i > 0 && j === (name === 'SummaryTable' ? 1 : 2) ? 'accent' : 'ink')),
+      ),
       bindings,
     })
     rule(name + 'TopRule', f[0], f[1] + rh, f[2], 'ink')
@@ -206,7 +216,7 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
           [
             f[0] + (i % 2) * (cellW + 0.32),
             f[1] + Math.floor(i / 2) * (cellH + 0.35),
-            cellW,
+            d.metrics.length === 3 && i === 2 ? f[2] : cellW,
             cellH,
           ],
           m,
@@ -214,7 +224,14 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
         ),
       )
       rule('MetricGridH', f[0], f[1] + cellH + 0.14, f[2])
-      rule('MetricGridV', f[0] + cellW + 0.16, f[1], f[3], 'rule', true)
+      rule(
+        'MetricGridV',
+        f[0] + cellW + 0.16,
+        f[1],
+        d.metrics.length === 3 ? cellH : f[3],
+        'rule',
+        true,
+      )
     } else
       cells(r.metrics, d.metrics.length).forEach((f, i) =>
         metric('Metric' + i, f, d.metrics[i], `metrics[${i}]`),
@@ -252,14 +269,14 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
     rule('JudgmentTick', x, y, h, 'accent', true)
     tx(
       'Judgment',
-      [x + 0.17, y, w - 0.17, id === 'band' ? 0.44 : 1.3],
+      [x + 0.17, y, w - 0.17, id === 'band' ? 0.44 : 0.75],
       d.judgment,
       'heading',
       'judgment',
     )
     tx(
       'JudgmentDetail',
-      [x + 0.17, y + (id === 'band' ? 0.53 : 1.55), w - 0.17, id === 'band' ? 0.4 : h - 1.55],
+      [x + 0.17, y + (id === 'band' ? 0.53 : 0.95), w - 0.17, id === 'band' ? 0.4 : h - 0.95],
       d.description,
       'body',
       'description',
@@ -276,7 +293,7 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
       r.table,
       d.headers,
       rows,
-      [2, 1.6, 1.6, 1.6, 1.5],
+      [1.6, 1.7, 1.7, 1.55, 1.4],
       (i, j) =>
         i
           ? [
@@ -386,28 +403,30 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
       throw Error('Attribution drivers must sum to total')
     notes(r.notes, d.notes)
     const [cx, cy, cw, ch] = r.total
-    cells(r.drivers, d.drivers.length, true, 0.16).forEach(([x, y, w, h], i) => {
-      const v = d.drivers[i]
-      tx('DriverLabel' + i, [x, y, w * 0.59, 0.33], v.label, 'body', `drivers[${i}].label`, {
-        bold: true,
-      })
-      tx(
-        'DriverValue' + i,
-        [x + w * 0.61, y, w * 0.36, 0.4],
-        number(v.value),
-        'heading',
-        `drivers[${i}].value`,
-        { color: 'accent', alignment: 'right' },
-      )
-      tx(
-        'DriverEvidence' + i,
-        [x, y + 0.36, w * 0.84, h - 0.36],
-        v.evidence,
-        'small',
-        `drivers[${i}].evidence`,
-      )
-      line('Convergence' + i, [x + w, y + 0.18], [cx, cy + ch / 2])
-    })
+    cells(r.drivers, d.drivers.length, true, id === 'stack' ? 0.12 : 0.16).forEach(
+      ([x, y, w, h], i) => {
+        const v = d.drivers[i]
+        tx('DriverLabel' + i, [x, y, w * 0.59, 0.33], v.label, 'body', `drivers[${i}].label`, {
+          bold: true,
+        })
+        tx(
+          'DriverValue' + i,
+          [x + w * 0.61, y, w * 0.36, 0.4],
+          number(v.value),
+          'heading',
+          `drivers[${i}].value`,
+          { color: 'accent', alignment: 'right' },
+        )
+        tx(
+          'DriverEvidence' + i,
+          [x, y + 0.36, w * 0.84, h - 0.36],
+          v.evidence,
+          'small',
+          `drivers[${i}].evidence`,
+        )
+        line('Convergence' + i, [x + w, y + 0.18], [cx, cy + ch / 2])
+      },
+    )
     fitTextPlan(number(d.total), [cx, cy, cw * 0.75, 0.55], b.styles.metric, path + '.total')
     owned('TotalBubble', r.total, `${number(d.total)}\n${d.unit}`, ['total', 'unit'], 'body')
     cs.at(-1).paragraphStyles = [
@@ -424,7 +443,7 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
       const v = d.cases[i],
         p = `cases[${i}]`
       if (horizontal) {
-        if (i) rule('CaseDivider' + i, x - 0.14, y, h, 'rule', true)
+        if (i) rule('CaseDivider' + i, x - 0.14, y, h - 0.18, 'rule', true)
         tx('CaseName' + i, [x, y, w, 0.4], v.name, 'heading', p + '.name')
         status('CaseStatus' + i, x, y + 0.49, v.state, v.statusLabel, p + '.statusLabel', w)
         tx('CaseActual' + i, [x, y + 0.98, w, 0.54], `${number(v.actual)} ${v.unit}`, 'metric', [
@@ -448,16 +467,16 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
         tx(
           'CaseActual' + i,
           [x + w * 0.3, y, w * 0.31, 0.45],
-          `${number(v.actual)} / ${number(v.target)} ${v.unit}`,
+          `${number(v.actual)} ${v.unit}`,
           'heading',
-          [p + '.actual', p + '.target', p + '.unit'],
+          [p + '.actual', p + '.unit'],
         )
         tx(
           'CaseTarget' + i,
           [x + w * 0.3, y + 0.5, w * 0.31, 0.32],
-          v.targetLabel,
+          `${v.targetLabel} ${number(v.target)} ${v.unit}`,
           'small',
-          p + '.targetLabel',
+          [p + '.targetLabel', p + '.target', p + '.unit'],
         )
         tx(
           'CaseEvidence' + i,
@@ -477,6 +496,18 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
     })
   } else if (role === 'projects') {
     const vertical = id === 'rows'
+    tx(
+      'ProjectProgressHeading',
+      [
+        r.projects[0] + (vertical ? 3 : 0),
+        r.projects[1] - 0.3,
+        vertical ? 4.7 : r.projects[2],
+        0.28,
+      ],
+      d.progressLabel ?? 'Completion',
+      'small',
+      'progressLabel',
+    )
     cells(r.projects, d.projects.length, vertical, 0.28).forEach(([x, y, w, h], i) => {
       const v = d.projects[i],
         p = `projects[${i}]`
@@ -583,7 +614,7 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
     })
     tx(
       'DecisionHeading',
-      horizontal ? [1.32, 3.98, 11.28, 0.35] : [7.35, 2.12, 5.25, 0.3],
+      horizontal ? [1.32, 3.98, 11.28, 0.35] : [7.35, 2.12, 5.25, 0.35],
       d.decisionHeading,
       'body',
       'decisionHeading',
@@ -598,7 +629,7 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
           'DecisionRequest' + i,
           [x + 0.17, y, w - 0.17, horizontal ? 0.53 : 0.53],
           v.request,
-          'heading',
+          'decision',
           p + '.request',
         )
         tx(
@@ -623,11 +654,18 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
           'body',
           [p + '.request', p + '.rationale', p + '.owner', p + '.date', p + '.consequence'],
         )
-        c.paragraphStyles = [{ ...b.styles.heading }, { ...b.styles.small }, { ...b.styles.small }]
+        c.paragraphStyles = [{ ...b.styles.decision }, { ...b.styles.small }, { ...b.styles.small }]
       }
     })
   } else if (role === 'rating') {
     const vertical = id === 'rows'
+    tx(
+      'RatingScaleLabel',
+      [r.ratings[0], r.ratings[1] - 0.4, r.ratings[2], 0.3],
+      d.scaleLabel ?? 'Position · 1–10',
+      'small',
+      'scaleLabel',
+    )
     cells(r.ratings, d.ratings.length, vertical, 0.25).forEach(([x, y, w, h], i) => {
       const v = d.ratings[i],
         p = `ratings[${i}]`
@@ -670,9 +708,15 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
             },
           })
       }
+      tx('RatingMinimum' + i, [sx - 0.08, sy + 0.29, 0.32, 0.28], '1', 'small', [], {
+        alignment: 'center',
+      })
+      tx('RatingMaximum' + i, [sx + 9 * step - 0.08, sy + 0.29, 0.32, 0.28], '10', 'small', [], {
+        alignment: 'center',
+      })
       tx(
         'RatingValue' + i,
-        [vertical ? sx + 3.4 : x, vertical ? y : y + 1.25, vertical ? 1 : w, 0.4],
+        [vertical ? sx + 3.4 : x, vertical ? y : y + 1.62, vertical ? 1 : w, 0.4],
         `${v.position}/10`,
         'heading',
         p + '.position',
@@ -680,7 +724,12 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
       )
       tx(
         'RatingEvidence' + i,
-        [vertical ? sx + 4.7 : x, vertical ? y : y + 2, vertical ? w - 8.3 : w, vertical ? h : 1.2],
+        [
+          vertical ? sx + 4.7 : x,
+          vertical ? y : y + 2.25,
+          vertical ? w - 8.3 : w,
+          vertical ? h : 1.05,
+        ],
         v.evidence,
         'small',
         p + '.evidence',
@@ -688,7 +737,7 @@ export function compileVioletLayout(design, family, id, variant, d, path = 'data
     })
   } else throw Error('Unregistered Violet role')
   rule('VerdictRule', 1.32, 6.12, 11.28)
-  tx('Verdict', b.chrome.verdict, d.verdict, 'body', 'verdict', { bold: true })
+  tx('Verdict', b.chrome.verdict, d.verdict, 'takeaway', 'verdict')
   tx('Source', b.chrome.source, d.source, 'small', 'source')
   return cs
 }

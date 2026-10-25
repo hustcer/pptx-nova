@@ -3867,7 +3867,7 @@
               },
               "sizePt": {
                 "type": "number",
-                "minimum": 10.5
+                "minimum": 11.5
               },
               "lineHeight": {
                 "type": "number",
@@ -3955,9 +3955,14 @@
               "type": "number",
               "minimum": 0.1,
               "maximum": 1
+            },
+            "tablePaddingIn": {
+              "type": "number",
+              "minimum": 0.07,
+              "maximum": 0.2
             }
           },
-          "required": ["gap", "rulePt"],
+          "required": ["gap", "rulePt", "tablePaddingIn"],
           "additionalProperties": false
         },
         "chrome": {

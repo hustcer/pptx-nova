@@ -5,9 +5,9 @@
       "type": "string",
       "minLength": 1,
       "x-slotBudget": {
-        "fontPt": 10.5,
+        "fontPt": 11.5,
         "widthIn": 11.28,
-        "heightIn": 0.32,
+        "heightIn": 0.34,
         "lineHeight": 1.1,
         "maxLines": 1
       }
@@ -16,9 +16,9 @@
       "type": "string",
       "minLength": 1,
       "x-slotBudget": {
-        "fontPt": 10.5,
+        "fontPt": 11.5,
         "widthIn": 11.28,
-        "heightIn": 0.32,
+        "heightIn": 0.34,
         "lineHeight": 1.1,
         "maxLines": 1
       }
@@ -27,9 +27,9 @@
       "type": "string",
       "minLength": 1,
       "x-slotBudget": {
-        "fontPt": 10.5,
+        "fontPt": 11.5,
         "widthIn": 10.1,
-        "heightIn": 0.27,
+        "heightIn": 0.28,
         "lineHeight": 1.1,
         "maxLines": 1
       }
@@ -38,7 +38,7 @@
       "type": "string",
       "minLength": 1,
       "x-slotBudget": {
-        "fontPt": 13,
+        "fontPt": 12,
         "widthIn": 11.28,
         "heightIn": 0.46,
         "lineHeight": 1.1,
@@ -51,7 +51,7 @@
       "x-slotBudget": {
         "fontPt": 25,
         "widthIn": 11.28,
-        "heightIn": 1.02,
+        "heightIn": 0.96,
         "lineHeight": 1.1,
         "maxLines": 1
       }
@@ -67,11 +67,11 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 17,
+              "fontPt": 18,
               "widthIn": 2.65,
               "heightIn": 0.75,
               "lineHeight": 1.1,
-              "maxLines": 2
+              "maxLines": 1
             }
           },
           "state": {
@@ -83,7 +83,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 2.3,
               "heightIn": 0.32,
               "lineHeight": 1.1,
@@ -99,7 +99,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 4.7,
               "heightIn": 0.8,
               "lineHeight": 1.1,
@@ -110,7 +110,7 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 10.5,
+              "fontPt": 11.5,
               "widthIn": 4.7,
               "heightIn": 0.8,
               "lineHeight": 1.1,
@@ -121,33 +121,33 @@
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 13,
+              "fontPt": 14,
               "widthIn": 2.63,
               "heightIn": 1.12,
               "lineHeight": 1.1,
-              "maxLines": 4
+              "maxLines": 3
             }
           },
           "owner": {
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 13,
+              "fontPt": 14,
               "widthIn": 2.63,
               "heightIn": 1.12,
               "lineHeight": 1.1,
-              "maxLines": 4
+              "maxLines": 3
             }
           },
           "date": {
             "type": "string",
             "minLength": 1,
             "x-slotBudget": {
-              "fontPt": 13,
+              "fontPt": 14,
               "widthIn": 2.63,
               "heightIn": 1.12,
               "lineHeight": 1.1,
-              "maxLines": 4
+              "maxLines": 3
             }
           }
         },
@@ -163,6 +163,18 @@
           "date"
         ],
         "additionalProperties": false
+      }
+    },
+    "progressLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "x-slotBudget": {
+        "fontPt": 11.5,
+        "widthIn": 4.7,
+        "heightIn": 0.28,
+        "lineHeight": 1.1,
+        "maxLines": 1
       }
     }
   },

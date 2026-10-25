@@ -1,7 +1,7 @@
 {
   "schemaVersion": "pptx-nova-design/v1",
   "id": "violet-momentum",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5
@@ -94,7 +94,7 @@
     {
       "id": "readable",
       "check": "font-floor",
-      "minPt": 10.5
+      "minPt": 11.5
     },
     {
       "id": "violet-language",
@@ -106,7 +106,7 @@
     "styles": {
       "hero": {
         "role": "body",
-        "sizePt": 32,
+        "sizePt": 34,
         "color": "paper",
         "bold": true,
         "lineHeight": 1.1
@@ -120,21 +120,21 @@
       },
       "heading": {
         "role": "body",
-        "sizePt": 17,
+        "sizePt": 18,
         "color": "ink",
         "bold": true,
         "lineHeight": 1.1
       },
       "body": {
         "role": "body",
-        "sizePt": 13,
+        "sizePt": 14,
         "color": "ink",
         "bold": false,
         "lineHeight": 1.1
       },
       "small": {
         "role": "body",
-        "sizePt": 10.5,
+        "sizePt": 11.5,
         "color": "muted",
         "bold": false,
         "lineHeight": 1.1
@@ -148,7 +148,7 @@
       },
       "metric": {
         "role": "body",
-        "sizePt": 22,
+        "sizePt": 28,
         "color": "ink",
         "bold": true,
         "lineHeight": 1.1
@@ -166,11 +166,26 @@
         "color": "paper",
         "bold": true,
         "lineHeight": 1.1
+      },
+      "takeaway": {
+        "role": "body",
+        "sizePt": 12,
+        "color": "muted",
+        "bold": false,
+        "lineHeight": 1.1
+      },
+      "decision": {
+        "role": "body",
+        "sizePt": 18,
+        "color": "accent",
+        "bold": true,
+        "lineHeight": 1.1
       }
     },
     "spacing": {
       "gap": 0.28,
-      "rulePt": 0.6
+      "rulePt": 0.6,
+      "tablePaddingIn": 0.12
     },
     "rhythm": {
       "maxConsecutive": 2
@@ -189,11 +204,11 @@
       "ratings": [2, 4]
     },
     "chrome": {
-      "title": [1.32, 0.56, 11.28, 1.02],
-      "basis": [1.32, 1.65, 11.28, 0.32],
+      "title": [1.32, 0.5, 11.28, 0.96],
+      "basis": [1.32, 1.52, 11.28, 0.34],
       "verdict": [1.32, 6.25, 11.28, 0.46],
-      "source": [1.32, 6.82, 10.1, 0.27],
-      "page": [11.7, 6.82, 0.9, 0.27]
+      "source": [1.32, 6.82, 10.1, 0.28],
+      "page": [11.7, 6.82, 0.9, 0.28]
     },
     "families": {
       "violetCoverSlide": {
@@ -220,8 +235,8 @@
         "variants": {
           "rail": {
             "regions": {
-              "judgment": [1.32, 2.3, 3.65, 3.4],
-              "table": [5.4, 2.18, 7.2, 3.6]
+              "judgment": [1.32, 2.2, 3.25, 3.5],
+              "table": [4.95, 2.08, 7.65, 3.72]
             }
           },
           "band": {
@@ -237,7 +252,7 @@
         "variants": {
           "wide": {
             "regions": {
-              "table": [1.32, 2.15, 11.28, 3.65]
+              "table": [1.32, 2.15, 11.28, 3.85]
             }
           }
         }

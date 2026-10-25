@@ -135,8 +135,8 @@ test('violet-momentum owned total holds mixed-size paragraphs in one native shap
   )
   assert.ok(frames.some((o) => o.frame?.verticalAnchor === 'middle'))
   const fonts = b.patch.ops.filter((o) => o.op === 'set-run' && o.shape?.name === shape.name)
-  assert.ok(fonts.some((o) => o.paragraph === 0 && o.font.size === '22pt'))
-  assert.ok(fonts.some((o) => o.paragraph === 1 && o.font.size === '10.5pt'))
+  assert.ok(fonts.some((o) => o.paragraph === 0 && o.font.size === '28pt'))
+  assert.ok(fonts.some((o) => o.paragraph === 1 && o.font.size === '11.5pt'))
 })
 
 test('violet-momentum uses uniform native series fill without redundant point overrides', () => {
@@ -166,4 +166,80 @@ test('violet-momentum invalid evidence identifies the failing field and bound', 
   assert.ok(
     v.errors.some((e) => /slides\[7\]\.data\.projects\[0\]\.progress: maximum 100/.test(e.message)),
   )
+})
+
+test('violet-momentum table fit and native cell styles share readable gutters and actual emphasis', () => {
+  const b = createDeck(violetGolden())
+  for (const [name, column] of [
+    ['SummaryTable', 1],
+    ['Scorecard', 2],
+  ]) {
+    const op = b.patch.ops.find((o) => o.op === 'set-table' && o.shape.name.endsWith(name))
+    const cells = op.cells.filter((c) => c.row > 0)
+    assert.ok(cells.length > 0)
+    for (const c of cells) {
+      assert.equal(c.style.marginLeft, '0.12in')
+      assert.equal(c.style.marginRight, '0.12in')
+      assert.equal(c.style.font.size, '11.5pt')
+      assert.equal(
+        c.style.font.color,
+        c.column === column ? DESIGN.colors.accent : DESIGN.colors.ink,
+      )
+      assert.equal(c.style.font.bold, c.column === column)
+    }
+    assert.ok(
+      cells.filter((c) => [1, 2, 3].includes(c.column)).every((c) => c.style.alignment === 'right'),
+    )
+  }
+})
+
+test('violet-momentum separates quantity and units and closes a three-metric cover grid', () => {
+  const c = violetGolden(),
+    slide = c.slides[0]
+  slide.data.metrics.pop()
+  const b = createDeck(excerpt([slide])),
+    p = b.patch.ops
+  const text = (suffix) =>
+    p.find(
+      (o) => o.op === 'set-text-frame' && o.shape.name.endsWith(suffix) && o.text !== undefined,
+    )?.text
+  assert.equal(text('Metric0Value'), String(slide.data.metrics[0].actual))
+  assert.equal(
+    text('Metric0Label'),
+    `${slide.data.metrics[0].label} · ${slide.data.metrics[0].unit}`,
+  )
+  const components = b.designPlan.layouts[0].components
+  assert.equal(components.find((c) => c.name === 'Metric2Value').frame[2], 3.55)
+  assert.ok(components.find((c) => c.name === 'MetricGridV').frame[3] < 2)
+})
+
+test('violet-momentum labels completion and position without changing risk or filling cumulative dots', () => {
+  const c = violetGolden()
+  c.slides[7].data.progressLabel = '交付完成度'
+  c.slides[8].data.scaleLabel = '成熟度位置 · 1–10'
+  const p = createDeck(c).patch.ops
+  const texts = p.filter((o) => o.op === 'set-text-frame').map((o) => o.text)
+  assert.ok(texts.includes('交付完成度'))
+  assert.ok(texts.includes('成熟度位置 · 1–10'))
+  assert.ok(texts.includes('Watch'))
+  for (let i = 0; i < 3; i++) {
+    assert.equal(
+      p.filter((o) => o.op === 'add-shape' && o.name.includes(`Rating${i}Dot`)).length,
+      1,
+    )
+    assert.ok(
+      p.some(
+        (o) =>
+          o.op === 'set-text-frame' && o.shape.name.endsWith(`RatingMinimum${i}`) && o.text === '1',
+      ),
+    )
+    assert.ok(
+      p.some(
+        (o) =>
+          o.op === 'set-text-frame' &&
+          o.shape.name.endsWith(`RatingMaximum${i}`) &&
+          o.text === '10',
+      ),
+    )
+  }
 })

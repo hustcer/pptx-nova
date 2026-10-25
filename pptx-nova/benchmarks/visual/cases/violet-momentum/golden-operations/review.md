@@ -1,19 +1,20 @@
 # Violet Momentum golden operations
 
-Accepted 2026-10-25, version 0.1.0, candidate. Synthetic verification fixture.
+Accepted 2026-10-25, version 0.2.0, candidate. Synthetic verification fixture.
 
 Final golden candidate SHA-256:
-`0f5b4e7ed366c43d1f76bff96602d7297ee8b80acdbeb10b2cb9dd6d419948b1`.
+`23c572b12f6e107445fa21ae462ecd7fe98c03b300f087aa03e88046a5d93465`.
 The curated example has identical bytes. All ten canonical pages were individually reviewed,
 with enlarged circle, table, progress and footer details. No open visual defect remains.
-Vision H0/M0/L0; benchmark/02 passed three repeated builds. The standard Create finalizer
+Vision H0/M0/L0; live golden benchmark passed. The standard Create finalizer
 published this same candidate after a hash-bound review.
 
-PowerPoint 16.114.1 on macOS: all golden pages natively exported and viewed; all five matrix
-files clean-opened without Repair. Isolated text/table/chart/shape edits survived save/reopen;
-chart B2 40→41 was confirmed in the cache, workbook and native render. Other hosts unverified.
+PowerPoint for Mac: the accepted golden clean-opened without Repair and all ten pages were
+natively exported and inspected. Native structures and chart cache/workbook values were
+audited separately. Other hosts and manual edit/save behavior were not re-certified in this run.
 
-The broader 58-page matrix, advisory semantic warnings, source decisions, editing boundaries
-and precise evidence paths are recorded in
-[the migration report](../../../../../assets/deckkits/violet-momentum/migration-report.md).
-Old iterations and matrix/01–05 are superseded; only matrix/06 is accepted.
+The 48-page golden/alternative/stress/mixed matrix passed visual and structural review.
+Source decisions and editing boundaries are documented in the
+[kit intent](../../../../../assets/deckkits/violet-momentum/intent.md).
+Detailed local evidence is retained in `.tmp/deckkit-violet-momentum-20261025-refine/`.
+Current refinement evidence is isolated from the original migration evidence.

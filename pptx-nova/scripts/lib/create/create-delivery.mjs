@@ -133,9 +133,11 @@ export function validateCreateDelivery(summary, args, artifacts) {
     throw new Error('candidate does not belong to this run')
   verifyCreateInputs(args, artifacts)
   verifyRenderContext(JSON.parse(readFileSync(artifacts.canonicalManifest, 'utf8')))
+  const lock = JSON.parse(readFileSync(args.lock, 'utf8'))
   const gate = evaluateVisualEvidence(artifacts.canonicalManifest, {
     candidate: artifacts.candidate,
     review: args.visualReview,
+    expectedDesignMode: lock.artDirection?.mode ?? '',
   })
   writeFileSync(artifacts.visualGate, JSON.stringify(gate, null, 2) + '\n')
   if (!gate.deliveryAuthorized)

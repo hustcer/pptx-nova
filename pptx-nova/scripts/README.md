@@ -64,6 +64,8 @@ The public release audit checks this layout and local module imports.
   through `--finalize` after machine gates and hash-bound visual review pass.
   Every Create review includes `design_review.json` via the review helper's `--design-review`:
   slide-specific craft observations and a weakest-page assessment, not just mechanical passes.
+  Finalization requires its audience mode to match the bound `deck_lock.artDirection.mode`;
+  the locked mode controls whether a signature moment is required.
   Dry-run/apply require explicit zero semantic issues;
   vision requires a consistent, passing full-package semantic summary. `--json`
   emits a compact Agent result with
@@ -214,6 +216,7 @@ The public release audit checks this layout and local module imports.
 - `cli/review/visual-evidence-gate.mjs` - evaluate a canonical
   `pptx-visual-evidence/v1` manifest; exit code reflects its
   `decision.action` (proceed / stop / needs human confirmation).
+  Reviewed Create evidence also requires `--lock` with the run's locked audience mode.
 
 - `cli/review/finalize-evidence.mjs` - finalize existing high-risk routes from
   the final candidate/inspect plus their existing vision/fidelity reports. It

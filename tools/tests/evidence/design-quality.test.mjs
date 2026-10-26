@@ -53,3 +53,37 @@ test('expressive decks require a meaningful signature; reading decks can be rest
   delete r.signatureMoment
   assert.deepEqual(validateDesignReview(r, binding), [])
 })
+
+test('locked audience mode rejects drift and controls the signature requirement', () => {
+  for (const expectedMode of ['persuade', 'experience']) {
+    for (const reportedMode of ['read', 'operate']) {
+      const review = designReviewFixture(binding)
+      review.mode = reportedMode
+      const errors = validateDesignReview(review, binding, expectedMode)
+      assert.ok(errors.some((e) => e.includes('does not match')))
+      assert.ok(errors.some((e) => e.includes('signature')))
+      review.signatureMoment = { slide: 2, description: 'A content-led reveal' }
+      assert.ok(
+        validateDesignReview(review, binding, expectedMode).some((e) =>
+          e.includes('does not match'),
+        ),
+      )
+    }
+  }
+})
+
+test('valid locked modes pass without imposing a signature on restrained decks', () => {
+  for (const mode of ['persuade', 'experience', 'read', 'operate']) {
+    const review = designReviewFixture(binding)
+    review.mode = mode
+    if (['persuade', 'experience'].includes(mode))
+      review.signatureMoment = { slide: 2, description: 'A content-led reveal' }
+    assert.deepEqual(validateDesignReview(review, binding, mode), [])
+  }
+  for (const mode of ['', 'unknown', 42])
+    assert.ok(
+      validateDesignReview(designReviewFixture(binding), binding, mode).some((e) =>
+        e.includes('deck_lock.artDirection.mode'),
+      ),
+    )
+})

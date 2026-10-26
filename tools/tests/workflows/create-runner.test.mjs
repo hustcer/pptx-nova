@@ -134,7 +134,10 @@ test('create runner finalizes only the same reviewed canonical candidate without
   const lock = join(runDir, 'deck_lock.json')
   const output = join(root, 'final.pptx')
   writeJson(content, swissColumnContent())
-  writeJson(lock, swissColumnLock({ finalPptx: output, runDir }))
+  writeJson(lock, {
+    ...swissColumnLock({ finalPptx: output, runDir }),
+    artDirection: { mode: 'persuade' },
+  })
   let source = successfulFakeXdocSource().replace(
     "import { dirname, join } from 'node:path'",
     "import { dirname, join } from 'node:path'\nimport { createHash } from 'node:crypto'",
@@ -224,6 +227,18 @@ test('create runner finalizes only the same reviewed canonical candidate without
     '1',
     ...checks.flatMap((c) => ['--check', c + '=pass']),
   ])
+  const drifted = runNodeStatus([...args, '--finalize', '--visual-review', review], 1)
+  const driftError = JSON.parse(drifted.stdout).error.message
+  assert.match(driftError, /does not match.*deck_lock\.artDirection\.mode/)
+  assert.match(driftError, /signature/)
+  assert.equal(existsSync(output), false)
+  const reviewed = JSON.parse(readFileSync(review, 'utf8'))
+  reviewed.designReview.mode = 'persuade'
+  reviewed.designReview.signatureMoment = {
+    slide: 1,
+    description: 'The rendered comparison reveals the product split',
+  }
+  writeJson(review, reviewed)
   const original = readFileSync(content)
   writeFileSync(content, original.toString() + ' ')
   runNodeStatus([...args, '--finalize', '--visual-review', review], 1)

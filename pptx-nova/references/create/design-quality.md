@@ -152,6 +152,14 @@ stale, failed or unresolved design reviews. This applies to short decks and Expr
 review remains an additional claim/proof check for formal decks. Neither record substitutes for
 actually looking, and neither claims universal aesthetic approval or PowerPoint fidelity.
 
+Final Create authorization also requires a valid `deck_lock.artDirection.mode` and rejects a review
+whose `mode` differs from that locked mode. The locked mode determines whether `signatureMoment` is
+required; changing a review to `read` cannot relax a `persuade` or `experience` design. The standard
+runner verifies the lock's existing input binding before checking its mode. When using the standalone
+visual-evidence gate, supply the same run lock with `--lock <run-dir>/deck_lock.json`.
+
 An older Create review without this record needs a new actual design review before finalization.
 If candidate and canonical evidence bytes are unchanged, record the missing judgment against those
 bytes; do not rebuild, rerender, or manufacture an old passing record just to migrate the report.
+If the bound lock has no valid `artDirection.mode`, regenerate in a fresh run with the intended mode
+locked before candidate creation. Do not rewrite the already bound lock to make finalization pass.

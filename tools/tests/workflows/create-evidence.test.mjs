@@ -139,15 +139,22 @@ test('create requires a completed review and binds candidate plus exact PDF/PNG 
   assert.equal(pending.deliveryAuthorized, false)
   const path = review(f)
   assert.equal(
-    evaluateVisualEvidence(f.manifestPath, { candidate: f.candidate, review: path })
-      .deliveryAuthorized,
+    evaluateVisualEvidence(f.manifestPath, {
+      candidate: f.candidate,
+      review: path,
+      expectedDesignMode: 'read',
+    }).deliveryAuthorized,
     true,
   )
   for (const file of [f.candidate, join(f.root, 'slide.png'), join(f.root, 'candidate.pdf')]) {
     const bytes = readFileSync(file)
     writeFileSync(file, 'changed')
     assert.equal(
-      evaluateVisualEvidence(f.manifestPath, { candidate: f.candidate, review: path }).status,
+      evaluateVisualEvidence(f.manifestPath, {
+        candidate: f.candidate,
+        review: path,
+        expectedDesignMode: 'read',
+      }).status,
       'invalid',
     )
     writeFileSync(file, bytes)
@@ -156,8 +163,11 @@ test('create requires a completed review and binds candidate plus exact PDF/PNG 
   failed.checks[0].status = 'fail'
   writeFileSync(path, JSON.stringify(failed))
   assert.equal(
-    evaluateVisualEvidence(f.manifestPath, { candidate: f.candidate, review: path })
-      .deliveryAuthorized,
+    evaluateVisualEvidence(f.manifestPath, {
+      candidate: f.candidate,
+      review: path,
+      expectedDesignMode: 'read',
+    }).deliveryAuthorized,
     false,
   )
 })
@@ -186,10 +196,45 @@ test('all mechanical visual passes cannot publish without current, substantive d
     const value = structuredClone(valid)
     change(value)
     writeFileSync(path, JSON.stringify(value))
-    const gate = evaluateVisualEvidence(f.manifestPath, { candidate: f.candidate, review: path })
+    const gate = evaluateVisualEvidence(f.manifestPath, {
+      candidate: f.candidate,
+      review: path,
+      expectedDesignMode: 'read',
+    })
     assert.equal(gate.deliveryAuthorized, false)
     assert.equal(gate.status, 'invalid')
   }
+})
+
+test('canonical Create authorization requires a locked mode in both API and standalone CLI', () => {
+  const f = fixture()
+  const path = review(f)
+  const unbound = evaluateVisualEvidence(f.manifestPath, { candidate: f.candidate, review: path })
+  assert.equal(unbound.deliveryAuthorized, false)
+  assert.ok(unbound.errors.some((e) => e.includes('deck_lock.artDirection.mode')))
+  const lock = join(f.root, 'deck_lock.json')
+  const args = [
+    resolve('pptx-nova/scripts/cli/review/visual-evidence-gate.mjs'),
+    '--manifest',
+    f.manifestPath,
+    '--candidate',
+    f.candidate,
+    '--review',
+    path,
+    '--json',
+  ]
+  for (const mode of [undefined, null, '', 'invalid', 'persuade', 'read']) {
+    writeFileSync(lock, JSON.stringify({ artDirection: { mode } }))
+    const result = spawnSync(process.execPath, [...args, '--lock', lock], { encoding: 'utf8' })
+    assert.equal(result.status, mode === 'read' ? 0 : 3, result.stderr || result.stdout)
+    const gate = JSON.parse(result.stdout)
+    assert.equal(gate.deliveryAuthorized, mode === 'read')
+    if (mode !== 'read')
+      assert.ok(gate.errors.some((e) => e.includes('deck_lock.artDirection.mode')))
+  }
+  const missing = spawnSync(process.execPath, args, { encoding: 'utf8' })
+  assert.equal(missing.status, 3, missing.stderr || missing.stdout)
+  assert.equal(JSON.parse(missing.stdout).deliveryAuthorized, false)
 })
 
 test('create rejects missing checks, forged regression, incomplete pages and namespace policy drift', () => {
@@ -230,7 +275,11 @@ test('review binding becomes stale after otherwise valid manifest changes', () =
   writeFileSync(f.manifestPath, JSON.stringify(f.manifest))
   assert.ok(captureVisualBinding(f.manifestPath, f.candidate))
   assert.equal(
-    evaluateVisualEvidence(f.manifestPath, { candidate: f.candidate, review: path }).status,
+    evaluateVisualEvidence(f.manifestPath, {
+      candidate: f.candidate,
+      review: path,
+      expectedDesignMode: 'read',
+    }).status,
     'invalid',
   )
 })

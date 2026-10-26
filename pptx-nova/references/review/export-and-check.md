@@ -191,9 +191,11 @@ confirmation; an Agent must not reinterpret it as success. Invalid or
 internally inconsistent manifests exit `3`.
 
 Always bind the gate to the current candidate. For Create, after actually reviewing the canonical PNGs,
-also pass `--review <visual_review.json>`. Record that review with both `--candidate` and `--manifest` using
+also pass `--review <visual_review.json> --lock <run-dir>/deck_lock.json`. Record that review with both `--candidate` and `--manifest` using
 `cli/review/visual-review.mjs`. The consumer verifies candidate, PDF/PNG and manifest hashes, complete
-slide coverage and all required review checks. Exit `6` means machine checks passed but actual
+slide coverage and all required review checks. Create authorization requires the review mode to match
+the supplied lock's valid `artDirection.mode`; that locked mode controls the signature-moment requirement.
+Use the standard runner for publication with its input-bound lock. Exit `6` means machine checks passed but actual
 visual review is missing; it does not require another user permission question. Stale or failed
 reviews do not authorize delivery. Use a fresh run after changing the candidate.
 

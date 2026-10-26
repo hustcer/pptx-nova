@@ -9,7 +9,8 @@ the conditions listed below.
 The standard runner requires:
 
 - `content.json` matching the selected DeckKit content contract;
-- `deck_lock.json` binding the output path, run directory, slide plan, and assumptions;
+- `deck_lock.json` binding the output path, run directory, slide plan, assumptions, and a valid
+  `artDirection.mode` (`persuade`, `read`, `operate`, or `experience`);
 - an output `.pptx` path that does not already exist unless replacement was explicitly requested;
 - an optional `assets_manifest.json` when the content uses registered external assets.
 - an optional `choreography.json` for native animation/Morph operations; see [animations](../content/animations.md#standard-create-choreography).
@@ -129,6 +130,9 @@ review using `node <skill-root>/scripts/cli/review/visual-review.mjs --mode crea
 checks actually performed; the helper validates the record, it does not understand images.
 
 Then rerun the original Create command with `--finalize --visual-review <run-dir>/visual_review.json`.
+Finalization checks the review mode against the bound `deck_lock.artDirection.mode`; the locked
+mode controls the signature-moment requirement. A missing or invalid locked mode requires a fresh
+candidate run, as described in [Design quality](design-quality.md).
 This validates frozen inputs, candidate bytes, canonical PDF/PNG bytes, full coverage and the review
 binding, then publishes without rebuilding or rendering. Successful finalization reports
 `status=delivered`, `deliveryReady=true`. Missing, failed or stale review evidence blocks publication.

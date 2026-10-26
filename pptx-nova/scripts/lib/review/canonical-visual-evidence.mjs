@@ -202,7 +202,10 @@ export function captureVisualBinding(manifestPath, candidatePath) {
   }
 }
 
-export function evaluateVisualEvidence(manifestPath, { candidate = '', review = '' } = {}) {
+export function evaluateVisualEvidence(
+  manifestPath,
+  { candidate = '', review = '', expectedDesignMode = '' } = {},
+) {
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
   const errors = validateManifest(manifest)
   const create = manifest.policyId === 'pptx-visual-oracle-create/v1'
@@ -249,7 +252,11 @@ export function evaluateVisualEvidence(manifestPath, { candidate = '', review = 
           value.issues?.length
         )
           throw new Error('visual review contains unresolved findings')
-        const designErrors = validateDesignReview(value.designReview, binding)
+        const designErrors = validateDesignReview(
+          value.designReview,
+          binding,
+          expectedDesignMode ?? '',
+        )
         if (designErrors.length) throw new Error(designErrors.join('; '))
         report.status = 'passed'
         report.deliveryAuthorized = true

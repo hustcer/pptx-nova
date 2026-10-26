@@ -10,6 +10,7 @@ Options:
   --manifest <path>  Canonical pptx-visual-evidence/v1 manifest.
   --candidate <path> Current PPTX, required for create evidence binding.
   --review <path>    Actual visual review bound by --candidate and --manifest.
+  --lock <path>      Run deck_lock.json, required to authorize a reviewed Create.
   --output <path>    Optional persisted gate report.
   --json             Print the gate report as JSON.
   --help             Show this help.
@@ -24,7 +25,7 @@ Exit status:
 `
 
 function parseArgs(argv) {
-  const args = { manifest: '', output: '', candidate: '', review: '', json: false }
+  const args = { manifest: '', output: '', candidate: '', review: '', lock: '', json: false }
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index]
     if (arg === '--help' || arg === '-h') {
@@ -32,7 +33,7 @@ function parseArgs(argv) {
       process.exit(0)
     } else if (arg === '--json') {
       args.json = true
-    } else if (['--manifest', '--output', '--candidate', '--review'].includes(arg)) {
+    } else if (['--manifest', '--output', '--candidate', '--review', '--lock'].includes(arg)) {
       const value = argv[index + 1]
       if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
       args[arg.slice(2)] = value
@@ -68,7 +69,14 @@ function writeReport(args, report) {
 try {
   const args = parseArgs(process.argv.slice(2))
   const { path, value: manifest } = readManifest(args.manifest)
-  const report = evaluateVisualEvidence(path, { candidate: args.candidate, review: args.review })
+  const expectedDesignMode = args.lock
+    ? (JSON.parse(readFileSync(resolve(args.lock), 'utf8'))?.artDirection?.mode ?? '')
+    : ''
+  const report = evaluateVisualEvidence(path, {
+    candidate: args.candidate,
+    review: args.review,
+    expectedDesignMode,
+  })
   writeReport(args, report)
   if (report.status === 'invalid') process.exit(3)
   if (report.status === 'needs-visual-review') process.exit(6)

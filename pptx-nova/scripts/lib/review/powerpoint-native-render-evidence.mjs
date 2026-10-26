@@ -43,23 +43,24 @@ export function detectPowerPointAvailability() {
       powerpointAvailable: false,
       nushellAvailable: false,
       mutoolAvailable: false,
+      pdfRenderAvailable: false,
     }
   }
   const powerpoint = spawnSync('osascript', ['-e', 'id of application "Microsoft PowerPoint"'], {
     encoding: 'utf8',
   })
   const nushell = spawnSync('nu', ['--version'], { encoding: 'utf8' })
-  const mutool = spawnSync('mutool', ['-v'], { encoding: 'utf8' })
+  const pdfRender = spawnSync('xdoc', ['pdf', 'render', '--help'], { encoding: 'utf8' })
   const powerpointAvailable = powerpoint.status === 0
   const nushellAvailable = nushell.status === 0
-  const mutoolAvailable = mutool.status === 0
-  const available = powerpointAvailable && nushellAvailable && mutoolAvailable
+  const pdfRenderAvailable = pdfRender.status === 0
+  const available = powerpointAvailable && nushellAvailable && pdfRenderAvailable
   const reason = !powerpointAvailable
     ? 'powerpoint-not-installed-or-not-scriptable'
     : !nushellAvailable
       ? 'optional-nushell-helper-unavailable'
-      : !mutoolAvailable
-        ? 'optional-mutool-helper-unavailable'
+      : !pdfRenderAvailable
+        ? 'optional-pdf-render-helper-unavailable'
         : 'available'
   return {
     available,
@@ -67,13 +68,14 @@ export function detectPowerPointAvailability() {
     platform: process.platform,
     powerpointAvailable,
     nushellAvailable,
-    mutoolAvailable,
+    mutoolAvailable: null, // Retained legacy field; no longer a prerequisite.
+    pdfRenderAvailable,
     error: available
       ? null
       : [
           [powerpointAvailable, powerpoint],
           [nushellAvailable, nushell],
-          [mutoolAvailable, mutool],
+          [pdfRenderAvailable, pdfRender],
         ]
           .filter(([probeAvailable]) => !probeAvailable)
           .map(([, result]) =>

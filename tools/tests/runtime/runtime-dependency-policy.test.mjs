@@ -51,7 +51,7 @@ test('missing optional PowerPoint evidence prerequisites do not block the baseli
   assert.match(workflow, /baseline route remains usable/)
   assert.match(animations, /缺少 Nushell 或其他可选前置不阻断基线 Morph 流程/)
   assert.match(evidence, /spawnSync\('nu', \['--version'\]/)
-  assert.match(evidence, /spawnSync\('mutool', \['-v'\]/)
+  assert.match(evidence, /spawnSync\('xdoc', \['pdf', 'render', '--help'\]/)
   assert.match(evidence, /optional-nushell-helper-unavailable/)
   assert.match(evidence, /native-render-helper-unavailable-unverified/)
 })

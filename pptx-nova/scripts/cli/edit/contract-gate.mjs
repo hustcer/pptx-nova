@@ -4,6 +4,11 @@ import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, posix, resolve } from 'node:path'
 import { inflateRawSync } from 'node:zlib'
 import { readResolvedSelectors } from '../../lib/pptx/resolved-selector.mjs'
+import {
+  documentFontTarget,
+  fontAnalysisCoverage,
+  validateFontContract,
+} from '../../lib/edit/font-normalization.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-edit-contract-gate/v1'
 const CONTRACT_SCHEMA_VERSION = 'pptx-nova-edit-contract/v1'
@@ -532,6 +537,7 @@ function selectorIdentity(target) {
 }
 
 function hasStableIdentity(target) {
+  if (target?.kind === 'document-fonts') return true
   const identity = selectorIdentity(target)
   return target?.kind === 'slide' || identity.id !== null || Boolean(identity.name)
 }
@@ -572,6 +578,40 @@ function targetCoverage(contract, dryRun, report) {
     const failedOps = results
       .filter((item) => item.status !== 'success')
       .map((item) => item.opIndex)
+    if (target.kind === 'document-fonts') {
+      const fontCoverage = fontAnalysisCoverage(target, results)
+      const categoriesValid = results.every(
+        (result) =>
+          Array.isArray(result.semanticChanges) &&
+          result.semanticChanges.every((change) => change.category === 'style'),
+      )
+      const covered =
+        fontCoverage.covered &&
+        missingOps.length === 0 &&
+        categoriesValid &&
+        dryRun.opResults.length === 1
+      if (!covered)
+        addIssue(
+          report,
+          'blockers',
+          fontCoverage.reason ?? 'font-analysis-invalid',
+          'set-font evidence must match the document font intent and reviewed selection analysis',
+        )
+      coverage.push({
+        id: target.id,
+        kind: target.kind,
+        opIndexes: target.opIndexes,
+        ...fontCoverage,
+        covered,
+        missingOps,
+        failedOps,
+        selectorMatchCount: null,
+        expectedAfterObserved: true,
+        unexpectedCategories: categoriesValid ? [] : ['non-style'],
+        resolvedIdentities: [],
+      })
+      continue
+    }
     const identities = results.flatMap(resultIdentities)
     const matchingIdentities = slideTarget
       ? identities.filter((item) => item?.slide === target.slide)
@@ -639,7 +679,9 @@ function targetCoverage(contract, dryRun, report) {
   if (
     coverage.some(
       (item) =>
-        contract.targets.find((target) => target.id === item.id)?.kind !== 'slide' &&
+        !['slide', 'document-fonts'].includes(
+          contract.targets.find((target) => target.id === item.id)?.kind,
+        ) &&
         item.selectorMatchCount === 0 &&
         item.missingOps.length === 0,
     )
@@ -1109,6 +1151,18 @@ function checkDiff(contract, diff, coverageResult, report) {
   const outOfScope = []
   const disallowed = []
   const changes = reliableShapeChanges(diff)
+  const fontTarget = documentFontTarget(contract)
+  if (
+    fontTarget &&
+    (counts.source !== fontTarget.slideCount || counts.candidate !== fontTarget.slideCount)
+  ) {
+    addIssue(
+      report,
+      'blockers',
+      'font-slide-count-mismatch',
+      'document font scope must cover every source and candidate slide',
+    )
+  }
   for (const item of changes) {
     const identity = diffIdentity(item)
     const categories = diffCategories(item)
@@ -1116,7 +1170,9 @@ function checkDiff(contract, diff, coverageResult, report) {
       contract.scope === 'structural' &&
       contract.expectedStructure?.changedSlides?.includes(item.slide)
     const targetMatch =
-      structuralSlideMatch || coveredIdentities.some((target) => sameIdentity(identity, target))
+      Boolean(fontTarget) ||
+      structuralSlideMatch ||
+      coveredIdentities.some((target) => sameIdentity(identity, target))
     if (!targetMatch) outOfScope.push({ identity, categories })
     const outsideCategories = categories.filter(
       (category) => !contract.allowedChanges.includes(category),
@@ -1306,7 +1362,15 @@ function checkAlreadyCompliant(contract, finalInspect, report) {
 }
 
 function targetSlides1Based(contract) {
-  return [...new Set(contract.targets.map((target) => target.slide + 1))].sort((a, b) => a - b)
+  return [
+    ...new Set(
+      contract.targets.flatMap((target) =>
+        target.kind === 'document-fonts'
+          ? Array.from({ length: target.slideCount }, (_, index) => index + 1)
+          : [target.slide + 1],
+      ),
+    ),
+  ].sort((a, b) => a - b)
 }
 
 function containsAll(actual, expected) {
@@ -1575,7 +1639,21 @@ function checkEvidence(contract, args, report) {
   }
   const visionDiff = loaded['vision-diff']
   if (visionDiff) {
-    const selected = visionDiff.scope?.slides
+    // Full-deck reports intentionally omit scope.slides. Only the explicit
+    // runtime mode plus valid source/candidate counts prove that wider scope.
+    const fullDeck =
+      visionDiff.agentGate?.scopeMode === 'full-deck' &&
+      [visionDiff.slideCount?.source, visionDiff.slideCount?.candidate].every(
+        (count) => Number.isSafeInteger(count) && count >= 0,
+      )
+    const selected =
+      visionDiff.scope?.slides ??
+      (fullDeck
+        ? Array.from(
+            { length: Math.max(visionDiff.slideCount.source, visionDiff.slideCount.candidate) },
+            (_, index) => index + 1,
+          )
+        : undefined)
     const newHigh = Number(
       visionDiff.agentGate?.newHighIssues ?? visionDiff.summary?.byClass?.new?.high ?? 0,
     )
@@ -1631,6 +1709,23 @@ function checkEvidence(contract, args, report) {
     )
   }
   if (finalInspect?.status === 'success') checkAlreadyCompliant(contract, finalInspect, report)
+  const fontTarget = documentFontTarget(contract)
+  if (
+    fontTarget &&
+    (finalInspect?.schemaVersion !== 'pptx-inspect/v1' ||
+      finalInspect.slides?.length !== fontTarget.slideCount ||
+      !containsAll(
+        finalInspect.slides.map((slide) => slide.index + 1),
+        expectedSlides,
+      ))
+  ) {
+    addIssue(
+      report,
+      'blockers',
+      'font-inspect-scope-incomplete',
+      'final inspect must cover every document font target slide',
+    )
+  }
   const structure = loaded['structure-check']
   if (structure && structure.status !== 'pass') {
     addIssue(
@@ -1722,6 +1817,7 @@ function buildReport(args) {
   if (!Array.isArray(contract.targets) || contract.targets.length === 0) {
     throw new Error('contract must contain targets[]')
   }
+  validateFontContract(contract)
   if (contract.targets.some((target) => !hasStableIdentity(target))) {
     throw new Error('every object target must contain a stable resolvedIdentity id/name')
   }

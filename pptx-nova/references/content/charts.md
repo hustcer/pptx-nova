@@ -66,6 +66,34 @@ point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
 长标签、overlay 和显式 manual box 仍须单独复核。category label 位于反转/交叉轴的
 另一侧时，应检查其实际物理侧与另一侧数值端点，不能靠移动 chart 外框补偿旧 renderer。
 
+### 横向分类标签、交叉轴与裁剪
+
+当前运行时的普通二维 bar 分类标签会按最终绘图区的可用宽度、作者字号和行密度进行
+换行、字素安全缩略及自动抽样。先完成轴标题、数值刻度、边框、共享表格表头等留白后
+再适配；初始外框宽度不是最终标签预算。显式 tick-label skip 仍是作者设置，manual、
+combo、date 和 3D 路径也不能套用同一自动规则。保留完整 category cache、数据点位置及
+显式间隔，不把图上省略号或少画的标签写回原始数据，不通过缩字号复刻旧截图。
+SVG 可访问文本与 PDF ActualText 可保留完整源标签，因此 PDF 提取到长文本而 PNG
+显示缩略是可能的；提取结果不能证明所有分类文字都已绘出或没有溢出。
+
+普通二维数值轴穿过分类轴时，核对分类序号、类别间距、反转方向与内部交叉位置；
+轴线、ticks、标签、display units 的锚点可以独立。显式 `crosses=max` 不等同于刚好位于
+最大分类坐标的自定义 crossing。不要把轴一律推到外边缘，或按数值 X 轴解释分类序号。
+
+面积填充/渐变/轮廓按 resolved plot 边界裁剪，但标签独立绘制；line/stock markers 按
+实际累计值判断是否在域内。边界附近的浮点误差不应吞掉合法堆叠 marker，真正越界的
+marker 则不应被夹到轴上。测试反转/log/百分比轴及大偏移窄域，不改值或放宽显式 bounds
+来“找回”本应隐藏的图形。
+
+### 曲面图的独立坐标轴与 paint
+
+category/depth 轴分别解析自己的 crossing、log/linear origin 与 reversal；不要用一个
+“顶轴”开关解释两者。面片投影为零面积时可不填色，但真实 mesh/wireframe 轮廓仍可能
+可见。核对显式 no-fill、隐藏线、dash、alpha，以及带 `spPr` 的高度色带对整套 paint
+的所有权；自动 wireframe 笔色和空心 legend key 与面填色独立，不能补成实心色块。
+旧灰阶 surface palette 还依赖有效 DK1/theme override，不能按默认 accent 色强行重涂。
+这些改进不证明整体拟合、legend 密度、材质和 Office 光照已完全一致。
+
 读取/渲染已有 ChartEx 多层 category cache 时按连续 run 建树，分隔开的同名路径不能全局合并；
 连续重复完整路径保留首条观测，不擅自求和。sunburst 的值排序、等值次序、颜色身份及
 长径向标签换行与 treemap 不同。保留输入顺序与节点身份，升级后先重渲染源文件，
@@ -926,7 +954,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -1018,7 +1046,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -1047,7 +1075,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1336,10 +1364,10 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   labels when a custom legend is required.
 - `xdoc convert` is not sufficient evidence for ChartEx rendering. Always
   use a non-interactive PowerPoint baseline render when the optional macOS +
-  scriptable PowerPoint + Nushell + `mutool` evidence route is available:
+  scriptable PowerPoint + Nushell + xdoc PDFium evidence route is available:
   `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

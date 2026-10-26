@@ -212,6 +212,13 @@ with this manifest.
 
 ## PPTX PNG Preview
 
+For external/PowerPoint PDF evidence, use `xdoc pdf render` (PDFium) and retain
+the exact PDF and rasterizer identities when available. The bundled optional
+Office snapshot helper records them while preserving logical-slide/page mapping.
+If rotated text appears missing or oversized in a MuPDF capture, re-render the
+same PDF with PDFium before attributing it to the deck; see
+[fidelity diagnosis](fidelity-diagnosis.md).
+
 Read `options[]` for the exact rendering action before choosing `--dpi`. The current CLI
 accepts integers from 1 through 1200 for `convert`, `pdf render`, `pptx preview`,
 `pptx visual-audit` and `pptx contact-diff`. Their defaults are 144 except contact-diff's 72;

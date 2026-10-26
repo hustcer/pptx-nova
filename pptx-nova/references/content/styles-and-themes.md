@@ -111,6 +111,9 @@ xdoc 让这四层都能改。整 deck 的主题槽位更新可用 theme 层；�
 这是显式无填充，不是“删除本地声明并恢复继承”。slide background 的 no-fill 会阻断
 layout/master 背景继承；透明 solid 也仍是本地声明。需要恢复母版背景时，按当前
 `set-slide-background` schema 使用 `followMaster:true`，不要以 no-fill 或透明色代替。
+普通 shape 从主题继承 no-fill 时也应保持透明，直接 solid override 则可恢复填充；
+不要为匹配旧预览给未声明 fill 的对象补实心背景。解析后的 deferred theme color
+可能输出小写 hex；颜色比较按数值归一化，大小写变化不构成重新着色。
 
 ### Picture fill（仅普通 shape）
 
@@ -159,6 +162,11 @@ crop/tile 显示差异就删除这些设置。已有 picture shape 的裁剪或 
 ```
 
 ## 字体
+
+整包统一中文或东亚字体时，先读 [字体归一化](../edit/font-normalization.md)，使用实时披露的
+`set-font`。只改主题不会覆盖已有 run 字体，只改 Latin `name` 也不会统一东亚字形。
+中文模式保留日文/韩文及通用 EA 默认值；全东亚模式需要对应范围的明确意图。
+局部改字族继续使用下面的 run patch，不将单对象请求扩大到整个文档。
 
 ### 单个 run 字体
 

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "cli-agent/v1",
+  "disclosure": {
+    "mode": "ops",
+    "schemaVersion": "cli-agent/v1",
+    "minimal": true
+  },
+  "operations": [
+    {
+      "op": "set-font",
+      "category": "text",
+      "summary": "Normalize East Asian or Chinese font families throughout supported presentation XML parts while preserving text, other styling, stored geometry and autofit.",
+      "required": ["op", "target", "typeface"],
+      "fields": ["target", "typeface"],
+      "constraints": [],
+      "optional": [],
+      "level": "patch",
+      "jsonSchema": {
+        "type": "object",
+        "properties": {
+          "op": {
+            "const": "set-font"
+          },
+          "target": {
+            "$ref": "#/$defs/setFontTarget"
+          },
+          "typeface": {
+            "$ref": "#/$defs/setFontTypeface"
+          }
+        },
+        "required": ["op", "target", "typeface"],
+        "additionalProperties": false,
+        "$defs": {
+          "setFontTarget": {
+            "type": "string",
+            "enum": ["east-asian", "chinese"],
+            "strict": true
+          },
+          "setFontTypeface": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[^\\s\\u0000-\\u001f\\u007f](?:[^\\u0000-\\u001f\\u007f]*[^\\s\\u0000-\\u001f\\u007f])?$"
+          }
+        }
+      }
+    }
+  ]
+}

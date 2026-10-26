@@ -289,6 +289,87 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
   return { directory, write, run, apply, inspect, body, create }
 }
 
+nativeTest(
+  'script-aware font normalization preserves mixed-language content and is idempotent',
+  (t) => {
+    const s = scenario(t)
+    const disclosure = s.run(['schema', '--mode', 'ops', '--ops', 'set-font', '--minimal'])
+    if (!disclosure.operations?.some((op) => op.op === 'set-font')) {
+      t.skip('The selected runtime has not disclosed set-font')
+      return
+    }
+    const samples = ['中文 English', '繁體中文', '日本語の資料', '한국어 Korean', '中文かな']
+    const source = s.apply([
+      { op: 'add-slide', layout: 'blank' },
+      ...samples.flatMap((text, index) => [
+        {
+          op: 'add-text-box',
+          slide: 0,
+          name: `Language ${index}`,
+          x: '1in',
+          y: `${index + 1}in`,
+          w: '8in',
+          h: '0.5in',
+          text,
+        },
+        {
+          op: 'set-text-frame',
+          slide: 0,
+          shape: { name: `Language ${index}` },
+          font: {
+            name: 'Arial',
+            eastAsian: 'SimSun',
+            complexScript: 'Arial',
+            size: '18pt',
+            bold: true,
+          },
+        },
+      ]),
+    ]).output
+    const sourceBytes = readFileSync(source)
+    const op = { op: 'set-font', target: 'chinese', typeface: 'Noto Sans SC' }
+    const dry = s.apply([op], source, { dryRun: true }).report
+    assert.equal(dry.opResults[0].analysis.selectionStatus, 'review-required')
+    assert.ok(dry.opResults[0].analysis.inferredSelections > 0)
+    assert.ok(dry.opResults[0].analysis.ambiguousSelections > 0)
+    assert.deepEqual(dry.opResults[0].resolvedSelectors, [])
+    const { output, report } = s.apply([op], source)
+    const cliOutput = join(s.directory, 'cli-fonts.pptx')
+    const cli = s.run([
+      'pptx',
+      'set-font',
+      source,
+      '--chinese',
+      'Noto Sans SC',
+      '--output',
+      cliOutput,
+      '--json',
+    ])
+    assert.deepEqual(cli.opResults[0].analysis, report.opResults[0].analysis)
+    const before = nativeParts(source),
+      after = nativeParts(output),
+      cliParts = nativeParts(cliOutput)
+    const xml = (parts) =>
+      [...parts.entries()].find(([name]) => /^ppt\/slides\/slide\d+\.xml$/.test(name))[1].toString()
+    const shapes = (text) => [...text.matchAll(/<p:sp>.*?<\/p:sp>/gs)].map((match) => match[0])
+    for (const [index, shape] of shapes(xml(before)).entries()) {
+      const changed = shapes(xml(after))[index]
+      assert.equal(changed.replace(/<a:ea\b[^>]*\/>/g, ''), shape.replace(/<a:ea\b[^>]*\/>/g, ''))
+      const sample = samples.findIndex((text) => shape.includes(`<a:t>${text}</a:t>`))
+      if (sample >= 0)
+        assert.match(
+          changed,
+          sample < 2 ? /<a:ea\b[^>]*typeface="Noto Sans SC"/ : /<a:ea\b[^>]*typeface="SimSun"/,
+        )
+    }
+    for (const [name, bytes] of after) assert.deepEqual(cliParts.get(name), bytes, name)
+    const repeated = s.apply([op], output, { dryRun: true }).report
+    assert.equal(repeated.opResults[0].analysis.changedSlots, 0)
+    assert.deepEqual(repeated.changedParts, [])
+    assert.deepEqual(readFileSync(source), sourceBytes)
+  },
+)
+
 nativeTest('current authoring enums reject aliases without publishing partial files', (t) => {
   const s = scenario(t)
   const source = s.create()

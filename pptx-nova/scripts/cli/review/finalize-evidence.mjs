@@ -465,6 +465,7 @@ function validatePowerPointNativeRender(args, report) {
       result.availability?.powerpointAvailable ?? result.availability?.available ?? false,
     nushellAvailable: result.availability?.nushellAvailable ?? null,
     mutoolAvailable: result.availability?.mutoolAvailable ?? null,
+    pdfRenderAvailable: result.availability?.pdfRenderAvailable ?? null,
     nativeRenderAvailabilityReason: result.availability?.reason ?? null,
     powerpointAvailabilityReason:
       (result.availability?.powerpointAvailable ?? result.availability?.available ?? false)

@@ -108,6 +108,12 @@ id or name; a slide-only identity is rejected. Mark an unchanged target with
 `expected.alreadyCompliant: true` only when its declared before/after values
 match and dry-run still resolves the intended object.
 
+Document-wide `set-font` has a dedicated `kind: "document-fonts"` target under
+`scope: "all-slides-style"` / `operationKind: "font-normalization"`; follow
+[font normalization](font-normalization.md) for its slide count, exact intent and reviewed analysis digest.
+It deliberately has no object selector. The gate accepts only one `set-font` operation, style changes,
+and complete slide evidence; this target cannot authorize arbitrary document-wide operations.
+
 Structural scope additionally declares expected slide delta, changed slides,
 and allowed object types:
 

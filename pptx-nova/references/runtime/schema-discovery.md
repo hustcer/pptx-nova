@@ -216,6 +216,10 @@ lt1 / dk1 / lt2 / dk2 / accent1..6 / hlink / folHlink
 
 ### Theme fonts
 
+整包中文/东亚字体归一化是独立的 top-level `set-font`，不是 `set-theme` 的别名，
+也没有 shape selector。先检查 `text/font-family-normalization`，再读
+[字体归一化](../edit/font-normalization.md) 的选择报告与文档级 Edit Contract。
+
 `set-theme.fonts` 使用 `major` / `minor` 两个槽位；每个槽位是字体对象，例如
 `{ "typeface": "Inter", "eastAsian": "Source Han Sans SC" }`。不要使用已删除的
 `themeFontKind` / `majorFont` / `minorFont` 别名。

@@ -6,7 +6,7 @@
 # 1. For PDF rendering, stage the PPTX inside PowerPoint's sandbox container
 # 2. For window capture, create a byte-identical tool-owned copy in the system temp directory
 # 3. Switch to the requested slide
-# 4. Default to exporting PDF inside PowerPoint's sandbox container and rendering the slide with `mutool`
+# 4. Default to exporting PDF inside PowerPoint's sandbox container and rendering the slide with PDFium
 # 5. If `--method auto` is used, fall back to a candidate-bound window screenshot with `screencapture`
 #
 # Examples:
@@ -20,7 +20,7 @@
 # - `window` mode needs macOS Screen Recording permission for the current terminal/host app
 # - `window` mode also needs macOS Accessibility permission to query the slide-show canvas rect
 # - `window` mode captures the slide-show canvas instead of the full editing window
-# - `pdf-render` mode requires `mutool` and Node.js
+# - `pdf-render` mode requires xdoc with PDFium support and Node.js
 # - PDF page identity follows presentation order and verified hidden-slide omissions
 # - `pdf-render` mode also requires App Data access to PowerPoint's sandbox container; use `auto` or
 #   `window` when the terminal/host app does not have that macOS privacy permission
@@ -144,17 +144,53 @@ def output-info-for-slides [
   }
 }
 
-def require-mutool []: nothing -> record {
-  if (command-exists 'mutool') {
+def require-pdf-renderer []: nothing -> record {
+  if (command-exists 'xdoc') {
     return {ok: true}
   }
 
   {
     ok: false
-    message: '`mutool` is required for pdf-render mode'
+    message: '`xdoc` with PDFium support is required for pdf-render mode'
     details: {
-      hint: 'Install MuPDF (`brew install mupdf`) or use --method window for single-slide capture'
+      hint: 'Install xdoc with PDFium support or use --method window for single-slide capture'
     }
+  }
+}
+
+# Bind each PNG to PDFium, the exact executable and the unchanged Office PDF.
+def render-pdf-page [pdf: path, page: int, dpi: int, output: path]: nothing -> record {
+  if $page < 1 or $dpi < 1 { error make {msg: 'PDF page and DPI must be positive.'} }
+  let pdf = ($pdf | path expand --strict)
+  let output = ($output | path expand)
+  let executable = (which xdoc | where type == external | first | get path | path expand --strict)
+  let binary_sha = (open --raw $executable | hash sha256)
+  let pdf_sha = (open --raw $pdf | hash sha256)
+  let version = (^$executable --version | complete)
+  if $version.exit_code != 0 { error make {msg: 'Cannot observe PDF rasterizer version.'} }
+  let run = (mktemp --directory --tmpdir-path ($output | path dirname) 'pdf-raster.XXXXXX' | path expand)
+  try {
+    let rendered_dir = ($run | path join rendered)
+    let result = (^$executable pdf render $pdf --pages ($page | into string) --dpi $dpi --output $rendered_dir | complete)
+    if $result.exit_code != 0 { error make {msg: $'PDFium rasterization failed: ($result.stderr) ($result.stdout)'} }
+    let manifest = (open ($rendered_dir | path join manifest.json))
+    let files = $manifest.outputs.png
+    if $manifest.input != $pdf or $manifest.pagesSelected != [$page] or ($files | length) != 1 {
+      error make {msg: 'PDF rasterizer manifest does not match the requested input/page.'}
+    }
+    let name = $files.0
+    if $name in ['' '.' '..'] or ($name | path basename) != $name {
+      error make {msg: 'PDF rasterizer returned an invalid image filename.'}
+    }
+    let image = ($rendered_dir | path join $name)
+    if ($image | path type) != file { error make {msg: 'PDF rasterizer did not create an image file.'} }
+    if (open --raw $pdf | hash sha256) != $pdf_sha or (open --raw $executable | hash sha256) != $binary_sha {
+      error make {msg: 'PDF input or rasterizer changed during capture.'}
+    }
+    cp --force $image $output
+    {engine: pdfium, executable: $executable, version: ($version.stdout | str trim), binarySha256: $binary_sha, pdfSha256: $pdf_sha}
+  } finally {
+    rm --recursive $run
   }
 }
 
@@ -1305,9 +1341,9 @@ def render-via-pdf [
   dpi: int
   open_delay: float
 ]: nothing -> record {
-  let mutool_check = (require-mutool)
-  if not $mutool_check.ok {
-    return $mutool_check
+  let renderer_check = (require-pdf-renderer)
+  if not $renderer_check.ok {
+    return $renderer_check
   }
 
   if ($slide_selection.multi and not ($output_target | str contains '%d')) {
@@ -1349,9 +1385,9 @@ def render-via-pdf [
   let identity = try {
     let source = ^node $SLIDE_VISIBILITY_TOOL $pptx_path | complete
     if $source.exit_code != 0 { error make {msg: $source.stderr} }
-    let count = ^mutool show $tmp_pdf trailer/Root/Pages/Count | complete
+    let count = ^xdoc pdf inspect $tmp_pdf --json | complete
     if $count.exit_code != 0 { error make {msg: $count.stderr} }
-    let pdf_page_count = $count.stdout | str trim | into int
+    let pdf_page_count = $count.stdout | from json | get pageCount | into int
     let pages = resolve-pdf-slide-pages ($source.stdout | from json) $pdf_page_count $requested
     {ok: true pages: $pages pdf_page_count: $pdf_page_count}
   } catch {|err|
@@ -1369,18 +1405,22 @@ def render-via-pdf [
       [$output_target]
     }
   )
-  # MuPDF substitutes physical PDF page numbers for %d. Render once into owned
-  # staging, then publish each image under the requested logical slide number.
+  # Stage every requested PDF page before publishing logical slide filenames.
+  # PDFium avoids MuPDF dropping or enlarging valid rotated glyphs.
   let staged_pattern = $tmp_dir | path join 'page-%d.png'
-  let pdf_spec = $identity.pages.pdf_page | uniq | each {into string} | str join ','
-  let draw_result = (
-    ^mutool draw
-      -r ($dpi | into string)
-      -o $staged_pattern
-      $tmp_pdf
-      $pdf_spec
-      | complete
-  )
+  let draw_result = try {
+    mut rasterizers: list<record> = []
+    for page in ($identity.pages.pdf_page | uniq) {
+      let current = (render-pdf-page $tmp_pdf $page $dpi (output-path-for-slide $staged_pattern $page))
+      if not ($rasterizers | is-empty) and $rasterizers.0 != $current {
+        error make {msg: 'PDF rasterizer identity changed during capture.'}
+      }
+      $rasterizers = ($rasterizers | append $current)
+    }
+    {exit_code: 0 stdout: '' stderr: '' rasterizer: $rasterizers.0}
+  } catch {|err|
+    {exit_code: 1 stdout: '' stderr: $err.msg rasterizer: null}
+  }
   let staged = $identity.pages | each {|page| output-path-for-slide $staged_pattern $page.pdf_page}
   let all_rendered = $staged | all {|path| $path | path exists}
   if $draw_result.exit_code == 0 and $all_rendered {
@@ -1435,6 +1475,7 @@ def render-via-pdf [
     method: 'pdf-render'
     pdf_page_count: $identity.pdf_page_count
     pdf_pages: $identity.pages
+    rasterizer: $draw_result.rasterizer
     presentation_name: $open_result.presentation_name
     slide: (
       if $slide_selection.multi {
@@ -1755,6 +1796,7 @@ def snapshot-result [
     outputs: ($capture.outputs? | default null)
     pdf_page_count: ($capture.pdf_page_count? | default null)
     pdf_pages: ($capture.pdf_pages? | default null)
+    rasterizer: ($capture.rasterizer? | default null)
     window: ($capture.window? | default null)
     image: (
       if $slide_selection.multi {

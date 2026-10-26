@@ -2,6 +2,11 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import {
+  FONT_NORMALIZATION_EVIDENCE,
+  documentFontTarget,
+  validateFontContract,
+} from '../../lib/edit/font-normalization.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-edit-contract/v1'
 const SCOPES = new Set([
@@ -187,6 +192,7 @@ function normalizeTargets(value) {
     if (!id) throw new Error(`targets[${index}].id is required`)
     if (ids.has(id)) throw new Error(`duplicate target id: ${id}`)
     ids.add(id)
+    if (target.kind === 'document-fonts') return { ...target, id }
     if (!Number.isInteger(target.slide) || target.slide < 0) {
       throw new Error(`targets[${index}].slide must be a non-negative 0-based index`)
     }
@@ -349,7 +355,12 @@ function normalizeContract(draft, args) {
   if (targets.some((target) => target.expected?.alreadyCompliant === true)) {
     if (!requiredEvidence.includes('final-inspect')) requiredEvidence.push('final-inspect')
   }
-  return {
+  if (documentFontTarget({ targets })) {
+    for (const kind of FONT_NORMALIZATION_EVIDENCE) {
+      if (!requiredEvidence.includes(kind)) requiredEvidence.push(kind)
+    }
+  }
+  const contract = {
     ...draft,
     schemaVersion: SCHEMA_VERSION,
     observedAt: new Date().toISOString(),
@@ -406,6 +417,8 @@ function normalizeContract(draft, args) {
       ? { expectedStructure: normalizeExpectedStructure(draft.expectedStructure, scope) }
       : {}),
   }
+  validateFontContract(contract)
+  return contract
 }
 
 function main() {

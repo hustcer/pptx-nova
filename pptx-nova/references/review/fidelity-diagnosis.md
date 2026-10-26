@@ -31,6 +31,15 @@ PDF page numbers. Retain the snapshot's `pdf_pages` mapping; a requested hidden
 slide absent from that export has no PDF evidence. A page-count mismatch is a
 failed identity check, not a reason to reuse the nearest page.
 
+The PDF rasterizer is also part of the evidence identity. The optional bundled
+PowerPoint snapshot route uses `xdoc pdf render` (PDFium) and records
+`rasterizer.engine/version/binarySha256/pdfSha256`. MuPDF antialiasing can enlarge
+or omit valid rotated/clipped glyphs in otherwise unchanged PDFs. Before
+repairing a deck for missing/oversized axis text, render the same PDF bytes with
+PDFium and inspect the PNG. Old captures without this identity need fresh
+capture for that diagnosis; changing rasterizers does not establish a PPTX edit
+or PowerPoint-equivalent layout.
+
 ## Preserve distinctions that affect rendering
 
 | Content         | Inspect before modifying                                                                                                                                                                                                                                                                                                                      |
@@ -78,6 +87,11 @@ Recent rendering changes also require these distinctions when reviewing the same
 - Fonts: record the actual resolved family/style and TTC face when disclosed,
   including Office aliases and Apple TrueType sources. A valid font file, an
   authored font declaration and an embedded PDF font are different facts.
+  Preserve authored symbol fonts for rating stars and trigrams, including when
+  they share a run with CJK text; a Unicode classification/fallback change does
+  not authorize replacing their families. For an explicitly requested family
+  normalization, follow `../edit/font-normalization.md`; selection inference,
+  installed-font availability and visual fit are separate evidence.
 - SmartArt: distinguish cached drawing precedence from supported cacheless
   linear-process/organization projections; keep semantic hierarchy, assistant
   branches, node/connector identities, theme paint and authored label metrics.
@@ -293,6 +307,10 @@ For new shape/copy differences, use `../edit/native-shape-editing.md` and
 geometry and owner isolation require structural evidence as well as fresh pixels.
 For horizontal chart legends, negative/narrow axes and ChartEx contiguous hierarchy
 runs, use `../content/charts.md` before changing authored layout, sorting or aggregating data.
+That reference also covers final-width bar-label fitting, complete source labels
+versus PDF ActualText, explicit tick skips, independent axis crossings, plot clips
+and surface paint ownership. Verify the original bytes under the current renderer
+before treating those changes as document regressions.
 
 ## Chart, SmartArt and effect regressions
 

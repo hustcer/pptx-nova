@@ -5,6 +5,7 @@ import { mkdtempSync, mkdirSync, readFileSync, utimesSync, writeFileSync } from 
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
+import { canonicalSha256V1 } from '../../../pptx-nova/scripts/lib/runtime/canonical-json.mjs'
 
 const repoRoot = resolve('.')
 const skillRoot = join(repoRoot, 'pptx-nova')
@@ -356,6 +357,7 @@ function writeFixture({
   const visionDiff = join(runDir, 'vision-diff.json')
   const styleDiff = join(runDir, 'style-diff.json')
   const finalInspect = join(runDir, 'final-inspect.json')
+  const structureCheck = join(runDir, 'structure-check.json')
   const evidenceManifest = join(runDir, 'evidence-manifest.json')
   const gate = join(runDir, 'edit-contract-gate.json')
   writeFileSync(source, 'stable pptx fixture bytes')
@@ -368,6 +370,7 @@ function writeFixture({
   writeJson(visionDiff, visionDiffFixture({ passed: visionDiffPassed, source, candidate }))
   writeJson(styleDiff, styleDiffFixture({ passed: stylePassed, source, candidate }))
   writeJson(finalInspect, finalInspectFixture(candidate))
+  writeJson(structureCheck, { status: 'pass', source, candidate })
   return {
     root,
     runDir,
@@ -383,6 +386,7 @@ function writeFixture({
     visionDiff,
     styleDiff,
     finalInspect,
+    structureCheck,
     evidenceManifest,
     gate,
   }
@@ -415,6 +419,7 @@ function writeManifest(fixture) {
     'vision-check': fixture.vision,
     'vision-diff': fixture.visionDiff,
     'final-inspect': fixture.finalInspect,
+    'structure-check': fixture.structureCheck,
   }
   const args = [manifestScript, '--candidate', fixture.candidate]
   for (const kind of contract.requiredEvidence.filter((item) => item !== 'dry-run')) {
@@ -712,6 +717,212 @@ function writeSessionRuleFixture({
   })
   return fixture
 }
+
+function writeFontFixture({ review = true } = {}) {
+  const fixture = writeFixture()
+  const analysis = {
+    kind: 'set-font',
+    selectionStatus: 'review-required',
+    coverage: 'supported-xml-only',
+    target: 'chinese',
+    typeface: 'Noto Sans SC',
+    visitedSlots: 4,
+    changedSlots: 2,
+    inferredSelections: 1,
+    ambiguousSelections: 1,
+    findings: [
+      {
+        part: 'ppt/slides/slide1.xml',
+        path: '/0/1',
+        status: 'skipped',
+        reason: 'ambiguous-mixed-east-asian-text',
+      },
+    ],
+    fontAvailability: 'not-evaluated',
+    visualFit: 'not-evaluated',
+  }
+  writeJson(fixture.draft, {
+    schemaVersion: 'pptx-nova-edit-contract/v1',
+    request: 'Normalize Chinese fonts, preserving Japanese and Korean',
+    scope: 'all-slides-style',
+    operationKind: 'font-normalization',
+    targets: [
+      {
+        id: 'document-fonts',
+        kind: 'document-fonts',
+        slideCount: 1,
+        opIndexes: [0],
+        expected: {
+          fontTarget: 'chinese',
+          typeface: 'Noto Sans SC',
+          changeCategories: ['style'],
+          ...(review ? { reviewedAnalysisSha256: canonicalSha256V1(analysis) } : {}),
+        },
+      },
+    ],
+    allowedChanges: ['style'],
+    preserve: ['slide-count'],
+    requiredEvidence: ['dry-run'],
+  })
+  writeJson(fixture.dryRun, {
+    ...dryRunFixture({ source: fixture.source, candidate: fixture.candidate }),
+    opResults: [
+      {
+        opIndex: 0,
+        op: 'set-font',
+        status: 'success',
+        resolvedSelectors: [],
+        semanticChanges: [{ category: 'style', action: 'updated' }],
+        analysis,
+      },
+    ],
+  })
+  const diff = diffFixture({ source: fixture.source, candidate: fixture.candidate })
+  diff.summary.sourceSlideCount = diff.summary.candidateSlideCount = 1
+  const shape = diff.slides[0].shapeChanges[0]
+  shape.category = 'style'
+  shape.categories = ['style']
+  shape.source.textPreview = shape.candidate.textPreview = '中文 English'
+  shape.changes = [
+    {
+      category: 'style',
+      field: 'font',
+      reliability: 'reliable',
+      conclusion: 'changed',
+      before: 'SimSun',
+      after: 'Noto Sans SC',
+    },
+  ]
+  writeJson(fixture.diff, diff)
+  return fixture
+}
+
+test('document font contracts accept native analysis without inventing object selectors', () => {
+  const fixture = writeFontFixture()
+  const contract = generateContract(fixture)
+  assert.equal(contract.targets[0].resolvedIdentity, undefined)
+  assert.ok(contract.requiredEvidence.includes('structure-check'))
+  const gate = runGate(fixture)
+  assert.equal(gate.agentGate.passed, true)
+  assert.equal(gate.targetCoverage[0].selectorMatchCount, null)
+  assert.equal(gate.targetCoverage[0].ambiguousSelections, 1)
+})
+
+test('document font contracts block unreviewed, stale and mismatched selection evidence', () => {
+  for (const change of [
+    'unreviewed',
+    'stale-review',
+    'wrong-target',
+    'missing-analysis',
+    'different-op',
+    'duplicate-op',
+  ]) {
+    const fixture = writeFontFixture({ review: change !== 'unreviewed' })
+    generateContract(fixture)
+    const dry = JSON.parse(readFileSync(fixture.dryRun))
+    if (change === 'stale-review') dry.opResults[0].analysis.findings[0].path = '/0/2'
+    if (change === 'wrong-target') dry.opResults[0].analysis.target = 'east-asian'
+    if (change === 'missing-analysis') delete dry.opResults[0].analysis
+    if (change === 'different-op') dry.opResults[0].op = 'set-theme'
+    if (change === 'duplicate-op') dry.opResults.push(structuredClone(dry.opResults[0]))
+    writeJson(fixture.dryRun, dry)
+    const gate = runGate(fixture, 2)
+    assert.equal(gate.agentGate.passed, false, change)
+    assert.ok(
+      gate.blockers.some((item) =>
+        ['font-analysis-invalid', 'font-selection-review-required'].includes(item.code),
+      ),
+      change,
+    )
+  }
+})
+
+test('font contracts consume full-deck vision-diff counts without inventing scope selectors', () => {
+  const fixture = writeFontFixture()
+  generateContract(fixture)
+  const vision = JSON.parse(readFileSync(fixture.visionDiff))
+  delete vision.scope
+  vision.agentGate.scopeMode = 'full-deck'
+  vision.slideCount = { source: 1, candidate: 1 }
+  writeJson(fixture.visionDiff, vision)
+  assert.equal(runGate(fixture).agentGate.passed, true)
+  delete vision.slideCount.candidate
+  writeJson(fixture.visionDiff, vision)
+  assert.equal(runGate(fixture, 2).agentGate.passed, false)
+})
+
+test('document font scope rejects content edits and incomplete slide evidence', () => {
+  for (const change of [
+    'text',
+    'geometry',
+    'hidden-slide',
+    'missing-inspect-slide',
+    'preview-scope',
+  ]) {
+    const fixture = writeFontFixture()
+    generateContract(fixture)
+    const diff = JSON.parse(readFileSync(fixture.diff))
+    if (change === 'text' || change === 'geometry') {
+      diff.slides[0].shapeChanges[0].changes[0].category = change
+    }
+    if (change === 'hidden-slide')
+      diff.summary.sourceSlideCount = diff.summary.candidateSlideCount = 2
+    writeJson(fixture.diff, diff)
+    if (change === 'missing-inspect-slide')
+      writeJson(fixture.finalInspect, {
+        schemaVersion: 'pptx-inspect/v1',
+        status: 'success',
+        input: fixture.candidate,
+        slides: [],
+      })
+    if (change === 'preview-scope')
+      writeJson(fixture.preview, { ...previewFixture(fixture.candidate), slidesSelected: [] })
+    assert.equal(runGate(fixture, 2).agentGate.passed, false, change)
+  }
+})
+
+test('document font targets cannot weaken ordinary edit contracts or drop required evidence', () => {
+  for (const change of [
+    'scope',
+    'operation',
+    'selector',
+    'op-count',
+    'style-only',
+    'preserve-count',
+    'control-family',
+    'delete-family',
+    'padded-family',
+    'oversized-family',
+  ]) {
+    const fixture = writeFontFixture()
+    const draft = JSON.parse(readFileSync(fixture.draft))
+    if (change === 'scope') draft.scope = 'single-object'
+    if (change === 'operation') draft.operationKind = 'text-edit'
+    if (change === 'selector') draft.targets[0].selector = { id: 5 }
+    if (change === 'op-count') draft.targets[0].opIndexes = [0, 1]
+    if (change === 'style-only') draft.allowedChanges.push('text')
+    if (change === 'preserve-count') draft.preserve = []
+    if (change === 'control-family') draft.targets[0].expected.typeface = 'Noto\nSans SC'
+    if (change === 'delete-family')
+      draft.targets[0].expected.typeface = `Noto${String.fromCodePoint(127)}Sans`
+    if (change === 'padded-family') draft.targets[0].expected.typeface = ' Noto Sans SC '
+    if (change === 'oversized-family') draft.targets[0].expected.typeface = '字'.repeat(257)
+    writeJson(fixture.draft, draft)
+    assert.match(
+      runNode([contractScript, '--draft', fixture.draft, '--source', fixture.source], 1).stderr,
+      /document-fonts requires/,
+    )
+  }
+  const fixture = writeFontFixture()
+  const contract = generateContract(fixture)
+  contract.requiredEvidence = ['dry-run']
+  writeJson(fixture.contract, contract)
+  const result = runNode(
+    [gateScript, '--contract', fixture.contract, '--candidate', fixture.candidate],
+    1,
+  )
+  assert.match(result.stderr, /font-normalization requires semantic-diff evidence/)
+})
 
 test('edit contract generator binds the draft to the current source bytes', () => {
   const fixture = writeFixture()

@@ -108,6 +108,9 @@ The public release audit checks this layout and local module imports.
   a manifest-bound passing copy-size gate. When session rules apply, it verifies produced-object
   identity and font/fill postconditions directly from candidate PPTX bytes.
   Read its stable `agentGate.nextAction` for repair routing.
+  A dedicated `document-fonts` target accepts one runtime-disclosed `set-font`
+  op with exact family/selection intent, a reviewed analysis digest when needed,
+  and full-deck evidence; see `references/edit/font-normalization.md`.
 
 - `cli/edit/copy-size-gate.mjs` - inspect donor and target slide dimensions,
   verify the current `pptx-slide-copy/v1` whole-file SHA-256 bindings separately
@@ -222,7 +225,7 @@ The public release audit checks this layout and local module imports.
   the final candidate/inspect plus their existing vision/fidelity reports. It
   detects ChartEx package parts and conditionally consumes a candidate-bound
   `pptx-nova-powerpoint-snapshot.nu --method pdf-render` report. When the optional
-  macOS + PowerPoint + Nushell + `mutool` route is available,
+  macOS + PowerPoint + Nushell + xdoc PDFium route is available,
   missing/stale/incomplete ChartEx evidence blocks; otherwise the baseline
   continues with an explicit unverified warning. It writes
   `layout-final.json` and `evidence-summary.json`; it intentionally excludes
@@ -322,7 +325,7 @@ The public release audit checks this layout and local module imports.
   and emit candidate/hash/image-bound `pptx-snapshot/v1` evidence. `window`
   mode additionally fails closed unless the foreground process, presentation,
   slide, canvas, and screenshot scale remain stable before and after capture.
-  It requires Nushell and, for the preferred `pdf-render` route, `mutool`; when
+  It requires Nushell and, for the preferred `pdf-render` route, xdoc PDFium rendering; when
   unavailable, the baseline Node/xdoc workflow continues with explicit
   unverified evidence and must not claim PowerPoint-native verification.
 

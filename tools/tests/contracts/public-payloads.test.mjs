@@ -178,9 +178,21 @@ test('copyable reference examples avoid removed xdoc payload aliases', () => {
   }
 })
 
-test('tracked literal op values stay within the current xdoc patch and condition schemas', () => {
+test('tracked literal op values stay within the snapshot and captured capability contracts', () => {
   const schema = JSON.parse(readFileSync(join(repoRoot, 'docs/xdoc-schema.json'), 'utf8'))
   const canonicalOps = new Set(schema.commands.pptx.patchSchema.supportedOps)
+  // Capability-gated additions can ship before the separate public schema
+  // refresh. Consume the exact focused runtime contract, not a string allowlist.
+  const focused = JSON.parse(
+    readFileSync(join(repoRoot, 'tools/tests/fixtures/runtime/set-font-op.json'), 'utf8'),
+  )
+  assert.equal(focused.disclosure.mode, 'ops')
+  for (const operation of focused.operations) {
+    assert.equal(operation.level, 'patch')
+    assert.equal(operation.jsonSchema.properties.op.const, operation.op)
+    assert.ok(operation.jsonSchema.required.includes('op'))
+    canonicalOps.add(operation.op)
+  }
   // Both patch operations and control-flow comparisons use the literal key `op`.
   const definitions = schema.commands.pptx.patchSchema.jsonSchema.$defs
   const conditionOps = new Set()

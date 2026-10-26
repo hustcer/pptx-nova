@@ -1,6 +1,6 @@
 {
   "name": "xdoc",
-  "version": "0.15.0 (a79e6eaa)",
+  "version": "0.16.0 (900c6c9e)",
   "description": "Convert PPTX decks into PDF, PNG, JSON, and Markdown outputs, and HTML into Markdown.\n\nLaunch plans (all core features, including editable PPTX):\n  Free: up to 10 slides per task and 5 MiB (5,242,880 bytes)\n    of compressed PPTX inputs combined; visual outputs carry a watermark.\n    Single-user local use; no account or License required.\n  Personal: offline 30-day License purchases for the individual purchaser;\n    no plan-level slide/PPTX byte limits or new plan watermarks.\n  Enterprise: offline contract License for local use within the organization;\n    multi-year terms supported; no plan-level slide/PPTX byte limits or new plan watermarks.\n  Local scripts and a per-user daemon are supported. Launch plans do not include\n  CI, shared servers or Service/API. Format, resource and existing signed watermark rules still apply.\n  Public downloads use the default non-commercial LICENSE. Commercial evaluation\n  requires accepting Evaluation Terms through the approved channel before delivery.\n  Free mode does not expand these legal rights; paid use follows the order terms.\n\nAccepts single files, multiple files, glob patterns (?/*/**), and\ndirectories. With --recursive, subdirectories are walked.\n\nShorthand:\n  xdoc <inputs...> [options]  ==  xdoc convert <inputs...> [options]\n\nStructured extraction:\n  xdoc extract <inputs...> --parts map,resources,notes,links,fonts\n\nHTML to Markdown:\n  xdoc html2md page.html --output page.md\n\nPreflight diagnostics:\n  xdoc check <inputs...> --checks fonts,links,compat\n  xdoc check <inputs...> --checks a11y --pretty\n\nLicense installation, renewal and diagnostics:\n  xdoc auth install xdoc-license.json\n  xdoc auth status --pretty\n  xdoc auth verify --license ./xdoc-license.json\n\nPPTX editing bridge:\n  xdoc pptx new --output out.pptx\n  xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx\n\n  xdoc pptx inspect deck.pptx --json\n\n  xdoc pptx select deck.pptx --query query.json --json\n\n  xdoc pptx preview deck.pptx --output-dir shots/ --contact-sheet --contact-output out.png --json\n\n  xdoc pptx chrome-detect deck.pptx --json\n\n  xdoc pptx chrome-remove deck.pptx --roles header,footer,page-number,rule --output clean.pptx\n\n  xdoc pptx chrome-apply deck.pptx --deckkit mckinsey-blue --output styled.pptx\n\n  xdoc pptx refurbish-skin --source old.pptx --deckkit mckinsey-blue --to pdf --output new.pdf\n\n  xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx\n\n  xdoc pptx slide-copy target.pptx --source source.pptx --slides 1,3,5-8 --output out.pptx\n\n  xdoc pptx extract-style deck.pptx --output style.json --json\n\n  xdoc pptx import-template reference.pptx --name imported-template --output-dir skills/pptx-nova/assets --json\n\n  xdoc pptx catalog shapes --json\n\n  xdoc pptx catalog themes --json\n\n  xdoc pptx swap-theme deck.pptx --theme corporate-blue --output out.pptx\n\n  xdoc pptx swap-style deck.pptx --style consulting --output out.pptx\n\n  xdoc pptx recipe --recipe recipe.json --compile --json\n\n  xdoc pptx replay --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\n  xdoc pptx audit --from-sidecar out.pptx.xdoc.json --json\n\n  xdoc pptx rollback --from-sidecar out.pptx.xdoc.json --output recovered.pptx\n\nPDF diagnostics and text extraction:\n  xdoc pdf inspect out.pdf --json\n  xdoc pdf extract-text input.pdf --json --pretty\n  xdoc pdf render input.pdf --pages 1,3-5 --output pages/\n\nAgent stdio protocols:\n  xdoc json-rpc\n  xdoc mcp\n\nMachine-readable schema:\n  xdoc schema",
   "commands": {
     "convert": {
@@ -2027,6 +2027,18 @@
           "required": false
         },
         {
+          "name": "east-asian",
+          "type": "string",
+          "description": "Font family for pptx set-font: all East Asian DrawingML slots; exclusive with --chinese",
+          "required": false
+        },
+        {
+          "name": "chinese",
+          "type": "string",
+          "description": "Font family for pptx set-font: Chinese theme mappings and selected Chinese runs; exclusive with --east-asian",
+          "required": false
+        },
+        {
           "name": "brand",
           "type": "string",
           "description": "Brand profile JSON path for pptx check-brand or apply-brand",
@@ -2395,6 +2407,7 @@
             "inspect",
             "preview",
             "rollback",
+            "set-font",
             "i18n-plan",
             "i18n-scan",
             "slide-copy",
@@ -2426,6 +2439,8 @@
         }
       },
       "examples": [
+        "xdoc pptx set-font deck.pptx --east-asian 'Microsoft YaHei' --output updated.pptx --json",
+        "xdoc pptx set-font deck.pptx --chinese 'Microsoft YaHei' --dry-run --json",
         "xdoc pptx new --output out.pptx",
         "xdoc pptx apply --patch patch.json --input in.pptx --output out.pptx --overwrite",
         "xdoc pptx apply --patch patch.json --dry-run",
@@ -4419,6 +4434,37 @@
           },
           {
             "feature": "text",
+            "subset": "font-family-normalization",
+            "status": "supported",
+            "summary": "Normalize East Asian font slots or deterministically selected Chinese runs and theme mappings, preserving other text styling and geometry.",
+            "operations": ["set-font"],
+            "limits": [
+              {
+                "code": "selection-and-rendering-limits",
+                "description": "Chinese selection reports Han inference and ambiguous mixed text. Unknown extensions, equations, embedded objects and images are preserved. Font availability and visual fit are not evaluated."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "patch-op:set-font",
+                "kind": "operation-contract",
+                "claim": "The executable operation is declared by the canonical patch contract."
+              },
+              {
+                "id": "set-font-preservation-roundtrip",
+                "kind": "behavior",
+                "claim": "Selected runs roundtrip with Latin families, styling and frame geometry preserved; repeated normalization changes no parts."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["set-font"],
+              "note": "Dry-run, inspect selection evidence, and preview the output with the intended font installed."
+            },
+            "axes": null
+          },
+          {
+            "feature": "text",
             "subset": "native-authoring",
             "status": "supported",
             "summary": "Create and update text frames, margins, anchoring, wrapping, paragraphs, runs, fitting, and default text styles.",
@@ -4825,6 +4871,10 @@
             "feature": "table",
             "subset": "native-authoring"
           },
+          "set-font": {
+            "feature": "text",
+            "subset": "font-family-normalization"
+          },
           "add-paragraph": {
             "feature": "text",
             "subset": "native-authoring"
@@ -4875,6 +4925,7 @@
           "lossy": true,
           "partialStatus": "not-represented",
           "supported": [
+            "set-font",
             "add-chart",
             "add-connector",
             "add-equation",
@@ -10972,6 +11023,326 @@
             "description": "Validated public parameters with defaults inserted. Omitted optional paths stay absent; json-full=true normalizes json to true. Admission, path resolution and authorization precede I/O selection."
           }
         },
+        "set-font": {
+          "usage": "xdoc pptx set-font deck.pptx (--east-asian FAMILY | --chinese FAMILY) --output out.pptx [--dry-run] [--json]",
+          "outputKind": "pptx",
+          "inputs": [
+            "Exactly one positional input PPTX or --input, and exactly one of --east-asian or --chinese."
+          ],
+          "outputs": [
+            "output PPTX",
+            "pptx-apply/v1 report",
+            "pptx-dry-run/v1 report",
+            "optional pptx-apply-sidecar/v1"
+          ],
+          "selection": {
+            "eastAsian": "All supported DrawingML East Asian font slots and Hans/Hant/Jpan/Hang theme mappings.",
+            "chinese": "Hans/Hant theme mappings and current runs selected by zh language or Han text without Japanese/Korean evidence. Explicit ja/ko and ambiguous mixed text are preserved; generic EA defaults are preserved. Inference and skipped ambiguity are reported.",
+            "mutualExclusion": "--east-asian and --chinese are mutually exclusive."
+          },
+          "compilesTo": {
+            "ops": ["set-font"]
+          },
+          "preservation": "Text, Latin/complex-script families, sizes, styling, stored geometry, autofit, unknown extensions and embedded assets are preserved. No font embedding, installation, glyph-coverage or visual-fit guarantee.",
+          "recommendedFollowUp": "Inspect opResults[].analysis for inferredSelections/ambiguousSelections/findings, then preview or visually audit the output.",
+          "options": [
+            {
+              "name": "input",
+              "type": "string",
+              "description": "Input or target PPTX path when the selected action accepts --input as an alternative to its positional deck",
+              "required": false,
+              "short": "i"
+            },
+            {
+              "name": "east-asian",
+              "type": "string",
+              "description": "Font family for pptx set-font: all East Asian DrawingML slots; exclusive with --chinese",
+              "required": false
+            },
+            {
+              "name": "chinese",
+              "type": "string",
+              "description": "Font family for pptx set-font: Chinese theme mappings and selected Chinese runs; exclusive with --east-asian",
+              "required": false
+            },
+            {
+              "name": "output",
+              "type": "path",
+              "description": "Primary output artifact path; task-35 actions may select PPTX, PDF, or a PNG directory with --to",
+              "required": false,
+              "short": "o"
+            },
+            {
+              "name": "overwrite",
+              "type": "bool",
+              "description": "Replace an existing output artifact when the selected action permits it",
+              "required": false,
+              "style": "flag"
+            },
+            {
+              "name": "dry-run",
+              "type": "bool",
+              "description": "Validate and report the selected mutation without publishing its output artifact",
+              "required": false,
+              "style": "flag"
+            },
+            {
+              "name": "sidecar",
+              "type": "string",
+              "description": "Sidecar JSON output path; defaults to <output>.xdoc.json; must differ from inputs/output, and existing sidecars require --overwrite",
+              "required": false
+            },
+            {
+              "name": "no-sidecar",
+              "type": "bool",
+              "description": "Disable writing the .xdoc.json sidecar for apply/new",
+              "required": false,
+              "style": "flag"
+            },
+            {
+              "name": "json",
+              "type": "bool",
+              "description": "Emit the selected action's documented machine-readable result on stdout",
+              "required": false,
+              "style": "flag"
+            },
+            {
+              "name": "quiet",
+              "type": "bool",
+              "description": "Suppress non-error logs; equivalent to --log-level error",
+              "required": false,
+              "style": "flag"
+            },
+            {
+              "name": "log-level",
+              "type": "string",
+              "description": "Diagnostic log level: trace|debug|info|warn|error",
+              "required": false,
+              "default": "info"
+            },
+            {
+              "name": "intent",
+              "type": "string",
+              "description": "xdoc-cli-feature-intent/v1 JSON object (inline or file path) matching this action's Feature/output; mutually exclusive with --require-entitlement, --require-unwatermarked, and --allow-fallback",
+              "required": false
+            },
+            {
+              "name": "require-entitlement",
+              "type": "bool",
+              "description": "Strict: fail instead of running the Free Baseline",
+              "required": false,
+              "style": "flag"
+            },
+            {
+              "name": "require-unwatermarked",
+              "type": "bool",
+              "description": "Strict: fail unless an unwatermarked mode is authorized",
+              "required": false,
+              "style": "flag"
+            },
+            {
+              "name": "allow-fallback",
+              "type": "bool",
+              "description": "Pre-authorize the Free Baseline fallback for automation",
+              "required": false,
+              "style": "flag"
+            }
+          ],
+          "positionals": [
+            {
+              "name": "input",
+              "required": false,
+              "type": "path",
+              "description": "Input PPTX path; equivalent to --input."
+            }
+          ],
+          "acceptsInputPositional": true,
+          "authorization": {
+            "productWrite": true,
+            "taskAuthorization": "two-stage",
+            "defaultFeature": "modify",
+            "intentOverride": "--intent xdoc-cli-feature-intent/v1",
+            "intentSchemaRef": "#/commands/pptx/intentSchema",
+            "intentMutuallyExclusiveWith": [
+              "require-entitlement",
+              "require-unwatermarked",
+              "allow-fallback"
+            ],
+            "inputIdentity": "frozen-bytes-before-admission",
+            "finalMeasurement": "actual-output-slide-count",
+            "watermarkBoundary": "before-writer",
+            "publish": "atomic-file-replace",
+            "publishScope": "editable-pptx-output",
+            "dryRun": "validates-without-product-output"
+          },
+          "examples": [
+            "xdoc pptx set-font deck.pptx --east-asian 'Microsoft YaHei' --output updated.pptx --json",
+            "xdoc pptx set-font deck.pptx --chinese 'Microsoft YaHei' --dry-run --json"
+          ],
+          "parametersSchema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "input": {
+                "type": "string"
+              },
+              "east-asian": {
+                "type": "string"
+              },
+              "chinese": {
+                "type": "string"
+              },
+              "output": {
+                "type": "string"
+              },
+              "overwrite": {
+                "type": "boolean",
+                "default": false
+              },
+              "dry-run": {
+                "type": "boolean",
+                "default": false
+              },
+              "sidecar": {
+                "type": "string"
+              },
+              "no-sidecar": {
+                "type": "boolean",
+                "default": false
+              },
+              "json": {
+                "type": "boolean",
+                "default": false
+              },
+              "quiet": {
+                "type": "boolean",
+                "default": false
+              },
+              "log-level": {
+                "type": "string",
+                "default": "info"
+              },
+              "intent": {
+                "type": "string"
+              },
+              "require-entitlement": {
+                "type": "boolean",
+                "default": false
+              },
+              "require-unwatermarked": {
+                "type": "boolean",
+                "default": false
+              },
+              "allow-fallback": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "overwrite",
+              "dry-run",
+              "no-sidecar",
+              "json",
+              "quiet",
+              "log-level",
+              "require-entitlement",
+              "require-unwatermarked",
+              "allow-fallback"
+            ],
+            "description": "Validated public parameters with defaults inserted. Omitted optional paths stay absent; json-full=true normalizes json to true. Admission, path resolution and authorization precede I/O selection.",
+            "oneOf": [
+              {
+                "required": ["east-asian"],
+                "not": {
+                  "required": ["chinese"]
+                }
+              },
+              {
+                "required": ["chinese"],
+                "not": {
+                  "required": ["east-asian"]
+                }
+              }
+            ]
+          },
+          "ioContract": {
+            "sidecar": {
+              "channel": "filesystem",
+              "when": {
+                "type": "object",
+                "properties": {
+                  "dry-run": {
+                    "const": false
+                  },
+                  "no-sidecar": {
+                    "const": false
+                  },
+                  "output": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["dry-run", "no-sidecar", "output"]
+              },
+              "schemaVersion": "pptx-apply-sidecar/v1",
+              "schemaRef": "#/commands/pptx/sidecarSchema"
+            },
+            "stdout": {
+              "when": {
+                "type": "object",
+                "properties": {
+                  "json": {
+                    "const": true
+                  }
+                },
+                "required": ["json"]
+              },
+              "format": "json",
+              "variants": [
+                {
+                  "when": {
+                    "type": "object",
+                    "properties": {
+                      "dry-run": {
+                        "const": false
+                      }
+                    },
+                    "required": ["dry-run"]
+                  },
+                  "schemaVersion": "pptx-apply/v1",
+                  "schemaRef": "#/commands/pptx/applyReportSchema"
+                },
+                {
+                  "when": {
+                    "type": "object",
+                    "properties": {
+                      "dry-run": {
+                        "const": true
+                      }
+                    },
+                    "required": ["dry-run"]
+                  },
+                  "schemaVersion": "pptx-dry-run/v1",
+                  "schemaRef": "#/commands/pptx/dryRunReportSchema"
+                }
+              ]
+            },
+            "failure": {
+              "schemaVersion": "pptx-error/v1",
+              "schemaRef": "#/commands/pptx/errorSchema",
+              "channel": "stdout",
+              "when": {
+                "type": "object",
+                "properties": {
+                  "json": {
+                    "const": true
+                  }
+                },
+                "required": ["json"]
+              }
+            }
+          }
+        },
         "apply-brand": {
           "usage": "xdoc pptx apply-brand deck.pptx --brand brand.json --output out.pptx",
           "outputKind": "pptx",
@@ -13339,6 +13710,7 @@
           "replay",
           "preview",
           "rollback",
+          "set-font",
           "slide-copy",
           "swap-style",
           "swap-theme",
@@ -19968,6 +20340,17 @@
         "additionalProperties": false,
         "required": ["schemaVersion", "ops"],
         "$defs": {
+          "setFontTarget": {
+            "type": "string",
+            "enum": ["east-asian", "chinese"],
+            "strict": true
+          },
+          "setFontTypeface": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[^\\s\\u0000-\\u001f\\u007f](?:[^\\u0000-\\u001f\\u007f]*[^\\s\\u0000-\\u001f\\u007f])?$"
+          },
           "length": {
             "type": "string",
             "pattern": "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)$",
@@ -27965,6 +28348,23 @@
                       "type": "object",
                       "properties": {
                         "op": {
+                          "const": "set-font"
+                        },
+                        "target": {
+                          "$ref": "#/$defs/setFontTarget"
+                        },
+                        "typeface": {
+                          "$ref": "#/$defs/setFontTypeface"
+                        }
+                      },
+                      "required": ["op", "target", "typeface"],
+                      "additionalProperties": false,
+                      "description": "target=east-asian updates DrawingML EA slots and Hans/Hant/Jpan/Hang theme mappings. target=chinese updates Hans/Hant mappings and runs selected by zh language or Han text without Japanese/Korean evidence; explicit ja/ko runs and ambiguous mixed text are preserved. Generic EA defaults are preserved in Chinese mode. Inference and ambiguity are disclosed in analysis. Product-owned demo markers, unknown extensions, images, equations and embedded objects are preserved. No font installation, embedding, glyph coverage or visual-fit guarantee. Reflow already pending from earlier operations remains effective."
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "op": {
                           "const": "add-chart"
                         },
                         "categoryAxis": {
@@ -30468,6 +30868,17 @@
         "$id": "https://structurify.io/schemas/pptx-recipe-compile/v1.schema.json",
         "description": "Complete compiled patch with separate diagnostic expansion summaries.",
         "$defs": {
+          "setFontTarget": {
+            "type": "string",
+            "enum": ["east-asian", "chinese"],
+            "strict": true
+          },
+          "setFontTypeface": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^[^\\s\\u0000-\\u001f\\u007f](?:[^\\u0000-\\u001f\\u007f]*[^\\s\\u0000-\\u001f\\u007f])?$"
+          },
           "chartDateAxis": {
             "type": "object",
             "additionalProperties": false,
@@ -37260,6 +37671,23 @@
                     "type": "object",
                     "properties": {
                       "op": {
+                        "const": "set-font"
+                      },
+                      "target": {
+                        "$ref": "#/$defs/setFontTarget"
+                      },
+                      "typeface": {
+                        "$ref": "#/$defs/setFontTypeface"
+                      }
+                    },
+                    "required": ["op", "target", "typeface"],
+                    "additionalProperties": false,
+                    "description": "target=east-asian updates DrawingML EA slots and Hans/Hant/Jpan/Hang theme mappings. target=chinese updates Hans/Hant mappings and runs selected by zh language or Han text without Japanese/Korean evidence; explicit ja/ko runs and ambiguous mixed text are preserved. Generic EA defaults are preserved in Chinese mode. Inference and ambiguity are disclosed in analysis. Product-owned demo markers, unknown extensions, images, equations and embedded objects are preserved. No font installation, embedding, glyph coverage or visual-fit guarantee. Reflow already pending from earlier operations remains effective."
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "op": {
                         "const": "add-chart"
                       },
                       "categoryAxis": {
@@ -39710,6 +40138,17 @@
           "required": ["schemaVersion", "ops"],
           "additionalProperties": false,
           "$defs": {
+            "setFontTarget": {
+              "type": "string",
+              "enum": ["east-asian", "chinese"],
+              "strict": true
+            },
+            "setFontTypeface": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[^\\s\\u0000-\\u001f\\u007f](?:[^\\u0000-\\u001f\\u007f]*[^\\s\\u0000-\\u001f\\u007f])?$"
+            },
             "length": {
               "type": "string",
               "pattern": "^-?[0-9]+(\\.[0-9]+)?(emu|in|cm|mm|pt|px)$",
@@ -46201,6 +46640,7 @@
           }
         },
         "supportedOps": [
+          "set-font",
           "add-chart",
           "add-connector",
           "add-equation",
@@ -46263,6 +46703,32 @@
         "deprecatedOps": [],
         "experimentalOps": [],
         "examples": [
+          {
+            "title": "Normalize East Asian font families",
+            "patch": {
+              "schemaVersion": "pptx-patch/v1",
+              "ops": [
+                {
+                  "target": "east-asian",
+                  "typeface": "Microsoft YaHei",
+                  "op": "set-font"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Normalize Chinese font families",
+            "patch": {
+              "schemaVersion": "pptx-patch/v1",
+              "ops": [
+                {
+                  "target": "chinese",
+                  "typeface": "Microsoft YaHei",
+                  "op": "set-font"
+                }
+              ]
+            }
+          },
           {
             "title": "Finite signed spin emphasis",
             "patch": {
@@ -48354,6 +48820,16 @@
           "bubble3D": ["standard"]
         },
         "operations": [
+          {
+            "op": "set-font",
+            "category": "text",
+            "summary": "Normalize East Asian or Chinese font families throughout supported presentation XML parts while preserving text, other styling, stored geometry and autofit.",
+            "description": "target=east-asian updates DrawingML EA slots and Hans/Hant/Jpan/Hang theme mappings. target=chinese updates Hans/Hant mappings and runs selected by zh language or Han text without Japanese/Korean evidence; explicit ja/ko runs and ambiguous mixed text are preserved. Generic EA defaults are preserved in Chinese mode. Inference and ambiguity are disclosed in analysis. Product-owned demo markers, unknown extensions, images, equations and embedded objects are preserved. No font installation, embedding, glyph coverage or visual-fit guarantee. Reflow already pending from earlier operations remains effective.",
+            "required": ["op", "target", "typeface"],
+            "constraints": [],
+            "optional": [],
+            "level": "patch"
+          },
           {
             "op": "add-chart",
             "category": "chart",
@@ -89227,6 +89703,91 @@
                           }
                         }
                       }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "target",
+                        "coverage",
+                        "findings",
+                        "typeface",
+                        "visualFit",
+                        "changedSlots",
+                        "visitedSlots",
+                        "selectionStatus",
+                        "fontAvailability",
+                        "inferredSelections",
+                        "ambiguousSelections"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "set-font"
+                        },
+                        "selectionStatus": {
+                          "type": "string",
+                          "enum": ["complete", "review-required"],
+                          "strict": true
+                        },
+                        "coverage": {
+                          "const": "supported-xml-only"
+                        },
+                        "target": {
+                          "type": "string",
+                          "enum": ["east-asian", "chinese"],
+                          "strict": true
+                        },
+                        "typeface": {
+                          "type": "string"
+                        },
+                        "visitedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "changedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "inferredSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "ambiguousSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "findings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["part", "path", "reason", "status"],
+                            "properties": {
+                              "part": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": ["changed", "skipped", "inferred"],
+                                "strict": true
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "fontAvailability": {
+                          "const": "not-evaluated"
+                        },
+                        "visualFit": {
+                          "const": "not-evaluated"
+                        }
+                      }
                     }
                   ]
                 }
@@ -91136,6 +91697,91 @@
                           }
                         }
                       }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "target",
+                        "coverage",
+                        "findings",
+                        "typeface",
+                        "visualFit",
+                        "changedSlots",
+                        "visitedSlots",
+                        "selectionStatus",
+                        "fontAvailability",
+                        "inferredSelections",
+                        "ambiguousSelections"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "set-font"
+                        },
+                        "selectionStatus": {
+                          "type": "string",
+                          "enum": ["complete", "review-required"],
+                          "strict": true
+                        },
+                        "coverage": {
+                          "const": "supported-xml-only"
+                        },
+                        "target": {
+                          "type": "string",
+                          "enum": ["east-asian", "chinese"],
+                          "strict": true
+                        },
+                        "typeface": {
+                          "type": "string"
+                        },
+                        "visitedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "changedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "inferredSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "ambiguousSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "findings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["part", "path", "reason", "status"],
+                            "properties": {
+                              "part": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": ["changed", "skipped", "inferred"],
+                                "strict": true
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "fontAvailability": {
+                          "const": "not-evaluated"
+                        },
+                        "visualFit": {
+                          "const": "not-evaluated"
+                        }
+                      }
                     }
                   ]
                 }
@@ -92876,6 +93522,91 @@
                               }
                             }
                           }
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "target",
+                        "coverage",
+                        "findings",
+                        "typeface",
+                        "visualFit",
+                        "changedSlots",
+                        "visitedSlots",
+                        "selectionStatus",
+                        "fontAvailability",
+                        "inferredSelections",
+                        "ambiguousSelections"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "set-font"
+                        },
+                        "selectionStatus": {
+                          "type": "string",
+                          "enum": ["complete", "review-required"],
+                          "strict": true
+                        },
+                        "coverage": {
+                          "const": "supported-xml-only"
+                        },
+                        "target": {
+                          "type": "string",
+                          "enum": ["east-asian", "chinese"],
+                          "strict": true
+                        },
+                        "typeface": {
+                          "type": "string"
+                        },
+                        "visitedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "changedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "inferredSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "ambiguousSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "findings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["part", "path", "reason", "status"],
+                            "properties": {
+                              "part": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": ["changed", "skipped", "inferred"],
+                                "strict": true
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "fontAvailability": {
+                          "const": "not-evaluated"
+                        },
+                        "visualFit": {
+                          "const": "not-evaluated"
                         }
                       }
                     }
@@ -104659,6 +105390,91 @@
                           }
                         }
                       }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "target",
+                        "coverage",
+                        "findings",
+                        "typeface",
+                        "visualFit",
+                        "changedSlots",
+                        "visitedSlots",
+                        "selectionStatus",
+                        "fontAvailability",
+                        "inferredSelections",
+                        "ambiguousSelections"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "set-font"
+                        },
+                        "selectionStatus": {
+                          "type": "string",
+                          "enum": ["complete", "review-required"],
+                          "strict": true
+                        },
+                        "coverage": {
+                          "const": "supported-xml-only"
+                        },
+                        "target": {
+                          "type": "string",
+                          "enum": ["east-asian", "chinese"],
+                          "strict": true
+                        },
+                        "typeface": {
+                          "type": "string"
+                        },
+                        "visitedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "changedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "inferredSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "ambiguousSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "findings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["part", "path", "reason", "status"],
+                            "properties": {
+                              "part": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": ["changed", "skipped", "inferred"],
+                                "strict": true
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "fontAvailability": {
+                          "const": "not-evaluated"
+                        },
+                        "visualFit": {
+                          "const": "not-evaluated"
+                        }
+                      }
                     }
                   ]
                 }
@@ -105835,6 +106651,91 @@
                               }
                             }
                           }
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "target",
+                        "coverage",
+                        "findings",
+                        "typeface",
+                        "visualFit",
+                        "changedSlots",
+                        "visitedSlots",
+                        "selectionStatus",
+                        "fontAvailability",
+                        "inferredSelections",
+                        "ambiguousSelections"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "const": "set-font"
+                        },
+                        "selectionStatus": {
+                          "type": "string",
+                          "enum": ["complete", "review-required"],
+                          "strict": true
+                        },
+                        "coverage": {
+                          "const": "supported-xml-only"
+                        },
+                        "target": {
+                          "type": "string",
+                          "enum": ["east-asian", "chinese"],
+                          "strict": true
+                        },
+                        "typeface": {
+                          "type": "string"
+                        },
+                        "visitedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "changedSlots": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "inferredSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "ambiguousSelections": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "findings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": ["part", "path", "reason", "status"],
+                            "properties": {
+                              "part": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": ["changed", "skipped", "inferred"],
+                                "strict": true
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "fontAvailability": {
+                          "const": "not-evaluated"
+                        },
+                        "visualFit": {
+                          "const": "not-evaluated"
                         }
                       }
                     }
@@ -108187,6 +109088,91 @@
                                   }
                                 }
                               }
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "kind",
+                            "target",
+                            "coverage",
+                            "findings",
+                            "typeface",
+                            "visualFit",
+                            "changedSlots",
+                            "visitedSlots",
+                            "selectionStatus",
+                            "fontAvailability",
+                            "inferredSelections",
+                            "ambiguousSelections"
+                          ],
+                          "properties": {
+                            "kind": {
+                              "const": "set-font"
+                            },
+                            "selectionStatus": {
+                              "type": "string",
+                              "enum": ["complete", "review-required"],
+                              "strict": true
+                            },
+                            "coverage": {
+                              "const": "supported-xml-only"
+                            },
+                            "target": {
+                              "type": "string",
+                              "enum": ["east-asian", "chinese"],
+                              "strict": true
+                            },
+                            "typeface": {
+                              "type": "string"
+                            },
+                            "visitedSlots": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "changedSlots": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "inferredSelections": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "ambiguousSelections": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "findings": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": ["part", "path", "reason", "status"],
+                                "properties": {
+                                  "part": {
+                                    "type": "string"
+                                  },
+                                  "path": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string",
+                                    "enum": ["changed", "skipped", "inferred"],
+                                    "strict": true
+                                  },
+                                  "reason": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "fontAvailability": {
+                              "const": "not-evaluated"
+                            },
+                            "visualFit": {
+                              "const": "not-evaluated"
                             }
                           }
                         }

@@ -164,10 +164,10 @@ package and the corresponding GitHub Release MUST NOT create separate command,
 patch, or report contracts. If a package installs or retrieves a platform
 binary, its provenance and integrity checks MUST be visible to the deployer.
 
-The v0.15.0 archives package the CLI with statically linked PDFium, `LICENSE`,
+The v0.16.0 archives package the CLI with statically linked PDFium, `LICENSE`,
 `EVALUATION-LICENSE.md`, `THIRD-PARTY-NOTICES`, `licenses-pdfium/`, and release
 evidence for Linux x86-64, Linux ARM64, macOS ARM64, and Windows x86-64.
-`@s8fy/xdoc@0.15.0` is published; its Node.js 22+ launcher selects an exact-version
+`@s8fy/xdoc@0.16.0` is published; its Node.js 22+ launcher selects an exact-version
 platform package from npm. The macOS ARM64 executable declares a minimum
 deployment target of 13.0. These distribution facts do not establish independent
 certification under this proposed profile or a universally signed channel manifest.
@@ -396,7 +396,7 @@ build with a pinned toolchain
   → publish release notes, channel mapping, manifest, and rollback instructions
 ```
 
-For v0.15.0, PDFium is statically linked; no separate PDFium library is required.
+For v0.16.0, PDFium is statically linked; no separate PDFium library is required.
 Keep the archive's notices and evidence with redistributed packages.
 Do not call an archive “portable” until its minimum OS and native-loader
 behavior have been tested on a clean machine for that target. In particular, the

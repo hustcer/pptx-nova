@@ -3,11 +3,11 @@
 > A compact native runtime for document conversion, editable PPTX execution,
 > rendering, validation, and auditable delivery.
 
-> **Runtime contract source for this document:** `v0.15.0 (a79e6eaa)`
+> **Runtime contract source for this document:** `v0.16.0 (900c6c9e)`
 >
 > **CLI contract:** `cli-agent/v1`
 >
-> **Verification date:** 2026-10-24
+> **Verification date:** 2026-10-26
 >
 > **Evidence policy:** A capability is described as runtime-supported only when
 > the executable exposes it through its versioned schema/help surface and the
@@ -24,7 +24,7 @@ library API.
 
 The installed runtime is the authority for executable behavior. At this
 verification point, the checked-in snapshot records the contract-bearing part
-of the runtime response for `v0.15.0 (a79e6eaa)`; JSON formatting may differ,
+of the runtime response for `v0.16.0 (900c6c9e)`; JSON formatting may differ,
 and the environment-specific top-level `build` and `authContract` provenance
 records are intentionally omitted. Implementation-specific prose is normalized,
 and selected catalog identifiers use JSON Unicode escaping without changing
@@ -155,7 +155,7 @@ artifact boundaries.
 
 ### Native-first deployment and release footprint
 
-The verified `v0.15.0` archives download as approximately 8.3–10.1 MB, with exact
+The verified `v0.16.0` archives download as approximately 8.3–10.1 MB, with exact
 size varying by target. That footprint includes the executable distribution
 and applicable notices for the selected target. It is small enough to promote
 as a pinned local container or offline-job layer without
@@ -164,7 +164,7 @@ separate server, or an always-on background service for ordinary one-shot
 execution. Multi-step sessions may optionally use the loopback-only local
 daemon while retaining the documented CLI and report boundary.
 
-The npm CLI is published as `@s8fy/xdoc@0.15.0` and requires Node.js 22+ for
+The npm CLI is published as `@s8fy/xdoc@0.16.0` and requires Node.js 22+ for
 its launcher; standalone archives need no Node.js. PDFium is statically linked
 in the current archives. Launch plans cover local use, local scripts, and a
 per-user daemon; CI, shared servers, and Service/API use require separately
@@ -249,7 +249,7 @@ screenshots or log interpretation alone.
 
 ### Current release surface
 
-| Area                           | Runtime contract in v0.15.0                                                                            |
+| Area                           | Runtime contract in v0.16.0                                                                            |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `auth`, `pdf`, `daemon`, `json-rpc`, `mcp`, `schema` |
 | PPTX CLI subcommands           | 37 discoverable subcommands                                                                            |
@@ -263,7 +263,7 @@ screenshots or log interpretation alone.
 | Enum families                  | 23 controlled vocabularies                                                                             |
 | Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                                    |
 | Embedded PPTX report schemas   | 31 report schemas                                                                                      |
-| Patch schema definitions       | 236 `$defs` in the current runtime schema                                                              |
+| Patch schema definitions       | 238 `$defs` in the current runtime schema                                                              |
 | Runtime examples               | 43 PPTX CLI examples, 23 patch examples, and 7 recipe examples                                         |
 | Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                           |
 
@@ -325,7 +325,7 @@ versioned system.
 - an implicit claim that reserved document kinds are already supported.
 
 The current capability registry marks `docx` and `xlsx` as `reserved`. They may
-be recognized as document kinds, but the v0.15.0 CLI must not be described as an
+be recognized as document kinds, but the v0.16.0 CLI must not be described as an
 implemented general-purpose converter for them.
 
 ## Design principles
@@ -350,7 +350,7 @@ The full runtime schema currently includes 43 PPTX CLI examples, 23 patch
 examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
-Cache the complete `xdoc schema` response for CLI discovery. In v0.15.0,
+Cache the complete `xdoc schema` response for CLI discovery. In v0.16.0,
 `discovery.commands` is only a list of the eleven top-level command names, while
 `xdoc schema --mode index` is specifically a patch-operation index rather than a
 complete CLI inventory. Neither surface should be treated as an exhaustive
@@ -531,7 +531,7 @@ xdoc schema > runtime-schema.json
 The expected runtime identity for this document is:
 
 ```text
-0.15.0 (a79e6eaa)
+0.16.0 (900c6c9e)
 ```
 
 The top-level schema response identifies itself as:
@@ -539,7 +539,7 @@ The top-level schema response identifies itself as:
 ```json
 {
   "schemaVersion": "cli-agent/v1",
-  "version": "0.15.0 (a79e6eaa)"
+  "version": "0.16.0 (900c6c9e)"
 }
 ```
 
@@ -689,7 +689,7 @@ The conversion command supports:
 | PPTX      | text     | enabled  | Plain extracted text                                                                |
 | PDF       | PNG/PDF  | enabled  | Render or inspect through the PDF command family                                    |
 | HTML      | Markdown | enabled  | Local HTML file, glob, or directory input                                           |
-| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in v0.15.0               |
+| DOCX/XLSX | any      | reserved | Recognized in the registry, not an enabled conversion path in v0.16.0               |
 
 The top-level capability registry is itself machine-readable:
 
@@ -1724,7 +1724,7 @@ xdoc daemon start
   → in-memory deck sessions
 ```
 
-Defaults in v0.15.0:
+Defaults in v0.16.0:
 
 - loopback TCP address: `127.0.0.1:0`;
 - idle session timeout: 300000 ms;
@@ -2097,7 +2097,7 @@ claims should stay tied to the measured contract and its declared limitations.
 
 ## Explicit limitations and non-claims
 
-1. `docx` and `xlsx` are reserved in the v0.15.0 capability registry.
+1. `docx` and `xlsx` are reserved in the v0.16.0 capability registry.
 2. The full CLI is native-first; parser/PDF WebAssembly paths do not imply a
    browser implementation of every command.
 3. Complex animations, transitions, SmartArt-like content, VBA, and other
@@ -2166,7 +2166,7 @@ Then store:
 - the final diff and preflight reports; and
 - the runtime backend and font inventory when visual fidelity matters.
 
-This document is anchored to xdoc 0.15.0 (a79e6eaa). Re-run the discovery
+This document is anchored to xdoc 0.16.0 (900c6c9e). Re-run the discovery
 commands when upgrading; do not assume that a newer binary has the same
 operation fields, report fields, or preservation defaults.
 

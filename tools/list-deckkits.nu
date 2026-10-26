@@ -52,7 +52,10 @@ def main [
           'missing' => $'missing: ($row.pptx | path relative-to $example_base)'
           _ => ($row.pptx | path relative-to $example_base)
         }
-        {id: $row.id, readiness: $row.readiness, version: $row.version, pptx: $pptx}
+        let size = if $row.example_status == 'available' {
+          ls ($repo_root | path join $row.pptx) | get 0.size | format filesize kB
+        } else { '-' }
+        {id: $row.id, readiness: $row.readiness, version: $row.version, size: $size, pptx: $pptx}
       }
     )
     

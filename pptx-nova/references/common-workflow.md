@@ -54,7 +54,7 @@ review context, or a failure state.
 Keep this minimum evidence set after successful delivery when the files exist:
 `xdoc-capabilities.json`, `render-context.json`, `outline.json`, `deck_lock.json`, `content.json`,
 `patch.json`, sidecar files, dry-run/apply/refurbish JSON reports,
-`vision.json`, `visual_review.json`, `clean-open.json`, `check.json`,
+`vision.json`, `design_review.json` for Create, `visual_review.json`, `clean-open.json`, `check.json`,
 `semantic-audit.json`, `structure-check.json`, `evidence-summary.json`,
 `pptx-diff.json` and its hash-bound `pptx-diff-full.json`,
 `layout-final.json`, `fidelity-gate.json`, `content-audit-final.json`, `review-policy.json`, `catalog-readiness.json`,
@@ -468,6 +468,11 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     Review the contact sheet for cross-slide rhythm, then inspect suspicious
     slides at full size. Record the review as visual_review.json so the final
     summary can disclose which visual checks were actually performed:
+
+    For Create, follow [Design quality](create/design-quality.md): inspect the canonical PNGs and
+    add `--mode create --candidate <candidate> --manifest <canonical-manifest>
+    --design-review <run-dir>/design_review.json` to the review command. Use the standard Create
+    runner's existing render; this generic example is not a second rendering requirement.
 
         node <skill-root>/scripts/cli/review/visual-review.mjs \
           --run-dir <run-dir> \

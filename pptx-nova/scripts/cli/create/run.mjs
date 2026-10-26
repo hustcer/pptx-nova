@@ -376,8 +376,14 @@ function initialSummary(args, content, artifacts) {
       instructions:
         'Review contact-sheet.png and suspicious full-size PNGs before treating the deck as visually delivered.',
     },
-    requiredReferences:
-      content?.meta?.deckProfile === 'animation-corpus'
+    requiredReferences: [
+      {
+        path: 'references/create/design-quality.md',
+        section: 'Recorded design judgment',
+        reason:
+          'Every Create requires rendered design observations, including short Express decks.',
+      },
+      ...(content?.meta?.deckProfile === 'animation-corpus'
         ? [
             {
               path: 'references/content/animations.md',
@@ -394,7 +400,8 @@ function initialSummary(args, content, artifacts) {
                   'The generated deck contains at least six slides and requires narrative review.',
               },
             ]
-          : [],
+          : []),
+    ],
     warnings: [],
     error: null,
   }

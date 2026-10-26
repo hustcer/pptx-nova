@@ -16,6 +16,8 @@ The standard runner requires:
 
 If these inputs are not prepared yet:
 
+- read `references/create/design-quality.md` for every new deck: audience, art direction,
+  rendered example selection and the design floor, including one-sentence Express;
 - read `references/create/create-express.md` for a simple/default deck;
 - read `references/create/deckkit-mode.md` only when DeckKit selection or content slots are unresolved;
 - read `references/create/create-studio.md` plus `references/create/design-lock-and-assets.md` for an explicitly
@@ -52,6 +54,7 @@ capability probe
 -> full-package visual + semantic vision check
 -> one canonical Create PDF/PNG render
 -> actual Agent/human visual review of the exact candidate
+-> recorded slide-specific design judgment (design_review.json)
 -> finalize with identity checks and atomic publish
 ```
 
@@ -119,9 +122,10 @@ new candidate, and rerun the runner in a new or safely reusable current run dire
 With a runtime that discloses `visualModes.values` including `create`, machine success produces
 `status=needs-visual-review`. Open `visual-evidence/review.html` (an index of the exact canonical PNGs)
 or inspect all PNGs directly. Review narrative and brand quality as applicable. Record the actual
-review using `pptx-nova-visual-review.mjs --mode create --candidate <run-dir>/candidate.pptx
+design judgment following [Design quality](design-quality.md), then record the actual
+review using `node <skill-root>/scripts/cli/review/visual-review.mjs --mode create --candidate <run-dir>/candidate.pptx
 --manifest <run-dir>/visual-evidence/manifest.json --previews <run-dir>/visual-evidence
---slides-reviewed <count>` and the required `--check` values from that helper's help. Record only
+--design-review <run-dir>/design_review.json --slides-reviewed <count>` and the required `--check` values from that helper's help. Record only
 checks actually performed; the helper validates the record, it does not understand images.
 
 Then rerun the original Create command with `--finalize --visual-review <run-dir>/visual_review.json`.
@@ -136,6 +140,6 @@ through this interface. Upgrade xdoc, or follow the legacy canonical gate and it
 confirmation route. Never reinterpret a candidate-only confirmation result as Create success.
 
 Preserve the summary, candidate, content/lock, patch/sidecars, machine reports, `create-binding.json`,
-canonical manifest/PDF/PNGs and `visual_review.json`. Do not compare a candidate to itself to obtain
+canonical manifest/PDF/PNGs, `design_review.json` and `visual_review.json`. Do not compare a candidate to itself to obtain
 a regression verdict. Native-object corpus tasks should follow the one-page smoke and preservation
 guidance in `../edit/inspect-and-edit.md` before expanding the deck.

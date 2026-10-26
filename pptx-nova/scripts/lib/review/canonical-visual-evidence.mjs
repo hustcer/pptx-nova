@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { readFileSync, realpathSync } from 'node:fs'
 import { dirname, resolve, relative, isAbsolute } from 'node:path'
+import { validateDesignReview } from './design-quality.mjs'
 
 const actions = new Set(['proceed', 'stop', 'require-human-confirmation'])
 const outcomes = new Set(['pass', 'fail', 'skipped', 'inconclusive'])
@@ -248,6 +249,8 @@ export function evaluateVisualEvidence(manifestPath, { candidate = '', review = 
           value.issues?.length
         )
           throw new Error('visual review contains unresolved findings')
+        const designErrors = validateDesignReview(value.designReview, binding)
+        if (designErrors.length) throw new Error(designErrors.join('; '))
         report.status = 'passed'
         report.deliveryAuthorized = true
       } catch (error) {

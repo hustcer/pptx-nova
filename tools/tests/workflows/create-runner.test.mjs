@@ -20,6 +20,8 @@ import {
   swissColumnLock,
 } from '../helpers/runner-fixtures.mjs'
 import { cartesianImageContent } from '../helpers/asset-fixtures.mjs'
+import { designReviewFixture } from '../helpers/design-review-fixtures.mjs'
+import { captureVisualBinding } from '../../../pptx-nova/scripts/lib/review/canonical-visual-evidence.mjs'
 
 test('create runner retains diagnostic previews on old runtimes without publishing', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-create-run-'))
@@ -185,6 +187,13 @@ test('create runner finalizes only the same reviewed canonical candidate without
   assert.equal(summary.performance.render.previewRenderInvocations, 1)
   const review = join(runDir, 'visual_review.json')
   runNodeStatus([...args, '--finalize', '--visual-review', review], 1)
+  const designReview = join(runDir, 'design_review.json')
+  writeJson(
+    designReview,
+    designReviewFixture(
+      captureVisualBinding(summary.artifacts.canonicalManifest, summary.artifacts.candidate),
+    ),
+  )
   const checks = [
     'titleWrap',
     'bodyReadability',
@@ -201,6 +210,8 @@ test('create runner finalizes only the same reviewed canonical candidate without
     skillPath('scripts/cli/review/visual-review.mjs'),
     '--mode',
     'create',
+    '--design-review',
+    designReview,
     '--candidate',
     summary.artifacts.candidate,
     '--manifest',

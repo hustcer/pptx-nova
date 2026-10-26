@@ -62,6 +62,8 @@ The public release audit checks this layout and local module imports.
   PNG/contact-sheet preview through the shared runner runtime, preserves every
   artifact in the run directory, then atomically publishes the final output
   through `--finalize` after machine gates and hash-bound visual review pass.
+  Every Create review includes `design_review.json` via the review helper's `--design-review`:
+  slide-specific craft observations and a weakest-page assessment, not just mechanical passes.
   Dry-run/apply require explicit zero semantic issues;
   vision requires a consistent, passing full-package semantic summary. `--json`
   emits a compact Agent result with

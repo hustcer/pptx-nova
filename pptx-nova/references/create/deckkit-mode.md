@@ -14,15 +14,21 @@ resolved design plan, style checks and post-apply native-data readback.
 
 ## Selection
 
-The bundled catalog has ten `production` DeckKits.
-Scenario, language, density and required slide types govern eligibility and ranking.
+Read [Design quality](design-quality.md) before selection. The current catalog determines eligible
+production/default kits; scenario, language, density and required slide types govern ranking.
 
 Before writing `content.json`, select a DeckKit from
 `assets/deckkits/catalog.json`:
 
 ```bash
-node <skill-root>/scripts/cli/deckkits/select.mjs --target delivery
+node <skill-root>/scripts/cli/deckkits/select.mjs \
+  --brief '<user brief>' --language zh --target delivery --json
 ```
+
+An explicit `--scenario` overrides brief inference. Known Chinese/English topic aliases only route
+the topic; they do not choose a visual identity. Missing or unknown intent earns no match points
+and yields a warning. Open the leading eligible rendered examples before committing to a kit.
+Readiness proves engineering eligibility, not taste; explicit style and content fit still win.
 
 Use the selected DeckKit's `visualGrammar` as the deck's visual contract:
 positioning, mood, signature elements, composition rules, and avoid list.

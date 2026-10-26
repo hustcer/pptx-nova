@@ -22,6 +22,7 @@ const usage = `Usage:
 
 Options:
   --scenario <name>          Target scenario, e.g. roadshow or executive consulting
+  --brief <text>             Infer a known scenario from a short brief; explicit --scenario wins
   --language <code>          Language coverage requirement, e.g. zh|en|mixed
   --density <level>          Density coverage requirement, e.g. normal|dense
   --slide-types <list>       Comma-separated required slide types
@@ -43,6 +44,7 @@ Example:
 function parseArgs(argv) {
   const args = {
     scenario: '',
+    brief: '',
     language: '',
     density: '',
     slideTypes: [],
@@ -60,6 +62,9 @@ function parseArgs(argv) {
       args.json = true
     } else if (arg === '--scenario') {
       args.scenario = valueAfter(argv, i, arg)
+      i += 1
+    } else if (arg === '--brief') {
+      args.brief = valueAfter(argv, i, arg)
       i += 1
     } else if (arg === '--language') {
       args.language = valueAfter(argv, i, arg)
@@ -117,7 +122,43 @@ function listIncludes(values, value) {
 }
 
 function matchWeight(values, value, weight) {
-  return listIncludes(values, value) ? weight : 0
+  return normalize(value) && listIncludes(values, value) ? weight : 0
+}
+
+// Topic routing only. These aliases do not select a palette or override a pinned visual brief.
+const SCENARIO_ALIASES = [
+  [
+    'product-platform',
+    [
+      '产品介绍',
+      '产品发布',
+      '产品平台',
+      'product introduction',
+      'product launch',
+      'product overview',
+    ],
+  ],
+  [
+    'engineering-platform',
+    ['技术架构', '开发者平台', 'technical architecture', 'developer platform'],
+  ],
+  ['research courseware', ['研究课件', 'research courseware']],
+  ['board review', ['董事会报告', 'board review']],
+  ['annual report', ['年度经营汇报', 'annual report']],
+]
+
+function resolveScenario(args) {
+  const explicit = normalize(args.scenario)
+  const text = explicit || normalize(args.brief)
+  const match = SCENARIO_ALIASES.find(([id, aliases]) =>
+    explicit
+      ? [id, ...aliases].includes(text)
+      : [id, ...aliases].some((alias) => text.includes(alias)),
+  )
+  return {
+    scenario: match?.[0] ?? explicit,
+    scenarioSource: explicit ? 'explicit' : match ? 'brief' : 'unspecified',
+  }
 }
 
 function slideTypeSet(entry) {
@@ -311,6 +352,7 @@ function evaluateEntry(entry, args) {
     },
     score,
     scoreParts,
+    scenarioMatched: Boolean(scoreParts.defaultFor || scoreParts.bestFor),
     missingSlideTypes: missingTypes,
     eligible: blockers.length === 0,
     blockers,
@@ -319,6 +361,7 @@ function evaluateEntry(entry, args) {
 }
 
 function selectDeckKit(args) {
+  args = { ...args, ...resolveScenario(args) }
   const catalog = readJson(args.catalog)
   const evaluated = (catalog.entries ?? []).map((entry) => evaluateEntry(entry, args))
   const ranked = evaluated
@@ -334,6 +377,7 @@ function selectDeckKit(args) {
     passed: Boolean(selected),
     query: {
       scenario: args.scenario || null,
+      scenarioSource: args.scenarioSource,
       language: args.language || null,
       density: args.density || null,
       slideTypes: args.slideTypes,
@@ -343,6 +387,13 @@ function selectDeckKit(args) {
       catalog: relative(SKILL_ROOT, args.catalog),
     },
     selected,
+    warnings: !args.scenario
+      ? [
+          'No scenario supplied or recognized; ranking is a readiness shortlist, not an art-direction decision.',
+        ]
+      : !ranked.some((entry) => entry.scenarioMatched)
+        ? ['No scenario match in eligible DeckKits; inspect rendered examples before choosing.']
+        : [],
     ranked,
     rejected,
   }
@@ -354,6 +405,7 @@ function previewList(values, limit = 4) {
 }
 
 function printHuman(result) {
+  for (const warning of result.warnings) process.stdout.write(`Warning: ${warning}\n`)
   if (result.selected) {
     process.stdout.write(`Selected DeckKit: ${result.selected.id}\n`)
     process.stdout.write(`- readiness: ${result.selected.readiness}\n`)

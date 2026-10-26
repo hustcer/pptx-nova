@@ -9,6 +9,10 @@ This layer does not replace DeckKit, `content.json`, xdoc patching, dry-run, or
 vision-check. It defines what the deck is trying to prove before DeckKit renders
 it, then checks whether the rendered deck still proves it.
 
+The separate [design floor](design-quality.md) applies to every Create, including short Express
+decks. Narrative scores do not prove visual craft. Record actual observations, and do not copy the
+example's all-4 scores into a report merely because machine gates passed.
+
 ## When It Is Required
 
 Read and apply this file when any of these are true:

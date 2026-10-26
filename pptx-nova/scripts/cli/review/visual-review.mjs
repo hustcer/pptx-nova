@@ -2,6 +2,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { captureVisualBinding, REVIEW_CHECKS } from '../../lib/review/canonical-visual-evidence.mjs'
+import { validateDesignReview } from '../../lib/review/design-quality.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-visual-review/v1'
 const BASE_REQUIRED_CHECKS = REVIEW_CHECKS
@@ -27,6 +28,7 @@ const usage =
   '  --mode <mode>           Workflow mode for context.\n' +
   '  --candidate <path>      Bind the review to the current PPTX (requires --manifest).\n' +
   '  --manifest <path>       Canonical manifest whose exact PNGs were reviewed.\n' +
+  '  --design-review <path>  Required for create: slide-specific design_review.json after PNG review.\n' +
   '  --reviewer <name>       reviewer label, e.g. agent or human.\n' +
   '  --slides-reviewed <n>   Number of rendered slides/contact-sheet pages reviewed.\n' +
   '  --contact-sheet <path>  Contact sheet image used for review.\n' +
@@ -65,6 +67,7 @@ function parseArgs(argv) {
     '--mode': 'mode',
     '--candidate': 'candidate',
     '--manifest': 'manifest',
+    '--design-review': 'designReview',
     '--reviewer': 'reviewer',
     '--slides-reviewed': 'slidesReviewed',
     '--contact-sheet': 'contactSheet',
@@ -348,6 +351,16 @@ function makeReport(args) {
       throw new Error('review must cover every candidate slide')
     report.artifacts.candidate = args.candidate
     report.artifacts.manifest = args.manifest
+  }
+  if (args.mode === 'create') {
+    report.designReview = args.designReview
+      ? JSON.parse(readFileSync(args.designReview, 'utf8'))
+      : null
+    for (const message of validateDesignReview(report.designReview, report.binding))
+      issue(report, 'error', 'design-review-incomplete', message)
+    report.summary.errors = report.errors.length
+    report.errorCount = report.summary.errors
+    if (report.errors.length) report.status = 'fail'
   }
   return report
 }

@@ -105,7 +105,7 @@ export function canonicalCreatePreview(summary, args, artifacts, runJsonPhase) {
   summary.artifacts.previews = artifacts.canonicalDir
   summary.artifacts.contactSheet = null
   summary.review.instructions =
-    'Open review.html or every canonical PNG, record --candidate/--manifest visual review, then rerun with --finalize --visual-review. No final output exists yet.'
+    'Open review.html or every canonical PNG; write design_review.json with slide-specific craft observations; record --candidate/--manifest/--design-review visual review, then rerun with --finalize --visual-review. No final output exists yet.'
   const phase = summary.phases.findLast((p) => p.name === 'preview-render')
   phase.slideCount = binding.slideCount
   phase.estimatedRenderedPixels = pages.reduce((sum, p) => {

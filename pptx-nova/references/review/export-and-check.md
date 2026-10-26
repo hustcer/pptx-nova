@@ -125,6 +125,9 @@ It reports `policyId=pptx-visual-oracle-create/v1` and, when candidate checks pa
 `assurance=candidate-checks`. This is not regression equivalence, content-intent acceptance or
 PowerPoint parity. Review the exact manifest PNGs and the content contract before delivery.
 The standard Create runner handles preparation and finalization as described in `../create/create-runner.md`.
+Create reviews also require the slide-specific design judgment from
+[Design quality](../create/design-quality.md), supplied as `--design-review` to the visual-review
+helper. Mechanical passes alone do not authorize a newly created deck.
 Old runtimes keep the legacy candidate-only confirmation boundary; do not remove it in the consumer.
 
 For a stable before/after same-renderer comparison, use the same 1-based scope

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import test from 'node:test'
+import { designReviewFixture } from '../helpers/design-review-fixtures.mjs'
 import {
   recordCreateInputs,
   verifyCreateInputs,
@@ -100,6 +101,11 @@ test('Create input binding rejects edited or omitted choreography and a changed 
 
 function review(f) {
   const path = join(f.root, 'visual_review.json')
+  const designPath = join(f.root, 'design_review.json')
+  writeFileSync(
+    designPath,
+    JSON.stringify(designReviewFixture(captureVisualBinding(f.manifestPath, f.candidate))),
+  )
   const result = spawnSync(
     process.execPath,
     [
@@ -108,6 +114,8 @@ function review(f) {
       path,
       '--mode',
       'create',
+      '--design-review',
+      designPath,
       '--candidate',
       f.candidate,
       '--manifest',
@@ -152,6 +160,36 @@ test('create requires a completed review and binds candidate plus exact PDF/PNG 
       .deliveryAuthorized,
     false,
   )
+})
+
+test('all mechanical visual passes cannot publish without current, substantive design observations', () => {
+  const f = fixture()
+  const path = review(f)
+  const valid = JSON.parse(readFileSync(path))
+  for (const change of [
+    (r) => {
+      delete r.designReview
+    },
+    (r) => {
+      r.designReview.criteria[0].observation = ''
+    },
+    (r) => {
+      r.designReview.criteria[0].verdict = 'fail'
+    },
+    (r) => {
+      r.designReview.candidateSha256 = '0'.repeat(64)
+    },
+    (r) => {
+      r.designReview.unresolvedIssues.push('Empty cover; needs redesign')
+    },
+  ]) {
+    const value = structuredClone(valid)
+    change(value)
+    writeFileSync(path, JSON.stringify(value))
+    const gate = evaluateVisualEvidence(f.manifestPath, { candidate: f.candidate, review: path })
+    assert.equal(gate.deliveryAuthorized, false)
+    assert.equal(gate.status, 'invalid')
+  }
 })
 
 test('create rejects missing checks, forged regression, incomplete pages and namespace policy drift', () => {

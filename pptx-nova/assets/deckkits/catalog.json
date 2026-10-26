@@ -14,7 +14,14 @@
         "baseline": "Contract-driven typography with a 10pt floor; actual render review remains required."
       },
       "defaultFor": [],
-      "bestFor": ["roadshow", "investor update", "executive consulting", "技术路演"],
+      "bestFor": [
+        "roadshow",
+        "investor update",
+        "executive consulting",
+        "技术路演",
+        "product-platform",
+        "engineering-platform"
+      ],
       "coverage": {
         "languages": ["zh", "en", "mixed"],
         "density": ["sparse", "normal", "dense"],
@@ -1691,7 +1698,8 @@
         "magazine or cultural pitch",
         "design talk",
         "bilingual EN/CN editorial deck",
-        "campaign launch"
+        "campaign launch",
+        "product-platform"
       ],
       "coverage": {
         "languages": ["en", "zh", "mixed"],

@@ -105,7 +105,7 @@ summary.
 
 Use these only to choose the entry reference; the routing table owns details.
 
-- **Create**: `references/create/create-runner.md`; formal/high-risk work also follows the Studio/design-lock references.
+- **Create**: `references/create/create-runner.md` and `references/create/design-quality.md`; the design floor applies even to a one-sentence Express brief. Formal/high-risk work also follows the Studio/design-lock references.
   The runner prepares canonical candidate evidence first; after actual PNG review, use its
   `--finalize --visual-review` phase to publish the same hash-bound candidate without rendering again.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
@@ -245,6 +245,13 @@ During xdoc PPTX creation or editing in Feedback Mode, investigate newly observe
 
 These rules apply to all new decks, including Express and Studio:
 
+- Read `references/create/design-quality.md` before selecting a DeckKit. Infer audience/mode,
+  commit to a content-led visual idea, and inspect actual eligible-kit examples; a readiness score
+  or absence of overflow is not evidence of aesthetic fit. Respect the user's pinned visual world.
+- Review the rendered design as well as its mechanics. Write candidate/manifest-bound
+  `design_review.json` with slide-specific observations and a weakest-page assessment; pass it as
+  `--design-review` when recording the Create visual review. Repair unresolved craft failures before
+  publication. The validator checks the judgment record, not beauty; never invent observations.
 - Generate or normalize `outline.json` first, then write `deck_lock.json`; do not jump directly from prompt to patch.
 - Default to DeckKit-first: `content.json -> DeckKit -> patch -> xdoc -> PPTX -> validation`.
 - Persuasive decks for formal reports, clients, investors, boards, roadshows, strategy, product-platform, and similar contexts must read `references/create/narrative-quality.md`, lock `deckProfile`, and per-slide `claimTitle` / `proofObject` / `rhythm` / `layoutIntent` / `visualDensity` in `deck_lock.json`, then write `narrative_quality_review.json` after PNG review.
@@ -321,7 +328,7 @@ Machine gates cannot see every pixel-level defect. In particular, check:
 When creating or visually significant modifying a deck, close in this order:
 
 ```text
-check-lock -> dry-run semanticIssues=0 -> apply semanticIssues=0 -> vision-check visual high/medium=0 + semanticSummary.passed=true for create -> structure-check when needed -> high-risk evidence finalizer when required -> PNG/contact-sheet review -> visual_review.json -> clean-open gate when available/high-risk -> narrative quality review when required -> optional xdoc check
+check-lock -> dry-run semanticIssues=0 -> apply semanticIssues=0 -> vision-check visual high/medium=0 + semanticSummary.passed=true for create -> structure-check when needed -> high-risk evidence finalizer when required -> PNG/contact-sheet design review -> design_review.json + visual_review.json -> clean-open gate when available/high-risk -> narrative quality review when required -> optional xdoc check
 ```
 
 Generic Edit/Micro Edit must additionally close its own contract:

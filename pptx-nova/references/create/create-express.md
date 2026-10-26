@@ -14,6 +14,7 @@ For Express creation read:
 1. `../common-workflow.md`
 2. `deckkit-mode.md`
 3. This file
+   and `design-quality.md` for the design floor and evidence-based kit selection
 4. `narrative-quality.md` when the deck has 6+ slides, a persuasive audience,
    or needs roadshow / customer / strategy polish
 5. `express-mode.md` when you need the full golden path details
@@ -42,13 +43,15 @@ main assumptions in the final summary.
 3. Generate `deck_lock.json` with canvas, DeckKit, theme/style, font, color,
    language, page-type decisions, and for persuasive decks the lightweight
    narrative fields from `narrative-quality.md`.
-4. Select a production/default DeckKit through `deckkit-mode.md`.
+4. Select a production/default DeckKit through `deckkit-mode.md`, with a meaningful scenario/brief
+   and actual rendered examples. Record `artDirection` using `design-quality.md`.
 5. Write `content.json`.
 6. Validate content in delivery mode.
 7. Build patch with the selected DeckKit.
 8. Run `cli/create/run.mjs` to execute check-lock, dry-run, apply,
    vision-check and canonical PDF/PNG evidence while keeping the intermediate artifacts.
-9. Review the exact canonical PNGs, record `visual_review.json`, then repeat the
+9. Review the exact canonical PNGs, write `design_review.json` and record it through
+   `visual-review.mjs --design-review` in `visual_review.json`, then repeat the
    Create command with `--finalize --visual-review <path>` to publish that same
    candidate without rebuilding or rendering. Follow `create-runner.md` for the
    required review checks and finalization binding, then write the completion summary.
@@ -84,3 +87,7 @@ For quick decks, do not over-document. The minimum narrative bar is:
 - avoid repeated card grids dominating the contact sheet
 - avoid invented facts
 - make each non-appendix slide carry one visible proof object or clear purpose
+
+The [design floor](design-quality.md) also applies below six slides. Sparse copy, a generic icon
+and passing static checks do not establish presentation quality. Infer and execute the design
+without turning a one-sentence request into a mandatory approval workshop.

@@ -67,6 +67,13 @@ must be distinguished from a viewer defect.
 
 ## Evidence that answers the task
 
+For `randomBar`, verify actual horizontal/vertical strip-mask playback at intermediate times;
+an unchanged slide-root opacity or polygon/fade screenshot is not evidence of the band effect.
+Starting playback or entering fullscreen can enter the current slide from black. Pending entrance
+must survive fullscreen resize ordering, while pause/resume retains progress without replaying it.
+Check those paths on the loaded build and with its motion policy; parser recognition alone does
+not prove playback, and these renderer fixes do not add a transition-authoring token.
+
 For affected behavior, retain source SHA-256, loaded build, animation policy,
 visible-slide sequence, options, click counts and observed state/events. Exercise
 pause/resume, natural-end restart, hidden/single-slide loop and callback navigation

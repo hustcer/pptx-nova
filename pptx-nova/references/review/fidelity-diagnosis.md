@@ -312,6 +312,48 @@ versus PDF ActualText, explicit tick skips, independent axis crossings, plot cli
 and surface paint ownership. Verify the original bytes under the current renderer
 before treating those changes as document regressions.
 
+## Latin breaks, distributed text, tables and pictures
+
+Read for those symptoms after re-rendering the unchanged source. These are consumer/model
+semantics, not new patch fields; query the exact operation before authoring any setting.
+
+- **Latin wrapping:** effective `latinLnBrk` can come from paragraph, list, placeholder or
+  presentation styles. Explicit false and absent policy must survive inheritance; the default
+  prevents emergency splitting inside Latin words/numbers. Styled runs and hyperlink boundaries
+  do not authorize a split. Keep authored breaks, emoji clusters and East Asian policies separate.
+  A long token may legitimately overflow: check font readiness and the effective policy before
+  shrinking text, inserting spaces or treating an unsplit word as a parser defect.
+- **Distributed is not justify:** DrawingML `dist` projects as `distributed`, distinct from
+  `justify`. Distribution expands character gaps on every line, including the last and authored
+  break lines; a single grapheme unit is centered. Combining marks/emoji spanning styled runs
+  remain one unit. Preserve tracking, margins, tabs, body anchor and columns. Do not replace
+  alignment or add spaces to imitate the old renderer. When disclosed, the writer uses
+  `set-paragraph.format.alignment: "distribute"`; the model value `distributed` and XML token
+  `dist` are not writer aliases. Latin word-break model metadata likewise is not a patch field.
+  Latin/space combinations still need their own Office comparison: correct `dist` XML, passing
+  static checks or a matching emoji control does not prove identical Office gap distribution.
+- **Table layout:** cells use shared paragraph layout, including hanging punctuation and soft-line
+  justification. DOM-measured growth and fixed grids are different evidence. Keep raw DrawingML
+  `spcPct` units distinct from a parsed effective line-height ratio and from point spacing;
+  do not copy raw percentages into a ratio field or apply ordinary textbox growth to every cell.
+- **Text frame and arrows:** authored text frames can extend beyond decorative shape geometry.
+  Custom-shape endpoint markers use physical display coordinates, not a scaled local viewport;
+  compare the same scale and docking angle before resizing arrowheads or constraining text.
+- **Pictures and symbols:** direct picture-frame solid/gradient fill lies beneath image pixels.
+  Supported uncompressed chunky RGB8/RGBA8 TIFF first pages (orientation 1, at most 16,777,216
+  pixels) can normalize to PNG with alpha/density; unsupported inputs remain unconverted.
+  EMF alpha/masks, embedded SVG raster viewport/crop/transforms/opacity and authored white symbol
+  colors need independent checks. Do not replace originals with flattened screenshots to hide
+  consumer differences or assume all TIFF pages/compressions are supported.
+- **Classic dark charts:** effective DK1 backgrounds/walls and LT1 text can be automatic;
+  explicit fill, no-fill and colors still take precedence, while modern styles resolve separately.
+  Inspect theme inheritance before recoloring preserved dark charts. Rendering a source black
+  frame is distinct from choosing a new chart palette under this skill's creation rules.
+
+For surface cameras, continuous paint, 3D fit, stacked ribbons and axis frames, use
+`../content/charts.md`'s 3D diagnosis section. Its improved rendering does not upgrade the
+capability truth or prove Office equivalence.
+
 ## Chart, SmartArt and effect regressions
 
 For chart-label regressions, read the inheritance checklist in `../content/charts.md`:

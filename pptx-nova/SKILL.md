@@ -153,6 +153,10 @@ Use these only to choose the entry reference; the routing table owns details.
   histogram ranges, signed percentage stacks and automatic axes/category fitting. Verify source
   values separately from painted or extracted labels; retain explicit bounds and real tail intervals.
   For doughnuts, follow its label-position restrictions and explicit hole-size default.
+- **Chart rendering changes**: use `references/content/charts.md` for automatic 2D/3D fitting,
+  surface camera/paint, imported stacked ribbons, axis crossings and hidden-axis semantics.
+  For Latin word breaks, distributed paragraphs, table spacing or picture/arrow differences,
+  use `references/review/fidelity-diagnosis.md`; parser model fields are not patch fields.
 - **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `references/edit/inspect-and-edit.md`.
   Preserve owner-bound XML facts during neighboring edits; render improvements do not grant
   authoring support or PowerPoint fidelity. Chart 3D and embedded models have separate contracts.

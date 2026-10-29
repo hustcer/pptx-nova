@@ -541,6 +541,13 @@ Notes:
 
 ## When Export Finds A Problem
 
+For image-heavy decks, distinguish compressed PPTX size, expanded image/JSON size, font discovery
+and actual rendering time before changing content or lowering DPI. Current consumers can share
+repeated background/raster work and native font discovery can avoid reading every full font file;
+these are internal optimizations, not new input formats or a universal speed guarantee. Preserve
+public image payload/alpha and font choice. Do not persist internal Worker transport envelopes as
+deck JSON, add private SDK/WASM dependencies to CLI runners, or bypass resource limits on a retry.
+
 When rechecking after an xdoc upgrade, create a fresh run and render the same
 source bytes with the current binary before changing the deck. Text inheritance,
 kerning, autofit, CJK wrapping, mixed-size line metrics, Office math, gradients,

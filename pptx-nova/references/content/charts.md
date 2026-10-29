@@ -56,7 +56,7 @@ point index 和缺失值语义。遇到 `resource_chart_slots_exceeded`，按
 - 顶视 surface/contour 的长宽来自 category/series 比例及作者 depth，再应用 manual layout；
   Web 坐标只解析一次。位置移动不应改变法线或光照，着色法线不应带入柱槽间距，自动高度
   与 fit 后尺寸也不是同一事实。核对空间轴 ticks、显式隐藏/无 outline、反转高度下的标签侧。
-  当前中性高光仍是有界材质近似；网格、轮廓更准确不证明 Office 光照一致，勿改数据或相机
+  当前连续高光仍是有界材质近似；网格、轮廓更准确不证明 Office 光照一致，勿改数据或相机
   去追旧颜色。精确保真仍需同候选的独立 PowerPoint 对照。
 - 显式 `heightPercent` 的 3D 高度基于 category/series 数据网格及有效轴间距，水平 bar
   与竖向图表的方向处理不同；自动高度是另一策略。不要套用固定 4:3 倍率，或为了匹配旧
@@ -93,6 +93,43 @@ category/depth 轴分别解析自己的 crossing、log/linear origin 与 reversa
 的所有权；自动 wireframe 笔色和空心 legend key 与面填色独立，不能补成实心色块。
 旧灰阶 surface palette 还依赖有效 DK1/theme override，不能按默认 accent 色强行重涂。
 这些改进不证明整体拟合、legend 密度、材质和 Office 光照已完全一致。
+
+### 3D 相机、曲面材质与轴框诊断
+
+本节描述已有对象的解析/渲染语义，不能把模型字段直接塞进 patch。
+`chart-3d/pdf-rendering` 与 `chart-3d/viewer-rendering` 仍按实时 capability truth 的
+`partial` 边界处理；精确视觉验收保留同候选的独立 PowerPoint 对照。
+
+- 自动 3D fit 先预留标题、非 overlay legend、轴标题和投影文字空间，再整体等比拟合。
+  折线/曲面的缺省高度还依赖有效 category/series 网格；`midCat`、`between` 与堆叠
+  方式会改变比例。显式高度、inner/outer manual layout、字号和 rotation（包括 0）
+  仍独立。斜排标签、深度标签侧、水平 bar 刻度密度变化不授权改写这些声明。
+  强透视以固定光学中心拟合，不用移动外框去补偿旧预览的消失点或峰值角度。
+- `surface` 不一律是平面等高图：非顶视相机可投影为高度网格；缺省相机与只写部分
+  `view3D` 不等价。分类/深度反转须同时作用于顶点、ticks、标签和物理坡度光照。
+  平面 `between` 把网格列/标签放在槽中心、两端留半槽，主刻度在槽边；`midCat`
+  或省略时首末点铺满，深度轴仍走端点。勿通过倒排数据、删高度区间或改相机修画面。
+- 连续渐变共用整张曲面的作者坐标，不按三角形/色带重新起算；`between` 的半槽留白
+  不属于实际网格色场。带格式的 paint 所有权、no-fill、透明度和矢量轮廓仍独立。
+  真实相机的连续高光按相机空间光照及透视位置求值，右角轴使用独立光照路径。
+  有界填充纹理可能在资源预算不足时整图回退为矢量面光照；这不是 PPTX 被扁平化，
+  也不证明无限缩放保真。不要为掩盖接缝重复叠加半透明面或合并缺失高度的洞。
+- 值恰在色带边界时，填充归属上方物理区间；最高平面的 cap paint 是绘制规则，
+  不新增数值区间或 legend 项。反转轴不改变区间身份，不能按颜色数反推数据或加假区间。
+  surface/contour 自动水平 legend 共用紧凑、按列对齐的换行和高度预留；核对窄框、
+  不同长度标签、末行起点、factor layout，保留 authored box、侧边及混合族的独立策略。
+- 普通 3D line/column 的数值轴跟随物理 category origin，不固定在屏幕左侧；
+  category crossing 按拟合后的值域解析，交叉平面、depth 边与标签侧独立。
+  删除轴会隐藏其主框线、ticks 和标签，但不等于删除 floor/wall 或独立交叉平面。
+  核对各轴自己的 color/width/dash/alpha；显式 no-fill/透明与省略不同，正线宽而
+  未指定 paint 可以解析为自动黑色。不要把保留源轴线误判为新建图表配色违规。
+- 已导入的 stacked/percent-stacked 3D line ribbon 按系列顺序累积带符号端点，
+  自动值域也使用累计值；percent 以绝对值总和归一，极大有限输入仍需有限结果。
+  blank/error 的 ribbon 缺口不沿用普通二维 stacked line 的 error-slot 连续规则。
+  这不扩大 `line-3d` writer 的 variant 集合；保留已有 grouping 和源数值。
+- 3D bar 的负值 paint 需核对 point override、显式 inversion 与 no-fill 优先级，
+  透明箱体的完整边线和正值面光照独立。signed area 穿越基线的前面、遮挡和反转
+  仍须视觉复核；不要改正负号、拆系列或改成 2D 来适配旧渲染器。
 
 读取/渲染已有 ChartEx 多层 category cache 时按连续 run 建树，分隔开的同名路径不能全局合并；
 连续重复完整路径保留首条观测，不擅自求和。sunburst 的值排序、等值次序、颜色身份及
@@ -134,6 +171,8 @@ semantic normalizer：经典 Chart 读取 `data`，ChartEx 读取 `dataEx`，并
 - 直方图保留原始重复样本和区间闭合规则。有限样本的跨度/偏移也可能在中间运算溢出，
   如 `[-1e308, 1e308]`；当前渲染器可保持有限区间端点。检查标签没有 `NaN`/`Infinity`，
   并核对每箱计数与总和，不能仅因图像存在就判定通过。不要手工缩放或截断观测值。
+  自动边界标签可作有界六位有效数字显示舍入，但精确边界、闭合方向和样本归属不变；
+  窄域仍须保留能区分边界的精度，显式格式独立。别把短标签写回 bin edges。
 - 曲面图的 legend 表示高度区间，不是空间系列名。自动边界可消除浮点噪声造成的多余
   色带，例如范围 `0..0.3`、`majorUnit=0.1` 应有三个区间；作者显式设置的
   `max=0.30000000000000004` 则保留最后的极小区间。大数偏移下的窄区间、包含真实
@@ -158,6 +197,12 @@ canonical PDF/PNG，提取 PDF 标签作辅助断言，再检查实际图像。�
 - 水平轴按真实文字 advance 估算容量；line/area 数值轴还考虑字号与可读间距。
   column 的数值刻度密度和 category fitting 是不同决策：category 可能先换行，再斜排，
   最后按绘图区、轴交叉和标题空间缩写。不要为增加 category 空间而强制改变数值间隔。
+  普通水平数值轴与 3D/百分比/垂直轴的密度策略不同；水平 bar 轴标题按物理侧预留和
+  绘制，不能只按 XML 中的轴角色猜位置。category 标签侧与数值轴 crossing 也独立。
+- 普通 smooth categorical line 的自动值域采用端点和曲线内部采样，保留真实极值、
+  gap/error 连续性与显式 bounds；不要只取源点范围，也不要改点值来恢复旧的自动轴。
+  signed area 沿源顺序使用同一带符号基线，bar 正负分开；窄负域和百分比端点不应
+  被强制添加正值空间。二维 logarithmic contour 的自动指数步长也不同于 3D 或显式 unit。
 - 缩写只改变绘制文字。Web 可访问标签/title 与 PDF 文本提取可保留完整 category，
   所以提取到全文不证明 PNG 上显示全文，也不能因此报告重复或漏字。分别核对原始
   category 顺序、数据回读和实际 PNG；不能截短源 category 去匹配画面。
@@ -518,6 +563,9 @@ chart 部件),并自动建立 `chartEx` 关系类型。`variant` 必须是 `stan
 `dataEx` 只接受 6 种 kind：waterfall(`points[]`) / funnel(`stages[]`) / histogram(`values[]`) /
 treemap、sunburst(`nodes[]`) / box-whisker(`series[]`)；`pareto` 与 `region-map` 不接受 `dataEx`
 （schema 直接 union-no-match），必须用普通 `data.categories` / `data.series`，xdoc 仍会写成 chartEx 部件。
+这里的 kind 是图表类别，不是每种 `dataEx` 都能带 `kind` 字段。hierarchy 的可选
+`dataEx.kind` 用于 treemap/sunburst；histogram 等载荷按自己的 schema 写 `values[]`
+等字段，不追加该 discriminator。
 其余 PowerPoint-only 图表必须使用 ChartEx 专用 `dataEx` 载荷，不要把普通
 `data.categories` / `data.series` 当作等价输入，除非当前 xdoc schema 明确说明支持自动
 lowering。对照参考 deck 时，以 PowerPoint 生成的 `chartEx*.xml` 语义为准，而不是用
@@ -954,7 +1002,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -1046,7 +1094,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -1075,7 +1123,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1367,7 +1415,7 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   scriptable PowerPoint + Nushell + xdoc PDFium evidence route is available:
   `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

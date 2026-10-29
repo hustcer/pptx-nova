@@ -29,7 +29,7 @@ verdict.
 
 ## Runtime capability matrix
 
-The current v0.16.0 discovery contract is `cli-agent/v1`, with a capability
+The current v0.17.0 discovery contract is `cli-agent/v1`, with a capability
 registry at `capabilities/v1`. The registry currently reports:
 
 | Input kind | Output                                                                       | Status     | Delivery    | Required backend               |
@@ -44,7 +44,7 @@ registry at `capabilities/v1`. The registry currently reports:
 | `xlsx`     | `*`                                                                          | `reserved` | unknown     | none                           |
 
 `reserved` means a future name is present in discovery. It is not a supported
-conversion path. In particular, do not advertise xdoc v0.16.0 as a generic DOCX or
+conversion path. In particular, do not advertise xdoc v0.17.0 as a generic DOCX or
 XLSX ingestion layer.
 
 The registry is a capability matrix, not a live health check. A worker must also
@@ -202,7 +202,7 @@ contract must be treated as one release unit. The
 [installation guide](./xdoc-installation.md) documents the published npm and
 release-archive channels, target names, statically linked PDFium backend, and
 host requirements. npm installation requires Node.js 22+; native archives do
-not require Node.js. The v0.16.0 macOS ARM64 target requires macOS 13+.
+not require Node.js. The v0.17.0 macOS ARM64 target requires macOS 13+.
 
 Technical deployability is separate from task authorization. The launch plans
 support single-user or organizational local use, local scripts, and a per-user

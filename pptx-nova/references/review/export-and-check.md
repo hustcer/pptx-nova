@@ -20,6 +20,13 @@ to drop flags, change transport or silently accept watermarked fallback. Keep th
 authorization/error report and disclose unavailable evidence. Ordinary preview needs no
 additional authorization-maintenance step.
 
+For a conversion input-limit or authorization refusal, follow
+`../runtime/troubleshooting.md#转换输入配额与授权失败` and retain the actual report.
+The local CLI task contract owns its combined input-byte and slide limits;
+Converter SDK profiles have a different slide-limit policy. Markdown/text output,
+a selected slide range, or a successful read-only inspect does not prove the
+conversion task is authorized. Keep caller constraints when choosing another route.
+
 ## Semantic PPTX Diff
 
 When the user only asks to compare two decks or audit before/after changes, use
@@ -339,6 +346,11 @@ For PNG and multi-format outputs, path shape matters:
 - `-o <run-dir>/previews/` means parent-directory mode. It creates
   `<run-dir>/previews/<deck>-img/` for PNG or `<deck>.xdoc/` for multi-format
   output.
+
+Separate single-file conversions such as `result.md` and `result.pdf` can both
+claim `result.manifest.json`. Use distinct stems (for example `result-md.md` /
+`result-pdf.pdf`) or one multi-format bundle; do not add `--overwrite` merely
+to silence a sidecar collision from the other conversion.
 
 Use `--overwrite` only when replacing outputs that belong to this conversion
 run, usually under `<run-dir>`. If the user explicitly requests a final export

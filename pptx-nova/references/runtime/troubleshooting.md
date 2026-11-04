@@ -40,6 +40,31 @@ one-shot apply/new 先发布 PPTX，再写 sidecar，二者不是联合原子事
 daemon 的 session 事务与磁盘文件是不同状态；失败后分别 inspect 会话和磁盘输出，
 不要根据其中一个推断另一个。参见 `daemon-sessions.md`。
 
+## 转换输入配额与授权失败
+
+先区分正在调用的产品与 Feature，再判断限制。读取当前 `xdoc schema --command convert`
+的 `commands.convert.licensePolicy`；需要完整配额事实时读取并保存 `xdoc schema --mode full`
+中的 `authContract.cliFeatureTask`、`authContract.productLimits`，不要拿 SDK 文案代替
+本地 CLI 契约，也不要从设计方案推断已发布的 API。
+
+- 本地 CLI 的 Free Baseline 当前为最多 10 页、压缩 PPTX 输入合计不超过
+  5,242,880 bytes（5 MiB，含边界）。具体任务以当前契约和实际授权报告为准；总输入
+  包括 primary 与 donor/secondary-source，页数按输入、计划处理、计划输出的最大值
+  计算。不能用 `--slides`、换输出格式或改 transport 推断配额已经解除。
+- Converter SDK 的 PDF/Markdown profile 则各自披露 `freeMaxInputBytes:5242880`、
+  `freeMaxSlides:null`，没有额外 Free 页数配额。它检查压缩 PPTX **输入**，不是最终
+  输出大小；不超过边界也仍受资源和策略限制。有效凭据必须授权所请求的产品/格式，
+  不能用另一个产品或格式的凭据解除限制。这些事实不替代 CLI 的任务授权。
+- 本地 `convert` 的授权拒绝按契约返回 exit code 4。保存实际错误/授权报告、输入字节数
+  和任务范围；它不是 chart 槽位超限、解析失败或坏文件的证明。`xdoc auth status`
+  仅做诊断（`taskAuthorization:not-evaluated`），不证明本次操作已获准。
+- 不自动拆分任务、删页、改数据、放宽 strict flags 或跨产品绕过拒绝。相同输入与条件
+  不重复尝试；使用已有且适用的授权，或向用户说明缺少的条件。压缩输入只有在任务允许、
+  内容保持且重新核对最终候选后才有意义，不能通过改扩展名、只选少数页或删图表修配额。
+
+普通成功任务无需额外查询凭据；仅在拒绝、配额疑问或用户明确要求时走此诊断。
+图表逻辑槽位、字体/内存等资源预算另见本文件对应诊断，付费授权不自动解除资源上限。
+
 ## 两种 remediation 与重试流程
 
 先确定失败来自本地命令、daemon、stdio JSON-RPC 还是 MCP，并读取对应的报告 schema。

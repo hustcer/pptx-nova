@@ -147,6 +147,8 @@ Use these only to choose the entry reference; the routing table owns details.
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual-evidence decision remains the delivery authority. Discover each action's DPI bounds/default;
   after upgrades or calendar changes, use fresh rendering evidence as described in `references/review/fidelity-diagnosis.md`.
+  For input quota or authorization failures, follow `references/runtime/troubleshooting.md#转换输入配额与授权失败`;
+  use the local CLI contract, keeping SDK product limits and proposed APIs separate.
 - **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
   required; an unavailable optional evidence route is disclosed risk, not invented proof.
 - **Chart numeric precision**: follow `references/content/charts.md`'s numeric checks for long labels, extreme
@@ -154,7 +156,8 @@ Use these only to choose the entry reference; the routing table owns details.
   values separately from painted or extracted labels; retain explicit bounds and real tail intervals.
   For doughnuts, follow its label-position restrictions and explicit hole-size default.
 - **Chart rendering changes**: use `references/content/charts.md` for automatic 2D/3D fitting,
-  surface camera/paint, imported stacked ribbons, axis crossings and hidden-axis semantics.
+  surface camera/paint, imported stacked ribbons, crossing-plane occlusion, signed-area end caps,
+  hidden-axis semantics and gradient cuts. Keep Web texture evidence separate from native PDF evidence.
   For Latin word breaks, distributed paragraphs, table spacing or picture/arrow differences,
   use `references/review/fidelity-diagnosis.md`; parser model fields are not patch fields.
 - **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `references/edit/inspect-and-edit.md`.

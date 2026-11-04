@@ -114,22 +114,49 @@ category/depth 轴分别解析自己的 crossing、log/linear origin 与 reversa
   真实相机的连续高光按相机空间光照及透视位置求值，右角轴使用独立光照路径。
   有界填充纹理可能在资源预算不足时整图回退为矢量面光照；这不是 PPTX 被扁平化，
   也不证明无限缩放保真。不要为掩盖接缝重复叠加半透明面或合并缺失高度的洞。
+  Web 纹理的同位置渐变 stops 保留两侧颜色/alpha 跳变，恰在断点时由最后一个 stop
+  拥有；包括首尾断点，不能去重或改成平滑过渡。共享纹理和单面纹理在像素尺寸分别
+  取整后仍映射到完整采样边界，不能通过改 chart 外框补偿旧版拉伸/留缝。
+  这项 Web 修复不证明原生 PDF 对相同渐变的支持；分别保留两条链路的实际证据。
 - 值恰在色带边界时，填充归属上方物理区间；最高平面的 cap paint 是绘制规则，
   不新增数值区间或 legend 项。反转轴不改变区间身份，不能按颜色数反推数据或加假区间。
   surface/contour 自动水平 legend 共用紧凑、按列对齐的换行和高度预留；核对窄框、
   不同长度标签、末行起点、factor layout，保留 authored box、侧边及混合族的独立策略。
 - 普通 3D line/column 的数值轴跟随物理 category origin，不固定在屏幕左侧；
   category crossing 按拟合后的值域解析，交叉平面、depth 边与标签侧独立。
+  对 line/column/area 分别核对 auto、显式 min/max、自定义交点和反转值域；有限
+  `crossesAt` 优先于 `crosses`，超域交点夹到有效边界。自定义交点恰在上界不等于
+  `crosses=max` 的远侧语义。远侧交叉平面边先于不透明数据绘制，不能穿透前景实体。
   删除轴会隐藏其主框线、ticks 和标签，但不等于删除 floor/wall 或独立交叉平面。
   核对各轴自己的 color/width/dash/alpha；显式 no-fill/透明与省略不同，正线宽而
   未指定 paint 可以解析为自动黑色。不要把保留源轴线误判为新建图表配色违规。
+  分类平面的平行边仍受分类轴画笔控制，depth/floor 几何边有独立归属；轴删除、
+  no-fill/零宽画笔、透明画笔及隐藏标签不是同一种操作。仅隐藏画笔不应删掉标签或
+  独立 floor。自动斜排的上侧分类标签向外起锚，下侧沿另一端向外；显式角度仍保留。
 - 已导入的 stacked/percent-stacked 3D line ribbon 按系列顺序累积带符号端点，
   自动值域也使用累计值；percent 以绝对值总和归一，极大有限输入仍需有限结果。
   blank/error 的 ribbon 缺口不沿用普通二维 stacked line 的 error-slot 连续规则。
   这不扩大 `line-3d` writer 的 variant 集合；保留已有 grouping 和源数值。
 - 3D bar 的负值 paint 需核对 point override、显式 inversion 与 no-fill 优先级，
   透明箱体的完整边线和正值面光照独立。signed area 穿越基线的前面、遮挡和反转
-  仍须视觉复核；不要改正负号、拆系列或改成 2D 来适配旧渲染器。
+  仍须视觉复核。面积 profile 按基线交点拆凸单元，但端盖只属于完整 profile 或缺失
+  数据分段的真实两端，内部分类截面不能重复叠加，尤其要查半透明面上的暗条。
+  反向相机、反转值域与缺失数据各自核对；不要改正负号、补洞、拆系列或改成 2D。
+  原生部件保留 fill alpha 不证明 PDF/PNG 已按相同透明度合成；半透明面积页需分别核对
+  源 alpha、当前输出与 PowerPoint，对差异保留证据，不通过改色或去透明度掩盖。
+
+按问题选择最小回归，不必为所有图表任务运行整套矩阵：
+
+| 症状                 | 保留源语义的对照                               | 核对证据                                               |
+| -------------------- | ---------------------------------------------- | ------------------------------------------------------ |
+| 交叉轴、前后遮挡     | auto/min/max/custom、值域反转、deleted/no-fill | 交点位置、平面远边遮挡、标签与独立 floor；PDF/Web 分开 |
+| 面积暗条、缺面       | 跨零值、连续半透明 profile、缺失分段、反向相机 | 正负前面、内部无重复端盖、真实分段端盖与源数据         |
+| 自动斜排标签侵入数据 | high/low 物理侧、自动与显式 rotation           | 文字向外包络；不要靠移动 chart 或改字号复刻旧预览      |
+| 曲面断色、透明接缝   | 重复 stops（含端点）、窄色带、共享/单面纹理    | Web 颜色/alpha 断点和完整采样边界；原生 PDF 单独判定   |
+
+使用同一 PPTX 字节、当前运行时、相同字体/日期/比例重渲染。已有真实文件可作最小
+复现；缺少触发条件时才另建合成探针，标注合成数据且不改用户源文件。机器检查与
+PNG 复核之后，精确 Office 保真仍须独立 PowerPoint 证据；clean-open 只证明可打开。
 
 读取/渲染已有 ChartEx 多层 category cache 时按连续 run 建树，分隔开的同名路径不能全局合并；
 连续重复完整路径保留首条观测，不擅自求和。sunburst 的值排序、等值次序、颜色身份及
@@ -915,8 +942,10 @@ PowerPoint 内置 1-48 covers warm/cool/mono/contrast 各种预设，比手动�
 
 原生 OOXML authoring 是 supported，但 PDF 和 bundled Viewer 的 3D rendering 分别是
 partial：投影、遮挡和默认着色有覆盖，不保证 bevel、material、custom lightRig 或所有
-surface/legend 细节与 PowerPoint 相同。3D 图表的最终视觉证据必须包含 PowerPoint
-原生渲染或 clean-open 复核，不能用 xdoc PNG/PDF 单独证明 Office parity。
+surface/legend 细节与 PowerPoint 相同。验收精确 Office 视觉保真时，必须对照同一候选的
+PowerPoint 原生渲染；clean-open 只证明没有观察到打开/修复问题，不能代替像素复核。
+原生证据不可用时如实标记未验证，按用户的实际验收要求处理，不能用 xdoc PNG/PDF
+单独证明 Office parity。
 
 ### 改标题
 
@@ -977,6 +1006,14 @@ title/axis 样式另行核对。验证真实显示文字及源 run 属性，不�
 `logBase`（2..1000，仅 value 轴，对数刻度）和 `crossBetween`
 （`between / mid-category`，仅 value 轴）。
 
+不要把 patch 选轴与 parser 的 crossing 字段位置混为一谈：`min/max/reverseOrder`
+作用于所选轴本身，`crosses/crossesAt` 则沿 `crossAx` 写到对轴声明。当前普通 3D
+图中，要把分类交叉平面置于数值 25，使用 `axis:"value"`、
+`scale:{"crosses":"custom","crossesAt":25}`（写到 `c:catAx`）；误用
+`axis:"category"` 会写入 `c:valAx`，dry-run 仍可能成功，却没有改变目标平面。
+需要精确交点时核对实际 chart part 的 `crossAx` 配对、`crossesAt` 所属轴，再检查
+当前渲染；inspect 的外框/相机回读不能证明交点正确。不要根据显示截图猜轴或重写数据。
+
 日期轴时间单位（仅当 deck 里已有 `c:dateAx` 时可用；它可以来自 PowerPoint，或由
 上面的 `add-chart.categoryAxis.type=date` 创建）：`scale` 支持
 `baseTimeUnit` / `majorTimeUnit` / `minorTimeUnit`
@@ -1002,7 +1039,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 - `title`：轴标题。`text` / `font` / `rotation`（-90..90 度）；`null` 删除轴标题。
 - `displayUnits`：仅 value 轴。`unit` 取内置档位
   `hundreds / thousands / ten-thousands / hundred-thousands / millions /
-  ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
+ten-millions / hundred-millions / billions / trillions`，或直接给正数作自定义
   除数（写 `c:custUnit`）；`showLabel: true` 同时显示单位标签；`null` 移除。
   金额类轴强烈建议用它代替手改数据（"以千为单位"的正确语义表达）。
 
@@ -1094,7 +1131,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
 
 > ⚠️ marker 用 `symbol`（不是 `kind`）：严格 enum，只收
 > `auto / circle / dash / diamond / dot / none / picture / plus / square / star /
-> triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
+triangle / x`（其它值直接被 schema 拒绝）。marker 的 `fill` /
 > `line` 取颜色字符串（如 `"FFFFFF"`），不是对象。
 
 ### 趋势线 / 误差线（系列级分析装饰）
@@ -1123,7 +1160,7 @@ X 轴标签挤成一团 → 设 `majorTimeUnit: "months"`。普通 `c:catAx` 对
   唯一稳定 identity，不要假设可按 index 增删。`trendlines: []` 清空全部趋势线，
   省略字段保持原集合。单数 `trendline` 和 `trendlines: null` 均被拒绝。
 - 每条趋势线的 `type`：`exponential / linear / logarithmic / moving-average /
-  polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
+polynomial / power`；`order`（2..6）仅 polynomial，`period`（2..255）仅
   moving-average，`intercept` 仅 exponential/linear/polynomial（组合错会被
   dry-run 拒绝并说明）；还支持 `forward` / `backward`（外推期数）、`name`、
   `line`（线样式）。pie/doughnut/radar 等不支持趋势线的 series 会拒绝非空集合，
@@ -1415,7 +1452,7 @@ For PowerPoint-only chart types such as `waterfall`, `sunburst`, `treemap`,
   scriptable PowerPoint + Nushell + xdoc PDFium evidence route is available:
   `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
   Then run the high-risk finalizer with `--candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. It reads
   the final ZIP, identifies ChartEx by OPC Content Type, and maps relationships
   through slide/layout/master ownership to one-based presentation order. Renamed
   parts and inherited charts are included; a filename alone is not chart identity.

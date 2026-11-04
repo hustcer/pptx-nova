@@ -312,6 +312,13 @@ versus PDF ActualText, explicit tick skips, independent axis crossings, plot cli
 and surface paint ownership. Verify the original bytes under the current renderer
 before treating those changes as document regressions.
 
+For ordinary 3D crossings, signed-area seams or surface gradient cuts, use the
+focused matrix in `../content/charts.md#3d-相机曲面材质与轴框诊断`. Separate the
+crossing plane from label side and depth/floor geometry, and real profile ends
+from internal area cells. Test Web repeated-stop color/alpha and texture mapping
+separately from native PDF; a Web fix does not certify the PDF consumer. Retain
+unchanged source bytes and current outputs before changing chart declarations.
+
 ## Latin breaks, distributed text, tables and pictures
 
 Read for those symptoms after re-rendering the unchanged source. These are consumer/model

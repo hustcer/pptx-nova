@@ -1,6 +1,6 @@
-# 错误排查与自修复
+# Troubleshooting and Self-Repair
 
-xdoc 的错误是结构化的。先读 `error.code`、诊断和 `suggestions[]`；可执行建议统一放在 `remediation` 中：
+xdoc errors are structured. First read `error.code`, the diagnostics, and `suggestions[]`; executable suggestions are provided in `remediation`:
 
 ```json
 {
@@ -18,86 +18,45 @@ xdoc 的错误是结构化的。先读 `error.code`、诊断和 `suggestions[]`�
 }
 ```
 
-上例没有可执行建议。`remediationUnavailable` 与 `remediation` 互斥，原因只可能是
-`identity-unavailable`、`context-unavailable`、`ambiguous-source`、`target-unavailable`、
-`payload-limit`。保留诊断，按实际原因恢复输入或修正请求，不能把缺少摘要当作跳过校验。
+The example has no executable suggestion. `remediationUnavailable` and `remediation` are mutually exclusive; the reason can only be `identity-unavailable`, `context-unavailable`, `ambiguous-source`, `target-unavailable`, or `payload-limit`. Retain the diagnostics and restore the input or correct the request according to the actual reason. A missing digest does not permit skipping validation.
 
-## 输出失败：先判定是否已写出主文件
+## Output Failure: First Determine Whether the Primary File Was Published
 
-sidecar 默认是 `<output>.xdoc.json`。它不能与输出 PPTX 或输入 PPTX、patch、brand、
-bindings、template data 指向同一文件，符号链接等路径别名也要检查；`--overwrite`
-不能解除这种冲突。已有 sidecar 同样受覆盖保护，优先使用新的 candidate/sidecar 路径。
+The default sidecar is `<output>.xdoc.json`. It must not resolve to the same file as the output PPTX or an input PPTX, patch, brand, bindings, or template data; check path aliases such as symlinks too. `--overwrite` cannot resolve this conflict. Existing sidecars are also protected against overwriting; prefer new candidate/sidecar paths.
 
-one-shot apply/new 先发布 PPTX，再写 sidecar，二者不是联合原子事务。晚期 sidecar
-失败仍返回错误，但会披露 `primaryOutputPublished:true`、`outputUntouched:false`、
-`output`（已写出的 PPTX）和 `blockedOutput`（失败的 sidecar）。保留报告与现有文件，
-核对两条路径、文件摘要及当前内容，不自动重放 mutation、不自动追加 `--overwrite`，
-也不把输出当成已通过交付门禁。无上述字段时不能推断“文件未变”。
+One-shot apply/new publishes the PPTX before writing the sidecar; the two are not a joint atomic transaction. A later sidecar failure still returns an error but discloses `primaryOutputPublished:true`, `outputUntouched:false`, `output` (the written PPTX), and `blockedOutput` (the failed sidecar). Retain the report and existing files; check both paths, file digests, and current contents. Do not automatically replay the mutation, add `--overwrite`, or treat the output as having passed delivery gates. If these fields are absent, do not infer that the file is unchanged.
 
-需要重新执行时，从保留的原输入和原 patch 向新的 candidate/sidecar 路径运行完整流程；
-不要把已经写出的 candidate 当作同一 patch 的新输入。若要继续使用已写出的 candidate，
-必须补齐当前流程所需的真实证据并完成门禁；不能伪造缺失 sidecar 或把失败报告改成成功。
-daemon 的 session 事务与磁盘文件是不同状态；失败后分别 inspect 会话和磁盘输出，
-不要根据其中一个推断另一个。参见 `daemon-sessions.md`。
+If re-execution is needed, run the complete workflow from the retained original input and patch to new candidate/sidecar paths; do not use the already written candidate as a new input for the same patch. To continue using that candidate, obtain the real evidence required by the current workflow and complete its gates; do not fabricate a missing sidecar or change a failed report to success. A daemon session transaction and the files on disk have separate state. After failure, inspect the session and disk output separately; do not infer one from the other. See `daemon-sessions.md`.
 
-## 转换输入配额与授权失败
+## Conversion Input Quotas and Authorization Failures
 
-用户已提供 Runtime 授权文件、要求安装/续期，或遇到凭据不健康、安装后未生效时，进入
-[授权安装与诊断](licensing.md)。该流程覆盖配置目录/来源优先级、环境差异、Clock、
-设备准入和不确定写入；普通成功任务无需额外维护授权。
+If the user has supplied a Runtime license, requests installation/renewal, or encounters unhealthy credentials or an ineffective installation, follow [License Installation and Diagnostics](licensing.md). That workflow covers configuration/source precedence, environment differences, Clock, device admission, and uncertain writes. Ordinary successful tasks need no extra authorization maintenance.
 
-先区分正在调用的产品与 Feature，再判断限制。读取当前 `xdoc schema --command convert`
-的 `commands.convert.licensePolicy`；需要完整配额事实时读取并保存 `xdoc schema --mode full`
-中的 `authContract.cliFeatureTask`、`authContract.productLimits`，不要拿 SDK 文案代替
-本地 CLI 契约，也不要从设计方案推断已发布的 API。
+Identify the product and feature being invoked before assessing limits. Read `commands.convert.licensePolicy` from the current `xdoc schema --command convert`; when complete quota facts are needed, read and save `authContract.cliFeatureTask` and `authContract.productLimits` from `xdoc schema --mode full`. Do not substitute SDK descriptions for the local CLI contract or infer published APIs from designs.
 
-- 本地 CLI 的 Free Baseline 当前为最多 10 页、压缩 PPTX 输入合计不超过
-  5,242,880 bytes（5 MiB，含边界）。具体任务以当前契约和实际授权报告为准；总输入
-  包括 primary 与 donor/secondary-source，页数按输入、计划处理、计划输出的最大值
-  计算。不能用 `--slides`、换输出格式或改 transport 推断配额已经解除。
-- Converter SDK 的 PDF/Markdown profile 则各自披露 `freeMaxInputBytes:5242880`、
-  `freeMaxSlides:null`，没有额外 Free 页数配额。它检查压缩 PPTX **输入**，不是最终
-  输出大小；不超过边界也仍受资源和策略限制。有效凭据必须授权所请求的产品/格式，
-  不能用另一个产品或格式的凭据解除限制。这些事实不替代 CLI 的任务授权。
-- 本地 `convert` 的授权拒绝按契约返回 exit code 4。保存实际错误/授权报告、输入字节数
-  和任务范围；它不是 chart 槽位超限、解析失败或坏文件的证明。`xdoc auth status`
-  仅做诊断（`taskAuthorization:not-evaluated`），不证明本次操作已获准。
-- 不自动拆分任务、删页、改数据、放宽 strict flags 或跨产品绕过拒绝。相同输入与条件
-  不重复尝试；使用已有且适用的授权，或向用户说明缺少的条件。压缩输入只有在任务允许、
-  内容保持且重新核对最终候选后才有意义，不能通过改扩展名、只选少数页或删图表修配额。
+- The local CLI Free Baseline currently allows at most 10 slides and 5,242,880 bytes (5 MiB, inclusive) of compressed PPTX input combined. The current contract and actual authorization report govern each task. Total input includes primary and donor/secondary sources; slide count is the maximum of input, planned processing, and planned output slides. Do not infer that `--slides`, a different output format, or another transport removes the quota.
+- Converter SDK PDF/Markdown profiles each disclose `freeMaxInputBytes:5242880` and `freeMaxSlides:null`, with no additional Free slide quota. They check compressed PPTX **input**, not final output size; resource and policy limits still apply below the boundary. A valid credential must authorize the requested product/format; another product's or format's credential cannot remove the restriction. These facts do not replace CLI task authorization.
+- A local `convert` authorization refusal returns exit code 4 under the contract. Retain the actual error/authorization report, input byte count, and task scope; it does not prove chart slot exhaustion, parsing failure, or a bad file. `xdoc auth status` is diagnostic only (`taskAuthorization:not-evaluated`) and does not prove this operation was authorized.
+- Do not automatically split tasks, delete slides, change data, relax strict flags, or bypass a refusal across products. Do not retry unchanged input and conditions; use an existing applicable license or explain the missing conditions. Compress input only when the task allows it, content is preserved, and the final candidate is rechecked. Do not fix quotas by changing extensions, selecting only a few slides, or deleting charts.
 
-普通成功任务无需额外查询凭据；仅在拒绝、配额疑问或用户明确要求时走此诊断。
-图表逻辑槽位、字体/内存等资源预算另见本文件对应诊断，付费授权不自动解除资源上限。
+Ordinary successful tasks need no additional credential query; use this diagnosis only for a refusal, quota question, or explicit user request. See the relevant diagnostics in this file for chart logical slots and resource budgets such as fonts/memory; paid authorization does not automatically remove resource limits.
 
-## 两种 remediation 与重试流程
+<a id="两种-remediation-与重试流程"></a>
 
-先确定失败来自本地命令、daemon、stdio JSON-RPC 还是 MCP，并读取对应的报告 schema。
-不同 transport 的重试指令不是通用 patch 契约，不能把远端服务的重试规则套到本地 apply，
-也不能仅凭 `retryable`、HTTP 状态、错误文案或等待时间就自动重放 mutation。
-当前 capability 未披露的服务合同不构成可用路线；保留失败证据，使用已披露的本地流程。
-已披露的恢复建议仍受原输入/请求身份、输出发布状态和现有授权约束；遇到同一失败且条件
-未改变时停止重复尝试，先解决诊断指出的前提。
+## Two Remediation Kinds and the Retry Workflow
 
-| kind                | 完整载荷                                                       | 执行目标                                           |
-| ------------------- | -------------------------------------------------------------- | -------------------------------------------------- |
-| `replace-request`   | `request`，保留版本、ops、recipe、vars、preconditions 等上下文 | 从原始输入重新执行完整请求；不得追加到原 ops       |
-| `apply-to-document` | `patch:{schemaVersion,ops}`，只含文档修复操作                  | 在诊断所依据的精确文档上执行一次；不重跑原创建操作 |
+Identify whether the failure came from the local command, daemon, stdio JSON-RPC, or MCP, and read the corresponding report schema. Retry instructions for different transports are not a universal patch contract: do not apply remote service retry rules to local apply, or automatically replay a mutation based only on `retryable`, HTTP status, error text, or elapsed time. A service contract undisclosed by the current capabilities is not an available route; retain failure evidence and use the disclosed local workflow. Disclosed recovery suggestions remain subject to original input/request identity, output publication state, and existing authorization. Stop repeating the same failure under unchanged conditions; first resolve the prerequisites identified by the diagnostic.
 
-`replace-request.target` 必含 `kind:"original-input"`、
-`requestCanonicalization:"jcs-rfc8785"`、`requestSha256`、`inputSha256`。
-明确从空文档开始时 `inputSha256:null`；已有输入时必须是其 SHA-256。
-`apply-to-document.target` 必含 `kind:"document"` 和文档的 `inputSha256`。
-所有摘要均为 64 位小写十六进制。消费者对自己保存的原请求/文档计算摘要后比较，
-不使用报告中的摘要替代自己的预期。
+| kind                | Complete payload                                                                   | Execution target                                                                               |
+| ------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `replace-request`   | `request`, preserving version, ops, recipe, vars, preconditions, and other context | Re-execute the complete request from the original input; do not append it to the original ops. |
+| `apply-to-document` | `patch:{schemaVersion,ops}`, containing only document-repair operations            | Execute once on the exact document used for the diagnosis; do not rerun the original creation. |
 
-`remediation.reason` 是非空说明，`confidence` 是 0–1 有限数，`autoRetry` 是必填
-boolean。`autoRetry:true` 只允许按已有策略尝试，仍须验证完整 shape、目标和上下文，
-再 dry-run、重新授权和执行。删除失败操作改变请求意图，固定为 `autoRetry:false`；
-复核具体变更后才传 `--reviewed`，不要用该参数跳过用户当前要求的批准。
+`replace-request.target` must contain `kind:"original-input"`, `requestCanonicalization:"jcs-rfc8785"`, `requestSha256`, and `inputSha256`. When explicitly starting from an empty document, `inputSha256:null`; otherwise it must be the input's SHA-256. `apply-to-document.target` must contain `kind:"document"` and the document's `inputSha256`. All digests are 64 lowercase hexadecimal characters. The consumer calculates and compares digests of its own retained original request/document; do not use report digests in place of independently expected values.
 
-要跨进程保留请求、输入和相对资源，在**首次提交前**使用快照脚本。先确认当前
-`xdoc schema --mode full` 披露 `commands.pptx.remediationSchema`；脚本会自动检查，
-旧运行时不提供旧字段 fallback。以下路径均为示例，输出与 capsule 必须使用新路径：
+`remediation.reason` is a nonempty explanation, `confidence` a finite number from 0 to 1, and `autoRetry` a required boolean. `autoRetry:true` permits an attempt only under existing policy; still validate the complete shape, target, and context, then dry-run, reauthorize, and execute. Removing a failed operation changes request intent and always has `autoRetry:false`. Pass `--reviewed` only after reviewing the specific change; do not use it to bypass approval required by the user's current request.
+
+To retain the request, input, and relative assets across processes, use the snapshot script **before the first submission**. First confirm that the current `xdoc schema --mode full` discloses `commands.pptx.remediationSchema`; the script checks this automatically and provides no legacy-field fallback for older runtimes. The following paths are examples; use new paths for the output and capsule:
 
 ```bash
 node scripts/cli/runtime/remediation.mjs run \
@@ -109,119 +68,89 @@ node scripts/cli/runtime/remediation.mjs apply \
   --pointer /error/suggestions/0 --output run/repaired.pptx
 ```
 
-从空文档开始时省略 `--input`。`run` 支持 `--transport json-rpc`、`--dry-run`、
-`--intent intent.json` 和已有授权下的 `--allow-raw-xml`。首次提交和重试都使用同一
-capsule 中的相对资源根；之后同名源文件变化不会换掉已冻结的资产。
-capsule 含私有原请求、PPTX 和资源，应保留到重试结束。没有首次提交的 capsule
-时不自动应用旧报告；重新组织一次有完整上下文的新请求。
+Omit `--input` when starting from an empty document. `run` supports `--transport json-rpc`, `--dry-run`, `--intent intent.json`, and, with existing authorization, `--allow-raw-xml`. The first submission and retry use the same relative asset root in the capsule; subsequent changes to source files of the same name do not replace frozen assets. The capsule contains the private original request, PPTX, and assets; retain it until the retry ends. Without the first submission's capsule, do not automatically apply an old report; prepare a new request with complete context.
 
-资产文件存在但包装脚本报 `ENOENT` 或使用了错误图片时，检查调用路径是否含
-`symlink/..`。在 POSIX 上按文件系统遍历，不能先用 `path.resolve` 或普通
-`realpathSync` 折叠；自定义 Node 包装可复用 `scripts/lib/runtime/filesystem-paths.mjs`。
-省略 `--asset-root` 时，资源相对于**提交的 patch 路径所在目录**，不是 patch 文件的
-符号链接目标目录。修复脚本会冻结该目录内的资源；逃逸到根外的资产链接仍拒绝。
+If an asset exists but the wrapper reports `ENOENT` or uses the wrong image, check whether the invocation path contains `symlink/..`. On POSIX, traverse according to the filesystem; do not first collapse it with `path.resolve` or ordinary `realpathSync`. Custom Node wrappers can reuse `scripts/lib/runtime/filesystem-paths.mjs`. When `--asset-root` is omitted, assets are relative to **the directory of the submitted patch path**, not the target directory of a patch symlink. The remediation script freezes assets within that directory; asset links escaping the root remain rejected.
 
-`apply` 按 kind 分派，只选一个具体 JSON Pointer，先校验、dry-run，再实际 apply。
-文档修复额外传 `--document diagnosed.pptx`。成功建议记录回执，同一建议不会重复执行。
-原始 intent、raw XML 约束和资产字节预算不会被放宽；当前授权仍由 xdoc 再次求解。
-任一摘要/上下文不匹配不写目标文件。修完后重新诊断新文档，再选择下一条建议，
-不要把同一旧文档的多条建议盲目合并。单份报告内可执行建议累计最多 1 MiB，
-超限建议保留诊断和 `payload-limit` 标记。
+`apply` dispatches by kind, selects exactly one JSON Pointer, validates and dry-runs it, then applies it. For document repair also pass `--document diagnosed.pptx`. Successful suggestions record receipts and cannot be executed twice. Original intent, raw XML constraints, and asset byte budgets are not relaxed; xdoc re-evaluates current authorization. Any digest/context mismatch prevents writing the target. After repair, diagnose the new document again before selecting another suggestion; do not blindly combine multiple suggestions for the same old document. Executable suggestions in one report total at most 1 MiB; over-limit suggestions retain diagnostics and the `payload-limit` marker.
 
-## errorCatalog.scenarioCoverage —— 修复场景与手工模板
+## errorCatalog.scenarioCoverage — Repair Scenarios and Manual Templates
 
-`commands.pptx.errorCatalog.scenarioCoverage` 提供场景说明及
-`patchTemplate:{schemaVersion,ops}`，同时标记 `autoApplicable:false`。
-模板没有本次请求身份，不能作为可执行建议直接复制重试。
+`commands.pptx.errorCatalog.scenarioCoverage` provides scenario descriptions and `patchTemplate:{schemaVersion,ops}`, marked `autoApplicable:false`. Templates lack the current request identity and cannot be copied directly as executable retry suggestions.
 
-| id                          | 触发                                                                     | 修复策略                                                           |
-| --------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| `missing-shape`             | selector 一个都没匹配到                                                  | 移除该 op 当 fallback,先 `inspect` 拿到真实 shape id 再重试        |
-| `ambiguous-selector`        | selector 匹配多个 shape,报告里有候选 id                                  | 改写 selector 为 `{ "shape": { "id": <候选 id> } }`                |
-| `invalid-chart-kind`        | `add-chart.kind` / `variant` 拼错                                        | 用 `enumRegistry.chartKind` / `chartVariant` 的 fuzzy 候选改写     |
-| `font-color-shape-spelling` | 字体名 / 颜色 / 主题色拼错,或 RGB 不是 6 位大写 hex                      | 用 `enumRegistry` 的 fuzzy 候选;或 `1A73E8`(不带 `#`,全大写)       |
-| `layout-contract`           | `populate-slide.content` 缺必填字段,或在 strict 模式下出现了非法额外字段 | 补上 placeholder 或删除非法字段;严格模式见 `../content/recipes.md` |
+| id                          | Trigger                                                                                  | Repair strategy                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `missing-shape`             | Selector matches nothing                                                                 | Remove the op as fallback; first `inspect` for the real shape id before retrying.            |
+| `ambiguous-selector`        | Selector matches multiple shapes and the report includes candidate ids                   | Rewrite the selector as `{ "shape": { "id": <candidate id> } }`.                             |
+| `invalid-chart-kind`        | Misspelled `add-chart.kind` / `variant`                                                  | Rewrite using fuzzy candidates in `enumRegistry.chartKind` / `chartVariant`.                 |
+| `font-color-shape-spelling` | Misspelled font, color, theme color, or RGB that is not six uppercase hex digits         | Use fuzzy `enumRegistry` candidates or `1A73E8` (no `#`, uppercase).                         |
+| `layout-contract`           | Missing required `populate-slide.content` field or an illegal extra field in strict mode | Add the placeholder or remove the illegal field; see strict mode in `../content/recipes.md`. |
 
-完整 schema（含 docsRef 与手工模板）：
+Complete schema, including docsRef and manual templates:
 
 ```bash
 xdoc schema --mode full | jq '.commands.pptx.errorCatalog.scenarioCoverage'
 ```
 
-模板用于理解诊断。实际自动尝试只消费带完整目标身份的 `remediation`。
+Templates explain diagnostics. Actual automatic attempts consume only `remediation` with complete target identity.
 
-## OOXML 数值范围拦截 —— 报错自带允许范围与出处，改值即可
+## OOXML Numeric Range Enforcement — Errors Include Bounds and Sources
 
-dry-run / apply 现在按 **OOXML 权威范围**拦截数值字段（约束抽取自
-Open-XML-SDK schema，ajv 与 dry-run 双侧同判）。报错 message 直接给出
-字段路径、边界值和 OOXML 出处，例如：
+dry-run / apply enforce **authoritative OOXML ranges** on numeric fields (constraints extracted from the Open-XML-SDK schema, enforced by both ajv and dry-run). Error messages provide the field path, bounds, and OOXML source, for example:
 
 ```
 set-paragraph.format.lineSpacing must be at most 132
   (line spacing multiple written as a:spcPct val (1.0 = 100000) — OOXML a:spcPct@val 0..13200000)
 ```
 
-优先检查 `suggestions[].remediation`：这类错误可能带一条
-`autoRetry: true`（confidence 0.8）的 clamp/wrap 修复，把越界值收回边界
-（角度按 360 取模而非截断），且引擎已验证修复后的 op 能通过契约校验，
-核对原请求身份后用完整 `replace-request.request` 重做 dry-run：
+First inspect `suggestions[].remediation`: such errors may provide a clamp/wrap repair with `autoRetry: true` (confidence 0.8), bringing out-of-range values within bounds (angles wrap modulo 360 rather than being clamped). The engine has validated that the repaired op passes contract validation. After checking the original request identity, repeat dry-run with the complete `replace-request.request`:
 
 ```
 "reason": "Clamp /ops/1 out-of-range values to the OOXML bounds: plot.gapWidth: 501 -> 500 (…)"
 ```
 
-没有 clamp suggestion 的情况（如 `majorUnit <= 0` 这类无确定替代值的
-exclusive 边界）才需要按 message 里的范围手改。写 patch 前就用对范围
-仍能省一轮 dry-run：
+Only when there is no clamp suggestion, such as an exclusive boundary like `majorUnit <= 0` with no definite replacement, manually change the value according to the message. Using correct ranges before writing the patch can save a dry-run:
 
-| 字段（wire 单位）                    | 允许范围  | 易错点                     |
-| ------------------------------------ | --------- | -------------------------- |
-| `plot.gapWidth`                      | 0..500    | 柱间距百分比               |
-| `plot.overlap`                       | -100..100 | 柱重叠百分比               |
-| `plot.bubbleScale`                   | 0..300    | 气泡缩放百分比             |
-| `marker.size` / line 系列 `size`     | 2..72     | **最小值是 2 不是 1**      |
-| chart `style`                        | 1..48     | c:style 内置样式号         |
-| `format.lineSpacing`（数字＝倍数）   | >0..132   | 1.0＝单倍行距；上限 132    |
-| `fill.angle` / shadow `angle`（度）  | 0..<360   | **360 本身非法**，整圈用 0 |
-| `axes.*.scale.majorUnit`/`minorUnit` | >0        | 0 或负数非法               |
-| `alpha` / gradient stop `position`   | 0..1      | 小数分数，**不是 0..100**  |
-| autofit `fontScale`                  | 1..100    | 且要求 `mode: "text"`      |
+| Field (wire units)                       | Allowed range | Common pitfall                            |
+| ---------------------------------------- | ------------- | ----------------------------------------- |
+| `plot.gapWidth`                          | 0..500        | Bar gap percentage                        |
+| `plot.overlap`                           | -100..100     | Bar overlap percentage                    |
+| `plot.bubbleScale`                       | 0..300        | Bubble scale percentage                   |
+| `marker.size` / line-series `size`       | 2..72         | **Minimum is 2, not 1**                   |
+| chart `style`                            | 1..48         | Built-in c:style number                   |
+| `format.lineSpacing` (number = multiple) | >0..132       | 1.0 is single spacing; maximum 132        |
+| `fill.angle` / shadow `angle` (degrees)  | 0..<360       | **360 is invalid**; use 0 for a full turn |
+| `axes.*.scale.majorUnit`/`minorUnit`     | >0            | Zero and negative values are invalid      |
+| `alpha` / gradient stop `position`       | 0..1          | Decimal fraction, **not 0..100**          |
+| autofit `fontScale`                      | 1..100        | Also requires `mode: "text"`              |
 
-## 写出侧自检 warnings 与 semanticIssues[] —— 语义审计信号
+## Writer Self-Check Warnings and semanticIssues[] — Semantic Audit Signals
 
-apply / dry-run 报告的 `warnings[]` 里有一组**写出侧自检**前缀（按 OOXML 规范
-对 xdoc 本次生成/改写的 part 做的检查；下表是最常见的五类，完整集合见
-`semanticIssues[].code` 枚举）：
+The apply / dry-run `warnings[]` report contains **writer self-check** prefixes: OOXML checks on parts generated or rewritten by xdoc in this run. The table lists the most common classes; see the `semanticIssues[].code` enum for the complete set:
 
-| 前缀            | 含义                                                                                                                                                                                                                                                       |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `child-order:`  | 子元素被写到 OOXML 规范顺序之外（含期望顺序全文）                                                                                                                                                                                                          |
-| `dangling-rel:` | r:id / r:embed / r:link 引用在所属 `.rels` 里不存在                                                                                                                                                                                                        |
-| `dangling-ref:` | 动画/build 的 `spid` 引用了 part 内不存在的形状 id（cNvPr）                                                                                                                                                                                                |
-| `duplicate-id:` | cNvPr / sldId 等 id 在 part 内重复（PowerPoint 会提示"修复"）                                                                                                                                                                                              |
-| `part-truth:`   | relationship 指向缺失 part / 类型错配 / part 缺 Content-Types 声明                                                                                                                                                                                         |
-| `part-graph:`   | part 挂错父级（如 notes 直接挂在 presentation 下）/ 一个 slide 两个 notesSlide / 缺必需 slideMaster / 媒体引用挂在不允许的容器；ruleId `sdk/part-graph/<not-allowed\|required\|only-one\|content-type\|data-reference>/<Parent>/<Child>`，只报告不自动修复 |
+| Prefix          | Meaning                                                                                                                                                                                                                                                                                                                                            |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `child-order:`  | Child elements were written out of OOXML schema order (includes the full expected order).                                                                                                                                                                                                                                                          |
+| `dangling-rel:` | An r:id / r:embed / r:link reference is absent from its owning `.rels`.                                                                                                                                                                                                                                                                            |
+| `dangling-ref:` | An animation/build `spid` refers to a shape id (cNvPr) absent from the part.                                                                                                                                                                                                                                                                       |
+| `duplicate-id:` | A cNvPr / sldId or other id is duplicated within a part (PowerPoint prompts for repair).                                                                                                                                                                                                                                                           |
+| `part-truth:`   | A relationship points to a missing part, has a type mismatch, or a part lacks a Content-Types declaration.                                                                                                                                                                                                                                         |
+| `part-graph:`   | A part has the wrong parent (e.g. notes directly under presentation), a slide has two notesSlide parts, a required slideMaster is missing, or a media reference is in a disallowed container. RuleId `sdk/part-graph/<not-allowed\|required\|only-one\|content-type\|data-reference>/<Parent>/<Child>`; reported only, not automatically repaired. |
 
-例：`child-order: ppt/slides/slide1.xml: <a:pPr> child <a:spcAft> must come
-before <a:buChar> (schema order: …)`。
+Example: `child-order: ppt/slides/slide1.xml: <a:pPr> child <a:spcAft> must come
+before <a:buChar> (schema order: …)`.
 
-`conformance:` 前缀**不属于**这组自检：它只说明输入包是 ISO Strict（或已是 mixed），
-未触达 part 保持原字节、新增内容按 Transitional 写出，输出包会被 inspect 报为
-`conformance.package: "mixed"`。这是信息披露，PowerPoint 正常打开 mixed 包，不要为它
-改写 patch 或重跑。
+The `conformance:` prefix **is not** one of these self-checks. It indicates that the input package is ISO Strict (or already mixed); untouched parts retain their original bytes and new content is written as Transitional, so inspect reports the output as `conformance.package: "mixed"`. This is informational; PowerPoint opens mixed packages normally. Do not rewrite the patch or rerun for this disclosure.
 
-**来源判断**：从零由 xdoc 生成的 deck 上出现这些告警 = xdoc writer 内部 bug，
-不要为绕过它改写 patch，应把完整 warning 上报维护者。**编辑既有 deck** 时它们
-更多是原文件里预存的缺陷（外部工具删了形状却留下动画引用等）——这时走下面的
-`semanticIssues[]` 修复循环。
+**Determine the source:** these warnings on a deck generated from scratch by xdoc indicate an internal xdoc writer bug. Do not rewrite the patch to bypass it; report the complete warning to maintainers. When **editing an existing deck**, they are more often pre-existing defects in the source (for example, an external tool deleted a shape but left animation references); use the `semanticIssues[]` repair loop below.
 
-### `semanticIssues[]` —— 结构化语义问题与文档修复
+### `semanticIssues[]` — Structured Semantic Issues and Document Repair
 
-同一批发现还会以结构化形式出现在 apply / dry-run 报告顶层 `semanticIssues[]`：
+The same findings also appear in structured form in the top-level `semanticIssues[]` of the apply / dry-run report:
 
 ```jsonc
 {
-  "code": "dangling-ref", // 枚举: dangling-rel | rel-type-mismatch | dangling-ref | duplicate-id | part-truth | value-out-of-range | invalid-attribute-value | missing-required-attribute | invalid-attribute-comparison | invalid-xml | invalid-relationships | child-order | child-cardinality | child-choice | part-graph
+  "code": "dangling-ref", // enum: dangling-rel | rel-type-mismatch | dangling-ref | duplicate-id | part-truth | value-out-of-range | invalid-attribute-value | missing-required-attribute | invalid-attribute-comparison | invalid-xml | invalid-relationships | child-order | child-cardinality | child-choice | part-graph
   "ruleId": "<rule id>",
   "part": "ppt/slides/slide1.xml",
   "message": "<p:spTgt> spid=\"2\" references no <cNvPr> with id=\"2\" in the part",
@@ -240,57 +169,30 @@ before <a:buChar> (schema order: …)`。
 }
 ```
 
-处理规则：
+Handling rules:
 
-- 仅对可重新取得的精确文档执行 `apply-to-document.patch`；使用上述脚本并传
-  `--document`。dry-run 的未交付候选不能冒充原文件，缺目标时只读诊断。
-- `requiresRawXml:true` 必须已有相应权限；不能为执行建议自动增开权限。
-  受限 `repair-child-order` / `repair-preset-adjustments` / `repair-relationships`
-  仍由当前运行时声明其权限要求。
-- 没有 remediation 的 issue 可能是修复不确定（多个候选孤儿 part、preserve-only 动画等），
-  保持现状并把 message 原文上报，不要自造修复。
-- `remove-shape` 已自动清理被删形状（含组内子形状）的动画与 build 引用，删除
-  带动画的形状**不需要**先手动清动画；出现 `dangling-ref` 通常来自 deck 预存
-  缺陷而非本次操作。
+- Execute `apply-to-document.patch` only on the exact document that can be retrieved again, using the script above with `--document`. An unpublished dry-run candidate cannot stand in for the original; without the target, diagnose read-only.
+- `requiresRawXml:true` requires existing permission; do not automatically grant extra permission to execute a suggestion. Permission requirements for restricted `repair-child-order` / `repair-preset-adjustments` / `repair-relationships` remain declared by the current runtime.
+- An issue without remediation may have an uncertain repair (multiple candidate orphan parts, preserve-only animation, etc.). Preserve it and report the original message; do not invent a repair.
+- `remove-shape` automatically cleans up animation and build references for removed shapes, including children in groups. Removing an animated shape **does not** require manually clearing its animations first; `dangling-ref` usually comes from a pre-existing deck defect, not this operation.
 
-### 重复 XML 属性与命名空间
+### Duplicate XML Attributes and Namespaces
 
-重复 XML 属性是另一类解析失败：相同 QName，或不同前缀解析到同一 namespace URI +
-local name，都会被拒绝；默认 namespace 不适用于无前缀属性。raw XML 编辑在 dry-run
-和 apply 中也会对完整 part 重新解析。不要用正则任取首个/末个值、删 namespace 或
-开启 raw XML 来绕过；保留输入/失败报告，定位具体 part 和来源后再作有依据的修复。
-几何编辑优先使用原生 shape/OLE 操作，保留命名空间别名及同名外部扩展元素。
+Duplicate XML attributes cause another kind of parse failure: the same QName, or different prefixes resolving to the same namespace URI + local name, are rejected. The default namespace does not apply to unprefixed attributes. Raw XML editing also reparses the complete part during dry-run and apply. Do not bypass this by choosing the first/last value with a regex, removing namespaces, or enabling raw XML. Retain the input/failure report, identify the exact part and source, then make an evidence-based repair. For geometry edits prefer native shape/OLE operations and preserve namespace aliases and external extension elements with the same name.
 
-### `preset-adjustments`：Office 互操作诊断与显式修复
+### `preset-adjustments`: Office Interoperability Diagnostics and Explicit Repair
 
-已知 preset 的非空 adjustment 列表若缺项或顺序不规范，会报告
-`code: "preset-adjustments"` 与 `ruleId: "office/preset-adjustments/<preset>"`。
-这是 PowerPoint 互操作风险，不是 XSD 无效的同义词；空列表沿用 preset 默认值，
-不要为了消除此问题批量填充所有空列表。
+A nonempty adjustment list for a known preset with missing entries or irregular order reports `code: "preset-adjustments"` and `ruleId: "office/preset-adjustments/<preset>"`. This is a PowerPoint interoperability risk, not a synonym for XSD invalidity. Empty lists use preset defaults; do not fill all empty lists in bulk to eliminate this finding.
 
-仅在已知、唯一、整数常量 guide 能安全归一化时，报告提供
-`apply-to-document` remediation，内部 action 为 `repair-preset-adjustments`。
-该修复保留显式值、补齐声明默认值并恢复声明顺序，`autoRetry:false`，
-`requiresRawXml:false`。先核对修复范围与已有任务授权，明确采纳后才使用
-remediation helper 的 `--reviewed`；不要因建议存在就自动重试，也不额外打开 raw XML。
+Only when known, unique, integer-constant guides can be safely normalized does the report provide `apply-to-document` remediation with internal action `repair-preset-adjustments`. It preserves explicit values, fills declared defaults, and restores declared order; `autoRetry:false`, `requiresRawXml:false`. Check the repair scope and existing task authorization first; pass `--reviewed` to the remediation helper only after explicitly adopting it. Do not automatically retry merely because a suggestion exists or additionally enable raw XML.
 
-保留 `target.inputSha256`、`expectedPartSha256`、`elementPath`、`ruleId`、
-`expectedRuleSha256` 及报告给出的 element guard，不手写或放宽它们。与 child-order
-修复不同，preset 修复即使带 element hash，仍要求整个 part 的精确 SHA 一致。
-同一 part 被其他编辑/修复改变后，重新审计新候选再取建议；旧建议不能继续串用。
-未知/重复 guide、非恒定公式、扩展内容或含糊结构可能只有诊断，不自造修复 patch。
+Preserve `target.inputSha256`, `expectedPartSha256`, `elementPath`, `ruleId`, `expectedRuleSha256`, and the reported element guard; do not hand-author or relax them. Unlike child-order repair, preset repair requires the exact SHA of the entire part even with an element hash. If another edit/repair changes the same part, re-audit the new candidate for suggestions; do not chain stale suggestions. Unknown/duplicate guides, nonconstant formulas, extension content, or ambiguous structures may provide diagnostics only; do not invent repair patches.
 
-修复后重跑完整 semantic/vision 检查、受影响页预览和可用的 PowerPoint clean-open。
-dry-run/apply 的新增 issue delta 仍与 candidate 的全量 inherited debt 分开判断。
-重命名或结构编辑可能改变问题的归属身份；若既有 finding 再次出现在 delta，仍应停下
-核对源/候选和当前完整诊断，不能因为肉眼认为它是旧问题就过滤掉门禁报告。
+After repair, rerun full semantic/vision checks, affected-page previews, and PowerPoint clean-open when available. Assess the dry-run/apply new-issue delta separately from the candidate's full inherited debt. Renaming or structural edits may change a finding's ownership identity; if an existing finding reappears in the delta, stop and check source/candidate and current full diagnostics. Do not filter the gate report merely because it appears old by eye.
 
-### `[Content_Types].xml` 的 shell 审计
+### Shell Audit of `[Content_Types].xml`
 
-PPTX 本质上是 ZIP。`unzip` 会自行按 pattern 匹配条目，因此单纯给文件名加 shell
-引号仍会把方括号当作 pattern；`[Content_Types].xml` 必须写成
-`'[[]Content_Types].xml'`，其中 `[[]` 才表示一个字面量左方括号。建议把 ZIP 完整性、
-Content Types XML，以及图表关键节点放在同一段可复现审计中：
+A PPTX is a ZIP. `unzip` matches entry patterns itself, so shell quoting alone still treats brackets as a pattern. Write `[Content_Types].xml` as `'[[]Content_Types].xml'`, where `[[]` means a literal opening bracket. Include ZIP integrity, Content Types XML, and key chart nodes in one reproducible audit:
 
 ```bash
 set -o pipefail
@@ -300,130 +202,104 @@ unzip -p out.pptx 'ppt/charts/chart1.xml' |
   rg '<c:(trendline|errBars|dTable|dispUnits|minorGridlines|title)'
 ```
 
-`chart1.xml` 这里只是示例；先用 `unzip -Z1 out.pptx` 或
-`xdoc pptx inspect out.pptx` 找到实际的 chart part，再替换命令中的路径。
-`set -o pipefail` 可确保上游 `unzip` 读取或匹配失败时整段审计返回失败，而不是被
-下游命令的成功状态掩盖。
+`chart1.xml` is an example; first find the actual chart part using `unzip -Z1 out.pptx` or `xdoc pptx inspect out.pptx`, then replace the path. `set -o pipefail` ensures the audit fails if upstream `unzip` cannot read or match an entry, instead of a downstream success hiding it.
 
-## 退出码速查（`xdoc schema` 的 `.exitCodes`）
+## Exit Code Reference (`.exitCodes` in `xdoc schema`)
 
-| code | stage         | 含义                                                                     |
-| ---- | ------------- | ------------------------------------------------------------------------ |
-| 0    | success       | 成功；gate/planner 类报告的裁决在 JSON 里，不在退出码里                  |
-| 1    | failed        | 未分类失败，当 bug 上报，不要按它分支                                    |
-| 2    | args          | CLI 参数解析/校验失败                                                    |
-| 3    | input         | 输入无效/不可读，或结构化 gate 报告以非 pass 状态完成（stdout 仍有报告） |
-| 4    | authorization | 授权拒绝（Free 限额超限、License 无效等），不写产物                      |
-| 5    | slide         | slide 选择超出范围                                                       |
-| 6    | parse         | PPTX 解析失败                                                            |
-| 7    | pdf           | PDF 生成失败                                                             |
-| 8    | png           | PNG 生成失败                                                             |
-| 9    | output        | 输出目标校验或写入失败（含输出已存在且未加 `--overwrite`）               |
-| 10   | dependency    | 后端依赖不可用                                                           |
-| 11   | internal      | 内部错误                                                                 |
-| 12   | batch         | 批处理至少一项失败（convert/html2md/extract/check），看 `--report`       |
+| code | stage         | Meaning                                                                                                          |
+| ---- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 0    | success       | Success; gate/planner decisions are in JSON, not the exit code.                                                  |
+| 1    | failed        | Unclassified failure; report as a bug, do not branch on it.                                                      |
+| 2    | args          | CLI argument parsing/validation failed.                                                                          |
+| 3    | input         | Invalid/unreadable input, or a structured gate report completed with a non-pass status (report still on stdout). |
+| 4    | authorization | Authorization refused (Free limit exceeded, invalid license, etc.); no artifact written.                         |
+| 5    | slide         | Slide selection out of range.                                                                                    |
+| 6    | parse         | PPTX parsing failed.                                                                                             |
+| 7    | pdf           | PDF generation failed.                                                                                           |
+| 8    | png           | PNG generation failed.                                                                                           |
+| 9    | output        | Output target validation or writing failed (including existing output without `--overwrite`).                    |
+| 10   | dependency    | Backend dependency unavailable.                                                                                  |
+| 11   | internal      | Internal error.                                                                                                  |
+| 12   | batch         | At least one batch item failed (convert/html2md/extract/check); inspect `--report`.                              |
 
-## 错误分类速查（errorCatalog 注册表）
+## Error Categories (errorCatalog Registry)
 
-PPTX 业务错误的 `error.code` 使用 **snake_case**，当前目录见本次运行的
-`xdoc schema` 中 `commands.pptx.errorCatalog.codes`。按命令的
-`ioContract.failure.schemaRef` 读取完整失败报告；精简错误不一定有
-`severity`、`suggestions` 或 `docsRef`，不能补造修复建议。协议错误单独按
-daemon / JSON-RPC / MCP 契约处理，不能把数字协议码当作业务错误码。
-高频类：
+PPTX business error `error.code` uses **snake_case**. Find the current catalog in this run's `xdoc schema` under `commands.pptx.errorCatalog.codes`. Read the complete failure report using the command's `ioContract.failure.schemaRef`; compact errors may omit `severity`, `suggestions`, or `docsRef`, so do not invent repairs. Handle protocol errors separately under the daemon / JSON-RPC / MCP contract; do not treat numeric protocol codes as business error codes. Common categories:
 
-| code                                    | 含义                                                                                  | 处理                                                                          |
-| --------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `invalid_json`                          | patch / recipe 不是合法 JSON                                                          | 修 JSON 语法后重发                                                            |
-| `invalid_argument`                      | 字段缺失、形状/取值错、资产路径读不到                                                 | 按 `path` / `expected` / `actual` 改字段                                      |
-| `invalid_arguments`                     | CLI 调用缺参数                                                                        | 按帮助补齐命令行                                                              |
-| `unsupported_feature`                   | 用了不支持的 op / schemaVersion                                                       | `xdoc schema --mode ops --ops <name>` 查能力，找替代                          |
-| `invalid_operation`                     | patch 合法但当前 deck 应用不了（selector 匹配 0 或 >1 个、layout 找不到、维度冲突等） | 看 message / `candidates[]`，核对完整 `suggestions[].remediation` 的目标      |
-| `invalid_package` / `invalid_xml`       | 输入包结构或 OOXML 解析失败                                                           | 换来源文件或先修复                                                            |
-| `missing_part` / `missing_relationship` | 输入包缺 part / relationship                                                          | 用 repair-relationships 或换文件                                              |
-| `encrypted_package` / `signed_package`  | 输入加密 / 已签名                                                                     | 先去密码；签名文件按策略处理                                                  |
-| `zip_error`                             | ZIP 读写失败                                                                          | 检查文件完整性与磁盘                                                          |
-| `patch_too_large` / `asset_too_large`   | patch / 资产超上限                                                                    | 拆 patch；压缩资产或调 `XDOC_PPTX_MAX_*`                                      |
-| `input_error` / `input_changed`         | 输入路径读不到 / 请求期间输入被改                                                     | 核对路径；重跑                                                                |
-| `output_error` / `output_exists`        | 输出写失败 / 输出已存在                                                               | 先查 publication facts 与两条路径；仅按已有授权覆盖本次生成文件，否则换新路径 |
-| `output_collision`                      | sidecar 或报告路径与输入/主输出冲突                                                   | 换独立路径；`--overwrite` 不能解除冲突                                        |
-| `session_conflict`                      | 输出被另一 daemon 会话占用                                                            | 换路径或等会话结束                                                            |
-| `invalid_sidecar`                       | sidecar 不是 `pptx-apply-sidecar/v1`                                                  | 重新生成 sidecar                                                              |
-| `daemon_unavailable` / `shutting_down`  | daemon 不可达 / 正在退出                                                              | 关 `--daemon-strict` 或检查 `XDOC_DAEMON_AUTO_SPAWN` / `XDOC_DAEMON_LOG`      |
-| `internal_error` / `unknown_error`      | 内部错误                                                                              | 附 message 上报                                                               |
-| `resource_*` 族                         | 工程安全预算超限（输入/ZIP/XML/图像/图表槽位/超时/临时盘/输出）                       | 看 `details.stage/subject/unit/limit/observed`，按实际超限项处理              |
+| code                                    | Meaning                                                                                                    | Action                                                                                                                              |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `invalid_json`                          | Patch / recipe is invalid JSON                                                                             | Fix JSON syntax and resubmit.                                                                                                       |
+| `invalid_argument`                      | Missing field, wrong shape/value, or unreadable asset path                                                 | Correct fields using `path` / `expected` / `actual`.                                                                                |
+| `invalid_arguments`                     | CLI invocation lacks arguments                                                                             | Supply arguments according to help.                                                                                                 |
+| `unsupported_feature`                   | Unsupported op / schemaVersion                                                                             | Check capabilities using `xdoc schema --mode ops --ops <name>` and find an alternative.                                             |
+| `invalid_operation`                     | Valid patch cannot apply to this deck (selector matches 0 or >1, layout missing, dimension conflict, etc.) | Check message / `candidates[]` and the target of complete `suggestions[].remediation`.                                              |
+| `invalid_package` / `invalid_xml`       | Input package structure or OOXML parsing failed                                                            | Use another source or repair first.                                                                                                 |
+| `missing_part` / `missing_relationship` | Input package lacks a part / relationship                                                                  | Use repair-relationships or another file.                                                                                           |
+| `encrypted_package` / `signed_package`  | Input is encrypted / signed                                                                                | Remove the password first; handle signed files according to policy.                                                                 |
+| `zip_error`                             | ZIP read/write failed                                                                                      | Check file integrity and disk.                                                                                                      |
+| `patch_too_large` / `asset_too_large`   | Patch / asset exceeds limit                                                                                | Split the patch; compress assets or adjust `XDOC_PPTX_MAX_*`.                                                                       |
+| `input_error` / `input_changed`         | Input path unreadable / input changed during request                                                       | Check path; rerun.                                                                                                                  |
+| `output_error` / `output_exists`        | Output write failed / output exists                                                                        | First check publication facts and both paths; overwrite this run's file only with existing authorization, otherwise use a new path. |
+| `output_collision`                      | Sidecar or report path conflicts with input/primary output                                                 | Use separate paths; `--overwrite` cannot resolve the conflict.                                                                      |
+| `session_conflict`                      | Another daemon session occupies the output                                                                 | Use another path or wait for the session to end.                                                                                    |
+| `invalid_sidecar`                       | Sidecar is not `pptx-apply-sidecar/v1`                                                                     | Regenerate the sidecar.                                                                                                             |
+| `daemon_unavailable` / `shutting_down`  | Daemon unreachable / shutting down                                                                         | Disable `--daemon-strict` or inspect `XDOC_DAEMON_AUTO_SPAWN` / `XDOC_DAEMON_LOG`.                                                  |
+| `internal_error` / `unknown_error`      | Internal error                                                                                             | Report with message.                                                                                                                |
+| `resource_*` family                     | Engineering safety budget exceeded (input/ZIP/XML/image/chart slots/timeout/temp disk/output)              | Inspect `details.stage/subject/unit/limit/observed` and address the actual limit.                                                   |
 
-`resource_chart_slots_exceeded` 的 `stage` 为 `chart`、`unit` 为 `slots`，限制的是
-图表展开后的逻辑槽位，不是 PPTX 压缩字节数。极大的稀疏点索引、声明的点数或
-系列/样式投影也可能让很小的文件触发此错误。先定位诊断中的 `subject` 并核对源数据；
-仅在确认输入错误时修正索引/计数，否则按用户意图拆分或缩小数据范围。
-不要压紧合法稀疏索引、把缺失值填成零或反复重试相同文件来绕过限制。
-工程上限不能靠购买授权解除，运行时配置只能收紧已编译的上限；按当前 schema 的
-`resourcePolicy` 读取实际限制和配置边界，
-不要把 `XDOC_PPTX_MAX_*` 当作所有 `resource_*` 的通用开关。
+`resource_chart_slots_exceeded` has `stage` `chart` and `unit` `slots`; it limits expanded logical chart slots, not compressed PPTX bytes. Very large sparse point indices, declared point counts, or series/style projections can trigger it even in a small file. Locate the diagnostic `subject` and check source data; correct indices/counts only when input is confirmed wrong, otherwise split or reduce data scope according to user intent. Do not compact valid sparse indices, fill missing values with zero, or repeatedly retry the same file to bypass the limit. Purchasing authorization does not remove engineering limits; runtime configuration can only tighten compiled limits. Read actual limits and configuration bounds from the current schema's `resourcePolicy`; do not treat `XDOC_PPTX_MAX_*` as a universal switch for every `resource_*` limit.
 
-## PNG 预览落点漂移 / 陈旧 PNG
+## PNG Preview Output Drift / Stale PNGs
 
-如果复核 PNG 时看到旧内容，先确认本轮 `xdoc convert` 的实际输出目录。旧版 xdoc
-曾经把 `-o previews` 的语义绑定到文件系统状态：第一次 `previews` 不存在时写到
-`previews/slide-*.png`，第二次目录已存在时可能静默写到
-`previews/<deck>-img/slide-*.png`，导致 agent 误读上一轮 PNG。
+If PNG review shows old content, first confirm the actual output directory of this run's `xdoc convert`. Older xdoc versions tied `-o previews` semantics to filesystem state: when `previews` did not exist it wrote `previews/slide-*.png`; when the directory already existed it could silently write `previews/<deck>-img/slide-*.png`, causing an agent to read PNGs from the previous run.
 
-当前工作流规避方式：
+Current workflow safeguards:
 
-1. 预览输出放在当前 run 目录，例如 `-o <run-dir>/previews`。
-2. 无尾随分隔符的 `-o <dir>` 表示 `<dir>` 就是 PNG/multi 输出根；有尾随分隔符的
-   `-o <dir>/` 才表示父目录模式。
-3. 重渲前只清理当前 run 的 preview 根，或使用 `--overwrite` 替换它。不要清理用户
-   自有目录。
-4. 复核前确认 `contact-sheet.png` 和 `slide-*.png` 的修改时间属于本轮命令，并在完成
-   摘要里写出实际预览目录和 contact sheet 路径。
+1. Put preview output in the current run directory, e.g. `-o <run-dir>/previews`.
+2. Without a trailing separator, `-o <dir>` means `<dir>` is the PNG/multi output root; only `-o <dir>/` with a trailing separator selects parent-directory mode.
+3. Before rerendering, clean only the current run's preview root or replace it with `--overwrite`. Do not clean user-owned directories.
+4. Before review, confirm the modification times of `contact-sheet.png` and `slide-*.png` belong to this command, and include the actual preview directory and contact sheet path in the completion summary.
 
-## Fuzzy 修复支持别名（alias-aware）
+## Alias-Aware Fuzzy Repair
 
-写错枚举名时,suggestions 不只看 Levenshtein 距离,还会优先匹配**别名表**。
-下面这些常见拼写都会自动得到正确候选(同时 `autoRetry=true` 直接重试):
+For misspelled enum names, suggestions use more than Levenshtein distance and prioritize the **alias table**. The following common spellings automatically yield correct candidates (and `autoRetry=true` directly retries):
 
-| 枚举类型      | 你写的（别名 / 拼错）                                                                                                       | suggestion 给出的正解                                                                                                           |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `themeColor`  | `accent-1` / `text1` / `background1` / `hyperlink` / `followedHyperlink`                                                    | `accent1` / `dk1` / `lt1` / `hlink` / `folHlink`                                                                                |
-| `fontFamily`  | `aptos-body` / `aptos-display` / `calibri-body` / `calibri-light` / `times` / `times-new-roman` / `courier` / `noto-cjk-sc` | `Aptos` / `Aptos Display` / `Calibri` / `Calibri Light` / `Times New Roman` / `Courier New` / `Noto Sans CJK SC`                |
-| `layoutName`  | `Title Slide` / `title` / `section` / `two-column` / `picture-caption`                                                      | `title-slide` / `section-header` / `two-content` / `picture-with-caption`（真实 deck 版式名仍按字面/大小写/kebab 归一三级匹配） |
-| `shapePreset` | 形状的所有 alias(参考 `pptx catalog shapes`)                                                                                | 标准 preset 名(如 `rectangel` → `rectangle`)                                                                                    |
+| Enum type     | Input (alias / typo)                                                                                                        | Correct suggestion                                                                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `themeColor`  | `accent-1` / `text1` / `background1` / `hyperlink` / `followedHyperlink`                                                    | `accent1` / `dk1` / `lt1` / `hlink` / `folHlink`                                                                                                            |
+| `fontFamily`  | `aptos-body` / `aptos-display` / `calibri-body` / `calibri-light` / `times` / `times-new-roman` / `courier` / `noto-cjk-sc` | `Aptos` / `Aptos Display` / `Calibri` / `Calibri Light` / `Times New Roman` / `Courier New` / `Noto Sans CJK SC`                                            |
+| `layoutName`  | `Title Slide` / `title` / `section` / `two-column` / `picture-caption`                                                      | `title-slide` / `section-header` / `two-content` / `picture-with-caption` (actual deck layout names still match by literal, case, then kebab normalization) |
+| `shapePreset` | All shape aliases (see `pptx catalog shapes`)                                                                               | Canonical preset name (e.g. `rectangel` → `rectangle`)                                                                                                      |
 
-**推论**:写 enum 时如果不确定标准名,先用直觉拼一个看 dry-run — 大概率会收到
-带 `autoRetry: true` 的修复建议,而不是 `unsupported_feature` 死路。
+**Implication:** if unsure of a canonical enum name, try an intuitive spelling in dry-run; it will likely yield a repair suggestion with `autoRetry: true` rather than an `unsupported_feature` dead end.
 
-`xdoc schema | jq '.commands.pptx.enumRegistry.fuzzySuggest.examples'` 会给出 4 类常见错拼
-的真实候选示例,可以离线对照。
+`xdoc schema | jq '.commands.pptx.enumRegistry.fuzzySuggest.examples'` provides actual candidate examples for four kinds of common misspellings for offline comparison.
 
-## 常见错误对照与修复
+## Common Errors and Repairs
 
-### 1. selector 匹配多个（最常见）
+### 1. Selector Matches Multiple Objects (Most Common)
 
-`error.candidates` 给出例如 `shape:12`、`shape:27` 的候选引用；用 `select` / `inspect`
-读取对应 bbox 和文本。可用建议的 `remediation.kind` 为 `replace-request`，其中
-`request` 保留整份原请求，仅将对应 authored 节点的 selector 改为具体 id。
+`error.candidates` provides candidate references such as `shape:12` and `shape:27`; use `select` / `inspect` to read their bounding boxes and text. An available suggestion has `remediation.kind` `replace-request`; its `request` retains the entire original request and changes only the corresponding authored node's selector to a specific id.
 
-修复：
+Repair:
 
-1. 对照候选引用的 bbox / textPreview 决定哪个才是目标。
-2. 用首次提交的 capsule 核对该建议的请求、输入和资源上下文。
-3. 运行本页通用消费者，重新 dry-run，再从原输入执行完整 replacement request。
+1. Compare candidate bbox / textPreview to determine the target.
+2. Check the suggested request, input, and asset context against the first submission's capsule.
+3. Run the generic consumer on this page, dry-run again, then execute the complete replacement request from the original input.
 
-### 2. selector 没匹配到
+### 2. Selector Matches Nothing
 
 ```json
 { "code": "invalid_operation", "message": "shape name 'KPI' not found" }
 ```
 
-修复：
+Repair:
 
 1. `xdoc pptx inspect input.pptx --json | jq '.slides[].shapes[] | select(.name | test("KPI"))'`
-2. 确认 name 拼写、slide 索引、shape 真存在
-3. 如果 shape 被层级嵌套（group），把 selector 改成更宽松的 query
+2. Confirm the name spelling, slide index, and that the shape exists.
+3. If the shape is nested in a hierarchy (group), use a broader query selector.
 
-### 3. layout 选不到
+### 3. Layout Cannot Be Selected
 
 ```json
 {
@@ -432,12 +308,11 @@ daemon / JSON-RPC / MCP 契约处理，不能把数字协议码当作业务错�
 }
 ```
 
-修复：从 `message` 内嵌的 available layouts 列表抄一个 `name` / `type` / `index`
-（`candidates` 是字符串数组，此场景为 `null`，不要依赖它）。
+Repair: copy a `name` / `type` / `index` from the available layouts embedded in `message` (`candidates` is a string array and is `null` in this case; do not rely on it).
 
-### 4. chart data 形状错
+### 4. Incorrect Chart Data Shape
 
-scatter / bubble 误传 `categories + values`：
+Scatter / bubble incorrectly receives `categories + values`:
 
 ```json
 {
@@ -446,61 +321,45 @@ scatter / bubble 误传 `categories + values`：
 }
 ```
 
-修复：scatter / bubble 改用 `{ series: [{ name, points: [{x,y}] }] }`。
+Repair: use `{ series: [{ name, points: [{x,y}] }] }` for scatter / bubble.
 
-### 5. 资产路径逃出 --asset-root
+### 5. Asset Path Escapes --asset-root
 
 ```json
 { "code": "invalid_argument", "message": "assetSource.path escapes --asset-root" }
 ```
 
-修复：
+Repair:
 
-1. 将本次所需资源复制到专用资产目录，保留用户原文件，以相对路径引用。
-2. 显式指定覆盖本次资源的 `--asset-root`；省略时根目录是 patch 文件所在目录，
-   不是进程 cwd。POSIX 上这两种根目录均按真实文件系统解释 symlink/`..`，不要在调用前
-   词法折叠路径；反斜杠是普通文件名字符。需要给包装脚本绝对路径时先解析实际文件身份。
-   重定位 patch 时同步核对资产根目录；这些规则不放宽资源相对路径的边界检查。
-3. 路径同时受词法和实际文件系统边界约束：绝对路径、`..` 越界、逃逸符号链接
-   以及指向根外的目录链接均不可用。不要扩大到整个 home/磁盘来绕过诊断。
-   CLI、daemon、MCP 使用同一资产策略，切换 transport 不会解除约束。
+1. Copy the required assets to a dedicated asset directory, preserving the user's originals, and reference them by relative path.
+2. Explicitly specify an `--asset-root` covering these assets; when omitted, the root is the patch file's directory, not the process cwd. On POSIX both kinds of root resolve symlink/`..` through the real filesystem; do not lexically collapse paths before invocation. Backslashes are ordinary filename characters. When a wrapper needs an absolute path, resolve actual file identity first. Recheck the asset root when relocating the patch; these rules do not relax asset-relative path boundary checks.
+3. Paths are subject to both lexical and actual filesystem boundaries: absolute paths, escaping `..`, escaping symlinks, and directory links outside the root are unavailable. Do not widen the root to the whole home/disk to bypass diagnostics. CLI, daemon, and MCP use the same asset policy; changing transport does not remove constraints.
 
-### 6. length 格式错
+### 6. Invalid Length Format
 
-新版运行时区分缺失与非法值：`add-text-box` 的非法 length 返回 `invalid_argument`，
-`error.path` 指向具体字段（嵌套 op 保留实际 authored path），`expected` 说明显式单位，
-`actual` 保留原值。缺失字段则报告 `required field` / `actual: "missing"`。
-先按当前报告修复该字段，不依赖旧版 message 文案。运行时不知道裸数字的目标单位时，
-会给出 `remediationUnavailable.reason: "input-required"`，而不是可自动执行的替换请求；
-必须按设计意图选单位，不能删除整条 op、静默猜单位或把提示视为自动重试授权。修复：
+The newer runtime distinguishes missing from invalid values: an invalid `add-text-box` length returns `invalid_argument`, `error.path` identifies the field (nested ops retain the actual authored path), `expected` describes explicit units, and `actual` retains the original value. A missing field reports `required field` / `actual: "missing"`. Repair the field using the current report, not old message text. When the runtime does not know the intended unit for a bare number, it provides `remediationUnavailable.reason: "input-required"` instead of an automatically executable replacement. Choose units according to design intent; do not delete the entire op, silently guess units, or treat the hint as authorization for automatic retry. Repair:
 
-| 写错                         | 改成                                                      |
-| ---------------------------- | --------------------------------------------------------- |
-| `"1 inch"`                   | `"1in"`                                                   |
-| `"1.5 in"`                   | `"1.5in"`（去空格）                                       |
-| `1` / `914400` 想表达 1 英寸 | `"1in"`（裸数字被拒绝，必须带 `in/cm/mm/pt/px/emu` 单位） |
+| Incorrect                           | Correct                                                                      |
+| ----------------------------------- | ---------------------------------------------------------------------------- |
+| `"1 inch"`                          | `"1in"`                                                                      |
+| `"1.5 in"`                          | `"1.5in"` (remove the space)                                                 |
+| `1` / `914400` intended as one inch | `"1in"` (bare numbers are rejected; `in/cm/mm/pt/px/emu` units are required) |
 
-### 6a. 源保护或 shape autofit 失败
+### 6a. Source Guard or Shape Autofit Failure
 
-`invalid_parameter` 的 `details.field: "/ops/<index>/shape"` 配合
-`reason: "unsupported"` 表示 guard 需要 numeric ID，不能用 name/query；
-`i18n_source_guard_mismatch` 才表示源验证失败。按结构化字段回到同一输入 inspect/scan，
-完整规则见 `../edit/inspect-and-edit.md`，不要删 guard。
+`invalid_parameter` with `details.field: "/ops/<index>/shape"` and `reason: "unsupported"` means the guard requires a numeric ID rather than name/query; `i18n_source_guard_mismatch` indicates source verification failure. Use the structured fields to inspect/scan the same input; see `../edit/inspect-and-edit.md` for complete rules. Do not remove the guard.
 
-带 guard 的嵌套文本编辑报 `invalid_argument` 时，将操作显式放到顶层 `ops[]`。
-原生 shape autofit 的测量失败可能在 opResults 已显示局部操作成功后返回顶层
-`invalid_operation`；局部成功不代表候选已发布。核对顶层状态与实际文件，保留报告，
-按其横排、单列矩形框和字体度量边界修正，不要把失败 candidate 当成输出。
+When a nested guarded text edit reports `invalid_argument`, explicitly place the operation in top-level `ops[]`. Native shape autofit measurement can return top-level `invalid_operation` after opResults already show local operation success; local success does not mean the candidate was published. Check top-level status and actual files, retain the report, and repair according to its horizontal, single-column rectangular-box and font-metric boundaries. Do not treat a failed candidate as output.
 
-### 7. color 格式错
+### 7. Invalid Color Format
 
 ```json
 { "code": "invalid_argument", "message": "set-shape has invalid fill" }
 ```
 
-修复：CSS 颜色名不支持，必须 hex。`blue` → `"0000FF"`，`red` → `"FF0000"`。
+Repair: CSS color names are unsupported; use hex. `blue` → `"0000FF"`, `red` → `"FF0000"`.
 
-### 8. 不支持的 op / 枚举值
+### 8. Unsupported Op / Enum Value
 
 ```json
 {
@@ -524,29 +383,22 @@ scatter / bubble 误传 `categories + values`：
 }
 ```
 
-`unsupported_feature` 只用于未知 op / schemaVersion；拼错的 chart kind、枚举值走
-`invalid_argument`（如 `add-chart has invalid kind 'bogus-kind'`）并附带 fuzzy
-`replace-request` 建议。`waterfall`、`funnel`、`treemap` 等 chartEx kind 现已在
-`enumRegistry.chartKind` 中。修复：按 suggestion 找替代，或告诉用户这种特性 xdoc 当前不支持。
+`unsupported_feature` is reserved for unknown op / schemaVersion. Misspelled chart kinds and enum values return `invalid_argument` (e.g. `add-chart has invalid kind 'bogus-kind'`) with a fuzzy `replace-request` suggestion. ChartEx kinds such as `waterfall`, `funnel`, and `treemap` are now in `enumRegistry.chartKind`. Repair: use the suggestion to find an alternative, or tell the user xdoc does not currently support the feature.
 
-### 9. layout.requiredSlot.missing（DeckKit validate-content）
+### 9. layout.requiredSlot.missing (DeckKit validate-content)
 
-来源是 DeckKit 的 `validate-content.mjs`（layout-contract），不是 xdoc;
+This comes from the DeckKit's `validate-content.mjs` (layout-contract), not xdoc. The hint in this example is translated into English:
 
 ```text
 [error] slides[3]: required layout slot "data.eyebrow" is missing or empty
-  — swiss-grid 内页 eyebrow 为真实的顶部短文案，请按内容补齐 ...
+  — The swiss-grid interior-page eyebrow is real short top text; fill it according to the content ...
 ```
 
-修复：按错误信息尾部的 hint 补齐对应槽位（hint 来自 catalog `layoutContract.slotHints`）。
-常见案例 swiss-grid 的 `data.eyebrow`：它是顶部排版契约的一部分，**必填且不可放宽**；
-2.0 会完整显示该字段，请填真实短文案（如 `"Origins"` 或 `"设计原则"`）。
-独立页码由生成器按页面位置计算；旧 `"P · 04"` 输入不会再被静默抑制。
-没有 hint 的槽位按 DeckKit 的 `assets/examples/deckkits/<deckkit>/content.json` 对照补齐。
+Repair: fill the corresponding slot using the hint at the end of the error (from catalog `layoutContract.slotHints`). A common example is swiss-grid's `data.eyebrow`: it is part of the top layout contract and **required without relaxation**. Version 2.0 displays the entire field; provide genuine short text such as `"Origins"` or `"Design Principles"`. Independent page numbers are calculated by the generator from slide position; old `"P · 04"` input is no longer silently suppressed. For slots without hints, compare and fill from the DeckKit's `assets/examples/deckkits/<deckkit>/content.json`.
 
-## visualRisks[] 警告处理
+## Handling visualRisks[] Warnings
 
-`visualRisks[]` 不是 error，是**潜在视觉问题**。每条 risk 形如：
+`visualRisks[]` are not errors; they are **potential visual issues**. Each risk looks like:
 
 ```json
 {
@@ -558,73 +410,66 @@ scatter / bubble 误传 `categories + values`：
 }
 ```
 
-常见 risk code：
+Common risk codes:
 
-| code                           | 含义                    | 处理                                        |
-| ------------------------------ | ----------------------- | ------------------------------------------- |
-| `text-overflow-estimate`       | 文字可能超出 shape 边界 | 加大 shape / 用 `fit-text` / 缩短文本       |
-| `text-unexpected-wrap`         | 预期单行文本出现孤行    | 缩短 subtitle/label / 加宽 / 换布局         |
-| `chart-label-density-possible` | chart 标签太密          | 改 `set-chart.dataLabels[].position` 或缩放 |
-| `table-data-outside-grid`      | 表格数据超出 grid       | 加行列 / 调整数据                           |
-| `table-cell-overflow-possible` | 表格单元格文本过长      | 加列宽 / 缩字号 / 拆行                      |
-| `picture-missing-dimension`    | 加图片没指定 w/h        | 加 `w` / `h` 字段                           |
-| `ole-icon-missing-or-unsized`  | OLE icon 未显式定尺寸   | 加 `iconW` / `iconH` 或确认默认 icon        |
+| code                           | Meaning                                       | Action                                             |
+| ------------------------------ | --------------------------------------------- | -------------------------------------------------- |
+| `text-overflow-estimate`       | Text may overflow the shape                   | Enlarge the shape / use `fit-text` / shorten text. |
+| `text-unexpected-wrap`         | Expected single-line text has a stranded line | Shorten subtitle/label / widen / change layout.    |
+| `chart-label-density-possible` | Chart labels are too dense                    | Change `set-chart.dataLabels[].position` or scale. |
+| `table-data-outside-grid`      | Table data exceeds the grid                   | Add rows/columns / adjust data.                    |
+| `table-cell-overflow-possible` | Table cell text is too long                   | Widen columns / reduce font size / split rows.     |
+| `picture-missing-dimension`    | Added picture lacks w/h                       | Add `w` / `h` fields.                              |
+| `ole-icon-missing-or-unsized`  | OLE icon has no explicit size                 | Add `iconW` / `iconH` or confirm the default icon. |
 
-不一定每条 risk 都要处理 —— **轻量警告可以让用户决定**。但 PPT 给老板看的话，
-至少把 `text-overflow-estimate`、`text-unexpected-wrap` 和 chart/table 相关风险处理掉。
+Not every risk necessarily needs action; **let the user decide on minor warnings**. For a presentation to a manager, at least address `text-overflow-estimate`, `text-unexpected-wrap`, and chart/table risks.
 
-## 调试技巧
+## Debugging Tips
 
-### 看完整 trace
+### Inspect the Full Trace
 
 ```bash
 xdoc pptx apply -p patch.json -o out.pptx --dry-run --json --log-level trace 2>&1
 ```
 
-dry-run 报告默认就带 `traces[]`（每个 op 的 `name` / `status` / `durationMs`）；
-`--log-level trace` 额外把逐步诊断日志打到 stderr，所以需要 `2>&1` 或分开重定向。
+The dry-run report includes `traces[]` by default (`name` / `status` / `durationMs` for each op). `--log-level trace` additionally writes step-by-step diagnostic logs to stderr, so use `2>&1` or redirect streams separately.
 
-### 用 `--explain` 把"这个 op 该怎么写"摊在面上
+### Use `--explain` to See How to Write an Op
 
 ```bash
 xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.json
 ```
 
-在已有的 dry-run 报告基础上追加 `explanations[]`：每个 op 的 `summary`（一句话）、
-`schema.requiredFields` / `optionalFields` / `fieldNotes` 直接告诉你"这个 op
-还少什么"，比单独 `xdoc schema --mode ops --ops <name>` 更精准 —— 只覆盖**当前 patch 里
-真用到**的 op。详见 `references/runtime/schema-discovery.md` 末尾。
+This adds `explanations[]` to the dry-run report: each op's one-sentence `summary` and `schema.requiredFields` / `optionalFields` / `fieldNotes` directly identify what the op lacks. It is more focused than `xdoc schema --mode ops --ops <name>` alone because it covers only ops **actually used in the current patch**. See the end of `references/runtime/schema-discovery.md`.
 
-### 拆 patch 二分
+### Bisect the Patch
 
-如果一个大 patch 里某个 op 报错难定位：
+If a failing op is hard to locate in a large patch:
 
-1. 复制 patch，只保留前 N/2 ops
-2. dry-run，如果不报错则错误在后半
-3. 再二分定位
+1. Copy the patch and retain only the first N/2 ops.
+2. Dry-run; if there is no error, the failure is in the second half.
+3. Continue bisecting to locate it.
 
 ### Schema validate
 
 ```bash
-# 单独用 jq 检查 patch 是否符合 schema (基础校验)
+# Check patch schema with jq separately (basic validation)
 jq -e '.schemaVersion == "pptx-patch/v1" and (.ops | type == "array")' patch.json
 ```
 
-### Sidecar 回滚
+### Sidecar Rollback
 
-如果意外把 deck 改坏了：
+If a deck was accidentally damaged:
 
 ```bash
 xdoc pptx rollback --from-sidecar out.pptx.xdoc.json -o restored.pptx
 ```
 
-rollback 不会重放任何 op：它直接复制 sidecar 记录的修改前输入（`strategy: "copy-recorded-input"`），
-sidecar 来自 `new` 时则输出一个最小空 deck（`"minimal-deck"`）；报告为 `pptx-rollback/v1`，
-`--from-sidecar` 与 `-o` 必填，不接受位置参数。
+Rollback does not replay any ops: it directly copies the pre-edit input recorded in the sidecar (`strategy: "copy-recorded-input"`); for a sidecar from `new`, it outputs a minimal empty deck (`"minimal-deck"`). The report is `pptx-rollback/v1`; `--from-sidecar` and `-o` are required, and positional arguments are not accepted.
 
-## 不要做的事
+## What Not to Do
 
-- ❌ 不要忽略结构化诊断，也不要把 `remediation` 当作授权；先核对目标和当前请求意图。
-- ❌ 不要把 `--dry-run` 报告当 "warning 没什么" 跳过 — `visualRisks[]` 是设计师在意的
-- ❌ 不要不读 `opIndex` 直接重写整个 patch — opIndex 精确告诉你哪一条出错
-- ❌ 不要假装做了 — 如果 apply 反复失败，把完整报告给用户，让他决定下一步
+- ❌ Do not ignore structured diagnostics or treat `remediation` as authorization; first check the target and current request intent.
+- ❌ Do not skip the `--dry-run` report by dismissing warnings — designers care about `visualRisks[]`.
+- ❌ Do not rewrite the entire patch without reading `opIndex` — it identifies exactly which operation failed.
+- ❌ Do not pretend the task succeeded — if apply repeatedly fails, give the user the complete report to decide the next step.

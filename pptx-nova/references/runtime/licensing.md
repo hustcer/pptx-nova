@@ -1,66 +1,39 @@
-# Runtime 授权安装与诊断
+# Runtime License Installation and Diagnostics
 
-用于用户要求安装、激活、续期 xdoc Runtime 授权，或实际任务遇到授权拒绝、授权不生效、
-付费后仍有水印的情况。普通成功任务不额外维护授权；单独处理授权无需创建 outline、
-DeckKit、PPTX 或运行视觉交付门禁。下载到本地的授权 JSON 是凭据，不是 deck 内容输入。
+Use this guide when a user asks to install, activate, or renew an xdoc Runtime license, or when a task encounters an authorization refusal, an ineffective license, or watermarks after payment. Ordinary successful tasks need no additional authorization maintenance. An authorization-only task does not require an outline, DeckKit, PPTX, or visual delivery gates. A downloaded license JSON is a credential, not deck content.
 
-## 先确定执行环境与操作范围
+## Determine the Execution Environment and Scope
 
-- 用户已要求安装/续期并提供文件时，按该授权完成校验、安装和验证，无需重复询问许可。
-  如果用户只要求解释或诊断，先做相应检查；不要顺手卸载、重置时钟或替换已有授权。
-- 使用运行 pptx-nova 的同一个 xdoc、系统用户、工作目录和环境。先确认实际二进制及
-  `xdoc --version`；显式配置的 `XDOC_BIN` 与 Agent 的 `PATH` 可能选中不同安装。
-  缺少二进制时，按[官方入门指南](https://docs.structurify.io/en/pptx-runtime/getting-started/)
-  安装已发布的 Runtime，再核对当前契约。
-- 定向读取 `xdoc schema --command auth.verify`、`auth.install`、`auth.status`；只在需要
-  恢复时读取 `auth.reset-clock` / `auth.uninstall`。报告通过各动作的
-  `ioContract.stdout.schemaRef` 解引用，详见[Schema discovery](schema-discovery.md#典型-agent-用法)。
-  文档示例不替代当前二进制的命令与报告契约。auth 输出本身是 JSON，使用 `--pretty`，
-  不添加 `--json`。
-- 只检查有关环境值：`XDOC_CONFIG_PATH`、用户 home（Windows 为 `APPDATA`）、`CI`、
-  当前工作目录 `.env` 中对应项，以及该任务的显式 `--license`。CLI 启动时会读取当前
-  工作目录的 `.env`；非空进程环境优先。不要输出整个环境或 `.env` 的无关秘密。
+- When the user has requested installation or renewal and provided a file, verify, install, and validate it under that authorization without asking again. If the user only requests an explanation or diagnosis, perform the corresponding checks; do not uninstall, reset the clock, or replace an existing license incidentally.
+- Use the same xdoc binary, OS user, working directory, and environment as the pptx-nova execution. First identify the actual binary and run `xdoc --version`; an explicit `XDOC_BIN` and the Agent's `PATH` can select different installations. If the binary is missing, install a published Runtime using the [official getting-started guide](https://docs.structurify.io/en/pptx-runtime/getting-started/), then check its current contract.
+- Read the focused schemas for `xdoc schema --command auth.verify`, `auth.install`, and `auth.status`; read `auth.reset-clock` / `auth.uninstall` only when recovery requires them. Resolve each report through its action's `ioContract.stdout.schemaRef`; see [Schema discovery](schema-discovery.md#典型-agent-用法). Examples here do not supersede the current binary's command and report contracts. Auth output is already JSON: use `--pretty`, not `--json`.
+- Inspect only relevant environment values: `XDOC_CONFIG_PATH`, the user's home (or `APPDATA` on Windows), `CI`, the corresponding entries in the working directory's `.env`, and any explicit task `--license`. The CLI loads `.env` from its working directory at startup; nonblank process environment values take precedence. Do not print the entire environment or unrelated secrets from `.env`.
 
-安装、续期会写授权配置和 Clock 状态；`status` 做完整准入，可能更新 Clock 状态，
-不是严格只读。`verify` 只读指定文件，适合用户明确要求不改本机状态的检查。
-开发验证须在新建临时私有绝对目录中设置 `XDOC_CONFIG_PATH`，不要触碰真实用户的授权。
+Installation and renewal write license configuration and Clock state. `status` performs full admission and may update Clock state; it is not strictly read-only. `verify` only reads the specified file and is suitable when the user explicitly requests no local state changes. For development verification, set `XDOC_CONFIG_PATH` to a newly created private absolute directory; do not touch the user's real license.
 
-## 安装与续期
+## Installation and Renewal
 
-1. 保留交付文件的原始 UTF-8 字节；有交付通知中的 SHA-256 时先比对。确认文件可读、
-   是普通文件，并且客户端属于签发方支持的版本范围。Runtime 需要
-   `xdoc-cli-license/v1`；Viewer/Converter 凭据不适用。文件原名可以保留，例如
-   `runtime-personal.json`。不要修改签名载荷的日期、身份、功能或能力，也不要安装签名私钥。
-2. 先校验指定文件；失败时按下表处理，修正条件后再继续：
+1. Preserve the original UTF-8 delivery bytes; compare the SHA-256 with the delivery notice when available. Confirm the file is a readable regular file and the client is within the issuer's supported version range. Runtime requires `xdoc-cli-license/v1`; Viewer/Converter credentials do not apply. The original file name, such as `runtime-personal.json`, may be retained. Do not edit signed dates, identity, features, or capabilities, and never install a signing private key.
+2. Verify the specified file first. If verification fails, use the table below and correct the conditions before continuing:
 
    ```sh
    xdoc auth verify --license "/absolute/path/runtime-personal.json" --pretty
    ```
 
-   签名/时间校验成功不代表已经安装，也不证明 Clock 防回拨准入、设备私钥持有证明或
-   具体任务授权成功。用户只要求校验时，到此报告结果即可。
+   Successful signature/time verification does not mean the file is installed or prove Clock rollback admission, possession of the device private key, or task authorization. Stop and report the result if the user requested verification only.
 
-3. 选定配置目录，再安装原文件：
+3. Select the configuration directory and install the original file:
 
    ```sh
    xdoc auth install "/absolute/path/runtime-personal.json" --pretty
    xdoc auth status --pretty
    ```
 
-   install 接收恰好一个位置文件，不能写成 `install --license ...`。auth 参数错误可能
-   只有 stderr；分别保留实际退出码、stdout 和 stderr，不要把它们混合后作为 JSON 解析。
+   Install accepts exactly one positional file; do not use `install --license ...`. Auth argument failures may produce stderr only. Preserve the actual exit code, stdout, and stderr separately; do not combine them and parse them as JSON.
 
-默认安装位置：POSIX 为 `$HOME/.config/xdoc/xdoc-license.json`，Windows 为
-`%APPDATA%\xdoc\xdoc-license.json`。设置 `XDOC_CONFIG_PATH` 时，它表示**配置目录**，
-必须是已存在、当前用户可访问的私有绝对目录；Runtime 在其中管理 `xdoc-license.json`。
-先创建该目录并为实际执行用户设置私有权限（POSIX 通常目录 `0700`，Windows 使用相应
-ACL），再在安装、status 和后续任务中保持相同环境。默认用户配置目录可由 Runtime 创建。
-不要把 `XDOC_CONFIG_PATH` 指向下载的 JSON 文件，也不要只在 install 的一次调用中设置
-它而让后续 Agent 任务使用另一个目录。普通用户安装使用用户目录即可，无需 `sudo`。
+The default installation target is `$HOME/.config/xdoc/xdoc-license.json` on POSIX and `%APPDATA%\xdoc\xdoc-license.json` on Windows. When set, `XDOC_CONFIG_PATH` identifies the **configuration directory**: it must be an existing private absolute directory accessible to the current user. Runtime manages `xdoc-license.json` inside it. Create the directory first and set private permissions for the actual execution user (normally `0700` on POSIX; use an appropriate ACL on Windows), then retain the same environment for installation, status, and later tasks. Runtime can create the default user configuration directory. Do not point `XDOC_CONFIG_PATH` at the downloaded JSON or set it only for installation while subsequent Agent tasks use another directory. A normal user installation uses the user's directory and does not need `sudo`.
 
-安装成功须同时看到 `status: "success"`、`outcome: "installed"`；核对 `installedPath`、
-`installedSha256` 与实际交付文件，读取 `authenticatedFacts` 的有效期和能力。
-健康的 status 应满足以下关键字段（这不是完整报告）：
+A successful install must show both `status: "success"` and `outcome: "installed"`. Compare `installedPath` and `installedSha256` with the delivered file and inspect the validity period and capabilities in `authenticatedFacts`. A healthy status has these key fields (this is not a complete report):
 
 ```json
 {
@@ -71,132 +44,92 @@ ACL），再在安装、status 和后续任务中保持相同环境。默认用�
 }
 ```
 
-同时将 `source.path` / `source.sha256` 与 install 报告比对。status 退出 0 只表示查询完成，
-`not-installed`、`unhealthy` 也可能返回 0；查看 `verification.reason`、`admission.reason`
-和 `clock`，不能据此宣称授权健康或任务通过。
+Compare `source.path` / `source.sha256` with the install report as well. Status exit 0 means only that the query completed: `not-installed` and `unhealthy` can also return 0. Inspect `verification.reason`, `admission.reason`, and `clock`; exit 0 alone does not establish healthy authorization or a successful task.
 
-续期使用同一套命令安装**新交付文件**，然后重复 status 和实际任务验证。新授权会替换
-选定配置目录内的旧授权；保留原交付文件，不先 uninstall。出现不同身份/授权谱系或更早
-到期的替换提示时，核对是否选错文件；不要把编辑旧 JSON 的到期日当作续期。
+For renewal, use the same commands to install the **newly delivered file**, then repeat status and real-task verification. The new license replaces the old one in the selected configuration directory; retain the original delivery file and do not uninstall first. If warned that the replacement has a different identity/license lineage or an earlier expiry, check that the intended file was selected. Editing the expiry in an old JSON file is not renewal.
 
-### 安装结果不确定
+### Uncertain Installation Outcome
 
-`outcome: "uncertain"` / `auth_install_outcome_uncertain` 表示发布可能已经发生。
-保留报告中的 `targetPath`、`attemptedSha256` 和 `publication`，在**相同环境**运行 status：
+`outcome: "uncertain"` / `auth_install_outcome_uncertain` means publication may already have occurred. Retain `targetPath`, `attemptedSha256`, and `publication` from the report, then run status in the **same environment**:
 
-- 目标路径和 `source.sha256` 与尝试安装的文件一致，且 health/admission 健康：记录当前
-  可观察到的安装结果，继续实际任务验证；保留原 uncertain 报告。
-- 仍是旧文件、无文件或状态无法确定：检查权限、存储和并发任务，条件修正后按原交付文件重试。
-- 发现其他进程安装了不同的新文件：先核对该替换是否符合当前任务，避免覆盖更新的授权。
+- If the target path and `source.sha256` match the attempted file and health/admission are healthy, record the currently observable installation result and continue with real-task verification; retain the original uncertain report.
+- If the old file remains, no file exists, or the outcome is still unclear, inspect permissions, storage, and concurrent tasks; correct the conditions before retrying the original delivery.
+- If another process installed a different newer file, check whether replacement matches the current task before overwriting that license.
 
-不要假定失败意味着旧文件完全没变，不自动回滚、删除目标或通过手工复制绕过安装准入。
+Do not assume failure left the old file unchanged. Do not automatically roll back, delete the target, or bypass installation admission by copying the file manually.
 
-## 验证具体任务
+## Verify the Actual Task
 
-安装和 status 验证的是本地凭据，任务仍按实际 feature、输出格式、能力及宿主事实求解。
-有用户原任务时，优先在同一环境恢复该任务，保留其严格约束和原始输入，使用新输出路径。
-不要仅凭 PDF 转换成功就宣称创建、修改、翻新、翻译全部获授权。
+Install and status verify the local credential; each task is still evaluated against its actual feature, output format, capabilities, and host facts. When there is an original user task, preferably resume it in the same environment, preserving its strict constraints and original inputs and using a new output path. Do not claim that creation, editing, refurbishment, and translation are all authorized merely because PDF conversion succeeded.
 
-需要独立验证转换时，用一份已知正常、原本无水印的 PPTX 和尚不存在的输出文件：
+To verify conversion independently, use a known valid PPTX that originally has no watermark and an output path that does not exist:
 
 ```sh
 xdoc convert "./slides.pptx" --to pdf --output "./licensed-check.pdf" --require-unwatermarked --report "./licensed-check-report.json"
 ```
 
-先在 `xdoc schema --command convert` 中确认参数；`--require-unwatermarked` 在无法获得
-无水印模式时拒绝任务。若只需证明付费 entitlement，且当前命令披露该选项，可用
-`--require-entitlement`。convert 的 stdout 不保证是 JSON；当前契约披露的 `--report` 可保存
-`batch/v1` 报告，检查 `items[].error` 的 `kind`、`stage` 和 `details.reason`。失败仍可能
-只有 stderr，不能假造授权报告。检查实际退出码、已有报告和生成文件；仅有授权文件，
-缺少适合的任务输入时，如实报告“已安装且健康，具体任务尚未验证”，不要虚构验证成功。
+First confirm the options in `xdoc schema --command convert`. `--require-unwatermarked` rejects the task when an unwatermarked mode cannot be authorized. If only paid entitlement needs to be proved and the current command discloses the option, use `--require-entitlement`. Convert stdout is not guaranteed to be JSON. The currently disclosed `--report` can save a `batch/v1` report; inspect `items[].error` fields `kind`, `stage`, and `details.reason`. Failures may still produce only stderr; never invent an authorization report. Check the actual exit code, available reports, and output file. If only the license file is available and there is no suitable task input, report truthfully that it is installed and healthy but task authorization remains unverified.
 
-一次性的 convert 可以显式选择凭据，该方式不安装到用户配置：
+A one-off convert can select a credential explicitly without installing it in the user configuration:
 
 ```sh
 xdoc convert "./slides.pptx" --to pdf --output "./explicit-check.pdf" --license "/absolute/path/runtime-personal.json" --require-unwatermarked
 ```
 
-`xdoc pptx` 的创建/编辑使用已安装凭据，不套用 convert 的 `--license`。其他命令只使用
-它们当前 schema/help 实际披露的参数；不要猜测所有子命令都支持严格开关。
+`xdoc pptx` creation/editing uses the installed credential; do not apply convert's `--license` option to it. For other commands use only options actually disclosed by their current schema/help; do not assume every subcommand supports strict flags.
 
-付费授权不会抹除任意输入内容水印。输入中已有的普通 Free 标记、签名水印义务和新输出
-授权分别处理；旧的带水印文件直接转换后仍有水印，不足以证明安装失败。不要删除签名元数据
-或改用其他格式来绕过义务。配额与资源区别见[转换输入配额与授权失败](troubleshooting.md#转换输入配额与授权失败)。
+A paid license does not erase arbitrary watermarks already present in input content. Existing ordinary Free marks, signed watermark obligations, and authorization for new output are handled separately; a watermark remaining after direct conversion of an old watermarked file does not prove installation failed. Do not delete signed metadata or change formats to bypass obligations. See [Conversion Input Quotas and Authorization Failures](troubleshooting.md#conversion-input-quotas-and-authorization-failures) for the distinction between quotas and resources.
 
-## 已安装但未被任务使用
+## Installed License Not Used by the Task
 
-对支持显式凭据的命令，查找顺序是：命令的 `--license` → 配置了 `XDOC_CONFIG_PATH` 时
-该目录中的 `xdoc-license.json` → 平台用户默认目录。选中了更高优先级来源后，文件缺失、
-不可读或无效不会自动改读较低优先级的凭据。项目目录里的任意 JSON 不会自动被发现。
+For commands supporting explicit credentials, lookup priority is: command `--license` → `xdoc-license.json` in `XDOC_CONFIG_PATH`, when configured → the platform user default directory. Once a higher-priority source is selected, a missing, unreadable, or invalid file does not automatically fall through to lower-priority credentials. An arbitrary JSON file in the project directory is not automatically discovered.
 
-按任务实际执行环境逐项比较：
+Compare the actual execution environment:
 
-1. 二进制路径/版本、用户/home、工作目录 `.env`、`XDOC_CONFIG_PATH` 和 `source.path`/hash。
-2. 命令是否仍有旧的显式 `--license`，或者 Agent/IDE 从不同启动环境继承了变量。
-3. daemon 是否仍使用旧环境；修改配置环境后按[daemon 指南](daemon-sessions.md)重启相应
-   长期进程，再在同一环境检查状态/任务，不终止无关任务。
-4. 容器或本地定时任务是否使用另一用户/配置路径；主机安装不会自动把文件复制进容器。
+1. Binary path/version, user/home, working-directory `.env`, `XDOC_CONFIG_PATH`, and `source.path`/hash.
+2. Whether the command still specifies an old `--license`, or the Agent/IDE inherited variables from another launch environment.
+3. Whether a daemon still uses the old environment. After changing its environment, restart the relevant long-running process according to the [daemon guide](daemon-sessions.md), then check status/the task in that same environment without stopping unrelated tasks.
+4. Whether a container or local scheduled task uses another user/configuration path. Installing on the host does not automatically copy the file into a container.
 
-Personal/Enterprise 本地授权并不自动包含 CI、跨用户共享服务器或 Service/API 使用权。
-非空 `CI` 除大小写不敏感的 `0` / `false` 外会触发 CI 判断。检查真实执行方式和已签发
-能力；需要相应交付时说明缺项并由用户向签发方申请，不篡改宿主事实或用
-`--allow-fallback` 绕过能力拒绝。商业授权失效时也不静默降为 Free：保留用户的无水印/
-严格授权约束，只在用户已明确接受且当前任务符合 Free 条件时才走披露的 fallback。
+Local Personal/Enterprise licenses do not automatically include CI, cross-user shared-server, or Service/API rights. A nonempty `CI` value other than case-insensitive `0` / `false` triggers CI evaluation. Check the actual execution mode and issued capabilities; explain missing rights and have the user request appropriate delivery from the issuer. Do not falsify host facts or use `--allow-fallback` to bypass a capability refusal. Do not silently fall back to Free when a commercial license fails: preserve the user's unwatermarked/strict authorization constraints and use a disclosed fallback only when the user has explicitly accepted it and the task qualifies for Free.
 
-## 按实际 reason 恢复
+## Recovery by Actual Reason
 
-以下是按症状选择的处理方向；完整 reason 集合和退出码由当前 action/report schema 决定。
-参数错误通常为 exit 2；install 的文件读取失败为 3、凭据拒绝为 4、写入失败/不确定为 9。
-没有 JSON 时保留 stderr，不从错误文案猜造报告字段。
+The following are symptom-based directions; the current action/report schema defines the complete reason set and exit codes. Argument errors generally use exit 2; install file-read failures use 3, credential refusals 4, and failed/uncertain writes 9. If there is no JSON, retain stderr and do not invent report fields from error prose.
 
-| 观察到的结果                                                                                                                      | 检查与恢复                                                                                                                                                                         |
-| --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cli_license_file_read_failed`                                                                                                    | 核对真实文件路径、大小写、当前用户的读取/目录遍历权限，确认是可读普通文件。保留原文件，不自动 sudo 或改变无关目录权限。                                                            |
-| `cli_license_too_large`                                                                                                           | 当前 verify/install 输入上限从 schema 的 `ioContract.input.maxBytes` 读取（当前为 65,536 字节）。确认拿到的是原始凭据而非整份归档/网页，向签发方重新获取；不要截断或精简签名文件。 |
-| JSON/envelope/payload 格式错误，如 `cli_license_json_invalid` / `cli_license_envelope_invalid`                                    | 排查下载到 HTML、复制截断或错误产品文件，重新获取原始 Runtime JSON；不要修补签名载荷。                                                                                             |
-| `cli_license_schema_unsupported` / `cli_license_kind_unsupported` / `cli_license_key_not_found` / `cli_license_signature_invalid` | 核对 Runtime 产品、交付 hash 和客户端支持范围；使用签发方支持的已发布客户端或要求更正交付，不自行添加信任密钥。                                                                    |
-| `cli_license_expired` / `cli_license_clock_invalid`                                                                               | 核对系统真实时间和交付有效期；已过期安装续期文件，尚未生效的凭据等待合法生效或要求更正。reset-clock 不续期、不改变签发日期。                                                       |
-| `health: "not-installed"`                                                                                                         | 对照用户、配置目录、cwd `.env` 和来源；将文件安装到任务真正使用的目录。仅下载文件或运行 verify 不会安装。                                                                          |
-| `health: "unhealthy"` 或 verify 通过但 install/任务拒绝                                                                           | 读取 verification/admission/clock 的实际 reason，分别排查有效期、Clock、设备绑定、撤销及具体 feature/capability。不要重复安装相同文件期待权限变化。                                |
-| `config_path_invalid` / `auth_config_invalid`                                                                                     | 确认 `XDOC_CONFIG_PATH` 是已存在的私有绝对目录而非 JSON/相对路径；排查路径别名和受管理目标的符号链接，用实际普通目录再试。                                                         |
-| `auth_storage_unavailable` / `auth_install_failed`                                                                                | 检查当前用户的目录/文件权限、只读挂载、磁盘空间和占锁进程。必要时使用新的受控私有目录，并同步后续任务环境；不要 chmod 777、递归改权限或删除锁文件。                                |
-| `outcome: "uncertain"`                                                                                                            | 按上面的路径/hash 比对流程确认发布事实，再决定是否重试同一交付；不自动回滚。                                                                                                       |
-| `clock_anomaly`                                                                                                                   | 走下节受控 Clock 恢复，先校准系统时间并停止相关任务/daemon。                                                                                                                       |
-| `device_pop_failed`                                                                                                               | 签名有效不证明当前宿主持有绑定设备私钥；核对交付是否绑定本设备及该已发布 Runtime 是否支持其宿主能力，向签发方申请适配或重发。不复制私钥或删除 devicePublicKey。                    |
-| `credential_revoked` 或撤销回执验证错误                                                                                           | 保存实际 reason 和授权 hash，向签发方核实撤销状态/获取更正交付；不删除回执、限制策略或状态来绕过拒绝。                                                                             |
-| 凭据健康，但任务为 `no_executable_mode` / `strict_mode_unsatisfied` / exit 4                                                      | 看本次授权诊断的具体原因、feature、格式、能力和输入范围；不将所有 exit 4 都解释为坏文件或过期，不靠拆页/删图/换格式自动规避。                                                      |
-| 凭据健康，仍有资源/字体/输入错误                                                                                                  | 按[运行时排障](troubleshooting.md)处理实际文件和工程上限；付费授权不提高编译资源上限。                                                                                             |
+| Observation                                                                                                                       | Check and recovery                                                                                                                                                                                                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cli_license_file_read_failed`                                                                                                    | Check the actual path, case, and current user's file-read and directory-traversal permissions; confirm a readable regular file. Preserve the original; do not automatically use sudo or change unrelated directory permissions.                                                                  |
+| `cli_license_too_large`                                                                                                           | Read the current verify/install input limit from schema `ioContract.input.maxBytes` (currently 65,536 bytes). Confirm this is the original credential rather than an archive or web page and obtain it again from the issuer; do not truncate or simplify the signed file.                       |
+| JSON/envelope/payload format error, such as `cli_license_json_invalid` / `cli_license_envelope_invalid`                           | Check for an HTML download, truncated copy, or wrong product file; obtain the original Runtime JSON again. Do not repair the signed payload.                                                                                                                                                     |
+| `cli_license_schema_unsupported` / `cli_license_kind_unsupported` / `cli_license_key_not_found` / `cli_license_signature_invalid` | Check the Runtime product, delivery hash, and supported client range. Use a published client supported by the issuer or request a corrected delivery; do not add trust keys yourself.                                                                                                            |
+| `cli_license_expired` / `cli_license_clock_invalid`                                                                               | Check the real system time and delivery validity. Install a renewal if expired; wait for valid activation or request correction if not yet valid. reset-clock does not renew or change issuance dates.                                                                                           |
+| `health: "not-installed"`                                                                                                         | Compare user, configuration directory, cwd `.env`, and source; install in the directory actually used by the task. Downloading the file or running verify alone does not install it.                                                                                                             |
+| `health: "unhealthy"` or verify succeeds but install/task is refused                                                              | Inspect the actual verification/admission/clock reason and investigate validity, Clock, device binding, revocation, and the specific feature/capability. Do not repeatedly install the same file expecting permissions to change.                                                                |
+| `config_path_invalid` / `auth_config_invalid`                                                                                     | Ensure `XDOC_CONFIG_PATH` is an existing private absolute directory, not a JSON file or relative path. Check path aliases and managed-target symlinks; retry with an actual regular directory.                                                                                                   |
+| `auth_storage_unavailable` / `auth_install_failed`                                                                                | Check current-user directory/file permissions, read-only mounts, disk space, and processes holding locks. If necessary use a new controlled private directory and align later task environments. Do not chmod 777, recursively change permissions, or delete lock files.                         |
+| `outcome: "uncertain"`                                                                                                            | Establish publication facts using the path/hash comparison above before deciding whether to retry the same delivery; do not automatically roll back.                                                                                                                                             |
+| `clock_anomaly`                                                                                                                   | Follow controlled Clock recovery below; first calibrate system time and stop the relevant tasks/daemon.                                                                                                                                                                                          |
+| `device_pop_failed`                                                                                                               | A valid signature does not prove this host possesses the bound device private key. Check whether the delivery is bound to this device and whether the published Runtime supports its host capability; ask the issuer to adapt or reissue it. Do not copy private keys or remove devicePublicKey. |
+| `credential_revoked` or revocation receipt verification error                                                                     | Retain the actual reason and license hash; ask the issuer to verify revocation or provide corrected delivery. Do not delete receipts, restriction policies, or state to bypass rejection.                                                                                                        |
+| Credential healthy but task reports `no_executable_mode` / `strict_mode_unsatisfied` / exit 4                                     | Inspect the actual authorization diagnostic, feature, format, capability, and input scope. Do not interpret every exit 4 as a bad file or expiry, or automatically bypass it by splitting slides, deleting charts, or changing formats.                                                          |
+| Credential healthy but resource/font/input error remains                                                                          | Follow [runtime troubleshooting](troubleshooting.md) for the actual file and engineering limits; a paid license does not raise compiled resource limits.                                                                                                                                         |
 
-### Clock 恢复与卸载
+### Clock Recovery and Uninstall
 
-只有已观察到 `clock_anomaly` 且用户的恢复请求覆盖该操作时，才执行时钟恢复：先校准真实
-系统时间，停止本次使用的任务与 daemon，确认同一配置目录，然后读取
-`xdoc schema --command auth.reset-clock` 并执行：
+Perform Clock recovery only when `clock_anomaly` has been observed and the user's recovery request covers this action. First calibrate the real system time, stop the tasks and daemon in use, confirm the same configuration directory, then read `xdoc schema --command auth.reset-clock` and execute:
 
 ```sh
 xdoc auth reset-clock --pretty
 xdoc auth status --pretty
 ```
 
-reset 只删除受支持的固定 Clock anchor，保留授权和锁文件。按实际报告处理
-`auth_clock_reset_failed`、`auth_clock_reset_outcome_uncertain` 或
-`auth_clock_reset_unsupported`；无法 reset 时说明限制并向签发方求助，不手删目录或锁文件。
-在新进程中检查状态，再恢复相关长期进程和原任务；reset 不能让过期、未来生效、设备不匹配
-或已撤销凭据变为有效。不将 reset 作为首次安装的准备步骤。
+Reset removes only the supported fixed Clock anchor, preserving the license and lock file. Handle `auth_clock_reset_failed`, `auth_clock_reset_outcome_uncertain`, or `auth_clock_reset_unsupported` according to the actual report. If reset is unavailable, explain the limitation and consult the issuer; do not manually delete directories or lock files. Check status in a new process, then restart relevant long-running processes and resume the original task. Reset cannot make an expired, future-valid, device-mismatched, or revoked credential valid. Do not make reset a prerequisite for first installation.
 
-仅当用户要求停止使用/移除已安装授权时，运行 `xdoc auth uninstall --pretty`；它只移除
-当前选定配置目录中的授权，保留 Clock 状态和锁文件，不删除下载原件，也不移除其他显式
-`--license` 文件。卸载后的 Free 可用性仍取决于真实任务条件。
+Run `xdoc auth uninstall --pretty` only when the user asks to stop using/remove the installed license. It removes only the license in the currently selected configuration directory, preserving Clock state and lock files. It does not delete the downloaded original or other explicit `--license` files. Free availability after uninstall still depends on actual task conditions.
 
-## 证据与交接
+## Evidence and Handoff
 
-按需要在新的任务证据目录保留二进制身份、相关定向 schema、实际命令、cwd/必要环境、
-退出码、auth 报告与 stderr，以及真实任务报告/输出。将交付 hash、install hash、status
-source hash 串起来；不要复制原始授权、私钥或无关环境进共享证据或版本库。
-向用户说明实际完成的是诊断、安装健康、还是具体任务验证成功；无法自行修复时给出
-实际 reason、受影响功能/环境和需要签发方更正的内容。未经用户明确要求不向外发送报告。
+As needed, retain binary identity, relevant focused schemas, actual commands, cwd/relevant environment, exit codes, auth reports and stderr, and real-task reports/output in a new task evidence directory. Bind the delivery hash, install hash, and status source hash; do not copy the original license, private keys, or unrelated environment into shared evidence or version control. Tell the user whether diagnosis, healthy installation, or an actual task was completed. When unable to resolve the problem, provide the actual reason, affected feature/environment, and what the issuer needs to correct. Do not send reports externally without the user's explicit request.
 
-参考：[官方授权说明](https://docs.structurify.io/en/pptx-runtime/licensing/)
-及其[机器可读版本](https://docs.structurify.io/llms.mdx/docs/en/pptx-runtime/licensing/content.md)。
-该说明标注的客户端范围可能与当前二进制不同；执行时以该二进制的 schema/help、实际报告
-和签发方交付范围共同确认，勿从本地源码推导未发布的激活、联网续期或设备迁移能力。
+References: [official licensing guide](https://docs.structurify.io/en/pptx-runtime/licensing/) and its [machine-readable version](https://docs.structurify.io/llms.mdx/docs/en/pptx-runtime/licensing/content.md). Its stated client range may differ from the current binary. Confirm against that binary's schema/help, actual reports, and the issuer's delivery scope; do not infer unpublished activation, online renewal, or device migration capabilities from local source.

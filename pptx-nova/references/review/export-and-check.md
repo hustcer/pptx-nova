@@ -21,7 +21,7 @@ authorization/error report and disclose unavailable evidence. Ordinary preview n
 additional authorization-maintenance step.
 
 For a conversion input-limit or authorization refusal, follow
-`../runtime/troubleshooting.md#转换输入配额与授权失败` and retain the actual report.
+`../runtime/troubleshooting.md#conversion-input-quotas-and-authorization-failures` and retain the actual report.
 The local CLI task contract owns its combined input-byte and slide limits;
 Converter SDK profiles have a different slide-limit policy. Markdown/text output,
 a selected slide range, or a successful read-only inspect does not prove the

@@ -154,7 +154,7 @@ Use these only to choose the entry reference; the routing table owns details.
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
   visual-evidence decision remains the delivery authority. Discover each action's DPI bounds/default;
   after upgrades or calendar changes, use fresh rendering evidence as described in `references/review/fidelity-diagnosis.md`.
-  For input quota or authorization failures, follow `references/runtime/troubleshooting.md#转换输入配额与授权失败`;
+  For input quota or authorization failures, follow `references/runtime/troubleshooting.md#conversion-input-quotas-and-authorization-failures`;
   use the local CLI contract, keeping SDK product limits and proposed APIs separate.
 - **ChartEx or structural risk**: bind the specialized audit and PowerPoint-native evidence when
   required; an unavailable optional evidence route is disclosed risk, not invented proof.

@@ -60,7 +60,9 @@ xdoc --version
 
 See the [xdoc installation guide](docs/xdoc-installation.md) for native archives,
 platform requirements, and runtime verification. After setup, describe the presentation
-task to your Agent in plain language.
+task to your Agent in plain language. For license installation, renewal, or
+authorization problems, ask the Agent to use pptx-nova's
+[licensing workflow](pptx-nova/references/runtime/licensing.md).
 
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
@@ -117,7 +119,7 @@ result is published as a separately validated candidate.
 - Rebuild editable PPTX files from structured JSON deck sources, making decks
   easier to version, review, replay, and regenerate with visual checks.
 - Refurbish an existing deck with the goal of preserving the original content
-  while making the visual system cleaner and more consistent, and deliver a
+  while making the visual system cleaner and more consistent, and deliver
   source-vs-final comparison images covering every slide for review.
 - Translate an existing `.pptx` into another language while aiming to preserve
   original deck structure, layout, styles, objects, notes, animations, and
@@ -131,6 +133,8 @@ result is published as a separately validated candidate.
   apply changes to validated candidates before publishing a final file.
 - Use a company template or reference deck as a guide while avoiding
   unapproved reuse of private or non-redistributable assets.
+- Fill supported content into an existing PPTX template or copy selected slides
+  between decks, subject to template, slide-size, and resource checks.
 - Apply or check brand, theme, and visual-system changes through DeckKit and
   `xdoc` workflows where supported.
 - Generate data-driven slides from CSV/JSON data, using editable tables,
@@ -138,6 +142,9 @@ result is published as a separately validated candidate.
 - Create or safely edit supported PPTX animations and transitions.
 - Convert existing or generated PPTX decks to high-fidelity PDF, and render PNG
   previews for visual review.
+- Extract supported deck content and metadata as Markdown, text, or JSON,
+  including notes, links, fonts, and resources; run preflight checks for fonts,
+  links, compatibility, or accessibility.
 - Run quality checks that look for overlap, clipped text, layout drift,
   template violations, content-preservation issues, visual defects, and
   before/after drift.
@@ -177,7 +184,7 @@ Update sales-review.pptx: change the title on slide 2, replace the KPI table on
 slide 5 with data from metrics.csv, and write the result to sales-review-v2.pptx.
 ```
 
-Or translate a presentation in place:
+Or translate a presentation while retaining the source:
 
 ```text
 Translate product-launch.pptx from Chinese to English. Preserve the original
@@ -189,6 +196,13 @@ Or export an existing presentation:
 
 ```text
 Convert proposal.pptx to a high-fidelity PDF and save it as proposal.pdf.
+```
+
+Or reuse an existing template:
+
+```text
+Fill company-template.pptx with the quarterly results in metrics.csv. Keep the
+company's visual style and save the new presentation as quarterly-results.pptx.
 ```
 
 ## What to provide
@@ -217,7 +231,10 @@ output filename unless you intentionally want to replace a file.
 HTML, web pages, and PDFs are treated as source material. They are first
 normalized into text or Markdown and then routed through the deck workflow;
 pptx-nova does not promise to copy their original page layout, imagery, or
-styles into PowerPoint one-to-one.
+styles into PowerPoint one-to-one. PDF extraction quality depends on the source;
+scans or embedded fonts can result in missing characters or incorrect reading
+order, so check the extracted content. CSV and JSON can provide tabular data;
+arbitrary JSON, Excel workbooks, and Word documents are not direct deck inputs.
 
 ## Outputs
 
@@ -234,6 +251,11 @@ A normal run can produce:
   that show what was translated, what was intentionally shortened, and any
   layout risks that still deserve human review.
 - A short summary of what changed and any remaining review risks.
+
+Run evidence is normally retained under `.pptx-nova/<run>/`, including the
+capability snapshot, relevant plans or patches, validation reports, and visual
+review artifacts. Successful runs may be slimmed while retaining their essential
+evidence; failed or interrupted runs are kept for inspection or resumption.
 
 For high-stakes decks, treat the generated file as a strong draft and still do a
 human review of facts, claims, numbers, brand compliance, and legal language.
@@ -255,6 +277,20 @@ default.
 
 See the [full creation and editing workflows](docs/workflows.md) for the
 detailed steps, validation gates, and retry paths.
+
+### Capability and playback boundaries
+
+pptx-nova discovers capabilities from the installed `xdoc` runtime for each
+run. Creating, editing, preserving, rendering, and verifying an object are
+separate capabilities: a feature that can be preserved or rendered is not
+necessarily editable. Complex animations and other unsupported regions may
+need to remain untouched or require a different workflow. See the
+[compatibility reference](docs/xdoc-compatibility.md) for current boundaries.
+
+PNG and PDF previews show static slides; they do not prove that animations or
+transitions play correctly in PowerPoint. When playback matters, review it in
+the intended presentation environment and treat unavailable playback evidence
+as a remaining review risk.
 
 ### Scoped edit safety
 
@@ -365,6 +401,8 @@ catalog and validation scripts instead of ad hoc one-off slide generators for
 ordinary deck delivery.
 
 ## Maintainer checks
+
+Run the full repository test suite with `node tools/run-tests.mjs`.
 
 Run the repository-level smoke test before publishing or packaging the skill:
 

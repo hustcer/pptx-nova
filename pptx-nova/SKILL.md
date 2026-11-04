@@ -8,7 +8,9 @@ description: >
   快速做一份 / 一句话生成 / 帮我快速出一版 / 简单提示词生成 / quick deck /
   reference deck style matching with a new outline, data-driven decks, brand
   checks, applying a corporate rebrand, creating or safely editing PPTX
-  animations/transitions, exporting PDF/PNG previews. Triggers on .pptx filenames, words like
+  animations/transitions, exporting PDF/PNG previews. Also use for xdoc Runtime
+  license installation, renewal, activation, and authorization diagnostics for pptx-nova.
+  Triggers on .pptx filenames, words like
   deck/slides/presentation/PPT/幻灯片/演示文稿, or any request that ends in
   "a PowerPoint file". Prefer this skill over hand-writing python-pptx /
   PptxGenJS / SVG-to-PPTX pipelines — xdoc CLI produces natively editable
@@ -66,6 +68,9 @@ For Agent transport routing, read the exact contracts under `capabilities.agentT
 only disclosed adapter calls, never workflow gates. Read `references/runtime/daemon-sessions.md` for details.
 For auth diagnostics or report validation, use the action-specific schema and report reference in
 `references/runtime/schema-discovery.md`; the compact capability snapshot is not a complete command contract.
+For license installation, renewal, unhealthy credentials, or an authorization refusal, read
+`references/runtime/licensing.md`. Keep authorization-only tasks on that route without deck preparation
+or deck delivery gates; ordinary successful PPTX tasks need no extra auth-maintenance step.
 Use `xdoc schema --command <command.action>` or `--report <schemaVersion>` for focused contracts.
 Standard runners freeze the display date in `render-context.json`; preserve it when resuming and
 verify the effective `renderContext` in rendering evidence. Manual render sequences must use the
@@ -105,6 +110,8 @@ summary.
 
 Use these only to choose the entry reference; the routing table owns details.
 
+- **Runtime license / activation / renewal / authorization failure**: `references/runtime/licensing.md`;
+  install for the actual execution user/environment, inspect admission, then verify the intended task.
 - **Create**: `references/create/create-runner.md` and `references/create/design-quality.md`; the design floor applies even to a one-sentence Express brief. Formal/high-risk work also follows the Studio/design-lock references.
   The runner prepares canonical candidate evidence first; after actual PNG review, use its
   `--finalize --visual-review` phase to publish the same hash-bound candidate without rendering again.
@@ -202,6 +209,7 @@ identify the actual renderer and its fallback before treating the symptom as a d
 
 | User intent                                                                              | Required references                                                                                                                                                                                 | Read conditionally                                                                                                                                                        |
 | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install/renew a Runtime license, activate xdoc, or diagnose authorization failures       | `references/runtime/licensing.md`                                                                                                                                                                   | `references/runtime/schema-discovery.md` for exact action/report contracts; `references/runtime/daemon-sessions.md` when the execution environment differs                |
 | Simple prompt / wants speed / default new deck generation                                | `references/create/create-runner.md`                                                                                                                                                                | Follow its preparation routes to `references/create/create-express.md`, `references/create/deckkit-mode.md`, or `references/create/narrative-quality.md` only when needed |
 | Investor / client / board / Studio / needs precise control                               | `references/common-workflow.md`, `references/create/deckkit-mode.md`, `references/create/create-studio.md`, `references/create/design-lock-and-assets.md`, `references/create/narrative-quality.md` | `references/review/visual-qa-and-asset-slots.md`, `references/create/rich-deck-patterns.md`                                                                               |
 | Strictly follow an existing PPTX template / adapt content to a template                  | `references/common-workflow.md`, `references/edit/template-following.md`, `references/edit/edit-mode.md`                                                                                            | `references/create/design-lock-and-assets.md`, `references/edit/inspect-and-edit.md`                                                                                      |
@@ -392,6 +400,11 @@ commands live in their matching references. Do not preload a command encyclopedi
 runner from individual commands when a standard runner owns the workflow.
 
 ## Completion Summary
+
+For authorization-only tasks, report what was actually installed or diagnosed, the selected path/hash,
+credential health/admission, whether an intended real task passed, and any remaining reason/action.
+Distinguish installed-and-healthy from task-authorized; when no suitable task input was available, say
+task authorization remains unverified. Do not invent deck artifacts or apply the deck summary below.
 
 After successfully generating, modifying, exporting, or checking, compress the final response into 4
 blocks and avoid dumping the full checklist on the user:

@@ -42,6 +42,10 @@ daemon 的 session 事务与磁盘文件是不同状态；失败后分别 inspec
 
 ## 转换输入配额与授权失败
 
+用户已提供 Runtime 授权文件、要求安装/续期，或遇到凭据不健康、安装后未生效时，进入
+[授权安装与诊断](licensing.md)。该流程覆盖配置目录/来源优先级、环境差异、Clock、
+设备准入和不确定写入；普通成功任务无需额外维护授权。
+
 先区分正在调用的产品与 Feature，再判断限制。读取当前 `xdoc schema --command convert`
 的 `commands.convert.licensePolicy`；需要完整配额事实时读取并保存 `xdoc schema --mode full`
 中的 `authContract.cliFeatureTask`、`authContract.productLimits`，不要拿 SDK 文案代替

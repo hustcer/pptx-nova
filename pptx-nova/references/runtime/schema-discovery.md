@@ -94,6 +94,9 @@ selector、enum 或完整校验合同，仍按下文使用 `xdoc schema --mode o
 
 ### Command / report 合同不在 op 投影里
 
+用户要求安装、续期或诊断 Runtime 授权时，先读[授权安装与诊断](licensing.md)的执行流程；
+本节负责命令参数和报告引用的精确发现。
+
 `--mode index` / `--mode ops` 和 skill 的 capability snapshot 用于渐进发现，不包含完整
 auth、渲染参数或报告校验合同。需要这些内容时，将 `xdoc schema --command <command.action>`
 或 `xdoc schema --report <schemaVersion>` 保存到 run 目录，再读取原位置的参数和

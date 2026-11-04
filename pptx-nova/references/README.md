@@ -49,6 +49,7 @@ Existing-deck changes, template following, refurbishment and guarded patch opera
 
 ## Runtime
 
+- [Runtime licensing](runtime/licensing.md) — License installation/renewal, source and environment diagnosis, admission checks, strict task verification, and bounded recovery
 - [Schema discovery](runtime/schema-discovery.md) — Progressive xdoc schema / dry-run --explain capability discovery
 - [Daemon, JSON-RPC and MCP sessions](runtime/daemon-sessions.md) — Daemon/stdio JSON-RPC/MCP selection, exact contracts, tuning, and troubleshooting
 - [Split and resume](runtime/resume-split-mode.md) — Split handoff and resume generation

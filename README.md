@@ -68,7 +68,7 @@ xdoc is an agent-native document execution runtime for native, editable PPTX wor
 
 > **xdoc is a high-performance, agent-first, headless PPTX runtime built for high-fidelity creation and editing.**
 
-The verified release is `0.18.0 (96708959)`. It exposes runtime discovery,
+The verified release is `0.18.0 (93fca5817)`. It exposes runtime discovery,
 native editable creation and modification, dry-runs, preservation diagnostics,
 rendering, validation, and auditable evidence. Support is specific to each
 object and operation; it does not imply complete PowerPoint feature parity.

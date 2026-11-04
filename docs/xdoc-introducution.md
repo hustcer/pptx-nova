@@ -3,7 +3,7 @@
 > A compact native runtime for document conversion, editable PPTX execution,
 > rendering, validation, and auditable delivery.
 
-> **Runtime contract source for this document:** `v0.18.0 (93fca581)`
+> **Runtime contract source for this document:** `v0.18.0 (93fca5817)`
 >
 > **CLI contract:** `cli-agent/v1`
 >

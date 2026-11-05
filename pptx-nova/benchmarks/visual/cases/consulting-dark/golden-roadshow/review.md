@@ -1,6 +1,6 @@
 # consulting-dark / golden-roadshow
 
-Consulting Dark 2.1 was reviewed on 2026-10-25 with xdoc 0.18.0 and the same frozen field date.
+Consulting Dark 2.1 was reviewed on 2026-10-25 with xdoc 0.19.0 and the same frozen field date.
 
 - All 10 canonical Create PNGs individually reviewed; no visual hard defect.
 - Navy canvas throughout; warm-white/pale text, copper numbers and light-teal output relationships.

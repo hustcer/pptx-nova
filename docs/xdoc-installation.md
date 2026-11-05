@@ -4,12 +4,12 @@ This guide explains how to install the native `xdoc` CLI, verify the executable
 that will run an Agent job, and keep the runtime evidence needed for a
 repeatable PPTX workflow.
 
-Runtime contract verified on 2026-10-24 against the clean `0.18.0 (93fca5817)` CLI. `xdoc`
+Runtime contract verified on 2026-10-24 against the clean `0.19.0 (93aafd96)` CLI. `xdoc`
 is a native executable with two published distribution channels:
 
 1. a global npm package, `@s8fy/xdoc`; and
 2. versioned native archives on the
-   [pptx-nova Releases page](https://github.com/hustcer/pptx-nova/releases/tag/xdoc-v0.18.0).
+   [pptx-nova Releases page](https://github.com/hustcer/pptx-nova/releases/tag/xdoc-v0.19.0).
 
 Both channels are expected to expose the same `xdoc` command, runtime version,
 discovery schema, native backends, and license notices for a given release. The
@@ -61,7 +61,7 @@ For a repeatable installation, pin the package version instead of accepting a mo
 tag:
 
 ```bash
-npm i -g @s8fy/xdoc@0.18.0
+npm i -g @s8fy/xdoc@0.19.0
 xdoc --version
 ```
 
@@ -97,22 +97,22 @@ There is currently no published macOS x86-64 or Windows ARM64 archive. A worker
 must reject an archive whose target does not match its host rather than trying
 to execute it and reporting a generic file error.
 
-The v0.18.0 macOS ARM64 executable declares macOS **13.0** as its minimum
+The v0.19.0 macOS ARM64 executable declares macOS **13.0** as its minimum
 deployment target. The release runner label alone is not a compatibility
 guarantee; check the selected artifact and its host requirements.
 
 ## Download a pinned release
 
-Replace `xdoc-v0.18.0` and the archive name with the release and target you have
+Replace `xdoc-v0.19.0` and the archive name with the release and target you have
 approved. GitHub's release API exposes an asset digest; retain that digest in
 the deployment record. If the public release process later publishes a signed
 manifest, verify the manifest as well.
 
-The v0.18.0 entry point is:
-<https://github.com/hustcer/pptx-nova/releases/tag/xdoc-v0.18.0>.
+The v0.19.0 entry point is:
+<https://github.com/hustcer/pptx-nova/releases/tag/xdoc-v0.19.0>.
 
 ```bash
-release_tag=xdoc-v0.18.0
+release_tag=xdoc-v0.19.0
 archive=xdoc-linux-x64.tar.gz
 release_repo=hustcer/pptx-nova
 
@@ -139,7 +139,7 @@ there is no separate `libpdfium` file to install. Keep the complete archive's
 notices and evidence alongside the installed runtime.
 
 ```bash
-release_tag=xdoc-v0.18.0
+release_tag=xdoc-v0.19.0
 archive=xdoc-linux-x64.tar.gz       # use xdoc-macos-arm64.tar.gz on Apple Silicon
 install_dir="$HOME/.local/lib/xdoc/$release_tag"
 
@@ -183,7 +183,7 @@ Extract the ZIP with its notices and evidence, then add the
 version directory to the worker's `PATH` or invoke the absolute path.
 
 ```powershell
-$releaseTag = 'xdoc-v0.18.0'
+$releaseTag = 'xdoc-v0.19.0'
 $installDir = Join-Path $env:LOCALAPPDATA "xdoc\$releaseTag"
 Expand-Archive .\xdoc-download\xdoc-windows-x64.zip -DestinationPath $installDir -Force
 
@@ -306,7 +306,7 @@ command.
 | Symptom                                              | Likely cause                                                          | Action                                                                                                                                            |
 | ---------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Exec format error` or an immediate loader failure   | The archive target does not match the host architecture or OS         | Select the exact target from the release matrix and verify with `file`/`Get-FileHash` before installation                                         |
-| PDF/PNG commands fail                                | Runtime/backend mismatch, invalid input, or missing fonts             | Re-probe the exact runtime and inspect its report; v0.18.0 does not require a separate PDFium library                                             |
+| PDF/PNG commands fail                                | Runtime/backend mismatch, invalid input, or missing fonts             | Re-probe the exact runtime and inspect its report; v0.19.0 does not require a separate PDFium library                                             |
 | macOS reports an incompatible system version         | The artifact was built with a newer deployment target than the worker | Publish and select an archive whose documented minimum macOS version includes the worker; do not promise compatibility from the runner name alone |
 | Text wraps differently across workers                | Fonts or font cache differ                                            | Compare `xdoc extract ... --parts fonts`, provision the same fonts, and retain render provenance                                                  |
 | A file exists but the Agent marks the job successful | The caller checked filesystem existence instead of the report         | Parse the command's versioned report and exit policy; a file alone is not a gate                                                                  |

@@ -21,7 +21,7 @@ The SVGs redraw the original WebP reference images with the workflow corrections
 ## Workflow accuracy
 
 Checked against the skill workflows, their runner implementations, and the xdoc
-implementation. The local runtime reported `0.18.0 (93fca5817)`; capabilities must
+implementation. The local runtime reported `0.19.0 (93aafd96)`; capabilities must
 still be probed for each run. These diagrams show the normal paths, not every
 task-specific branch or optional evidence integration.
 

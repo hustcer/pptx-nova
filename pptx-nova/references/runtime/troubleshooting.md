@@ -20,6 +20,22 @@ xdoc errors are structured. First read `error.code`, the diagnostics, and `sugge
 
 The example has no executable suggestion. `remediationUnavailable` and `remediation` are mutually exclusive; the reason can only be `identity-unavailable`, `context-unavailable`, `ambiguous-source`, `target-unavailable`, or `payload-limit`. Retain the diagnostics and restore the input or correct the request according to the actual reason. A missing digest does not permit skipping validation.
 
+## CLI Argument Failures
+
+Exit 2 can occur before a document is opened or a JSON report is produced. Retain stderr and the
+actual argument array. Check missing values, duplicate single-value options, integer syntax and
+overflow, and flags outside the selected action's contract. For example, `--dpi abc` is a parser
+failure, while a parsed DPI outside the action's permitted range is a product validation failure;
+neither permits silently substituting the default DPI. Follow
+[CLI invocation guidance](schema-discovery.md#cli-invocation-and-argument-failures) to build the call.
+
+Query action help separately, then correct the same intended request. Use absolute paths for
+option-looking filenames; a newer parser may now treat a literal `--help` or `--field-date` operand
+as a filename where an older runtime misinterpreted it. Help text or completion output is discovery
+evidence, not a document result. A parser failure alone is not evidence of an authorization problem
+or an unsupported PPTX feature. If execution reached publication, use the output-failure checks below
+before considering a retry.
+
 ## Output Failure: First Determine Whether the Primary File Was Published
 
 The default sidecar is `<output>.xdoc.json`. It must not resolve to the same file as the output PPTX or an input PPTX, patch, brand, bindings, or template data; check path aliases such as symlinks too. `--overwrite` cannot resolve this conflict. Existing sidecars are also protected against overwriting; prefer new candidate/sidecar paths.

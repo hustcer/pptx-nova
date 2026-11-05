@@ -23,6 +23,35 @@ previews, prefer `xdoc pptx preview --json`; for structured single-file prefligh
 `xdoc <command> --help` discloses `--report`, treat it only as a report/summary sidecar, not as a
 replacement for `preview.json` or single-file `check.json`.
 
+### CLI invocation and argument failures
+
+For automation, prefer explicit commands such as `xdoc convert ...` and `xdoc pptx inspect ...`
+over conversion shorthand. Pass an argument array to a process API instead of interpolating a shell
+command. Use resolved absolute input paths, especially for filenames that resemble commands or
+options. When using `--` to separate literal positional inputs, place the command, action and all
+options before it. Absolute paths also avoid older runtimes' help/calendar token ambiguity.
+
+Build options from the exact action contract, not just its parent command: a flag listed under
+`pdf` or `pptx` may be invalid for a particular action. Omit absent optional values and disabled
+`style: "flag"` booleans; do not emit empty values, `undefined`, `--flag=false`, or invented `--no-*`
+options. Supply CLI `int` values as canonical decimal signed 32-bit integers without unnecessary
+leading zeros, then respect the action's range constraints. Older parsers may silently substitute
+defaults for malformed, overflowing, or excessively zero-padded values; do not rely on that behavior.
+
+Request help in a separate, clean invocation such as `xdoc pdf render --help`; do not append it to
+an incomplete command with a missing string value. Newer runtimes distinguish help from literal
+`--help` input operands and show root help for a bare `xdoc` invocation. Help success only proves
+discovery worked. On exit 2, preserve stderr and correct the invocation using action help/schema;
+there may be no JSON report. See [argument failure recovery](troubleshooting.md#cli-argument-failures).
+
+### Optional shell completion
+
+When the current snapshot discloses `completions`, read `xdoc schema --command completions` for
+accepted shells. `xdoc completions bash`, `xdoc completions zsh`, or `xdoc completions fish` prints
+a shell script, not JSON. Generation does not install it or edit shell configuration. Generate or
+reload it after a CLI upgrade when the user wants interactive completion; it is not a prerequisite
+for Agent workflows. Completion candidates do not prove capability support or task authorization.
+
 ### Apply report detail
 
 When `xdoc schema --command pptx.apply` discloses `detailModes`, `apply --detail summary`

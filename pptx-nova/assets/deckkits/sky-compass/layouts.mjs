@@ -310,7 +310,8 @@ export function compileSkyLayout(design, family, layoutId, variant, d, path = 'd
       label,
       weight: (layoutId === 'rail'
         ? [2.7, 1.15, 1.2, 1.2, 1.05, 3.65]
-        : [2.5, 1.1, 1.1, 1.15, 1.15, 2.7])[i],
+        : [2.5, 1.1, 1.1, 1.15, 1.15, 2.7]
+      )[i],
       align: i > 0 && i < 5 ? 'right' : 'left',
     }))
     const rows = d.metrics.map((v) => {

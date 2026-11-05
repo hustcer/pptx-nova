@@ -55,6 +55,8 @@ detected entry, and a safe recovery hint; preserve that directory as evidence an
 For operation lookup, schema projections, or CLI output flags, read
 `references/runtime/schema-discovery.md#focused-lookup-and-output-flags` first. Prefer exact capability truth
 and the saved op index; projected schemas discover fields but do not prove patch validity.
+For direct CLI calls, use explicit commands and action-local options; follow that reference's
+CLI invocation guidance for literal paths, typed arguments, and parser failures.
 Derive selectors from inspect, the target op schema, then dry-run suggestions.
 Choose one selector lookup method; do not combine `id`, `name`, or `query` with another method.
 Combine AND predicates inside one query or its supported inline form, and pair `idx` with `placeholder`.

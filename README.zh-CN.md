@@ -26,7 +26,28 @@
 提示：点击示例右下角的三角形播放按钮，即可查看播放效果。
 **这些都是真正的原生、可编辑 PPTX 文件！**
 
-## 安装技能
+## 让 AI 帮你安装
+
+打开支持本地 Skill、能够安装依赖和访问文件的 AI 助手，例如 Claude Code 或 Codex，
+直接发送这句话：
+
+```text
+帮我安装 hustcer/pptx-nova 仓库中的 pptx-nova skill 以及相关依赖。
+安装完成后，请检查是否可以正常使用。
+```
+
+由 AI 根据你的环境选择安装方式，安装技能和用于处理 PowerPoint 文件的 `xdoc` 运行时，
+并检查配置。请让它确认：
+
+- 当前使用的 AI 助手可以识别并使用 `pptx-nova`。
+- 所需运行环境已安装，并能在该 AI 助手的环境中正常运行。
+- 当前任务是否需要许可证，以及还有哪些步骤需要你完成。
+
+<details>
+<summary>手动安装（可选）</summary>
+
+以下基于 npm 的安装步骤需要 Node.js 22.20 或更新版本，
+以满足 [skills CLI](https://github.com/vercel-labs/skills#install-a-skill) 的要求。
 
 从本仓库中只安装面向用户的 `pptx-nova` 技能：
 
@@ -50,7 +71,7 @@ npx skills add hustcer/pptx-nova --skill pptx-nova -g -a codex -y
 
 技能安装工具不会安装 `xdoc` 运行时。实际创建、编辑、转换 PPTX 和生成预览，
 还需要确保 Agent 的 `PATH` 中可以找到 `xdoc`。
-使用 Node.js 22+ 单独安装文档中指定的发布版：
+单独安装文档中指定的运行时发布版：
 
 ```bash
 npm i -g @s8fy/xdoc@0.19.0
@@ -58,11 +79,32 @@ xdoc --version
 ```
 
 原生安装包、平台要求和运行时验证方法见 [xdoc 安装指南](docs/xdoc-installation.md)。
-配置完成后，直接用自然语言向 Agent 描述演示文稿任务即可。
-如果遇到许可证安装、续期或授权问题，可以让 Agent 使用 pptx-nova 的
-[许可证工作流](pptx-nova/references/runtime/licensing.md)。
 
-### xdoc Runtime 套餐
+</details>
+
+## 制作第一份 PPT
+
+安装检查通过后，向同一个 AI 助手发送以下请求。
+如果它提示需要许可证，请先按下方的[许可证与套餐](#许可证与套餐)完成安装，再继续任务。
+
+```text
+使用 pptx-nova 制作一份 3 页的中文“远程办公入门”演示文稿，
+采用简洁风格，保存到当前工作文件夹，文件名为 demo.pptx。
+```
+
+任务成功后，AI 应提供可编辑 PPTX 文件的位置或链接。你可以在同一段对话中继续修改：
+
+```text
+把第 2 页的标题改得更简短，其他内容保持不变。
+```
+
+编辑已有演示文稿时，让 AI 能够读取 `.pptx` 文件或其本机路径，说明修改要求，
+并指定新的输出文件名。编辑、翻译和导出示例见[常见请求](#常见请求)。
+
+## 许可证与套餐
+
+Free 无需账号或许可证，在下表所列限制内即可使用。
+Personal 目前对个人本地非商业用途的价格为 0，但仍需申请并安装许可证。
 
 | 项目                         | Free（免费版）             | Personal（需许可证）                                                           |
 | ---------------------------- | -------------------------- | ------------------------------------------------------------------------------ |
@@ -77,47 +119,32 @@ xdoc --version
 Personal 目前对个人本地非商业用途免费，近期暂无针对这类用途的收费计划。
 许可证条款请参阅上方链接中的申请页面。
 
-## 由 [`xdoc`](docs/xdoc-introducution.md) 驱动
+使用 Personal 的步骤：
 
-xdoc 是面向 Agent 的文档执行运行时，用于处理原生、可编辑的 PPTX。
+1. [申请许可证](https://structurify.io/en/commerce/?product=runtime-personal)，
+   获取 xdoc Runtime 许可证文件。
+2. 让 AI 能够读取下载的许可证文件或其本机路径，然后发送：
 
-> **xdoc 是一个高性能、以 Agent 为先、无需图形界面的 PPTX 运行时，专为高保真创建和编辑而构建。**
+   ```text
+   帮我安装这份 xdoc Personal 许可证，并检查是否生效。
+   ```
 
-已核对的发布版为 `0.19.0 (93aafd96)`。它提供运行时能力发现、原生可编辑内容的创建和修改、
-试运行、保留情况诊断、渲染、验证，以及可审计的证据。
-支持范围取决于具体对象和操作，不代表完全覆盖 PowerPoint 的所有功能。
+3. 让 AI 继续原来的演示文稿任务，并说明是否还有未解决的授权问题。
 
-pptx-nova 基于 `xdoc` 构建，后者是一个为 AI Agent 自研的 PPTX 引擎。
-它可以检查真实的 PowerPoint 文件结构，通过试运行验证声明式 JSON 补丁，
-应用原生可编辑修改，渲染预览，比较源演示文稿和候选演示文稿，
-将已有或生成的演示文稿导出为高保真 PDF，并留下可回放的伴随证据（sidecar）。
+标准自动视觉检查需要无水印转换授权。如果 Free 无法完成必要检查，
+请先安装可授权该任务的许可证后继续；Free 仍可生成带水印的预览。
+续期时，提供新签发的许可证文件，让 AI 安装并检查即可。
+安装、续期和授权诊断可由 AI 按[许可证工作流](pptx-nova/references/runtime/licensing.md)处理。
 
-这些功能通过一个集成渲染后端的轻量原生 CLI 提供：
-预览、PDF 导出和视觉检查均无需 PowerPoint、办公套件或无头浏览器。
-当前 `v0.19.0` 原生安装包的下载大小因目标平台而异，约为 8.4–10.3 MB（十进制），
-无需独立服务器或始终运行的后台服务。
-原生构建支持 Linux x64/ARM64、macOS 13+ ARM64 和 Windows x64。
-渲染效果仍取决于可用字体和所需功能的支持状态。
+## 遇到问题时让 AI 帮忙
 
-使用 `npm i -g @s8fy/xdoc@0.19.0`（Node.js 22+）安装已发布的 CLI，
-或使用[原生发布安装包](docs/xdoc-installation.md)。Free 模式支持单用户本地任务，
-每个任务最多 10 页幻灯片、压缩 PPTX 输入合计最多 5 MiB；
-可编辑 PPTX、PDF 和 PNG 输出均带有 `structurify.io` 水印。
-支持本地脚本和用户级守护进程。首发的 Free、Personal 和 Enterprise 套餐
-不包含 CI、共享服务器或 Service/API 用途；在这些环境中部署需要另行取得适用授权。
-公开下载默认适用非商业条款，另有许可的情况除外。
-标准自动化视觉审计需要无水印转换授权；Free 模式仍可生成带水印的预览供审阅。
+将错误原文交给 AI，让它诊断原因。你可以这样说：
 
-这改变了演示文稿的制作方式：pptx-nova 可以用 DeckKit 规划演示文稿，
-编辑真实 PPTX 对象，写入前检查选择器，默认保留原始演示文稿，
-并生成审阅产物，让结果可以被审计。
-它更接近结构化的 PPTX 构建和编辑流水线，而非一次性的幻灯片生成器。
-
-### 基于原文件的局部编辑
-
-`xdoc` 以原始 PPTX 为基础，对目标对象及相关结构做局部修改，无需重建整份演示文稿。
-未涉及的 OOXML 部件、对象关系和扩展数据会尽可能保留。
-源文件默认保持只读，结果作为经过单独验证的候选文件发布。
+| 遇到的问题             | 可以对 AI 说的话                                                          |
+| ---------------------- | ------------------------------------------------------------------------- |
+| 找不到技能或安装未完成 | 请检查 pptx-nova 是否已安装到当前 AI 助手，并验证相关依赖，帮我修复配置。 |
+| 授权报错或出现意外水印 | 请检查当前任务使用的许可证，说明原因，以及继续任务需要做什么。            |
+| 找不到生成的文件       | 请告诉我最终 PPTX 保存在哪里，并提供文件链接或完整路径。                  |
 
 ## pptx-nova 能做什么
 
@@ -143,18 +170,6 @@ pptx-nova 基于 `xdoc` 构建，后者是一个为 AI Agent 自研的 PPTX 引�
 - 以 Markdown、文本或 JSON 提取受支持的演示文稿内容和元数据，
   包括备注、链接、字体及资源；执行字体、链接、兼容性或无障碍预检。
 - 执行质量检查，查找重叠、文字裁切、布局漂移、模板违规、内容保留问题、视觉缺陷及修改前后的偏差。
-
-## 我们的其他产品
-
-- **[xdoc Runtime](https://structurify.io/en/products/pptx-runtime/)** — 面向 Agent 的原生 CLI，
-  用于检查、创建、编辑、渲染和验证 PowerPoint 文件。
-- **[PPTX Viewer](https://structurify.io/en/products/pptx-viewer/)** — 浏览器 SDK，
-  用于 PowerPoint 预览和受支持的动画播放，提供 Web Component 和框架集成。
-- **[PPTX Converter](https://structurify.io/en/products/pptx-converter/)** — 在浏览器、Node.js、Bun 和 Deno 中
-  本地执行 PPTX 转 PDF 和 Markdown 的 SDK。
-- **[PPTX API Service](https://structurify.io/en/products/pptx-api/)** — 专为**通过 Docker 镜像私有部署**设计的
-  HTTP 服务，提供 PPTX 转换、提取和检查功能。
-  目前为仅监听本机回环地址的开发预览版，暂不支持生产部署。
 
 ## 常见请求
 
@@ -240,6 +255,48 @@ CSV 和 JSON 可以提供表格数据；任意 JSON、Excel 工作簿和 Word �
 
 对于重要演示文稿，应将生成的文件视为一份质量较高的初稿，
 仍需人工核对事实、主张、数字、品牌合规性和法律措辞。
+
+## 由 [`xdoc`](docs/xdoc-introducution.md) 驱动
+
+xdoc 是面向 Agent 的文档执行运行时，用于处理原生、可编辑的 PPTX。
+
+> **xdoc 是一个高性能、以 Agent 为先、无需图形界面的 PPTX 运行时，专为高保真创建和编辑而构建。**
+
+已核对的发布版为 `0.19.0 (93aafd96)`。它提供运行时能力发现、原生可编辑内容的创建和修改、
+试运行、保留情况诊断、渲染、验证，以及可审计的证据。
+支持范围取决于具体对象和操作，不代表完全覆盖 PowerPoint 的所有功能。
+
+pptx-nova 基于 `xdoc` 构建，后者是一个为 AI Agent 自研的 PPTX 引擎。
+它可以检查真实的 PowerPoint 文件结构，通过试运行验证声明式 JSON 补丁，
+应用原生可编辑修改，渲染预览，比较源演示文稿和候选演示文稿，
+将已有或生成的演示文稿导出为高保真 PDF，并留下可回放的伴随证据（sidecar）。
+
+这些功能通过一个集成渲染后端的轻量原生 CLI 提供：
+预览、PDF 导出和视觉检查均无需 PowerPoint、办公套件或无头浏览器。
+当前 `v0.19.0` 原生安装包的下载大小因目标平台而异，约为 8.4–10.3 MB（十进制），
+无需独立服务器或始终运行的后台服务。
+原生构建支持 Linux x64/ARM64、macOS 13+ ARM64 和 Windows x64。
+渲染效果仍取决于可用字体和所需功能的支持状态。
+
+使用 `npm i -g @s8fy/xdoc@0.19.0`（Node.js 22+）安装已发布的 CLI，
+或使用[原生发布安装包](docs/xdoc-installation.md)。Free 模式支持单用户本地任务，
+每个任务最多 10 页幻灯片、压缩 PPTX 输入合计最多 5 MiB；
+可编辑 PPTX、PDF 和 PNG 输出均带有 `structurify.io` 水印。
+支持本地脚本和用户级守护进程。首发的 Free、Personal 和 Enterprise 套餐
+不包含 CI、共享服务器或 Service/API 用途；在这些环境中部署需要另行取得适用授权。
+公开下载默认适用非商业条款，另有许可的情况除外。
+标准自动化视觉审计需要无水印转换授权；Free 模式仍可生成带水印的预览供审阅。
+
+这改变了演示文稿的制作方式：pptx-nova 可以用 DeckKit 规划演示文稿，
+编辑真实 PPTX 对象，写入前检查选择器，默认保留原始演示文稿，
+并生成审阅产物，让结果可以被审计。
+它更接近结构化的 PPTX 构建和编辑流水线，而非一次性的幻灯片生成器。
+
+### 基于原文件的局部编辑
+
+`xdoc` 以原始 PPTX 为基础，对目标对象及相关结构做局部修改，无需重建整份演示文稿。
+未涉及的 OOXML 部件、对象关系和扩展数据会尽可能保留。
+源文件默认保持只读，结果作为经过单独验证的候选文件发布。
 
 ## 工作原理
 
@@ -360,6 +417,18 @@ DeckKit 运行时代码位于 `pptx-nova/assets/deckkits/`。
 
 它不是面向普通用户的主要演示文稿生成入口。常规的创建、编辑、翻新和质量检查请使用 `pptx-nova`。
 只有在现有 DeckKit 不足以满足需求，需要构建或扩展可复用视觉系统本身时，才使用 `deckkit-maker`。
+
+## 我们的其他产品
+
+- **[xdoc Runtime](https://structurify.io/en/products/pptx-runtime/)** — 面向 Agent 的原生 CLI，
+  用于检查、创建、编辑、渲染和验证 PowerPoint 文件。
+- **[PPTX Viewer](https://structurify.io/en/products/pptx-viewer/)** — 浏览器 SDK，
+  用于 PowerPoint 预览和受支持的动画播放，提供 Web Component 和框架集成。
+- **[PPTX Converter](https://structurify.io/en/products/pptx-converter/)** — 在浏览器、Node.js、Bun 和 Deno 中
+  本地执行 PPTX 转 PDF 和 Markdown 的 SDK。
+- **[PPTX API Service](https://structurify.io/en/products/pptx-api/)** — 专为**通过 Docker 镜像私有部署**设计的
+  HTTP 服务，提供 PPTX 转换、提取和检查功能。
+  目前为仅监听本机回环地址的开发预览版，暂不支持生产部署。
 
 ## 致谢
 

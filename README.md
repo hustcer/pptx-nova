@@ -28,7 +28,29 @@ Explore presentations created with `pptx-nova` directly in your browser:
 Tip: Click the triangular play button in the bottom-right corner of a showcase to see it in action.
 **These are real, native, editable PPTX files!**
 
-## Install the skill
+## Let your AI assistant install it
+
+Open an AI assistant that supports local skills and can install dependencies
+and access files, such as Claude Code or Codex. Send it this request:
+
+```text
+Install the pptx-nova skill from hustcer/pptx-nova and its required dependencies.
+After installation, check that it is ready to use.
+```
+
+Let the assistant choose the installation method for your environment, install
+the skill and the `xdoc` runtime that handles PowerPoint files, and check the
+setup. Ask it to confirm:
+
+- `pptx-nova` is available in the assistant you are using.
+- The required runtime is installed and can run in that assistant's environment.
+- Whether a license is needed for your task and what, if anything, you need to do next.
+
+<details>
+<summary>Manual installation (optional)</summary>
+
+For these npm-based installation steps, use Node.js 22.20 or newer, as required
+by the [skills CLI](https://github.com/vercel-labs/skills#install-a-skill).
 
 Install only the user-facing `pptx-nova` skill from this repository:
 
@@ -53,7 +75,7 @@ development and is not required to use `pptx-nova`.
 
 The skill installer does not install the `xdoc` runtime. Real PPTX creation, editing,
 conversion, and preview workflows also require `xdoc` on the Agent's `PATH`.
-Install the documented release separately with Node.js 22+:
+Install the documented runtime release separately:
 
 ```bash
 npm i -g @s8fy/xdoc@0.19.0
@@ -61,12 +83,38 @@ xdoc --version
 ```
 
 See the [xdoc installation guide](docs/xdoc-installation.md) for native archives,
-platform requirements, and runtime verification. After setup, describe the presentation
-task to your Agent in plain language. For license installation, renewal, or
-authorization problems, ask the Agent to use pptx-nova's
-[licensing workflow](pptx-nova/references/runtime/licensing.md).
+platform requirements, and runtime verification.
 
-### xdoc Runtime plans
+</details>
+
+## Make your first presentation
+
+Once the setup checks pass, send this request to the same assistant. If it
+reports that a license is required, follow [Licenses and plans](#licenses-and-plans)
+below and then continue the task.
+
+```text
+Use pptx-nova to create a 3-slide Chinese presentation about getting started
+with remote work. Use a clean style and save it as demo.pptx in the current
+working folder.
+```
+
+When the task succeeds, the assistant should provide the location or a link to
+the editable PPTX file. You can continue in the same conversation:
+
+```text
+Make the title on slide 2 shorter. Keep the other content unchanged.
+```
+
+To edit an existing presentation, give the assistant access to the `.pptx`
+file or its local path, describe the changes, and choose a new output filename.
+See [Typical requests](#typical-requests) for editing, translation, and export examples.
+
+## Licenses and plans
+
+Free works without an account or license, within the limits below. Personal
+requires a license even though its current price is 0 for personal local
+noncommercial use.
 
 |                                 | Free                               | Personal (licensed plan)                                                                |
 | ------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------- |
@@ -82,55 +130,38 @@ Personal is currently free for personal local noncommercial use, with no plans
 to charge for this use in the near term. See the linked application page for
 license terms.
 
-## Powered by [`xdoc`](docs/xdoc-introducution.md)
+To use Personal:
 
-xdoc is an agent-native document execution runtime for native, editable PPTX work.
+1. [Apply for a license](https://structurify.io/en/commerce/?product=runtime-personal)
+   and obtain the xdoc Runtime license file.
+2. Give your assistant access to the downloaded license file or its local path,
+   then send this request:
 
-> **xdoc is a high-performance, agent-first, headless PPTX runtime built for high-fidelity creation and editing.**
+   ```text
+   Install this xdoc Personal license and check that it is effective.
+   ```
 
-The verified release is `0.19.0 (93aafd96)`. It exposes runtime discovery,
-native editable creation and modification, dry-runs, preservation diagnostics,
-rendering, validation, and auditable evidence. Support is specific to each
-object and operation; it does not imply complete PowerPoint feature parity.
+3. Ask the assistant to continue your presentation task and report any remaining
+   authorization issue.
 
-pptx-nova is built on `xdoc`, an in-house PPTX engine for AI agents. It can inspect
-the real PowerPoint file structure, validate declarative JSON patches with
-dry-runs, apply native editable changes, render previews, compare source and
-candidate decks, export existing or generated presentations to high-fidelity
-PDF, and leave replayable sidecar evidence.
+The standard automated visual checks require unwatermarked conversion
+authorization. If Free cannot complete a required check, install a license that
+authorizes the task before continuing; Free can still produce watermarked previews.
+For renewal, provide the newly issued license file and ask the assistant to
+install and check it. The assistant can follow the
+[licensing workflow](pptx-nova/references/runtime/licensing.md) for installation,
+renewal, and authorization diagnostics.
 
-All of this runs through a single lightweight native CLI with integrated
-rendering backends: previews, PDF export, and visual checks require no
-PowerPoint, office suite, or headless browser. The current `v0.19.0` native
-archives download as approximately 8.4–10.3 MB (decimal), depending on the target, and need no
-separate server or always-on background service. Native builds are available
-for Linux x64/ARM64, macOS 13+ ARM64, and Windows x64. Rendering still depends
-on the available fonts and the support status of the requested feature.
+## Get help from your AI assistant
 
-Install the published CLI with `npm i -g @s8fy/xdoc@0.19.0` (Node.js 22+), or
-use a [native release archive](docs/xdoc-installation.md). Free mode supports
-single-user local tasks up to 10 slides and 5 MiB of compressed PPTX inputs
-combined; editable PPTX, PDF, and PNG outputs carry a `structurify.io` watermark.
-Local scripts and a per-user daemon are supported. The launch Free, Personal,
-and Enterprise plans do not include CI, shared servers, or Service/API use;
-deployment in those environments requires separately applicable authorization.
-Public downloads use non-commercial terms unless separately licensed.
-The canonical automated visual audit requires unwatermarked conversion
-authorization; Free mode can still produce watermarked previews for review.
+Share the original error message with your assistant and ask it to diagnose the
+problem. You can use these requests:
 
-That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real
-PPTX objects instead of screenshots, check selectors before writing, preserve
-the original deck by default, and produce review artifacts that make the result
-auditable. It is closer to a structured PPTX build/edit pipeline than a
-one-shot slide generator.
-
-### Targeted edits to the original PPTX
-
-`xdoc` applies targeted changes to objects and related PPTX structures in the
-original file, without rebuilding the entire presentation. Untouched OOXML
-parts, relationships, and extension data are preserved where possible. The
-source remains read-only by default, and the result is published as a
-separately validated candidate.
+| Problem                                                   | What to say to your assistant                                                                               |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| The skill is unavailable or installation did not complete | Check whether pptx-nova is installed for this assistant and verify its dependencies. Help me fix the setup. |
+| A license error or unexpected watermark                   | Check the license used for this task, explain the cause, and tell me what is needed to continue.            |
+| You cannot find the generated file                        | Tell me where the final PPTX was saved and provide a file link or full path.                                |
 
 ## What pptx-nova can do
 
@@ -168,18 +199,6 @@ separately validated candidate.
 - Run quality checks that look for overlap, clipped text, layout drift,
   template violations, content-preservation issues, visual defects, and
   before/after drift.
-
-## Our other products
-
-- **[xdoc Runtime](https://structurify.io/en/products/pptx-runtime/)** — An Agent-ready native
-  CLI to inspect, create, edit, render, and verify PowerPoint files.
-- **[PPTX Viewer](https://structurify.io/en/products/pptx-viewer/)** — A browser SDK for
-  PowerPoint preview and supported animation playback, with Web Component and framework integrations.
-- **[PPTX Converter](https://structurify.io/en/products/pptx-converter/)** — An SDK for local
-  PPTX-to-PDF and Markdown conversion in browsers, Node.js, Bun, and Deno.
-- **[PPTX API Service](https://structurify.io/en/products/pptx-api/)** — An HTTP service designed
-  for **private deployment via Docker images**, with PPTX conversion, extraction, and checks.
-  Currently a loopback-only development preview; production deployment is not yet available.
 
 ## Typical requests
 
@@ -279,6 +298,56 @@ evidence; failed or interrupted runs are kept for inspection or resumption.
 
 For high-stakes decks, treat the generated file as a strong draft and still do a
 human review of facts, claims, numbers, brand compliance, and legal language.
+
+## Powered by [`xdoc`](docs/xdoc-introducution.md)
+
+xdoc is an agent-native document execution runtime for native, editable PPTX work.
+
+> **xdoc is a high-performance, agent-first, headless PPTX runtime built for high-fidelity creation and editing.**
+
+The verified release is `0.19.0 (93aafd96)`. It exposes runtime discovery,
+native editable creation and modification, dry-runs, preservation diagnostics,
+rendering, validation, and auditable evidence. Support is specific to each
+object and operation; it does not imply complete PowerPoint feature parity.
+
+pptx-nova is built on `xdoc`, an in-house PPTX engine for AI agents. It can inspect
+the real PowerPoint file structure, validate declarative JSON patches with
+dry-runs, apply native editable changes, render previews, compare source and
+candidate decks, export existing or generated presentations to high-fidelity
+PDF, and leave replayable sidecar evidence.
+
+All of this runs through a single lightweight native CLI with integrated
+rendering backends: previews, PDF export, and visual checks require no
+PowerPoint, office suite, or headless browser. The current `v0.19.0` native
+archives download as approximately 8.4–10.3 MB (decimal), depending on the target, and need no
+separate server or always-on background service. Native builds are available
+for Linux x64/ARM64, macOS 13+ ARM64, and Windows x64. Rendering still depends
+on the available fonts and the support status of the requested feature.
+
+Install the published CLI with `npm i -g @s8fy/xdoc@0.19.0` (Node.js 22+), or
+use a [native release archive](docs/xdoc-installation.md). Free mode supports
+single-user local tasks up to 10 slides and 5 MiB of compressed PPTX inputs
+combined; editable PPTX, PDF, and PNG outputs carry a `structurify.io` watermark.
+Local scripts and a per-user daemon are supported. The launch Free, Personal,
+and Enterprise plans do not include CI, shared servers, or Service/API use;
+deployment in those environments requires separately applicable authorization.
+Public downloads use non-commercial terms unless separately licensed.
+The canonical automated visual audit requires unwatermarked conversion
+authorization; Free mode can still produce watermarked previews for review.
+
+That changes the workflow: pptx-nova can plan a deck with DeckKits, edit real
+PPTX objects instead of screenshots, check selectors before writing, preserve
+the original deck by default, and produce review artifacts that make the result
+auditable. It is closer to a structured PPTX build/edit pipeline than a
+one-shot slide generator.
+
+### Targeted edits to the original PPTX
+
+`xdoc` applies targeted changes to objects and related PPTX structures in the
+original file, without rebuilding the entire presentation. Untouched OOXML
+parts, relationships, and extension data are preserved where possible. The
+source remains read-only by default, and the result is published as a
+separately validated candidate.
 
 ## How it works
 
@@ -431,6 +500,18 @@ It is not the main user-facing deck generation path. For normal presentation
 creation, editing, refurbishment, and QA, use `pptx-nova`. Use `deckkit-maker`
 only when the existing DeckKits are not enough and the reusable visual system
 itself needs to be built or extended.
+
+## Our other products
+
+- **[xdoc Runtime](https://structurify.io/en/products/pptx-runtime/)** — An Agent-ready native
+  CLI to inspect, create, edit, render, and verify PowerPoint files.
+- **[PPTX Viewer](https://structurify.io/en/products/pptx-viewer/)** — A browser SDK for
+  PowerPoint preview and supported animation playback, with Web Component and framework integrations.
+- **[PPTX Converter](https://structurify.io/en/products/pptx-converter/)** — An SDK for local
+  PPTX-to-PDF and Markdown conversion in browsers, Node.js, Bun, and Deno.
+- **[PPTX API Service](https://structurify.io/en/products/pptx-api/)** — An HTTP service designed
+  for **private deployment via Docker images**, with PPTX conversion, extraction, and checks.
+  Currently a loopback-only development preview; production deployment is not yet available.
 
 ## Acknowledgments
 

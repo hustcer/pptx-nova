@@ -118,7 +118,7 @@ node <skill-root>/scripts/cli/create/check-lock.mjs \
   --json
 # 有 assets_manifest.json 时加：--assets assets_manifest.json
 
-# 6. 丰富度自检（客户演示级目标 ≥200 ops，见 §5）
+# 6. 记录操作数，并按 §5 检查内容和视觉质量
 jq '.ops | length' patch.json
 
 # 7. 首次提交前保存上下文，再 dry-run（运行时需披露 remediationSchema）
@@ -175,7 +175,7 @@ DeckKit 页型或 content 重跑，不要跳步、不要在没过闸门时声称
 outline 顶层还带 `out`（输出路径）和 `themePack` / `stylePack`（如 `corporate-blue` /
 `consulting`）。主题色、字体、底色、字号节奏先从 themePack/stylePack 派生；用户给了
 `rebrand.{colors,fonts,background}` 时再覆盖并走 `set-theme` / `remap-theme`。`kind` 是页型意图、不强制枚举——
-每页写一个 slide 函数即可；模板已含 8 个同型示例可改：`slideCover` / `slideAgenda` / `slideKPI` /
+探索生成器时可修改模板的 `executive-grid` 中 8 个示例：`slideCover` / `slideAgenda` / `slideKPI` /
 `slideChart` / `slideTable` / `slidePillars`（多列支柱）/ `slideWorkflow` / `slideHero`（全色收尾），
 挑最接近的页型改内容。
 
@@ -232,9 +232,8 @@ helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `page
 express 默认按**客户演示级**产出，不交 recipe-only 草稿。硬指标（详见
 `create-studio.md` 的可读性红线与 `rich-deck-patterns.md` 的 op 量级表）：
 
-- **op 量级**：7 页左右 deck **≥200 ops**；`jq '.ops|length'` < 100 说明只堆了 recipe、视觉太空，
-  回去给每页加视觉元素（顶部品牌条 / accent 竖条 / eyebrow / KPI 顶部色条 / delta pill /
-  callout / hero 收尾）。
+- **op 量级**：`jq '.ops|length'` 仅用于了解构建规模，不设操作数下限；是否需要补充视觉元素，
+  应根据内容、页面结构和渲染结果判断。
 - **每页有视觉锚点**：页眉/页脚/章节标记/导航 或 全屏 hero 之一。
 - **chart 页必须有结论 callout**：右 1/3 放 2-3 个数字卡，别让用户自己解读图。
 - **长文本压缩**成结论 / 表格 / callout / notes，不堆满正文。

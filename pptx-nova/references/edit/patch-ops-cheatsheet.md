@@ -1,6 +1,6 @@
-# Patch Ops Cheatsheet —— 58 个 op 按场景速查
+# Patch Ops Cheatsheet —— 59 个 op 按场景速查
 
-下面把 xdoc schema v1 的 58 个 op 按 **"我想做什么"** 反向归类。每条只列
+下面按 **"我想做什么"** 归类 xdoc schema v1 的常用 op。当前契约包含 59 个 op，每条只列
 关键字段；完整 schema 用 `xdoc schema --mode ops --ops <name>` 拉。旧版细粒度 shape / chart /
 table setter 已全部并入对应的聚合 op
 （`set-shape` / `set-chart` / `set-table` ...），本表只列 canonical 名字。
@@ -43,18 +43,19 @@ table setter 已全部并入对应的聚合 op
 
 ### Layout / Master / Theme
 
-| op                             | 用途                                                              |
-| ------------------------------ | ----------------------------------------------------------------- |
-| `add-layout`                   | 新建 layout（`type` 可选 `title` / `obj` / `secHead` 等）         |
-| `add-layout`（`source`）       | 复制既有 layout 到新 layout part（`source` 选源 layout）          |
-| `set-layout`（`name`）         | 重命名 layout                                                     |
-| `set-layout`（`type`）         | 改 layout type                                                    |
-| `add-layout-placeholder`       | 给 layout 加 placeholder（type + idx）                            |
-| `set-theme`（`colors`）        | 改主题色（`colors: { accent1: "1A73E8", ... }`）                  |
-| `set-theme`（`fonts`）         | 改主题字体（`fonts: { major / minor: { typeface, eastAsian } }`） |
-| `set-master`（`background`）   | 改 master 背景（`background: <fill>`）                            |
-| `set-master`（`placeholders`） | 改 master 占位符默认（`placeholders: [{ type, font, ... }]`）     |
-| `set-default-text-style`       | 整个 deck 的默认文字样式（`levels: [{ level, font, ... }]`）      |
+| op                             | 用途                                                               |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `add-layout`                   | 新建 layout（`type` 可选 `title` / `obj` / `secHead` 等）          |
+| `add-layout`（`source`）       | 复制既有 layout 到新 layout part（`source` 选源 layout）           |
+| `set-layout`（`name`）         | 重命名 layout                                                      |
+| `set-layout`（`type`）         | 改 layout type                                                     |
+| `add-layout-placeholder`       | 给 layout 加 placeholder（type + idx）                             |
+| `set-theme`（`colors`）        | 改主题色（`colors: { accent1: "1A73E8", ... }`）                   |
+| `set-theme`（`fonts`）         | 改主题字体（`fonts: { major / minor: { typeface, eastAsian } }`）  |
+| `set-master`（`background`）   | 改 master 背景（`background: <fill>`）                             |
+| `set-master`（`placeholders`） | 改 master 占位符默认（`placeholders: [{ type, font, ... }]`）      |
+| `set-default-text-style`       | 整个 deck 的默认文字样式（`levels: [{ level, font, ... }]`）       |
+| `set-font`                     | 整包中文或东亚字体归一化；选择边界和复核见 `font-normalization.md` |
 
 详见 `../content/styles-and-themes.md`。
 

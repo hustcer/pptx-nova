@@ -94,7 +94,7 @@ an error with candidates, not permission to choose the first array element.
 
 The native bridge exposes ordinary editing for slides, text, shapes, tables,
 connectors, pictures, layouts, themes, backgrounds, notes, and selected chart
-and media operations. The runtime also exposes 58 patch operations, 182 preset
+and media operations. The runtime also exposes 59 patch operations, 182 preset
 PowerPoint shapes, and a chart catalog whose individual constants are marked
 supported, partial, or unsupported.
 

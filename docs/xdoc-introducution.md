@@ -252,8 +252,8 @@ screenshots or log interpretation alone.
 | Area                           | Runtime contract in v0.19.0                                                                            |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `auth`, `pdf`, `daemon`, `json-rpc`, `mcp`, `schema` |
-| PPTX CLI subcommands           | 37 discoverable subcommands                                                                            |
-| Patch operations               | 58 canonical operations                                                                                |
+| PPTX CLI subcommands           | 38 discoverable subcommands                                                                            |
+| Patch operations               | 59 canonical operations                                                                                |
 | High-level recipes             | 18 recipe kinds                                                                                        |
 | Shape catalog                  | 182 preset shapes                                                                                      |
 | Layout contracts               | 6 built-in content contracts                                                                           |
@@ -264,7 +264,7 @@ screenshots or log interpretation alone.
 | Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                                    |
 | Embedded PPTX report schemas   | 31 report schemas                                                                                      |
 | Patch schema definitions       | 238 `$defs` in the current runtime schema                                                              |
-| Runtime examples               | 43 PPTX CLI examples, 23 patch examples, and 7 recipe examples                                         |
+| Runtime examples               | 45 PPTX CLI examples, 25 patch examples, and 7 recipe examples                                         |
 | Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                           |
 
 Counts are discovery aids, not promises that every long-tail PPTX feature is
@@ -346,7 +346,7 @@ xdoc schema --mode examples
 The index is intentionally small. An agent can request the complete definition
 only after it knows which operation it needs.
 
-The full runtime schema currently includes 43 PPTX CLI examples, 23 patch
+The full runtime schema currently includes 45 PPTX CLI examples, 25 patch
 examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
@@ -807,12 +807,12 @@ an ordered list of operations:
 
 `slide` in patch operations is zero-based. This differs from the 1-based
 `--slides` selectors used by most CLI inspection and conversion commands.
-Lengths can be numeric or unit-bearing strings such as `in`, `cm`, `mm`, `pt`,
-`px`, or `emu`; ask `xdoc schema --mode ops --ops OP_NAME` for the exact field contract.
+Length fields use strings with units such as `in`, `cm`, `mm`, `pt`, `px`, or
+`emu`; ask `xdoc schema --mode ops --ops OP_NAME` for the exact field contract.
 
 ### Operation families
 
-The 58 canonical operations are grouped conceptually below:
+The 59 canonical operations are grouped conceptually below:
 
 **Presentation structure**
 
@@ -827,6 +827,7 @@ The 58 canonical operations are grouped conceptually below:
 - `add-text-box`, `add-paragraph`, `add-run`
 - `set-text-frame`, `set-paragraph`, `set-run`
 - `replace-paragraph-text`, `set-default-text-style`, `fit-text`
+- `set-font` for scoped document-wide Chinese or East Asian font normalization
 
 **Shapes and media**
 
@@ -928,7 +929,7 @@ representation before generating a patch. The current catalog registers two
 production-ready native DeckKits without making DeckKit internals part of the
 patch schema.
 
-In the verified build, all 58 canonical operation names appear in
+In the verified build, all 59 canonical operation names appear in
 `patchSchema.supportedOps` and `patchSchema.experimentalOps` is empty. This is
 about the availability of operation entry points, not universal OOXML parity:
 individual chart variants, extension parts, and long-tail objects still carry
@@ -2225,7 +2226,7 @@ rendering, and history verification still connect end to end.
 
 ## Appendix A: complete canonical patch operation list
 
-The current runtime index reports these 58 canonical operations:
+The current runtime index reports these 59 canonical operations:
 
 ```text
 add-chart
@@ -2269,6 +2270,7 @@ set-chart-text
 set-connector
 set-default-text-style
 set-document-properties
+set-font
 set-layout
 set-master
 set-paragraph

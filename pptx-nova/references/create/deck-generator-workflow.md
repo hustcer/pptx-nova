@@ -37,13 +37,14 @@ production/default DeckKit。若有可用 DeckKit，直接回到 `deckkit-mode.m
 ```bash
 # 1. 复制模板
 cp <skill-root>/assets/examples/generator/deck-generator-template.mjs <run-dir>/generate.mjs
+cp <skill-root>/assets/examples/generator/theme-packs.generated.mjs <run-dir>/theme-packs.generated.mjs
 
 # 2. 选择 themePack/stylePack；要新增风格时先改 assets/themes/catalog.json
 #    并在发布前同步生成的 theme catalogs
 #    然后只改各 slide 函数里的文字/数据
 
 # 3. 生成探索 patch + 丰富度自检 + dry-run gate + 落盘
-node generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
+node <run-dir>/generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
 jq '.ops | length' patch.json   # 仅记录构建规模；质量由内容、结构和真实渲染证明，不设操作数下限
 # shell 驱动的多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：当前 runtime
 # 自动按需拉起，首次 ~200ms、之后调用 ~5ms 走 RPC。CI 用 --daemon-strict。
@@ -193,7 +194,7 @@ const nm = (slide, base) => `S${slide}_${base}`
 
 ### 4. 复合 helpers 减少重复
 
-模板里这 6 个 helper 覆盖 95% 的场景：
+模板提供以下常用 helper：
 
 ```js
 shape(s, name, kind, x, y, w, h) // add-shape
@@ -448,8 +449,8 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](rich-deck-pattern
 
 ## 升级路径：从模板到完整 deck
 
-模板里 8 个 slide 函数（cover / agenda / KPI / chart / table / pillars /
-workflow / hero）覆盖 `rich-deck-patterns.md` 的 7 页推荐结构和常用页型。
+模板的 `executive-grid` 使用 8 个 slide 函数（cover / agenda / KPI / chart / table /
+pillars / workflow / hero）。模板还包含 `narrative-split` 和 `data-room` 的专用函数。
 
 按需 **复制函数 + 改函数名** 即可生成第 9、10 页：
 
@@ -493,7 +494,7 @@ generator 的全流程，直接走 **content manifest → DeckKit → patch** �
 ```bash
 # 1. 只写内容清单（~200 行 JSON，不含坐标/配色/组件逻辑）
 cp assets/deckkits/consulting-dark/examples/content.json ./content.json
-#    参照 assets/deckkits/schemas/<slideType>.schema.json 改内容
+#    参照 assets/deckkits/consulting-dark/schemas/<slideType>.schema.json 改内容
 #    或运行 node <skill-root>/scripts/cli/deckkits/slots.mjs --deckkit <id> 查看槽位速查
 
 # 2. 校验 content（schema + density limit，几何错误 apply 前拦截）
@@ -531,6 +532,6 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 ## 也参考
 
 - [rich-deck-patterns.md](rich-deck-patterns.md) — 视觉元素清单与 7 页 deck 起手势
-- [patch-ops-cheatsheet.md](../edit/patch-ops-cheatsheet.md) — 58 个 op 的 schema 速查
+- [patch-ops-cheatsheet.md](../edit/patch-ops-cheatsheet.md) — patch op 的 schema 速查
 - [charts.md](../content/charts.md) — 27 种 chart kind 与 enum 全名表
 - [troubleshooting.md](../runtime/troubleshooting.md) — `errorCatalog` 错误自修复

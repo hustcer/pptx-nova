@@ -167,6 +167,14 @@ camera、bevel、extrusion 或 material 已正确渲染的证据。即使当前�
 渲染侧诊断与 `threeDFacts` 不是同一种证据：没有诊断不代表完整支持，模型被保留也不等于
 源 XML 被保留。仅消费当前命令实际披露的报告，不给 CLI 臆造 SDK 回调或诊断参数。
 
+当前 render 轴已披露有界正交/等距平行相机、可见 extrusion 侧壁、顶部/底部 bevel，
+以及符合条件的 Text3D 字形挤出，不应继续假定只能画正面。具体准入仍逐项查 limits：
+投影实体要求受支持的闭合凸轮廓和不透明纯色；Text3D 需要可用字形轮廓、正 extrusion、
+受支持平行相机且无活动 glyph bevel/contour。透视、斜投影、背向/奇异平面、复杂轮廓、
+不支持的 paint/光照/材质及资源超限仍有 fallback。保留源声明，先重新渲染未修改输入；
+不要为匹配旧预览删掉 extrusion 或改相机。`create/edit` 轴仍为 unsupported，
+`verify` 仍为 inconclusive；渲染改善不授权写入 Shape/Text 3D 声明。
+
 原生对象语料先做一页包含“对象、编号、脚注”的 smoke，核对返回的实际 ID、尺寸、3D 声明和
 `semanticIssues[]`，再展开全稿。`status=success` 不代表语义问题为空。不要把固定步长或某个
 大 ID 区间当成通用 allocator；交错执行 raw 插入与 typed add 时，后者会占用当前可用 ID。

@@ -68,6 +68,9 @@ timing 诊断，不计入逻辑效果数量。相同 `grpId` 不合并不同效�
 它不是任意修改都成功的保证。`mergeSafe` 独立判断能否安全合并整棵 timing，计数变少不扩大权限。
 `preserveOnly` 命中的 timing 不要 raw XML 猜改；仅在用户已明确授权丢弃/重建相应动画语义时
 使用 `mode: "replace"` 或 `mode: "clear"`，否则先说明影响并取得授权。
+`mergeSafe:false` 拒绝的是默认安全合并，不是禁止同页所有编辑：不相关文字/几何编辑
+应保留未触达 timing；明确授权的 replace/clear 会整体替换/移除 timing。先保留原始
+inspect/timing 证据，再回读最终 timing；不要仅为通过 merge-safe 而切换 mode。
 
 安全修改还取决于 carrier、调度和引用：
 

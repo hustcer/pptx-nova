@@ -79,11 +79,19 @@ OLE host 与显示 preview 的变换应在创建、移动、缩放和组坐标�
 导入 payload 和不明归属内容可能保留。不要为了缩小文件手动删除剩余 part 或把
 所有剩余媒体都判为泄漏；检查新悬空引用和完整包语义证据。
 
-嵌入 3D model 与 Shape/Text 3D 是不同合同。已有模型的 object-mode poster 可以跟随
-host 中心移动并保持 cached canvas scale，不代表重新渲染模型；window-mode 的移动
-与缩放不同，需要新 raster 的 resize、模型 ungroup 或含糊 fallback 几何可能被拒绝。
-保留 opaque scene、fallback 及其关系，不能用 `threeDFacts` 或二维 PNG 认证模型保真。
-要求 Office 外观或模型交互时另取 PowerPoint 原生证据。
+嵌入 3D model 与 Shape/Text 3D 是不同合同。先发现
+`model-3d/host-geometry-editing`；当前 `partial` 条目的 `operations` 可为空，而
+`recommendation.operations: ["set-shape"]` 明确指向已有 host 的有限几何编辑。
+不要让 `model-3d/create-edit: unsupported` 覆盖这个独立子集，也不要据此修改场景、
+相机、材质、动画或创建新模型。
+
+按 inspect 得到的 host selector，用 `set-shape` 的位置/尺寸字段先 dry-run。
+object-mode 可以移动和缩放 host，poster 跟随 host 中心并保持 cached canvas scale；
+这不是模型重新渲染。window-mode 可平移，但需要新 raster 的 resize 会拒绝。
+含糊 carrier、不合法或不匹配的 raster 几何、模型 ungroup 也会拒绝，不用 raw XML 绕过。
+apply 后核对 host 与 group-local 几何，并比较 opaque scene、嵌入 payload、cached raster
+字节和关系归属。不能用 `threeDFacts` 或二维 PNG 认证模型保真；要求 Office 外观或模型
+交互时另取 PowerPoint 原生证据。
 
 ## 验证
 

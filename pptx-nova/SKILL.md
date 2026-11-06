@@ -46,6 +46,9 @@ manually initialize a full run first. An explicit `--run-dir` must be new, empty
 Operation/catalog indexes are not allowlists; missing means `undisclosed`. For semantic routing, read
 the exact `capabilities.capabilityTruth.entries[]` feature/subset: `supported` may use its operations,
 `partial` requires verification, `preserve-only` stays untouched, and `unsupported` follows its alternative; operation presence never upgrades feature status.
+For `partial` entries, follow the declared limits and `recommendation.operations` / `target`, even
+when `operations` is empty. Match the exact subset: a model scene's unsupported authoring contract
+does not prohibit separately disclosed host-geometry edits.
 When an entry has non-null `axes`, route `create` / `edit` / `inspect` / `preserve` / `render` /
 `verify` independently. The entry-level status does not upgrade a weaker axis, and static PDF/PNG or
 Viewer fallback evidence never upgrades `verify` to PowerPoint playback support.
@@ -124,7 +127,8 @@ Use these only to choose the entry reference; the routing table owns details.
   respect autofit; geometry-preserving edits require the disclosed policy and final fit checks.
 - **Connectors / groups / OLE / embedded models**: read `references/edit/native-shape-editing.md` before geometry
   edits or duplication. Use native connection sites, retain owner-specific resources and reject
-  unrepresentable transforms. A `preset-adjustments` finding uses an explicitly reviewed,
+  unrepresentable transforms. Discover `model-3d/host-geometry-editing` for bounded existing-host
+  edits through `set-shape`; retain the scene and cached raster. A `preset-adjustments` finding uses an explicitly reviewed,
   document-bound repair from `references/runtime/troubleshooting.md`; it is not an automatic retry or an XSD failure.
 - **Animation**: inspect timing capabilities first; edit only the declared safe subset and preserve
   complex or unsupported timing. Read logical `kind`, all `targets[]`, and `timingSummary.mergeSafe`;
@@ -171,7 +175,8 @@ Use these only to choose the entry reference; the routing table owns details.
   use `references/review/fidelity-diagnosis.md`; parser model fields are not patch fields.
 - **Existing Shape 3D / Text 3D**: read the local-declaration guidance in `references/edit/inspect-and-edit.md`.
   Preserve owner-bound XML facts during neighboring edits; render improvements do not grant
-  authoring support or PowerPoint fidelity. Chart 3D and embedded models have separate contracts.
+  authoring support or PowerPoint fidelity. Query the independent render axis for bounded parallel
+  cameras, extrusion/bevels and Text3D; Chart 3D and embedded models have separate contracts.
 
 ## Skill Root
 

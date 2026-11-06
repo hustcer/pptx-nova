@@ -317,6 +317,14 @@ xdoc pptx apply -p patch.json -o out.pptx --allow-raw-xml --dry-run --json
   `repair-child-order` / `repair-preset-adjustments` / `repair-relationships` 不需要。
   preset 修复必须显式采纳报告建议，不能自动重试；其精确 part hash 不允许退回
   element-only guard。完整流程见 `../runtime/troubleshooting.md`，不要手写这些 guard。
+- 普通 `set/add/remove/replace` **不接受** `expectedPartSha256`，也没有运行时源摘要
+  guard。记录输入文件 SHA-256，在 apply 前确认仍是 dry-run 的原始字节；有变化就重新
+  inspect/dry-run。不要给普通 action 填 repair 字段来制造“已防陈旧”的保证。
+- `repair-relationships` 要区分现有与缺失 `.rels`：现有 part 的 add/retarget 都要求
+  `expectedPartSha256`，retarget 还要求每项 `expectedTarget`；新建缺失 part 只允许 add，
+  且禁止 `expectedPartSha256`。按当前 action schema 和已审阅修复建议构造；owner、
+  target/type 校验仍执行，不能把新建规则套到已有 part 或省略 retarget 的旧目标。
+  retarget 只修复当前目标 part 已缺失的关系，不是任意重定向已有有效关系的工具。
 - `target` 只接受 OPC 包内部部件路径,会拒绝任意路径穿越
 - 普通 raw mutation 会 emit `semanticChanges[]`(category=`rawOoxml`)和 `visualRisks[]`
   (code=`patch-ooxml`, severity=`high`, "raw OOXML patch bypasses the schema-v1 semantic contract")

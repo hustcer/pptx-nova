@@ -17,6 +17,13 @@ theme/style/native DeckKit information from matching snapshot catalogs. Derive s
 target op schema, then dry-run suggestions. For PPTX CLI syntax, use `xdoc pptx <action> --help`; this
 schema-backed human synopsis is neither machine schema nor JSON.
 
+For a `partial` feature, read its limits and `recommendation.operations` / `target`; an empty
+`operations` list does not cancel that explicit recommendation. For example, existing model-host
+geometry and semantic model authoring have different contracts. Probe `--require-feature` requires
+the exact entry to be fully `supported`, so its strict failure for a `partial` entry is expected.
+Use operation discovery plus the declared subset's dry-run/readback evidence for a bounded task;
+do not relabel the feature as fully supported to satisfy that flag.
+
 Do not append `--json` to top-level `xdoc convert` or `xdoc check` by default. For structured PPTX PNG
 previews, prefer `xdoc pptx preview --json`; for structured single-file preflight results, prefer
 `xdoc check ... -o check.json`. If the current `xdoc-capabilities.json#capabilities.commandFlags` or
@@ -35,14 +42,20 @@ Build options from the exact action contract, not just its parent command: a fla
 `pdf` or `pptx` may be invalid for a particular action. Omit absent optional values and disabled
 `style: "flag"` booleans; do not emit empty values, `undefined`, `--flag=false`, or invented `--no-*`
 options. Supply CLI `int` values as canonical decimal signed 32-bit integers without unnecessary
-leading zeros, then respect the action's range constraints. Older parsers may silently substitute
-defaults for malformed, overflowing, or excessively zero-padded values; do not rely on that behavior.
+leading zeros, then respect the action's range constraints. Current runtimes reject malformed or
+overflowing integers during parsing, including options that the selected action would otherwise
+reject as inapplicable; they do not silently substitute defaults. Older parsers may do so; do not
+rely on that behavior or use a parser failure to infer anything about the document.
 
 Request help in a separate, clean invocation such as `xdoc pdf render --help`; do not append it to
 an incomplete command with a missing string value. Newer runtimes distinguish help from literal
 `--help` input operands and show root help for a bare `xdoc` invocation. Help success only proves
 discovery worked. On exit 2, preserve stderr and correct the invocation using action help/schema;
 there may be no JSON report. See [argument failure recovery](troubleshooting.md#cli-argument-failures).
+Put the action before `--help`: `xdoc pdf render --help` selects action help, while
+`xdoc pdf --help render` selects PDF command help. After `--`, help-looking tokens remain literal
+operands. Even an invalid integer may coexist with a successful help request; validate the actual
+invocation separately and never infer numeric acceptance or task authorization from help output.
 
 ### Optional shell completion
 
@@ -214,6 +227,11 @@ xdoc schema --mode examples > examples.json
 
 示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
 shape effects / hyperlinks 等。对照修改最快。
+
+已选定操作时，优先 `xdoc schema --mode ops --ops set-shape`：完整单操作视图同时返回
+匹配的 `examples[]`，无需再取全量 examples。`--minimal` 和带 `--fields` 的投影有意省略
+示例；缺少示例不表示操作不可用。示例可能含准备步骤，复用时只保留当前任务需要的操作，
+仍按 inspect selector、完整合同与 dry-run 核实。
 
 ## Schema 关键 `$defs` 速记
 

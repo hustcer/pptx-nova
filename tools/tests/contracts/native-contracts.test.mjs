@@ -210,7 +210,12 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     )
     return path
   }
-  const run = (args, expectedCode = null, executable = binary, { json = true } = {}) => {
+  const run = (
+    args,
+    expectedCode = null,
+    executable = binary,
+    { json = true, stderrPattern } = {},
+  ) => {
     const result = spawnSync(executable, args, {
       cwd: directory,
       env,
@@ -228,6 +233,7 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     })
     assert.equal(result.error, undefined)
     assert.equal(result.signal, null)
+    if (stderrPattern) assert.match(result.stderr, stderrPattern)
     const report = json ? JSON.parse(result.stdout) : result.stdout
     if (typeof expectedCode === 'number') {
       assert.equal(result.status, expectedCode, result.stdout + result.stderr)
@@ -288,6 +294,177 @@ function scenario(t, { useInstalledAuthorization = false } = {}) {
     ).output
   return { directory, write, run, apply, inspect, body, create }
 }
+
+nativeTest('CLI help routing does not certify integer acceptance or open input operands', (t) => {
+  const s = scenario(t)
+  const helpCases = [
+    [['pdf', 'render', '--help'], /^PDF action: render/],
+    [['pdf', '--help', 'render'], /^Inspect PDF diagnostics/],
+    [['pptx', '--input', '-', 'inspect', '--help'], /^PPTX action: inspect/],
+    [['pptx', '--input', '-', '--help', 'inspect'], /^Usage: xdoc pptx/],
+    [['pdf', 'render', '--dpi', 'abc', '--help'], /^PDF action: render/],
+  ]
+  for (const [args, heading] of helpCases) {
+    assert.match(s.run(args, 0, binary, { json: false }), heading)
+  }
+  for (const [command, action] of [
+    ['pdf', 'render'],
+    ['pptx', 'inspect'],
+  ]) {
+    for (const [value, reason] of [
+      ['abc', 'invalid integer'],
+      ['1.5', 'invalid integer'],
+      ['2147483648', 'integer out of Int32 range'],
+      ['-2147483649', 'integer out of Int32 range'],
+    ]) {
+      const stderrPattern = new RegExp(
+        `ERROR \\[args\\]: ${reason} for 'dpi': '${value.replaceAll('.', '\\.')}'`,
+      )
+      assert.equal(
+        s.run([command, action, '--dpi', value], 2, binary, { json: false, stderrPattern }),
+        '',
+      )
+    }
+  }
+  const literal = s.run(['pdf', 'render', '--', '--help'], 3, binary, { json: false })
+  assert.doesNotMatch(literal, /^PDF action: render/)
+})
+
+nativeTest('operation examples and capability recommendations survive focused discovery', (t) => {
+  const s = scenario(t)
+  const full = s.run(['schema', '--mode', 'ops', '--ops', 'set-shape'])
+  const minimal = s.run(['schema', '--mode', 'ops', '--ops', 'set-shape', '--minimal'])
+  const projected = s.run([
+    'schema',
+    '--mode',
+    'ops',
+    '--ops',
+    'set-shape',
+    '--fields',
+    'name,shape,slide',
+  ])
+  const examples = full.operations[0].examples
+  assert.ok(examples.length > 0)
+  assert.ok(examples.every((example) => example.patch.ops.some((op) => op.op === 'set-shape')))
+  for (const view of [minimal, projected]) {
+    assert.ok(!view.operations[0].examples || view.operations[0].examples.length === 0)
+  }
+  const snapshot = join(s.directory, 'capabilities.json')
+  s.run(
+    [skillScript('cli/runtime/probe'), '--xdoc-bin', binary, '--output', snapshot],
+    0,
+    process.execPath,
+    { json: false },
+  )
+  const truth = JSON.parse(readFileSync(snapshot)).capabilities.capabilityTruth
+  assert.equal(truth.available, true)
+  const entry = (feature, subset) =>
+    truth.entries.find((value) => value.feature === feature && value.subset === subset)
+  const host = entry('model-3d', 'host-geometry-editing')
+  assert.equal(host.status, 'partial')
+  assert.deepEqual(host.operations, [])
+  assert.deepEqual(host.recommendation.operations, ['set-shape'])
+  assert.equal(entry('model-3d', 'create-edit').status, 'unsupported')
+  const shape = entry('shape-3d', 'local-declarations')
+  assert.equal(shape.axes.render.status, 'partial')
+  assert.equal(shape.axes.edit.status, 'unsupported')
+  assert.equal(shape.axes.verify.status, 'inconclusive')
+  assert.ok(shape.axes.render.limits.some((limit) => limit.code === 'bounded-text-volume'))
+})
+
+nativeTest('raw mutation and relationship repair enforce different source guards', (t) => {
+  const s = scenario(t)
+  const source = s.create('Before raw edit')
+  const original = readFileSync(source)
+  const raw = {
+    op: 'patch-ooxml',
+    target: 'ppt/slides/slide1.xml',
+    xpath: '//a:t',
+    action: 'set',
+    value: 'After raw edit',
+  }
+  s.apply([raw], source, { error: 'unsupported_feature' })
+  s.apply([{ ...raw, expectedPartSha256: 'a'.repeat(64) }], source, {
+    allowRawXml: true,
+    error: 'invalid_argument',
+  })
+  const edited = s.apply([raw], source, { allowRawXml: true }).output
+  assert.equal(s.body(edited).textPreview, 'After raw edit')
+
+  // Synthetic damaged fixture: break only the layout relationship, retaining its real target.
+  const target = 'ppt/slides/_rels/slide1.xml.rels'
+  const beforeRels = nativeParts(source).get(target).toString('utf8')
+  const relationship =
+    /<Relationship\b[^>]*\bId="([^"]+)"[^>]*\bType="([^"]+)"[^>]*\bTarget="([^"]+)"/.exec(
+      beforeRels,
+    )
+  assert.ok(relationship)
+  const patch = s.write('dangling-layout.json', {
+    schemaVersion: 'pptx-patch/v1',
+    ops: [
+      {
+        op: 'patch-ooxml',
+        target,
+        xpath: '//Relationship/@Target',
+        action: 'set',
+        value: '../slideLayouts/missing.xml',
+      },
+    ],
+  })
+  const damaged = join(s.directory, 'dangling-layout.pptx')
+  const damage = s.run([
+    'pptx',
+    'apply',
+    '--input',
+    source,
+    '--patch',
+    patch,
+    '--output',
+    damaged,
+    '--allow-raw-xml',
+    '--json',
+  ])
+  assert.ok(damage.semanticIssues.length > 0)
+  const digest = createHash('sha256').update(nativeParts(damaged).get(target)).digest('hex')
+  const repair = {
+    op: 'patch-ooxml',
+    target,
+    xpath: '/',
+    action: 'repair-relationships',
+    expectedPartSha256: digest,
+    relationshipRepairs: [
+      {
+        kind: 'retarget',
+        id: relationship[1],
+        type: relationship[2],
+        target: relationship[3],
+        expectedTarget: '../slideLayouts/missing.xml',
+      },
+    ],
+  }
+  const { expectedPartSha256: _expectedPartSha256, ...unguarded } = repair
+  s.apply([unguarded], damaged, { error: 'invalid_operation' })
+  s.apply([{ ...repair, expectedPartSha256: 'a'.repeat(64) }], damaged, {
+    error: 'invalid_operation',
+  })
+  s.apply(
+    [
+      {
+        ...repair,
+        relationshipRepairs: [
+          { ...repair.relationshipRepairs[0], expectedTarget: '../slideLayouts/other.xml' },
+        ],
+      },
+    ],
+    damaged,
+    { error: 'invalid_operation' },
+  )
+  const repaired = s.apply([repair], damaged).output
+  assert.equal(s.body(repaired).textPreview, 'Before raw edit')
+  const checked = s.run(['pptx', 'vision-check', repaired, '--json'])
+  assert.deepEqual(checked.semanticIssues, [])
+  assert.deepEqual(readFileSync(source), original)
+})
 
 nativeTest(
   'script-aware font normalization preserves mixed-language content and is idempotent',
@@ -2073,6 +2250,33 @@ nativeTest(
         fixture,
         { dryRun, error: 'invalid_operation' },
       )
+    assert.deepEqual(readFileSync(fixture), original)
+    const timingXml = (input) =>
+      nativeParts(input)
+        .get(page.partName)
+        .toString('utf8')
+        .match(/<p:timing\b[\s\S]*?<\/p:timing>/)?.[0]
+    assert.ok(timingXml(fixture))
+    const neighbor = s.apply(
+      [{ op: 'set-shape', slide: 0, shape: { name: 'Body' }, position: { x: '2in', y: '1in' } }],
+      fixture,
+    ).output
+    assert.equal(timingXml(neighbor), timingXml(fixture))
+    for (const mode of ['replace', 'clear']) {
+      const op = {
+        op: 'set-slide-animations',
+        slide: 0,
+        mode,
+        ...(mode === 'replace'
+          ? { animations: [{ shape: { name: 'Body' }, effect: 'fade' }] }
+          : {}),
+      }
+      s.apply([op], fixture, { dryRun: true })
+      const changed = s.apply([op], fixture).output
+      const after = s.inspect(changed).slides[0]
+      assert.equal(after.animations.length, mode === 'replace' ? 1 : 0)
+      if (mode === 'replace') assert.equal(after.animations[0].effect, 'fade')
+    }
     assert.deepEqual(readFileSync(fixture), original)
   },
 )

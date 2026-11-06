@@ -476,16 +476,18 @@ slideKPI2(TOTAL)
 ## 与 recipe 的关系
 
 模板**几乎全用 patch op**（`add-shape` / `add-text-box` / `add-chart` /
-`add-table`），不用 recipe。原因：
+`add-table`），以便在探索阶段直接控制对象、布局和样式。
 
-- recipe 给的是默认排版，不可拆解（封面就一个 title + subtitle，加不了
-  eyebrow / accent bar / 装饰）
-- 客户演示级 deck 必须的 "顶部品牌条 / 左侧 accent / eyebrow / KPI 顶部色条
-  / delta pill / callout 卡片" 全是 patch op
-- recipe 的 KPI grid 是 3+1 布局，不是 4-across；自己手堆 4 张才能对齐
+Recipe 同样展开为原生 patch operations。对 `schemaVersion: "pptx-recipe/v1"` 的 recipe envelope 执行
+`xdoc pptx recipe --recipe recipe.json --compile --json`，可从返回的 `patch`
+获取完整展开请求，继续按普通 patch 流程修改、校验和 dry-run。一份 patch 也可
+混用 `add-slide.recipe` 与底层操作，给生成页补充或调整原生形状、文字和样式。
+部分 recipe 已提供 `section.eyebrow`、`kpi-grid.items[].delta` 等内容字段；
+具体布局由 recipe 实现和输入决定，需要自定义几何时检查编译结果或改用 DeckKit。
 
-**recipe 适合：草稿 / 极简内部速记（≤30 ops）**。客户演示级交付直接走
-production/default DeckKit；模板只用于抽取或扩展 DeckKit。
+操作数量不决定 recipe 的适用性或交付质量。普通客户演示级交付仍按本 skill 的
+production/default DeckKit 路线执行；模板用于抽取或扩展 DeckKit，recipe 可作为
+页面原型或显式 patch 的组成部分。完整字段和编译边界见 [recipes.md](../content/recipes.md)。
 
 ---
 

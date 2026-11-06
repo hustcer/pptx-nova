@@ -13,6 +13,11 @@ intended to be redistributable with the skill; source examples demonstrate workf
 Use DeckKit content and the standard create runner for ordinary delivery. The generator is a
 development starting point for creating or extending DeckKits.
 
+Showcase manifests and summaries retain the metadata of their generation run. Their recorded
+`readiness` can differ from a later promotion; use the current
+[DeckKit catalog](../deckkits/catalog.json) and readiness audit for selection eligibility.
+Regeneration can legitimately change metadata when the catalog changes.
+
 `just deckkit-examples` updates only `deckkits/`; it does not replace this index or the other examples.
 Use `just deckkit-examples -d broadside` for one showcase, `just deckkit-examples check` to check
 reproducibility without writing committed assets, or `just deckkit-examples all` for all visual cases.

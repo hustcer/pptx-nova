@@ -1,8 +1,8 @@
 # Phase 2 — 组件化抽象
 
 目标：把验收通过的探索生成器冻结为正式 DeckKit，并走完注册、校验、benchmark、
-readiness 全链路。规范以 xdoc 维护者仓库 `docs/skill-dev-guide.md`（本机 `../pptx/docs/`）§4（开发流程）、§3（content
-契约与字符串分层）和 `pptx-nova/assets/deckkits/README.md`（冻结准入）为准，
+readiness 全链路。规范以仓库 `AGENTS.md`、`pptx-nova/references/create/design-contracts.md`（设计合同）
+和 `pptx-nova/assets/deckkits/README.md`（目录、content 契约与冻结准入）为准，
 本文件按复刻场景串起执行顺序。
 
 ## 目录
@@ -35,7 +35,7 @@ readiness 全链路。规范以 xdoc 维护者仓库 `docs/skill-dev-guide.md`�
   照片、插画和背景位图不搬入 examples/assets；对应字段写成 `asset` 槽位、占位行为或
   known limit。
 
-**逐字符串过 content leak 防线**（字符串分层表见 skill-dev-guide §3）：标题、观点、
+**逐字符串过 content leak 防线**：标题、观点、
 指标、实体、年份、来源、callout 强调词一律进 content；kit 里只允许 shape 名、
 颜色 token、字体名、可被 `data.labels` 覆盖的中性结构标签和自动页码。检查方法：
 对 kit 源码 grep 参考 deck 的主题词，命中即泄漏。允许的 fallback 只能是
@@ -247,5 +247,5 @@ promotion 的 catalog-update 同样传本轮 `--out`，不能重新读取共享�
 - [ ] golden benchmark 通过；stress-density 和 mixed-language 已在 `.tmp` 审查并记录；
       readiness audit 达到 candidate
 - [ ] 完整 golden 的 canonical Create 通过且已逐页 review；benchmark/readiness/catalog 使用同轮证据目录和冻结日期
-- [ ] 若改了默认行为/文档：按维护者仓库 skill-dev-guide §8.2 同步清单检查 pptx-nova 各文档
+- [ ] 若改了默认行为/文档：同步 SKILL 路由、对应 references、scripts README 与相关用户指南，并运行公开审计和相关文档测试
 - [ ] `git diff --check`；按仓库规范提交（English Conventional Commit）

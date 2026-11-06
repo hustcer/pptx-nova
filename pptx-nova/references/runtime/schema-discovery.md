@@ -1,7 +1,7 @@
 # xdoc Schema 渐进式披露
 
-xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整 schema 几千行 / 几十万 token
-——你不需要一次拉全部，按需取就行。
+xdoc 的 `schema` 子命令是机器可读的 JSON Schema 入口。完整输出包含操作、定义、示例和报告合同，
+体积随版本与格式变化；按需获取投影，避免每次加载完整 schema。
 
 ## Focused Lookup and Output Flags
 
@@ -157,7 +157,7 @@ auth 通过 `commands.auth.subcommands.<action>` 披露 `usage`、`options`、`p
 ### 1. 初次进 deck → 取 op 索引
 
 ```bash
-xdoc schema --mode index | save -f schema-index.json
+xdoc schema --mode index > schema-index.json
 ```
 
 得到当前 op 名、summary、required / optional 字段名与 constraints —— 用来
@@ -171,7 +171,7 @@ xdoc schema --mode index | save -f schema-index.json
 
 ```bash
 xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary --minimal \
-  | save -f schema-set-shape-name.json
+  > schema-set-shape-name.json
 ```
 
 `--defs summary` 只保留投影字段直接引用的定义，并在 `$defs.*.x-xdoc-summary` 中披露类型、
@@ -182,8 +182,8 @@ xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs summary 
 
 ```bash
 xdoc schema --mode ops --ops set-shape --fields name,shape,slide --defs full --minimal \
-  | save -f schema-set-shape-name-full.json
-xdoc schema --mode ops --ops add-chart --minimal | save -f schema-add-chart.json
+  > schema-set-shape-name-full.json
+xdoc schema --mode ops --ops add-chart --minimal > schema-add-chart.json
 ```
 
 `--defs full` 保留投影字段可达的完整 `$defs` 闭包；省略 `--defs` 与显式 `full` 等价。
@@ -199,7 +199,7 @@ xdoc schema --mode ops --ops add-chart --minimal | save -f schema-add-chart.json
 动画字段和安全边界更新频繁，涉及动画时先拉对应 op：
 
 ```bash
-xdoc schema --mode ops --ops set-slide-animations --minimal | save -f schema-set-slide-animations.json
+xdoc schema --mode ops --ops set-slide-animations --minimal > schema-set-slide-animations.json
 ```
 
 重点看 `mode`、`effect`、`phase`、`target`、`build`、`trigger` 的 enum。不要把旧版本
@@ -209,7 +209,7 @@ xdoc schema --mode ops --ops set-slide-animations --minimal | save -f schema-set
 ### 3. 想抄个例子 → 拉 examples
 
 ```bash
-xdoc schema --mode examples | save -f examples.json
+xdoc schema --mode examples > examples.json
 ```
 
 示例覆盖 populate-slide / bind-data / rich notes / charts / tables /
@@ -403,7 +403,7 @@ xdoc schema | from json | get commands.pptx.recipeOps | select recipeKind descri
 schema 全集时，可以在 `apply --dry-run` 上加 `--explain`：
 
 ```bash
-xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.json
+xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json > dry.json
 ```
 
 报告顶层会新增 `explanations[]`，与 `opResults[]` / `traces[]` 一一对应，每项形如

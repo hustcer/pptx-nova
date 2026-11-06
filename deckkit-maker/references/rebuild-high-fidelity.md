@@ -9,7 +9,7 @@ Phase 2 再把内容抽到 content.json。
 高保真不是像素描摹：目标是网格、比例、层级、配色、字号节奏、chrome 和内容结构无
 hard defect；字体替代、Tabler 近似图标、明确披露的 unsupported 资产可以接受。
 
-先读 `pptx-nova/references/create/deck-generator-workflow.md`（模板设计、txH 表、
+先读 `pptx-nova/references/create/deck-generator-workflow.md`（模板设计、`_txH` 高度表、
 装饰安全区、视觉验证盲点清单），本文件只补充复刻场景的差异点与已知坑。
 
 ## 目录
@@ -139,16 +139,17 @@ visual element。若发现新增形态，回到 Phase 0 扩大 rebuild set。
 - shape 引用必须双向走 `nm(s, base)`；裸名 selector 命不中。
 - enum 必须使用 canonical 值：`"bottom"` 不是 `"b"`，`"outside-end"` 不是 `"outEnd"`；
   `titleStyle.bold` 被拒 → 放进 `font: { bold: true }`。
-- 居中短文本框宽度 ≥ 文本实际宽 + ~0.2in（默认 inset），否则静默折行；
-  vision-check 抓不到这类折行，只能 PNG 人工抓。
-- 单行高度用 `txH(sizePt)`（中文 1.5 系数），多行 `txH(sizePt, lines)`。
-- dry-run 与 vision-check 的 overflow 阈值不同，dry-run 干净不代表 vision-check
-  干净，两个都跑。
+- 短文本框宽度须考虑有效 inset 与真实字形宽度；静态 `text-unexpected-wrap` 能提示部分
+  意外换行，但不能证明实际渲染没有折行，仍须检查 PNG。
+- 探索模板使用 `_txH(sizePt, lines)`（中文 1.5 系数，返回带单位字符串）；传给数值几何
+  helper 前用 `Number.parseFloat()` 转换。共享 primitives 的 `txH()` 是另一接口，勿混用。
+- dry-run 与 vision-check 复用静态 overflow 估算器，但检查范围不同：dry-run 主要记录本次
+  触达文本框风险，vision-check 检查候选全稿；两者与 PNG 复核都要执行。
 - 旧版 text layout 补偿在新 runtime 可能造成多余留白或折行；先看实际字体、body margin、
-  autofit、CJK/RTL/rich text 输出，再改 `txH` 或 slot budget，不能只更新静态估算。
+  autofit、CJK/RTL/rich text 输出，再改高度或 slot budget，不能只更新静态估算。
 - freeform 使用显式 frame + 整数 `path`；group 几何须按最终 slide 坐标核对，不能比较局部坐标。
 - 图标：`p.icon(s, nm(s,'Xxx'), '<tabler-name>', x, y, w, h, { color, strokeWidth })`；
-  名字必须先用 `pptx-nova-icons.mjs search` 确认存在。
+  名字必须先用 `<skill-root>/scripts/cli/assets/icons.mjs search` 确认存在。
 - 调试图片槽位时只记录尺寸、角色和来源；`generate.mjs` 默认用占位框或语义相关原生元素，
   不引用参考 deck 提取图。移动到 Phase 2 时改成 content `assetSource` 或明确空/隐藏策略。
 

@@ -129,11 +129,11 @@ also exposes `feedbackGateCommand`; write `skill-feedback.md` first. On failure 
 which points at `<new-empty-run-dir>`; never retry in a failed/historical run.
 
 If the final candidate contains ChartEx parts, xdoc preview/compare is not PowerPoint-native proof. Generate a candidate-bound `<skill-root>/scripts/cli/office/powerpoint-snapshot.nu --method pdf-render` report covering every ChartEx slide and pass it to
-`pptx-nova-finalize-evidence.mjs --mode refurbish --candidate <candidate> --powerpoint-native-render <report>` when the optional macOS + scriptable PowerPoint + Nushell + xdoc PDFium evidence route is available. With that route available, missing, stale, or incomplete coverage is a blocker. If any optional prerequisite is unavailable, the finalizer returns an explicit unverified warning without breaking the baseline workflow; do not claim PowerPoint-native verification, and stop if the user or delivery policy explicitly requires it.
+`<skill-root>/scripts/cli/review/finalize-evidence.mjs --mode refurbish --candidate <candidate> --powerpoint-native-render <report>` when the optional macOS + scriptable PowerPoint + Nushell + xdoc PDFium evidence route is available. With that route available, missing, stale, or incomplete coverage is a blocker. If any optional prerequisite is unavailable, the finalizer returns an explicit unverified warning without breaking the baseline workflow; do not claim PowerPoint-native verification, and stop if the user or delivery policy explicitly requires it.
 Window capture is retained only after pdf-render failure and does not satisfy the ChartEx gate.
 
 If extra repair passes ran after the standard runner, the canonical evidence still describes the earlier
-candidate. Before delivery, regenerate `final-inspect.json`, re-run `pptx-nova-finalize-evidence.mjs --mode refurbish --candidate <published-pptx>` with bound PowerPoint-native evidence when ChartEx exists, and verify SHA-256.
+candidate. Before delivery, regenerate `final-inspect.json`, re-run `<skill-root>/scripts/cli/review/finalize-evidence.mjs --mode refurbish --candidate <published-pptx>` with bound PowerPoint-native evidence when ChartEx exists, and verify SHA-256.
 Refresh stale `visual_review.json`/content-audit paths; never hand-edit evidence JSON to swap paths.
 
 Deliver only after compare and binding pass; list only key outputs, gates, evidence, and risks.

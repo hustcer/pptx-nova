@@ -395,6 +395,7 @@ labels, lost formatting, or PowerPoint repair issues.
 .
 +-- pptx-nova/                 # The main publishable pptx-nova skill
 |   +-- README.md              # English user guide
+|   +-- README.zh-CN.md         # Chinese user guide
 |   +-- SKILL.md               # Agent instructions and task routing
 |   +-- assets/                # DeckKits, examples, themes, icons, schemas
 |   +-- benchmarks/visual/     # Visual benchmark cases and baselines
@@ -484,6 +485,7 @@ itself needs to be built or extended.
 ## More documentation
 
 - [pptx-nova user guide](pptx-nova/README.md)
+- [pptx-nova 中文使用指南](pptx-nova/README.zh-CN.md)
 - [Workflow reference index](pptx-nova/references/README.md)
 - [xdoc introduction and architecture](docs/xdoc-introducution.md)
 - [Install the xdoc CLI](docs/xdoc-installation.md)

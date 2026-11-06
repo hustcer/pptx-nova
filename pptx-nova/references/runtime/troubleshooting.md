@@ -453,7 +453,7 @@ The dry-run report includes `traces[]` by default (`name` / `status` / `duration
 ### Use `--explain` to See How to Write an Op
 
 ```bash
-xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json | save dry.json
+xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json > dry.json
 ```
 
 This adds `explanations[]` to the dry-run report: each op's one-sentence `summary` and `schema.requiredFields` / `optionalFields` / `fieldNotes` directly identify what the op lacks. It is more focused than `xdoc schema --mode ops --ops <name>` alone because it covers only ops **actually used in the current patch**. See the end of `references/runtime/schema-discovery.md`.

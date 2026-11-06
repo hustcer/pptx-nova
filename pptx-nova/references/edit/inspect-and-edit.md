@@ -20,7 +20,7 @@ inspect → 写 patch → dry-run ──┤
 ```bash
 # shell 驱动的多步流程默认加 --daemon（当前 runtime 会按需 auto-spawn）；
 # 单次一次性 inspect 不加也行。
-xdoc pptx inspect input.pptx --daemon --json | save inspect.json
+xdoc pptx inspect input.pptx --daemon --json > inspect.json
 ```
 
 输出 `pptx-inspect/v1`，**实际结构**（注意字段名）：
@@ -266,7 +266,7 @@ Chart 3D 和 GLB 使用各自契约。
 ^xdoc pptx inspect input.pptx --json | from json
   | get slides.4.shapes
   | where shapeType in ["autoShape" "connector" "freeform"]
-  | select id name shapeType fillColor lineColor lineWidthEmu bbox
+  | select --optional id name shapeType fillColor lineColor lineWidthEmu bbox
 ```
 
 ## 1.5 用 `xdoc pptx select` 缩小候选

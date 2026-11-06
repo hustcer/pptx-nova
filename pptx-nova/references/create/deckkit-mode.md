@@ -186,7 +186,7 @@ Use this flow for DeckKit-first creation:
 outline.json
   -> deck_lock.json
   -> content.json
-  -> pptx-nova-create-run.mjs
+  -> <skill-root>/scripts/cli/create/run.mjs
   -> PNG/contact-sheet review
 ```
 

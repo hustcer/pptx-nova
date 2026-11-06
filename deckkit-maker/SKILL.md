@@ -120,13 +120,14 @@ test ! -e pptx-nova/assets/examples/deckkits/<id>
 ## 前置阅读（必读，按序）
 
 1. `pptx-nova/SKILL.md` —— pptx-nova 路由与红线
-2. xdoc 维护者仓库的 `docs/skill-dev-guide.md`（不随本仓库分发，本机位于 `../pptx/docs/`）—— §3 术语（DeckKit / content 契约 / content leak 防线 /
-   字符串分层规则 / 新增 DeckKit 准入标准）、§4 开发流程、§5 benchmark 与 readiness
+2. `references/componentize.md` 与 `pptx-nova/references/create/design-contracts.md` ——
+   DeckKit/content 契约、字符串分层、组件化、benchmark 与 readiness
 3. `pptx-nova/assets/deckkits/README.md` —— core-primitives 职责边界、冻结准入
 4. `pptx-nova/references/create/deck-generator-workflow.md` —— 探索生成器方法与避坑
 
-外部维护者指南可能仍含旧的扁平目录或 CLI 名称。目录、发布边界与当前命令以本仓库
-AGENTS.md、skill 和真实 CLI `--help` 为准；记录冲突，不照搬旧路径，也不要为兼容旧示例添加 wrapper。
+额外的维护者指南仅在可用时作为补充，不是本 skill 的必需输入。外部指南可能仍含旧的
+扁平目录或 CLI 名称；目录、发布边界与当前命令以本仓库 AGENTS.md、skill 和真实
+CLI `--help` 为准，记录冲突，不照搬旧路径，也不要为兼容旧示例添加 wrapper。
 
 已有先例：`swiss-grid` DeckKit 即从 xdoc 维护者仓库的 `demos/67-swiss-grid-systems.pptx` 复刻而来，
 `broadside` / `cartesian` / `biennale-yellow` 则来自 HTML 模板（见 catalog `knownLimits`），
@@ -324,7 +325,7 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   下沉；下沉前必须与用户确认，并跑全部现有 DeckKit 的 validation tests。
 - **参考 pptx / HTML 只读**。所有解包、DOM/CSS 抽取和分析副本都放进
   `.tmp/deckkit-<id>/ref-unpack/` 或同一 run 目录下的对应子目录。
-- **content leak 防线**（详见维护者仓库 `docs/skill-dev-guide.md` §3 字符串分层规则）：
+- **content leak 防线**（细节见 `references/componentize.md` 的字符串分层与审计）：
   `.kit.mjs` 只冻结视觉语言、几何、chrome、结构标签；参考 deck 的业务文案
   （标题、观点、指标、实体、年份、来源、callout 强调词）最终只能进入
   `content.json` / examples / benchmark fixture。Phase 1 的探索生成器里可以暂时

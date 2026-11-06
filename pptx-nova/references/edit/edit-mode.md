@@ -52,7 +52,7 @@ Use `matches[].patchSelector` only after confirming `summary.matchCount`,
 `text`, `bbox`, and `name` match the user intent.
 
 If current-deck session rules exist, write `session-operation.json` and run
-`pptx-nova-session-rules-resolve.mjs --strict` before the contract. A passed
+`<skill-root>/scripts/cli/edit/session-rules-resolve.mjs --strict` before the contract. A passed
 resolution contributes rule-owned targets and preserve requirements. If no
 active rule applies, continue normally without additional evidence or user
 confirmation.
@@ -122,7 +122,7 @@ that part requires fresh diagnosis. See `../runtime/troubleshooting.md` for its 
 interoperability boundary and `native-shape-editing.md` for geometry edits.
 
 Once the candidate is stable, run one semantic diff and the evidence required
-by `edit-contract.json`, then run `pptx-nova-edit-contract-gate.mjs --strict`.
+by `edit-contract.json`, then run `<skill-root>/scripts/cli/edit/contract-gate.mjs --strict`.
 Do not publish while `agentGate.passed=false`. For visible text-only edits that
 must preserve formatting, require `style-diff`; whole-frame `set-text-frame` can
 silently replace small styled runs even when dry-run and vision-check pass.
@@ -156,7 +156,7 @@ full-deck risk separately.
 For structural edits—slide/object additions or deletion, geometry/layout,
 theme/brand, chart/table, image/crop, or multi-slide visual changes—save
 `final-inspect.json` after apply and run
-`pptx-nova-finalize-evidence.mjs --mode structural-edit --changed-slides 25-38`
+`<skill-root>/scripts/cli/review/finalize-evidence.mjs --mode structural-edit --changed-slides 25-38`
 with `vision.json` before PNG review. It writes `layout-final.json` and
 `evidence-summary.json`. With a changed-slide scope, high/medium issues outside
 the scope are recorded as `deckResidualRisk` rather than keeping the finalizer in

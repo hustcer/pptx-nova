@@ -50,7 +50,7 @@
 - `refurbish-compare.png` / `refurbish-compare.json`：Refurbish Existing Deck 时由
   `xdoc pptx contact-diff --dpi 192` 生成的全量翻新前/后并排对比图和报告。
 - `refurbish-compare-gate.json`：Refurbish Existing Deck 时由
-  `pptx-nova-compare-gate.mjs --kind refurbish --publish` 生成的同目录发布门禁报告；必须证明
+  `<skill-root>/scripts/cli/review/compare-gate.mjs --kind refurbish --publish` 生成的同目录发布门禁报告；必须证明
   `status=pass`、`finalBinding.status=bound`，且最终 PPTX 与
   `<output-stem>-refurbish-compare-<MMDDhhmmss>.png` 已作为同一交付 bundle 发布。
 - `chrome-detect.json` / `chrome-remove.json` / `chrome-apply.json`：Refurbish Existing Deck
@@ -123,7 +123,7 @@ style/layout evidence；除非用户明确允许复用素材，不把参考 deck
 8. apply 到 run 目录中间 `.pptx`。
 9. 跑 `vision-check`，创建型 deck 的 high/medium 必须清零。
 10. 对最终 PPTX 保存 `final-inspect.json`，运行
-    `pptx-nova-finalize-evidence.mjs --mode reference-create`，生成
+    `<skill-root>/scripts/cli/review/finalize-evidence.mjs --mode reference-create`，生成
     `layout-final.json` 和 `evidence-summary.json`。
 11. 转 PNG/contact sheet，逐页检查参考风格是否一致、文字是否溢出、页面是否像新内容而不是旧页残留。
 
@@ -573,7 +573,7 @@ DeckKit 选择注意事项：
 - `refurbish-compare.png` 是交付物，不只是内部 QA 图。它必须覆盖全 deck，报告中的
   `status` 必须为 `success`，`agentGate.status` 必须为 `pass`，`summary.scopeMode` 必须为
   `all-slides`，`summary.pairCount` 必须匹配源/输出页数，且 render 尺寸必须非零。交付前运行
-  `pptx-nova-compare-gate.mjs --kind refurbish --publish`，并要求
+  `<skill-root>/scripts/cli/review/compare-gate.mjs --kind refurbish --publish`，并要求
   `refurbish-compare-gate.json.status=pass` 且 `finalBinding.status=bound`；gate
   是唯一最终 PPTX 发布者，之后不得再次复制候选文件；最终回复列出同目录 PNG 路径。
 - 最终必须对比源 deck 和输出 deck：slide count、每页文本摘要、表格数量、chart 数量、SmartArt/diagram

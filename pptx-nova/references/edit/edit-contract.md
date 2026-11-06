@@ -18,13 +18,13 @@ this contract; session rules never form a parallel execution or delivery gate.
 ```text
 inspect/select
   -> edit-contract-draft.json
-  -> pptx-nova-edit-contract.mjs
+  -> <skill-root>/scripts/cli/edit/contract.mjs
   -> edit-contract.json
   -> patch + dry-run
   -> apply into run directory
   -> semantic diff + scoped evidence
   -> evidence-manifest.json
-  -> pptx-nova-edit-contract-gate.mjs
+  -> <skill-root>/scripts/cli/edit/contract-gate.mjs
   -> publish only when agentGate.passed=true
 ```
 

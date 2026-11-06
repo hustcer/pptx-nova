@@ -1,7 +1,8 @@
 # pptx-nova Scripts
 
-All published runtime code is self-contained in this directory and uses only Node built-ins
-and the disclosed xdoc executable. Repository-only checks remain under tools/.
+Required published runtime code is self-contained in this directory and uses only Node built-ins
+and the disclosed xdoc executable. Optional Office integrations also require the prerequisites
+listed below, including Nushell where indicated. Repository-only checks remain under tools/.
 
 ```text
 scripts/
@@ -50,7 +51,8 @@ The public release audit checks this layout and local module imports.
   sandbox tmp directory, opens that staged copy, checks System Events UI state
   for Repair dialogs, distinguishes plain Cancel buttons from repair prompts,
   and writes clean-open.json. Windows/Linux, macOS without PowerPoint, or
-  missing UI scripting return `skipped` and do not block delivery.
+  missing UI scripting return `skipped`. This does not prove a clean open; the task's
+  delivery policy determines whether that missing evidence is acceptable.
 
 ## Create
 
@@ -181,6 +183,9 @@ The public release audit checks this layout and local module imports.
 
 - `cli/deckkits/select.mjs` - select an eligible DeckKit from the bundled catalog.
 
+- `cli/deckkits/design.mjs` - discover a DeckKit's design contract, registered layouts,
+  content fields, and capacity guidance before authoring content.
+
 - `cli/deckkits/readiness.mjs` - audit catalog and visual benchmark readiness.
   It uses persisted catalog benchmark evidence by default; pass `--out <dir>`
   for a live benchmark check or `--benchmark-mode required-live` for strict
@@ -297,8 +302,9 @@ The public release audit checks this layout and local module imports.
 
 - `cli/assets/icons.mjs` - query and generate the bundled Tabler icon pack.
 
-- `cli/assets/formula-render.mjs` - materialize formula assets declared in
-  `assets_manifest.json` (`--provider auto|text-svg`, `--dry-run`).
+- `cli/assets/formula-render.mjs` - materialize literal-LaTeX draft SVGs from a dedicated
+  formula manifest (`--provider auto|text-svg`, `--dry-run`). It does not typeset math or skip
+  existing/native entries; use fresh paths and preserve supplied or externally typeset assets.
 
 ## Animation
 

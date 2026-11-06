@@ -2,8 +2,8 @@
 
 Recipe 是 xdoc 在 `add-slide.recipe` 中暴露的 **18 个严格页面意图**。相比手堆
 `add-text-box`/`add-shape`，
-recipe 已经把字体、间距、坐标、placeholder 类型预设好；模型选错坐标的概率几乎
-为 0，是创建 deck 的首选。
+recipe 预设了字体、间距与几何，适合页面原型或显式 patch 的组成部分；输入和展开结果仍须
+校验、dry-run 及渲染复核。普通交付新建 deck 优先走本 skill 的 DeckKit 与标准 Create runner。
 
 每个 recipe 都作为 `add-slide` 的 `recipe` 字段放进 patch JSON，并在执行时展开成底层
 patch。先用 `xdoc schema --mode ops --ops add-slide --minimal` 获取当前严格字段，再通过 dry-run
@@ -11,7 +11,8 @@ patch。先用 `xdoc schema --mode ops --ops add-slide --minimal` 获取当前�
 `opResults[].expandedOps[]` 每项只含操作名 `{op}`，不能直接执行。
 需要完整展开请求时，对 recipe envelope 执行
 `xdoc pptx recipe --recipe recipe.json --compile --json`，读取返回的 `patch`
-并按正常 patch 流程校验和 dry-run；`recipeResults[].expandedOps[]` 仍是名称摘要。
+并按正常 patch 流程校验和 dry-run。该 CLI 输入使用 `schemaVersion: "pptx-recipe/v1"`，
+与下面用于 `apply` 的 `pptx-patch/v1` envelope 不同；`recipeResults[].expandedOps[]` 仍是名称摘要。
 
 ## 通用 envelope
 
@@ -59,7 +60,9 @@ recipe 与底层 patch op 可以混用：一份 patch 可同时包含 `add-slide
 }
 ```
 
-颜色支持 `#RRGGBB` / `RRGGBB`（大小写不敏感）。省略 `theme` 使用 deck 当前主题。
+颜色支持 `#RRGGBB` / `RRGGBB`（大小写不敏感）。省略 `theme` 使用 recipe 内置默认值：
+accent `3366CC`、background `FFFFFF`、text `111827`、muted `667085`。
+它不会自动读取 deck 当前主题色；需要品牌配色时显式传入相应字段。
 
 ---
 
@@ -171,7 +174,7 @@ canonical v1 的 `image-caption.image` 严格接受 `bytesBase64`、`mimeType` �
 ```
 
 每个 `item` 形如 `{ label, value, delta? }`，3 字段都是字符串。可选 `delta`
-默认不渲染颜色趋势（recipe 会按文本启发式渲染，不会自动算 +/-）。
+作为标签文字输出，不自动计算涨跌，也不按正负号推导趋势颜色。
 
 适合：仪表盘、季度报告、招股书指标页。
 

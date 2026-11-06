@@ -256,7 +256,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     JSON-mode compare failures still return one `pptx-nova-compare-error/v1`
     document on stdout and emit `compare-failed` as JSONL on stderr.
     Use lower-level `chrome-detect`, `chrome-remove`, `remap-theme --scope
-    text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
+text,shapes,tables,charts`, and `chrome-apply` reports only for fallback
     or page-level repair. - Data/template: template, data, bindings, and asset paths. - If the source outline only gives a slide title or leaves factual content
     blank, record any AI-filled facts, competitors, metrics, or examples in
     `deck_lock.assumptions[]` before writing `content.json`. - If the user-provided outline explicitly fixes slide titles or subtitles,
@@ -363,7 +363,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     candidate with one semantic diff and every evidence kind declared in
     `edit-contract.json`, bind the stable candidate and evidence hashes in
     `evidence-manifest.json`, then require
-    `pptx-nova-edit-contract-gate.mjs --strict` before publication. Visible
+    `<skill-root>/scripts/cli/edit/contract-gate.mjs --strict` before publication. Visible
     text edits that preserve target formatting should require `style-diff` plus
     scoped preview and `vision-diff` evidence. Use candidate-only
     `vision-check` as a diagnostic when needed; inherited source issues are not
@@ -471,7 +471,7 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
 
     For Create, follow [Design quality](create/design-quality.md): inspect the canonical PNGs and
     add `--mode create --candidate <candidate> --manifest <canonical-manifest>
-    --design-review <run-dir>/design_review.json` to the review command. Use the standard Create
+--design-review <run-dir>/design_review.json` to the review command. Use the standard Create
     runner's existing render; this generic example is not a second rendering requirement.
 
         node <skill-root>/scripts/cli/review/visual-review.mjs \
@@ -507,13 +507,13 @@ Use this order unless a mode-specific file explicitly narrows the workflow:
     set, `refurbish-compare.json`, and `refurbish-compare-gate.json`
     before returning. If running low-level commands manually, run
     `cli/review/layout-snapshot.mjs` on final inspect, then run
-    `pptx-nova-fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
+    `<skill-root>/scripts/cli/review/fidelity-gate.mjs --mode refurbish` after `vision-diff` and final
     `refurbish-audit` so the final policy receipt can consume the raw layout findings,
-    then run `pptx-nova-compare.mjs --kind refurbish --slide-count <count>
+    then run `<skill-root>/scripts/cli/review/compare.mjs --kind refurbish --slide-count <count>
 
 --compare-chunk-size 20 --dpi 192 --fallback-dpi 144`. Decks larger than
     20 slides become numbered parts; only an explicit retryable `render_error`     may lower the failed part to 144 DPI. Run
-    `pptx-nova-compare-gate.mjs --kind refurbish --publish --final-pptx-source
+    `<skill-root>/scripts/cli/review/compare-gate.mjs --kind refurbish --publish --final-pptx-source
 <candidate>`; the gate must be the only final PPTX publisher. Require both
     `status=pass`and`finalBinding.status=bound`, keep the manifest and all
     part reports with the run artifacts, and list every sibling PNG in the
@@ -563,8 +563,8 @@ xdoc check out.pptx --checks fonts,links,compat -o check.json --pretty --overwri
 17. If the user requested skill feedback (`need feedback`, `needs feedback`,
     `feedback wanted`, `需要反馈`, `给反馈`,
     or equivalent), write the feedback first and run
-    `pptx-nova-feedback-gate.mjs --run-dir <run-dir> --require-feedback
-    --workflow <create|refurbish|translation|other> --strict` or the same
+    `<skill-root>/scripts/cli/review/feedback-gate.mjs --run-dir <run-dir> --require-feedback
+--workflow <create|refurbish|translation|other> --strict` or the same
     command with `--prompt-file`. Create, Refurbish, and Translation feedback
     must contain the exact seven-dimension process scorecard and a matching
     weighted overall score. Do not send the final response while
@@ -687,11 +687,11 @@ PowerPoint display-effect screenshots and comparisons:
   `chartex-native-render-unverified` and do not claim PowerPoint-native proof.
 - When a visual gate must reflect PowerPoint's display/export result and the optional route is available, render
   with `<skill-root>/scripts/cli/office/powerpoint-snapshot.nu --method
-  pdf-render` first:
+pdf-render` first:
   `nu <skill-root>/scripts/cli/office/powerpoint-snapshot.nu deck.pptx --slides N-M --out <run-dir>/powerpoint/slide-%d.png --method pdf-render --json > <run-dir>/powerpoint-native-render.json`.
 - When the candidate contains OPC-declared ChartEx parts (at any path), pass that report to
-  `pptx-nova-finalize-evidence.mjs --candidate deck.pptx
-  --powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
+  `<skill-root>/scripts/cli/review/finalize-evidence.mjs --candidate deck.pptx
+--powerpoint-native-render <run-dir>/powerpoint-native-render.json`. The gate
   verifies the candidate SHA-256, exact ChartEx slide coverage, and every PNG's
   dimensions, byte length, and SHA-256. With hidden slides, it also requires the
   snapshot's `pdf_page_count` / `pdf_pages` mapping to match logical slide identity;

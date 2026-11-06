@@ -57,7 +57,7 @@ xdoc 让这四层都能改。整 deck 的主题槽位更新可用 theme 层；�
 }
 ```
 
-`position` 范围 `[0, 1]`；`angle` 度数（0 = 上→下）。stop 可以混用 `color` 与 `schemeClr`。
+`position` 范围 `[0, 1]`；`angle` 为顺时针角度（0 = 左→右，90 = 上→下）。stop 可以混用 `color` 与 `schemeClr`。
 
 ### Radial gradient
 
@@ -270,7 +270,7 @@ PPTX，也不证明接收方安装了同一 face；`xdoc check --checks fonts` �
 
 ### CJK 字体注意
 
-PowerPoint 在中英混排时会根据字符类型选择拉丁（`typeface`）或东亚（`eastAsian`）字体。若你想中英都用一种字体：
+PowerPoint 在中英混排时会根据字符类型选择拉丁（`typeface`）或东亚（`eastAsian`）字体。若你想为中英分别指定字体：
 
 ```json
 {
@@ -281,7 +281,8 @@ PowerPoint 在中英混排时会根据字符类型选择拉丁（`typeface`）�
 }
 ```
 
-某些字体（如 `Inter`）只覆盖拉丁字符，中文会 fallback；显式设 `eastAsian` 才能保证中文也用指定字体。
+某些字体（如 `Inter`）不覆盖中文，缺失字形会触发 fallback。显式设 `eastAsian` 声明东亚字体意图，
+但实际显示仍取决于字体安装、字形覆盖、语言和对象上的显式格式；须检查最终渲染。
 
 ### 字体栈质量策略
 

@@ -191,7 +191,7 @@ The normalizer:
 - binds the rules, operation, and resolution SHA-256 values;
 - increases required target coverage instead of treating rule work as optional.
 
-The ordinary `pptx-nova-edit-contract-gate.mjs --strict` then verifies:
+The ordinary `<skill-root>/scripts/cli/edit/contract-gate.mjs --strict` then verifies:
 
 - the three bound session artifacts are unchanged;
 - the rules still match the contract source revision and deck id;

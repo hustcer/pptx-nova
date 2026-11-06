@@ -5,6 +5,11 @@ generated PPTX files, full patches, full vision reports, or per-slide PNG images
 It does store reviewed low-severity vision baselines so every DeckKit can
 separate expected style noise from newly introduced visual issues.
 
+Case `review.md` files record the dated acceptance run and its original scope.
+Their recorded runtime, counts and candidate/default status are historical evidence;
+current selection eligibility comes from the [DeckKit catalog](../../assets/deckkits/catalog.json) and readiness,
+and a new delivery still requires evidence bound to its own candidate.
+
 ## Layout
 
 ```text

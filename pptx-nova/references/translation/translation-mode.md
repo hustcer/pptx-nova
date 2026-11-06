@@ -1182,7 +1182,7 @@ After the comparison set passes validation, publish the final PPTX and the
 single PNG or complete numbered sibling set as one delivery bundle so reviewers
 can find it without opening the run directory. Preserve the run-directory
 manifest, part reports, and PNGs as audit evidence. Run
-`pptx-nova-compare-gate.mjs --kind translation --publish --final-pptx-source
+`<skill-root>/scripts/cli/review/compare-gate.mjs --kind translation --publish --final-pptx-source
 <candidate>` after the candidate is stable, and block delivery unless
 `translation-compare-gate.json.status` is `pass` and
 `finalBinding.status=bound`. The gate rejects scoped final reports, requires

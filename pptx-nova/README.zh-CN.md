@@ -80,12 +80,19 @@ CLI 是公开分发与集成界面，execution layer 是它在 Agent 与文档�
   和 sidecar 使一次修改可审阅、可回放，而不是只用“文件已经生成”判断成功。
 - **本地、轻量、适合自动化。** 预览渲染、PDF 导出和视觉检查不依赖 PowerPoint、完整 Office
   套件或 headless browser。当前的 `v0.19.0` 原生包会因受支持目标不同而略有差异，单个包
-  解压后约 20MB；不需要独立服务器或常驻后台服务，适合 CI、容器、离线 worker 和无人值守的
-  Agent 环境。多步骤任务也可以按需使用仅监听本机 loopback 的可选 daemon。
+  下载大小约 8.4–10.3 MB（十进制）；普通本地任务不需要独立服务器或常驻后台服务。
+  多步骤任务也可以按需使用仅监听本机 loopback 的可选 daemon。
 
 小体积属于特定版本的发布证据，不是永久兼容性承诺；平台支持、渲染后端、字体和精确二进制大小，
 都应以所选 release 的实际信息为准。当前公开原生目标覆盖受支持的 Linux、macOS 和 Windows
 构建。最终渲染仍取决于所需后端和字体，少见或尚未支持的 PPTX 特性仍需要明确复核。
+
+已核对的发布版为 `0.19.0 (93aafd96)`。Free 支持单用户本地任务，每任务最多 10 页、
+压缩 PPTX 输入合计不超过 5 MiB；PPTX、PDF、PNG 等视觉输出带 `structurify.io` 水印。
+Personal 与 Enterprise 可移除套餐级页数、大小限制及新增套餐水印，已有签名水印规则仍适用。
+Launch plans 支持本地脚本和每用户 daemon，不包含 CI、共享服务器或 Service/API 部署；
+这些环境需要另行适用的授权。公开下载默认适用非商业条款，除非另有许可。
+canonical 自动视觉审计需要无水印转换授权；Free 仍可生成带水印预览供审阅。
 
 这些能力组合起来，使 `pptx-nova` 更接近一套可检查、可回放的 PPTX 构建和编辑流程，
 而不是把内容渲染成图片后塞进幻灯片。
@@ -499,7 +506,7 @@ content validation、DeckKit patch build、icon pack query、DeckKit selector、
 - examples 是否声明 synthetic / redistributable policy。
 
 `tools/ci-check.nu` 还会校验 `pptx-nova/assets/examples/deckkits/*/content.json`，并对 production/default
-DeckKit 运行 `pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mode catalog`。
+DeckKit 运行 `<skill-root>/scripts/cli/deckkits/readiness.mjs --target delivery --benchmark-mode catalog`。
 
 ### Tabler 图标包
 

@@ -300,7 +300,7 @@ slide. Do not switch to a parallel rebuild that only resembles the template.
 - identity assets in `assets_manifest.json` / `template-audit.json` must have
   approved provenance and cannot be generated lookalikes.
 
-`pptx-nova-fidelity-gate.mjs --mode template-following` is the delivery summary
+`<skill-root>/scripts/cli/review/fidelity-gate.mjs --mode template-following` is the delivery summary
 gate. It does not replace `template-gate`; it verifies the final inspect,
 template frame-map coverage, and `template-gate.json` result into one
 `fidelity-gate.json` artifact. A failed `template-gate` remains a failed

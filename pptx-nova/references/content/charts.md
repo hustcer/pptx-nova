@@ -165,7 +165,7 @@ PNG 复核之后，精确 Office 保真仍须独立 PowerPoint 证据；clean-op
 
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含
 add-chart / set-chart / set-chart-data / set-chart-text，apply 后保存 final-inspect.json，并运行
-pptx-nova-semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
+<skill-root>/scripts/cli/review/semantic-audit.mjs 输出 semantic-audit.json。该审计只做轻量语义门禁：
 数据维度、数值类型、source/claim 披露和最终原生 chart 对象存在性；它不是完整 OOXML
 chart 等价检查。semantic-audit.json 若为 fail，最终 evidence-summary 必须阻塞；warn
 可以披露后继续视觉复核。

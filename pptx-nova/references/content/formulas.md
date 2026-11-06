@@ -77,21 +77,21 @@ When any formula is rendered or inserted natively, write formula intent into the
 
 Formula entries use `kind: "formula"` and one of these statuses:
 
-| status        | Meaning                                              | Blocks delivery         |
-| ------------- | ---------------------------------------------------- | ----------------------- |
-| `available`   | User supplied or existing formula asset is available | No                      |
-| `rendered`    | This run rendered the formula asset from LaTeX       | No                      |
-| `native`      | This run inserted a native PowerPoint equation       | No                      |
-| `placeholder` | Visual placeholder only                              | Yes for formal delivery |
-| `needs-user`  | Needs user source, approval, or missing LaTeX        | Yes                     |
-| `missing`     | Declared path does not exist                         | Yes                     |
+| status        | Meaning                                                       | Blocks delivery         |
+| ------------- | ------------------------------------------------------------- | ----------------------- |
+| `available`   | User supplied or existing formula asset is available          | No                      |
+| `rendered`    | This run materialized an SVG; verify its provider and content | No                      |
+| `native`      | This run inserted a native PowerPoint equation                | No                      |
+| `placeholder` | Visual placeholder only                                       | Yes for formal delivery |
+| `needs-user`  | Needs user source, approval, or missing LaTeX                 | Yes                     |
+| `missing`     | Declared path does not exist                                  | Yes                     |
 
 Always set `pptxUse.noCrop: true` for formulas. Cropping a formula is almost always a
 semantic error.
 
 ## Patch guidance
 
-Preferred patch op for a built-in SVG fallback:
+Built-in SVG fallback (literal LaTeX text, without mathematical typesetting):
 
 ```json
 {
@@ -107,7 +107,7 @@ Preferred patch op for a built-in SVG fallback:
 }
 ```
 
-Preferred patch op for production typography after rendering an SVG asset:
+For typeset production output, supply an SVG produced by a suitable math renderer:
 
 ```json
 {
@@ -153,26 +153,36 @@ still keep the formula metadata in `assets_manifest.json`.
 
 ## Render manifest
 
-When `assets_manifest.json` contains formula entries, render them with the bundled MJS
-script before building the patch:
+Only when a literal-LaTeX draft SVG is intended, use the bundled helper with a dedicated
+`formula-drafts.json` manifest containing just those entries and fresh output paths:
 
 ```bash
-node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json
+node <skill-root>/scripts/cli/assets/formula-render.mjs formula-drafts.json
 ```
 
 Useful variants:
 
 ```bash
-node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json --dry-run
-node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json --out assets_manifest.rendered.json
-node <skill-root>/scripts/cli/assets/formula-render.mjs assets_manifest.json --asset-root assets
+node <skill-root>/scripts/cli/assets/formula-render.mjs formula-drafts.json --dry-run
+node <skill-root>/scripts/cli/assets/formula-render.mjs formula-drafts.json --out formula-drafts.rendered.json
+node <skill-root>/scripts/cli/assets/formula-render.mjs formula-drafts.json --asset-root assets
 ```
 
-The current bundled provider is `text-svg`: deterministic, offline, and safe for
-PowerPoint insertion. It writes SVG files, updates formula entries to
+The current bundled provider is `text-svg`: a deterministic offline SVG text wrapper.
+It escapes and displays the literal LaTeX source; it does not typeset fractions,
+radicals, matrices, or other LaTeX notation. Its `rendered` status means that an
+SVG file was materialized, not that the formula was mathematically typeset.
+It writes SVG files, updates formula entries to
 `status: "rendered"`, records `render.mime: "image/svg+xml"`, and enforces
 `pptxUse.noCrop: true`. For typography-sensitive final decks, prefer externally
-rendered SVG assets if available and keep the same manifest fields.
+typeset SVG assets when available and keep the same manifest fields. For expressions
+in the editable native subset, use `native-omml` when that representation meets the task.
+
+The helper processes every formula entry regardless of `available`, `rendered`, or `native`
+status and overwrites the resolved SVG path. Do not pass a mixed manifest containing supplied,
+externally typeset, or native formulas. `--out` redirects only the updated manifest, not the SVG
+writes. After reviewing draft outputs, merge only their intended entries into the run's main
+manifest; preserve other assets and formula records.
 
 Simple inline formulas can stay in ordinary text when all of these are true:
 

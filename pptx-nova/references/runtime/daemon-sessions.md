@@ -35,8 +35,8 @@ MCP host 必须先确认 `capabilities.agentTransports.mcp.status == "disclosed"
 ## §1 起手最短路径
 
 ```bash
-# 直接用 — 第一次会自动拉起 daemon（~200ms 启动开销）
-xdoc pptx inspect deck.pptx --daemon --json | save inspect.json
+# 直接用 — daemon 未运行时会自动拉起；启动耗时取决于环境
+xdoc pptx inspect deck.pptx --daemon --json > inspect.json
 
 # 状态查询 / 显式关闭（status / stop 不会触发 auto-spawn）
 xdoc daemon status --json
@@ -60,7 +60,7 @@ nohup xdoc daemon start >/tmp/xdoc-daemon.log 2>&1 &
 
 ```bash
 # 默认模式：auto-spawn + 失败 fallback 到一次性
-xdoc pptx inspect deck.pptx --daemon --json | save inspect.json
+xdoc pptx inspect deck.pptx --daemon --json > inspect.json
 
 # 严格模式：CI / 脚本里防止"误用一次性、看不出来"；auto-spawn 失败也直接 DaemonUnavailable
 xdoc pptx apply -p patch.json -i deck.pptx -o deck.pptx --daemon-strict --overwrite
@@ -187,14 +187,14 @@ daemon 不改变 patch 语义，只改变执行链路：
 
 ```bash
 # 注意：不再需要 daemon start！第一次 --daemon 调用自动拉起
-xdoc pptx inspect deck.pptx --daemon --json | save inspect.json
+xdoc pptx inspect deck.pptx --daemon --json > inspect.json
 
 # Agent 根据 inspect 生成 patch1.json（改主标题文字）
-xdoc pptx apply -p patch1.json -i deck.pptx -o deck.pptx --daemon --overwrite --dry-run --json | save dry1.json
+xdoc pptx apply -p patch1.json -i deck.pptx -o deck.pptx --daemon --overwrite --dry-run --json > dry1.json
 xdoc pptx apply -p patch1.json -i deck.pptx -o deck.pptx --daemon --overwrite
 
 # 第二轮：验证 + 下一步（命中已在内存中的 session，秒回）
-xdoc pptx inspect deck.pptx --daemon --json | save inspect-after.json
+xdoc pptx inspect deck.pptx --daemon --json > inspect-after.json
 # ... 多轮修改 ...
 
 # 可选：完事后关 daemon；不关也行，5 分钟 idle 后 session 自动淘汰
@@ -335,8 +335,8 @@ JSON-RPC adapter：`xdoc mcp` 直接提供标准 MCP over stdio。配置形状�
 
 用它时有五条必须记住：
 
-- `xdoc_schema` 默认 `mode=index`（约 17 KB）。`mode=full` 约 1.8 MB、贵约 100 倍，
-  只在确实需要时请求；通常 `mode=ops` + `ops:[...]` 才是正确选择。
+- `xdoc_schema` 默认 `mode=index`。`mode=full` 包含完整合同，体积随 runtime 变化；
+  只在确实需要时请求，通常优先用 `mode=ops` + `ops:[...]` 获取目标操作。
 - **传绝对路径**。相对路径是相对 `xdoc` 子进程的工作目录，不是 client 的。
 - `isError: true` 是**业务失败**，不是 JSON-RPC transport error。完整
   `xdoc-mcp-tool-result/v1` envelope 的位置由 `contract.resultEncoding` 决定：支持的 era

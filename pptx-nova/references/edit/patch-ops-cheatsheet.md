@@ -9,9 +9,10 @@ table setter 已全部并入对应的聚合 op
 >
 > 通用：`slide` 字段是 **0-based** 索引；`paragraph` / `run` / `row` / `column` 同样 0-based。
 >
-> 通用：长度字段（`x` / `y` / `w` / `h` / `width` / `height`）只接受带单位的
+> 通用：schema 类型为 `length` 的几何字段只接受带单位的
 > 字符串：`"1in"` / `"2cm"` / `"96px"` / `"72pt"` / `"914400emu"`。
-> 裸 number 与无单位字符串会被拒收。
+> 裸 number 与无单位字符串会被拒收。字段名本身不能决定类型：例如 freeform
+> 的 `path.width/height` 和路径点坐标使用整数 viewport，见 §2。
 
 ---
 

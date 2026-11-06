@@ -89,7 +89,7 @@ Its power comes from several properties that reinforce each other, not from any 
   instead of reducing success to “the file exists.”
 - **Local, lightweight, and automation-friendly.** Preview rendering, PDF export, and visual checks do
   not require PowerPoint, a full office suite, or a headless browser. The current `v0.19.0` native
-  archives download as approximately 8.3–10.1 MB depending on the target and require no separate
+  archives download as approximately 8.4–10.3 MB (decimal) depending on the target and require no separate
   server or always-on background service. Local scripts and multi-step jobs may optionally use
   the loopback-only local daemon.
 
@@ -575,7 +575,7 @@ normalization and resolution, Edit Contract source binding, and candidate/eviden
 - Whether examples declare the synthetic / redistributable policy.
 
 `tools/ci-check.nu` also validates `pptx-nova/assets/examples/deckkits/*/content.json` and runs
-`pptx-nova-deckkit-readiness.mjs --target delivery --benchmark-mode catalog` for production/default
+`scripts/cli/deckkits/readiness.mjs --target delivery --benchmark-mode catalog` for production/default
 DeckKits.
 
 ### Tabler Icon Pack

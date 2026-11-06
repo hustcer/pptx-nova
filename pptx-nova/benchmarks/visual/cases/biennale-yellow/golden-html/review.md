@@ -23,4 +23,4 @@ and explicit Arial Unicode MS CJK text. Scientific number formats can render as 
 in the validated runtime. No bitmap backgrounds, browser controls or legacy renderer are bundled.
 
 Hashes, page notes, field mapping, retired symbols and release status:
-[Biennale 2.0 cleanup results](../../../../../../docs/biennale-yellow-v2-cleanup-results.md).
+Biennale 2.0 cleanup results (not included in this repository: `biennale-yellow-v2-cleanup-results.md`).

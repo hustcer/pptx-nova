@@ -6,7 +6,7 @@
 > 长 deck 或高风险 deck 可以在 deck_lock 后写 `resume_manifest.json`，让用户新会话
 > `继续生成 <run-dir>`；这只是会话切分，不改变 Express 的 DeckKit-first 路线。
 >
-> **express ≠ 草稿**：它默认也按客户演示级（200-300 ops）产出，只是把
+> **express ≠ 草稿**：它默认也按客户演示级的内容与视觉质量产出，只是把
 > `../common-workflow.md` 的完整工作流自动串起来、不逐项追问。要草稿请明说「简单/速记版」。
 
 ## 目录
@@ -64,6 +64,10 @@ prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资�
 
 ## 2. Express 黄金路径（自动化 12 步）
 
+正式创建按 [create-runner.md](create-runner.md) 调用 `cli/create/run.mjs`，由 runner
+执行机器检查和 canonical PDF/PNG 取证；实际审阅后再以 `--finalize --visual-review`
+发布同一候选。下面拆解低层步骤供诊断和 DeckKit 开发使用，不替代 runner 的交付门禁。
+
 ```bash
 # 0. 从用户大纲标准化 outline.json；若无大纲，再从 prompt 提炼 deckBrief/outline → 见 §3、§7
 # 0b. 自动生成 deck_lock.json；只有使用外部/复用资源时生成 assets_manifest.json。Express 不阻塞确认，假设写入 assumptions[]
@@ -80,9 +84,9 @@ node <skill-root>/scripts/cli/deckkits/select.mjs \
 # 1b. 对 selected.id 再跑 delivery readiness audit
 node <skill-root>/scripts/cli/deckkits/readiness.mjs --deckkit <selected-id> --target delivery
 
-# 当前内置套件均为 candidate，自动 delivery 选择可能没有结果。
-# 用户明确指定 consulting-dark 等候选时，按 deckkit-mode.md 的 explicit 路线继续，
-# 不把候选提升到 production 或伪造自动选择成功。
+# 当前 catalog 已有 production/default 套件；选择结果仍取决于页型覆盖、场景与 readiness。
+# 若没有合适结果，先扩展 DeckKit；用户明确指定 candidate 时按 deckkit-mode.md
+# 的 explicit 路线处理，不把候选提升到 production 或伪造自动选择成功。
 
 # 1c. 使用 selected.visualGrammar 约束内容创作：
 #     positioning 决定风格判断，signatureElements/compositionRules 决定页面构成，
@@ -94,7 +98,7 @@ node <skill-root>/scripts/cli/deckkits/slots.mjs \
   > deckkit-slots.md
 
 # 2. 写 content manifest（纯数据，不写坐标/配色/组件逻辑）
-cp skills/pptx-nova/assets/deckkits/consulting-dark/examples/content.json content.json
+cp <skill-root>/assets/deckkits/consulting-dark/examples/content.json content.json
 #    按 outline.json 改 slides[].type 和 slides[].data
 
 # 3. 校验 content（schema + density + layout contract + diversity + fit diagnostics）
@@ -136,15 +140,16 @@ xdoc pptx apply -p run/remediation-context/request.json \
   --asset-root run/remediation-context/assets -o out.pptx --daemon
 
 # 10. 几何自检闭环（render-free，见 §6）
-xdoc pptx vision-check out.pptx --json | save vision.json
+xdoc pptx vision-check out.pptx --json > vision.json
 #    核对一条文档 remediation 并执行 → 重新诊断新文档 → 处理剩余 medium/high
 
 # 11. 转 PNG 像素复核（对比度/装饰挡标题等几何看不到的，见 §5 与 ../common-workflow.md）
 xdoc convert out.pptx --to png -o previews --overwrite
 #    逐页检查字符重叠、换行压字、截断、页脚/来源撞正文
 
-# 12. 产出物：out.pptx + outline.json + deck_lock.json + content.json + patch.json + dry.json + vision.json + previews/
+# 12. 这些是中间产物：out.pptx + outline.json + deck_lock.json + content.json + patch.json + dry.json + vision.json + previews/
 #     若使用外部/复用资源，再包含 assets_manifest.json
+#     正式交付仍须完成 create-runner.md 的 canonical evidence、绑定审阅和 finalize
 ```
 
 四道闸门分层：**check-lock（设计锁漂移 + 资产槽位）→ dry-run（语义 + touched
@@ -192,8 +197,9 @@ Express 生成的 `deck_lock.json` 必须记录这些推断值和 `assumptions[]
 
 ### 3.2 无可用 DeckKit 时：创建/扩展 DeckKit
 
-只有 readiness audit 没有合适 DeckKit、outline 缺页型或需要改组件结构时，才复制
-`assets/examples/generator/deck-generator-template.mjs`。目标是抽取/扩展 DeckKit，再回到
+只有 readiness audit 没有合适 DeckKit、outline 缺页型或需要改组件结构时，才把
+`assets/examples/generator/deck-generator-template.mjs` 和相邻的 `theme-packs.generated.mjs`
+一起复制到 run 目录。目标是抽取/扩展 DeckKit，再回到
 content manifest 生产路径；不要把临时 generator 当作最终交付路径。按 outline 改这三处即可，
 **不要重写 helper**：
 
@@ -203,9 +209,9 @@ content manifest 生产路径；不要把临时 generator 当作最终交付路�
    `product` / `cartesian`，或用
    `--theme-pack ./theme.json --style-pack ./style.json` 加载外部 pack。
 2. **各 slide 函数内容** —— 填 outline 里的标题、KPI 数据、表格行、bullet。
-3. **`TOTAL` + main 里的 slide 调用序列** —— 改成实际页数与页序。
+3. **`TOTAL` + `variantSlideSets` 中所选布局的函数列表** —— 改成实际页数与页序。
 
-helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `pageChrome()` / `pageHeader()`）
+helper（`nm()` 双向命名 / `grid()` 网格 / `_txH()` 字号→盒高 / `pageChrome()` / `pageHeader()`）
 的签名与避坑细节见 `deck-generator-workflow.md`，express 直接用、不展开。
 
 ---
@@ -230,7 +236,7 @@ helper（`nm()` 双向命名 / `grid()` 网格 / `txH()` 字号→盒高 / `page
 ## 5. 质量门与丰富度
 
 express 默认按**客户演示级**产出，不交 recipe-only 草稿。硬指标（详见
-`create-studio.md` 的可读性红线与 `rich-deck-patterns.md` 的 op 量级表）：
+`create-studio.md` 的可读性红线与 `rich-deck-patterns.md` 的视觉模式）：
 
 - **op 量级**：`jq '.ops|length'` 仅用于了解构建规模，不设操作数下限；是否需要补充视觉元素，
   应根据内容、页面结构和渲染结果判断。
@@ -275,7 +281,7 @@ apply 后跑 `xdoc pptx vision-check out.pptx --json`（render-free 几何自检
 
 vision-check 是静态估算；**字符实际重叠 / 字体换行压字 / 小字号可读性 / 对比度 /
 箭头是否歪、连接线是否接上 / 中轴标识是否真居中 / 装饰是否真盖住文字 / 配色协调仍靠
-§2 第 8 步的 PNG 复核**（公共检查清单见 `../common-workflow.md`），不可省。
+§2 第 11 步的 PNG 复核**（公共检查清单见 `../common-workflow.md`），不可省。
 
 ---
 

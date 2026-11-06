@@ -155,7 +155,7 @@ artifact boundaries.
 
 ### Native-first deployment and release footprint
 
-The verified `v0.19.0` archives download as approximately 8.3–10.1 MB, with exact
+The verified `v0.19.0` archives download as approximately 8.4–10.3 MB (decimal), with exact
 size varying by target. That footprint includes the executable distribution
 and applicable notices for the selected target. It is small enough to promote
 as a pinned local container or offline-job layer without
@@ -249,23 +249,23 @@ screenshots or log interpretation alone.
 
 ### Current release surface
 
-| Area                           | Runtime contract in v0.19.0                                                                            |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `auth`, `pdf`, `daemon`, `json-rpc`, `mcp`, `schema` |
-| PPTX CLI subcommands           | 38 discoverable subcommands                                                                            |
-| Patch operations               | 59 canonical operations                                                                                |
-| High-level recipes             | 18 recipe kinds                                                                                        |
-| Shape catalog                  | 182 preset shapes                                                                                      |
-| Layout contracts               | 6 built-in content contracts                                                                           |
-| Theme/style assets             | 9 theme packs and 4 style packs                                                                        |
-| Gradients and chart styles     | 24 preset gradients and 48 chart styles                                                                |
-| Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status                                    |
-| Enum families                  | 23 controlled vocabularies                                                                             |
-| Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                                    |
-| Embedded PPTX report schemas   | 31 report schemas                                                                                      |
-| Patch schema definitions       | 238 `$defs` in the current runtime schema                                                              |
-| Runtime examples               | 45 PPTX CLI examples, 25 patch examples, and 7 recipe examples                                         |
-| Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                           |
+| Area                           | Runtime contract in v0.19.0                                                                                           |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Top-level CLI                  | `convert`, `html2md`, `extract`, `check`, `pptx`, `auth`, `pdf`, `daemon`, `json-rpc`, `mcp`, `completions`, `schema` |
+| PPTX CLI subcommands           | 38 discoverable subcommands                                                                                           |
+| Patch operations               | 59 canonical operations                                                                                               |
+| High-level recipes             | 18 recipe kinds                                                                                                       |
+| Shape catalog                  | 182 preset shapes                                                                                                     |
+| Layout contracts               | 6 built-in content contracts                                                                                          |
+| Theme/style assets             | 9 theme packs and 4 style packs                                                                                       |
+| Gradients and chart styles     | 24 preset gradients and 48 chart styles                                                                               |
+| Chart type catalog             | 103 `XlChartType` entries with supported/partial/unsupported status                                                   |
+| Enum families                  | 23 controlled vocabularies                                                                                            |
+| Published bridge error catalog | Discover current entries through `commands.pptx.errorCatalog.codes`                                                   |
+| Embedded PPTX report schemas   | 31 report schemas                                                                                                     |
+| Patch schema definitions       | 238 `$defs` in the current runtime schema                                                                             |
+| Runtime examples               | 45 PPTX CLI examples, 25 patch examples, and 7 recipe examples                                                        |
+| Chart status breakdown         | 54 supported, 31 partial, and 18 unsupported entries in the 103-type catalog                                          |
 
 Counts are discovery aids, not promises that every long-tail PPTX feature is
 fully editable. Each operation and capability carries its own support or
@@ -926,8 +926,9 @@ The schema also publishes six layout contracts, 24 preset gradients, 48 built-in
 chart styles, and a 103-entry chart-type catalog. The chart catalog labels
 entries as supported, partial, or unsupported so a planner can choose a safe
 representation before generating a patch. The current catalog registers two
-production-ready native DeckKits without making DeckKit internals part of the
-patch schema.
+native skinning DeckKits, `mckinsey-blue` and `cartesian`, with `production`
+readiness. This is the runtime's skinning catalog, distinct from the larger
+creation DeckKit catalog bundled with `pptx-nova`.
 
 In the verified build, all 59 canonical operation names appear in
 `patchSchema.supportedOps` and `patchSchema.experimentalOps` is empty. This is
@@ -1927,19 +1928,20 @@ not a cross-machine latency SLA.
 
 ### Top-level commands
 
-| Command    | Purpose                                                                       | Typical output                             |
-| ---------- | ----------------------------------------------------------------------------- | ------------------------------------------ |
-| `convert`  | Convert document files to PDF, PNG, JSON, Markdown, or text                   | File, directory, manifest, or batch report |
-| `html2md`  | Convert HTML files to Markdown                                                | Markdown file/directory                    |
-| `extract`  | Extract PPTX map, resources, notes, links, and fonts                          | Versioned JSON artifact                    |
-| `check`    | Run font, link, compatibility, asset, policy, and opt-in accessibility checks | `preflight/v1` JSON                        |
-| `pptx`     | Create, patch, inspect, render, compare, translate, brand, or refurbish decks | PPTX plus versioned reports                |
-| `auth`     | Verify, install, uninstall, inspect, or reset the local license credential    | `xdoc-cli-auth-*/v1` JSON reports          |
-| `pdf`      | Inspect, extract text from, or render PDFs                                    | PDF diagnostics, text, or PNG              |
-| `daemon`   | Start, inspect, or stop the local session service                             | `xdoc-daemon-status/v2` or diagnostics     |
-| `json-rpc` | Serve the published stdio Agent transport                                     | `xdoc-json-rpc-result/v1` NDJSON frames    |
-| `mcp`      | Serve the published tools-only MCP transport over stdio                       | MCP frames with `xdoc-mcp-tool-result/v1`  |
-| `schema`   | Print the machine-readable CLI and patch contract                             | `cli-agent/v1` JSON                        |
+| Command       | Purpose                                                                       | Typical output                             |
+| ------------- | ----------------------------------------------------------------------------- | ------------------------------------------ |
+| `convert`     | Convert document files to PDF, PNG, JSON, Markdown, or text                   | File, directory, manifest, or batch report |
+| `html2md`     | Convert HTML files to Markdown                                                | Markdown file/directory                    |
+| `extract`     | Extract PPTX map, resources, notes, links, and fonts                          | Versioned JSON artifact                    |
+| `check`       | Run font, link, compatibility, asset, policy, and opt-in accessibility checks | `preflight/v1` JSON                        |
+| `pptx`        | Create, patch, inspect, render, compare, translate, brand, or refurbish decks | PPTX plus versioned reports                |
+| `auth`        | Verify, install, uninstall, inspect, or reset the local license credential    | `xdoc-cli-auth-*/v1` JSON reports          |
+| `pdf`         | Inspect, extract text from, or render PDFs                                    | PDF diagnostics, text, or PNG              |
+| `daemon`      | Start, inspect, or stop the local session service                             | `xdoc-daemon-status/v2` or diagnostics     |
+| `json-rpc`    | Serve the published stdio Agent transport                                     | `xdoc-json-rpc-result/v1` NDJSON frames    |
+| `mcp`         | Serve the published tools-only MCP transport over stdio                       | MCP frames with `xdoc-mcp-tool-result/v1`  |
+| `completions` | Generate shell completion scripts for Bash, Zsh, or Fish                      | Shell script                               |
+| `schema`      | Print the machine-readable CLI and patch contract                             | `cli-agent/v1` JSON                        |
 
 ### PPTX action families
 
@@ -1950,7 +1952,7 @@ not a cross-machine latency SLA.
 | Rendering and comparison | `preview`, `visual-audit`, `vision-check`, `diff`, `vision-diff`, `contact-diff`                                         |
 | Translation              | `i18n-scan`, `i18n-anchor-draft`, `i18n-plan`, `i18n-text-plan`, `i18n-style-diff`, `replace-text`, `replace-chart-text` |
 | Refurbishment            | `refurbish-skin`, `refurbish-audit`, `chrome-detect`, `chrome-remove`, `chrome-apply`                                    |
-| Theme and brand          | `remap-theme`, `swap-theme`, `swap-style`, `check-brand`, `apply-brand`                                                  |
+| Theme, fonts and brand   | `remap-theme`, `swap-theme`, `swap-style`, `set-font`, `check-brand`, `apply-brand`                                      |
 | Reuse and history        | `slide-copy`, `import-template`, `replay`, `audit`, `rollback`                                                           |
 
 ### Selector index conventions

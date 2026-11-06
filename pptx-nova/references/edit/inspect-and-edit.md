@@ -573,6 +573,9 @@ overflow 会扩展共同栏高；显式 clip/ellipsis 则保留作者高度。�
 
 ### 5.3 加一页和现有 layout 一样的
 
+先从源文件 inspect 选择实际存在的 layout；下面的名称只是示例，须带 `--input`
+应用到包含该版式的源 PPTX。空白新文稿默认只有 Blank，不内置此标题正文版式。
+
 ```json
 {
   "schemaVersion": "pptx-patch/v1",

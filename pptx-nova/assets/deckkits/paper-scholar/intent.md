@@ -2,7 +2,7 @@
 
 Paper Scholar 把暖纸底、橄榄绿层级、珊瑚标记、开放式证据和研究课件节奏组织成标准 DeckKit。
 通过 `content.json → validate-content → build → Create` 使用，无须手写坐标。
-版本与 readiness 以 [catalog](../catalog.json) 为准；本套件须显式选择。
+版本与 readiness 以 [catalog](../catalog.json) 为准；当前为 default，可参与自动交付选择。
 
 ## 身份、构图与内容
 

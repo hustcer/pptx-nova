@@ -390,11 +390,15 @@ PowerPoint（PPTX 表格不像 Excel 那样有计算引擎）。再次改数据�
 {
   "schemaVersion": "pptx-patch/v1",
   "ops": [
-    { "op": "add-slide", "layout": { "type": "title" } },
+    { "op": "add-slide" },
     {
-      "op": "set-text-frame",
+      "op": "add-text-box",
       "slide": 0,
-      "shape": { "placeholder": "title" },
+      "name": "Title",
+      "x": "1in",
+      "y": "0.5in",
+      "w": "11in",
+      "h": "0.8in",
       "text": "关键指标"
     },
     {

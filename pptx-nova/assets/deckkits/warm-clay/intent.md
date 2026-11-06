@@ -63,4 +63,4 @@ node pptx-nova/scripts/cli/create/build.mjs --deckkit warm-clay content.json -o 
   Arial / Arial Unicode MS 正文。字体不嵌入；中文粗体可能由宿主合成。不同字体/平台需复核。
 - 不宣称源稿保留、任意已有 PPTX 翻新、native skinning、动画播放或图片导入能力。
 
-实际覆盖、逐页审查、原生宿主结果和未验证项见 [迁移验收报告](migration-report.md)。
+实际覆盖、逐页审查、原生宿主结果和未验证项见 迁移验收报告（未随本仓库发布：`migration-report.md`）。

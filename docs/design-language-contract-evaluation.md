@@ -1,6 +1,9 @@
 # pptx-nova 设计语言载体评估
 
 初评日期：2026-10-21；更新日期：2026-10-22。
+本文保留当时的评估与后续迁移快照，版本、套件数量和验收范围均为历史记录。
+部分原始报告未随本仓库发布；当前套件状态以 [catalog](../pptx-nova/assets/deckkits/catalog.json) 为准，
+当前运行时能力以实际 `xdoc schema` 为准，不能从历史通过记录推导本次交付通过。
 范围：设计语言的表达、执行、扩展与验证。初评为方案比较，本次结合 Biennale、Black Gold、
 Green Slate、Clear Value，以及后续 Biennale/Cartesian/Broadside/Long Table/Swiss Grid/McKinsey Blue 2.0 的落地结果更新结论。
 
@@ -19,29 +22,29 @@ Green Slate、Clear Value，以及后续 Biennale/Cartesian/Broadside/Long Table
 Clear Value 曾有实机 Repair 丢页反例，原完整验收结论因此撤回。2026-10-22 已用重构建的
 `xdoc 0.13.0 (92a5aa13)` 复核修复，并同步调用方：新完整样例原生打开、另存、关闭重开均无 Repair，
 第 11 页内容和原生环图保留。历史 PPTX 不会被新二进制自动修好，catalog 也不因此自动晋级。见第 7 节及
-[REPAIR-001](repair-issues.md)。其余风格也不能因本次未发现 Repair 就推定已通过原生宿主验证。
+REPAIR-001（未随本仓库发布：`repair-issues.md`）。其余风格也不能因本次未发现 Repair 就推定已通过原生宿主验证。
 
 下文第 1–3 节保留初评依据并标注历史范围；第 4–10 节区分已实现能力、实测经验和后续建议。
 自有合同始终由 pptx-nova 编译，不能直接传给 xdoc。
 
-### 当前落地快照
+### 历史落地快照
 
 2026-10-24 经维护者明确授权，十套均获得交付选型资格，均登记为 `production`。
 交付资格登记时重跑了当时全部 19 个注册基准及十套 readiness；新增 Cartesian native-exhibits 后共有 20 个注册基准。历史人工视觉与
 原生宿主证据仍按下表所列范围使用，不扩写为所有未来输入的保真保证。
 
-| DeckKit         | 当前版本 / catalog 状态      | 实际实现                                          | 证据与边界                                                                                                                                                                                                       |
-| --------------- | ---------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| consulting-dark | 2.0.0 / production           | consulting-editorial/v1，10 类职责、20 个注册布局 | [2.0 迁移报告](consulting-dark-v2-migration-results.md)；64 页最终 canonical 逐张检查，七组原生打开，英文/中文保存重开回读，标题/形状文字/表格/图表数据编辑通过                                                  |
-| biennale-yellow | 2.0.0 / production           | 九类职责全部经注册合同执行，旧分支退役            | [2.0 清理报告](biennale-yellow-v2-cleanup-results.md)；35 页最终矩阵、原生保存重开及回读                                                                                                                         |
-| cartesian       | 2.0.0 / production           | cartesian-editorial/v1，15 个页型、28 个注册布局  | 原十页型的 [2.0 迁移报告](cartesian-v2-migration-results.md) 覆盖 42 页 canonical 与原生宿主证据；新增五个展示页型的证据及边界见 [intent.md](../pptx-nova/assets/deckkits/cartesian/intent.md)，不沿用旧宿主结论 |
-| broadside       | 2.0.0 / production           | broadside-poster/v1，16 类职责、28 个注册布局     | [2.0 迁移报告](broadside-v2-migration-results.md)；60 页最终 canonical 逐张检查，四份原生保存重开与回读，代表文字/形状/图表数据编辑通过                                                                          |
-| long-table      | 2.0.0 / production           | long-table-editorial/v1，8 类职责、15 个注册布局  | [2.0 迁移报告](long-table-v2-migration-results.md)；45 页最终 canonical 逐张检查，六份原生保存重开，标题/圆内字/胶囊/表格单元格实际编辑回读通过                                                                  |
-| swiss-grid      | 2.0.0 / production           | swiss-typographic/v1，15 类职责、24 个注册布局    | [2.0 迁移报告](swiss-grid-v2-migration-results.md)；57 页最终 canonical 逐张检查，五份原生保存重开，标题/形状内文字/表格单元格实际编辑回读通过                                                                   |
-| mckinsey-blue   | 2.0.0 / production           | mck-consulting/v1，8 类职责、16 个注册布局        | [2.0 迁移报告](mckinsey-blue-v2-migration-results.md)；56 页最终 canonical 逐张检查，七份原生保存重开，标题/编号/图表数据/表格单元格实际编辑回读通过                                                             |
-| black-gold      | 0.1.0 / production           | editorial-ledger/v1，6 页型、10 个注册布局        | [第三阶段报告](black-gold-migration-results.md)；26 页迁移验证，金融 policy 与皮肤分离                                                                                                                           |
-| green-slate     | 0.1.0 / production           | strategy-report/v1，10 页型、13 个注册布局        | [迁移报告](green-slate-migration-results.md)；36 页最终视觉矩阵，初轮漏检已撤回并返修                                                                                                                            |
-| clear-value     | 0.1.0 / production（登记值） | annual-research/v1，8 页型、14 个注册布局         | [迁移记录](clear-value-migration-results.md)记录 41 页机器/视觉矩阵；REPAIR-001 的新生成样例已通过原生打开/保存重开复核；历史 41 页文件须重新生成，不能沿用旧交付结论                                            |
+| DeckKit         | 快照版本 / catalog 状态      | 当时实现                                          | 历史证据与边界                                                                                                                                                                                                                     |
+| --------------- | ---------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| consulting-dark | 2.0.0 / production           | consulting-editorial/v1，10 类职责、20 个注册布局 | 2.0 迁移报告（未随本仓库发布：`consulting-dark-v2-migration-results.md`）；64 页最终 canonical 逐张检查，七组原生打开，英文/中文保存重开回读，标题/形状文字/表格/图表数据编辑通过                                                  |
+| biennale-yellow | 2.0.0 / production           | 九类职责全部经注册合同执行，旧分支退役            | 2.0 清理报告（未随本仓库发布：`biennale-yellow-v2-cleanup-results.md`）；35 页最终矩阵、原生保存重开及回读                                                                                                                         |
+| cartesian       | 2.0.0 / production           | cartesian-editorial/v1，15 个页型、28 个注册布局  | 原十页型的 2.0 迁移报告（未随本仓库发布：`cartesian-v2-migration-results.md`） 覆盖 42 页 canonical 与原生宿主证据；新增五个展示页型的证据及边界见 [intent.md](../pptx-nova/assets/deckkits/cartesian/intent.md)，不沿用旧宿主结论 |
+| broadside       | 2.0.0 / production           | broadside-poster/v1，16 类职责、28 个注册布局     | 2.0 迁移报告（未随本仓库发布：`broadside-v2-migration-results.md`）；60 页最终 canonical 逐张检查，四份原生保存重开与回读，代表文字/形状/图表数据编辑通过                                                                          |
+| long-table      | 2.0.0 / production           | long-table-editorial/v1，8 类职责、15 个注册布局  | 2.0 迁移报告（未随本仓库发布：`long-table-v2-migration-results.md`）；45 页最终 canonical 逐张检查，六份原生保存重开，标题/圆内字/胶囊/表格单元格实际编辑回读通过                                                                  |
+| swiss-grid      | 2.0.0 / production           | swiss-typographic/v1，15 类职责、24 个注册布局    | 2.0 迁移报告（未随本仓库发布：`swiss-grid-v2-migration-results.md`）；57 页最终 canonical 逐张检查，五份原生保存重开，标题/形状内文字/表格单元格实际编辑回读通过                                                                   |
+| mckinsey-blue   | 2.0.0 / production           | mck-consulting/v1，8 类职责、16 个注册布局        | 2.0 迁移报告（未随本仓库发布：`mckinsey-blue-v2-migration-results.md`）；56 页最终 canonical 逐张检查，七份原生保存重开，标题/编号/图表数据/表格单元格实际编辑回读通过                                                             |
+| black-gold      | 0.1.0 / production           | editorial-ledger/v1，6 页型、10 个注册布局        | 第三阶段报告（未随本仓库发布：`black-gold-migration-results.md`）；26 页迁移验证，金融 policy 与皮肤分离                                                                                                                           |
+| green-slate     | 0.1.0 / production           | strategy-report/v1，10 页型、13 个注册布局        | 迁移报告（未随本仓库发布：`green-slate-migration-results.md`）；36 页最终视觉矩阵，初轮漏检已撤回并返修                                                                                                                            |
+| clear-value     | 0.1.0 / production（登记值） | annual-research/v1，8 页型、14 个注册布局         | 迁移记录（未随本仓库发布：`clear-value-migration-results.md`）记录 41 页机器/视觉矩阵；REPAIR-001 的新生成样例已通过原生打开/保存重开复核；历史 41 页文件须重新生成，不能沿用旧交付结论                                            |
 
 页型/布局数量描述覆盖范围，不能作为质量评分。后续分别重新生成和验收 Cartesian、Broadside；其他风格的回读、视觉
 数量来自各轮报告，不代表本次全量重新验收。
@@ -66,7 +69,7 @@ Broadside 复用该注册接口，同时保留黑橙海报、衰减文字和闭�
 - [core-primitives.kit.mjs](../pptx-nova/assets/deckkits/shared/core-primitives.kit.mjs)：几何边界、内容校验、版式分组多样性和部分质量检查。
 - [DeckKit 工作流](../pptx-nova/references/create/deckkit-mode.md)：内容合同、生成、dry-run、应用、预览和人工视觉复核。
 
-Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kimi-ppt/reference/design_system/finance/black-gold-ledger/design.md) 则是面向模型/设计者的语义规范，包含金融领域基线与黑金视觉系统，不能只看成一张配色表。
+Black Gold Ledger 的 design.md（未随本仓库发布：`design.md`） 则是面向模型/设计者的语义规范，包含金融领域基线与黑金视觉系统，不能只看成一张配色表。
 
 | 维度         | 抽取前的 Biennale DeckKit 机制                   | Black Gold Ledger design.md                            |
 | ------------ | ------------------------------------------------ | ------------------------------------------------------ |
@@ -87,7 +90,7 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 
 对 bundled Biennale 内容直接调用 `createDeck()`：8 页、671 条操作；两次相同输入得到相同 patch SHA-256。操作种类为 slide、shape、text，未出现 `set-theme`、`add-chart` 或 `add-table`。
 
-这证明此样例的 **patch 生成确定性**，不证明 PPTX 字节一致，也不证明跨字体、平台或渲染器的像素一致。[本次实验记录](../.pptx-nova/style-contract-evaluation-20261021/generator-observations.json)
+这证明此样例的 **patch 生成确定性**，不证明 PPTX 字节一致，也不证明跨字体、平台或渲染器的像素一致。本次实验记录（未随本仓库发布：`generator-observations.json`）
 
 初评生成器按 `slide.type` 分派固定函数。直接增加 `layoutIntent` / `macroLayout` 时 patch 不变，
 当时的内容校验也拒绝这两个额外 slide 字段。现在的构图能力来自新增的 `layoutId`、容量解析和执行组件，
@@ -102,7 +105,7 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 这些数值是初评时的历史差异，不是当前文件的缺陷清单。对应文件为
 [数据页 schema](../pptx-nova/assets/deckkits/biennale-yellow/schemas/biennaleDataSlide.schema.json)、
 [生成器](../pptx-nova/assets/deckkits/biennale-yellow/biennale-yellow.kit.mjs) 和 [catalog](../pptx-nova/assets/deckkits/catalog.json)；
-修复与投影防漂移证据见[试点报告](design-contract-pilot-results.md)。
+修复与投影防漂移证据见试点报告（未随本仓库发布：`design-contract-pilot-results.md`）。
 
 这些事实促成了统一事实源和投影检查。试点后来重新执行 benchmark、canonical 和视觉验证；
 不能继续把初评“只读取 catalog readiness”的证据范围当成今天的验证状态。
@@ -118,7 +121,7 @@ Black Gold Ledger 的 [design.md](../../refs/open-kimi-ppt-skill/skills/open-kim
 ## 3. xdoc 的特点决定了合同该怎样落地
 
 初评及后续迁移记录使用 `xdoc 0.13.0 (ea2c8e58)`；初评能力探测、定向命令合同与 operation schema
-保存于[初评证据目录](../.pptx-nova/style-contract-evaluation-20261021/)。能力表描述该运行时的已披露范围，
+保存于初评证据目录（未随本仓库发布：`style-contract-evaluation-20261021`）。能力表描述该运行时的已披露范围，
 不是任意版本或任意图表组合的保证。新迁移仍须查询实际运行时并做最小实物探针。
 
 | 设计合同内容       | 已披露的 xdoc 表达能力                                            | pptx-nova 仍需承担的工作                            |
@@ -331,7 +334,7 @@ readiness 的 production/candidate 是注册与门禁状态，不能把上述维
 
 ### 7.2 已确认的反例必须覆盖旧通过结论
 
-Clear Value 的 [REPAIR-001](repair-issues.md) 揭示了通用 XML 校验与 Office 实现约束的差异，现已复核修复：
+Clear Value 的 REPAIR-001（未随本仓库发布：`repair-issues.md`） 揭示了通用 XML 校验与 Office 实现约束的差异，现已复核修复：
 
 - 历史 iteration 09 打开要求 Repair，修复后第 11 页 22 个对象被清空，关联环图部件删除。
   通用 XSD 和渲染未拦住该输出；这个历史失败仍然成立。

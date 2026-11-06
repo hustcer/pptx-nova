@@ -15,4 +15,4 @@ Expected result:
 - Final source golden candidate SHA-256: `f8353d9e23cd5d8d0e7f928a642d3dfc255c35acae6e5c32fd50ee69ba25d212`.
 - All ten canonical pages were individually reviewed. The wider 42-page matrix covers all eighteen compositions, CJK/mixed text, capacity limits, native paragraphs and real contain/cover image slots.
 - PowerPoint 16.114 opened, saved and reopened all six matrix decks without Repair. Saved-file readback passed; title, owned-circle text and embedded chart data edits were independently verified.
-- See [migration results](../../../../../../docs/cartesian-v2-migration-results.md) for scope, evidence paths and unverified capabilities. This is candidate readiness, not automatic production/default qualification.
+- See migration results (not included in this repository: `cartesian-v2-migration-results.md`) for scope, evidence paths and unverified capabilities. This is candidate readiness, not automatic production/default qualification.

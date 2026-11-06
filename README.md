@@ -66,16 +66,19 @@ authorization problems, ask the Agent to use pptx-nova's
 
 ### xdoc Runtime plans
 
-|                                 | Free                               | Personal (paid plan)                                                                    |
-| ------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------- |
-| Current price                   | 0                                  | 0 — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
-| License                         | No account or license required     | Offline license for the individual purchaser, valid for 30 days                         |
-| Slides per task                 | Up to 10                           | No plan-level limit                                                                     |
-| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                     |
-| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                       |
+|                                 | Free                               | Personal (licensed plan)                                                                                          |
+| ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Current price                   | 0                                  | 0 for eligible first claims — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
+| License                         | No account or license required     | Offline license for the individual purchaser, valid for 30 days                                                   |
+| Slides per task                 | Up to 10                           | No plan-level limit                                                                                               |
+| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                                               |
+| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                                                 |
 
 Both plans support single-user local use, local scripts, and a per-user daemon.
 Format and resource limits and existing signed watermark rules still apply.
+The current zero-price Personal offer covers eligible personal local
+noncommercial use. Repeated claims return the original license and validity
+period; check the linked application page for current eligibility and terms.
 
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
@@ -97,7 +100,7 @@ PDF, and leave replayable sidecar evidence.
 All of this runs through a single lightweight native CLI with integrated
 rendering backends: previews, PDF export, and visual checks require no
 PowerPoint, office suite, or headless browser. The current `v0.19.0` native
-archives download as approximately 8.3–10.1 MB, depending on the target, and need no
+archives download as approximately 8.4–10.3 MB (decimal), depending on the target, and need no
 separate server or always-on background service. Native builds are available
 for Linux x64/ARM64, macOS 13+ ARM64, and Windows x64. Rendering still depends
 on the available fonts and the support status of the requested feature.
@@ -392,7 +395,7 @@ labels, lost formatting, or PowerPoint repair issues.
 .
 +-- pptx-nova/                 # The main publishable pptx-nova skill
 |   +-- README.md              # English user guide
-|   +-- README.zh-CN.md        # Chinese user guide
+|   +-- SKILL.md               # Agent instructions and task routing
 |   +-- assets/                # DeckKits, examples, themes, icons, schemas
 |   +-- benchmarks/visual/     # Visual benchmark cases and baselines
 |   +-- references/            # Workflow references for agents and maintainers
@@ -481,7 +484,7 @@ itself needs to be built or extended.
 ## More documentation
 
 - [pptx-nova user guide](pptx-nova/README.md)
-- [pptx-nova 中文使用指南](pptx-nova/README.zh-CN.md)
+- [Workflow reference index](pptx-nova/references/README.md)
 - [xdoc introduction and architecture](docs/xdoc-introducution.md)
 - [Install the xdoc CLI](docs/xdoc-installation.md)
 - [Integrate xdoc with a PPTX Agent](docs/xdoc-integration.md)

@@ -47,7 +47,8 @@ cp <skill-root>/assets/examples/generator/theme-packs.generated.mjs <run-dir>/th
 node <run-dir>/generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
 jq '.ops | length' patch.json   # 仅记录构建规模；质量由内容、结构和真实渲染证明，不设操作数下限
 # shell 驱动的多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：当前 runtime
-# 自动按需拉起，首次 ~200ms、之后调用 ~5ms 走 RPC。CI 用 --daemon-strict。
+# 自动按需拉起；复用 session 可减少重复解析。耗时随输入和环境变化。
+# 需要 daemon 不可用时直接失败的流程可用 --daemon-strict；CI 需另行适用的授权。
 xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json
 # 检查 dry-run.json 里没有阻塞性 visualRisks，并在 apply 后用 vision-check 清零 high/medium
 xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
@@ -69,12 +70,12 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 
 ### 从零探索样本(10 页 / 1105 ops)
 
-| 阶段                         | 耗时   | 占比    | 优化抓手                                   |
-| ---------------------------- | ------ | ------- | ------------------------------------------ |
-| 内容大纲提炼                 | ~3 min | 15%     | 先列每页主题再下笔                         |
-| **JS 生成器编写**            | ~9 min | **45%** | **`grid()` / `txH()` helper 压缩坐标手算** |
-| dry-run gate + 修 schema bug | ~3 min | 15%     | 核对 remediation 目标，再校验完整请求      |
-| 落盘 + PNG 视觉验证          | ~5 min | 25%     | 逐页 Read,不要批量浏览                     |
+| 阶段                         | 耗时   | 占比    | 优化抓手                                    |
+| ---------------------------- | ------ | ------- | ------------------------------------------- |
+| 内容大纲提炼                 | ~3 min | 15%     | 先列每页主题再下笔                          |
+| **JS 生成器编写**            | ~9 min | **45%** | **`grid()` / `_txH()` helper 压缩坐标手算** |
+| dry-run gate + 修 schema bug | ~3 min | 15%     | 核对 remediation 目标，再校验完整请求       |
+| 落盘 + PNG 视觉验证          | ~5 min | 25%     | 逐页 Read,不要批量浏览                      |
 
 总计 ~20 min。这个样本代表从零探索主题、布局和生成器结构的场景。
 
@@ -90,7 +91,7 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 总计 ~6.6 min。这个样本代表已经熟悉 skill、复用生成器模式和避坑规则的快路径；
 绝对时间比从零样本低很多，但占比仍显示"JS 生成器编写 / 坐标排版"最耗时。
 
-模板里 `grid()` 把网格对齐从手算变 1 行,`txH()` 把字号→高度的人脑表查变函数
+模板里 `grid()` 把网格对齐从手算变 1 行,`_txH()` 把字号→高度的人脑表查变函数
 调用,这两个是压缩"JS 生成器编写"耗时的关键。新建生成器还必须把**可读字号下限**
 写进 helper，而不是靠每个 slide 函数自觉：核心正文不低于 `10.5pt`，label / badge /
 chart / table 和页脚 / 来源不低于当前 canonical 门禁（默认 `10pt`），套件合同更严格时
@@ -190,7 +191,8 @@ const nm = (slide, base) => `S${slide}_${base}`
 ```
 
 **严格规则：所有 shape name 进出都走 `nm(slide, base)`**。这是 selector
-命中失败最常见的根因 —— 生成时 helper 默默加了前缀，引用时直接写裸名。
+命中失败的常见根因 —— 创建时传入了带前缀的名称，引用时直接写裸名。
+`shape()`、`textbox()`、`fill()` 等 helper 使用传入的名称，不会自动补前缀。
 
 ### 4. 复合 helpers 减少重复
 
@@ -202,11 +204,11 @@ box(s, name, kind, x, y, w, h, color) // add-shape + fill + noLine
 textbox(s, name, x, y, w, h) // add-text-box
 tx(s, name, x, y, w, h, text, font) // textbox + setText + setRun
 grid(cols, gap, startX, contentW) // 自动算 N 列等距网格 → [{x, w}, ...]
-txH(sizePt, (lines = 1)) // 自动算 textbox 高度,防 text-overflow-estimate
+_txH(sizePt, lines) // lines 默认 1；估算 textbox 高度，仍需检查溢出
 ```
 
 `box` 是装饰元素的 one-liner，`tx` 是文字元素的 one-liner，`grid` 把"4 张 KPI
-对齐"这类问题从手算变成一行,`txH` 把"高度给字号几倍"的人脑表查变成函数调用。
+对齐"这类问题从手算变成一行,`_txH` 把"高度给字号几倍"的人脑表查变成函数调用。
 
 对于对比页、流程图和架构图，再补两个几何 helper 思路：
 
@@ -234,17 +236,17 @@ cells.forEach((c, i) => {
 })
 ```
 
-**用 `txH()` 写 textbox**：
+**用 `_txH()` 写 textbox**：
 
 ```js
-tx(s, nm(s, 'Title'), 0.85, 0.95, 11, txH(32), 'Page H1', {
+tx(s, nm(s, 'Title'), 0.85, 0.95, 11, Number.parseFloat(_txH(32)), 'Page H1', {
   // 32pt 单行
   name: FONT_LATIN,
   size: F.pageH1,
   bold: true,
   color: C.textPri,
 })
-tx(s, nm(s, 'Body'), 0.85, 3.0, 6, txH(14, 4), longBody, {
+tx(s, nm(s, 'Body'), 0.85, 3.0, 6, Number.parseFloat(_txH(14, 4)), longBody, {
   // 14pt 4 行
   name: FONT_LATIN,
   size: F.body,
@@ -256,12 +258,13 @@ tx(s, nm(s, 'Body'), 0.85, 3.0, 6, txH(14, 4), longBody, {
 
 ## textbox 高度规则（防 text-overflow-estimate）
 
-**首选用 `txH(sizePt, lines)` helper**：
+**模板中的估算 helper 名为 `_txH(sizePt, lines)`**，返回带 `in` 的字符串，可用于
+patch 长度字段。`tx()` 的几何参数使用数值英寸，传入时须如上调用 `Number.parseFloat()`：
 
 ```js
-txH(54) // → "1.13in"  (单行 54pt)
-txH(44, 2) // → "1.83in"  (2 行 44pt)
-txH(14, 4) // → "0.58in"  (4 行 14pt body)
+_txH(54) // → "1.13in"  (单行 54pt)
+_txH(44, 2) // → "1.83in"  (2 行 44pt)
+_txH(14, 4) // → "1.17in"  (4 行 14pt body)
 ```
 
 公式：`(sizePt / 72) * 1.5 * lines` —— 中文环境给 1.5 倍系数(西文可以 1.4)。
@@ -271,16 +274,16 @@ txH(14, 4) // → "0.58in"  (4 行 14pt body)
 medium 时优先加高、重组内容、拆页或选择合法布局。**单行最小给字号的 1.4 倍,中文给
 1.5 倍**;多行按行数线性放大。
 
-| 字号 | 单行 `txH()` 输出 | 2 行 `txH()` 输出 | 4 行 `txH()` 输出 |
-| ---- | ----------------- | ----------------- | ----------------- |
-| 54pt | 1.13in            | 2.25in            | 4.50in            |
-| 44pt | 0.92in            | 1.83in            | 3.67in            |
-| 32pt | 0.67in            | 1.33in            | 2.67in            |
-| 24pt | 0.50in            | 1.00in            | 2.00in            |
-| 16pt | 0.33in            | 0.67in            | 1.33in            |
-| 14pt | 0.29in            | 0.58in            | 1.17in            |
-| 12pt | 0.25in            | 0.50in            | 1.00in            |
-| 9pt  | 0.19in            | 0.38in            | 0.75in            |
+| 字号 | 单行高度（in） | 2 行高度（in） | 4 行高度（in） |
+| ---- | -------------- | -------------- | -------------- |
+| 54pt | 1.13in         | 2.25in         | 4.50in         |
+| 44pt | 0.92in         | 1.83in         | 3.67in         |
+| 32pt | 0.67in         | 1.33in         | 2.67in         |
+| 24pt | 0.50in         | 1.00in         | 2.00in         |
+| 16pt | 0.33in         | 0.67in         | 1.33in         |
+| 14pt | 0.29in         | 0.58in         | 1.17in         |
+| 12pt | 0.25in         | 0.50in         | 1.00in         |
+| 9pt  | 0.19in         | 0.38in         | 0.75in         |
 
 ---
 
@@ -436,7 +439,7 @@ Read PNG 时按 [rich-deck-patterns.md §9 视觉验证清单](rich-deck-pattern
 | fill / line op 命不中（resolvedSelectors 报 not-found）      | shape name 引用裸名，应用 `nm(s, "...")`                                                                                                 |
 | 主题色没换干净（部分 shape 还是旧色）                        | 某处 hex 字面量没走 `C.*`，grep `[0-9A-F]{6}` 找漏的                                                                                     |
 | KPI 4 卡片不等距                                             | 手算 `startX + i*(cardW+gap)` 易错;统一用 `grid(4, gap, startX, contentW)`                                                               |
-| textbox 大量 text-overflow-estimate warning                  | 手填高度系数不统一;统一用 `txH(sizePt, lines)` helper                                                                                    |
+| textbox 大量 text-overflow-estimate warning                  | 核对字号、inset 和真实换行；用 `_txH(sizePt, lines)` 估算高度，传给 `tx()` 时转成数值，仍须验证。                                        |
 | freeform / donut / polygon 在 PNG 中看不见                   | 核对 `add-freeform` 的带单位 `x/y/w/h` 与整数 `path` viewport，按运行时 schema 使用 move/line/cubic/close，并检查填充和线条。            |
 | 同页左下 footer 写"BRAND·X"右上 watermark 写"structurify.io" | 旧版模板把 watermark 字串硬编码;新版 `pageChrome(s, total, footerLeft, watermark='')` 已参数化                                           |
 | 第二次跑 `apply` 报 `output_exists`                          | 加 `--overwrite`，或 `xdoc pptx rollback --from-sidecar`                                                                                 |
@@ -461,7 +464,7 @@ function slideKPI2(total) {
   // ... 内容部分照搬模板，改 kpis 数组
 }
 
-// main 里追加调用
+// 把 TOTAL 改为 9，在 main 的 JSON 输出前追加调用
 slideKPI2(TOTAL)
 ```
 

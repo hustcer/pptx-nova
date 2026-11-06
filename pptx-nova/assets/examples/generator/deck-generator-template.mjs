@@ -5,14 +5,14 @@ import { BUILTIN_STYLE_PACKS, BUILTIN_THEME_PACKS } from './theme-packs.generate
 // deck-generator-template.mjs —— 客户演示级 8 页 deck 的 JS 生成器骨架
 //
 // 用法：
-//   1. cp deck-generator-template.mjs ./generate.mjs
+//   1. 同时复制 deck-generator-template.mjs 为 ./generate.mjs 及相邻的 theme-packs.generated.mjs
 //   2. 选择 themePack/stylePack:
 //        node generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
 //      或加载外部 pack:
 //        node generate.mjs --theme-pack ./theme.json --style-pack ./style.json > patch.json
 //   3. 改各 slide 函数里的文字与数据
 //   4. node generate.mjs --theme corporate-blue > patch.json
-//   5. jq '.ops | length' patch.json  # 丰富度自检:客户演示级 ≥ 200,低于这条线视觉一定空
+//   5. jq '.ops | length' patch.json  # 只记录构建规模；质量由内容、结构和真实渲染证明
 //   6. xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | tee dry-run.json
 //   7. apply 后跑 vision-check；创建型 deck 必须 high=0 且 medium=0
 //   8. xdoc convert out.pptx --to png -o previews --overwrite
@@ -451,8 +451,8 @@ const pAlign = (slide, name, align, paragraph = 0) => {
 
 // 组合 helper：一次完成 textbox + setText + runFont
 // 注意 h 给字号的 1.4-1.5 倍，否则触发 text-overflow-possible。
-// 可见文字低于 MIN_VISIBLE_FONT_PT 会在 runFont 层自动抬高；正文设计仍应按
-// MIN_BODY_FONT_PT 以上规划，塞不下时删字/换布局，而不是缩到 7pt/8pt。
+// 可见文字低于 MIN_VISIBLE_FONT_PT 会在 runFont 层自动抬高；正文仍应按设计锁字号
+// 规划，塞不下时删字/换布局，而不是缩到 7pt/8pt。
 const tx = (slide, name, x, y, w, h, text, font) => {
   textbox(slide, name, x, y, w, h)
   setText(slide, name, text)
@@ -660,8 +660,8 @@ const grid = (
 }
 
 // 字号自动给 textbox 高度,避免 text-overflow-possible risk
-//   tx(s, name, x, y, w, txH(32), title, {...})              // 单行 32pt → 0.62in
-//   tx(s, name, x, y, w, txH(14, 3), bodyMulti, {...})       // 3 行 14pt → 0.82in
+//   tx(s, name, x, y, w, Number.parseFloat(_txH(32)), title, {...})       // 单行 32pt → 0.67in
+//   tx(s, name, x, y, w, Number.parseFloat(_txH(14, 3)), bodyMulti, {...}) // 3 行 14pt → 0.88in
 // 中文环境多给一点保险(系数 1.5 而非 1.4),CJK 行高比西文略高
 const _txH = (sizePt, lines = 1) => `${((sizePt / 72) * 1.5 * lines).toFixed(2)}in`
 

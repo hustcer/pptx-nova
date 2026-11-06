@@ -15,5 +15,5 @@ Native PDF export omitted some text and moved tables despite correct editor/slid
 that PDF evidence is rejected, and PDF export is not an accepted capability.
 Candidate does not imply production/default readiness or cross-platform validation.
 
-See [migration report](../../../../../assets/deckkits/warm-clay/migration-report.md)
+See migration report (not included in this repository: `migration-report.md`)
 for coverage, font substitutions, limits, evidence paths and superseded samples.

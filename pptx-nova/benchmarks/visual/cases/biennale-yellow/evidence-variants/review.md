@@ -9,4 +9,4 @@ footer clearance. Dry-run/apply/vision, canonical Create and numeric/object read
 H0/M0/L0. All three pages also opened, saved, closed and reopened in PowerPoint 16.114 without Repair;
 saved-file readback retained the exact categories, series name and numeric values.
 
-[Complete 2.0 cleanup evidence and limitations](../../../../../../docs/biennale-yellow-v2-cleanup-results.md).
+Complete 2.0 cleanup evidence and limitations (not included in this repository: `biennale-yellow-v2-cleanup-results.md`).

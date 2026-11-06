@@ -110,29 +110,29 @@ cohort 宽度和圆面积来自数值。Arial / Arial Unicode MS 不嵌入；SVG
 
 Clear Impact 提供十二类开放式证据报告职责及二十四个注册构图，支持白底深绿层级、指标带、
 原生柱图、稀疏表格、处理链、数值派生达成条和差异桥。中文、英文与混排使用正体无衬线字体。
-它须显式选择；派生形状与旁注编辑后须从 content 重新生成。详见 [设计与边界](clear-impact/intent.md)。
+当前为 production，可参与自动交付选择；派生形状与旁注编辑后须从 content 重新生成。详见 [设计与边界](clear-impact/intent.md)。
 
 Warm Clay 提供八类暖陶土报告职责与十五个有界构图，使用奶油底、墨棕衬线标题、
 陶土证据、粉色编号和角落圆环。柱图与表格为原生对象；中文、英文及混排有实际渲染覆盖。
-封面竖幅仅为原生占位外壳，不接受图片输入；字体不嵌入，须显式选择。
-详见 [设计意图与编辑边界](warm-clay/intent.md) 及 [迁移验收](warm-clay/migration-report.md)。
+封面竖幅仅为原生占位外壳，不接受图片输入；字体不嵌入，当前为 production，可参与自动交付选择。
+详见 [设计意图与编辑边界](warm-clay/intent.md) 及 [验收摘要](../../benchmarks/visual/cases/warm-clay/golden-workshop/review.md)。
 
 Amber Ledger 提供八类年度报告职责与十六个注册构图，以暖象牙底、炭黑观点、鼠尾草证据、
 正体衬线解释及蜂蜜琥珀焦点组织开放版面。常规柱图、点线、环图和表格为原生对象；极小量图、
-差异桥、进度为数值派生形状，编辑后须从 content 重建同步。须显式选择，字体不嵌入。
+差异桥、进度为数值派生形状，编辑后须从 content 重建同步。当前为 production，可参与自动交付选择，字体不嵌入。
 详见 [设计意图、验证范围与编辑边界](amber-ledger/intent.md)。
 
 Sky Compass 提供十二类运营复盘职责与二十四个注册构图，以白底、天空蓝观点、海军蓝重点、
 浅冰蓝解释栏及开放式原生表格组织证据。封面采用开放式罗盘弧线，保留蓝点页眉、短下划线、基准刻线、
 流程虚线及日期刻度；原生环图、趋势柱图、表格和数值派生形状支持编辑，独立标签须从 content 重建同步。
-须显式选择，字体不嵌入。详见 [设计与边界](sky-compass/intent.md) 及 [验收记录](../../benchmarks/visual/cases/sky-compass/golden-operations/review.md)。
+当前为 default，可参与自动交付选择，字体不嵌入。详见 [设计与边界](sky-compass/intent.md) 及 [验收记录](../../benchmarks/visual/cases/sky-compass/golden-operations/review.md)。
 
 ## Midnight Pulse
 
 Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青蓝仪表、开放式衬线诊断表、
 差异汇聚、比较、状态治理与路线决策。背景薄雾是原生可编辑路径，不可为通用极简而删除。
-套件须显式选择；派生形状和独立标签在手工数据编辑后须从 content 重建。
-详见 [设计与编辑边界](midnight-pulse/intent.md) 及 [迁移验收](midnight-pulse/migration-report.md)。
+当前为 production，可参与自动交付选择；派生形状和独立标签在手工数据编辑后须从 content 重建。
+详见 [设计与编辑边界](midnight-pulse/intent.md) 及 [验收摘要](../../benchmarks/visual/cases/midnight-pulse/golden-operations/review.md)。
 
 ## core-primitives 职责边界
 
@@ -169,7 +169,7 @@ Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青�
 当前页型级 fit diagnostics 已覆盖 `heroSlide`、`kpiRowSlide`、`multiCardSlide`、
 `benchmarkSlide`、`timelineSlide` 和 `askSlide`，并包含长 Latin token 风险检查。
 
-`catalog.json` 可声明两类交付 gate：
+`catalog.json` 可声明以下交付与选型合同：
 
 - `layoutContract`：按 DeckKit / 页型声明必填数据槽位、任一满足槽位组、允许的
   `layoutId`、`customOps` 策略和 `assetSlots`。draft 默认给 warning，delivery 可通过
@@ -187,7 +187,7 @@ Midnight Pulse 提供深黑蓝运营报告、叠层深蓝／深青薄雾、青�
 不要把特定风格下沉到 core。通用入口共享校验；构建和标准 create runner 还会保存设计计划、
 检查应用后的对象和原生数值。详见 `../../references/create/design-contracts.md`。
 
-合同路线现覆盖全部十套风格：Consulting Dark、Biennale、Cartesian、Broadside、Long Table、Swiss Grid、McKinsey Blue、Black Gold、Green Slate 与 Clear Value。Consulting Dark 2.1 保留深蓝首尾与大小不同的圆形装饰，
+合同路线包括 Consulting Dark、Biennale、Cartesian、Broadside、Long Table、Swiss Grid、McKinsey Blue、Black Gold、Green Slate 与 Clear Value 等风格；完整套件列表以 catalog 为准。Consulting Dark 2.1 保留深蓝首尾与大小不同的圆形装饰，
 所有内容页统一深蓝底，以暖白正文、暖铜数字、浅青输出关系和开放台账、比较栏、共享时间轴替换重复切角面板，提供十类职责、二十个注册布局及英文完整示例；支持中文和混排，
 原生条形图保留负数、零与极小值，表格逐格回读。字段迁移和编辑同步边界见 `consulting-dark/intent.md`。
 Black Gold 增加原生表格逐格回读、单焦点与

@@ -61,9 +61,10 @@ Helvetica 与 Arial Black 是已安装的相近替代；中文采用正体 Arial
 
 ## 验证状态
 
-2.0.0 于 2026-10-24 经维护者明确授权晋级为唯一的 default。迁移验收时，最终源码对应的
+2.0.0 于 2026-10-24 经维护者明确授权晋级，在当时登记为唯一的 default；当前 readiness
+以 [catalog](../catalog.json) 为准，现登记为 production。迁移验收时，最终源码对应的
 57 页 canonical 已逐张检查，五组文件均通过 PowerPoint
 for Mac 16.114 原生打开、保存、关闭重开及对象回读；标题、形状内文字和表格单元格实际编辑也已回读。
 本次晋级重跑三项 live benchmark，并通过 default readiness；原生宿主证据沿用迁移验收的范围。
 机器、视觉、原生宿主的范围和未验证项见
-[迁移报告](../../../../docs/swiss-grid-v2-migration-results.md)。新生成的每份 PPTX 仍须完成其交付检查。
+迁移报告（未随本仓库发布：`swiss-grid-v2-migration-results.md`）。新生成的每份 PPTX 仍须完成其交付检查。

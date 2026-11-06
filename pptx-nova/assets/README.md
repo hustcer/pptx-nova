@@ -3,14 +3,15 @@
 This directory is the local asset catalog used by the `pptx-nova` skill.
 
 The catalogs are intentionally small and metadata-first. They define stable IDs,
-selection hints, and generator/patch entry points before large binary assets are
-introduced.
+selection hints, and generator/patch entry points. Bundled binary assets include
+the Tabler icon pack and curated DeckKit showcases.
 
 ## Directories
 
 - `brands/` - brand profiles, logo references, and font preferences.
 - `layouts/` - reusable grid systems and layout-contract mappings.
 - `decks/` - complete sample deck generators or patch bundles.
+- `deckkits/` - creation DeckKits, design contracts, schemas, and content examples.
 - `themes/` - themePack/stylePack catalog consumed by `catalog themes`.
 - `charts/` - native chart/table/diagram presets, not SVG-only templates.
 - `icons/` - icon metadata and migration policy for vector/native assets.
@@ -56,6 +57,6 @@ introduced.
   plus `node <skill-root>/scripts/cli/deckkits/readiness.mjs --deckkit <id> --target delivery --benchmark-mode required-live`
   for production visual gates. Store long-lived benchmark inputs under
   `<skill-root>/benchmarks/visual/`, not under `assets/decks/`.
-- Do not commit generated `.pptx`, PNG previews, contact sheets, regenerated
-  `patch.json`, dry-run reports, or full `vision*.json` files unless a future
-  review explicitly needs a frozen full artifact.
+- Keep routine generated `.pptx`, previews, contact sheets, patches, and reports
+  in run directories. Intentional curated showcases belong under
+  `examples/deckkits/`, with their source content and manifest hashes.

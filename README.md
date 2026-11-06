@@ -1,5 +1,7 @@
 # pptx-nova
 
+English | [简体中文](README.zh-CN.md)
+
 `pptx-nova` is an agent skill for creating, editing, refurbishing, translating, and checking
 PowerPoint presentations. It is designed to deliver real, editable `.pptx`
 files, not slide screenshots pasted into a deck.
@@ -66,19 +68,19 @@ authorization problems, ask the Agent to use pptx-nova's
 
 ### xdoc Runtime plans
 
-|                                 | Free                               | Personal (licensed plan)                                                                                          |
-| ------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Current price                   | 0                                  | 0 for eligible first claims — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
-| License                         | No account or license required     | Offline license for the individual purchaser, valid for 30 days                                                   |
-| Slides per task                 | Up to 10                           | No plan-level limit                                                                                               |
-| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                                               |
-| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                                                 |
+|                                 | Free                               | Personal (licensed plan)                                                                   |
+| ------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| Current price                   | Free                               | Free — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
+| License                         | No account or license required     | Offline individual license, valid for 30 days                                              |
+| Slides per task                 | Up to 10                           | No plan-level limit                                                                        |
+| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                        |
+| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                          |
 
 Both plans support single-user local use, local scripts, and a per-user daemon.
 Format and resource limits and existing signed watermark rules still apply.
-The current zero-price Personal offer covers eligible personal local
-noncommercial use. Repeated claims return the original license and validity
-period; check the linked application page for current eligibility and terms.
+Personal is currently free for personal local noncommercial use, with no plans
+to charge for this use in the near term. See the linked application page for
+license terms.
 
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
@@ -486,16 +488,7 @@ itself needs to be built or extended.
 
 - [pptx-nova user guide](pptx-nova/README.md)
 - [pptx-nova 中文使用指南](pptx-nova/README.zh-CN.md)
-- [Workflow reference index](pptx-nova/references/README.md)
 - [xdoc introduction and architecture](docs/xdoc-introducution.md)
 - [Install the xdoc CLI](docs/xdoc-installation.md)
-- [Integrate xdoc with a PPTX Agent](docs/xdoc-integration.md)
 - [xdoc compatibility reference](docs/xdoc-compatibility.md)
-- [xdoc errors and reports](docs/xdoc-errors-and-reports.md)
-- [xdoc conformance profile](docs/xdoc-conformance.md)
-- [xdoc runtime schema snapshot](docs/xdoc-schema.json)
-- [pptx-nova scripts](pptx-nova/scripts/README.md)
-- [Translation workflow](pptx-nova/references/translation/translation-mode.md)
-- [pptx-nova assets](pptx-nova/assets/README.md)
-- [DeckKits](pptx-nova/assets/deckkits/README.md)
 - [DeckKit examples](pptx-nova/assets/examples/deckkits/README.md)

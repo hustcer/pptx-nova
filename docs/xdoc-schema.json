@@ -2871,12 +2871,16 @@
             "feature": "advanced-ooxml",
             "subset": "guarded-low-level-editing",
             "status": "partial",
-            "summary": "Apply explicitly guarded OOXML edits when no high-level operation exists.",
+            "summary": "Apply opt-in expert OOXML edits and action-specific guarded repairs when no high-level operation exists.",
             "operations": ["patch-ooxml"],
             "limits": [
               {
-                "code": "stale-and-structure-guards-required",
-                "description": "Raw edits require explicit part, selector, expected source state, and child-order validation; semantic safety is not inferred."
+                "code": "action-specific-stale-guards",
+                "description": "Ordinary set/add/remove/replace actions require allowRawXml opt-in, an explicit XML part and a restricted selector, but do not accept expectedPartSha256 and have no source-digest guard. Guarded repair actions do not require that opt-in; element repairs require expectedPartSha256 plus explicit repairs. XML/package validation does not prove semantic or visual safety."
+              },
+              {
+                "code": "relationship-repair-part-identity",
+                "description": "Existing relationship parts require expectedPartSha256 for both add and retarget; retarget additionally requires expectedTarget. Creating a missing relationship part allows only add and rejects expectedPartSha256. Owner-part and relationship target/type validation still apply."
               }
             ],
             "evidence": [
@@ -2888,7 +2892,7 @@
               {
                 "id": "guarded-ooxml-edit-contract",
                 "kind": "behavior",
-                "claim": "Guarded raw edits reject stale or structurally invalid mutations and report affected parts."
+                "claim": "Raw edits require explicit opt-in and report affected parts and risks; guarded repair actions additionally reject mismatched source state."
               }
             ],
             "recommendation": {
@@ -3009,11 +3013,11 @@
               },
               {
                 "code": "surface3d-band-palette-and-shading",
-                "description": "A surface is coloured by value band and shaded by facet against a measured light rig. Both halves are measured against PowerPoint: the band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. Rendered meshes agree with PowerPoint to within seven channel steps across that range; the residual tracks the plot rectangle each renderer fits its cube into rather than the light rig. A value axis carrying four bands or fewer uses the accents unmodulated, and there the brightest facet the light rig can produce passes full scale, so a channel already near full — the red of a yellow accent, for instance — clips at full scale instead of carrying the last few percent of its highlight; 8-bit sRGB cannot express that difference and PowerPoint has the same ceiling. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied, but gradient fills degrade to their first stop in native PDF."
+                "description": "Surface value bands use a theme-accent luminance ladder calibrated against PowerPoint; sparse c:bandFmts fill and outline overrides retain their authored ownership. Both projected and top-view surfaces implement facet lighting and bounded highlights. Continuous gradient paint, alpha and per-fragment transforms are supported within resource limits; they do not establish Office pixel parity for every mesh, material or texture."
               },
               {
-                "code": "surface-legend-and-contour-shading",
-                "description": "Two measured differences remain outside the mesh itself. A c:surface3DChart legend lists the series rather than the value bands PowerPoint lists there, so a 3D surface with a legend shows the wrong entries; the c:surfaceChart top view does list bands. And PowerPoint shades a top-view contour cell by its facet the same way it shades a 3D one, which this renderer does not: flat cells come out right and steep ones render brighter than PowerPoint's."
+                "code": "surface-legend-and-paint-bounded",
+                "description": "Surface and surface3D legends list complete height-band intervals, with authored bounds, hidden/deleted entries and automatic row layout. Contour lighting follows physical slope and axis orientation. Font metrics, automatic layout, finite highlight/texture sampling and unsupported paint fallbacks can still differ from Office; verify the actual chart against an independent reference."
               }
             ],
             "evidence": [
@@ -3056,6 +3060,11 @@
                 "id": "chart-axis-tick-marks",
                 "kind": "behavior",
                 "claim": "c:majorTickMark and c:minorTickMark are drawn on the category, value and series axes, at the lengths measured off PowerPoint as a fraction of the axis label font. They keep the screen orientation PowerPoint gives them on a projected axis: horizontal on a value axis and vertical on a category axis, even under a perspective camera where the axis itself leans. The same marks are drawn for the 2D chart families."
+              },
+              {
+                "id": "chart-surface-pdf-current",
+                "kind": "behavior",
+                "claim": "PDF regressions cover complete surface3D height-band legends, contour lighting with axis reversal, continuous gradient resources, alpha and per-fragment paint transforms."
               }
             ],
             "recommendation": {
@@ -3082,11 +3091,11 @@
               },
               {
                 "code": "surface3d-band-palette-and-shading-viewer",
-                "description": "A surface is coloured by value band and shaded by facet against a measured light rig, from the same modules the PDF renderer uses. The band palette modulates the theme accents by a ladder that the band count selects, matched to within two 8-bit channel steps against PowerPoint's own legend swatches from two through twenty-four bands, and past twenty-four bands the ladder is clamped to the widest measured rung. A value axis carrying four bands or fewer uses the accents unmodulated, and there the brightest facet the light rig can produce passes full scale, so a channel already near full — the red of a yellow accent, for instance — clips at full scale instead of carrying the last few percent of its highlight; 8-bit sRGB cannot express that difference and PowerPoint has the same ceiling. Sparse c:bandFmts fill and outline overrides are used exactly as authored, with no ladder applied; the 2D contour keeps SVG gradients, while the shaded 3D surface degrades them to the first stop."
+                "description": "Surface value bands use the shared theme-accent luminance ladder and lighting model. Sparse c:bandFmts fill and outline overrides retain their authored ownership. Both projected and top-view surfaces implement facet lighting, bounded highlights and continuous gradient paint with alpha; SVG texture and highlight sampling do not establish Office pixel parity for every mesh or material."
               },
               {
-                "code": "surface-legend-and-contour-shading-viewer",
-                "description": "Two measured differences remain outside the mesh itself. A c:surface3DChart legend lists the series rather than the value bands PowerPoint lists there, so a 3D surface with a legend shows the wrong entries; the c:surfaceChart top view does list bands. And PowerPoint shades a top-view contour cell by its facet the same way it shades a 3D one, which this renderer does not: flat cells come out right and steep ones render brighter than PowerPoint's."
+                "code": "surface-legend-and-paint-bounded-viewer",
+                "description": "Surface and surface3D legends list complete height-band intervals with authored bounds, hidden/deleted entries and automatic row layout. Contour lighting follows physical slope and axis orientation. Browser font metrics, automatic layout, texture sampling and unsupported paint fallbacks can still differ from PDF and Office; verify the actual chart against an independent reference."
               },
               {
                 "code": "viewer-tracks-pdf-geometry",
@@ -3118,6 +3127,11 @@
                 "id": "chart-axis-tick-marks-viewer",
                 "kind": "behavior",
                 "claim": "c:majorTickMark and c:minorTickMark are drawn on the category, value and series axes from the same measured lengths and placements the PDF renderer uses, ported rather than re-derived, and keep PowerPoint's screen orientation on a projected 3D axis. The same marks are drawn for the 2D chart families."
+              },
+              {
+                "id": "chart-surface-viewer-current",
+                "kind": "behavior",
+                "claim": "Viewer regressions cover surface3D value-band legends, contour lighting with axis reversal, and continuous gradient coordinates, alpha and facet ownership in both surface chart families."
               }
             ],
             "recommendation": {
@@ -3362,6 +3376,36 @@
                 "set-image"
               ],
               "note": "Use declared assets and inspect package relationships plus visual output."
+            },
+            "axes": null
+          },
+          {
+            "feature": "model-3d",
+            "subset": "host-geometry-editing",
+            "status": "partial",
+            "summary": "Move or resize a recognized existing 3D model host while retaining its opaque scene and cached raster; this does not create or semantically edit a model.",
+            "operations": [],
+            "limits": [
+              {
+                "code": "cached-model-geometry-only",
+                "description": "Object-mode edits preserve cached canvas scale and follow the host center. Window-mode permits translation but rejects resizing that needs a new raster. Ambiguous carriers, invalid or mismatched raster geometry, and ungrouping opaque model scenes reject without mutation; no model re-rendering or camera/material editing is provided."
+              }
+            ],
+            "evidence": [
+              {
+                "id": "model-3d-host-geometry",
+                "kind": "behavior",
+                "claim": "Existing model geometry tests cover host and group-local transforms, retained scene/raster identity, namespace aliases, and atomic rejection of window-mode resizing, ambiguous carriers and ungrouping."
+              }
+            ],
+            "recommendation": {
+              "action": "use-operations",
+              "operations": ["set-shape"],
+              "note": "Inspect the existing host, dry-run geometry changes, compare retained scene and raster bytes, and verify the visible result in Office when model fidelity matters.",
+              "target": {
+                "feature": "shape",
+                "subset": "native-authoring"
+              }
             },
             "axes": null
           },
@@ -3635,7 +3679,7 @@
             "feature": "shape-3d",
             "subset": "local-declarations",
             "status": "preserve-only",
-            "summary": "Read and preserve existing DrawingML Shape 3D declarations without authoring them; bundled rendering covers only the separately disclosed front-surface subset.",
+            "summary": "Read and preserve existing DrawingML Shape 3D declarations without authoring them; bounded surface, parallel-camera and Text3D rendering are disclosed on the separate render axis.",
             "operations": [],
             "limits": [
               {
@@ -3657,7 +3701,12 @@
               {
                 "id": "shape-3d-front-surface",
                 "kind": "behavior",
-                "claim": "Viewer/PDF front-surface tests cover directional and Balanced lighting with bounded material, bevel and gradient rendering; unsupported light rigs remain diagnosed."
+                "claim": "Viewer/PDF surface tests cover directional and balanced lighting, bounded matte/plastic/metal materials, supported bevel profiles and gradient rendering; unsupported combinations remain diagnosed."
+              },
+              {
+                "id": "shape-3d-projection-and-text-volume",
+                "kind": "behavior",
+                "claim": "Viewer/PDF regressions cover parallel-camera projection, visible extrusion walls, bounded volume rasterization and Text3D decoration while retaining original text and fallback behavior."
               }
             ],
             "recommendation": {
@@ -3732,15 +3781,23 @@
               },
               "render": {
                 "status": "partial",
-                "summary": "Bundled Viewer/PDF render a bounded orthographicFront surface: front/angle/circle top bevel, solid or linear-gradient fill, matte/warmMatte/plastic material, and threePt/balanced lighting.",
+                "summary": "Bundled Viewer/PDF render bounded front surfaces, parallel-camera projection, visible extrusion walls and top/bottom bevels, plus opaque glyph extrusion for supported Text3D bodies. Materials include matte, warmMatte, plastic and metal; lighting includes threePt and balanced.",
                 "limits": [
                   {
-                    "code": "single-convex-contour",
-                    "description": "Requires one closed convex contour and an orthographicFront camera without 3D orientation. Light direction/rotation is supported; it does not enable camera rotation, perspective, extrusion walls, bottom bevels, non-convex or compound geometry, or true Text3D."
+                    "code": "bounded-parallel-camera",
+                    "description": "Only recognized orthographicFront/isometric parallel camera presets are projected, including finite explicit rotations, positive zoom and z offset on a nonsingular front-facing plane. Perspective, oblique and back-facing cameras retain fallback behavior; camera field-of-view and backdrop semantics are not reproduced."
+                  },
+                  {
+                    "code": "bounded-shape-volume",
+                    "description": "Beveled or extruded solids require a supported closed convex contour and bounded volume geometry. Front-only paint accepts solid or linear gradients; projected volume requires opaque solid paint. Supported bevel profiles include circle, angle and relaxedInset, with additional profile-specific admission. Non-convex or compound solids, unsupported paint/material/light combinations and resource overflows retain diagnosed fallback behavior."
+                  },
+                  {
+                    "code": "bounded-text-volume",
+                    "description": "Text3D extrusion requires available glyph coverage/outlines, opaque solid glyph paint, a supported parallel camera, positive extrusion, and no active glyph bevel or contour. Layout, clipping, paragraph animation ownership and shared geometry/raster budgets can reject the complete decoration. Original text is retained; this is not a complete Office WordArt or Text3D renderer."
                   },
                   {
                     "code": "bounded-surface-rendering",
-                    "description": "Unsupported combinations and resource-budget limits retain explicit fallback boundaries. Circle textures and sharp face edges remain finite raster approximations; independent PowerPoint references are required for visible acceptance. Chart 3D and GLB are separate capabilities."
+                    "description": "Lighting, material highlights, glyph coverage and depth-buffer sampling are bounded approximations; independent PowerPoint references are required for visible acceptance. Chart 3D and GLB are separate capabilities."
                   }
                 ],
                 "officeTarget": {
@@ -3748,7 +3805,7 @@
                   "minimumVersion": "2007",
                   "platforms": ["windows", "macos"]
                 },
-                "evidenceIds": ["shape-3d-front-surface"]
+                "evidenceIds": ["shape-3d-front-surface", "shape-3d-projection-and-text-volume"]
               },
               "verify": {
                 "status": "inconclusive",
@@ -4019,7 +4076,7 @@
             "limits": [
               {
                 "code": "merge-unsafe-timing",
-                "description": "Editing a slide with merge-unsafe timing is rejected rather than rewriting unknown animation semantics."
+                "description": "Default merge-safe animation mutation rejects unmodeled timing rather than rewriting it. Explicit mode=replace or mode=clear intentionally replaces or removes the timing; unrelated edits retain untouched timing."
               }
             ],
             "evidence": [
@@ -56543,7 +56600,7 @@
           {
             "mode": "index",
             "flag": "--mode index",
-            "description": "Operation index: name, level, required/optional, one-line summary."
+            "description": "Operation index: name, required/optional fields, constraints, and one-line summary. Operation level is disclosed by --mode ops."
           },
           {
             "mode": "ops",
@@ -114053,7 +114110,7 @@
           {
             "mode": "index",
             "flag": "--mode index",
-            "description": "Operation index: name, level, required/optional, one-line summary."
+            "description": "Operation index: name, required/optional fields, constraints, and one-line summary. Operation level is disclosed by --mode ops."
           },
           {
             "mode": "ops",
@@ -114094,7 +114151,7 @@
     }
   },
   "name": "xdoc",
-  "version": "0.19.0 (93aafd96)",
+  "version": "0.20.0 (91827673)",
   "schemaVersion": "cli-agent/v1",
   "defaultCommand": "convert",
   "artifactSchemaEvolution": {

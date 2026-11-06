@@ -68,13 +68,13 @@ authorization problems, ask the Agent to use pptx-nova's
 
 ### xdoc Runtime plans
 
-|                                 | Free                               | Personal (licensed plan)                                                                   |
-| ------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------ |
-| Current price                   | Free                               | Free — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
-| License                         | No account or license required     | Offline individual license, valid for 30 days                                              |
-| Slides per task                 | Up to 10                           | No plan-level limit                                                                        |
-| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                        |
-| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                          |
+|                                 | Free                               | Personal (licensed plan)                                                                |
+| ------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------- |
+| Current price                   | Free                               | 0 — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
+| License                         | No account or license required     | Offline individual license, valid for 30 days                                           |
+| Slides per task                 | Up to 10                           | No plan-level limit                                                                     |
+| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                     |
+| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                       |
 
 Both plans support single-user local use, local scripts, and a per-user daemon.
 Format and resource limits and existing signed watermark rules still apply.
@@ -124,11 +124,13 @@ the original deck by default, and produce review artifacts that make the result
 auditable. It is closer to a structured PPTX build/edit pipeline than a
 one-shot slide generator.
 
-New-deck creation and existing-deck editing use different models. New decks are
-generated from structured content, while existing decks are edited through
-source-preserving patches to their native PPTX objects rather than being
-reconstructed slide by slide. The source remains read-only by default, and the
-result is published as a separately validated candidate.
+### Targeted edits to the original PPTX
+
+`xdoc` applies targeted changes to objects and related PPTX structures in the
+original file, without rebuilding the entire presentation. Untouched OOXML
+parts, relationships, and extension data are preserved where possible. The
+source remains read-only by default, and the result is published as a
+separately validated candidate.
 
 ## What pptx-nova can do
 

@@ -36,4 +36,5 @@ Tabler 为 SVG 矢量图片，不承诺图标路径节点可编辑。文字、�
 七份 PowerPoint for Mac 16.114 保存关闭重开与完整回读通过；标题、形状持有编号、图表数据、表格单元格实际编辑后保留。
 窄 rail 的五条 cohort 应使用短标签；五项 ledger 单元格最多 80 字符，中文标点可能自然换行，较长内容应改用 columns 或重组拆页。
 字体不嵌入，其他系统/Office 版本及跨宿主像素一致性未验证；独立翻新路线未重做源稿保真验收。
-机器、逐页视觉和原生宿主证据分别见仓库 docs/mckinsey-blue-v2-migration-results.md 与本轮 catalog。
+机器、逐页视觉和原生宿主的历史证据记录于迁移报告（未随本仓库发布：
+`mckinsey-blue-v2-migration-results.md`）；当前选型状态以 [catalog](../catalog.json) 为准。

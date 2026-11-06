@@ -351,7 +351,7 @@ examples, and 7 recipe examples. These examples are part of the same versioned
 discovery output as the field definitions.
 
 Cache the complete `xdoc schema` response for CLI discovery. In v0.19.0,
-`discovery.commands` is only a list of the eleven top-level command names, while
+`discovery.commands` is only a list of the twelve top-level command names, while
 `xdoc schema --mode index` is specifically a patch-operation index rather than a
 complete CLI inventory. Neither surface should be treated as an exhaustive
 replacement for the full `.commands` map or command help.
@@ -1280,7 +1280,7 @@ and a hash for each page, plus the contact sheet identity when requested.
 ### `vision-diff`
 
 `vision-diff` compares source and candidate visual issues and classifies them as
-`new`, `resolved`, `inherited`, or `changed`. The report's `agentGate` blocks
+`new`, `resolved`, `inherited`, `changed`, or `worsened`. The report's `agentGate` blocks
 new high/medium issues and inherited issues that became high/medium. Existing
 unchanged source issues remain visible rather than being misreported as new.
 
@@ -1662,11 +1662,11 @@ Patch execution is all-or-nothing at the presentation-state boundary: the
 operation set runs against an isolated candidate, and the original presentation
 adopts it only after every operation succeeds. In one-shot mode, PPTX delivery
 and sidecar delivery are separate filesystem writes rather than one atomic
-evidence transaction. In daemon mode, a failed patch does not replace the prior
-presentation, but the session can advance before output-path validation,
-serialization, PPTX writing, or sidecar writing completes. A later delivery
-failure can therefore leave the in-memory session advanced; inspect or restart
-that session before retrying.
+evidence transaction. In daemon mode, patch or delivery failure does not commit
+the candidate to the input session. A late sidecar failure can still leave the
+primary PPTX published: retain the structured publication fields and inspect
+the actual source and output before recovery. If an in-place write changed the
+source bytes, a subsequent inspect reloads those bytes from disk.
 
 ## Sidecars, replay, audit, and rollback
 
@@ -1747,8 +1747,8 @@ Relevant environment variables are:
 | `XDOC_DAEMON_SPAWN_TIMEOUT_MS` | Change auto-spawn readiness timeout           |
 | `XDOC_DAEMON_LOG`              | Override the auto-spawn log path              |
 
-Sessions are keyed by canonical input paths and, after save, by output paths.
-Requests for the same filesystem-identity deck session are FIFO-serialized, so
+Sessions are keyed by filesystem identity; successful saves also register the
+output identity. Requests for the same deck session are FIFO-serialized, so
 symlink, hard-link, and host case/separator aliases share one history. Different
 deck sessions may execute concurrently within the disclosed connection limit.
 
@@ -1757,10 +1757,10 @@ requests with a 256-bit bearer token stored in its state file. State replacement
 uses a temporary file and rename, with mode `0600` where supported; keep both the
 state and auto-spawn log private. The daemon host is fixed to `127.0.0.1`;
 `XDOC_DAEMON_PORT` changes only the port and cannot broaden that local boundary.
-A cached session is authoritative for its keyed path
-until eviction and is not re-stat'ed or hash-checked on every cache hit, so use
-one-shot mode or exclusive path ownership when another process may replace an
-input file.
+Before reusing cached state, the runtime checks current disk bytes. External
+changes invalidate the cached model and inspect report, including in-place
+writes that retain the inode. Keep immutable source copies and SHA-256 bindings;
+a session does not freeze a path against another process's writes.
 
 The verified runtime emits `xdoc-daemon-status/v2` for status reports. It
 includes separate data and control endpoints plus active-connection and
@@ -1848,10 +1848,10 @@ machine callers:
 6. re-run the relevant gate after every automatic repair.
 
 The process boundary is command-specific and is published in a command- or
-family-level `ioContract` when one is available. Coverage is not yet uniform
-across every top-level command and PPTX action; for commands without a
-fine-grained contract, pin the runtime and validate the observed report and
-exit behavior before integrating it.
+family-level `ioContract`. The verified build discloses these contracts for all
+top-level commands and PPTX actions; daemon control actions share the
+family-level contract. Resolve each command's report references and validate
+its observed output and exit behavior before integrating it.
 
 | Channel     | Integration rule                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -2137,8 +2137,9 @@ claims should stay tied to the measured contract and its declared limitations.
     independently published `xdoc-json-rpc-contract/v1` or
     `xdoc-mcp-contract/v1` stdio adapter.
 16. Patch operations are transactional at the presentation-state boundary,
-    but PPTX and sidecar writes are separate, and a daemon delivery failure can
-    leave its in-memory session advanced. Sidecars do not carry deck hashes or
+    but PPTX and sidecar writes are separate. A daemon delivery failure leaves
+    the input session uncommitted, while a primary PPTX may already exist on disk.
+    Sidecars do not carry deck hashes or
     cryptographic revision links.
 17. Distribution licensing and task authorization are separate. Free local
     tasks are limited to 10 slides and 5 MiB of compressed PPTX inputs combined,

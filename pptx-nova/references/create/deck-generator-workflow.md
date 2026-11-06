@@ -13,14 +13,14 @@
 
 ## 为什么手写 JSON 不可行（800+ 行 envelope 的真实代价）
 
-| 痛点                              | 手写 JSON                    | JS 生成器               |
-| --------------------------------- | ---------------------------- | ----------------------- |
-| 换主题色（hex 散落 N 处）         | grep + 全文 replace，易遗漏  | 改 `C.primary` 一行     |
-| 字号节奏微调（page H1 32pt→28pt） | 找所有 page header 改        | 改 `F.pageH1` 一行      |
-| 加新 KPI 卡片                     | 复制 50 行 JSON 改坐标       | 改 `kpis` 数组多一项    |
-| 4 张 KPI 卡 x 坐标对齐            | 手算 + 数像素                | `startX + i*(w+gap)`    |
-| selector 命中率                   | shape name 散落，typo 不报错 | `nm(s, "X")` 双向       |
-| 维护性                            | 800 行 JSON 难审查           | 250 行 JS 可循环 / 函数 |
+| 痛点                              | 手写 JSON                   | JS 生成器               |
+| --------------------------------- | --------------------------- | ----------------------- |
+| 换主题色（hex 散落 N 处）         | grep + 全文 replace，易遗漏 | 改 `C.primary` 一行     |
+| 字号节奏微调（page H1 32pt→28pt） | 找所有 page header 改       | 改 `F.pageH1` 一行      |
+| 加新 KPI 卡片                     | 复制 50 行 JSON 改坐标      | 改 `kpis` 数组多一项    |
+| 4 张 KPI 卡 x 坐标对齐            | 手算 + 数像素               | `startX + i*(w+gap)`    |
+| selector 命中率                   | shape name 散落，拼写易漂移 | `nm(s, "X")` 统一命名   |
+| 维护性                            | 800 行 JSON 难审查          | 250 行 JS 可循环 / 函数 |
 
 **判断：deck 超过 ~100 ops 且没有可用 DeckKit 时，先上生成器抽取/扩展 DeckKit**。
 规模越大收益越大；冻结后后续交付回到 DeckKit/content 路径。
@@ -46,12 +46,11 @@ cp <skill-root>/assets/examples/generator/theme-packs.generated.mjs <run-dir>/th
 # 3. 生成探索 patch + 丰富度自检 + dry-run gate + 落盘
 node <run-dir>/generate.mjs --theme corporate-blue --style consulting --layout executive-grid > patch.json
 jq '.ops | length' patch.json   # 仅记录构建规模；质量由内容、结构和真实渲染证明，不设操作数下限
-# shell 驱动的多步流程（dry-run + apply 至少两次解析同一 deck）默认带 --daemon：当前 runtime
-# 自动按需拉起；复用 session 可减少重复解析。耗时随输入和环境变化。
-# 需要 daemon 不可用时直接失败的流程可用 --daemon-strict；CI 需另行适用的授权。
-xdoc pptx apply -p patch.json -o out.pptx --daemon --dry-run --json | tee dry-run.json
+# 这里没有 --input，是从空白新建；不会复用已有 deck session。
+# 编辑同一已有输入时可加 --daemon 复用解析；严格要求该 transport 时用 --daemon-strict。
+xdoc pptx apply -p patch.json -o out.pptx --dry-run --json | tee dry-run.json
 # 检查 dry-run.json 里没有阻塞性 visualRisks，并在 apply 后用 vision-check 清零 high/medium
-xdoc pptx apply -p patch.json -o out.pptx --daemon --overwrite
+xdoc pptx apply -p patch.json -o out.pptx --overwrite
 xdoc pptx vision-check out.pptx --json | tee vision.json
 # 创建型 deck 必须 high=0 且 medium=0；medium 也要改 generator/layout 后重跑
 xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
@@ -68,6 +67,8 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 
 ## 耗时基准
 
+以下为早期探索任务的历史人工计时，不代表当前运行时或其他机器的性能保证。
+
 ### 从零探索样本(10 页 / 1105 ops)
 
 | 阶段                         | 耗时   | 占比    | 优化抓手                                    |
@@ -81,12 +82,12 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 
 ### 模板熟练样本(8 页 / 893 ops / 橙色 roadmap deck)
 
-| 阶段                   | 耗时         | 占比       | 备注                                      |
-| ---------------------- | ------------ | ---------- | ----------------------------------------- |
-| 内容大纲提炼           | ~1.0 min     | 15-20%     | 从现有 `docs/agent-pptx-plan.md` 提炼     |
-| **JS 生成器编写**      | ~3.0-3.3 min | **45-50%** | 复用本模板模式,仍是最大耗时项             |
-| dry-run gate + 小修    | ~0.7-1.0 min | 10-15%     | 本次只修了 1 处长文本 overflow risk       |
-| apply + PNG + 结构验证 | ~1.3-1.6 min | 20-25%     | 包含 sidecar、PNG 导出、MD/zip/check 验证 |
+| 阶段                   | 耗时         | 占比       | 备注                                                         |
+| ---------------------- | ------------ | ---------- | ------------------------------------------------------------ |
+| 内容大纲提炼           | ~1.0 min     | 15-20%     | 从当时的规划文档提炼（未随本仓库发布：`agent-pptx-plan.md`） |
+| **JS 生成器编写**      | ~3.0-3.3 min | **45-50%** | 复用本模板模式,仍是最大耗时项                                |
+| dry-run gate + 小修    | ~0.7-1.0 min | 10-15%     | 本次只修了 1 处长文本 overflow risk                          |
+| apply + PNG + 结构验证 | ~1.3-1.6 min | 20-25%     | 包含 sidecar、PNG 导出、MD/zip/check 验证                    |
 
 总计 ~6.6 min。这个样本代表已经熟悉 skill、复用生成器模式和避坑规则的快路径；
 绝对时间比从零样本低很多，但占比仍显示"JS 生成器编写 / 坐标排版"最耗时。
@@ -97,10 +98,9 @@ xdoc convert out.pptx --to png -o previews --overwrite --contact-sheet
 chart / table 和页脚 / 来源不低于当前 canonical 门禁（默认 `10pt`），套件合同更严格时
 采用更严格下限。如果文字放不下，重组内容、换布局、扩容器或拆页；不要静默删字段或缩字通过。
 
-> **当前 runtime 可用 `--daemon`**：dry-run + apply 两步会复用同一份 in-memory deck，
-> 把"dry-run gate + 修 schema bug"和"apply + PNG"这两阶段里"重新解 PPTX zip"
-> 的开销（每次 ~80–150ms）压成一次，对 200+ ops 的大 patch 累积可节省 ~0.5s 量级。
-> 反复修 schema bug 时（同一 patch.json 改 5 次重 dry-run），daemon 的省时更明显。
+> **已有输入可用 `--daemon` 复用 session**：带同一 `--input` 的 inspect、dry-run 和 apply
+> 可以复用解析状态；无输入的新建 patch 不会获得这项收益。PNG 转换仍走独立命令，
+> 不复用该 PPTX session。实际收益须按输入、缓存状态和当前机器测量，不按 op 数推算。
 
 ---
 

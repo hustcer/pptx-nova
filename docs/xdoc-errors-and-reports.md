@@ -316,9 +316,11 @@ Use this sequence for an unattended worker:
    Office-compatibility, rendered, and human-review gates. A report that merely
    completed is not necessarily a passing gate.
 
-This distinction matters for daemon jobs. A daemon may advance an in-memory
-session before a later candidate or sidecar write fails. On retry, account for
-that session state or use one-shot mode; never replay blindly against a path
+This distinction matters for daemon jobs. A failed delivery does not commit the
+candidate to the input session, but a late sidecar failure can leave the primary
+PPTX on disk. An in-place write can therefore change the next inspected input
+even though the session was not committed. Read publication fields and verify
+the actual file identities before retrying; never replay blindly against a path
 that another worker may have replaced.
 
 ## Practical command patterns

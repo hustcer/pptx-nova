@@ -9,7 +9,8 @@ inspected. No hard defects remain. The 45-page reuse matrix also covers every re
 Chinese/English mixed text, unrelated synthetic astronomy, maximum and minimum collection density.
 PowerPoint for Mac 16.114 opened, saved and reopened all six cases without Repair; representative
 title, badge, capsule and native table-cell edits passed readback. Final showcase PPTX bytes match
-the reviewed golden candidate. See `docs/long-table-v2-migration-results.md` in the repository.
+the reviewed golden candidate. The detailed `long-table-v2-migration-results.md` report is not
+included in this repository.
 
 Accepted differences: Arial Black / Georgia and upright Arial Unicode MS replace unavailable fonts;
 solid cream replaces the source grain. The golden closing copy still names the original reference

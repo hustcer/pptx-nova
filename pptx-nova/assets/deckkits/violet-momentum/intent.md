@@ -69,4 +69,5 @@ preservation or cross-platform PowerPoint equivalence is claimed.
 
 Current acceptance is recorded in the
 [golden review](../../../benchmarks/visual/cases/violet-momentum/golden-operations/review.md).
-Candidate status requires explicit selection; it is not a production/default promotion.
+Current selection readiness comes from the [catalog](../catalog.json), which registers
+Violet Momentum as production and eligible for automatic delivery selection.

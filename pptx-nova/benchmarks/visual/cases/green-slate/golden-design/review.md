@@ -7,5 +7,6 @@ the accepted baseline uses shape-owned labels, centered node text and a reserved
 
 Three repeated builds pass with no content, fit, dry-run or vision findings. Native chart data and every
 native table cell are read back. Variant, density, CJK and unrelated-content evidence remains in the
-ignored run directory. Details and limitations are recorded in `docs/green-slate-migration-results.md`.
+ignored run directory. Details and limitations were recorded in `green-slate-migration-results.md`,
+which is not included in this repository.
 This is candidate creation evidence, not a PowerPoint-parity or refurbishment certification.

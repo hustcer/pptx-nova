@@ -443,9 +443,11 @@ reachable. The daemon is loopback-only by default, stores a bearer token in a
 0600 state file where supported, and prunes sessions by idle timeout and pool
 size. Keep `XDOC_DAEMON_STATE` and `XDOC_DAEMON_LOG` private.
 
-Sessions are keyed by canonical paths. A cached session is not re-hash-checked
-on every hit, so give one worker exclusive ownership of a source path or use
-one-shot mode when another process may replace the file.
+Sessions use filesystem identity: symlink, hard-link, and host-equivalent path
+aliases share one history. The runtime checks current disk bytes and reloads
+the model when an external write changes them, even when the inode stays the
+same. Keep immutable source copies and SHA-256 bindings for task evidence;
+session reuse does not freeze a path against other writers.
 
 Integrate through `xdoc daemon start|status|stop` and the documented CLI
 reports. Do not depend on the internal newline-delimited daemon RPC framing. The

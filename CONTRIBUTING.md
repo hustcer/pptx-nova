@@ -69,8 +69,8 @@ Keep user-facing capability claims precise.
 ## Validation
 
 List all DeckKits with their catalog readiness, version, and committed PPTX example location using
-`just list`. Narrow terminals use a text list so columns are not hidden. PPTX paths are relative to
-the printed example root. Use `just list --json`
+`just ls`. Narrow terminals use a text list so columns are not hidden. PPTX paths are relative to
+the printed example root. Use `just ls --json`
 for full repository-relative PPTX, preview and content paths, supported slide-type counts, and
 explicit `available`, `missing`, or `unregistered` PPTX availability. The read-only Nushell helper lives
 at `tools/list-deckkits.nu` and can also run directly from another working directory.

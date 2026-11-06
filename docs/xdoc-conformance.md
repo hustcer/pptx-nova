@@ -227,9 +227,10 @@ candidate bytes + evidence sidecar → publication decision
 The operation set MUST fail as one unit at the presentation-state boundary.
 Candidate and sidecar writes MAY be separate filesystem operations, but the
 report MUST make that boundary visible so a host can retry, quarantine, or
-recover without guessing what happened. A daemon MAY advance an in-memory
-session before a later filesystem delivery step; the host must account for that
-state when retrying.
+recover without guessing what happened. The verified xdoc daemon commits its
+input session only after successful delivery, while a late sidecar failure can
+still leave the primary PPTX on disk. The host MUST check publication facts and
+current file identities before retrying.
 
 ### Capability statuses
 

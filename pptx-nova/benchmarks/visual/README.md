@@ -172,4 +172,5 @@ Current consulting-dark cases:
   and native chart negative, zero and tiny values without blocking fit warnings.
 - `mixed-language` verifies Chinese/English regular and bold text in a synthetic
   community-library scenario. The migration report records the separate complete
-  Chinese, alternate-layout and sparse probes. Readiness remains candidate.
+  Chinese, alternate-layout and sparse probes. Those acceptance records used
+  candidate readiness; the current catalog registers consulting-dark as production.

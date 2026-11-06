@@ -421,53 +421,6 @@ DeckKit runtime code lives under `pptx-nova/assets/deckkits/`. Use the bundled
 catalog and validation scripts instead of ad hoc one-off slide generators for
 ordinary deck delivery.
 
-## Maintainer checks
-
-Run the full repository test suite with `node tools/run-tests.mjs`.
-
-Run the repository-level smoke test before publishing or packaging the skill:
-
-```bash
-node tools/pptx-nova-smoke-test.mjs
-```
-
-Run the public-audit gate when preparing a public release:
-
-```bash
-node tools/pptx-nova-audit-public.mjs --strict
-```
-
-The smoke test validates bundled DeckKit content, builds a patch, queries the
-bundled icon pack, checks DeckKit selection, exercises session-rules
-normalization/resolution, and verifies Edit Contract source and evidence
-bindings. The public audit scans for machine-local paths, private repository
-context, unexpected binaries, missing license requirements, and other release
-blockers.
-
-To check an installed xdoc's native edit, autofit, translation, sidecar-publication and asset-boundary
-contracts, including the published Edit Contract gate with real semantic/style/visual
-reports, run the opt-in executable suite:
-
-```bash
-XDOC_TEST_BIN=/absolute/path/to/xdoc node --test tools/tests/contracts/native-contracts.test.mjs
-```
-
-The default test suite skips these cases when `XDOC_TEST_BIN` is absent. Set
-`XDOC_TEST_EVIDENCE_DIR` to retain the independently allocated scenario outputs;
-these maintainer tests are not dependencies of the published skill.
-
-Add `XDOC_TEST_VISUAL=1` to also check every Cartesian stock page through
-canonical PDF/PNG Create gates. This additional case uses the installed
-authorization and requires an unwatermarked CLI License; the ordinary native
-cases keep isolated configuration. Evidence directories may be relative or absolute.
-
-`xdoc` is the in-house, agent-oriented PPTX engine behind pptx-nova, exposed to
-the skill through its primary CLI. pptx-nova uses it for PowerPoint inspection,
-declarative patch dry-runs and application, conversion, preview rendering,
-semantic diff, and visual checks. Some metadata validation and DeckKit selection
-scripts can run without `xdoc`, but real PPTX apply, conversion, preview, diff,
-and vision-check workflows require it.
-
 ## About deckkit-maker
 
 `deckkit-maker` is included as a companion developer skill. It exists to create,

@@ -353,46 +353,6 @@ PNG 和 PDF 预览展示的是静态幻灯片，不能证明动画或切换效�
 DeckKit 运行时代码位于 `pptx-nova/assets/deckkits/`。
 日常交付演示文稿时，应使用内置目录和验证脚本，而不是临时编写一次性幻灯片生成器。
 
-## 维护者检查
-
-使用 `node tools/run-tests.mjs` 运行完整的仓库测试套件。
-
-发布或打包技能前，运行仓库级冒烟测试：
-
-```bash
-node tools/pptx-nova-smoke-test.mjs
-```
-
-准备公开发布时，运行公开审计检查：
-
-```bash
-node tools/pptx-nova-audit-public.mjs --strict
-```
-
-冒烟测试会验证内置 DeckKit 内容、构建补丁、查询内置图标包、检查 DeckKit 选择，
-执行会话规则的规范化与解析，并验证编辑契约（Edit Contract）中的源文件和证据绑定。
-公开审计会扫描机器本地路径、私有仓库上下文、意外的二进制文件、缺失的许可要求及其他发布阻断项。
-
-如需检查已安装 xdoc 的原生编辑、自动适配、翻译、伴随证据发布和素材边界契约，
-包括使用真实语义、样式及视觉报告的已发布编辑契约检查，请运行以下按需启用的可执行测试套件：
-
-```bash
-XDOC_TEST_BIN=/absolute/path/to/xdoc node --test tools/tests/contracts/native-contracts.test.mjs
-```
-
-未设置 `XDOC_TEST_BIN` 时，默认测试套件会跳过这些用例。
-设置 `XDOC_TEST_EVIDENCE_DIR` 可保留各场景单独分配的输出；
-这些维护者测试不是已发布技能的依赖。
-
-额外设置 `XDOC_TEST_VISUAL=1`，还可通过标准 PDF/PNG 创建检查关卡验证每个 Cartesian 内置页面。
-这一附加用例使用已安装的授权，要求具备无水印 CLI 许可证；普通原生测试用例则保持配置隔离。
-证据目录可以使用相对路径或绝对路径。
-
-`xdoc` 是 pptx-nova 背后面向 Agent 的自研 PPTX 引擎，通过其主要 CLI 向技能提供能力。
-pptx-nova 使用它检查 PowerPoint、试运行和应用声明式补丁、转换文件、渲染预览、执行语义差异比较及视觉检查。
-部分元数据验证和 DeckKit 选择脚本可以在没有 `xdoc` 的情况下运行，
-但实际的 PPTX 修改应用、转换、预览、差异比较和视觉检查工作流均需要它。
-
 ## 关于 deckkit-maker
 
 `deckkit-maker` 是随仓库提供的配套开发者技能，

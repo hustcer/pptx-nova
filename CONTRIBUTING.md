@@ -105,9 +105,36 @@ node pptx-nova/scripts/cli/deckkits/readiness.mjs --deckkit <deckkit-id> --targe
 node pptx-nova/scripts/cli/deckkits/benchmark.mjs --deckkit <deckkit-id> --all
 ```
 
+Also run the smoke test before publishing or packaging the skill, and the strict
+public audit when preparing a public release.
+
 The smoke test validates bundled DeckKit content, patch generation, icon lookup,
-and DeckKit selection. The public audit checks for private paths, unexpected
-binaries, missing licenses, and release blockers.
+DeckKit selection, session-rules normalization/resolution, and Edit Contract
+source and evidence bindings. The public audit checks for private paths,
+unexpected binaries, missing licenses, and release blockers.
+
+### Native xdoc Contract Tests
+
+Some metadata validation and DeckKit selection scripts can run without `xdoc`,
+but real PPTX apply, conversion, preview, diff, and vision-check workflows require
+the CLI.
+
+To check an installed xdoc's native edit, autofit, translation, sidecar-publication,
+and asset-boundary contracts, including the Edit Contract gate with real
+semantic/style/visual reports, run the opt-in executable suite:
+
+```bash
+XDOC_TEST_BIN=/absolute/path/to/xdoc node --test tools/tests/contracts/native-contracts.test.mjs
+```
+
+The default test suite skips these cases when `XDOC_TEST_BIN` is absent. Set
+`XDOC_TEST_EVIDENCE_DIR` to retain the independently allocated scenario outputs;
+these maintainer tests are not dependencies of the published skill.
+
+Add `XDOC_TEST_VISUAL=1` to also check every Cartesian stock page through
+canonical PDF/PNG Create gates. This additional case uses the installed
+authorization and requires an unwatermarked CLI License; the ordinary native
+cases keep isolated configuration. Evidence directories may be relative or absolute.
 
 ## Generated Files
 

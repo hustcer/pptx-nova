@@ -64,6 +64,19 @@ task to your Agent in plain language. For license installation, renewal, or
 authorization problems, ask the Agent to use pptx-nova's
 [licensing workflow](pptx-nova/references/runtime/licensing.md).
 
+### xdoc Runtime plans
+
+|                                 | Free                               | Personal (paid plan)                                                                    |
+| ------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------- |
+| Current price                   | 0                                  | 0 — [apply for a license](https://structurify.io/en/commerce/?product=runtime-personal) |
+| License                         | No account or license required     | Offline license for the individual purchaser, valid for 30 days                         |
+| Slides per task                 | Up to 10                           | No plan-level limit                                                                     |
+| Compressed PPTX inputs per task | Up to 5 MiB combined               | No plan-level limit                                                                     |
+| PPTX, PDF, and PNG outputs      | Carry a `structurify.io` watermark | No new plan watermark when the task is authorized                                       |
+
+Both plans support single-user local use, local scripts, and a per-user daemon.
+Format and resource limits and existing signed watermark rules still apply.
+
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
 xdoc is an agent-native document execution runtime for native, editable PPTX work.

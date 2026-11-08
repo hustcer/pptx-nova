@@ -404,15 +404,11 @@ PNG 和 PDF 预览展示的是静态幻灯片，不能证明动画或切换效�
 `-- tools/                     # 仓库级冒烟测试和公开发布检查
 ```
 
-## DeckKit 示例
+## DeckKit 预览
 
-仓库中已提交的展示素材位于 `pptx-nova/assets/examples/deckkits/`。
-它们是合成的、可再分发的示例，不是客户材料。
-每个示例通常包含生成的可编辑 `deck.pptx`、精简的缩略图总览、
-源 `content.json`、需求简述和摘要元数据。
-
-DeckKit 运行时代码位于 `pptx-nova/assets/deckkits/`。
-日常交付演示文稿时，应使用内置目录和验证脚本，而不是临时编写一次性幻灯片生成器。
+制作 PPTX 时，可以使用 DeckKit 统一配色、字体和页面布局。
+先到 [DeckKit 预览图库](https://structurify.io/en/deckkits/) 查看效果，
+选择适合内容和使用场景的 DeckKit，再在请求中告诉 AI 要使用的 DeckKit 名称。
 
 ## 关于 deckkit-maker
 
@@ -448,4 +444,4 @@ DeckKit 运行时代码位于 `pptx-nova/assets/deckkits/`。
 - [xdoc 简介与架构](docs/xdoc-introducution.md)
 - [安装 xdoc CLI](docs/xdoc-installation.md)
 - [xdoc 兼容性说明](docs/xdoc-compatibility.md)
-- [DeckKit 示例](pptx-nova/assets/examples/deckkits/README.md)
+- [DeckKit 预览图库](https://structurify.io/en/deckkits/)

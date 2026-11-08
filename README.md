@@ -484,16 +484,12 @@ labels, lost formatting, or PowerPoint repair issues.
 `-- tools/                     # Repository-level smoke and public-release checks
 ```
 
-## DeckKit examples
+## DeckKit previews
 
-Committed showcase assets live under `pptx-nova/assets/examples/deckkits/`. They are
-synthetic, redistributable examples, not customer materials. Each example
-usually includes the generated editable `deck.pptx`, a compact contact sheet,
-the source `content.json`, a brief, and summary metadata.
-
-DeckKit runtime code lives under `pptx-nova/assets/deckkits/`. Use the bundled
-catalog and validation scripts instead of ad hoc one-off slide generators for
-ordinary deck delivery.
+When creating PPTX files, you can use a DeckKit for consistent colors, typography,
+and page layouts. Browse the [DeckKit preview gallery](https://structurify.io/en/deckkits/)
+to choose one that suits your content and presentation setting, then include its
+name in your request to the assistant.
 
 ## About deckkit-maker
 
@@ -532,4 +528,4 @@ itself needs to be built or extended.
 - [xdoc introduction and architecture](docs/xdoc-introducution.md)
 - [Install the xdoc CLI](docs/xdoc-installation.md)
 - [xdoc compatibility reference](docs/xdoc-compatibility.md)
-- [DeckKit examples](pptx-nova/assets/examples/deckkits/README.md)
+- [DeckKit preview gallery](https://structurify.io/en/deckkits/)

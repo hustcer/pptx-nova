@@ -92,6 +92,10 @@ xdoc --version
 采用简洁风格，保存到当前工作文件夹，文件名为 demo.pptx。
 ```
 
+制作 PPTX 时，可以使用 DeckKit 统一配色、字体和页面布局。
+先到 [DeckKit 预览图库](https://structurify.io/en/deckkits/) 查看效果，
+选择适合内容和使用场景的 DeckKit，再在请求中告诉 AI 要使用的 DeckKit 名称。
+
 任务成功后，AI 应提供可编辑 PPTX 文件的位置或链接。你可以在同一段对话中继续修改：
 
 ```text

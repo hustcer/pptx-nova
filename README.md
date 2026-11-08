@@ -99,6 +99,11 @@ with remote work. Use a clean style and save it as demo.pptx in the current
 working folder.
 ```
 
+When creating PPTX files, you can use a DeckKit for consistent colors, typography,
+and page layouts. Browse the [DeckKit preview gallery](https://structurify.io/en/deckkits/)
+to choose one that suits your content and presentation setting, then include its
+name in your request to the assistant.
+
 When the task succeeds, the assistant should provide the location or a link to
 the editable PPTX file. You can continue in the same conversation:
 

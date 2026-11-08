@@ -1,8 +1,13 @@
 # pptx-nova Scripts
 
-Required published runtime code is self-contained in this directory and uses only Node built-ins
-and the disclosed xdoc executable. Optional Office integrations also require the prerequisites
-listed below, including Nushell where indicated. Repository-only checks remain under tools/.
+All scripts shipped inside `pptx-nova/` must be `.mjs` modules running directly on Node.js 20
+or later, using only Node built-ins and the disclosed xdoc executable. This rule also applies
+to optional and platform-specific helpers. Node.js is already required; do not add Python or
+Nushell dependencies, including by invoking them from `.mjs`.
+
+The two existing Office `.nu` helpers listed below are legacy code awaiting migration to
+dependency-free `.mjs`, not exceptions to this policy. Their current prerequisites remain
+documented until that migration is complete. Repository-only Nushell tools belong under tools/.
 
 ```text
 scripts/

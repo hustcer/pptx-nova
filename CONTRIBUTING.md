@@ -41,22 +41,25 @@ the maintenance suite also checks callers in repository documentation and `deckk
 - Keep publishable skill files self-contained inside `pptx-nova/`.
 - Do not make runtime code depend on repository-root `tools/`, local machine
   paths, private checkouts, or generated files outside the skill directory.
-- Every script required by a published user workflow must be a plain JavaScript
-  ES module (`.mjs`) running directly on Node.js 20 or later, using only Node
-  built-ins. The published `xdoc` binary is the only allowed external runtime
-  dependency; do not require package installation, Nushell, or Python.
+- All scripts shipped anywhere inside `pptx-nova/` must be plain JavaScript ES
+  modules (`.mjs`) running directly on Node.js 20 or later, using only Node
+  built-ins. Node.js is already a dependency; do not add Python or Nushell, which
+  users may not have installed. The published `xdoc` binary is the only allowed
+  external runtime dependency; do not require package installation.
 - Prefer Nushell for repository maintenance scripts when structured file
   inspection or release checks benefit from it; use `.mjs` when Node is a better
   fit. Keep maintenance scripts under `tools/` by default and all human-facing
   Nushell output, help, and generated prose in English.
-- Published Nushell helpers must be optional or capability-gated, disclose
-  unavailability, and never claim evidence they did not produce. Port a helper
-  to dependency-free `.mjs` before making it mandatory.
+- Optional and platform-specific helpers follow the same `.mjs` rule. Do not add
+  `.py`, `.nu`, shell wrappers, or other script formats inside `pptx-nova/`, or
+  invoke Python/Nushell from `.mjs` to bypass the rule. Repository-only Nushell
+  tools stay under `tools/`, outside the published skill.
 - Use kebab-case for DeckKit ids and file names, for example
   `consulting-dark/consulting-dark.kit.mjs` and `cli/create/build.mjs`.
 - Prefer JSON catalogs and schemas over undocumented loose files.
 
-Do not add Python scripts to published user workflows.
+Existing non-`.mjs` helpers are migration debt and must be ported to
+dependency-free `.mjs`; they do not create exceptions for new scripts.
 
 ## Documentation Guidelines
 

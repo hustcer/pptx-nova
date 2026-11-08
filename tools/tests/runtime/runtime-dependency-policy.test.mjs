@@ -10,28 +10,28 @@ function read(relativePath) {
   return readFileSync(join(repoRoot, relativePath), 'utf8')
 }
 
-test('published mandatory workflow scripts stay dependency-free Node.js modules', () => {
+test('published script policy requires dependency-free Node.js modules', () => {
   const agents = read('AGENTS.md')
 
   assert.match(
     agents,
-    /Every script required by a published user workflow must be a plain JavaScript ES module/,
+    /All scripts shipped anywhere inside `pptx-nova\/` must be plain JavaScript ES modules/,
   )
   assert.match(agents, /Node\.js 20 or later/)
-  assert.match(
-    agents,
-    /must not require Nushell, Python, a package-manager install, or any third-party runtime dependency/,
-  )
+  assert.match(agents, /do not add Python or Nushell as another user dependency/)
+  assert.match(agents, /do not invoke Python or Nushell from `\.mjs` as a workaround/)
+  assert.match(agents, /without package installation or third-party runtime dependencies/)
   assert.match(agents, /published `xdoc` binary is the only allowed external runtime dependency/)
 })
 
-test('bundled Nushell scripts are explicitly optional evidence integrations', () => {
+test('legacy Nushell evidence integrations remain optional pending migration', () => {
   const scriptDir = join(repoRoot, 'pptx-nova/scripts/cli/office')
   const nushellScripts = readdirSync(scriptDir)
     .filter((name) => name.endsWith('.nu'))
     .sort()
   const scriptsReadme = read('pptx-nova/scripts/README.md')
 
+  assert.match(scriptsReadme, /legacy code awaiting migration/)
   assert.deepEqual(nushellScripts, ['morph-playback.nu', 'powerpoint-snapshot.nu'])
   for (const name of nushellScripts) {
     assert.ok(scriptsReadme.includes(`- \`cli/office/${name}\` - optional`))

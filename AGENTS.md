@@ -6,16 +6,27 @@ This repository packages two agent skills. `pptx-nova/` is the main publishable 
 
 ## Build, Test, and Development Commands
 
-There is no root package manifest or build step. Run scripts directly with Node:
+There is no root package manifest or build step. Run scripts directly with Node.js 20 or later:
 
 ```bash
 node tools/pptx-nova-smoke-test.mjs
 node tools/pptx-nova-audit-public.mjs --strict
-node pptx-nova/scripts/cli/deckkits/readiness.mjs --deckkit consulting-dark --target delivery
-node pptx-nova/scripts/cli/deckkits/benchmark.mjs --deckkit consulting-dark --all
+node tools/run-tests.mjs deckkits maintenance/deckkit-layout.test.mjs
 ```
 
 The smoke test validates bundled DeckKit content, patch generation, icon lookup, and DeckKit selection. The public audit checks for private paths, unexpected binaries, missing licenses, and release blockers.
+
+For DeckKit change validation, run the benchmark before readiness, using a fresh output directory for the current iteration. Replace `<id>` and `<run>` below; use `--target candidate` for a new kit and `--target delivery` for an existing production/default kit:
+
+```bash
+node pptx-nova/scripts/cli/deckkits/benchmark.mjs \
+  --deckkit <id> --all --out .tmp/deckkit-<id>-<run>/benchmark/01
+node pptx-nova/scripts/cli/deckkits/readiness.mjs \
+  --deckkit <id> --target delivery --benchmark-mode required-live \
+  --out .tmp/deckkit-<id>-<run>/benchmark/01 --json
+```
+
+Use the same `--out` for benchmark, readiness, and any `catalog-update.mjs` invocation. Catalog-mode readiness is appropriate for selection and CI metadata checks; it does not validate a changed kit against current-run benchmark evidence. Detailed commands and contribution requirements are in [CONTRIBUTING.md](CONTRIBUTING.md#deckkit-contributions).
 
 ## Coding Style & Naming Conventions
 
@@ -26,6 +37,15 @@ Every script required by a published user workflow must be a plain JavaScript ES
 Keep files self-contained inside the publishable skill when they are part of `pptx-nova`; runtime code must not depend on repository-root `tools/` or local machine paths. Use kebab-case for DeckKit ids and file names, for example `consulting-dark/consulting-dark.kit.mjs` and `cli/create/build.mjs`. Prefer JSON catalogs and schemas over undocumented loose files.
 
 Keep each DeckKit under `pptx-nova/assets/deckkits/<id>/`: `<id>.kit.mjs`, `design.json`, `intent.md`, `layouts.mjs`, optional `components.mjs`/`registry.mjs`, `schemas/`, and `examples/content.json` plus `examples/build.mjs`. Common runtime modules belong in `deckkits/shared/`; only the common content/design schemas belong in `deckkits/schemas/`. Suite modules must not import another suite directly. Catalog paths are relative to `deckkits/`. Run the directory-policy test and public audit after adding or moving DeckKit files; update `deckkit-maker` authoring conventions with any layout-policy change.
+
+## DeckKit Development Rules
+
+- Before creating or migrating a kit, read [deckkit-maker](deckkit-maker/SKILL.md), its [componentization workflow](deckkit-maker/references/componentize.md), the [design contract reference](pptx-nova/references/create/design-contracts.md), and the [DeckKit conventions](pptx-nova/assets/deckkits/README.md). Review the reference-based visual baseline before componentizing a new kit. Existing-kit repairs extend the registered kit and its tests rather than rerunning new-kit initialization.
+- Treat `design.json` as design facts, `intent.md` as design judgment, and `<id>.kit.mjs` as the thin public entry. Layout resolution must check actual content capacity; new visual families register through `shared/design-family-registry.mjs`. After changing a registered design, run `node tools/generate-pptx-design-projections.mjs <id>` and then the same command with `--check`; do not hand-edit generated budgets or catalog projections. Preserve asset-slot metadata and independently registered refurbishment mappings; generator support does not imply native skinning or source-preservation support.
+- Keep schema fields, slot budgets, layout contracts, rendering, and catalog coverage aligned. Register new page types in the common content schema. Reject blank required text and excessive item counts; do not silently truncate input or accept fields that rendering ignores. Add page-type tests for minimal valid input, non-reference-topic content, capacity boundaries, and relevant asset/rich-text behavior. Run content validation, slot consistency, and the DeckKit test group for affected kits.
+- Keep reference titles, claims, metrics, entities, dates, sources, and callouts in content, never hard-coded into reusable kit logic or fallback text. Audit leakage with non-reference-topic content and a reference-specific denylist, supplementing the audit's bounded coverage with emitted-text regression checks and PPTX readback. Do not bundle one-off reference images in kits, examples, or assets; reusable brand assets require clear authorization and user confirmation. Document asset-slot or placeholder behavior instead.
+- Keep `shared/core-primitives.kit.mjs` focused on geometry safety and op generation; kit-specific colors, spacing, chrome, and layouts stay in the kit. Shared-core changes require evidence of cross-kit reuse or a general geometry/op-generation need, plus user confirmation. Run all existing DeckKit validation tests and affected benchmarks after such changes.
+- New kits start as `experimental` and normally advance only to `candidate`. Promotion to `production`/`default` requires the applicable quality gates, completed per-page PNG review, zero manual hard defects, user confirmation, and `--confirm-manual-png-review`; catalog updates do not infer manual review. Preserve an existing kit's readiness during routine repair rather than copying a new-kit downgrade. Apply the DeckKit README's semver policy, including major versions for removed/renamed fields, newly rejected inputs, or changed layout capacity. Record migration guidance and known limits.
 
 ## Testing Guidelines
 
@@ -43,11 +63,17 @@ Published CLI entries belong under `pptx-nova/scripts/cli/<workflow>/` and inter
 
 Keep tests under `tools/tests/{deckkits,workflows,contracts,evidence,runtime,maintenance}/`, with support code in `helpers/` and data in `fixtures/`. Run all suites with `node tools/run-tests.mjs`; CI and `just t` must use this same recursive discovery entry point. Do not restore flat test globs. Preserve test names and conditional integration coverage when splitting suites.
 
-Before changing runtime scripts, DeckKits, schemas, examples, or assets, run the smoke test and public audit. For DeckKit changes, also run targeted readiness and benchmark commands for the affected id. Do not commit generated `.pptx`, PNG previews, contact sheets, full vision reports, or temporary run outputs unless they are intentional curated examples under `pptx-nova/assets/examples/`.
+Before changing runtime scripts, DeckKits, schemas, examples, or assets, run the smoke test and public audit; rerun them and the affected tests after changes. For DeckKit changes, also run targeted benchmark and required-live readiness checks for the affected id.
+
+Keep each DeckKit run under a fresh `.tmp/deckkit-<id>-<run>/` with numbered iterations. Record the exact runtime version/capabilities and freeze `XDOC_FIELD_DATE` across reference, candidate, and benchmark renders. Retain previous iterations; do not use `--clean` to delete earlier evidence. New kits need a committed golden benchmark plus recorded stress-density and mixed-language reviews; the latter may stay in the run directory unless they justify permanent fixtures. Every indexed case remains gated.
+
+Benchmark success and historical low baselines do not replace the full golden PPTX's canonical Create gate and per-page PNG review under the same runtime and frozen date. Keep vision high/medium at zero; review new/changed low findings before updating their baseline, and do not treat a successful benchmark exit as delivery/promotion approval. Retain review findings and critical-detail evidence in the current run; follow the [visual acceptance checklist](deckkit-maker/references/visual-acceptance.md).
+
+For intentional curated showcase changes, use `just deckkit-examples -d <id>` and `just deckkit-examples check -d <id>` to synchronize PPTX, preview, summary, manifest hashes, and deck-catalog entries. Each invocation gets a fresh temporary run by default. Do not hand-edit generated showcase metadata. Do not commit generated `.pptx`, PNG previews, contact sheets, full vision reports, or temporary run outputs unless they are intentional curated examples under `pptx-nova/assets/examples/`.
 
 ## Commit & Pull Request Guidelines
 
-Follow Conventional Commit style as used in history: `feat(pptx-nova): ...`, `fix(pptx): ...`, `docs(deckkit-maker): ...`, or `chore: ...`. Keep commits scoped and include a detailed body when behavior, validation, or release safety changes. Pull requests should summarize the user-visible change, list validation commands run, call out changed DeckKits or assets, and include screenshots/contact sheets only when visual output changed.
+Follow Conventional Commit style as used in history: `feat(pptx-nova): ...`, `fix(pptx): ...`, `docs(deckkit-maker): ...`, or `chore: ...`. Keep commits scoped and include a detailed body when behavior, validation, or release safety changes. Pull requests should summarize the user-visible change, list validation commands run, call out changed DeckKits or assets, and include screenshots/contact sheets only when visual output changed. For DeckKit changes, include ids, versions, readiness transitions, migration guidance, and benchmark/canonical review results with stress-density and mixed-language coverage.
 
 ## Agent-Specific Instructions
 

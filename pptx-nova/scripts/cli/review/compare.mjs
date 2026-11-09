@@ -19,6 +19,7 @@ import {
 import { basename, delimiter, dirname, extname, join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { createProgressReporter, progressHeartbeatMs } from '../../lib/runtime/progress.mjs'
+import { captureProofMapBinding } from '../../lib/review/proof-map-binding.mjs'
 import {
   createPageBitmapCacheBinding,
   pageBitmapCacheMetrics,
@@ -826,6 +827,7 @@ async function runSingleCompare(args, reporter) {
     ...attempt.report,
     pptxNovaCompare: {
       mode: 'single',
+      ...(args.proofMapBinding ? { proofMapBinding: args.proofMapBinding } : {}),
       requestedDpi: args.dpi,
       fallbackDpi: args.fallbackDpi,
       agentReviewDpi: args.agentReviewDpi || null,
@@ -1059,6 +1061,9 @@ async function runMultipartCompare(args, reporter) {
       schemaVersion: 'pptx-nova-compare-manifest/v1',
       status: 'success',
       kind: args.kind,
+      ...(args.proofMapBinding
+        ? { pptxNovaCompare: { proofMapBinding: args.proofMapBinding } }
+        : {}),
       source: sourceIdentity,
       candidate: candidateIdentity,
       slideCount: args.slideCount,
@@ -1092,6 +1097,14 @@ async function main(args, reporter) {
   ensureWritable(args.report, args.overwrite)
   mkdirSync(args.runDir, { recursive: true })
   ensureRenderContext(args.runDir)
+  const previous = existsSync(args.report) ? JSON.parse(readFileSync(args.report, 'utf8')) : null
+  const previousBinding = previous?.pptxNovaCompare?.proofMapBinding
+  if (
+    args.kind === 'refurbish' ||
+    previousBinding !== undefined ||
+    existsSync(join(args.runDir, 'refurbish-run-summary.json'))
+  )
+    args.proofMapBinding = captureProofMapBinding(args.runDir, previousBinding)
 
   const multipart = !args.slides && args.slideCount > args.chunkSize
   if (!multipart) {

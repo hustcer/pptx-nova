@@ -1,3 +1,53 @@
+import { readPptxPackage } from '../pptx/pptx-package.mjs'
+
+const P = new Set([
+  'http://schemas.openxmlformats.org/presentationml/2006/main',
+  'http://purl.oclc.org/ooxml/presentationml/main',
+])
+const A = new Set([
+  'http://schemas.openxmlformats.org/drawingml/2006/main',
+  'http://purl.oclc.org/ooxml/drawingml/main',
+])
+const MC = 'http://schemas.openxmlformats.org/markup-compatibility/2006'
+const attr = (node, key) => node?.attrs.find((a) => a.local === key && !a.uri)?.value
+const children = (node, ns, name) =>
+  node?.children.filter((n) => ns.has(n.uri) && n.local === name) ?? []
+const child = (node, ns, name) => children(node, ns, name)[0]
+
+// Inspect discloses preset names but not their adjustment guides. Read the native
+// geometry too, so equal preset names cannot hide a changed silhouette.
+function maskGeometry(pkg, part, id) {
+  if (!pkg) return null
+  const matches = []
+  const visit = (node, conditional = false) => {
+    conditional ||= node.uri === MC || (P.has(node.uri) && node.local === 'grpSp')
+    if (P.has(node.uri) && node.local === 'pic') {
+      if (Number(attr(child(child(node, P, 'nvPicPr'), P, 'cNvPr'), 'id')) === id)
+        matches.push({ node, conditional })
+    } else for (const nested of node.children) visit(nested, conditional)
+  }
+  visit(pkg.partTree(part))
+  if (matches.length !== 1 || matches[0].conditional) return null
+  const properties = child(matches[0].node, P, 'spPr')
+  const presets = children(properties, A, 'prstGeom')
+  if (presets.length !== 1 || child(properties, A, 'custGeom')) return null
+  const preset = attr(presets[0], 'prst')
+  const lists = children(presets[0], A, 'avLst')
+  if (!preset || lists.length > 1 || presets[0].children.length !== lists.length) return null
+  const guides = lists[0]?.children ?? []
+  const names = new Set()
+  const adjustments = []
+  for (const guide of guides) {
+    const name = attr(guide, 'name'),
+      formula = attr(guide, 'fmla')
+    if (!A.has(guide.uri) || guide.local !== 'gd' || !name || !formula?.trim() || names.has(name))
+      return null
+    names.add(name)
+    adjustments.push([name, formula.trim().replace(/\s+/g, ' ')])
+  }
+  return { preset, signature: JSON.stringify([preset, adjustments]) }
+}
+
 const pictures = (inspect) =>
   (inspect?.slides ?? []).flatMap((slide) =>
     (slide.shapes ?? [])
@@ -33,6 +83,9 @@ export function buildImageGeometryReport({
   candidate = null,
 }) {
   const sourcePictures = pictures(sourceInspect)
+  const sourcePackage = sourcePictures.length && source?.path ? readPptxPackage(source.path) : null
+  const candidatePackage =
+    sourcePictures.length && candidate?.path ? readPptxPackage(candidate.path) : null
   const issues = [],
     results = []
   for (const { slide, shape } of sourcePictures) {
@@ -100,6 +153,22 @@ export function buildImageGeometryReport({
       )
     else if (masks[0] !== masks[1])
       add('picture-mask-changed', 'Source picture mask geometry changed.')
+    if (target) {
+      const beforeMask = maskGeometry(sourcePackage, slide.partName, shape.id)
+      const afterMask = maskGeometry(candidatePackage, slide.partName, shape.id)
+      if (
+        !beforeMask ||
+        !afterMask ||
+        beforeMask.preset !== masks[0] ||
+        afterMask.preset !== masks[1]
+      )
+        add(
+          'picture-mask-geometry-unverified',
+          'Unambiguous native preset geometry and adjustment guides are required; inspect preset names alone are insufficient.',
+        )
+      else if (beforeMask.signature !== afterMask.signature)
+        add('picture-mask-changed', 'Source picture preset or adjustment guides changed.')
+    }
     results.push({
       slideNumber: slide.index + 1,
       slidePart: slide.partName,
@@ -120,7 +189,12 @@ export function buildImageGeometryReport({
     source,
     candidate,
     coverage: {
-      checked: ['slide-local picture identity', 'uniform frame scaling', 'crop', 'preset mask'],
+      checked: [
+        'slide-local picture identity',
+        'uniform frame scaling',
+        'crop',
+        'native preset mask and adjustment guides',
+      ],
       unverified: [
         'media bytes and relationships',
         'color/effects and theme-bound recoloring',

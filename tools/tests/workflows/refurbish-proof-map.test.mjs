@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, renameSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileIdentity, runNodeStatus, skillPath, writeJson } from '../helpers/common.mjs'
@@ -38,6 +38,9 @@ const visionDiff = { schemaVersion: 'pptx-vision-diff/v1', status: 'success', ne
 const audit = { schemaVersion: 'pptx-refurbish-audit/v1', status: 'success', outcome: 'passed',
   summary: { errorCount: 0, warningCount: 0, baselineSlideCount: 1, targetSlideCount: 1, slideCountMatches: true }, issues: [] }
 if (args[0] === 'schema') {
+  const summary = JSON.parse(readFileSync(join(${JSON.stringify(runDir)}, 'refurbish-run-summary.json')))
+  if (!summary.phases.some(phase => phase.name === 'proof-map-snapshot' && phase.details?.sha256))
+    throw new Error('Proof map publication requirement must be durable before capability probing')
   print({ version: '9.9.9 (fake)', schemaVersion: 'cli-agent/v1', capabilities: {}, commands: { pptx: {
     subcommands: { inspect: {}, apply: {}, 'refurbish-skin': {}, 'chrome-detect': {}, 'vision-diff': {}, 'refurbish-audit': {}, preview: {}, diff: {} },
     patchSchema: {}, catalogs: { nativeDeckkits: { deckkits: [{ id: 'mckinsey-blue', readiness: 'production' }] } }
@@ -165,5 +168,71 @@ test('a supplied proof map cannot disappear or change before publication', () =>
     assert.equal(summary.error.phase, 'proof-map-binding')
     assert.equal(existsSync(f.output), false)
     assert.equal(existsSync(join(f.runDir, 'refurbish-compare-gate.json')), false)
+  }
+})
+
+test('independent replay retains proof requirements when both summary and map disappear', () => {
+  for (const route of ['native', 'fallback']) {
+    const f = fixture('002A12')
+    const summary = readRefurbishSummary(runNodeStatus([...f.args, '--route', route], 0))
+    renameSync(join(f.runDir, 'proof-objects.json'), join(f.runDir, 'proof-objects.json.retained'))
+    renameSync(
+      join(f.runDir, 'refurbish-run-summary.json'),
+      join(f.runDir, 'refurbish-run-summary.json.retained'),
+    )
+    const delivery = join(f.root, 'replayed.pptx')
+    const compareReportPath = join(f.runDir, 'refurbish-compare.json')
+    const reportBefore = readFileSync(compareReportPath, 'utf8')
+    for (const kind of ['refurbish', 'compare']) {
+      const regenerate = runNodeStatus(
+        [
+          skillPath('scripts/cli/review/compare.mjs'),
+          '--source',
+          summary.artifacts.sourceSnapshot,
+          '--candidate',
+          summary.artifacts.candidate,
+          '--run-dir',
+          f.runDir,
+          '--kind',
+          kind,
+          '--slide-count',
+          '1',
+          '--report',
+          compareReportPath,
+          '--output',
+          join(f.runDir, 'refurbish-compare.png'),
+          '--overwrite',
+          '--json',
+        ],
+        1,
+      )
+      assert.match(regenerate.stderr, /proof map.*missing/i)
+      assert.equal(readFileSync(compareReportPath, 'utf8'), reportBefore)
+      const result = runNodeStatus(
+        [
+          skillPath('scripts/cli/review/compare-gate.mjs'),
+          '--run-dir',
+          f.runDir,
+          '--final-pptx',
+          delivery,
+          '--final-pptx-source',
+          summary.artifacts.candidate,
+          '--kind',
+          kind,
+          '--compare',
+          join(f.runDir, 'refurbish-compare.png'),
+          '--report',
+          join(f.runDir, 'refurbish-compare.json'),
+          '--publish',
+          '--output',
+          join(f.runDir, `replay-${kind}-gate.json`),
+          '--json',
+        ],
+        2,
+      )
+      const gate = JSON.parse(result.stdout)
+      assert.match(gate.blockers.join('\n'), /proof map.*missing/i)
+      assert.equal(existsSync(delivery), false)
+    }
   }
 })

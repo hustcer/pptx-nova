@@ -130,6 +130,9 @@ The automatic mask check requires a disclosed preset name on both pictures. A `n
 missing preset cannot establish unchanged geometry: custom paths can differ while both presets
 are `null`. The gate fails these cases as unverified; retain separate source/candidate-bound
 geometry and visual evidence rather than recording an automatic preservation pass.
+The gate also reads native `prstGeom/avLst` from both PPTX files: equal preset names do not prove
+equal adjustment guides. Absent and empty adjustment lists are equivalent; changed guides fail.
+Other formula equivalences are not evaluated. Missing or ambiguous native geometry remains unverified.
 
 ## Review full-size composition, not only thumbnails
 
@@ -183,6 +186,14 @@ For a standard Refurbish runner, prepare the map outside the fresh run directory
 archives it as `proof-objects.json` before probing xdoc. Both native and fallback routes retain
 the publication check; a missing or changed archive blocks publication. Do not prepopulate the
 fresh run directory with the map.
+The runner persists the snapshot requirement in `refurbish-run-summary.json` before probing.
+Refurbish comparisons also capture it before rendering in the single/multipart compare report's
+`pptxNovaCompare.proofMapBinding`. Independent publication checks both records; losing the summary
+and map together cannot erase the report's requirement. Comparison regeneration, including cache
+hits and `--overwrite`, retains an existing required binding and checks it before rendering; changing
+the output kind does not disable that contract. Retain all three artifacts. Legacy reports
+without the embedded binding still consume the runner snapshot when available; absence of every
+historical requirement record cannot prove that no protected objects were declared.
 
 ```json
 {
@@ -205,6 +216,8 @@ node <skill-root>/scripts/cli/review/proof-visibility-gate.mjs \
 occlusion or playback certification. Other/custom geometry, effects, background-fill overrides,
 undisclosed outline thickness, inherited/theme/gradient paint, groups, rotations and unresolved
 backgrounds require review. Ambiguous `AlternateContent` identities remain unresolved.
+Even a unique shape/table inside a single `Choice` or `Fallback` requires branch review on either
+the source or candidate; ordinary bounds/paint cannot establish consumer branch selection.
 
 Keep unsupported proofs in a separate manual checklist with identities/branch, roles, concrete
 automatic-check exclusions, candidate hash and reviewed PNG hashes. Automatic/manual lists together

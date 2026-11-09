@@ -13,6 +13,7 @@ import {
 import { createHash } from 'node:crypto'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { buildProofVisibilityReport } from '../../lib/review/proof-visibility.mjs'
+import { readProofMapSnapshot, validProofMapBinding } from '../../lib/review/proof-map-binding.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-compare-gate/v1'
 
@@ -21,7 +22,8 @@ const usage = `Usage:
 
 Validate and optionally publish one SHA-256-bound delivery bundle containing
 the final PPTX and its before/after compare PNG sibling(s).
-Refurbish runs with proof-objects.json recheck its native proofs before publication.
+Refurbish runs retain proof-map requirements in compare reports and legacy run summaries:
+missing/changed archives block publication; present maps recheck native proofs.
 
 Options:
   --run-dir <dir>          Required current pptx-nova run directory.
@@ -888,7 +890,35 @@ function buildReport(args) {
   let published = []
   let proofVisibility = null
   const proofMapPath = join(args.runDir, 'proof-objects.json')
-  if (args.kind === 'refurbish' && existsSync(proofMapPath)) {
+  const embedded = compareReport?.pptxNovaCompare?.proofMapBinding
+  const checkProofs =
+    args.kind === 'refurbish' ||
+    embedded !== undefined ||
+    existsSync(join(args.runDir, 'refurbish-run-summary.json'))
+  if (checkProofs) {
+    try {
+      const snapshot = readProofMapSnapshot(args.runDir)
+      if (embedded !== undefined && !validProofMapBinding(embedded))
+        throw new Error('Proof map binding in the compare report is invalid')
+      if (
+        snapshot &&
+        embedded &&
+        (snapshot.required !== embedded.required || snapshot.sha256 !== embedded.sha256)
+      )
+        throw new Error('Proof map binding in the compare report does not match the run snapshot')
+      const binding = embedded ?? snapshot
+      if (binding?.required) {
+        const state = fileState(proofMapPath)
+        if (!state.exists || !state.isFile)
+          throw new Error('Protected proof map archive is missing or is not a file')
+        if (sha256(proofMapPath) !== binding.sha256)
+          throw new Error('Protected proof map archive does not match its snapshot SHA-256')
+      }
+    } catch (error) {
+      blockers.push(`protected proof map binding failed: ${error.message}`)
+    }
+  }
+  if (checkProofs && existsSync(proofMapPath)) {
     try {
       proofVisibility = buildProofVisibilityReport({
         source: sourceIdentity.path,

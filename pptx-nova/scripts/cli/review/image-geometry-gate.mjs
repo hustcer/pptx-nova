@@ -18,7 +18,8 @@ Options:
   --help            Show this help.
 
 Freshly inspects both inputs and binds their file hashes. Checks original slide-local
-pictures for uniform scaling, unchanged crop and mask; allows movement. Does not prove
+pictures for uniform scaling, unchanged crop and native preset/adjustment geometry;
+allows movement. Preset names alone are insufficient. Does not prove
 media-byte, color/effect, grouped-transform, or PowerPoint visual preservation.
 Custom or undisclosed masks fail as unverified; equal null presets do not prove unchanged geometry.
 `

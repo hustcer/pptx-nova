@@ -2263,6 +2263,8 @@ function runRefurbish(inputArgs) {
         artifact: relativeArtifact(args.runDir, artifacts.proofMap),
         sha256: sha256(artifacts.proofMap),
       })
+      // Independent compare publication must retain this requirement even after interruption.
+      writeJson(artifacts.summary, summary)
     }
     if (args.authoringPatch) {
       const patch = validateAuthoringPatch(readJson(args.authoringPatch, 'authoring patch'), {

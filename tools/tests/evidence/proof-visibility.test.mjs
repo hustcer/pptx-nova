@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { mkdtempSync, writeFileSync, rmSync, readFileSync, existsSync, readdirSync } from 'node:fs'
+import {
+  mkdtempSync,
+  writeFileSync,
+  rmSync,
+  readFileSync,
+  existsSync,
+  readdirSync,
+  renameSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { createHash } from 'node:crypto'
@@ -22,6 +30,8 @@ function fixture(t, paint, options) {
 const solid = (color, alpha = '') =>
   `<a:solidFill><a:srgbClr val="${color}">${alpha}</a:srgbClr></a:solidFill>`
 const none = '<a:ln><a:noFill/></a:ln>'
+const choice = (object) =>
+  `<mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:unsupported="urn:unsupported-proof"><mc:Choice Requires="unsupported">${object}</mc:Choice><mc:Fallback/></mc:AlternateContent>`
 function report(source, candidate, overrides = {}) {
   return buildProofVisibilityReport({
     source,
@@ -130,6 +140,144 @@ test('unresolved inherited background requires review instead of an invented whi
   const candidate = fixture(t, solid('002A12') + none, { background: false })
   assert.equal(report(source, candidate).status, 'review-required')
 })
+
+test('single AlternateContent objects require branch review on both source and candidate', (t) => {
+  for (const kind of ['shape', 'table']) {
+    const options = kind === 'table' ? { tableGridWidth: 500000 } : {}
+    const direct = fixture(t, solid('0000FF') + none, options)
+    for (const wrapObject of [
+      choice,
+      (object) => choice('').replace('<mc:Fallback/>', `<mc:Fallback>${object}</mc:Fallback>`),
+    ]) {
+      const conditional = fixture(t, solid('0000FF') + none, { ...options, wrapObject })
+      for (const [source, candidate] of [
+        [direct, conditional],
+        [conditional, direct],
+        [conditional, conditional],
+      ]) {
+        const r = report(source, candidate, {
+          proofObjects: [{ slideNumber: 1, shapeId: 7, kind, role: 'protected-proof' }],
+        })
+        assert.equal(r.status, 'review-required')
+        assert.ok(r.results[0].issues.some((issue) => issue.code === 'proof-branch-unverified'))
+      }
+    }
+  }
+})
+
+test('independent publication rejects missing, changed or inconsistent proof bindings', (t) => {
+  for (const change of [
+    'missing',
+    'changed',
+    'snapshot-missing',
+    'binding-invalid',
+    'binding-conflict',
+  ]) {
+    const source = fixture(t, solid('0000FF') + none)
+    const candidate = fixture(t, solid('002A12') + none)
+    const runDir = dirname(candidate)
+    const delivery = join(runDir, 'delivery.pptx')
+    const compare = join(runDir, 'refurbish-compare.png')
+    const map = join(runDir, 'proof-objects.json')
+    writeFileSync(compare, 'compare png')
+    writeJson(
+      join(runDir, 'refurbish-compare.json'),
+      contactDiffReport({ compare, sourcePptx: source, finalPptx: candidate }),
+    )
+    const proofMap = {
+      sourceSha256: hash(source),
+      proofObjects: [{ slideNumber: 1, shapeId: 7, role: 'milestone-node' }],
+    }
+    writeJson(map, proofMap)
+    writeJson(join(runDir, 'refurbish-run-summary.json'), {
+      schemaVersion: 'pptx-nova-refurbish-run/v1',
+      handoff: { '--proof-map': map },
+      phases: [{ name: 'proof-map-snapshot', status: 'passed', details: { sha256: hash(map) } }],
+    })
+    if (change === 'missing') renameSync(map, map + '.retained')
+    else if (change === 'changed')
+      writeJson(map, {
+        ...proofMap,
+        proofObjects: [{ ...proofMap.proofObjects[0], role: 'changed' }],
+      })
+    else if (change === 'snapshot-missing')
+      writeJson(join(runDir, 'refurbish-run-summary.json'), {
+        schemaVersion: 'pptx-nova-refurbish-run/v1',
+        handoff: { '--proof-map': map },
+        phases: [],
+      })
+    else {
+      const reportPath = join(runDir, 'refurbish-compare.json')
+      const compareReport = JSON.parse(readFileSync(reportPath))
+      compareReport.pptxNovaCompare = {
+        proofMapBinding: { required: change === 'binding-invalid', sha256: null },
+      }
+      writeJson(reportPath, compareReport)
+    }
+    for (const kind of ['refurbish', 'compare']) {
+      const result = spawnSync(
+        process.execPath,
+        [
+          skillPath('scripts/cli/review/compare-gate.mjs'),
+          '--run-dir',
+          runDir,
+          '--final-pptx',
+          delivery,
+          '--final-pptx-source',
+          candidate,
+          '--kind',
+          kind,
+          '--compare',
+          compare,
+          '--report',
+          join(runDir, 'refurbish-compare.json'),
+          '--output',
+          join(runDir, `${kind}-gate.json`),
+          '--publish',
+          '--json',
+        ],
+        { encoding: 'utf8' },
+      )
+      assert.equal(result.status, 2, result.stderr || result.stdout)
+      assert.match(
+        JSON.parse(result.stdout).blockers.join('\n'),
+        /proof map.*(missing|match|changed|invalid)/i,
+      )
+      assert.equal(existsSync(delivery), false)
+      assert.equal(
+        readdirSync(runDir).some((file) => file.startsWith('delivery-')),
+        false,
+      )
+    }
+    if (change === 'missing' || change === 'changed') {
+      const before = readFileSync(join(runDir, 'refurbish-compare.json'), 'utf8')
+      const result = spawnSync(
+        process.execPath,
+        [
+          skillPath('scripts/cli/review/compare.mjs'),
+          '--source',
+          source,
+          '--candidate',
+          candidate,
+          '--run-dir',
+          runDir,
+          '--kind',
+          'compare',
+          '--report',
+          join(runDir, 'refurbish-compare.json'),
+          '--overwrite',
+          '--xdoc-bin',
+          join(runDir, 'must-not-run-xdoc'),
+          '--json',
+        ],
+        { encoding: 'utf8' },
+      )
+      assert.equal(result.status, 1)
+      assert.match(result.stderr, /proof map.*(missing|match)/i)
+      assert.equal(readFileSync(join(runDir, 'refurbish-compare.json'), 'utf8'), before)
+    }
+  }
+})
 test('stale, empty and unresolved proof declarations cannot produce a pass', (t) => {
   const source = fixture(t, solid('0000FF') + none),
     candidate = fixture(t, solid('002A12') + none)
@@ -200,6 +348,11 @@ test('publication recomputes current proof geometry and paint instead of trustin
     {
       paint: solid('002A12') + none,
       options: { geometry: '<a:prstGeom prst="line"/>' },
+      expected: 'review-required',
+    },
+    {
+      paint: solid('002A12') + none,
+      options: { wrapObject: choice },
       expected: 'review-required',
     },
   ]) {

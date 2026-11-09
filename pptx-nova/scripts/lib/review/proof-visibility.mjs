@@ -10,6 +10,7 @@ const A = new Set([
   'http://schemas.openxmlformats.org/drawingml/2006/main',
   'http://purl.oclc.org/ooxml/drawingml/main',
 ])
+const MC = 'http://schemas.openxmlformats.org/markup-compatibility/2006'
 const attr = (n, key) => n?.attrs.find((a) => a.local === key && !a.uri)?.value
 const children = (n, ns, name) => n?.children.filter((x) => ns.has(x.uri) && x.local === name) ?? []
 const child = (n, ns, name) => children(n, ns, name)[0]
@@ -27,7 +28,7 @@ function descendant(root, ns, name) {
   }
   return null
 }
-function shapes(root, grouped = false, kind = 'shape') {
+function shapes(root, grouped = false, kind = 'shape', branches = []) {
   return root.children.flatMap((n) =>
     P.has(n.uri) &&
     ((kind === 'shape' && n.local === 'sp') ||
@@ -36,6 +37,7 @@ function shapes(root, grouped = false, kind = 'shape') {
           {
             node: n,
             grouped,
+            branches,
             id: Number(
               attr(
                 child(child(n, P, kind === 'table' ? 'nvGraphicFramePr' : 'nvSpPr'), P, 'cNvPr'),
@@ -44,7 +46,14 @@ function shapes(root, grouped = false, kind = 'shape') {
             ),
           },
         ]
-      : shapes(n, grouped || (P.has(n.uri) && n.local === 'grpSp'), kind),
+      : shapes(
+          n,
+          grouped || (P.has(n.uri) && n.local === 'grpSp'),
+          kind,
+          n.uri === MC && ['AlternateContent', 'Choice', 'Fallback'].includes(n.local)
+            ? [...branches, { kind: n.local, requires: attr(n, 'Requires') ?? null }]
+            : branches,
+        ),
   )
 }
 function color(fill) {
@@ -206,6 +215,14 @@ export function buildProofVisibilityReport({ source, candidate, proofMap }) {
     if (hidden === true) fail('proof-hidden', 'Protected proof is explicitly hidden.')
     else if (hidden === null)
       review('proof-visibility-unresolved', 'Unrecognized native visibility flag requires review.')
+    if (before[0].branches.length || shape.branches.length) {
+      result.branches = { source: before[0].branches, candidate: shape.branches }
+      review(
+        'proof-branch-unverified',
+        'Source or candidate belongs to an AlternateContent branch; consumer branch selection requires separate evidence.',
+      )
+      continue
+    }
     if (shape.grouped) {
       review(
         'proof-group-transform-unverified',

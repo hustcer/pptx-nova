@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+  renameSync,
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { test } from 'node:test'
@@ -58,6 +66,108 @@ test('refurbish publication rejects a stale protected-proof map before writing t
   )
   assert.equal(result.status, 2, result.stdout)
   assert.match(JSON.parse(result.stdout).blockers.join('\n'), /proof/i)
+  assert.equal(existsSync(delivery), false)
+})
+
+test('multipart compare reports retain proof-map binding without the runner summary', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'nova-multipart-proof-binding-'))
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  const runDir = join(root, 'run'),
+    source = join(root, 'source.pptx'),
+    candidate = join(root, 'candidate.pptx')
+  mkdirSync(runDir)
+  writeFileSync(source, 'source fixture bytes')
+  writeFileSync(candidate, 'candidate fixture bytes')
+  const map = join(runDir, 'proof-objects.json')
+  writeJson(map, {
+    sourceSha256: fileIdentity(source).sha256,
+    proofObjects: [{ slideNumber: 1, shapeId: 7, role: 'proof' }],
+  })
+  const expected = fileIdentity(map).sha256
+  runNode([
+    skillPath('scripts/cli/review/compare.mjs'),
+    '--source',
+    source,
+    '--candidate',
+    candidate,
+    '--run-dir',
+    runDir,
+    '--kind',
+    'refurbish',
+    '--slide-count',
+    '48',
+    '--xdoc-bin',
+    writeMultipartContactDiffXdoc(root),
+    '--json',
+  ])
+  const manifest = JSON.parse(readFileSync(join(runDir, 'refurbish-compare.json')))
+  assert.deepEqual(manifest.pptxNovaCompare.proofMapBinding, { required: true, sha256: expected })
+  runNode([
+    skillPath('scripts/cli/review/compare.mjs'),
+    '--source',
+    source,
+    '--candidate',
+    candidate,
+    '--run-dir',
+    runDir,
+    '--kind',
+    'refurbish',
+    '--slide-count',
+    '48',
+    '--xdoc-bin',
+    join(root, 'fake-xdoc.mjs'),
+    '--overwrite',
+    '--json',
+  ])
+  const cached = JSON.parse(readFileSync(join(runDir, 'refurbish-compare.json')))
+  assert.ok(cached.parts.every((part) => part.cache.status === 'hit'))
+  assert.deepEqual(cached.pptxNovaCompare.proofMapBinding, manifest.pptxNovaCompare.proofMapBinding)
+  renameSync(map, map + '.retained')
+  const reportBefore = readFileSync(join(runDir, 'refurbish-compare.json'), 'utf8')
+  for (const kind of ['refurbish', 'compare']) {
+    const blocked = runNodeStatus(
+      [
+        skillPath('scripts/cli/review/compare.mjs'),
+        '--source',
+        source,
+        '--candidate',
+        candidate,
+        '--run-dir',
+        runDir,
+        '--kind',
+        kind,
+        '--slide-count',
+        '48',
+        '--report',
+        join(runDir, 'refurbish-compare.json'),
+        '--xdoc-bin',
+        join(root, 'fake-xdoc.mjs'),
+        '--overwrite',
+        '--json',
+      ],
+      1,
+    )
+    assert.match(blocked.stderr, /proof map.*missing/i)
+    assert.equal(readFileSync(join(runDir, 'refurbish-compare.json'), 'utf8'), reportBefore)
+  }
+  const delivery = join(root, 'delivery.pptx')
+  const result = runNodeStatus(
+    [
+      skillPath('scripts/cli/review/compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      delivery,
+      '--final-pptx-source',
+      candidate,
+      '--kind',
+      'refurbish',
+      '--publish',
+      '--json',
+    ],
+    2,
+  )
+  assert.match(JSON.parse(result.stdout).blockers.join('\n'), /proof map.*missing/i)
   assert.equal(existsSync(delivery), false)
 })
 

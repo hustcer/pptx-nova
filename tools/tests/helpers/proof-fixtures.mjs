@@ -18,6 +18,7 @@ export function proofPptx(
     shapeAttrs = '',
     tableGridWidth,
     tableRowHeight = 500000,
+    wrapObject = (object) => object,
   } = {},
 ) {
   const nativeObject =
@@ -44,7 +45,7 @@ export function proofPptx(
     ],
     [
       'ppt/slides/proof.xml',
-      `<p:sld xmlns:p="${P}" xmlns:a="${A}"><p:cSld>${background ? `<p:bg><p:bgPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill>${backgroundEffects}</p:bgPr></p:bg>` : ''}<p:spTree>${nativeObject}</p:spTree></p:cSld></p:sld>`,
+      `<p:sld xmlns:p="${P}" xmlns:a="${A}"><p:cSld>${background ? `<p:bg><p:bgPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill>${backgroundEffects}</p:bgPr></p:bg>` : ''}<p:spTree>${wrapObject(nativeObject)}</p:spTree></p:cSld></p:sld>`,
     ],
   ])
 }

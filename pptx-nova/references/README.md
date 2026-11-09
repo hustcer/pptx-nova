@@ -7,6 +7,8 @@ links are relative to the containing document. Explicit `references/...` paths i
 
 The [common workflow](common-workflow.md) owns shared run setup, source ingestion, filesystem
 rules, evidence retention, and delivery conventions.
+The [object integrity reference](review/object-integrity.md) owns shared visible-object authoring
+and preservation rules; creation, editing and specialized workflows consume the relevant sections.
 
 ## Create
 
@@ -58,6 +60,7 @@ Existing-deck changes, template following, refurbishment and guarded patch opera
 
 ## Review
 
+- [Object integrity](review/object-integrity.md) — Cross-workflow evidence styles, proof visibility, native table fitting, chart semantics, heading/image fit and conditional source-bound guards
 - [Export, comparison and checks](review/export-and-check.md) — Export, extract, checks, semantic diff, and canonical unified visual evidence
 - [Fidelity diagnosis](review/fidelity-diagnosis.md) — Distinguish authored semantics, renderer behavior and environment differences before repairing a deck
 - [Visual QA and asset slots](review/visual-qa-and-asset-slots.md) — Image slots, AI image prompt guard, P0/P1 QA

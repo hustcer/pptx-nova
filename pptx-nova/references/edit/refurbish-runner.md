@@ -9,9 +9,8 @@ the execution boundary: it chooses a route, validates fidelity, binds publicatio
 - Preserve slide ownership, visible content, notes, links, and editable semantics unless explicitly approved.
 - Apply the requested DeckKit visibly. A light chrome-only change is not a completed refurbishment.
 - Never preserve content by inserting source-slide screenshots or opaque page overlays.
-- Preserve the visible existence of diagram nodes, milestone markers, shape specimens and animation
-  targets. For native shape proofs, follow the design-led source-bound proof checklist and visibility
-  guard; unchanged object counts or labels cannot excuse disappearing silhouettes.
+- Preserve visible proof objects under [shared object integrity](../review/object-integrity.md);
+  unchanged object counts or labels cannot excuse disappearing silhouettes.
 - Let the compare gate publish the final PPTX. Do not copy or overwrite it afterward.
 
 ## Target design before execution
@@ -66,10 +65,9 @@ Progress is archived to `<run-dir>/progress.jsonl` by default; `--progress-file`
 
 ## Progressive failure routing
 
-Read `refurbish-plan.json.requiredReferences[]` after route selection. Those references are the only
-additional workflow documents required for the current route:
+Follow `refurbish-plan.json.requiredReferences[]` for route-specific reading beyond shared object integrity:
 
-- Native route with production/default readiness normally requires no deeper reference.
+- Native route with production/default readiness normally requires no deeper route-specific reference.
 - Fallback loads the named Refurbish section from `../create/reference-create.md`.
 - A readiness exception or missing DeckKit loads the named selection section from `../create/deckkit-mode.md`.
 - Load `inspect-and-edit.md` only for a page-local repair with ambiguous selectors.

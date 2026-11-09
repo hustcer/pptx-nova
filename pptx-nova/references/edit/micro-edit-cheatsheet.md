@@ -6,6 +6,9 @@ notes, footer/date/page-number text, document metadata, a small color/font tweak
 or a single image replacement.
 
 The goal is speed without weakening selector or edit-contract safety.
+For visible edits, use the relevant [object integrity](../review/object-integrity.md) sections on
+the changed objects. Notes/metadata-only work needs neither that visual review nor source-bound
+shape/image guards; keep this path scoped.
 
 ## Scope
 

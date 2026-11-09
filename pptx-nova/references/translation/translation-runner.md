@@ -1,8 +1,9 @@
 # Translation Finalization Runner
 
-Use this reference when a translated candidate is already stable and must pass the final machine
-gates, full-deck visual comparison, publication binding, and manual-review handoff. This runner does
-not scan source text, create translations, repair target segments, or mark human review complete.
+Use this reference to finalize a stable translated candidate: machine gates, full-deck comparison,
+publication binding and manual-review handoff. It does not translate, repair or certify human review.
+Apply [object integrity](../review/object-integrity.md) within the translation layout/style contract;
+review affected objects without authorizing redesign or unrelated source-object guards.
 
 ## Inputs
 
@@ -31,9 +32,8 @@ content-deduplicated translation memory, resumes bound review classification, an
 the planner artifacts. When supported by the current xdoc contract, preparation also consumes
 high-confidence `i18n-anchor-draft` merge material and reruns `i18n-plan`; it never treats the draft
 as apply authorization. This finalizer begins only after that preparation result is `prepared`.
-Preparation keeps review partitions count-only by default; use
-`--expand-review <languageUncertain|shared|embeddedWorkbook|other>` to persist
-one bound partition when its individual units are actually needed.
+Preparation keeps partitions count-only; `--expand-review <languageUncertain|shared|embeddedWorkbook|other>`
+persists one bound partition when its individual units are needed.
 Retain the planner's disclosed `textLayout: "preserve-geometry"`; see `translation-mode.md` for pending reflow, fitting and older runtimes. Keep all gates; avoid a default geometry-restoration pass.
 Use `artifacts.units`: the inventory and SHA-256 recorded in `summary.units` and used by planning,
 including when `--apply` reuses approved classification. With older preparation scripts, use

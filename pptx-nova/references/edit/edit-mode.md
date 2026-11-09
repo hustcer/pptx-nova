@@ -5,6 +5,8 @@ add/remove slides, update tables/charts, replace images, add notes, rebrand an
 existing deck, or copy slides from another deck.
 
 Editing is selector-sensitive. The main risk is changing the wrong object.
+For visible changes, apply [shared object integrity](../review/object-integrity.md) to affected
+objects within the Edit Contract; do not redesign preserved content merely to satisfy a new style.
 
 ## Load Order
 

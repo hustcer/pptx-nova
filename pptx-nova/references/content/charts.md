@@ -4,6 +4,10 @@
 `xdoc schema --mode ops --ops add-chart` 当作当前可写契约；操作名存在不等于内置 PDF/Viewer
 拥有 PowerPoint 渲染等价性，尤其是 3D 和 ChartEx。
 
+新建与编辑统一遵循[图表继承和可见语义规则](../review/object-integrity.md#check-chart-inheritance-and-visible-semantics)：
+系列调色、标题字体和点级标签格式都可能影响含义，不能只比较数据值。本文件继续负责具体
+chart 契约、语义验证和渲染边界。
+
 ## 专项语义验证
 
 chart 页的目标是原生、可编辑、语义正确，不做 SVG 像素坐标校准。写 chart 前先在

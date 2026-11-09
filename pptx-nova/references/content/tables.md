@@ -3,6 +3,10 @@
 xdoc 的表格支持完整的对象模型：创建、改单元格、改样式、改宽高、合并、边框、
 导入 CSV/JSON、静态公式。
 
+新建、编辑、翻新和数据填充统一遵循
+[原生表格内部适配规则](../review/object-integrity.md#fit-native-tables-internally-not-only-their-frames)：
+外框、列宽、行高、边距和字号需要一起检查；操作字段与专项语义验证以本文件为准。
+
 ## 专项语义验证
 
 在 Studio、data-driven、结构编辑、模板跟随或手工 refurbish 路线中，只要 patch 含

@@ -33,6 +33,12 @@ If a task spans multiple types, read the entry reference for each relevant type.
 formulas, raw XML, complex brand styling, or other specialized content appears, then read the matching
 specialized reference.
 
+For any workflow that creates or changes visible content, styling or geometry, read the scope and
+relevant object sections in `references/review/object-integrity.md`. This includes Create, Edit,
+Refurbish, Translation, template/data filling and brand work;
+it does not expand edit scope or require source-bound guards for new decks. Skip this authoring
+reference for notes/metadata-only work, licensing and read-only export/checks.
+
 References are grouped by create, edit, translation, runtime, review, content, and policies;
 see [the reference index](references/README.md) for ownership. Reading paths in references are
 relative to the containing document; explicit `references/...` paths start at the skill root.
@@ -251,7 +257,7 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
   editable objects, and never rasterize, downgrade content, or silently switch DeckKits. A named kit
   requires its actual showcase identity and composition; the runner's design-led route owns this review.
   Diagram nodes, milestone markers and shape/animation specimens must remain visibly distinguishable.
-  Follow the design-led proof-visibility checklist; source-object counts and text equality alone do not
+  Follow the shared object-integrity proof checklist; source-object counts and text equality alone do not
   prove their preservation.
 - **Edit / Micro Edit / Animation**: Inspect before patching. Micro edits use the short contract path;
   animation changes stay inside the capability-declared safe subset.
@@ -316,7 +322,7 @@ These rules apply to modifying existing PPTX files:
 - When copying source slides or filling templates, explicitly fill or delete empty structural placeholders such as title/body/dt/sldNum/ftr. Do not leave empty placeholders in PowerPoint edit state just because they are invisible in PNG output. If an actionable finding is intentionally required by the deck's semantics, preserve it only through a source-hash-bound `pptx-nova-review-policy/v1` rule using the exact `reviewIdentity.sha256` from `layout-final.json`; never use a global boolean exception.
 - Native `pptx-slide-copy/v1` must disclose `preflight.strategy.slideSize: "require-match"`; mismatched donor/target dimensions are a core blocker, not a renderer concern. Retain the bundled copy-size gate as independent file-bound evidence, and stop if either native preflight or the gate reports a mismatch. Do not scale implicitly or move this policy into Viewer/PDF rendering.
 - Identity assets such as logos, client marks, product screenshots, headshots, app icons, and third-party brand graphics must come from user-provided files, source-deck assets whose reuse is allowed, official verifiable sources, or registered authorized sources. When this cannot be confirmed, use text/native shapes instead of generating pseudo-official assets.
-- Refurbishment preserves source pictures by default: move or scale uniformly, retaining crop, mask and visible color/effects. A target DeckKit does not authorize stretching, recropping or theme-driven photo recoloring. Follow the image-geometry gate and full-size visual checks in `references/edit/refurbish-design-led.md`; unchanged media bytes alone do not prove unchanged appearance.
+- Refurbishment preserves source pictures by default: move or scale uniformly, retaining crop, mask and visible color/effects. A target DeckKit does not authorize stretching, recropping or theme-driven photo recoloring. Follow the shared source-picture policy, image-geometry gate and full-size checks in `references/review/object-integrity.md`; unchanged media bytes alone do not prove unchanged appearance.
 - When using external, reused, generated, or formula assets, `assets_manifest.json` must record `status`, `source.kind`, `licenseRisk`, and PPTX usage slots. `missing` / `needs-user` / `forbidden` blocks delivery.
 - If the user asks for in-place modification, still complete validation in the run directory first, then write back only according to the user's explicit intent.
 - Preserve SmartArt, macros, complex animations, and unsupported objects by default. Edit animations only inside `inspect.animations[].editable` or the creation-safe subset explicitly supported by the current schema. Explain the boundary when they cannot be edited.

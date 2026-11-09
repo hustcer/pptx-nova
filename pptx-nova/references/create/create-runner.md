@@ -3,6 +3,8 @@
 Use this reference for the standard DeckKit-based new-deck workflow. It contains the shortest safe
 path from prepared content to a machine-validated candidate. Load deeper creation references only for
 the conditions listed below.
+Apply [shared object integrity](../review/object-integrity.md) to the authored objects; source-bound
+preservation guards apply only when the task actually retains source objects, not to a fresh deck.
 
 ## Inputs
 

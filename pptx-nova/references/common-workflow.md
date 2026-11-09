@@ -1,5 +1,8 @@
 # Common Workflow
 
+For visible authoring/changes, use the relevant [object integrity](review/object-integrity.md)
+sections across workflows, within the task's authorized scope.
+
 Read this file before any task that writes, modifies, exports, or validates a
 PPTX. It contains the shared execution contract; mode-specific files add only
 task details.

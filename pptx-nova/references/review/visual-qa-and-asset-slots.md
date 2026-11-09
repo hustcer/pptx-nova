@@ -3,6 +3,9 @@
 本文件把 guizang 可借鉴的视觉验收经验转成 pptx-nova 可执行规则：PPTX 仍由 DeckKit / xdoc
 原生 shape 生成，图片只作为素材进入明确槽位，不生成整页 slide chrome。
 
+新建和各种编辑流程共同使用 [object integrity](object-integrity.md) 的对象规则，再按本文件
+检查 P0/P1 与素材槽位。证据形状、语义样式及源图片保真不应按普通装饰处理。
+
 ## P0 必修项
 
 交付前任何 P0 都必须清零：

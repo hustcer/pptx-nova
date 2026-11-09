@@ -19,6 +19,48 @@ import {
   contactDiffReport,
 } from '../helpers/compare-fixtures.mjs'
 
+test('refurbish publication rejects a stale protected-proof map before writing the delivery', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-proof-publication-'))
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  const runDir = join(root, 'run'),
+    source = join(root, 'source.pptx'),
+    candidate = join(root, 'candidate.pptx'),
+    delivery = join(root, 'delivery.pptx')
+  mkdirSync(runDir)
+  writeFileSync(source, 'source bytes')
+  writeFileSync(candidate, 'candidate bytes')
+  const compare = join(runDir, 'refurbish-compare.png')
+  writeFileSync(compare, 'compare png')
+  writeJson(
+    join(runDir, 'refurbish-compare.json'),
+    contactDiffReport({ compare, sourcePptx: source, finalPptx: candidate }),
+  )
+  writeJson(join(runDir, 'proof-objects.json'), {
+    sourceSha256: '0'.repeat(64),
+    proofObjects: [{ slideNumber: 1, shapeId: 7, role: 'milestone-node' }],
+  })
+  const result = spawnSync(
+    process.execPath,
+    [
+      skillPath('scripts/cli/review/compare-gate.mjs'),
+      '--run-dir',
+      runDir,
+      '--final-pptx',
+      delivery,
+      '--final-pptx-source',
+      candidate,
+      '--kind',
+      'refurbish',
+      '--publish',
+      '--json',
+    ],
+    { cwd: repoRoot, encoding: 'utf8' },
+  )
+  assert.equal(result.status, 2, result.stdout)
+  assert.match(JSON.parse(result.stdout).blockers.join('\n'), /proof/i)
+  assert.equal(existsSync(delivery), false)
+})
+
 test('compare gate publishes every multipart sibling and rejects duplicate coverage', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-multipart-gate-'))
   const source = join(root, 'source.pptx')

@@ -12,6 +12,7 @@ import {
 } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { basename, dirname, extname, join, resolve } from 'node:path'
+import { buildProofVisibilityReport } from '../../lib/review/proof-visibility.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-compare-gate/v1'
 
@@ -20,6 +21,7 @@ const usage = `Usage:
 
 Validate and optionally publish one SHA-256-bound delivery bundle containing
 the final PPTX and its before/after compare PNG sibling(s).
+Refurbish runs with proof-objects.json recheck its native proofs before publication.
 
 Options:
   --run-dir <dir>          Required current pptx-nova run directory.
@@ -884,6 +886,23 @@ function buildReport(args) {
   }
 
   let published = []
+  let proofVisibility = null
+  const proofMapPath = join(args.runDir, 'proof-objects.json')
+  if (args.kind === 'refurbish' && existsSync(proofMapPath)) {
+    try {
+      proofVisibility = buildProofVisibilityReport({
+        source: sourceIdentity.path,
+        candidate: candidateIdentity.path,
+        proofMap: readJson(proofMapPath),
+      })
+      if (proofVisibility.status !== 'pass')
+        blockers.push(
+          `protected proof visibility requires repair or review: ${proofVisibility.status}`,
+        )
+    } catch (error) {
+      blockers.push(`protected proof visibility could not be verified: ${error.message}`)
+    }
+  }
   if (args.publish && blockers.length === 0) {
     try {
       const publishResult = publishBundle(publishItems, args.overwrite)
@@ -977,6 +996,7 @@ function buildReport(args) {
     status,
     mode: args.publish ? 'publish-and-bind' : 'check-binding',
     kind: args.kind,
+    proofVisibility,
     compareStem: args.compareStem,
     runDir: args.runDir,
     finalPptx: finalState,

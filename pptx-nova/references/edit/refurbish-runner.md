@@ -9,6 +9,9 @@ the execution boundary: it chooses a route, validates fidelity, binds publicatio
 - Preserve slide ownership, visible content, notes, links, and editable semantics unless explicitly approved.
 - Apply the requested DeckKit visibly. A light chrome-only change is not a completed refurbishment.
 - Never preserve content by inserting source-slide screenshots or opaque page overlays.
+- Preserve the visible existence of diagram nodes, milestone markers, shape specimens and animation
+  targets. For native shape proofs, follow the design-led source-bound proof checklist and visibility
+  guard; unchanged object counts or labels cannot excuse disappearing silhouettes.
 - Let the compare gate publish the final PPTX. Do not copy or overwrite it afterward.
 
 ## Target design before execution

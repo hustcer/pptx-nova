@@ -250,6 +250,9 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
 - **Refurbish**: Preserve the source as read-only content truth, apply the selected DeckKit visibly to
   editable objects, and never rasterize, downgrade content, or silently switch DeckKits. A named kit
   requires its actual showcase identity and composition; the runner's design-led route owns this review.
+  Diagram nodes, milestone markers and shape/animation specimens must remain visibly distinguishable.
+  Follow the design-led proof-visibility checklist; source-object counts and text equality alone do not
+  prove their preservation.
 - **Edit / Micro Edit / Animation**: Inspect before patching. Micro edits use the short contract path;
   animation changes stay inside the capability-declared safe subset.
   Use reported part identities and current inspect order for slide/layout/master selectors;

@@ -297,6 +297,17 @@ The public release audit checks this layout and local module imports.
   visual evidence and reviewed slide counts are present, and leaves actual
   visual judgment to the human or agent reviewer.
 
+- `cli/review/proof-visibility-gate.mjs` - verify source-hash-bound native proof
+  identities, direct bounds and fill/outline contrast for unadjusted rect, roundRect
+  and ellipse shapes against the actual slide background. A nonempty run-local
+  `proof-objects.json` declares `slideNumber`,
+  `shapeId`, `role` and optional `kind: "table"` for native frame/grid/row consistency.
+  Hidden/invisible retained objects fail; other/custom geometry, effects, unresolved
+  inherited paint, groups and rotations require review. This is a disappearance
+  guard, not a pixel, text-readability or animation-playback certificate.
+  Refurbish compare publication recomputes any run-local proof map and blocks all
+  non-passing results. Unsupported proofs need the separate manual workflow checklist.
+
 - `cli/review/structure-check.mjs` - lightweight PPTX OOXML structure check. It
   scans XML inside the PPTX for expected font declarations, expected sRGB/theme
   colors, and empty/default-text placeholder residue, then writes
@@ -354,6 +365,9 @@ The public release audit checks this layout and local module imports.
 - `lib/review/layout-snapshot.mjs` - pure layout detector shared by the layout CLI and
   refurbish source/candidate adapters. `lib/review/finding-analysis.mjs` is the pure FA
   decision seam; neither module reads files, launches commands, or renders.
+
+- `lib/review/proof-visibility.mjs` - read-only OPC analysis for the protected
+  native shape silhouette guard; no mutation or rendering.
 
 - `lib/runtime/progress.mjs`, `lib/refurbish/style.mjs`,
   `lib/edit/session-rules.mjs`, `lib/review/vision-baseline.mjs`, and the

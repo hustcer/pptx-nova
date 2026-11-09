@@ -18,6 +18,7 @@ const KNOWN_CHECKS = new Set([
 const ALLOWED_CHECK_STATUSES = new Set(['pass', 'warn', 'fail', 'na'])
 const FAIL_SEVERITIES = new Set(['error', 'high', 'fail'])
 const WARN_SEVERITIES = new Set(['warning', 'warn', 'medium'])
+const SCOPED_REVIEW_MODES = new Set(['edit', 'micro-edit'])
 
 const usage =
   'Usage:\n' +
@@ -26,6 +27,7 @@ const usage =
   '  --run-dir <path>        Optional run directory. Defaults output to run-dir/visual_review.json.\n' +
   '  --output <path>         Output path. Defaults to visual_review.json in cwd or run-dir.\n' +
   '  --mode <mode>           Workflow mode for context.\n' +
+  '                          Only edit/micro-edit permit scoped canonical review.\n' +
   '  --candidate <path>      Bind the review to the current PPTX (requires --manifest).\n' +
   '  --manifest <path>       Canonical manifest whose exact PNGs were reviewed.\n' +
   '  --design-review <path>  Required for create: slide-specific design_review.json after PNG review.\n' +
@@ -347,8 +349,14 @@ function makeReport(args) {
     if (!args.candidate || !args.manifest)
       throw new Error('--candidate and --manifest must be supplied together')
     report.binding = captureVisualBinding(args.manifest, args.candidate)
-    if (args.slidesReviewed !== report.binding.slideCount)
-      throw new Error('review must cover every candidate slide')
+    const selectedCount = report.binding.reviewedSlides?.length ?? report.binding.slideCount
+    if (!SCOPED_REVIEW_MODES.has(args.mode) && selectedCount !== report.binding.slideCount)
+      throw new Error('this review mode requires complete candidate slide coverage')
+    const expectedReviewCount = SCOPED_REVIEW_MODES.has(args.mode)
+      ? selectedCount
+      : report.binding.slideCount
+    if (args.slidesReviewed !== expectedReviewCount)
+      throw new Error('review must cover every selected canonical candidate slide')
     report.artifacts.candidate = args.candidate
     report.artifacts.manifest = args.manifest
   }

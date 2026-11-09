@@ -211,6 +211,34 @@ policy and their approved source/reference. Producing a new output filename does
 a Create task. Keep each workflow's semantic/style/fidelity checks; do not substitute Create mode
 for explaining intended changes.
 
+### Scoped edit evidence
+
+For generic Edit/Micro Edit, the binding records `reviewedSlides` from the
+canonical manifest's selected scope; `slideCount` remains the whole-deck count.
+Review every requested slide, and require the manifest scope to cover the Edit
+Contract targets. Candidate and reference selections must match. Create still
+requires every candidate slide. Only `--mode edit` and `--mode micro-edit` permit
+scoped bound review; other or unspecified modes require complete candidate coverage
+and retain their specialized gates.
+
+Record the review with `visual-review.mjs --mode edit --candidate <candidate>
+--manifest <manifest> --slides-reviewed <selected-count>` and the required checks.
+Reviewing more pages requires fresh evidence for that scope, not a larger count
+over the same PNGs. A scoped review does not certify unselected slides.
+
+Expected pixel changes and inherited source findings still need diagnosis:
+compare finding owners and source/candidate measurements, use the bound Edit
+Contract and `vision-diff`, and retain targeted XML preservation or native Office
+evidence where needed. Record those observations in the visual review and, when
+requested, feedback. Do not silently repair unrelated objects to satisfy the gate.
+
+These records explain a result; they are not an alternate delivery decision.
+Preserve the canonical verdict and the exit-status policy above. An Agent review,
+unchanged source XML or native screenshot cannot turn `stop` or
+`require-human-confirmation` into automated delivery authorization. If a suspected
+CLI false positive remains, retain the candidate/evidence and report the exact
+blocker for correction rather than authoring a replacement gate result.
+
 `ocr-overflow=skipped` and `independent-reference=skipped` are expected v1
 limitations, not passing evidence. Keep manual PNG/contact-sheet review and
 PowerPoint snapshot/clean-open evidence when those policies apply. Never replace

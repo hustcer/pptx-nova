@@ -143,6 +143,26 @@ export function fileSha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
 
+function selectedSlidesFor(subject, label) {
+  const selected = subject.selectedSlides
+  if (
+    !Number.isSafeInteger(subject.slideCount) ||
+    subject.slideCount <= 0 ||
+    !Array.isArray(selected) ||
+    selected.length === 0 ||
+    selected.some(
+      (slide, i) =>
+        !Number.isSafeInteger(slide) ||
+        slide < 1 ||
+        slide > subject.slideCount ||
+        (i > 0 && slide <= selected[i - 1]),
+    )
+  ) {
+    throw new Error(`${label} slide coverage must be nonempty, ordered, unique and within its deck`)
+  }
+  return selected
+}
+
 /** Bind the current candidate and exact renderer artifacts, including opaque bytes.
  * This validates provenance/completeness; it does not perform visual understanding.
  */
@@ -160,10 +180,21 @@ export function captureVisualBinding(manifestPath, candidatePath) {
   ) {
     throw new Error('candidate bytes do not match the canonical manifest')
   }
-  const expected = Array.from({ length: candidate.slideCount }, (_, i) => i + 1)
-  if (!expected.length || JSON.stringify(candidate.selectedSlides) !== JSON.stringify(expected)) {
+  const create = manifest.policyId === 'pptx-visual-oracle-create/v1'
+  const expected = selectedSlidesFor(candidate, 'candidate')
+  if (
+    create &&
+    (expected.length !== candidate.slideCount || expected.some((slide, i) => slide !== i + 1))
+  ) {
     throw new Error('delivery review requires complete candidate slide coverage')
   }
+  const reference = manifest.subjects.find((s) => s.id === 'reference')
+  if (
+    !create &&
+    reference &&
+    JSON.stringify(selectedSlidesFor(reference, 'reference')) !== JSON.stringify(expected)
+  )
+    throw new Error('reference and candidate slide scope must match')
   if (manifest.policyId === 'pptx-visual-oracle-create/v1' && manifest.subjects.length !== 1) {
     throw new Error('create evidence must contain only the candidate subject')
   }
@@ -198,6 +229,7 @@ export function captureVisualBinding(manifestPath, candidatePath) {
     candidateSha256,
     manifestSha256: fileSha256(manifestPath),
     slideCount: candidate.slideCount,
+    ...(!create ? { reviewedSlides: [...expected] } : {}),
     artifacts,
   }
 }

@@ -156,13 +156,16 @@ but new or worsened high/medium issues block. Use a separate scoped
 full-deck risk separately.
 
 For structural edits—slide/object additions or deletion, geometry/layout,
-theme/brand, chart/table, image/crop, or multi-slide visual changes—save
+theme/brand, chart/table data or structure, image/crop, or multi-slide visual changes—save
 `final-inspect.json` after apply and run
 `<skill-root>/scripts/cli/review/finalize-evidence.mjs --mode structural-edit --changed-slides 25-38`
 with `vision.json` before PNG review. It writes `layout-final.json` and
 `evidence-summary.json`. With a changed-slide scope, high/medium issues outside
 the scope are recorded as `deckResidualRisk` rather than keeping the finalizer in
 warn. Localized Micro Edit remains on its separate fast path.
+Changing only table-cell paint or fonts does not by itself trigger whole-deck
+structural certification; use the Micro Edit contract plus targeted table XML
+preservation. The presence of unrelated charts does not expand the user's edit scope.
 
 For every generic Edit Contract, run one semantic diff after the final
 candidate is stable. Structural edits and user-requested change audits already

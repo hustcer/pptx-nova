@@ -20,7 +20,13 @@ Use Micro Edit only when all of these are true:
 - No new deck narrative, DeckKit selection, brand system, or design lock is
   needed.
 
-Escalate to `edit-mode.md` when the task touches charts/tables, many slides,
+Localized native-table fill/font changes may stay on this path after reading
+`../content/tables.md`. Preserve text/data, merges, row/column dimensions, run
+structure and unrequested formatting. Bind a targeted XML preservation audit to
+the source/candidate hashes, excluding only the declared fill/font attributes;
+semantic diff may omit cell paint. If wrapping, autofit or cell geometry changes,
+escalate to the geometry-edit route.
+Escalate to `edit-mode.md` for table data/structure/geometry, charts, many slides,
 layout changes, template fidelity, brand rework, complex images/crops, ambiguous
 selectors, SmartArt, animations, or any user-visible redesign.
 

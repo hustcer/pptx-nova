@@ -2,6 +2,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { verifyMultiColumnEvidence } from '../../lib/review/multi-column-evidence.mjs'
 import {
   REVIEW_POLICY_EVALUATION_SCHEMA_VERSION,
   evaluateReviewPolicy,
@@ -32,6 +33,7 @@ Options:
   --content-audit <path>    Optional baseline content-audit.json.
   --final-audit <path>      content-audit-final.json from xdoc pptx refurbish-audit.
   --vision-diff <path>      vision-diff.json from xdoc pptx vision-diff.
+  --multi-column-review <path> Bound visual review; closes only multi-column review findings.
   --layout-snapshot <path>  layout-final.json with raw layout findings.
   --review-policy <path>    Optional pptx-nova-review-policy/v1 document.
   --review-evaluation <path>
@@ -54,6 +56,7 @@ function parseArgs(argv) {
     contentAudit: '',
     finalAudit: '',
     visionDiff: '',
+    multiColumnReview: '',
     layoutSnapshot: '',
     reviewPolicy: '',
     reviewEvaluation: '',
@@ -91,6 +94,7 @@ const valueFlags = {
   '--content-audit': 'contentAudit',
   '--final-audit': 'finalAudit',
   '--vision-diff': 'visionDiff',
+  '--multi-column-review': 'multiColumnReview',
   '--layout-snapshot': 'layoutSnapshot',
   '--review-policy': 'reviewPolicy',
   '--review-evaluation': 'reviewEvaluation',
@@ -369,7 +373,24 @@ function validateRefurbish(args, report) {
   const finalCount = auditFinalCount
 
   validateFinalAudit(report, finalAudit, sourceCount, finalCount)
-  validateVisionDiff(report, visionDiff)
+  const multiColumn = args.multiColumnReview
+    ? verifyMultiColumnEvidence({
+        candidate: args.candidatePptx,
+        visionDiff: args.visionDiff,
+        review: args.multiColumnReview,
+      })
+    : null
+  if (multiColumn) {
+    report.multiColumnReview = multiColumn
+    if (multiColumn.agentGate?.passed !== true)
+      push(
+        report.errors,
+        'error',
+        'multi-column-review-failed',
+        'Bound multi-column review did not pass',
+      )
+  }
+  validateVisionDiff(report, visionDiff, multiColumn?.agentGate?.passed === true)
   validateReferenceMap(report, referenceMap, sourceCount, finalCount)
   validateReviewedFindings({
     args,
@@ -688,9 +709,10 @@ function validateFinalAudit(report, finalAudit, sourceCount, finalCount) {
   )
 }
 
-function validateVisionDiff(report, visionDiff) {
+function validateVisionDiff(report, visionDiff, reviewed = false) {
   const fresh = visionCounts(visionDiff, 'new')
   const changed = visionCounts(visionDiff, 'changed')
+  const worsened = visionCounts(visionDiff, 'worsened')
   if (visionDiff?.schemaVersion !== VISION_DIFF_SCHEMA_VERSION) {
     push(
       report.errors,
@@ -705,13 +727,16 @@ function validateVisionDiff(report, visionDiff) {
       status: visionDiff?.status ?? '',
     })
   }
-  if (fresh.high > 0 || fresh.medium > 0) {
+  if (
+    !reviewed &&
+    (fresh.high > 0 || fresh.medium > 0 || worsened.high > 0 || worsened.medium > 0)
+  ) {
     push(
       report.errors,
       'error',
       'vision-diff-new-issue',
-      'candidate introduced new high/medium visual issues',
-      { new: fresh },
+      'candidate has new or worsened high/medium visual issues',
+      { new: fresh, worsened },
     )
   }
   if (changed.high > 0) {
@@ -728,12 +753,12 @@ function validateVisionDiff(report, visionDiff) {
     'refurbish-vision-diff',
     visionDiff?.schemaVersion === VISION_DIFF_SCHEMA_VERSION &&
       visionDiff?.status === 'success' &&
-      fresh.high === 0 &&
-      fresh.medium === 0 &&
+      (reviewed ||
+        (fresh.high === 0 && fresh.medium === 0 && worsened.high === 0 && worsened.medium === 0)) &&
       changed.high === 0
       ? 'passed'
       : 'failed',
-    { new: fresh, changed },
+    { new: fresh, changed, worsened },
   )
 }
 

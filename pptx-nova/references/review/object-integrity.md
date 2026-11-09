@@ -162,6 +162,10 @@ slide-local inventory. Prefer disclosed field-aware operations; scoped raw repai
 identity and use the raw-XML evidence route. Exact finding-bound review policies may close verified
 diagnostic gaps; never globally suppress placeholders or delete evidence objects to pass a check.
 
+Reserve new chrome against populated field output, including an apparently empty slide-number
+placeholder. Review source footer/date/number fields beside any added counter at readable size;
+an empty inspected string can still paint a number and collide after rendering.
+
 ## Source-bound proof guard
 
 Use this guard when restyling/resizing retained proof shapes or tables risks erasing silhouettes

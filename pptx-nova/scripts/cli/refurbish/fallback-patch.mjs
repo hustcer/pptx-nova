@@ -3,7 +3,7 @@ import { SKILL_ROOT } from '../../lib/runtime/skill-paths.mjs'
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { fallbackFor, hexFrom, luminance } from '../../lib/refurbish/style.mjs'
+import { fallbackFor, hexFrom, luminance, themeFor } from '../../lib/refurbish/style.mjs'
 
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
 
@@ -504,24 +504,7 @@ function buildArtifacts(args) {
   const ops = []
   const palette = fallback.palette
 
-  const themeColors = {
-    dk1: palette.text,
-    lt1: palette.background,
-    dk2: palette.rule,
-    lt2: palette.surface,
-    accent1: palette.accent,
-    accent2: palette.text,
-    accent3: palette.softAccent,
-    accent4: palette.secondary,
-    accent5: palette.rule,
-    accent6: palette.surface,
-    hlink: palette.text,
-    folHlink: palette.secondary,
-  }
-  const themeFonts = {
-    major: { typeface: fallback.fonts.heading, eastAsian: fallback.fonts.cjk },
-    minor: { typeface: fallback.fonts.body, eastAsian: fallback.fonts.cjk },
-  }
+  const { colors: themeColors, fonts: themeFonts } = themeFor(entry, fallback, args.catalog)
   const styleFingerprint = targetStyleFingerprint(inspect, themeColors, themeFonts)
   const { emit, audit: operationAudit } = createOperationEmitter(ops, styleFingerprint)
   emit(

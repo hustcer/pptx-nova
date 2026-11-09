@@ -134,11 +134,51 @@ preservation with deliberate new chrome separated from original objects. Allow a
 geometry/font/color changes without claiming all XML is byte-identical; a rendered fallback
 does not establish native equation or chart preservation.
 
+Inventory all proof objects within a page before allocating regions. A single-chart layout cannot
+place several retained charts in the same frame: equal counts/data can still hide an entire chart.
+Check pairwise proof visibility and give each object a distinct region or an intentional shared-axis
+composition. After a theme change, inspect labels on every inherited palette region, particularly
+white labels on theme-bound light fills. Prefer the chart's disclosed `colorStyle`/label operations
+for a scoped contrast repair; retain data and label visibility, then renew native evidence as needed.
+
 Run the normal semantic diff, refurbishment audit and fidelity gate too. If an audit treats every
 geometry change as a failure, inspect its exact content policy; do not weaken it globally or invent
 passed evidence. Fix the map or use the workflow's documented scoped evidence path.
 
-## 5. Close one stable candidate
+## 5. Return authored composition to the runner
+
+Keep the inspect-generated fallback as the mechanical baseline. For a full redesign, produce a
+**complete replacement** `pptx-patch/v1` patch from the original source, with
+`metadata.deckkit` and `metadata.refurbishSourceSha256` bound to the selected kit and exact source
+bytes. Keep its generator, design map and specimen exceptions in the task run, not the reusable kit.
+Review representative pages, then pass it as `--authoring-patch <path>` to the standard runner in a
+fresh run. This forces the fallback route, archives the mechanical baseline and applies the authored
+patch through the existing lock, dry-run, apply, audit, fidelity, comparison and publication gates.
+It does not authorize content loss or waive a visual finding. For file-backed resources, pass
+`--assets <assets_manifest.json>` with the authored patch. The runner passes the manifest to lock
+validation and uses its directory as `--asset-root` for dry-run and apply. Keep `assetSource.path`
+relative to that directory, including any manifest `assetRoot` prefix (for example `assets/proof.svg`);
+xdoc rejects absolute paths. Keep these resource files stable through the run. The runner archives
+the source-bound patch before probing and preserves handoff flags in its recovery command.
+Raw operations additionally require explicit `--allow-raw-xml` with `--authoring-patch`; prefer typed operations first and
+retain the raw route's structural/native checks. A supplied patch never enables raw XML implicitly.
+
+When only `multi-column-text-layout-review` findings remain, use the existing
+`scripts/cli/review/multi-column-scaffold.mjs` and `multi-column-gate.mjs` against the representative
+candidate/vision/preview. Read the complete columns and fill the scaffold judgments after visual
+review. Pass that reviewed file with `--multi-column-review <path>` on the final run. This selects
+fallback; an explicit `--route native` is rejected. The runner
+re-renders the affected pages and carries judgments only when candidate bytes, PNGs, finding coverage
+and normalized vision identity match. Stale reviews and every other new/worsened high/medium issue
+still block, including inconsistent blocker counts and detailed findings. A changed candidate needs
+a fresh visual review, never edited binding hashes.
+
+Use `effect: { inherit: false }` to avoid importing theme effects when authoring new paint; do not
+assume an empty effect patch clears an existing local shadow. Inspect effective effects and render
+the result. For a protected specimen, retain its effect; for expendable chrome, use a supported
+explicit override and verify the actual appearance.
+
+## 6. Close one stable candidate
 
 After the final repair, retain one clearly named candidate. Refresh inspect, layout, semantic diff,
 review evaluation, fidelity, applicable structural/compatibility evidence and the canonical
@@ -151,6 +191,9 @@ pages for dense formulas/tables, suspected clipping, changed inheritance and the
 Record page-specific design observations and content-equivalence results. Compare/clean-open
 proves different facts from design identity; each applicable gate must close on the same bytes.
 Publish through the compare gate and list the actual bound deliverables.
+Native render evidence must live in that final run and name the exact candidate path checked by
+the finalizer. For post-publication checks, capture the published path into the final run; an earlier
+authoring-path report is not interchangeable merely because its PPTX hash matches.
 
 When Feedback Mode is active, separate skill guidance/tooling gaps, operator mistakes and confirmed
 xdoc problems. Keep one-off content/layout choices in the run. Only general, demonstrated workflow

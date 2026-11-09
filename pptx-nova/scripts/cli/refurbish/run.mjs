@@ -42,6 +42,9 @@ import {
 } from '../../lib/review/page-bitmap-cache.mjs'
 import { createProgressReporter } from '../../lib/runtime/progress.mjs'
 import { buildRefurbishPlan } from './plan.mjs'
+import { validateAuthoringPatch } from '../../lib/refurbish/authoring-patch.mjs'
+import { resolveFilesystemPath } from '../../lib/runtime/filesystem-paths.mjs'
+import { verifyMultiColumnEvidence } from '../../lib/review/multi-column-evidence.mjs'
 import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from '../../lib/review/policy.mjs'
 
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
@@ -85,6 +88,10 @@ Options:
   --run-dir <path>        New, empty, or pre-probed run directory. Defaults to <cwd>/.pptx-nova/refurbish-<deckkit>-<timestamp>
   --catalog <path>        DeckKit catalog. Defaults to <skill-root>/assets/deckkits/catalog.json
   --route <route>         auto|native|fallback. Defaults to auto
+  --authoring-patch <path> Complete source-bound design-led patch; forces fallback and retains all gates
+  --assets <path>         Asset manifest for the authored patch; paths are relative to its directory
+  --multi-column-review <path> Carry identical-evidence judgments; forces fallback
+  --allow-raw-xml         Explicitly allow raw ops in the authored patch; structural/native review still required
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc
   --readiness-out <path>  Optional benchmark output for a full delivery readiness audit
   --review-policy <path>  Optional hash-bound pptx-nova-review-policy/v1 document
@@ -119,6 +126,10 @@ function parseArgs(argv) {
     runDir: '',
     catalog: CATALOG_PATH,
     route: 'auto',
+    authoringPatch: '',
+    assets: '',
+    multiColumnReview: '',
+    allowRawXml: false,
     xdocBin: 'xdoc',
     readinessOut: '',
     reviewPolicy: '',
@@ -146,6 +157,8 @@ function parseArgs(argv) {
       args.contactDiff = true
     } else if (arg === '--overwrite') {
       args.overwrite = true
+    } else if (arg === '--allow-raw-xml') {
+      args.allowRawXml = true
     } else if (arg === '--json') {
       args.json = true
     } else if (arg === '--json-full') {
@@ -166,6 +179,16 @@ function parseArgs(argv) {
   if (!args.output) throw new Error(`--output is required.\n\n${usage}`)
   if (!['auto', 'native', 'fallback'].includes(args.route)) {
     throw new Error('--route must be one of auto|native|fallback')
+  }
+  if (args.assets && !args.authoringPatch) throw new Error('--assets requires --authoring-patch')
+  if (args.allowRawXml && !args.authoringPatch)
+    throw new Error('--allow-raw-xml requires --authoring-patch')
+  if (args.authoringPatch || args.multiColumnReview) {
+    if (args.route === 'native')
+      throw new Error(
+        '--authoring-patch and --multi-column-review cannot be used with --route native',
+      )
+    args.route = 'fallback'
   }
   if (!Number.isInteger(args.compareChunkSize) || args.compareChunkSize <= 0) {
     throw new Error('--compare-chunk-size must be a positive integer')
@@ -190,6 +213,9 @@ const valueFlags = {
   '--run-dir': 'runDir',
   '--catalog': 'catalog',
   '--route': 'route',
+  '--authoring-patch': 'authoringPatch',
+  '--assets': 'assets',
+  '--multi-column-review': 'multiColumnReview',
   '--xdoc-bin': 'xdocBin',
   '--readiness-out': 'readinessOut',
   '--review-policy': 'reviewPolicy',
@@ -481,6 +507,9 @@ function recoveryCommand(summary) {
     '<new-empty-run-dir>',
     '--route',
     selectedRoute,
+    ...Object.entries(summary.handoff ?? {}).flatMap(([flag, value]) =>
+      value === true ? [flag] : value ? [flag, value] : [],
+    ),
     '--json',
   ]
     .map(commandArg)
@@ -734,22 +763,28 @@ function visionCounts(report, classification) {
   }
 }
 
-function gateVisionDiff(summary, report) {
+function gateVisionDiff(summary, report, reviewed = false) {
   const schemaValid = report?.schemaVersion === 'pptx-vision-diff/v1'
   const statusValid = report?.status === 'success'
   const fresh = visionCounts(report, 'new')
   const changed = visionCounts(report, 'changed')
+  const worsened = visionCounts(report, 'worsened')
   return requireGate(
     summary,
     'vision-diff',
-    schemaValid && statusValid && fresh.high === 0 && fresh.medium === 0 && changed.high === 0,
+    schemaValid &&
+      statusValid &&
+      changed.high === 0 &&
+      (reviewed ||
+        (fresh.high === 0 && fresh.medium === 0 && worsened.high === 0 && worsened.medium === 0)),
     {
       schemaVersion: report?.schemaVersion ?? '',
       status: report?.status ?? '',
       new: fresh,
       changed,
+      worsened,
       message:
-        'vision-diff requires valid v1 output, no new high/medium issues, and no changed issue ending at high severity',
+        'vision-diff requires valid v1 output, no unreviewed new/worsened high/medium issues, and no changed issue ending at high severity',
     },
   )
 }
@@ -803,12 +838,25 @@ function normalizeArgs(args) {
     catalog: resolve(cwd, args.catalog),
     readinessOut: args.readinessOut ? resolve(cwd, args.readinessOut) : '',
     reviewPolicy: args.reviewPolicy ? resolve(cwd, args.reviewPolicy) : '',
+    authoringPatch: args.authoringPatch ? resolveFilesystemPath(args.authoringPatch, cwd) : '',
+    assets: args.assets ? resolveFilesystemPath(args.assets, cwd) : '',
+    multiColumnReview: args.multiColumnReview
+      ? resolveFilesystemPath(args.multiColumnReview, cwd)
+      : '',
   }
   normalized.runDir = args.runDir ? resolve(cwd, args.runDir) : defaultRunDir(normalized, cwd)
   return normalized
 }
 
 function validatePaths(args) {
+  for (const [key, label] of [
+    ['authoringPatch', 'authoring patch'],
+    ['assets', 'assets manifest'],
+    ['multiColumnReview', 'multi-column review'],
+  ]) {
+    if (args[key] && (!existsSync(args[key]) || !statSync(args[key]).isFile()))
+      throw new Error(`${label} does not exist or is not a file: ${args[key]}`)
+  }
   if (!existsSync(args.source) || !statSync(args.source).isFile()) {
     throw new Error(`source PPTX does not exist or is not a file: ${args.source}`)
   }
@@ -858,6 +906,7 @@ function artifactPaths(runDir) {
     chromeDetect: join(runDir, 'chrome-detect.json'),
     fallbackReport: join(runDir, 'fallback-patch-report.json'),
     patch: join(runDir, 'patch.json'),
+    authoringPatch: join(runDir, 'authoring-patch-input.json'),
     deckLock: join(runDir, 'deck_lock.json'),
     contentAuditBaseline: join(runDir, 'content-audit.json'),
     referenceMap: join(runDir, 'reference-map.json'),
@@ -916,6 +965,12 @@ function initialSummary(args, artifacts) {
     requiredReferences: [],
     recovery: null,
     operationAudit: null,
+    handoff: {
+      '--authoring-patch': args.authoringPatch,
+      '--assets': args.assets,
+      '--multi-column-review': args.multiColumnReview,
+      '--allow-raw-xml': args.allowRawXml,
+    },
     artifacts: Object.fromEntries(Object.entries(artifacts).map(([key, path]) => [key, path])),
     phases: [],
     gates: [],
@@ -1186,10 +1241,40 @@ function runFallback(summary, args, artifacts) {
           'The fallback report predates operation classification; emitted operations are not evidence of effective changes.',
       }
 
+  if (args.authoringPatch) {
+    const patch = readJson(artifacts.authoringPatch, 'archived authoring patch')
+    copyFileSync(artifacts.patch, join(summary.runDir, 'generated-fallback-patch.json'))
+    writeJson(artifacts.patch, patch)
+    summary.operationAudit = {
+      plannedOps: patch.ops.length,
+      emittedOps: patch.ops.length,
+      knownNoOpOps: 0,
+      effectiveOps: null,
+      knownChangingOps: 0,
+      unknownEffectOps: patch.ops.length,
+      evidenceNote:
+        'Source-bound authoring patch replaces the mechanical baseline; effects require dry-run/apply evidence.',
+    }
+    addInternalPhase(summary, 'authoring-patch', 'passed', {
+      artifact: relativeArtifact(summary.runDir, artifacts.patch),
+      sha256: sha256(artifacts.patch),
+      sourceSha256: sha256(artifacts.sourceSnapshot),
+      ops: patch.ops.length,
+    })
+  }
+
   const lockCheck = runJsonPhase(summary, {
     name: 'check-lock',
     bin: process.execPath,
-    args: [CHECK_LOCK_SCRIPT, '--lock', artifacts.deckLock, '--patch', artifacts.patch, '--json'],
+    args: [
+      CHECK_LOCK_SCRIPT,
+      '--lock',
+      artifacts.deckLock,
+      '--patch',
+      artifacts.patch,
+      ...(args.assets ? ['--assets', args.assets] : []),
+      '--json',
+    ],
     artifact: artifacts.lockCheck,
   })
   requireGate(summary, 'check-lock', lockCheck?.valid === true, {
@@ -1214,6 +1299,8 @@ function runFallback(summary, args, artifacts) {
       '-o',
       artifacts.candidate,
       '--dry-run',
+      ...(args.assets ? ['--asset-root', dirname(args.assets)] : []),
+      ...(args.allowRawXml ? ['--allow-raw-xml'] : []),
       '--json',
     ],
     artifact: artifacts.dryRun,
@@ -1242,6 +1329,8 @@ function runFallback(summary, args, artifacts) {
       '-o',
       artifacts.candidate,
       '--overwrite',
+      ...(args.assets ? ['--asset-root', dirname(args.assets)] : []),
+      ...(args.allowRawXml ? ['--allow-raw-xml'] : []),
       '--json',
     ],
     artifact: artifacts.apply,
@@ -1280,7 +1369,71 @@ function runFallback(summary, args, artifacts) {
     ],
     artifact: artifacts.visionDiff,
   })
-  gateVisionDiff(summary, visionDiff)
+  let reviewed = false
+  if (args.multiColumnReview) {
+    const findings = [
+      ...(visionDiff.newIssues ?? []),
+      ...(visionDiff.changedIssues ?? []),
+      ...(visionDiff.worsenedIssues ?? []),
+    ]
+      .map((item) => item.candidateIssue ?? item.issue ?? item)
+      .filter((item) => item.kind === 'multi-column-text-layout-review')
+    const slides = [...new Set(findings.map((item) => item.slideIndex + 1))].sort((a, b) => a - b)
+    if (!slides.length)
+      throw new PhaseFailure(
+        'multi-column-review',
+        'No multi-column findings require the supplied review',
+      )
+    const previewPath = join(summary.runDir, 'multi-column-preview.json')
+    runJsonPhase(summary, {
+      name: 'multi-column-preview',
+      bin: args.xdocBin,
+      args: [
+        'pptx',
+        'preview',
+        artifacts.candidate,
+        '--slides',
+        slides.join(','),
+        '--output-dir',
+        join(summary.runDir, 'multi-column-previews'),
+        '--dpi',
+        '144',
+        '--json',
+      ],
+      artifact: previewPath,
+    })
+    const reviewPath = join(summary.runDir, 'multi-column-review.json')
+    runJsonPhase(summary, {
+      name: 'multi-column-review-carry',
+      bin: process.execPath,
+      args: [
+        cliPath('review/multi-column-scaffold.mjs'),
+        '--candidate',
+        artifacts.candidate,
+        '--vision-diff',
+        artifacts.visionDiff,
+        '--preview',
+        previewPath,
+        '--carry-review-from',
+        args.multiColumnReview,
+        '--output',
+        reviewPath,
+        '--json',
+      ],
+      artifact: join(summary.runDir, 'multi-column-carry-report.json'),
+    })
+    const gate = verifyMultiColumnEvidence({
+      candidate: artifacts.candidate,
+      visionDiff: artifacts.visionDiff,
+      review: reviewPath,
+    })
+    writeJson(join(summary.runDir, 'multi-column-review-gate.json'), gate)
+    reviewed = gate.agentGate?.passed === true
+    requireGate(summary, 'multi-column-review', reviewed, {
+      message: 'Only unchanged, bound multi-column review evidence may close review-only findings',
+    })
+  }
+  gateVisionDiff(summary, visionDiff, reviewed)
 
   const audit = runJsonPhase(summary, {
     name: 'refurbish-audit-command',
@@ -1580,6 +1733,10 @@ function runFidelityGate(summary, artifacts, findingAnalysisReport = null) {
   ]
   if (existsSync(artifacts.referenceMap)) {
     gateArgs.push('--reference-map', artifacts.referenceMap)
+  }
+  const multiColumnReview = join(summary.runDir, 'multi-column-review.json')
+  if (existsSync(multiColumnReview)) {
+    gateArgs.push('--multi-column-review', multiColumnReview)
   }
   if (existsSync(artifacts.contentAuditBaseline)) {
     gateArgs.push('--content-audit', artifacts.contentAuditBaseline)
@@ -2072,6 +2229,17 @@ function runRefurbish(inputArgs) {
       durationMs: durationMs(sourceSnapshotStarted),
       bytes: statSync(artifacts.sourceSnapshot).size,
     })
+    if (args.authoringPatch) {
+      const patch = validateAuthoringPatch(readJson(args.authoringPatch, 'authoring patch'), {
+        sourceSha256: sha256(artifacts.sourceSnapshot),
+        deckkit: args.deckkit,
+      })
+      writeJson(artifacts.authoringPatch, patch)
+      addInternalPhase(summary, 'authoring-patch-snapshot', 'passed', {
+        artifact: relativeArtifact(args.runDir, artifacts.authoringPatch),
+        sha256: sha256(artifacts.authoringPatch),
+      })
+    }
     if (args.reviewPolicy) {
       copyFileSync(args.reviewPolicy, artifacts.reviewPolicy)
       addInternalPhase(summary, 'review-policy-snapshot', 'passed', {

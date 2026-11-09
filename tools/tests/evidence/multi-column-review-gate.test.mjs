@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { test } from 'node:test'
+import { verifyMultiColumnEvidence } from '../../../pptx-nova/scripts/lib/review/multi-column-evidence.mjs'
 
 const repoRoot = resolve('.')
 const script = join(repoRoot, 'pptx-nova/scripts/cli/review/multi-column-gate.mjs')
@@ -126,6 +127,17 @@ test('multi-column review gate passes when every review-only blocker has bound f
   assert.equal(report.summary.reviewedIssueCount, 1)
 })
 
+test('multi-column evidence helper preserves actionable missing-input diagnostics', () => {
+  const item = fixture()
+  const report = verifyMultiColumnEvidence({
+    candidate: item.candidate,
+    visionDiff: item.visionDiff,
+    review: join(item.root, 'missing.json'),
+  })
+  assert.equal(report.agentGate.passed, false)
+  assert.match(report.error.message, /does not exist/)
+})
+
 test('multi-column review gate never exempts a real overflow blocker', () => {
   const item = fixture({
     extraIssue: {
@@ -140,6 +152,29 @@ test('multi-column review gate never exempts a real overflow blocker', () => {
   const report = JSON.parse(result.stdout)
   assert.equal(report.agentGate.passed, false)
   assert.ok(report.blockers.some((blocker) => blocker.code === 'non-review-visual-blocker'))
+})
+
+test('multi-column review cannot waive high/medium counts omitted from finding arrays', () => {
+  for (const location of ['summary', 'agentGate']) {
+    const item = fixture()
+    const vision = JSON.parse(readFileSync(item.visionDiff, 'utf8'))
+    if (location === 'summary') {
+      vision.summary = { byClass: { new: { high: 1, medium: 1 } } }
+    } else {
+      vision.agentGate.worsenedMediumIssues = 1
+    }
+    writeJson(item.visionDiff, vision)
+    const review = JSON.parse(readFileSync(item.review, 'utf8'))
+    review.visionDiff.sha256 = digest(readFileSync(item.visionDiff))
+    writeJson(item.review, review)
+    const result = run(item)
+    assert.equal(result.status, 2, result.stderr || result.stdout)
+    assert.ok(
+      JSON.parse(result.stdout).blockers.some(
+        (blocker) => blocker.code === 'vision-counts-mismatch',
+      ),
+    )
+  }
 })
 
 test('multi-column review gate fails closed when the candidate hash is stale', () => {

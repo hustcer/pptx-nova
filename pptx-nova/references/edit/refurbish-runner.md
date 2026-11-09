@@ -38,6 +38,9 @@ feedback gate. Compare parts render concurrently (`--compare-concurrency`, defau
 makes the saved plan, commands, gates, and references consistently describe fallback execution. `auto`
 normally tries declared native support first; `native` never recovers through fallback.
 
+For source-bound `--authoring-patch` (plus `--assets` for file resources) and unchanged-evidence `--multi-column-review`, follow
+the [design-led handoff](refurbish-design-led.md#5-return-authored-composition-to-the-runner). Keep all gates.
+
 Do not add `--contact-diff` for ordinary full-deck review. The mandatory compare is complete; the
 compatibility alias is materialized from the same final evidence without another render.
 
@@ -53,15 +56,13 @@ compatibility alias is materialized from the same final evidence without another
 - `performance` with total time, render share, top phases, budget, and Finding Analysis overhead;
 - the terminal error when the run fails.
 
-Compact Agent artifact paths are relative to `runDir`; published files outside it remain absolute. The
-full report and `--json-full` retain compatibility fields and absolute paths.
+Compact artifact paths are relative to `runDir`; published files remain absolute. `--json-full` retains full fields/paths.
 
 After path preflight, the full report is saved as `<run-dir>/refurbish-run-summary.json`; an earlier error
 cannot create it. Read it only for warnings, failures, unsupported regions, or diagnosis. Use
 `--json-full` only when a consumer explicitly needs complete phase history.
 
-Progress is archived to `<run-dir>/progress.jsonl` by default; `--progress-file` overrides it and
-`none` disables it. Stderr carries only phase summaries. Read JSONL on failure or for performance.
+Progress defaults to `<run-dir>/progress.jsonl`; `--progress-file` overrides it, `none` disables it. Stderr carries phase summaries.
 
 ## Progressive failure routing
 
@@ -90,8 +91,7 @@ plan and readiness -> capability probe and source inspect
   -> one cached high-DPI comparison plus low-DPI Agent review -> publication gate
 ```
 
-The high-DPI comparison is visual truth. Lower-DPI `refurbish-agent-review*.png` files reuse its page
-cache without another conversion/render; do not rerender for aliases.
+High-DPI comparison is visual truth; low-DPI Agent parts reuse its page cache. Do not rerender aliases.
 
 `finding-analysis.json` is calibration evidence. Never treat `effectiveStatus=not-applied` as a pass or
 use it to weaken fidelity, comparison, publication, or human-review requirements.

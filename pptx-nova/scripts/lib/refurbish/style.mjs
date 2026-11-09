@@ -298,3 +298,46 @@ export function mergeFallbackFor(entry, profileFallback, catalogPath = CATALOG_P
 export function fallbackFor(entry, catalogPath = CATALOG_PATH) {
   return mergeFallbackFor(entry, entry?.refurbishProfile?.fallback, catalogPath)
 }
+
+// A refurbishment palette is not an ordered Office color scheme. Prefer the
+// kit's declared scheme/font roles; retain legacy derivation for undeclared slots.
+export function themeFor(entry, fallback, catalogPath = CATALOG_PATH) {
+  const p = fallback.palette
+  const colors = {
+    dk1: p.text,
+    lt1: p.background,
+    dk2: p.rule,
+    lt2: p.surface,
+    accent1: p.accent,
+    accent2: p.text,
+    accent3: p.softAccent,
+    accent4: p.secondary,
+    accent5: p.rule,
+    accent6: p.surface,
+    hlink: p.text,
+    folHlink: p.secondary,
+  }
+  const fonts = {
+    major: { typeface: fallback.fonts.heading, eastAsian: fallback.fonts.cjk },
+    minor: { typeface: fallback.fonts.body, eastAsian: fallback.fonts.cjk },
+  }
+  if (!entry?.designContract) return { colors, fonts }
+  const path = resolve(dirname(catalogPath), entry.designContract)
+  if (!existsSync(path)) return { colors, fonts }
+  const design = JSON.parse(readFileSync(path, 'utf8'))
+  for (const slot of Object.keys(colors)) {
+    const ref = design.theme?.colors?.[slot]
+    if (ref === undefined) continue
+    const value = hexFrom(design.colors?.[ref] ?? ref)
+    if (!value) throw new Error(`Invalid declared theme color: ${slot}`)
+    colors[slot] = value
+  }
+  for (const slot of ['major', 'minor']) {
+    const ref = design.theme?.fonts?.[slot]
+    if (ref === undefined) continue
+    const role = design.fonts?.[ref]
+    if (!role?.latin) throw new Error(`Invalid declared theme font: ${slot}`)
+    fonts[slot] = { typeface: role.latin, ...(role.eastAsian ? { eastAsian: role.eastAsian } : {}) }
+  }
+  return { colors, fonts }
+}

@@ -7,6 +7,19 @@ import { skillPath, skillUrl } from '../helpers/common.mjs'
 
 const { buildRefurbishPlan } = await import(skillUrl('scripts/cli/refurbish/plan.mjs'))
 const { fontFamilyFrom } = await import(skillUrl('scripts/lib/refurbish/style.mjs'))
+const { themeFor } = await import(skillUrl('scripts/lib/refurbish/style.mjs'))
+
+test('fallback theme resolves every declared scheme slot and independent font role', () => {
+  const design = JSON.parse(readFileSync(skillPath('assets/deckkits/swiss-grid/design.json')))
+  const entry = { designContract: 'swiss-grid/design.json' }
+  const fallback = { palette: {}, fonts: {} }
+  const theme = themeFor(entry, fallback, skillPath('assets/deckkits/catalog.json'))
+  for (const [slot, role] of Object.entries(design.theme.colors)) {
+    assert.equal(theme.colors[slot], design.colors[role], slot)
+  }
+  assert.equal(theme.fonts.major.typeface, design.fonts.display.latin)
+  assert.equal(theme.fonts.minor.eastAsian, design.fonts.body.eastAsian)
+})
 
 test('sans serif descriptions never select the serif fallback', () => {
   assert.equal(fontFamilyFrom('Upright sans serif, 14pt body', 'Arial'), 'Arial')
@@ -40,8 +53,9 @@ test('custom catalog resolves design facts relative to itself and keeps explicit
       colors: { paper: 'F9F8F7', ink: '123456', highlight: 'AB4567', line: '456789' },
       fonts: {
         display: { latin: 'Custom Display', eastAsian: 'Custom CJK' },
-        body: { latin: 'Custom Sans' },
+        body: { latin: 'Custom Sans', eastAsian: 'Custom Body CJK' },
       },
+      theme: { colors: { accent1: 'highlight' }, fonts: { major: 'display', minor: 'body' } },
       refurbish: {
         palette: { background: 'paper', text: 'ink', accent: 'highlight', line: 'line' },
         fonts: { display: 'display', body: 'body', cjk: 'display' },
@@ -68,4 +82,8 @@ test('custom catalog resolves design facts relative to itself and keeps explicit
   assert.equal(fallback.fonts.heading, 'Custom Display')
   assert.equal(fallback.fonts.body, 'Custom Sans')
   assert.equal(fallback.fonts.cjk, 'Custom CJK')
+  const theme = themeFor(entry, fallback, catalog)
+  assert.equal(theme.colors.accent1, 'AB4567')
+  assert.equal(theme.fonts.major.eastAsian, 'Custom CJK')
+  assert.equal(theme.fonts.minor.eastAsian, 'Custom Body CJK')
 })

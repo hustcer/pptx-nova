@@ -493,6 +493,37 @@ function writeFidelityFixture(root, reviewedFindings) {
   return { source, candidate, sourceInspect, referenceMap, finalAudit, visionDiff, layout }
 }
 
+test('refurbish fidelity blocks worsened medium findings even with no fresh findings', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-fidelity-worsened-'))
+  const files = writeFidelityFixture(root, [])
+  const vision = JSON.parse(readFileSync(files.visionDiff))
+  vision.summary.byClass.worsened = { high: 0, medium: 1, low: 0 }
+  writeJson(files.visionDiff, vision)
+  const result = runNode(
+    [
+      join(skillRoot, 'scripts/cli/review/fidelity-gate.mjs'),
+      '--mode',
+      'refurbish',
+      '--source-inspect',
+      files.sourceInspect,
+      '--source-pptx',
+      files.source,
+      '--candidate-pptx',
+      files.candidate,
+      '--reference-map',
+      files.referenceMap,
+      '--final-audit',
+      files.finalAudit,
+      '--vision-diff',
+      files.visionDiff,
+      '--json',
+    ],
+    1,
+  )
+  assert.equal(JSON.parse(result.stdout).status, 'fail')
+  assert.ok(JSON.parse(result.stdout).errors.some((e) => e.code === 'vision-diff-new-issue'))
+})
+
 test('fidelity gate applies fingerprint-reviewed findings and binds evidence hashes', async () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-fidelity-review-'))
   const { reviewFindingSha256 } = await loadReviewPolicyModule()

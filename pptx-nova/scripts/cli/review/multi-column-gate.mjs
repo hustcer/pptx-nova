@@ -133,6 +133,40 @@ function readPngDimensions(path) {
   return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) }
 }
 
+function validateBlockingCounts(report, visionDiff) {
+  // Manual review cannot account for a blocker missing from the detailed evidence.
+  for (const classification of ['new', 'worsened']) {
+    const findings = asArray(visionDiff?.[`${classification}Issues`]).map(normalizedIssue)
+    for (const severity of ['high', 'medium']) {
+      const actual = findings.filter((item) => item?.severity === severity).length
+      const gateKey = `${classification}${severity === 'high' ? 'High' : 'Medium'}Issues`
+      for (const [field, claimed] of [
+        [
+          `summary.byClass.${classification}.${severity}`,
+          visionDiff?.summary?.byClass?.[classification]?.[severity],
+        ],
+        [`agentGate.${gateKey}`, visionDiff?.agentGate?.[gateKey]],
+      ]) {
+        if (
+          claimed !== undefined &&
+          (!Number.isInteger(claimed) || claimed < 0 || claimed !== actual)
+        ) {
+          issue(
+            report,
+            'vision-counts-mismatch',
+            'Vision blocker counts must match detailed findings before manual review can close them',
+            {
+              field,
+              claimed,
+              actual,
+            },
+          )
+        }
+      }
+    }
+  }
+}
+
 function validateBinding(report, label, actualPath, claimed, claimArtifactPath) {
   if (!existsSync(actualPath)) {
     issue(report, `${label}-missing`, `${label} evidence does not exist`, { path: actualPath })
@@ -278,6 +312,7 @@ function main() {
     )
   }
 
+  validateBlockingCounts(report, visionDiff)
   const findings = collectVisionFindings(visionDiff)
   if (
     visionDiff?.agentGate?.passed === false &&

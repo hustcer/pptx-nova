@@ -2,13 +2,14 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { mkdtempSync, writeFileSync, readFileSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { skillUrl, skillPath } from '../helpers/common.mjs'
+import { storedZip, contentTypes } from '../helpers/pptx-package.mjs'
 
 const { buildImageGeometryReport } = await import(skillUrl('scripts/lib/review/image-geometry.mjs'))
 
-function deck({ w = 4000000, h = 6000000, x = 0, crop = null, maskPreset = null } = {}) {
+function deck({ w = 4000000, h = 6000000, x = 0, crop = null, maskPreset = 'rect' } = {}) {
   return {
     slides: [
       {
@@ -69,6 +70,25 @@ test('missing geometry or crop disclosure is not a preservation pass', () => {
   assert.equal(report(deck(), invalid).status, 'fail')
 })
 
+test('custom or undisclosed picture masks cannot pass as equal preset geometry', () => {
+  const masked = (maskPreset) => {
+    const inspect = deck()
+    inspect.slides[0].shapes[0].image.maskPreset = maskPreset
+    return inspect
+  }
+  for (const maskPreset of [null, '', undefined]) {
+    for (const [source, candidate] of [
+      [masked(maskPreset), masked(maskPreset)],
+      [deck(), masked(maskPreset)],
+      [masked(maskPreset), deck()],
+    ]) {
+      const r = report(source, candidate)
+      assert.equal(r.status, 'fail')
+      assert.ok(r.issues.some((issue) => issue.code === 'picture-mask-undisclosed'))
+    }
+  }
+})
+
 test('candidate-only pictures do not alter the source-picture preservation scope', () => {
   const candidate = deck()
   candidate.slides[0].shapes.push({ ...candidate.slides[0].shapes[0], id: 10 })
@@ -110,3 +130,101 @@ test('CLI refuses overwriting input bytes through the report path or an alias', 
   assert.equal(readFileSync(source, 'utf8'), 'Source bytes')
   assert.equal(readFileSync(candidate, 'utf8'), 'Candidate bytes')
 })
+
+test(
+  'real inspect rejects changed custom masks while unchanged preset pictures still pass',
+  {
+    skip: !process.env.XDOC_TEST_BIN && 'Set XDOC_TEST_BIN to run executable contract tests',
+  },
+  () => {
+    const root = mkdtempSync(join(tmpdir(), 'nova-native-picture-mask-'))
+    const P = 'http://schemas.openxmlformats.org/presentationml/2006/main'
+    const A = 'http://schemas.openxmlformats.org/drawingml/2006/main'
+    const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+    const REL = 'http://schemas.openxmlformats.org/package/2006/relationships'
+    const custom = (points) =>
+      `<a:custGeom><a:avLst/><a:gdLst/><a:ahLst/><a:cxnLst/><a:rect l="0" t="0" r="1000" b="1000"/><a:pathLst><a:path w="1000" h="1000">${points.map(([x, y], i) => `<a:${i ? 'lnTo' : 'moveTo'}><a:pt x="${x}" y="${y}"/></a:${i ? 'lnTo' : 'moveTo'}>`).join('')}<a:close/></a:path></a:pathLst></a:custGeom>`
+    const deckBytes = (geometry) =>
+      storedZip([
+        [
+          '[Content_Types].xml',
+          contentTypes([
+            [
+              'ppt/presentation.xml',
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml',
+            ],
+            [
+              'ppt/slides/slide1.xml',
+              'application/vnd.openxmlformats-officedocument.presentationml.slide+xml',
+            ],
+            ['ppt/media/image1.png', 'image/png'],
+          ]),
+        ],
+        [
+          'ppt/presentation.xml',
+          `<p:presentation xmlns:p="${P}" xmlns:r="${R}"><p:sldIdLst><p:sldId id="256" r:id="slide"/></p:sldIdLst><p:sldSz cx="9144000" cy="5143500"/></p:presentation>`,
+        ],
+        [
+          'ppt/_rels/presentation.xml.rels',
+          `<Relationships xmlns="${REL}"><Relationship Id="slide" Type="${R}/slide" Target="slides/slide1.xml"/></Relationships>`,
+        ],
+        [
+          'ppt/slides/slide1.xml',
+          `<p:sld xmlns:p="${P}" xmlns:a="${A}" xmlns:r="${R}"><p:cSld><p:spTree><p:pic><p:nvPicPr><p:cNvPr id="7" name="Proof"/><p:cNvPicPr/><p:nvPr/></p:nvPicPr><p:blipFill><a:blip r:embed="image"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="100000" y="100000"/><a:ext cx="500000" cy="500000"/></a:xfrm>${geometry}</p:spPr></p:pic></p:spTree></p:cSld></p:sld>`,
+        ],
+        [
+          'ppt/slides/_rels/slide1.xml.rels',
+          `<Relationships xmlns="${REL}"><Relationship Id="image" Type="${R}/image" Target="../media/image1.png"/></Relationships>`,
+        ],
+        [
+          'ppt/media/image1.png',
+          Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j6GQAAAAASUVORK5CYII=',
+            'base64',
+          ),
+        ],
+      ])
+    for (const [name, geometry] of Object.entries({
+      source: custom([
+        [0, 0],
+        [1000, 0],
+        [1000, 1000],
+        [0, 1000],
+      ]),
+      candidate: custom([
+        [500, 0],
+        [1000, 1000],
+        [0, 1000],
+      ]),
+      preset: '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>',
+    }))
+      writeFileSync(join(root, `${name}.pptx`), deckBytes(geometry))
+    for (const [source, candidate, expected] of [
+      ['source', 'candidate', 'fail'],
+      ['preset', 'preset', 'pass'],
+    ]) {
+      const result = spawnSync(
+        process.execPath,
+        [
+          skillPath('scripts/cli/review/image-geometry-gate.mjs'),
+          '--source',
+          join(root, `${source}.pptx`),
+          '--candidate',
+          join(root, `${candidate}.pptx`),
+          '--xdoc-bin',
+          resolve(process.env.XDOC_TEST_BIN),
+          '--output',
+          join(root, `${source}-report.json`),
+          '--json',
+        ],
+        { encoding: 'utf8' },
+      )
+      assert.equal(result.status, expected === 'pass' ? 0 : 1, result.stderr || result.stdout)
+      const report = JSON.parse(result.stdout)
+      assert.equal(report.status, expected)
+      assert.equal(report.summary.picturesChecked, 1)
+      if (expected === 'fail')
+        assert.ok(report.issues.some((issue) => issue.code === 'picture-mask-undisclosed'))
+    }
+  },
+)

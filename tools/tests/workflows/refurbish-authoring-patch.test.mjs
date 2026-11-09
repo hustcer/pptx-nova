@@ -159,6 +159,7 @@ test('fallback-only inputs reject incompatible flags before running xdoc', () =>
     [['--allow-raw-xml'], /allow-raw-xml.*authoring-patch/],
     [['--assets', f.manifest], /assets.*authoring-patch/],
     [['--authoring-patch', join(f.root, 'missing.json')], /authoring patch.*not.*file/],
+    [['--proof-map', join(f.root, 'missing.json')], /proof map.*not.*file/],
   ]) {
     const result = runNodeStatus([...f.args, ...flags], 1, f.options)
     assert.match(result.stderr || result.stdout, message)

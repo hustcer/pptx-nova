@@ -148,6 +148,11 @@ The public release audit checks this layout and local module imports.
   Read compact stdout first, then `refurbish-run-summary.json.agentSummary` only when deeper phase
   evidence is needed.
 
+  Pass `--proof-map <path>` for retained proof shapes/tables. Keep the input outside the
+  fresh run directory; the runner validates the source hash and nonempty map, archives
+  `proof-objects.json` before probing xdoc, and checks it again before publication on
+  both routes. Recovery commands preserve the flag.
+
 - `cli/refurbish/fallback-patch.mjs` - generate generic inspect-driven
   fallback artifacts (`patch.json`, `deck_lock.json`, baseline
   `content-audit.json`, and `reference-map.json`) for DeckKits without native
@@ -306,7 +311,8 @@ The public release audit checks this layout and local module imports.
   inherited paint, groups and rotations require review. This is a disappearance
   guard, not a pixel, text-readability or animation-playback certificate.
   Refurbish compare publication recomputes any run-local proof map and blocks all
-  non-passing results. Unsupported proofs need the separate manual workflow checklist.
+  non-passing results; use the runner's `--proof-map` to supply it to a fresh run.
+  Unsupported proofs need the separate manual workflow checklist.
 
 - `cli/review/structure-check.mjs` - lightweight PPTX OOXML structure check. It
   scans XML inside the PPTX for expected font declarations, expected sRGB/theme

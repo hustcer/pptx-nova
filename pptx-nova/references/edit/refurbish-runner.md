@@ -38,8 +38,8 @@ feedback gate. Compare parts render concurrently (`--compare-concurrency`, defau
 makes the saved plan, commands, gates, and references consistently describe fallback execution. `auto`
 normally tries declared native support first; `native` never recovers through fallback.
 
-For source-bound `--authoring-patch` (plus `--assets` for file resources) and unchanged-evidence `--multi-column-review`, follow
-the [design-led handoff](refurbish-design-led.md#5-return-authored-composition-to-the-runner). Keep all gates.
+For source-bound `--authoring-patch` (plus `--assets`) and unchanged-evidence `--multi-column-review`, follow the [design-led handoff](refurbish-design-led.md#5-return-authored-composition-to-the-runner). Keep all gates.
+For protected proof shapes/tables, pass `--proof-map <path>` from outside the fresh run directory; see the [source-bound proof guard](../review/object-integrity.md#source-bound-proof-guard) for archival and publication checks.
 
 Do not add `--contact-diff` for ordinary full-deck review. The mandatory compare is complete; the
 compatibility alias is materialized from the same final evidence without another render.

@@ -126,6 +126,11 @@ unchanged media bytes prove preservation. Compare modified photos at full size b
 including proportions, crop, mask and tint. An authorized crop/replacement needs its own declared
 fit checks, not a false unchanged-appearance claim.
 
+The automatic mask check requires a disclosed preset name on both pictures. A `null`, blank or
+missing preset cannot establish unchanged geometry: custom paths can differ while both presets
+are `null`. The gate fails these cases as unverified; retain separate source/candidate-bound
+geometry and visual evidence rather than recording an automatic preservation pass.
+
 ## Review full-size composition, not only thumbnails
 
 Check dense and sparse affected pages. For agendas/lists, inspect first and last painted lines,
@@ -172,6 +177,12 @@ Use this guard when restyling/resizing retained proof shapes or tables risks era
 or desynchronizing native table dimensions. Put the supported subset at `<run-dir>/proof-objects.json`.
 Text-only changes do not by themselves require it. New-deck creation uses intent, semantic and PNG
 checks above; this source-identity guard is not applicable without a source.
+
+For a standard Refurbish runner, prepare the map outside the fresh run directory and pass
+`--proof-map <path>`. The runner validates its source binding and nonempty declarations, then
+archives it as `proof-objects.json` before probing xdoc. Both native and fallback routes retain
+the publication check; a missing or changed archive blocks publication. Do not prepopulate the
+fresh run directory with the map.
 
 ```json
 {

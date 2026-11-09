@@ -91,9 +91,15 @@ export function buildImageGeometryReport({
     else {
       if (JSON.stringify(beforeCrop) !== JSON.stringify(afterCrop))
         add('picture-crop-changed', 'Source picture crop offsets changed.')
-      if (shape.image.maskPreset !== target.image.maskPreset)
-        add('picture-mask-changed', 'Source picture mask geometry changed.')
     }
+    const masks = [shape.image?.maskPreset, target?.image?.maskPreset]
+    if (masks.some((mask) => typeof mask !== 'string' || !mask.trim()))
+      add(
+        'picture-mask-undisclosed',
+        'Custom or undisclosed picture masks require independent geometry evidence; equal null presets do not prove preservation.',
+      )
+    else if (masks[0] !== masks[1])
+      add('picture-mask-changed', 'Source picture mask geometry changed.')
     results.push({
       slideNumber: slide.index + 1,
       slidePart: slide.partName,
@@ -119,6 +125,7 @@ export function buildImageGeometryReport({
         'media bytes and relationships',
         'color/effects and theme-bound recoloring',
         'grouped picture transforms',
+        'custom mask geometry',
         'pixel-level appearance',
       ],
     },

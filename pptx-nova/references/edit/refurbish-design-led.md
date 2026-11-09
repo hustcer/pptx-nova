@@ -160,6 +160,9 @@ validation and uses its directory as `--asset-root` for dry-run and apply. Keep 
 relative to that directory, including any manifest `assetRoot` prefix (for example `assets/proof.svg`);
 xdoc rejects absolute paths. Keep these resource files stable through the run. The runner archives
 the source-bound patch before probing and preserves handoff flags in its recovery command.
+Pass the supported protected-object subset separately as `--proof-map <path>`; the runner archives
+that source-bound map before probing and checks it again at publication. Keep the input map outside
+the fresh run directory and unsupported objects in the separate manual checklist.
 Raw operations additionally require explicit `--allow-raw-xml` with `--authoring-patch`; prefer typed operations first and
 retain the raw route's structural/native checks. A supplied patch never enables raw XML implicitly.
 

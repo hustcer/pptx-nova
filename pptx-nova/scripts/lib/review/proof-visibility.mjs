@@ -108,6 +108,21 @@ function unresolvedShapeEffects(shape, properties) {
   )
 }
 
+export function proofMapIssues(proofMap, sourceSha256) {
+  const issues = []
+  if (proofMap?.sourceSha256 !== sourceSha256)
+    issues.push({
+      code: 'proof-map-source-stale',
+      message: 'Proof map must bind the current source SHA-256.',
+    })
+  if (!Array.isArray(proofMap?.proofObjects) || !proofMap.proofObjects.length)
+    issues.push({
+      code: 'proof-map-empty',
+      message: 'Declare at least one protected proof object; zero checks cannot pass.',
+    })
+  return issues
+}
+
 /** Bounded native shape silhouettes and table-grid geometry; unresolved inheritance is review-required. */
 export function buildProofVisibilityReport({ source, candidate, proofMap }) {
   const report = {
@@ -120,15 +135,8 @@ export function buildProofVisibilityReport({ source, candidate, proofMap }) {
     issues: [],
     results: [],
   }
-  const error = (code, message) => report.issues.push({ code, message })
-  if (proofMap?.sourceSha256 !== report.source.sha256)
-    error('proof-map-source-stale', 'Proof map must bind the current source SHA-256.')
+  report.issues.push(...proofMapIssues(proofMap, report.source.sha256))
   const declarations = proofMap?.proofObjects
-  if (!Array.isArray(declarations) || !declarations.length)
-    error(
-      'proof-map-empty',
-      'Declare at least one protected proof object; zero checks cannot pass.',
-    )
   if (report.issues.length) return report
   const a = readPptxPackage(source),
     b = readPptxPackage(candidate)

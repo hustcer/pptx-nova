@@ -45,6 +45,7 @@ import { buildRefurbishPlan } from './plan.mjs'
 import { validateAuthoringPatch } from '../../lib/refurbish/authoring-patch.mjs'
 import { resolveFilesystemPath } from '../../lib/runtime/filesystem-paths.mjs'
 import { verifyMultiColumnEvidence } from '../../lib/review/multi-column-evidence.mjs'
+import { proofMapIssues } from '../../lib/review/proof-visibility.mjs'
 import { evaluateReviewPolicy, hasEmbeddedReviewedFindings } from '../../lib/review/policy.mjs'
 
 const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
@@ -91,6 +92,7 @@ Options:
   --authoring-patch <path> Complete source-bound design-led patch; forces fallback and retains all gates
   --assets <path>         Asset manifest for the authored patch; paths are relative to its directory
   --multi-column-review <path> Carry identical-evidence judgments; forces fallback
+  --proof-map <path>      Source-bound protected proof objects; archived before execution and checked before publication
   --allow-raw-xml         Explicitly allow raw ops in the authored patch; structural/native review still required
   --xdoc-bin <path>       xdoc executable. Defaults to xdoc
   --readiness-out <path>  Optional benchmark output for a full delivery readiness audit
@@ -129,6 +131,7 @@ function parseArgs(argv) {
     authoringPatch: '',
     assets: '',
     multiColumnReview: '',
+    proofMap: '',
     allowRawXml: false,
     xdocBin: 'xdoc',
     readinessOut: '',
@@ -216,6 +219,7 @@ const valueFlags = {
   '--authoring-patch': 'authoringPatch',
   '--assets': 'assets',
   '--multi-column-review': 'multiColumnReview',
+  '--proof-map': 'proofMap',
   '--xdoc-bin': 'xdocBin',
   '--readiness-out': 'readinessOut',
   '--review-policy': 'reviewPolicy',
@@ -638,6 +642,7 @@ function buildAgentSummary(summary) {
       'nativeReport',
       'fallbackReport',
       'patch',
+      'proofMap',
       'dryRun',
       'apply',
       'visionDiff',
@@ -843,6 +848,7 @@ function normalizeArgs(args) {
     multiColumnReview: args.multiColumnReview
       ? resolveFilesystemPath(args.multiColumnReview, cwd)
       : '',
+    proofMap: args.proofMap ? resolveFilesystemPath(args.proofMap, cwd) : '',
   }
   normalized.runDir = args.runDir ? resolve(cwd, args.runDir) : defaultRunDir(normalized, cwd)
   return normalized
@@ -853,6 +859,7 @@ function validatePaths(args) {
     ['authoringPatch', 'authoring patch'],
     ['assets', 'assets manifest'],
     ['multiColumnReview', 'multi-column review'],
+    ['proofMap', 'proof map'],
   ]) {
     if (args[key] && (!existsSync(args[key]) || !statSync(args[key]).isFile()))
       throw new Error(`${label} does not exist or is not a file: ${args[key]}`)
@@ -907,6 +914,7 @@ function artifactPaths(runDir) {
     fallbackReport: join(runDir, 'fallback-patch-report.json'),
     patch: join(runDir, 'patch.json'),
     authoringPatch: join(runDir, 'authoring-patch-input.json'),
+    proofMap: join(runDir, 'proof-objects.json'),
     deckLock: join(runDir, 'deck_lock.json'),
     contentAuditBaseline: join(runDir, 'content-audit.json'),
     referenceMap: join(runDir, 'reference-map.json'),
@@ -969,6 +977,7 @@ function initialSummary(args, artifacts) {
       '--authoring-patch': args.authoringPatch,
       '--assets': args.assets,
       '--multi-column-review': args.multiColumnReview,
+      '--proof-map': args.proofMap,
       '--allow-raw-xml': args.allowRawXml,
     },
     artifacts: Object.fromEntries(Object.entries(artifacts).map(([key, path]) => [key, path])),
@@ -2125,6 +2134,19 @@ function runRefurbishCompare(summary, args, artifacts, inspect) {
 }
 
 function runRefurbishCompareGate(summary, args, artifacts) {
+  if (args.proofMap) {
+    const expected = summary.phases.find((phase) => phase.name === 'proof-map-snapshot')?.details
+      ?.sha256
+    const actual =
+      existsSync(artifacts.proofMap) && statSync(artifacts.proofMap).isFile()
+        ? sha256(artifacts.proofMap)
+        : null
+    requireGate(summary, 'proof-map-binding', Boolean(expected && actual === expected), {
+      expectedSha256: expected ?? null,
+      actualSha256: actual,
+      message: 'The supplied proof map must remain present and unchanged before publication',
+    })
+  }
   const report = runJsonPhase(summary, {
     name: 'refurbish-compare-delivery',
     bin: process.execPath,
@@ -2229,6 +2251,19 @@ function runRefurbish(inputArgs) {
       durationMs: durationMs(sourceSnapshotStarted),
       bytes: statSync(artifacts.sourceSnapshot).size,
     })
+    if (args.proofMap) {
+      const proofMap = readJson(args.proofMap, 'proof map')
+      writeJson(artifacts.proofMap, proofMap)
+      const issues = proofMapIssues(proofMap, sha256(artifacts.sourceSnapshot))
+      requireGate(summary, 'proof-map', issues.length === 0, {
+        issues,
+        message: issues.map((issue) => issue.message).join('; '),
+      })
+      addInternalPhase(summary, 'proof-map-snapshot', 'passed', {
+        artifact: relativeArtifact(args.runDir, artifacts.proofMap),
+        sha256: sha256(artifacts.proofMap),
+      })
+    }
     if (args.authoringPatch) {
       const patch = validateAuthoringPatch(readJson(args.authoringPatch, 'authoring patch'), {
         sourceSha256: sha256(artifacts.sourceSnapshot),

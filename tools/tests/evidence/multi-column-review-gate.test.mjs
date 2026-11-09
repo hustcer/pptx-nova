@@ -102,7 +102,7 @@ function fixture(options = {}) {
 }
 
 function run(item) {
-  return spawnSync(
+  const result = spawnSync(
     process.execPath,
     [
       script,
@@ -116,6 +116,8 @@ function run(item) {
     ],
     { cwd: repoRoot, encoding: 'utf8' },
   )
+  assert.deepEqual(JSON.parse(result.stdout || result.stderr), verifyMultiColumnEvidence(item))
+  return result
 }
 
 test('multi-column review gate passes when every review-only blocker has bound full-size evidence', () => {

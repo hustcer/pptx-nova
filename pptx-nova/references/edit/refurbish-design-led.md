@@ -45,10 +45,44 @@ Apply the design at all these layers:
 | Identity    | The kit's real signature geometry, markers, palette and chapter/closing treatments    |
 | Inheritance | Theme plus visible master/layout artwork, explicit cell/run styles and old chrome     |
 
+When a mechanical fallback derives a theme from its small refurbishment palette, compare the emitted
+`set-theme` colors and major/minor font families with `design.json.theme`. Resolve the declared color
+and font role references, including each role's East Asian family; a generic accent order or a single
+CJK fallback can change inherited artwork, tables, photos with theme-bound duotones and body text.
+Freeze source-picture color/effect roles before changing their theme context: resolve theme-bound
+duotones to equivalent local colors when necessary, retaining the original transforms and media.
+Repair mismatches in the current authoring patch before judging target identity. A valid fallback
+report proves execution, not equivalence to the kit's complete theme contract.
+
 Do not treat the mechanical fallback as the design itself. Inspect-driven color/font replacement
 is a useful baseline; it commonly needs object-level recomposition. Do not apply a uniform
 coordinate multiplier and call the retained source grid a new design. A canvas change also requires
 text, equations, tables and images to be fitted independently rather than merely scaling frames.
+
+### Preserve source-picture appearance
+
+Default to movement and **uniform** scaling of source pictures. Preserve their original crop, mask,
+rotation/flip, border/effects and visible color treatment unless the user authorizes a change. A
+new DeckKit is permission to recompose the page, not to fill every image slot by independently
+setting width and height. For a source frame `(w, h)`, choose one scale `s` and derive `(s*w, s*h)`;
+if it does not fit, change the surrounding composition or leave whitespace. If the user requires
+unchanged size, use `s=1`. Do not silently switch to cover/crop or alter a person's proportions.
+
+For source-preserving refurbishment with slide-local pictures, run after the stable candidate:
+
+```bash
+node <skill-root>/scripts/cli/review/image-geometry-gate.mjs \
+  --source source.pptx --candidate candidate.pptx \
+  --output <run-dir>/image-geometry-gate.json --json
+```
+
+Require `status=pass` for the checked pictures before recording `assetFit=pass`. The helper freshly
+inspects both hashed files, allows translation and uniform scale within one-EMU rounding, and rejects
+changed crop/mask, stretching and unresolved original identities. It covers slide-local pictures;
+group transforms, remapped identities, media bytes, color/effects and pixel appearance need separate
+bound evidence. Do not treat excluded coverage or `not-applicable` as image-preservation proof.
+Compare every modified photograph beside the original at full size: faces/body proportions, crop,
+mask and tint must agree. Theme changes can recolor a picture even when its bytes and crop match.
 
 An empty `textPreview` does not prove that an object is disposable: it may contain native OMML,
 OLE or a cached diagram. Conversely, `hasText` may only mean an empty text frame exists. Classify
@@ -56,6 +90,14 @@ decorative frames using their actual structure and role before clearing their vi
 Inherited layout/master shapes may be absent from the slide-local object list. Preserve content
 and resource ownership when using a scoped raw-XML repair; follow the raw-XML reference and retain
 the exact input, patch, dry-run/apply and structural evidence.
+
+Dynamic text fields need the same distinction. A populated slide-number/date field can have empty
+`textPreview` and `fontFacts`, and its `a:fld/a:rPr` may retain inherited styling after an ordinary
+text-frame font edit. Check the actual field text/style and rendered output before calling it empty
+or successfully recolored. Prefer a disclosed field-aware operation; if a bounded raw repair is
+needed, preserve the field identity/type/text and follow the raw-XML evidence route. For a diagnostic
+that still labels verified fields, pictures or tables as empty, use the existing exact finding-bound
+review policy with XML/readback and PNG evidence; do not suppress all placeholders or delete them.
 
 ## 3. Test representative pages before the full pass
 
@@ -78,6 +120,15 @@ Ask three concrete questions:
 
 When the answer fails, repair the composition/source mapping. Do not add more decoration or
 declare `targetDeckkitApplied=pass` merely because machine gates passed.
+
+For agendas, lists and other sparse pages, full-size review must check the **first and last painted
+lines**, list rhythm and the balance of occupied regions. Reset inherited paragraph before/after
+spacing and line spacing when adopting a new type scale; changing only font size or space-after
+can leave the old master controlling the list height. Use a coherent row pitch or open ledger,
+align numbers with their corresponding rows, and reserve clear breathing room above footer rules.
+A text frame inside the page, unchanged text, `vision=0`, or a small contact-sheet thumbnail does
+not prove the final line has enough space. Review every changed sparse page at readable size,
+not only the densest page; never mark spacing/assetFit as pass from a contact sheet alone.
 
 ## 4. Verify content independently of appearance
 

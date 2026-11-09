@@ -244,3 +244,34 @@ does not prove codepoint coverage. SVG formula/image text needs resolved PDF fon
 bytes independently of browser CSS font readiness; inspect local SVG text and
 inherited inline styles, and do not assume external images/stylesheets were
 fetched. See `../review/export-and-check.md` for the distinct font-evidence boundaries.
+
+## Diagnose native equation metrics
+
+For an imported equation, keep its OMML and authored frame while diagnosing a
+preview difference. The creation policies above do not authorize converting an
+existing editable equation into a formula image.
+
+Distinguish three facts: the declared math family, the effective inherited point
+size, and the glyphs/metrics actually used by each consumer. Inspect OMML run and
+control properties plus paragraph/list/presentation defaults; a nearby label's
+size or an end-paragraph property alone does not establish the equation's size.
+A successful ordinary-font report, or no reported substitution, does not prove
+that the mathematical glyph path used that family. Record missing math-font
+coverage as unverified; installing the declared font need not change a renderer
+that uses built-in mathematical outlines.
+
+Compare a complete expression first, then operator ink, limits/scripts and host
+anchoring separately. Display style, n-ary limit placement and physical point
+size are separate decisions. Different operator variants and font-specific MATH
+metrics can change height without a font-size change; repeated synthetic margins
+can accumulate width without changing any authored spaces. A single crop's
+width/height ratio cannot identify either cause.
+
+For an independent comparison, retain the same PPTX hash, logical slide/object,
+DPI and rasterizer identity; rasterizing both exported PDFs with the same engine
+helps isolate layout from antialiasing. Reduce to one native expression in a new
+diagnostic copy and retain the original OMML. Do not substitute a LaTeX rewrite,
+shrink the authored font or scale the screenshot to make the evidence agree.
+Report a corrected spacing defect separately from remaining font/variant or
+script-layout differences; neither a passing structural check nor one improved
+bounding box establishes PowerPoint-equivalent mathematics.

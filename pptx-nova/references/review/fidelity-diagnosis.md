@@ -290,8 +290,10 @@ Use these only for the affected content; compare original and candidate with the
   Check merged perimeters and explicit overrides before adding borders or replacing the table.
 - **Equations:** preserve explicit n-ary limit placement, display-style operator size,
   Word run properties inside OMML, singleton child collections and equation-array delimiter
-  ownership. Missing-glyph fallback metrics can change bounds across renderers. Rendering an
-  imported equation does not expand the native formula-authoring subset in `../content/formulas.md`.
+  ownership. Check effective inherited size and actual math-glyph/font coverage separately
+  from ordinary-font reports; follow [native equation metrics](../content/formulas.md#diagnose-native-equation-metrics)
+  to isolate operator, script and spacing differences. Rendering an imported equation does
+  not expand the native formula-authoring subset.
 - **Paint and playback:** picture opacity/outward outlines, inherited stroke geometry,
   unequal-ellipse arc angles, curved/short-path markers, physical pattern sampling, tile
   mirroring, gradient weights and rounded/reflection clips can change without source edits.

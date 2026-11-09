@@ -248,7 +248,8 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
 - **Template / Reference Create**: Template following edits copied/inherited objects; Reference Create
   treats the reference as read-only style/layout evidence for new content.
 - **Refurbish**: Preserve the source as read-only content truth, apply the selected DeckKit visibly to
-  editable objects, and never rasterize, downgrade content, or silently switch DeckKits.
+  editable objects, and never rasterize, downgrade content, or silently switch DeckKits. A named kit
+  requires its actual showcase identity and composition; the runner's design-led route owns this review.
 - **Edit / Micro Edit / Animation**: Inspect before patching. Micro edits use the short contract path;
   animation changes stay inside the capability-declared safe subset.
   Use reported part identities and current inspect order for slide/layout/master selectors;

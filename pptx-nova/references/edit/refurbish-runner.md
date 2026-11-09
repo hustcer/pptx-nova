@@ -11,6 +11,12 @@ the execution boundary: it chooses a route, validates fidelity, binds publicatio
 - Never preserve content by inserting source-slide screenshots or opaque page overlays.
 - Let the compare gate publish the final PPTX. Do not copy or overwrite it afterward.
 
+## Target design before execution
+
+For a named target DeckKit or a DeckKit-native redesign goal, use
+[design-led refurbishment](refurbish-design-led.md) for the source/design map, representative-page
+review and independent content-equivalence checks.
+
 ## Standard command
 
 Check that the requested final path does not already exist, then run:
@@ -115,6 +121,8 @@ instead of always opening every published byte:
 Confirm:
 
 - the target DeckKit is visually apparent across the deck;
+- inspect inherited layout/master artwork and native table-cell styles when old chrome survives;
+  slide-local remapping is insufficient. Repair the scoped objects and renew candidate-bound evidence;
 - the requested display/body font roles are actually applied: inspect the visible title and subtitle
   `fontFacts`, not only the theme fonts. For Cartesian, verify regular Playfair Display headlines and
   Inter supporting text. A successful skin report does not establish this visual identity;

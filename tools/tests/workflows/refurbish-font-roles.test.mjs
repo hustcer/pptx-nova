@@ -101,3 +101,10 @@ test('DeckKits with bold display typography retain bold headings and metrics', (
     assert.equal(font.bold, true, names[i])
   })
 })
+
+test('fallback patch applies the declared design font roles without a registered skin profile', () => {
+  const fonts = fontsFor(['S1_title', 'S1_subtitle', 'S1_PageNum'], 'paper-scholar')
+  for (const font of fonts) {
+    assert.equal(font.name, 'Arial')
+  }
+})

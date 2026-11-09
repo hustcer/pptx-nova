@@ -1,3 +1,9 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { SKILL_ROOT } from '../runtime/skill-paths.mjs'
+
+const CATALOG_PATH = join(SKILL_ROOT, 'assets/deckkits/catalog.json')
+
 const NAMED_COLORS = [
   ['near black', '111111'],
   ['ink black', '111111'],
@@ -120,15 +126,15 @@ export function fontFamilyFrom(value, fallback, label = 'font', warnings = []) {
     warnings.push(`No concrete ${label} font family found; using Courier New for mono typography.`)
     return 'Courier New'
   }
+  if (/\bsans(?:[ -]serif)?\b/i.test(value)) {
+    warnings.push(`No concrete ${label} font family found; using ${fallback} for sans typography.`)
+    return fallback
+  }
   if (/\bserif\b/i.test(value)) {
     warnings.push(
       `No concrete ${label} font family found; using Times New Roman for serif typography.`,
     )
     return 'Times New Roman'
-  }
-  if (/\bsans\b/i.test(value)) {
-    warnings.push(`No concrete ${label} font family found; using ${fallback} for sans typography.`)
-    return fallback
   }
   warnings.push(
     `Could not derive a concrete ${label} font family from "${value}"; using ${fallback}.`,
@@ -162,7 +168,44 @@ function warningCoveredByProfile(warning, profileFallback) {
   return false
 }
 
-export function genericFallbackFor(entry) {
+function designFallbackFor(entry, catalogPath) {
+  if (!entry?.designContract) return null
+  const path = resolve(dirname(catalogPath), entry.designContract)
+  if (!existsSync(path)) return null
+  const design = JSON.parse(readFileSync(path, 'utf8'))
+  const mapping = design.refurbish
+  if (!isPlainObject(mapping)) return null
+  const palette = {}
+  const colorRoles = {
+    background: 'background',
+    text: 'text',
+    accent: 'accent',
+    softAccent: 'surface',
+    secondary: 'muted',
+    surface: 'surface',
+    rule: 'line',
+  }
+  for (const [target, role] of Object.entries(colorRoles)) {
+    const ref = mapping.palette?.[target] ?? mapping.palette?.[role]
+    const color = hexFrom(design.colors?.[ref] ?? ref)
+    if (color) palette[target] = color
+  }
+  const fonts = {}
+  for (const [target, role] of Object.entries({
+    heading: 'display',
+    body: 'body',
+    label: 'body',
+    cjk: 'cjk',
+  })) {
+    const ref = mapping.fonts?.[target] ?? mapping.fonts?.[role]
+    const font = design.fonts?.[ref]
+    const family = target === 'cjk' ? font?.eastAsian : font?.latin
+    if (typeof family === 'string' && family.trim()) fonts[target] = family
+  }
+  return { source: 'generic-design-contract', palette, fonts }
+}
+
+export function genericFallbackFor(entry, catalogPath = CATALOG_PATH) {
   const colors = entry?.visualGrammar?.colorSystem ?? {}
   const typography = entry?.visualGrammar?.typography ?? {}
   const warnings = []
@@ -187,7 +230,7 @@ export function genericFallbackFor(entry) {
     warnings,
   )
   const softAccent = firstColor(asArray(colors.accent).slice(1), 'EFE2B7', 'soft accent', warnings)
-  return {
+  const generic = {
     schemaVersion: 'pptx-nova-refurbish-fallback/v1',
     source: 'generic-visual-grammar',
     strategy: 'inspect-driven-editable-object-restyle',
@@ -225,10 +268,19 @@ export function genericFallbackFor(entry) {
     contentPolicy: 'preserve-source-slides-and-editable-objects',
     derivationWarnings: warnings,
   }
+  const design = designFallbackFor(entry, catalogPath)
+  if (!design) return generic
+  return {
+    ...generic,
+    ...design,
+    palette: { ...generic.palette, ...design.palette },
+    fonts: { ...generic.fonts, ...design.fonts },
+    derivationWarnings: warnings.filter((warning) => !warningCoveredByProfile(warning, design)),
+  }
 }
 
-export function mergeFallbackFor(entry, profileFallback) {
-  const generic = genericFallbackFor(entry)
+export function mergeFallbackFor(entry, profileFallback, catalogPath = CATALOG_PATH) {
+  const generic = genericFallbackFor(entry, catalogPath)
   if (!isPlainObject(profileFallback)) return generic
   const derivationWarnings = generic.derivationWarnings.filter(
     (warning) => !warningCoveredByProfile(warning, profileFallback),
@@ -243,6 +295,6 @@ export function mergeFallbackFor(entry, profileFallback) {
   }
 }
 
-export function fallbackFor(entry) {
-  return mergeFallbackFor(entry, entry?.refurbishProfile?.fallback)
+export function fallbackFor(entry, catalogPath = CATALOG_PATH) {
+  return mergeFallbackFor(entry, entry?.refurbishProfile?.fallback, catalogPath)
 }

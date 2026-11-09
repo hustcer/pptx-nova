@@ -499,7 +499,7 @@ function buildArtifacts(args) {
   const inspect = readJson(args.inspect)
   const chromeDetect = readChromeDetect(args.chromeDetect)
   const chrome = chromeModelFrom(chromeDetect)
-  const fallback = fallbackFor(entry)
+  const fallback = fallbackFor(entry, args.catalog)
   const warnings = [...(fallback.derivationWarnings ?? []), ...chrome.warnings]
   const ops = []
   const palette = fallback.palette

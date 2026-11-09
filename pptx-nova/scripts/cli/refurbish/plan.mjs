@@ -109,10 +109,10 @@ function nativeSkinningFor(entry) {
   }
 }
 
-function profileFor(entry, nativeSkinning) {
+function profileFor(entry, nativeSkinning, catalogPath) {
   const profile = entry?.refurbishProfile
   if (!isPlainObject(profile)) {
-    const fallback = nativeSkinning.supported ? null : genericFallbackFor(entry)
+    const fallback = nativeSkinning.supported ? null : genericFallbackFor(entry, catalogPath)
     return {
       present: false,
       mode: nativeSkinning.supported ? 'native' : 'manual-fallback',
@@ -135,10 +135,10 @@ function profileFor(entry, nativeSkinning) {
       }
     : nativeSkinning
   const fallback = isPlainObject(profile.fallback)
-    ? mergeFallbackFor(entry, profile.fallback)
+    ? mergeFallbackFor(entry, profile.fallback, catalogPath)
     : profileNative.supported
       ? null
-      : genericFallbackFor(entry)
+      : genericFallbackFor(entry, catalogPath)
   const result = {
     present: true,
     mode: profile.mode ?? (nativeSkinning.supported ? 'native' : 'manual-fallback'),
@@ -265,7 +265,7 @@ export function buildRefurbishPlan(args) {
     throw new Error('route must be one of auto|native|fallback')
   }
   const nativeSkinning = nativeSkinningFor(entry)
-  const catalogProfile = profileFor(entry, nativeSkinning)
+  const catalogProfile = profileFor(entry, nativeSkinning, args.catalog)
   const selectedRoute =
     requestedRoute === 'fallback'
       ? 'fallback-patch'
@@ -276,7 +276,7 @@ export function buildRefurbishPlan(args) {
           : 'fallback-patch'
   const usesFallback = selectedRoute === 'fallback-patch'
   const selectedFallback =
-    catalogProfile.fallback ?? (usesFallback ? genericFallbackFor(entry) : null)
+    catalogProfile.fallback ?? (usesFallback ? genericFallbackFor(entry, args.catalog) : null)
   const profile = {
     ...catalogProfile,
     fallback: selectedFallback,

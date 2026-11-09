@@ -37,6 +37,7 @@ Existing-deck changes, template following, refurbishment and guarded patch opera
 - [Native shape editing](edit/native-shape-editing.md) — Native connector sites, exact group transforms, OLE/model preview geometry, and object-copy ownership
 - [Font normalization](edit/font-normalization.md) — Chinese/East Asian selection, document-level Edit Contract, ambiguity review and full-deck font checks
 - [Refurbish runner](edit/refurbish-runner.md) — Compact standard refurbish route, Agent output, comparison reuse, failure-driven disclosure, and review boundary
+- [Design-led refurbishment](edit/refurbish-design-led.md) — Target showcase identity, source-object recomposition, representative-page review and independent content equivalence
 - [Session rules](edit/session-rules.md) — Explicit current-deck future/carryover rules, revision lifecycle, deterministic resolver, and Edit Contract integration
 - [Template following and slide copy](edit/template-following.md) — Strict template following: copy source slides, edit inherited objects, placeholder QA
 - [Patch operations quick reference](edit/patch-ops-cheatsheet.md) — Patch op quick reference

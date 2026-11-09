@@ -113,6 +113,12 @@ test('refurbish fallback prunes only inspect-proven exact theme and solid-fill n
   const source = join(root, 'source.pptx')
   const inspectPath = join(root, 'inspect.json')
   const patchPath = join(root, 'patch.json')
+  // This fixture tests pruning against its frozen visual-grammar palette.
+  const catalogPath = join(root, 'catalog.json')
+  const catalog = JSON.parse(readFileSync(skillPath('assets/deckkits/catalog.json'), 'utf8'))
+  const entry = { ...catalog.entries.find((item) => item.id === 'cartesian') }
+  delete entry.designContract
+  writeJson(catalogPath, { entries: [entry] })
   writeFileSync(source, 'fake pptx')
   writeJson(inspectPath, {
     schemaVersion: 'pptx-inspect/v1',
@@ -184,6 +190,8 @@ test('refurbish fallback prunes only inspect-proven exact theme and solid-fill n
     skillPath('scripts/cli/refurbish/fallback-patch.mjs'),
     '--deckkit',
     'cartesian',
+    '--catalog',
+    catalogPath,
     '--source',
     source,
     '--inspect',

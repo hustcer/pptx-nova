@@ -336,8 +336,10 @@ xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --overwrite --dry
 xdoc pptx apply -p patch.json -i source.pptx -o candidate.pptx --overwrite --json > apply.json
 ```
 
-该脚本优先读取 `refurbishProfile.fallback`；若 DeckKit 没有专用 fallback，则从
-`visualGrammar.colorSystem` / `visualGrammar.typography` 合成通用 palette、字体和对象保留策略。
+该脚本优先读取 `refurbishProfile.fallback`；未覆盖的颜色与字体优先读取 catalog 相对路径
+`designContract` 的 `refurbish.palette` / `refurbish.fonts`，解析 `colors` / `fonts` 中的角色引用。
+只有缺失的字段才从 `visualGrammar.colorSystem` / `visualGrammar.typography` 推导。
+核对 plan 的最终 palette/fonts 与设计事实，不能用描述文字猜测的近似值覆盖已声明的设计值。
 这条路线服务所有 DeckKit，不能在脚本里对单个 DeckKit id 做硬编码特判。`content-audit.json`
 是 apply 前的保留基线和操作计划，最终交付仍必须由 `content-audit-final.json` 证明。
 

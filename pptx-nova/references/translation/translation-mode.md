@@ -201,6 +201,20 @@ as `highRiskShortWords` warnings, not as a built-in business dictionary and
 not as automatic translation decisions. Review those warnings manually even
 when the machine gate passes.
 
+All-capital headings can also look like acronyms. Review the extracted tokens
+before filling: when a token is ordinary prose, supply an explicit exact-token
+glossary mapping (for example `ANNUAL` → `年度`) at preparation start. The
+mapping overrides only acronym-only inference; URLs, filenames, inline code,
+QNames and other syntax retain protection. The mapped target is still required
+by the glossary gate. Do not retain English heading words just to satisfy a
+false positive or remove the constraints gate. If a glossary is already bound,
+start a fresh preparation run with the revised glossary and reuse the reviewed
+fill by exact memory/source identities; preserve the earlier run as evidence.
+Use `match: "substring"` for glossary terms embedded in continuous Chinese or
+Japanese text; `term` enforces Unicode word boundaries and can reject a valid
+term inside a longer unspaced phrase. This setting does not permit partial-token
+acronym overrides: the glossary source must still equal the entire inferred token.
+
 Then resume with `--apply`. The runner revalidates source bytes, classified-unit
 bytes, languages, every source hash, and the translation constraints before
 producing a stable prepared candidate. Feed that candidate, the emitted
@@ -902,6 +916,17 @@ alignment, chart/table structure, and other style signatures were not changed.
 ## Chart And Table Coverage
 
 Charts are a frequent translation blind spot.
+
+A passed candidate consistency gate proves the inventoried units, not every
+string painted by Office or a renderer. Compare rendered chart labels with the
+inventory as well: generated semantic legends (for example a waterfall's
+increase/decrease/total keys) may have no stored text node. Discover the current
+scan/replacement contract before assuming a generated label is editable. If it
+has no supported selector, retain the native chart, record the exact residual
+label and affected slide as an unresolved capability limit, and do not claim a
+fully localized deck. Do not hide it with overlays, rewrite chart data, or
+weaken the coverage gate. Generated default titles have their own guarded route
+below; support for those titles does not imply support for every generated label.
 
 - `inspect` can report chart objects without exposing chart title, series,
   categories, data labels, or workbook cache text.

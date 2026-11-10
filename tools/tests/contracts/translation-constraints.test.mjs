@@ -98,6 +98,102 @@ test('project glossary validation is normalized and target-language bound', () =
   )
 })
 
+test('an explicit glossary translates inferred uppercase prose without waiving technical syntax', () => {
+  const sourceText = 'ANNUAL SUMMARY / API / `REPORT` / API.json'
+  const glossary = {
+    schemaVersion: 'pptx-nova-translation-glossary/v1',
+    targetLang: 'de',
+    entries: [
+      { source: 'ANNUAL', target: 'Jährlicher', match: 'substring' },
+      { source: 'SUMMARY', target: 'Bericht' },
+      { source: 'REPORT', target: 'Bericht' },
+      { source: 'API', target: 'API' },
+      { source: 'API.json', target: 'Datei' },
+    ],
+  }
+  const constraints = buildTranslationConstraints(memory([sourceText]), { glossary })
+  assert.equal(
+    constraints.entries[0].protectedTokens.some((x) => x.token === 'ANNUAL'),
+    false,
+  )
+  assert.equal(
+    constraints.entries[0].protectedTokens.some((x) => x.token === 'REPORT'),
+    true,
+  )
+  assert.equal(
+    constraints.entries[0].protectedTokens.some((x) => x.token === 'API.json'),
+    true,
+  )
+  const result = validateTranslationConstraints(
+    translations([
+      {
+        sourceText,
+        targetText: 'Jährlicher Bericht / API / `REPORT` / API.json (Datei)',
+      },
+    ]),
+    constraints,
+  )
+  assert.equal(result.agentGate.passed, true)
+  assert.equal(
+    validateTranslationConstraints(
+      translations([
+        {
+          sourceText,
+          targetText: 'Jährlicher Bericht / API / `REPORT` / Datei',
+        },
+      ]),
+      constraints,
+    ).agentGate.passed,
+    false,
+  )
+  assert.equal(
+    buildTranslationConstraints(memory(['ANNUAL REPORT'])).entries[0].protectedTokens.length,
+    2,
+  )
+})
+
+test('CJK substring glossary mappings accept continuous target prose but cannot waive part of a token', () => {
+  const glossary = {
+    schemaVersion: 'pptx-nova-translation-glossary/v1',
+    targetLang: 'de',
+    entries: [
+      { source: 'ANNUAL', target: '年度', match: 'substring' },
+      { source: 'REPORT', target: '报告', match: 'substring' },
+      { source: 'XML', target: '标记语言', match: 'substring' },
+    ],
+  }
+  const sourceText = 'ANNUAL REPORT / OOXML'
+  const constraints = buildTranslationConstraints(memory([sourceText]), { glossary })
+  assert.deepEqual(
+    constraints.entries[0].protectedTokens.map((x) => x.token),
+    ['OOXML'],
+  )
+  assert.equal(
+    validateTranslationConstraints(
+      translations([
+        {
+          sourceText,
+          targetText: '年度报告 / OOXML（标记语言）',
+        },
+      ]),
+      constraints,
+    ).agentGate.passed,
+    true,
+  )
+  assert.equal(
+    validateTranslationConstraints(
+      translations([
+        {
+          sourceText,
+          targetText: '年度报告 / 标记语言',
+        },
+      ]),
+      constraints,
+    ).agentGate.passed,
+    false,
+  )
+})
+
 test('protected token and glossary violations fail closed while short words remain warnings', () => {
   const sourceMemory = memory(['Use OOXML with `holeSize` in deck.json', 'bug', 'Mar'])
   const glossary = {

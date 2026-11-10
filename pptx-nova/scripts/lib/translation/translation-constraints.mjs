@@ -228,8 +228,23 @@ export function buildTranslationConstraints(
   let protectedTokenCount = 0
   let glossaryRuleCount = 0
   for (const memoryEntry of memory.entries ?? []) {
-    const protectedTokens = extractProtectedTokens(memoryEntry.sourceText)
     const glossaryEntries = applicableGlossaryEntries(memoryEntry.sourceText, normalizedGlossary)
+    // Capitalization alone cannot distinguish headings from acronyms. An explicit
+    // exact-token glossary mapping outranks that heuristic, but never code/URL syntax.
+    const protectedTokens = extractProtectedTokens(memoryEntry.sourceText).filter(
+      (token) =>
+        !(
+          token.kinds.length === 1 &&
+          token.kinds[0] === 'acronym' &&
+          glossaryEntries.some(
+            (entry) =>
+              (entry.caseSensitive
+                ? entry.source === token.token
+                : entry.source.toLowerCase() === token.token.toLowerCase()) &&
+              entry.target !== token.token,
+          )
+        ),
+    )
     const shortRisk = highRiskShortWord(memoryEntry.sourceText)
     if (shortRisk) highRiskShortWords.push({ memoryId: memoryEntry.memoryId, ...shortRisk })
     if (protectedTokens.length === 0 && glossaryEntries.length === 0 && !shortRisk) continue

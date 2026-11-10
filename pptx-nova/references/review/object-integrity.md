@@ -92,6 +92,14 @@ at the same nominal size. Put a marker and one-line title in a shared vertical b
 vertical-center anchors, horizontal marker centering and controlled paragraph before/after spacing.
 Matching bboxes alone do not establish optical alignment.
 
+When renumbering Unicode badges, verify the actual new characters in the export font: support for
+one circled-number range does not prove support for another. Check the authored/resolved font and
+glyph coverage, and compare native evidence when available before attributing the symptom to the
+deck. Without native evidence, keep PowerPoint parity unverified; do not make that optional route
+a prerequisite for an otherwise authorized edit. Preserve fonts outside the requested scope.
+For an authorized numbering redesign, plain digits in a native shape avoid a dependency on uncommon
+circled glyphs.
+
 Review complete headings at readable size, including long mixed-language titles. Check weight,
 gap, centering and wrapping together. For a wrapped title, choose first-line or full-block alignment
 explicitly; never crop the title to make its marker align. In a layout-preserving edit, verify the

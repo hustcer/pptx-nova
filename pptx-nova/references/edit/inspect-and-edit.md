@@ -720,3 +720,6 @@ xdoc pptx rollback --from-sidecar output.pptx.xdoc.json -o input-restored.pptx
 ```
 
 每次给用户输出 `.pptx` 时，也提醒一下 sidecar 在哪：用户可以保留它做 audit。
+含普通 `patch-ooxml` 的 sidecar 回放仍须按当前 action 合同显式传入
+`replay --allow-raw-xml`；不要假定原 apply 的执行权限随 sidecar 自动授权。
+权限拒绝后先检查输出是否已发布，保留失败报告，再按已获授权的同一请求恢复。

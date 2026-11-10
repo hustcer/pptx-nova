@@ -36,6 +36,17 @@ inspect 回读、PNG/播放复核和 clean-open gate 证明。
 
 ## Inspect First
 
+先区分整页转场与对象动画。单页卡片上写着 Push、Cover、Split 或 Random，并不表示每张
+卡片可以独立播放同名整页切换。核对标签、实际 `effect`、所有 target 和调度，再决定是
+修复对象动画，还是用多页演示转场。只有方案涉及用户尚未确定的演示含义或页数变化时，
+才给出具体选项并取得用户选择；用户已明确授权的新增页或 timing 重建直接执行，复用
+同一方案的已有授权。不得把不支持的效果静默替换成 fade 并保留原标签。
+
+对对象动画样本，明确点击顺序与初始/结束状态。逐项演示通常用独立 `on-click`；同时展示
+才用 `with-previous`，自动衔接才用 `after-previous`。由对象边界限制路径、旋转和缩放幅度，
+避免动画过程越界或遮住相邻样本；需要返回原位时使用已披露的有限 repeat/autoReverse。
+inspect 回读可以证明配置和目标，静态导出不能证明实际播放。
+
 既有 dissolve 转场的 Web 显示或速度异常，先核对加载的 Viewer build、原始转场
 metadata、显式 Office duration（包括零）与 fallback。Web dissolve 采用有预算的
 整页场景遮罩；不可用时的降级不表示源转场丢失。静态 PDF/PNG 不验证时长、seek、
@@ -339,10 +350,9 @@ probe snapshot 中若 capability entry 的 `axes` 非 null，不能只看 entry-
 - contract 的 `requiredFor` 条目若缺失完整 axes 或任一轴畸形，该 feature/subset 视为
   `undisclosed`，不能因为 operation 已披露就推断为 supported。
 
-- `slide-animation/basic-shape-and-text-builds`：create/edit/inspect 为 `supported`，preserve/render
-  为 `partial`，verify 为 `inconclusive`。
-- `slide-transition/morph-authoring`：create/edit/inspect/preserve 为 `supported`，render 为
-  `unsupported`，verify 为 `inconclusive`，直到引用到受控 Windows PowerPoint evidence。
+- 对 `slide-animation/basic-shape-and-text-builds` 和 `slide-transition/morph-authoring` 分别读取
+  当前六轴状态，不把本文或历史 run 中的状态值当成当前事实。单个平台的原生证据只支持
+  对应平台和验证范围；新增 Web 播放能力也不等于已完成 PowerPoint 动态保真验证。
 
 `verify` 的 `supported` 必须来自该轴引用的目标 Office evidence。结构 round-trip、Viewer 测试、
 静态 PDF/PNG 和 Morph fade fallback 都不能替代 PowerPoint clean-open/resave/playback 证据；环境不可用时
@@ -689,6 +699,11 @@ PowerPoint clean-open -> 播放/点击复核(可用时) -> Morph 时运行 morph
 结构证据：
 
 - `unzip -t out.pptx`
+- 先检查语义 diff 的覆盖边界。若它明确把 `animation-or-transition` 列为 unsupported，
+  `slideChanged: 0` 不表示动画未变，也不能证明修复完成。对仅修改已有对象动画的任务，
+  Edit Contract 可使用 `single-slide` 与 inspect 证明的各 shape target；不要为了要求 diff
+  报出它尚未建模的 timing 变化而伪造结构 delta。另行保留修改前后完整动画回读、目标/参数
+  核对和 timing 结构证据，播放验证仍独立执行。
 - 按报告中的实际 slide `partName` 检查修改部件的 XML well-formed；不要由页码拼文件名。
 - 对新增/编辑 timing，确认 `<p:timing>` 位于合法 slide 子元素顺序，`bldLst` 与目标 shape id 对齐。
 - PowerPoint clean-open 不得出现 Repair。

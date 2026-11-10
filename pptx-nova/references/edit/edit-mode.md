@@ -187,6 +187,37 @@ requested slides or object categories are blockers until explained or fixed.
 them as proof that nothing changed. Avoid running this in each patch iteration
 because it is slower than inspect/select/dry-run.
 
+## Slide Order and Numbering
+
+For insertions, removals or moves combined with content edits, plan identities before patching:
+record each retained slide's source index, `slideId`, reported `partName`, final index and intended
+displayed number. Interpret a user-mentioned page against the source unless they say otherwise.
+Patch selectors and CLI slide ranges use different index bases; operation-time indexes also change
+after a move. An OOXML filename suffix is not a presentation index.
+
+Prefer completing the structural phase first, then inspect that staged PPTX and use it as the
+source for the content Edit Contract and source guards. Keep the original-to-stage structural
+patch, sidecar and source-preservation evidence as well. This lets the content diff, style-diff
+and vision-diff compare corresponding pages. It does not certify the structural phase: independently
+verify the retained slide identities/order, owner relationships and preserved resource bytes.
+Canonical XML comparison may normalize serializer line endings; it must not erase unapproved text,
+style, geometry or timing differences.
+
+Do not assume `diff`, `vision-diff` or `visual-audit` aligns moved slides. Check the current command
+contract: positional comparison can report unrelated charts/media as changes or inherited issues as
+new, and unequal selected page sets can block visual-audit. Never broaden allowed categories or
+rewrite reports to hide that mismatch. If the current contract/gate cannot represent the structural
+edit, retain the evidence and report that limitation; an aligned staged comparison proves only its
+own later edits, not original-to-final preservation or delivery authorization.
+
+Treat numbering as separate semantic scopes: physical page counters, heading/section markers and
+example/fixture sequences. Decide which follows final page order and which restarts within a series.
+Inspect repeated footer text, native slide-number fields and page-number examples in body text;
+`textPreview` may omit a populated field. Update totals and stale explicit references, preserve
+native field identity/style, then read back every final counter and check heading fit. If a typed op
+cannot update a field cache, discover the bounded `patch-ooxml` route and validate its actual match
+set; do not convert the native field to ordinary text merely to change its displayed value.
+
 ## Micro Edit Flow
 
 Micro edits have a separate one-screen route in `micro-edit-cheatsheet.md`.

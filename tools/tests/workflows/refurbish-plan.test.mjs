@@ -270,7 +270,8 @@ test('skill routes standard translation finalization through one compact referen
   assert.match(reference, /stable translated candidate/i)
   assert.match(reference, /requiredReferences\[\]/)
   assert.match(reference, /must not trigger another full-deck render/)
-  assert.ok(reference.split('\n').length < 150)
+  // Allow the pre-publication visual gate guidance while keeping this entry reference compact.
+  assert.ok(reference.split('\n').length < 180)
 })
 
 test('refurbish fallback plan overwrites current-run candidate commands', async () => {

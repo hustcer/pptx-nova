@@ -296,6 +296,22 @@ function visionEvidenceIdentity(report) {
     source: withoutPath(report?.source),
     candidate: withoutPath(report?.candidate),
   }
+  // Current reports repeat these same input paths in their suggested audit
+  // command. Normalize only matching input operands, never flags or findings.
+  const inputPath = (value) => (typeof value === 'string' ? value : value?.path)
+  if (Array.isArray(report?.visualEvidence?.command)) {
+    const command = report.visualEvidence.command
+    canonical.visualEvidence = {
+      ...report.visualEvidence,
+      command: command.map((value, index) => {
+        const flag = command[index - 1]
+        if (flag === '--candidate' && value === inputPath(report.candidate))
+          return '<bound-candidate>'
+        if (flag === '--reference' && value === inputPath(report.source)) return '<bound-source>'
+        return value
+      }),
+    }
+  }
   return createHash('sha256').update(JSON.stringify(canonical)).digest('hex')
 }
 

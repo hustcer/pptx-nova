@@ -385,6 +385,71 @@ test('a partial JSONL fill merges by memoryId without touching other entries', (
   assert.equal(memory.entries.find((entry) => entry.sourceText === 'Revenue').targetText, null)
 })
 
+test('a changed fill rejects shadowing per-unit targets and resumes after explicit synchronization', () => {
+  let memory = buildTranslationMemory(scan, {
+    sourceSha256: 'sha256:source',
+    unitsSha256: 'sha256:units',
+    targetLang: 'de',
+  })
+  const revenue = memory.entries.find((entry) => entry.sourceText === 'Revenue')
+  revenue.targetText = 'Umsatz'
+  memory.entries.find((entry) => entry.sourceText === 'Master title').targetText = 'Mastertitel'
+  memory.unitOverrides.push({
+    unitId: 'layout-1',
+    reviewDecision: 'preserve',
+    targetText: 'Leave unchanged',
+  })
+  memory = mergeTranslationMemoryRepairs(memory, {
+    reviewRequired: [
+      {
+        repair: {
+          schemaVersion: 'pptx-i18n-target-segments-repair/v1',
+          kind: 'target-segments',
+          translationPatchTemplate: {
+            unitId: 'slide-1',
+            sourceHash: 'sha256:a',
+            sourceText: 'Revenue',
+            targetText: 'Umsatz',
+            targetSegments: [{ sourceRunGroupId: 'g0', text: 'Umsatz' }],
+            targetSegmentsContractId: 'contract-1',
+          },
+        },
+      },
+    ],
+  })
+  const before = structuredClone(memory)
+  const revision = JSON.stringify({ memoryId: revenue.memoryId, targetText: 'Erlös' })
+  assert.throws(() => applyMemoryFill(memory, revision), /unitOverrides.*slide-1/)
+  assert.deepEqual(memory, before)
+
+  const unchanged = applyMemoryFill(
+    memory,
+    JSON.stringify({ memoryId: revenue.memoryId, targetText: 'Umsatz' }),
+  )
+  assert.equal(materializeTranslations(scan, unchanged.memory).translations[0].targetText, 'Umsatz')
+
+  const synchronized = structuredClone(memory)
+  synchronized.unitOverrides.find((item) => item.unitId === 'slide-1').targetText = 'Erlös'
+  synchronized.unitOverrides.find((item) => item.unitId === 'slide-1').targetSegments[0].text =
+    'Erlös'
+  const revised = applyMemoryFill(synchronized, revision)
+  const translations = materializeTranslations(scan, revised.memory).translations
+  assert.deepEqual(
+    translations.map((item) => item.targetText),
+    ['Erlös', 'Erlös'],
+  )
+  assert.equal(translations[0].targetSegmentsContractId, 'contract-1')
+
+  // An explicitly preserved review unit has no executable target to shadow.
+  const master = memory.entries.find((entry) => entry.sourceText === 'Master title')
+  assert.doesNotThrow(() =>
+    applyMemoryFill(
+      memory,
+      JSON.stringify({ memoryId: master.memoryId, targetText: 'Neuer Titel' }),
+    ),
+  )
+})
+
 test('a fill with unknown ids, stale sourceText, or unfilled targetText fails closed', () => {
   const memory = buildTranslationMemory(scan, {
     sourceSha256: 'sha256:source',

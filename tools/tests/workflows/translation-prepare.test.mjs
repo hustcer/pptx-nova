@@ -55,7 +55,7 @@ if (args[0] === 'schema') {
       { unitId: 'u2', action: 'translate', category: 'visibleBody', sourceText: 'Revenue', sourceHash: 'sha256:a', part: 'ppt/slides/slide2.xml', slide: 2, selectors: { replaceText: { kind: 'text-node', part: 'ppt/slides/slide2.xml' } } },
       { unitId: 'u3', action: 'review', category: 'visibleBody', sourceText: 'Master title', sourceHash: 'sha256:b', part: 'ppt/slideLayouts/slideLayout1.xml', slide: null, selectors: { replaceText: { kind: 'text-node', part: 'ppt/slideLayouts/slideLayout1.xml' } } },
       { unitId: 'u4', action: 'review', category: 'visibleBody', sourceText: 'Forecast', sourceHash: 'sha256:c', part: 'ppt/slides/slide3.xml', slide: 3, requiresReview: true, notes: ['language-classification-uncertain'], selectors: { replaceText: { kind: 'text-node', part: 'ppt/slides/slide3.xml' } } },
-      { unitId: 'u5', action: 'review', category: 'chartVisibleCache', sourceText: 'Forecast', sourceHash: 'sha256:c', part: 'ppt/charts/chart1.xml', slide: 4, requiresReview: true, notes: ['language-classification-uncertain'], selectors: { replaceChartText: { kind: 'chart-cache', part: 'ppt/charts/chart1.xml' } } }
+      { unitId: 'u5', action: 'review', category: 'chartVisibleCache', sourceText: 'Forecast', sourceHash: 'sha256:c', part: 'ppt/charts/chart1.xml', slide: null, referencedBySlides: [4, 7, 4], requiresReview: true, notes: ['language-classification-uncertain'], selectors: { replaceChartText: { kind: 'chart-cache', part: 'ppt/charts/chart1.xml' } } }
     ] }
   }
   writeFileSync(output, JSON.stringify(report))
@@ -71,7 +71,7 @@ if (args[0] === 'schema') {
   const anchorUnits = (process.env.FAKE_PLAN_ANCHORS ?? '').split(',').filter(Boolean)
   const missingSegments = segmentUnits.filter((unitId) => {
     const entry = translations.find((item) => item.unitId === unitId)
-    return !Array.isArray(entry?.targetSegments) || entry.targetSegments.some((segment) => typeof segment?.text !== 'string')
+    return !Array.isArray(entry?.targetSegments) || entry.targetSegments.some((segment) => typeof segment?.text !== 'string') || entry.targetSegments.map((segment) => segment.text).join('') !== entry.targetText
   })
   const missingAnchors = anchorUnits.filter((unitId) => {
     const entry = translations.find((item) => item.unitId === unitId)
@@ -89,7 +89,10 @@ if (args[0] === 'schema') {
             schemaVersion: 'pptx-i18n-target-segments-repair/v1', kind: 'target-segments',
             translationPatchTemplate: {
               unitId,
-              targetSegments: [{ segmentId: unitId + '-s1', text: null }],
+              sourceHash: translations.find((item) => item.unitId === unitId).sourceHash,
+              sourceText: translations.find((item) => item.unitId === unitId).sourceText,
+              targetText: translations.find((item) => item.unitId === unitId).targetText,
+              targetSegments: [{ sourceRunGroupId: unitId + '-g1', text: null }],
               targetSegmentsContractId: 'contract-' + unitId,
             },
           },
@@ -227,7 +230,7 @@ test('translation preparation deduplicates memory and resumes through guarded ap
   assert.equal(decisions.byText.length, 1)
   assert.equal(decisions.byText[0].sourceText, 'Forecast')
   assert.equal(decisions.byText[0].context.unitCount, 2)
-  assert.deepEqual(decisions.byText[0].context.slides, [3, 4])
+  assert.deepEqual(decisions.byText[0].context.slides, [3, 4, 7])
   assert.deepEqual(decisions.decisions, [])
   decisions.byText[0].decision = 'invalid'
   decisions.byText[0].reason = 'Intentional invalid decision for resume testing.'
@@ -645,6 +648,63 @@ test('target-segment repair rounds write sequenced scaffolds and accept the fill
     segmentsEnv,
   )
   assert.equal(finalRound.status, 'prepared')
+
+  const secondRepairBytes = readFileSync(secondRepairPath, 'utf8')
+  const translationsBefore = readFileSync(finalRound.artifacts.translations, 'utf8')
+  const candidateBefore = readFileSync(finalRound.artifacts.candidate)
+  const revenue = secondRepair.entries.find((entry) => entry.sourceText === 'Revenue')
+  const revisionPath = join(root, 'revision.jsonl')
+  writeFileSync(
+    revisionPath,
+    `${JSON.stringify({ memoryId: revenue.memoryId, targetText: 'Erlös' })}\n`,
+  )
+  const blocked = run(
+    [...base, '--memory', secondRepairPath, '--apply', '--fill', revisionPath, '--overwrite'],
+    1,
+    segmentsEnv,
+  )
+  assert.equal(blocked.status, 'error')
+  assert.equal(blocked.error.phase, 'memory-fill-merge')
+  assert.match(blocked.error.message, /unitOverrides.*u1/)
+  assert.match(blocked.error.message, /unitOverrides.*u2/)
+  assert.match(blocked.error.message, /targetSegments/)
+  assert.equal(blocked.artifacts.memoryFilled, null)
+  assert.equal(existsSync(join(runDir, 'translation-memory.filled.json')), false)
+  assert.equal(readFileSync(secondRepairPath, 'utf8'), secondRepairBytes)
+  assert.equal(readFileSync(finalRound.artifacts.translations, 'utf8'), translationsBefore)
+  assert.deepEqual(readFileSync(finalRound.artifacts.candidate), candidateBefore)
+
+  const synchronized = JSON.parse(secondRepairBytes)
+  for (const override of synchronized.unitOverrides.filter((item) =>
+    ['u1', 'u2'].includes(item.unitId),
+  )) {
+    assert.equal(override.targetText, 'Umsatz')
+    override.targetText = 'Erlös'
+    override.targetSegments[0].text = 'Erlös'
+  }
+  const synchronizedPath = join(root, 'synchronized-memory.json')
+  writeFileSync(synchronizedPath, JSON.stringify(synchronized, null, 2))
+  const synchronizedBytes = readFileSync(synchronizedPath, 'utf8')
+  const revised = run(
+    [...base, '--memory', synchronizedPath, '--apply', '--fill', revisionPath, '--overwrite'],
+    0,
+    segmentsEnv,
+  )
+  assert.equal(revised.status, 'prepared')
+  const revisedTranslations = JSON.parse(readFileSync(revised.artifacts.translations, 'utf8'))
+  for (const unitId of ['u1', 'u2']) {
+    const translation = revisedTranslations.translations.find((item) => item.unitId === unitId)
+    assert.equal(translation.targetText, 'Erlös')
+    assert.equal(translation.targetSegments[0].text, 'Erlös')
+    assert.equal(translation.targetSegmentsContractId, 'contract-' + unitId)
+  }
+  assert.equal(
+    revisedTranslations.translations.find((item) => item.unitId === 'u4').targetText,
+    'Prognose',
+  )
+  assert.equal(readFileSync(synchronizedPath, 'utf8'), synchronizedBytes)
+  assert.equal(readFileSync(secondRepairPath, 'utf8'), secondRepairBytes)
+  assert.deepEqual(readFileSync(source), translationSource)
 })
 
 test('translation preparation merges high-confidence anchor drafts and reruns the planner', () => {
@@ -690,7 +750,16 @@ test('translation preparation merges high-confidence anchor drafts and reruns th
   })
   writeFileSync(memoryPath, JSON.stringify(memory, null, 2))
 
-  const applied = run([...base, '--apply', '--overwrite'], 0, { FAKE_PLAN_ANCHORS: 'u1' })
+  const initialFillPath = join(root, 'initial-fill.jsonl')
+  writeFileSync(
+    initialFillPath,
+    memory.entries
+      .map(({ memoryId, targetText }) => JSON.stringify({ memoryId, targetText }))
+      .join('\n') + '\n',
+  )
+  const applied = run([...base, '--apply', '--overwrite', '--fill', initialFillPath], 0, {
+    FAKE_PLAN_ANCHORS: 'u1',
+  })
   assert.equal(applied.status, 'prepared')
   assert.equal(applied.summary.plan.applyGate.passed, true)
   assert.equal(applied.summary.anchorDraft.mergedUnitCount, 1)
@@ -718,6 +787,51 @@ test('translation preparation merges high-confidence anchor drafts and reruns th
   const initialPlan = JSON.parse(readFileSync(applied.artifacts.planBeforeAnchorDraft, 'utf8'))
   assert.equal(initialPlan.applyGate.passed, false)
   assert.equal(finalPlan.applyGate.passed, true)
+
+  const anchorMemoryPath = applied.artifacts.anchorDraftMemory
+  const anchorMemoryBytes = readFileSync(anchorMemoryPath, 'utf8')
+  assert.match(applied.nextAction, new RegExp('anchor-draft\\.json'))
+  const forecast = memory.entries.find((entry) => entry.sourceText === 'Forecast')
+  const revisionPath = join(root, 'revision.jsonl')
+  writeFileSync(
+    revisionPath,
+    `${JSON.stringify({ memoryId: forecast.memoryId, targetText: 'Ausblick' })}\n`,
+  )
+  const revised = run(
+    [...base, '--apply', '--overwrite', '--memory', anchorMemoryPath, '--fill', revisionPath],
+    0,
+    { FAKE_PLAN_ANCHORS: 'u1,u2' },
+  )
+  assert.equal(revised.status, 'prepared')
+  assert.equal(
+    revised.artifacts.anchorDraftMemory,
+    join(runDir, 'translation-memory.anchor-draft-2.json'),
+  )
+  assert.equal(readFileSync(anchorMemoryPath, 'utf8'), anchorMemoryBytes)
+  const revisedTranslations = JSON.parse(readFileSync(revised.artifacts.translations, 'utf8'))
+  for (const unitId of ['u1', 'u2']) {
+    assert.deepEqual(
+      revisedTranslations.translations.find((item) => item.unitId === unitId).anchors,
+      ['Umsatz'],
+    )
+  }
+  assert.equal(
+    revisedTranslations.translations.find((item) => item.unitId === 'u4').targetText,
+    'Ausblick',
+  )
+
+  const revisedMemoryBytes = readFileSync(revised.artifacts.anchorDraftMemory, 'utf8')
+  const memoryAlias = join(root, 'anchor-memory-alias.json')
+  symlinkSync(revised.artifacts.anchorDraftMemory, memoryAlias)
+  const aliasRevision = run(
+    [...base, '--apply', '--overwrite', '--memory', memoryAlias, '--fill', revisionPath],
+    0,
+    { FAKE_PLAN_ANCHORS: 'u1,u2' },
+  )
+  assert.equal(aliasRevision.status, 'prepared')
+  assert.equal(readFileSync(revised.artifacts.anchorDraftMemory, 'utf8'), revisedMemoryBytes)
+  assert.equal(readFileSync(anchorMemoryPath, 'utf8'), anchorMemoryBytes)
+  assert.deepEqual(readFileSync(source), translationSource)
 })
 
 test('the compact fill view feeds --apply --fill without touching the full memory JSON', () => {
@@ -790,6 +904,38 @@ test('the compact fill view feeds --apply --fill without touching the full memor
   assert.equal(mergedPath, join(runDir, 'translation-memory.filled.json'))
   const merged = JSON.parse(readFileSync(mergedPath, 'utf8'))
   assert.equal(merged.entries.find((entry) => entry.sourceText === 'Revenue').targetText, 'Umsatz')
+
+  const mergedBytes = readFileSync(mergedPath, 'utf8')
+  const revisionPath = join(root, 'revision.jsonl')
+  const revenue = fillLines.find((entry) => entry.sourceText === 'Revenue')
+  writeFileSync(revisionPath, `${JSON.stringify({ ...revenue, targetText: 'Erlös' })}\n`)
+  const revised = run([
+    ...base,
+    '--apply',
+    '--overwrite',
+    '--memory',
+    mergedPath,
+    '--fill',
+    revisionPath,
+  ])
+  assert.equal(revised.status, 'prepared')
+  assert.notEqual(revised.artifacts.memoryFilled, mergedPath)
+  assert.equal(readFileSync(mergedPath, 'utf8'), mergedBytes)
+  assert.equal(readFileSync(memoryPath, 'utf8'), memoryBytes)
+  const revisedMemory = JSON.parse(readFileSync(revised.artifacts.memoryFilled, 'utf8'))
+  assert.equal(
+    revisedMemory.entries.find((entry) => entry.sourceText === 'Revenue').targetText,
+    'Erlös',
+  )
+  assert.equal(
+    revisedMemory.entries.find((entry) => entry.sourceText === 'Forecast').targetText,
+    'Prognose',
+  )
+  const revisedTranslations = JSON.parse(readFileSync(revised.artifacts.translations, 'utf8'))
+  assert.equal(
+    revisedTranslations.translations.find((entry) => entry.unitId === 'u3').targetText,
+    'Mastertitel',
+  )
 })
 
 test('translation preparation blocks glossary violations before i18n-plan and resumes after repair', () => {

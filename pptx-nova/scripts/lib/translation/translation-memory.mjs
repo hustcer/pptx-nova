@@ -149,6 +149,7 @@ export function applyMemoryFill(memory, fillText) {
   }
   const merged = structuredClone(memory)
   const byId = new Map((merged.entries ?? []).map((entry) => [entry.memoryId, entry]))
+  const filledIds = new Set()
   const problems = []
   let filledCount = 0
   const lines = String(fillText ?? '')
@@ -178,7 +179,23 @@ export function applyMemoryFill(memory, fillText) {
       continue
     }
     entry.targetText = record.targetText
+    filledIds.add(record.memoryId)
     filledCount += 1
+  }
+  const overrides = new Map(
+    (merged.unitOverrides ?? []).map((override) => [override.unitId, override]),
+  )
+  for (const id of filledIds) {
+    const entry = byId.get(id)
+    for (const context of entry.contexts ?? []) {
+      const override = overrides.get(context.unitId)
+      if (context.action === 'review' && override?.reviewDecision === 'preserve') continue
+      if (typeof override?.targetText === 'string' && override.targetText !== entry.targetText) {
+        problems.push(
+          `fill targetText would be shadowed by unitOverrides for ${context.unitId}; synchronize its targetText and targetSegments/anchors in a new --memory copy, keeping source guards and targetSegmentsContractId unchanged`,
+        )
+      }
+    }
   }
   if (problems.length > 0) {
     const shown = problems.slice(0, 10).join('; ')

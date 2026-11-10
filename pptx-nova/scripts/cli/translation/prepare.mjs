@@ -53,8 +53,9 @@ Options:
   --prompt-file <path>       Read the original user prompt from outside the run directory and
                              archive it as run-dir/prompt.txt after the fresh-run guard passes.
   --fill <path>              Apply-time JSONL overlay ({memoryId, sourceText?, targetText} per line)
-                             merged into the memory; supports partial/incremental wording revisions
-                             without touching the full memory JSON. Requires --apply.
+                             merged into --memory without modifying that input. For partial revisions,
+                             pass the previous complete memoryFilled/anchorDraftMemory via --memory.
+                             Each fill writes a fresh numbered memory snapshot. Requires --apply.
   --expand-review <name>     Persist one lazy review partition: languageUncertain,
                              shared, embeddedWorkbook, or other.
   --resume-stage review      Reuse the bound source scan to expand one review partition after
@@ -198,8 +199,8 @@ function artifactsFor(args) {
     classificationReport: join(args.runDir, 'i18n-review-classification.json'),
     memory: args.memory,
     memoryFill: join(args.runDir, 'translation-memory.fill.jsonl'),
-    memoryFilled: join(args.runDir, 'translation-memory.filled.json'),
-    anchorDraftMemory: join(args.runDir, 'translation-memory.anchor-draft.json'),
+    memoryFilled: nextMemorySnapshotPath(args, 'filled', 100),
+    anchorDraftMemory: nextMemorySnapshotPath(args, 'anchor-draft', 100),
     glossary: join(args.runDir, 'translation-glossary.json'),
     constraints: join(args.runDir, 'translation-constraints.json'),
     constraintsCheck: join(args.runDir, 'translation-constraints-check.json'),
@@ -209,7 +210,7 @@ function artifactsFor(args) {
     reviewExpansionSummary: args.expandReview
       ? join(args.runDir, `review-expansion-${args.expandReview}-summary.json`)
       : null,
-    memoryRepair: nextRepairArtifactPath(args),
+    memoryRepair: nextMemorySnapshotPath(args, 'repair', 20),
     translations: join(args.runDir, 'translations.json'),
     translationsBeforeAnchorDraft: join(args.runDir, 'translations.before-anchor-draft.json'),
     anchorDraft: join(args.runDir, 'i18n-anchor-draft.json'),
@@ -250,22 +251,19 @@ function sameIdentity(left, right) {
   )
 }
 
-// Each targetSegments repair round writes a fresh scaffold file: the file the
-// agent filled and passed back via --memory is a read-only input, so the next
-// scaffold must never resolve to it or to any earlier round's file.
-function nextRepairArtifactPath(args) {
+// Every generated memory may become a later read-only --memory input. Retain
+// each round under --overwrite, including aliases to earlier snapshots.
+function nextMemorySnapshotPath(args, kind, maximumRounds) {
   const memoryIdentity = pathIdentity(args.memory)
-  for (let round = 1; round <= 20; round += 1) {
+  for (let round = 1; round <= maximumRounds; round += 1) {
     const name =
-      round === 1 ? 'translation-memory.repair.json' : `translation-memory.repair-${round}.json`
+      round === 1 ? `translation-memory.${kind}.json` : `translation-memory.${kind}-${round}.json`
     const candidate = join(args.runDir, name)
     if (existsSync(candidate)) continue
     if (sameIdentity(pathIdentity(candidate), memoryIdentity)) continue
     return candidate
   }
-  throw new Error(
-    'too many translation-memory repair rounds in this run directory; start a fresh preparation run',
-  )
+  throw new Error(`too many translation-memory ${kind} rounds; start a fresh preparation run`)
 }
 
 function readJson(path, label) {
@@ -475,6 +473,7 @@ function writeReviewDecisionTemplate(scanPath, scan, output, overwrite) {
     entry.context.unitCount += 1
     if (unit.category) entry.context.categories.add(unit.category)
     if ((unit.slide ?? null) !== null) entry.context.slides.add(unit.slide)
+    for (const slide of unit.referencedBySlides ?? []) entry.context.slides.add(slide)
     for (const lang of unit.detectedLangs ?? []) entry.context.detectedLangs.add(lang)
     grouped.set(unit.sourceText, entry)
   }
@@ -1034,6 +1033,13 @@ function applyPlan(args, artifacts, summary, classified, memory, glossary, repor
   }
   summary.status = 'prepared'
   summary.nextAction = 'Run the standard translation finalizer with this stable candidate.'
+  if (summary.memoryFill) {
+    const revisionMemory =
+      summary.anchorDraft?.mergedUnitCount > 0
+        ? artifacts.anchorDraftMemory
+        : artifacts.memoryFilled
+    summary.nextAction += ` For partial wording revisions, pass the complete memory snapshot with --memory ${revisionMemory} --apply --fill <revision.jsonl> --overwrite.`
+  }
   summary.requiredReferences = [
     requiredReference(
       'references/translation/translation-runner.md',

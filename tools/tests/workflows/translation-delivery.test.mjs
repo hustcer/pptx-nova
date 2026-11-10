@@ -326,6 +326,10 @@ test('translation runner requires the reviewed vision report to match the curren
     status: 'success',
     source,
     candidate,
+    visualEvidence: {
+      reportRole: 'observation-only',
+      command: ['xdoc', 'pptx', 'visual-audit', '--candidate', candidate, '--reference', source],
+    },
     newIssues: [issue],
     worsenedIssues: [],
     agentGate: {
@@ -373,6 +377,18 @@ test('translation runner requires the reviewed vision report to match the curren
     ...vision,
     source: '/different/source.pptx',
     candidate: '/different/candidate.pptx',
+    visualEvidence: {
+      ...vision.visualEvidence,
+      command: [
+        'xdoc',
+        'pptx',
+        'visual-audit',
+        '--candidate',
+        '/different/candidate.pptx',
+        '--reference',
+        '/different/source.pptx',
+      ],
+    },
   }
   const positiveXdoc = writeFakeXdoc(
     root,

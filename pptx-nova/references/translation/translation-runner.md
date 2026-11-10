@@ -1,9 +1,8 @@
 # Translation Finalization Runner
 
-Use this reference to finalize a stable translated candidate: machine gates, full-deck comparison,
-publication binding and manual-review handoff. It does not translate, repair or certify human review.
-Apply [object integrity](../review/object-integrity.md) within the translation layout/style contract;
-review affected objects without authorizing redesign or unrelated source-object guards.
+Finalize a stable translated candidate with machine gates, comparison and publication binding; this
+runner does not translate, repair or certify human review. Apply [object integrity](../review/object-integrity.md)
+within the translation contract, without authorizing redesign or unrelated source-object guards.
 
 ## Inputs
 
@@ -16,12 +15,9 @@ The finalizer requires:
 - the matching `pptx-i18n-translations/v1` data;
 - a new or empty run directory and a final output path.
 
-Pass the complete effective source inventory used by planning. Preserve the
-top-level `part` on every shape `textPlan` unit; it is source identity, not
-optional display metadata. If xdoc rejects incomplete identity as `invalid_data`,
-regenerate the inventory from the bound source and rebuild the translation plan
-before finalization. Do not fill the gap from logical slide filenames or from
-the candidate, and do not reuse a stale candidate report after an input error.
+Preserve the planner's complete source inventory, including every shape `textPlan` unit's top-level `part`.
+On identity `invalid_data`, rescan the bound source and rebuild the plan. Never infer parts from
+logical slide filenames/candidate data or consume a stale candidate report.
 
 Before these inputs exist, read `references/translation/translation-mode.md` for scan, classification, planning,
 apply, repair, chart/table coverage, and multi-column review preparation. Do not invoke the finalizer
@@ -73,11 +69,10 @@ archive the original user request to `<run-dir>/prompt.txt` for the feedback gat
 event stream is archived to `<run-dir>/progress.jsonl` by default (`--progress-file none` disables);
 while active, stderr carries only single-line phase-boundary summaries.
 
-The finalizer re-runs the bundled multi-column gate before accepting it. Candidate bytes, the bound
-vision report, exact slide/shape finding set, reviewed PNG hashes/dimensions, and decisions must all
-remain valid; a previously passing but stale gate fails closed. Current and reviewed vision reports
-use a normalized evidence identity that ignores only their run-local source/candidate path strings;
-all other report fields must match.
+The finalizer reruns supplied multi-column gates and checks candidate bytes, exact findings, PNG
+hashes/dimensions and decisions. Report identity ignores only run-local source/candidate paths,
+including matching `--candidate` / `--reference` operands in the suggested audit command; all flags,
+findings and other fields must match. Stale gates fail closed.
 
 The finalizer owns this sequence:
 
@@ -142,7 +137,11 @@ page PNG, byte length, dimensions, or SHA-256 no longer matches.
 
 ## Delivery boundary
 
-The final output is published only after the compare gate passes and binds the exact candidate bytes.
-After machine success, inspect the candidate contact sheet, every compare part, and all bound
-review-only full-size pages. Preserve the summary, scans, style and vision reports, semantic diff,
-preview manifest, compare reports/images, compare gate, and final PPTX binding as audit evidence.
+The compare gate binds exact candidate bytes before machine publication. Review the candidate contact
+sheet, every compare part and all bound review-only full-size pages; retain the summary, scans,
+style/vision reports, semantic diff, preview manifest, comparison reports/images/gate and final binding.
+
+Compare publication does not authorize visual delivery. Run the [canonical visual gate](../review/export-and-check.md#unified-visual-evidence-canonical-agent-gate)
+against the source using the frozen field date; retain its manifest and consumer result.
+Never override `stop` or `require-human-confirmation` with a specialized pass. Diagnose inherited
+findings and renderer differences before changing source geometry or typography.

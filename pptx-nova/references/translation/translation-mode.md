@@ -97,7 +97,35 @@ one `{memoryId, sourceText, targetText}` line per unique text — and resume wit
 into context (its `contexts[]` bookkeeping is only needed on disk). Later
 wording revisions may pass a partial fill (only the changed memoryId lines).
 Editing `entries[].targetText` in the memory JSON directly and rerunning with
-`--apply` remains supported.
+`--apply` remains supported. A partial fill overlays the **explicit input memory**,
+not the previous candidate or the unfilled template. For a later revision, pass
+the last complete `artifacts.memoryFilled` as `--memory` (use
+`artifacts.anchorDraftMemory` instead when the successful plan accepted anchors):
+
+```bash
+node <skill-root>/scripts/cli/translation/prepare.mjs \
+  --source source.pptx --source-lang <multi|zh|en> --target-lang <target-lang> \
+  --run-dir <same-run-dir> --memory <previous-complete-memory.json> \
+  --apply --fill <partial-revision.jsonl> --overwrite --json
+```
+
+Every fill writes a new `translation-memory.filled[-N].json` snapshot; the input
+memory stays read-only even with `--overwrite`. Anchor drafts likewise write new
+`translation-memory.anchor-draft[-N].json` snapshots. Read the emitted artifact
+path instead of assuming a fixed filename. Preserve any later target-segment
+repairs by using their completed memory as the next revision base.
+
+A fill never silently overrides `unitOverrides[].targetText`. If a filled entry
+would be shadowed by an executable unit's explicit target, preparation stops in
+`memory-fill-merge` before writing a new filled snapshot, plan or candidate, and
+names the conflicting unit IDs. Make a new copy of the complete input memory,
+synchronize those units' `targetText` and their `targetSegments` / `anchors` with
+the intended revision, then retry with that copy as `--memory` and the same fill.
+Keep source guards and `targetSegmentsContractId` unchanged; the native planner
+must revalidate the mapping. Intentionally different per-unit wording requires
+an explicit memory edit rather than a contradictory global fill. Unrelated
+overrides and review units explicitly marked `preserve` remain unchanged.
+
 Exact repeated source strings share one target; use `unitOverrides[]` (in the
 memory JSON) only when a context needs different wording, target segments,
 anchors, or an explicit review choice. A reviewed executable unit must use
@@ -184,7 +212,7 @@ first plan is blocked, the runner invokes that read-only helper before asking
 for manual target segments. It persists `i18n-anchor-draft.json`, accepts only
 `translationsDraft` entries guarded by `agentGate.applyAuthorized=false`, merges
 their evidence-bound, one-to-one ordered anchors into
-`translation-memory.anchor-draft.json`, snapshots the pre-draft translations
+`translation-memory.anchor-draft[-N].json`, snapshots the pre-draft translations
 and plan, rematerializes `translations.json`, and reruns `i18n-plan`. The merge
 helper verifies every projected anchor against the matching
 `drafts[].candidateAnchors` evidence. It continues automatically only when the

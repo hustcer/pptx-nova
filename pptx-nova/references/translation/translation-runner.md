@@ -38,6 +38,29 @@ memory's bound units path/hash. No classification work means no `i18n-scan-class
 invent that file or reclassify to satisfy a filename. Use the same effective inventory as the
 successful plan, plus `artifacts.candidate` and `artifacts.translations`.
 
+## Fit and review before publication
+
+`prepared` proves guarded text application, not rendered fit. If the deck contains tight labels or
+changed multi-column text, use the [pre-finalization review](translation-mode.md#visual-parity-gate)
+before starting this runner. Inspect the vision delta once, repair actual fit regressions through
+the completed translation memory, and render only the slides needed for the bound multi-column
+review. Pass that review gate to the finalizer; do not start a deliberately incomplete finalize run
+just to discover the review scaffold. A wording revision invalidates the old candidate-bound review.
+For native tables and dense chart labels, inspect readable-size PNGs even when the vision delta has
+no blockers: a long compound label can be clipped inside a cell without a shape-level fit warning.
+Reuse the canonical audit's page PNGs when available. Compact the wording before the expensive full
+comparison rather than treating a clean estimator or contact-sheet thumbnail as proof of cell fit.
+
+Run the [canonical visual gate](../review/export-and-check.md#unified-visual-evidence-canonical-agent-gate)
+on the stable candidate against the source using the frozen field date **before invoking this runner**.
+The runner neither pauses before publication nor consumes the canonical decision. Its specialized
+gates can pass and publish a hash-bound bundle while the independent canonical decision still blocks
+delivery. Keep those results separate: `machineGatesPassed=true`, a compare-gate pass, and a
+PowerPoint clean-open pass do not turn a canonical `stop` into delivery authorization. Diagnose
+reference-owned findings separately from candidate regressions and report any unresolved limitation;
+do not alter preserved source objects merely to clear inherited diagnostics. Retain this manifest
+and its consumer result for the delivery boundary below; unchanged evidence needs no second render.
+
 ## Standard command
 
 ```bash
@@ -141,7 +164,10 @@ The compare gate binds exact candidate bytes before machine publication. Review 
 sheet, every compare part and all bound review-only full-size pages; retain the summary, scans,
 style/vision reports, semantic diff, preview manifest, comparison reports/images/gate and final binding.
 
-Compare publication does not authorize visual delivery. Run the [canonical visual gate](../review/export-and-check.md#unified-visual-evidence-canonical-agent-gate)
-against the source using the frozen field date; retain its manifest and consumer result.
+Compare publication does not authorize visual delivery. Reuse the pre-publication
+[canonical visual gate](../review/export-and-check.md#unified-visual-evidence-canonical-agent-gate)
+manifest and consumer result only while their source, candidate, renderer and render-context bindings
+remain current. Rebuild evidence when a binding changes; a completed finalizer alone does not require
+another render.
 Never override `stop` or `require-human-confirmation` with a specialized pass. Diagnose inherited
 findings and renderer differences before changing source geometry or typography.

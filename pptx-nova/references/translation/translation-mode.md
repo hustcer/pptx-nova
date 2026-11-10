@@ -1036,30 +1036,59 @@ Tables require style-preserving cell-level handling:
 
 ## Visual Parity Gate
 
-A translation delivery must include a before/after visual review:
+A translation delivery must include a before/after visual review. The standard finalizer owns the
+full candidate preview, full before/after comparison and publication binding. The commands below
+are preparation or manual recovery paths, not an extra full-render checklist after that runner.
+
+For tight text or changed multi-column text, prepare the review **before** invoking the finalizer:
+keep these artifacts in the preparation run or a separate review directory, outside the finalizer's
+new run directory. The examples regenerate current-run outputs with `--overwrite`; retain any
+needed issue evidence first, and never use it to replace user-owned or another run's artifacts.
 
 ```bash
-xdoc pptx preview source.pptx --slides <changed> \
-  --output-dir <run-dir>/previews-source \
-  --contact-sheet --contact-output <run-dir>/previews-source/contact-sheet.png \
-  --overwrite --json > <run-dir>/preview-source.json
+xdoc pptx vision-diff --source source.pptx --candidate candidate.pptx \
+  --json > <run-dir>/vision-diff.json
+```
 
-xdoc pptx preview candidate.pptx --slides <changed> \
+Read `newIssues[]` and `worsenedIssues[]`, preserving their evidence classes. Repair actual
+overflow/overlap/edge regressions through the complete memory and rerun preparation. If the only
+remaining high/medium blockers are `multi-column-text-layout-review`, derive the preview's 1-based
+slides from those exact findings' zero-based `slideIndex` values, then render only that scope:
+
+```bash
+xdoc pptx preview candidate.pptx --slides <review-slides> --field-date <frozen-date> \
   --output-dir <run-dir>/previews-candidate \
-  --contact-sheet --contact-output <run-dir>/previews-candidate/contact-sheet.png \
   --overwrite --json > <run-dir>/preview-candidate.json
 
-xdoc pptx contact-diff --source source.pptx --candidate candidate.pptx \
-  --slides <changed> \
-  --output <run-dir>/contact-diff.png --json > <run-dir>/contact-diff.json
+node <skill-root>/scripts/cli/review/multi-column-scaffold.mjs \
+  --candidate candidate.pptx \
+  --vision-diff <run-dir>/vision-diff.json \
+  --preview <run-dir>/preview-candidate.json \
+  --output <run-dir>/multi-column-review.json --overwrite --json
+```
 
+Review those full-size PNGs and fill only the scaffold's judgment fields, then run:
+
+```bash
 node <skill-root>/scripts/cli/review/multi-column-gate.mjs \
   --candidate candidate.pptx \
   --vision-diff <run-dir>/vision-diff.json \
   --review <run-dir>/multi-column-review.json \
   --output <run-dir>/multi-column-review-gate.json \
   --overwrite --json
+```
 
+Pass the resulting gate as `--multi-column-review-gate` to the standard finalizer. It reruns the
+checks against its own immutable input snapshots. If no such review findings exist, omit the
+scaffold/gate. Do not turn estimator or rendered blockers into review-only findings. Reuse the
+current frozen field date for all manual renders; later wording changes require new PNGs and review.
+
+The independent canonical visual decision must also be known before final publication; follow
+[the finalizer's publication boundary](translation-runner.md#fit-and-review-before-publication).
+
+For manual comparison recovery only, retain the same multipart and publication contracts:
+
+```bash
 node <skill-root>/scripts/cli/review/compare.mjs \
   --source source.pptx \
   --candidate candidate.pptx \

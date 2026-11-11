@@ -337,7 +337,7 @@ The public release audit checks this layout and local module imports.
 
 ## Optional Office integrations
 
-- `cli/office/morph-playback.nu` - optional macOS-only PowerPoint-native Morph semantic
+- `cli/office/morph-playback.mjs` - optional macOS-only PowerPoint-native Morph semantic
   playback probe. It verifies the recognized by-object/by-word/by-char entry
   effect, exact adjacent slide navigation, animation-enabled slide show, and
   required expected duration plus optional resave evidence. It does not capture
@@ -345,8 +345,19 @@ The public release audit checks this layout and local module imports.
   It starts at the requested source using a temporary slide-show range on the
   staged copy and restores the original range before resaving. Navigation and
   playback use separate bounded timeouts. Optional resave requires
-  editing-enabled PowerPoint and `unzip`; empty or corrupt packages fail before
+  editing-enabled PowerPoint and macOS's bundled `/usr/bin/unzip`; empty or corrupt packages fail before
   publishing the resaved file or a passing report.
+  Report and resave destinations use physical paths and device/inode checks to
+  reject source aliases and aliases of each other. Publication is exclusive by
+  default, including files created during playback. Explicit `--overwrite` uses
+  atomic replacement of each file, preserving other hard links to old evidence.
+  Output conflicts preserve existing files and fail; a new failure report is
+  written only when its destination can safely be published. The two outputs
+  are published separately, not as one transaction.
+
+- `cli/office/morph-playback.nu` - optional legacy integration retained for existing
+  callers. New workflows use the Node helper above, which waits for the source
+  entry transition and retains failed probe reports.
 
 - `cli/office/powerpoint-snapshot.nu` - optional macOS-only evidence helper that stages the exact candidate in
   PowerPoint's sandbox, render requested slides through PowerPoint PDF export,

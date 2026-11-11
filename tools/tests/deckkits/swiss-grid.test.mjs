@@ -43,7 +43,7 @@ const strings = (v, k = '') =>
 test('Swiss Grid has one deterministic registered plan for every public responsibility', () => {
   const a = createDeck(fixture),
     b = createDeck(fixture)
-  assert.equal(DESIGN.version, '2.0.0')
+  assert.equal(DESIGN.version, '2.0.1')
   assert.equal(a.designCheck.status, 'pass')
   assert.equal(a.designPlan.layouts.length, 15)
   assert.equal(designHash(a.patch), designHash(b.patch))
@@ -146,6 +146,29 @@ test('control fields affect rendering and legal optional fields never disappear'
     (o) => o.op === 'set-table',
   )
   assert.ok(focus.cells.some((c) => c.row === 9 && c.style.font.color === DESIGN.colors.red))
+})
+
+test('blank paragraphs preserve their font and paragraph index without targeting a missing run', () => {
+  for (const newline of ['\n', '\r\n', '\r']) {
+    const slide = structuredClone(fixture.slides[1])
+    slide.data.body = ['First paragraph', '', 'Last paragraph'].join(newline)
+    const { patch } = createDeck(excerpt([slide]))
+    const body = patch.ops.filter((o) => o.shape?.name === 'S0_Body')
+    assert.ok(
+      body.some(
+        (o) => o.op === 'set-text-frame' && o.text === slide.data.body.replace(/\r\n?/g, '\n'),
+      ),
+    )
+    assert.ok(!body.some((o) => o.op === 'set-run' && o.paragraph === 1))
+    const empty = body.find((o) => o.op === 'add-run' && o.paragraph === 1)
+    assert.equal(empty?.text, '')
+    assert.equal(empty?.font.size, '14pt')
+    assert.deepEqual(
+      body.filter((o) => o.op === 'set-paragraph').map((o) => o.paragraph),
+      [0, 1, 2],
+    )
+    assert.ok(body.some((o) => o.op === 'set-run' && o.paragraph === 2))
+  }
 })
 
 test('one numeric source drives system labels and geometry including zero gutter', () => {

@@ -19,9 +19,13 @@ function renderSwissPlan(design, layouts) {
     })
     const tx = (name, f, v, style, owned = false, inset = 0, highlights = []) => {
       if (!owned) p.textbox(s, name, ...f)
-      p.setText(s, name, v)
-      v.split(/\r\n|\r|\n/).forEach((para, i) => {
-        p.runFont(s, name, font(style), i)
+      const text = v.replace(/\r\n?/g, '\n')
+      p.setText(s, name, text)
+      text.split('\n').forEach((para, i) => {
+        // setText creates no run for an empty paragraph. Materialize its styled
+        // empty run so intentional blank lines retain the same line metrics.
+        if (para.length === 0) p.addRun(s, name, i, '', font(style))
+        else p.runFont(s, name, font(style), i)
         if (highlights.length) {
           const escaped = highlights
               .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))

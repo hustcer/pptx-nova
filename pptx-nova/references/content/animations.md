@@ -553,20 +553,27 @@ xdoc pptx morph-check <run-dir>/candidate.pptx --from-slide 1 --to-slide 2 --jso
 到 `kind: morph`、正确的 mode/duration、extension wrapper 以及 fade fallback。若两页本来没有 `!!`
 名称，先通过普通 inspect/select 和受支持的重命名操作建立显式配对；不要通过 raw XML 绕过诊断。
 
-`clean-open.mjs` 在可用时按主流程运行。下面的 Nushell 播放探针是可选的、能力门控的
-PowerPoint-native 证据，仅在 macOS + PowerPoint + Nushell 都可用时运行：
+`clean-open.mjs` 在可用时按主流程运行。下面的 Node 播放探针是可选的、能力门控的
+PowerPoint-native 证据，仅在 macOS + PowerPoint 可用时运行；无需额外安装 Nushell：
 
 ```bash
 node <skill-root>/scripts/cli/runtime/clean-open.mjs \
   --pptx <run-dir>/candidate.pptx --output <run-dir>/clean-open.json --json
-nu <skill-root>/scripts/cli/office/morph-playback.nu <run-dir>/candidate.pptx \
+node <skill-root>/scripts/cli/office/morph-playback.mjs <run-dir>/candidate.pptx \
   --from-slide 1 --to-slide 2 --mode by-object --duration-ms 900 \
   --output <run-dir>/morph-playback.json --json
 ```
 
-缺少 Nushell 或其他可选前置不阻断基线 Morph 流程，但必须把 PowerPoint 播放证据标为
+缺少 macOS、PowerPoint 或自动化权限不阻断基线 Morph 流程，但必须把 PowerPoint 播放证据标为
 unverified，不能声称已经验证；若用户或交付策略明确要求 PowerPoint-native Morph 证明，
 则该证明门禁保持阻塞，直到可选前置可用。
+
+探针先等待源页自身的进入转场结束，再发送下一页指令；连续 Morph 的源页不能只等待固定
+0.5 秒，否则 PowerPoint 可能用该指令结束当前转场而不翻页。探测失败时，在报告路径可安全发布的
+前提下保存带输入摘要和具体超时阶段的 JSON，并清理本次 staging；不得把一次超时写成已通过的播放证明。
+报告与 resave 使用同一套物理路径和文件身份检查，拒绝输入别名及彼此硬链接；默认排他发布，
+包括探测期间才出现的文件也不会覆盖。`--overwrite` 以原子替换发布单个文件，不截断旧文件的其他
+硬链接。发布冲突时保留既有文件并报错，可能没有新的 JSON 报告；两份输出不构成整体事务。
 
 `--duration-ms` 是通过门禁的必填预期值，必须来自 patch 或 inspect，不能省略后仍宣称时长已验证。
 需要验证 PowerPoint 保存往返时，再加 `--resave-output <run-dir>/powerpoint-resaved.pptx`，随后对该文件

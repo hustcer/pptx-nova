@@ -388,7 +388,7 @@ Animation, structural, or compatibility high-risk tasks must also append:
 OPC zip check -> XML well-formed check -> targeted OOXML semantic audit -> target-Office compatibility gate -> PowerPoint clean-open smoke gate when available
 ```
 
-Morph authoring requires the exact adjacent-pair `morph-check`. The `.nu` playback probe is optional;
+Morph authoring requires the exact adjacent-pair `morph-check`. The Node playback probe is optional;
 without it the baseline continues but PowerPoint playback stays unverified. An explicit native-proof
 requirement blocks that proof gate. Static PNG/PDF or viewer fallback does not prove interpolation.
 

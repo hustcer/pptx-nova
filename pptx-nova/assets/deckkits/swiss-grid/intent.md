@@ -61,6 +61,9 @@ Helvetica 与 Arial Black 是已安装的相近替代；中文采用正体 Arial
 
 ## 验证状态
 
+2.0.1 修复包含空白段落的文字生成：先将 LF、CRLF、CR 统一为 LF，再写入文本和计算段落索引；
+保留空行字号，避免向不存在的文本 run 写入样式。既有字段、布局容量与视觉身份不变。
+
 2.0.0 于 2026-10-24 经维护者明确授权晋级，在当时登记为唯一的 default；当前 readiness
 以 [catalog](../catalog.json) 为准，现登记为 production。迁移验收时，最终源码对应的
 57 页 canonical 已逐张检查，五组文件均通过 PowerPoint

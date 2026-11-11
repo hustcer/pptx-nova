@@ -44,6 +44,35 @@ node <skill-root>/scripts/cli/create/run.mjs \
 Add `--assets <run-dir>/assets_manifest.json` only when the deck uses registered assets. Add
 `--overwrite` only when replacing the final path was explicitly intended.
 
+### Named DeckKit with native feature specimens
+
+Before drafting a feature/translation test corpus, compare its requested objects with the named
+DeckKit's slots and `intent.md`. A production kit may deliberately omit charts, equations, rich
+text or animation specimens. Do not discover that mismatch after filling every slide, switch the
+named kit silently, or put arbitrary authoring ops in `choreography.json`.
+
+For a corpus that explicitly needs these objects, use the kit for its registered pages and visual
+grammar, then a documented manual native-exhibit composition for the missing specimens. Retain the
+unmodified kit patch as `deckkit.patch.json`, the reproducible composition script/input, an
+`extension-plan.json` declaring affected slides and retained/replaced objects, and the final
+`patch.json`. Keep scaffold content distinguishable from the final authored specimen content.
+Use current, typed xdoc operations; do not rewrite package XML or modify the installed kit's
+geometry constants for a single deck. Reusable kit changes remain a separate maintained-kit task.
+
+The standard runner's `--choreography` boundary stays unchanged. A manually composed patch uses
+the equivalent manual sequence in [DeckKit mode](deckkit-mode.md#production-path): validate the
+registered content, check the final lock/patch/assets, dry-run, apply, inspect, specialized semantic
+and structure checks, vision, then canonical `visual-audit --visual-mode create`. Assert semantic
+success and zero high/medium vision findings **before** starting the full render. Review the exact
+canonical PNGs, record the Create design/visual reviews, and consume them with
+`visual-evidence-gate.mjs --candidate ... --review ... --lock ...`. Keep the applicable high-risk,
+compatibility, clean-open and Morph checks. Publish only those reviewed candidate bytes to the
+unoccupied requested output and record both SHA-256 values; do not label this a standard-runner
+`delivered` result or claim registered-layout readback for replaced specimen bodies.
+
+For ordinary recurring presentation content, extend the maintained DeckKit and its schema/tests
+instead. This corpus route is not permission to replace an eligible kit with a one-off generic deck.
+
 The runner owns this sequence:
 
 ```text

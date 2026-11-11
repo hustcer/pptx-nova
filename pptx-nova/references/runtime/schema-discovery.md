@@ -420,6 +420,12 @@ xdoc schema | from json | get commands.pptx.recipeOps | select recipeKind descri
 当你只想了解"**当前 patch 里这个 op** 的字段约束 / 该 op 做什么"，而不需要
 schema 全集时，可以在 `apply --dry-run` 上加 `--explain`：
 
+For a failed large patch, first read only `status`, `error.code`, `error.message`, and the failing
+`opResults[].opIndex`/resolved target; use that index to read the authored operation. A remediation
+suggestion can contain a complete replacement request, so dumping `error` recursively may repeat
+the entire deck. Retain the full report on disk, inspect the relevant suggestion separately, and
+do not delete a requested feature merely because the generic suggestion proposes removing its op.
+
 ```bash
 xdoc pptx apply -p patch.json -i in.pptx --dry-run --explain --json > dry.json
 ```

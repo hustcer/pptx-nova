@@ -1,6 +1,6 @@
 {
   "id": "swiss-grid",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "canvas": {
     "widthIn": 13.333,
     "heightIn": 7.5

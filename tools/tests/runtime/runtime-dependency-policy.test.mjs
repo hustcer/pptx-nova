@@ -49,7 +49,8 @@ test('missing optional PowerPoint evidence prerequisites do not block the baseli
     /optional, capability-gated evidence integrations, never baseline dependencies/,
   )
   assert.match(workflow, /baseline route remains usable/)
-  assert.match(animations, /缺少 Nushell 或其他可选前置不阻断基线 Morph 流程/)
+  assert.match(animations, /缺少 macOS、PowerPoint 或自动化权限不阻断基线 Morph 流程/)
+  assert.match(animations, /node <skill-root>\/scripts\/cli\/office\/morph-playback\.mjs/)
   assert.match(evidence, /spawnSync\('nu', \['--version'\]/)
   assert.match(evidence, /spawnSync\('xdoc', \['pdf', 'render', '--help'\]/)
   assert.match(evidence, /optional-nushell-helper-unavailable/)

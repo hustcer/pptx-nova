@@ -8,12 +8,12 @@ while choosing the most reliable PowerPoint representation for the task.
 
 Record the formula policy in `deck_lock.json.typography.formulaPolicy`:
 
-| policy        | Use when                                                                                            | Output behavior                                                                                                            |
-| ------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `mixed`       | Default for technical, academic, and training decks                                                 | Keep simple inline math as editable text/Unicode; render complex formulas as formula assets.                               |
-| `text-only`   | Business decks or user explicitly values editability over typesetting                               | Use ordinary text boxes and Unicode symbols; no rendered formula assets.                                                   |
-| `rendered`    | Formula-heavy decks where visual fidelity matters                                                   | Render every formula-worthy expression as SVG formula assets and insert with `add-equation.assetSource`.                   |
-| `native-omml` | User explicitly requests editable PowerPoint equations and the expression fits the supported subset | Use `add-equation` with `mode: "native-omml"`; fall back to rendered SVG for unsupported or typography-sensitive formulas. |
+| policy        | Use when                                                                                            | Output behavior                                                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `mixed`       | Default for technical, academic, and training decks                                                 | Keep simple inline math as editable text/Unicode; render complex formulas as formula assets.                                         |
+| `text-only`   | Business decks or user explicitly values editability over typesetting                               | Use ordinary text boxes and Unicode symbols; no rendered formula assets.                                                             |
+| `rendered`    | Formula-heavy decks where visual fidelity matters                                                   | Use the runtime's disclosed SVG typesetter or supply a typeset SVG through `add-equation.assetSource`.                               |
+| `native-omml` | User explicitly requests editable PowerPoint equations and the expression fits the supported subset | Use `add-equation` with `mode: "native-omml"`; use SVG for unsupported formulas only when the task permits that loss of editability. |
 
 Default to `mixed` when the prompt contains LaTeX, `$...$`, `$$...$$`, equation-heavy
 source text, or terms like formula / equation / 数学公式 / LaTeX / OMML. In Studio
@@ -89,9 +89,24 @@ Formula entries use `kind: "formula"` and one of these statuses:
 Always set `pptxUse.noCrop: true` for formulas. Cropping a formula is almost always a
 semantic error.
 
+For native equations or SVGs generated inside the PPTX by the CLI, retain the expression,
+chosen mode, patch and output evidence. A manifest `path` must name a real materialized file;
+omit it for a semantic-only formula record rather than inventing a separate SVG path.
+Such a record is not an image-slot asset until a real image file is available.
+
 ## Patch guidance
 
-Built-in SVG fallback (literal LaTeX text, without mathematical typesetting):
+First inspect the installed runtime, then dry-run the exact expressions against the intended deck:
+
+```bash
+xdoc --version
+xdoc schema --mode ops --ops add-equation
+xdoc pptx apply --input candidate.pptx --patch formulas.patch.json --dry-run --json
+```
+
+Use the runtime's capability disclosure and actual results, not its version number or an
+older schema snapshot. When it discloses built-in SVG typesetting, `rendered` (also the default)
+produces mathematically typeset vector SVG:
 
 ```json
 {
@@ -107,7 +122,9 @@ Built-in SVG fallback (literal LaTeX text, without mathematical typesetting):
 }
 ```
 
-For typeset production output, supply an SVG produced by a suitable math renderer:
+For syntax outside the disclosed subset, or when another renderer is needed for typography,
+supply an SVG actually produced by that renderer. Supplied SVG bypasses the built-in LaTeX
+parser; retain the LaTeX as semantic metadata and verify that it matches the image:
 
 ```json
 {
@@ -118,6 +135,7 @@ For typeset production output, supply an SVG produced by a suitable math rendere
   "w": "5.8in",
   "h": "0.9in",
   "latex": "\\frac{\\partial L}{\\partial \\theta}=0",
+  "mode": "rendered",
   "display": true,
   "assetSource": {
     "path": "formulas/s3-objective.svg",
@@ -144,12 +162,14 @@ native subset:
 }
 ```
 
-In `mode: "native-omml"`, `display` is ignored. It only affects rendered SVG
-fallback sizing (`display: false` uses the inline SVG fallback box).
+In `mode: "native-omml"`, `display` is ignored. In built-in SVG typesetting it selects
+the math style; `display: false` requests inline style. The rendered `x/y/w/h` frame is
+a centered contain box when the SVG has a known intrinsic aspect ratio. Supplied SVG
+bytes remain unchanged; without an intrinsic ratio, the explicit frame is retained.
 
-Use the built-in fallback for quick drafts. For final formula-heavy decks, render the
-formula asset into the run directory and insert it with `add-equation.assetSource`;
-still keep the formula metadata in `assets_manifest.json`.
+If an older runtime emits literal LaTeX text or reports `formula-fallback-svg`, that is
+draft output, not mathematical typesetting. Use a supplied typeset SVG for final output,
+or an appropriate current runtime whose disclosure and dry-run confirm the required behavior.
 
 ## Render manifest
 
@@ -174,9 +194,9 @@ radicals, matrices, or other LaTeX notation. Its `rendered` status means that an
 SVG file was materialized, not that the formula was mathematically typeset.
 It writes SVG files, updates formula entries to
 `status: "rendered"`, records `render.mime: "image/svg+xml"`, and enforces
-`pptxUse.noCrop: true`. For typography-sensitive final decks, prefer externally
-typeset SVG assets when available and keep the same manifest fields. For expressions
-in the editable native subset, use `native-omml` when that representation meets the task.
+`pptxUse.noCrop: true`. This helper is separate from the CLI's disclosed math typesetter.
+For final formulas, choose native OMML, built-in CLI typesetting, or externally typeset
+SVG according to the task and keep the corresponding formula evidence.
 
 The helper processes every formula entry regardless of `available`, `rendered`, or `native`
 status and overwrites the resolved SVG path. Do not pass a mixed manifest containing supplied,
@@ -196,42 +216,32 @@ Use rendered/native formula assets for:
 - Formula-heavy academic or engineering slides.
 - Any expression where plain text would change meaning or readability.
 
-The current native OMML subset is conservative: plain math text, superscript,
-subscript, top-level `\frac{...}{...}`, and top-level `\sqrt{...}`. Use rendered
-SVG for matrices, aligned equations, cases, and complex n-ary limits until the
-native subset expands.
+## Supported expression planning
 
-"Top-level" means the **whole** expression: one `\frac{...}{...}` or one `\sqrt{...}` with
-nothing before or after it except a supported trailing script. Fraction arguments, radicands and script
-arguments must also fit the native subset recursively. Outer structure alone is not enough:
-`\frac{a^2+b^2}{c}` and `\sqrt{a^2+b^2}` are rejected because their inner expression continues
-after a script. Use this table to plan the representation, then confirm the exact expression
-with the current runtime's capability disclosure and dry-run:
+When the runtime discloses the bounded compositional subset, native OMML and built-in
+SVG typesetting share its parser. Pass the expression body without `$` delimiters;
+escape literal TeX reserved characters, such as `100\%`. Respect the disclosed length
+and nesting limits, fixed symbol vocabulary and exact-expression dry-run result.
 
-| Shape                                                              | Example                                  | Native |
-| ------------------------------------------------------------------ | ---------------------------------------- | ------ |
-| Whole expression is a fraction or radical                          | `\frac{W_{t}}{W_{s}}`, `\sqrt{D_{xy}}`   | yes    |
-| Fraction/radical with a trailing script                            | `\frac{a}{b}^2`                          | yes    |
-| Plain math text, scripts only at the very end                      | `E=mc^2`, `x\le 1`, `A\times B`, `x_i^2` | yes    |
-| Left-hand side or any text around `\frac`/`\sqrt`                  | `E=\frac{a}{b}`, `\frac{a}{b}\le 1`      | no     |
-| Ordinary text/operator after a script at the same expression level | `a^2+b^2=c^2`, `W_{a}=W_{b}`             | no     |
-| N-ary operators, `\pm`, `\div`, matrices, cases                    | `\sum_{i=1}^{n} w_i`, `\int_0^T v\,dt`   | no     |
+| Expression shape                                                 | Examples                                              | Disclosed compositional subset                       |
+| ---------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| Rows with fractions or roots, including nested arguments         | `E=\frac{a}{b}`, `\sqrt{a^2+b^2}`, `\frac{a}{b}\le 1` | Native or built-in SVG                               |
+| Local scripts followed by more arithmetic                        | `a^2+b^2=c^2`, `W_a=W_b`                              | Native or built-in SVG                               |
+| Both script orders and grouped bases                             | `x_i^2`, `x^2_i`, `{a+b}_i^2`                         | Native simultaneous sub/superscripts or built-in SVG |
+| Sum/product/integral operators and limits                        | `\sum_{i=1}^{n}w_i`, `\int_0^T v(t)\,dt`              | Native n-ary structure or built-in SVG               |
+| TeX environments, matrices/cases, user-defined or unknown macros | `\begin{matrix}...\end{matrix}`, `\custom{x}`         | Supply externally typeset SVG                        |
 
-When editability is required and the unsupported part is text around an otherwise supported
-fraction or radical, compose it from separate native objects: an ordinary text box for `E =` / `≤ 1` beside a bare
-native fraction or radical, aligned on one baseline. Record that composition in the lock so later
-edits and translation treat the pieces as one formula. The built-in `mode: "rendered"` fallback
-is the literal-source `text-svg` provider described above; it never typesets a refused
-expression, so do not use it to "upgrade" a formula that native mode rejected.
+Scripts attach to the preceding atom or explicit group, preserving the rest of the row.
+Keep an accepted composed expression in one equation so later edits and translation retain
+its structure. In this subset, an n-ary operator's body consumes the following product up
+to the next top-level additive/relation operator. Use braces for a larger body, such as
+`\sum_{i=1}^{n}{a_i+b_i}`, and review that boundary in the output.
 
-Native script handling is intentionally trailing-script-only. The whole expression
-prefix before the final top-level `^` or `_` becomes the base expression; for
-example `\frac{a}{b}^2` is emitted as a fraction with a trailing superscript.
-`x_i^2` is emitted as nested subscript then superscript, not as aligned
-`sSubSup`; this does not imply arbitrary mixed-script ordering (`x^2_i` is rejected).
-Avoid native mode for expressions where exact LaTeX grouping,
-simultaneous aligned super/subscripts, or operator limits are part of the meaning;
-render those formulas to SVG instead.
+Unknown macros or malformed structures are rejected without substituting literal text.
+Changing only `mode` to `rendered` does not bypass the shared parser. Use `mode: "rendered"`
+with a supplied, typeset SVG for syntax beyond the subset; switching representation must
+still satisfy the task's editability requirement. Older runtimes may support a narrower
+subset, so use their actual results to select the representation.
 
 ## Verification
 
@@ -255,6 +265,12 @@ Add formula-specific checks during PNG review:
 3. Inline formulas align with surrounding text baseline closely enough to read.
 4. Block formulas have stable visual rhythm and do not overpower the slide title.
 5. The final summary mentions whether formulas are editable text, rendered assets, or native equations.
+
+For composed or dense math, also check operators, literal percent signs, both script slots,
+grouped bases and n-ary body boundaries in the actual target consumer. A structurally valid
+PPTX does not prove mathematical correctness. When a discrepancy needs an independent
+reference, compare the same candidate in PowerPoint and the target preview/export;
+record font/size differences separately from lost content or collisions.
 
 For an imported native equation, retain attributed OMML text, including `m:t`
 with `xml:space` or other attributes, whitespace, fractions and sub/superscript

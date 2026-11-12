@@ -226,7 +226,9 @@ Studio / 高风险场景只做一次 bundled confirmation，内容保持短。Ex
 所有临时资源放在 run 目录或其子目录，例如 `.pptx-nova/<run>/assets/`。
 正式 schema 位于 `assets/schemas/assets-manifest.schema.json`；它约束 manifest 形状，
 `cli/create/check-lock.mjs` 负责跨文件引用、文件存在、图片槽位和 AI prompt guard。
-公式按 [formulas.md](../content/formulas.md) 选择原生 OMML、已有排版 SVG 或草稿文字 SVG。
+公式按 [formulas.md](../content/formulas.md) 先查当前运行时并对具体表达式 dry-run，再选择
+原生 OMML、运行时声明支持的内建 SVG 排版或外部排版 SVG。只在确实需要草稿时使用文字 SVG。
+原生或 CLI 内嵌公式保留语义与输出证据，manifest 的 `path` 只填写实际存在的独立资源文件。
 bundled `formula-render.mjs` 只生成 LaTeX 原文 SVG，且会覆盖传入 manifest 中每个 formula
 条目的目标文件，不按状态跳过。只对明确需要此草稿表示的条目使用独立 manifest 与新路径，
 审阅后再合并；不要把已有用户公式、外部排版 SVG 或 native 条目一起交给它批量重写。

@@ -252,10 +252,14 @@ debugging path.
    - `inspect.slides[].shapes[].textPreview` for editable shape text.
    - `xdoc convert source.pptx --to text` for rendered text order.
    - Choose the native source-language detector deliberately:
-     - Use `multi` for mixed Chinese/English source decks translated into a
-       non-English target such as German.
-     - Use `zh` for Chinese-only source decks, especially when the target is
-       English.
+     - Use `multi` when the deck contains prose in more than one source
+       language, including translation into English. A dominant Chinese
+       language does not justify `zh` when independent Latin-language samples
+       also need translation. Review those samples in the inventory;
+       `detectedLangs: ["en"]` on Latin text is not proof that its prose is
+       already English.
+     - Use `zh` for Chinese-only prose with preserved technical identifiers,
+       including when the target is English.
      - Use `en` for English-only source decks.
      - Native `i18n-scan` additionally accepts `cjk` (normalized to `zh` in
        the report); `cli/translation/prepare.mjs` accepts only
@@ -803,6 +807,26 @@ This gate does not prove translation completeness or rendered fit. It must be
 paired with bilingual text audit, source-language scan, preview/contact-diff,
 and visual review.
 
+It also does not prove that visible styling still belongs to the intended
+words: a textless signature can pass when a colored run remains in XML but its
+text was cleared. Compare the source and target phrase-to-run mapping for
+multi-run text, including color, font face, size and spacing, not only
+bold/italic/underline. Do not treat `mixedStyle=false` or a uniform planner
+strategy as sufficient evidence that every run is visually interchangeable.
+
+If the prepared candidate collapses meaningful run boundaries, retain that
+candidate and the reproducing plan. Prefer a planner-supported mapping that
+represents the actual boundaries. If its disclosed group contract merges them,
+use a separate, reviewed native `set-run` correction, following
+[source paragraph guards](../edit/inspect-and-edit.md#52a-源段落保护与稳定-selector):
+take numeric shape ids and paragraph/run indices from current native inspect,
+map translated phrases back to the source runs, and guard every correction
+against the complete current candidate paragraph. Preserve `textLayout:
+"preserve-geometry"` when disclosed; change text only. Retain the mapping,
+dry-run/apply reports and candidate-bound evidence, then recheck exact paragraph
+targets, style signatures and rendered emphasis before finalization. Never
+invent finer `sourceRunGroupId` values or weaken the planner's segment contract.
+
 ## I18n Plan Gate
 
 `xdoc pptx i18n-plan` is mandatory before applying automated translation
@@ -1016,6 +1040,19 @@ below; support for those titles does not imply support for every generated label
 - Do not use the patch op `set-chart-text` as the default translation path:
   that op may synchronize embedded workbook labels and is intended for ordinary
   chart editing, not visible-cache-only i18n.
+  When the requested scope explicitly includes workbook-backed labels, this
+  default is not a capability prohibition. For classic charts, discover the
+  current `set-chart-text` contract and use only its supported series/category
+  text fields with inspect-bound chart identities; keep unrelated title, data
+  and styling fields absent. Retain dry-run/apply and independent workbook
+  cell validation alongside the normal translation gates. Compare actual cell
+  values, numbers, formulas and styles, not just the workbook byte hash or raw
+  shared-string inventory: a writer can leave old, unreferenced shared strings
+  after updating every referenced cell. Separately record any unsupported
+  standalone cells or XY helper headers; a series/category operation does not
+  authorize arbitrary worksheet text, guessed workbook selectors or data
+  regeneration. Disclose unresolved cells when a CLI-only task cannot cover
+  them.
 - If the planner or top-level helper cannot identify a unique visible cache
   node, do not ignore the chart. Refresh the scan, keep the unit in manual
   review, or use a targeted OOXML fallback only for visible cache text,

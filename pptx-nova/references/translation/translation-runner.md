@@ -61,6 +61,13 @@ reference-owned findings separately from candidate regressions and report any un
 do not alter preserved source objects merely to clear inherited diagnostics. Retain this manifest
 and its consumer result for the delivery boundary below; unchanged evidence needs no second render.
 
+Translation normally changes pixels. If the canonical action is
+`require-human-confirmation`, finish the candidate validation and comparison,
+then request one review of the exact candidate and its known limits before
+publication. Retain the user's explicit approval bound to those candidate
+bytes; keep the original machine verdict. Do not mask translated glyphs, retry
+unchanged evidence or substitute a specialized pass to manufacture `proceed`.
+
 ## Standard command
 
 ```bash

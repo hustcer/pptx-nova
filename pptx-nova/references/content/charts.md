@@ -881,8 +881,10 @@ OPC 声明为 Chart/ChartEx 的部件中的可见文本节点，不依赖路径�
 relationship target、embedded workbook 数据/sharedStrings 或 `formatCode`。
 
 普通 chart 编辑仍可用 patch op `set-chart-text`。它会改已有 chart 文本缓存和
-embedded workbook 中对应标签，不重建 chart data XML，适合需要保持 workbook-backed
-chart 标签同步的非翻译场景。
+embedded workbook 中对应标签，不重建 chart data XML，适合明确要求 workbook-backed
+标签同步的普通编辑。翻译默认仍使用 visible-cache-only 路径；若任务同时要求本地化
+工作簿标签，按[翻译覆盖规则](../translation/translation-mode.md#chart-and-table-coverage)
+执行受限的 series/category 文本同步与独立单元格校验，不据此扩大到任意 worksheet 文本。
 
 ```json
 {

@@ -43,7 +43,7 @@ The full repository suite also exposed an existing maintenance mismatch: a test 
 while the current Justfile names the recipe `ls`. This is outside the DeckKit implementation and was
 not changed as a side effect of the design task.
 
-The review uses xdoc 0.20.0 with a frozen display date of 2026-10-25. Arial / Arial Unicode MS are not
+The review uses xdoc 0.21.0 with a frozen display date of 2026-10-25. Arial / Arial Unicode MS are not
 embedded. A clean-open is not certification of native editing, other Office releases, Windows,
 PowerPoint pixel parity or real projection-distance readability. No reference business facts were added.
 

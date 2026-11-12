@@ -74,7 +74,7 @@ npx skills add hustcer/pptx-nova --skill pptx-nova -g -a codex -y
 单独安装文档中指定的运行时发布版：
 
 ```bash
-npm i -g @s8fy/xdoc@0.20.0
+npm i -g @s8fy/xdoc@0.21.0
 xdoc --version
 ```
 
@@ -266,7 +266,7 @@ xdoc 是面向 Agent 的文档执行运行时，用于处理原生、可编辑�
 
 > **xdoc 是一个高性能、以 Agent 为先、无需图形界面的 PPTX 运行时，专为高保真创建和编辑而构建。**
 
-已核对的发布版为 `0.20.0 (91827673)`。它提供运行时能力发现、原生可编辑内容的创建和修改、
+已核对的发布版为 `0.21.0 (dcce9c1c)`。它提供运行时能力发现、原生可编辑内容的创建和修改、
 试运行、保留情况诊断、渲染、验证，以及可审计的证据。
 支持范围取决于具体对象和操作，不代表完全覆盖 PowerPoint 的所有功能。
 
@@ -277,12 +277,12 @@ pptx-nova 基于 `xdoc` 构建，后者是一个为 AI Agent 自研的 PPTX 引�
 
 这些功能通过一个集成渲染后端的轻量原生 CLI 提供：
 预览、PDF 导出和视觉检查均无需 PowerPoint、办公套件或无头浏览器。
-当前 `v0.20.0` 原生安装包的下载大小因目标平台而异，约为 8.4–10.3 MB（十进制），
+当前 `v0.21.0` 原生安装包的下载大小因目标平台而异，约为 8.4–10.3 MB（十进制），
 无需独立服务器或始终运行的后台服务。
 原生构建支持 Linux x64/ARM64、macOS 13+ ARM64 和 Windows x64。
 渲染效果仍取决于可用字体和所需功能的支持状态。
 
-使用 `npm i -g @s8fy/xdoc@0.20.0`（Node.js 22+）安装已发布的 CLI，
+使用 `npm i -g @s8fy/xdoc@0.21.0`（Node.js 22+）安装已发布的 CLI，
 或使用[原生发布安装包](docs/xdoc-installation.md)。Free 模式支持单用户本地任务，
 每个任务最多 10 页幻灯片、压缩 PPTX 输入合计最多 5 MiB；
 可编辑 PPTX、PDF 和 PNG 输出均带有 `structurify.io` 水印。

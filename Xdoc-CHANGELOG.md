@@ -4,7 +4,7 @@ Each release is compared with the preceding `v0.*.*` tag. Dates are the dates of
 
 For current Agent workflows, use the installed executable's `xdoc schema` and `xdoc pptx <action> --help` to discover its actual contract. Names and examples below describe each historical release; follow later migration entries when upgrading. These notes highlight migrations, new operations, report changes, and failure boundaries. PDF rendering fixes also affect PPTX PNG previews produced through the PDF pipeline; static previews do not verify animation playback or PowerPoint fidelity.
 
-## v0.20.0 - 2026/11/06
+## v0.21.0 - 2026/11/06
 
 - Corrected `pdf` and `pptx` help routing when options precede the action. For example, `xdoc pdf -i - render --help` returns render help; help before the action, or a lone `-` in the action position, returns command help. Tokens after `--` remain literal, so `--help` there does not prevent execution.
 - Unified integer option reads with the command parser and aligned completion handling. Regenerate scripts with `xdoc completions <shell>` (`bash`, `zsh`, or `fish`) after upgrading; Bash falls back to filenames when no command or option matches, while Zsh also supports attached option values and paths containing spaces.

@@ -1,6 +1,6 @@
 # Paper Scholar golden review
 
-2026-10-26：1.0.0，candidate；xdoc 0.20.0 (91827673)。
+2026-10-26：1.0.0，candidate；xdoc 0.21.0 (dcce9c1c)。
 
 同日先晋级 production，再晋级 default。golden benchmark 重跑通过，vision 高／中／低均为 0，并建立空的已接受 vision 基线。八页 canonical PNG 与 contact sheet 均和此前已审查的 benchmark 逐字节相同。本轮 benchmark 证据：`.tmp/deckkit-production-20261026-fBFdCq/paper-scholar/golden-learning/`。
 

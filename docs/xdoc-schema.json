@@ -3332,6 +3332,10 @@
               {
                 "code": "asset-policy-and-host-boundaries",
                 "description": "Assets must satisfy the published size and source policy; OLE activation and host application editing are separate capabilities."
+              },
+              {
+                "code": "equation-typesetting-subset",
+                "description": "Equations share bounded compositional parsing for native OMML and host-typeset vector SVG. Full TeX and unknown macros reject; external SVG bypasses that parser. Native xdoc supplies the typesetter; bare library calls require a per-request renderer or supplied SVG. No literal-source fallback is generated."
               }
             ],
             "evidence": [
@@ -29192,7 +29196,8 @@
                         }
                       },
                       "required": ["op", "slide", "x", "y", "w", "h"],
-                      "additionalProperties": false
+                      "additionalProperties": false,
+                      "description": "Native OMML and built-in SVG typesetting share a bounded compositional LaTeX subset: sequences, groups, fractions, square roots, paired parentheses/brackets, subscripts and superscripts in either order, sum/product/integral limits, explicit spacing and fixed symbols. Nary bodies consume the following product up to the next top-level additive/relation operator; braces delimit larger bodies. Unknown macros, malformed syntax, input beyond 65536 UTF-16 units or nesting beyond 64 reject without a literal-text fallback. The native xdoc host supplies the SVG typesetter; bare library callers must install a per-request renderer or supply externally typeset SVG bytes/assetSource. Supplied SVG is preserved unchanged and bypasses the LaTeX parser. Rendered w/h bound a centered contain box: known SVG intrinsic aspect ratio is preserved without modifying its bytes; SVGs without an intrinsic ratio retain the explicit frame. Rendered is the default; native-omml creates an editable equation. Full TeX, environments and user-defined macros are not supported."
                     },
                     {
                       "type": "object",
@@ -38515,7 +38520,8 @@
                       }
                     },
                     "required": ["op", "slide", "x", "y", "w", "h"],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Native OMML and built-in SVG typesetting share a bounded compositional LaTeX subset: sequences, groups, fractions, square roots, paired parentheses/brackets, subscripts and superscripts in either order, sum/product/integral limits, explicit spacing and fixed symbols. Nary bodies consume the following product up to the next top-level additive/relation operator; braces delimit larger bodies. Unknown macros, malformed syntax, input beyond 65536 UTF-16 units or nesting beyond 64 reject without a literal-text fallback. The native xdoc host supplies the SVG typesetter; bare library callers must install a per-request renderer or supply externally typeset SVG bytes/assetSource. Supplied SVG is preserved unchanged and bypasses the LaTeX parser. Rendered w/h bound a centered contain box: known SVG intrinsic aspect ratio is preserved without modifying its bytes; SVGs without an intrinsic ratio retain the explicit frame. Rendered is the default; native-omml creates an editable equation. Full TeX, environments and user-defined macros are not supported."
                   },
                   {
                     "type": "object",
@@ -48096,7 +48102,7 @@
                 },
                 {
                   "slide": 0,
-                  "latex": "\\\\frac{d}{dx} e^x = e^x",
+                  "latex": "\\frac{d}{dx} e^x = e^x",
                   "display": true,
                   "x": "1.75in",
                   "y": "0.5in",
@@ -49564,7 +49570,8 @@
           {
             "op": "add-equation",
             "category": "media",
-            "summary": "Add a LaTeX equation as SVG or editable math.",
+            "summary": "Add a typeset SVG equation or editable native math.",
+            "description": "Native OMML and built-in SVG typesetting share a bounded compositional LaTeX subset: sequences, groups, fractions, square roots, paired parentheses/brackets, subscripts and superscripts in either order, sum/product/integral limits, explicit spacing and fixed symbols. Nary bodies consume the following product up to the next top-level additive/relation operator; braces delimit larger bodies. Unknown macros, malformed syntax, input beyond 65536 UTF-16 units or nesting beyond 64 reject without a literal-text fallback. The native xdoc host supplies the SVG typesetter; bare library callers must install a per-request renderer or supply externally typeset SVG bytes/assetSource. Supplied SVG is preserved unchanged and bypasses the LaTeX parser. Rendered w/h bound a centered contain box: known SVG intrinsic aspect ratio is preserved without modifying its bytes; SVGs without an intrinsic ratio retain the explicit frame. Rendered is the default; native-omml creates an editable equation. Full TeX, environments and user-defined macros are not supported.",
             "required": ["op", "slide", "x", "y", "w", "h"],
             "constraints": [],
             "optional": [
@@ -114151,7 +114158,7 @@
     }
   },
   "name": "xdoc",
-  "version": "0.20.0 (91827673)",
+  "version": "0.21.0 (dcce9c1c)",
   "schemaVersion": "cli-agent/v1",
   "defaultCommand": "convert",
   "artifactSchemaEvolution": {

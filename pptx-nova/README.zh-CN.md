@@ -30,7 +30,7 @@ skill 安装命令不会安装 `xdoc`。实际生成、编辑、转换 PPTX 和�
 并确保 Agent 可以通过 `PATH` 找到 `xdoc`。使用 Node.js 22+ 时可以运行：
 
 ```bash
-npm i -g @s8fy/xdoc@0.20.0
+npm i -g @s8fy/xdoc@0.21.0
 xdoc --version
 ```
 
@@ -79,7 +79,7 @@ CLI 是公开分发与集成界面，execution layer 是它在 Agent 与文档�
 - **证据是输出的一部分。** 结构检查、语义检查、渲染预览、源文件与候选文件 diff、操作 trace
   和 sidecar 使一次修改可审阅、可回放，而不是只用“文件已经生成”判断成功。
 - **本地、轻量、适合自动化。** 预览渲染、PDF 导出和视觉检查不依赖 PowerPoint、完整 Office
-  套件或 headless browser。当前的 `v0.20.0` 原生包会因受支持目标不同而略有差异，单个包
+  套件或 headless browser。当前的 `v0.21.0` 原生包会因受支持目标不同而略有差异，单个包
   下载大小约 8.4–10.3 MB（十进制）；普通本地任务不需要独立服务器或常驻后台服务。
   多步骤任务也可以按需使用仅监听本机 loopback 的可选 daemon。
 
@@ -87,7 +87,7 @@ CLI 是公开分发与集成界面，execution layer 是它在 Agent 与文档�
 都应以所选 release 的实际信息为准。当前公开原生目标覆盖受支持的 Linux、macOS 和 Windows
 构建。最终渲染仍取决于所需后端和字体，少见或尚未支持的 PPTX 特性仍需要明确复核。
 
-已核对的发布版为 `0.20.0 (91827673)`。Free 支持单用户本地任务，每任务最多 10 页、
+已核对的发布版为 `0.21.0 (dcce9c1c)`。Free 支持单用户本地任务，每任务最多 10 页、
 压缩 PPTX 输入合计不超过 5 MiB；PPTX、PDF、PNG 等视觉输出带 `structurify.io` 水印。
 Personal 与 Enterprise 可移除套餐级页数、大小限制及新增套餐水印，已有签名水印规则仍适用。
 Launch plans 支持本地脚本和每用户 daemon，不包含 CI、共享服务器或 Service/API 部署；

@@ -78,7 +78,7 @@ conversion, and preview workflows also require `xdoc` on the Agent's `PATH`.
 Install the documented runtime release separately:
 
 ```bash
-npm i -g @s8fy/xdoc@0.20.0
+npm i -g @s8fy/xdoc@0.21.0
 xdoc --version
 ```
 
@@ -310,7 +310,7 @@ xdoc is an agent-native document execution runtime for native, editable PPTX wor
 
 > **xdoc is a high-performance, agent-first, headless PPTX runtime built for high-fidelity creation and editing.**
 
-The verified release is `0.20.0 (91827673)`. It exposes runtime discovery,
+The verified release is `0.21.0 (dcce9c1c)`. It exposes runtime discovery,
 native editable creation and modification, dry-runs, preservation diagnostics,
 rendering, validation, and auditable evidence. Support is specific to each
 object and operation; it does not imply complete PowerPoint feature parity.
@@ -323,13 +323,13 @@ PDF, and leave replayable sidecar evidence.
 
 All of this runs through a single lightweight native CLI with integrated
 rendering backends: previews, PDF export, and visual checks require no
-PowerPoint, office suite, or headless browser. The current `v0.20.0` native
+PowerPoint, office suite, or headless browser. The current `v0.21.0` native
 archives download as approximately 8.4–10.3 MB (decimal), depending on the target, and need no
 separate server or always-on background service. Native builds are available
 for Linux x64/ARM64, macOS 13+ ARM64, and Windows x64. Rendering still depends
 on the available fonts and the support status of the requested feature.
 
-Install the published CLI with `npm i -g @s8fy/xdoc@0.20.0` (Node.js 22+), or
+Install the published CLI with `npm i -g @s8fy/xdoc@0.21.0` (Node.js 22+), or
 use a [native release archive](docs/xdoc-installation.md). Free mode supports
 single-user local tasks up to 10 slides and 5 MiB of compressed PPTX inputs
 combined; editable PPTX, PDF, and PNG outputs carry a `structurify.io` watermark.

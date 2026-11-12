@@ -260,7 +260,7 @@ B - $20
 
 ### 嵌套（当前不支持）
 
-当前运行时（xdoc 0.20.0）**不支持**嵌套 `{{#each}}`（报 `bind-data template has
+当前运行时（xdoc 0.21.0）**不支持**嵌套 `{{#each}}`（报 `bind-data template has
 unterminated each block`），也不支持 `{{../path}}`（报 `bind-data template path not
 found: ../name`）。`{{#each}}` 块内只能用 `{{.}}`、当前元素字段和 `{{$.path}}`（根 data）；
 多层数据请先在 data.json 里拍平成单层列表。

@@ -552,6 +552,11 @@ node <skill-root>/scripts/cli/runtime/clean-open.mjs \
     structural replacement checks that were run. `--classify-ui` is only for
     offline saved UI snapshot classification and is platform-independent.
 
+    If a skipped report contains `osascript ETIMEDOUT`, the timeout alone does not prove
+    missing UI scripting permission. Retain that report and retry once with a fresh output path
+    and a larger `--timeout-ms` (for example `60000`). Use only the actual retry result;
+    do not reuse an earlier candidate's passing clean-open report.
+
 14. For external/customer/public delivery, run:
 
 ```bash

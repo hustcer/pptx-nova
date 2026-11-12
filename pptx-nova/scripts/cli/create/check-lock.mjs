@@ -864,7 +864,8 @@ function checkLock(lock, errors, warnings) {
         push(
           warnings,
           'lock-slide-density-unknown',
-          `slides[${index}] uses unknown visualDensity "${visualDensity}"`,
+          `slides[${index}] uses unknown visualDensity "${visualDensity}"; allowed values: ${[...VISUAL_DENSITIES].join(', ')}`,
+          { allowedValues: [...VISUAL_DENSITIES] },
         )
       }
       if (formalNarrative && !isAppendixLike(slide)) {

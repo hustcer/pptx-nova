@@ -59,6 +59,12 @@ unmodified kit patch as `deckkit.patch.json`, the reproducible composition scrip
 Use current, typed xdoc operations; do not rewrite package XML or modify the installed kit's
 geometry constants for a single deck. Reusable kit changes remain a separate maintained-kit task.
 
+For native diagrams with bound connectors, read the connection-site section of
+[native shape editing](../edit/native-shape-editing.md) before composing the patch, even during
+creation. Connection-site indices belong to each preset, not to a universal compass: an endpoint
+can be valid yet connect to the wrong corner. Review the actual entry/exit points and every segment
+through node interiors in the pilot render; a successful dry-run proves validity, not routing intent.
+
 The standard runner's `--choreography` boundary stays unchanged. A manually composed patch uses
 the equivalent manual sequence in [DeckKit mode](deckkit-mode.md#production-path): validate the
 registered content, check the final lock/patch/assets, dry-run, apply, inspect, specialized semantic

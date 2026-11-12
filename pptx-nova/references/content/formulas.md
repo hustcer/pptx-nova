@@ -201,11 +201,35 @@ subscript, top-level `\frac{...}{...}`, and top-level `\sqrt{...}`. Use rendered
 SVG for matrices, aligned equations, cases, and complex n-ary limits until the
 native subset expands.
 
+"Top-level" means the **whole** expression: one `\frac{...}{...}` or one `\sqrt{...}` with
+nothing before or after it except a supported trailing script. Fraction arguments, radicands and script
+arguments must also fit the native subset recursively. Outer structure alone is not enough:
+`\frac{a^2+b^2}{c}` and `\sqrt{a^2+b^2}` are rejected because their inner expression continues
+after a script. Use this table to plan the representation, then confirm the exact expression
+with the current runtime's capability disclosure and dry-run:
+
+| Shape                                                              | Example                                  | Native |
+| ------------------------------------------------------------------ | ---------------------------------------- | ------ |
+| Whole expression is a fraction or radical                          | `\frac{W_{t}}{W_{s}}`, `\sqrt{D_{xy}}`   | yes    |
+| Fraction/radical with a trailing script                            | `\frac{a}{b}^2`                          | yes    |
+| Plain math text, scripts only at the very end                      | `E=mc^2`, `x\le 1`, `A\times B`, `x_i^2` | yes    |
+| Left-hand side or any text around `\frac`/`\sqrt`                  | `E=\frac{a}{b}`, `\frac{a}{b}\le 1`      | no     |
+| Ordinary text/operator after a script at the same expression level | `a^2+b^2=c^2`, `W_{a}=W_{b}`             | no     |
+| N-ary operators, `\pm`, `\div`, matrices, cases                    | `\sum_{i=1}^{n} w_i`, `\int_0^T v\,dt`   | no     |
+
+When editability is required and the unsupported part is text around an otherwise supported
+fraction or radical, compose it from separate native objects: an ordinary text box for `E =` / `≤ 1` beside a bare
+native fraction or radical, aligned on one baseline. Record that composition in the lock so later
+edits and translation treat the pieces as one formula. The built-in `mode: "rendered"` fallback
+is the literal-source `text-svg` provider described above; it never typesets a refused
+expression, so do not use it to "upgrade" a formula that native mode rejected.
+
 Native script handling is intentionally trailing-script-only. The whole expression
 prefix before the final top-level `^` or `_` becomes the base expression; for
 example `\frac{a}{b}^2` is emitted as a fraction with a trailing superscript.
 `x_i^2` is emitted as nested subscript then superscript, not as aligned
-`sSubSup`. Avoid native mode for expressions where exact LaTeX grouping,
+`sSubSup`; this does not imply arbitrary mixed-script ordering (`x^2_i` is rejected).
+Avoid native mode for expressions where exact LaTeX grouping,
 simultaneous aligned super/subscripts, or operator limits are part of the meaning;
 render those formulas to SVG instead.
 

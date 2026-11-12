@@ -2,14 +2,18 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { evaluateVisualEvidence } from '../../lib/review/canonical-visual-evidence.mjs'
+import { evaluateTranslationVisualEvidence } from '../../lib/translation/visual-acceptance.mjs'
 
 const usage = `Usage:
   node <skill-root>/scripts/cli/review/visual-evidence-gate.mjs --manifest <path> [options]
 
 Options:
   --manifest <path>  Canonical pptx-visual-evidence/v1 manifest.
-  --candidate <path> Current PPTX, required for create evidence binding.
+  --candidate <path> Current PPTX, required for create and translation evidence binding.
   --review <path>    Actual visual review bound by --candidate and --manifest.
+  --translation-evidence <path>
+                    Hash-bound translation evidence from cli/translation/run.mjs.
+                    Accept expected text pixel changes after Agent review, without user approval.
   --lock <path>      Run deck_lock.json, required to authorize a reviewed Create.
   --output <path>    Optional persisted gate report.
   --json             Print the gate report as JSON.
@@ -20,8 +24,9 @@ Exit status:
   2  invalid command arguments
   3  invalid or inconsistent evidence manifest
   4  manifest.decision.action is stop
-  5  manifest.decision.action requires human confirmation
+  5  applicable workflow still requires human confirmation
   6  candidate checks passed; actual visual review is still required
+  7  translation visual review passed; complete machine workflow/publication evidence is missing
 `
 
 function parseArgs(argv) {
@@ -33,16 +38,29 @@ function parseArgs(argv) {
       process.exit(0)
     } else if (arg === '--json') {
       args.json = true
-    } else if (['--manifest', '--output', '--candidate', '--review', '--lock'].includes(arg)) {
+    } else if (
+      [
+        '--manifest',
+        '--output',
+        '--candidate',
+        '--review',
+        '--lock',
+        '--translation-evidence',
+      ].includes(arg)
+    ) {
       const value = argv[index + 1]
       if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value`)
-      args[arg.slice(2)] = value
+      args[arg === '--translation-evidence' ? 'translationEvidence' : arg.slice(2)] = value
       index += 1
     } else {
       throw new Error(`Unknown option: ${arg}`)
     }
   }
   if (!args.manifest) throw new Error('--manifest is required')
+  if (args.translationEvidence && (!args.candidate || args.lock))
+    throw new Error(
+      '--translation-evidence requires --candidate and cannot be combined with --lock',
+    )
   return args
 }
 
@@ -72,14 +90,20 @@ try {
   const expectedDesignMode = args.lock
     ? (JSON.parse(readFileSync(resolve(args.lock), 'utf8'))?.artDirection?.mode ?? '')
     : ''
-  const report = evaluateVisualEvidence(path, {
+  const evaluate = args.translationEvidence
+    ? evaluateTranslationVisualEvidence
+    : evaluateVisualEvidence
+  const report = evaluate(path, {
     candidate: args.candidate,
     review: args.review,
     expectedDesignMode,
+    translationEvidence: args.translationEvidence,
   })
   writeReport(args, report)
   if (report.status === 'invalid') process.exit(3)
   if (report.status === 'needs-visual-review') process.exit(6)
+  if (report.status === 'needs-machine-completion') process.exit(7)
+  if (report.deliveryAuthorized) process.exit(0)
   if (manifest.decision.action === 'stop') process.exit(4)
   if (manifest.decision.action === 'require-human-confirmation') process.exit(5)
 } catch (error) {

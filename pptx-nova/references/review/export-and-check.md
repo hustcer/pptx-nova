@@ -197,6 +197,17 @@ delivery. Exit `4` is a content blocker. Exit `5` requires actual human
 confirmation; an Agent must not reinterpret it as success. Invalid or
 internally inconsistent manifests exit `3`.
 
+Translation uses the explicit workflow consumer described in
+[Translation finalization](../translation/translation-runner.md#fit-and-review-before-publication):
+pass `--translation-evidence` from the current finalizer plus a bound translation `--review`.
+Expected translated pixels and reviewed low static estimates then require Agent review, not user
+approval. The result preserves the native `decision` and records a separate translation `acceptance`;
+use the consumer's exit status and `deliveryAuthorized`. Exit `7` requires complete, hash-bound
+machine workflow and publication evidence; preflight visual acceptance alone cannot authorize delivery.
+It cannot waive content `stop`, failed
+translation checks, stale/incomplete bindings or an environment-dependent decision. Without this
+explicit contract, the default consumer and exit policy above remain unchanged.
+
 Always bind the gate to the current candidate. For Create, after actually reviewing the canonical PNGs,
 also pass `--review <visual_review.json> --lock <run-dir>/deck_lock.json`. Record that review with both `--candidate` and `--manifest` using
 `cli/review/visual-review.mjs`. The consumer verifies candidate, PDF/PNG and manifest hashes, complete
@@ -206,10 +217,10 @@ Use the standard runner for publication with its input-bound lock. Exit `6` mean
 visual review is missing; it does not require another user permission question. Stale or failed
 reviews do not authorize delivery. Use a fresh run after changing the candidate.
 
-Edit, Translation and Refurbish continue to use the common consumer with the default regression
-policy and their approved source/reference. Producing a new output filename does not make an edit
-a Create task. Keep each workflow's semantic/style/fidelity checks; do not substitute Create mode
-for explaining intended changes.
+Edit and Refurbish continue to use the default regression consumer and their approved source/reference.
+Translation retains that native manifest but uses the explicit contract-bound translation acceptance
+policy above. Producing a new output filename does not make an edit a Create task. Keep each workflow's
+semantic/style/fidelity checks; do not substitute Create mode for explaining intended changes.
 
 ### Scoped edit evidence
 
@@ -233,7 +244,8 @@ evidence where needed. Record those observations in the visual review and, when
 requested, feedback. Do not silently repair unrelated objects to satisfy the gate.
 
 These records explain a result; they are not an alternate delivery decision.
-Preserve the canonical verdict and the exit-status policy above. An Agent review,
+Preserve the canonical verdict and the applicable workflow consumer's exit-status policy above. For
+the default regression consumer, an Agent review,
 unchanged source XML or native screenshot cannot turn `stop` or
 `require-human-confirmation` into automated delivery authorization. If a suspected
 CLI false positive remains, retain the candidate/evidence and report the exact

@@ -1,15 +1,14 @@
 # Translation Finalization Runner
 
-Finalize a stable translated candidate with machine gates, comparison and publication binding; this
-runner does not translate, repair or certify human review. Apply [object integrity](../review/object-integrity.md)
+Finalize a stable translated candidate with machine gates, comparison and publication binding;
+record only supplied, bound Agent review. Apply [object integrity](../review/object-integrity.md)
 within the translation contract, without authorizing redesign or unrelated source-object guards.
 
 ## Inputs
 
 The finalizer requires:
 
-- the read-only source `.pptx`;
-- the stable translated candidate `.pptx`;
+- the read-only source and stable translated candidate `.pptx`;
 - the effective source `pptx-i18n-scan/v1` inventory consumed by the translation plan
   (classified when review classification was needed);
 - the matching `pptx-i18n-translations/v1` data;
@@ -19,54 +18,49 @@ Preserve the planner's complete source inventory, including every shape `textPla
 On identity `invalid_data`, rescan the bound source and rebuild the plan. Never infer parts from
 logical slide filenames/candidate data or consume a stale candidate report.
 
-Before these inputs exist, read `references/translation/translation-mode.md` for scan, classification, planning,
-apply, repair, chart/table coverage, and multi-column review preparation. Do not invoke the finalizer
-with an intermediate candidate.
+Before inputs exist, read `translation-mode.md` for scan, classification, planning, apply, repair,
+chart/table coverage and multi-column review. Never finalize an intermediate candidate.
 
-For a new translation, prefer `cli/translation/prepare.mjs`. It creates a hash-bound,
-content-deduplicated translation memory, resumes bound review classification, and sequentially applies
-the planner artifacts. When supported by the current xdoc contract, preparation also consumes
-high-confidence `i18n-anchor-draft` merge material and reruns `i18n-plan`; it never treats the draft
-as apply authorization. This finalizer begins only after that preparation result is `prepared`.
-Preparation keeps partitions count-only; `--expand-review <languageUncertain|shared|embeddedWorkbook|other>`
-persists one bound partition when its individual units are needed.
-Retain the planner's disclosed `textLayout: "preserve-geometry"`; see `translation-mode.md` for pending reflow, fitting and older runtimes. Keep all gates; avoid a default geometry-restoration pass.
-Use `artifacts.units`: the inventory and SHA-256 recorded in `summary.units` and used by planning,
-including when `--apply` reuses approved classification. With older preparation scripts, use
-`artifacts.classifiedScan` when non-null, otherwise `artifacts.scan` after checking the translation
-memory's bound units path/hash. No classification work means no `i18n-scan-classified.json`; do not
-invent that file or reclassify to satisfy a filename. Use the same effective inventory as the
-successful plan, plus `artifacts.candidate` and `artifacts.translations`.
+Prefer `cli/translation/prepare.mjs`: it builds hash-bound, content-deduplicated memory, resumes bound
+classification and sequentially applies planner artifacts. Supported `i18n-anchor-draft` material
+feeds a fresh `i18n-plan`, never apply authorization. Finalize only a `prepared` result.
+Partitions remain count-only until `--expand-review <languageUncertain|shared|embeddedWorkbook|other>`.
+Retain `textLayout: "preserve-geometry"` and all gates; see `translation-mode.md` for fitting/reflow
+and older runtimes. Avoid a default geometry-restoration pass. Use `artifacts.units`, whose inventory
+and SHA-256 are recorded in `summary.units`, including approved classification reused by `--apply`.
+For older scripts, use non-null `artifacts.classifiedScan`, otherwise `artifacts.scan`, after checking
+the memory's bound units path/hash. Do not invent `i18n-scan-classified.json` or reclassify for a filename.
+Use that successful plan's inventory with `artifacts.candidate` and `artifacts.translations`.
 
 ## Fit and review before publication
 
-`prepared` proves guarded text application, not rendered fit. If the deck contains tight labels or
-changed multi-column text, use the [pre-finalization review](translation-mode.md#visual-parity-gate)
-before starting this runner. Inspect the vision delta once, repair actual fit regressions through
-the completed translation memory, and render only the slides needed for the bound multi-column
-review. Pass that review gate to the finalizer; do not start a deliberately incomplete finalize run
-just to discover the review scaffold. A wording revision invalidates the old candidate-bound review.
-For native tables and dense chart labels, inspect readable-size PNGs even when the vision delta has
-no blockers: a long compound label can be clipped inside a cell without a shape-level fit warning.
-Reuse the canonical audit's page PNGs when available. Compact the wording before the expensive full
-comparison rather than treating a clean estimator or contact-sheet thumbnail as proof of cell fit.
+`prepared` proves guarded application, not rendered fit. For tight labels or changed multi-column text,
+complete [pre-finalization review](translation-mode.md#visual-parity-gate) first. Inspect the vision
+delta once, repair fit through the translation memory, render only needed multi-column pages and pass
+the bound review gate. Do not start an incomplete finalize run to discover a scaffold; revised wording
+invalidates old review. Inspect native tables/dense chart labels at readable size even without vision
+blockers: cell clipping may lack a shape-level warning. Reuse canonical page PNGs and compact wording
+before full comparison; a clean estimator or contact-sheet thumbnail does not prove cell fit.
 
-Run the [canonical visual gate](../review/export-and-check.md#unified-visual-evidence-canonical-agent-gate)
-on the stable candidate against the source using the frozen field date **before invoking this runner**.
-The runner neither pauses before publication nor consumes the canonical decision. Its specialized
-gates can pass and publish a hash-bound bundle while the independent canonical decision still blocks
-delivery. Keep those results separate: `machineGatesPassed=true`, a compare-gate pass, and a
-PowerPoint clean-open pass do not turn a canonical `stop` into delivery authorization. Diagnose
-reference-owned findings separately from candidate regressions and report any unresolved limitation;
-do not alter preserved source objects merely to clear inherited diagnostics. Retain this manifest
-and its consumer result for the delivery boundary below; unchanged evidence needs no second render.
+Run `xdoc pptx visual-audit` on the stable candidate against the source, using the frozen field date,
+**before invoking this runner**. Review its exact candidate PNGs and findings, then record a passing
+`visual-review.mjs --mode translation --candidate <candidate> --manifest <manifest>
+--previews <review-dir>/visual-evidence/candidate` record with the
+full slide count and every required check. Supply it with `--visual-manifest` and `--visual-review`
+below. This is Agent visual review; it does not require a user approval conversation.
 
-Translation normally changes pixels. If the canonical action is
-`require-human-confirmation`, finish the candidate validation and comparison,
-then request one review of the exact candidate and its known limits before
-publication. Retain the user's explicit approval bound to those candidate
-bytes; keep the original machine verdict. Do not mask translated glyphs, retry
-unchanged evidence or substitute a specialized pass to manufacture `proceed`.
+Translation acceptance consumes the original regression manifest and freshly generated, hash-bound
+source, candidate, inventory, translations, style, consistency and full-deck vision evidence. Complete
+bound Agent review accepts `same-renderer-change-detected`, reviewed low static estimates and the
+separately bound multi-column exception. Static findings marked `contradicted-by-rendered-layout`
+are resolved; their original severity remains recorded. The native manifest is unchanged; acceptance
+does not claim unchanged pixels or PowerPoint parity.
+
+Expected translated glyphs, normal wrapping and pixel diffs need no user approval. Finish missing Agent
+review; regenerate missing/stale evidence. Repair or diagnose overflow, overlap, page-bound errors,
+style/coverage failures, unexplained findings and canonical `stop`; never ask to waive a defect.
+Preserve genuinely environment-dependent font/fidelity decisions, which may need user input after
+diagnosis. Do not alter unrelated source objects to clear inherited diagnostics.
 
 ## Standard command
 
@@ -76,28 +70,28 @@ node <skill-root>/scripts/cli/translation/run.mjs \
   --candidate <run-dir>/candidate-final.pptx \
   --units-file <effective-units-file> \
   --translations <run-dir>/translations.json \
+  --visual-manifest <review-dir>/visual-evidence/manifest.json \
+  --visual-review <review-dir>/visual_review.json \
   --output translated.pptx \
   --run-dir <run-dir>/finalize \
   --json
 ```
 
+The two visual flags must be supplied together. Preflight checks fresh translation and visual evidence
+before preview/compare publication; `visualReviewPassed=true` alone never authorizes delivery.
 Add `--allow-text-attrs tooltip,descr,title` only for explicitly translated typed text attributes.
 Add `--multi-column-review-gate <path>` only when the final `vision-diff` contains exclusively bound
 `review-only` multi-column findings and the gate belongs to the same candidate bytes. Add
 `--contact-diff` when compatibility aliases are needed; aliases are copied from the final compare and
 must not trigger another full-deck render.
 
-Before creating the run directory or starting xdoc, the finalizer reads the
-bound units and translations and derives the exact changed
-`visibleTextAttr` attribute names. If the explicit `--allow-text-attrs` list
-does not cover them, it fails with the changed attribute names, unit counts,
-and a copyable retry flag. It never grants the authorization automatically;
-this avoids a full finalizer rerun caused by a late style-gate failure.
+Before creating the run directory or starting xdoc, derive changed `visibleTextAttr` names from bound
+units/translations. An incomplete explicit `--allow-text-attrs` fails with names, counts and a retry
+flag; authorization is never automatic. This avoids discovering the omission after expensive checks.
 
-Compare parts render concurrently (`--compare-concurrency`, default 3). `--prompt-text`/`--prompt-file`
-archive the original user request to `<run-dir>/prompt.txt` for the feedback gate. The full progress
-event stream is archived to `<run-dir>/progress.jsonl` by default (`--progress-file none` disables);
-while active, stderr carries only single-line phase-boundary summaries.
+Compare concurrency defaults to 3 (`--compare-concurrency`). `--prompt-text`/`--prompt-file` archive the
+request to `<run-dir>/prompt.txt` for feedback. Full progress defaults to `<run-dir>/progress.jsonl`
+(`--progress-file none` disables); stderr carries single-line phase-boundary summaries.
 
 The finalizer reruns supplied multi-column gates and checks candidate bytes, exact findings, PNG
 hashes/dimensions and decisions. Report identity ignores only run-local source/candidate paths,
@@ -107,63 +101,69 @@ findings and other fields must match. Stale gates fail closed.
 The finalizer owns this sequence:
 
 ```text
-snapshot immutable inputs
--> source inspect
--> i18n style diff
--> candidate target consistency
+snapshot immutable inputs -> source inspect -> i18n style diff -> candidate target consistency
 -> vision diff and optional bound review-only exception
--> one candidate full preview/contact sheet
--> semantic diff
--> one full translation compare
+-> freeze translation-evidence.json and consume supplied canonical/Agent review
+-> one candidate full preview/contact sheet -> semantic diff -> one full translation compare
 -> optional contact aliases from the same evidence
--> compare publish gate and final hash binding
+-> revalidate translation acceptance against current evidence
+-> compare publish/final hash binding -> seal machine completion -> final delivery acceptance
 ```
 
 ## Agent-facing output
 
-`--json` prints a compact `pptx-nova-translation-result/v1` result with status, paths, machine-gate
-summary, performance, conditional `requiredReferences[]`, and terminal error. The complete
-`pptx-nova-translation-run/v1` report is persisted as
-`<run-dir>/translation-run-summary.json`; read it only for diagnosis or evidence inspection. Use
-`--json-full` only when complete stdout compatibility is explicitly required.
+`--json` prints compact `pptx-nova-translation-result/v1`: status, paths, machine gates, performance,
+conditional `requiredReferences[]` and terminal error. Read the complete `pptx-nova-translation-run/v1`
+at `<run-dir>/translation-run-summary.json` only for diagnosis/evidence inspection; use `--json-full`
+only when complete stdout compatibility is explicitly required.
 
-Successful machine finalization returns `status=needs-human-review`,
-`machineGatesPassed=true`, and `deliveryReady=false`. The runner never records manual review as
-completed.
+With valid supplied visual evidence, successful finalization returns `status=completed`,
+`machineGatesPassed=true`, `deliveryReady=true`, and `needsHumanReview=false`. It retains
+`translation-visual-acceptance.json` with the original machine decision and the separate Skill
+acceptance result. Review the complete compare set before delivering the bundle.
+
+Without visual flags, evidence preparation returns `status=needs-visual-review`, `needsVisualReview=true`,
+`needsHumanReview=false` and `deliveryReady=false`. Agent work remains; keep the bundle inside the run
+until accepted. After recording bound translation review, consume it without rendering again:
+
+```bash
+node <skill-root>/scripts/cli/review/visual-evidence-gate.mjs \
+  --manifest <review-dir>/visual-evidence/manifest.json \
+  --candidate <run-dir>/candidate.pptx \
+  --translation-evidence <run-dir>/translation-evidence.json \
+  --review <review-dir>/visual_review.json \
+  --output <run-dir>/translation-visual-acceptance.json --json
+```
+
+Require exit 0 and `deliveryAuthorized=true`; exit 6 needs Agent review, not a user question. Exit 7
+means machine completion is missing: repair and rerun finalization. Only successful bundle publication
+seals the preview, full semantic diff, comparison, delivery gate and published files in `completion`.
+Changed files invalidate it; without `--translation-evidence`, default semantics remain. Old runs
+without completion need fresh finalization; never manufacture records or infer success.
 
 ## Visual evidence and performance
 
-The candidate preview and translation compare serve different policies:
-
-- preview proves every candidate slide rendered and supplies the candidate contact sheet;
-- compare binds every source/candidate slide pair for final visual review;
-- optional `contact-diff` files are compatibility aliases of compare evidence, not a second render.
-
-Performance records preview invocations, compare parts, actual retry attempts, estimated pixels,
-pair-cache hits, page-bitmap hits/misses/population, saved render invocations, saved alias invocations,
-render share, and invocation/pixel budgets. Multipart compare must cover
-every slide without overlap or gaps. A 192 DPI part may retry once at 144 DPI; every retry remains
-visible in the report. Compare evidence is content-addressed by source/candidate bytes, selector, DPI,
-and xdoc executable bytes. Below that pair-level cache, preview and compare share page bitmaps keyed by
-PPTX SHA-256, one-based slide, DPI, and the xdoc renderer binary SHA-256. The default cache is shared
-beside the run directory and survives failed finalize runs. A validated pair-cache hit is rebound to the
-current artifact paths and counts as zero actual render invocations.
+Preview proves every candidate slide rendered and supplies a contact sheet; compare binds every
+source/candidate pair. Optional `contact-diff` aliases reuse that evidence without another render.
+Performance records preview/compare/retry invocations, estimated pixels, pair/page cache activity,
+saved render/alias invocations, render share and invocation/pixel budgets. Multipart coverage has no
+gaps/overlaps; each 192 DPI part may retry once at 144 DPI, recorded in the report. Pair-cache keys
+bind source/candidate bytes, selector, DPI and xdoc binary bytes. Shared page bitmaps bind PPTX SHA-256,
+one-based slide, DPI and renderer SHA-256. The default cache beside the run directory survives failure;
+validated pair hits rebind current paths and count as zero actual render invocations.
 
 ## Failure routing
 
-Always follow `requiredReferences[]` first. For visual blockers without a supplied review gate, load
-the named `Visual Parity Gate` section in `references/translation/translation-mode.md`. Load deeper sections only
-for the detected problem:
+Follow `requiredReferences[]` first. For visual blockers without a review gate, load `Visual Parity Gate`
+in `references/translation/translation-mode.md`. Load deeper sections only for the detected problem:
 
 - missing or inconsistent target text: `I18n Plan Gate` and translation repair rules;
 - changed style signatures: `Style Signature Gate`;
 - charts or tables: the matching translation-mode section plus `../content/charts.md` or `../content/tables.md`;
 - multi-column review-only findings: `Visual Parity Gate` and the scaffold/gate workflow;
-- real overflow, overlap, edge, or other high/medium regressions: repair the candidate; they cannot be
-  waived by a multi-column review gate.
+- real overflow/overlap/edge or other high/medium regressions: repair; multi-column review cannot waive them.
 
-Never retry finalization with stale review evidence. Recreate any gate whose candidate, vision report,
-page PNG, byte length, dimensions, or SHA-256 no longer matches.
+Recreate stale gates when candidate, vision report, PNG, byte length, dimensions or SHA-256 changes.
 
 ## Delivery boundary
 
@@ -171,10 +171,7 @@ The compare gate binds exact candidate bytes before machine publication. Review 
 sheet, every compare part and all bound review-only full-size pages; retain the summary, scans,
 style/vision reports, semantic diff, preview manifest, comparison reports/images/gate and final binding.
 
-Compare publication does not authorize visual delivery. Reuse the pre-publication
-[canonical visual gate](../review/export-and-check.md#unified-visual-evidence-canonical-agent-gate)
-manifest and consumer result only while their source, candidate, renderer and render-context bindings
-remain current. Rebuild evidence when a binding changes; a completed finalizer alone does not require
-another render.
-Never override `stop` or `require-human-confirmation` with a specialized pass. Diagnose inherited
-findings and renderer differences before changing source geometry or typography.
+Compare publication alone does not authorize delivery. Require passing translation acceptance and
+current source/candidate, translation-contract, canonical PDF/PNG, date and Agent-review bindings.
+Rebuild changed evidence; unchanged evidence needs no second render. Never override canonical `stop`,
+environment decisions or unresolved defects. Expected text pixels need Agent review, not user approval.

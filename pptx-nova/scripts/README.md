@@ -176,8 +176,12 @@ The public release audit checks this layout and local module imports.
   source/candidate/translation contracts, runs style, target-consistency, vision, preview, semantic,
   full-deck comparison, and publication-binding gates, and can materialize `contact-diff` aliases
   from the same compare evidence without another render. `--json` emits a compact Agent result;
-  `--json-full` or `translation-run-summary.json` provides complete diagnostics. Machine success
-  remains `needs-human-review`.
+  `--json-full` or `translation-run-summary.json` provides complete diagnostics. With a valid bound
+  `--visual-manifest` and `--visual-review`, success returns `completed` and `deliveryReady=true`.
+  Machine-only success returns `needs-visual-review` and `deliveryReady=false`: Agent review remains,
+  without requiring user approval for expected text pixel changes. Delivery also requires the sealed
+  machine completion evidence written after successful publication; preflight review is insufficient. See
+  [translation finalization](../references/translation/translation-runner.md).
 
 - `cli/translation/classify-chart-units.mjs` - convert xdoc's structurally
   inventoried but language-uncertain chart review units into explicit

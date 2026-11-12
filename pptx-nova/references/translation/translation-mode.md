@@ -1120,8 +1120,11 @@ checks against its own immutable input snapshots. If no such review findings exi
 scaffold/gate. Do not turn estimator or rendered blockers into review-only findings. Reuse the
 current frozen field date for all manual renders; later wording changes require new PNGs and review.
 
-The independent canonical visual decision must also be known before final publication; follow
-[the finalizer's publication boundary](translation-runner.md#fit-and-review-before-publication).
+The original canonical visual decision and the contract-bound translation acceptance result must also
+be known before delivery; follow [the finalizer's publication boundary](translation-runner.md#fit-and-review-before-publication).
+Expected translated pixels need actual Agent review, not a user permission request. A missing or
+stale review requires Agent work; real defects require repair. Keep genuine environment/fidelity
+choices separate from inevitable text changes.
 
 For manual comparison recovery only, retain the same multipart and publication contracts:
 

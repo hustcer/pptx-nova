@@ -139,6 +139,37 @@ export const REVIEW_CHECKS = [
   'assetFit',
 ]
 
+/** Validate the common review contract; workflow-specific checks stay with callers. */
+export function verifyVisualReview(reviewPath, binding, { mode }) {
+  const review = JSON.parse(readFileSync(reviewPath, 'utf8'))
+  if (
+    review.schemaVersion !== 'pptx-nova-visual-review/v1' ||
+    review.mode !== mode ||
+    review.status !== 'pass' ||
+    typeof review.reviewer !== 'string' ||
+    !review.reviewer.trim()
+  )
+    throw new Error(`${mode} requires a completed passing visual review`)
+  if (
+    review.summary?.slidesReviewed !== binding.slideCount ||
+    JSON.stringify(review.binding) !== JSON.stringify(binding)
+  )
+    throw new Error('visual review is stale or has incomplete candidate coverage')
+  if (
+    !Array.isArray(review.checks) ||
+    REVIEW_CHECKS.some((name) => review.checks.filter((c) => c?.name === name).length !== 1)
+  )
+    throw new Error('visual review required checks are incomplete or duplicated')
+  if (
+    review.checks.some((c) => !['pass', 'na'].includes(c?.status)) ||
+    review.errors?.length ||
+    review.warnings?.length ||
+    review.issues?.length
+  )
+    throw new Error('visual review contains unresolved findings')
+  return review
+}
+
 export function fileSha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
 }
@@ -256,34 +287,7 @@ export function evaluateVisualEvidence(
     report.status = 'needs-visual-review'
     if (review) {
       try {
-        const value = JSON.parse(readFileSync(review, 'utf8'))
-        if (
-          value.schemaVersion !== 'pptx-nova-visual-review/v1' ||
-          value.mode !== 'create' ||
-          value.status !== 'pass' ||
-          !value.reviewer?.trim()
-        )
-          throw new Error('create requires a completed passing visual review')
-        if (
-          value.summary?.slidesReviewed !== binding.slideCount ||
-          JSON.stringify(value.binding) !== JSON.stringify(binding)
-        )
-          throw new Error('visual review is stale or has incomplete candidate coverage')
-        if (
-          !Array.isArray(value.checks) ||
-          REVIEW_CHECKS.some(
-            (name) =>
-              !value.checks.some((c) => c.name === name && ['pass', 'na'].includes(c.status)),
-          )
-        )
-          throw new Error('visual review required checks are incomplete')
-        if (
-          value.checks.some((c) => !['pass', 'na'].includes(c.status)) ||
-          value.errors?.length ||
-          value.warnings?.length ||
-          value.issues?.length
-        )
-          throw new Error('visual review contains unresolved findings')
+        const value = verifyVisualReview(review, binding, { mode: 'create' })
         const designErrors = validateDesignReview(
           value.designReview,
           binding,

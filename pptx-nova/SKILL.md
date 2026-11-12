@@ -164,7 +164,7 @@ Use these only to choose the entry reference; the routing table owns details.
   described in `references/edit/template-following.md`; equal previews do not prove editing isolation.
 - **Export / diff / preview / check**: use `references/review/export-and-check.md`. Run semantic diff once on a stable
   candidate; only reliable changes are machine facts. Preview is for inspection, while the canonical
-  visual-evidence decision remains the delivery authority. Discover each action's DPI bounds/default;
+  visual evidence consumed through the applicable workflow gate remains the delivery authority. Discover each action's DPI bounds/default;
   after upgrades or calendar changes, use fresh rendering evidence as described in `references/review/fidelity-diagnosis.md`.
   For input quota or authorization failures, follow `references/runtime/troubleshooting.md#conversion-input-quotas-and-authorization-failures`;
   use the local CLI contract, keeping SDK product limits and proposed APIs separate.
@@ -266,11 +266,12 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
   animation changes stay inside the capability-declared safe subset.
   Use reported part identities and current inspect order for slide/layout/master selectors;
   filename suffixes and ZIP order are not selector indices. See `references/edit/inspect-and-edit.md`.
-- **Translation**: Copy, replace visible text in place, and preserve styling/layout semantics. Repair by
-  compressing text, then minimally reducing font, then geometry only with proven whitespace. Changed
-  multi-column text requires its bound human-review gate; real overflow/overlap/edge findings and
-  rendered chart-title/page-bound collisions never receive a review override. The translation runner
-  owns coverage, style/vision audits, comparison parts, and SHA-256 publication binding.
+- **Translation**: Copy, translate visible text in place and preserve style/layout semantics. Shorten text
+  before minimal font reduction; change geometry only with proven whitespace. Bind multi-column review;
+  never waive overflow/overlap/edge or rendered chart-title/page-bound collisions. The runner owns coverage,
+  style/vision audits, compare parts and SHA-256 publication binding. Its acceptance contract needs Agent
+  review for expected pixels, not user approval. Retain native manifests/content/environment blockers;
+  complete missing review/evidence.
 - **Data-driven / Export-Check**: Data plus template selects `references/content/data-driven.md`; conversion, preview,
   extraction, or checking alone must not mutate the PPTX.
 

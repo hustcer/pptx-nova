@@ -9,10 +9,72 @@ import {
   evaluateVisualEvidence,
   fileSha256,
   REVIEW_CHECKS,
+  verifyVisualReview,
 } from '../../../pptx-nova/scripts/lib/review/canonical-visual-evidence.mjs'
 
 const repository = resolve('.')
 const gateScript = join(repository, 'pptx-nova/scripts/cli/review/visual-evidence-gate.mjs')
+
+test('Create and Translation share complete, unique, workflow-bound visual review requirements', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pptx-nova-review-contract-'))
+  const path = join(root, 'review.json')
+  const binding = { candidateSha256: 'current', slideCount: 2, artifacts: [] }
+  for (const mode of ['create', 'translation']) {
+    const makeReview = () => ({
+      schemaVersion: 'pptx-nova-visual-review/v1',
+      mode,
+      status: 'pass',
+      reviewer: 'agent',
+      binding,
+      summary: { slidesReviewed: 2 },
+      checks: REVIEW_CHECKS.map((name) => ({ name, status: 'pass' })),
+    })
+    const valid = makeReview()
+    valid.checks[0].status = 'na'
+    writeFileSync(path, JSON.stringify(valid))
+    assert.deepEqual(verifyVisualReview(path, binding, { mode }), valid)
+    for (const mutate of [
+      (r) => {
+        r.mode = mode === 'create' ? 'translation' : 'create'
+      },
+      (r) => {
+        r.binding = { ...binding, candidateSha256: 'stale' }
+      },
+      (r) => {
+        r.summary.slidesReviewed = 1
+      },
+      (r) => {
+        r.reviewer = ' '
+      },
+      (r) => {
+        r.status = 'warn'
+      },
+      (r) => {
+        r.checks.pop()
+      },
+      (r) => {
+        r.checks.push({ ...r.checks[0] })
+      },
+      (r) => {
+        r.checks[0].status = 'fail'
+      },
+      (r) => {
+        r.errors = ['unresolved']
+      },
+      (r) => {
+        r.warnings = ['unresolved']
+      },
+      (r) => {
+        r.issues = ['unresolved']
+      },
+    ]) {
+      const review = makeReview()
+      mutate(review)
+      writeFileSync(path, JSON.stringify(review))
+      assert.throws(() => verifyVisualReview(path, binding, { mode }), /visual review/)
+    }
+  }
+})
 
 function writeManifest(root, action, assurance, policyOutcome, checkOverrides = {}) {
   const path = join(root, `${action}.json`)

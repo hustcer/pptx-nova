@@ -34,6 +34,12 @@ import {
   snapshotPageBitmapCache,
 } from '../../lib/review/page-bitmap-cache.mjs'
 import { createProgressReporter } from '../../lib/runtime/progress.mjs'
+import {
+  visionEvidenceIdentity,
+  recordTranslationEvidence,
+  recordTranslationCompletion,
+  evaluateTranslationVisualEvidence,
+} from '../../lib/translation/visual-acceptance.mjs'
 
 const COMPARE_SCRIPT = cliPath('review/compare.mjs')
 const COMPARE_GATE_SCRIPT = cliPath('review/compare-gate.mjs')
@@ -63,6 +69,8 @@ Options:
   --xdoc-bin <path>                  xdoc executable. Defaults to xdoc
   --allow-text-attrs <csv>           Explicit typed i18n-style-diff allowlist
   --multi-column-review-gate <path>  Optional passing bound review gate for review-only vision blockers
+  --visual-manifest <path>           Canonical source/candidate manifest; pair with --visual-review
+  --visual-review <path>             Passing Agent review bound to that manifest and candidate
   --contact-diff                     Materialize contact-diff aliases from translation-compare evidence
   --compare-chunk-size <n>           Maximum slides per compare PNG. Defaults to 20
   --compare-concurrency <n>          Concurrent compare part renders. Defaults to 3
@@ -78,7 +86,8 @@ Options:
   --help                             Show this help
 
 This runner finalizes an already translated stable candidate. It does not create translations or mark
-manual review complete.
+manual review complete without a supplied, bound visual review. Expected translation pixel
+changes need Agent review, not user permission.
 `
 
 function parseArgs(argv) {
@@ -92,6 +101,8 @@ function parseArgs(argv) {
     xdocBin: 'xdoc',
     allowTextAttrs: '',
     multiColumnReviewGate: '',
+    visualManifest: '',
+    visualReview: '',
     contactDiff: false,
     compareChunkSize: 20,
     compareConcurrency: 3,
@@ -138,6 +149,8 @@ function parseArgs(argv) {
   if (args.promptText && args.promptFile) {
     throw new Error('--prompt-text and --prompt-file are mutually exclusive')
   }
+  if (Boolean(args.visualManifest) !== Boolean(args.visualReview))
+    throw new Error('--visual-manifest and --visual-review must be supplied together')
   return args
 }
 
@@ -151,6 +164,8 @@ const valueFlags = {
   '--xdoc-bin': 'xdocBin',
   '--allow-text-attrs': 'allowTextAttrs',
   '--multi-column-review-gate': 'multiColumnReviewGate',
+  '--visual-manifest': 'visualManifest',
+  '--visual-review': 'visualReview',
   '--compare-chunk-size': 'compareChunkSize',
   '--compare-concurrency': 'compareConcurrency',
   '--progress': 'progress',
@@ -194,6 +209,8 @@ function normalizeArgs(input) {
       ? resolve(cwd, input.multiColumnReviewGate)
       : '',
     promptFile: input.promptFile ? resolve(cwd, input.promptFile) : '',
+    visualManifest: input.visualManifest ? resolve(cwd, input.visualManifest) : '',
+    visualReview: input.visualReview ? resolve(cwd, input.visualReview) : '',
   }
   args.runDir = input.runDir
     ? resolve(cwd, input.runDir)
@@ -211,6 +228,12 @@ function validatePaths(args) {
     ['candidate', args.candidate],
     ['units', args.units],
     ['translations', args.translations],
+    ...(args.visualManifest
+      ? [
+          ['visual manifest', args.visualManifest],
+          ['visual review', args.visualReview],
+        ]
+      : []),
     ...(args.multiColumnReviewGate
       ? [['multi-column review gate', args.multiColumnReviewGate]]
       : []),
@@ -285,36 +308,6 @@ function reviewOnlyFindingKeys(report) {
     .sort()
 }
 
-function visionEvidenceIdentity(report) {
-  const withoutPath = (value) => {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return null
-    const { path: _path, ...identity } = value
-    return identity
-  }
-  const canonical = {
-    ...report,
-    source: withoutPath(report?.source),
-    candidate: withoutPath(report?.candidate),
-  }
-  // Current reports repeat these same input paths in their suggested audit
-  // command. Normalize only matching input operands, never flags or findings.
-  const inputPath = (value) => (typeof value === 'string' ? value : value?.path)
-  if (Array.isArray(report?.visualEvidence?.command)) {
-    const command = report.visualEvidence.command
-    canonical.visualEvidence = {
-      ...report.visualEvidence,
-      command: command.map((value, index) => {
-        const flag = command[index - 1]
-        if (flag === '--candidate' && value === inputPath(report.candidate))
-          return '<bound-candidate>'
-        if (flag === '--reference' && value === inputPath(report.source)) return '<bound-source>'
-        return value
-      }),
-    }
-  }
-  return createHash('sha256').update(JSON.stringify(canonical)).digest('hex')
-}
-
 function artifactPaths(runDir) {
   return {
     renderContext: join(runDir, 'render-context.json'),
@@ -340,6 +333,8 @@ function artifactPaths(runDir) {
     progressLog: join(runDir, 'progress.jsonl'),
     prompt: join(runDir, 'prompt.txt'),
     summary: join(runDir, 'translation-run-summary.json'),
+    translationEvidence: join(runDir, 'translation-evidence.json'),
+    visualAcceptance: join(runDir, 'translation-visual-acceptance.json'),
   }
 }
 
@@ -350,7 +345,8 @@ function initialSummary(args, artifacts) {
     mode: 'translation',
     machineGatesPassed: false,
     deliveryReady: false,
-    needsHumanReview: true,
+    needsHumanReview: false,
+    needsVisualReview: true,
     source: args.source,
     candidate: args.candidate,
     output: args.output,
@@ -604,6 +600,45 @@ function runVisionDiff(summary, args, artifacts) {
         'Translation vision-diff must pass directly or only through a bound review-only multi-column exception',
     },
   )
+}
+
+function runVisualAcceptance(summary, args, artifacts, { freeze = false, stage = 'visual' } = {}) {
+  // These reports were just generated from the immutable run-local inputs.
+  // Retain their hashes even for a machine-only run that still needs Agent review.
+  if (freeze)
+    writeFileSync(
+      artifacts.translationEvidence,
+      JSON.stringify(recordTranslationEvidence(artifacts), null, 2) + '\n',
+    )
+  if (!args.visualManifest) return
+  const report = evaluateTranslationVisualEvidence(args.visualManifest, {
+    candidate: artifacts.candidate,
+    review: args.visualReview,
+    translationEvidence: artifacts.translationEvidence,
+    stage,
+  })
+  writeFileSync(artifacts.visualAcceptance, JSON.stringify(report, null, 2) + '\n')
+  summary.needsHumanReview = report.requiresUserApproval === true
+  requireGate(
+    summary,
+    stage === 'delivery'
+      ? 'translation-delivery-acceptance'
+      : freeze
+        ? 'translation-visual-acceptance'
+        : 'translation-publication-acceptance',
+    stage === 'delivery' ? report.deliveryAuthorized === true : report.visualReviewPassed === true,
+    {
+      status: report.status,
+      requiresUserApproval: report.requiresUserApproval ?? false,
+      errors: report.errors,
+      message:
+        'Translation requires valid evidence and actual Agent visual review; pixel changes alone do not require user approval',
+    },
+  )
+  summary.review.completed = true
+  summary.review.manifest = args.visualManifest
+  summary.review.record = args.visualReview
+  summary.needsVisualReview = false
 }
 
 function runPreview(summary, args, artifacts, slideCount) {
@@ -889,8 +924,13 @@ function buildAgentSummary(summary) {
     status: summary.status,
     machineGatesPassed: Boolean(summary.machineGatesPassed),
     deliveryReady: Boolean(summary.deliveryReady),
-    needsHumanReview: true,
-    decision: summary.machineGatesPassed ? 'continue-to-human-review' : 'stop-and-fix',
+    needsHumanReview: Boolean(summary.needsHumanReview),
+    needsVisualReview: Boolean(summary.needsVisualReview),
+    decision: summary.deliveryReady
+      ? 'deliver'
+      : summary.machineGatesPassed
+        ? 'continue-to-agent-visual-review'
+        : 'stop-and-fix',
     gates: {
       style: { gate: gateStatus(style), blockers: style?.blockerCount ?? null },
       consistency: {
@@ -929,6 +969,8 @@ function buildAgentSummary(summary) {
       compare: summary.artifacts.compare,
       compareParts: summary.artifacts.compareParts,
       compareGate: summary.artifacts.compareGate,
+      translationEvidence: summary.artifacts.translationEvidence,
+      visualAcceptance: summary.artifacts.visualAcceptance,
       contactDiffParts: summary.artifacts.contactDiffParts,
     },
     warnings: summary.warnings,
@@ -973,6 +1015,24 @@ function failureReferences(error) {
       path: 'references/translation/translation-mode.md',
       section: 'Visual Parity Gate',
       reason: 'Vision blockers require translation repair or a bound multi-column review.',
+    },
+    'translation-visual-acceptance': {
+      path: 'references/translation/translation-runner.md',
+      section: 'Delivery boundary',
+      reason:
+        'Inspect the retained canonical decision and translation acceptance report; repair defects or stale evidence, complete Agent review, or resolve a genuine environment-dependent approval request.',
+    },
+    'translation-publication-acceptance': {
+      path: 'references/translation/translation-runner.md',
+      section: 'Delivery boundary',
+      reason:
+        'Translation inputs, reports or visual review changed after acceptance; restore the correct evidence or rerun finalization before publication.',
+    },
+    'translation-delivery-acceptance': {
+      path: 'references/translation/translation-runner.md',
+      section: 'Delivery boundary',
+      reason:
+        'Complete machine workflow and publication evidence must remain bound before delivery.',
     },
     'translation-preview': {
       path: 'references/translation/translation-runner.md',
@@ -1072,14 +1132,26 @@ function runTranslation(input) {
     runStyleDiff(summary, args, artifacts)
     runCandidateConsistency(summary, args, artifacts)
     runVisionDiff(summary, args, artifacts)
+    runVisualAcceptance(summary, args, artifacts, { freeze: true })
     runPreview(summary, args, artifacts, slideCount)
     runSemanticDiff(summary, args, artifacts)
     const compareReport = runCompare(summary, args, artifacts, slideCount)
     materializeContactDiff(summary, args, artifacts, compareReport)
+    if (args.visualManifest) runVisualAcceptance(summary, args, artifacts)
     publish(summary, args, artifacts)
+    writeFileSync(
+      artifacts.translationEvidence,
+      JSON.stringify(
+        recordTranslationCompletion({ ...artifacts, output: args.output }, summary.gates),
+        null,
+        2,
+      ) + '\n',
+    )
+    if (args.visualManifest) runVisualAcceptance(summary, args, artifacts, { stage: 'delivery' })
 
-    summary.status = 'needs-human-review'
+    summary.status = summary.review.completed ? 'completed' : 'needs-visual-review'
     summary.machineGatesPassed = true
+    summary.deliveryReady = summary.review.completed
     return finalizeRunnerSummary(summary, {
       summaryPath: artifacts.summary,
       totalMs: durationMs(started),
@@ -1089,6 +1161,7 @@ function runTranslation(input) {
     })
   } catch (error) {
     summary.status = 'failed'
+    summary.deliveryReady = false
     summary.error = summarizePhaseError(error)
     summary.requiredReferences = failureReferences(error)
     finalizeRunnerSummary(summary, {
@@ -1110,7 +1183,9 @@ function printHuman(summary) {
   process.stdout.write(`- run dir: ${summary.runDir}\n`)
   process.stdout.write(`- output: ${summary.output}\n`)
   process.stdout.write(`- machine gates: ${summary.machineGatesPassed ? 'passed' : 'failed'}\n`)
-  process.stdout.write('- manual review: required\n')
+  process.stdout.write(
+    `- Agent visual review: ${summary.review?.completed ? 'complete' : 'required'}\n`,
+  )
   if (summary.error)
     process.stdout.write(`- error: ${summary.error.phase}: ${summary.error.message}\n`)
 }

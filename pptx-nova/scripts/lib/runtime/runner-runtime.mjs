@@ -319,6 +319,9 @@ export function buildAgentResult(summary, { schemaVersion, requiredReferences } 
     machineGatesPassed: Boolean(summary.machineGatesPassed),
     deliveryReady: Boolean(summary.deliveryReady),
     needsHumanReview: Boolean(summary.needsHumanReview),
+    ...(summary.needsVisualReview !== undefined
+      ? { needsVisualReview: Boolean(summary.needsVisualReview) }
+      : {}),
     runDir: summary.runDir ?? null,
     output: summary.output ?? null,
     performance: compactPerformanceSummary(summary.performance),

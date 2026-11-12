@@ -17,7 +17,7 @@ test('visual-audit is routed as the canonical final Agent decision', () => {
 
   assert.match(
     skill,
-    /Preview is for inspection, while the canonical\s+visual-evidence decision remains the delivery authority/,
+    /Preview is for inspection, while the canonical\s+visual evidence consumed through the applicable workflow gate remains the delivery authority/,
   )
   assert.match(common, /Run `xdoc pptx visual-audit` once on the stable final candidate/)
 
@@ -27,6 +27,15 @@ test('visual-audit is routed as the canonical final Agent decision', () => {
   assert.match(exportAndCheck, /then read `decision\.action`/)
   assert.match(exportAndCheck, /does not prove PowerPoint parity or\n\s+visual intent/)
   assert.match(exportAndCheck, /both reference and\n\s+candidate receive static-layout/)
+  assert.match(
+    exportAndCheck,
+    /pass `--translation-evidence` from the current finalizer plus a bound translation `--review`/,
+  )
+  assert.match(
+    exportAndCheck,
+    /Without this\s+explicit contract, the default consumer and exit policy above remain unchanged/,
+  )
+  assert.match(exportAndCheck, /It cannot waive content `stop`/)
   assert.match(
     readSkill('scripts/cli/runtime/init-run.mjs'),
     /cliPath\('review\/visual-evidence-gate\.mjs'\)/,

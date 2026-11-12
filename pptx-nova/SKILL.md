@@ -174,6 +174,9 @@ Use these only to choose the entry reference; the routing table owns details.
   histogram ranges, signed percentage stacks and automatic axes/category fitting. Verify source
   values separately from painted or extracted labels; retain explicit bounds and real tail intervals.
   For doughnuts, follow its label-position restrictions and explicit hole-size default.
+- **Scatter / bubble**: follow `references/content/charts.md` for marker-only versus connected variants,
+  positional series-line `noFill` preservation in marker-style XY data replacement, and horizontal tick
+  density. Data replacement does not preserve all chart formatting; inspect and verify the result.
 - **Chart rendering changes**: use `references/content/charts.md` for automatic 2D/3D fitting,
   surface camera/paint, imported stacked ribbons, crossing-plane occlusion, signed-area end caps,
   hidden-axis semantics and gradient cuts. Keep Web texture evidence separate from native PDF evidence.

@@ -514,6 +514,41 @@ canonical PDF/PNG，提取 PDF 标签作辅助断言，再检查实际图像。�
 
 不合法的 kind/variant 组合在写之前就会被 schema 拒绝；apply 前用 `--dry-run` 兜底。
 
+### 散点标记与系列连线
+
+新建 `scatter + markers` 应只有标记、没有点间连线；`line + markers` 则保留折线。
+散点的 `lines` / `smooth` 表达带标记连线，`lines-no-markers` /
+`smooth-no-markers` 表达无标记连线；实际系列默认样式仍须验证。不要用删除数据点或
+更改 marker 边框来消除系列连线。
+
+当前运行时为新建 marker-only 散点的每个系列显式写入系列级
+`c:ser/c:spPr/a:ln/a:noFill`；仅有 `c:scatterStyle=marker` 不足以保证 PowerPoint
+不连线。marker 自己的 fill/line 与系列连线独立，可继续设置。核对实际图表 XML 和
+PNG；需要 Office 保真时再比较同一候选的 PowerPoint 输出，不能只看 variant 名称。
+
+已有 marker-style 图表可能带作者显式连线，无关编辑应保留。替换 XY 数据时，当前
+运行时对 marker-style 系列按位置保留是否以显式系列级 `noFill` 关闭连线，新系列默认
+写入 `noFill`；这不是按名称匹配，也不保留零线宽、透明度等其他隐藏方式或其他图表
+格式：数据替换会重建 chart XML。先 inspect 并保留
+所需格式证据，稳定系列次序，再通过受支持的 `set-chart` 字段恢复任务要求的格式，
+核对 workbook/cache、轴、legend、marker 和连线。要求严格保留而不能证明时，停止该
+替换方案，不把“系列级 `noFill` 保留”扩展为“所有格式保留”。旧运行时先实测，不盲目追加
+raw XML 修补。
+
+连线变体还要分别核对标记有无、直线/平滑和系列级覆盖。仅写 `scatterStyle=line`
+并不锁定系列的 marker/smooth 默认值，PowerPoint 与内置预览都可能显示样式提供的
+标记或平滑。新建任务要求确定的无标记直线时，按 inspect 中的实际系列索引，显式
+使用 `set-chart` 的系列设置，例如下列单系列条目；多系列须逐个指定：
+
+```json
+{ "series": 0, "smooth": false, "marker": { "symbol": "none" } }
+```
+
+这不是整个 patch，要放入 `set-chart.series[]`，仍须 dry-run 和 PNG 复核。已有图表
+仅在任务要求改变这些样式时使用。若 XML 和显示仍不一致，先对同一候选获取
+PowerPoint 证据，区分写入、继承样式和预览问题；不要因为一个 renderer 的外观就
+重写数据、改 variant 或添加重复图形。
+
 ## 数据结构（关键）
 
 ### 直角坐标系（column / bar / line / area / radar / pie / doughnut）
@@ -1402,6 +1437,14 @@ point 作用域目前只收 `position` 和 `font`（带 `showValue` 等会报
 - Bubble 自动轴使用有效 x/y/正 size 点及 bubbleScale 对应留白，窄的同号范围可不含零。
   显式范围和 major unit 仍优先，且可裁切气泡；轴留白不等于气泡直径。散点 spline、精确
   bubble 直径或 plot layout 仍须独立证据，不从本次自动轴改进推导保真。
+- Scatter / bubble 的自动水平数值刻度密度会依据 chart frame 和标签测量调整；自动
+  major unit 的变化也可能改变自动轴端点。窄框、长数值标签、空/全零数据都要重新检查。
+  显式 major unit 保持优先；X 轴 min/max 两端均为有限显式值时保留既有自动间隔预算，
+  不能承诺它也会按窄框自动稀疏。保留作者 bounds、unit、log 和反转语义，不把当前 PNG
+  的自动刻度写成固定数据或轴设置。Web 与 PDF 分别核对，不从共享策略推导像素等价。
+  自动密度仍是有界启发式，大偏移窄值域的长标签可能贴连；实际重叠不能视为通过。
+  新建任务可增加图宽、明确数值格式或选择合适的 major unit 后复核；已有图表只有在
+  编辑范围允许时才调整这些作者设置，否则记录渲染限制并保留独立对照。
 - 3D horizontal bar 同时检查 `barDir`、类目/数值反转、投影 geometry、刻度、gridline 与
   depth 标题；轴与柱体不能分别转向。保留 view3D 与真实数据，勿改成竖柱或 2D 补偿。
 - 字体取证应包含实际可见 title、axis/depth title、display-unit label、legend 与 data label，

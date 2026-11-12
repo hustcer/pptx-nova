@@ -11,9 +11,17 @@ Use this guide when a user asks to install, activate, or renew an xdoc Runtime l
 
 Installation and renewal write license configuration and Clock state. `status` performs full admission and may update Clock state; it is not strictly read-only. `verify` only reads the specified file and is suitable when the user explicitly requests no local state changes. For development verification, set `XDOC_CONFIG_PATH` to a newly created private absolute directory; do not touch the user's real license.
 
+When reading authorization profiles from the runtime schema, select by exact
+profile ID and product, never by array position or a fixed profile count. The
+independent `writer-pptx-export-v1` profile belongs to the `pptx-writer` SDK:
+its `freeQuotaSubjects` are `final-output` and `read-only-input`; Converter uses
+`compressed-input`. These are SDK quota subjects, not native CLI limits. Continue
+using the Runtime's own feature/output admission and quota reports for this skill;
+the Writer SDK is not a replacement execution path for local xdoc tasks.
+
 ## Installation and Renewal
 
-1. Preserve the original UTF-8 delivery bytes; compare the SHA-256 with the delivery notice when available. Confirm the file is a readable regular file and the client is within the issuer's supported version range. Runtime requires `xdoc-cli-license/v1`; Viewer/Converter credentials do not apply. The original file name, such as `runtime-personal.json`, may be retained. Do not edit signed dates, identity, features, or capabilities, and never install a signing private key.
+1. Preserve the original UTF-8 delivery bytes; compare the SHA-256 with the delivery notice when available. Confirm the file is a readable regular file and the client is within the issuer's supported version range. Runtime requires `xdoc-cli-license/v1`; Viewer/Converter/Writer SDK credentials do not apply. The original file name, such as `runtime-personal.json`, may be retained. Do not edit signed dates, identity, features, or capabilities, and never install a signing private key.
 2. Verify the specified file first. If verification fails, use the table below and correct the conditions before continuing:
 
    ```sh

@@ -107,6 +107,13 @@ bindings 里的 shape 不会被触碰：
 | `chart`      | 用 `data.categories` + `data.series` 替换 chart 数据                                     |
 | `layout`     | 用 `layout` + `content` 填充内置 layout contract（可选 `contract: "strict" \| "loose"`） |
 
+布局绑定在 `slide == 当前页数` 时可追加页面；`populate-slide` 也有此路径。当前运行时
+会保留填充过程中新增的图片 Content Types 和 layout overrides。若旧产物在追加含图页后
+出现资源/布局丢失，先用当前 runtime 从原模板和 patch 生成新候选，不沿用旧损坏文件或
+直接补 raw XML。除常规 dry-run、apply 和预览外，检查 `[Content_Types].xml` 的媒体声明、
+slide/layout relationships 的目标及资源实际存在性，并重新打开候选。多次追加尤其应覆盖
+首张与末张含图页；单看页数或 apply 成功不能证明包结构完整。
+
 > `--bindings` 是必填项（缺省报 `xdoc pptx template-fill requires --bindings`，退出码 2）；
 > xdoc 不会自动扫描所有 shape，只替换 bindings 里列出的 `text` shape。
 

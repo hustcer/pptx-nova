@@ -480,6 +480,19 @@ display-unit labels, combo groups and local SVG text when diagnosing missing
 glyphs. Browser CSS fonts and browser PDF font bytes have separate lifecycles;
 font discovery does not imply that remote SVG images/stylesheets were loaded.
 
+Current native PDF font preparation can append complementary local or cached
+faces when the primary Unicode fallback lacks visible slide/chart glyphs. It
+preserves authored families and primary fallback order, adds only faces that
+contribute missing glyphs, and stops when coverage is complete. This supplementary
+search does not download fonts, replace the primary math fallback, or certify
+emoji/style/shaping fidelity. Re-render the unchanged source with the current
+runtime and available fonts before replacing circled numbers, enclosed symbols,
+or supplementary-plane characters. If a glyph is still absent, identify its
+codepoint and an available authorized font that covers it; do not rewrite deck
+text or change the authored family solely to compensate for an older preview.
+Retain the actual PDF/PNG evidence; native coverage does not prove browser font
+readiness or coverage in another environment.
+
 If an existing browser export integration actually supplies a `cjkFallback`
 report, retain its status, required/covered/missing/unknown codepoints and
 coverage sources. `complete` concerns only that resolver's returned CJK fallback

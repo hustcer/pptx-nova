@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monochrome split",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Content-owned structural label; Latin uppercase is an authoring preference, never an automatic transform.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9.5,
+        "heightIn": 0.3,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Preserved heading or quotation, including intentional line breaks.",
+      "x-slotBudget": {
+        "fontPt": 30.72,
+        "widthIn": 10.733,
+        "heightIn": 1.05,
+        "lineHeight": 1.08,
+        "maxLines": 2
+      }
+    },
+    "source": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Provenance/date/qualification; synthetic samples must be identified explicitly.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.32,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "body": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Visible supporting prose or attribution; input is never silently shortened.",
+      "x-slotBudget": {
+        "fontPt": 14.4,
+        "widthIn": 5.05,
+        "heightIn": 1.5,
+        "lineHeight": 1.15,
+        "maxLines": 4
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "\\S",
+        "description": "Em-dash item",
+        "x-slotBudget": {
+          "fontPt": 14.4,
+          "widthIn": 4.71,
+          "heightIn": 0.7366666666666667,
+          "lineHeight": 1.15,
+          "maxLines": 2
+        }
+      },
+      "minItems": 2,
+      "maxItems": 3
+    },
+    "assetLabel": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Editable placeholder label; no actual asset input is registered.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 4.465999999999999,
+        "heightIn": 0.4,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "assetCaption": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Placeholder caption",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 4.866,
+        "heightIn": 0.42,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    }
+  },
+  "required": ["section", "title", "source", "body", "items", "assetLabel", "assetCaption"],
+  "additionalProperties": false
+}

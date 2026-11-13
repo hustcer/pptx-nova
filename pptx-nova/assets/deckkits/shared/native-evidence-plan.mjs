@@ -15,8 +15,9 @@ export function renderNativeEvidencePlan(design, layouts, b) {
   })
   const text = (s, name, c) => {
     p.setText(s, name, c.text)
-    c.text.split(/\r\n|\r|\n/).forEach((_, i) => {
-      p.runFont(s, name, font(c.paragraphStyles?.[i] ?? c.style), i)
+    c.text.split(/\r\n|\r|\n/).forEach((line, i) => {
+      // Empty paragraphs own spacing/format but contain no run to address.
+      if (line.length) p.runFont(s, name, font(c.paragraphStyles?.[i] ?? c.style), i)
       p.ops.push({
         op: 'set-paragraph',
         slide: s,

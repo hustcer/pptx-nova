@@ -8840,6 +8840,357 @@
         },
         "thresholds": []
       }
+    },
+    {
+      "id": "monochrome",
+      "version": "0.1.0",
+      "path": "monochrome/monochrome.kit.mjs",
+      "designContract": "monochrome/design.json",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "readiness": "candidate",
+      "qualityProfile": {
+        "minFontPt": 10.5,
+        "labelFontPt": 10.5,
+        "sourceFontPt": 10.5,
+        "baseline": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": ["research synthesis", "literary report", "policy brief", "bilingual editorial"],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "monoCoverSlide",
+          "monoOpeningSlide",
+          "monoSplitSlide",
+          "monoMetricsSlide",
+          "monoListSlide",
+          "monoComparisonSlide",
+          "monoQuoteSlide",
+          "monoAnalysisSlide",
+          "monoChartSlide",
+          "monoProcessSlide",
+          "monoHierarchySlide",
+          "monoClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "monoCoverSlide",
+        "monoOpeningSlide",
+        "monoSplitSlide",
+        "monoMetricsSlide",
+        "monoListSlide",
+        "monoComparisonSlide",
+        "monoQuoteSlide",
+        "monoAnalysisSlide",
+        "monoChartSlide",
+        "monoProcessSlide",
+        "monoHierarchySlide",
+        "monoClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Single-ink ivory editorial ledger",
+        "mood": ["Restrained", "Literary", "Archival"],
+        "layoutPrinciples": [
+          "Generous asymmetric gutters",
+          "Open rules separate evidence",
+          "Each role owns a different reading path"
+        ],
+        "signatureElements": [
+          "Paper canvas and ink hairlines",
+          "Ultra-light geometric display",
+          "Serif quotations and insight titles",
+          "Mono structural labels",
+          "Em-dash recommendations",
+          "Rule-topped metrics",
+          "Ordinal stepped hierarchy"
+        ],
+        "compositionRules": [
+          "Use fitting registered variants",
+          "Content owns sources, units, claims, dates and business decisions",
+          "No implicit target highlighting or numeric scaling"
+        ],
+        "avoid": [
+          "Chromatic accents",
+          "Shadows and gradients",
+          "Rasterized charts",
+          "Generic card-only decks",
+          "Silent truncation"
+        ],
+        "typography": {
+          "display": "Avenir Next Ultra Light / Noto Sans SC",
+          "body": "Avenir Next / Noto Sans SC",
+          "serif": "Georgia / Songti SC",
+          "mono": "JetBrains Mono / Noto Sans SC",
+          "hierarchy": "Size, space, hairlines and limited serif voice"
+        },
+        "colorSystem": {
+          "paper": "FAFADF",
+          "warm": "F5F0E4",
+          "pale": "F0F0D4",
+          "ink": "1A1A16",
+          "body": "5E5E54",
+          "charcoal": "606055",
+          "stone": "9A9A89",
+          "mist": "C3C3B0",
+          "rule": "1A1A16",
+          "accent": "1A1A16",
+          "history": "9A9A89"
+        },
+        "slideRhythm": {
+          "anchor": ["monoCoverSlide", "monoOpeningSlide", "monoClosingSlide"],
+          "narrative": ["monoSplitSlide", "monoListSlide", "monoQuoteSlide", "monoAnalysisSlide"],
+          "evidence": [
+            "monoMetricsSlide",
+            "monoComparisonSlide",
+            "monoChartSlide",
+            "monoHierarchySlide"
+          ],
+          "process": ["monoProcessSlide"]
+        }
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "slideTypes": {
+          "monoCoverSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
+            "allowedLayoutIds": ["auto", "bottom", "editorial"]
+          },
+          "monoOpeningSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
+            "allowedLayoutIds": ["auto", "chapter", "statement"]
+          },
+          "monoSplitSlide": {
+            "assetSlots": {
+              "image": {
+                "kind": "image",
+                "acceptsAsset": false,
+                "placeholderBehavior": "native editable cream shell with content-owned label/caption",
+                "labelSlot": "data.assetLabel",
+                "captionSlot": "data.assetCaption"
+              }
+            },
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.source",
+              "data.body",
+              "data.items",
+              "data.assetLabel",
+              "data.assetCaption"
+            ],
+            "allowedLayoutIds": ["auto", "right", "left"]
+          },
+          "monoMetricsSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.metrics"],
+            "allowedLayoutIds": ["auto", "row", "rail"]
+          },
+          "monoListSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.source",
+              "data.body",
+              "data.items"
+            ],
+            "allowedLayoutIds": ["auto", "split", "wide"]
+          },
+          "monoComparisonSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.panels"],
+            "allowedLayoutIds": ["auto", "side", "stacked"]
+          },
+          "monoQuoteSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
+            "allowedLayoutIds": ["auto", "inset", "wide"]
+          },
+          "monoAnalysisSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.blocks"],
+            "allowedLayoutIds": ["auto", "columns", "insights"]
+          },
+          "monoChartSlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.source",
+              "data.kind",
+              "data.unit",
+              "data.seriesName",
+              "data.points",
+              "data.note"
+            ],
+            "allowedLayoutIds": ["auto", "wide", "left", "right"]
+          },
+          "monoProcessSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.steps"],
+            "allowedLayoutIds": ["auto", "sequence", "timeline", "cycle"]
+          },
+          "monoHierarchySlide": {
+            "requiredSlots": [
+              "data.section",
+              "data.title",
+              "data.source",
+              "data.body",
+              "data.levels"
+            ],
+            "allowedLayoutIds": ["auto", "pyramid", "ladder"]
+          },
+          "monoClosingSlide": {
+            "requiredSlots": ["data.section", "data.title", "data.source", "data.body"],
+            "allowedLayoutIds": ["auto", "left", "center"]
+          }
+        },
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 6,
+        "groups": {
+          "anchor": ["monoCoverSlide", "monoOpeningSlide", "monoClosingSlide"],
+          "narrative": ["monoSplitSlide", "monoListSlide", "monoQuoteSlide", "monoAnalysisSlide"],
+          "evidence": [
+            "monoMetricsSlide",
+            "monoComparisonSlide",
+            "monoChartSlide",
+            "monoHierarchySlide"
+          ],
+          "process": ["monoProcessSlide"]
+        },
+        "thresholds": []
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 160
+        }
+      },
+      "validatedWith": {
+        "xdoc": "0.22.0",
+        "report": "../../benchmarks/visual/cases/monochrome/golden-library/review.md",
+        "powerPoint": "PowerPoint for Mac 16.115: final 16-page sample opened without Repair; representative native render review; 30-page combination copy saved/reopened with objects and data preserved; text and embedded column data edits verified. Windows not tested."
+      },
+      "quality": {
+        "manualHardDefects": 0,
+        "knownBlockingLimits": [],
+        "lastBenchmark": "2026-11-14",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-11-14",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-monochrome/benchmark/03"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "monochrome.golden-library",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-monochrome/benchmark/03/monochrome/golden-library/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/monochrome/golden-library/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 16,
+                "expectedCount": 16,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 250075
+              },
+              "patchOps": 1104,
+              "p50TotalMs": 119.68
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "knownLimits": [
+        "Based on all files of the Monochrome HTML template; actual DOM has 16 pages versus 18 in metadata. Browser-only navigation, dormant sidebar and animation are excluded.",
+        "Native column and doughnut charts retain raw numeric data. External legends/notes must be regenerated from content after manual chart edits.",
+        "Hierarchy bars encode ordinal order, not quantitative proportions. Metric strings are descriptive, not an arithmetic model.",
+        "Image split is an editable placeholder shell; no image ingestion, native table role, animation or arbitrary existing-deck refurbishment is registered.",
+        "Avenir Next Ultra Light / Avenir Next / Georgia / JetBrains Mono / Noto Sans SC / Songti SC are not bundled. Other machines must recheck substitution.",
+        "All provided examples use synthetic data and invented quotations, clearly marked in content. The skin contains no research or financial policy.",
+        "Scientific chart labels can render as full decimals in canonical previews while PowerPoint honors scientific notation; raw values and proportional geometry are retained."
+      ],
+      "examples": [
+        "monochrome/examples/content.json",
+        "monochrome/examples/alternate-content.json",
+        "monochrome/examples/community-content.json"
+      ]
     }
   ]
 }

@@ -1,0 +1,218 @@
+{
+  "meta": {
+    "deckkit": "monochrome"
+  },
+  "slides": [
+    {
+      "type": "monoCoverSlide",
+      "layoutId": "bottom",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "社区河岸 / DEMO",
+        "title": "让河岸\n重新连接社区",
+        "body": "这是河岸修复的合成演示。Actual decisions, dates and sources belong to content."
+      }
+    },
+    {
+      "type": "monoOpeningSlide",
+      "layoutId": "chapter",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "01 · 连接",
+        "title": "从一段河岸\n开始观察",
+        "body": "这是河岸修复的合成演示。Actual decisions, dates and sources belong to content."
+      }
+    },
+    {
+      "type": "monoSplitSlide",
+      "layoutId": "right",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "入口与导览",
+        "title": "先把入口说清楚",
+        "body": "这是河岸修复的合成演示。Actual decisions, dates and sources belong to content.",
+        "items": ["先找到安全的入口", "选择一段步行路线", "在服务点寻求帮助"],
+        "assetLabel": "导览图占位 / MAP",
+        "assetCaption": "原生可编辑外壳，不包含参考图片"
+      }
+    },
+    {
+      "type": "monoMetricsSlide",
+      "layoutId": "row",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "合成样本",
+        "title": "用有限指标理解现场",
+        "metrics": [
+          {
+            "value": "240",
+            "label": "虚构样本中的步行到访次数",
+            "note": "合成计数"
+          },
+          {
+            "value": "18",
+            "label": "演示计划中的社区活动",
+            "note": "合成排期"
+          },
+          {
+            "value": "72%",
+            "label": "仅用于版式验证的比例",
+            "note": "非真实事实"
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoListSlide",
+      "layoutId": "split",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "下一步行动",
+        "title": "五项行动，\n形成共同方向",
+        "body": "这是河岸修复的合成演示。Actual decisions, dates and sources belong to content.",
+        "items": [
+          "让入口指引更清楚",
+          "给不同步速留出空间",
+          "提供短程观察路线",
+          "公布简明的每周安排",
+          "与参与者复核服务体验"
+        ]
+      }
+    },
+    {
+      "type": "monoComparisonSlide",
+      "layoutId": "side",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "两个方案",
+        "title": "让参与的下一步更清楚",
+        "panels": [
+          {
+            "label": "现有方案",
+            "title": "信息分散",
+            "body": "参与者需要自己拼接路线和服务信息。",
+            "items": ["入口较多", "缺少共同起点"]
+          },
+          {
+            "label": "建议方案",
+            "title": "先有清楚的邀请",
+            "body": "以一个入口说明下一步可以做什么。",
+            "items": ["保留一个服务点", "提供简短导览"]
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoQuoteSlide",
+      "layoutId": "inset",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "虚构访谈",
+        "title": "“我想留下来，因为这里能听见水，也能遇见邻居。”",
+        "body": "虚构居民 / FICTIONAL PARTICIPANT · 演示引文"
+      }
+    },
+    {
+      "type": "monoAnalysisSlide",
+      "layoutId": "insights",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "两项观察",
+        "title": "空间与日常需要一起设计",
+        "blocks": [
+          {
+            "title": "共同的空间",
+            "body": "清楚的入口可以容纳不同的到访习惯。这个判断仅用于演示，不是已经证实的结论。"
+          },
+          {
+            "title": "可预期的日常",
+            "body": "稳定的每周活动方便社区安排参与时间。The hypothesis needs local evidence."
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoChartSlide",
+      "layoutId": "wide",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "数量演示",
+        "title": "四周样本 / Fictional visits",
+        "kind": "column",
+        "seriesName": "到访量 / Visits",
+        "unit": "次 / visits",
+        "points": [
+          {
+            "label": "第1周",
+            "value": 0
+          },
+          {
+            "label": "第2周",
+            "value": -2
+          },
+          {
+            "label": "第3周",
+            "value": 0.000001
+          },
+          {
+            "label": "第4周",
+            "value": 4
+          }
+        ],
+        "note": "合成边界样本：负数、零与极小值均保留；线性轴下极小柱可能不可见"
+      }
+    },
+    {
+      "type": "monoProcessSlide",
+      "layoutId": "cycle",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "开放流程",
+        "title": "从一次邀请到共同参与",
+        "steps": [
+          {
+            "title": "邀请",
+            "body": "以一个明确入口开始。",
+            "date": "第1周"
+          },
+          {
+            "title": "探索",
+            "body": "给参与者一条短路线。",
+            "date": "第2周"
+          },
+          {
+            "title": "加入",
+            "body": "组织一次小型共同活动。",
+            "date": "第3周"
+          },
+          {
+            "title": "回访",
+            "body": "明确下一次参与方式。",
+            "date": "第4周"
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoHierarchySlide",
+      "layoutId": "pyramid",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "顺序框架",
+        "title": "从现场记录到共同决策",
+        "body": "这是河岸修复的合成演示。Actual decisions, dates and sources belong to content.",
+        "levels": ["共同决策", "有用的解释", "重复出现的模式", "整理后的现场观察", "个人现场笔记"]
+      }
+    },
+    {
+      "type": "monoClosingSlide",
+      "layoutId": "left",
+      "data": {
+        "source": "合成演示 / SYNTHETIC · 并非真实调查",
+        "section": "继续交流",
+        "title": "让讨论\n继续发生",
+        "body": "这是河岸修复的合成演示。Actual decisions, dates and sources belong to content."
+      }
+    }
+  ]
+}

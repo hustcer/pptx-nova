@@ -294,7 +294,19 @@
               "forestProcessSlide",
               "forestStatsSlide",
               "forestMatrixSlide",
-              "forestClosingSlide"
+              "forestClosingSlide",
+              "monoCoverSlide",
+              "monoOpeningSlide",
+              "monoSplitSlide",
+              "monoMetricsSlide",
+              "monoListSlide",
+              "monoComparisonSlide",
+              "monoQuoteSlide",
+              "monoAnalysisSlide",
+              "monoChartSlide",
+              "monoProcessSlide",
+              "monoHierarchySlide",
+              "monoClosingSlide"
             ]
           },
           "data": {

@@ -1,0 +1,498 @@
+{
+  "schemaVersion": "pptx-nova-design/v1",
+  "id": "monochrome",
+  "version": "0.1.0",
+  "canvas": {
+    "widthIn": 13.333,
+    "heightIn": 7.5
+  },
+  "colors": {
+    "paper": "FAFADF",
+    "warm": "F5F0E4",
+    "pale": "F0F0D4",
+    "ink": "1A1A16",
+    "body": "5E5E54",
+    "charcoal": "606055",
+    "stone": "9A9A89",
+    "mist": "C3C3B0",
+    "rule": "1A1A16",
+    "accent": "1A1A16",
+    "history": "9A9A89"
+  },
+  "fonts": {
+    "display": {
+      "latin": "Avenir Next Ultra Light",
+      "eastAsian": "Noto Sans SC"
+    },
+    "body": {
+      "latin": "Avenir Next",
+      "eastAsian": "Noto Sans SC"
+    },
+    "mono": {
+      "latin": "JetBrains Mono",
+      "eastAsian": "Noto Sans SC"
+    },
+    "serif": {
+      "latin": "Georgia",
+      "eastAsian": "Songti SC"
+    }
+  },
+  "textFrame": {
+    "marginLeft": "0in",
+    "marginRight": "0in",
+    "marginTop": "0in",
+    "marginBottom": "0in"
+  },
+  "theme": {
+    "colors": {
+      "lt1": "paper",
+      "dk1": "ink",
+      "lt2": "pale",
+      "dk2": "body",
+      "accent1": "ink",
+      "accent2": "body",
+      "accent3": "charcoal",
+      "accent4": "stone",
+      "accent5": "mist",
+      "accent6": "pale",
+      "hlink": "ink",
+      "folHlink": "body"
+    },
+    "fonts": {
+      "major": "display",
+      "minor": "body"
+    }
+  },
+  "roles": {
+    "surface": "paper",
+    "text": "ink",
+    "rule": "ink",
+    "series": "ink",
+    "focus": "ink"
+  },
+  "refurbish": {
+    "palette": {
+      "background": "paper",
+      "text": "ink",
+      "muted": "body",
+      "accent": "ink",
+      "line": "ink",
+      "surface": "pale"
+    },
+    "fonts": {
+      "display": "display",
+      "body": "body",
+      "cjk": "body"
+    }
+  },
+  "rules": [
+    {
+      "id": "palette",
+      "check": "allowed-colors"
+    },
+    {
+      "id": "fonts",
+      "check": "allowed-fonts"
+    },
+    {
+      "id": "effects",
+      "check": "forbidden-effects",
+      "values": ["shadow", "glow", "reflection", "softEdge"]
+    },
+    {
+      "id": "bounds",
+      "check": "bounds"
+    },
+    {
+      "id": "readable",
+      "check": "font-floor",
+      "minPt": 10.5
+    },
+    {
+      "id": "monochrome-language",
+      "check": "monochrome-language"
+    }
+  ],
+  "monochrome": {
+    "family": "monochrome-ledger/v1",
+    "styles": {
+      "hero": {
+        "role": "display",
+        "sizePt": 66,
+        "color": "ink",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.08
+      },
+      "chapter": {
+        "role": "display",
+        "sizePt": 48,
+        "color": "ink",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.08
+      },
+      "statement": {
+        "role": "display",
+        "sizePt": 40,
+        "color": "ink",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.08
+      },
+      "title": {
+        "role": "display",
+        "sizePt": 30.72,
+        "color": "ink",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.08
+      },
+      "heading": {
+        "role": "body",
+        "sizePt": 18,
+        "color": "ink",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.15
+      },
+      "lead": {
+        "role": "body",
+        "sizePt": 14.4,
+        "color": "body",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.15
+      },
+      "body": {
+        "role": "body",
+        "sizePt": 12,
+        "color": "body",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.15
+      },
+      "compact": {
+        "role": "body",
+        "sizePt": 10.5,
+        "color": "body",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.15
+      },
+      "small": {
+        "role": "mono",
+        "sizePt": 10.5,
+        "color": "body",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.15
+      },
+      "label": {
+        "role": "mono",
+        "sizePt": 10.5,
+        "color": "body",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.15,
+        "trackingPt": 0.8
+      },
+      "number": {
+        "role": "display",
+        "sizePt": 54,
+        "color": "ink",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.08
+      },
+      "step": {
+        "role": "display",
+        "sizePt": 34,
+        "color": "body",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.08
+      },
+      "quote": {
+        "role": "serif",
+        "sizePt": 31,
+        "color": "ink",
+        "bold": false,
+        "italic": true,
+        "lineHeight": 1.08
+      },
+      "serif": {
+        "role": "serif",
+        "sizePt": 25,
+        "color": "ink",
+        "bold": false,
+        "italic": false,
+        "lineHeight": 1.08
+      }
+    },
+    "spacing": {
+      "gap": 0.45,
+      "ruleIn": 0.00926,
+      "rulePt": 0.667,
+      "shortRule": 0.333
+    },
+    "rhythm": {
+      "maxConsecutive": 2
+    },
+    "chrome": {
+      "section": [1.533, 0.43, 9.5, 0.3],
+      "page": [11.57, 0.43, 0.696, 0.3],
+      "title": [1.533, 1.05, 10.733, 1.05],
+      "headerRule": [1.533, 0.78, 10.733],
+      "footerRule": [1.533, 6.8, 10.733],
+      "source": [1.533, 6.98, 10.733, 0.32]
+    },
+    "capacity": {
+      "metrics": [2, 3],
+      "items": [2, 5],
+      "panels": [2, 2],
+      "panelItems": [1, 3],
+      "blocks": [2, 2],
+      "points": [2, 4],
+      "steps": [2, 5],
+      "levels": [3, 5]
+    },
+    "chartTones": ["ink", "charcoal", "stone", "mist"],
+    "hierarchyTones": ["ink", "charcoal", "stone", "mist", "pale"],
+    "families": {
+      "monoCoverSlide": {
+        "role": "cover",
+        "variants": {
+          "bottom": {
+            "regions": {
+              "section": [1.533, 0.5, 10.733, 0.35],
+              "title": [1.533, 3, 10.733, 2.4],
+              "body": [1.533, 5.85, 10.733, 0.65]
+            }
+          },
+          "editorial": {
+            "regions": {
+              "section": [1.533, 0.55, 10.733, 0.35],
+              "title": [1.533, 2.1, 10.733, 2.7],
+              "body": [1.533, 5.25, 8.5, 0.95]
+            }
+          }
+        }
+      },
+      "monoOpeningSlide": {
+        "role": "opening",
+        "variants": {
+          "chapter": {
+            "regions": {
+              "section": [1.533, 2, 10.733, 0.35],
+              "title": [1.533, 2.65, 10.3, 2.15],
+              "body": [1.533, 5.1, 8.4, 1.25]
+            }
+          },
+          "statement": {
+            "regions": {
+              "title": [1.533, 1.85, 10.733, 3.7],
+              "body": [1.533, 5.85, 10.733, 0.65]
+            }
+          }
+        }
+      },
+      "monoSplitSlide": {
+        "role": "split",
+        "variants": {
+          "right": {
+            "regions": {
+              "body": [1.533, 2.35, 5.05, 1.5],
+              "items": [1.533, 4, 5.05, 2.45],
+              "asset": [7.4, 2.35, 4.866, 3.65],
+              "caption": [7.4, 6.16, 4.866, 0.42]
+            }
+          },
+          "left": {
+            "regions": {
+              "body": [7, 2.35, 5.266, 1.5],
+              "items": [7, 4, 5.266, 2.45],
+              "asset": [1.533, 2.35, 4.866, 3.65],
+              "caption": [1.533, 6.16, 4.866, 0.42]
+            }
+          }
+        }
+      },
+      "monoMetricsSlide": {
+        "role": "metrics",
+        "variants": {
+          "row": {
+            "regions": {
+              "metrics": [1.533, 2.9, 10.733, 3.55]
+            }
+          },
+          "rail": {
+            "regions": {
+              "metrics": [1.533, 2.25, 10.733, 4.25]
+            }
+          }
+        }
+      },
+      "monoListSlide": {
+        "role": "list",
+        "variants": {
+          "split": {
+            "regions": {
+              "title": [1.533, 2.25, 4.15, 1.6],
+              "body": [1.533, 4.05, 4.15, 1.8],
+              "items": [6.35, 2.25, 5.916, 4.2]
+            }
+          },
+          "wide": {
+            "regions": {
+              "title": [1.533, 1.1, 10.733, 1.25],
+              "body": [1.533, 2.55, 10.733, 0.6],
+              "items": [1.533, 3.3, 10.733, 3.2]
+            }
+          }
+        }
+      },
+      "monoComparisonSlide": {
+        "role": "comparison",
+        "variants": {
+          "side": {
+            "regions": {
+              "panels": [1.533, 2.1, 10.733, 4.45]
+            }
+          },
+          "stacked": {
+            "regions": {
+              "panels": [1.533, 2.1, 10.733, 4.45]
+            }
+          }
+        }
+      },
+      "monoQuoteSlide": {
+        "role": "quote",
+        "variants": {
+          "inset": {
+            "regions": {
+              "section": [1.7, 1.8, 9.4, 0.35],
+              "title": [1.7, 2.4, 9.4, 2.75],
+              "body": [1.7, 5.4, 9.4, 0.55],
+              "source": [1.7, 6.1, 9.4, 0.35]
+            }
+          },
+          "wide": {
+            "regions": {
+              "section": [1.533, 1.2, 10.733, 0.35],
+              "title": [1.533, 2.05, 10.733, 2.75],
+              "body": [1.533, 5.35, 10.733, 0.55],
+              "source": [1.533, 6.1, 10.733, 0.35]
+            }
+          }
+        }
+      },
+      "monoAnalysisSlide": {
+        "role": "analysis",
+        "variants": {
+          "columns": {
+            "regions": {
+              "blocks": [1.533, 2.1, 10.733, 4.5]
+            }
+          },
+          "insights": {
+            "regions": {
+              "blocks": [1.533, 2.1, 10.733, 4.5]
+            }
+          }
+        }
+      },
+      "monoChartSlide": {
+        "role": "chart",
+        "variants": {
+          "wide": {
+            "regions": {
+              "chart": [1.533, 2.65, 10.733, 3.5],
+              "ring": [1.533, 2.3, 4, 4],
+              "head": [1.533, 2.18, 10.733, 0.35],
+              "legend": [7, 2.7, 5.266, 2.9],
+              "note": [1.533, 6.3, 10.733, 0.35]
+            }
+          },
+          "left": {
+            "regions": {
+              "chart": [1.533, 2.5, 6, 3.7],
+              "ring": [1.95, 2.3, 4, 4],
+              "head": [7.9, 2.3, 4.366, 0.6],
+              "legend": [7.9, 3.15, 4.366, 2.65],
+              "note": [1.533, 6.3, 10.733, 0.35]
+            }
+          },
+          "right": {
+            "regions": {
+              "chart": [6.266, 2.5, 6, 3.7],
+              "ring": [7.7, 2.3, 4, 4],
+              "head": [1.533, 2.3, 4.366, 0.6],
+              "legend": [1.533, 3.15, 4.366, 2.65],
+              "note": [1.533, 6.3, 10.733, 0.35]
+            }
+          }
+        }
+      },
+      "monoProcessSlide": {
+        "role": "process",
+        "variants": {
+          "sequence": {
+            "regions": {
+              "steps": [1.533, 2.6, 10.733, 3.95]
+            }
+          },
+          "timeline": {
+            "regions": {
+              "steps": [1.533, 2.25, 10.733, 4.35]
+            }
+          },
+          "cycle": {
+            "regions": {
+              "steps": [1.533, 2.1, 10.733, 4.5]
+            }
+          }
+        }
+      },
+      "monoHierarchySlide": {
+        "role": "hierarchy",
+        "variants": {
+          "pyramid": {
+            "regions": {
+              "body": [1.533, 2.05, 10.733, 0.55],
+              "levels": [1.533, 3.1, 10.733, 3.35]
+            }
+          },
+          "ladder": {
+            "regions": {
+              "body": [1.533, 2.05, 10.733, 0.55],
+              "levels": [1.533, 3.1, 10.733, 3.35]
+            }
+          }
+        }
+      },
+      "monoClosingSlide": {
+        "role": "closing",
+        "variants": {
+          "left": {
+            "regions": {
+              "section": [1.533, 2, 10.733, 0.35],
+              "title": [1.533, 2.95, 9.3, 2.1],
+              "body": [1.533, 5.35, 9.3, 0.8],
+              "source": [1.533, 6.4, 10.733, 0.35]
+            }
+          },
+          "center": {
+            "regions": {
+              "section": [1.533, 1.75, 10.733, 0.35],
+              "title": [1.533, 2.7, 10.733, 2.1],
+              "body": [1.533, 5.25, 10.733, 0.8],
+              "source": [1.533, 6.4, 10.733, 0.35]
+            }
+          }
+        }
+      }
+    }
+  }
+}

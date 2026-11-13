@@ -791,10 +791,12 @@ export function checkDesignReadback(plan, patch, inspect, model = null, nativeCh
           paragraphs.set(index, (paragraphs.get(index) ?? '') + fact.text)
         }
       }
-      const actualText = [...paragraphs]
-        .sort(([a], [b]) => a - b)
-        .map(([, text]) => text)
-        .join('\n')
+      // fontFacts contain runs, not empty paragraphs. Preserve the disclosed paragraph
+      // indices so an intentional blank line is not misclassified as dropped content.
+      const actualText = Array.from(
+        { length: Math.max(-1, ...paragraphs.keys()) + 1 },
+        (_, index) => paragraphs.get(index) ?? '',
+      ).join('\n')
       if (expected !== undefined && expected.replace(/\r\n?/g, '\n') !== actualText) {
         fail(`${object.name}: text changed or was dropped`)
       }

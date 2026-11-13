@@ -33,8 +33,9 @@ if (args.includes('eval')) {
     getBoundingClientRect: () => ({ x: 0, y: 0, left: 0, top: 0,
       right: mode === 'clipped' ? 1500 : 1440, bottom: 810, width: 1440, height: 810 }),
     querySelectorAll: selector => selector === '[data-anim]'
-      ? (mode === 'hidden-content' || mode === 'animation-end'
-        ? [{ textContent: 'Animated title', hidden: mode === 'hidden-content' || !animationFinished }] : [])
+      ? (['hidden-content', 'animation-end', 'omitted-chrome'].includes(mode)
+        ? [{ textContent: 'Animated title', hidden: mode !== 'animation-end' || !animationFinished,
+          getClientRects: () => mode === 'omitted-chrome' ? [] : [{}] }] : [])
       : [{ decode: () => new Promise((resolve, reject) => setTimeout(() =>
           mode === 'image-error' ? reject(new Error('Image decode failed')) : resolve(), 40)) }],
     getAnimations: () => [{ effect: { getComputedTiming: () => ({ endTime: 500 }) },
@@ -201,6 +202,16 @@ test('capture activates the requested class and finishes entry animations before
   assert.match(report.captureCss, /animation-fill-mode: forwards/)
   assert.doesNotMatch(report.captureCss, /animation: none/)
   assert.match(report.hideSelectors, /#slide-counter/)
+})
+
+test('capture preserves intentionally omitted animated chrome without accepting transparent visible text', (t) => {
+  const f = fixture(t)
+  const result = f.run('omitted-chrome')
+  assert.equal(result.status, 0, result.stderr)
+  assert.equal(JSON.parse(result.stdout).slideCount, 2)
+  const transparent = f.run('hidden-content', [], join(f.root, 'transparent'))
+  assert.equal(transparent.status, 1)
+  assert.match(transparent.stderr, /Animated content remains hidden/)
 })
 
 for (const mode of ['screen-label', 'aria-label']) {

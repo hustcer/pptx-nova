@@ -416,6 +416,9 @@ try {
       }
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       const hiddenAnimatedText = Array.from(active.querySelectorAll('[data-anim]')).filter(el => {
+        // Intentionally omitted chrome (including display:none ancestors) has no layout box.
+        // Do not force it visible or confuse it with an unfinished entry animation.
+        if (!el.getClientRects().length) return false;
         const style = getComputedStyle(el);
         return el.textContent.trim() && (Number(style.opacity) === 0 || style.visibility === 'hidden');
       });

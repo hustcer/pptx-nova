@@ -1,0 +1,328 @@
+{
+  "meta": {
+    "deckkit": "monochrome"
+  },
+  "slides": [
+    {
+      "type": "monoCoverSlide",
+      "layoutId": "editorial",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "COMMUNITY READING / DEMO",
+        "title": "Community reading\nA service ledger",
+        "body": "A fictional library programme, expressed through a quiet editorial system."
+      }
+    },
+    {
+      "type": "monoOpeningSlide",
+      "layoutId": "statement",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "01 · ACCESS",
+        "title": "Make the first visit\nfeel easy",
+        "body": "A legible entrance and one clear starting point can shape a welcoming service."
+      }
+    },
+    {
+      "type": "monoOpeningSlide",
+      "layoutId": "chapter",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "01 · ACCESS",
+        "title": "One invitation,\nmany ways to read",
+        "body": "The welcome stays consistent while the service leaves room for different reading habits."
+      }
+    },
+    {
+      "type": "monoSplitSlide",
+      "layoutId": "left",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "THE ENTRY",
+        "title": "One clear starting point",
+        "body": "A welcome desk introduces the collection through three small actions.",
+        "items": ["Find a reading interest", "Choose a comfortable place", "Ask a person for help"],
+        "assetLabel": "SERVICE MAP PLACEHOLDER",
+        "assetCaption": "Editable shell · bind no reference image"
+      }
+    },
+    {
+      "type": "monoMetricsSlide",
+      "layoutId": "rail",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "A FICTIONAL MONTH",
+        "title": "A small programme, in numbers",
+        "metrics": [
+          {
+            "value": "240",
+            "label": "Visits in the invented demonstration month",
+            "note": "Synthetic count"
+          },
+          {
+            "value": "18",
+            "label": "Reading sessions in this sample plan",
+            "note": "Synthetic schedule"
+          },
+          {
+            "value": "72%",
+            "label": "Fictional return-visit share",
+            "note": "Illustrative ratio"
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoListSlide",
+      "layoutId": "wide",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "NEXT ACTIONS",
+        "title": "Five changes,\none shared direction",
+        "body": "A proposed sequence for a fictional service, not a measured recommendation.",
+        "items": [
+          "Clarify the entrance sign",
+          "Keep the first shelf approachable",
+          "Offer one short introduction",
+          "Publish a simple weekly rhythm",
+          "Review the welcome with readers"
+        ]
+      }
+    },
+    {
+      "type": "monoComparisonSlide",
+      "layoutId": "stacked",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "TWO SERVICE MODELS",
+        "title": "Make the invitation visible",
+        "panels": [
+          {
+            "label": "BEFORE",
+            "title": "Information is scattered",
+            "body": "Visitors need to assemble the service for themselves.",
+            "items": ["Several entry points", "No shared first step"]
+          },
+          {
+            "label": "PROPOSED",
+            "title": "One visible welcome",
+            "body": "A single invitation makes the next action clear.",
+            "items": ["One welcome point", "A short orientation"]
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoQuoteSlide",
+      "layoutId": "wide",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "AN INVENTED VOICE",
+        "title": "“I came for a book, and found a place to stay for a while.”",
+        "body": "FICTIONAL READER · DEMONSTRATION QUOTATION"
+      }
+    },
+    {
+      "type": "monoAnalysisSlide",
+      "layoutId": "insights",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "TWO OBSERVATIONS",
+        "title": "Space and rhythm belong together",
+        "blocks": [
+          {
+            "title": "A shared place",
+            "body": "A clear welcome leaves room for different reading habits. The service begins with a useful invitation."
+          },
+          {
+            "title": "A useful rhythm",
+            "body": "A predictable weekly programme can make participation easier to plan. This is an illustrative hypothesis."
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoChartSlide",
+      "layoutId": "right",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "NUMERIC EXAMPLE",
+        "title": "Visits across four fictional weeks",
+        "kind": "column",
+        "seriesName": "Demonstration visits",
+        "unit": "visits / week",
+        "points": [
+          {
+            "label": "Week 1",
+            "value": 18
+          },
+          {
+            "label": "Week 2",
+            "value": 27
+          },
+          {
+            "label": "Week 3",
+            "value": 35
+          },
+          {
+            "label": "Week 4",
+            "value": 44
+          }
+        ],
+        "note": "Synthetic observations · raw values retained; no forecast implied"
+      }
+    },
+    {
+      "type": "monoProcessSlide",
+      "layoutId": "timeline",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "AN OPEN SEQUENCE",
+        "title": "From invitation to a shared routine",
+        "steps": [
+          {
+            "title": "Welcome",
+            "body": "Offer one clear starting point."
+          },
+          {
+            "title": "Explore",
+            "body": "Help readers find a useful direction."
+          },
+          {
+            "title": "Join",
+            "body": "Introduce a small shared activity."
+          },
+          {
+            "title": "Return",
+            "body": "Make the next visit easy to imagine."
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoChartSlide",
+      "layoutId": "right",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "NUMERIC EXAMPLE",
+        "title": "Four fictional reading activities",
+        "kind": "doughnut",
+        "seriesName": "Synthetic activity count",
+        "unit": "activities",
+        "points": [
+          {
+            "label": "Read",
+            "value": 38
+          },
+          {
+            "label": "Discuss",
+            "value": 25
+          },
+          {
+            "label": "Browse",
+            "value": 22
+          },
+          {
+            "label": "Ask",
+            "value": 15
+          }
+        ],
+        "note": "Synthetic observations · raw values retained; no forecast implied"
+      }
+    },
+    {
+      "type": "monoProcessSlide",
+      "layoutId": "timeline",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "AN OPEN SEQUENCE",
+        "title": "A predictable weekly rhythm",
+        "steps": [
+          {
+            "title": "Welcome",
+            "body": "Offer one clear starting point.",
+            "date": "W1"
+          },
+          {
+            "title": "Explore",
+            "body": "Help readers find a useful direction.",
+            "date": "W2"
+          },
+          {
+            "title": "Join",
+            "body": "Introduce a small shared activity.",
+            "date": "W3"
+          },
+          {
+            "title": "Return",
+            "body": "Make the next visit easy to imagine.",
+            "date": "W4"
+          },
+          {
+            "title": "Reflect",
+            "body": "Record a shared lesson.",
+            "date": "W5"
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoProcessSlide",
+      "layoutId": "cycle",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "AN OPEN SEQUENCE",
+        "title": "A welcome that learns each week",
+        "steps": [
+          {
+            "title": "Welcome",
+            "body": "Offer one clear starting point.",
+            "date": "W1"
+          },
+          {
+            "title": "Explore",
+            "body": "Help readers find a useful direction.",
+            "date": "W2"
+          },
+          {
+            "title": "Join",
+            "body": "Introduce a small shared activity.",
+            "date": "W3"
+          },
+          {
+            "title": "Return",
+            "body": "Make the next visit easy to imagine.",
+            "date": "W4"
+          }
+        ]
+      }
+    },
+    {
+      "type": "monoHierarchySlide",
+      "layoutId": "ladder",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "AN ORDINAL FRAME",
+        "title": "Build from observations to a decision",
+        "body": "The widths express order, not measured quantities.",
+        "levels": [
+          "A shared decision",
+          "A useful interpretation",
+          "Recurring patterns",
+          "Organised observations",
+          "Individual field notes"
+        ]
+      }
+    },
+    {
+      "type": "monoClosingSlide",
+      "layoutId": "center",
+      "data": {
+        "source": "SYNTHETIC DEMONSTRATION · NOT OBSERVED DATA",
+        "section": "CONTINUE THE CONVERSATION",
+        "title": "Keep the door\nopen",
+        "body": "Use the example content as a starting point; replace every claim, unit and source with your own."
+      }
+    }
+  ]
+}

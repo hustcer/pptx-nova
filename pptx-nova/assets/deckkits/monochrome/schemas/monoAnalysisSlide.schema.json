@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monochrome analysis",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Content-owned structural label; Latin uppercase is an authoring preference, never an automatic transform.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9.5,
+        "heightIn": 0.3,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Preserved heading or quotation, including intentional line breaks.",
+      "x-slotBudget": {
+        "fontPt": 30.72,
+        "widthIn": 10.733,
+        "heightIn": 1.05,
+        "lineHeight": 1.08,
+        "maxLines": 2
+      }
+    },
+    "source": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Provenance/date/qualification; synthetic samples must be identified explicitly.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.32,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Analysis heading; serif in insight layout",
+            "x-slotBudget": {
+              "fontPt": 25,
+              "widthIn": 4.7764999999999995,
+              "heightIn": 1.35,
+              "lineHeight": 1.08,
+              "maxLines": 3
+            }
+          },
+          "body": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Visible supporting prose or attribution; input is never silently shortened.",
+            "x-slotBudget": {
+              "fontPt": 12,
+              "widthIn": 4.7764999999999995,
+              "heightIn": 2.3,
+              "lineHeight": 1.15,
+              "maxLines": 9
+            }
+          }
+        },
+        "required": ["title", "body"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "required": ["section", "title", "source", "blocks"],
+  "additionalProperties": false
+}

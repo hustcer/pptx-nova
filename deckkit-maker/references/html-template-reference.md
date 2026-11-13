@@ -53,6 +53,10 @@ make `[data-anim]` descendants visible or verify CSS backgrounds/canvas; inspect
 that need it. `fonts.ready` cannot prove that an unavailable system font has not fallen back: record actual font
 substitution in the style spec. A geometrically valid slide can still have incomplete content.
 
+Intentionally omitted elements with no layout box (`display:none`, including an ancestor) remain omitted.
+They must not be forced visible or treated as unfinished entry animations. Visible-layout animated text
+that stays transparent still blocks capture; select the real activation class or a template-specific adapter.
+
 Use absolute screenshot output paths. Some browser tools can treat relative `.tmp/...` paths as selectors or resolve them
 against their own working directory.
 
@@ -120,6 +124,12 @@ Use a 16:9 capture viewport so ratios map cleanly to PPTX:
 
 Do not preserve viewport-scaled type blindly. PPTX needs text to pass dry-run and vision gates; use the HTML scale as a
 visual reference, then choose stable PPTX point sizes and text box heights.
+
+CSS fixed corner radii do not automatically map to preset `roundRect`: its default rounding may scale
+with the shape height. Compare actual corner geometry at the largest intended panel size. Discover current
+adjustment support or use a bounded native cubic path; preserve the small radius without rasterizing the panel.
+Likewise, a font family, style label and PostScript face name may resolve differently in canonical and
+PowerPoint. Probe the actual typeface string and regular/bold/italic/script combination before full rebuild.
 
 ## Phase 2 Notes
 

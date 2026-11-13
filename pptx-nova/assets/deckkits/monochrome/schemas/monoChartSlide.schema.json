@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monochrome chart",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Content-owned structural label; Latin uppercase is an authoring preference, never an automatic transform.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9.5,
+        "heightIn": 0.3,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Preserved heading or quotation, including intentional line breaks.",
+      "x-slotBudget": {
+        "fontPt": 30.72,
+        "widthIn": 10.733,
+        "heightIn": 1.05,
+        "lineHeight": 1.08,
+        "maxLines": 2
+      }
+    },
+    "source": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Provenance/date/qualification; synthetic samples must be identified explicitly.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.32,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["column", "doughnut"],
+      "x-slotRole": "control",
+      "description": "Doughnut requires nonnegative values and a positive total; wide is column-only."
+    },
+    "unit": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Content-owned unit; no implicit percent scaling.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 4.366,
+        "heightIn": 0.6,
+        "lineHeight": 1.15,
+        "maxLines": 2
+      }
+    },
+    "seriesName": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Visible series label and native chart metadata",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 4.366,
+        "heightIn": 0.6,
+        "lineHeight": 1.15,
+        "maxLines": 2
+      }
+    },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Visible category",
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 1.5,
+              "heightIn": 0.5,
+              "lineHeight": 1.15,
+              "maxLines": 2
+            }
+          },
+          "value": {
+            "type": "number",
+            "description": "Finite raw numeric observation; retained unchanged."
+          }
+        },
+        "required": ["label", "value"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 4
+    },
+    "note": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Visible chart interpretation/period/qualification",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.35,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    }
+  },
+  "required": ["section", "title", "source", "kind", "unit", "seriesName", "points", "note"],
+  "additionalProperties": false
+}

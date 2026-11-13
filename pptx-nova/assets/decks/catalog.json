@@ -266,6 +266,19 @@
       "status": "available"
     },
     {
+      "id": "monochrome-showcase",
+      "name": "monochrome DeckKit Showcase",
+      "type": "deckkit-showcase",
+      "deckkit": "monochrome",
+      "caseId": "monochrome.golden-library",
+      "path": "../examples/deckkits/monochrome/deck.pptx",
+      "preview": "../examples/deckkits/monochrome/contact-sheet.webp",
+      "content": "../examples/deckkits/monochrome/content.json",
+      "summary": "../examples/deckkits/monochrome/summary.json",
+      "bestFor": ["research synthesis", "literary report", "policy brief", "bilingual editorial"],
+      "status": "preview"
+    },
+    {
       "id": "paper-scholar-showcase",
       "name": "paper-scholar DeckKit Showcase",
       "type": "deckkit-showcase",

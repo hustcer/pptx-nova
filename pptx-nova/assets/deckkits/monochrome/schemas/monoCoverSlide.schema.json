@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monochrome cover",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Content-owned structural label; Latin uppercase is an authoring preference, never an automatic transform.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.35,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Preserved heading or quotation, including intentional line breaks.",
+      "x-slotBudget": {
+        "fontPt": 66,
+        "widthIn": 10.733,
+        "heightIn": 2.4,
+        "lineHeight": 1.08,
+        "maxLines": 2
+      }
+    },
+    "source": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Provenance/date/qualification; synthetic samples must be identified explicitly.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.32,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "body": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Visible supporting prose or attribution; input is never silently shortened.",
+      "x-slotBudget": {
+        "fontPt": 14.4,
+        "widthIn": 8.5,
+        "heightIn": 0.95,
+        "lineHeight": 1.15,
+        "maxLines": 3
+      }
+    }
+  },
+  "required": ["section", "title", "source", "body"],
+  "additionalProperties": false
+}

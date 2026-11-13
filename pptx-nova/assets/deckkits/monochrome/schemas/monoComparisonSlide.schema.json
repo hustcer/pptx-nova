@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monochrome comparison",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Content-owned structural label; Latin uppercase is an authoring preference, never an automatic transform.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9.5,
+        "heightIn": 0.3,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Preserved heading or quotation, including intentional line breaks.",
+      "x-slotBudget": {
+        "fontPt": 30.72,
+        "widthIn": 10.733,
+        "heightIn": 1.05,
+        "lineHeight": 1.08,
+        "maxLines": 2
+      }
+    },
+    "source": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Provenance/date/qualification; synthetic samples must be identified explicitly.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.32,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "panels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Comparison header",
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 3,
+              "heightIn": 0.32,
+              "lineHeight": 1.15,
+              "maxLines": 1
+            }
+          },
+          "title": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Panel heading",
+            "x-slotBudget": {
+              "fontPt": 18,
+              "widthIn": 3,
+              "heightIn": 1.245,
+              "lineHeight": 1.15,
+              "maxLines": 3
+            }
+          },
+          "body": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Visible supporting prose or attribution; input is never silently shortened.",
+            "x-slotBudget": {
+              "fontPt": 12,
+              "widthIn": 5.0665000000000004,
+              "heightIn": 1.15,
+              "lineHeight": 1.15,
+              "maxLines": 4
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "\\S",
+              "description": "Comparison detail",
+              "x-slotBudget": {
+                "fontPt": 12,
+                "widthIn": 4.726500000000001,
+                "heightIn": 0.49,
+                "lineHeight": 1.15,
+                "maxLines": 1
+              }
+            },
+            "minItems": 1,
+            "maxItems": 3
+          }
+        },
+        "required": ["label", "title", "body", "items"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "required": ["section", "title", "source", "panels"],
+  "additionalProperties": false
+}

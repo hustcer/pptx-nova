@@ -114,6 +114,10 @@ node pptx-nova/scripts/cli/deckkits/slot-consistency.mjs --deckkit <id> --json
 约束误拦截探针；不得为让单页探针通过而放松真实完整 deck 的约束。数字与单位使用 `add-run`
 时，还须执行应用后的文字回读，确认追加文本进入正确段落；仅在 patch JSON 中找到哨兵不够。
 
+多段正文也覆盖含空段落的输入：空段落没有可寻址的 run，执行器只能保留其段落格式；回读须按
+已披露的 paragraph index 重建中间空段落。不得通过压平空白或只拼接非空 run 来“修复”内容
+比较；缺失、顺序改变及意外折叠段落的反例仍须失败。
+
 判松紧：schema 通过但 build 报错 = schema 太松；schema 拒绝但 build 能跑 = 太紧。
 
 ## 3. catalog 注册

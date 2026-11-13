@@ -2065,6 +2065,99 @@
         "changedLowSamples": [],
         "resolvedLowSamples": []
       }
+    },
+    {
+      "id": "monochrome",
+      "deckkit": "monochrome",
+      "caseId": "monochrome.golden-library",
+      "kind": "golden",
+      "readiness": "candidate",
+      "version": "0.1.0",
+      "title": "Community reading A service ledger",
+      "bestFor": ["research synthesis", "literary report", "policy brief", "bilingual editorial"],
+      "defaultFor": [],
+      "files": {
+        "deck": {
+          "path": "monochrome/deck.pptx",
+          "bytes": 41780,
+          "sha256": "14770af5fac3528078f825c225752a46fb50493b5c0306783fb55bbfe7c9a46e"
+        },
+        "contactSheet": {
+          "path": "monochrome/contact-sheet.webp",
+          "bytes": 460684,
+          "sha256": "328eda67eef8a6d8ec3c12a1088fe32192209c19fe0bdc683be353b76081753e",
+          "quality": 86
+        },
+        "content": {
+          "path": "monochrome/content.json",
+          "bytes": 9855,
+          "sha256": "a9c125bb409238cde7e2e2b37228471013b61699eedc73525dd044c7b2932d5a"
+        },
+        "brief": {
+          "path": "monochrome/brief.md",
+          "bytes": 696,
+          "sha256": "834412a007dae514828eb0e1813b59fafbc54d8a58bd0184a70f2000875def76"
+        },
+        "summary": {
+          "path": "monochrome/summary.json",
+          "bytes": 2701,
+          "sha256": "618ba5dc66df0f4d7e098beb47d32b4b2e3901178cb4db916ad8edd15abad97f"
+        }
+      },
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "fitDiagnostics": 0,
+        "blockingFitDiagnostics": 0
+      },
+      "patch": {
+        "schemaVersion": "pptx-patch/v1",
+        "ops": 1104
+      },
+      "vision": {
+        "status": "success",
+        "slideCount": 16,
+        "issueCount": 0,
+        "autoFixable": 0,
+        "bySeverity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "lowBuckets": {
+          "total": 0,
+          "styleAllowed": 0,
+          "baselineKnown": 0,
+          "new": 0,
+          "changed": 0,
+          "resolved": 0,
+          "reviewable": 0,
+          "baselineUnavailable": true,
+          "baselineUpdated": false
+        },
+        "lowByFamily": {},
+        "newLowByFamily": {},
+        "changedLowByFamily": {},
+        "baseline": {
+          "schemaVersion": "",
+          "fingerprintVersion": "",
+          "path": "pptx-nova/benchmarks/visual/baselines/monochrome.golden-library.vision-baseline.json",
+          "available": false,
+          "issueCount": 0
+        },
+        "stylePolicy": {
+          "schemaVersion": "pptx-nova-vision-style-policy/v1",
+          "source": "catalog.qualityProfile",
+          "minFontPt": 10.5,
+          "labelFontPt": 10.5,
+          "sourceFontPt": 10.5,
+          "note": "Contract-driven typography with a 10.5pt floor; actual render review remains required."
+        },
+        "newLowSamples": [],
+        "changedLowSamples": [],
+        "resolvedLowSamples": []
+      }
     }
   ]
 }

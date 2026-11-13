@@ -281,6 +281,15 @@
       "buildPath": "../../assets/deckkits/editorial-forest/examples/build.mjs",
       "expectedPath": "cases/editorial-forest/golden-editorial/expected.json",
       "reviewPath": "cases/editorial-forest/golden-editorial/review.md"
+    },
+    {
+      "id": "monochrome.golden-library",
+      "deckkit": "monochrome",
+      "kind": "golden",
+      "contentPath": "../../assets/deckkits/monochrome/examples/content.json",
+      "buildPath": "../../assets/deckkits/monochrome/examples/build.mjs",
+      "expectedPath": "cases/monochrome/golden-library/expected.json",
+      "reviewPath": "cases/monochrome/golden-library/review.md"
     }
   ]
 }

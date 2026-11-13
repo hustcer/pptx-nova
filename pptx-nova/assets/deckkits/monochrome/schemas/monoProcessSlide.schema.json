@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Monochrome process",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Content-owned structural label; Latin uppercase is an authoring preference, never an automatic transform.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 9.5,
+        "heightIn": 0.3,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Preserved heading or quotation, including intentional line breaks.",
+      "x-slotBudget": {
+        "fontPt": 30.72,
+        "widthIn": 10.733,
+        "heightIn": 1.05,
+        "lineHeight": 1.08,
+        "maxLines": 2
+      }
+    },
+    "source": {
+      "type": "string",
+      "pattern": "\\S",
+      "description": "Provenance/date/qualification; synthetic samples must be identified explicitly.",
+      "x-slotBudget": {
+        "fontPt": 10.5,
+        "widthIn": 10.733,
+        "heightIn": 0.32,
+        "lineHeight": 1.15,
+        "maxLines": 1
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Step name",
+            "x-slotBudget": {
+              "fontPt": 18,
+              "widthIn": 2.5332500000000002,
+              "heightIn": 0.55,
+              "lineHeight": 1.15,
+              "maxLines": 1
+            }
+          },
+          "body": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Visible supporting prose or attribution; input is never silently shortened.",
+            "x-slotBudget": {
+              "fontPt": 12,
+              "widthIn": 2.5332500000000002,
+              "heightIn": 2.3000000000000003,
+              "lineHeight": 1.15,
+              "maxLines": 9
+            }
+          },
+          "date": {
+            "type": "string",
+            "pattern": "\\S",
+            "description": "Optional content-owned date; visible in every registered layout",
+            "x-slotBudget": {
+              "fontPt": 10.5,
+              "widthIn": 1.18,
+              "heightIn": 1.0031249999999998,
+              "lineHeight": 1.15,
+              "maxLines": 4
+            }
+          }
+        },
+        "required": ["title", "body"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 5
+    }
+  },
+  "required": ["section", "title", "source", "steps"],
+  "additionalProperties": false
+}

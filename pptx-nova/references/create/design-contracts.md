@@ -2,8 +2,12 @@
 
 Read this reference when a selected catalog entry has `designContract`. Other DeckKits keep their
 existing workflow. Registered designs include `biennale-yellow`, `cartesian`, `broadside`, `long-table`,
-`black-gold`, `green-slate`, `clear-value`, `swiss-grid`, `mckinsey-blue`, `clear-impact`, `warm-clay` and `amber-ledger`; this is a pptx-nova
+`black-gold`, `green-slate`, `clear-value`, `swiss-grid`, `mckinsey-blue`, `clear-impact`, `warm-clay`, `amber-ledger` and `monochrome`; this is a pptx-nova
 extension, not a new xdoc format.
+
+`monochrome` provides twelve public responsibilities and twenty-six layouts, including open columns,
+native columns/doughnuts, dated timelines, cycles and ordinal tiers. Read its
+[intent](../../assets/deckkits/monochrome/intent.md) for capacity, fonts and manual chart-edit boundaries.
 
 ## Agent workflow
 

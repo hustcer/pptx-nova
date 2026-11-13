@@ -55851,6 +55851,7 @@
           "styleBlockers",
           "allowedChanges",
           "textAttrChanges",
+          "textStyleMapping",
           "embeddedWorkbooks"
         ],
         "properties": {
@@ -56013,6 +56014,99 @@
               }
             }
           },
+          "textStyleMapping": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["policy", "mappings", "schemaVersion", "reviewRequiredCount"],
+            "properties": {
+              "schemaVersion": {
+                "const": "pptx-i18n-text-style-mapping/v1"
+              },
+              "reviewRequiredCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "mappings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "part",
+                    "groups",
+                    "mappingId",
+                    "sourceText",
+                    "candidateText",
+                    "paragraphIndex",
+                    "referencedBySlides"
+                  ],
+                  "properties": {
+                    "mappingId": {
+                      "type": "string"
+                    },
+                    "part": {
+                      "type": "string"
+                    },
+                    "paragraphIndex": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "referencedBySlides": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    },
+                    "sourceText": {
+                      "type": "string"
+                    },
+                    "candidateText": {
+                      "type": "string"
+                    },
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "styleXml",
+                          "runIndexes",
+                          "sourceText",
+                          "candidateText",
+                          "sourceRunGroupId"
+                        ],
+                        "properties": {
+                          "sourceRunGroupId": {
+                            "type": "string"
+                          },
+                          "styleXml": {
+                            "type": "string"
+                          },
+                          "sourceText": {
+                            "type": "string"
+                          },
+                          "candidateText": {
+                            "type": "string"
+                          },
+                          "runIndexes": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "policy": {
+                "type": "string"
+              }
+            }
+          },
           "embeddedWorkbooks": {
             "type": "object",
             "additionalProperties": false,
@@ -56142,7 +56236,7 @@
         },
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://structurify.io/schemas/pptx-i18n-style-diff/v1.schema.json",
-        "description": "Pass requires the same textless OOXML signatures except documented font-size and explicitly allowed visible text attribute changes. Embedded workbooks are only byte-compared; a changed workbook still needs dedicated validation.",
+        "description": "Pass requires matching textless OOXML signatures except documented font-size and allowed typed text attributes, plus non-empty meaningful source style groups. textStyleMapping exposes every changed mixed-style paragraph for additional bound Agent semantic alignment review; mechanical occupancy is not a semantic verdict. Embedded workbooks remain outer-package-only.",
         "$defs": {
           "i18nStyleIssue": {
             "type": "object",
@@ -114158,7 +114252,7 @@
     }
   },
   "name": "xdoc",
-  "version": "0.21.0 (dcce9c1c)",
+  "version": "0.22.0 (80bf93e7)",
   "schemaVersion": "cli-agent/v1",
   "defaultCommand": "convert",
   "artifactSchemaEvolution": {

@@ -222,13 +222,13 @@ test('public xdoc docs updater replaces literal $defs text and keeps checks dete
   writeFileSync(
     join(docsDir, 'xdoc-introducution.md'),
     [
-      '> **Runtime build verified for this document:** `1.2.2 (cafebabe)`',
+      '> **Runtime build verified for this document:** `1.2.2 (cafebabef)`',
       '',
       '> **Verification date:** 2025-01-02',
       '',
       '| Patch schema definitions | 1 `$defs` in the current runtime schema |',
       '',
-      'This document is anchored to xdoc 1.2.2 (cafebabe).',
+      'This document is anchored to xdoc 1.2.2 (cafebabef).',
       '',
     ].join('\n'),
   )
@@ -248,7 +248,7 @@ test('public xdoc docs updater replaces literal $defs text and keeps checks dete
   assert.doesNotMatch(`${update.stdout}${update.stderr}`, /[\u3400-\u9fff]/u)
   const introduction = readFileSync(join(docsDir, 'xdoc-introducution.md'), 'utf8')
   assert.match(introduction, /2 `\$defs` in the current runtime schema/)
-  assert.match(introduction, /1\.2\.3 \(deadbeef\)/)
+  assert.equal((introduction.match(/1\.2\.3 \(deadbeef\)/g) ?? []).length, 2)
   assert.match(introduction, /Verification date:\*\* 2026-07-23/)
   const writtenSchema = JSON.parse(readFileSync(join(docsDir, 'xdoc-schema.json'), 'utf8'))
   assert.equal('build' in writtenSchema, false)

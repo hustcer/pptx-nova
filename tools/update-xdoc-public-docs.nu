@@ -42,6 +42,9 @@ const APPROVED_PUBLIC_CLI_BUILD = {
   edition: 'public-cli'
 }
 const RUNTIME_VERSION_PATTERN = r#'[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)? \([0-9a-f]{8}(?:-dirty)?\)'#
+# Introductions may contain a longer source revision copied from release notes.
+# Accept it for replacement while keeping schema runtime identities strict.
+const INTRODUCTION_VERSION_PATTERN = r#'[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)? \([0-9a-f]{8,40}(?:-dirty)?\)'#
 const VERIFICATION_DATE_PATTERN = r#'[0-9]{4}-[0-9]{2}-[0-9]{2}'#
 
 def required-record [value: any, label: string]: nothing -> record {
@@ -184,7 +187,7 @@ def update-introduction [
   let dollar = '$'
   let defs_text = $'($defs_count) `($dollar)defs`'
   $text
-  | str replace --all --regex $RUNTIME_VERSION_PATTERN { $runtime_version }
+  | str replace --all --regex $INTRODUCTION_VERSION_PATTERN { $runtime_version }
   | str replace --all --regex r#'> \*\*Verification date:\*\* [0-9]{4}-[0-9]{2}-[0-9]{2}'# { $'> **Verification date:** ($verification_date)' }
   | str replace --all --regex r#'[0-9]+ `\$defs`'# { $defs_text }
 }

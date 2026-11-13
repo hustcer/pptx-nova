@@ -4,9 +4,18 @@ Each tagged release is compared with the preceding `v*.*.*` version tag. Tagged 
 
 For current Agent workflows, use the installed executable's `xdoc schema` and `xdoc pptx <action> --help` to discover its actual contract. Names and examples below describe each historical release; follow later migration entries when upgrading. These notes highlight migrations, new operations, report changes, and failure boundaries. PDF rendering fixes also affect PPTX PNG previews produced through the PDF pipeline; static previews do not verify animation playback or PowerPoint fidelity.
 
-## v0.21.0 - 2026/11/12
+## v0.22.0 - 2026/11/13
 
-Compared with `v0.20.0` (`918276739`), through HEAD `80de38d6f` (source version `0.21.0`). These notes cover CLI behavior and shared engine changes used by the CLI.
+Compared with `v0.22.0` (`80bf93e7eb`), through tag `v0.22.0` (`80bf93e7e`). These notes cover CLI behavior and shared engine changes used by the CLI.
+
+- `pptx i18n-text-plan` now considers complete local paragraph and run style declarations, including nested color, font and effect properties, when identifying visible style boundaries. Translations previously planned as a single style may now require review or explicit mapping. Differently authored inherited styles are not assumed equivalent; inspect the plan before applying its patch.
+- **Translation input migration:** an explicit `targetSegments` entry for a source run group containing non-whitespace text must itself contain non-whitespace text. A previously accepted empty segment is rejected; redistribute the translated phrases among the source groups instead of erasing a meaningful style boundary.
+- `pptx i18n-style-diff` independently checks text occupancy in changed mixed-style paragraphs, including supported slide, table, chart, notes and shared-template parts. A meaningful source style group emptied in the candidate produces a `visible-style-emptied` blocker even if the remaining style XML is unchanged. Unreadable paragraph structure and changed paragraph counts can also block the check. Same-style continuation runs may still be consolidated without emptying the group.
+- The `pptx-i18n-style-diff/v1` report now includes `textStyleMapping`, with a mapping ID, part, paragraph index, referenced slides, source and candidate text, and style-group details for changed mixed-style paragraphs. Update strict report consumers to accept the expanded schema. Review every mapping's phrase-to-style alignment against the source and candidate previews; non-empty groups and `status: pass` do not establish semantic alignment. Embedded workbook contents remain outside this style check and require separate validation.
+
+## v0.22.0 - 2026/11/12
+
+Compared with `v0.20.0` (`918276739`), through HEAD `80bf93e7eb` (source version `0.22.0`). These notes cover CLI behavior and shared engine changes used by the CLI.
 
 - `add-equation` now typesets supported LaTeX into SVG vector paths in the default and `rendered` modes, replacing the previous SVG containing literal LaTeX text. One-shot and cooperative daemon patch execution use the same typesetter. The obsolete `formula-fallback-svg` risk is no longer emitted; this does not establish visual fidelity for a particular equation.
 - Expanded `native-omml` equation creation to compose sequences, grouped expressions, fractions, square roots, paired parentheses/brackets, combined subscripts/superscripts in either order, and sum/product/integral bodies and limits. For example, `E=\frac{a}{b}+x_i^2` retains all terms. Native editable math and built-in rendered math use the same bounded parser. A sum or integral body stops at the next top-level additive or relation operator; use braces when a larger expression belongs to the body.

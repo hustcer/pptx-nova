@@ -1,6 +1,6 @@
 # Teal Journal golden handbook
 
-Accepted 2026-10-25, Teal Journal 1.0.0 candidate, xdoc 0.21.0 (dcce9c1c).
+Accepted 2026-10-25, Teal Journal 1.0.0 candidate, xdoc 0.22.0 (80bf93e7e).
 
 Promoted to production, then default on 2026-10-26. The golden benchmark passed again with vision high/medium/low 0/0/0 and an empty accepted vision baseline. All eight canonical PNGs and the contact sheet are byte-identical to the previously reviewed benchmark. Current benchmark evidence: `.tmp/deckkit-production-20261026-fBFdCq/teal-journal/golden-handbook/`.
 

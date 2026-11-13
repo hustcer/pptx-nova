@@ -243,6 +243,38 @@ contract id, and resume with `--memory <repair-file> --apply --overwrite`.
 The manual commands below remain the authoritative lower-level contract and
 debugging path.
 
+### Batch Review Of Mixed-Style Paragraphs
+
+The three-field translation fill view intentionally omits formatting context. When the scan's
+`styleHints.mixedStyle` / `requiresAnchors` is true, preserve the order of emphasized phrases while
+drafting; fluent target-language word order can otherwise move emphasis or a hyperlink onto the wrong
+words. Rephrase into an equivalent ordered sentence rather than moving source groups.
+
+For a large `needs-target-segments` result, do not load the complete memory or planner report into
+conversation context. Read a compact projection of **blocking** repairs first. One JSONL row per
+paragraph should retain `unitId`, `sourceText`, `targetText`, `targetSegmentsContractId`, the ordered
+`sourceRunGroups[]` (`sourceRunGroupId`, `sourceText`, `semantics`), and the complete `sourceSequence[]`.
+Read target fields from `reviewRequired[].repair.translationPatchTemplate`; copy groups and the typed
+sequence from that same `repair`. Preserve sequence literals, field placeholders and any field identity
+metadata. Skip non-blocking workbook reviews in this repair view. Keep the full plan and repair memory
+unchanged on disk as authority. This projection is a reading aid, never a replacement
+units file, translation contract, or executable patch.
+
+Review and fill the paragraph groups in batches. Copy the emitted repair memory to a new file and
+merge decisions by `unitId`, then by its exact `sourceRunGroupId`, preserving all unedited entries,
+source guards and contract IDs. If wording changes, update that override's `targetText` and every
+affected segment together. Reconstruct `targetText` by replaying `sourceSequence[]` in order: substitute
+each `text-group` with its translated segment matched by `sourceRunGroupId`, append the unchanged
+`literal` for `break` / `tab`, and append the unchanged `placeholder` for `field`. The result must equal
+`targetText` exactly. Keep structural literals and field placeholders outside `targetSegments[].text`;
+do not duplicate them inside text groups or translate field cached text.
+Check coverage and group order before resuming `prepare.mjs --memory <completed-copy>
+--apply --overwrite`. The native planner remains the apply authority. During later fitting revisions,
+use this complete memory as the base so earlier mappings are not discarded. A fit repair must retain
+the meaning of each styled phrase, not merely the paragraph's overall meaning.
+
+### Manual Preparation And Execution
+
 1. Create a run directory and capture `xdoc-capabilities.json`.
 2. Inspect the source deck:
    ```bash

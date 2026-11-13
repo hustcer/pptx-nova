@@ -34,7 +34,12 @@ Use that successful plan's inventory with `artifacts.candidate` and `artifacts.t
 
 ## Fit and review before publication
 
-`prepared` proves guarded application, not rendered fit. For tight labels or changed multi-column text,
+`prepared` proves guarded application, not exact target-text consistency or rendered fit. Before
+expensive visual evidence, run the [candidate target-consistency gate](translation-mode.md#standard-flow)
+with that preparation's effective units and translations. Repair every mismatch through the complete
+memory and rerun preparation; unchanged code and identifiers must also match byte-for-byte text.
+The finalizer still reruns this gate against its immutable snapshots.
+For tight labels or changed multi-column text,
 complete [pre-finalization review](translation-mode.md#visual-parity-gate) first. Inspect the vision
 delta once, repair fit through the translation memory, render only needed multi-column pages and pass
 the bound review gate. Do not start an incomplete finalize run to discover a scaffold; revised wording

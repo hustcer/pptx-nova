@@ -1,0 +1,238 @@
+{
+  "meta": {
+    "deckkit": "editorial-forest"
+  },
+  "slides": [
+    {
+      "type": "forestCoverSlide",
+      "layoutId": "hanging",
+      "data": {
+        "eyebrow": "A PRESENTATION TEMPLATE",
+        "title": "Quarterly\nReview\n2026",
+        "monogram": "01",
+        "byline": "STUDIO PLACEHOLDER",
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    },
+    {
+      "type": "forestIndexSlide",
+      "layoutId": "mosaic",
+      "data": {
+        "eyebrow": "FIVE TOPICS · NINETY MINUTES",
+        "title": "Agenda",
+        "items": [
+          {
+            "title": "Where we stand today",
+            "tag": "CONTEXT"
+          },
+          {
+            "title": "The big shift",
+            "tag": "INSIGHT"
+          },
+          {
+            "title": "By the numbers",
+            "tag": "DATA"
+          },
+          {
+            "title": "How we’ll get there",
+            "tag": "PLAN"
+          },
+          {
+            "title": "What it adds up to",
+            "tag": "OUTCOMES"
+          }
+        ],
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    },
+    {
+      "type": "forestQuoteSlide",
+      "layoutId": "broad",
+      "data": {
+        "eyebrow": "THE SHIFT",
+        "title": "The next twelve months are about doing fewer things, and doing them with more conviction.",
+        "attribution": "Name Placeholder",
+        "role": "ROLE PLACEHOLDER · SECTION 02",
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    },
+    {
+      "type": "forestFeatureSlide",
+      "layoutId": "left",
+      "data": {
+        "eyebrow": "THE BIG SHIFT",
+        "title": "Fewer bets, stronger commitments",
+        "assetCaption": "Image placeholder",
+        "assetLabel": "VISUAL 01 · REPLACE WITH PHOTO",
+        "paragraphs": [
+          "Placeholder body copy sits here as a stand-in for the supporting narrative. Open with the point you want the audience to remember.",
+          "Use the second paragraph to add proof — a customer, a moment in market, a number that earns the claim. Keep one idea per paragraph."
+        ],
+        "metadata": [
+          {
+            "label": "OWNER",
+            "value": "Team Placeholder"
+          },
+          {
+            "label": "TIMEFRAME",
+            "value": "Q2 — Q4"
+          },
+          {
+            "label": "STATUS",
+            "value": "On track"
+          }
+        ],
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    },
+    {
+      "type": "forestChartSlide",
+      "layoutId": "full",
+      "data": {
+        "eyebrow": "BY THE NUMBERS",
+        "title": "Revenue by quarter,\nyear over year",
+        "unit": "INDEXED TO PLAN · ILLUSTRATIVE",
+        "categories": ["Q1", "Q2", "Q3", "Q4", "YTD"],
+        "series": [
+          {
+            "name": "THIS YEAR",
+            "values": [62, 74, 81, 88, 92]
+          },
+          {
+            "name": "LAST YEAR",
+            "values": [48, 55, 67, 72, 78]
+          }
+        ],
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    },
+    {
+      "type": "forestProcessSlide",
+      "layoutId": "columns",
+      "data": {
+        "eyebrow": "HOW WE’LL GET THERE",
+        "corner": "FOUR STEPS",
+        "title": "A simple plan in four moves",
+        "steps": [
+          {
+            "title": "Listen",
+            "body": "Open with structured conversations. Capture what we hear without filtering.",
+            "period": "W1–2",
+            "owner": "TEAM"
+          },
+          {
+            "title": "Align",
+            "body": "Cluster signals into themes. Name them plainly so everyone uses the same language.",
+            "period": "W3",
+            "owner": "TEAM"
+          },
+          {
+            "title": "Build",
+            "body": "Translate themes into a short list of bets. Decide what to keep and what to cut.",
+            "period": "W4–6",
+            "owner": "TEAM"
+          },
+          {
+            "title": "Ship",
+            "body": "Put work in market on a known cadence. Measure against the plan and adjust.",
+            "period": "W7–12",
+            "owner": "TEAM"
+          }
+        ],
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    },
+    {
+      "type": "forestStatsSlide",
+      "layoutId": "band",
+      "data": {
+        "eyebrow": "WHAT IT ADDS UP TO",
+        "corner": "YEAR TO DATE",
+        "title": "Three numbers tell the story",
+        "stats": [
+          {
+            "label": "GROWTH",
+            "value": "+42",
+            "unit": "%",
+            "body": "Year over year increase in active accounts, ahead of the illustrative plan."
+          },
+          {
+            "label": "RETENTION",
+            "value": "94",
+            "unit": "%",
+            "body": "Net retention across the top cohort, a four-point lift from last year."
+          },
+          {
+            "label": "REACH",
+            "value": "3.1",
+            "unit": "M",
+            "body": "People served this quarter, across the markets entered in spring."
+          }
+        ],
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    },
+    {
+      "type": "forestMatrixSlide",
+      "layoutId": "full",
+      "data": {
+        "eyebrow": "EVIDENCE REGISTER",
+        "title": "Keep the decisions visible",
+        "source": "SYNTHETIC DEMONSTRATION · NOT ACTUAL RESULTS",
+        "columns": [
+          {
+            "label": "WORK",
+            "weight": 1.3,
+            "align": "left"
+          },
+          {
+            "label": "OWNER",
+            "weight": 1,
+            "align": "left"
+          },
+          {
+            "label": "WINDOW",
+            "weight": 1,
+            "align": "left"
+          },
+          {
+            "label": "EVIDENCE",
+            "weight": 1.8,
+            "align": "left"
+          }
+        ],
+        "rows": [
+          ["Listening", "Editorial", "Week 2", "Interview notes"],
+          ["Prototyping", "Studio", "Week 6", "Test record"],
+          ["Publishing", "Delivery", "Week 12", "Review log"]
+        ],
+        "focusColumn": 0,
+        "note": "Illustrative work register · timing and meanings supplied by content"
+      }
+    },
+    {
+      "type": "forestClosingSlide",
+      "layoutId": "broad",
+      "data": {
+        "eyebrow": "IN SUMMARY",
+        "corner": "THANK YOU",
+        "title": "Three\nthings to take",
+        "items": [
+          {
+            "label": "ONE",
+            "body": "The strategy holds. We are doing fewer things, and the right things."
+          },
+          {
+            "label": "TWO",
+            "body": "The numbers back the bets. Growth, retention, and reach are ahead of plan."
+          },
+          {
+            "label": "THREE",
+            "body": "Next quarter, keep the pace and add focus where the data points us."
+          }
+        ],
+        "source": "ILLUSTRATIVE TEMPLATE · NOT ACTUAL RESULTS"
+      }
+    }
+  ]
+}

@@ -285,7 +285,16 @@
               "scholarMechanismSlide",
               "scholarSegmentsSlide",
               "scholarCaseSlide",
-              "scholarClosingSlide"
+              "scholarClosingSlide",
+              "forestCoverSlide",
+              "forestIndexSlide",
+              "forestQuoteSlide",
+              "forestFeatureSlide",
+              "forestChartSlide",
+              "forestProcessSlide",
+              "forestStatsSlide",
+              "forestMatrixSlide",
+              "forestClosingSlide"
             ]
           },
           "data": {

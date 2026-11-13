@@ -80,8 +80,15 @@ xdoc pptx apply -p iterations/01/patch.json -o iterations/01/out.pptx --daemon -
 xdoc pptx apply -p iterations/01/patch.json -o iterations/01/out.pptx --daemon --json > iterations/01/apply.json
 xdoc pptx inspect iterations/01/out.pptx --daemon --json > iterations/01/inspect.json
 xdoc pptx vision-check iterations/01/out.pptx --json > iterations/01/vision.json
+node ../../deckkit-maker/scripts/check-build-evidence.mjs --dir iterations/01 > iterations/01/pre-render-gate.json && \
 xdoc pptx visual-audit --candidate iterations/01/out.pptx --visual-mode create --field-date <YYYY-MM-DD> --output-dir iterations/01/canonical --json > iterations/01/visual-audit.json
 ```
+
+上例在 run 根目录执行时，`check-build-evidence.mjs` 的相对路径是 `../../deckkit-maker/scripts/`；
+也可始终使用源码仓库中的绝对路径。该检查须成功后才运行 canonical：它复用标准 Create 的
+语义证据判定，拒绝缺失／矛盾报告、非空语义问题和 high/medium 风险。low 保留为后续
+逐页审查输入。它只检查报告，不证明这些报告对应同一候选字节；canonical manifest 的
+身份绑定、实际 PNG 检查和适用原生宿主验证仍不可省略。
 
 检查 dry-run 的阻塞、apply/inspect 的页数与对象、vision 的 high/medium，以及 canonical manifest
 的 required checks、findings、decision。Create 必须覆盖完整 candidate；PDF 最终布局是门禁的一部分。

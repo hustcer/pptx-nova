@@ -1,0 +1,124 @@
+{
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 12,
+        "widthIn": 9.6,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "corner": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 2.1,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible text",
+      "x-slotBudget": {
+        "fontPt": 42,
+        "widthIn": 11.6,
+        "heightIn": 0.9,
+        "lineHeight": 1.04,
+        "maxLines": 1
+      }
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible provenance or explicit synthetic-data disclosure",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 10.3,
+        "heightIn": 0.26,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Content-owned label; preserve input casing and language",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 2.088,
+              "heightIn": 1,
+              "lineHeight": 1.12,
+              "maxLines": 4
+            }
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Display value; no size or length encodes quantity",
+            "x-slotBudget": {
+              "fontPt": 40,
+              "widthIn": 3.48,
+              "heightIn": 1.08,
+              "lineHeight": 1.02,
+              "maxLines": 1
+            }
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Visible text",
+            "x-slotBudget": {
+              "fontPt": 28,
+              "widthIn": 1.16,
+              "heightIn": 1.05,
+              "lineHeight": 1.04,
+              "maxLines": 2
+            }
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Visible text",
+            "x-slotBudget": {
+              "fontPt": 15,
+              "widthIn": 3.5666666666666664,
+              "heightIn": 1.3500000000000005,
+              "lineHeight": 1.18,
+              "maxLines": 4
+            }
+          }
+        },
+        "required": ["label", "value", "unit", "body"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 3
+    }
+  },
+  "required": ["eyebrow", "title", "source", "stats"],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

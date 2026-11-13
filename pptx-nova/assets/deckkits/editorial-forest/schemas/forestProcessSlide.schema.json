@@ -1,0 +1,124 @@
+{
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 12,
+        "widthIn": 9.6,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "corner": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 2.1,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible text",
+      "x-slotBudget": {
+        "fontPt": 42,
+        "widthIn": 11.6,
+        "heightIn": 0.9,
+        "lineHeight": 1.04,
+        "maxLines": 1
+      }
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible provenance or explicit synthetic-data disclosure",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 10.3,
+        "heightIn": 0.26,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Visible text",
+            "x-slotBudget": {
+              "fontPt": 28,
+              "widthIn": 2.315,
+              "heightIn": 0.65,
+              "lineHeight": 1.04,
+              "maxLines": 1
+            }
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Visible text",
+            "x-slotBudget": {
+              "fontPt": 13,
+              "widthIn": 2.315,
+              "heightIn": 1.4,
+              "lineHeight": 1.16,
+              "maxLines": 5
+            }
+          },
+          "period": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Content-owned label; preserve input casing and language",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 2.315,
+              "heightIn": 0.35,
+              "lineHeight": 1.12,
+              "maxLines": 1
+            }
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Content-owned label; preserve input casing and language",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 2.315,
+              "heightIn": 0.35,
+              "lineHeight": 1.12,
+              "maxLines": 1
+            }
+          }
+        },
+        "required": ["title", "body", "period", "owner"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 4
+    }
+  },
+  "required": ["eyebrow", "title", "source", "steps"],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

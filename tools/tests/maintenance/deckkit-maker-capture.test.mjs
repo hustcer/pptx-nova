@@ -24,7 +24,7 @@ if (args.includes('eval')) {
   const slides = [0, 1].map(i => ({
     id: 'page-' + i, className: 'slide type-' + i,
     textContent: 'Source page ' + (i + 1),
-    getAttribute: name => name === 'data-label' ? 'Label ' + (i + 1) : null,
+    getAttribute: name => name === (mode === 'screen-label' ? 'data-screen-label' : mode === 'aria-label' ? 'aria-label' : 'data-label') ? 'Label ' + (i + 1) : null,
     style: { setProperty() {} }, classList: {
       add(name) { if (mode === 'animation-end' && name !== 'is-active') throw new Error('Wrong activation class'); },
       remove() {},
@@ -202,3 +202,15 @@ test('capture activates the requested class and finishes entry animations before
   assert.doesNotMatch(report.captureCss, /animation: none/)
   assert.match(report.hideSelectors, /#slide-counter/)
 })
+
+for (const mode of ['screen-label', 'aria-label']) {
+  test(`capture retains source page identity from ${mode}`, (t) => {
+    const f = fixture(t)
+    const result = f.run(mode)
+    assert.equal(result.status, 0, result.stderr)
+    assert.deepEqual(
+      JSON.parse(result.stdout).sourceInventory.map((s) => s.label),
+      ['Label 1', 'Label 2'],
+    )
+  })
+}

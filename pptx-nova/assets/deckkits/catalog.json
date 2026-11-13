@@ -8539,6 +8539,307 @@
         "paper-scholar/examples/alternate-content.json",
         "paper-scholar/examples/water-content.json"
       ]
+    },
+    {
+      "id": "editorial-forest",
+      "name": "Editorial Forest",
+      "version": "0.1.0",
+      "readiness": "candidate",
+      "path": "editorial-forest/editorial-forest.kit.mjs",
+      "designContract": "editorial-forest/design.json",
+      "primitiveDependency": "core-primitives@0.1.0",
+      "qualityProfile": {
+        "minFontPt": 11,
+        "labelFontPt": 11,
+        "sourceFontPt": 11,
+        "baseline": "Contract-driven typography with a 11pt floor; actual render review remains required."
+      },
+      "defaultFor": [],
+      "bestFor": ["editorial review", "research recap", "studio update"],
+      "coverage": {
+        "languages": ["zh", "en", "mixed"],
+        "density": ["normal", "dense"],
+        "slideTypes": [
+          "forestCoverSlide",
+          "forestIndexSlide",
+          "forestQuoteSlide",
+          "forestFeatureSlide",
+          "forestChartSlide",
+          "forestProcessSlide",
+          "forestStatsSlide",
+          "forestMatrixSlide",
+          "forestClosingSlide"
+        ]
+      },
+      "supportedSlideTypes": [
+        "forestCoverSlide",
+        "forestIndexSlide",
+        "forestQuoteSlide",
+        "forestFeatureSlide",
+        "forestChartSlide",
+        "forestProcessSlide",
+        "forestStatsSlide",
+        "forestMatrixSlide",
+        "forestClosingSlide"
+      ],
+      "visualGrammar": {
+        "schemaVersion": "pptx-nova-visual-grammar/v1",
+        "positioning": "Quiet serif-led editorial review",
+        "mood": ["literary", "considered", "warm"],
+        "layoutPrinciples": ["One dominant subject; generous paper margins"],
+        "signatureElements": [
+          "Forest/rose/oat palette",
+          "Upright serif display and tracked mono chrome",
+          "Circular identity stamp",
+          "Asymmetric topic mosaic",
+          "Ruled step markers and oversized numeral suffixes"
+        ],
+        "compositionRules": [
+          "Keep source and unit content-owned",
+          "Use full-width or rail evidence as capacity requires"
+        ],
+        "avoid": ["Shadows, gradients, glows", "Shrinking or discarding content to fit"],
+        "typography": {
+          "display": "Georgia / Songti SC",
+          "body": "Georgia / Songti SC",
+          "chrome": "JetBrains Mono / Noto Sans SC"
+        },
+        "colorSystem": {
+          "surfaces": "forest, rose, cream",
+          "focus": "rose"
+        },
+        "slideRhythm": {
+          "anchor": ["forestCoverSlide", "forestClosingSlide"],
+          "editorial": ["forestIndexSlide", "forestQuoteSlide", "forestFeatureSlide"],
+          "evidence": ["forestChartSlide", "forestStatsSlide", "forestMatrixSlide"],
+          "process": ["forestProcessSlide"]
+        }
+      },
+      "layoutContract": {
+        "schemaVersion": "pptx-nova-layout-contract/v1",
+        "deliverySeverity": "error",
+        "slideTypes": {
+          "forestCoverSlide": {
+            "allowedLayoutIds": ["auto", "hanging", "offset"],
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.monogram",
+              "data.byline"
+            ]
+          },
+          "forestIndexSlide": {
+            "allowedLayoutIds": ["auto", "mosaic", "rows"],
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"]
+          },
+          "forestQuoteSlide": {
+            "allowedLayoutIds": ["auto", "broad", "inset"],
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.attribution",
+              "data.role"
+            ]
+          },
+          "forestFeatureSlide": {
+            "allowedLayoutIds": ["auto", "left", "right"],
+            "assetSlots": {
+              "visual": {
+                "kind": "image",
+                "acceptsAsset": false,
+                "labelSlot": "assetCaption",
+                "captionSlot": "assetLabel",
+                "placeholderBehavior": "native editable forest panel with content-owned caption"
+              }
+            },
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.assetCaption",
+              "data.assetLabel",
+              "data.paragraphs",
+              "data.metadata"
+            ]
+          },
+          "forestChartSlide": {
+            "allowedLayoutIds": ["auto", "full", "rail"],
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.unit",
+              "data.categories",
+              "data.series"
+            ]
+          },
+          "forestProcessSlide": {
+            "allowedLayoutIds": ["auto", "columns", "rows"],
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.steps"]
+          },
+          "forestStatsSlide": {
+            "allowedLayoutIds": ["auto", "band", "rows"],
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.stats"]
+          },
+          "forestMatrixSlide": {
+            "allowedLayoutIds": ["auto", "full", "inset"],
+            "requiredSlots": [
+              "data.eyebrow",
+              "data.title",
+              "data.source",
+              "data.columns",
+              "data.rows",
+              "data.focusColumn",
+              "data.note"
+            ]
+          },
+          "forestClosingSlide": {
+            "allowedLayoutIds": ["auto", "broad", "rail"],
+            "requiredSlots": ["data.eyebrow", "data.title", "data.source", "data.items"]
+          }
+        },
+        "customOps": {
+          "allowed": false,
+          "severity": "warning",
+          "deliverySeverity": "error"
+        }
+      },
+      "density": {
+        "soft": {
+          "titleMaxChars": 90
+        },
+        "hard": {
+          "titleMaxChars": 140
+        }
+      },
+      "knownLimits": [
+        "Based on the Editorial Forest HTML template (8 real 16:9 pages); browser navigation and motion are excluded.",
+        "Georgia and Songti SC replace Source Serif 4/variable opsz and the suggested CJK brush face; fonts are not embedded.",
+        "Feature is a native editable placeholder shell, without image ingestion.",
+        "Native clustered columns and open native tables are emitted and read back; independent source, legend, interpretations and numeric registers require regeneration after manual data edits.",
+        "Numeric display formats round labels separately from unchanged chart data; very small/long values use a native register. Tiny bars may be subpixel on a common linear axis.",
+        "Metric values are content-owned display strings; no quantitative geometry is derived from them.",
+        "Candidate requires explicit selection; arbitrary existing-deck refurbishment and all-host visual parity are not verified."
+      ],
+      "examples": ["editorial-forest/examples/content.json"],
+      "validatedWith": {
+        "xdoc": "0.22.0 (80bf93e7)",
+        "report": "../../benchmarks/visual/cases/editorial-forest/golden-editorial/review.md",
+        "powerPoint": "Microsoft PowerPoint for Mac 16.115: native PDF export reviewed for all 9 golden pages, 4 mixed-language and 4 chart/table stress pages. Clean-open UI scripting unavailable; interactive editing and save/reopen timed out and remain unverified."
+      },
+      "quality": {
+        "manualHardDefects": 0,
+        "lastBenchmark": "2026-11-13",
+        "vision": {
+          "high": 0,
+          "medium": 0,
+          "low": 0,
+          "lowBuckets": {
+            "total": 0,
+            "styleAllowed": 0,
+            "baselineKnown": 0,
+            "new": 0,
+            "changed": 0,
+            "resolved": 0,
+            "reviewable": 0,
+            "baselineUnavailableCases": 1,
+            "baselineUpdatedCases": 0
+          }
+        },
+        "knownBlockingLimits": [],
+        "benchmark": {
+          "schemaVersion": "pptx-nova-deckkit-quality-benchmark/v1",
+          "date": "2026-11-13",
+          "source": {
+            "visualIndex": "pptx-nova/benchmarks/visual/index.json",
+            "out": ".tmp/deckkit-editorial-forest-20261113/benchmark/02"
+          },
+          "minimumRequiredKinds": ["golden"],
+          "requiredKinds": ["golden"],
+          "gatedKinds": ["golden"],
+          "passed": true,
+          "vision": {
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "lowBuckets": {
+              "total": 0,
+              "styleAllowed": 0,
+              "baselineKnown": 0,
+              "new": 0,
+              "changed": 0,
+              "resolved": 0,
+              "reviewable": 0,
+              "baselineUnavailableCases": 1,
+              "baselineUpdatedCases": 0
+            }
+          },
+          "cases": [
+            {
+              "caseId": "editorial-forest.golden-editorial",
+              "kind": "golden",
+              "passed": true,
+              "summaryPath": ".tmp/deckkit-editorial-forest-20261113/benchmark/02/editorial-forest/golden-editorial/summary.json",
+              "reviewPath": "pptx-nova/benchmarks/visual/cases/editorial-forest/golden-editorial/review.md",
+              "validation": {
+                "valid": true,
+                "errors": 0,
+                "warnings": 0,
+                "fitDiagnostics": 0,
+                "blockingFitDiagnostics": 0
+              },
+              "dryRun": {
+                "high": 0,
+                "medium": 0
+              },
+              "vision": {
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "lowBuckets": {
+                  "total": 0,
+                  "styleAllowed": 0,
+                  "baselineKnown": 0,
+                  "new": 0,
+                  "changed": 0,
+                  "resolved": 0,
+                  "reviewable": 0,
+                  "baselineUnavailable": true,
+                  "baselineUpdated": false
+                }
+              },
+              "previews": {
+                "count": 9,
+                "expectedCount": 9,
+                "nonEmpty": true,
+                "countEqualsSlides": true
+              },
+              "contactSheet": {
+                "nonEmpty": true,
+                "bytes": 219074
+              },
+              "patchOps": 593,
+              "p50TotalMs": 114.08
+            }
+          ],
+          "blockers": []
+        }
+      },
+      "diversityGate": {
+        "schemaVersion": "pptx-nova-layout-diversity/v1",
+        "severity": "warning",
+        "deliverySeverity": "error",
+        "maxConsecutiveSameGroup": 5,
+        "groups": {
+          "anchor": ["forestCoverSlide", "forestClosingSlide"],
+          "editorial": ["forestIndexSlide", "forestQuoteSlide", "forestFeatureSlide"],
+          "evidence": ["forestChartSlide", "forestStatsSlide", "forestMatrixSlide"],
+          "process": ["forestProcessSlide"]
+        },
+        "thresholds": []
+      }
     }
   ]
 }

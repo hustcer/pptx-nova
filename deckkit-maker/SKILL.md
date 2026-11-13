@@ -341,7 +341,9 @@ DeckKit 复刻视觉语法，不复刻一次性素材。图片主导页（照片
   `dry-run → apply → inspect → vision-check(high/medium=0) → canonical Create → 人工逐页 PNG review`。
   dry-run 与 vision-check 的溢出估算阈值不同，两个都要跑。benchmark 的历史 low 基线不等于
   canonical Create 放行；仍须通过当前交付门禁，不能用 qualityProfile 覆盖它。
-  现有 benchmark 的 vision/PNG 成功也不能代替 canonical PDF 最终布局检查。修复 kit 后，
+  现有 benchmark 的 vision/PNG 成功也不能代替 canonical PDF 最终布局检查。
+  手动探索循环在完整渲染前运行 `deckkit-maker/scripts/check-build-evidence.mjs --dir <iteration>`，
+  先拒绝缺失语义证据和已知 high/medium 风险，再调用 canonical；不要把命令顺序当作门禁判定。
   至少对完整 golden 示例执行一次当前 runtime 的 canonical 检查。替换下例路径和冻结日期：
 
   ```sh

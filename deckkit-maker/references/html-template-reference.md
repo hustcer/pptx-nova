@@ -17,6 +17,8 @@ Count actual selected DOM sections before announcing scope. Numbered CSS comment
 styles and speaker-note descriptions do not prove that a page exists. The capture manifest now retains
 `sourceInventory[]` in real DOM order (id/classes/data-label/textContent), including text from initially
 hidden pages. Compare this inventory with metadata and screenshots; do not infer slide count from CSS.
+The inventory label falls back from `data-label` to `data-screen-label`, then `aria-label`; missing
+labels stay explicit rather than inventing a page name from CSS or speaker notes.
 
 ## Capture Baseline Screenshots
 

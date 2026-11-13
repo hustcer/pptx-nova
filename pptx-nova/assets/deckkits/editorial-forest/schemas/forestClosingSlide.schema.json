@@ -1,0 +1,98 @@
+{
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 12,
+        "widthIn": 9.6,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "corner": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 2.1,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible text",
+      "x-slotBudget": {
+        "fontPt": 58,
+        "widthIn": 5.5,
+        "heightIn": 4.7,
+        "lineHeight": 1.03,
+        "maxLines": 4
+      }
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible provenance or explicit synthetic-data disclosure",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 10.3,
+        "heightIn": 0.26,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Content-owned label; preserve input casing and language",
+            "x-slotBudget": {
+              "fontPt": 12,
+              "widthIn": 3.5666666666666664,
+              "heightIn": 0.35,
+              "lineHeight": 1.12,
+              "maxLines": 1
+            }
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Visible text",
+            "x-slotBudget": {
+              "fontPt": 15,
+              "widthIn": 3.5666666666666664,
+              "heightIn": 1.1,
+              "lineHeight": 1.18,
+              "maxLines": 3
+            }
+          }
+        },
+        "required": ["label", "body"],
+        "additionalProperties": false
+      },
+      "minItems": 2,
+      "maxItems": 3
+    }
+  },
+  "required": ["eyebrow", "title", "source", "items"],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

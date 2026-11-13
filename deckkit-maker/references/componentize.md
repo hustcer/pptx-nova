@@ -225,6 +225,8 @@ vision low 出现 `new`/`changed` 时先人工 review PNG，确认是可接受�
 promotion 的 catalog-update 同样传本轮 `--out`，不能重新读取共享默认目录。
 用户可见 showcase（`assets/examples/deckkits/<id>/`）用 `just deckkit-examples` 维护，
 通常在 production 阶段才补。
+单套件更新和检查传 `-d <id>`，只刷新该套件的产物与 catalog 元数据；其他套件已有的
+readiness、版本和推荐场景保持原值。全量元数据同步使用不带 `-d` 的命令。
 
 ## 7. core-primitives 修改门槛
 

@@ -273,6 +273,9 @@
     },
     "scholar": {
       "$ref": "#/$defs/scholar"
+    },
+    "forest": {
+      "$ref": "#/$defs/forest"
     }
   },
   "required": [
@@ -5334,6 +5337,295 @@
         }
       },
       "required": ["role", "sizePt", "color", "bold", "lineHeight"],
+      "additionalProperties": false
+    },
+    "forestStyle": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["display", "body", "mono"]
+        },
+        "sizePt": {
+          "type": "number",
+          "minimum": 11,
+          "maximum": 120
+        },
+        "color": {
+          "type": "string"
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "lineHeight": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1.5
+        }
+      },
+      "required": ["role", "sizePt", "color", "bold", "lineHeight"],
+      "additionalProperties": false
+    },
+    "forest": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "const": "forest-editorial/v1"
+        },
+        "styles": {
+          "type": "object",
+          "properties": {
+            "hero": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "statement": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "title": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "tile": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "lead": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "body": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "card": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "small": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "label": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "metric": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "unit": {
+              "$ref": "#/$defs/forestStyle"
+            },
+            "table": {
+              "$ref": "#/$defs/forestStyle"
+            }
+          },
+          "required": [
+            "hero",
+            "statement",
+            "title",
+            "tile",
+            "lead",
+            "body",
+            "card",
+            "small",
+            "label",
+            "metric",
+            "unit",
+            "table"
+          ],
+          "additionalProperties": false
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "rulePt": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 2
+            }
+          },
+          "required": ["gap", "rulePt"],
+          "additionalProperties": false
+        },
+        "rhythm": {
+          "type": "object",
+          "properties": {
+            "maxConsecutive": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            }
+          },
+          "required": ["maxConsecutive"],
+          "additionalProperties": false
+        },
+        "chrome": {
+          "type": "object",
+          "properties": {
+            "eyebrow": {
+              "$ref": "#/$defs/frame"
+            },
+            "corner": {
+              "$ref": "#/$defs/frame"
+            },
+            "source": {
+              "$ref": "#/$defs/frame"
+            },
+            "page": {
+              "$ref": "#/$defs/frame"
+            }
+          },
+          "required": ["eyebrow", "corner", "source", "page"],
+          "additionalProperties": false
+        },
+        "capacity": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "paragraphs": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "metadata": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "series": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "stats": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "takeaways": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 1
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "items",
+            "paragraphs",
+            "metadata",
+            "categories",
+            "series",
+            "steps",
+            "stats",
+            "takeaways",
+            "columns",
+            "rows"
+          ],
+          "additionalProperties": false
+        },
+        "families": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "index",
+                  "quote",
+                  "feature",
+                  "chart",
+                  "process",
+                  "stats",
+                  "matrix",
+                  "closing"
+                ]
+              },
+              "variants": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "regions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/frame"
+                      }
+                    }
+                  },
+                  "required": ["regions"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["role", "variants"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["family", "styles", "spacing", "rhythm", "chrome", "capacity", "families"],
       "additionalProperties": false
     }
   }

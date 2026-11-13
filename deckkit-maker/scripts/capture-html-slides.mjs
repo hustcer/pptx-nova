@@ -358,7 +358,7 @@ return JSON.stringify({
     slideIndex,
     id: slide.id || null,
     classes: String(slide.className || '').split(/\\s+/).filter(Boolean),
-    label: slide.getAttribute?.('data-label') || null,
+    label: slide.getAttribute?.('data-label') || slide.getAttribute?.('data-screen-label') || slide.getAttribute?.('aria-label') || null,
     textContent: String(slide.textContent || '').replace(/\\s+/g, ' ').trim(),
   })),
   selector,

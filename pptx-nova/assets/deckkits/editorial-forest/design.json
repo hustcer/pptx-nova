@@ -1,0 +1,394 @@
+{
+  "id": "editorial-forest",
+  "canvas": {
+    "widthIn": 13.333,
+    "heightIn": 7.5
+  },
+  "colors": {
+    "paper": "EFE7D4",
+    "ink": "2E4A2A",
+    "deep": "243A21",
+    "light": "3A5A36",
+    "accent": "E89CB1",
+    "roseEdge": "D27E96",
+    "pale": "E6DCC4",
+    "body": "1A1A17",
+    "rule": "2E4A2A",
+    "history": "E89CB1"
+  },
+  "fonts": {
+    "display": {
+      "latin": "Georgia",
+      "eastAsian": "Songti SC"
+    },
+    "body": {
+      "latin": "Georgia",
+      "eastAsian": "Songti SC"
+    },
+    "mono": {
+      "latin": "JetBrains Mono",
+      "eastAsian": "Noto Sans SC"
+    }
+  },
+  "textFrame": {
+    "marginLeft": "0in",
+    "marginRight": "0in",
+    "marginTop": "0in",
+    "marginBottom": "0in"
+  },
+  "theme": {
+    "colors": {
+      "lt1": "paper",
+      "dk1": "ink",
+      "lt2": "pale",
+      "dk2": "deep",
+      "accent1": "ink",
+      "accent2": "accent",
+      "accent3": "light",
+      "accent4": "pale",
+      "accent5": "roseEdge",
+      "accent6": "body",
+      "hlink": "ink",
+      "folHlink": "deep"
+    },
+    "fonts": {
+      "major": "display",
+      "minor": "body"
+    }
+  },
+  "forest": {
+    "styles": {
+      "hero": {
+        "role": "display",
+        "sizePt": 100,
+        "color": "accent",
+        "lineHeight": 1,
+        "bold": false
+      },
+      "statement": {
+        "role": "display",
+        "sizePt": 58,
+        "color": "deep",
+        "lineHeight": 1.03,
+        "bold": false
+      },
+      "title": {
+        "role": "display",
+        "sizePt": 42,
+        "color": "ink",
+        "lineHeight": 1.04,
+        "bold": false
+      },
+      "tile": {
+        "role": "display",
+        "sizePt": 28,
+        "color": "ink",
+        "lineHeight": 1.04,
+        "bold": false
+      },
+      "lead": {
+        "role": "display",
+        "sizePt": 40,
+        "color": "accent",
+        "lineHeight": 1.02,
+        "bold": false
+      },
+      "body": {
+        "role": "body",
+        "sizePt": 15,
+        "color": "body",
+        "lineHeight": 1.18,
+        "bold": false
+      },
+      "card": {
+        "role": "body",
+        "sizePt": 13,
+        "color": "ink",
+        "lineHeight": 1.16,
+        "bold": false
+      },
+      "small": {
+        "role": "mono",
+        "sizePt": 11,
+        "color": "ink",
+        "lineHeight": 1.12,
+        "bold": false
+      },
+      "label": {
+        "role": "mono",
+        "sizePt": 12,
+        "color": "ink",
+        "lineHeight": 1.12,
+        "bold": false
+      },
+      "metric": {
+        "role": "display",
+        "sizePt": 100,
+        "color": "accent",
+        "lineHeight": 1,
+        "bold": false
+      },
+      "unit": {
+        "role": "display",
+        "sizePt": 36,
+        "color": "paper",
+        "lineHeight": 1,
+        "bold": false
+      },
+      "table": {
+        "role": "body",
+        "sizePt": 14,
+        "color": "ink",
+        "lineHeight": 1.12,
+        "bold": false
+      }
+    },
+    "spacing": {
+      "gap": 0.22,
+      "rulePt": 1
+    },
+    "family": "forest-editorial/v1",
+    "rhythm": {
+      "maxConsecutive": 2
+    },
+    "chrome": {
+      "eyebrow": [0.85, 0.5, 9.6, 0.32],
+      "corner": [10.35, 0.5, 2.1, 0.32],
+      "source": [0.85, 6.83, 10.3, 0.26],
+      "page": [11.55, 6.83, 0.9, 0.26]
+    },
+    "capacity": {
+      "items": [3, 5],
+      "paragraphs": [1, 2],
+      "metadata": [1, 3],
+      "categories": [2, 6],
+      "series": [1, 2],
+      "steps": [2, 4],
+      "stats": [2, 3],
+      "takeaways": [2, 3],
+      "columns": [3, 5],
+      "rows": [2, 6]
+    },
+    "families": {
+      "forestCoverSlide": {
+        "role": "cover",
+        "variants": {
+          "hanging": {
+            "regions": {
+              "stamp": [11.6, 0.7, 0.9, 0.9],
+              "hero": [0.95, 1.65, 11.3, 5.1],
+              "byline": [8.2, 6.8, 4.3, 0.3]
+            }
+          },
+          "offset": {
+            "regions": {
+              "stamp": [0.95, 1.45, 0.9, 0.9],
+              "hero": [3.2, 1.65, 9.25, 5.1],
+              "byline": [8.2, 6.8, 4.3, 0.3]
+            }
+          }
+        }
+      },
+      "forestIndexSlide": {
+        "role": "index",
+        "variants": {
+          "mosaic": {
+            "regions": {
+              "title": [0.85, 1.05, 11.6, 0.85],
+              "tiles": [0.85, 2.1, 11.6, 4.5]
+            }
+          },
+          "rows": {
+            "regions": {
+              "title": [0.85, 1.05, 11.6, 0.85],
+              "tiles": [0.85, 2.1, 11.6, 4.5]
+            }
+          }
+        }
+      },
+      "forestQuoteSlide": {
+        "role": "quote",
+        "variants": {
+          "broad": {
+            "regions": {
+              "quote": [1.1, 1.55, 11.1, 4.2],
+              "attribution": [1.1, 5.9, 10, 0.55],
+              "details": [1.1, 6.5, 10, 0.32]
+            }
+          },
+          "inset": {
+            "regions": {
+              "quote": [2.8, 1.55, 9.5, 4.2],
+              "attribution": [2.8, 5.9, 9.5, 0.55],
+              "details": [2.8, 6.5, 9.5, 0.32]
+            }
+          }
+        }
+      },
+      "forestFeatureSlide": {
+        "role": "feature",
+        "variants": {
+          "left": {
+            "regions": {
+              "shell": [0.85, 1.18, 5.3, 5.35],
+              "title": [6.75, 1.1, 5.7, 2.12],
+              "body": [6.75, 3.4, 5.7, 2.1],
+              "meta": [6.75, 5.6, 5.7, 1.12]
+            }
+          },
+          "right": {
+            "regions": {
+              "shell": [7.15, 1.18, 5.3, 5.35],
+              "title": [0.85, 1.1, 5.7, 2.12],
+              "body": [0.85, 3.4, 5.7, 2.1],
+              "meta": [0.85, 5.6, 5.7, 1.12]
+            }
+          }
+        }
+      },
+      "forestChartSlide": {
+        "role": "chart",
+        "variants": {
+          "full": {
+            "regions": {
+              "title": [0.85, 1.1, 8, 1.6],
+              "legend": [8.9, 1.15, 3.55, 0.65],
+              "unit": [0.85, 2.7, 11.6, 0.3],
+              "plot": [0.85, 3.1, 11.6, 3.55]
+            }
+          },
+          "rail": {
+            "regions": {
+              "title": [0.85, 1.3, 3.3, 3.5],
+              "legend": [0.85, 5.15, 3.3, 0.9],
+              "unit": [0.85, 6.2, 3.3, 0.35],
+              "plot": [4.55, 1.5, 7.9, 5.1]
+            }
+          }
+        }
+      },
+      "forestProcessSlide": {
+        "role": "process",
+        "variants": {
+          "columns": {
+            "regions": {
+              "title": [0.85, 1.05, 11.6, 1.6],
+              "steps": [0.85, 2.8, 11.6, 3.85]
+            }
+          },
+          "rows": {
+            "regions": {
+              "title": [0.85, 1.05, 11.6, 0.9],
+              "steps": [0.85, 2.15, 11.6, 4.5]
+            }
+          }
+        }
+      },
+      "forestStatsSlide": {
+        "role": "stats",
+        "variants": {
+          "band": {
+            "regions": {
+              "title": [0.85, 1.05, 11.6, 1.45],
+              "stats": [0.85, 2.6, 11.6, 4.15]
+            }
+          },
+          "rows": {
+            "regions": {
+              "title": [0.85, 1.05, 11.6, 0.9],
+              "stats": [0.85, 2.15, 11.6, 4.5]
+            }
+          }
+        }
+      },
+      "forestMatrixSlide": {
+        "role": "matrix",
+        "variants": {
+          "full": {
+            "regions": {
+              "title": [0.85, 1.1, 11.6, 1.45],
+              "table": [0.85, 2.7, 11.6, 3.25],
+              "note": [0.85, 6.15, 11.6, 0.45]
+            }
+          },
+          "inset": {
+            "regions": {
+              "title": [0.85, 1.1, 3.2, 4.1],
+              "table": [4.55, 1.45, 7.9, 4.25],
+              "note": [4.55, 5.95, 7.9, 0.65]
+            }
+          }
+        }
+      },
+      "forestClosingSlide": {
+        "role": "closing",
+        "variants": {
+          "broad": {
+            "regions": {
+              "title": [0.95, 1.25, 11.5, 3.5],
+              "items": [0.95, 4.9, 11.5, 1.8]
+            }
+          },
+          "rail": {
+            "regions": {
+              "title": [0.95, 1.5, 5.5, 4.7],
+              "items": [7.15, 1.5, 5.3, 5.15]
+            }
+          }
+        }
+      }
+    }
+  },
+  "schemaVersion": "pptx-nova-design/v1",
+  "version": "0.1.0",
+  "roles": {
+    "surface": "paper",
+    "text": "ink",
+    "rule": "rule",
+    "series": "accent",
+    "focus": "accent"
+  },
+  "refurbish": {
+    "palette": {
+      "background": "paper",
+      "text": "ink",
+      "muted": "deep",
+      "accent": "accent",
+      "line": "rule",
+      "surface": "pale"
+    },
+    "fonts": {
+      "display": "display",
+      "body": "body",
+      "cjk": "display"
+    }
+  },
+  "rules": [
+    {
+      "id": "palette",
+      "check": "allowed-colors"
+    },
+    {
+      "id": "fonts",
+      "check": "allowed-fonts"
+    },
+    {
+      "id": "effects",
+      "check": "forbidden-effects",
+      "values": ["shadow", "glow", "reflection", "softEdge"]
+    },
+    {
+      "id": "bounds",
+      "check": "bounds"
+    },
+    {
+      "id": "readable",
+      "check": "font-floor",
+      "minPt": 11
+    },
+    {
+      "id": "forest-language",
+      "check": "forest-language"
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+{
+  "meta": {
+    "deckkit": "editorial-forest"
+  },
+  "slides": [
+    {
+      "type": "forestCoverSlide",
+      "layoutId": "hanging",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "社区图书修复计划",
+        "title": "让旧书\n重新流通",
+        "monogram": "书",
+        "byline": "街角图书馆"
+      }
+    },
+    {
+      "type": "forestIndexSlide",
+      "layoutId": "mosaic",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "五个议题",
+        "title": "从纸页到书架",
+        "items": [
+          {
+            "title": "修复现场",
+            "tag": "概况"
+          },
+          {
+            "title": "纸张线索",
+            "tag": "发现"
+          },
+          {
+            "title": "数量变化",
+            "tag": "证据"
+          },
+          {
+            "title": "协作方法",
+            "tag": "行动"
+          },
+          {
+            "title": "开放记录",
+            "tag": "复盘"
+          }
+        ]
+      }
+    },
+    {
+      "type": "forestQuoteSlide",
+      "layoutId": "broad",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "共同的判断",
+        "title": "让修复成为阅读的起点",
+        "attribution": "社区修复小组",
+        "role": "共创笔记"
+      }
+    },
+    {
+      "type": "forestFeatureSlide",
+      "layoutId": "left",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "工作现场",
+        "title": "先修一本\n再形成方法",
+        "assetCaption": "修复记录外壳",
+        "assetLabel": "可编辑占位 · 不含照片",
+        "paragraphs": [
+          "记录纸张与装订状态，保留每一次修复选择的依据。",
+          "让新成员能沿着记录接手工作，也让读者知道书页如何回来。"
+        ],
+        "metadata": [
+          {
+            "label": "负责人",
+            "value": "修复小组"
+          },
+          {
+            "label": "周期",
+            "value": "春季试行"
+          },
+          {
+            "label": "状态",
+            "value": "待复核"
+          }
+        ]
+      }
+    },
+    {
+      "type": "forestChartSlide",
+      "layoutId": "full",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "数量证据",
+        "title": "修复数量稳步增加",
+        "unit": "册",
+        "categories": ["春季", "夏季", "秋季", "冬季"],
+        "series": [
+          {
+            "name": "修复完成",
+            "values": [24, 31, 38, 46]
+          },
+          {
+            "name": "新增入库",
+            "values": [18, 27, 30, 34]
+          }
+        ]
+      }
+    },
+    {
+      "type": "forestProcessSlide",
+      "layoutId": "columns",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "协作方法",
+        "title": "用四步留下可接续的记录",
+        "steps": [
+          {
+            "title": "观察",
+            "body": "先记录纸张与装订状态，保留原始线索。",
+            "period": "第一周",
+            "owner": "记录组"
+          },
+          {
+            "title": "讨论",
+            "body": "比较修复方法，把选择理由写进记录。",
+            "period": "第二周",
+            "owner": "修复组"
+          },
+          {
+            "title": "试修",
+            "body": "从小范围开始，复核接缝与纸张状态。",
+            "period": "第三周",
+            "owner": "协作组"
+          },
+          {
+            "title": "回架",
+            "body": "整理完成记录，让读者接续阅读。",
+            "period": "第四周",
+            "owner": "服务组"
+          }
+        ]
+      }
+    },
+    {
+      "type": "forestStatsSlide",
+      "layoutId": "band",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "阶段观察",
+        "title": "把成果放回阅读现场",
+        "stats": [
+          {
+            "label": "修复",
+            "value": "48",
+            "unit": "本",
+            "body": "每本书都附有简明修复记录。"
+          },
+          {
+            "label": "共创",
+            "value": "12",
+            "unit": "人",
+            "body": "不同经验的成员共同完成试行。"
+          },
+          {
+            "label": "周期",
+            "value": "3.1",
+            "unit": "周",
+            "body": "演示周期不代表真实工作耗时。"
+          }
+        ]
+      }
+    },
+    {
+      "type": "forestMatrixSlide",
+      "layoutId": "full",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "开放台账",
+        "title": "每一项工作都有去向",
+        "columns": [
+          {
+            "label": "任务",
+            "weight": 1.2,
+            "align": "left"
+          },
+          {
+            "label": "负责人",
+            "weight": 1,
+            "align": "left"
+          },
+          {
+            "label": "窗口",
+            "weight": 1,
+            "align": "left"
+          },
+          {
+            "label": "证据",
+            "weight": 1.5,
+            "align": "left"
+          }
+        ],
+        "rows": [
+          ["装订复核", "修复组", "春季", "工作日志"],
+          ["纸页整理", "协作组", "夏季", "状态记录"],
+          ["借阅回访", "服务组", "秋季", "读者笔记"]
+        ],
+        "focusColumn": 0,
+        "note": "单位与时间范围由内容定义；本表仅演示记录结构"
+      }
+    },
+    {
+      "type": "forestClosingSlide",
+      "layoutId": "broad",
+      "data": {
+        "source": "合成演示数据 · 非真实馆藏记录",
+        "eyebrow": "后续行动",
+        "title": "把修复\n带回书架",
+        "items": [
+          {
+            "label": "先记录",
+            "body": "每次修复保留方法与理由。"
+          },
+          {
+            "label": "再接续",
+            "body": "让下一位成员能沿记录继续。"
+          },
+          {
+            "label": "回到阅读",
+            "body": "用读者的体验检验修复工作。"
+          }
+        ]
+      }
+    }
+  ]
+}

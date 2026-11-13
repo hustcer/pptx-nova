@@ -112,6 +112,28 @@ test('multiple golden cases require an explicit showcase without removing regres
   assert.deepEqual(selectGoldenCases({ cases: [a] }, 'kit'), [a])
 })
 
+test('targeted showcase metadata sync preserves unrelated readiness, version and recommendations', () => {
+  const unrelated = {
+    id: 'other',
+    deckkit: 'other',
+    readiness: 'candidate',
+    version: '1.0.0',
+    bestFor: ['reviewed scenario'],
+    defaultFor: [],
+  }
+  const synced = syncManifestEntriesWithCatalog({
+    entries: [unrelated, { id: 'target', deckkit: 'target', readiness: 'experimental' }],
+    catalogEntries: [
+      { id: 'other', readiness: 'production', version: '2.0.0', bestFor: ['new scenario'] },
+      { id: 'target', readiness: 'candidate', version: '0.1.0' },
+    ],
+    deckkit: 'target',
+  })
+  assert.deepEqual(synced[0], unrelated)
+  assert.equal(synced[1].readiness, 'candidate')
+  assert.equal(synced[1].version, '0.1.0')
+})
+
 test('full and partial showcase updates use the same catalog order', () => {
   const first = { id: 'first', deckkit: 'first', caseId: 'first.golden' }
   const second = { id: 'second', deckkit: 'second', caseId: 'second.golden' }

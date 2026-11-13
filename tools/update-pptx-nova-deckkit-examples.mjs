@@ -98,7 +98,7 @@ export function mergeManifestEntries({ existingEntries = [], generatedEntries, d
   return merged
 }
 
-export function syncManifestEntriesWithCatalog({ entries, catalogEntries }) {
+export function syncManifestEntriesWithCatalog({ entries, catalogEntries, deckkit }) {
   const lookup =
     catalogEntries instanceof Map
       ? catalogEntries
@@ -107,6 +107,7 @@ export function syncManifestEntriesWithCatalog({ entries, catalogEntries }) {
 
   return entries
     .map((entry) => {
+      if (deckkit && entry.deckkit !== deckkit) return entry
       const catalogEntry = lookup.get(entry.deckkit)
       if (!catalogEntry) return entry
       return {
@@ -633,6 +634,7 @@ async function main() {
       deckkit: args.deckkit,
     }),
     catalogEntries,
+    deckkit: args.deckkit,
   })
 
   const manifest = {

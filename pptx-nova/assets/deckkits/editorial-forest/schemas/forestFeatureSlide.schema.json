@@ -1,0 +1,150 @@
+{
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 12,
+        "widthIn": 9.6,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "corner": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 2.1,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible text",
+      "x-slotBudget": {
+        "fontPt": 42,
+        "widthIn": 5.7,
+        "heightIn": 2.12,
+        "lineHeight": 1.04,
+        "maxLines": 2
+      }
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible provenance or explicit synthetic-data disclosure",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 10.3,
+        "heightIn": 0.26,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "assetCaption": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Editable placeholder caption, not an image asset",
+      "x-slotBudget": {
+        "fontPt": 28,
+        "widthIn": 4.7,
+        "heightIn": 1.15,
+        "lineHeight": 1.04,
+        "maxLines": 2
+      }
+    },
+    "assetLabel": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 4.8,
+        "heightIn": 0.38,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "paragraphs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S",
+        "description": "Visible text",
+        "x-slotBudget": {
+          "fontPt": 15,
+          "widthIn": 5.7,
+          "heightIn": 0.99,
+          "lineHeight": 1.18,
+          "maxLines": 3
+        }
+      },
+      "minItems": 1,
+      "maxItems": 2
+    },
+    "metadata": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Content-owned label; preserve input casing and language",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 1.7666666666666666,
+              "heightIn": 0.26,
+              "lineHeight": 1.12,
+              "maxLines": 1
+            }
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Visible text",
+            "x-slotBudget": {
+              "fontPt": 15,
+              "widthIn": 1.7666666666666666,
+              "heightIn": 0.6900000000000002,
+              "lineHeight": 1.18,
+              "maxLines": 2
+            }
+          }
+        },
+        "required": ["label", "value"],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 3
+    }
+  },
+  "required": [
+    "eyebrow",
+    "title",
+    "source",
+    "assetCaption",
+    "assetLabel",
+    "paragraphs",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

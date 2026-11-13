@@ -1,0 +1,139 @@
+{
+  "type": "object",
+  "properties": {
+    "eyebrow": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 12,
+        "widthIn": 9.6,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "corner": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Content-owned label; preserve input casing and language",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 2.1,
+        "heightIn": 0.32,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible text",
+      "x-slotBudget": {
+        "fontPt": 42,
+        "widthIn": 3.2,
+        "heightIn": 4.1,
+        "lineHeight": 1.04,
+        "maxLines": 5
+      }
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Visible provenance or explicit synthetic-data disclosure",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 10.3,
+        "heightIn": 0.26,
+        "lineHeight": 1.12,
+        "maxLines": 1
+      }
+    },
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S",
+            "description": "Content-owned label; preserve input casing and language",
+            "x-slotBudget": {
+              "fontPt": 11,
+              "widthIn": 1.4200000000000002,
+              "heightIn": 0.4871428571428571,
+              "lineHeight": 1.12,
+              "maxLines": 2
+            }
+          },
+          "weight": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "x-slotRole": "control",
+            "x-slotProbeValue": 1
+          },
+          "align": {
+            "type": "string",
+            "enum": ["left", "center", "right"],
+            "x-slotRole": "control"
+          }
+        },
+        "required": ["label", "weight", "align"],
+        "additionalProperties": false
+      },
+      "minItems": 3,
+      "maxItems": 5
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S",
+          "description": "Visible text",
+          "x-slotBudget": {
+            "fontPt": 14,
+            "widthIn": 1.4200000000000002,
+            "heightIn": 0.4871428571428571,
+            "lineHeight": 1.12,
+            "maxLines": 1
+          }
+        },
+        "minItems": 3,
+        "maxItems": 5
+      },
+      "minItems": 2,
+      "maxItems": 6
+    },
+    "focusColumn": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 4,
+      "x-slotRole": "control",
+      "x-slotProbeValue": 0
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Method, measurement unit and time scope",
+      "x-slotBudget": {
+        "fontPt": 11,
+        "widthIn": 7.9,
+        "heightIn": 0.65,
+        "lineHeight": 1.12,
+        "maxLines": 2
+      }
+    }
+  },
+  "required": ["eyebrow", "title", "source", "columns", "rows", "focusColumn", "note"],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

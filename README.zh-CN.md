@@ -12,6 +12,11 @@
 
 ## 查看效果
 
+通过同步翻页，直观对比源文件与处理结果：
+
+- [翻新对比案例](https://structurify.io/zh/showcases/refurbish-001/)：并排查看数学演示文稿的原稿和重新设计后的版本。
+- [翻译对比案例](https://structurify.io/zh/showcases/i18n-001/)：对比中文原稿与英文、法文和德文译稿。
+
 [![Copper Motion — 原生 PPTX 播放](docs/images/copper-motion-playback.gif)](https://structurify.io/en/showcases/copper-motion/)
 
 这段 20 秒的录屏展示了浏览器中的原生 PPTX 播放效果。点击预览可查看完整的交互演示。

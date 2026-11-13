@@ -14,6 +14,11 @@ PPTX compatibility.
 
 ## See the results
 
+Compare source and result side by side, with synchronized slides:
+
+- [Refurbishment showcase](https://structurify.io/en/showcases/refurbish-001/) — see an original math presentation alongside its redesigned version.
+- [Translation showcase](https://structurify.io/en/showcases/i18n-001/) — compare the Chinese original with English, French, and German translations.
+
 [![Copper Motion — native PPTX playback](docs/images/copper-motion-playback.gif)](https://structurify.io/en/showcases/copper-motion/)
 
 A 20-second recording of native PPTX playback in the browser. Click the preview for the full interactive showcase.

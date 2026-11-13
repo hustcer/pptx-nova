@@ -1,13 +1,22 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { captureVisualBinding, REVIEW_CHECKS } from '../../lib/review/canonical-visual-evidence.mjs'
+import {
+  captureVisualBinding,
+  fileSha256,
+  REVIEW_CHECKS,
+} from '../../lib/review/canonical-visual-evidence.mjs'
 import { validateDesignReview } from '../../lib/review/design-quality.mjs'
+import {
+  createTextStyleReview,
+  verifyTextStyleReview,
+} from '../../lib/translation/text-style-review.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-visual-review/v1'
 const BASE_REQUIRED_CHECKS = REVIEW_CHECKS
 const MODE_REQUIRED_CHECKS = {
   refurbish: ['targetDeckkitApplied'],
+  translation: ['textStyleAlignment'],
 }
 const CHECK_ALIASES = new Map([['visualTargetApplied', 'targetDeckkitApplied']])
 const KNOWN_CHECKS = new Set([
@@ -31,6 +40,8 @@ const usage =
   '  --candidate <path>      Bind the review to the current PPTX (requires --manifest).\n' +
   '  --manifest <path>       Canonical manifest whose exact PNGs were reviewed.\n' +
   '  --design-review <path>  Required for create: slide-specific design_review.json after PNG review.\n' +
+  '  --style-diff <path>     Required for translation: current native style/occupancy report.\n' +
+  '  --text-style-review <path>  Translation: completed per-paragraph source/target style judgments.\n' +
   '  --reviewer <name>       reviewer label, e.g. agent or human.\n' +
   '  --slides-reviewed <n>   Number of rendered slides/contact-sheet pages reviewed.\n' +
   '  --contact-sheet <path>  Contact sheet image used for review.\n' +
@@ -70,6 +81,8 @@ function parseArgs(argv) {
     '--candidate': 'candidate',
     '--manifest': 'manifest',
     '--design-review': 'designReview',
+    '--style-diff': 'styleDiff',
+    '--text-style-review': 'textStyleReview',
     '--reviewer': 'reviewer',
     '--slides-reviewed': 'slidesReviewed',
     '--contact-sheet': 'contactSheet',
@@ -369,6 +382,26 @@ function makeReport(args) {
     report.summary.errors = report.errors.length
     report.errorCount = report.summary.errors
     if (report.errors.length) report.status = 'fail'
+  }
+  if (args.mode === 'translation') {
+    if (!report.binding || !args.styleDiff)
+      throw new Error('translation visual review requires candidate, manifest and --style-diff')
+    const style = JSON.parse(readFileSync(args.styleDiff, 'utf8'))
+    const identity = {
+      sourceSha256: fileSha256(style.source),
+      candidateSha256: report.binding.candidateSha256,
+    }
+    if (fileSha256(style.candidate) !== identity.candidateSha256)
+      throw new Error('translation style report belongs to different candidate bytes')
+    const reference = JSON.parse(readFileSync(args.manifest, 'utf8')).subjects?.find(
+      (s) => s.id === 'reference',
+    )
+    if (reference?.sha256 !== identity.sourceSha256)
+      throw new Error('translation style report belongs to a different visual reference')
+    report.textStyleReview = args.textStyleReview
+      ? JSON.parse(readFileSync(args.textStyleReview, 'utf8'))
+      : createTextStyleReview(style, identity)
+    verifyTextStyleReview(report.textStyleReview, style, identity)
   }
   return report
 }

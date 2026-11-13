@@ -39,7 +39,7 @@ const print = (value) => process.stdout.write(JSON.stringify(value))
 if (args[0] === 'pptx' && args[1] === 'inspect') {
   print({ schemaVersion: 'pptx-inspect/v1', status: 'success', presentation: { slideCount: 21 }, slides: [] })
 } else if (args[0] === 'pptx' && args[1] === 'i18n-style-diff') {
-  print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true, blockerCount: 0 }, blockers: [] })
+  print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true, blockerCount: 0 }, blockers: [], textStyleMapping: { schemaVersion: 'pptx-i18n-text-style-mapping/v1', reviewRequiredCount: 0, mappings: [] } })
 } else if (args[0] === 'pptx' && args[1] === 'i18n-scan') {
   print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true, blockerCount: 0 }, summary: { verifiedCount: 1 } })
 } else if (args[0] === 'pptx' && args[1] === 'vision-diff') {
@@ -118,7 +118,11 @@ if (args[0] === 'pptx' && args[1] === 'inspect') {
   assert.equal(compact.performance.render.compareRenderInvocations, 2)
   assert.equal(compact.performance.render.renderInvocationsSaved, 2)
   assert.equal(compact.performance.render.contactDiffReused, true)
-  assert.equal(existsSync(output), true)
+  assert.equal(
+    existsSync(output),
+    false,
+    'machine-only evidence must not publish the requested final path',
+  )
   assert.equal(
     summary.phases.some((phase) => phase.name === 'contact-diff'),
     false,
@@ -202,7 +206,7 @@ test('translation runner routes unreviewed vision blockers to the precise refere
 const args = process.argv.slice(2)
 const print = (value) => process.stdout.write(JSON.stringify(value))
 if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
-else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true }, textStyleMapping: { schemaVersion: 'pptx-i18n-text-style-mapping/v1', reviewRequiredCount: 0, mappings: [] } })
 else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
 else if (args[1] === 'vision-diff') print({ schemaVersion: 'pptx-vision-diff/v1', status: 'success', agentGate: { passed: false, blockerCount: 1, blockersByEvidenceClass: { 'review-only': 1 } } })
 else process.exit(2)
@@ -259,7 +263,7 @@ const args = process.argv.slice(2)
 const after = (flag) => args[args.indexOf(flag) + 1]
 const print = (value) => process.stdout.write(JSON.stringify(value))
 if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
-else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true }, textStyleMapping: { schemaVersion: 'pptx-i18n-text-style-mapping/v1', reviewRequiredCount: 0, mappings: [] } })
 else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
 else if (args[1] === 'vision-diff') print({ schemaVersion: 'pptx-vision-diff/v1', status: 'success', agentGate: { passed: true, blockersByEvidenceClass: {} } })
 else if (args[1] === 'preview') {
@@ -400,7 +404,7 @@ test('translation runner requires the reviewed vision report to match the curren
 const args = process.argv.slice(2)
 const print = (value) => process.stdout.write(JSON.stringify(value))
 if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
-else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true }, textStyleMapping: { schemaVersion: 'pptx-i18n-text-style-mapping/v1', reviewRequiredCount: 0, mappings: [] } })
 else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
 else if (args[1] === 'vision-diff') process.stdout.write(${JSON.stringify(JSON.stringify(pathOnlyVision))})
 else process.exit(2)
@@ -449,7 +453,7 @@ else process.exit(2)
 const args = process.argv.slice(2)
 const print = (value) => process.stdout.write(JSON.stringify(value))
 if (args[1] === 'inspect') print({ status: 'success', presentation: { slideCount: 1 } })
-else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true } })
+else if (args[1] === 'i18n-style-diff') print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true }, textStyleMapping: { schemaVersion: 'pptx-i18n-text-style-mapping/v1', reviewRequiredCount: 0, mappings: [] } })
 else if (args[1] === 'i18n-scan') print({ schemaVersion: 'pptx-i18n-scan/v1', status: 'pass', agentGate: { passed: true } })
 else if (args[1] === 'vision-diff') process.stdout.write(${JSON.stringify(JSON.stringify(currentVision))})
 else process.exit(2)

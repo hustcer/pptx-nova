@@ -807,12 +807,31 @@ This gate does not prove translation completeness or rendered fit. It must be
 paired with bilingual text audit, source-language scan, preview/contact-diff,
 and visual review.
 
-It also does not prove that visible styling still belongs to the intended
-words: a textless signature can pass when a colored run remains in XML but its
-text was cleared. Compare the source and target phrase-to-run mapping for
-multi-run text, including color, font face, size and spacing, not only
-bold/italic/underline. Do not treat `mixedStyle=false` or a uniform planner
-strategy as sufficient evidence that every run is visually interchangeable.
+The native gate additionally rejects emptied meaningful style groups and emits
+`textStyleMapping` for changed mixed-style paragraphs, including table/chart and
+shared-part text. Missing mapping coverage is not a pass. Complete style identity
+includes color/font/effect children, not just bold/italic/size attributes.
+Mechanical occupancy still cannot prove that emphasis belongs to the intended
+words. Use the runner's `style-review.mjs` scaffold, compare every source/target
+group and its canonical PNGs, and retain a specific paragraph judgment. Translation
+visual review requires `--style-diff`, the completed `--text-style-review` when
+nonempty, and `textStyleAlignment=pass`; global pass flags alone are rejected.
+
+Retain `xdoc pptx i18n-style-diff --source <source> --candidate <candidate>
+--json` as `i18n-style-diff.json`. For nonzero `reviewRequiredCount`, run:
+
+```bash
+node <skill-root>/scripts/cli/translation/style-review.mjs \
+  --source <source> --candidate <candidate> --style-diff <report> \
+  --output <run-dir>/text-style-review.json
+```
+
+Read its Markdown comparison alongside canonical source/candidate PNGs, then fill
+every paragraph's `verdict` and specific `reason` citing actual source and translated phrases, retaining all group facts.
+Pass `--style-diff <report> --text-style-review <completed-review>` and
+`--check textStyleAlignment=pass` to `visual-review.mjs`. With zero mappings,
+only the style report and check are needed. The finalizer verifies the embedded
+judgments against fresh mapping facts and exact source/candidate hashes.
 
 If the prepared candidate collapses meaningful run boundaries, retain that
 candidate and the reproducing plan. Prefer a planner-supported mapping that

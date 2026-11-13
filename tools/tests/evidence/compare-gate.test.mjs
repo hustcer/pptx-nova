@@ -258,14 +258,16 @@ test('compare gate publishes every multipart sibling and rejects duplicate cover
   assert.match(JSON.parse(invalidGate.stdout).blockers.join('\n'), /duplicate|coverage/i)
 })
 
+// These cases exercise generic bundle identity. Translation publication has
+// additional workflow/style proof requirements in translation-visual-evidence.
 test('compare gate publishes the exact single-file candidate bytes and records a bound receipt', () => {
   const root = mkdtempSync(join(tmpdir(), 'pptx-nova-single-binding-'))
   const runDir = join(root, 'run')
   const source = join(root, 'source.pptx')
   const candidate = join(runDir, 'candidate.pptx')
   const finalPptx = join(root, 'delivery.pptx')
-  const compare = join(runDir, 'translation-compare.png')
-  const reportPath = join(runDir, 'translation-compare.json')
+  const compare = join(runDir, 'compare-compare.png')
+  const reportPath = join(runDir, 'compare-compare.json')
   mkdirSync(runDir, { recursive: true })
   writeFileSync(source, 'source bytes')
   writeFileSync(candidate, 'compared candidate bytes')
@@ -282,7 +284,7 @@ test('compare gate publishes the exact single-file candidate bytes and records a
     '--final-pptx-source',
     candidate,
     '--kind',
-    'translation',
+    'compare',
     '--publish',
     '--overwrite',
     '--timestamp',
@@ -305,8 +307,8 @@ test('compare gate rejects an unbound cache-hit attempt', () => {
   const source = join(root, 'source.pptx')
   const candidate = join(runDir, 'candidate.pptx')
   const finalPptx = join(root, 'delivery.pptx')
-  const compare = join(runDir, 'translation-compare.png')
-  const reportPath = join(runDir, 'translation-compare.json')
+  const compare = join(runDir, 'compare-compare.png')
+  const reportPath = join(runDir, 'compare-compare.json')
   mkdirSync(runDir, { recursive: true })
   writeFileSync(source, 'source bytes')
   writeFileSync(candidate, 'candidate bytes')
@@ -328,7 +330,7 @@ test('compare gate rejects an unbound cache-hit attempt', () => {
       '--final-pptx-source',
       candidate,
       '--kind',
-      'translation',
+      'compare',
       '--publish',
       '--overwrite',
       '--json',
@@ -345,8 +347,8 @@ test('compare gate check-only mode binds an existing final without a staged sour
   const source = join(root, 'source.pptx')
   const candidate = join(runDir, 'candidate.pptx')
   const finalPptx = join(root, 'delivery.pptx')
-  const compare = join(runDir, 'translation-compare.png')
-  const reportPath = join(runDir, 'translation-compare.json')
+  const compare = join(runDir, 'compare-compare.png')
+  const reportPath = join(runDir, 'compare-compare.json')
   mkdirSync(runDir, { recursive: true })
   writeFileSync(source, 'source bytes')
   writeFileSync(candidate, 'candidate bytes')
@@ -362,7 +364,7 @@ test('compare gate check-only mode binds an existing final without a staged sour
     '--final-pptx-source',
     candidate,
     '--kind',
-    'translation',
+    'compare',
     '--publish',
     '--overwrite',
     '--timestamp',
@@ -378,7 +380,7 @@ test('compare gate check-only mode binds an existing final without a staged sour
       '--final-pptx',
       finalPptx,
       '--kind',
-      'translation',
+      'compare',
       '--overwrite',
       '--json',
     ]).stdout,
@@ -399,8 +401,8 @@ test('compare gate rejects a different staged final and preserves the existing d
   const comparedCandidate = join(runDir, 'compared.pptx')
   const wrongCandidate = join(runDir, 'wrong.pptx')
   const finalPptx = join(root, 'delivery.pptx')
-  const compare = join(runDir, 'translation-compare.png')
-  const reportPath = join(runDir, 'translation-compare.json')
+  const compare = join(runDir, 'compare-compare.png')
+  const reportPath = join(runDir, 'compare-compare.json')
   mkdirSync(runDir, { recursive: true })
   writeFileSync(source, 'source bytes')
   writeFileSync(comparedCandidate, 'compared candidate bytes')
@@ -411,7 +413,7 @@ test('compare gate rejects a different staged final and preserves the existing d
     reportPath,
     contactDiffReport({ compare, sourcePptx: source, finalPptx: comparedCandidate }),
   )
-  const gatePath = join(runDir, 'translation-compare-gate.json')
+  const gatePath = join(runDir, 'compare-compare-gate.json')
   writeJson(gatePath, { status: 'pass', stale: true })
 
   const result = runNodeStatus(
@@ -424,7 +426,7 @@ test('compare gate rejects a different staged final and preserves the existing d
       '--final-pptx-source',
       wrongCandidate,
       '--kind',
-      'translation',
+      'compare',
       '--publish',
       '--overwrite',
       '--timestamp',
@@ -450,8 +452,8 @@ test('compare gate rejects a candidate overwritten after compare evidence was cr
   const source = join(root, 'source.pptx')
   const candidate = join(runDir, 'candidate.pptx')
   const finalPptx = join(root, 'delivery.pptx')
-  const compare = join(runDir, 'translation-compare.png')
-  const reportPath = join(runDir, 'translation-compare.json')
+  const compare = join(runDir, 'compare-compare.png')
+  const reportPath = join(runDir, 'compare-compare.json')
   mkdirSync(runDir, { recursive: true })
   writeFileSync(source, 'source bytes')
   writeFileSync(candidate, 'compared bytes')
@@ -470,7 +472,7 @@ test('compare gate rejects a candidate overwritten after compare evidence was cr
       '--final-pptx-source',
       candidate,
       '--kind',
-      'translation',
+      'compare',
       '--publish',
       '--overwrite',
       '--timestamp',

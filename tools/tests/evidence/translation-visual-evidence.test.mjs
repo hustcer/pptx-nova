@@ -11,6 +11,7 @@ import {
   REVIEW_CHECKS,
 } from '../../../pptx-nova/scripts/lib/review/canonical-visual-evidence.mjs'
 import { recordTranslationEvidence } from '../../../pptx-nova/scripts/lib/translation/visual-acceptance.mjs'
+import { createTextStyleReview } from '../../../pptx-nova/scripts/lib/translation/text-style-review.mjs'
 
 // Exercise the public consumer: a translation must not need user permission
 // merely because its fully reviewed text differs from the reference pixels.
@@ -35,6 +36,12 @@ function fixture() {
       agentGate: { passed: true },
       blockers: [],
       styleBlockers: [],
+      textStyleMapping: {
+        schemaVersion: 'pptx-i18n-text-style-mapping/v1',
+        reviewRequiredCount: 0,
+        mappings: [],
+        policy: 'Review every mapping.',
+      },
     }),
     candidateScan: write('scan.json', {
       schemaVersion: 'pptx-i18n-candidate-result/v1',
@@ -142,7 +149,14 @@ function fixture() {
         reviewer: 'agent',
         binding: captureVisualBinding(manifestPath, files.candidate),
         summary: { slidesReviewed: 1 },
-        checks: REVIEW_CHECKS.map((name) => ({ name, status: 'pass' })),
+        checks: [...REVIEW_CHECKS, 'textStyleAlignment'].map((name) => ({ name, status: 'pass' })),
+        textStyleReview:
+          JSON.parse(readFileSync(files.styleDiff)).status === 'pass'
+            ? createTextStyleReview(JSON.parse(readFileSync(files.styleDiff)), {
+                sourceSha256: fileSha256(files.source),
+                candidateSha256: fileSha256(files.candidate),
+              })
+            : undefined,
         issues: [],
         errors: [],
         warnings: [],
@@ -289,6 +303,142 @@ test('independent translation delivery rejects evidence from an incomplete final
   }
 })
 
+test('translation rejects a legacy style pass without visible phrase/style evidence', () => {
+  const f = fixture()
+  const style = JSON.parse(readFileSync(f.files.styleDiff))
+  delete style.textStyleMapping
+  writeFileSync(f.files.styleDiff, JSON.stringify(style))
+  const r = runFinalizer(f)
+  assert.notEqual(r.exit, 0, 'textless pass alone must not authorize publication')
+  assert.equal(existsSync(r.output), false)
+})
+
+function mixedStyleFixture() {
+  const f = fixture()
+  const style = JSON.parse(readFileSync(f.files.styleDiff))
+  style.textStyleMapping = {
+    schemaVersion: 'pptx-i18n-text-style-mapping/v1',
+    reviewRequiredCount: 1,
+    mappings: [
+      {
+        mappingId: 'sha256:' + 'a'.repeat(64),
+        part: 'ppt/slides/slide1.xml',
+        paragraphIndex: 0,
+        referencedBySlides: [1],
+        sourceText: 'Hello world',
+        candidateText: 'Hallo Welt',
+        groups: [
+          {
+            sourceRunGroupId: 'group-0',
+            styleXml: '<a:rPr><a:solidFill>blue</a:solidFill></a:rPr>',
+            sourceText: 'Hello ',
+            candidateText: 'Hallo ',
+            runIndexes: [0],
+          },
+          {
+            sourceRunGroupId: 'group-1',
+            styleXml: '<a:rPr><a:solidFill>red</a:solidFill></a:rPr>',
+            sourceText: 'world',
+            candidateText: 'Welt',
+            runIndexes: [1],
+          },
+        ],
+      },
+    ],
+  }
+  writeFileSync(f.files.styleDiff, JSON.stringify(style))
+  f.save()
+  const review = JSON.parse(readFileSync(f.reviewPath))
+  review.textStyleReview.entries[0].verdict = 'pass'
+  review.textStyleReview.entries[0].reason =
+    'The translated noun Welt retains the red emphasis of world; Hallo remains blue in the paired PNGs.'
+  writeFileSync(f.reviewPath, JSON.stringify(review))
+  return f
+}
+
+test('translation requires paragraph-bound phrase/style judgments and rejects stale or global approvals', () => {
+  const valid = runFinalizer(mixedStyleFixture())
+  assert.equal(valid.exit, 0, JSON.stringify(valid.compact))
+  for (const mutate of [
+    (r) => {
+      delete r.textStyleReview
+    },
+    (r) => {
+      r.textStyleReview.entries = []
+    },
+    (r) => {
+      r.textStyleReview.entries[0].verdict = 'pending'
+    },
+    (r) => {
+      r.textStyleReview.entries[0].reason = 'pass'
+    },
+    (r) => {
+      r.textStyleReview.entries[0].reason =
+        'Every paragraph preserves all colors and fonts correctly.'
+    },
+    (r) => {
+      r.textStyleReview.entries[0].groups[1].candidateText = 'Hallo Welt'
+    },
+    (r) => {
+      r.textStyleReview.sourceSha256 = '0'.repeat(64)
+    },
+    (r) => {
+      r.textStyleReview.styleMappingSha256 = '0'.repeat(64)
+    },
+    (r) => {
+      r.checks = r.checks.filter((c) => c.name !== 'textStyleAlignment')
+    },
+  ]) {
+    const f = mixedStyleFixture(),
+      review = JSON.parse(readFileSync(f.reviewPath))
+    mutate(review)
+    writeFileSync(f.reviewPath, JSON.stringify(review))
+    const r = runFinalizer(f)
+    assert.notEqual(r.exit, 0, JSON.stringify(review))
+    assert.equal(existsSync(r.output), false, 'an invalid review must fail before publication')
+  }
+})
+
+test('a native pass cannot hide an emptied colored group from the translation finalizer', () => {
+  const f = mixedStyleFixture(),
+    style = JSON.parse(readFileSync(f.files.styleDiff))
+  style.textStyleMapping.mappings[0].groups[0].candidateText = 'Hallo Welt'
+  style.textStyleMapping.mappings[0].groups[1].candidateText = ''
+  writeFileSync(f.files.styleDiff, JSON.stringify(style))
+  const r = runFinalizer(f)
+  assert.notEqual(r.exit, 0)
+  assert.equal(existsSync(r.output), false)
+})
+
+test('standalone compare publication cannot bypass translation workflow and style review', () => {
+  const f = mixedStyleFixture(),
+    r = runFinalizer(f)
+  assert.equal(r.exit, 0, JSON.stringify(r.compact))
+  const output = join(f.root, 'bypass.pptx')
+  const result = spawnSync(
+    process.execPath,
+    [
+      'pptx-nova/scripts/cli/review/compare-gate.mjs',
+      '--run-dir',
+      r.runDir,
+      '--kind',
+      'translation',
+      '--publish',
+      '--final-pptx-source',
+      f.files.candidate,
+      '--final-pptx',
+      output,
+      '--output',
+      join(f.root, 'bypass-gate.json'),
+      '--json',
+    ],
+    { encoding: 'utf8' },
+  )
+  assert.notEqual(result.status, 0)
+  assert.equal(existsSync(output), false)
+  assert.match(result.stdout + result.stderr, /translation publication requires/)
+})
+
 test('a reviewed translation authorizes delivery only after machine workflow and publication complete', () => {
   const f = fixture()
   const r = runFinalizer(f)
@@ -322,21 +472,22 @@ test('a reviewed translation authorizes delivery only after machine workflow and
   assert.equal(gate.report.machineChecksPassed, true)
 })
 
-test('a completed machine-only run accepts later bound Agent review without rendering again', () => {
+test('machine-only preparation cannot publish or authorize delivery through a later global review', () => {
   const f = fixture()
   const r = runFinalizer(f, '', { withReview: false })
   assert.equal(r.exit, 0, JSON.stringify(r.compact))
   assert.equal(r.compact.status, 'needs-visual-review')
   assert.equal(r.compact.deliveryReady, false)
   const evidence = join(r.runDir, 'translation-evidence.json')
-  assert.ok(JSON.parse(readFileSync(evidence)).completion)
+  assert.equal(JSON.parse(readFileSync(evidence)).completion, undefined)
+  assert.equal(existsSync(r.output), false)
   const missing = f.run({ evidence, review: false })
   assert.equal(missing.exit, 6)
-  assert.equal(missing.report.machineChecksPassed, true)
+  assert.equal(missing.report.machineChecksPassed, false)
   assert.equal(missing.report.deliveryAuthorized, false)
   const reviewed = f.run({ evidence })
-  assert.equal(reviewed.exit, 0, JSON.stringify(reviewed.report))
-  assert.equal(reviewed.report.deliveryAuthorized, true)
+  assert.notEqual(reviewed.exit, 0, JSON.stringify(reviewed.report))
+  assert.equal(reviewed.report.deliveryAuthorized, false)
   assert.equal(reviewed.report.requiresUserApproval, false)
 })
 

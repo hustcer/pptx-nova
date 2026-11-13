@@ -22,7 +22,7 @@ const print = (data) => process.stdout.write(JSON.stringify(data))
 if (args[0] === 'pptx' && args[1] === 'inspect') {
   print({ schemaVersion: 'pptx-inspect/v1', presentation: { slideCount: 1 }, slides: [{}] })
 } else if (args[0] === 'pptx' && args[1] === 'i18n-style-diff') {
-  print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true, blockerCount: 0 } })
+  print({ schemaVersion: 'pptx-i18n-style-diff/v1', status: 'pass', agentGate: { passed: true, blockerCount: 0 }, textStyleMapping: { schemaVersion: 'pptx-i18n-text-style-mapping/v1', reviewRequiredCount: 0, mappings: [] } })
 } else if (args[0] === 'pptx' && args[1] === 'i18n-scan' && args.includes('candidate')) {
   print({ schemaVersion: ${JSON.stringify(candidateSchema)}, status: 'pass', summary: { verifiedCount: 7 }, agentGate: { passed: true, blockerCount: 0 } })
 } else {

@@ -14,6 +14,7 @@ import { createHash } from 'node:crypto'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { buildProofVisibilityReport } from '../../lib/review/proof-visibility.mjs'
 import { readProofMapSnapshot, validProofMapBinding } from '../../lib/review/proof-map-binding.mjs'
+import { evaluateTranslationVisualEvidence } from '../../lib/translation/visual-acceptance.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-compare-gate/v1'
 
@@ -31,6 +32,8 @@ Options:
   --final-pptx-source <path>
                            Staged final PPTX. Required with --publish; otherwise optional.
   --kind <name>            Compare kind, e.g. translation or refurbish. Defaults to compare.
+  --translation-evidence <path> --visual-manifest <path> --visual-review <path>
+                           Required for translation publication; recheck bound workflow and phrase/style review.
   --compare-stem <stem>    Artifact/published stem. Defaults to <kind>-compare.
   --compare <path>         Run-directory compare PNG. Defaults to <run-dir>/<compare-stem>.png.
   --report <path>          Run-directory compare JSON. Defaults to <run-dir>/<compare-stem>.json.
@@ -82,6 +85,14 @@ function parseArgs(argv) {
       index += 1
     } else if (arg === '--kind') {
       args.kind = valueAfter(argv, index, arg)
+      index += 1
+    } else if (['--translation-evidence', '--visual-manifest', '--visual-review'].includes(arg)) {
+      const key = {
+        '--translation-evidence': 'translationEvidence',
+        '--visual-manifest': 'visualManifest',
+        '--visual-review': 'visualReview',
+      }[arg]
+      args[key] = resolve(valueAfter(argv, index, arg))
       index += 1
     } else if (arg === '--compare-stem') {
       args.compareStem = valueAfter(argv, index, arg)
@@ -888,6 +899,26 @@ function buildReport(args) {
   }
 
   let published = []
+  let translationAcceptance = null
+  if (args.publish && args.kind === 'translation') {
+    if (!args.translationEvidence || !args.visualManifest || !args.visualReview) {
+      blockers.push(
+        'translation publication requires current workflow evidence, canonical manifest and completed phrase/style visual review',
+      )
+    } else {
+      translationAcceptance = evaluateTranslationVisualEvidence(args.visualManifest, {
+        candidate: args.finalPptxSource,
+        review: args.visualReview,
+        translationEvidence: args.translationEvidence,
+        stage: 'visual',
+      })
+      if (translationAcceptance.visualReviewPassed !== true || translationAcceptance.errors?.length)
+        blockers.push(
+          'translation publication acceptance failed: ' +
+            (translationAcceptance.errors?.join('; ') || translationAcceptance.status),
+        )
+    }
+  }
   let proofVisibility = null
   const proofMapPath = join(args.runDir, 'proof-objects.json')
   const embedded = compareReport?.pptxNovaCompare?.proofMapBinding
@@ -1026,6 +1057,7 @@ function buildReport(args) {
     status,
     mode: args.publish ? 'publish-and-bind' : 'check-binding',
     kind: args.kind,
+    translationAcceptance,
     proofVisibility,
     compareStem: args.compareStem,
     runDir: args.runDir,

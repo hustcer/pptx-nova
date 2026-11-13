@@ -167,6 +167,12 @@ The public release audit checks this layout and local module imports.
 
 ## Translation
 
+- `cli/translation/style-review.mjs` - materialize native source/target style-group
+  facts as a hash-bound per-paragraph review scaffold and readable Markdown.
+  Complete its judgments alongside canonical PNG review, then attach it through
+  `visual-review.mjs --style-diff --text-style-review`; global pass flags do not
+  replace phrase/style review.
+
 - `cli/translation/prepare.mjs` - scan and classify translation units,
   bind an optional external prompt and project glossary, create the compact
   translation memory plus protected-token constraints, and resume a bound review
@@ -178,8 +184,8 @@ The public release audit checks this layout and local module imports.
   from the same compare evidence without another render. `--json` emits a compact Agent result;
   `--json-full` or `translation-run-summary.json` provides complete diagnostics. With a valid bound
   `--visual-manifest` and `--visual-review`, success returns `completed` and `deliveryReady=true`.
-  Machine-only success returns `needs-visual-review` and `deliveryReady=false`: Agent review remains,
-  without requiring user approval for expected text pixel changes. Delivery also requires the sealed
+  Machine-only preparation returns `needs-visual-review` without publishing the final PPTX/siblings.
+  Complete bound review before finalizing; expected translated pixels need no user approval. Delivery requires the sealed
   machine completion evidence written after successful publication; preflight review is insufficient. See
   [translation finalization](../references/translation/translation-runner.md).
 
@@ -316,6 +322,8 @@ The public release audit checks this layout and local module imports.
   guard, not a pixel, text-readability or animation-playback certificate.
   Refurbish compare publication recomputes any run-local proof map and blocks all
   non-passing results; use the runner's `--proof-map` to supply it to a fresh run.
+  Translation publication also rechecks workflow evidence, canonical manifest and
+  paragraph phrase/style review; a hash-only or user-confirmation-only call cannot publish.
   Unsupported proofs need the separate manual workflow checklist.
 
 - `cli/review/structure-check.mjs` - lightweight PPTX OOXML structure check. It

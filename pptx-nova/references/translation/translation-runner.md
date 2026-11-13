@@ -47,7 +47,8 @@ Run `xdoc pptx visual-audit` on the stable candidate against the source, using t
 `visual-review.mjs --mode translation --candidate <candidate> --manifest <manifest>
 --previews <review-dir>/visual-evidence/candidate` record with the
 full slide count and every required check. Supply it with `--visual-manifest` and `--visual-review`
-below. This is Agent visual review; it does not require a user approval conversation.
+below. This is Agent visual review; it does not require user approval. Follow
+[the style mapping gate](translation-mode.md#style-signature-gate) for required `--style-diff`, `textStyleAlignment=pass` and bound paragraph judgments via `--text-style-review`.
 
 Translation acceptance consumes the original regression manifest and freshly generated, hash-bound
 source, candidate, inventory, translations, style, consistency and full-deck vision evidence. Complete
@@ -123,20 +124,11 @@ With valid supplied visual evidence, successful finalization returns `status=com
 acceptance result. Review the complete compare set before delivering the bundle.
 
 Without visual flags, evidence preparation returns `status=needs-visual-review`, `needsVisualReview=true`,
-`needsHumanReview=false` and `deliveryReady=false`. Agent work remains; keep the bundle inside the run
-until accepted. After recording bound translation review, consume it without rendering again:
-
-```bash
-node <skill-root>/scripts/cli/review/visual-evidence-gate.mjs \
-  --manifest <review-dir>/visual-evidence/manifest.json \
-  --candidate <run-dir>/candidate.pptx \
-  --translation-evidence <run-dir>/translation-evidence.json \
-  --review <review-dir>/visual_review.json \
-  --output <run-dir>/translation-visual-acceptance.json --json
-```
-
-Require exit 0 and `deliveryAuthorized=true`; exit 6 needs Agent review, not a user question. Exit 7
-means machine completion is missing: repair and rerun finalization. Only successful bundle publication
+`needsHumanReview=false` and `deliveryReady=false`. It retains evidence without publishing the final
+PPTX or siblings. Complete bound review, then finalize the same candidate with visual flags in a new
+run directory; preserve the date and reuse page caches. A standalone compare gate also requires
+`--translation-evidence`, `--visual-manifest` and `--visual-review` for translation publication.
+Only successful reviewed bundle publication
 seals the preview, full semantic diff, comparison, delivery gate and published files in `completion`.
 Changed files invalidate it; without `--translation-evidence`, default semantics remain. Old runs
 without completion need fresh finalization; never manufacture records or infer success.
@@ -167,7 +159,7 @@ Recreate stale gates when candidate, vision report, PNG, byte length, dimensions
 
 ## Delivery boundary
 
-The compare gate binds exact candidate bytes before machine publication. Review the candidate contact
+The compare gate rechecks translation acceptance and exact candidate bytes before publication. Review the candidate contact
 sheet, every compare part and all bound review-only full-size pages; retain the summary, scans,
 style/vision reports, semantic diff, preview manifest, comparison reports/images/gate and final binding.
 

@@ -2,6 +2,7 @@
 import { cliPath } from '../../lib/runtime/skill-paths.mjs'
 import { ensureRenderContext, verifyRenderContext } from '../../lib/review/render-context.mjs'
 import { verifyDiffEvidence } from '../../lib/review/diff-evidence.mjs'
+import { readTextStyleMapping } from '../../lib/translation/text-style-review.mjs'
 import { createHash } from 'node:crypto'
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, extname, join, resolve } from 'node:path'
@@ -436,6 +437,7 @@ function runStyleDiff(summary, args, artifacts) {
     args: commandArgs,
     artifact: artifacts.styleDiff,
   })
+  readTextStyleMapping(report)
   requireGate(
     summary,
     'i18n-style-diff',
@@ -832,6 +834,12 @@ function publish(summary, args, artifacts) {
       artifacts.candidate,
       '--kind',
       'translation',
+      '--translation-evidence',
+      artifacts.translationEvidence,
+      '--visual-manifest',
+      args.visualManifest,
+      '--visual-review',
+      args.visualReview,
       '--publish',
       '--overwrite',
       '--json',
@@ -928,7 +936,7 @@ function buildAgentSummary(summary) {
     needsVisualReview: Boolean(summary.needsVisualReview),
     decision: summary.deliveryReady
       ? 'deliver'
-      : summary.machineGatesPassed
+      : summary.status === 'needs-visual-review'
         ? 'continue-to-agent-visual-review'
         : 'stop-and-fix',
     gates: {
@@ -1137,6 +1145,18 @@ function runTranslation(input) {
     runSemanticDiff(summary, args, artifacts)
     const compareReport = runCompare(summary, args, artifacts, slideCount)
     materializeContactDiff(summary, args, artifacts, compareReport)
+    if (!args.visualManifest) {
+      summary.status = 'needs-visual-review'
+      summary.machineGatesPassed = false
+      summary.deliveryReady = false
+      return finalizeRunnerSummary(summary, {
+        summaryPath: artifacts.summary,
+        totalMs: durationMs(started),
+        finalizeArtifacts,
+        buildPerformance: buildPerformanceSummary,
+        buildAgentSummary,
+      })
+    }
     if (args.visualManifest) runVisualAcceptance(summary, args, artifacts)
     publish(summary, args, artifacts)
     writeFileSync(

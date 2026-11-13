@@ -12,6 +12,7 @@ import {
 import { verifyRenderContext } from '../review/render-context.mjs'
 import { verifyMultiColumnEvidence } from '../review/multi-column-evidence.mjs'
 import { verifyDiffEvidence } from '../review/diff-evidence.mjs'
+import { readTextStyleMapping, verifyTextStyleReview } from './text-style-review.mjs'
 
 export function visionEvidenceIdentity(report) {
   const withoutPath = (value) => {
@@ -213,6 +214,7 @@ function verifyTranslationEvidence(path, manifest, candidate) {
 
   const style = readJson(files.styleDiff.path),
     scan = readJson(files.candidateScan.path)
+  readTextStyleMapping(style)
   for (const [name, report, schemas] of [
     ['style', style, ['pptx-i18n-style-diff/v1']],
     ['consistency', scan, ['pptx-i18n-candidate-result/v1', 'pptx-i18n-scan/v1']],
@@ -360,6 +362,15 @@ export function evaluateTranslationVisualEvidence(
     }
     if (!review) return report
     const reviewed = verifyVisualReview(review, binding, { mode: 'translation' })
+    if (
+      reviewed.checks.filter((c) => c.name === 'textStyleAlignment' && c.status === 'pass')
+        .length !== 1
+    )
+      fail('translation requires explicit textStyleAlignment review')
+    verifyTextStyleReview(reviewed.textStyleReview, readJson(record.files.styleDiff.path), {
+      sourceSha256: record.files.source.sha256,
+      candidateSha256: record.files.candidate.sha256,
+    })
     report.visualReviewPassed = true
     report.status = 'needs-machine-completion'
     report.acceptance.status = 'visual-accepted'

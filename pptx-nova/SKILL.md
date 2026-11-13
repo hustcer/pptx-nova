@@ -268,8 +268,8 @@ If the user only wants HTML/URL/PDF converted to Markdown/text without a deck, f
   filename suffixes and ZIP order are not selector indices. See `references/edit/inspect-and-edit.md`.
 - **Translation**: Copy, translate visible text in place and preserve style/layout semantics. Shorten text
   before minimal font reduction; change geometry only with proven whitespace. Bind multi-column review;
-  never waive overflow/overlap/edge or rendered chart-title/page-bound collisions. The runner owns coverage,
-  style/vision audits, compare parts and SHA-256 publication binding. Its acceptance contract needs Agent
+  never waive overflow/overlap/edge or rendered chart-title/page-bound collisions. The runner requires style
+  occupancy, paragraph phrase/style review and hash-bound publication. Its acceptance contract needs Agent
   review for expected pixels, not user approval. Retain native manifests/content/environment blockers;
   complete missing review/evidence.
 - **Data-driven / Export-Check**: Data plus template selects `references/content/data-driven.md`; conversion, preview,

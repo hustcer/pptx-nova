@@ -165,12 +165,33 @@ function scopedFixture() {
   )
   const save = () => writeFileSync(manifestPath, JSON.stringify(manifest))
   save()
-  return { root, candidate, manifestPath, manifest, save }
+  return { root, candidate, reference, manifestPath, manifest, save }
 }
 
 function runVisualReview(fixture, mode, count = 2) {
   const script = join(repository, 'pptx-nova/scripts/cli/review/visual-review.mjs')
-  const checks = [...REVIEW_CHECKS, ...(mode === 'refurbish' ? ['targetDeckkitApplied'] : [])]
+  const checks = [
+    ...REVIEW_CHECKS,
+    ...(mode === 'refurbish' ? ['targetDeckkitApplied'] : []),
+    ...(mode === 'translation' ? ['textStyleAlignment'] : []),
+  ]
+  const style = join(fixture.root, 'style.json')
+  if (mode === 'translation')
+    writeFileSync(
+      style,
+      JSON.stringify({
+        schemaVersion: 'pptx-i18n-style-diff/v1',
+        status: 'pass',
+        agentGate: { passed: true },
+        source: fixture.reference,
+        candidate: fixture.candidate,
+        textStyleMapping: {
+          schemaVersion: 'pptx-i18n-text-style-mapping/v1',
+          reviewRequiredCount: 0,
+          mappings: [],
+        },
+      }),
+    )
   const args = [
     script,
     ...(mode ? ['--mode', mode] : []),
@@ -185,6 +206,7 @@ function runVisualReview(fixture, mode, count = 2) {
     '--slides-reviewed',
     String(count),
     '--json',
+    ...(mode === 'translation' ? ['--style-diff', style] : []),
     ...checks.flatMap((name) => ['--check', `${name}=pass`]),
   ]
   return spawnSync(process.execPath, args, { encoding: 'utf8' })

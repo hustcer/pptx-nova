@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { SKILL_ROOT } from '../../lib/runtime/skill-paths.mjs'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
@@ -12,6 +11,7 @@ import {
 import { validateDeckkitContent } from '../../../assets/deckkits/shared/validate-deckkit.mjs'
 import { registeredDesignFamily } from '../../../assets/deckkits/shared/design-family-registry.mjs'
 import { readNativeCharts } from '../../lib/pptx/native-chart-readback.mjs'
+import { deckkitModulePath } from '../../lib/deckkits/module-path.mjs'
 
 const usage = `Usage:
   node <skill-root>/scripts/cli/deckkits/design.mjs --deckkit <id> [--content content.json] [--output report.json]
@@ -77,8 +77,7 @@ try {
       'utf8',
     )
     const entry = JSON.parse(catalog).entries.find((e) => e.id === args.deckkit)
-    const root = resolve(SKILL_ROOT, 'assets/deckkits')
-    const mod = await import(pathToFileURL(resolve(root, entry.path)).href)
+    const mod = await import(pathToFileURL(deckkitModulePath(entry)).href)
     const built = mod.createDeck(content)
     report = {
       status: 'pass',

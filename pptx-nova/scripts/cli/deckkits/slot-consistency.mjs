@@ -23,6 +23,7 @@ import { SKILL_ROOT as skillRoot } from '../../lib/runtime/skill-paths.mjs'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { deckkitModulePath } from '../../lib/deckkits/module-path.mjs'
 
 const deckkitRoot = join(skillRoot, 'assets', 'deckkits')
 const schemasRoot = join(deckkitRoot, 'schemas')
@@ -214,7 +215,7 @@ function checkProbe(mod, deckkit, slideType, schema) {
 }
 
 async function checkDeckkit(entry) {
-  const mod = await import(pathToFileURL(join(deckkitRoot, entry.path)).href)
+  const mod = await import(pathToFileURL(deckkitModulePath(entry)).href)
   if (typeof mod.createDeck !== 'function')
     return { deckkit: entry.id, error: 'no createDeck export', slideTypes: [] }
   const report = []

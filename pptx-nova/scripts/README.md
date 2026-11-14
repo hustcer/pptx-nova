@@ -19,7 +19,7 @@ scripts/
 
 CLI workflows are runtime, create, edit, refurbish, translation, deckkits, review, assets,
 animation, and office. Internal domains are runtime, create, edit, refurbish, translation,
-review, pptx, assets, and animation. Use concise names inside these namespaces; do not add
+review, pptx, assets, animation, and deckkits. Use concise names inside these namespaces; do not add
 flat scripts or repeat the pptx-nova prefix. Internal modules must not import CLI entries or
 run a CLI on import. Shared resources and child commands use lib/runtime/skill-paths.mjs,
 anchored to the installed skill rather than the caller's working directory.
@@ -58,6 +58,9 @@ The public release audit checks this layout and local module imports.
   and writes clean-open.json. Windows/Linux, macOS without PowerPoint, or
   missing UI scripting return `skipped`. This does not prove a clean open; the task's
   delivery policy determines whether that missing evidence is acceptable.
+  macOS commands use the system `/usr/bin/open` and `/usr/bin/osascript`; the
+  application name and document path are passed as arguments to fixed scripts,
+  never interpolated into AppleScript source or evaluated by a shell.
 
 ## Create
 
@@ -383,6 +386,19 @@ The public release audit checks this layout and local module imports.
 - `cli/office/slide-visibility.mjs` - read-only PPTX visibility helper used by the optional PowerPoint snapshot integration.
 
 ## Internal modules
+
+- `lib/deckkits/module-path.mjs` - validate catalog-selected entry modules before
+  loading them in build, design, or slot-consistency. The entry must use
+  `<id>/<id>.kit.mjs`; its physical target must remain within that kit's installed
+  directory. Installed-root aliases and module links within the same kit remain
+  supported. This prevents out-of-directory selection, not execution by a modified
+  installed kit: the catalog and bundled JavaScript are trusted executable code,
+  and this guard is not a sandbox or a package-integrity verifier.
+
+- `lib/runtime/powerpoint-app.mjs` - query a PowerPoint application identifier
+  through a fixed AppleScript and literal argument array. Office validation still
+  uses desktop automation and existing host permissions; source documents cannot
+  authorize unrelated commands or UI actions.
 
 - `lib/review/policy.mjs` - shared pure policy evaluator for hash-bound
   reviewed findings. It never deletes detector output: exact source SHA-256,

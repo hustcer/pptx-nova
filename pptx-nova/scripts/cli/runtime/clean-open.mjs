@@ -13,6 +13,7 @@ import {
 } from 'node:fs'
 import { homedir, platform, tmpdir } from 'node:os'
 import { basename, dirname, extname, join, resolve } from 'node:path'
+import { checkPowerPointApp } from '../../lib/runtime/powerpoint-app.mjs'
 
 const SCHEMA_VERSION = 'pptx-nova-clean-open/v1'
 const DEFAULT_APP = 'Microsoft PowerPoint'
@@ -209,17 +210,13 @@ function emit(report, args) {
   process.exitCode = exitCodeFor(report)
 }
 
-function commandAvailable(name) {
-  const result = spawnSync('which', [name], { encoding: 'utf8' })
-  return result.status === 0
-}
-
 function osascript(args, script, timeoutMs) {
-  const result = spawnSync('osascript', args, {
+  const result = spawnSync('/usr/bin/osascript', args, {
     input: script,
     encoding: 'utf8',
     timeout: timeoutMs,
     maxBuffer: 16 * 1024 * 1024,
+    shell: false,
   })
   return {
     ok: result.status === 0,
@@ -272,11 +269,7 @@ function stagePptx(pptxPath) {
 }
 
 function checkPowerPoint(appName, timeoutMs) {
-  const script = `id of application "${appName.replaceAll('"', '\\"')}"`
-  return spawnSync('osascript', ['-e', script], {
-    encoding: 'utf8',
-    timeout: timeoutMs,
-  })
+  return checkPowerPointApp(appName, timeoutMs)
 }
 
 function waitMs(delayMs) {
@@ -285,9 +278,10 @@ function waitMs(delayMs) {
 }
 
 function launchPresentation(stagedPath, appName, timeoutMs) {
-  const result = spawnSync('open', ['-a', appName, stagedPath], {
+  const result = spawnSync('/usr/bin/open', ['-a', appName, stagedPath], {
     encoding: 'utf8',
     timeout: timeoutMs,
+    shell: false,
   })
   return {
     ok: result.status === 0,
@@ -692,7 +686,7 @@ function runLive(args) {
       environment: { osascriptAvailable: false, powerPointAvailable: false },
     })
   }
-  report.environment.osascriptAvailable = commandAvailable('osascript')
+  report.environment.osascriptAvailable = existsSync('/usr/bin/osascript')
   if (!report.environment.osascriptAvailable) {
     return unavailable(report, args, 'osascript-unavailable', {
       environment: { powerPointAvailable: false },

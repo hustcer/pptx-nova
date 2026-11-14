@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { SKILL_ROOT as skillRoot } from '../../lib/runtime/skill-paths.mjs'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -10,8 +9,7 @@ import {
 import { validateDeckkitContent as validateContent } from '../../../assets/deckkits/shared/validate-deckkit.mjs'
 import { createAssetContext, readAssetManifest } from '../../lib/assets/asset-manifest.mjs'
 import { resolveFilesystemPath } from '../../lib/runtime/filesystem-paths.mjs'
-
-const deckkitRoot = join(skillRoot, 'assets', 'deckkits')
+import { deckkitModulePath } from '../../lib/deckkits/module-path.mjs'
 
 const usage = `Usage:
   node <skill-root>/scripts/cli/create/build.mjs --deckkit <id> content.json [options]
@@ -115,7 +113,7 @@ async function loadDeckkit(deckkit) {
       `DeckKit "${deckkit}" not found. Available: ${catalog.entries.map((e) => e.id).join(', ')}`,
     )
   }
-  const modulePath = join(deckkitRoot, entry.path)
+  const modulePath = deckkitModulePath(entry)
   const mod = await import(pathToFileURL(modulePath).href)
   if (typeof mod.createDeck !== 'function') {
     throw new Error(`DeckKit "${deckkit}" at ${entry.path} does not export createDeck(content)`)

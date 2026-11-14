@@ -186,6 +186,11 @@ test('indexed control probes build legal distinct positions and reject invalid a
     fs.mkdirSync(schemas, { recursive: true })
     fs.mkdirSync(join(root, 'scripts/cli/deckkits'), { recursive: true })
     fs.mkdirSync(join(root, 'scripts/lib/runtime'), { recursive: true })
+    fs.mkdirSync(join(root, 'scripts/lib/deckkits'), { recursive: true })
+    fs.copyFileSync(
+      new URL('../../../pptx-nova/scripts/lib/deckkits/module-path.mjs', import.meta.url),
+      join(root, 'scripts/lib/deckkits/module-path.mjs'),
+    )
     fs.copyFileSync(
       new URL('../../../pptx-nova/scripts/lib/runtime/skill-paths.mjs', import.meta.url),
       join(root, 'scripts/lib/runtime/skill-paths.mjs'),
@@ -198,11 +203,11 @@ test('indexed control probes build legal distinct positions and reject invalid a
     fs.writeFileSync(
       join(deck, 'catalog.json'),
       JSON.stringify({
-        entries: [{ id: 'probe', path: 'probe.mjs', supportedSlideTypes: ['page'] }],
+        entries: [{ id: 'probe', path: 'probe/probe.kit.mjs', supportedSlideTypes: ['page'] }],
       }),
     )
     fs.writeFileSync(
-      join(deck, 'probe.mjs'),
+      join(deck, 'probe/probe.kit.mjs'),
       `export const createDeck=c=>{const a=c.slides[0].data.items;if(a&&a[0].position===a[1].position)throw Error('overlapping position probe');return c}`,
     )
     for (const [field, outer, exit] of [

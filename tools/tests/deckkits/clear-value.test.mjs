@@ -268,6 +268,11 @@ test('Slot probes omit only optional controls and configuration failures exit no
     fs.mkdirSync(schemas, { recursive: true })
     fs.mkdirSync(join(root, 'scripts/cli/deckkits'), { recursive: true })
     fs.mkdirSync(join(root, 'scripts/lib/runtime'), { recursive: true })
+    fs.mkdirSync(join(root, 'scripts/lib/deckkits'), { recursive: true })
+    fs.copyFileSync(
+      new URL('../../../pptx-nova/scripts/lib/deckkits/module-path.mjs', import.meta.url),
+      join(root, 'scripts/lib/deckkits/module-path.mjs'),
+    )
     fs.copyFileSync(
       new URL('../../../pptx-nova/scripts/lib/runtime/skill-paths.mjs', import.meta.url),
       join(root, 'scripts/lib/runtime/skill-paths.mjs'),
@@ -280,10 +285,10 @@ test('Slot probes omit only optional controls and configuration failures exit no
     fs.writeFileSync(
       join(deck, 'catalog.json'),
       JSON.stringify({
-        entries: [{ id: 'probe', path: 'probe.mjs', supportedSlideTypes: ['page'] }],
+        entries: [{ id: 'probe', path: 'probe/probe.kit.mjs', supportedSlideTypes: ['page'] }],
       }),
     )
-    fs.writeFileSync(join(deck, 'probe.mjs'), 'export const createDeck = c => c')
+    fs.writeFileSync(join(deck, 'probe/probe.kit.mjs'), 'export const createDeck = c => c')
     for (const c of [
       { role: 'control', required: false, exit: 0 },
       { role: 'control', required: true, exit: 1 },
@@ -314,7 +319,7 @@ test('Slot probes omit only optional controls and configuration failures exit no
       }),
     )
     fs.writeFileSync(
-      join(deck, 'probe.mjs'),
+      join(deck, 'probe/probe.kit.mjs'),
       'export const createDeck = c => { delete c.slides[0].data.v0; return c }',
     )
     const dropped = spawnSync(process.execPath, [script, '--json'], { encoding: 'utf8' })

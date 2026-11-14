@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "pptx-nova-tabler-icon-pack-manifest/v1",
+  "purpose": "Offline passive SVG icon data; not executable code.",
+  "source": {
+    "repository": "https://github.com/tabler/tabler-icons",
+    "version": "3.45.0"
+  },
+  "compression": {
+    "algorithm": "brotli",
+    "quality": 11
+  },
+  "pack": {
+    "file": "tabler-icons.pack.br",
+    "byteLength": 361877,
+    "sha256": "96c01f2753d80a0c0d44221dd9edfb51b476c25f18442f2a8fd8bb57b70ad14c"
+  },
+  "decoded": {
+    "encoding": "utf-8",
+    "format": "Tab-separated catalog and fixed-shell SVG geometry",
+    "schemaVersion": "pptx-nova-tabler-icon-pack/v1",
+    "byteLength": 2366876,
+    "sha256": "1ec3475bd962c9e913097bf65bde173ae5b7554931ee5248f4e26f24fe872ec0",
+    "iconCount": 6166,
+    "counts": {
+      "outline": 5112,
+      "filled": 1054
+    }
+  },
+  "license": {
+    "spdx": "MIT",
+    "file": "icon-license",
+    "sha256": "b740a1d46122672da62833e97f7e7c8a13fa85cbc7445b584b297cc00dde93db"
+  },
+  "sample": {
+    "style": "outline",
+    "name": "presentation",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 4l18 0\"/><path d=\"M4 4v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-10\"/><path d=\"M12 16l0 4\"/><path d=\"M9 20l6 0\"/><path d=\"M8 12l3 -3l2 2l3 -3\"/></svg>"
+  }
+}

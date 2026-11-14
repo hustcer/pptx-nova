@@ -6,6 +6,7 @@ import { auditDeckkitLayout } from './lib/deckkit-layout.mjs'
 import { auditScriptsLayout } from './lib/scripts-layout.mjs'
 import { auditExamplesLayout } from './lib/examples-layout.mjs'
 import { auditReferencesLayout } from './lib/references-layout.mjs'
+import { verifyTablerIconPack } from '../pptx-nova/scripts/lib/assets/tabler-icons.mjs'
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(SCRIPT_DIR, '..')
@@ -138,6 +139,31 @@ function audit() {
     ...auditExamplesLayout(SKILL_ROOT),
     ...auditReferencesLayout(SKILL_ROOT),
   ]
+  try {
+    const info = verifyTablerIconPack()
+    const iconsRoot = join(SKILL_ROOT, 'assets/icons')
+    const catalog = JSON.parse(readFileSync(join(iconsRoot, 'catalog.json'), 'utf8'))
+    const entry = catalog.entries.find((item) => item.id === 'tabler-full-pack')
+    const provenance = JSON.parse(
+      readFileSync(join(iconsRoot, 'tabler-icons.pack.provenance.json'), 'utf8'),
+    )
+    if (
+      !info.manifestVerified ||
+      entry?.sourceVersion !== info.version ||
+      entry?.iconCount !== info.iconCount ||
+      ['outline', 'filled'].some((style) => entry?.styles?.[style] !== info.counts[style]) ||
+      provenance.packSha256 !== info.sha256
+    )
+      throw new Error('Icon catalog or provenance does not match the verified pack')
+  } catch (error) {
+    pushIssue(
+      issues,
+      'error',
+      'icon-pack-integrity',
+      'assets/icons/tabler-icons.pack.br',
+      error.message,
+    )
+  }
   const files = walk(SKILL_ROOT)
   for (const path of files) {
     const relPath = relative(SKILL_ROOT, path).replaceAll('\\', '/')

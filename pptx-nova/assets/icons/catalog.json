@@ -25,14 +25,16 @@
       "type": "svgBundle",
       "preferredFormat": "svg-inline-picture",
       "pack": "tabler-icons.pack.br",
+      "integrityManifest": "tabler-icons.pack.manifest.json",
+      "provenance": "tabler-icons.pack.provenance.json",
       "licenseFile": "icon-license",
       "source": "https://github.com/tabler/tabler-icons",
-      "sourceVersion": "3.44.0",
+      "sourceVersion": "3.45.0",
       "license": "MIT",
-      "iconCount": 6146,
+      "iconCount": 6166,
       "styles": {
-        "outline": 5093,
-        "filled": 1053
+        "outline": 5112,
+        "filled": 1054
       },
       "bestFor": ["DeckKit icon badges", "status markers", "charts", "business objects"],
       "status": "ready",

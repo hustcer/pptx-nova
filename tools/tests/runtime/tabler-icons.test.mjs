@@ -53,8 +53,10 @@ test('Tabler icon pack metadata and license are present', () => {
   const tablerEntry = catalog.entries.find((entry) => entry.id === 'tabler-full-pack')
   assert.equal(tablerEntry.pack, 'tabler-icons.pack.br')
   assert.equal(tablerEntry.licenseFile, 'icon-license')
-  assert.equal(tablerEntry.iconCount, 6146)
-  assert.deepEqual(tablerEntry.styles, { outline: 5093, filled: 1053 })
+  assert.equal(tablerEntry.sourceVersion, info.version)
+  assert.equal(tablerEntry.iconCount, info.iconCount)
+  assert.deepEqual(tablerEntry.styles, info.counts)
+  assert.equal(tablerEntry.integrityManifest, 'tabler-icons.pack.manifest.json')
 
   const license = readFileSync(LICENSE_PATH, 'utf8')
   assert.match(license, /MIT License/)
@@ -274,4 +276,27 @@ ${FILLED_SHELL}
     { cwd: ROOT, encoding: 'utf8' },
   )
   assert.equal(check.status, 0, check.stderr || check.stdout)
+  const manifestPath = join(dir, 'out', 'tabler-icons.pack.manifest.json')
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  assert.equal(manifest.decoded.iconCount, 2)
+  writeFileSync(manifestPath, '{}\n')
+  const staleManifest = spawnSync(
+    'node',
+    [
+      ICON_CLI,
+      'generate',
+      '--source-root',
+      sourceRoot,
+      '--output',
+      outputPath,
+      '--license-output',
+      licenseOutputPath,
+      '--stroke',
+      '1.5',
+      '--check',
+    ],
+    { cwd: ROOT, encoding: 'utf8' },
+  )
+  assert.equal(staleManifest.status, 1)
+  assert.match(staleManifest.stderr, /manifest\.json/)
 })

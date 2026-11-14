@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "pptx-nova-tabler-icon-pack-provenance/v1",
+  "packSha256": "96c01f2753d80a0c0d44221dd9edfb51b476c25f18442f2a8fd8bb57b70ad14c",
+  "upstream": {
+    "repository": "https://github.com/tabler/tabler-icons",
+    "tag": "v3.45.0",
+    "commit": "975920ff99c12c4dc9e3fe61a03738330600f9b2"
+  },
+  "generation": {
+    "outlineStrokeWidth": "1",
+    "command": "node scripts/cli/assets/icons.mjs generate --source-root <prepared-checkout>",
+    "preparation": "Apply the two literal geometry adjustments below to the pinned upstream checkout before generation. No upstream code or install scripts need to run."
+  },
+  "localAdjustments": [
+    {
+      "file": "icons/outline/server.svg",
+      "reason": "Complete the upper server enclosure's left edge; preserve the existing bundled geometry.",
+      "find": "M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3",
+      "replace": "M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-2",
+      "expectedOccurrences": 1
+    },
+    {
+      "file": "icons/outline/server-bolt.svg",
+      "reason": "Complete the upper server enclosure's left edge; preserve the existing bundled geometry.",
+      "find": "M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3",
+      "replace": "M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-2",
+      "expectedOccurrences": 1
+    }
+  ]
+}

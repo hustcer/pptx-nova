@@ -337,7 +337,9 @@ The public release audit checks this layout and local module imports.
 
 ## Asset tools
 
-- `cli/assets/icons.mjs` - query and generate the bundled Tabler icon pack.
+- `cli/assets/icons.mjs` - query/generate the bundled Tabler icon pack, verify its
+  integrity and passive geometry, or unpack it to a new review-only TSV file.
+  See [icon data and provenance](../assets/icons/README.md).
 
 - `cli/assets/formula-render.mjs` - materialize literal-LaTeX draft SVGs from a dedicated
   formula manifest (`--provider auto|text-svg`, `--dry-run`). It does not typeset math or skip

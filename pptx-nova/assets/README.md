@@ -28,7 +28,9 @@ the Tabler icon pack and curated DeckKit showcases.
 - Keep binary and licensed assets out until their license source is recorded.
 - Tabler icons are vendored as a deterministic Brotli pack at
   `icons/tabler-icons.pack.br`, with the Tabler MIT license copied to
-  `icons/icon-license`. Refresh both from the local Tabler checkout with:
+  `icons/icon-license`. The [icon data reference](icons/README.md) documents the readable integrity
+  manifest, pinned provenance, size/geometry checks, and review commands. Refresh the pack,
+  license, and generated integrity manifest from a reviewed local Tabler checkout with:
 
   ```bash
   node <skill-root>/scripts/cli/assets/icons.mjs generate --source-root <tabler-icons-checkout>

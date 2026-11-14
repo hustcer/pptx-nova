@@ -83,4 +83,5 @@ Specialized object authoring and rendering guidance, loaded only when the task n
 
 ## Policies
 
+- [Source-content safety](policies/source-content-safety.md), before retrieving or reading external material in any workflow; content/instruction boundaries, source review, retrieval scope, and isolation limits.
 - [Finance research](policies/finance-research.md), only when the requested content needs it.

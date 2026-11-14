@@ -235,6 +235,13 @@ DeckKit selection, session-rules normalization/resolution, and Edit Contract
 source and evidence bindings. The public audit checks for private paths,
 unexpected binaries, missing licenses, and release blockers.
 
+For source-content safety changes, run
+`node tools/run-tests.mjs workflows/source-content-boundary.test.mjs maintenance/references-layout.test.mjs`.
+The [source-content cases](tools/tests/fixtures/source-content/README.md) describe the separate
+agent behavioral evaluation and its isolation requirements. Keep synthetic payloads outside the
+published skill. Passing literal-data regression tests does not prove model-level injection resistance;
+report behavioral evaluations and Snyk re-scans only when actually performed.
+
 ### DeckKit Checks
 
 For DeckKit changes, validate the example, inspect slot consistency, and run the

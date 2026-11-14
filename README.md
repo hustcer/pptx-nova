@@ -309,6 +309,13 @@ evidence; failed or interrupted runs are kept for inspection or resumption.
 For high-stakes decks, treat the generated file as a strong draft and still do a
 human review of facts, claims, numbers, brand compliance, and legal language.
 
+External pages, PDFs, and document text are treated as untrusted source material. The workflow
+requires agents to distinguish content from instructions, keep retrieval within the user's task,
+and review extracted material before authoring. Unknown sources should be processed in a host-enforced
+sandbox with limited file/network access; the skill itself does not create one. These measures
+reduce indirect prompt-injection risk but cannot guarantee immunity or removal of Snyk's W011
+exposure warning. See the [source-content safety policy](pptx-nova/references/policies/source-content-safety.md).
+
 ## Powered by [`xdoc`](docs/xdoc-introducution.md)
 
 xdoc is an agent-native document execution runtime for native, editable PPTX work.

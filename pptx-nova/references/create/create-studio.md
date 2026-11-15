@@ -16,6 +16,8 @@ For Studio creation read:
 3. `design-lock-and-assets.md`
 4. `narrative-quality.md`
 5. This file
+   plus [design quality](design-quality.md) and [presentation expression](presentation-expression.md)
+   for the proactive visual/icon/motion defaults shared by all new decks
 6. `../review/visual-qa-and-asset-slots.md` when images/assets are involved
 7. `rich-deck-patterns.md` only if no suitable DeckKit exists or a DeckKit must
    be extended for a richer pattern

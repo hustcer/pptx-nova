@@ -14,7 +14,8 @@ For Express creation read:
 1. `../common-workflow.md`
 2. `deckkit-mode.md`
 3. This file
-   and `design-quality.md` for the design floor and evidence-based kit selection
+   and `design-quality.md` for the design floor and evidence-based kit selection;
+   [presentation expression](presentation-expression.md) for proactive icons, animation and Morph
 4. `narrative-quality.md` when the deck has 6+ slides, a persuasive audience,
    or needs roadshow / customer / strategy polish
 5. `express-mode.md` when you need the full golden path details
@@ -45,14 +46,19 @@ main assumptions in the final summary.
    narrative fields from `narrative-quality.md`.
 4. Select a production/default DeckKit through `deckkit-mode.md`, with a meaningful scenario/brief
    and actual rendered examples. Record `artDirection` using `design-quality.md`.
-5. Write `content.json`.
+5. Write `content.json`, filling suitable registered semantic icon slots. Record reveal order and
+   useful cross-page continuity in the existing lock using `presentation-expression.md`; a
+   one-sentence prompt receives the same design judgment without extra questions.
 6. Validate content in delivery mode.
-7. Build patch with the selected DeckKit.
+7. Build patch with the selected DeckKit; resolve actual object names and write `choreography.json`
+   for the default transitions, meaningful builds and applicable Morph pairs. A documented static
+   exception can omit choreography; lack of an explicit animation request cannot.
 8. Run `cli/create/run.mjs` to execute check-lock, dry-run, apply,
-   vision-check and canonical PDF/PNG evidence while keeping the intermediate artifacts.
+   vision-check and canonical PDF/PNG evidence while keeping the intermediate artifacts. Pass
+   `--choreography` for the planned effects and inspect the applied timing/pairs separately.
 9. Review the exact canonical PNGs, write `design_review.json` and record it through
    `visual-review.mjs --design-review` in `visual_review.json`, then repeat the
-   Create command with `--finalize --visual-review <path>` to publish that same
+   Create command, retaining `--choreography`, with `--finalize --visual-review <path>` to publish that same
    candidate without rebuilding or rendering. Follow `create-runner.md` for the
    required review checks and finalization binding, then write the completion summary.
 

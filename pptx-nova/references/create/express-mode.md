@@ -9,6 +9,10 @@
 > **express ≠ 草稿**：它默认也按客户演示级的内容与视觉质量产出，只是把
 > `../common-workflow.md` 的完整工作流自动串起来、不逐项追问。要草稿请明说「简单/速记版」。
 
+每次新建先读 [设计质量](design-quality.md) 与 [演示表现力](presentation-expression.md)。
+一句话也默认主动设计语义图标、基础转场、内容分组入场和适合的 Morph 连续叙事；
+不用额外询问「要不要动画」。明确静态、减少运动或播放能力限制按指南记录例外。
+
 ## 目录
 
 1. [何时用 Express（vs Studio / Edit）](#1-何时用-expressvs-studio--edit)
@@ -48,7 +52,8 @@ prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资�
   → 读取 selected DeckKit visualGrammar（定位 / signature / composition / avoid）
   → content.json（~200 行纯数据）
   → validate-content.mjs 校验（schema / density / layout contract / diversity）
-  → createDeck(content) 生成 patch
+  → createDeck(content) 生成 patch → 按实际对象名准备 choreography.json
+  → 标准 Create runner 以 --choreography 组合原生动效
   → check-lock → dry-run → apply → vision-check → PNG/contact sheet review
 ```
 
@@ -67,6 +72,8 @@ prompt / 用户大纲 → outline.json → deck_lock.json（有外部/复用资�
 正式创建按 [create-runner.md](create-runner.md) 调用 `cli/create/run.mjs`，由 runner
 执行机器检查和 canonical PDF/PNG 取证；实际审阅后再以 `--finalize --visual-review`
 发布同一候选。下面拆解低层步骤供诊断和 DeckKit 开发使用，不替代 runner 的交付门禁。
+动效规划与对象名解析按 [演示表现力](presentation-expression.md) 执行，首次运行和 finalize
+都传同一份 `--choreography`。下面的低层布局 patch 示例本身不会自动添加动画。
 
 ```bash
 # 0. 从用户大纲标准化 outline.json；若无大纲，再从 prompt 提炼 deckBrief/outline → 见 §3、§7

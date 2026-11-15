@@ -2,6 +2,8 @@
 
 读取本文件的场景：用户要求新增、修改或删除 PPTX 动画/转场，或提到点击顺序、自动播放、
 `with previous` / `after previous`、逐条 bullet、退出动画、motion path、emphasis、timing tree。
+新建 PPTX 也通过 [演示表现力指南](../create/presentation-expression.md) 主动进入本流程，
+包括一句话 Express；用户无需先提出动画要求。既有文稿的局部编辑仍遵守原任务范围。
 
 仅当任务涉及 Web 放映、play/pause、自动切页或键盘/焦点异常时，再读
 [Viewer 播放诊断](viewer-playback.md)。普通 PPTX 导出无需启动浏览器。
@@ -427,10 +429,11 @@ dry-run 重点看：
   "slide": 0,
   "kind": "fade",
   "speed": "medium",
-  "advanceOnClick": true,
-  "advanceAfter": 5000
+  "advanceOnClick": true
 }
 ```
+
+普通新建文稿默认手动翻页，不设置 `advanceAfter`；仅在已确定自动播放意图时设置自动切页时间。
 
 以下是基础转场的参数规则；P14 扩展使用下方单独的运行时契约。
 `speed` 仅接受 `slow/medium/fast`，默认 `fast`。`dir` 在 `push/wipe` 上接受
@@ -629,6 +632,13 @@ PowerPoint 播放与保存往返提供原生兼容性证据；缺少目标平台
 hook 或放开 `customOps`。组合发生在 build 后、check-lock 前；`deckkit.patch.json` 保留原始版式，
 `patch.json` 是最终组合。两份 patch 和编排输入均进入最终摘要绑定；修改后必须重新生成和审查，
 finalize 也须带原来的 `--choreography`。
+
+同一语义分节由多个 shape 组成时，让组首决定 trigger 和 delay，其余成员用
+`with-previous` + `delay: 0` 同步。`with-previous` 的 delay 相对前一个效果的开始时间，
+不是全页绝对时间；给图标、标题和正文分别重复填 `80` 会逐个累加，不能得到同组一起入场。
+例如自动错峰用第一组组首 `with-previous/0`，第二组组首 `with-previous/80`，
+第三组组首 `with-previous/80`，各组其余成员均为 `with-previous/0`；三个分节分别从
+0/80/160 ms 开始。inspect、实际 timing 与播放顺序仍须回读核对。
 
 Cartesian Agenda 可设置 `data.textLayout: "paragraphs"`，生成单一原生对象
 `S{0-based slide index}_AgendaParagraphs`。每个 item 对应一个段落，可声明 `level: 0..8`，默认 0；

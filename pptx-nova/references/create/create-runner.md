@@ -15,12 +15,16 @@ The standard runner requires:
   `artDirection.mode` (`persuade`, `read`, `operate`, or `experience`);
 - an output `.pptx` path that does not already exist unless replacement was explicitly requested;
 - an optional `assets_manifest.json` when the content uses registered external assets.
-- an optional `choreography.json` for native animation/Morph operations; see [animations](../content/animations.md#standard-create-choreography).
+- `choreography.json` for the default native transitions and selected animation/Morph operations;
+  technically optional in the CLI, omitted for a recorded static/unsupported exception. See
+  [presentation expression](presentation-expression.md) and [animations](../content/animations.md#standard-create-choreography).
 
 If these inputs are not prepared yet:
 
 - read `references/create/design-quality.md` for every new deck: audience, art direction,
   rendered example selection and the design floor, including one-sentence Express;
+- read `references/create/presentation-expression.md` for every new deck: proactive icon choices,
+  motion grammar, Morph opportunities and standard choreography preparation, including Express;
 - read `references/create/create-express.md` for a simple/default deck;
 - read `references/create/deckkit-mode.md` only when DeckKit selection or content slots are unresolved;
 - read `references/create/create-studio.md` plus `references/create/design-lock-and-assets.md` for an explicitly
@@ -41,6 +45,7 @@ node <skill-root>/scripts/cli/create/run.mjs \
   --deckkit <id> \
   --content <run-dir>/content.json \
   --lock <run-dir>/deck_lock.json \
+  --choreography <run-dir>/choreography.json \
   --output output.pptx \
   --run-dir <run-dir> \
   --json
@@ -48,6 +53,8 @@ node <skill-root>/scripts/cli/create/run.mjs \
 
 Add `--assets <run-dir>/assets_manifest.json` only when the deck uses registered assets. Add
 `--overwrite` only when replacing the final path was explicitly intended.
+Omit `--choreography` for a recorded static/unsupported exception. The runner composes the supplied
+effects; it does not automatically add icons or motion when they were omitted during preparation.
 
 ### Named DeckKit with native feature specimens
 

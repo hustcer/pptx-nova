@@ -1,6 +1,8 @@
 # Morph 编排：先确定对象关系，再安排运动
 
 读取条件：用户要求 Morph、跨页连续运动、聚焦某个对象、放大 KPI 或主体退场。
+新建文稿按 [演示表现力指南](../create/presentation-expression.md) 主动识别适合的连续叙事时也读取，
+包括一句话 Express；无需等待用户点名 Morph。
 先按 [动画与转场](animations.md) 发现运行时契约；本文件复用现有操作，不增加新的动画效果。
 
 ## 三种对象角色
@@ -15,6 +17,9 @@
 重复的同名主体。不要给全部 shape 批量加前缀；普通名称的 PowerPoint 隐式匹配不在本流程保证范围内。
 
 ## 复制后再改变目标页
+
+以下复制流程适用于已有页。标准 Create 可以先用 DeckKit 的注册版式规划两个有连续关系的状态，
+再通过 `--choreography` 给实际生成的主体配对并设置目标页 Morph；不必为效果额外增加重复页。
 
 1. inspect 源页，确定场景与主体的名称、shape id、几何和实际画幅。
 2. 用 `duplicate-slide` 复制源页（也可使用同 deck 的 `slide-copy` CLI）。复制后再次 inspect，

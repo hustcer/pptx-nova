@@ -17,6 +17,7 @@ New-deck preparation, DeckKit selection, narrative and design authoring:
 - [Standard create runner](create/create-runner.md) — Standard Create runner contract, compact output, performance, progressive preparation and failure routing
 - [Express preparation](create/create-express.md) — Quick deck generation from a simple prompt
 - [Design quality](create/design-quality.md) — Audience modes, art direction, rendered kit selection, craft floor and candidate-bound design review for every Create
+- [Presentation expression](create/presentation-expression.md) — Default semantic icons, native builds/transitions, content-led focal moments and Morph for every Create, including one-sentence Express
 - [Express golden path](create/express-mode.md) — Full golden path for Express mode
 - [Studio preparation](create/create-studio.md) — Confirmation, design lock, and split for high-risk/formal/precision decks
 - [DeckKit workflow](create/deckkit-mode.md) — DeckKit selection, readiness, content, user-visible examples

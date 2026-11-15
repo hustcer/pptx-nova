@@ -61,10 +61,11 @@ second final render. The standard runner still owns the final full-deck canonica
   names. Long stretches of tiny text on the same empty surface fail. A persuasive deck needs a
   memorable content-led moment: a strong reveal, visual transformation, comparison or typographic
   assertion. It need not animate. Quiet evidence reports do not need manufactured spectacle.
-- **Icons and motion:** use a coherent licensed icon family at a supporting scale. “CLI / PDF”
-  inside a circle and Unicode arrows are labels, not a drawn icon system. Add animation/Morph only
-  within the user's request and capability contract, with one clear explanatory purpose. Motion
-  never compensates for a weak static composition; continue separate playback verification.
+- **Icons and motion:** follow [presentation expression](presentation-expression.md) for every new
+  deck, including one-sentence Express. Proactively design semantic icons, native builds and
+  meaningful Morph continuity within the kit and runtime contract; use a gentle transition baseline
+  and content-led focal moments. Motion complements a strong static composition and needs separate
+  playback evidence. A short prompt does not request a static-only deck.
 
 ## Review the render, then repair
 

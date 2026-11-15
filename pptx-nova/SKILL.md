@@ -145,7 +145,7 @@ Use these only to choose the entry reference; the routing table owns details.
 
 - **Runtime license / activation / renewal / authorization failure**: `references/runtime/licensing.md`;
   install for the actual execution user/environment, inspect admission, then verify the intended task.
-- **Create**: `references/create/create-runner.md` and `references/create/design-quality.md`; the design floor applies even to a one-sentence Express brief. Formal/high-risk work also follows the Studio/design-lock references.
+- **Create**: `references/create/create-runner.md`, `references/create/design-quality.md` and `references/create/presentation-expression.md`; the design floor and proactive icons/motion apply even to a one-sentence Express brief. Formal/high-risk work also follows the Studio/design-lock references.
   The runner prepares canonical candidate evidence first; after actual PNG review, use its
   `--finalize --visual-review` phase to publish the same hash-bound candidate without rendering again.
 - **Edit or micro-edit**: inspect/select, normalize the Edit Contract, dry-run, apply in the run,
@@ -307,6 +307,11 @@ These rules apply to all new decks, including Express and Studio:
 - Read `references/create/design-quality.md` before selecting a DeckKit. Infer audience/mode,
   commit to a content-led visual idea, and inspect actual eligible-kit examples; a readiness score
   or absence of overflow is not evidence of aesthetic fit. Respect the user's pinned visual world.
+- Read `references/create/presentation-expression.md` for every new deck, including one-sentence
+  Express. Proactively use semantic icons for suitable peer sections, native transitions/builds
+  and meaningful Morph continuity; aim for a memorable, polished result within the content and
+  DeckKit. Execute the plan through registered slots and `--choreography`; silence about motion
+  is not an opt-out. Record concrete static/accessibility/playback exceptions instead of guessing.
 - Review the rendered design as well as its mechanics. Write candidate/manifest-bound
   `design_review.json` with slide-specific observations and a weakest-page assessment; pass it as
   `--design-review` when recording the Create visual review. Repair unresolved craft failures before
